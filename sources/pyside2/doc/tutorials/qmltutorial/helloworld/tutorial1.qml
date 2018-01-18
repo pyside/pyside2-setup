@@ -50,7 +50,7 @@
 
 //![0]
 //![3]
-import QtQuick 1.0
+import QtQuick 2.0
 //![3]
 
 //![1]

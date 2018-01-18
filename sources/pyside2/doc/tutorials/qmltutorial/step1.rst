@@ -4,7 +4,7 @@ QML Tutorial 1 - Basic Types
 ****************************
 
 This first program is a very simple "Hello world" example that introduces some basic QML concepts.
-The picture below is a screenshot of this program.
+The following image is a screenshot of this program.
 
 .. figure:: declarative-tutorial1.png
     :align: center
@@ -20,8 +20,8 @@ Walkthrough
 Import
 ------
 
-First, we need to import the types that we need for this example. Most QML files will import the built-in QML
-types (like Rectangle, Image, ...) that come with Qt, using:
+First, you need to import the types that are required for this example. Most QML files import the built-in QML
+types (like Rectangle, Image, ...) that come with Qt, using the following statement:
 
 .. pysideinclude:: helloworld/tutorial1.qml
     :snippet: 3
@@ -32,10 +32,9 @@ Rectangle element
 .. pysideinclude:: helloworld/tutorial1.qml
     :snippet: 1
 
-We declare a root element of type Rectangle. It is one of the basic building blocks you can use to create an application in QML.
-We give it an ``id`` to be able to refer to it later. In this case, we call it "page".
-We also set the ``width``, ``height`` and ``color`` properties.
-The Rectangle element contains many other properties (such as ``x`` and ``y``), but these are left at their default values.
+Declare a root element using the Rectangle type, which is one of the basic building blocks to create an application in QML.
+Give it an ``id`` so that you can refer to it later. For example, call it "page", and also set its ``width``,
+``height``, and ``color`` properties.
 
 Text element
 ------------
@@ -43,12 +42,12 @@ Text element
 .. pysideinclude code/tutorial1.qml
     :snippet: 2
 
-We add a Text element as a child of the root Rectangle element that displays the text 'Hello world!'.
+Add a Text element as the child of the Rectangle element to display the text, 'Hello world!'.
 
-The ``y`` property is used to position the text vertically at 30 pixels from the top of its parent.
+Use its ``y`` property to position it at 30 pixels from the top of its parent.
 
 The ``anchors.horizontalCenter`` property refers to the horizontal center of an element.
-In this case, we specify that our text element should be horizontally centered in the *page* element.
+In this case, specify that the text element must be horizontally centered in the *page* element.
 
 The ``font.pointSize`` and ``font.bold properties`` are related to fonts and use the dot notation.
 
@@ -56,11 +55,12 @@ The ``font.pointSize`` and ``font.bold properties`` are related to fonts and use
 Viewing the example
 -------------------
 
-To view what you have created, run the QML Viewer tool (located in the ``bin directory`` of your Qt installation) with your filename as the first argument.
-For example, to run the provided completed Tutorial 1 example from the install location, you would type:
+To view what you have created, run the ``qmlscene`` tool (located in the ``bin directory`` of your Qt installation) with your
+QML filename as the first argument. For example, to run the Tutorial 1 example from the install
+location, you would type:
 
 ::
 
-    bin/qmlviewer tutorial1.qml
+    > [QT_INSTALL_DIR]\bin\qmlscene tutorial1.qml
 
 [Previous :ref:`qmltutorial`][Next :ref:`qmlcomponents`]
