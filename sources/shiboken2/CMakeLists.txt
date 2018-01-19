@@ -302,6 +302,12 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 set(SHIBOKEN_BUILD_TYPE "Release")
+
+# We do not want to link against the python shared / static library on Linux And macOS.
+# The dynamic linker will pick up the python symbols at runtime automatically.
+# On Windows we do need to link against the python.lib import library.
+
+set(SBK_PYTHON_LIBRARIES "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
         message(WARNING "Python debug shared library not found; assuming python was built with shared library support disabled.")
@@ -321,10 +327,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION "${SBK_PKG_CONFIG_PY_DEBUG_DEFINITION} -DCOUNT_ALLOCS")
     endif()
 
-    set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
+    if(WIN32)
+        set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
+    endif()
     set(SHIBOKEN_BUILD_TYPE "Debug")
 else()
-    set(SBK_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
+    if(WIN32)
+        set(SBK_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
+    endif()
     add_definitions("-DNDEBUG")
 endif()
 
