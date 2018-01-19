@@ -495,7 +495,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         if (prefix.isEmpty() && match.hasMatch()) {
             QString flagName = match.captured(1);
             QStringList enumItems = match.captured(2).split(QLatin1Char('|'));
-            QString scope = searchForEnumScope(func->implementingClass(), enumItems.first());
+            QString scope = searchForEnumScope(func->implementingClass(), enumItems.constFirst());
             if (!scope.isEmpty())
                 scope.append(QLatin1String("::"));
 
@@ -1019,7 +1019,7 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaCla
     AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     if (ctors.count() != 1)
         return false;
-    return ctors.first()->functionType() == AbstractMetaFunction::CopyConstructorFunction;
+    return ctors.constFirst()->functionType() == AbstractMetaFunction::CopyConstructorFunction;
 }
 
 bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const TypeEntry* type) const
@@ -1123,7 +1123,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
             || type == ContainerTypeEntry::StackContainer
             || type == ContainerTypeEntry::SetContainer
             || type == ContainerTypeEntry::QueueContainer) {
-            const AbstractMetaType* type = metaType->instantiations().first();
+            const AbstractMetaType* type = metaType->instantiations().constFirst();
             if (isPointerToWrapperType(type)) {
                 typeCheck += QString::fromLatin1("checkSequenceTypes(%1, ").arg(cpythonTypeNameExt(type));
             } else if (isWrapperType(type)) {
@@ -1139,8 +1139,8 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
             || type == ContainerTypeEntry::MultiHashContainer
             || type == ContainerTypeEntry::PairContainer) {
             QString pyType = (type == ContainerTypeEntry::PairContainer) ? QLatin1String("Pair") : QLatin1String("Dict");
-            const AbstractMetaType* firstType = metaType->instantiations().first();
-            const AbstractMetaType* secondType = metaType->instantiations().last();
+            const AbstractMetaType* firstType = metaType->instantiations().constFirst();
+            const AbstractMetaType* secondType = metaType->instantiations().constLast();
             if (isPointerToWrapperType(firstType) && isPointerToWrapperType(secondType)) {
                 typeCheck += QString::fromLatin1("check%1Types(%2, %3, ").arg(pyType)
                                 .arg(cpythonTypeNameExt(firstType), cpythonTypeNameExt(secondType));
@@ -1966,8 +1966,8 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
     while (rit.hasNext()) {
         const QRegularExpressionMatch match = rit.next();
         const QStringList list = match.capturedTexts();
-        QString conversionString = list.first();
-        QString conversionTypeName = list.last();
+        QString conversionString = list.constFirst();
+        QString conversionTypeName = list.constLast();
         const AbstractMetaType* conversionType = buildAbstractMetaTypeFromString(conversionTypeName);
         if (!conversionType) {
             qFatal(qPrintable(QString::fromLatin1("Could not find type '%1' for use in '%2' conversion. "
@@ -1986,7 +1986,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 while (code.at(start).isSpace())
                     ++start;
                 QString varType = code.mid(start, end - start);
-                conversionString = varType + list.first();
+                conversionString = varType + list.constFirst();
                 varType = miniNormalizer(varType);
                 QString varName = list.at(1).trimmed();
                 if (!varType.isEmpty()) {
@@ -2193,7 +2193,7 @@ AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStatic
             if (overloads.isEmpty())
                 continue;
             if (OverloadData::hasStaticAndInstanceFunctions(overloads))
-                methods.append(overloads.first());
+                methods.append(overloads.constFirst());
         }
     }
     return methods;

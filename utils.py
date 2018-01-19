@@ -49,6 +49,11 @@ import fnmatch
 import glob
 import itertools
 import popenasync
+# There is no urllib.request in Python2
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 
 from distutils import log
 from distutils.errors import DistutilsOptionError
@@ -748,3 +753,21 @@ def detectClang():
         arch = '64' if sys.maxsize > 2**31-1 else '32'
         clangDir = clangDir.replace('_ARCH_', arch)
     return (clangDir, source)
+
+def download_and_extract_7z(fileurl, target):
+    """ Downloads 7z file from fileurl and extract to target  """
+
+    print("Downloading fileUrl %s " % fileurl)
+    info = ""
+    try:
+        localfile, info = urllib.urlretrieve(fileurl)
+    except:
+        print("Error downloading %r : %r" % (fileurl, info))
+        raise RuntimeError(' Error downloading ' + fileurl)
+
+    try:
+        outputDir = "-o" + target
+        print("calling 7z x %s %s" % (localfile, outputDir))
+        subprocess.call(["7z", "x", "-y", localfile, outputDir])
+    except:
+        raise RuntimeError(' Error extracting ' + localfile)

@@ -373,6 +373,7 @@ bool Handler::endElement(const QStringRef &localName)
                 m_current->parent->entry->setCodeSnips(snips);
                 break;
             }
+            Q_FALLTHROUGH();
         case StackElement::NativeToTarget:
         case StackElement::AddConversion:
             m_contextStack.top()->codeSnips.last().addTemplateInstance(m_current->value.templateInstance);
@@ -614,11 +615,10 @@ void Handler::addFlags(const QString &name, QString flagName,
     if (QStringList(lst.mid(0, lst.size() - 1)).join(colonColon()) != m_currentEnum->targetLangQualifier()) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
-                              // avoid constFirst to stay Qt 5.5 compatible
-                              .arg(m_currentEnum->targetLangQualifier(), lst.first());
+                              .arg(m_currentEnum->targetLangQualifier(), lst.constFirst());
     }
 
-    ftype->setFlagsName(lst.last());
+    ftype->setFlagsName(lst.constLast());
     m_currentEnum->setFlags(ftype);
 
     m_database->addFlagsType(ftype);
@@ -756,20 +756,20 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             break;
         case StackElement::ValueTypeEntry:
             attributes.insert(QLatin1String("default-constructor"), QString());
-            // fall throooough
+            Q_FALLTHROUGH();
         case StackElement::ObjectTypeEntry:
             attributes.insert(QLatin1String("force-abstract"), QLatin1String("no"));
             attributes.insert(QLatin1String("deprecated"), QLatin1String("no"));
             attributes.insert(QLatin1String("hash-function"), QString());
             attributes.insert(QLatin1String("stream"), QLatin1String("no"));
-            // fall throooough
+            Q_FALLTHROUGH();
         case StackElement::InterfaceTypeEntry:
             attributes[QLatin1String("default-superclass")] = m_defaultSuperclass;
             attributes.insert(QLatin1String("polymorphic-id-expression"), QString());
             attributes.insert(QLatin1String("delete-in-main-thread"), QLatin1String("no"));
             attributes.insert(QLatin1String("held-type"), QString());
             attributes.insert(QLatin1String("copyable"), QString());
-            // fall through
+            Q_FALLTHROUGH();
         case StackElement::NamespaceTypeEntry:
             attributes.insert(QLatin1String("target-lang-name"), QString());
             attributes[QLatin1String("package")] = m_defaultPackage;
@@ -932,7 +932,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
              else
                 m_currentEnum =
                     new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(colonColon()),
-                                      names.last(), since);
+                                      names.constLast(), since);
             m_currentEnum->setAnonymous(!attributes[QLatin1String("identified-by-value")].isEmpty());
             element->entry = m_currentEnum;
             m_currentEnum->setCodeGeneration(m_generate);
@@ -968,7 +968,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             itype->setOrigin(otype);
             element->entry = otype;
         }
-        // fall through
+        Q_FALLTHROUGH();
         case StackElement::ValueTypeEntry: {
             if (!element->entry) {
                 ValueTypeEntry* typeEntry = new ValueTypeEntry(name, since);
@@ -978,12 +978,12 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 element->entry = typeEntry;
             }
 
-        // fall through
+        Q_FALLTHROUGH();
         case StackElement::NamespaceTypeEntry:
             if (!element->entry)
                 element->entry = new NamespaceTypeEntry(name, since);
 
-        // fall through
+        Q_FALLTHROUGH();
         case StackElement::ObjectTypeEntry:
             if (!element->entry)
                 element->entry = new ObjectTypeEntry(name, since);
@@ -1334,13 +1334,12 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
         }
         break;
-        case StackElement::RejectEnumValue: {
+        case StackElement::RejectEnumValue:
             if (!m_currentEnum) {
                 m_error = QLatin1String("<reject-enum-value> node must be used inside a <enum-type> node");
                 return false;
             }
-            QString name = attributes[nameAttribute()];
-        } break;
+        break;
         case StackElement::ReplaceType: {
             if (topElement.type != StackElement::ModifyArgument) {
                 m_error = QLatin1String("Type replacement can only be specified for argument modifications");
@@ -1978,7 +1977,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
 
             if (topElement.type == StackElement::ModifyFunction || topElement.type == StackElement::AddFunction) {
-                FunctionModification mod = m_contextStack.top()->functionMods.last();
+                FunctionModification mod = m_contextStack.top()->functionMods.constLast();
                 if (snip.language == TypeSystem::ShellDeclaration) {
                     m_error = QLatin1String("no function implementation in shell declaration in which to inject code");
                     return false;
@@ -2495,7 +2494,7 @@ AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
                 break;
         }
         // is const?
-        m_isConst = signature.right(signatureLength - endPos).contains(QLatin1String("const"));
+        m_isConst = signature.rightRef(signatureLength - endPos).contains(QLatin1String("const"));
     }
 }
 

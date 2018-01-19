@@ -94,7 +94,7 @@ static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType*
  */
 struct OverloadSortData
 {
-    OverloadSortData() : counter(0) {};
+    OverloadSortData() : counter(0) {}
 
     /**
      * Adds a typeName into the type map without associating it with
@@ -142,7 +142,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
     else if (function->isConversionOperator())
         impConv = function->ownerClass()->typeEntry()->name();
     else
-        impConv = getTypeName(function->arguments().first()->type());
+        impConv = getTypeName(function->arguments().constFirst()->type());
 
     QStringList types;
     const AbstractMetaTypeList &instantiations = containerType->instantiations();
@@ -211,7 +211,7 @@ void OverloadData::sortNextOverloads()
        << QLatin1String("long");
 
     // sort the children overloads
-    for (OverloadData *ov : m_nextOverloadData)
+    for (OverloadData *ov : qAsConst(m_nextOverloadData))
         ov->sortNextOverloads();
 
     if (m_nextOverloadData.size() <= 1)
@@ -220,7 +220,7 @@ void OverloadData::sortNextOverloads()
     // Populates the OverloadSortData object containing map and reverseMap, to map type names to ids,
     // these ids will be used by the topological sort algorithm, because is easier and faster to work
     // with graph sorting using integers.
-    for (OverloadData *ov : m_nextOverloadData) {
+    for (OverloadData *ov : qAsConst(m_nextOverloadData)) {
         sortData.mapType(ov);
 
         const QString typeName(getTypeName(ov));
@@ -293,7 +293,7 @@ void OverloadData::sortNextOverloads()
 
     MetaFunctionList involvedConversions;
 
-    for (OverloadData *ov : m_nextOverloadData) {
+    for (OverloadData *ov : qAsConst(m_nextOverloadData)) {
         const AbstractMetaType* targetType = ov->argType();
         const QString targetTypeEntryName(getTypeName(ov));
         int targetTypeId = sortData.map[targetTypeEntryName];
@@ -305,7 +305,7 @@ void OverloadData::sortNextOverloads()
             if (function->isConversionOperator())
                 convertibleType = function->ownerClass()->typeEntry()->name();
             else
-                convertibleType = getTypeName(function->arguments().first()->type());
+                convertibleType = getTypeName(function->arguments().constFirst()->type());
 
             if (convertibleType == QLatin1String("int") || convertibleType == QLatin1String("unsigned int"))
                 classesWithIntegerImplicitConversion << targetTypeEntryName;
@@ -323,7 +323,7 @@ void OverloadData::sortNextOverloads()
         }
 
         // Process inheritance relationships
-        if (targetType->isValue() || targetType->isObject()) {
+        if (targetType->isValue() || targetType->isObject() || targetType->isQObject()) {
             const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType->typeEntry());
             const AbstractMetaClassList &ancestors = m_generator->getAllAncestors(metaClass);
             for (const AbstractMetaClass *ancestor : ancestors) {
@@ -404,7 +404,7 @@ void OverloadData::sortNextOverloads()
     if (sortData.map.contains(QLatin1String("QString")) && sortData.map.contains(QLatin1String("QByteArray")))
         graph.addEdge(sortData.map[QLatin1String("QString")], sortData.map[QLatin1String("QByteArray")]);
 
-    for (OverloadData *ov : m_nextOverloadData) {
+    for (OverloadData *ov : qAsConst(m_nextOverloadData)) {
         const AbstractMetaType* targetType = ov->argType();
         if (!targetType->isEnum())
             continue;
@@ -435,9 +435,8 @@ void OverloadData::sortNextOverloads()
 
         // Dump overload graph
         QString graphName = QDir::tempPath() + QLatin1Char('/') + funcName + QLatin1String(".dot");
-        QHash<QString, int>::const_iterator it = sortData.map.begin();
         QHash<int, QString> nodeNames;
-        for (; it != sortData.map.end(); ++it)
+        for (auto it = sortData.map.cbegin(), end = sortData.map.cend(); it != end; ++it)
             nodeNames.insert(it.value(), it.key());
         graph.dumpDot(nodeNames, graphName);
         qCWarning(lcShiboken).noquote() << qPrintable(msgCyclicDependency(funcName, graphName, involvedConversions));
@@ -521,7 +520,7 @@ void OverloadData::addOverload(const AbstractMetaFunction* func)
     for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
         if (func->argumentRemoved(i + 1))
             continue;
-        if (!ShibokenGenerator::getDefaultValue(func, func->arguments()[i]).isEmpty()) {
+        if (!ShibokenGenerator::getDefaultValue(func, func->arguments().at(i)).isEmpty()) {
             int fixedArgIndex = i - removed;
             if (fixedArgIndex < m_headOverloadData->m_minArgs)
                 m_headOverloadData->m_minArgs = fixedArgIndex;
@@ -590,7 +589,7 @@ bool OverloadData::hasVarargs() const
 {
     for (const AbstractMetaFunction *func : m_overloads) {
         AbstractMetaArgumentList args = func->arguments();
-        if (args.size() > 1 && args.last()->type()->isVarargs())
+        if (args.size() > 1 && args.constLast()->type()->isVarargs())
             return true;
     }
     return false;
@@ -653,7 +652,7 @@ bool OverloadData::hasStaticAndInstanceFunctions() const
 
 const AbstractMetaFunction* OverloadData::referenceFunction() const
 {
-    return m_overloads.first();
+    return m_overloads.constFirst();
 }
 
 const AbstractMetaArgument* OverloadData::argument(const AbstractMetaFunction* func) const
@@ -670,7 +669,7 @@ const AbstractMetaArgument* OverloadData::argument(const AbstractMetaFunction* f
             argPos++;
     }
 
-    return func->arguments()[m_argPos + removed];
+    return func->arguments().at(m_argPos + removed);
 }
 
 OverloadDataList OverloadData::overloadDataOnPosition(OverloadData* overloadData, int argPos) const
@@ -755,7 +754,7 @@ const AbstractMetaFunction* OverloadData::getFunctionWithDefaultValue() const
             if (func->argumentRemoved(i + 1))
                 removedArgs++;
         }
-        if (!ShibokenGenerator::getDefaultValue(func, func->arguments()[m_argPos + removedArgs]).isEmpty())
+        if (!ShibokenGenerator::getDefaultValue(func, func->arguments().at(m_argPos + removedArgs)).isEmpty())
             return func;
     }
     return 0;
@@ -822,7 +821,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList&
             if (func->argumentRemoved(j + 1))
                 continue;
             int fixedArgIndex = j - removed;
-            if (fixedArgIndex < minArgs && !ShibokenGenerator::getDefaultValue(func, func->arguments()[j]).isEmpty())
+            if (fixedArgIndex < minArgs && !ShibokenGenerator::getDefaultValue(func, func->arguments().at(j)).isEmpty())
                 minArgs = fixedArgIndex;
         }
     }

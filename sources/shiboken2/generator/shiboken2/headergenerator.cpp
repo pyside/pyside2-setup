@@ -417,7 +417,7 @@ bool HeaderGenerator::finishGeneration()
     // TODO-CONVERTER ------------------------------------------------------------------------------
 
     macrosStream << "// Macros for type check" << endl;
-    for (const AbstractMetaEnum *cppEnum : globalEnums) {
+    for (const AbstractMetaEnum *cppEnum : qAsConst(globalEnums)) {
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
         includes << cppEnum->typeEntry()->include();

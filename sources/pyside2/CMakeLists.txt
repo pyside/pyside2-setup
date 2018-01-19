@@ -227,6 +227,9 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
     set(name "Qt5${shortname}")
     find_package(${name})
     set(_name_found "${name}_FOUND")
+    set(_name_dir "${name}_DIR")
+    get_filename_component(_qt_dir ${QT_INCLUDE_DIR}   DIRECTORY)
+    get_filename_component(_module_dir "${${_name_dir}}/../../../" ABSOLUTE)
 
     # Determine essential/optional/missing
     set(module_state "missing")
@@ -240,7 +243,7 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
         set(module_state "essential")
     endif()
 
-    if(${_name_found})
+    if(${${_name_found}} AND ${_qt_dir} STREQUAL ${_module_dir})
         message(STATUS "${module_state} module ${name} found (${ARGN})")
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})

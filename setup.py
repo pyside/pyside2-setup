@@ -201,6 +201,8 @@ from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
 from utils import osx_fix_rpaths_for_library
+from utils import download_and_extract_7z
+from textwrap import dedent
 
 # guess a close folder name for extensions
 def get_extension_folder(ext):
@@ -261,6 +263,7 @@ OPTION_MODULE_SUBSET = option_value("module-subset")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_QT_SRC = option_value("qt-src-dir")
+OPTION_ICULIB = option_value("iculib-url")
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -321,6 +324,14 @@ if OPTION_JOBS:
             OPTION_JOBS = '-j' + OPTION_JOBS
 else:
     OPTION_JOBS = ''
+
+if OPTION_ICULIB:
+    if not OPTION_STANDALONE:
+        print("--iculib-url is usable only when creating standalone wheel with --standalone switch")
+        sys.exit(1)
+    if sys.platform != "linux":
+        print("--iculib-url is usable only when creating standalone wheels in Linux")
+        sys.exit(1)
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -1110,12 +1121,10 @@ class pyside_build(_build):
             "{dist_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
-            # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
-            folder = get_extension_folder('pyside2-examples')
-            copydir(
-                "{sources_dir}/%s/examples" % folder,
-                "{dist_dir}/PySide2/examples",
-                force=False, vars=vars)
+            # examples/* -> <setup>/PySide2/examples
+            copydir(os.path.join(self.script_dir, "examples"),
+                    "{dist_dir}/PySide2/examples",
+                    force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
                 examples_path = "{dist_dir}/PySide2/examples".format(**vars)
@@ -1142,6 +1151,41 @@ class pyside_build(_build):
 
     def prepare_standalone_package_linux(self, executables, vars):
         built_modules = vars['built_modules']
+
+        def _print_warn():
+            print(dedent("""\
+                  ***********************************************************
+                    If one is using Qt binaries provided by QtCompany's CI,
+                    those aren't working as expected!
+                  ***********************************************************
+                  """))
+
+        # To get working QtCompany Qt CI binaries we have to extract the ICU libs
+        # If no link provided we'll use the libs from qt-project
+        icuUrl = ""
+        if OPTION_ICULIB:
+            icuUrl = OPTION_ICULIB
+        else:
+            qt_version = self.qtinfo.version
+            url_pre = "http://master.qt.io/development_releases/prebuilt/icu/prebuilt/"
+            if qt_version.startswith("5.6"):
+                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel6.6-x64.7z"
+            else:
+                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel7.2-x64.7z"
+
+        if find_executable("7z"):
+            try:
+                download_and_extract_7z(icuUrl, "{qt_lib_dir}".format(**vars))
+            except RuntimeError as e:
+                # The Qt libs now requires patching to system ICU
+                # OR it is possible that Qt was built without ICU and
+                # Works as such
+                print("Failed to download and extract %s" % icuUrl)
+                print(str(e))
+                _print_warn()
+        else:
+                print("Install 7z into PATH to extract ICU libs")
+                _print_warn()
 
         # <qt>/lib/* -> <setup>/PySide2/Qt/lib
         copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
@@ -1347,12 +1391,10 @@ class pyside_build(_build):
             "{dist_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
-            # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
-            folder = get_extension_folder('pyside2-examples')
-            copydir(
-                "{sources_dir}/%s/examples" % folder,
-                "{dist_dir}/PySide2/examples",
-                force=False, vars=vars)
+            # examples/* -> <setup>/PySide2/examples
+            copydir(os.path.join(self.script_dir, "examples"),
+                    "{dist_dir}/PySide2/examples",
+                    force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
                 examples_path = "{dist_dir}/PySide2/examples".format(**vars)
@@ -1559,7 +1601,9 @@ setup(
     url = 'http://www.pyside.org',
     download_url = 'https://download.qt-project.org/official_releases/pyside2/',
     license = 'LGPL',
-    packages = ['PySide2', 'pyside2uic'],
+    packages = ['PySide2', 'pyside2uic',
+                'pyside2uic.Compiler',
+                'pyside2uic.port_v%s' % (sys.version_info[0]) ],
     package_dir = {'': 'pyside_package'},
     include_package_data = True,
     zip_safe = False,

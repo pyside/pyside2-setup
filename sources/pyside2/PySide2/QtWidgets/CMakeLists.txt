@@ -23,6 +23,7 @@ ${QtWidgets_GEN_DIR}/qbuttongroup_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qcalendarwidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qcheckbox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qcolordialog_wrapper.cpp
+${QtWidgets_GEN_DIR}/qcolormap_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qcolumnview_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qcombobox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qcommandlinkbutton_wrapper.cpp

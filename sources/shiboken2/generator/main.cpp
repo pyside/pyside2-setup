@@ -218,7 +218,7 @@ static QMap<QString, QString> getInitializedArguments()
 {
     QMap<QString, QString> args;
     QStringList arguments = QCoreApplication::arguments();
-    QString appName = arguments.first();
+    QString appName = arguments.constFirst();
     arguments.removeFirst();
 
     QString projectFileName;
@@ -502,9 +502,8 @@ int main(int argc, char *argv[])
             QStringList parts = fullVersion.split(QLatin1Char(','));
             QString package;
             QString version;
-            // avoid constFirst to stay Qt 5.5 compatible
-            package = parts.count() == 1 ? QLatin1String("*") : parts.first();
-            version = parts.last();
+            package = parts.count() == 1 ? QLatin1String("*") : parts.constFirst();
+            version = parts.constLast();
             if (!extractor.setApiVersion(package, version)) {
                 errorPrint(msgInvalidVersion(package, version));
                 return EXIT_FAILURE;

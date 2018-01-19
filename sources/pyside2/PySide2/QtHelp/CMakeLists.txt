@@ -11,6 +11,7 @@ ${QtHelp_GEN_DIR}/qhelpindexwidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchengine_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchquerywidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchquery_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchresult_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 # module is always needed
 ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp

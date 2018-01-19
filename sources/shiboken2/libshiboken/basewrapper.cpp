@@ -838,13 +838,15 @@ Py_hash_t hash(PyObject* pyObj)
 static void setSequenceOwnership(PyObject* pyObj, bool owner)
 {
     if (PySequence_Check(pyObj)) {
-        std::list<SbkObject*> objs = splitPyObject(pyObj);
-        std::list<SbkObject*>::const_iterator it = objs.begin();
-        for(; it != objs.end(); ++it) {
-            if (owner)
-                getOwnership(*it);
-            else
-                releaseOwnership(*it);
+        Py_ssize_t size = PySequence_Size(pyObj);
+        if (size > 0) {
+            std::list<SbkObject*> objs = splitPyObject(pyObj);
+            for (auto it = objs.begin(), end = objs.end(); it != end; ++it) {
+                if (owner)
+                    getOwnership(*it);
+                else
+                    releaseOwnership(*it);
+            }
         }
     } else if (Object::checkType(pyObj)) {
         if (owner)

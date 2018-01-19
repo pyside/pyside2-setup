@@ -71,8 +71,6 @@ macro(create_pyside_module
     set(shiboken_framework_include_dirs_option "")
     if(CMAKE_HOST_APPLE)
         set(shiboken_framework_include_dirs "${QT_FRAMEWORK_INCLUDE_DIR}")
-        # On macOS, provide the framework paths for OpenGL headers.
-        set(shiboken_framework_include_dirs ${shiboken_framework_include_dirs} ${CMAKE_SYSTEM_FRAMEWORK_PATH})
         make_path(shiboken_framework_include_dirs ${shiboken_framework_include_dirs})
         set(shiboken_framework_include_dirs_option "--framework-include-paths=${shiboken_framework_include_dirs}")
     endif()
@@ -121,7 +119,19 @@ macro(create_pyside_module
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
     file(GLOB typesystem_files ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_*.xml ${typesystem_path})
-    install(FILES ${typesystem_files} DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems)
+
+#   Copy typesystem files and remove module names from the <load-typesystem> element
+#   so that it works in a flat directory:
+#   <load-typesystem name="QtWidgets/typesystem_widgets.xml" ... ->
+#   <load-typesystem name="typesystem_widgets.xml"
+    foreach(typesystem_file ${typesystem_files})
+        get_filename_component(typesystem_file_name "${typesystem_file}" NAME)
+        file(READ "${typesystem_file}" typesystemXml)
+        string(REGEX REPLACE "<load-typesystem name=\"[^/\"]+/" "<load-typesystem name=\"" typesystemXml "${typesystemXml}")
+        set (typesystem_target_file "${CMAKE_CURRENT_BINARY_DIR}/PySide2/typesystems/${typesystem_file_name}")
+        file(WRITE "${typesystem_target_file}" "${typesystemXml}")
+        install(FILES "${typesystem_target_file}" DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems)
+    endforeach()
 endmacro()
 
 #macro(check_qt_class_with_namespace module namespace class optional_source_files dropped_entries [namespace] [module])

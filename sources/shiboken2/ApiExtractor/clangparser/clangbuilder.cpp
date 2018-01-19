@@ -533,6 +533,13 @@ static inline bool compareHeaderName(const char *haystack, const char *needle)
 #endif
 }
 
+#ifdef Q_OS_UNIX
+static bool cStringStartsWith(const char *prefix, const char *str)
+{
+    return strncmp(prefix, str, strlen(prefix)) == 0;
+}
+#endif
+
 bool Builder::visitLocation(const CXSourceLocation &location) const
 {
     if (clang_Location_isInSystemHeader(location) == 0)
@@ -546,7 +553,21 @@ bool Builder::visitLocation(const CXSourceLocation &location) const
     // Has been observed to be 0 for invalid locations
     if (const char *cFileName = clang_getCString(cxFileName)) {
         // Resolve OpenGL typedefs although the header is considered a system header.
-        const bool visitHeader = compareHeaderName(cFileName, "gl.h");
+        const bool visitHeader = compareHeaderName(cFileName, "gl.h")
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+                || cStringStartsWith("/usr/include/stdint.h", cFileName)
+#endif
+#if defined(Q_OS_LINUX)
+                || cStringStartsWith("/usr/include/stdlib.h", cFileName)
+                || cStringStartsWith("/usr/include/sys/types.h", cFileName)
+#elif defined(Q_OS_MACOS)
+                // Parse the following system headers to get the correct typdefs for types like
+                // int32_t, which are used in the macOS implementation of OpenGL framework.
+                || compareHeaderName(cFileName, "gltypes.h")
+                || cStringStartsWith("/usr/include/_types", cFileName)
+                || cStringStartsWith("/usr/include/sys/_types", cFileName)
+#endif
+                ;
         clang_disposeString(cxFileName);
         if (visitHeader)
             return true;

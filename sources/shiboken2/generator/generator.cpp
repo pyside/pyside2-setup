@@ -127,7 +127,7 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
         QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
         QString warning =
                 QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
-                               " arguments.").arg(piece).arg(type->originalTypeDescription());
+                               " arguments.").arg(piece, type->originalTypeDescription());
         if (!context.isEmpty())
             warning.append(QStringLiteral(" Calling context: %1").arg(context));
 
@@ -443,7 +443,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
 
     for (QString line : lst) {
         if (!line.isEmpty() && !emptyLine.match(line).hasMatch()) {
-            while (line.end()->isSpace())
+            while (line.constEnd()->isSpace())
                 line.chop(1);
             int limit = 0;
             for(int i = 0; i < spacesToRemove; ++i) {

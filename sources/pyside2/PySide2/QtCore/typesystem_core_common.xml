@@ -216,17 +216,6 @@
     <include file-name="signalmanager.h" location="global"/>
   </primitive-type>
 
-  <!-- Among other use cases, these types are necessary for OpenGL "GLint"-like typedefs on macOS.
-  -->
-  <primitive-type name="int64_t" />
-  <primitive-type name="int32_t" />
-  <primitive-type name="int16_t" />
-  <primitive-type name="int8_t" />
-  <primitive-type name="uint64_t" />
-  <primitive-type name="uint32_t" />
-  <primitive-type name="uint16_t" />
-  <primitive-type name="uint8_t" />
-
   <primitive-type name="bool" target-lang-api-name="PyBool">
     <conversion-rule>
         <native-to-target>
@@ -2922,7 +2911,7 @@
             QByteArray ba;
             ba.resize(%2);
             %CPPSELF.%FUNCTION_NAME(ba.data(), ba.size());
-            %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
+            %PYARG_0 = Shiboken::String::fromCString(ba.constData());
         </inject-code>
         <modify-argument index="1">
             <remove-argument />
@@ -2946,7 +2935,7 @@
             QByteArray ba;
             ba.resize(%2);
             %CPPSELF.%FUNCTION_NAME(ba.data(), ba.size());
-            %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
+            %PYARG_0 = Shiboken::String::fromCString(ba.constData());
         </inject-code>
         <modify-argument index="1">
             <remove-argument />
@@ -2954,12 +2943,13 @@
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
             <conversion-rule class="native">
-                %RETURN_TYPE %out;
-                if (!PyBytes_Check(%PYARG_0)) {
-                    %out = -1;
-                } else {
+                %RETURN_TYPE %out = 0;
+                if (PyBytes_Check(%PYARG_0)) {
                     %out = PyBytes_GET_SIZE((PyObject*)%PYARG_0);
                     memcpy(%1, PyBytes_AS_STRING((PyObject*)%PYARG_0), %out);
+                } else if (Shiboken::String::check(%PYARG_0)) {
+                    %out = Shiboken::String::len((PyObject*)%PYARG_0);
+                    memcpy(%1, Shiboken::String::toCString((PyObject*)%PYARG_0), %out);
                 }
             </conversion-rule>
         </modify-argument>

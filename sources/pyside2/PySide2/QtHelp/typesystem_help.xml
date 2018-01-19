@@ -61,5 +61,6 @@
         <enum-type name="FieldName"/>
     </value-type>
     <object-type name="QHelpSearchQueryWidget"/>
+    <object-type name="QHelpSearchResult"/>
     <object-type name="QHelpSearchResultWidget"/>
 </typesystem>

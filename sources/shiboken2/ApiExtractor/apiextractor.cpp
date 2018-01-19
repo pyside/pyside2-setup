@@ -46,7 +46,7 @@
 ApiExtractor::ApiExtractor() : m_builder(0)
 {
     // Environment TYPESYSTEMPATH
-    QString envTypesystemPaths = QFile::decodeName(getenv("TYPESYSTEMPATH"));
+    QString envTypesystemPaths = QFile::decodeName(qgetenv("TYPESYSTEMPATH"));
     if (!envTypesystemPaths.isEmpty())
         TypeDatabase::instance()->addTypesystemPath(envTypesystemPaths);
 }

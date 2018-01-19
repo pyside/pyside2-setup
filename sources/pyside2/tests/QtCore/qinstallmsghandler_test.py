@@ -65,9 +65,10 @@ class QInstallMsgHandlerTest(unittest.TestCase):
 
     def testHandler(self):
         rethandler = qInstallMessageHandler(handler)
-        qDebug("Test Debug")
-        self.assertEqual(param[0], QtDebugMsg)
-        self.assertEqual(param[2], "Test Debug")
+        if QLibraryInfo.isDebugBuild():
+            qDebug("Test Debug")
+            self.assertEqual(param[0], QtDebugMsg)
+            self.assertEqual(param[2], "Test Debug")
         qWarning("Test Warning")
         self.assertEqual(param[0], QtWarningMsg)
         self.assertEqual(param[2], "Test Warning")
