@@ -76,13 +76,10 @@ endmacro()
 # Test files.
 file(GLOB_RECURSE pyside_folder_py_files "../*.py")
 
-# Example files.
-file(GLOB_RECURSE example_folder_py_files "../../pyside2-examples/*.py")
-
 # Mostly for setup.py.
 file(GLOB setup_folder_py_files "../../../*.py")
 
-set(other_files ${pyside_folder_py_files} ${example_folder_py_files} ${setup_folder_py_files})
+set(other_files ${pyside_folder_py_files} ${setup_folder_py_files})
 add_other_files(${other_files})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
