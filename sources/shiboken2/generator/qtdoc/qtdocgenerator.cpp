@@ -303,7 +303,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
 QString QtXmlToSphinx::readFromLocations(const QStringList& locations, const QString& path, const QString& identifier)
 {
     QString result;
-    bool ok;
+    bool ok = false;
     for (QString location : locations) {
         location.append(QLatin1Char('/'));
         location.append(path);
@@ -372,7 +372,7 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
     static char types[] = { '-', '^' };
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        uint typeIdx = reader.attributes().value(QLatin1String("level")).toString().toInt();
+        uint typeIdx = reader.attributes().value(QLatin1String("level")).toString().toUInt();
         if (typeIdx >= sizeof(types))
             type = types[sizeof(types)-1];
         else
@@ -731,12 +731,11 @@ void QtXmlToSphinx::handleCodeTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        QString format = reader.attributes().value(QLatin1String("format")).toString();
         m_output << INDENT << "::" << endl << endl;
         INDENT.indent++;
     } else if (token == QXmlStreamReader::Characters) {
         const QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
-        for (const QString row : lst)
+        for (const QString &row : lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << endl << endl;
@@ -981,8 +980,8 @@ static QString getFuncName(const AbstractMetaFunction* cppFunc) {
         hashInitialized = true;
     }
 
-    QHash<QString, QString>::const_iterator it = operatorsHash.find(cppFunc->name());
-    QString result = it != operatorsHash.end() ? it.value() : cppFunc->name();
+    QHash<QString, QString>::const_iterator it = operatorsHash.constFind(cppFunc->name());
+    QString result = it != operatorsHash.cend() ? it.value() : cppFunc->name();
     result.replace(QLatin1String("::"), QLatin1String("."));
     return result;
 }
@@ -1164,7 +1163,6 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
 
     if ((functionList.size() > 0) || (staticFunctionList.size() > 0)) {
         QtXmlToSphinx::Table functionTable;
-        QtXmlToSphinx::TableRow row;
 
         s << "Synopsis" << endl
           << "--------" << endl << endl;
