@@ -210,7 +210,8 @@ from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
 from utils import osx_fix_rpaths_for_library
-from utils import download_and_extract_7z
+from utils import copy_icu_libs
+from utils import find_files_using_glob
 from textwrap import dedent
 
 # guess a close folder name for extensions
@@ -1160,48 +1161,26 @@ class pyside_build(_build):
     def prepare_standalone_package_linux(self, executables, vars):
         built_modules = vars['built_modules']
 
-        def _print_warn():
-            print(dedent("""\
-                  ***********************************************************
-                    If one is using Qt binaries provided by QtCompany's CI,
-                    those aren't working as expected!
-                  ***********************************************************
-                  """))
-
-        # To get working QtCompany Qt CI binaries we have to extract the ICU libs
-        # If no link provided we'll use the libs from qt-project
-        icuUrl = ""
-        if OPTION_ICULIB:
-            icuUrl = OPTION_ICULIB
-        else:
-            qt_version = self.qtinfo.version
-            url_pre = "http://master.qt.io/development_releases/prebuilt/icu/prebuilt/"
-            if qt_version.startswith("5.6"):
-                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel6.6-x64.7z"
-            else:
-                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel7.2-x64.7z"
-
-        if find_executable("7z"):
-            try:
-                download_and_extract_7z(icuUrl, "{qt_lib_dir}".format(**vars))
-            except RuntimeError as e:
-                # The Qt libs now requires patching to system ICU
-                # OR it is possible that Qt was built without ICU and
-                # Works as such
-                print("Failed to download and extract %s" % icuUrl)
-                print(str(e))
-                _print_warn()
-        else:
-                print("Install 7z into PATH to extract ICU libs")
-                _print_warn()
-
         # <qt>/lib/* -> <setup>/PySide2/Qt/lib
-        copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
+        destination_lib_dir = "{pyside_package_dir}/PySide2/Qt/lib"
+        copydir("{qt_lib_dir}", destination_lib_dir,
             filter=[
                 "libQt5*.so.?",
                 "libicu*.so.??",
             ],
             recursive=False, vars=vars, force_copy_symlinks=True)
+
+        # Check if ICU libraries were copied over to the destination Qt libdir.
+        resolved_destination_lib_dir = destination_lib_dir.format(**vars)
+        maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir, "libcu*")
+
+        # If no ICU libraries are present in the Qt libdir (like when Qt is built against system
+        # ICU, or in the Coin CI where ICU libs are in a different directory) try to
+        # find out / resolve which ICU libs are used by QtCore (if used at all) using a custom
+        # written ldd, and copy the ICU libs to the Pyside Qt dir if necessary. We choose the QtCore
+        # lib to inspect, by checking which QtCore library the shiboken2 executable uses.
+        if not maybe_icu_libs:
+            copy_icu_libs(resolved_destination_lib_dir)
 
         if 'WebEngineWidgets' in built_modules:
             copydir("{qt_lib_execs_dir}", "{pyside_package_dir}/PySide2/Qt/libexec",
