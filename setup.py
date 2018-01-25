@@ -164,6 +164,8 @@ old_submodules = {
     ],
 }
 
+pyside_package_dir_name = "pyside_package"
+
 try:
     import setuptools
 except ImportError:
@@ -269,6 +271,11 @@ OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_ICULIB = option_value("iculib-url")
+
+# This is used automatically by distutils.command.install object, to specify final installation
+# location.
+OPTION_FINAL_INSTALL_PREFIX = option_value("prefix")
+
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -445,7 +452,7 @@ def prepareBuild():
     if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
         prepareSubModules()
     # Clean up temp and package folders
-    for n in ["pyside_package", "build", "PySide2-%s" % __version__]:
+    for n in [pyside_package_dir_name, "build", "PySide2-%s" % __version__]:
         d = os.path.join(script_dir, n)
         if os.path.isdir(d):
             print("Removing %s" % d)
@@ -455,7 +462,8 @@ def prepareBuild():
                 print('***** problem removing "{}"'.format(d))
                 print('ignored error: {}'.format(e))
     # Prepare package folders
-    for pkg in ["pyside_package/PySide2", "pyside_package/pyside2uic"]:
+    ppdn = pyside_package_dir_name
+    for pkg in [os.path.join(ppdn, "PySide2"), os.path.join(ppdn, "pyside2uic")]:
         pkg_dir = os.path.join(script_dir, pkg)
         os.makedirs(pkg_dir)
     # locate Qt sources for the documentation
@@ -743,6 +751,7 @@ class pyside_build(_build):
         self.make_generator = make_generator
         self.debug = OPTION_DEBUG
         self.script_dir = script_dir
+        self.pyside_package_dir = os.path.join(self.script_dir, pyside_package_dir_name)
         self.sources_dir = sources_dir
         self.build_dir = build_dir
         self.install_dir = install_dir
@@ -754,6 +763,10 @@ class pyside_build(_build):
         self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
         self.build_tests = OPTION_BUILDTESTS
 
+        setuptools_install_prefix = get_python_lib(1)
+        if OPTION_FINAL_INSTALL_PREFIX:
+            setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
+
         log.info("=" * 30)
         log.info("Package version: %s" % __version__)
         log.info("Build type: %s" % self.build_type)
@@ -763,11 +776,27 @@ class pyside_build(_build):
         log.info("Make generator: %s" % self.make_generator)
         log.info("Make jobs: %s" % OPTION_JOBS)
         log.info("-" * 3)
+
         log.info("Script directory: %s" % self.script_dir)
         log.info("Sources directory: %s" % self.sources_dir)
-        log.info("Build directory: %s" % self.build_dir)
-        log.info("Install directory: %s" % self.install_dir)
-        log.info("Python site-packages install directory: %s" % self.site_packages_dir)
+
+        log.info(dedent("""
+        Building PySide2 will create and touch directories in the following order:
+          make build directory (py*_build/*/*) ->
+          make install directory (py*_install/*/*) ->
+          {} directory (pyside_package/*) ->
+          setuptools build directory (build/*/*) ->
+          setuptools install directory (usually path-installed-python/lib/python*/site-packages/*)
+         """).format(pyside_package_dir_name))
+
+        log.info("make build directory: %s" % self.build_dir)
+        log.info("make install directory: %s" % self.install_dir)
+        log.info("%s directory: %s" % (pyside_package_dir_name, self.pyside_package_dir))
+        log.info("setuptools build directory: %s" % os.path.join(self.script_dir, "build"))
+        log.info("setuptools install directory: %s" % setuptools_install_prefix)
+        log.info("make-installed site-packages directory: %s \n"
+                 "  (only relevant for copying files from 'make install directory' "
+                 "to '%s directory'" % (self.site_packages_dir, pyside_package_dir_name))
         log.info("-" * 3)
         log.info("Python executable: %s" % self.py_executable)
         log.info("Python includes: %s" % self.py_include_dir)
@@ -976,7 +1005,7 @@ class pyside_build(_build):
                 "install_dir": self.install_dir,
                 "build_dir": self.build_dir,
                 "script_dir": self.script_dir,
-                "dist_dir": os.path.join(self.script_dir, 'pyside_package'),
+                "dist_dir": self.pyside_package_dir,
                 "ssl_libs_dir": OPTION_OPENSSL,
                 "py_version": self.py_version,
                 "qt_version": self.qtinfo.version,
@@ -1585,7 +1614,7 @@ setup(
     packages = ['PySide2', 'pyside2uic',
                 'pyside2uic.Compiler',
                 'pyside2uic.port_v%s' % (sys.version_info[0]) ],
-    package_dir = {'': 'pyside_package'},
+    package_dir = {'': pyside_package_dir_name},
     include_package_data = True,
     zip_safe = False,
     entry_points = {
