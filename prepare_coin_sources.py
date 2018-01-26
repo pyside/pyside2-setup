@@ -51,8 +51,7 @@ QT_CI_TESTED_SUBMODULE = option_value("module")
 SUBMODULE_BRANCH = option_value("branch")
 
 submodules = {
-        "pyside2-tools" : "pyside-tools",
-        "pyside2-examples" : "examples"
+        "pyside2-tools" : "pyside-tools"
 }
 
 def usage():

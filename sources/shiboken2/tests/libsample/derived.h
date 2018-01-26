@@ -53,13 +53,13 @@ public:
     };
 
     Derived(int id = -1);
-    virtual ~Derived();
-    virtual void pureVirtual();
-    virtual void* pureVirtualReturningVoidPtr();
-    virtual void unpureVirtual();
+    ~Derived() override;
+    void pureVirtual() override;
+    void* pureVirtualReturningVoidPtr() override;
+    void unpureVirtual() override;
 
-    virtual PrintFormat returnAnEnum() { return Short; }
-    virtual Type type() const { return TpDerived; }
+    PrintFormat returnAnEnum()  override { return Short; }
+    Type type() const override { return TpDerived; }
 
     // factory method
     static Abstract* createObject();
@@ -83,10 +83,13 @@ public:
     static Abstract* triggerImpossibleTypeDiscovery();
     static Abstract* triggerAnotherImpossibleTypeDiscovery();
 
-    void hideFunction(HideType*) {}
+    void hideFunction(HideType*) override {}
 protected:
     const char* getClassName() { return className(); }
-    virtual const char* className() { return "Derived"; }
+    virtual const char* className() override { return "Derived"; }
+
+private:
+    void pureVirtualPrivate() override;
 };
 #endif // DERIVED_H
 

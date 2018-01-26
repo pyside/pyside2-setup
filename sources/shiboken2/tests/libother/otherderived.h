@@ -41,11 +41,11 @@ class LIBOTHER_API OtherDerived : public Abstract
 {
 public:
     OtherDerived(int id = -1);
-    virtual ~OtherDerived();
-    virtual void pureVirtual();
-    virtual void* pureVirtualReturningVoidPtr();
-    virtual void unpureVirtual();
-    virtual PrintFormat returnAnEnum() { return Short; }
+    ~OtherDerived() override;
+    void pureVirtual() override;
+    void* pureVirtualReturningVoidPtr() override;
+    void unpureVirtual() override;
+    PrintFormat returnAnEnum()  override { return Short; }
 
     inline void useObjectTypeFromOtherModule(ObjectType*) {}
     inline Event useValueTypeFromOtherModule(const Event& e) { return e; }
@@ -59,7 +59,10 @@ public:
 
 protected:
     inline const char* getClassName() { return className(); }
-    virtual const char* className() { return "OtherDerived"; }
+    virtual const char* className()  override { return "OtherDerived"; }
+
+private:
+    void pureVirtualPrivate() override;
 };
 #endif // OTHERDERIVED_H
 

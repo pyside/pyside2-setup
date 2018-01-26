@@ -58,11 +58,11 @@ class LIBSAMPLE_API MDerived1 : public Base1, public Base2
 {
 public:
     MDerived1();
-    virtual ~MDerived1() {}
+    ~MDerived1() override {}
 
-    virtual int mderived1Method() { return m_value; }
-    virtual int base1Method() { return Base1::base1Method() * 10; }
-    virtual int base2Method() { return Base2::base2Method() * 10; }
+    int mderived1Method() { return m_value; }
+    int base1Method () override { return Base1::base1Method() * 10; }
+    int base2Method() override { return Base2::base2Method() * 10; }
 
     inline Base1* castToBase1() { return (Base1*) this; }
     inline Base2* castToBase2() { return (Base2*) this; }
@@ -71,7 +71,7 @@ public:
     static MDerived1* transformFromBase2(Base2 *self);
 
 private:
-    virtual void publicMethod() {}
+    void publicMethod() override {}
     int m_value;
 };
 

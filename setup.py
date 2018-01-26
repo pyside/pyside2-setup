@@ -102,12 +102,10 @@ containedModules = ['shiboken2', 'pyside2']
 submodules = {
     '2.0.0.dev0': [
         ["pyside2-tools", "dev"],
-        ["pyside2-examples", "dev"],
         ["wiki", "master", ".."],
     ],
     '5.9': [
         ["pyside2-tools", "5.9"],
-        ["pyside2-examples", "5.9"],
         ["wiki", "master", ".."]
     ],
     '5.6': [
@@ -364,12 +362,6 @@ if OPTION_VERSION:
 Use --list-versions option to get list of available versions""" % OPTION_VERSION)
         sys.exit(1)
     __version__ = OPTION_VERSION
-
-if OPTION_NOEXAMPLES:
-    # remove pyside2-exampes from submodules so they will not be included
-    for idx, item in enumerate(submodules[__version__]):
-        if item[0].startswith('pyside2-examples'):
-            del submodules[__version__][idx]
 
 # Return a prefix suitable for the _install/_build directory
 def prefix():

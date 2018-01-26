@@ -59,3 +59,6 @@ OtherDerived::unpureVirtual()
 {
 }
 
+void OtherDerived::pureVirtualPrivate()
+{
+}

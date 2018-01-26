@@ -17,14 +17,10 @@ recursive-include sources/patchelf **
 recursive-include sources/shiboken2 **
 recursive-include sources/pyside2 **
 recursive-include sources/pyside2-tools **
-recursive-include sources/pyside2-examples **
-recursive-exclude sources/pyside2-examples/examples/hyperui **
-recursive-exclude sources/pyside2examples/mobility **
 # ignore .git
 recursive-exclude sources/shiboken2/.git **
 recursive-exclude sources/pyside2/.git **
 recursive-exclude sources/pyside2-tools/.git **
-recursive-exclude sources/pyside2-examples/.git **
 
 # PySide package
 recursive-include pyside_package/PySide2 **

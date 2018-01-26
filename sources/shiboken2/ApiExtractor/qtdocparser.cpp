@@ -46,7 +46,6 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     if (!metaClass)
         return;
 
-    QString scope = metaClass->name();
     const AbstractMetaClass* context = metaClass->enclosingClass();
     while(context) {
         if (context->enclosingClass() == 0)
