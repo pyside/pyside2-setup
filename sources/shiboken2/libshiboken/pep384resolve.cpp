@@ -46,6 +46,36 @@ extern "C"
 
 /*****************************************************************************
  *
+ * Support for longobject.h
+ *
+ */
+
+/*
+ * This is the original Python function _PyLong_AsInt() from longobject.c .
+ * We define it here because we are not allowed to use the function
+ * from Python with an underscore.
+ */
+
+/* Get a C int from an int object or any object that has an __int__
+   method.  Return -1 and set an error if overflow occurs. */
+
+int
+_Pep384Long_AsInt(PyObject *obj)
+{
+    int overflow;
+    long result = PyLong_AsLongAndOverflow(obj, &overflow);
+    if (overflow || result > INT_MAX || result < INT_MIN) {
+        /* XXX: could be cute and give a different
+           message for overflow == -1 */
+        PyErr_SetString(PyExc_OverflowError,
+                        "Python int too large to convert to C int");
+        return -1;
+    }
+    return (int)result;
+}
+
+/*****************************************************************************
+ *
  * Support for pydebug.h
  *
  */
@@ -184,6 +214,77 @@ PyTime_FromTime(int hour, int min, int sec, int usec)
 {
     return PyObject_CallFunction((PyObject *)PyDateTimeAPI->TimeType,
                                  (char *)"(iiii)", hour, min, sec, usec);
+}
+
+/*****************************************************************************
+ *
+ * Support for pythonrun.h
+ *
+ */
+
+PyObject *
+PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
+{
+    PyObject* code = Py_CompileString(str, "pyscript", start);
+    PyObject* ret = NULL;
+
+    if (code != NULL) {
+        ret = PyEval_EvalCode(code, globals, locals);
+    }
+    Py_XDECREF(code);
+    return ret;
+}
+
+/*****************************************************************************
+ *
+ * Support for classobject.h
+ *
+ */
+
+// We have no access to PyMethod_New and must call types.MethodType, instead.
+PyObject *
+PyMethod_New(PyObject *func, PyObject *self)
+{
+    return PyObject_CallFunction((PyObject *)&PyMethod_Type,
+                                 (char *)"(OO)", func, self);
+}
+
+PyObject *
+PyMethod_Function(PyObject *im)
+{
+    PyObject *ret = PyObject_GetAttrString(im, "__func__");
+
+    // We have to return a borrowed reference.
+    Py_DECREF(ret);
+    return ret;
+}
+
+PyObject *
+PyMethod_Self(PyObject *im)
+{
+    PyObject *ret = PyObject_GetAttrString(im, "__self__");
+
+    // We have to return a borrowed reference.
+    // If we don't obey that here, then we get a test error!
+    Py_DECREF(ret);
+    return ret;
+}
+
+/*****************************************************************************
+ *
+ * Support for funcobject.h
+ *
+ */
+
+PyObject *
+Pep384Function_Get(PyObject *ob, const char *name)
+{
+    PyObject *ret;
+
+    // We have to return a borrowed reference.
+    ret = PyObject_GetAttrString(ob, name);
+    Py_XDECREF(ret);
+    return ret;
 }
 
 /*****************************************************************************

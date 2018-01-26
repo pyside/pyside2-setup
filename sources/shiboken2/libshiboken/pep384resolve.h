@@ -338,11 +338,13 @@ typedef struct _heaptypeobject {
 
 /*****************************************************************************
  *
- * From longobject.h
+ * RESOLVED: longobject.h
  *
  */
 #ifdef Py_LIMITED_API
-LIBSHIBOKEN_API int _PyLong_AsInt(PyObject *);
+LIBSHIBOKEN_API int _Pep384Long_AsInt(PyObject *);
+#else
+#define _Pep384Long_AsInt _PyLong_AsInt
 #endif
 
 /*****************************************************************************
@@ -489,98 +491,80 @@ typedef struct {
 
 /*****************************************************************************
  *
- * From pystate.h
+ * RESOLVED: pystate.h
  *
  */
+
+/*
+ * pystate provides the data structure that is needed for the trashcan
+ * algorithm. Unfortunately, it is not included in the limited API.
+ * We have two options:
+ *
+ *  (1) ignore trashcan and live without secured deeply nested structures,
+ *  (2) maintain the structure ourselves and make sure it does not change.
+ *
+ * I have chosen the second option.
+ *
+ * When a new python version appears, you need to check compatibility of
+ * the PyThreadState structure (pystate.h) and the trashcan macros at the
+ * end of object.h .
+ */
+
 #ifdef Py_LIMITED_API
-/* Py_tracefunc return -1 when raising an exception, or 0 for success. */
+
+#define Py_TRASH_MIN_COMPATIBLE 0x03020400
+#define Py_TRASH_MAX_COMPATIBLE 0x030700A0
+
+#if PY_VERSION_HEX >= Py_TRASH_MIN_COMPATIBLE && \
+    PY_VERSION_HEX <= Py_TRASH_MAX_COMPATIBLE
 typedef int (*Py_tracefunc)(PyObject *, struct _frame *, int, PyObject *);
-#endif
 
-#ifdef Py_LIMITED_API
+// This structure has the trashcan variables since Python 3.2.4.
+// We renamed all but the trashcan fields to make sure that we don't use
+// anything else somewhere.
+
 typedef struct _ts {
-    /* See Python/ceval.c for comments explaining most fields */
+    struct _ts *pep384_prev;
+    struct _ts *pep384_next;
+    PyInterpreterState *pep384_interp;
 
-    struct _ts *prev;
-    struct _ts *next;
-    PyInterpreterState *interp;
+    struct _frame *pep384_frame;
+    int pep384_recursion_depth;
+    char pep384_overflowed;
+    char pep384_recursion_critical;
 
-    struct _frame *frame;
-    int recursion_depth;
-    char overflowed; /* The stack has overflowed. Allow 50 more calls
-                        to handle the runtime error. */
-    char recursion_critical; /* The current calls must not cause
-                                a stack overflow. */
-    /* 'tracing' keeps track of the execution depth when tracing/profiling.
-       This is to prevent the actual trace/profile code from being recorded in
-       the trace/profile. */
-    int tracing;
-    int use_tracing;
+    int pep384_tracing;
+    int pep384_use_tracing;
 
-    Py_tracefunc c_profilefunc;
-    Py_tracefunc c_tracefunc;
-    PyObject *c_profileobj;
-    PyObject *c_traceobj;
+    Py_tracefunc pep384_c_profilefunc;
+    Py_tracefunc pep384_c_tracefunc;
+    PyObject *pep384_c_profileobj;
+    PyObject *pep384_c_traceobj;
 
-    PyObject *curexc_type;
-    PyObject *curexc_value;
-    PyObject *curexc_traceback;
+    PyObject *pep384_curexc_type;
+    PyObject *pep384_curexc_value;
+    PyObject *pep384_curexc_traceback;
 
-    PyObject *exc_type;
-    PyObject *exc_value;
-    PyObject *exc_traceback;
+    PyObject *pep384_exc_type;
+    PyObject *pep384_exc_value;
+    PyObject *pep384_exc_traceback;
 
-    PyObject *dict;  /* Stores per-thread state */
+    PyObject *pep384_dict;
 
-    int gilstate_counter;
+    int pep384_gilstate_counter;
 
-    PyObject *async_exc; /* Asynchronous exception to raise */
-    long thread_id; /* Thread id where this tstate was created */
-
+    PyObject *pep384_async_exc;
+    long pep384_thread_id;
+    // These two variables only are of interest to us.
     int trash_delete_nesting;
     PyObject *trash_delete_later;
-
-    /* Called when a thread state is deleted normally, but not when it
-     * is destroyed after fork().
-     * Pain:  to prevent rare but fatal shutdown errors (issue 18808),
-     * Thread.join() must wait for the join'ed thread's tstate to be unlinked
-     * from the tstate chain.  That happens at the end of a thread's life,
-     * in pystate.c.
-     * The obvious way doesn't quite work:  create a lock which the tstate
-     * unlinking code releases, and have Thread.join() wait to acquire that
-     * lock.  The problem is that we _are_ at the end of the thread's life:
-     * if the thread holds the last reference to the lock, decref'ing the
-     * lock will delete the lock, and that may trigger arbitrary Python code
-     * if there's a weakref, with a callback, to the lock.  But by this time
-     * _PyThreadState_Current is already NULL, so only the simplest of C code
-     * can be allowed to run (in particular it must not be possible to
-     * release the GIL).
-     * So instead of holding the lock directly, the tstate holds a weakref to
-     * the lock:  that's the value of on_delete_data below.  Decref'ing a
-     * weakref is harmless.
-     * on_delete points to _threadmodule.c's static release_sentinel() function.
-     * After the tstate is unlinked, release_sentinel is called with the
-     * weakref-to-lock (on_delete_data) argument, and release_sentinel releases
-     * the indirectly held lock.
-     */
-    void (*on_delete)(void *);
-    void *on_delete_data;
-
-    PyObject *coroutine_wrapper;
-    int in_coroutine_wrapper;
-
-    /* Now used from PyInterpreterState, kept here for ABI
-       compatibility with PyThreadState */
-    Py_ssize_t _preserve_36_ABI_1;
-    freefunc _preserve_36_ABI_2[MAX_CO_EXTRA_USERS];
-
-    PyObject *async_gen_firstiter;
-    PyObject *async_gen_finalizer;
-
-    /* XXX signal handlers should also be here */
-
+    // Here we cut away the rest of the reduced structure.
 } PyThreadState;
+#else
+#error *** Please check compatibility of the trashcan code, see pep384.h ***
 #endif
+
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
@@ -608,42 +592,23 @@ PyAPI_FUNC(PyObject *) PyRun_String(const char *, int, PyObject *, PyObject *);
 
 /*****************************************************************************
  *
- * From funcobject.h
+ * RESOLVED: funcobject.h
  *
  */
 #ifdef Py_LIMITED_API
-typedef struct {
-    PyObject_HEAD
-    PyObject *func_code;    /* A code object, the __code__ attribute */
-    PyObject *func_globals; /* A dictionary (other mappings won't do) */
-    PyObject *func_defaults;    /* NULL or a tuple */
-    PyObject *func_kwdefaults;  /* NULL or a dict */
-    PyObject *func_closure; /* NULL or a tuple of cell objects */
-    PyObject *func_doc;     /* The __doc__ attribute, can be anything */
-    PyObject *func_name;    /* The __name__ attribute, a string object */
-    PyObject *func_dict;    /* The __dict__ attribute, a dict or NULL */
-    PyObject *func_weakreflist; /* List of weak references */
-    PyObject *func_module;  /* The __module__ attribute, can be anything */
-    PyObject *func_annotations; /* Annotations, a dict or NULL */
-    PyObject *func_qualname;    /* The qualified name */
-
-    /* Invariant:
-     *     func_closure contains the bindings for func_code->co_freevars, so
-     *     PyTuple_Size(func_closure) == PyCode_GetNumFree(func_code)
-     *     (func_closure may be NULL if PyCode_GetNumFree(func_code) == 0).
-     */
-} PyFunctionObject;
+typedef struct _func PyFunctionObject;
 
 PyAPI_DATA(PyTypeObject) PyFunction_Type;
-
-#define PyFunction_Check(op) (Py_TYPE(op) == &PyFunction_Type)
 PyAPI_DATA(PyTypeObject) PyStaticMethod_Type;
+LIBSHIBOKEN_API PyObject *Pep384Function_Get(PyObject *, const char *);
 
-/* Macros for direct access to these values. Type checks are *not*
-   done, so use with care. */
-#define PyFunction_GET_CODE(func) \
-        (((PyFunctionObject *)func) -> func_code)
+#define PyFunction_Check(op)        (Py_TYPE(op) == &PyFunction_Type)
+#define PyFunction_GET_CODE(func)   PyFunction_GetCode(func)
 
+#define PyFunction_GetCode(func)        Pep384Function_Get((PyObject *)func, "__code__")
+#define Pep384Function_GetName(func)    Pep384Function_Get((PyObject *)func, "__name__")
+#else
+#define Pep384Function_GetName(func)    (((PyFunctionObject *)func)->func_name)
 #endif
 
 /*****************************************************************************

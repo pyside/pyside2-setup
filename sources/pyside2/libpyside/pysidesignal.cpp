@@ -427,7 +427,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
             PyObject *function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
             PyCodeObject *objCode = reinterpret_cast<PyCodeObject *>(PyFunction_GET_CODE(function));
             PyFunctionObject *function_obj = reinterpret_cast<PyFunctionObject *>(function);
-            functionName = Shiboken::String::toCString(function_obj->func_name);
+            functionName = Shiboken::String::toCString(Pep384Function_GetName(function_obj));
             useSelf = isMethod;
             slotArgs = Pep384Code_GET_FLAGS(objCode) & CO_VARARGS ? -1 : Pep384Code_GET_ARGCOUNT(objCode);
             if (useSelf)
@@ -1047,7 +1047,7 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
     if (isMethod || isFunction) {
         PyObject* function = isMethod ? PyMethod_GET_FUNCTION(callback) : callback;
         PyCodeObject* objCode = reinterpret_cast<PyCodeObject*>(PyFunction_GET_CODE(function));
-        functionName = Shiboken::String::toCString(reinterpret_cast<PyFunctionObject*>(function)->func_name);
+        functionName = Shiboken::String::toCString(Pep384Function_GetName(function));
         useSelf = isMethod;
         numArgs = Pep384Code_GET_FLAGS(objCode) & CO_VARARGS ? -1 : Pep384Code_GET_ARGCOUNT(objCode);
     } else if (PyCFunction_Check(callback)) {

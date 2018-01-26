@@ -166,7 +166,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         PySideSlot *data = reinterpret_cast<PySideSlot*>(self);
 
         if (!data->slotName) {
-            PyObject *funcName = reinterpret_cast<PyFunctionObject*>(callback)->func_name;
+            PyObject *funcName = Pep384Function_GetName(callback);
             data->slotName = strdup(Shiboken::String::toCString(funcName));
         }
 
