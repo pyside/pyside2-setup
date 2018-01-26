@@ -1052,9 +1052,9 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
         numArgs = objCode->co_flags & CO_VARARGS ? -1 : objCode->co_argcount;
     } else if (PyCFunction_Check(callback)) {
         const PyCFunctionObject *funcObj = reinterpret_cast<const PyCFunctionObject *>(callback);
-        functionName = funcObj->m_ml->ml_name;
-        useSelf = funcObj->m_self;
-        const int flags = funcObj->m_ml->ml_flags;
+        functionName = Pep384CFunction_GET_NAMESTR(funcObj);
+        useSelf = PyCFunction_GET_SELF(funcObj);
+        const int flags = PyCFunction_GET_FLAGS(funcObj);
 
         if (receiver) {
             //Search for signature on metaobject

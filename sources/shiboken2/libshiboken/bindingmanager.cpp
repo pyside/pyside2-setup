@@ -278,7 +278,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
     if (method && PyMethod_Check(method)
-        && reinterpret_cast<PyMethodObject*>(method)->im_self == reinterpret_cast<PyObject*>(wrapper)) {
+        && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject*>(wrapper)) {
         PyObject* defaultMethod;
         PyObject* mro = Py_TYPE(wrapper)->tp_mro;
 
@@ -288,7 +288,7 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
             PyTypeObject* parent = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(mro, i));
             if (parent->tp_dict) {
                 defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
-                if (defaultMethod && reinterpret_cast<PyMethodObject*>(method)->im_func != defaultMethod) {
+                if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod) {
                     Py_DECREF(pyMethodName);
                     return method;
                 }

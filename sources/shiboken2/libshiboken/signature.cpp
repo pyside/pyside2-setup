@@ -127,7 +127,7 @@ extern "C"
 
 // These constants are still in use:
 #define PYTHON_USES_D_COMMON            (PY_VERSION_HEX >= 0x03020000)
-#define PYTHON_NO_TYPE_IN_FUNCTIONS     (!PYTHON_IS_PYTHON3)
+#define PYTHON_NO_TYPE_IN_FUNCTIONS     (!PYTHON_IS_PYTHON3 || Py_LIMITED_API)
 
 typedef struct safe_globals_struc {
     // init part 1: get arg_dict
@@ -215,7 +215,12 @@ GetSignature_Function(PyCFunctionObject *func)
     const char *sig_kind;
     int flags;
 
+#ifndef Py_LIMITED_API
     selftype = func->m_self;
+#else
+    // this implies that we always need the Python2 version!
+    selftype = PyCFunction_GET_SELF((PyObject *)func);
+#endif
     if (selftype == NULL) {
 #if PYTHON_NO_TYPE_IN_FUNCTIONS
         selftype = PyDict_GetItem(pyside_globals->arg_dict, (PyObject *)func);
@@ -224,7 +229,9 @@ GetSignature_Function(PyCFunctionObject *func)
 #endif
         if (!PyErr_Occurred()) {
             PyErr_Format(PyExc_SystemError,
-                "the signature for \"%s\" should exist", func->m_ml->ml_name);
+                "the signature for \"%s\" should exist",
+                Pep384CFunction_GET_NAMESTR(func)
+                );
         }
         return NULL;
     }
@@ -251,7 +258,7 @@ GetSignature_Function(PyCFunctionObject *func)
     props = PyDict_GetItem(dict, func_name);
     if (props == NULL)
         Py_RETURN_NONE;
-    flags = PyCFunction_GET_FLAGS(func);
+    flags = PyCFunction_GET_FLAGS((PyObject *)func);
     if (flags & METH_CLASS)
         sig_kind = "classmethod";
     else if (flags & METH_STATIC)
@@ -657,6 +664,9 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
      *
      * Note: This function crashed when called from PySide_BuildSignatureArgs.
      * Probably this was too early.
+     *
+     * PEP384: We need to switch this always on since we have no access
+     * to the PyCFunction
      */
     {
         PyObject *key, *value;

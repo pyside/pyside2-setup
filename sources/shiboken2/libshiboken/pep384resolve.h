@@ -47,53 +47,12 @@ extern "C"
 
 /*****************************************************************************
  *
- * From longobject.h
- *
- */
-#ifdef Py_LIMITED_API
-LIBSHIBOKEN_API int _PyLong_AsInt(PyObject *);
-#endif
-
-/*****************************************************************************
- *
  * From object.h
  *
  */
 #ifdef Py_LIMITED_API
-/********************* String Literals ****************************************/
-/* This structure helps managing static strings. The basic usage goes like this:
-   Instead of doing
-
-       r = PyObject_CallMethod(o, "foo", "args", ...);
-
-   do
-
-       _Py_IDENTIFIER(foo);
-       ...
-       r = _PyObject_CallMethodId(o, &PyId_foo, "args", ...);
-
-   PyId_foo is a static variable, either on block level or file level. On first
-   usage, the string "foo" is interned, and the structures are linked. On interpreter
-   shutdown, all strings are released (through _PyUnicode_ClearStaticStrings).
-
-   Alternatively, _Py_static_string allows choosing the variable name.
-   _PyUnicode_FromId returns a borrowed reference to the interned string.
-   _PyObject_{Get,Set,Has}AttrId are __getattr__ versions using _Py_Identifier*.
-*/
-typedef struct _Py_Identifier {
-    struct _Py_Identifier *next;
-    const char* string;
-    PyObject *object;
-} _Py_Identifier;
-
-#define _Py_static_string_init(value) { .next = NULL, .string = value, .object = NULL }
-#define _Py_static_string(varname, value)  static _Py_Identifier varname = _Py_static_string_init(value)
-#define _Py_IDENTIFIER(varname) _Py_static_string(PyId_##varname, #varname)
-
-#endif /* !Py_LIMITED_API */
-
-#ifdef Py_LIMITED_API
 /* buffer interface */
+// This has been renamed to Pep384_buffer and will be used.
 typedef struct bufferinfo {
     void *buf;
     PyObject *obj;        /* owned reference */
@@ -107,10 +66,10 @@ typedef struct bufferinfo {
     Py_ssize_t *strides;
     Py_ssize_t *suboffsets;
     void *internal;
-} Py_buffer;
+} Pep384_buffer;
 
-typedef int (*getbufferproc)(PyObject *, Py_buffer *, int);
-typedef void (*releasebufferproc)(PyObject *, Py_buffer *);
+typedef int (*getbufferproc)(PyObject *, Pep384_buffer *, int);
+typedef void (*releasebufferproc)(PyObject *, Pep384_buffer *);
 
 /* Maximum number of dimensions */
 #define PyBUF_MAX_NDIM 64
@@ -146,6 +105,30 @@ typedef void (*releasebufferproc)(PyObject *, Py_buffer *);
 
 /* End buffer interface */
 #endif /* Py_LIMITED_API */
+
+#ifdef Py_LIMITED_API
+PyAPI_FUNC(PyObject *) PyMemoryView_FromBuffer(Pep384_buffer *info);
+#define Py_buffer Pep384_buffer
+#endif
+
+/*****************************************************************************
+ *
+ * From object.h
+ *
+ */
+#ifdef Py_LIMITED_API
+
+typedef struct _Py_Identifier {
+    struct _Py_Identifier *next;
+    const char* string;
+    PyObject *object;
+} _Py_Identifier;
+
+#define _Py_static_string_init(value) { .next = NULL, .string = value, .object = NULL }
+#define _Py_static_string(varname, value)  static _Py_Identifier varname = _Py_static_string_init(value)
+#define _Py_IDENTIFIER(varname) _Py_static_string(PyId_##varname, #varname)
+
+#endif /* !Py_LIMITED_API */
 
 #ifdef Py_LIMITED_API
 typedef struct {
@@ -347,6 +330,15 @@ typedef struct _heaptypeobject {
     struct _dictkeysobject *ht_cached_keys;
     /* here are optional user slots, followed by the members. */
 } PyHeapTypeObject;
+#endif
+
+/*****************************************************************************
+ *
+ * From longobject.h
+ *
+ */
+#ifdef Py_LIMITED_API
+LIBSHIBOKEN_API int _PyLong_AsInt(PyObject *);
 #endif
 
 /*****************************************************************************
@@ -668,27 +660,27 @@ PyAPI_DATA(PyTypeObject) PyMethod_Type;
 
 /*****************************************************************************
  *
- * From methodobject.h
+ * RESOLVED: methodobject.h
  *
  */
+
 #ifdef Py_LIMITED_API
 
-// #define METH_FASTCALL  0x0080
-
-typedef struct {
-    PyObject_HEAD
-    PyMethodDef *m_ml; /* Description of the C function to call */
-    PyObject    *m_self; /* Passed as 'self' arg to the C func, can be NULL */
-    PyObject    *m_module; /* The __module__ attribute, can be anything */
-    PyObject    *m_weakreflist; /* List of weak references */
-} PyCFunctionObject;
-#define PyCFunction_GET_FUNCTION(func) \
-        (((PyCFunctionObject *)func) -> m_ml -> ml_meth)
-#define PyCFunction_GET_SELF(func) \
-        (((PyCFunctionObject *)func) -> m_ml -> ml_flags & METH_STATIC ? \
-         NULL : ((PyCFunctionObject *)func) -> m_self)
-#define PyCFunction_GET_FLAGS(func) \
-        (((PyCFunctionObject *)func) -> m_ml -> ml_flags)
+typedef struct _pycfunc PyCFunctionObject;
+#define PyCFunction_GET_FUNCTION(func)  PyCFunction_GetFunction((PyObject *)func)
+#define PyCFunction_GET_SELF(func)      PyCFunction_GetSelf((PyObject *)func)
+#define PyCFunction_GET_FLAGS(func)     PyCFunction_GetFlags((PyObject *)func)
+#define Pep384CFunction_GET_NAMESTR(func) \
+    ({ \
+      PyObject *_V = PyObject_GetAttrString((PyObject *)func, "__name__"); \
+      PyObject * _T = PyUnicode_AsEncodedString(_V, "UTF-8", "strict"); \
+      char *_c = strdup(PyBytes_AsString(_T)); \
+      Py_DECREF(_T); \
+      Py_DECREF(_V); \
+      _c; \
+    })
+#else
+#define Pep384CFunction_GET_NAMESTR(func)        ((func)->m_ml->ml_name)
 #endif
 
 /*****************************************************************************
