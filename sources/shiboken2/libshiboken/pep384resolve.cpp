@@ -90,6 +90,28 @@ Py_GetVerboseFlag()
 
 /*****************************************************************************
  *
+ * Support for code.h
+ *
+ */
+
+int
+Pep384Code_Get(PyCodeObject *co, const char *name)
+{
+    PyObject *ob = (PyObject *)co;
+    PyObject *ob_ret;
+    int ret = -1;
+
+    ob_ret = PyObject_GetAttrString(ob, name);
+    if (ob_ret != NULL) {
+        long long_ret = PyLong_AsLong(ob_ret);
+        Py_DECREF(ob_ret);
+        ret = (int) long_ret;
+    }
+    return ret;
+}
+
+/*****************************************************************************
+ *
  * Support for datetime.h
  *
  */
