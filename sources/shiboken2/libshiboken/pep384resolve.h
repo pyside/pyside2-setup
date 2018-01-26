@@ -47,6 +47,27 @@ extern "C"
 
 /*****************************************************************************
  *
+ * Unresolvable Structures Heuristics
+ *
+ */
+
+/*
+ * There are a few structures that are needed, but cannot be used without
+ * breaking the API. We use some heuristics to get those fields anyway
+ * and validate that we really found them, see pep384resolve.cpp .
+ */
+#ifndef Py_LIMITED_API
+# define Pep384Type_GET_DICT(o)          ((o)->tp_dict)
+# define Pep384Type_GET_METHODS(o)       ((o)->tp_methods)
+#else
+LIBSHIBOKEN_API PyObject *Pep384Type_GetDict(PyTypeObject *o);
+LIBSHIBOKEN_API PyMethodDef *Pep384Type_GetMethods(PyTypeObject *o);
+# define Pep384Type_GET_DICT(o)          Pep384Type_GetDict(o)
+# define Pep384Type_GET_METHODS(o)       Pep384Type_GetMethods(o)
+#endif
+
+/*****************************************************************************
+ *
  * RESOLVED: memoryobject.h
  *
  */
@@ -107,7 +128,7 @@ typedef void (*releasebufferproc)(PyObject *, Pep384_buffer *);
 #endif /* Py_LIMITED_API */
 
 #ifdef Py_LIMITED_API
-PyAPI_FUNC(PyObject *) PyMemoryView_FromBuffer(Pep384_buffer *info);
+LIBSHIBOKEN_API PyObject *PyMemoryView_FromBuffer(Pep384_buffer *info);
 #define Py_buffer Pep384_buffer
 #endif
 
@@ -118,7 +139,7 @@ PyAPI_FUNC(PyObject *) PyMemoryView_FromBuffer(Pep384_buffer *info);
  */
 #ifdef Py_LIMITED_API
 // Why the hell is this useful debugging function not allowed?
-PyAPI_FUNC(void) _PyObject_Dump(PyObject *);
+LIBSHIBOKEN_API void _PyObject_Dump(PyObject *);
 #endif
 
 #ifdef Py_LIMITED_API
@@ -357,36 +378,26 @@ LIBSHIBOKEN_API int _Pep384Long_AsInt(PyObject *);
  * We have no direct access to Py_VerboseFlag because debugging is not
  * supported. The python developers are partially a bit too rigorous.
  * Instead, we compute the value and use a function call macro.
- * Was before: PyAPI_DATA(int) Py_VerboseFlag;
+ * Was before: extern LIBSHIBOKEN_API int Py_VerboseFlag;
  */
-PyAPI_FUNC(int) Py_GetFlag(const char *name);
-PyAPI_FUNC(int) Py_GetVerboseFlag(void);
-#define Py_VerboseFlag Py_GetVerboseFlag()
+LIBSHIBOKEN_API int Pep384_GetFlag(const char *name);
+LIBSHIBOKEN_API int Pep384_GetVerboseFlag(void);
+#define Py_VerboseFlag              Pep384_GetVerboseFlag()
 #endif
 
 /*****************************************************************************
  *
- * From unicodeobject.h
+ * RESOLVED: unicodeobject.h
  *
  */
 #ifdef Py_LIMITED_API
 
-#define PyUnicode_GET_SIZE(op)           PyUnicode_GetSize((PyObject *)(op))
+LIBSHIBOKEN_API char *_Pep384Unicode_AsString(PyObject *);
 
-PyAPI_FUNC(char *) PyUnicode_AsUTF8(PyObject *unicode);
+#define PyUnicode_GET_SIZE(op)      PyUnicode_GetSize((PyObject *)(op))
 
-#define _PyUnicode_AsString PyUnicode_AsUTF8
-/* Return a read-only pointer to the Unicode object's internal
-   Py_UNICODE buffer.
-   If the wchar_t/Py_UNICODE representation is not yet available, this
-   function will calculate it. */
-
-typedef wchar_t Py_UNICODE;
-PyAPI_FUNC(Py_UNICODE *) PyUnicode_AsUnicode(
-    PyObject *unicode           /* Unicode object */
-    );
-#define PyUnicode_AS_UNICODE(op) PyUnicode_AsUnicode((PyObject *)(op))
-
+#else
+#define _Pep384Unicode_AsString     PyUnicode_AsUTF8
 #endif
 
 /*****************************************************************************
@@ -443,50 +454,18 @@ typedef struct _pycfunc PyCFunctionObject;
 #define PyCFunction_GET_SELF(func)      PyCFunction_GetSelf((PyObject *)func)
 #define PyCFunction_GET_FLAGS(func)     PyCFunction_GetFlags((PyObject *)func)
 #define Pep384CFunction_GET_NAMESTR(func) \
-    ({ \
-      PyObject *_V = PyObject_GetAttrString((PyObject *)func, "__name__"); \
-      PyObject * _T = PyUnicode_AsEncodedString(_V, "UTF-8", "strict"); \
-      char *_c = strdup(PyBytes_AsString(_T)); \
-      Py_DECREF(_T); \
-      Py_DECREF(_V); \
-      _c; \
-    })
+    _Pep384Unicode_AsString(PyObject_GetAttrString((PyObject *)func, "__name__"))
 #else
 #define Pep384CFunction_GET_NAMESTR(func)        ((func)->m_ml->ml_name)
 #endif
 
 /*****************************************************************************
  *
- * From descrobject.h
+ * RESOLVED: descrobject.h
  *
  */
 #ifdef Py_LIMITED_API
-typedef struct {
-    PyObject_HEAD
-    PyTypeObject *d_type;
-    PyObject *d_name;
-    PyObject *d_qualname;
-} PyDescrObject;
-
-#define PyDescr_COMMON PyDescrObject d_common
-
-#define PyDescr_TYPE(x) (((PyDescrObject *)(x))->d_type)
-#define PyDescr_NAME(x) (((PyDescrObject *)(x))->d_name)
-
-typedef struct {
-    PyDescr_COMMON;
-    PyMethodDef *d_method;
-} PyMethodDescrObject;
-
-// typedef struct {
-//     PyDescr_COMMON;
-//     struct PyMemberDef *d_member;
-// } PyMemberDescrObject;
-
-// typedef struct {
-//     PyDescr_COMMON;
-//     PyGetSetDef *d_getset;
-// } PyGetSetDescrObject;
+typedef struct _methoddescr PyMethodDescrObject;
 #endif
 
 /*****************************************************************************
@@ -572,7 +551,7 @@ typedef struct _ts {
  *
  */
 #ifdef Py_LIMITED_API
-PyAPI_FUNC(PyObject *) PyRun_String(const char *, int, PyObject *, PyObject *);
+LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *);
 #endif
 
 /*****************************************************************************
@@ -585,9 +564,9 @@ PyAPI_FUNC(PyObject *) PyRun_String(const char *, int, PyObject *, PyObject *);
     (((obj)->ob_type->tp_as_buffer != NULL) &&  \
      ((obj)->ob_type->tp_as_buffer->bf_getbuffer != NULL))
 
-    PyAPI_FUNC(int) PyObject_GetBuffer(PyObject *obj, Pep384_buffer *view,
+    LIBSHIBOKEN_API int PyObject_GetBuffer(PyObject *obj, Pep384_buffer *view,
                                       int flags);
-    PyAPI_FUNC(void) PyBuffer_Release(Pep384_buffer *view);
+    LIBSHIBOKEN_API void PyBuffer_Release(Pep384_buffer *view);
 #endif /* Py_LIMITED_API */
 
 /*****************************************************************************
@@ -598,8 +577,8 @@ PyAPI_FUNC(PyObject *) PyRun_String(const char *, int, PyObject *, PyObject *);
 #ifdef Py_LIMITED_API
 typedef struct _func PyFunctionObject;
 
-PyAPI_DATA(PyTypeObject) PyFunction_Type;
-PyAPI_DATA(PyTypeObject) PyStaticMethod_Type;
+extern LIBSHIBOKEN_API PyTypeObject PyFunction_Type;
+extern LIBSHIBOKEN_API PyTypeObject PyStaticMethod_Type;
 LIBSHIBOKEN_API PyObject *Pep384Function_Get(PyObject *, const char *);
 
 #define PyFunction_Check(op)        (Py_TYPE(op) == &PyFunction_Type)
@@ -620,11 +599,11 @@ LIBSHIBOKEN_API PyObject *Pep384Function_Get(PyObject *, const char *);
 
 typedef struct _meth PyMethodObject;
 
-PyAPI_DATA(PyTypeObject) PyMethod_Type;
+extern LIBSHIBOKEN_API PyTypeObject PyMethod_Type;
 
-PyAPI_FUNC(PyObject *) PyMethod_New(PyObject *, PyObject *);
-PyAPI_FUNC(PyObject *) PyMethod_Function(PyObject *);
-PyAPI_FUNC(PyObject *) PyMethod_Self(PyObject *);
+LIBSHIBOKEN_API PyObject *PyMethod_New(PyObject *, PyObject *);
+LIBSHIBOKEN_API PyObject *PyMethod_Function(PyObject *);
+LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 
 #define PyMethod_Check(op) ((op)->ob_type == &PyMethod_Type)
 

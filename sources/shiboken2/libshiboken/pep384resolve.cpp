@@ -46,6 +46,117 @@ extern "C"
 
 /*****************************************************************************
  *
+ * Support for unresolvable structures
+ *
+ */
+
+/*
+ * Here we are really a bit cheating, because this structure is not published.
+ * Instead of checking consistency by hand, we will test if the referenced
+ * object is the same dict as expected.
+ */
+
+typedef struct {
+    PyObject_HEAD
+    PyObject *mapping;
+} mappingproxyobject;
+
+PyObject *
+Pep384Type_GetDict(PyTypeObject *type)
+{
+    mappingproxyobject *proxy = (mappingproxyobject *)PyObject_GetAttrString(
+                                    (PyObject *)type, "__dict__");
+    PyObject *ret = proxy->mapping;
+    Py_DECREF(proxy);
+    return ret;
+}
+
+PyMethodDef *
+Pep384Type_GetMethods(PyTypeObject *type)
+{
+    /*
+     * As soon as heap types are implemented, this will be replaced by
+     * PyType_GetSlot(type, Py_tp_methods);
+     * Right now, this function raises PyErr_BadInternalCall.
+     */
+    return type->tp_methods;
+}
+
+int
+Pep384_EnsureTypeHeuristic(void)
+{
+    PyObject *tpdict = Pep384Type_GetDict(&PyLong_Type);
+    PyMethodDef *tpmeth = Pep384Type_GetMethods(&PyLong_Type);
+    int ok = 0;
+
+    /*
+     * This code checks that these fields are 4 slots apart and contain
+     * the expected value. We typically find tp_methods at 29
+     * and tp_dict at 33.
+     */
+    for (int idx = 25; idx <= 40; ++idx) {
+        void **thing = (void **)&PyLong_Type + idx;
+        // printf("idx=%d ptr=%p\n", idx, thing);
+        if (*thing == tpmeth) {
+            thing = (void **)&PyLong_Type + idx + 4;
+            if (*thing == tpdict) {
+                // both are at a distance of four, we believe in the result!
+                ok += 1;
+            }
+        }
+    }
+    if (ok != 1) {
+        Py_FatalError(
+            "The 'tp_methods' pointer should be found somewhere in the\n"
+            "opaque type structure, and 'tp_dict' should be 4 pointers\n"
+            "apart. Please check the mappingproxyobject, it might have\n"
+            "changed its layout.");
+        return -1;
+    }
+    return 0;
+}
+
+/*****************************************************************************
+ *
+ * Support for unicodeobject.h
+ *
+ */
+
+char *
+_Pep384Unicode_AsString(PyObject *str)
+{
+    /*
+     * We need to keep the string alive but cannot borrow the Python object.
+     * Ugly easy way out: We re-code as an interned bytes string. This
+     * produces a pseudo-leak as long there are new strings.
+     * Typically, this function is used for name strings, and the dict size
+     * will not grow so much.
+     */
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define AT __FILE__ ":" TOSTRING(__LINE__)
+
+    static PyObject *cstring_dict = NULL;
+    if (cstring_dict == NULL) {
+        cstring_dict = PyDict_New();
+        if (cstring_dict == NULL)
+            Py_FatalError("Error in " AT);
+    }
+    PyObject *bytesStr = PyUnicode_AsEncodedString(str, "utf8", NULL);
+    PyObject *entry = PyDict_GetItem(cstring_dict, bytesStr);
+    if (entry == NULL) {
+        int e = PyDict_SetItem(cstring_dict, bytesStr, bytesStr);
+        if (e != 0)
+            Py_FatalError("Error in " AT);
+        entry = bytesStr;
+    }
+    else
+        Py_DECREF(bytesStr);
+    return PyBytes_AsString(entry);
+}
+
+/*****************************************************************************
+ *
  * Support for longobject.h
  *
  */
@@ -82,7 +193,7 @@ _Pep384Long_AsInt(PyObject *obj)
 static PyObject *sys_flags = NULL;
 
 int
-Py_GetFlag(const char *name)
+Pep384_GetFlag(const char *name)
 {
     static int initialized = 0;
     int ret = -1;
@@ -105,13 +216,13 @@ Py_GetFlag(const char *name)
 }
 
 int
-Py_GetVerboseFlag()
+Pep384_GetVerboseFlag()
 {
     static int initialized = 0;
     static int verbose_flag = -1;
 
     if (!initialized) {
-        verbose_flag = Py_GetFlag("verbose");
+        verbose_flag = Pep384_GetFlag("verbose");
         if (verbose_flag != -1)
             initialized = 1;
     }
@@ -146,20 +257,22 @@ Pep384Code_Get(PyCodeObject *co, const char *name)
  *
  */
 
-// init_datetime is called earlier than our module init.
+static PyTypeObject *dt_getCheck(const char *name)
+{
+    PyObject *op = PyObject_GetAttrString(PyDateTimeAPI->module, name);
+    if (op == NULL) {
+        fprintf(stderr, "datetime.%s not found\n", name);
+        Py_FatalError("aborting");
+    }
+    return (PyTypeObject *)op;
+}
+
+// init_DateTime is called earlier than our module init.
 // We use the provided PyDateTime_IMPORT machinery.
 datetime_struc *
 init_DateTime(void)
 {
     static int initialized = 0;
-
-#define GETCHECK(name) \
-    ({  PyObject *_V = PyObject_GetAttrString(PyDateTimeAPI->module, name); \
-        if (_V == NULL)                                                 \
-            Py_FatalError("datetime." name " not found, aborting");     \
-        (PyTypeObject *)_V;                                             \
-    })
-
     if (!initialized) {
         PyDateTimeAPI = (datetime_struc *)malloc(sizeof(datetime_struc));
         if (PyDateTimeAPI == NULL)
@@ -167,12 +280,11 @@ init_DateTime(void)
         PyDateTimeAPI->module = PyImport_ImportModule("datetime");
         if (PyDateTimeAPI->module == NULL)
             Py_FatalError("datetime module not found, aborting");
-        PyDateTimeAPI->DateType     = GETCHECK("date");
-        PyDateTimeAPI->DateTimeType = GETCHECK("datetime");
-        PyDateTimeAPI->TimeType     = GETCHECK("time");
-        PyDateTimeAPI->DeltaType    = GETCHECK("timedelta");
-        PyDateTimeAPI->TZInfoType   = GETCHECK("tzinfo");
-#undef GETCHECK
+        PyDateTimeAPI->DateType     = dt_getCheck("date");
+        PyDateTimeAPI->DateTimeType = dt_getCheck("datetime");
+        PyDateTimeAPI->TimeType     = dt_getCheck("time");
+        PyDateTimeAPI->DeltaType    = dt_getCheck("timedelta");
+        PyDateTimeAPI->TZInfoType   = dt_getCheck("tzinfo");
         initialized = 1;
     }
     return PyDateTimeAPI;
@@ -653,7 +765,7 @@ void
 PEP384_Init()
 {
 #ifdef Py_LIMITED_API
-    Py_GetVerboseFlag();
+    Pep384_GetVerboseFlag();
 #endif
 }
 

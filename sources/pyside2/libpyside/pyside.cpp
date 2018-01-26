@@ -400,7 +400,7 @@ QString pyStringToQString(PyObject *str) {
 
 #ifdef IS_PY3K
     if (PyUnicode_Check(str)) {
-        const char *unicodeBuffer = _PyUnicode_AsString(str);
+        const char *unicodeBuffer = _Pep384Unicode_AsString(str);
         if (unicodeBuffer)
             return QString::fromUtf8(unicodeBuffer);
     }

@@ -291,12 +291,18 @@
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyUnicode">
-            Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
-            #if defined(Py_UNICODE_WIDE)
+            #ifndef Py_LIMITED_API
+            Py_UNICODE* unicode = PyUnicode_AS_UNICODE(%in);
+            # if defined(Py_UNICODE_WIDE)
             // cast as Py_UNICODE can be a different type
             %out = QString::fromUcs4((const uint*)unicode);
-            #else
+            # else
             %out = QString::fromUtf16((const ushort*)unicode, PyUnicode_GET_SIZE(%in));
+            # endif
+            #else
+            wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
+            %out = QString::fromWCharArray(temp);
+            PyMem_Free(temp);
             #endif
             </add-conversion>
             <add-conversion type="PyString" check="py2kStrCheck(%in)">
