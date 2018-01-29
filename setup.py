@@ -799,6 +799,9 @@ class pyside_build(_build):
         if OPTION_FINAL_INSTALL_PREFIX:
             setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
 
+        # Save the shiboken build dir path for clang deployment purposes.
+        self.shiboken_build_dir = os.path.join(self.build_dir, "shiboken2")
+
         log.info("=" * 30)
         log.info("Package version: %s" % __version__)
         log.info("Build type: %s" % self.build_type)
@@ -1206,6 +1209,9 @@ class pyside_build(_build):
             else:
                 self.prepare_standalone_package_linux(executables, vars)
 
+            # Copy over clang before rpath patching.
+            self.prepare_standalone_clang(is_win=False)
+
         # Update rpath to $ORIGIN
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             self.update_rpath("{pyside_package_dir}/PySide2".format(**vars), executables)
@@ -1527,6 +1533,8 @@ class pyside_build(_build):
                 filter=["QtWebEngineProcess*.exe"],
                 recursive=False, vars=vars)
 
+        self.prepare_standalone_clang(is_win=True)
+
         # pdb files for libshiboken and libpyside
         if self.debug or self.build_type == 'RelWithDebInfo':
             # XXX dbgPostfix gives problems - the structure in shiboken2/data should be re-written!
@@ -1545,6 +1553,56 @@ class pyside_build(_build):
                 "{pyside_package_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
+
+    def prepare_standalone_clang(self, is_win = False):
+        """ Copies the libclang library to the pyside package so that shiboken exceutable works. """
+        log.info('Finding path to the libclang shared library.')
+        cmake_cmd = [
+            OPTION_CMAKE,
+            "-L",         # Lists variables
+            "-N",         # Just inspects the cache (faster)
+            "--build",    # Specifies the build dir
+            self.shiboken_build_dir
+        ]
+        out = run_process_output(cmake_cmd)
+        lines = [s.strip() for s in out]
+        pattern = re.compile(r"CLANG_LIBRARY:FILEPATH=(.+)$")
+
+        clang_lib_path = None
+        for line in lines:
+            match = pattern.search(line)
+            if match:
+                clang_lib_path = match.group(1)
+                break
+
+        if not clang_lib_path:
+            raise RuntimeError("Could not finding location of libclang library from CMake cache.")
+
+        if is_win:
+            # clang_lib_path points to the static import library (lib/libclang.lib), whereas we want
+            # to copy the shared library (bin/libclang.dll).
+            clang_lib_path = re.sub(r'lib/libclang.lib$', 'bin/libclang.dll', clang_lib_path)
+
+        # Path to directory containing clang.
+        clang_lib_dir = os.path.dirname(clang_lib_path)
+
+        # The name of the clang file found by CMake.
+        basename = os.path.basename(clang_lib_path)
+
+        # We want to copy the library and all the symlinks for now, thus the wildcard.
+        clang_filter = basename + "*"
+
+        # Destination is the package folder near the other extension modules.
+        destination_dir = "{}/PySide2".format(os.path.join(self.script_dir, 'pyside_package'))
+        if os.path.exists(clang_lib_path):
+            log.info('Copying libclang shared library to the pyside package.')
+
+            copydir(clang_lib_dir, destination_dir,
+                filter=[clang_filter],
+                recursive=False)
+        else:
+            raise RuntimeError("Error copying libclang library "
+                               "from {} to {}. ".format(clang_lib_path, destination_dir))
 
     def update_rpath(self, package_path, executables):
         if sys.platform.startswith('linux'):
