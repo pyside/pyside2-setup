@@ -3706,15 +3706,15 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     const bool isQApp = qCoreApp != Q_NULLPTR && metaClass->inheritsFrom(qCoreApp);
 
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
+        tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_CHECKTYPES");
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      QLatin1String("SbkDeallocWrapperWithPrivateDtor") : QLatin1String("0");
         tp_init = QLatin1String("0");
     } else {
         if (onlyPrivCtor)
-            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
+            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_CHECKTYPES");
         else
-            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
+            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
 
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))

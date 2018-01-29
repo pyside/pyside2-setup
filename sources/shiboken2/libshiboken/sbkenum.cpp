@@ -345,7 +345,7 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_getattro*/         0,
     /*tp_setattro*/         0,
     /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
     /*tp_doc*/              0,
     /*tp_traverse*/         0,
     /*tp_clear*/            0,
@@ -555,7 +555,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
     type->tp_print = &SbkEnumObject_print;
     type->tp_repr = &SbkEnumObject_repr;
     type->tp_str = &SbkEnumObject_repr;
-    type->tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES;
+    type->tp_flags = Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_CHECKTYPES;
     type->tp_name = name;
     type->tp_getset = SbkEnumGetSetList;
     type->tp_new = SbkEnum_tp_new;

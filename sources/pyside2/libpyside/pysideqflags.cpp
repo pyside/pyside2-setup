@@ -137,7 +137,7 @@ namespace QFlags
         ::memset(type, 0, sizeof(PySideQFlagsType));
         Py_TYPE(type) = &PyType_Type;
         type->tp_basicsize = sizeof(PySideQFlagsObject);
-        type->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES;
+        type->tp_flags = Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_CHECKTYPES;
         type->tp_name = name;
         type->tp_new = &PySideQFlagsNew;
         type->tp_as_number = numberMethods;

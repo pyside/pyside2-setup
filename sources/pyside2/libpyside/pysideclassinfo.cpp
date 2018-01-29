@@ -75,7 +75,7 @@ PyTypeObject PySideClassInfoType = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT,        /*tp_flags*/
+    Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/,        /*tp_flags*/
     0,                         /*tp_doc */
     0,                         /*tp_traverse */
     0,                         /*tp_clear */

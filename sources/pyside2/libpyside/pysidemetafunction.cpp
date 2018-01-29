@@ -78,7 +78,7 @@ PyTypeObject PySideMetaFunctionType = {
     /*tp_getattro*/         0,
     /*tp_setattro*/         0,
     /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/,
     /*tp_doc*/              "MetaFunction",
     /*tp_traverse*/         0,
     /*tp_clear*/            0,
