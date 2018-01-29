@@ -112,6 +112,8 @@ static PyTypeObject PySideSlotType = {
     0                          /*tp_version_tag*/
 };
 
+static PyTypeObject *PySideSlotTypeP = &PySideSlotType;
+
 int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 {
     static PyObject *emptyTuple = 0;
@@ -209,11 +211,11 @@ namespace PySide { namespace Slot {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(&PySideSlotType) < 0)
+    if (PyType_Ready(PySideSlotTypeP) < 0)
         return;
 
-    Py_INCREF(&PySideSlotType);
-    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(&PySideSlotType));
+    Py_INCREF(PySideSlotTypeP);
+    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(PySideSlotTypeP));
 }
 
 } // namespace Slot

@@ -66,7 +66,7 @@ extern "C"
 static void SbkObjectTypeDealloc(PyObject* pyObj);
 static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
-PyTypeObject SbkObjectType_Type = {
+static PyTypeObject SbkObjectType_Type = {
     PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "Shiboken.ObjectType",
     /*tp_basicsize*/        sizeof(SbkObjectType),
@@ -115,6 +115,8 @@ PyTypeObject SbkObjectType_Type = {
     /*tp_del*/              0,
     /*tp_version_tag*/      0
 };
+
+PyTypeObject *SbkObjectType_TypeP = &SbkObjectType_Type;
 
 static PyObject *SbkObjectGetDict(PyObject* pObj, void *)
 {
@@ -176,8 +178,8 @@ static int SbkObject_clear(PyObject* self)
     return 0;
 }
 
-SbkObjectType SbkObject_Type = { { {
-    PyVarObject_HEAD_INIT(&SbkObjectType_Type, 0)
+static SbkObjectType SbkObject_Type = { { {
+    PyVarObject_HEAD_INIT(SbkObjectType_TypeP, 0)
     /*tp_name*/             "Shiboken.Object",
     /*tp_basicsize*/        sizeof(SbkObject),
     /*tp_itemsize*/         0,
@@ -227,6 +229,8 @@ SbkObjectType SbkObject_Type = { { {
 }, },
     /*priv_data*/           0
 };
+
+SbkObjectType *SbkObject_TypeP = &SbkObject_Type;
 
 
 static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
@@ -469,7 +473,7 @@ static void _walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisit
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
 
-        if (!PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
+        if (!PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeP))) {
             continue;
         } else {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
@@ -558,14 +562,15 @@ void init()
     PEP384_Init();
 
     Shiboken::ObjectType::initPrivateData(&SbkObject_Type);
+    Shiboken::ObjectType::initPrivateData(SbkObject_TypeP);
 
-    if (PyType_Ready(&SbkEnumType_Type) < 0)
+    if (PyType_Ready(SbkEnumType_TypeP) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.SbkEnumType metatype.");
 
-    if (PyType_Ready(&SbkObjectType_Type) < 0)
+    if (PyType_Ready(SbkObjectType_TypeP) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
 
-    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(&SbkObject_Type)) < 0)
+    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(SbkObject_TypeP)) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapper type.");
 
     VoidPtr::init();
@@ -662,7 +667,7 @@ namespace ObjectType
 
 bool checkType(PyTypeObject* type)
 {
-    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type)) != 0;
+    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeP)) != 0;
 }
 
 bool isUserType(PyTypeObject* type)
@@ -1075,7 +1080,7 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 bool isValid(PyObject* pyObj)
 {
     if (!pyObj || pyObj == Py_None
-        || Py_TYPE(pyObj->ob_type) != &SbkObjectType_Type) {
+        || Py_TYPE(pyObj->ob_type) != SbkObjectType_TypeP) {
         return true;
     }
 
@@ -1118,7 +1123,7 @@ bool isValid(SbkObject* pyObj, bool throwPyError)
 bool isValid(PyObject* pyObj, bool throwPyError)
 {
     if (!pyObj || pyObj == Py_None ||
-        !PyType_IsSubtype(pyObj->ob_type, reinterpret_cast<PyTypeObject*>(&SbkObject_Type))) {
+        !PyType_IsSubtype(pyObj->ob_type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeP))) {
         return true;
     }
     return isValid(reinterpret_cast<SbkObject*>(pyObj), throwPyError);

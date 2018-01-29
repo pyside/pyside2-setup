@@ -58,7 +58,7 @@ struct PySideMetaFunctionPrivate
 static void         functionFree(void*);
 static PyObject*    functionCall(PyObject*, PyObject*, PyObject*);
 
-PyTypeObject PySideMetaFunctionType = {
+static PyTypeObject PySideMetaFunctionType = {
     PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "PySide.MetaFunction",
     /*tp_basicsize*/        sizeof(PySideMetaFunction),
@@ -108,6 +108,8 @@ PyTypeObject PySideMetaFunctionType = {
     /*tp_version_tag*/      0
 };
 
+PyTypeObject *PySideMetaFunctionTypeP = &PySideMetaFunctionType;
+
 void functionFree(void *self)
 {
     PySideMetaFunction* function = reinterpret_cast<PySideMetaFunction*>(self);
@@ -130,10 +132,10 @@ namespace PySide { namespace MetaFunction {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(&PySideMetaFunctionType) < 0)
+    if (PyType_Ready(PySideMetaFunctionTypeP) < 0)
         return;
 
-    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(&PySideMetaFunctionType));
+    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunctionTypeP));
 }
 
 PySideMetaFunction* newObject(QObject* source, int methodIndex)
@@ -144,7 +146,7 @@ PySideMetaFunction* newObject(QObject* source, int methodIndex)
     QMetaMethod method = source->metaObject()->method(methodIndex);
     if ((method.methodType() == QMetaMethod::Slot) ||
         (method.methodType() == QMetaMethod::Method)) {
-        PySideMetaFunction* function = PyObject_New(PySideMetaFunction, &PySideMetaFunctionType);
+        PySideMetaFunction* function = PyObject_New(PySideMetaFunction, PySideMetaFunctionTypeP);
         function->d = new PySideMetaFunctionPrivate();
         function->d->qobject = source;
         function->d->methodIndex = methodIndex;

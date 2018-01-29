@@ -66,7 +66,7 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     return reinterpret_cast<PyObject *>(self);
 }
 
-#define SbkVoidPtr_Check(op) (Py_TYPE(op) == &SbkVoidPtrType)
+#define SbkVoidPtr_Check(op) (Py_TYPE(op) == SbkVoidPtrTypeP)
 
 
 int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
@@ -279,7 +279,7 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 
 
 // Void pointer type definition.
-PyTypeObject SbkVoidPtrType = {
+static PyTypeObject SbkVoidPtrType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)                      /*ob_size*/
     "VoidPtr",                                                  /*tp_name*/
     sizeof(SbkVoidPtrObject),                                   /*tp_basicsize*/
@@ -334,6 +334,7 @@ PyTypeObject SbkVoidPtrType = {
 
 }
 
+PyTypeObject *SbkVoidPtrTypeP = &SbkVoidPtrType;
 
 namespace VoidPtr {
 
@@ -341,7 +342,7 @@ static int voidPointerInitialized = false;
 
 void init()
 {
-    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(&SbkVoidPtrType)) < 0)
+    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(SbkVoidPtrTypeP)) < 0)
         Py_FatalError("[libshiboken] Failed to initialize Shiboken.VoidPtr type.");
     else
         voidPointerInitialized = true;
@@ -350,9 +351,9 @@ void init()
 void addVoidPtrToModule(PyObject *module)
 {
     if (voidPointerInitialized) {
-        Py_INCREF(&SbkVoidPtrType);
-        PyModule_AddObject(module, SbkVoidPtrType.tp_name,
-                           reinterpret_cast<PyObject *>(&SbkVoidPtrType));
+        Py_INCREF(SbkVoidPtrTypeP);
+        PyModule_AddObject(module, SbkVoidPtrTypeP->tp_name,
+                           reinterpret_cast<PyObject *>(SbkVoidPtrTypeP));
     }
 }
 
@@ -361,7 +362,7 @@ static PyObject *createVoidPtr(void *cppIn, Py_ssize_t size = 0, bool isWritable
     if (!cppIn)
         Py_RETURN_NONE;
 
-    SbkVoidPtrObject *result = PyObject_NEW(SbkVoidPtrObject, &SbkVoidPtrType);
+    SbkVoidPtrObject *result = PyObject_NEW(SbkVoidPtrObject, SbkVoidPtrTypeP);
     if (!result)
         Py_RETURN_NONE;
 
@@ -434,7 +435,7 @@ static PythonToCppFunc PythonBufferToCppIsConvertible(PyObject *pyIn)
 
 SbkConverter *createConverter()
 {
-    SbkConverter *converter = Shiboken::Conversions::createConverter(&SbkVoidPtrType, toPython);
+    SbkConverter *converter = Shiboken::Conversions::createConverter(SbkVoidPtrTypeP, toPython);
     Shiboken::Conversions::addPythonToCppValueConversion(converter,
                                                          VoidPtrToCpp,
                                                          VoidPtrToCppIsConvertible);

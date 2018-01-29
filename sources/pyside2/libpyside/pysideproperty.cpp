@@ -72,7 +72,7 @@ static PyMethodDef PySidePropertyMethods[] = {
     {0, 0, 0, 0}
 };
 
-PyTypeObject PySidePropertyType = {
+static PyTypeObject PySidePropertyType = {
     PyVarObject_HEAD_INIT(0, 0)
     QPROPERTY_CLASS_NAME,      /*tp_name*/
     sizeof(PySideProperty),   /*tp_basicsize*/
@@ -121,6 +121,8 @@ PyTypeObject PySidePropertyType = {
     0,                         /*tp_del */
     0                          /*tp_version_tag */
 };
+
+PyTypeObject *PySidePropertyTypeP = &PySidePropertyType;
 
 static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call, void** args)
 {
@@ -350,17 +352,17 @@ namespace PySide { namespace Property {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(&PySidePropertyType) < 0)
+    if (PyType_Ready(PySidePropertyTypeP) < 0)
         return;
 
-    Py_INCREF(&PySidePropertyType);
-    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, reinterpret_cast<PyObject *>(&PySidePropertyType));
+    Py_INCREF(PySidePropertyTypeP);
+    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, reinterpret_cast<PyObject *>(PySidePropertyTypeP));
 }
 
 bool checkType(PyObject* pyObj)
 {
     if (pyObj) {
-        return PyType_IsSubtype(pyObj->ob_type, &PySidePropertyType);
+        return PyType_IsSubtype(pyObj->ob_type, PySidePropertyTypeP);
     }
     return false;
 }

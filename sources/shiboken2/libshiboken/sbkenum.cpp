@@ -325,7 +325,7 @@ static PyNumberMethods enum_as_number = {
 static void SbkEnumTypeDealloc(PyObject* pyObj);
 static PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
-PyTypeObject SbkEnumType_Type = {
+static PyTypeObject SbkEnumType_Type = {
     PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "Shiboken.EnumType",
     /*tp_basicsize*/        sizeof(SbkEnumType),
@@ -375,6 +375,8 @@ PyTypeObject SbkEnumType_Type = {
     /*tp_version_tag*/      0
 };
 
+PyTypeObject *SbkEnumType_TypeP = &SbkEnumType_Type;
+
 void SbkEnumTypeDealloc(PyObject* pyObj)
 {
     SbkEnumType* sbkType = reinterpret_cast<SbkEnumType*>(pyObj);
@@ -417,7 +419,7 @@ namespace Enum {
 
 bool check(PyObject* pyObj)
 {
-    return Py_TYPE(pyObj->ob_type) == &SbkEnumType_Type;
+    return Py_TYPE(pyObj->ob_type) == SbkEnumType_TypeP;
 }
 
 PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
@@ -550,7 +552,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
 {
     PyTypeObject* type = reinterpret_cast<PyTypeObject*>(new SbkEnumType);
     ::memset(type, 0, sizeof(SbkEnumType));
-    Py_TYPE(type) = &SbkEnumType_Type;
+    Py_TYPE(type) = SbkEnumType_TypeP;
     type->tp_basicsize = sizeof(SbkEnumObject);
     type->tp_print = &SbkEnumObject_print;
     type->tp_repr = &SbkEnumObject_repr;
@@ -572,7 +574,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
 
 const char* getCppName(PyTypeObject* enumType)
 {
-    assert(Py_TYPE(enumType) == &SbkEnumType_Type);
+    assert(Py_TYPE(enumType) == SbkEnumType_TypeP);
     return reinterpret_cast<SbkEnumType*>(enumType)->cppName;;
 }
 

@@ -441,7 +441,7 @@
     <inject-code class="native" position="beginning">
     static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
     {
-        if (PyObject_TypeCheck(type, &amp;SbkObjectType_Type)) {
+        if (PyObject_TypeCheck(type, SbkObjectType_TypeP)) {
             SbkObjectType *sbkType = (SbkObjectType*)type;
             const char *typeName = Shiboken::ObjectType::getOriginalName(sbkType);
             if (!typeName)
@@ -569,14 +569,14 @@
             </add-conversion>
             <add-conversion type="PyTypeObject">
             const char *typeName;
-            if (Shiboken::String::checkType((PyTypeObject*)%in))
+            if (Shiboken::String::checkType(reinterpret_cast&lt;PyTypeObject*&gt;(%in)))
                 typeName = "QString";
             else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyFloat_Type))
                 typeName = "double"; // float is a UserType in QVariant.
             else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyLong_Type))
                 typeName = "int";    // long is a UserType in QVariant.
-            else if (%in->ob_type == &amp;SbkObjectType_Type)
-                typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType*)%in);
+            else if (%in->ob_type == SbkObjectType_TypeP)
+                typeName = Shiboken::ObjectType::getOriginalName(reinterpret_cast&lt;SbkObjectType*&gt;(%in));
             else
                 typeName = (reinterpret_cast&lt;PyTypeObject*&gt;(%in))->tp_name;
             %out = QVariant::nameToType(typeName);
@@ -3094,7 +3094,7 @@
         <inject-code>
         Py_ssize_t size;
         uchar *ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1, &amp;size));
-        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast&lt;const uchar*>(ptr), size);
+        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast&lt;const uchar*&gt;(ptr), size);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </modify-function>
@@ -3149,9 +3149,9 @@
         QTimer* timer = %CONVERTTOCPP[QTimer*](pyTimer);
         timer->setSingleShot(true);
 
-        if (PyObject_TypeCheck(%2, &amp;PySideSignalInstanceType)) {
+        if (PyObject_TypeCheck(%2, PySideSignalInstanceTypeF())) {
             PySideSignalInstance *signalInstance = reinterpret_cast&lt;PySideSignalInstance*&gt;(%2);
-            Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s",PySide::Signal::getSignature(signalInstance)));
+            Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
             Shiboken::AutoDecRef result(
                 PyObject_CallMethod(pyTimer,
                                     const_cast&lt;char*&gt;("connect"),
@@ -4032,7 +4032,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
             <replace-default-expression with="0" />
         </modify-argument>
         <inject-code>
-            if (PyObject_TypeCheck(%1, &amp;PySideSignalInstanceType)) {
+            if (PyObject_TypeCheck(%1, PySideSignalInstanceTypeF())) {
                 PyObject *dataSource = PySide::Signal::getObject((PySideSignalInstance*)%PYARG_1);
                 Shiboken::AutoDecRef obType(PyObject_Type(dataSource));
                 QObject* sender = %CONVERTTOCPP[QObject*](dataSource);
@@ -4088,11 +4088,11 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       // since it refers to a name very tied to the generator implementation.
       // Check bug #362 for more information on this
       // http://bugs.openbossa.org/show_bug.cgi?id=362
-      if (!PyObject_TypeCheck(%1, &amp;PySideSignalInstanceType))
+      if (!PyObject_TypeCheck(%1, PySideSignalInstanceTypeF()))
           goto Sbk_%TYPEFunc_%FUNCTION_NAME_TypeError;
       PySideSignalInstance *signalInstance = reinterpret_cast&lt;PySideSignalInstance*&gt;(%1);
       QObject* sender = %CONVERTTOCPP[QObject*](PySide::Signal::getObject(signalInstance));
-      QSignalTransition*%0 = %CPPSELF->%FUNCTION_NAME(sender,PySide::Signal::getSignature(signalInstance),%2);
+      QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSignature(signalInstance),%2);
       %PYARG_0 = %CONVERTTOPYTHON[QSignalTransition*](%0);
       </inject-code>
     </add-function>

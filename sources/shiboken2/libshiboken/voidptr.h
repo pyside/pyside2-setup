@@ -48,7 +48,7 @@ extern "C"
 {
 
 // Void pointer type declaration.
-extern LIBSHIBOKEN_API PyTypeObject SbkVoidPtrType;
+extern LIBSHIBOKEN_API PyTypeObject *SbkVoidPtrTypeP;
 
 } // extern "C"
 

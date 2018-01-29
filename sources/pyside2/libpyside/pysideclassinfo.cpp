@@ -55,7 +55,7 @@ static int classInfoTpInit(PyObject*, PyObject*, PyObject*);
 static void classInfoFree(void*);
 static PyObject* classCall(PyObject*, PyObject*, PyObject*);
 
-PyTypeObject PySideClassInfoType = {
+static PyTypeObject PySideClassInfoType = {
     PyVarObject_HEAD_INIT(0, 0)
     "PySide2.QtCore." CLASSINFO_CLASS_NAME, /*tp_name*/
     sizeof(PySideClassInfo),   /*tp_basicsize*/
@@ -104,6 +104,8 @@ PyTypeObject PySideClassInfoType = {
     0,                         /*tp_del */
     0,                         /*tp_version_tag */
 };
+
+PyTypeObject *PySideClassInfoTypeP = &PySideClassInfoType;
 
 PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
@@ -206,17 +208,17 @@ namespace PySide { namespace ClassInfo {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(&PySideClassInfoType) < 0)
+    if (PyType_Ready(PySideClassInfoTypeP) < 0)
         return;
 
-    Py_INCREF(&PySideClassInfoType);
-    PyModule_AddObject(module, CLASSINFO_CLASS_NAME, reinterpret_cast<PyObject *>(&PySideClassInfoType));
+    Py_INCREF(PySideClassInfoTypeP);
+    PyModule_AddObject(module, CLASSINFO_CLASS_NAME, reinterpret_cast<PyObject *>(PySideClassInfoTypeP));
 }
 
 bool checkType(PyObject* pyObj)
 {
     if (pyObj)
-        return PyType_IsSubtype(pyObj->ob_type, &PySideClassInfoType);
+        return PyType_IsSubtype(pyObj->ob_type, PySideClassInfoTypeP);
     return false;
 }
 

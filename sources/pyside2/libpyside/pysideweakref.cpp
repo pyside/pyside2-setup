@@ -100,6 +100,8 @@ static PyTypeObject PySideCallableObjectType = {
     0                          /* tp_version_tag */
 };
 
+static PyTypeObject *PySideCallableObjectTypeP = &PySideCallableObjectType;
+
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject * /* kw */)
 {
     PySideCallableObject* obj = reinterpret_cast<PySideCallableObject *>(callable_object);
@@ -116,13 +118,13 @@ PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
     if (obj == Py_None)
         return 0;
 
-    if (Py_TYPE(&PySideCallableObjectType) == 0)
+    if (Py_TYPE(PySideCallableObjectTypeP) == 0)
     {
-        Py_TYPE(&PySideCallableObjectType) = &PyType_Type;
-        PyType_Ready(&PySideCallableObjectType);
+        Py_TYPE(PySideCallableObjectTypeP) = &PyType_Type;
+        PyType_Ready(PySideCallableObjectTypeP);
     }
 
-    PySideCallableObject* callable = PyObject_New(PySideCallableObject, &PySideCallableObjectType);
+    PySideCallableObject* callable = PyObject_New(PySideCallableObject, PySideCallableObjectTypeP);
     if (!callable || PyErr_Occurred())
         return 0;
 

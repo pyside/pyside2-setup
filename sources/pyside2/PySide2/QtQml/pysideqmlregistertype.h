@@ -78,8 +78,8 @@ typedef struct {
     volatile bool flag;
 } QtQml_VolatileBoolObject;
 
-PyAPI_DATA(PyTypeObject) QtQml_VolatileBoolType;
+PyAPI_DATA(PyTypeObject *) QtQml_VolatileBoolTypeP;
 
-#define VolatileBool_Check(op) (Py_TYPE(op) == &QtQml_VolatileBoolType)
+#define VolatileBool_Check(op) (Py_TYPE(op) == QtQml_VolatileBoolTypeP)
 
 #endif

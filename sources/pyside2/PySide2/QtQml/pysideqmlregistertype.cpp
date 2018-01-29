@@ -232,7 +232,7 @@ void propListTpFree(void* self)
     Py_TYPE(pySelf)->tp_base->tp_free(self);
 }
 
-PyTypeObject PropertyListType = {
+static PyTypeObject PropertyListType = {
     PyVarObject_HEAD_INIT(0, 0)
     "ListProperty",            /*tp_name*/
     sizeof(PySideProperty),    /*tp_basicsize*/
@@ -263,7 +263,7 @@ PyTypeObject PropertyListType = {
     0,                         /*tp_methods */
     0,                         /*tp_members */
     0,                         /*tp_getset */
-    &PySidePropertyType,       /*tp_base */
+    PySidePropertyTypeP,       /*tp_base */
     0,                         /*tp_dict */
     0,                         /*tp_descr_get */
     0,                         /*tp_descr_set */
@@ -280,6 +280,8 @@ PyTypeObject PropertyListType = {
     0,                         /*tp_weaklist */
     0,                         /*tp_del */
 };
+
+PyTypeObject *PropertyListTypeP = &PropertyListType;
 
 } // extern "C"
 
@@ -467,7 +469,7 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
     return s;
 }
 
-PyTypeObject QtQml_VolatileBoolType = {
+static PyTypeObject QtQml_VolatileBoolType = {
     PyVarObject_HEAD_INIT(Q_NULLPTR, 0)                         /*ob_size*/
     "VolatileBool",                                             /*tp_name*/
     sizeof(QtQml_VolatileBoolObject),                           /*tp_basicsize*/
@@ -520,26 +522,28 @@ PyTypeObject QtQml_VolatileBoolType = {
 #endif
 };
 
+PyTypeObject *QtQml_VolatileBoolTypeP = &QtQml_VolatileBoolType;
+
 void PySide::initQmlSupport(PyObject* module)
 {
     ElementFactory<PYSIDE_MAX_QML_TYPES - 1>::init();
 
     // Export QmlListProperty type
-    if (PyType_Ready(&PropertyListType) < 0) {
+    if (PyType_Ready(PropertyListTypeP) < 0) {
         qWarning() << "Error initializing PropertyList type.";
         return;
     }
 
-    Py_INCREF(reinterpret_cast<PyObject *>(&PropertyListType));
-    PyModule_AddObject(module, PropertyListType.tp_name,
-                       reinterpret_cast<PyObject *>(&PropertyListType));
+    Py_INCREF(reinterpret_cast<PyObject *>(PropertyListTypeP));
+    PyModule_AddObject(module, PropertyListTypeP->tp_name,
+                       reinterpret_cast<PyObject *>(PropertyListTypeP));
 
-    if (PyType_Ready(&QtQml_VolatileBoolType) < 0) {
+    if (PyType_Ready(QtQml_VolatileBoolTypeP) < 0) {
         qWarning() << "Error initializing VolatileBool type.";
         return;
     }
 
-    Py_INCREF(&QtQml_VolatileBoolType);
-    PyModule_AddObject(module, QtQml_VolatileBoolType.tp_name,
-                       reinterpret_cast<PyObject *>(&QtQml_VolatileBoolType));
+    Py_INCREF(QtQml_VolatileBoolTypeP);
+    PyModule_AddObject(module, QtQml_VolatileBoolTypeP->tp_name,
+                       reinterpret_cast<PyObject *>(QtQml_VolatileBoolTypeP));
 }
