@@ -433,7 +433,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
             return 0;
         }
         PyObject* result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (result == Py_True)
+        if (result == Py_True || result == Py_False)
             return result;
         else
             Py_XDECREF(result);

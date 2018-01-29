@@ -34,7 +34,12 @@
 import unittest
 import py3kcompat as py3k
 
-from PySide2.QtCore import QObject
+from PySide2.QtCore import QObject, Signal, Qt
+
+class Obj(QObject):
+    signal = Signal()
+    def empty(self):
+        pass
 
 class ObjectNameCase(unittest.TestCase):
     '''Tests related to QObject object name'''
@@ -67,6 +72,12 @@ class ObjectNameCase(unittest.TestCase):
         obj.setObjectName(name)
         self.assertEqual(obj.objectName(), name)
 
+    def testUniqueConnection(self):
+        obj = Obj()
+        # On first connect, UniqueConnection returns True, and on the second
+        # it must return False, and not a RuntimeError (PYSIDE-34)
+        self.assertTrue(obj.signal.connect(obj.empty, Qt.UniqueConnection))
+        self.assertFalse(obj.signal.connect(obj.empty, Qt.UniqueConnection))
 
 if __name__ == '__main__':
     unittest.main()
