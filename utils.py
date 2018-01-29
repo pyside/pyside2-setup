@@ -812,3 +812,65 @@ def copy_icu_libs(destination_lib_dir):
             basename = os.path.basename(path)
             destination = os.path.join(destination_lib_dir, basename)
             copyfile(path, destination, force_copy_symlink=True)
+            # Patch the ICU libraries to contain the $ORIGIN rpath value, so that only the local
+            # package libraries are used.
+            linuxSetRPaths(destination, '$ORIGIN')
+
+        # Patch the QtCore library to find the copied over ICU libraries (if necessary).
+        log.info('Checking if QtCore library needs a new rpath to make it work with ICU libs.')
+        rpaths = linuxGetRPaths(qt_core_library_path)
+        if not rpaths or not rpathsHasOrigin(rpaths):
+            log.info('Patching QtCore library to contain $ORIGIN rpath.')
+            rpaths.insert(0, '$ORIGIN')
+            new_rpaths_string = ":".join(rpaths)
+            linuxSetRPaths(qt_core_library_path, new_rpaths_string)
+
+def linuxSetRPaths(executable_path, rpath_string):
+    """ Patches the `executable_path` with a new rpath string. """
+
+    if not hasattr(linuxSetRPaths, "patchelf_path"):
+        script_dir = os.getcwd()
+        patchelf_path = os.path.join(script_dir, "patchelf")
+        setattr(linuxSetRPaths, "patchelf_path", patchelf_path)
+
+    cmd = [linuxSetRPaths.patchelf_path, '--set-rpath', rpath_string, executable_path]
+
+    if run_process(cmd) != 0:
+        raise RuntimeError("Error patching rpath in {}".format(executable_path))
+
+def linuxGetRPaths(executable_path):
+    """ Returns a list of run path values embedded in the executable or just an empty list. """
+
+    cmd = "readelf -d {}".format(executable_path)
+    (out, err, code) = back_tick(cmd, True)
+    if code != 0:
+        raise RuntimeError('Running `readelf -d {}` failed with '
+                           'error output:\n {}. '.format(executable_path, err))
+    lines = split_and_strip(out)
+    pattern = re.compile(r"^.+?\(RUNPATH\).+?\[(.+?)\]$")
+
+    rpath_line = None
+    for line in lines:
+        match = pattern.search(line)
+        if match:
+            rpath_line = match.group(1)
+            break
+
+    rpaths = []
+
+    if rpath_line:
+        rpaths = rpath_line.split(':')
+
+    return rpaths
+
+def rpathsHasOrigin(rpaths):
+    """ Return True if the specified list of rpaths has an "$ORIGIN" value (aka current dir). """
+    if not rpaths:
+        return False
+
+    pattern = re.compile(r"^\$ORIGIN(/)?$")
+    for rpath in rpaths:
+        match = pattern.search(rpath)
+        if match:
+            return True
+    return False
