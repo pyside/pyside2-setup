@@ -4288,4 +4288,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="unhandled enum value: QT_VERSION in QCoreApplication::ApplicationFlags from header 'qcoreapplication.h'" />
   <suppress-warning text="unmatched enum QT_VERSION from header 'qcoreapplication.h'" />
 
+  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'const QSysInfo::WinVersion'" />
+  <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known" />
+
+
 </typesystem>
