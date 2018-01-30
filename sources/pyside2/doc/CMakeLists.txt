@@ -21,7 +21,11 @@ file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/
 #    - Configure the module docconf file
 #    - Write shiboken header consisting of pyside2_global.h and module includes
 #    - Build include path for qdoc for shiboken
-set(QDOC_INCPATH -I "${QT_INCLUDE_DIR}")
+
+# The last element of the include list is the mkspec directory containing qplatformdefs.h
+list(GET Qt5Core_INCLUDE_DIRS -1 mkspecInclude)
+set(QDOC_INCPATH -I "${QT_INCLUDE_DIR}" -I "${mkspecInclude}")
+
 file(READ "${pyside2_BINARY_DIR}/pyside2_global.h" docHeaderContents)
 file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
 
@@ -35,8 +39,10 @@ foreach(module ${all_module_shortnames})
         file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/${BASENAME}\n")
 
         # -- @TODO fix this for macOS frameworks.
-        list(APPEND QDOC_INCPATH -I)
-        list(APPEND QDOC_INCPATH "${QT_INCLUDE_DIR}Qt${module}")
+        list(APPEND QDOC_INCPATH
+             -I "${QT_INCLUDE_DIR}Qt${module}"
+             -I "${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}"
+             -I "${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}/Qt${module}")
 
         set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/Qt${module}>")
         set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
