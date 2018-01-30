@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtdatavis3d/src/datavisualization/doc/qtdatavis3d.qdocconf)
+include(../pyside-config.qdocconf)

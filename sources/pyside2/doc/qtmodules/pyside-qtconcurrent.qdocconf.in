@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/src/concurrent/doc/qtconcurrent.qdocconf)
+include(../pyside-config.qdocconf)

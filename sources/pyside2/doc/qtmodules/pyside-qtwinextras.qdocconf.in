@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtwinextras/src/winextras/doc/qtwinextras.qdocconf)
+include(../pyside-config.qdocconf)

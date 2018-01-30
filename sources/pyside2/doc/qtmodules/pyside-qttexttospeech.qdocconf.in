@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtspeech/src/doc/qtspeech.qdocconf)
+include(../pyside-config.qdocconf)

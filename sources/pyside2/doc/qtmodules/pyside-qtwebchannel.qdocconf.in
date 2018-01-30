@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtwebchannel/src/webchannel/doc/qtwebchannel.qdocconf)
+include(../pyside-config.qdocconf)
