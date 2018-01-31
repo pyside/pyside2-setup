@@ -155,10 +155,19 @@ macro(check_qt_class module class optional_source_files dropped_entries)
              "${NAMESPACE_USE}\n"
              "int main() { sizeof(${class}); }\n"
         )
+
+        # Because Qt is built with -fPIC (by default), the compile tests also have to have that.
+        get_property(ADDITIONAL_FLAGS TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS)
+
+        # Don't add version tagging, because for some reason linker fails with:
+        # (.qtversion[qt_version_tag]+0x0): undefined reference to `qt_version_tag'
+        set(ADDITIONAL_FLAGS "${ADDITIONAL_FLAGS} -DQT_NO_VERSION_TAGGING")
+
         try_compile(Q_WORKS ${CMAKE_BINARY_DIR}
                     ${SRC_FILE}
                     CMAKE_FLAGS
                         "-DINCLUDE_DIRECTORIES=${QT_INCLUDE_DIR};${Qt5${_module_no_qt_prefix}_INCLUDE_DIRS}"
+                        "-DCOMPILE_DEFINITIONS:STRING=${ADDITIONAL_FLAGS}"
                     OUTPUT_VARIABLE OUTPUT)
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCheckQtClassTest.log ${OUTPUT})
 
