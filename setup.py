@@ -101,12 +101,10 @@ containedModules = ['shiboken2', 'pyside2']
 
 submodules = {
     '2.0.0.dev0': [
-        ["pyside2-tools", "dev"],
-        ["wiki", "master", ".."],
+        ["pyside2-tools", "dev"]
     ],
     '5.9': [
-        ["pyside2-tools", "5.9"],
-        ["wiki", "master", ".."]
+        ["pyside2-tools", "5.9"]
     ],
     '5.6': [
         ["pyside2-tools", "5.6"],

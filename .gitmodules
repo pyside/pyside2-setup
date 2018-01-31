@@ -2,6 +2,3 @@
 	path = sources/pyside2-tools
 	branch = 5.9
 	url = ../pyside-tools.git
-[submodule "wiki"]
-	path = wiki
-	url = https://github.com/PySide/pyside2.wiki.git
