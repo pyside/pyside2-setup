@@ -694,21 +694,75 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     }
 }
 
+// Copy images that are placed in a subdirectory "images" under the webxml files
+// by qdoc to a matching subdirectory under the "rst/PySide2/<module>" directory
+static bool copyImage(const QString &href, const QString &docDataDir,
+                      const QString &context, const QString &outputDir,
+                      QString *errorMessage)
+{
+    const QChar slash = QLatin1Char('/');
+    const int lastSlash = href.lastIndexOf(slash);
+    const QString imagePath = lastSlash != -1 ? href.left(lastSlash) : QString();
+    const QString imageFileName = lastSlash != -1 ? href.right(href.size() - lastSlash - 1) : href;
+    QFileInfo imageSource(docDataDir + slash + href);
+    if (!imageSource.exists()) {
+        QTextStream(errorMessage) << "Image " << href << " does not exist in "
+            << QDir::toNativeSeparators(docDataDir);
+        return false;
+    }
+    // Determine directory from context, "Pyside2.QtGui.QPainter" ->"Pyside2/QtGui".
+    // FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
+    // nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
+    QString relativeTargetDir = context;
+    const int lastDot = relativeTargetDir.lastIndexOf(QLatin1Char('.'));
+    if (lastDot != -1)
+        relativeTargetDir.truncate(lastDot);
+    relativeTargetDir.replace(QLatin1Char('.'), slash);
+    if (!imagePath.isEmpty())
+        relativeTargetDir += slash + imagePath;
+
+    const QString targetDir = outputDir + slash + relativeTargetDir;
+    const QString targetFileName = targetDir + slash + imageFileName;
+    if (QFileInfo::exists(targetFileName))
+        return true;
+    if (!QFileInfo::exists(targetDir)) {
+        const QDir outDir(outputDir);
+        if (!outDir.mkpath(relativeTargetDir)) {
+            QTextStream(errorMessage) << "Cannot create " << QDir::toNativeSeparators(relativeTargetDir)
+                << " under " << QDir::toNativeSeparators(outputDir);
+            return false;
+        }
+    }
+
+    QFile source(imageSource.absoluteFilePath());
+    if (!source.copy(targetFileName)) {
+        QTextStream(errorMessage) << "Cannot copy " << QDir::toNativeSeparators(source.fileName())
+            << " to " << QDir::toNativeSeparators(targetFileName) << ": "
+            << source.errorString();
+        return false;
+    }
+    qCDebug(lcShiboken()).noquote().nospace() << __FUNCTION__ << " href=\""
+        << href << "\", context=\"" << context << "\", docDataDir=\""
+        << docDataDir << "\", outputDir=\"" << outputDir << "\", copied \""
+        << source.fileName() << "\"->\"" << targetFileName << '"';
+    return true;
+}
+
 void QtXmlToSphinx::handleImageTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
         QString href = reader.attributes().value(QLatin1String("href")).toString();
-        QString packageName = m_generator->packageName();
-        packageName.replace(QLatin1Char('.'), QLatin1Char('/'));
-        QDir dir(m_generator->outputDirectory() + QLatin1Char('/') + packageName);
-        QString imgPath = dir.relativeFilePath(m_generator->libSourceDir() + QLatin1String("/doc/src/"))
-                          + QLatin1Char('/') + href;
+        QString errorMessage;
+        if (!copyImage(href,m_generator->docDataDir(), m_context,
+                       m_generator->outputDirectory(), &errorMessage)) {
+            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        }
 
         if (reader.name() == QLatin1String("image"))
-            m_output << INDENT << ".. image:: " <<  imgPath << endl << endl;
+            m_output << INDENT << ".. image:: " <<  href << endl << endl;
         else
-            m_output << ".. image:: " << imgPath << ' ';
+            m_output << ".. image:: " << href << ' ';
     }
 }
 

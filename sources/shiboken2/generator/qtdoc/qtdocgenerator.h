@@ -179,6 +179,8 @@ public:
         return m_libSourceDir;
     }
 
+    QString docDataDir() const { return m_docDataDir; }
+
     bool doSetup(const QMap<QString, QString>& args);
 
     const char* name() const
