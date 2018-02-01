@@ -73,6 +73,15 @@ def sharedLibraryGlobPattern():
     glob = '*.' + sharedLibrarySuffix()
     return glob if sys.platform == 'win32' else 'lib' + glob
 
+def filterPySide2SharedLibraries(list):
+    def predicate(item):
+        basename = os.path.basename(item)
+        if 'shiboken' in basename or 'pyside2' in basename:
+            return True
+        return False
+    result = [item for item in list if predicate(item)]
+    return result
+
 # Return qmake link option for a library file name
 def linkOption(lib):
     baseName = os.path.splitext(os.path.basename(lib))[0]
@@ -99,54 +108,86 @@ def pythonVersion():
 def pythonInclude():
     return sysconfig.get_python_inc()
 
-def pythonLink():
+def pythonLinkQmake():
+    flags = pythonLinkData()
+    if sys.platform == 'win32' or sys.platform == 'darwin':
+        return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
+
+    # Linux and anything else
+    return '-l{}'.format(flags['lib'])
+
+def pythonLinkCmake():
+    flags = pythonLinkData()
+    libdir = flags['libdir']
+    lib = re.sub(r'.dll$', '.lib', flags['lib'])
+    return '{} {}'.format(libdir, lib)
+
+def pythonLinkData():
     # @TODO Fix to work with static builds of Python
     libdir = sysconfig.get_config_var('LIBDIR')
     version = pythonVersion()
     version_no_dots = version.replace('.', '')
 
+    flags = {}
+    flags['libdir'] = libdir
     if sys.platform == 'win32':
         suffix = '_d' if any([tup[0].endswith('_d.pyd') for tup in imp.get_suffixes()]) else ''
-        return "-L%s -lpython%s%s" % (libdir, version_no_dots, suffix)
+        flags['lib'] = 'python{}{}'.format(version_no_dots, suffix)
 
-    if sys.platform == 'darwin':
-        return '-L%s -lpython%s' % (libdir, version)
+    elif sys.platform == 'darwin':
+        flags['lib'] = 'python{}'.format(version)
 
     # Linux and anything else
-    if sys.version_info[0] < 3:
-        suffix = '_d' if any([tup[0].endswith('_d.so') for tup in imp.get_suffixes()]) else ''
-        return "-lpython%s%s" % (version, suffix)
     else:
-        return "-lpython%s%s" % (version, sys.abiflags)
+        if sys.version_info[0] < 3:
+            suffix = '_d' if any([tup[0].endswith('_d.so') for tup in imp.get_suffixes()]) else ''
+            flags['lib'] = 'python{}{}'.format(version, suffix)
+        else:
+            flags['lib'] = 'python{}{}'.format(version, sys.abiflags)
+
+    return flags
 
 def pyside2Include():
     pySide2 = findPySide2()
     if pySide2 is None:
         return None
-    return "%s/include/PySide2 %s/include/shiboken2" % (pySide2, pySide2)
+    return "{0}/include/PySide2 {0}/include/shiboken2".format(pySide2)
 
 def pyside2Link():
     pySide2 = findPySide2()
     if pySide2 is None:
         return None
-    link = "-L%s" % pySide2
-    for lib in glob.glob(os.path.join(pySide2, sharedLibraryGlobPattern())):
+    link = "-L{}".format(pySide2)
+    glob_result = glob.glob(os.path.join(pySide2, sharedLibraryGlobPattern()))
+    for lib in filterPySide2SharedLibraries(glob_result):
         link += ' '
         link += linkOption(lib)
     return link
 
-def pyside2SharedLibraries():
+def pyside2SharedLibrariesData():
     pySide2 = findPySide2()
     if pySide2 is None:
         return None
 
+    glob_result = glob.glob(os.path.join(pySide2, sharedLibraryGlobPattern()))
+    filtered_libs = filterPySide2SharedLibraries(glob_result)
+    libs = []
     if sys.platform == 'win32':
-        libs = []
-        for lib in glob.glob(os.path.join(pySide2, sharedLibraryGlobPattern())):
+        for lib in filtered_libs:
             libs.append(os.path.realpath(lib))
+    else:
+        for lib in filtered_libs:
+            libs.append(lib)
+    return libs
+
+def pyside2SharedLibraries():
+    libs = pyside2SharedLibrariesData()
+    if libs is None:
+        return None
+
+    if sys.platform == 'win32':
         if not libs:
             return ''
-
         dlls = ''
         for lib in libs:
             dll = os.path.splitext(lib)[0] + '.dll'
@@ -154,10 +195,15 @@ def pyside2SharedLibraries():
 
         return dlls
     else:
-        libs = ''
-        for lib in glob.glob(os.path.join(pySide2, sharedLibraryGlobPattern())):
-            libs += ' ' + lib
-        return libs
+        libs_string = ''
+        for lib in libs:
+            libs_string += ' ' + lib
+        return libs_string
+
+def pyside2SharedLibrariesCmake():
+    libs = pyside2SharedLibrariesData()
+    result = ' '.join(libs)
+    return result
 
 def clangBinPath():
     source = 'LLVM_INSTALL_DIR'
@@ -207,7 +253,13 @@ if option == '--python-include' or option == '-a':
     print(i)
 
 if option == '--python-link' or option == '-a':
-    l = pythonLink()
+    l = pythonLinkQmake()
+    if l is None:
+        sys.exit('Unable to locate Python')
+    print(l)
+
+if option == '--python-link-cmake' or option == '-a':
+    l = pythonLinkCmake()
     if l is None:
         sys.exit('Unable to locate Python')
     print(l)
@@ -215,7 +267,13 @@ if option == '--python-link' or option == '-a':
 if option == '--pyside2-shared-libraries' or option == '-a':
     l = pyside2SharedLibraries()
     if l is None:
-        sys.exit('Unable to locate the PySide sahred libraries')
+        sys.exit('Unable to locate the PySide2 shared libraries')
+    print(l)
+
+if option == '--pyside2-shared-libraries-cmake' or option == '-a':
+    l = pyside2SharedLibrariesCmake()
+    if l is None:
+        sys.exit('Unable to locate the PySide2 shared libraries')
     print(l)
 
 if option == '--clang-bin-dir' or option == '-a':
