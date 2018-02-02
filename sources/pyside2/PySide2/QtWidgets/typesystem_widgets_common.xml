@@ -2526,10 +2526,13 @@
     </modify-function>
     <modify-function signature="clear()">
         <inject-code class="target" position="beginning">
+            Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
             for (int i = 0; i &lt; %CPPSELF.count(); i++) {
                 QWidget* widget = %CPPSELF.widget(i);
-                Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](widget));
-                Shiboken::Object::setParent(0, pyWidget);
+                if (bm.hasWrapper(widget)) {
+                    Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](widget));
+                    Shiboken::Object::releaseOwnership(pyWidget);
+                }
             }
             %CPPSELF.%FUNCTION_NAME();
         </inject-code>

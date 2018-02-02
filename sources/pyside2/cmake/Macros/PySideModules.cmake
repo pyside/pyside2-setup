@@ -174,16 +174,22 @@ macro(check_qt_class module class optional_source_files dropped_entries)
              "int main() { sizeof(${class}); }\n"
         )
 
+        # Because Qt is built with -fPIC (by default), the compile tests also have to have that.
+        get_property(ADDITIONAL_FLAGS TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_OPTIONS)
+
+        # Don't add version tagging, because for some reason linker fails with:
+        # (.qtversion[qt_version_tag]+0x0): undefined reference to `qt_version_tag'
         # Force usage of the C++11 standard. CMAKE_CXX_STANDARD does not work with try_compile
         # but the issue has a fix in CMake 3.9. Thus we use a terrible workaround, we pass the C++
         # standard flag the way CheckCXXSourceCompiles.cmake does it.
-        set(CUSTOM_CPP_STANDARD ${CMAKE_CXX11_EXTENSION_COMPILE_OPTION})
+
+        set(ADDITIONAL_FLAGS "${ADDITIONAL_FLAGS} -DQT_NO_VERSION_TAGGING ${CMAKE_CXX11_EXTENSION_COMPILE_OPTION}")
 
         try_compile(Q_WORKS ${CMAKE_BINARY_DIR}
                     ${SRC_FILE}
                     CMAKE_FLAGS
                         "-DINCLUDE_DIRECTORIES=${QT_INCLUDE_DIR};${Qt5${_module_no_qt_prefix}_INCLUDE_DIRS}"
-                        "-DCOMPILE_DEFINITIONS:STRING=${CUSTOM_CPP_STANDARD}"
+                        "-DCOMPILE_DEFINITIONS:STRING=${ADDITIONAL_FLAGS}"
                     OUTPUT_VARIABLE OUTPUT)
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCheckQtClassTest.log ${OUTPUT})
 

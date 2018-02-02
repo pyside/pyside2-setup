@@ -42,10 +42,10 @@ from distutils.version import LooseVersion
 
 """This is a distutils setup-script for the PySide2 project
 
-To build the PySide2, simply execute:
-  python setup.py build --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
+To build PySide2 simply execute:
+  python setup.py build --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [only Windows --openssl=</path/to/openssl/bin>]
 or
-  python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [--openssl=</path/to/openssl/bin>]
+  python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [only Windows --openssl=</path/to/openssl/bin>]
 to build and install into your current Python installation.
 
 On Linux and macOS you can use option --standalone, to embed Qt libraries into the PySide2 package.
@@ -59,10 +59,10 @@ option is not specified.
 You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
 without rebuilding entire PySide2 every time:
   # First time we create bdist_wheel with full PySide2 build
-  python setup.py bdist_wheel --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --openssl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_wheel --qmake=c:\Qt\5.6\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --openssl=c:\libs\OpenSSL32bit\bin
 
   # Then we create bdist_egg reusing PySide2 build with option --only-package
-  python setup.py bdist_egg --only-package --qmake=c:\Qt\4.8.5\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_egg --only-package --qmake=c:\Qt\5.6\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
 
 You can use the option --qt-conf-prefix to pass a path relative to the PySide2 installed package,
 which will be embedded into an auto-generated qt.conf registered in the Qt resource system. This
@@ -88,8 +88,21 @@ REQUIREMENTS:
 - Qt: 5.5 and 5.6 are supported. Specify the path to qmake with --qmake option or add qmake to the system path.
 
 OPTIONAL:
-OpenSSL: You can specify the location of OpenSSL DLLs with option --opnessl=</path/to/openssl/bin>.
-    You can download OpenSSL for windows here: http://slproweb.com/products/Win32OpenSSL.html
+OpenSSL:
+    Specifying the --openssl option is only required on Windows. It is a no-op for other platforms.
+    You can specify the location of OpenSSL DLLs with option --openssl=</path/to/openssl/bin>.
+    You can download OpenSSL for Windows here: http://slproweb.com/products/Win32OpenSSL.html
+
+    Official Qt packages do not link to the SSL library directly, but rather try to find the library
+    at runtime.
+
+    On Windows, official Qt builds will try to pick up OpenSSL libraries at application path,
+    system registry, or in the PATH environment variable.
+    On macOS, official Qt builds use SecureTransport (provided by OS) instead of OpenSSL.
+    On Linux, official Qt builds will try to pick up the system OpenSSL library.
+
+    Note: this means that Qt packages that directly link to the OpenSSL shared libraries, are not
+    currently compatible with standalone PySide2 packages.
 
 OS X SDK: You can specify which OS X SDK should be used for compilation with the option --osx-sysroot=</path/to/sdk>.
           For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
@@ -784,7 +797,8 @@ class pyside_build(_build):
         log.info("Qt docs: %s" % self.qtinfo.docs_dir)
         log.info("Qt plugins: %s" % self.qtinfo.plugins_dir)
         log.info("-" * 3)
-        log.info("OpenSSL libs: %s" % OPTION_OPENSSL)
+        if sys.platform == 'win32':
+            log.info("OpenSSL dll directory: %s" % OPTION_OPENSSL)
         log.info("=" * 30)
 
         # Prepare folders
