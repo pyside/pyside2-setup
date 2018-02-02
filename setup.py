@@ -1249,14 +1249,8 @@ class pyside_build(_build):
 
             def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if '.framework' in dir_name:
-                    if dir_name in ['QtWebEngine.framework', 'QtWebEngineCore.framework', \
-                                    'QtPositioning.framework', 'QtLocation.framework'] and \
-                       'QtWebEngineWidgets.framework' in framework_built_modules:
-                           return True
-                    if dir_name in ['QtCLucene.framework'] and \
-                       'QtHelp.framework' in framework_built_modules:
-                           return True
-                    if dir_name not in framework_built_modules:
+                    if dir_name.startswith('QtWebEngine') and \
+                            'QtWebEngineWidgets.framework' not in framework_built_modules:
                         return False
                 if dir_name in ['Headers', 'fonts']:
                     return False
@@ -1273,14 +1267,14 @@ class pyside_build(_build):
                 ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
                 dir_filter_function=framework_dir_filter)
         else:
-            if 'WebEngineWidgets' in built_modules:
-                built_modules.extend(['WebEngine', 'WebEngineCore', 'Positioning', 'Location'])
-            if 'Help' in built_modules:
-                built_modules.extend(['CLucene'])
-            prefixed_built_modules = ['*Qt5' + name + '*.dylib' for name in built_modules]
+            ignored_modules = []
+            if 'WebEngineWidgets' not in built_modules:
+                ignored_modules.extend(['*Qt5WebEngine*.dylib'])
+            accepted_modules = ['*Qt5*.dylib']
 
             copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
-                filter=prefixed_built_modules,
+                filter=accepted_modules,
+                ignore=ignored_modules,
                 recursive=True, vars=vars)
 
             if 'WebEngineWidgets' in built_modules:
