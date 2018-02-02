@@ -163,11 +163,11 @@ class TestRunner(object):
                 print(*args, file=output, **kw)
 
             # 'for line in input:' would read into too large chunks
+            labelled = True
             while True:
                 line = input.readline()
                 if not line:
                     break
-                labelled = True
                 if line.startswith('BEGIN_FILE'):
                     labelled = False
                 txt = line.rstrip()
