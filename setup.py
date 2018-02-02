@@ -80,6 +80,7 @@ For development purposes the following options might be of use, when using "setu
     --skip-make-install will not run make install (or equivalent) for each built module,
     --skip-packaging will skip creation of the python package,
     --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
+    --verbose-build will output the compiler invocation with command line arguments, etc.
 
 REQUIREMENTS:
 - Python: 2.6, 2.7, 3.3, 3.4, 3.5 and 3.6 are supported
@@ -272,6 +273,7 @@ OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_ICULIB = option_value("iculib-url")
+OPTION_VERBOSE_BUILD = has_option("verbose-build")
 
 # This is used automatically by distutils.command.install object, to specify final installation
 # location.
@@ -920,6 +922,9 @@ class pyside_build(_build):
             cmake_cmd.append("-DQT_SRC_DIR=%s" % qtSrcDir)
         if self.build_type.lower() == 'debug':
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
+
+        if OPTION_VERBOSE_BUILD:
+            cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
 
         if extension.lower() == "pyside2":
             pyside_qt_conf_prefix = ''
