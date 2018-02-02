@@ -1277,6 +1277,18 @@ class pyside_build(_build):
                 recursive=True, vars=vars,
                 ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
                 dir_filter_function=framework_dir_filter)
+
+            # Fix rpath for WebEngine process executable. The already present rpath does not work
+            # because it assumes a symlink from Versions/5/Helpers, thus adding two more levels of
+            # directory hierarchy.
+            if 'QtWebEngineWidgets.framework' in framework_built_modules:
+                qt_lib_path = "{pyside_package_dir}/PySide2/Qt/lib".format(**vars)
+                bundle = "QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app"
+                binary = "Contents/MacOS/QtWebEngineProcess"
+                webengine_process_path = os.path.join(bundle, binary)
+                final_path = os.path.join(qt_lib_path, webengine_process_path)
+                rpath = "@loader_path/../../../../../"
+                osx_fix_rpaths_for_library(final_path, rpath)
         else:
             ignored_modules = []
             if 'WebEngineWidgets' not in built_modules:
