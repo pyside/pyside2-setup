@@ -106,6 +106,18 @@ OpenSSL:
 
 OS X SDK: You can specify which OS X SDK should be used for compilation with the option --osx-sysroot=</path/to/sdk>.
           For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
+
+OS X Minimum deployment target:
+    You can specify the OS X minimum deployment target with the --osx-deployment-target=<x> option.
+    For example "--osx-deployment-target=10.10".
+
+    OS X provides the ability to set what is the minimum OS version on which a binary will run. This
+    means that a build can be done on the latest OS X version with latest XCode and SDK versions,
+    but the built application / library can run on older OS versions.
+
+    Note: if the option is not set, CMake will try to query the MACOSX_DEPLOYMENT_TARGET environment
+          variable, and if that is empty, it will try to deduce a value internally (afaik based on
+          current OS X version and on the chosen SDK version).
 """
 
 __version__ = "5.6"
@@ -265,6 +277,7 @@ OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
 OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
 OPTION_OSX_SYSROOT = option_value("osx-sysroot")
+OPTION_OSX_DEPLOYMENT_TARGET = option_value("osx-deployment-target")
 OPTION_XVFB = has_option("use-xvfb")
 OPTION_REUSE_BUILD = has_option("reuse-build")
 OPTION_SKIP_CMAKE = has_option("skip-cmake")
@@ -964,6 +977,9 @@ class pyside_build(_build):
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={0}".format(latest_sdk_path))
 
+            if OPTION_OSX_DEPLOYMENT_TARGET:
+                cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}"
+                                  .format(OPTION_OSX_DEPLOYMENT_TARGET))
 
         if not OPTION_SKIP_CMAKE:
             log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
