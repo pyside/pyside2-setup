@@ -213,13 +213,15 @@ private:
     void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
     void writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeFunction(QTextStream& s, bool writeDoc, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
-    void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func);
+    void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
+                                     const AbstractMetaFunction* func);
     void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);
     void writeFunctionBlock(QTextStream& s, const QString& title, QStringList& functions);
-    void writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg);
+    void writeParameterType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg);
 
     void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass);
-    void writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaclass = 0);
+    void writeFormattedText(QTextStream &s, const Documentation &doc,
+                            const AbstractMetaClass *metaclass = nullptr);
     bool writeInjectDocumentation(QTextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
