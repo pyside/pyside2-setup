@@ -1193,7 +1193,7 @@ class pyside_build(_build):
 
         # Check if ICU libraries were copied over to the destination Qt libdir.
         resolved_destination_lib_dir = destination_lib_dir.format(**vars)
-        maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir, "libcu*")
+        maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir, "libicu*")
 
         # If no ICU libraries are present in the Qt libdir (like when Qt is built against system
         # ICU, or in the Coin CI where ICU libs are in a different directory) try to
