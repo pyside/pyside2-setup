@@ -1102,17 +1102,24 @@ void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc
         QtXmlToSphinx x(this, doc.value(), metaClassName);
         s << x;
     } else {
-        const QStringList lines = doc.value().split(QLatin1Char('\n'));
-        QRegExp regex(QLatin1String("\\S")); // non-space character
+        const QString &value = doc.value();
+        const QVector<QStringRef> lines = value.splitRef(QLatin1Char('\n'));
         int typesystemIndentation = std::numeric_limits<int>().max();
         // check how many spaces must be removed from the beginning of each line
-        for (const QString &line : lines) {
-            int idx = line.indexOf(regex);
-            if (idx >= 0)
-                typesystemIndentation = qMin(typesystemIndentation, idx);
+        for (const QStringRef &line : lines) {
+            const auto it = std::find_if(line.cbegin(), line.cend(),
+                                         [] (QChar c) { return !c.isSpace(); });
+            if (it != line.cend())
+                typesystemIndentation = qMin(typesystemIndentation, int(it - line.cbegin()));
         }
-        for (QString line : lines)
-            s << INDENT << line.remove(0, typesystemIndentation) << endl;
+        if (typesystemIndentation == std::numeric_limits<int>().max())
+            typesystemIndentation = 0;
+        for (const QStringRef &line : lines) {
+            s << INDENT
+                << (typesystemIndentation > 0 && typesystemIndentation < line.size()
+                    ? line.right(line.size() - typesystemIndentation) : line)
+                << endl;
+        }
     }
 
     s << endl;
