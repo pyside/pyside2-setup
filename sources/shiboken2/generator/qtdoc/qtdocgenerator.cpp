@@ -35,6 +35,7 @@
 #include <typedatabase.h>
 #include <algorithm>
 #include <QtCore/QStack>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QTextStream>
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QFile>
@@ -353,29 +354,34 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         return QString();
     }
 
-    QRegExp searchString(QLatin1String("//!\\s*\\[") + identifier + QLatin1String("\\]"));
-    QRegExp codeSnippetCode(QLatin1String("//!\\s*\\[[\\w\\d\\s]+\\]"));
     QString code;
+    if (identifier.isEmpty()) {
+        while (!inputFile.atEnd())
+            code += QString::fromUtf8(inputFile.readLine());
+        return code;
+    }
 
-    bool identifierIsEmpty = identifier.isEmpty();
+    const QRegularExpression searchString(QLatin1String("//!\\s*\\[")
+                                          + identifier + QLatin1String("\\]"));
+    Q_ASSERT(searchString.isValid());
+    static const QRegularExpression codeSnippetCode(QLatin1String("//!\\s*\\[[\\w\\d\\s]+\\]"));
+    Q_ASSERT(codeSnippetCode.isValid());
+
     bool getCode = false;
 
     while (!inputFile.atEnd()) {
         QString line = QString::fromUtf8(inputFile.readLine());
-        if (identifierIsEmpty) {
-            code += line;
-        } else if (getCode && !line.contains(searchString)) {
+        if (getCode && !line.contains(searchString)) {
             line.remove(codeSnippetCode);
             code += line;
         } else if (line.contains(searchString)) {
             if (getCode)
                 break;
-            else
-                getCode = true;
+            getCode = true;
         }
     }
 
-    if (!identifierIsEmpty && !getCode) {
+    if (!getCode) {
         QTextStream(errorMessage) << "Code snippet file found ("
             << QDir::toNativeSeparators(location) << "), but snippet ["
             << identifier << "] not found.";
