@@ -151,8 +151,10 @@ private:
     QString m_lastTagName;
     QString m_opened_anchor;
 
-    QString readFromLocations(const QStringList& locations, const QString& path, const QString& identifier);
-    QString readFromLocation(const QString& location, const QString& identifier, bool* ok = 0);
+    QString readFromLocations(const QStringList &locations, const QString &path,
+                              const QString &identifier, QString *errorMessage);
+    QString readFromLocation(const QString &location, const QString &identifier,
+                             QString *errorMessage);
     void pushOutputBuffer();
     QString popOutputBuffer();
     void writeTable(Table& table);

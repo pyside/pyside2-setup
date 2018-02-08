@@ -106,6 +106,21 @@ static QString escape(const QStringRef& strref)
     return escape(str);
 }
 
+static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
+                             const QString &tag, const QString &message)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Error handling <";
+    const QStringRef currentTag = reader.name();
+    if (currentTag.isEmpty())
+        str << tag;
+    else
+        str << currentTag;
+    str << "> in " << context << ", line "<< reader.lineNumber()
+        << ": " << message;
+    return result;
+}
 
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
         : m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
@@ -300,36 +315,41 @@ QString QtXmlToSphinx::transform(const QString& doc)
     return retval;
 }
 
-QString QtXmlToSphinx::readFromLocations(const QStringList& locations, const QString& path, const QString& identifier)
+static QString resolveFile(const QStringList &locations, const QString &path)
 {
-    QString result;
-    bool ok = false;
     for (QString location : locations) {
         location.append(QLatin1Char('/'));
         location.append(path);
-        result = readFromLocation(location, identifier, &ok);
-        if (ok)
-            break;
+        if (QFileInfo::exists(location))
+            return location;
     }
-    if (!ok) {
-        qCDebug(lcShiboken).noquote().nospace() << "Couldn't read code snippet file: {"
-            << locations.join(QLatin1Char('|')) << '}' << path;
-    }
-    return result;
-
+    return QString();
 }
 
-QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& identifier, bool* ok)
+QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QString &path,
+                                         const QString &identifier, QString *errorMessage)
+{
+    QString result;
+    const QString resolvedPath = resolveFile(locations, path);
+    if (resolvedPath.isEmpty()) {
+        QTextStream(errorMessage) << "Could not resolve \"" << path << "\" in \""
+           << locations.join(QLatin1String("\", \""));
+        return QString();
+    }
+    qCDebug(lcShiboken).noquote().nospace() << "snippet file " << path
+        << " resolved to " << resolvedPath;
+    return readFromLocation(resolvedPath, identifier, errorMessage);
+}
+
+QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &identifier,
+                                        QString *errorMessage)
 {
     QFile inputFile;
     inputFile.setFileName(location);
     if (!inputFile.open(QIODevice::ReadOnly)) {
-        if (!ok) {
-            qCDebug(lcShiboken).noquote().nospace() << "Couldn't read code snippet file: "
-                << QDir::toNativeSeparators(inputFile.fileName());
-        } else {
-            *ok = false;
-        }
+        QTextStream(errorMessage) << "Could not read code snippet file: "
+            << QDir::toNativeSeparators(inputFile.fileName())
+            << ": " << inputFile.errorString();
         return QString();
     }
 
@@ -356,12 +376,11 @@ QString QtXmlToSphinx::readFromLocation(const QString& location, const QString& 
     }
 
     if (!identifierIsEmpty && !getCode) {
-        qCDebug(lcShiboken).noquote().nospace() << "Code snippet file found ("
-            << location << "), but snippet " << identifier << " not found.";
+        QTextStream(errorMessage) << "Code snippet file found ("
+            << QDir::toNativeSeparators(location) << "), but snippet ["
+            << identifier << "] not found.";
     }
 
-    if (ok)
-        *ok = true;
     return code;
 }
 
@@ -462,7 +481,10 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         }
         QString location = reader.attributes().value(QLatin1String("location")).toString();
         QString identifier = reader.attributes().value(QLatin1String("identifier")).toString();
-        QString code = readFromLocations(m_generator->codeSnippetDirs(), location, identifier);
+        QString errorMessage;
+        QString code = readFromLocations(m_generator->codeSnippetDirs(), location, identifier, &errorMessage);
+        if (!errorMessage.isEmpty())
+            qCWarning(lcShiboken(), "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
         if (!consecutiveSnippet)
             m_output << INDENT << "::\n\n";
 
@@ -853,8 +875,10 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         QString location = reader.text().toString();
         QString identifier;
         location.prepend(m_generator->libSourceDir() + QLatin1Char('/'));
-        QString code = readFromLocation(location, identifier);
-
+        QString errorMessage;
+        QString code = readFromLocation(location, identifier, &errorMessage);
+        if (!errorMessage.isEmpty())
+            qCWarning(lcShiboken(), "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
         m_output << INDENT << "::\n\n";
         Indentation indentation(INDENT);
         if (code.isEmpty()) {
