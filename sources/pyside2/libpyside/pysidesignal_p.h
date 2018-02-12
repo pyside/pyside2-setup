@@ -44,7 +44,7 @@
 
 extern "C"
 {
-    extern PyTypeObject *PySideSignalTypeP;
+    extern PyTypeObject *PySideSignalTypeF(void);
 
     struct PySideSignal {
         PyObject_HEAD

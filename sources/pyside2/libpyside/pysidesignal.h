@@ -50,8 +50,8 @@
 
 extern "C"
 {
-    extern PYSIDE_API PyTypeObject *PySideSignalTypeP;
-    extern PYSIDE_API PyTypeObject *PySideSignalInstanceTypeP;
+    extern PYSIDE_API PyTypeObject *PySideSignalTypeF(void);
+    extern PYSIDE_API PyTypeObject *PySideSignalInstanceTypeF(void);
 
     // Internal object
     struct PYSIDE_API PySideSignal;
