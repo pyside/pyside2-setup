@@ -45,7 +45,10 @@ addActionWithPyObject(QMenuBar* self, const QString& text, PyObject* callback)
     self->addAction(act);
 
     PyObject* pyAct = %CONVERTTOPYTHON[QAction*](act);
-    PyObject* result = PyObject_CallMethod(pyAct, "connect", "OsO", pyAct,
+    PyObject* result = PyObject_CallMethod(pyAct,
+                                           const_cast<char *>("connect"),
+                                           const_cast<char *>("OsO"),
+                                           pyAct,
                                            SIGNAL(triggered(bool)), callback);
 
     if (result == 0 || result == Py_False) {

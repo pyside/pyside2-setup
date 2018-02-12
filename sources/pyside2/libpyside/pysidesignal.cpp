@@ -116,7 +116,9 @@ static PyType_Slot PySideSignalMetaType_slots[] = {
 };
 static PyType_Spec PySideSignalMetaType_spec = {
     "PySide2.QtCore.MetaSignal",
-    sizeof(PyHeapTypeObject),
+    0,
+    // sizeof(PyHeapTypeObject) is filled in by PyType_FromSpecWithBases
+    // which calls PyType_Ready which calls inherit_special.
     0,
     Py_TPFLAGS_DEFAULT,
     PySideSignalMetaType_slots,

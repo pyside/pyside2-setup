@@ -79,7 +79,7 @@ LIBSHIBOKEN_API void* PyType_GetSlot(PyTypeObject*, int);
 #define Py_nb_absolute 6
 #define Py_nb_add 7
 #define Py_nb_and 8
-#define Py_nb_bool 9
+#define Py_nb_nonzero 9
 #define Py_nb_divmod 10
 #define Py_nb_float 11
 #define Py_nb_floor_divide 12
@@ -145,16 +145,8 @@ LIBSHIBOKEN_API void* PyType_GetSlot(PyTypeObject*, int);
 #define Py_tp_members 72
 #define Py_tp_getset 73
 #define Py_tp_free 74
-#define Py_nb_matrix_multiply 75
-#define Py_nb_inplace_matrix_multiply 76
-#define Py_am_await 77
-#define Py_am_aiter 78
-#define Py_am_anext 79
-#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03050000
-/* New in 3.5 */
-#define Py_tp_finalize 80
-#endif
-
+#define Py_nb_long 75
+#define Py_nb_divide 76
 } // extern "C"
 #endif // PY_MAJOR_VERSION < 3
 #endif // TYPESPEC_H

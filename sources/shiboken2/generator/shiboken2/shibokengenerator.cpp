@@ -804,7 +804,7 @@ QString ShibokenGenerator::cpythonTypeName(const AbstractMetaClass* metaClass)
 
 QString ShibokenGenerator::cpythonTypeName(const TypeEntry* type)
 {
-    return cpythonBaseName(type) + QLatin1String("_Type");
+    return cpythonBaseName(type) + QLatin1String("_TypeF()");
 }
 
 QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntry* type)
@@ -1625,7 +1625,7 @@ void ShibokenGenerator::processCodeSnip(QString& code, const AbstractMetaClass* 
         // Replace template variable by the Python Type object
         // for the class context in which the variable is used.
         code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
-                     cpythonTypeName(context) + QLatin1String(".super.ht_type"));
+                     cpythonTypeName(context) + QLatin1String("->super.ht_type"));
         code.replace(QLatin1String("%TYPE"), wrapperName(context));
         code.replace(QLatin1String("%CPPTYPE"), context->name());
     }
@@ -1856,7 +1856,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         // class implementing the method in which the code snip is written
         if (func->isStatic()) {
             code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
-                                       cpythonTypeName(func->implementingClass()) + QLatin1String(".super.ht_type"));
+                                       cpythonTypeName(func->implementingClass()) + QLatin1String("->super.ht_type"));
         } else {
             code.replace(QLatin1String("%PYTHONTYPEOBJECT."), pySelf + QLatin1String("->ob_type->"));
             code.replace(QLatin1String("%PYTHONTYPEOBJECT"), pySelf + QLatin1String("->ob_type"));

@@ -50,8 +50,11 @@ inline PyObject* addActionWithPyObject(QMenu* self, const QIcon& icon, const QSt
     self->addAction(act);
 
     PyObject* pyAct = %CONVERTTOPYTHON[QAction*](act);
-    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct, const_cast<char *>("connect"), "OsO",
-                                                    pyAct, SIGNAL(triggered()), callback));
+    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct,
+                                                    const_cast<char *>("connect"),
+                                                    const_cast<char *>("OsO"),
+                                                    pyAct,
+                                                    SIGNAL(triggered()), callback));
     if (result.isNull()) {
         Py_DECREF(pyAct);
         return 0;
