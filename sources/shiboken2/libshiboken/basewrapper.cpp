@@ -1391,6 +1391,7 @@ void deallocData(SbkObject* self, bool cleanup)
     }
     delete self->d; // PYSIDE-205: always delete d.
     Py_XDECREF(self->ob_dict);
+
     // PYSIDE-571: qApp is no longer allocated.
     if (PyObject_IS_GC((PyObject*)self))
         Py_TYPE(self)->tp_free(self);

@@ -93,166 +93,75 @@ static PyObject* signalCall(PyObject*, PyObject*, PyObject*);
 
 static PyObject* metaSignalCheck(PyObject*, PyObject*);
 
-static PyMappingMethods Signal_as_mapping = {
-    0,
-    signalGetItem,
-    0
-};
+
+// PYSIDE-595: Avoid trouble by keeping everything as it was.
+// The automatically added tp_dealloc is wrong, because the code
+// took care about this, already.
+// We can refine this later if we want.
+static void
+dummyDealloc(PyObject *)
+{}
 
 static PyMethodDef Signal_methods[] = {
     {"__instancecheck__", (PyCFunction)metaSignalCheck, METH_O, NULL},
     {0, 0, 0, 0}
 };
 
-static void
-dummy_dealloc(PyObject *)
-{
-
-}
-// this function is only temporarily here.
-PyTypeObject *initHeaptype(PyTypeObject *type)
-{
-    PyTypeObject *ret;
-
-    if (PyType_HasFeature(type, Py_TPFLAGS_HEAPTYPE)) {
-        type->tp_flags &= ~Py_TPFLAGS_HEAPTYPE;
-        type->tp_flags |= Py_TPFLAGS_BASETYPE;
-        if (PyType_Ready(type) < 0)
-            return nullptr;
-        PyObject *args = Py_BuildValue("(s(OO){})", type->tp_name, type, &PyBaseObject_Type);
-        PyTypeObject *meta = &PyType_Type;
-        PyType_Ready(meta);
-        ret = reinterpret_cast<PyTypeObject *>(
-                  PyType_Type.tp_new(meta, args, nullptr));
-        if (!(type->tp_flags & Py_TPFLAGS_HAVE_GC) &&
-            ret->tp_flags & Py_TPFLAGS_HAVE_GC) {
-            fprintf(stderr, "%s has grown GC, error in sight!\n", ret->tp_name);
-            ret->tp_flags &= ~Py_TPFLAGS_HAVE_GC;
-            ret->tp_free = PyObject_Del;
-            ret->tp_dealloc = dummy_dealloc;
-        }
-    }
-    else
-        ret = type;
-    return ret;
-}
-
-// this one has no problems with heaptype conversion
-static PyTypeObject PySideSignalMetaType = {
-    PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide2.QtCore.MetaSignal",
-    /*tp_basicsize*/        sizeof(PyHeapTypeObject),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        0,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       0,
-    /*tp_hash*/             0,
-    /*tp_call*/             0,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HEAPTYPE,
-    /*tp_doc*/              0,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          Signal_methods,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             &PyType_Type,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             0,
-    /*tp_alloc*/            0,
-    /*tp_new*/              0,
-    /*tp_free*/             PyObject_GC_Del,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0,
-    /*tp_del*/              0,
-    /*tp_version_tag*/      0
+static PyType_Slot PySideSignalMetaType_slots[] = {
+    {Py_tp_methods, (void *)Signal_methods},
+    {Py_tp_base, (void *)&PyType_Type},
+    {Py_tp_free, (void *)PyObject_GC_Del},
+    {Py_tp_dealloc, (void *)dummyDealloc},
+    {0, 0}
 };
+static PyType_Spec PySideSignalMetaType_spec = {
+    "PySide2.QtCore.MetaSignal",
+    sizeof(PyHeapTypeObject),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    PySideSignalMetaType_slots,
+};
+
 
 PyTypeObject *PySideSignalMetaTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
-        type = initHeaptype(&PySideSignalMetaType);
+    if (type == nullptr) {
+        PyObject *bases = Py_BuildValue("(O)", &PyType_Type);
+        type = (PyTypeObject *)PyType_FromSpecWithBases(&PySideSignalMetaType_spec, bases);
+        Py_XDECREF(bases);
+    }
     return type;
 }
 
-// Problems with heaptype!
-static PyTypeObject PySideSignalType = {
-    PyVarObject_HEAD_INIT(nullptr, 0)
-    /*tp_name*/             "PySide2.QtCore." SIGNAL_CLASS_NAME,
-    /*tp_basicsize*/        sizeof(PySideSignal),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        0,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       &Signal_as_mapping,
-    /*tp_hash*/             0,
-    /*tp_call*/             signalCall,
-    /*tp_str*/              signalToString,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/,
-    /*tp_doc*/              SIGNAL_CLASS_NAME,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          0,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             0,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             signalTpInit,
-    /*tp_alloc*/            0,
-    /*tp_new*/              PyType_GenericNew,
-    /*tp_free*/             signalFree,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0,
-    /*tp_del*/              0,
-    /*tp_version_tag*/      0
+static PyType_Slot PySideSignalType_slots[] = {
+    {Py_mp_subscript, (void *)signalGetItem},
+    {Py_tp_call, (void *)signalCall},
+    {Py_tp_str, (void *)signalToString},
+    {Py_tp_init, (void *)signalTpInit},
+    {Py_tp_new, (void *)PyType_GenericNew},
+    {Py_tp_free, (void *)signalFree},
+    {Py_tp_dealloc, (void *)dummyDealloc},
+    {0, 0}
 };
+static PyType_Spec PySideSignalType_spec = {
+    "PySide2.QtCore." SIGNAL_CLASS_NAME,
+    sizeof(PySideSignal),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    PySideSignalType_slots,
+};
+
 
 PyTypeObject *PySideSignalTypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (type == nullptr) {
-        Py_TYPE(&PySideSignalType) = PySideSignalMetaTypeF();
-        type = initHeaptype(&PySideSignalType);
+        type = (PyTypeObject *)PyType_FromSpec(&PySideSignalType_spec);
+        PyTypeObject *hold = Py_TYPE(type);
+        Py_TYPE(type) = PySideSignalMetaTypeF();
+        Py_INCREF(Py_TYPE(type));
+        Py_DECREF(hold);
     }
     return type;
 }
@@ -264,68 +173,30 @@ static PyMethodDef SignalInstance_methods[] = {
     {0, 0, 0, 0}  /* Sentinel */
 };
 
-static PyMappingMethods SignalInstance_as_mapping = {
+static PyType_Slot PySideSignalInstanceType_slots[] = {
+    //{Py_tp_as_mapping, (void *)&SignalInstance_as_mapping},
+    {Py_mp_subscript, (void *)signalInstanceGetItem},
+    {Py_tp_call, (void *)signalInstanceCall},
+    {Py_tp_methods, (void *)SignalInstance_methods},
+    {Py_tp_new, (void *)PyType_GenericNew},
+    {Py_tp_free, (void *)signalInstanceFree},
+    {Py_tp_dealloc, (void *)dummyDealloc},
+    {0, 0}
+};
+static PyType_Spec PySideSignalInstanceType_spec = {
+    "PySide2.QtCore." SIGNAL_INSTANCE_NAME,
+    sizeof(PySideSignalInstance),
     0,
-    signalInstanceGetItem,
-    0
+    Py_TPFLAGS_DEFAULT,
+    PySideSignalInstanceType_slots,
 };
 
-// Problems with heaptype!
-static PyTypeObject PySideSignalInstanceType = {
-    PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide2.QtCore." SIGNAL_INSTANCE_NAME,
-    /*tp_basicsize*/        sizeof(PySideSignalInstance),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        0,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       &SignalInstance_as_mapping,
-    /*tp_hash*/             0,
-    /*tp_call*/             signalInstanceCall,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/,
-    /*tp_doc*/              SIGNAL_INSTANCE_NAME,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          SignalInstance_methods,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             0,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             0,
-    /*tp_alloc*/            0,
-    /*tp_new*/              PyType_GenericNew,
-    /*tp_free*/             signalInstanceFree,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0,
-    /*tp_del*/              0,
-    /*tp_version_tag*/      0
-};
 
 PyTypeObject *PySideSignalInstanceTypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (type == nullptr)
-        type = initHeaptype(&PySideSignalInstanceType);
+        type = (PyTypeObject *)PyType_FromSpec(&PySideSignalInstanceType_spec);
     return type;
 }
 

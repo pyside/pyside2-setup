@@ -50,6 +50,7 @@ signature.cpp
 qapp_macro.cpp
 pep384resolve.cpp
 voidptr.cpp
+typespec.cpp
 )
 
 get_numpy_location()
@@ -94,6 +95,7 @@ install(FILES
         signature.h
         qapp_macro.h
         voidptr.h
+        typespec.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken2
