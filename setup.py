@@ -1004,9 +1004,20 @@ class pyside_build(_build):
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={0}".format(latest_sdk_path))
 
+            # If no explicit minimum deployment target is set, then use the current build OS
+            # version. Otherwise use the given version.
+            # This is required so that calling run_process -> distutils.spawn() does not
+            # set its own minimum deployment target environment variable,
+            # based on the python interpreter sysconfig value. Doing so could break the
+            # detected clang include paths for example.
+            current_os_version, _, _ = platform.mac_ver()
+            current_os_version = '.'.join(current_os_version.split('.')[:2])
+            deployment_target = current_os_version
             if OPTION_OSX_DEPLOYMENT_TARGET:
                 cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}"
                                   .format(OPTION_OSX_DEPLOYMENT_TARGET))
+                deployment_target = OPTION_OSX_DEPLOYMENT_TARGET
+            os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
         if not OPTION_SKIP_CMAKE:
             log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
