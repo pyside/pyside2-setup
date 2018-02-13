@@ -81,6 +81,7 @@ For development purposes the following options might be of use, when using "setu
     --skip-make-install will not run make install (or equivalent) for each built module,
     --skip-packaging will skip creation of the python package,
     --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
+    --verbose-build will output the compiler invocation with command line arguments, etc.
 
 REQUIREMENTS:
 - Python: 2.6, 2.7, 3.3, 3.4, 3.5 and 3.6 are supported
@@ -106,6 +107,18 @@ OpenSSL:
 
 OS X SDK: You can specify which OS X SDK should be used for compilation with the option --osx-sysroot=</path/to/sdk>.
           For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
+
+OS X Minimum deployment target:
+    You can specify the OS X minimum deployment target with the --osx-deployment-target=<x> option.
+    For example "--osx-deployment-target=10.10".
+
+    OS X provides the ability to set what is the minimum OS version on which a binary will run. This
+    means that a build can be done on the latest OS X version with latest XCode and SDK versions,
+    but the built application / library can run on older OS versions.
+
+    Note: if the option is not set, CMake will try to query the MACOSX_DEPLOYMENT_TARGET environment
+          variable, and if that is empty, it will try to deduce a value internally (afaik based on
+          current OS X version and on the chosen SDK version).
 """
 
 __version__ = "5.9"
@@ -166,6 +179,8 @@ old_submodules = {
     ],
 }
 
+pyside_package_dir_name = "pyside_package"
+
 try:
     import setuptools
 except ImportError:
@@ -210,7 +225,8 @@ from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
 from utils import osx_fix_rpaths_for_library
-from utils import download_and_extract_7z
+from utils import copy_icu_libs
+from utils import find_files_using_glob
 from textwrap import dedent
 
 # guess a close folder name for extensions
@@ -263,6 +279,7 @@ OPTION_BUILDTESTS = has_option("build-tests")
 OPTION_OSXARCH = option_value("osx-arch")
 OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
 OPTION_OSX_SYSROOT = option_value("osx-sysroot")
+OPTION_OSX_DEPLOYMENT_TARGET = option_value("osx-deployment-target")
 OPTION_XVFB = has_option("use-xvfb")
 OPTION_REUSE_BUILD = has_option("reuse-build")
 OPTION_SKIP_CMAKE = has_option("skip-cmake")
@@ -273,6 +290,12 @@ OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_QT_SRC = option_value("qt-src-dir")
 OPTION_ICULIB = option_value("iculib-url")
+OPTION_VERBOSE_BUILD = has_option("verbose-build")
+
+# This is used automatically by distutils.command.install object, to specify final installation
+# location.
+OPTION_FINAL_INSTALL_PREFIX = option_value("prefix")
+
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -443,7 +466,7 @@ def prepareBuild():
     if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
         prepareSubModules()
     # Clean up temp and package folders
-    for n in ["pyside_package", "build", "PySide2-%s" % __version__]:
+    for n in [pyside_package_dir_name, "build", "PySide2-%s" % __version__]:
         d = os.path.join(script_dir, n)
         if os.path.isdir(d):
             print("Removing %s" % d)
@@ -453,7 +476,8 @@ def prepareBuild():
                 print('***** problem removing "{}"'.format(d))
                 print('ignored error: {}'.format(e))
     # Prepare package folders
-    for pkg in ["pyside_package/PySide2", "pyside_package/pyside2uic"]:
+    ppdn = pyside_package_dir_name
+    for pkg in [os.path.join(ppdn, "PySide2"), os.path.join(ppdn, "pyside2uic")]:
         pkg_dir = os.path.join(script_dir, pkg)
         os.makedirs(pkg_dir)
     # locate Qt sources for the documentation
@@ -759,6 +783,7 @@ class pyside_build(_build):
         self.make_generator = make_generator
         self.debug = OPTION_DEBUG
         self.script_dir = script_dir
+        self.pyside_package_dir = os.path.join(self.script_dir, pyside_package_dir_name)
         self.sources_dir = sources_dir
         self.build_dir = build_dir
         self.install_dir = install_dir
@@ -770,6 +795,10 @@ class pyside_build(_build):
         self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
         self.build_tests = OPTION_BUILDTESTS
 
+        setuptools_install_prefix = get_python_lib(1)
+        if OPTION_FINAL_INSTALL_PREFIX:
+            setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
+
         log.info("=" * 30)
         log.info("Package version: %s" % __version__)
         log.info("Build type: %s" % self.build_type)
@@ -779,11 +808,27 @@ class pyside_build(_build):
         log.info("Make generator: %s" % self.make_generator)
         log.info("Make jobs: %s" % OPTION_JOBS)
         log.info("-" * 3)
+
         log.info("Script directory: %s" % self.script_dir)
         log.info("Sources directory: %s" % self.sources_dir)
-        log.info("Build directory: %s" % self.build_dir)
-        log.info("Install directory: %s" % self.install_dir)
-        log.info("Python site-packages install directory: %s" % self.site_packages_dir)
+
+        log.info(dedent("""
+        Building PySide2 will create and touch directories in the following order:
+          make build directory (py*_build/*/*) ->
+          make install directory (py*_install/*/*) ->
+          {} directory (pyside_package/*) ->
+          setuptools build directory (build/*/*) ->
+          setuptools install directory (usually path-installed-python/lib/python*/site-packages/*)
+         """).format(pyside_package_dir_name))
+
+        log.info("make build directory: %s" % self.build_dir)
+        log.info("make install directory: %s" % self.install_dir)
+        log.info("%s directory: %s" % (pyside_package_dir_name, self.pyside_package_dir))
+        log.info("setuptools build directory: %s" % os.path.join(self.script_dir, "build"))
+        log.info("setuptools install directory: %s" % setuptools_install_prefix)
+        log.info("make-installed site-packages directory: %s \n"
+                 "  (only relevant for copying files from 'make install directory' "
+                 "to '%s directory'" % (self.site_packages_dir, pyside_package_dir_name))
         log.info("-" * 3)
         log.info("Python executable: %s" % self.py_executable)
         log.info("Python includes: %s" % self.py_include_dir)
@@ -918,6 +963,9 @@ class pyside_build(_build):
         if self.build_type.lower() == 'debug':
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY=%s" % self.py_library)
 
+        if OPTION_VERBOSE_BUILD:
+            cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
+
         if extension.lower() == "pyside2":
             pyside_qt_conf_prefix = ''
             if OPTION_QT_CONF_PREFIX:
@@ -956,6 +1004,9 @@ class pyside_build(_build):
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={0}".format(latest_sdk_path))
 
+            if OPTION_OSX_DEPLOYMENT_TARGET:
+                cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}"
+                                  .format(OPTION_OSX_DEPLOYMENT_TARGET))
 
         if not OPTION_SKIP_CMAKE:
             log.info("Configuring module %s (%s)..." % (extension,  module_src_dir))
@@ -1003,7 +1054,7 @@ class pyside_build(_build):
                 "install_dir": self.install_dir,
                 "build_dir": self.build_dir,
                 "script_dir": self.script_dir,
-                "dist_dir": os.path.join(self.script_dir, 'pyside_package'),
+                "pyside_package_dir": self.pyside_package_dir,
                 "ssl_libs_dir": OPTION_OPENSSL,
                 "py_version": self.py_version,
                 "qt_version": self.qtinfo.version,
@@ -1030,7 +1081,7 @@ class pyside_build(_build):
 
     def get_built_pyside_modules(self, vars):
         # Get list of built modules, so that we copy only required Qt libraries.
-        pyside_package_dir = vars['dist_dir']
+        pyside_package_dir = vars['pyside_package_dir']
         built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
 
         try:
@@ -1054,12 +1105,12 @@ class pyside_build(_build):
         # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
             "{build_dir}/shiboken2/doc/html",
-            "{dist_dir}/PySide2/docs/shiboken2",
+            "{pyside_package_dir}/PySide2/docs/shiboken2",
             force=False, vars=vars)
         # <install>/lib/site-packages/PySide2/* -> <setup>/PySide2
         copydir(
             "{site_packages_dir}/PySide2",
-            "{dist_dir}/PySide2",
+            "{pyside_package_dir}/PySide2",
             vars=vars)
         # <install>/lib/site-packages/shiboken2.so -> <setup>/PySide2/shiboken2.so
         shiboken_module_name = 'shiboken2.so'
@@ -1071,29 +1122,29 @@ class pyside_build(_build):
         vars.update({'shiboken_module_name': shiboken_module_name})
         copyfile(
             "{site_packages_dir}/{shiboken_module_name}",
-            "{dist_dir}/PySide2/{shiboken_module_name}",
+            "{pyside_package_dir}/PySide2/{shiboken_module_name}",
             vars=vars)
         # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
             "{site_packages_dir}/pyside2uic",
-            "{dist_dir}/pyside2uic",
+            "{pyside_package_dir}/pyside2uic",
             force=False, vars=vars)
         if sys.version_info[0] > 2:
-            rmtree("{dist_dir}/pyside2uic/port_v2".format(**vars))
+            rmtree("{pyside_package_dir}/pyside2uic/port_v2".format(**vars))
         else:
-            rmtree("{dist_dir}/pyside2uic/port_v3".format(**vars))
+            rmtree("{pyside_package_dir}/pyside2uic/port_v3".format(**vars))
         # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
-            "{dist_dir}/PySide2/scripts/__init__.py",
+            "{pyside_package_dir}/PySide2/scripts/__init__.py",
             vars=vars)
         copyfile(
             "{install_dir}/bin/pyside2-uic",
-            "{dist_dir}/PySide2/scripts/uic.py",
+            "{pyside_package_dir}/PySide2/scripts/uic.py",
             force=False, vars=vars)
         # <install>/bin/* -> PySide2/
         executables.extend(copydir(
             "{install_dir}/bin/",
-            "{dist_dir}/PySide2",
+            "{pyside_package_dir}/PySide2",
             filter=[
                 "pyside2-lupdate",
                 "pyside2-rcc",
@@ -1103,7 +1154,7 @@ class pyside_build(_build):
         # <install>/lib/lib* -> PySide2/
         copydir(
             "{install_dir}/lib/",
-            "{dist_dir}/PySide2",
+            "{pyside_package_dir}/PySide2",
             filter=[
                 "libpyside*" + so_star,
                 "libshiboken*" + so_star,
@@ -1112,26 +1163,26 @@ class pyside_build(_build):
         # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
             "{install_dir}/share/PySide2/typesystems",
-            "{dist_dir}/PySide2/typesystems",
+            "{pyside_package_dir}/PySide2/typesystems",
             vars=vars)
         # <install>/include/* -> <setup>/PySide2/include
         copydir(
             "{install_dir}/include",
-            "{dist_dir}/PySide2/include",
+            "{pyside_package_dir}/PySide2/include",
             vars=vars)
         # <source>/pyside2/PySide2/support/* -> <setup>/PySide2/support/*
         copydir(
             "{build_dir}/pyside2/PySide2/support",
-            "{dist_dir}/PySide2/support",
+            "{pyside_package_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # examples/* -> <setup>/PySide2/examples
             copydir(os.path.join(self.script_dir, "examples"),
-                    "{dist_dir}/PySide2/examples",
+                    "{pyside_package_dir}/PySide2/examples",
                     force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
-                examples_path = "{dist_dir}/PySide2/examples".format(**vars)
+                examples_path = "{pyside_package_dir}/PySide2/examples".format(**vars)
                 pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(**vars)
                 pyside_rcc_options = '-py3'
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
@@ -1146,7 +1197,7 @@ class pyside_build(_build):
 
         # Update rpath to $ORIGIN
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-            self.update_rpath("{dist_dir}/PySide2".format(**vars), executables)
+            self.update_rpath("{pyside_package_dir}/PySide2".format(**vars), executables)
 
     def qt_is_framework_build(self):
         if os.path.isdir(self.qtinfo.headers_dir + "/../lib/QtCore.framework"):
@@ -1156,68 +1207,46 @@ class pyside_build(_build):
     def prepare_standalone_package_linux(self, executables, vars):
         built_modules = vars['built_modules']
 
-        def _print_warn():
-            print(dedent("""\
-                  ***********************************************************
-                    If one is using Qt binaries provided by QtCompany's CI,
-                    those aren't working as expected!
-                  ***********************************************************
-                  """))
-
-        # To get working QtCompany Qt CI binaries we have to extract the ICU libs
-        # If no link provided we'll use the libs from qt-project
-        icuUrl = ""
-        if OPTION_ICULIB:
-            icuUrl = OPTION_ICULIB
-        else:
-            qt_version = self.qtinfo.version
-            url_pre = "http://master.qt.io/development_releases/prebuilt/icu/prebuilt/"
-            if qt_version.startswith("5.6"):
-                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel6.6-x64.7z"
-            else:
-                icuUrl = url_pre + "56.1/icu-linux-g++-Rhel7.2-x64.7z"
-
-        if find_executable("7z"):
-            try:
-                download_and_extract_7z(icuUrl, "{qt_lib_dir}".format(**vars))
-            except RuntimeError as e:
-                # The Qt libs now requires patching to system ICU
-                # OR it is possible that Qt was built without ICU and
-                # Works as such
-                print("Failed to download and extract %s" % icuUrl)
-                print(str(e))
-                _print_warn()
-        else:
-                print("Install 7z into PATH to extract ICU libs")
-                _print_warn()
-
         # <qt>/lib/* -> <setup>/PySide2/Qt/lib
-        copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+        destination_lib_dir = "{pyside_package_dir}/PySide2/Qt/lib"
+        copydir("{qt_lib_dir}", destination_lib_dir,
             filter=[
                 "libQt5*.so.?",
                 "libicu*.so.??",
             ],
             recursive=False, vars=vars, force_copy_symlinks=True)
 
+        # Check if ICU libraries were copied over to the destination Qt libdir.
+        resolved_destination_lib_dir = destination_lib_dir.format(**vars)
+        maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir, "libcu*")
+
+        # If no ICU libraries are present in the Qt libdir (like when Qt is built against system
+        # ICU, or in the Coin CI where ICU libs are in a different directory) try to
+        # find out / resolve which ICU libs are used by QtCore (if used at all) using a custom
+        # written ldd, and copy the ICU libs to the Pyside Qt dir if necessary. We choose the QtCore
+        # lib to inspect, by checking which QtCore library the shiboken2 executable uses.
+        if not maybe_icu_libs:
+            copy_icu_libs(resolved_destination_lib_dir)
+
         if 'WebEngineWidgets' in built_modules:
-            copydir("{qt_lib_execs_dir}", "{dist_dir}/PySide2/Qt/libexec",
+            copydir("{qt_lib_execs_dir}", "{pyside_package_dir}/PySide2/Qt/libexec",
                 filter=None,
                 recursive=False,
                 vars=vars)
 
-            copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/Qt/resources",
+            copydir("{qt_prefix_dir}/resources", "{pyside_package_dir}/PySide2/Qt/resources",
                 filter=None,
                 recursive=False,
                 vars=vars)
 
         # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
-        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/Qt/plugins",
+        copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/Qt/plugins",
             filter=["*.so"],
             recursive=True,
             vars=vars)
 
         # <qt>/qml/* -> <setup>/PySide2/Qt/qml
-        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/Qt/qml",
+        copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/Qt/qml",
             filter=None,
             force=False,
             recursive=True,
@@ -1225,7 +1254,7 @@ class pyside_build(_build):
 
         # <qt>/translations/* -> <setup>/PySide2/Qt/translations
 
-        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/Qt/translations",
+        copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/Qt/translations",
             filter=["*.qm"],
             force=False,
             vars=vars)
@@ -1245,14 +1274,8 @@ class pyside_build(_build):
 
             def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if '.framework' in dir_name:
-                    if dir_name in ['QtWebEngine.framework', 'QtWebEngineCore.framework', \
-                                    'QtPositioning.framework', 'QtLocation.framework'] and \
-                       'QtWebEngineWidgets.framework' in framework_built_modules:
-                           return True
-                    if dir_name in ['QtCLucene.framework'] and \
-                       'QtHelp.framework' in framework_built_modules:
-                           return True
-                    if dir_name not in framework_built_modules:
+                    if dir_name.startswith('QtWebEngine') and \
+                            'QtWebEngineWidgets.framework' not in framework_built_modules:
                         return False
                 if dir_name in ['Headers', 'fonts']:
                     return False
@@ -1264,41 +1287,41 @@ class pyside_build(_build):
                     return False
                 return general_dir_filter(dir_name, parent_full_path, dir_full_path)
 
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
+            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
                 recursive=True, vars=vars,
                 ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
                 dir_filter_function=framework_dir_filter)
         else:
-            if 'WebEngineWidgets' in built_modules:
-                built_modules.extend(['WebEngine', 'WebEngineCore', 'Positioning', 'Location'])
-            if 'Help' in built_modules:
-                built_modules.extend(['CLucene'])
-            prefixed_built_modules = ['*Qt5' + name + '*.dylib' for name in built_modules]
+            ignored_modules = []
+            if 'WebEngineWidgets' not in built_modules:
+                ignored_modules.extend(['*Qt5WebEngine*.dylib'])
+            accepted_modules = ['*Qt5*.dylib']
 
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2/Qt/lib",
-                filter=prefixed_built_modules,
+            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
+                filter=accepted_modules,
+                ignore=ignored_modules,
                 recursive=True, vars=vars)
 
             if 'WebEngineWidgets' in built_modules:
-                copydir("{qt_lib_execs_dir}", "{dist_dir}/PySide2/Qt/libexec",
+                copydir("{qt_lib_execs_dir}", "{pyside_package_dir}/PySide2/Qt/libexec",
                     filter=None,
                     recursive=False,
                     vars=vars)
 
-                copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/Qt/resources",
+                copydir("{qt_prefix_dir}/resources", "{pyside_package_dir}/PySide2/Qt/resources",
                     filter=None,
                     recursive=False,
                     vars=vars)
 
         # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
-        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/Qt/plugins",
+        copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/Qt/plugins",
             filter=["*.dylib"],
             recursive=True,
             dir_filter_function=general_dir_filter,
             vars=vars)
 
         # <qt>/qml/* -> <setup>/PySide2/Qt/qml
-        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/Qt/qml",
+        copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/Qt/qml",
             filter=None,
             recursive=True,
             force=False,
@@ -1306,7 +1329,7 @@ class pyside_build(_build):
             vars=vars)
 
         # <qt>/translations/* -> <setup>/PySide2/Qt/translations
-        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/Qt/translations",
+        copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/Qt/translations",
             filter=["*.qm"],
             force=False,
             vars=vars)
@@ -1316,7 +1339,7 @@ class pyside_build(_build):
         # <install>/lib/site-packages/PySide2/* -> <setup>/PySide2
         copydir(
             "{site_packages_dir}/PySide2",
-            "{dist_dir}/PySide2",
+            "{pyside_package_dir}/PySide2",
             vars=vars)
         built_modules = self.get_built_pyside_modules(vars)
 
@@ -1324,13 +1347,13 @@ class pyside_build(_build):
             # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
             copydir(
                 "{build_dir}/pyside2/PySide2",
-                "{dist_dir}/PySide2",
+                "{pyside_package_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
         # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
             "{build_dir}/shiboken2/doc/html",
-            "{dist_dir}/PySide2/docs/shiboken2",
+            "{pyside_package_dir}/PySide2/docs/shiboken2",
             force=False, vars=vars)
         # <install>/lib/site-packages/shiboken2.pyd -> <setup>/PySide2/shiboken2.pyd
         shiboken_module_name = 'shiboken2.pyd'
@@ -1342,79 +1365,79 @@ class pyside_build(_build):
         vars.update({'shiboken_module_name': shiboken_module_name})
         copyfile(
             "{site_packages_dir}/{shiboken_module_name}",
-            "{dist_dir}/PySide2/{shiboken_module_name}",
+            "{pyside_package_dir}/PySide2/{shiboken_module_name}",
             vars=vars)
         if self.debug or self.build_type == 'RelWithDebInfo':
             copydir(
                 "{build_dir}/shiboken2/shibokenmodule",
-                "{dist_dir}/PySide2",
+                "{pyside_package_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
         # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
             "{site_packages_dir}/pyside2uic",
-            "{dist_dir}/pyside2uic",
+            "{pyside_package_dir}/pyside2uic",
             force=False, vars=vars)
         if sys.version_info[0] > 2:
-            rmtree("{dist_dir}/pyside2uic/port_v2".format(**vars))
+            rmtree("{pyside_package_dir}/pyside2uic/port_v2".format(**vars))
         else:
-            rmtree("{dist_dir}/pyside2uic/port_v3".format(**vars))
+            rmtree("{pyside_package_dir}/pyside2uic/port_v3".format(**vars))
         # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
-            "{dist_dir}/PySide2/scripts/__init__.py",
+            "{pyside_package_dir}/PySide2/scripts/__init__.py",
             vars=vars)
         copyfile(
             "{install_dir}/bin/pyside2-uic",
-            "{dist_dir}/PySide2/scripts/uic.py",
+            "{pyside_package_dir}/PySide2/scripts/uic.py",
             force=False, vars=vars)
         # <install>/bin/*.exe,*.dll,*.pdb -> PySide2/
         copydir(
             "{install_dir}/bin/",
-            "{dist_dir}/PySide2",
+            "{pyside_package_dir}/PySide2",
             filter=["*.exe", "*.dll"] + pdbs,
             recursive=False, vars=vars)
         # <install>/lib/*.lib -> PySide2/
         copydir(
             "{install_dir}/lib/",
-            "{dist_dir}/PySide2",
+            "{pyside_package_dir}/PySide2",
             filter=["*.lib"],
             recursive=False, vars=vars)
         # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
             "{install_dir}/share/PySide2/typesystems",
-            "{dist_dir}/PySide2/typesystems",
+            "{pyside_package_dir}/PySide2/typesystems",
             vars=vars)
         # <install>/include/* -> <setup>/PySide2/include
         copydir(
             "{install_dir}/include",
-            "{dist_dir}/PySide2/include",
+            "{pyside_package_dir}/PySide2/include",
             vars=vars)
         # <source>/pyside2/PySide2/support/* -> <setup>/PySide2/support/*
         copydir(
             "{build_dir}/pyside2/PySide2/support",
-            "{dist_dir}/PySide2/support",
+            "{pyside_package_dir}/PySide2/support",
             vars=vars)
         if not OPTION_NOEXAMPLES:
             # examples/* -> <setup>/PySide2/examples
             copydir(os.path.join(self.script_dir, "examples"),
-                    "{dist_dir}/PySide2/examples",
+                    "{pyside_package_dir}/PySide2/examples",
                     force=False, vars=vars)
             # Re-generate examples Qt resource files for Python 3 compatibility
             if sys.version_info[0] == 3:
-                examples_path = "{dist_dir}/PySide2/examples".format(**vars)
+                examples_path = "{pyside_package_dir}/PySide2/examples".format(**vars)
                 pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(**vars)
                 pyside_rcc_options = '-py3'
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
         # <ssl_libs>/* -> <setup>/PySide2/openssl
-        copydir("{ssl_libs_dir}", "{dist_dir}/PySide2/openssl",
+        copydir("{ssl_libs_dir}", "{pyside_package_dir}/PySide2/openssl",
             filter=[
                 "libeay32.dll",
                 "ssleay32.dll"],
             force=False, vars=vars)
 
         # <qt>/bin/*.dll -> <setup>/PySide2
-        copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
+        copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
             filter=[
                 "*.dll",
                 "designer.exe",
@@ -1426,58 +1449,58 @@ class pyside_build(_build):
             recursive=False, vars=vars)
         if self.debug:
             # <qt>/bin/*d4.dll -> <setup>/PySide2
-            copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
+            copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
                 filter=["*d4.dll"] + pdbs,
                 recursive=False, vars=vars)
 
         if self.debug  or self.build_type == 'RelWithDebInfo':
             # <qt>/lib/*.pdb -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
+            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
                 filter=["*.pdb"],
                 recursive=False, vars=vars)
 
         # I think these are the qt-mobility DLLs, at least some are,
         # so let's copy them too
         # <qt>/lib/*.dll -> <setup>/PySide2
-        copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
+        copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
             filter=["*.dll"],
             ignore=["*d?.dll"],
             recursive=False, vars=vars)
         if self.debug:
             # <qt>/lib/*d4.dll -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
+            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
                 filter=["*d?.dll"],
                 recursive=False, vars=vars)
         if self.debug  or self.build_type == 'RelWithDebInfo':
             # <qt>/lib/*pdb -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{dist_dir}/PySide2",
+            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
 
         # <qt>/plugins/* -> <setup>/PySide2/plugins
-        copydir("{qt_plugins_dir}", "{dist_dir}/PySide2/plugins",
+        copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/plugins",
             filter=["*.dll"] + pdbs,
             vars=vars)
         # <qt>/translations/* -> <setup>/PySide2/translations
-        copydir("{qt_translations_dir}", "{dist_dir}/PySide2/translations",
+        copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/translations",
             filter=["*.qm"],
             force=False,
             vars=vars)
 
         # <qt>/qml/* -> <setup>/PySide2/qml
-        copydir("{qt_qml_dir}", "{dist_dir}/PySide2/qml",
+        copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
             filter=None,
             force=False,
             recursive=True,
             vars=vars)
 
         if 'WebEngineWidgets' in built_modules:
-            copydir("{qt_prefix_dir}/resources", "{dist_dir}/PySide2/resources",
+            copydir("{qt_prefix_dir}/resources", "{pyside_package_dir}/PySide2/resources",
                 filter=None,
                 recursive=False,
                 vars=vars)
 
-            copydir("{qt_bin_dir}", "{dist_dir}/PySide2",
+            copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
                 filter=["QtWebEngineProcess*.exe"],
                 recursive=False, vars=vars)
 
@@ -1491,12 +1514,12 @@ class pyside_build(_build):
             # @TODO Change the shared library name on Windows.
             copydir(
                 "{build_dir}/shiboken2/libshiboken",
-                "{dist_dir}/PySide2",
+                "{pyside_package_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
             copydir(
                 "{build_dir}/pyside2/libpyside",
-                "{dist_dir}/PySide2",
+                "{pyside_package_dir}/PySide2",
                 filter=pdbs,
                 recursive=False, vars=vars)
 
@@ -1608,7 +1631,7 @@ setup(
     packages = ['PySide2', 'pyside2uic',
                 'pyside2uic.Compiler',
                 'pyside2uic.port_v%s' % (sys.version_info[0]) ],
-    package_dir = {'': 'pyside_package'},
+    package_dir = {'': pyside_package_dir_name},
     include_package_data = True,
     zip_safe = False,
     entry_points = {
