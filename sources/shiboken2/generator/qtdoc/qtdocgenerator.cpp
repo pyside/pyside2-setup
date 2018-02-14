@@ -112,7 +112,7 @@ static QString msgTagWarning(const QXmlStreamReader &reader, const QString &cont
 {
     QString result;
     QTextStream str(&result);
-    str << "Error handling <";
+    str << "While handling <";
     const QStringRef currentTag = reader.name();
     if (currentTag.isEmpty())
         str << tag;
@@ -121,6 +121,16 @@ static QString msgTagWarning(const QXmlStreamReader &reader, const QString &cont
     str << "> in " << context << ", line "<< reader.lineNumber()
         << ": " << message;
     return result;
+}
+
+static QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &context,
+                                  const QString &tag, const QString &location,
+                                  const QString &fallback)
+{
+    const QString message = QLatin1String("Falling back to \"")
+        + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"") + location
+        + QLatin1Char('"');
+    return msgTagWarning(reader, context, tag, message);
 }
 
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
@@ -475,6 +485,40 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
         m_output << endl;
 }
 
+static inline QString fallbackPathAttribute() { return QStringLiteral("path"); }
+
+static inline bool snippetComparison()
+{
+    return ReportHandler::debugLevel() >= ReportHandler::FullDebug;
+}
+
+template <class Indent> // const char*/class Indentor
+void formatSnippet(QTextStream &str, Indent indent, const QString &snippet)
+{
+    const QVector<QStringRef> lines = snippet.splitRef(QLatin1Char('\n'));
+    for (const QStringRef &line : lines) {
+        if (!line.trimmed().isEmpty())
+            str << indent << line;
+        str << endl;
+    }
+}
+
+static QString msgSnippetComparison(const QString &location, const QString &identifier,
+                                    const QString &pythonCode, const QString &fallbackCode)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Python snippet " << location;
+    if (!identifier.isEmpty())
+        str << " [" << identifier << ']';
+    str << ":\n";
+    formatSnippet(str, "  ", pythonCode);
+    str << "Corresponding fallback snippet:\n";
+    formatSnippet(str, "  ", fallbackCode);
+    str << "-- end --\n";
+    return result;
+}
+
 void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
@@ -488,24 +532,37 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         QString location = reader.attributes().value(QLatin1String("location")).toString();
         QString identifier = reader.attributes().value(QLatin1String("identifier")).toString();
         QString errorMessage;
-        QString code = readFromLocations(m_generator->codeSnippetDirs(), location, identifier, &errorMessage);
+        const QString pythonCode =
+            readFromLocations(m_generator->codeSnippetDirs(), location, identifier, &errorMessage);
         if (!errorMessage.isEmpty())
-            qCWarning(lcShiboken(), "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
+            qCWarning(lcShiboken, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
+        // Fall back to C++ snippet when "path" attribute is present.
+        // Also read fallback snippet when comparison is desired.
+        QString fallbackCode;
+        if ((pythonCode.isEmpty() || snippetComparison())
+            && reader.attributes().hasAttribute(fallbackPathAttribute())) {
+            const QString fallback = reader.attributes().value(fallbackPathAttribute()).toString();
+            if (QFileInfo::exists(fallback)) {
+                if (pythonCode.isEmpty())
+                    qCWarning(lcShiboken, "%s", qPrintable(msgFallbackWarning(reader, m_context, m_lastTagName, location, fallback)));
+                fallbackCode = readFromLocation(fallback, identifier, &errorMessage);
+                if (!errorMessage.isEmpty())
+                    qCWarning(lcShiboken, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
+            }
+        }
+
+        if (!pythonCode.isEmpty() && !fallbackCode.isEmpty() && snippetComparison())
+            qCDebug(lcShiboken, "%s", qPrintable(msgSnippetComparison(location, identifier, pythonCode, fallbackCode)));
+
         if (!consecutiveSnippet)
             m_output << INDENT << "::\n\n";
 
         Indentation indentation(INDENT);
-        if (code.isEmpty()) {
+        const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
+        if (code.isEmpty())
             m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>" << endl;
-        } else {
-            const QStringList lines = code.split(QLatin1Char('\n'));
-            for (const QString &line : lines) {
-                if (!QString(line).trimmed().isEmpty())
-                    m_output << INDENT << line;
-
-                m_output << endl;
-            }
-        }
+        else
+            formatSnippet(m_output, INDENT, code);
         m_output << endl;
     }
 }
