@@ -34,7 +34,7 @@ import unittest
 import ctypes
 import sys
 
-from PySide2.QtCore import QMimeDatabase
+from PySide2.QtCore import QMimeDatabase, QLocale
 
 class QMimeDatabaseTest(unittest.TestCase):
     def testMimeTypeForName(self):
@@ -43,7 +43,8 @@ class QMimeDatabaseTest(unittest.TestCase):
         s0 = db.mimeTypeForName("application/x-zerosize")
         self.assertTrue(s0.isValid())
         self.assertEqual(s0.name(), "application/x-zerosize")
-        self.assertEqual(s0.comment(), "empty document")
+        if "en" in QLocale().name():
+            self.assertEqual(s0.comment(), "empty document")
 
         s0Again = db.mimeTypeForName("application/x-zerosize")
         self.assertEqual(s0Again.name(), s0.name())
