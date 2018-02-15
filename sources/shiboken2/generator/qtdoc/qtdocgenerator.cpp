@@ -124,12 +124,14 @@ static QString msgTagWarning(const QXmlStreamReader &reader, const QString &cont
 }
 
 static QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &context,
-                                  const QString &tag, const QString &location,
+                                  const QString &tag, const QString &location, const QString &identifier,
                                   const QString &fallback)
 {
-    const QString message = QLatin1String("Falling back to \"")
+    QString message = QLatin1String("Falling back to \"")
         + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"") + location
         + QLatin1Char('"');
+    if (!identifier.isEmpty())
+        message += QLatin1String(" [") + identifier + QLatin1Char(']');
     return msgTagWarning(reader, context, tag, message);
 }
 
@@ -345,10 +347,10 @@ QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QSt
     if (resolvedPath.isEmpty()) {
         QTextStream(errorMessage) << "Could not resolve \"" << path << "\" in \""
            << locations.join(QLatin1String("\", \""));
-        return QString();
+        return QString(); // null
     }
     qCDebug(lcShiboken).noquote().nospace() << "snippet file " << path
-        << " resolved to " << resolvedPath;
+        << " [" << identifier << ']' << " resolved to " << resolvedPath;
     return readFromLocation(resolvedPath, identifier, errorMessage);
 }
 
@@ -361,10 +363,10 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         QTextStream(errorMessage) << "Could not read code snippet file: "
             << QDir::toNativeSeparators(inputFile.fileName())
             << ": " << inputFile.errorString();
-        return QString();
+        return QString(); // null
     }
 
-    QString code;
+    QString code = QLatin1String(""); // non-null
     if (identifier.isEmpty()) {
         while (!inputFile.atEnd())
             code += QString::fromUtf8(inputFile.readLine());
@@ -395,6 +397,7 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         QTextStream(errorMessage) << "Code snippet file found ("
             << QDir::toNativeSeparators(location) << "), but snippet ["
             << identifier << "] not found.";
+        return QString(); // null
     }
 
     return code;
@@ -539,12 +542,12 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         // Fall back to C++ snippet when "path" attribute is present.
         // Also read fallback snippet when comparison is desired.
         QString fallbackCode;
-        if ((pythonCode.isEmpty() || snippetComparison())
+        if ((pythonCode.isNull() || snippetComparison())
             && reader.attributes().hasAttribute(fallbackPathAttribute())) {
             const QString fallback = reader.attributes().value(fallbackPathAttribute()).toString();
             if (QFileInfo::exists(fallback)) {
-                if (pythonCode.isEmpty())
-                    qCWarning(lcShiboken, "%s", qPrintable(msgFallbackWarning(reader, m_context, m_lastTagName, location, fallback)));
+                if (pythonCode.isNull())
+                    qCWarning(lcShiboken, "%s", qPrintable(msgFallbackWarning(reader, m_context, m_lastTagName, location, identifier, fallback)));
                 fallbackCode = readFromLocation(fallback, identifier, &errorMessage);
                 if (!errorMessage.isEmpty())
                     qCWarning(lcShiboken, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
@@ -558,7 +561,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
             m_output << INDENT << "::\n\n";
 
         Indentation indentation(INDENT);
-        const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
+        const QString code = pythonCode.isNull() ? fallbackCode : pythonCode;
         if (code.isEmpty())
             m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>" << endl;
         else
