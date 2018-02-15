@@ -116,7 +116,7 @@ QDomElement element4 = document.createElement("MyElement")
 
 
 //! [7]
-<link href="http://qtsoftware.com" color="red" />
+<link href="http://qt-project.org" color="red" />
 //! [7]
 
 
@@ -124,10 +124,10 @@ QDomElement element4 = document.createElement("MyElement")
 e = # some QDomElement...
 #...
 a = e.attributeNode("href")
-print a.value()                         # prints "http://qtsoftware.com"
-a.setValue("http://doc.trolltech.com")  # change the node's attribute
+print a.value()                         # prints "http://qt-project.org.com"
+a.setValue("http://qt-project.org/doc")  # change the node's attribute
 a2 = e.attributeNode("href")
-print a2.value()                        # prints "http://doc.trolltech.com"
+print a2.value()                        # prints "http://qt-project.org/doc"
 //! [8]
 
 

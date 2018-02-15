@@ -78,6 +78,6 @@ class Thumbnailer (QObject):
 
 app = QApplication(sys.argv)
 
-thumbnail = Thumbnailer(QUrl("http://qt.nokia.com"))
+thumbnail = Thumbnailer(QUrl("http://qt-project.org"))
 thumbnail.finished.connect(app.quit)
 sys.exit(app.exec_())

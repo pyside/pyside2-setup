@@ -50,19 +50,9 @@
 
 //! [0]
 def main():
-    if Qt.Q_WS_X11
-        useGUI = getenv("DISPLAY") != 0
-    else:
-        useGUI = True
-
-    app = QApplication(sys.argv, useGUI)
-
-    if useGUI:
-       # start GUI version
-       ...
-    else:
-       # start non-GUI version
-       ...
+    useGUI = not '-no-gui' in sys.argv
+    app = QApplication(sys.argv) if useGUI else QCoreApplication(sys.argv)
+    ...
     return app.exec_()
 //! [0]
 

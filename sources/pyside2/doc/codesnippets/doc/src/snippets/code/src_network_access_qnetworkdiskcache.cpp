@@ -57,11 +57,11 @@ manager.setCache(diskCache)
 
 //! [1]
 # do a normal request (preferred from network, as this is the default)
-request = QNetworkRequest(QUrl("http://qt.nokia.com"))
+request = QNetworkRequest(QUrl("http://qt-project.org"))
 manager.get(request)
 
 # do a request preferred from cache
-request2 = QNetworkRequest(QUrl("http://qt.nokia.com"))
+request2 = QNetworkRequest(QUrl("http://qt-project.org"))
 request2.setAttribute(QNetworkRequest.CacheLoadControlAttribute, QNetworkRequest.PreferCache)
 manager.get(request2)
 //! [1]

@@ -51,10 +51,10 @@
 #ifndef CUSTOMSTYLE_H
 #define CUSTOMSTYLE_H
 
-#include <QWindowsStyle>
+#include <QProxyStyle>
 
 //! [0]
-class CustomStyle(QWindowsStyle):
+class CustomStyle(QProxyStyle):
     ...
 
     def drawPrimitive(PrimitiveElement element, const QStyleOption *option,

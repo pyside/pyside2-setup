@@ -49,7 +49,7 @@
 ****************************************************************************/
 
 //! [0]
-python myapplication.py -style motif
+python myapplication.py -style windows
 //! [0]
 
 

@@ -136,7 +136,7 @@ while pos >= 0:
 
 
 //! [10]
-txt = "Nokia Corporation and/or its subsidiary(-ies)\tqtsoftware.com\tNorway"
+txt = "The Qt Company Ltd\tqt.io\tFinland"
 rx.setPattern("^([^\t]+)\t([^\t]+)\t([^\t]+)$");
 if rx.indexIn(txt) != -1:
     company = rx.cap(1)
