@@ -241,30 +241,28 @@ QString QtXmlToSphinx::popOutputBuffer()
 
 QString QtXmlToSphinx::expandFunction(const QString& function)
 {
-    QStringList functionSpec = function.split(QLatin1Char('.'));
-    QString className = functionSpec.first();
-    const AbstractMetaClass* metaClass = 0;
-    const AbstractMetaClassList &classes = m_generator->classes();
-    for (const AbstractMetaClass *cls : classes) {
-        if (cls->name() == className) {
-            metaClass = cls;
-            break;
+    const int firstDot = function.indexOf(QLatin1Char('.'));
+    const AbstractMetaClass *metaClass = nullptr;
+    if (firstDot != -1) {
+        const QStringRef className = function.leftRef(firstDot);
+        const AbstractMetaClassList &classes = m_generator->classes();
+        for (const AbstractMetaClass *cls : classes) {
+            if (cls->name() == className) {
+                metaClass = cls;
+                break;
+            }
         }
     }
 
-    if (metaClass) {
-        functionSpec.removeFirst();
-        return metaClass->typeEntry()->qualifiedTargetLangName()
-               + QLatin1Char('.') + functionSpec.join(QLatin1Char('.'));
-    } else {
-        return function;
-    }
+    return metaClass
+        ? metaClass->typeEntry()->qualifiedTargetLangName()
+          + function.right(function.size() - firstDot)
+        : function;
 }
 
 QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName)
 {
-    // avoid constLast to stay Qt 5.5 compatible
-    QString currentClass = m_context.split(QLatin1Char('.')).last();
+    const QStringRef currentClass = m_context.splitRef(QLatin1Char('.')).constLast();
 
     const AbstractMetaClass* metaClass = 0;
     const AbstractMetaClassList &classes = m_generator->classes();
@@ -684,8 +682,8 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
             if (listType == QLatin1String("bullet")) {
                 m_output << endl;
                 for (const TableCell &cell : m_currentTable.constFirst()) {
-                    QStringList itemLines = cell.data.split(QLatin1Char('\n'));
-                    m_output << INDENT << "* " << itemLines.first() << endl;
+                    const QVector<QStringRef> itemLines = cell.data.splitRef(QLatin1Char('\n'));
+                    m_output << INDENT << "* " << itemLines.constFirst() << endl;
                     for (int i = 1, max = itemLines.count(); i < max; ++i)
                         m_output << INDENT << "  " << itemLines[i] << endl;
                 }
@@ -744,9 +742,9 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
 
         if (l_type == QLatin1String("function") && !m_context.isEmpty()) {
             l_linktag = QLatin1String(" :meth:`");
-            QStringList rawlinklist = l_linkref.split(QLatin1Char('.'));
-            if (rawlinklist.size() == 1 || rawlinklist.first() == m_context) {
-                QString context = resolveContextForMethod(rawlinklist.last());
+            const QVector<QStringRef> rawlinklist = l_linkref.splitRef(QLatin1Char('.'));
+            if (rawlinklist.size() == 1 || rawlinklist.constFirst() == m_context) {
+                QString context = resolveContextForMethod(rawlinklist.constLast().toString());
                 if (!l_linkref.startsWith(context))
                     l_linkref.prepend(context + QLatin1Char('.'));
             } else {
@@ -760,9 +758,9 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
             if (type) {
                 l_linkref = type->qualifiedTargetLangName();
             } else { // fall back to the old heuristic if the type wasn't found.
-                QStringList rawlinklist = l_linkref.split(QLatin1Char('.'));
+                const QVector<QStringRef> rawlinklist = l_linkref.splitRef(QLatin1Char('.'));
                 QStringList splittedContext = m_context.split(QLatin1Char('.'));
-                if (rawlinklist.size() == 1 || rawlinklist.first() == splittedContext.last()) {
+                if (rawlinklist.size() == 1 || rawlinklist.constFirst() == splittedContext.constLast()) {
                     splittedContext.removeLast();
                     l_linkref.prepend(QLatin1Char('~') + splittedContext.join(QLatin1Char('.'))
                                       + QLatin1Char('.'));
@@ -779,8 +777,7 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     } else if (token == QXmlStreamReader::Characters) {
         QString linktext = reader.text().toString();
         linktext.replace(QLatin1String("::"), QLatin1String("."));
-        // avoid constLast to stay Qt 5.5 compatible
-        QString item = l_linkref.split(QLatin1Char('.')).last();
+        const QStringRef item = l_linkref.splitRef(QLatin1Char('.')).constLast();
         if (l_linkref == linktext
             || (l_linkref + QLatin1String("()")) == linktext
             || item == linktext
@@ -874,8 +871,8 @@ void QtXmlToSphinx::handleRawTag(QXmlStreamReader& reader)
         QString format = reader.attributes().value(QLatin1String("format")).toString();
         m_output << INDENT << ".. raw:: " << format.toLower() << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
-        const QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
-        for (const QString &row : lst)
+        const QVector<QStringRef> lst(reader.text().split(QLatin1Char('\n')));
+        for (const QStringRef &row : lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << endl << endl;
@@ -889,8 +886,8 @@ void QtXmlToSphinx::handleCodeTag(QXmlStreamReader& reader)
         m_output << INDENT << "::" << endl << endl;
         INDENT.indent++;
     } else if (token == QXmlStreamReader::Characters) {
-        const QStringList lst(reader.text().toString().split(QLatin1Char('\n')));
-        for (const QString &row : lst)
+        const QVector<QStringRef> lst(reader.text().split(QLatin1Char('\n')));
+        for (const QStringRef &row : lst)
             m_output << INDENT << INDENT << row << endl;
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << endl << endl;
@@ -952,25 +949,17 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::Characters) {
         QString location = reader.text().toString();
-        QString identifier;
         location.prepend(m_generator->libSourceDir() + QLatin1Char('/'));
         QString errorMessage;
-        QString code = readFromLocation(location, identifier, &errorMessage);
+        QString code = readFromLocation(location, QString(), &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShiboken(), "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
         m_output << INDENT << "::\n\n";
         Indentation indentation(INDENT);
-        if (code.isEmpty()) {
+        if (code.isEmpty())
             m_output << INDENT << "<Code snippet \"" << location << "\" not found>" << endl;
-        } else {
-            const QStringList lines = code.split(QLatin1Char('\n'));
-            for (const QString &line : lines) {
-                if (!QString(line).trimmed().isEmpty())
-                    m_output << INDENT << line;
-
-                m_output << endl;
-            }
-        }
+        else
+            formatCode(m_output, code, INDENT);
         m_output << endl;
     }
 }
@@ -1044,8 +1033,8 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     for (int i = 0, maxI = table.count(); i < maxI; ++i) {
         const QtXmlToSphinx::TableRow& row = table[i];
         for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) {
-            const QStringList rowLines = row[j].data.split(QLatin1Char('\n')); // cache this would be a good idea
-            for (const QString &str : rowLines)
+            const QVector<QStringRef> rowLines = row[j].data.splitRef(QLatin1Char('\n')); // cache this would be a good idea
+            for (const QStringRef &str : rowLines)
                 colWidths[j] = std::max(colWidths[j], str.count());
             rowHeights[i] = std::max(rowHeights[i], row[j].data.count(QLatin1Char('\n')) + 1);
         }
@@ -1084,7 +1073,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
         for (int rowLine = 0; rowLine < rowHeights[i]; ++rowLine) { // for each line in a row
             for (int j = 0, maxJ = std::min(row.count(), colWidths.size()); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
-                QStringList rowLines = cell.data.split(QLatin1Char('\n')); // FIXME: Cache this!!!
+                const QVector<QStringRef> rowLines = cell.data.splitRef(QLatin1Char('\n')); // FIXME: Cache this!!!
                 if (!j) // First column, so we need print the identation
                     s << INDENT;
 
@@ -1092,9 +1081,10 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
                     s << '|';
                 else
                     s << ' ';
-                s << qSetFieldWidth(colWidths[j]) << left;
-                s << (rowLine < rowLines.count() ? rowLines[rowLine] : QString());
-                s << qSetFieldWidth(0);
+                if (rowLine < rowLines.count())
+                    s << qSetFieldWidth(colWidths[j]) << left << rowLines.at(rowLine) << qSetFieldWidth(0);
+                else
+                    s << Pad(' ', colWidths.at(j));
             }
             s << '|' << endl;
         }
