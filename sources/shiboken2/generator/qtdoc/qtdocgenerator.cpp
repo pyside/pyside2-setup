@@ -85,13 +85,26 @@ static bool functionSort(const AbstractMetaFunction* func1, const AbstractMetaFu
     return func1->name() < func2->name();
 }
 
-static QString createRepeatedChar(int i, char c)
+class Pad
 {
-    QString out;
-    for (int j = 0; j < i; ++j)
-        out += QLatin1Char(c);
+public:
+    explicit Pad(char c, int count) : m_char(c), m_count(count) {}
 
-    return out;
+    void write(QTextStream &str) const
+    {
+        for (int i = 0; i < m_count; ++i)
+            str << m_char;
+    }
+
+private:
+    const char m_char;
+    const int m_count;
+};
+
+inline QTextStream &operator<<(QTextStream &str, const Pad &pad)
+{
+    pad.write(str);
+    return str;
 }
 
 static QString escape(QString str)
@@ -416,7 +429,7 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
         else
             type = types[typeIdx];
     } else if (token == QXmlStreamReader::EndElement) {
-        m_output << createRepeatedChar(heading.length(), type) << endl << endl;
+        m_output << Pad(type, heading.length()) << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
         heading = escape(reader.text()).trimmed();
         m_output << endl << endl << heading << endl;
@@ -1044,7 +1057,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
     // create a horizontal line to be used later.
     QString horizontalLine = QLatin1String("+");
     for (int i = 0, max = colWidths.count(); i < max; ++i) {
-        horizontalLine += createRepeatedChar(colWidths[i], '-');
+        horizontalLine += QString(colWidths.at(i), QLatin1Char('-'));
         horizontalLine += QLatin1Char('+');
     }
 
@@ -1062,7 +1075,7 @@ QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx::Table &table)
                 c = '=';
             else
                 c = '-';
-            s << createRepeatedChar(colWidths[col], c) << '+';
+            s << Pad(c, colWidths.at(col)) << '+';
         }
         s << endl;
 
@@ -1224,7 +1237,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     s << ".. _" << className << ":" << endl << endl;
 
     s << className << endl;
-    s << createRepeatedChar(className.count(), '*') << endl << endl;
+    s << Pad('*', className.count()) << endl << endl;
 
     s << ".. inheritance-diagram:: " << className << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
@@ -1758,7 +1771,7 @@ bool QtDocGenerator::finishGeneration()
 
         QString title = it.key();
         s << title << endl;
-        s << createRepeatedChar(title.length(), '*') << endl << endl;
+        s << Pad('*', title.length()) << endl << endl;
 
         /* Avoid showing "Detailed Description for *every* class in toc tree */
         Indentation indentation(INDENT);
