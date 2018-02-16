@@ -1376,15 +1376,16 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     static const QString sectionTitle = QLatin1String(".. class:: ");
     static const QString sectionTitleSpace = QString(sectionTitle.size(), QLatin1Char(' '));
 
-    const AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
+    AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
+    for (int i = lst.size() - 1; i >= 0; --i) {
+        if (lst.at(i)->isModifiedRemoved() || lst.at(i)->functionType() == AbstractMetaFunction::MoveConstructorFunction)
+            lst.removeAt(i);
+    }
 
     bool first = true;
     QHash<QString, AbstractMetaArgument*> arg_map;
 
-    for (AbstractMetaFunction *func : lst) {
-        if (func->isModifiedRemoved())
-            continue;
-
+    for (AbstractMetaFunction *func : qAsConst(lst)) {
         if (first) {
             first = false;
             s << sectionTitle;
@@ -1409,7 +1410,7 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
 
     s << endl;
 
-    for (AbstractMetaFunction *func : lst)
+    for (AbstractMetaFunction *func : qAsConst(lst))
         writeFormattedText(s, func->documentation(), cppClass);
 }
 
