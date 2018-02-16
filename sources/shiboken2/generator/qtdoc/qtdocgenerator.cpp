@@ -421,7 +421,7 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
     static char types[] = { '-', '^' };
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        uint typeIdx = reader.attributes().value(QLatin1String("level")).toString().toUInt();
+        uint typeIdx = reader.attributes().value(QLatin1String("level")).toUInt();
         if (typeIdx >= sizeof(types))
             type = types[sizeof(types)-1];
         else
@@ -487,7 +487,7 @@ void QtXmlToSphinx::handleArgumentTag(QXmlStreamReader& reader)
     if (token == QXmlStreamReader::StartElement || token == QXmlStreamReader::EndElement)
         m_output << "``";
     else if (token == QXmlStreamReader::Characters)
-        m_output << reader.text().toString().trimmed();
+        m_output << reader.text().trimmed();
 }
 
 void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
@@ -593,7 +593,7 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
         Indentation indentation(INDENT);
         pushOutputBuffer();
         m_output << INDENT;
-        int indent = reader.attributes().value(QLatin1String("indent")).toString().toInt();
+        int indent = reader.attributes().value(QLatin1String("indent")).toInt();
         for (int i = 0; i < indent; ++i)
             m_output << ' ';
     } else if (token == QXmlStreamReader::Characters) {
@@ -641,8 +641,8 @@ void QtXmlToSphinx::handleItemTag(QXmlStreamReader& reader)
             m_currentTable << TableRow();
         TableRow& row = m_currentTable.last();
         TableCell cell;
-        cell.colSpan = reader.attributes().value(QLatin1String("colspan")).toString().toShort();
-        cell.rowSpan = reader.attributes().value(QLatin1String("rowspan")).toString().toShort();
+        cell.colSpan = reader.attributes().value(QLatin1String("colspan")).toShort();
+        cell.rowSpan = reader.attributes().value(QLatin1String("rowspan")).toShort();
         row << cell;
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::EndElement) {
