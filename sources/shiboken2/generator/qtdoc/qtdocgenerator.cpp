@@ -107,17 +107,35 @@ inline QTextStream &operator<<(QTextStream &str, const Pad &pad)
     return str;
 }
 
-static QString escape(QString str)
+template <class String>
+static int writeEscapedRstText(QTextStream &str, const String &s)
 {
-    str.replace(QLatin1Char('*'), QLatin1String("\\*"));
-    str.replace(QLatin1Char('_'), QLatin1String("\\_"));
-    return str;
+    int escaped = 0;
+    for (const QChar &c : s) {
+        if (c == QLatin1Char('*') || c == QLatin1Char('_')) {
+            str << '\\';
+            ++escaped;
+        }
+        str << c;
+    }
+    return s.size() + escaped;
 }
 
-static QString escape(const QStringRef& strref)
+class escape
 {
-    QString str = strref.toString();
-    return escape(str);
+public:
+    explicit escape(const QStringRef &s) : m_string(s) {}
+
+    void write(QTextStream &str) const { writeEscapedRstText(str, m_string); }
+
+private:
+    const QStringRef m_string;
+};
+
+inline QTextStream &operator<<(QTextStream &str, const escape &e)
+{
+    e.write(str);
+    return str;
 }
 
 static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
@@ -416,7 +434,7 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
 
 void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
 {
-    static QString heading;
+    static int headingSize = 0;
     static char type;
     static char types[] = { '-', '^' };
     QXmlStreamReader::TokenType token = reader.tokenType();
@@ -427,10 +445,11 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
         else
             type = types[typeIdx];
     } else if (token == QXmlStreamReader::EndElement) {
-        m_output << Pad(type, heading.length()) << endl << endl;
+        m_output << Pad(type, headingSize) << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
-        heading = escape(reader.text()).trimmed();
-        m_output << endl << endl << heading << endl;
+        m_output << endl << endl;
+        headingSize = writeEscapedRstText(m_output, reader.text().trimmed());
+        m_output << endl;
     }
 }
 
@@ -448,14 +467,14 @@ void QtXmlToSphinx::handleParaTag(QXmlStreamReader& reader)
 
         m_output << INDENT << result << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
-        QString text = escape(reader.text());
-        if (!m_output.string()->isEmpty()) {
+        const QStringRef text = reader.text();
+        if (!text.isEmpty() && INDENT.indent == 0 && !m_output.string()->isEmpty()) {
             QChar start = text[0];
             QChar end = m_output.string()->at(m_output.string()->length() - 1);
             if ((end == QLatin1Char('*') || end == QLatin1Char('`')) && start != QLatin1Char(' ') && !start.isPunct())
                 m_output << '\\';
         }
-        m_output << INDENT << text;
+        m_output << INDENT << escape(text);
     }
 }
 
@@ -466,7 +485,7 @@ void QtXmlToSphinx::handleItalicTag(QXmlStreamReader& reader)
         m_insideItalic = !m_insideItalic;
         m_output << '*';
     } else if (token == QXmlStreamReader::Characters) {
-        m_output << escape(reader.text()).trimmed();
+        m_output << escape(reader.text().trimmed());
     }
 }
 
@@ -477,7 +496,7 @@ void QtXmlToSphinx::handleBoldTag(QXmlStreamReader& reader)
         m_insideBold = !m_insideBold;
         m_output << "**";
     } else if (token == QXmlStreamReader::Characters) {
-        m_output << escape(reader.text()).trimmed();
+        m_output << escape(reader.text().trimmed());
     }
 }
 
@@ -788,7 +807,9 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     } else if (token == QXmlStreamReader::EndElement) {
         if (!l_linktext.isEmpty())
             l_linktagending.prepend(QLatin1Char('>'));
-        m_output << l_linktag << l_linktext << escape(l_linkref) << l_linktagending;
+        m_output << l_linktag << l_linktext;
+        writeEscapedRstText(m_output, l_linkref);
+        m_output << l_linktagending;
     }
 }
 
