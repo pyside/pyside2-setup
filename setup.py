@@ -214,6 +214,7 @@ from setuptools.command.build_py import build_py as _build_py
 wheel_module_exists = False
 try:
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    from wheel.bdist_wheel import safer_name as _safer_name
     wheel_module_exists = True
 except ImportError:
     pass
@@ -496,8 +497,22 @@ def prepareBuild():
         global qtSrcDir
         qtSrcDir = qmakeOutput[0].rstrip()
 
+def get_qt_version(computed_qtinfo = None):
+    if not computed_qtinfo:
+        qtinfo = QtInfo(QMAKE_COMMAND)
+    else:
+        qtinfo = computed_qtinfo
+
+    qt_version = qtinfo.version
+
+    if not qt_version:
+        log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
+        sys.exit(1)
+
+    return qt_version
+
 class pyside_install(_install):
-    def _init(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         _install.__init__(self, *args, **kwargs)
 
     def initialize_options (self):
@@ -550,6 +565,20 @@ if wheel_module_exists:
     class pyside_build_wheel(_bdist_wheel):
         def __init__(self, *args, **kwargs):
             _bdist_wheel.__init__(self, *args, **kwargs)
+
+        @property
+        def wheel_dist_name(self):
+            # Slightly modified version of wheel's wheel_dist_name method, to add the Qt version
+            # as well.
+            # Example: PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
+            # The PySide2 version is "5.6. The built against Qt version is "5.6.4.
+            qt_version = get_qt_version()
+            wheel_version = "{}-{}".format(__version__, qt_version)
+            components = (_safer_name(self.distribution.get_name()),
+                          wheel_version)
+            if self.build_number:
+                components += (self.build_number,)
+            return '-'.join(components)
 
         def finalize_options(self):
             if sys.platform == 'darwin':
@@ -792,10 +821,7 @@ class pyside_build(_build):
 
         self.qtinfo = QtInfo(QMAKE_COMMAND)
         qt_dir = os.path.dirname(OPTION_QMAKE)
-        qt_version = self.qtinfo.version
-        if not qt_version:
-            log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
-            sys.exit(1)
+        qt_version = get_qt_version(self.qtinfo)
 
         # Update the PATH environment variable
         update_env_path([py_scripts_dir, qt_dir])
