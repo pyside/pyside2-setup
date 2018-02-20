@@ -105,11 +105,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     metaClass->setDocumentation(classDoc);
 
     //Functions Documentation
-    const AbstractMetaFunctionList &funcs = metaClass->functionsInTargetLang();
+    const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
     for (AbstractMetaFunction *func : funcs) {
-        if (!func || func->isPrivate())
-            continue;
-
         QString query = QLatin1String("/doxygen/compounddef/sectiondef");
         // properties
         if (func->isPropertyReader() || func->isPropertyWriter()

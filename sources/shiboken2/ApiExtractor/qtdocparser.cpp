@@ -91,11 +91,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
 
     //Functions Documentation
-    const AbstractMetaFunctionList &funcs = metaClass->functionsInTargetLang();
+    const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
     for (AbstractMetaFunction *func : funcs) {
-        if (!func || func->isPrivate())
-            continue;
-
         QString query = QLatin1String("/WebXML/document/") + type
                         + QLatin1String("[@name=\"") + className + QLatin1String("\"]");
         // properties

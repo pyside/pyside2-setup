@@ -69,6 +69,36 @@ QString DocParser::execXQuery(QXmlQuery& xquery, const QString& query) const
     return result;
 }
 
+bool DocParser::skipForQuery(const AbstractMetaFunction *func)
+{
+    // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
+    if (!func || func->isPrivate()
+        || func->isModifiedRemoved()
+        || func->declaringClass() != func->ownerClass()
+        || func->isCastOperator()) {
+        return true;
+    }
+    switch (func->functionType()) {
+    case AbstractMetaFunction::MoveConstructorFunction:
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
+        return true;
+    default:
+        break;
+    }
+    return false;
+}
+
+AbstractMetaFunctionList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
+{
+    AbstractMetaFunctionList result = metaClass->functionsInTargetLang();
+    for (int i = result.size() - 1; i >= 0; --i)  {
+        if (DocParser::skipForQuery(result.at(i)) || result.at(i)->isUserAdded())
+            result.removeAt(i);
+    }
+    return result;
+}
+
 namespace
 {
 

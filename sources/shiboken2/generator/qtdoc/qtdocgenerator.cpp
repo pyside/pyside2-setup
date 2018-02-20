@@ -47,37 +47,36 @@ static Indentor INDENT;
 
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
-    bool skipable =  func->isConstructor()
-                     || func->isModifiedRemoved()
-                     || func->declaringClass() != func->ownerClass()
-                     || func->isCastOperator()
-                     || func->name() == QLatin1String("operator=");
+    // Constructors go to separate section
+    if (DocParser::skipForQuery(func) || func->isConstructor())
+        return true;
 
-    // Search a const clone
-    if (!skipable && !func->isConstant()) {
-        const AbstractMetaArgumentList funcArgs = func->arguments();
-        const AbstractMetaFunctionList &ownerFunctions = func->ownerClass()->functions();
-        for (AbstractMetaFunction *f : ownerFunctions) {
-            if (f != func
-                && f->isConstant()
-                && f->name() == func->name()
-                && f->arguments().count() == funcArgs.count()) {
-                // Compare each argument
-                bool cloneFound = true;
+    // Search a const clone (QImage::bits() vs QImage::bits() const)
+    if (func->isConstant())
+        return false;
 
-                const AbstractMetaArgumentList fargs = f->arguments();
-                for (int i = 0, max = funcArgs.count(); i < max; ++i) {
-                    if (funcArgs.at(i)->type()->typeEntry() != fargs.at(i)->type()->typeEntry()) {
-                        cloneFound = false;
-                        break;
-                    }
+    const AbstractMetaArgumentList funcArgs = func->arguments();
+    const AbstractMetaFunctionList &ownerFunctions = func->ownerClass()->functions();
+    for (AbstractMetaFunction *f : ownerFunctions) {
+        if (f != func
+            && f->isConstant()
+            && f->name() == func->name()
+            && f->arguments().count() == funcArgs.count()) {
+            // Compare each argument
+            bool cloneFound = true;
+
+            const AbstractMetaArgumentList fargs = f->arguments();
+            for (int i = 0, max = funcArgs.count(); i < max; ++i) {
+                if (funcArgs.at(i)->type()->typeEntry() != fargs.at(i)->type()->typeEntry()) {
+                    cloneFound = false;
+                    break;
                 }
-                if (cloneFound)
-                    return true;
             }
+            if (cloneFound)
+                return true;
         }
     }
-    return skipable;
+    return false;
 }
 
 static bool functionSort(const AbstractMetaFunction* func1, const AbstractMetaFunction* func2)
