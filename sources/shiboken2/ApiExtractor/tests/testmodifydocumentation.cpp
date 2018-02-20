@@ -66,7 +66,7 @@ void TestModifyDocumentation::testModifyDocumentation()
                 <para>Paragraph number 1</para>\n\
     <para>Paragraph number 2</para>\n\
     <para>Some changed contents here</para>\n\
-</description>\n"));
+</description>"));
 }
 
 // We expand QTEST_MAIN macro but using QCoreApplication instead of QApplication

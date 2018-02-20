@@ -96,12 +96,11 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     xquery.setFocus(QUrl(doxyFilePath));
 
     // Get class documentation
-    QString classDoc = getDocumentation(xquery, QLatin1String("/doxygen/compounddef/detaileddescription"),
+    const QString classQuery = QLatin1String("/doxygen/compounddef/detaileddescription");
+    QString classDoc = getDocumentation(xquery, classQuery,
                                         metaClass->typeEntry()->docModifications());
-    if (classDoc.isEmpty()) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << "Can't find documentation for class \"" << metaClass->name() << "\".";
-    }
+    if (classDoc.isEmpty())
+        qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(doxyFilePath, "class", metaClass->name(), classQuery)));
     metaClass->setDocumentation(classDoc);
 
     //Functions Documentation
@@ -147,6 +146,10 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             query += QLatin1String("/../detaileddescription)[1]");
         }
         QString doc = getDocumentation(xquery, query, DocModificationList());
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, func, query)));
+        }
         func->setDocumentation(doc);
         isProperty = false;
     }
@@ -160,6 +163,10 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
         QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef/name[text()=\"")
                         + field->name() + QLatin1String("\"]/../detaileddescription");
         QString doc = getDocumentation(xquery, query, DocModificationList());
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, field, query)));
+        }
         field->setDocumentation(doc);
     }
 
@@ -169,6 +176,10 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
         QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef[@kind=\"enum\"]/name[text()=\"")
             + meta_enum->name() + QLatin1String("\"]/..");
         QString doc = getDocumentation(xquery, query, DocModificationList());
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, meta_enum, query)));
+        }
         meta_enum->setDocumentation(doc);
     }
 

@@ -74,7 +74,9 @@ public:
     Documentation() {}
 
     Documentation(const QString& value, Format fmt = Documentation::Native)
-            : m_data(value), m_format(fmt) {}
+            : m_data(value.trimmed()), m_format(fmt) {}
+
+    bool isEmpty() const { return m_data.isEmpty(); }
 
     QString value() const
     {
@@ -83,7 +85,8 @@ public:
 
     void setValue(const QString& value, Format fmt = Documentation::Native)
     {
-        m_data = value; m_format = fmt;
+        m_data = value.trimmed();
+        m_format = fmt;
     }
 
     Documentation::Format format() const

@@ -68,7 +68,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     QXmlQuery xquery;
-    xquery.setFocus(QUrl::fromLocalFile(sourceFile.absoluteFilePath()));
+    const QString sourceFileName = sourceFile.absoluteFilePath();
+    xquery.setFocus(QUrl::fromLocalFile(sourceFileName));
 
     QString className = metaClass->name();
 
@@ -87,6 +88,8 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     Documentation doc(getDocumentation(xquery, query, classModifs));
+    if (doc.isEmpty())
+         qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
     metaClass->setDocumentation(doc);
 
 
@@ -134,6 +137,10 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
                 funcModifs.append(funcModif);
         }
         doc.setValue(getDocumentation(xquery, query, funcModifs));
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, func, query)));
+        }
         func->setDocumentation(doc);
     }
 #if 0
@@ -156,6 +163,10 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
                         + className + QLatin1String("\"]/enum[@name=\"")
                         + meta_enum->name() + QLatin1String("\"]/description");
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, query)));
+        }
         meta_enum->setDocumentation(doc);
     }
 }
@@ -184,5 +195,8 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
 
     // Module documentation
     QString query = QLatin1String("/WebXML/document/page[@name=\"") + moduleName + QLatin1String("\"]/description");
-    return Documentation(getDocumentation(xquery, query, DocModificationList()));
+    const Documentation doc = getDocumentation(xquery, query, DocModificationList());
+    if (doc.isEmpty())
+        qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
+    return doc;
 }
