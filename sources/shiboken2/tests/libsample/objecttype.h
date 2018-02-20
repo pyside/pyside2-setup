@@ -129,7 +129,6 @@ public:
 
     void destroyCppParent() {
         delete m_parent;
-        m_parent = 0;
     }
 
     //Deprecated test
