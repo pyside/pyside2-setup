@@ -202,6 +202,7 @@ from distutils.sysconfig import get_python_lib
 from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 from distutils.command.build_ext import build_ext as _build_ext
+from distutils.util import get_platform
 
 from setuptools import setup, Extension
 from setuptools.command.install import install as _install
@@ -209,6 +210,13 @@ from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
 from setuptools.command.build_py import build_py as _build_py
+
+wheel_module_exists = False
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    wheel_module_exists = True
+except ImportError:
+    pass
 
 from qtinfo import QtInfo
 from utils import rmtree
@@ -522,6 +530,18 @@ class pyside_build_ext(_build_ext):
     def run(self):
         pass
 
+if wheel_module_exists:
+    class pyside_build_wheel(_bdist_wheel):
+        def __init__(self, *args, **kwargs):
+            _bdist_wheel.__init__(self, *args, **kwargs)
+
+        def finalize_options(self):
+            if sys.platform == 'darwin':
+                # Override the platform name to contain the correct minimum deployment target.
+                # This is used in the final wheel name.
+                self.plat_name = pyside_build.macos_plat_name()
+            _bdist_wheel.finalize_options(self)
+
 # pyside_build_py and pyside_install_lib are reimplemented to preserve symlinks when
 # distutils / setuptools copy files to various directories through the different build stages.
 class pyside_build_py(_build_py):
@@ -560,6 +580,22 @@ class pyside_build(_build):
 
     def __init__(self, *args, **kwargs):
         _build.__init__(self, *args, **kwargs)
+
+    def finalize_options(self):
+        os_name_backup = os.name
+        if sys.platform == 'darwin':
+            self.plat_name = pyside_build.macos_plat_name()
+            # This is a hack to circumvent the dubious check in distutils.commands.build ->
+            # finalize_options, which only allows setting the plat_name for windows NT.
+            # That is not the case for the wheel module though (which does allow setting plat_name),
+            # so we circumvent by faking the os name when finalizing the options, and then restoring
+            # the original os name.
+            os.name = "nt"
+
+        _build.finalize_options(self)
+
+        if sys.platform == 'darwin':
+            os.name = os_name_backup
 
     def initialize_options(self):
         _build.initialize_options(self)
@@ -871,6 +907,26 @@ class pyside_build(_build):
             log.info("Skipped preparing and building packages.")
         log.info('*** Build completed')
 
+    @staticmethod
+    def macos_min_deployment_target():
+        # If no explicit minimum deployment target is provided to setup.py, then use the current
+        # build OS version. Otherwise use the provided version.
+        current_os_version, _, _ = platform.mac_ver()
+        current_os_version = '.'.join(current_os_version.split('.')[:2])
+        deployment_target = current_os_version
+        if OPTION_OSX_DEPLOYMENT_TARGET:
+            deployment_target = OPTION_OSX_DEPLOYMENT_TARGET
+
+        return deployment_target
+
+    @staticmethod
+    def macos_plat_name():
+        deployment_target = pyside_build.macos_min_deployment_target()
+        # Example triple "macosx-10.12-x86_64".
+        plat = get_platform().split("-")
+        plat_name = "{}-{}-{}".format(plat[0], deployment_target, plat[2])
+        return plat_name
+
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
             return
@@ -977,19 +1033,13 @@ class pyside_build(_build):
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={0}".format(latest_sdk_path))
 
-            # If no explicit minimum deployment target is set, then use the current build OS
-            # version. Otherwise use the given version.
+            # Set macOS minimum deployment target (version).
             # This is required so that calling run_process -> distutils.spawn() does not
-            # set its own minimum deployment target environment variable,
+            # set its own minimum deployment target environment variable which is
             # based on the python interpreter sysconfig value. Doing so could break the
             # detected clang include paths for example.
-            current_os_version, _, _ = platform.mac_ver()
-            current_os_version = '.'.join(current_os_version.split('.')[:2])
-            deployment_target = current_os_version
-            if OPTION_OSX_DEPLOYMENT_TARGET:
-                cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}"
-                                  .format(OPTION_OSX_DEPLOYMENT_TARGET))
-                deployment_target = OPTION_OSX_DEPLOYMENT_TARGET
+            deployment_target = pyside_build.macos_min_deployment_target()
+            cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
         if not OPTION_SKIP_CMAKE:
@@ -1587,6 +1637,18 @@ except IOError:
     README = CHANGES = ''
 
 
+cmd_class_dict = {
+    'build': pyside_build,
+    'build_py': pyside_build_py,
+    'build_ext': pyside_build_ext,
+    'bdist_egg': pyside_bdist_egg,
+    'develop': pyside_develop,
+    'install': pyside_install,
+    'install_lib': pyside_install_lib
+}
+if wheel_module_exists:
+    cmd_class_dict['bdist_wheel'] = pyside_build_wheel
+
 setup(
     name = "PySide2",
     version = __version__,
@@ -1639,16 +1701,7 @@ setup(
             'pyside2-uic = PySide2.scripts.uic:main',
         ]
     },
-    cmdclass = {
-        'build': pyside_build,
-        'build_py': pyside_build_py,
-        'build_ext': pyside_build_ext,
-        'bdist_egg': pyside_bdist_egg,
-        'develop': pyside_develop,
-        'install': pyside_install,
-        'install_lib': pyside_install_lib
-    },
-
+    cmdclass = cmd_class_dict,
     # Add a bogus extension module (will never be built here since we are
     # overriding the build command to do it using cmake) so things like
     # bdist_egg will know that there are extension modules and will name the
