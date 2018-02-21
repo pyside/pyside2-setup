@@ -1268,8 +1268,9 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     AbstractMetaFunctionList functionList = metaClass->functions();
     qSort(functionList.begin(), functionList.end(), functionSort);
 
-    s << "Detailed Description\n"
-         "--------------------\n\n";
+    s << endl
+        << "Detailed Description\n"
+           "--------------------\n\n";
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, 0);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, 0))
@@ -1343,7 +1344,8 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
     if ((functionList.size() > 0) || (staticFunctionList.size() > 0)) {
         QtXmlToSphinx::Table functionTable;
 
-        s << "Synopsis" << endl
+        s << endl
+          << "Synopsis" << endl
           << "--------" << endl << endl;
 
         writeFunctionBlock(s, QLatin1String("Functions"), functionList);
