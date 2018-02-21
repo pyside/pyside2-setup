@@ -137,6 +137,21 @@ inline QTextStream &operator<<(QTextStream &str, const escape &e)
     return str;
 }
 
+// Return last character of a QString-buffered stream.
+static QChar lastChar(const QTextStream &str)
+{
+    const QString *string = str.string();
+    Q_ASSERT(string);
+    return string->isEmpty() ? QChar() : *(string->crbegin());
+}
+
+static QTextStream &ensureEndl(QTextStream &s)
+{
+    if (lastChar(s) != QLatin1Char('\n'))
+        s << endl;
+    return s;
+}
+
 static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                              const QString &tag, const QString &message)
 {
@@ -467,9 +482,9 @@ void QtXmlToSphinx::handleParaTag(QXmlStreamReader& reader)
         m_output << INDENT << result << endl << endl;
     } else if (token == QXmlStreamReader::Characters) {
         const QStringRef text = reader.text();
-        if (!text.isEmpty() && INDENT.indent == 0 && !m_output.string()->isEmpty()) {
+        const QChar end = lastChar(m_output);
+        if (!text.isEmpty() && INDENT.indent == 0 && !end.isNull()) {
             QChar start = text[0];
-            QChar end = m_output.string()->at(m_output.string()->length() - 1);
             if ((end == QLatin1Char('*') || end == QLatin1Char('`')) && start != QLatin1Char(' ') && !start.isPunct())
                 m_output << '\\';
         }
@@ -631,7 +646,7 @@ void QtXmlToSphinx::handleTableTag(QXmlStreamReader& reader)
         // write the table on m_output
         m_currentTable.enableHeader(m_tableHasHeader);
         m_currentTable.normalize();
-        m_output << m_currentTable;
+        m_output << ensureEndl << m_currentTable;
         m_currentTable.clear();
     }
 }
@@ -709,7 +724,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
             } else if (listType == QLatin1String("enum")) {
                 m_currentTable.enableHeader(m_tableHasHeader);
                 m_currentTable.normalize();
-                m_output << m_currentTable;
+                m_output << ensureEndl << m_currentTable;
             }
         }
         m_currentTable.clear();
