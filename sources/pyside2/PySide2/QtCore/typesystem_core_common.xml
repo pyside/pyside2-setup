@@ -888,6 +888,8 @@
   <rejection class="QFile" function-name="setEncodingFunction"/>
   <rejection class="QRegion" function-name="cleanUp"/>
   <rejection class="QSettings" function-name="registerFormat"/>
+  <rejection class="Qt" function-name="qt_getEnumMetaObject"/>
+  <rejection class="Qt" function-name="qt_getEnumName"/>
 
   <namespace-type name="Qt">
     <enum-type name="AlignmentFlag" flags="Alignment" />
