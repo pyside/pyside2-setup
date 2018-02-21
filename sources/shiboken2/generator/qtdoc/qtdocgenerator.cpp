@@ -1382,7 +1382,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
         s << ".. container:: function_list" << endl << endl;
         Indentation indentation(INDENT);
         for (const QString &func : qAsConst(functions))
-            s << '*' << INDENT << func << endl;
+            s << INDENT << '*' << ' ' << func << endl;
 
         s << endl << endl;
     }
