@@ -166,6 +166,7 @@ set(BINDING_API_MICRO_VERSION "0")
 set(BINDING_API_RELEASE_LEVEL "alpha") # alpha, beta, rc, or final
 set(BINDING_API_SERIAL 0) # leave as 0 when release level is final
 set(BINDING_API_VERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}" CACHE STRING "PySide version" FORCE)
+set(PYSIDE_SO_VERSION ${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION})
 if (BINDING_API_RELEASE_LEVEL STREQUAL "final")
     set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}"
         CACHE STRING "PySide version [full]" FORCE)
@@ -219,6 +220,11 @@ if(GIT_FOUND)
 
     endif()
 endif()
+
+# Used by setup.py to know which symlink to resolve and copy in to the final package, in order to
+# avoid resolving all symlinks and thus copying unnecessary duplicate files.
+set(config_py_shiboken_library_version "")
+set(config_py_pyside_library_version "")
 
 include(PySideModules)
 

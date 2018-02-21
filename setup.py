@@ -1129,29 +1129,27 @@ class pyside_build(_build):
             print('setup.py/prepare_packages: ', e)
             raise
 
-    def get_built_pyside_modules(self, vars):
-        # Get list of built modules, so that we copy only required Qt libraries.
+    def get_built_pyside_config(self, vars):
+        # Get config that contains list of built modules, and SOVERSIONs of the built libraries.
         pyside_package_dir = vars['pyside_package_dir']
-        built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
+        config_path = os.path.join(pyside_package_dir, "PySide2", "_config.py")
 
         try:
-            with open(built_modules_path) as f:
+            with open(config_path) as f:
                 scoped_locals = {}
-                code = compile(f.read(), built_modules_path, 'exec')
+                code = compile(f.read(), config_path, 'exec')
                 exec(code, scoped_locals, scoped_locals)
-                return scoped_locals['built_modules']
+                config = {}
+                config['built_modules'] = scoped_locals['built_modules']
+                config['shiboken_library_soversion'] = scoped_locals['shiboken_library_soversion']
+                config['pyside_library_soversion'] = scoped_locals['pyside_library_soversion']
+                return config
         except IOError as e:
-            print("get_built_pyside_modules: Couldn't find file: {}.".format(built_modules_path))
+            print("get_built_pyside_config: Couldn't find file: {}.".format(config_path))
             raise
 
     def prepare_packages_posix(self, vars):
         executables = []
-        if sys.platform.startswith('linux'):
-            so_ext = '.so'
-            so_star = so_ext + '*'
-        elif sys.platform == 'darwin':
-            so_ext = '.dylib'
-            so_star = so_ext
         # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
             "{build_dir}/shiboken2/doc/html",
@@ -1202,14 +1200,22 @@ class pyside_build(_build):
             ],
             recursive=False, vars=vars))
         # <install>/lib/lib* -> PySide2/
+        config = self.get_built_pyside_config(vars)
+        def adjusted_lib_name(name, version):
+            postfix = ''
+            if sys.platform.startswith('linux'):
+                postfix = '.so.' + version
+            elif sys.platform == 'darwin':
+                postfix = '.' + version + '.dylib'
+            return name + postfix
         copydir(
             "{install_dir}/lib/",
             "{pyside_package_dir}/PySide2",
             filter=[
-                "libpyside*" + so_star,
-                "libshiboken*" + so_star,
+                adjusted_lib_name("libpyside*", config['pyside_library_soversion']),
+                adjusted_lib_name("libshiboken*", config['shiboken_library_soversion']),
             ],
-            recursive=False, vars=vars)
+            recursive=False, vars=vars, force_copy_symlinks=True)
         # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
             "{install_dir}/share/PySide2/typesystems",
@@ -1241,7 +1247,7 @@ class pyside_build(_build):
                     pyside_rcc_options)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
-            vars['built_modules'] = self.get_built_pyside_modules(vars)
+            vars['built_modules'] = config['built_modules']
             if sys.platform == 'darwin':
                 self.prepare_standalone_package_osx(executables, vars)
             else:
@@ -1358,13 +1364,15 @@ class pyside_build(_build):
         else:
             ignored_modules = []
             if 'WebEngineWidgets' not in built_modules:
-                ignored_modules.extend(['*Qt5WebEngine*.dylib'])
-            accepted_modules = ['*Qt5*.dylib']
+                ignored_modules.extend(['libQt5WebEngine*.dylib'])
+            if 'WebKit' not in built_modules:
+                ignored_modules.extend(['libQt5WebKit*.dylib'])
+            accepted_modules = ['libQt5*.5.dylib']
 
             copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
                 filter=accepted_modules,
                 ignore=ignored_modules,
-                recursive=True, vars=vars)
+                recursive=True, vars=vars, force_copy_symlinks=True)
 
             if 'WebEngineWidgets' in built_modules:
                 copydir("{qt_lib_execs_dir}", "{pyside_package_dir}/PySide2/Qt/libexec",
@@ -1405,7 +1413,7 @@ class pyside_build(_build):
             "{site_packages_dir}/PySide2",
             "{pyside_package_dir}/PySide2",
             vars=vars)
-        built_modules = self.get_built_pyside_modules(vars)
+        built_modules = self.get_built_pyside_config(vars)['built_modules']
 
         if self.debug or self.build_type == 'RelWithDebInfo':
             # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2

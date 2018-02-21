@@ -99,7 +99,7 @@ target_link_libraries(pyside2
 
 set_target_properties(pyside2 PROPERTIES
                       VERSION ${BINDING_API_VERSION}
-                      SOVERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}"
+                      SOVERSION "${PYSIDE_SO_VERSION}"
                       OUTPUT_NAME "pyside2${pyside2_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
                       DEFINE_SYMBOL PYSIDE_EXPORTS)
 

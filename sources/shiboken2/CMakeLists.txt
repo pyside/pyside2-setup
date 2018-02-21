@@ -15,6 +15,7 @@ set(shiboken_MAJOR_VERSION "2")
 set(shiboken_MINOR_VERSION "0")
 set(shiboken_MICRO_VERSION "0")
 set(shiboken2_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
+set(shiboken2_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
 
 option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
