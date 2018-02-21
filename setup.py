@@ -500,6 +500,22 @@ class pyside_install(_install):
     def _init(self, *args, **kwargs):
         _install.__init__(self, *args, **kwargs)
 
+    def initialize_options (self):
+        _install.initialize_options(self)
+
+        if sys.platform == 'darwin':
+            # Because we change the plat_name to include a correct deployment target on macOS
+            # distutils thinks we are cross-compiling, and throws an exception when trying to
+            # execute setup.py install.
+            # The check looks like this
+            #if self.warn_dir and build_plat != get_platform():
+            #    raise DistutilsPlatformError("Can't install when "
+            #                                  "cross-compiling")
+            # Obviously get_platform will return the old deployment target.
+            # The fix is to disable the warn_dir flag, which was created for bdist_* derived classes
+            # to override, for similar cases.
+            self.warn_dir = False
+
     def run(self):
         _install.run(self)
         log.info('*** Install completed')
