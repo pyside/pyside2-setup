@@ -60,22 +60,46 @@ static QRegularExpression placeHolderRegex(int index)
     return QRegularExpression(QLatin1Char('%') + QString::number(index) + QStringLiteral("\\b"));
 }
 
-static QString resolveScopePrefix(const AbstractMetaClass* scope, const QString& value)
+// Return a prefix to fully qualify value, eg:
+// resolveScopePrefix("Class::NestedClass::Enum::Value1", "Enum::Value1")
+//     -> "Class::NestedClass::")
+static QString resolveScopePrefix(const QStringList &scopeList, const QString &value)
 {
-    if (!scope)
-        return QString();
-
     QString name;
-    QStringList parts = scope->qualifiedCppName().split(QLatin1String("::"), QString::SkipEmptyParts);
-    for(int i = (parts.size() - 1) ; i >= 0; i--) {
-        if (!value.startsWith(parts[i] + QLatin1String("::")))
-            name = parts[i] + QLatin1String("::") + name;
-        else
+    for (int i = scopeList.size() - 1 ; i >= 0; --i) {
+        const QString prefix = scopeList.at(i) + QLatin1String("::");
+        if (value.startsWith(prefix))
             name.clear();
+        else
+            name.prepend(prefix);
     }
-
     return name;
 }
+
+static inline QStringList splitClassScope(const AbstractMetaClass *scope)
+{
+    return scope->qualifiedCppName().split(QLatin1String("::"), QString::SkipEmptyParts);
+}
+
+static QString resolveScopePrefix(const AbstractMetaClass *scope, const QString &value)
+{
+    return scope
+        ? resolveScopePrefix(splitClassScope(scope), value)
+        : QString();
+}
+
+static QString resolveScopePrefix(const AbstractMetaEnum *metaEnum,
+                                  const QString &value)
+{
+    QStringList parts;
+    if (const AbstractMetaClass *scope = metaEnum->enclosingClass())
+        parts.append(splitClassScope(scope));
+    // Fully qualify the value which is required for C++ 11 enum classes.
+    if (!metaEnum->isAnonymous())
+        parts.append(metaEnum->name());
+    return resolveScopePrefix(parts, value);
+}
+
 ShibokenGenerator::ShibokenGenerator() : Generator()
 {
     if (m_pythonPrimitiveTypeName.isEmpty())
@@ -417,33 +441,91 @@ static QString cpythonEnumFlagsName(QString moduleName, QString qualifiedCppName
     return result;
 }
 
+// Return the scope for fully qualifying the enumeration including trailing "::".
 static QString searchForEnumScope(const AbstractMetaClass* metaClass, const QString& value)
 {
-    QString enumValueName = value.trimmed();
-
     if (!metaClass)
         return QString();
     const AbstractMetaEnumList &enums = metaClass->enums();
-    for (const AbstractMetaEnum* metaEnum : enums) {
-        const AbstractMetaEnumValueList &values = metaEnum->values();
-        for (const AbstractMetaEnumValue *enumValue : values) {
-            if (enumValueName == enumValue->name())
-                return metaClass->qualifiedCppName();
-        }
+    for (const AbstractMetaEnum *metaEnum : enums) {
+        if (metaEnum->findEnumValue(value))
+            return resolveScopePrefix(metaEnum, value);
     }
     // PYSIDE-331: We need to also search the base classes.
-    QString ret = searchForEnumScope(metaClass->enclosingClass(), enumValueName);
+    QString ret = searchForEnumScope(metaClass->enclosingClass(), value);
     if (ret.isEmpty())
-        ret = searchForEnumScope(metaClass->baseClass(), enumValueName);
+        ret = searchForEnumScope(metaClass->baseClass(), value);
     return ret;
+}
+
+// Handle QFlags<> for guessScopeForDefaultValue()
+QString ShibokenGenerator::guessScopeForDefaultFlagsValue(const AbstractMetaFunction *func,
+                                                          const AbstractMetaArgument *arg,
+                                                          const QString &value) const
+{
+    // Numeric values -> "Options(42)"
+    static const QRegularExpression numberRegEx(QStringLiteral("^\\d+$")); // Numbers to flags
+    Q_ASSERT(numberRegEx.isValid());
+    if (numberRegEx.match(value).hasMatch()) {
+        QString typeName = translateTypeForWrapperMethod(arg->type(), func->implementingClass());
+        if (arg->type()->isConstant())
+            typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
+        switch (arg->type()->referenceType()) {
+        case NoReference:
+            break;
+        case LValueReference:
+            typeName.chop(1);
+            break;
+        case RValueReference:
+            typeName.chop(2);
+            break;
+        }
+        return typeName + QLatin1Char('(') + value + QLatin1Char(')');
+    }
+
+    // "Options(Option1 | Option2)" -> "Options(Class::Enum::Option1 | Class::Enum::Option2)"
+    static const QRegularExpression enumCombinationRegEx(QStringLiteral("^([A-Za-z_][\\w:]*)\\(([^,\\(\\)]*)\\)$")); // FlagName(EnumItem|EnumItem|...)
+    Q_ASSERT(enumCombinationRegEx.isValid());
+    const QRegularExpressionMatch match = enumCombinationRegEx.match(value);
+    if (match.hasMatch()) {
+        const QString expression = match.captured(2).trimmed();
+        if (expression.isEmpty())
+            return value;
+        const QStringList enumItems = expression.split(QLatin1Char('|'));
+        const QString scope = searchForEnumScope(func->implementingClass(),
+                                                 enumItems.constFirst().trimmed());
+        if (scope.isEmpty())
+            return value;
+        QString result;
+        QTextStream str(&result);
+        str << match.captured(1) << '('; // Flag name
+        for (int i = 0, size = enumItems.size(); i < size; ++i) {
+            if (i)
+                str << '|';
+            str << scope << enumItems.at(i).trimmed();
+        }
+        str << ')';
+        return result;
+    }
+    // A single flag "Option1" -> "Class::Enum::Option1"
+    return searchForEnumScope(func->implementingClass(), value) + value;
 }
 
 /*
  * This function uses some heuristics to find out the scope for a given
- * argument default value. New situations may arise in the future and
+ * argument default value since they must be fully qualified when used outside the class:
+ * class A {
+ *     enum Enum { e1, e1 };
+ *     void foo(Enum e = e1);
+ * }
+ * should be qualified to:
+ * A::Enum cppArg0 = A::Enum::e1;
+ *
+ * New situations may arise in the future and
  * this method should be updated, do it with care.
  */
-QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg)
+QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction *func,
+                                                     const AbstractMetaArgument *arg) const
 {
     QString value = getDefaultValue(func, arg);
 
@@ -462,53 +544,11 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
         return value;
 
     QString prefix;
-    QString suffix;
-
     if (arg->type()->isEnum()) {
-        const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type());
-        if (metaEnum)
-            prefix = resolveScopePrefix(metaEnum->enclosingClass(), value);
+        if (const AbstractMetaEnum* metaEnum = findAbstractMetaEnum(arg->type()))
+            prefix = resolveScopePrefix(metaEnum, value);
     } else if (arg->type()->isFlags()) {
-        static const QRegularExpression numberRegEx(QStringLiteral("^\\d+$")); // Numbers to flags
-        Q_ASSERT(numberRegEx.isValid());
-        if (numberRegEx.match(value).hasMatch()) {
-            QString typeName = translateTypeForWrapperMethod(arg->type(), func->implementingClass());
-            if (arg->type()->isConstant())
-                typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-            switch (arg->type()->referenceType()) {
-            case NoReference:
-                break;
-            case LValueReference:
-                typeName.chop(1);
-                break;
-            case RValueReference:
-                typeName.chop(2);
-                break;
-            }
-            prefix = typeName + QLatin1Char('(');
-            suffix = QLatin1Char(')');
-        }
-
-        static const QRegularExpression enumCombinationRegEx(QStringLiteral("^([A-Za-z_][\\w:]*)\\(([^,\\(\\)]*)\\)$")); // FlagName(EnumItem|EnumItem|...)
-        Q_ASSERT(enumCombinationRegEx.isValid());
-        const QRegularExpressionMatch match = enumCombinationRegEx.match(value);
-        if (prefix.isEmpty() && match.hasMatch()) {
-            QString flagName = match.captured(1);
-            QStringList enumItems = match.captured(2).split(QLatin1Char('|'));
-            QString scope = searchForEnumScope(func->implementingClass(), enumItems.constFirst());
-            if (!scope.isEmpty())
-                scope.append(QLatin1String("::"));
-
-            QStringList fixedEnumItems;
-            for (const QString &enumItem : qAsConst(enumItems))
-                fixedEnumItems << QString(scope + enumItem);
-
-            if (!fixedEnumItems.isEmpty()) {
-                prefix = flagName + QLatin1Char('(');
-                value = fixedEnumItems.join(QLatin1Char('|'));
-                suffix = QLatin1Char(')');
-            }
-        }
+        value = guessScopeForDefaultFlagsValue(func, arg, value);
     } else if (arg->type()->typeEntry()->isValue()) {
         const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), arg->type()->typeEntry());
         if (enumValueRegEx.match(value).hasMatch() && value != QLatin1String("NULL"))
@@ -541,9 +581,6 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction*
 
     if (!prefix.isEmpty())
         value.prepend(prefix);
-    if (!suffix.isEmpty())
-        value.append(suffix);
-
     return value;
 }
 

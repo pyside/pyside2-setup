@@ -411,7 +411,11 @@ public:
     QString cpythonWrapperCPtr(const TypeEntry* type, QString argName);
 
     /// Guesses the scope to where belongs an argument's default value.
-    QString guessScopeForDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
+    QString guessScopeForDefaultValue(const AbstractMetaFunction *func,
+                                      const AbstractMetaArgument *arg) const;
+    QString guessScopeForDefaultFlagsValue(const AbstractMetaFunction *func,
+                                           const AbstractMetaArgument *arg,
+                                           const QString &value) const;
 
     QString cpythonEnumName(const EnumTypeEntry* enumEntry);
     QString cpythonEnumName(const AbstractMetaEnum* metaEnum);

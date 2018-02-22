@@ -4520,6 +4520,9 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             enumValueText = QLatin1String("(long) ");
             if (cppEnum->enclosingClass())
                 enumValueText += cppEnum->enclosingClass()->qualifiedCppName() + QLatin1String("::");
+            // Fully qualify the value which is required for C++ 11 enum classes.
+            if (!cppEnum->isAnonymous())
+                enumValueText += cppEnum->name() + QLatin1String("::");
             enumValueText += enumValue->name();
         } else {
             enumValueText += QString::number(enumValue->value());
