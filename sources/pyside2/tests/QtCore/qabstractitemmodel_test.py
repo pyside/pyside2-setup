@@ -43,6 +43,10 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
         m = MyModel()
         foo = Foo()
         idx = m.createIndex(0,0, foo)
+        check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
+                                  | QAbstractItemModel.CheckIndexOption.DoNotUseParent
+                                  | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
+        self.assertTrue(check)
 
     def testPassQPersistentModelIndexAsQModelIndex(self):
         # Related to bug #716

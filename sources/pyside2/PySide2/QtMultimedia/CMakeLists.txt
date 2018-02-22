@@ -82,6 +82,11 @@ ${QtMultimedia_GEN_DIR}/qvideowindowcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )
 
+if (Qt5Multimedia_VERSION VERSION_EQUAL 5.11.0 OR Qt5Multimedia_VERSION VERSION_GREATER 5.11.0)
+    list(APPEND QtMultimedia_SRC
+         ${QtMultimedia_GEN_DIR}/qcustomaudiorolecontrol_wrapper.cpp)
+endif()
+
 set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${QtMultimedia_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}

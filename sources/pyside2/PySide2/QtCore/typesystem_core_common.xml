@@ -1785,6 +1785,7 @@
   </value-type>
 
   <value-type name="QUuid">
+    <enum-type name="StringFormat" since="5.11"/>
     <enum-type name="Variant"/>
     <enum-type name="Version"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -2031,6 +2032,7 @@
   </object-type>
 
   <object-type name="QAbstractItemModel">
+    <enum-type name="CheckIndexOption" flags="CheckIndexOptions" class="yes" since="5.11"/>
     <enum-type name="LayoutChangeHint" />
     <!-- This function was replaced by a added function -->
     <modify-function signature="createIndex(int, int, void*) const" remove="all"/>

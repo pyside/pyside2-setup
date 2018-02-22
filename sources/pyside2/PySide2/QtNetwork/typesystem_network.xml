@@ -192,10 +192,13 @@
         <modify-function signature="lookupHost(QString,QObject*,const char*)" access="private"/>
     </value-type>
 
-    <value-type name="QNetworkAddressEntry" />
+    <value-type name="QNetworkAddressEntry">
+        <enum-type name="DnsEligibilityStatus" since="5.11"/>
+    </value-type>
 
     <value-type name="QNetworkInterface">
         <enum-type name="InterfaceFlag" flags="InterfaceFlags"/>
+        <enum-type name="InterfaceType" since="5.11"/>
     </value-type>
 
     <value-type name="QNetworkProxy">

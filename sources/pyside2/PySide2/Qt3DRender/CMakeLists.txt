@@ -117,6 +117,14 @@ if (Qt53DRender_VERSION VERSION_EQUAL 5.10.0 OR Qt53DRender_VERSION VERSION_GREA
 )
 endif()
 
+if (Qt53DRender_VERSION VERSION_EQUAL 5.11.0 OR Qt53DRender_VERSION VERSION_GREATER 5.11.0)
+    list(APPEND Qt3DRender_SRC
+         ${Qt3DRender_GEN_DIR}/qt3drender_qabstractraycaster_wrapper.cpp
+         ${Qt3DRender_GEN_DIR}/qt3drender_qraycaster_wrapper.cpp
+         ${Qt3DRender_GEN_DIR}/qt3drender_qraycasterhit_wrapper.cpp
+         ${Qt3DRender_GEN_DIR}/qt3drender_qscreenraycaster_wrapper.cpp)
+endif()
+
 set(Qt3DRender_include_dirs
                      ${Qt3DRender_SOURCE_DIR}
                      ${Qt3DRender_BINARY_DIR}
