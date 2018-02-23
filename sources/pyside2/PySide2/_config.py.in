@@ -1,0 +1,6 @@
+built_modules = list(name for name in
+    "@all_module_shortnames@"
+    .split(";"))
+
+shiboken_library_soversion = str(@SHIBOKEN_SO_VERSION@)
+pyside_library_soversion = str(@PYSIDE_SO_VERSION@)

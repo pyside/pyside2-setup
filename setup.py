@@ -204,6 +204,7 @@ from distutils.sysconfig import get_python_lib
 from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 from distutils.command.build_ext import build_ext as _build_ext
+from distutils.util import get_platform
 
 from setuptools import setup, Extension
 from setuptools.command.install import install as _install
@@ -211,6 +212,14 @@ from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
 from setuptools.command.build_py import build_py as _build_py
+
+wheel_module_exists = False
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    from wheel.bdist_wheel import safer_name as _safer_name
+    wheel_module_exists = True
+except ImportError:
+    pass
 
 from qtinfo import QtInfo
 from utils import rmtree, detectClang
@@ -289,7 +298,7 @@ OPTION_MODULE_SUBSET = option_value("module-subset")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_QT_SRC = option_value("qt-src-dir")
-OPTION_ICULIB = option_value("iculib-url")
+OPTION_ICULIB = option_value("iculib-url") # Deprecated
 OPTION_VERBOSE_BUILD = has_option("verbose-build")
 
 # This is used automatically by distutils.command.install object, to specify final installation
@@ -359,11 +368,7 @@ else:
 
 if OPTION_ICULIB:
     if not OPTION_STANDALONE:
-        print("--iculib-url is usable only when creating standalone wheel with --standalone switch")
-        sys.exit(1)
-    if sys.platform != "linux":
-        print("--iculib-url is usable only when creating standalone wheels in Linux")
-        sys.exit(1)
+        print("--iculib-url option is a no-op option and will be removed soon.")
 
 # Show available versions
 if OPTION_LISTVERSIONS:
@@ -491,9 +496,39 @@ def prepareBuild():
             else: # SDK: Use 'Src' directory
                 qtSrcDir = os.path.join(os.path.dirname(installPrefix), 'Src', 'qtbase')
 
+def get_qt_version(computed_qtinfo = None):
+    if not computed_qtinfo:
+        qtinfo = QtInfo(QMAKE_COMMAND)
+    else:
+        qtinfo = computed_qtinfo
+
+    qt_version = qtinfo.version
+
+    if not qt_version:
+        log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
+        sys.exit(1)
+
+    return qt_version
+
 class pyside_install(_install):
-    def _init(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         _install.__init__(self, *args, **kwargs)
+
+    def initialize_options (self):
+        _install.initialize_options(self)
+
+        if sys.platform == 'darwin':
+            # Because we change the plat_name to include a correct deployment target on macOS
+            # distutils thinks we are cross-compiling, and throws an exception when trying to
+            # execute setup.py install.
+            # The check looks like this
+            #if self.warn_dir and build_plat != get_platform():
+            #    raise DistutilsPlatformError("Can't install when "
+            #                                  "cross-compiling")
+            # Obviously get_platform will return the old deployment target.
+            # The fix is to disable the warn_dir flag, which was created for bdist_* derived classes
+            # to override, for similar cases.
+            self.warn_dir = False
 
     def run(self):
         _install.run(self)
@@ -524,6 +559,32 @@ class pyside_build_ext(_build_ext):
 
     def run(self):
         pass
+
+if wheel_module_exists:
+    class pyside_build_wheel(_bdist_wheel):
+        def __init__(self, *args, **kwargs):
+            _bdist_wheel.__init__(self, *args, **kwargs)
+
+        @property
+        def wheel_dist_name(self):
+            # Slightly modified version of wheel's wheel_dist_name method, to add the Qt version
+            # as well.
+            # Example: PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
+            # The PySide2 version is "5.6. The built against Qt version is "5.6.4.
+            qt_version = get_qt_version()
+            wheel_version = "{}-{}".format(__version__, qt_version)
+            components = (_safer_name(self.distribution.get_name()),
+                          wheel_version)
+            if self.build_number:
+                components += (self.build_number,)
+            return '-'.join(components)
+
+        def finalize_options(self):
+            if sys.platform == 'darwin':
+                # Override the platform name to contain the correct minimum deployment target.
+                # This is used in the final wheel name.
+                self.plat_name = pyside_build.macos_plat_name()
+            _bdist_wheel.finalize_options(self)
 
 # pyside_build_py and pyside_install_lib are reimplemented to preserve symlinks when
 # distutils / setuptools copy files to various directories through the different build stages.
@@ -563,6 +624,22 @@ class pyside_build(_build):
 
     def __init__(self, *args, **kwargs):
         _build.__init__(self, *args, **kwargs)
+
+    def finalize_options(self):
+        os_name_backup = os.name
+        if sys.platform == 'darwin':
+            self.plat_name = pyside_build.macos_plat_name()
+            # This is a hack to circumvent the dubious check in distutils.commands.build ->
+            # finalize_options, which only allows setting the plat_name for windows NT.
+            # That is not the case for the wheel module though (which does allow setting plat_name),
+            # so we circumvent by faking the os name when finalizing the options, and then restoring
+            # the original os name.
+            os.name = "nt"
+
+        _build.finalize_options(self)
+
+        if sys.platform == 'darwin':
+            os.name = os_name_backup
 
     def initialize_options(self):
         _build.initialize_options(self)
@@ -743,10 +820,7 @@ class pyside_build(_build):
 
         self.qtinfo = QtInfo(QMAKE_COMMAND)
         qt_dir = os.path.dirname(OPTION_QMAKE)
-        qt_version = self.qtinfo.version
-        if not qt_version:
-            log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
-            sys.exit(1)
+        qt_version = get_qt_version(self.qtinfo)
 
         # Update the PATH environment variable
         additionalPaths = [py_scripts_dir, qt_dir]
@@ -890,6 +964,26 @@ class pyside_build(_build):
             log.info("Skipped preparing and building packages.")
         log.info('*** Build completed')
 
+    @staticmethod
+    def macos_min_deployment_target():
+        # If no explicit minimum deployment target is provided to setup.py, then use the current
+        # build OS version. Otherwise use the provided version.
+        current_os_version, _, _ = platform.mac_ver()
+        current_os_version = '.'.join(current_os_version.split('.')[:2])
+        deployment_target = current_os_version
+        if OPTION_OSX_DEPLOYMENT_TARGET:
+            deployment_target = OPTION_OSX_DEPLOYMENT_TARGET
+
+        return deployment_target
+
+    @staticmethod
+    def macos_plat_name():
+        deployment_target = pyside_build.macos_min_deployment_target()
+        # Example triple "macosx-10.12-x86_64".
+        plat = get_platform().split("-")
+        plat_name = "{}-{}-{}".format(plat[0], deployment_target, plat[2])
+        return plat_name
+
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
             return
@@ -1007,19 +1101,13 @@ class pyside_build(_build):
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={0}".format(latest_sdk_path))
 
-            # If no explicit minimum deployment target is set, then use the current build OS
-            # version. Otherwise use the given version.
+            # Set macOS minimum deployment target (version).
             # This is required so that calling run_process -> distutils.spawn() does not
-            # set its own minimum deployment target environment variable,
+            # set its own minimum deployment target environment variable which is
             # based on the python interpreter sysconfig value. Doing so could break the
             # detected clang include paths for example.
-            current_os_version, _, _ = platform.mac_ver()
-            current_os_version = '.'.join(current_os_version.split('.')[:2])
-            deployment_target = current_os_version
-            if OPTION_OSX_DEPLOYMENT_TARGET:
-                cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}"
-                                  .format(OPTION_OSX_DEPLOYMENT_TARGET))
-                deployment_target = OPTION_OSX_DEPLOYMENT_TARGET
+            deployment_target = pyside_build.macos_min_deployment_target()
+            cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
         if not OPTION_SKIP_CMAKE:
@@ -1093,29 +1181,27 @@ class pyside_build(_build):
             print('setup.py/prepare_packages: ', e)
             raise
 
-    def get_built_pyside_modules(self, vars):
-        # Get list of built modules, so that we copy only required Qt libraries.
+    def get_built_pyside_config(self, vars):
+        # Get config that contains list of built modules, and SOVERSIONs of the built libraries.
         pyside_package_dir = vars['pyside_package_dir']
-        built_modules_path = os.path.join(pyside_package_dir, "PySide2", "_built_modules.py")
+        config_path = os.path.join(pyside_package_dir, "PySide2", "_config.py")
 
         try:
-            with open(built_modules_path) as f:
+            with open(config_path) as f:
                 scoped_locals = {}
-                code = compile(f.read(), built_modules_path, 'exec')
+                code = compile(f.read(), config_path, 'exec')
                 exec(code, scoped_locals, scoped_locals)
-                return scoped_locals['built_modules']
+                config = {}
+                config['built_modules'] = scoped_locals['built_modules']
+                config['shiboken_library_soversion'] = scoped_locals['shiboken_library_soversion']
+                config['pyside_library_soversion'] = scoped_locals['pyside_library_soversion']
+                return config
         except IOError as e:
-            print("get_built_pyside_modules: Couldn't find file: {}.".format(built_modules_path))
+            print("get_built_pyside_config: Couldn't find file: {}.".format(config_path))
             raise
 
     def prepare_packages_posix(self, vars):
         executables = []
-        if sys.platform.startswith('linux'):
-            so_ext = '.so'
-            so_star = so_ext + '*'
-        elif sys.platform == 'darwin':
-            so_ext = '.dylib'
-            so_star = so_ext
         # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
             "{build_dir}/shiboken2/doc/html",
@@ -1166,14 +1252,22 @@ class pyside_build(_build):
             ],
             recursive=False, vars=vars))
         # <install>/lib/lib* -> PySide2/
+        config = self.get_built_pyside_config(vars)
+        def adjusted_lib_name(name, version):
+            postfix = ''
+            if sys.platform.startswith('linux'):
+                postfix = '.so.' + version
+            elif sys.platform == 'darwin':
+                postfix = '.' + version + '.dylib'
+            return name + postfix
         copydir(
             "{install_dir}/lib/",
             "{pyside_package_dir}/PySide2",
             filter=[
-                "libpyside*" + so_star,
-                "libshiboken*" + so_star,
+                adjusted_lib_name("libpyside*", config['pyside_library_soversion']),
+                adjusted_lib_name("libshiboken*", config['shiboken_library_soversion']),
             ],
-            recursive=False, vars=vars)
+            recursive=False, vars=vars, force_copy_symlinks=True)
         # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
             "{install_dir}/share/PySide2/typesystems",
@@ -1203,7 +1297,7 @@ class pyside_build(_build):
                     pyside_rcc_options)
         # Copy Qt libs to package
         if OPTION_STANDALONE:
-            vars['built_modules'] = self.get_built_pyside_modules(vars)
+            vars['built_modules'] = config['built_modules']
             if sys.platform == 'darwin':
                 self.prepare_standalone_package_osx(executables, vars)
             else:
@@ -1323,13 +1417,15 @@ class pyside_build(_build):
         else:
             ignored_modules = []
             if 'WebEngineWidgets' not in built_modules:
-                ignored_modules.extend(['*Qt5WebEngine*.dylib'])
-            accepted_modules = ['*Qt5*.dylib']
+                ignored_modules.extend(['libQt5WebEngine*.dylib'])
+            if 'WebKit' not in built_modules:
+                ignored_modules.extend(['libQt5WebKit*.dylib'])
+            accepted_modules = ['libQt5*.5.dylib']
 
             copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
                 filter=accepted_modules,
                 ignore=ignored_modules,
-                recursive=True, vars=vars)
+                recursive=True, vars=vars, force_copy_symlinks=True)
 
             if 'WebEngineWidgets' in built_modules:
                 copydir("{qt_lib_execs_dir}", "{pyside_package_dir}/PySide2/Qt/libexec",
@@ -1370,7 +1466,7 @@ class pyside_build(_build):
             "{site_packages_dir}/PySide2",
             "{pyside_package_dir}/PySide2",
             vars=vars)
-        built_modules = self.get_built_pyside_modules(vars)
+        built_modules = self.get_built_pyside_config(vars)['built_modules']
 
         if self.debug or self.build_type == 'RelWithDebInfo':
             # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
@@ -1668,6 +1764,18 @@ except IOError:
     README = CHANGES = ''
 
 
+cmd_class_dict = {
+    'build': pyside_build,
+    'build_py': pyside_build_py,
+    'build_ext': pyside_build_ext,
+    'bdist_egg': pyside_bdist_egg,
+    'develop': pyside_develop,
+    'install': pyside_install,
+    'install_lib': pyside_install_lib
+}
+if wheel_module_exists:
+    cmd_class_dict['bdist_wheel'] = pyside_build_wheel
+
 setup(
     name = "PySide2",
     version = __version__,
@@ -1720,16 +1828,7 @@ setup(
             'pyside2-uic = PySide2.scripts.uic:main',
         ]
     },
-    cmdclass = {
-        'build': pyside_build,
-        'build_py': pyside_build_py,
-        'build_ext': pyside_build_ext,
-        'bdist_egg': pyside_bdist_egg,
-        'develop': pyside_develop,
-        'install': pyside_install,
-        'install_lib': pyside_install_lib
-    },
-
+    cmdclass = cmd_class_dict,
     # Add a bogus extension module (will never be built here since we are
     # overriding the build command to do it using cmake) so things like
     # bdist_egg will know that there are extension modules and will name the
