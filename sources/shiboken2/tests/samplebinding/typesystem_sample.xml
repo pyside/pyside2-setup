@@ -548,6 +548,7 @@
             <value-type name="SomeInnerClass">
                 <object-type name="OkThisIsRecursiveEnough">
                     <enum-type name="NiceEnum" />
+                    <enum-type name="NiceEnumClass" />
                 </object-type>
                 <enum-type name="ProtectedEnum"/>
             </value-type>
