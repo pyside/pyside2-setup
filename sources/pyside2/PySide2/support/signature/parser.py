@@ -82,10 +82,18 @@ def _parse_line(line):
         """
     ret = re.match(line_re, line, re.VERBOSE).groupdict()
     arglist = ret["arglist"]
+    # The following is a split re. The string is broken into pieces which are
+    # between the recognized strings. Because the re has groups, both the
+    # strings and the delimiters are returned, where the strings are not
+    # interesting at all: They are just the commata.
+    # Note that it is necessary to put the characters with special handling in
+    # the first group (comma, brace, angle bracket).
+    # Then they are not recognized there, and we can handle them differently
+    # in the following expressions.
     arglist = list(x.strip() for x in re.split(r"""
         (
             (?:                     # inner group is not capturing
-                [^,()]              # no commas or braces
+                [^,()<>]            # no commas or braces or angle brackets
                 |
                 \(
                     (?:
@@ -96,6 +104,10 @@ def _parse_line(line):
                         \)
                     )*
                 \)
+                |
+                <                   # or one angle bracket pair
+                    [^<>]*
+                >
             )+                      # longest possible span
         )   # this list is interspersed with "," and surrounded by ""
         """, arglist, flags=re.VERBOSE)
