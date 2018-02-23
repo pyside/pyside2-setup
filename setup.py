@@ -294,7 +294,7 @@ OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
 OPTION_SKIP_PACKAGING = has_option("skip-packaging")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
-OPTION_ICULIB = option_value("iculib-url")
+OPTION_ICULIB = option_value("iculib-url") # Deprecated
 OPTION_VERBOSE_BUILD = has_option("verbose-build")
 
 # This is used automatically by distutils.command.install object, to specify final installation
@@ -364,11 +364,7 @@ else:
 
 if OPTION_ICULIB:
     if not OPTION_STANDALONE:
-        print("--iculib-url is usable only when creating standalone wheel with --standalone switch")
-        sys.exit(1)
-    if sys.platform != "linux":
-        print("--iculib-url is usable only when creating standalone wheels in Linux")
-        sys.exit(1)
+        print("--iculib-url option is a no-op option and will be removed soon.")
 
 # Show available versions
 if OPTION_LISTVERSIONS:
