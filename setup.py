@@ -81,6 +81,7 @@ For development purposes the following options might be of use, when using "setu
     --skip-packaging will skip creation of the python package,
     --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
     --verbose-build will output the compiler invocation with command line arguments, etc.
+    --sanitize-address will build all targets with address sanitizer enabled.
 
 REQUIREMENTS:
 - Python: 2.6, 2.7, 3.3, 3.4, 3.5 and 3.6 are supported
@@ -296,6 +297,7 @@ OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_ICULIB = option_value("iculib-url") # Deprecated
 OPTION_VERBOSE_BUILD = has_option("verbose-build")
+OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
 
 # This is used automatically by distutils.command.install object, to specify final installation
 # location.
@@ -1032,6 +1034,13 @@ class pyside_build(_build):
 
         if OPTION_VERBOSE_BUILD:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
+
+        if OPTION_SANITIZE_ADDRESS:
+            # Some simple sanity checking. Only use at your own risk.
+            if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+                cmake_cmd.append("-DSANITIZE_ADDRESS=ON")
+            else:
+                raise DistutilsSetupError("Address sanitizer can only be used on Linux and macOS.")
 
         if extension.lower() == "pyside2":
             pyside_qt_conf_prefix = ''

@@ -398,6 +398,22 @@ else()
     message(STATUS "PySide will be generated using the protected hack!")
 endif()
 
+# Build with Address sanitizer enabled if requested. This may break things, so use at your own risk.
+if (SANITIZE_ADDRESS AND NOT MSVC)
+    # Currently this does not check that the clang / gcc version used supports Address sanitizer,
+    # so once again, use at your own risk.
+    add_compile_options("-fsanitize=address" "-g" "-fno-omit-frame-pointer")
+    # We need to add the sanitize address option to all linked executables / shared libraries
+    # so that proper sanitizer symbols are linked in.
+    #
+    # Note that when running tests, you may need to set an additional environment variable
+    # in set_tests_properties for shiboken2 / pyside tests, or exported in your shell. Address
+    # sanitizer will tell you what environment variable needs to be exported. For example:
+    # export DYLD_INSERT_LIBRARIES=/Applications/Xcode.app/Contents/Developer/Toolchains/
+    #   ./XcodeDefault.xctoolchain/usr/lib/clang/8.1.0/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_STANDARD_LIBRARIES} -fsanitize=address")
+endif()
+
 add_subdirectory(libpyside)
 find_package(Qt5Designer)
 if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
