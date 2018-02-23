@@ -1938,61 +1938,26 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
     if (typeEntry()->designatedInterface())
         return extractInterface()->findEnum(enumName);
 
-    return 0;
+    return nullptr;
 }
 
-
-
-
-/*!  Recursivly searches for the enum value named \a enumValueName in
-  this class and its superclasses and interfaces. Values belonging to
-  \a meta_enum are excluded from the search.
+/*!  Recursively searches for the enum value named \a enumValueName in
+  this class and its superclasses and interfaces.
 */
-AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValueName, AbstractMetaEnum *meta_enum)
+AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValueName)
 {
     for (AbstractMetaEnum *e : qAsConst(m_enums)) {
-        if (e != meta_enum)
-            continue;
-        const AbstractMetaEnumValueList &values = e->values();
-        for (AbstractMetaEnumValue *v : values) {
-            if (v->name() == enumValueName)
-                return v;
-        }
+        if (AbstractMetaEnumValue *v = e->findEnumValue(enumValueName))
+            return v;
     }
 
     if (typeEntry()->designatedInterface())
-        return extractInterface()->findEnumValue(enumValueName, meta_enum);
+        return extractInterface()->findEnumValue(enumValueName);
 
     if (baseClass())
-        return baseClass()->findEnumValue(enumValueName, meta_enum);
+        return baseClass()->findEnumValue(enumValueName);
 
-    return 0;
-}
-
-
-/*!
- * Searches through all of this class' enums for a value matching the
- * name \a enumValueName. The name is excluding the class/namespace
- * prefix. The function recursivly searches interfaces and baseclasses
- * of this class.
- */
-AbstractMetaEnum *AbstractMetaClass::findEnumForValue(const QString &enumValueName)
-{
-    for (AbstractMetaEnum *e : qAsConst(m_enums)) {
-        const AbstractMetaEnumValueList &values = e->values();
-        for (AbstractMetaEnumValue *v : values) {
-            if (v->name() == enumValueName)
-                return e;
-        }
-    }
-
-    if (typeEntry()->designatedInterface())
-        return extractInterface()->findEnumForValue(enumValueName);
-
-    if (baseClass())
-        return baseClass()->findEnumForValue(enumValueName);
-
-    return 0;
+    return nullptr;
 }
 
 
@@ -2332,29 +2297,23 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &class
 AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
                                                         const QString &name)
 {
-    QStringList lst = name.split(QLatin1String("::"));
+    const QVector<QStringRef> lst = name.splitRef(QLatin1String("::"));
 
     if (lst.size() > 1) {
-        QString prefixName = lst.at(0);
-        QString enumName = lst.at(1);
-
-        AbstractMetaClass* cl = findClass(classes, prefixName);
-        if (cl)
-            return cl->findEnumValue(enumName, 0);
+        const QStringRef prefixName = lst.at(0);
+        const QStringRef enumName = lst.at(1);
+        if (AbstractMetaClass *cl = findClass(classes, prefixName.toString()))
+            return cl->findEnumValue(enumName.toString());
     }
 
     for (AbstractMetaClass *metaClass : classes) {
-        const AbstractMetaEnumList &enums = metaClass->enums();
-        for (AbstractMetaEnum *metaEnum : enums) {
-            AbstractMetaEnumValue* enumValue = metaClass->findEnumValue(name, metaEnum);
-            if (enumValue)
-                return enumValue;
-        }
+        if (AbstractMetaEnumValue *enumValue = metaClass->findEnumValue(name))
+            return enumValue;
     }
 
     qCWarning(lcShiboken).noquote().nospace()
         << QStringLiteral("no matching enum '%1'").arg(name);
-    return 0;
+    return nullptr;
 }
 
 /*!
@@ -2459,6 +2418,29 @@ AbstractMetaEnum::AbstractMetaEnum() :
 AbstractMetaEnum::~AbstractMetaEnum()
 {
     qDeleteAll(m_enumValues);
+}
+
+template <class String>
+AbstractMetaEnumValue *findMatchingEnumValue(const AbstractMetaEnumValueList &list, const String &value)
+{
+    for (AbstractMetaEnumValue *enumValue : list) {
+        if (enumValue->name() == value)
+            return enumValue;
+    }
+    return nullptr;
+}
+
+// Find enum values for "enum Enum { e1 }" either for "e1" or "Enum::e1"
+AbstractMetaEnumValue *AbstractMetaEnum::findEnumValue(const QString &value) const
+{
+    if (isAnonymous())
+        return findMatchingEnumValue(m_enumValues, value);
+    const int sepPos = value.indexOf(QLatin1String("::"));
+    if (sepPos == -1)
+        return findMatchingEnumValue(m_enumValues, value);
+    return name() == value.leftRef(sepPos)
+        ? findMatchingEnumValue(m_enumValues, value.rightRef(value.size() - sepPos - 2))
+        : nullptr;
 }
 
 QString AbstractMetaEnum::name() const

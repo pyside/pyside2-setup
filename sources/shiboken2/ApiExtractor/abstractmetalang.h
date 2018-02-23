@@ -1155,6 +1155,8 @@ public:
         m_enumValues << enumValue;
     }
 
+    AbstractMetaEnumValue *findEnumValue(const QString &value) const;
+
     QString name() const;
 
     QString qualifier() const;
@@ -1383,8 +1385,7 @@ public:
     }
 
     AbstractMetaEnum *findEnum(const QString &enumName);
-    AbstractMetaEnum *findEnumForValue(const QString &enumName);
-    AbstractMetaEnumValue *findEnumValue(const QString &enumName, AbstractMetaEnum *meta_enum);
+    AbstractMetaEnumValue *findEnumValue(const QString &enumName);
 
     AbstractMetaClassList interfaces() const
     {

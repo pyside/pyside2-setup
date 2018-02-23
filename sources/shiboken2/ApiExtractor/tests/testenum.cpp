@@ -83,6 +83,10 @@ void TestEnum::testEnumCppSignature()
 
     AbstractMetaEnumList classEnums = classA->enums();
     QCOMPARE(classEnums.first()->name(), QLatin1String("ClassEnum"));
+    AbstractMetaEnumValue *e = AbstractMetaClass::findEnumValue(classes, QLatin1String("CA"));
+    QVERIFY(e);
+    e = AbstractMetaClass::findEnumValue(classes, QLatin1String("ClassEnum::CA"));
+    QVERIFY(e);
 }
 
 void TestEnum::testEnumWithApiVersion()

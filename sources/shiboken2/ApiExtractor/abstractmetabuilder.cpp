@@ -2740,12 +2740,9 @@ int AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValu
     }
 
     for (AbstractMetaEnum *metaEnum : qAsConst(m_globalEnums)) {
-        const AbstractMetaEnumValueList &values = metaEnum->values();
-        for (const AbstractMetaEnumValue *ev : values) {
-            if (ev->name() == stringValue) {
-                ok = true;
-                return ev->value();
-            }
+        if (const AbstractMetaEnumValue *ev = metaEnum->findEnumValue(stringValue)) {
+            ok = true;
+            return ev->value();
         }
     }
 

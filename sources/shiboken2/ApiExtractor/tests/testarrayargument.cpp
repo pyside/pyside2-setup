@@ -128,7 +128,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 
     AbstractMetaEnum* someEnum = classA->findEnum(QLatin1String("SomeEnum"));
     QVERIFY(someEnum);
-    AbstractMetaEnumValue* nvalues = classA->findEnumValue(QLatin1String("NValues"), someEnum);
+    AbstractMetaEnumValue *nvalues = classA->findEnumValue(QLatin1String("NValues"));
     QVERIFY(nvalues);
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
@@ -159,14 +159,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
 
     AbstractMetaEnum* someEnum = builder->globalEnums().first();
     QVERIFY(someEnum);
-    AbstractMetaEnumValue* nvalues = 0;
-    const AbstractMetaEnumValueList &values = someEnum->values();
-    for (AbstractMetaEnumValue *enumValue : values) {
-        if (enumValue->name() == QLatin1String("NValues")) {
-            nvalues = enumValue;
-            break;
-        }
-    }
+    const AbstractMetaEnumValue *nvalues = someEnum->findEnumValue(QLatin1String("NValues"));
     QVERIFY(nvalues);
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
