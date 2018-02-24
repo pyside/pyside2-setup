@@ -402,6 +402,9 @@ Use --list-versions option to get list of available versions""" % OPTION_VERSION
         sys.exit(1)
     __version__ = OPTION_VERSION
 
+def is_debug_python():
+    return getattr(sys, "gettotalrefcount", None) is not None
+
 # Return a prefix suitable for the _install/_build directory
 def prefix():
     virtualEnvName = os.environ.get('VIRTUAL_ENV', None)
@@ -409,6 +412,8 @@ def prefix():
     name += str(sys.version_info[0])
     if OPTION_DEBUG:
         name += 'd'
+    if is_debug_python():
+        name += 'p'
     return name
 
 # Initialize, pull and checkout submodules
