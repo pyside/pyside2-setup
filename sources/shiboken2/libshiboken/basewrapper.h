@@ -151,14 +151,6 @@ LIBSHIBOKEN_API bool        isUserType(PyTypeObject* pyObj);
 */
 LIBSHIBOKEN_API bool        canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType);
 
-
-LIBSHIBOKEN_API bool        hasExternalCppConversions(SbkObjectType*);                                   // DEPRECATED.
-LIBSHIBOKEN_API bool        isExternalConvertible(SbkObjectType*, PyObject*);                            // DEPRECATED.
-LIBSHIBOKEN_API void        setExternalCppConversionFunction(SbkObjectType*, ExtendedToCppFunc);         // DEPRECATED.
-LIBSHIBOKEN_API void        setExternalIsConvertibleFunction(SbkObjectType*, ExtendedIsConvertibleFunc); // DEPRECATED.
-LIBSHIBOKEN_API void*       callExternalCppConversion(SbkObjectType*, PyObject*);                        // DEPRECATED.
-
-
 /**
  *  Tells if the \p type represents an object of a class with multiple inheritance in C++.
  *  When this occurs, the C++ pointer held by the Python wrapper will need to be cast when
@@ -180,9 +172,6 @@ LIBSHIBOKEN_API void        setOriginalName(SbkObjectType* self, const char* nam
 LIBSHIBOKEN_API const char* getOriginalName(SbkObjectType* self);
 
 LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(SbkObjectType* self, TypeDiscoveryFuncV2 func);
-LIBSHIBOKEN_API SBK_DEPRECATED(void setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func));
-LIBSHIBOKEN_API SBK_DEPRECATED(TypeDiscoveryFunc getTypeDiscoveryFunction(SbkObjectType* self));
-
 LIBSHIBOKEN_API void        copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other);
 LIBSHIBOKEN_API void        setMultipleIheritanceFunction(SbkObjectType* self, MultipleInheritanceInitFunction func);
 LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleIheritanceFunction(SbkObjectType* self);
@@ -333,11 +322,6 @@ LIBSHIBOKEN_API void        releaseOwnership(PyObject* pyObj);
 LIBSHIBOKEN_API void        releaseOwnership(SbkObject* pyObj);
 
 /**
- *  Returns true if the pyObj holds information about their parents.
- */
-LIBSHIBOKEN_API bool        hasParentInfo(SbkObject* pyObj);
-
-/**
  *   Get the C++ pointer of type \p desiredType from a Python object.
  */
 LIBSHIBOKEN_API void*       cppPointer(SbkObject* pyObj, PyTypeObject* desiredType);
@@ -385,12 +369,6 @@ LIBSHIBOKEN_API void        setParent(PyObject* parent, PyObject* child);
 *   \param child the child.
 */
 LIBSHIBOKEN_API void        removeParent(SbkObject* child, bool giveOwnershipBack = true, bool keepReferenc = false);
-
-/**
-* \internal This is an internal function called by tp_dealloc, it's exported just for technical reasons.
-* \note Do not call this function inside your bindings.
-*/
-LIBSHIBOKEN_API void        destroyParentInfo(SbkObject* obj, bool removeFromParent = true);
 
 /**
  * Mark the object as invalid

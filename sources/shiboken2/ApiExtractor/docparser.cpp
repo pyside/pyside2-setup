@@ -29,6 +29,8 @@
 #include "abstractmetalang.h"
 #include "typesystem.h"
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QTextStream>
 #include <QtXmlPatterns/QXmlQuery>
 #include <QBuffer>
 
@@ -49,7 +51,7 @@ QString DocParser::getDocumentation(QXmlQuery& xquery, const QString& query,
                                     const DocModificationList& mods) const
 {
     QString doc = execXQuery(xquery, query);
-    return applyDocModifications(mods, doc);
+    return applyDocModifications(mods, doc.trimmed());
 }
 
 QString DocParser::execXQuery(QXmlQuery& xquery, const QString& query) const
@@ -67,6 +69,77 @@ QString DocParser::execXQuery(QXmlQuery& xquery, const QString& query) const
     QString result;
     xquery.evaluateTo(&result);
     return result;
+}
+
+bool DocParser::skipForQuery(const AbstractMetaFunction *func)
+{
+    // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
+    if (!func || func->isPrivate()
+        || func->isModifiedRemoved()
+        || func->declaringClass() != func->ownerClass()
+        || func->isCastOperator()) {
+        return true;
+    }
+    switch (func->functionType()) {
+    case AbstractMetaFunction::MoveConstructorFunction:
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
+        return true;
+    default:
+        break;
+    }
+    return false;
+}
+
+AbstractMetaFunctionList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
+{
+    AbstractMetaFunctionList result = metaClass->functionsInTargetLang();
+    for (int i = result.size() - 1; i >= 0; --i)  {
+        if (DocParser::skipForQuery(result.at(i)) || result.at(i)->isUserAdded())
+            result.removeAt(i);
+    }
+    return result;
+}
+
+QString DocParser::msgCannotFindDocumentation(const QString &fileName,
+                                          const char *what, const QString &name,
+                                          const QString &query)
+{
+    QString result;
+    QTextStream(&result) << "Cannot find documentation for " << what
+        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName)
+        << "\n  using query:\n    " << query;
+    return result;
+}
+
+QString DocParser::msgCannotFindDocumentation(const QString &fileName,
+                                              const AbstractMetaClass *metaClass,
+                                              const AbstractMetaFunction *function,
+                                              const QString &query)
+{
+    return msgCannotFindDocumentation(fileName, "function",
+                                      metaClass->name() + QLatin1String("::") + function->name() + QLatin1String("()"),
+                                      query);
+}
+
+QString DocParser::msgCannotFindDocumentation(const QString &fileName,
+                                              const AbstractMetaClass *metaClass,
+                                              const AbstractMetaEnum *e,
+                                              const QString &query)
+{
+    return msgCannotFindDocumentation(fileName, "enum",
+                                      metaClass->name() + QLatin1String("::") + e->name(),
+                                      query);
+}
+
+QString DocParser::msgCannotFindDocumentation(const QString &fileName,
+                                              const AbstractMetaClass *metaClass,
+                                              const AbstractMetaField *f,
+                                              const QString &query)
+{
+    return msgCannotFindDocumentation(fileName, "field",
+                                      metaClass->name() + QLatin1String("::") + f->name(),
+                                      query);
 }
 
 namespace
@@ -100,7 +173,7 @@ struct XslResources
 
 QString DocParser::applyDocModifications(const DocModificationList& mods, const QString& xml) const
 {
-    if (mods.isEmpty())
+    if (mods.isEmpty() || xml.isEmpty())
         return xml;
 
     bool hasXPathBasedModification = false;
@@ -169,6 +242,6 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
     }
 
     Q_ASSERT(result != xml);
-    return result;
+    return result.trimmed();
 }
 

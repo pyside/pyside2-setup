@@ -632,6 +632,7 @@ SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
     return ret;
 }
 
+#if EXTENSION_ENABLED
 static int
 PySide_FinishSignatures(PyObject *module, const char *signatures)
 {
@@ -675,6 +676,7 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
 #endif
     return 0;
 }
+#endif // EXTENSION_ENABLED
 
 void
 FinishSignatureInitialization(PyObject *module, const char *signatures)

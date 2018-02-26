@@ -74,11 +74,9 @@ win32:QMAKE_EXTRA_COMPILERS += hard_link_libraries
 
 INCLUDEPATH += $$WRAPPER_DIR
 
-# fixme: Hack to find wrappers
-PACKAGE_DIR = $$PWD/../../pyside_package/PySide2
-
-INCLUDEPATH += $$PACKAGE_DIR/include/PySide2/QtWidgets \
-    $$PACKAGE_DIR/include/PySide2/QtGui $$PACKAGE_DIR/include/PySide2/QtCore
+for(i, PYSIDE2_INCLUDE) {
+    INCLUDEPATH += $$i/QtWidgets $$i/QtGui $$i/QtCore
+}
 
 SOURCES += \
     main.cpp \

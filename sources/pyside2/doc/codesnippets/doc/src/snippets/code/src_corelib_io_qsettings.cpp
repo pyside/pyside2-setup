@@ -92,11 +92,8 @@ settings.value("HKEY_CURRENT_USER\\MySoft\\Star Runner\\Galaxy\\Default")   # re
 
 
 //! [7]
-#ifdef Q_WS_MAC
-    settings = QSettings("grenoullelogique.fr", "Squash")
-#else
-    settings = QSettings("Grenoulle Logique", "Squash")
-#endif
+    organizationName = "grenoullelogique.fr" if sys.platform.startswith('darwin') else "Grenoulle Logique"
+    settings = QSettings(organizationName, "Squash")
 //! [7]
 
 

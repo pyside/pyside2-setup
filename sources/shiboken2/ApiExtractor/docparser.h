@@ -29,6 +29,7 @@
 #define DOCPARSER_H
 
 #include "typesystem_typedefs.h"
+#include "abstractmetalang_typedefs.h"
 
 #include <QtCore/QString>
 
@@ -110,9 +111,30 @@ public:
     */
     virtual Documentation retrieveModuleDocumentation(const QString& name) = 0;
 
+    static bool skipForQuery(const AbstractMetaFunction *func);
+
 protected:
     QString getDocumentation(QXmlQuery& xquery, const QString& query,
                              const DocModificationList& mods) const;
+
+
+    static AbstractMetaFunctionList documentableFunctions(const AbstractMetaClass *metaClass);
+
+    static QString msgCannotFindDocumentation(const QString &fileName,
+                                              const char *what, const QString &name,
+                                              const QString &query);
+    static QString msgCannotFindDocumentation(const QString &fileName,
+                                              const AbstractMetaClass *metaClass,
+                                              const AbstractMetaFunction *function,
+                                              const QString &query);
+    static QString msgCannotFindDocumentation(const QString &fileName,
+                                              const AbstractMetaClass *metaClass,
+                                              const AbstractMetaEnum *e,
+                                              const QString &query);
+    static QString msgCannotFindDocumentation(const QString &fileName,
+                                              const AbstractMetaClass *metaClass,
+                                              const AbstractMetaField *f,
+                                              const QString &query);
 
 private:
     QString m_packageName;

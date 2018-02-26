@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of PySide2.
@@ -27,25 +27,37 @@
 #############################################################################
 
 import unittest
-import sys
-import os
 
+from PySide2.QtWidgets import QMainWindow, QTabWidget, QTextEdit, QSplitter
+from helper import UsesQApplication
 
-if sys.platform == 'win32':
-    from PySide2._utils import _get_win32_case_sensitive_name
+class TabWidgetClear(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
+        self.tabWidget = QTabWidget(self)
+        self.setCentralWidget(self.tabWidget)
+        self.editBox = QTextEdit(self)
+        self.tabWidget.addTab(self.getSplitter(), 'Test')
 
-    class Win32UtilsTest(unittest.TestCase):
-        def testWin32CaseSensitiveName(self):
-            from tempfile import mkdtemp
-            caseSensitiveName = 'CaseSensitiveName'
-            tmpdir = mkdtemp(caseSensitiveName)
-            try:
-                path = _get_win32_case_sensitive_name(tmpdir.lower())
-                self.assertTrue(path.endswith(caseSensitiveName))
-            finally:
-                if os.path.exists(tmpdir):
-                    os.rmdir(tmpdir)
+    def getSplitter(self):
+        splitter = QSplitter()
+        splitter.addWidget(self.editBox)
+        return splitter
 
+    def toggle(self):
+        self.tabWidget.clear()
+        self.getSplitter()
+
+class TestTabWidgetClear(UsesQApplication):
+
+    def testClear(self):
+        self.window = TabWidgetClear()
+        self.window.show()
+        try:
+            self.window.toggle()
+        except RuntimeError as e:
+            # This should never happened, PYSIDE-213
+            raise e
 
 if __name__ == '__main__':
     unittest.main()

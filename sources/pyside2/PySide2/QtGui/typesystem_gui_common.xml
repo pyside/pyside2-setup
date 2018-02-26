@@ -309,6 +309,8 @@
         }
       </inject-code>
     </add-function>
+    <!-- Disambiguate from Qt3DCore/qtransform.h -->
+    <include file-name="QtGui/qtransform.h" location="global"/>
   </value-type>
 
   <value-type name="QStaticText">
@@ -321,7 +323,7 @@
         <replace-type modified-type="PyBuffer"/>
       </modify-argument>
       <inject-code>
-        uchar* buffer = (uchar*) Shiboken::Buffer::getPointer(%PYARG_2);
+        uchar *buffer = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_2));
         QBitmap %0 = QBitmap::fromData(%1, buffer, %3);
         %PYARG_0 = %CONVERTTOPYTHON[QBitmap](%0);
       </inject-code>
@@ -438,11 +440,11 @@
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
             <conversion-rule class="target">
-                PyObject* %out = Shiboken::Buffer::newObject(%in, size);
+                PyObject *%out = Shiboken::Buffer::newObject(%in, size);
             </conversion-rule>
             <conversion-rule class="native">
                 Py_ssize_t bufferLen;
-                char* %out = (char*) Shiboken::Buffer::getPointer(%PYARG_1, &amp;bufferLen);
+                char *%out = reinterpret_cast&lt;char*&gt;(Shiboken::Buffer::getPointer(%PYARG_1, &amp;bufferLen));
             </conversion-rule>
         </modify-argument>
         <modify-argument index="2">
@@ -491,7 +493,7 @@
     </add-function>
     <modify-function signature="setUserData(QTextBlockUserData*)">
         <inject-code class="target" position="end">
-            const QTextDocument* doc = %CPPSELF.document();
+            const QTextDocument *doc = %CPPSELF.document();
             if (doc) {
                 Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument*](doc));
                 Shiboken::Object::setParent(pyDocument, %PYARG_1);
@@ -503,7 +505,7 @@
             <define-ownership class="target" owner="default"/>
         </modify-argument>
         <inject-code class="target" position="end">
-            const QTextDocument* doc = %CPPSELF.document();
+            const QTextDocument *doc = %CPPSELF.document();
             if (doc) {
                 Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument*](doc));
                 Shiboken::Object::setParent(pyDocument, %PYARG_0);
@@ -538,7 +540,7 @@
     </extra-includes>
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
-            PyObject* points = PyList_New(%CPPSELF.count());
+            PyObject *points = PyList_New(%CPPSELF.count());
             for (int i = 0, max = %CPPSELF.count(); i &lt; max; ++i){
                 int x, y;
                 %CPPSELF.point(i, &amp;x, &amp;y);
@@ -606,7 +608,7 @@
             }
         }
 
-        const char** xpm = (const char**) malloc (lineCount * sizeof(const char**));
+        const char **xpm = reinterpret_cast&lt;const char**&gt;(malloc(lineCount * sizeof(const char**)));
         for (int line = 0; line &lt; lineCount; ++line)
             xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
 
@@ -649,7 +651,7 @@
       <modify-argument index="1">
         <replace-type modified-type="PyBytes"/>
         <conversion-rule class="native">
-          const uchar* %out = reinterpret_cast&lt;const uchar*>(PyBytes_AS_STRING(%PYARG_1));
+          const uchar *%out = reinterpret_cast&lt;const uchar*>(PyBytes_AS_STRING(%PYARG_1));
         </conversion-rule>
       </modify-argument>
       <modify-argument index="2">
@@ -818,7 +820,7 @@
     </extra-includes>
 
     <template name="qimage_buffer_constructor">
-        uchar* ptr = (uchar*) Shiboken::Buffer::getPointer(%PYARG_1);
+        uchar *ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1));
         %0 = new %TYPE(ptr, %ARGS);
     </template>
     <modify-function signature="QImage(uchar *,int,int,int,QImage::Format,QImageCleanupFunction, void *)">
@@ -1001,7 +1003,7 @@
     <add-function signature="__setstate__(PyObject*)" return-type="PyObject">
         <inject-code>
             Shiboken::AutoDecRef func(PyObject_GetAttr(%PYSELF, PyTuple_GET_ITEM(%1, 0)));
-            PyObject* args = PyTuple_GET_ITEM(%1, 1);
+            PyObject *args = PyTuple_GET_ITEM(%1, 1);
             %PYARG_0 = PyObject_Call(func, args, NULL);
         </inject-code>
     </add-function>
@@ -1316,7 +1318,7 @@
           <replace-type modified-type="PyObject"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
-        int* array = NULL;
+        int *array = nullptr;
         bool errorOccurred = false;
 
         if (numArgs == 5) {
@@ -1344,7 +1346,7 @@
           <replace-type modified-type="PyObject"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
-        int* array = NULL;
+        int *array = nullptr;
         bool errorOccurred = false;
 
         if (numArgs == 4) {
@@ -1392,7 +1394,7 @@
         <replace-type modified-type="PyObject"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
-        int* array = NULL;
+        int *array = nullptr;
         bool errorOccurred = false;
 
         if (numArgs == 8) {
@@ -1420,7 +1422,7 @@
           <replace-type modified-type="PyObject"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
-        int* array = NULL;
+        int *array = nullptr;
         bool errorOccurred = false;
 
         if (numArgs == 5) {
@@ -1448,7 +1450,7 @@
           <replace-type modified-type="PyObject"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
-        int* array = NULL;
+        int *array = nullptr;
         bool errorOccurred = false;
 
         if (numArgs == 4) {
@@ -1613,9 +1615,9 @@
     <modify-function signature="setChild(int, int, QStandardItem *)">
       <inject-code class="target" position="beginning">
         // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->child(%1, %2);
+        QStandardItem *_i = %CPPSELF->child(%1, %2);
         if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
             Shiboken::Object::setParent(0, _pyI);
         }
       </inject-code>
@@ -1626,9 +1628,9 @@
     <modify-function signature="setChild(int, QStandardItem *)">
       <inject-code class="target" position="beginning">
         // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->child(%1);
+        QStandardItem *_i = %CPPSELF->child(%1);
         if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
             Shiboken::Object::setParent(0, _pyI);
         }
       </inject-code>
@@ -2003,9 +2005,9 @@
     <modify-function signature="setItem(int, int, QStandardItem*)">
       <inject-code class="target" position="beginning">
         // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->item(%1, %2);
+        QStandardItem *_i = %CPPSELF->item(%1, %2);
         if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
             Shiboken::Object::setParent(0, _pyI);
         }
       </inject-code>
@@ -2016,9 +2018,9 @@
     <modify-function signature="setItem(int, QStandardItem*)">
       <inject-code class="target" position="beginning">
         // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->item(%1);
+        QStandardItem *_i = %CPPSELF->item(%1);
         if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
             Shiboken::Object::setParent(0, _pyI);
         }
       </inject-code>
@@ -2035,9 +2037,9 @@
     <modify-function signature="setVerticalHeaderItem(int, QStandardItem*)">
       <inject-code class="target" position="beginning">
         // Clear parent from the old child
-        QStandardItem* _i = %CPPSELF->verticalHeaderItem(%1);
+        QStandardItem *_i = %CPPSELF->verticalHeaderItem(%1);
         if (_i) {
-            PyObject* _pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+            PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
             Shiboken::Object::setParent(0, _pyI);
         }
       </inject-code>
@@ -2084,13 +2086,13 @@
 
     <modify-function signature="clear()">
         <inject-code class="target" position="beginning">
-          Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
-          SbkObject* pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem());
+          Shiboken::BindingManager &amp;bm = Shiboken::BindingManager::instance();
+          SbkObject *pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem());
           if (pyRoot) {
             Shiboken::Object::destroy(pyRoot, %CPPSELF.invisibleRootItem());
           }
 
-          for(int r=0, r_max = %CPPSELF.rowCount(); r &lt; r_max; r++) {
+          for (int r=0, r_max = %CPPSELF.rowCount(); r &lt; r_max; r++) {
             QList&lt;QStandardItem *&gt; ri = %CPPSELF.takeRow(0);
 
             PyObject *pyResult = %CONVERTTOPYTHON[QList&lt;QStandardItem * &gt;](ri);
@@ -2981,7 +2983,7 @@
       <inject-code class="target" position="beginning">
         if (PySequence_Size(%PYARG_1) == 16) {
             float values[16];
-            for(int i=0; i &lt; 16; i++) {
+            for (int i=0; i &lt; 16; i++) {
                 PyObject *pv = PySequence_Fast_GET_ITEM(%PYARG_1, i);
                 values[i] = PyFloat_AsDouble(pv);
             }
@@ -3011,7 +3013,7 @@
         float values[16];
         %CPPSELF.%FUNCTION_NAME(values);
         %PYARG_0 = PyTuple_New(16);
-        for(int i=0; i &lt; 16; i++) {
+        for (int i = 0; i &lt; 16; i++) {
           PyObject *v = PyFloat_FromDouble(values[i]);
           PyTuple_SET_ITEM(%PYARG_0, i, v);
         }
@@ -3041,8 +3043,8 @@
          if (PySequence_Check(_key)) {
              Shiboken::AutoDecRef key(PySequence_Fast(_key, "Invalid matrix index."));
              if (PySequence_Fast_GET_SIZE(key.object()) == 2) {
-                 PyObject* posx = PySequence_Fast_GET_ITEM(key.object(), 0);
-                 PyObject* posy = PySequence_Fast_GET_ITEM(key.object(), 1);
+                 PyObject *posx = PySequence_Fast_GET_ITEM(key.object(), 0);
+                 PyObject *posy = PySequence_Fast_GET_ITEM(key.object(), 1);
                  Py_ssize_t x = PyInt_AsSsize_t(posx);
                  Py_ssize_t y = PyInt_AsSsize_t(posy);
                  float ret = (*%CPPSELF)(x,y);

@@ -52,13 +52,13 @@
 manager = QNetworkAccessManager(self)
 manager.finished[QNetworkReply].connect(self.replyFinished)
 
-manager.get(QNetworkRequest(QUrl("http://qt.nokia.com")))
+manager.get(QNetworkRequest(QUrl("http://qt-project.org")))
 //! [0]
 
 
 //! [1]
 request = QNetworkRequest()
-request.setUrl(QUrl("http://qt.nokia.com"))
+request.setUrl(QUrl("http://qt-project.org"))
 request.setRawHeader("User-Agent", "MyOwnBrowser 1.0")
 
 reply = manager.get(request)

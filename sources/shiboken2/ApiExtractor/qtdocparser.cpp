@@ -34,11 +34,51 @@
 #include <QtXmlPatterns/QXmlQuery>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QTextStream>
 #include <QUrl>
 
 Documentation QtDocParser::retrieveModuleDocumentation()
 {
     return retrieveModuleDocumentation(packageName());
+}
+
+static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgument *arg)
+{
+    const AbstractMetaType *metaType = arg->type();
+    if (metaType->isConstant())
+        str << "const " ;
+    switch (metaType->typeUsagePattern()) {
+    case AbstractMetaType::PrimitivePattern:
+        str << metaType->name();
+        break;
+    case AbstractMetaType::FlagsPattern: {
+        // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
+        // to "Qt::Alignment" as seen by qdoc.
+        const FlagsTypeEntry *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType->typeEntry());
+        QString name = flagsEntry->qualifiedCppName();
+        if (name.endsWith(QLatin1Char('>')) && name.startsWith(QLatin1String("QFlags<"))) {
+            const int lastColon = name.lastIndexOf(QLatin1Char(':'));
+            if (lastColon != -1) {
+                name.replace(lastColon + 1, name.size() - lastColon - 1, metaType->name());
+                name.remove(0, 7);
+            } else {
+                name = metaType->name(); // QFlags<> of enum in global namespace
+            }
+        }
+        str << name;
+    }
+        break;
+    default: // Fully qualify enums (Qt::AlignmentFlag), nested classes, etc.
+        str << metaType->typeEntry()->qualifiedCppName();
+        break;
+    }
+
+    if (metaType->referenceType() == LValueReference)
+        str << " &";
+    else if (metaType->referenceType() == RValueReference)
+        str << " &&";
+    else if (metaType->indirections())
+        str << ' ' << QByteArray(metaType->indirections(), '*');
 }
 
 void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
@@ -68,14 +108,16 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     QXmlQuery xquery;
-    xquery.setFocus(QUrl::fromLocalFile(sourceFile.absoluteFilePath()));
+    const QString sourceFileName = sourceFile.absoluteFilePath();
+    xquery.setFocus(QUrl::fromLocalFile(sourceFileName));
 
     QString className = metaClass->name();
 
     // Class/Namespace documentation
-    QString type = metaClass->isNamespace() ? QLatin1String("namespace") : QLatin1String("class");
-    QString query = QLatin1String("/WebXML/document/") + type + QLatin1String("[@name=\"")
-                    + className + QLatin1String("\"]/description");
+    const QString classQuery = QLatin1String("/WebXML/document/")
+         + (metaClass->isNamespace() ? QLatin1String("namespace") : QLatin1String("class"))
+         + QLatin1String("[@name=\"") + className + QLatin1String("\"]");
+    QString query = classQuery + QLatin1String("/description");
 
     DocModificationList signedModifs, classModifs;
     const DocModificationList &mods = metaClass->typeEntry()->docModifications();
@@ -87,56 +129,43 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     Documentation doc(getDocumentation(xquery, query, classModifs));
+    if (doc.isEmpty())
+         qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
     metaClass->setDocumentation(doc);
 
 
     //Functions Documentation
-    const AbstractMetaFunctionList &funcs = metaClass->functionsInTargetLang();
+    const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
     for (AbstractMetaFunction *func : funcs) {
-        if (!func || func->isPrivate())
-            continue;
-
-        QString query = QLatin1String("/WebXML/document/") + type
-                        + QLatin1String("[@name=\"") + className + QLatin1String("\"]");
+        query.clear();
+        QTextStream str(&query);
+        str << classQuery;
         // properties
         if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
-            query += QLatin1String("/property[@name=\"") + func->propertySpec()->name()
-                     + QLatin1String("\"]");
+            str << "/property[@name=\"" << func->propertySpec()->name() << "\"]";
         } else { // normal methods
-            QString isConst = func->isConstant() ? QLatin1String("true") : QLatin1String("false");
-            query += QLatin1String("/function[@name=\"") + func->originalName()
-                     + QLatin1String("\" and count(parameter)=")
-                     + QString::number(func->arguments().count())
-                     + QLatin1String(" and @const=\"") + isConst + QLatin1String("\"]");
+            str << "/function[@name=\"" <<  func->originalName() << "\" and count(parameter)="
+                << func->arguments().count() << " and @const=\""
+                << (func->isConstant() ? "true" : "false") << "\"]";
 
             const AbstractMetaArgumentList &arguments = func->arguments();
             for (int i = 0, size = arguments.size(); i < size; ++i) {
-                const AbstractMetaArgument *arg = arguments.at(i);
-                QString type = arg->type()->name();
-
-                if (arg->type()->isConstant())
-                    type.prepend(QLatin1String("const "));
-
-                if (arg->type()->referenceType() == LValueReference) {
-                    type += QLatin1String(" &");
-                } else if (arg->type()->referenceType() == RValueReference) {
-                    type += QLatin1String(" &&");
-                } else if (arg->type()->indirections()) {
-                    type += QLatin1Char(' ');
-                    for (int j = 0, max = arg->type()->indirections(); j < max; ++j)
-                        type += QLatin1Char('*');
-                }
-                query += QLatin1String("/parameter[") + QString::number(i + 1)
-                         + QLatin1String("][@left=\"") + type + QLatin1String("\"]/..");
+                str << "/parameter[" << (i + 1) << "][@type=\"";
+                formatFunctionArgTypeQuery(str, arguments.at(i));
+                str << "\"]/..";
             }
         }
-        query += QLatin1String("/description");
+        str << "/description";
         DocModificationList funcModifs;
         for (const DocModification &funcModif : qAsConst(signedModifs)) {
             if (funcModif.signature() == func->minimalSignature())
                 funcModifs.append(funcModif);
         }
         doc.setValue(getDocumentation(xquery, query, funcModifs));
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, func, query)));
+        }
         func->setDocumentation(doc);
     }
 #if 0
@@ -154,11 +183,14 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     // Enums
     const AbstractMetaEnumList &enums = metaClass->enums();
     for (AbstractMetaEnum *meta_enum : enums) {
-        QString query = QLatin1String("/WebXML/document/") + type
-                        + QLatin1String("[@name=\"")
-                        + className + QLatin1String("\"]/enum[@name=\"")
-                        + meta_enum->name() + QLatin1String("\"]/description");
+        query.clear();
+        QTextStream(&query) << classQuery << "/enum[@name=\""
+            << meta_enum->name() << "\"]/description";
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
+        if (doc.isEmpty()) {
+            qCWarning(lcShiboken(), "%s",
+                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, query)));
+        }
         meta_enum->setDocumentation(doc);
     }
 }
@@ -187,5 +219,8 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
 
     // Module documentation
     QString query = QLatin1String("/WebXML/document/page[@name=\"") + moduleName + QLatin1String("\"]/description");
-    return Documentation(getDocumentation(xquery, query, DocModificationList()));
+    const Documentation doc = getDocumentation(xquery, query, DocModificationList());
+    if (doc.isEmpty())
+        qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
+    return doc;
 }

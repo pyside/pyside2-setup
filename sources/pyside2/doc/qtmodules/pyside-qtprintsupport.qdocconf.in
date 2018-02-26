@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/src/printsupport/doc/qtprintsupport.qdocconf)
+include(../pyside-config.qdocconf)

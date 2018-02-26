@@ -3,14 +3,14 @@
 QML Tutorial 3 - States and Transitions
 ***************************************
 
-In this chapter, we make this example a little bit more dynamic by introducing states and transitions.
-
-We want our text to move to the bottom of the screen, rotate and become red when clicked.
+In this chapter, you are guided through the steps to make the example a little more dynamic by
+introducing states and transitions. For example, moving the text to the bottom of the screen,
+rotate, and change its color when clicked.
 
 .. figure:: declarative-tutorial3_animation.gif
     :align: center
 
-Here is the QML code:
+Here is the QML code for such a behavior:
 
 .. pysideinclude:: helloworld/tutorial3.qml
     :snippet: 0
@@ -21,27 +21,26 @@ Walkthrough
 .. pysideinclude:: helloworld/tutorial3.qml
     :snippet: 2
 
-First, we create a new *down* state for our text element.
-This state will be activated when the MouseArea is pressed, and deactivated when it is released.
+First, create a new *down* state for the text element.
+Pressing the MouseArea activates this new state and releasing it deactivates the state.
 
-The *down* state includes a set of property changes from our implicit *default state*
+The *down* state includes a set of property changes from the implicit *default state*
 (the items as they were initially defined in the QML).
-Specifically, we set the ``y`` property of the text to ``160``, the rotation to ``180`` and the ``color`` to red.
+Specifically, set the ``y`` property of the text to ``160``, rotation to ``180``, and ``color`` to red.
 
 .. pysideinclude:: helloworld/tutorial3.qml
     :snippet: 3
 
-Because we don't want the text to appear at the bottom instantly but rather move smoothly,
-we add a transition between our two states.
+To make the application even better, add a transiton between the two states so that switching between these
+two states look smooth and nice.
 
-``from`` and ``to`` define the states between which the transition will run.
-In this case, we want a transition from the default state to our *down* state.
+The ``from`` and ``to`` properties of the Transition element define the states between which the transition will run.
+In this case, you want a transition from the default state to the *down* state.
 
-Because we want the same transition to be run in reverse when changing back from the *down* state to the default state,
-we set ``reversible`` to ``true``.
-This is equivalent to writing the two transitions separately.
+To have a similar transition effect when changing back from the *down* state to the default state,
+set the ``reversible`` property to ``true``. This is equivalent to writing two transitions.
 
 The ParallelAnimation element makes sure that the two types of animations (number and color) start at the same time.
-We could also run them one after the other by using SequentialAnimation instead.
+You could also run them one after the other by using SequentialAnimation instead.
 
 [Previous :ref:`qmlcomponents`]

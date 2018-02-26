@@ -49,7 +49,7 @@
 ****************************************************************************/
 
 //! [0]
-clipboard = QApplication.clipboard()
+clipboard = QGuiApplication.clipboard()
 originalText = clipboard.text()
 ...
 clipboard.setText(newText)

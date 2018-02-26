@@ -21,25 +21,41 @@ file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/
 #    - Configure the module docconf file
 #    - Write shiboken header consisting of pyside2_global.h and module includes
 #    - Build include path for qdoc for shiboken
-set(QDOC_INCPATH -I "${QT_INCLUDE_DIR}")
+
+# The last element of the include list is the mkspec directory containing qplatformdefs.h
+list(GET Qt5Core_INCLUDE_DIRS -1 mkspecInclude)
+set(QDOC_INCPATH -I "${QT_INCLUDE_DIR}" -I "${mkspecInclude}")
+
 file(READ "${pyside2_BINARY_DIR}/pyside2_global.h" docHeaderContents)
 file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
 
-foreach(module ${all_module_shortnames})
-    string(TOLOWER "${module}" lowerModule)
-    set(docConf "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-qt${lowerModule}.qdocconf.in")
+foreach(moduleIn ${all_module_shortnames})
+    string(TOLOWER "${moduleIn}" lowerModuleIn)
+    set(docConf "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-qt${lowerModuleIn}.qdocconf.in")
     if(EXISTS "${docConf}")
         string(REGEX REPLACE "(^.*)\.in" "\\1" OUTFILE ${docConf})
         get_filename_component(BASENAME ${OUTFILE} NAME)
         configure_file(${docConf} "${CMAKE_CURRENT_LIST_DIR}/qtmodules/${BASENAME}" @ONLY)
         file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/${BASENAME}\n")
+        # Handle docconf files in Qt that contain multiple modules
+        if ("${moduleIn}" STREQUAL "3DExtras")
+            set(modules 3DCore 3DRender 3DInput 3DLogic 3DAnimation "${moduleIn}")
+        elseif ("${moduleIn}" STREQUAL "QuickWidgets")
+            set(modules Qml Quick "${moduleIn}")
+        else()
+            set(modules "${moduleIn}")
+        endif()
+        foreach(module ${modules})
+            string(TOLOWER "${module}" lowerModule)
+            # -- @TODO fix this for macOS frameworks.
+            list(APPEND QDOC_INCPATH
+                 -I "${QT_INCLUDE_DIR}Qt${module}"
+                 -I "${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}"
+                 -I "${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}/Qt${module}")
 
-        # -- @TODO fix this for macOS frameworks.
-        list(APPEND QDOC_INCPATH -I)
-        list(APPEND QDOC_INCPATH "${QT_INCLUDE_DIR}Qt${module}")
-
-        set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/Qt${module}>")
-        set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
+            set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/Qt${module}>")
+            set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
+        endforeach()
     endif()
 endforeach()
 

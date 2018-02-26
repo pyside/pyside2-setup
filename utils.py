@@ -49,6 +49,8 @@ import fnmatch
 import glob
 import itertools
 import popenasync
+import glob
+
 # There is no urllib.request in Python2
 try:
     import urllib.request as urllib
@@ -531,7 +533,7 @@ def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
 
 
 def back_tick(cmd, ret_err=False):
-    """ Run command `cmd`, return stdout, or stdout, stderr if `ret_err`
+    """ Run command `cmd`, return stdout, or stdout, stderr, return_code if `ret_err` is True.
 
     Roughly equivalent to ``check_output`` in Python 2.7
 
@@ -540,20 +542,20 @@ def back_tick(cmd, ret_err=False):
     cmd : str
         command to execute
     ret_err : bool, optional
-        If True, return stderr in addition to stdout.  If False, just return
+        If True, return stderr and return_code in addition to stdout.  If False, just return
         stdout
 
     Returns
     -------
     out : str or tuple
         If `ret_err` is False, return stripped string containing stdout from
-        `cmd`.  If `ret_err` is True, return tuple of (stdout, stderr) where
+        `cmd`.  If `ret_err` is True, return tuple of (stdout, stderr, return_code) where
         ``stdout`` is the stripped stdout, and ``stderr`` is the stripped
-        stderr.
+        stderr, and ``return_code`` is the process exit code.
 
     Raises
     ------
-    Raises RuntimeError if command returns non-zero exit code
+    Raises RuntimeError if command returns non-zero exit code when ret_err isn't set.
     """
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     out, err = proc.communicate()
@@ -562,16 +564,16 @@ def back_tick(cmd, ret_err=False):
         out = out.decode()
         err = err.decode()
     retcode = proc.returncode
-    if retcode is None:
+    if retcode is None and not ret_err:
         proc.terminate()
         raise RuntimeError(cmd + ' process did not terminate')
-    if retcode != 0:
+    if retcode != 0 and not ret_err:
         raise RuntimeError(cmd + ' process returned code %d\n*** %s' %
                            (retcode, err))
     out = out.strip()
     if not ret_err:
         return out
-    return out, err.strip()
+    return out, err.strip(), retcode
 
 
 OSX_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
@@ -756,7 +758,6 @@ def detectClang():
 
 def download_and_extract_7z(fileurl, target):
     """ Downloads 7z file from fileurl and extract to target  """
-
     print("Downloading fileUrl %s " % fileurl)
     info = ""
     try:
@@ -771,3 +772,214 @@ def download_and_extract_7z(fileurl, target):
         subprocess.call(["7z", "x", "-y", localfile, outputDir])
     except:
         raise RuntimeError(' Error extracting ' + localfile)
+
+def split_and_strip(input):
+    lines = [s.strip() for s in input.splitlines()]
+    return lines
+
+def ldd_get_dependencies(executable_path):
+    """ Returns a dictionary of dependencies that `executable_path` depends on.
+
+    The keys are library names and the values are the library paths.
+
+    """
+    output = ldd(executable_path)
+    lines = split_and_strip(output)
+    pattern = re.compile(r"\s*(.*?)\s+=>\s+(.*?)\s+\(.*\)")
+    dependencies = {}
+    for line in lines:
+        match = pattern.search(line)
+        if match:
+            dependencies[match.group(1)] = match.group(2)
+    return dependencies
+
+def ldd_get_paths_for_dependencies(dependencies_regex, executable_path = None, dependencies = None):
+    """ Returns file paths to shared library dependencies that match given `dependencies_regex`
+        against given `executable_path`.
+
+        The function retrieves the list of shared library dependencies using ld.so for the given
+        `executable_path` in order to search for libraries that match the `dependencies_regex`, and
+        then returns a list of absolute paths of the matching libraries.
+
+        If no matching library is found in the list of dependencies, an empty list is returned.
+        """
+
+    if not dependencies and not executable_path:
+        return None
+
+    if not dependencies:
+        dependencies = ldd_get_dependencies(executable_path)
+
+    pattern = re.compile(dependencies_regex)
+
+    paths = []
+    for key in dependencies:
+        match = pattern.search(key)
+        if match:
+            paths.append(dependencies[key])
+
+    return paths
+
+def ldd(executable_path):
+    """ Returns ld.so output of shared library dependencies for given `executable_path`.
+
+    This is a partial port of /usr/bin/ldd from bash to Python. The dependency list is retrieved
+    by setting the LD_TRACE_LOADED_OBJECTS=1 environment variable, and executing the given path
+    via the dynamic loader ld.so.
+
+    Only works on Linux. The port is required to make this work on systems that might not have ldd.
+    This is because ldd (on Ubuntu) is shipped in the libc-bin package that, which might have a
+    minuscule percentage of not being installed.
+
+    Parameters
+    ----------
+    executable_path : str
+        path to executable or shared library.
+
+    Returns
+    -------
+    output : str
+        the raw output retrieved from the dynamic linker.
+    """
+
+    chosen_rtld = None
+    # List of ld's considered by ldd on Ubuntu (here's hoping it's the same on all distros).
+    rtld_list = ["/lib/ld-linux.so.2", "/lib64/ld-linux-x86-64.so.2", "/libx32/ld-linux-x32.so.2"]
+
+    # Choose appropriate runtime dynamic linker.
+    for rtld in rtld_list:
+        if os.path.isfile(rtld) and os.access(rtld, os.X_OK):
+            (_, _, code) = back_tick(rtld, True)
+            # Code 127 is returned by ld.so when called without any arguments (some kind of sanity
+            # check I guess).
+            if code == 127:
+                (_, _, code) = back_tick("{} --verify {}".format(rtld, executable_path), True)
+                # Codes 0 and 2 mean given executable_path can be understood by ld.so.
+                if code in [0, 2]:
+                    chosen_rtld = rtld
+                    break
+
+    if not chosen_rtld:
+        raise RuntimeError('Could not find appropriate ld.so to query for dependencies.')
+
+    # Query for shared library dependencies.
+    rtld_env = "LD_TRACE_LOADED_OBJECTS=1"
+    rtld_cmd = "{} {} {}".format(rtld_env, chosen_rtld, executable_path)
+    (out, _, return_code) = back_tick(rtld_cmd, True)
+    if return_code == 0:
+        return out
+    else:
+        raise RuntimeError('ld.so failed to query for dependent shared libraries '
+                           'of {} '.format(executable_path))
+
+def find_files_using_glob(path, pattern):
+    """ Returns list of files that matched glob `pattern` in `path`. """
+    final_pattern = os.path.join(path, pattern)
+    maybe_files = glob.glob(final_pattern)
+    return maybe_files
+
+def find_qt_core_library_glob(lib_dir):
+    """ Returns path to the QtCore library found in `lib_dir`. """
+    maybe_file = find_files_using_glob(lib_dir, "libQt5Core.so.?")
+    if len(maybe_file) == 1:
+        return maybe_file[0]
+    return None
+
+# @TODO: Possibly fix ICU library copying on macOS and Windows. This would require
+# to implement the equivalent of the custom written ldd for the specified platforms.
+# This has less priority because ICU libs are not used in the default Qt configuration build.
+
+def copy_icu_libs(destination_lib_dir):
+    """ Copy ICU libraries that QtCore depends on, to given `destination_lib_dir`. """
+    qt_core_library_path = find_qt_core_library_glob(destination_lib_dir)
+
+    if not qt_core_library_path or not os.path.exists(qt_core_library_path):
+        raise RuntimeError('QtCore library does not exist at path: {}. '
+                           'Failed to copy ICU libraries.'.format(qt_core_library_path))
+
+    dependencies = ldd_get_dependencies(qt_core_library_path)
+
+    icu_regex = r"^libicu.+"
+    icu_compiled_pattern = re.compile(icu_regex)
+    icu_required = False
+    for dependency in dependencies:
+        match = icu_compiled_pattern.search(dependency)
+        if match:
+            icu_required = True
+            break
+
+    if icu_required:
+        paths = ldd_get_paths_for_dependencies(icu_regex, dependencies=dependencies)
+        if not paths:
+            raise RuntimeError('Failed to find the necessary ICU libraries required by QtCore.')
+        log.info('Copying the detected ICU libraries required by QtCore.')
+
+        if not os.path.exists(destination_lib_dir):
+            os.makedirs(destination_lib_dir)
+
+        for path in paths:
+            basename = os.path.basename(path)
+            destination = os.path.join(destination_lib_dir, basename)
+            copyfile(path, destination, force_copy_symlink=True)
+            # Patch the ICU libraries to contain the $ORIGIN rpath value, so that only the local
+            # package libraries are used.
+            linuxSetRPaths(destination, '$ORIGIN')
+
+        # Patch the QtCore library to find the copied over ICU libraries (if necessary).
+        log.info('Checking if QtCore library needs a new rpath to make it work with ICU libs.')
+        rpaths = linuxGetRPaths(qt_core_library_path)
+        if not rpaths or not rpathsHasOrigin(rpaths):
+            log.info('Patching QtCore library to contain $ORIGIN rpath.')
+            rpaths.insert(0, '$ORIGIN')
+            new_rpaths_string = ":".join(rpaths)
+            linuxSetRPaths(qt_core_library_path, new_rpaths_string)
+
+def linuxSetRPaths(executable_path, rpath_string):
+    """ Patches the `executable_path` with a new rpath string. """
+
+    if not hasattr(linuxSetRPaths, "patchelf_path"):
+        script_dir = os.getcwd()
+        patchelf_path = os.path.join(script_dir, "patchelf")
+        setattr(linuxSetRPaths, "patchelf_path", patchelf_path)
+
+    cmd = [linuxSetRPaths.patchelf_path, '--set-rpath', rpath_string, executable_path]
+
+    if run_process(cmd) != 0:
+        raise RuntimeError("Error patching rpath in {}".format(executable_path))
+
+def linuxGetRPaths(executable_path):
+    """ Returns a list of run path values embedded in the executable or just an empty list. """
+
+    cmd = "readelf -d {}".format(executable_path)
+    (out, err, code) = back_tick(cmd, True)
+    if code != 0:
+        raise RuntimeError('Running `readelf -d {}` failed with '
+                           'error output:\n {}. '.format(executable_path, err))
+    lines = split_and_strip(out)
+    pattern = re.compile(r"^.+?\(RUNPATH\).+?\[(.+?)\]$")
+
+    rpath_line = None
+    for line in lines:
+        match = pattern.search(line)
+        if match:
+            rpath_line = match.group(1)
+            break
+
+    rpaths = []
+
+    if rpath_line:
+        rpaths = rpath_line.split(':')
+
+    return rpaths
+
+def rpathsHasOrigin(rpaths):
+    """ Return True if the specified list of rpaths has an "$ORIGIN" value (aka current dir). """
+    if not rpaths:
+        return False
+
+    pattern = re.compile(r"^\$ORIGIN(/)?$")
+    for rpath in rpaths:
+        match = pattern.search(rpath)
+        if match:
+            return True
+    return False

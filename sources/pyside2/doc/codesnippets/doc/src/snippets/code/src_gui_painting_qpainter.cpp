@@ -216,7 +216,7 @@ painter.drawPixmap(target, image, source)
 
 //! [17]
 painter = QPainter(self)
-painter.drawText(rect, Qt.AlignCenter, tr("Qt by\nTrolltech"))
+painter.drawText(rect, Qt.AlignCenter, tr("Qt\nProject"))
 //! [17]
 
 

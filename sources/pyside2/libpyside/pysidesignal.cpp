@@ -433,7 +433,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
             return 0;
         }
         PyObject* result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (result == Py_True)
+        if (result == Py_True || result == Py_False)
             return result;
         else
             Py_XDECREF(result);
@@ -564,17 +564,26 @@ PyObject* signalCall(PyObject* self, PyObject* args, PyObject* kw)
 {
     PySideSignal* signal = reinterpret_cast<PySideSignal*>(self);
 
+    // Native C++ signals can't be called like functions, thus we throw an exception.
+    // The only way calling a signal can succeed (the Python equivalent of C++'s operator() )
+    // is when a method with the same name as the signal is attached to an object.
+    // An example is QProcess::error() (don't check the docs, but the source code of qprocess.h).
     if (!signal->homonymousMethod) {
         PyErr_SetString(PyExc_TypeError, "native Qt signal is not callable");
         return 0;
     }
 
     descrgetfunc getDescriptor = signal->homonymousMethod->ob_type->tp_descr_get;
+
+    // Check if there exists a method with the same name as the signal, which is also a static
+    // method in C++ land.
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(signal->homonymousMethod, 0, 0));
-
-    if (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC)
+    if (PyCFunction_Check(homonymousMethod)
+            && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC)) {
         return PyCFunction_Call(homonymousMethod, args, kw);
+    }
 
+    // Assumes homonymousMethod is not a static method.
     ternaryfunc callFunc = signal->homonymousMethod->ob_type->tp_call;
     return callFunc(homonymousMethod, args, kw);
 }

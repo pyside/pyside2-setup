@@ -48,12 +48,36 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.0
-import "ImageProviderCore" // import the plugin that registers the color image provider
+//![0]
+class ColorImageProvider (QQuickImageProvider):
+    def __init__(self):
+        QQuickImageProvider.__init__(self, QDeclarativeImageProvider.Pixmap)
 
+    def requestPixmap(id, size, requestedSize):
+        width = 100
+        height = 50
+
+        if size:
+            size.setWidth(width)
+            size.setHeight(height)
+
+        if requestedSize.width() > 0:
+            width = requestedSize.width()
+        if requestedSize.height() > 0:
+            height = requestedSize.height()
+
+        pixmap = QPixmap(width, height)
+        pixmap.fill(QColor(id).rgba())
 //![0]
-Column {
-    Image { source: "image://colors/yellow" }
-    Image { source: "image://colors/red" }
-}
-//![0]
+        # write the color name
+        painter = QPainter(pixmap)
+        f = painter.font()
+        f.setPixelSize(20)
+        painter.setFont(f)
+        painter.setPen(Qt.black)
+        if requestedSize.isValid():
+            painter.scale(requestedSize.width() / width, requestedSize.height() / height)
+        painter.drawText(QRectF(0, 0, width, height), Qt.AlignCenter, id)
+//![1]
+        return pixmap
+//![1]

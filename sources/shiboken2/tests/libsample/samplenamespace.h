@@ -110,6 +110,10 @@ public:
                 NiceValue1, NiceValue2
             };
 
+            enum class NiceEnumClass {
+                NiceClassValue1, NiceClassValue2
+            };
+
             inline int someMethod(SomeInnerClass*) { return 0; }
             virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
         };

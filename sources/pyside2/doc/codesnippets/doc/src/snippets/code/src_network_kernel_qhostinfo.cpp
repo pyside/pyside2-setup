@@ -49,8 +49,8 @@
 ****************************************************************************/
 
 //! [0]
-# To find the IP address of qtsoftware.com
-QHostInfo.lookupHost("qtsoftware.com", self, SLOT("printResults(QHostInfo)"))
+# To find the IP address of qt-project.org
+QHostInfo.lookupHost("qt-project.org", self, SLOT("printResults(QHostInfo)"))
 
 # To find the host name for 4.2.2.1
 QHostInfo.lookupHost("4.2.2.1", self, SLOT("printResults(QHostInfo)"))
@@ -58,7 +58,7 @@ QHostInfo.lookupHost("4.2.2.1", self, SLOT("printResults(QHostInfo)"))
 
 
 //! [1]
-info = QHostInfo.fromName("qtsoftware.com")
+info = QHostInfo.fromName("qt-project.org")
 //! [1]
 
 

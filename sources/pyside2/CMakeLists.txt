@@ -167,6 +167,7 @@ set(BINDING_API_MICRO_VERSION "0")
 set(BINDING_API_RELEASE_LEVEL "alpha") # alpha, beta, rc, or final
 set(BINDING_API_SERIAL 0) # leave as 0 when release level is final
 set(BINDING_API_VERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}" CACHE STRING "PySide version" FORCE)
+set(PYSIDE_SO_VERSION ${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION})
 if (BINDING_API_RELEASE_LEVEL STREQUAL "final")
     set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}"
         CACHE STRING "PySide version [full]" FORCE)
@@ -221,15 +222,38 @@ if(GIT_FOUND)
     endif()
 endif()
 
+# Used by setup.py to know which symlink to resolve and copy in to the final package, in order to
+# avoid resolving all symlinks and thus copying unnecessary duplicate files.
+set(config_py_shiboken_library_version "")
+set(config_py_pyside_library_version "")
+
 include(PySideModules)
 
 macro(COLLECT_MODULE_IF_FOUND shortname)
     set(name "Qt5${shortname}")
     find_package(${name})
+    # If package is found, _name_found will be equal to 1
     set(_name_found "${name}_FOUND")
+    # _name_dir will keep the path to the directory where the CMake rules were found
+    # e.g: ~/qt5.9-install/qtbase/lib/cmake/Qt5Core or /usr/lib64/cmake/Qt5Core
     set(_name_dir "${name}_DIR")
-    get_filename_component(_qt_dir ${QT_INCLUDE_DIR}   DIRECTORY)
-    get_filename_component(_module_dir "${${_name_dir}}/../../../" ABSOLUTE)
+    # Qt5Core will set the base path to check if all the modules are on the same
+    # directory, to avoid CMake looking in another path.
+    # This will be saved in a global variable at the beginning of the modules
+    # collection process.
+    string(FIND "${name}" "Qt5Core" qtcore_found)
+    if(("${qtcore_found}" GREATER "0") OR ("${qtcore_found}" EQUAL "0"))
+        get_filename_component(_core_abs_dir "${${_name_dir}}/../" ABSOLUTE)
+        # Setting the absolute path where the Qt5Core was found
+        # e.g: ~/qt5.9-install/qtbase/lib/cmake or /usr/lib64/cmake
+        message(STATUS "CORE_ABS_DIR:" ${_core_abs_dir})
+    endif()
+
+    # Getting the absolute path for each module where the CMake was found, to
+    # compare it with CORE_ABS_DIR and check if they are in the same source directory
+    # e.g: ~/qt5.9-install/qtbase/lib/cmake/Qt5Script or /usr/lib64/cmake/Qt5Script
+    get_filename_component(_module_dir "${${_name_dir}}" ABSOLUTE)
+    string(FIND "${_module_dir}" "${_core_abs_dir}" found_basepath)
 
     # Determine essential/optional/missing
     set(module_state "missing")
@@ -243,7 +267,9 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
         set(module_state "essential")
     endif()
 
-    if(${${_name_found}} AND ${_qt_dir} STREQUAL ${_module_dir})
+    # If the module was found, and also the module path is the same as the
+    # Qt5Core base path, we will generate the list with the modules to be install
+    if("${${_name_found}}" AND (("${found_basepath}" GREATER "0") OR ("${found_basepath}" EQUAL "0")))
         message(STATUS "${module_state} module ${name} found (${ARGN})")
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})
@@ -290,6 +316,9 @@ if(WIN32)
     list(APPEND ALL_OPTIONAL_MODULES AxContainer)
 endif()
 list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineWidgets WebKit WebKitWidgets WebSockets)
+if (Qt5Core_VERSION VERSION_GREATER 5.9.3 AND Qt5Core_VERSION VERSION_LESS 5.10.0) # Depending on fixes in Qt3D
+    list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
+endif()
 
 # Modules to be built unless specified by -DMODULES on command line
 if (NOT MODULES)

@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtdeclarative/src/quick/doc/qtquick.qdocconf)
+include(../pyside-config.qdocconf)

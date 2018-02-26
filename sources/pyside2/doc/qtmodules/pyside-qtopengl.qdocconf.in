@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/src/opengl/doc/qtopengl.qdocconf)
+include(../pyside-config.qdocconf)

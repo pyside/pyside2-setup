@@ -78,5 +78,12 @@ class QListWidgetTest(UsesQApplication):
         self.app.exec_()
         self.assertEqual(lst.count(), 1)
 
+    def testClear(self):
+        lst = QtWidgets.QListWidget()
+        lst.addItem("foo")
+        item = lst.item(0)
+        self.assertIsNone(lst.clear())
+        self.assertRaises(RuntimeError, lambda: item.text())
+
 if __name__ == '__main__':
     unittest.main()

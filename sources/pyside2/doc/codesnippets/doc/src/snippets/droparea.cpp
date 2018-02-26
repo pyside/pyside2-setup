@@ -98,7 +98,7 @@ void DropArea.dropEvent(QDropEvent *event)
 
 //![0]
 def paste(self):
-    clipboard = QApplication.clipboard()
+    clipboard = QGuiApplication.clipboard()
     mimeData = clipboard.mimeData()
 
     if mimeData.hasImage():

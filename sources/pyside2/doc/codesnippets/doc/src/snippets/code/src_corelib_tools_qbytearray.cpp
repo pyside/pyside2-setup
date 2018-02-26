@@ -253,7 +253,7 @@ ba.lastIndexOf("X")        # returns -1
 
 
 //! [25]
-url = QByteArray("ftp://ftp.trolltech.com/")
+url = QByteArray("ftp://ftp.qt-project.org/")
 if url.startsWith("ftp:"):
     ...
 //! [25]
@@ -288,16 +288,16 @@ z = x.mid(5)        # z == "pineapples"
 
 
 //! [30]
-x = QByteArray("TROlltECH")
+x = QByteArray("Qt by THE QT COMPANY")
 y = x.toLower()
-# y == "trolltech"
+# y == "qt by the qt company"
 //! [30]
 
 
 //! [31]
-x = QByteArray("TROlltECH")
+x = QByteArray("Qt by THE QT COMPANY")
 y = x.toUpper()
-# y == "TROLLTECH"
+# y == "QT BY THE QT COMPANY"
 //! [31]
 
 

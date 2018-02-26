@@ -10,6 +10,8 @@
     linux
     darwin
     win32
+[Qt3DExtras::qt3dextras_test]
+    linux
 [QtCore::qfile_test]
     win32
     darwin py3

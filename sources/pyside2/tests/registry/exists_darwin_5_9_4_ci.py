@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of PySide2.
@@ -36,6 +36,14 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
+
+"""
+This file contains the simplified signatures for all functions in PySide
+for module 'exists_darwin_5_9_4_ci'. There are no default values, no variable
+names and no self parameter. Only types are present after simplification.
+The functions 'next' resp. '__next__' are removed
+to make the output identical for Python 2 and 3.
+"""
 
 import sys
 
@@ -249,7 +257,7 @@ if "PySide2.QtCore" in sys.modules:
 
     # class PySide2.QtCore.QBasicMutex:
         "QBasicMutex.__init__": (),
-        "QBasicMutex.isRecursive": [],
+        "QBasicMutex.isRecursive": (),
         "QBasicMutex.lock": (),
         "QBasicMutex.tryLock": (),
         "QBasicMutex.try_lock": (),
@@ -284,7 +292,7 @@ if "PySide2.QtCore" in sys.modules:
     # class PySide2.QtCore.QBuffer:
         "QBuffer.__init__": [('PySide2.QtCore.QByteArray', 'PySide2.QtCore.QObject'), ('PySide2.QtCore.QObject',)],
         "QBuffer.atEnd": (),
-        "QBuffer.buffer": [],
+        "QBuffer.buffer": (),
         "QBuffer.canReadLine": (),
         "QBuffer.close": (),
         "QBuffer.connectNotify": ('PySide2.QtCore.QMetaMethod',),
@@ -312,7 +320,7 @@ if "PySide2.QtCore" in sys.modules:
         "QByteArray.clear": (),
         "QByteArray.contains": [('PySide2.QtCore.QByteArray',), ('Union[str, int]',)],
         "QByteArray.count": [(), ('PySide2.QtCore.QByteArray',), ('Union[str, int]',)],
-        "QByteArray.data": [],
+        "QByteArray.data": (),
         "QByteArray.endsWith": [('PySide2.QtCore.QByteArray',), ('Union[str, int]',)],
         "QByteArray.fill": ('Union[str, int]', 'int'),
         "QByteArray.fromBase64": [('PySide2.QtCore.QByteArray',), ('PySide2.QtCore.QByteArray', 'Base64Options')],
@@ -340,7 +348,7 @@ if "PySide2.QtCore" in sys.modules:
         "QByteArray.rightJustified": ('int', 'Union[str, int]', 'bool'),
         "QByteArray.setNum": [('float', 'Union[str, int]', 'int'), ('int', 'int')],
         "QByteArray.setRawData": ('str', 'int'),
-        "QByteArray.simplified": [],
+        "QByteArray.simplified": (),
         "QByteArray.size": (),
         "QByteArray.split": ('Union[str, int]',),
         "QByteArray.squeeze": (),
@@ -353,15 +361,15 @@ if "PySide2.QtCore" in sys.modules:
         "QByteArray.toInt": ('bool', 'int'),
         "QByteArray.toLong": ('bool', 'int'),
         "QByteArray.toLongLong": ('bool', 'int'),
-        "QByteArray.toLower": [],
+        "QByteArray.toLower": (),
         "QByteArray.toPercentEncoding": ('PySide2.QtCore.QByteArray', 'PySide2.QtCore.QByteArray', 'Union[str, int]'),
         "QByteArray.toShort": ('bool', 'int'),
         "QByteArray.toUInt": ('bool', 'int'),
         "QByteArray.toULong": ('bool', 'int'),
         "QByteArray.toULongLong": ('bool', 'int'),
         "QByteArray.toUShort": ('bool', 'int'),
-        "QByteArray.toUpper": [],
-        "QByteArray.trimmed": [],
+        "QByteArray.toUpper": (),
+        "QByteArray.trimmed": (),
         "QByteArray.truncate": ('int',),
 
     # class PySide2.QtCore.QByteArrayMatcher:
@@ -561,7 +569,7 @@ if "PySide2.QtCore" in sys.modules:
         "QDate.daysTo": ('PySide2.QtCore.QDate',),
         "QDate.fromJulianDay": ('int',),
         "QDate.fromString": [('str', 'PySide2.QtCore.Qt.DateFormat'), ('str', 'str')],
-        "QDate.getDate": ['int', 'int', 'int'],
+        "QDate.getDate": ('int', 'int', 'int'),
         "QDate.isLeapYear": ('int',),
         "QDate.isNull": (),
         "QDate.isValid": [(), ('int', 'int', 'int')],
@@ -697,7 +705,6 @@ if "PySide2.QtCore" in sys.modules:
         "QDirIterator.fileName": (),
         "QDirIterator.filePath": (),
         "QDirIterator.hasNext": (),
-        "QDirIterator.next": (),
         "QDirIterator.path": (),
 
     # class PySide2.QtCore.QDynamicPropertyChangeEvent:
@@ -957,7 +964,7 @@ if "PySide2.QtCore" in sys.modules:
         "QItemSelection.__copy__": (),
         "QItemSelection.append": [('PySide2.QtCore.QItemSelectionRange',), ('list',)],
         "QItemSelection.at": ('int',),
-        "QItemSelection.back": [],
+        "QItemSelection.back": (),
         "QItemSelection.clear": (),
         "QItemSelection.constFirst": (),
         "QItemSelection.constLast": (),
@@ -966,16 +973,16 @@ if "PySide2.QtCore" in sys.modules:
         "QItemSelection.detachShared": (),
         "QItemSelection.empty": (),
         "QItemSelection.endsWith": ('PySide2.QtCore.QItemSelectionRange',),
-        "QItemSelection.first": [],
+        "QItemSelection.first": (),
         "QItemSelection.fromSet": ('set',),
         "QItemSelection.fromVector": ('list',),
-        "QItemSelection.front": [],
+        "QItemSelection.front": (),
         "QItemSelection.indexOf": ('PySide2.QtCore.QItemSelectionRange', 'int'),
         "QItemSelection.indexes": (),
         "QItemSelection.insert": ('int', 'PySide2.QtCore.QItemSelectionRange'),
         "QItemSelection.isEmpty": (),
         "QItemSelection.isSharedWith": ('list',),
-        "QItemSelection.last": [],
+        "QItemSelection.last": (),
         "QItemSelection.lastIndexOf": ('PySide2.QtCore.QItemSelectionRange', 'int'),
         "QItemSelection.length": (),
         "QItemSelection.merge": ('PySide2.QtCore.QItemSelection', 'SelectionFlags'),
@@ -1018,7 +1025,7 @@ if "PySide2.QtCore" in sys.modules:
         "QItemSelectionModel.isColumnSelected": ('int', 'PySide2.QtCore.QModelIndex'),
         "QItemSelectionModel.isRowSelected": ('int', 'PySide2.QtCore.QModelIndex'),
         "QItemSelectionModel.isSelected": ('PySide2.QtCore.QModelIndex',),
-        "QItemSelectionModel.model": [],
+        "QItemSelectionModel.model": (),
         "QItemSelectionModel.reset": (),
         "QItemSelectionModel.rowIntersectsSelection": ('int', 'PySide2.QtCore.QModelIndex'),
         "QItemSelectionModel.select": [('PySide2.QtCore.QItemSelection', 'SelectionFlags'), ('PySide2.QtCore.QModelIndex', 'SelectionFlags')],
@@ -1123,13 +1130,13 @@ if "PySide2.QtCore" in sys.modules:
         "QJsonValue.type": (),
 
     # class PySide2.QtCore.QLibraryInfo:
-        "QLibraryInfo.platformPluginArguments": ('str',),
         "QLibraryInfo.build": (),
         "QLibraryInfo.buildDate": (),
         "QLibraryInfo.isDebugBuild": (),
         "QLibraryInfo.licensedProducts": (),
         "QLibraryInfo.licensee": (),
         "QLibraryInfo.location": ('PySide2.QtCore.QLibraryInfo.LibraryLocation',),
+        "QLibraryInfo.platformPluginArguments": ('str',),
         "QLibraryInfo.version": (),
 
     # class PySide2.QtCore.QLine:
@@ -1218,7 +1225,7 @@ if "PySide2.QtCore" in sys.modules:
         "QLocale.percent": (),
         "QLocale.pmText": (),
         "QLocale.positiveSign": (),
-        "QLocale.quoteString": ['PySide2.QtCore.QLocale.QuotationStyle', 'str'],
+        "QLocale.quoteString": ('str', 'PySide2.QtCore.QLocale.QuotationStyle'),
         "QLocale.script": (),
         "QLocale.scriptToString": ('PySide2.QtCore.QLocale.Script',),
         "QLocale.setDefault": ('PySide2.QtCore.QLocale',),
@@ -1323,7 +1330,7 @@ if "PySide2.QtCore" in sys.modules:
 
     # class PySide2.QtCore.QMetaObject:
         "QMetaObject.__init__": (),
-        "QMetaObject.cast": ['PySide2.QtCore.QObject'],
+        "QMetaObject.cast": ('PySide2.QtCore.QObject',),
         "QMetaObject.checkConnectArgs": [('PySide2.QtCore.QMetaMethod', 'PySide2.QtCore.QMetaMethod'), ('str', 'str')],
         "QMetaObject.classInfo": ('int',),
         "QMetaObject.classInfoCount": (),
@@ -1464,7 +1471,7 @@ if "PySide2.QtCore" in sys.modules:
 
     # class PySide2.QtCore.QMutex:
         "QMutex.__init__": ('PySide2.QtCore.QMutex.RecursionMode',),
-        "QMutex.isRecursive": [],
+        "QMutex.isRecursive": (),
         "QMutex.lock": (),
         "QMutex.tryLock": [(), ('int',)],
         "QMutex.try_lock": (),
@@ -1489,8 +1496,8 @@ if "PySide2.QtCore" in sys.modules:
         "QObject.deleteLater": (),
         "QObject.disconnect": [('PySide2.QtCore.QMetaObject.Connection',), ('PySide2.QtCore.QObject', 'PySide2.QtCore.QMetaMethod', 'PySide2.QtCore.QObject', 'PySide2.QtCore.QMetaMethod'), ('PySide2.QtCore.QObject', 'str'), ('PySide2.QtCore.QObject', 'str', 'Callable'), ('PySide2.QtCore.QObject', 'str', 'PySide2.QtCore.QObject', 'str'), ('str', 'Callable'), ('str', 'PySide2.QtCore.QObject', 'str')],
         "QObject.disconnectNotify": ('PySide2.QtCore.QMetaMethod',),
-        "QObject.dumpObjectInfo": [],
-        "QObject.dumpObjectTree": [],
+        "QObject.dumpObjectInfo": (),
+        "QObject.dumpObjectTree": (),
         "QObject.dynamicPropertyNames": (),
         "QObject.emit": ('str', '...'),
         "QObject.event": ('PySide2.QtCore.QEvent',),
@@ -1814,11 +1821,11 @@ if "PySide2.QtCore" in sys.modules:
         "QRegExp.__init__": [(), ('PySide2.QtCore.QRegExp',), ('str', 'PySide2.QtCore.Qt.CaseSensitivity', 'PySide2.QtCore.QRegExp.PatternSyntax')],
         "QRegExp.__copy__": (),
         "QRegExp.__reduce__": (),
-        "QRegExp.cap": ['int'],
+        "QRegExp.cap": ('int',),
         "QRegExp.captureCount": (),
-        "QRegExp.capturedTexts": [],
+        "QRegExp.capturedTexts": (),
         "QRegExp.caseSensitivity": (),
-        "QRegExp.errorString": [],
+        "QRegExp.errorString": (),
         "QRegExp.escape": ('str',),
         "QRegExp.exactMatch": ('str',),
         "QRegExp.indexIn": ('str', 'int', 'PySide2.QtCore.QRegExp.CaretMode'),
@@ -1829,7 +1836,7 @@ if "PySide2.QtCore" in sys.modules:
         "QRegExp.matchedLength": (),
         "QRegExp.pattern": (),
         "QRegExp.patternSyntax": (),
-        "QRegExp.pos": ['int'],
+        "QRegExp.pos": ('int',),
         "QRegExp.replace": ('str', 'str'),
         "QRegExp.setCaseSensitivity": ('PySide2.QtCore.Qt.CaseSensitivity',),
         "QRegExp.setMinimal": ('bool',),
@@ -1843,9 +1850,9 @@ if "PySide2.QtCore" in sys.modules:
         "QRegularExpression.captureCount": (),
         "QRegularExpression.errorString": (),
         "QRegularExpression.escape": ('str',),
-        "QRegularExpression.globalMatch": ['MatchOptions', 'PySide2.QtCore.QRegularExpression.MatchType', 'int', 'str'],
+        "QRegularExpression.globalMatch": ('str', 'int', 'PySide2.QtCore.QRegularExpression.MatchType', 'MatchOptions'),
         "QRegularExpression.isValid": (),
-        "QRegularExpression.match": ['MatchOptions', 'PySide2.QtCore.QRegularExpression.MatchType', 'int', 'str'],
+        "QRegularExpression.match": ('str', 'int', 'PySide2.QtCore.QRegularExpression.MatchType', 'MatchOptions'),
         "QRegularExpression.namedCaptureGroups": (),
         "QRegularExpression.optimize": (),
         "QRegularExpression.pattern": (),
@@ -1880,7 +1887,6 @@ if "PySide2.QtCore" in sys.modules:
         "QRegularExpressionMatchIterator.isValid": (),
         "QRegularExpressionMatchIterator.matchOptions": (),
         "QRegularExpressionMatchIterator.matchType": (),
-        "QRegularExpressionMatchIterator.next": (),
         "QRegularExpressionMatchIterator.peekNext": (),
         "QRegularExpressionMatchIterator.regularExpression": (),
         "QRegularExpressionMatchIterator.swap": ('PySide2.QtCore.QRegularExpressionMatchIterator',),
@@ -2100,7 +2106,6 @@ if "PySide2.QtCore" in sys.modules:
         "QSortFilterProxyModel.supportedDropActions": (),
 
     # class PySide2.QtCore.QStandardPaths:
-        "QStandardPaths.writableLocation": ('PySide2.QtCore.QStandardPaths.StandardLocation',),
         "QStandardPaths.displayName": ('PySide2.QtCore.QStandardPaths.StandardLocation',),
         "QStandardPaths.enableTestMode": ('bool',),
         "QStandardPaths.findExecutable": ('str', 'List[str]'),
@@ -2109,6 +2114,7 @@ if "PySide2.QtCore" in sys.modules:
         "QStandardPaths.locateAll": ('PySide2.QtCore.QStandardPaths.StandardLocation', 'str', 'LocateOptions'),
         "QStandardPaths.setTestModeEnabled": ('bool',),
         "QStandardPaths.standardLocations": ('PySide2.QtCore.QStandardPaths.StandardLocation',),
+        "QStandardPaths.writableLocation": ('PySide2.QtCore.QStandardPaths.StandardLocation',),
 
     # class PySide2.QtCore.QState:
         "QState.__init__": [('PySide2.QtCore.QState',), ('PySide2.QtCore.QState.ChildMode', 'PySide2.QtCore.QState')],
@@ -2134,7 +2140,7 @@ if "PySide2.QtCore" in sys.modules:
         "QStateMachine.beginSelectTransitions": ('PySide2.QtCore.QEvent',),
         "QStateMachine.cancelDelayedEvent": ('int',),
         "QStateMachine.clearError": (),
-        "QStateMachine.configuration": [],
+        "QStateMachine.configuration": (),
         "QStateMachine.defaultAnimations": (),
         "QStateMachine.endMicrostep": ('PySide2.QtCore.QEvent',),
         "QStateMachine.endSelectTransitions": ('PySide2.QtCore.QEvent',),
@@ -2187,6 +2193,7 @@ if "PySide2.QtCore" in sys.modules:
         "QSysInfo.currentCpuArchitecture": (),
         "QSysInfo.kernelType": (),
         "QSysInfo.kernelVersion": (),
+        "QSysInfo.macVersion": (),
         "QSysInfo.machineHostName": (),
         "QSysInfo.prettyProductName": (),
         "QSysInfo.productType": (),
@@ -2642,18 +2649,18 @@ if "PySide2.QtCore" in sys.modules:
         "QXmlStreamAttributes.constLast": (),
         "QXmlStreamAttributes.contains": ('PySide2.QtCore.QXmlStreamAttribute',),
         "QXmlStreamAttributes.count": [(), ('PySide2.QtCore.QXmlStreamAttribute',)],
-        "QXmlStreamAttributes.data": [],
+        "QXmlStreamAttributes.data": (),
         "QXmlStreamAttributes.empty": (),
         "QXmlStreamAttributes.endsWith": ('PySide2.QtCore.QXmlStreamAttribute',),
         "QXmlStreamAttributes.fill": ('PySide2.QtCore.QXmlStreamAttribute', 'int'),
-        "QXmlStreamAttributes.first": [],
+        "QXmlStreamAttributes.first": (),
         "QXmlStreamAttributes.front": (),
         "QXmlStreamAttributes.hasAttribute": [('str',), ('str', 'str')],
         "QXmlStreamAttributes.indexOf": ('PySide2.QtCore.QXmlStreamAttribute', 'int'),
         "QXmlStreamAttributes.insert": [('int', 'PySide2.QtCore.QXmlStreamAttribute'), ('int', 'int', 'PySide2.QtCore.QXmlStreamAttribute')],
         "QXmlStreamAttributes.isEmpty": (),
         "QXmlStreamAttributes.isSharedWith": ('list',),
-        "QXmlStreamAttributes.last": [],
+        "QXmlStreamAttributes.last": (),
         "QXmlStreamAttributes.lastIndexOf": ('PySide2.QtCore.QXmlStreamAttribute', 'int'),
         "QXmlStreamAttributes.length": (),
         "QXmlStreamAttributes.mid": ('int', 'int'),
@@ -2789,10 +2796,6 @@ if "PySide2.QtCore" in sys.modules:
         "QXmlStreamWriter.writeStartElement": [('str',), ('str', 'str')],
         "QXmlStreamWriter.writeTextElement": [('str', 'str'), ('str', 'str', 'str')],
 
-    # class PySide2.QtCore.Qt:
-        "Qt.qt_getEnumName": [('Alignment',), ('DockWidgetAreas',), ('DropActions',), ('Edges',), ('ImageConversionFlags',), ('InputMethodHints',), ('InputMethodQueries',), ('ItemFlags',), ('KeyboardModifiers',), ('MatchFlags',), ('MouseButtons',), ('Orientations',), ('PySide2.QtCore.Qt.ApplicationAttribute',), ('PySide2.QtCore.Qt.ApplicationState',), ('PySide2.QtCore.Qt.ArrowType',), ('PySide2.QtCore.Qt.AspectRatioMode',), ('PySide2.QtCore.Qt.Axis',), ('PySide2.QtCore.Qt.BGMode',), ('PySide2.QtCore.Qt.BrushStyle',), ('PySide2.QtCore.Qt.CaseSensitivity',), ('PySide2.QtCore.Qt.CheckState',), ('PySide2.QtCore.Qt.ChecksumType',), ('PySide2.QtCore.Qt.ClipOperation',), ('PySide2.QtCore.Qt.ConnectionType',), ('PySide2.QtCore.Qt.ContextMenuPolicy',), ('PySide2.QtCore.Qt.Corner',), ('PySide2.QtCore.Qt.CursorMoveStyle',), ('PySide2.QtCore.Qt.CursorShape',), ('PySide2.QtCore.Qt.DateFormat',), ('PySide2.QtCore.Qt.DayOfWeek',), ('PySide2.QtCore.Qt.DockWidgetArea',), ('PySide2.QtCore.Qt.DropAction',), ('PySide2.QtCore.Qt.Edge',), ('PySide2.QtCore.Qt.EnterKeyType',), ('PySide2.QtCore.Qt.FillRule',), ('PySide2.QtCore.Qt.FocusPolicy',), ('PySide2.QtCore.Qt.FocusReason',), ('PySide2.QtCore.Qt.GestureState',), ('PySide2.QtCore.Qt.GestureType',), ('PySide2.QtCore.Qt.GlobalColor',), ('PySide2.QtCore.Qt.InputMethodHint',), ('PySide2.QtCore.Qt.InputMethodQuery',), ('PySide2.QtCore.Qt.ItemDataRole',), ('PySide2.QtCore.Qt.ItemSelectionMode',), ('PySide2.QtCore.Qt.ItemSelectionOperation',), ('PySide2.QtCore.Qt.Key',), ('PySide2.QtCore.Qt.LayoutDirection',), ('PySide2.QtCore.Qt.MaskMode',), ('PySide2.QtCore.Qt.MouseEventFlag',), ('PySide2.QtCore.Qt.MouseEventSource',), ('PySide2.QtCore.Qt.NativeGestureType',), ('PySide2.QtCore.Qt.Orientation',), ('PySide2.QtCore.Qt.PenCapStyle',), ('PySide2.QtCore.Qt.PenJoinStyle',), ('PySide2.QtCore.Qt.PenStyle',), ('PySide2.QtCore.Qt.ScreenOrientation',), ('PySide2.QtCore.Qt.ScrollBarPolicy',), ('PySide2.QtCore.Qt.ScrollPhase',), ('PySide2.QtCore.Qt.ShortcutContext',), ('PySide2.QtCore.Qt.SizeHint',), ('PySide2.QtCore.Qt.SizeMode',), ('PySide2.QtCore.Qt.SortOrder',), ('PySide2.QtCore.Qt.TabFocusBehavior',), ('PySide2.QtCore.Qt.TextElideMode',), ('PySide2.QtCore.Qt.TextFlag',), ('PySide2.QtCore.Qt.TextFormat',), ('PySide2.QtCore.Qt.TextInteractionFlag',), ('PySide2.QtCore.Qt.TimeSpec',), ('PySide2.QtCore.Qt.TimerType',), ('PySide2.QtCore.Qt.ToolBarArea',), ('PySide2.QtCore.Qt.ToolButtonStyle',), ('PySide2.QtCore.Qt.TransformationMode',), ('PySide2.QtCore.Qt.WidgetAttribute',), ('PySide2.QtCore.Qt.WindowModality',), ('PySide2.QtCore.Qt.WindowState',), ('PySide2.QtCore.Qt.WindowType',), ('ScreenOrientations',), ('TextInteractionFlags',), ('ToolBarAreas',), ('TouchPointStates',), ('WindowFlags',), ('WindowStates',)],
-        "Qt.qt_getEnumMetaObject": [('Alignment',), ('DockWidgetAreas',), ('DropActions',), ('Edges',), ('ImageConversionFlags',), ('InputMethodHints',), ('InputMethodQueries',), ('ItemFlags',), ('KeyboardModifiers',), ('MatchFlags',), ('MouseButtons',), ('Orientations',), ('PySide2.QtCore.Qt.ApplicationAttribute',), ('PySide2.QtCore.Qt.ApplicationState',), ('PySide2.QtCore.Qt.ArrowType',), ('PySide2.QtCore.Qt.AspectRatioMode',), ('PySide2.QtCore.Qt.Axis',), ('PySide2.QtCore.Qt.BGMode',), ('PySide2.QtCore.Qt.BrushStyle',), ('PySide2.QtCore.Qt.CaseSensitivity',), ('PySide2.QtCore.Qt.CheckState',), ('PySide2.QtCore.Qt.ChecksumType',), ('PySide2.QtCore.Qt.ClipOperation',), ('PySide2.QtCore.Qt.ConnectionType',), ('PySide2.QtCore.Qt.ContextMenuPolicy',), ('PySide2.QtCore.Qt.Corner',), ('PySide2.QtCore.Qt.CursorMoveStyle',), ('PySide2.QtCore.Qt.CursorShape',), ('PySide2.QtCore.Qt.DateFormat',), ('PySide2.QtCore.Qt.DayOfWeek',), ('PySide2.QtCore.Qt.DockWidgetArea',), ('PySide2.QtCore.Qt.DropAction',), ('PySide2.QtCore.Qt.Edge',), ('PySide2.QtCore.Qt.EnterKeyType',), ('PySide2.QtCore.Qt.FillRule',), ('PySide2.QtCore.Qt.FocusPolicy',), ('PySide2.QtCore.Qt.FocusReason',), ('PySide2.QtCore.Qt.GestureState',), ('PySide2.QtCore.Qt.GestureType',), ('PySide2.QtCore.Qt.GlobalColor',), ('PySide2.QtCore.Qt.InputMethodHint',), ('PySide2.QtCore.Qt.InputMethodQuery',), ('PySide2.QtCore.Qt.ItemDataRole',), ('PySide2.QtCore.Qt.ItemSelectionMode',), ('PySide2.QtCore.Qt.ItemSelectionOperation',), ('PySide2.QtCore.Qt.Key',), ('PySide2.QtCore.Qt.LayoutDirection',), ('PySide2.QtCore.Qt.MaskMode',), ('PySide2.QtCore.Qt.MouseEventFlag',), ('PySide2.QtCore.Qt.MouseEventSource',), ('PySide2.QtCore.Qt.NativeGestureType',), ('PySide2.QtCore.Qt.Orientation',), ('PySide2.QtCore.Qt.PenCapStyle',), ('PySide2.QtCore.Qt.PenJoinStyle',), ('PySide2.QtCore.Qt.PenStyle',), ('PySide2.QtCore.Qt.ScreenOrientation',), ('PySide2.QtCore.Qt.ScrollBarPolicy',), ('PySide2.QtCore.Qt.ScrollPhase',), ('PySide2.QtCore.Qt.ShortcutContext',), ('PySide2.QtCore.Qt.SizeHint',), ('PySide2.QtCore.Qt.SizeMode',), ('PySide2.QtCore.Qt.SortOrder',), ('PySide2.QtCore.Qt.TabFocusBehavior',), ('PySide2.QtCore.Qt.TextElideMode',), ('PySide2.QtCore.Qt.TextFlag',), ('PySide2.QtCore.Qt.TextFormat',), ('PySide2.QtCore.Qt.TextInteractionFlag',), ('PySide2.QtCore.Qt.TimeSpec',), ('PySide2.QtCore.Qt.TimerType',), ('PySide2.QtCore.Qt.ToolBarArea',), ('PySide2.QtCore.Qt.ToolButtonStyle',), ('PySide2.QtCore.Qt.TransformationMode',), ('PySide2.QtCore.Qt.WidgetAttribute',), ('PySide2.QtCore.Qt.WindowModality',), ('PySide2.QtCore.Qt.WindowState',), ('PySide2.QtCore.Qt.WindowType',), ('ScreenOrientations',), ('TextInteractionFlags',), ('ToolBarAreas',), ('TouchPointStates',), ('WindowFlags',), ('WindowStates',)],
-
     # class PySide2.QtCore.QtMsgType:
 
     # class PySide2.QtCore.Signal:
@@ -2836,11 +2839,11 @@ if "PySide2.QtGui" in sys.modules:
         "QAbstractTextDocumentLayout.unregisterHandler": ('int', 'PySide2.QtCore.QObject'),
 
     # class PySide2.QtGui.QAccessible:
-        "QAccessible.isActive": (),
         "QAccessible.__copy__": (),
         "QAccessible.accessibleInterface": ('int',),
         "QAccessible.cleanup": (),
         "QAccessible.deleteAccessibleInterface": ('int',),
+        "QAccessible.isActive": (),
         "QAccessible.qAccessibleTextBoundaryHelper": ('PySide2.QtGui.QTextCursor', 'PySide2.QtGui.QAccessible.TextBoundaryType'),
         "QAccessible.queryAccessibleInterface": ('PySide2.QtCore.QObject',),
         "QAccessible.registerAccessibleInterface": ('PySide2.QtGui.QAccessibleInterface',),
@@ -2900,7 +2903,7 @@ if "PySide2.QtGui" in sys.modules:
         "QBitmap.__copy__": (),
         "QBitmap.clear": (),
         "QBitmap.fromData": ('PySide2.QtCore.QSize', 'Union[str, int]', 'PySide2.QtGui.QImage.Format'),
-        "QBitmap.fromImage": ['ImageConversionFlags', 'PySide2.QtGui.QImage'],
+        "QBitmap.fromImage": ('PySide2.QtGui.QImage', 'ImageConversionFlags'),
         "QBitmap.swap": [('PySide2.QtGui.QBitmap',), ('PySide2.QtGui.QPixmap',)],
         "QBitmap.transformed": [('PySide2.QtGui.QMatrix',), ('PySide2.QtGui.QMatrix', 'PySide2.QtCore.Qt.TransformationMode'), ('PySide2.QtGui.QTransform',)],
 
@@ -2924,7 +2927,6 @@ if "PySide2.QtGui" in sys.modules:
         "QBrush.transform": (),
 
     # class PySide2.QtGui.QClipboard:
-        "QClipboard.setText": ('str', 'PySide2.QtGui.QClipboard.Mode'),
         "QClipboard.clear": ('PySide2.QtGui.QClipboard.Mode',),
         "QClipboard.image": ('PySide2.QtGui.QClipboard.Mode',),
         "QClipboard.mimeData": ('PySide2.QtGui.QClipboard.Mode',),
@@ -2935,6 +2937,7 @@ if "PySide2.QtGui" in sys.modules:
         "QClipboard.setImage": ('PySide2.QtGui.QImage', 'PySide2.QtGui.QClipboard.Mode'),
         "QClipboard.setMimeData": ('PySide2.QtCore.QMimeData', 'PySide2.QtGui.QClipboard.Mode'),
         "QClipboard.setPixmap": ('PySide2.QtGui.QPixmap', 'PySide2.QtGui.QClipboard.Mode'),
+        "QClipboard.setText": ('str', 'PySide2.QtGui.QClipboard.Mode'),
         "QClipboard.supportsFindBuffer": (),
         "QClipboard.supportsSelection": (),
         "QClipboard.text": [('PySide2.QtGui.QClipboard.Mode',), ('str', 'PySide2.QtGui.QClipboard.Mode')],
@@ -3043,9 +3046,9 @@ if "PySide2.QtGui" in sys.modules:
 
     # class PySide2.QtGui.QContextMenuEvent:
         "QContextMenuEvent.__init__": [('PySide2.QtGui.QContextMenuEvent.Reason', 'PySide2.QtCore.QPoint'), ('PySide2.QtGui.QContextMenuEvent.Reason', 'PySide2.QtCore.QPoint', 'PySide2.QtCore.QPoint'), ('PySide2.QtGui.QContextMenuEvent.Reason', 'PySide2.QtCore.QPoint', 'PySide2.QtCore.QPoint', 'KeyboardModifiers')],
-        "QContextMenuEvent.global"+"Y": (),
         "QContextMenuEvent.globalPos": (),
         "QContextMenuEvent.globalX": (),
+        "QContextMenuEvent.global""Y": (),
         "QContextMenuEvent.pos": (),
         "QContextMenuEvent.reason": (),
         "QContextMenuEvent.x": (),
@@ -3129,9 +3132,9 @@ if "PySide2.QtGui" in sys.modules:
 
     # class PySide2.QtGui.QEnterEvent:
         "QEnterEvent.__init__": ('PySide2.QtCore.QPointF', 'PySide2.QtCore.QPointF', 'PySide2.QtCore.QPointF'),
-        "QEnterEvent.global"+"Y": (),
         "QEnterEvent.globalPos": (),
         "QEnterEvent.globalX": (),
+        "QEnterEvent.global""Y": (),
         "QEnterEvent.localPos": (),
         "QEnterEvent.pos": (),
         "QEnterEvent.screenPos": (),
@@ -3406,9 +3409,9 @@ if "PySide2.QtGui" in sys.modules:
 
     # class PySide2.QtGui.QHelpEvent:
         "QHelpEvent.__init__": ('PySide2.QtCore.QEvent.Type', 'PySide2.QtCore.QPoint', 'PySide2.QtCore.QPoint'),
-        "QHelpEvent.global"+"Y": (),
         "QHelpEvent.globalPos": (),
         "QHelpEvent.globalX": (),
+        "QHelpEvent.global""Y": (),
         "QHelpEvent.pos": (),
         "QHelpEvent.x": (),
         "QHelpEvent.y": (),
@@ -3465,7 +3468,7 @@ if "PySide2.QtGui" in sys.modules:
         "QIconEngine.write": ('PySide2.QtCore.QDataStream',),
 
     # class PySide2.QtGui.QImage:
-        "QImage.__init__": [(), ('List[str]',), ('PySide2.QtCore.QSize', 'PySide2.QtGui.QImage.Format'), ('PySide2.QtGui.QImage',), ('Union[str, int]', 'int', 'int', 'PySide2.QtGui.QImage.Format', 'Callable[[bytes], NoneType]', 'int'), ('Union[str, int]', 'int', 'int', 'int', 'PySide2.QtGui.QImage.Format', 'Callable[[bytes], NoneType]', 'int'), ('int', 'int', 'PySide2.QtGui.QImage.Format'), ('str', 'int', 'int', 'PySide2.QtGui.QImage.Format'), ('str', 'int', 'int', 'int', 'PySide2.QtGui.QImage.Format'), ('str', 'str')],
+        "QImage.__init__": [(), ('List[str]',), ('PySide2.QtCore.QSize', 'PySide2.QtGui.QImage.Format'), ('PySide2.QtGui.QImage',), ('Union[str, int]', 'int', 'int', 'PySide2.QtGui.QImage.Format', 'Callable', 'int'), ('Union[str, int]', 'int', 'int', 'int', 'PySide2.QtGui.QImage.Format', 'Callable', 'int'), ('int', 'int', 'PySide2.QtGui.QImage.Format'), ('str', 'int', 'int', 'PySide2.QtGui.QImage.Format'), ('str', 'int', 'int', 'int', 'PySide2.QtGui.QImage.Format'), ('str', 'str')],
         "QImage.__copy__": (),
         "QImage.allGray": (),
         "QImage.alphaChannel": (),
@@ -3560,7 +3563,7 @@ if "PySide2.QtGui" in sys.modules:
         "QImageIOHandler.option": ('PySide2.QtGui.QImageIOHandler.ImageOption',),
         "QImageIOHandler.read": ('PySide2.QtGui.QImage',),
         "QImageIOHandler.setDevice": ('PySide2.QtCore.QIODevice',),
-        "QImageIOHandler.setFormat": ['PySide2.QtCore.QByteArray'],
+        "QImageIOHandler.setFormat": ('PySide2.QtCore.QByteArray',),
         "QImageIOHandler.setOption": ('PySide2.QtGui.QImageIOHandler.ImageOption', 'Any'),
         "QImageIOHandler.supportsOption": ('PySide2.QtGui.QImageIOHandler.ImageOption',),
         "QImageIOHandler.write": ('PySide2.QtGui.QImage',),
@@ -3836,9 +3839,9 @@ if "PySide2.QtGui" in sys.modules:
         "QMouseEvent.button": (),
         "QMouseEvent.buttons": (),
         "QMouseEvent.flags": (),
-        "QMouseEvent.global"+"Y": (),
         "QMouseEvent.globalPos": (),
         "QMouseEvent.globalX": (),
+        "QMouseEvent.global""Y": (),
         "QMouseEvent.localPos": (),
         "QMouseEvent.pos": (),
         "QMouseEvent.screenPos": (),
@@ -3952,8 +3955,8 @@ if "PySide2.QtGui" in sys.modules:
         "QOpenGLContext.versionFunctions": ('PySide2.QtGui.QOpenGLVersionProfile',),
 
     # class PySide2.QtGui.QOpenGLContextGroup:
-        "QOpenGLContextGroup.shares": (),
         "QOpenGLContextGroup.currentContextGroup": (),
+        "QOpenGLContextGroup.shares": (),
 
     # class PySide2.QtGui.QOpenGLDebugLogger:
         "QOpenGLDebugLogger.__init__": ('PySide2.QtCore.QObject',),
@@ -4041,6 +4044,7 @@ if "PySide2.QtGui" in sys.modules:
         "QOpenGLExtraFunctions.glGetQueryiv": ('int', 'int', 'int'),
         "QOpenGLExtraFunctions.glGetSamplerParameterfv": ('int', 'int', 'float'),
         "QOpenGLExtraFunctions.glGetSamplerParameteriv": ('int', 'int', 'int'),
+        "QOpenGLExtraFunctions.glGetStringi": ('int', 'int'),
         "QOpenGLExtraFunctions.glGetTexLevelParameterfv": ('int', 'int', 'int', 'float'),
         "QOpenGLExtraFunctions.glGetTexLevelParameteriv": ('int', 'int', 'int', 'int'),
         "QOpenGLExtraFunctions.glGetUniformBlockIndex": ('int', 'str'),
@@ -4235,6 +4239,7 @@ if "PySide2.QtGui" in sys.modules:
         "QOpenGLFunctions.glGetRenderbufferParameteriv": ('int', 'int', 'int'),
         "QOpenGLFunctions.glGetShaderPrecisionFormat": ('int', 'int', 'int', 'int'),
         "QOpenGLFunctions.glGetShaderiv": ('int', 'int', 'int'),
+        "QOpenGLFunctions.glGetString": ('int',),
         "QOpenGLFunctions.glGetTexParameterfv": ('int', 'int', 'float'),
         "QOpenGLFunctions.glGetTexParameteriv": ('int', 'int', 'int'),
         "QOpenGLFunctions.glGetUniformLocation": ('int', 'str'),
@@ -4567,7 +4572,7 @@ if "PySide2.QtGui" in sys.modules:
 
     # class PySide2.QtGui.QPagedPaintDevice:
         "QPagedPaintDevice.__init__": (),
-        "QPagedPaintDevice.devicePageLayout": [],
+        "QPagedPaintDevice.devicePageLayout": (),
         "QPagedPaintDevice.margins": (),
         "QPagedPaintDevice.newPage": (),
         "QPagedPaintDevice.pageLayout": (),
@@ -4604,10 +4609,10 @@ if "PySide2.QtGui" in sys.modules:
         "QPaintDevice.widthMM": (),
 
     # class PySide2.QtGui.QPaintDeviceWindow:
-        "QPaintDeviceWindow.paintEngine": (),
         "QPaintDeviceWindow.event": ('PySide2.QtCore.QEvent',),
         "QPaintDeviceWindow.exposeEvent": ('PySide2.QtGui.QExposeEvent',),
         "QPaintDeviceWindow.metric": ('PySide2.QtGui.QPaintDevice.PaintDeviceMetric',),
+        "QPaintDeviceWindow.paintEngine": (),
         "QPaintDeviceWindow.paintEvent": ('PySide2.QtGui.QPaintEvent',),
         "QPaintDeviceWindow.update": [(), ('PySide2.QtCore.QRect',), ('PySide2.QtGui.QRegion',)],
 
@@ -4694,7 +4699,7 @@ if "PySide2.QtGui" in sys.modules:
         "QPainter.drawEllipse": [('PySide2.QtCore.QPoint', 'int', 'int'), ('PySide2.QtCore.QPointF', 'float', 'float'), ('PySide2.QtCore.QRect',), ('PySide2.QtCore.QRectF',), ('int', 'int', 'int', 'int')],
         "QPainter.drawImage": [('PySide2.QtCore.QPoint', 'PySide2.QtGui.QImage'), ('PySide2.QtCore.QPoint', 'PySide2.QtGui.QImage', 'PySide2.QtCore.QRect', 'ImageConversionFlags'), ('PySide2.QtCore.QPointF', 'PySide2.QtGui.QImage'), ('PySide2.QtCore.QPointF', 'PySide2.QtGui.QImage', 'PySide2.QtCore.QRectF', 'ImageConversionFlags'), ('PySide2.QtCore.QRect', 'PySide2.QtGui.QImage'), ('PySide2.QtCore.QRect', 'PySide2.QtGui.QImage', 'PySide2.QtCore.QRect', 'ImageConversionFlags'), ('PySide2.QtCore.QRectF', 'PySide2.QtGui.QImage'), ('PySide2.QtCore.QRectF', 'PySide2.QtGui.QImage', 'PySide2.QtCore.QRectF', 'ImageConversionFlags'), ('int', 'int', 'PySide2.QtGui.QImage', 'int', 'int', 'int', 'int', 'ImageConversionFlags')],
         "QPainter.drawLine": [('PySide2.QtCore.QLine',), ('PySide2.QtCore.QLineF',), ('PySide2.QtCore.QPoint', 'PySide2.QtCore.QPoint'), ('PySide2.QtCore.QPointF', 'PySide2.QtCore.QPointF'), ('int', 'int', 'int', 'int')],
-        "QPainter.drawLines": ['list'],
+        "QPainter.drawLines": ('list',),
         "QPainter.drawPath": ('PySide2.QtGui.QPainterPath',),
         "QPainter.drawPicture": [('PySide2.QtCore.QPoint', 'PySide2.QtGui.QPicture'), ('PySide2.QtCore.QPointF', 'PySide2.QtGui.QPicture'), ('int', 'int', 'PySide2.QtGui.QPicture')],
         "QPainter.drawPie": [('PySide2.QtCore.QRect', 'int', 'int'), ('PySide2.QtCore.QRectF', 'int', 'int'), ('int', 'int', 'int', 'int', 'int', 'int')],
@@ -4705,7 +4710,7 @@ if "PySide2.QtGui" in sys.modules:
         "QPainter.drawPolygon": [('PySide2.QtGui.QPolygon', 'PySide2.QtCore.Qt.FillRule'), ('PySide2.QtGui.QPolygonF', 'PySide2.QtCore.Qt.FillRule'), ('list', 'PySide2.QtCore.Qt.FillRule')],
         "QPainter.drawPolyline": [('PySide2.QtGui.QPolygon',), ('PySide2.QtGui.QPolygonF',), ('list',)],
         "QPainter.drawRect": [('PySide2.QtCore.QRect',), ('PySide2.QtCore.QRectF',), ('int', 'int', 'int', 'int')],
-        "QPainter.drawRects": ['list'],
+        "QPainter.drawRects": ('list',),
         "QPainter.drawRoundRect": [('PySide2.QtCore.QRect', 'int', 'int'), ('PySide2.QtCore.QRectF', 'int', 'int'), ('int', 'int', 'int', 'int', 'int', 'int')],
         "QPainter.drawRoundedRect": [('PySide2.QtCore.QRect', 'float', 'float', 'PySide2.QtCore.Qt.SizeMode'), ('PySide2.QtCore.QRectF', 'float', 'float', 'PySide2.QtCore.Qt.SizeMode'), ('int', 'int', 'int', 'int', 'float', 'float', 'PySide2.QtCore.Qt.SizeMode')],
         "QPainter.drawStaticText": [('PySide2.QtCore.QPoint', 'PySide2.QtGui.QStaticText'), ('PySide2.QtCore.QPointF', 'PySide2.QtGui.QStaticText'), ('int', 'int', 'PySide2.QtGui.QStaticText')],
@@ -5064,11 +5069,11 @@ if "PySide2.QtGui" in sys.modules:
         "QPolygon.contains": ('PySide2.QtCore.QPoint',),
         "QPolygon.containsPoint": ('PySide2.QtCore.QPoint', 'PySide2.QtCore.Qt.FillRule'),
         "QPolygon.count": [(), ('PySide2.QtCore.QPoint',)],
-        "QPolygon.data": [],
+        "QPolygon.data": (),
         "QPolygon.empty": (),
         "QPolygon.endsWith": ('PySide2.QtCore.QPoint',),
         "QPolygon.fill": ('PySide2.QtCore.QPoint', 'int'),
-        "QPolygon.first": [],
+        "QPolygon.first": (),
         "QPolygon.fromList": ('list',),
         "QPolygon.front": (),
         "QPolygon.indexOf": ('PySide2.QtCore.QPoint', 'int'),
@@ -5076,7 +5081,7 @@ if "PySide2.QtGui" in sys.modules:
         "QPolygon.intersected": ('PySide2.QtGui.QPolygon',),
         "QPolygon.isEmpty": (),
         "QPolygon.isSharedWith": ('list',),
-        "QPolygon.last": [],
+        "QPolygon.last": (),
         "QPolygon.lastIndexOf": ('PySide2.QtCore.QPoint', 'int'),
         "QPolygon.length": (),
         "QPolygon.mid": ('int', 'int'),
@@ -5124,11 +5129,11 @@ if "PySide2.QtGui" in sys.modules:
         "QPolygonF.contains": ('PySide2.QtCore.QPointF',),
         "QPolygonF.containsPoint": ('PySide2.QtCore.QPointF', 'PySide2.QtCore.Qt.FillRule'),
         "QPolygonF.count": [(), ('PySide2.QtCore.QPointF',)],
-        "QPolygonF.data": [],
+        "QPolygonF.data": (),
         "QPolygonF.empty": (),
         "QPolygonF.endsWith": ('PySide2.QtCore.QPointF',),
         "QPolygonF.fill": ('PySide2.QtCore.QPointF', 'int'),
-        "QPolygonF.first": [],
+        "QPolygonF.first": (),
         "QPolygonF.fromList": ('list',),
         "QPolygonF.front": (),
         "QPolygonF.indexOf": ('PySide2.QtCore.QPointF', 'int'),
@@ -5137,7 +5142,7 @@ if "PySide2.QtGui" in sys.modules:
         "QPolygonF.isClosed": (),
         "QPolygonF.isEmpty": (),
         "QPolygonF.isSharedWith": ('list',),
-        "QPolygonF.last": [],
+        "QPolygonF.last": (),
         "QPolygonF.lastIndexOf": ('PySide2.QtCore.QPointF', 'int'),
         "QPolygonF.length": (),
         "QPolygonF.mid": ('int', 'int'),
@@ -5303,7 +5308,6 @@ if "PySide2.QtGui" in sys.modules:
         "QResizeEvent.size": (),
 
     # class PySide2.QtGui.QScreen:
-        "QScreen.virtualGeometry": (),
         "QScreen.angleBetween": ('PySide2.QtCore.Qt.ScreenOrientation', 'PySide2.QtCore.Qt.ScreenOrientation'),
         "QScreen.availableGeometry": (),
         "QScreen.availableSize": (),
@@ -5335,11 +5339,11 @@ if "PySide2.QtGui" in sys.modules:
         "QScreen.setOrientationUpdateMask": ('ScreenOrientations',),
         "QScreen.size": (),
         "QScreen.transformBetween": ('PySide2.QtCore.Qt.ScreenOrientation', 'PySide2.QtCore.Qt.ScreenOrientation', 'PySide2.QtCore.QRect'),
+        "QScreen.virtualGeometry": (),
         "QScreen.virtualSiblings": (),
         "QScreen.virtualSize": (),
 
     # class PySide2.QtGui.QSessionManager:
-        "QSessionManager.restartCommand": (),
         "QSessionManager.allowsErrorInteraction": (),
         "QSessionManager.allowsInteraction": (),
         "QSessionManager.cancel": (),
@@ -5347,6 +5351,7 @@ if "PySide2.QtGui" in sys.modules:
         "QSessionManager.isPhase2": (),
         "QSessionManager.release": (),
         "QSessionManager.requestPhase2": (),
+        "QSessionManager.restartCommand": (),
         "QSessionManager.restartHint": (),
         "QSessionManager.sessionId": (),
         "QSessionManager.sessionKey": (),
@@ -5534,7 +5539,6 @@ if "PySide2.QtGui" in sys.modules:
         "QStringListModel.supportedDropActions": (),
 
     # class PySide2.QtGui.QStyleHints:
-        "QStyleHints.useRtlExtensions": (),
         "QStyleHints.cursorFlashTime": (),
         "QStyleHints.fontSmoothingGamma": (),
         "QStyleHints.keyboardAutoRepeatRate": (),
@@ -5561,6 +5565,7 @@ if "PySide2.QtGui" in sys.modules:
         "QStyleHints.startDragVelocity": (),
         "QStyleHints.tabFocusBehavior": (),
         "QStyleHints.useHoverEffects": (),
+        "QStyleHints.useRtlExtensions": (),
         "QStyleHints.wheelScrollLines": (),
 
     # class PySide2.QtGui.QSurface:
@@ -5634,12 +5639,12 @@ if "PySide2.QtGui" in sys.modules:
         "QTabletEvent.button": (),
         "QTabletEvent.buttons": (),
         "QTabletEvent.device": (),
-        "QTabletEvent.global"+"Y": (),
         "QTabletEvent.globalPos": (),
         "QTabletEvent.globalPosF": (),
         "QTabletEvent.globalX": (),
-        "QTabletEvent.hiResGlobal"+"Y": (),
+        "QTabletEvent.global""Y": (),
         "QTabletEvent.hiResGlobalX": (),
+        "QTabletEvent.hiResGlobal""Y": (),
         "QTabletEvent.pointerType": (),
         "QTabletEvent.pos": (),
         "QTabletEvent.posF": (),
@@ -5673,7 +5678,6 @@ if "PySide2.QtGui" in sys.modules:
         "QTextBlock.layout": (),
         "QTextBlock.length": (),
         "QTextBlock.lineCount": (),
-        "QTextBlock.next": (),
         "QTextBlock.position": (),
         "QTextBlock.previous": (),
         "QTextBlock.revision": (),
@@ -6464,10 +6468,10 @@ if "PySide2.QtGui" in sys.modules:
         "QWheelEvent.angleDelta": (),
         "QWheelEvent.buttons": (),
         "QWheelEvent.delta": (),
-        "QWheelEvent.global"+"Y": (),
         "QWheelEvent.globalPos": (),
         "QWheelEvent.globalPosF": (),
         "QWheelEvent.globalX": (),
+        "QWheelEvent.global""Y": (),
         "QWheelEvent.inverted": (),
         "QWheelEvent.orientation": (),
         "QWheelEvent.phase": (),
@@ -7196,6 +7200,19 @@ if "PySide2.QtWidgets" in sys.modules:
         "QColorDialog.standardColor": ('int',),
         "QColorDialog.testOption": ('PySide2.QtWidgets.QColorDialog.ColorDialogOption',),
 
+    # class PySide2.QtWidgets.QColormap:
+        "QColormap.__init__": ('PySide2.QtWidgets.QColormap',),
+        "QColormap.__copy__": (),
+        "QColormap.cleanup": (),
+        "QColormap.colorAt": ('int',),
+        "QColormap.colormap": (),
+        "QColormap.depth": (),
+        "QColormap.initialize": (),
+        "QColormap.instance": ('int',),
+        "QColormap.mode": (),
+        "QColormap.pixel": ('PySide2.QtGui.QColor',),
+        "QColormap.size": (),
+
     # class PySide2.QtWidgets.QColumnView:
         "QColumnView.__init__": ('PySide2.QtWidgets.QWidget',),
         "QColumnView.columnWidths": (),
@@ -7896,10 +7913,10 @@ if "PySide2.QtWidgets" in sys.modules:
         "QGestureRecognizer.unregisterRecognizer": ('PySide2.QtCore.Qt.GestureType',),
 
     # class PySide2.QtWidgets.QGraphicsAnchor:
-        "QGraphicsAnchor.spacing": (),
         "QGraphicsAnchor.setSizePolicy": ('PySide2.QtWidgets.QSizePolicy.Policy',),
         "QGraphicsAnchor.setSpacing": ('float',),
         "QGraphicsAnchor.sizePolicy": (),
+        "QGraphicsAnchor.spacing": (),
         "QGraphicsAnchor.unsetSpacing": (),
 
     # class PySide2.QtWidgets.QGraphicsAnchorLayout:
@@ -8182,7 +8199,7 @@ if "PySide2.QtWidgets" in sys.modules:
         "QGraphicsItem.shape": (),
         "QGraphicsItem.show": (),
         "QGraphicsItem.stackBefore": ('PySide2.QtWidgets.QGraphicsItem',),
-        "QGraphicsItem.toGraphicsObject": [],
+        "QGraphicsItem.toGraphicsObject": (),
         "QGraphicsItem.toolTip": (),
         "QGraphicsItem.topLevelItem": (),
         "QGraphicsItem.topLevelWidget": (),
@@ -9751,6 +9768,7 @@ if "PySide2.QtWidgets" in sys.modules:
         "QMenu.popup": ('PySide2.QtCore.QPoint', 'PySide2.QtWidgets.QAction'),
         "QMenu.separatorsCollapsible": (),
         "QMenu.setActiveAction": ('PySide2.QtWidgets.QAction',),
+        "QMenu.setAsDockMenu": (),
         "QMenu.setDefaultAction": ('PySide2.QtWidgets.QAction',),
         "QMenu.setIcon": ('PySide2.QtGui.QIcon',),
         "QMenu.setSeparatorsCollapsible": ('bool',),
@@ -11146,13 +11164,13 @@ if "PySide2.QtWidgets" in sys.modules:
         "QToolButton.toolButtonStyle": (),
 
     # class PySide2.QtWidgets.QToolTip:
-        "QToolTip.showText": [('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget'), ('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget', 'PySide2.QtCore.QRect'), ('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget', 'PySide2.QtCore.QRect', 'int')],
         "QToolTip.font": (),
         "QToolTip.hideText": (),
         "QToolTip.isVisible": (),
         "QToolTip.palette": (),
         "QToolTip.setFont": ('PySide2.QtGui.QFont',),
         "QToolTip.setPalette": ('PySide2.QtGui.QPalette',),
+        "QToolTip.showText": [('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget'), ('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget', 'PySide2.QtCore.QRect'), ('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget', 'PySide2.QtCore.QRect', 'int')],
         "QToolTip.text": (),
 
     # class PySide2.QtWidgets.QTreeView:
@@ -11271,7 +11289,7 @@ if "PySide2.QtWidgets" in sys.modules:
         "QTreeWidget.expandItem": ('PySide2.QtWidgets.QTreeWidgetItem',),
         "QTreeWidget.findItems": ('str', 'MatchFlags', 'int'),
         "QTreeWidget.headerItem": (),
-        "QTreeWidget.indexFromItem": ['PySide2.QtWidgets.QTreeWidgetItem', 'int'],
+        "QTreeWidget.indexFromItem": ('PySide2.QtWidgets.QTreeWidgetItem', 'int'),
         "QTreeWidget.indexOfTopLevelItem": ('PySide2.QtWidgets.QTreeWidgetItem',),
         "QTreeWidget.insertTopLevelItem": ('int', 'PySide2.QtWidgets.QTreeWidgetItem'),
         "QTreeWidget.insertTopLevelItems": ('int', 'list'),
@@ -11455,12 +11473,12 @@ if "PySide2.QtWidgets" in sys.modules:
         "QVBoxLayout.__init__": [(), ('PySide2.QtWidgets.QWidget',)],
 
     # class PySide2.QtWidgets.QWhatsThis:
-        "QWhatsThis.showText": ('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget'),
         "QWhatsThis.createAction": ('PySide2.QtCore.QObject',),
         "QWhatsThis.enterWhatsThisMode": (),
         "QWhatsThis.hideText": (),
         "QWhatsThis.inWhatsThisMode": (),
         "QWhatsThis.leaveWhatsThisMode": (),
+        "QWhatsThis.showText": ('PySide2.QtCore.QPoint', 'str', 'PySide2.QtWidgets.QWidget'),
 
     # class PySide2.QtWidgets.QWidget:
         "QWidget.__init__": ('PySide2.QtWidgets.QWidget', 'WindowFlags'),
@@ -11765,7 +11783,6 @@ if "PySide2.QtWidgets" in sys.modules:
         "QWizard.field": ('str',),
         "QWizard.hasVisitedPage": ('int',),
         "QWizard.initializePage": ('int',),
-        "QWizard.next": (),
         "QWizard.nextId": (),
         "QWizard.options": (),
         "QWizard.page": ('int',),
@@ -11853,10 +11870,10 @@ if "PySide2.QtPrintSupport" in sys.modules:
         "QPageSetupDialog.exec_": (),
         "QPageSetupDialog.open": [(), ('PySide2.QtCore.QObject', 'str')],
         "QPageSetupDialog.printer": (),
+        "QPageSetupDialog.setVisible": ('bool',),
 
     # class PySide2.QtPrintSupport.QPrintDialog:
         "QPrintDialog.__init__": [('PySide2.QtPrintSupport.QPrinter', 'PySide2.QtWidgets.QWidget'), ('PySide2.QtWidgets.QWidget',)],
-        "QPrintDialog.accept": (),
         "QPrintDialog.done": ('int',),
         "QPrintDialog.exec_": (),
         "QPrintDialog.open": [(), ('PySide2.QtCore.QObject', 'str')],
@@ -12170,7 +12187,6 @@ if "PySide2.QtSql" in sys.modules:
         "QSqlQuery.lastError": (),
         "QSqlQuery.lastInsertId": (),
         "QSqlQuery.lastQuery": (),
-        "QSqlQuery.next": (),
         "QSqlQuery.nextResult": (),
         "QSqlQuery.numRowsAffected": (),
         "QSqlQuery.numericalPrecisionPolicy": (),
@@ -12535,6 +12551,7 @@ if "PySide2.QtNetwork" in sys.modules:
         "QNetworkAccessManager.clearConnectionCache": (),
         "QNetworkAccessManager.configuration": (),
         "QNetworkAccessManager.connectToHost": ('str', 'int'),
+        "QNetworkAccessManager.connectToHostEncrypted": ('str', 'int', 'PySide2.QtNetwork.QSslConfiguration'),
         "QNetworkAccessManager.cookieJar": (),
         "QNetworkAccessManager.createRequest": ('PySide2.QtNetwork.QNetworkAccessManager.Operation', 'PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QIODevice'),
         "QNetworkAccessManager.deleteResource": ('PySide2.QtNetwork.QNetworkRequest',),
@@ -12747,7 +12764,8 @@ if "PySide2.QtNetwork" in sys.modules:
         "QNetworkReply.close": (),
         "QNetworkReply.hasRawHeader": ('PySide2.QtCore.QByteArray',),
         "QNetworkReply.header": ('PySide2.QtNetwork.QNetworkRequest.KnownHeaders',),
-        "QNetworkReply.ignoreSslErrors": (),
+        "QNetworkReply.ignoreSslErrors": [(), ('list',)],
+        "QNetworkReply.ignoreSslErrorsImplementation": ('list',),
         "QNetworkReply.isFinished": (),
         "QNetworkReply.isRunning": (),
         "QNetworkReply.isSequential": (),
@@ -12765,7 +12783,11 @@ if "PySide2.QtNetwork" in sys.modules:
         "QNetworkReply.setRawHeader": ('PySide2.QtCore.QByteArray', 'PySide2.QtCore.QByteArray'),
         "QNetworkReply.setReadBufferSize": ('int',),
         "QNetworkReply.setRequest": ('PySide2.QtNetwork.QNetworkRequest',),
+        "QNetworkReply.setSslConfiguration": ('PySide2.QtNetwork.QSslConfiguration',),
+        "QNetworkReply.setSslConfigurationImplementation": ('PySide2.QtNetwork.QSslConfiguration',),
         "QNetworkReply.setUrl": ('PySide2.QtCore.QUrl',),
+        "QNetworkReply.sslConfiguration": (),
+        "QNetworkReply.sslConfigurationImplementation": ('PySide2.QtNetwork.QSslConfiguration',),
         "QNetworkReply.url": (),
         "QNetworkReply.writeData": ('str', 'int'),
 
@@ -12786,7 +12808,9 @@ if "PySide2.QtNetwork" in sys.modules:
         "QNetworkRequest.setOriginatingObject": ('PySide2.QtCore.QObject',),
         "QNetworkRequest.setPriority": ('PySide2.QtNetwork.QNetworkRequest.Priority',),
         "QNetworkRequest.setRawHeader": ('PySide2.QtCore.QByteArray', 'PySide2.QtCore.QByteArray'),
+        "QNetworkRequest.setSslConfiguration": ('PySide2.QtNetwork.QSslConfiguration',),
         "QNetworkRequest.setUrl": ('PySide2.QtCore.QUrl',),
+        "QNetworkRequest.sslConfiguration": (),
         "QNetworkRequest.swap": ('PySide2.QtNetwork.QNetworkRequest',),
         "QNetworkRequest.url": (),
 
@@ -12815,6 +12839,183 @@ if "PySide2.QtNetwork" in sys.modules:
         "QNetworkSession.waitForOpened": ('int',),
 
     # class PySide2.QtNetwork.QSsl:
+
+    # class PySide2.QtNetwork.QSslCertificate:
+        "QSslCertificate.__init__": [('PySide2.QtCore.QByteArray', 'PySide2.QtNetwork.QSsl.EncodingFormat'), ('PySide2.QtCore.QIODevice', 'PySide2.QtNetwork.QSsl.EncodingFormat'), ('PySide2.QtNetwork.QSslCertificate',)],
+        "QSslCertificate.__copy__": (),
+        "QSslCertificate.clear": (),
+        "QSslCertificate.digest": ('PySide2.QtCore.QCryptographicHash.Algorithm',),
+        "QSslCertificate.effectiveDate": (),
+        "QSslCertificate.expiryDate": (),
+        "QSslCertificate.fromData": ('PySide2.QtCore.QByteArray', 'PySide2.QtNetwork.QSsl.EncodingFormat'),
+        "QSslCertificate.fromDevice": ('PySide2.QtCore.QIODevice', 'PySide2.QtNetwork.QSsl.EncodingFormat'),
+        "QSslCertificate.fromPath": ('str', 'PySide2.QtNetwork.QSsl.EncodingFormat', 'PySide2.QtCore.QRegExp.PatternSyntax'),
+        "QSslCertificate.handle": (),
+        "QSslCertificate.importPkcs12": ('PySide2.QtCore.QIODevice', 'PySide2.QtNetwork.QSslKey', 'PySide2.QtNetwork.QSslCertificate', 'list', 'PySide2.QtCore.QByteArray'),
+        "QSslCertificate.isBlacklisted": (),
+        "QSslCertificate.isNull": (),
+        "QSslCertificate.isSelfSigned": (),
+        "QSslCertificate.issuerInfo": [('PySide2.QtCore.QByteArray',), ('PySide2.QtNetwork.QSslCertificate.SubjectInfo',)],
+        "QSslCertificate.issuerInfoAttributes": (),
+        "QSslCertificate.publicKey": (),
+        "QSslCertificate.serialNumber": (),
+        "QSslCertificate.subjectAlternativeNames": (),
+        "QSslCertificate.subjectInfo": [('PySide2.QtCore.QByteArray',), ('PySide2.QtNetwork.QSslCertificate.SubjectInfo',)],
+        "QSslCertificate.subjectInfoAttributes": (),
+        "QSslCertificate.swap": ('PySide2.QtNetwork.QSslCertificate',),
+        "QSslCertificate.toDer": (),
+        "QSslCertificate.toPem": (),
+        "QSslCertificate.toText": (),
+        "QSslCertificate.verify": ('list', 'str'),
+        "QSslCertificate.version": (),
+
+    # class PySide2.QtNetwork.QSslCipher:
+        "QSslCipher.__init__": [(), ('PySide2.QtNetwork.QSslCipher',), ('str',), ('str', 'PySide2.QtNetwork.QSsl.SslProtocol')],
+        "QSslCipher.__copy__": (),
+        "QSslCipher.authenticationMethod": (),
+        "QSslCipher.encryptionMethod": (),
+        "QSslCipher.isNull": (),
+        "QSslCipher.keyExchangeMethod": (),
+        "QSslCipher.name": (),
+        "QSslCipher.protocol": (),
+        "QSslCipher.protocolString": (),
+        "QSslCipher.supportedBits": (),
+        "QSslCipher.swap": ('PySide2.QtNetwork.QSslCipher',),
+        "QSslCipher.usedBits": (),
+
+    # class PySide2.QtNetwork.QSslConfiguration:
+        "QSslConfiguration.__init__": [(), ('PySide2.QtNetwork.QSslConfiguration',)],
+        "QSslConfiguration.__copy__": (),
+        "QSslConfiguration.allowedNextProtocols": (),
+        "QSslConfiguration.caCertificates": (),
+        "QSslConfiguration.ciphers": (),
+        "QSslConfiguration.defaultConfiguration": (),
+        "QSslConfiguration.ephemeralServerKey": (),
+        "QSslConfiguration.isNull": (),
+        "QSslConfiguration.localCertificate": (),
+        "QSslConfiguration.localCertificateChain": (),
+        "QSslConfiguration.nextNegotiatedProtocol": (),
+        "QSslConfiguration.nextProtocolNegotiationStatus": (),
+        "QSslConfiguration.peerCertificate": (),
+        "QSslConfiguration.peerCertificateChain": (),
+        "QSslConfiguration.peerVerifyDepth": (),
+        "QSslConfiguration.peerVerifyMode": (),
+        "QSslConfiguration.preSharedKeyIdentityHint": (),
+        "QSslConfiguration.privateKey": (),
+        "QSslConfiguration.protocol": (),
+        "QSslConfiguration.sessionCipher": (),
+        "QSslConfiguration.sessionProtocol": (),
+        "QSslConfiguration.sessionTicket": (),
+        "QSslConfiguration.sessionTicketLifeTimeHint": (),
+        "QSslConfiguration.setAllowedNextProtocols": ('list',),
+        "QSslConfiguration.setCaCertificates": ('list',),
+        "QSslConfiguration.setCiphers": ('list',),
+        "QSslConfiguration.setDefaultConfiguration": ('PySide2.QtNetwork.QSslConfiguration',),
+        "QSslConfiguration.setLocalCertificate": ('PySide2.QtNetwork.QSslCertificate',),
+        "QSslConfiguration.setLocalCertificateChain": ('list',),
+        "QSslConfiguration.setPeerVerifyDepth": ('int',),
+        "QSslConfiguration.setPeerVerifyMode": ('PySide2.QtNetwork.QSslSocket.PeerVerifyMode',),
+        "QSslConfiguration.setPreSharedKeyIdentityHint": ('PySide2.QtCore.QByteArray',),
+        "QSslConfiguration.setPrivateKey": ('PySide2.QtNetwork.QSslKey',),
+        "QSslConfiguration.setProtocol": ('PySide2.QtNetwork.QSsl.SslProtocol',),
+        "QSslConfiguration.setSessionTicket": ('PySide2.QtCore.QByteArray',),
+        "QSslConfiguration.setSslOption": ('PySide2.QtNetwork.QSsl.SslOption', 'bool'),
+        "QSslConfiguration.supportedCiphers": (),
+        "QSslConfiguration.swap": ('PySide2.QtNetwork.QSslConfiguration',),
+        "QSslConfiguration.systemCaCertificates": (),
+        "QSslConfiguration.testSslOption": ('PySide2.QtNetwork.QSsl.SslOption',),
+
+    # class PySide2.QtNetwork.QSslError:
+        "QSslError.__init__": [(), ('PySide2.QtNetwork.QSslError',), ('PySide2.QtNetwork.QSslError.SslError',), ('PySide2.QtNetwork.QSslError.SslError', 'PySide2.QtNetwork.QSslCertificate')],
+        "QSslError.__copy__": (),
+        "QSslError.certificate": (),
+        "QSslError.error": (),
+        "QSslError.errorString": (),
+        "QSslError.swap": ('PySide2.QtNetwork.QSslError',),
+
+    # class PySide2.QtNetwork.QSslKey:
+        "QSslKey.__init__": [(), ('PySide2.QtCore.QByteArray', 'PySide2.QtNetwork.QSsl.KeyAlgorithm', 'PySide2.QtNetwork.QSsl.EncodingFormat', 'PySide2.QtNetwork.QSsl.KeyType', 'PySide2.QtCore.QByteArray'), ('PySide2.QtCore.QIODevice', 'PySide2.QtNetwork.QSsl.KeyAlgorithm', 'PySide2.QtNetwork.QSsl.EncodingFormat', 'PySide2.QtNetwork.QSsl.KeyType', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QSslKey',), ('int', 'PySide2.QtNetwork.QSsl.KeyType')],
+        "QSslKey.__copy__": (),
+        "QSslKey.algorithm": (),
+        "QSslKey.clear": (),
+        "QSslKey.handle": (),
+        "QSslKey.isNull": (),
+        "QSslKey.length": (),
+        "QSslKey.swap": ('PySide2.QtNetwork.QSslKey',),
+        "QSslKey.toDer": ('PySide2.QtCore.QByteArray',),
+        "QSslKey.toPem": ('PySide2.QtCore.QByteArray',),
+        "QSslKey.type": (),
+
+    # class PySide2.QtNetwork.QSslSocket:
+        "QSslSocket.__init__": ('PySide2.QtCore.QObject',),
+        "QSslSocket.abort": (),
+        "QSslSocket.addCaCertificate": ('PySide2.QtNetwork.QSslCertificate',),
+        "QSslSocket.addCaCertificates": [('list',), ('str', 'PySide2.QtNetwork.QSsl.EncodingFormat', 'PySide2.QtCore.QRegExp.PatternSyntax')],
+        "QSslSocket.addDefaultCaCertificate": ('PySide2.QtNetwork.QSslCertificate',),
+        "QSslSocket.addDefaultCaCertificates": [('list',), ('str', 'PySide2.QtNetwork.QSsl.EncodingFormat', 'PySide2.QtCore.QRegExp.PatternSyntax')],
+        "QSslSocket.atEnd": (),
+        "QSslSocket.bytesAvailable": (),
+        "QSslSocket.bytesToWrite": (),
+        "QSslSocket.caCertificates": (),
+        "QSslSocket.canReadLine": (),
+        "QSslSocket.ciphers": (),
+        "QSslSocket.close": (),
+        "QSslSocket.connectToHost": [('PySide2.QtNetwork.QHostAddress', 'int', 'OpenMode'), ('str', 'int', 'OpenMode', 'PySide2.QtNetwork.QAbstractSocket.NetworkLayerProtocol')],
+        "QSslSocket.connectToHostEncrypted": [('str', 'int', 'OpenMode', 'PySide2.QtNetwork.QAbstractSocket.NetworkLayerProtocol'), ('str', 'int', 'str', 'OpenMode', 'PySide2.QtNetwork.QAbstractSocket.NetworkLayerProtocol')],
+        "QSslSocket.defaultCaCertificates": (),
+        "QSslSocket.defaultCiphers": (),
+        "QSslSocket.disconnectFromHost": (),
+        "QSslSocket.encryptedBytesAvailable": (),
+        "QSslSocket.encryptedBytesToWrite": (),
+        "QSslSocket.flush": (),
+        "QSslSocket.ignoreSslErrors": [(), ('list',)],
+        "QSslSocket.isEncrypted": (),
+        "QSslSocket.localCertificate": (),
+        "QSslSocket.localCertificateChain": (),
+        "QSslSocket.mode": (),
+        "QSslSocket.peerCertificate": (),
+        "QSslSocket.peerCertificateChain": (),
+        "QSslSocket.peerVerifyDepth": (),
+        "QSslSocket.peerVerifyMode": (),
+        "QSslSocket.peerVerifyName": (),
+        "QSslSocket.privateKey": (),
+        "QSslSocket.protocol": (),
+        "QSslSocket.readData": ('str', 'int'),
+        "QSslSocket.resume": (),
+        "QSslSocket.sessionCipher": (),
+        "QSslSocket.sessionProtocol": (),
+        "QSslSocket.setCaCertificates": ('list',),
+        "QSslSocket.setCiphers": [('list',), ('str',)],
+        "QSslSocket.setDefaultCaCertificates": ('list',),
+        "QSslSocket.setDefaultCiphers": ('list',),
+        "QSslSocket.setLocalCertificate": [('PySide2.QtNetwork.QSslCertificate',), ('str', 'PySide2.QtNetwork.QSsl.EncodingFormat')],
+        "QSslSocket.setLocalCertificateChain": ('list',),
+        "QSslSocket.setPeerVerifyDepth": ('int',),
+        "QSslSocket.setPeerVerifyMode": ('PySide2.QtNetwork.QSslSocket.PeerVerifyMode',),
+        "QSslSocket.setPeerVerifyName": ('str',),
+        "QSslSocket.setPrivateKey": [('PySide2.QtNetwork.QSslKey',), ('str', 'PySide2.QtNetwork.QSsl.KeyAlgorithm', 'PySide2.QtNetwork.QSsl.EncodingFormat', 'PySide2.QtCore.QByteArray')],
+        "QSslSocket.setProtocol": ('PySide2.QtNetwork.QSsl.SslProtocol',),
+        "QSslSocket.setReadBufferSize": ('int',),
+        "QSslSocket.setSocketDescriptor": ('int', 'PySide2.QtNetwork.QAbstractSocket.SocketState', 'OpenMode'),
+        "QSslSocket.setSocketOption": ('PySide2.QtNetwork.QAbstractSocket.SocketOption', 'Any'),
+        "QSslSocket.setSslConfiguration": ('PySide2.QtNetwork.QSslConfiguration',),
+        "QSslSocket.socketOption": ('PySide2.QtNetwork.QAbstractSocket.SocketOption',),
+        "QSslSocket.sslConfiguration": (),
+        "QSslSocket.sslLibraryBuildVersionNumber": (),
+        "QSslSocket.sslLibraryBuildVersionString": (),
+        "QSslSocket.sslLibraryVersionNumber": (),
+        "QSslSocket.sslLibraryVersionString": (),
+        "QSslSocket.startClientEncryption": (),
+        "QSslSocket.startServerEncryption": (),
+        "QSslSocket.supportedCiphers": (),
+        "QSslSocket.supportsSsl": (),
+        "QSslSocket.systemCaCertificates": (),
+        "QSslSocket.waitForBytesWritten": ('int',),
+        "QSslSocket.waitForConnected": ('int',),
+        "QSslSocket.waitForDisconnected": ('int',),
+        "QSslSocket.waitForEncrypted": ('int',),
+        "QSslSocket.waitForReadyRead": ('int',),
+        "QSslSocket.writeData": ('str', 'int'),
 
     # class PySide2.QtNetwork.QTcpServer:
         "QTcpServer.__init__": ('PySide2.QtCore.QObject',),
@@ -12859,12 +13060,12 @@ if "PySide2.QtTest" in sys.modules:
     dict.update({
 
     # class PySide2.QtTest.QTest:
-        "QTest.currentDataTag": (),
         "QTest.addColumnInternal": ('int', 'str'),
         "QTest.asciiToKey": ('Union[str, int]',),
         "QTest.compare_string_helper": ('str', 'str', 'str', 'str', 'str', 'int'),
         "QTest.createTouchDevice": ('PySide2.QtGui.QTouchDevice.DeviceType',),
         "QTest.currentAppName": (),
+        "QTest.currentDataTag": (),
         "QTest.currentTestFailed": (),
         "QTest.currentTestFunction": (),
         "QTest.ignoreMessage": [('PySide2.QtCore.QtMsgType', 'PySide2.QtCore.QRegularExpression'), ('PySide2.QtCore.QtMsgType', 'str')],
@@ -12882,7 +13083,7 @@ if "PySide2.QtTest" in sys.modules:
         "QTest.mouseRelease": [('PySide2.QtGui.QWindow', 'PySide2.QtCore.Qt.MouseButton', 'KeyboardModifiers', 'PySide2.QtCore.QPoint', 'int'), ('PySide2.QtWidgets.QWidget', 'PySide2.QtCore.Qt.MouseButton', 'KeyboardModifiers', 'PySide2.QtCore.QPoint', 'int')],
         "QTest.qElementData": ('str', 'int'),
         "QTest.qExpectFail": ('str', 'str', 'PySide2.QtTest.QTest.TestFailMode', 'str', 'int'),
-        "QTest.qFindTestData": ['int', 'str', 'str', 'str'],
+        "QTest.qFindTestData": ('str', 'str', 'int', 'str'),
         "QTest.qGlobalData": ('str', 'int'),
         "QTest.qSkip": ('str', 'str', 'int'),
         "QTest.qWaitForWindowActive": ('PySide2.QtWidgets.QWidget', 'int'),
@@ -12904,24 +13105,44 @@ if "PySide2.QtConcurrent" in sys.modules:
     # class PySide2.QtConcurrent.QtConcurrent:
     })
 
-# Module PySide2.QtX11Extras
-if "PySide2.QtX11Extras" in sys.modules:
+# Module PySide2.QtMacExtras
+if "PySide2.QtMacExtras" in sys.modules:
     dict.update({
 
-    # class PySide2.QtX11Extras.QX11Info:
-        "QX11Info.appRootWindow": ('int',),
-        "QX11Info.appDpiX": ('int',),
-        "QX11Info.appDpiY": ('int',),
-        "QX11Info.appScreen": (),
-        "QX11Info.appTime": (),
-        "QX11Info.appUserTime": (),
-        "QX11Info.getTimestamp": (),
-        "QX11Info.isCompositingManagerRunning": ('int',),
-        "QX11Info.isPlatformX11": (),
-        "QX11Info.nextStartupId": (),
-        "QX11Info.setAppTime": ('int',),
-        "QX11Info.setAppUserTime": ('int',),
-        "QX11Info.setNextStartupId": ('PySide2.QtCore.QByteArray',),
+    # class PySide2.QtMacExtras.QMacPasteboardMime:
+        "QMacPasteboardMime.__init__": ('Union[str, int]',),
+        "QMacPasteboardMime.canConvert": ('str', 'str'),
+        "QMacPasteboardMime.convertFromMime": ('str', 'Any', 'str'),
+        "QMacPasteboardMime.convertToMime": ('str', 'list', 'str'),
+        "QMacPasteboardMime.convertorName": (),
+        "QMacPasteboardMime.count": ('PySide2.QtCore.QMimeData',),
+        "QMacPasteboardMime.flavorFor": ('str',),
+        "QMacPasteboardMime.mimeFor": ('str',),
+
+    # class PySide2.QtMacExtras.QMacToolBar:
+        "QMacToolBar.__init__": [('PySide2.QtCore.QObject',), ('str', 'PySide2.QtCore.QObject')],
+        "QMacToolBar.addAllowedItem": ('PySide2.QtGui.QIcon', 'str'),
+        "QMacToolBar.addAllowedStandardItem": ('PySide2.QtMacExtras.QMacToolBarItem.StandardItem',),
+        "QMacToolBar.addItem": ('PySide2.QtGui.QIcon', 'str'),
+        "QMacToolBar.addSeparator": (),
+        "QMacToolBar.addStandardItem": ('PySide2.QtMacExtras.QMacToolBarItem.StandardItem',),
+        "QMacToolBar.allowedItems": (),
+        "QMacToolBar.attachToWindow": ('PySide2.QtGui.QWindow',),
+        "QMacToolBar.detachFromWindow": (),
+        "QMacToolBar.items": (),
+        "QMacToolBar.setAllowedItems": ('list',),
+        "QMacToolBar.setItems": ('list',),
+
+    # class PySide2.QtMacExtras.QMacToolBarItem:
+        "QMacToolBarItem.__init__": ('PySide2.QtCore.QObject',),
+        "QMacToolBarItem.icon": (),
+        "QMacToolBarItem.selectable": (),
+        "QMacToolBarItem.setIcon": ('PySide2.QtGui.QIcon',),
+        "QMacToolBarItem.setSelectable": ('bool',),
+        "QMacToolBarItem.setStandardItem": ('PySide2.QtMacExtras.QMacToolBarItem.StandardItem',),
+        "QMacToolBarItem.setText": ('str',),
+        "QMacToolBarItem.standardItem": (),
+        "QMacToolBarItem.text": (),
     })
 
 # Module PySide2.QtXml
@@ -13253,7 +13474,6 @@ if "PySide2.QtXml" in sys.modules:
         "QXmlInputSource.data": (),
         "QXmlInputSource.fetchData": (),
         "QXmlInputSource.fromRawData": ('PySide2.QtCore.QByteArray', 'bool'),
-        "QXmlInputSource.next": (),
         "QXmlInputSource.reset": (),
         "QXmlInputSource.setData": [('PySide2.QtCore.QByteArray',), ('str',)],
 
@@ -13304,7 +13524,7 @@ if "PySide2.QtXml" in sys.modules:
         "QXmlReader.hasFeature": ('str',),
         "QXmlReader.hasProperty": ('str',),
         "QXmlReader.lexicalHandler": (),
-        "QXmlReader.parse": ['PySide2.QtXml.QXmlInputSource'],
+        "QXmlReader.parse": ('PySide2.QtXml.QXmlInputSource',),
         "QXmlReader.property": ('str', 'bool'),
         "QXmlReader.setContentHandler": ('PySide2.QtXml.QXmlContentHandler',),
         "QXmlReader.setDTDHandler": ('PySide2.QtXml.QXmlDTDHandler',),
@@ -13470,7 +13690,6 @@ if "PySide2.QtXmlPatterns" in sys.modules:
         "QXmlResultItems.__init__": (),
         "QXmlResultItems.current": (),
         "QXmlResultItems.hasError": (),
-        "QXmlResultItems.next": (),
 
     # class PySide2.QtXmlPatterns.QXmlSchema:
         "QXmlSchema.__init__": [(), ('PySide2.QtXmlPatterns.QXmlSchema',)],
@@ -13528,12 +13747,12 @@ if "PySide2.QtHelp" in sys.modules:
         "QHelpContentItem.url": (),
 
     # class PySide2.QtHelp.QHelpContentModel:
-        "QHelpContentModel.isCreatingContents": (),
         "QHelpContentModel.columnCount": ('PySide2.QtCore.QModelIndex',),
         "QHelpContentModel.contentItemAt": ('PySide2.QtCore.QModelIndex',),
         "QHelpContentModel.createContents": ('str',),
         "QHelpContentModel.data": ('PySide2.QtCore.QModelIndex', 'int'),
         "QHelpContentModel.index": ('int', 'int', 'PySide2.QtCore.QModelIndex'),
+        "QHelpContentModel.isCreatingContents": (),
         "QHelpContentModel.parent": [(), ('PySide2.QtCore.QModelIndex',)],
         "QHelpContentModel.rowCount": ('PySide2.QtCore.QModelIndex',),
 
@@ -13580,9 +13799,9 @@ if "PySide2.QtHelp" in sys.modules:
         "QHelpEngineCore.unregisterDocumentation": ('str',),
 
     # class PySide2.QtHelp.QHelpIndexModel:
-        "QHelpIndexModel.isCreatingIndex": (),
         "QHelpIndexModel.createIndex": [('int', 'int', 'int'), ('int', 'int', 'object'), ('str',)],
         "QHelpIndexModel.filter": ('str', 'str'),
+        "QHelpIndexModel.isCreatingIndex": (),
         "QHelpIndexModel.linksForKeyword": ('str',),
 
     # class PySide2.QtHelp.QHelpIndexWidget:
@@ -13603,6 +13822,7 @@ if "PySide2.QtHelp" in sys.modules:
         "QHelpSearchEngine.search": [('list',), ('str',)],
         "QHelpSearchEngine.searchInput": (),
         "QHelpSearchEngine.searchResultCount": (),
+        "QHelpSearchEngine.searchResults": ('int', 'int'),
 
     # class PySide2.QtHelp.QHelpSearchQuery:
         "QHelpSearchQuery.__init__": [(), ('PySide2.QtHelp.QHelpSearchQuery',), ('PySide2.QtHelp.QHelpSearchQuery.FieldName', 'List[str]')],
@@ -13620,6 +13840,12 @@ if "PySide2.QtHelp" in sys.modules:
         "QHelpSearchQueryWidget.setCompactMode": ('bool',),
         "QHelpSearchQueryWidget.setQuery": ('list',),
         "QHelpSearchQueryWidget.setSearchInput": ('str',),
+
+    # class PySide2.QtHelp.QHelpSearchResult:
+        "QHelpSearchResult.__init__": [(), ('PySide2.QtCore.QUrl', 'str', 'str'), ('PySide2.QtHelp.QHelpSearchResult',)],
+        "QHelpSearchResult.snippet": (),
+        "QHelpSearchResult.title": (),
+        "QHelpSearchResult.url": (),
 
     # class PySide2.QtHelp.QHelpSearchResultWidget:
         "QHelpSearchResultWidget.changeEvent": ('PySide2.QtCore.QEvent',),
@@ -13725,7 +13951,7 @@ if "PySide2.QtMultimedia" in sys.modules:
         "QAudioBuffer.__copy__": (),
         "QAudioBuffer.byteCount": (),
         "QAudioBuffer.constData": (),
-        "QAudioBuffer.data": [],
+        "QAudioBuffer.data": (),
         "QAudioBuffer.duration": (),
         "QAudioBuffer.format": (),
         "QAudioBuffer.frameCount": (),
@@ -14148,9 +14374,9 @@ if "PySide2.QtMultimedia" in sys.modules:
         "QMediaNetworkAccessControl.setConfigurations": ('list',),
 
     # class PySide2.QtMultimedia.QMediaObject:
-        "QMediaObject.availableMetaData": (),
         "QMediaObject.addPropertyWatch": ('PySide2.QtCore.QByteArray',),
         "QMediaObject.availability": (),
+        "QMediaObject.availableMetaData": (),
         "QMediaObject.bind": ('PySide2.QtCore.QObject',),
         "QMediaObject.isAvailable": (),
         "QMediaObject.isMetaDataAvailable": (),
@@ -14240,7 +14466,6 @@ if "PySide2.QtMultimedia" in sys.modules:
         "QMediaPlaylist.mediaCount": (),
         "QMediaPlaylist.mediaObject": (),
         "QMediaPlaylist.moveMedia": ('int', 'int'),
-        "QMediaPlaylist.next": (),
         "QMediaPlaylist.nextIndex": ('int',),
         "QMediaPlaylist.playbackMode": (),
         "QMediaPlaylist.previous": (),
@@ -14505,7 +14730,7 @@ if "PySide2.QtMultimedia" in sys.modules:
         "QVideoFrame.__init__": [(), ('PySide2.QtGui.QImage',), ('PySide2.QtMultimedia.QAbstractVideoBuffer', 'PySide2.QtCore.QSize', 'PySide2.QtMultimedia.QVideoFrame.PixelFormat'), ('PySide2.QtMultimedia.QVideoFrame',), ('int', 'PySide2.QtCore.QSize', 'int', 'PySide2.QtMultimedia.QVideoFrame.PixelFormat')],
         "QVideoFrame.__copy__": (),
         "QVideoFrame.availableMetaData": (),
-        "QVideoFrame.bits": [],
+        "QVideoFrame.bits": (),
         "QVideoFrame.bytesPerLine": [(), ('int',)],
         "QVideoFrame.endTime": (),
         "QVideoFrame.fieldType": (),
@@ -15006,7 +15231,6 @@ if "PySide2.QtQml" in sys.modules:
         "QJSValueIterator.__init__": ('PySide2.QtQml.QJSValue',),
         "QJSValueIterator.hasNext": (),
         "QJSValueIterator.name": (),
-        "QJSValueIterator.next": (),
         "QJSValueIterator.value": (),
 
     # class PySide2.QtQml.QQmlAbstractUrlInterceptor:
@@ -15017,7 +15241,7 @@ if "PySide2.QtQml" in sys.modules:
         "QQmlApplicationEngine.__init__": [('PySide2.QtCore.QObject',), ('PySide2.QtCore.QUrl', 'PySide2.QtCore.QObject'), ('str', 'PySide2.QtCore.QObject')],
         "QQmlApplicationEngine.load": [('PySide2.QtCore.QUrl',), ('str',)],
         "QQmlApplicationEngine.loadData": ('PySide2.QtCore.QByteArray', 'PySide2.QtCore.QUrl'),
-        "QQmlApplicationEngine.rootObjects": [],
+        "QQmlApplicationEngine.rootObjects": (),
 
     # class PySide2.QtQml.QQmlComponent:
         "QQmlComponent.__init__": [('PySide2.QtCore.QObject',), ('PySide2.QtQml.QQmlEngine', 'PySide2.QtCore.QObject'), ('PySide2.QtQml.QQmlEngine', 'PySide2.QtCore.QUrl', 'PySide2.QtCore.QObject'), ('PySide2.QtQml.QQmlEngine', 'PySide2.QtCore.QUrl', 'PySide2.QtQml.QQmlComponent.CompilationMode', 'PySide2.QtCore.QObject'), ('PySide2.QtQml.QQmlEngine', 'str', 'PySide2.QtCore.QObject'), ('PySide2.QtQml.QQmlEngine', 'str', 'PySide2.QtQml.QQmlComponent.CompilationMode', 'PySide2.QtCore.QObject')],
@@ -15168,7 +15392,7 @@ if "PySide2.QtQml" in sys.modules:
         "QQmlFileSelector.__init__": ('PySide2.QtQml.QQmlEngine', 'PySide2.QtCore.QObject'),
         "QQmlFileSelector.get": ('PySide2.QtQml.QQmlEngine',),
         "QQmlFileSelector.selector": (),
-        "QQmlFileSelector.setExtraSelectors": ['List[str]'],
+        "QQmlFileSelector.setExtraSelectors": ('List[str]',),
         "QQmlFileSelector.setSelector": ('PySide2.QtCore.QFileSelector',),
 
     # class PySide2.QtQml.QQmlImageProviderBase:
@@ -15458,9 +15682,9 @@ if "PySide2.QtQuick" in sys.modules:
         "QQuickItem.z": (),
 
     # class PySide2.QtQuick.QQuickItemGrabResult:
-        "QQuickItemGrabResult.saveToFile": ['str'],
         "QQuickItemGrabResult.event": ('PySide2.QtCore.QEvent',),
         "QQuickItemGrabResult.image": (),
+        "QQuickItemGrabResult.saveToFile": ('str',),
         "QQuickItemGrabResult.url": (),
 
     # class PySide2.QtQuick.QQuickPaintedItem:
@@ -15615,7 +15839,7 @@ if "PySide2.QtQuick" in sys.modules:
     # class PySide2.QtQuick.QSGBasicGeometryNode:
         "QSGBasicGeometryNode.__init__": ('PySide2.QtQuick.QSGNode.NodeType',),
         "QSGBasicGeometryNode.clipList": (),
-        "QSGBasicGeometryNode.geometry": [],
+        "QSGBasicGeometryNode.geometry": (),
         "QSGBasicGeometryNode.matrix": (),
         "QSGBasicGeometryNode.setGeometry": ('PySide2.QtQuick.QSGGeometry',),
         "QSGBasicGeometryNode.setRendererClipList": ('PySide2.QtQuick.QSGClipNode',),
@@ -15650,9 +15874,9 @@ if "PySide2.QtQuick" in sys.modules:
         "QSGGeometry.defaultAttributes_TexturedPoint2D": (),
         "QSGGeometry.drawingMode": (),
         "QSGGeometry.indexCount": (),
-        "QSGGeometry.indexData": [],
-        "QSGGeometry.indexDataAsUInt": [],
-        "QSGGeometry.indexDataAsUShort": [],
+        "QSGGeometry.indexData": (),
+        "QSGGeometry.indexDataAsUInt": (),
+        "QSGGeometry.indexDataAsUShort": (),
         "QSGGeometry.indexDataPattern": (),
         "QSGGeometry.indexType": (),
         "QSGGeometry.lineWidth": (),
@@ -15668,10 +15892,10 @@ if "PySide2.QtQuick" in sys.modules:
         "QSGGeometry.updateRectGeometry": ('PySide2.QtQuick.QSGGeometry', 'PySide2.QtCore.QRectF'),
         "QSGGeometry.updateTexturedRectGeometry": ('PySide2.QtQuick.QSGGeometry', 'PySide2.QtCore.QRectF', 'PySide2.QtCore.QRectF'),
         "QSGGeometry.vertexCount": (),
-        "QSGGeometry.vertexData": [],
-        "QSGGeometry.vertexDataAsColoredPoint2D": [],
-        "QSGGeometry.vertexDataAsPoint2D": [],
-        "QSGGeometry.vertexDataAsTexturedPoint2D": [],
+        "QSGGeometry.vertexData": (),
+        "QSGGeometry.vertexDataAsColoredPoint2D": (),
+        "QSGGeometry.vertexDataAsPoint2D": (),
+        "QSGGeometry.vertexDataAsTexturedPoint2D": (),
         "QSGGeometry.vertexDataPattern": (),
 
     # class PySide2.QtQuick.QSGGeometryNode:
@@ -15957,7 +16181,7 @@ if "PySide2.QtDataVisualization" in sys.modules:
     dict.update({
 
     # class PySide2.QtDataVisualization.QtDataVisualization:
-        "QtDataVisualization.qDefaultSurfaceFormat": ['bool'],
+        "QtDataVisualization.qDefaultSurfaceFormat": ('bool',),
     })
 
 # Module PySide2.QtUiTools
@@ -16018,13 +16242,13 @@ if "PySide2.QtWebEngineWidgets" in sys.modules:
         "QWebEngineCertificateError.url": (),
 
     # class PySide2.QtWebEngineWidgets.QWebEngineDownloadItem:
-        "QWebEngineDownloadItem.path": (),
         "QWebEngineDownloadItem.accept": (),
         "QWebEngineDownloadItem.cancel": (),
         "QWebEngineDownloadItem.id": (),
         "QWebEngineDownloadItem.interruptReasonString": (),
         "QWebEngineDownloadItem.isFinished": (),
         "QWebEngineDownloadItem.mimeType": (),
+        "QWebEngineDownloadItem.path": (),
         "QWebEngineDownloadItem.receivedBytes": (),
         "QWebEngineDownloadItem.setPath": ('str',),
         "QWebEngineDownloadItem.state": (),

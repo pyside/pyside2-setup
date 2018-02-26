@@ -679,14 +679,6 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
     return true;
 }
 
-
-bool hasExternalCppConversions(SbkObjectType*) { return false; }                    // DEPRECATED.
-bool isExternalConvertible(SbkObjectType *, PyObject *) { return false; }           // DEPRECATED.
-void setExternalCppConversionFunction(SbkObjectType*, ExtendedToCppFunc) {}         // DEPRECATED.
-void setExternalIsConvertibleFunction(SbkObjectType*, ExtendedIsConvertibleFunc) {} // DEPRECATED.
-void* callExternalCppConversion(SbkObjectType*, PyObject*) { return 0; }            // DEPRECATED.
-
-
 bool hasCast(SbkObjectType* type)
 {
     return type->d->mi_specialcast != 0;
@@ -717,18 +709,6 @@ const char* getOriginalName(SbkObjectType* self)
 void setTypeDiscoveryFunctionV2(SbkObjectType* self, TypeDiscoveryFuncV2 func)
 {
     self->d->type_discovery = func;
-}
-
-void setTypeDiscoveryFunction(SbkObjectType* self, TypeDiscoveryFunc func)
-{
-    self->d->type_discovery = (TypeDiscoveryFuncV2)func;
-}
-
-TypeDiscoveryFunc getTypeDiscoveryFunction(SbkObjectType* self)
-{
-    // This is an illegal cast because the return value is different,
-    // but nobody ever used this function, so... =]
-    return (TypeDiscoveryFunc)self->d->type_discovery;
 }
 
 void copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other)
@@ -1051,11 +1031,6 @@ void makeValid(SbkObject* self)
             }
         }
     }
-}
-
-bool hasParentInfo(SbkObject* pyObj)
-{
-    return pyObj->d->parentInfo != 0;
 }
 
 void* cppPointer(SbkObject* pyObj, PyTypeObject* desiredType)

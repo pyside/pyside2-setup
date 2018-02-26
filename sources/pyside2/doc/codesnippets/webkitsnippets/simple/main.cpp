@@ -57,7 +57,7 @@ app = QApplication(sys.argv)
 parent = None
 //! [Using QWebView]
 view = QWebView(parent)
-view.load(QUrl("http://qt.nokia.com/"))
+view.load(QUrl("http://qt-project.org/"))
 view.show()
 //! [Using QWebView]
 sys.exit(app.exec_())

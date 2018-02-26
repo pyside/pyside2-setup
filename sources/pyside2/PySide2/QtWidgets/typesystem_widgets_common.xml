@@ -215,7 +215,7 @@
     <add-function signature="__next__()" return-type="PyObject*">
       <inject-code class="target" position="beginning">
       if (**%CPPSELF) {
-          QTreeWidgetItemIterator* %0 = new QTreeWidgetItemIterator((*%CPPSELF)++);
+          QTreeWidgetItemIterator *%0 = new QTreeWidgetItemIterator((*%CPPSELF)++);
           %PYARG_0 = %CONVERTTOPYTHON[QTreeWidgetItemIterator*](%0);
       }
       </inject-code>
@@ -223,7 +223,7 @@
 
     <add-function signature="value()" return-type="QTreeWidgetItem*">
         <inject-code>
-        QTreeWidgetItem* %0 = %CPPSELF.operator*();
+        QTreeWidgetItem *%0 = %CPPSELF.operator*();
         %PYARG_0 = %CONVERTTOPYTHON[QTreeWidgetItem*](%0);
         Shiboken::Object::releaseOwnership(%PYARG_0);
         </inject-code>
@@ -267,7 +267,7 @@
     <enum-type name="GraphicsItemFlag" flags="GraphicsItemFlags"/>
     <enum-type name="PanelModality" since="4.6"/>
     <inject-code class="target" position="end">
-        PyObject* userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
+        PyObject *userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
         PyDict_SetItemString(Sbk_QGraphicsItem_Type.super.ht_type.tp_dict, "UserType", userTypeConstant);
     </inject-code>
     <modify-function signature="setParentItem(QGraphicsItem *)">
@@ -277,7 +277,7 @@
     </modify-function>
     <template name="scene_return_parenting">
     if (%0) {
-        QObject* parent = %0->parent();
+        QObject *parent = %0->parent();
         Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QObject*](parent));
         Shiboken::Object::setParent(pyParent, %PYARG_0);
     }
@@ -432,6 +432,16 @@
     </modify-function>
     <modify-function signature="setItemDelegate(QAbstractItemDelegate*)">
       <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemDelegateForColumn(int, QAbstractItemDelegate*)">
+      <modify-argument index="2">
+        <reference-count action="set"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setItemDelegateForRow(int, QAbstractItemDelegate*)">
+      <modify-argument index="2">
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
@@ -2149,6 +2159,22 @@
         <parent index="this" action="remove"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="clear()">
+      <inject-code class="target" position="beginning">
+          Shiboken::BindingManager &amp;bm = Shiboken::BindingManager::instance();
+          PyObject *pyObj;
+          for (int i = 0; i &lt; %CPPSELF.count(); i++) {
+            QListWidgetItem *item = %CPPSELF.item(i);
+            if ((pyObj = reinterpret_cast&lt;PyObject*&gt;(bm.retrieveWrapper(item))) != 0) {
+                Py_INCREF(pyObj);
+                Shiboken::Object::setParent(NULL, pyObj);
+                Shiboken::Object::invalidate(pyObj);
+                Py_DECREF(pyObj);
+            }
+          }
+          %CPPSELF.%FUNCTION_NAME();
+      </inject-code>
+    </modify-function>
   </object-type>
 
   <object-type name="QWidget">
@@ -2510,10 +2536,13 @@
     </modify-function>
     <modify-function signature="clear()">
         <inject-code class="target" position="beginning">
+            Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
             for (int i = 0; i &lt; %CPPSELF.count(); i++) {
                 QWidget* widget = %CPPSELF.widget(i);
-                Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](widget));
-                Shiboken::Object::setParent(0, pyWidget);
+                if (bm.hasWrapper(widget)) {
+                    Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](widget));
+                    Shiboken::Object::releaseOwnership(pyWidget);
+                }
             }
             %CPPSELF.%FUNCTION_NAME();
         </inject-code>
@@ -2973,7 +3002,7 @@
       </modify-argument>
 
       <inject-code>
-        QAction* action = %CPPSELF.addAction(%1, %2);
+        QAction *action = %CPPSELF.addAction(%1, %2);
         %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
         Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0, "connect", "OsO", %PYARG_0, SIGNAL(triggered()), %PYARG_3));
       </inject-code>
@@ -2989,7 +3018,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
       <inject-code>
-        QAction* action = %CPPSELF.addAction(%1);
+        QAction *action = %CPPSELF.addAction(%1);
         %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
         Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0, "connect", "OsO", %PYARG_0, SIGNAL(triggered()), %PYARG_2));
       </inject-code>

@@ -30,6 +30,7 @@
 
 #include <QtCore/QStack>
 #include <QtCore/QHash>
+#include <QtCore/QScopedPointer>
 #include <QtCore/QTextStream>
 #include <QXmlStreamReader>
 #include "generator.h"
@@ -101,8 +102,19 @@ public:
     }
 
 private:
-    QString resolveContextForMethod(const QString& methodName);
-    QString expandFunction(const QString& function);
+    struct LinkContext
+    {
+        LinkContext(const QString &ref, const QString &lType) : linkRef(ref), type(lType) {}
+
+        QString linkTag;
+        QString linkRef;
+        QString linkText;
+        QString linkTagEnding;
+        QString type;
+    };
+
+    QString resolveContextForMethod(const QString& methodName) const;
+    QString expandFunction(const QString& function) const;
     QString transform(const QString& doc);
 
     void handleHeadingTag(QXmlStreamReader& reader);
@@ -133,6 +145,10 @@ private:
     void handleUselessTag(QXmlStreamReader& reader);
     void handleAnchorTag(QXmlStreamReader& reader);
 
+    LinkContext *handleLinkStart(const QString &type, const QString &ref) const;
+    void handleLinkText(LinkContext *linkContext, QString linktext) const;
+    void handleLinkEnd(LinkContext *linkContext);
+
     typedef void (QtXmlToSphinx::*TagHandler)(QXmlStreamReader&);
     QHash<QString, TagHandler> m_handlerMap;
     QStack<TagHandler> m_handlers;
@@ -143,6 +159,8 @@ private:
 
 
     Table m_currentTable;
+    QScopedPointer<LinkContext> m_linkContext; // for <link>
+    QScopedPointer<LinkContext> m_seeAlsoContext; // for <see-also>foo()</see-also>
     bool m_tableHasHeader;
     QString m_context;
     QtDocGenerator* m_generator;
@@ -151,8 +169,10 @@ private:
     QString m_lastTagName;
     QString m_opened_anchor;
 
-    QString readFromLocations(const QStringList& locations, const QString& path, const QString& identifier);
-    QString readFromLocation(const QString& location, const QString& identifier, bool* ok = 0);
+    QString readFromLocations(const QStringList &locations, const QString &path,
+                              const QString &identifier, QString *errorMessage);
+    QString readFromLocation(const QString &location, const QString &identifier,
+                             QString *errorMessage);
     void pushOutputBuffer();
     QString popOutputBuffer();
     void writeTable(Table& table);
@@ -178,6 +198,8 @@ public:
     {
         return m_libSourceDir;
     }
+
+    QString docDataDir() const { return m_docDataDir; }
 
     bool doSetup(const QMap<QString, QString>& args);
 
@@ -209,13 +231,15 @@ private:
     void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
     void writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeFunction(QTextStream& s, bool writeDoc, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
-    void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction* func);
+    void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
+                                     const AbstractMetaFunction* func);
     void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);
     void writeFunctionBlock(QTextStream& s, const QString& title, QStringList& functions);
-    void writeParamerteType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg);
+    void writeParameterType(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaArgument *arg);
 
     void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass);
-    void writeFormatedText(QTextStream& s, const Documentation& doc, const AbstractMetaClass* metaclass = 0);
+    void writeFormattedText(QTextStream &s, const Documentation &doc,
+                            const AbstractMetaClass *metaclass = nullptr);
     bool writeInjectDocumentation(QTextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 

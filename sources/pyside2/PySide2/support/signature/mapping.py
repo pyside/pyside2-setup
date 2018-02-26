@@ -282,7 +282,9 @@ def init_QtCore():
         "zero(unsigned int)": 0,
         "zero(PySide2.QtCore.QPoint)": Default("PySide2.QtCore.QPoint"),
         "zero(unsigned char)": 0,
-        "zero(PySide2.QtCore.QEvent.Type)": None
+        "zero(PySide2.QtCore.QEvent.Type)": None,
+        "CheckIndexOption.NoOption": Instance(
+            "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
     })
     try:
         type_map.update({

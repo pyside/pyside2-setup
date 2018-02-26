@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtsvg/src/svg/doc/qtsvg.qdocconf)
+include(../pyside-config.qdocconf)

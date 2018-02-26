@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtcharts/src/charts/doc/qtcharts.qdocconf)
+include(../pyside-config.qdocconf)
