@@ -647,7 +647,7 @@ char* getTypeName(PyObject* type)
 {
     if (PyType_Check(type)) {
         char* typeName = NULL;
-        if (PyType_IsSubtype(reinterpret_cast<PyTypeObject*>(type), reinterpret_cast<PyTypeObject*>(SbkObject_TypeP))) {
+        if (PyType_IsSubtype(reinterpret_cast<PyTypeObject*>(type), reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))) {
             SbkObjectType* objType = reinterpret_cast<SbkObjectType*>(type);
             typeName = strdup(Shiboken::ObjectType::getOriginalName(objType));
         } else {
@@ -663,7 +663,7 @@ char* getTypeName(PyObject* type)
                 typeName = strdup("double");
             else if (objType == &PyBool_Type)
                 typeName = strdup("bool");
-            else if (Py_TYPE(objType) == SbkEnumType_TypeP)
+            else if (Py_TYPE(objType) == SbkEnumType_TypeF())
                 typeName = strdup(Shiboken::Enum::getCppName(objType));
             else
                 typeName = strdup("PyObject");

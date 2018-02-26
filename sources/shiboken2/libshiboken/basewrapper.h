@@ -93,8 +93,8 @@ typedef void (*ObjectDestructor)(void*);
 
 typedef void (*SubTypeInitHook)(SbkObjectType*, PyObject*, PyObject*);
 
-extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeP;
-extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeP;
+extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
+extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);
 
 
 struct SbkObjectTypePrivate;

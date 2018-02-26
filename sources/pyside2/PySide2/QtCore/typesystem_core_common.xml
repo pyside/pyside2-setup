@@ -441,9 +441,9 @@
     <inject-code class="native" position="beginning">
     static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
     {
-        if (PyObject_TypeCheck(type, SbkObjectType_TypeP)) {
-            SbkObjectType *sbkType = (SbkObjectType*)type;
-            const char *typeName = Shiboken::ObjectType::getOriginalName(sbkType);
+        if (PyObject_TypeCheck(type, SbkObjectType_TypeF())) {
+            SbkObjectType* sbkType = (SbkObjectType*)type;
+            const char* typeName = Shiboken::ObjectType::getOriginalName(sbkType);
             if (!typeName)
                 return 0;
             bool valueType = '*' != typeName[qstrlen(typeName) - 1];
@@ -575,8 +575,8 @@
                 typeName = "double"; // float is a UserType in QVariant.
             else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyLong_Type))
                 typeName = "int";    // long is a UserType in QVariant.
-            else if (%in->ob_type == SbkObjectType_TypeP)
-                typeName = Shiboken::ObjectType::getOriginalName(reinterpret_cast&lt;SbkObjectType*&gt;(%in));
+            else if (%in->ob_type == SbkObjectType_TypeF())
+                typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType*)%in);
             else
                 typeName = (reinterpret_cast&lt;PyTypeObject*&gt;(%in))->tp_name;
             %out = QVariant::nameToType(typeName);

@@ -50,57 +50,31 @@ typedef struct {
 
 static PyObject* CallableObject_call(PyObject* callable_object, PyObject* args, PyObject* kw);
 
-static PyTypeObject PySideCallableObjectType = {
-    PyVarObject_HEAD_INIT(0, 0)
+static void
+dummyDealloc(PyObject *)
+{}
+
+static PyType_Slot PySideCallableObjectType_slots[] = {
+    {Py_tp_call, (void *)CallableObject_call},
+    {Py_tp_dealloc, (void *)dummyDealloc},
+    {0, 0}
+};
+static PyType_Spec PySideCallableObjectType_spec = {
     const_cast<char*>("PySide.Callable"),
-    sizeof(PySideCallableObject),    /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    0,                         /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    CallableObject_call,       /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/,        /*tp_flags*/
-    0,                         /* tp_doc */
-    0,                         /* tp_traverse */
-    0,                         /* tp_clear */
-    0,                         /* tp_richcompare */
-    0,                         /* tp_weaklistoffset */
-    0,                         /* tp_iter */
-    0,                         /* tp_iternext */
-    0,                         /* tp_methods */
-    0,                         /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    0,                         /* tp_init */
-    0,                         /* tp_alloc */
-    0,                         /* tp_new */
-    0,                         /* tp_free */
-    0,                         /* tp_is_gc */
-    0,                         /* tp_bases */
-    0,                         /* tp_mro */
-    0,                         /* tp_cache */
-    0,                         /* tp_subclasses */
-    0,                         /* tp_weaklist */
-    0,                         /* tp_del */
-    0                          /* tp_version_tag */
+    sizeof(PySideCallableObject),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    PySideCallableObjectType_slots,
 };
 
-static PyTypeObject *PySideCallableObjectTypeP = &PySideCallableObjectType;
+
+static PyTypeObject *PySideCallableObjectTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (type == nullptr)
+        type = (PyTypeObject *)PyType_FromSpec(&PySideCallableObjectType_spec);
+    return type;
+}
 
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject * /* kw */)
 {
@@ -118,13 +92,13 @@ PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
     if (obj == Py_None)
         return 0;
 
-    if (Py_TYPE(PySideCallableObjectTypeP) == 0)
+    if (Py_TYPE(PySideCallableObjectTypeF()) == 0)
     {
-        Py_TYPE(PySideCallableObjectTypeP) = &PyType_Type;
-        PyType_Ready(PySideCallableObjectTypeP);
+        Py_TYPE(PySideCallableObjectTypeF()) = &PyType_Type;
+        PyType_Ready(PySideCallableObjectTypeF());
     }
 
-    PySideCallableObject* callable = PyObject_New(PySideCallableObject, PySideCallableObjectTypeP);
+    PySideCallableObject* callable = PyObject_New(PySideCallableObject, PySideCallableObjectTypeF());
     if (!callable || PyErr_Occurred())
         return 0;
 

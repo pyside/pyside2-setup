@@ -66,6 +66,10 @@ extern "C"
 static void SbkObjectTypeDealloc(PyObject* pyObj);
 static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
+static void
+dummyDealloc(PyObject *)
+{}
+
 static PyTypeObject SbkObjectType_Type = {
     PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "Shiboken.ObjectType",
@@ -86,7 +90,7 @@ static PyTypeObject SbkObjectType_Type = {
     /*tp_getattro*/         0,
     /*tp_setattro*/         PyObject_GenericSetAttr,
     /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_BASETYPE,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
     /*tp_doc*/              0,
     /*tp_traverse*/         0,
     /*tp_clear*/            0,
@@ -116,7 +120,14 @@ static PyTypeObject SbkObjectType_Type = {
     /*tp_version_tag*/      0
 };
 
-PyTypeObject *SbkObjectType_TypeP = &SbkObjectType_Type;
+PyTypeObject *SbkObjectType_TypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (type == nullptr)
+        //type = (PyTypeObject *)PyType_FromSpec(&SbkObjectType_Type_spec);
+        type = &SbkObjectType_Type;
+    return type;
+}
 
 static PyObject *SbkObjectGetDict(PyObject* pObj, void *)
 {
@@ -179,7 +190,7 @@ static int SbkObject_clear(PyObject* self)
 }
 
 static SbkObjectType SbkObject_Type = { { {
-    PyVarObject_HEAD_INIT(SbkObjectType_TypeP, 0)
+    PyVarObject_HEAD_INIT(0, 0)
     /*tp_name*/             "Shiboken.Object",
     /*tp_basicsize*/        sizeof(SbkObject),
     /*tp_itemsize*/         0,
@@ -198,7 +209,7 @@ static SbkObjectType SbkObject_Type = { { {
     /*tp_getattro*/         0,
     /*tp_setattro*/         0,
     /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
+    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
     /*tp_doc*/              0,
     /*tp_traverse*/         SbkObject_traverse,
     /*tp_clear*/            SbkObject_clear,
@@ -230,7 +241,16 @@ static SbkObjectType SbkObject_Type = { { {
     /*priv_data*/           0
 };
 
-SbkObjectType *SbkObject_TypeP = &SbkObject_Type;
+SbkObjectType *SbkObject_TypeF(void)
+{
+    static SbkObjectType *type = nullptr;
+    if (type == nullptr) {
+        //type = (PyTypeObject *)PyType_FromSpec(&SbkObject_Type_spec);
+        type = &SbkObject_Type;
+        Py_TYPE(type) = SbkObjectType_TypeF();
+    }
+    return type;
+}
 
 
 static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
@@ -473,7 +493,7 @@ static void _walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisit
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
 
-        if (!PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeP))) {
+        if (!PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))) {
             continue;
         } else {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
@@ -562,15 +582,15 @@ void init()
     PEP384_Init();
 
     Shiboken::ObjectType::initPrivateData(&SbkObject_Type);
-    Shiboken::ObjectType::initPrivateData(SbkObject_TypeP);
+    Shiboken::ObjectType::initPrivateData(SbkObject_TypeF());
 
-    if (PyType_Ready(SbkEnumType_TypeP) < 0)
+    if (PyType_Ready(SbkEnumType_TypeF()) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.SbkEnumType metatype.");
 
-    if (PyType_Ready(SbkObjectType_TypeP) < 0)
+    if (PyType_Ready(SbkObjectType_TypeF()) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
 
-    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(SbkObject_TypeP)) < 0)
+    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())) < 0)
         Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapper type.");
 
     VoidPtr::init();
@@ -667,7 +687,7 @@ namespace ObjectType
 
 bool checkType(PyTypeObject* type)
 {
-    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeP)) != 0;
+    return PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeF())) != 0;
 }
 
 bool isUserType(PyTypeObject* type)
@@ -1080,7 +1100,7 @@ bool setCppPointer(SbkObject* sbkObj, PyTypeObject* desiredType, void* cptr)
 bool isValid(PyObject* pyObj)
 {
     if (!pyObj || pyObj == Py_None
-        || Py_TYPE(pyObj->ob_type) != SbkObjectType_TypeP) {
+        || Py_TYPE(pyObj->ob_type) != SbkObjectType_TypeF()) {
         return true;
     }
 
@@ -1123,7 +1143,7 @@ bool isValid(SbkObject* pyObj, bool throwPyError)
 bool isValid(PyObject* pyObj, bool throwPyError)
 {
     if (!pyObj || pyObj == Py_None ||
-        !PyType_IsSubtype(pyObj->ob_type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeP))) {
+        !PyType_IsSubtype(pyObj->ob_type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))) {
         return true;
     }
     return isValid(reinterpret_cast<SbkObject*>(pyObj), throwPyError);

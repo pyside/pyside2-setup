@@ -598,7 +598,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
     for (Py_ssize_t i = 0; i < basesCount; ++i) {
         PyTypeObject *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
         if (PyType_IsSubtype(baseType, qObjectType)
-                || baseType == reinterpret_cast<PyTypeObject *>(SbkObject_TypeP)
+                || baseType == reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())
                 || baseType == reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type)) {
             continue;
         } else {

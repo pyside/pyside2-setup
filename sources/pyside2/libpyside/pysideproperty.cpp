@@ -72,57 +72,33 @@ static PyMethodDef PySidePropertyMethods[] = {
     {0, 0, 0, 0}
 };
 
-static PyTypeObject PySidePropertyType = {
-    PyVarObject_HEAD_INIT(0, 0)
-    QPROPERTY_CLASS_NAME,      /*tp_name*/
-    sizeof(PySideProperty),   /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    qpropertyDeAlloc,          /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    qPropertyCall,             /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_HAVE_GC,        /*tp_flags*/
-    0,                         /*tp_doc */
-    qpropertyTraverse,         /*tp_traverse */
-    qpropertyClear,            /*tp_clear */
-    0,                         /*tp_richcompare */
-    0,                         /*tp_weaklistoffset */
-    0,                         /*tp_iter */
-    0,                         /*tp_iternext */
-    PySidePropertyMethods,     /*tp_methods */
-    0,                         /*tp_members */
-    0,                         /*tp_getset */
-    0,                         /*tp_base */
-    0,                         /*tp_dict */
-    0,                         /*tp_descr_get */
-    0,                         /*tp_descr_set */
-    0,                         /*tp_dictoffset */
-    qpropertyTpInit,           /*tp_init */
-    0,                         /*tp_alloc */
-    qpropertyTpNew,            /*tp_new */
-    0,                         /*tp_free */
-    0,                         /*tp_is_gc */
-    0,                         /*tp_bases */
-    0,                         /*tp_mro */
-    0,                         /*tp_cache */
-    0,                         /*tp_subclasses */
-    0,                         /*tp_weaklist */
-    0,                         /*tp_del */
-    0                          /*tp_version_tag */
+static PyType_Slot PySidePropertyType_slots[] = {
+    {Py_tp_dealloc, (void *)qpropertyDeAlloc},
+    {Py_tp_call, (void *)qPropertyCall},
+    {Py_tp_traverse, (void *)qpropertyTraverse},
+    {Py_tp_clear, (void *)qpropertyClear},
+    {Py_tp_methods, (void *)PySidePropertyMethods},
+    {Py_tp_init, (void *)qpropertyTpInit},
+    {Py_tp_new, (void *)qpropertyTpNew},
+    {0, 0}
+};
+// Dotted modulename is crucial for PyType_FromSpec to work. Is this name right?
+static PyType_Spec PySidePropertyType_spec = {
+    "PySide2.QtCore." QPROPERTY_CLASS_NAME,
+    sizeof(PySideProperty),
+    0,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_BASETYPE,
+    PySidePropertyType_slots,
 };
 
-PyTypeObject *PySidePropertyTypeP = &PySidePropertyType;
+
+PyTypeObject *PySidePropertyTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (type == nullptr)
+        type = (PyTypeObject *)PyType_FromSpec(&PySidePropertyType_spec);
+    return type;
+}
 
 static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call, void** args)
 {
@@ -352,17 +328,17 @@ namespace PySide { namespace Property {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(PySidePropertyTypeP) < 0)
+    if (PyType_Ready(PySidePropertyTypeF()) < 0)
         return;
 
-    Py_INCREF(PySidePropertyTypeP);
-    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, reinterpret_cast<PyObject *>(PySidePropertyTypeP));
+    Py_INCREF(PySidePropertyTypeF());
+    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, reinterpret_cast<PyObject *>(PySidePropertyTypeF()));
 }
 
 bool checkType(PyObject* pyObj)
 {
     if (pyObj) {
-        return PyType_IsSubtype(pyObj->ob_type, PySidePropertyTypeP);
+        return PyType_IsSubtype(pyObj->ob_type, PySidePropertyTypeF());
     }
     return false;
 }

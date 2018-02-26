@@ -266,6 +266,7 @@ static PyGetSetDef SbkEnumGetSetList[] = {
     {0, 0, 0, 0, 0} // Sentinel
 };
 
+// This structure will go away when we have also converted 'newTypeWithName()'
 static PyNumberMethods enum_as_number = {
      /* nb_add */                   enum_add,
      /* nb_subtract */              enum_subtract,
@@ -325,57 +326,43 @@ static PyNumberMethods enum_as_number = {
 static void SbkEnumTypeDealloc(PyObject* pyObj);
 static PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
-static PyTypeObject SbkEnumType_Type = {
-    PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "Shiboken.EnumType",
-    /*tp_basicsize*/        sizeof(SbkEnumType),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          SbkEnumTypeDealloc,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        &enum_as_number,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       0,
-    /*tp_hash*/             0,
-    /*tp_call*/             0,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
-    /*tp_doc*/              0,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          0,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             &PyType_Type,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             0,
-    /*tp_alloc*/            PyType_GenericAlloc,
-    /*tp_new*/              SbkEnumTypeTpNew,
-    /*tp_free*/             PyObject_GC_Del,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0,
-    /*tp_del*/              0,
-    /*tp_version_tag*/      0
+static PyType_Slot SbkEnumType_Type_slots[] = {
+    {Py_tp_dealloc, (void *)SbkEnumTypeDealloc},
+    {Py_nb_add, (void *)enum_add},
+    {Py_nb_subtract, (void *)enum_subtract},
+    {Py_nb_multiply, (void *)enum_multiply},
+#ifndef IS_PY3K
+    {Py_nb_true_divide, (void *)enum_divide},
+#endif
+    {Py_nb_positive, (void *)enum_int},
+    {Py_nb_bool, (void *)enum_bool},
+    {Py_nb_and, (void *)enum_and},
+    {Py_nb_xor, (void *)enum_xor},
+    {Py_nb_or, (void *)enum_or},
+    {Py_nb_int, (void *)enum_int},
+    {Py_nb_index, (void *)enum_int},
+    {Py_tp_base, (void *)&PyType_Type},
+    {Py_tp_alloc, (void *)PyType_GenericAlloc},
+    {Py_tp_new, (void *)SbkEnumTypeTpNew},
+    {Py_tp_free, (void *)PyObject_GC_Del},
+    {0, 0}
+};
+static PyType_Spec SbkEnumType_Type_spec = {
+    "Shiboken.EnumType",
+    sizeof(SbkEnumType),
+    0,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
+    SbkEnumType_Type_slots,
 };
 
-PyTypeObject *SbkEnumType_TypeP = &SbkEnumType_Type;
+
+PyTypeObject *SbkEnumType_TypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (type == nullptr)
+        type = (PyTypeObject *)PyType_FromSpec(&SbkEnumType_Type_spec);
+    return type;
+}
 
 void SbkEnumTypeDealloc(PyObject* pyObj)
 {
@@ -419,7 +406,7 @@ namespace Enum {
 
 bool check(PyObject* pyObj)
 {
-    return Py_TYPE(pyObj->ob_type) == SbkEnumType_TypeP;
+    return Py_TYPE(pyObj->ob_type) == SbkEnumType_TypeF();
 }
 
 PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
@@ -552,12 +539,12 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
 {
     PyTypeObject* type = reinterpret_cast<PyTypeObject*>(new SbkEnumType);
     ::memset(type, 0, sizeof(SbkEnumType));
-    Py_TYPE(type) = SbkEnumType_TypeP;
+    Py_TYPE(type) = SbkEnumType_TypeF();
     type->tp_basicsize = sizeof(SbkEnumObject);
     type->tp_print = &SbkEnumObject_print;
     type->tp_repr = &SbkEnumObject_repr;
     type->tp_str = &SbkEnumObject_repr;
-    type->tp_flags = Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/|Py_TPFLAGS_CHECKTYPES;
+    type->tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES;
     type->tp_name = name;
     type->tp_getset = SbkEnumGetSetList;
     type->tp_new = SbkEnum_tp_new;
@@ -574,7 +561,7 @@ PyTypeObject* newTypeWithName(const char* name, const char* cppName)
 
 const char* getCppName(PyTypeObject* enumType)
 {
-    assert(Py_TYPE(enumType) == SbkEnumType_TypeP);
+    assert(Py_TYPE(enumType) == SbkEnumType_TypeF());
     return reinterpret_cast<SbkEnumType*>(enumType)->cppName;;
 }
 

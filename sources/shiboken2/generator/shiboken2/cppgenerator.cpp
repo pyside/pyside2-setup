@@ -3698,7 +3698,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     }
 
     if (!metaClass->baseClass())
-        baseClassName = QLatin1String("reinterpret_cast<PyTypeObject*>(SbkObject_TypeP)");
+        baseClassName = QLatin1String("reinterpret_cast<PyTypeObject*>(SbkObject_TypeF())");
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
@@ -3808,7 +3808,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     }
 
     s << "static SbkObjectType " << className + QLatin1String("_Type") << " = { { {" << endl;
-    s << INDENT << "PyVarObject_HEAD_INIT(SbkObjectType_TypeP, 0)" << endl;
+    s << INDENT << "PyVarObject_HEAD_INIT(SbkObjectType_TypeF(), 0)" << endl;
     QString computedClassTargetFullName;
     if (!classContext.forSmartPointer())
         computedClassTargetFullName = getClassTargetFullName(metaClass);
@@ -4061,7 +4061,7 @@ void CppGenerator::writeTpTraverseFunction(QTextStream& s, const AbstractMetaCla
     s << "static int ";
     s << baseName << "_traverse(PyObject* " PYTHON_SELF_VAR ", visitproc visit, void* arg)" << endl;
     s << '{' << endl;
-    s << INDENT << "return reinterpret_cast<PyTypeObject*>(SbkObject_TypeP)->tp_traverse(" PYTHON_SELF_VAR ", visit, arg);" << endl;
+    s << INDENT << "return reinterpret_cast<PyTypeObject*>(SbkObject_TypeF())->tp_traverse(" PYTHON_SELF_VAR ", visit, arg);" << endl;
     s << '}' << endl;
 }
 
@@ -4071,7 +4071,7 @@ void CppGenerator::writeTpClearFunction(QTextStream& s, const AbstractMetaClass*
     s << "static int ";
     s << baseName << "_clear(PyObject* " PYTHON_SELF_VAR ")" << endl;
     s << '{' << endl;
-    s << INDENT << "return reinterpret_cast<PyTypeObject*>(SbkObject_TypeP)->tp_clear(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "return reinterpret_cast<PyTypeObject*>(SbkObject_TypeF())->tp_clear(" PYTHON_SELF_VAR ");" << endl;
     s << '}' << endl;
 }
 

@@ -61,58 +61,34 @@ extern "C"
 static int slotTpInit(PyObject*, PyObject*, PyObject*);
 static PyObject* slotCall(PyObject*, PyObject*, PyObject*);
 
+static void
+dummyDealloc(PyObject *)
+{}
+
 // Class Definition -----------------------------------------------
-static PyTypeObject PySideSlotType = {
-    PyVarObject_HEAD_INIT(0, 0)
-    "PySide2.QtCore." SLOT_DEC_NAME, /*tp_name*/
-    sizeof(PySideSlot),        /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    0,                         /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    slotCall,                  /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT/*|Py_TPFLAGS_HEAPTYPE*/,        /*tp_flags*/
-    SLOT_DEC_NAME,             /*tp_doc */
-    0,                         /*tp_traverse */
-    0,                         /*tp_clear */
-    0,                         /*tp_richcompare */
-    0,                         /*tp_weaklistoffset */
-    0,                         /*tp_iter */
-    0,                         /*tp_iternext */
-    0,                         /*tp_methods */
-    0,                         /*tp_members */
-    0,                         /*tp_getset */
-    0,                         /*tp_base */
-    0,                         /*tp_dict */
-    0,                         /*tp_descr_get */
-    0,                         /*tp_descr_set */
-    0,                         /*tp_dictoffset */
-    slotTpInit,                /*tp_init */
-    0,                         /*tp_alloc */
-    PyType_GenericNew,         /*tp_new */
-    0,                         /*tp_free */
-    0,                         /*tp_is_gc */
-    0,                         /*tp_bases */
-    0,                         /*tp_mro */
-    0,                         /*tp_cache */
-    0,                         /*tp_subclasses */
-    0,                         /*tp_weaklist */
-    0,                         /*tp_del */
-    0                          /*tp_version_tag*/
+static PyType_Slot PySideSlotType_slots[] = {
+    {Py_tp_call, (void *)slotCall},
+    {Py_tp_init, (void *)slotTpInit},
+    {Py_tp_new, (void *)PyType_GenericNew},
+    {Py_tp_dealloc, (void *)dummyDealloc},
+    {0, 0}
+};
+static PyType_Spec PySideSlotType_spec = {
+    "PySide2.QtCore." SLOT_DEC_NAME,
+    sizeof(PySideSlot),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    PySideSlotType_slots,
 };
 
-static PyTypeObject *PySideSlotTypeP = &PySideSlotType;
+
+static PyTypeObject *PySideSlotTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (type == nullptr)
+        type = (PyTypeObject *)PyType_FromSpec(&PySideSlotType_spec);
+    return type;
+}
 
 int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 {
@@ -211,11 +187,11 @@ namespace PySide { namespace Slot {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(PySideSlotTypeP) < 0)
+    if (PyType_Ready(PySideSlotTypeF()) < 0)
         return;
 
-    Py_INCREF(PySideSlotTypeP);
-    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(PySideSlotTypeP));
+    Py_INCREF(PySideSlotTypeF());
+    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(PySideSlotTypeF()));
 }
 
 } // namespace Slot

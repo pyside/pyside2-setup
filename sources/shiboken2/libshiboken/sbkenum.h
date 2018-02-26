@@ -46,7 +46,7 @@
 extern "C"
 {
 
-extern LIBSHIBOKEN_API PyTypeObject *SbkEnumType_TypeP;
+extern LIBSHIBOKEN_API PyTypeObject *SbkEnumType_TypeF(void);
 struct SbkObjectType;
 struct SbkConverter;
 
@@ -57,7 +57,7 @@ namespace Shiboken
 
 inline bool isShibokenEnum(PyObject* pyObj)
 {
-    return Py_TYPE(pyObj->ob_type) == SbkEnumType_TypeP;
+    return Py_TYPE(pyObj->ob_type) == SbkEnumType_TypeF();
 }
 
 namespace Enum
