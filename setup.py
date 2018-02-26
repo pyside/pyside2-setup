@@ -471,6 +471,18 @@ def prepareSubModules():
             print("Submodule %s has branch %s checked out" % (module_name, module_version))
         os.chdir(script_dir)
 
+# Single global instance of QtInfo to be used later in multiple code paths.
+qtinfo = QtInfo(QMAKE_COMMAND)
+
+def get_qt_version():
+    qt_version = qtinfo.version
+
+    if not qt_version:
+        log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
+        sys.exit(1)
+
+    return qt_version
+
 def prepareBuild():
     if os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD:
         prepareSubModules()
@@ -490,24 +502,10 @@ def prepareBuild():
         pkg_dir = os.path.join(script_dir, pkg)
         os.makedirs(pkg_dir)
     # locate Qt sources for the documentation
-    qmakeOutput = run_process_output([OPTION_QMAKE, '-query', 'QT_INSTALL_PREFIX/src'])
-    if qmakeOutput:
+    qt_src_dir = qtinfo.src_dir
+    if qt_src_dir:
         global qtSrcDir
-        qtSrcDir = qmakeOutput[0].rstrip()
-
-def get_qt_version(computed_qtinfo = None):
-    if not computed_qtinfo:
-        qtinfo = QtInfo(QMAKE_COMMAND)
-    else:
-        qtinfo = computed_qtinfo
-
-    qt_version = qtinfo.version
-
-    if not qt_version:
-        log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
-        sys.exit(1)
-
-    return qt_version
+        qtSrcDir = qt_src_dir
 
 class pyside_install(_install):
     def __init__(self, *args, **kwargs):
@@ -817,9 +815,9 @@ class pyside_build(_build):
                 log.error("Failed to locate a dynamic Python library, using %s"
                           % py_library)
 
-        self.qtinfo = QtInfo(QMAKE_COMMAND)
+        self.qtinfo = qtinfo
         qt_dir = os.path.dirname(OPTION_QMAKE)
-        qt_version = get_qt_version(self.qtinfo)
+        qt_version = get_qt_version()
 
         # Update the PATH environment variable
         update_env_path([py_scripts_dir, qt_dir])
