@@ -198,6 +198,7 @@ import re
 import fnmatch
 
 import difflib # for a close match of dirname and module
+import functools
 
 from distutils import log
 from distutils.errors import DistutilsOptionError
@@ -666,7 +667,7 @@ class pyside_build(_build):
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is %s" % platform_arch)
 
-        build_type = OPTION_DEBUG and "Debug" or "Release"
+        build_type = "Debug" if OPTION_DEBUG else "Release"
         if OPTION_RELWITHDEBINFO:
             build_type = 'RelWithDebInfo'
 
@@ -1479,7 +1480,11 @@ class pyside_build(_build):
             vars=vars)
 
     def prepare_packages_win32(self, vars):
-        pdbs = ['*.pdb'] if self.debug or self.build_type == 'RelWithDebInfo' else []
+        # For now, debug symbols will not be shipped into the package.
+        copy_pdbs = False
+        pdbs = []
+        if (self.debug or self.build_type == 'RelWithDebInfo') and copy_pdbs:
+            pdbs = ['*.pdb']
         # <install>/lib/site-packages/PySide2/* -> <setup>/PySide2
         copydir(
             "{site_packages_dir}/PySide2",
@@ -1487,18 +1492,19 @@ class pyside_build(_build):
             vars=vars)
         built_modules = self.get_built_pyside_config(vars)['built_modules']
 
-        if self.debug or self.build_type == 'RelWithDebInfo':
-            # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
-            copydir(
-                "{build_dir}/pyside2/PySide2",
-                "{pyside_package_dir}/PySide2",
-                filter=pdbs,
-                recursive=False, vars=vars)
+        # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
+        copydir(
+            "{build_dir}/pyside2/PySide2",
+            "{pyside_package_dir}/PySide2",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
         # <build>/shiboken2/doc/html/* -> <setup>/PySide2/docs/shiboken2
         copydir(
             "{build_dir}/shiboken2/doc/html",
             "{pyside_package_dir}/PySide2/docs/shiboken2",
             force=False, vars=vars)
+
         # <install>/lib/site-packages/shiboken2.pyd -> <setup>/PySide2/shiboken2.pyd
         shiboken_module_name = 'shiboken2.pyd'
         shiboken_src_path = "{site_packages_dir}".format(**vars)
@@ -1511,12 +1517,14 @@ class pyside_build(_build):
             "{site_packages_dir}/{shiboken_module_name}",
             "{pyside_package_dir}/PySide2/{shiboken_module_name}",
             vars=vars)
-        if self.debug or self.build_type == 'RelWithDebInfo':
-            copydir(
-                "{build_dir}/shiboken2/shibokenmodule",
-                "{pyside_package_dir}/PySide2",
-                filter=pdbs,
-                recursive=False, vars=vars)
+        # @TODO: Fix this .pdb file not to overwrite release {shibokengenerator}.pdb file.
+        # Task-number: PYSIDE-615
+        copydir(
+            "{build_dir}/shiboken2/shibokenmodule",
+            "{pyside_package_dir}/PySide2",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
         # <install>/lib/site-packages/pyside2uic/* -> <setup>/pyside2uic
         copydir(
             "{site_packages_dir}/pyside2uic",
@@ -1526,6 +1534,7 @@ class pyside_build(_build):
             rmtree("{pyside_package_dir}/pyside2uic/port_v2".format(**vars))
         else:
             rmtree("{pyside_package_dir}/pyside2uic/port_v3".format(**vars))
+
         # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
         makefile(
             "{pyside_package_dir}/PySide2/scripts/__init__.py",
@@ -1534,33 +1543,46 @@ class pyside_build(_build):
             "{install_dir}/bin/pyside2-uic",
             "{pyside_package_dir}/PySide2/scripts/uic.py",
             force=False, vars=vars)
+
         # <install>/bin/*.exe,*.dll,*.pdb -> PySide2/
         copydir(
             "{install_dir}/bin/",
             "{pyside_package_dir}/PySide2",
-            filter=["*.exe", "*.dll"] + pdbs,
+            filter=["*.exe", "*.dll"],
             recursive=False, vars=vars)
+        # @TODO: Fix this .pdb file not to overwrite release {shibokenmodule}.pdb file.
+        # Task-number: PYSIDE-615
+        copydir(
+            "{build_dir}/shiboken2/generator",
+            "{pyside_package_dir}/PySide2",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
         # <install>/lib/*.lib -> PySide2/
         copydir(
             "{install_dir}/lib/",
             "{pyside_package_dir}/PySide2",
             filter=["*.lib"],
             recursive=False, vars=vars)
+
         # <install>/share/PySide2/typesystems/* -> <setup>/PySide2/typesystems
         copydir(
             "{install_dir}/share/PySide2/typesystems",
             "{pyside_package_dir}/PySide2/typesystems",
             vars=vars)
+
         # <install>/include/* -> <setup>/PySide2/include
         copydir(
             "{install_dir}/include",
             "{pyside_package_dir}/PySide2/include",
             vars=vars)
+
         # <source>/pyside2/PySide2/support/* -> <setup>/PySide2/support/*
         copydir(
             "{build_dir}/pyside2/PySide2/support",
             "{pyside_package_dir}/PySide2/support",
             vars=vars)
+
         if not OPTION_NOEXAMPLES:
             # <sources>/pyside2-examples/examples/* -> <setup>/PySide2/examples
             folder = get_extension_folder('pyside2-examples')
@@ -1575,6 +1597,7 @@ class pyside_build(_build):
                 pyside_rcc_options = '-py3'
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
+
         # <ssl_libs>/* -> <setup>/PySide2/openssl
         copydir("{ssl_libs_dir}", "{pyside_package_dir}/PySide2/openssl",
             filter=[
@@ -1582,51 +1605,81 @@ class pyside_build(_build):
                 "ssleay32.dll"],
             force=False, vars=vars)
 
-        # <qt>/bin/*.dll -> <setup>/PySide2
+        # <qt>/bin/*.dll and Qt *.exe -> <setup>/PySide2
+        qt_artifacts_permanent = [
+            "opengl*.dll",
+            "d3d*.dll",
+            "designer.exe",
+            "linguist.exe",
+            "lrelease.exe",
+            "lupdate.exe",
+            "lconvert.exe",
+            "qtdiag.exe"
+        ]
         copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
-            filter=[
-                "*.dll",
-                "designer.exe",
-                "linguist.exe",
-                "lrelease.exe",
-                "lupdate.exe",
-                "lconvert.exe"],
-            ignore=["*d4.dll"],
+            filter=qt_artifacts_permanent,
             recursive=False, vars=vars)
-        if self.debug:
-            # <qt>/bin/*d4.dll -> <setup>/PySide2
-            copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
-                filter=["*d4.dll"] + pdbs,
-                recursive=False, vars=vars)
 
-        if self.debug  or self.build_type == 'RelWithDebInfo':
-            # <qt>/lib/*.pdb -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
-                filter=["*.pdb"],
-                recursive=False, vars=vars)
+        # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/PySide2 part two
+        # File filter to copy only debug or only release files.
+        qt_dll_patterns = ["Qt5*{}.dll", "lib*{}.dll"]
+        if copy_pdbs:
+            qt_dll_patterns += ["Qt5*{}.pdb", "lib*{}.pdb"]
+        def qt_build_config_filter(patterns, file_name, file_full_path):
+            release = [a.format('') for a in patterns]
+            debug = [a.format('d') for a in patterns]
 
-        # I think these are the qt-mobility DLLs, at least some are,
-        # so let's copy them too
-        # <qt>/lib/*.dll -> <setup>/PySide2
-        copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
-            filter=["*.dll"],
-            ignore=["*d?.dll"],
+            # If qt is not a debug_and_release build, that means there is only one set of shared
+            # libraries, so we can just copy them.
+            if qtinfo.build_type != 'debug_and_release':
+                if filter_match(file_name, release):
+                    return True
+                return False
+
+            # In debug_and_release case, choosing which files to copy is more difficult. We want
+            # to copy only the files that match the PySide2 build type. So if PySide2 is built in
+            # debug mode, we want to copy only Qt debug libraries (ending with "d.dll"). Or vice
+            # versa. The problem is that some libraries have "d" as the last character of the actual
+            # library name (for example Qt5Gamepad.dll and Qt5Gamepadd.dll). So we can't just
+            # match a pattern ending in "d". Instead we check if there exists a file with the same
+            # name plus an additional "d" at the end, and using that information we can judge if
+            # the currently processed file is a debug or release file.
+
+            # e.g. ["Qt5Cored", ".dll"]
+            file_split = os.path.splitext(file_name)
+            file_base_name = file_split[0]
+            file_ext = file_split[1]
+            # e.g. "/home/work/qt/qtbase/bin"
+            file_path_dir_name = os.path.dirname(file_full_path)
+            # e.g. "Qt5Coredd"
+            maybe_debug_name = file_base_name + 'd'
+            if self.debug:
+                filter = debug
+                def predicate(path): return not os.path.exists(path)
+            else:
+                filter = release
+                def predicate(path): return os.path.exists(path)
+            # e.g. "/home/work/qt/qtbase/bin/Qt5Coredd.dll"
+            other_config_path = os.path.join(file_path_dir_name, maybe_debug_name + file_ext)
+
+            if filter_match(file_name, filter) and predicate(other_config_path):
+                return True
+            return False
+
+        qt_dll_filter = functools.partial(qt_build_config_filter, qt_dll_patterns)
+        copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
+            file_filter_function=qt_dll_filter,
             recursive=False, vars=vars)
-        if self.debug:
-            # <qt>/lib/*d4.dll -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
-                filter=["*d?.dll"],
-                recursive=False, vars=vars)
-        if self.debug  or self.build_type == 'RelWithDebInfo':
-            # <qt>/lib/*pdb -> <setup>/PySide2
-            copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2",
-                filter=pdbs,
-                recursive=False, vars=vars)
 
         # <qt>/plugins/* -> <setup>/PySide2/plugins
+        plugin_dll_patterns = ["*{}.dll"]
+        if copy_pdbs:
+            plugin_dll_patterns += ["*{}.pdb"]
+        plugin_dll_filter = functools.partial(qt_build_config_filter, plugin_dll_patterns)
         copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/plugins",
-            filter=["*.dll"] + pdbs,
+            file_filter_function=plugin_dll_filter,
             vars=vars)
+
         # <qt>/translations/* -> <setup>/PySide2/translations
         copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/translations",
             filter=["*.qm", "*.pak"],
@@ -1634,8 +1687,18 @@ class pyside_build(_build):
             vars=vars)
 
         # <qt>/qml/* -> <setup>/PySide2/qml
+        qml_dll_patterns = ["*{}.dll"]
+        if copy_pdbs:
+            qml_dll_patterns += ["*{}.pdb"]
+        qml_ignore = [a.format('') for a in qml_dll_patterns]
+        qml_dll_filter = functools.partial(qt_build_config_filter, qml_dll_patterns)
         copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
-            filter=None,
+            ignore=qml_ignore,
+            force=False,
+            recursive=True,
+            vars=vars)
+        copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
+            file_filter_function=qml_dll_filter,
             force=False,
             recursive=True,
             vars=vars)
@@ -1646,28 +1709,22 @@ class pyside_build(_build):
                 recursive=False,
                 vars=vars)
 
+            filter = 'QtWebEngineProcess{}.exe'.format('d' if self.debug else '')
             copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
-                filter=["QtWebEngineProcess*.exe"],
+                filter=[filter],
                 recursive=False, vars=vars)
 
         # pdb files for libshiboken and libpyside
-        if self.debug or self.build_type == 'RelWithDebInfo':
-            # XXX dbgPostfix gives problems - the structure in shiboken2/data should be re-written!
-            # Not sure what the above refers to, but because both the extension module
-            # (shiboken2.pyd) and the shared library (shiboken2.dll) have the same basename,
-            # the pdb file gets overwritten. This doesn't happen on Unix because the shared library
-            # has a 'lib' prefix in the basename.
-            # @TODO Change the shared library name on Windows.
-            copydir(
-                "{build_dir}/shiboken2/libshiboken",
-                "{pyside_package_dir}/PySide2",
-                filter=pdbs,
-                recursive=False, vars=vars)
-            copydir(
-                "{build_dir}/pyside2/libpyside",
-                "{pyside_package_dir}/PySide2",
-                filter=pdbs,
-                recursive=False, vars=vars)
+        copydir(
+            "{build_dir}/shiboken2/libshiboken",
+            "{pyside_package_dir}/PySide2",
+            filter=pdbs,
+            recursive=False, vars=vars)
+        copydir(
+            "{build_dir}/pyside2/libpyside",
+            "{pyside_package_dir}/PySide2",
+            filter=pdbs,
+            recursive=False, vars=vars)
 
     def update_rpath(self, package_path, executables):
         if sys.platform.startswith('linux'):
