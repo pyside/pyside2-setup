@@ -874,3 +874,17 @@ def rpathsHasOrigin(rpaths):
         if match:
             return True
     return False
+
+def memoize(function):
+    """ Decorator to wrap a function with a memoizing callable.
+        It returns cached values when the wrapped function is called with the same arguments.
+    """
+    memo = {}
+    def wrapper(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            rv = function(*args)
+            memo[args] = rv
+            return rv
+    return wrapper

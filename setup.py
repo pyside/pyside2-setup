@@ -109,16 +109,20 @@ OS X SDK: You can specify which OS X SDK should be used for compilation with the
           For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
 
 OS X Minimum deployment target:
-    You can specify the OS X minimum deployment target with the --osx-deployment-target=<x> option.
-    For example "--osx-deployment-target=10.10".
+    You can specify a custom OS X minimum deployment target with the --osx-deployment-target=<value>
+    option.
+    For example: "--osx-deployment-target=10.10".
 
-    OS X provides the ability to set what is the minimum OS version on which a binary will run. This
-    means that a build can be done on the latest OS X version with latest XCode and SDK versions,
-    but the built application / library can run on older OS versions.
+    If the option is not set, the minimum deployment target of the used Qt library will be used
+    instead. Thus it is not necessary to use the option without a good reason.
+    If a new value is specified, it has to be higher or equal to both Python's and Qt's minimum
+    deployment targets.
 
-    Note: if the option is not set, CMake will try to query the MACOSX_DEPLOYMENT_TARGET environment
-          variable, and if that is empty, it will try to deduce a value internally (afaik based on
-          current OS X version and on the chosen SDK version).
+    Description:
+    OS X allows specifying a minimum OS version on which a binary will be able to run. This implies
+    that an application can be built on a machine with the latest OS X version installed, with
+    latest Xcode version and SDK version and the built application can still run on an older OS
+    version.
 """
 
 __version__ = "5.6"
@@ -235,6 +239,8 @@ from utils import filter_match
 from utils import osx_fix_rpaths_for_library
 from utils import copy_icu_libs
 from utils import find_files_using_glob
+from utils import memoize
+
 from textwrap import dedent
 
 # guess a close folder name for extensions
@@ -902,6 +908,9 @@ class pyside_build(_build):
         log.info("-" * 3)
         if sys.platform == 'win32':
             log.info("OpenSSL dll directory: %s" % OPTION_OPENSSL)
+        if sys.platform == 'darwin':
+            pyside_macos_deployment_target = pyside_build.macos_pyside_min_deployment_target()
+            log.info("MACOSX_DEPLOYMENT_TARGET set to: {}".format(pyside_macos_deployment_target))
         log.info("=" * 30)
 
         # Prepare folders
@@ -946,20 +955,57 @@ class pyside_build(_build):
         log.info('*** Build completed')
 
     @staticmethod
-    def macos_min_deployment_target():
-        # If no explicit minimum deployment target is provided to setup.py, then use the current
-        # build OS version. Otherwise use the provided version.
-        current_os_version, _, _ = platform.mac_ver()
-        current_os_version = '.'.join(current_os_version.split('.')[:2])
-        deployment_target = current_os_version
-        if OPTION_OSX_DEPLOYMENT_TARGET:
-            deployment_target = OPTION_OSX_DEPLOYMENT_TARGET
+    def macos_qt_min_deployment_target():
+        target = qtinfo.macos_min_deployment_target
 
-        return deployment_target
+        if not target:
+            raise DistutilsSetupError("Failed to query for Qt's QMAKE_MACOSX_DEPLOYMENT_TARGET.")
+        return target
 
     @staticmethod
+    @memoize
+    def macos_pyside_min_deployment_target():
+        """
+        Compute and validate PySide2 MACOSX_DEPLOYMENT_TARGET value. Candidate sources that are
+        considered:
+            - setup.py provided value
+            - maximum value between minimum deployment target of the Python interpreter and the
+              minimum deployment target of the Qt libraries.
+        If setup.py value is provided, that takes precedence.
+        Otherwise use the maximum of the above mentioned two values.
+        """
+        python_target = get_config_var('MACOSX_DEPLOYMENT_TARGET') or None
+        qt_target = pyside_build.macos_qt_min_deployment_target()
+        setup_target = OPTION_OSX_DEPLOYMENT_TARGET
+
+        qt_target_split = [int(x) for x in qt_target.split('.')]
+        if python_target:
+            python_target_split = [int(x) for x in python_target.split('.')]
+        if setup_target:
+            setup_target_split = [int(x) for x in setup_target.split('.')]
+
+        message = "Can't set MACOSX_DEPLOYMENT_TARGET value to {} because " \
+                  "{} was built with minimum deployment target set to {}."
+        # setup.py provided OPTION_OSX_DEPLOYMENT_TARGET value takes precedence.
+        if setup_target:
+            if python_target and setup_target_split < python_target_split:
+                raise DistutilsSetupError(message.format(setup_target, "Python", python_target))
+            if setup_target_split < qt_target_split:
+                raise DistutilsSetupError(message.format(setup_target, "Qt", qt_target))
+            # All checks clear, use setup.py provided value.
+            return setup_target
+
+        # Setup.py value not provided, use same value as provided by Qt.
+        if python_target:
+            maximum_target = '.'.join([str(e) for e in max(python_target_split, qt_target_split)])
+        else:
+            maximum_target = qt_target
+        return maximum_target
+
+    @staticmethod
+    @memoize
     def macos_plat_name():
-        deployment_target = pyside_build.macos_min_deployment_target()
+        deployment_target = pyside_build.macos_pyside_min_deployment_target()
         # Example triple "macosx-10.12-x86_64".
         plat = get_platform().split("-")
         plat_name = "{}-{}-{}".format(plat[0], deployment_target, plat[2])
@@ -1083,7 +1129,7 @@ class pyside_build(_build):
             # set its own minimum deployment target environment variable which is
             # based on the python interpreter sysconfig value. Doing so could break the
             # detected clang include paths for example.
-            deployment_target = pyside_build.macos_min_deployment_target()
+            deployment_target = pyside_build.macos_pyside_min_deployment_target()
             cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={0}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 

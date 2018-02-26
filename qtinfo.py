@@ -56,6 +56,10 @@ class QtInfo(object):
     def getQmlPath(self):
         return self.getProperty("QT_INSTALL_QML")
 
+    def getMacOSMinDeploymentTarget(self):
+        """ Return value is a macOS version or None. """
+        return self.getProperty("QMAKE_MACOSX_DEPLOYMENT_TARGET")
+
     def getBuildType(self):
         """ Return value is either debug, release, debug_release, or None. """
         return self.getProperty("BUILD_TYPE")
@@ -134,6 +138,11 @@ class QtInfo(object):
         # Get mkspecs variables and cache them.
         self._getQMakeMkspecsVariables()
 
+        # Get macOS minimum deployment target.
+        key = 'QMAKE_MACOSX_DEPLOYMENT_TARGET'
+        if key in self._mkspecs_dict:
+            self._query_dict[key] = self._mkspecs_dict[key]
+
         # Figure out how Qt was built: debug mode, release mode, or both.
         build_type = self._parseQtBuildType()
         if build_type:
@@ -181,5 +190,6 @@ class QtInfo(object):
     headers_dir = property(getHeadersPath)
     docs_dir = property(getDocsPath)
     qml_dir = property(getQmlPath)
+    macos_min_deployment_target = property(getMacOSMinDeploymentTarget)
     build_type = property(getBuildType)
     src_dir = property(getSrcDir)
