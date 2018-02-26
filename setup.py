@@ -1385,7 +1385,7 @@ class pyside_build(_build):
         # <qt>/translations/* -> <setup>/PySide2/Qt/translations
 
         copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/Qt/translations",
-            filter=["*.qm"],
+            filter=["*.qm", "*.pak"],
             force=False,
             vars=vars)
 
@@ -1474,7 +1474,7 @@ class pyside_build(_build):
 
         # <qt>/translations/* -> <setup>/PySide2/Qt/translations
         copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/Qt/translations",
-            filter=["*.qm"],
+            filter=["*.qm", "*.pak"],
             force=False,
             vars=vars)
 
@@ -1629,7 +1629,7 @@ class pyside_build(_build):
             vars=vars)
         # <qt>/translations/* -> <setup>/PySide2/translations
         copydir("{qt_translations_dir}", "{pyside_package_dir}/PySide2/translations",
-            filter=["*.qm"],
+            filter=["*.qm", "*.pak"],
             force=False,
             vars=vars)
 
