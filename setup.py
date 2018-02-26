@@ -1171,8 +1171,6 @@ class pyside_build(_build):
     def prepare_packages(self):
         try:
             log.info("Preparing packages...")
-            version_str = "%sqt%s%s" % (__version__, self.qtinfo.version.replace(".", "")[0:3],
-                self.debug and "dbg" or "")
             vars = {
                 "site_packages_dir": self.site_packages_dir,
                 "sources_dir": self.sources_dir,
@@ -1191,7 +1189,6 @@ class pyside_build(_build):
                 "qt_prefix_dir": self.qtinfo.prefix_dir,
                 "qt_translations_dir": self.qtinfo.translations_dir,
                 "qt_qml_dir": self.qtinfo.qml_dir,
-                "version": version_str,
             }
             os.chdir(self.script_dir)
 
