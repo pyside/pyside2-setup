@@ -167,7 +167,7 @@ class InheritanceGraph(object):
         for cls in classes:
             recurse(cls)
 
-        return all_classes.values()
+        return list(all_classes.values())
 
     def class_name(self, cls, parts=0):
         """Given a class object, return a fully-qualified name.
@@ -200,8 +200,8 @@ class InheritanceGraph(object):
         'shape': 'box',
         'fontsize': 10,
         'height': 0.25,
-        'fontname': 'Vera Sans, DejaVu Sans, Liberation Sans, '
-                    'Arial, Helvetica, sans',
+        'fontname': '"Vera Sans, DejaVu Sans, Liberation Sans, '
+                    'Arial, Helvetica, sans"',
         'style': '"setlinewidth(0.5)"',
     }
     default_edge_attrs = {
@@ -314,7 +314,8 @@ class InheritanceDiagram(Directive):
 
 
 def get_graph_hash(node):
-    return md5(node['content'] + str(node['parts'])).hexdigest()[-10:]
+    hashString = node['content'] + str(node['parts'])
+    return md5(hashString.encode('utf-8')).hexdigest()[-10:]
 
 
 def html_visit_inheritance_diagram(self, node):
@@ -336,7 +337,7 @@ def html_visit_inheritance_diagram(self, node):
             urls[child['reftitle']] = '#' + child.get('refid')
 
     dotcode = graph.generate_dot(name, urls, env=self.builder.env)
-    render_dot_html(self, node, dotcode, [], 'inheritance', 'inheritance',
+    render_dot_html(self, node, dotcode, {}, 'inheritance', 'inheritance',
                     alt='Inheritance diagram of ' + node['content'])
     raise nodes.SkipNode
 
@@ -352,7 +353,7 @@ def latex_visit_inheritance_diagram(self, node):
 
     dotcode = graph.generate_dot(name, env=self.builder.env,
                                  graph_attrs={'size': '"6.0,6.0"'})
-    render_dot_latex(self, node, dotcode, [], 'inheritance')
+    render_dot_latex(self, node, dotcode, {}, 'inheritance')
     raise nodes.SkipNode
 
 
