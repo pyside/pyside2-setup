@@ -1713,6 +1713,9 @@
       <modify-argument index="return">
         <replace-type modified-type="QString"/>
       </modify-argument>
+      <inject-code class="native" position="end">
+        <insert-template name="return_QString_native"/>
+      </inject-code>
       <inject-code class="target" position="end">
         <insert-template name="return_QString"/>
       </inject-code>
