@@ -201,7 +201,9 @@ types_to_ignore.add('QSqlDriverPlugin')
 qt_documentation_website_prefixes = OrderedDict()
 qt_documentation_website_prefixes['5.6'] = 'http://doc.qt.io/qt-5.6/'
 qt_documentation_website_prefixes['5.8'] = 'http://doc.qt.io/qt-5.8/'
-qt_documentation_website_prefixes['5.9'] = 'http://doc-snapshots.qt.io/qt5-5.9/'
+qt_documentation_website_prefixes['5.9'] = 'http://doc.qt.io/qt-5.9/'
+qt_documentation_website_prefixes['5.10'] = 'http://doc.qt.io/qt-5.10/'
+qt_documentation_website_prefixes['5.11'] = 'http://doc-snapshots.qt.io/qt5-5.11/'
 qt_documentation_website_prefixes['dev'] = 'http://doc-snapshots.qt.io/qt5-dev/'
 
 
