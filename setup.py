@@ -132,6 +132,9 @@ submodules = {
     '5.9': [
         ["pyside2-tools", "5.9"]
     ],
+    '5.11': [
+        ["pyside2-tools", "5.11"]
+    ],
     '5.6': [
         ["pyside2-tools", "5.6"],
         ["pyside2-examples", "5.6"],
