@@ -111,9 +111,14 @@ static int writeEscapedRstText(QTextStream &str, const String &s)
 {
     int escaped = 0;
     for (const QChar &c : s) {
-        if (c == QLatin1Char('*') || c == QLatin1Char('_')) {
+        switch (c.unicode()) {
+        case '*':
+        case '`':
+        case '_':
+        case '\\':
             str << '\\';
             ++escaped;
+            break;
         }
         str << c;
     }
