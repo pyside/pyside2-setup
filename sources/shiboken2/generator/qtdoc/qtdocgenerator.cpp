@@ -1323,7 +1323,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     s << className << endl;
     s << Pad('*', className.count()) << endl << endl;
 
-    s << ".. inheritance-diagram:: " << className << endl
+    s << ".. inheritance-diagram:: " << getClassTargetFullName(metaClass, true) << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
 
 
