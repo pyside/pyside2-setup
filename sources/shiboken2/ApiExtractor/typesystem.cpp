@@ -2279,19 +2279,6 @@ QString FlagsTypeEntry::targetLangPackage() const
     return m_enum->targetLangPackage();
 }
 
-void EnumTypeEntry::addEnumValueRedirection(const QString &rejected, const QString &usedValue)
-{
-    m_enumRedirections << EnumValueRedirection(rejected, usedValue);
-}
-
-QString EnumTypeEntry::enumValueRedirection(const QString &value) const
-{
-    for (int i = 0; i < m_enumRedirections.size(); ++i)
-        if (m_enumRedirections.at(i).rejected == value)
-            return m_enumRedirections.at(i).used;
-    return QString();
-}
-
 QString FlagsTypeEntry::qualifiedTargetLangName() const
 {
     return targetLangPackage() + QLatin1Char('.') + m_enum->targetLangQualifier()

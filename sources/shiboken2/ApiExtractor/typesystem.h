@@ -1042,18 +1042,6 @@ private:
     PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
 };
 
-struct EnumValueRedirection
-{
-    EnumValueRedirection() {}
-    EnumValueRedirection(const QString &rej, const QString &us)
-            : rejected(rej),
-            used(us)
-    {
-    }
-    QString rejected;
-    QString used;
-};
-
 class EnumTypeEntry : public TypeEntry
 {
 public:
@@ -1133,9 +1121,6 @@ public:
         return m_rejectedEnums;
     }
 
-    void addEnumValueRedirection(const QString &rejected, const QString &usedValue);
-    QString enumValueRedirection(const QString &value) const;
-
     bool forceInteger() const
     {
         return m_forceInteger;
@@ -1163,7 +1148,6 @@ private:
     QString m_upperBound;
 
     QStringList m_rejectedEnums;
-    QVector<EnumValueRedirection> m_enumRedirections;
 
     FlagsTypeEntry *m_flags = nullptr;
 
@@ -1172,6 +1156,8 @@ private:
     bool m_anonymous = false;
 };
 
+// EnumValueTypeEntry is used for resolving integer type templates
+// like array<EnumValue>.
 class EnumValueTypeEntry : public TypeEntry
 {
 public:
