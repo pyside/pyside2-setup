@@ -95,6 +95,8 @@ namespace Enum
      */
     LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject* enumType, PyObject* module, const char* itemName, long itemValue);
     /// This function does the same as createGlobalEnumItem, but adds the enum to a Shiboken type or namespace.
+    LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
+                                              const char *itemName, long itemValue);
     LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const char* itemName, long itemValue);
 
     LIBSHIBOKEN_API PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName = 0);

@@ -110,6 +110,11 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(SampleNamespace.AnonymousClassEnum_Value0, 0)
         self.assertEqual(SampleNamespace.AnonymousClassEnum_Value1, 1)
 
+    def testEnumClasses(self):
+        # C++ 11: values of enum classes need to be fully qualified to match C++
+        sum = Event.EventTypeClass.Value1 + Event.EventTypeClass.Value2
+        self.assertEqual(sum, 1)
+
     def testEnumTpPrintImplementation(self):
         '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
         tmpfile = createTempFile()

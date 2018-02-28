@@ -798,6 +798,7 @@
 
     <value-type name="Event">
         <enum-type name="EventType"/>
+        <enum-type name="EventTypeClass" class="yes"/>
     </value-type>
 
     <value-type name="BlackBox">

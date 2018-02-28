@@ -58,6 +58,7 @@ static inline QString enumNameAttribute() { return QStringLiteral("enum-name"); 
 static inline QString argumentTypeAttribute() { return QStringLiteral("argument-type"); }
 static inline QString returnTypeAttribute() { return QStringLiteral("return-type"); }
 static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
+static inline QString enumIdentifiedByValueAttribute() { return QStringLiteral("identified-by-value"); }
 
 static inline QString noAttributeValue() { return QStringLiteral("no"); }
 static inline QString yesAttributeValue() { return QStringLiteral("yes"); }
@@ -758,7 +759,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(QLatin1String("lower-bound"), QString());
             attributes.insert(QLatin1String("force-integer"), noAttributeValue());
             attributes.insert(QLatin1String("extensible"), noAttributeValue());
-            attributes.insert(QLatin1String("identified-by-value"), QString());
+            attributes.insert(enumIdentifiedByValueAttribute(), QString());
+            attributes.insert(classAttribute(), falseAttributeValue());
             break;
         case StackElement::ValueTypeEntry:
             attributes.insert(QLatin1String("default-constructor"), QString());
@@ -852,9 +854,10 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         }
 
         if (element->type == StackElement::EnumTypeEntry) {
+            const QString identifiedByValue = attributes.value(enumIdentifiedByValueAttribute());
             if (name.isEmpty()) {
-                name = attributes[QLatin1String("identified-by-value")];
-            } else if (!attributes[QLatin1String("identified-by-value")].isEmpty()) {
+                name = identifiedByValue;
+            } else if (!identifiedByValue.isEmpty()) {
                 m_error = QLatin1String("can't specify both 'name' and 'identified-by-value' attributes");
                 return false;
             }
@@ -939,7 +942,11 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 m_currentEnum =
                     new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(colonColon()),
                                       names.constLast(), since);
-            m_currentEnum->setAnonymous(!attributes[QLatin1String("identified-by-value")].isEmpty());
+            if (!attributes.value(enumIdentifiedByValueAttribute()).isEmpty()) {
+                m_currentEnum->setEnumKind(EnumTypeEntry::AnonymousEnum);
+            } else if (convertBoolean(attributes.value(classAttribute()), classAttribute(), false)) {
+                m_currentEnum->setEnumKind(EnumTypeEntry::EnumClass);
+            }
             element->entry = m_currentEnum;
             m_currentEnum->setCodeGeneration(m_generate);
             m_currentEnum->setTargetLangPackage(m_defaultPackage);
