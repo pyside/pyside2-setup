@@ -59,6 +59,11 @@ static inline QString argumentTypeAttribute() { return QStringLiteral("argument-
 static inline QString returnTypeAttribute() { return QStringLiteral("return-type"); }
 static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
 
+static inline QString noAttributeValue() { return QStringLiteral("no"); }
+static inline QString yesAttributeValue() { return QStringLiteral("yes"); }
+static inline QString trueAttributeValue() { return QStringLiteral("true"); }
+static inline QString falseAttributeValue() { return QStringLiteral("false"); }
+
 static QVector<CustomConversion *> customConversionsForReview;
 
 // Set a regular expression for rejection from text. By legacy, those are fixed
@@ -537,14 +542,14 @@ bool Handler::importFileElement(const QXmlStreamAttributes &atts)
 bool Handler::convertBoolean(const QString &_value, const QString &attributeName, bool defaultValue)
 {
     QString value = _value.toLower();
-    if (value == QLatin1String("true") || value == QLatin1String("yes"))
+    if (value == trueAttributeValue() || value == yesAttributeValue())
         return true;
-     else if (value == QLatin1String("false") || value == QLatin1String("no"))
+     else if (value == falseAttributeValue() || value == noAttributeValue())
         return false;
      else {
         QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
                                       .arg(value, attributeName,
-                                           defaultValue ? QLatin1String("yes") : QLatin1String("no"));
+                                           defaultValue ? yesAttributeValue() : noAttributeValue());
 
         qCWarning(lcShiboken).noquote().nospace() << warn;
         return defaultValue;
@@ -733,8 +738,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         case StackElement::PrimitiveTypeEntry:
             attributes.insert(QLatin1String("target-lang-name"), QString());
             attributes.insert(QLatin1String("target-lang-api-name"), QString());
-            attributes.insert(QLatin1String("preferred-conversion"), QLatin1String("yes"));
-            attributes.insert(QLatin1String("preferred-target-lang-type"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("preferred-conversion"), yesAttributeValue());
+            attributes.insert(QLatin1String("preferred-target-lang-type"), yesAttributeValue());
             attributes.insert(QLatin1String("default-constructor"), QString());
             break;
         case StackElement::ContainerTypeEntry:
@@ -750,23 +755,23 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(QLatin1String("flags-revision"), QString());
             attributes.insert(QLatin1String("upper-bound"), QString());
             attributes.insert(QLatin1String("lower-bound"), QString());
-            attributes.insert(QLatin1String("force-integer"), QLatin1String("no"));
-            attributes.insert(QLatin1String("extensible"), QLatin1String("no"));
+            attributes.insert(QLatin1String("force-integer"), noAttributeValue());
+            attributes.insert(QLatin1String("extensible"), noAttributeValue());
             attributes.insert(QLatin1String("identified-by-value"), QString());
             break;
         case StackElement::ValueTypeEntry:
             attributes.insert(QLatin1String("default-constructor"), QString());
             Q_FALLTHROUGH();
         case StackElement::ObjectTypeEntry:
-            attributes.insert(QLatin1String("force-abstract"), QLatin1String("no"));
-            attributes.insert(QLatin1String("deprecated"), QLatin1String("no"));
+            attributes.insert(QLatin1String("force-abstract"), noAttributeValue());
+            attributes.insert(QLatin1String("deprecated"), noAttributeValue());
             attributes.insert(QLatin1String("hash-function"), QString());
-            attributes.insert(QLatin1String("stream"), QLatin1String("no"));
+            attributes.insert(QLatin1String("stream"), noAttributeValue());
             Q_FALLTHROUGH();
         case StackElement::InterfaceTypeEntry:
             attributes[QLatin1String("default-superclass")] = m_defaultSuperclass;
             attributes.insert(QLatin1String("polymorphic-id-expression"), QString());
-            attributes.insert(QLatin1String("delete-in-main-thread"), QLatin1String("no"));
+            attributes.insert(QLatin1String("delete-in-main-thread"), noAttributeValue());
             attributes.insert(QLatin1String("held-type"), QString());
             attributes.insert(QLatin1String("copyable"), QString());
             Q_FALLTHROUGH();
@@ -775,10 +780,10 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes[QLatin1String("package")] = m_defaultPackage;
             attributes.insert(QLatin1String("expense-cost"), QLatin1String("1"));
             attributes.insert(QLatin1String("expense-limit"), QLatin1String("none"));
-            attributes.insert(QLatin1String("polymorphic-base"), QLatin1String("no"));
-            attributes.insert(QLatin1String("generate"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("polymorphic-base"), noAttributeValue());
+            attributes.insert(QLatin1String("generate"), yesAttributeValue());
             attributes.insert(QLatin1String("target-type"), QString());
-            attributes.insert(QLatin1String("generic-class"), QLatin1String("no"));
+            attributes.insert(QLatin1String("generic-class"), noAttributeValue());
             break;
         case StackElement::FunctionTypeEntry:
             attributes.insert(QLatin1String("signature"), QString());
@@ -988,7 +993,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             if (!element->entry)
                 element->entry = new ObjectTypeEntry(name, since);
 
-            element->entry->setStream(attributes[QLatin1String("stream")] == QLatin1String("yes"));
+            element->entry->setStream(attributes[QLatin1String("stream")] == yesAttributeValue());
 
             ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
             ctype->setTargetLangPackage(attributes[QLatin1String("package")]);
@@ -1174,7 +1179,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             break;
         case StackElement::LoadTypesystem:
             attributes.insert(nameAttribute(), QString());
-            attributes.insert(QLatin1String("generate"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("generate"), yesAttributeValue());
             break;
         case StackElement::NoNullPointers:
             attributes.insert(QLatin1String("default-value"), QString());
@@ -1193,28 +1198,28 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(QLatin1String("signature"), QString());
             attributes.insert(QLatin1String("return-type"), QLatin1String("void"));
             attributes.insert(QLatin1String("access"), QLatin1String("public"));
-            attributes.insert(QLatin1String("static"), QLatin1String("no"));
+            attributes.insert(QLatin1String("static"), noAttributeValue());
             break;
         case StackElement::ModifyFunction:
             attributes.insert(QLatin1String("signature"), QString());
             attributes.insert(QLatin1String("access"), QString());
             attributes.insert(QLatin1String("remove"), QString());
             attributes.insert(QLatin1String("rename"), QString());
-            attributes.insert(QLatin1String("deprecated"), QLatin1String("no"));
+            attributes.insert(QLatin1String("deprecated"), noAttributeValue());
             attributes.insert(QLatin1String("associated-to"), QString());
-            attributes.insert(QLatin1String("virtual-slot"), QLatin1String("no"));
-            attributes.insert(QLatin1String("thread"), QLatin1String("no"));
-            attributes.insert(QLatin1String("allow-thread"), QLatin1String("no"));
+            attributes.insert(QLatin1String("virtual-slot"), noAttributeValue());
+            attributes.insert(QLatin1String("thread"), noAttributeValue());
+            attributes.insert(QLatin1String("allow-thread"), noAttributeValue());
             break;
         case StackElement::ModifyArgument:
             attributes.insert(QLatin1String("index"), QString());
             attributes.insert(QLatin1String("replace-value"), QString());
-            attributes.insert(QLatin1String("invalidate-after-use"), QLatin1String("no"));
+            attributes.insert(QLatin1String("invalidate-after-use"), noAttributeValue());
             break;
         case StackElement::ModifyField:
             attributes.insert(nameAttribute(), QString());
-            attributes.insert(QLatin1String("write"), QLatin1String("true"));
-            attributes.insert(QLatin1String("read"), QLatin1String("true"));
+            attributes.insert(QLatin1String("write"), trueAttributeValue());
+            attributes.insert(QLatin1String("read"), trueAttributeValue());
             attributes.insert(QLatin1String("remove"), QString());
             break;
         case StackElement::Access:
@@ -1245,7 +1250,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             attributes.insert(QLatin1String("file"), QString());
             break;
         case StackElement::TargetToNative:
-            attributes.insert(QLatin1String("replace"), QLatin1String("yes"));
+            attributes.insert(QLatin1String("replace"), yesAttributeValue());
             break;
         case StackElement::AddConversion:
             attributes.insert(QLatin1String("type"), QString());
@@ -1429,7 +1434,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 m_error = QLatin1String("Target to Native conversions can only be specified for custom conversion rules.");
                 return false;
             }
-            bool replace = attributes[QLatin1String("replace")] == QLatin1String("yes");
+            bool replace = attributes[QLatin1String("replace")] == yesAttributeValue();
             static_cast<TypeEntry*>(m_current->entry)->customConversion()->setReplaceOriginalTargetToNativeConversions(replace);
         }
         break;
@@ -1679,8 +1684,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             QString read = attributes[QLatin1String("read")];
             QString write = attributes[QLatin1String("write")];
 
-            if (read == QLatin1String("true")) fm.modifiers |= FieldModification::Readable;
-            if (write == QLatin1String("true")) fm.modifiers |= FieldModification::Writable;
+            if (read == trueAttributeValue()) fm.modifiers |= FieldModification::Readable;
+            if (write == trueAttributeValue()) fm.modifiers |= FieldModification::Writable;
 
             m_contextStack.top()->fieldMods << fm;
         }
@@ -1706,7 +1711,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             }
 
             AddedFunction func(signature, attributes[QLatin1String("return-type")], since);
-            func.setStatic(attributes[QLatin1String("static")] == QLatin1String("yes"));
+            func.setStatic(attributes[QLatin1String("static")] == yesAttributeValue());
             if (!signature.contains(QLatin1Char('(')))
                 signature += QLatin1String("()");
             m_currentSignature = signature;
