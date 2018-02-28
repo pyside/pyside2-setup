@@ -539,21 +539,22 @@ bool Handler::importFileElement(const QXmlStreamAttributes &atts)
     return true;
 }
 
-bool Handler::convertBoolean(const QString &_value, const QString &attributeName, bool defaultValue)
+static bool convertBoolean(const QString &value, const QString &attributeName, bool defaultValue)
 {
-    QString value = _value.toLower();
-    if (value == trueAttributeValue() || value == yesAttributeValue())
+    if (value.compare(trueAttributeValue(), Qt::CaseInsensitive) == 0
+        || value.compare(yesAttributeValue(), Qt::CaseInsensitive) == 0) {
         return true;
-     else if (value == falseAttributeValue() || value == noAttributeValue())
+    }
+    if (value.compare(falseAttributeValue(), Qt::CaseInsensitive) == 0
+        || value.compare(noAttributeValue(), Qt::CaseInsensitive) == 0) {
         return false;
-     else {
-        QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
+    }
+    const QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
                                       .arg(value, attributeName,
                                            defaultValue ? yesAttributeValue() : noAttributeValue());
 
-        qCWarning(lcShiboken).noquote().nospace() << warn;
-        return defaultValue;
-    }
+    qCWarning(lcShiboken).noquote().nospace() << warn;
+    return defaultValue;
 }
 
 static bool convertRemovalAttribute(const QString& removalAttribute, Modification& mod, QString& errorMsg)

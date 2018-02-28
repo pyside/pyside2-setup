@@ -153,7 +153,6 @@ private:
                               QHash<QString, QString> *acceptedAttributes);
 
     bool importFileElement(const QXmlStreamAttributes &atts);
-    bool convertBoolean(const QString &, const QString &, bool);
     void addFlags(const QString &name, QString flagName,
                   const QHash<QString, QString> &attributes, double since);
 
