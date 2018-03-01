@@ -21,6 +21,27 @@ else()
     find_package(PythonLibs 2.6)
 endif()
 
+set(PYSIDE_VERSION_FILE_PATH "${CMAKE_SOURCE_DIR}/pyside_version.py")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  ${PYSIDE_VERSION_FILE_PATH}
+)
+execute_process(
+  COMMAND ${PYTHON_EXECUTABLE} "${PYSIDE_VERSION_FILE_PATH}"
+  OUTPUT_VARIABLE PYSIDE_VERSION_OUTPUT
+  ERROR_VARIABLE PYSIDE_VERSION_OUTPUT_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (NOT PYSIDE_VERSION_OUTPUT)
+    message(FATAL_ERROR "Could not identify PySide2 version. Error: ${PYSIDE_VERSION_OUTPUT_ERROR}")
+endif()
+
+list(GET PYSIDE_VERSION_OUTPUT 0 BINDING_API_MAJOR_VERSION)
+list(GET PYSIDE_VERSION_OUTPUT 1 BINDING_API_MINOR_VERSION)
+list(GET PYSIDE_VERSION_OUTPUT 2 BINDING_API_MICRO_VERSION)
+# a - alpha, b - beta, rc - rc
+list(GET PYSIDE_VERSION_OUTPUT 3 BINDING_API_PRE_RELEASE_VERSION_TYPE)
+# the number of the pre release (alpha1, beta3, rc7, etc.)
+list(GET PYSIDE_VERSION_OUTPUT 4 BINDING_API_PRE_RELEASE_VERSION)
+
 macro(get_python_extension_suffix)
   # Result of imp.get_suffixes() depends on the platform, but generally looks something like:
   # [('.cpython-34m-x86_64-linux-gnu.so', 'rb', 3), ('.cpython-34m.so', 'rb', 3),
@@ -160,24 +181,33 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(BINDING_NAME PySide2)
-set(BINDING_API_MAJOR_VERSION "2")
-set(BINDING_API_MINOR_VERSION "0")
-set(BINDING_API_MICRO_VERSION "0")
-set(BINDING_API_RELEASE_LEVEL "alpha") # alpha, beta, rc, or final
-set(BINDING_API_SERIAL 0) # leave as 0 when release level is final
-set(BINDING_API_VERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}" CACHE STRING "PySide version" FORCE)
+
+set(BINDING_API_VERSION "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}" CACHE STRING "PySide2 version" FORCE)
 set(PYSIDE_SO_VERSION ${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION})
-if (BINDING_API_RELEASE_LEVEL STREQUAL "final")
+if (BINDING_API_PRE_RELEASE_VERSION_TYPE STREQUAL "")
     set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}"
-        CACHE STRING "PySide version [full]" FORCE)
+        CACHE STRING "PySide2 version [full]" FORCE)
 else()
-    set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}~${BINDING_API_RELEASE_LEVEL}${BINDING_API_SERIAL}"
-        CACHE STRING "PySide version [full]" FORCE)
+    set(BINDING_API_VERSION_FULL "${BINDING_API_MAJOR_VERSION}.${BINDING_API_MINOR_VERSION}.${BINDING_API_MICRO_VERSION}~${BINDING_API_PRE_RELEASE_VERSION_TYPE}${BINDING_API_PRE_RELEASE_VERSION}"
+        CACHE STRING "PySide2 version [full]" FORCE)
 endif()
 
 string(TIMESTAMP PYSIDE_BUILD_DATE "%Y-%m-%dT%H:%M:%S+00:00" UTC)
 if (PYSIDE_BUILD_DATE)
     set(PYSIDE_BUILD_DATE "__build_date__ = '${PYSIDE_BUILD_DATE}'")
+endif()
+
+if (PYSIDE_SETUP_PY_PACKAGE_VERSION)
+    set(PYSIDE_SETUP_PY_PACKAGE_VERSION_ASSIGNMENT "__setup_py_package_version__ = '${PYSIDE_SETUP_PY_PACKAGE_VERSION}'")
+    set(FINAL_PACKAGE_VERSION ${PYSIDE_SETUP_PY_PACKAGE_VERSION})
+else()
+    set(FINAL_PACKAGE_VERSION ${BINDING_API_VERSION_FULL})
+endif()
+
+if (PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP)
+    set(PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP_ASSIGNMENT "__setup_py_package_timestamp__ = '${PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP}'")
+else()
+    set(PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP_ASSIGNMENT "__setup_py_package_timestamp__ = ''")
 endif()
 
 find_package(Git)
@@ -220,11 +250,6 @@ if(GIT_FOUND)
 
     endif()
 endif()
-
-# Used by setup.py to know which symlink to resolve and copy in to the final package, in order to
-# avoid resolving all symlinks and thus copying unnecessary duplicate files.
-set(config_py_shiboken_library_version "")
-set(config_py_pyside_library_version "")
 
 include(PySideModules)
 
@@ -346,8 +371,6 @@ endif()
 # Define supported Qt Version
 set(SUPPORTED_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")
 
-set(BINDING_VERSION ${BINDING_API_VERSION}.${QT_VERSION_MAJOR}.${QT_VERSION_MINOR})
-
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
@@ -355,16 +378,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
 add_custom_target(uninstall "${CMAKE_COMMAND}"
                   -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
-
-set(ARCHIVE_NAME pyside-qt${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}+${BINDING_API_VERSION_FULL})
-add_custom_target(dist
-    COMMAND mkdir -p "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}" &&
-            git log > "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}/ChangeLog" &&
-            git archive --prefix=${ARCHIVE_NAME}/ HEAD --format=tar --output="${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
-            tar -C "${CMAKE_BINARY_DIR}" --owner=root --group=root -r "${ARCHIVE_NAME}/ChangeLog" -f "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
-            bzip2 -f9 "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
-            echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2.\n"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 if (NOT PYTHON_SITE_PACKAGES)
     execute_process(

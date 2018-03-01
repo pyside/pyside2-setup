@@ -890,3 +890,14 @@ def memoize(function):
             memo[args] = rv
             return rv
     return wrapper
+
+def get_python_dict(python_script_path):
+    try:
+        with open(python_script_path) as f:
+            python_dict = {}
+            code = compile(f.read(), python_script_path, 'exec')
+            exec(code, {}, python_dict)
+            return python_dict
+    except IOError as e:
+        print("get_python_dict: Couldn't get dict from python file: {}.".format(python_script_path))
+        raise

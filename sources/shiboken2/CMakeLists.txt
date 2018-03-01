@@ -11,12 +11,6 @@ find_package(Qt5 REQUIRED COMPONENTS Core Xml XmlPatterns)
 
 add_definitions(${Qt5Core_DEFINITIONS})
 
-set(shiboken_MAJOR_VERSION "2")
-set(shiboken_MINOR_VERSION "0")
-set(shiboken_MICRO_VERSION "0")
-set(shiboken2_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
-set(shiboken2_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
-
 option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
 
@@ -27,6 +21,31 @@ else()
     find_package(PythonInterp 2.6)
     find_package(PythonLibs 2.6)
 endif()
+
+set(SHIBOKEN_VERSION_FILE_PATH "${CMAKE_SOURCE_DIR}/shiboken_version.py")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  ${SHIBOKEN_VERSION_FILE_PATH}
+)
+execute_process(
+  COMMAND ${PYTHON_EXECUTABLE} "${SHIBOKEN_VERSION_FILE_PATH}"
+  OUTPUT_VARIABLE SHIBOKEN_VERSION_OUTPUT
+  ERROR_VARIABLE SHIBOKEN_VERSION_OUTPUT_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (NOT SHIBOKEN_VERSION_OUTPUT)
+    message(FATAL_ERROR "Could not identify shiboken version. \
+                         Error: ${SHIBOKEN_VERSION_OUTPUT_ERROR}")
+endif()
+
+list(GET SHIBOKEN_VERSION_OUTPUT 0 shiboken_MAJOR_VERSION)
+list(GET SHIBOKEN_VERSION_OUTPUT 1 shiboken_MINOR_VERSION)
+list(GET SHIBOKEN_VERSION_OUTPUT 2 shiboken_MICRO_VERSION)
+# a - alpha, b - beta, rc - rc
+list(GET SHIBOKEN_VERSION_OUTPUT 3 shiboken_PRE_RELEASE_VERSION_TYPE)
+# the number of the pre release (alpha1, beta3, rc7, etc.)
+list(GET SHIBOKEN_VERSION_OUTPUT 4 shiboken_PRE_RELEASE_VERSION)
+
+set(shiboken2_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
+set(shiboken2_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
 
 ## For debugging the PYTHON* variables
 message("PYTHONLIBS_FOUND: " ${PYTHONLIBS_FOUND})
@@ -279,16 +298,3 @@ else()
 endif()
 
 add_subdirectory(data)
-
-# dist target
-set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${shiboken2_VERSION})
-add_custom_target(dist
-    COMMAND mkdir -p "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}" &&
-            git log > "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}/ChangeLog" &&
-            git archive --prefix=${ARCHIVE_NAME}/ HEAD --format=tar --output="${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
-            tar -C "${CMAKE_BINARY_DIR}" --owner=root --group=root -r "${ARCHIVE_NAME}/ChangeLog" -f "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
-            bzip2 -f9 "${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar" &&
-            echo "Source package created at ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2."
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-
