@@ -52,15 +52,38 @@ from docutils.parsers.rst import directives
 from sphinx.ext.graphviz import render_dot_html, render_dot_latex
 from sphinx.util.compat import Directive
 
-
-class_sig_re = re.compile(r'''^([\w.]*\.)?    # module names
-                          (\w+)  \s* $        # class/final module name
-                          ''', re.VERBOSE)
-
-
 class InheritanceException(Exception):
     pass
 
+# When passed something like:
+#  PySide2.QtCore.QStateMachine.SignalEvent
+# try to import the underlying module and return a
+# handle to the object. In a loop, import
+#   PySide2.QtCore.QStateMachine.SignalEvent
+#   PySide2.QtCore.QStateMachine
+#   PySide2.QtCore
+# until the import succeeds and walk up the attributes
+# to obtain the object
+
+def importClassOrModule(name):
+    components = name.split('.')
+    for i in range(len(components), 0, -1):
+        importPath = '.'.join(components[: i])
+        try:
+            __import__(importPath)
+        except ImportError:
+            continue
+        if i == len(components):
+            return sys.modules[importPath]
+        remaining = components[i :]
+        cls = sys.modules[importPath]
+        for component in remaining:
+            try:
+                cls = getattr(cls, component)
+            except Exception: # No such attribute
+                return None
+        return cls
+    return None
 
 class InheritanceGraph(object):
     """
@@ -86,38 +109,13 @@ class InheritanceGraph(object):
         """
         Import a class using its fully-qualified *name*.
         """
-        try:
-            path, base = class_sig_re.match(name).groups()
-        except (AttributeError, ValueError):
-            raise InheritanceException('Invalid class or module %r specified '
-                                       'for inheritance diagram' % name)
-
-        fullname = (path or '') + base
-        path = (path and path.rstrip('.') or '')
-
-        # two possibilities: either it is a module, then import it
-        try:
-            __import__(fullname)
-            todoc = sys.modules[fullname]
-        except ImportError:
-            # else it is a class, then import the module
-            if not path:
-                if currmodule:
-                    # try the current module
-                    path = currmodule
-                else:
-                    raise InheritanceException(
-                        'Could not import class %r specified for '
-                        'inheritance diagram' % base)
-            try:
-                __import__(path)
-                todoc = getattr(sys.modules[path], base)
-            except (ImportError, AttributeError):
-                raise InheritanceException(
-                    'Could not import class or module %r specified for '
-                    'inheritance diagram' % (path + '.' + base))
-
-        # If a class, just return it
+        todoc = importClassOrModule(name)
+        if not todoc and currmodule is not None:
+            todoc = importClassOrModule(currmodule + '.' + name)
+        if not todoc:
+            moduleStr = '(module {})'.format(currmodule) if currmodule else ''
+            raise InheritanceException('Could not import class {} specified for '
+                                       'inheritance diagram {}.'.format(name, moduleStr))
         if inspect.isclass(todoc):
             return [todoc]
         elif inspect.ismodule(todoc):
