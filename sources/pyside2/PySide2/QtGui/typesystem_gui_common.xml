@@ -1637,7 +1637,6 @@
     <!-- ??? -->
     <modify-function signature="operator&lt;(QStandardItem)const" remove="all"/>
   </object-type>
-  <object-type name="QStringListModel"/>
   <object-type name="QSyntaxHighlighter">
     <modify-function signature="setCurrentBlockUserData(QTextBlockUserData*)">
       <modify-argument index="1">
