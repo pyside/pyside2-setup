@@ -323,7 +323,7 @@ def makefile(dst, content=None, vars=None):
 
 
 def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars=None,
-            dir_filter_function=None, force_copy_symlinks=False):
+            dir_filter_function=None, file_filter_function=None, force_copy_symlinks=False):
 
     if vars is not None:
         src = src.format(**vars)
@@ -357,10 +357,12 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
                 if recursive:
                     results.extend(
                         copydir(srcname, dstname, filter, ignore, force, recursive,
-                                vars, dir_filter_function, force_copy_symlinks))
+                                vars, dir_filter_function, file_filter_function,
+                                force_copy_symlinks))
             else:
-                if (filter is not None and not filter_match(name, filter)) or \
-                    (ignore is not None and filter_match(name, ignore)):
+                if (file_filter_function is not None and not file_filter_function(name, srcname)) \
+                    or (filter is not None and not filter_match(name, filter)) \
+                    or (ignore is not None and filter_match(name, ignore)):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
@@ -983,3 +985,28 @@ def rpathsHasOrigin(rpaths):
         if match:
             return True
     return False
+
+def memoize(function):
+    """ Decorator to wrap a function with a memoizing callable.
+        It returns cached values when the wrapped function is called with the same arguments.
+    """
+    memo = {}
+    def wrapper(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            rv = function(*args)
+            memo[args] = rv
+            return rv
+    return wrapper
+
+def get_python_dict(python_script_path):
+    try:
+        with open(python_script_path) as f:
+            python_dict = {}
+            code = compile(f.read(), python_script_path, 'exec')
+            exec(code, {}, python_dict)
+            return python_dict
+    except IOError as e:
+        print("get_python_dict: Couldn't get dict from python file: {}.".format(python_script_path))
+        raise

@@ -29,37 +29,48 @@
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
+from PySide2.QtTest import *
 
 import unittest
 from helper import UsesQApplication
 
 class MyValidator1(QValidator):
-    def fixUp(self, input):
+    def fixup(self, input):
         return "fixed"
 
     def validate(self, input, pos):
         return (QValidator.Acceptable, "fixed", 1)
 
 class MyValidator2(QValidator):
-    def fixUp(self, input):
+    def fixup(self, input):
         return "fixed"
 
     def validate(self, input, pos):
         return (QValidator.Acceptable, "fixed")
 
 class MyValidator3(QValidator):
-    def fixUp(self, input):
+    def fixup(self, input):
         return "fixed"
 
     def validate(self, input, pos):
         return (QValidator.Acceptable,)
 
 class MyValidator4(QValidator):
-    def fixUp(self, input):
+    def fixup(self, input):
         return "fixed"
 
     def validate(self, input, pos):
         return QValidator.Acceptable
+
+class MyValidator5(QValidator):
+    def validate(self, input, pos):
+        if input.islower():
+            return (QValidator.Intermediate, input, pos)
+        else:
+            return (QValidator.Acceptable, input, pos)
+
+    def fixup(self, input):
+        return "22"
 
 class QValidatorTest(UsesQApplication):
     def testValidator1(self):
@@ -109,6 +120,14 @@ class QValidatorTest(UsesQApplication):
 
         self.assertEqual(line.text(), "foo")
         self.assertEqual(line.cursorPosition(), 3)
+
+    def testValidator5(self):
+        line = QLineEdit()
+        line.show()
+        line.setValidator(MyValidator5())
+        line.setText("foo")
+        QTest.keyClick(line, Qt.Key_Return)
+        self.assertEqual(line.text(), "22")
 
 if __name__ == '__main__':
     unittest.main()

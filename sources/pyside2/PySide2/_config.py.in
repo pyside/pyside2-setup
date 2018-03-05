@@ -4,3 +4,14 @@ built_modules = list(name for name in
 
 shiboken_library_soversion = str(@SHIBOKEN_SO_VERSION@)
 pyside_library_soversion = str(@PYSIDE_SO_VERSION@)
+
+version = "@FINAL_PACKAGE_VERSION@"
+version_info = (@BINDING_API_MAJOR_VERSION@, @BINDING_API_MINOR_VERSION@, @BINDING_API_MICRO_VERSION@, "@BINDING_API_PRE_RELEASE_VERSION_TYPE@", @BINDING_API_PRE_RELEASE_VERSION@)
+
+@PYSIDE_BUILD_DATE@
+@PYSIDE_BUILD_COMMIT_DATE@
+@PYSIDE_BUILD_COMMIT_HASH@
+@PYSIDE_BUILD_COMMIT_HASH_DESCRIBED@
+
+# Timestamp used for snapshot build, which is part of snapshot package version.
+@PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP_ASSIGNMENT@

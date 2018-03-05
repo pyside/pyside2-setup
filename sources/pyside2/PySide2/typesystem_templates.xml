@@ -286,6 +286,12 @@
     <template name="return_QString">
         %PYARG_0 = %CONVERTTOPYTHON[QString](%1);
     </template>
+    <template name="return_QString_native">
+        if (%ISCONVERTIBLE[QString](%PYARG_0))
+            %1 = %CONVERTTOCPP[QString](%PYARG_0);
+        else
+            qWarning("%TYPE::%FUNCTION_NAME: Argument is not convertible to unicode.");
+    </template>
 
     <template name="return_tuple_QValidator_QString_int">
     %BEGIN_ALLOW_THREADS
