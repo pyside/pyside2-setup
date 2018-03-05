@@ -7,7 +7,7 @@ cmake_policy(VERSION 3.1)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
 
-find_package(Qt5 REQUIRED COMPONENTS Core Xml XmlPatterns)
+find_package(Qt5 5.7 REQUIRED COMPONENTS Core Xml XmlPatterns)
 
 add_definitions(${Qt5Core_DEFINITIONS})
 

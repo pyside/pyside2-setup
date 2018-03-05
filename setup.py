@@ -411,7 +411,12 @@ def get_qt_version():
     qt_version = qtinfo.version
 
     if not qt_version:
-        log.error("Failed to query the Qt version with qmake %s" % self.qtinfo.qmake_command)
+        log.error("Failed to query the Qt version with qmake {0}".format(self.qtinfo.qmake_command))
+        sys.exit(1)
+
+    if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
+        m = "Incompatible Qt version detected: {0}. A Qt version >= 5.7 is required."
+        log.error(m.format(qt_version))
         sys.exit(1)
 
     return qt_version
