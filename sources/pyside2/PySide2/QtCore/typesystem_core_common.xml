@@ -2373,9 +2373,6 @@
     <enum-type name="UrlFormattingOption" />
     <enum-type name="UserInputResolutionOption" flags="UserInputResolutionOptions"/>
     <enum-type name="ParsingMode"/>
-    <modify-documentation xpath='description/para[3]'>
-        &lt;para>URLs can be represented in two forms: encoded or unencoded. The unencoded representation is suitable for showing to users, but the encoded representation is typically what you would send to a web server. For example, the unencoded URL &quot;http://bühler.example.com&quot; would be sent to the server as &quot;http://xn--bhler-kva.example.com/List%20of%20applicants.xml&quot;.&lt;/para>
-    </modify-documentation>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
@@ -3979,9 +3976,9 @@
     <modify-documentation xpath='description/code'>
         &lt;code>machine = QStateMachine()
 
-s1 = new QState()
-s11 = new QState(s1)
-s12 = new QState(s1)
+s1 = QState()
+s11 = QState(s1)
+s12 = QState(s1)
 
 s1h = QHistoryState(s1)
 s1h.setDefaultState(s11)
