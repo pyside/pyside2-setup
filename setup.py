@@ -161,9 +161,7 @@ __version__ = get_package_version()
 containedModules = ['shiboken2', 'pyside2', 'pyside2-tools']
 
 # Git submodules: ["submodule_name", "location_relative_to_sources_folder"]
-submodules = [["pyside2-tools"],
-              ["pyside2-examples"],
-              ["wiki", ".."]]
+submodules = [["pyside2-tools"]]
 
 pyside_package_dir_name = "pyside_package"
 
@@ -222,14 +220,6 @@ from utils import copy_icu_libs
 from utils import find_files_using_glob
 
 from textwrap import dedent
-
-# guess a close folder name for extensions
-def get_extension_folder(ext):
-    candidates = list(containedModules)
-    for gitModules in submodules:
-        candidates.append(gitModules[0])
-    folder = difflib.get_close_matches(ext, candidates)[0]
-    return folder
 
 # make sure that setup.py is run with an allowed python version
 def check_allowed_python_version():
@@ -367,12 +357,6 @@ if os.path.dirname(this_file):
 
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
-
-if OPTION_NOEXAMPLES:
-    # Remove pyside2-examples from submodules so they will not be included.
-    for idx, item in enumerate(submodules):
-        if item[0].startswith('pyside2-examples'):
-            del submodules[idx]
 
 # Return a prefix suitable for the _install/_build directory
 def prefix():
@@ -991,7 +975,6 @@ class pyside_build(_build):
 
     def build_extension(self, extension):
         # calculate the subrepos folder name
-        folder = get_extension_folder(extension)
 
         log.info("Building module %s..." % extension)
 
@@ -1019,7 +1002,7 @@ class pyside_build(_build):
             os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
 
-        module_src_dir = os.path.join(self.sources_dir, folder)
+        module_src_dir = os.path.join(self.sources_dir, extension)
 
         # Build module
         cmake_cmd = [
