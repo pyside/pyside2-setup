@@ -49,6 +49,12 @@ class QtDocGenerator;
 class QtXmlToSphinx
 {
 public:
+    struct InlineImage
+    {
+        QString tag;
+        QString href;
+    };
+
     struct TableCell
     {
         short rowSpan;
@@ -127,6 +133,7 @@ private:
     void handleDotsTag(QXmlStreamReader& reader);
     void handleLinkTag(QXmlStreamReader& reader);
     void handleImageTag(QXmlStreamReader& reader);
+    void handleInlineImageTag(QXmlStreamReader& reader);
     void handleListTag(QXmlStreamReader& reader);
     void handleTermTag(QXmlStreamReader& reader);
     void handleSuperScriptTag(QXmlStreamReader& reader);
@@ -168,6 +175,7 @@ private:
     bool m_insideItalic;
     QString m_lastTagName;
     QString m_opened_anchor;
+    QVector<InlineImage> m_inlineImages;
 
     QString readFromLocations(const QStringList &locations, const QString &path,
                               const QString &identifier, QString *errorMessage);
@@ -176,6 +184,7 @@ private:
     void pushOutputBuffer();
     QString popOutputBuffer();
     void writeTable(Table& table);
+    bool copyImage(const QString &href) const;
 };
 
 inline QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx& xmlToSphinx)

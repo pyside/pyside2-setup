@@ -1042,21 +1042,15 @@ private:
     PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
 };
 
-struct EnumValueRedirection
-{
-    EnumValueRedirection() {}
-    EnumValueRedirection(const QString &rej, const QString &us)
-            : rejected(rej),
-            used(us)
-    {
-    }
-    QString rejected;
-    QString used;
-};
-
 class EnumTypeEntry : public TypeEntry
 {
 public:
+    enum EnumKind {
+        CEnum,         // Standard C: enum Foo { value1, value2 }
+        AnonymousEnum, //             enum { value1, value2 }
+        EnumClass      // C++ 11    : enum class Foo { value1, value2 }
+    };
+
     explicit EnumTypeEntry(const QString &nspace, const QString &enumName, double vr);
 
     QString targetLangPackage() const override;
@@ -1076,6 +1070,9 @@ public:
     {
         m_qualifier = q;
     }
+
+    EnumKind enumKind() const { return m_enumKind; }
+    void setEnumKind(EnumKind kind) { m_enumKind = kind; }
 
     bool preferredConversion() const override;
 
@@ -1120,7 +1117,7 @@ public:
         m_extensible = is;
     }
 
-    bool isEnumValueRejected(const QString &name)
+    bool isEnumValueRejected(const QString &name) const
     {
         return m_rejectedEnums.contains(name);
     }
@@ -1133,9 +1130,6 @@ public:
         return m_rejectedEnums;
     }
 
-    void addEnumValueRedirection(const QString &rejected, const QString &usedValue);
-    QString enumValueRedirection(const QString &value) const;
-
     bool forceInteger() const
     {
         return m_forceInteger;
@@ -1145,14 +1139,7 @@ public:
         m_forceInteger = force;
     }
 
-    bool isAnonymous() const
-    {
-        return m_anonymous;
-    }
-    void setAnonymous(bool anonymous)
-    {
-        m_anonymous = anonymous;
-    }
+    bool isAnonymous() const { return m_enumKind == AnonymousEnum; }
 
 private:
     QString m_packageName;
@@ -1163,15 +1150,17 @@ private:
     QString m_upperBound;
 
     QStringList m_rejectedEnums;
-    QVector<EnumValueRedirection> m_enumRedirections;
 
     FlagsTypeEntry *m_flags = nullptr;
 
+    EnumKind m_enumKind = CEnum;
+
     bool m_extensible = false;
     bool m_forceInteger = false;
-    bool m_anonymous = false;
 };
 
+// EnumValueTypeEntry is used for resolving integer type templates
+// like array<EnumValue>.
 class EnumValueTypeEntry : public TypeEntry
 {
 public:

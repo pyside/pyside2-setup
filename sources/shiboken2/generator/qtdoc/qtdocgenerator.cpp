@@ -111,9 +111,14 @@ static int writeEscapedRstText(QTextStream &str, const String &s)
 {
     int escaped = 0;
     for (const QChar &c : s) {
-        if (c == QLatin1Char('*') || c == QLatin1Char('_')) {
+        switch (c.unicode()) {
+        case '*':
+        case '`':
+        case '_':
+        case '\\':
             str << '\\';
             ++escaped;
+            break;
         }
         str << c;
     }
@@ -199,7 +204,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert(QLatin1String("argument"), &QtXmlToSphinx::handleArgumentTag);
     m_handlerMap.insert(QLatin1String("teletype"), &QtXmlToSphinx::handleArgumentTag);
     m_handlerMap.insert(QLatin1String("link"), &QtXmlToSphinx::handleLinkTag);
-    m_handlerMap.insert(QLatin1String("inlineimage"), &QtXmlToSphinx::handleImageTag);
+    m_handlerMap.insert(QLatin1String("inlineimage"), &QtXmlToSphinx::handleInlineImageTag);
     m_handlerMap.insert(QLatin1String("image"), &QtXmlToSphinx::handleImageTag);
     m_handlerMap.insert(QLatin1String("list"), &QtXmlToSphinx::handleListTag);
     m_handlerMap.insert(QLatin1String("term"), &QtXmlToSphinx::handleTermTag);
@@ -365,6 +370,16 @@ QString QtXmlToSphinx::transform(const QString& doc)
             m_lastTagName = reader.name().toString();
         }
     }
+
+    if (!m_inlineImages.isEmpty()) {
+        // Write out inline image definitions stored in handleInlineImageTag().
+        m_output << endl;
+        for (const InlineImage &img : qAsConst(m_inlineImages))
+            m_output << ".. |" << img.tag << "| image:: " << img.href << endl;
+        m_output << endl;
+        m_inlineImages.clear();
+    }
+
     m_output.flush();
     QString retval = popOutputBuffer();
     Q_ASSERT(m_buffers.isEmpty());
@@ -936,22 +951,46 @@ static bool copyImage(const QString &href, const QString &docDataDir,
     return true;
 }
 
+bool QtXmlToSphinx::copyImage(const QString &href) const
+{
+    QString errorMessage;
+    const bool result =
+        ::copyImage(href, m_generator->docDataDir(), m_context,
+                    m_generator->outputDirectory(), &errorMessage);
+    if (!result)
+        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+    return result;
+}
+
 void QtXmlToSphinx::handleImageTag(QXmlStreamReader& reader)
 {
-    QXmlStreamReader::TokenType token = reader.tokenType();
-    if (token == QXmlStreamReader::StartElement) {
-        QString href = reader.attributes().value(QLatin1String("href")).toString();
-        QString errorMessage;
-        if (!copyImage(href,m_generator->docDataDir(), m_context,
-                       m_generator->outputDirectory(), &errorMessage)) {
-            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
-        }
+    if (reader.tokenType() != QXmlStreamReader::StartElement)
+        return;
+    const QString href = reader.attributes().value(QLatin1String("href")).toString();
+    if (copyImage(href))
+        m_output << INDENT << ".. image:: " <<  href << endl << endl;
+}
 
-        if (reader.name() == QLatin1String("image"))
-            m_output << INDENT << ".. image:: " <<  href << endl << endl;
-        else
-            m_output << ".. image:: " << href << ' ';
-    }
+void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
+{
+    if (reader.tokenType() != QXmlStreamReader::StartElement)
+        return;
+    const QString href = reader.attributes().value(QLatin1String("href")).toString();
+    if (!copyImage(href))
+        return;
+    // Handle inline images by substitution references. Insert a unique tag
+    // enclosed by '|' and define it further down. Determine tag from the base
+    //file name with number.
+    QString tag = href;
+    int pos = tag.lastIndexOf(QLatin1Char('/'));
+    if (pos != -1)
+        tag.remove(0, pos + 1);
+    pos = tag.indexOf(QLatin1Char('.'));
+    if (pos != -1)
+        tag.truncate(pos);
+    tag += QString::number(m_inlineImages.size() + 1);
+    m_inlineImages.append(InlineImage{tag, href});
+    m_output << '|' << tag << '|' << ' ';
 }
 
 void QtXmlToSphinx::handleRawTag(QXmlStreamReader& reader)
@@ -1323,7 +1362,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     s << className << endl;
     s << Pad('*', className.count()) << endl << endl;
 
-    s << ".. inheritance-diagram:: " << className << endl
+    s << ".. inheritance-diagram:: " << getClassTargetFullName(metaClass, true) << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
 
 

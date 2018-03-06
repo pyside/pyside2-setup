@@ -45,6 +45,12 @@ struct Event
         SOME_EVENT,
         ANY_EVENT
     };
+
+    enum class EventTypeClass {
+        Value1,
+        Value2
+    };
+
     Event(EventType eventType) : m_eventType(eventType) {}
     EventType eventType() { return m_eventType; }
 private:

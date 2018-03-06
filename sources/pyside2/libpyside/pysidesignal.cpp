@@ -413,11 +413,64 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
             sourceWalk = reinterpret_cast<PySideSignalInstance*>(sourceWalk->d->next);
         }
     } else {
-        //try the first signature
-        PyList_Append(pyArgs, source->d->source);
-        Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(source->d->signature));
-        PyList_Append(pyArgs, signature);
+        // Check signature of the slot (method or function) to match signal
+        int slotArgs = -1;
+        bool useSelf = false;
+        bool isMethod = PyMethod_Check(slot);
+        bool isFunction = PyFunction_Check(slot);
+        bool matchedSlot = false;
 
+        QByteArray functionName;
+        PySideSignalInstance *it = source;
+
+        if (isMethod || isFunction) {
+            PyObject *function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
+            PyCodeObject *objCode = reinterpret_cast<PyCodeObject *>(PyFunction_GET_CODE(function));
+            PyFunctionObject *function_obj = reinterpret_cast<PyFunctionObject *>(function);
+            functionName = Shiboken::String::toCString(function_obj->func_name);
+            useSelf = isMethod;
+            slotArgs = objCode->co_flags & CO_VARARGS ? -1 : objCode->co_argcount;
+            if (useSelf)
+                slotArgs -= 1;
+
+            // Get signature args
+            bool isShortCircuit = false;
+            int signatureArgs = 0;
+            QStringList argsSignature;
+
+            argsSignature = PySide::Signal::getArgsFromSignature(it->d->signature,
+                &isShortCircuit);
+            signatureArgs = argsSignature.length();
+
+            // Iterate the possible types of connection for this signal and compare
+            // it with slot arguments
+            if (signatureArgs != slotArgs) {
+                while (it->d->next != nullptr) {
+                    it = it->d->next;
+                    argsSignature = PySide::Signal::getArgsFromSignature(it->d->signature,
+                        &isShortCircuit);
+                    signatureArgs = argsSignature.length();
+                    if (signatureArgs == slotArgs) {
+                        matchedSlot = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Adding references to pyArgs
+        PyList_Append(pyArgs, source->d->source);
+
+        if (matchedSlot) {
+            // If a slot matching the same number of arguments was found,
+            // include signature to the pyArgs
+            Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(it->d->signature));
+            PyList_Append(pyArgs, signature);
+        } else {
+            // Try the first by default if the slot was not found
+            Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(source->d->signature));
+            PyList_Append(pyArgs, signature);
+        }
         PyList_Append(pyArgs, slot);
         match = true;
     }

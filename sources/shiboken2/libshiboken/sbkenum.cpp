@@ -492,16 +492,21 @@ bool createGlobalEnumItem(PyTypeObject* enumType, PyObject* module, const char* 
     return false;
 }
 
-bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const char* itemName, long itemValue)
+bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
+                          const char *itemName, long itemValue)
 {
-    PyObject* enumItem = createEnumItem(enumType, itemName, itemValue);
-    if (enumItem) {
-        if (PyDict_SetItemString(scope->super.ht_type.tp_dict, itemName, enumItem) < 0)
+    if (PyObject *enumItem = createEnumItem(enumType, itemName, itemValue)) {
+        if (PyDict_SetItemString(scope->tp_dict, itemName, enumItem) < 0)
             return false;
         Py_DECREF(enumItem);
         return true;
     }
     return false;
+}
+
+bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const char* itemName, long itemValue)
+{
+    return createScopedEnumItem(enumType, &scope->super.ht_type, itemName, itemValue);
 }
 
 PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)

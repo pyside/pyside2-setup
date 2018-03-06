@@ -34,7 +34,11 @@ import unittest
 from PySide2.QtCore import *
 from helper import UsesQCoreApplication
 
+called = False
+name = "Old"
 class Obj(QObject):
+    dummySignalArgs = Signal(str)
+    numberSignal = Signal(int)
     def __init__(self):
         QObject.__init__(self)
         self.signal = ''
@@ -42,7 +46,19 @@ class Obj(QObject):
     def connectNotify(self, signal):
         self.signal = signal
 
+    @staticmethod
+    def static_method():
+        global called
+        called = True
+
+    @staticmethod
+    def static_method_args(arg="default"):
+        global name
+        name = arg
+
 def callback(arg=None):
+    pass
+def callback_empty():
     pass
 
 class TestConnectNotifyWithNewStyleSignals(UsesQCoreApplication):
@@ -65,11 +81,33 @@ class TestConnectNotifyWithNewStyleSignals(UsesQCoreApplication):
     def testNewStyle(self):
         sender = Obj()
 
-        sender.destroyed.connect(callback)
+        sender.destroyed.connect(callback_empty)
         self.assertEqual(sender.signal.methodSignature(), 'destroyed()')
 
         sender.destroyed[QObject].connect(callback)
         self.assertEqual(sender.signal.methodSignature(), 'destroyed(QObject*)')
+
+    def testStaticSlot(self):
+        global called
+        sender = Obj()
+        sender.connect(sender, SIGNAL("dummySignal()"), Obj.static_method)
+        sender.emit(SIGNAL("dummySignal()"))
+        self.assertTrue(called)
+
+
+    def testStaticSlotArgs(self):
+        global name
+        sender = Obj()
+        sender.dummySignalArgs.connect(Obj.static_method_args)
+        sender.dummySignalArgs[str].emit("New")
+        self.assertEqual(name, "New")
+
+    def testLambdaSlot(self):
+        sender = Obj()
+        sender.numberSignal[int].connect(lambda x: 42)
+        with self.assertRaises(IndexError):
+            sender.numberSignal[str].emit("test")
+
 
 if __name__ == '__main__':
     unittest.main()
