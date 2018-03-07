@@ -5,11 +5,13 @@ find_package(LibXslt 1.1.19)
 
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
+set (USE_LIBXSLT 0)
 if (NOT DISABLE_DOCSTRINGS)
-    if (NOT LIBXSLT_FOUND OR NOT LIBXML2_FOUND)
-        set(DISABLE_DOCSTRINGS TRUE CACHE BOOL "Disable doc strings" PARENT_SCOPE)
-        set(DISABLE_DOCSTRINGS TRUE)
-        message(WARNING "libxslt and/or libxml not found, disabling support for doc strings!")
+    if (LIBXSLT_FOUND AND LIBXML2_FOUND)
+        add_definitions(-DHAVE_LIBXSLT)
+        set (USE_LIBXSLT 1)
+    else()
+        message(WARNING "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
     endif()
 endif()
 
@@ -65,8 +67,12 @@ if (NOT DISABLE_DOCSTRINGS)
         doxygenparser.cpp
         qtdocparser.cpp
     )
-    set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES} ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
-    set(APIEXTRACTOR_EXTRA_LIBRARIES ${APIEXTRACTOR_EXTRA_LIBRARIES} ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
+    set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES})
+    set(APIEXTRACTOR_EXTRA_LIBRARIES ${APIEXTRACTOR_EXTRA_LIBRARIES})
+    if (USE_LIBXSLT)
+        list(APPEND APIEXTRACTOR_EXTRA_INCLUDES ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+        list(APPEND APIEXTRACTOR_EXTRA_LIBRARIES ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
+    endif()
 endif()
 
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)

@@ -27,6 +27,7 @@
 ****************************************************************************/
 #include "docparser.h"
 #include "abstractmetalang.h"
+#include "reporthandler.h"
 #include "typesystem.h"
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
@@ -35,12 +36,18 @@
 #include <QBuffer>
 
 #include <cstdlib>
-#include <libxslt/xsltutils.h>
-#include <libxslt/transform.h>
+#ifdef HAVE_LIBXSLT
+#  include <libxslt/xsltutils.h>
+#  include <libxslt/transform.h>
+#endif
+
+#include <algorithm>
 
 DocParser::DocParser()
 {
+#ifdef HAVE_LIBXSLT
     xmlSubstituteEntitiesDefault(1);
+#endif
 }
 
 DocParser::~DocParser()
@@ -142,6 +149,7 @@ QString DocParser::msgCannotFindDocumentation(const QString &fileName,
                                       query);
 }
 
+#ifdef HAVE_LIBXSLT
 namespace
 {
 
@@ -170,23 +178,57 @@ struct XslResources
 };
 
 } // namespace
+#endif // HAVE_LIBXSLT
+
+static inline bool isXpathDocModification(const DocModification &mod)
+{
+    return mod.mode() == TypeSystem::DocModificationXPathReplace;
+}
+
+QString msgXpathDocModificationError(const DocModificationList& mods,
+                                     const QString &what)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Error when applying modifications (";
+    for (const DocModification &mod : mods) {
+        if (isXpathDocModification(mod)) {
+            str << '"' << mod.xpath() << "\" -> \"";
+            const QString simplified = mod.code().simplified();
+            if (simplified.size() > 20)
+                str << simplified.leftRef(20) << "...";
+            else
+                str << simplified;
+            str << '"';
+        }
+    }
+    str << "): " << what;
+    return result;
+}
 
 QString DocParser::applyDocModifications(const DocModificationList& mods, const QString& xml) const
 {
-    if (mods.isEmpty() || xml.isEmpty())
+    if (mods.isEmpty() || xml.isEmpty()
+        || !std::any_of(mods.cbegin(), mods.cend(), isXpathDocModification)) {
         return xml;
-
-    bool hasXPathBasedModification = false;
-    for (const DocModification &mod : mods) {
-        if (mod.mode() == TypeSystem::DocModificationXPathReplace) {
-            hasXPathBasedModification = true;
-            break;
-        }
     }
+#ifdef HAVE_LIBXSLT
+    const QString result = applyDocModificationsLibXsl(mods, xml);
+#else
+    const QString result = applyDocModificationsQt(mods, xml);
+#endif
+    if (result == xml) {
+        const QString message = QLatin1String("Query did not result in any modifications to \"")
+            + xml + QLatin1Char('"');
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgXpathDocModificationError(mods, message)));
+    }
+    return result;
+}
 
-    if (!hasXPathBasedModification)
-        return xml;
-
+QString DocParser::applyDocModificationsLibXsl(const DocModificationList& mods, const QString& xml) const
+{
+#ifdef HAVE_LIBXSLT
     QString xsl = QLatin1String("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
                                 "<xsl:transform version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
                                 "<xsl:template match=\"/\">\n"
@@ -200,7 +242,7 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
                                 "</xsl:template>\n"
                                );
     for (const DocModification &mod : mods) {
-        if (mod.mode() == TypeSystem::DocModificationXPathReplace) {
+        if (isXpathDocModification(mod)) {
             QString xpath = mod.xpath();
             xpath.replace(QLatin1Char('"'), QLatin1String("&quot;"));
             xsl += QLatin1String("<xsl:template match=\"")
@@ -240,8 +282,54 @@ QString DocParser::applyDocModifications(const DocModificationList& mods, const 
     } else {
         result = xml;
     }
-
-    Q_ASSERT(result != xml);
     return result.trimmed();
+#else // HAVE_LIBXSLT
+    Q_UNUSED(mods)
+    return xml;
+#endif // !HAVE_LIBXSLT
 }
 
+QString DocParser::applyDocModificationsQt(const DocModificationList& mods, const QString& xml) const
+{
+    const char xslPrefix[] =
+R"(<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+    <xsl:template match="/">
+        <xsl:apply-templates/>\n"
+    </xsl:template>
+    <xsl:template match="*">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+        <xsl:apply-templates/>
+    </xsl:copy>
+    </xsl:template>
+)";
+
+    QString xsl = QLatin1String(xslPrefix);
+    for (const DocModification &mod : mods) {
+        if (isXpathDocModification(mod)) {
+            QString xpath = mod.xpath();
+            xpath.replace(QLatin1Char('"'), QLatin1String("&quot;"));
+            xsl += QLatin1String("<xsl:template match=\"")
+                   + xpath + QLatin1String("\">")
+                   + mod.code() + QLatin1String("</xsl:template>\n");
+        }
+    }
+    xsl += QLatin1String("</xsl:stylesheet>");
+
+    QXmlQuery query(QXmlQuery::XSLT20);
+    query.setFocus(xml);
+    query.setQuery(xsl);
+    if (!query.isValid()) {
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgXpathDocModificationError(mods, QLatin1String("Invalid query."))));
+        return xml;
+    }
+    QString result;
+    if (!query.evaluateTo(&result)) {
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgXpathDocModificationError(mods, QLatin1String("evaluate() failed."))));
+        return xml;
+    }
+    return result.trimmed();
+}

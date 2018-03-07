@@ -143,6 +143,8 @@ private:
 
     QString execXQuery(QXmlQuery& xquery, const QString& query) const;
     QString applyDocModifications(const DocModificationList& mods, const QString& xml) const;
+    QString applyDocModificationsLibXsl(const DocModificationList& mods, const QString& xml) const;
+    QString applyDocModificationsQt(const DocModificationList& mods, const QString& xml) const;
 };
 
 #endif // DOCPARSER_H

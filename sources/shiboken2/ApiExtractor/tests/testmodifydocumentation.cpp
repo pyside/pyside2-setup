@@ -38,35 +38,53 @@
 void TestModifyDocumentation::testModifyDocumentation()
 {
     const char* cppCode ="struct B { void b(); }; class A {};\n";
-    const char* xmlCode = "<typesystem package=\"Foo\">\n\
-    <value-type name='B'>\n\
-        <modify-function signature='b()' remove='all'/>\n\
-    </value-type>\n\
-    <value-type name='A'>\n\
-    <modify-documentation xpath='description/para[3]'>\n\
-    &lt;para>Some changed contents here&lt;/para>\n\
-    </modify-documentation>\n\
-    </value-type>\n\
-    </typesystem>\n";
+    const char xmlCode[] =
+R"(<typesystem package="Foo">
+    <value-type name='B'>
+        <modify-function signature='b()' remove='all'/>
+    </value-type>
+    <value-type name='A'>
+    <modify-documentation xpath='description/brief'>&lt;brief>Modified Brief&lt;/brief></modify-documentation>
+    <modify-documentation xpath='description/para[3]'>&lt;para>Some changed contents here&lt;/para></modify-documentation>
+    </value-type>
+</typesystem>
+)";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
-    QCOMPARE(docMods.count(), 1);
-    QCOMPARE(docMods[0].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));
+    QCOMPARE(docMods.count(), 2);
+    QCOMPARE(docMods[0].code().trimmed(), QLatin1String("<brief>Modified Brief</brief>"));
     QCOMPARE(docMods[0].signature(), QString());
+    QCOMPARE(docMods[1].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));
+    QCOMPARE(docMods[1].signature(), QString());
     QtDocParser docParser;
     docParser.setDocumentationDataDirectory(QDir::currentPath());
     docParser.fillDocumentation(classA);
 
-    QVERIFY(!classA->documentation().value().trimmed().isEmpty());
-    QCOMPARE(classA->documentation().value(), QLatin1String("<?xml version=\"1.0\"?>\n\
-<description>oi\n\
-                <para>Paragraph number 1</para>\n\
-    <para>Paragraph number 2</para>\n\
-    <para>Some changed contents here</para>\n\
-</description>"));
+    const QString actualDocSimplified = classA->documentation().value().simplified();
+    QVERIFY(!actualDocSimplified.isEmpty());
+
+const char expectedDoc[] =
+R"(<?xml version="1.0"?>
+<description>oi
+<brief>Modified Brief</brief>
+<para>Paragraph number 1</para>
+<para>Paragraph number 2</para>
+<para>Some changed contents here</para>
+</description>
+)";
+    const QString expectedDocSimplified = QString::fromLatin1(expectedDoc).simplified();
+    // Check whether the first modification worked.
+    QVERIFY(actualDocSimplified.contains(QLatin1String("Modified Brief")));
+
+#ifndef HAVE_LIBXSLT
+    // QtXmlPatterns is unable to handle para[3] in style sheets,
+    // this only works in its XPath search.
+    QEXPECT_FAIL("", "QtXmlPatterns cannot handle para[3] (QTBUG-66925)", Abort);
+#endif
+    QCOMPARE(actualDocSimplified, expectedDocSimplified);
 }
 
 // We expand QTEST_MAIN macro but using QCoreApplication instead of QApplication
