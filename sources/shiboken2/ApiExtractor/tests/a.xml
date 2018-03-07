@@ -1,9 +1,10 @@
 <?xml version="1.0" ?>
-
+<!-- Sample for testModifyDocumentation -->
 <WebXML>
     <document>
         <class name="A">
             <description>oi
+                <brief>Brief description</brief>
                 <para>Paragraph number 1</para>
                 <para>Paragraph number 2</para>
                 <para>Paragraph number 3</para>
