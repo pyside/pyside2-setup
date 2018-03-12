@@ -130,6 +130,15 @@ import os
 import time
 from utils import memoize, has_option, get_python_dict
 OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")
+
+# Change the cwd to setup.py's dir.
+try:
+    this_file = __file__
+except NameError:
+    this_file = sys.argv[0]
+this_file = os.path.abspath(this_file)
+if os.path.dirname(this_file):
+    os.chdir(os.path.dirname(this_file))
 script_dir = os.getcwd()
 
 @memoize
@@ -345,15 +354,6 @@ else:
 if OPTION_ICULIB:
     if not OPTION_STANDALONE:
         print("--iculib-url option is a no-op option and will be removed soon.")
-
-# Change the cwd to our source dir
-try:
-    this_file = __file__
-except NameError:
-    this_file = sys.argv[0]
-this_file = os.path.abspath(this_file)
-if os.path.dirname(this_file):
-    os.chdir(os.path.dirname(this_file))
 
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
