@@ -42,7 +42,8 @@
 
 #include "sbkversion.h"
 
-#include "Python.h"
+#include <Python.h>
+#include <structmember.h>
 // Now we have the usual variables from Python.h .
 #include "python25compat.h"
 #include "shibokenmacros.h"

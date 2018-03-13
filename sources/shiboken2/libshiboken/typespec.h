@@ -147,6 +147,7 @@ LIBSHIBOKEN_API void* PyType_GetSlot(PyTypeObject*, int);
 #define Py_tp_free 74
 #define Py_nb_long 75
 #define Py_nb_divide 76
+#define Py_sq_slice 77
 } // extern "C"
 #endif // PY_MAJOR_VERSION < 3
 #endif // TYPESPEC_H

@@ -55,16 +55,12 @@ static int classInfoTpInit(PyObject*, PyObject*, PyObject*);
 static void classInfoFree(void*);
 static PyObject* classCall(PyObject*, PyObject*, PyObject*);
 
-static void
-dummyDealloc(PyObject *)
-{}
-
 static PyType_Slot PySideClassInfoType_slots[] = {
     {Py_tp_call, (void *)classCall},
     {Py_tp_init, (void *)classInfoTpInit},
     {Py_tp_new, (void *)classInfoTpNew},
     {Py_tp_free, (void *)classInfoFree},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideClassInfoType_spec = {

@@ -40,6 +40,7 @@
 #include "pysideweakref.h"
 
 #include <sbkpython.h>
+#include <shiboken.h>
 
 typedef struct {
     PyObject_HEAD
@@ -50,13 +51,9 @@ typedef struct {
 
 static PyObject* CallableObject_call(PyObject* callable_object, PyObject* args, PyObject* kw);
 
-static void
-dummyDealloc(PyObject *)
-{}
-
 static PyType_Slot PySideCallableObjectType_slots[] = {
     {Py_tp_call, (void *)CallableObject_call},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideCallableObjectType_spec = {

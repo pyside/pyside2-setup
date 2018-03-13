@@ -109,6 +109,19 @@ LIBSHIBOKEN_API PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObj
 // the special case of a switchable singleton
 LIBSHIBOKEN_API PyObject* SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
 
+/**
+ *  PYSIDE-595: Use a null deallocator instead of nullptr.
+ *
+ *  When moving to heaptypes, we were struck by a special default behavior of
+ *  PyType_FromSpecWithBases that inserts subtype_dealloc when tp_dealloc is
+ *  nullptr. To prevent inserting this, we use a null deallocator that is there
+ *  as a placeholder.
+ *
+ *  The same holds for a null tp_new. We use one that raises the right error.
+ */
+LIBSHIBOKEN_API void SbkDummyDealloc(PyObject*);
+LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject*, PyObject*);
+
 } // extern "C"
 
 namespace Shiboken
@@ -173,7 +186,7 @@ LIBSHIBOKEN_API const char* getOriginalName(SbkObjectType* self);
 
 LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(SbkObjectType* self, TypeDiscoveryFuncV2 func);
 LIBSHIBOKEN_API void        copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other);
-LIBSHIBOKEN_API void        setMultipleIheritanceFunction(SbkObjectType* self, MultipleInheritanceInitFunction func);
+LIBSHIBOKEN_API void        setMultipleInheritanceFunction(SbkObjectType* self, MultipleInheritanceInitFunction func);
 LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleIheritanceFunction(SbkObjectType* self);
 
 LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDestructor func);
@@ -197,13 +210,15 @@ LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
  *                          wrapper type.
  *  \returns                true if the initialization went fine, false otherwise.
  */
-LIBSHIBOKEN_API bool        introduceWrapperType(PyObject* enclosingObject,
-                                                 const char* typeName, const char* originalName,
-                                                 SbkObjectType* type,
-                                                 const char* signaturesString,
-                                                 ObjectDestructor cppObjDtor = 0,
-                                                 SbkObjectType* baseType = 0, PyObject* baseTypes = 0,
-                                                 bool isInnerClass = false);
+LIBSHIBOKEN_API SbkObjectType *introduceWrapperType(PyObject *enclosingObject,
+                                                    const char *typeName,
+                                                    const char *originalName,
+                                                    PyType_Spec *typeSpec,
+                                                    const char *signaturesString,
+                                                    ObjectDestructor cppObjDtor,
+                                                    SbkObjectType *baseType,
+                                                    PyObject *baseTypes,
+                                                    bool isInnerClass);
 
 /**
  *  Set the subtype init hook for a type.

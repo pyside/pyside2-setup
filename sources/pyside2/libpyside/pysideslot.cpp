@@ -61,16 +61,12 @@ extern "C"
 static int slotTpInit(PyObject*, PyObject*, PyObject*);
 static PyObject* slotCall(PyObject*, PyObject*, PyObject*);
 
-static void
-dummyDealloc(PyObject *)
-{}
-
 // Class Definition -----------------------------------------------
 static PyType_Slot PySideSlotType_slots[] = {
     {Py_tp_call, (void *)slotCall},
     {Py_tp_init, (void *)slotTpInit},
     {Py_tp_new, (void *)PyType_GenericNew},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideSlotType_spec = {

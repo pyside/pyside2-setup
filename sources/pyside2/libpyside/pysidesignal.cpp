@@ -94,14 +94,6 @@ static PyObject* signalCall(PyObject*, PyObject*, PyObject*);
 static PyObject* metaSignalCheck(PyObject*, PyObject*);
 
 
-// PYSIDE-595: Avoid trouble by keeping everything as it was.
-// The automatically added tp_dealloc is wrong, because the code
-// took care about this, already.
-// We can refine this later if we want.
-static void
-dummyDealloc(PyObject *)
-{}
-
 static PyMethodDef Signal_methods[] = {
     {"__instancecheck__", (PyCFunction)metaSignalCheck, METH_O, NULL},
     {0, 0, 0, 0}
@@ -111,7 +103,7 @@ static PyType_Slot PySideSignalMetaType_slots[] = {
     {Py_tp_methods, (void *)Signal_methods},
     {Py_tp_base, (void *)&PyType_Type},
     {Py_tp_free, (void *)PyObject_GC_Del},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideSignalMetaType_spec = {
@@ -143,7 +135,7 @@ static PyType_Slot PySideSignalType_slots[] = {
     {Py_tp_init, (void *)signalTpInit},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)signalFree},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideSignalType_spec = {
@@ -182,7 +174,7 @@ static PyType_Slot PySideSignalInstanceType_slots[] = {
     {Py_tp_methods, (void *)SignalInstance_methods},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)signalInstanceFree},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideSignalInstanceType_spec = {

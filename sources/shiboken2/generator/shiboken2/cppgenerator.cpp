@@ -3707,17 +3707,13 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     const AbstractMetaClass *qCoreApp = AbstractMetaClass::findClass(classes(), QLatin1String("QCoreApplication"));
     const bool isQApp = qCoreApp != Q_NULLPTR && metaClass->inheritsFrom(qCoreApp);
 
+    tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
         tp_dealloc = metaClass->hasPrivateDestructor() ?
-                     QLatin1String("SbkDeallocWrapperWithPrivateDtor") : QLatin1String("0");
+                     QLatin1String("SbkDeallocWrapperWithPrivateDtor") :
+                     QLatin1String("SbkDummyDealloc /* PYSIDE-595: Prevent replacement of \"0\" with subtype_dealloc. */");
         tp_init = QLatin1String("0");
     } else {
-        if (onlyPrivCtor)
-            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
-        else
-            tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES");
-
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))
             deallocClassName = wrapperName(metaClass);
@@ -3743,7 +3739,12 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     }
 
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor) {
-        tp_new = QLatin1String("0");
+        // tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
+        // This is not generally possible, because PySide does not care about
+        // privacy the same way. This worked before the heap types were used,
+        // because inheritance is not really checked for static types.
+        // Instead, we check this at runtime, see SbkObjectTypeTpNew.
+        tp_new = QLatin1String("SbkDummyNew /* PYSIDE-595: Prevent replacement of \"0\" with base->tp_new. */");
         tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
     }
     else if (isQApp) {
@@ -3784,6 +3785,9 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
         s << endl;
     }
 
+    s << "// Class Definition -----------------------------------------------" << endl;
+    s << "extern \"C\" {" << endl;
+
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = QLatin1Char('&') + cpythonBaseName(metaClass) + QLatin1String("_HashFunc");
 
@@ -3791,96 +3795,64 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     if (callOp && !callOp->isModifiedRemoved())
         tp_call = QLatin1Char('&') + cpythonFunctionName(callOp);
 
-    s << "// Class Definition -----------------------------------------------" << endl;
-    s << "extern \"C\" {" << endl;
-
-    if (supportsNumberProtocol(metaClass)) {
-        s << "static PyNumberMethods " << className + QLatin1String("_TypeAsNumber") << ";" << endl;
-        s << endl;
-    }
-
-    if (supportsSequenceProtocol(metaClass)) {
-        s << "static PySequenceMethods " << className + QLatin1String("_TypeAsSequence") << ";" << endl;
-        s << endl;
-    }
-
-    if (supportsMappingProtocol(metaClass)) {
-        s << "static PyMappingMethods " << className + QLatin1String("_TypeAsMapping") << ";" << endl;
-        s << endl;
-    }
-
-    s << "static SbkObjectType " << className + QLatin1String("_Type") << " = { { {" << endl;
-    s << INDENT << "PyVarObject_HEAD_INIT(0, 0)" << endl;
     QString computedClassTargetFullName;
     if (!classContext.forSmartPointer())
         computedClassTargetFullName = getClassTargetFullName(metaClass);
     else
         computedClassTargetFullName = getClassTargetFullName(classContext.preciseType());
 
-    s << INDENT << "/*tp_name*/             \"" << computedClassTargetFullName << "\"," << endl;
-    s << INDENT << "/*tp_basicsize*/        sizeof(SbkObject)," << endl;
-    s << INDENT << "/*tp_itemsize*/         0," << endl;
-    s << INDENT << "/*tp_dealloc*/          " << tp_dealloc << ',' << endl;
-    s << INDENT << "/*tp_print*/            0," << endl;
-    s << INDENT << "/*tp_getattr*/          0," << endl;
-    s << INDENT << "/*tp_setattr*/          0," << endl;
-    s << INDENT << "/*tp_compare*/          0," << endl;
-    s << INDENT << "/*tp_repr*/             " << m_tpFuncs[QLatin1String("__repr__")] << "," << endl;
-    s << INDENT << "/*tp_as_number*/        0," << endl;
-    s << INDENT << "/*tp_as_sequence*/      0," << endl;
-    s << INDENT << "/*tp_as_mapping*/       0," << endl;
-    s << INDENT << "/*tp_hash*/             " << tp_hash << ',' << endl;
-    s << INDENT << "/*tp_call*/             " << tp_call << ',' << endl;
-    s << INDENT << "/*tp_str*/              " << m_tpFuncs[QLatin1String("__str__")] << ',' << endl;
-    s << INDENT << "/*tp_getattro*/         " << tp_getattro << ',' << endl;
-    s << INDENT << "/*tp_setattro*/         " << tp_setattro << ',' << endl;
-    s << INDENT << "/*tp_as_buffer*/        0," << endl;
-    s << INDENT << "/*tp_flags*/            " << tp_flags << ',' << endl;
-    s << INDENT << "/*tp_doc*/              0," << endl;
-    s << INDENT << "/*tp_traverse*/         " << className << "_traverse," << endl;
-    s << INDENT << "/*tp_clear*/            " << className << "_clear," << endl;
-    s << INDENT << "/*tp_richcompare*/      " << tp_richcompare << ',' << endl;
-    s << INDENT << "/*tp_weaklistoffset*/   0," << endl;
-    s << INDENT << "/*tp_iter*/             " << m_tpFuncs[QLatin1String("__iter__")] << ',' << endl;
-    s << INDENT << "/*tp_iternext*/         " << m_tpFuncs[QLatin1String("__next__")] << ',' << endl;
-    s << INDENT << "/*tp_methods*/          " << className << "_methods," << endl;
-    s << INDENT << "/*tp_members*/          0," << endl;
-    s << INDENT << "/*tp_getset*/           " << tp_getset << ',' << endl;
-    s << INDENT << "/*tp_base*/             " << baseClassName << ',' << endl;
-    s << INDENT << "/*tp_dict*/             0," << endl;
-    s << INDENT << "/*tp_descr_get*/        0," << endl;
-    s << INDENT << "/*tp_descr_set*/        0," << endl;
-    s << INDENT << "/*tp_dictoffset*/       0," << endl;
-    s << INDENT << "/*tp_init*/             " << tp_init << ',' << endl;
-    s << INDENT << "/*tp_alloc*/            0," << endl;
-    s << INDENT << "/*tp_new*/              " << tp_new << ',' << endl;
-    s << INDENT << "/*tp_free*/             0," << endl;
-    s << INDENT << "/*tp_is_gc*/            0," << endl;
-    s << INDENT << "/*tp_bases*/            0," << endl;
-    s << INDENT << "/*tp_mro*/              0," << endl;
-    s << INDENT << "/*tp_cache*/            0," << endl;
-    s << INDENT << "/*tp_subclasses*/       0," << endl;
-    s << INDENT << "/*tp_weaklist*/         0" << endl;
-    s << "}, }," << endl;
-    s << INDENT << "/*priv_data*/           0" << endl;
-    s << "};" << endl;
     QString suffix;
     if (isObjectType(metaClass))
         suffix = QLatin1String("*");
-
-    s << "static SbkObjectType *" << className + QLatin1String("_TypeF(void)") << endl;
+    QString typePtr = QLatin1String("_") + className + QLatin1String("_Type");
+    s << "static SbkObjectType *" << typePtr << " = nullptr;" << endl;
+    s << "static SbkObjectType *" << className << "_TypeF(void)" << endl;
     s << "{" << endl;
-    s << INDENT <<     "static SbkObjectType *type = nullptr;" << endl;
-    s << INDENT <<     "if (type == nullptr) {" << endl;
-    s << INDENT <<     "    type = (SbkObjectType *)(&" << className + QLatin1String("_Type") << ");" << endl;
-    s << INDENT <<     "    Py_TYPE(type) = SbkObjectType_TypeF();" << endl;
-    s << INDENT <<     "    Py_INCREF(Py_TYPE(type));" << endl;
-    s << INDENT <<     "}" << endl;
-    s << INDENT <<     "return type;" << endl;
+    s << INDENT << "return " << typePtr << ";" << endl;
     s << "}" << endl;
     s << endl;
-
-    s << "} //extern"  << endl;
+    s << "static PyType_Slot " << className << "_slots[] = {" << endl;
+    s << INDENT << "{Py_tp_base,        (void *)0}, // inserted by introduceWrapperType" << endl;
+    s << INDENT << "{Py_tp_dealloc,     (void *)" << tp_dealloc << "}," << endl;
+    s << INDENT << "{Py_tp_repr,        (void *)" << m_tpFuncs[QLatin1String("__repr__")] << "}," << endl;
+    s << INDENT << "{Py_tp_hash,        (void *)" << tp_hash << "}," << endl;
+    s << INDENT << "{Py_tp_call,        (void *)" << tp_call << "}," << endl;
+    s << INDENT << "{Py_tp_str,         (void *)" << m_tpFuncs[QLatin1String("__str__")] << "}," << endl;
+    s << INDENT << "{Py_tp_getattro,    (void *)" << tp_getattro << "}," << endl;
+    s << INDENT << "{Py_tp_setattro,    (void *)" << tp_setattro << "}," << endl;
+    s << INDENT << "{Py_tp_traverse,    (void *)" << className << "_traverse}," << endl;
+    s << INDENT << "{Py_tp_clear,       (void *)" << className << "_clear}," << endl;
+    s << INDENT << "{Py_tp_richcompare, (void *)" << tp_richcompare << "}," << endl;
+    s << INDENT << "{Py_tp_iter,        (void *)" << m_tpFuncs[QLatin1String("__iter__")] << "}," << endl;
+    s << INDENT << "{Py_tp_iternext,    (void *)" << m_tpFuncs[QLatin1String("__next__")] << "}," << endl;
+    s << INDENT << "{Py_tp_methods,     (void *)" << className << "_methods}," << endl;
+    s << INDENT << "{Py_tp_getset,      (void *)" << tp_getset << "}," << endl;
+    s << INDENT << "{Py_tp_init,        (void *)" << tp_init << "}," << endl;
+    s << INDENT << "{Py_tp_new,         (void *)" << tp_new << "}," << endl;
+    if (supportsSequenceProtocol(metaClass)) {
+        s << INDENT << "// type supports sequence protocol" << endl;
+        writeTypeAsSequenceDefinition(s, metaClass);
+    }
+    if (supportsMappingProtocol(metaClass)) {
+        s << INDENT << "// type supports mapping protocol" << endl;
+        writeTypeAsMappingDefinition(s, metaClass);
+    }
+    if (supportsNumberProtocol(metaClass)) {
+        // This one must come last. See the function itself.
+        s << INDENT << "// type supports number protocol" << endl;
+        writeTypeAsNumberDefinition(s, metaClass);
+    }
+    s << INDENT << "{0, 0}" << endl;
+    s << "};" << endl;
+    s << "static PyType_Spec " << className << "_spec = {" << endl;
+    s << INDENT << "\"" << computedClassTargetFullName << "\"," << endl;
+    s << INDENT << "sizeof(SbkObject)," << endl;
+    s << INDENT << "0," << endl;
+    s << INDENT << tp_flags << "," << endl;
+    s << INDENT << className << "_slots" << endl;
+    s << "};" << endl;
+    s << endl;
+    s << "} //extern \"C\""  << endl;
 }
 
 void CppGenerator::writeMappingMethods(QTextStream &s,
@@ -3958,14 +3930,13 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream& s, const AbstractM
         funcs[QLatin1String("__setitem__")] = baseName + QLatin1String("__setitem__");
     }
 
-    s << INDENT << "memset(&" << baseName << "_TypeAsSequence, 0, sizeof(PySequenceMethods));" << endl;
     for (QHash<QString, QString>::const_iterator it = m_sqFuncs.cbegin(), end = m_sqFuncs.cend(); it != end; ++it) {
         const QString& sqName = it.key();
         if (funcs[sqName].isEmpty())
             continue;
         if (it.value() == QLatin1String("sq_slice"))
             s << "#ifndef IS_PY3K" << endl;
-        s << INDENT << baseName << "_TypeAsSequence." << it.value() << " = " << funcs[sqName] << ';' << endl;
+        s << INDENT <<  "{Py_" << it.value() << ", (void *)" << funcs[sqName] << "}," << endl;
         if (it.value() == QLatin1String("sq_slice"))
             s << "#endif" << endl;
     }
@@ -3991,12 +3962,11 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
     }
 
     QString baseName = cpythonBaseName(metaClass);
-    s << INDENT << "memset(&" << baseName << "_TypeAsMapping, 0, sizeof(PyMappingMethods));" << endl;
     for (auto it = m_mpFuncs.cbegin(), end = m_mpFuncs.cend(); it != end; ++it) {
         const QString &mpName = it.key();
         if (funcs[mpName].isEmpty())
             continue;
-        s << INDENT << baseName << "_TypeAsMapping." << it.value() << " = " << funcs[mpName] << ';' << endl;
+        s << INDENT <<  "{Py_" << it.value() << ", (void *)" << funcs[mpName] << "}," << endl;
     }
 }
 
@@ -4044,7 +4014,6 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
     nb[QLatin1String("bool")] = hasBoolCast(metaClass) ? baseName + QLatin1String("___nb_bool") : QString();
 
-    s << INDENT << "memset(&" << baseName << "_TypeAsNumber, 0, sizeof(PyNumberMethods));" << endl;
     for (QHash<QString, QString>::const_iterator it = m_nbFuncs.cbegin(), end = m_nbFuncs.cend(); it != end; ++it) {
         const QString &nbName = it.key();
         if (nb[nbName].isEmpty())
@@ -4053,21 +4022,26 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
         // bool is special because the field name differs on Python 2 and 3 (nb_nonzero vs nb_bool)
         // so a shiboken macro is used.
         if (nbName == QLatin1String("bool")) {
-            s << INDENT << "SBK_NB_BOOL(" << baseName << "_TypeAsNumber) = " << nb[nbName] << ';' << endl;
+            s << "#ifdef IS_PY3K" << endl;
+            s << INDENT <<  "{Py_nb_bool, (void *)" << nb[nbName] << "}," << endl;
+            s << "#else" << endl;
+            s << INDENT <<  "{Py_nb_nonzero, (void *)" << nb[nbName] << "}," << endl;
+            s << "#endif" << endl;
         } else {
             bool excludeFromPy3K = nbName == QLatin1String("__div__") || nbName == QLatin1String("__idiv__");
-            if (excludeFromPy3K) {
-                s << "#ifdef IS_PY3K" << endl;
-                s << INDENT << "SBK_UNUSED(&" << nb[nbName] << ");" << endl;
-                s << "#else" << endl;
-            }
-            s << INDENT << baseName << "_TypeAsNumber." << it.value() << " = " << nb[nbName] << ';' << endl;
-            if (excludeFromPy3K)
-                s << "#endif" << endl;
+            if (!excludeFromPy3K)
+                s << INDENT <<  "{Py_" << it.value() << ", (void *)" << nb[nbName] << "}," << endl;
         }
     }
     if (!nb[QLatin1String("__div__")].isEmpty())
-        s << INDENT << baseName << "_TypeAsNumber.nb_true_divide = " << nb[QLatin1String("__div__")] << ';' << endl;
+        s << INDENT << "{Py_nb_true_divide, (void *)" << nb[QLatin1String("__div__")] << "}," << endl;
+    if (!nb[QLatin1String("__idiv__")].isEmpty()) {
+        s << INDENT << "// This function is unused in Python 3. We reference it here." << endl;
+        s << INDENT << "{0, (void *)" << nb[QLatin1String("__idiv__")] << "}," << endl;
+        s << INDENT << "// This list is unfortunately ending at the first 0 entry." << endl;
+        s << INDENT << "// Therefore, we need to put the unused functions at the very end." << endl;
+        s << INDENT << "// A better implementation of PyType_FromSpec would end at {0, 0}, instead." << endl;
+    }
 }
 
 void CppGenerator::writeTpTraverseFunction(QTextStream& s, const AbstractMetaClass* metaClass)
@@ -4489,7 +4463,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     const EnumTypeEntry *enumTypeEntry = cppEnum->typeEntry();
     QString enclosingObjectVariable;
     if (enclosingClass)
-        enclosingObjectVariable = /*QLatin1Char('&') + */cpythonTypeName(enclosingClass); ////????
+        enclosingObjectVariable = cpythonTypeName(enclosingClass);
     else if (hasUpperEnclosingClass)
         enclosingObjectVariable = QLatin1String("enclosingClass");
     else
@@ -4818,35 +4792,6 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
     s << '{' << endl;
 
-    if (supportsNumberProtocol(metaClass)) {
-        s << INDENT << "// type has number operators" << endl;
-        writeTypeAsNumberDefinition(s, metaClass);
-        s << INDENT << pyTypeName << "->super.ht_type.tp_as_number = &" << chopType(pyTypeName) << "_TypeAsNumber;" << endl;
-        s << endl;
-    }
-
-    if (supportsSequenceProtocol(metaClass)) {
-        s << INDENT << "// type supports sequence protocol" << endl;
-        writeTypeAsSequenceDefinition(s, metaClass);
-        s << INDENT << pyTypeName << "->super.ht_type.tp_as_sequence = &" << chopType(pyTypeName) << "_TypeAsSequence;" << endl;
-        s << endl;
-    }
-
-    if (supportsMappingProtocol(metaClass)) {
-        s << INDENT << "// type supports mapping protocol" << endl;
-        writeTypeAsMappingDefinition(s, metaClass);
-        s << INDENT << pyTypeName << "->super.ht_type.tp_as_mapping = &" << chopType(pyTypeName) << "_TypeAsMapping;" << endl;
-        s << endl;
-    }
-
-    if (!classContext.forSmartPointer())
-        s << INDENT << cpythonTypeNameExt(classTypeEntry) << endl;
-    else
-        s << INDENT << cpythonTypeNameExt(classContext.preciseType()) << endl;
-
-    s << INDENT << "    = reinterpret_cast<PyTypeObject*>(" << pyTypeName << ");" << endl;
-    s << endl;
-
     // Multiple inheritance
     QString pyTypeBasesVariable = chopType(pyTypeName) + QLatin1String("_Type_bases");
     const AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
@@ -4863,28 +4808,38 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
 
     // Create type and insert it in the module or enclosing class.
-    s << INDENT << "if (!Shiboken::ObjectType::introduceWrapperType(" << enclosingObjectVariable;
-    QString typeName;
-    if (!classContext.forSmartPointer())
-        typeName = metaClass->name();
-    else
-        typeName = classContext.preciseType()->cppSignature();
+    QString typePtr = QLatin1String("_") + chopType(pyTypeName) + QLatin1String("_Type");
 
-    s << ", \"" << typeName << "\", \"";
-
-    // Original name
-    if (!classContext.forSmartPointer())
-        s << metaClass->qualifiedCppName() << (isObjectType(classTypeEntry) ?  "*" : "");
-    else
-        s << classContext.preciseType()->cppSignature();
-
-    s << "\"," << endl;
+    s << INDENT << typePtr << " = Shiboken::ObjectType::introduceWrapperType(" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << pyTypeName << "," << endl;
-        s << INDENT << initFunctionName << "_SignaturesString";
+        // 1:enclosingObject
+        s << INDENT << enclosingObjectVariable << "," << endl;
+        QString typeName;
+        if (!classContext.forSmartPointer())
+            typeName = metaClass->name();
+        else
+            typeName = classContext.preciseType()->cppSignature();
 
-        // Set destructor function
+        // 2:typeName
+        s << INDENT << "\"" << typeName << "\"," << endl;
+
+        // 3:originalName
+        s << INDENT << "\"";
+        if (!classContext.forSmartPointer())
+            s << metaClass->qualifiedCppName() << (isObjectType(classTypeEntry) ?  "*" : "");
+        else
+            s << classContext.preciseType()->cppSignature();
+
+        s << "\"," << endl;
+        // 4:typeSpec
+        s << INDENT << "&" << chopType(pyTypeName) << "_spec," << endl;
+
+        // 5:signaturesString
+        s << INDENT << initFunctionName << "_SignaturesString," << endl;
+
+        // 6:cppObjDtor
+        s << INDENT;
         if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
             QString dtorClassName = metaClass->qualifiedCppName();
             if ((avoidProtectedHack() && metaClass->hasProtectedDestructor()) || classTypeEntry->isValue())
@@ -4892,28 +4847,37 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             if (classContext.forSmartPointer())
                 dtorClassName = wrapperName(classContext.preciseType());
 
-            s << ", &Shiboken::callCppDestructor< ::" << dtorClassName << " >";
-        } else if (metaClass->baseClass() || hasEnclosingClass) {
-            s << ", 0";
+            s << "&Shiboken::callCppDestructor< ::" << dtorClassName << " >," << endl;
+        } else {
+            s << "0," << endl;
         }
 
-        // Base type
+        // 7:baseType
         if (metaClass->baseClass()) {
-            s << ", reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ')';
-            // The other base types
-            if (metaClass->baseClassNames().size() > 1)
-                s << ", " << pyTypeBasesVariable;
-            else if (hasEnclosingClass)
-                s << ", 0";
-        } else if (hasEnclosingClass) {
-            s << ", 0, 0";
-        }
-        if (hasEnclosingClass)
-            s << ", true";
-        s << ")) {" << endl;
-        s << INDENT << "return;" << endl;
+            s << INDENT << "reinterpret_cast<SbkObjectType *>("
+                << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ")," << endl;
+            }
+        else
+            s << INDENT << "0," << endl;
+
+        // 8:baseTypes
+        if (metaClass->baseClassNames().size() > 1)
+            s << INDENT << pyTypeBasesVariable << "," << endl;
+        else
+            s << INDENT << "0," << endl;
+
+        // 9:isInnerClass
+        s << INDENT << (hasEnclosingClass ? "true" : "false") << endl;
     }
-    s << INDENT << '}' << endl << endl;
+    s << INDENT << ");" << endl;
+    s << INDENT << endl;
+
+    if (!classContext.forSmartPointer())
+        s << INDENT << cpythonTypeNameExt(classTypeEntry) << endl;
+    else
+        s << INDENT << cpythonTypeNameExt(classContext.preciseType()) << endl;
+    s << INDENT << "    = reinterpret_cast<PyTypeObject*>(" << pyTypeName << ");" << endl;
+    s << endl;
 
     // Register conversions for the type.
     writeConverterRegister(s, metaClass, classContext);
@@ -4935,7 +4899,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << "Shiboken::ObjectType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(";
             s << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
         }
-        s << INDENT << "Shiboken::ObjectType::setMultipleIheritanceFunction(";
+        s << INDENT << "Shiboken::ObjectType::setMultipleInheritanceFunction(";
         s << cpythonTypeName(metaClass) << ", func);" << endl;
         s << INDENT << "Shiboken::ObjectType::setCastFunction(" << cpythonTypeName(metaClass);
         s << ", &" << cpythonSpecialCastFunctionName(metaClass) << ");" << endl;
@@ -5872,7 +5836,9 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
         s << INDENT << "str.replace(0, idx, Py_TYPE(self)->tp_name);" << endl;
     }
     s << INDENT << "PyObject* mod = PyDict_GetItemString(Py_TYPE(self)->tp_dict, \"__module__\");" << endl;
-    s << INDENT << "if (mod)" << endl;
+    // PYSIDE-595: The introduction of heap types has the side effect that the module name
+    // is always prepended to the type name. Therefore the strchr check:
+    s << INDENT << "if (mod and !strchr(str, '.'))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\", Shiboken::String::toCString(mod), str.constData(), self);" << endl;

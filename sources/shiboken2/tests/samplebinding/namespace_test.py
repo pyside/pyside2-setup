@@ -33,13 +33,7 @@
 
 import unittest
 from sample import *
-from py3kcompat import IS_PY3K
 
-# PYSIDE-595: The following will vanish when all types have become heaptypes.
-if IS_PY3K:
-    TYPE_STR = "class"
-else:
-    TYPE_STR = "type"
 
 class TestEnumUnderNamespace(unittest.TestCase):
     def testInvisibleNamespace(self):
@@ -60,11 +54,16 @@ class TestClassesUnderNamespace(unittest.TestCase):
         self.assertEqual(res, 4)
 
     def testTpNames(self):
-        self.assertEqual(str(SampleNamespace.SomeClass), "<%s 'sample.SampleNamespace.SomeClass'>"%TYPE_STR)
-        self.assertEqual(str(SampleNamespace.SomeClass.ProtectedEnum), "<class 'sample.SampleNamespace.SomeClass.ProtectedEnum'>")
-        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum), "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum'>")
-        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough), "<%s 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>"%TYPE_STR)
-        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum), "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
+        self.assertEqual(str(SampleNamespace.SomeClass),
+            "<class 'sample.SampleNamespace.SomeClass'>")
+        self.assertEqual(str(SampleNamespace.SomeClass.ProtectedEnum),
+            "<class 'sample.SampleNamespace.SomeClass.ProtectedEnum'>")
+        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum),
+            "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum'>")
+        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough),
+            "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>")
+        self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum),
+            "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
 
 if __name__ == '__main__':
     unittest.main()

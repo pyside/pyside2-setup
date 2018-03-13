@@ -48,10 +48,6 @@
 extern "C"
 {
 
-static void
-dummyDealloc(PyObject *)
-{}
-
 struct PySideMetaFunctionPrivate
 {
     QObject* qobject;
@@ -66,7 +62,7 @@ static PyType_Slot PySideMetaFunctionType_slots[] = {
     {Py_tp_call, (void *)functionCall},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)functionFree},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec PySideMetaFunctionType_spec = {

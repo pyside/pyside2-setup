@@ -131,9 +131,6 @@ namespace PySide
 {
 namespace QFlags
 {
-    static void
-    dummyDealloc(PyObject *)
-    {}
     static PyType_Slot SbkNewQFlagsType_slots[] = {
 #ifdef IS_PY3K
         {Py_nb_bool, 0},
@@ -148,7 +145,7 @@ namespace QFlags
         {Py_nb_int, 0},
         {Py_tp_new, (void *)PySideQFlagsNew},
         {Py_tp_richcompare, (void *)PySideQFlagsRichCompare},
-        {Py_tp_dealloc, (void *)dummyDealloc},
+        {Py_tp_dealloc, (void *)SbkDummyDealloc},
         {0, 0}
     };
     static PyType_Spec SbkNewQFlagsType_spec = {

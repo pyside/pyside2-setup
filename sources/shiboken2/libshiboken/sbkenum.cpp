@@ -257,10 +257,6 @@ static PyGetSetDef SbkEnumGetSetList[] = {
 static void SbkEnumTypeDealloc(PyObject* pyObj);
 static PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
-static void
-dummyDealloc(PyObject *)
-{}
-
 static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_dealloc, (void *)SbkEnumTypeDealloc},
     {Py_nb_add, (void *)enum_add},
@@ -290,7 +286,7 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
 static PyType_Spec SbkEnumType_Type_spec = {
     "Shiboken.EnumType",
     sizeof(SbkEnumType),
-    0,
+    sizeof(PyMemberDef),
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
     SbkEnumType_Type_slots,
 };
@@ -500,7 +496,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_nb_index, (void *)enum_int},
     {Py_tp_richcompare, (void *)enum_richcompare},
     {Py_tp_hash, (void *)enum_hash},
-    {Py_tp_dealloc, (void *)dummyDealloc},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
     {0, 0}
 };
 static PyType_Spec SbkNewType_spec = {
