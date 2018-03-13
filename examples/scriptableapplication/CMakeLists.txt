@@ -37,7 +37,7 @@ endmacro()
 
 # Get relevant general paths, include paths and linker flags.
 pyside2_config(--pyside2 PYSIDE2_PATH)
-set(SHIBOKEN_PATH "${PYSIDE2_PATH}/shiboken2")
+set(SHIBOKEN_PATH "${PYSIDE2_PATH}/shiboken2${CMAKE_EXECUTABLE_SUFFIX}")
 
 if(NOT EXISTS ${SHIBOKEN_PATH})
     message(FATAL_ERROR "Shiboken executable not found at path: ${SHIBOKEN_PATH}")

@@ -125,6 +125,9 @@ def pythonLinkCmake():
 def pythonLinkData():
     # @TODO Fix to work with static builds of Python
     libdir = sysconfig.get_config_var('LIBDIR')
+    if libdir is None:
+        libdir = os.path.abspath(os.path.join(
+            sysconfig.get_config_var('LIBDEST'), "..", "libs"))
     version = pythonVersion()
     version_no_dots = version.replace('.', '')
 
