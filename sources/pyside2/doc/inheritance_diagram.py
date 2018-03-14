@@ -47,10 +47,9 @@ except ImportError:
     from md5 import md5
 
 from docutils import nodes
-from docutils.parsers.rst import directives
+from docutils.parsers.rst import directives, Directive
 
 from sphinx.ext.graphviz import render_dot_html, render_dot_latex
-from sphinx.util.compat import Directive
 
 class InheritanceException(Exception):
     pass
