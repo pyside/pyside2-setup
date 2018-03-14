@@ -1,9 +1,10 @@
-PySide Documentation contents
-*****************************
+Qt for Python Documentation
+***************************
 
 .. toctree::
     :maxdepth: 2
 
+    gettingstarted.rst
     modules.rst
 
 Tutorials

@@ -1,8 +1,7 @@
-
 .. _pysideapi2:
 
-PySide API 2
-************
+|project| API
+***************
 
 Since the beginning one of the PySide goals was to be API compatible with PyQt4,
 but with some (documented) exceptions. For example, PySide will not export to
