@@ -48,7 +48,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.0
+import QtQuick 2.0
 import "content"
 import "content/samegame.js" as SameGame
 
