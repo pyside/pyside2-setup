@@ -245,7 +245,7 @@ def check_allowed_python_version():
     import re
     pattern = "'Programming Language :: Python :: (\d+)\.(\d+)'"
     supported = []
-    with open(__file__) as setup:
+    with open(this_file) as setup:
         for line in setup.readlines():
             found = re.search(pattern, line)
             if found:
