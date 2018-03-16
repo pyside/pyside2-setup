@@ -42,7 +42,7 @@
 extern "C"
 {
 
-#if PY_MAJOR_VERSION >= 3
+#ifdef Py_LIMITED_API
 
 /*****************************************************************************
  *
@@ -61,14 +61,25 @@ typedef struct {
     PyObject *mapping;
 } mappingproxyobject;
 
+static int dictoffset = 0;
+
 PyObject *
 Pep384Type_GetDict(PyTypeObject *type)
 {
-    mappingproxyobject *proxy = (mappingproxyobject *)PyObject_GetAttrString(
-                                    (PyObject *)type, "__dict__");
-    PyObject *ret = proxy->mapping;
-    Py_DECREF(proxy);
-    return ret;
+    if (dictoffset > 0) {
+        PyObject **thing = (PyObject **)type + dictoffset;
+        return *thing;
+    }
+    else {
+        PyObject *ret;
+        mappingproxyobject *proxy;
+
+        proxy = (mappingproxyobject *)PyObject_GetAttrString(
+                    (PyObject *)type, "__dict__");
+        ret = proxy->mapping;
+        Py_DECREF(proxy);
+        return ret;
+    }
 }
 
 PyMethodDef *
@@ -87,7 +98,7 @@ Pep384_EnsureTypeHeuristic(void)
 {
     PyObject *tpdict = Pep384Type_GetDict(&PyLong_Type);
     PyMethodDef *tpmeth = Pep384Type_GetMethods(&PyLong_Type);
-    int ok = 0;
+    int ok = 0, ret;
 
     /*
      * This code checks that these fields are 4 slots apart and contain
@@ -98,7 +109,8 @@ Pep384_EnsureTypeHeuristic(void)
         void **thing = (void **)&PyLong_Type + idx;
         // printf("idx=%d ptr=%p\n", idx, thing);
         if (*thing == tpmeth) {
-            thing = (void **)&PyLong_Type + idx + 4;
+            ret = idx + 4;
+            thing = (void **)&PyLong_Type + ret;
             if (*thing == tpdict) {
                 // both are at a distance of four, we believe in the result!
                 ok += 1;
@@ -113,7 +125,7 @@ Pep384_EnsureTypeHeuristic(void)
             "changed its layout.");
         return -1;
     }
-    return 0;
+    return ret;
 }
 
 /*****************************************************************************
@@ -334,6 +346,7 @@ PyTime_FromTime(int hour, int min, int sec, int usec)
  *
  */
 
+// Flags are ignored in these simple helpers.
 PyObject *
 PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 {
@@ -347,17 +360,45 @@ PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
     return ret;
 }
 
+// This is only a simple local helper that returns a computed variable.
+static PyObject *
+Pep384Run_GetResult(const char *command, const char *resvar)
+{
+    PyObject *d, *v, *res;
+
+    d = PyDict_New();
+    if (d == NULL || PyDict_SetItemString(d, "__builtins__",
+                                          PyEval_GetBuiltins()) < 0)
+        return NULL;
+    v = PyRun_String(command, Py_file_input, d, d);
+    res = v ? PyDict_GetItemString(d, resvar) : NULL;
+    Py_XDECREF(v);
+    Py_DECREF(d);
+    return res;
+}
+
 /*****************************************************************************
  *
  * Support for classobject.h
  *
  */
 
+PyTypeObject *Pep384Method_TypePtr = NULL;
+
+static PyTypeObject *getMethodType(void)
+{
+    static const char prog[] =
+        "class _C:\n"
+        "    def _m(self): pass\n"
+        "MethodType = type(_C()._m)\n";
+    return (PyTypeObject *) Pep384Run_GetResult(prog, "MethodType");
+}
+
 // We have no access to PyMethod_New and must call types.MethodType, instead.
 PyObject *
 PyMethod_New(PyObject *func, PyObject *self)
 {
-    return PyObject_CallFunction((PyObject *)&PyMethod_Type,
+    return PyObject_CallFunction((PyObject *)Pep384Method_TypePtr,
                                  (char *)"(OO)", func, self);
 }
 
@@ -753,7 +794,39 @@ PyBuffer_Release(Pep384_buffer *view)
     Py_DECREF(obj);
 }
 
-#endif // PY_MAJOR_VERSION >= 3
+/*****************************************************************************
+ *
+ * Support for funcobject.h
+ *
+ */
+
+// this became necessary after Windows was activated.
+
+PyTypeObject *Pep384Function_TypePtr = NULL;
+
+static PyTypeObject *getFunctionType(void)
+{
+    static const char prog[] =
+        "from types import FunctionType\n";
+    return (PyTypeObject *) Pep384Run_GetResult(prog, "FunctionType");
+}
+
+/*****************************************************************************
+ *
+ * Extra support for signature.cpp
+ *
+ */
+
+PyTypeObject *Pep384StaticMethod_TypePtr = NULL;
+
+static PyTypeObject *getStaticMethodType(void)
+{
+    static const char prog[] =
+        "StaticMethodType = type(str.__dict__['maketrans'])\n";
+    return (PyTypeObject *) Pep384Run_GetResult(prog, "StaticMethodType");
+}
+
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
@@ -765,7 +838,11 @@ void
 PEP384_Init()
 {
 #ifdef Py_LIMITED_API
+    dictoffset = Pep384_EnsureTypeHeuristic();
     Pep384_GetVerboseFlag();
+    Pep384Method_TypePtr = getMethodType();
+    Pep384Function_TypePtr = getFunctionType();
+    Pep384StaticMethod_TypePtr = getStaticMethodType();
 #endif
 }
 

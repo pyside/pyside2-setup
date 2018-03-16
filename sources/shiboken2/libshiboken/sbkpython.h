@@ -42,14 +42,6 @@
 
 #include "sbkversion.h"
 
-#if PYTHON_VERSION_MAJOR >= 3
-// This is the variable to use directly from CMake. Others like PY_VERSION_HEX
-// are still undefined. They are introduced with Python.h .
-#  define Py_LIMITED_API 0x03050000
-#else
-#  undef Py_LIMITED_API
-#endif
-
 #include "Python.h"
 // Now we have the usual variables from Python.h .
 #include "python25compat.h"

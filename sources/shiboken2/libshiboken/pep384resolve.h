@@ -577,11 +577,10 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 #ifdef Py_LIMITED_API
 typedef struct _func PyFunctionObject;
 
-extern LIBSHIBOKEN_API PyTypeObject PyFunction_Type;
-extern LIBSHIBOKEN_API PyTypeObject PyStaticMethod_Type;
+extern LIBSHIBOKEN_API PyTypeObject *Pep384Function_TypePtr;
 LIBSHIBOKEN_API PyObject *Pep384Function_Get(PyObject *, const char *);
 
-#define PyFunction_Check(op)        (Py_TYPE(op) == &PyFunction_Type)
+#define PyFunction_Check(op)        (Py_TYPE(op) == Pep384Function_TypePtr)
 #define PyFunction_GET_CODE(func)   PyFunction_GetCode(func)
 
 #define PyFunction_GetCode(func)        Pep384Function_Get((PyObject *)func, "__code__")
@@ -599,13 +598,13 @@ LIBSHIBOKEN_API PyObject *Pep384Function_Get(PyObject *, const char *);
 
 typedef struct _meth PyMethodObject;
 
-extern LIBSHIBOKEN_API PyTypeObject PyMethod_Type;
+extern LIBSHIBOKEN_API PyTypeObject *Pep384Method_TypePtr;
 
 LIBSHIBOKEN_API PyObject *PyMethod_New(PyObject *, PyObject *);
 LIBSHIBOKEN_API PyObject *PyMethod_Function(PyObject *);
 LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 
-#define PyMethod_Check(op) ((op)->ob_type == &PyMethod_Type)
+#define PyMethod_Check(op) ((op)->ob_type == Pep384Method_TypePtr)
 
 #define PyMethod_GET_SELF(op)       PyMethod_Self(op)
 #define PyMethod_GET_FUNCTION(op)   PyMethod_Function(op)
@@ -700,6 +699,18 @@ LIBSHIBOKEN_API PyObject *PyTime_FromTime(
     int hour, int minute, int second, int usecond);
 
 #endif /* Py_LIMITED_API */
+
+/*****************************************************************************
+ *
+ * Extra support for signature.cpp
+ *
+ */
+
+#ifdef Py_LIMITED_API
+extern LIBSHIBOKEN_API PyTypeObject *Pep384StaticMethod_TypePtr;
+#else
+#define Pep384StaticMethod_TypePtr &PyStaticMethod_Type
+#endif
 
 /*****************************************************************************
  *

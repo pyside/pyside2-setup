@@ -84,7 +84,9 @@ PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
     view.itemsize = sizeof(char);
     Py_ssize_t shape[] = { size };
     view.shape = shape;
-    return PyMemoryView_FromBuffer(&view);
+    // Pep384: This is way too complicated and impossible with the limited api:
+    //return PyMemoryView_FromBuffer(&view);
+    return PyMemoryView_FromMemory((char *)view.buf, size, type == ReadOnly ? PyBUF_READ : PyBUF_WRITE);
 #else
     return type == ReadOnly ? PyBuffer_FromMemory(memory, size) : PyBuffer_FromReadWriteMemory(memory, size);
 #endif

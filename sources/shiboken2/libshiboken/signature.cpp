@@ -574,12 +574,12 @@ PySideType_Ready(PyTypeObject *type)
             || PyType_Ready(Py_TYPE(md)) < 0
             || add_more_getsets(Py_TYPE(md), new_PyMethodDescr_getsets) < 0
             || add_more_getsets(&PyCFunction_Type, new_PyCFunction_getsets) < 0
-            || add_more_getsets(&PyStaticMethod_Type, new_PyStaticMethod_getsets) < 0
+            || add_more_getsets(Pep384StaticMethod_TypePtr, new_PyStaticMethod_getsets) < 0
             || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0)
             return -1;
         Py_DECREF(md);
 #ifndef _WIN32
-        // we enable the stack trace in CI, only.
+        // We enable the stack trace in CI, only.
         const char *testEnv = getenv("QTEST_ENVIRONMENT");
         if (testEnv && strstr(testEnv, "ci"))
             signal(SIGSEGV, handler);   // install our handler
