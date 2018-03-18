@@ -340,7 +340,7 @@ endif()
 if(WIN32)
     list(APPEND ALL_OPTIONAL_MODULES AxContainer)
 endif()
-list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineWidgets WebKit WebKitWidgets WebSockets)
+list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets WebKit WebKitWidgets WebSockets)
 if (Qt5Core_VERSION VERSION_GREATER 5.9.3) # Depending on fixes in Qt3D
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
 endif()

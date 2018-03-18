@@ -1366,6 +1366,9 @@ class pyside_build(_build):
         config = get_python_dict(config_path)
         return config
 
+    def is_webengine_built(self, built_modules):
+        return 'WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
+
     def prepare_packages_posix(self, vars):
         executables = []
         # <build>/shiboken2/doc/html/* ->
@@ -1521,7 +1524,7 @@ class pyside_build(_build):
         if not maybe_icu_libs:
             copy_icu_libs(resolved_destination_lib_dir)
 
-        if 'WebEngineWidgets' in built_modules:
+        if self.is_webengine_built(built_modules):
             copydir("{qt_lib_execs_dir}",
                 "{pyside_package_dir}/PySide2/Qt/libexec",
                 filter=None,
@@ -1580,9 +1583,8 @@ class pyside_build(_build):
             def framework_dir_filter(dir_name, parent_full_path,
                     dir_full_path):
                 if '.framework' in dir_name:
-                    if (dir_name.startswith('QtWebEngine') and
-                            'QtWebEngineWidgets.framework' not in
-                                framework_built_modules):
+                    if dir_name.startswith('QtWebEngine') and not \
+                                self.is_webengine_built(built_modules):
                         return False
                 if dir_name in ['Headers', 'fonts']:
                     return False
@@ -1604,7 +1606,7 @@ class pyside_build(_build):
             # present rpath does not work because it assumes a symlink
             # from Versions/5/Helpers, thus adding two more levels of
             # directory hierarchy.
-            if 'QtWebEngineWidgets.framework' in framework_built_modules:
+            if self.is_webengine_built(built_modules):
                 qt_lib_path = "{pyside_package_dir}/PySide2/Qt/lib".format(
                     **vars)
                 bundle = "QtWebEngineCore.framework/Helpers/"
@@ -1616,7 +1618,7 @@ class pyside_build(_build):
                 osx_fix_rpaths_for_library(final_path, rpath)
         else:
             ignored_modules = []
-            if 'WebEngineWidgets' not in built_modules:
+            if not self.is_webengine_built(built_modules):
                 ignored_modules.extend(['libQt5WebEngine*.dylib'])
             if 'WebKit' not in built_modules:
                 ignored_modules.extend(['libQt5WebKit*.dylib'])
@@ -1628,7 +1630,7 @@ class pyside_build(_build):
                 ignore=ignored_modules,
                 recursive=True, vars=vars, force_copy_symlinks=True)
 
-            if 'WebEngineWidgets' in built_modules:
+            if self.is_webengine_built(built_modules):
                 copydir("{qt_lib_execs_dir}",
                     "{pyside_package_dir}/PySide2/Qt/libexec",
                     filter=None,
@@ -1928,7 +1930,7 @@ class pyside_build(_build):
             recursive=True,
             vars=vars)
 
-        if 'WebEngineWidgets' in built_modules:
+        if self.is_webengine_built(built_modules):
             copydir("{qt_prefix_dir}/resources",
                 "{pyside_package_dir}/PySide2/resources",
                 filter=None,

@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of PySide2.
@@ -39,59 +39,31 @@
 **
 ****************************************************************************/
 -->
-<typesystem package="PySide2.QtWebEngineWidgets">
+<typesystem package="PySide2.QtWebEngineCore">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
-  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
-  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
-  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
-  <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
-  <load-typesystem name="QtWebEngineCore/typesystem_webenginecore.xml" generate="no"/>
 
+  <object-type name="QWebEngineCookieStore"/>
 
-  <object-type name="QWebEngineCertificateError">
+  <object-type name="QWebEngineHttpRequest">
+    <enum-type name="Method"/>
+    <modify-function signature="QWebEngineHttpRequest(const QUrl &amp;, const QWebEngineHttpRequest::Method &amp;)">
+      <modify-argument index="2">
+        <replace-type modified-type="QWebEngineHttpRequest::Method"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QWebEngineUrlRequestInfo">
+    <enum-type name="NavigationType"/>
+    <enum-type name="ResourceType"/>
+  </object-type>
+
+  <object-type name="QWebEngineUrlRequestInterceptor"/>
+
+  <object-type name="QWebEngineUrlRequestJob">
     <enum-type name="Error"/>
   </object-type>
 
-  <object-type name="QWebEngineDownloadItem">
-    <enum-type name="DownloadState" />
-  </object-type>
-
-  <!-- TODO: Deal with private constructor
-  <value-type name="QWebEngineHistory" /> -->
-
-  <object-type name="QWebEngineHistoryItem" />
-
-  <object-type name="QWebEnginePage">
-    <enum-type name="WebAction" />
-    <enum-type name="FindFlag" flags="FindFlags"/>
-    <enum-type name="WebWindowType" />
-    <enum-type name="PermissionPolicy" />
-    <enum-type name="NavigationType" />
-    <enum-type name="Feature" />
-    <enum-type name="FileSelectionMode" />
-    <enum-type name="JavaScriptConsoleMessageLevel" />
-  </object-type>
-
-  <object-type name="QWebEngineProfile">
-    <enum-type name="HttpCacheType" />
-    <enum-type name="PersistentCookiesPolicy" />
-  </object-type>
-
-  <value-type name="QWebEngineScript">
-    <enum-type name="InjectionPoint" />
-    <enum-type name="ScriptWorldId" />
-  </value-type>
-
-  <!-- TODO: Deal with private constructor
-  <value-type name="QWebEngineScriptCollection" /> -->
-
-  <!-- TODO: Deal with private constructor
-  <value-type name="QWebEngineSettings">
-    <enum-type name="FontFamily" />
-    <enum-type name="WebAttribute" />
-    <enum-type name="FontSize" />
-  </value-type> -->
-
-  <object-type name="QWebEngineView" />
+  <object-type name="QWebEngineUrlSchemeHandler"/>
 
 </typesystem>
