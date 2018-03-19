@@ -72,7 +72,7 @@
       <object-type name="QChart" since="5.7">
           <enum-type name="ChartType"/>
           <enum-type name="ChartTheme"/>
-          <enum-type name="AnimationOption"/>
+          <enum-type name="AnimationOption" flags="AnimationOptions"/>
           <modify-function signature="addSeries(QAbstractSeries*)">
               <modify-argument index="1">
                    <parent index="this" action="add"/>
