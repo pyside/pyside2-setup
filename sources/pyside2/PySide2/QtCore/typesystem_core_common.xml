@@ -2994,27 +2994,27 @@
 
   <object-type name="QSocketNotifier">
     <enum-type name="Type"/>
-    <add-function signature="QSocketNotifier(PyObject*,QSocketNotifier::Type,QObject*)">
-        <modify-argument index="3">
-            <replace-default-expression with="0" />
-            <rename to="parent" />
-        </modify-argument>
-        <inject-code>
-        Shiboken::AutoDecRef fileNo(PyObject_GetAttrString(%PYARG_1, "fileno"));
-        if (!fileNo.isNull()) {
-            Shiboken::AutoDecRef fileNoValue(PyObject_CallObject(fileNo, 0));
-            if (%CHECKTYPE[int](fileNoValue)) {
-                int cppFileNoValue = %CONVERTTOCPP[int](fileNoValue);
-                /* Qt4 version:
-                 * %0 = new %TYPE(cppFileNoValue, %2, %3);
-                 * Qt5 has qintptr instead.
-                 * XXX check if this means a pointer or just the pointer size cast (what I implemented)
-                 */
-                qintptr socket = (qintptr)cppFileNoValue;
-                %0 = new %TYPE(socket, %2, %3);
-            }
-        }
-        </inject-code>
+    <add-function signature="QSocketNotifier(PyObject*, QSocketNotifier::Type, QObject*)">
+      <modify-argument index="3">
+        <replace-default-expression with="0" />
+        <rename to="parent" />
+      </modify-argument>
+      <inject-code>
+      Shiboken::AutoDecRef socket(%PYARG_1);
+      if (!socket.isNull()) {
+          // We use qintptr as PyLong, but we check for int
+          // since it is currently an alias to be Python2 compatible.
+          // Internally, ints are qlonglongs.
+          if (%CHECKTYPE[int](socket)) {
+              int cppSocket = %CONVERTTOCPP[int](socket);
+              qintptr socket = (qintptr)cppSocket;
+              %0 = new %TYPE(socket, %2, %3);
+          } else {
+              PyErr_SetString(PyExc_TypeError,
+                  "QSocketNotifier: first argument (socket) must be an int.");
+          }
+      }
+      </inject-code>
     </add-function>
   </object-type>
 
