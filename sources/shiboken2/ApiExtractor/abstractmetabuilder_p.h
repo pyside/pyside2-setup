@@ -60,11 +60,6 @@ public:
 
     AbstractMetaClass *argumentToClass(ArgumentModelItem);
 
-    void figureOutEnumValuesForClass(AbstractMetaClass *metaClass, QSet<AbstractMetaClass *> *classes);
-    int figureOutEnumValue(const QString &name, int value, AbstractMetaEnum *meta_enum, AbstractMetaFunction *metaFunction = 0);
-    void figureOutEnumValues();
-    void figureOutDefaultEnumArguments();
-
     void addAbstractMetaClass(AbstractMetaClass *cls);
     AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
                                        const TypeDefModelItem &typeDef);
@@ -129,7 +124,7 @@ public:
                                     bool resolveType = true,
                                     bool resolveScope = true);
 
-    int findOutValueFromString(const QString &stringValue, bool &ok);
+    qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 
     void decideUsagePattern(AbstractMetaType *type);
 

@@ -133,7 +133,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
     QVERIFY(arg->type()->isArray());
-    QCOMPARE(arg->type()->arrayElementCount(), nvalues->value());
+    QCOMPARE(arg->type()->arrayElementCount(), nvalues->value().value());
     QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
 };
 
@@ -164,7 +164,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
 
     const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
     QVERIFY(arg->type()->isArray());
-    QCOMPARE(arg->type()->arrayElementCount(), nvalues->value());
+    QCOMPARE(arg->type()->arrayElementCount(), nvalues->value().value());
     QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
 };
 

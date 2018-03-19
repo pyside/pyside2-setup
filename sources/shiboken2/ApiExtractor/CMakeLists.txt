@@ -55,6 +55,7 @@ clangparser/clangdebugutils.cpp
 clangparser/clangutils.cpp
 # Old parser
 parser/codemodel.cpp
+parser/enumvalue.cpp
 )
 
 set(APIEXTRACTOR_EXTRA_INCLUDES ${CLANG_EXTRA_INCLUDES})

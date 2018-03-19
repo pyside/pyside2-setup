@@ -34,6 +34,7 @@
 #include "typesystem_typedefs.h"
 
 #include "parser/codemodel_enums.h"
+#include "parser/enumvalue.h"
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QStringList>
@@ -1090,12 +1091,12 @@ class AbstractMetaEnumValue
 public:
     AbstractMetaEnumValue() {}
 
-    int value() const
+    EnumValue value() const
     {
         return m_value;
     }
 
-    void setValue(int value)
+    void setValue(EnumValue value)
     {
         m_value = value;
     }
@@ -1134,7 +1135,7 @@ private:
     QString m_name;
     QString m_stringValue;
 
-    int m_value = 0;
+    EnumValue m_value;
 
     Documentation m_doc;
 };
@@ -1204,6 +1205,9 @@ public:
         m_class = c;
     }
 
+    bool isSigned() const { return m_signed; }
+    void setSigned(bool s) { m_signed = s; }
+
 private:
     AbstractMetaEnumValueList m_enumValues;
     EnumTypeEntry *m_typeEntry = nullptr;
@@ -1211,6 +1215,7 @@ private:
 
     EnumKind m_enumKind = CEnum;
     uint m_hasQenumsDeclaration : 1;
+    uint m_signed : 1;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

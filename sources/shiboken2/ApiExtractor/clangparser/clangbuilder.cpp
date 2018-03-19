@@ -124,6 +124,24 @@ static void setFileName(const CXCursor &cursor, _CodeModelItem *item)
     }
 }
 
+static bool isSigned(CXTypeKind kind)
+{
+    switch (kind) {
+    case CXType_UChar:
+    case CXType_Char16:
+    case CXType_Char32:
+    case CXType_UShort:
+    case CXType_UInt:
+    case CXType_ULong:
+    case CXType_ULongLong:
+    case CXType_UInt128:
+        return false;
+    default:
+        break;
+    }
+    return true;
+}
+
 class BuilderPrivate {
 public:
     typedef QHash<CXCursor, ClassModelItem> CursorClassHash;
@@ -687,6 +705,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         setFileName(cursor, d->m_currentEnum.data());
         d->m_currentEnum->setScope(d->m_scope);
         d->m_currentEnum->setEnumKind(kind);
+        d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
         if (!qSharedPointerDynamicCast<_ClassModelItem>(d->m_scopeStack.back()).isNull())
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
         d->m_scopeStack.back()->addEnum(d->m_currentEnum);
@@ -700,8 +719,14 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             appendDiagnostic(d);
             return Error;
         }
+        EnumValue enumValue;
+        if (d->m_currentEnum->isSigned())
+            enumValue.setValue(clang_getEnumConstantDeclValue(cursor));
+        else
+            enumValue.setUnsignedValue(clang_getEnumConstantDeclUnsignedValue(cursor));
         EnumeratorModelItem enumConstant(new _EnumeratorModelItem(d->m_model, name));
-        enumConstant->setValue(d->cursorValueExpression(this, cursor));
+        enumConstant->setStringValue(d->cursorValueExpression(this, cursor));
+        enumConstant->setValue(enumValue);
         d->m_currentEnum->addEnumerator(enumConstant);
     }
         break;

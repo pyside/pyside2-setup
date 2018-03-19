@@ -4529,7 +4529,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                 enumValueText += cppEnum->name() + QLatin1String("::");
             enumValueText += enumValue->name();
         } else {
-            enumValueText += QString::number(enumValue->value());
+            enumValueText += enumValue->value().toString();
         }
 
         switch (cppEnum->enumKind()) {

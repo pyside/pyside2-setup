@@ -508,8 +508,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         addAbstractMetaClass(cls);
     }
 
-    figureOutEnumValues();
-
     for (const ClassModelItem &item : typeValues)
         traverseClassMembers(item);
 
@@ -684,7 +682,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             traverseStreamOperator(item);
     }
 
-    figureOutDefaultEnumArguments();
     checkFunctionModifications();
 
     // sort all classes topologically
@@ -839,207 +836,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     return metaClass;
 }
 
-struct Operator
-{
-    enum Type { Complement, Plus, ShiftRight, ShiftLeft, None };
-
-    Operator() : type(None) {}
-
-    int calculate(int x)
-    {
-        switch (type) {
-        case Complement: return ~value;
-        case Plus: return x + value;
-        case ShiftRight: return x >> value;
-        case ShiftLeft: return x << value;
-        case None: return x;
-        }
-        return x;
-    }
-
-    Type type;
-    int value;
-};
-
-
-
-Operator findOperator(QString* s)
-{
-    const char *names[] = {
-        "~",
-        "+",
-        ">>",
-        "<<"
-    };
-
-    for (int i = 0; i < Operator::None; ++i) {
-        QString name = QLatin1String(names[i]);
-        QString str = *s;
-        int splitPoint = str.indexOf(name);
-        if (splitPoint > -1) {
-            bool ok;
-            QString right = str.mid(splitPoint + name.length());
-            Operator op;
-
-            op.value = right.toInt(&ok);
-            if (!ok && right.length() > 0 && right.at(right.length() - 1).toLower() == QLatin1Char('u'))
-                op.value = right.left(right.length() - 1).toUInt(&ok, 0);
-
-            if (ok) {
-                op.type = Operator::Type(i);
-                if (splitPoint > 0)
-                    *s = str.left(splitPoint).trimmed();
-                else
-                    *s = QString();
-                return op;
-            }
-        }
-    }
-    return Operator();
-}
-
-int AbstractMetaBuilderPrivate::figureOutEnumValue(const QString &stringValue,
-                                                   int oldValuevalue,
-                                                   AbstractMetaEnum *metaEnum,
-                                                   AbstractMetaFunction *metaFunction)
-{
-    if (stringValue.isEmpty())
-        return oldValuevalue;
-
-    QStringList stringValues = stringValue.split(QLatin1Char('|'));
-
-    int returnValue = 0;
-
-    bool matched = false;
-
-    for (int i = 0; i < stringValues.size(); ++i) {
-        QString s = stringValues.at(i).trimmed();
-
-        bool ok;
-        int v;
-
-        Operator op = findOperator(&s);
-
-        if (s.length() > 0 && s.at(0) == QLatin1Char('0'))
-            v = s.toUInt(&ok, 0);
-        else if (s.length() > 0 && s.at(s.length() - 1).toLower() == QLatin1Char('u'))
-            v = s.left(s.length() - 1).toUInt(&ok, 0);
-        else
-            v = s.toInt(&ok);
-
-        if (ok || s.isEmpty()) {
-            matched = true;
-        } else if (m_enumValues.contains(s)) {
-            v = m_enumValues[s]->value();
-            matched = true;
-        } else {
-            if (metaEnum) {
-                v = findOutValueFromString(s, matched);
-                if (!matched) {
-                    QString enclosingClass = QString(metaEnum->enclosingClass() ? metaEnum->enclosingClass()->name() + colonColon() : QString());
-                    qCWarning(lcShiboken).noquote().nospace()
-                        << "unhandled enum value: " << s << " in "
-                        << enclosingClass << metaEnum->name() << " from header '"
-                        << metaEnum->typeEntry()->include().name() << '\'';
-                }
-            } else {
-                qCWarning(lcShiboken) << "unhandled enum value: Unknown enum";
-            }
-        }
-
-        if (matched)
-            returnValue |= op.calculate(v);
-    }
-
-    if (!matched) {
-        QString warn = QStringLiteral("unmatched enum %1").arg(stringValue);
-
-        if (metaFunction) {
-            warn += QStringLiteral(" when parsing default value of '%1' in class '%2'")
-                    .arg(metaFunction->name(), metaFunction->implementingClass()->name());
-        }
-        warn += QLatin1String(" from header '") + metaEnum->typeEntry()->include().name()
-                + QLatin1Char('\'');
-
-        qCWarning(lcShiboken).noquote().nospace() << warn;
-        returnValue = oldValuevalue;
-    }
-
-    return returnValue;
-}
-
-void AbstractMetaBuilderPrivate::figureOutEnumValuesForClass(AbstractMetaClass *metaClass,
-                                                             QSet<AbstractMetaClass *> *classes)
-{
-    AbstractMetaClass* base = metaClass->baseClass();
-
-    if (base && !classes->contains(base))
-        figureOutEnumValuesForClass(base, classes);
-
-    if (classes->contains(metaClass))
-        return;
-
-    const AbstractMetaEnumList &enums = metaClass->enums();
-    for (AbstractMetaEnum* e : enums) {
-        if (!e) {
-            qCWarning(lcShiboken).noquote().nospace() << "bad enum in class " << metaClass->name();
-            continue;
-        }
-        AbstractMetaEnumValueList lst = e->values();
-        int value = 0;
-        for (int i = 0; i < lst.size(); ++i) {
-            value = figureOutEnumValue(lst.at(i)->stringValue(), value, e);
-            lst.at(i)->setValue(value);
-            value++;
-        }
-    }
-
-    *classes += metaClass;
-}
-
-
-void AbstractMetaBuilderPrivate::figureOutEnumValues()
-{
-    // Keep a set of classes that we already traversed. We use this to
-    // enforce that we traverse base classes prior to subclasses.
-    QSet<AbstractMetaClass*> classes;
-    for (AbstractMetaClass *c : qAsConst(m_metaClasses))
-        figureOutEnumValuesForClass(c, &classes);
-
-    for (AbstractMetaEnum* metaEnum : qAsConst(m_globalEnums)) {
-        AbstractMetaEnumValueList enumValues = metaEnum->values();
-        int value = 0;
-        for (int i = 0; i < enumValues.size(); ++i) {
-            value = figureOutEnumValue(enumValues.at(i)->stringValue(), value, metaEnum);
-            enumValues.at(i)->setValue(value);
-            value++;
-        }
-    }
-}
-
-void AbstractMetaBuilderPrivate::figureOutDefaultEnumArguments()
-{
-    for (AbstractMetaClass* metaClass : qAsConst(m_metaClasses)) {
-        const AbstractMetaFunctionList &functions = metaClass->functions();
-        for (AbstractMetaFunction* metaFunction : functions) {
-            const AbstractMetaArgumentList &arguments = metaFunction->arguments();
-            for (AbstractMetaArgument *arg : arguments) {
-                QString expr = arg->defaultValueExpression();
-                if (expr.isEmpty())
-                    continue;
-
-                if (!metaFunction->replacedDefaultExpression(metaFunction->implementingClass(),
-                                                             arg->argumentIndex() + 1).isEmpty()) {
-                    continue;
-                }
-
-                arg->setDefaultValueExpression(expr);
-            }
-        }
-    }
-}
-
-
 AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumItem,
                                                            AbstractMetaClass *enclosing,
                                                            const QSet<QString> &enumsDeclarations)
@@ -1097,12 +893,14 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
 
     AbstractMetaEnum *metaEnum = new AbstractMetaEnum;
     metaEnum->setEnumKind(enumItem->enumKind());
+    metaEnum->setSigned(enumItem->isSigned());
     if (enumsDeclarations.contains(qualifiedName)
         || enumsDeclarations.contains(enumName)) {
         metaEnum->setHasQEnumsDeclaration(true);
     }
 
-    metaEnum->setTypeEntry((EnumTypeEntry*) typeEntry);
+    EnumTypeEntry *enumTypeEntry = static_cast<EnumTypeEntry *>(typeEntry);
+    metaEnum->setTypeEntry(enumTypeEntry);
     switch (enumItem->accessPolicy()) {
     case CodeModel::Public:
         *metaEnum += AbstractMetaAttributes::Public;
@@ -1128,7 +926,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
         metaEnumValue->setName(value->name());
         // Deciding the enum value...
 
-        metaEnumValue->setStringValue(value->value());
+        metaEnumValue->setStringValue(value->stringValue());
+        metaEnumValue->setValue(value->value());
         metaEnum->addEnumValue(metaEnumValue);
 
         if (ReportHandler::isDebug(ReportHandler::FullDebug)) {
@@ -1159,7 +958,9 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
             name += colonColon();
         }
         name += e->name();
-        EnumValueTypeEntry* enumValue = new EnumValueTypeEntry(name, e->value(), static_cast<EnumTypeEntry*>(typeEntry), typeEntry->version());
+        EnumValueTypeEntry *enumValue =
+            new EnumValueTypeEntry(name, e->stringValue(),
+                                   enumTypeEntry, enumTypeEntry->version());
         TypeDatabase::instance()->addType(enumValue);
     }
 
@@ -2571,9 +2372,9 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
             arrayType->setArrayElementType(elementType);
             if (!typeInfo.arrays.at(i).isEmpty()) {
                 bool _ok;
-                const int elems = findOutValueFromString(typeInfo.arrays.at(i), _ok);
+                const qint64 elems = findOutValueFromString(typeInfo.arrays.at(i), _ok);
                 if (_ok)
-                    arrayType->setArrayElementCount(elems);
+                    arrayType->setArrayElementCount(int(elems));
             }
             arrayType->setTypeEntry(new ArrayTypeEntry(elementType->typeEntry() , elementType->typeEntry()->version()));
             decideUsagePattern(arrayType);
@@ -2713,9 +2514,9 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
 }
 
 
-int AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValue, bool &ok)
+qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValue, bool &ok)
 {
-    int value = stringValue.toInt(&ok);
+    qint64 value = stringValue.toLongLong(&ok);
     if (ok)
         return value;
 
@@ -2736,13 +2537,13 @@ int AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValu
     AbstractMetaEnumValue *enumValue = AbstractMetaClass::findEnumValue(m_metaClasses, stringValue);
     if (enumValue) {
         ok = true;
-        return enumValue->value();
+        return enumValue->value().value();
     }
 
     for (AbstractMetaEnum *metaEnum : qAsConst(m_globalEnums)) {
         if (const AbstractMetaEnumValue *ev = metaEnum->findEnumValue(stringValue)) {
             ok = true;
-            return ev->value();
+            return ev->value().value();
         }
     }
 

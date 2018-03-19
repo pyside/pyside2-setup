@@ -33,6 +33,7 @@
 
 #include "codemodel_fwd.h"
 #include "codemodel_enums.h"
+#include "enumvalue.h"
 
 #include <QtCore/QHash>
 #include <QtCore/QSet>
@@ -633,6 +634,8 @@ public:
 
     explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind) {}
+    explicit _EnumModelItem(CodeModel *model, int kind = __node_kind)
+        : _CodeModelItem(model, kind) {}
     ~_EnumModelItem();
 
     CodeModel::AccessPolicy accessPolicy() const;
@@ -648,10 +651,14 @@ public:
     void formatDebug(QDebug &d) const override;
 #endif
 
+    bool isSigned() const;
+    void setSigned(bool s);
+
 private:
     CodeModel::AccessPolicy m_accessPolicy = CodeModel::Public;
     EnumeratorList m_enumerators;
     EnumKind m_enumKind = CEnum;
+    bool m_signed = true;
 };
 
 class _EnumeratorModelItem: public _CodeModelItem
@@ -665,15 +672,19 @@ public:
         : _CodeModelItem(model, name, kind) {}
     ~_EnumeratorModelItem();
 
-    QString value() const;
-    void setValue(const QString &value);
+    QString stringValue() const;
+    void setStringValue(const QString &stringValue);
+
+    EnumValue value() const { return m_value; }
+    void setValue(EnumValue v) { m_value = v; }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
 
 private:
-    QString m_value;
+    QString m_stringValue;
+    EnumValue m_value;
 };
 
 class _TemplateParameterModelItem: public _CodeModelItem
