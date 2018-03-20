@@ -124,7 +124,7 @@ public:
     QString fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
                             AbstractMetaFunction *fnc, AbstractMetaClass *,
                             int argumentIndex);
-    AbstractMetaType* translateType(double vr, const AddedFunction::TypeInfo &typeInfo);
+    AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type, bool *ok,
                                     bool resolveType = true,
                                     bool resolveScope = true);

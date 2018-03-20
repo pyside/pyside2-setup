@@ -157,6 +157,14 @@ static QTextStream &ensureEndl(QTextStream &s)
     return s;
 }
 
+static void formatSince(QTextStream &s, const char *what, const TypeEntry *te)
+{
+    if (te && te->version() > QVersionNumber(0, 0)) {
+        s << ".. note:: This " << what << " was introduced in Qt "
+            << te->version().toString() << '.' << endl;
+    }
+}
+
 static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                              const QString &tag, const QString &message)
 {
@@ -1368,8 +1376,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
 
     writeInheritedByList(s, metaClass, classes());
 
-    if (metaClass->typeEntry() && (metaClass->typeEntry()->version() != 0))
-        s << ".. note:: This class was introduced in Qt " << metaClass->typeEntry()->version() << endl;
+    formatSince(s, "class", metaClass->typeEntry());
 
     writeFunctionList(s, metaClass);
 
@@ -1490,9 +1497,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
     for (AbstractMetaEnum *en : enums) {
         s << section_title << getClassTargetFullName(cppClass) << '.' << en->name() << endl << endl;
         writeFormattedText(s, en->documentation(), cppClass);
-
-        if (en->typeEntry() && (en->typeEntry()->version() != 0))
-            s << ".. note:: This enum was introduced or modified in Qt " << en->typeEntry()->version() << endl;
+        formatSince(s, "enum", en->typeEntry());
     }
 
 }
@@ -1807,8 +1812,7 @@ void QtDocGenerator::writeFunction(QTextStream& s, bool writeDoc, const Abstract
     writeFunctionSignature(s, cppClass, func);
     s << endl;
 
-    if (func->typeEntry() && (func->typeEntry()->version() != 0))
-        s << ".. note:: This method was introduced in Qt " << func->typeEntry()->version() << endl;
+    formatSince(s, "method", func->typeEntry());
 
     if (writeDoc) {
         s << endl;

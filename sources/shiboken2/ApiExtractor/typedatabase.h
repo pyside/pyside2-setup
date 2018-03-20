@@ -39,6 +39,7 @@
 #include <QtCore/QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
+QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 
 class ComplexTypeEntry;
 class ContainerTypeEntry;
@@ -148,7 +149,7 @@ public:
 
     bool setApiVersion(const QString& package, const QString& version);
 
-    bool checkApiVersion(const QString& package, const QString &version) const;
+    bool checkApiVersion(const QString &package, const QVersionNumber &version) const;
 
     bool hasDroppedTypeEntries() const { return !m_dropTypeEntries.isEmpty(); }
 

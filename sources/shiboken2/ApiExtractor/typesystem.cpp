@@ -215,6 +215,17 @@ static QString msgReaderError(const QXmlStreamReader &reader)
     return msgReaderError(reader, reader.errorString());
 }
 
+static QString msgInvalidVersion(const QStringRef &version, const QString &package = QString())
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Invalid version \"" << version << '"';
+    if (!package.isEmpty())
+        str << "\" specified for package " << package;
+    str << '.';
+    return result;
+}
+
 bool Handler::parse(QXmlStreamReader &reader)
 {
     m_error.clear();
@@ -605,7 +616,8 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
 }
 
 void Handler::addFlags(const QString &name, QString flagName,
-                       const QHash<QString, QString> &attributes, double since)
+                       const QHash<QString, QString> &attributes,
+                       const QVersionNumber &since)
 {
     FlagsTypeEntry *ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + name + QLatin1Char('>'), since);
     ftype->setOriginator(m_currentEnum);
@@ -640,7 +652,7 @@ void Handler::addFlags(const QString &name, QString flagName,
 bool Handler::handleSmartPointerEntry(StackElement *element,
                                       QHash<QString, QString> &attributes,
                                       const QString &name,
-                                      double since)
+                                      const QVersionNumber &since)
 {
     QString smartPointerType = attributes[QLatin1String("type")];
     if (smartPointerType.isEmpty()) {
@@ -692,9 +704,19 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         return true;
     }
 
-    if (!m_defaultPackage.isEmpty() && atts.hasAttribute(sinceAttribute())) {
+    QVersionNumber since(0, 0);
+    const QStringRef sinceSpec = atts.value(sinceAttribute());
+    if (!sinceSpec.isNull()) {
+        since = QVersionNumber::fromString(sinceSpec.toString());
+        if (since.isNull()) {
+            m_error = msgInvalidVersion(sinceSpec, m_defaultPackage);
+            return false;
+        }
+    }
+
+    if (!m_defaultPackage.isEmpty() && since > QVersionNumber(0, 0)) {
         TypeDatabase* td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, atts.value(sinceAttribute()).toString())) {
+        if (!td->checkApiVersion(m_defaultPackage, since)) {
             ++m_ignoreDepth;
             return true;
         }
@@ -734,7 +756,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         QHash<QString, QString> attributes;
         attributes.insert(nameAttribute(), QString());
         attributes.insert(QLatin1String("revision"), QLatin1String("0"));
-        attributes.insert(sinceAttribute(), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QString()); // dummy for matching allowed attributes
 
         switch (element->type) {
         case StackElement::PrimitiveTypeEntry:
@@ -798,7 +820,6 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
 
         fetchAttributeValues(tagName, atts, &attributes);
         QString name = attributes[nameAttribute()];
-        double since = attributes[sinceAttribute()].toDouble();
 
         if (m_database->hasDroppedTypeEntries()) {
             QString identifier = getNamePrefix(element) + QLatin1Char('.');
@@ -1097,7 +1118,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         QHash<QString, QString> attributes;
         attributes.insert(QLatin1String("mode"), QLatin1String("replace"));
         attributes.insert(QLatin1String("format"), QLatin1String("native"));
-        attributes.insert(sinceAttribute(), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QString()); // dummy for matching allowed attributes
 
         fetchAttributeValues(tagName, atts, &attributes);
 
@@ -1144,7 +1165,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         // check the XML tag attributes
         QHash<QString, QString> attributes;
         attributes.insert(xPathAttribute(), QString());
-        attributes.insert(sinceAttribute(), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QString()); // dummy for matching allowed attributes
         fetchAttributeValues(tagName, atts, &attributes);
 
         const int validParent = StackElement::TypeEntryMask
@@ -1179,7 +1200,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
         element->entry = topElement.entry;
 
         QHash<QString, QString> attributes;
-        attributes.insert(sinceAttribute(), QLatin1String("0"));
+        attributes.insert(sinceAttribute(), QString()); // dummy for matching allowed attributes
         switch (element->type) {
         case StackElement::Root:
             attributes.insert(QLatin1String("package"), QString());
@@ -1309,11 +1330,8 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             { };
         };
 
-        double since = 0;
-        if (attributes.count() > 0) {
+        if (!attributes.isEmpty())
             fetchAttributeValues(tagName, atts, &attributes);
-            since = attributes[sinceAttribute()].toDouble();
-        }
 
         switch (element->type) {
         case StackElement::Root:
@@ -1718,7 +1736,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 return false;
             }
 
-            AddedFunction func(signature, attributes[QLatin1String("return-type")], since);
+            AddedFunction func(signature, attributes[QLatin1String("return-type")]);
             func.setStatic(attributes[QLatin1String("static")] == yesAttributeValue());
             if (!signature.contains(QLatin1Char('(')))
                 signature += QLatin1String("()");
@@ -2082,7 +2100,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
     return true;
 }
 
-PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &name, double vr) :
+PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, PrimitiveType, vr),
     m_preferredConversion(true),
     m_preferredTargetLangType(true)
@@ -2471,8 +2489,7 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
     return result;
 }
 
-AddedFunction::AddedFunction(QString signature, QString returnType, double vr) :
-    m_version(vr),
+AddedFunction::AddedFunction(QString signature, const QString &returnType) :
     m_access(Public)
 {
     Q_ASSERT(!returnType.isEmpty());
@@ -2540,7 +2557,8 @@ AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& si
     return parseType(signature);
 }
 
-ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t, double vr) :
+ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t,
+                                   const QVersionNumber &vr) :
     TypeEntry(QString(name).replace(QLatin1String(".*::"), QString()), t, vr),
     m_qualifiedCppName(name),
     m_qobject(false),
@@ -2581,7 +2599,7 @@ bool StringTypeEntry::isNativeIdBased() const
     return false;
 }
 
-CharTypeEntry::CharTypeEntry(const QString &name, double vr) :
+CharTypeEntry::CharTypeEntry(const QString &name, const QVersionNumber &vr) :
     ValueTypeEntry(name, CharType, vr)
 {
     setCodeGeneration(GenerateNothing);
@@ -2606,7 +2624,7 @@ bool CharTypeEntry::isNativeIdBased() const
     return false;
 }
 
-VariantTypeEntry::VariantTypeEntry(const QString &name, double vr) :
+VariantTypeEntry::VariantTypeEntry(const QString &name, const QVersionNumber &vr) :
     ValueTypeEntry(name, VariantType, vr)
 {
 }
@@ -2695,7 +2713,7 @@ bool TypeEntry::isCppPrimitive() const
 typedef QHash<const TypeEntry*, CustomConversion*> TypeEntryCustomConversionMap;
 Q_GLOBAL_STATIC(TypeEntryCustomConversionMap, typeEntryCustomConversionMap);
 
-TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, double vr) :
+TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumber &vr) :
     m_name(name),
     m_type(t),
     m_version(vr)
@@ -2729,27 +2747,27 @@ CustomConversion* TypeEntry::customConversion() const
     return 0;
 }
 
-TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, double vr) :
+TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, TypeSystemType, vr)
 {
 }
 
 VoidTypeEntry::VoidTypeEntry() :
-    TypeEntry(QLatin1String("void"), VoidType, 0)
+    TypeEntry(QLatin1String("void"), VoidType, QVersionNumber(0, 0))
 {
 }
 
 VarargsTypeEntry::VarargsTypeEntry() :
-    TypeEntry(QLatin1String("..."), VarargsType, 0)
+    TypeEntry(QLatin1String("..."), VarargsType, QVersionNumber(0, 0))
 {
 }
 
-TemplateArgumentEntry::TemplateArgumentEntry(const QString &name, double vr) :
+TemplateArgumentEntry::TemplateArgumentEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, TemplateArgumentType, vr)
 {
 }
 
-ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, double vr) :
+ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr) :
     TypeEntry(QLatin1String("Array"), ArrayType, vr),
     m_nestedType(nested_type)
 {
@@ -2769,7 +2787,8 @@ QString ArrayTypeEntry::targetLangApiName() const
         return QLatin1String("jobjectArray");
 }
 
-EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName, double vr) :
+EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName,
+                             const QVersionNumber &vr) :
     TypeEntry(nspace.isEmpty() ? enumName : nspace + QLatin1String("::") + enumName,
               EnumType, vr),
     m_qualifier(nspace),
@@ -2792,19 +2811,22 @@ QString EnumTypeEntry::targetLangName() const
     return m_targetLangName;
 }
 
-EnumValueTypeEntry::EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum, double vr) :
+EnumValueTypeEntry::EnumValueTypeEntry(const QString &name, const QString &value,
+                                       const EnumTypeEntry *enclosingEnum,
+                                       const QVersionNumber &vr) :
     TypeEntry(name, TypeEntry::EnumValue, vr),
     m_value(value),
     m_enclosingEnum(enclosingEnum)
 {
 }
 
-FlagsTypeEntry::FlagsTypeEntry(const QString &name, double vr) :
+FlagsTypeEntry::FlagsTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, FlagsType, vr)
 {
 }
 
-ContainerTypeEntry::ContainerTypeEntry(const QString &name, Type type, double vr) :
+ContainerTypeEntry::ContainerTypeEntry(const QString &name, Type type,
+                                       const QVersionNumber &vr) :
     ComplexTypeEntry(name, ContainerType, vr),
     m_type(type)
 {
@@ -2815,7 +2837,7 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &name,
                                              const QString &getterName,
                                              const QString &smartPointerType,
                                              const QString &refCountMethodName,
-                                             double vr) :
+                                             const QVersionNumber &vr) :
     ComplexTypeEntry(name, SmartPointerType, vr),
     m_getterName(getterName),
     m_smartPointerType(smartPointerType),
@@ -2823,12 +2845,12 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &name,
 {
 }
 
-NamespaceTypeEntry::NamespaceTypeEntry(const QString &name, double vr) :
+NamespaceTypeEntry::NamespaceTypeEntry(const QString &name, const QVersionNumber &vr) :
     ComplexTypeEntry(name, NamespaceType, vr)
 {
 }
 
-ValueTypeEntry::ValueTypeEntry(const QString &name, double vr) :
+ValueTypeEntry::ValueTypeEntry(const QString &name, const QVersionNumber &vr) :
     ComplexTypeEntry(name, BasicValueType, vr)
 {
 }
@@ -2843,12 +2865,12 @@ bool ValueTypeEntry::isNativeIdBased() const
     return true;
 }
 
-ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, double vr) :
+ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr) :
     ComplexTypeEntry(name, t, vr)
 {
 }
 
-StringTypeEntry::StringTypeEntry(const QString &name, double vr) :
+StringTypeEntry::StringTypeEntry(const QString &name, const QVersionNumber &vr) :
     ValueTypeEntry(name, StringType, vr)
 {
     setCodeGeneration(GenerateNothing);
@@ -3007,7 +3029,7 @@ void CustomConversion::TargetToNativeConversion::setConversion(const QString& co
     m_d->conversion = conversion;
 }
 
-InterfaceTypeEntry::InterfaceTypeEntry(const QString &name, double vr) :
+InterfaceTypeEntry::InterfaceTypeEntry(const QString &name, const QVersionNumber &vr) :
     ComplexTypeEntry(name, InterfaceType, vr)
 {
 }
@@ -3024,13 +3046,13 @@ QString InterfaceTypeEntry::qualifiedCppName() const
 }
 
 FunctionTypeEntry::FunctionTypeEntry(const QString &name, const QString &signature,
-                                     double vr) :
+                                     const QVersionNumber &vr) :
     TypeEntry(name, FunctionType, vr)
 {
     addSignature(signature);
 }
 
-ObjectTypeEntry::ObjectTypeEntry(const QString &name, double vr)
+ObjectTypeEntry::ObjectTypeEntry(const QString &name, const QVersionNumber &vr)
     : ComplexTypeEntry(name, ObjectType, vr)
 {
 }
