@@ -1141,11 +1141,12 @@ void QtXmlToSphinx::Table::normalize()
                 if (cell.rowSpan > 0) {
                     QtXmlToSphinx::TableCell newCell;
                     newCell.rowSpan = -1;
-                    int max = std::min(cell.rowSpan - 1, count());
+                    int targetRow = row + 1;
+                    const int targetEndRow =
+                        std::min(targetRow + cell.rowSpan - 1, count());
                     cell.rowSpan = 0;
-                    for (int i = 0; i < max; ++i) {
-                        self[row+i+1].insert(col, newCell);
-                    }
+                    for ( ; targetRow < targetEndRow; ++targetRow)
+                        self[targetRow].insert(col, newCell);
                     row++;
                 }
             }
