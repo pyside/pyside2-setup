@@ -1283,7 +1283,7 @@ QtDocGenerator::~QtDocGenerator()
     delete m_docParser;
 }
 
-QString QtDocGenerator::fileNamePrefix() const
+QString QtDocGenerator::fileNameSuffix() const
 {
     return QLatin1String(".rst");
 }
@@ -1292,11 +1292,11 @@ QString QtDocGenerator::fileNameForContext(GeneratorContext &context) const
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     if (!context.forSmartPointer()) {
-        return getClassTargetFullName(metaClass, false) + fileNamePrefix();
+        return getClassTargetFullName(metaClass, false) + fileNameSuffix();
     } else {
         const AbstractMetaType *smartPointerType = context.preciseType();
         QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNamePrefix();
+        return fileNameBase + fileNameSuffix();
     }
 }
 

@@ -225,7 +225,7 @@ public:
     }
 
 protected:
-    QString fileNamePrefix() const;
+    QString fileNameSuffix() const override;
     QString fileNameForContext(GeneratorContext &context) const;
     void generateClass(QTextStream &s, GeneratorContext &classContext);
     bool finishGeneration();

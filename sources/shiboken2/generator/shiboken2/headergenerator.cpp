@@ -37,7 +37,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QDebug>
 
-QString HeaderGenerator::fileNamePrefix() const
+QString HeaderGenerator::fileNameSuffix() const
 {
     return QLatin1String("_wrapper.h");
 }
@@ -48,11 +48,11 @@ QString HeaderGenerator::fileNameForContext(GeneratorContext &context) const
     if (!context.forSmartPointer()) {
         QString fileNameBase = metaClass->qualifiedCppName().toLower();
         fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
-        return fileNameBase + fileNamePrefix();
+        return fileNameBase + fileNameSuffix();
     } else {
         const AbstractMetaType *smartPointerType = context.preciseType();
         QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNamePrefix();
+        return fileNameBase + fileNameSuffix();
     }
 }
 
