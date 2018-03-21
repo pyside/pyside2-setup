@@ -1014,22 +1014,20 @@ void _EnumModelItem::addEnumerator(EnumeratorModelItem item)
     m_enumerators.append(item);
 }
 
-bool _EnumModelItem::isAnonymous() const
-{
-    return m_anonymous;
-}
-
-void _EnumModelItem::setAnonymous(bool anonymous)
-{
-    m_anonymous = anonymous;
-}
-
 #ifndef QT_NO_DEBUG_STREAM
 void _EnumModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
-    if (m_anonymous)
-         d << " (anonymous)";
+    switch (m_enumKind) {
+    case CEnum:
+        break;
+    case AnonymousEnum:
+        d << " (anonymous)";
+        break;
+    case EnumClass:
+        d << " (class)";
+        break;
+    }
     formatModelItemList(d, ", enumerators=", m_enumerators);
 }
 #endif // !QT_NO_DEBUG_STREAM

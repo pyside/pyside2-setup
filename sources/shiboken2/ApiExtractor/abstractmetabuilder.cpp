@@ -1055,7 +1055,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
             nspace = QStringList(names.mid(0, names.size() - 1)).join(colonColon());
         typeEntry = new EnumTypeEntry(nspace, enumName, QVersionNumber(0, 0));
         TypeDatabase::instance()->addType(typeEntry);
-    } else if (!enumItem->isAnonymous()) {
+    } else if (enumItem->enumKind() != AnonymousEnum) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
     } else {
         QStringList tmpQualifiedName = enumItem->qualifiedName();
@@ -1096,6 +1096,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     }
 
     AbstractMetaEnum *metaEnum = new AbstractMetaEnum;
+    metaEnum->setEnumKind(enumItem->enumKind());
     if (enumsDeclarations.contains(qualifiedName)
         || enumsDeclarations.contains(enumName)) {
         metaEnum->setHasQEnumsDeclaration(true);

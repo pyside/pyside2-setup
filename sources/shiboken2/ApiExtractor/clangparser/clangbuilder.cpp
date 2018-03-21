@@ -41,6 +41,7 @@
 #include <QtCore/QVector>
 
 #include <string.h>
+#include <ctype.h>
 
 #if QT_VERSION < 0x050800
 #  define Q_FALLTHROUGH()  (void)0
@@ -437,6 +438,36 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
     return QString::fromLocal8Bit(equalSign, int(snippet.second - equalSign)).trimmed();
 }
 
+// A hacky reimplementation of clang_EnumDecl_isScoped() for Clang < 5.0
+// which simply checks for a blank-delimited " class " keyword in the enum snippet.
+
+#define CLANG_NO_ENUMDECL_ISSCOPED \
+    (CINDEX_VERSION_MAJOR == 0 && CINDEX_VERSION_MINOR < 43)
+
+#if CLANG_NO_ENUMDECL_ISSCOPED
+static const char *indexOf(const BaseVisitor::CodeSnippet &snippet, const char *needle)
+{
+    const size_t snippetLength = snippet.first ? size_t(snippet.second - snippet.first) : 0;
+    const size_t needleLength = strlen(needle);
+    if (needleLength > snippetLength)
+        return nullptr;
+    for (const char *c = snippet.first, *end = snippet.second - needleLength; c < end; ++c) {
+        if (memcmp(c, needle, needleLength) == 0)
+            return c;
+    }
+    return nullptr;
+}
+
+long clang_EnumDecl_isScoped4(BaseVisitor *bv, const CXCursor &cursor)
+{
+    BaseVisitor::CodeSnippet snippet = bv->getCodeSnippet(cursor);
+    const char *classSpec = indexOf(snippet, "class");
+    const bool isClass = classSpec && classSpec > snippet.first
+        && isspace(*(classSpec - 1)) && isspace(*(classSpec + 5));
+    return isClass ? 1 : 0;
+}
+#endif // CLANG_NO_ENUMDECL_ISSCOPED
+
 // Add a base class to the current class from CXCursor_CXXBaseSpecifier
 void BuilderPrivate::addBaseClass(const CXCursor &cursor)
 {
@@ -641,13 +672,21 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_EnumDecl: {
         QString name = getCursorSpelling(cursor);
-        const bool anonymous = name.isEmpty();
-        if (anonymous)
+        EnumKind kind = CEnum;
+        if (name.isEmpty()) {
+            kind = AnonymousEnum;
             name = QStringLiteral("enum_") + QString::number(++d->m_anonymousEnumCount);
+#if !CLANG_NO_ENUMDECL_ISSCOPED
+        } else if (clang_EnumDecl_isScoped(cursor) != 0) {
+#else
+        } else if (clang_EnumDecl_isScoped4(this, cursor) != 0) {
+#endif
+            kind = EnumClass;
+        }
         d->m_currentEnum.reset(new _EnumModelItem(d->m_model, name));
         setFileName(cursor, d->m_currentEnum.data());
         d->m_currentEnum->setScope(d->m_scope);
-        d->m_currentEnum->setAnonymous(anonymous);
+        d->m_currentEnum->setEnumKind(kind);
         if (!qSharedPointerDynamicCast<_ClassModelItem>(d->m_scopeStack.back()).isNull())
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
         d->m_scopeStack.back()->addEnum(d->m_currentEnum);

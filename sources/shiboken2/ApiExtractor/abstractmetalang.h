@@ -1168,6 +1168,11 @@ public:
         return package() + QLatin1Char('.') + qualifier()  + QLatin1Char('.') + name();
     }
 
+    EnumKind enumKind() const { return m_enumKind; }
+    void setEnumKind(EnumKind kind) { m_enumKind = kind; }
+
+    bool isAnonymous() const { return m_enumKind == AnonymousEnum; }
+
     // Has the enum been declared inside a Q_ENUMS() macro in its enclosing class?
     void setHasQEnumsDeclaration(bool on)
     {
@@ -1199,13 +1204,12 @@ public:
         m_class = c;
     }
 
-    bool isAnonymous() const;
-
 private:
     AbstractMetaEnumValueList m_enumValues;
     EnumTypeEntry *m_typeEntry = nullptr;
     AbstractMetaClass *m_class = nullptr;
 
+    EnumKind m_enumKind = CEnum;
     uint m_hasQenumsDeclaration : 1;
 };
 

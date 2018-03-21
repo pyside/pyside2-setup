@@ -35,4 +35,10 @@ enum ReferenceType {
     RValueReference
 };
 
+enum EnumKind {
+    CEnum,         // Standard C: enum Foo { value1, value2 }
+    AnonymousEnum, //             enum { value1, value2 }
+    EnumClass      // C++ 11    : enum class Foo { value1, value2 }
+};
+
 #endif // CODEMODEL_ENUMS_H

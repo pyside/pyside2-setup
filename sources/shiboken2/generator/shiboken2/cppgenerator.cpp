@@ -4532,8 +4532,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             enumValueText += QString::number(enumValue->value());
         }
 
-        switch (enumTypeEntry->enumKind()) {
-        case EnumTypeEntry::AnonymousEnum:
+        switch (cppEnum->enumKind()) {
+        case AnonymousEnum:
             if (enclosingClass || hasUpperEnclosingClass) {
                 s << INDENT << '{' << endl;
                 {
@@ -4557,7 +4557,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                 }
             }
             break;
-        case EnumTypeEntry::CEnum: {
+        case CEnum: {
             s << INDENT << "if (!Shiboken::Enum::";
             s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem" : "createGlobalEnumItem");
             s << '(' << enumVarTypeObj << ',' << endl;
@@ -4567,7 +4567,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             s << INDENT << "return " << m_currentErrorCode << ';' << endl;
         }
             break;
-        case EnumTypeEntry::EnumClass: {
+        case EnumClass: {
             s << INDENT << "if (!Shiboken::Enum::createScopedEnumItem("
                 << enumVarTypeObj << ',' << endl;
             Indentation indent(INDENT);

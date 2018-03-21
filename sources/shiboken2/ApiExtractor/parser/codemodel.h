@@ -631,10 +631,8 @@ class _EnumModelItem: public _CodeModelItem
 public:
     DECLARE_MODEL_NODE(Enum)
 
-    explicit _EnumModelItem(CodeModel *model, int kind = __node_kind)
-        : _CodeModelItem(model, kind), m_accessPolicy(CodeModel::Public), m_anonymous(false)  {}
     explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
-        : _CodeModelItem(model, name, kind), m_accessPolicy(CodeModel::Public), m_anonymous(false) {}
+        : _CodeModelItem(model, name, kind) {}
     ~_EnumModelItem();
 
     CodeModel::AccessPolicy accessPolicy() const;
@@ -642,17 +640,18 @@ public:
 
     EnumeratorList enumerators() const;
     void addEnumerator(EnumeratorModelItem item);
-    bool isAnonymous() const;
-    void setAnonymous(bool anonymous);
+
+    EnumKind enumKind() const { return m_enumKind; }
+    void setEnumKind(EnumKind kind) { m_enumKind = kind; }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
 
 private:
-    CodeModel::AccessPolicy m_accessPolicy;
+    CodeModel::AccessPolicy m_accessPolicy = CodeModel::Public;
     EnumeratorList m_enumerators;
-    bool m_anonymous;
+    EnumKind m_enumKind = CEnum;
 };
 
 class _EnumeratorModelItem: public _CodeModelItem

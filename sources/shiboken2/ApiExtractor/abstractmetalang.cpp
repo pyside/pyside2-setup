@@ -2457,8 +2457,3 @@ QString AbstractMetaEnum::package() const
 {
     return m_typeEntry->targetLangPackage();
 }
-
-bool AbstractMetaEnum::isAnonymous() const
-{
-    return m_typeEntry->isAnonymous();
-}
