@@ -210,14 +210,14 @@ public:
 
     QString docDataDir() const { return m_docDataDir; }
 
-    bool doSetup(const QMap<QString, QString>& args);
+    bool doSetup(const QMap<QString, QString>& args) override;
 
-    const char* name() const
+    const char* name() const override
     {
         return "QtDocGenerator";
     }
 
-    OptionDescriptions options() const;
+    OptionDescriptions options() const override;
 
     QStringList codeSnippetDirs() const
     {
@@ -226,12 +226,12 @@ public:
 
 protected:
     QString fileNameSuffix() const override;
-    QString fileNameForContext(GeneratorContext &context) const;
-    void generateClass(QTextStream &s, GeneratorContext &classContext);
-    bool finishGeneration();
+    QString fileNameForContext(GeneratorContext &context) const override;
+    void generateClass(QTextStream &s, GeneratorContext &classContext) override;
+    bool finishGeneration() override;
 
-    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const {}
-    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, Options) const {}
+    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const override {}
+    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, Options) const override {}
 
 private:
     void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass);
