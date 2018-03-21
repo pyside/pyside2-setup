@@ -174,6 +174,27 @@ static void diff(QList<QByteArray> a, QList<QByteArray> b)
 
 FileOut::State FileOut::done()
 {
+    QString errorMessage;
+    const State result = done(&errorMessage);
+    if (result == Failure)
+         qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+    return result;
+}
+
+QString FileOut::msgCannotOpenForReading(const QFile &f)
+{
+    return QStringLiteral("Failed to open file '%1' for reading: %2")
+           .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
+}
+
+QString FileOut::msgCannotOpenForWriting(const QFile &f)
+{
+    return QStringLiteral("Failed to open file '%1' for writing: %2")
+           .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
+}
+
+FileOut::State FileOut::done(QString *errorMessage)
+{
     Q_ASSERT(!isDone);
     if (name.isEmpty())
         return Failure;
@@ -186,9 +207,7 @@ FileOut::State FileOut::done()
     QByteArray original;
     if (info.exists() && (diff || (info.size() == tmp.size()))) {
         if (!fileRead.open(QIODevice::ReadOnly)) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("failed to open file '%1' for reading")
-                                  .arg(QDir::toNativeSeparators(fileRead.fileName()));
+            *errorMessage = msgCannotOpenForReading(fileRead);
             return Failure;
         }
 
@@ -203,17 +222,14 @@ FileOut::State FileOut::done()
     if (!FileOut::dummy) {
         QDir dir(info.absolutePath());
         if (!dir.mkpath(dir.absolutePath())) {
-            qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("unable to create directory '%1'")
-                       .arg(QDir::toNativeSeparators(dir.absolutePath()));
+            *errorMessage = QStringLiteral("unable to create directory '%1'")
+                            .arg(QDir::toNativeSeparators(dir.absolutePath()));
             return Failure;
         }
 
         QFile fileWrite(name);
         if (!fileWrite.open(QIODevice::WriteOnly)) {
-            qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("failed to open file '%1' for writing")
-                       .arg(QDir::toNativeSeparators(fileWrite.fileName()));
+            *errorMessage = msgCannotOpenForWriting(fileWrite);
             return Failure;
         }
         QTextCodec *codec = QTextCodec::codecForName("UTF-8");
