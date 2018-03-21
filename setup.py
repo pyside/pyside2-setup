@@ -1569,6 +1569,8 @@ class pyside_build(_build):
         qt_artifacts_permanent = [
             "opengl*.dll",
             "d3d*.dll",
+            "libEGL*.dll",
+            "libGLESv2*.dll",
             "designer.exe",
             "linguist.exe",
             "lrelease.exe",
