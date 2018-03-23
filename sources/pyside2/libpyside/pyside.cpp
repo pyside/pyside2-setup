@@ -162,10 +162,10 @@ static void destructionVisitor(SbkObject* pyObj, void* data)
 
 void destroyQCoreApplication()
 {
-    SignalManager::instance().clear();
     QCoreApplication* app = QCoreApplication::instance();
     if (!app)
         return;
+    SignalManager::instance().clear();
 
     Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();
     SbkObject* pyQApp = bm.retrieveWrapper(app);
