@@ -29,8 +29,12 @@
 '''Test cases for QObject methods'''
 
 import unittest
+import sys
 
-from PySide2.QtCore import QObject
+from PySide2.QtCore import QObject, QTimer
+from PySide2.QtWidgets import QApplication, QLabel, QVBoxLayout
+
+is_alive = None
 
 class InheritsCase(unittest.TestCase):
     '''Test case for QObject.inherits'''
@@ -86,6 +90,37 @@ class InheritsCase(unittest.TestCase):
                 pass
 
         self.assertRaises(TypeError, declareClass)
+
+    # PYSIDE-11:
+    #   The takeOwnership() method was relying that the SbkObject
+    #   had a converter, which it's not the case when multiple
+    #   inheritance is used.
+    #   The deleteLater() method uses the takeOwnership() to give
+    #   control of the object to C++, so it can be remove once
+    #   the destructor is called.
+    #   The solution was to add a default case when the object
+    #   is null under the pythonTypeIsValueType() method in shiboken.
+    def testDeleteMultipleInheritance(self):
+        app = QApplication(sys.argv)
+        class DerivedLabel(QLabel, QObject):
+            def __del__(self):
+                global is_alive
+                is_alive = False
+
+        global is_alive
+        child = DerivedLabel('Hello')
+        is_alive = True
+        parent = QVBoxLayout()
+        parent.addWidget(child)
+        parent.removeWidget(child)
+        child.deleteLater()
+        self.assertTrue(is_alive)
+        del child
+        self.assertTrue(is_alive)
+        QTimer.singleShot(100, app.quit)
+        app.exec_()
+        self.assertFalse(is_alive)
+
 
 if __name__ == '__main__':
     unittest.main()

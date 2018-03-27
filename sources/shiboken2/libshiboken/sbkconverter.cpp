@@ -523,7 +523,10 @@ PyTypeObject* getPythonTypeObject(const char* typeName)
 
 bool pythonTypeIsValueType(const SbkConverter *converter)
 {
-    assert(converter);
+    // Unlikely to happen but for multi-inheritance SbkObjs
+    // the converter is not defined, hence we need a default return.
+    if (!converter)
+        return false;
     return converter->pointerToPython && converter->copyToPython;
 }
 
