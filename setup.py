@@ -1635,8 +1635,9 @@ class pyside_build(_build):
 
         # <qt>/plugins/* -> <setup>/PySide2/plugins
         plugin_dll_patterns = ["*{}.dll"]
+        pdb_pattern = "*{}.pdb"
         if copy_pdbs:
-            plugin_dll_patterns += ["*{}.pdb"]
+            plugin_dll_patterns += [pdb_pattern]
         plugin_dll_filter = functools.partial(qt_build_config_filter, plugin_dll_patterns)
         copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/plugins",
             file_filter_function=plugin_dll_filter,
@@ -1650,9 +1651,11 @@ class pyside_build(_build):
 
         # <qt>/qml/* -> <setup>/PySide2/qml
         qml_dll_patterns = ["*{}.dll"]
+        qml_ignore_patterns = qml_dll_patterns + [pdb_pattern]
+        # Remove the "{}" from the patterns
+        qml_ignore = [a.format('') for a in qml_ignore_patterns]
         if copy_pdbs:
-            qml_dll_patterns += ["*{}.pdb"]
-        qml_ignore = [a.format('') for a in qml_dll_patterns]
+            qml_dll_patterns += [pdb_pattern]
         qml_dll_filter = functools.partial(qt_build_config_filter, qml_dll_patterns)
         copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
             ignore=qml_ignore,
