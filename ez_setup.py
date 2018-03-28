@@ -38,7 +38,8 @@
 ##
 #############################################################################
 
-"""Bootstrap setuptools installation
+"""
+Bootstrap setuptools installation
 
 To use setuptools in your package's setup.py, include this
 file in the same directory and add this to the top of your setup.py::
@@ -100,7 +101,7 @@ def _install(archive_filename, install_args=()):
 def _build_egg(egg, archive_filename, to_dir):
     with archive_context(archive_filename):
         # building an egg
-        log.warn('Building a Setuptools egg in %s', to_dir)
+        log.warn('Building a Setuptools egg in {}'.format(to_dir))
         _python_cmd('setup.py', '-q', 'bdist_egg', '--dist-dir', to_dir)
     # returning the result
     log.warn(egg)
@@ -132,7 +133,7 @@ class ContextualZipFile(zipfile.ZipFile):
 def archive_context(filename):
     # extracting the archive
     tmpdir = tempfile.mkdtemp()
-    log.warn('Extracting in %s', tmpdir)
+    log.warn('Extracting in {}'.format(tmpdir))
     old_wd = os.getcwd()
     try:
         os.chdir(tmpdir)
@@ -142,7 +143,7 @@ def archive_context(filename):
         # going in the directory
         subdir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
         os.chdir(subdir)
-        log.warn('Now working in %s', subdir)
+        log.warn('Now working in {}'.format(subdir))
         yield
 
     finally:
@@ -185,9 +186,9 @@ def use_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
     except pkg_resources.VersionConflict as VC_err:
         if imported:
             msg = textwrap.dedent("""
-                The required version of setuptools (>={version}) is not available,
-                and can't be installed while this script is running. Please
-                install a more recent version first, using
+                The required version of setuptools (>={version}) is not
+                available, and can't be installed while this script is running.
+                Please install a more recent version first, using
                 'easy_install -U setuptools'.
 
                 (Currently using {VC_err.args[0]!r})
@@ -201,8 +202,8 @@ def use_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
 
 def _clean_check(cmd, target):
     """
-    Run the command to download target. If the command fails, clean up before
-    re-raising the error.
+    Run the command to download target.
+    If the command fails, clean up before re-raising the error.
     """
     try:
         subprocess.check_call(cmd)
@@ -213,15 +214,16 @@ def _clean_check(cmd, target):
 
 def download_file_powershell(url, target):
     """
-    Download the file at url to target using Powershell (which will validate
-    trust). Raise an exception if the command cannot complete.
+    Download the file at url to target using Powershell
+    (which will validate trust).
+    Raise an exception if the command cannot complete.
     """
     target = os.path.abspath(target)
     ps_cmd = (
         "[System.Net.WebRequest]::DefaultWebProxy.Credentials = "
         "[System.Net.CredentialCache]::DefaultCredentials; "
-        "(new-object System.Net.WebClient).DownloadFile(%(url)r, %(target)r)"
-        % vars()
+        "(new-object System.Net.WebClient).DownloadFile({}, {})".format(
+            url, target))
     )
     cmd = [
         'powershell',
@@ -275,8 +277,8 @@ download_file_wget.viable = has_wget
 
 def download_file_insecure(url, target):
     """
-    Use Python to download the file, even though it cannot authenticate the
-    connection.
+    Use Python to download the file, even though it cannot authenticate
+    the connection.
     """
     src = urlopen(url)
     try:
@@ -304,11 +306,13 @@ def get_best_downloader():
 def download_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
         to_dir=os.curdir, delay=15, downloader_factory=get_best_downloader):
     """
-    Download setuptools from a specified location and return its filename
+    Download setuptools from a specified location and return its
+    filename
 
-    `version` should be a valid setuptools version number that is available
-    as an sdist for download under the `download_base` URL (which should end
-    with a '/'). `to_dir` is the directory where the egg will be downloaded.
+    `version` should be a valid setuptools version number that is
+    available as an sdist for download under the `download_base` URL
+    (which should end with a '/').
+    `to_dir` is the directory where the egg will be downloaded.
     `delay` is the number of seconds to pause before an actual download
     attempt.
 
@@ -317,18 +321,19 @@ def download_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
     """
     # making sure we use the absolute path
     to_dir = os.path.abspath(to_dir)
-    zip_name = "setuptools-%s.zip" % version
+    zip_name = "setuptools-{}.zip".format(version)
     url = download_base + zip_name
     saveto = os.path.join(to_dir, zip_name)
     if not os.path.exists(saveto):  # Avoid repeated downloads
-        log.warn("Downloading %s", url)
+        log.warn("Downloading {}".format(url))
         downloader = downloader_factory()
         downloader(url, saveto)
     return os.path.realpath(saveto)
 
 def _build_install_args(options):
     """
-    Build the arguments to 'python setup.py install' on the setuptools package
+    Build the arguments to 'python setup.py install' on the
+    setuptools package
     """
     return ['--user'] if options.user_install else []
 

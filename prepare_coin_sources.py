@@ -55,12 +55,12 @@ submodules = {
 }
 
 def usage():
-    print("""\
-This is a utility script for pyside-setup to prepare its source tree for testing
-by the Qt Continuous Integration (CI). The script will checkout all submodules in the
-pyside-setup/ sources directory except the one under test in the CI. The submodule
-to be tested is expected to be found as a sibling directory of pyside-setup,
-from which it is moved under the pyside-setup/sources directory.
+    print("""This is a utility script for pyside-setup to prepare its source
+tree for testing by the Qt Continuous Integration (CI). The script will
+checkout all submodules in the pyside-setup/ sources directory except the one
+under test in the CI.
+The submodule to be tested is expected to be found as a sibling directory of
+pyside-setup, from which it is moved under the pyside-setup/sources directory.
 
 Usage:
 python prepare-sources.py --module=pyside/<submodule> --branch=<branch>
@@ -85,40 +85,49 @@ def prepare_sources():
             try:
                 shutil.move(module_dir, module_dir + "_removed")
             except Exception as e:
-                raise Exception("!!!!!!!!!!!!! Failed to rename %s " % module_dir)
+                raise Exception("!!!!!!!!!!!!! Failed to rename {} ".format(
+                    module_dir))
             git_checkout_cmd = ["git", "clone", sub_repo, module_dir]
             if run_process(git_checkout_cmd) != 0:
-                raise Exception("!!!!!!!!!!!!! Failed to clone the git submodule %s" % sub_repo)
+                raise Exception("!!!!!!!!!!!!! Failed to clone the git "
+                    "submodule {}".format(sub_repo))
     print("************************* CLONED **********************")
     for module_name, repo_name in submodules.items():
-        print("***** Preparing %s" % module_name)
+        print("***** Preparing {}".format(module_name))
         if repo_name == QT_CI_TESTED_SUBMODULE:
-            print("Skipping tested module %s and using sources from Coin storage instead" % module_name)
+            print("Skipping tested module {} and using sources from Coin "
+                "storage instead".format(module_name))
             module_dir = os.path.join("sources", module_name)
             storage_dir = os.path.join("..", QT_CI_TESTED_SUBMODULE)
             try:
                 shutil.move(module_dir, module_dir + "_replaced_as_tested")
             except Exception as e:
-                raise Exception("!!!!!!!!!!!!! Failed to rename %s " % module_dir)
+                raise Exception("!!!!!!!!!!!!! Failed to rename {} ".format(
+                    module_dir))
             shutil.move(storage_dir, module_dir)
         else:
             module_dir = os.path.join("sources", module_name)
             os.chdir(module_dir)
             #Make sure  the branch exists, if not use dev
             _branch = SUBMODULE_BRANCH
-            git_list_branch_cmd = ["git", "ls-remote", "origin", "refs/heads/" + _branch]
+            git_list_branch_cmd = ["git", "ls-remote", "origin",
+                "refs/heads/" + _branch]
             shell = (sys.platform == "win32")
             result = Popen(git_list_branch_cmd, stdout=PIPE, shell=shell)
             if len(result.communicate()[0].split())==0:
-                print("Warning: Requested %s branch doesn't exist so we'll fall back to 'dev' branch instead"\
-                % SUBMODULE_BRANCH)
+                print("Warning: Requested {} branch doesn't exist so we'll "
+                    "fall back to 'dev' branch instead".format(
+                        SUBMODULE_BRANCH))
                 _branch = "dev"
-            print("Checking out submodule %s to branch %s" % (module_name, _branch))
+            print("Checking out submodule {} to branch {}".format(module_name,
+                _branch))
             git_checkout_cmd = ["git", "checkout", _branch]
             if run_process(git_checkout_cmd) != 0:
-                print("Failed to initialize the git submodule %s" % module_name)
+                print("Failed to initialize the git submodule {}".format(
+                    module_name))
             else:
-                print("Submodule %s has branch %s checked out" % (module_name, _branch))
+                print("Submodule {} has branch {} checked out".format(
+                    module_name, _branch))
             os.chdir(script_dir)
 
 
