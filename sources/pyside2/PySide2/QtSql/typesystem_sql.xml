@@ -52,7 +52,7 @@
     <enum-type name="TableType"/>
     <enum-type name="NumericalPrecisionPolicy"/>
     <extra-includes>
-        <include file-name="QtSql/qsql.h" location="global"/>
+        <include file-name="QtSql/qtsqlglobal.h" location="global"/>
     </extra-includes>
   </namespace-type>
 
