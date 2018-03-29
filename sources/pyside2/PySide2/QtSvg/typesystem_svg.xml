@@ -52,7 +52,7 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="outputDevice() const">
+    <modify-function signature="outputDevice()const">
       <modify-argument index="return">
           <define-ownership class="target" owner="default"/>
       </modify-argument>
@@ -65,7 +65,7 @@
           <parent index="1" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="QGraphicsSvgItem(const QString&amp;, QGraphicsItem*)">
+    <modify-function signature="QGraphicsSvgItem(const QString&amp;,QGraphicsItem*)">
       <modify-argument index="this">
           <parent index="2" action="add"/>
       </modify-argument>

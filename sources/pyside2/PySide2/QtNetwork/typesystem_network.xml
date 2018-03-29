@@ -64,8 +64,8 @@
         <enum-type name="SocketOption" since="4.6"/>
         <enum-type name="SocketState"/>
         <enum-type name="SocketType"/>
-        <modify-function signature="connectToHost(const QString&amp;, quint16, QFlags&lt;QIODevice::OpenModeFlag>, QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes" />
-        <modify-function signature="connectToHost(const QHostAddress&amp;, quint16, QFlags&lt;QIODevice::OpenModeFlag>)" allow-thread="yes" />
+        <modify-function signature="connectToHost(const QString&amp;,quint16,QFlags&lt;QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes" />
+        <modify-function signature="connectToHost(const QHostAddress&amp;,quint16,QFlags&lt;QIODevice::OpenModeFlag>)" allow-thread="yes" />
         <modify-function signature="disconnectFromHost()" allow-thread="yes" />
         <modify-function signature="waitForConnected(int)" allow-thread="yes" />
         <modify-function signature="waitForDisconnected(int)" allow-thread="yes" />
@@ -91,7 +91,7 @@
     </object-type>
     <object-type name="QTcpSocket"/>
     <object-type name="QUdpSocket">
-        <modify-function signature="readDatagram(char*, qint64, QHostAddress*, quint16*)" allow-thread="yes">
+        <modify-function signature="readDatagram(char*,qint64,QHostAddress*,quint16*)" allow-thread="yes">
             <modify-argument index="1">
                 <remove-argument/>
             </modify-argument>
@@ -120,7 +120,7 @@
             PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[quint16](port));
             </inject-code>
         </modify-function>
-        <modify-function signature="writeDatagram(const QByteArray&amp;, const QHostAddress&amp;, quint16)" allow-thread="yes"/>
+        <modify-function signature="writeDatagram(const QByteArray&amp;,const QHostAddress&amp;,quint16)" allow-thread="yes"/>
         <!-- ### writeDatagram(QByteArray, ...) does the trick -->
         <modify-function signature="writeDatagram(const char*,qint64,const QHostAddress&amp;,quint16)" remove="all"/>
         <!-- ### -->
@@ -153,18 +153,18 @@
     <object-type name="QNetworkAccessManager">
         <enum-type name="NetworkAccessibility" since="4.7"/>
         <enum-type name="Operation"/>
-        <modify-function signature="createRequest(QNetworkAccessManager::Operation, const QNetworkRequest&amp;, QIODevice *)">
+        <modify-function signature="createRequest(QNetworkAccessManager::Operation,const QNetworkRequest&amp;,QIODevice*)">
           <modify-argument index="3" invalidate-after-use="yes"/>
           <modify-argument index="return">
             <define-ownership class="target" owner="default"/>
           </modify-argument>
         </modify-function>
         <modify-function signature="get(const QNetworkRequest&amp;)" allow-thread="yes"/>
-        <modify-function signature="post(const QNetworkRequest &amp;, QIODevice *)" allow-thread="yes"/>
-        <modify-function signature="post(const QNetworkRequest &amp;, const QByteArray &amp;)" allow-thread="yes"/>
-        <modify-function signature="put(const QNetworkRequest &amp;, QIODevice *)" allow-thread="yes"/>
-        <modify-function signature="put(const QNetworkRequest &amp;, const QByteArray &amp;)" allow-thread="yes"/>
-        <modify-function signature="sendCustomRequest(const QNetworkRequest &amp;, const QByteArray &amp;, QIODevice *)" allow-thread="yes" since="4.7" />
+        <modify-function signature="post(const QNetworkRequest &amp;,QIODevice*)" allow-thread="yes"/>
+        <modify-function signature="post(const QNetworkRequest &amp;,const QByteArray &amp;)" allow-thread="yes"/>
+        <modify-function signature="put(const QNetworkRequest &amp;,QIODevice*)" allow-thread="yes"/>
+        <modify-function signature="put(const QNetworkRequest &amp;,const QByteArray &amp;)" allow-thread="yes"/>
+        <modify-function signature="sendCustomRequest(const QNetworkRequest &amp;,const QByteArray &amp;,QIODevice*)" allow-thread="yes" since="4.7" />
         <modify-function signature="setCookieJar(QNetworkCookieJar*)">
             <modify-argument index="1">
                 <define-ownership class="target" owner="c++"/>
@@ -301,7 +301,7 @@
     <object-type name="QSslSocket">
         <enum-type name="SslMode"/>
         <enum-type name="PeerVerifyMode"/>
-        <modify-function signature="connectToHostEncrypted(const QString&amp;, quint16, QFlags&lt;QIODevice::OpenModeFlag>, QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes" />
+        <modify-function signature="connectToHostEncrypted(const QString&amp;,quint16,QFlags&lt;QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes" />
         <modify-function signature="waitForEncrypted(int)" allow-thread="yes" />
     </object-type>
     <!-- The above entries may be present in the system or not. Keep this section organized. -->

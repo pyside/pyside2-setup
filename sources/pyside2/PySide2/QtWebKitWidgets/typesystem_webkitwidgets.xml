@@ -53,7 +53,7 @@
     <enum-type name="Extension"/>
     <value-type name="Plugin"/>
     <value-type name="MimeType"/>
-    <modify-function signature="create(const QString &amp;, const QUrl &amp;, const QStringList &amp;, const QStringList &amp;) const">
+    <modify-function signature="create(const QString &amp;,const QUrl &amp;,const QStringList &amp;,const QStringList &amp;)const">
         <modify-argument index="return">
             <define-ownership class="native" owner="c++"/>
             <define-ownership class="target" owner="target"/>
@@ -83,7 +83,7 @@
             <reference-count action="set"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="page() const">
+    <modify-function signature="page()const">
         <modify-argument index="return">
             <define-ownership class="target" owner="default"/>
         </modify-argument>
@@ -162,7 +162,7 @@
     <value-type name="ExtensionReturn" />
     <value-type name="ViewportAttributes" />
 
-    <modify-function signature="extension(QWebPage::Extension, const QWebPage::ExtensionOption*, QWebPage::ExtensionReturn*)">
+    <modify-function signature="extension(QWebPage::Extension,const QWebPage::ExtensionOption*,QWebPage::ExtensionReturn*)">
         <template name="qwebpage_extension_argument_conversion">
         PyObject* %out = 0;
         // Cast the parameters according to the extension type

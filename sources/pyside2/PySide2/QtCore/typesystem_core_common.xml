@@ -69,7 +69,7 @@
     <function signature="qIsNull(double)" />
     <!-- Qt5: gone <function signature="qRound(qreal)" /> -->
     <function signature="qTan(qreal)" since="4.6" />
-    <function signature="qtTrId(const char *, int)" since="4.6" />
+    <function signature="qtTrId(const char*,int)" since="4.6" />
     <function signature="qVersion()" />
     <function signature="qrand()" />
     <function signature="qsrand(uint)" />
@@ -895,7 +895,7 @@
     <enum-type name="AlignmentFlag" flags="Alignment" />
     <enum-type name="AnchorPoint" since="4.6" />
     <enum-type name="ApplicationAttribute"/>
-    <enum-type name="ApplicationState" flags="ApplicationStates" since="5.1"/> 
+    <enum-type name="ApplicationState" flags="ApplicationStates" since="5.1"/>
     <enum-type name="ArrowType"/>
     <enum-type name="AspectRatioMode"/>
     <enum-type name="Axis"/>
@@ -979,9 +979,9 @@
     <enum-type name="CursorMoveStyle" since="4.8" revision="4800"/>
 
    <!--### These functions are part of QtGui, not QtCore -->
-    <modify-function signature="codecForHtml(const QByteArray &amp;)" remove="all"/>
-    <modify-function signature="mightBeRichText(const QString &amp;)" remove="all"/>
-    <modify-function signature="convertFromPlainText(const QString &amp;, Qt::WhiteSpaceMode)" remove="all"/>
+    <modify-function signature="codecForHtml(const QByteArray&amp;)" remove="all"/>
+    <modify-function signature="mightBeRichText(const QString&amp;)" remove="all"/>
+    <modify-function signature="convertFromPlainText(const QString&amp;,Qt::WhiteSpaceMode)" remove="all"/>
     <!--### -->
   </namespace-type>
 
@@ -1188,7 +1188,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <modify-function signature="intersect(QLineF, QPointF*)const">
+    <modify-function signature="intersect(QLineF,QPointF*)const">
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
@@ -1228,7 +1228,7 @@
     %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
     </template>
 
-    <modify-function signature="unregisterResource(const uchar*, const QString&amp;)" rename="unregisterResourceData">
+    <modify-function signature="unregisterResource(const uchar*,const QString&amp;)" rename="unregisterResourceData">
       <modify-argument index="1">
         <replace-type modified-type="PyBuffer"/>
       </modify-argument>
@@ -1236,7 +1236,7 @@
         <insert-template name="QResource_registerResource" />
       </inject-code>
     </modify-function>
-    <modify-function signature="registerResource(const uchar*, const QString&amp;)" rename="registerResourceData">
+    <modify-function signature="registerResource(const uchar*,const QString&amp;)" rename="registerResourceData">
       <modify-argument index="1">
         <replace-type modified-type="PyBuffer"/>
       </modify-argument>
@@ -1377,7 +1377,7 @@
       <include file-name="datetime.h" location="global"/>
     </extra-includes>
     <!-- Somewhat internal constructor used to pickle QDateTime -->
-    <add-function signature="QDateTime(int, int, int, int, int, int, int, int)">
+    <add-function signature="QDateTime(int,int,int,int,int,int,int,int)">
         <modify-argument index="8">
           <replace-default-expression with="Qt::LocalTime"/>
         </modify-argument>
@@ -1387,7 +1387,7 @@
             %0 = new %TYPE(date, time, Qt::TimeSpec(%8));
         </inject-code>
     </add-function>
-    <add-function signature="QDateTime(int, int, int, int, int, int)">
+    <add-function signature="QDateTime(int,int,int,int,int,int)">
         <inject-code class="target" position="beginning">
             QDate date(%1, %2, %3);
             QTime time(%4, %5, %6);
@@ -1777,7 +1777,7 @@
         </modify-argument>
     </modify-function>
   </value-type>
-  
+
   <value-type name="QTimeZone">
     <enum-type name="TimeType"/>
     <enum-type name="NameType"/>
@@ -1821,19 +1821,19 @@
     <enum-type name="CurrencySymbolFormat" since="4.8" revision="4800"/>
     <enum-type name="QuotationStyle" since="4.8" revision="4800"/>
     <!--### All those C++ number types have the same representation in Python -->
-    <modify-function signature="toString(qulonglong) const" remove="all"/>
-    <modify-function signature="toString(ushort) const" remove="all"/>
-    <modify-function signature="toString(unsigned int) const" remove="all"/>
+    <modify-function signature="toString(qulonglong)const" remove="all"/>
+    <modify-function signature="toString(ushort)const" remove="all"/>
+    <modify-function signature="toString(unsigned int)const" remove="all"/>
     <!--### -->
     <extra-includes>
       <include file-name="QDate" location="global"/>
     </extra-includes>
-    <modify-function signature="toTime(QString, QLocale::FormatType)const">
+    <modify-function signature="toTime(QString,QLocale::FormatType)const">
         <modify-argument index="2">
             <rename to="format" />
         </modify-argument>
     </modify-function>
-    <modify-function signature="toDate(QString, QLocale::FormatType)const">
+    <modify-function signature="toDate(QString,QLocale::FormatType)const">
         <modify-argument index="2">
             <rename to="format" />
         </modify-argument>
@@ -1990,7 +1990,7 @@
     </modify-function>
     <modify-function signature="relock()" allow-thread="yes" />
     <add-function signature="__enter__()" />
-    <add-function signature="__exit__(PyObject*, PyObject*, PyObject*)">
+    <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
         <inject-code>
             %CPPSELF.unlock();
         </inject-code>
@@ -2004,7 +2004,7 @@
     </modify-function>
     <modify-function signature="relock()" allow-thread="yes" />
     <add-function signature="__enter__()" />
-    <add-function signature="__exit__(PyObject*, PyObject*, PyObject*)">
+    <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
         <inject-code>
             %CPPSELF.unlock();
         </inject-code>
@@ -2032,14 +2032,14 @@
   <object-type name="QAbstractItemModel">
     <enum-type name="LayoutChangeHint" />
     <!-- This function was replaced by a added function -->
-    <modify-function signature="createIndex(int, int, void*) const" remove="all"/>
-    <!-- This function is the same as createIndex(int, int, int) const -->
-    <modify-function signature="createIndex(int, int, quintptr)const">
+    <modify-function signature="createIndex(int,int,void*)const" remove="all"/>
+    <!-- This function is the same as createIndex(int, int, int)const -->
+    <modify-function signature="createIndex(int,int,quintptr)const">
         <modify-argument index="3">
             <replace-default-expression with="0" />
         </modify-argument>
     </modify-function>
-    <add-function signature="createIndex(int, int, PyObject*)const" return-type="QModelIndex">
+    <add-function signature="createIndex(int,int,PyObject*)const" return-type="QModelIndex">
         <modify-argument index="1">
             <rename to="row"/>
         </modify-argument>
@@ -2064,13 +2064,13 @@
     <inject-code class="target" position="end">
         qRegisterMetaType&lt;QVector&lt;int&gt; &gt;("QVector&lt;int&gt;");
     </inject-code>
-    <modify-function signature="mimeData(QModelIndexList) const">
+    <modify-function signature="mimeData(QModelIndexList)const">
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="data(const QModelIndex&amp;,int) const">
+    <modify-function signature="data(const QModelIndex&amp;,int)const">
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
       </modify-argument>
@@ -2079,14 +2079,14 @@
   <value-type name="QItemSelection">
     <include file-name="QList" location="global"/>
   </value-type>
-    
+
   <object-type name="QItemSelectionModel">
     <extra-includes>
         <include file-name="QItemSelection" location="global"/>
     </extra-includes>
     <enum-type name="SelectionFlag" flags="SelectionFlags"/>
   </object-type>
- 
+
   <value-type name="QItemSelectionRange" hash-function="qHash">
   </value-type>
   <primitive-type name="QModelIndexList"/>
@@ -2096,7 +2096,7 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="setSourceModel(QAbstractItemModel *)">
+    <modify-function signature="setSourceModel(QAbstractItemModel*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -2111,7 +2111,7 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="setSourceModel(QAbstractItemModel *)">
+    <modify-function signature="setSourceModel(QAbstractItemModel*)">
       <modify-argument index="1">
         <reference-count action="set"/>
       </modify-argument>
@@ -2120,7 +2120,7 @@
     <modify-function signature="clear()" remove="all"/>
     <modify-function signature="filterChanged()" remove="all"/>
     <!--### End of obsolete section -->
-  </object-type>  
+  </object-type>
   <!-- QObject is created manually -->
   <object-type name="QObject">
     <extra-includes>
@@ -2128,7 +2128,7 @@
       <include file-name="QCoreApplication" location="global"/>
       <include file-name="signalmanager.h" location="local" />
     </extra-includes>
-    <modify-function signature="metaObject() const">
+    <modify-function signature="metaObject()const">
       <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
@@ -2160,7 +2160,7 @@
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
     <!-- End of Invalidate-after-use fix -->
-    <modify-function signature="parent() const">
+    <modify-function signature="parent()const">
       <modify-argument index="this">
         <parent index="return" action="add"/>
       </modify-argument>
@@ -2173,7 +2173,7 @@
         <parent index="1" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="connect(const QObject*, const char*, const char *, Qt::ConnectionType) const">
+    <modify-function signature="connect(const QObject*,const char*,const char*,Qt::ConnectionType)const">
         <modify-argument index="4">
             <rename to="type"/>
         </modify-argument>
@@ -2184,7 +2184,7 @@
         </inject-code>
     </modify-function>
     <!-- static version -->
-    <modify-function signature="connect(const QObject*, QMetaMethod, const QObject*, QMetaMethod, Qt::ConnectionType)">
+    <modify-function signature="connect(const QObject*,QMetaMethod,const QObject*,QMetaMethod,Qt::ConnectionType)">
         <modify-argument index="5">
             <rename to="type"/>
         </modify-argument>
@@ -2194,7 +2194,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[bool](%0);
         </inject-code>
     </modify-function>
-    <modify-function signature="connect(const QObject*, const char*, const QObject*, const char *, Qt::ConnectionType)">
+    <modify-function signature="connect(const QObject*,const char*,const QObject*,const char*,Qt::ConnectionType)">
         <modify-argument index="5">
             <rename to="type"/>
         </modify-argument>
@@ -2205,7 +2205,7 @@
         </inject-code>
     </modify-function>
     <inject-code class="native" position="beginning" file="glue/qobject_connect.cpp" />
-    <add-function signature="connect(const QObject*, const char*, PyCallable*, Qt::ConnectionType)" return-type="bool" static="yes">
+    <add-function signature="connect(const QObject*,const char*,PyCallable*,Qt::ConnectionType)" return-type="bool" static="yes">
         <modify-argument index="4">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2217,7 +2217,7 @@
         </inject-code>
     </add-function>
     <!-- static version -->
-    <add-function signature="connect(const char*, PyCallable*, Qt::ConnectionType)" return-type="bool">
+    <add-function signature="connect(const char*,PyCallable*,Qt::ConnectionType)" return-type="bool">
         <modify-argument index="3">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2228,7 +2228,7 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <add-function signature="connect(const char*, const QObject*, const char *, Qt::ConnectionType)" return-type="bool">
+    <add-function signature="connect(const char*,const QObject*,const char*,Qt::ConnectionType)" return-type="bool">
         <modify-argument index="4">
             <rename to="type"/>
             <replace-default-expression with="Qt::AutoConnection" />
@@ -2239,21 +2239,21 @@
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    
-    <add-function signature="emit(const char*, ...)" return-type="bool">
+
+    <add-function signature="emit(const char*,...)" return-type="bool">
         <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = PySide::SignalManager::instance().emitSignal(%CPPSELF, %1, %PYARG_2);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <add-function signature="disconnect(const char *, PyCallable*)" return-type="bool">
+    <add-function signature="disconnect(const char*,PyCallable*)" return-type="bool">
          <inject-code class="target" position="beginning">
         // %FUNCTION_NAME() - disable generation of function call.
         %RETURN_TYPE %0 = qobjectDisconnectCallback(%CPPSELF, %1, %2);
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
         </inject-code>
     </add-function>
-    <add-function signature="disconnect(const QObject*, const char*, PyCallable*)" return-type="bool" static="yes">
+    <add-function signature="disconnect(const QObject*,const char*,PyCallable*)" return-type="bool" static="yes">
          <inject-code class="target" position="beginning">
         // %FUNCTION_NAME() - disable generation of function call.
         %RETURN_TYPE %0 = qobjectDisconnectCallback(%1, %2, %3);
@@ -2263,7 +2263,7 @@
 
 
     <inject-code class="native" file="glue/qobject_findchild.cpp"/>
-    <add-function signature="findChild(PyTypeObject*, const QString&amp;)" return-type="PyObject*">
+    <add-function signature="findChild(PyTypeObject*,const QString&amp;)" return-type="PyObject*">
         <inject-code class="target" position="beginning">
         QObject *child = _findChildHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1);
         %PYARG_0 = %CONVERTTOPYTHON[QObject*](child);
@@ -2275,7 +2275,7 @@
           <replace-default-expression with="QString()" />
       </modify-argument>
     </add-function>
-    <add-function signature="findChildren(PyTypeObject*, const QString&amp;)" return-type="PySequence*" >
+    <add-function signature="findChildren(PyTypeObject*,const QString&amp;)" return-type="PySequence*" >
         <inject-code class="target" position="beginning">
             %PYARG_0 = PyList_New(0);
             _findChildrenHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1, %PYARG_0);
@@ -2287,7 +2287,7 @@
             <replace-default-expression with="QString()" />
         </modify-argument>
     </add-function>
-    <add-function signature="findChildren(PyTypeObject*, const QRegExp&amp;)" return-type="PySequence*" >
+    <add-function signature="findChildren(PyTypeObject*,const QRegExp&amp;)" return-type="PySequence*" >
         <inject-code class="target" position="beginning">
             %PYARG_0 = PyList_New(0);
             _findChildrenHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1, %PYARG_0);
@@ -2297,7 +2297,7 @@
         </modify-argument>
     </add-function>
 
-    <add-function signature="tr(const char *, const char *, int)" return-type="QString">
+    <add-function signature="tr(const char*,const char*,int)" return-type="QString">
         <modify-argument index="2">
           <replace-default-expression with="0"/>
         </modify-argument>
@@ -2323,7 +2323,7 @@
         </inject-code>
     </add-function>
 
-   <modify-function signature="receivers(const char*) const">
+   <modify-function signature="receivers(const char*)const">
      <inject-code class="target" position="beginning">
        // Avoid return +1 because SignalManager connect to "destroyed()" signal to control object timelife
        int ret = %CPPSELF.%FUNCTION_NAME(%1);
@@ -2340,14 +2340,14 @@
      </modify-argument>
    </modify-function>
 
-   <modify-function signature="sender() const">
+   <modify-function signature="sender()const">
       <modify-argument index="return">
          <define-ownership owner="default"/>
       </modify-argument>
   </modify-function>
 
    <!-- This is not supported due the lack of information durring the call with no arguments,  this can cause a memory leak -->
-   <modify-function signature="disconnect(const char*, const QObject *, const char *)const">
+   <modify-function signature="disconnect(const char*,const QObject*,const char*)const">
        <modify-argument index="1">
            <remove-default-expression />
        </modify-argument>
@@ -2417,7 +2417,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <add-function signature="replace(QString, QString)" return-type="QString">
+    <add-function signature="replace(QString,QString)" return-type="QString">
         <modify-argument index="1">
             <rename to="sourceString"/>
         </modify-argument>
@@ -2529,7 +2529,7 @@
     <modify-function signature="startsWith(const char*)const" remove="all" />
     <modify-function signature="operator==(QString)const" remove="all" />
     <modify-function signature="operator==(const char*,QByteArray)" remove="all" />
-    <modify-function signature="operator==(QByteArray, const char*)" remove="all" />
+    <modify-function signature="operator==(QByteArray,const char*)" remove="all" />
     <modify-function signature="operator>(QString)const" remove="all" />
     <modify-function signature="operator>(const char*,QByteArray)" remove="all" />
     <modify-function signature="operator>(QByteArray,const char*)" remove="all" />
@@ -2561,7 +2561,7 @@
             }
         </inject-code>
     </add-function>
-    <add-function signature="operator+(PyUnicode, QByteArray)">
+    <add-function signature="operator+(PyUnicode,QByteArray)">
         <inject-code>
             Shiboken::AutoDecRef str(PyUnicode_AsASCIIString(%PYARG_1));
             if (!str.isNull()) {
@@ -2571,7 +2571,7 @@
             }
         </inject-code>
     </add-function>
-    <add-function signature="operator+(PyBytes, QByteArray)">
+    <add-function signature="operator+(PyBytes,QByteArray)">
         <inject-code>
         QByteArray ba = QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1)) + *%CPPSELF;
         %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
@@ -2603,7 +2603,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <modify-function signature="QByteArray(const char *, int)">
+    <modify-function signature="QByteArray(const char*,int)">
         <!-- Keep \x00 bytes passed in python strings -->
         <inject-code class="target" position="beginning">
             if (PyBytes_Check(%PYARG_1)) {
@@ -2663,8 +2663,8 @@
 
     <!--### -->
 
-    <modify-function signature="operator const char *()const" remove="all"/>
-    <modify-function signature="operator const void *()const" remove="all"/>
+    <modify-function signature="operator const char*()const" remove="all"/>
+    <modify-function signature="operator const void*()const" remove="all"/>
 
     <!--### STL compatibility functions not supported by PySide -->
     <modify-function signature="push_back(char)" remove="all"/>
@@ -2675,7 +2675,7 @@
     <modify-function signature="push_front(const char*)" remove="all"/>
     <!--### -->
 
-    <modify-function signature="toLong(bool*, int) const">
+    <modify-function signature="toLong(bool*,int)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -2683,7 +2683,7 @@
         <insert-template name="fix_bool*,arg"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="toLongLong(bool*, int) const">
+    <modify-function signature="toLongLong(bool*,int)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -2691,7 +2691,7 @@
         <insert-template name="fix_bool*,arg"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="toShort(bool*, int) const">
+    <modify-function signature="toShort(bool*,int)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -2699,7 +2699,7 @@
         <insert-template name="fix_bool*,arg"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="toUInt(bool*, int) const">
+    <modify-function signature="toUInt(bool*,int)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -2707,7 +2707,7 @@
         <insert-template name="fix_bool*,arg"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="toULong(bool*, int) const">
+    <modify-function signature="toULong(bool*,int)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -2715,7 +2715,7 @@
         <insert-template name="fix_bool*,arg"/>
       </inject-code>
     </modify-function>
-    <modify-function signature="toULongLong(bool*, int) const">
+    <modify-function signature="toULongLong(bool*,int)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -2828,7 +2828,7 @@
       <enum-type name="ProcessEventsFlag" flags="ProcessEventsFlags"/>
       <modify-function signature="exec(QFlags&lt;QEventLoop::ProcessEventsFlag>)" rename="exec_" allow-thread="yes" />
       <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes" />
-      <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>, int)" allow-thread="yes" />
+      <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>,int)" allow-thread="yes" />
   </object-type>
   <object-type name="QFileDevice" since="5.0">
     <enum-type name="FileError"/>
@@ -2860,13 +2860,13 @@
   </object-type>
   <object-type name="QFile">
     <modify-function signature="copy(const QString&amp;)" allow-thread="yes"/>
-    <modify-function signature="copy(const QString&amp;, const QString&amp;)" allow-thread="yes"/>
+    <modify-function signature="copy(const QString&amp;,const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="link(const QString&amp;)" allow-thread="yes"/>
-    <modify-function signature="link(const QString&amp;, const QString&amp;)" allow-thread="yes"/>
+    <modify-function signature="link(const QString&amp;,const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="remove()" allow-thread="yes"/>
     <modify-function signature="remove(const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="rename(const QString&amp;)" allow-thread="yes"/>
-    <modify-function signature="rename(const QString&amp;, const QString&amp;)" allow-thread="yes"/>
+    <modify-function signature="rename(const QString&amp;,const QString&amp;)" allow-thread="yes"/>
   </object-type>
   <object-type name="QSaveFile"/>
   <object-type name="QFileSelector" />
@@ -2882,13 +2882,13 @@
     <modify-function signature="waitForReadyRead(int)" allow-thread="yes"/>
     <modify-function signature="waitForBytesWritten(int)" allow-thread="yes"/>
     <!-- ### peek(qint64) do the job -->
-    <modify-function signature="peek(char*, qint64)" remove="all"/>
+    <modify-function signature="peek(char*,qint64)" remove="all"/>
     <!-- ### read(qint64) do the job -->
-    <modify-function signature="read(char*, qint64)" remove="all"/>
+    <modify-function signature="read(char*,qint64)" remove="all"/>
     <!-- ### readLine(qint64) do the job -->
-    <modify-function signature="readLine(char*, qint64)" remove="all"/>
+    <modify-function signature="readLine(char*,qint64)" remove="all"/>
     <!-- ### write(str) do the job -->
-    <modify-function signature="write(const char*, qint64)" remove="all"/>
+    <modify-function signature="write(const char*,qint64)" remove="all"/>
     <modify-function signature="write(const char*)" remove="all"/>
     <modify-function signature="getChar(char*)">
         <modify-argument index="1">
@@ -2899,7 +2899,7 @@
             <insert-template name="fix_char*" />
         </inject-code>
     </modify-function>
-    <modify-function signature="readData(char*, qint64)">
+    <modify-function signature="readData(char*,qint64)">
         <inject-code class="target">
             QByteArray ba;
             ba.resize(%2);
@@ -2923,7 +2923,7 @@
             </conversion-rule>
         </modify-argument>
     </modify-function>
-    <modify-function signature="readLineData(char*, qint64)">
+    <modify-function signature="readLineData(char*,qint64)">
         <inject-code class="target">
             QByteArray ba;
             ba.resize(%2);
@@ -2969,13 +2969,13 @@
         </modify-argument>
     </modify-function>
     <modify-function signature="relock()" allow-thread="yes"/>
-    <modify-function signature="mutex() const">
+    <modify-function signature="mutex()const">
       <modify-argument index="return">
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
     <add-function signature="__enter__()" />
-    <add-function signature="__exit__(PyObject*, PyObject*, PyObject*)">
+    <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
         <inject-code>
             %CPPSELF.unlock();
         </inject-code>
@@ -2995,12 +2995,12 @@
   </object-type>
   <object-type name="QSemaphore">
     <modify-function signature="acquire(int)" allow-thread="yes"/>
-    <modify-function signature="tryAcquire(int, int)" allow-thread="yes"/>
+    <modify-function signature="tryAcquire(int,int)" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QSocketNotifier">
     <enum-type name="Type"/>
-    <add-function signature="QSocketNotifier(PyObject*, QSocketNotifier::Type, QObject*)">
+    <add-function signature="QSocketNotifier(PyObject*,QSocketNotifier::Type,QObject*)">
         <modify-argument index="3">
             <replace-default-expression with="0" />
             <rename to="parent" />
@@ -3075,7 +3075,7 @@
     <enum-type name="State"/>
   </object-type>
   <object-type name="QTranslator">
-    <modify-function signature="load(const uchar*, int, QString)">
+    <modify-function signature="load(const uchar*,int,QString)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer" />
         </modify-argument>
@@ -3091,8 +3091,8 @@
     </modify-function>
   </object-type>
   <object-type name="QWaitCondition">
-    <modify-function signature="wait(QMutex*, unsigned long)" allow-thread="yes"/>
-    <modify-function signature="wait(QReadWriteLock*, unsigned long)" allow-thread="yes"/>
+    <modify-function signature="wait(QMutex*,unsigned long)" allow-thread="yes"/>
+    <modify-function signature="wait(QReadWriteLock*,unsigned long)" allow-thread="yes"/>
   </object-type>
   <object-type name="QFileSystemWatcher">
     <extra-includes>
@@ -3131,7 +3131,7 @@
         timer->start(%1);
       </inject-code>
     </modify-function>
-    <add-function signature="singleShot(int, PyCallable*)" static="yes">
+    <add-function signature="singleShot(int,PyCallable*)" static="yes">
         <inject-code class="target" position="beginning">
         // %FUNCTION_NAME() - disable generation of c++ function call
         Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
@@ -3142,7 +3142,7 @@
 
         if (PyObject_TypeCheck(%2, &amp;PySideSignalInstanceType)) {
             PySideSignalInstance *signalInstance = reinterpret_cast&lt;PySideSignalInstance*&gt;(%2);
-            Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
+            Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s",PySide::Signal::getSignature(signalInstance)));
             Shiboken::AutoDecRef result(
                 PyObject_CallMethod(pyTimer,
                                     const_cast&lt;char*&gt;("connect"),
@@ -3183,7 +3183,7 @@
     <modify-function signature="waitForFinished(int)" allow-thread="yes"/>
     <modify-function signature="readAllStandardOutput()" allow-thread="yes"/>
     <modify-function signature="readAllStandardError()" allow-thread="yes"/>
-    <modify-function signature="execute(QString, QStringList)" allow-thread="yes"/>
+    <modify-function signature="execute(QString,QStringList)" allow-thread="yes"/>
     <modify-function signature="execute(QString)" allow-thread="yes"/>
     <modify-function signature="startDetached(QString,QStringList,QString,qint64*)">
         <modify-argument index="4">
@@ -3201,7 +3201,7 @@
         </inject-code>
     </modify-function>
     <!-- Function removed because on windows it returns a win32 specific structure -->
-    <modify-function signature="pid() const" remove="all" />
+    <modify-function signature="pid()const" remove="all" />
     <add-function signature="pid()" return-type="long">
         <inject-code>
             long result;
@@ -3257,11 +3257,11 @@
         </inject-code>
     </add-function>
     <!-- blocking functions -->
-    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;, int)" allow-thread="yes"/>
+    <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;,int)" allow-thread="yes"/>
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;)" allow-thread="yes"/>
     <modify-function signature="flush()" allow-thread="yes"/>
-    <modify-function signature="sendEvent(QObject*, QEvent*)" allow-thread="yes"/>
-    <modify-function signature="sendPostedEvents(QObject*, int)" allow-thread="yes"/>
+    <modify-function signature="sendEvent(QObject*,QEvent*)" allow-thread="yes"/>
+    <modify-function signature="sendPostedEvents(QObject*,int)" allow-thread="yes"/>
     <modify-function signature="instance()">
       <inject-code class="target">
         QCoreApplication *app = QCoreApplication::instance();
@@ -3285,14 +3285,14 @@
     <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes">
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="QCoreApplication(int &amp;, char  **, int)" access="private"/>
+    <modify-function signature="QCoreApplication(int &amp;,char **,int)" access="private"/>
     <inject-code class="native" file="glue/qcoreapplication_init.cpp" position="beginning" />
-    <modify-function signature="postEvent(QObject*,QEvent*, int)">
+    <modify-function signature="postEvent(QObject*,QEvent*,int)">
       <modify-argument index="2">
         <define-ownership owner="c++"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="winEventFilter(MSG*, long*)">
+    <modify-function signature="winEventFilter(MSG*,long*)">
       <modify-argument index="2">
         <remove-argument />
         <conversion-rule class="native">
@@ -3334,7 +3334,7 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="value(const QString&amp;, const QVariant&amp;)const">
+    <modify-function signature="value(const QString&amp;,const QVariant&amp;)const">
         <inject-documentation mode="append" format="target">
             .. warning:: QSettings.value can return different types (QVariant types) depending on the platform it's running on, so the safest way to use it is always casting the result to the desired type, e.g.: int(settings.value("myKey"))
         </inject-documentation>
@@ -3345,7 +3345,7 @@
   </object-type>
   <object-type name="QChildEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ChildAdded || %1-&gt;type() == QEvent::ChildPolished || %1-&gt;type() == QEvent::ChildRemoved">
     <modify-field name="c" read="false" write="false"/>
-    <modify-function signature="child() const">
+    <modify-function signature="child()const">
       <modify-argument index="return">
          <define-ownership class="target" owner="default"/>
       </modify-argument>
@@ -3620,7 +3620,7 @@
     <!-- Qt5.5: Removed because it expect QString to be mutable -->
     <modify-function signature="readLineInto(QString*,qint64)" since="5.5" remove="all"/>
     <!-- Removed because we use the non-const version -->
-    <modify-function signature="QTextStream(const QByteArray&amp;, QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
+    <modify-function signature="QTextStream(const QByteArray&amp;,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
 
     <!-- Removed because it expect QString to be mutable -->
     <modify-function signature="setString(QString*,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
@@ -3677,7 +3677,7 @@
   </object-type>
 
   <object-type name="QThreadPool">
-    <modify-function signature="start(QRunnable*, int)">
+    <modify-function signature="start(QRunnable*,int)">
       <modify-argument index="1">
         <parent index="this" action="add" />
       </modify-argument>
@@ -3700,7 +3700,7 @@
     <modify-function signature="pop_back()" remove="all"/>
     <modify-function signature="push_front(QXmlStreamAttribute)" remove="all"/>
     <modify-function signature="pop_front()" remove="all"/>
-    <modify-function signature="toList() const" remove="all"/>
+    <modify-function signature="toList()const" remove="all"/>
     <modify-function signature="fromList(const QList&lt;QXmlStreamAttribute&gt; &amp;)" remove="all"/>
     <modify-function signature="operator+=(QVector&lt;QXmlStreamAttribute&gt;)" remove="all" />
   </value-type>
@@ -3714,7 +3714,7 @@
   </object-type>
   <object-type name="QXmlStreamWriter">
     <!-- Removed because it expect QString to be mutable -->
-    <modify-function signature="QXmlStreamWriter(QString *)" remove="all" />
+    <modify-function signature="QXmlStreamWriter(QString*)" remove="all" />
     <modify-function signature="codec()const">
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
@@ -3745,19 +3745,19 @@
   <object-type name="QMessageLogContext">
     <modify-function signature="copy(const QMessageLogContext &amp;)" remove="all" />
   </object-type>
-  
+
   <value-type name="QMetaMethod">
     <enum-type name="Access"/>
     <enum-type name="MethodType"/>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="attributes()const" remove="all" />
-    <modify-function signature="getParameterTypes(int *) const" remove="all" />
+    <modify-function signature="getParameterTypes(int*)const" remove="all" />
   </value-type>
   <object-type name="QMetaObject">
     <enum-type name="Call"/>
     <include file-name="qobjectdefs.h" location="global" />
     <!-- This isn't part of Qt public API -->
-    <modify-function signature="connect(const QObject*, int, const QObject*, int, int, int*)" remove="all" />
+    <modify-function signature="connect(const QObject*,int,const QObject*,int,int,int*)" remove="all" />
   </object-type>
   <object-type name="QMetaObject::Connection">
     <include file-name="qobjectdefs.h" location="global" />
@@ -3772,7 +3772,7 @@
   </value-type>
 
   <value-type name="QMetaEnum">
-    <modify-function signature="keyToValue(const char*, bool*) const" allow-thread="yes">
+    <modify-function signature="keyToValue(const char*,bool*)const" allow-thread="yes">
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
@@ -3783,7 +3783,7 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <modify-function signature="keysToValue(const char*, bool*) const" allow-thread="yes">
+    <modify-function signature="keysToValue(const char*,bool*)const" allow-thread="yes">
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
@@ -3809,7 +3809,7 @@
   </object-type>
 
   <object-type name="QAbstractState" since="4.6">
-    <modify-function signature="machine() const">
+    <modify-function signature="machine()const">
         <modify-argument index="this">
             <parent index="return" action="add"/>
         </modify-argument>
@@ -3843,13 +3843,13 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="targetState() const">
+    <modify-function signature="targetState()const">
       <modify-argument index="return">
         <reference-count action="set" variable-name="setTargetState(QAbstractState*)1" />
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="targetStates() const">
+    <modify-function signature="targetStates()const">
       <modify-argument index="return">
         <reference-count action="set" variable-name="setTargetState(QAbstractState*)1" />
       </modify-argument>
@@ -3870,7 +3870,7 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="insertAnimation(int, QAbstractAnimation*)">
+    <modify-function signature="insertAnimation(int,QAbstractAnimation*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -3961,7 +3961,7 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="QEventTransition(QObject*, QEvent::Type, QState*)">
+    <modify-function signature="QEventTransition(QObject*,QEvent::Type,QState*)">
       <modify-argument index="3">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -4010,7 +4010,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <object-type name="QSequentialAnimationGroup" since="4.6"/>
 
   <object-type name="QSignalTransition" since="4.6">
-    <add-function signature="QSignalTransition(PyObject*, QState*)" return-type="QSignalTransition*">
+    <add-function signature="QSignalTransition(PyObject*,QState*)" return-type="QSignalTransition*">
         <modify-argument index="2">
             <replace-default-expression with="0" />
         </modify-argument>
@@ -4020,9 +4020,9 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
                 Shiboken::AutoDecRef obType(PyObject_Type(dataSource));
                 QObject* sender = %CONVERTTOCPP[QObject*](dataSource);
                 if (sender) {
-                    const char *dataSignature = PySide::Signal::getSignature((PySideSignalInstance*)%PYARG_1);
+                    const char*dataSignature = PySide::Signal::getSignature((PySideSignalInstance*)%PYARG_1);
                     QByteArray signature(dataSignature); // Append SIGNAL flag (2)
-                    %0 = new QSignalTransitionWrapper(sender, "2" + signature, %2);
+                    %0 = new QSignalTransitionWrapper(sender,"2" + signature,%2);
                 }
             }
         </inject-code>
@@ -4038,7 +4038,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="addTransition(const QObject*, const char*, QAbstractState*)">
+    <modify-function signature="addTransition(const QObject*,const char*,QAbstractState*)">
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -4062,7 +4062,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     <!-- FIXME: the proper signature for this added function would be something like
          addTransition(PySide2.QtCore.Signal, QAbstractState*)
          but that depends on bug #362. -->
-    <add-function signature="addTransition(PyObject*, QAbstractState*)" return-type="QSignalTransition*">
+    <add-function signature="addTransition(PyObject*,QAbstractState*)" return-type="QSignalTransition*">
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -4075,7 +4075,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
           goto Sbk_%TYPEFunc_%FUNCTION_NAME_TypeError;
       PySideSignalInstance *signalInstance = reinterpret_cast&lt;PySideSignalInstance*&gt;(%1);
       QObject* sender = %CONVERTTOCPP[QObject*](PySide::Signal::getObject(signalInstance));
-      QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSignature(signalInstance), %2);
+      QSignalTransition*%0 = %CPPSELF->%FUNCTION_NAME(sender,PySide::Signal::getSignature(signalInstance),%2);
       %PYARG_0 = %CONVERTTOPYTHON[QSignalTransition*](%0);
       </inject-code>
     </add-function>
@@ -4094,12 +4094,12 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     <value-type name="SignalEvent" since="4.6"/>
     <value-type name="WrappedEvent" since="4.6"/>
 
-    <modify-function signature="addState(QAbstractState *)">
+    <modify-function signature="addState(QAbstractState*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="removeState(QAbstractState *)">
+    <modify-function signature="removeState(QAbstractState*)">
       <modify-argument index="1">
         <parent index="this" action="remove"/>
       </modify-argument>
@@ -4117,7 +4117,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
     </add-function>
 
     <!-- Replaced by a added function -->
-    <modify-function signature="defaultAnimations() const" remove="all"/>
+    <modify-function signature="defaultAnimations()const" remove="all"/>
     <add-function signature="defaultAnimations()" return-type="list of QAbstractAnimation" >
         <inject-code class="target" position="beginning">
             %PYARG_0 = PyList_New(0);
@@ -4144,13 +4144,13 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
 
   <add-function signature="SIGNAL(const char*)" return-type="str">
     <inject-code class="target" position="beginning">
-      %PYARG_0 = Shiboken::String::fromFormat("2%s", QMetaObject::normalizedSignature(%1).constData());
+      %PYARG_0 = Shiboken::String::fromFormat("2%s",QMetaObject::normalizedSignature(%1).constData());
     </inject-code>
   </add-function>
 
   <add-function signature="SLOT(const char*)" return-type="str">
     <inject-code class="target" position="beginning">
-      %PYARG_0 = Shiboken::String::fromFormat("1%s", QMetaObject::normalizedSignature(%1).constData());
+      %PYARG_0 = Shiboken::String::fromFormat("1%s",QMetaObject::normalizedSignature(%1).constData());
     </inject-code>
   </add-function>
 
@@ -4164,12 +4164,12 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       <insert-template name="return_argument"><replace from="#" to="1" /></insert-template>
     </inject-code>
   </add-function>
-  <add-function signature="QT_TRANSLATE_NOOP(PyObject, PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TRANSLATE_NOOP(PyObject,PyObject)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="2" /></insert-template>
     </inject-code>
   </add-function>
-  <add-function signature="QT_TRANSLATE_NOOP3(PyObject, PyObject, PyObject)" return-type="PyObject*">
+  <add-function signature="QT_TRANSLATE_NOOP3(PyObject,PyObject,PyObject)" return-type="PyObject*">
     <inject-code class="target" position="beginning">
       <insert-template name="return_argument"><replace from="#" to="2" /></insert-template>
     </inject-code>
@@ -4193,7 +4193,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
                             const unsigned char *,
                             const unsigned char *);
   </inject-code>
-  <add-function signature="qRegisterResourceData(int, PyBytes, PyBytes, PyBytes)" return-type="bool">
+  <add-function signature="qRegisterResourceData(int,PyBytes,PyBytes,PyBytes)" return-type="bool">
     <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = %FUNCTION_NAME(%1, reinterpret_cast&lt;uchar*&gt;(PyBytes_AS_STRING(%PYARG_2)),
                                              reinterpret_cast&lt;uchar*&gt;(PyBytes_AS_STRING(%PYARG_3)),
@@ -4201,7 +4201,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
     </inject-code>
   </add-function>
-  <add-function signature="qUnregisterResourceData(int, PyBytes, PyBytes, PyBytes)" return-type="bool">
+  <add-function signature="qUnregisterResourceData(int,PyBytes,PyBytes,PyBytes)" return-type="bool">
     <inject-code class="target" position="beginning">
         %RETURN_TYPE %0 = %FUNCTION_NAME(%1, reinterpret_cast&lt;uchar*&gt;(PyBytes_AS_STRING(%PYARG_2)),
                                              reinterpret_cast&lt;uchar*&gt;(PyBytes_AS_STRING(%PYARG_3)),
@@ -4222,7 +4222,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="visibility of function '*' modified in class '*'"/>
   <suppress-warning text="hiding of function '*' in class '*'"/>
   <suppress-warning text="namespace '*' does not have a type entry"/>
-  <suppress-warning text="Shadowing: QObject::parent() const and QAbstractItemModel::parent() const"/>
+  <suppress-warning text="Shadowing: QObject::parent()const and QAbstractItemModel::parent() const"/>
   <suppress-warning text="namespace '*' for enum 'QtMsgType' is not declared"/>
   <suppress-warning text="horribly broken type 'imaxdiv_t'"/>
   <suppress-warning text="horribly broken type '__off64_t'"/>
@@ -4250,8 +4250,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="signature 'winEventFilter(MSG*,long*)' for function modification in 'QCoreApplication' not found. Possible candidates:*"/>
 
   <!-- this is necessary to avoid warning on other modules -->
-  <suppress-warning text="signature 'operator*(QByteArray,const char*)' for function modification in 'QByteArray' not found. Possible candidates: *"/>
-  <suppress-warning text="signature 'operator+(QByteArray,QString)' for function modification in 'QByteArray' not found. Possible candidates: *"/>
+  <suppress-warning text="signature 'operator*(QByteArray,const char*)' for function modification in 'QByteArray' not found. Possible candidates:*"/>
+  <suppress-warning text="signature 'operator+(QByteArray,QString)' for function modification in 'QByteArray' not found. Possible candidates:*"/>
 
   <!-- This enum is intenaly used -->
   <suppress-warning text="enum 'PM_CbaIconHeight' does not have a type entry or is not an enum" />
