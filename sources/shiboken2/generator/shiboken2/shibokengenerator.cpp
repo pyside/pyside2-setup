@@ -2240,7 +2240,13 @@ AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass*
 {
     AbstractMetaClassList baseClasses;
     if (metaClass) {
-        const QStringList &baseClassNames = metaClass->baseClassNames();
+        QStringList baseClassNames(metaClass->baseClassNames());
+        const QString defaultSuperclass = metaClass->typeEntry()->defaultSuperclass();
+        if (!defaultSuperclass.isEmpty()) {
+            int index = baseClassNames.indexOf(defaultSuperclass);
+            if (index >= 0)
+                baseClassNames.move(index, 0);
+        }
         for (const QString &parent : baseClassNames) {
             AbstractMetaClass *clazz = AbstractMetaClass::findClass(classes(), parent);
             if (clazz)
