@@ -1902,6 +1902,11 @@
     </modify-function>
   </object-type>
   <object-type name="QTreeWidget">
+    <modify-function signature="setItemWidget(QTreeWidgetItem*,int,QWidget*)">
+      <modify-argument index="3">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="dropMimeData(QTreeWidgetItem*,int,const QMimeData*,Qt::DropAction)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
