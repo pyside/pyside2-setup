@@ -2513,15 +2513,19 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
         << qMakePair(QLatin1String(AVOID_PROTECTED_HACK),
                      QLatin1String("Avoid the use of the '#define protected public' hack."))
         << qMakePair(QLatin1String(DISABLE_VERBOSE_ERROR_MESSAGES),
-                     QLatin1String("Disable verbose error messages. Turn the python code hard to debug but safe few kB on the generated bindings."))
+                     QLatin1String("Disable verbose error messages. Turn the python code hard to debug\n"
+                                   "but safe few kB on the generated bindings."))
         << qMakePair(QLatin1String(PARENT_CTOR_HEURISTIC),
                      QLatin1String("Enable heuristics to detect parent relationship on constructors."))
         << qMakePair(QLatin1String(ENABLE_PYSIDE_EXTENSIONS),
-                     QLatin1String("Enable PySide extensions, such as support for signal/slots, use this if you are creating a binding for a Qt-based library."))
+                     QLatin1String("Enable PySide extensions, such as support for signal/slots,\n"
+                                   "use this if you are creating a binding for a Qt-based library."))
         << qMakePair(QLatin1String(RETURN_VALUE_HEURISTIC),
-                     QLatin1String("Enable heuristics to detect parent relationship on return values (USE WITH CAUTION!)"))
+                     QLatin1String("Enable heuristics to detect parent relationship on return values\n"
+                                   "(USE WITH CAUTION!)"))
         << qMakePair(QLatin1String(USE_ISNULL_AS_NB_NONZERO),
-                     QLatin1String("If a class have an isNull()const method, it will be used to compute the value of boolean casts"));
+                     QLatin1String("If a class have an isNull() const method, it will be used to compute\n"
+                                   "the value of boolean casts"));
 }
 
 static void getCode(QStringList& code, const CodeSnipList& codeSnips)
