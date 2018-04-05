@@ -1289,6 +1289,12 @@ QString QtDocGenerator::fileNameSuffix() const
     return QLatin1String(".rst");
 }
 
+bool QtDocGenerator::shouldGenerate(const AbstractMetaClass *cls) const
+{
+    return Generator::shouldGenerate(cls)
+        && cls->typeEntry()->type() != TypeEntry::SmartPointerType;
+}
+
 QString QtDocGenerator::fileNameForContext(GeneratorContext &context) const
 {
     const AbstractMetaClass *metaClass = context.metaClass();
