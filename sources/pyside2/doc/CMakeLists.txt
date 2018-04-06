@@ -98,7 +98,17 @@ add_custom_target("docrsts"
     WORKING_DIRECTORY ${${module}_SOURCE_DIR}
     COMMENT "Running generator to generate documentation..."
 )
-add_dependencies(apidoc docrsts)
+
+add_custom_target("licensedocrsts"
+    COMMAND ${PYTHON_EXECUTABLE}
+            ${CMAKE_CURRENT_LIST_DIR}/qtattributionsscannertorst.py
+            ${CMAKE_CURRENT_LIST_DIR}/../../..
+            ${CMAKE_CURRENT_BINARY_DIR}/rst/licenses.rst
+    COMMENT "Creating 3rdparty license documentation..."
+)
+
+add_dependencies(apidoc docrsts licensedocrsts)
+add_dependencies(licensedocrsts docrsts)
 add_dependencies(docrsts qdoc)
 
 # #create devhelp file
