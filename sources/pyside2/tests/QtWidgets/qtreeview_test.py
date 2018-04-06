@@ -29,7 +29,9 @@
 import unittest
 
 from PySide2.QtGui import QStandardItemModel
-from PySide2.QtWidgets import QWidget, QTreeView, QVBoxLayout, QStyledItemDelegate
+from PySide2.QtWidgets import (QWidget, QTreeView, QVBoxLayout,
+    QStyledItemDelegate, QHeaderView)
+from PySide2.QtCore import Qt
 from helper import UsesQApplication
 
 class Widget(QWidget):
@@ -84,6 +86,11 @@ class QWidgetTest(UsesQApplication):
         # Test for general delegate
         t.setItemDelegate(QStyledItemDelegate())
         self.assertIsInstance(t.itemDelegate(), QStyledItemDelegate)
+
+    def testHeader(self):
+        tree = QTreeView()
+        tree.setHeader(QHeaderView(Qt.Horizontal))
+        self.assertIsNotNone(tree.header())
 
 if __name__ == '__main__':
     unittest.main()

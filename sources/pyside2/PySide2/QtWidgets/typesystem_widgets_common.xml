@@ -1126,6 +1126,11 @@
     <modify-function signature="drawRow(QPainter*,QStyleOptionViewItem,QModelIndex)const">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
+    <modify-function signature="setHeader(QHeaderView*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
   </object-type>
   <object-type name="QUndoCommand">
     <modify-function signature="mergeWith(const QUndoCommand*)">
