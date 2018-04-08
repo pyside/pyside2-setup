@@ -133,3 +133,17 @@ Abandoned Alternative
 
 We also tried an alternative implementation with a ``qApp()`` function that was more *pythonic*
 and problem free, but many people liked the ``qApp`` macro better for its brevity, so here it is.
+
+
+Rich Comparison
+~~~~~~~~~~~~~~~
+
+There was a long-standing bug in the ``tp_richcompare`` implementation of PySide classes.
+
+* When a class did not implement it, the default implementation of ``object`` is used.
+  This implements ``==`` and ``!=`` like the ``is`` operator.
+
+* When a class implements only a single function like ``<``, then the default implementation
+  was disabled, and expressions like ``obj in sequence`` failed with ``NotImplemented``.
+
+This oversight was fixed in version 5.15.1 .

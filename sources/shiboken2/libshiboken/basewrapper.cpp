@@ -823,6 +823,33 @@ PyObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     return type;
 }
 
+// PYSIDE-74: Fallback used in all types now.
+PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
+{
+    // This is a very simple implementation that supplies a simple identity.
+    static const char * const opstrings[] = {"<", "<=", "==", "!=", ">", ">="};
+    PyObject *res;
+
+    switch (op) {
+
+    case Py_EQ:
+        res = (self == other) ? Py_True : Py_False;
+        break;
+    case Py_NE:
+        res = (self != other) ? Py_True : Py_False;
+        break;
+    default:
+        PyErr_Format(PyExc_TypeError,
+                     "'%s' not supported between instances of '%.100s' and '%.100s'",
+                     opstrings[op],
+                     self->ob_type->tp_name,
+                     other->ob_type->tp_name);
+        return NULL;
+    }
+    Py_INCREF(res);
+    return res;
+}
+
 } //extern "C"
 
 
