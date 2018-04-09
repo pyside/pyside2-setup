@@ -905,8 +905,8 @@ class pyside_build(_build):
                         clangBinDir, clangDir[1]))
                     additionalPaths.append(clangBinDir)
             else:
-                log.error("Failed to detect Clang by checking "
-                    "LLVM_INSTALL_DIR, CLANG_INSTALL_DIR, llvm-config")
+                raise DistutilsSetupError("Failed to detect Clang when checking "
+                                          "LLVM_INSTALL_DIR, CLANG_INSTALL_DIR, llvm-config")
 
         update_env_path(additionalPaths)
 

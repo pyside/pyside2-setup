@@ -775,9 +775,10 @@ def detectClang():
         if not clangDir:
             source = findLlvmConfig()
             try:
-                output = run_process_output([source, '--prefix'])
-                if output:
-                    clangDir = output[0]
+                if source is not None:
+                    output = run_process_output([source, '--prefix'])
+                    if output:
+                        clangDir = output[0]
             except OSError:
                 pass
     if clangDir:
