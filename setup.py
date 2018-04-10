@@ -1635,6 +1635,14 @@ class pyside_build(_build):
                     recursive=False,
                     vars=vars)
 
+                # Fix rpath for WebEngine process executable.
+                pyside_package_dir = vars['pyside_package_dir']
+                qt_libexec_path = "{}/PySide2/Qt/libexec".format(pyside_package_dir)
+                binary = "QtWebEngineProcess"
+                final_path = os.path.join(qt_libexec_path, binary)
+                rpath = "@loader_path/../lib"
+                osx_fix_rpaths_for_library(final_path, rpath)
+
         # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
         copydir("{qt_plugins_dir}",
             "{pyside_package_dir}/PySide2/Qt/plugins",
