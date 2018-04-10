@@ -12,4 +12,4 @@ bindings is performed by specific generators using the API Extractor library.
 
 The API Extractor is based on QtScriptGenerator_ codebase.
 
-.. _QtScriptGenerator: http://labs.trolltech.com/page/Projects/QtScript/Generator
+.. _QtScriptGenerator: http://code.qt.io/cgit/qt-labs/qtscriptgenerator.git/
