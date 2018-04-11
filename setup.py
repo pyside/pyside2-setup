@@ -1557,6 +1557,12 @@ class pyside_build(_build):
             force=False,
             vars=vars)
 
+        # Copy the qt.conf file to libexec.
+        copyfile(
+            "{build_dir}/pyside2/PySide2/qt.conf",
+            "{pyside_package_dir}/PySide2/Qt/libexec",
+            vars=vars)
+
     def prepare_standalone_package_osx(self, executables, vars):
         built_modules = vars['built_modules']
 
@@ -1642,6 +1648,12 @@ class pyside_build(_build):
                 final_path = os.path.join(qt_libexec_path, binary)
                 rpath = "@loader_path/../lib"
                 osx_fix_rpaths_for_library(final_path, rpath)
+
+                # Copy the qt.conf file to libexec.
+                copyfile(
+                    "{build_dir}/pyside2/PySide2/qt.conf",
+                    "{pyside_package_dir}/PySide2/Qt/libexec",
+                    vars=vars)
 
         # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
         copydir("{qt_plugins_dir}",
@@ -1929,6 +1941,12 @@ class pyside_build(_build):
                 "{pyside_package_dir}/PySide2",
                 filter=[filter],
                 recursive=False, vars=vars)
+
+        # Copy the qt.conf file to prefix dir.
+        copyfile(
+            "{build_dir}/pyside2/PySide2/qt.conf",
+            "{pyside_package_dir}/PySide2",
+            vars=vars)
 
         self.prepare_standalone_clang(is_win=True)
 
