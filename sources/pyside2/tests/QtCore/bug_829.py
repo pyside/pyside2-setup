@@ -4,7 +4,7 @@
 ## Copyright (C) 2011 Thomas Perl <thp.io/about>
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the test suite of PySide2.
+## This file is part of the test suite of the Qt for Python project.
 ##
 ## $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ## Commercial License Usage

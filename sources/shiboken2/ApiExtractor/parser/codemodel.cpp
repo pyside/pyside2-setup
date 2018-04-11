@@ -4,7 +4,7 @@
 ** Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of the Qt for Python project.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
