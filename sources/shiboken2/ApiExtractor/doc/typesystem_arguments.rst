@@ -3,17 +3,18 @@
 Modifying Arguments
 -------------------
 
-.. _conversion-rule:
+.. _conversionrule:
 
 conversion-rule
 ^^^^^^^^^^^^^^^
 
     The conversion-rule node allows you to write customized code to convert
-    the given argument between the target language and C++, and it is a child of the modify-argument node.
+    the given argument between the target language and C++, and it is a child of the modify-argument node:
 
     .. code-block:: xml
 
-        <modify-argument ...>
+        <modify-argument index="2">
+        <!-- for the second argument of the function -->
         <conversion-rule class="target | native">
             // the code
         </conversion-rule>
@@ -36,6 +37,8 @@ conversion-rule
 
     .. note:: You can also use the conversion-rule node to specify :ref:`a conversion code which will be used instead of the generator's conversion code everywhere for a given type <conversion-rule-on-types>`.
 
+.. _remove-argument:
+
 remove-argument
 ^^^^^^^^^^^^^^^
 
@@ -48,6 +51,8 @@ remove-argument
          <remove-argument />
      </modify-argument>
 
+.. _rename-to:
+
 rename to
 ^^^^^^^^^
 
@@ -59,6 +64,7 @@ rename to
          <rename to='...' />
      </modify-argument>
 
+.. _remove-default-expression:
 
 remove-default-expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -71,6 +77,8 @@ remove-default-expression
          <modify-argument...>
              <remove-default-expression />
          </modify-argument>
+
+.. _replace-default-expression:
 
 replace-default-expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -85,6 +93,7 @@ replace-default-expression
              <replace-default-expression with="..." />
          </modify-argument>
 
+.. _replace-type:
 
 replace-type
 ^^^^^^^^^^^^
@@ -102,6 +111,8 @@ replace-type
     If the new type is a class, the ``modified-type`` attribute must be set to
     the fully qualified name (including name of the package as well as the class
     name).
+
+.. _define-ownership:
 
 define-ownership
 ^^^^^^^^^^^^^^^^
@@ -126,6 +137,7 @@ define-ownership
                                 owner="target | c++ | default" />
         </modify-argument>
 
+.. _reference-count:
 
 reference-count
 ^^^^^^^^^^^^^^^
@@ -161,6 +173,7 @@ reference-count
     The variable-name attribute specifies the name used for the variable that
     holds the reference(s).
 
+.. _replace-value:
 
 replace-value
 ^^^^^^^^^^^^^
@@ -173,6 +186,7 @@ replace-value
 
          <modify-argument index="0" replace-value="this"/>
 
+.. _parent:
 
 parent
 ^^^^^^
