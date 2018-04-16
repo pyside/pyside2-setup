@@ -97,9 +97,10 @@ reset_qApp_var()
 
     for (mod_ptr = qApp_moduledicts; *mod_ptr != NULL; mod_ptr++) {
         // We respect whatever the user may have set.
-        if (PyDict_GetItem(*mod_ptr, qApp_var) == NULL)
+        if (PyDict_GetItem(*mod_ptr, qApp_var) == NULL) {
             if (PyDict_SetItem(*mod_ptr, qApp_var, qApp_content) < 0)
                 return -1;
+        }
     }
     return 0;
 }
@@ -157,7 +158,9 @@ setup_qApp_var(PyObject *module)
         qApp_var = Py_BuildValue("s", "qApp");
         if (qApp_var == NULL)
             return -1;
+        // This is a borrowed reference
         qApp_moduledicts[0] = PyEval_GetBuiltins();
+        Py_INCREF(qApp_content);
         init_done = 1;
     }
 
@@ -165,7 +168,9 @@ setup_qApp_var(PyObject *module)
     // into __builtins__, to let it appear like a real macro.
     module_index = qApp_module_index(module);
     if (module_index) {
+        // This line gets a borrowed reference
         qApp_moduledicts[module_index] = PyModule_GetDict(module);
+        Py_INCREF(qApp_content);
         if (reset_qApp_var() < 0)
             return -1;
     }

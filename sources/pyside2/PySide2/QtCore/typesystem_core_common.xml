@@ -4226,6 +4226,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <object-type name="QRunnable"/>
 
   <object-type name="QPluginLoader"/>
+  <object-type name="QStringListModel"/>
 
   <suppress-warning text="Unable to decide type of property: 'QLibrary::LoadHints' in class 'QPluginLoader'" />
   <suppress-warning text="enum '_ISalnum' does not have a type entry or is not an enum" />

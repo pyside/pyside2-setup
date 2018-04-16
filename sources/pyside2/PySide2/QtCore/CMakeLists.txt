@@ -121,6 +121,7 @@ ${QtCore_GEN_DIR}/qstatemachine_signalevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrappedevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrapper.cpp
 ${QtCore_GEN_DIR}/qstorageinfo_wrapper.cpp
+${QtCore_GEN_DIR}/qstringlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qt_wrapper.cpp

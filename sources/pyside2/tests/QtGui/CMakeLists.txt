@@ -3,7 +3,6 @@
 PYSIDE_TEST(bug_300_test.py)
 PYSIDE_TEST(bug_367.py)
 PYSIDE_TEST(bug_480.py)
-PYSIDE_TEST(bug_500.py)
 PYSIDE_TEST(bug_606.py)
 PYSIDE_TEST(bug_617.py)
 PYSIDE_TEST(bug_652.py)

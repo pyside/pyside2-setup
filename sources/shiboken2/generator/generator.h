@@ -366,7 +366,7 @@ protected:
      *   for which the file name must be returned
      *   \return the file name used to write the binding code for the class
      */
-    virtual QString fileNamePrefix() const = 0;
+    virtual QString fileNameSuffix() const = 0;
     virtual QString fileNameForContext(GeneratorContext &context) const = 0;
 
 

@@ -1655,7 +1655,6 @@
     <!-- ??? -->
     <modify-function signature="operator&lt;(QStandardItem)const" remove="all"/>
   </object-type>
-  <object-type name="QStringListModel"/>
   <object-type name="QSyntaxHighlighter">
     <modify-function signature="setCurrentBlockUserData(QTextBlockUserData*)">
       <modify-argument index="1">
@@ -1762,7 +1761,7 @@
   <object-type name="QDropEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Drop">
     <modify-function signature="source() const">
       <modify-argument index="return">
-        <define-ownership owner="target"/>
+        <define-ownership class="target" owner="default" />
       </modify-argument>
     </modify-function>
   </object-type>
