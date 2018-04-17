@@ -9,8 +9,12 @@ PYSIDE2_LFLAGS = $$system(python $$PWD/pyside2_config.py --pyside2-link)
 PYSIDE2_SHARED_LIBRARIES = $$system(python $$PWD/pyside2_config.py --pyside2-shared-libraries)
 CLANG_BIN_DIR = $$system(python $$PWD/pyside2_config.py --clang-bin-dir)
 
-INCLUDEPATH += $$PYTHON_INCLUDE $$PYSIDE2_INCLUDE
+INCLUDEPATH += "$$PYTHON_INCLUDE" $$PYSIDE2_INCLUDE
 LIBS += $$PYTHON_LFLAGS $$PYSIDE2_LFLAGS
+LIBPATH += $$PYTHON_LFLAGS $$PYSIDE2_LFLAGS
+!build_pass:message(INCLUDEPATH is $$INCLUDEPATH)
+!build_pass:message(LIBS are $$LIBS)
+!build_pass:message(LIBPATH is $$LIBPATH)
 
 !build_pass:message(Using $$PYSIDE2)
 

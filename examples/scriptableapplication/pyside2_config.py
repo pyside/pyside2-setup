@@ -67,7 +67,9 @@ def sharedLibrarySuffix():
         return 'lib'
     elif sys.platform == 'darwin':
         return 'dylib'
-    return 'so'
+    # Linux
+    else:
+        return 'so.*'
 
 def sharedLibraryGlobPattern():
     glob = '*.' + sharedLibrarySuffix()
@@ -84,12 +86,18 @@ def filterPySide2SharedLibraries(list):
 
 # Return qmake link option for a library file name
 def linkOption(lib):
-    baseName = os.path.splitext(os.path.basename(lib))[0]
+    # On Linux:
+    # Since we cannot include symlinks with wheel packages
+    # we are using an absolute path for the libpyside and libshiboken
+    # libraries when compiling the project
+    baseName = os.path.basename(lib)
     link = ' -l'
-    if sys.platform in ['linux', 'linux2', 'darwin']: # Linux: 'libfoo.so' -> '-lfoo'
-        link += baseName[3:]
+    if sys.platform in ['linux', 'linux2']: # Linux: 'libfoo.so' -> '-lfoo'
+        link = lib
+    elif sys.platform in ['darwin']: # Linux: 'libfoo.so' -> '-lfoo'
+        link += os.path.splitext(baseName[3:])[0]
     else:
-        link += baseName
+        link += os.path.splitext(baseName)[0]
     return link
 
 # Locate PySide2 via package path
@@ -110,17 +118,30 @@ def pythonInclude():
 
 def pythonLinkQmake():
     flags = pythonLinkData()
-    if sys.platform == 'win32' or sys.platform == 'darwin':
+    if sys.platform == 'win32':
+        libdir = flags['libdir']
+        # This will add the "~1" shortcut for directories that
+        # contain white spaces
+        # e.g.: "Program Files" to "Progra~1"
+        for d in libdir.split("\\"):
+            if " " in d:
+                libdir = libdir.replace(d, d.split(" ")[0][:-1]+"~1")
+        return '-L{} -l{}'.format(libdir, flags['lib'])
+    elif sys.platform == 'darwin':
         return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
 
-    # Linux and anything else
-    return '-l{}'.format(flags['lib'])
+    else:
+        # Linux and anything else
+        return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
 
 def pythonLinkCmake():
     flags = pythonLinkData()
     libdir = flags['libdir']
     lib = re.sub(r'.dll$', '.lib', flags['lib'])
-    return '{} {}'.format(libdir, lib)
+    if sys.platform == 'win32':
+        return '{};{}'.format(libdir, lib)
+    else:
+        return '{} {}'.format(libdir, lib)
 
 def pythonLinkData():
     # @TODO Fix to work with static builds of Python

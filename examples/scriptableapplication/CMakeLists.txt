@@ -45,8 +45,12 @@ endif()
 
 pyside2_config(--python-include PYTHON_INCLUDE_DIR)
 pyside2_config(--pyside2-include PYSIDE2_INCLUDE_DIR 1)
-pyside2_config(--python-link-cmake PYTHON_LINKING_DATA 1)
 pyside2_config(--pyside2-shared-libraries-cmake PYSIDE2_SHARED_LIBRARIES 1)
+if(WIN32)
+pyside2_config(--python-link-cmake PYTHON_LINKING_DATA 0)
+else()
+pyside2_config(--python-link-cmake PYTHON_LINKING_DATA 1)
+endif()
 
 # Get all relevant Qt include dirs, to pass them on to shiboken.
 get_property(QT_CORE_INCLUDE_DIRS TARGET Qt5::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
@@ -148,7 +152,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PYSIDE2_SHARED_LIBRARIES})
 # Find and link to the python library.
 list(GET PYTHON_LINKING_DATA 0 PYTHON_LIBDIR)
 list(GET PYTHON_LINKING_DATA 1 PYTHON_LIB)
-find_library(PYTHON_LINK_FLAGS ${PYTHON_LIB} HINTS ${PYTHON_LIBDIR})
+find_library(PYTHON_LINK_FLAGS ${PYTHON_LIB} PATHS ${PYTHON_LIBDIR} HINTS ${PYTHON_LIBDIR} NO_DEFAULT_PATH)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PYTHON_LINK_FLAGS})
 
 # Same as CONFIG += no_keywords to avoid syntax errors in object.h due to the usage of the word Slot

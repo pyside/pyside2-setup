@@ -9,8 +9,8 @@ WRAPPED_HEADER = wrappedclasses.h
 WRAPPER_DIR = $$OUT_PWD/AppLib
 TYPESYSTEM_FILE = scriptableapplication.xml
 
-QT_INCLUDEPATHS = -I$$[QT_INSTALL_HEADERS] -I$$[QT_INSTALL_HEADERS]/QtCore \
-    -I$$[QT_INSTALL_HEADERS]/QtGui -I$$[QT_INSTALL_HEADERS]/QtWidgets
+QT_INCLUDEPATHS = -I"$$[QT_INSTALL_HEADERS]" -I"$$[QT_INSTALL_HEADERS]/QtCore" \
+    -I"$$[QT_INSTALL_HEADERS]/QtGui" -I"$$[QT_INSTALL_HEADERS]/QtWidgets"
 
 # On macOS, check if Qt is a framework build. This affects how include paths should be handled.
 qtConfig(framework): QT_INCLUDEPATHS += --framework-include-paths=$$[QT_INSTALL_LIBS]
