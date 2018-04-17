@@ -672,15 +672,9 @@ bool TypeDatabase::setApiVersion(const QString& packageWildcardPattern, const QS
     return true;
 }
 
-bool TypeDatabase::checkApiVersion(const QString& package, const QString& version) const
+bool TypeDatabase::checkApiVersion(const QString &package,
+                                   const QVersionNumber &versionNumber) const
 {
-    const QVersionNumber versionNumber = QVersionNumber::fromString(version);
-    if (versionNumber.isNull()) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << "checkApiVersion: Invalid version \"" << version << "\" specified for package "
-            << package << '.';
-        return false;
-    }
     const ApiVersions &versions = *apiVersions();
     for (int i = 0, size = versions.size(); i < size; ++i) {
         if (versions.at(i).first.match(package).hasMatch())

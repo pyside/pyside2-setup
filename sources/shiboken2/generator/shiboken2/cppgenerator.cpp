@@ -135,7 +135,7 @@ CppGenerator::CppGenerator()
     m_mpFuncs.insert(QLatin1String("__msetitem__"), QLatin1String("mp_ass_subscript"));
 }
 
-QString CppGenerator::fileNamePrefix() const
+QString CppGenerator::fileNameSuffix() const
 {
     return QLatin1String("_wrapper.cpp");
 }
@@ -146,11 +146,11 @@ QString CppGenerator::fileNameForContext(GeneratorContext &context) const
     if (!context.forSmartPointer()) {
         QString fileNameBase = metaClass->qualifiedCppName().toLower();
         fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
-        return fileNameBase + fileNamePrefix();
+        return fileNameBase + fileNameSuffix();
     } else {
         const AbstractMetaType *smartPointerType = context.preciseType();
         QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNamePrefix();
+        return fileNameBase + fileNameSuffix();
     }
 }
 

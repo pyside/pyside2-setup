@@ -40,96 +40,178 @@
 from __future__ import print_function
 from distutils.version import LooseVersion
 
-"""This is a distutils setup-script for the PySide2 project
+"""
+This is a distutils setup-script for the Qt for Python project
 
 To build PySide2 simply execute:
-  python setup.py build --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [only Windows --openssl=</path/to/openssl/bin>]
+  python setup.py build
 or
-  python setup.py install --qmake=</path/to/qt/bin/qmake> [--cmake=</path/to/cmake>] [only Windows --openssl=</path/to/openssl/bin>]
+  python setup.py install
 to build and install into your current Python installation.
 
-On Linux and macOS you can use option --standalone, to embed Qt libraries into the PySide2 package.
-The option does not affect Windows, because it is used implicitly, i.e. all relevant DLLs have to
-be copied into the PySide2 package anyway, because there is no proper rpath support on the platform.
 
-You can use option --rpath="your_value" to specify what rpath values should be embedded into the
-PySide2 modules and shared libraries. This overrides the automatically generated values when the
-option is not specified.
+Optionally, one can specify the location of qmake and cmake if it is
+not on the current PATH with:
+    --qmake=/path/to/qt/bin/qmake
+and
+    --cmake=/path/to/bin/cmake
+respectively.
 
-You can use option --only-package, if you want to create more binary packages (bdist_wheel, bdist_egg, ...)
-without rebuilding entire PySide2 every time:
-  # First time we create bdist_wheel with full PySide2 build
-  python setup.py bdist_wheel --qmake=c:\Qt\5.6\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --openssl=c:\libs\OpenSSL32bit\bin
+For windows, if OpenSSL support is required, it is necessary to specify
+the directory with:
+    --openssl=/path/to/openssl/bin
 
-  # Then we create bdist_egg reusing PySide2 build with option --only-package
-  python setup.py bdist_egg --only-package --qmake=c:\Qt\5.6\bin\qmake.exe --cmake=c:\tools\cmake\bin\cmake.exe --opnessl=c:\libs\OpenSSL32bit\bin
+ADDITIONAL OPTIONS:
 
-You can use the option --qt-conf-prefix to pass a path relative to the PySide2 installed package,
-which will be embedded into an auto-generated qt.conf registered in the Qt resource system. This
-path will serve as the PrefixPath for QLibraryInfo, thus allowing to choose where Qt plugins
-should be loaded from. This option overrides the usual prefix chosen by --standalone option, or when
-building on Windows.
-To temporarily disable registration of the internal qt.conf file, a new environment variable called
-PYSIDE_DISABLE_INTERNAL_QT_CONF is introduced. You should assign the integer "1" to disable the
-internal qt.conf, or "0" (or leave empty) to keep use the internal qt.conf file.
+On Linux and macOS you can use the option `--standalone` to embed Qt
+libraries into the PySide2 package.
+The option does not affect Windows, because it is used implicitly,
+i.e. all relevant DLLs have to be copied into the PySide2 package
+anyway, because there is no proper rpath support on the platform.
 
-For development purposes the following options might be of use, when using "setup.py build":
-    --reuse-build option allows recompiling only the modified sources and not the whole world,
-      shortening development iteration time,
-    --skip-cmake will reuse the already generated Makefiles (or equivalents), instead of invoking,
-      CMake to update the Makefiles (note, CMake should be ran at least once to generate the files),
-    --skip-make-install will not run make install (or equivalent) for each built module,
-    --skip-packaging will skip creation of the python package,
-    --ignore-git will skip the fetching and checkout steps for supermodule and all submodules.
-    --verbose-build will output the compiler invocation with command line arguments, etc.
-    --sanitize-address will build all targets with address sanitizer enabled.
+You can use the option `--rpath=/path/to/lib/path` to specify which
+rpath values should be embedded into the PySide2 modules and shared
+libraries.
+This overrides the automatically generated values when the option is
+not specified.
+
+You can use the option `--only-package` if you want to create more
+binary packages (bdist_wheel, bdist_egg, ...) without rebuilding the
+entire PySide2 every time:
+
+e.g.:
+
+* First, we create a bdist_wheel from a full PySide2 build:
+
+  python setup.py bdist_wheel --qmake=c:\Qt\5.9\bin\qmake.exe
+    --cmake=c:\tools\cmake\bin\cmake.exe
+    --openssl=c:\libs\OpenSSL32bit\bin
+
+* Then,  we create a bdist_egg reusing PySide2 build with option
+  `--only-package`:
+
+  python setup.py bdist_egg --only-package
+    --qmake=c:\Qt\5.9\bin\qmake.exe
+    --cmake=c:\tools\cmake\bin\cmake.exe
+    --openssl=c:\libs\OpenSSL32bit\bin
+
+You can use the option `--qt-conf-prefix` to pass a path relative to
+the PySide2 installed package, which will be embedded into an
+auto-generated `qt.conf` registered in the Qt resource system.
+This path will serve as the PrefixPath for QLibraryInfo, thus allowing
+to choose where Qt plugins should be loaded from.
+This option overrides the usual prefix chosen by `--standalone` option,
+or when building on Windows.
+
+To temporarily disable registration of the internal `qt.conf` file, a
+new environment variable called PYSIDE_DISABLE_INTERNAL_QT_CONF is
+introduced.
+
+You should assign the integer "1" to disable the internal `qt.conf`,
+or "0" (or leave empty) to keep usining the internal `qt.conf` file.
+
+DEVELOPMENT OPTIONS:
+
+For development purposes the following options might be of use, when
+using `setup.py build`:
+
+  --reuse-build option allows recompiling only the modified sources and
+        not the whole world, shortening development iteration time,
+  --skip-cmake will reuse the already generated Makefiles (or
+        equivalents), instead of invoking, CMake to update the
+        Makefiles (note, CMake should be ran at least once to generate
+        the files),
+  --skip-make-install will not run make install (or equivalent) for
+        each module built,
+  --skip-packaging will skip creation of the python package,
+  --ignore-git will skip the fetching and checkout steps for
+        supermodule and all submodules.
+  --verbose-build will output the compiler invocation with command line
+        arguments, etc.
+  --sanitize-address will build the project with address sanitizer
+    enabled (Linux or macOS only).
 
 REQUIREMENTS:
-- Python: 2.6, 2.7, 3.3, 3.4, 3.5 and 3.6 are supported
-- Cmake: Specify the path to cmake with --cmake option or add cmake to the system path.
-- Qt: 5.5 and 5.6 are supported. Specify the path to qmake with --qmake option or add qmake to the system path.
+
+* Python: 2.7 and 3.3+ are supported
+* CMake: Specify the path to cmake with `--cmake` option or add cmake
+  to the system path.
+* Qt: 5.9 and 5.11 are supported. Specify the path to qmake with
+  `--qmake` option or add qmake to the system path.
 
 OPTIONAL:
-OpenSSL:
-    Specifying the --openssl option is only required on Windows. It is a no-op for other platforms.
-    You can specify the location of OpenSSL DLLs with option --openssl=</path/to/openssl/bin>.
-    You can download OpenSSL for Windows here: http://slproweb.com/products/Win32OpenSSL.html
 
-    Official Qt packages do not link to the SSL library directly, but rather try to find the library
-    at runtime.
+* OpenSSL:
+    Specifying the --openssl option is only required on Windows.
+    It is a no-op for other platforms.
 
-    On Windows, official Qt builds will try to pick up OpenSSL libraries at application path,
-    system registry, or in the PATH environment variable.
-    On macOS, official Qt builds use SecureTransport (provided by OS) instead of OpenSSL.
-    On Linux, official Qt builds will try to pick up the system OpenSSL library.
+    You can specify the location of OpenSSL DLLs with option:
+        --openssl=</path/to/openssl/bin>.
 
-    Note: this means that Qt packages that directly link to the OpenSSL shared libraries, are not
-    currently compatible with standalone PySide2 packages.
+    You can download OpenSSL for Windows here:
+        http://slproweb.com/products/Win32OpenSSL.html (*)
 
-OS X SDK: You can specify which OS X SDK should be used for compilation with the option --osx-sysroot=</path/to/sdk>.
-          For e.g. "--osx-sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/".
+    Official Qt packages do not link to the SSL library directly, but
+    rather try to find the library at runtime.
 
-OS X Minimum deployment target:
-    You can specify a custom OS X minimum deployment target with the --osx-deployment-target=<value>
-    option.
-    For example: "--osx-deployment-target=10.10".
+    On Windows, official Qt builds will try to pick up OpenSSL
+    libraries at application path, system registry, or in the PATH
+    environment variable.
 
-    If the option is not set, the minimum deployment target of the used Qt library will be used
-    instead. Thus it is not necessary to use the option without a good reason.
-    If a new value is specified, it has to be higher or equal to both Python's and Qt's minimum
-    deployment targets.
+    On macOS, official Qt builds use SecureTransport (provided by OS)
+    instead of OpenSSL.
 
-    Description:
-    OS X allows specifying a minimum OS version on which a binary will be able to run. This implies
-    that an application can be built on a machine with the latest OS X version installed, with
-    latest Xcode version and SDK version and the built application can still run on an older OS
-    version.
+    On Linux, official Qt builds will try to pick up the system OpenSSL
+    library.
+
+    Note: this means that Qt packages that directly link to the OpenSSL
+          shared libraries, are not currently compatible with
+          standalone PySide2 packages.
+
+    (*) Revised on 23.03.2018
+
+* macOS SDK:
+    You can specify which macOS SDK should be used for compilation with
+    the option:
+        --osx-sysroot=</path/to/sdk>.
+
+    e.g.: "--osx-sysroot=/Applications/.../Developer/SDKs/MacOSX10.11.sdk/"
+
+* macOS minimum deployment target:
+    You can specify a custom macOS minimum deployment target with the
+    option:
+        --osx-deployment-target=<value>
+
+    e.g.: "--osx-deployment-target=10.10"
+
+    If the option is not set, the minimum deployment target of the used
+    Qt library will be used instead. Thus it is not necessary to use
+    the option without a good reason.
+
+    If a new value is specified, it has to be higher or equal to both
+    Python's and Qt's minimum deployment targets.
+
+    Description: macOS allows specifying a minimum OS version on which
+                 a binary will be able to run. This implies that an
+                 application can be built on a machine with the latest
+                 macOS version installed, with latest Xcode version and
+                 SDK version and the built application can still run on
+                 an older OS version.
 """
 
 import os
 import time
 from utils import memoize, has_option, get_python_dict
 OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")
+
+# Change the cwd to setup.py's dir.
+try:
+    this_file = __file__
+except NameError:
+    this_file = sys.argv[0]
+this_file = os.path.abspath(this_file)
+if os.path.dirname(this_file):
+    os.chdir(os.path.dirname(this_file))
 script_dir = os.getcwd()
 
 @memoize
@@ -226,7 +308,7 @@ def check_allowed_python_version():
     import re
     pattern = "'Programming Language :: Python :: (\d+)\.(\d+)'"
     supported = []
-    with open(__file__) as setup:
+    with open(this_file) as setup:
         for line in setup.readlines():
             found = re.search(pattern, line)
             if found:
@@ -345,15 +427,6 @@ else:
 if OPTION_ICULIB:
     if not OPTION_STANDALONE:
         print("--iculib-url option is a no-op option and will be removed soon.")
-
-# Change the cwd to our source dir
-try:
-    this_file = __file__
-except NameError:
-    this_file = sys.argv[0]
-this_file = os.path.abspath(this_file)
-if os.path.dirname(this_file):
-    os.chdir(os.path.dirname(this_file))
 
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
@@ -1569,6 +1642,8 @@ class pyside_build(_build):
         qt_artifacts_permanent = [
             "opengl*.dll",
             "d3d*.dll",
+            "libEGL*.dll",
+            "libGLESv2*.dll",
             "designer.exe",
             "linguist.exe",
             "lrelease.exe",
@@ -1633,8 +1708,9 @@ class pyside_build(_build):
 
         # <qt>/plugins/* -> <setup>/PySide2/plugins
         plugin_dll_patterns = ["*{}.dll"]
+        pdb_pattern = "*{}.pdb"
         if copy_pdbs:
-            plugin_dll_patterns += ["*{}.pdb"]
+            plugin_dll_patterns += [pdb_pattern]
         plugin_dll_filter = functools.partial(qt_build_config_filter, plugin_dll_patterns)
         copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/plugins",
             file_filter_function=plugin_dll_filter,
@@ -1648,9 +1724,11 @@ class pyside_build(_build):
 
         # <qt>/qml/* -> <setup>/PySide2/qml
         qml_dll_patterns = ["*{}.dll"]
+        qml_ignore_patterns = qml_dll_patterns + [pdb_pattern]
+        # Remove the "{}" from the patterns
+        qml_ignore = [a.format('') for a in qml_ignore_patterns]
         if copy_pdbs:
-            qml_dll_patterns += ["*{}.pdb"]
-        qml_ignore = [a.format('') for a in qml_dll_patterns]
+            qml_dll_patterns += [pdb_pattern]
         qml_dll_filter = functools.partial(qt_build_config_filter, qml_dll_patterns)
         copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
             ignore=qml_ignore,

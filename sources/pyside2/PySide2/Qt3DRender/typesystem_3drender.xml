@@ -48,6 +48,10 @@
         <object-type name="QAbstractLight">
             <enum-type name="Type"/>
         </object-type>
+        <object-type name="QAbstractRayCaster" since="5.11">
+            <enum-type name="RunMode"/>
+            <enum-type name="FilterMode"/>
+        </object-type>
         <object-type name="QAbstractTexture">
             <enum-type name="CubeMapFace"/>
             <enum-type name="ComparisonFunction"/>
@@ -163,6 +167,10 @@
         </object-type>
         <object-type name="QPolygonOffset"/>
         <object-type name="QProximityFilter" since="5.10"/>
+        <object-type name="QRayCaster" since="5.11"/>
+        <value-type name="QRayCasterHit" since="5.11">
+            <enum-type name="HitType"/>
+        </value-type>
         <object-type name="QRenderAspect">
             <enum-type name="RenderType"/>
         </object-type>
@@ -186,6 +194,7 @@
             <enum-type name="ComponentType"/>
         </object-type>
         <object-type name="QScissorTest"/>
+        <object-type name="QScreenRayCaster" since="5.11"/>
         <object-type name="QSeamlessCubemap"/>
         <object-type name="QShaderData"/>
         <object-type name="QShaderProgram">

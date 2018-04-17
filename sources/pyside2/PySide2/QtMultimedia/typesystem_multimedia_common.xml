@@ -264,6 +264,7 @@
   <value-type name="QMediaContent"/>
   <object-type name="QMediaGaplessPlaybackControl"/>
   <object-type name="QMediaControl"/>
+  <object-type name="QCustomAudioRoleControl" since="5.11"/>
   <object-type name="QMediaNetworkAccessControl"/>
   <!-- Causes compile errors
   <namespace-type name="QMediaMetaData"/>

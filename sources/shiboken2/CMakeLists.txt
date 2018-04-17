@@ -50,7 +50,7 @@ macro(get_llvm_config)
        "
     OUTPUT_VARIABLE LLVM_CONFIG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("LLMV_CONFIG:             " ${LLVM_CONFIG})
+  message("LLVM_CONFIG:             " ${LLVM_CONFIG})
 endmacro()
 
 set(CLANG_DIR "")

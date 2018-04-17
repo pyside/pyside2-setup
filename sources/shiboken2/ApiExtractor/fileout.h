@@ -32,6 +32,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QTextStream>
 
+QT_FORWARD_DECLARE_CLASS(QFile)
+
 class FileOut : public QObject
 {
 private:
@@ -49,6 +51,10 @@ public:
     }
 
     State done();
+    State done(QString *errorMessage);
+
+    static QString msgCannotOpenForReading(const QFile &f);
+    static QString msgCannotOpenForWriting(const QFile &f);
 
     QTextStream stream;
 

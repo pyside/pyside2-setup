@@ -43,7 +43,7 @@ class HeaderGenerator : public ShibokenGenerator
 public:
     OptionDescriptions options() const override { return OptionDescriptions(); }
 protected:
-    QString fileNamePrefix() const override;
+    QString fileNameSuffix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;
     void generateClass(QTextStream& s, GeneratorContext &classContext) override;
     bool finishGeneration() override;
