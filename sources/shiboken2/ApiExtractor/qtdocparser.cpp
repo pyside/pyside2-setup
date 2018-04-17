@@ -68,6 +68,17 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
         str << name;
     }
         break;
+    case AbstractMetaType::ContainerPattern: { // QVector<int>
+        str << metaType->typeEntry()->qualifiedCppName() << '<';
+        const auto instantiations = metaType->instantiations();
+        for (int i = 0, size = instantiations.size(); i < size; ++i) {
+            if (i)
+                str << ", ";
+            str << instantiations.at(i)->typeEntry()->qualifiedCppName();
+        }
+        str << '>';
+    }
+        break;
     default: // Fully qualify enums (Qt::AlignmentFlag), nested classes, etc.
         str << metaType->typeEntry()->qualifiedCppName();
         break;
