@@ -229,7 +229,8 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     xquery.setFocus(QUrl(sourceFile));
 
     // Module documentation
-    QString query = QLatin1String("/WebXML/document/page[@name=\"") + moduleName + QLatin1String("\"]/description");
+    QString query = QLatin1String("/WebXML/document/module[@name=\"")
+        + moduleName + QLatin1String("\"]/description");
     const Documentation doc = getDocumentation(xquery, query, DocModificationList());
     if (doc.isEmpty())
         qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
