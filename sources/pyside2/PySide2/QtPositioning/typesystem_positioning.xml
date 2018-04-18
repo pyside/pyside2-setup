@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of PySide2.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide2.QtPositioning">
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <value-type name="QGeoAddress"/>
+  <value-type name="QGeoAreaMonitorInfo"/>
+  <object-type name="QGeoAreaMonitorSource">
+      <enum-type name="Error"/>
+      <enum-type name="AreaMonitorFeature" flags="AreaMonitorFeatures"/>
+  </object-type>
+  <value-type name="QGeoLocation"/>
+  <value-type name="QGeoCircle"/>
+  <value-type name="QGeoCoordinate">
+      <enum-type name="CoordinateType"/>
+      <enum-type name="CoordinateFormat"/>
+  </value-type>
+  <value-type name="QGeoPath"/>
+  <value-type name="QGeoPolygon" since="5.10"/>
+  <value-type name="QGeoPositionInfo">
+      <enum-type name="Attribute"/>
+  </value-type>
+  <object-type name="QGeoPositionInfoSource">
+      <enum-type name="Error"/>
+      <enum-type name="PositioningMethod" flags="PositioningMethods"/>
+  </object-type>
+  <object-type name="QGeoPositionInfoSourceFactory"/>
+  <value-type name="QGeoRectangle"/>
+  <value-type name="QGeoSatelliteInfo">
+      <enum-type name="Attribute"/>
+      <enum-type name="SatelliteSystem"/>
+  </value-type>
+  <object-type name="QGeoSatelliteInfoSource">
+      <enum-type name="Error"/>
+  </object-type>
+  <value-type name="QGeoShape">
+      <enum-type name="ShapeType"/>
+  </value-type>
+  <object-type name="QNmeaPositionInfoSource">
+      <enum-type name="UpdateMode"/>
+  </object-type>
+</typesystem>
