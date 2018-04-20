@@ -39,11 +39,7 @@ class MainTest(unittest.TestCase):
         qApp = (QtWidgets.QApplication.instance() or
                 QtWidgets.QApplication([]))
         view = QtWebEngineWidgets.QWebEngineView()
-        with self.assertRaises(TypeError):
-            view.findText(123)
         view.findText("nothing")
-        # we are testing only the existence of the function,
-        # after it suddenly showed up.
 
 if __name__ == '__main__':
     unittest.main()

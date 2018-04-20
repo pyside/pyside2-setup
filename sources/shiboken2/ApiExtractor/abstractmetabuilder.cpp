@@ -2088,6 +2088,20 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
         bool ok;
         AbstractMetaType* metaType = translateType(arg->type(), &ok);
         if (!ok) {
+            // If an invalid argument has a default value, simply remove it
+            if (arg->defaultValue()) {
+                if (!m_currentClass
+                    || (m_currentClass->typeEntry()->codeGeneration()
+                        & TypeEntry::GenerateTargetLang)) {
+                    qCWarning(lcShiboken).noquote().nospace()
+                    << "Stripping argument #" << (i + 1) << " of "
+                    << originalQualifiedSignatureWithReturn
+                    << " due to unmatched type \"" << arg->type().toString()
+                    << "\" with default expression \""
+                    << arg->defaultValueExpression() << "\".";
+                }
+                break;
+            }
             Q_ASSERT(metaType == 0);
             const QString reason = msgUnmatchedParameterType(arg, i);
             qCWarning(lcShiboken).noquote().nospace()
@@ -2123,7 +2137,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     metaFunction->setArguments(metaArguments);
 
     // Find the correct default values
-    for (int i = 0; i < arguments.size(); ++i) {
+    for (int i = 0, size = metaArguments.size(); i < size; ++i) {
         ArgumentModelItem arg = arguments.at(i);
         AbstractMetaArgument* metaArg = metaArguments.at(i);
 
