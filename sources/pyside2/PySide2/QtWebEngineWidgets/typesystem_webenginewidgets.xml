@@ -54,6 +54,7 @@
 
   <object-type name="QWebEngineDownloadItem">
     <enum-type name="DownloadState" />
+    <enum-type name="SavePageFormat"/>
   </object-type>
 
   <!-- TODO: Deal with private constructor
