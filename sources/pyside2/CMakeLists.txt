@@ -330,7 +330,7 @@ if(APPLE)
 endif()
 
 # Collect all optional modules.
-set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia MultimediaWidgets OpenGL Qml Quick QuickWidgets Script ScriptTools TextToSpeech Charts Svg DataVisualization)
+set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia MultimediaWidgets OpenGL Qml Quick QuickWidgets Script ScriptTools Sensors TextToSpeech Charts Svg DataVisualization)
 find_package(Qt5UiTools)
 if(Qt5UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)
