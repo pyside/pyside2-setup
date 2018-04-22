@@ -409,7 +409,7 @@ def make_file_writable_by_owner(path):
     current_permissions = stat.S_IMODE(os.lstat(path).st_mode)
     os.chmod(path, current_permissions | stat.S_IWUSR)
 
-def rmtree(dirname):
+def rmtree(dirname, ignore=False):
     def handleRemoveReadonly(func, path, exc):
         excvalue = exc[1]
         if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
@@ -417,7 +417,7 @@ def rmtree(dirname):
             func(path)
         else:
             raise
-    shutil.rmtree(dirname, ignore_errors=False, onerror=handleRemoveReadonly)
+    shutil.rmtree(dirname, ignore_errors=ignore, onerror=handleRemoveReadonly)
 
 def run_process_output(args, initial_env=None):
     if initial_env is None:
@@ -1081,3 +1081,31 @@ def get_python_dict(python_script_path):
         print("get_python_dict: Couldn't get dict from python "
             "file: {}.".format(python_script_path))
         raise
+
+def install_pip_dependencies(env_pip, packages):
+    for p in packages:
+        run_instruction([env_pip, "install", p], "Failed to install " + p)
+
+def get_qtci_virtualEnv(python_ver, host):
+    _pExe = "python"
+    _env = "env" + str(python_ver)
+    env_python = _env + "/bin/python"
+    env_pip = _env + "/bin/pip"
+
+    if host == "Windows":
+        _pExe = "python.exe"
+        if python_ver == "3":
+            _pExe = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+        env_python = _env + "\\Scripts\\python.exe"
+        env_pip = _env + "\\Scripts\\pip.exe"
+    else:
+        if python_ver == "3":
+            _pExe = "python3"
+    return(_pExe, _env, env_pip, env_python)
+
+def run_instruction(instruction, error):
+    print("Running Coin instruction: " + ' '.join(str(e) for e in instruction))
+    result = subprocess.call(instruction)
+    if result != 0:
+        print("ERROR : " + error)
+        exit(result)
