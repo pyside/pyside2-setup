@@ -301,7 +301,7 @@ from utils import update_env_path
 from utils import init_msvc_env
 from utils import regenerate_qt_resources
 from utils import filter_match
-from utils import osx_fix_rpaths_for_library
+from utils import macos_fix_rpaths_for_library
 from utils import copy_icu_libs
 from utils import find_files_using_glob
 
@@ -1478,7 +1478,7 @@ class pyside_build(_build):
         if OPTION_STANDALONE:
             vars['built_modules'] = config['built_modules']
             if sys.platform == 'darwin':
-                self.prepare_standalone_package_osx(executables, vars)
+                self.prepare_standalone_package_macos(executables, vars)
             else:
                 self.prepare_standalone_package_linux(executables, vars)
 
@@ -1566,7 +1566,7 @@ class pyside_build(_build):
             "{pyside_package_dir}/PySide2/Qt/libexec",
             vars=vars)
 
-    def prepare_standalone_package_osx(self, executables, vars):
+    def prepare_standalone_package_macos(self, executables, vars):
         built_modules = vars['built_modules']
 
         # Directory filter for skipping unnecessary files.
@@ -1615,7 +1615,7 @@ class pyside_build(_build):
                 webengine_process_path = os.path.join(bundle, binary)
                 final_path = os.path.join(qt_lib_path, webengine_process_path)
                 rpath = "@loader_path/../../../../../"
-                osx_fix_rpaths_for_library(final_path, rpath)
+                macos_fix_rpaths_for_library(final_path, rpath)
         else:
             ignored_modules = []
             if not self.is_webengine_built(built_modules):
@@ -1649,7 +1649,7 @@ class pyside_build(_build):
                 binary = "QtWebEngineProcess"
                 final_path = os.path.join(qt_libexec_path, binary)
                 rpath = "@loader_path/../lib"
-                osx_fix_rpaths_for_library(final_path, rpath)
+                macos_fix_rpaths_for_library(final_path, rpath)
 
                 # Copy the qt.conf file to libexec.
                 copyfile(
@@ -2063,7 +2063,7 @@ class pyside_build(_build):
                         final_rpath = "@loader_path/Qt/lib"
                     else:
                         final_rpath = self.qtinfo.libs_dir
-                osx_fix_rpaths_for_library(srcpath, final_rpath)
+                macos_fix_rpaths_for_library(srcpath, final_rpath)
 
         else:
             raise RuntimeError('Not configured for platform ' +

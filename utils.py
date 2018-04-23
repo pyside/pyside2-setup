@@ -599,10 +599,10 @@ def back_tick(cmd, ret_err=False):
     return out, err.strip(), retcode
 
 
-OSX_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
+MACOS_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
                         '[\d.]+\)')
 
-def osx_get_install_names(libpath):
+def macos_get_install_names(libpath):
     """
     Get macOS library install names from library `libpath` using ``otool``
 
@@ -618,12 +618,12 @@ def osx_get_install_names(libpath):
     """
     out = back_tick('otool -L ' + libpath)
     libs = [line for line in out.split('\n')][1:]
-    return [OSX_OUTNAME_RE.sub('', lib).strip() for lib in libs]
+    return [MACOS_OUTNAME_RE.sub('', lib).strip() for lib in libs]
 
 
-OSX_RPATH_RE = re.compile(r"path (.+) \(offset \d+\)")
+MACOS_RPATH_RE = re.compile(r"path (.+) \(offset \d+\)")
 
-def osx_get_rpaths(libpath):
+def macos_get_rpaths(libpath):
     """ Get rpath load commands from library `libpath` using ``otool``
 
     Parameters
@@ -650,7 +650,7 @@ def osx_get_rpaths(libpath):
             continue
         assert lines[ctr + 1].strip().startswith('cmdsize')
         rpath_line = lines[ctr + 2].strip()
-        match = OSX_RPATH_RE.match(rpath_line)
+        match = MACOS_RPATH_RE.match(rpath_line)
         if match is None:
             raise RuntimeError('Unexpected path line: ' + rpath_line)
         rpaths.append(match.groups()[0])
@@ -658,7 +658,7 @@ def osx_get_rpaths(libpath):
     return rpaths
 
 
-def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
+def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
     """ Adds required rpath load commands to given library.
 
     This is a necessary post-installation step, to allow loading PySide
@@ -677,8 +677,8 @@ def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
         rpath to installed Qt lib directory.
     """
 
-    install_names = osx_get_install_names(library_path)
-    existing_rpath_commands = osx_get_rpaths(library_path)
+    install_names = macos_get_install_names(library_path)
+    existing_rpath_commands = macos_get_rpaths(library_path)
 
     needs_loader_path = False
     for install_name in install_names:
@@ -700,10 +700,10 @@ def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
 
     # If the library depends on a Qt library, add an rpath load comment
     # pointing to the Qt lib directory.
-    osx_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands,
+    macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands,
         install_names)
 
-def osx_add_qt_rpath(library_path, qt_lib_dir,
+def macos_add_qt_rpath(library_path, qt_lib_dir,
                      existing_rpath_commands = [], library_dependencies = []):
     """
     Adds an rpath load command to the Qt lib directory if necessary
@@ -713,7 +713,7 @@ def osx_add_qt_rpath(library_path, qt_lib_dir,
     (qt_lib_dir).
     """
     if not existing_rpath_commands:
-        existing_rpath_commands = osx_get_rpaths(library_path)
+        existing_rpath_commands = macos_get_rpaths(library_path)
 
     # Return early if qt rpath is already present.
     if qt_lib_dir in existing_rpath_commands:
@@ -721,7 +721,7 @@ def osx_add_qt_rpath(library_path, qt_lib_dir,
 
     # Check if any library dependencies are Qt libraries (hacky).
     if not library_dependencies:
-        library_dependencies = osx_get_install_names(library_path)
+        library_dependencies = macos_get_install_names(library_path)
 
     needs_qt_rpath = False
     for library in library_dependencies:
