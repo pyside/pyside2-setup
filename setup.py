@@ -173,16 +173,16 @@ OPTIONAL:
 * macOS SDK:
     You can specify which macOS SDK should be used for compilation with
     the option:
-        --osx-sysroot=</path/to/sdk>.
+        --macos-sysroot=</path/to/sdk>.
 
-    e.g.: "--osx-sysroot=/Applications/.../Developer/SDKs/MacOSX10.11.sdk/"
+    e.g.: "--macos-sysroot=/Applications/Xcode.app/.../Developer/SDKs/MacOSX10.12.sdk/"
 
 * macOS minimum deployment target:
     You can specify a custom macOS minimum deployment target with the
     option:
-        --osx-deployment-target=<value>
+        --macos-deployment-target=<value>
 
-    e.g.: "--osx-deployment-target=10.10"
+    e.g.: "--macos-deployment-target=10.10"
 
     If the option is not set, the minimum deployment target of the used
     Qt library will be used instead. Thus it is not necessary to use
@@ -350,10 +350,10 @@ OPTION_JOM = has_option('jom')
 # Do not use jom instead of nmake with msvc
 OPTION_NO_JOM = has_option('no-jom')
 OPTION_BUILDTESTS = has_option("build-tests")
-OPTION_OSXARCH = option_value("osx-arch")
-OPTION_OSX_USE_LIBCPP = has_option("osx-use-libc++")
-OPTION_OSX_SYSROOT = option_value("osx-sysroot")
-OPTION_OSX_DEPLOYMENT_TARGET = option_value("osx-deployment-target")
+OPTION_MACOS_ARCH = option_value("macos-arch")
+OPTION_MACOS_USE_LIBCPP = has_option("macos-use-libc++")
+OPTION_MACOS_SYSROOT = option_value("macos-sysroot")
+OPTION_MACOS_DEPLOYMENT_TARGET = option_value("macos-deployment-target")
 OPTION_XVFB = has_option("use-xvfb")
 OPTION_REUSE_BUILD = has_option("reuse-build")
 OPTION_SKIP_CMAKE = has_option("skip-cmake")
@@ -1076,7 +1076,7 @@ class pyside_build(_build):
         """
         python_target = get_config_var('MACOSX_DEPLOYMENT_TARGET') or None
         qt_target = pyside_build.macos_qt_min_deployment_target()
-        setup_target = OPTION_OSX_DEPLOYMENT_TARGET
+        setup_target = OPTION_MACOS_DEPLOYMENT_TARGET
 
         qt_target_split = [int(x) for x in qt_target.split('.')]
         if python_target:
@@ -1086,7 +1086,7 @@ class pyside_build(_build):
 
         message = ("Can't set MACOSX_DEPLOYMENT_TARGET value to {} because "
                   "{} was built with minimum deployment target set to {}.")
-        # setup.py provided OPTION_OSX_DEPLOYMENT_TARGET value takes
+        # setup.py provided OPTION_MACOS_DEPLOYMENT_TARGET value takes
         # precedence.
         if setup_target:
             if python_target and setup_target_split < python_target_split:
@@ -1242,12 +1242,12 @@ class pyside_build(_build):
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
 
         if sys.platform == 'darwin':
-            if OPTION_OSXARCH:
+            if OPTION_MACOS_ARCH:
                 # also tell cmake which architecture to use
                 cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(
-                    OPTION_OSXARCH))
+                    OPTION_MACOS_ARCH))
 
-            if OPTION_OSX_USE_LIBCPP:
+            if OPTION_MACOS_USE_LIBCPP:
                 # Explicitly link the libc++ standard library (useful
                 # for macOS deployment targets lower than 10.9).
                 # This is not on by default, because most libraries and
@@ -1258,9 +1258,9 @@ class pyside_build(_build):
                 # option is a no-op in those cases.
                 cmake_cmd.append("-DOSX_USE_LIBCPP=ON")
 
-            if OPTION_OSX_SYSROOT:
+            if OPTION_MACOS_SYSROOT:
                 cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(
-                    OPTION_OSX_SYSROOT))
+                    OPTION_MACOS_SYSROOT))
             else:
                 latest_sdk_path = run_process_output(['xcrun',
                     '--show-sdk-path'])
