@@ -337,8 +337,6 @@ OPTION_CMAKE = option_value("cmake")
 OPTION_OPENSSL = option_value("openssl")
 OPTION_ONLYPACKAGE = has_option("only-package")
 OPTION_STANDALONE = has_option("standalone")
-OPTION_VERSION = option_value("version") # Deprecated
-OPTION_LISTVERSIONS = has_option("list-versions") # Deprecated
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
 # don't include pyside2-examples
@@ -363,7 +361,6 @@ OPTION_MODULE_SUBSET = option_value("module-subset")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_QT_SRC = option_value("qt-src-dir")
-OPTION_ICULIB = option_value("iculib-url") # Deprecated
 OPTION_VERBOSE_BUILD = has_option("verbose-build")
 OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
 
@@ -436,11 +433,6 @@ if OPTION_JOBS:
             OPTION_JOBS = '-j' + OPTION_JOBS
 else:
     OPTION_JOBS = ''
-
-if OPTION_ICULIB:
-    if not OPTION_STANDALONE:
-        print("--iculib-url "
-            "option is a no-op option and will be removed soon.")
 
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
