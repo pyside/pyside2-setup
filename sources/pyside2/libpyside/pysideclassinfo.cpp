@@ -75,7 +75,7 @@ static PyType_Spec PySideClassInfoType_spec = {
 PyTypeObject *PySideClassInfoTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&PySideClassInfoType_spec);
     return type;
 }

@@ -4033,14 +4033,17 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
                 s << INDENT <<  "{Py_" << it.value() << ", (void *)" << nb[nbName] << "}," << endl;
         }
     }
-    if (!nb[QLatin1String("__div__")].isEmpty())
+    if (!nb[QLatin1String("__div__")].isEmpty()) {
         s << INDENT << "{Py_nb_true_divide, (void *)" << nb[QLatin1String("__div__")] << "}," << endl;
+        s << "#ifndef IS_PY3K" << endl;
+        s << INDENT << "{Py_nb_divide, (void *)" << nb[QLatin1String("__div__")] << "}," << endl;
+        s << "#endif" << endl;
+    }
     if (!nb[QLatin1String("__idiv__")].isEmpty()) {
         s << INDENT << "// This function is unused in Python 3. We reference it here." << endl;
         s << INDENT << "{0, (void *)" << nb[QLatin1String("__idiv__")] << "}," << endl;
-        s << INDENT << "// This list is unfortunately ending at the first 0 entry." << endl;
+        s << INDENT << "// This list is ending at the first 0 entry." << endl;
         s << INDENT << "// Therefore, we need to put the unused functions at the very end." << endl;
-        s << INDENT << "// A better implementation of PyType_FromSpec would end at {0, 0}, instead." << endl;
     }
 }
 
@@ -4477,8 +4480,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     if (!cppEnum->isAnonymous()) {
         FlagsTypeEntry* flags = enumTypeEntry->flags();
         if (flags) {
-            s << INDENT << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\"" << flags->flagsName() << "\", &"
-              << cpythonEnumName(cppEnum) << "_as_number);" << endl;
+            s << INDENT << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\"" << flags->flagsName() << "\", "
+              << cpythonEnumName(cppEnum) << "_number_slots);" << endl;
         }
 
         enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
@@ -4648,57 +4651,22 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const Abstr
 {
     QString cpythonName = cpythonEnumName(cppEnum);
 
-    s << "static PyNumberMethods " << cpythonName << "_as_number = {" << endl;
-    s << INDENT << "/*nb_add*/                  0," << endl;
-    s << INDENT << "/*nb_subtract*/             0," << endl;
-    s << INDENT << "/*nb_multiply*/             0," << endl;
-    s << INDENT << "#ifndef IS_PY3K" << endl;
-    s << INDENT << "/* nb_divide */             0," << endl;
-    s << INDENT << "#endif" << endl;
-    s << INDENT << "/*nb_remainder*/            0," << endl;
-    s << INDENT << "/*nb_divmod*/               0," << endl;
-    s << INDENT << "/*nb_power*/                0," << endl;
-    s << INDENT << "/*nb_negative*/             0," << endl;
-    s << INDENT << "/*nb_positive*/             0," << endl;
-    s << INDENT << "/*nb_absolute*/             0," << endl;
-    s << INDENT << "/*nb_nonzero*/              " << cpythonName << "__nonzero," << endl;
-    s << INDENT << "/*nb_invert*/               (unaryfunc)" << cpythonName << "___invert__," << endl;
-    s << INDENT << "/*nb_lshift*/               0," << endl;
-    s << INDENT << "/*nb_rshift*/               0," << endl;
-    s << INDENT << "/*nb_and*/                  (binaryfunc)" << cpythonName  << "___and__," << endl;
-    s << INDENT << "/*nb_xor*/                  (binaryfunc)" << cpythonName  << "___xor__," << endl;
-    s << INDENT << "/*nb_or*/                   (binaryfunc)" << cpythonName  << "___or__," << endl;
-    s << INDENT << "#ifndef IS_PY3K" << endl;
-    s << INDENT << "/* nb_coerce */             0," << endl;
-    s << INDENT << "#endif" << endl;
-    s << INDENT << "/*nb_int*/                  " << cpythonName << "_long," << endl;
-    s << INDENT << "#ifdef IS_PY3K" << endl;
-    s << INDENT << "/*nb_reserved*/             0," << endl;
-    s << INDENT << "/*nb_float*/                0," << endl;
-    s << INDENT << "#else" << endl;
-    s << INDENT << "/*nb_long*/                 " << cpythonName << "_long," << endl;
-    s << INDENT << "/*nb_float*/                0," << endl;
-    s << INDENT << "/*nb_oct*/                  0," << endl;
-    s << INDENT << "/*nb_hex*/                  0," << endl;
-    s << INDENT << "#endif" << endl;
-    s << INDENT << "/*nb_inplace_add*/          0," << endl;
-    s << INDENT << "/*nb_inplace_subtract*/     0," << endl;
-    s << INDENT << "/*nb_inplace_multiply*/     0," << endl;
-    s << INDENT << "#ifndef IS_PY3K" << endl;
-    s << INDENT << "/*nb_inplace_divide*/       0," << endl;
-    s << INDENT << "#endif" << endl;
-    s << INDENT << "/*nb_inplace_remainder*/    0," << endl;
-    s << INDENT << "/*nb_inplace_power*/        0," << endl;
-    s << INDENT << "/*nb_inplace_lshift*/       0," << endl;
-    s << INDENT << "/*nb_inplace_rshift*/       0," << endl;
-    s << INDENT << "/*nb_inplace_and*/          0," << endl;
-    s << INDENT << "/*nb_inplace_xor*/          0," << endl;
-    s << INDENT << "/*nb_inplace_or*/           0," << endl;
-    s << INDENT << "/*nb_floor_divide*/         0," << endl;
-    s << INDENT << "/*nb_true_divide*/          0," << endl;
-    s << INDENT << "/*nb_inplace_floor_divide*/ 0," << endl;
-    s << INDENT << "/*nb_inplace_true_divide*/  0," << endl;
-    s << INDENT << "/*nb_index*/                0" << endl;
+    s << "static PyType_Slot " << cpythonName << "_number_slots[] = {" << endl;
+    s << "#ifdef IS_PY3K" << endl;
+    s << INDENT << "{Py_nb_bool,    (void *)" << cpythonName << "__nonzero}," << endl;
+    s << "#else" << endl;
+    s << INDENT << "{Py_nb_nonzero, (void *)" << cpythonName << "__nonzero}," << endl;
+    s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long}," << endl;
+    s << "#endif" << endl;
+    s << INDENT << "{Py_nb_invert,  (void *)" << cpythonName << "___invert__}," << endl;
+    s << INDENT << "{Py_nb_and,     (void *)" << cpythonName  << "___and__}," << endl;
+    s << INDENT << "{Py_nb_xor,     (void *)" << cpythonName  << "___xor__}," << endl;
+    s << INDENT << "{Py_nb_or,      (void *)" << cpythonName  << "___or__}," << endl;
+    s << INDENT << "{Py_nb_int,     (void *)" << cpythonName << "_long}," << endl;
+    s << "#ifndef IS_PY3K" << endl;
+    s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long}," << endl;
+    s << "#endif" << endl;
+    s << INDENT << "{0, 0}  // sentinel" << endl;
     s << "};" << endl << endl;
 }
 
@@ -5838,7 +5806,7 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
     s << INDENT << "PyObject* mod = PyDict_GetItemString(Py_TYPE(self)->tp_dict, \"__module__\");" << endl;
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
     // is always prepended to the type name. Therefore the strchr check:
-    s << INDENT << "if (mod and !strchr(str, '.'))" << endl;
+    s << INDENT << "if (mod && !strchr(str, '.'))" << endl;
     {
         Indentation indent(INDENT);
         s << INDENT << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\", Shiboken::String::toCString(mod), str.constData(), self);" << endl;

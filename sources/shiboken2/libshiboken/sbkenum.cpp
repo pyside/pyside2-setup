@@ -295,7 +295,7 @@ static PyType_Spec SbkEnumType_Type_spec = {
 PyTypeObject *SbkEnumType_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&SbkEnumType_Type_spec);
     return type;
 }
@@ -363,9 +363,7 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 
 static PyTypeObject* createEnum(const char* fullName, const char* cppName, const char* shortName, PyTypeObject* flagsType)
 {
-    PyTypeObject* enumType = newTypeWithName(fullName, cppName);
-    if (flagsType)
-        enumType->tp_as_number = flagsType->tp_as_number;
+    PyTypeObject* enumType = newTypeWithName(fullName, cppName, flagsType);
     if (PyType_Ready(enumType) < 0)
         return 0;
     return enumType;
@@ -434,12 +432,14 @@ bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const ch
     return createScopedEnumItem(enumType, &scope->super.ht_type, itemName, itemValue);
 }
 
-PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
+PyObject *
+newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
 {
     bool newValue = true;
     SbkEnumObject* enumObj;
     if (!itemName) {
-        enumObj = reinterpret_cast<SbkEnumObject*>(getEnumItemFromValue(enumType, itemValue));
+        enumObj = reinterpret_cast<SbkEnumObject*>(
+                      getEnumItemFromValue(enumType, itemValue));
         if (enumObj)
             return reinterpret_cast<PyObject*>(enumObj);
 
@@ -507,13 +507,69 @@ static PyType_Spec SbkNewType_spec = {
     SbkNewType_slots,
 };
 
-PyTypeObject* newTypeWithName(const char* name, const char* cppName)
+static void
+copyNumberMethods(PyTypeObject *flagsType,
+                  PyType_Slot number_slots[],
+                  int *pidx)
+{
+    int idx = *pidx;
+#ifdef IS_PY3K
+#  define SLOT slot
+#else
+#  define SLOT slot_
+#endif
+#define PUT_SLOT(name) \
+    number_slots[idx].SLOT = (name);                                \
+    number_slots[idx].pfunc = PyType_GetSlot(flagsType, (name));    \
+    ++idx;
+
+    PUT_SLOT(Py_nb_add);
+    PUT_SLOT(Py_nb_subtract);
+    PUT_SLOT(Py_nb_multiply);
+#ifndef IS_PY3K
+    PUT_SLOT(Py_nb_divide);
+#endif
+    PUT_SLOT(Py_nb_positive);
+#ifdef IS_PY3K
+    PUT_SLOT(Py_nb_bool);
+#else
+    PUT_SLOT(Py_nb_nonzero);
+    PUT_SLOT(Py_nb_long);
+#endif
+    PUT_SLOT(Py_nb_and);
+    PUT_SLOT(Py_nb_xor);
+    PUT_SLOT(Py_nb_or);
+    PUT_SLOT(Py_nb_int);
+    PUT_SLOT(Py_nb_index);
+#undef PUT_SLOT
+    *pidx = idx;
+}
+
+PyTypeObject *
+newTypeWithName(const char* name,
+                const char* cppName,
+                PyTypeObject *numbers_fromFlag)
 {
     // Careful: PyType_FromSpec does not allocate the string.
-    SbkNewType_spec.name = strdup(name);
+    PyType_Slot newslots[99] = {};
+    PyType_Spec *newspec = new PyType_Spec;
+    newspec->name = strdup(name);
+    newspec->basicsize = SbkNewType_spec.basicsize;
+    newspec->itemsize = SbkNewType_spec.itemsize;
+    newspec->flags = SbkNewType_spec.flags;
+    // we must append all the number methods, so rebuild everything:
+    int idx = 0;
+    while (SbkNewType_slots[idx].SLOT) {
+        newslots[idx].SLOT = SbkNewType_slots[idx].SLOT;
+        newslots[idx].pfunc = SbkNewType_slots[idx].pfunc;
+        ++idx;
+    }
+    if (numbers_fromFlag)
+        copyNumberMethods(numbers_fromFlag, newslots, &idx);
+    newspec->slots = newslots;
     // temp HACK until we remove the modification of types!
     PyType_Type.tp_basicsize += 3 * sizeof(void *);
-    PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(&SbkNewType_spec);
+    PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(newspec);
     PyType_Type.tp_basicsize -= 3 * sizeof(void *);
     Py_TYPE(type) = SbkEnumType_TypeF();
     Py_INCREF(Py_TYPE(type));

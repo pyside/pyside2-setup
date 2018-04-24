@@ -63,7 +63,7 @@ namespace QFlags
     /**
      * Creates a new QFlags type.
      */
-    PYSIDE_API PyTypeObject* create(const char* name, PyNumberMethods* numberMethods);
+    PYSIDE_API PyTypeObject *create(const char* name, PyType_Slot *numberMethods);
     /**
      * Creates a new QFlags instance of type \p type and value \p value.
      */

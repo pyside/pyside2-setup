@@ -2647,7 +2647,7 @@ bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QStri
             classItem = ns->findClass(names.at(names.size() - 1));
     }
 
-    if (classItem == nullptr)
+    if (!classItem)
         return false;
 
     if (classItem->extendsClass(QLatin1String("QObject")))

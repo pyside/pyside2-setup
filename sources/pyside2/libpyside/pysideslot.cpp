@@ -81,7 +81,7 @@ static PyType_Spec PySideSlotType_spec = {
 static PyTypeObject *PySideSlotTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&PySideSlotType_spec);
     return type;
 }

@@ -77,7 +77,7 @@ static PyType_Spec PySideMetaFunctionType_spec = {
 PyTypeObject *PySideMetaFunctionTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&PySideMetaFunctionType_spec);
     return type;
 }

@@ -568,10 +568,10 @@ static inline bool compareHeaderName(const char *haystack, const char *needle)
 {
     const char *lastSlash = strrchr(haystack, '/');
 #ifdef Q_OS_WIN
-    if (lastSlash == nullptr)
+    if (!lastSlash)
         lastSlash = strrchr(haystack, '\\');
 #endif
-    if (lastSlash == nullptr)
+    if (!lastSlash)
         lastSlash = haystack;
     else
         ++lastSlash;

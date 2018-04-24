@@ -120,7 +120,7 @@ static PyType_Spec PySideSignalMetaType_spec = {
 PyTypeObject *PySideSignalMetaTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr) {
+    if (!type) {
         PyObject *bases = Py_BuildValue("(O)", &PyType_Type);
         type = (PyTypeObject *)PyType_FromSpecWithBases(&PySideSignalMetaType_spec, bases);
         Py_XDECREF(bases);
@@ -150,7 +150,7 @@ static PyType_Spec PySideSignalType_spec = {
 PyTypeObject *PySideSignalTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr) {
+    if (!type) {
         type = (PyTypeObject *)PyType_FromSpec(&PySideSignalType_spec);
         PyTypeObject *hold = Py_TYPE(type);
         Py_TYPE(type) = PySideSignalMetaTypeF();
@@ -189,7 +189,7 @@ static PyType_Spec PySideSignalInstanceType_spec = {
 PyTypeObject *PySideSignalInstanceTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&PySideSignalInstanceType_spec);
     return type;
 }

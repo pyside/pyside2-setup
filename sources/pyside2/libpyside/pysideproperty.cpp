@@ -95,7 +95,7 @@ static PyType_Spec PySidePropertyType_spec = {
 PyTypeObject *PySidePropertyTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&PySidePropertyType_spec);
     return type;
 }

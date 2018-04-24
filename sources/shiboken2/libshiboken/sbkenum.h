@@ -103,7 +103,8 @@ namespace Enum
 
     /// \deprecated Use 'newTypeWithName'
     SBK_DEPRECATED(LIBSHIBOKEN_API PyTypeObject* newType(const char* name));
-    LIBSHIBOKEN_API PyTypeObject* newTypeWithName(const char* name, const char* cppName);
+    LIBSHIBOKEN_API PyTypeObject* newTypeWithName(const char* name, const char* cppName,
+                                                  PyTypeObject *numbers_fromFlag=nullptr);
     LIBSHIBOKEN_API const char* getCppName(PyTypeObject* type);
 
     LIBSHIBOKEN_API long getValue(PyObject* enumItem);

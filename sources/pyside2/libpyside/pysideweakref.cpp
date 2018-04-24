@@ -68,7 +68,7 @@ static PyType_Spec PySideCallableObjectType_spec = {
 static PyTypeObject *PySideCallableObjectTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&PySideCallableObjectType_spec);
     return type;
 }

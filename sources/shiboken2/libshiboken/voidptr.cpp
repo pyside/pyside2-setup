@@ -235,7 +235,7 @@ static PyType_Spec SbkVoidPtrType_spec = {
 PyTypeObject *SbkVoidPtrTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&SbkVoidPtrType_spec);
     return type;
 }

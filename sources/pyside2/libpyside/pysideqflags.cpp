@@ -143,6 +143,9 @@ namespace QFlags
         {Py_nb_xor, 0},
         {Py_nb_or, 0},
         {Py_nb_int, 0},
+#ifndef IS_PY3K
+        {Py_nb_long, 0},
+#endif
         {Py_tp_new, (void *)PySideQFlagsNew},
         {Py_tp_richcompare, (void *)PySideQFlagsRichCompare},
         {Py_tp_dealloc, (void *)SbkDummyDealloc},
@@ -156,29 +159,32 @@ namespace QFlags
         SbkNewQFlagsType_slots,
     };
 
-    PyTypeObject* create(const char* name, PyNumberMethods* numberMethods)
+    PyTypeObject *create(const char* name, PyType_Slot numberMethods[])
     {
         char qualname[200];
 
         strcpy(qualname, "PySide2.libpyside.");
         strcat(qualname, name);
         // Careful: PyType_FromSpec does not allocate the string.
-        SbkNewQFlagsType_spec.name = strdup(qualname);
-        int idx = 0;
-#if PY_MAJOR_VERSION >= 3
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_bool;
+        PyType_Spec *newspec = new PyType_Spec;
+        newspec->name = strdup(qualname);
+        newspec->basicsize = SbkNewQFlagsType_spec.basicsize;
+        newspec->itemsize = SbkNewQFlagsType_spec.itemsize;
+        newspec->flags = SbkNewQFlagsType_spec.flags;
+        int idx = -1;
+#ifdef IS_PY3K
+#  define SLOT slot
 #else
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_nonzero;
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_long;
+#  define SLOT slot_
 #endif
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_invert;
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_and;
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_xor;
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_or;
-        SbkNewQFlagsType_slots[idx++].pfunc = (void *)numberMethods->nb_int;
+        while (numberMethods[++idx].SLOT) {
+            assert(SbkNewQFlagsType_slots[idx].SLOT == numberMethods[idx].SLOT);
+            SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
+        }
+        newspec->slots = SbkNewQFlagsType_spec.slots;
         // temp HACK until we remove the modification of types!
         PyType_Type.tp_basicsize += 2 * sizeof(void *);
-        PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(&SbkNewQFlagsType_spec);
+        PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(newspec);
         PyType_Type.tp_basicsize -= 2 * sizeof(void *);
         Py_TYPE(type) = &PyType_Type;
 

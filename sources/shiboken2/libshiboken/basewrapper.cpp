@@ -87,7 +87,7 @@ static PyType_Spec SbkObjectType_Type_spec = {
 PyTypeObject *SbkObjectType_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr)
+    if (!type)
         type = (PyTypeObject *)PyType_FromSpec(&SbkObjectType_Type_spec);
     return type;
 }
@@ -173,7 +173,7 @@ static PyType_Spec SbkObject_Type_spec = {
 SbkObjectType *SbkObject_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (type == nullptr) {
+    if (!type) {
         PyType_Type.tp_basicsize += 2 * sizeof(void *);
         type = (PyTypeObject *)PyType_FromSpec(&SbkObject_Type_spec);
         PyType_Type.tp_basicsize -= 2 * sizeof(void *);
