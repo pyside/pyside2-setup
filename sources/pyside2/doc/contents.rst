@@ -1,4 +1,4 @@
-Qt for Python Documentation
+|project| Documentation
 ***************************
 
 .. toctree::

@@ -33,7 +33,8 @@ guide you through the development process:
         import random
         from PySide2 import QtCore, QtWidgets, QtGui
 
-  These imports should provide access to the APIs specific to those Qt modules.
+  The |pymodname| Python module provides access to the Qt APIs as its submodule.
+  In this case, you are importing the :code:`QtCore`, :code:`QtWidgets`, and :code:`QtGui` submodules.
 
 * Define a class named :code:`MyWidget`, which extends QWidget and includes a QPushButton and QLabel.
 

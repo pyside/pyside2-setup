@@ -1,5 +1,5 @@
 buildversion              = @PYSIDE_QT_VERSION@
-navigation.homepage       = PySide
+navigation.homepage       = Qt for Python
 
 outputdir                 = @DOC_DATA_DIR@
 outputformats             = WebXML

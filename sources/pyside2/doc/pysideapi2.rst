@@ -1,20 +1,11 @@
 .. _pysideapi2:
 
-|project| API
+|pymodname| API
 ***************
 
-Since the beginning one of the PySide goals was to be API compatible with PyQt4,
-but with some (documented) exceptions. For example, PySide will not export to
-Python components marked as deprecated on C++ Qt. All the modifications follow
-the `PSEP101 <http://www.pyside.org/docs/pseps/psep-0101.html>`_ as its guideline.
-
-The release 4.7 of PyQt4 came with improvements on the pythonic front, being
-the extinction of QString a good example. PySide followed this change, except in
-one point: while PyQt4 has conserved the old behavior as optional, PySide
-bindings fully adopted the new API - completely removing QString. No turning
-back. Thus remember to update your source code to the new API, this will ensure
-your code will run on both bindings.
-
+One of the goals of |pymodname| is to be API compatible with PyQt5,
+with certain exceptions. For example, |pymodname| will not export C++ components
+that are marked as deprecated by Qt.
 
 __hash__() function return value
 ================================

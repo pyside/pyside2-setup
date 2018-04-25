@@ -1,8 +1,10 @@
 |project|
 *************
 
-|project| enables the use of Qt 5 APIs in Python applications. It lets Python
-developers utilize the full power of Qt. The following Qt5 modules are supported:
+The |project| product enables the use of Qt5 APIs in Python applications. It
+lets Python developers utilize the full potential of Qt, using the |pymodname| module.
+The |pymodname| module provides access to the individual Qt modules such as QtCore,
+QtGui, and so on. The following is the list of supported Qt5 modules:
 
 Qt Modules
 ===========

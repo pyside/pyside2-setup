@@ -26,7 +26,8 @@ sys.path.append('@pyside_BINARY_DIR@')
 extensions = ['sphinx.ext.todo', 'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude']
 
 rst_epilog = """
-.. |project| replace:: PySide
+.. |project| replace:: Qt for Python
+.. |pymodname| replace:: PySide2
 """
 
 # Add any paths that contain templates here, relative to this directory.
