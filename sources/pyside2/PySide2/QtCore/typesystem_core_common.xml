@@ -430,7 +430,8 @@
             %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
             <add-conversion type="PySequence">
-            %out = QVariant_convertToVariantList(%in);
+            QVariant ret = QVariant_convertToVariantList(%in);
+            %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
             <add-conversion type="PyObject">
             // Is a shiboken type not known by Qt
@@ -480,8 +481,12 @@
     }
     static QVariant QVariant_convertToValueList(PyObject *list)
     {
-        if (PySequence_Size(list) &lt; 1)
-            return QVariant();
+        if (PySequence_Size(list) &lt; 0) {
+             // clear the error if &lt; 0 which means no length at all
+             PyErr_Clear();
+             return QVariant();
+        }
+
         Shiboken::AutoDecRef element(PySequence_GetItem(list, 0));
         int typeId;
         const char *typeName = QVariant_resolveMetaType(element.cast&lt;PyTypeObject*&gt;(), &amp;typeId);
@@ -505,14 +510,26 @@
     static bool QVariant_isStringList(PyObject *list)
     {
         bool allString = true;
-        Shiboken::AutoDecRef fast(PySequence_Fast(list, "Failed to convert QVariantList"));
-        Py_ssize_t size = PySequence_Fast_GET_SIZE(fast.object());
-        for (int i = 0; i &lt; size; ++i) {
-            PyObject *item = PySequence_Fast_GET_ITEM(fast.object(), i);
-            if (!%CHECKTYPE[QString](item)) {
-                allString = false;
-                break;
+
+        if (PySequence_Check(list)) {
+            if (PySequence_Size(list) &lt; 0) {
+                 // clear the error if &lt; 0 which means no length at all
+                 PyErr_Clear();
+                 return false;
             }
+            Shiboken::AutoDecRef fast(PySequence_Fast(list, "Failed to convert QVariantList"));
+            Py_ssize_t size = PySequence_Fast_GET_SIZE(fast.object());
+            for (int i = 0; i &lt; size; ++i) {
+                PyObject *item = PySequence_Fast_GET_ITEM(fast.object(), i);
+                if (!%CHECKTYPE[QString](item)) {
+                    allString = false;
+                    break;
+                }
+            }
+        } else {
+            // If it is not a list or a derived list class
+            // we assume that will not be a String list neither.
+            allString = false;
         }
         return allString;
     }
@@ -541,6 +558,13 @@
         QVariant valueList = QVariant_convertToValueList(list);
         if (valueList.isValid())
             return valueList;
+
+        if (PySequence_Size(list) &lt; 0) {
+            // clear the error if &lt; 0 which means no length at all
+            PyErr_Clear();
+            return QVariant();
+        }
+
         QList&lt;QVariant&gt; lst;
         Shiboken::AutoDecRef fast(PySequence_Fast(list, "Failed to convert QVariantList"));
         Py_ssize_t size = PySequence_Fast_GET_SIZE(fast.object());
