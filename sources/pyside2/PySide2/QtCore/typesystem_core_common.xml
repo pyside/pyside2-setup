@@ -2015,6 +2015,7 @@
   </object-type>
   <object-type name="QThread">
     <enum-type name="Priority"/>
+    <modify-function signature="currentThreadId()" remove="all"/>
     <modify-function signature="run()" thread="yes" />
     <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
     <modify-function signature="msleep(unsigned long)" allow-thread="yes" />

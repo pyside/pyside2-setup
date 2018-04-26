@@ -2321,7 +2321,6 @@ if "PySide2.QtCore" in sys.modules:
     # class PySide2.QtCore.QThread:
         "QThread.__init__": ('PySide2.QtCore.QObject',),
         "QThread.currentThread": (),
-        "QThread.currentThreadId": (),
         "QThread.event": ('PySide2.QtCore.QEvent',),
         "QThread.eventDispatcher": (),
         "QThread.exec_": (),
