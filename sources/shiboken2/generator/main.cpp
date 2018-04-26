@@ -146,13 +146,18 @@ static void printOptions(QTextStream& s, const OptionDescriptions& options)
 {
     s.setFieldAlignment(QTextStream::AlignLeft);
     for (const auto &od : options) {
-        s << ' ';
         if (!od.first.startsWith(QLatin1Char('-')))
             s << "--";
-        s.setFieldWidth(38);
-        s << od.first << od.second;
-        s.setFieldWidth(0);
-        s << endl;
+        s << od.first;
+        if (od.second.isEmpty()) {
+            s << ", ";
+        } else {
+            s << endl;
+            const auto lines = od.second.splitRef(QLatin1Char('\n'));
+            for (const auto &line : lines)
+                s << "        " << line << endl;
+            s << endl;
+        }
     }
 }
 
@@ -348,7 +353,8 @@ void printUsage()
         << qMakePair(QLatin1String("documentation-only"),
                      QLatin1String("Do not generates any code, just the documentation"))
         << qMakePair(QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
-                     QLatin1String("Semicolon separated list of type system entries (classes, namespaces, global functions and enums) to be dropped from generation."))
+                     QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
+                                   "global functions and enums) to be dropped from generation."))
         << qMakePair(QLatin1String("-F") + pathSyntax, QString())
         << qMakePair(QLatin1String("framework-include-paths=") + pathSyntax,
                      QLatin1String("Framework include paths used by the C++ parser"))
@@ -367,7 +373,8 @@ void printUsage()
         << qMakePair(QLatin1String("output-directory=<path>"),
                      QLatin1String("The directory where the generated files will be written"))
         << qMakePair(QLatin1String("project-file=<file>"),
-                     QLatin1String("text file containing a description of the binding project. Replaces and overrides command line arguments"))
+                     QLatin1String("text file containing a description of the binding project.\n"
+                                   "Replaces and overrides command line arguments"))
         << qMakePair(QLatin1String("silent"),
                      QLatin1String("Avoid printing any message"))
         << qMakePair(QLatin1String("-T") + pathSyntax, QString())
@@ -381,7 +388,7 @@ void printUsage()
     for (const GeneratorPtr &generator : generators) {
         const OptionDescriptions options = generator->options();
         if (!options.isEmpty()) {
-            s << endl << generator->name() << " options:\n";
+            s << endl << generator->name() << " options:\n\n";
             printOptions(s, generator->options());
         }
     }

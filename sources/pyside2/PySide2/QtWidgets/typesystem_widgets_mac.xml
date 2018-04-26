@@ -49,7 +49,7 @@
     <enum-type name="FocusRectPolicy"/>
     <enum-type name="WidgetSizePolicy"/>
   </object-type>
-  --> 
+  -->
   <rejection class="QWidget" function-name="macCGHandle"/>
   <rejection class="QWidget" function-name="macQDHandle"/>
 </typesystem>

@@ -4,9 +4,9 @@
 Binding Project File
 ********************
 
-Instead of directing the Generator behaviour via command line, the binding developer
-can write a text project file describing the same information, and avoid the hassle
-of a long stream of command line arguments.
+Instead of directing the Generator behavior via command line, the binding
+developer can write a text project file describing the same information, and
+avoid the hassle of a long stream of command line arguments.
 
 .. _project-file-structure:
 
@@ -34,11 +34,13 @@ Project file tags
 
 The generator project file tags are in direct relation to the
 :ref:`command line arguments <command-line>`. All of the current command line
-options provided by |project| were already seen on the :ref:`project-file-structure`,
-for new command line options provided by additional generator modules (e.g.: qtdoc,
-Shiboken) could also be used in the generator project file following simple conversion rules.
+options provided by |project| were already seen on the
+:ref:`project-file-structure`, for new command line options provided by
+additional generator modules (e.g.: qtdoc, Shiboken) could also be used in the
+generator project file following simple conversion rules.
 
-For tags without options, just write as an empty tag without any attributes. Example:
+For tags without options, just write as an empty tag without any attributes.
+Example:
 
     .. code-block:: bash
 

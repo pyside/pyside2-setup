@@ -69,7 +69,7 @@
 
     <value-type name="QDomDocument">
         <!-- will be replaced in inject code -->
-        <modify-function signature="setContent(const QByteArray&amp;, bool, QString*, int*, int*)">
+        <modify-function signature="setContent(const QByteArray&amp;,bool,QString*,int*,int*)">
             <modify-argument index="3">
                 <remove-argument/>
                 <remove-default-expression/>
@@ -89,7 +89,7 @@
                 <insert-template name="qdomdocument_setcontent" />
             </inject-code>
         </modify-function>
-        <modify-function signature="setContent(const QString&amp;, bool, QString*, int*, int*)">
+        <modify-function signature="setContent(const QString&amp;,bool,QString*,int*,int*)">
             <modify-argument index="3">
                 <remove-argument/>
                 <remove-default-expression/>
@@ -109,7 +109,7 @@
                 <insert-template name="qdomdocument_setcontent" />
             </inject-code>
         </modify-function>
-        <modify-function signature="setContent(QIODevice*, bool, QString*, int*, int*)">
+        <modify-function signature="setContent(QIODevice*,bool,QString*,int*,int*)">
             <modify-argument index="3">
                 <remove-argument/>
                 <remove-default-expression/>
@@ -129,7 +129,7 @@
                 <insert-template name="qdomdocument_setcontent" />
             </inject-code>
         </modify-function>
-        <modify-function signature="setContent(const QByteArray&amp;, QString*, int*, int*)">
+        <modify-function signature="setContent(const QByteArray&amp;,QString*,int*,int*)">
             <modify-argument index="2">
                 <remove-argument/>
                 <remove-default-expression/>
@@ -209,7 +209,7 @@
                 <insert-template name="qdomdocument_setcontent" />
             </inject-code>
         </modify-function>
-        <modify-function signature="setContent(const QString&amp;, QString*,int*,int*)">
+        <modify-function signature="setContent(const QString&amp;,QString*,int*,int*)">
             <modify-argument index="2">
                 <remove-argument/>
                 <remove-default-expression/>
@@ -244,7 +244,7 @@
     <value-type name="QDomNode">
         <enum-type name="EncodingPolicy"/>
         <enum-type name="NodeType"/>
-        <modify-function signature="save(QTextStream&amp;, int, QDomNode::EncodingPolicy)const" allow-thread="yes"/>
+        <modify-function signature="save(QTextStream&amp;,int,QDomNode::EncodingPolicy)const" allow-thread="yes"/>
     </value-type>
 
     <value-type name="QDomNodeList" />
@@ -281,7 +281,7 @@
     </template>
 
     <object-type name="QXmlEntityResolver">
-        <modify-function signature="resolveEntity(const QString&amp;, const QString&amp;, QXmlInputSource*&amp;)">
+        <modify-function signature="resolveEntity(const QString&amp;,const QString&amp;,QXmlInputSource*&amp;)">
             <modify-argument index="3">
                 <remove-argument/>
             </modify-argument>
@@ -308,7 +308,7 @@
                 <define-ownership owner="c++"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="resolveEntity(const QString&amp;, const QString&amp;, QXmlInputSource*&amp;)">
+        <modify-function signature="resolveEntity(const QString&amp;,const QString&amp;,QXmlInputSource*&amp;)">
             <modify-argument index="3">
                 <remove-argument/>
             </modify-argument>

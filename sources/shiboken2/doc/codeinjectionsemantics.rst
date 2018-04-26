@@ -2,11 +2,12 @@
 Code Injection Semantics
 ************************
 
-API Extractor provides the `inject-code
-<http://www.pyside.org/docs/apiextractor/typesystem_manipulating_objects.html#inject-code>`_ tag
-allowing the user to put custom written code to on specific locations of the generated code.
-Yet this is only part of what is needed to generate proper binding code, where the custom code
-should be written to depends upon the technology used on the generated binding code.
+API Extractor provides the `inject-code`_ tag allowing the user to put custom
+written code to on specific locations of the generated code.
+Yet this is only part of what is needed to generate proper binding code, where
+the custom code should be written to depends upon the technology used on the
+generated binding code.
+
 
 This is the ``inject-code`` tag options that matters to |project|.
 
@@ -15,6 +16,7 @@ This is the ``inject-code`` tag options that matters to |project|.
          <inject-code class="native | target" position="beginning | end">
              // custom code
          </inject-code>
+
 
 Conventions
 ===========
@@ -86,7 +88,7 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |         |signature.                                                    |
     |               +------+---------+--------------------------------------------------------------+
     |               |shell |beginning|Used only for virtual functions. The code is injected when the|
-    |               |      |         |function does not has a pyhton implementation, then the code  |
+    |               |      |         |function does not has a Python implementation, then the code  |
     |               |      |         |is inserted before c++ call                                   |
     |               |      +---------+--------------------------------------------------------------+
     |               |      |end      |Same as above, but the code is inserted after c++ call        |
@@ -158,7 +160,7 @@ If the argument is removed and no default value is provided, the generator will
 not write any call to the method and expect the ``modify-function - target/beginning``
 code injection to call the original C++ method on its own terms. If even this
 custom code is not provided the generator will put an ``#error`` clause to
-prevent compilation of erroneus binding code.
+prevent compilation of erroneous binding code.
 
 Calling the method with your own hands always!
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -352,7 +354,7 @@ Code injections to the class Python initialization function.
 Code Injection for Modules
 ==========================
 
-The C++ libraries are wapped as Python modules, a collection of classes,
+The C++ libraries are wrapped as Python modules, a collection of classes,
 functions, enums and namespaces. |project| creates wrapper files for all of
 them and also one extra ``MODULENAME_module_wrapper.cpp`` to register the whole
 module. Code injection xml tags who have the ``typesystem`` tag as parent will
@@ -395,3 +397,5 @@ to prevent bad custom code to pass unnoticed.
 
         // Start of ``MODULENAME_module_wrapper.cpp``
 
+
+.. _`inject-code`: http://www.pyside.org/docs/apiextractor/typesystem_manipulating_objects.html#inject-code

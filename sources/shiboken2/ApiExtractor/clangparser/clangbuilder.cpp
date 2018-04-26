@@ -41,6 +41,7 @@
 #include <QtCore/QVector>
 
 #include <string.h>
+#include <ctype.h>
 
 #if QT_VERSION < 0x050800
 #  define Q_FALLTHROUGH()  (void)0
@@ -121,6 +122,24 @@ static void setFileName(const CXCursor &cursor, _CodeModelItem *item)
         item->setStartPosition(int(range.first.line), int(range.first.column));
         item->setEndPosition(int(range.second.line), int(range.second.column));
     }
+}
+
+static bool isSigned(CXTypeKind kind)
+{
+    switch (kind) {
+    case CXType_UChar:
+    case CXType_Char16:
+    case CXType_Char32:
+    case CXType_UShort:
+    case CXType_UInt:
+    case CXType_ULong:
+    case CXType_ULongLong:
+    case CXType_UInt128:
+        return false;
+    default:
+        break;
+    }
+    return true;
 }
 
 class BuilderPrivate {
@@ -437,6 +456,36 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
     return QString::fromLocal8Bit(equalSign, int(snippet.second - equalSign)).trimmed();
 }
 
+// A hacky reimplementation of clang_EnumDecl_isScoped() for Clang < 5.0
+// which simply checks for a blank-delimited " class " keyword in the enum snippet.
+
+#define CLANG_NO_ENUMDECL_ISSCOPED \
+    (CINDEX_VERSION_MAJOR == 0 && CINDEX_VERSION_MINOR < 43)
+
+#if CLANG_NO_ENUMDECL_ISSCOPED
+static const char *indexOf(const BaseVisitor::CodeSnippet &snippet, const char *needle)
+{
+    const size_t snippetLength = snippet.first ? size_t(snippet.second - snippet.first) : 0;
+    const size_t needleLength = strlen(needle);
+    if (needleLength > snippetLength)
+        return nullptr;
+    for (const char *c = snippet.first, *end = snippet.second - needleLength; c < end; ++c) {
+        if (memcmp(c, needle, needleLength) == 0)
+            return c;
+    }
+    return nullptr;
+}
+
+long clang_EnumDecl_isScoped4(BaseVisitor *bv, const CXCursor &cursor)
+{
+    BaseVisitor::CodeSnippet snippet = bv->getCodeSnippet(cursor);
+    const char *classSpec = indexOf(snippet, "class");
+    const bool isClass = classSpec && classSpec > snippet.first
+        && isspace(*(classSpec - 1)) && isspace(*(classSpec + 5));
+    return isClass ? 1 : 0;
+}
+#endif // CLANG_NO_ENUMDECL_ISSCOPED
+
 // Add a base class to the current class from CXCursor_CXXBaseSpecifier
 void BuilderPrivate::addBaseClass(const CXCursor &cursor)
 {
@@ -641,13 +690,22 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_EnumDecl: {
         QString name = getCursorSpelling(cursor);
-        const bool anonymous = name.isEmpty();
-        if (anonymous)
+        EnumKind kind = CEnum;
+        if (name.isEmpty()) {
+            kind = AnonymousEnum;
             name = QStringLiteral("enum_") + QString::number(++d->m_anonymousEnumCount);
+#if !CLANG_NO_ENUMDECL_ISSCOPED
+        } else if (clang_EnumDecl_isScoped(cursor) != 0) {
+#else
+        } else if (clang_EnumDecl_isScoped4(this, cursor) != 0) {
+#endif
+            kind = EnumClass;
+        }
         d->m_currentEnum.reset(new _EnumModelItem(d->m_model, name));
         setFileName(cursor, d->m_currentEnum.data());
         d->m_currentEnum->setScope(d->m_scope);
-        d->m_currentEnum->setAnonymous(anonymous);
+        d->m_currentEnum->setEnumKind(kind);
+        d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
         if (!qSharedPointerDynamicCast<_ClassModelItem>(d->m_scopeStack.back()).isNull())
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
         d->m_scopeStack.back()->addEnum(d->m_currentEnum);
@@ -661,8 +719,14 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             appendDiagnostic(d);
             return Error;
         }
+        EnumValue enumValue;
+        if (d->m_currentEnum->isSigned())
+            enumValue.setValue(clang_getEnumConstantDeclValue(cursor));
+        else
+            enumValue.setUnsignedValue(clang_getEnumConstantDeclUnsignedValue(cursor));
         EnumeratorModelItem enumConstant(new _EnumeratorModelItem(d->m_model, name));
-        enumConstant->setValue(d->cursorValueExpression(this, cursor));
+        enumConstant->setStringValue(d->cursorValueExpression(this, cursor));
+        enumConstant->setValue(enumValue);
         d->m_currentEnum->addEnumerator(enumConstant);
     }
         break;

@@ -71,7 +71,7 @@ except NameError:
 
 def has_option(name):
     try:
-        sys.argv.remove('--%s' % name)
+        sys.argv.remove("--{}".format(name))
         return True
     except ValueError:
         pass
@@ -82,8 +82,8 @@ def option_value(name):
     for index, option in enumerate(sys.argv):
         if option == '--' + name:
             if index+1 >= len(sys.argv):
-                raise DistutilsOptionError(
-                    'The option %s requires a value' % option)
+                raise DistutilsOptionError("The option {} requires a "
+                    "value".format(option))
             value = sys.argv[index+1]
             sys.argv[index:index+2] = []
             return value
@@ -108,7 +108,7 @@ def update_env_path(newpaths):
     paths = os.environ['PATH'].lower().split(os.pathsep)
     for path in newpaths:
         if not path.lower() in paths:
-            log.info("Inserting path \"%s\" to environment" % path)
+            log.info("Inserting path '{}' to environment".format(path))
             paths.insert(0, path)
             os.environ['PATH'] = path + os.pathsep + os.environ['PATH']
 
@@ -127,7 +127,8 @@ def winsdk_setenv(platform_arch, build_type):
         "v7.1": 10.0
     }
 
-    log.info("Searching Windows SDK with MSVC compiler version %s" % MSVC_VERSION)
+    log.info("Searching Windows SDK with MSVC compiler version {}".format(
+        MSVC_VERSION))
     setenv_paths = []
     for base in HKEYS:
         sdk_versions = Reg.read_keys(base, WINSDK_BASE)
@@ -148,14 +149,14 @@ def winsdk_setenv(platform_arch, build_type):
                 setenv_paths.append(setenv_path)
     if len(setenv_paths) == 0:
         raise DistutilsSetupError(
-            "Failed to find the Windows SDK with MSVC compiler version %s"
-                % MSVC_VERSION)
+            "Failed to find the Windows SDK with MSVC compiler "
+                "version {}".format(MSVC_VERSION))
     for setenv_path in setenv_paths:
-        log.info("Found %s" % setenv_path)
+        log.info("Found {}".format(setenv_path))
 
     # Get SDK env (use latest SDK version installed on system)
     setenv_path = setenv_paths[-1]
-    log.info("Using %s " % setenv_path)
+    log.info("Using {} ".format(setenv_path))
     build_arch = "/x86" if platform_arch.startswith("32") else "/x64"
     build_type = "/Debug" if build_type.lower() == "debug" else "/Release"
     setenv_cmd = [setenv_path, build_arch, build_type]
@@ -168,22 +169,22 @@ def winsdk_setenv(platform_arch, build_type):
     update_env_path(setenv_env_paths)
     for k in sorted(setenv_env_without_paths):
         v = setenv_env_without_paths[k]
-        log.info("Inserting \"%s = %s\" to environment" % (k, v))
+        log.info("Inserting '{} = {}' to environment".format(k, v))
         os.environ[k] = v
     log.info("Done initializing Windows SDK env")
 
 
 def find_vcdir(version):
     """
-    This is the customized version of distutils.msvc9compiler.find_vcvarsall method
+    This is the customized version of
+    distutils.msvc9compiler.find_vcvarsall method
     """
     from distutils.msvc9compiler import VS_BASE
     from distutils.msvc9compiler import Reg
     from distutils import log
     vsbase = VS_BASE % version
     try:
-        productdir = Reg.get_value(r"%s\Setup\VC" % vsbase,
-                                   "productdir")
+        productdir = Reg.get_value(r"{}\Setup\VC".format(vsbase), "productdir")
     except KeyError:
         productdir = None
 
@@ -196,7 +197,7 @@ def find_vcdir(version):
         else:
             vsbase = VSEXPRESS_BASE % version
             try:
-                productdir = Reg.get_value(r"%s\Setup\VC" % vsbase,
+                productdir = Reg.get_value(r"{}\Setup\VC".format(vsbase),
                                            "productdir")
             except KeyError:
                 productdir = None
@@ -210,10 +211,10 @@ def find_vcdir(version):
             productdir = os.path.join(toolsdir, os.pardir, os.pardir, "VC")
             productdir = os.path.abspath(productdir)
             if not os.path.isdir(productdir):
-                log.debug("%s is not a valid directory" % productdir)
+                log.debug("{} is not a valid directory".format(productdir))
                 return None
         else:
-            log.debug("Env var %s is not set or invalid" % toolskey)
+            log.debug("Env var {} is not set or invalid".format(toolskey))
     if not productdir:
         log.debug("No productdir found")
         return None
@@ -223,37 +224,41 @@ def find_vcdir(version):
 def init_msvc_env(platform_arch, build_type):
     from distutils.msvc9compiler import VERSION as MSVC_VERSION
 
-    log.info("Searching MSVC compiler version %s" % MSVC_VERSION)
+    log.info("Searching MSVC compiler version {}".format(MSVC_VERSION))
     vcdir_path = find_vcdir(MSVC_VERSION)
     if not vcdir_path:
         raise DistutilsSetupError(
-            "Failed to find the MSVC compiler version %s on your system." % MSVC_VERSION)
+            "Failed to find the MSVC compiler version {} on your "
+            "system.".formar(MSVC_VERSION))
     else:
-        log.info("Found %s" % vcdir_path)
+        log.info("Found {}".format(vcdir_path))
 
-    log.info("Searching MSVC compiler %s environment init script" % MSVC_VERSION)
+    log.info("Searching MSVC compiler {} environment init script".format(
+        MSVC_VERSION))
     if platform_arch.startswith("32"):
         vcvars_path = os.path.join(vcdir_path, "bin", "vcvars32.bat")
     else:
         vcvars_path = os.path.join(vcdir_path, "bin", "vcvars64.bat")
         if not os.path.exists(vcvars_path):
-            vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvars64.bat")
+            vcvars_path = os.path.join(vcdir_path, "bin", "amd64",
+                "vcvars64.bat")
             if not os.path.exists(vcvars_path):
-                vcvars_path = os.path.join(vcdir_path, "bin", "amd64", "vcvarsamd64.bat")
+                vcvars_path = os.path.join(vcdir_path, "bin", "amd64",
+                    "vcvarsamd64.bat")
 
     if not os.path.exists(vcvars_path):
         # MSVC init script not found, try to find and init Windows SDK env
-        log.error(
-            "Failed to find the MSVC compiler environment init script (vcvars.bat) on your system.")
+        log.error("Failed to find the MSVC compiler environment init script "
+            "(vcvars.bat) on your system.")
         winsdk_setenv(platform_arch, build_type)
         return
     else:
-        log.info("Found %s" % vcvars_path)
+        log.info("Found {}".format(vcvars_path))
 
     # Get MSVC env
-    log.info("Using MSVC %s in %s" % (MSVC_VERSION, vcvars_path))
+    log.info("Using MSVC {} in {}".format(MSVC_VERSION, vcvars_path))
     msvc_arch = "x86" if platform_arch.startswith("32") else "amd64"
-    log.info("Getting MSVC env for %s architecture" % msvc_arch)
+    log.info("Getting MSVC env for {} architecture".format(msvc_arch))
     vcvars_cmd = [vcvars_path, msvc_arch]
     msvc_env = get_environment_from_batch_command(vcvars_cmd)
     msvc_env_paths = os.pathsep.join([msvc_env[k] for k in msvc_env if k.upper() == 'PATH']).split(os.pathsep)
@@ -264,7 +269,7 @@ def init_msvc_env(platform_arch, build_type):
     update_env_path(msvc_env_paths)
     for k in sorted(msvc_env_without_paths):
         v = msvc_env_without_paths[k]
-        log.info("Inserting \"%s = %s\" to environment" % (k, v))
+        log.info("Inserting '{} = {}' to environment".format(k, v))
         os.environ[k] = v
     log.info("Done initializing MSVC env")
 
@@ -275,11 +280,12 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False):
         dst = dst.format(**vars)
 
     if not os.path.exists(src) and not force:
-        log.info("**Skiping copy file %s to %s. Source does not exists." % (src, dst))
+        log.info("**Skiping copy file {} to {}. "
+            "Source does not exists.".format(src, dst))
         return
 
     if not os.path.islink(src) or force_copy_symlink:
-        log.info("Copying file %s to %s." % (src, dst))
+        log.info("Copying file {} to {}.".format(src, dst))
         shutil.copy2(src, dst)
     else:
         linkTargetPath = os.path.realpath(src)
@@ -292,14 +298,17 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False):
                 os.chdir(targetDir)
                 if os.path.exists(linkName):
                     os.remove(linkName)
-                log.info("Symlinking %s -> %s in %s." % (linkName, linkTarget, targetDir))
+                log.info("Symlinking {} -> {} in {}.".format(linkName,
+                    linkTarget, targetDir))
                 os.symlink(linkTarget, linkName)
             except OSError:
-                log.error("%s -> %s: Error creating symlink" % (linkName, linkTarget))
+                log.error("{} -> {}: Error creating symlink".format(linkName,
+                    linkTarget))
             finally:
                 os.chdir(currentDirectory)
         else:
-            log.error("%s -> %s: Can only create symlinks within the same directory" % (src, linkTargetPath))
+            log.error("{} -> {}: Can only create symlinks within the same "
+                "directory".format(src, linkTargetPath))
 
     return dst
 
@@ -310,7 +319,7 @@ def makefile(dst, content=None, vars=None):
             content = content.format(**vars)
         dst = dst.format(**vars)
 
-    log.info("Making file %s." % (dst))
+    log.info("Making file {}.".format(dst))
 
     dstdir = os.path.dirname(dst)
     if not os.path.exists(dstdir):
@@ -322,8 +331,9 @@ def makefile(dst, content=None, vars=None):
     f.close()
 
 
-def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars=None,
-            dir_filter_function=None, file_filter_function=None, force_copy_symlinks=False):
+def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True,
+    vars=None, dir_filter_function=None, file_filter_function=None,
+    force_copy_symlinks=False):
 
     if vars is not None:
         src = src.format(**vars)
@@ -336,12 +346,12 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
                 ignore[i] = ignore[i].format(**vars)
 
     if not os.path.exists(src) and not force:
-        log.info("**Skiping copy tree %s to %s. Source does not exists. filter=%s. ignore=%s." % \
-            (src, dst, filter, ignore))
+        log.info("**Skiping copy tree {} to {}. Source does not exists. "
+            "filter={}. ignore={}.".format(src, dst, filter, ignore))
         return []
 
-    log.info("Copying tree %s to %s. filter=%s. ignore=%s." % \
-        (src, dst, filter, ignore))
+    log.info("Copying tree {} to {}. filter={}. ignore={}.".format(src, dst,
+        filter, ignore))
 
     names = os.listdir(src)
 
@@ -352,21 +362,25 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True, vars
         dstname = os.path.join(dst, name)
         try:
             if os.path.isdir(srcname):
-                if dir_filter_function and not dir_filter_function(name, src, srcname):
+                if (dir_filter_function and
+                        not dir_filter_function(name, src, srcname)):
                     continue
                 if recursive:
                     results.extend(
-                        copydir(srcname, dstname, filter, ignore, force, recursive,
-                                vars, dir_filter_function, file_filter_function,
-                                force_copy_symlinks))
+                        copydir(srcname, dstname, filter, ignore, force,
+                            recursive, vars, dir_filter_function,
+                            file_filter_function, force_copy_symlinks))
             else:
-                if (file_filter_function is not None and not file_filter_function(name, srcname)) \
-                    or (filter is not None and not filter_match(name, filter)) \
-                    or (ignore is not None and filter_match(name, ignore)):
+                if ((file_filter_function is not None and
+                        not file_filter_function(name, srcname)) or
+                        (filter is not None and
+                        not filter_match(name, filter)) or
+                        (ignore is not None and filter_match(name, ignore))):
                     continue
                 if not os.path.exists(dst):
                     os.makedirs(dst)
-                results.append(copyfile(srcname, dstname, True, vars, force_copy_symlinks))
+                results.append(copyfile(srcname, dstname, True, vars,
+                    force_copy_symlinks))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
         except shutil.Error as err:
@@ -423,7 +437,8 @@ def run_process(args, initial_env=None):
         for line in lines:
             log.info(line.rstrip('\r'))
         return buffer
-    _log("Running process in {0}: {1}".format(os.getcwd(), " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
+    _log("Running process in {0}: {1}".format(os.getcwd(),
+        " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
 
     if sys.platform != "win32":
         try:
@@ -471,7 +486,7 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     def validate_pair(ob):
         try:
             if not (len(ob) == 2):
-                print("Unexpected result: %s" % ob)
+                print("Unexpected result: {}".format(ob))
                 raise ValueError
         except:
             return False
@@ -490,7 +505,8 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     # create a tag so we can tell in the output when the proc is done
     tag = 'Done running command'
     # construct a cmd.exe command to do accomplish this
-    cmd = 'cmd.exe /E:ON /V:ON /s /c "{env_cmd} && echo "{tag}" && set"'.format(**vars())
+    cmd = 'cmd.exe /E:ON /V:ON /s /c "{} && echo "{}" && set"'.format(env_cmd,
+        tag)
     # launch the process
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=initial)
     # parse the output sent to stdout
@@ -527,15 +543,17 @@ def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
             srcname_split = srcname.rsplit('.qrc', 1)
             dstname = '_rc.py'.join(srcname_split)
             if os.path.exists(dstname):
-                log.info('Regenerating %s from %s' % \
-                    (dstname, os.path.basename(srcname)))
+                log.info('Regenerating {} from {}'.format(dstname,
+                    os.path.basename(srcname)))
                 run_process([pyside_rcc_path,
                              pyside_rcc_options,
                              srcname, '-o', dstname])
 
 
 def back_tick(cmd, ret_err=False):
-    """ Run command `cmd`, return stdout, or stdout, stderr, return_code if `ret_err` is True.
+    """
+    Run command `cmd`, return stdout, or stdout, stderr,
+    return_code if `ret_err` is True.
 
     Roughly equivalent to ``check_output`` in Python 2.7
 
@@ -544,22 +562,25 @@ def back_tick(cmd, ret_err=False):
     cmd : str
         command to execute
     ret_err : bool, optional
-        If True, return stderr and return_code in addition to stdout.  If False, just return
-        stdout
+        If True, return stderr and return_code in addition to stdout.
+        If False, just return stdout
 
     Returns
     -------
     out : str or tuple
         If `ret_err` is False, return stripped string containing stdout from
-        `cmd`.  If `ret_err` is True, return tuple of (stdout, stderr, return_code) where
-        ``stdout`` is the stripped stdout, and ``stderr`` is the stripped
+        `cmd`.
+        If `ret_err` is True, return tuple of (stdout, stderr, return_code)
+        where ``stdout`` is the stripped stdout, and ``stderr`` is the stripped
         stderr, and ``return_code`` is the process exit code.
 
     Raises
     ------
-    Raises RuntimeError if command returns non-zero exit code when ret_err isn't set.
+    Raises RuntimeError if command returns non-zero exit code when ret_err
+    isn't set.
     """
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, shell=True)
     out, err = proc.communicate()
     if not isinstance(out, str):
         # python 3
@@ -570,19 +591,20 @@ def back_tick(cmd, ret_err=False):
         proc.terminate()
         raise RuntimeError(cmd + ' process did not terminate')
     if retcode != 0 and not ret_err:
-        raise RuntimeError(cmd + ' process returned code %d\n*** %s' %
-                           (retcode, err))
+        raise RuntimeError("{} process returned code {}\n*** {}".format(
+            (cmd, retcode, err)))
     out = out.strip()
     if not ret_err:
         return out
     return out, err.strip(), retcode
 
 
-OSX_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
+MACOS_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
                         '[\d.]+\)')
 
-def osx_get_install_names(libpath):
-    """ Get OSX library install names from library `libpath` using ``otool``
+def macos_get_install_names(libpath):
+    """
+    Get macOS library install names from library `libpath` using ``otool``
 
     Parameters
     ----------
@@ -596,12 +618,12 @@ def osx_get_install_names(libpath):
     """
     out = back_tick('otool -L ' + libpath)
     libs = [line for line in out.split('\n')][1:]
-    return [OSX_OUTNAME_RE.sub('', lib).strip() for lib in libs]
+    return [MACOS_OUTNAME_RE.sub('', lib).strip() for lib in libs]
 
 
-OSX_RPATH_RE = re.compile(r"path (.+) \(offset \d+\)")
+MACOS_RPATH_RE = re.compile(r"path (.+) \(offset \d+\)")
 
-def osx_get_rpaths(libpath):
+def macos_get_rpaths(libpath):
     """ Get rpath load commands from library `libpath` using ``otool``
 
     Parameters
@@ -628,7 +650,7 @@ def osx_get_rpaths(libpath):
             continue
         assert lines[ctr + 1].strip().startswith('cmdsize')
         rpath_line = lines[ctr + 2].strip()
-        match = OSX_RPATH_RE.match(rpath_line)
+        match = MACOS_RPATH_RE.match(rpath_line)
         if match is None:
             raise RuntimeError('Unexpected path line: ' + rpath_line)
         rpaths.append(match.groups()[0])
@@ -636,15 +658,16 @@ def osx_get_rpaths(libpath):
     return rpaths
 
 
-def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
+def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
     """ Adds required rpath load commands to given library.
 
-    This is a necessary post-installation step, to allow loading PySide modules without setting
-    DYLD_LIBRARY_PATH or DYLD_FRAMEWORK_PATH.
-    The CMake rpath commands which are added at build time  are used only for testing (make check),
-    and they are stripped once the equivalent of make install is executed (except for shiboken,
-    which currently uses CMAKE_INSTALL_RPATH_USE_LINK_PATH, which might be necessary to remove in
-    the future).
+    This is a necessary post-installation step, to allow loading PySide
+    modules without setting DYLD_LIBRARY_PATH or DYLD_FRAMEWORK_PATH.
+    The CMake rpath commands which are added at build time are used only
+    for testing (make check), and they are stripped once the equivalent
+    of make install is executed (except for shiboken, which currently
+    uses CMAKE_INSTALL_RPATH_USE_LINK_PATH, which might be necessary to
+    remove in the future).
 
     Parameters
     ----------
@@ -654,8 +677,8 @@ def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
         rpath to installed Qt lib directory.
     """
 
-    install_names = osx_get_install_names(library_path)
-    existing_rpath_commands = osx_get_rpaths(library_path)
+    install_names = macos_get_install_names(library_path)
+    existing_rpath_commands = macos_get_rpaths(library_path)
 
     needs_loader_path = False
     for install_name in install_names:
@@ -663,9 +686,10 @@ def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
         if install_name[0] == '/':
             continue
 
-        # If there are dynamic library install names that contain @rpath tokens, we will
-        # provide an rpath load command with the value of "@loader_path". This will allow loading
-        # dependent libraries from within the same directory as 'library_path'.
+        # If there are dynamic library install names that contain
+        # @rpath tokens, we will provide an rpath load command with the
+        # value of "@loader_path". This will allow loading dependent
+        # libraries from within the same directory as 'library_path'.
         if install_name[0] == '@':
             needs_loader_path = True
             break
@@ -674,19 +698,22 @@ def osx_fix_rpaths_for_library(library_path, qt_lib_dir):
         back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
                   rpath="@loader_path", library_path=library_path))
 
-    # If the library depends on a Qt library, add an rpath load comment pointing to the Qt lib
-    # directory.
-    osx_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands, install_names)
+    # If the library depends on a Qt library, add an rpath load comment
+    # pointing to the Qt lib directory.
+    macos_add_qt_rpath(library_path, qt_lib_dir, existing_rpath_commands,
+        install_names)
 
-def osx_add_qt_rpath(library_path, qt_lib_dir,
+def macos_add_qt_rpath(library_path, qt_lib_dir,
                      existing_rpath_commands = [], library_dependencies = []):
-    """ Adds an rpath load command to the Qt lib directory if necessary
+    """
+    Adds an rpath load command to the Qt lib directory if necessary
 
-    Checks if library pointed to by 'library_path' has Qt dependencies, and adds an rpath load
-    command that points to the Qt lib directory (qt_lib_dir).
+    Checks if library pointed to by 'library_path' has Qt dependencies,
+    and adds an rpath load command that points to the Qt lib directory
+    (qt_lib_dir).
     """
     if not existing_rpath_commands:
-        existing_rpath_commands = osx_get_rpaths(library_path)
+        existing_rpath_commands = macos_get_rpaths(library_path)
 
     # Return early if qt rpath is already present.
     if qt_lib_dir in existing_rpath_commands:
@@ -694,7 +721,7 @@ def osx_add_qt_rpath(library_path, qt_lib_dir,
 
     # Check if any library dependencies are Qt libraries (hacky).
     if not library_dependencies:
-        library_dependencies = osx_get_install_names(library_path)
+        library_dependencies = macos_get_install_names(library_path)
 
     needs_qt_rpath = False
     for library in library_dependencies:
@@ -748,9 +775,10 @@ def detectClang():
         if not clangDir:
             source = findLlvmConfig()
             try:
-                output = run_process_output([source, '--prefix'])
-                if output:
-                    clangDir = output[0]
+                if source is not None:
+                    output = run_process_output([source, '--prefix'])
+                    if output:
+                        clangDir = output[0]
             except OSError:
                 pass
     if clangDir:
@@ -760,27 +788,29 @@ def detectClang():
 
 def download_and_extract_7z(fileurl, target):
     """ Downloads 7z file from fileurl and extract to target  """
-    print("Downloading fileUrl %s " % fileurl)
+    print("Downloading fileUrl {} ".format(fileurl))
     info = ""
     try:
         localfile, info = urllib.urlretrieve(fileurl)
     except:
-        print("Error downloading %r : %r" % (fileurl, info))
-        raise RuntimeError(' Error downloading ' + fileurl)
+        print("Error downloading {} : {}".format(fileurl, info))
+        raise RuntimeError(' Error downloading {}'.format(fileurl))
 
     try:
         outputDir = "-o" + target
-        print("calling 7z x %s %s" % (localfile, outputDir))
+        print("calling 7z x {} {}".format(localfile, outputDir))
         subprocess.call(["7z", "x", "-y", localfile, outputDir])
     except:
-        raise RuntimeError(' Error extracting ' + localfile)
+        raise RuntimeError(' Error extracting {}'.format(localfile))
 
 def split_and_strip(input):
     lines = [s.strip() for s in input.splitlines()]
     return lines
 
 def ldd_get_dependencies(executable_path):
-    """ Returns a dictionary of dependencies that `executable_path` depends on.
+    """
+    Returns a dictionary of dependencies that `executable_path`
+    depends on.
 
     The keys are library names and the values are the library paths.
 
@@ -795,16 +825,20 @@ def ldd_get_dependencies(executable_path):
             dependencies[match.group(1)] = match.group(2)
     return dependencies
 
-def ldd_get_paths_for_dependencies(dependencies_regex, executable_path = None, dependencies = None):
-    """ Returns file paths to shared library dependencies that match given `dependencies_regex`
-        against given `executable_path`.
+def ldd_get_paths_for_dependencies(dependencies_regex, executable_path = None,
+    dependencies = None):
+    """
+    Returns file paths to shared library dependencies that match given
+    `dependencies_regex` against given `executable_path`.
 
-        The function retrieves the list of shared library dependencies using ld.so for the given
-        `executable_path` in order to search for libraries that match the `dependencies_regex`, and
-        then returns a list of absolute paths of the matching libraries.
+    The function retrieves the list of shared library dependencies using
+    ld.so for the given `executable_path` in order to search for
+    libraries that match the `dependencies_regex`, and then returns a
+    list of absolute paths of the matching libraries.
 
-        If no matching library is found in the list of dependencies, an empty list is returned.
-        """
+    If no matching library is found in the list of dependencies,
+    an empty list is returned.
+    """
 
     if not dependencies and not executable_path:
         return None
@@ -823,14 +857,19 @@ def ldd_get_paths_for_dependencies(dependencies_regex, executable_path = None, d
     return paths
 
 def ldd(executable_path):
-    """ Returns ld.so output of shared library dependencies for given `executable_path`.
+    """
+    Returns ld.so output of shared library dependencies for given
+    `executable_path`.
 
-    This is a partial port of /usr/bin/ldd from bash to Python. The dependency list is retrieved
-    by setting the LD_TRACE_LOADED_OBJECTS=1 environment variable, and executing the given path
-    via the dynamic loader ld.so.
+    This is a partial port of /usr/bin/ldd from bash to Python.
+    The dependency list is retrieved by setting the
+    LD_TRACE_LOADED_OBJECTS=1 environment variable, and executing the
+    given path via the dynamic loader ld.so.
 
-    Only works on Linux. The port is required to make this work on systems that might not have ldd.
-    This is because ldd (on Ubuntu) is shipped in the libc-bin package that, which might have a
+    Only works on Linux. The port is required to make this work on
+    systems that might not have ldd.
+    This is because ldd (on Ubuntu) is shipped in the libc-bin package
+    that, which might have a
     minuscule percentage of not being installed.
 
     Parameters
@@ -845,24 +884,29 @@ def ldd(executable_path):
     """
 
     chosen_rtld = None
-    # List of ld's considered by ldd on Ubuntu (here's hoping it's the same on all distros).
-    rtld_list = ["/lib/ld-linux.so.2", "/lib64/ld-linux-x86-64.so.2", "/libx32/ld-linux-x32.so.2"]
+    # List of ld's considered by ldd on Ubuntu (here's hoping it's the
+    # same on all distros).
+    rtld_list = ["/lib/ld-linux.so.2", "/lib64/ld-linux-x86-64.so.2",
+        "/libx32/ld-linux-x32.so.2"]
 
     # Choose appropriate runtime dynamic linker.
     for rtld in rtld_list:
         if os.path.isfile(rtld) and os.access(rtld, os.X_OK):
             (_, _, code) = back_tick(rtld, True)
-            # Code 127 is returned by ld.so when called without any arguments (some kind of sanity
-            # check I guess).
+            # Code 127 is returned by ld.so when called without any
+            # arguments (some kind of sanity check I guess).
             if code == 127:
-                (_, _, code) = back_tick("{} --verify {}".format(rtld, executable_path), True)
-                # Codes 0 and 2 mean given executable_path can be understood by ld.so.
+                (_, _, code) = back_tick("{} --verify {}".format(rtld,
+                    executable_path), True)
+                # Codes 0 and 2 mean given executable_path can be
+                # understood by ld.so.
                 if code in [0, 2]:
                     chosen_rtld = rtld
                     break
 
     if not chosen_rtld:
-        raise RuntimeError('Could not find appropriate ld.so to query for dependencies.')
+        raise RuntimeError("Could not find appropriate ld.so to query "
+            "for dependencies.")
 
     # Query for shared library dependencies.
     rtld_env = "LD_TRACE_LOADED_OBJECTS=1"
@@ -871,8 +915,8 @@ def ldd(executable_path):
     if return_code == 0:
         return out
     else:
-        raise RuntimeError('ld.so failed to query for dependent shared libraries '
-                           'of {} '.format(executable_path))
+        raise RuntimeError("ld.so failed to query for dependent shared "
+            "libraries of {} ".format(executable_path))
 
 def find_files_using_glob(path, pattern):
     """ Returns list of files that matched glob `pattern` in `path`. """
@@ -887,17 +931,21 @@ def find_qt_core_library_glob(lib_dir):
         return maybe_file[0]
     return None
 
-# @TODO: Possibly fix ICU library copying on macOS and Windows. This would require
-# to implement the equivalent of the custom written ldd for the specified platforms.
-# This has less priority because ICU libs are not used in the default Qt configuration build.
-
+# @TODO: Possibly fix ICU library copying on macOS and Windows.
+# This would require to implement the equivalent of the custom written
+# ldd for the specified platforms.
+# This has less priority because ICU libs are not used in the default
+# Qt configuration build.
 def copy_icu_libs(destination_lib_dir):
-    """ Copy ICU libraries that QtCore depends on, to given `destination_lib_dir`. """
+    """
+    Copy ICU libraries that QtCore depends on,
+    to given `destination_lib_dir`.
+    """
     qt_core_library_path = find_qt_core_library_glob(destination_lib_dir)
 
     if not qt_core_library_path or not os.path.exists(qt_core_library_path):
         raise RuntimeError('QtCore library does not exist at path: {}. '
-                           'Failed to copy ICU libraries.'.format(qt_core_library_path))
+            'Failed to copy ICU libraries.'.format(qt_core_library_path))
 
     dependencies = ldd_get_dependencies(qt_core_library_path)
 
@@ -911,9 +959,11 @@ def copy_icu_libs(destination_lib_dir):
             break
 
     if icu_required:
-        paths = ldd_get_paths_for_dependencies(icu_regex, dependencies=dependencies)
+        paths = ldd_get_paths_for_dependencies(icu_regex,
+            dependencies=dependencies)
         if not paths:
-            raise RuntimeError('Failed to find the necessary ICU libraries required by QtCore.')
+            raise RuntimeError("Failed to find the necessary ICU libraries "
+                "required by QtCore.")
         log.info('Copying the detected ICU libraries required by QtCore.')
 
         if not os.path.exists(destination_lib_dir):
@@ -923,12 +973,14 @@ def copy_icu_libs(destination_lib_dir):
             basename = os.path.basename(path)
             destination = os.path.join(destination_lib_dir, basename)
             copyfile(path, destination, force_copy_symlink=True)
-            # Patch the ICU libraries to contain the $ORIGIN rpath value, so that only the local
-            # package libraries are used.
+            # Patch the ICU libraries to contain the $ORIGIN rpath
+            # value, so that only the local package libraries are used.
             linuxSetRPaths(destination, '$ORIGIN')
 
-        # Patch the QtCore library to find the copied over ICU libraries (if necessary).
-        log.info('Checking if QtCore library needs a new rpath to make it work with ICU libs.')
+        # Patch the QtCore library to find the copied over ICU libraries
+        # (if necessary).
+        log.info("Checking if QtCore library needs a new rpath to make it "
+            "work with ICU libs.")
         rpaths = linuxGetRPaths(qt_core_library_path)
         if not rpaths or not rpathsHasOrigin(rpaths):
             log.info('Patching QtCore library to contain $ORIGIN rpath.')
@@ -944,19 +996,24 @@ def linuxSetRPaths(executable_path, rpath_string):
         patchelf_path = os.path.join(script_dir, "patchelf")
         setattr(linuxSetRPaths, "patchelf_path", patchelf_path)
 
-    cmd = [linuxSetRPaths.patchelf_path, '--set-rpath', rpath_string, executable_path]
+    cmd = [linuxSetRPaths.patchelf_path, '--set-rpath',
+        rpath_string, executable_path]
 
     if run_process(cmd) != 0:
-        raise RuntimeError("Error patching rpath in {}".format(executable_path))
+        raise RuntimeError("Error patching rpath in {}".format(
+            executable_path))
 
 def linuxGetRPaths(executable_path):
-    """ Returns a list of run path values embedded in the executable or just an empty list. """
+    """
+    Returns a list of run path values embedded in the executable or just
+    an empty list.
+    """
 
     cmd = "readelf -d {}".format(executable_path)
     (out, err, code) = back_tick(cmd, True)
     if code != 0:
-        raise RuntimeError('Running `readelf -d {}` failed with '
-                           'error output:\n {}. '.format(executable_path, err))
+        raise RuntimeError("Running `readelf -d {}` failed with error "
+            "output:\n {}. ".format(executable_path, err))
     lines = split_and_strip(out)
     pattern = re.compile(r"^.+?\(RUNPATH\).+?\[(.+?)\]$")
 
@@ -975,7 +1032,10 @@ def linuxGetRPaths(executable_path):
     return rpaths
 
 def rpathsHasOrigin(rpaths):
-    """ Return True if the specified list of rpaths has an "$ORIGIN" value (aka current dir). """
+    """
+    Return True if the specified list of rpaths has an "$ORIGIN" value
+    (aka current dir).
+    """
     if not rpaths:
         return False
 
@@ -987,8 +1047,10 @@ def rpathsHasOrigin(rpaths):
     return False
 
 def memoize(function):
-    """ Decorator to wrap a function with a memoizing callable.
-        It returns cached values when the wrapped function is called with the same arguments.
+    """
+    Decorator to wrap a function with a memoizing callable.
+    It returns cached values when the wrapped function is called with
+    the same arguments.
     """
     memo = {}
     def wrapper(*args):
@@ -1008,5 +1070,6 @@ def get_python_dict(python_script_path):
             exec(code, {}, python_dict)
             return python_dict
     except IOError as e:
-        print("get_python_dict: Couldn't get dict from python file: {}.".format(python_script_path))
+        print("get_python_dict: Couldn't get dict from python "
+            "file: {}.".format(python_script_path))
         raise

@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of PySide2.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide2.QtLocation">
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtPositioning/typesystem_positioning.xml" generate="no"/>
+  <object-type name="QGeoCodeReply">
+      <enum-type name="Error"/>
+  </object-type>
+  <value-type name="QGeoManeuver">
+      <enum-type name="InstructionDirection"/>
+   </value-type>
+  <value-type name="QGeoRoute"/>
+  <object-type name="QGeoRouteReply">
+      <enum-type name="Error"/>
+  </object-type>
+  <value-type name="QGeoRouteSegment"/>
+  <object-type name="QGeoServiceProvider">
+      <enum-type name="Error"/>
+      <enum-type name="RoutingFeature" flags="RoutingFeatures"/>
+      <enum-type name="GeocodingFeature" flags="GeocodingFeatures"/>
+      <enum-type name="MappingFeature" flags="MappingFeatures"/>
+      <enum-type name="PlacesFeature" flags="PlacesFeatures"/>
+      <enum-type name="NavigationFeature" flags="NavigationFeatures"/>
+  </object-type>
+  <value-type name="QPlace"/>
+  <object-type name="QPlaceContentReply"/>
+  <object-type name="QPlaceDetailsReply"/>
+  <value-type name="QPlaceIcon"/>
+  <object-type name="QPlaceIdReply">
+      <enum-type name="OperationType"/>
+  </object-type>
+  <object-type name="QPlaceManager"/>
+  <value-type name="QPlaceUser"/>
+  <object-type name="QGeoCodingManager"/>
+  <object-type name="QGeoCodingManagerEngine"/>
+  <object-type name="QGeoRouteRequest">
+      <enum-type name="TravelMode" flags="TravelModes"/>
+      <enum-type name="FeatureType" flags="FeatureTypes"/>
+      <enum-type name="FeatureWeight" flags="FeatureWeights"/>
+      <enum-type name="RouteOptimization" flags="RouteOptimizations"/>
+      <enum-type name="SegmentDetail" flags="SegmentDetails"/>
+      <enum-type name="ManeuverDetail" flags="ManeuverDetails"/>
+  </object-type>
+  <object-type name="QGeoRoutingManager"/>
+  <object-type name="QGeoRoutingManagerEngine"/>
+  <object-type name="QGeoServiceProviderFactory"/>
+  <object-type name="QGeoServiceProviderFactoryV2" since="5.11"/>
+  <value-type name="QPlaceAttribute"/>
+  <value-type name="QPlaceCategory"/>
+  <value-type name="QPlaceContactDetail"/>
+  <value-type name="QPlaceContent"/>
+  <value-type name="QPlaceContentRequest"/>
+  <object-type name="QPlaceEditorial"/>
+  <object-type name="QPlaceImage"/>
+  <object-type name="QPlaceManagerEngine"/>
+  <object-type name="QPlaceMatchReply"/>
+  <value-type name="QPlaceMatchRequest"/>
+  <object-type name="QPlaceProposedSearchResult"/>
+  <value-type name="QPlaceRatings"/>
+  <object-type name="QPlaceReply">
+      <enum-type name="Error"/>
+      <enum-type name="Type"/>
+  </object-type>
+  <object-type name="QPlaceResult"/>
+  <object-type name="QPlaceReview"/>
+  <object-type name="QPlaceSearchReply"/>
+  <object-type name="QPlaceSearchRequest">
+      <enum-type name="RelevanceHint"/>
+  </object-type>
+  <object-type name="QPlaceSearchResult"/>
+  <object-type name="QPlaceSearchSuggestionReply"/>
+  <value-type name="QPlaceSupplier"/>
+</typesystem>

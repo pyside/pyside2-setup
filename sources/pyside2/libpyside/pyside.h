@@ -50,6 +50,7 @@
 #include <QMetaType>
 #include <QHash>
 #include <QList>
+#include <QLoggingCategory>
 
 struct SbkObjectType;
 
@@ -162,6 +163,8 @@ PYSIDE_API QString pyStringToQString(PyObject *str);
  * are installed) so that plugins can be successfully loaded.
  */
 PYSIDE_API bool registerInternalQtConf();
+
+Q_DECLARE_LOGGING_CATEGORY(lcPySide2)
 
 } //namespace PySide
 

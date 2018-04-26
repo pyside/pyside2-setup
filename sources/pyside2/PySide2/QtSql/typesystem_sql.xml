@@ -52,7 +52,7 @@
     <enum-type name="TableType"/>
     <enum-type name="NumericalPrecisionPolicy"/>
     <extra-includes>
-        <include file-name="QtSql/qsql.h" location="global"/>
+        <include file-name="QtSql/qtsqlglobal.h" location="global"/>
     </extra-includes>
   </namespace-type>
 
@@ -71,7 +71,7 @@
     <modify-function signature="commit()" allow-thread="yes" />
     <modify-function signature="rollback()" allow-thread="yes" />
     <modify-function signature="transaction()" allow-thread="yes" />
-    <modify-function signature="registerSqlDriver(const QString &amp;, QSqlDriverCreatorBase*)">
+    <modify-function signature="registerSqlDriver(const QString&amp;,QSqlDriverCreatorBase*)">
       <modify-argument index="2">
         <define-ownership owner="c++"/>
       </modify-argument>
@@ -87,7 +87,7 @@
         <include file-name="QSize" location="global"/>
     </extra-includes>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
-    <modify-function signature="exec(const QString &amp;)" rename="exec_" allow-thread="yes" />
+    <modify-function signature="exec(const QString&amp;)" rename="exec_" allow-thread="yes" />
     <modify-function signature="prepare(const QString&amp;)" allow-thread="yes" />
     <modify-function signature="clear()" allow-thread="yes" />
     <modify-function signature="last()" allow-thread="yes" />
@@ -135,9 +135,9 @@
     <modify-function signature="beginTransaction()" allow-thread="yes" />
     <modify-function signature="commitTransaction()" allow-thread="yes" />
     <modify-function signature="rollbackTransaction()" allow-thread="yes" />
-    <modify-function signature="open(const QString &amp;, const QString&amp;, const QString&amp;, const QString&amp;, int, const QString&amp;)" allow-thread="yes" />
+    <modify-function signature="open(const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,int,const QString&amp;)" allow-thread="yes" />
     <!-- ### This is too low level for Python, and pointer would be useless for the Python programmer -->
-    <modify-function signature="handle() const" remove="all"/>
+    <modify-function signature="handle()const" remove="all"/>
     <!-- ### -->
   </object-type>
 

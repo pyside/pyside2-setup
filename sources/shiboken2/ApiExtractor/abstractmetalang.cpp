@@ -1700,7 +1700,10 @@ QDebug operator<<(QDebug d, const AbstractMetaEnum *ae)
     d.nospace();
     d << "AbstractMetaEnum(";
     if (ae) {
-        d << ae->fullName() << '[';
+        d << ae->fullName();
+        if (!ae->isSigned())
+            d << " (unsigned) ";
+        d << '[';
         const AbstractMetaEnumValueList &values = ae->values();
         for (int i = 0, count = values.size(); i < count; ++i) {
             if (i)
@@ -2411,7 +2414,7 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
 */
 
 AbstractMetaEnum::AbstractMetaEnum() :
-    m_hasQenumsDeclaration(false)
+    m_hasQenumsDeclaration(false), m_signed(true)
 {
 }
 
@@ -2456,9 +2459,4 @@ QString AbstractMetaEnum::qualifier() const
 QString AbstractMetaEnum::package() const
 {
     return m_typeEntry->targetLangPackage();
-}
-
-bool AbstractMetaEnum::isAnonymous() const
-{
-    return m_typeEntry->isAnonymous();
 }

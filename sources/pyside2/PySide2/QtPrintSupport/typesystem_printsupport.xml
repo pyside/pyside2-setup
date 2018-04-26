@@ -50,7 +50,7 @@
     <enum-type name="PrintDialogOption" flags="PrintDialogOptions" />
     <enum-type name="PrintRange" />
   </object-type>
-  
+
   <object-type name="QPrintDialog">
     <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
   </object-type>

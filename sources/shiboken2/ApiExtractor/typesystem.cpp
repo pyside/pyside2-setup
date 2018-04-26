@@ -963,11 +963,6 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                 m_currentEnum =
                     new EnumTypeEntry(QStringList(names.mid(0, names.size() - 1)).join(colonColon()),
                                       names.constLast(), since);
-            if (!attributes.value(enumIdentifiedByValueAttribute()).isEmpty()) {
-                m_currentEnum->setEnumKind(EnumTypeEntry::AnonymousEnum);
-            } else if (convertBoolean(attributes.value(classAttribute()), classAttribute(), false)) {
-                m_currentEnum->setEnumKind(EnumTypeEntry::EnumClass);
-            }
             element->entry = m_currentEnum;
             m_currentEnum->setCodeGeneration(m_generate);
             m_currentEnum->setTargetLangPackage(m_defaultPackage);

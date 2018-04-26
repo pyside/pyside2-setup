@@ -33,6 +33,7 @@ set(QtWebEngineWidgets_include_dirs
                             ${QtWebEngineWidgets_GEN_DIR}
                             ${QtNetwork_GEN_DIR}
                             ${QtWebChannel_GEN_DIR}
+                            ${QtWebEngineCore_GEN_DIR}
                             )
 set(QtWebEngineWidgets_libraries      pyside2
                             ${SHIBOKEN_PYTHON_LIBRARIES}

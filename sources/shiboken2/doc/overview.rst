@@ -23,13 +23,13 @@ Each module of the generator system has an specific role.
 3. Modify the API to expose the objects in a way that fits you target language best.
 4. Insert customizations where handwritten code is needed.
 
-.. figure:: images/boostqtarch.png
+.. figure:: images/shibokenqtarch.png
    :scale: 80
    :align: center
 
    Runtime architecture
 
-The newly created binding will run on top of Boost.Python library which takes
+The newly created binding will run on top of Shiboken which takes
 care of interfacing Python and the underlying C++ library.
 
 Handwritten inputs

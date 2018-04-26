@@ -35,7 +35,7 @@ Invalidating objects
 ====================
 
 To prevent segfaults and double frees, the wrapper objects are invalidated.
-An invalidated can't be passed as argument or have an attributte or method accessed.
+An invalidated can't be passed as argument or have an attribute or method accessed.
 Trying to do this will raise RuntimeError.
 
 The following situations can invalidate an object:
@@ -48,7 +48,7 @@ C++ taking ownership
     :ref:`virtual destructor <ownership-virt-method>` or the transfer is due to the special case
     of :ref:`parent ownership <ownership-parent>`.
 
-    Besides being passed as argument, the callee object can have its ownership changed, like
+    Besides being passed as argument, the called object can have its ownership changed, like
     the `setParent` method in Qt's `QObject`.
 
 Invalidate after use
@@ -69,7 +69,7 @@ Objects with virtual methods
     any derived class in Python also override it.
 
     If the class has a virtual destructor (and C++ classes with virtual methods should have), this
-    C++ instance invalidates the wrapper only when the overriden destructor is called.
+    C++ instance invalidates the wrapper only when the overridden destructor is called.
 
     One exception to this rule is when the object is created in C++, like in a
     factory method. This way the wrapped object is a C++ instance of the native
@@ -128,7 +128,7 @@ Not saving unowned objects references
 -------------------------------------
 
     Sometimes when you pass an instance as argument to a method and the receiving
-    instance will need that object to live indifinitely, but will not take ownership
+    instance will need that object to live indefinitely, but will not take ownership
     of the argument instance. In this case, you should hold a reference to the argument
     instance.
 

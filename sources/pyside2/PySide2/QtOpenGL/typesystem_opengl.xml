@@ -99,7 +99,7 @@
     </modify-function>
 
     <!-- ### Obsolete functions and ctors -->
-    <modify-function signature="QGLContext(const QGLFormat&amp;, QPaintDevice*)" remove="all" />
+    <modify-function signature="QGLContext(const QGLFormat&amp;,QPaintDevice*)" remove="all" />
     <!-- ### -->
   </object-type>
   <object-type name="QGLFramebufferObject">
@@ -115,7 +115,7 @@
         <include file-name="QImage" location="global"/>
         <include file-name="QPixmap" location="global"/>
     </extra-includes>
-    <modify-function signature="QGLWidget(QGLContext*, QWidget*, const QGLWidget*, QFlags&lt;Qt::WindowType&gt;)">
+    <modify-function signature="QGLWidget(QGLContext*,QWidget*,const QGLWidget*,QFlags&lt;Qt::WindowType&gt;)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -156,7 +156,7 @@
 
   <object-type name="QGLShaderProgram" since="4.6">
     <!-- setAttributeArray -->
-    <modify-function signature="setAttributeArray(int, const QVector2D*, int)" rename="setAttributeArray2D">
+    <modify-function signature="setAttributeArray(int,const QVector2D*,int)" rename="setAttributeArray2D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -169,7 +169,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setAttributeArray(int, const QVector3D*, int)" rename="setAttributeArray3D">
+    <modify-function signature="setAttributeArray(int,const QVector3D*,int)" rename="setAttributeArray3D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -182,7 +182,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setAttributeArray(int, const QVector4D*, int)" rename="setAttributeArray4D">
+    <modify-function signature="setAttributeArray(int,const QVector4D*,int)" rename="setAttributeArray4D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -195,7 +195,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setAttributeArray(const char*, const QVector2D*, int)" rename="setAttributeArray2D">
+    <modify-function signature="setAttributeArray(const char*,const QVector2D*,int)" rename="setAttributeArray2D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -208,7 +208,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setAttributeArray(const char*, const QVector3D*, int)" rename="setAttributeArray3D">
+    <modify-function signature="setAttributeArray(const char*,const QVector3D*,int)" rename="setAttributeArray3D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -221,7 +221,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setAttributeArray(const char*, const QVector4D*, int)" rename="setAttributeArray4D">
+    <modify-function signature="setAttributeArray(const char*,const QVector4D*,int)" rename="setAttributeArray4D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -235,7 +235,7 @@
     </modify-function>
 
     <!-- setUniformValueArray -->
-    <modify-function signature="setUniformValueArray(int, const GLint*, int)" rename="setUniformValueArrayInt">
+    <modify-function signature="setUniformValueArray(int,const GLint*,int)" rename="setUniformValueArrayInt">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -251,7 +251,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const GLuint*, int)" rename="setUniformValueArrayUint">
+    <modify-function signature="setUniformValueArray(int,const GLuint*,int)" rename="setUniformValueArrayUint">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -267,7 +267,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QVector2D*, int)" rename="setUniformValueArray2D">
+    <modify-function signature="setUniformValueArray(int,const QVector2D*,int)" rename="setUniformValueArray2D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -283,7 +283,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QVector3D*, int)" rename="setUniformValueArray3D">
+    <modify-function signature="setUniformValueArray(int,const QVector3D*,int)" rename="setUniformValueArray3D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -299,7 +299,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QVector4D*, int)" rename="setUniformValueArray4D">
+    <modify-function signature="setUniformValueArray(int,const QVector4D*,int)" rename="setUniformValueArray4D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -315,7 +315,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix2x2*, int)" rename="setUniformValueArray2x2">
+    <modify-function signature="setUniformValueArray(int,const QMatrix2x2*,int)" rename="setUniformValueArray2x2">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -331,7 +331,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix2x3*, int)" rename="setUniformValueArray2x3">
+    <modify-function signature="setUniformValueArray(int,const QMatrix2x3*,int)" rename="setUniformValueArray2x3">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -347,7 +347,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix2x4*, int)" rename="setUniformValueArray2x4">
+    <modify-function signature="setUniformValueArray(int,const QMatrix2x4*,int)" rename="setUniformValueArray2x4">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -363,7 +363,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix3x2*, int)" rename="setUniformValueArray3x2">
+    <modify-function signature="setUniformValueArray(int,const QMatrix3x2*,int)" rename="setUniformValueArray3x2">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -379,7 +379,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix3x3*, int)" rename="setUniformValueArray3x3">
+    <modify-function signature="setUniformValueArray(int,const QMatrix3x3*,int)" rename="setUniformValueArray3x3">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -395,7 +395,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix3x4*, int)" rename="setUniformValueArray3x4">
+    <modify-function signature="setUniformValueArray(int,const QMatrix3x4*,int)" rename="setUniformValueArray3x4">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -411,7 +411,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix4x2*, int)" rename="setUniformValueArray4x2">
+    <modify-function signature="setUniformValueArray(int,const QMatrix4x2*,int)" rename="setUniformValueArray4x2">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -427,7 +427,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix4x3*, int)" rename="setUniformValueArray4x3">
+    <modify-function signature="setUniformValueArray(int,const QMatrix4x3*,int)" rename="setUniformValueArray4x3">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -443,7 +443,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(int, const QMatrix4x4*, int)" rename="setUniformValueArray4x4">
+    <modify-function signature="setUniformValueArray(int,const QMatrix4x4*,int)" rename="setUniformValueArray4x4">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -459,7 +459,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const GLint*, int)" rename="setUniformValueArrayInt">
+    <modify-function signature="setUniformValueArray(const char*,const GLint*,int)" rename="setUniformValueArrayInt">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -475,7 +475,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const GLuint*, int)" rename="setUniformValueArrayUint">
+    <modify-function signature="setUniformValueArray(const char*,const GLuint*,int)" rename="setUniformValueArrayUint">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -491,7 +491,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QVector2D*, int)" rename="setUniformValueArray2D">
+    <modify-function signature="setUniformValueArray(const char*,const QVector2D*,int)" rename="setUniformValueArray2D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -507,7 +507,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QVector3D*, int)" rename="setUniformValueArray3D">
+    <modify-function signature="setUniformValueArray(const char*,const QVector3D*,int)" rename="setUniformValueArray3D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -523,7 +523,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QVector4D*, int)" rename="setUniformValueArray4D">
+    <modify-function signature="setUniformValueArray(const char*,const QVector4D*,int)" rename="setUniformValueArray4D">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -539,7 +539,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix2x2*, int)" rename="setUniformValueArray2x2">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix2x2*,int)" rename="setUniformValueArray2x2">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -555,7 +555,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix2x3*, int)" rename="setUniformValueArray2x3">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix2x3*,int)" rename="setUniformValueArray2x3">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -571,7 +571,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix2x4*, int)" rename="setUniformValueArray2x4">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix2x4*,int)" rename="setUniformValueArray2x4">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -587,7 +587,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix3x2*, int)" rename="setUniformValueArray3x2">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix3x2*,int)" rename="setUniformValueArray3x2">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -603,7 +603,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix3x3*, int)" rename="setUniformValueArray3x3">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix3x3*,int)" rename="setUniformValueArray3x3">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -619,7 +619,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix3x4*, int)" rename="setUniformValueArray3x4">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix3x4*,int)" rename="setUniformValueArray3x4">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -635,7 +635,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix4x2*, int)" rename="setUniformValueArray4x2">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix4x2*,int)" rename="setUniformValueArray4x2">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -651,7 +651,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix4x3*, int)" rename="setUniformValueArray4x3">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix4x3*,int)" rename="setUniformValueArray4x3">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -667,7 +667,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="setUniformValueArray(const char*, const QMatrix4x4*, int)" rename="setUniformValueArray4x4">
+    <modify-function signature="setUniformValueArray(const char*,const QMatrix4x4*,int)" rename="setUniformValueArray4x4">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -693,8 +693,8 @@
     <!-- ### Use QMatrixZxY overloads -->
     <modify-function signature="setAttributeValue(int,const GLfloat*,int,int)" remove="all" />
     <modify-function signature="setAttributeValue(const char*,const GLfloat*,int,int)" remove="all" />
-    <modify-function signature="setAttributeArray(int, GLenum, const void*, int, int)" remove="all" since="4.7" />
-    <modify-function signature="setAttributeArray(const char*, GLenum, const void*, int, int)" remove="all" since="4.7" />
+    <modify-function signature="setAttributeArray(int,GLenum,const void*,int,int)" remove="all" since="4.7" />
+    <modify-function signature="setAttributeArray(const char*,GLenum,const void*,int,int)" remove="all" since="4.7" />
     <!-- ### -->
   </object-type>
 
@@ -703,7 +703,7 @@
     <enum-type name="Access" since="4.7"/>
     <enum-type name="Type" since="4.7"/>
     <enum-type name="UsagePattern" since="4.7"/>
-    <modify-function signature="allocate(const void*, int)">
+    <modify-function signature="allocate(const void*,int)">
       <modify-argument index="1">
         <replace-type modified-type="QByteArray&amp;"/>
       </modify-argument>
@@ -730,7 +730,7 @@
         }
       </inject-code>
     </modify-function>
-    <modify-function signature="read(int, void*, int)">
+    <modify-function signature="read(int,void*,int)">
       <modify-argument index="2">
         <remove-argument/>
       </modify-argument>
@@ -749,7 +749,7 @@
         delete[] data;
       </inject-code>
     </modify-function>
-    <modify-function signature="write(int, const void*, int)">
+    <modify-function signature="write(int,const void*,int)">
       <modify-argument index="2">
         <replace-type modified-type="QByteArray&amp;"/>
       </modify-argument>

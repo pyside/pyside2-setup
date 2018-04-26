@@ -13,6 +13,25 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../pyside_version.py"
                "${CMAKE_CURRENT_BINARY_DIR}/_git_pyside_version.py" @ONLY)
 
+# qt.conf needs to be placed next to QtWebEngineProcess so that the executable uses the correct
+# Prefix location leading to an existing icu data file. It is needed on Windows, Linux, and macOS
+# non-framework build. In framework build, instead of using qt.conf, Bundle querying is used.
+if (WIN32 OR (UNIX AND NOT APPLE) OR (APPLE AND NOT QtCore_is_framework))
+
+    if (WIN32)
+        # On Windows, the QtWebEngineProcess is directly located in the Prefix, due to not using
+        # a "Qt" subfolder like on the other platforms.
+        set(QT_CONF_PREFIX ".")
+    else()
+        # On Linux and non-framework macOS, the QtWebEngineProcess is in ./libexec, so prefix is one
+        # level higher.
+        set(QT_CONF_PREFIX "..")
+    endif()
+
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/qt.conf.in"
+                   "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" @ONLY)
+endif()
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
