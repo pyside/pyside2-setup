@@ -70,7 +70,7 @@
         <enum-type name="Flag" flags="Flags" />
         <enum-type name="ItemChange" />
         <enum-type name="TransformOrigin" />
-        <modify-function signature="itemTransform(QQuickItem *, bool *) const" allow-thread="yes">
+        <modify-function signature="itemTransform(QQuickItem*,bool*)const" allow-thread="yes">
             <modify-argument index="2">
                 <remove-argument />
             </modify-argument>

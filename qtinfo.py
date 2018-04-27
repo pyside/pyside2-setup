@@ -100,7 +100,9 @@ class QtInfo(object):
         return self.getProperty("QMAKE_MACOSX_DEPLOYMENT_TARGET")
 
     def getBuildType(self):
-        """ Return value is either debug, release, debug_release, or None. """
+        """
+        Return value is either debug, release, debug_release, or None.
+        """
         return self.getProperty("BUILD_TYPE")
 
     def getSrcDir(self):
@@ -168,8 +170,8 @@ class QtInfo(object):
         return None
 
     def _getOtherProperties(self):
-        # Get the src property separately, because it is not returned by qmake unless explicitly
-        # specified.
+        # Get the src property separately, because it is not returned by
+        # qmake unless explicitly specified.
         key = 'QT_INSTALL_PREFIX/src'
         result = self._getQMakeOutput(['-query', key])
         self._query_dict[key] = result
@@ -182,7 +184,8 @@ class QtInfo(object):
         if key in self._mkspecs_dict:
             self._query_dict[key] = self._mkspecs_dict[key]
 
-        # Figure out how Qt was built: debug mode, release mode, or both.
+        # Figure out how Qt was built:
+        #   debug mode, release mode, or both.
         build_type = self._parseQtBuildType()
         if build_type:
             self._query_dict['BUILD_TYPE'] = build_type
@@ -207,8 +210,8 @@ class QtInfo(object):
                 value = found.group(2).strip()
                 self._mkspecs_dict[key] = value
 
-        # We need to clean up after qmake, which always creates a .qmake.stash file after a -E
-        # invocation.
+        # We need to clean up after qmake, which always creates a
+        # .qmake.stash file after a -E invocation.
         qmake_stash_file = os.path.join(os.getcwd(), ".qmake.stash")
         if os.path.exists(qmake_stash_file):
             os.remove(qmake_stash_file)

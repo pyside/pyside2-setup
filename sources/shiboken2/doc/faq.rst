@@ -2,8 +2,8 @@
 Frequently Asked Questions
 **************************
 
-This is a list of Frequently Asked Questions about |project|.  Feel free to
-suggest new entries!
+This is a list of Frequently Asked Questions about |project|.
+Feel free to suggest new entries using our `Mailing list`_ or our IRC channel!
 
 General
 =======
@@ -11,17 +11,20 @@ General
 What is Shiboken?
 -----------------
 
-Shiboken is a `GeneratorRunner <http://www.pyside.org/home-binding/binding-generator>`_
-plugin that outputs C++ code for CPython extensions. The first version of PySide
-had source code based on Boost templates. It was easier to produce code but a
-paradigm change was needed, as the next question explains.
+Shiboken is a `GeneratorRunner`_ that outputs C++ code for CPython
+extensions.
+The first version of PySide had source code based on Boost templates.
+It was easier to produce code but a paradigm change was needed, as the next
+question explains.
+
 
 Why did you switch from Boost.Python to Shiboken?
 -------------------------------------------------
 
-The main reason was the size reduction. Boost.Python makes excessive use of templates
-resulting in a significant increase of the binaries size. On the other hand, as Shiboken
-generates CPython code, the resulting binaries are smaller.
+The main reason was the size reduction. Boost.Python makes excessive use of
+templates resulting in a significant increase of the binaries size.
+On the other hand, as Shiboken generates CPython code, the resulting binaries
+are smaller.
 
 Creating bindings
 =================
@@ -41,13 +44,12 @@ and the C++ library that is being wrapped.
 What do I have to do to create my bindings?
 -------------------------------------------
 
-.. todo: put link to typesystem documentation
+Most of the work is already done by the API Extractor.
+The developer creates a `typesystem`_ file with any customization wanted in
+the generated code, like removing classes or changing method signatures.
+The generator will output the *.h* and *.cpp* files with the CPython code that
+will wrap the target library for python.
 
-Most of the work is already done by the API Extractor. The developer creates
-a `typesystem <http://www.pyside.org/docs/apiextractor/typesystem.html>`_ file
-with any customization wanted in the generated code, like removing classes or
-changing method signatures. The generator will output the .h and .cpp files
-with the CPython code that will wrap the target library for python.
 
 Is there any recommended build system?
 --------------------------------------
@@ -63,5 +65,8 @@ What is 'inject code'?
 ----------------------
 
 That's how we call customized code that will be *injected* into the
-generated at specific locations. They are specified inside the typesytem.
+generated at specific locations. They are specified inside the typesystem.
 
+.. _`Mailing list`:  http://lists.qt-project.org/mailman/listinfo/pyside
+.. _`GeneratorRunner`:  http://www.pyside.org/home-binding/binding-generator
+.. _`typesystem`:  http://www.pyside.org/docs/apiextractor/typesystem.html

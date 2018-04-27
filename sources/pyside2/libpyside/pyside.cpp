@@ -162,10 +162,10 @@ static void destructionVisitor(SbkObject* pyObj, void* data)
 
 void destroyQCoreApplication()
 {
-    SignalManager::instance().clear();
     QCoreApplication* app = QCoreApplication::instance();
     if (!app)
         return;
+    SignalManager::instance().clear();
 
     Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();
     SbkObject* pyQApp = bm.retrieveWrapper(app);
@@ -442,6 +442,11 @@ static const unsigned char qt_resource_struct[] = {
   0x0,0x0,0x0,0x16,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0
 };
 
+// Note that setting QT_LOGGING_RULES for categories used before QCoreApplication is instantiated,
+// will only work on Qt 5.9.4+. On lower versions, it will appear that setting QT_LOGGING_RULES
+// does not affect lcPysideQtConf in any way.
+Q_LOGGING_CATEGORY(lcPySide2, "pyside2", QtWarningMsg)
+
 bool registerInternalQtConf()
 {
     // Guard to ensure single registration.
@@ -449,18 +454,49 @@ bool registerInternalQtConf()
         static bool registrationAttempted = false;
 #else
         static bool registrationAttempted = true;
+        qCDebug(lcPySide2) << "PySide2 was built without qt.conf modification support. "
+                              "No special qt.conf behavior will be applied.";
 #endif
     static bool isRegistered = false;
     if (registrationAttempted)
         return isRegistered;
     registrationAttempted = true;
 
+    // Support PyInstaller case when a qt.conf file might be provided next to the generated
+    // PyInstaller executable.
+    // This will disable the internal qt.conf which points to the PySide2 subdirectory (due to the
+    // subdirectory not existing anymore).
+    QString executablePath =
+#if PY_MAJOR_VERSION >= 3
+            QString::fromWCharArray(Py_GetProgramFullPath());
+#else
+            // Python 2 unfortunately returns a char* array instead of a wchar*, which means that on
+            // Windows if the executable path contains unicode characters, the returned path will be
+            // invalid. We can't use QCoreApplication::applicationFilePath because it requires an
+            // existing QCoreApplication instance despite being a static method.
+            // This means that a qt.conf near an executable won't be picked up correctly on
+            // Windows + Python 2.
+            QString::fromLocal8Bit(Py_GetProgramFullPath());
+#endif
+    QString appDirPath = QFileInfo(executablePath).absolutePath();
+    QString maybeQtConfPath = QDir(appDirPath).filePath(QStringLiteral("qt.conf"));
+    bool executableQtConfAvailable = QFileInfo::exists(maybeQtConfPath);
+    maybeQtConfPath = QDir::toNativeSeparators(maybeQtConfPath);
+    if (!executableQtConfAvailable) {
+        qCDebug(lcPySide2) << "No qt.conf found near executable at: " << maybeQtConfPath
+                           << "\nTrying next candidates.";
+    }
+
     // Allow disabling the usage of the internal qt.conf. This is necessary for tests to work,
     // because tests are executed before the package is installed, and thus the Prefix specified
     // in qt.conf would point to a not yet existing location.
     bool disableInternalQtConf =
             qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0 ? true : false;
-    if (disableInternalQtConf) {
+    if (disableInternalQtConf || executableQtConfAvailable) {
+        if (executableQtConfAvailable)
+            qCDebug(lcPySide2) << "Using qt.conf found near executable at: " << maybeQtConfPath;
+        if (disableInternalQtConf)
+            qCDebug(lcPySide2) << "Internal qt.conf usage disabled via environment variable.";
         registrationAttempted = true;
         return false;
     }
@@ -494,7 +530,14 @@ bool registerInternalQtConf()
 
     // rccData needs to be static, otherwise when it goes out of scope, the Qt resource system
     // will point to invalid memory.
-    static QByteArray rccData = QByteArray("[Paths]\nPrefix = ") + prefixPath.toLocal8Bit();
+    static QByteArray rccData = QByteArray("[Paths]\nPrefix = ") + prefixPath.toLocal8Bit()
+#ifdef Q_OS_WIN
+            // LibraryExecutables needs to point to Prefix instead of ./bin because we don't
+            // currently conform to the Qt default directory layout on Windows. This is necessary
+            // for QtWebEngineCore to find the location of QtWebEngineProcess.exe.
+            + QByteArray("\nLibraryExecutables = ") + prefixPath.toLocal8Bit()
+#endif
+            ;
     rccData.append('\n');
 
     // The RCC data structure expects a 4-byte size value representing the actual data.
@@ -509,6 +552,9 @@ bool registerInternalQtConf()
     isRegistered = qRegisterResourceData(version, qt_resource_struct, qt_resource_name,
                                          reinterpret_cast<const unsigned char *>(
                                              rccData.constData()));
+
+    if (isRegistered)
+        qCDebug(lcPySide2) << "Using internal qt.conf with prefix pointing to: " << prefixPath;
 
     return isRegistered;
 }

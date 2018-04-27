@@ -76,10 +76,10 @@ if mswindows:
         # Strings only; do nothing
         def encode(s):
             return s
-        
+
         def decode(b):
             return b
-        
+
     try:
         import ctypes
         from ctypes.wintypes import DWORD
@@ -87,12 +87,15 @@ if mswindows:
         TerminateProcess = ctypes.windll.kernel32.TerminateProcess
         def WriteFile(handle, data, ol = None):
             c_written = DWORD()
-            success = ctypes.windll.kernel32.WriteFile(handle, ctypes.create_string_buffer(encode(data)), len(data), ctypes.byref(c_written), ol)
+            success = ctypes.windll.kernel32.WriteFile(handle,
+                ctypes.create_string_buffer(encode(data)), len(data),
+                ctypes.byref(c_written), ol)
             return ctypes.windll.kernel32.GetLastError(), c_written.value
         def ReadFile(handle, desired_bytes, ol = None):
             c_read = DWORD()
             buffer = ctypes.create_string_buffer(desired_bytes+1)
-            success = ctypes.windll.kernel32.ReadFile(handle, buffer, desired_bytes, ctypes.byref(c_read), ol)
+            success = ctypes.windll.kernel32.ReadFile(handle, buffer,
+                desired_bytes, ctypes.byref(c_read), ol)
             buffer[c_read.value] = null_byte
             return ctypes.windll.kernel32.GetLastError(), decode(buffer.value)
         def PeekNamedPipe(handle, desired_bytes):
@@ -101,19 +104,23 @@ if mswindows:
             if desired_bytes > 0:
                 c_read = DWORD()
                 buffer = ctypes.create_string_buffer(desired_bytes+1)
-                success = ctypes.windll.kernel32.PeekNamedPipe(handle, buffer, desired_bytes, ctypes.byref(c_read), ctypes.byref(c_avail), ctypes.byref(c_message))
+                success = ctypes.windll.kernel32.PeekNamedPipe(handle, buffer,
+                    desired_bytes, ctypes.byref(c_read), ctypes.byref(c_avail),
+                    ctypes.byref(c_message))
                 buffer[c_read.value] = null_byte
                 return decode(buffer.value), c_avail.value, c_message.value
             else:
-                success = ctypes.windll.kernel32.PeekNamedPipe(handle, None, desired_bytes, None, ctypes.byref(c_avail), ctypes.byref(c_message))
+                success = ctypes.windll.kernel32.PeekNamedPipe(handle, None,
+                    desired_bytes, None, ctypes.byref(c_avail),
+                    ctypes.byref(c_message))
                 return "", c_avail.value, c_message.value
-                
+
     except ImportError:
         from win32file import ReadFile, WriteFile
         from win32pipe import PeekNamedPipe
         from win32api import TerminateProcess
     import msvcrt
-    
+
 else:
     from signal import SIGINT, SIGTERM, SIGKILL
     import select
@@ -128,16 +135,16 @@ PIPE = subprocess.PIPE
 class Popen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
         subprocess.Popen.__init__(self, *args, **kwargs)
-    
+
     def recv(self, maxsize=None):
         return self._recv('stdout', maxsize)
-    
+
     def recv_err(self, maxsize=None):
         return self._recv('stderr', maxsize)
 
     def send_recv(self, input='', maxsize=None):
         return self.send(input), self.recv(maxsize), self.recv_err(maxsize)
-    
+
     def read_async(self,  wait=.1, e=1, tr=5, stderr=0):
         if tr < 1:
             tr = 1
@@ -159,21 +166,21 @@ class Popen(subprocess.Popen):
             else:
                 time.sleep(max((x-time.time())/tr, 0))
         return ''.join(y)
-        
+
     def send_all(self, data):
         while len(data):
             sent = self.send(data)
             if sent is None:
                 raise Exception("Other end disconnected!")
             data = buffer(data, sent)
-    
+
     def get_conn_maxsize(self, which, maxsize):
         if maxsize is None:
             maxsize = 1024
         elif maxsize < 1:
             maxsize = 1
         return getattr(self, which), maxsize
-    
+
     def _close(self, which):
         conn = getattr(self, which)
         flags = fcntl.fcntl(conn, fcntl.F_GETFL)
@@ -182,13 +189,13 @@ class Popen(subprocess.Popen):
         assert conn.read() == ''
         getattr(self, which).close()
         setattr(self, which, None)
-    
+
     if mswindows:
         def kill(self):
             # Recipes
             #http://me.in-berlin.de/doc/python/faq/windows.html#how-do-i-emulate-os-kill-in-windows
             #http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/347462
-            
+
             """kill function for Win32"""
             TerminateProcess(int(self._handle), 0) # returns None
 
@@ -212,7 +219,7 @@ class Popen(subprocess.Popen):
             conn, maxsize = self.get_conn_maxsize(which, maxsize)
             if conn is None:
                 return None
-            
+
             try:
                 x = msvcrt.get_osfhandle(conn.fileno())
                 (read, nAvail, nMessage) = PeekNamedPipe(x, 0)
@@ -226,7 +233,7 @@ class Popen(subprocess.Popen):
                 if geterror()[0] in (109, errno.ESHUTDOWN):
                     return self._close(which)
                 raise
-            
+
             if self.universal_newlines:
                 # Translate newlines. For Python 3.x assume read is text.
                 # If bytes then another solution is needed.
@@ -241,7 +248,7 @@ class Popen(subprocess.Popen):
 
                 killed_pid, stat = os.waitpid(self.pid, os.WNOHANG)
                 if killed_pid != 0: return
-                
+
         def send(self, input):
             if not self.stdin:
                 return None
@@ -262,15 +269,15 @@ class Popen(subprocess.Popen):
             conn, maxsize = self.get_conn_maxsize(which, maxsize)
             if conn is None:
                 return None
-            
+
             flags = fcntl.fcntl(conn, fcntl.F_GETFL)
             if not conn.closed:
                 fcntl.fcntl(conn, fcntl.F_SETFL, flags| os.O_NONBLOCK)
-            
+
             try:
                 if not select.select([conn], [], [], 0)[0]:
                     return ''
-                
+
                 try:
                     r = conn.read(maxsize)
                 except IOError as e:
@@ -279,7 +286,7 @@ class Popen(subprocess.Popen):
                     raise
                 if not r:
                     return self._close(which)
-    
+
                 if self.universal_newlines:
                     r = r.replace("\r\n", "\n").replace("\r", "\n")
                 return r
@@ -292,7 +299,7 @@ class Popen(subprocess.Popen):
 def proc_in_time_or_kill(cmd, time_out, wd = None, env = None):
     proc = Popen (
         cmd, cwd = wd, env = env,
-        stdin = subprocess.PIPE, stdout = subprocess.PIPE, 
+        stdin = subprocess.PIPE, stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT, universal_newlines = 1
     )
 
@@ -305,13 +312,13 @@ def proc_in_time_or_kill(cmd, time_out, wd = None, env = None):
         response += [proc.read_async(wait=0.1, e=0)]
 
     if ret_code is None:
-        ret_code = '"Process timed out (time_out = %s secs) ' % time_out
+        ret_code = '"Process timed out (time_out = {} secs) '.format(time_out)
         try:
             proc.kill()
             ret_code += 'and was successfully terminated"'
         except Exception:
-            ret_code += ('and termination failed (exception: %s)"' %
-                         (geterror(),))
+            ret_code += ("and termination failed "
+                "(exception: {})".format(geterror(),))
 
     return ret_code, ''.join(response)
 
@@ -322,7 +329,7 @@ class AsyncTest(unittest.TestCase):
         ret_code, response = proc_in_time_or_kill(
             [sys.executable, '-c', 'while 1: pass'], time_out = 1
         )
-        
+
         self.assert_( 'rocess timed out' in ret_code )
         self.assert_( 'successfully terminated' in ret_code )
 
@@ -330,10 +337,11 @@ class AsyncTest(unittest.TestCase):
 
 def _example():
     if sys.platform == 'win32':
-        shell, commands, tail = ('cmd', ('echo "hello"', 'echo "HELLO WORLD"'), '\r\n')
+        shell, commands, tail = ('cmd', ('echo "hello"', 'echo "HELLO WORLD"'),
+            '\r\n')
     else:
         shell, commands, tail = ('sh', ('ls', 'echo HELLO WORLD'), '\n')
-    
+
     a = Popen(shell, stdin=PIPE, stdout=PIPE)
     sys.stdout.write(a.read_async())
     sys.stdout.write(" ")
@@ -346,7 +354,7 @@ def _example():
     a.wait()
 
 ################################################################################
-    
+
 if __name__ == '__main__':
     if 1: unittest.main()
     else: _example()

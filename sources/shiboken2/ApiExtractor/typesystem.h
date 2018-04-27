@@ -1041,12 +1041,6 @@ private:
 class EnumTypeEntry : public TypeEntry
 {
 public:
-    enum EnumKind {
-        CEnum,         // Standard C: enum Foo { value1, value2 }
-        AnonymousEnum, //             enum { value1, value2 }
-        EnumClass      // C++ 11    : enum class Foo { value1, value2 }
-    };
-
     explicit EnumTypeEntry(const QString &nspace, const QString &enumName,
                            const QVersionNumber &vr);
 
@@ -1067,9 +1061,6 @@ public:
     {
         m_qualifier = q;
     }
-
-    EnumKind enumKind() const { return m_enumKind; }
-    void setEnumKind(EnumKind kind) { m_enumKind = kind; }
 
     bool preferredConversion() const override;
 
@@ -1136,8 +1127,6 @@ public:
         m_forceInteger = force;
     }
 
-    bool isAnonymous() const { return m_enumKind == AnonymousEnum; }
-
 private:
     QString m_packageName;
     QString m_qualifier;
@@ -1149,8 +1138,6 @@ private:
     QStringList m_rejectedEnums;
 
     FlagsTypeEntry *m_flags = nullptr;
-
-    EnumKind m_enumKind = CEnum;
 
     bool m_extensible = false;
     bool m_forceInteger = false;

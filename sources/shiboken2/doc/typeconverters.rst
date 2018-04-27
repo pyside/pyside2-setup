@@ -2,7 +2,13 @@
 User Defined Type Conversion
 ****************************
 
-In the process of creating Python bindings of a C++ library, most of the C++ classes will have wrappers representing them in Python land. But there may be other classes that are very simple and/or have a Python type as a direct counter part. (Example: a "Complex" class, that represents complex numbers, has a Python equivalent in the "complex" type.) Such classes, instead of getting a Python wrapper, normally have conversions rules, from Python to C++ and vice-versa.
+In the process of creating Python bindings of a C++ library, most of the C++
+classes will have wrappers representing them in Python land.
+But there may be other classes that are very simple and/or have a Python type
+as a direct counter part. (Example: a "Complex" class, that represents complex
+numbers, has a Python equivalent in the "complex" type.) Such classes, instead
+of getting a Python wrapper, normally have conversions rules, from Python to
+C++ and vice-versa.
 
       .. code-block:: c++
 
@@ -22,7 +28,8 @@ In the process of creating Python bindings of a C++ library, most of the C++ cla
           Complex cpx(real, imag);
 
 
-For the user defined conversion code to be inserted in the proper places, the "<conversion-rule>" tag must be used.
+For the user defined conversion code to be inserted in the proper places,
+the "<conversion-rule>" tag must be used.
 
       .. code-block:: xml
 
@@ -51,25 +58,23 @@ For the user defined conversion code to be inserted in the proper places, the "<
 
 
 The details will be given later, but the gist of it are the tags
-`<native-to-target> <http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#native-to-target>`_,
-which has only one conversion from C++ to Python, and
-`<target-to-native> <http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#target-to-native>`_,
-that may define the conversion of multiple Python types to C++'s "Complex" type.
+`<native-to-target>`_, which has only one conversion from C++ to Python, and
+`<target-to-native>`_, that may define the conversion of multiple Python types
+to C++'s "Complex" type.
 
 .. image:: images/converter.png
     :height: 240px
     :align: center
 
-|project| expects the code for `<native-to-target> <http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#native-to-target>`_,
-to directly return the Python result of the conversion, and the added conversions inside the
-`<target-to-native> <http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#target-to-native>`_
-must attribute the Python to C++ conversion result to the :ref:`%out <out>` variable.
+|project| expects the code for `<native-to-target>`_, to directly return the
+Python result of the conversion, and the added conversions inside the
+`<target-to-native>`_ must attribute the Python to C++ conversion result to
+the :ref:`%out <out>` variable.
 
-
-Expanding on the last example, if the binding developer want a Python 2-tuple of numbers to be accepted
-by wrapped C++ functions with "Complex" arguments, an
-`<add-conversion> <http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#add-conversion>`_
-tag and a custom check must be added. Here's how to do it:
+Expanding on the last example, if the binding developer want a Python 2-tuple
+of numbers to be accepted by wrapped C++ functions with "Complex" arguments,
+an `<add-conversion>`_ tag and a custom check must be added.
+Here's how to do it:
 
       .. code-block:: xml
 
@@ -120,18 +125,18 @@ tag and a custom check must be added. Here's how to do it:
         </primitive-type>
 
 
-
 .. _container_conversions:
 
 Container Conversions
 =====================
 
-Converters for
-`<container-type> <http://www.pyside.org/docs/apiextractor/typesystem_specifying_types.html#container-type>`_
-are pretty much the same as for other type, except that they make use of the type system variables
-:ref:`%INTYPE_# <intype_n>` and :ref:`%OUTTYPE_# <outtype_n>`. |project| combines the conversion code for
-containers with the conversion defined (or automatically generated) for the containees.
+Converters for `<container-type>`_ are pretty much the same as for other type,
+except that they make use of the type system variables
+:ref:`%INTYPE_# <intype_n>` and :ref:`%OUTTYPE_# <outtype_n>`.
+|project| combines the conversion code for containers with the conversion
+defined (or automatically generated) for the containers.
 
+.. _`container-type`: http://www.pyside.org/docs/apiextractor/typesystem_specifying_types.html#container-type
 
       .. code-block:: xml
 
@@ -279,10 +284,14 @@ And implemented in a separate C++ file, like this:
         }
 
 
-In this case, the parts of the implementation that will be used in the new conversion-rule
-are the ones in the two last method ``static inline PyObject* toPython(const Complex& cpx)``
-and ``static inline Complex toCpp(PyObject* pyobj)``. The ``isConvertible`` method is gone,
-and the ``checkType`` is now an attribute of the
-`<add-conversion> <http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#add-conversion>`_
-tag. Refer back to the first example in this page and you will be able to correlate the above template
-with the new scheme of conversion rule definition.
+In this case, the parts of the implementation that will be used in the new
+conversion-rule are the ones in the two last method
+``static inline PyObject* toPython(const Complex& cpx)`` and
+``static inline Complex toCpp(PyObject* pyobj)``. The ``isConvertible`` method
+is gone, and the ``checkType`` is now an attribute of the `<add-conversion>`_
+tag. Refer back to the first example in this page and you will be able to
+correlate the above template with the new scheme of conversion rule definition.
+
+.. _`<native-to-target>`: http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#native-to-target
+.. _`<target-to-native>`: http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#target-to-native
+.. _`<add-conversion>`: http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#add-conversion

@@ -44,7 +44,7 @@
 
     <object-type name="QXmlSchema" since="4.6" /> <!-- Qt scoped pointer does not allow declare this as value type -->
     <object-type name="QXmlSchemaValidator" since="4.6">
-      <modify-function signature="schema() const">
+      <modify-function signature="schema()const">
         <modify-argument index="return">
           <replace-type modified-type="QXmlSchema*"/>
           <define-ownership owner="target"/>
@@ -70,7 +70,7 @@
         <primitive-type name="PrefixCode"/>
         <primitive-type name="LocalNameCode"/>
         <!-- ### These methods aren't part of Qt public API -->
-        <modify-function signature="QXmlName(QXmlName::NamespaceCode, QXmlName::LocalNameCode, QXmlName::PrefixCode)" remove="all"/>
+        <modify-function signature="QXmlName(QXmlName::NamespaceCode,QXmlName::LocalNameCode,QXmlName::PrefixCode)" remove="all"/>
         <modify-function signature="setNamespaceURI(QXmlName::NamespaceCode)" remove="all" />
         <modify-function signature="localName()const" remove="all" />
         <modify-function signature="prefix()const" remove="all" />
@@ -101,7 +101,7 @@
         <modify-function signature="kind()const" remove="all" />
         <modify-function signature="isDeepEqual(const QXmlNodeModelIndex&amp;)const" remove="all" />
         <modify-function signature="compareOrder(const QXmlNodeModelIndex &amp;)const" remove="all" />
-        <modify-function signature="sendNamespaces(QAbstractXmlReceiver *)const" remove="all" />
+        <modify-function signature="sendNamespaces(QAbstractXmlReceiver*)const" remove="all" />
         <modify-function signature="namespaceBindings()const" remove="all" />
         <modify-function signature="namespaceForPrefix(QXmlName::PrefixCode)const" remove="all" />
         <modify-function signature="stringValue()const" remove="all" />

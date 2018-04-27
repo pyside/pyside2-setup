@@ -224,6 +224,8 @@ public:
         return m_codeSnippetDirs;
     }
 
+    bool shouldGenerate(const AbstractMetaClass *) const override;
+
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;

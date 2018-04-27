@@ -44,7 +44,7 @@
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
 
     <value-type name="QHelpContentItem">
-      <modify-function signature="parent() const">
+      <modify-function signature="parent()const">
         <modify-argument index="return">
           <define-ownership owner="default"/>
         </modify-argument>

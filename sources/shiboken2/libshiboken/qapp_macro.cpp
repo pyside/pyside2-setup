@@ -105,7 +105,14 @@ reset_qApp_var()
     return 0;
 }
 
-
+/*
+ * Note:
+ * The PYSIDE-585 problem was that shutdown is called one more often
+ * than Q*Application is created. We could special-case that last
+ * shutdown or add a refcount, initially, but actually it was easier
+ * and more intuitive in that context to make the refcount of
+ * qApp_content equal to the refcount of Py_None.
+ */
 PyObject *
 MakeSingletonQAppWrapper(PyTypeObject *type)
 {
@@ -132,15 +139,16 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
         // Debug mode showed that we need to do more than just remove the
         // reference. To keep everything in the right order, it is easiest
         // to do a full shutdown, using QtCore.__moduleShutdown().
+        // restore the "None-state"
         PyObject *__moduleShutdown = PyDict_GetItemString(qApp_moduledicts[1],
                                                           "__moduleShutdown");
-        if (__moduleShutdown != NULL) {
-            Py_DECREF(PyObject_CallFunction(__moduleShutdown, (char *)"()"));
-        }
-        // restore the "None-state"
+        // PYSIDE-585: It was crucial to update the refcounts *before*
+        // calling the shutdown.
         Py_TYPE(qApp_content) = Py_NONE_TYPE;
         Py_REFCNT(qApp_var) = qApp_var_ref;
-        Py_REFCNT(qApp_content) = qApp_content_ref;
+        Py_REFCNT(qApp_content) = Py_REFCNT(Py_None);
+        if (__moduleShutdown != NULL)
+            Py_DECREF(PyObject_CallFunction(__moduleShutdown, (char *)"()"));
     }
     else
         (void)PyObject_INIT(qApp_content, type);
@@ -160,7 +168,7 @@ setup_qApp_var(PyObject *module)
             return -1;
         // This is a borrowed reference
         qApp_moduledicts[0] = PyEval_GetBuiltins();
-        Py_INCREF(qApp_content);
+        Py_INCREF(qApp_moduledicts[0]);
         init_done = 1;
     }
 
@@ -170,7 +178,7 @@ setup_qApp_var(PyObject *module)
     if (module_index) {
         // This line gets a borrowed reference
         qApp_moduledicts[module_index] = PyModule_GetDict(module);
-        Py_INCREF(qApp_content);
+        Py_INCREF(qApp_moduledicts[module_index]);
         if (reset_qApp_var() < 0)
             return -1;
     }

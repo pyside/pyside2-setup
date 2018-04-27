@@ -1014,22 +1014,32 @@ void _EnumModelItem::addEnumerator(EnumeratorModelItem item)
     m_enumerators.append(item);
 }
 
-bool _EnumModelItem::isAnonymous() const
+bool _EnumModelItem::isSigned() const
 {
-    return m_anonymous;
+    return m_signed;
 }
 
-void _EnumModelItem::setAnonymous(bool anonymous)
+void _EnumModelItem::setSigned(bool s)
 {
-    m_anonymous = anonymous;
+    m_signed = s;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
 void _EnumModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
-    if (m_anonymous)
-         d << " (anonymous)";
+    switch (m_enumKind) {
+    case CEnum:
+        break;
+    case AnonymousEnum:
+        d << " (anonymous)";
+        break;
+    case EnumClass:
+        d << " (class)";
+        break;
+    }
+    if (!m_signed)
+         d << " (unsigned)";
     formatModelItemList(d, ", enumerators=", m_enumerators);
 }
 #endif // !QT_NO_DEBUG_STREAM
@@ -1039,22 +1049,21 @@ _EnumeratorModelItem::~_EnumeratorModelItem()
 {
 }
 
-QString _EnumeratorModelItem::value() const
+QString _EnumeratorModelItem::stringValue() const
 {
-    return m_value;
+    return m_stringValue;
 }
 
-void _EnumeratorModelItem::setValue(const QString &value)
+void _EnumeratorModelItem::setStringValue(const QString &value)
 {
-    m_value = value;
+    m_stringValue = value;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
 void _EnumeratorModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
-    if (!m_value.isEmpty())
-        d << ", value=\"" << m_value << '"';
+    d << ", value=" << m_value << ", stringValue=\"" << m_stringValue << '"';
 }
 #endif // !QT_NO_DEBUG_STREAM
 

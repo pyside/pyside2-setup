@@ -180,10 +180,6 @@ enum-type
     Notice that the **enum-type** tag can either have **name** or **identified-by-value**
     but not both.
 
-    The *optional* boolean attribute **class** specifies whether the underlying
-    enumeration is a C++ 11 enumeration class. In that case, the enumeration values
-    need to be qualified by the enumeration name to match the C++ Syntax.
-
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
 

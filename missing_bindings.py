@@ -37,19 +37,21 @@
 ##
 #############################################################################
 
-# This script is used to generate a summary of missing types / classes which are present in C++ Qt5,
-# but are missing in PySide2.
+# This script is used to generate a summary of missing types / classes
+# which are present in C++ Qt5, but are missing in PySide2.
 #
 # Required packages: bs4
 # Installed via: pip install bs4
 #
-# The script uses beautiful soup 4 to parse out the class names from the online Qt
-# documentation. It then tries to import the types from PySide2.
+# The script uses beautiful soup 4 to parse out the class names from
+# the online Qt documentation. It then tries to import the types from
+# PySide2.
 #
 # Example invocation of script:
 # python missing_bindings.py --qt-version 5.9 -w all
 # --qt-version - specify which version of qt documentation to load.
-# -w           - if PyQt5 is an installed package, check if the tested class also exists there.
+# -w           - if PyQt5 is an installed package, check if the tested
+# class also exists there.
 
 from __future__ import print_function
 
@@ -237,8 +239,8 @@ parser.add_argument("--which-missing",
                     choices=['all', 'in-pyqt', 'not-in-pyqt'],
                     type=str,
                     dest='which_missing',
-                    help="Which missing types to show (all, or just those that are not present in "
-                         "PyQt)")
+                    help="Which missing types to show (all, or just those "
+                        "that are not present in PyQt)")
 
 args = parser.parse_args()
 
@@ -292,18 +294,18 @@ def log(*pargs, **kw):
 
 log('PySide2 bindings for Qt {}'.format(args.version), style='heading1')
 
-log("""
-Using Qt version {} documentation to find public API Qt types and test if the types are present \
-in the PySide2 package.""".format(args.version))
+log("""Using Qt version {} documentation to find public API Qt types and test "
+    "if the types are present in the PySide2 package.""".format(args.version))
 
-log("""
-Results are usually stored at https://wiki.qt.io/PySide2_Missing_Bindings so consider \
-taking the contents of the generated missing_bindings_for_wiki_qt_io.txt file and updating \
-the linked wiki page.""", style='end')
+log("""Results are usually stored at
+https://wiki.qt.io/PySide2_Missing_Bindings
+so consider taking the contents of the generated
+missing_bindings_for_wiki_qt_io.txt file and updating the linked wiki page.""",
+style='end')
 
-log("""
-Similar report: https://gist.github.com/ethanhs/6c626ca4e291f3682589699296377d3a \
-""", style='text_with_link')
+log("""Similar report:
+https://gist.github.com/ethanhs/6c626ca4e291f3682589699296377d3a""",
+style='text_with_link')
 
 python_executable = os.path.basename(sys.executable or '')
 command_line_arguments = ' '.join(sys.argv)
@@ -324,20 +326,22 @@ for module_name in modules_to_test.keys():
 
     # Import the tested module
     try:
-        pyside_tested_module = getattr(__import__(pyside_package_name, fromlist=[module_name]),
-                                       module_name)
+        pyside_tested_module = getattr(__import__(pyside_package_name,
+            fromlist=[module_name]), module_name)
     except Exception as e:
-        log('\nCould not load {}.{}. Received error: {}. Skipping.\n'
-            .format(pyside_package_name, module_name, str(e).replace("'", '')), style='error')
+        log('\nCould not load {}.{}. Received error: {}. Skipping.\n'.format(
+            pyside_package_name, module_name, str(e).replace("'", '')),
+            style='error')
         total_missing_modules_count += 1
         continue
 
     try:
-        pyqt_tested_module = getattr(__import__(pyqt_package_name, fromlist=[module_name]),
-                                     module_name)
+        pyqt_tested_module = getattr(__import__(pyqt_package_name,
+            fromlist=[module_name]), module_name)
     except Exception as e:
-        log('\nCould not load {}.{} for comparison. Received error: {}.\n'
-            .format(pyqt_package_name, module_name, str(e).replace("'", '')), style='error')
+        log("\nCould not load {}.{} for comparison. "
+            "Received error: {}.\n".format(pyqt_package_name, module_name,
+                str(e).replace("'", '')), style='error')
 
     # Get C++ class list from documentation page.
     page = urllib2.urlopen(url)
@@ -353,8 +357,8 @@ for module_name in modules_to_test.keys():
         if link_text not in types_to_ignore:
             types_on_html_page.append(link_text)
 
-    log('Number of types in {}: {}'.format(module_name, len(types_on_html_page)),
-        style='bold_colon')
+    log('Number of types in {}: {}'.format(module_name,
+        len(types_on_html_page)), style='bold_colon')
 
     missing_types_count = 0
     missing_types_compared_to_pyqt = 0
@@ -383,7 +387,8 @@ for module_name in modules_to_test.keys():
                 missing_types.append(missing_type)
             elif args.which_missing == 'in-pyqt' and is_present_in_pyqt:
                 missing_types.append(missing_type)
-            elif args.which_missing == 'not-in-pyqt' and not is_present_in_pyqt:
+            elif (args.which_missing == 'not-in-pyqt' and
+                    not is_present_in_pyqt):
                 missing_types.append(missing_type)
 
     if len(missing_types) > 0:
@@ -393,7 +398,8 @@ for module_name in modules_to_test.keys():
             log(missing_type, style='code')
         log('')
 
-    log('Number of missing types: {}'.format(missing_types_count), style='bold_colon')
+    log('Number of missing types: {}'.format(missing_types_count),
+        style='bold_colon')
     if len(missing_types) > 0:
         log('Number of missing types that are present in PyQt5: {}'
             .format(missing_types_compared_to_pyqt), style='bold_colon')
@@ -402,7 +408,8 @@ for module_name in modules_to_test.keys():
         log('', style='end')
 
 log('Summary', style='heading5')
-log('Total number of missing types: {}'.format(total_missing_types_count), style='bold_colon')
+log('Total number of missing types: {}'.format(total_missing_types_count),
+    style='bold_colon')
 log('Total number of missing types that are present in PyQt5: {}'
     .format(total_missing_types_count_compared_to_pyqt), style='bold_colon')
 log('Total number of missing modules: {}'

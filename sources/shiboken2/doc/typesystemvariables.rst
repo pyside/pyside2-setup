@@ -59,9 +59,8 @@ Variables
   system), this value will be inserted in the argument list. If you want to remove
   the argument so completely that it doesn't appear in any form on the
   ``%ARGUMENT_NAMES`` replacement, don't forget to remove also its default value
-  with the `<remove-default-expression/>
-  <http://www.pyside.org/docs/apiextractor/typesystem_arguments.html#remove-default-expression>`_
-  type system tag.
+  with the `<remove-default-expression/>`_  type system tag.
+
 
   Take the following method and related type system description as an example:
 
@@ -334,3 +333,5 @@ that expects a Python sequence instead.
             </inject-code>
         </modify-function>
 
+
+.. _`<remove-default-expression/>`: http://www.pyside.org/docs/apiextractor/typesystem_arguments.html#remove-default-expression

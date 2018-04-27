@@ -116,19 +116,19 @@ namespace PySide {
 PyObjectWrapper::PyObjectWrapper()
     :m_me(Py_None)
 {
-    Py_INCREF(m_me);
+    Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::PyObjectWrapper(PyObject* me)
     : m_me(me)
 {
-    Py_INCREF(m_me);
+    Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::PyObjectWrapper(const PyObjectWrapper &other)
     : m_me(other.m_me)
 {
-    Py_INCREF(m_me);
+    Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::~PyObjectWrapper()
@@ -139,13 +139,13 @@ PyObjectWrapper::~PyObjectWrapper()
         return;
 
     Shiboken::GilState gil;
-    Py_DECREF(m_me);
+    Py_XDECREF(m_me);
 }
 
 PyObjectWrapper& PyObjectWrapper::operator=(const PySide::PyObjectWrapper& other)
 {
-    Py_INCREF(other.m_me);
-    Py_DECREF(m_me);
+    Py_XINCREF(other.m_me);
+    Py_XDECREF(m_me);
     m_me = other.m_me;
     return *this;
 }

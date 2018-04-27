@@ -54,7 +54,7 @@
              in generator tests folder. -->
     </primitive-type>
 
-    <add-function signature="qmlRegisterType(PyTypeObject, const char*, int, int, const char*)" return-type="int">
+    <add-function signature="qmlRegisterType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
         <inject-documentation format="target" mode="append">
             This function registers the Python type in the QML system with the name qmlName, in the library imported from uri having the version number composed from versionMajor and versionMinor.
             Returns the QML type id.
@@ -123,7 +123,7 @@
         <enum-type name="ObjectOwnership" />
     </object-type>
     <object-type name="QQmlExpression">
-        <modify-function signature="evaluate(bool *)" allow-thread="yes">
+        <modify-function signature="evaluate(bool*)" allow-thread="yes">
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>
@@ -181,7 +181,7 @@
     <object-type name="QQmlPropertyMap" />
     <object-type name="QQmlPropertyValueSource" />
     <value-type name="QQmlScriptString">
-        <modify-function signature="numberLiteral(bool *) const" allow-thread="yes">
+        <modify-function signature="numberLiteral(bool*)const" allow-thread="yes">
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>
@@ -192,7 +192,7 @@
                 <insert-template name="fix_bool*"/>
             </inject-code>
         </modify-function>
-        <modify-function signature="booleanLiteral(bool *) const" allow-thread="yes">
+        <modify-function signature="booleanLiteral(bool*)const" allow-thread="yes">
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>

@@ -80,7 +80,7 @@
 
   <rejection class="QTest" function-name="compare_helper"/>
   <rejection class="QTest" function-name="toPrettyUnicode"/>
-  
+
   <rejection class="QTest" field-name="lastMouseButton"/>
   <rejection class="QTest" field-name="lastMouseTimestamp"/>
 
@@ -89,8 +89,8 @@
       The problem that costed my days of bug hunting is the fact that shiboken gives
       misleading error messages. The messages that I could not get rid of were
 
-    signature 'generateTouchEvent(QWidget*,QTouchDevice*,bool)' for function modification in 'QTest' not found. Possible candidates: 
-    signature 'generateTouchEvent(QWindow*,QTouchDevice*,bool)' for function modification in 'QTest' not found. Possible candidates: 
+    signature 'generateTouchEvent(QWidget*,QTouchDevice*,bool)' for function modification in 'QTest' not found. Possible candidates:
+    signature 'generateTouchEvent(QWindow*,QTouchDevice*,bool)' for function modification in 'QTest' not found. Possible candidates:
 
       I always thought that for some reason the functions were not recognized, or the arguments somehow
       do not match their declaration. Only late in the project, I learnt that also
@@ -115,32 +115,32 @@
 
     <rejection class="QTouchEventSequence"/>
     <object-type name="PySideQTouchEventSequence" target-lang-name="QTouchEventSequence" since="4.6" >
-        <modify-function signature="press(int, const QPoint&amp;, QWidget*)">
+        <modify-function signature="press(int,const QPoint&amp;,QWidget*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="press(int, const QPoint&amp;, QWindow*)">
+        <modify-function signature="press(int,const QPoint&amp;,QWindow*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="move(int, const QPoint&amp;, QWidget*)">
+        <modify-function signature="move(int,const QPoint&amp;,QWidget*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="move(int, const QPoint&amp;, QWindow*)">
+        <modify-function signature="move(int,const QPoint&amp;,QWindow*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="release(int, const QPoint&amp;, QWidget*)">
+        <modify-function signature="release(int,const QPoint&amp;,QWidget*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="release(int, const QPoint&amp;, QWindow*)">
+        <modify-function signature="release(int,const QPoint&amp;,QWindow*)">
             <modify-argument index="return">
                 <define-ownership class="target" owner="default"/>
             </modify-argument>
@@ -151,12 +151,12 @@
             </modify-argument>
         </modify-function>
     </object-type>
-    <modify-function signature="generateTouchEvent(QWidget*, QTouchDevice*, bool)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWidget*,QTouchDevice*,bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="generateTouchEvent(QWindow*, QTouchDevice*, bool)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWindow*,QTouchDevice*,bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>

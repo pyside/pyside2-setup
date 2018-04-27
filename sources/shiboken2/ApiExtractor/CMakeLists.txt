@@ -1,5 +1,7 @@
 project(apiextractor)
 
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(VERSION 3.1)
 find_package(LibXml2 2.6.32)
 find_package(LibXslt 1.1.19)
 
@@ -55,11 +57,13 @@ clangparser/clangdebugutils.cpp
 clangparser/clangutils.cpp
 # Old parser
 parser/codemodel.cpp
+parser/enumvalue.cpp
 )
 
 set(APIEXTRACTOR_EXTRA_INCLUDES ${CLANG_EXTRA_INCLUDES})
 set(APIEXTRACTOR_EXTRA_LIBRARIES ${CLANG_EXTRA_LIBRARIES})
 
+add_subdirectory(doc)
 if (NOT DISABLE_DOCSTRINGS)
     set(apiextractor_SRC
         ${apiextractor_SRC}
