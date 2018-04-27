@@ -544,6 +544,12 @@ int main(int argc, char *argv[])
     }
 
     QString cppFileName = argsHandler.removeArg(QLatin1String("arg-1"));
+    const QFileInfo cppFileNameFi(cppFileName);
+    if (!cppFileNameFi.isFile() && !cppFileNameFi.isSymLink()) {
+        errorPrint(QLatin1Char('"') + cppFileName + QLatin1String("\" does not exist."));
+        return EXIT_FAILURE;
+    }
+
     QString typeSystemFileName = argsHandler.removeArg(QLatin1String("arg-2"));
     QString messagePrefix = QFileInfo(typeSystemFileName).baseName();
     if (messagePrefix.startsWith(QLatin1String("typesystem_")))
@@ -579,7 +585,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    extractor.setCppFileName(cppFileName);
+    extractor.setCppFileName(cppFileNameFi.absoluteFilePath());
     extractor.setTypeSystem(typeSystemFileName);
     if (!extractor.run()) {
         errorPrint(QLatin1String("Error running ApiExtractor."));
