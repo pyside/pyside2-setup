@@ -38,7 +38,7 @@ strong {
     text-align:center;
     background-color: white;
     border-top: 2px solid #e0e0e0;
-    white-space: nowrap;
+    white-space: normal;
     height: 90px;
     width: 100%;
 }
