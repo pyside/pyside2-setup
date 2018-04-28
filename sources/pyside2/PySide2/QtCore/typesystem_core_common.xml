@@ -2793,6 +2793,9 @@
                 }
         </inject-code>
     </add-function>
+    <add-function signature="__mgetitem__">
+        <inject-code class="target" position="beginning" file="glue/qbytearray_mgetitem.cpp" />
+    </add-function>
     <add-function signature="__setitem__">
         <inject-code class="target" position="beginning">
                 %CPPSELF.remove(_i, 1);
@@ -2801,17 +2804,6 @@
                 Py_DECREF(args);
                 Py_XDECREF(result);
                 return !result ? -1 : 0;
-        </inject-code>
-    </add-function>
-    <add-function signature="__getslice__">
-        <inject-code class="target" position="beginning">
-            Py_ssize_t max = %CPPSELF.count();
-            _i1 = qBound(Py_ssize_t(0), _i1, max);
-            _i2 = qBound(Py_ssize_t(0), _i2, max);
-            QByteArray ba;
-            if (_i1 &lt; _i2)
-                ba = %CPPSELF.mid(_i1, _i2 - _i1);
-            return %CONVERTTOPYTHON[QByteArray](ba);
         </inject-code>
     </add-function>
   </value-type>
