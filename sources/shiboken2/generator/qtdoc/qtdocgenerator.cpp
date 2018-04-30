@@ -167,6 +167,36 @@ static void formatSince(QTextStream &s, const char *what, const TypeEntry *te)
     }
 }
 
+// RST anchor string: Anything else but letters, numbers, '_' or '.' replaced by '-'
+static inline bool isValidRstLabelChar(QChar c)
+{
+    return c.isLetterOrNumber() || c == QLatin1Char('_') || c == QLatin1Char('.');
+}
+
+static QString toRstLabel(QString s)
+{
+    for (int i = 0, size = s.size(); i < size; ++i) {
+        if (!isValidRstLabelChar(s.at(i)))
+            s[i] = QLatin1Char('-');
+    }
+    return s;
+}
+
+class rstLabel
+{
+public:
+    explicit rstLabel(const QString &l) : m_label(l) {}
+
+    friend QTextStream &operator<<(QTextStream &str, const rstLabel &a)
+    {
+        str << ".. _" << toRstLabel(a.m_label) << ':' << endl << endl;
+        return str;
+    }
+
+private:
+    const QString &m_label;
+};
+
 static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                              const QString &tag, const QString &message)
 {
@@ -851,9 +881,11 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     }
 }
 
-QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, const QString &ref) const
+QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, QString ref) const
 {
-    LinkContext *result = new LinkContext(ref, type);
+    ref.replace(QLatin1String("::"), QLatin1String("."));
+    ref.remove(QLatin1String("()"));
+    LinkContext *result = new LinkContext(toRstLabel(ref), type);
 
     result->linkTagEnding = QLatin1String("` ");
     if (m_insideBold) {
@@ -864,8 +896,6 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
         result->linkTagEnding.append(QLatin1Char('*'));
     }
 
-    result->linkRef.replace(QLatin1String("::"), QLatin1String("."));
-    result->linkRef.remove(QLatin1String("()"));
 
     if (result->type == functionLinkType() && !m_context.isEmpty()) {
         result->linkTag = QLatin1String(" :meth:`");
@@ -1094,7 +1124,9 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
             anchor = reader.attributes().value(QLatin1String("name")).toString();
         if (!anchor.isEmpty() && m_opened_anchor != anchor) {
             m_opened_anchor = anchor;
-            m_output << INDENT << ".. _" << m_context << "_" << anchor.toLower() << ":" << endl << endl;
+            if (!m_context.isEmpty())
+                anchor.prepend(m_context + QLatin1Char('_'));
+            m_output << INDENT << rstLabel(anchor);
         }
    } else if (token == QXmlStreamReader::EndElement) {
        m_opened_anchor.clear();
