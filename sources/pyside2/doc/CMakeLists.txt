@@ -10,7 +10,6 @@ else()
 endif()
 
 set(DOC_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/qdoc-output")
-configure_file("pyside-config.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf" @ONLY)
 
 get_filename_component(ROOT ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 set(TS_ROOT "${ROOT}/PySide2")
@@ -24,7 +23,7 @@ file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/
 
 # The last element of the include list is the mkspec directory containing qplatformdefs.h
 list(GET Qt5Core_INCLUDE_DIRS -1 mkspecInclude)
-set(QDOC_INCPATH -I "${QT_INCLUDE_DIR}" -I "${mkspecInclude}")
+configure_file("pyside-config.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf" @ONLY)
 
 file(READ "${pyside2_BINARY_DIR}/pyside2_global.h" docHeaderContents)
 file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
@@ -48,10 +47,10 @@ foreach(moduleIn ${all_module_shortnames})
         foreach(module ${modules})
             string(TOLOWER "${module}" lowerModule)
             # -- @TODO fix this for macOS frameworks.
-            list(APPEND QDOC_INCPATH
-                 -I "${QT_INCLUDE_DIR}Qt${module}"
-                 -I "${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}"
-                 -I "${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}/Qt${module}")
+            file(APPEND "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf"
+                 "    -I ${QT_INCLUDE_DIR}Qt${module} \\\n"
+                 "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION} \\\n"
+                 "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}/Qt${module} \\\n")
 
             set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/Qt${module}>")
             set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
@@ -72,7 +71,7 @@ set(QDOC_TYPESYSTEM_PATH "${pyside2_SOURCE_DIR}${PATH_SEP}${pyside2_BINARY_DIR}"
 add_custom_target(qdoc
                 # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
                 COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc QT_VERSION=1.0.0 QT_VER=1.0 QT_VERSION_TAG=100
-                qdoc pyside.qdocconf ${QDOC_INCPATH} -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
+                qdoc pyside.qdocconf -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
                 COMMENT "Running qdoc against Qt source code..."
                 SOURCE "pyside.qdocconf")
 

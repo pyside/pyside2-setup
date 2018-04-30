@@ -8,3 +8,7 @@ WebXML.nosubdirs          = true
 WebXML.outputsubdir       = webxml
 
 spurious                 += "Hostile character .*"
+
+includepaths += \
+    -I @QT_INCLUDE_DIR@ \
+    -I @mkspecInclude@ \
