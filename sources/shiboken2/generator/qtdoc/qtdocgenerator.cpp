@@ -47,6 +47,11 @@ static Indentor INDENT;
 
 static inline QString additionalDocumentationOption() { return QStringLiteral("additional-documentation"); }
 
+static inline QString nameAttribute() { return QStringLiteral("name"); }
+static inline QString titleAttribute() { return QStringLiteral("title"); }
+static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
+static inline QString briefAttribute() { return QStringLiteral("brief"); }
+
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
     // Constructors go to separate section
@@ -262,7 +267,8 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert(QLatin1String("tableofcontents"), &QtXmlToSphinx::handleIgnoredTag);
     m_handlerMap.insert(QLatin1String("quotefromfile"), &QtXmlToSphinx::handleIgnoredTag);
     m_handlerMap.insert(QLatin1String("skipto"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleTargetTag);
+    m_handlerMap.insert(QLatin1String("page"), &QtXmlToSphinx::handlePageTag);
 
     // useless tags
     m_handlerMap.insert(QLatin1String("description"), &QtXmlToSphinx::handleUselessTag);
@@ -632,7 +638,7 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
             handleLinkEnd(m_seeAlsoContext.data());
             m_seeAlsoContext.reset();
         }
-        m_output << endl;
+        m_output << endl << endl;
         break;
     default:
         break;
@@ -729,6 +735,8 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
         if (consecutiveSnippet) {
             m_output.flush();
             m_output.string()->chop(2);
+        } else {
+            m_output << INDENT << "::\n\n";
         }
         Indentation indentation(INDENT);
         pushOutputBuffer();
@@ -1101,6 +1109,35 @@ void QtXmlToSphinx::handleSuperScriptTag(QXmlStreamReader& reader)
         m_output << popOutputBuffer();
         m_output << '`';
     }
+}
+
+void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
+{
+    if (reader.tokenType() != QXmlStreamReader::StartElement)
+        return;
+
+    const QStringRef title = reader.attributes().value(titleAttribute());
+    if (!title.isEmpty())
+        m_output << rstLabel(title.toString());
+
+    const QStringRef fullTitle = reader.attributes().value(fullTitleAttribute());
+    if (!fullTitle.isEmpty()) {
+        const int size = writeEscapedRstText(m_output, fullTitle);
+        m_output << endl << Pad('*', size) << endl << endl;
+    }
+
+    const QStringRef brief = reader.attributes().value(briefAttribute());
+    if (!brief.isEmpty())
+        m_output << escape(brief) << endl << endl;
+}
+
+void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
+{
+    if (reader.tokenType() != QXmlStreamReader::StartElement)
+        return;
+    const QStringRef name = reader.attributes().value(nameAttribute());
+    if (!name.isEmpty())
+        m_output << INDENT << rstLabel(name.toString());
 }
 
 void QtXmlToSphinx::handleIgnoredTag(QXmlStreamReader&)

@@ -152,6 +152,8 @@ private:
     void handleItemTag(QXmlStreamReader& reader);
     void handleRawTag(QXmlStreamReader& reader);
     void handleCodeTag(QXmlStreamReader& reader);
+    void handlePageTag(QXmlStreamReader&);
+    void handleTargetTag(QXmlStreamReader&);
 
     void handleIgnoredTag(QXmlStreamReader& reader);
     void handleUnknownTag(QXmlStreamReader& reader);
