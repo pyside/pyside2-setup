@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtsensors/src/sensors/doc/qtsensors.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtsensors/src/sensors/doc
+include(../pyside-config.qdocconf)

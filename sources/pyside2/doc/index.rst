@@ -88,7 +88,15 @@ Qt Modules
         Enables synchronizing frames with the Qt 3D backend.
      - `Qt 3D Render <PySide2/Qt3DRender/index.html>`_
         Contains functionality to support 2D and 3D rendering using Qt 3D.
+   * - `Qt Positioning <PySide2/QtPositioning/index.html>`_
+        Provides positioning information via QML and Python interfaces.
+     - `Qt Location <PySide2/QtLocation/index.html>`_
+        Helps you create viable mapping solutions using the data available from some of the popular location services.
+   * - `Qt Sensors <PySide2/QtSensors/index.html>`_
+        Provides access to sensor hardware via QML and Python interfaces and a motion gesture recognition API for devices.
+     -
 
+provides access to sensor hardware via QML and C++ interfaces. The Qt Sensors API also provides a motion gesture recognition API for devices.
 
 .. toctree::
     :maxdepth: 2
