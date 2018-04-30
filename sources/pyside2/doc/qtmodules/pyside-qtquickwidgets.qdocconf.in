@@ -1,2 +1,3 @@
 include(@QT_SRC_DIR@/../qtdeclarative/src/quick/doc/qtquick.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtdeclarative/src/quick/doc
 include(../pyside-config.qdocconf)

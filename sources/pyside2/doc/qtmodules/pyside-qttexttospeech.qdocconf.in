@@ -1,2 +1,3 @@
 include(@QT_SRC_DIR@/../qtspeech/src/doc/qtspeech.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtspeech/src/doc
 include(../pyside-config.qdocconf)
