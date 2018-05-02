@@ -6,7 +6,7 @@
 ## Copyright (C) 2016 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the test suite of the Qt for Python project.
+## This file is part of the test suite of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ## Commercial License Usage

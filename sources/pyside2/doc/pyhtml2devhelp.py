@@ -6,7 +6,7 @@
 ## Copyright (C) 2009 Matthias Klose <doko@debian.org>
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the Qt for Python project tools.
+## This file is part of Qt for Python tools.
 ##
 ## $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ## Commercial License Usage
