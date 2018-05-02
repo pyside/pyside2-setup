@@ -1786,11 +1786,6 @@
   <object-type name="QMoveEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Move" />
   <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize"/>
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
-    <!-- All these have const overloads that are used instead -->
-    <modify-function signature="isAmbiguous()const" remove="all"/>
-    <modify-function signature="shortcutId()const" remove="all"/>
-    <modify-function signature="key()const" remove="all"/>
-    <!-- ### -->
   </object-type>
   <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
   <object-type name="QStatusTipEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::StatusTip"/>
