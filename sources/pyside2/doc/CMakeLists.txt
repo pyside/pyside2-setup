@@ -94,6 +94,7 @@ add_custom_target("docrsts"
             --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
             --documentation-code-snippets-dir=${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/examples
             --documentation-extra-sections-dir=${CMAKE_CURRENT_SOURCE_DIR}/extras
+            --additional-documentation=${CMAKE_CURRENT_LIST_DIR}/additionaldocs.lst
             ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
     WORKING_DIRECTORY ${${module}_SOURCE_DIR}
     COMMENT "Running generator to generate documentation..."

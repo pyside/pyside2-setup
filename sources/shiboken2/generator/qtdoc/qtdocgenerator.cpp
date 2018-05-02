@@ -45,6 +45,8 @@
 
 static Indentor INDENT;
 
+static inline QString additionalDocumentationOption() { return QStringLiteral("additional-documentation"); }
+
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
     // Constructors go to separate section
@@ -1119,6 +1121,26 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
     }
 }
 
+bool QtXmlToSphinx::convertToRst(QtDocGenerator *generator,
+                                 const QString &sourceFileName,
+                                 const QString &targetFileName,
+                                 const QString &context, QString *errorMessage)
+{
+    QFile sourceFile(sourceFileName);
+    if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (errorMessage)
+            *errorMessage = FileOut::msgCannotOpenForReading(sourceFile);
+        return false;
+    }
+    const QString doc = QString::fromUtf8(sourceFile.readAll());
+    sourceFile.close();
+
+    FileOut targetFile(targetFileName);
+    QtXmlToSphinx x(generator, doc, context);
+    targetFile.stream << x;
+    return targetFile.done(errorMessage) != FileOut::Failure;
+}
+
 void QtXmlToSphinx::Table::normalize()
 {
     if (m_normalized || isEmpty())
@@ -1910,9 +1932,15 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
 
 bool QtDocGenerator::finishGeneration()
 {
-    if (classes().isEmpty())
-        return true;
+    if (!classes().isEmpty())
+        writeModuleDocumentation();
+    if (!m_additionalDocumentationList.isEmpty())
+        writeAdditionalDocumentation();
+    return true;
+}
 
+void QtDocGenerator::writeModuleDocumentation()
+{
     QMap<QString, QStringList>::iterator it = m_packages.begin();
     for (; it != m_packages.end(); ++it) {
         QString key = it.key();
@@ -1984,7 +2012,63 @@ bool QtDocGenerator::finishGeneration()
             }
         }
     }
-    return true;
+}
+
+static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
+                                                      const QString &fileName)
+{
+    const QString result = QLatin1Char('"') + fileName
+        + QLatin1String("\" does not exist in ")
+        + QDir::toNativeSeparators(dir) + QLatin1Char('.');
+    return result;
+}
+
+void QtDocGenerator::writeAdditionalDocumentation()
+{
+    QFile additionalDocumentationFile(m_additionalDocumentationList);
+    if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(FileOut::msgCannotOpenForReading(additionalDocumentationFile)));
+        return;
+    }
+    const QByteArray contents = additionalDocumentationFile.readAll();
+    const QStringList lines = QFile::decodeName(contents).split(QLatin1Char('\n'));
+    QFileInfoList additionalDocFiles;
+    additionalDocFiles.reserve(lines.size());
+    for (const QString &lineIn : lines) {
+        const QString line = lineIn.trimmed();
+        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#'))) {
+            QFileInfo fi(m_docDataDir + QLatin1Char('/') + line);
+            if (fi.isFile()) {
+                additionalDocFiles.append(fi);
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgNonExistentAdditionalDocFile(m_docDataDir, line)));
+            }
+        }
+    }
+    additionalDocumentationFile.close();
+
+    const QString rstPrefix = outputDirectory() + QLatin1Char('/');
+    const QString rstSuffix = fileNameSuffix();
+
+    QString errorMessage;
+    int successCount = 0;
+    for (const QFileInfo &additionalDocFile : additionalDocFiles) {
+        const QString rstFileName = additionalDocFile.baseName() + rstSuffix;
+        const QString rstFile = rstPrefix + rstFileName;
+        if (QtXmlToSphinx::convertToRst(this, additionalDocFile.absoluteFilePath(),
+                                        rstFile, QString(), &errorMessage)) {
+            ++successCount;
+            qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
+                << " converted " << additionalDocFile.fileName()
+                << ' ' << rstFileName;
+        } else {
+            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        }
+    }
+    qCInfo(lcShiboken, "Created %d/%d additional documentation files.",
+           successCount, additionalDocFiles.size());
 }
 
 bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
@@ -2012,6 +2096,7 @@ bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
         m_docParser->setDocumentationDataDirectory(m_docDataDir);
         m_docParser->setLibrarySourceDirectory(m_libSourceDir);
     }
+    m_additionalDocumentationList = args.value(additionalDocumentationOption());
     return true;
 }
 
@@ -2029,6 +2114,9 @@ Generator::OptionDescriptions QtDocGenerator::options() const
         << qMakePair(QLatin1String("documentation-extra-sections-dir"),
                      QLatin1String("Directory used to search for extra documentation sections"))
         << qMakePair(QLatin1String("library-source-dir"),
-                     QLatin1String("Directory where library source code is located"));
+                     QLatin1String("Directory where library source code is located"))
+        << qMakePair(additionalDocumentationOption(),
+                     QLatin1String("List of additional XML files to be converted to .rst files\n"
+                                   "(for example, tutorials)."));
 }
 
