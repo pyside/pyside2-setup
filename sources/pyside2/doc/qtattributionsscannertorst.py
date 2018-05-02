@@ -119,7 +119,7 @@ def runScanner(directory, targetFileName):
 
     with open(targetFileName, 'w') as targetFile:
         targetFile.write(rstHeader)
-        for entry in json.loads(jsonS):
+        for entry in json.loads(jsonS.decode('utf-8')):
             name = entry['Name']
             title = "{}\n{}".format(name, '-' * len(name))
             brief = entry['License']
