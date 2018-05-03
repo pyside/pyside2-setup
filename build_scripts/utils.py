@@ -229,7 +229,7 @@ def init_msvc_env(platform_arch, build_type):
     if not vcdir_path:
         raise DistutilsSetupError(
             "Failed to find the MSVC compiler version {} on your "
-            "system.".formar(MSVC_VERSION))
+            "system.".format(MSVC_VERSION))
     else:
         log.info("Found {}".format(vcdir_path))
 
