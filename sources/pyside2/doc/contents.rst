@@ -6,6 +6,7 @@
 
     gettingstarted.rst
     modules.rst
+    licenses.rst
 
 Tutorials
 =========
