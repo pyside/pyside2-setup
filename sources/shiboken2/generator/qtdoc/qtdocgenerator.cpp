@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -44,6 +44,13 @@
 #include <limits>
 
 static Indentor INDENT;
+
+static inline QString additionalDocumentationOption() { return QStringLiteral("additional-documentation"); }
+
+static inline QString nameAttribute() { return QStringLiteral("name"); }
+static inline QString titleAttribute() { return QStringLiteral("title"); }
+static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
+static inline QString briefAttribute() { return QStringLiteral("brief"); }
 
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
@@ -165,6 +172,36 @@ static void formatSince(QTextStream &s, const char *what, const TypeEntry *te)
     }
 }
 
+// RST anchor string: Anything else but letters, numbers, '_' or '.' replaced by '-'
+static inline bool isValidRstLabelChar(QChar c)
+{
+    return c.isLetterOrNumber() || c == QLatin1Char('_') || c == QLatin1Char('.');
+}
+
+static QString toRstLabel(QString s)
+{
+    for (int i = 0, size = s.size(); i < size; ++i) {
+        if (!isValidRstLabelChar(s.at(i)))
+            s[i] = QLatin1Char('-');
+    }
+    return s;
+}
+
+class rstLabel
+{
+public:
+    explicit rstLabel(const QString &l) : m_label(l) {}
+
+    friend QTextStream &operator<<(QTextStream &str, const rstLabel &a)
+    {
+        str << ".. _" << toRstLabel(a.m_label) << ':' << endl << endl;
+        return str;
+    }
+
+private:
+    const QString &m_label;
+};
+
 static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                              const QString &tag, const QString &message)
 {
@@ -230,7 +267,8 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert(QLatin1String("tableofcontents"), &QtXmlToSphinx::handleIgnoredTag);
     m_handlerMap.insert(QLatin1String("quotefromfile"), &QtXmlToSphinx::handleIgnoredTag);
     m_handlerMap.insert(QLatin1String("skipto"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleIgnoredTag);
+    m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleTargetTag);
+    m_handlerMap.insert(QLatin1String("page"), &QtXmlToSphinx::handlePageTag);
 
     // useless tags
     m_handlerMap.insert(QLatin1String("description"), &QtXmlToSphinx::handleUselessTag);
@@ -600,7 +638,7 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
             handleLinkEnd(m_seeAlsoContext.data());
             m_seeAlsoContext.reset();
         }
-        m_output << endl;
+        m_output << endl << endl;
         break;
     default:
         break;
@@ -697,6 +735,8 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
         if (consecutiveSnippet) {
             m_output.flush();
             m_output.string()->chop(2);
+        } else {
+            m_output << INDENT << "::\n\n";
         }
         Indentation indentation(INDENT);
         pushOutputBuffer();
@@ -849,9 +889,11 @@ void QtXmlToSphinx::handleLinkTag(QXmlStreamReader& reader)
     }
 }
 
-QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, const QString &ref) const
+QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, QString ref) const
 {
-    LinkContext *result = new LinkContext(ref, type);
+    ref.replace(QLatin1String("::"), QLatin1String("."));
+    ref.remove(QLatin1String("()"));
+    LinkContext *result = new LinkContext(toRstLabel(ref), type);
 
     result->linkTagEnding = QLatin1String("` ");
     if (m_insideBold) {
@@ -862,8 +904,6 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
         result->linkTagEnding.append(QLatin1Char('*'));
     }
 
-    result->linkRef.replace(QLatin1String("::"), QLatin1String("."));
-    result->linkRef.remove(QLatin1String("()"));
 
     if (result->type == functionLinkType() && !m_context.isEmpty()) {
         result->linkTag = QLatin1String(" :meth:`");
@@ -1071,6 +1111,35 @@ void QtXmlToSphinx::handleSuperScriptTag(QXmlStreamReader& reader)
     }
 }
 
+void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
+{
+    if (reader.tokenType() != QXmlStreamReader::StartElement)
+        return;
+
+    const QStringRef title = reader.attributes().value(titleAttribute());
+    if (!title.isEmpty())
+        m_output << rstLabel(title.toString());
+
+    const QStringRef fullTitle = reader.attributes().value(fullTitleAttribute());
+    if (!fullTitle.isEmpty()) {
+        const int size = writeEscapedRstText(m_output, fullTitle);
+        m_output << endl << Pad('*', size) << endl << endl;
+    }
+
+    const QStringRef brief = reader.attributes().value(briefAttribute());
+    if (!brief.isEmpty())
+        m_output << escape(brief) << endl << endl;
+}
+
+void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
+{
+    if (reader.tokenType() != QXmlStreamReader::StartElement)
+        return;
+    const QStringRef name = reader.attributes().value(nameAttribute());
+    if (!name.isEmpty())
+        m_output << INDENT << rstLabel(name.toString());
+}
+
 void QtXmlToSphinx::handleIgnoredTag(QXmlStreamReader&)
 {
 }
@@ -1092,7 +1161,9 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
             anchor = reader.attributes().value(QLatin1String("name")).toString();
         if (!anchor.isEmpty() && m_opened_anchor != anchor) {
             m_opened_anchor = anchor;
-            m_output << INDENT << ".. _" << m_context << "_" << anchor.toLower() << ":" << endl << endl;
+            if (!m_context.isEmpty())
+                anchor.prepend(m_context + QLatin1Char('_'));
+            m_output << INDENT << rstLabel(anchor);
         }
    } else if (token == QXmlStreamReader::EndElement) {
        m_opened_anchor.clear();
@@ -1117,6 +1188,26 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
             formatCode(m_output, code, INDENT);
         m_output << endl;
     }
+}
+
+bool QtXmlToSphinx::convertToRst(QtDocGenerator *generator,
+                                 const QString &sourceFileName,
+                                 const QString &targetFileName,
+                                 const QString &context, QString *errorMessage)
+{
+    QFile sourceFile(sourceFileName);
+    if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (errorMessage)
+            *errorMessage = FileOut::msgCannotOpenForReading(sourceFile);
+        return false;
+    }
+    const QString doc = QString::fromUtf8(sourceFile.readAll());
+    sourceFile.close();
+
+    FileOut targetFile(targetFileName);
+    QtXmlToSphinx x(generator, doc, context);
+    targetFile.stream << x;
+    return targetFile.done(errorMessage) != FileOut::Failure;
 }
 
 void QtXmlToSphinx::Table::normalize()
@@ -1910,9 +2001,15 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
 
 bool QtDocGenerator::finishGeneration()
 {
-    if (classes().isEmpty())
-        return true;
+    if (!classes().isEmpty())
+        writeModuleDocumentation();
+    if (!m_additionalDocumentationList.isEmpty())
+        writeAdditionalDocumentation();
+    return true;
+}
 
+void QtDocGenerator::writeModuleDocumentation()
+{
     QMap<QString, QStringList>::iterator it = m_packages.begin();
     for (; it != m_packages.end(); ++it) {
         QString key = it.key();
@@ -1984,7 +2081,63 @@ bool QtDocGenerator::finishGeneration()
             }
         }
     }
-    return true;
+}
+
+static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
+                                                      const QString &fileName)
+{
+    const QString result = QLatin1Char('"') + fileName
+        + QLatin1String("\" does not exist in ")
+        + QDir::toNativeSeparators(dir) + QLatin1Char('.');
+    return result;
+}
+
+void QtDocGenerator::writeAdditionalDocumentation()
+{
+    QFile additionalDocumentationFile(m_additionalDocumentationList);
+    if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(FileOut::msgCannotOpenForReading(additionalDocumentationFile)));
+        return;
+    }
+    const QByteArray contents = additionalDocumentationFile.readAll();
+    const QStringList lines = QFile::decodeName(contents).split(QLatin1Char('\n'));
+    QFileInfoList additionalDocFiles;
+    additionalDocFiles.reserve(lines.size());
+    for (const QString &lineIn : lines) {
+        const QString line = lineIn.trimmed();
+        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#'))) {
+            QFileInfo fi(m_docDataDir + QLatin1Char('/') + line);
+            if (fi.isFile()) {
+                additionalDocFiles.append(fi);
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgNonExistentAdditionalDocFile(m_docDataDir, line)));
+            }
+        }
+    }
+    additionalDocumentationFile.close();
+
+    const QString rstPrefix = outputDirectory() + QLatin1Char('/');
+    const QString rstSuffix = fileNameSuffix();
+
+    QString errorMessage;
+    int successCount = 0;
+    for (const QFileInfo &additionalDocFile : additionalDocFiles) {
+        const QString rstFileName = additionalDocFile.baseName() + rstSuffix;
+        const QString rstFile = rstPrefix + rstFileName;
+        if (QtXmlToSphinx::convertToRst(this, additionalDocFile.absoluteFilePath(),
+                                        rstFile, QString(), &errorMessage)) {
+            ++successCount;
+            qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
+                << " converted " << additionalDocFile.fileName()
+                << ' ' << rstFileName;
+        } else {
+            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        }
+    }
+    qCInfo(lcShiboken, "Created %d/%d additional documentation files.",
+           successCount, additionalDocFiles.size());
 }
 
 bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
@@ -2012,6 +2165,7 @@ bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
         m_docParser->setDocumentationDataDirectory(m_docDataDir);
         m_docParser->setLibrarySourceDirectory(m_libSourceDir);
     }
+    m_additionalDocumentationList = args.value(additionalDocumentationOption());
     return true;
 }
 
@@ -2029,6 +2183,9 @@ Generator::OptionDescriptions QtDocGenerator::options() const
         << qMakePair(QLatin1String("documentation-extra-sections-dir"),
                      QLatin1String("Directory used to search for extra documentation sections"))
         << qMakePair(QLatin1String("library-source-dir"),
-                     QLatin1String("Directory where library source code is located"));
+                     QLatin1String("Directory where library source code is located"))
+        << qMakePair(additionalDocumentationOption(),
+                     QLatin1String("List of additional XML files to be converted to .rst files\n"
+                                   "(for example, tutorials)."));
 }
 

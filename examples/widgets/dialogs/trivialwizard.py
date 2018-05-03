@@ -6,7 +6,7 @@
 ## Copyright (C) 2016 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
-## This file is part of the PySide examples of the Qt Toolkit.
+## This file is part of the Qt for Python examples of the Qt Toolkit.
 ##
 ## $QT_BEGIN_LICENSE:BSD$
 ## You may use this file under the terms of the BSD license as follows:

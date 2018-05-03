@@ -6,6 +6,7 @@ else()
     endif()
 
    # tests/QtWidgets/qstandarditemmodel_test.py needs shiboken2
+   # tests/QtWidgets/qlabel_test.py needs shiboken2
    if(WIN32)
         set(TEST_PYTHONPATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/tests/util;${CMAKE_BINARY_DIR}/tests/pysidetest;${CMAKE_BINARY_DIR}/../shiboken2/shibokenmodule;$ENV{PYTHONPATH}")
         set(TEST_LIBRARY_PATH   "${libpyside_BINARY_DIR};${pysidetest_BINARY_DIR};${SHIBOKEN_INCLUDE_DIR}/../../bin;$ENV{PATH}")

@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the examples of PySide2.
+** This file is part of the examples of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:BSD$
 ** Commercial License Usage
@@ -48,7 +48,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.0
+import QtQuick 2.0
 
 Item {
     id: block

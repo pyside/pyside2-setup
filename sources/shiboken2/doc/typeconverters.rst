@@ -58,22 +58,22 @@ the "<conversion-rule>" tag must be used.
 
 
 The details will be given later, but the gist of it are the tags
-`<native-to-target>`_, which has only one conversion from C++ to Python, and
-`<target-to-native>`_, that may define the conversion of multiple Python types
+:ref:`native-to-target <apiextractor:native-to-target>`, which has only one conversion from C++ to Python, and
+:ref:`native-to-native <apiextractor:target-to-native>`, that may define the conversion of multiple Python types
 to C++'s "Complex" type.
 
 .. image:: images/converter.png
     :height: 240px
     :align: center
 
-|project| expects the code for `<native-to-target>`_, to directly return the
+|project| expects the code for :ref:`native-to-target <apiextractor:native-to-target>`, to directly return the
 Python result of the conversion, and the added conversions inside the
-`<target-to-native>`_ must attribute the Python to C++ conversion result to
+:ref:`target-to-native <apiextractor:target-to-native>` must attribute the Python to C++ conversion result to
 the :ref:`%out <out>` variable.
 
 Expanding on the last example, if the binding developer want a Python 2-tuple
 of numbers to be accepted by wrapped C++ functions with "Complex" arguments,
-an `<add-conversion>`_ tag and a custom check must be added.
+an :ref:`add-conversion <apiextractor:add-conversion>` tag and a custom check must be added.
 Here's how to do it:
 
       .. code-block:: xml
@@ -130,13 +130,11 @@ Here's how to do it:
 Container Conversions
 =====================
 
-Converters for `<container-type>`_ are pretty much the same as for other type,
+Converters for :ref:`container-type <apiextractor:container-type>` are pretty much the same as for other type,
 except that they make use of the type system variables
 :ref:`%INTYPE_# <intype_n>` and :ref:`%OUTTYPE_# <outtype_n>`.
 |project| combines the conversion code for containers with the conversion
 defined (or automatically generated) for the containers.
-
-.. _`container-type`: http://www.pyside.org/docs/apiextractor/typesystem_specifying_types.html#container-type
 
       .. code-block:: xml
 
@@ -288,10 +286,6 @@ In this case, the parts of the implementation that will be used in the new
 conversion-rule are the ones in the two last method
 ``static inline PyObject* toPython(const Complex& cpx)`` and
 ``static inline Complex toCpp(PyObject* pyobj)``. The ``isConvertible`` method
-is gone, and the ``checkType`` is now an attribute of the `<add-conversion>`_
+is gone, and the ``checkType`` is now an attribute of the :ref:`add-conversion <apiextractor:add-conversion>`
 tag. Refer back to the first example in this page and you will be able to
 correlate the above template with the new scheme of conversion rule definition.
-
-.. _`<native-to-target>`: http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#native-to-target
-.. _`<target-to-native>`: http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#target-to-native
-.. _`<add-conversion>`: http://www.pyside.org/docs/apiextractor/typesystem_conversionrule.html#add-conversion

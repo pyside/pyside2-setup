@@ -1,9 +1,9 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of PySide2.
+## This file is part of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:LGPL$
 ## Commercial License Usage
@@ -229,7 +229,7 @@ def init_msvc_env(platform_arch, build_type):
     if not vcdir_path:
         raise DistutilsSetupError(
             "Failed to find the MSVC compiler version {} on your "
-            "system.".formar(MSVC_VERSION))
+            "system.".format(MSVC_VERSION))
     else:
         log.info("Found {}".format(vcdir_path))
 

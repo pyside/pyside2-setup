@@ -5,7 +5,7 @@
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -80,7 +80,7 @@
           </modify-function>
       </object-type>
       <object-type name="QChartView" since="5.7">
-          <enum-type name="RubberBand"/>
+          <enum-type name="RubberBand" flags="RubberBands"/>
       </object-type>
       <object-type name="QDateTimeAxis" since="5.7"/>
       <object-type name="QHBarModelMapper" since="5.7"/>

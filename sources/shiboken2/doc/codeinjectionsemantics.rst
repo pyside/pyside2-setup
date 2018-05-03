@@ -2,12 +2,11 @@
 Code Injection Semantics
 ************************
 
-API Extractor provides the `inject-code`_ tag allowing the user to put custom
-written code to on specific locations of the generated code.
-Yet this is only part of what is needed to generate proper binding code, where
-the custom code should be written to depends upon the technology used on the
-generated binding code.
-
+:std:doc:`API Extractor <apiextractor:overview>` provides the
+:ref:`inject-code <apiextractor:inject-code>` tag
+allowing the user to put custom written code to on specific locations of the generated code.
+Yet this is only part of what is needed to generate proper binding code, where the custom code
+should be written to depends upon the technology used on the generated binding code.
 
 This is the ``inject-code`` tag options that matters to |project|.
 
@@ -396,6 +395,3 @@ to prevent bad custom code to pass unnoticed.
         (...)
 
         // Start of ``MODULENAME_module_wrapper.cpp``
-
-
-.. _`inject-code`: http://www.pyside.org/docs/apiextractor/typesystem_manipulating_objects.html#inject-code

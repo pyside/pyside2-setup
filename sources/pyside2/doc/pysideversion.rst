@@ -1,9 +1,10 @@
-Getting PySide and Qt version
-*****************************
+Printing |project| and Qt version
+*********************************
 
-PySide exports their version numbers among the version of Qt used to compile PySide in a pythonic way, you can check it using the variables:
+|project| exports its version numbers in a pythonic way. You can print these
+numbers using the following python constructs:
 
-::
+  ::
 
     import PySide2.QtCore
 
@@ -24,8 +25,7 @@ PySide exports their version numbers among the version of Qt used to compile PyS
     print(PySide2.QtCore.__version_info__)
 
 
-Note that the Qt version used to compile PySide may differ from the version used to run PySide, to get the current running Qt version you can do:
-
-::
+Note that the Qt version used to compile |project| may differ from the version used to
+run |project|. To print the current running Qt version number, you can use::
 
     print(PySide2.QtCore.qVersion())

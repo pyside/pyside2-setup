@@ -5,7 +5,7 @@
 ## Copyright (C) 2016 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the test suite of PySide2.
+## This file is part of the test suite of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ## Commercial License Usage
@@ -152,15 +152,20 @@ class QByteArrayOnQVariant(unittest.TestCase):
         a = QSettings().value("some_prop", QByteArray())
         self.assertEqual(type(a), QByteArray)
 
-class TestBug666(unittest.TestCase):
-    '''QByteArray does not support slices'''
+class TestBug567(unittest.TestCase):
+    '''
+    QByteArray should support slices
+    '''
     def testIt(self):
-        if not py3k.IS_PY3K:
-            ba = QByteArray('1234567890')
-            self.assertEqual(ba[2:4], '34')
-            self.assertEqual(ba[:4], '1234')
-            self.assertEqual(ba[4:], '567890')
-            self.assertEqual(len(ba[4:1]), 0)
+        ba = QByteArray('1234567890')
+        self.assertEqual(ba[2:4], '34')
+        self.assertEqual(ba[:4], '1234')
+        self.assertEqual(ba[4:], '567890')
+        self.assertEqual(len(ba[4:1]), 0)
+        self.assertEqual(ba[::-1], '0987654321')
+        self.assertEqual(ba[::2], '13579')
+        self.assertEqual(ba[::-2], '08642')
+        self.assertEqual(ba[2:8:3], '36')
 
 class QByteArrayBug514(unittest.TestCase):
     def testIt(self):

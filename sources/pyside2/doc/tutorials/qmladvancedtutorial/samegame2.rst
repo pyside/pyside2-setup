@@ -6,13 +6,12 @@ QML Advanced Tutorial 2 - Populating the Game Canvas
 Generating the blocks in JavaScript
 ===================================
 
-Now that we've written some basic elements, let's start writing the game.
+Now that the basic elements are in place, start writing the game.
 
 The first task is to generate the game blocks. Each time the New Game button
 is clicked, the game canvas is populated with a new, random set of
-blocks. Since we need to dynamically generate new blocks for each new game,
-we cannot use Repeater to define the blocks. Instead, we will
-create the blocks in JavaScript.
+blocks that are generated dynamically. You can achieve this by creating
+the blocks using JavaScript intead of a Repeater.
 
 Here is the JavaScript code for generating the blocks, contained in a new
 file, ``samegame.js``. The code is explained below.
@@ -29,11 +28,11 @@ The ``createBlock()`` function creates a block from the ``Block.qml`` file
 and moves the new block to its position on the game canvas. This involves several steps:
 
 *  ``Qt.createComponent()`` is called to
-   generate an element from ``Block.qml``.  If the component is ready,
+   generate an instance of ``Block.qml``.  If the component is ready,
    we can call ``createObject()`` to create an instance of the ``Block``
    item.
 
-*  If ``createObject()`` returned null (i.e. if there was an error
+*  If ``createObject()`` returned null (that is, if there was an error
    while loading the object), print the error information.
 
 *  Place the block in its position on the board and set its width and
@@ -46,26 +45,26 @@ and moves the new block to its position on the game canvas. This involves severa
 Connecting JavaScript components to QML
 =======================================
 
-Now we need to call the JavaScript code in ``samegame.js`` from our QML files.
-To do this, we add this line to ``samegame.qml`` which imports
+Now, call the JavaScript code in ``samegame.js`` from your QML files.
+To do this, add the following line to ``samegame.qml`` to import
 the JavaScript file as a module:
 
 .. pysideinclude:: samegame/samegame2/samegame.qml
     :snippet: 2
 
-This allows us to refer to any functions within ``samegame.js`` using "SameGame"
+This lets you to refer to any functions within ``samegame.js`` using "SameGame"
 as a prefix: for example, ``SameGame.startNewGame()`` or ``SameGame.createBlock()``.
-This means we can now connect the New Game button's ``onClicked`` handler to the ``startNewGame()``
+This means you can now connect the New Game button's ``onClicked`` handler to the ``startNewGame()``
 function, like this:
 
 .. pysideinclude:: samegame/samegame2/samegame.qml
     :snippet: 1
 
-So, when you click the New Game button, ``startNewGame()`` is called and generates a field of blocks, like this:
+So, when you click the New Game button, ``startNewGame()`` is called to generate a field of blocks, like this:
 
 .. figure:: declarative-adv-tutorial2.png
     :align: center
 
-Now, we have a screen of blocks, and we can begin to add the game mechanics.
+Now that the screen of blocks is ready, you can start adding the game mechanics.
 
 [Previous :ref:`samegame1`] [Next :ref:`samegame3`]

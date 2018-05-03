@@ -3,7 +3,7 @@
 ## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of PySide2.
+## This file is part of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:LGPL$
 ## Commercial License Usage
@@ -2235,7 +2235,6 @@ if "PySide2.QtCore" in sys.modules:
     # class PySide2.QtCore.QThread:
         "QThread.__init__": ('PySide2.QtCore.QObject',),
         "QThread.currentThread": (),
-        "QThread.currentThreadId": (),
         "QThread.event": ('PySide2.QtCore.QEvent',),
         "QThread.eventDispatcher": (),
         "QThread.exec_": (),

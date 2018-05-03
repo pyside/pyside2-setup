@@ -1,10 +1,12 @@
-PySide Documentation contents
-*****************************
+|project| Documentation
+***************************
 
 .. toctree::
     :maxdepth: 2
 
+    gettingstarted.rst
     modules.rst
+    licenses.rst
 
 Tutorials
 =========
