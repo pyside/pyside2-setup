@@ -12,9 +12,12 @@
     win32
 [Qt3DExtras::qt3dextras_test]
     linux
+    darwin
 [QtCore::qfile_test]
     win32
     darwin py3
+[QtCore::qfileread_test]
+    darwin
 #  Nested exception in Python 3
 [QtCore::qflags_test]
     py3

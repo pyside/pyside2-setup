@@ -92,8 +92,8 @@ add-function
 
     The add-function node allows you to add a given function onto the target language,
     and it is a child of an :ref:`object-type` or :ref:`value-type` nodes if the
-    function is suposed to be a method, or :ref:`namespace` and :ref:`typesystem` if
-    the function is suposed to be a function inside a namespace or a global function.
+    function is supposed to be a method, or :ref:`namespace` and :ref:`typesystem` if
+    the function is supposed to be a function inside a namespace or a global function.
 
     Typically when adding a function some code must be injected to provide the function
     logic. This can be done using the :ref:`inject-code` node.
