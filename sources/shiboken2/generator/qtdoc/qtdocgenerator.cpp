@@ -230,6 +230,78 @@ static QString msgFallbackWarning(const QXmlStreamReader &reader, const QString 
     return msgTagWarning(reader, context, tag, message);
 }
 
+struct QtXmlToSphinx::LinkContext
+{
+    enum Type
+    {
+        Method = 0x1, Function = 0x2,
+        FunctionMask = Method | Function,
+        Class = 0x4, Attribute = 0x8, Module = 0x10,
+        Reference = 0x20, External= 0x40
+    };
+
+    enum Flags { InsideBold = 0x1, InsideItalic = 0x2 };
+
+    explicit LinkContext(const QString &ref) : linkRef(ref) {}
+
+    QString linkRef;
+    QString linkText;
+    Type type = Reference;
+    int flags = 0;
+};
+
+static const char *linkKeyWord(QtXmlToSphinx::LinkContext::Type type)
+{
+    switch (type) {
+    case QtXmlToSphinx::LinkContext::Method:
+        return ":meth:";
+    case QtXmlToSphinx::LinkContext::Function:
+        return ":func:";
+    case QtXmlToSphinx::LinkContext::Class:
+        return ":class:";
+    case QtXmlToSphinx::LinkContext::Attribute:
+        return ":attr:";
+    case QtXmlToSphinx::LinkContext::Module:
+        return ":mod:";
+    case QtXmlToSphinx::LinkContext::Reference:
+        return ":ref:";
+    case QtXmlToSphinx::LinkContext::External:
+        break;
+     }
+    return "";
+}
+
+QTextStream &operator<<(QTextStream &str, const QtXmlToSphinx::LinkContext &linkContext)
+{
+    // Temporarily turn off bold/italic since links do not work within
+    if (linkContext.flags & QtXmlToSphinx::LinkContext::InsideBold)
+        str << "**";
+    else if (linkContext.flags & QtXmlToSphinx::LinkContext::InsideItalic)
+        str << '*';
+    str << ' ' << linkKeyWord(linkContext.type) << '`';
+    const bool isExternal = linkContext.type == QtXmlToSphinx::LinkContext::External;
+    if (!linkContext.linkText.isEmpty()) {
+        writeEscapedRstText(str, linkContext.linkText);
+        if (isExternal && !linkContext.linkText.endsWith(QLatin1Char(' ')))
+            str << ' ';
+        str << '<';
+    }
+    // Convert page titles to RST labels
+    str << (linkContext.type == QtXmlToSphinx::LinkContext::Reference
+        ? toRstLabel(linkContext.linkRef) : linkContext.linkRef);
+    if (!linkContext.linkText.isEmpty())
+        str << '>';
+    str << '`';
+    if (isExternal)
+        str << '_';
+    str << ' ';
+    if (linkContext.flags & QtXmlToSphinx::LinkContext::InsideBold)
+        str << "**";
+    else if (linkContext.flags & QtXmlToSphinx::LinkContext::InsideItalic)
+        str << '*';
+    return str;
+}
+
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
         : m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
 {
@@ -893,20 +965,15 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
 {
     ref.replace(QLatin1String("::"), QLatin1String("."));
     ref.remove(QLatin1String("()"));
-    LinkContext *result = new LinkContext(toRstLabel(ref), type);
+    LinkContext *result = new LinkContext(ref);
 
-    result->linkTagEnding = QLatin1String("` ");
-    if (m_insideBold) {
-        result->linkTag.prepend(QLatin1String("**"));
-        result->linkTagEnding.append(QLatin1String("**"));
-    } else if (m_insideItalic) {
-        result->linkTag.prepend(QLatin1Char('*'));
-        result->linkTagEnding.append(QLatin1Char('*'));
-    }
+    if (m_insideBold)
+        result->flags |= LinkContext::InsideBold;
+    else if (m_insideItalic)
+        result->flags |= LinkContext::InsideItalic;
 
-
-    if (result->type == functionLinkType() && !m_context.isEmpty()) {
-        result->linkTag = QLatin1String(" :meth:`");
+    if (type == functionLinkType() && !m_context.isEmpty()) {
+        result->type = LinkContext::Method;
         const QVector<QStringRef> rawlinklist = result->linkRef.splitRef(QLatin1Char('.'));
         if (rawlinklist.size() == 1 || rawlinklist.constFirst() == m_context) {
             QString context = resolveContextForMethod(rawlinklist.constLast().toString());
@@ -915,10 +982,10 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
         } else {
             result->linkRef = expandFunction(result->linkRef);
         }
-    } else if (result->type == functionLinkType() && m_context.isEmpty()) {
-        result->linkTag = QLatin1String(" :func:`");
-    } else if (result->type == classLinkType()) {
-        result->linkTag = QLatin1String(" :class:`");
+    } else if (type == functionLinkType() && m_context.isEmpty()) {
+        result->type = LinkContext::Function;
+    } else if (type == classLinkType()) {
+        result->type = LinkContext::Class;
         if (const TypeEntry *type = TypeDatabase::instance()->findType(result->linkRef)) {
             result->linkRef = type->qualifiedTargetLangName();
         } else { // fall back to the old heuristic if the type wasn't found.
@@ -930,37 +997,64 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
                                                  + QLatin1Char('.'));
             }
         }
-    } else if (result->type == QLatin1String("enum")) {
-        result->linkTag = QLatin1String(" :attr:`");
-    } else if (result->type == QLatin1String("page") && result->linkRef == m_generator->moduleName()) {
-        result->linkTag = QLatin1String(" :mod:`");
+    } else if (type == QLatin1String("enum")) {
+        result->type = LinkContext::Attribute;
+    } else if (type == QLatin1String("page")) {
+        // Module, external web page or reference
+        if (result->linkRef == m_generator->moduleName())
+            result->type = LinkContext::Module;
+        else if (result->linkRef.startsWith(QLatin1String("http")))
+            result->type = LinkContext::External;
+        else
+            result->type = LinkContext::Reference;
     } else {
-        result->linkTag = QLatin1String(" :ref:`");
+        result->type = LinkContext::Reference;
     }
     return result;
 }
 
-void QtXmlToSphinx::handleLinkText(LinkContext *linkContext, QString linktext) const
+// <link raw="Model/View Classes" href="model-view-programming.html#model-view-classes"
+//  type="page" page="Model/View Programming">Model/View Classes</link>
+// <link type="page" page="http://doc.qt.io/qt-5/class.html">QML types</link>
+// <link raw="Qt Quick" href="qtquick-index.html" type="page" page="Qt Quick">Qt Quick</link>
+// <link raw="QObject" href="qobject.html" type="class">QObject</link>
+// <link raw="Qt::Window" href="qt.html#WindowType-enum" type="enum" enum="Qt::WindowType">Qt::Window</link>
+// <link raw="QNetworkSession::reject()" href="qnetworksession.html#reject" type="function">QNetworkSession::reject()</link>
+
+static QString fixLinkText(const QtXmlToSphinx::LinkContext *linkContext,
+                           QString linktext)
 {
-    linktext.replace(QLatin1String("::"), QLatin1String("."));
-    const QStringRef item = linkContext->linkRef.splitRef(QLatin1Char('.')).constLast();
-    if (linkContext->linkRef == linktext
-        || (linkContext->linkRef + QLatin1String("()")) == linktext
-        || item == linktext
-        || (item + QLatin1String("()")) == linktext) {
-        linkContext->linkText.clear();
-    } else {
-        linkContext->linkText = linktext + QLatin1Char('<');
+    if (linkContext->type == QtXmlToSphinx::LinkContext::External
+        || linkContext->type == QtXmlToSphinx::LinkContext::Reference) {
+        return linktext;
     }
+    // For the language reference documentation, clear the link text if it matches
+    // the function/class/enumeration name.
+    linktext.replace(QLatin1String("::"), QLatin1String("."));
+    if (linkContext->linkRef == linktext)
+        return QString();
+    if ((linkContext->type & QtXmlToSphinx::LinkContext::FunctionMask) != 0
+        && (linkContext->linkRef + QLatin1String("()")) == linktext) {
+        return QString();
+    }
+    const QStringRef item = linkContext->linkRef.splitRef(QLatin1Char('.')).constLast();
+    if (item == linktext)
+        return QString();
+    if ((linkContext->type & QtXmlToSphinx::LinkContext::FunctionMask) != 0
+        && (item + QLatin1String("()")) == linktext) {
+        return QString();
+    }
+    return  linktext;
+}
+
+void QtXmlToSphinx::handleLinkText(LinkContext *linkContext, const QString &linktext) const
+{
+    linkContext->linkText = fixLinkText(linkContext, linktext);
 }
 
 void QtXmlToSphinx::handleLinkEnd(LinkContext *linkContext)
 {
-    if (!linkContext->linkText.isEmpty())
-        linkContext->linkTagEnding.prepend(QLatin1Char('>'));
-    m_output << linkContext->linkTag << linkContext->linkText;
-    writeEscapedRstText(m_output, linkContext->linkRef);
-    m_output << linkContext->linkTagEnding;
+    m_output << *linkContext;
 }
 
 // Copy images that are placed in a subdirectory "images" under the webxml files
