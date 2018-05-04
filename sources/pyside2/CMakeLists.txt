@@ -330,9 +330,7 @@ if(APPLE)
 endif()
 
 # Collect all optional modules.
-# Temporarily disable Positioning Location until
-# qtlocation/987e5359ade73c4326fe102892dfc1eb1143ba9d is in qt5.git
-set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia MultimediaWidgets OpenGL Qml Quick QuickWidgets Script ScriptTools Sensors TextToSpeech Charts Svg DataVisualization)
+set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia MultimediaWidgets OpenGL Positioning Location Qml Quick QuickWidgets Script ScriptTools Sensors TextToSpeech Charts Svg DataVisualization)
 find_package(Qt5UiTools)
 if(Qt5UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)
