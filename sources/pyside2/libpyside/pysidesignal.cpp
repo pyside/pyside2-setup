@@ -109,7 +109,7 @@ static PyType_Slot PySideSignalMetaType_slots[] = {
 static PyType_Spec PySideSignalMetaType_spec = {
     "PySide2.QtCore.MetaSignal",
     0,
-    // sizeof(PyHeapTypeObject) is filled in by PyType_FromSpecWithBases
+    // sizeof(PepTypeObject) is filled in by PyType_FromSpecWithBases
     // which calls PyType_Ready which calls inherit_special.
     0,
     Py_TPFLAGS_DEFAULT,
@@ -254,7 +254,7 @@ void signalFree(void* self)
     Py_XDECREF(data->homonymousMethod);
     data->homonymousMethod = 0;
 
-    pySelf->ob_type->tp_base->tp_free(self);
+    PepType_tp_free(PepType_tp_base(Py_TYPE(pySelf)))(self);
 }
 
 PyObject* signalGetItem(PyObject* self, PyObject* key)
@@ -299,7 +299,7 @@ void signalInstanceFree(void* self)
     }
     delete dataPvt;
     data->d = 0;
-    pySelf->ob_type->tp_base->tp_free(self);
+    PepType_tp_free(PepType_tp_base(Py_TYPE(pySelf)))(self);
 }
 
 PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
@@ -354,9 +354,9 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
             PyObject *function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
             PyCodeObject *objCode = reinterpret_cast<PyCodeObject *>(PyFunction_GET_CODE(function));
             PyFunctionObject *function_obj = reinterpret_cast<PyFunctionObject *>(function);
-            functionName = Shiboken::String::toCString(Pep384Function_GetName(function_obj));
+            functionName = Shiboken::String::toCString(PepFunction_GetName(function_obj));
             useSelf = isMethod;
-            slotArgs = Pep384Code_GET_FLAGS(objCode) & CO_VARARGS ? -1 : Pep384Code_GET_ARGCOUNT(objCode);
+            slotArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
             if (useSelf)
                 slotArgs -= 1;
 
@@ -553,7 +553,7 @@ PyObject* signalCall(PyObject* self, PyObject* args, PyObject* kw)
         return 0;
     }
 
-    descrgetfunc getDescriptor = signal->homonymousMethod->ob_type->tp_descr_get;
+    descrgetfunc getDescriptor = PepType_tp_descr_get(Py_TYPE(signal->homonymousMethod));
 
     // Check if there exists a method with the same name as the signal, which is also a static
     // method in C++ land.
@@ -564,7 +564,7 @@ PyObject* signalCall(PyObject* self, PyObject* args, PyObject* kw)
     }
 
     // Assumes homonymousMethod is not a static method.
-    ternaryfunc callFunc = signal->homonymousMethod->ob_type->tp_call;
+    ternaryfunc callFunc = PepType_tp_call(Py_TYPE(signal->homonymousMethod));
     return callFunc(homonymousMethod, args, kw);
 }
 
@@ -576,7 +576,7 @@ PyObject* signalInstanceCall(PyObject* self, PyObject* args, PyObject* kw)
         return 0;
     }
 
-    descrgetfunc getDescriptor = PySideSignal->d->homonymousMethod->ob_type->tp_descr_get;
+    descrgetfunc getDescriptor = PepType_tp_descr_get(Py_TYPE(PySideSignal->d->homonymousMethod));
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(PySideSignal->d->homonymousMethod, PySideSignal->d->source, 0));
     return PyCFunction_Call(homonymousMethod, args, kw);
 }
@@ -626,7 +626,7 @@ void updateSourceObject(PyObject* source)
     PyObject* value;
     PyObject* key;
 
-    while (PyDict_Next(objType->tp_dict, &pos, &key, &value)) {
+    while (PyDict_Next(PepType_tp_dict(objType), &pos, &key, &value)) {
         if (PyObject_TypeCheck(value, PySideSignalTypeF())) {
             Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF())));
             instanceInitialize(signalInstance.cast<PySideSignalInstance*>(), key, reinterpret_cast<PySideSignal*>(value), source, 0);
@@ -690,7 +690,7 @@ char* parseSignature(PyObject* args)
         return getTypeName(args);
 
     for (Py_ssize_t i = 0, i_max = PySequence_Size(args); i < i_max; i++) {
-        Shiboken::AutoDecRef arg(PySequence_ITEM(args, i));
+        Shiboken::AutoDecRef arg(PySequence_GetItem(args, i));
         char* typeName = getTypeName(arg);
         if (typeName) {
             if (signature) {
@@ -855,7 +855,7 @@ static typename T::value_type join(T t, const char* sep)
 
 static void _addSignalToWrapper(SbkObjectType* wrapperType, const char* signalName, PySideSignal* signal)
 {
-    PyObject* typeDict = wrapperType->super.ht_type.tp_dict;
+    PyObject* typeDict = PepType_tp_dict(wrapperType);
     PyObject* homonymousMethod;
     if ((homonymousMethod = PyDict_GetItemString(typeDict, signalName))) {
         Py_INCREF(homonymousMethod);
@@ -974,12 +974,12 @@ QString getCallbackSignature(const char* signal, QObject* receiver, PyObject* ca
     if (isMethod || isFunction) {
         PyObject* function = isMethod ? PyMethod_GET_FUNCTION(callback) : callback;
         PyCodeObject* objCode = reinterpret_cast<PyCodeObject*>(PyFunction_GET_CODE(function));
-        functionName = Shiboken::String::toCString(Pep384Function_GetName(function));
+        functionName = Shiboken::String::toCString(PepFunction_GetName(function));
         useSelf = isMethod;
-        numArgs = Pep384Code_GET_FLAGS(objCode) & CO_VARARGS ? -1 : Pep384Code_GET_ARGCOUNT(objCode);
+        numArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
     } else if (PyCFunction_Check(callback)) {
         const PyCFunctionObject *funcObj = reinterpret_cast<const PyCFunctionObject *>(callback);
-        functionName = Pep384CFunction_GET_NAMESTR(funcObj);
+        functionName = PepCFunction_GET_NAMESTR(funcObj);
         useSelf = PyCFunction_GET_SELF(funcObj);
         const int flags = PyCFunction_GET_FLAGS(funcObj);
 

@@ -136,6 +136,10 @@ using `setup.py build`:
   --sanitize-address will build the project with address sanitizer
     enabled (Linux or macOS only).
   --skip-docs skip the documentation generation.
+  --limited-api
+        Enforce setting the limited API flag, whether it is correct or
+        not. This is useful for debugging, although the limited API is
+        only defined for release mode. Ignored for Python 2.
 
 REQUIREMENTS:
 

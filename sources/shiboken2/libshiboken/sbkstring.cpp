@@ -108,7 +108,7 @@ const char* toCString(PyObject* str, Py_ssize_t* len)
         }
         // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
         // depends on the lifetime of str.
-        return _Pep384Unicode_AsString(str);
+        return _PepUnicode_AsString(str);
     }
 #endif
     if (PyBytes_Check(str)) {

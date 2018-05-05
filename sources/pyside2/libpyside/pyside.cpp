@@ -309,10 +309,10 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
 
 bool inherits(PyTypeObject* objType, const char* class_name)
 {
-    if (strcmp(objType->tp_name, class_name) == 0)
+    if (strcmp(PepType_tp_name(objType), class_name) == 0)
         return true;
 
-    PyTypeObject* base = (objType)->tp_base;
+    PyTypeObject* base = PepType_tp_base(objType);
     if (base == 0)
         return false;
 
@@ -400,7 +400,7 @@ QString pyStringToQString(PyObject *str) {
 
 #ifdef IS_PY3K
     if (PyUnicode_Check(str)) {
-        const char *unicodeBuffer = _Pep384Unicode_AsString(str);
+        const char *unicodeBuffer = _PepUnicode_AsString(str);
         if (unicodeBuffer)
             return QString::fromUtf8(unicodeBuffer);
     }

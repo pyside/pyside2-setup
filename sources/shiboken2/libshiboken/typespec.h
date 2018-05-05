@@ -40,7 +40,7 @@
 #ifndef TYPESPEC_H
 #define TYPESPEC_H
 
-#include "sbkpython.h"
+#include <Python.h>
 #include "shibokenmacros.h"
 
 #if PY_MAJOR_VERSION < 3

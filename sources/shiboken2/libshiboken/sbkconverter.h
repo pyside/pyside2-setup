@@ -394,7 +394,7 @@ template<> inline PyTypeObject* SbkType<unsigned short>() { return &PyInt_Type; 
 #define PyObject_Check(X) true
 #define SbkChar_Check(X) (SbkNumber_Check(X) || Shiboken::String::checkChar(X))
 
-struct _SbkGenericType { PyHeapTypeObject super; SbkConverter** converter; };
+struct _SbkGenericType { PepTypeObject super; SbkConverter** converter; };
 #define SBK_CONVERTER(pyType) (*reinterpret_cast<_SbkGenericType*>(pyType)->converter)
 
 

@@ -421,18 +421,21 @@ else()
     set(PATH_SEP ":")
 endif()
 
+option(FORCE_LIMITED_API "Enable the limited API for debugging." "")
+
 set(PYTHON_LIMITED_API 0)
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR FORCE_LIMITED_API)
     # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
     if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
-        # PYSIDE-560: XXX maybe add an option to setup.py as override
         if (WIN32)
             set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
         endif()
         add_definitions("-DPy_LIMITED_API=0x03050000")
         set(PYTHON_LIMITED_API 1)
     endif()
-    add_definitions("-DNDEBUG")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_definitions("-DNDEBUG")
+    endif()
 endif()
 
 if (PYTHON_LIMITED_API)

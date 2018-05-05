@@ -55,7 +55,8 @@ typedef struct {
 
 PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    SbkVoidPtrObject *self = reinterpret_cast<SbkVoidPtrObject *>(type->tp_alloc(type, 0));
+    SbkVoidPtrObject *self =
+        reinterpret_cast<SbkVoidPtrObject *>(PepType_tp_alloc(type));
 
     if (self != 0) {
         self->cptr = 0;
@@ -188,7 +189,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(%p, %zd, %s)",
-                           Py_TYPE(sbkObject)->tp_name,
+                           PepType_tp_name(Py_TYPE(sbkObject)),
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -200,7 +201,7 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
-                           Py_TYPE(sbkObject)->tp_name,
+                           PepType_tp_name(Py_TYPE(sbkObject)),
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -256,7 +257,7 @@ void addVoidPtrToModule(PyObject *module)
 {
     if (voidPointerInitialized) {
         Py_INCREF(SbkVoidPtrTypeF());
-        PyModule_AddObject(module, strrchr(SbkVoidPtrTypeF()->tp_name, '.') + 1,
+        PyModule_AddObject(module, PepType_GetNameStr(SbkVoidPtrTypeF()),
                            reinterpret_cast<PyObject *>(SbkVoidPtrTypeF()));
     }
 }
@@ -266,7 +267,7 @@ static PyObject *createVoidPtr(void *cppIn, Py_ssize_t size = 0, bool isWritable
     if (!cppIn)
         Py_RETURN_NONE;
 
-    SbkVoidPtrObject *result = PyObject_NEW(SbkVoidPtrObject, SbkVoidPtrTypeF());
+    SbkVoidPtrObject *result = PyObject_New(SbkVoidPtrObject, SbkVoidPtrTypeF());
     if (!result)
         Py_RETURN_NONE;
 

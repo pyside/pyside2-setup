@@ -47,8 +47,8 @@
 // Now we have the usual variables from Python.h .
 #include "python25compat.h"
 #include "shibokenmacros.h"
-#include "pep384resolve.h"
 #include "typespec.h"
+#include "pep384impl.h"
 
 #if PY_MAJOR_VERSION >= 3
     #define IS_PY3K

@@ -985,6 +985,9 @@ class PysideBuild(_build):
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY={}".format(
                 self.py_library))
 
+        if OPTION_LIMITED_API:
+            cmake_cmd.append("-DFORCE_LIMITED_API=1")
+
         if OPTION_VERBOSE_BUILD:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
 

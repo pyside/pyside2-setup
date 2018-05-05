@@ -187,7 +187,7 @@ static int
 build_qualname_to_func(PyObject *obtype)
 {
     PyTypeObject *type = (PyTypeObject *)obtype;
-    PyMethodDef *meth = Pep384Type_GET_METHODS(type);
+    PyMethodDef *meth = PepType_tp_methods(type);
 
     if (meth == 0)
         return 0;
@@ -308,7 +308,7 @@ GetSignature_Function(PyCFunctionObject *func)
         if (!PyErr_Occurred()) {
             PyErr_Format(PyExc_SystemError,
                 "the signature for \"%s\" should exist",
-                Pep384CFunction_GET_NAMESTR(func)
+                PepCFunction_GET_NAMESTR(func)
                 );
         }
         return NULL;
@@ -477,7 +477,7 @@ error:
 static int
 add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
 {
-    PyObject *dict = Pep384Type_GET_DICT(type);
+    PyObject *dict = PepType_tp_dict(type);
 
     for (; gsp->name != NULL; gsp++) {
         PyObject *descr;
@@ -574,7 +574,7 @@ PySideType_Ready(PyTypeObject *type)
             || PyType_Ready(Py_TYPE(md)) < 0
             || add_more_getsets(Py_TYPE(md), new_PyMethodDescr_getsets) < 0
             || add_more_getsets(&PyCFunction_Type, new_PyCFunction_getsets) < 0
-            || add_more_getsets(Pep384StaticMethod_TypePtr, new_PyStaticMethod_getsets) < 0
+            || add_more_getsets(PepStaticMethod_TypePtr, new_PyStaticMethod_getsets) < 0
             || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0)
             return -1;
         Py_DECREF(md);
@@ -593,8 +593,8 @@ static int
 build_func_to_type(PyObject *obtype)
 {
     PyTypeObject *type = (PyTypeObject *)obtype;
-    PyObject *dict = Pep384Type_GET_DICT(type);
-    PyMethodDef *meth = Pep384Type_GET_METHODS(type);
+    PyObject *dict = PepType_tp_dict(type);
+    PyMethodDef *meth = PepType_tp_methods(type);
 
     if (meth == 0)
         return 0;
@@ -743,7 +743,7 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
      * Note: This function crashed when called from PySide_BuildSignatureArgs.
      * Probably this was too early.
      *
-     * PEP384: We need to switch this always on since we have no access
+     * Pep384: We need to switch this always on since we have no access
      * to the PyCFunction attributes. Therefore I simplified things
      * and always use our own mapping.
      */

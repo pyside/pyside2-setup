@@ -127,7 +127,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 static PyObject *classInfoTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
-    PySideClassInfo* me = reinterpret_cast<PySideClassInfo*>(subtype->tp_alloc(subtype, 0));
+    PySideClassInfo* me = reinterpret_cast<PySideClassInfo*>(PepType_tp_alloc(subtype)(subtype, 0));
     me->d = new PySideClassInfoPrivate;
 
     me->d->m_alreadyWrapped = false;
@@ -170,7 +170,7 @@ void classInfoFree(void *self)
     PySideClassInfo* data = reinterpret_cast<PySideClassInfo*>(self);
 
     delete data->d;
-    pySelf->ob_type->tp_base->tp_free(self);
+    PepType_tp_free(PepType_tp_base(Py_TYPE(pySelf)))(self);
 }
 
 

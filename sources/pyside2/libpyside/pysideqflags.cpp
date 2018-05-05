@@ -49,7 +49,7 @@ extern "C" {
      */
     struct PySideQFlagsType
     {
-        PyHeapTypeObject super;
+        PepTypeObject super;
         SbkConverter** converterPtr;
         SbkConverter* converter;
     };
@@ -162,7 +162,6 @@ namespace QFlags
     PyTypeObject *create(const char* name, PyType_Slot numberMethods[])
     {
         char qualname[200];
-
         strcpy(qualname, "PySide2.libpyside.");
         strcat(qualname, name);
         // Careful: PyType_FromSpec does not allocate the string.
@@ -182,10 +181,7 @@ namespace QFlags
             SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
         }
         newspec->slots = SbkNewQFlagsType_spec.slots;
-        // temp HACK until we remove the modification of types!
-        PyType_Type.tp_basicsize += 2 * sizeof(void *);
-        PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(newspec);
-        PyType_Type.tp_basicsize -= 2 * sizeof(void *);
+        PyTypeObject *type = (PyTypeObject *)PepType_FromSpec(newspec, 2);
         Py_TYPE(type) = &PyType_Type;
 
         PySideQFlagsType* flagsType = reinterpret_cast<PySideQFlagsType*>(type);

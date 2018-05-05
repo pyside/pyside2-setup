@@ -46,86 +46,134 @@ extern "C"
 
 /*****************************************************************************
  *
- * Support for unresolvable structures
+ * Support for object.h
  *
  */
 
-/*
- * Here we are really a bit cheating, because this structure is not published.
- * Instead of checking consistency by hand, we will test if the referenced
- * object is the same dict as expected.
- */
+// Here will be the verification code.
+
+// static PyType_Slot PyType_Type_slots[] = {
+//     {0, 0},     // Here we insert the wanted slot for probing.
+//     {0, 0}
+// };
+// static PyType_Spec PyType_Type_spec = {
+//     "python.type",
+//     sizeof(PepTypeObject),                   /* tp_basicsize */
+//     sizeof(PyMemberDef),                        /* tp_itemsize */
+//     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC |
+//     Py_TPFLAGS_BASETYPE | Py_TPFLAGS_TYPE_SUBCLASS,
+//     PyType_Type_slots,
+// };
+
+
+// #ifdef IS_PY3K
+// #  define SLOT slot
+// #else
+// #  define SLOT slot_
+// #endif
+
+// static void *handle_static_type(PyTypeObject *type, void *what, int length)
+// {
+//         for (int idx = 0; idx < length; ++idx) {
+//             void **thing = (void **)type + idx;
+//             if (*thing == what)
+//                 break;
+//         }
+//         Py_DECREF(probe_type);
+//         known_offsets[pyslot] = idx;
+//     }
+//     void **thing = (void **)type + idx;
+//     return *thing;
+// }
+
+
+// This structure is only here because Python 3 has an error.
+// I will fix that.
 
 typedef struct {
-    PyObject_HEAD
-    PyObject *mapping;
-} mappingproxyobject;
+    /* Number implementations must check *both*
+       arguments for proper type and implement the necessary conversions
+       in the slot functions themselves. */
 
-static int dictoffset = 0;
+    binaryfunc nb_add;
+    binaryfunc nb_subtract;
+    binaryfunc nb_multiply;
+    binaryfunc nb_remainder;
+    binaryfunc nb_divmod;
+    ternaryfunc nb_power;
+    unaryfunc nb_negative;
+    unaryfunc nb_positive;
+    unaryfunc nb_absolute;
+    inquiry nb_bool;
+    unaryfunc nb_invert;
+    binaryfunc nb_lshift;
+    binaryfunc nb_rshift;
+    binaryfunc nb_and;
+    binaryfunc nb_xor;
+    binaryfunc nb_or;
+    unaryfunc nb_int;
+    void *nb_reserved;  /* the slot formerly known as nb_long */
+    unaryfunc nb_float;
 
-PyObject *
-Pep384Type_GetDict(PyTypeObject *type)
+    binaryfunc nb_inplace_add;
+    binaryfunc nb_inplace_subtract;
+    binaryfunc nb_inplace_multiply;
+    binaryfunc nb_inplace_remainder;
+    ternaryfunc nb_inplace_power;
+    binaryfunc nb_inplace_lshift;
+    binaryfunc nb_inplace_rshift;
+    binaryfunc nb_inplace_and;
+    binaryfunc nb_inplace_xor;
+    binaryfunc nb_inplace_or;
+
+    binaryfunc nb_floor_divide;
+    binaryfunc nb_true_divide;
+    binaryfunc nb_inplace_floor_divide;
+    binaryfunc nb_inplace_true_divide;
+
+    unaryfunc nb_index;
+
+    binaryfunc nb_matrix_multiply;
+    binaryfunc nb_inplace_matrix_multiply;
+} PyNumberMethods;
+
+// temporary structure until we have a generator for the offsets
+typedef struct _oldtypeobject {
+    PyVarObject ob_base;
+    void *X01; // const char *tp_name;
+    void *X02; // Py_ssize_t tp_basicsize;
+    void *X03; // Py_ssize_t tp_itemsize;
+    void *X04; // destructor tp_dealloc;
+    void *X05; // printfunc tp_print;
+    void *X06; // getattrfunc tp_getattr;
+    void *X07; // setattrfunc tp_setattr;
+    void *X08; // PyAsyncMethods *tp_as_async;
+    void *X09; // reprfunc tp_repr;
+    PyNumberMethods *tp_as_number;
+
+} PyOldTypeObject;
+
+// There is a bug in Python 3.6 that turned the Index_Check function
+// into a macro without taking care of the limited API.
+// This leads to the single problem that we don't have
+// access to PyLong_Type's nb_index field which is no heap type.
+// We cannot easily create this function by inheritance since it is
+// not inherited.
+//
+// Simple solution: Create the structure and write such a function.
+// Long term: Submit a patch to python.org .
+
+unaryfunc
+PepType_nb_index(PyTypeObject *type)
 {
-    if (dictoffset > 0) {
-        PyObject **thing = (PyObject **)type + dictoffset;
-        return *thing;
-    }
-    else {
-        PyObject *ret;
-        mappingproxyobject *proxy;
-
-        proxy = (mappingproxyobject *)PyObject_GetAttrString(
-                    (PyObject *)type, "__dict__");
-        ret = proxy->mapping;
-        Py_DECREF(proxy);
-        return ret;
-    }
+    return reinterpret_cast<PyOldTypeObject*>(type)->tp_as_number->nb_index;
 }
 
-PyMethodDef *
-Pep384Type_GetMethods(PyTypeObject *type)
+int PyIndex_Check(PyObject *obj)
 {
-    /*
-     * As soon as heap types are implemented, this will be replaced by
-     * PyType_GetSlot(type, Py_tp_methods);
-     * Right now, this function raises PyErr_BadInternalCall.
-     */
-    return type->tp_methods;
-}
-
-int
-Pep384_EnsureTypeHeuristic(void)
-{
-    PyObject *tpdict = Pep384Type_GetDict(&PyLong_Type);
-    PyMethodDef *tpmeth = Pep384Type_GetMethods(&PyLong_Type);
-    int ok = 0, ret;
-
-    /*
-     * This code checks that these fields are 4 slots apart and contain
-     * the expected value. We typically find tp_methods at 29
-     * and tp_dict at 33.
-     */
-    for (int idx = 25; idx <= 40; ++idx) {
-        void **thing = (void **)&PyLong_Type + idx;
-        // printf("idx=%d ptr=%p\n", idx, thing);
-        if (*thing == tpmeth) {
-            ret = idx + 4;
-            thing = (void **)&PyLong_Type + ret;
-            if (*thing == tpdict) {
-                // both are at a distance of four, we believe in the result!
-                ok += 1;
-            }
-        }
-    }
-    if (ok != 1) {
-        Py_FatalError(
-            "The 'tp_methods' pointer should be found somewhere in the\n"
-            "opaque type structure, and 'tp_dict' should be 4 pointers\n"
-            "apart. Please check the mappingproxyobject, it might have\n"
-            "changed its layout.");
-        return -1;
-    }
-    return ret;
+    PyOldTypeObject *type = reinterpret_cast<PyOldTypeObject*>(Py_TYPE(obj));
+    return type->tp_as_number != NULL &&
+           type->tp_as_number->nb_index != NULL;
 }
 
 /*****************************************************************************
@@ -135,7 +183,7 @@ Pep384_EnsureTypeHeuristic(void)
  */
 
 char *
-_Pep384Unicode_AsString(PyObject *str)
+_PepUnicode_AsString(PyObject *str)
 {
     /*
      * We need to keep the string alive but cannot borrow the Python object.
@@ -183,7 +231,7 @@ _Pep384Unicode_AsString(PyObject *str)
    method.  Return -1 and set an error if overflow occurs. */
 
 int
-_Pep384Long_AsInt(PyObject *obj)
+_PepLong_AsInt(PyObject *obj)
 {
     int overflow;
     long result = PyLong_AsLongAndOverflow(obj, &overflow);
@@ -205,7 +253,7 @@ _Pep384Long_AsInt(PyObject *obj)
 static PyObject *sys_flags = NULL;
 
 int
-Pep384_GetFlag(const char *name)
+Pep_GetFlag(const char *name)
 {
     static int initialized = 0;
     int ret = -1;
@@ -228,13 +276,13 @@ Pep384_GetFlag(const char *name)
 }
 
 int
-Pep384_GetVerboseFlag()
+Pep_GetVerboseFlag()
 {
     static int initialized = 0;
     static int verbose_flag = -1;
 
     if (!initialized) {
-        verbose_flag = Pep384_GetFlag("verbose");
+        verbose_flag = Pep_GetFlag("verbose");
         if (verbose_flag != -1)
             initialized = 1;
     }
@@ -248,7 +296,7 @@ Pep384_GetVerboseFlag()
  */
 
 int
-Pep384Code_Get(PyCodeObject *co, const char *name)
+PepCode_Get(PyCodeObject *co, const char *name)
 {
     PyObject *ob = (PyObject *)co;
     PyObject *ob_ret;
@@ -362,7 +410,7 @@ PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 
 // This is only a simple local helper that returns a computed variable.
 static PyObject *
-Pep384Run_GetResult(const char *command, const char *resvar)
+PepRun_GetResult(const char *command, const char *resvar)
 {
     PyObject *d, *v, *res;
 
@@ -383,7 +431,7 @@ Pep384Run_GetResult(const char *command, const char *resvar)
  *
  */
 
-PyTypeObject *Pep384Method_TypePtr = NULL;
+PyTypeObject *PepMethod_TypePtr = NULL;
 
 static PyTypeObject *getMethodType(void)
 {
@@ -391,14 +439,14 @@ static PyTypeObject *getMethodType(void)
         "class _C:\n"
         "    def _m(self): pass\n"
         "MethodType = type(_C()._m)\n";
-    return (PyTypeObject *) Pep384Run_GetResult(prog, "MethodType");
+    return (PyTypeObject *) PepRun_GetResult(prog, "MethodType");
 }
 
 // We have no access to PyMethod_New and must call types.MethodType, instead.
 PyObject *
 PyMethod_New(PyObject *func, PyObject *self)
 {
-    return PyObject_CallFunction((PyObject *)Pep384Method_TypePtr,
+    return PyObject_CallFunction((PyObject *)PepMethod_TypePtr,
                                  (char *)"(OO)", func, self);
 }
 
@@ -430,7 +478,7 @@ PyMethod_Self(PyObject *im)
  */
 
 PyObject *
-Pep384Function_Get(PyObject *ob, const char *name)
+PepFunction_Get(PyObject *ob, const char *name)
 {
     PyObject *ret;
 
@@ -444,28 +492,28 @@ Pep384Function_Get(PyObject *ob, const char *name)
  *
  * Copied from abstract.c
  *
- * Py_buffer has been replaced by Pep384_buffer
+ * Py_buffer has been replaced by Pep_buffer
  *
  */
 
 /* Buffer C-API for Python 3.0 */
 
 int
-PyObject_GetBuffer(PyObject *obj, Pep384_buffer *view, int flags)
+PyObject_GetBuffer(PyObject *obj, Pep_buffer *view, int flags)
 {
-    PyBufferProcs *pb = obj->ob_type->tp_as_buffer;
+    PyBufferProcs *pb = PepType_AS_BUFFER(Py_TYPE(obj));
 
     if (pb == NULL || pb->bf_getbuffer == NULL) {
         PyErr_Format(PyExc_TypeError,
                      "a bytes-like object is required, not '%.100s'",
-                     Py_TYPE(obj)->tp_name);
+                     PepType_tp_name(Py_TYPE(obj)));
         return -1;
     }
     return (*pb->bf_getbuffer)(obj, view, flags);
 }
 
 static int
-_IsFortranContiguous(const Pep384_buffer *view)
+_IsFortranContiguous(const Pep_buffer *view)
 {
     Py_ssize_t sd, dim;
     int i;
@@ -505,7 +553,7 @@ _IsFortranContiguous(const Pep384_buffer *view)
 }
 
 static int
-_IsCContiguous(const Pep384_buffer *view)
+_IsCContiguous(const Pep_buffer *view)
 {
     Py_ssize_t sd, dim;
     int i;
@@ -532,7 +580,7 @@ _IsCContiguous(const Pep384_buffer *view)
 }
 
 int
-PyBuffer_IsContiguous(const Pep384_buffer *view, char order)
+PyBuffer_IsContiguous(const Pep_buffer *view, char order)
 {
 
     if (view->suboffsets != NULL) return 0;
@@ -548,7 +596,7 @@ PyBuffer_IsContiguous(const Pep384_buffer *view, char order)
 
 
 void*
-PyBuffer_GetPointer(Pep384_buffer *view, Py_ssize_t *indices)
+PyBuffer_GetPointer(Pep_buffer *view, Py_ssize_t *indices)
 {
     char* pointer;
     int i;
@@ -596,7 +644,7 @@ _Py_add_one_to_index_C(int nd, Py_ssize_t *index, const Py_ssize_t *shape)
 }
 
 int
-PyBuffer_FromContiguous(Pep384_buffer *view, void *buf, Py_ssize_t len, char fort)
+PyBuffer_FromContiguous(Pep_buffer *view, void *buf, Py_ssize_t len, char fort)
 {
     int k;
     void (*addone)(int, Py_ssize_t *, const Py_ssize_t *);
@@ -649,7 +697,7 @@ PyBuffer_FromContiguous(Pep384_buffer *view, void *buf, Py_ssize_t len, char for
 
 int PyObject_CopyData(PyObject *dest, PyObject *src)
 {
-    Pep384_buffer view_dest, view_src;
+    Pep_buffer view_dest, view_src;
     int k;
     Py_ssize_t *indices, elements;
     char *dptr, *sptr;
@@ -742,7 +790,7 @@ PyBuffer_FillContiguousStrides(int nd, Py_ssize_t *shape,
 }
 
 int
-PyBuffer_FillInfo(Pep384_buffer *view, PyObject *obj, void *buf, Py_ssize_t len,
+PyBuffer_FillInfo(Pep_buffer *view, PyObject *obj, void *buf, Py_ssize_t len,
                   int readonly, int flags)
 {
     if (view == NULL) {
@@ -781,13 +829,13 @@ PyBuffer_FillInfo(Pep384_buffer *view, PyObject *obj, void *buf, Py_ssize_t len,
 }
 
 void
-PyBuffer_Release(Pep384_buffer *view)
+PyBuffer_Release(Pep_buffer *view)
 {
     PyObject *obj = view->obj;
     PyBufferProcs *pb;
     if (obj == NULL)
         return;
-    pb = Py_TYPE(obj)->tp_as_buffer;
+    pb = PepType_AS_BUFFER(Py_TYPE(obj));
     if (pb && pb->bf_releasebuffer)
         pb->bf_releasebuffer(obj, view);
     view->obj = NULL;
@@ -802,13 +850,13 @@ PyBuffer_Release(Pep384_buffer *view)
 
 // this became necessary after Windows was activated.
 
-PyTypeObject *Pep384Function_TypePtr = NULL;
+PyTypeObject *PepFunction_TypePtr = NULL;
 
 static PyTypeObject *getFunctionType(void)
 {
     static const char prog[] =
         "from types import FunctionType\n";
-    return (PyTypeObject *) Pep384Run_GetResult(prog, "FunctionType");
+    return (PyTypeObject *) PepRun_GetResult(prog, "FunctionType");
 }
 
 /*****************************************************************************
@@ -817,16 +865,53 @@ static PyTypeObject *getFunctionType(void)
  *
  */
 
-PyTypeObject *Pep384StaticMethod_TypePtr = NULL;
+PyTypeObject *PepStaticMethod_TypePtr = NULL;
 
 static PyTypeObject *getStaticMethodType(void)
 {
     static const char prog[] =
         "StaticMethodType = type(str.__dict__['maketrans'])\n";
-    return (PyTypeObject *) Pep384Run_GetResult(prog, "StaticMethodType");
+    return (PyTypeObject *) PepRun_GetResult(prog, "StaticMethodType");
 }
 
 #endif // Py_LIMITED_API
+
+/*****************************************************************************
+ *
+ * These functions are always needed due to the heaptypes.
+ *
+ */
+
+PyObject *
+PepType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases, int extra)
+{
+    _PepTypeObject *type = reinterpret_cast<_PepTypeObject*>(&PyType_Type);
+    type->tp_basicsize += extra;
+    PyObject *ret = PyType_FromSpecWithBases(spec, bases);
+    type->tp_basicsize -= extra;
+    return ret;
+}
+
+PyObject *
+PepType_FromSpec(PyType_Spec *spec, int extra)
+{
+    return PepType_FromSpecWithBases(spec, nullptr, extra);
+}
+
+const char *
+PepType_GetNameStr(PyTypeObject *type)
+{
+    // We behave like tp_name, but remove any leading dotted parts.
+#ifdef Py_LIMITED_API
+    const char *ret = PepType_tp_name(type);
+#else
+    const char *ret = type->tp_name;
+#endif
+    const char *nodots = strrchr(ret, '.');
+    if (nodots)
+        ret = nodots + 1;
+    return ret;
+}
 
 /*****************************************************************************
  *
@@ -835,14 +920,13 @@ static PyTypeObject *getStaticMethodType(void)
  */
 
 void
-PEP384_Init()
+Pep_Init()
 {
 #ifdef Py_LIMITED_API
-    dictoffset = Pep384_EnsureTypeHeuristic();
-    Pep384_GetVerboseFlag();
-    Pep384Method_TypePtr = getMethodType();
-    Pep384Function_TypePtr = getFunctionType();
-    Pep384StaticMethod_TypePtr = getStaticMethodType();
+    Pep_GetVerboseFlag();
+    PepMethod_TypePtr = getMethodType();
+    PepFunction_TypePtr = getFunctionType();
+    PepStaticMethod_TypePtr = getStaticMethodType();
 #endif
 }
 

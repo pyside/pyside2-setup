@@ -113,7 +113,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
                 data->args = typeName;
             }
         } else {
-            PyErr_Format(PyExc_TypeError, "Unknown signal argument type: %s", argType->ob_type->tp_name);
+            PyErr_Format(PyExc_TypeError, "Unknown signal argument type: %s", PepType_tp_name(argType->ob_type));
             return -1;
         }
     }
@@ -140,7 +140,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         PySideSlot *data = reinterpret_cast<PySideSlot*>(self);
 
         if (!data->slotName) {
-            PyObject *funcName = Pep384Function_GetName(callback);
+            PyObject *funcName = PepFunction_GetName(callback);
             data->slotName = strdup(Shiboken::String::toCString(funcName));
         }
 

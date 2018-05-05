@@ -120,9 +120,9 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+    if (!PySequence_Contains(PepType_tp_mro(pyObjType), reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     qobjectType->tp_name, pyObjType->tp_name);
+                     PepType_tp_name(qobjectType), PepType_tp_name(pyObjType));
         return -1;
     }
 
@@ -229,7 +229,7 @@ void propListTpFree(void* self)
     PySideProperty* pySelf = reinterpret_cast<PySideProperty*>(self);
     delete reinterpret_cast<QmlListProperty*>(PySide::Property::userData(pySelf));
     // calls base type constructor
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
+    PepType_tp_free(PepType_tp_base(Py_TYPE(pySelf)))(self);
 }
 
 static PyType_Slot PropertyListType_slots[] = {
@@ -289,7 +289,7 @@ int propListCount(QQmlListProperty<QObject> *propList)
 
     // Check return type
     int cppResult = 0;
-    PythonToCppFunc pythonToCpp;
+    PythonToCppFunc pythonToCpp = 0;
     if (PyErr_Occurred())
         PyErr_Print();
     else if ((pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible(Shiboken::Conversions::PrimitiveTypeConverter<int>(), retVal)))
@@ -364,7 +364,7 @@ QtQml_VolatileBoolObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return Q_NULLPTR;
 
     QtQml_VolatileBoolObject *self
-            = reinterpret_cast<QtQml_VolatileBoolObject *>(type->tp_alloc(type, 0));
+            = reinterpret_cast<QtQml_VolatileBoolObject *>(PepType_tp_alloc(type)(type, 0));
 
     if (self != Q_NULLPTR)
         self->flag = ok;
@@ -421,10 +421,10 @@ QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
 
     if (self->flag)
         s = PyBytes_FromFormat("%s(True)",
-                                Py_TYPE(self)->tp_name);
+                                PepType_tp_name(Py_TYPE(self)));
     else
         s = PyBytes_FromFormat("%s(False)",
-                                Py_TYPE(self)->tp_name);
+                                PepType_tp_name(Py_TYPE(self)));
     Py_XINCREF(s);
     return s;
 }
@@ -436,10 +436,10 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
 
     if (self->flag)
         s = PyBytes_FromFormat("%s(True) -> %p",
-                                Py_TYPE(self)->tp_name, &(self->flag));
+                                PepType_tp_name(Py_TYPE(self)), &(self->flag));
     else
         s = PyBytes_FromFormat("%s(False) -> %p",
-                                Py_TYPE(self)->tp_name, &(self->flag));
+                                PepType_tp_name(Py_TYPE(self)), &(self->flag));
     Py_XINCREF(s);
     return s;
 }
@@ -481,7 +481,7 @@ void PySide::initQmlSupport(PyObject* module)
     }
 
     Py_INCREF(reinterpret_cast<PyObject *>(PropertyListTypeF()));
-    PyModule_AddObject(module, strrchr(PropertyListTypeF()->tp_name, '.') + 1,
+    PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
                        reinterpret_cast<PyObject *>(PropertyListTypeF()));
 
     if (PyType_Ready(QtQml_VolatileBoolTypeF()) < 0) {
@@ -491,6 +491,6 @@ void PySide::initQmlSupport(PyObject* module)
     }
 
     Py_INCREF(QtQml_VolatileBoolTypeF());
-    PyModule_AddObject(module, strrchr(QtQml_VolatileBoolTypeF()->tp_name, '.') + 1,
+    PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBoolTypeF()),
                        reinterpret_cast<PyObject *>(QtQml_VolatileBoolTypeF()));
 }

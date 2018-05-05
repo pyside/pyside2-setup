@@ -174,17 +174,13 @@ SbkObjectType *SbkObject_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
-        PyType_Type.tp_basicsize += 2 * sizeof(void *);
-        type = (PyTypeObject *)PyType_FromSpec(&SbkObject_Type_spec);
-        PyType_Type.tp_basicsize -= 2 * sizeof(void *);
+        type = reinterpret_cast<PyTypeObject *>(PepType_FromSpec(&SbkObject_Type_spec, 2));
         Py_TYPE(type) = SbkObjectType_TypeF();
         Py_INCREF(Py_TYPE(type));
-        // here we need a hack:
-        type->tp_weaklistoffset = offsetof(SbkObject, weakreflist);
-        type->tp_dictoffset = offsetof(SbkObject, ob_dict);
-        // This will be solved by the PEP 384 support.
+        PepType_tp_weaklistoffset(type) = offsetof(SbkObject, weakreflist);
+        PepType_tp_dictoffset(type) = offsetof(SbkObject, ob_dict);
     }
-    return (SbkObjectType *)type;
+    return reinterpret_cast<SbkObjectType *>(type);
 }
 
 
@@ -196,8 +192,8 @@ static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
     // Need to decref the type if this is the dealloc func; if type
     // is subclassed, that dealloc func will decref (see subtype_dealloc
     // in typeobject.c in the python sources)
-    bool needTypeDecref = (pyType->tp_dealloc == SbkDeallocWrapper
-                           || pyType->tp_dealloc == SbkDeallocWrapperWithPrivateDtor);
+    bool needTypeDecref = (PyType_GetSlot(pyType, Py_tp_dealloc) == SbkDeallocWrapper
+                           || PyType_GetSlot(pyType, Py_tp_dealloc) == SbkDeallocWrapperWithPrivateDtor);
 
     // Ensure that the GC is no longer tracking this object to avoid a
     // possible reentrancy problem.  Since there are multiple steps involved
@@ -302,18 +298,19 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
 #ifndef IS_PY3K
         if (PyClass_Check(baseType)) {
             PyErr_Format(PyExc_TypeError, "Invalid base class used in type %s. "
-                "PySide only support multiple inheritance from python new style class.", metatype->tp_name);
+                "PySide only support multiple inheritance from python new style class.", PepType_tp_name(metatype));
             return 0;
         }
 #endif
-        if (reinterpret_cast<PyTypeObject*>(baseType)->tp_new == SbkDummyNew) {
+        if (PepType_tp_new(reinterpret_cast<PyTypeObject*>(baseType)) == SbkDummyNew) {
             // PYSIDE-595: A base class does not allow inheritance.
             return SbkDummyNew(metatype, args, kwds);
         }
     }
 
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
-    SbkObjectType* newType = reinterpret_cast<SbkObjectType*>(PyType_Type.tp_new(metatype, args, kwds));
+    newfunc type_new = reinterpret_cast<newfunc>(PepType_tp_new(&PyType_Type));
+    SbkObjectType *newType = reinterpret_cast<SbkObjectType*>(type_new(metatype, args, kwds));
     if (!newType)
         return 0;
 
@@ -391,14 +388,20 @@ PyObject* SbkQAppTpNew(PyTypeObject* subtype, PyObject *, PyObject *)
     // For qApp, we need to create a singleton Python object.
     // We cannot track this with the GC, because it is a static variable!
 
-    // Python2 has a weird handling of flags in derived classes that Python3
+    // Python 2 has a weird handling of flags in derived classes that Python 3
     // does not have. Observed with bug_307.py.
     // But it could theoretically also happen with Python3.
     // Therefore we enforce that there is no GC flag, ever!
+
+    // PYSIDE-560:
+    // We avoid to use this in Python 3, because we have a hard time to get
+    // write access to these flags
+#ifndef IS_PY3K
     if (PyType_HasFeature(subtype, Py_TPFLAGS_HAVE_GC)) {
         subtype->tp_flags &= ~Py_TPFLAGS_HAVE_GC;
         subtype->tp_free = PyObject_Del;
     }
+#endif
     SbkObject* self = reinterpret_cast<SbkObject*>(MakeSingletonQAppWrapper(subtype));
     return self == 0 ? 0 : _setupNew(self, subtype);
 }
@@ -413,7 +416,7 @@ SbkDummyNew(PyTypeObject *type, PyObject*, PyObject*)
     // PYSIDE-595: Give the same error as type_call does when tp_new is NULL.
     PyErr_Format(PyExc_TypeError,
                  "cannot create '%.100s' instances ¯\\_(ツ)_/¯",
-                 type->tp_name);
+                 PepType_tp_name(type));
     return nullptr;
 }
 
@@ -446,7 +449,7 @@ static void decRefPyObjectList(const std::list<PyObject*> &pyObj, PyObject* skip
 
 static void _walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
 {
-    PyObject* bases = currentType->tp_bases;
+    PyObject* bases = PepType_tp_bases(currentType);
     Py_ssize_t numBases = PyTuple_GET_SIZE(bases);
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
@@ -537,7 +540,7 @@ void init()
     PyEval_InitThreads();
 
     //Init private data
-    PEP384_Init();
+    Pep_Init();
 
     Shiboken::ObjectType::initPrivateData(SbkObject_TypeF());
 
@@ -565,10 +568,10 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
                 if (i)
                     params += ", ";
                 PyObject* arg = PyTuple_GET_ITEM(args, i);
-                params += arg->ob_type->tp_name;
+                params += PepType_tp_name(arg->ob_type);
             }
         } else {
-            params = args->ob_type->tp_name;
+            params = PepType_tp_name(args->ob_type);
         }
     }
 
@@ -657,7 +660,7 @@ bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
     FindBaseTypeVisitor visitor(ctorType);
     walkThroughClassHierarchy(myType, &visitor);
     if (!visitor.found()) {
-        PyErr_Format(PyExc_TypeError, "%s isn't a direct base class of %s", ctorType->tp_name, myType->tp_name);
+        PyErr_Format(PyExc_TypeError, "%s isn't a direct base class of %s", PepType_tp_name(ctorType), PepType_tp_name(myType));
         return false;
     }
     return true;
@@ -740,16 +743,13 @@ introduceWrapperType(PyObject *enclosingObject,
     else {
         typeSpec->slots[0].pfunc = reinterpret_cast<void *>(SbkObject_TypeF());
     }
-    // temp HACK until we remove the modification of types!
-    // fprintf(stderr, "PyHeapTypeObject %ld\n", sizeof(PyHeapTypeObject));
+    // fprintf(stderr, "PepTypeObject %ld\n", sizeof(PepTypeObject));
     // fprintf(stderr, "SbkObjectType %ld\n", sizeof(SbkObjectType));
     // XXX Observation:
     // These types are 8 bytes different, so a "1" below should be enough.
     // But we get a crash if we don't use at least "2".
     // I guess there is some other typecast hiding somewhere!
-    PyType_Type.tp_basicsize += 2 * sizeof(void *);
-    PyObject *heaptype = PyType_FromSpecWithBases(typeSpec, baseTypes);
-    PyType_Type.tp_basicsize -= 2 * sizeof(void *);
+    PyObject *heaptype = PepType_FromSpecWithBases(typeSpec, baseTypes, 2);
     Py_TYPE(heaptype) = SbkObjectType_TypeF();
     Py_INCREF(Py_TYPE(heaptype));
     SbkObjectType *type = reinterpret_cast<SbkObjectType *>(heaptype);
@@ -1089,12 +1089,14 @@ bool isValid(PyObject* pyObj)
     SbkObjectPrivate* priv = reinterpret_cast<SbkObject*>(pyObj)->d;
 
     if (!priv->cppObjectCreated && isUserType(pyObj)) {
-        PyErr_Format(PyExc_RuntimeError, "'__init__' method of object's base class (%s) not called.", pyObj->ob_type->tp_name);
+        PyErr_Format(PyExc_RuntimeError, "'__init__' method of object's base class (%s) not called.",
+                     PepType_tp_name(pyObj->ob_type));
         return false;
     }
 
     if (!priv->validCppObject) {
-        PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", pyObj->ob_type->tp_name);
+        PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.",
+                     PepType_tp_name(pyObj->ob_type));
         return false;
     }
 
@@ -1109,13 +1111,15 @@ bool isValid(SbkObject* pyObj, bool throwPyError)
     SbkObjectPrivate* priv = pyObj->d;
     if (!priv->cppObjectCreated && isUserType(reinterpret_cast<PyObject*>(pyObj))) {
         if (throwPyError)
-            PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.", Py_TYPE(pyObj)->tp_name);
+            PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.",
+                         PepType_tp_name(Py_TYPE(pyObj)));
         return false;
     }
 
     if (!priv->validCppObject) {
         if (throwPyError)
-            PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.", Py_TYPE(pyObj)->tp_name);
+            PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.",
+                         PepType_tp_name(Py_TYPE(pyObj)));
         return false;
     }
 
@@ -1395,8 +1399,8 @@ void deallocData(SbkObject* self, bool cleanup)
     Py_XDECREF(self->ob_dict);
 
     // PYSIDE-571: qApp is no longer allocated.
-    if (PyObject_IS_GC((PyObject*)self))
-        Py_TYPE(self)->tp_free(self);
+    if (PyObject_IS_GC(reinterpret_cast<PyObject*>(self)))
+        PepType_tp_free(Py_TYPE(self));
 }
 
 void setTypeUserData(SbkObject* wrapper, void* userData, DeleteUserDataFunc d_func)
@@ -1493,7 +1497,7 @@ std::string info(SbkObject* self)
         s << "C++ address....... ";
         std::list<SbkObjectType*>::const_iterator it = bases.begin();
         for (int i = 0; it != bases.end(); ++it, ++i)
-            s << reinterpret_cast<PyTypeObject *>(*it)->tp_name << '/' << self->d->cptr[i] << ' ';
+            s << PepType_tp_name(reinterpret_cast<PyTypeObject*>(*it)) << '/' << self->d->cptr[i] << ' ';
         s << "\n";
     }
     else {
