@@ -180,7 +180,7 @@ void pythonToCppPointer(SbkObjectType* type, PyObject* pyIn, void* cppOut)
 {
     assert(pyIn);
     assert(cppOut);
-    SbkObjectType* inType = (SbkObjectType*)pyIn->ob_type;
+    SbkObjectType* inType = (SbkObjectType*)Py_TYPE(pyIn);
     if (ObjectType::hasCast(inType))
         *((void**)cppOut) = ObjectType::cast(inType, (SbkObject*)pyIn, (PyTypeObject*)type);
     else

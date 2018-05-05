@@ -309,10 +309,10 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
 
 bool inherits(PyTypeObject* objType, const char* class_name)
 {
-    if (strcmp(PepType_tp_name(objType), class_name) == 0)
+    if (strcmp(PepType(objType)->tp_name, class_name) == 0)
         return true;
 
-    PyTypeObject* base = PepType_tp_base(objType);
+    PyTypeObject* base = PepType(objType)->tp_base;
     if (base == 0)
         return false;
 

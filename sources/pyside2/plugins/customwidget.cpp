@@ -51,7 +51,7 @@ PyCustomWidget::PyCustomWidget(PyObject* objectType)
     : m_data(new PyCustomWidgetPrivate())
 {
     m_data->pyObject = objectType;
-    m_name = QString(PepType_tp_name(reinterpret_cast<PyTypeObject*>(objectType)));
+    m_name = QString(PepType(reinterpret_cast<PyTypeObject*>(objectType))->tp_name);
 }
 
 PyCustomWidget::~PyCustomWidget()

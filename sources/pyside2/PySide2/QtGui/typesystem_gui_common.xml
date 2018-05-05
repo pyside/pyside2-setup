@@ -1752,7 +1752,7 @@
             PyErr_Format(PyExc_TypeError, "Invalid return value in function %s, expected %s, got %s.",
                         "QValidator.validate",
                         "PySide2.QtGui.QValidator.State, (PySide2.QtGui.QValidator.State,), (PySide2.QtGui.QValidator.State, unicode) or (PySide2.QtGui.QValidator.State, unicode, int)",
-                        PepType_tp_name(pyResult->ob_type));
+                        PepType((Py_TYPE(pyResult)))->tp_name);
             return QValidator::State();
         }
   </template>

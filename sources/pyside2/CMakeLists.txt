@@ -421,10 +421,10 @@ else()
     set(PATH_SEP ":")
 endif()
 
-option(FORCE_LIMITED_API "Enable the limited API for debugging." "")
+option(FORCE_LIMITED_API "Enable the limited API." "no")
 
 set(PYTHON_LIMITED_API 0)
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR FORCE_LIMITED_API)
+if(FORCE_LIMITED_API STREQUAL "yes")
     # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
     if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
         if (WIN32)

@@ -400,7 +400,7 @@ set(SHIBOKEN_BUILD_TYPE "Release")
 # On Windows we do need to link against the python.lib import library.
 
 set(SBK_PYTHON_LIBRARIES "")
-option(FORCE_LIMITED_API "Enable the limited API for debugging." "")
+option(FORCE_LIMITED_API "Enable the limited API." "no")
 set(PYTHON_LIMITED_API 0)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
@@ -426,7 +426,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif()
     set(SHIBOKEN_BUILD_TYPE "Debug")
 endif()
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR FORCE_LIMITED_API)
+if(FORCE_LIMITED_API STREQUAL "yes")
     if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
         # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
         add_definitions("-DPy_LIMITED_API=0x03050000")

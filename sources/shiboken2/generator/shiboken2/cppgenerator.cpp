@@ -667,7 +667,7 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     if (func->type()->isPrimitive())
         return QLatin1Char('"') + func->type()->name() + QLatin1Char('"');
 
-    return QString::fromLatin1("PepType_tp_name(Shiboken::SbkType< %1 >())").arg(func->type()->typeEntry()->qualifiedCppName());
+    return QString::fromLatin1("PepType(Shiboken::SbkType< %1 >())->tp_name").arg(func->type()->typeEntry()->qualifiedCppName());
 }
 
 void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFunction* func)
@@ -894,7 +894,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                         s << INDENT << "Shiboken::warning(PyExc_RuntimeWarning, 2, "\
                                        "\"Invalid return value in function %s, expected %s, got %s.\", \"";
                         s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
-                        s << ", PepType_tp_name(" PYTHON_RETURN_VAR "->ob_type));" << endl;
+                        s << ", PepType(Py_TYPE(" PYTHON_RETURN_VAR "))->tp_name);" << endl;
                         s << INDENT << "return " << defaultReturnExpr << ';' << endl;
                     }
                     s << INDENT << '}' << endl;
@@ -914,7 +914,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                         s << INDENT << "Shiboken::warning(PyExc_RuntimeWarning, 2, "\
                                        "\"Invalid return value in function %s, expected %s, got %s.\", \"";
                         s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
-                        s << ", PepType_tp_name(" PYTHON_RETURN_VAR "->ob_type));" << endl;
+                        s << ", PepType(Py_TYPE(" PYTHON_RETURN_VAR "))->tp_name);" << endl;
                         s << INDENT << "return " << defaultReturnExpr << ';' << endl;
                     }
                     s << INDENT << '}' << endl;
@@ -2326,7 +2326,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream& s,
     if (!defaultValue.isEmpty())
         s << '{' << endl << INDENT;
 
-    s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<const SbkObjectType *>("
+    s << "if (Shiboken::Conversions::isImplicitConversion(reinterpret_cast<SbkObjectType *>("
         << cpythonTypeNameExt(type) << "), " << pythonToCppFunc << "))" << endl;
     {
         Indentation indent(INDENT);
@@ -3744,7 +3744,16 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
         // privacy the same way. This worked before the heap types were used,
         // because inheritance is not really checked for static types.
         // Instead, we check this at runtime, see SbkObjectTypeTpNew.
-        tp_new = QLatin1String("SbkDummyNew /* PYSIDE-595: Prevent replacement of \"0\" with base->tp_new. */");
+        if (metaClass->fullName().startsWith(QLatin1String("PySide2.Qt"))) {
+            // PYSIDE-595: No idea how to do non-inheritance correctly.
+            // Since that is only relevant in shiboken, I used a shortcut for
+            // PySide.
+            tp_new = QLatin1String("SbkObjectTpNew");
+        }
+        else {
+            tp_new = QLatin1String("SbkDummyNew /* PYSIDE-595: Prevent replacement "
+                                   "of \"0\" with base->tp_new. */");
+        }
         tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
     }
     else if (isQApp) {
@@ -3804,7 +3813,8 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     QString suffix;
     if (isObjectType(metaClass))
         suffix = QLatin1String("*");
-    QString typePtr = QLatin1String("_") + className + QLatin1String("_Type");
+    const QString typePtr = QLatin1String("_") + className
+        + QLatin1String("_Type");
     s << "static SbkObjectType *" << typePtr << " = nullptr;" << endl;
     s << "static SbkObjectType *" << className << "_TypeF(void)" << endl;
     s << "{" << endl;
@@ -4053,7 +4063,7 @@ void CppGenerator::writeTpTraverseFunction(QTextStream& s, const AbstractMetaCla
     s << "static int ";
     s << baseName << "_traverse(PyObject* " PYTHON_SELF_VAR ", visitproc visit, void* arg)" << endl;
     s << '{' << endl;
-    s << INDENT << "return PepType_tp_traverse(reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))(" PYTHON_SELF_VAR ", visit, arg);" << endl;
+    s << INDENT << "return PepType(reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))->tp_traverse(" PYTHON_SELF_VAR ", visit, arg);" << endl;
     s << '}' << endl;
 }
 
@@ -4063,7 +4073,7 @@ void CppGenerator::writeTpClearFunction(QTextStream& s, const AbstractMetaClass*
     s << "static int ";
     s << baseName << "_clear(PyObject* " PYTHON_SELF_VAR ")" << endl;
     s << '{' << endl;
-    s << INDENT << "return PepType_tp_clear(reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))(" PYTHON_SELF_VAR ");" << endl;
+    s << INDENT << "return PepType(reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))->tp_clear(" PYTHON_SELF_VAR ");" << endl;
     s << '}' << endl;
 }
 
@@ -4139,7 +4149,7 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
         {
             Indentation indent(INDENT);
             s << INDENT << "pyOut = reinterpret_cast<PyObject *>(Shiboken::Object::findColocatedChild("
-                        << "reinterpret_cast<SbkObject *>(self), reinterpret_cast<const SbkObjectType *>("
+                        << "reinterpret_cast<SbkObject *>(self), reinterpret_cast<SbkObjectType *>("
                         << cpythonTypeNameExt(fieldType)
                         << ")));\n";
             s << INDENT << "if (pyOut) {Py_IncRef(pyOut); return pyOut;}\n";
@@ -4531,8 +4541,8 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                 {
                     Indentation indent(INDENT);
                     s << INDENT << "PyObject* anonEnumItem = PyInt_FromLong(" << enumValueText << ");" << endl;
-                    s << INDENT << "if (PyDict_SetItemString(PepType_tp_dict(reinterpret_cast<SbkObjectType *>(" << enclosingObjectVariable
-                        << ")), \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
+                    s << INDENT << "if (PyDict_SetItemString(PepType(reinterpret_cast<SbkObjectType *>(" << enclosingObjectVariable
+                        << "))->tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << "return " << m_currentErrorCode << ';' << endl;
@@ -4776,7 +4786,8 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
 
     // Create type and insert it in the module or enclosing class.
-    QString typePtr = QLatin1String("_") + chopType(pyTypeName) + QLatin1String("_Type");
+    const QString typePtr = QLatin1String("_") + chopType(pyTypeName)
+        + QLatin1String("_Type");
 
     s << INDENT << typePtr << " = Shiboken::ObjectType::introduceWrapperType(" << endl;
     {
@@ -4794,14 +4805,17 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 
         // 3:originalName
         s << INDENT << "\"";
-        if (!classContext.forSmartPointer())
-            s << metaClass->qualifiedCppName() << (isObjectType(classTypeEntry) ?  "*" : "");
-        else
+        if (!classContext.forSmartPointer()) {
+            s << metaClass->qualifiedCppName();
+            if (isObjectType(classTypeEntry))
+                s << '*';
+        } else {
             s << classContext.preciseType()->cppSignature();
+        }
 
         s << "\"," << endl;
         // 4:typeSpec
-        s << INDENT << "&" << chopType(pyTypeName) << "_spec," << endl;
+        s << INDENT << '&' << chopType(pyTypeName) << "_spec," << endl;
 
         // 5:signaturesString
         s << INDENT << initFunctionName << "_SignaturesString," << endl;
@@ -4824,13 +4838,13 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         if (metaClass->baseClass()) {
             s << INDENT << "reinterpret_cast<SbkObjectType *>("
                 << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ")," << endl;
-            }
-        else
+        } else {
             s << INDENT << "0," << endl;
+        }
 
         // 8:baseTypes
         if (metaClass->baseClassNames().size() > 1)
-            s << INDENT << pyTypeBasesVariable << "," << endl;
+            s << INDENT << pyTypeBasesVariable << ',' << endl;
         else
             s << INDENT << "0," << endl;
 
@@ -4895,7 +4909,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     for (const AbstractMetaField *field : fields) {
         if (!field->isStatic())
             continue;
-        s << INDENT << QLatin1String("PyDict_SetItemString(PepType_tp_dict(") + cpythonTypeName(metaClass) + QLatin1String("), \"");
+        s << INDENT << QLatin1String("PyDict_SetItemString(PepType(") + cpythonTypeName(metaClass) + QLatin1String(")->tp_dict, \"");
         s << field->name() << "\", ";
         writeToPythonConversion(s, field->type(), metaClass, metaClass->qualifiedCppName() + QLatin1String("::") + field->name());
         s << ");" << endl;
@@ -5110,7 +5124,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, GeneratorContext &conte
             s << INDENT << "if (Shiboken::Object::isUserType(" PYTHON_SELF_VAR ")) {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyObject* meth = PyDict_GetItem(PepType_tp_dict(Py_TYPE(" PYTHON_SELF_VAR ")), name);" << endl;
+                s << INDENT << "PyObject* meth = PyDict_GetItem(PepType(Py_TYPE(" PYTHON_SELF_VAR "))->tp_dict, name);" << endl;
                 s << INDENT << "if (meth)" << endl;
                 {
                     Indentation indent(INDENT);
@@ -5175,7 +5189,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, GeneratorContext &conte
                 s << INDENT << "PyTypeObject *tp = Py_TYPE(self);" << endl;
                 s << INDENT << "PyErr_Format(PyExc_AttributeError," << endl;
                 s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\"," << endl;
-                s << INDENT << "             PepType_tp_name(tp), PyBytes_AS_STRING(name));" << endl;
+                s << INDENT << "             PepType(tp)->tp_name, PyBytes_AS_STRING(name));" << endl;
                 s << INDENT << "return NULL;" << endl;
             }
             s << INDENT << "} else {" << endl;
@@ -5255,7 +5269,7 @@ bool CppGenerator::finishGeneration()
         QString defineStr = QLatin1String("init_") + cls->qualifiedCppName().replace(QLatin1String("::"), QLatin1String("_"));
 
         if (cls->enclosingClass() && (cls->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass))
-            defineStr += QLatin1String("(PepType_tp_dict(") + cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) + QLatin1String("));");
+            defineStr += QLatin1String("(PepType(") + cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) + QLatin1String(")->tp_dict);");
         else
             defineStr += QLatin1String("(module);");
         s_classPythonDefines << INDENT << defineStr << endl;
@@ -5801,9 +5815,9 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
     s << INDENT << "if (idx >= 0)" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "str.replace(0, idx, PepType_tp_name(Py_TYPE(self)));" << endl;
+        s << INDENT << "str.replace(0, idx, PepType((Py_TYPE(self)))->tp_name);" << endl;
     }
-    s << INDENT << "PyObject* mod = PyDict_GetItemString(PepType_tp_dict(Py_TYPE(self)), \"__module__\");" << endl;
+    s << INDENT << "PyObject* mod = PyDict_GetItemString(PepType(Py_TYPE(self))->tp_dict, \"__module__\");" << endl;
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
     // is always prepended to the type name. Therefore the strchr check:
     s << INDENT << "if (mod && !strchr(str, '.'))" << endl;

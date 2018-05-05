@@ -56,7 +56,7 @@ typedef struct {
 PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     SbkVoidPtrObject *self =
-        reinterpret_cast<SbkVoidPtrObject *>(PepType_tp_alloc(type));
+        reinterpret_cast<SbkVoidPtrObject *>(PepType(type)->tp_alloc);
 
     if (self != 0) {
         self->cptr = 0;
@@ -189,7 +189,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(%p, %zd, %s)",
-                           PepType_tp_name(Py_TYPE(sbkObject)),
+                           PepType((Py_TYPE(sbkObject)))->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -201,7 +201,7 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
-                           PepType_tp_name(Py_TYPE(sbkObject)),
+                           PepType((Py_TYPE(sbkObject)))->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);

@@ -120,9 +120,9 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (!PySequence_Contains(PepType_tp_mro(pyObjType), reinterpret_cast<PyObject *>(qobjectType))) {
+    if (!PySequence_Contains(PepType(pyObjType)->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
         PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     PepType_tp_name(qobjectType), PepType_tp_name(pyObjType));
+                     PepType(qobjectType)->tp_name, PepType(pyObjType)->tp_name);
         return -1;
     }
 
@@ -229,7 +229,7 @@ void propListTpFree(void* self)
     PySideProperty* pySelf = reinterpret_cast<PySideProperty*>(self);
     delete reinterpret_cast<QmlListProperty*>(PySide::Property::userData(pySelf));
     // calls base type constructor
-    PepType_tp_free(PepType_tp_base(Py_TYPE(pySelf)))(self);
+    PepType(PepType(Py_TYPE(pySelf))->tp_base)->tp_free(self);
 }
 
 static PyType_Slot PropertyListType_slots[] = {
@@ -364,7 +364,7 @@ QtQml_VolatileBoolObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return Q_NULLPTR;
 
     QtQml_VolatileBoolObject *self
-            = reinterpret_cast<QtQml_VolatileBoolObject *>(PepType_tp_alloc(type)(type, 0));
+            = reinterpret_cast<QtQml_VolatileBoolObject *>(PepType(type)->tp_alloc(type, 0));
 
     if (self != Q_NULLPTR)
         self->flag = ok;
@@ -421,10 +421,10 @@ QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
 
     if (self->flag)
         s = PyBytes_FromFormat("%s(True)",
-                                PepType_tp_name(Py_TYPE(self)));
+                                PepType((Py_TYPE(self)))->tp_name);
     else
         s = PyBytes_FromFormat("%s(False)",
-                                PepType_tp_name(Py_TYPE(self)));
+                                PepType((Py_TYPE(self)))->tp_name);
     Py_XINCREF(s);
     return s;
 }
@@ -436,10 +436,10 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
 
     if (self->flag)
         s = PyBytes_FromFormat("%s(True) -> %p",
-                                PepType_tp_name(Py_TYPE(self)), &(self->flag));
+                                PepType((Py_TYPE(self)))->tp_name, &(self->flag));
     else
         s = PyBytes_FromFormat("%s(False) -> %p",
-                                PepType_tp_name(Py_TYPE(self)), &(self->flag));
+                                PepType((Py_TYPE(self)))->tp_name, &(self->flag));
     Py_XINCREF(s);
     return s;
 }

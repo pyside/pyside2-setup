@@ -44,14 +44,17 @@
 extern "C" {
     struct SbkConverter;
 
+    struct PySideQFlagsTypePrivate
+    {
+        SbkConverter** converterPtr;
+        SbkConverter* converter;
+    };
     /**
      * Type of all QFlags
      */
     struct PySideQFlagsType
     {
-        PepTypeObject super;
-        SbkConverter** converterPtr;
-        SbkConverter* converter;
+        PepTypeObject type;
     };
 
     #define PYSIDE_QFLAGS(X) reinterpret_cast<PySideQFlagsObject*>(X)
@@ -181,14 +184,15 @@ namespace QFlags
             SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
         }
         newspec->slots = SbkNewQFlagsType_spec.slots;
-        PyTypeObject *type = (PyTypeObject *)PepType_FromSpec(newspec, 2);
+        PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(newspec);
         Py_TYPE(type) = &PyType_Type;
 
         PySideQFlagsType* flagsType = reinterpret_cast<PySideQFlagsType*>(type);
-        flagsType->converterPtr = &flagsType->converter;
+        PepType_PFTP(flagsType)->converterPtr = &PepType_PFTP(flagsType)->converter;
 
         if (PyType_Ready(type) < 0)
             return 0;
+
         return type;
     }
 

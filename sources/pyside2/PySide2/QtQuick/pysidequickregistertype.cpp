@@ -110,7 +110,7 @@ bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className
 {
     className.append('*');
     PyTypeObject *classPyType = Shiboken::Conversions::getPythonTypeObject(className.constData());
-    bool isDerived = PySequence_Contains(PepType_tp_mro(pyObjType),
+    bool isDerived = PySequence_Contains(PepType(pyObjType)->tp_mro,
                                          reinterpret_cast<PyObject *>(classPyType));
     return isDerived;
 }
@@ -190,7 +190,7 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     PyTypeObject *qQuickItemPyType =
             Shiboken::Conversions::getPythonTypeObject("QQuickItem*");
-    bool isQuickItem = PySequence_Contains(PepType_tp_mro(pyObjType),
+    bool isQuickItem = PySequence_Contains(PepType(pyObjType)->tp_mro,
                                            reinterpret_cast<PyObject *>(qQuickItemPyType));
 
     // Register only classes that inherit QQuickItem or its children.

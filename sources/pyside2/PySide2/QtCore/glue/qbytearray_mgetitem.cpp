@@ -82,6 +82,6 @@ if (PyIndex_Check(_key)) {
 } else {
     PyErr_Format(PyExc_TypeError,
                  "list indices must be integers or slices, not %.200s",
-                 PepType_tp_name(_key->ob_type));
+                 PepType((Py_TYPE(_key)))->tp_name);
     return NULL;
 }

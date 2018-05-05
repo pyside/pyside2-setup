@@ -101,8 +101,7 @@ struct SbkObjectTypePrivate;
 /// PyTypeObject extended with C++ multiple inheritance information.
 struct LIBSHIBOKEN_API SbkObjectType
 {
-    PepTypeObject super;
-    SbkObjectTypePrivate* d;
+    PepTypeObject type;
 };
 
 LIBSHIBOKEN_API PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObject*);

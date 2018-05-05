@@ -3,7 +3,7 @@
 ** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -37,12 +37,302 @@
 **
 ****************************************************************************/
 
-#include "sbkpython.h"
+#include "pep384impl.h"
 
 extern "C"
 {
 
-#ifdef Py_LIMITED_API
+/**********************************************************************
+ **********************************************************************
+
+
+    The New Type API
+    ================
+
+    After converting everything but the "object.h" file, we could not
+    believe our eyes: it suddenly was clear that we would have no more
+    access to type objects, and even more scary that all types which we
+    use have to be heap types, only!
+
+    For PySide with it's intense use of heap type extensions in various
+    flavors, it seemed to be quite unsolvable. In the end, it was
+    nicely solved, but it took almost 3.5 months to get that right.
+
+    Before we see how this is done, we will explain the differences
+    between the APIs and their consequences.
+
+
+    The Interface
+    -------------
+
+    The old type API of Python knows static types and heap types.
+    Static types are written down as a declaration of a PyTypeObject
+    structure with all its fields filled in. Here is for example
+    the definition of the Python type "object":
+
+        PyTypeObject PyBaseObject_Type = {
+            PyVarObject_HEAD_INIT(&PyType_Type, 0)
+            "object",                                   |* tp_name *|
+            sizeof(PyObject),                           |* tp_basicsize *|
+            0,                                          |* tp_itemsize *|
+            object_dealloc,                             |* tp_dealloc *|
+            0,                                          |* tp_print *|
+            0,                                          |* tp_getattr *|
+            0,                                          |* tp_setattr *|
+            0,                                          |* tp_reserved *|
+            object_repr,                                |* tp_repr *|
+            0,                                          |* tp_as_number *|
+            0,                                          |* tp_as_sequence *|
+            0,                                          |* tp_as_mapping *|
+            (hashfunc)_Py_HashPointer,                  |* tp_hash *|
+            0,                                          |* tp_call *|
+            object_str,                                 |* tp_str *|
+            PyObject_GenericGetAttr,                    |* tp_getattro *|
+            PyObject_GenericSetAttr,                    |* tp_setattro *|
+            0,                                          |* tp_as_buffer *|
+            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   |* tp_flags *|
+            PyDoc_STR("object()\n--\n\nThe most base type"),  |* tp_doc *|
+            0,                                          |* tp_traverse *|
+            0,                                          |* tp_clear *|
+            object_richcompare,                         |* tp_richcompare *|
+            0,                                          |* tp_weaklistoffset *|
+            0,                                          |* tp_iter *|
+            0,                                          |* tp_iternext *|
+            object_methods,                             |* tp_methods *|
+            0,                                          |* tp_members *|
+            object_getsets,                             |* tp_getset *|
+            0,                                          |* tp_base *|
+            0,                                          |* tp_dict *|
+            0,                                          |* tp_descr_get *|
+            0,                                          |* tp_descr_set *|
+            0,                                          |* tp_dictoffset *|
+            object_init,                                |* tp_init *|
+            PyType_GenericAlloc,                        |* tp_alloc *|
+            object_new,                                 |* tp_new *|
+            PyObject_Del,                               |* tp_free *|
+        };
+
+    We can write the same structure in form of a PyType_Spec structure,
+    and there is even a tool that does this for us, but I had to fix a
+    few things because there is little support for this.
+
+    The tool is XXX go home and continue.....
+
+
+
+
+    The Transition To Simpler Types
+    ===============================
+
+    After all code has been converted to the limited API, there is the
+    PyHeapTypeObject remaining as a problem.
+
+    Why a problem? Well, all the type structures in shiboken use
+    special extra fields at the end of the heap type object. This
+    currently enforces knowledge at compile time about how large the
+    heap type object is. In a clean implementation, we would only use
+    the PyTypeObject itself and access the fields "behind" the type
+    by a pointer that is computed at runtime.
+
+
+    Excursion: PepTypeObject
+    ------------------------
+
+    Before we are going into details, let us motivate the existence of
+    the PepTypeObject, an alias to PyTypeObject:
+
+    Originally, we wanted to use PyTypeObject as an opaque type and
+    restrict ourselves to only use the access function PyType_GetSlot.
+    This function allows access to all fields which are supported by
+    the limited API.
+
+    But this is a restriction, because we get no access to tp_dict,
+    which we need to support the signature extension. But we can work
+    around that.
+
+    The real restriction is that PyType_GetSlot only works for heap
+    types. This makes the function quite useless, because we have
+    no access to PyType_Type, which is the most important type "type"
+    in Python. We need that for instance to compute the size of
+    PyHeapTypeObject dynamically.
+
+    With much effort, it is possible to clone PyType_Type as a heap
+    type. But due to a bug in the Pep 384 support, we need
+    access to the nb_index field of a normal type. Cloning does not
+    help because PyNumberMethods fields are not inherited.
+
+    After I realized this dead end, I changed the concept and did not
+    use PyType_GetSlot at all (except in function copyNumberMethods),
+    but created PepTypeObject as a remake of PyTypeObject with only
+    those fields defined that are needed in PySide.
+
+    Is this breakage of the limited API? I don't think so. A special
+    function runs on program startup that checks the correct position
+    of the fields of PepHeapType, although a change in those fields is
+    more than unlikely.
+    The really crucial thing is to no longer use PyHeapTypeObject
+    explicitly because that _does_ change its layout over time.
+
+
+    Diversification
+    ---------------
+
+    There are multiple SbkXXX structures which all use a "d" field
+    for their private data. This makes it not easy to find the right
+    fields when switching between types and objects.
+
+        struct LIBSHIBOKEN_API SbkObjectType
+        {
+            PyHeapTypeObject super;
+            SbkObjectTypePrivate *d;
+        };
+
+        struct LIBSHIBOKEN_API SbkObject
+        {
+            PyObject_HEAD
+            PyObject* ob_dict;
+            PyObject* weakreflist;
+            SbkObjectPrivate* d;
+        };
+
+    The first step was to rename the SbkObjectTypePrivate from "d" to
+    "sotp". It was chosen to be short but easy to remember.
+
+
+    Abstraction
+    -----------
+
+    After renaming the type extension pointers to "sotp", I replaced
+    them by function-like macros which did the special access "behind"
+    the types, instead of those explicit fields. For instance, the
+    expression
+
+        type->sotp->converter
+
+    became
+
+        PepType_SOTP(type)->converter
+
+    The macro expression can be seen here:
+
+    #define _genericTypeExtender(etype) \
+        (reinterpret_cast<char*>(etype) + \
+            (reinterpret_cast<PepTypeObject*>(&PyType_Type))->tp_basicsize)
+
+    #define PepType_SOTP(etype) \
+        (*reinterpret_cast<SbkObjectTypePrivate**>(_genericTypeExtender(etype)))
+
+    It looks complicated, but in the end there is only a single new
+    indirection via PyType_Type, which happens at runtime. This is the
+    key to fulfil what Pep 384 wants: No version-dependent fields.
+
+
+    Simplification
+    --------------
+
+    After all type extension fields were replaced by macro calls, we
+    could remove the version dependent definition
+
+        typedef struct _pepheaptypeobject {
+            union {
+                PepTypeObject ht_type;
+                void *opaque[PY_HEAPTYPE_SIZE];
+            };
+        } PepHeapTypeObject;
+
+    and the version dependent structure
+
+        struct LIBSHIBOKEN_API SbkObjectType
+        {
+            PepHeapTypeObject super;
+            SbkObjectTypePrivate *sotp;
+        };
+
+    could be replaced by the simplified
+
+        struct LIBSHIBOKEN_API SbkObjectType
+        {
+            PepTypeObject type;
+        };
+
+    which is no longer version-dependent.
+
+
+    Verification Of PepTypeObject
+    =============================
+
+    We have introduced PepTypeObject as a new alias for PyTypeObject,
+    and now we need to prove that we are allowed to do so.
+
+    When using the limited API as intended, then types are completely
+    opaque, and access is only through PyType_FromSpec and (from
+    version 3.5 upwards) through PyType_GetSlot.
+
+    Python then uses all the slot definitions in the type description
+    and produces a regular type object.
+
+
+    Unused Information
+    ------------------
+
+    But we know many things about types that are not explicitly said,
+    but they are inherently clear:
+
+     a) The basic structure of a type is always the same, regardless
+        if it is a static type or a heap type.
+
+     b) types are evolving very slowly, and a field is never replaced
+        by another field with different semantics.
+
+    Inherent rule a) gives us the following information: If we calculate
+    the offsets of the fields, then this info is also usable for non-
+    -heap types.
+
+    The validation checks if rule b) is still valid.
+
+
+    How it Works
+    ------------
+
+    The basic idea of the validation is to produce a new type using
+    PyType_FromSpec and to see where in the type structure these fields
+    show up. So we build a PyType_Slot structure with all the fields we
+    are using and make sure that these values are all unique in the
+    type.
+
+    Most fields are not investigated by PyType_FromSpec, and so we
+    simply used some numeric value. Some fields are interpreted, like
+    tp_members. This field must really be a PyMemberDef. And there are
+    tp_base and tp_bases which have to be type objects and lists
+    thereof. It was easiest to not produce these fields from scratch
+    but use them from the "type" object PyType_Type.
+
+    Then one would think to write a function that searches the known
+    values in the opaque type structure.
+
+    But we can do better and use optimistically the observation (b):
+    We simply use the PepTypeObject structure and assume that every
+    field lands exactly where we are awaiting it.
+
+    And that is the whole proof: If we find all the disjoint values at
+    the places where we expect them, thenthis is q.e.d. :)
+
+
+    About tp_dict
+    -------------
+
+    One word about the tp_dict field: This field is a bit special in
+    the proof, since it does not appear in the spec and cannot easily
+    be checked by "type.__dict__" because that creates a dictproxy
+    object. So how do we proove that is really the right dict?
+
+    We have to create that PyMethodDef structure anyway, and instead of
+    leaving it empty, we insert a dummy function. Then we ask the
+    tp_dict field if it has that object in it, and that's q.e.d.
+
+
+ *********/
+
 
 /*****************************************************************************
  *
@@ -50,42 +340,114 @@ extern "C"
  *
  */
 
-// Here will be the verification code.
+/*
+ * Here is the verification code for PepTypeObject.
+ * We create a type object and check if its fields
+ * appear at the right offsets.
+ */
 
-// static PyType_Slot PyType_Type_slots[] = {
-//     {0, 0},     // Here we insert the wanted slot for probing.
-//     {0, 0}
-// };
-// static PyType_Spec PyType_Type_spec = {
-//     "python.type",
-//     sizeof(PepTypeObject),                   /* tp_basicsize */
-//     sizeof(PyMemberDef),                        /* tp_itemsize */
-//     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC |
-//     Py_TPFLAGS_BASETYPE | Py_TPFLAGS_TYPE_SUBCLASS,
-//     PyType_Type_slots,
-// };
+#define make_dummy_int(x)   (x * sizeof(void*))
+#define make_dummy(x)       (reinterpret_cast<void*>(make_dummy_int(x)))
+
+#ifdef Py_LIMITED_API
+datetime_struc *PyDateTimeAPI = NULL;
+#endif
+
+static PyObject *
+dummy_func(PyObject *self, PyObject *args)
+{
+    Py_RETURN_NONE;
+}
+
+static struct PyMethodDef probe_methoddef[] = {
+    {"dummy", dummy_func, METH_NOARGS},
+    {0}
+};
+
+#define probe_tp_call       make_dummy(1)
+#define probe_tp_str        make_dummy(2)
+#define probe_tp_traverse   make_dummy(3)
+#define probe_tp_clear      make_dummy(4)
+#define probe_tp_methods    probe_methoddef
+#define probe_tp_descr_get  make_dummy(6)
+#define probe_tp_init       make_dummy(7)
+#define probe_tp_alloc      make_dummy(8)
+#define probe_tp_new        make_dummy(9)
+#define probe_tp_free       make_dummy(10)
+#define probe_tp_is_gc      make_dummy(11)
+
+#define probe_tp_name       "type.probe"
+#define probe_tp_basicsize  make_dummy_int(42)
+
+static PyType_Slot typeprobe_slots[] = {
+    {Py_tp_call,        probe_tp_call},
+    {Py_tp_str,         probe_tp_str},
+    {Py_tp_traverse,    probe_tp_traverse},
+    {Py_tp_clear,       probe_tp_clear},
+    {Py_tp_methods,     probe_tp_methods},
+    {Py_tp_descr_get,   probe_tp_descr_get},
+    {Py_tp_init,        probe_tp_init},
+    {Py_tp_alloc,       probe_tp_alloc},
+    {Py_tp_new,         probe_tp_new},
+    {Py_tp_free,        probe_tp_free},
+    {Py_tp_is_gc,       probe_tp_is_gc},
+    {0, 0}
+};
+static PyType_Spec typeprobe_spec = {
+    probe_tp_name,
+    probe_tp_basicsize,
+    0,
+    Py_TPFLAGS_DEFAULT,
+    typeprobe_slots,
+};
+
+static void
+check_PepTypeObject_valid(void)
+{
+    PyObject *obtype = reinterpret_cast<PyObject*>(&PyType_Type);
+    PyTypeObject *probe_tp_base = reinterpret_cast<PyTypeObject*>(
+        PyObject_GetAttrString(obtype, "__base__"));
+    PyObject *probe_tp_bases = PyObject_GetAttrString(obtype, "__bases__");
+    PepTypeObject *check = reinterpret_cast<PepTypeObject*>(
+        PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
+    PepTypeObject *typetype = reinterpret_cast<PepTypeObject*>(obtype);
+    PyObject *w = PyObject_GetAttrString(obtype, "__weakrefoffset__");
+    long probe_tp_weakrefoffset = PyLong_AsLong(w);
+    PyObject *d = PyObject_GetAttrString(obtype, "__dictoffset__");
+    long probe_tp_dictoffset = PyLong_AsLong(d);
+    PyObject *probe_tp_mro = PyObject_GetAttrString(obtype, "__mro__");
+    if (false
+        || probe_tp_name            != check->tp_name
+        || probe_tp_basicsize       != check->tp_basicsize
+        || probe_tp_call            != check->tp_call
+        || probe_tp_str             != check->tp_str
+        || probe_tp_traverse        != check->tp_traverse
+        || probe_tp_clear           != check->tp_clear
+        || probe_tp_weakrefoffset   != typetype->tp_weaklistoffset
+        || probe_tp_methods         != check->tp_methods
+        || probe_tp_base            != typetype->tp_base
+        || !PyDict_Check(check->tp_dict)
+        || !PyDict_GetItemString(check->tp_dict, "dummy")
+        || probe_tp_descr_get       != check->tp_descr_get
+        || probe_tp_dictoffset      != typetype->tp_dictoffset
+        || probe_tp_init            != check->tp_init
+        || probe_tp_alloc           != check->tp_alloc
+        || probe_tp_new             != check->tp_new
+        || probe_tp_free            != check->tp_free
+        || probe_tp_is_gc           != check->tp_is_gc
+        || probe_tp_bases           != typetype->tp_bases
+        || probe_tp_mro             != typetype->tp_mro)
+        Py_FatalError("The structure of type objects has changed!");
+    Py_DECREF(check);
+    Py_DECREF(probe_tp_base);
+    Py_DECREF(w);
+    Py_DECREF(d);
+    Py_DECREF(probe_tp_bases);
+    Py_DECREF(probe_tp_mro);
+}
 
 
-// #ifdef IS_PY3K
-// #  define SLOT slot
-// #else
-// #  define SLOT slot_
-// #endif
-
-// static void *handle_static_type(PyTypeObject *type, void *what, int length)
-// {
-//         for (int idx = 0; idx < length; ++idx) {
-//             void **thing = (void **)type + idx;
-//             if (*thing == what)
-//                 break;
-//         }
-//         Py_DECREF(probe_type);
-//         known_offsets[pyslot] = idx;
-//     }
-//     void **thing = (void **)type + idx;
-//     return *thing;
-// }
-
+#ifdef Py_LIMITED_API
 
 // This structure is only here because Python 3 has an error.
 // I will fix that.
@@ -490,360 +852,6 @@ PepFunction_Get(PyObject *ob, const char *name)
 
 /*****************************************************************************
  *
- * Copied from abstract.c
- *
- * Py_buffer has been replaced by Pep_buffer
- *
- */
-
-/* Buffer C-API for Python 3.0 */
-
-int
-PyObject_GetBuffer(PyObject *obj, Pep_buffer *view, int flags)
-{
-    PyBufferProcs *pb = PepType_AS_BUFFER(Py_TYPE(obj));
-
-    if (pb == NULL || pb->bf_getbuffer == NULL) {
-        PyErr_Format(PyExc_TypeError,
-                     "a bytes-like object is required, not '%.100s'",
-                     PepType_tp_name(Py_TYPE(obj)));
-        return -1;
-    }
-    return (*pb->bf_getbuffer)(obj, view, flags);
-}
-
-static int
-_IsFortranContiguous(const Pep_buffer *view)
-{
-    Py_ssize_t sd, dim;
-    int i;
-
-    /* 1) len = product(shape) * itemsize
-       2) itemsize > 0
-       3) len = 0 <==> exists i: shape[i] = 0 */
-    if (view->len == 0) return 1;
-    if (view->strides == NULL) {  /* C-contiguous by definition */
-        /* Trivially F-contiguous */
-        if (view->ndim <= 1) return 1;
-
-        /* ndim > 1 implies shape != NULL */
-        assert(view->shape != NULL);
-
-        /* Effectively 1-d */
-        sd = 0;
-        for (i=0; i<view->ndim; i++) {
-            if (view->shape[i] > 1) sd += 1;
-        }
-        return sd <= 1;
-    }
-
-    /* strides != NULL implies both of these */
-    assert(view->ndim > 0);
-    assert(view->shape != NULL);
-
-    sd = view->itemsize;
-    for (i=0; i<view->ndim; i++) {
-        dim = view->shape[i];
-        if (dim > 1 && view->strides[i] != sd) {
-            return 0;
-        }
-        sd *= dim;
-    }
-    return 1;
-}
-
-static int
-_IsCContiguous(const Pep_buffer *view)
-{
-    Py_ssize_t sd, dim;
-    int i;
-
-    /* 1) len = product(shape) * itemsize
-       2) itemsize > 0
-       3) len = 0 <==> exists i: shape[i] = 0 */
-    if (view->len == 0) return 1;
-    if (view->strides == NULL) return 1; /* C-contiguous by definition */
-
-    /* strides != NULL implies both of these */
-    assert(view->ndim > 0);
-    assert(view->shape != NULL);
-
-    sd = view->itemsize;
-    for (i=view->ndim-1; i>=0; i--) {
-        dim = view->shape[i];
-        if (dim > 1 && view->strides[i] != sd) {
-            return 0;
-        }
-        sd *= dim;
-    }
-    return 1;
-}
-
-int
-PyBuffer_IsContiguous(const Pep_buffer *view, char order)
-{
-
-    if (view->suboffsets != NULL) return 0;
-
-    if (order == 'C')
-        return _IsCContiguous(view);
-    else if (order == 'F')
-        return _IsFortranContiguous(view);
-    else if (order == 'A')
-        return (_IsCContiguous(view) || _IsFortranContiguous(view));
-    return 0;
-}
-
-
-void*
-PyBuffer_GetPointer(Pep_buffer *view, Py_ssize_t *indices)
-{
-    char* pointer;
-    int i;
-    pointer = (char *)view->buf;
-    for (i = 0; i < view->ndim; i++) {
-        pointer += view->strides[i]*indices[i];
-        if ((view->suboffsets != NULL) && (view->suboffsets[i] >= 0)) {
-            pointer = *((char**)pointer) + view->suboffsets[i];
-        }
-    }
-    return (void*)pointer;
-}
-
-
-void
-_Py_add_one_to_index_F(int nd, Py_ssize_t *index, const Py_ssize_t *shape)
-{
-    int k;
-
-    for (k=0; k<nd; k++) {
-        if (index[k] < shape[k]-1) {
-            index[k]++;
-            break;
-        }
-        else {
-            index[k] = 0;
-        }
-    }
-}
-
-void
-_Py_add_one_to_index_C(int nd, Py_ssize_t *index, const Py_ssize_t *shape)
-{
-    int k;
-
-    for (k=nd-1; k>=0; k--) {
-        if (index[k] < shape[k]-1) {
-            index[k]++;
-            break;
-        }
-        else {
-            index[k] = 0;
-        }
-    }
-}
-
-int
-PyBuffer_FromContiguous(Pep_buffer *view, void *buf, Py_ssize_t len, char fort)
-{
-    int k;
-    void (*addone)(int, Py_ssize_t *, const Py_ssize_t *);
-    Py_ssize_t *indices, elements;
-    char *src, *ptr;
-
-    if (len > view->len) {
-        len = view->len;
-    }
-
-    if (PyBuffer_IsContiguous(view, fort)) {
-        /* simplest copy is all that is needed */
-        memcpy(view->buf, buf, len);
-        return 0;
-    }
-
-    /* Otherwise a more elaborate scheme is needed */
-
-    /* view->ndim <= 64 */
-    indices = (Py_ssize_t *)PyMem_Malloc(sizeof(Py_ssize_t)*(view->ndim));
-    if (indices == NULL) {
-        PyErr_NoMemory();
-        return -1;
-    }
-    for (k=0; k<view->ndim;k++) {
-        indices[k] = 0;
-    }
-
-    if (fort == 'F') {
-        addone = _Py_add_one_to_index_F;
-    }
-    else {
-        addone = _Py_add_one_to_index_C;
-    }
-    src = (char *)buf; // patched by CT
-    /* XXX : This is not going to be the fastest code in the world
-             several optimizations are possible.
-     */
-    elements = len / view->itemsize;
-    while (elements--) {
-        ptr = (char *)PyBuffer_GetPointer(view, indices); // patched by CT
-        memcpy(ptr, src, view->itemsize);
-        src += view->itemsize;
-        addone(view->ndim, indices, view->shape);
-    }
-
-    PyMem_Free(indices);
-    return 0;
-}
-
-int PyObject_CopyData(PyObject *dest, PyObject *src)
-{
-    Pep_buffer view_dest, view_src;
-    int k;
-    Py_ssize_t *indices, elements;
-    char *dptr, *sptr;
-
-    if (!PyObject_CheckBuffer(dest) ||
-        !PyObject_CheckBuffer(src)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "both destination and source must be "\
-                        "bytes-like objects");
-        return -1;
-    }
-
-    if (PyObject_GetBuffer(dest, &view_dest, PyBUF_FULL) != 0) return -1;
-    if (PyObject_GetBuffer(src, &view_src, PyBUF_FULL_RO) != 0) {
-        PyBuffer_Release(&view_dest);
-        return -1;
-    }
-
-    if (view_dest.len < view_src.len) {
-        PyErr_SetString(PyExc_BufferError,
-                        "destination is too small to receive data from source");
-        PyBuffer_Release(&view_dest);
-        PyBuffer_Release(&view_src);
-        return -1;
-    }
-
-    if ((PyBuffer_IsContiguous(&view_dest, 'C') &&
-         PyBuffer_IsContiguous(&view_src, 'C')) ||
-        (PyBuffer_IsContiguous(&view_dest, 'F') &&
-         PyBuffer_IsContiguous(&view_src, 'F'))) {
-        /* simplest copy is all that is needed */
-        memcpy(view_dest.buf, view_src.buf, view_src.len);
-        PyBuffer_Release(&view_dest);
-        PyBuffer_Release(&view_src);
-        return 0;
-    }
-
-    /* Otherwise a more elaborate copy scheme is needed */
-
-    /* XXX(nnorwitz): need to check for overflow! */
-    indices = (Py_ssize_t *)PyMem_Malloc(sizeof(Py_ssize_t)*view_src.ndim);
-    if (indices == NULL) {
-        PyErr_NoMemory();
-        PyBuffer_Release(&view_dest);
-        PyBuffer_Release(&view_src);
-        return -1;
-    }
-    for (k=0; k<view_src.ndim;k++) {
-        indices[k] = 0;
-    }
-    elements = 1;
-    for (k=0; k<view_src.ndim; k++) {
-        /* XXX(nnorwitz): can this overflow? */
-        elements *= view_src.shape[k];
-    }
-    while (elements--) {
-        _Py_add_one_to_index_C(view_src.ndim, indices, view_src.shape);
-        dptr = (char *)PyBuffer_GetPointer(&view_dest, indices); // patched by CT
-        sptr = (char *)PyBuffer_GetPointer(&view_src, indices); // patched by CT
-        memcpy(dptr, sptr, view_src.itemsize);
-    }
-    PyMem_Free(indices);
-    PyBuffer_Release(&view_dest);
-    PyBuffer_Release(&view_src);
-    return 0;
-}
-
-void
-PyBuffer_FillContiguousStrides(int nd, Py_ssize_t *shape,
-                               Py_ssize_t *strides, int itemsize,
-                               char fort)
-{
-    int k;
-    Py_ssize_t sd;
-
-    sd = itemsize;
-    if (fort == 'F') {
-        for (k=0; k<nd; k++) {
-            strides[k] = sd;
-            sd *= shape[k];
-        }
-    }
-    else {
-        for (k=nd-1; k>=0; k--) {
-            strides[k] = sd;
-            sd *= shape[k];
-        }
-    }
-    return;
-}
-
-int
-PyBuffer_FillInfo(Pep_buffer *view, PyObject *obj, void *buf, Py_ssize_t len,
-                  int readonly, int flags)
-{
-    if (view == NULL) {
-        PyErr_SetString(PyExc_BufferError,
-            "PyBuffer_FillInfo: view==NULL argument is obsolete");
-        return -1;
-    }
-
-    if (((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) &&
-        (readonly == 1)) {
-        PyErr_SetString(PyExc_BufferError,
-                        "Object is not writable.");
-        return -1;
-    }
-
-    view->obj = obj;
-    if (obj)
-        Py_INCREF(obj);
-    view->buf = buf;
-    view->len = len;
-    view->readonly = readonly;
-    view->itemsize = 1;
-    view->format = NULL;
-    if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
-        view->format = (char *)"B"; // patched by CT
-    view->ndim = 1;
-    view->shape = NULL;
-    if ((flags & PyBUF_ND) == PyBUF_ND)
-        view->shape = &(view->len);
-    view->strides = NULL;
-    if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
-        view->strides = &(view->itemsize);
-    view->suboffsets = NULL;
-    view->internal = NULL;
-    return 0;
-}
-
-void
-PyBuffer_Release(Pep_buffer *view)
-{
-    PyObject *obj = view->obj;
-    PyBufferProcs *pb;
-    if (obj == NULL)
-        return;
-    pb = PepType_AS_BUFFER(Py_TYPE(obj));
-    if (pb && pb->bf_releasebuffer)
-        pb->bf_releasebuffer(obj, view);
-    view->obj = NULL;
-    Py_DECREF(obj);
-}
-
-/*****************************************************************************
- *
  * Support for funcobject.h
  *
  */
@@ -878,35 +886,17 @@ static PyTypeObject *getStaticMethodType(void)
 
 /*****************************************************************************
  *
- * These functions are always needed due to the heaptypes.
+ * Common newly needed functions
  *
  */
 
-PyObject *
-PepType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases, int extra)
-{
-    _PepTypeObject *type = reinterpret_cast<_PepTypeObject*>(&PyType_Type);
-    type->tp_basicsize += extra;
-    PyObject *ret = PyType_FromSpecWithBases(spec, bases);
-    type->tp_basicsize -= extra;
-    return ret;
-}
-
-PyObject *
-PepType_FromSpec(PyType_Spec *spec, int extra)
-{
-    return PepType_FromSpecWithBases(spec, nullptr, extra);
-}
-
+// The introduction of heaptypes converted many type names to the
+// dotted form, since PyType_FromSpec uses it to compute the module
+// name. This function reverts this effect.
 const char *
 PepType_GetNameStr(PyTypeObject *type)
 {
-    // We behave like tp_name, but remove any leading dotted parts.
-#ifdef Py_LIMITED_API
-    const char *ret = PepType_tp_name(type);
-#else
-    const char *ret = type->tp_name;
-#endif
+    const char *ret = PepType(type)->tp_name;
     const char *nodots = strrchr(ret, '.');
     if (nodots)
         ret = nodots + 1;
@@ -922,6 +912,7 @@ PepType_GetNameStr(PyTypeObject *type)
 void
 Pep_Init()
 {
+    check_PepTypeObject_valid();
 #ifdef Py_LIMITED_API
     Pep_GetVerboseFlag();
     PepMethod_TypePtr = getMethodType();

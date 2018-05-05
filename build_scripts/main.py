@@ -985,8 +985,13 @@ class PysideBuild(_build):
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY={}".format(
                 self.py_library))
 
-        if OPTION_LIMITED_API:
-            cmake_cmd.append("-DFORCE_LIMITED_API=1")
+        if OPTION_LIMITED_API == "yes" or not OPTION_LIMITED_API:
+            cmake_cmd.append("-DFORCE_LIMITED_API=yes")
+        elif OPTION_LIMITED_API == "no":
+            cmake_cmd.append("-DFORCE_LIMITED_API=no")
+        else:
+            raise DistutilsSetupError("option limited-api must be 'yes' or 'no' "
+                                      "(default yes if applicable)")
 
         if OPTION_VERBOSE_BUILD:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")

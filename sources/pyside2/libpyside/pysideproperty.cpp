@@ -152,7 +152,7 @@ static void qpropertyMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::C
 
 static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
-    PySideProperty* me = reinterpret_cast<PySideProperty*>(PepType_tp_alloc(subtype)(subtype, 0));
+    PySideProperty* me = reinterpret_cast<PySideProperty*>(PepType(subtype)->tp_alloc(subtype, 0));
     me->d = new PySidePropertyPrivate;
     memset(me->d, 0, sizeof(PySidePropertyPrivate));
     PySidePropertyPrivate* pData = me->d;
@@ -210,7 +210,7 @@ int qpropertyTpInit(PyObject* self, PyObject* args, PyObject* kwds)
 void qpropertyDeAlloc(PyObject* self)
 {
     qpropertyClear(self);
-    PepType_tp_free(Py_TYPE(self))(self);
+    PepType(Py_TYPE(self))->tp_free(self);
 }
 
 PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
@@ -307,9 +307,9 @@ namespace {
 static PyObject* getFromType(PyTypeObject* type, PyObject* name)
 {
     PyObject* attr = 0;
-    attr = PyDict_GetItem(PepType_tp_dict(type), name);
+    attr = PyDict_GetItem(PepType(type)->tp_dict, name);
     if (!attr) {
-        PyObject* bases = PepType_tp_bases(type);
+        PyObject* bases = PepType(type)->tp_bases;
         int size = PyTuple_GET_SIZE(bases);
         for(int i=0; i < size; i++) {
             PyObject* base = PyTuple_GET_ITEM(bases, i);
@@ -338,7 +338,7 @@ void init(PyObject* module)
 bool checkType(PyObject* pyObj)
 {
     if (pyObj) {
-        return PyType_IsSubtype(pyObj->ob_type, PySidePropertyTypeF());
+        return PyType_IsSubtype(Py_TYPE(pyObj), PySidePropertyTypeF());
     }
     return false;
 }
@@ -405,7 +405,7 @@ PySideProperty* getObject(PyObject* source, PyObject* name)
             attr = PyDict_GetItem(dict, name);
     }
 
-    attr = getFromType(source->ob_type, name);
+    attr = getFromType(Py_TYPE(source), name);
     if (attr && checkType(attr)) {
         Py_INCREF(attr);
         return reinterpret_cast<PySideProperty*>(attr);

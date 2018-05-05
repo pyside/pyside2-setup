@@ -1666,7 +1666,7 @@
             Tested in InjectCodeTest.testTypeNativeBeginning_TypeTargetBeginning:
         -->
         <inject-code class="target" position="beginning">
-        PepType_tp_str(&amp;%PYTHONTYPEOBJECT) = InjectCode_tpstr;
+        PepType(&amp;%PYTHONTYPEOBJECT)->tp_str = InjectCode_tpstr;
         </inject-code>
 
         <!-- Tested in InjectCodeTest.testFunctionTargetBeginning_FunctionTargetEnd -->
@@ -2178,7 +2178,7 @@
         </add-function>
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
-            ByteArray b(PepType_tp_name(((PyObject*)%PYSELF)->ob_type));
+            ByteArray b(PepType(Py_TYPE(%PYSELF))->tp_name);
             PyObject* aux = Shiboken::String::fromStringAndSize(%CPPSELF.data(), %CPPSELF.size());
             if (PyUnicode_CheckExact(aux)) {
                 PyObject* tmp = PyUnicode_AsASCIIString(aux);

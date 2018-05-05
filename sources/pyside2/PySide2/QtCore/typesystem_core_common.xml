@@ -416,7 +416,7 @@
             <add-conversion type="SbkObject">
             // a class supported by QVariant?
             int typeCode;
-            const char *typeName = QVariant_resolveMetaType(%in->ob_type, &amp;typeCode);
+            const char *typeName = QVariant_resolveMetaType(Py_TYPE(%in), &amp;typeCode);
             if (!typeCode || !typeName)
                 return;
             QVariant var(typeCode, (void*)0);
@@ -462,16 +462,16 @@
             // tp_base does not always point to the first base class, but rather to the first
             // that has added any python fields or slots to its object layout.
             // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
-            if (PepType_tp_bases(type)) {
-                for (int i = 0; i &lt; PyTuple_GET_SIZE(PepType_tp_bases(type)); ++i) {
+            if (PepType(type)->tp_bases) {
+                for (int i = 0; i &lt; PyTuple_GET_SIZE(PepType(type)->tp_bases); ++i) {
                     const char *derivedName = QVariant_resolveMetaType((PyTypeObject*)PyTuple_GET_ITEM(
-                                              PepType_tp_bases(type), i), typeId);
+                                              PepType(type)->tp_bases, i), typeId);
                     if (derivedName)
                         return derivedName;
                 }
             }
-            else if (PepType_tp_base(type)) {
-                return QVariant_resolveMetaType(PepType_tp_base(type), typeId);
+            else if (PepType(type)->tp_base) {
+                return QVariant_resolveMetaType(PepType(type)->tp_base, typeId);
             }
         }
         *typeId = 0;
@@ -576,10 +576,10 @@
                 typeName = "double"; // float is a UserType in QVariant.
             else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyLong_Type))
                 typeName = "int";    // long is a UserType in QVariant.
-            else if (%in->ob_type == SbkObjectType_TypeF())
+            else if (Py_TYPE(%in) == SbkObjectType_TypeF())
                 typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType*)%in);
             else
-                typeName = PepType_tp_name((reinterpret_cast&lt;PyTypeObject*&gt;(%in)));
+                typeName = PepType((reinterpret_cast&lt;PyTypeObject*&gt;(%in)))->tp_name;
             %out = QVariant::nameToType(typeName);
             </add-conversion>
             <add-conversion type="PyString" check="Shiboken::String::check(%in)">
@@ -2596,11 +2596,7 @@
 
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
-            QByteArray b(
-                PepType_tp_name(
-                    (reinterpret_cast&lt;PyObject*&gt;(%PYSELF))->ob_type
-                )
-            );
+            QByteArray b(PepType(Py_TYPE(%PYSELF))->tp_name);
             PyObject *aux = Shiboken::String::fromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
             if (PyUnicode_CheckExact(aux)) {
                 PyObject *tmp = PyUnicode_AsASCIIString(aux);
@@ -3125,8 +3121,8 @@
         // %FUNCTION_NAME() - disable generation of c++ function call
         (void) %2; // remove warning about unused variable
         Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-        PyObject *pyTimer = PepType_tp_new(Shiboken::SbkType&lt;QTimer&gt;())(Shiboken::SbkType&lt;QTimer&gt;(), emptyTuple, 0);
-        PepType_tp_init(Shiboken::SbkType&lt;QTimer&gt;())(pyTimer, emptyTuple, 0);
+        PyObject *pyTimer = PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_new(Shiboken::SbkType&lt;QTimer&gt;(), emptyTuple, 0);
+        PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_init(pyTimer, emptyTuple, 0);
 
         QTimer* timer = %CONVERTTOCPP[QTimer*](pyTimer);
         Shiboken::AutoDecRef result(
@@ -3149,8 +3145,8 @@
         <inject-code class="target" position="beginning">
         // %FUNCTION_NAME() - disable generation of c++ function call
         Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-        PyObject *pyTimer = PepType_tp_new(Shiboken::SbkType&lt;QTimer&gt;())(Shiboken::SbkType&lt;QTimer&gt;(), emptyTuple, 0);
-        PepType_tp_init(Shiboken::SbkType&lt;QTimer&gt;())(pyTimer, emptyTuple, 0);
+        PyObject *pyTimer = PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_new(Shiboken::SbkType&lt;QTimer&gt;(), emptyTuple, 0);
+        PepType(Shiboken::SbkType&lt;QTimer&gt;())->tp_init(pyTimer, emptyTuple, 0);
         QTimer* timer = %CONVERTTOCPP[QTimer*](pyTimer);
         timer->setSingleShot(true);
 

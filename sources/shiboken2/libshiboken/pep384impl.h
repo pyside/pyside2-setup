@@ -3,7 +3,7 @@
 ** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -50,65 +50,10 @@ extern "C"
  * RESOLVED: memoryobject.h
  *
  */
+
+// Extracted into bufferprocs27.h
 #ifdef Py_LIMITED_API
-/* buffer interface */
-// This has been renamed to Pep_buffer and will be used.
-typedef struct bufferinfo {
-    void *buf;
-    PyObject *obj;        /* owned reference */
-    Py_ssize_t len;
-    Py_ssize_t itemsize;  /* This is Py_ssize_t so it can be
-                             pointed to by strides in simple case.*/
-    int readonly;
-    int ndim;
-    char *format;
-    Py_ssize_t *shape;
-    Py_ssize_t *strides;
-    Py_ssize_t *suboffsets;
-    void *internal;
-} Pep_buffer;
-
-typedef int (*getbufferproc)(PyObject *, Pep_buffer *, int);
-typedef void (*releasebufferproc)(PyObject *, Pep_buffer *);
-
-/* Maximum number of dimensions */
-#define PyBUF_MAX_NDIM 64
-
-/* Flags for getting buffers */
-#define PyBUF_SIMPLE 0
-#define PyBUF_WRITABLE 0x0001
-/*  we used to include an E, backwards compatible alias  */
-#define PyBUF_WRITEABLE PyBUF_WRITABLE
-#define PyBUF_FORMAT 0x0004
-#define PyBUF_ND 0x0008
-#define PyBUF_STRIDES (0x0010 | PyBUF_ND)
-#define PyBUF_C_CONTIGUOUS (0x0020 | PyBUF_STRIDES)
-#define PyBUF_F_CONTIGUOUS (0x0040 | PyBUF_STRIDES)
-#define PyBUF_ANY_CONTIGUOUS (0x0080 | PyBUF_STRIDES)
-#define PyBUF_INDIRECT (0x0100 | PyBUF_STRIDES)
-
-#define PyBUF_CONTIG (PyBUF_ND | PyBUF_WRITABLE)
-#define PyBUF_CONTIG_RO (PyBUF_ND)
-
-#define PyBUF_STRIDED (PyBUF_STRIDES | PyBUF_WRITABLE)
-#define PyBUF_STRIDED_RO (PyBUF_STRIDES)
-
-#define PyBUF_RECORDS (PyBUF_STRIDES | PyBUF_WRITABLE | PyBUF_FORMAT)
-#define PyBUF_RECORDS_RO (PyBUF_STRIDES | PyBUF_FORMAT)
-
-#define PyBUF_FULL (PyBUF_INDIRECT | PyBUF_WRITABLE | PyBUF_FORMAT)
-#define PyBUF_FULL_RO (PyBUF_INDIRECT | PyBUF_FORMAT)
-
-
-#define PyBUF_READ  0x100
-#define PyBUF_WRITE 0x200
-
-/* End buffer interface */
-#endif /* Py_LIMITED_API */
-
-#ifdef Py_LIMITED_API
-LIBSHIBOKEN_API PyObject *PyMemoryView_FromBuffer(Pep_buffer *info);
-#define Py_buffer Pep_buffer
+#include "bufferprocs27.h"
 #endif
 
 /*****************************************************************************
@@ -127,38 +72,22 @@ LIBSHIBOKEN_API void _PyObject_Dump(PyObject *);
  * and validate that we really found them, see Pepresolve.cpp .
  */
 
-#ifdef Py_LIMITED_API
-# define _TYPE_CAST_(o)                     reinterpret_cast<_PepTypeObject*>(o)
-#else
-// The following type cast will finally removed when Sbk..Type is simplified.
-# define _TYPE_CAST_(o)                     reinterpret_cast<PyTypeObject*>(o)
-# define PepTypeObject                      PyHeapTypeObject
-#endif
-
-#define PepType_tp_methods(o)               (_TYPE_CAST_(o)->tp_methods)
-#define PepType_tp_alloc(o)                 (_TYPE_CAST_(o)->tp_alloc)
-#define PepType_tp_base(o)                  (_TYPE_CAST_(o)->tp_base)
-#define PepType_tp_bases(o)                 (_TYPE_CAST_(o)->tp_bases)
-#define PepType_tp_free(o)                  (_TYPE_CAST_(o)->tp_free)
-#define PepType_tp_traverse(o)              (_TYPE_CAST_(o)->tp_traverse)
-#define PepType_tp_clear(o)                 (_TYPE_CAST_(o)->tp_clear)
-#define PepType_tp_descr_get(o)             (_TYPE_CAST_(o)->tp_descr_get)
-#define PepType_tp_new(o)                   (_TYPE_CAST_(o)->tp_new)
-#define PepType_tp_init(o)                  (_TYPE_CAST_(o)->tp_init)
-#define PepType_tp_is_gc(o)                 (_TYPE_CAST_(o)->tp_is_gc)
-#define PepType_tp_mro(o)                   (_TYPE_CAST_(o)->tp_mro)
-#define PepType_tp_dict(o)                  (_TYPE_CAST_(o)->tp_dict)
-#define PepType_tp_name(o)                  (_TYPE_CAST_(o)->tp_name)
-#define PepType_tp_str(o)                   (_TYPE_CAST_(o)->tp_str)
-#define PepType_tp_call(o)                  (_TYPE_CAST_(o)->tp_call)
-#define PepType_tp_weaklistoffset(o)        (_TYPE_CAST_(o)->tp_weaklistoffset)
-#define PepType_tp_dictoffset(o)            (_TYPE_CAST_(o)->tp_dictoffset)
+// PepType is just a typecast that allows direct access. This is
+// often better to read than the reversal via the former macro
+// functions PepType_tp_xxx.
+#define PepType(o)                          (reinterpret_cast<PepTypeObject*>(o))
 
 #ifdef Py_LIMITED_API
 
-// These are the type object fields that we use.
-// We will verify that they never change.
-typedef struct __Peptypeobject {
+/*
+ * These are the type object fields that we use.
+ * We will verify that they never change.
+ * The unused fields are intentionally named as "void *Xnn" because
+ * the chance is smaller to forget to validate a field.
+ * When we need more fields, we replace it back and add it to the
+ * validation.
+ */
+typedef struct _peptypeobject {
     PyVarObject ob_base;
     const char *tp_name;
     Py_ssize_t tp_basicsize;
@@ -202,7 +131,7 @@ typedef struct __Peptypeobject {
     PyObject *tp_bases;
     PyObject *tp_mro; /* method resolution order */
 
-} _PepTypeObject;
+} PepTypeObject;
 
 LIBSHIBOKEN_API unaryfunc PepType_nb_index(PyTypeObject *type);
 
@@ -212,32 +141,38 @@ LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 
 #undef PyObject_IS_GC
 #define PyObject_IS_GC(o) (PyType_IS_GC(Py_TYPE(o)) && \
-    ( PepType_tp_is_gc(Py_TYPE(o)) == NULL || \
-      PepType_tp_is_gc(Py_TYPE(o))(o) ))
-
-// This will hopefully go away, or we need to compute that size for every
-// Python 3 version that we use.
-#define PYTHON_3_6_HEAPTYPE_SIZE 109
-#if PY_MINOR_VERSION == 6
-# define PY_HEAPTYPE_SIZE PYTHON_3_6_HEAPTYPE_SIZE
-#endif
-
-typedef struct _peptypeobject {
-    union {
-        _PepTypeObject ht_type;
-        void *opaque[PY_HEAPTYPE_SIZE];
-    };
-} PepTypeObject;
+    ( PepType(Py_TYPE(o))->tp_is_gc == NULL || \
+      PepType(Py_TYPE(o))->tp_is_gc(o) ))
 
 #else
-#define PepType_nb_index(o)             (_TYPE_CAST_(o)->nb_index)
+#define PepTypeObject                   PyTypeObject
+#define PepType_nb_index(o)             (PepType(o)->nb_index)
 #endif // Py_LIMITED_API
 
+struct SbkObjectTypePrivate;
+struct PySideQFlagsTypePrivate;
+struct _SbkGenericTypePrivate;
+
+#define PepHeapType_SIZE \
+    (reinterpret_cast<PepTypeObject*>(&PyType_Type)->tp_basicsize)
+
+#define _genericTypeExtender(etype) \
+    (reinterpret_cast<char*>(etype) + PepHeapType_SIZE)
+
+#define PepType_SOTP(etype) \
+    (*reinterpret_cast<SbkObjectTypePrivate**>(_genericTypeExtender(etype)))
+
+#define PepType_SETP(etype) \
+    (reinterpret_cast<SbkEnumTypePrivate*>(_genericTypeExtender(etype)))
+
+#define PepType_PFTP(etype) \
+    (reinterpret_cast<PySideQFlagsTypePrivate*>(_genericTypeExtender(etype)))
+
+#define PepType_SGTP(etype) \
+    (reinterpret_cast<_SbkGenericTypePrivate*>(_genericTypeExtender(etype)))
+
 // functions used everywhere
-LIBSHIBOKEN_API PyObject *PepType_FromSpec(PyType_Spec *spec, int extra);
-LIBSHIBOKEN_API PyObject *PepType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases, int extra);
 LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
-LIBSHIBOKEN_API PyObject *PepType___new__(PyTypeObject *self, PyObject *args, PyObject *kwds);
 
 /*****************************************************************************
  *
@@ -473,6 +408,11 @@ typedef struct _Pepbuffertype {
 
 LIBSHIBOKEN_API int PyObject_GetBuffer(PyObject *ob, Pep_buffer *view, int flags);
 LIBSHIBOKEN_API void PyBuffer_Release(Pep_buffer *view);
+
+#else
+
+#define Pep_buffer                          Py_buffer
+
 #endif /* Py_LIMITED_API */
 
 /*****************************************************************************
@@ -592,7 +532,7 @@ LIBSHIBOKEN_API datetime_struc *init_DateTime(void);
 
 #define PyDateTime_IMPORT     PyDateTimeAPI = init_DateTime()
 
-static datetime_struc *PyDateTimeAPI = NULL;
+extern LIBSHIBOKEN_API datetime_struc *PyDateTimeAPI;
 
 #define PyDate_Check(op)      PyObject_TypeCheck(op, PyDateTimeAPI->DateType)
 #define PyDateTime_Check(op)  PyObject_TypeCheck(op, PyDateTimeAPI->DateTimeType)

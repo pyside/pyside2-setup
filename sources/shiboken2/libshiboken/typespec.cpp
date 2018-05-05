@@ -3,7 +3,7 @@
 ** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -41,8 +41,14 @@
 #include <structmember.h>
 
 #if PY_MAJOR_VERSION < 3
+
 extern "C"
 {
+
+// for some reason python 2.7 needs this on Windows
+#ifdef WIN32
+static PyGC_Head *_PyGC_generation0;
+#endif
 
 // from pymacro.h
 #ifndef Py_PYMACRO_H
@@ -196,7 +202,6 @@ subtype_dealloc(PyObject *self)
     PyTypeObject *type, *base;
     destructor basedealloc;
     PyThreadState *tstate = PyThreadState_GET();
-    int has_finalizer;
 
     /* Extract the type; we expect it to be a heap type */
     type = Py_TYPE(self);
@@ -212,11 +217,6 @@ subtype_dealloc(PyObject *self)
            clear_slots(), or DECREF the dict, or clear weakrefs. */
 
         /* Maybe call finalizer; exit early if resurrected */
-        // no tp_finalize in Python 2
-        // if (type->tp_finalize) {
-        //     if (PyObject_CallFinalizerFromDealloc(self) < 0)
-        //         return;
-        // }
         if (type->tp_del) {
             type->tp_del(self);
             if (self->ob_refcnt > 0)
@@ -255,51 +255,38 @@ subtype_dealloc(PyObject *self)
     Py_TRASHCAN_SAFE_BEGIN(self);
     --_PyTrash_delete_nesting;
     -- tstate->trash_delete_nesting;
+    /* DO NOT restore GC tracking at this point.  weakref callbacks
+     * (if any, and whether directly here or indirectly in something we
+     * call) may trigger GC, and if self is tracked at that point, it
+     * will look like trash to GC and GC will try to delete self again.
+     */
 
     /* Find the nearest base with a different tp_dealloc */
     base = type;
-    while ((/*basedealloc =*/ base->tp_dealloc) == subtype_dealloc) {
+    while ((basedealloc = base->tp_dealloc) == subtype_dealloc) {
         base = base->tp_base;
         assert(base);
     }
 
-    has_finalizer = /* type->tp_finalize */ 0 || type->tp_del;
+    /* If we added a weaklist, we clear it.      Do this *before* calling
+       the finalizer (__del__), clearing slots, or clearing the instance
+       dict. */
 
-    // no tp_finalize in Python 2
-    // if (type->tp_finalize) {
-    //     _PyObject_GC_TRACK(self);
-    //     if (PyObject_CallFinalizerFromDealloc(self) < 0) {
-    //         /* Resurrected */
-    //         goto endlabel;
-    //     }
-    //     _PyObject_GC_UNTRACK(self);
-    // }
-    /*
-      If we added a weaklist, we clear it. Do this *before* calling tp_del,
-      clearing slots, or clearing the instance dict.
-
-      GC tracking must be off at this point. weakref callbacks (if any, and
-      whether directly here or indirectly in something we call) may trigger GC,
-      and if self is tracked at that point, it will look like trash to GC and GC
-      will try to delete self again.
-    */
     if (type->tp_weaklistoffset && !base->tp_weaklistoffset)
         PyObject_ClearWeakRefs(self);
 
+    /* Maybe call finalizer; exit early if resurrected */
     if (type->tp_del) {
         _PyObject_GC_TRACK(self);
         type->tp_del(self);
-        if (self->ob_refcnt > 0) {
-            /* Resurrected */
-            goto endlabel;
-        }
-        _PyObject_GC_UNTRACK(self);
-    }
-    if (has_finalizer) {
+        if (self->ob_refcnt > 0)
+            goto endlabel;              /* resurrected */
+        else
+            _PyObject_GC_UNTRACK(self);
         /* New weakrefs could be created during the finalizer call.
-           If this occurs, clear them out without calling their
-           finalizers since they might rely on part of the object
-           being finalized that has already been destroyed. */
+            If this occurs, clear them out without calling their
+            finalizers since they might rely on part of the object
+            being finalized that has already been destroyed. */
         if (type->tp_weaklistoffset && !base->tp_weaklistoffset) {
             /* Modeled after GET_WEAKREFS_LISTPTR() */
             PyWeakReference **list = (PyWeakReference **) \
@@ -311,7 +298,7 @@ subtype_dealloc(PyObject *self)
 
     /*  Clear slots up to the nearest base with a different tp_dealloc */
     base = type;
-    while ((basedealloc = base->tp_dealloc) == subtype_dealloc) {
+    while (base->tp_dealloc == subtype_dealloc) {
         if (Py_SIZE(base))
             clear_slots(base, self);
         base = base->tp_base;
@@ -341,11 +328,8 @@ subtype_dealloc(PyObject *self)
     assert(basedealloc);
     basedealloc(self);
 
-    /* Can't reference self beyond this point. It's possible tp_del switched
-       our type from a HEAPTYPE to a non-HEAPTYPE, so be careful about
-       reference counting. */
-    if (type->tp_flags & Py_TPFLAGS_HEAPTYPE)
-      Py_DECREF(type);
+    /* Can't reference self beyond this point */
+    Py_DECREF(type);
 
   endlabel:
     ++_PyTrash_delete_nesting;
@@ -485,6 +469,8 @@ best_base(PyObject *bases)
     winner = NULL;
     for (i = 0; i < n; i++) {
         base_proto = PyTuple_GET_ITEM(bases, i);
+        if (PyClass_Check(base_proto))
+            continue;
         if (!PyType_Check(base_proto)) {
             PyErr_SetString(
                 PyExc_TypeError,
@@ -521,8 +507,9 @@ best_base(PyObject *bases)
             return NULL;
         }
     }
-    assert (base != NULL);
-
+    if (base == NULL)
+        PyErr_SetString(PyExc_TypeError,
+            "a new-style class can't have only classic bases");
     return base;
 }
 
