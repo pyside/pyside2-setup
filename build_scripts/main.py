@@ -1188,8 +1188,8 @@ class pyside_build(_build):
                 break
 
         if not clang_lib_path:
-            raise RuntimeError("Could not finding location of libclang "
-                "library from CMake cache.")
+            raise RuntimeError("Could not find the location of the libclang "
+                "library inside the CMake cache file.")
 
         if is_win:
             # clang_lib_path points to the static import library
