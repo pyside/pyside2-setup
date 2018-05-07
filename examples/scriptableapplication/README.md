@@ -10,7 +10,7 @@ The header `wrappedclasses.h` is passed to Shiboken which generates
 class wrappers and headers in a sub directory called **AppLib/**
 which are linked to the application.
 
-The files `pythonutils.{cpp,h}` contains some code which binds the
+The files `pythonutils.{cpp,h}` contain some code which binds the
 instance of **MainWindow** to a variable called **'mainWindow'** in
 the global Python namespace (`__main___`).
 It is then possible to run Python script snippets like:
@@ -29,24 +29,29 @@ consideration:
 * Make sure that a --standalone PySide2 package (bundled with Qt libraries)
   is installed into the current active Python environment
   (system or virtualenv)
-* qmake to be in your PATH:
+* qmake has to be in your PATH:
   * so that CMake find_package(Qt5) works (used for include headers),
-  * and also for using the proper qmake version when building with qmake
+  * used for building the application with qmake instead of CMake
 * use the same Qt version for building the example application, as was used
   for building PySide2, this is to ensure binary compatibility between the
   newly generated bindings libraries, the PySide2 libraries and the
   Qt libraries.
 
 For Windows you will also need:
-* Visual studio environment to be active in your terminal
+* a Visual Studio environment to be active in your terminal
 * Correct visual studio architecture chosen (32 vs 64 bit)
-* Make sure that your Qt + Python + PySide + app build configuration
-  is the same (either or all Release, which is more likely, or all Debug).
+* Make sure that your Qt + Python + PySide2 package + app build configuration
+  is the same (all Release, which is more likely, or all Debug).
+* Make sure that your Qt + Python + PySide2 package + app are built with the
+  same version of MSVC, to avoid mixing of C++ runtime libraries.
+  In principle this means that if you use the python.org provided Python
+  interpreters, you need to use MSVC2015 for Python 3 projects, and MSVC2008
+  for Python 2 projects. Which also means that you can't use official Qt
+  packages, because none of the supported ones are built with MSVC2008.
 
-Both build options will use the `pyside2.pri` file to configure the project
-using the current PySide2/Shiboken2 installation (via `pyside2_config.py`).
-
-Keep in mind that Clang libraries must be on your path.
+Both build options will use the `pyside2_config.py` file to configure the project
+using the current PySide2/Shiboken2 installation (for qmake via pyside2.pri,
+and for CMake via the project CMakeLists.txt).
 
 
 ### Using CMake
@@ -54,7 +59,7 @@ Keep in mind that Clang libraries must be on your path.
 To build this example with CMake you will need a recent version of CMake (3.1+).
 
 You can build this example by executing the following commands
-(slightly adapted to your file system) in a terminal:
+(slightly adapted to your file system layout) in a terminal:
 
 On macOS/Linux:
 ```bash
@@ -71,7 +76,9 @@ On Windows:
 cd C:\pyside-setup\examples\scriptableapplication
 mkdir build
 cd build
-cmake -H.. -B. -G "NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release
+cmake -H.. -B. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
+# or if you have jom available
+# cmake -H.. -B. -G "NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release
 nmake # or jom
 scriptableapplication.exe
 ```
@@ -86,7 +93,7 @@ You can build this example by executing:
 mkdir build
 cd build
 qmake ..
-make # or nmake for Windows
+make # or nmake / jom for Windows
 ```
 
 #### Windows troubleshooting
@@ -109,11 +116,18 @@ cmake -H.. -B. -G "Visual Studio 14 Win64" -DCMAKE_BUILD_TYPE=Release
 
 If the `-G "Visual Studio 14 Win64"` option is used, a `sln` file
 will be generated, and can be used with `MSBuild`
-instead of `nmake/jom`
+instead of `nmake/jom`.
 
 ```bash
-MSBuild scriptableapplication.sln "/p:DebugType=None"
+MSBuild scriptableapplication.sln "/p:Configuration=Release"
 ```
+
+Note that using the "NMake Makefiles JOM" generator is preferred to
+the MSBuild one, because in the latter case the executable is placed
+into a directory other than the one that contains the dependency
+dlls (shiboken, pyside). This leads to execution problems if the
+application is started within the Release subdirectory and not the
+one containing the dependencies.
 
 ## Virtualenv Support
 
@@ -122,14 +136,15 @@ virtual environment, that environment's packages will be used for the
 python module import process.
 In this case, make sure that the application was built while the
 `virtualenv` was active, so that the build system picks up the correct
-python shared library.
+python shared library and PySide2 package.
 
-## Shared Libraries Notes
+## Linux Shared Libraries Notes
 
-For this example's purpose, we are using the absolute path of the
+For this example's purpose, we link against the absolute paths of the
 shared libraries (`libshiboken` and `libpyside`) because the
-installation of the modules is being made via wheels, and there is
-no clean solution to include symbolic links into the package.
+installation of the modules is being done via wheels, and there is
+no clean solution to include symbolic links in the package
+(so that regular -lshiboken works).
 
 ## Windows Notes
 

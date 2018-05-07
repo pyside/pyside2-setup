@@ -24,15 +24,7 @@ win32:SHIBOKEN_OPTIONS += --avoid-protected-hack
 
 # Prepare the shiboken tool
 QT_TOOL.shiboken.binary = $$system_path($$PYSIDE2/shiboken2)
-win32 {
-    # Add the libclang/bin subdir to PATH.
-    CLANG_PATH.name = PATH
-    CLANG_PATH.value = $$CLANG_BIN_DIR
-    CLANG_PATH.CONFIG += prepend
-    exists($$CLANG_PATH.value): QT_TOOL_ENV = CLANG_PATH
-}
 qtPrepareTool(SHIBOKEN, shiboken)
-QT_TOOL_ENV =
 
 # Shiboken run that adds the module wrapper to GENERATED_SOURCES
 shiboken.output = $$WRAPPER_DIR/applib_module_wrapper.cpp
@@ -90,4 +82,4 @@ HEADERS += \
     mainwindow.h \
     pythonutils.h
 
-OTHER_FILES += $$TYPESYSTEM_FILE $$WRAPPED_HEADER pyside2_config.py README.txt
+OTHER_FILES += $$TYPESYSTEM_FILE $$WRAPPED_HEADER pyside2_config.py README.md
