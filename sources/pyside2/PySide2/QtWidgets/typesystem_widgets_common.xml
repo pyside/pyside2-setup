@@ -3201,6 +3201,14 @@
             QApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
+    <add-function signature="QApplication()">
+        <inject-code>
+            PyObject *empty = PyTuple_New(2);
+            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
+                QApplicationConstructor(%PYSELF, empty, &amp;%0);
+            }
+        </inject-code>
+    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
   </object-type>

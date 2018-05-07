@@ -3259,6 +3259,14 @@
             QCoreApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
+    <add-function signature="QCoreApplication()">
+        <inject-code>
+            PyObject *empty = PyTuple_New(2);
+            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
+                QCoreApplicationConstructor(%PYSELF, empty, &amp;%0);
+            }
+        </inject-code>
+    </add-function>
     <!-- blocking functions -->
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;,int)" allow-thread="yes"/>
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;)" allow-thread="yes"/>

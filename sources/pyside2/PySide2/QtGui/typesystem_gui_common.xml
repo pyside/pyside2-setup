@@ -3286,6 +3286,14 @@
             QGuiApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
+    <add-function signature="QGuiApplication()">
+        <inject-code>
+            PyObject *empty = PyTuple_New(2);
+            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
+                QGuiApplicationConstructor(%PYSELF, empty, &amp;%0);
+            }
+        </inject-code>
+    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning" />
 
