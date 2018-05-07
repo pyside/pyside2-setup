@@ -23,7 +23,7 @@ Qt Modules
         Provides classes for integrating online documentation in applications.
    * - `Qt Network <PySide2/QtNetwork/index.html>`_
         Offers classes that lets you to write TCP/IP clients and servers.
-     - `Qt OpenGL <PySide2/QtCore/index.html>`_
+     - `Qt OpenGL <PySide2/QtOpenGL/index.html>`_
         Offers classes that make it easy to use OpenGL in Qt applications.
    * - `Qt PrintSupport <PySide2/QtPrintSupport/index.html>`_
         Offers classes that make it easy to use OpenGL in Qt applications.
