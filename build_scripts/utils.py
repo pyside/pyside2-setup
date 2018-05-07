@@ -39,6 +39,7 @@
 
 import sys
 import os
+import stat
 import re
 import stat
 import errno
@@ -274,7 +275,8 @@ def init_msvc_env(platform_arch, build_type):
     log.info("Done initializing MSVC env")
 
 
-def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False):
+def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
+             make_writable_by_owner=False):
     if vars is not None:
         src = src.format(**vars)
         dst = dst.format(**vars)
@@ -287,6 +289,9 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False):
     if not os.path.islink(src) or force_copy_symlink:
         log.info("Copying file {} to {}.".format(src, dst))
         shutil.copy2(src, dst)
+        if make_writable_by_owner:
+            make_file_writable_by_owner(dst)
+
     else:
         linkTargetPath = os.path.realpath(src)
         if os.path.dirname(linkTargetPath) == os.path.dirname(src):
@@ -400,6 +405,9 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True,
         raise EnvironmentError(errors)
     return results
 
+def make_file_writable_by_owner(path):
+    current_permissions = stat.S_IMODE(os.lstat(path).st_mode)
+    os.chmod(path, current_permissions | stat.S_IWUSR)
 
 def rmtree(dirname):
     def handleRemoveReadonly(func, path, exc):

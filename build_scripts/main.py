@@ -1211,7 +1211,12 @@ class pyside_build(_build):
             'pyside_package'))
         if os.path.exists(clang_lib_path):
             log.info('Copying libclang shared library to the package folder.')
-            copyfile(clang_lib_path, destination_dir)
+            basename = os.path.basename(clang_lib_path)
+            destination_path = os.path.join(destination_dir, basename)
+
+            # Need to modify permissions in case file is not writable
+            # (a reinstall would cause a permission denied error).
+            copyfile(clang_lib_path, destination_path, make_writable_by_owner=True)
         else:
             raise RuntimeError("Error copying libclang library "
                                "from {} to {}. ".format(
