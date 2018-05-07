@@ -43,7 +43,7 @@ macro(get_llvm_config)
        import os
        import sys
        sys.path.append(os.path.realpath(os.path.join('${CMAKE_CURRENT_LIST_DIR}', '..', '..')))
-       from utils import findLlvmConfig
+       from build_scripts.utils import findLlvmConfig
        llvmConfig = findLlvmConfig()
        if llvmConfig:
            print(llvmConfig)
