@@ -1197,27 +1197,21 @@ class pyside_build(_build):
             # library (bin/libclang.dll).
             clang_lib_path = re.sub(r'lib/libclang.lib$', 'bin/libclang.dll',
                 clang_lib_path)
+        else:
+            # We want to resolve any symlink on Linux and macOS, and
+            # copy the actual file.
+            clang_lib_path = os.path.realpath(clang_lib_path)
 
-        # Path to directory containing clang.
+        # Path to directory containing libclang.
         clang_lib_dir = os.path.dirname(clang_lib_path)
 
-        # The name of the clang file found by CMake.
-        basename = os.path.basename(clang_lib_path)
-
-        # We want to copy the library and all the symlinks for now,
-        # thus the wildcard.
-        clang_filter = basename + "*"
-
-        # Destination is the package folder near the other extension
-        # modules.
+        # The destination will be the package folder near the other
+        # extension modules.
         destination_dir = "{}/PySide2".format(os.path.join(self.script_dir,
             'pyside_package'))
         if os.path.exists(clang_lib_path):
-            log.info('Copying libclang shared library to the pyside package.')
-
-            copydir(clang_lib_dir, destination_dir,
-                filter=[clang_filter],
-                recursive=False)
+            log.info('Copying libclang shared library to the package folder.')
+            copyfile(clang_lib_path, destination_dir)
         else:
             raise RuntimeError("Error copying libclang library "
                                "from {} to {}. ".format(
