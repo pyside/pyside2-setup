@@ -1079,17 +1079,21 @@ class pyside_build(_build):
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError("Error compiling {}".format(extension))
 
-        if extension.lower() == "shiboken2":
-            try:
-                # Check if sphinx is installed to proceed.
-                import sphinx
+        if not OPTION_SKIP_DOCS:
+            if extension.lower() == "shiboken2":
+                try:
+                    # Check if sphinx is installed to proceed.
+                    import sphinx
 
-                log.info("Generating Shiboken documentation")
-                if run_process([self.make_path, "doc"]) != 0:
-                    raise DistutilsSetupError(
-                        "Error generating documentation for {}".format(extension))
-            except ImportError:
-                log.info("Sphinx not found, skipping documentation build")
+                    log.info("Generating Shiboken documentation")
+                    if run_process([self.make_path, "doc"]) != 0:
+                        raise DistutilsSetupError(
+                            "Error generating documentation for {}".format(
+                                extension))
+                except ImportError:
+                    log.info("Sphinx not found, skipping documentation build")
+        else:
+            log.info("Skipped documentation generation")
 
 
         if not OPTION_SKIP_MAKE_INSTALL:
