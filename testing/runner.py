@@ -1,9 +1,9 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of PySide2.
+## This file is part of the Qt for Python project.
 ##
 ## $QT_BEGIN_LICENSE:LGPL$
 ## Commercial License Usage
@@ -51,7 +51,16 @@ from textwrap import dedent
 from .buildlog import builds
 from .helper import decorate, PY3, TimeoutExpired
 
-sys.path.append('..')
+# Get the dir path to the utils module
+try:
+    this_file = __file__
+except NameError:
+    this_file = sys.argv[0]
+this_file = os.path.abspath(this_file)
+this_dir = os.path.dirname(this_file)
+build_scripts_dir = os.path.abspath(os.path.join(this_dir, '../build_scripts'))
+
+sys.path.append(build_scripts_dir)
 from utils import detectClang
 
 class TestRunner(object):

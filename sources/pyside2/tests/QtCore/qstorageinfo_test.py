@@ -5,7 +5,7 @@
 ## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the test suite of PySide2.
+## This file is part of the test suite of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ## Commercial License Usage

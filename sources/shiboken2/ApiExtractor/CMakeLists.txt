@@ -63,7 +63,6 @@ parser/enumvalue.cpp
 set(APIEXTRACTOR_EXTRA_INCLUDES ${CLANG_EXTRA_INCLUDES})
 set(APIEXTRACTOR_EXTRA_LIBRARIES ${CLANG_EXTRA_LIBRARIES})
 
-add_subdirectory(doc)
 if (NOT DISABLE_DOCSTRINGS)
     set(apiextractor_SRC
         ${apiextractor_SRC}
@@ -92,6 +91,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${Qt5Xml_INCLUDE_DIRS}
                     )
 
+add_subdirectory(doc)
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor
                       ${Qt5Xml_LIBRARIES}

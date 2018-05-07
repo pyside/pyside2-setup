@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -102,6 +102,12 @@ public:
 
     QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context = QString());
 
+    static bool convertToRst(QtDocGenerator *generator,
+                             const QString &sourceFileName,
+                             const QString &targetFileName,
+                             const QString &context = QString(),
+                             QString *errorMessage = nullptr);
+
     QString result() const
     {
         return m_result;
@@ -146,13 +152,15 @@ private:
     void handleItemTag(QXmlStreamReader& reader);
     void handleRawTag(QXmlStreamReader& reader);
     void handleCodeTag(QXmlStreamReader& reader);
+    void handlePageTag(QXmlStreamReader&);
+    void handleTargetTag(QXmlStreamReader&);
 
     void handleIgnoredTag(QXmlStreamReader& reader);
     void handleUnknownTag(QXmlStreamReader& reader);
     void handleUselessTag(QXmlStreamReader& reader);
     void handleAnchorTag(QXmlStreamReader& reader);
 
-    LinkContext *handleLinkStart(const QString &type, const QString &ref) const;
+    LinkContext *handleLinkStart(const QString &type, QString ref) const;
     void handleLinkText(LinkContext *linkContext, QString linktext) const;
     void handleLinkEnd(LinkContext *linkContext);
 
@@ -254,6 +262,8 @@ private:
     bool writeInjectDocumentation(QTextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
+    void writeModuleDocumentation();
+    void writeAdditionalDocumentation();
 
     QString parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
     QString translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass);
@@ -265,6 +275,7 @@ private:
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;
     DocParser* m_docParser;
+    QString m_additionalDocumentationList;
 };
 
 #endif // DOCGENERATOR_H

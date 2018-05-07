@@ -14,7 +14,7 @@ Ownership transfers
 From C++ to target
 ^^^^^^^^^^^^^^^^^^
 
-    When an object that is currently owned by C++ has its ownership transfered
+    When an object currently owned by C++ has its ownership transferred
     back to the target language, the binding can know for sure when the object will be deleted and
     tie the C++ instance existence to the wrapper, calling the C++ destructor normally when the
     wrapper is deleted.
@@ -29,7 +29,7 @@ From C++ to target
 From target to C++
 ^^^^^^^^^^^^^^^^^^
 
-    In the opposite direction,when an object ownership is transfered from the target language
+    In the opposite direction, when an object ownership is transferred from the target language
     to C++, the native code takes full control of the object life and you don't
     know when that object will be deleted, rendering the wrapper object invalid,
     unless you're wrapping an object with a virtual destructor,
@@ -82,4 +82,4 @@ call returned. In this case, you should use the ``invalidate-after-use`` attribu
 
 In this example the second argument will be invalidated after this method call.
 
-.. [#] See *Object Trees and Object Ownership* http://doc.trolltech.com/4.5/objecttrees.html
+.. [#] See *Object Trees and Object Ownership* http://doc.qt.io/qt-5/objecttrees.html

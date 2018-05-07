@@ -3,7 +3,7 @@ Type System Variables
 *********************
 
 User written code can be placed in arbitrary places using the
-:doc:`inject-code <codeinjectionsemantics>` tag. To ease the binding developer
+:ref:`inject-code <apiextractor:inject-code>` tag. To ease the binding developer
 work, the injected code can make use of special variables that will be replaced
 by the correct values. This also shields the developer from some |project|
 implementation specifics.
@@ -59,7 +59,7 @@ Variables
   system), this value will be inserted in the argument list. If you want to remove
   the argument so completely that it doesn't appear in any form on the
   ``%ARGUMENT_NAMES`` replacement, don't forget to remove also its default value
-  with the `<remove-default-expression/>`_  type system tag.
+  with the :ref:`remove-default-expression <apiextractor:remove-default-expression>`  type system tag.
 
 
   Take the following method and related type system description as an example:
@@ -332,6 +332,3 @@ that expects a Python sequence instead.
                 delete[] argv;
             </inject-code>
         </modify-function>
-
-
-.. _`<remove-default-expression/>`: http://www.pyside.org/docs/apiextractor/typesystem_arguments.html#remove-default-expression

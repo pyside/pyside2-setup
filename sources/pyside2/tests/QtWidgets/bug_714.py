@@ -3,7 +3,7 @@
 ## Copyright (C) 2016 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the test suite of PySide2.
+## This file is part of the test suite of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ## Commercial License Usage
@@ -38,8 +38,12 @@ class TestLabelPixmap(unittest.TestCase):
         l.setPixmap(p) # doesn't increment pixmap ref because this makes a copy
         self.assertEqual(sys.getrefcount(p), 2)
 
-        p = l.pixmap() # this increment the reference because this is an internal pointer
-        self.assertEqual(sys.getrefcount(p), 3)
+        p = l.pixmap()
+        # this used to increment the reference because this is
+        # an internal pointer, but not anymore since we don't create
+        # a copy
+        # self.assertEqual(sys.getrefcount(p), 3)
+        self.assertEqual(sys.getrefcount(p), 2)
 
         p2 = l.pixmap()
         self.assertEqual(p, p2)

@@ -5,7 +5,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of PySide2.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -2017,6 +2017,7 @@
   </object-type>
   <object-type name="QThread">
     <enum-type name="Priority"/>
+    <modify-function signature="currentThreadId()" remove="all"/>
     <modify-function signature="run()" thread="yes" />
     <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
     <modify-function signature="msleep(unsigned long)" allow-thread="yes" />
@@ -2795,6 +2796,9 @@
                 }
         </inject-code>
     </add-function>
+    <add-function signature="__mgetitem__">
+        <inject-code class="target" position="beginning" file="glue/qbytearray_mgetitem.cpp" />
+    </add-function>
     <add-function signature="__setitem__">
         <inject-code class="target" position="beginning">
                 %CPPSELF.remove(_i, 1);
@@ -2803,17 +2807,6 @@
                 Py_DECREF(args);
                 Py_XDECREF(result);
                 return !result ? -1 : 0;
-        </inject-code>
-    </add-function>
-    <add-function signature="__getslice__">
-        <inject-code class="target" position="beginning">
-            Py_ssize_t max = %CPPSELF.count();
-            _i1 = qBound(Py_ssize_t(0), _i1, max);
-            _i2 = qBound(Py_ssize_t(0), _i2, max);
-            QByteArray ba;
-            if (_i1 &lt; _i2)
-                ba = %CPPSELF.mid(_i1, _i2 - _i1);
-            return %CONVERTTOPYTHON[QByteArray](ba);
         </inject-code>
     </add-function>
   </value-type>

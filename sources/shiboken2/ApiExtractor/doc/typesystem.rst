@@ -12,8 +12,8 @@ It is even possible to use the typesystem specification to inject arbitrary
 code into the source files, such as an extra member function.
 
 Below there is a complete reference guide to the various nodes (XML tags) of the typesystem.
-For usage examples, take a look at the typesystem files used to generate PySide. These files
-can be found in the PySide/<QT_MODULE_NAME> directory of the PySide package.
+For usage examples, take a look at the typesystem files used to generate PySide2. These files
+can be found in the PySide2/<QT_MODULE_NAME> directory of the PySide2 package.
 
 .. toctree::
 

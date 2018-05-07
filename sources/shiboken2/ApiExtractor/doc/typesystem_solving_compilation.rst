@@ -28,7 +28,7 @@ extra-includes
     The generator automatically tries to read the global header for each type but
     sometimes it is required to include extra files in the generated C++ code to
     make sure that the code compiles. These files must be listed using include
-    nodes witin the extra-include node:
+    nodes within the extra-include node:
 
     .. code-block:: xml
 
