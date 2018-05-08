@@ -72,10 +72,10 @@ def sharedLibraryGlobPattern():
     glob = '*.' + sharedLibrarySuffix()
     return glob if sys.platform == 'win32' else 'lib' + glob
 
-def filterPySide2SharedLibraries(list):
+def filterPySide2SharedLibraries(list, only_shiboken=False):
     def predicate(item):
         basename = os.path.basename(item)
-        if 'shiboken' in basename or 'pyside2' in basename:
+        if 'shiboken' in basename or ('pyside2' in basename and not only_shiboken):
             return True
         return False
     result = [item for item in list if predicate(item)]
@@ -165,11 +165,16 @@ def pythonLinkData():
 
     return flags
 
-def pyside2Include():
+def pyside2Include(only_shiboken=False):
     pySide2 = findPySide2()
     if pySide2 is None:
         return None
-    return "{0}/include/PySide2 {0}/include/shiboken2".format(pySide2)
+
+    includes = "{0}/include/shiboken2".format(pySide2)
+    if not only_shiboken:
+        includes = includes + " {0}/include/PySide2".format(pySide2)
+
+    return includes
 
 def pyside2Link():
     pySide2 = findPySide2()
@@ -182,13 +187,13 @@ def pyside2Link():
         link += linkOption(lib)
     return link
 
-def pyside2SharedLibrariesData():
+def pyside2SharedLibrariesData(only_shiboken=False):
     pySide2 = findPySide2()
     if pySide2 is None:
         return None
 
     glob_result = glob.glob(os.path.join(pySide2, sharedLibraryGlobPattern()))
-    filtered_libs = filterPySide2SharedLibraries(glob_result)
+    filtered_libs = filterPySide2SharedLibraries(glob_result, only_shiboken)
     libs = []
     if sys.platform == 'win32':
         for lib in filtered_libs:
@@ -218,8 +223,8 @@ def pyside2SharedLibraries():
             libs_string += lib + ' '
         return libs_string
 
-def pyside2SharedLibrariesCmake():
-    libs = pyside2SharedLibrariesData()
+def pyside2SharedLibrariesCmake(only_shiboken=False):
+    libs = pyside2SharedLibrariesData(only_shiboken)
     result = ';'.join(libs)
     return result
 
@@ -247,6 +252,12 @@ if option == '--pyside2-link' or option == '-a':
         sys.exit(pyside2_error)
 
     print(l)
+
+if option == '--shiboken-include' or option == '-a':
+    i = pyside2Include(only_shiboken=True)
+    if i is None:
+        sys.exit(pyside2_error)
+    print(i)
 
 if option == '--pyside2-include' or option == '-a':
     i = pyside2Include()
@@ -280,6 +291,12 @@ if option == '--pyside2-shared-libraries' or option == '-a':
 
 if option == '--pyside2-shared-libraries-cmake' or option == '-a':
     l = pyside2SharedLibrariesCmake()
+    if l is None:
+        sys.exit(pyside2_libs_error)
+    print(l)
+
+if option == '--shiboken-shared-libraries-cmake' or option == '-a':
+    l = pyside2SharedLibrariesCmake(only_shiboken=True)
     if l is None:
         sys.exit(pyside2_libs_error)
     print(l)
