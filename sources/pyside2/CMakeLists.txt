@@ -340,7 +340,10 @@ endif()
 if(WIN32)
     list(APPEND ALL_OPTIONAL_MODULES AxContainer)
 endif()
-list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets WebKit WebKitWidgets WebSockets)
+# Disabling WebKit by default
+#   If WebKit support is needed add the following elements
+#   to the list: WebKit WebKitWidgets
+list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets WebSockets)
 if (Qt5Core_VERSION VERSION_GREATER 5.9.3) # Depending on fixes in Qt3D
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
 endif()
