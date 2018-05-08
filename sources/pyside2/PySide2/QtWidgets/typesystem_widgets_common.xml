@@ -997,6 +997,13 @@
   <object-type name="QProgressBar">
       <enum-type name="Direction"/>
   </object-type>
+  <object-type name="QProxyStyle">
+      <modify-function signature="QProxyStyle(QStyle*)">
+          <modify-argument index="1">
+              <define-ownership owner="c++"/>
+          </modify-argument>
+      </modify-function>
+  </object-type>
   <object-type name="QPushButton" />
   <object-type name="QScrollArea">
     <modify-function signature="setWidget(QWidget*)">

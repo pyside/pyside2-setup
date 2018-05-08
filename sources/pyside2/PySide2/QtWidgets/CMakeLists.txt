@@ -123,6 +123,7 @@ ${QtWidgets_GEN_DIR}/qplaintextdocumentlayout_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qplaintextedit_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qprogressbar_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qprogressdialog_wrapper.cpp
+${QtWidgets_GEN_DIR}/qproxystyle_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qpushbutton_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qradiobutton_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qrubberband_wrapper.cpp

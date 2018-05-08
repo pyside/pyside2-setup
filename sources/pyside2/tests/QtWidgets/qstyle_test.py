@@ -29,7 +29,20 @@
 import unittest
 from helper import UsesQApplication
 
-from PySide2.QtWidgets import QWidget, QLabel, QFontComboBox, QStyleFactory
+from PySide2.QtGui import QWindow
+from PySide2.QtWidgets import (QApplication, QFontComboBox, QLabel, QProxyStyle,
+    QStyleFactory, QWidget)
+
+class ProxyStyle(QProxyStyle):
+
+    def __init__(self, style):
+        QProxyStyle.__init__(self, style)
+        self.polished = 0
+
+    def polish(self, widget):
+        self.polished = self.polished + 1
+        super(ProxyStyle, self).polish(widget)
+
 
 class SetStyleTest(UsesQApplication):
     '''Tests setting the same QStyle for all objects in a UI hierarchy.'''
@@ -53,6 +66,17 @@ class SetStyleTest(UsesQApplication):
         label.setText('Label')
         style = QStyleFactory.create(QStyleFactory.keys()[0])
         setStyleHelper(container, style)
+
+    def testSetProxyStyle(self):
+        label = QLabel("QtWidgets/ProxyStyle test")
+        baseStyle = QStyleFactory.create(QApplication.instance().style().objectName())
+        self.assertTrue(baseStyle)
+        proxyStyle = ProxyStyle(baseStyle)
+        label.setStyle(proxyStyle)
+        label.show()
+        while not label.windowHandle().isExposed():
+           QApplication.instance().processEvents()
+        self.assertTrue(proxyStyle.polished > 0)
 
 if __name__ == '__main__':
     unittest.main()
