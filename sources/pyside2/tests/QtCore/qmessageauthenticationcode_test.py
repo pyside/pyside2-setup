@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,38 +28,18 @@
 ##
 #############################################################################
 
+'''Test cases for QMessageAuthenticationCode'''
+
 import unittest
-from PySide2.QtCore import *
 
-class MyModel (QAbstractListModel):
-    pass
+from PySide2.QtCore import QCryptographicHash, QMessageAuthenticationCode
 
-class Foo:
-    pass
-
-class TestQModelIndexInternalPointer(unittest.TestCase):
-
-    def testInternalPointer(self):
-        m = MyModel()
-        foo = Foo()
-        idx = m.createIndex(0,0, foo)
-
-    def testPassQPersistentModelIndexAsQModelIndex(self):
-        # Related to bug #716
-        m = MyModel()
-        idx = QPersistentModelIndex()
-        m.span(idx)
-
-    def testQIdentityProxyModel(self):
-        sourceModel = QStringListModel(['item1', 'item2'])
-        sourceIndex = sourceModel.index(0, 0)
-        sourceData = str(sourceModel.data(sourceIndex, Qt.DisplayRole))
-        proxyModel = QIdentityProxyModel()
-        proxyModel.setSourceModel(sourceModel)
-        proxyIndex = proxyModel.mapFromSource(sourceIndex)
-        proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
-        self.assertEqual(sourceData, proxyData)
+class TestQMessageAuthenticationCode (unittest.TestCase):
+    def test(self):
+        code = QMessageAuthenticationCode(QCryptographicHash.Sha1, 'bla')
+        result = code.result()
+        self.assertTrue(result.size() > 0)
+        print(result.toHex())
 
 if __name__ == '__main__':
     unittest.main()
-

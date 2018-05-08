@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,38 +28,28 @@
 ##
 #############################################################################
 
-import unittest
-from PySide2.QtCore import *
+'''Test cases for QLockFile'''
 
-class MyModel (QAbstractListModel):
-    pass
+import os, unittest
 
-class Foo:
-    pass
+from PySide2.QtCore import QDir, QLockFile, QCoreApplication
 
-class TestQModelIndexInternalPointer(unittest.TestCase):
+class TestQMessageAuthenticationCode (unittest.TestCase):
 
-    def testInternalPointer(self):
-        m = MyModel()
-        foo = Foo()
-        idx = m.createIndex(0,0, foo)
+    def setUp(self):
+        pid = QCoreApplication.applicationPid()
+        self._fileName = "{}/pqlockfiletest{}.tmp".format(QDir.tempPath(), pid)
 
-    def testPassQPersistentModelIndexAsQModelIndex(self):
-        # Related to bug #716
-        m = MyModel()
-        idx = QPersistentModelIndex()
-        m.span(idx)
+    def tearDown(self):
+        if (os.path.exists(self._fileName)):
+            os.remove(self._fileName)
 
-    def testQIdentityProxyModel(self):
-        sourceModel = QStringListModel(['item1', 'item2'])
-        sourceIndex = sourceModel.index(0, 0)
-        sourceData = str(sourceModel.data(sourceIndex, Qt.DisplayRole))
-        proxyModel = QIdentityProxyModel()
-        proxyModel.setSourceModel(sourceModel)
-        proxyIndex = proxyModel.mapFromSource(sourceIndex)
-        proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
-        self.assertEqual(sourceData, proxyData)
+    def test(self):
+        # Merely exercise the API, no locking against another processes.
+        lockFile = QLockFile(self._fileName)
+        self.assertTrue(lockFile.lock())
+        self.assertTrue(lockFile.isLocked())
+        lockFile.unlock()
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -1974,6 +1974,11 @@
         </inject-code>
     </add-function>
   </value-type>
+  <object-type name="QLockFile">
+      <enum-type name="LockError"/>
+  </object-type>
+  <object-type name="QMessageAuthenticationCode"/>
+  <object-type name="QSignalBlocker"/>
   <value-type name="QStorageInfo"/>
   <!-- QReadWriteLock does not have a copy ctor! -->
   <object-type name="QReadWriteLock">
@@ -2123,6 +2128,7 @@
     <modify-function signature="filterChanged()" remove="all"/>
     <!--### End of obsolete section -->
   </object-type>
+  <object-type name="QIdentityProxyModel"/>
   <!-- QObject is created manually -->
   <object-type name="QObject">
     <extra-includes>
@@ -2953,6 +2959,9 @@
         </inject-code>
     </modify-function>
   </object-type>
+  <value-type name="QOperatingSystemVersion" since="5.9">
+      <enum-type name="OSType"/>
+  </value-type>
   <object-type name="QLibraryInfo">
     <enum-type name="LibraryLocation"/>
   </object-type>
