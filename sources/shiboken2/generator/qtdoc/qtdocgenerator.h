@@ -49,6 +49,8 @@ class QtDocGenerator;
 class QtXmlToSphinx
 {
 public:
+    struct LinkContext;
+
     struct InlineImage
     {
         QString tag;
@@ -114,17 +116,6 @@ public:
     }
 
 private:
-    struct LinkContext
-    {
-        LinkContext(const QString &ref, const QString &lType) : linkRef(ref), type(lType) {}
-
-        QString linkTag;
-        QString linkRef;
-        QString linkText;
-        QString linkTagEnding;
-        QString type;
-    };
-
     QString resolveContextForMethod(const QString& methodName) const;
     QString expandFunction(const QString& function) const;
     QString transform(const QString& doc);
@@ -161,7 +152,7 @@ private:
     void handleAnchorTag(QXmlStreamReader& reader);
 
     LinkContext *handleLinkStart(const QString &type, QString ref) const;
-    void handleLinkText(LinkContext *linkContext, QString linktext) const;
+    void handleLinkText(LinkContext *linkContext, const QString &linktext) const;
     void handleLinkEnd(LinkContext *linkContext);
 
     typedef void (QtXmlToSphinx::*TagHandler)(QXmlStreamReader&);

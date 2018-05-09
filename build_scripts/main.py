@@ -1079,17 +1079,21 @@ class pyside_build(_build):
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError("Error compiling {}".format(extension))
 
-        if extension.lower() == "shiboken2":
-            try:
-                # Check if sphinx is installed to proceed.
-                import sphinx
+        if not OPTION_SKIP_DOCS:
+            if extension.lower() == "shiboken2":
+                try:
+                    # Check if sphinx is installed to proceed.
+                    import sphinx
 
-                log.info("Generating Shiboken documentation")
-                if run_process([self.make_path, "doc"]) != 0:
-                    raise DistutilsSetupError(
-                        "Error generating documentation for {}".format(extension))
-            except ImportError:
-                log.info("Sphinx not found, skipping documentation build")
+                    log.info("Generating Shiboken documentation")
+                    if run_process([self.make_path, "doc"]) != 0:
+                        raise DistutilsSetupError(
+                            "Error generating documentation for {}".format(
+                                extension))
+                except ImportError:
+                    log.info("Sphinx not found, skipping documentation build")
+        else:
+            log.info("Skipped documentation generation")
 
 
         if not OPTION_SKIP_MAKE_INSTALL:
@@ -1184,8 +1188,8 @@ class pyside_build(_build):
                 break
 
         if not clang_lib_path:
-            raise RuntimeError("Could not finding location of libclang "
-                "library from CMake cache.")
+            raise RuntimeError("Could not find the location of the libclang "
+                "library inside the CMake cache file.")
 
         if is_win:
             # clang_lib_path points to the static import library
@@ -1193,27 +1197,26 @@ class pyside_build(_build):
             # library (bin/libclang.dll).
             clang_lib_path = re.sub(r'lib/libclang.lib$', 'bin/libclang.dll',
                 clang_lib_path)
+        else:
+            # We want to resolve any symlink on Linux and macOS, and
+            # copy the actual file.
+            clang_lib_path = os.path.realpath(clang_lib_path)
 
-        # Path to directory containing clang.
+        # Path to directory containing libclang.
         clang_lib_dir = os.path.dirname(clang_lib_path)
 
-        # The name of the clang file found by CMake.
-        basename = os.path.basename(clang_lib_path)
-
-        # We want to copy the library and all the symlinks for now,
-        # thus the wildcard.
-        clang_filter = basename + "*"
-
-        # Destination is the package folder near the other extension
-        # modules.
+        # The destination will be the package folder near the other
+        # extension modules.
         destination_dir = "{}/PySide2".format(os.path.join(self.script_dir,
             'pyside_package'))
         if os.path.exists(clang_lib_path):
-            log.info('Copying libclang shared library to the pyside package.')
+            log.info('Copying libclang shared library to the package folder.')
+            basename = os.path.basename(clang_lib_path)
+            destination_path = os.path.join(destination_dir, basename)
 
-            copydir(clang_lib_dir, destination_dir,
-                filter=[clang_filter],
-                recursive=False)
+            # Need to modify permissions in case file is not writable
+            # (a reinstall would cause a permission denied error).
+            copyfile(clang_lib_path, destination_path, make_writable_by_owner=True)
         else:
             raise RuntimeError("Error copying libclang library "
                                "from {} to {}. ".format(

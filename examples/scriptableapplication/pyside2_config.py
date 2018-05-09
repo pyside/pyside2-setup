@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,8 +40,6 @@
 
 import os, glob, re, sys, imp
 from distutils import sysconfig
-if sys.platform == 'win32':
-    import winreg
 
 usage = """
 Utility to determine include/link options of PySide2 and Python for qmake
@@ -54,7 +52,6 @@ Options:
     --pyside2-include           Print PySide2 include paths
     --pyside2-link              Print PySide2 link flags
     --pyside2-shared-libraries  Print paths of PySide2 shared libraries (.so's, .dylib's, .dll's)
-    --clang-bin-dir             Print path to the clang bin directory
     -a                          Print all
     --help/-h                   Print this help
 """
@@ -67,7 +64,9 @@ def sharedLibrarySuffix():
         return 'lib'
     elif sys.platform == 'darwin':
         return 'dylib'
-    return 'so'
+    # Linux
+    else:
+        return 'so.*'
 
 def sharedLibraryGlobPattern():
     glob = '*.' + sharedLibrarySuffix()
@@ -84,12 +83,18 @@ def filterPySide2SharedLibraries(list):
 
 # Return qmake link option for a library file name
 def linkOption(lib):
-    baseName = os.path.splitext(os.path.basename(lib))[0]
+    # On Linux:
+    # Since we cannot include symlinks with wheel packages
+    # we are using an absolute path for the libpyside and libshiboken
+    # libraries when compiling the project
+    baseName = os.path.basename(lib)
     link = ' -l'
-    if sys.platform in ['linux', 'linux2', 'darwin']: # Linux: 'libfoo.so' -> '-lfoo'
-        link += baseName[3:]
-    else:
-        link += baseName
+    if sys.platform in ['linux', 'linux2']: # Linux: 'libfoo.so' -> '/absolute/path/libfoo.so'
+        link = lib
+    elif sys.platform in ['darwin']: # Darwin: 'libfoo.so' -> '-lfoo'
+        link += os.path.splitext(baseName[3:])[0]
+    else: # Windows: 'libfoo.dll' -> 'libfoo.dll'
+        link += os.path.splitext(baseName)[0]
     return link
 
 # Locate PySide2 via package path
@@ -110,17 +115,27 @@ def pythonInclude():
 
 def pythonLinkQmake():
     flags = pythonLinkData()
-    if sys.platform == 'win32' or sys.platform == 'darwin':
+    if sys.platform == 'win32':
+        libdir = flags['libdir']
+        # This will add the "~1" shortcut for directories that
+        # contain white spaces
+        # e.g.: "Program Files" to "Progra~1"
+        for d in libdir.split("\\"):
+            if " " in d:
+                libdir = libdir.replace(d, d.split(" ")[0][:-1]+"~1")
+        return '-L{} -l{}'.format(libdir, flags['lib'])
+    elif sys.platform == 'darwin':
         return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
 
-    # Linux and anything else
-    return '-l{}'.format(flags['lib'])
+    else:
+        # Linux and anything else
+        return '-L{} -l{}'.format(flags['libdir'], flags['lib'])
 
 def pythonLinkCmake():
     flags = pythonLinkData()
     libdir = flags['libdir']
     lib = re.sub(r'.dll$', '.lib', flags['lib'])
-    return '{} {}'.format(libdir, lib)
+    return '{};{}'.format(libdir, lib)
 
 def pythonLinkData():
     # @TODO Fix to work with static builds of Python
@@ -200,87 +215,71 @@ def pyside2SharedLibraries():
     else:
         libs_string = ''
         for lib in libs:
-            libs_string += ' ' + lib
+            libs_string += lib + ' '
         return libs_string
 
 def pyside2SharedLibrariesCmake():
     libs = pyside2SharedLibrariesData()
-    result = ' '.join(libs)
+    result = ';'.join(libs)
     return result
-
-def clangBinPath():
-    source = 'LLVM_INSTALL_DIR'
-    clangDir = os.environ.get(source, None)
-    if not clangDir:
-        source = 'CLANG_INSTALL_DIR'
-        clangDir = os.environ.get(source, None)
-        if not clangDir:
-            source = 'llvm-config'
-            try:
-                output = run_process_output([source, '--prefix'])
-                if output:
-                    clangDir = output[0]
-            except OSError:
-                pass
-    if clangDir:
-        return os.path.realpath(clangDir + os.path.sep + 'bin')
-    return ''
 
 option = sys.argv[1] if len(sys.argv) == 2 else '-a'
 if option == '-h' or option == '--help':
     print(usage)
     sys.exit(0)
 
+generic_error = (' Did you forget to activate your virtualenv? Or perhaps'
+                 ' you forgot to build / install PySide2 into your currently active Python'
+                 ' environment?')
+pyside2_error = 'Unable to locate PySide2.' + generic_error
+pyside2_libs_error = 'Unable to locate the PySide2 shared libraries.' + generic_error
+python_link_error = 'Unable to locate the Python library for linking.'
+
 if option == '--pyside2' or option == '-a':
     pySide2 = findPySide2()
     if pySide2 is None:
-        sys.exit('Unable to locate PySide2')
+        sys.exit(pyside2_error)
     print(pySide2)
 
 if option == '--pyside2-link' or option == '-a':
     l = pyside2Link()
     if l is None:
-        sys.exit('Unable to locate PySide2')
+        sys.exit(pyside2_error)
+
     print(l)
 
 if option == '--pyside2-include' or option == '-a':
     i = pyside2Include()
     if i is None:
-        sys.exit('Unable to locate PySide2')
+        sys.exit(pyside2_error)
     print(i)
 
 if option == '--python-include' or option == '-a':
     i = pythonInclude()
     if i is None:
-        sys.exit('Unable to locate Python')
+        sys.exit('Unable to locate the Python include headers directory.')
     print(i)
 
 if option == '--python-link' or option == '-a':
     l = pythonLinkQmake()
     if l is None:
-        sys.exit('Unable to locate Python')
+        sys.exit(python_link_error)
     print(l)
 
 if option == '--python-link-cmake' or option == '-a':
     l = pythonLinkCmake()
     if l is None:
-        sys.exit('Unable to locate Python')
+        sys.exit(python_link_error)
     print(l)
 
 if option == '--pyside2-shared-libraries' or option == '-a':
     l = pyside2SharedLibraries()
     if l is None:
-        sys.exit('Unable to locate the PySide2 shared libraries')
+        sys.exit(pyside2_libs_error)
     print(l)
 
 if option == '--pyside2-shared-libraries-cmake' or option == '-a':
     l = pyside2SharedLibrariesCmake()
     if l is None:
-        sys.exit('Unable to locate the PySide2 shared libraries')
-    print(l)
-
-if option == '--clang-bin-dir' or option == '-a':
-    l = clangBinPath()
-    if l is None:
-        sys.exit('Unable to locate Clang')
+        sys.exit(pyside2_libs_error)
     print(l)

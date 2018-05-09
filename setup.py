@@ -129,6 +129,7 @@ using `setup.py build`:
         arguments, etc.
   --sanitize-address will build the project with address sanitizer
     enabled (Linux or macOS only).
+  --skip-docs skip the documentation generation.
 
 REQUIREMENTS:
 

@@ -1,5 +1,6 @@
 Include(icecc.cmake)
 project(shiboken2)
+include(CheckIncludeFileCXX)
 
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
@@ -43,7 +44,7 @@ macro(get_llvm_config)
        import os
        import sys
        sys.path.append(os.path.realpath(os.path.join('${CMAKE_CURRENT_LIST_DIR}', '..', '..')))
-       from utils import findLlvmConfig
+       from build_scripts.utils import findLlvmConfig
        llvmConfig = findLlvmConfig()
        if llvmConfig:
            print(llvmConfig)
@@ -80,7 +81,7 @@ else ()
     if (NOT "${CLANG_DIR}" STREQUAL "")
         EXEC_PROGRAM("${LLVM_CONFIG}" ARGS "--version" OUTPUT_VARIABLE CLANG_VERSION)
         if (CLANG_VERSION VERSION_LESS 3.9)
-            message(FATAL_ERROR "LLVM version 3.9 is required (${LLVM_CONFIG} detected ${CLANG_VERSION} at ${CLANG_DIR}).")
+            message(FATAL_ERROR "libclang version 3.9 or higher is required (${LLVM_CONFIG} detected ${CLANG_VERSION} at ${CLANG_DIR}).")
         endif()
     endif()
 endif()
@@ -91,21 +92,39 @@ elseif (NOT IS_DIRECTORY ${CLANG_DIR})
     message(FATAL_ERROR "${CLANG_DIR} detected by ${CLANG_DIR_SOURCE} does not exist.")
 endif()
 
-set(CLANG_LIB_NAME "clang")
+# The non-development Debian / Ubuntu packages (e.g. libclang1-6.0) do not ship a
+# libclang.so symlink, but only libclang-6.0.so.1 and libclang.so.1 (adjusted for version number).
+# Thus searching for libclang would not succeed.
+# The "libclang.so" symlink is shipped as part of the development package (libclang-6.0-dev) which
+# we need anyway because of the headers. Thus we will search for libclang.so.1 also, and complain
+# about the headers not being found in a check further down. This is more friendly to the user,
+# so they don't scratch their head thinking that they have already installed the necessary package.
+set(CLANG_LIB_NAMES clang libclang.so libclang.so.1)
 if(MSVC)
-    set(CLANG_LIB_NAME "libclang")
+    set(CLANG_LIB_NAMES libclang)
 endif()
 
-find_library(CLANG_LIBRARY ${CLANG_LIB_NAME} HINTS ${CLANG_DIR}/lib)
+find_library(CLANG_LIBRARY NAMES ${CLANG_LIB_NAMES} HINTS ${CLANG_DIR}/lib)
 if (NOT EXISTS ${CLANG_LIBRARY})
-    message(FATAL_ERROR "Unable to find Clang library ${CLANG_LIB_NAME} in ${CLANG_DIR}.")
+    string(REPLACE ";" ", " CLANG_LIB_NAMES_STRING "${CLANG_LIB_NAMES}")
+    message(FATAL_ERROR "Unable to find the Clang library in ${CLANG_DIR}.\
+        Names tried: ${CLANG_LIB_NAMES_STRING}.")
 endif()
 
 message(STATUS "CLANG: ${CLANG_DIR}, ${CLANG_LIBRARY} detected by ${CLANG_DIR_SOURCE}")
 
 # Find highest version clang builtin includes folder to pass along to shiboken.
 set(CLANG_BUILTIN_INCLUDES_DIR_PREFIX ${CLANG_DIR}/lib/clang)
-file(GLOB CLANG_BUILTIN_INCLUDES_DIR_VERSIONS "${CLANG_BUILTIN_INCLUDES_DIR_PREFIX}/*")
+file(GLOB CLANG_BUILTIN_INCLUDES_DIR_CANDIDATES "${CLANG_BUILTIN_INCLUDES_DIR_PREFIX}/*")
+
+# Collect only directories, and not files, and only directories starting with a number.
+set(CLANG_BUILTIN_INCLUDES_DIR_VERSIONS "")
+foreach(candidate ${CLANG_BUILTIN_INCLUDES_DIR_CANDIDATES})
+    get_filename_component(candidate_basename ${candidate} NAME)
+    if (IS_DIRECTORY ${candidate} AND ${candidate_basename} MATCHES "^[0-9]") # starts with number
+        list(APPEND CLANG_BUILTIN_INCLUDES_DIR_VERSIONS ${candidate})
+    endif()
+endforeach()
 
 # Sort in alphabetical order the list of version folders.
 list(SORT CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
@@ -113,7 +132,9 @@ list(SORT CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
 # Reverse it so the first element is the highest version.
 list(REVERSE CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
 
-message(STATUS "Found the following CLANG builtins includes directories: ${CLANG_BUILTIN_INCLUDES_DIR_VERSIONS}")
+message(STATUS
+    "Found the following CLANG builtins includes directories: ${CLANG_BUILTIN_INCLUDES_DIR_VERSIONS} \
+     Considered the following directories: ${CLANG_BUILTIN_INCLUDES_DIR_CANDIDATES}")
 if(CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
     # Get highest version.
     list(GET CLANG_BUILTIN_INCLUDES_DIR_VERSIONS 0 CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION)
@@ -122,10 +143,35 @@ if(CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
         set(CLANG_BUILTIN_INCLUDES_DIR "${CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION}/include")
     endif()
 endif()
+
 message(STATUS "CLANG builtins includes directory chosen: ${CLANG_BUILTIN_INCLUDES_DIR}")
+
+# We don't exit with a hard error here, because it is uncertain whether all clang extra include
+# paths follow the same layout across OSes and distros.
+if (NOT CLANG_BUILTIN_INCLUDES_DIR)
+    message(WARNING "No CLANG builtins includes directory found. This may lead to shiboken \
+                     execution failure.")
+endif()
 
 set(CLANG_EXTRA_INCLUDES ${CLANG_DIR}/include)
 set(CLANG_EXTRA_LIBRARIES ${CLANG_LIBRARY})
+
+# Check if one of the required clang headers is found. Error out early at CMake time instead of
+# compile time if not found.
+# It can happen that a user uses a distro-provided libclang.so, but no development header package
+# was installed (e.g. libclang-6.0-dev on Ubuntu).
+set(CMAKE_REQUIRED_INCLUDES ${CLANG_EXTRA_INCLUDES})
+set(CLANG_HEADER_FILE_TO_CHECK "clang-c/Index.h")
+check_include_file_cxx(${CLANG_HEADER_FILE_TO_CHECK} CLANG_INCLUDE_FOUND)
+unset(CMAKE_REQUIRED_INCLUDES)
+if (NOT CLANG_INCLUDE_FOUND)
+    # Need to unset so that when installing the package, CMake doesn't complain that the header
+    # still isn't found.
+    unset(CLANG_INCLUDE_FOUND CACHE)
+    message(FATAL_ERROR "Unable to find required Clang header file ${CLANG_HEADER_FILE_TO_CHECK} \
+        in ${CLANG_DIR}/include. Perhaps you forgot to install the clang development header \
+        package? (e.g. libclang-6.0-dev)")
+endif()
 
 set(SHIBOKEN_VERSION_FILE_PATH "${CMAKE_SOURCE_DIR}/shiboken_version.py")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS

@@ -72,7 +72,6 @@ modules_to_test = OrderedDict()
 # Essentials
 modules_to_test['QtCore'] = 'qtcore-module.html'
 modules_to_test['QtGui'] = 'qtgui-module.html'
-modules_to_test['QtWidgets'] = 'qtwidgets-module.html'
 modules_to_test['QtMultimedia'] = 'qtmultimedia-module.html'
 modules_to_test['QtMultimediaWidgets'] = 'qtmultimediawidgets-module.html'
 modules_to_test['QtNetwork'] = 'qtnetwork-module.html'
@@ -80,23 +79,35 @@ modules_to_test['QtQml'] = 'qtqml-module.html'
 modules_to_test['QtQuick'] = 'qtquick-module.html'
 modules_to_test['QtSql'] = 'qtsql-module.html'
 modules_to_test['QtTest'] = 'qttest-module.html'
+modules_to_test['QtWidgets'] = 'qtwidgets-module.html'
 
 # Addons
+modules_to_test['Qt3DCore'] = 'qt3dcore-module.html'
+modules_to_test['Qt3DInput'] = 'qt3dinput-module.html'
+modules_to_test['Qt3DLogic'] = 'qt3dlogic-module.html'
+modules_to_test['Qt3DRender'] = 'qt3drender-module.html'
+modules_to_test['Qt3DAnimation'] = 'qt3danimation-module.html'
+modules_to_test['Qt3DExtras'] = 'qt3dextras-module.html'
 modules_to_test['QtConcurrent'] = 'qtconcurrent-module.html'
+modules_to_test['QtNetworkAuth'] = 'qtnetworkauth-module.html'
 modules_to_test['QtHelp'] = 'qthelp-module.html'
-modules_to_test['QtOpenGL'] = 'qtopengl-module.html'
 modules_to_test['QtLocation'] = 'qtlocation-module.html'
 modules_to_test['QtPrintSupport'] = 'qtprintsupport-module.html'
-modules_to_test['QtScript'] = 'qtscript-module.html'
-modules_to_test['QtScriptTools'] = 'qtscripttools-module.html'
+modules_to_test['QtSCXML'] = 'qtscxml-module.html'
+modules_to_test['QtSpeech'] = 'qtspeech-module.html'
 modules_to_test['QtSvg'] = 'qtsvg-module.html'
 modules_to_test['QtUiTools'] = 'qtuitools-module.html'
 modules_to_test['QtWebChannel'] = 'qtwebchannel-module.html'
+modules_to_test['QtWebEngine'] = 'qtwebengine-module.html'
 modules_to_test['QtWebEngineWidgets'] = 'qtwebenginewidgets-module.html'
 modules_to_test['QtWebSockets'] = 'qtwebsockets-module.html'
+modules_to_test['QtMacExtras'] = 'qtmacextras-module.html'
 modules_to_test['QtX11Extras'] = 'qtx11extras-module.html'
+modules_to_test['QtWinExtras'] = 'qtwinextras-module.html'
 modules_to_test['QtXml'] = 'qtxml-module.html'
 modules_to_test['QtXmlPatterns'] = 'qtxmlpatterns-module.html'
+modules_to_test['QtCharts'] = 'qt-charts-module.html'
+modules_to_test['QtDataVisualization'] = 'qtdatavisualization-module.html'
 
 types_to_ignore = set()
 # QtCore
@@ -228,8 +239,8 @@ parser.add_argument("module",
                     help="the Qt module for which to get the missing types")
 parser.add_argument("--qt-version",
                     "-v",
-                    default='5.6',
-                    choices=['5.6', '5.8', '5.9', 'dev'],
+                    default='5.11',
+                    choices=['5.6', '5.9', '5.11', 'dev'],
                     type=str,
                     dest='version',
                     help="the Qt version to use to check for types")
