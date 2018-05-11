@@ -52,6 +52,8 @@ OPTION_ONLYPACKAGE = has_option("only-package")
 OPTION_STANDALONE = has_option("standalone")
 OPTION_MAKESPEC = option_value("make-spec")
 OPTION_IGNOREGIT = has_option("ignore-git")
+# don't generate documentation
+OPTION_SKIP_DOCS = has_option("skip-docs")
 # don't include pyside2-examples
 OPTION_NOEXAMPLES = has_option("no-examples")
 # number of parallel build jobs
