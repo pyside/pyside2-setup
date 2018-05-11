@@ -8,6 +8,7 @@ check_qt_class(QtWidgets QGtkStyle                  QtWidgets_OPTIONAL_SRC QtWid
 check_qt_class(QtWidgets QMacStyle                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
 
 set(QtWidgets_SRC
+${QtWidgets_GEN_DIR}/qaccessiblewidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractbutton_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractgraphicsshapeitem_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractitemdelegate_wrapper.cpp
@@ -127,6 +128,8 @@ ${QtWidgets_GEN_DIR}/qradiobutton_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qrubberband_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscrollarea_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscrollbar_wrapper.cpp
+${QtWidgets_GEN_DIR}/qscroller_wrapper.cpp
+${QtWidgets_GEN_DIR}/qscrollerproperties_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qshortcut_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qsizegrip_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qsizepolicy_wrapper.cpp

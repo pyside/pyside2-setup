@@ -190,6 +190,7 @@
       <enum-type name="ViewItemPosition"/>
   </value-type>
 
+  <object-type name="QAccessibleWidget"/>
   <value-type name="QColormap">
       <enum-type name="Mode"/>
   </value-type>
@@ -3664,6 +3665,17 @@
   </object-type>
 
   <value-type name="QTileRules" since="4.6"/>
+
+  <object-type name="QScroller">
+      <enum-type name="State"/>
+      <enum-type name="ScrollerGestureType"/>
+      <enum-type name="Input"/>
+  </object-type>
+  <value-type name="QScrollerProperties">
+      <enum-type name="OvershootPolicy"/>
+      <enum-type name="FrameRates"/>
+      <enum-type name="ScrollMetric"/>
+  </value-type>
 
   <object-type name="QSizeGrip"/>
 
