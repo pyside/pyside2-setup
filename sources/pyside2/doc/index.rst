@@ -96,7 +96,9 @@ Qt Modules
         Provides access to sensor hardware via QML and Python interfaces and a motion gesture recognition API for devices.
      -
 
-provides access to sensor hardware via QML and C++ interfaces. The Qt Sensors API also provides a motion gesture recognition API for devices.
+|project| also comes with the
+:doc:`Shiboken2 <shiboken2:contents>` generator that outputs C++ code
+for CPython extensions.
 
 .. toctree::
     :maxdepth: 2
