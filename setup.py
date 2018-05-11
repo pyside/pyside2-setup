@@ -114,6 +114,8 @@ DEVELOPMENT OPTIONS:
 For development purposes the following options might be of use, when
 using `setup.py build`:
 
+  --module-subset allows for specifying the Qt modules to be built.
+    A minimal set is: --module-subset=Core,Gui,Test,Widgets
   --reuse-build option allows recompiling only the modified sources and
         not the whole world, shortening development iteration time,
   --skip-cmake will reuse the already generated Makefiles (or
