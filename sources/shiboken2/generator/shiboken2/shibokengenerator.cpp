@@ -1996,6 +1996,17 @@ static QString getConverterTypeSystemVariableArgument(const QString& code, int p
     return arg;
 }
 typedef QPair<QString, QString> StringPair;
+
+static QString msgCannotFindType(const QString &type, const QString &variable,
+                                 const QString &why)
+{
+    QString result;
+    QTextStream(&result) << "Could not find type '"
+        << type << "' for use in '" << variable << "' conversion: " << why
+        << "\nMake sure to use the full C++ name, e.g. 'Namespace::Class'.";
+    return result;
+}
+
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code)
 {
     QVector<StringPair> replacements;
@@ -2005,12 +2016,12 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         const QStringList list = match.capturedTexts();
         QString conversionString = list.constFirst();
         QString conversionTypeName = list.constLast();
-        const AbstractMetaType* conversionType = buildAbstractMetaTypeFromString(conversionTypeName);
+        QString message;
+        const AbstractMetaType *conversionType = buildAbstractMetaTypeFromString(conversionTypeName, &message);
         if (!conversionType) {
-            qFatal(qPrintable(QString::fromLatin1("Could not find type '%1' for use in '%2' conversion. "
-                                      "Make sure to use the full C++ name, e.g. 'Namespace::Class'.")
-                                 .arg(conversionTypeName).arg(m_typeSystemConvName[converterVariable])), NULL);
-
+            qFatal("%s", qPrintable(msgCannotFindType(conversionTypeName,
+                                                      m_typeSystemConvName[converterVariable],
+                                                      message)));
         }
         QString conversion;
         QTextStream c(&conversion);
@@ -2312,7 +2323,8 @@ bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
     return false;
 }
 
-AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature)
+AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature,
+                                                                     QString *errorMessage)
 {
     typeSignature = typeSignature.trimmed();
     if (typeSignature.startsWith(QLatin1String("::")))
@@ -2348,9 +2360,10 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
         typeString.remove(0, 2);
 
     QString adjustedTypeName = typeString;
-    QStringList instantiatedTypes;
+    AbstractMetaTypeList instantiations;
     int lpos = typeString.indexOf(QLatin1Char('<'));
     if (lpos > -1) {
+        QStringList instantiatedTypes;
         int rpos = typeString.lastIndexOf(QLatin1Char('>'));
         if ((lpos != -1) && (rpos != -1)) {
             QString type = typeString.mid(lpos + 1, rpos - lpos - 1);
@@ -2369,25 +2382,37 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
             instantiatedTypes << type.mid(start).trimmed();
             adjustedTypeName.truncate(lpos);
         }
+        for (const QString &instantiatedType : qAsConst(instantiatedTypes)) {
+            AbstractMetaType *tmplArgType = buildAbstractMetaTypeFromString(instantiatedType);
+            if (!tmplArgType) {
+                if (errorMessage) {
+                    QTextStream(errorMessage) << "Cannot find template type \""
+                        << instantiatedType << "\" for \"" << typeSignature << "\".";
+                }
+                return nullptr;
+            }
+            instantiations.append(tmplArgType);
+        }
     }
 
     TypeEntry* typeEntry = TypeDatabase::instance()->findType(adjustedTypeName);
-
-    AbstractMetaType* metaType = 0;
-    if (typeEntry) {
-        metaType = new AbstractMetaType();
-        metaType->setTypeEntry(typeEntry);
-        metaType->setIndirections(indirections);
-        metaType->setReferenceType(refType);
-        metaType->setConstant(isConst);
-        metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
-        for (const QString &instantiation : qAsConst(instantiatedTypes)) {
-            AbstractMetaType* tmplArgType = buildAbstractMetaTypeFromString(instantiation);
-            metaType->addInstantiation(tmplArgType);
+    if (!typeEntry) {
+        if (errorMessage) {
+            QTextStream(errorMessage) << "Cannot find type \"" << adjustedTypeName
+                << "\" for \"" << typeSignature << "\".";
         }
-        metaType->decideUsagePattern();
-        m_metaTypeFromStringCache.insert(typeSignature, metaType);
+        return nullptr;
     }
+
+    AbstractMetaType *metaType = new AbstractMetaType();
+    metaType->setTypeEntry(typeEntry);
+    metaType->setIndirections(indirections);
+    metaType->setReferenceType(refType);
+    metaType->setConstant(isConst);
+    metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
+    metaType->setInstantiations(instantiations);
+    metaType->decideUsagePattern();
+    m_metaTypeFromStringCache.insert(typeSignature, metaType);
     return metaType;
 }
 
