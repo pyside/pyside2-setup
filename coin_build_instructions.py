@@ -47,7 +47,7 @@ import os
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")
 CI_TARGET_OS = option_value("targetOs")
-CI_HOST_OS_VER = option_value("osver")
+CI_HOST_OS_VER = option_value("osVer")
 CI_ENV_INSTALL_DIR = option_value("instdir")
 CI_ENV_AGENT_DIR = option_value("agentdir")
 CI_COMPILER = option_value("compiler")
