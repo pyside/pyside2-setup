@@ -2395,7 +2395,18 @@ AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
         }
     }
 
-    TypeEntry* typeEntry = TypeDatabase::instance()->findType(adjustedTypeName);
+    TypeEntry *typeEntry = nullptr;
+    AbstractMetaType::TypeUsagePattern pattern = AbstractMetaType::InvalidPattern;
+
+    if (instantiations.size() == 1
+        && instantiations.at(0)->typeUsagePattern() == AbstractMetaType::EnumPattern
+        && adjustedTypeName == QLatin1String("QFlags")) {
+        pattern = AbstractMetaType::FlagsPattern;
+        typeEntry = TypeDatabase::instance()->findType(typeSignature);
+    } else {
+        typeEntry = TypeDatabase::instance()->findType(adjustedTypeName);
+    }
+
     if (!typeEntry) {
         if (errorMessage) {
             QTextStream(errorMessage) << "Cannot find type \"" << adjustedTypeName
@@ -2410,8 +2421,17 @@ AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     metaType->setReferenceType(refType);
     metaType->setConstant(isConst);
     metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
-    metaType->setInstantiations(instantiations);
-    metaType->decideUsagePattern();
+    switch (pattern) {
+    case AbstractMetaType::FlagsPattern:
+        metaType->setTypeUsagePattern(pattern);
+        break;
+    default:
+        metaType->setInstantiations(instantiations);
+        metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
+        metaType->decideUsagePattern();
+        break;
+    }
+
     m_metaTypeFromStringCache.insert(typeSignature, metaType);
     return metaType;
 }
