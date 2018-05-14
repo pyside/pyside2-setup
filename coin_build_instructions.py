@@ -76,7 +76,7 @@ def call_setup(python_ver):
     elif CI_HOST_OS == "Windows":
 
         cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "\\bin\\qmake.exe",
-                "--openssl=C:\\openssl\\bin\\openssl"]
+                "--openssl=C:\\openssl\\bin"]
     else:
         cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "/bin/qmake"]
     cmd += ["--build-tests",

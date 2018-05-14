@@ -56,9 +56,10 @@ and
     --cmake=/path/to/bin/cmake
 respectively.
 
-For windows, if OpenSSL support is required, it is necessary to specify
-the directory with:
-    --openssl=/path/to/openssl/bin
+For Windows, if OpenSSL support is required, it's necessary to specify
+the directory path that contains the OpenSSL shared libraries
+"libeay32.dll" and "ssleay32.dll", for example:
+    --openssl=C:\OpenSSL-Win64\bin
 
 ADDITIONAL OPTIONS:
 
@@ -150,8 +151,9 @@ OPTIONAL:
     Specifying the --openssl option is only required on Windows.
     It is a no-op for other platforms.
 
-    You can specify the location of OpenSSL DLLs with option:
-        --openssl=</path/to/openssl/bin>.
+    You can specify the location of the OpenSSL DLLs with the
+    following option:
+        --openssl=</path/to/openssl/bin-directory>.
 
     You can download OpenSSL for Windows here:
         http://slproweb.com/products/Win32OpenSSL.html (*)
