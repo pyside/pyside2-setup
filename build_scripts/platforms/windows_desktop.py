@@ -180,8 +180,6 @@ def prepare_packages_win32(self, vars):
     qt_artifacts_permanent = [
         "opengl*.dll",
         "d3d*.dll",
-        "libEGL*.dll",
-        "libGLESv2*.dll",
         "designer.exe",
         "linguist.exe",
         "lrelease.exe",
@@ -189,6 +187,21 @@ def prepare_packages_win32(self, vars):
         "lconvert.exe",
         "qtdiag.exe"
     ]
+
+    # Choose which EGL library variants to copy.
+    qt_artifacts_egl = [
+        "libEGL{}.dll",
+        "libGLESv2{}.dll"
+    ]
+    if self.qtinfo.build_type != 'debug_and_release':
+        egl_suffix = '*'
+    elif self.debug:
+        egl_suffix = 'd'
+    else:
+        egl_suffix = ''
+    qt_artifacts_egl = [a.format(egl_suffix) for a in qt_artifacts_egl]
+    qt_artifacts_permanent += qt_artifacts_egl
+
     copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
         filter=qt_artifacts_permanent,
         recursive=False, vars=vars)
@@ -273,18 +286,21 @@ def prepare_packages_win32(self, vars):
     # <qt>/qml/* -> <setup>/PySide2/qml
     qml_dll_patterns = ["*{}.dll"]
     qml_ignore_patterns = qml_dll_patterns + [pdb_pattern]
-    # Remove the "{}" from the patterns
     qml_ignore = [a.format('') for a in qml_ignore_patterns]
-    if copy_pdbs:
-        qml_dll_patterns += [pdb_pattern]
-    qml_ignore = [a.format('') for a in qml_dll_patterns]
-    qml_dll_filter = functools.partial(qt_build_config_filter,
-        qml_dll_patterns)
+
+    # Copy all files that are not dlls and pdbs (.qml, qmldir).
     copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
         ignore=qml_ignore,
         force=False,
         recursive=True,
         vars=vars)
+
+    if copy_pdbs:
+        qml_dll_patterns += [pdb_pattern]
+    qml_dll_filter = functools.partial(qt_build_config_filter,
+        qml_dll_patterns)
+
+    # Copy all dlls (and possibly pdbs).
     copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
         file_filter_function=qml_dll_filter,
         force=False,
