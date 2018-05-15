@@ -434,6 +434,8 @@ public:
         m_constant = constant;
     }
 
+    bool isConstRef() const;
+
     ReferenceType referenceType() const { return m_referenceType; }
     void setReferenceType(ReferenceType ref) { m_referenceType = ref; }
 

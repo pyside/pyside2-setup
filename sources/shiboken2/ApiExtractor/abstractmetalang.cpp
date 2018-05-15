@@ -189,6 +189,11 @@ AbstractMetaTypeCList AbstractMetaType::nestedArrayTypes() const
     return result;
 }
 
+bool AbstractMetaType::isConstRef() const
+{
+    return isConstant() && m_referenceType == LValueReference && indirections() == 0;
+}
+
 QString AbstractMetaType::cppSignature() const
 {
     if (m_cachedCppSignature.isEmpty())
@@ -201,10 +206,8 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isTemplateArgument() || m_referenceType == RValueReference)
         return InvalidPattern;
 
-    if (m_typeEntry->isPrimitive() && (!actualIndirections()
-        || (isConstant() && m_referenceType == LValueReference && !indirections()))) {
+    if (m_typeEntry->isPrimitive() && (actualIndirections() == 0 || isConstRef()))
         return PrimitivePattern;
-    }
 
     if (m_typeEntry->isVoid())
         return NativePointerPattern;
@@ -212,7 +215,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isVarargs())
         return VarargsPattern;
 
-    if (m_typeEntry->isEnum() && actualIndirections() == 0)
+    if (m_typeEntry->isEnum() && (actualIndirections() == 0 || isConstRef()))
         return EnumPattern;
 
     if (m_typeEntry->isObject()) {
@@ -228,8 +231,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isSmartPointer() && indirections() == 0)
         return SmartPointerPattern;
 
-    if (m_typeEntry->isFlags() && indirections() == 0
-        && (isConstant() == (m_referenceType == LValueReference)))
+    if (m_typeEntry->isFlags() && (actualIndirections() == 0 || isConstRef()))
         return FlagsPattern;
 
     if (m_typeEntry->isArray())

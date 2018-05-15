@@ -115,6 +115,14 @@ class EnumTest(unittest.TestCase):
         sum = Event.EventTypeClass.Value1 + Event.EventTypeClass.Value2
         self.assertEqual(sum, 1)
 
+    def testSetEnum(self):
+        event = Event(Event.ANY_EVENT)
+        self.assertEqual(event.eventType(), Event.ANY_EVENT)
+        event.setEventType(Event.BASIC_EVENT)
+        self.assertEqual(event.eventType(), Event.BASIC_EVENT)
+        event.setEventTypeByConstRef(Event.SOME_EVENT)
+        self.assertEqual(event.eventType(), Event.SOME_EVENT)
+
     def testEnumTpPrintImplementation(self):
         '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
         tmpfile = createTempFile()
