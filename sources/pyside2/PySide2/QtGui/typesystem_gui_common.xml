@@ -223,7 +223,8 @@
     </conversion-rule>
   </primitive-type>
 
-  <value-type name="QAccessible" copyable="false">
+  <value-type name="QAccessible">
+      <value-type name="State"/>
       <enum-type name="Event"/>
       <enum-type name="Role"/>
       <enum-type name="Text"/>
@@ -233,6 +234,7 @@
   </value-type>
 
   <object-type name="QAccessibleEditableTextInterface"/>
+  <object-type name="QAccessibleInterface"/>
   <object-type name="QAccessibleObject"/>
   <object-type name="QAccessibleTableCellInterface"/>
   <object-type name="QAccessibleTextInterface"/>
@@ -3299,17 +3301,6 @@
 
   </object-type>
 
-  <value-type name="QAccessible">
-      <value-type name="State"/>
-      <enum-type name="Role"/>
-      <enum-type name="Text"/>
-      <enum-type name="RelationFlag"/>
-      <enum-type name="InterfaceType"/>
-      <enum-type name="TextBoundaryType"/>
-      <enum-type name="Event"/>
-  </value-type>
-  <object-type name="QAccessibleInterface">
-  </object-type>
   <object-type name="QOpenGLBuffer" since="5.0">
     <enum-type name="Access" />
     <enum-type name="RangeAccessFlag" flags="RangeAccessFlags" />
