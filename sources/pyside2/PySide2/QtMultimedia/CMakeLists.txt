@@ -27,7 +27,10 @@ ${QtMultimedia_GEN_DIR}/qcameracapturedestinationcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameracontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraexposurecontrol_wrapper.cpp
 # Private destructor: ${QtMultimedia_GEN_DIR}/qcameraexposure_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcamerafeedbackcontrol_wrapper.cpp
 # Private destructor: ${${QtMultimedia_GEN_DIR}/qcamerafocus_wrapper.cpp
+# needs enums from QCameraFocus ${QtMultimedia_GEN_DIR}/qcameraflashcontrol_wrapper.cpp
+# needs enums from QCameraFocus ${QtMultimedia_GEN_DIR}/qcamerafocuscontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerafocuszone_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_frameraterange_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimagecapturecontrol_wrapper.cpp
@@ -60,7 +63,19 @@ ${QtMultimedia_GEN_DIR}/qmediaplaylist_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediarecordercontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediarecorder_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediaresource_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaservice_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaservicecamerainfointerface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaservicedefaultdeviceinterface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaservicefeaturesinterface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaserviceproviderhint_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaservicesupporteddevicesinterface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediaservicesupportedformatsinterface_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediastreamscontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediatimeinterval_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediatimerange_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmediavideoprobecontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmetadatareadercontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qmetadatawritercontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmultimedia_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qradiodatacontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qradiodata_wrapper.cpp
