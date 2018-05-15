@@ -116,6 +116,9 @@ using `setup.py build`:
 
   --module-subset allows for specifying the Qt modules to be built.
     A minimal set is: --module-subset=Core,Gui,Test,Widgets
+  --skip-modules allows for specifying the Qt modules that will be
+    skipped during the build process.
+    For example: --skip-modules=WebEngineCore,WebEngineWidgets
   --reuse-build option allows recompiling only the modified sources and
         not the whole world, shortening development iteration time,
   --skip-cmake will reuse the already generated Makefiles (or

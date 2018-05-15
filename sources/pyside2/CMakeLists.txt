@@ -353,6 +353,14 @@ if (NOT MODULES)
     set(MODULES "${ALL_ESSENTIAL_MODULES};${ALL_OPTIONAL_MODULES}")
 endif()
 
+# Removing from the MODULES list the items that were defined with
+# -DSKIP_MODULES on command line
+if (SKIP_MODULES)
+    foreach(s ${SKIP_MODULES})
+        list(REMOVE_ITEM MODULES ${s})
+    endforeach()
+endif()
+
 foreach(m ${MODULES})
     COLLECT_MODULE_IF_FOUND(${m})
 endforeach()
