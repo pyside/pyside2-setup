@@ -47,6 +47,8 @@ import os
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")
 CI_TARGET_OS = option_value("targetOs")
+CI_HOST_ARCH = option_value("hostArch")
+CI_TARGET_ARCH = option_value("targetArch")
 CI_HOST_OS_VER = option_value("osVer")
 CI_ENV_INSTALL_DIR = option_value("instdir")
 CI_ENV_AGENT_DIR = option_value("agentdir")
@@ -60,7 +62,7 @@ CI_RELEASE_CONF = has_option("packaging")
 
 
 def call_setup(python_ver):
-    _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS)
+    _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
     install_pip_dependencies(env_pip, ["six", "wheel"])
