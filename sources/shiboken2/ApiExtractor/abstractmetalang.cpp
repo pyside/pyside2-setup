@@ -1756,7 +1756,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
 
-    f->setAttributes(AbstractMetaAttributes::Public | AbstractMetaAttributes::FinalInTargetLang);
+    f->setAttributes(Public | FinalInTargetLang | AddedMethod);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
 
@@ -1784,7 +1784,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     arg->setName(name());
     f->addArgument(arg);
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::FinalInTargetLang;
+    AbstractMetaAttributes::Attributes attr = FinalInTargetLang | AddedMethod;
     if (isPrivate)
         attr |= AbstractMetaAttributes::Private;
     else
@@ -2156,8 +2156,11 @@ void AbstractMetaClass::fixFunctions()
                 funcsToAdd << sf;
         }
 
-        for (AbstractMetaFunction *f : qAsConst(funcsToAdd))
-            funcs << f->copy();
+        for (AbstractMetaFunction *f : qAsConst(funcsToAdd)) {
+            AbstractMetaFunction *copy = f->copy();
+            (*copy) += AddedMethod;
+            funcs.append(copy);
+        }
 
         if (superClass)
             superClass = superClass->baseClass();

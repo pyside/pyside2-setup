@@ -137,7 +137,9 @@ public:
         FinalCppClass               = 0x00100000,
         VirtualCppMethod            = 0x00200000,
         OverriddenCppMethod         = 0x00400000,
-        FinalCppMethod              = 0x00800000
+        FinalCppMethod              = 0x00800000,
+        // Add by meta builder (implicit constructors, inherited methods, etc)
+        AddedMethod                 = 0x01000000
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)
