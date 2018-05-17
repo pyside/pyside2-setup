@@ -293,19 +293,20 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
     endif()
 
     # If the module was found, and also the module path is the same as the
-    # Qt5Core base path, we will generate the list with the modules to be install
+    # Qt5Core base path, we will generate the list with the modules to be installed
+    set(looked_in_message ". Looked in: ${${_name_dir}}")
     if("${${_name_found}}" AND (("${found_basepath}" GREATER "0") OR ("${found_basepath}" EQUAL "0")))
-        message(STATUS "${module_state} module ${name} found (${ARGN})")
+        message(STATUS "${module_state} module ${name} found (${ARGN})${looked_in_message}")
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})
     else()
         if("${module_state}" STREQUAL "optional")
-            message(STATUS "optional module ${name} skipped")
+            message(STATUS "optional module ${name} skipped${looked_in_message}")
         elseif("${module_state}" STREQUAL "essential")
             message(STATUS "skipped module ${name} is essential!\n"
-                           "   We do not guarantee that all tests are working.")
+                           "   We do not guarantee that all tests are working.${looked_in_message}")
         else()
-            message(FATAL_ERROR "module ${name} MISSING")
+            message(FATAL_ERROR "module ${name} MISSING${looked_in_message}")
         endif()
     endif()
 endmacro()
