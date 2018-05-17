@@ -48,9 +48,6 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
     if (metaType->isConstant())
         str << "const " ;
     switch (metaType->typeUsagePattern()) {
-    case AbstractMetaType::PrimitivePattern:
-        str << metaType->name();
-        break;
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
         // to "Qt::Alignment" as seen by qdoc.
