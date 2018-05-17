@@ -38,6 +38,15 @@ public:
     void fillDocumentation(AbstractMetaClass* metaClass) override;
     Documentation retrieveModuleDocumentation() override;
     Documentation retrieveModuleDocumentation(const QString& name) override;
+
+private:
+    QString queryFunctionDocumentation(const QString &sourceFileName,
+                                       const AbstractMetaClass* metaClass,
+                                       const QString &classQuery,
+                                       const  AbstractMetaFunction *func,
+                                       const DocModificationList &signedModifs,
+                                       QXmlQuery &xquery,
+                                       QString *errorMessage);
 };
 
 #endif // QTDOCPARSER_H
