@@ -464,8 +464,10 @@ QString QtXmlToSphinx::transform(const QString& doc)
     while (!reader.atEnd()) {
         QXmlStreamReader::TokenType token = reader.readNext();
         if (reader.hasError()) {
-            const QString message = QLatin1String("XML Error: ") + reader.errorString()
-                                    + QLatin1Char('\n') + doc;
+            QString message;
+            QTextStream(&message) << "XML Error "
+                << reader.errorString() << " at " << reader.lineNumber()
+                << ':' << reader.columnNumber() << '\n' << doc;
             m_output << INDENT << message;
             qCWarning(lcShiboken).noquote().nospace() << message;
             break;
