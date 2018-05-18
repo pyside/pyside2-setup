@@ -32,7 +32,7 @@ import unittest
 import os
 from tempfile import mkstemp
 
-from PySide2.QtCore import QObject, SIGNAL, QFile
+from PySide2.QtCore import QObject, SIGNAL, QFile, QSignalBlocker
 
 class TestSignalsBlockedBasic(unittest.TestCase):
     '''Basic test case for signalsBlocked'''
@@ -46,6 +46,15 @@ class TestSignalsBlockedBasic(unittest.TestCase):
         self.assertTrue(not obj.blockSignals(True))
         self.assertTrue(obj.signalsBlocked())
         self.assertTrue(obj.blockSignals(False))
+        blocker = QSignalBlocker(obj)
+        self.assertTrue(obj.signalsBlocked())
+        blocker.unblock()
+        self.assertTrue(not obj.signalsBlocked())
+        blocker.reblock()
+        self.assertTrue(obj.signalsBlocked())
+        del blocker
+        self.assertTrue(not obj.signalsBlocked())
+
 
 class TestSignalsBlocked(unittest.TestCase):
     '''Test case to check if the signals are really blocked'''

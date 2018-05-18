@@ -464,8 +464,10 @@ QString QtXmlToSphinx::transform(const QString& doc)
     while (!reader.atEnd()) {
         QXmlStreamReader::TokenType token = reader.readNext();
         if (reader.hasError()) {
-            const QString message = QLatin1String("XML Error: ") + reader.errorString()
-                                    + QLatin1Char('\n') + doc;
+            QString message;
+            QTextStream(&message) << "XML Error "
+                << reader.errorString() << " at " << reader.lineNumber()
+                << ':' << reader.columnNumber() << '\n' << doc;
             m_output << INDENT << message;
             qCWarning(lcShiboken).noquote().nospace() << message;
             break;
@@ -2194,44 +2196,61 @@ void QtDocGenerator::writeAdditionalDocumentation()
                   qPrintable(FileOut::msgCannotOpenForReading(additionalDocumentationFile)));
         return;
     }
-    const QByteArray contents = additionalDocumentationFile.readAll();
-    const QStringList lines = QFile::decodeName(contents).split(QLatin1Char('\n'));
-    QFileInfoList additionalDocFiles;
-    additionalDocFiles.reserve(lines.size());
-    for (const QString &lineIn : lines) {
-        const QString line = lineIn.trimmed();
-        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#'))) {
-            QFileInfo fi(m_docDataDir + QLatin1Char('/') + line);
-            if (fi.isFile()) {
-                additionalDocFiles.append(fi);
-            } else {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgNonExistentAdditionalDocFile(m_docDataDir, line)));
-            }
-        }
-    }
-    additionalDocumentationFile.close();
 
-    const QString rstPrefix = outputDirectory() + QLatin1Char('/');
+    QDir outDir(outputDirectory());
     const QString rstSuffix = fileNameSuffix();
 
     QString errorMessage;
     int successCount = 0;
-    for (const QFileInfo &additionalDocFile : additionalDocFiles) {
-        const QString rstFileName = additionalDocFile.baseName() + rstSuffix;
-        const QString rstFile = rstPrefix + rstFileName;
-        if (QtXmlToSphinx::convertToRst(this, additionalDocFile.absoluteFilePath(),
-                                        rstFile, QString(), &errorMessage)) {
-            ++successCount;
-            qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
-                << " converted " << additionalDocFile.fileName()
-                << ' ' << rstFileName;
+    int count = 0;
+
+    QString targetDir = outDir.absolutePath();
+
+    while (!additionalDocumentationFile.atEnd()) {
+        const QByteArray lineBA = additionalDocumentationFile.readLine().trimmed();
+        if (lineBA.isEmpty() || lineBA.startsWith('#'))
+            continue;
+        const QString line = QFile::decodeName(lineBA);
+        // Parse "[directory]" specification
+        if (line.size() > 2 && line.startsWith(QLatin1Char('[')) && line.endsWith(QLatin1Char(']'))) {
+            const QString dir = line.mid(1, line.size() - 2);
+            if (dir.isEmpty() || dir == QLatin1String(".")) {
+                targetDir = outDir.absolutePath();
+            } else {
+                if (!outDir.exists(dir) && !outDir.mkdir(dir)) {
+                    qCWarning(lcShiboken, "Cannot create directory %s under %s",
+                              qPrintable(dir),
+                              qPrintable(QDir::toNativeSeparators(outputDirectory())));
+                    break;
+                }
+                targetDir = outDir.absoluteFilePath(dir);
+            }
         } else {
-            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+            // Normal file entry
+            QFileInfo fi(m_docDataDir + QLatin1Char('/') + line);
+            if (fi.isFile()) {
+                const QString rstFileName = fi.baseName() + rstSuffix;
+                const QString rstFile = targetDir + QLatin1Char('/') + rstFileName;
+                if (QtXmlToSphinx::convertToRst(this, fi.absoluteFilePath(),
+                                                rstFile, QString(), &errorMessage)) {
+                    ++successCount;
+                    qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
+                        << " converted " << fi.fileName()
+                        << ' ' << rstFileName;
+                } else {
+                    qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+                }
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgNonExistentAdditionalDocFile(m_docDataDir, line)));
+            }
+            ++count;
         }
     }
+    additionalDocumentationFile.close();
+
     qCInfo(lcShiboken, "Created %d/%d additional documentation files.",
-           successCount, additionalDocFiles.size());
+           successCount, count);
 }
 
 bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)

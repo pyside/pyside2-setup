@@ -56,9 +56,10 @@ and
     --cmake=/path/to/bin/cmake
 respectively.
 
-For windows, if OpenSSL support is required, it is necessary to specify
-the directory with:
-    --openssl=/path/to/openssl/bin
+For Windows, if OpenSSL support is required, it's necessary to specify
+the directory path that contains the OpenSSL shared libraries
+"libeay32.dll" and "ssleay32.dll", for example:
+    --openssl=C:\OpenSSL-Win64\bin
 
 ADDITIONAL OPTIONS:
 
@@ -114,6 +115,11 @@ DEVELOPMENT OPTIONS:
 For development purposes the following options might be of use, when
 using `setup.py build`:
 
+  --module-subset allows for specifying the Qt modules to be built.
+    A minimal set is: --module-subset=Core,Gui,Test,Widgets
+  --skip-modules allows for specifying the Qt modules that will be
+    skipped during the build process.
+    For example: --skip-modules=WebEngineCore,WebEngineWidgets
   --reuse-build option allows recompiling only the modified sources and
         not the whole world, shortening development iteration time,
   --skip-cmake will reuse the already generated Makefiles (or
@@ -145,8 +151,9 @@ OPTIONAL:
     Specifying the --openssl option is only required on Windows.
     It is a no-op for other platforms.
 
-    You can specify the location of OpenSSL DLLs with option:
-        --openssl=</path/to/openssl/bin>.
+    You can specify the location of the OpenSSL DLLs with the
+    following option:
+        --openssl=</path/to/openssl/bin-directory>.
 
     You can download OpenSSL for Windows here:
         http://slproweb.com/products/Win32OpenSSL.html (*)

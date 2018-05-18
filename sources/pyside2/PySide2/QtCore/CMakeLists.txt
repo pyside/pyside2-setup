@@ -55,6 +55,7 @@ ${QtCore_GEN_DIR}/qfinalstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qhistorystate_wrapper.cpp
+${QtCore_GEN_DIR}/qidentityproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevice_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsondocument_wrapper.cpp
@@ -67,8 +68,10 @@ ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
 ${QtCore_GEN_DIR}/qlocale_wrapper.cpp
+${QtCore_GEN_DIR}/qlockfile_wrapper.cpp
 ${QtCore_GEN_DIR}/qmargins_wrapper.cpp
 ${QtCore_GEN_DIR}/qmarginsf_wrapper.cpp
+${QtCore_GEN_DIR}/qmessageauthenticationcode_wrapper.cpp
 ${QtCore_GEN_DIR}/qmessagelogcontext_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaclassinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaenum_wrapper.cpp
@@ -83,6 +86,7 @@ ${QtCore_GEN_DIR}/qmodelindex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutexlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qobject_wrapper.cpp
+${QtCore_GEN_DIR}/qoperatingsystemversion_wrapper.cpp
 ${QtCore_GEN_DIR}/qparallelanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qpauseanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qpersistentmodelindex_wrapper.cpp
@@ -109,6 +113,7 @@ ${QtCore_GEN_DIR}/qsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qsemaphorereleaser_wrapper.cpp
 ${QtCore_GEN_DIR}/qsequentialanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qsettings_wrapper.cpp
+${QtCore_GEN_DIR}/qsignalblocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignalmapper_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignaltransition_wrapper.cpp
 ${QtCore_GEN_DIR}/qsize_wrapper.cpp

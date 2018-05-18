@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,42 +28,32 @@
 ##
 #############################################################################
 
+'''Unit tests for QUuid'''
+
 import unittest
-from PySide2.QtCore import *
 
-class MyModel (QAbstractListModel):
-    pass
+from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import QSocketNotifier
+import socket
+import sys
+import os
 
-class Foo:
-    pass
+class QSocketNotifierTest(unittest.TestCase):
+    def testClass(self):
+        app = QApplication([])
+        # socketpair is not available on Windows
+        if os.name != "nt":
+            w_sock, r_sock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
 
-class TestQModelIndexInternalPointer(unittest.TestCase):
+            self.assertIsInstance(r_sock.fileno(), int)
 
-    def testInternalPointer(self):
-        m = MyModel()
-        foo = Foo()
-        idx = m.createIndex(0,0, foo)
-        check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
-                                  | QAbstractItemModel.CheckIndexOption.DoNotUseParent
-                                  | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
-        self.assertTrue(check)
+            notifier = QSocketNotifier(r_sock.fileno(), QSocketNotifier.Read)
 
-    def testPassQPersistentModelIndexAsQModelIndex(self):
-        # Related to bug #716
-        m = MyModel()
-        idx = QPersistentModelIndex()
-        m.span(idx)
+            self.assertIsNotNone(notifier)
 
-    def testQIdentityProxyModel(self):
-        sourceModel = QStringListModel(['item1', 'item2'])
-        sourceIndex = sourceModel.index(0, 0)
-        sourceData = str(sourceModel.data(sourceIndex, Qt.DisplayRole))
-        proxyModel = QIdentityProxyModel()
-        proxyModel.setSourceModel(sourceModel)
-        proxyIndex = proxyModel.mapFromSource(sourceIndex)
-        proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
-        self.assertEqual(sourceData, proxyData)
+            w_sock.close()
+            r_sock.close()
+
 
 if __name__ == '__main__':
     unittest.main()
-

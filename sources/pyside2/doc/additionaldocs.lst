@@ -50,7 +50,9 @@
 #         fi
 #     fi
 # done
+# A line enclosed in [] denotes a (relative) target directory
 
+[overviews]
 animation-overview.webxml
 animation.webxml
 application-windows.webxml

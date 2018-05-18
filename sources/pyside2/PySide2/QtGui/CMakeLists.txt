@@ -7,7 +7,21 @@ ${QtGui_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleeditabletextinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleobject_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessiblestatechangeevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletablecellinterface_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletablemodelchangeevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletextcursorevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletextinsertevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletextinterface_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletextremoveevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletextselectionevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibletextupdateevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessiblevaluechangeevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessiblevalueinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qactionevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qbackingstore_wrapper.cpp
 ${QtGui_GEN_DIR}/qbitmap_wrapper.cpp
@@ -48,8 +62,10 @@ ${QtGui_GEN_DIR}/qimageiohandler_wrapper.cpp
 ${QtGui_GEN_DIR}/qimagereader_wrapper.cpp
 ${QtGui_GEN_DIR}/qimagewriter_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputevent_wrapper.cpp
+${QtGui_GEN_DIR}/qinputmethod_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_attribute_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_wrapper.cpp
+${QtGui_GEN_DIR}/qinputmethodqueryevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qintvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeyevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeysequence_wrapper.cpp
@@ -67,6 +83,7 @@ ${QtGui_GEN_DIR}/qmatrix4x4_wrapper.cpp
 ${QtGui_GEN_DIR}/qmouseevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmovie_wrapper.cpp
+${QtGui_GEN_DIR}/qnativegestureevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qoffscreensurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengldebuglogger_wrapper.cpp
@@ -78,6 +95,7 @@ ${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglpixeltransferoptions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengltexture_wrapper.cpp
+${QtGui_GEN_DIR}/qopengltextureblitter_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengltimemonitor_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengltimerquery_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglversionprofile_wrapper.cpp
@@ -107,6 +125,7 @@ ${QtGui_GEN_DIR}/qpixmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_key_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixelformat_wrapper.cpp
+${QtGui_GEN_DIR}/qpointingdeviceuniqueid_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygon_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygonf_wrapper.cpp
 ${QtGui_GEN_DIR}/qpytextobject_wrapper.cpp
@@ -123,7 +142,6 @@ ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglbuffer_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontext_wrapper.cpp
-${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_state_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qscreen_wrapper.cpp
@@ -132,6 +150,8 @@ ${QtGui_GEN_DIR}/qopenglshader_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglframebufferobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qrasterwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qrawfont_wrapper.cpp
+${QtGui_GEN_DIR}/qscrollevent_wrapper.cpp
+${QtGui_GEN_DIR}/qscrollprepareevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatictext_wrapper.cpp
 ${QtGui_GEN_DIR}/qstylehints_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurface_wrapper.cpp

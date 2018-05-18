@@ -217,6 +217,9 @@
       <enum-type name="ExposureParameter"/>
       <modify-function signature="supportedParameterRange(QCameraExposureControl::ExposureParameter,bool*)const" remove="all"/>
   </object-type>
+  <object-type name="QCameraFeedbackControl">
+      <enum-type name="EventType"/>
+  </object-type>
   <value-type name="QCameraFocusZone">
       <enum-type name="FocusZoneStatus"/>
   </value-type>
@@ -225,6 +228,8 @@
       <enum-type name="FocusMode" flags="FocusModes"/>
       <enum-type name="FocusPointMode"/>
   </object-type>
+  <object-type name="QCameraFlashControl"/> needs enums from QCameraFocus
+  <object-type name="QCameraFocusControl"/>
   -->
   <value-type name="QCameraInfo"/>
   <object-type name="QCameraInfoControl"/>
@@ -313,7 +318,25 @@
   </object-type>
   <object-type name="QMediaRecorderControl"/>
   <value-type name="QMediaResource"/>
+  <object-type name="QMediaService"/>
+  <interface-type name="QMediaServiceCameraInfoInterface"/>
+  <interface-type name="QMediaServiceDefaultDeviceInterface"/>
+  <interface-type name="QMediaServiceFeaturesInterface"/>
+  <value-type name="QMediaServiceProviderHint">
+      <enum-type name="Type"/>
+      <enum-type name="Feature" flags="Features"/>
+  </value-type>
+  <interface-type name="QMediaServiceSupportedDevicesInterface"/>
+  <interface-type name="QMediaServiceSupportedFormatsInterface"/>
+  <object-type name="QMediaStreamsControl">
+      <enum-type name="StreamType"/>
+  </object-type>
+  <value-type name="QMediaTimeInterval"/>
   <value-type name="QMediaTimeRange"/>
+  <object-type name="QMediaVideoProbeControl"/>
+
+  <object-type name="QMetaDataReaderControl"/>
+  <object-type name="QMetaDataWriterControl"/>
 
   <namespace-type name="QMultimedia">
       <enum-type name="SupportEstimate"/>

@@ -49,6 +49,16 @@ def prepare_standalone_package_macos(self, executables, vars):
             return False
         return True
 
+    # Filter out debug plugins and qml plugins in the
+    # debug_and_release config.
+    no_copy_debug = True
+    def file_variant_filter(file_name, file_full_path):
+        if self.qtinfo.build_type != 'debug_and_release':
+            return True
+        if file_name.endswith('_debug.dylib') and no_copy_debug:
+            return False
+        return True
+
     # <qt>/lib/* -> <setup>/PySide2/Qt/lib
     if self.qt_is_framework_build():
         framework_built_modules = [
@@ -71,10 +81,23 @@ def prepare_standalone_package_macos(self, executables, vars):
             return general_dir_filter(dir_name, parent_full_path,
                 dir_full_path)
 
+        # Filter out debug frameworks in the
+        # debug_and_release config.
+        no_copy_debug = True
+        def framework_variant_filter(file_name, file_full_path):
+            if self.qtinfo.build_type != 'debug_and_release':
+                return True
+            dir_path = os.path.dirname(file_full_path)
+            in_framework = dir_path.endswith("Versions/5")
+            if file_name.endswith('_debug') and in_framework and no_copy_debug:
+                return False
+            return True
+
         copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
             recursive=True, vars=vars,
             ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
-            dir_filter_function=framework_dir_filter)
+            dir_filter_function=framework_dir_filter,
+            file_filter_function=framework_variant_filter)
 
         # Fix rpath for WebEngine process executable. The already
         # present rpath does not work because it assumes a symlink
@@ -102,6 +125,7 @@ def prepare_standalone_package_macos(self, executables, vars):
             "{pyside_package_dir}/PySide2/Qt/lib",
             filter=accepted_modules,
             ignore=ignored_modules,
+            file_filter_function=file_variant_filter,
             recursive=True, vars=vars, force_copy_symlinks=True)
 
         if self.is_webengine_built(built_modules):
@@ -137,6 +161,7 @@ def prepare_standalone_package_macos(self, executables, vars):
         filter=["*.dylib"],
         recursive=True,
         dir_filter_function=general_dir_filter,
+        file_filter_function=file_variant_filter,
         vars=vars)
 
     # <qt>/qml/* -> <setup>/PySide2/Qt/qml
@@ -146,6 +171,7 @@ def prepare_standalone_package_macos(self, executables, vars):
         recursive=True,
         force=False,
         dir_filter_function=general_dir_filter,
+        file_filter_function=file_variant_filter,
         vars=vars)
 
     # <qt>/translations/* -> <setup>/PySide2/Qt/translations

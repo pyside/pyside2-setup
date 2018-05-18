@@ -36,48 +36,47 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
+from build_scripts.utils import has_option
+from build_scripts.utils import option_value
+from build_scripts.utils import install_pip_dependencies
+from build_scripts.utils import get_qtci_virtualEnv
+from build_scripts.utils import run_instruction
+from build_scripts.utils import rmtree
+import os
 
-from __future__ import print_function
+# Values must match COIN thrift
+CI_HOST_OS = option_value("os")
+CI_TARGET_OS = option_value("targetOs")
+CI_HOST_ARCH = option_value("hostArch")
+CI_TARGET_ARCH = option_value("targetArch")
+CI_HOST_OS_VER = option_value("osVer")
+CI_ENV_INSTALL_DIR = option_value("instdir")
+CI_ENV_AGENT_DIR = option_value("agentdir") or "."
+CI_COMPILER = option_value("compiler")
+CI_FEATURES = []
+_ci_features = option_value("features")
+if _ci_features is not None:
+    for f in _ci_features.split(', '):
+        CI_FEATURES.append(f)
 
-from .utils import has_option, option_value
+CI_RELEASE_CONF = has_option("packaging")
 
-# Declare options
-OPTION_DEBUG = has_option("debug")
-OPTION_RELWITHDEBINFO = has_option('relwithdebinfo')
-OPTION_QMAKE = option_value("qmake")
-OPTION_QT_VERSION = option_value("qt")
-OPTION_CMAKE = option_value("cmake")
-OPTION_OPENSSL = option_value("openssl")
-OPTION_ONLYPACKAGE = has_option("only-package")
-OPTION_STANDALONE = has_option("standalone")
-OPTION_MAKESPEC = option_value("make-spec")
-OPTION_IGNOREGIT = has_option("ignore-git")
-# don't generate documentation
-OPTION_SKIP_DOCS = has_option("skip-docs")
-# don't include pyside2-examples
-OPTION_NOEXAMPLES = has_option("no-examples")
-# number of parallel build jobs
-OPTION_JOBS = option_value('jobs')
-# Legacy, not used any more.
-OPTION_JOM = has_option('jom')
-# Do not use jom instead of nmake with msvc
-OPTION_NO_JOM = has_option('no-jom')
-OPTION_BUILDTESTS = has_option("build-tests")
-OPTION_MACOS_ARCH = option_value("macos-arch")
-OPTION_MACOS_USE_LIBCPP = has_option("macos-use-libc++")
-OPTION_MACOS_SYSROOT = option_value("macos-sysroot")
-OPTION_MACOS_DEPLOYMENT_TARGET = option_value("macos-deployment-target")
-OPTION_XVFB = has_option("use-xvfb")
-OPTION_REUSE_BUILD = has_option("reuse-build")
-OPTION_SKIP_CMAKE = has_option("skip-cmake")
-OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
-OPTION_SKIP_PACKAGING = has_option("skip-packaging")
-OPTION_SKIP_MODULES = option_value("skip-modules")
-OPTION_MODULE_SUBSET = option_value("module-subset")
-OPTION_RPATH_VALUES = option_value("rpath")
-OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
-OPTION_QT_SRC = option_value("qt-src-dir")
-OPTION_VERBOSE_BUILD = has_option("verbose-build")
-OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
-OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")
+def call_testrunner(python_ver, buildnro):
+    _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
+    rmtree(_env, True)
+    run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
+    install_pip_dependencies(env_pip, ["six", "wheel"])
+    cmd = [env_python, "testrunner.py", "test",
+                  "--blacklist", "build_history/blacklist.txt",
+                  "--buildno=" + buildnro]
+    run_instruction(cmd, "Failed to run testrunner.py")
 
+def run_test_instructions():
+    os.chdir(CI_ENV_AGENT_DIR)
+    call_testrunner("", "0")
+    # We know that second build was with python3
+    if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
+        call_testrunner("3", "1")
+
+if __name__ == "__main__":
+    run_test_instructions()

@@ -190,6 +190,7 @@
       <enum-type name="ViewItemPosition"/>
   </value-type>
 
+  <object-type name="QAccessibleWidget"/>
   <value-type name="QColormap">
       <enum-type name="Mode"/>
   </value-type>
@@ -995,6 +996,13 @@
   </object-type>
   <object-type name="QProgressBar">
       <enum-type name="Direction"/>
+  </object-type>
+  <object-type name="QProxyStyle">
+      <modify-function signature="QProxyStyle(QStyle*)">
+          <modify-argument index="1">
+              <define-ownership owner="c++"/>
+          </modify-argument>
+      </modify-function>
   </object-type>
   <object-type name="QPushButton" />
   <object-type name="QScrollArea">
@@ -3193,6 +3201,14 @@
             QApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
+    <add-function signature="QApplication()">
+        <inject-code>
+            PyObject *empty = PyTuple_New(2);
+            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
+                QApplicationConstructor(%PYSELF, empty, &amp;%0);
+            }
+        </inject-code>
+    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
   </object-type>
@@ -3664,6 +3680,17 @@
   </object-type>
 
   <value-type name="QTileRules" since="4.6"/>
+
+  <object-type name="QScroller">
+      <enum-type name="State"/>
+      <enum-type name="ScrollerGestureType"/>
+      <enum-type name="Input"/>
+  </object-type>
+  <value-type name="QScrollerProperties">
+      <enum-type name="OvershootPolicy"/>
+      <enum-type name="FrameRates"/>
+      <enum-type name="ScrollMetric"/>
+  </value-type>
 
   <object-type name="QSizeGrip"/>
 
