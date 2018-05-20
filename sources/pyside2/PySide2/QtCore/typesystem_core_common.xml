@@ -44,6 +44,7 @@
 
     <custom-type name="str" />
     <custom-type name="PyBytes" />
+    <custom-type name="PyByteArray" />
     <custom-type name="PyCallable" />
     <custom-type name="PyObject" />
     <custom-type name="PySequence" />
@@ -2498,13 +2499,15 @@
             <add-conversion type="Py_None">
             %out = %OUTTYPE();
             </add-conversion>
-            <add-conversion type="PyString" check="Shiboken::String::check(%in)">
-            %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
-            </add-conversion>
             <add-conversion type="PyBytes">
             #ifdef IS_PY3K
             %out = %OUTTYPE(PyBytes_AS_STRING(%in), PyBytes_GET_SIZE(%in));
+            #else
+            %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
             #endif
+            </add-conversion>
+            <add-conversion type="PyString" check="Shiboken::String::check(%in) &amp;&amp; !PyUnicode_Check(%in)">
+            %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
             </add-conversion>
         </target-to-native>
     </conversion-rule>
@@ -2566,47 +2569,108 @@
     <modify-function signature="operator+(QByteArray,const char*)" remove="all" />
     <modify-function signature="operator+(QString,QByteArray)" remove="all" />
     <modify-function signature="operator+(QByteArray,QString)" remove="all" />
-    <add-function signature="operator+(PyUnicode)">
-        <inject-code>
-            Shiboken::AutoDecRef str(PyUnicode_AsASCIIString(%PYARG_1));
-            if (!str.isNull()) {
-                QByteArray b(PyBytes_AS_STRING(str.object()), PyBytes_GET_SIZE (str.object()));
-                b.prepend(*%CPPSELF);
-                %PYARG_0 = %CONVERTTOPYTHON[QByteArray](b);
-            }
-        </inject-code>
-    </add-function>
-    <add-function signature="operator+(PyUnicode,QByteArray)">
-        <inject-code>
-            Shiboken::AutoDecRef str(PyUnicode_AsASCIIString(%PYARG_1));
-            if (!str.isNull()) {
-                QByteArray b(PyBytes_AS_STRING(str.object()), PyBytes_GET_SIZE(str.object()));
-                b.append(*%CPPSELF);
-                %PYARG_0 = %CONVERTTOPYTHON[QByteArray](b);
-            }
-        </inject-code>
-    </add-function>
     <add-function signature="operator+(PyBytes,QByteArray)">
         <inject-code>
         QByteArray ba = QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1)) + *%CPPSELF;
         %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
         </inject-code>
     </add-function>
+    <add-function signature="operator+(PyByteArray, QByteArray)" return-type="QByteArray">
+        <inject-code>
+        QByteArray ba = QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArray_Size(%PYARG_1)) + *%CPPSELF;
+        %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
+        </inject-code>
+    </add-function>
+    <add-function signature="operator+(PyByteArray)" return-type="QByteArray">
+        <inject-code>
+        QByteArray ba = *%CPPSELF + QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArray_Size(%PYARG_1));
+        %PYARG_0 = %CONVERTTOPYTHON[QByteArray](ba);
+        </inject-code>
+    </add-function>
+    <add-function signature="operator+=(PyByteArray)" return-type="QByteArray">
+        <inject-code>
+            *%CPPSELF += QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArray_Size(%PYARG_1));
+        </inject-code>
+    </add-function>
+    <add-function signature="operator==(PyUnicode)">
+        <inject-code>
+        if (PyUnicode_CheckExact(%PYARG_1)) {
+            Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
+            QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+            bool cppResult = %CPPSELF == ba;
+            %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
+        }
+        </inject-code>
+    </add-function>
+    <add-function signature="operator!=(PyUnicode)">
+        <inject-code>
+        if (PyUnicode_CheckExact(%PYARG_1)) {
+            Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
+            QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+            bool cppResult = %CPPSELF != ba;
+            %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
+        }
+        </inject-code>
+    </add-function>
+    <add-function signature="operator&gt;(PyUnicode)">
+        <inject-code>
+        if (PyUnicode_CheckExact(%PYARG_1)) {
+            Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
+            QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+            bool cppResult = %CPPSELF &gt; ba;
+            %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
+        }
+        </inject-code>
+    </add-function>
+    <add-function signature="operator&gt;=(PyUnicode)">
+        <inject-code>
+        if (PyUnicode_CheckExact(%PYARG_1)) {
+            Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
+            QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+            bool cppResult = %CPPSELF &gt;= ba;
+            %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
+        }
+        </inject-code>
+    </add-function>
+    <add-function signature="operator&lt;(PyUnicode)">
+        <inject-code>
+        if (PyUnicode_CheckExact(%PYARG_1)) {
+            Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
+            QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+            bool cppResult = %CPPSELF &lt; ba;
+            %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
+        }
+        </inject-code>
+    </add-function>
+    <add-function signature="operator&lt;=(PyUnicode)">
+        <inject-code>
+        if (PyUnicode_CheckExact(%PYARG_1)) {
+            Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
+            QByteArray ba = QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
+            bool cppResult = %CPPSELF &lt;= ba;
+            %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
+        }
+        </inject-code>
+    </add-function>
     <!-- ### -->
 
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
-            QByteArray b(PepType(Py_TYPE(%PYSELF))->tp_name);
-            PyObject *aux = Shiboken::String::fromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
-            if (PyUnicode_CheckExact(aux)) {
-                PyObject *tmp = PyUnicode_AsASCIIString(aux);
-                Py_DECREF(aux);
-                aux = tmp;
+            PyObject *aux = PyBytes_FromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
+            if (aux == NULL) {
+                return NULL;
             }
-            b += "('";
-            b += QByteArray(PyBytes_AS_STRING(aux), PyBytes_GET_SIZE(aux));
-            b += "')";
-            %PYARG_0 = Shiboken::String::fromStringAndSize(b.constData(), b.size());
+            QByteArray b(PepType(Py_TYPE(%PYSELF))->tp_name);
+            #ifdef IS_PY3K
+                %PYARG_0 = PyUnicode_FromFormat("%s(%R)", b.constData(), aux);
+            #else
+                aux = PyObject_Repr(aux);
+                b += "(";
+                b += QByteArray(PyBytes_AS_STRING(aux), PyBytes_GET_SIZE(aux));
+                b += ")";
+                %PYARG_0 = Shiboken::String::fromStringAndSize(b.constData(), b.size());
+            #endif
+            Py_DECREF(aux);
         </inject-code>
     </add-function>
 
@@ -2623,14 +2687,21 @@
         <inject-code class="target" position="beginning">
             if (PyBytes_Check(%PYARG_1)) {
                 %0 = new QByteArray(PyBytes_AsString(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
-            } else if (PyUnicode_CheckExact(%PYARG_1)) {
-                Shiboken::AutoDecRef data(PyUnicode_AsASCIIString(%PYARG_1));
-                %0 = new QByteArray(PyBytes_AsString(data.object()), PyBytes_GET_SIZE(data.object()));
             } else if (Shiboken::String::check(%PYARG_1)) {
                 %0 = new QByteArray(Shiboken::String::toCString(%PYARG_1), Shiboken::String::len(%PYARG_1));
             }
         </inject-code>
     </modify-function>
+    <add-function signature="QByteArray(PyByteArray)" allow-thread="yes">>
+         <inject-code class="target" position="beginning">
+            %0 = new QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArray_Size(%PYARG_1));
+        </inject-code>
+    </add-function>
+    <add-function signature="QByteArray(PyBytes)" allow-thread="yes">
+        <inject-code class="target" position="beginning">
+            %0 = new QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
+        </inject-code>
+    </add-function>
     <!-- buffer protocol -->
     <inject-code class="native" position="beginning" file="glue/qbytearray_bufferprotocol.cpp" />
     <inject-code class="target" position="end">
@@ -2661,6 +2732,7 @@
     <modify-function signature="number(uint,int)" remove="all"/>
     <modify-function signature="number(qulonglong,int)" remove="all"/>
     <modify-function signature="operator+=(const char*)" remove="all"/>
+    <modify-function signature="operator+(char,QByteArray)" remove="all"/>
     <modify-function signature="operator==(const char*,QByteArray)" remove="all" />
     <modify-function signature="operator!=(const char*,QByteArray)" remove="all" />
     <modify-function signature="operator&lt;(const char*,QByteArray)" remove="all" />
@@ -2786,7 +2858,16 @@
     </modify-function>
     <add-function signature="__str__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
-            %PYARG_0 = Shiboken::String::fromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
+            PyObject *aux = PyBytes_FromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
+            if (aux == NULL) {
+                return NULL;
+            }
+            #ifdef IS_PY3K
+                %PYARG_0 = PyObject_Repr(aux);
+                Py_DECREF(aux);
+            #else
+                %PYARG_0 = aux;
+            #endif
         </inject-code>
     </add-function>
     <add-function signature="__len__">

@@ -1988,7 +1988,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 QString strArg;
                 AbstractMetaType* argType = arg->type();
                 if (isCString(argType)) {
-                    strArg = QLatin1String("\" SBK_STR_NAME \"");
+                    strArg = QLatin1String("\" SBK_BYTES_NAME \"");
                 } else if (argType->isPrimitive()) {
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->referencedTypeEntry())
@@ -2025,7 +2025,9 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     else if (strArg == QLatin1String("PyString"))
                         strArg = QLatin1String("str");
                     else if (strArg == QLatin1String("PyBytes"))
-                        strArg = QLatin1String("\" SBK_STR_NAME \"");
+                        strArg = QLatin1String("\" SBK_BYTES_NAME \"");
+                    else if (strArg == QLatin1String("PyByteArray"))
+                        strArg = QLatin1String("bytearray");
                     else if (strArg == QLatin1String("PySequence"))
                         strArg = QLatin1String("list");
                     else if (strArg == QLatin1String("PyTuple"))

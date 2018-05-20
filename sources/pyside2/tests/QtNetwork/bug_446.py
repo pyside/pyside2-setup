@@ -32,10 +32,11 @@ from PySide2.QtCore import *
 from PySide2.QtNetwork import *
 
 from helper import UsesQCoreApplication
+import py3kcompat as py3k
 
 class HttpSignalsCase(UsesQCoreApplication):
     '''Test case for launching QHttp signals'''
-    DATA = "PySide rocks"
+    DATA = py3k.b("PySide rocks")
 
     def onError(self):
         self.assertTrue(False)
@@ -48,7 +49,7 @@ class HttpSignalsCase(UsesQCoreApplication):
 
     def onReadReady(self):
         data = self.client.read(100)
-        self.assertEqual(data.size(), len(HttpSignalsCase.DATA))
+        self.assertEqual(len(data), len(HttpSignalsCase.DATA))
         self.assertEqual(data, HttpSignalsCase.DATA)
         self.done()
 

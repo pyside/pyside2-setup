@@ -31,6 +31,7 @@ from copy import deepcopy
 
 from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
 from PySide2.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QDir, QPoint, QPointF
+import py3kcompat as py3k
 try:
     from PySide2.QtCore import QUuid
     HAVE_Q = True
@@ -45,7 +46,7 @@ class DeepCopyHelper:
 
 class QByteArrayDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QByteArray('the quick brown fox jumps over the lazy dog')
+        self.original = QByteArray(py3k.b('the quick brown fox jumps over the lazy dog'))
 
 
 class QDateDeepCopy(DeepCopyHelper, unittest.TestCase):

@@ -102,12 +102,12 @@ class QTextStreamReadLinesFromDevice(unittest.TestCase):
         data = []
 
         data.append((QByteArray(), []))
-        data.append((QByteArray('\n'), ['']))
-        data.append((QByteArray('\r\n'), ['']))
-        data.append((QByteArray('ole'), ['ole']))
-        data.append((QByteArray('ole\n'), ['ole']))
-        data.append((QByteArray('ole\r\n'), ['ole']))
-        data.append((QByteArray('ole\r\ndole\r\ndoffen'), ['ole', 'dole', 'doffen']))
+        data.append((QByteArray(py3k.b('\n')), ['']))
+        data.append((QByteArray(py3k.b('\r\n')), ['']))
+        data.append((QByteArray(py3k.b('ole')), ['ole']))
+        data.append((QByteArray(py3k.b('ole\n')), ['ole']))
+        data.append((QByteArray(py3k.b('ole\r\n')), ['ole']))
+        data.append((QByteArray(py3k.b('ole\r\ndole\r\ndoffen')), ['ole', 'dole', 'doffen']))
 
         self._check_data(data)
 

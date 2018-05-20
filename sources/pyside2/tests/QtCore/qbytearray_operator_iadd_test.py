@@ -30,6 +30,7 @@ import unittest
 
 from PySide2.QtCore import QByteArray
 from helper.docmodifier import DocModifier
+import py3kcompat as py3k
 
 class BaseQByteArrayOperatorIAdd(object):
     '''Base class for QByteArray += operator tests.
@@ -41,31 +42,25 @@ class BaseQByteArrayOperatorIAdd(object):
     __metaclass__ = DocModifier
 
     def testSingleString(self):
-        '''QByteArray += string of size 1'''
-        s = '0'
+        '''QByteArray += bytes of size 1'''
+        s = py3k.b('0')
         self.obj += s
         self.assertEqual(self.obj, self.orig_obj + s)
         self.assertEqual(self.obj.size(), self.orig_obj.size() + len(s))
 
     def testString(self):
-        '''QByteArray += string of size > 1'''
-        s = 'dummy'
-        self.obj += s
+        '''QByteArray += bytes of size > 1'''
+        s = bytearray(py3k.b('dummy'))
+        self.obj += s # XXx iadd support abytearray
         self.assertEqual(self.obj, self.orig_obj + s)
         self.assertEqual(self.obj.size(), self.orig_obj.size() + len(s))
 
     def testQByteArray(self):
         '''QByteArray += QByteArray'''
-        s = QByteArray('array')
+        s = QByteArray(py3k.b('array'))
         self.obj += s
         self.assertEqual(self.obj, self.orig_obj + s)
 
-    def testChar(self):
-        '''QByteArray += char (number < 256)'''
-        s = ord('a')
-        self.obj += s
-        self.assertEqual(self.obj, self.orig_obj + s)
-        self.assertEqual(self.obj.size(), self.orig_obj.size() + 1)
 
 class NullQByteArrayOperatorIAdd(unittest.TestCase, BaseQByteArrayOperatorIAdd):
     '''Test case for operator QByteArray += on null QByteArrays'''
@@ -85,8 +80,8 @@ class ValidQByteArrayOperatorIAdd(unittest.TestCase, BaseQByteArrayOperatorIAdd)
     doc_filter = lambda x: x.startswith('test')
 
     def setUp(self):
-        self.obj = QByteArray('some byte array')
-        self.orig_obj = QByteArray('some byte array')
+        self.obj = QByteArray(py3k.b('some byte array'))
+        self.orig_obj = QByteArray(py3k.b('some byte array'))
 
 if __name__ == '__main__':
     unittest.main()

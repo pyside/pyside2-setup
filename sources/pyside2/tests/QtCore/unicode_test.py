@@ -58,10 +58,6 @@ class UnicodeConversion(unittest.TestCase):
         obj.setObjectName(py3k.unicode_('ümlaut'))
         self.assertEqual(obj.objectName(), py3k.unicode_('ümlaut'))
 
-    def testTranslateUnicode(self):
-        ba = QByteArray(py3k.unicode_('0123456789'))
-        self.assertEqual(ba.__str__(), py3k.unicode_('0123456789'))
-
 if __name__ == '__main__':
     unittest.main()
 
