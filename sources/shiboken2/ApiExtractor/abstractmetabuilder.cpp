@@ -1878,6 +1878,12 @@ static inline QString msgUnmatchedParameterType(const ArgumentModelItem &arg, in
     return result;
 }
 
+static inline QString msgUnmatchedReturnType(const FunctionModelItem &functionItem)
+{
+    return QLatin1String("unmatched return type '")
+        + functionItem->type().toString() + QLatin1Char('\'');
+}
+
 static inline QString msgVoidParameterType(const ArgumentModelItem &arg, int n)
 {
     QString result;
@@ -1885,6 +1891,22 @@ static inline QString msgVoidParameterType(const ArgumentModelItem &arg, int n)
     str << "'void' encountered at parameter #" << (n + 1);
     if (!arg->name().isEmpty())
         str << " \"" << arg->name() << '"';
+    return result;
+}
+
+static QString msgSkippingFunction(const FunctionModelItem &functionItem,
+                                   const QString &signature, const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "skipping ";
+    if (functionItem->isAbstract())
+        str << "abstract ";
+    str << "function '" << signature << "', " << why;
+    if (functionItem->isAbstract()) {
+        str << "\nThis will lead to compilation errors due to not "
+               "being able to instantiate the wrapper.";
+    }
     return result;
 }
 
@@ -2048,13 +2070,11 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
         bool ok;
         AbstractMetaType *type = translateType(returnType, &ok);
-
         if (!ok) {
             Q_ASSERT(type == 0);
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("skipping function '%1', unmatched return type '%2'")
-                                  .arg(originalQualifiedSignatureWithReturn,
-                                       functionItem->type().toString());
+            const QString reason = msgUnmatchedReturnType(functionItem);
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
             m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::UnmatchedReturnType);
             delete metaFunction;
             return nullptr;
@@ -2104,9 +2124,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
             }
             Q_ASSERT(metaType == 0);
             const QString reason = msgUnmatchedParameterType(arg, i);
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("skipping function '%1', %2")
-                                  .arg(originalQualifiedSignatureWithReturn, reason);
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
             const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
                 + QLatin1String(": ") + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
@@ -2116,9 +2135,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
         if (metaType == Q_NULLPTR) {
             const QString reason = msgVoidParameterType(arg, i);
-            qCWarning(lcShiboken).noquote().nospace()
-                << QString::fromLatin1("skipping function '%1': %2")
-                                       .arg(originalQualifiedSignatureWithReturn, reason);
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
             const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
                 + QLatin1String(": ") + reason;
             m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);

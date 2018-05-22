@@ -119,7 +119,7 @@
     besides the fact they are accessible by ordinary event methods.
     -->
 
-  <rejection class="QAccessibleEvent" field-name="m_type"/>
+  <rejection class="^QAccessible.*Event$" field-name="^m_.*$"/>
 
   <rejection class="QEnterEvent" field-name="l"/>
   <rejection class="QEnterEvent" field-name="w"/>
@@ -132,6 +132,7 @@
   <rejection class="QMouseEvent" field-name="g"/>
   <rejection class="QMouseEvent" field-name="b"/>
   <rejection class="QMouseEvent" field-name="mouseState"/>
+  <rejection class="QNativeGestureEvent" field-name="^m.*$"/>
 
   <rejection class="QHoverEvent" field-name="p"/>
   <rejection class="QHoverEvent" field-name="op"/>
@@ -221,6 +222,35 @@
       </target-to-native>
     </conversion-rule>
   </primitive-type>
+
+  <value-type name="QAccessible">
+      <value-type name="State"/>
+      <enum-type name="Event"/>
+      <enum-type name="Role"/>
+      <enum-type name="Text"/>
+      <enum-type name="RelationFlag" flags="Relation"/>
+      <enum-type name="InterfaceType"/>
+      <enum-type name="TextBoundaryType"/>
+  </value-type>
+
+  <object-type name="QAccessibleEditableTextInterface"/>
+  <object-type name="QAccessibleInterface"/>
+  <object-type name="QAccessibleObject"/>
+  <object-type name="QAccessibleTableCellInterface"/>
+  <object-type name="QAccessibleTextInterface"/>
+  <object-type name="QAccessibleValueInterface"/>
+
+  <object-type name="QAccessibleEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::InvalidEvent"/>
+  <object-type name="QAccessibleStateChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::StateChanged"/>
+  <object-type name="QAccessibleTableModelChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TableModelChanged">
+      <enum-type name="ModelChangeType"/>
+  </object-type>
+  <object-type name="QAccessibleTextCursorEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TextCaretMoved"/>
+  <object-type name="QAccessibleTextInsertEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TextInserted"/>
+  <object-type name="QAccessibleTextRemoveEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TextRemoved"/>
+  <object-type name="QAccessibleTextSelectionEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TextSelectionChanged"/>
+  <object-type name="QAccessibleTextUpdateEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TextUpdated"/>
+  <object-type name="QAccessibleValueChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::ValueChanged"/>
 
   <value-type name="QTransform">
     <enum-type name="TransformationType"/>
@@ -383,6 +413,9 @@
     <enum-type name="ColorGroup" />
     <enum-type name="ColorRole" />
   </value-type>
+  <object-type name="QInputMethod">
+      <enum-type name="Action" />
+  </object-type>
   <value-type name="QKeySequence">
     <enum-type name="SequenceFormat"/>
     <enum-type name="SequenceMatch"/>
@@ -1782,8 +1815,10 @@
     </value-type>
     <!-- endif ndef QT_NO_INPUTMETHOD -->
   </object-type>
+  <object-type name="QInputMethodQueryEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::InputMethodQuery"/>
 
   <object-type name="QMoveEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Move" />
+  <object-type name="QNativeGestureEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::NativeGesture"/>
   <object-type name="QResizeEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Resize"/>
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
   </object-type>
@@ -1813,7 +1848,10 @@
   </object-type>
   <object-type name="QMouseEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::MouseButtonDblClick || %1-&gt;type() == QEvent::MouseButtonPress || %1-&gt;type() == QEvent::MouseButtonRelease || %1-&gt;type() == QEvent::MouseMove"/>
   <object-type name="QPaintEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Paint"/>
-  <object-type name="QAccessibleEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::AccessibilityDescription || %1-&gt;type() == QEvent::AccessibilityHelp"/>
+  <object-type name="QScrollEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Scroll">
+      <enum-type name="ScrollState"/>
+  </object-type>
+  <object-type name="QScrollPrepareEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::ScrollPrepare"/>
 
   <object-type name="QTextFrame" >
     <extra-includes>
@@ -3056,7 +3094,6 @@
 
     _______ end of matrix block _______ -->
 
-
   <value-type name="QQuaternion" since="4.6">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -3251,22 +3288,19 @@
             QGuiApplicationConstructor(%PYSELF, args, &amp;%0);
         </inject-code>
     </add-function>
+    <add-function signature="QGuiApplication()">
+        <inject-code>
+            PyObject *empty = PyTuple_New(2);
+            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
+                QGuiApplicationConstructor(%PYSELF, empty, &amp;%0);
+            }
+        </inject-code>
+    </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning" />
 
   </object-type>
 
-  <value-type name="QAccessible">
-      <value-type name="State"/>
-      <enum-type name="Role"/>
-      <enum-type name="Text"/>
-      <enum-type name="RelationFlag"/>
-      <enum-type name="InterfaceType"/>
-      <enum-type name="TextBoundaryType"/>
-      <enum-type name="Event"/>
-  </value-type>
-  <object-type name="QAccessibleInterface">
-  </object-type>
   <object-type name="QOpenGLBuffer" since="5.0">
     <enum-type name="Access" />
     <enum-type name="RangeAccessFlag" flags="RangeAccessFlags" />
@@ -3661,6 +3695,7 @@
       <modify-function signature="borderColor(int*)const" remove="all"/>
       <modify-function signature="borderColor(float*)const" remove="all"/>
   </object-type>
+  <object-type name="QOpenGLTextureBlitter"/>
   <object-type name="QOpenGLTimeMonitor" since="5.1"/>
   <object-type name="QOpenGLTimerQuery" since="5.1"/>
   <object-type name="QOpenGLWindow" since="5.4">
@@ -3691,6 +3726,7 @@
       <enum-type name="YUVLayout"/>
   </value-type>
   <object-type name="QPdfWriter"/>
+  <value-type name="QPointingDeviceUniqueId"/>
   <value-type name="QRawFont">
       <enum-type name="AntialiasingType"/>
       <enum-type name="LayoutFlag" flags="LayoutFlags"/>

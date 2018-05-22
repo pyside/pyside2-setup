@@ -23,7 +23,7 @@ macro(pyside2_config option output_var)
     endif()
 
     execute_process(
-      COMMAND python "${CMAKE_SOURCE_DIR}/pyside2_config.py" ${option}
+      COMMAND python "${CMAKE_SOURCE_DIR}/../utils/pyside2_config.py" ${option}
       OUTPUT_VARIABLE ${output_var}
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -35,19 +35,19 @@ macro(pyside2_config option output_var)
     endif()
 endmacro()
 
-# Get relevant general paths, include paths and linker flags.
+# Query for the PySide2 path, Python path, include paths and linker flags.
 pyside2_config(--pyside2 PYSIDE2_PATH)
+pyside2_config(--python-include PYTHON_INCLUDE_DIR)
+pyside2_config(--pyside2-include PYSIDE2_INCLUDE_DIR 1)
+pyside2_config(--pyside2-shared-libraries-cmake PYSIDE2_SHARED_LIBRARIES 0)
+pyside2_config(--python-link-cmake PYTHON_LINKING_DATA 0)
+
 set(SHIBOKEN_PATH "${PYSIDE2_PATH}/shiboken2${CMAKE_EXECUTABLE_SUFFIX}")
 
 if(NOT EXISTS ${SHIBOKEN_PATH})
     message(FATAL_ERROR "Shiboken executable not found at path: ${SHIBOKEN_PATH}")
 endif()
 
-pyside2_config(--pyside2 PYSIDE2_DIR)
-pyside2_config(--python-include PYTHON_INCLUDE_DIR)
-pyside2_config(--pyside2-include PYSIDE2_INCLUDE_DIR 1)
-pyside2_config(--pyside2-shared-libraries-cmake PYSIDE2_SHARED_LIBRARIES 0)
-pyside2_config(--python-link-cmake PYTHON_LINKING_DATA 0)
 
 # Get all relevant Qt include dirs, to pass them on to shiboken.
 get_property(QT_CORE_INCLUDE_DIRS TARGET Qt5::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
@@ -122,7 +122,7 @@ endforeach()
 # Enable rpaths so that the example can be executed from the build dir.
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${PYSIDE2_DIR})
+set(CMAKE_INSTALL_RPATH ${PYSIDE2_PATH})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # =============================================================================================
 # !!! End of dubious section.

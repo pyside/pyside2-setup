@@ -189,6 +189,11 @@ AbstractMetaTypeCList AbstractMetaType::nestedArrayTypes() const
     return result;
 }
 
+bool AbstractMetaType::isConstRef() const
+{
+    return isConstant() && m_referenceType == LValueReference && indirections() == 0;
+}
+
 QString AbstractMetaType::cppSignature() const
 {
     if (m_cachedCppSignature.isEmpty())
@@ -201,10 +206,8 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isTemplateArgument() || m_referenceType == RValueReference)
         return InvalidPattern;
 
-    if (m_typeEntry->isPrimitive() && (!actualIndirections()
-        || (isConstant() && m_referenceType == LValueReference && !indirections()))) {
+    if (m_typeEntry->isPrimitive() && (actualIndirections() == 0 || isConstRef()))
         return PrimitivePattern;
-    }
 
     if (m_typeEntry->isVoid())
         return NativePointerPattern;
@@ -212,7 +215,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isVarargs())
         return VarargsPattern;
 
-    if (m_typeEntry->isEnum() && actualIndirections() == 0)
+    if (m_typeEntry->isEnum() && (actualIndirections() == 0 || isConstRef()))
         return EnumPattern;
 
     if (m_typeEntry->isObject()) {
@@ -228,8 +231,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isSmartPointer() && indirections() == 0)
         return SmartPointerPattern;
 
-    if (m_typeEntry->isFlags() && indirections() == 0
-        && (isConstant() == (m_referenceType == LValueReference)))
+    if (m_typeEntry->isFlags() && (actualIndirections() == 0 || isConstRef()))
         return FlagsPattern;
 
     if (m_typeEntry->isArray())
@@ -1754,7 +1756,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setArguments(AbstractMetaArgumentList());
     f->setDeclaringClass(this);
 
-    f->setAttributes(AbstractMetaAttributes::Public | AbstractMetaAttributes::FinalInTargetLang);
+    f->setAttributes(Public | FinalInTargetLang | AddedMethod);
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
 
@@ -1782,7 +1784,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     arg->setName(name());
     f->addArgument(arg);
 
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::FinalInTargetLang;
+    AbstractMetaAttributes::Attributes attr = FinalInTargetLang | AddedMethod;
     if (isPrivate)
         attr |= AbstractMetaAttributes::Private;
     else
@@ -2154,8 +2156,11 @@ void AbstractMetaClass::fixFunctions()
                 funcsToAdd << sf;
         }
 
-        for (AbstractMetaFunction *f : qAsConst(funcsToAdd))
-            funcs << f->copy();
+        for (AbstractMetaFunction *f : qAsConst(funcsToAdd)) {
+            AbstractMetaFunction *copy = f->copy();
+            (*copy) += AddedMethod;
+            funcs.append(copy);
+        }
 
         if (superClass)
             superClass = superClass->baseClass();

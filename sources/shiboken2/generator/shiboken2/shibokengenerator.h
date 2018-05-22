@@ -467,7 +467,8 @@ public:
      *   \param typeSignature The string describing the type to be built.
      *   \return A new AbstractMetaType object that must be deleted by the caller, or a NULL pointer in case of failure.
      */
-    AbstractMetaType* buildAbstractMetaTypeFromString(QString typeSignature);
+    AbstractMetaType *buildAbstractMetaTypeFromString(QString typeSignature,
+                                                      QString *errorMessage = nullptr);
 
     /// Creates an AbstractMetaType object from a TypeEntry.
     AbstractMetaType* buildAbstractMetaTypeFromTypeEntry(const TypeEntry* typeEntry);

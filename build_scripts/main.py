@@ -967,6 +967,15 @@ class pyside_build(_build):
                     moduleSubSet += ';'
                 moduleSubSet += m
             cmake_cmd.append("-DMODULES={}".format(moduleSubSet))
+        if OPTION_SKIP_MODULES:
+            skip_modules = ''
+            for m in OPTION_SKIP_MODULES.split(','):
+                if m.startswith('Qt'):
+                    m = m[2:]
+                if skip_modules:
+                    skip_modules += ';'
+                skip_modules += m
+            cmake_cmd.append("-DSKIP_MODULES={}".format(skip_modules))
         # Add source location for generating documentation
         cmake_src_dir = OPTION_QT_SRC if OPTION_QT_SRC else qtSrcDir
         cmake_cmd.append("-DQT_SRC_DIR={}".format(cmake_src_dir))

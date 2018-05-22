@@ -35,6 +35,8 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
+#include <QtCore/QXmlStreamAttributes>
+#include <QtCore/QXmlStreamReader>
 #include <QUrl>
 
 Documentation QtDocParser::retrieveModuleDocumentation()
@@ -48,9 +50,6 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
     if (metaType->isConstant())
         str << "const " ;
     switch (metaType->typeUsagePattern()) {
-    case AbstractMetaType::PrimitivePattern:
-        str << metaType->name();
-        break;
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
         // to "Qt::Alignment" as seen by qdoc.
@@ -90,6 +89,119 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
         str << " &&";
     else if (metaType->indirections())
         str << ' ' << QByteArray(metaType->indirections(), '*');
+}
+
+enum FunctionMatchFlags
+{
+    MatchArgumentCount = 0x1,
+    MatchArgumentType = 0x2,
+    DescriptionOnly = 0x4
+};
+
+static QString functionXQuery(const QString &classQuery,
+                              const AbstractMetaFunction *func,
+                              unsigned matchFlags = MatchArgumentCount | MatchArgumentType
+                                                    | DescriptionOnly)
+{
+    QString result;
+    QTextStream str(&result);
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    str << classQuery << "/function[@name=\"" << func->originalName()
+        << "\" and @const=\"" << (func->isConstant() ? "true" : "false") << '"';
+    if (matchFlags & MatchArgumentCount)
+        str << " and count(parameter)=" << arguments.size();
+    str << ']';
+    if (!arguments.isEmpty() && (matchFlags & MatchArgumentType)) {
+        for (int i = 0, size = arguments.size(); i < size; ++i) {
+            str << "/parameter[" << (i + 1) << "][@type=\"";
+            // Fixme: Use arguments.at(i)->type()->originalTypeDescription()
+            //        instead to get unresolved typedefs?
+            formatFunctionArgTypeQuery(str, arguments.at(i));
+            str << "\"]/..";
+        }
+    }
+    if (matchFlags & DescriptionOnly)
+        str << "/description";
+    return result;
+}
+
+static QStringList signaturesFromWebXml(QString w)
+{
+    QStringList result;
+    if (w.isEmpty())
+        return result;
+    w.prepend(QLatin1String("<root>")); // Fake root element
+    w.append(QLatin1String("</root>"));
+    QXmlStreamReader reader(w);
+    while (!reader.atEnd()) {
+        if (reader.readNext() == QXmlStreamReader::StartElement
+            && reader.name() == QLatin1String("function")) {
+            result.append(reader.attributes().value(QStringLiteral("signature")).toString());
+        }
+    }
+    return result;
+}
+
+static QString msgArgumentCountMatch(const AbstractMetaFunction *func,
+                                     const QStringList &matches)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "\n  Note: Querying for the argument count=="
+        << func->arguments().size() << " only yields " << matches.size()
+        << " matches";
+    if (!matches.isEmpty())
+        str << ": \"" << matches.join(QLatin1String("\", \"")) << '"';
+    return result;
+}
+
+QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
+                                                const AbstractMetaClass* metaClass,
+                                                const QString &classQuery,
+                                                const  AbstractMetaFunction *func,
+                                                const DocModificationList &signedModifs,
+                                                QXmlQuery &xquery,
+                                                QString *errorMessage)
+{
+    DocModificationList funcModifs;
+    for (const DocModification &funcModif : signedModifs) {
+        if (funcModif.signature() == func->minimalSignature())
+            funcModifs.append(funcModif);
+    }
+
+    // Properties
+    if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
+        const QString propertyQuery = classQuery + QLatin1String("/property[@name=\"")
+            + func->propertySpec()->name() + QLatin1String("\"]/description");
+        const QString properyDocumentation = getDocumentation(xquery, propertyQuery, funcModifs);
+        if (properyDocumentation.isEmpty())
+            *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func, propertyQuery);
+        return properyDocumentation;
+    }
+
+    // Query with full match of argument types
+    const QString fullQuery = functionXQuery(classQuery, func);
+    const QString result = getDocumentation(xquery, fullQuery, funcModifs);
+    if (!result.isEmpty())
+        return result;
+    *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func, fullQuery);
+    if (func->arguments().isEmpty()) // No arguments, can't be helped
+        return result;
+    // Test whether some mismatch in argument types occurred by checking for
+    // the argument count only. Include the outer <function> element.
+    QString countOnlyQuery = functionXQuery(classQuery, func, MatchArgumentCount);
+    QStringList signatures =
+            signaturesFromWebXml(getDocumentation(xquery, countOnlyQuery, funcModifs));
+    if (signatures.size() == 1) {
+        // One match was found. Repeat the query restricted to the <description>
+        // element and use the result with a warning.
+        countOnlyQuery = functionXQuery(classQuery, func, MatchArgumentCount | DescriptionOnly);
+        errorMessage->append(QLatin1String("\n  Falling back to \"") + signatures.constFirst()
+                             + QLatin1String("\" obtained by matching the argument count only."));
+        return getDocumentation(xquery, countOnlyQuery, funcModifs);
+    }
+    *errorMessage += msgArgumentCountMatch(func, signatures);
+    return result;
 }
 
 void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
@@ -144,40 +256,16 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
          qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
     metaClass->setDocumentation(doc);
 
-
     //Functions Documentation
+    QString errorMessage;
     const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
     for (AbstractMetaFunction *func : funcs) {
-        query.clear();
-        QTextStream str(&query);
-        str << classQuery;
-        // properties
-        if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
-            str << "/property[@name=\"" << func->propertySpec()->name() << "\"]";
-        } else { // normal methods
-            str << "/function[@name=\"" <<  func->originalName() << "\" and count(parameter)="
-                << func->arguments().count() << " and @const=\""
-                << (func->isConstant() ? "true" : "false") << "\"]";
-
-            const AbstractMetaArgumentList &arguments = func->arguments();
-            for (int i = 0, size = arguments.size(); i < size; ++i) {
-                str << "/parameter[" << (i + 1) << "][@type=\"";
-                formatFunctionArgTypeQuery(str, arguments.at(i));
-                str << "\"]/..";
-            }
-        }
-        str << "/description";
-        DocModificationList funcModifs;
-        for (const DocModification &funcModif : qAsConst(signedModifs)) {
-            if (funcModif.signature() == func->minimalSignature())
-                funcModifs.append(funcModif);
-        }
-        doc.setValue(getDocumentation(xquery, query, funcModifs));
-        if (doc.isEmpty()) {
-            qCWarning(lcShiboken(), "%s",
-                      qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, func, query)));
-        }
-        func->setDocumentation(doc);
+        const QString documentation =
+            queryFunctionDocumentation(sourceFileName, metaClass, classQuery,
+                                       func, signedModifs, xquery, &errorMessage);
+        if (!errorMessage.isEmpty())
+            qCWarning(lcShiboken(), "%s", qPrintable(errorMessage));
+        func->setDocumentation(Documentation(documentation));
     }
 #if 0
     // Fields
@@ -206,18 +294,28 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 }
 
+static QString qmlReferenceLink(const QFileInfo &qmlModuleFi)
+{
+    QString result;
+    QTextStream(&result) << "<para>The module also provides <link"
+        << " type=\"page\""
+        << " page=\"http://doc.qt.io/qt-5/" << qmlModuleFi.baseName() << ".html\""
+        << ">QML types</link>.</para>";
+    return result;
+}
+
 Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
 {
     // TODO: This method of acquiring the module name supposes that the target language uses
     // dots as module separators in package names. Improve this.
     QString moduleName = name;
     moduleName.remove(0, name.lastIndexOf(QLatin1Char('.')) + 1);
-    QString sourceFile = documentationDataDirectory() + QLatin1Char('/')
-                         + moduleName.toLower() + QLatin1String(".xml");
+    const QString prefix = documentationDataDirectory() + QLatin1Char('/')
+        + moduleName.toLower();
+    QString sourceFile = prefix + QLatin1String(".xml");
 
     if (!QFile::exists(sourceFile))
-        sourceFile = documentationDataDirectory() + QLatin1Char('/')
-                         + moduleName.toLower() + QLatin1String("-module.webxml");
+        sourceFile = prefix + QLatin1String("-module.webxml");
     if (!QFile::exists(sourceFile)) {
         qCWarning(lcShiboken).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
@@ -231,8 +329,22 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     // Module documentation
     QString query = QLatin1String("/WebXML/document/module[@name=\"")
         + moduleName + QLatin1String("\"]/description");
-    const Documentation doc = getDocumentation(xquery, query, DocModificationList());
-    if (doc.isEmpty())
+    Documentation doc = getDocumentation(xquery, query, DocModificationList());
+    if (doc.isEmpty()) {
         qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
+        return doc;
+    }
+
+    // If a QML module info file exists, insert a link to the Qt docs.
+    const QFileInfo qmlModuleFi(prefix + QLatin1String("-qmlmodule.webxml"));
+    if (qmlModuleFi.isFile()) {
+        QString docString = doc.value();
+        const int pos = docString.lastIndexOf(QLatin1String("</description>"));
+        if (pos != -1) {
+            docString.insert(pos, qmlReferenceLink(qmlModuleFi));
+            doc.setValue(docString);
+        }
+    }
+
     return doc;
 }

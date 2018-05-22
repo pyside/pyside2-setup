@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -29,41 +27,14 @@
 #############################################################################
 
 import unittest
-from PySide2.QtCore import *
 
-class MyModel (QAbstractListModel):
-    pass
+from PySide2.QtWidgets import QApplication
 
-class Foo:
-    pass
+class TestQApplication(unittest.TestCase):
+    def testNoArguments(self):
+        app = QApplication()
+        self.assertIsInstance(app, QApplication)
 
-class TestQModelIndexInternalPointer(unittest.TestCase):
-
-    def testInternalPointer(self):
-        m = MyModel()
-        foo = Foo()
-        idx = m.createIndex(0,0, foo)
-        check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
-                                  | QAbstractItemModel.CheckIndexOption.DoNotUseParent
-                                  | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
-        self.assertTrue(check)
-
-    def testPassQPersistentModelIndexAsQModelIndex(self):
-        # Related to bug #716
-        m = MyModel()
-        idx = QPersistentModelIndex()
-        m.span(idx)
-
-    def testQIdentityProxyModel(self):
-        sourceModel = QStringListModel(['item1', 'item2'])
-        sourceIndex = sourceModel.index(0, 0)
-        sourceData = str(sourceModel.data(sourceIndex, Qt.DisplayRole))
-        proxyModel = QIdentityProxyModel()
-        proxyModel.setSourceModel(sourceModel)
-        proxyIndex = proxyModel.mapFromSource(sourceIndex)
-        proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
-        self.assertEqual(sourceData, proxyData)
 
 if __name__ == '__main__':
     unittest.main()
-

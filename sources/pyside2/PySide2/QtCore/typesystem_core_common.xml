@@ -1976,6 +1976,11 @@
         </inject-code>
     </add-function>
   </value-type>
+  <object-type name="QLockFile">
+      <enum-type name="LockError"/>
+  </object-type>
+  <object-type name="QMessageAuthenticationCode"/>
+  <object-type name="QSignalBlocker"/>
   <value-type name="QStorageInfo"/>
   <!-- QReadWriteLock does not have a copy ctor! -->
   <object-type name="QReadWriteLock">
@@ -2126,6 +2131,7 @@
     <modify-function signature="filterChanged()" remove="all"/>
     <!--### End of obsolete section -->
   </object-type>
+  <object-type name="QIdentityProxyModel"/>
   <!-- QObject is created manually -->
   <object-type name="QObject">
     <extra-includes>
@@ -2957,6 +2963,9 @@
         </inject-code>
     </modify-function>
   </object-type>
+  <value-type name="QOperatingSystemVersion" since="5.9">
+      <enum-type name="OSType"/>
+  </value-type>
   <object-type name="QLibraryInfo">
     <enum-type name="LibraryLocation"/>
   </object-type>
@@ -3006,27 +3015,27 @@
 
   <object-type name="QSocketNotifier">
     <enum-type name="Type"/>
-    <add-function signature="QSocketNotifier(PyObject*,QSocketNotifier::Type,QObject*)">
-        <modify-argument index="3">
-            <replace-default-expression with="0" />
-            <rename to="parent" />
-        </modify-argument>
-        <inject-code>
-        Shiboken::AutoDecRef fileNo(PyObject_GetAttrString(%PYARG_1, "fileno"));
-        if (!fileNo.isNull()) {
-            Shiboken::AutoDecRef fileNoValue(PyObject_CallObject(fileNo, 0));
-            if (%CHECKTYPE[int](fileNoValue)) {
-                int cppFileNoValue = %CONVERTTOCPP[int](fileNoValue);
-                /* Qt4 version:
-                 * %0 = new %TYPE(cppFileNoValue, %2, %3);
-                 * Qt5 has qintptr instead.
-                 * XXX check if this means a pointer or just the pointer size cast (what I implemented)
-                 */
-                qintptr socket = (qintptr)cppFileNoValue;
-                %0 = new %TYPE(socket, %2, %3);
-            }
-        }
-        </inject-code>
+    <add-function signature="QSocketNotifier(PyObject*, QSocketNotifier::Type, QObject*)">
+      <modify-argument index="3">
+        <replace-default-expression with="0" />
+        <rename to="parent" />
+      </modify-argument>
+      <inject-code>
+      Shiboken::AutoDecRef socket(%PYARG_1);
+      if (!socket.isNull()) {
+          // We use qintptr as PyLong, but we check for int
+          // since it is currently an alias to be Python2 compatible.
+          // Internally, ints are qlonglongs.
+          if (%CHECKTYPE[int](socket)) {
+              int cppSocket = %CONVERTTOCPP[int](socket);
+              qintptr socket = (qintptr)cppSocket;
+              %0 = new %TYPE(socket, %2, %3);
+          } else {
+              PyErr_SetString(PyExc_TypeError,
+                  "QSocketNotifier: first argument (socket) must be an int.");
+          }
+      }
+      </inject-code>
     </add-function>
   </object-type>
 
@@ -3260,6 +3269,14 @@
     <add-function signature="QCoreApplication(QStringList)">
         <inject-code>
             QCoreApplicationConstructor(%PYSELF, args, &amp;%0);
+        </inject-code>
+    </add-function>
+    <add-function signature="QCoreApplication()">
+        <inject-code>
+            PyObject *empty = PyTuple_New(2);
+            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
+                QCoreApplicationConstructor(%PYSELF, empty, &amp;%0);
+            }
         </inject-code>
     </add-function>
     <!-- blocking functions -->

@@ -82,6 +82,7 @@ bool DocParser::skipForQuery(const AbstractMetaFunction *func)
 {
     // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
     if (!func || func->isPrivate()
+        || (func->attributes() & AbstractMetaAttributes::AddedMethod) != 0
         || func->isModifiedRemoved()
         || func->declaringClass() != func->ownerClass()
         || func->isCastOperator()) {
@@ -124,9 +125,9 @@ QString DocParser::msgCannotFindDocumentation(const QString &fileName,
                                               const AbstractMetaFunction *function,
                                               const QString &query)
 {
-    return msgCannotFindDocumentation(fileName, "function",
-                                      metaClass->name() + QLatin1String("::") + function->name() + QLatin1String("()"),
-                                      query);
+    const QString name = metaClass->name() + QLatin1String("::")
+        + function->minimalSignature();
+    return msgCannotFindDocumentation(fileName, "function", name, query);
 }
 
 QString DocParser::msgCannotFindDocumentation(const QString &fileName,

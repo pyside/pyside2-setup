@@ -10,7 +10,11 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
               "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../pyside_version.py"
+# Use absolute path instead of relative path, to avoid ninja build errors due to
+# duplicate file dependency inconsistency.
+set(pyside_version_relative_path "${CMAKE_CURRENT_SOURCE_DIR}/../pyside_version.py")
+get_filename_component(pyside_version_path ${pyside_version_relative_path} ABSOLUTE)
+configure_file("${pyside_version_path}"
                "${CMAKE_CURRENT_BINARY_DIR}/_git_pyside_version.py" @ONLY)
 
 # qt.conf needs to be placed next to QtWebEngineProcess so that the executable uses the correct
