@@ -73,6 +73,18 @@ def get_package_version():
         final_version += ".dev{}".format(get_package_timestamp())
     return final_version
 
+def get_setuptools_extension_modules():
+    # Setting py_limited_api on the extension is the "correct" thing
+    # to do, but it doesn't actually do anything, because we
+    # override build_ext. So this is just foolproofing for the
+    # future.
+    extension_args = ('QtCore', [])
+    extension_kwargs = {}
+    if OPTION_LIMITED_API:
+        extension_kwargs['py_limited_api'] = True
+    extension_modules = [Extension(*extension_args, **extension_kwargs)]
+    return extension_modules
+
 # Buildable extensions.
 contained_modules = ['shiboken2', 'pyside2', 'pyside2-tools']
 
@@ -113,19 +125,12 @@ from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 from setuptools.command.develop import develop as _develop
 from setuptools.command.build_py import build_py as _build_py
 
-wheel_module_exists = False
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-    from wheel.bdist_wheel import safer_name as _safer_name
-    wheel_module_exists = True
-except ImportError:
-    pass
-
 from .qtinfo import QtInfo
 from .utils import rmtree, detect_clang, copyfile, copydir, run_process_output, run_process
 from .utils import update_env_path, init_msvc_env, filter_match, macos_fix_rpaths_for_library
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
+from .wheel_override import wheel_module_exists, get_bdist_wheel_override
 
 from textwrap import dedent
 
@@ -378,35 +383,7 @@ class PysideBuildExt(_build_ext):
     def run(self):
         pass
 
-if wheel_module_exists:
-    class PysideBuildWheel(_bdist_wheel):
-        def __init__(self, *args, **kwargs):
-            _bdist_wheel.__init__(self, *args, **kwargs)
 
-        @property
-        def wheel_dist_name(self):
-            # Slightly modified version of wheel's wheel_dist_name
-            # method, to add the Qt version as well.
-            # Example:
-            #   PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
-            # The PySide2 version is "5.6".
-            # The Qt version built against is "5.6.4".
-            qt_version = get_qt_version()
-            package_version = get_package_version()
-            wheel_version = "{}-{}".format(package_version, qt_version)
-            components = (_safer_name(self.distribution.get_name()),
-                wheel_version)
-            if self.build_number:
-                components += (self.build_number,)
-            return '-'.join(components)
-
-        def finalize_options(self):
-            if sys.platform == 'darwin':
-                # Override the platform name to contain the correct
-                # minimum deployment target.
-                # This is used in the final wheel name.
-                self.plat_name = PysideBuild.macos_plat_name()
-            _bdist_wheel.finalize_options(self)
 
 # pyside_build_py and pyside_install_lib are reimplemented to preserve
 # symlinks when distutils / setuptools copy files to various
@@ -1317,4 +1294,11 @@ cmd_class_dict = {
     'install_lib': PysideInstallLib
 }
 if wheel_module_exists:
-    cmd_class_dict['bdist_wheel'] = PysideBuildWheel
+    params = {}
+    params['qt_version'] = get_qt_version()
+    params['package_version'] = get_package_version()
+    if sys.platform == 'darwin':
+        params['macos_plat_name'] = PysideBuild.macos_plat_name()
+    pyside_bdist_wheel = get_bdist_wheel_override(params)
+    if pyside_bdist_wheel:
+        cmd_class_dict['bdist_wheel'] = pyside_bdist_wheel

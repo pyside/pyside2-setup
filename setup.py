@@ -219,7 +219,7 @@ this_file = os.path.abspath(this_file)
 if os.path.dirname(this_file):
     os.chdir(os.path.dirname(this_file))
 
-from build_scripts.main import get_package_version
+from build_scripts.main import get_package_version, get_setuptools_extension_modules
 from build_scripts.main import pyside_package_dir_name
 from build_scripts.main import cmd_class_dict
 from build_scripts.main import README, CHANGES
@@ -228,6 +228,8 @@ from setuptools import setup, Extension
 # The __version__ variable is just for PEP compliancy, and shouldn't be
 # used as a value source.
 __version__ = get_package_version()
+
+extension_modules = get_setuptools_extension_modules()
 
 setup(
     name = "PySide2",
@@ -286,6 +288,6 @@ setup(
     # are overriding the build command to do it using cmake) so things
     # like bdist_egg will know that there are extension modules and
     # will name the dist with the full platform info.
-    ext_modules = [Extension('QtCore', [])],
+    ext_modules = extension_modules,
     ext_package = 'PySide2',
 )
