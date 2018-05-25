@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtscxml/src/scxml/doc/qtscxml.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtscxml/src/scxml/doc
+include(../pyside-config.qdocconf)
