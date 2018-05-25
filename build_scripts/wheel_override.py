@@ -108,6 +108,20 @@ if wheel_module_exists:
                 plat_name = self.plat_name or wheel_get_platform()
                 if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize == 2147483647:
                     plat_name = 'linux_i686'
+
+                # To allow uploading to pypi, we need the wheel name
+                # to contain 'manylinux1'.
+                # The wheel which will be uploaded to pypi will be
+                # built on RHEL7, so it doesn't completely qualify for
+                # manylinux1 support, but it's the minimum requirement
+                # for building Qt. We only enable this for x64 limited
+                # api builds (which are the only ones uploaded to
+                # pypi).
+                # TODO: Add actual distro detection, instead of
+                # relying on limited_api option.
+                if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize > 2147483647 \
+                             and self.py_limited_api:
+                    plat_name = 'manylinux1_x86_64'
             plat_name = plat_name.replace('-', '_').replace('.', '_')
 
             if self.root_is_pure:
