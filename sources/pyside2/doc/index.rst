@@ -94,7 +94,8 @@ Qt Modules
         Helps you create viable mapping solutions using the data available from some of the popular location services.
    * - `Qt Sensors <PySide2/QtSensors/index.html>`_
         Provides access to sensor hardware via QML and Python interfaces and a motion gesture recognition API for devices.
-     -
+     - `Qt Scxml <PySide2/QtScxml/index.html>`_
+        Provides classes to create and use state machines from SCXML files.
 
 |project| also comes with the
 :doc:`Shiboken2 <shiboken2:contents>` generator that outputs C++ code

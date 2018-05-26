@@ -6,7 +6,8 @@
     "Description": "Qt for Python is an add-on for Python. The signature packages of PySide uses certain copied and adapted source files (inspect.py, backport_inspect.py, typing27.py, typing36.py). See the folder sources/pyside2/PySide2/support/signature .",
     "Homepage": "http://www.python.org/",
     "Version": "3.6.5",
-    "License": "PSF LICENSE AGREEMENT FOR PYTHON 3.6.5",
-    "LicenseFile": "backport_inspect.py",
+    "LicenseId": "Python-2.0",
+    "License": "Python License 2.0",
+    "LicenseFile": "PSF-3.6.2.txt",
     "Copyright": "© Copyright 2001-2018, Python Software Foundation."
 }

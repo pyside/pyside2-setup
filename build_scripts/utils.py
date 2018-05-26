@@ -293,27 +293,27 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
             make_file_writable_by_owner(dst)
 
     else:
-        linkTargetPath = os.path.realpath(src)
-        if os.path.dirname(linkTargetPath) == os.path.dirname(src):
-            linkTarget = os.path.basename(linkTargetPath)
-            linkName = os.path.basename(src)
-            currentDirectory = os.getcwd()
+        link_target_path = os.path.realpath(src)
+        if os.path.dirname(link_target_path) == os.path.dirname(src):
+            link_target = os.path.basename(link_target_path)
+            link_name = os.path.basename(src)
+            current_directory = os.getcwd()
             try:
-                targetDir = dst if os.path.isdir(dst) else os.path.dirname(dst)
-                os.chdir(targetDir)
-                if os.path.exists(linkName):
-                    os.remove(linkName)
-                log.info("Symlinking {} -> {} in {}.".format(linkName,
-                    linkTarget, targetDir))
-                os.symlink(linkTarget, linkName)
+                target_dir = dst if os.path.isdir(dst) else os.path.dirname(dst)
+                os.chdir(target_dir)
+                if os.path.exists(link_name):
+                    os.remove(link_name)
+                log.info("Symlinking {} -> {} in {}.".format(link_name,
+                    link_target, target_dir))
+                os.symlink(link_target, link_name)
             except OSError:
-                log.error("{} -> {}: Error creating symlink".format(linkName,
-                    linkTarget))
+                log.error("{} -> {}: Error creating symlink".format(link_name,
+                    link_target))
             finally:
-                os.chdir(currentDirectory)
+                os.chdir(current_directory)
         else:
             log.error("{} -> {}: Can only create symlinks within the same "
-                "directory".format(src, linkTargetPath))
+                "directory".format(src, link_target_path))
 
     return dst
 
@@ -410,36 +410,36 @@ def make_file_writable_by_owner(path):
     os.chmod(path, current_permissions | stat.S_IWUSR)
 
 def rmtree(dirname, ignore=False):
-    def handleRemoveReadonly(func, path, exc):
+    def handle_remove_readonly(func, path, exc):
         excvalue = exc[1]
         if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
             os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
             func(path)
         else:
             raise
-    shutil.rmtree(dirname, ignore_errors=ignore, onerror=handleRemoveReadonly)
+    shutil.rmtree(dirname, ignore_errors=ignore, onerror=handle_remove_readonly)
 
 def run_process_output(args, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
-    stdOut = subprocess.Popen(args, env = initial_env, universal_newlines = 1,
+    std_out = subprocess.Popen(args, env = initial_env, universal_newlines = 1,
                               stdout=subprocess.PIPE).stdout
     result = []
-    for rawLine in stdOut.readlines():
-        line = rawLine if sys.version_info >= (3,) else rawLine.decode('utf-8')
+    for raw_line in std_out.readlines():
+        line = raw_line if sys.version_info >= (3,) else raw_line.decode('utf-8')
         result.append(line.rstrip())
     return result
 
 def run_process(args, initial_env=None):
-    def _log(buffer, checkNewLine=False):
-        endsWithNewLine = False
+    def _log(buffer, check_new_line=False):
+        ends_with_new_line = False
         if buffer.endswith('\n'):
-            endsWithNewLine = True
-        if checkNewLine and buffer.find('\n') == -1:
+            ends_with_new_line = True
+        if check_new_line and buffer.find('\n') == -1:
             return buffer
         lines = buffer.splitlines()
         buffer = ''
-        if checkNewLine and not endsWithNewLine:
+        if check_new_line and not ends_with_new_line:
             buffer = lines[-1]
             lines = lines[:-1]
         for line in lines:
@@ -742,7 +742,7 @@ def macos_add_qt_rpath(library_path, qt_lib_dir,
                   rpath=qt_lib_dir, library_path=library_path))
 
 # Find an executable specified by a glob pattern ('foo*') in the OS path
-def findGlobInPath(pattern):
+def find_glob_in_path(pattern):
     result = []
     if sys.platform == 'win32':
         pattern += '.exe'
@@ -752,47 +752,47 @@ def findGlobInPath(pattern):
             result.append(match)
     return result
 
-# Locate the most recent version of llvmConfig in the path.
-def findLlvmConfig():
-    versionRe = re.compile('(\d+)\.(\d+)\.(\d+)')
+# Locate the most recent version of llvm_config in the path.
+def find_llvm_config():
+    version_re = re.compile('(\d+)\.(\d+)\.(\d+)')
     result = None
-    lastVersionString = '000000'
-    for llvmConfig in findGlobInPath('llvm-config*'):
+    last_version_string = '000000'
+    for llvm_config in find_glob_in_path('llvm-config*'):
         try:
-            output = run_process_output([llvmConfig, '--version'])
+            output = run_process_output([llvm_config, '--version'])
             if output:
-                match = versionRe.match(output[0])
+                match = version_re.match(output[0])
                 if match:
-                    versionString = '%02d%02d%02d' % (int(match.group(1)),
+                    version_string = '%02d%02d%02d' % (int(match.group(1)),
                                     int(match.group(2)), int(match.group(3)))
-                    if (versionString > lastVersionString):
-                        result = llvmConfig
-                        lastVersionString = versionString
+                    if (version_string > last_version_string):
+                        result = llvm_config
+                        last_version_string = version_string
         except OSError:
             pass
     return result
 
 # Add Clang to path for Windows for the shiboken ApiExtractor tests.
 # Revisit once Clang is bundled with Qt.
-def detectClang():
+def detect_clang():
     source = 'LLVM_INSTALL_DIR'
-    clangDir = os.environ.get(source, None)
-    if not clangDir:
+    clang_dir = os.environ.get(source, None)
+    if not clang_dir:
         source = 'CLANG_INSTALL_DIR'
-        clangDir = os.environ.get(source, None)
-        if not clangDir:
-            source = findLlvmConfig()
+        clang_dir = os.environ.get(source, None)
+        if not clang_dir:
+            source = find_llvm_config()
             try:
                 if source is not None:
                     output = run_process_output([source, '--prefix'])
                     if output:
-                        clangDir = output[0]
+                        clang_dir = output[0]
             except OSError:
                 pass
-    if clangDir:
+    if clang_dir:
         arch = '64' if sys.maxsize > 2**31-1 else '32'
-        clangDir = clangDir.replace('_ARCH_', arch)
-    return (clangDir, source)
+        clang_dir = clang_dir.replace('_ARCH_', arch)
+    return (clang_dir, source)
 
 def download_and_extract_7z(fileurl, target):
     """ Downloads 7z file from fileurl and extract to target  """
@@ -983,35 +983,35 @@ def copy_icu_libs(destination_lib_dir):
             copyfile(path, destination, force_copy_symlink=True)
             # Patch the ICU libraries to contain the $ORIGIN rpath
             # value, so that only the local package libraries are used.
-            linuxSetRPaths(destination, '$ORIGIN')
+            linux_set_rpaths(destination, '$ORIGIN')
 
         # Patch the QtCore library to find the copied over ICU libraries
         # (if necessary).
         log.info("Checking if QtCore library needs a new rpath to make it "
             "work with ICU libs.")
-        rpaths = linuxGetRPaths(qt_core_library_path)
-        if not rpaths or not rpathsHasOrigin(rpaths):
+        rpaths = linux_get_rpaths(qt_core_library_path)
+        if not rpaths or not rpaths_has_origin(rpaths):
             log.info('Patching QtCore library to contain $ORIGIN rpath.')
             rpaths.insert(0, '$ORIGIN')
             new_rpaths_string = ":".join(rpaths)
-            linuxSetRPaths(qt_core_library_path, new_rpaths_string)
+            linux_set_rpaths(qt_core_library_path, new_rpaths_string)
 
-def linuxSetRPaths(executable_path, rpath_string):
+def linux_set_rpaths(executable_path, rpath_string):
     """ Patches the `executable_path` with a new rpath string. """
 
-    if not hasattr(linuxSetRPaths, "patchelf_path"):
+    if not hasattr(linux_set_rpaths, "patchelf_path"):
         script_dir = os.getcwd()
         patchelf_path = os.path.join(script_dir, "patchelf")
-        setattr(linuxSetRPaths, "patchelf_path", patchelf_path)
+        setattr(linux_set_rpaths, "patchelf_path", patchelf_path)
 
-    cmd = [linuxSetRPaths.patchelf_path, '--set-rpath',
+    cmd = [linux_set_rpaths.patchelf_path, '--set-rpath',
         rpath_string, executable_path]
 
     if run_process(cmd) != 0:
         raise RuntimeError("Error patching rpath in {}".format(
             executable_path))
 
-def linuxGetRPaths(executable_path):
+def linux_get_rpaths(executable_path):
     """
     Returns a list of run path values embedded in the executable or just
     an empty list.
@@ -1039,7 +1039,7 @@ def linuxGetRPaths(executable_path):
 
     return rpaths
 
-def rpathsHasOrigin(rpaths):
+def rpaths_has_origin(rpaths):
     """
     Return True if the specified list of rpaths has an "$ORIGIN" value
     (aka current dir).

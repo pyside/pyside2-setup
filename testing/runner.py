@@ -61,7 +61,7 @@ this_dir = os.path.dirname(this_file)
 build_scripts_dir = os.path.abspath(os.path.join(this_dir, '../build_scripts'))
 
 sys.path.append(build_scripts_dir)
-from utils import detectClang
+from utils import detect_clang
 
 class TestRunner(object):
     def __init__(self, log_entry, project, index):
@@ -74,19 +74,19 @@ class TestRunner(object):
         else:
             self.logfile = os.path.join(log_dir, project + ".log")
         os.environ['CTEST_OUTPUT_ON_FAILURE'] = '1'
-        self._setupClang()
+        self._setup_clang()
         self._setup()
 
-    def _setupClang(self):
+    def _setup_clang(self):
         if sys.platform != "win32":
             return
-        clangDir = detectClang()
-        if clangDir[0]:
-            clangBinDir = os.path.join(clangDir[0], 'bin')
+        clang_dir = detect_clang()
+        if clang_dir[0]:
+            clang_bin_dir = os.path.join(clang_dir[0], 'bin')
             path = os.environ.get('PATH')
-            if not clangBinDir in path:
-                os.environ['PATH'] = clangBinDir + os.pathsep + path
-                print("Adding %s as detected by %s to PATH" % (clangBinDir, clangDir[1]))
+            if not clang_bin_dir in path:
+                os.environ['PATH'] = clang_bin_dir + os.pathsep + path
+                print("Adding %s as detected by %s to PATH" % (clang_bin_dir, clang_dir[1]))
 
     def _find_ctest(self):
         """
