@@ -54,7 +54,12 @@ foreach(moduleIn ${all_module_shortnames})
                  "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION} \\\n"
                  "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}/Qt${module} \\\n")
 
-            set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/Qt${module}>")
+            if (${moduleIn} STREQUAL "X11Extras")
+                set(globalHeader "QX11Info")
+            else()
+                set(globalHeader "Qt${module}")
+            endif()
+            set(docHeaderContents "${docHeaderContents}\n#include <Qt${module}/${globalHeader}>")
             set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n<load-typesystem name=\"Qt${module}/typesystem_${lowerModule}.xml\" generate=\"yes\"/>")
         endforeach()
     endif()
