@@ -60,6 +60,7 @@ from PySide2.QtWebEngineWidgets import (QWebEngineDownloadItem, QWebEnginePage,
 main_windows = []
 
 def create_main_window():
+    """Creates a MainWindow using 75% of the available screen resolution."""
     main_win = MainWindow()
     main_windows.append(main_win)
     available_geometry = app.desktop().availableGeometry(main_win)
@@ -68,11 +69,14 @@ def create_main_window():
     return main_win
 
 def create_main_window_with_browser():
+    """Creates a MainWindow with a tab that loads the www.qt.io webpage."""
     main_win = create_main_window()
     return main_win.add_browser_tab()
 
 class MainWindow(QMainWindow):
-
+    """Provides the parent window that includes the BookmarkWidget,
+    BrowserTabWidget, and a DownloadWidget, to offer the complete
+    web browsing experience."""
     def __init__(self):
         super(MainWindow, self).__init__()
 
