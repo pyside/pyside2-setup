@@ -94,6 +94,7 @@ def prepare_standalone_package_linux(self, executables, vars):
         filter=None,
         force=False,
         recursive=True,
+        ignore=["*.so.debug"],
         vars=vars)
 
     # <qt>/translations/* -> <setup>/PySide2/Qt/translations

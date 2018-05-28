@@ -54,73 +54,73 @@ class QtInfo(object):
         # Dict to cache mkspecs variables.
         self._mkspecs_dict = {}
         # Initialize the properties.
-        self._initProperties()
+        self._init_properties()
 
-    def getQMakeCommand(self):
+    def get_qmake_command(self):
         qmake_command_string = self._qmake_command[0]
         for entry in self._qmake_command[1:]:
             qmake_command_string += " {}".format(entry)
         return qmake_command_string
 
-    def getVersion(self):
-        return self.getProperty("QT_VERSION")
+    def get_version(self):
+        return self.get_property("QT_VERSION")
 
-    def getBinsPath(self):
-        return self.getProperty("QT_INSTALL_BINS")
+    def get_bins_path(self):
+        return self.get_property("QT_INSTALL_BINS")
 
-    def getLibsPath(self):
-        return self.getProperty("QT_INSTALL_LIBS")
+    def get_libs_path(self):
+        return self.get_property("QT_INSTALL_LIBS")
 
-    def getLibsExecsPath(self):
-        return self.getProperty("QT_INSTALL_LIBEXECS")
+    def get_libs_execs_path(self):
+        return self.get_property("QT_INSTALL_LIBEXECS")
 
-    def getPluginsPath(self):
-        return self.getProperty("QT_INSTALL_PLUGINS")
+    def get_plugins_path(self):
+        return self.get_property("QT_INSTALL_PLUGINS")
 
-    def getPrefixPath(self):
-        return self.getProperty("QT_INSTALL_PREFIX")
+    def get_prefix_path(self):
+        return self.get_property("QT_INSTALL_PREFIX")
 
-    def getImportsPath(self):
-        return self.getProperty("QT_INSTALL_IMPORTS")
+    def get_imports_path(self):
+        return self.get_property("QT_INSTALL_IMPORTS")
 
-    def getTranslationsPath(self):
-        return self.getProperty("QT_INSTALL_TRANSLATIONS")
+    def get_translations_path(self):
+        return self.get_property("QT_INSTALL_TRANSLATIONS")
 
-    def getHeadersPath(self):
-        return self.getProperty("QT_INSTALL_HEADERS")
+    def get_headers_path(self):
+        return self.get_property("QT_INSTALL_HEADERS")
 
-    def getDocsPath(self):
-        return self.getProperty("QT_INSTALL_DOCS")
+    def get_docs_path(self):
+        return self.get_property("QT_INSTALL_DOCS")
 
-    def getQmlPath(self):
-        return self.getProperty("QT_INSTALL_QML")
+    def get_qml_path(self):
+        return self.get_property("QT_INSTALL_QML")
 
-    def getMacOSMinDeploymentTarget(self):
+    def get_macos_deployment_target(self):
         """ Return value is a macOS version or None. """
-        return self.getProperty("QMAKE_MACOSX_DEPLOYMENT_TARGET")
+        return self.get_property("QMAKE_MACOSX_DEPLOYMENT_TARGET")
 
-    def getBuildType(self):
+    def get_build_type(self):
         """
         Return value is either debug, release, debug_release, or None.
         """
-        return self.getProperty("BUILD_TYPE")
+        return self.get_property("BUILD_TYPE")
 
-    def getSrcDir(self):
+    def get_src_dir(self):
         """ Return path to Qt src dir or None.. """
-        return self.getProperty("QT_INSTALL_PREFIX/src")
+        return self.get_property("QT_INSTALL_PREFIX/src")
 
-    def getProperty(self, prop_name):
+    def get_property(self, prop_name):
         if prop_name not in self._query_dict:
             return None
         return self._query_dict[prop_name]
 
-    def getProperties(self):
+    def get_properties(self):
         return self._query_dict
 
-    def getMkspecsVariables(self):
+    def get_mkspecs_variables(self):
         return self._mkspecs_dict
 
-    def _getQMakeOutput(self, args_list = []):
+    def _get_qmake_output(self, args_list = []):
         cmd = self._qmake_command + args_list
         proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, shell=False)
         output = proc.communicate()[0]
@@ -133,7 +133,7 @@ class QtInfo(object):
             output = output.strip()
         return output
 
-    def _parseQueryProperties(self, process_output):
+    def _parse_query_properties(self, process_output):
         props = {}
         if not process_output:
             return props
@@ -144,11 +144,11 @@ class QtInfo(object):
                 props[key] = value
         return props
 
-    def _getQueryProperties(self):
-        output = self._getQMakeOutput(['-query'])
-        self._query_dict = self._parseQueryProperties(output)
+    def _get_query_properties(self):
+        output = self._get_qmake_output(['-query'])
+        self._query_dict = self._parse_query_properties(output)
 
-    def _parseQtBuildType(self):
+    def _parse_qt_build_type(self):
         key = 'QT_CONFIG'
         if key not in self._mkspecs_dict:
             return None
@@ -169,15 +169,15 @@ class QtInfo(object):
 
         return None
 
-    def _getOtherProperties(self):
+    def _get_other_properties(self):
         # Get the src property separately, because it is not returned by
         # qmake unless explicitly specified.
         key = 'QT_INSTALL_PREFIX/src'
-        result = self._getQMakeOutput(['-query', key])
+        result = self._get_qmake_output(['-query', key])
         self._query_dict[key] = result
 
         # Get mkspecs variables and cache them.
-        self._getQMakeMkspecsVariables()
+        self._get_qmake_mkspecs_variables()
 
         # Get macOS minimum deployment target.
         key = 'QMAKE_MACOSX_DEPLOYMENT_TARGET'
@@ -186,22 +186,22 @@ class QtInfo(object):
 
         # Figure out how Qt was built:
         #   debug mode, release mode, or both.
-        build_type = self._parseQtBuildType()
+        build_type = self._parse_qt_build_type()
         if build_type:
             self._query_dict['BUILD_TYPE'] = build_type
 
-    def _initProperties(self):
-        self._getQueryProperties()
-        self._getOtherProperties()
+    def _init_properties(self):
+        self._get_query_properties()
+        self._get_other_properties()
 
-    def _getQMakeMkspecsVariables(self):
+    def _get_qmake_mkspecs_variables(self):
         # Create empty temporary qmake project file.
         temp_file_name = 'qmake_fake_empty_project.txt'
         open(temp_file_name, 'a').close()
 
         # Query qmake for all of its mkspecs variables.
-        qmakeOutput = self._getQMakeOutput(['-E', temp_file_name])
-        lines = [s.strip() for s in qmakeOutput.splitlines()]
+        qmake_output = self._get_qmake_output(['-E', temp_file_name])
+        lines = [s.strip() for s in qmake_output.splitlines()]
         pattern = re.compile(r"^(.+?)=(.+?)$")
         for line in lines:
             found = pattern.search(line)
@@ -220,18 +220,18 @@ class QtInfo(object):
         if os.path.exists(temp_file_name):
             os.remove(temp_file_name)
 
-    version = property(getVersion)
-    bins_dir = property(getBinsPath)
-    libs_dir = property(getLibsPath)
-    lib_execs_dir = property(getLibsExecsPath)
-    plugins_dir = property(getPluginsPath)
-    prefix_dir = property(getPrefixPath)
-    qmake_command = property(getQMakeCommand)
-    imports_dir = property(getImportsPath)
-    translations_dir = property(getTranslationsPath)
-    headers_dir = property(getHeadersPath)
-    docs_dir = property(getDocsPath)
-    qml_dir = property(getQmlPath)
-    macos_min_deployment_target = property(getMacOSMinDeploymentTarget)
-    build_type = property(getBuildType)
-    src_dir = property(getSrcDir)
+    version = property(get_version)
+    bins_dir = property(get_bins_path)
+    libs_dir = property(get_libs_path)
+    lib_execs_dir = property(get_libs_execs_path)
+    plugins_dir = property(get_plugins_path)
+    prefix_dir = property(get_prefix_path)
+    qmake_command = property(get_qmake_command)
+    imports_dir = property(get_imports_path)
+    translations_dir = property(get_translations_path)
+    headers_dir = property(get_headers_path)
+    docs_dir = property(get_docs_path)
+    qml_dir = property(get_qml_path)
+    macos_min_deployment_target = property(get_macos_deployment_target)
+    build_type = property(get_build_type)
+    src_dir = property(get_src_dir)
