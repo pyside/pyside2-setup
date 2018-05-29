@@ -26,7 +26,7 @@ Qt Modules
      - `Qt OpenGL <PySide2/QtOpenGL/index.html>`_
         Offers classes that make it easy to use OpenGL in Qt applications.
    * - `Qt PrintSupport <PySide2/QtPrintSupport/index.html>`_
-        Offers classes that make it easy to use OpenGL in Qt applications.
+        Provides extensive cross-platform support for printing.
      - `Qt Qml <PySide2/QtQml/index.html>`_
         Python API for Qt QML.
    * - `Qt Charts <PySide2/QtCharts/index.html>`_
@@ -75,7 +75,7 @@ Qt Modules
    * - `Qt X11Extras <PySide2/QtX11Extras/index.html>`_
         Provides information about the X display configuration.
      - `Qt Xml <PySide2/QtXml/index.html>`_
-        Provides a stream reader and writer for XML documents.
+        Provides C++ implementations of SAX and DOM.
    * - `Qt XmlPatterns <PySide2/QtXmlPatterns/index.html>`_
         Provides support for XPath, XQuery, XSLTi, and XML Schema validation.
      - `Qt 3D Core <PySide2/Qt3DCore/index.html>`_

@@ -72,6 +72,14 @@ def call_testrunner(python_ver, buildnro):
     run_instruction(cmd, "Failed to run testrunner.py")
 
 def run_test_instructions():
+    # Disable unsupported configs for now
+    if CI_HOST_OS_VER in ["WinRT_10"]:
+        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
+        exit()
+    if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
+        print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
+        exit()
+
     os.chdir(CI_ENV_AGENT_DIR)
     call_testrunner("", "0")
     # We know that second build was with python3
