@@ -89,6 +89,14 @@ def call_setup(python_ver):
     run_instruction(cmd, "Failed to run setup.py")
 
 def run_build_instructions():
+    # Disable unsupported configs for now
+    if CI_HOST_OS_VER in ["WinRT_10"]:
+        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
+        exit()
+    if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
+        print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
+        exit()
+
     # Uses default python, hopefully we have python2 installed on all hosts
     call_setup("")
 
