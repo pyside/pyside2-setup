@@ -51,41 +51,41 @@ from PySide2.QtWebEngineWidgets import (QWebEngineDownloadItem,
 
 class BrowserTabWidget(QTabWidget):
 
-    urlChanged = QtCore.Signal(QUrl)
-    enabledChanged = QtCore.Signal(QWebEnginePage.WebAction, bool)
-    downloadRequested = QtCore.Signal(QWebEngineDownloadItem)
+    url_changed = QtCore.Signal(QUrl)
+    enabled_changed = QtCore.Signal(QWebEnginePage.WebAction, bool)
+    download_requested = QtCore.Signal(QWebEngineDownloadItem)
 
-    def __init__(self, windowFactoryFunction):
+    def __init__(self, window_factory_function):
         super(BrowserTabWidget, self).__init__()
         self.setTabsClosable(True)
-        self._windowFactoryFunction = windowFactoryFunction
+        self._window_factory_function = window_factory_function
         self._webengineviews = []
-        self.currentChanged.connect(self._currentChanged)
-        self.tabCloseRequested.connect(self.handleTabCloseRequest)
-        self._actionsEnabled = {}
-        for webAction in WebEngineView.webActions():
-            self._actionsEnabled[webAction] = False
+        self.currentChanged.connect(self._current_changed)
+        self.tabCloseRequested.connect(self.handle_tab_close_request)
+        self._actions_enabled = {}
+        for web_action in WebEngineView.web_actions():
+            self._actions_enabled[web_action] = False
 
-        tabBar = self.tabBar()
-        tabBar.setSelectionBehaviorOnRemove(QTabBar.SelectPreviousTab)
-        tabBar.setContextMenuPolicy(Qt.CustomContextMenu)
-        tabBar.customContextMenuRequested.connect(self._handleTabContextMenu)
+        tab_bar = self.tabBar()
+        tab_bar.setSelectionBehaviorOnRemove(QTabBar.SelectPreviousTab)
+        tab_bar.setContextMenuPolicy(Qt.CustomContextMenu)
+        tab_bar.customContextMenuRequested.connect(self._handle_tab_context_menu)
 
-    def addBrowserTab(self):
-        factoryFunc = partial(BrowserTabWidget.addBrowserTab, self)
-        webEngineView = WebEngineView(factoryFunc, self._windowFactoryFunction)
+    def add_browser_tab(self):
+        factory_func = partial(BrowserTabWidget.add_browser_tab, self)
+        web_engine_view = WebEngineView(factory_func, self._window_factory_function)
         index = self.count()
-        self._webengineviews.append(webEngineView)
+        self._webengineviews.append(web_engine_view)
         title = 'Tab {}'.format(index + 1)
-        self.addTab(webEngineView, title)
-        page = webEngineView.page()
-        page.titleChanged.connect(self._titleChanged)
-        page.iconChanged.connect(self._iconChanged)
-        page.profile().downloadRequested.connect(self._downloadRequested)
-        webEngineView.urlChanged.connect(self._urlChanged)
-        webEngineView.enabledChanged.connect(self._enabledChanged)
+        self.addTab(web_engine_view, title)
+        page = web_engine_view.page()
+        page.titleChanged.connect(self._title_changed)
+        page.iconChanged.connect(self._icon_changed)
+        page.profile().downloadRequested.connect(self._download_requested)
+        web_engine_view.urlChanged.connect(self._url_changed)
+        web_engine_view.enabled_changed.connect(self._enabled_changed)
         self.setCurrentIndex(index)
-        return webEngineView
+        return web_engine_view
 
     def load(self, url):
         index = self.currentIndex()
@@ -101,120 +101,120 @@ class BrowserTabWidget(QTabWidget):
         index = self.currentIndex()
         return self._webengineviews[index].url() if index >= 0 else QUrl()
 
-    def _urlChanged(self, url):
+    def _url_changed(self, url):
         index = self.currentIndex()
         if index >= 0 and self._webengineviews[index] == self.sender():
-                self.urlChanged.emit(url)
+                self.url_changed.emit(url)
 
-    def _titleChanged(self, title):
-        index = self._indexOfPage(self.sender())
+    def _title_changed(self, title):
+        index = self._index_of_page(self.sender())
         if (index >= 0):
-            self.setTabText(index, BookmarkWidget.shortTitle(title))
+            self.setTabText(index, BookmarkWidget.short_title(title))
 
-    def _iconChanged(self, icon):
-        index = self._indexOfPage(self.sender())
+    def _icon_changed(self, icon):
+        index = self._index_of_page(self.sender())
         if (index >= 0):
             self.setTabIcon(index, icon)
 
-    def _enabledChanged(self, webAction, enabled):
+    def _enabled_changed(self, web_action, enabled):
         index = self.currentIndex()
         if index >= 0 and self._webengineviews[index] == self.sender():
-            self._checkEmitEnabledChanged(webAction, enabled)
+            self._check_emit_enabled_changed(web_action, enabled)
 
-    def _checkEmitEnabledChanged(self, webAction, enabled):
-        if enabled != self._actionsEnabled[webAction]:
-            self._actionsEnabled[webAction] = enabled
-            self.enabledChanged.emit(webAction, enabled)
+    def _check_emit_enabled_changed(self, web_action, enabled):
+        if enabled != self._actions_enabled[web_action]:
+            self._actions_enabled[web_action] = enabled
+            self.enabled_changed.emit(web_action, enabled)
 
-    def _currentChanged(self, index):
-        self._updateActions(index)
-        self.urlChanged.emit(self.url())
+    def _current_changed(self, index):
+        self._update_actions(index)
+        self.url_changed.emit(self.url())
 
-    def _updateActions(self, index):
+    def _update_actions(self, index):
         if index >= 0 and index < len(self._webengineviews):
             view = self._webengineviews[index]
-            for webAction in WebEngineView.webActions():
-                enabled = view.isWebActionEnabled(webAction)
-                self._checkEmitEnabledChanged(webAction, enabled)
+            for web_action in WebEngineView.web_actions():
+                enabled = view.is_web_action_enabled(web_action)
+                self._check_emit_enabled_changed(web_action, enabled)
 
     def back(self):
-        self._triggerAction(QWebEnginePage.Back)
+        self._trigger_action(QWebEnginePage.Back)
 
     def forward(self):
-        self._triggerAction(QWebEnginePage.Forward)
+        self._trigger_action(QWebEnginePage.Forward)
 
     def reload(self):
-        self._triggerAction(QWebEnginePage.Reload)
+        self._trigger_action(QWebEnginePage.Reload)
 
     def undo(self):
-        self._triggerAction(QWebEnginePage.Undo)
+        self._trigger_action(QWebEnginePage.Undo)
 
     def redo(self):
-        self._triggerAction(QWebEnginePage.Redo)
+        self._trigger_action(QWebEnginePage.Redo)
 
     def cut(self):
-        self._triggerAction(QWebEnginePage.Cut)
+        self._trigger_action(QWebEnginePage.Cut)
 
     def copy(self):
-        self._triggerAction(QWebEnginePage.Copy)
+        self._trigger_action(QWebEnginePage.Copy)
 
     def paste(self):
-        self._triggerAction(QWebEnginePage.Paste)
+        self._trigger_action(QWebEnginePage.Paste)
 
-    def selectAll(self):
-        self._triggerAction(QWebEnginePage.SelectAll)
+    def select_all(self):
+        self._trigger_action(QWebEnginePage.SelectAll)
 
-    def zoomFactor(self):
+    def zoom_factor(self):
         return self._webengineviews[0].zoomFactor() if self._webengineviews else 1.0
 
-    def setZoomFactor(self, z):
+    def set_zoom_factor(self, z):
         for w in self._webengineviews:
             w.setZoomFactor(z)
 
-    def _handleTabContextMenu(self, point):
+    def _handle_tab_context_menu(self, point):
         index = self.tabBar().tabAt(point)
         if index < 0:
             return
-        tabCount = len(self._webengineviews)
-        contextMenu = QMenu()
-        duplicateTabAction = contextMenu.addAction("Duplicate Tab")
-        closeOtherTabsAction = contextMenu.addAction("Close Other Tabs")
-        closeOtherTabsAction.setEnabled(tabCount > 1)
-        closeTabsToTheRightAction = contextMenu.addAction("Close Tabs to the Right")
-        closeTabsToTheRightAction.setEnabled(index < tabCount - 1)
-        closeTabAction = contextMenu.addAction("&Close Tab")
-        chosenAction = contextMenu.exec_(self.tabBar().mapToGlobal(point))
-        if chosenAction == duplicateTabAction:
-            currentUrl = self.url()
-            self.addBrowserTab().load(currentUrl)
-        elif chosenAction == closeOtherTabsAction:
-            for t in range(tabCount - 1, -1, -1):
+        tab_count = len(self._webengineviews)
+        context_menu = QMenu()
+        duplicate_tab_action = context_menu.addAction("Duplicate Tab")
+        close_other_tabs_action = context_menu.addAction("Close Other Tabs")
+        close_other_tabs_action.setEnabled(tab_count > 1)
+        close_tabs_to_the_right_action = context_menu.addAction("Close Tabs to the Right")
+        close_tabs_to_the_right_action.setEnabled(index < tab_count - 1)
+        close_tab_action = context_menu.addAction("&Close Tab")
+        chosen_action = context_menu.exec_(self.tabBar().mapToGlobal(point))
+        if chosen_action == duplicate_tab_action:
+            current_url = self.url()
+            self.add_browser_tab().load(current_url)
+        elif chosen_action == close_other_tabs_action:
+            for t in range(tab_count - 1, -1, -1):
                 if t != index:
-                     self.handleTabCloseRequest(t)
-        elif chosenAction == closeTabsToTheRightAction:
-            for t in range(tabCount - 1, index, -1):
-                self.handleTabCloseRequest(t)
-        elif chosenAction == closeTabAction:
-            self.handleTabCloseRequest(index)
+                     self.handle_tab_close_request(t)
+        elif chosen_action == close_tabs_to_the_right_action:
+            for t in range(tab_count - 1, index, -1):
+                self.handle_tab_close_request(t)
+        elif chosen_action == close_tab_action:
+            self.handle_tab_close_request(index)
 
-    def handleTabCloseRequest(self, index):
+    def handle_tab_close_request(self, index):
         if (index >= 0 and self.count() > 1):
             self._webengineviews.remove(self._webengineviews[index])
             self.removeTab(index)
 
-    def closeCurrentTab(self):
-        self.handleTabCloseRequest(self.currentIndex())
+    def close_current_tab(self):
+        self.handle_tab_close_request(self.currentIndex())
 
-    def _triggerAction(self, action):
+    def _trigger_action(self, action):
         index = self.currentIndex()
         if index >= 0:
             self._webengineviews[index].page().triggerAction(action)
 
-    def _indexOfPage(self, webPage):
+    def _index_of_page(self, web_page):
         for p in range(0, len(self._webengineviews)):
-            if (self._webengineviews[p].page() == webPage):
+            if (self._webengineviews[p].page() == web_page):
                 return p
         return -1
 
-    def _downloadRequested(self, item):
+    def _download_requested(self, item):
         self.downloadRequested.emit(item)

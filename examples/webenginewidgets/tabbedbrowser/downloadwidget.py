@@ -50,95 +50,95 @@ from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem
 class DownloadWidget(QProgressBar):
 
     finished = QtCore.Signal()
-    removeRequested = QtCore.Signal()
+    remove_requested = QtCore.Signal()
 
-    def __init__(self, downloadItem):
+    def __init__(self, download_item):
         super(DownloadWidget, self).__init__()
-        self._downloadItem = downloadItem
-        downloadItem.finished.connect(self._finished)
-        downloadItem.downloadProgress.connect(self._downloadProgress)
-        downloadItem.stateChanged.connect(self._updateToolTip())
-        path = downloadItem.path()
+        self._download_item = download_item
+        download_item.finished.connect(self._finished)
+        download_item.downloadProgress.connect(self._download_progress)
+        download_item.stateChanged.connect(self._update_tool_tip())
+        path = download_item.path()
         self.setMaximumWidth(300)
         # Shorten 'PySide2-5.11.0a1-5.11.0-cp36-cp36m-linux_x86_64.whl'...
         description = QFileInfo(path).fileName()
-        descriptionLength = len(description)
-        if descriptionLength > 30:
-            description = '{}...{}'.format(description[0:10], description[descriptionLength - 10:])
+        description_length = len(description)
+        if description_length > 30:
+            description = '{}...{}'.format(description[0:10], description[description_length - 10:])
         self.setFormat('{} %p%'.format(description))
         self.setOrientation(Qt.Horizontal)
         self.setMinimum(0)
         self.setValue(0)
         self.setMaximum(100)
-        self._updateToolTip()
+        self._update_tool_tip()
         # Force progress bar text to be shown on macoS by using 'fusion' style
         if sys.platform == 'darwin':
             self.setStyle(QStyleFactory.create('fusion'))
 
     @staticmethod
-    def openFile(file):
+    def open_file(file):
         QDesktopServices.openUrl(QUrl.fromLocalFile(file))
 
     @staticmethod
-    def openDownloadDirectory():
+    def open_download_directory():
         path = QStandardPaths.writableLocation(QStandardPaths.DownloadLocation)
-        DownloadWidget.openFile(path)
+        DownloadWidget.open_file(path)
 
     def state(self):
-        return self._downloadItem.state()
+        return self._download_item.state()
 
-    def _updateToolTip(self):
-        path = self._downloadItem.path()
-        toolTip = "{}\n{}".format(self._downloadItem.url().toString(),
+    def _update_tool_tip(self):
+        path = self._download_item.path()
+        tool_tip = "{}\n{}".format(self._download_item.url().toString(),
             QDir.toNativeSeparators(path))
-        totalBytes = self._downloadItem.totalBytes()
-        if totalBytes > 0:
-            toolTip += "\n{}K".format(totalBytes / 1024)
+        total_bytes = self._download_item.total_bytes()
+        if total_bytes > 0:
+            tool_tip += "\n{}K".format(total_bytes / 1024)
         state = self.state()
         if state == QWebEngineDownloadItem.DownloadRequested:
-            toolTip += "\n(requested)"
+            tool_tip += "\n(requested)"
         elif state == QWebEngineDownloadItem.DownloadInProgress:
-            toolTip += "\n(downloading)"
+            tool_tip += "\n(downloading)"
         elif state == QWebEngineDownloadItem.DownloadCompleted:
-            toolTip += "\n(completed)"
+            tool_tip += "\n(completed)"
         elif state == QWebEngineDownloadItem.DownloadCancelled:
-            toolTip += "\n(cancelled)"
+            tool_tip += "\n(cancelled)"
         else:
-            toolTip += "\n(interrupted)"
-        self.setToolTip(toolTip)
+            tool_tip += "\n(interrupted)"
+        self.setToolTip(tool_tip)
 
-    def _downloadProgress(self, bytesReceived, bytesTotal):
-        self.setValue(int(100 * bytesReceived / bytesTotal))
+    def _download_progress(self, bytes_received, bytes_total):
+        self.setValue(int(100 * bytes_received / bytes_total))
 
     def _finished(self):
-        self._updateToolTip()
+        self._update_tool_tip()
         self.finished.emit()
 
     def _launch(self):
-        DownloadWidget.openFile(self._downloadItem.path())
+        DownloadWidget.open_file(self._download_item.path())
 
-    def mouseDoubleClickEvent(self, event):
+    def mouse_double_click_event(self, event):
         if self.state() == QWebEngineDownloadItem.DownloadCompleted:
             self._launch()
 
-    def contextMenuEvent(self, event):
+    def context_menu_event(self, event):
         state = self.state()
-        contextMenu = QMenu()
-        launchAction = contextMenu.addAction("Launch")
-        launchAction.setEnabled(state == QWebEngineDownloadItem.DownloadCompleted)
-        showInFolderAction = contextMenu.addAction("Show in Folder")
-        showInFolderAction.setEnabled(state == QWebEngineDownloadItem.DownloadCompleted)
-        cancelAction = contextMenu.addAction("Cancel")
-        cancelAction.setEnabled(state == QWebEngineDownloadItem.DownloadInProgress)
-        removeAction = contextMenu.addAction("Remove")
-        removeAction.setEnabled(state != QWebEngineDownloadItem.DownloadInProgress)
+        context_menu = QMenu()
+        launch_action = context_menu.addAction("Launch")
+        launch_action.setEnabled(state == QWebEngineDownloadItem.DownloadCompleted)
+        show_in_folder_action = context_menu.addAction("Show in Folder")
+        show_in_folder_action.setEnabled(state == QWebEngineDownloadItem.DownloadCompleted)
+        cancel_action = context_menu.addAction("Cancel")
+        cancel_action.setEnabled(state == QWebEngineDownloadItem.DownloadInProgress)
+        remove_action = context_menu.addAction("Remove")
+        remove_action.setEnabled(state != QWebEngineDownloadItem.DownloadInProgress)
 
-        chosenAction = contextMenu.exec_(event.globalPos())
-        if chosenAction == launchAction:
+        chosen_action = context_menu.exec_(event.globalPos())
+        if chosen_action == launch_action:
             self._launch()
-        elif chosenAction == showInFolderAction:
-            DownloadWidget.openFile(QFileInfo(self._downloadItem.path()).absolutePath())
-        elif chosenAction == cancelAction:
-            self._downloadItem.cancel()
-        elif chosenAction == removeAction:
-            self.removeRequested.emit()
+        elif chosen_action == show_in_folder_action:
+            DownloadWidget.open_file(QFileInfo(self._download_item.path()).absolutePath())
+        elif chosen_action == cancel_action:
+            self._download_item.cancel()
+        elif chosen_action == remove_action:
+            self.remove_requested.emit()
