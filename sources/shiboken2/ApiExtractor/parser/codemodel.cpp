@@ -146,6 +146,14 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
     return __result;
 }
 
+bool TypeInfo::isVoid() const
+{
+    return m_indirections == 0 && m_referenceType == NoReference
+        && m_arguments.isEmpty() && m_arrayElements.isEmpty()
+        && m_qualifiedName.size() == 1
+        && m_qualifiedName.constFirst() == QLatin1String("void");
+}
+
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
 {
     CodeModel *__model = __scope->model();
