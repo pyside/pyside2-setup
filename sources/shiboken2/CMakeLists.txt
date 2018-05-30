@@ -234,7 +234,7 @@ if (NOT PYTHON_EXTENSION_SUFFIX)
   get_python_extension_suffix()
 endif()
 
-option(FORCE_LIMITED_API "Enable the limited API." "no")
+option(FORCE_LIMITED_API "Enable the limited API." "yes")
 set(PYTHON_LIMITED_API 0)
 
 # On Windows, PYTHON_LIBRARIES can be a list. Example:

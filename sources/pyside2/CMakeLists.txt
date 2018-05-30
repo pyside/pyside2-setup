@@ -90,7 +90,7 @@ else()
     set(PATH_SEP ":")
 endif()
 
-option(FORCE_LIMITED_API "Enable the limited API." "no")
+option(FORCE_LIMITED_API "Enable the limited API." "yes")
 
 set(PYTHON_LIMITED_API 0)
 if(FORCE_LIMITED_API STREQUAL "yes")
