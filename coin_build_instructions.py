@@ -69,7 +69,7 @@ def call_setup(python_ver):
     cmd = [env_python, "setup.py"]
     # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
     # we shouldn't release the 2015 version.
-    if CI_RELEASE_CONF and CI_COMPILER not in ["MSVC2017"]:
+    if CI_RELEASE_CONF and CI_COMPILER not in ["MSVC2015"]:
         cmd += ["bdist_wheel", "--standalone"]
     else:
         cmd += ["build"]
