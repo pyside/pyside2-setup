@@ -64,7 +64,7 @@ def get_package_version():
         d['major_version'], d['minor_version'], d['patch_version'])
     pre_release_version_type = d['pre_release_version_type']
     pre_release_version = d['pre_release_version']
-    if pre_release_version and pre_release_version:
+    if pre_release_version and pre_release_version_type:
         final_version += pre_release_version_type + pre_release_version
 
     # Add the current timestamp to the version number, to suggest it
