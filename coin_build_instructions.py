@@ -85,6 +85,8 @@ def call_setup(python_ver):
             "--jobs=4",
             "--verbose-build",
             "--snapshot-build"]
+    if python_ver == "3":
+        cmd += ["--limited-api=yes"]
 
     run_instruction(cmd, "Failed to run setup.py")
 
