@@ -52,20 +52,20 @@ class QMimeDatabaseTest(unittest.TestCase):
         s1 = db.mimeTypeForName("text/plain")
         self.assertTrue(s1.isValid())
         self.assertEqual(s1.name(), "text/plain")
-        # print("Comment is  %s" % s1.comment())
 
         krita = db.mimeTypeForName("application/x-krita")
         self.assertTrue(krita.isValid())
 
-        # Test <comment> parsing with application/rdf+xml which has the english comment after the other ones
         rdf = db.mimeTypeForName("application/rdf+xml")
         self.assertTrue(rdf.isValid())
         self.assertEqual(rdf.name(), "application/rdf+xml")
-        self.assertEqual(rdf.comment(), "RDF file")
+        if "en" in QLocale().name():
+            self.assertEqual(rdf.comment(), "RDF file")
 
         bzip2 = db.mimeTypeForName("application/x-bzip2")
         self.assertTrue(bzip2.isValid())
-        self.assertEqual(bzip2.comment(), "Bzip archive")
+        if "en" in QLocale().name():
+            self.assertEqual(bzip2.comment(), "Bzip archive")
 
         defaultMime = db.mimeTypeForName("application/octet-stream")
         self.assertTrue(defaultMime.isValid())
