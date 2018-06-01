@@ -76,8 +76,8 @@ def run_test_instructions():
     if CI_HOST_OS_VER in ["WinRT_10"]:
         print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
         exit()
-    if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
-        print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
+    if CI_COMPILER in ["MSVC2015"] and CI_TARGET_ARCH in ["X86_64"]:
+        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
         exit()
 
     os.chdir(CI_ENV_AGENT_DIR)

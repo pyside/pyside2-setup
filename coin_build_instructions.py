@@ -98,9 +98,7 @@ def call_setup(python_ver):
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
     install_pip_dependencies(env_pip, ["six", "wheel"])
     cmd = [env_python, "setup.py"]
-    # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
-    # we shouldn't release the 2015 version.
-    if CI_RELEASE_CONF and CI_COMPILER not in ["MSVC2015"]:
+    if CI_RELEASE_CONF:
         cmd += ["bdist_wheel", "--standalone"]
     else:
         cmd += ["build"]
@@ -127,8 +125,10 @@ def run_build_instructions():
     if CI_HOST_OS_VER in ["WinRT_10"]:
         print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
         exit()
-    if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
-        print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
+   # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
+    # we shouldn't release the 2015 version. BUT, 32 bit build is done only on msvc 2015...
+    if CI_COMPILER in ["MSVC2015"] and CI_TARGET_ARCH in ["X86_64"]:
+        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
         exit()
 
     # Uses default python, hopefully we have python2 installed on all hosts
