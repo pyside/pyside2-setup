@@ -379,6 +379,27 @@ static QStringList parseArrayArgs(const CXType &type, QString *typeName)
     return result;
 }
 
+// Create qualified name "std::list<std::string>" -> ("std", "list<std::string>")
+static QStringList qualifiedName(const QString &t)
+{
+    QStringList result;
+    int end = t.indexOf(QLatin1Char('<'));
+    if (end == -1)
+        end = t.indexOf(QLatin1Char('('));
+    if (end == -1)
+        end = t.size();
+    int lastPos = 0;
+    while (true) {
+        const int nextPos = t.indexOf(colonColon(), lastPos);
+        if (nextPos < 0 || nextPos >= end)
+            break;
+        result.append(t.mid(lastPos, nextPos - lastPos));
+        lastPos = nextPos + 2;
+    }
+    result.append(t.right(t.size() - lastPos));
+    return result;
+}
+
 TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
 {
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
@@ -439,7 +460,7 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
 
     typeName = typeName.trimmed();
 
-    typeInfo.setQualifiedName(typeName.split(colonColon()));
+    typeInfo.setQualifiedName(qualifiedName(typeName));
     // 3320:CINDEX_LINKAGE int clang_getNumArgTypes(CXType T); function ptr types?
     return typeInfo;
 }
