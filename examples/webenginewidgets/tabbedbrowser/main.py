@@ -57,326 +57,326 @@ from PySide2.QtWidgets import (qApp, QAction, QApplication, QDesktopWidget,
 from PySide2.QtWebEngineWidgets import (QWebEngineDownloadItem, QWebEnginePage,
     QWebEngineView)
 
-mainWindows = []
+main_windows = []
 
-def createMainWindow():
-    mainWin = MainWindow()
-    mainWindows.append(mainWin)
-    availableGeometry = app.desktop().availableGeometry(mainWin)
-    mainWin.resize(availableGeometry.width() * 2 / 3, availableGeometry.height() * 2 / 3)
-    mainWin.show()
-    return mainWin
+def create_main_window():
+    main_win = MainWindow()
+    main_windows.append(main_win)
+    available_geometry = app.desktop().availableGeometry(main_win)
+    main_win.resize(available_geometry.width() * 2 / 3, available_geometry.height() * 2 / 3)
+    main_win.show()
+    return main_win
 
-def createMainWindowWithBrowser():
-    mainWin = createMainWindow()
-    return mainWin.addBrowserTab()
+def create_main_window_with_browser():
+    main_win = create_main_window()
+    return main_win.add_browser_tab()
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.setWindowTitle('PySide2 Tabbed Browser Example')
+        self.setWindowTitle('PySide2 tabbed browser Example')
 
-        self._tabWidget = BrowserTabWidget(createMainWindowWithBrowser)
-        self._tabWidget.enabledChanged.connect(self._enabledChanged)
-        self._tabWidget.downloadRequested.connect(self._downloadRequested)
-        self.setCentralWidget(self._tabWidget)
-        self.connect(self._tabWidget, QtCore.SIGNAL("urlChanged(QUrl)"),
-                     self.urlChanged)
+        self._tab_widget = BrowserTabWidget(create_main_window_with_browser)
+        self._tab_widget.enabled_changed.connect(self._enabled_changed)
+        self._tab_widget.download_requested.connect(self._download_requested)
+        self.setCentralWidget(self._tab_widget)
+        self.connect(self._tab_widget, QtCore.SIGNAL("url_changed(QUrl)"),
+                     self.url_changed)
 
-        self._bookmarkDock = QDockWidget()
-        self._bookmarkDock.setWindowTitle('Bookmarks')
-        self._bookmarkWidget = BookmarkWidget()
-        self._bookmarkWidget.openBookmark.connect(self.loadUrl)
-        self._bookmarkWidget.openBookmarkInNewTab.connect(self.loadUrlInNewTab)
-        self._bookmarkDock.setWidget(self._bookmarkWidget)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self._bookmarkDock)
+        self._bookmark_dock = QDockWidget()
+        self._bookmark_dock.setWindowTitle('Bookmarks')
+        self._bookmark_widget = BookmarkWidget()
+        self._bookmark_widget.open_bookmark.connect(self.load_url)
+        self._bookmark_widget.open_bookmark_in_new_tab.connect(self.load_url_in_new_tab)
+        self._bookmark_dock.setWidget(self._bookmark_widget)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self._bookmark_dock)
 
-        self._findToolBar = None
+        self._find_tool_bar = None
 
         self._actions = {}
-        self._createMenu()
+        self._create_menu()
 
-        self._toolBar = QToolBar()
-        self.addToolBar(self._toolBar)
+        self._tool_bar = QToolBar()
+        self.addToolBar(self._tool_bar)
         for action in self._actions.values():
             if not action.icon().isNull():
-                self._toolBar.addAction(action)
+                self._tool_bar.addAction(action)
 
-        self._addressLineEdit = QLineEdit()
-        self._addressLineEdit.setClearButtonEnabled(True)
-        self._addressLineEdit.returnPressed.connect(self.load)
-        self._toolBar.addWidget(self._addressLineEdit)
-        self._zoomLabel = QLabel()
-        self.statusBar().addPermanentWidget(self._zoomLabel)
-        self._updateZoomLabel()
+        self._addres_line_edit = QLineEdit()
+        self._addres_line_edit.setClearButtonEnabled(True)
+        self._addres_line_edit.returnPressed.connect(self.load)
+        self._tool_bar.addWidget(self._addres_line_edit)
+        self._zoom_label = QLabel()
+        self.statusBar().addPermanentWidget(self._zoom_label)
+        self._update_zoom_label()
 
         self._bookmarksToolBar = QToolBar()
         self.addToolBar(Qt.TopToolBarArea, self._bookmarksToolBar)
         self.insertToolBarBreak(self._bookmarksToolBar)
-        self._bookmarkWidget.changed.connect(self._updateBookmarks)
-        self._updateBookmarks()
+        self._bookmark_widget.changed.connect(self._update_bookmarks)
+        self._update_bookmarks()
 
-    def _updateBookmarks(self):
-        self._bookmarkWidget.populateToolBar(self._bookmarksToolBar)
-        self._bookmarkWidget.populateOther(self._bookmarkMenu, 3)
+    def _update_bookmarks(self):
+        self._bookmark_widget.populate_tool_bar(self._bookmarksToolBar)
+        self._bookmark_widget.populate_other(self._bookmark_menu, 3)
 
-    def _createMenu(self):
-        fileMenu = self.menuBar().addMenu("&File")
-        exitAction = QAction(QIcon.fromTheme("application-exit"), "E&xit",
+    def _create_menu(self):
+        file_menu = self.menuBar().addMenu("&File")
+        exit_action = QAction(QIcon.fromTheme("application-exit"), "E&xit",
                              self, shortcut = "Ctrl+Q", triggered=qApp.quit)
-        fileMenu.addAction(exitAction)
+        file_menu.addAction(exit_action)
 
-        navigationMenu = self.menuBar().addMenu("&Navigation")
+        navigation_menu = self.menuBar().addMenu("&Navigation")
 
-        styleIcons = ':/qt-project.org/styles/commonstyle/images/'
-        backAction = QAction(QIcon.fromTheme("go-previous",
-                                             QIcon(styleIcons + 'left-32.png')),
+        style_icons = ':/qt-project.org/styles/commonstyle/images/'
+        back_action = QAction(QIcon.fromTheme("go-previous",
+                                             QIcon(style_icons + 'left-32.png')),
                              "Back", self,
                              shortcut = QKeySequence(QKeySequence.Back),
-                             triggered = self._tabWidget.back)
-        self._actions[QWebEnginePage.Back] = backAction
-        backAction.setEnabled(False)
-        navigationMenu.addAction(backAction)
-        forwardAction = QAction(QIcon.fromTheme("go-next",
-                                                QIcon(styleIcons + 'right-32.png')),
+                             triggered = self._tab_widget.back)
+        self._actions[QWebEnginePage.Back] = back_action
+        back_action.setEnabled(False)
+        navigation_menu.addAction(back_action)
+        forward_action = QAction(QIcon.fromTheme("go-next",
+                                                QIcon(style_icons + 'right-32.png')),
                                 "Forward", self,
                                 shortcut = QKeySequence(QKeySequence.Forward),
-                                triggered = self._tabWidget.forward)
-        forwardAction.setEnabled(False)
-        self._actions[QWebEnginePage.Forward] = forwardAction
+                                triggered = self._tab_widget.forward)
+        forward_action.setEnabled(False)
+        self._actions[QWebEnginePage.Forward] = forward_action
 
-        navigationMenu.addAction(forwardAction)
-        reloadAction = QAction(QIcon(styleIcons + 'refresh-32.png'),
+        navigation_menu.addAction(forward_action)
+        reload_action = QAction(QIcon(style_icons + 'refresh-32.png'),
                                "Reload", self,
                                shortcut = QKeySequence(QKeySequence.Refresh),
-                               triggered = self._tabWidget.reload)
-        self._actions[QWebEnginePage.Reload] = reloadAction
-        reloadAction.setEnabled(False)
-        navigationMenu.addAction(reloadAction)
+                               triggered = self._tab_widget.reload)
+        self._actions[QWebEnginePage.Reload] = reload_action
+        reload_action.setEnabled(False)
+        navigation_menu.addAction(reload_action)
 
-        navigationMenu.addSeparator()
+        navigation_menu.addSeparator()
 
-        newTabAction = QAction("New Tab", self,
+        new_tab_action = QAction("New Tab", self,
                              shortcut = 'Ctrl+T',
-                             triggered = self.addBrowserTab)
-        navigationMenu.addAction(newTabAction)
+                             triggered = self.add_browser_tab)
+        navigation_menu.addAction(new_tab_action)
 
-        closeTabAction = QAction("Close Current Tab", self,
+        close_tab_action = QAction("Close Current Tab", self,
                                  shortcut = "Ctrl+W",
-                                 triggered = self._closeCurrentTab)
-        navigationMenu.addAction(closeTabAction)
+                                 triggered = self._close_current_tab)
+        navigation_menu.addAction(close_tab_action)
 
-        editMenu = self.menuBar().addMenu("&Edit")
+        edit_menu = self.menuBar().addMenu("&Edit")
 
-        findAction = QAction("Find", self,
+        find_action = QAction("Find", self,
                              shortcut = QKeySequence(QKeySequence.Find),
-                             triggered = self._showFind)
-        editMenu.addAction(findAction)
+                             triggered = self._show_find)
+        edit_menu.addAction(find_action)
 
-        editMenu.addSeparator()
-        undoAction = QAction("Undo", self,
+        edit_menu.addSeparator()
+        undo_action = QAction("Undo", self,
                              shortcut = QKeySequence(QKeySequence.Undo),
-                             triggered = self._tabWidget.undo)
-        self._actions[QWebEnginePage.Undo] = undoAction
-        undoAction.setEnabled(False)
-        editMenu.addAction(undoAction)
+                             triggered = self._tab_widget.undo)
+        self._actions[QWebEnginePage.Undo] = undo_action
+        undo_action.setEnabled(False)
+        edit_menu.addAction(undo_action)
 
-        redoAction = QAction("Redo", self,
+        redo_action = QAction("Redo", self,
                              shortcut = QKeySequence(QKeySequence.Redo),
-                             triggered = self._tabWidget.redo)
-        self._actions[QWebEnginePage.Redo] = redoAction
-        redoAction.setEnabled(False)
-        editMenu.addAction(redoAction)
+                             triggered = self._tab_widget.redo)
+        self._actions[QWebEnginePage.Redo] = redo_action
+        redo_action.setEnabled(False)
+        edit_menu.addAction(redo_action)
 
-        editMenu.addSeparator()
+        edit_menu.addSeparator()
 
-        cutAction = QAction("Cut", self,
+        cut_action = QAction("Cut", self,
                             shortcut = QKeySequence(QKeySequence.Cut),
-                            triggered = self._tabWidget.cut)
-        self._actions[QWebEnginePage.Cut] = cutAction
-        cutAction.setEnabled(False)
-        editMenu.addAction(cutAction)
+                            triggered = self._tab_widget.cut)
+        self._actions[QWebEnginePage.Cut] = cut_action
+        cut_action.setEnabled(False)
+        edit_menu.addAction(cut_action)
 
-        copyAction = QAction("Copy", self,
+        copy_action = QAction("Copy", self,
                              shortcut = QKeySequence(QKeySequence.Copy),
-                             triggered = self._tabWidget.copy)
-        self._actions[QWebEnginePage.Copy] = copyAction
-        copyAction.setEnabled(False)
-        editMenu.addAction(copyAction)
+                             triggered = self._tab_widget.copy)
+        self._actions[QWebEnginePage.Copy] = copy_action
+        copy_action.setEnabled(False)
+        edit_menu.addAction(copy_action)
 
-        pasteAction = QAction("Paste", self,
+        paste_action = QAction("Paste", self,
                              shortcut = QKeySequence(QKeySequence.Paste),
-                             triggered = self._tabWidget.paste)
-        self._actions[QWebEnginePage.Paste] = pasteAction
-        pasteAction.setEnabled(False)
-        editMenu.addAction(pasteAction)
+                             triggered = self._tab_widget.paste)
+        self._actions[QWebEnginePage.Paste] = paste_action
+        paste_action.setEnabled(False)
+        edit_menu.addAction(paste_action)
 
-        editMenu.addSeparator()
+        edit_menu.addSeparator()
 
-        selectAllAction = QAction("Select All", self,
+        select_all_action = QAction("Select All", self,
                                   shortcut = QKeySequence(QKeySequence.SelectAll),
-                                  triggered = self._tabWidget.selectAll)
-        self._actions[QWebEnginePage.SelectAll] = selectAllAction
-        selectAllAction.setEnabled(False)
-        editMenu.addAction(selectAllAction)
+                                  triggered = self._tab_widget.select_all)
+        self._actions[QWebEnginePage.SelectAll] = select_all_action
+        select_all_action.setEnabled(False)
+        edit_menu.addAction(select_all_action)
 
-        self._bookmarkMenu = self.menuBar().addMenu("&Bookmarks")
-        addBookmarkAction = QAction("&Add Bookmark", self,
-                                    triggered = self._addBookmark)
-        self._bookmarkMenu.addAction(addBookmarkAction)
-        addToolBarBookmarkAction = QAction("&Add Bookmark to Tool Bar", self,
-                                           triggered = self._addToolBarBookmark)
-        self._bookmarkMenu.addAction(addToolBarBookmarkAction)
-        self._bookmarkMenu.addSeparator()
+        self._bookmark_menu = self.menuBar().addMenu("&Bookmarks")
+        add_bookmark_action = QAction("&Add Bookmark", self,
+                                    triggered = self._add_bookmark)
+        self._bookmark_menu.addAction(add_bookmark_action)
+        add_tool_bar_bookmark_action = QAction("&Add Bookmark to Tool Bar", self,
+                                           triggered = self._add_tool_bar_bookmark)
+        self._bookmark_menu.addAction(add_tool_bar_bookmark_action)
+        self._bookmark_menu.addSeparator()
 
-        toolsMenu = self.menuBar().addMenu("&Tools")
-        downloadAction = QAction("Open Downloads", self,
-                                 triggered = DownloadWidget.openDownloadDirectory)
-        toolsMenu.addAction(downloadAction)
+        tools_menu = self.menuBar().addMenu("&Tools")
+        download_action = QAction("Open Downloads", self,
+                                 triggered = DownloadWidget.open_download_directory)
+        tools_menu.addAction(download_action)
 
-        windowMenu = self.menuBar().addMenu("&Window")
+        window_menu = self.menuBar().addMenu("&Window")
 
-        windowMenu.addAction(self._bookmarkDock.toggleViewAction())
+        window_menu.addAction(self._bookmark_dock.toggleViewAction())
 
-        windowMenu.addSeparator()
+        window_menu.addSeparator()
 
-        zoomInAction = QAction(QIcon.fromTheme("zoom-in"),
+        zoom_in_action = QAction(QIcon.fromTheme("zoom-in"),
                                "Zoom In", self,
                                shortcut = QKeySequence(QKeySequence.ZoomIn),
-                               triggered = self._zoomIn)
-        windowMenu.addAction(zoomInAction)
-        zoomOutAction = QAction(QIcon.fromTheme("zoom-out"),
+                               triggered = self._zoom_in)
+        window_menu.addAction(zoom_in_action)
+        zoom_out_action = QAction(QIcon.fromTheme("zoom-out"),
                                 "Zoom Out", self,
                                 shortcut = QKeySequence(QKeySequence.ZoomOut),
-                                triggered = self._zoomOut)
-        windowMenu.addAction(zoomOutAction)
+                                triggered = self._zoom_out)
+        window_menu.addAction(zoom_out_action)
 
-        resetZoomAction = QAction(QIcon.fromTheme("zoom-original"),
+        reset_zoom_action = QAction(QIcon.fromTheme("zoom-original"),
                                   "Reset Zoom", self,
                                   shortcut = "Ctrl+0",
-                                  triggered = self._resetZoom)
-        windowMenu.addAction(resetZoomAction)
+                                  triggered = self._reset_zoom)
+        window_menu.addAction(reset_zoom_action)
 
-        aboutMenu = self.menuBar().addMenu("&About")
-        aboutAction = QAction("About Qt", self,
+        about_menu = self.menuBar().addMenu("&About")
+        about_action = QAction("About Qt", self,
                               shortcut = QKeySequence(QKeySequence.HelpContents),
                               triggered=qApp.aboutQt)
-        aboutMenu.addAction(aboutAction)
+        about_menu.addAction(about_action)
 
-    def addBrowserTab(self):
-        return self._tabWidget.addBrowserTab()
+    def add_browser_tab(self):
+        return self._tab_widget.add_browser_tab()
 
-    def _closeCurrentTab(self):
-        if self._tabWidget.count() > 1:
-            self._tabWidget.closeCurrentTab()
+    def _close_current_tab(self):
+        if self._tab_widget.count() > 1:
+            self._tab_widget.close_current_tab()
         else:
             self.close()
 
-    def closeEvent(self, event):
-        mainWindows.remove(self)
+    def close_event(self, event):
+        main_windows.remove(self)
         event.accept()
 
     def load(self):
-        urlString = self._addressLineEdit.text().strip()
-        if urlString:
-            self.loadUrlString(urlString)
+        url_string = self._addres_line_edit.text().strip()
+        if url_string:
+            self.load_url_string(url_string)
 
-    def loadUrlString(self, urlS):
-        url = QUrl.fromUserInput(urlS)
+    def load_url_string(self, url_s):
+        url = QUrl.fromUserInput(url_s)
         if (url.isValid()):
-            self.loadUrl(url)
+            self.load_url(url)
 
-    def loadUrl(self, url):
-        self._tabWidget.load(url)
+    def load_url(self, url):
+        self._tab_widget.load(url)
 
-    def loadUrlInNewTab(self, url):
-        self.addBrowserTab().load(url)
+    def load_url_in_new_tab(self, url):
+        self.add_browser_tab().load(url)
 
-    def urlChanged(self, url):
-        self._addressLineEdit.setText(url.toString())
+    def url_changed(self, url):
+        self._addres_line_edit.setText(url.toString())
 
-    def _enabledChanged(self, webAction, enabled):
-        action = self._actions[webAction]
+    def _enabled_changed(self, web_action, enabled):
+        action = self._actions[web_action]
         if action:
             action.setEnabled(enabled)
 
-    def _addBookmark(self):
-        index = self._tabWidget.currentIndex()
+    def _add_bookmark(self):
+        index = self._tab_widget.currentIndex()
         if index >= 0:
-            url = self._tabWidget.url()
-            title = self._tabWidget.tabText(index)
-            icon = self._tabWidget.tabIcon(index)
-            self._bookmarkWidget.addBookmark(url, title, icon)
+            url = self._tab_widget.url()
+            title = self._tab_widget.tabText(index)
+            icon = self._tab_widget.tabIcon(index)
+            self._bookmark_widget.add_bookmark(url, title, icon)
 
-    def _addToolBarBookmark(self):
-        index = self._tabWidget.currentIndex()
+    def _add_tool_bar_bookmark(self):
+        index = self._tab_widget.currentIndex()
         if index >= 0:
-            url = self._tabWidget.url()
-            title = self._tabWidget.tabText(index)
-            icon = self._tabWidget.tabIcon(index)
-            self._bookmarkWidget.addToolBarBookmark(url, title, icon)
+            url = self._tab_widget.url()
+            title = self._tab_widget.tabText(index)
+            icon = self._tab_widget.tabIcon(index)
+            self._bookmark_widget.add_tool_bar_bookmark(url, title, icon)
 
-    def _zoomIn(self):
-        newZoom = self._tabWidget.zoomFactor() * 1.5
-        if (newZoom <= WebEngineView.maximumZoomFactor()):
-            self._tabWidget.setZoomFactor(newZoom)
-            self._updateZoomLabel()
+    def _zoom_in(self):
+        new_zoom = self._tab_widget.zoom_factor() * 1.5
+        if (new_zoom <= WebEngineView.maximum_zoom_factor()):
+            self._tab_widget.set_zoom_factor(new_zoom)
+            self._update_zoom_label()
 
-    def _zoomOut(self):
-        newZoom = self._tabWidget.zoomFactor() / 1.5
-        if (newZoom >= WebEngineView.minimumZoomFactor()):
-            self._tabWidget.setZoomFactor(newZoom)
-            self._updateZoomLabel()
+    def _zoom_out(self):
+        new_zoom = self._tab_widget.zoom_factor() / 1.5
+        if (new_zoom >= WebEngineView.minimum_zoom_factor()):
+            self._tab_widget.set_zoom_factor(new_zoom)
+            self._update_zoom_label()
 
-    def _resetZoom(self):
-        self._tabWidget.setZoomFactor(1)
-        self._updateZoomLabel()
+    def _reset_zoom(self):
+        self._tab_widget.set_zoom_factor(1)
+        self._update_zoom_label()
 
-    def _updateZoomLabel(self):
-        percent = int(self._tabWidget.zoomFactor() * 100)
-        self._zoomLabel.setText("{}%".format(percent))
+    def _update_zoom_label(self):
+        percent = int(self._tab_widget.zoom_factor() * 100)
+        self._zoom_label.setText("{}%".format(percent))
 
-    def _downloadRequested(self, item):
+    def _download_requested(self, item):
         # Remove old downloads before opening a new one
-        for oldDownload in self.statusBar().children():
-            if type(oldDownload).__name__ == 'DownloadWidget' and \
-                oldDownload.state() != QWebEngineDownloadItem.DownloadInProgress:
-                self.statusBar().removeWidget(oldDownload)
-                del oldDownload
+        for old_download in self.statusBar().children():
+            if type(old_download).__name__ == 'download_widget' and \
+                old_download.state() != QWebEngineDownloadItem.DownloadInProgress:
+                self.statusBar().removeWidget(old_download)
+                del old_download
 
         item.accept()
-        downloadWidget = DownloadWidget(item)
-        downloadWidget.removeRequested.connect(self._removeDownloadRequested,
+        download_widget = download_widget(item)
+        download_widget.removeRequested.connect(self._remove_download_requested,
                                                Qt.QueuedConnection)
-        self.statusBar().addWidget(downloadWidget)
+        self.statusBar().addWidget(download_widget)
 
-    def _removeDownloadRequested(self):
-            downloadWidget = self.sender()
-            self.statusBar().removeWidget(downloadWidget)
-            del downloadWidget
+    def _remove_download_requested(self):
+            download_widget = self.sender()
+            self.statusBar().removeWidget(download_widget)
+            del download_widget
 
-    def _showFind(self):
-        if self._findToolBar is None:
-            self._findToolBar = FindToolBar()
-            self._findToolBar.find.connect(self._tabWidget.find)
-            self.addToolBar(Qt.BottomToolBarArea, self._findToolBar)
+    def _show_find(self):
+        if self._find_tool_bar is None:
+            self._find_tool_bar = FindToolBar()
+            self._find_tool_bar.find.connect(self._tab_widget.find)
+            self.addToolBar(Qt.BottomToolBarArea, self._find_tool_bar)
         else:
-            self._findToolBar.show()
-        self._findToolBar.focusFind()
+            self._find_tool_bar.show()
+        self._find_tool_bar.focus_find()
 
-    def writeBookmarks(self):
-        self._bookmarkWidget.writeBookmarks()
+    def write_bookmarks(self):
+        self._bookmark_widget.write_bookmarks()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mainWin = createMainWindow()
-    initialUrls = sys.argv[1:]
-    if not initialUrls:
-        initialUrls.append('http://qt.io')
-    for url in initialUrls:
-        mainWin.loadUrlInNewTab(QUrl.fromUserInput(url))
-    exitCode = app.exec_()
-    mainWin.writeBookmarks()
-    sys.exit(exitCode)
+    main_win = create_main_window()
+    initial_urls = sys.argv[1:]
+    if not initial_urls:
+        initial_urls.append('http://qt.io')
+    for url in initial_urls:
+        main_win.load_url_in_new_tab(QUrl.fromUserInput(url))
+    exit_code = app.exec_()
+    main_win.write_bookmarks()
+    sys.exit(exit_code)

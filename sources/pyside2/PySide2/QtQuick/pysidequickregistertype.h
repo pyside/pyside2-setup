@@ -40,7 +40,7 @@
 #ifndef PYSIDE_QUICK_REGISTER_TYPE_H
 #define PYSIDE_QUICK_REGISTER_TYPE_H
 
-#include <Python.h>
+#include <sbkpython.h>
 
 struct SbkObjectType;
 

@@ -58,55 +58,29 @@ struct PySideMetaFunctionPrivate
 static void         functionFree(void*);
 static PyObject*    functionCall(PyObject*, PyObject*, PyObject*);
 
-PyTypeObject PySideMetaFunctionType = {
-    PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "PySide.MetaFunction",
-    /*tp_basicsize*/        sizeof(PySideMetaFunction),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          0,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        0,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       0,
-    /*tp_hash*/             0,
-    /*tp_call*/             functionCall,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT,
-    /*tp_doc*/              "MetaFunction",
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          0,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             0,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             0,
-    /*tp_alloc*/            0,
-    /*tp_new*/              PyType_GenericNew,
-    /*tp_free*/             functionFree,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0,
-    /*tp_del*/              0,
-    /*tp_version_tag*/      0
+static PyType_Slot PySideMetaFunctionType_slots[] = {
+    {Py_tp_call, (void *)functionCall},
+    {Py_tp_new, (void *)PyType_GenericNew},
+    {Py_tp_free, (void *)functionFree},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {0, 0}
 };
+static PyType_Spec PySideMetaFunctionType_spec = {
+    "PySide.MetaFunction",
+    sizeof(PySideMetaFunction),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    PySideMetaFunctionType_slots,
+};
+
+
+PyTypeObject *PySideMetaFunctionTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (!type)
+        type = (PyTypeObject *)PyType_FromSpec(&PySideMetaFunctionType_spec);
+    return type;
+}
 
 void functionFree(void *self)
 {
@@ -130,10 +104,10 @@ namespace PySide { namespace MetaFunction {
 
 void init(PyObject* module)
 {
-    if (PyType_Ready(&PySideMetaFunctionType) < 0)
+    if (PyType_Ready(PySideMetaFunctionTypeF()) < 0)
         return;
 
-    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(&PySideMetaFunctionType));
+    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunctionTypeF()));
 }
 
 PySideMetaFunction* newObject(QObject* source, int methodIndex)
@@ -144,7 +118,7 @@ PySideMetaFunction* newObject(QObject* source, int methodIndex)
     QMetaMethod method = source->metaObject()->method(methodIndex);
     if ((method.methodType() == QMetaMethod::Slot) ||
         (method.methodType() == QMetaMethod::Method)) {
-        PySideMetaFunction* function = PyObject_New(PySideMetaFunction, &PySideMetaFunctionType);
+        PySideMetaFunction* function = PyObject_New(PySideMetaFunction, PySideMetaFunctionTypeF());
         function->d = new PySideMetaFunctionPrivate();
         function->d->qobject = source;
         function->d->methodIndex = methodIndex;

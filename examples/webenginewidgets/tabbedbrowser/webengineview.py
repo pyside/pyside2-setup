@@ -43,7 +43,7 @@ from PySide2.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 
 from PySide2 import QtCore
 
-_webActions = [QWebEnginePage.Back, QWebEnginePage.Forward,
+_web_actions = [QWebEnginePage.Back, QWebEnginePage.Forward,
                QWebEnginePage.Reload,
                QWebEnginePage.Undo, QWebEnginePage.Redo,
                QWebEnginePage.Cut, QWebEnginePage.Copy,
@@ -51,40 +51,40 @@ _webActions = [QWebEnginePage.Back, QWebEnginePage.Forward,
 
 class WebEngineView(QWebEngineView):
 
-    enabledChanged = QtCore.Signal(QWebEnginePage.WebAction, bool)
+    enabled_changed = QtCore.Signal(QWebEnginePage.WebAction, bool)
 
     @staticmethod
-    def webActions():
-        return _webActions
+    def web_actions():
+        return _web_actions
 
     @staticmethod
-    def minimumZoomFactor():
+    def minimum_zoom_factor():
         return 0.25
 
     @staticmethod
-    def maximumZoomFactor():
+    def maximum_zoom_factor():
         return 5
 
-    def __init__(self, tabFactoryFunc, windowFactoryFunc):
+    def __init__(self, tab_factory_func, window_factory_func):
         super(WebEngineView, self).__init__()
-        self._tabFactoryFunc = tabFactoryFunc
-        self._windowFactoryFunc = windowFactoryFunc
+        self._tab_factory_func = tab_factory_func
+        self._window_factory_func = window_factory_func
         page = self.page()
         self._actions = {}
-        for webAction in WebEngineView.webActions():
-            action = page.action(webAction)
-            action.changed.connect(self._enabledChanged)
-            self._actions[action] = webAction
+        for web_action in WebEngineView.web_actions():
+            action = page.action(web_action)
+            action.changed.connect(self._enabled_changed)
+            self._actions[action] = web_action
 
-    def isWebActionEnabled(self, webAction):
-        return self.page().action(webAction).isEnabled()
+    def is_web_action_enabled(self, web_action):
+        return self.page().action(web_action).isEnabled()
 
-    def createWindow(self, windowType):
-        if windowType == QWebEnginePage.WebBrowserTab or windowType == QWebEnginePage.WebBrowserBackgroundTab:
-            return self._tabFactoryFunc()
-        return self._windowFactoryFunc()
+    def create_window(self, window_type):
+        if window_type == QWebEnginePage.WebBrowserTab or window_type == QWebEnginePage.WebBrowserBackgroundTab:
+            return self._tab_factory_func()
+        return self._window_factory_func()
 
-    def _enabledChanged(self):
+    def _enabled_changed(self):
         action = self.sender()
-        webAction = self._actions[action]
-        self.enabledChanged.emit(webAction, action.isEnabled())
+        web_action = self._actions[action]
+        self.enabled_changed.emit(web_action, action.isEnabled())

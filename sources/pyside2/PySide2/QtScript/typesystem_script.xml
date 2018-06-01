@@ -84,11 +84,12 @@
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
                 if (%CPPSELF.isVariant() || %CPPSELF.isString()) {
-                    QString format = QString().sprintf("%s(\"%s\")", ((PyObject*)%PYSELF)->ob_type->tp_name, qPrintable(%CPPSELF.toString()));
+                    QString format = QString().sprintf("%s(\"%s\")",
+                            PepType(Py_TYPE(%PYSELF))->tp_name,
+                            qPrintable(%CPPSELF.toString()));
                     %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
                  } else {
-                    %PYARG_0 = Shiboken::String::fromCString(
-                                    ((PyObject* )%PYSELF)->ob_type->tp_name);
+                    %PYARG_0 = Shiboken::String::fromCString(PepType(Py_TYPE(%PYSELF))->tp_name);
                 }
             </inject-code>
         </add-function>

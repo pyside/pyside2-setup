@@ -120,13 +120,10 @@ public:
                             AbstractMetaFunction *fnc, AbstractMetaClass *,
                             int argumentIndex);
     AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo);
-    AbstractMetaType *translateType(const TypeInfo &type, bool *ok,
-                                    bool resolveType = true,
-                                    bool resolveScope = true);
+    AbstractMetaType *translateType(const TypeInfo &type,
+                                    bool resolveType = true);
 
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
-
-    void decideUsagePattern(AbstractMetaType *type);
 
     AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
                                          TypeParser::Info *info = Q_NULLPTR,

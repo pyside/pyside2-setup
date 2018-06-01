@@ -804,7 +804,7 @@ QString ShibokenGenerator::cpythonTypeName(const AbstractMetaClass* metaClass)
 
 QString ShibokenGenerator::cpythonTypeName(const TypeEntry* type)
 {
-    return cpythonBaseName(type) + QLatin1String("_Type");
+    return cpythonBaseName(type) + QLatin1String("_TypeF()");
 }
 
 QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntry* type)
@@ -838,7 +838,7 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
     if (isCppPrimitive(type))
         return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (isWrapperType(type) || type->isEnum() || type->isFlags())
-        return QString::fromLatin1("SBK_CONVERTER(%1)").arg(cpythonTypeNameExt(type));
+        return QString::fromLatin1("*PepType_SGTP(%1)->converter").arg(cpythonTypeNameExt(type));
 
     if (type->isArray()) {
         qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
@@ -1164,7 +1164,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
             if (isPointerToWrapperType(type)) {
                 typeCheck += QString::fromLatin1("checkSequenceTypes(%1, ").arg(cpythonTypeNameExt(type));
             } else if (isWrapperType(type)) {
-                typeCheck += QLatin1String("convertibleSequenceTypes(reinterpret_cast<const SbkObjectType *>(");
+                typeCheck += QLatin1String("convertibleSequenceTypes(reinterpret_cast<SbkObjectType *>(");
                 typeCheck += cpythonTypeNameExt(type);
                 typeCheck += QLatin1String("), ");
             } else {
@@ -1287,7 +1287,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType* 
             result += QLatin1String("isPythonToCppReferenceConvertible");
         else
             result += QLatin1String("isPythonToCppValueConvertible");
-        result += QLatin1String("(reinterpret_cast<const SbkObjectType *>(")
+        result += QLatin1String("(reinterpret_cast<SbkObjectType *>(")
             + cpythonTypeNameExt(metaType) + QLatin1String("), ");
         return result;
     }
@@ -1341,7 +1341,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
         else
             conversion = QLatin1String("pointer");
         QString result = QLatin1String("Shiboken::Conversions::") + conversion
-            + QLatin1String("ToPython(reinterpret_cast<const SbkObjectType *>(")
+            + QLatin1String("ToPython(reinterpret_cast<SbkObjectType *>(")
             + cpythonTypeNameExt(type) + QLatin1String("), ");
         if (conversion != QLatin1String("pointer"))
             result += QLatin1Char('&');
@@ -1362,7 +1362,7 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry* ty
     if (isWrapperType(type)) {
         const QString conversion = type->isValue() ? QLatin1String("copy") : QLatin1String("pointer");
          QString result = QLatin1String("Shiboken::Conversions::") + conversion
-             + QLatin1String("ToPython(reinterpret_cast<const SbkObjectType *>(") + cpythonTypeNameExt(type)
+             + QLatin1String("ToPython(reinterpret_cast<SbkObjectType *>(") + cpythonTypeNameExt(type)
              + QLatin1String("), ");
          if (conversion != QLatin1String("pointer"))
              result += QLatin1Char('&');
@@ -1625,7 +1625,7 @@ void ShibokenGenerator::processCodeSnip(QString& code, const AbstractMetaClass* 
         // Replace template variable by the Python Type object
         // for the class context in which the variable is used.
         code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
-                     cpythonTypeName(context) + QLatin1String(".super.ht_type"));
+                     cpythonTypeName(context) + QLatin1String("->type"));
         code.replace(QLatin1String("%TYPE"), wrapperName(context));
         code.replace(QLatin1String("%CPPTYPE"), context->name());
     }
@@ -1856,7 +1856,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         // class implementing the method in which the code snip is written
         if (func->isStatic()) {
             code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
-                                       cpythonTypeName(func->implementingClass()) + QLatin1String(".super.ht_type"));
+                                       cpythonTypeName(func->implementingClass()) + QLatin1String("->type"));
         } else {
             code.replace(QLatin1String("%PYTHONTYPEOBJECT."), pySelf + QLatin1String("->ob_type->"));
             code.replace(QLatin1String("%PYTHONTYPEOBJECT"), pySelf + QLatin1String("->ob_type"));

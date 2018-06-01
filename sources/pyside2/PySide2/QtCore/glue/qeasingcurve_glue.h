@@ -40,7 +40,7 @@
 #ifndef __QEASINGCURVE_GLUE__
 #define __QEASINGCURVE_GLUE__ 
 
-#include <Python.h>
+#include <sbkpython.h>
 #include <QEasingCurve>
 
 class PySideEasingCurveFunctor

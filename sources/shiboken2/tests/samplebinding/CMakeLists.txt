@@ -136,7 +136,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
                     ${SBK_PYTHON_INCLUDE_DIR}
                     ${libsample_SOURCE_DIR}
-                    ${libshiboken_SOURCE_DIR})
+                    ${libshiboken_SOURCE_DIR}
+                    ${libshiboken_BINARY_DIR})
 add_library(sample MODULE ${sample_SRC})
 set_property(TARGET sample PROPERTY PREFIX "")
 set_property(TARGET sample PROPERTY OUTPUT_NAME "sample${PYTHON_EXTENSION_SUFFIX}")

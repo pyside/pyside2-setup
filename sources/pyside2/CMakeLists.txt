@@ -69,6 +69,50 @@ if (NOT PYTHON_EXTENSION_SUFFIX)
   get_python_extension_suffix()
 endif()
 
+# On Windows, PYTHON_LIBRARIES can be a list. Example:
+#    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
+# On other platforms, this result is not used at all.
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        for lib in '${PYTHON_LIBRARIES}'.split(';'):
+            if '/' in lib:
+                prefix, py = lib.rsplit( '/', 1)
+                if py.startswith('python3'):
+                    print(prefix + '/python3.lib')
+                    break
+        "
+    OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if (WIN32)
+    set(PATH_SEP "\;")
+else()
+    set(PATH_SEP ":")
+endif()
+
+option(FORCE_LIMITED_API "Enable the limited API." "yes")
+
+set(PYTHON_LIMITED_API 0)
+if(FORCE_LIMITED_API STREQUAL "yes")
+    # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
+    if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
+        add_definitions("-DPy_LIMITED_API=0x03050000")
+        set(PYTHON_LIMITED_API 1)
+    endif()
+endif()
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_definitions("-DNDEBUG")
+endif()
+
+if (PYTHON_LIMITED_API)
+    if (WIN32 AND NOT EXISTS "${PYTHON_LIMITED_LIBRARIES}")
+        message(FATAL_ERROR "The Limited API was enabled, but ${PYTHON_LIMITED_LIBRARIES} was not found!")
+    endif()
+    message(STATUS "******************************************************")
+    message(STATUS "** Limited API enabled ${PYTHON_LIMITED_LIBRARIES}")
+    message(STATUS "******************************************************")
+endif()
+
 if (NOT PYTHON_CONFIG_SUFFIX)
   if (PYTHON_VERSION_MAJOR EQUAL 2)
       set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
@@ -76,6 +120,13 @@ if (NOT PYTHON_CONFIG_SUFFIX)
           set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
       endif()
   elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+      if (PYTHON_LIMITED_API)
+          if(WIN32)
+              set(PYTHON_EXTENSION_SUFFIX "")
+          else()
+              set(PYTHON_EXTENSION_SUFFIX ".abi3")
+          endif()
+      endif()
       set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
   endif()
 endif()
@@ -399,12 +450,6 @@ else()
     message(FATAL_ERROR "OS not supported")
 endif()
 message(STATUS "Detected OS: ${AUTO_OS}")
-
-if (WIN32)
-    set(PATH_SEP "\;")
-else()
-    set(PATH_SEP ":")
-endif()
 
 # Define supported Qt Version
 set(SUPPORTED_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")

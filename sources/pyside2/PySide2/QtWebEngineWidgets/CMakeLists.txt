@@ -8,9 +8,11 @@ ${QtWebEngineWidgets_GEN_DIR}/qwebenginehistoryitem_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebenginepage_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebengineprofile_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebenginescript_wrapper.cpp
-#${QtWebEngineWidgets_GEN_DIR}/qwebenginescriptcollection_wrapper.cpp
-#${QtWebEngineWidgets_GEN_DIR}/qwebenginesettings_wrapper.cpp
+${QtWebEngineWidgets_GEN_DIR}/qwebenginescriptcollection_wrapper.cpp
+${QtWebEngineWidgets_GEN_DIR}/qwebenginesettings_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebengineview_wrapper.cpp
+${QtWebEngineWidgets_GEN_DIR}/qwebenginecontextmenudata_wrapper.cpp
+${QtWebEngineWidgets_GEN_DIR}/qwebenginefullscreenrequest_wrapper.cpp
 # module is always needed
 ${QtWebEngineWidgets_GEN_DIR}/qtwebenginewidgets_module_wrapper.cpp
 )

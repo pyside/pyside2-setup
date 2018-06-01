@@ -39,7 +39,7 @@
 
 #ifndef PYTHON25COMPAT_H
 #define PYTHON25COMPAT_H
-#include <Python.h>
+#include "sbkpython.h"
 #include <cstring>
 
 /*

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -108,7 +108,7 @@ const char* toCString(PyObject* str, Py_ssize_t* len)
         }
         // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
         // depends on the lifetime of str.
-        return _PyUnicode_AsString(str);
+        return _PepUnicode_AsString(str);
     }
 #endif
     if (PyBytes_Check(str)) {

@@ -41,7 +41,7 @@
 Tool to run qtattributionsscanner and convert its output to rst
 """
 
-import os, json, subprocess, sys
+import os, json, subprocess, sys, warnings
 
 def indent(lines, indent):
     result = ''
@@ -76,38 +76,21 @@ licensed under third-party open-source licenses:
 
 """
 
-rstEntryFormat = """{}
+def rstHeadline(title):
+    return '{}\n{}\n'.format(title, '-' * len(title))
 
-{}
+def rstUrl(title, url):
+    return '`{} <{}>`_'.format(title, url)
 
-{}
+def rstLiteralBlock(lines):
+    return '::\n\n' + indent(lines, '    ') + '\n\n'
 
-{}
+def rstLiteralBlockFromText(text):
+    return rstLiteralBlock(text.strip().split('\n'))
 
-`Project Homepage <{}>`_ , upstream version: {}
-
-::
-
-{}
-
-
-"""
-
-# Extract the license which is embedded in triple quotes
-def extractLicense(fileName):
-    result = []
+def readFile(fileName):
     with open(fileName, 'r') as file:
-        recording = False
-        for line in file.readlines():
-            line = line.strip("\n\r\xc2\xb6")
-            if line == '"""':
-                if recording:
-                    break
-                else:
-                    recording = True
-            elif recording:
-               result.append(line)
-    return result
+        return file.readlines()
 
 def runScanner(directory, targetFileName):
     # qtattributionsscanner recursively searches for qt_attribution.json files
@@ -120,17 +103,25 @@ def runScanner(directory, targetFileName):
     with open(targetFileName, 'w') as targetFile:
         targetFile.write(rstHeader)
         for entry in json.loads(jsonS.decode('utf-8')):
-            name = entry['Name']
-            title = "{}\n{}".format(name, '-' * len(name))
-            brief = entry['License']
+            content = '{}\n{}\n{}\n\n'.format(rstHeadline(entry['Name']),
+                entry['Description'], entry['QtUsage'])
             url = entry['Homepage']
             version = entry['Version']
-            description = entry['Description']
-            qtUsage = entry['QtUsage']
-            content = extractLicense(entry['LicenseFile'])
-            rst = rstEntryFormat.format(title, brief, description, qtUsage,
-                                        url, version, indent(content, '    '))
-            targetFile.write(rst)
+            if url and version:
+                content += '{}, upstream version: {}\n\n'.format(
+                    rstUrl('Project Homepage', url), version)
+            copyright = entry['Copyright']
+            if copyright:
+                content += rstLiteralBlockFromText(copyright)
+            content += entry['License'] + '\n\n'
+            licenseFile = entry['LicenseFile']
+            if licenseFile:
+                if os.path.isfile(licenseFile):
+                    content += rstLiteralBlock(readFile(licenseFile))
+                else:
+                    warnings.warn('"{}" is not a file'.format(licenseFile),
+                                  RuntimeWarning)
+            targetFile.write(content)
 
 if len(sys.argv) < 3:
     print("Usage: qtattributionsscannertorst [directory] [file]'")
