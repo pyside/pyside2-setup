@@ -265,7 +265,7 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
     }
 
     //mutate native signals to signal instance type
-    if (attr && PyObject_TypeCheck(attr, &PySideSignalType)) {
+    if (attr && PyObject_TypeCheck(attr, PySideSignalTypeF())) {
         PyObject* signal = reinterpret_cast<PyObject*>(Signal::initialize(reinterpret_cast<PySideSignal*>(attr), name, self));
         PyObject_SetAttr(self, name, reinterpret_cast<PyObject*>(signal));
         return signal;
@@ -309,10 +309,10 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
 
 bool inherits(PyTypeObject* objType, const char* class_name)
 {
-    if (strcmp(objType->tp_name, class_name) == 0)
+    if (strcmp(PepType(objType)->tp_name, class_name) == 0)
         return true;
 
-    PyTypeObject* base = (objType)->tp_base;
+    PyTypeObject* base = PepType(objType)->tp_base;
     if (base == 0)
         return false;
 
@@ -400,7 +400,7 @@ QString pyStringToQString(PyObject *str) {
 
 #ifdef IS_PY3K
     if (PyUnicode_Check(str)) {
-        const char *unicodeBuffer = _PyUnicode_AsString(str);
+        const char *unicodeBuffer = _PepUnicode_AsString(str);
         if (unicodeBuffer)
             return QString::fromUtf8(unicodeBuffer);
     }

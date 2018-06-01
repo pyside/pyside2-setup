@@ -52,25 +52,25 @@ class FindToolBar(QToolBar):
 
     def __init__(self):
         super(FindToolBar, self).__init__()
-        self._lineEdit = QLineEdit()
-        self._lineEdit.setClearButtonEnabled(True)
-        self._lineEdit.setPlaceholderText("Find...")
-        self._lineEdit.setMaximumWidth(300)
-        self._lineEdit.returnPressed.connect(self._findNext)
-        self.addWidget(self._lineEdit)
+        self._line_edit = QLineEdit()
+        self._line_edit.setClearButtonEnabled(True)
+        self._line_edit.setPlaceholderText("Find...")
+        self._line_edit.setMaximumWidth(300)
+        self._line_edit.returnPressed.connect(self._find_next)
+        self.addWidget(self._line_edit)
 
-        self._previousButton = QToolButton()
-        self._previousButton.setIcon(QIcon(':/qt-project.org/styles/commonstyle/images/up-32.png'))
-        self._previousButton.clicked.connect(self._findPrevious)
-        self.addWidget(self._previousButton)
+        self._previous_button = QToolButton()
+        self._previous_button.setIcon(QIcon(':/qt-project.org/styles/commonstyle/images/up-32.png'))
+        self._previous_button.clicked.connect(self._find_previous)
+        self.addWidget(self._previous_button)
 
-        self._nextButton = QToolButton()
-        self._nextButton.setIcon(QIcon(':/qt-project.org/styles/commonstyle/images/down-32.png'))
-        self._nextButton.clicked.connect(self._findNext)
-        self.addWidget(self._nextButton)
+        self._next_button = QToolButton()
+        self._next_button.setIcon(QIcon(':/qt-project.org/styles/commonstyle/images/down-32.png'))
+        self._next_button.clicked.connect(self._find_next)
+        self.addWidget(self._next_button)
 
-        self._caseSensitiveCheckBox = QCheckBox('Case Sensitive')
-        self.addWidget(self._caseSensitiveCheckBox)
+        self._case_sensitive_checkbox = QCheckBox('Case Sensitive')
+        self.addWidget(self._case_sensitive_checkbox)
 
         self._hideButton = QToolButton()
         self._hideButton.setShortcut(QKeySequence(Qt.Key_Escape))
@@ -78,21 +78,21 @@ class FindToolBar(QToolBar):
         self._hideButton.clicked.connect(self.hide)
         self.addWidget(self._hideButton)
 
-    def focusFind(self):
-        self._lineEdit.setFocus()
+    def focus_find(self):
+        self._line_edit.setFocus()
 
-    def _emitFind(self, backward):
-        needle =  self._lineEdit.text().strip()
+    def _emit_find(self, backward):
+        needle =  self._line_edit.text().strip()
         if needle:
             flags = QWebEnginePage.FindFlags()
-            if self._caseSensitiveCheckBox.isChecked():
+            if self._case_sensitive_checkbox.isChecked():
                 flags |= QWebEnginePage.FindCaseSensitively
             if backward:
                 flags |= QWebEnginePage.FindBackward
             self.find.emit(needle, flags)
 
-    def _findNext(self):
-        self._emitFind(False)
+    def _find_next(self):
+        self._emit_find(False)
 
-    def _findPrevious(self):
-        self._emitFind(True)
+    def _find_previous(self):
+        self._emit_find(True)

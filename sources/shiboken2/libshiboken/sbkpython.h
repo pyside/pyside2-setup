@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,8 +40,15 @@
 #ifndef SBKPYTHON_H
 #define SBKPYTHON_H
 
-#include "Python.h"
+#include "sbkversion.h"
+
+#include <Python.h>
+#include <structmember.h>
+// Now we have the usual variables from Python.h .
 #include "python25compat.h"
+#include "shibokenmacros.h"
+#include "pep384impl.h"
+#include "typespec.h"
 
 #if PY_MAJOR_VERSION >= 3
     #define IS_PY3K

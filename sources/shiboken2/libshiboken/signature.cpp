@@ -114,7 +114,7 @@ extern "C"
 #if EXTENSION_ENABLED
 
 // These constants were needed in former versions of the module:
-#define PYTHON_HAS_QUALNAME             (PY_VERSION_HEX >= 0x03060000)
+#define PYTHON_HAS_QUALNAME             (PY_VERSION_HEX >= 0x03030000)
 #define PYTHON_HAS_UNICODE              (PY_VERSION_HEX >= 0x03000000)
 #define PYTHON_HAS_WEAKREF_PYCFUNCTION  (PY_VERSION_HEX >= 0x030500A0)
 #define PYTHON_IS_PYTHON3               (PY_VERSION_HEX >= 0x03000000)
@@ -124,15 +124,16 @@ extern "C"
 #define PYTHON_HAS_METH_REDUCE          (PYTHON_HAS_DESCR_REDUCE)
 #define PYTHON_NEEDS_ITERATOR_FLAG      (!PYTHON_IS_PYTHON3)
 #define PYTHON_EXPOSES_METHODDESCR      (PYTHON_IS_PYTHON3)
+#define PYTHON_NO_TYPE_IN_FUNCTIONS     (!PYTHON_IS_PYTHON3 || Py_LIMITED_API)
 
 // These constants are still in use:
 #define PYTHON_USES_D_COMMON            (PY_VERSION_HEX >= 0x03020000)
-#define PYTHON_NO_TYPE_IN_FUNCTIONS     (!PYTHON_IS_PYTHON3)
 
 typedef struct safe_globals_struc {
     // init part 1: get arg_dict
     PyObject *helper_module;
     PyObject *arg_dict;
+    PyObject *map_dict;
     // init part 2: run module
     PyObject *sigparse_func;
     PyObject *createsig_func;
@@ -164,9 +165,9 @@ CreateSignature(PyObject *props, const char *sig_kind)
 }
 
 static PyObject *
-pyside_cf_get___signature__(PyCFunctionObject *func)
+pyside_cf_get___signature__(PyObject *func)
 {
-    return GetSignature_Function(func);
+    return GetSignature_Function((PyCFunctionObject *)func);
 }
 
 static PyObject *
@@ -180,22 +181,107 @@ pyside_sm_get___signature__(PyObject *sm)
     return ret;
 }
 
-static PyObject *
-pyside_md_get___signature__(PyMethodDescrObject *descr)
-{
-    PyCFunctionObject *func;
-    PyObject *result;
+#ifdef Py_LIMITED_API
 
-    func = (PyCFunctionObject *)
-            PyCFunction_NewEx(descr->d_method,
-#if PYTHON_USES_D_COMMON
-                (PyObject *)descr->d_common.d_type, NULL
-#else
-                (PyObject *)descr->d_type, NULL
+static int
+build_qualname_to_func(PyObject *obtype)
+{
+    PyTypeObject *type = (PyTypeObject *)obtype;
+    PyMethodDef *meth = PepType(type)->tp_methods;
+
+    if (meth == 0)
+        return 0;
+
+    for (; meth->ml_name != NULL; meth++) {
+        PyObject *func = PyCFunction_NewEx(meth, obtype, NULL);
+        PyObject *qualname = PyObject_GetAttrString(func, "__qualname__");
+        if (func == NULL || qualname == NULL) {
+            return -1;
+        }
+        if (PyDict_SetItem(pyside_globals->map_dict, qualname, func) < 0) {
+            return -1;
+        }
+        Py_DECREF(func);
+        Py_DECREF(qualname);
+    }
+    return 0;
+}
+
+static PyObject *
+qualname_to_typename(PyObject *qualname)
+{
+    PyObject *func = PyObject_GetAttrString(qualname, "split");
+    PyObject *list = func ? PyObject_CallFunction(func, (char *)"(s)", ".")
+                          : NULL;
+    PyObject *res = list ? PyList_GetItem(list, 0) : NULL;
+    Py_XINCREF(res);
+    Py_XDECREF(func);
+    Py_XDECREF(list);
+    return res;
+}
+
+static PyObject *
+qualname_to_func(PyObject *ob)
+{
+    /*
+     * If we have __qualname__, then we can easily build a mapping
+     * from __qualname__ to PyCFunction. This is necessary when
+     * the limited API does not let us go easily from descriptor
+     * to PyMethodDef.
+     */
+    PyObject *ret;
+    PyObject *qualname = PyObject_GetAttrString((PyObject *)ob,
+                                                "__qualname__");
+    if (qualname != NULL) {
+        ret = PyDict_GetItem(pyside_globals->map_dict, qualname);
+        if (ret == NULL) {
+            // do a lazy initialization
+            PyObject *type_name = qualname_to_typename(qualname);
+            PyObject *type = PyDict_GetItem(pyside_globals->map_dict,
+                                            type_name);
+            Py_XDECREF(type_name);
+            if (type == NULL)
+                Py_RETURN_NONE;
+            if (build_qualname_to_func(type) < 0)
+                return NULL;
+            ret = PyDict_GetItem(pyside_globals->map_dict, qualname);
+        }
+        Py_XINCREF(ret);
+        Py_DECREF(qualname);
+    }
+    else
+        Py_RETURN_NONE;
+    return ret;
+}
 #endif
-            );
+
+static PyObject *
+pyside_md_get___signature__(PyObject *ob)
+{
+    PyObject *func;
+    PyObject *result;
+#ifndef Py_LIMITED_API
+    PyMethodDescrObject *descr = (PyMethodDescrObject *)ob;
+
+# if PYTHON_USES_D_COMMON
+    func = PyCFunction_NewEx(descr->d_method,
+                             (PyObject *)descr->d_common.d_type, NULL);
+# else
+    func = PyCFunction_NewEx(descr->d_method,
+                             (PyObject *)descr->d_type, NULL);
+# endif
+#else
+    /*
+     * With limited access, we cannot use the fields of a method descriptor,
+     * but in Python 3 we have the __qualname__ field which allows us to
+     * grab the method object from our registry.
+     */
+    func = qualname_to_func(ob);
+#endif
+    if (func == Py_None)
+        return Py_None;
     if (func == NULL)
-        return NULL;
+        Py_FatalError("missing mapping in MethodDescriptor");
     result = pyside_cf_get___signature__(func);
     Py_DECREF(func);
     return result;
@@ -215,16 +301,15 @@ GetSignature_Function(PyCFunctionObject *func)
     const char *sig_kind;
     int flags;
 
-    selftype = func->m_self;
+    selftype = PyCFunction_GET_SELF((PyObject *)func);
+    if (selftype == NULL)
+        selftype = PyDict_GetItem(pyside_globals->map_dict, (PyObject *)func);
     if (selftype == NULL) {
-#if PYTHON_NO_TYPE_IN_FUNCTIONS
-        selftype = PyDict_GetItem(pyside_globals->arg_dict, (PyObject *)func);
-    }
-    if (selftype == NULL) {
-#endif
         if (!PyErr_Occurred()) {
             PyErr_Format(PyExc_SystemError,
-                "the signature for \"%s\" should exist", func->m_ml->ml_name);
+                "the signature for \"%s\" should exist",
+                PepCFunction_GET_NAMESTR(func)
+                );
         }
         return NULL;
     }
@@ -251,7 +336,7 @@ GetSignature_Function(PyCFunctionObject *func)
     props = PyDict_GetItem(dict, func_name);
     if (props == NULL)
         Py_RETURN_NONE;
-    flags = PyCFunction_GET_FLAGS(func);
+    flags = PyCFunction_GET_FLAGS((PyObject *)func);
     if (flags & METH_CLASS)
         sig_kind = "classmethod";
     else if (flags & METH_STATIC)
@@ -347,6 +432,11 @@ init_phase_1(void)
         goto error;
     Py_DECREF(v);
 
+    // build a dict for diverse mappings
+    p->map_dict = PyDict_New();
+    if (p->map_dict == NULL)
+        goto error;
+
     // Build a dict for the prepared arguments
     p->arg_dict = PyDict_New();
     if (p->arg_dict == NULL)
@@ -387,7 +477,7 @@ error:
 static int
 add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
 {
-    PyObject *dict = type->tp_dict;
+    PyObject *dict = PepType(type)->tp_dict;
 
     for (; gsp->name != NULL; gsp++) {
         PyObject *descr;
@@ -479,16 +569,17 @@ PySideType_Ready(PyTypeObject *type)
         // PyMethodDescr_Type       'type(str.__dict__["split"])'
         // PyClassMethodDescr_Type. 'type(dict.__dict__["fromkeys"])'
         // The latter is not needed until we use class methods in PySide.
-        md = PyDict_GetItemString(PyString_Type.tp_dict, "split");
+        md = PyObject_GetAttrString((PyObject *)&PyString_Type, "split");
         if (md == NULL
             || PyType_Ready(Py_TYPE(md)) < 0
             || add_more_getsets(Py_TYPE(md), new_PyMethodDescr_getsets) < 0
             || add_more_getsets(&PyCFunction_Type, new_PyCFunction_getsets) < 0
-            || add_more_getsets(&PyStaticMethod_Type, new_PyStaticMethod_getsets) < 0
+            || add_more_getsets(PepStaticMethod_TypePtr, new_PyStaticMethod_getsets) < 0
             || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0)
             return -1;
+        Py_DECREF(md);
 #ifndef _WIN32
-        // we enable the stack trace in CI, only.
+        // We enable the stack trace in CI, only.
         const char *testEnv = getenv("QTEST_ENVIRONMENT");
         if (testEnv && strstr(testEnv, "ci"))
             signal(SIGSEGV, handler);   // install our handler
@@ -498,20 +589,12 @@ PySideType_Ready(PyTypeObject *type)
     return PyType_Ready(type);
 }
 
-#if PYTHON_NO_TYPE_IN_FUNCTIONS
-
-typedef struct {
-    PyObject_HEAD
-    PyObject *sm_callable;
-    PyObject *sm_dict;
-} staticmethod;
-
 static int
 build_func_to_type(PyObject *obtype)
 {
     PyTypeObject *type = (PyTypeObject *)obtype;
-    PyObject *dict = type->tp_dict;
-    PyMethodDef *meth = type->tp_methods;
+    PyObject *dict = PepType(type)->tp_dict;
+    PyMethodDef *meth = PepType(type)->tp_methods;
 
     if (meth == 0)
         return 0;
@@ -521,18 +604,15 @@ build_func_to_type(PyObject *obtype)
             PyObject *descr = PyDict_GetItemString(dict, meth->ml_name);
             if (descr == NULL)
                 return -1;
-            staticmethod *sm = (staticmethod *)descr;
-            PyObject *cfunc = sm->sm_callable;
-            if (cfunc == NULL)
+            PyObject *func = PyObject_GetAttrString(descr, "__func__");
+            if (func == NULL ||
+                PyDict_SetItem(pyside_globals->map_dict, func, obtype) < 0)
                 return -1;
-            if (PyDict_SetItem(pyside_globals->arg_dict, cfunc, obtype) < 0)
-                return -1;
+            Py_DECREF(func);
         }
     }
     return 0;
 }
-
-#endif
 
 static int
 PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
@@ -573,6 +653,12 @@ PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
     if (type_name == NULL)
         return -1;
     if (PyDict_SetItem(pyside_globals->arg_dict, type_name, arg_tup) < 0)
+        return -1;
+    /*
+     * We record also a mapping from type name to type. This helps to lazily
+     * initialize the Py_LIMITED_API in qualname_to_func().
+     */
+    if (PyDict_SetItem(pyside_globals->map_dict, type_name, type) < 0)
         return -1;
     return 0;
 }
@@ -650,13 +736,16 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
     if (PySide_BuildSignatureArgs(module, module, signatures) < 0)
         return -1;
 
-#if PYTHON_NO_TYPE_IN_FUNCTIONS
     /*
      * Python2 does not abuse the 'm_self' field for the type. So we need to
      * supply this for all static methods.
      *
      * Note: This function crashed when called from PySide_BuildSignatureArgs.
      * Probably this was too early.
+     *
+     * Pep384: We need to switch this always on since we have no access
+     * to the PyCFunction attributes. Therefore I simplified things
+     * and always use our own mapping.
      */
     {
         PyObject *key, *value;
@@ -668,12 +757,12 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
 
         while (PyDict_Next(dict, &pos, &key, &value)) {
             if (PyType_Check(value)) {
-                if (build_func_to_type(value) < 0)
+                PyObject *type = value;
+                if (build_func_to_type(type) < 0)
                     return -1;
             }
         }
     }
-#endif
     return 0;
 }
 #endif // EXTENSION_ENABLED

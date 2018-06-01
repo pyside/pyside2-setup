@@ -41,7 +41,7 @@ static QObject* _findChildHelper(const QObject* parent, const QString& name, PyT
 {
     foreach(QObject* child, parent->children()) {
         Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject*](child));
-        if (PyType_IsSubtype(pyChild->ob_type, desiredType)
+        if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType)
             && (name.isNull() || name == child->objectName())) {
             return child;
         }
@@ -71,7 +71,7 @@ static void _findChildrenHelper(const QObject* parent, const T& name, PyTypeObje
 {
     foreach(const QObject* child, parent->children()) {
         Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject*](child));
-        if (PyType_IsSubtype(pyChild->ob_type, desiredType) && _findChildrenComparator(child, name))
+        if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType) && _findChildrenComparator(child, name))
             PyList_Append(result, pyChild);
         _findChildrenHelper(child, name, desiredType, result);
     }

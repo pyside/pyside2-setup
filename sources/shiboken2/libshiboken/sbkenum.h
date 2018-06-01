@@ -46,9 +46,11 @@
 extern "C"
 {
 
-extern LIBSHIBOKEN_API PyTypeObject SbkEnumType_Type;
+extern LIBSHIBOKEN_API PyTypeObject *SbkEnumType_TypeF(void);
 struct SbkObjectType;
 struct SbkConverter;
+struct SbkEnumType;
+struct SbkEnumTypePrivate;
 
 } // extern "C"
 
@@ -57,7 +59,7 @@ namespace Shiboken
 
 inline bool isShibokenEnum(PyObject* pyObj)
 {
-    return Py_TYPE(pyObj->ob_type) == &SbkEnumType_Type;
+    return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
 }
 
 namespace Enum
@@ -101,9 +103,8 @@ namespace Enum
 
     LIBSHIBOKEN_API PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName = 0);
 
-    /// \deprecated Use 'newTypeWithName'
-    SBK_DEPRECATED(LIBSHIBOKEN_API PyTypeObject* newType(const char* name));
-    LIBSHIBOKEN_API PyTypeObject* newTypeWithName(const char* name, const char* cppName);
+    LIBSHIBOKEN_API PyTypeObject* newTypeWithName(const char* name, const char* cppName,
+                                                  PyTypeObject *numbers_fromFlag=nullptr);
     LIBSHIBOKEN_API const char* getCppName(PyTypeObject* type);
 
     LIBSHIBOKEN_API long getValue(PyObject* enumItem);
