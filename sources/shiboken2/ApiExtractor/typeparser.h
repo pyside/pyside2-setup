@@ -31,36 +31,15 @@
 
 #include "parser/codemodel_enums.h"
 
-#include <QtCore/QList>
 #include <QtCore/QString>
-#include <QtCore/QStringList>
 #include <QtCore/QVector>
 
-QT_FORWARD_DECLARE_CLASS(QDebug)
+class TypeInfo;
 
 class TypeParser
 {
 public:
-    struct Info
-    {
-        Info() : referenceType(NoReference), is_constant(false), is_busted(false), indirections(0) { }
-        QStringList qualified_name;
-        QStringList arrays;
-        QVector<Info> template_instantiations;
-        ReferenceType referenceType;
-        uint is_constant : 1;
-        uint is_busted : 1;
-        uint indirections : 6;
-
-        QString toString() const;
-        QString instantiationName() const;
-    };
-
-    static Info parse(const QString &str, QString *errorMessage = Q_NULLPTR);
+    static TypeInfo parse(const QString &str, QString *errorMessage = nullptr);
 };
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const TypeParser::Info &);
-#endif
 
 #endif // TYPEPARSER_H

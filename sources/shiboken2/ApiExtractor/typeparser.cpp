@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "typeparser.h"
+#include <codemodel.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QStack>
@@ -155,19 +156,12 @@ QString Scanner::msgParseError(const QString &why) const
         + QString(m_chars, m_length) + QStringLiteral("\": ") + why;
 }
 
-static TypeParser::Info invalidInfo()
-{
-    TypeParser::Info result;
-    result.is_busted = true;
-    return result;
-}
-
-TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
+TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
 {
     Scanner scanner(str);
 
-    Info info;
-    QStack<Info *> stack;
+    TypeInfo info;
+    QStack<TypeInfo *> stack;
     stack.push(&info);
 
     bool colon_prefix = false;
@@ -177,7 +171,7 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
     Scanner::Token tok = scanner.nextToken(errorMessage);
     while (tok != Scanner::NoToken) {
         if (tok == Scanner::InvalidToken)
-            return invalidInfo();
+            return TypeInfo();
 
 //         switch (tok) {
 //         case Scanner::StarToken: printf(" - *\n"); break;
@@ -197,16 +191,16 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
         switch (tok) {
 
         case Scanner::StarToken:
-            ++stack.top()->indirections;
+            ++stack.top()->m_indirections;
             break;
 
         case Scanner::AmpersandToken:
-            switch (stack.top()->referenceType) {
+            switch (stack.top()->referenceType()) {
             case NoReference:
-                stack.top()->referenceType = LValueReference;
+                stack.top()->setReferenceType(LValueReference);
                 break;
             case LValueReference:
-                stack.top()->referenceType = RValueReference;
+                stack.top()->setReferenceType(RValueReference);
                 break;
             case RValueReference:
                 const QString message = scanner.msgParseError(QStringLiteral("Too many '&' qualifiers"));
@@ -214,18 +208,18 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
                     *errorMessage = message;
                 else
                     qWarning().noquote().nospace() << message;
-                return invalidInfo();
+                return TypeInfo();
             }
             break;
         case Scanner::LessThanToken:
-            stack.top()->template_instantiations << Info();
-            stack.push(&stack.top()->template_instantiations.last());
+            stack.top()->m_arguments << TypeInfo();
+            stack.push(&stack.top()->m_arguments.last());
             break;
 
         case Scanner::CommaToken:
             stack.pop();
-            stack.top()->template_instantiations << Info();
-            stack.push(&stack.top()->template_instantiations.last());
+            stack.top()->m_arguments << TypeInfo();
+            stack.push(&stack.top()->m_arguments.last());
             break;
 
         case Scanner::GreaterThanToken:
@@ -237,7 +231,7 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
             break;
 
         case Scanner::ConstToken:
-            stack.top()->is_constant = true;
+            stack.top()->m_constant = true;
             break;
 
         case Scanner::OpenParenToken: // function pointers not supported
@@ -247,17 +241,17 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
                 *errorMessage = message;
             else
                 qWarning().noquote().nospace() << message;
-            return invalidInfo();
+            return TypeInfo();
         }
 
         case Scanner::Identifier:
             if (in_array) {
                 array = scanner.identifier();
-            } else if (colon_prefix || stack.top()->qualified_name.isEmpty()) {
-                stack.top()->qualified_name << scanner.identifier();
+            } else if (colon_prefix || stack.top()->m_qualifiedName.isEmpty()) {
+                stack.top()->m_qualifiedName << scanner.identifier();
                 colon_prefix = false;
             } else {
-                stack.top()->qualified_name.last().append(QLatin1Char(' ') + scanner.identifier());
+                stack.top()->m_qualifiedName.last().append(QLatin1Char(' ') + scanner.identifier());
             }
             break;
 
@@ -267,7 +261,7 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
 
         case Scanner::SquareEnd:
             in_array = false;
-            stack.top()->arrays += array;
+            stack.top()->m_arrayElements += array;
             break;
 
 
@@ -280,83 +274,3 @@ TypeParser::Info TypeParser::parse(const QString &str, QString *errorMessage)
 
     return info;
 }
-
-QString TypeParser::Info::instantiationName() const
-{
-    QString s(qualified_name.join(QLatin1String("::")));
-    if (!template_instantiations.isEmpty()) {
-        QStringList insts;
-        for (const Info &info : template_instantiations)
-            insts << info.toString();
-        s += QLatin1String("< ") + insts.join(QLatin1String(", ")) + QLatin1String(" >");
-    }
-
-    return s;
-}
-
-QString TypeParser::Info::toString() const
-{
-    QString s;
-
-    if (is_constant)
-        s += QLatin1String("const ");
-    s += instantiationName();
-    for (int i = 0; i < arrays.size(); ++i)
-        s += QLatin1Char('[') + arrays.at(i) + QLatin1Char(']');
-    s += QString(indirections, QLatin1Char('*'));
-    switch (referenceType) {
-    case NoReference:
-        break;
-    case LValueReference:
-        s += QLatin1Char('&');
-        break;
-    case RValueReference:
-        s += QLatin1String("&&");
-        break;
-    }
-    return s;
-}
-
-#ifndef QT_NO_DEBUG_STREAM
-
-static void formatTypeInfo(QDebug &d, const TypeParser::Info &i)
-{
-    if (i.is_busted) {
-        d << "busted";
-        return;
-    }
-
-    d << '"' << i.qualified_name << '"';
-    if (!i.arrays.isEmpty()) {
-        d << ", arrays=";
-        for (const QString &a : i.arrays)
-            d << '[' << a << ']';
-    }
-    if (!i.template_instantiations.isEmpty()) {
-        d << ", template_instantiations=[";
-        for (int t = 0, size = i.template_instantiations.size(); t < size; ++t) {
-            if (t)
-                d << ", ";
-            formatTypeInfo(d, i.template_instantiations.at(t));
-        }
-        d << ']';
-    }
-    if (i.referenceType != NoReference)
-        d << ", refType=" << i.referenceType;
-    if (i.is_constant)
-        d << ", [const]";
-    if (i.indirections > 0)
-        d << ", indirections=" << i.indirections;
-}
-
-QDebug operator<<(QDebug d, const TypeParser::Info &i)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "TypeParser::Info(";
-    formatTypeInfo(d, i);
-    d << ')';
-    return d;
-}
-#endif // !QT_NO_DEBUG_STREAM
