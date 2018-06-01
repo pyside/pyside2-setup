@@ -61,6 +61,10 @@ Qt Modules
      - `Qt AxContainer <PySide2/QtAxContainer/index.html>`_
         Provides QAxObject and QAxWidget which act as
         containers for COM objects and ActiveX controls.
+   * - `Qt WebEngineCore <PySide2/QtWebEngineCore/index.html>`_
+        Provides the core functionality to integrate web content
+     - `Qt WebEngineWidgets <PySide2/QtWebEngineWidgets/index.html>`_
+        Provides widgets that can handle web content
    * - `Qt WebChannel <PySide2/QtWebChannel/index.html>`_
         Enables peer-to-peer communication between a server and a client
         (HTML/JavaScript or QML application).
