@@ -1117,3 +1117,16 @@ def run_instruction(instruction, error):
     if result != 0:
         print("ERROR : " + error)
         exit(result)
+
+def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
+    # Disable unsupported CI configs for now
+    # NOTE: String must match with QT CI's storagesturct thrift
+    if hostOSVer in ["WinRT_10"]:
+        print("Disabled " + hostOSVer + " from Coin configuration")
+        return False
+   # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
+    # we shouldn't release the 2015 version. BUT, 32 bit build is done only on msvc 2015...
+    if compiler in ["MSVC2015"] and targetArch in ["X86_64"]:
+        print("Disabled " + compiler + " to " + targetArch + " from Coin configuration")
+        return False
+    return True

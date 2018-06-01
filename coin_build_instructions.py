@@ -43,6 +43,7 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
+from build_scripts.utils import acceptCITestConfiguration
 import os
 
 # Values must match COIN thrift
@@ -121,14 +122,7 @@ def call_setup(python_ver):
     run_instruction(cmd, "Failed to run setup.py")
 
 def run_build_instructions():
-    # Disable unsupported configs for now
-    if CI_HOST_OS_VER in ["WinRT_10"]:
-        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
-        exit()
-   # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
-    # we shouldn't release the 2015 version. BUT, 32 bit build is done only on msvc 2015...
-    if CI_COMPILER in ["MSVC2015"] and CI_TARGET_ARCH in ["X86_64"]:
-        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
+    if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
     # Uses default python, hopefully we have python2 installed on all hosts

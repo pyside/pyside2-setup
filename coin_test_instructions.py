@@ -42,6 +42,7 @@ from build_scripts.utils import install_pip_dependencies
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
+from build_scripts.utils import acceptCITestConfiguration
 import os
 
 # Values must match COIN thrift
@@ -72,12 +73,7 @@ def call_testrunner(python_ver, buildnro):
     run_instruction(cmd, "Failed to run testrunner.py")
 
 def run_test_instructions():
-    # Disable unsupported configs for now
-    if CI_HOST_OS_VER in ["WinRT_10"]:
-        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
-        exit()
-    if CI_COMPILER in ["MSVC2015"] and CI_TARGET_ARCH in ["X86_64"]:
-        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
+    if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
     os.chdir(CI_ENV_AGENT_DIR)
