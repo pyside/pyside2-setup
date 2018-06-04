@@ -55,8 +55,13 @@ typedef struct {
 
 PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    SbkVoidPtrObject *self =
-        reinterpret_cast<SbkVoidPtrObject *>(PepType(type)->tp_alloc);
+    // PYSIDE-560: It is much safer to first call a function and then do a
+    // type cast than to do everything in one line. The bad construct looked
+    // like this, actual call forgotten:
+    //    SbkVoidPtrObject *self =
+    //        reinterpret_cast<SbkVoidPtrObject *>(PepType(type)->tp_alloc);
+    PyObject *ob = PepType(type)->tp_alloc(type, 0);
+    SbkVoidPtrObject *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
 
     if (self != 0) {
         self->cptr = 0;
