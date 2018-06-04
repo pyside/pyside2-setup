@@ -590,7 +590,7 @@ int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signa
 
             // Create a instance meta object
             if (!dict || !PyDict_Contains(dict, metaObjectAttr)) {
-                dmo = new DynamicQMetaObject(pySelf->ob_type, metaObject);
+                dmo = new DynamicQMetaObject(Py_TYPE(pySelf), metaObject);
 #ifdef IS_PY3K
                 PyObject* pyDmo = PyCapsule_New(dmo, 0, destroyMetaObject);
 #else

@@ -234,6 +234,47 @@ if (NOT PYTHON_EXTENSION_SUFFIX)
   get_python_extension_suffix()
 endif()
 
+option(FORCE_LIMITED_API "Enable the limited API." "yes")
+set(PYTHON_LIMITED_API 0)
+
+# On Windows, PYTHON_LIBRARIES can be a list. Example:
+#    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
+# On other platforms, this result is not used at all.
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        for lib in '${PYTHON_LIBRARIES}'.split(';'):
+            if '/' in lib:
+                prefix, py = lib.rsplit('/', 1)
+                if py.startswith('python3'):
+                    print(prefix + '/python3.lib')
+                    break
+        "
+    OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if(FORCE_LIMITED_API STREQUAL "yes")
+    if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
+        # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
+        add_definitions("-DPy_LIMITED_API=0x03050000")
+        set(PYTHON_LIMITED_API 1)
+    endif()
+    if(WIN32)
+        if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
+            # PYSIDE-560: XXX maybe add an option to setup.py as override
+            set(SBK_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
+        endif()
+    endif()
+endif()
+
+if (PYTHON_LIMITED_API)
+    if (WIN32 AND NOT EXISTS "${PYTHON_LIMITED_LIBRARIES}")
+        message(FATAL_ERROR "The Limited API was enabled, but ${PYTHON_LIMITED_LIBRARIES} was not found!")
+    endif()
+    message(STATUS "******************************************************")
+    message(STATUS "** Limited API enabled ${PYTHON_LIMITED_LIBRARIES}")
+    message(STATUS "******************************************************")
+endif()
+
 if (NOT PYTHON_CONFIG_SUFFIX)
   if (PYTHON_VERSION_MAJOR EQUAL 2)
       set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
@@ -241,6 +282,13 @@ if (NOT PYTHON_CONFIG_SUFFIX)
           set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
       endif()
   elseif (PYTHON_VERSION_MAJOR EQUAL 3)
+      if (PYTHON_LIMITED_API)
+          if(WIN32)
+              set(PYTHON_EXTENSION_SUFFIX "")
+          else()
+              set(PYTHON_EXTENSION_SUFFIX ".abi3")
+          endif()
+      endif()
       set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
   endif()
 endif()
@@ -335,18 +383,6 @@ if (SANITIZE_ADDRESS AND NOT MSVC)
     set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_STANDARD_LIBRARIES} -fsanitize=address")
 endif()
 
-add_subdirectory(ApiExtractor)
-
-set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner${generator_SUFFIX})
-
-# uninstall target
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
-               "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-               IMMEDIATE @ONLY)
-add_custom_target(uninstall "${CMAKE_COMMAND}"
-                  -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
-
-
 # Detect if the python libs were compiled in debug mode
 # On Linux distros there is no standard way to check that.
 execute_process(
@@ -392,11 +428,13 @@ execute_process(
 
 set(SHIBOKEN_BUILD_TYPE "Release")
 
-# We do not want to link against the python shared / static library on Linux And macOS.
+# We do not want to link against the python shared / static library on Linux and macOS.
 # The dynamic linker will pick up the python symbols at runtime automatically.
 # On Windows we do need to link against the python.lib import library.
+if (NOT SBK_PYTHON_LIBRARIES)
+    set(SBK_PYTHON_LIBRARIES "")
+endif()
 
-set(SBK_PYTHON_LIBRARIES "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_DEBUG_LIBRARIES)
         message(WARNING "Python debug shared library not found; assuming python was built with shared library support disabled.")
@@ -416,26 +454,39 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION "${SBK_PKG_CONFIG_PY_DEBUG_DEFINITION} -DCOUNT_ALLOCS")
     endif()
 
-    if(WIN32)
+    if(WIN32 AND NOT SBK_PYTHON_LIBRARIES)
         set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
     endif()
     set(SHIBOKEN_BUILD_TYPE "Debug")
-else()
-    if(WIN32)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_definitions("-DNDEBUG")
+    if(WIN32 AND NOT SBK_PYTHON_LIBRARIES)
         set(SBK_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
     endif()
-    add_definitions("-DNDEBUG")
 endif()
+
 
 if(APPLE)
     set(SBK_PYTHON_LIBRARIES "-undefined dynamic_lookup")
 endif()
-
 if(CMAKE_VERSION VERSION_LESS 2.8)
     set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_PATH})
 else()
     set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIRS})
 endif()
+
+add_subdirectory(ApiExtractor)
+
+set(generator_plugin_DIR ${LIB_INSTALL_DIR}/generatorrunner${generator_SUFFIX})
+
+# uninstall target
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
+               "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+               IMMEDIATE @ONLY)
+add_custom_target(uninstall "${CMAKE_COMMAND}"
+                  -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 add_subdirectory(libshiboken)
 add_subdirectory(doc)

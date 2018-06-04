@@ -40,7 +40,7 @@
 #ifndef PYSIDEQMLREGISTERTYPE_H
 #define PYSIDEQMLREGISTERTYPE_H
 
-#include <Python.h>
+#include <sbkpython.h>
 
 struct SbkObjectType;
 
@@ -78,8 +78,8 @@ typedef struct {
     volatile bool flag;
 } QtQml_VolatileBoolObject;
 
-PyAPI_DATA(PyTypeObject) QtQml_VolatileBoolType;
+PyAPI_FUNC(PyTypeObject *) QtQml_VolatileBoolTypeF(void);
 
-#define VolatileBool_Check(op) (Py_TYPE(op) == &QtQml_VolatileBoolType)
+#define VolatileBool_Check(op) (Py_TYPE(op) == QtQml_VolatileBoolTypeF())
 
 #endif

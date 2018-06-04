@@ -53,6 +53,7 @@
   </object-type>
 
   <object-type name="QWebEngineDownloadItem">
+    <enum-type name="DownloadInterruptReason"/>
     <enum-type name="DownloadState" />
     <enum-type name="SavePageFormat"/>
   </object-type>
@@ -71,6 +72,7 @@
     <enum-type name="Feature" />
     <enum-type name="FileSelectionMode" />
     <enum-type name="JavaScriptConsoleMessageLevel" />
+    <enum-type name="RenderProcessTerminationStatus"/>
   </object-type>
 
   <object-type name="QWebEngineProfile">
@@ -83,16 +85,23 @@
     <enum-type name="ScriptWorldId" />
   </value-type>
 
-  <!-- TODO: Deal with private constructor
-  <value-type name="QWebEngineScriptCollection" /> -->
+  <object-type name="QWebEngineScriptCollection"/>
 
-  <!-- TODO: Deal with private constructor
-  <value-type name="QWebEngineSettings">
-    <enum-type name="FontFamily" />
-    <enum-type name="WebAttribute" />
-    <enum-type name="FontSize" />
-  </value-type> -->
+  <object-type name="QWebEngineSettings">
+    <enum-type name="FontFamily"/>
+    <enum-type name="FontSize"/>
+    <enum-type name="UnknownUrlSchemePolicy" since="5.11"/>
+    <enum-type name="WebAttribute"/>
+  </object-type>
 
   <object-type name="QWebEngineView" />
+
+  <value-type name="QWebEngineContextMenuData">
+    <enum-type name="EditFlag" flags="EditFlags" since="5.11"/>
+    <enum-type name="MediaFlag" flags="MediaFlags" since="5.11"/>
+    <enum-type name="MediaType"/>
+  </value-type>
+
+  <object-type name="QWebEngineFullScreenRequest"/>
 
 </typesystem>

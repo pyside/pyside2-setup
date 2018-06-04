@@ -269,7 +269,7 @@
     <enum-type name="PanelModality" since="4.6"/>
     <inject-code class="target" position="end">
         PyObject *userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
-        PyDict_SetItemString(Sbk_QGraphicsItem_Type.super.ht_type.tp_dict, "UserType", userTypeConstant);
+        PyDict_SetItemString(PepType(Sbk_QGraphicsItem_TypeF())->tp_dict, "UserType", userTypeConstant);
     </inject-code>
     <modify-function signature="setParentItem(QGraphicsItem*)">
       <modify-argument index="this">
@@ -1022,7 +1022,11 @@
         %0 = new %TYPE(%1, %2);
       </inject-code>
       <inject-code class="target" position="end">
-        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, "connect", "OsO", %PYSELF, SIGNAL(activated()), %PYARG_3));
+        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF,
+            const_cast&lt;char *&gt;("connect"),
+            const_cast&lt;char *&gt;("OsO"),
+            %PYSELF, SIGNAL(activated()), %PYARG_3)
+        );
         if (!result.isNull())
             Shiboken::Object::setParent(%PYARG_2, %PYSELF);
       </inject-code>
@@ -3029,7 +3033,11 @@
       <inject-code>
         QAction *action = %CPPSELF.addAction(%1, %2);
         %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
-        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0, "connect", "OsO", %PYARG_0, SIGNAL(triggered()), %PYARG_3));
+        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
+            const_cast&lt;char *&gt;("connect"),
+            const_cast&lt;char *&gt;("OsO"),
+            %PYARG_0, SIGNAL(triggered()), %PYARG_3)
+        );
       </inject-code>
     </modify-function>
     <modify-function signature="addAction(QString,const QObject*,const char*)">
@@ -3045,7 +3053,11 @@
       <inject-code>
         QAction *action = %CPPSELF.addAction(%1);
         %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
-        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0, "connect", "OsO", %PYARG_0, SIGNAL(triggered()), %PYARG_2));
+        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
+            const_cast&lt;char *&gt;("connect"),
+            const_cast&lt;char *&gt;("OsO"),
+            %PYARG_0, SIGNAL(triggered()), %PYARG_2)
+        );
       </inject-code>
     </modify-function>
     <modify-function signature="addAction(const QString&amp;)">

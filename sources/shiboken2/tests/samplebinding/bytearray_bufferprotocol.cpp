@@ -33,7 +33,7 @@ extern "C" {
 static Py_ssize_t SbkByteArray_segcountproc(PyObject* self, Py_ssize_t* lenp)
 {
     if (lenp)
-        *lenp = self->ob_type->tp_as_sequence->sq_length(self);
+        *lenp = Py_TYPE(self)->tp_as_sequence->sq_length(self);
     return 1;
 }
 static Py_ssize_t SbkByteArray_readbufferproc(PyObject* self, Py_ssize_t segment, void** ptrptr)

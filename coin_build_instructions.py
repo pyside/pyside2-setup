@@ -42,6 +42,7 @@ from build_scripts.utils import install_pip_dependencies
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
+from build_scripts.utils import get_python_dict
 import os
 
 # Values must match COIN thrift
@@ -60,6 +61,36 @@ if _ci_features is not None:
         CI_FEATURES.append(f)
 CI_RELEASE_CONF = has_option("packaging")
 
+def get_current_script_path():
+    """ Returns the absolute path containing this script. """
+    try:
+        this_file = __file__
+    except NameError:
+        this_file = sys.argv[0]
+    this_file = os.path.abspath(this_file)
+    return os.path.dirname(this_file)
+
+def is_snapshot_build():
+    """
+    Returns True if project needs to be built with --snapshot-build
+
+    This is true if the version found in pyside_version.py is not a
+    pre-release version (no alphas, betas).
+
+    This eliminates the need to remove the --snapshot-build option
+    on a per-release branch basis (less things to remember to do
+    for a release).
+    """
+    setup_script_dir = get_current_script_path()
+    pyside_version_py = os.path.join(
+        setup_script_dir, "sources", "pyside2", "pyside_version.py")
+    d = get_python_dict(pyside_version_py)
+
+    pre_release_version_type = d['pre_release_version_type']
+    pre_release_version = d['pre_release_version']
+    if pre_release_version or pre_release_version_type:
+        return True
+    return False
 
 def call_setup(python_ver):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
@@ -69,7 +100,7 @@ def call_setup(python_ver):
     cmd = [env_python, "setup.py"]
     # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
     # we shouldn't release the 2015 version.
-    if CI_RELEASE_CONF and CI_COMPILER not in ["MSVC2017"]:
+    if CI_RELEASE_CONF and CI_COMPILER not in ["MSVC2015"]:
         cmd += ["bdist_wheel", "--standalone"]
     else:
         cmd += ["build"]
@@ -83,8 +114,11 @@ def call_setup(python_ver):
         cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "/bin/qmake"]
     cmd += ["--build-tests",
             "--jobs=4",
-            "--verbose-build",
-            "--snapshot-build"]
+            "--verbose-build"]
+    if python_ver == "3":
+        cmd += ["--limited-api=yes"]
+    if is_snapshot_build():
+        cmd += ["--snapshot-build"]
 
     run_instruction(cmd, "Failed to run setup.py")
 

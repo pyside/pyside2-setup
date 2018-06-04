@@ -111,6 +111,8 @@ public:
         m_qualifiedName = qualified_name;
     }
 
+    bool isVoid() const;
+
     bool isConstant() const
     {
         return m_constant;

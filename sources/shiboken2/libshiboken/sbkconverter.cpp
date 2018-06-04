@@ -112,6 +112,8 @@ SbkConverter *createConverterObject(PyTypeObject *type,
 {
     SbkConverter* converter = new SbkConverter;
     converter->pythonType = type;
+    // PYSIDE-595: All types are heaptypes now, so provide reference.
+    Py_XINCREF(type);
 
     converter->pointerToPython = pointerToPythonFunc;
     converter->copyToPython = copyToPythonFunc;
@@ -133,7 +135,7 @@ SbkConverter* createConverter(SbkObjectType* type,
         createConverterObject(reinterpret_cast<PyTypeObject *>(type),
                               toCppPointerConvFunc, toCppPointerCheckFunc,
                               pointerToPythonFunc, copyToPythonFunc);
-    type->d->converter = converter;
+    PepType_SOTP(type)->converter = converter;
     return converter;
 }
 
@@ -172,12 +174,12 @@ void addPythonToCppValueConversion(SbkObjectType* type,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)
 {
-    addPythonToCppValueConversion(type->d->converter, pythonToCppFunc, isConvertibleToCppFunc);
+    addPythonToCppValueConversion(PepType_SOTP(type)->converter, pythonToCppFunc, isConvertibleToCppFunc);
 }
 
-PyObject* pointerToPython(const SbkObjectType *type, const void *cppIn)
+PyObject* pointerToPython(SbkObjectType *type, const void *cppIn)
 {
-    return pointerToPython(type->d->converter, cppIn);
+    return pointerToPython(PepType_SOTP(type)->converter, cppIn);
 }
 
 PyObject* pointerToPython(const SbkConverter *converter, const void *cppIn)
@@ -187,15 +189,15 @@ PyObject* pointerToPython(const SbkConverter *converter, const void *cppIn)
         Py_RETURN_NONE;
     if (!converter->pointerToPython) {
         warning(PyExc_RuntimeWarning, 0, "pointerToPython(): SbkConverter::pointerToPython is null for \"%s\".",
-                converter->pythonType->tp_name);
+                PepType(converter->pythonType)->tp_name);
         Py_RETURN_NONE;
     }
     return converter->pointerToPython(cppIn);
 }
 
-PyObject* referenceToPython(const SbkObjectType *type, const void *cppIn)
+PyObject* referenceToPython(SbkObjectType *type, const void *cppIn)
 {
-    return referenceToPython(type->d->converter, cppIn);
+    return referenceToPython(PepType_SOTP(type)->converter, cppIn);
 }
 
 PyObject* referenceToPython(const SbkConverter *converter, const void *cppIn)
@@ -209,7 +211,7 @@ PyObject* referenceToPython(const SbkConverter *converter, const void *cppIn)
     }
     if (!converter->pointerToPython) {
         warning(PyExc_RuntimeWarning, 0, "referenceToPython(): SbkConverter::pointerToPython is null for \"%s\".",
-                converter->pythonType->tp_name);
+                PepType(converter->pythonType)->tp_name);
         Py_RETURN_NONE;
     }
     return converter->pointerToPython(cppIn);
@@ -221,24 +223,24 @@ static inline PyObject* CopyCppToPython(const SbkConverter *converter, const voi
         Py_RETURN_NONE;
     if (!converter->copyToPython) {
         warning(PyExc_RuntimeWarning, 0, "CopyCppToPython(): SbkConverter::copyToPython is null for \"%s\".",
-                converter->pythonType->tp_name);
+                PepType(converter->pythonType)->tp_name);
         Py_RETURN_NONE;
     }
     return converter->copyToPython(cppIn);
 }
-PyObject* copyToPython(const SbkObjectType *type, const void *cppIn)
+PyObject* copyToPython(SbkObjectType *type, const void *cppIn)
 {
-    return CopyCppToPython(type->d->converter, cppIn);
+    return CopyCppToPython(PepType_SOTP(type)->converter, cppIn);
 }
 PyObject* copyToPython(const SbkConverter *converter, const void *cppIn)
 {
     return CopyCppToPython(converter, cppIn);
 }
 
-PythonToCppFunc isPythonToCppPointerConvertible(const SbkObjectType *type, PyObject *pyIn)
+PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType *type, PyObject *pyIn)
 {
     assert(pyIn);
-    return type->d->converter->toCppPointerConversion.first(pyIn);
+    return PepType_SOTP(type)->converter->toCppPointerConversion.first(pyIn);
 }
 
 static inline PythonToCppFunc IsPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)
@@ -252,9 +254,9 @@ static inline PythonToCppFunc IsPythonToCppConvertible(const SbkConverter *conve
     }
     return 0;
 }
-PythonToCppFunc isPythonToCppValueConvertible(const SbkObjectType *type, PyObject *pyIn)
+PythonToCppFunc isPythonToCppValueConvertible(SbkObjectType *type, PyObject *pyIn)
 {
-    return IsPythonToCppConvertible(type->d->converter, pyIn);
+    return IsPythonToCppConvertible(PepType_SOTP(type)->converter, pyIn);
 }
 PythonToCppFunc isPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)
 {
@@ -272,7 +274,7 @@ PythonToCppFunc isPythonToCppConvertible(const SbkArrayConverter *converter,
     return nullptr;
 }
 
-PythonToCppFunc isPythonToCppReferenceConvertible(const SbkObjectType *type, PyObject *pyIn)
+PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType *type, PyObject *pyIn)
 {
     if (pyIn != Py_None) {
         PythonToCppFunc toCpp = isPythonToCppPointerConvertible(type, pyIn);
@@ -329,10 +331,10 @@ static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void
         toCpp(pyIn, cppOut);
 }
 
-void pythonToCppCopy(const SbkObjectType *type, PyObject *pyIn, void *cppOut)
+void pythonToCppCopy(SbkObjectType *type, PyObject *pyIn, void *cppOut)
 {
     assert(type);
-    _pythonToCppCopy(type->d->converter, pyIn, cppOut);
+    _pythonToCppCopy(PepType_SOTP(type)->converter, pyIn, cppOut);
 }
 
 void pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut)
@@ -340,16 +342,16 @@ void pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut
     _pythonToCppCopy(converter, pyIn, cppOut);
 }
 
-bool isImplicitConversion(const SbkObjectType *type, PythonToCppFunc toCppFunc)
+bool isImplicitConversion(SbkObjectType *type, PythonToCppFunc toCppFunc)
 {
     // This is the Object Type or Value Type conversion that only
     // retrieves the C++ pointer held in the Python wrapper.
-    if (toCppFunc == type->d->converter->toCppPointerConversion.second)
+    if (toCppFunc == PepType_SOTP(type)->converter->toCppPointerConversion.second)
         return false;
 
     // Object Types doesn't have any kind of value conversion,
     // only C++ pointer retrieval.
-    if (type->d->converter->toCppConversions.empty())
+    if (PepType_SOTP(type)->converter->toCppConversions.empty())
         return false;
 
     // The first conversion of the non-pointer conversion list is
@@ -359,7 +361,7 @@ bool isImplicitConversion(const SbkObjectType *type, PythonToCppFunc toCppFunc)
     // Note that we don't check if the Python to C++ conversion is in
     // the list of the type's conversions, for it is expected that the
     // caller knows what he's doing.
-    ToCppConversionList::iterator conv = type->d->converter->toCppConversions.begin();
+    ToCppConversionList::iterator conv = PepType_SOTP(type)->converter->toCppConversions.begin();
     return toCppFunc != (*conv).second;
 }
 
@@ -411,10 +413,10 @@ bool convertibleSequenceTypes(const SbkConverter *converter, PyObject *pyIn)
     }
     return true;
 }
-bool convertibleSequenceTypes(const SbkObjectType *type, PyObject *pyIn)
+bool convertibleSequenceTypes(SbkObjectType *type, PyObject *pyIn)
 {
     assert(type);
-    return convertibleSequenceTypes(type->d->converter, pyIn);
+    return convertibleSequenceTypes(PepType_SOTP(type)->converter, pyIn);
 }
 
 bool checkPairTypes(PyTypeObject* firstType, PyTypeObject* secondType, PyObject* pyIn)

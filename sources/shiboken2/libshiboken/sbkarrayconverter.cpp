@@ -162,7 +162,7 @@ static void sequenceToCppIntArray(PyObject *pyIn, void *cppOut)
 {
     ArrayHandle<int> *handle = reinterpret_cast<ArrayHandle<int> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
-    convertPySequence(pyIn, _PyLong_AsInt, handle->data());
+    convertPySequence(pyIn, _PepLong_AsInt, handle->data());
 }
 
 static PythonToCppFunc sequenceToCppIntArrayCheck(PyObject *pyIn, int dim1, int /* dim2 */)

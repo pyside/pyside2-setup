@@ -55,7 +55,8 @@ typedef struct {
 
 PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    SbkVoidPtrObject *self = reinterpret_cast<SbkVoidPtrObject *>(type->tp_alloc(type, 0));
+    SbkVoidPtrObject *self =
+        reinterpret_cast<SbkVoidPtrObject *>(PepType(type)->tp_alloc);
 
     if (self != 0) {
         self->cptr = 0;
@@ -66,7 +67,7 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     return reinterpret_cast<PyObject *>(self);
 }
 
-#define SbkVoidPtr_Check(op) (Py_TYPE(op) == &SbkVoidPtrType)
+#define SbkVoidPtr_Check(op) (Py_TYPE(op) == SbkVoidPtrTypeF())
 
 
 int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
@@ -168,62 +169,6 @@ PyObject *SbkVoidPtrObject_int(PyObject *v)
     return PyLong_FromVoidPtr(sbkObject->cptr);
 }
 
-static PyNumberMethods SbkVoidPtrObjectAsNumber = {
-     /* nb_add */                   0,
-     /* nb_subtract */              0,
-     /* nb_multiply */              0,
-#ifndef IS_PY3K
-     /* nb_divide */                0,
-#endif
-     /* nb_remainder */             0,
-     /* nb_divmod */                0,
-     /* nb_power */                 0,
-     /* nb_negative */              0,
-     /* nb_positive */              0,
-     /* nb_absolute */              0,
-     /* nb_bool/nb_nonzero */       0,
-     /* nb_invert */                0,
-     /* nb_lshift */                0,
-     /* nb_rshift */                0,
-     /* nb_and */                   0,
-     /* nb_xor */                   0,
-     /* nb_or */                    0,
-#ifndef IS_PY3K
-     /* nb_coerce */                0,
-#endif
-     /* nb_int */                   SbkVoidPtrObject_int,
-#ifdef IS_PY3K
-     /* nb_reserved */              0,
-     /* nb_float */                 0,
-#else
-     /* nb_long */                  0,
-     /* nb_float */                 0,
-     /* nb_oct */                   0,
-     /* nb_hex */                   0,
-#endif
-
-     /* nb_inplace_add */           0,
-     /* nb_inplace_subtract */      0,
-     /* nb_inplace_multiply */      0,
-#ifndef IS_PY3K
-     /* nb_inplace_div */           0,
-#endif
-     /* nb_inplace_remainder */     0,
-     /* nb_inplace_power */         0,
-     /* nb_inplace_lshift */        0,
-     /* nb_inplace_rshift */        0,
-     /* nb_inplace_and */           0,
-     /* nb_inplace_xor */           0,
-     /* nb_inplace_or */            0,
-
-     /* nb_floor_divide */          0,
-     /* nb_true_divide */           0,
-     /* nb_inplace_floor_divide */  0,
-     /* nb_inplace_true_divide */   0,
-
-     /* nb_index */                 0
-};
-
 static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
 {
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
@@ -235,19 +180,6 @@ static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
     return sbkObject->size;
 }
 
-static PySequenceMethods SbkVoidPtrObjectAsSequence = {
-    /* sq_length */                 SbkVoidPtrObject_length,
-    /* sq_concat */                 0,
-    /* sq_repeat */                 0,
-    /* sq_item */                   0,
-    /* sq_slice */                  0,
-    /* sq_ass_item */               0,
-    /* sq_ass_slice */              0,
-    /* sq_contains */               0,
-    /* sq_inplace_concat */         0,
-    /* sq_inplace_repeat */         0
-};
-
 static const char trueString[] = "True" ;
 static const char falseString[] = "False" ;
 
@@ -257,7 +189,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(%p, %zd, %s)",
-                           Py_TYPE(sbkObject)->tp_name,
+                           PepType((Py_TYPE(sbkObject)))->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -269,7 +201,7 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
-                           Py_TYPE(sbkObject)->tp_name,
+                           PepType((Py_TYPE(sbkObject)))->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -279,61 +211,35 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 
 
 // Void pointer type definition.
-PyTypeObject SbkVoidPtrType = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)                      /*ob_size*/
-    "VoidPtr",                                                  /*tp_name*/
-    sizeof(SbkVoidPtrObject),                                   /*tp_basicsize*/
-    0,                                                          /*tp_itemsize*/
-    0,                                                          /*tp_dealloc*/
-    0,                                                          /*tp_print*/
-    0,                                                          /*tp_getattr*/
-    0,                                                          /*tp_setattr*/
-    0,                                                          /*tp_compare*/
-    SbkVoidPtrObject_repr,                                      /*tp_repr*/
-    &SbkVoidPtrObjectAsNumber,                                  /*tp_as_number*/
-    &SbkVoidPtrObjectAsSequence,                                /*tp_as_sequence*/
-    0,                                                          /*tp_as_mapping*/
-    0,                                                          /*tp_hash */
-    0,                                                          /*tp_call*/
-    SbkVoidPtrObject_str,                                       /*tp_str*/
-    0,                                                          /*tp_getattro*/
-    0,                                                          /*tp_setattro*/
-    0,                                                          /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT,                                         /*tp_flags*/
-    "Void pointer wrapper",                                     /*tp_doc*/
-    0,                                                          /*tp_traverse*/
-    0,                                                          /*tp_clear*/
-    SbkVoidPtrObject_richcmp,                                   /*tp_richcompare*/
-    0,                                                          /*tp_weaklistoffset*/
-    0,                                                          /*tp_iter*/
-    0,                                                          /*tp_iternext*/
-    0,                                                          /*tp_methods*/
-    0,                                                          /*tp_members*/
-    0,                                                          /*tp_getset*/
-    0,                                                          /*tp_base*/
-    0,                                                          /*tp_dict*/
-    0,                                                          /*tp_descr_get*/
-    0,                                                          /*tp_descr_set*/
-    0,                                                          /*tp_dictoffset*/
-    SbkVoidPtrObject_init,                                      /*tp_init*/
-    0,                                                          /*tp_alloc*/
-    SbkVoidPtrObject_new,                                       /*tp_new*/
-    0,                                                          /*tp_free*/
-    0,                                                          /*tp_is_gc*/
-    0,                                                          /*tp_bases*/
-    0,                                                          /*tp_mro*/
-    0,                                                          /*tp_cache*/
-    0,                                                          /*tp_subclasses*/
-    0,                                                          /*tp_weaklist*/
-    0,                                                          /*tp_del*/
-    0,                                                          /*tp_version_tag*/
-#if PY_MAJOR_VERSION > 3 || PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 4
-    0                                                           /*tp_finalize*/
-#endif
+static PyType_Slot SbkVoidPtrType_slots[] = {
+    {Py_tp_repr, (void *)SbkVoidPtrObject_repr},
+    {Py_nb_int, (void *)SbkVoidPtrObject_int},
+    {Py_sq_length, (void *)SbkVoidPtrObject_length},
+    {Py_tp_str, (void *)SbkVoidPtrObject_str},
+    {Py_tp_richcompare, (void *)SbkVoidPtrObject_richcmp},
+    {Py_tp_init, (void *)SbkVoidPtrObject_init},
+    {Py_tp_new, (void *)SbkVoidPtrObject_new},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {0, 0}
 };
+static PyType_Spec SbkVoidPtrType_spec = {
+    "shiboken2.libshiboken.VoidPtr",
+    sizeof(SbkVoidPtrObject),
+    0,
+    Py_TPFLAGS_DEFAULT,
+    SbkVoidPtrType_slots,
+};
+
 
 }
 
+PyTypeObject *SbkVoidPtrTypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (!type)
+        type = (PyTypeObject *)PyType_FromSpec(&SbkVoidPtrType_spec);
+    return type;
+}
 
 namespace VoidPtr {
 
@@ -341,7 +247,7 @@ static int voidPointerInitialized = false;
 
 void init()
 {
-    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(&SbkVoidPtrType)) < 0)
+    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(SbkVoidPtrTypeF())) < 0)
         Py_FatalError("[libshiboken] Failed to initialize Shiboken.VoidPtr type.");
     else
         voidPointerInitialized = true;
@@ -350,9 +256,9 @@ void init()
 void addVoidPtrToModule(PyObject *module)
 {
     if (voidPointerInitialized) {
-        Py_INCREF(&SbkVoidPtrType);
-        PyModule_AddObject(module, SbkVoidPtrType.tp_name,
-                           reinterpret_cast<PyObject *>(&SbkVoidPtrType));
+        Py_INCREF(SbkVoidPtrTypeF());
+        PyModule_AddObject(module, PepType_GetNameStr(SbkVoidPtrTypeF()),
+                           reinterpret_cast<PyObject *>(SbkVoidPtrTypeF()));
     }
 }
 
@@ -361,7 +267,7 @@ static PyObject *createVoidPtr(void *cppIn, Py_ssize_t size = 0, bool isWritable
     if (!cppIn)
         Py_RETURN_NONE;
 
-    SbkVoidPtrObject *result = PyObject_NEW(SbkVoidPtrObject, &SbkVoidPtrType);
+    SbkVoidPtrObject *result = PyObject_New(SbkVoidPtrObject, SbkVoidPtrTypeF());
     if (!result)
         Py_RETURN_NONE;
 
@@ -434,7 +340,7 @@ static PythonToCppFunc PythonBufferToCppIsConvertible(PyObject *pyIn)
 
 SbkConverter *createConverter()
 {
-    SbkConverter *converter = Shiboken::Conversions::createConverter(&SbkVoidPtrType, toPython);
+    SbkConverter *converter = Shiboken::Conversions::createConverter(SbkVoidPtrTypeF(), toPython);
     Shiboken::Conversions::addPythonToCppValueConversion(converter,
                                                          VoidPtrToCpp,
                                                          VoidPtrToCppIsConvertible);

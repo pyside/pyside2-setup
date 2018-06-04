@@ -46,7 +46,7 @@
 
 extern "C"
 {
-    extern PYSIDE_API PyTypeObject PySidePropertyType;
+    extern PYSIDE_API PyTypeObject *PySidePropertyTypeF(void);
 
     struct PySidePropertyPrivate;
     struct PYSIDE_API PySideProperty

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -54,12 +54,16 @@
 extern "C"
 {
 
-struct SbkEnumType
+struct SbkEnumTypePrivate
 {
-    PyHeapTypeObject super;
     SbkConverter** converterPtr;
     SbkConverter* converter;
     const char* cppName;
+};
+
+struct SbkEnumType
+{
+    PepTypeObject type;
 };
 
 struct SbkEnumObject
@@ -73,21 +77,9 @@ static PyObject* SbkEnumObject_repr(PyObject* self)
 {
     const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
     if (enumObj->ob_name)
-        return Shiboken::String::fromFormat("%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
+        return Shiboken::String::fromFormat("%s.%s", PepType((Py_TYPE(self)))->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
     else
-        return Shiboken::String::fromFormat("%s(%ld)", self->ob_type->tp_name, enumObj->ob_value);
-}
-
-static int SbkEnumObject_print(PyObject* self, FILE* fp, int)
-{
-    Py_BEGIN_ALLOW_THREADS
-    const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
-    if (enumObj->ob_name)
-        fprintf(fp, "%s.%s", self->ob_type->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
-    else
-        fprintf(fp, "%s(%ld)", self->ob_type->tp_name, enumObj->ob_value);
-    Py_END_ALLOW_THREADS
-    return 0;
+        return Shiboken::String::fromFormat("%s(%ld)", PepType((Py_TYPE(self)))->tp_name, enumObj->ob_value);
 }
 
 static PyObject* SbkEnumObject_name(PyObject* self, void*)
@@ -266,114 +258,54 @@ static PyGetSetDef SbkEnumGetSetList[] = {
     {0, 0, 0, 0, 0} // Sentinel
 };
 
-static PyNumberMethods enum_as_number = {
-     /* nb_add */                   enum_add,
-     /* nb_subtract */              enum_subtract,
-     /* nb_multiply */              enum_multiply,
-#ifndef IS_PY3K
-     /* nb_divide */                enum_divide,
-#endif
-     /* nb_remainder */             0,
-     /* nb_divmod */                0,
-     /* nb_power */                 0,
-     /* nb_negative */              0,
-     /* nb_positive */              enum_int,
-     /* nb_absolute */              0,
-     /* nb_bool/nb_nonzero */       enum_bool,
-     /* nb_invert */                0,
-     /* nb_lshift */                0,
-     /* nb_rshift */                0,
-     /* nb_and */                   enum_and,
-     /* nb_xor */                   enum_xor,
-     /* nb_or */                    enum_or,
-#ifndef IS_PY3K
-     /* nb_coerce */                0,
-#endif
-     /* nb_int */                   enum_int,
-#ifdef IS_PY3K
-     /* nb_reserved */              0,
-     /* nb_float */                 0,
-#else
-     /* nb_long */                  enum_int,
-     /* nb_float */                 0,
-     /* nb_oct */                   0,
-     /* nb_hex */                   0,
-#endif
-
-     /* nb_inplace_add */           0,
-     /* nb_inplace_subtract */      0,
-     /* nb_inplace_multiply */      0,
-#ifndef IS_PY3K
-     /* nb_inplace_div */           0,
-#endif
-     /* nb_inplace_remainder */     0,
-     /* nb_inplace_power */         0,
-     /* nb_inplace_lshift */        0,
-     /* nb_inplace_rshift */        0,
-     /* nb_inplace_and */           0,
-     /* nb_inplace_xor */           0,
-     /* nb_inplace_or */            0,
-
-     /* nb_floor_divide */          0,
-     /* nb_true_divide */           0,
-     /* nb_inplace_floor_divide */  0,
-     /* nb_inplace_true_divide */   0,
-
-     /* nb_index */                 enum_int
-};
-
 static void SbkEnumTypeDealloc(PyObject* pyObj);
 static PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
-PyTypeObject SbkEnumType_Type = {
-    PyVarObject_HEAD_INIT(0, 0)
-    /*tp_name*/             "Shiboken.EnumType",
-    /*tp_basicsize*/        sizeof(SbkEnumType),
-    /*tp_itemsize*/         0,
-    /*tp_dealloc*/          SbkEnumTypeDealloc,
-    /*tp_print*/            0,
-    /*tp_getattr*/          0,
-    /*tp_setattr*/          0,
-    /*tp_compare*/          0,
-    /*tp_repr*/             0,
-    /*tp_as_number*/        &enum_as_number,
-    /*tp_as_sequence*/      0,
-    /*tp_as_mapping*/       0,
-    /*tp_hash*/             0,
-    /*tp_call*/             0,
-    /*tp_str*/              0,
-    /*tp_getattro*/         0,
-    /*tp_setattro*/         0,
-    /*tp_as_buffer*/        0,
-    /*tp_flags*/            Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
-    /*tp_doc*/              0,
-    /*tp_traverse*/         0,
-    /*tp_clear*/            0,
-    /*tp_richcompare*/      0,
-    /*tp_weaklistoffset*/   0,
-    /*tp_iter*/             0,
-    /*tp_iternext*/         0,
-    /*tp_methods*/          0,
-    /*tp_members*/          0,
-    /*tp_getset*/           0,
-    /*tp_base*/             &PyType_Type,
-    /*tp_dict*/             0,
-    /*tp_descr_get*/        0,
-    /*tp_descr_set*/        0,
-    /*tp_dictoffset*/       0,
-    /*tp_init*/             0,
-    /*tp_alloc*/            PyType_GenericAlloc,
-    /*tp_new*/              SbkEnumTypeTpNew,
-    /*tp_free*/             PyObject_GC_Del,
-    /*tp_is_gc*/            0,
-    /*tp_bases*/            0,
-    /*tp_mro*/              0,
-    /*tp_cache*/            0,
-    /*tp_subclasses*/       0,
-    /*tp_weaklist*/         0,
-    /*tp_del*/              0,
-    /*tp_version_tag*/      0
+static PyType_Slot SbkEnumType_Type_slots[] = {
+    {Py_tp_dealloc, (void *)SbkEnumTypeDealloc},
+    {Py_nb_add, (void *)enum_add},
+    {Py_nb_subtract, (void *)enum_subtract},
+    {Py_nb_multiply, (void *)enum_multiply},
+#ifndef IS_PY3K
+    {Py_nb_divide, (void *)enum_divide},
+#endif
+    {Py_nb_positive, (void *)enum_int},
+#ifdef IS_PY3K
+    {Py_nb_bool, (void *)enum_bool},
+#else
+    {Py_nb_nonzero, (void *)enum_bool},
+    {Py_nb_long, (void *)enum_int},
+#endif
+    {Py_nb_and, (void *)enum_and},
+    {Py_nb_xor, (void *)enum_xor},
+    {Py_nb_or, (void *)enum_or},
+    {Py_nb_int, (void *)enum_int},
+    {Py_nb_index, (void *)enum_int},
+    {Py_tp_base, (void *)&PyType_Type},
+    {Py_tp_alloc, (void *)PyType_GenericAlloc},
+    {Py_tp_new, (void *)SbkEnumTypeTpNew},
+    {Py_tp_free, (void *)PyObject_GC_Del},
+    {0, 0}
 };
+static PyType_Spec SbkEnumType_Type_spec = {
+    "Shiboken.EnumType",
+    0,    // filled in later
+    sizeof(PyMemberDef),
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
+    SbkEnumType_Type_slots,
+};
+
+
+PyTypeObject *SbkEnumType_TypeF(void)
+{
+    static PyTypeObject *type = nullptr;
+    if (!type) {
+        SbkEnumType_Type_spec.basicsize =
+            PepHeapType_SIZE + sizeof(SbkEnumTypePrivate);
+        type = (PyTypeObject *)PyType_FromSpec(&SbkEnumType_Type_spec);
+    }
+    return type;
+}
 
 void SbkEnumTypeDealloc(PyObject* pyObj)
 {
@@ -381,15 +313,16 @@ void SbkEnumTypeDealloc(PyObject* pyObj)
 
     PyObject_GC_UnTrack(pyObj);
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
-    if (sbkType->converter) {
-        Shiboken::Conversions::deleteConverter(sbkType->converter);
+    if (PepType_SETP(sbkType)->converter) {
+        Shiboken::Conversions::deleteConverter(PepType_SETP(sbkType)->converter);
     }
     Py_TRASHCAN_SAFE_END(pyObj);
 }
 
 PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
 {
-    SbkEnumType* newType = reinterpret_cast<SbkEnumType*>(PyType_Type.tp_new(metatype, args, kwds));
+    newfunc type_new = reinterpret_cast<newfunc>(PyType_GetSlot(&PyType_Type, Py_tp_new));
+    SbkEnumType *newType = reinterpret_cast<SbkEnumType*>(type_new(metatype, args, kwds));
     if (!newType)
         return 0;
     return reinterpret_cast<PyObject*>(newType);
@@ -417,14 +350,14 @@ namespace Enum {
 
 bool check(PyObject* pyObj)
 {
-    return Py_TYPE(pyObj->ob_type) == &SbkEnumType_Type;
+    return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
 }
 
 PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 {
     PyObject *key, *value;
     Py_ssize_t pos = 0;
-    PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
+    PyObject *values = PyDict_GetItemString(PepType(enumType)->tp_dict, const_cast<char*>("values"));
 
     while (PyDict_Next(values, &pos, &key, &value)) {
         SbkEnumObject *obj = reinterpret_cast<SbkEnumObject *>(value);
@@ -438,9 +371,7 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 
 static PyTypeObject* createEnum(const char* fullName, const char* cppName, const char* shortName, PyTypeObject* flagsType)
 {
-    PyTypeObject* enumType = newTypeWithName(fullName, cppName);
-    if (flagsType)
-        enumType->tp_as_number = flagsType->tp_as_number;
+    PyTypeObject* enumType = newTypeWithName(fullName, cppName, flagsType);
     if (PyType_Ready(enumType) < 0)
         return 0;
     return enumType;
@@ -451,7 +382,8 @@ PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* f
     PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
     if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0)
         return 0;
-    if (flagsType && PyModule_AddObject(module, flagsType->tp_name, reinterpret_cast<PyObject *>(flagsType)) < 0)
+    if (flagsType && PyModule_AddObject(module, PepType_GetNameStr(flagsType),
+            reinterpret_cast<PyObject *>(flagsType)) < 0)
         return 0;
     return enumType;
 }
@@ -459,17 +391,20 @@ PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* f
 PyTypeObject* createScopedEnum(SbkObjectType* scope, const char* name, const char* fullName, const char* cppName, PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
-    if (enumType && PyDict_SetItemString(scope->super.ht_type.tp_dict, name, reinterpret_cast<PyObject *>(enumType)) < 0)
-       return 0;
-    if (flagsType && PyDict_SetItemString(scope->super.ht_type.tp_dict, flagsType->tp_name, reinterpret_cast<PyObject *>(flagsType)) < 0)
-       return 0;
+    if (enumType && PyDict_SetItemString(PepType(scope)->tp_dict, name,
+            reinterpret_cast<PyObject *>(enumType)) < 0)
+        return nullptr;
+    if (flagsType && PyDict_SetItemString(PepType(scope)->tp_dict,
+            PepType_GetNameStr(flagsType),
+            reinterpret_cast<PyObject *>(flagsType)) < 0)
+        return nullptr;
     return enumType;
 }
 
 static PyObject* createEnumItem(PyTypeObject* enumType, const char* itemName, long itemValue)
 {
     PyObject* enumItem = newItem(enumType, itemValue, itemName);
-    if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0)
+    if (PyDict_SetItemString(PepType(enumType)->tp_dict, itemName, enumItem) < 0)
         return 0;
     Py_DECREF(enumItem);
     return enumItem;
@@ -496,7 +431,7 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
                           const char *itemName, long itemValue)
 {
     if (PyObject *enumItem = createEnumItem(enumType, itemName, itemValue)) {
-        if (PyDict_SetItemString(scope->tp_dict, itemName, enumItem) < 0)
+        if (PyDict_SetItemString(PepType(scope)->tp_dict, itemName, enumItem) < 0)
             return false;
         Py_DECREF(enumItem);
         return true;
@@ -506,15 +441,17 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
 
 bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const char* itemName, long itemValue)
 {
-    return createScopedEnumItem(enumType, &scope->super.ht_type, itemName, itemValue);
+    return createScopedEnumItem(enumType, reinterpret_cast<PyTypeObject *>(scope), itemName, itemValue);
 }
 
-PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
+PyObject *
+newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
 {
     bool newValue = true;
     SbkEnumObject* enumObj;
     if (!itemName) {
-        enumObj = reinterpret_cast<SbkEnumObject*>(getEnumItemFromValue(enumType, itemValue));
+        enumObj = reinterpret_cast<SbkEnumObject*>(
+                      getEnumItemFromValue(enumType, itemValue));
         if (enumObj)
             return reinterpret_cast<PyObject*>(enumObj);
 
@@ -529,10 +466,10 @@ PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
     enumObj->ob_value = itemValue;
 
     if (newValue) {
-        PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
+        PyObject* values = PyDict_GetItemString(PepType(enumType)->tp_dict, const_cast<char*>("values"));
         if (!values) {
             values = PyDict_New();
-            PyDict_SetItemString(enumType->tp_dict, const_cast<char*>("values"), values);
+            PyDict_SetItemString(PepType(enumType)->tp_dict, const_cast<char*>("values"), values);
             Py_DECREF(values); // ^ values still alive, because setitemstring incref it
         }
         PyDict_SetItemString(values, itemName, reinterpret_cast<PyObject*>(enumObj));
@@ -541,39 +478,140 @@ PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName)
     return reinterpret_cast<PyObject*>(enumObj);
 }
 
-PyTypeObject* newType(const char* name)
+static PyType_Slot SbkNewType_slots[] = {
+    {Py_tp_repr, (void *)SbkEnumObject_repr},
+    {Py_tp_str, (void *)SbkEnumObject_repr},
+    {Py_tp_getset, (void *)SbkEnumGetSetList},
+    {Py_tp_new, (void *)SbkEnum_tp_new},
+    {Py_nb_add, (void *)enum_add},
+    {Py_nb_subtract, (void *)enum_subtract},
+    {Py_nb_multiply, (void *)enum_multiply},
+#ifndef IS_PY3K
+    {Py_nb_divide, (void *)enum_divide},
+#endif
+    {Py_nb_positive, (void *)enum_int},
+#ifdef IS_PY3K
+    {Py_nb_bool, (void *)enum_bool},
+#else
+    {Py_nb_nonzero, (void *)enum_bool},
+    {Py_nb_long, (void *)enum_int},
+#endif
+    {Py_nb_and, (void *)enum_and},
+    {Py_nb_xor, (void *)enum_xor},
+    {Py_nb_or, (void *)enum_or},
+    {Py_nb_int, (void *)enum_int},
+    {Py_nb_index, (void *)enum_int},
+    {Py_tp_richcompare, (void *)enum_richcompare},
+    {Py_tp_hash, (void *)enum_hash},
+    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {0, 0}
+};
+static PyType_Spec SbkNewType_spec = {
+    "missing Enum name", // to be inserted later
+    sizeof(SbkEnumObject),
+    0,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES,
+    SbkNewType_slots,
+};
+
+static void
+copyNumberMethods(PyTypeObject *flagsType,
+                  PyType_Slot number_slots[],
+                  int *pidx)
 {
-    return newTypeWithName(name, "");
+    int idx = *pidx;
+#ifdef IS_PY3K
+#  define SLOT slot
+#else
+#  define SLOT slot_
+#endif
+#define PUT_SLOT(name) \
+    number_slots[idx].SLOT = (name);                                \
+    number_slots[idx].pfunc = PyType_GetSlot(flagsType, (name));    \
+    ++idx;
+
+    PUT_SLOT(Py_nb_absolute);
+    PUT_SLOT(Py_nb_add);
+    PUT_SLOT(Py_nb_and);
+#ifdef IS_PY3K
+    PUT_SLOT(Py_nb_bool);
+#else
+    PUT_SLOT(Py_nb_nonzero);
+#endif
+    PUT_SLOT(Py_nb_divmod);
+    PUT_SLOT(Py_nb_float);
+    PUT_SLOT(Py_nb_floor_divide);
+    PUT_SLOT(Py_nb_index);
+    PUT_SLOT(Py_nb_inplace_add);
+    PUT_SLOT(Py_nb_inplace_and);
+    PUT_SLOT(Py_nb_inplace_floor_divide);
+    PUT_SLOT(Py_nb_inplace_lshift);
+    PUT_SLOT(Py_nb_inplace_multiply);
+    PUT_SLOT(Py_nb_inplace_or);
+    PUT_SLOT(Py_nb_inplace_power);
+    PUT_SLOT(Py_nb_inplace_remainder);
+    PUT_SLOT(Py_nb_inplace_rshift);
+    PUT_SLOT(Py_nb_inplace_subtract);
+    PUT_SLOT(Py_nb_inplace_true_divide);
+    PUT_SLOT(Py_nb_inplace_xor);
+    PUT_SLOT(Py_nb_int);
+    PUT_SLOT(Py_nb_invert);
+    PUT_SLOT(Py_nb_lshift);
+    PUT_SLOT(Py_nb_multiply);
+    PUT_SLOT(Py_nb_negative);
+    PUT_SLOT(Py_nb_or);
+    PUT_SLOT(Py_nb_positive);
+    PUT_SLOT(Py_nb_power);
+    PUT_SLOT(Py_nb_remainder);
+    PUT_SLOT(Py_nb_rshift);
+    PUT_SLOT(Py_nb_subtract);
+    PUT_SLOT(Py_nb_true_divide);
+    PUT_SLOT(Py_nb_xor);
+#ifndef IS_PY3K
+    PUT_SLOT(Py_nb_long);
+    PUT_SLOT(Py_nb_divide);
+#endif
+#undef PUT_SLOT
+    *pidx = idx;
 }
 
-PyTypeObject* newTypeWithName(const char* name, const char* cppName)
+PyTypeObject *
+newTypeWithName(const char* name,
+                const char* cppName,
+                PyTypeObject *numbers_fromFlag)
 {
-    PyTypeObject* type = reinterpret_cast<PyTypeObject*>(new SbkEnumType);
-    ::memset(type, 0, sizeof(SbkEnumType));
-    Py_TYPE(type) = &SbkEnumType_Type;
-    type->tp_basicsize = sizeof(SbkEnumObject);
-    type->tp_print = &SbkEnumObject_print;
-    type->tp_repr = &SbkEnumObject_repr;
-    type->tp_str = &SbkEnumObject_repr;
-    type->tp_flags = Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES;
-    type->tp_name = name;
-    type->tp_getset = SbkEnumGetSetList;
-    type->tp_new = SbkEnum_tp_new;
-    type->tp_as_number = &enum_as_number;
-    type->tp_richcompare = &enum_richcompare;
-    type->tp_hash = &enum_hash;
+    // Careful: PyType_FromSpec does not allocate the string.
+    PyType_Slot newslots[99] = {};  // enough but not too big for the stack
+    PyType_Spec *newspec = new PyType_Spec;
+    newspec->name = strdup(name);
+    newspec->basicsize = SbkNewType_spec.basicsize;
+    newspec->itemsize = SbkNewType_spec.itemsize;
+    newspec->flags = SbkNewType_spec.flags;
+    // we must append all the number methods, so rebuild everything:
+    int idx = 0;
+    while (SbkNewType_slots[idx].SLOT) {
+        newslots[idx].SLOT = SbkNewType_slots[idx].SLOT;
+        newslots[idx].pfunc = SbkNewType_slots[idx].pfunc;
+        ++idx;
+    }
+    if (numbers_fromFlag)
+        copyNumberMethods(numbers_fromFlag, newslots, &idx);
+    newspec->slots = newslots;
+    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(newspec));
+    Py_TYPE(type) = SbkEnumType_TypeF();
+    Py_INCREF(Py_TYPE(type));
 
     SbkEnumType* enumType = reinterpret_cast<SbkEnumType*>(type);
-    enumType->cppName = cppName;
-    enumType->converterPtr = &enumType->converter;
+    PepType_SETP(enumType)->cppName = cppName;
+    PepType_SETP(enumType)->converterPtr = &PepType_SETP(enumType)->converter;
     DeclaredEnumTypes::instance().addEnumType(type);
     return type;
 }
 
 const char* getCppName(PyTypeObject* enumType)
 {
-    assert(Py_TYPE(enumType) == &SbkEnumType_Type);
-    return reinterpret_cast<SbkEnumType*>(enumType)->cppName;;
+    assert(Py_TYPE(enumType) == SbkEnumType_TypeF());
+    return PepType_SETP(reinterpret_cast<SbkEnumType*>(enumType))->cppName;
 }
 
 long int getValue(PyObject* enumItem)
@@ -585,13 +623,13 @@ long int getValue(PyObject* enumItem)
 void setTypeConverter(PyTypeObject* enumType, SbkConverter* converter)
 {
     //reinterpret_cast<SbkEnumType*>(enumType)->converter = converter;
-    SBK_CONVERTER(enumType) = converter;
+    *PepType_SGTP(enumType)->converter = converter;
 }
 
 SbkConverter* getTypeConverter(PyTypeObject* enumType)
 {
     //return reinterpret_cast<SbkEnumType*>(enumType)->converter;
-    return SBK_CONVERTER(enumType);
+    return *PepType_SGTP(enumType)->converter;
 }
 
 } // namespace Enum
@@ -609,8 +647,17 @@ DeclaredEnumTypes::DeclaredEnumTypes()
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
     std::list<PyTypeObject*>::const_iterator it = m_enumTypes.begin();
-    for (; it != m_enumTypes.end(); ++it)
-        delete *it;
+    for (; it != m_enumTypes.end(); ++it) {
+        /*
+         * PYSIDE-595: This was "delete *it;" before introducing 'PyType_FromSpec'.
+         * XXX what should I do now?
+         * Refcounts in tests are 30 or 0 at end.
+         * When I add the default tp_dealloc, we get negative refcounts!
+         * So right now I am doing nothing. Surely wrong but no crash.
+         * See also the comment in function 'createGlobalEnumItem'.
+         */
+        //fprintf(stderr, "ttt %d %s\n", Py_REFCNT(*it), PepType(*it)->tp_name);
+    }
     m_enumTypes.clear();
 }
 

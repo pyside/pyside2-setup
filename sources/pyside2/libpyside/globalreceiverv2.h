@@ -140,7 +140,6 @@ private:
     DynamicQMetaObject m_metaObject;
     DynamicSlotDataV2 *m_data;
     QList<const QObject*> m_refs;
-    int m_ref;
     SharedMap m_sharedMap;
 };
 
