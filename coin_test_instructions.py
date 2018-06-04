@@ -73,7 +73,7 @@ def call_testrunner(python_ver, buildnro):
 
 def run_test_instructions():
     # Disable unsupported configs for now
-    if CI_HOST_OS_VER in ["WinRT_10"]:
+    if CI_HOST_OS_VER in ["WinRT_10", "MacOS_10_13"]:
         print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
         exit()
     if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
