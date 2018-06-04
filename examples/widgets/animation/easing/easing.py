@@ -135,7 +135,7 @@ class Window(QtWidgets.QWidget):
         self.m_scene.addItem(self.m_item.pixmap_item)
         self.m_ui.graphicsView.setScene(self.m_scene)
 
-        self.m_anim = Animation(self.m_item, 'pos')
+        self.m_anim = Animation(self.m_item, b'pos')
         self.m_anim.setEasingCurve(QtCore.QEasingCurve.OutBounce)
         self.m_ui.easingCurvePicker.setCurrentRow(int(QtCore.QEasingCurve.OutBounce))
 
