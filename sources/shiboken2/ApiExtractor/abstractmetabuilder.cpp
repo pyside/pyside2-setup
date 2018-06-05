@@ -422,7 +422,7 @@ void AbstractMetaBuilderPrivate::fixQObjectForScope(const FileModelItem &dom,
         TypeEntry* entry = types->findType(qualifiedName);
         if (entry) {
             if (isQObject(dom, qualifiedName) && entry->isComplex())
-                ((ComplexTypeEntry*) entry)->setQObject(true);
+                static_cast<ComplexTypeEntry *>(entry)->setQObject(true);
         }
     }
 
@@ -616,7 +616,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                     }
                 }
             } else if (entry->isEnum() && (entry->generateCode() & TypeEntry::GenerateTargetLang)) {
-                const QString name = ((EnumTypeEntry*) entry)->targetLangQualifier();
+                const QString name = static_cast<const EnumTypeEntry *>(entry)->targetLangQualifier();
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
                 bool enumFound = false;
@@ -2200,15 +2200,17 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
 
         QString msg = QStringLiteral("Type '%1' wasn't found in the type database.\n").arg(typeName);
 
-        if (candidates.isEmpty())
-            qFatal(qPrintable(QString(msg + QLatin1String("Declare it in the type system using the proper <*-type> tag."))), NULL);
+        if (candidates.isEmpty()) {
+            qFatal("%sDeclare it in the type system using the proper <*-type> tag.",
+                   qPrintable(msg));
+        }
 
         msg += QLatin1String("Remember to inform the full qualified name for the type you want to use.\nCandidates are:\n");
         candidates.sort();
         for (const QString& candidate : qAsConst(candidates)) {
             msg += QLatin1String("    ") + candidate + QLatin1Char('\n');
         }
-        qFatal(qPrintable(msg), NULL);
+        qFatal("%s", qPrintable(msg));
     }
 
     AbstractMetaType *metaType = new AbstractMetaType;

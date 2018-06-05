@@ -707,7 +707,8 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
             || arg->type()->referenceType() == LValueReference) {
             result += QLatin1Char(objType);
         } else if (arg->type()->isPrimitive()) {
-            const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
+            const PrimitiveTypeEntry *ptype =
+                static_cast<const PrimitiveTypeEntry *>(arg->type()->typeEntry());
             if (ptype->basicReferencedTypeEntry())
                 ptype = ptype->basicReferencedTypeEntry();
             if (m_formatUnits.contains(ptype->name()))
@@ -746,7 +747,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
     if (ShibokenGenerator::isWrapperType(type) || type->isNamespace()) { // && type->referenceType() == NoReference) {
         baseName = QLatin1String("Sbk_") + type->name();
     } else if (type->isPrimitive()) {
-        const PrimitiveTypeEntry* ptype = (const PrimitiveTypeEntry*) type;
+        const PrimitiveTypeEntry *ptype = static_cast<const PrimitiveTypeEntry *>(type);
         while (ptype->basicReferencedTypeEntry())
             ptype = ptype->basicReferencedTypeEntry();
         if (ptype->targetLangApiName() == ptype->name())
@@ -754,11 +755,11 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry* type)
         else
             baseName = ptype->targetLangApiName();
     } else if (type->isEnum()) {
-        baseName = cpythonEnumName((const EnumTypeEntry*) type);
+        baseName = cpythonEnumName(static_cast<const EnumTypeEntry *>(type));
     } else if (type->isFlags()) {
-        baseName = cpythonFlagsName((const FlagsTypeEntry*) type);
+        baseName = cpythonFlagsName(static_cast<const FlagsTypeEntry *>(type));
     } else if (type->isContainer()) {
-        const ContainerTypeEntry* ctype = (const ContainerTypeEntry*) type;
+        const ContainerTypeEntry *ctype = static_cast<const ContainerTypeEntry *>(type);
         switch (ctype->type()) {
             case ContainerTypeEntry::ListContainer:
             case ContainerTypeEntry::StringListContainer:
@@ -976,7 +977,7 @@ bool ShibokenGenerator::isNumber(const TypeEntry* type)
 {
     if (!type->isPrimitive())
         return false;
-    return isNumber(pythonPrimitiveTypeName((const PrimitiveTypeEntry*) type));
+    return isNumber(pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type)));
 }
 
 bool ShibokenGenerator::isNumber(const AbstractMetaType* type)
@@ -988,7 +989,8 @@ bool ShibokenGenerator::isPyInt(const TypeEntry* type)
 {
     if (!type->isPrimitive())
         return false;
-    return pythonPrimitiveTypeName((const PrimitiveTypeEntry*) type) == QLatin1String("PyInt");
+    return pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type))
+        == QLatin1String("PyInt");
 }
 
 bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
@@ -999,7 +1001,7 @@ bool ShibokenGenerator::isPyInt(const AbstractMetaType* type)
 bool ShibokenGenerator::isWrapperType(const TypeEntry* type)
 {
     if (type->isComplex())
-        return ShibokenGenerator::isWrapperType((const ComplexTypeEntry*)type);
+        return ShibokenGenerator::isWrapperType(static_cast<const ComplexTypeEntry *>(type));
     return type->isObject() || type->isValue() || type->isSmartPointer();
 }
 bool ShibokenGenerator::isWrapperType(const ComplexTypeEntry* type)
@@ -1053,7 +1055,7 @@ bool ShibokenGenerator::isUserPrimitive(const TypeEntry* type)
 {
     if (!type->isPrimitive())
         return false;
-    const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
+    const PrimitiveTypeEntry *trueType = static_cast<const PrimitiveTypeEntry *>(type);
     if (trueType->basicReferencedTypeEntry())
         trueType = trueType->basicReferencedTypeEntry();
     return trueType->isPrimitive() && !trueType->isCppPrimitive()
@@ -1073,7 +1075,7 @@ bool ShibokenGenerator::isCppPrimitive(const TypeEntry* type)
         return true;
     if (!type->isPrimitive())
         return false;
-    const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
+    const PrimitiveTypeEntry *trueType = static_cast<const PrimitiveTypeEntry *>(type);
     if (trueType->basicReferencedTypeEntry())
         trueType = trueType->basicReferencedTypeEntry();
     return trueType->qualifiedCppName() == QLatin1String("std::string");
@@ -1128,7 +1130,8 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType* metaType
         return cpythonCheckFunction(metaType->typeEntry(), genericNumberType);
     } else if (metaType->typeEntry()->isContainer()) {
         QString typeCheck = QLatin1String("Shiboken::Conversions::");
-        ContainerTypeEntry::Type type = ((const ContainerTypeEntry*)metaType->typeEntry())->type();
+        ContainerTypeEntry::Type type =
+            static_cast<const ContainerTypeEntry *>(metaType->typeEntry())->type();
         if (type == ContainerTypeEntry::ListContainer
             || type == ContainerTypeEntry::StringListContainer
             || type == ContainerTypeEntry::LinkedListContainer
@@ -1183,8 +1186,10 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry* type, bool gene
 
     if (type->isEnum() || type->isFlags() || isWrapperType(type))
         return QString::fromLatin1("SbkObject_TypeCheck(%1, ").arg(cpythonTypeNameExt(type));
-    else if (isCppPrimitive(type))
-        return pythonPrimitiveTypeName((const PrimitiveTypeEntry*)type) + QLatin1String("_Check");
+    else if (isCppPrimitive(type)) {
+        return pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type))
+                                       + QLatin1String("_Check");
+    }
     QString typeCheck;
     if (type->targetLangApiName() == type->name())
         typeCheck = cpythonIsConvertibleFunction(type);
@@ -1620,8 +1625,9 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
         QString argValue;
         if (language == TypeSystem::TargetLangCode) {
             bool hasConversionRule = !func->conversionRule(convLang, i+1).isEmpty();
-            bool argRemoved = func->argumentRemoved(i+1);
-            removed = removed + (int) argRemoved;
+            const bool argRemoved = func->argumentRemoved(i+1);
+            if (argRemoved)
+                ++removed;
             if (argRemoved && hasConversionRule)
                 argValue = arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
             else if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
@@ -2003,8 +2009,8 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 QString varName = list.at(1).trimmed();
                 if (!varType.isEmpty()) {
                     if (varType != conversionType->cppSignature()) {
-                        qFatal(qPrintable(QString::fromLatin1("Types of receiver variable ('%1') and %CONVERTTOCPP type system variable ('%2') differ.")
-                                                              .arg(varType, conversionType->cppSignature())), NULL);
+                        qFatal("Types of receiver variable ('%s') and %%CONVERTTOCPP type system variable ('%s') differ.",
+                               qPrintable(varType), qPrintable(conversionType->cppSignature()));
                     }
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, conversionType);
@@ -2033,18 +2039,21 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                     c << '(';
                     break;
                 }
+            Q_FALLTHROUGH();
             case TypeSystemIsConvertibleFunction:
                 if (conversion.isEmpty())
                     conversion = cpythonIsConvertibleFunction(conversionType);
+            Q_FALLTHROUGH();
             case TypeSystemToPythonFunction:
                 if (conversion.isEmpty())
                     conversion = cpythonToPythonConversionFunction(conversionType);
+            Q_FALLTHROUGH();
             default: {
                 QString arg = getConverterTypeSystemVariableArgument(code, match.capturedEnd());
                 conversionString += arg;
                 if (converterVariable == TypeSystemToPythonFunction && !isVariable(arg)) {
-                    qFatal(qPrintable(QString::fromLatin1("Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '%1'")
-                                         .arg(code)), NULL);
+                    qFatal("Only variables are acceptable as argument to %%CONVERTTOPYTHON type system variable on code snippet: '%s'",
+                           qPrintable(code));
                 }
                 if (conversion.contains(QLatin1String("%in"))) {
                     conversion.prepend(QLatin1Char('('));
@@ -2257,10 +2266,8 @@ bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
         return false;
     else if (metaClass->typeEntry()->copyable() == ComplexTypeEntry::Unknown)
         return metaClass->hasCloneOperator();
-    else
-        return (metaClass->typeEntry()->copyable() == ComplexTypeEntry::CopyableSet);
 
-    return false;
+    return metaClass->typeEntry()->copyable() == ComplexTypeEntry::CopyableSet;
 }
 
 static inline QString msgCannotBuildMetaType(const QString &s)
@@ -2364,7 +2371,7 @@ AbstractMetaFunctionList ShibokenGenerator::getInheritedOverloads(const Abstract
 {
     AbstractMetaFunctionList results;
     AbstractMetaClass* basis;
-    if (func->ownerClass() && (basis = func->ownerClass()->baseClass(), basis)) {
+    if (func->ownerClass() && (basis = func->ownerClass()->baseClass())) {
         for (; basis; basis = basis->baseClass()) {
             const AbstractMetaFunction* inFunc = basis->findFunction(func->name());
             if (inFunc && !seen->contains(inFunc->minimalSignature())) {
@@ -2572,7 +2579,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass* met
 QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
 {
     if (type->isCppPrimitive()) {
-        const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
+        const PrimitiveTypeEntry *trueType = static_cast<const PrimitiveTypeEntry*>(type);
         if (trueType->basicReferencedTypeEntry())
             type = trueType->basicReferencedTypeEntry();
     }
@@ -2653,7 +2660,7 @@ bool ShibokenGenerator::isCppIntegralPrimitive(const TypeEntry* type)
 {
     if (!type->isCppPrimitive())
         return false;
-    const PrimitiveTypeEntry* trueType = (const PrimitiveTypeEntry*) type;
+    const PrimitiveTypeEntry *trueType = static_cast<const PrimitiveTypeEntry *>(type);
     if (trueType->basicReferencedTypeEntry())
         trueType = trueType->basicReferencedTypeEntry();
     QString typeName = trueType->qualifiedCppName();
