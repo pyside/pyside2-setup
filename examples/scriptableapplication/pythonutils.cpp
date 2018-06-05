@@ -122,7 +122,7 @@ bool bindAppObject(const QString &moduleName, const QString &name,
         return false;
     PyTypeObject *typeObject = SbkAppLibTypes[index];
 
-    PyObject *po = Shiboken::Conversions::pointerToPython(reinterpret_cast<const SbkObjectType *>(typeObject), o);
+    PyObject *po = Shiboken::Conversions::pointerToPython(reinterpret_cast<SbkObjectType *>(typeObject), o);
     if (!po) {
         qWarning() << __FUNCTION__ << "Failed to create wrapper for" << o;
         return false;
