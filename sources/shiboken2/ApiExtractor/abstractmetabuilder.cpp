@@ -1327,14 +1327,8 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
 
 static bool _compareAbstractMetaTypes(const AbstractMetaType* type, const AbstractMetaType* other)
 {
-    if (!type && !other)
-        return true;
-    if (!type || !other)
-        return false;
-    return type->typeEntry() == other->typeEntry()
-            && type->isConstant() == other->isConstant()
-            && type->referenceType() == other->referenceType()
-            && type->indirections() == other->indirections();
+    return (type != nullptr) == (other != nullptr)
+        && (type == nullptr || *type == *other);
 }
 
 static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, const AbstractMetaFunction* other)

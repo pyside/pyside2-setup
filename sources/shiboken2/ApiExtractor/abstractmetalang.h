@@ -536,6 +536,8 @@ public:
 
     bool hasTemplateChildren() const;
 
+    bool equals(const AbstractMetaType &rhs) const;
+
 private:
     TypeUsagePattern determineUsagePattern() const;
     QString formatSignature(bool minimal) const;
@@ -563,6 +565,11 @@ private:
 
     Q_DISABLE_COPY(AbstractMetaType)
 };
+
+inline bool operator==(const AbstractMetaType &t1, const AbstractMetaType &t2)
+{ return t1.equals(t2); }
+inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
+{ return !t1.equals(t2); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType *at);

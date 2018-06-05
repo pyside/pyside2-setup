@@ -281,6 +281,26 @@ bool AbstractMetaType::hasTemplateChildren() const
     return false;
 }
 
+bool AbstractMetaType::equals(const AbstractMetaType &rhs) const
+{
+    if (m_typeEntry != rhs.m_typeEntry || m_constant != rhs.m_constant
+        || m_referenceType != rhs.m_referenceType
+        || m_indirections != rhs.m_indirections
+        || m_instantiations.size() != rhs.m_instantiations.size()
+        || m_arrayElementCount != rhs.m_arrayElementCount) {
+        return false;
+    }
+    if ((m_arrayElementType != nullptr) != (rhs.m_arrayElementType != nullptr)
+        || (m_arrayElementType != nullptr && !m_arrayElementType->equals(*rhs.m_arrayElementType))) {
+        return false;
+    }
+    for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
+        if (!m_instantiations.at(i)->equals(*rhs.m_instantiations.at(i)))
+                return false;
+    }
+    return true;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType *at)
 {
