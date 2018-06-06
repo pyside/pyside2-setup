@@ -910,7 +910,7 @@ PepType_GetNameStr(PyTypeObject *type)
  */
 
 void
-Pep_Init()
+Pep384_Init()
 {
     check_PepTypeObject_valid();
 #ifdef Py_LIMITED_API
