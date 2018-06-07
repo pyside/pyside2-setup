@@ -1160,7 +1160,8 @@ class PysideBuild(_build):
         return config
 
     def is_webengine_built(self, built_modules):
-        return 'WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
+        return ('WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
+                                                    or 'WebEngine' in built_modules)
 
     def prepare_standalone_clang(self, is_win = False):
         """
