@@ -499,6 +499,9 @@ class PysideBuild(_build):
                     log.info("nmake was found in {}".format(nmake_path))
                     make_name = "nmake"
                     make_generator = "NMake Makefiles"
+                    if OPTION_JOBS:
+                        msg = "Option --jobs can only be used with 'jom' on Windows."
+                        raise DistutilsSetupError(msg)
             elif OPTION_MAKESPEC == "mingw":
                 make_name = "mingw32-make"
                 make_generator = "MinGW Makefiles"

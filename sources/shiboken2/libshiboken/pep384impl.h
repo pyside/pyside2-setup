@@ -564,7 +564,7 @@ extern LIBSHIBOKEN_API PyTypeObject *PepStaticMethod_TypePtr;
  *
  */
 
-LIBSHIBOKEN_API void Pep_Init(void);
+LIBSHIBOKEN_API void Pep384_Init(void);
 
 } // extern "C"
 

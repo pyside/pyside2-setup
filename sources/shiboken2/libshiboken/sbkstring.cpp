@@ -99,18 +99,24 @@ const char* toCString(PyObject* str, Py_ssize_t* len)
 {
     if (str == Py_None)
         return NULL;
-#ifdef IS_PY3K
     if (PyUnicode_Check(str)) {
         if (len) {
             // We need to encode the unicode string into utf8 to know the size of returned char*.
             Shiboken::AutoDecRef uniStr(PyUnicode_AsUTF8String(str));
             *len = PyBytes_GET_SIZE(uniStr.object());
         }
+#ifdef IS_PY3K
         // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
         // depends on the lifetime of str.
         return _PepUnicode_AsString(str);
-    }
+#else
+        str = PyUnicode_AsUTF8String(str);
+        if (str == NULL) {
+            return NULL;
+        }
+        return PyString_AsString(str);
 #endif
+    }
     if (PyBytes_Check(str)) {
         if (len)
             *len = PyBytes_GET_SIZE(str);

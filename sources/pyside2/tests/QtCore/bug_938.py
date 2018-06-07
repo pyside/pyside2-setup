@@ -28,13 +28,14 @@
 
 import unittest
 from PySide2.QtCore import *
+import py3kcompat as py3k
 
 class TestBug938 (unittest.TestCase):
 
     def testIt(self):
         b = QBuffer()
         b.open(QBuffer.WriteOnly)
-        b.write("\x0023\x005")
+        b.write(py3k.b("\x0023\x005"))
         b.close()
         self.assertEqual(b.buffer().size(), 5)
 

@@ -34,6 +34,7 @@ from PySide2.QtCore import QBuffer, QTimer
 from PySide2.QtWidgets import QApplication
 from PySide2.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
 from PySide2.QtWebEngineCore import QWebEngineUrlSchemeHandler
+import py3kcompat as py3k
 
 class TestSchemeHandler(QWebEngineUrlSchemeHandler):
     def requestStarted(self, request):
@@ -42,16 +43,16 @@ class TestSchemeHandler(QWebEngineUrlSchemeHandler):
             return
 
         self.buffer = QBuffer()
-        self.buffer.setData("Really nice goodbye text.")
+        self.buffer.setData(py3k.b("Really nice goodbye text."))
         self.buffer.aboutToClose.connect(self.buffer.deleteLater)
-        request.reply("text/plain;charset=utf-8", self.buffer)
+        request.reply(py3k.b("text/plain;charset=utf-8"), self.buffer)
 
 class MainTest(unittest.TestCase):
     def test_SchemeHandlerRedirect(self):
         app = QApplication([])
         handler = TestSchemeHandler()
         profile = QWebEngineProfile.defaultProfile()
-        profile.installUrlSchemeHandler("testpy", handler)
+        profile.installUrlSchemeHandler(py3k.b("testpy"), handler)
         view = QWebEngineView()
         view.loadFinished.connect(app.quit)
         QTimer.singleShot(5000, app.quit)

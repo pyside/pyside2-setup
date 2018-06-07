@@ -121,6 +121,11 @@
     </object-type>
     <object-type name="QQmlEngine">
         <enum-type name="ObjectOwnership" />
+        <modify-function signature="addImageProvider(const QString&amp;,QQmlImageProviderBase*)">
+          <modify-argument index="2">
+            <define-ownership owner="c++"/>
+          </modify-argument>
+        </modify-function>
     </object-type>
     <object-type name="QQmlExpression">
         <modify-function signature="evaluate(bool*)" allow-thread="yes">

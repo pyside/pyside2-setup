@@ -195,6 +195,6 @@ if wheel_module_exists:
             # create a properly named package.
             limited_api_enabled = OPTION_LIMITED_API and sys.version_info[0] >= 3
             if limited_api_enabled:
-                self.py_limited_api = "cp35.cp36.cp37.cp38"
+                self.py_limited_api = "cp35.cp36"
 
             _bdist_wheel.finalize_options(self)

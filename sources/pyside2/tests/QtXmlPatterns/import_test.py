@@ -32,18 +32,19 @@ import unittest
 from PySide2.QtCore import *
 from PySide2.QtXmlPatterns import QXmlSchema
 from helper import UsesQCoreApplication
+import py3kcompat as py3k
 
 class QXmlPatternsTest(UsesQCoreApplication):
 
     def testSchema(self):
-        data = QByteArray('''<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+        data = QByteArray(py3k.b('''<?xml version=\"1.0\" encoding=\"UTF-8\"?>
                               <xsd:schema
                                  xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
                                   xmlns=\"http://qt.nokia.com/xmlschematest\"
                                   targetNamespace=\"http://qt.nokia.com/xmlschematest\"
                                   version=\"1.0\"
                                   elementFormDefault=\"qualified\">
-                              </xsd:schema>''')
+                              </xsd:schema>'''))
 
         buf = QBuffer(data)
         buf.open(QIODevice.ReadOnly)

@@ -238,6 +238,7 @@ def init_QtCore():
         "QDir.SortFlags(Name | IgnoreCase)": Instance(
             "QDir.SortFlags(QDir.Name | QDir.IgnoreCase)"),
         "PyBytes": bytes,
+        "PyByteArray": bytearray,
         "PyUnicode": Text,
         "signed long": int,
         "PySide2.QtCore.int": int,

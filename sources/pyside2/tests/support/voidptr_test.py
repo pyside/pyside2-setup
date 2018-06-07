@@ -1,8 +1,6 @@
-#!/usr/bin/python
-
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,45 +26,22 @@
 ##
 #############################################################################
 
-'''Unit tests for QGLBuffer'''
-
 import unittest
-
+from PySide2 import shiboken2
+from PySide2.support import VoidPtr
 from PySide2.QtCore import QByteArray
-from PySide2.QtOpenGL import QGLBuffer, QGLWidget
-import py3kcompat as py3k
-from helper import UsesQApplication
 
-class QGLBufferTest(UsesQApplication):
-    def testIt(self):
-        w = QGLWidget()
-        w.makeCurrent()
+class PySide2Support(unittest.TestCase):
 
-        b = QGLBuffer()
-        b.setUsagePattern(QGLBuffer.DynamicDraw)
-
-        self.assertTrue(b.create())
-        self.assertTrue(b.bufferId() != 0)
-        self.assertTrue(b.bind())
-
-        data = QByteArray(py3k.b("12345"))
-        b.allocate(data)
-        self.assertEqual(b.size(), data.size())
-
-        m = b.map(QGLBuffer.ReadOnly)
-        if m:
-            self.assertEqual(m, py3k.buffer(py3k.b(data.data())))
-            b.unmap()
-
-            m = b.map(QGLBuffer.ReadWrite)
-            m[3] = py3k.b('A')[0]
-            b.unmap()
-            result, rdata = b.read(3, 1)
-            self.assertTrue(result)
-            self.assertEqual(py3k.b('A'), rdata.data())
-        else:
-            print(" memory mapping is not possible in this OpenGL implementation.")
-        b.release()
+    def testVoidPtr(self):
+        # Creating a VoidPtr object requires an address of
+        # a C++ object, a wrapped Shiboken Object type,
+        # an object implementing the Python Buffer interface,
+        # or another VoidPtr object.
+        ba = QByteArray(b"Hello world")
+        voidptr = VoidPtr(ba)
+        self.assertIsInstance(voidptr, shiboken2.VoidPtr)
 
 if __name__ == '__main__':
     unittest.main()
+

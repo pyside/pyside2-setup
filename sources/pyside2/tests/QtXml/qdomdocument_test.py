@@ -29,26 +29,28 @@
 #############################################################################
 
 import unittest
+
 from PySide2.QtCore import QByteArray
 from PySide2.QtXml import QDomDocument, QDomElement
+import py3kcompat as py3k
 
 class QDomDocumentTest(unittest.TestCase):
 
     def setUp(self):
         self.dom = QDomDocument()
 
-        self.goodXmlData = QByteArray('''
+        self.goodXmlData = QByteArray(py3k.b('''
         <typesystem package="PySide2.QtXml">
             <value-type name="QDomDocument"/>
             <value-type name="QDomElement"/>
         </typesystem>
-        ''')
+        '''))
 
-        self.badXmlData = QByteArray('''
+        self.badXmlData = QByteArray(py3k.b('''
         <typesystem package="PySide2.QtXml">
             <value-type name="QDomDocument">
         </typesystem>
-        ''')
+        '''))
 
     def tearDown(self):
         del self.dom

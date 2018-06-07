@@ -545,7 +545,7 @@ void init()
     PyEval_InitThreads();
 
     //Init private data
-    Pep_Init();
+    Pep384_Init();
 
     Shiboken::ObjectType::initPrivateData(SbkObject_TypeF());
 
