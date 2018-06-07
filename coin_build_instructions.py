@@ -132,7 +132,9 @@ def run_build_instructions():
         exit()
 
     # Uses default python, hopefully we have python2 installed on all hosts
-    call_setup("")
+    # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
+    if CI_HOST_OS != "Windows":
+        call_setup("")
 
     # In case of packaging build, we have to build also python3 wheel
     if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
