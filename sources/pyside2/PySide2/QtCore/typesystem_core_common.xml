@@ -2530,6 +2530,9 @@
             %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
             #endif
             </add-conversion>
+            <add-conversion type="PyByteArray">
+            %out = %OUTTYPE(PyByteArray_AsString(%in), PyByteArray_Size(%in));
+            </add-conversion>
             <add-conversion type="PyString" check="Shiboken::String::check(%in) &amp;&amp; !PyUnicode_Check(%in)">
             %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
             </add-conversion>
@@ -2924,6 +2927,9 @@
                 Py_XDECREF(result);
                 return !result ? -1 : 0;
         </inject-code>
+    </add-function>
+    <add-function signature="__msetitem__">
+        <inject-code class="target" position="beginning" file="glue/qbytearray_msetitem.cpp" />
     </add-function>
   </value-type>
   <value-type name="QTextBoundaryFinder">

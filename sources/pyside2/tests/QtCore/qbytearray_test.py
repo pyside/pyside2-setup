@@ -108,46 +108,6 @@ class QByteArrayOperatorAtSetter(unittest.TestCase):
         obj[1] = py3k.b('0')
         self.assertEqual(obj, QByteArray(py3k.b('103456')))
 
-    def testSetterStringLarge(self):
-        '''QByteArray[x] = pythonstring (larget than 1 char)'''
-        obj = QByteArray(py3k.b('123456'))
-        obj[3] = py3k.b('abba')
-        self.assertEqual(obj, QByteArray(py3k.b('123abba56')))
-
-    def testSetterQByteArray(self):
-        '''QByteArray[x] = qbytearray'''
-        obj = QByteArray(py3k.b('123456'))
-        obj[3] = QByteArray(py3k.b('array'))
-        self.assertEqual(obj, QByteArray(py3k.b('123array56')))
-
-
-class QByteArrayOperatorAtSetterNegativeIndex(unittest.TestCase):
-    '''Test case for QByteArray[] - __setitem__ - for negative index'''
-
-    def testSetterNegativeIndex(self):
-        '''QByteArray[x] = string - negative index'''
-        obj = QByteArray(py3k.b('123456'))
-        obj[-3] = py3k.b('array')
-        self.assertEqual(obj, QByteArray(py3k.b('123array56')))
-
-
-class QByteArrayOperatorAtSetterLargeIndex(unittest.TestCase):
-    '''Test case for QByteArray[] - __setitem__ - for 'overflown' index'''
-
-    def testSetterLargeIndexEmpty(self):
-        '''QByteArray[x] = somestring - Overflow index on empty string'''
-        # should pad with spaces if the index is larger
-        obj = QByteArray(py3k.b(''))
-        obj[2] = py3k.b('a')
-        self.assertEqual(obj, QByteArray(py3k.b('  a')))
-
-    def testSetterLargeIndexNormal(self):
-        '''QByteArray[x] = somestring - Overflow index on normal string'''
-        # should pad with spaces if the index is larger
-        obj = QByteArray(py3k.b('mystring'))
-        obj[10] = py3k.b('normal')
-        self.assertEqual(obj, QByteArray(py3k.b('mystring  normal')))
-
 class QByteArrayOnQDataStream(unittest.TestCase):
     '''
     Bug PYSIDE-232
@@ -219,6 +179,91 @@ class QByteArrayImplicitConvert(unittest.TestCase):
         ba = QByteArray(py3k.b("object name"))
         obj = QObject()
         self.assertRaises(TypeError, obj.setObjectName, ba)
+
+
+class QByteArraySliceAssignment(unittest.TestCase):
+    def testIndexAssignment(self):
+        a = QByteArray(py3k.b('abc'))
+        a[0] = py3k.b('x')
+        self.assertEqual(a[0], py3k.b('x'))
+
+        def test_1():
+            a[0] = py3k.b('xy')
+        self.assertRaises(ValueError, test_1)
+
+    def testSliceAssignmentBytes(self):
+        b = QByteArray(py3k.b('0123456789'))
+        b[2:8] = py3k.b('abcdef')
+        self.assertEqual(b[2:8], py3k.b('abcdef'))
+        # Delete behavior
+        b[2:8] = None
+        self.assertEqual(b, py3k.b('0189'))
+
+        # number of slots and number of values doesn't match
+        def test_2():
+            b[2:8:2] = py3k.b('')
+        self.assertRaises(ValueError, test_2)
+        b = QByteArray(py3k.b('0123456789'))
+        # reverse slice
+        b[5:2:-1] = py3k.b('ABC')
+        self.assertEqual(b, py3k.b('012CBA6789'))
+        # step is not 1
+        b[2:9:3] = py3k.b('XYZ')
+        self.assertEqual(b, py3k.b('01XCBY67Z9'))
+        b = QByteArray(py3k.b('0123456789'))
+        b[9:2:-3] = py3k.b('XYZ')
+        self.assertEqual(b, py3k.b('012Z45Y78X'))
+
+    def testSliceAssignmentQByteArray(self):
+        b = QByteArray(py3k.b('0123456789'))
+        b[2:8] = QByteArray(py3k.b('abcdef'))
+        self.assertEqual(b[2:8], py3k.b('abcdef'))
+        # shrink
+        b[2:8] = QByteArray(py3k.b('aaa'))
+        self.assertEqual(b, py3k.b('01aaa89'))
+        # expanse
+        b[2:5] = QByteArray(py3k.b('uvwxyz'))
+        self.assertEqual(b, py3k.b('01uvwxyz89'))
+        # Delete behavior
+        b[2:8] = QByteArray()
+        self.assertEqual(b, py3k.b('0189'))
+
+        b = QByteArray(py3k.b('0123456789'))
+        # reverse assginment
+        b[5:2:-1] = QByteArray(py3k.b('ABC'))
+        self.assertEqual(b, py3k.b('012CBA6789'))
+        # step is not 1
+        b[2:9:3] = QByteArray(py3k.b('XYZ'))
+        self.assertEqual(b, py3k.b('01XCBY67Z9'))
+        b = QByteArray(py3k.b('0123456789'))
+        b[9:2:-3] = QByteArray(py3k.b('XYZ'))
+        self.assertEqual(b, py3k.b('012Z45Y78X'))
+
+    def testSliceAssignmentByteArray(self):
+        b = QByteArray(py3k.b('0123456789'))
+        # replace
+        b[2:8] = bytearray(py3k.b('abcdef'))
+        self.assertEqual(b[2:8], py3k.b('abcdef'))
+        # shrink
+        b[2:8] = bytearray(py3k.b('aaa'))
+        self.assertEqual(b, py3k.b('01aaa89'))
+        # expanse
+        b[2:5] = bytearray(py3k.b('uvwxyz'))
+        self.assertEqual(b, py3k.b('01uvwxyz89'))
+        # Delete behavior
+        b[2:8] = bytearray(py3k.b(''))
+        self.assertEqual(b, py3k.b('0189'))
+
+        b = QByteArray(py3k.b('0123456789'))
+        # reverse assginment
+        b[5:2:-1] = bytearray(py3k.b('ABC'))
+        self.assertEqual(b, py3k.b('012CBA6789'))
+        # step is not 1
+        b[2:9:3] = bytearray(py3k.b('XYZ'))
+        self.assertEqual(b, py3k.b('01XCBY67Z9'))
+        b = QByteArray(py3k.b('0123456789'))
+        b[9:2:-3] = bytearray(py3k.b('XYZ'))
+        self.assertEqual(b, py3k.b('012Z45Y78X'))
 
 
 if __name__ == '__main__':
