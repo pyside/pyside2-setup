@@ -77,10 +77,14 @@ def run_test_instructions():
         exit()
 
     os.chdir(CI_ENV_AGENT_DIR)
-    call_testrunner("", "0")
+    testRun = 0
+    # We didn't build for Python 2 in win
+    if CI_HOST_OS != "Windows":
+        call_testrunner("", str(testRun))
+        testRun =+ 1
     # We know that second build was with python3
     if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
-        call_testrunner("3", "1")
+        call_testrunner("3", str(testRun))
 
 if __name__ == "__main__":
     run_test_instructions()

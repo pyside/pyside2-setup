@@ -1,22 +1,12 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the documentation of Qt for Python.
+** This file is part of the Qt for Python examples of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
+** You may use this file under the terms of the BSD license as follows:
 **
 ** "Redistribution and use in source and binary forms, with or without
 ** modification, are permitted provided that the following conditions are
@@ -48,36 +38,16 @@
 **
 ****************************************************************************/
 
-//![0]
-class ColorImageProvider (QQuickImageProvider):
-    def __init__(self):
-        QQuickImageProvider.__init__(self, QQuickImageProvider.Pixmap)
+import QtQuick 2.0
+import QtQuick.Window 2.0
+import QtWebEngine 1.0
 
-    def requestPixmap(id, size, requestedSize):
-        width = 100
-        height = 50
-
-        if size:
-            size.setWidth(width)
-            size.setHeight(height)
-
-        if requestedSize.width() > 0:
-            width = requestedSize.width()
-        if requestedSize.height() > 0:
-            height = requestedSize.height()
-
-        pixmap = QPixmap(width, height)
-        pixmap.fill(QColor(id).rgba())
-//![0]
-        # write the color name
-        painter = QPainter(pixmap)
-        f = painter.font()
-        f.setPixelSize(20)
-        painter.setFont(f)
-        painter.setPen(Qt.black)
-        if requestedSize.isValid():
-            painter.scale(requestedSize.width() / width, requestedSize.height() / height)
-        painter.drawText(QRectF(0, 0, width, height), Qt.AlignCenter, id)
-//![1]
-        return pixmap
-//![1]
+Window {
+    width: 1024
+    height: 768
+    visible: true
+    WebEngineView {
+        anchors.fill: parent
+        url: "https://www.qt.io"
+    }
+}

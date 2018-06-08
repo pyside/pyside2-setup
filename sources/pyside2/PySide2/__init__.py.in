@@ -24,7 +24,7 @@ def _setupQtDirectories():
         # PATH has to contain the package directory, otherwise plugins
         # won't be able to find their required Qt libraries (e.g. the
         # svg image plugin won't find Qt5Svg.dll).
-        os.environ['PATH'] = pyside_package_dir + ";" + os.environ['PATH']
+        os.environ['PATH'] = pyside_package_dir + os.pathsep + os.environ['PATH']
 
         # On Windows add the PySide2\openssl folder (if it exists) to
         # the PATH so that the SSL DLLs can be found when Qt tries to
@@ -34,7 +34,7 @@ def _setupQtDirectories():
         if os.path.exists(openssl_dir):
             path = os.environ['PATH']
             try:
-                os.environ['PATH'] = os.path.join(openssl_dir, path)
+                os.environ['PATH'] = openssl_dir + os.pathsep + path
                 try:
                     from . import QtNetwork
                 except ImportError:
