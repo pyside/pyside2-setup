@@ -40,8 +40,8 @@
 major_version = "5"
 minor_version = "11"
 patch_version = "0"
-pre_release_version_type = "a" # e.g. "a", "b", "rc".
-pre_release_version = "1" # e.g "1", "2", (which means "beta1", "beta2", if type is "b")
+pre_release_version_type = "" # e.g. "a", "b", "rc".
+pre_release_version = "" # e.g "1", "2", (which means "beta1", "beta2", if type is "b")
 
 if __name__ == '__main__':
     # Used by CMake.
