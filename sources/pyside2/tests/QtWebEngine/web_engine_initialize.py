@@ -26,4 +26,21 @@
 ##
 #############################################################################
 
-PYSIDE_TEST(web_engine_initialize.py)
+from __future__ import print_function
+
+import unittest
+
+from PySide2.QtCore import QTimer
+from PySide2.QtWebEngine import QtWebEngine
+from PySide2.QtWidgets import QApplication
+
+
+class MainTest(unittest.TestCase):
+    def test_initializePresent(self):
+        app = QApplication([])
+        QtWebEngine.initialize()
+        QTimer.singleShot(2000, app.quit)
+        app.exec_()
+
+if __name__ == '__main__':
+    unittest.main()
