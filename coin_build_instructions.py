@@ -44,6 +44,7 @@ from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
 from build_scripts.utils import acceptCITestConfiguration
+from build_scripts.utils import runCIProvisioning
 import os
 
 # Values must match COIN thrift
@@ -125,6 +126,10 @@ def run_build_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
+    # Make sure we have 32 bit python on 64 bit host
+    # FIXME this is hack for 5.11.0
+    if CI_HOST_OS == "Windows" and CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
+        runCIProvisioning()
     # Uses default python, hopefully we have python2 installed on all hosts
     # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
     if CI_HOST_OS != "Windows":

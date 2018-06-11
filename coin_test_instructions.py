@@ -43,6 +43,7 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import acceptCITestConfiguration
+from build_scripts.utils import runCIProvisioning
 import os
 
 # Values must match COIN thrift
@@ -76,6 +77,10 @@ def run_test_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
+    # Make sure we have 32 bit python on 64 bit host
+    # FIXME this is hack for 5.11.0
+    if CI_HOST_OS == "Windows" and CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
+        runCIProvisioning()
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
     # We didn't build for Python 2 in win
