@@ -69,7 +69,7 @@ def create_main_window():
     return main_win
 
 def create_main_window_with_browser():
-    """Creates a MainWindow with a tab that loads the www.qt.io webpage."""
+    """Creates a MainWindow with a BrowserTabWidget."""
     main_win = create_main_window()
     return main_win.add_browser_tab()
 

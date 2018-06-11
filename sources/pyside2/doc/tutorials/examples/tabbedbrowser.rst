@@ -19,9 +19,9 @@ them a little better.
 BookmarkWidget or :code:`bookmarkwidget.py`
 ===========================================
 
-This is a widget that docks to the left of the main window by default. It inherits QTreeView and
+This widget docks to the left of the main window by default. It inherits QTreeView and
 loads a default set of bookmarks using a QStandardItemModel. The model is populated at startup
-for a JSON file, which is updated when you add or remove bookmarks from the tree view.
+from a JSON file, which is updated when you add or remove bookmarks from the tree view.
 
 .. automodule:: bookmarkwidget
    :members:
@@ -29,7 +29,7 @@ for a JSON file, which is updated when you add or remove bookmarks from the tree
 DownloadWidget or :code:`downloadwidget.py`
 =============================================
 
-This is a widget that tracks progress of the download item. It inherits QProgressBar to display
+The widget tracks progress of the download item. It inherits QProgressBar to display
 progress of the QWebEngineDownloadItem instance, and offers a context-menu with actions such as Launch,
 Show in folder, Cancel, and Remove.
 
@@ -39,7 +39,7 @@ Show in folder, Cancel, and Remove.
 BrowserTabWidget or :code:`browsertabwidget.py`
 ===============================================
 
-This is a widget that includes a QWebEngineView to enable viewing web pages. It docks to the right
+The widget includes a QWebEngineView to enable viewing web content. It docks to the right
 of BookmarkWidget in the main window.
 
 .. automodule:: browsertabwidget
