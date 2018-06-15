@@ -42,6 +42,8 @@ import os, re, sys
 from ..options import *
 from ..utils import copydir, copyfile, rmtree, makefile
 from ..utils import regenerate_qt_resources, filter_match
+from ..utils import download_and_extract_7z
+
 def prepare_packages_win32(self, vars):
     # For now, debug symbols will not be shipped into the package.
     copy_pdbs = False
@@ -187,6 +189,16 @@ def prepare_packages_win32(self, vars):
         "lconvert.exe",
         "qtdiag.exe"
     ]
+    # MSVC redistributable
+    msvc_redist = [
+        "concrt140.dll",
+        "msvcp140.dll",
+        "ucrtbase.dll",
+        "vcamp140.dll",
+        "vccorlib140.dll",
+        "vcomp140.dll" ,
+        "vcruntime140.dll"
+    ]
 
     # Choose which EGL library variants to copy.
     qt_artifacts_egl = [
@@ -201,6 +213,17 @@ def prepare_packages_win32(self, vars):
         egl_suffix = ''
     qt_artifacts_egl = [a.format(egl_suffix) for a in qt_artifacts_egl]
     qt_artifacts_permanent += qt_artifacts_egl
+    qt_artifacts_permanent += msvc_redist
+
+    # Extract Qt dependency dll's when building on Qt CI
+    # There is no proper CI env variable, so using agent launch params
+    in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
+    if in_coin is not None:
+        redist_url = "http://download.qt.io/development_releases/prebuilt/vcredist//"
+        zip_file = "pyside_qt_deps_64.7z"
+        if "{target_arch}".format(**vars) == "32":
+            zip_file = "pyside_qt_deps_32.7z"
+        download_and_extract_7z(redist_url + zip_file, "{qt_bin_dir}".format(**vars))
 
     copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
         filter=qt_artifacts_permanent,

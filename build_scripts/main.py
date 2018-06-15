@@ -466,6 +466,7 @@ class PysideBuild(_build):
         self.py_include_dir = None
         self.py_library = None
         self.py_version = None
+        self.py_arch = None
         self.build_type = "Release"
         self.qtinfo = None
         self.build_tests = False
@@ -474,6 +475,7 @@ class PysideBuild(_build):
         prepare_build()
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is {}".format(platform_arch))
+        self.py_arch = platform_arch[:-3]
 
         build_type = "Debug" if OPTION_DEBUG else "Release"
         if OPTION_RELWITHDEBINFO:
@@ -1139,6 +1141,7 @@ class PysideBuild(_build):
                 "qt_prefix_dir": self.qtinfo.prefix_dir,
                 "qt_translations_dir": self.qtinfo.translations_dir,
                 "qt_qml_dir": self.qtinfo.qml_dir,
+                "target_arch": self.py_arch,
             }
             os.chdir(self.script_dir)
 
