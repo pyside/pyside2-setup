@@ -66,10 +66,10 @@ class MyWidget(QtWidgets.QWidget):
                      lcd, QtCore.SLOT("display(int)"))
 
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(quit);
-        layout.addWidget(lcd);
-        layout.addWidget(slider);
-        self.setLayout(layout);
+        layout.addWidget(quit)
+        layout.addWidget(lcd)
+        layout.addWidget(slider)
+        self.setLayout(layout)
 
 
 app = QtWidgets.QApplication(sys.argv)
