@@ -173,7 +173,7 @@ class Window(QtWidgets.QWidget):
             painter.drawLine(0, xAxis, self.m_iconSize.width(),  xAxis)
             painter.drawLine(yAxis, 0, yAxis, self.m_iconSize.height())
 
-            curveScale = self.m_iconSize.height() / 2.0;
+            curveScale = self.m_iconSize.height() / 2.0
 
             painter.setPen(QtCore.Qt.NoPen)
 

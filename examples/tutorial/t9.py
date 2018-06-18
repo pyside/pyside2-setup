@@ -103,7 +103,7 @@ class CannonField(QtWidgets.QWidget):
         if angle < 5:
             angle = 5
         if angle > 70:
-            angle = 70;
+            angle = 70
         if self.currentAngle == angle:
             return
         self.currentAngle = angle

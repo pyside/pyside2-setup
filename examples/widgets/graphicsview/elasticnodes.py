@@ -131,7 +131,7 @@ class Edge(QtWidgets.QGraphicsItem):
         sourceArrowP1 = self.sourcePoint + QtCore.QPointF(math.sin(angle + Edge.Pi / 3) * self.arrowSize,
                                                           math.cos(angle + Edge.Pi / 3) * self.arrowSize)
         sourceArrowP2 = self.sourcePoint + QtCore.QPointF(math.sin(angle + Edge.Pi - Edge.Pi / 3) * self.arrowSize,
-                                                          math.cos(angle + Edge.Pi - Edge.Pi / 3) * self.arrowSize);
+                                                          math.cos(angle + Edge.Pi - Edge.Pi / 3) * self.arrowSize)
         destArrowP1 = self.destPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
                                                       math.cos(angle - Edge.Pi / 3) * self.arrowSize)
         destArrowP2 = self.destPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,

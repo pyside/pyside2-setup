@@ -161,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addAction(self.saveAct)
         self.fileMenu.addAction(self.saveAsAct)
-        self.fileMenu.addSeparator();
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
 
         self.editMenu = self.menuBar().addMenu("&Edit")
@@ -243,7 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
         outf << self.textEdit.toPlainText()
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        self.setCurrentFile(fileName);
+        self.setCurrentFile(fileName)
         self.statusBar().showMessage("File saved", 2000)
         return True
 

@@ -90,7 +90,7 @@ class Mouse(QtWidgets.QGraphicsItem):
     def shape(self):
         path = QtGui.QPainterPath()
         path.addRect(-10, -20, 20, 40)
-        return path;
+        return path
 
     def paint(self, painter, option, widget):
         # Body.
@@ -133,7 +133,7 @@ class Mouse(QtWidgets.QGraphicsItem):
         if lineToCenter.length() > 150:
             angleToCenter = math.acos(lineToCenter.dx() / lineToCenter.length())
             if lineToCenter.dy() < 0:
-                angleToCenter = Mouse.TwoPi - angleToCenter;
+                angleToCenter = Mouse.TwoPi - angleToCenter
             angleToCenter = Mouse.normalizeAngle((Mouse.Pi - angleToCenter) + Mouse.Pi / 2)
 
             if angleToCenter < Mouse.Pi and angleToCenter > Mouse.Pi / 4:

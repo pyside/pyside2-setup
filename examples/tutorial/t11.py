@@ -112,7 +112,7 @@ class CannonField(QtWidgets.QWidget):
         if angle < 5:
             angle = 5
         if angle > 70:
-            angle = 70;
+            angle = 70
         if self.currentAngle == angle:
             return
         self.currentAngle = angle
@@ -128,7 +128,7 @@ class CannonField(QtWidgets.QWidget):
             force = 0
         if self.currentForce == force:
             return
-        self.currentForce = force;
+        self.currentForce = force
         self.emit(QtCore.SIGNAL("forceChanged(int)"), self.currentForce)
 
     @QtCore.Slot()
@@ -162,7 +162,7 @@ class CannonField(QtWidgets.QWidget):
             self.paintShot(painter)
 
     def paintShot(self, painter):
-        painter.setPen(QtCore.Qt.NoPen);
+        painter.setPen(QtCore.Qt.NoPen)
         painter.setBrush(QtCore.Qt.black)
         painter.drawRect(self.shotRect())
 

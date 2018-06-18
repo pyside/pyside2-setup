@@ -109,10 +109,10 @@ colors = numpy.array([1, 0, 0, 0, 1, 0, 0, 0, 1], dtype = numpy.float32)
 class RenderWindow(QWindow):
     def __init__(self, format):
         super(RenderWindow, self).__init__()
-        self.setSurfaceType(QWindow.OpenGLSurface);
-        self.setFormat(format);
-        self.context = QOpenGLContext(self);
-        self.context.setFormat(self.requestedFormat());
+        self.setSurfaceType(QWindow.OpenGLSurface)
+        self.setFormat(format)
+        self.context = QOpenGLContext(self)
+        self.context.setFormat(self.requestedFormat())
         if not self.context.create():
             raise Exception("Unable to create GL context")
         self.program = None
@@ -120,12 +120,12 @@ class RenderWindow(QWindow):
         self.angle = 0
 
     def initGl(self):
-        self.program = QOpenGLShaderProgram(self);
+        self.program = QOpenGLShaderProgram(self)
         self.vao = QOpenGLVertexArrayObject()
         self.vbo = QOpenGLBuffer()
 
-        format = self.context.format();
-        useNewStyleShader = format.profile() == QSurfaceFormat.CoreProfile;
+        format = self.context.format()
+        useNewStyleShader = format.profile() == QSurfaceFormat.CoreProfile
         # Try to handle 3.0 & 3.1 that do not have the core/compatibility profile
         # concept 3.2+ has. This may still fail since version 150 (3.2) is
         # specified in the sources but it's worth a try.
@@ -142,31 +142,31 @@ class RenderWindow(QWindow):
         if not self.program.link():
             raise Exception("Could not link shaders: {}".format(self.program.log()))
 
-        self.posAttr = self.program.attributeLocation("posAttr");
-        self.colAttr = self.program.attributeLocation("colAttr");
-        self.matrixUniform = self.program.uniformLocation("matrix");
+        self.posAttr = self.program.attributeLocation("posAttr")
+        self.colAttr = self.program.attributeLocation("colAttr")
+        self.matrixUniform = self.program.uniformLocation("matrix")
 
-        self.vbo.create();
-        self.vbo.bind();
+        self.vbo.create()
+        self.vbo.bind()
         self.verticesData = vertices.tobytes()
         self.colorsData = colors.tobytes()
         verticesSize = 4 * vertices.size
         colorsSize = 4 * colors.size
-        self.vbo.allocate(VoidPtr(self.verticesData), verticesSize + colorsSize);
+        self.vbo.allocate(VoidPtr(self.verticesData), verticesSize + colorsSize)
         self.vbo.write(verticesSize, VoidPtr(self.colorsData), colorsSize)
-        self.vbo.release();
+        self.vbo.release()
 
         vaoBinder = QOpenGLVertexArrayObject.Binder(self.vao)
         if self.vao.isCreated(): # have VAO support, use it
             self.setupVertexAttribs()
 
     def setupVertexAttribs(self):
-        self.vbo.bind();
-        self.program.setAttributeBuffer(self.posAttr, GL.GL_FLOAT, 0, 2);
-        self.program.setAttributeBuffer(self.colAttr, GL.GL_FLOAT, 4 * vertices.size, 3);
-        self.program.enableAttributeArray(self.posAttr);
-        self.program.enableAttributeArray(self.colAttr);
-        self.vbo.release();
+        self.vbo.bind()
+        self.program.setAttributeBuffer(self.posAttr, GL.GL_FLOAT, 0, 2)
+        self.program.setAttributeBuffer(self.colAttr, GL.GL_FLOAT, 4 * vertices.size, 3)
+        self.program.enableAttributeArray(self.posAttr)
+        self.program.enableAttributeArray(self.colAttr)
+        self.vbo.release()
 
     def exposeEvent(self, event):
         if self.isExposed():
@@ -185,22 +185,22 @@ class RenderWindow(QWindow):
             functions.glClearColor(0, 0, 0, 1)
             self.initGl()
 
-        functions.glViewport(0, 0, self.width(), self.height());
-        functions.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        functions.glViewport(0, 0, self.width(), self.height())
+        functions.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-        self.program.bind();
+        self.program.bind()
         matrix = QMatrix4x4()
         matrix.perspective(60, 4 / 3, 0.1, 100)
         matrix.translate(0, 0, -2)
         matrix.rotate(self.angle, 0, 1, 0)
-        self.program.setUniformValue(self.matrixUniform, matrix);
+        self.program.setUniformValue(self.matrixUniform, matrix)
 
         if self.vao.isCreated():
-            self.vao.bind();
+            self.vao.bind()
         else: # no VAO support, set the vertex attribute arrays now
             self.setupVertexAttribs()
 
-        functions.glDrawArrays(GL.GL_TRIANGLES, 0, 3);
+        functions.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
 
         self.vao.release()
         self.program.release()

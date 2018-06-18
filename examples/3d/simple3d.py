@@ -82,7 +82,7 @@ class OrbitTransformController(QObject):
         return self._angle
 
     def updateMatrix(self):
-        self._matrix.setToIdentity();
+        self._matrix.setToIdentity()
         self._matrix.rotate(self._angle, QVector3D(0, 1, 0))
         self._matrix.translate(self._radius, 0, 0)
         if self._target is not None:
