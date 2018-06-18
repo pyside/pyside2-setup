@@ -52,10 +52,8 @@ def runProcess(command, arguments):
     process = QProcess()
     process.start(command, arguments)
     process.waitForFinished()
-    result = []
-    for line in str(process.readAllStandardOutput()).split(os.linesep):
-       result.append(line)
-    return result
+    std_output = process.readAllStandardOutput().data().decode('utf-8')
+    return std_output.split('\n')
 
 def getMemoryUsage():
     result = []
@@ -82,9 +80,9 @@ def getMemoryUsage():
             psOptions = ['-e', '-v']
             memoryColumn = 11
             commandColumn = 12
-        for line in runProcess('ps', psOptions)[1:]:
+        for line in runProcess('ps', psOptions):
             tokens = line.split(None)
-            if len(tokens) > commandColumn: # Percentage and command
+            if len(tokens) > commandColumn and "PID" not in tokens: # Percentage and command
                 command = tokens[commandColumn]
                 if not command.startswith('['):
                     command = os.path.basename(command)
