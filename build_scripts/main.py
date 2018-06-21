@@ -1019,7 +1019,7 @@ class PysideBuild(_build):
             cmake_cmd.append("-DPYSIDE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(
                 timestamp))
 
-        if extension.lower() == "shiboken2":
+        if extension.lower() in ["shiboken2", "pyside2-tools"]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
