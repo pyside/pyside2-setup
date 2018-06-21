@@ -60,6 +60,8 @@ For Windows, if OpenSSL support is required, it's necessary to specify
 the directory path that contains the OpenSSL shared libraries
 "libeay32.dll" and "ssleay32.dll", for example:
     --openssl=C:\OpenSSL-Win64\bin
+This will make sure that the libraries are copied into the PySide2
+package and are found by the QtNetwork module.
 
 ADDITIONAL OPTIONS:
 
@@ -150,8 +152,13 @@ REQUIREMENTS:
 OPTIONAL:
 
 * OpenSSL:
-    Specifying the --openssl option is only required on Windows.
+    Specifying the --openssl option only affects Windows.
     It is a no-op for other platforms.
+
+    Please note that official Windows packages do not ship the
+    OpenSSL libraries due to import / export restrictions as
+    described in
+    http://doc.qt.io/qt-5/ssl.html#import-and-export-restrictions
 
     You can specify the location of the OpenSSL DLLs with the
     following option:
@@ -177,7 +184,7 @@ OPTIONAL:
           shared libraries, are not currently compatible with
           standalone PySide2 packages.
 
-    (*) Revised on 23.03.2018
+    (*) Revised on 21.06.2018
 
 * macOS SDK:
     You can specify which macOS SDK should be used for compilation with
