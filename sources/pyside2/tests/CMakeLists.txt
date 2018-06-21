@@ -49,7 +49,9 @@ else()
                              ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH};PYSIDE_DISABLE_INTERNAL_QT_CONF=1;QT_NO_GLIB=1")
     endmacro()
 
-    add_subdirectory(pysidetest)
+    if (NOT DISABLE_QtCore AND NOT DISABLE_QtGui AND NOT DISABLE_QtWidgets)
+        add_subdirectory(pysidetest)
+    endif()
     add_subdirectory(registry)
     add_subdirectory(signals)
 
