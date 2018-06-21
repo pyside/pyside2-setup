@@ -33,30 +33,36 @@
 #include <QList>
 #include <QString>
 
+enum class HeaderType
+{
+    Standard,
+    System,         // -isystem
+    Framework,      // macOS framework path
+    FrameworkSystem // macOS framework system path
+};
+
 class HeaderPath {
 public:
-    explicit HeaderPath(const QByteArray &p = QByteArray()) : path(p), m_isFramework(false) {}
-    explicit HeaderPath(const QString &s = QString(), bool isFramework = false) :
-        path(s.toLatin1()), m_isFramework(isFramework) {}
-
     QByteArray path;
-    bool m_isFramework; // macOS framework path
+    HeaderType type;
 
-    static QByteArray includeOption(const HeaderPath &p, bool systemInclude = false)
+    static QByteArray includeOption(const HeaderPath &p)
     {
         QByteArray option;
-
-        if (p.m_isFramework) {
-            if (systemInclude)
-                option = QByteArrayLiteral("-iframework");
-            else
-                option = QByteArrayLiteral("-F");
-        } else if (systemInclude) {
-            option = QByteArrayLiteral("-isystem");
-        } else {
+        switch (p.type) {
+        case HeaderType::Standard:
             option = QByteArrayLiteral("-I");
+            break;
+        case HeaderType::System:
+            option = QByteArrayLiteral("-isystem");
+            break;
+        case HeaderType::Framework:
+            option = QByteArrayLiteral("-F");
+            break;
+        case HeaderType::FrameworkSystem:
+            option = QByteArrayLiteral("-iframework");
+            break;
         }
-
         return option + p.path;
     }
 };

@@ -106,9 +106,9 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
             if (line.startsWith(QByteArrayLiteral("End of search list"))) {
                 isIncludeDir = false;
             } else {
-                HeaderPath headerPath(line.trimmed());
+                HeaderPath headerPath{line.trimmed(), HeaderType::System};
                 if (headerPath.path.endsWith(frameworkPath())) {
-                    headerPath.m_isFramework = true;
+                    headerPath.type = HeaderType::FrameworkSystem;
                     headerPath.path.truncate(headerPath.path.size() - frameworkPath().size());
                 }
                 result.append(headerPath);
@@ -127,7 +127,8 @@ static void detectVulkan(HeaderPaths *headerPaths)
     static const char *vulkanVariables[] = {"VULKAN_SDK", "VK_SDK_PATH"};
     for (const char *vulkanVariable : vulkanVariables) {
         if (qEnvironmentVariableIsSet(vulkanVariable)) {
-            headerPaths->append(HeaderPath(qgetenv(vulkanVariable) + QByteArrayLiteral("/include")));
+            const QByteArray path = qgetenv(vulkanVariable) + QByteArrayLiteral("/include");
+            headerPaths->append(HeaderPath{path, HeaderType::System});
             break;
         }
     }
@@ -193,9 +194,7 @@ QByteArrayList emulatedCompilerOptions()
 #endif
     detectVulkan(&headerPaths);
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
-                   std::back_inserter(result), [](const HeaderPath &p) {
-                       return HeaderPath::includeOption(p, true);
-    });
+                   std::back_inserter(result), HeaderPath::includeOption);
     return result;
 }
 

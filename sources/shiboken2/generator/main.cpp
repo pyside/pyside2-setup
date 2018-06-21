@@ -48,6 +48,7 @@
 
 static inline QString includePathOption() { return QStringLiteral("include-paths"); }
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
+static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
 static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
@@ -171,6 +172,7 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 
     QStringList includePaths;
     QStringList frameworkIncludePaths;
+    QStringList systemIncludePaths;
     QStringList typesystemPaths;
     QStringList apiVersions;
 
@@ -193,6 +195,8 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
             includePaths << QDir::toNativeSeparators(value);
         else if (key == "framework-include-path")
             frameworkIncludePaths << QDir::toNativeSeparators(value);
+        else if (key == "system-include-paths")
+            systemIncludePaths << QDir::toNativeSeparators(value);
         else if (key == "typesystem-path")
             typesystemPaths << QDir::toNativeSeparators(value);
         else if (key == "api-version")
@@ -211,6 +215,10 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
     if (!frameworkIncludePaths.isEmpty())
         args.insert(frameworkIncludePathOption(),
                     frameworkIncludePaths.join(QLatin1String(PATH_SPLITTER)));
+    if (!systemIncludePaths.isEmpty()) {
+        args.insert(systemIncludePathOption(),
+                    systemIncludePaths.join(QLatin1String(PATH_SPLITTER)));
+    }
 
     if (!typesystemPaths.isEmpty())
         args.insert(typesystemPathOption(), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
@@ -284,7 +292,7 @@ static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &
         const QString option = arg.left(split);
         const QString value = arg.mid(split + 1).trimmed();
         if (option == includePathOption() || option == frameworkIncludePathOption()
-            || option == typesystemPathOption()) {
+            || option == systemIncludePathOption() || option == typesystemPathOption()) {
             addPathOptionValue(option, value, args);
         } else {
             args.insert(option, value);
@@ -297,6 +305,8 @@ static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &
             addPathOptionValue(includePathOption(), arg.mid(1), args);
         else if (arg.startsWith(QLatin1Char('F')))
             addPathOptionValue(frameworkIncludePathOption(), arg.mid(1), args);
+        else if (arg.startsWith(QLatin1String("isystem")))
+            addPathOptionValue(systemIncludePathOption(), arg.mid(7), args);
         else if (arg.startsWith(QLatin1Char('T')))
             addPathOptionValue(typesystemPathOption(), arg.mid(1), args);
         else if (arg == QLatin1String("h"))
@@ -358,6 +368,9 @@ void printUsage()
         << qMakePair(QLatin1String("-F") + pathSyntax, QString())
         << qMakePair(QLatin1String("framework-include-paths=") + pathSyntax,
                      QLatin1String("Framework include paths used by the C++ parser"))
+        << qMakePair(QLatin1String("-isystem") + pathSyntax, QString())
+        << qMakePair(QLatin1String("system-include-paths=") + pathSyntax,
+                     QLatin1String("System include paths used by the C++ parser"))
         << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
                      QLatin1String("generator-set to be used. e.g. qtdoc"))
         << qMakePair(QLatin1String("-h"), QString())
@@ -412,6 +425,18 @@ static QString msgInvalidVersion(const QString &package, const QString &version)
 {
     return QLatin1String("Invalid version \"") + version
         + QLatin1String("\" specified for package ") + package + QLatin1Char('.');
+}
+
+static void parseIncludePathOption(const QString &option, HeaderType headerType,
+                                   ArgsHandler &args,
+                                   ApiExtractor &extractor)
+{
+    const QString path = args.removeArg(option);
+    if (!path.isEmpty()) {
+        const QStringList includePathListList = path.split(QLatin1String(PATH_SPLITTER));
+        for (const QString &s : includePathListList)
+            extractor.addIncludePath(HeaderPath{QFile::encodeName(s), headerType});
+    }
 }
 
 int main(int argc, char *argv[])
@@ -525,23 +550,12 @@ int main(int argc, char *argv[])
     if (!path.isEmpty())
         extractor.addTypesystemSearchPath(path.split(QLatin1String(PATH_SPLITTER)));
 
-    path = argsHandler.removeArg(QLatin1String("include-paths"));
-    if (!path.isEmpty()) {
-        const QStringList includePathListList = path.split(QLatin1String(PATH_SPLITTER));
-        for (const QString &s : qAsConst(includePathListList)) {
-            const bool isFramework = false;
-            extractor.addIncludePath(HeaderPath(s, isFramework));
-        }
-    }
-
-    path = argsHandler.removeArg(QLatin1String("framework-include-paths"));
-    if (!path.isEmpty()) {
-        const QStringList frameworkPathList = path.split(QLatin1String(PATH_SPLITTER));
-        const bool isFramework = true;
-        for (const QString &s : qAsConst(frameworkPathList)) {
-            extractor.addIncludePath(HeaderPath(s, isFramework));
-        }
-    }
+    parseIncludePathOption(includePathOption(), HeaderType::Standard,
+                           argsHandler, extractor);
+    parseIncludePathOption(frameworkIncludePathOption(), HeaderType::Framework,
+                           argsHandler, extractor);
+    parseIncludePathOption(systemIncludePathOption(), HeaderType::System,
+                           argsHandler, extractor);
 
     QString cppFileName = argsHandler.removeArg(QLatin1String("arg-1"));
     const QFileInfo cppFileNameFi(cppFileName);
