@@ -55,6 +55,7 @@ CI_HOST_OS_VER = option_value("osVer")
 CI_ENV_INSTALL_DIR = option_value("instdir")
 CI_ENV_AGENT_DIR = option_value("agentdir")
 CI_COMPILER = option_value("compiler")
+CI_INTEGRATION_ID = option_value("coinIntegrationId")
 CI_FEATURES = []
 _ci_features = option_value("features")
 if _ci_features is not None:
@@ -117,6 +118,8 @@ def call_setup(python_ver):
         cmd += ["--limited-api=yes"]
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
+
+    cmd += ["--package-timestamp=" + CI_INTEGRATION_ID]
 
     run_instruction(cmd, "Failed to run setup.py")
 

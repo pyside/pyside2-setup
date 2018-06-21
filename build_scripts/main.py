@@ -51,6 +51,11 @@ setup_py_path = os.path.join(setup_script_dir, "setup.py")
 
 @memoize
 def get_package_timestamp():
+    """ In a Coin CI build the returned timestamp will be the
+        Coin integration id timestamp. For regular builds it's
+        just the current timestamp or a user provided one."""
+    if OPTION_PACKAGE_TIMESTAMP:
+        return OPTION_PACKAGE_TIMESTAMP
     return int(time.time())
 
 @memoize

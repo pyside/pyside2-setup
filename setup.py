@@ -140,6 +140,10 @@ using `setup.py build`:
   --skip-docs skip the documentation generation.
   --limited-api=yes|no  default yes if applicable
         Set or clear the limited API flag. Ignored for Python 2.
+  --package-timestamp allows specifying the timestamp that will be
+        used as part of the version number for a snapshot package.
+        For example given --package-timestamp=1529646276
+        the package version will be 5.x.y.dev1529646276.
 
 REQUIREMENTS:
 
