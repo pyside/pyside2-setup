@@ -49,7 +49,7 @@ class ListModel(QAbstractListModel):
         QAbstractListModel.__init__(self)
 
     def roleNames(self):
-        return { Qt.DisplayRole: 'pysideModelData' }
+        return { Qt.DisplayRole: b'pysideModelData' }
 
     def rowCount(self, parent = QModelIndex()):
         return 3
