@@ -163,13 +163,18 @@ QSet<QString> AbstractMetaBuilder::qtMetaTypeDeclaredTypeNames() const
     return d->m_qmetatypeDeclaredTypenames;
 }
 
-static QString msgNoFunctionForModification(const QString &signature, const QString &className,
+static QString msgNoFunctionForModification(const QString &signature,
+                                            const QString &originalSignature,
+                                            const QString &className,
                                             const QStringList &possibleSignatures,
                                             const AbstractMetaFunctionList &allFunctions)
 {
     QString result;
     QTextStream str(&result);
-    str << "signature '" << signature << "' for function modification in '"
+    str << "signature '" << signature << '\'';
+    if (!originalSignature.isEmpty() && originalSignature != signature)
+        str << " (specified as '" << originalSignature << "')";
+    str << " for function modification in '"
         << className << "' not found.";
     if (possibleSignatures.isEmpty()) {
         str << " No candidates were found. Member functions: ";
@@ -231,7 +236,9 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
 
             if (!found) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << msgNoFunctionForModification(signature, clazz->qualifiedCppName(),
+                    << msgNoFunctionForModification(signature,
+                                                    modification.originalSignature(),
+                                                    clazz->qualifiedCppName(),
                                                     possibleSignatures, functions);
             }
         }

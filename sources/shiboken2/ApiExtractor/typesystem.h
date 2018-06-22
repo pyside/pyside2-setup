@@ -356,6 +356,9 @@ struct FunctionModification: public Modification
     bool setSignature(const QString &s, QString *errorMessage =  nullptr);
     QString signature() const { return m_signature.isEmpty() ? m_signaturePattern.pattern() : m_signature; }
 
+    void setOriginalSignature(const QString &s) { m_originalSignature = s; }
+    QString originalSignature() const { return m_originalSignature; }
+
     QString toString() const;
 
     QString association;
@@ -365,6 +368,7 @@ struct FunctionModification: public Modification
 
 private:
     QString m_signature;
+    QString m_originalSignature;
     QRegularExpression m_signaturePattern;
     bool m_thread = false;
     bool m_allowThread = false;
