@@ -521,7 +521,13 @@ QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QSt
                                          const QString &identifier, QString *errorMessage)
 {
     QString result;
-    const QString resolvedPath = resolveFile(locations, path);
+    QString resolvedPath;
+    if (path.endsWith(QLatin1String(".cpp"))) {
+        const QString pySnippet = path.left(path.size() - 3) + QLatin1String("py");
+        resolvedPath = resolveFile(locations, pySnippet);
+    }
+    if (resolvedPath.isEmpty())
+        resolvedPath = resolveFile(locations, path);
     if (resolvedPath.isEmpty()) {
         QTextStream(errorMessage) << "Could not resolve \"" << path << "\" in \""
            << locations.join(QLatin1String("\", \""));
