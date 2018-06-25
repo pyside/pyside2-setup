@@ -133,11 +133,14 @@ typedef struct _peptypeobject {
 
 } PepTypeObject;
 
-LIBSHIBOKEN_API unaryfunc PepType_nb_index(PyTypeObject *type);
-
+// This was a macro error in the limited API from the beginning.
+// It was fixed in Python 3.7 .
+// XXX The commit did go to master, but did not make it to 3.7, yet.
+//#if PY_VERSION_HEX < 0x03070000
+#if PY_VERSION_HEX < 0x03080000
 #undef PyIndex_Check
-
 LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
+#endif
 
 #undef PyObject_IS_GC
 #define PyObject_IS_GC(o) (PyType_IS_GC(Py_TYPE(o)) && \
@@ -146,7 +149,6 @@ LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 
 #else
 #define PepTypeObject                   PyTypeObject
-#define PepType_nb_index(o)             (PepType(o)->nb_index)
 #endif // Py_LIMITED_API
 
 struct SbkObjectTypePrivate;
@@ -309,7 +311,7 @@ typedef struct _methoddescr PyMethodDescrObject;
 #ifdef Py_LIMITED_API
 
 #define Py_TRASH_MIN_COMPATIBLE 0x03020400
-#define Py_TRASH_MAX_COMPATIBLE 0x030700A0
+#define Py_TRASH_MAX_COMPATIBLE 0x0307FFFF
 
 #if PY_VERSION_HEX >= Py_TRASH_MIN_COMPATIBLE && \
     PY_VERSION_HEX <= Py_TRASH_MAX_COMPATIBLE
@@ -383,7 +385,7 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 // But this is no problem as we check it's validity for every version.
 
 #define PYTHON_BUFFER_VERSION_COMPATIBLE    (PY_VERSION_HEX >= 0x03030000 && \
-                                             PY_VERSION_HEX <  0X0306FFFF)
+                                             PY_VERSION_HEX <  0X0307FFFF)
 #if !PYTHON_BUFFER_VERSION_COMPATIBLE
 # error Please check the buffer compatibility for this python version!
 #endif
