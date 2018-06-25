@@ -81,6 +81,16 @@ if have_refmodule and not hasattr(sig_exists, "dict"):
     os.unlink(effectiveRefPath)
     have_refmodule = False
 
+def formatSignatures(signatures):
+    result = ''
+    for s in signatures:
+        result += ' ({})'.format(','.join(s))
+    return result
+
+def msgMultiSignatureCount(key, actual, expected):
+    return "multi-signature count mismatch for '{}'. Actual {} [{}] vs. expected {} [{}]')".format(key,
+        len(actual), formatSignatures(actual),
+        len(expected), formatSignatures(expected))
 
 @unittest.skipIf(not have_refmodule,
                  "not activated for this platform or version")
@@ -101,7 +111,7 @@ class TestSignaturesExists(unittest.TestCase):
                 if key not in found_sigs:
                     warn("missing key: '{}'".format(key))
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warn("multi-signature count mismatch: '{}'".format(key))
+                    warn(msgMultiSignatureCount(key, found_sigs[key], value))
             if is_ci and check_warnings():
                 raise RuntimeError("There are errors, see above.")
 
@@ -117,7 +127,7 @@ class TestSignaturesExists(unittest.TestCase):
                 if key not in found_sigs:
                     warn("missing key: '{}'".format(key))
                 elif isinstance(value, list) and len(value) != len(found_sigs[key]):
-                    warn("multi-signature count mismatch: '{}'".format(key))
+                    warn(msgMultiSignatureCount(key, found_sigs[key], value))
             self.assertTrue(check_warnings())
 
 tested_versions = (5, 6), (5, 9), (5, 11)
