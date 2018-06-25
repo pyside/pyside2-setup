@@ -828,7 +828,14 @@ Py_hash_t hash(PyObject* pyObj)
 
 static void setSequenceOwnership(PyObject* pyObj, bool owner)
 {
-    if (PySequence_Check(pyObj)) {
+
+    bool has_length = true;
+    if (PySequence_Size(pyObj) < 0) {
+        PyErr_Clear();
+        has_length = false;
+    }
+
+    if (PySequence_Check(pyObj) && has_length) {
         Py_ssize_t size = PySequence_Size(pyObj);
         if (size > 0) {
             std::list<SbkObject*> objs = splitPyObject(pyObj);
