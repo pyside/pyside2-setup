@@ -2490,8 +2490,18 @@ QMap< QString, AbstractMetaFunctionList > ShibokenGenerator::getFunctionGroups(c
 
     QMap<QString, AbstractMetaFunctionList> results;
     for (AbstractMetaFunction *func : qAsConst(lst)) {
-        if (isGroupable(func))
-            results[func->name()].append(func);
+        if (isGroupable(func)) {
+            AbstractMetaFunctionList &list = results[func->name()];
+            // If there are virtuals methods in the mix (PYSIDE-570,
+            // QFileSystemModel::index(QString,int) and
+            // QFileSystemModel::index(int,int,QModelIndex)) override, make sure
+            // the overriding method of the most-derived class is seen first
+            // and inserted into the "seenSignatures" set.
+            if (func->isVirtual())
+                list.prepend(func);
+            else
+                list.append(func);
+        }
     }
     return results;
 }

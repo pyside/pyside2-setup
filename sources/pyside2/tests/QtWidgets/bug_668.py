@@ -42,6 +42,8 @@ class A(QMainWindow):
         v = QTreeView(self)
         v.setModel(a)
         self.setCentralWidget(v)
+        # Test index() method (see PYSIDE-570, PYSIDE-331)
+        index = a.index(0, 0, QModelIndex())
 
 app = QApplication([])
 m = A()
