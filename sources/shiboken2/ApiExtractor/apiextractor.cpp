@@ -259,8 +259,9 @@ bool ApiExtractor::run()
     for (const HeaderPath &headerPath : qAsConst(m_includePaths))
         arguments.append(HeaderPath::includeOption(headerPath));
     arguments.append(QFile::encodeName(preprocessedCppFileName));
-    qCDebug(lcShiboken) << __FUNCTION__ << arguments;
-    const bool result = m_builder->build(arguments);
+    qCDebug(lcShiboken) << __FUNCTION__ << arguments
+        << "level=" << int(m_languageLevel);
+    const bool result = m_builder->build(arguments, m_languageLevel);
     if (!result)
         autoRemove = false;
     if (!autoRemove) {
@@ -268,6 +269,16 @@ bool ApiExtractor::run()
         std::cerr << "Keeping temporary file: " << qPrintable(QDir::toNativeSeparators(preprocessedCppFileName)) << '\n';
     }
     return result;
+}
+
+LanguageLevel ApiExtractor::languageLevel() const
+{
+    return m_languageLevel;
+}
+
+void ApiExtractor::setLanguageLevel(const LanguageLevel languageLevel)
+{
+    m_languageLevel = languageLevel;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

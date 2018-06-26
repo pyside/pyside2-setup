@@ -40,11 +40,18 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVersionNumber>
 
+#include <clang-c/Index.h>
+
 #include <string.h>
 #include <algorithm>
 #include <iterator>
 
 namespace clang {
+
+QVersionNumber libClangVersion()
+{
+    return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
+}
 
 static bool runProcess(const QString &program, const QStringList &arguments,
                        QByteArray *stdOutIn = nullptr, QByteArray *stdErrIn = nullptr)
@@ -269,6 +276,49 @@ QByteArrayList emulatedCompilerOptions()
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
                    std::back_inserter(result), HeaderPath::includeOption);
     return result;
+}
+
+LanguageLevel emulatedCompilerLanguageLevel()
+{
+#if defined(Q_CC_MSVC) && _MSC_VER > 1900
+    // Fixes constexpr errors in MSVC2017 library headers with Clang 4.1..5.X (0.45 == Clang 6).
+    if (libClangVersion() < QVersionNumber(0, 45))
+        return LanguageLevel::Cpp1Z;
+#endif // Q_CC_MSVC && _MSC_VER > 1900
+    return LanguageLevel::Cpp14; // otherwise, t.h is parsed as "C"
+}
+
+struct LanguageLevelMapping
+{
+    const char *option;
+    LanguageLevel level;
+};
+
+static const LanguageLevelMapping languageLevelMapping[] =
+{
+    {"c++11", LanguageLevel::Cpp11},
+    {"c++14", LanguageLevel::Cpp14},
+    {"c++17", LanguageLevel::Cpp17},
+    {"c++20", LanguageLevel::Cpp20},
+    {"c++1z", LanguageLevel::Cpp1Z}
+};
+
+const char *languageLevelOption(LanguageLevel l)
+{
+    for (const LanguageLevelMapping &m : languageLevelMapping) {
+        if (m.level == l)
+            return m.option;
+    }
+    return nullptr;
+}
+
+LanguageLevel languageLevelFromOption(const char *o)
+{
+    for (const LanguageLevelMapping &m : languageLevelMapping) {
+        if (!strcmp(m.option, o))
+            return m.level;
+    }
+    return LanguageLevel::Default;
 }
 
 } // namespace clang

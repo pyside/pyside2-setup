@@ -46,7 +46,9 @@ public:
     AbstractMetaBuilderPrivate();
     ~AbstractMetaBuilderPrivate();
 
-    static FileModelItem buildDom(const QByteArrayList &arguments, unsigned clangFlags);
+    static FileModelItem buildDom(QByteArrayList arguments,
+                                  LanguageLevel level,
+                                  unsigned clangFlags);
     void traverseDom(const FileModelItem &dom);
 
     void dumpLog() const;

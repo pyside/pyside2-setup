@@ -32,6 +32,7 @@
 
 #include <clangparser/clangbuilder.h>
 #include <clangparser/clangutils.h>
+#include <clangparser/compilersupport.h>
 
 #include "parser/codemodel.h"
 
@@ -443,10 +444,15 @@ void AbstractMetaBuilderPrivate::sortLists()
         cls->sortFunctions();
 }
 
-FileModelItem AbstractMetaBuilderPrivate::buildDom(const QByteArrayList &arguments,
+FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
+                                                   LanguageLevel level,
                                                    unsigned clangFlags)
 {
     clang::Builder builder;
+    if (level == LanguageLevel::Default)
+        level = clang::emulatedCompilerLanguageLevel();
+    arguments.prepend(QByteArrayLiteral("-std=")
+                      + clang::languageLevelOption(level));
     FileModelItem result = clang::parse(arguments, clangFlags, builder)
         ? builder.dom() : FileModelItem();
     const clang::BaseVisitor::Diagnostics &diagnostics = builder.diagnostics();
@@ -726,9 +732,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     std::puts("");
 }
 
-bool AbstractMetaBuilder::build(const QByteArrayList &arguments, unsigned clangFlags)
+bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
+                                LanguageLevel level,
+                                unsigned clangFlags)
 {
-    const FileModelItem dom = d->buildDom(arguments, clangFlags);
+    const FileModelItem dom = d->buildDom(arguments, level, clangFlags);
     if (dom.isNull())
         return false;
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))

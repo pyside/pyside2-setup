@@ -46,6 +46,7 @@
     #define PATH_SPLITTER ":"
 #endif
 
+static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
 static inline QString includePathOption() { return QStringLiteral("include-paths"); }
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
 static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
@@ -175,6 +176,7 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
     QStringList systemIncludePaths;
     QStringList typesystemPaths;
     QStringList apiVersions;
+    QString languageLevel;
 
     while (!projectFile.atEnd()) {
         line = projectFile.readLine().trimmed();
@@ -199,6 +201,8 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
             systemIncludePaths << QDir::toNativeSeparators(value);
         else if (key == "typesystem-path")
             typesystemPaths << QDir::toNativeSeparators(value);
+        else if (key == "language-level")
+            languageLevel = value;
         else if (key == "api-version")
             apiVersions << value;
         else if (key == "header-file")
@@ -224,6 +228,8 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
         args.insert(typesystemPathOption(), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
     if (!apiVersions.isEmpty())
         args.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
+    if (!languageLevel.isEmpty())
+        args.insert(languageLevelOption(), languageLevel);
     return true;
 }
 
@@ -311,6 +317,8 @@ static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &
             addPathOptionValue(typesystemPathOption(), arg.mid(1), args);
         else if (arg == QLatin1String("h"))
             args.insert(helpOption(), QString());
+        else if (arg.startsWith(QLatin1String("std=")))
+            args.insert(languageLevelOption(), arg.mid(4));
         else
             args.insert(arg, QString());
         return;
@@ -348,6 +356,13 @@ static inline Generators shibokenGenerators()
     return result;
 }
 
+static inline QString languageLevelDescription()
+{
+    return QLatin1String("C++ Language level (c++11..c++17, default=")
+        + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
+        + QLatin1Char(')');
+}
+
 void printUsage()
 {
     QTextStream s(stdout);
@@ -379,6 +394,8 @@ void printUsage()
         << qMakePair(QLatin1String("-I") + pathSyntax, QString())
         << qMakePair(QLatin1String("include-paths=") + pathSyntax,
                      QLatin1String("Include paths used by the C++ parser"))
+        << qMakePair(languageLevelOption() + QLatin1String("=, -std=<level>"),
+                     languageLevelDescription())
         << qMakePair(QLatin1String("license-file=<license-file>"),
                      QLatin1String("File used for copyright headers of generated files"))
         << qMakePair(QLatin1String("no-suppress-warnings"),
@@ -588,6 +605,18 @@ int main(int argc, char *argv[])
             argsHandler.removeArg(od.first);
     }
 
+    const QString languageLevel = argsHandler.removeArg(languageLevelOption());
+    if (!languageLevel.isEmpty()) {
+        const QByteArray languageLevelBA = languageLevel.toLatin1();
+        const LanguageLevel level = clang::languageLevelFromOption(languageLevelBA.constData());
+        if (level == LanguageLevel::Default) {
+            std::cout << "Invalid argument for language level: \""
+                << languageLevelBA.constData() << "\"\n" << helpHint;
+            return EXIT_FAILURE;
+        }
+        extractor.setLanguageLevel(level);
+    }
+
     if (!argsHandler.noArgs()) {
         errorPrint(argsHandler.errorMessage());
         std::cout << helpHint;
@@ -601,6 +630,7 @@ int main(int argc, char *argv[])
 
     extractor.setCppFileName(cppFileNameFi.absoluteFilePath());
     extractor.setTypeSystem(typeSystemFileName);
+
     if (!extractor.run()) {
         errorPrint(QLatin1String("Error running ApiExtractor."));
         return EXIT_FAILURE;

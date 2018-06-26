@@ -28,6 +28,7 @@
 
 #include <abstractmetabuilder_p.h>
 #include <parser/codemodel.h>
+#include <clangparser/compilersupport.h>
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QCommandLineOption>
@@ -39,6 +40,13 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+
+static inline QString languageLevelDescription()
+{
+    return QLatin1String("C++ Language level (c++11..c++17, default=")
+        + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
+        + QLatin1Char(')');
+}
 
 int main(int argc, char **argv)
 {
@@ -52,6 +60,10 @@ int main(int argc, char **argv)
     QCommandLineOption verboseOption(QStringLiteral("d"),
                                      QStringLiteral("Display verbose output about types"));
     parser.addOption(verboseOption);
+    QCommandLineOption languageLevelOption(QStringLiteral("std"),
+                                           languageLevelDescription(),
+                                           QStringLiteral("level"));
+    parser.addOption(languageLevelOption);
     parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("C++ source file"));
 
     parser.process(app);
@@ -62,7 +74,19 @@ int main(int argc, char **argv)
     QByteArrayList arguments;
     std::transform(positionalArguments.cbegin(), positionalArguments.cend(),
                    std::back_inserter(arguments), QFile::encodeName);
-    const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, 0);
+
+    LanguageLevel level = LanguageLevel::Default;
+    if (parser.isSet(languageLevelOption)) {
+        const QByteArray value = parser.value(languageLevelOption).toLatin1();
+        level = clang::languageLevelFromOption(value.constData());
+        if (level == LanguageLevel::Default) {
+            std::cerr << "Invalid value \"" << value.constData()
+                << "\" for language level option.\n";
+            return -2;
+        }
+    }
+
+    const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, level, 0);
     if (dom.isNull()) {
         QString message = QLatin1String("Unable to parse ") + positionalArguments.join(QLatin1Char(' '));
         std::cerr << qPrintable(message) << '\n';

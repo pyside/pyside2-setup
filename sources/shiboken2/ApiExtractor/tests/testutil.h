@@ -67,7 +67,7 @@ namespace TestUtil
         tempSource.write(cppCode, qint64(strlen(cppCode)));
         tempSource.close();
         AbstractMetaBuilder *builder = new AbstractMetaBuilder;
-        if (!builder->build(arguments, 0)) {
+        if (!builder->build(arguments)) {
             delete builder;
             return Q_NULLPTR;
         }

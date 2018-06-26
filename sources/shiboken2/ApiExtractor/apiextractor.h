@@ -36,6 +36,7 @@
 #include "header_paths.h"
 #include "typedatabase_typedefs.h"
 #include "typesystem_typedefs.h"
+#include "clangparser/compilersupport.h"
 #include <QStringList>
 
 class AbstractMetaBuilder;
@@ -75,6 +76,8 @@ public:
     void setLogDirectory(const QString& logDir);
     bool setApiVersion(const QString& package, const QString& version);
     void setDropTypeEntries(QString dropEntries);
+    LanguageLevel languageLevel() const;
+    void setLanguageLevel(const LanguageLevel languageLevel);
 
     AbstractMetaEnumList globalEnums() const;
     AbstractMetaFunctionList globalFunctions() const;
@@ -99,6 +102,7 @@ private:
     HeaderPaths m_includePaths;
     AbstractMetaBuilder* m_builder;
     QString m_logDirectory;
+    LanguageLevel m_languageLevel = LanguageLevel::Default;
 
     // disable copy
     ApiExtractor(const ApiExtractor&);

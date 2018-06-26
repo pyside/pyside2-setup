@@ -32,6 +32,8 @@
 #include "abstractmetalang_typedefs.h"
 #include "dependency.h"
 
+#include "clangparser/compilersupport.h"
+
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class AbstractMetaBuilderPrivate;
@@ -71,7 +73,9 @@ public:
     AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR,
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
 
-    bool build(const QByteArrayList &arguments, unsigned clangFlags = 0);
+    bool build(const QByteArrayList &arguments,
+               LanguageLevel level = LanguageLevel::Default,
+               unsigned clangFlags = 0);
     void setLogDirectory(const QString& logDir);
 
     /**
