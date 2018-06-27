@@ -9,6 +9,9 @@ WebXML.outputsubdir       = webxml
 
 spurious                 += "Hostile character .*"
 
+#excludes qdoc statements that are not relevant for PySide2
+defines                  += qtforpython
+
 includepaths += \
     -I @QT_INCLUDE_DIR@ \
     -I @mkspecInclude@ \
