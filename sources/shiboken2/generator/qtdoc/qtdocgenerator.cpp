@@ -2259,22 +2259,19 @@ void QtDocGenerator::writeAdditionalDocumentation()
            successCount, count);
 }
 
-bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
-{
-    m_libSourceDir = args.value(QLatin1String("library-source-dir"));
-    m_docDataDir = args.value(QLatin1String("documentation-data-dir"));
 #ifdef __WIN32__
 #   define PATH_SEP ';'
 #else
 #   define PATH_SEP ':'
 #endif
-    m_codeSnippetDirs = args.value(QLatin1String("documentation-code-snippets-dir"), m_libSourceDir).split(QLatin1Char(PATH_SEP));
-    m_extraSectionDir = args.value(QLatin1String("documentation-extra-sections-dir"));
 
-    m_docParser = args.value(QLatin1String("doc-parser")) == QLatin1String("doxygen")
-        ? static_cast<DocParser*>(new DoxygenParser)
-        : static_cast<DocParser*>(new QtDocParser);
-    qCDebug(lcShiboken).noquote().nospace() << "doc-parser: " << args.value(QLatin1String("doc-parser"));
+bool QtDocGenerator::doSetup()
+{
+    if (m_codeSnippetDirs.isEmpty())
+        m_codeSnippetDirs = m_libSourceDir.split(QLatin1Char(PATH_SEP));
+
+    if (!m_docParser)
+        m_docParser = new QtDocParser;
 
     if (m_libSourceDir.isEmpty() || m_docDataDir.isEmpty()) {
         qCWarning(lcShiboken) << "Documentation data dir and/or Qt source dir not informed, "
@@ -2284,7 +2281,6 @@ bool QtDocGenerator::doSetup(const QMap<QString, QString>& args)
         m_docParser->setDocumentationDataDirectory(m_docDataDir);
         m_docParser->setLibrarySourceDirectory(m_libSourceDir);
     }
-    m_additionalDocumentationList = args.value(additionalDocumentationOption());
     return true;
 }
 
@@ -2308,3 +2304,33 @@ Generator::OptionDescriptions QtDocGenerator::options() const
                                    "(for example, tutorials)."));
 }
 
+bool QtDocGenerator::handleOption(const QString &key, const QString &value)
+{
+    if (key == QLatin1String("library-source-dir")) {
+        m_libSourceDir = value;
+        return true;
+    }
+    if (key == QLatin1String("documentation-data-dir")) {
+        m_docDataDir = value;
+        return true;
+    }
+    if (key == QLatin1String("documentation-code-snippets-dir")) {
+        m_codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
+        return true;
+    }
+    if (key == QLatin1String("documentation-extra-sections-dir")) {
+        m_extraSectionDir = value;
+        return true;
+    }
+    if (key == QLatin1String("doc-parser")) {
+        qCDebug(lcShiboken).noquote().nospace() << "doc-parser: " << value;
+        if (value == QLatin1String("doxygen"))
+            m_docParser = new DoxygenParser;
+        return true;
+    }
+    if (key == additionalDocumentationOption()) {
+        m_additionalDocumentationList = value;
+        return true;
+    }
+    return false;
+}

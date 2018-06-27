@@ -414,6 +414,7 @@ public:
     QString getModuleHeaderFileName(const QString& moduleName = QString()) const;
 
     OptionDescriptions options() const override;
+    bool handleOption(const QString &key, const QString &value) override;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     bool useCtorHeuristic() const;
@@ -462,7 +463,7 @@ public:
      */
     static QString getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
 protected:
-    bool doSetup(const QMap<QString, QString>& args);
+    bool doSetup() override;
     void collectContainerTypesFromConverterMacros(const QString& code, bool toPythonMacro);
     // verify whether the class is copyable
     bool isCopyable(const AbstractMetaClass* metaClass);
@@ -517,12 +518,12 @@ protected:
     static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
 
 private:
-    bool m_useCtorHeuristic;
-    bool m_userReturnValueHeuristic;
-    bool m_usePySideExtensions;
-    bool m_verboseErrorMessagesDisabled;
-    bool m_useIsNullAsNbNonZero;
-    bool m_avoidProtectedHack;
+    bool m_useCtorHeuristic = false;
+    bool m_userReturnValueHeuristic = false;
+    bool m_usePySideExtensions = false;
+    bool m_verboseErrorMessagesDisabled = false;
+    bool m_useIsNullAsNbNonZero = false;
+    bool m_avoidProtectedHack = false;
 
     typedef QHash<QString, AbstractMetaType*> AbstractMetaTypeCache;
     AbstractMetaTypeCache m_metaTypeFromStringCache;

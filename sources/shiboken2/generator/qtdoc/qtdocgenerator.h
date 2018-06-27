@@ -209,7 +209,7 @@ public:
 
     QString docDataDir() const { return m_docDataDir; }
 
-    bool doSetup(const QMap<QString, QString>& args) override;
+    bool doSetup() override;
 
     const char* name() const override
     {
@@ -217,6 +217,7 @@ public:
     }
 
     OptionDescriptions options() const override;
+    bool handleOption(const QString &key, const QString &value) override;
 
     QStringList codeSnippetDirs() const
     {

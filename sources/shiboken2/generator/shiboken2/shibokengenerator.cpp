@@ -2431,6 +2431,23 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
                                    "the value of boolean casts"));
 }
 
+bool ShibokenGenerator::handleOption(const QString &key, const QString & /* value */)
+{
+    if (key == QLatin1String(PARENT_CTOR_HEURISTIC))
+        return (m_useCtorHeuristic = true);
+    if (key == QLatin1String(ENABLE_PYSIDE_EXTENSIONS))
+        return (m_usePySideExtensions = true);
+    if (key == QLatin1String(RETURN_VALUE_HEURISTIC))
+        return (m_userReturnValueHeuristic = true);
+    if (key == QLatin1String(DISABLE_VERBOSE_ERROR_MESSAGES))
+        return (m_verboseErrorMessagesDisabled = true);
+    if (key == QLatin1String(USE_ISNULL_AS_NB_NONZERO))
+        return (m_useIsNullAsNbNonZero = true);
+    if (key == QLatin1String(AVOID_PROTECTED_HACK))
+        return (m_avoidProtectedHack = true);
+    return false;
+}
+
 static void getCode(QStringList& code, const CodeSnipList& codeSnips)
 {
     for (const CodeSnip &snip : qAsConst(codeSnips))
@@ -2456,15 +2473,8 @@ static void getCode(QStringList& code, const TypeEntry* type)
         code.append(toNative->conversion());
 }
 
-bool ShibokenGenerator::doSetup(const QMap<QString, QString>& args)
+bool ShibokenGenerator::doSetup()
 {
-    m_useCtorHeuristic = args.contains(QLatin1String(PARENT_CTOR_HEURISTIC));
-    m_usePySideExtensions = args.contains(QLatin1String(ENABLE_PYSIDE_EXTENSIONS));
-    m_userReturnValueHeuristic = args.contains(QLatin1String(RETURN_VALUE_HEURISTIC));
-    m_verboseErrorMessagesDisabled = args.contains(QLatin1String(DISABLE_VERBOSE_ERROR_MESSAGES));
-    m_useIsNullAsNbNonZero = args.contains(QLatin1String(USE_ISNULL_AS_NB_NONZERO));
-    m_avoidProtectedHack = args.contains(QLatin1String(AVOID_PROTECTED_HACK));
-
     TypeDatabase* td = TypeDatabase::instance();
     QStringList snips;
     const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();

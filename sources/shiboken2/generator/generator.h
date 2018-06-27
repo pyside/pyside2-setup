@@ -166,9 +166,10 @@ public:
     Generator();
     virtual ~Generator();
 
-    bool setup(const ApiExtractor& extractor, const QMap<QString, QString> args);
+    bool setup(const ApiExtractor& extractor);
 
     virtual OptionDescriptions options() const;
+    virtual bool handleOption(const QString &key, const QString &value);
 
     /// Returns the classes used to generate the binding code.
     AbstractMetaClassList classes() const;
@@ -348,7 +349,7 @@ protected:
     virtual QString fileNameForContext(GeneratorContext &context) const = 0;
 
 
-    virtual bool doSetup(const QMap<QString, QString>& args) = 0;
+    virtual bool doSetup() = 0;
 
     /**
      *   Write the bindding code for an AbstractMetaClass.

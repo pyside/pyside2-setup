@@ -62,7 +62,7 @@ Generator::~Generator()
     delete m_d;
 }
 
-bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QString > args)
+bool Generator::setup(const ApiExtractor& extractor)
 {
     m_d->apiextractor = &extractor;
     TypeEntryHash allEntries = TypeDatabase::instance()->allEntries();
@@ -84,7 +84,7 @@ bool Generator::setup(const ApiExtractor& extractor, const QMap< QString, QStrin
 
     collectInstantiatedContainersAndSmartPointers();
 
-    return doSetup(args);
+    return doSetup();
 }
 
 QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
@@ -195,6 +195,11 @@ QVector<const AbstractMetaType*> Generator::instantiatedSmartPointers() const
 Generator::OptionDescriptions Generator::options() const
 {
     return OptionDescriptions();
+}
+
+bool Generator::handleOption(const QString & /* key */, const QString & /* value */)
+{
+    return false;
 }
 
 AbstractMetaClassList Generator::classes() const
