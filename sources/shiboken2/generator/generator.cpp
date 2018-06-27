@@ -46,7 +46,6 @@ struct Generator::GeneratorPrivate {
     // License comment
     QString licenseComment;
     QString packageName;
-    int numGenerated;
     QStringList instantiatedContainersNames;
     QStringList instantiatedSmartPointerNames;
     QVector<const AbstractMetaType *> instantiatedContainers;
@@ -56,7 +55,6 @@ struct Generator::GeneratorPrivate {
 
 Generator::Generator() : m_d(new GeneratorPrivate)
 {
-    m_d->numGenerated = 0;
 }
 
 Generator::~Generator()
@@ -249,11 +247,6 @@ const AbstractMetaEnum* Generator::findAbstractMetaEnum(const AbstractMetaType* 
     return m_d->apiextractor->findAbstractMetaEnum(metaType);
 }
 
-QSet< QString > Generator::qtMetaTypeDeclaredTypeNames() const
-{
-    return m_d->apiextractor->qtMetaTypeDeclaredTypeNames();
-}
-
 QString Generator::licenseComment() const
 {
     return m_d->licenseComment;
@@ -283,11 +276,6 @@ QString Generator::outputDirectory() const
 void Generator::setOutputDirectory(const QString &outDir)
 {
     m_d->outDir = outDir;
-}
-
-int Generator::numGenerated() const
-{
-    return m_d->numGenerated;
 }
 
 inline void touchFile(const QString &filePath)
@@ -337,7 +325,6 @@ bool Generator::generateFileForContext(GeneratorContext &context)
         break;
     }
 
-    ++m_d->numGenerated;
     return true;
 }
 

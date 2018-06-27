@@ -64,14 +64,12 @@ private:
     void writeConverterRegister(QTextStream &s, const AbstractMetaClass *metaClass,
                                 GeneratorContext &classContext);
     void writeCustomConverterRegister(QTextStream& s, const CustomConversion* customConversion, const QString& converterVar);
-    void writeContainerConverterRegister(QTextStream& s, const AbstractMetaType* container, const QString& converterVar);
 
     void writeContainerConverterFunctions(QTextStream& s, const AbstractMetaType* containerType);
 
     void writeMethodWrapperPreamble(QTextStream &s, OverloadData &overloadData,
                                     GeneratorContext &context);
     void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads, GeneratorContext &classContext);
-    void writeDestructorWrapper(QTextStream& s, const AbstractMetaClass* metaClass);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
                             GeneratorContext &classContext);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
@@ -266,7 +264,6 @@ private:
                              GeneratorContext &context);
 
     void writeRichCompareFunction(QTextStream &s, GeneratorContext &context);
-    void writeToPythonFunction(QTextStream& s, const AbstractMetaClass* metaClass);
 
     void writeEnumsInitialization(QTextStream& s, AbstractMetaEnumList& enums);
     void writeEnumInitialization(QTextStream& s, const AbstractMetaEnum* metaEnum);

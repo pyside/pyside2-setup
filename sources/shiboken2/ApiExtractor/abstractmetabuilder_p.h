@@ -182,9 +182,6 @@ public:
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 
-    // QtScript
-    QSet<QString> m_qmetatypeDeclaredTypenames;
-
     QString m_logDirectory;
     QFileInfo m_globalHeader;
 };

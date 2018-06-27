@@ -159,11 +159,6 @@ AbstractMetaEnumList AbstractMetaBuilder::globalEnums() const
     return d->m_globalEnums;
 }
 
-QSet<QString> AbstractMetaBuilder::qtMetaTypeDeclaredTypeNames() const
-{
-    return d->m_qmetatypeDeclaredTypenames;
-}
-
 static QString msgNoFunctionForModification(const QString &signature,
                                             const QString &originalSignature,
                                             const QString &className,
@@ -1045,16 +1040,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
 
     ComplexTypeEntry* type = TypeDatabase::instance()->findComplexType(fullClassName);
     AbstractMetaBuilder::RejectReason reason = AbstractMetaBuilder::NoReason;
-
-    if (fullClassName == QLatin1String("QMetaTypeId")) {
-        // QtScript: record which types have been declared
-        int lpos = classItem->name().indexOf(QLatin1Char('<'));
-        int rpos = classItem->name().lastIndexOf(QLatin1Char('>'));
-        if ((lpos != -1) && (rpos != -1)) {
-            QString declaredTypename = classItem->name().mid(lpos + 1, rpos - lpos - 1);
-            m_qmetatypeDeclaredTypenames.insert(declaredTypename);
-        }
-    }
 
     if (TypeDatabase::instance()->isClassRejected(fullClassName)) {
         reason = AbstractMetaBuilder::GenerationDisabled;
@@ -3307,7 +3292,6 @@ static void debugFormatSequence(QDebug &d, const char *key, const Container& c,
 void AbstractMetaBuilder::formatDebug(QDebug &debug) const
 {
     debug << "m_globalHeader=" << d->m_globalHeader.absoluteFilePath();
-    debugFormatSequence(debug, "qtMetaTypeDeclaredTypeNames", d->m_qmetatypeDeclaredTypenames);
     debugFormatSequence(debug, "globalEnums", d->m_globalEnums, "\n");
     debugFormatSequence(debug, "globalFunctions", d->m_globalFunctions, "\n");
     if (const int scopeCount = d->m_scopes.size()) {

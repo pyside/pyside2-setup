@@ -61,8 +61,6 @@ public:
     AbstractMetaClassList smartPointers() const;
     AbstractMetaFunctionList globalFunctions() const;
     AbstractMetaEnumList globalEnums() const;
-    // QtScript
-    QSet<QString> qtMetaTypeDeclaredTypeNames() const;
 
     /**
     *   Sorts a list of classes topologically, if an AbstractMetaClass object

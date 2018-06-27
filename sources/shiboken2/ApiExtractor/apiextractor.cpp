@@ -159,12 +159,6 @@ ContainerTypeEntryList ApiExtractor::containerTypes() const
     return TypeDatabase::instance()->containerTypes();
 }
 
-QSet<QString> ApiExtractor::qtMetaTypeDeclaredTypeNames() const
-{
-    Q_ASSERT(m_builder);
-    return m_builder->qtMetaTypeDeclaredTypeNames();
-}
-
 static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClasses, const EnumTypeEntry* typeEntry)
 {
     const AbstractMetaEnum* result = 0;

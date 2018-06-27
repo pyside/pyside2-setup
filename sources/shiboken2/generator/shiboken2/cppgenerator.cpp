@@ -1446,15 +1446,6 @@ void CppGenerator::writeCustomConverterRegister(QTextStream& s, const CustomConv
     }
 }
 
-void CppGenerator::writeContainerConverterRegister(QTextStream& s, const AbstractMetaType* container, const QString& converterVar)
-{
-    s << INDENT << "// Add user defined container conversion to type converter." << endl;
-    QString typeName = fixedCppTypeName(container);
-    QString toCpp = pythonToCppFunctionName(typeName, typeName);
-    QString isConv = convertibleToCppFunctionName(typeName, typeName);
-    writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
-}
-
 void CppGenerator::writeContainerConverterFunctions(QTextStream& s, const AbstractMetaType* containerType)
 {
     writeCppToPythonFunction(s, containerType);

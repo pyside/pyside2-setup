@@ -86,7 +86,6 @@ public:
     AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
     PrimitiveTypeEntryList primitiveTypes() const;
     ContainerTypeEntryList containerTypes() const;
-    QSet<QString> qtMetaTypeDeclaredTypeNames() const;
 
     const AbstractMetaEnum* findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const;
     const AbstractMetaEnum* findAbstractMetaEnum(const TypeEntry* typeEntry) const;
