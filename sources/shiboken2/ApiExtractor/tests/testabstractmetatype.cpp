@@ -31,6 +31,31 @@
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <typesystem.h>
+#include <parser/codemodel.h>
+#include <typeparser.h>
+
+void TestAbstractMetaType::parsing_data()
+{
+    QTest::addColumn<QString>("input");
+    QTest::addColumn<QString>("output");
+    QTest::newRow("primitive")
+        << QString::fromLatin1("int") << QString::fromLatin1("int");
+    QTest::newRow("ref")
+        << QString::fromLatin1("int &") << QString::fromLatin1("int&");
+    QTest::newRow("pointer")
+        << QString::fromLatin1("int **") << QString::fromLatin1("int**");
+}
+
+void TestAbstractMetaType::parsing()
+{
+    QFETCH(QString, input);
+    QFETCH(QString, output);
+    QString errorMessage;
+    const TypeInfo ti = TypeParser::parse(input, &errorMessage);
+    QVERIFY2(errorMessage.isEmpty(), qPrintable(errorMessage));
+    const QString actual = ti.toString();
+    QCOMPARE(actual, output);
+}
 
 void TestAbstractMetaType::testConstCharPtrType()
 {

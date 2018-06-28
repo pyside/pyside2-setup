@@ -35,6 +35,8 @@ class TestAbstractMetaType : public QObject
 {
     Q_OBJECT
 private slots:
+    void parsing_data();
+    void parsing();
     void testConstCharPtrType();
     void testCharType();
     void testTypedef();
