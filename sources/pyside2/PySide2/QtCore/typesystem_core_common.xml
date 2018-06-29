@@ -283,11 +283,8 @@
     <include file-name="QString" location="global"/>
     <conversion-rule>
         <native-to-target>
-        const int N = %in.length();
-        wchar_t *str = new wchar_t[N];
-        %in.toWCharArray(str);
-        PyObject *%out = PyUnicode_FromWideChar(str, N);
-        delete[] str;
+        QByteArray ba = %in.toUtf8();
+        PyObject *%out = PyUnicode_FromStringAndSize(ba.constData(), ba.size());
         return %out;
         </native-to-target>
         <target-to-native>
