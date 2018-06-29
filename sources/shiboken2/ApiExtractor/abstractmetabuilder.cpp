@@ -1356,45 +1356,6 @@ static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, cons
     return true;
 }
 
-// Fix the arguments of template classes that take the class itself, for example:
-// "QList(const QList &)" to "QList(const QList<T> &)".
-static bool _fixFunctionModelItemTypes(FunctionModelItem& function, const AbstractMetaClass* metaClass)
-{
-    const QVector<TypeEntry *> &templateTypes = metaClass->templateArguments();
-    if (templateTypes.isEmpty())
-        return false;
-
-    const QStringList classType = metaClass->typeEntry()->qualifiedCppName().split(colonColon());
-    QStringList fixedClassType = classType;
-    fixedClassType.last().append(QLatin1Char('<'));
-    for (int i = 0, count = templateTypes.size(); i < count; ++i) {
-        if (i)
-            fixedClassType.last().append(QLatin1String(", "));
-        fixedClassType.last().append(templateTypes.at(i)->qualifiedCppName());
-    }
-    fixedClassType.last().append(QLatin1String(" >"));
-
-    bool templateTypeFixed = false;
-    TypeInfo functionType = function->type();
-    if (functionType.qualifiedName() == classType) {
-        templateTypeFixed = true;
-        functionType.setQualifiedName(fixedClassType);
-        function->setType(functionType);
-    }
-
-    ArgumentList arguments = function->arguments();
-    for (int i = 0; i < arguments.size(); ++i) {
-        ArgumentModelItem arg = arguments.at(i);
-        TypeInfo type = arg->type();
-        if (type.qualifiedName() == classType) {
-            type.setQualifiedName(fixedClassType);
-            arg->setType(type);
-            templateTypeFixed = true;
-        }
-    }
-    return templateTypeFixed;
-}
-
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
                                                                        bool *constructorRejected)
 {
@@ -1434,49 +1395,12 @@ private:
     const AbstractMetaFunction *m_function;
 };
 
-AbstractMetaFunctionList AbstractMetaBuilderPrivate::templateClassFunctionList(const ScopeModelItem &scopeItem,
-                                                                               AbstractMetaClass *metaClass,
-                                                                               bool *constructorRejected)
-{
-    AbstractMetaFunctionList result;
-    AbstractMetaFunctionList unchangedFunctions;
-
-    *constructorRejected = false;
-    const FunctionList &scopeFunctionList = scopeItem->functions();
-    result.reserve(scopeFunctionList.size());
-    unchangedFunctions.reserve(scopeFunctionList.size());
-    for (FunctionModelItem function : scopeFunctionList) {
-        // This fixes method's arguments and return types that are templates
-        // but the template variable wasn't declared in the C++ header.
-        const bool templateTypeFixed =_fixFunctionModelItemTypes(function, metaClass);
-        if (AbstractMetaFunction *metaFunction = traverseFunction(function)) {
-            result.append(metaFunction);
-            if (!templateTypeFixed)
-                unchangedFunctions.append(metaFunction);
-        } else if (function->functionType() == CodeModel::Constructor) {
-            *constructorRejected = true;
-        }
-    }
-
-    const AbstractMetaFunctionList::ConstIterator unchangedBegin = unchangedFunctions.cbegin();
-    const AbstractMetaFunctionList::ConstIterator unchangedEnd = unchangedFunctions.cend();
-    for (int i = result.size() - 1; i >= 0; --i) {
-        AbstractMetaFunction *function = result.at(i);
-        if (!unchangedFunctions.contains(function)
-            && unchangedEnd != std::find_if(unchangedBegin, unchangedEnd, DuplicatingFunctionPredicate(function))) {
-            delete result.takeAt(i);
-        }
-    }
-    return result;
-}
-
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
 {
     bool constructorRejected = false;
-    const AbstractMetaFunctionList functions = metaClass->templateArguments().isEmpty()
-        ? classFunctionList(scopeItem, &constructorRejected)
-        : templateClassFunctionList(scopeItem, metaClass, &constructorRejected);
+    const AbstractMetaFunctionList functions =
+        classFunctionList(scopeItem, &constructorRejected);
 
     if (constructorRejected)
         *metaClass += AbstractMetaAttributes::HasRejectedConstructor;
