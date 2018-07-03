@@ -40,7 +40,7 @@
 #ifndef PYSIDEQTESTTOUCH_H
 #define PYSIDEQTESTTOUCH_H
 
-#include <QtTest/qtest_global.h>
+#include <QtTest/qttestglobal.h>
 #include <QtTest/qtestassert.h>
 #include <QtTest/qtestsystem.h>
 #include <QtTest/qtestspontaneevent.h>

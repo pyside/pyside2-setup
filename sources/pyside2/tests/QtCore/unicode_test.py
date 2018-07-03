@@ -35,6 +35,7 @@ import unittest
 import py3kcompat as py3k
 
 from PySide2.QtCore import QObject
+from PySide2.QtCore import QByteArray
 
 class UnicodeConversion(unittest.TestCase):
     '''Test case for QString to/from Python Unicode conversion'''

@@ -49,7 +49,7 @@ class QGLBufferTest(UsesQApplication):
         self.assertTrue(b.bufferId() != 0)
         self.assertTrue(b.bind())
 
-        data = QByteArray("12345")
+        data = QByteArray(py3k.b("12345"))
         b.allocate(data)
         self.assertEqual(b.size(), data.size())
 

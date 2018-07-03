@@ -391,8 +391,11 @@ bool checkSequenceTypes(PyTypeObject* type, PyObject* pyIn)
 {
     assert(type);
     assert(pyIn);
-    if (!PySequence_Check(pyIn))
+    if (PySequence_Size(pyIn) < 0) {
+        // clear the error if < 0 which means no length at all
+        PyErr_Clear();
         return false;
+    }
     const Py_ssize_t size = PySequence_Size(pyIn);
     for (Py_ssize_t i = 0; i < size; ++i) {
         if (!PyObject_TypeCheck(AutoDecRef(PySequence_GetItem(pyIn, i)), type))

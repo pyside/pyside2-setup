@@ -50,6 +50,7 @@ from PySide2.QtWebEngineWidgets import (QWebEngineDownloadItem,
     QWebEnginePage, QWebEngineProfile)
 
 class BrowserTabWidget(QTabWidget):
+    """Enables having several tabs with QWebEngineView."""
 
     url_changed = QtCore.Signal(QUrl)
     enabled_changed = QtCore.Signal(QWebEnginePage.WebAction, bool)

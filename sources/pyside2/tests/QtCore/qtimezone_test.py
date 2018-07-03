@@ -29,10 +29,11 @@
 import unittest
 
 from PySide2.QtCore import QTimeZone
+import py3kcompat as py3k
 
 class TestQTimeZone (unittest.TestCase):
     def testTimeZone(self):
-        id = 'Europe/Berlin'
+        id = py3k.b('Europe/Berlin')
         timeZone = QTimeZone(id)
         self.assertTrue(timeZone.isValid())
         self.assertEqual(timeZone.id(), id)

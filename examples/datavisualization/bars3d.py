@@ -68,18 +68,18 @@ class MainWindow(QMainWindow):
         self.columnAxis.setTitle('Columns')
         self.columnAxis.setTitleVisible(True)
         self.columnAxis.setLabels(['Column1', 'Column2'])
-        self.columnAxis.setLabelAutoRotation(30);
+        self.columnAxis.setLabelAutoRotation(30)
 
         self.rowAxis = QtDataVisualization.QCategory3DAxis()
         self.rowAxis.setTitle('Rows')
         self.rowAxis.setTitleVisible(True)
         self.rowAxis.setLabels(['Row1', 'Row2'])
-        self.rowAxis.setLabelAutoRotation(30);
+        self.rowAxis.setLabelAutoRotation(30)
 
         self.valueAxis = QtDataVisualization.QValue3DAxis()
         self.valueAxis.setTitle('Values')
         self.valueAxis.setTitleVisible(True)
-        self.valueAxis.setRange(0, 5);
+        self.valueAxis.setRange(0, 5)
 
         self.bars.setRowAxis(self.rowAxis)
         self.bars.setColumnAxis(self.columnAxis)
@@ -104,8 +104,8 @@ class MainWindow(QMainWindow):
         size = geometry.height() * 3 / 4
         self.container.setMinimumSize(size, size)
 
-        self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-        self.container.setFocusPolicy(Qt.StrongFocus);
+        self.container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.container.setFocusPolicy(Qt.StrongFocus)
         self.setCentralWidget(self.container)
 
 if __name__ == '__main__':

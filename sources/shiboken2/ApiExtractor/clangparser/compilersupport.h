@@ -31,10 +31,25 @@
 
 #include <QtCore/QByteArrayList>
 
+QT_FORWARD_DECLARE_CLASS(QVersionNumber)
+
+enum class LanguageLevel {
+    Default,
+    Cpp11,
+    Cpp14,
+    Cpp17,
+    Cpp20,
+    Cpp1Z
+};
+
 namespace clang {
+QVersionNumber libClangVersion();
 
 QByteArrayList emulatedCompilerOptions();
+LanguageLevel emulatedCompilerLanguageLevel();
 
+const char *languageLevelOption(LanguageLevel l);
+LanguageLevel languageLevelFromOption(const char *);
 } // namespace clang
 
 #endif // COMPILERSUPPORT_H

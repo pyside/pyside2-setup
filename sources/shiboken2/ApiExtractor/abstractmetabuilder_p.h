@@ -46,7 +46,9 @@ public:
     AbstractMetaBuilderPrivate();
     ~AbstractMetaBuilderPrivate();
 
-    static FileModelItem buildDom(const QByteArrayList &arguments, unsigned clangFlags);
+    static FileModelItem buildDom(QByteArrayList arguments,
+                                  LanguageLevel level,
+                                  unsigned clangFlags);
     void traverseDom(const FileModelItem &dom);
 
     void dumpLog() const;
@@ -122,18 +124,17 @@ public:
     AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type,
                                     bool resolveType = true);
-
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 
     AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,
-                                         TypeParser::Info *info = Q_NULLPTR,
+                                         TypeInfo *info = Q_NULLPTR,
                                          ComplexTypeEntry **baseContainerType = Q_NULLPTR) const;
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass *metaClass) const;
     bool ancestorHasPrivateCopyConstructor(const AbstractMetaClass *metaClass) const;
 
     bool inheritTemplate(AbstractMetaClass *subclass,
                          const AbstractMetaClass *templateClass,
-                         const TypeParser::Info &info);
+                         const TypeInfo &info);
     AbstractMetaType *inheritTemplateType(const QVector<AbstractMetaType *> &templateTypes,
                                           const AbstractMetaType *metaType,
                                           bool *ok = Q_NULLPTR);
@@ -180,9 +181,6 @@ public:
     QString m_namespacePrefix;
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
-
-    // QtScript
-    QSet<QString> m_qmetatypeDeclaredTypenames;
 
     QString m_logDirectory;
     QFileInfo m_globalHeader;

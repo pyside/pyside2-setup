@@ -75,7 +75,7 @@ class Callout(QGraphicsItem):
         path = QPainterPath()
         path.addRoundedRect(self._rect, 5, 5)
         anchor = self.mapFromParent(self._chart.mapToPosition(self._anchor))
-        if not self._rect.contains(anchor):
+        if not self._rect.contains(anchor) and not self._anchor.isNull():
             point1 = QPointF()
             point2 = QPointF()
 
@@ -131,7 +131,7 @@ class Callout(QGraphicsItem):
         if event.buttons() & Qt.LeftButton:
             self.setPos(mapToParent(
                 event.pos() - event.buttonDownPos(Qt.LeftButton)))
-            event.setAccepted(Ttrue)
+            event.setAccepted(True)
         else:
             event.setAccepted(False)
 

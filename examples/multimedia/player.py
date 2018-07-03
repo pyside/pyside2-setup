@@ -114,9 +114,9 @@ class MainWindow(QMainWindow):
 
         self.videoWidget = QVideoWidget()
         self.setCentralWidget(self.videoWidget)
-        self.player.setPlaylist(self.playlist);
+        self.player.setPlaylist(self.playlist)
         self.player.stateChanged.connect(self.updateButtons)
-        self.player.setVideoOutput(self.videoWidget);
+        self.player.setVideoOutput(self.videoWidget)
 
         self.updateButtons(self.player.state())
 
@@ -136,9 +136,9 @@ class MainWindow(QMainWindow):
         # Go to previous track if we are within the first 5 seconds of playback
         # Otherwise, seek to the beginning.
         if self.player.position() <= 5000:
-            self.playlist.previous();
+            self.playlist.previous()
         else:
-            player.setPosition(0);
+            player.setPosition(0)
 
     def updateButtons(self, state):
         mediaCount = self.playlist.mediaCount()

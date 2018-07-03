@@ -80,7 +80,7 @@ class GetCharTest(unittest.TestCase):
         self.assertTrue(dir.isValid())
         saveFile = QSaveFile(dir.path() + "/test.dat")
         self.assertTrue(saveFile.open(QIODevice.WriteOnly))
-        saveFile.write("Test")
+        saveFile.write(py3k.b("Test"))
         self.assertTrue(saveFile.commit())
         self.assertTrue(os.path.exists(QDir.toNativeSeparators(saveFile.fileName())))
 

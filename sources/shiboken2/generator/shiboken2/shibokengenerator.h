@@ -106,11 +106,6 @@ public:
     */
     AbstractMetaFunctionList getFunctionOverloads(const AbstractMetaClass* scope, const QString& functionName);
     /**
-    *   Returns the minimun and maximun number of arguments which this function and all overloads
-    *   can accept. Arguments removed by typesystem are considered as well.
-    */
-    QPair<int, int> getMinMaxArguments(const AbstractMetaFunction* metaFunction);
-    /**
      *   Write a function argument in the C++ in the text stream \p s.
      *   This function just call \code s << argumentString(); \endcode
      *   \param s text stream used to write the output.
@@ -195,14 +190,6 @@ public:
     {
         replaceConverterTypeSystemVariable(TypeSystemCheckFunction, code);
     }
-
-    /**
-     *   Verifies if any of the function's code injections of the "target"
-     *   type needs the type system variable "%CPPSELF".
-     *   \param func the function to check
-     *   \return true if the function's target code snippets use "%CPPSELF"
-     */
-    bool injectedCodeUsesCppSelf(const AbstractMetaFunction* func);
 
     /**
      *   Verifies if any of the function's code injections of the "native"
@@ -310,8 +297,6 @@ public:
     static QString pythonRichCompareOperatorId(QString cppOpFuncName);
     static QString pythonRichCompareOperatorId(const AbstractMetaFunction* func);
 
-    static QString cpythonOperatorFunctionName(const AbstractMetaFunction* func);
-
     static QString fixedCppTypeName(const CustomConversion::TargetToNativeConversion* toNative);
     static QString fixedCppTypeName(const AbstractMetaType* type);
     static QString fixedCppTypeName(const TypeEntry* type, QString typeName = QString());
@@ -321,7 +306,6 @@ public:
     static bool isNumber(const AbstractMetaType* type);
     static bool isPyInt(const TypeEntry* type);
     static bool isPyInt(const AbstractMetaType* type);
-    static bool isPairContainer(const AbstractMetaType* type);
 
     /**
      *  Returns true if the type passed has a Python wrapper for it.
@@ -391,7 +375,6 @@ public:
     QString cpythonIsConvertibleFunction(const TypeEntry* type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonIsConvertibleFunction(const AbstractMetaType* metaType, bool genericNumberType = false);
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument* metaArg, bool genericNumberType = false);
-    QString guessCPythonIsConvertible(const QString& type);
 
     QString cpythonToCppConversionFunction(const AbstractMetaClass* metaClass);
     QString cpythonToCppConversionFunction(const AbstractMetaType* type, const AbstractMetaClass* context = 0);
@@ -425,14 +408,10 @@ public:
     /// Returns the special cast function name, the function used to proper cast class with multiple inheritance.
     QString cpythonSpecialCastFunctionName(const AbstractMetaClass* metaClass);
 
-    QString getFunctionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
     QString getFormatUnitString(const AbstractMetaFunction* func, bool incRef = false) const;
 
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
     QString getModuleHeaderFileName(const QString& moduleName = QString()) const;
-
-    QString extendedIsConvertibleFunctionName(const TypeEntry* targetType) const;
-    QString extendedToCppFunctionName(const TypeEntry* targetType) const;
 
     OptionDescriptions options() const override;
 
@@ -477,12 +456,6 @@ public:
 
     void writeMinimalConstructorExpression(QTextStream& s, const AbstractMetaType* type, const QString& defaultCtor = QString());
     void writeMinimalConstructorExpression(QTextStream& s, const TypeEntry* type, const QString& defaultCtor = QString());
-
-    /**
-     *  Helper function to return the flags to be used by a meta type when
-     * it needs to write some converter code.
-     */
-    static Options getConverterOptions(const AbstractMetaType* metaType);
 
     /**
      * Helper function to find for argument default value

@@ -42,6 +42,7 @@ from build_scripts.utils import install_pip_dependencies
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
+from build_scripts.utils import acceptCITestConfiguration
 import os
 
 # Values must match COIN thrift
@@ -72,19 +73,22 @@ def call_testrunner(python_ver, buildnro):
     run_instruction(cmd, "Failed to run testrunner.py")
 
 def run_test_instructions():
-    # Disable unsupported configs for now
-    if CI_HOST_OS_VER in ["WinRT_10", "MacOS_10_13"]:
-        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
+    if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
+
     if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
         print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
         exit()
 
     os.chdir(CI_ENV_AGENT_DIR)
-    call_testrunner("", "0")
+    testRun = 0
+    # We didn't build for Python 2 in win
+    if CI_HOST_OS != "Windows":
+        call_testrunner("", str(testRun))
+        testRun =+ 1
     # We know that second build was with python3
     if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
-        call_testrunner("3", "1")
+        call_testrunner("3", str(testRun))
 
 if __name__ == "__main__":
     run_test_instructions()

@@ -79,7 +79,7 @@ def createStates(objects, selectedRect, parent):
 
 def createAnimations(objects, machine):
     for obj in objects:
-        animation = QtCore.QPropertyAnimation(obj, 'geometry', obj)
+        animation = QtCore.QPropertyAnimation(obj, b'geometry', obj)
         machine.addDefaultAnimation(animation)
 
 

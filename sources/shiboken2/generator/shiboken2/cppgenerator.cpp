@@ -1446,15 +1446,6 @@ void CppGenerator::writeCustomConverterRegister(QTextStream& s, const CustomConv
     }
 }
 
-void CppGenerator::writeContainerConverterRegister(QTextStream& s, const AbstractMetaType* container, const QString& converterVar)
-{
-    s << INDENT << "// Add user defined container conversion to type converter." << endl;
-    QString typeName = fixedCppTypeName(container);
-    QString toCpp = pythonToCppFunctionName(typeName, typeName);
-    QString isConv = convertibleToCppFunctionName(typeName, typeName);
-    writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
-}
-
 void CppGenerator::writeContainerConverterFunctions(QTextStream& s, const AbstractMetaType* containerType)
 {
     writeCppToPythonFunction(s, containerType);
@@ -1988,7 +1979,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                 QString strArg;
                 AbstractMetaType* argType = arg->type();
                 if (isCString(argType)) {
-                    strArg = QLatin1String("\" SBK_STR_NAME \"");
+                    strArg = QLatin1String("\" SBK_BYTES_NAME \"");
                 } else if (argType->isPrimitive()) {
                     const PrimitiveTypeEntry* ptp = reinterpret_cast<const PrimitiveTypeEntry*>(argType->typeEntry());
                     while (ptp->referencedTypeEntry())
@@ -2025,7 +2016,9 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
                     else if (strArg == QLatin1String("PyString"))
                         strArg = QLatin1String("str");
                     else if (strArg == QLatin1String("PyBytes"))
-                        strArg = QLatin1String("\" SBK_STR_NAME \"");
+                        strArg = QLatin1String("\" SBK_BYTES_NAME \"");
+                    else if (strArg == QLatin1String("PyByteArray"))
+                        strArg = QLatin1String("bytearray");
                     else if (strArg == QLatin1String("PySequence"))
                         strArg = QLatin1String("list");
                     else if (strArg == QLatin1String("PyTuple"))

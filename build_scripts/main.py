@@ -51,6 +51,11 @@ setup_py_path = os.path.join(setup_script_dir, "setup.py")
 
 @memoize
 def get_package_timestamp():
+    """ In a Coin CI build the returned timestamp will be the
+        Coin integration id timestamp. For regular builds it's
+        just the current timestamp or a user provided one."""
+    if OPTION_PACKAGE_TIMESTAMP:
+        return OPTION_PACKAGE_TIMESTAMP
     return int(time.time())
 
 @memoize
@@ -461,6 +466,7 @@ class PysideBuild(_build):
         self.py_include_dir = None
         self.py_library = None
         self.py_version = None
+        self.py_arch = None
         self.build_type = "Release"
         self.qtinfo = None
         self.build_tests = False
@@ -469,6 +475,7 @@ class PysideBuild(_build):
         prepare_build()
         platform_arch = platform.architecture()[0]
         log.info("Python architecture is {}".format(platform_arch))
+        self.py_arch = platform_arch[:-3]
 
         build_type = "Debug" if OPTION_DEBUG else "Release"
         if OPTION_RELWITHDEBINFO:
@@ -499,6 +506,9 @@ class PysideBuild(_build):
                     log.info("nmake was found in {}".format(nmake_path))
                     make_name = "nmake"
                     make_generator = "NMake Makefiles"
+                    if OPTION_JOBS:
+                        msg = "Option --jobs can only be used with 'jom' on Windows."
+                        raise DistutilsSetupError(msg)
             elif OPTION_MAKESPEC == "mingw":
                 make_name = "mingw32-make"
                 make_generator = "MinGW Makefiles"
@@ -1011,7 +1021,7 @@ class PysideBuild(_build):
             cmake_cmd.append("-DPYSIDE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(
                 timestamp))
 
-        if extension.lower() == "shiboken2":
+        if extension.lower() in ["shiboken2", "pyside2-tools"]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             if sys.version_info[0] > 2:
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
@@ -1131,6 +1141,7 @@ class PysideBuild(_build):
                 "qt_prefix_dir": self.qtinfo.prefix_dir,
                 "qt_translations_dir": self.qtinfo.translations_dir,
                 "qt_qml_dir": self.qtinfo.qml_dir,
+                "target_arch": self.py_arch,
             }
             os.chdir(self.script_dir)
 
@@ -1157,7 +1168,8 @@ class PysideBuild(_build):
         return config
 
     def is_webengine_built(self, built_modules):
-        return 'WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
+        return ('WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
+                                                    or 'WebEngine' in built_modules)
 
     def prepare_standalone_clang(self, is_win = False):
         """

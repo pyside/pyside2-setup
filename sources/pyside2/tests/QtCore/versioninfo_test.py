@@ -39,7 +39,7 @@ class TestVersionInfo(unittest.TestCase):
         self.assertEqual(type(v[1]), int)
         self.assertEqual(type(v[2]), int)
         self.assertEqual(type(v[3]), str)
-        self.assertEqual(type(v[4]), int)
+        self.assertEqual(type(v[4]), str)
 
         self.assertEqual(type(PySide2.__version__), str)
 

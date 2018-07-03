@@ -43,6 +43,7 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
+from build_scripts.utils import acceptCITestConfiguration
 import os
 
 # Values must match COIN thrift
@@ -54,6 +55,7 @@ CI_HOST_OS_VER = option_value("osVer")
 CI_ENV_INSTALL_DIR = option_value("instdir")
 CI_ENV_AGENT_DIR = option_value("agentdir")
 CI_COMPILER = option_value("compiler")
+CI_INTEGRATION_ID = option_value("coinIntegrationId")
 CI_FEATURES = []
 _ci_features = option_value("features")
 if _ci_features is not None:
@@ -98,9 +100,7 @@ def call_setup(python_ver):
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
     install_pip_dependencies(env_pip, ["six", "wheel"])
     cmd = [env_python, "setup.py"]
-    # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
-    # we shouldn't release the 2015 version.
-    if CI_RELEASE_CONF and CI_COMPILER not in ["MSVC2015"]:
+    if CI_RELEASE_CONF:
         cmd += ["bdist_wheel", "--standalone"]
     else:
         cmd += ["build"]
@@ -108,8 +108,7 @@ def call_setup(python_ver):
         cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "/bin/qmake"]
     elif CI_HOST_OS == "Windows":
 
-        cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "\\bin\\qmake.exe",
-                "--openssl=C:\\openssl\\bin"]
+        cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "\\bin\\qmake.exe"]
     else:
         cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "/bin/qmake"]
     cmd += ["--build-tests",
@@ -120,19 +119,22 @@ def call_setup(python_ver):
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 
+    cmd += ["--package-timestamp=" + CI_INTEGRATION_ID]
+
     run_instruction(cmd, "Failed to run setup.py")
 
 def run_build_instructions():
-    # Disable unsupported configs for now
-    if CI_HOST_OS_VER in ["WinRT_10", "MacOS_10_13"]:
-        print("Disabled " + CI_HOST_OS_VER + " from Coin configuration")
+    if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
+
     if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
         print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
         exit()
 
     # Uses default python, hopefully we have python2 installed on all hosts
-    call_setup("")
+    # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
+    if CI_HOST_OS != "Windows":
+        call_setup("")
 
     # In case of packaging build, we have to build also python3 wheel
     if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:

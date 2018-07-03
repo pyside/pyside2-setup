@@ -113,46 +113,6 @@ endif()
 
 message(STATUS "CLANG: ${CLANG_DIR}, ${CLANG_LIBRARY} detected by ${CLANG_DIR_SOURCE}")
 
-# Find highest version clang builtin includes folder to pass along to shiboken.
-set(CLANG_BUILTIN_INCLUDES_DIR_PREFIX ${CLANG_DIR}/lib/clang)
-file(GLOB CLANG_BUILTIN_INCLUDES_DIR_CANDIDATES "${CLANG_BUILTIN_INCLUDES_DIR_PREFIX}/*")
-
-# Collect only directories, and not files, and only directories starting with a number.
-set(CLANG_BUILTIN_INCLUDES_DIR_VERSIONS "")
-foreach(candidate ${CLANG_BUILTIN_INCLUDES_DIR_CANDIDATES})
-    get_filename_component(candidate_basename ${candidate} NAME)
-    if (IS_DIRECTORY ${candidate} AND ${candidate_basename} MATCHES "^[0-9]") # starts with number
-        list(APPEND CLANG_BUILTIN_INCLUDES_DIR_VERSIONS ${candidate})
-    endif()
-endforeach()
-
-# Sort in alphabetical order the list of version folders.
-list(SORT CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
-
-# Reverse it so the first element is the highest version.
-list(REVERSE CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
-
-message(STATUS
-    "Found the following CLANG builtins includes directories: ${CLANG_BUILTIN_INCLUDES_DIR_VERSIONS} \
-     Considered the following directories: ${CLANG_BUILTIN_INCLUDES_DIR_CANDIDATES}")
-if(CLANG_BUILTIN_INCLUDES_DIR_VERSIONS)
-    # Get highest version.
-    list(GET CLANG_BUILTIN_INCLUDES_DIR_VERSIONS 0 CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION)
-    if (CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION)
-        # Set the final variable to the full include path to pass along to shiboken.
-        set(CLANG_BUILTIN_INCLUDES_DIR "${CLANG_BUILTIN_INCLUDES_DIR_HIGHEST_VERSION}/include")
-    endif()
-endif()
-
-message(STATUS "CLANG builtins includes directory chosen: ${CLANG_BUILTIN_INCLUDES_DIR}")
-
-# We don't exit with a hard error here, because it is uncertain whether all clang extra include
-# paths follow the same layout across OSes and distros.
-if (NOT CLANG_BUILTIN_INCLUDES_DIR)
-    message(WARNING "No CLANG builtins includes directory found. This may lead to shiboken \
-                     execution failure.")
-endif()
-
 set(CLANG_EXTRA_INCLUDES ${CLANG_DIR}/include)
 set(CLANG_EXTRA_LIBRARIES ${CLANG_LIBRARY})
 

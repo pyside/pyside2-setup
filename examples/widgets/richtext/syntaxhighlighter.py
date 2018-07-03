@@ -189,7 +189,7 @@ class Highlighter(QtGui.QSyntaxHighlighter):
             self.setFormat(startIndex, commentLength,
                     self.multiLineCommentFormat)
             startIndex = self.commentStartExpression.indexIn(text,
-                    startIndex + commentLength);
+                    startIndex + commentLength)
 
 
 if __name__ == '__main__':

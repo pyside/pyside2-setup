@@ -238,6 +238,20 @@ QString TypeInfo::toString() const
     return tmp;
 }
 
+QStringList TypeInfo::instantiationName() const
+{
+    QStringList result = m_qualifiedName;
+    if (const int argumentCount = m_arguments.size()) {
+        QString &last = result.last();
+        for (int i = 0; i < argumentCount; ++i) {
+            last += i ? QLatin1String(", ") : QLatin1String("< ");
+            last += m_arguments.at(i).toString();
+        }
+        last += QLatin1String(" >");
+    }
+    return result;
+}
+
 bool TypeInfo::operator==(const TypeInfo &other) const
 {
     if (arrayElements().count() != other.arrayElements().count())

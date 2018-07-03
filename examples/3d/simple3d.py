@@ -82,7 +82,7 @@ class OrbitTransformController(QObject):
         return self._angle
 
     def updateMatrix(self):
-        self._matrix.setToIdentity();
+        self._matrix.setToIdentity()
         self._matrix.rotate(self._angle, QVector3D(0, 1, 0))
         self._matrix.translate(self._radius, 0, 0)
         if self._target is not None:
@@ -146,7 +146,7 @@ class Window(Qt3DExtras.Qt3DWindow):
 
         self.sphereRotateTransformAnimation = QPropertyAnimation(self.sphereTransform)
         self.sphereRotateTransformAnimation.setTargetObject(self.controller)
-        self.sphereRotateTransformAnimation.setPropertyName("angle")
+        self.sphereRotateTransformAnimation.setPropertyName(b"angle")
         self.sphereRotateTransformAnimation.setStartValue(0)
         self.sphereRotateTransformAnimation.setEndValue(360)
         self.sphereRotateTransformAnimation.setDuration(10000)

@@ -302,7 +302,7 @@ if "PySide2.QtCore" in sys.modules:
         "QBuffer.writeData": ('str', 'int'),
 
     # class PySide2.QtCore.QByteArray:
-        "QByteArray.__init__": [(), ('PySide2.QtCore.QByteArray',), ('int', 'PySide2.support.signature.typing.Union[str, int]')],
+        "QByteArray.__init__": [(), ('PySide2.QtCore.QByteArray',), ('int', 'PySide2.support.signature.typing.Union[str, int]'), ('bytes',), ('bytearray',)],
         "QByteArray.__copy__": (),
         "QByteArray.__reduce__": (),
         "QByteArray.append": [('PySide2.QtCore.QByteArray',), ('PySide2.support.signature.typing.Union[str, int]',)],

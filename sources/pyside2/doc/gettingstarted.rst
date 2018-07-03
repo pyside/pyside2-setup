@@ -12,7 +12,7 @@ With these installed, you are ready to install the |project|
 packages using the pip wheel. Run the following command from your command
 prompt to install::
 
- python -m pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.9/latest pyside2 --trusted-host download.qt.io
+ python -m pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.11/latest pyside2 --trusted-host download.qt.io
 
 Now that you have |project| installed, you can test your setup by running the following Python
 constructs to print version information:

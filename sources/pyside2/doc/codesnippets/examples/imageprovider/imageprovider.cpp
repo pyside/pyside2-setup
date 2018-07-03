@@ -51,7 +51,7 @@
 //![0]
 class ColorImageProvider (QQuickImageProvider):
     def __init__(self):
-        QQuickImageProvider.__init__(self, QDeclarativeImageProvider.Pixmap)
+        QQuickImageProvider.__init__(self, QQuickImageProvider.Pixmap)
 
     def requestPixmap(id, size, requestedSize):
         width = 100

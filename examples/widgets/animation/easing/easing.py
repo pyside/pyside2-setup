@@ -135,7 +135,7 @@ class Window(QtWidgets.QWidget):
         self.m_scene.addItem(self.m_item.pixmap_item)
         self.m_ui.graphicsView.setScene(self.m_scene)
 
-        self.m_anim = Animation(self.m_item, 'pos')
+        self.m_anim = Animation(self.m_item, b'pos')
         self.m_anim.setEasingCurve(QtCore.QEasingCurve.OutBounce)
         self.m_ui.easingCurvePicker.setCurrentRow(int(QtCore.QEasingCurve.OutBounce))
 
@@ -173,7 +173,7 @@ class Window(QtWidgets.QWidget):
             painter.drawLine(0, xAxis, self.m_iconSize.width(),  xAxis)
             painter.drawLine(yAxis, 0, yAxis, self.m_iconSize.height())
 
-            curveScale = self.m_iconSize.height() / 2.0;
+            curveScale = self.m_iconSize.height() / 2.0
 
             painter.setPen(QtCore.Qt.NoPen)
 

@@ -1717,9 +1717,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                                               ", was=%1").arg(topElement.type, 0, 16);
                 return false;
             }
-            QString signature = attributes[QLatin1String("signature")];
+            const QString originalSignature = attributes[QLatin1String("signature")];
 
-            signature = TypeDatabase::normalizedSignature(signature);
+            QString signature = TypeDatabase::normalizedSignature(originalSignature);
             if (signature.isEmpty()) {
                 m_error = QLatin1String("No signature for the added function");
                 return false;
@@ -1754,6 +1754,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             FunctionModification mod;
             if (!mod.setSignature(m_currentSignature, &m_error))
                 return false;
+            mod.setOriginalSignature(originalSignature);
             m_contextStack.top()->functionMods << mod;
         }
         break;
@@ -1763,9 +1764,9 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
                                               ", was=%1").arg(topElement.type, 0, 16);
                 return false;
             }
-            QString signature = attributes[QLatin1String("signature")];
+            const QString originalSignature = attributes[QLatin1String("signature")];
 
-            signature = TypeDatabase::normalizedSignature(signature);
+            const QString signature = TypeDatabase::normalizedSignature(originalSignature);
             if (signature.isEmpty()) {
                 m_error = QLatin1String("No signature for modified function");
                 return false;
@@ -1780,6 +1781,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
             FunctionModification mod;
             if (!mod.setSignature(signature, &m_error))
                 return false;
+            mod.setOriginalSignature(originalSignature);
             m_currentSignature = signature;
 
             QString access = attributes[QLatin1String("access")].toLower();

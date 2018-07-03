@@ -42,7 +42,7 @@ class MyItemModel(QStandardItemModel):
 
     def mimeData(self,indexes):
         self.__mimedata = super(MyItemModel,self).mimeData(indexes)
-        self.__mimedata.setData(py3k.unicode_('application/my-form'), 'hi')
+        self.__mimedata.setData(py3k.unicode_('application/my-form'), py3k.b('hi'))
         return self.__mimedata
 
 class TestBug660(unittest.TestCase):

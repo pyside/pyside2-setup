@@ -31,13 +31,6 @@ add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
-# Pass the path to the clang includes dir, so it headers like stdarg.h.
-if(UNIX AND NOT APPLE)
-    add_definitions(-DCLANG_BUILTIN_INCLUDES_DIR="${CLANG_BUILTIN_INCLUDES_DIR}")
-else()
-    add_definitions(-DCLANG_BUILTIN_INCLUDES_DIR="")
-endif()
-
 set(apiextractor_SRC
 apiextractor.cpp
 abstractmetabuilder.cpp

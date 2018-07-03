@@ -116,7 +116,7 @@ class TestWidget(QtWidgets.QWidget):
         if e.mimeData().hasFormat("application/x-mycompany-VCard"):
             s = e.mimeData().data( "application/x-mycompany-VCard" )
             # s now contains text of vcard
-            self.label2.setText(str(s));
+            self.label2.setText(str(s))
             e.acceptProposedAction()
 
 if __name__ == '__main__':

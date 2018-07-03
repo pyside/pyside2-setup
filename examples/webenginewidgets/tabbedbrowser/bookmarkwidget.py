@@ -122,6 +122,7 @@ def _serialize_model(model, directory):
 # Bookmarks as a tree view to be used in a dock widget with
 # functionality to persist and populate tool bars and menus.
 class BookmarkWidget(QTreeView):
+    """Provides a tree view to manage the bookmarks."""
 
     open_bookmark = QtCore.Signal(QUrl)
     open_bookmark_in_new_tab = QtCore.Signal(QUrl)

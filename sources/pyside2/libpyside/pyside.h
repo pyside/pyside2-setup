@@ -164,7 +164,6 @@ PYSIDE_API QString pyStringToQString(PyObject *str);
  */
 PYSIDE_API bool registerInternalQtConf();
 
-Q_DECLARE_LOGGING_CATEGORY(lcPySide2)
 
 } //namespace PySide
 

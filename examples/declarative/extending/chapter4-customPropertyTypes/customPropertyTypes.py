@@ -51,9 +51,10 @@ from utils import text_type
 from PySide2.QtCore import Property, QUrl
 from PySide2.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide2.QtQml import qmlRegisterType
-from PySide2.QtQuick import QQuickPaintedItem, QQuickView
+from PySide2.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
 
 class PieSlice (QQuickPaintedItem):
+
     def __init__(self, parent = None):
         QQuickPaintedItem.__init__(self, parent)
         self._color = QColor()
@@ -68,14 +69,14 @@ class PieSlice (QQuickPaintedItem):
 
     def paint(self, painter):
         pen = QPen(self._color, 2)
-        painter.setPen(pen);
-        painter.setRenderHints(QPainter.Antialiasing, True);
-        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16);
+        painter.setPen(pen)
+        painter.setRenderHints(QPainter.Antialiasing, True)
+        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16)
 
-class PieChart (QQuickPaintedItem):
+class PieChart (QQuickItem):
     def __init__(self, parent = None):
-        QQuickPaintedItem.__init__(self, parent)
-        self._name = u''
+        QQuickItem.__init__(self, parent)
+        self._name = None
         self._pieSlice = None
 
     def getName(self):

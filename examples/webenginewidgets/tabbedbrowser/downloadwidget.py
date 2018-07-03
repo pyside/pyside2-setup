@@ -48,7 +48,7 @@ from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem
 
 # A QProgressBar with context menu for displaying downloads in a QStatusBar.
 class DownloadWidget(QProgressBar):
-
+    """Lets you track progress of a QWebEngineDownloadItem."""
     finished = QtCore.Signal()
     remove_requested = QtCore.Signal()
 

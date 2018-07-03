@@ -29,16 +29,29 @@
 #include "compilersupport.h"
 #include "header_paths.h"
 
+#include <reporthandler.h>
+
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QProcess>
+#include <QtCore/QStandardPaths>
 #include <QtCore/QStringList>
 #include <QtCore/QVersionNumber>
+
+#include <clang-c/Index.h>
 
 #include <string.h>
 #include <algorithm>
 #include <iterator>
 
 namespace clang {
+
+QVersionNumber libClangVersion()
+{
+    return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
+}
 
 static bool runProcess(const QString &program, const QStringList &arguments,
                        QByteArray *stdOutIn = nullptr, QByteArray *stdErrIn = nullptr)
@@ -106,9 +119,9 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
             if (line.startsWith(QByteArrayLiteral("End of search list"))) {
                 isIncludeDir = false;
             } else {
-                HeaderPath headerPath(line.trimmed());
+                HeaderPath headerPath{line.trimmed(), HeaderType::System};
                 if (headerPath.path.endsWith(frameworkPath())) {
-                    headerPath.m_isFramework = true;
+                    headerPath.type = HeaderType::FrameworkSystem;
                     headerPath.path.truncate(headerPath.path.size() - frameworkPath().size());
                 }
                 result.append(headerPath);
@@ -127,7 +140,8 @@ static void detectVulkan(HeaderPaths *headerPaths)
     static const char *vulkanVariables[] = {"VULKAN_SDK", "VK_SDK_PATH"};
     for (const char *vulkanVariable : vulkanVariables) {
         if (qEnvironmentVariableIsSet(vulkanVariable)) {
-            headerPaths->append(HeaderPath(qgetenv(vulkanVariable) + QByteArrayLiteral("/include")));
+            const QByteArray path = qgetenv(vulkanVariable) + QByteArrayLiteral("/include");
+            headerPaths->append(HeaderPath{path, HeaderType::System});
             break;
         }
     }
@@ -154,6 +168,68 @@ static inline bool isRedHat74()
 static QByteArray noStandardIncludeOption() { return QByteArrayLiteral("-nostdinc"); }
 #endif
 
+// The clang builtin includes directory is used to find the definitions for
+// intrinsic functions and builtin types. It is necessary to use the clang
+// includes to prevent redefinition errors. The default toolchain includes
+// should be picked up automatically by clang without specifying
+// them implicitly.
+
+#if defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN)
+#  define NEED_CLANG_BUILTIN_INCLUDES 1
+#else
+#  define NEED_CLANG_BUILTIN_INCLUDES 0
+#endif
+
+#if NEED_CLANG_BUILTIN_INCLUDES
+static QString findClang()
+{
+    for (const char *envVar : {"LLVM_INSTALL_DIR", "CLANG_INSTALL_DIR"}) {
+        if (qEnvironmentVariableIsSet(envVar)) {
+            const QString path = QFile::decodeName(qgetenv(envVar));
+            if (QFileInfo::exists(path))
+                return path;
+        }
+    }
+    const QString llvmConfig =
+        QStandardPaths::findExecutable(QLatin1String("llvm-config"));
+    if (!llvmConfig.isEmpty()) {
+        QByteArray stdOut;
+        if (runProcess(llvmConfig, QStringList{QLatin1String("--prefix")}, &stdOut)) {
+            const QString path = QFile::decodeName(stdOut.trimmed());
+            if (QFileInfo::exists(path))
+                return path;
+        }
+    }
+    return QString();
+}
+
+static QString findClangBuiltInIncludesDir()
+{
+    // Find the include directory of the highest version.
+    const QString clangPath = findClang();
+    if (!clangPath.isEmpty()) {
+        QString candidate;
+        QVersionNumber lastVersionNumber(1, 0, 0);
+        QDir clangDir(clangPath + QLatin1String("/lib/clang"));
+        const QFileInfoList versionDirs =
+            clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QFileInfo &fi : versionDirs) {
+            const QString fileName = fi.fileName();
+            if (fileName.at(0).isDigit()) {
+                const QVersionNumber versionNumber = QVersionNumber::fromString(fileName.at(0));
+                if (!versionNumber.isNull() && versionNumber > lastVersionNumber) {
+                    candidate = fi.absoluteFilePath();
+                    lastVersionNumber = versionNumber;
+                }
+            }
+        }
+        if (!candidate.isEmpty())
+            return candidate + QStringLiteral("/include");
+    }
+    return QString();
+}
+#endif // NEED_CLANG_BUILTIN_INCLUDES
+
 // Returns clang options needed for emulating the host compiler
 QByteArrayList emulatedCompilerOptions()
 {
@@ -168,16 +244,21 @@ QByteArrayList emulatedCompilerOptions()
 #elif defined(Q_CC_GNU)
     HeaderPaths headerPaths;
 
-    // The clang builtin includes directory is used to find the definitions for intrinsic functions
-    // and builtin types. It is necessary to use the clang includes to prevent redefinition errors.
-    // The default toolchain includes should be picked up automatically by clang without specifying
-    // them implicitly.
-    QByteArray clangBuiltinIncludesDir(CLANG_BUILTIN_INCLUDES_DIR);
-
-    if (!clangBuiltinIncludesDir.isEmpty()) {
-        result.append(QByteArrayLiteral("-isystem"));
-        result.append(clangBuiltinIncludesDir);
+#if NEED_CLANG_BUILTIN_INCLUDES
+    const QString clangBuiltinIncludesDir =
+        QDir::toNativeSeparators(findClangBuiltInIncludesDir());
+    if (clangBuiltinIncludesDir.isEmpty()) {
+        qCWarning(lcShiboken, "Unable to locate Clang's built-in include directory "
+                  "(neither by checking the environment variables LLVM_INSTALL_DIR, CLANG_INSTALL_DIR "
+                  " nor running llvm-config). This may lead to parse errors.");
+    } else {
+        qCInfo(lcShiboken, "CLANG builtins includes directory: %s",
+               qPrintable(clangBuiltinIncludesDir));
+        headerPaths.append(HeaderPath{QFile::encodeName(clangBuiltinIncludesDir),
+                                      HeaderType::System});
     }
+#endif // NEED_CLANG_BUILTIN_INCLUDES
+
     // Append the c++ include paths since Clang is unable to find <list> etc
     // on RHEL 7.4 with g++ 6.3. A fix for this has been added to Clang 5.0,
     // so, the code can be removed once Clang 5.0 is the minimum version.
@@ -193,10 +274,51 @@ QByteArrayList emulatedCompilerOptions()
 #endif
     detectVulkan(&headerPaths);
     std::transform(headerPaths.cbegin(), headerPaths.cend(),
-                   std::back_inserter(result), [](const HeaderPath &p) {
-                       return HeaderPath::includeOption(p, true);
-    });
+                   std::back_inserter(result), HeaderPath::includeOption);
     return result;
+}
+
+LanguageLevel emulatedCompilerLanguageLevel()
+{
+#if defined(Q_CC_MSVC) && _MSC_VER > 1900
+    // Fixes constexpr errors in MSVC2017 library headers with Clang 4.1..5.X (0.45 == Clang 6).
+    if (libClangVersion() < QVersionNumber(0, 45))
+        return LanguageLevel::Cpp1Z;
+#endif // Q_CC_MSVC && _MSC_VER > 1900
+    return LanguageLevel::Cpp14; // otherwise, t.h is parsed as "C"
+}
+
+struct LanguageLevelMapping
+{
+    const char *option;
+    LanguageLevel level;
+};
+
+static const LanguageLevelMapping languageLevelMapping[] =
+{
+    {"c++11", LanguageLevel::Cpp11},
+    {"c++14", LanguageLevel::Cpp14},
+    {"c++17", LanguageLevel::Cpp17},
+    {"c++20", LanguageLevel::Cpp20},
+    {"c++1z", LanguageLevel::Cpp1Z}
+};
+
+const char *languageLevelOption(LanguageLevel l)
+{
+    for (const LanguageLevelMapping &m : languageLevelMapping) {
+        if (m.level == l)
+            return m.option;
+    }
+    return nullptr;
+}
+
+LanguageLevel languageLevelFromOption(const char *o)
+{
+    for (const LanguageLevelMapping &m : languageLevelMapping) {
+        if (!strcmp(m.option, o))
+            return m.level;
+    }
+    return LanguageLevel::Default;
 }
 
 } // namespace clang

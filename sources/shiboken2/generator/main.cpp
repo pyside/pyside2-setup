@@ -46,8 +46,10 @@
     #define PATH_SPLITTER ":"
 #endif
 
+static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
 static inline QString includePathOption() { return QStringLiteral("include-paths"); }
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
+static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
 static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
@@ -171,8 +173,10 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 
     QStringList includePaths;
     QStringList frameworkIncludePaths;
+    QStringList systemIncludePaths;
     QStringList typesystemPaths;
     QStringList apiVersions;
+    QString languageLevel;
 
     while (!projectFile.atEnd()) {
         line = projectFile.readLine().trimmed();
@@ -193,8 +197,12 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
             includePaths << QDir::toNativeSeparators(value);
         else if (key == "framework-include-path")
             frameworkIncludePaths << QDir::toNativeSeparators(value);
+        else if (key == "system-include-paths")
+            systemIncludePaths << QDir::toNativeSeparators(value);
         else if (key == "typesystem-path")
             typesystemPaths << QDir::toNativeSeparators(value);
+        else if (key == "language-level")
+            languageLevel = value;
         else if (key == "api-version")
             apiVersions << value;
         else if (key == "header-file")
@@ -211,11 +219,17 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
     if (!frameworkIncludePaths.isEmpty())
         args.insert(frameworkIncludePathOption(),
                     frameworkIncludePaths.join(QLatin1String(PATH_SPLITTER)));
+    if (!systemIncludePaths.isEmpty()) {
+        args.insert(systemIncludePathOption(),
+                    systemIncludePaths.join(QLatin1String(PATH_SPLITTER)));
+    }
 
     if (!typesystemPaths.isEmpty())
         args.insert(typesystemPathOption(), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
     if (!apiVersions.isEmpty())
         args.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
+    if (!languageLevel.isEmpty())
+        args.insert(languageLevelOption(), languageLevel);
     return true;
 }
 
@@ -284,7 +298,7 @@ static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &
         const QString option = arg.left(split);
         const QString value = arg.mid(split + 1).trimmed();
         if (option == includePathOption() || option == frameworkIncludePathOption()
-            || option == typesystemPathOption()) {
+            || option == systemIncludePathOption() || option == typesystemPathOption()) {
             addPathOptionValue(option, value, args);
         } else {
             args.insert(option, value);
@@ -297,10 +311,14 @@ static void getCommandLineArg(QString arg, int &argNum, QMap<QString, QString> &
             addPathOptionValue(includePathOption(), arg.mid(1), args);
         else if (arg.startsWith(QLatin1Char('F')))
             addPathOptionValue(frameworkIncludePathOption(), arg.mid(1), args);
+        else if (arg.startsWith(QLatin1String("isystem")))
+            addPathOptionValue(systemIncludePathOption(), arg.mid(7), args);
         else if (arg.startsWith(QLatin1Char('T')))
             addPathOptionValue(typesystemPathOption(), arg.mid(1), args);
         else if (arg == QLatin1String("h"))
             args.insert(helpOption(), QString());
+        else if (arg.startsWith(QLatin1String("std=")))
+            args.insert(languageLevelOption(), arg.mid(4));
         else
             args.insert(arg, QString());
         return;
@@ -338,6 +356,13 @@ static inline Generators shibokenGenerators()
     return result;
 }
 
+static inline QString languageLevelDescription()
+{
+    return QLatin1String("C++ Language level (c++11..c++17, default=")
+        + QLatin1String(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
+        + QLatin1Char(')');
+}
+
 void printUsage()
 {
     QTextStream s(stdout);
@@ -358,6 +383,9 @@ void printUsage()
         << qMakePair(QLatin1String("-F") + pathSyntax, QString())
         << qMakePair(QLatin1String("framework-include-paths=") + pathSyntax,
                      QLatin1String("Framework include paths used by the C++ parser"))
+        << qMakePair(QLatin1String("-isystem") + pathSyntax, QString())
+        << qMakePair(QLatin1String("system-include-paths=") + pathSyntax,
+                     QLatin1String("System include paths used by the C++ parser"))
         << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
                      QLatin1String("generator-set to be used. e.g. qtdoc"))
         << qMakePair(QLatin1String("-h"), QString())
@@ -366,6 +394,8 @@ void printUsage()
         << qMakePair(QLatin1String("-I") + pathSyntax, QString())
         << qMakePair(QLatin1String("include-paths=") + pathSyntax,
                      QLatin1String("Include paths used by the C++ parser"))
+        << qMakePair(languageLevelOption() + QLatin1String("=, -std=<level>"),
+                     languageLevelDescription())
         << qMakePair(QLatin1String("license-file=<license-file>"),
                      QLatin1String("File used for copyright headers of generated files"))
         << qMakePair(QLatin1String("no-suppress-warnings"),
@@ -412,6 +442,18 @@ static QString msgInvalidVersion(const QString &package, const QString &version)
 {
     return QLatin1String("Invalid version \"") + version
         + QLatin1String("\" specified for package ") + package + QLatin1Char('.');
+}
+
+static void parseIncludePathOption(const QString &option, HeaderType headerType,
+                                   ArgsHandler &args,
+                                   ApiExtractor &extractor)
+{
+    const QString path = args.removeArg(option);
+    if (!path.isEmpty()) {
+        const QStringList includePathListList = path.split(QLatin1String(PATH_SPLITTER));
+        for (const QString &s : includePathListList)
+            extractor.addIncludePath(HeaderPath{QFile::encodeName(s), headerType});
+    }
 }
 
 int main(int argc, char *argv[])
@@ -525,23 +567,12 @@ int main(int argc, char *argv[])
     if (!path.isEmpty())
         extractor.addTypesystemSearchPath(path.split(QLatin1String(PATH_SPLITTER)));
 
-    path = argsHandler.removeArg(QLatin1String("include-paths"));
-    if (!path.isEmpty()) {
-        const QStringList includePathListList = path.split(QLatin1String(PATH_SPLITTER));
-        for (const QString &s : qAsConst(includePathListList)) {
-            const bool isFramework = false;
-            extractor.addIncludePath(HeaderPath(s, isFramework));
-        }
-    }
-
-    path = argsHandler.removeArg(QLatin1String("framework-include-paths"));
-    if (!path.isEmpty()) {
-        const QStringList frameworkPathList = path.split(QLatin1String(PATH_SPLITTER));
-        const bool isFramework = true;
-        for (const QString &s : qAsConst(frameworkPathList)) {
-            extractor.addIncludePath(HeaderPath(s, isFramework));
-        }
-    }
+    parseIncludePathOption(includePathOption(), HeaderType::Standard,
+                           argsHandler, extractor);
+    parseIncludePathOption(frameworkIncludePathOption(), HeaderType::Framework,
+                           argsHandler, extractor);
+    parseIncludePathOption(systemIncludePathOption(), HeaderType::System,
+                           argsHandler, extractor);
 
     QString cppFileName = argsHandler.removeArg(QLatin1String("arg-1"));
     const QFileInfo cppFileNameFi(cppFileName);
@@ -574,6 +605,18 @@ int main(int argc, char *argv[])
             argsHandler.removeArg(od.first);
     }
 
+    const QString languageLevel = argsHandler.removeArg(languageLevelOption());
+    if (!languageLevel.isEmpty()) {
+        const QByteArray languageLevelBA = languageLevel.toLatin1();
+        const LanguageLevel level = clang::languageLevelFromOption(languageLevelBA.constData());
+        if (level == LanguageLevel::Default) {
+            std::cout << "Invalid argument for language level: \""
+                << languageLevelBA.constData() << "\"\n" << helpHint;
+            return EXIT_FAILURE;
+        }
+        extractor.setLanguageLevel(level);
+    }
+
     if (!argsHandler.noArgs()) {
         errorPrint(argsHandler.errorMessage());
         std::cout << helpHint;
@@ -587,6 +630,7 @@ int main(int argc, char *argv[])
 
     extractor.setCppFileName(cppFileNameFi.absoluteFilePath());
     extractor.setTypeSystem(typeSystemFileName);
+
     if (!extractor.run()) {
         errorPrint(QLatin1String("Error running ApiExtractor."));
         return EXIT_FAILURE;

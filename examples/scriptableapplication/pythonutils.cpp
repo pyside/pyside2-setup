@@ -54,6 +54,8 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 #include <QtCore/QStringList>
+#include <QtCore/QTemporaryFile>
+#include <QtCore/QDir>
 
 #include <sbkpython.h>
 #include <sbkconverter.h>
@@ -122,7 +124,7 @@ bool bindAppObject(const QString &moduleName, const QString &name,
         return false;
     PyTypeObject *typeObject = SbkAppLibTypes[index];
 
-    PyObject *po = Shiboken::Conversions::pointerToPython(reinterpret_cast<const SbkObjectType *>(typeObject), o);
+    PyObject *po = Shiboken::Conversions::pointerToPython(reinterpret_cast<SbkObjectType *>(typeObject), o);
     if (!po) {
         qWarning() << __FUNCTION__ << "Failed to create wrapper for" << o;
         return false;
@@ -152,17 +154,22 @@ bool runScript(const QStringList &script)
 {
     if (init() == PythonUninitialized)
         return false;
+
+    // Concatenating all the lines
+    QString content;
+    QTextStream ss(&content);
+    for (const QString &line: script)
+        ss << line << "\n";
+
+    // Executing the whole script as one line
     bool result = true;
-    for (const QString& lineS : script) {
-        const QByteArray line = lineS.toUtf8();
-        if (PyRun_SimpleString(line.constData()) == -1) {
-            if (PyErr_Occurred())
-                PyErr_Print();
-            qWarning() << __FUNCTION__ << "Error at" << line;
-            result = false;
-            break;
-        }
+    const QByteArray line = content.toUtf8();
+    if (PyRun_SimpleString(line.constData()) == -1) {
+        if (PyErr_Occurred())
+            PyErr_Print();
+        result = false;
     }
+
     return result;
 }
 

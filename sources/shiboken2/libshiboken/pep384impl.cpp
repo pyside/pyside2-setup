@@ -449,94 +449,9 @@ check_PepTypeObject_valid(void)
 
 #ifdef Py_LIMITED_API
 
-// This structure is only here because Python 3 has an error.
-// I will fix that.
-
-typedef struct {
-    /* Number implementations must check *both*
-       arguments for proper type and implement the necessary conversions
-       in the slot functions themselves. */
-
-    binaryfunc nb_add;
-    binaryfunc nb_subtract;
-    binaryfunc nb_multiply;
-    binaryfunc nb_remainder;
-    binaryfunc nb_divmod;
-    ternaryfunc nb_power;
-    unaryfunc nb_negative;
-    unaryfunc nb_positive;
-    unaryfunc nb_absolute;
-    inquiry nb_bool;
-    unaryfunc nb_invert;
-    binaryfunc nb_lshift;
-    binaryfunc nb_rshift;
-    binaryfunc nb_and;
-    binaryfunc nb_xor;
-    binaryfunc nb_or;
-    unaryfunc nb_int;
-    void *nb_reserved;  /* the slot formerly known as nb_long */
-    unaryfunc nb_float;
-
-    binaryfunc nb_inplace_add;
-    binaryfunc nb_inplace_subtract;
-    binaryfunc nb_inplace_multiply;
-    binaryfunc nb_inplace_remainder;
-    ternaryfunc nb_inplace_power;
-    binaryfunc nb_inplace_lshift;
-    binaryfunc nb_inplace_rshift;
-    binaryfunc nb_inplace_and;
-    binaryfunc nb_inplace_xor;
-    binaryfunc nb_inplace_or;
-
-    binaryfunc nb_floor_divide;
-    binaryfunc nb_true_divide;
-    binaryfunc nb_inplace_floor_divide;
-    binaryfunc nb_inplace_true_divide;
-
-    unaryfunc nb_index;
-
-    binaryfunc nb_matrix_multiply;
-    binaryfunc nb_inplace_matrix_multiply;
-} PyNumberMethods;
-
-// temporary structure until we have a generator for the offsets
-typedef struct _oldtypeobject {
-    PyVarObject ob_base;
-    void *X01; // const char *tp_name;
-    void *X02; // Py_ssize_t tp_basicsize;
-    void *X03; // Py_ssize_t tp_itemsize;
-    void *X04; // destructor tp_dealloc;
-    void *X05; // printfunc tp_print;
-    void *X06; // getattrfunc tp_getattr;
-    void *X07; // setattrfunc tp_setattr;
-    void *X08; // PyAsyncMethods *tp_as_async;
-    void *X09; // reprfunc tp_repr;
-    PyNumberMethods *tp_as_number;
-
-} PyOldTypeObject;
-
-// There is a bug in Python 3.6 that turned the Index_Check function
-// into a macro without taking care of the limited API.
-// This leads to the single problem that we don't have
-// access to PyLong_Type's nb_index field which is no heap type.
-// We cannot easily create this function by inheritance since it is
-// not inherited.
-//
-// Simple solution: Create the structure and write such a function.
-// Long term: Submit a patch to python.org .
-
-unaryfunc
-PepType_nb_index(PyTypeObject *type)
-{
-    return reinterpret_cast<PyOldTypeObject*>(type)->tp_as_number->nb_index;
-}
-
-int PyIndex_Check(PyObject *obj)
-{
-    PyOldTypeObject *type = reinterpret_cast<PyOldTypeObject*>(Py_TYPE(obj));
-    return type->tp_as_number != NULL &&
-           type->tp_as_number->nb_index != NULL;
-}
+#if PY_VERSION_HEX < 0x03070000
+#include "pep384_issue33738.cpp"
+#endif
 
 /*****************************************************************************
  *
@@ -910,7 +825,7 @@ PepType_GetNameStr(PyTypeObject *type)
  */
 
 void
-Pep_Init()
+Pep384_Init()
 {
     check_PepTypeObject_valid();
 #ifdef Py_LIMITED_API

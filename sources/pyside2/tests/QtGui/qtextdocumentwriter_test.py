@@ -30,6 +30,7 @@ import unittest
 
 from PySide2.QtGui import QTextDocumentWriter, QTextDocument
 from PySide2.QtCore import QBuffer
+import py3kcompat as py3k
 
 class QTextDocumentWriterTest(unittest.TestCase):
 
@@ -38,7 +39,7 @@ class QTextDocumentWriterTest(unittest.TestCase):
         doc = QTextDocument(text)
         b = QBuffer()
         b.open(QBuffer.ReadWrite)
-        writer = QTextDocumentWriter(b, "plaintext");
+        writer = QTextDocumentWriter(b, py3k.b("plaintext"));
         writer.write(doc);
         b.close()
         self.assertEqual(b.buffer(), text)

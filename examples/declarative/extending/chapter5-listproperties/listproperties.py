@@ -51,7 +51,7 @@ from utils import text_type
 from PySide2.QtCore import Property, QUrl
 from PySide2.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide2.QtQml import qmlRegisterType, ListProperty
-from PySide2.QtQuick import QQuickPaintedItem, QQuickView
+from PySide2.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
 
 class PieSlice (QQuickPaintedItem):
     def __init__(self, parent = None):
@@ -84,13 +84,13 @@ class PieSlice (QQuickPaintedItem):
 
     def paint(self, painter):
         pen = QPen(self._color, 2)
-        painter.setPen(pen);
-        painter.setRenderHints(QPainter.Antialiasing, True);
-        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), self._fromAngle * 16, self._angleSpan * 16);
+        painter.setPen(pen)
+        painter.setRenderHints(QPainter.Antialiasing, True)
+        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), self._fromAngle * 16, self._angleSpan * 16)
 
-class PieChart (QQuickPaintedItem):
+class PieChart (QQuickItem):
     def __init__(self, parent = None):
-        QQuickPaintedItem.__init__(self, parent)
+        QQuickItem.__init__(self, parent)
         self._name = u''
         self._slices = []
 
@@ -111,8 +111,8 @@ class PieChart (QQuickPaintedItem):
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
 
-    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart');
-    qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice");
+    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart')
+    qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice")
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)

@@ -31,6 +31,7 @@ import unittest
 import os
 
 from PySide2.QtCore import QIODevice, QTemporaryFile
+import py3kcompat as py3k
 
 class FileChild1(QTemporaryFile):
     pass
@@ -48,11 +49,11 @@ class readDataTest(unittest.TestCase):
         '''Acquire resources'''
         self.filename1 = FileChild1()
         self.assertTrue(self.filename1.open())
-        self.filename1.write('Test text for testing')
+        self.filename1.write(py3k.b('Test text for testing'))
 
         self.filename2 = FileChild2()
         self.assertTrue(self.filename2.open())
-        self.filename2.write('Test text for testing')
+        self.filename2.write(py3k.b('Test text for testing'))
 
     def tearDown(self):
         '''release resources'''
