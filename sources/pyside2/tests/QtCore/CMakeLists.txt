@@ -1,3 +1,4 @@
+PYSIDE_TEST(attr_cache_py3k.py)
 PYSIDE_TEST(bug_278_test.py)
 PYSIDE_TEST(bug_332.py)
 PYSIDE_TEST(bug_408.py)
