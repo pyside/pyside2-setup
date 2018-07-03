@@ -1014,7 +1014,7 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
-    metaClass->setBaseClassNames(QStringList() << typeDef->type().qualifiedName().join(colonColon()));
+    metaClass->setBaseClassNames(QStringList(typeDef->type().toString()));
     *metaClass += AbstractMetaAttributes::Public;
 
     // Set the default include file name
@@ -2358,8 +2358,10 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     QString name = qualifierList.takeLast();
 
     // 4. Special case QFlags (include instantiation in name)
-    if (qualifiedName == QLatin1String("QFlags"))
+    if (qualifiedName == QLatin1String("QFlags")) {
         qualifiedName = typeInfo.toString();
+        typeInfo.clearInstantiations();
+    }
 
     const TypeEntry *type = 0;
     // 5. Try to find the type
@@ -2417,10 +2419,9 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     metaType->setConstant(typeInfo.isConstant());
     metaType->setOriginalTypeDescription(_typei.toString());
 
-    const auto &templateArguments = typeInfo.arguments();
+    const auto &templateArguments = typeInfo.instantiations();
     for (int t = 0, size = templateArguments.size(); t < size; ++t) {
         TypeInfo ti = templateArguments.at(t);
-        ti.setQualifiedName(ti.instantiationName());
         AbstractMetaType *targType = translateType(ti);
         if (!targType) {
             delete metaType;
@@ -2733,7 +2734,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                                                  const AbstractMetaClass *templateClass,
                                                  const TypeInfo &info)
 {
-    QVector<TypeInfo> targs = info.arguments();
+    QVector<TypeInfo> targs = info.instantiations();
     QVector<AbstractMetaType *> templateTypes;
 
     if (subclass->isTypeDef()) {
@@ -2775,7 +2776,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << "Ignoring template parameter " << templateParamName << " from "
-                << info.instantiationName() << ", because I don't know what it is.";
+                << info.toString() << ", because I don't know what it is.";
         }
     }
 

@@ -142,6 +142,7 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
         __result.setReferenceType(__rhs.referenceType());
     __result.setIndirections(__result.indirections() + __rhs.indirections());
     __result.setArrayElements(__result.arrayElements() + __rhs.arrayElements());
+    __result.m_instantiations.append(__rhs.m_instantiations);
 
     return __result;
 }
@@ -150,6 +151,7 @@ bool TypeInfo::isVoid() const
 {
     return m_indirections == 0 && m_referenceType == NoReference
         && m_arguments.isEmpty() && m_arrayElements.isEmpty()
+        && m_instantiations.isEmpty()
         && m_qualifiedName.size() == 1
         && m_qualifiedName.constFirst() == QLatin1String("void");
 }
@@ -204,6 +206,18 @@ QString TypeInfo::toString() const
     if (isVolatile())
         tmp += QLatin1String(" volatile");
 
+    if (const int instantiationCount = m_instantiations.size()) {
+        tmp += QLatin1Char('<');
+        for (int i = 0; i < instantiationCount; ++i) {
+            if (i)
+                tmp += QLatin1String(", ");
+            tmp += m_instantiations.at(i).toString();
+        }
+        if (tmp.endsWith(QLatin1Char('>')))
+            tmp += QLatin1Char(' ');
+        tmp += QLatin1Char('>');
+    }
+
     if (indirections())
         tmp += QString(indirections(), QLatin1Char('*'));
 
@@ -238,20 +252,6 @@ QString TypeInfo::toString() const
     return tmp;
 }
 
-QStringList TypeInfo::instantiationName() const
-{
-    QStringList result = m_qualifiedName;
-    if (const int argumentCount = m_arguments.size()) {
-        QString &last = result.last();
-        for (int i = 0; i < argumentCount; ++i) {
-            last += i ? QLatin1String(", ") : QLatin1String("< ");
-            last += m_arguments.at(i).toString();
-        }
-        last += QLatin1String(" >");
-    }
-    return result;
-}
-
 bool TypeInfo::operator==(const TypeInfo &other) const
 {
     if (arrayElements().count() != other.arrayElements().count())
@@ -269,7 +269,8 @@ bool TypeInfo::operator==(const TypeInfo &other) const
 
     return flags == other.flags
            && m_qualifiedName == other.m_qualifiedName
-           && (!m_functionPointer || m_arguments == other.m_arguments);
+           && (!m_functionPointer || m_arguments == other.m_arguments)
+           && m_instantiations == other.m_instantiations;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -303,6 +304,11 @@ void TypeInfo::formatDebug(QDebug &d) const
     case RValueReference:
         d << ", [rvalref]";
         break;
+    }
+    if (!m_instantiations.isEmpty()) {
+        d << ", template<";
+        formatSequence(d, m_instantiations.begin(), m_instantiations.end());
+        d << '>';
     }
     if (m_functionPointer) {
         d << ", function ptr(";

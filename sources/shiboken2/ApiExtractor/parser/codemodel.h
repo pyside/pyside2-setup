@@ -174,6 +174,11 @@ public:
         m_arguments.append(arg);
     }
 
+    QVector<TypeInfo> instantiations() const { return m_instantiations; }
+    void setInstantiations(const QVector<TypeInfo> &i) { m_instantiations = i; }
+    void addInstantiation(const TypeInfo &i) { m_instantiations.append(i); }
+    void clearInstantiations() { m_instantiations.clear(); }
+
     bool operator==(const TypeInfo &other) const;
 
     bool operator!=(const TypeInfo &other) const
@@ -184,8 +189,6 @@ public:
     // ### arrays and templates??
 
     QString toString() const;
-
-    QStringList instantiationName() const;
 
     static TypeInfo combine(const TypeInfo &__lhs, const TypeInfo &__rhs);
     static TypeInfo resolveType(TypeInfo const &__type, CodeModelItem __scope);
@@ -200,6 +203,7 @@ private:
     QStringList m_qualifiedName;
     QStringList m_arrayElements;
     QVector<TypeInfo> m_arguments;
+    QVector<TypeInfo> m_instantiations;
 
     union {
         uint flags;

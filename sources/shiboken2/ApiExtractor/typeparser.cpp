@@ -212,14 +212,14 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
             }
             break;
         case Scanner::LessThanToken:
-            stack.top()->m_arguments << TypeInfo();
-            stack.push(&stack.top()->m_arguments.last());
+            stack.top()->m_instantiations << TypeInfo();
+            stack.push(&stack.top()->m_instantiations.last());
             break;
 
         case Scanner::CommaToken:
             stack.pop();
-            stack.top()->m_arguments << TypeInfo();
-            stack.push(&stack.top()->m_arguments.last());
+            stack.top()->m_instantiations << TypeInfo();
+            stack.push(&stack.top()->m_instantiations.last());
             break;
 
         case Scanner::GreaterThanToken:
