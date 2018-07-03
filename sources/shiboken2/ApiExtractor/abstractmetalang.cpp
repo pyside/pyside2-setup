@@ -301,6 +301,16 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
                 d << ", array of \"" << at->arrayElementType()->cppSignature()
                     << "\", arrayElementCount="  << at->arrayElementCount();
             }
+            const auto &instantiations = at->instantiations();
+            if (const int instantiationsSize = instantiations.size()) {
+                d << ", instantiations[" << instantiationsSize << "]=<";
+                for (int i = 0; i < instantiationsSize; ++i) {
+                    if (i)
+                        d << ", ";
+                    d << instantiations.at(i);
+                }
+            }
+            d << '>';
         }
     } else {
         d << '0';
@@ -2406,6 +2416,18 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
             }
             d << ')';
         }
+        const auto &templateArguments = ac->templateArguments();
+        if (const int count = templateArguments.size()) {
+            d << ", templateArguments=[" << count << "](";
+            for (int i = 0; i < count; ++i) {
+                if (i)
+                    d << ", ";
+                d << templateArguments.at(i);
+            }
+            d << ')';
+        }
+
+
     } else {
         d << '0';
     }
