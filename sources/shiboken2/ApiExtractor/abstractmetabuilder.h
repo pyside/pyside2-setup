@@ -38,7 +38,9 @@ QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class AbstractMetaBuilderPrivate;
 class AbstractMetaClass;
+class AbstractMetaType;
 class AbstractMetaEnumValue;
+class TypeInfo;
 
 class AbstractMetaBuilder
 {
@@ -82,6 +84,16 @@ public:
     *   filled.
     */
     void setGlobalHeader(const QString& globalHeader);
+
+    static AbstractMetaType *translateType(const TypeInfo &_typei,
+                                           AbstractMetaClass *currentClass = nullptr,
+                                           bool resolveType = true,
+                                           QString *errorMessage = nullptr);
+    static AbstractMetaType *translateType(const QString &t,
+                                           AbstractMetaClass *currentClass = nullptr,
+                                           bool resolveType = true,
+                                           QString *errorMessage = nullptr);
+
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;

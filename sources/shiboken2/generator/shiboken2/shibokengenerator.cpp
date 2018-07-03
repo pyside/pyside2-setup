@@ -31,6 +31,7 @@
 #include "overloaddata.h"
 #include <reporthandler.h>
 #include <typedatabase.h>
+#include <abstractmetabuilder.h>
 #include <iostream>
 
 #include <QtCore/QDir>
@@ -2262,6 +2263,12 @@ bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
     return false;
 }
 
+static inline QString msgCannotBuildMetaType(const QString &s)
+{
+    return QLatin1String("Unable to build meta type for \"")
+        + s + QLatin1String("\": ");
+}
+
 AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature,
                                                                      QString *errorMessage)
 {
@@ -2269,110 +2276,18 @@ AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     if (typeSignature.startsWith(QLatin1String("::")))
         typeSignature.remove(0, 2);
 
-    if (m_metaTypeFromStringCache.contains(typeSignature))
-        return m_metaTypeFromStringCache.value(typeSignature);
-
-    QString typeString = typeSignature;
-    bool isConst = typeString.startsWith(QLatin1String("const "));
-    if (isConst)
-        typeString.remove(0, sizeof("const ") / sizeof(char) - 1);
-
-    ReferenceType refType = NoReference;
-    if (typeString.endsWith(QLatin1String("&&"))) {
-        refType = RValueReference;
-        typeString.chop(2);
-        typeString = typeString.trimmed();
-    } else if (typeString.endsWith(QLatin1Char('&'))) {
-        refType = LValueReference;
-        typeString.chop(1);
-        typeString = typeString.trimmed();
-    }
-
-    int indirections = 0;
-    while (typeString.endsWith(QLatin1Char('*'))) {
-        ++indirections;
-        typeString.chop(1);
-        typeString = typeString.trimmed();
-    }
-
-    if (typeString.startsWith(QLatin1String("::")))
-        typeString.remove(0, 2);
-
-    QString adjustedTypeName = typeString;
-    AbstractMetaTypeList instantiations;
-    int lpos = typeString.indexOf(QLatin1Char('<'));
-    if (lpos > -1) {
-        QStringList instantiatedTypes;
-        int rpos = typeString.lastIndexOf(QLatin1Char('>'));
-        if ((lpos != -1) && (rpos != -1)) {
-            QString type = typeString.mid(lpos + 1, rpos - lpos - 1);
-            int depth = 0;
-            int start = 0;
-            for (int i = 0; i < type.count(); ++i) {
-                if (type.at(i) == QLatin1Char('<')) {
-                    ++depth;
-                } else if (type.at(i) == QLatin1Char('>')) {
-                    --depth;
-                } else if (type.at(i) == QLatin1Char(',') && depth == 0) {
-                    instantiatedTypes << type.mid(start, i - start).trimmed();
-                    start = i + 1;
-                }
-            }
-            instantiatedTypes << type.mid(start).trimmed();
-            adjustedTypeName.truncate(lpos);
+    auto it = m_metaTypeFromStringCache.find(typeSignature);
+    if (it == m_metaTypeFromStringCache.end()) {
+        AbstractMetaType *metaType =
+            AbstractMetaBuilder::translateType(typeSignature, nullptr, true, errorMessage);
+        if (Q_UNLIKELY(!metaType)) {
+            if (errorMessage)
+                errorMessage->prepend(msgCannotBuildMetaType(typeSignature));
+            return nullptr;
         }
-        for (const QString &instantiatedType : qAsConst(instantiatedTypes)) {
-            AbstractMetaType *tmplArgType = buildAbstractMetaTypeFromString(instantiatedType);
-            if (!tmplArgType) {
-                if (errorMessage) {
-                    QTextStream(errorMessage) << "Cannot find template type \""
-                        << instantiatedType << "\" for \"" << typeSignature << "\".";
-                }
-                return nullptr;
-            }
-            instantiations.append(tmplArgType);
-        }
+        it = m_metaTypeFromStringCache.insert(typeSignature, metaType);
     }
-
-    TypeEntry *typeEntry = nullptr;
-    AbstractMetaType::TypeUsagePattern pattern = AbstractMetaType::InvalidPattern;
-
-    if (instantiations.size() == 1
-        && instantiations.at(0)->typeUsagePattern() == AbstractMetaType::EnumPattern
-        && adjustedTypeName == QLatin1String("QFlags")) {
-        pattern = AbstractMetaType::FlagsPattern;
-        typeEntry = TypeDatabase::instance()->findType(typeSignature);
-    } else {
-        typeEntry = TypeDatabase::instance()->findType(adjustedTypeName);
-    }
-
-    if (!typeEntry) {
-        if (errorMessage) {
-            QTextStream(errorMessage) << "Cannot find type \"" << adjustedTypeName
-                << "\" for \"" << typeSignature << "\".";
-        }
-        return nullptr;
-    }
-
-    AbstractMetaType *metaType = new AbstractMetaType();
-    metaType->setTypeEntry(typeEntry);
-    metaType->setIndirections(indirections);
-    metaType->setReferenceType(refType);
-    metaType->setConstant(isConst);
-    metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
-    switch (pattern) {
-    case AbstractMetaType::FlagsPattern:
-        metaType->setTypeUsagePattern(pattern);
-        break;
-    default:
-        metaType->setInstantiations(instantiations);
-        metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
-        metaType->decideUsagePattern();
-        break;
-    }
-
-    m_metaTypeFromStringCache.insert(typeSignature, metaType);
-    return metaType;
+    return it.value();
 }
 
 AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const TypeEntry* typeEntry)

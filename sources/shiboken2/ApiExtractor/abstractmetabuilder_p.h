@@ -123,7 +123,14 @@ public:
                             int argumentIndex);
     AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type,
-                                    bool resolveType = true);
+                                    bool resolveType = true,
+                                    QString *errorMessage = nullptr);
+    static AbstractMetaType *translateTypeStatic(const TypeInfo &type,
+                                                 AbstractMetaClass *current,
+                                                 AbstractMetaBuilderPrivate *d = nullptr,
+                                                 bool resolveType = true,
+                                                 QString *errorMessageIn = nullptr);
+
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 
     AbstractMetaClass *findTemplateClass(const QString& name, const AbstractMetaClass *context,

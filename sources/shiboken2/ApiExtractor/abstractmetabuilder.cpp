@@ -2255,14 +2255,51 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
     return type;
 }
 
+static QString msgUnableToTranslateType(const QString &t, const QString &why)
+{
+    return QLatin1String("Unable to translate type \"")
+        + t + QLatin1String("\": ") + why;
+}
+
+static inline QString msgUnableToTranslateType(const TypeInfo &typeInfo,
+                                               const QString &why)
+{
+    return msgUnableToTranslateType(typeInfo.toString(), why);
+}
+
+static inline QString msgCannotFindTypeEntry(const QString &t)
+{
+    return QLatin1String("Cannot find type entry for \"") + t + QLatin1String("\".");
+}
+
+static inline QString msgCannotTranslateTemplateArgument(int i,
+                                                         const TypeInfo &typeInfo,
+                                                         const QString &why)
+{
+    QString result;
+    QTextStream(&result) << "Unable to translate template argument "
+        << (i + 1) << typeInfo.toString() << ": " << why;
+    return result;
+}
+
 AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
-                                                            bool resolveType)
+                                                            bool resolveType,
+                                                            QString *errorMessage)
+{
+    return translateTypeStatic(_typei, m_currentClass, this, resolveType, errorMessage);
+}
+
+AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
+                                                                  AbstractMetaClass *currentClass,
+                                                                  AbstractMetaBuilderPrivate *d,
+                                                                  bool resolveType,
+                                                                  QString *errorMessageIn)
 {
     // 1. Test the type info without resolving typedefs in case this is present in the
     //    type system
     TypeInfo typei;
     if (resolveType) {
-        if (AbstractMetaType *resolved = translateType(_typei, false))
+        if (AbstractMetaType *resolved = translateTypeStatic(_typei, currentClass, d, false, errorMessageIn))
             return resolved;
     }
 
@@ -2274,23 +2311,29 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
         // the global scope when they are referenced from inside a namespace.
         // This is a work around to fix this bug since fixing it in resolveType
         // seemed non-trivial
-        int i = m_scopes.size() - 1;
+        int i = d ? d->m_scopes.size() - 1 : -1;
         while (i >= 0) {
-            typei = TypeInfo::resolveType(_typei, m_scopes.at(i--));
+            typei = TypeInfo::resolveType(_typei, d->m_scopes.at(i--));
             if (typei.qualifiedName().join(colonColon()) != _typei.qualifiedName().join(colonColon()))
                 break;
         }
 
     }
 
-    if (typei.isFunctionPointer())
+    if (typei.isFunctionPointer()) {
+        if (errorMessageIn)
+            *errorMessageIn = msgUnableToTranslateType(_typei, QLatin1String("Unsupported function pointer."));
         return nullptr;
+    }
 
     QString errorMessage;
     TypeInfo typeInfo = TypeParser::parse(typei.toString(), &errorMessage);
     if (typeInfo.qualifiedName().isEmpty()) {
-        qWarning().noquote().nospace() << "Unable to translate type \"" << _typei.toString()
-            << "\": " << errorMessage;
+        errorMessage = msgUnableToTranslateType(_typei, errorMessage);
+        if (errorMessageIn)
+            *errorMessageIn = errorMessage;
+        else
+            qCWarning(lcShiboken,"%s", qPrintable(errorMessage));
         return 0;
     }
 
@@ -2324,9 +2367,14 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
         newInfo.setReferenceType(typeInfo.referenceType());
         newInfo.setVolatile(typeInfo.isVolatile());
 
-        AbstractMetaType *elementType = translateType(newInfo);
-        if (!elementType)
+        AbstractMetaType *elementType = translateTypeStatic(newInfo, currentClass, d, true, &errorMessage);
+        if (!elementType) {
+            if (errorMessageIn) {
+                errorMessage.prepend(QLatin1String("Unable to translate array element: "));
+                *errorMessageIn = msgUnableToTranslateType(_typei, errorMessage);
+            }
             return nullptr;
+        }
 
         for (int i = typeInfo.arrayElements().size() - 1; i >= 0; --i) {
             AbstractMetaType *arrayType = new AbstractMetaType;
@@ -2334,7 +2382,9 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
             const QString &arrayElement = typeInfo.arrayElements().at(i);
             if (!arrayElement.isEmpty()) {
                 bool _ok;
-                const qint64 elems = findOutValueFromString(arrayElement, _ok);
+                const qint64 elems = d
+                    ? d->findOutValueFromString(arrayElement, _ok)
+                    : arrayElement.toLongLong(&_ok, 0);
                 if (_ok)
                     arrayType->setArrayElementCount(int(elems));
             }
@@ -2349,8 +2399,11 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
 
     QStringList qualifierList = typeInfo.qualifiedName();
     if (qualifierList.isEmpty()) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("horribly broken type '%1'").arg(_typei.toString());
+        errorMessage = msgUnableToTranslateType(_typei, QLatin1String("horribly broken type"));
+        if (errorMessageIn)
+            *errorMessageIn = errorMessage;
+        else
+            qCWarning(lcShiboken,"%s", qPrintable(errorMessage));
         return nullptr;
     }
 
@@ -2367,12 +2420,12 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     // 5. Try to find the type
 
     // 5.1 - Try first using the current scope
-    if (m_currentClass) {
-        type = findTypeEntryUsingContext(m_currentClass, qualifiedName);
+    if (currentClass) {
+        type = findTypeEntryUsingContext(currentClass, qualifiedName);
 
         // 5.1.1 - Try using the class parents' scopes
-        if (!type && !m_currentClass->baseClassNames().isEmpty()) {
-            const AbstractMetaClassList &baseClasses = getBaseClasses(m_currentClass);
+        if (!type && d && !currentClass->baseClassNames().isEmpty()) {
+            const AbstractMetaClassList &baseClasses = d->getBaseClasses(currentClass);
             for (const AbstractMetaClass *cls : baseClasses) {
                 type = findTypeEntryUsingContext(cls, qualifiedName);
                 if (type)
@@ -2395,19 +2448,25 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
 
     // 8. No? Check if the current class is a template and this type is one
     //    of the parameters.
-    if (!type && m_currentClass) {
-        const QVector<TypeEntry *> &template_args = m_currentClass->templateArguments();
+    if (!type && currentClass) {
+        const QVector<TypeEntry *> &template_args = currentClass->templateArguments();
         for (TypeEntry *te : template_args) {
             if (te->name() == qualifiedName)
                 type = te;
         }
     }
 
-    if (!type)
+    if (!type) {
+        if (errorMessageIn) {
+            *errorMessageIn =
+                msgUnableToTranslateType(_typei, msgCannotFindTypeEntry(qualifiedName));
+        }
         return nullptr;
+    }
 
     // Used to for diagnostics later...
-    m_usedTypes << type;
+    if (d)
+        d->m_usedTypes << type;
 
     // These are only implicit and should not appear in code...
     Q_ASSERT(!type->isInterface());
@@ -2422,8 +2481,10 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     const auto &templateArguments = typeInfo.instantiations();
     for (int t = 0, size = templateArguments.size(); t < size; ++t) {
         TypeInfo ti = templateArguments.at(t);
-        AbstractMetaType *targType = translateType(ti);
+        AbstractMetaType *targType = translateTypeStatic(ti, currentClass, d, true, &errorMessage);
         if (!targType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgCannotTranslateTemplateArgument(t, ti, errorMessage);
             delete metaType;
             return nullptr;
         }
@@ -2440,6 +2501,33 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     return metaType;
 }
 
+AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei,
+                                                     AbstractMetaClass *currentClass,
+                                                     bool resolveType,
+                                                     QString *errorMessage)
+{
+    return AbstractMetaBuilderPrivate::translateTypeStatic(_typei, currentClass,
+                                                           nullptr, resolveType,
+                                                           errorMessage);
+}
+
+AbstractMetaType *AbstractMetaBuilder::translateType(const QString &t,
+                                                     AbstractMetaClass *currentClass,
+                                                     bool resolveType,
+                                                     QString *errorMessageIn)
+{
+    QString errorMessage;
+    TypeInfo typeInfo = TypeParser::parse(t, &errorMessage);
+    if (typeInfo.qualifiedName().isEmpty()) {
+        errorMessage = msgUnableToTranslateType(t, errorMessage);
+        if (errorMessageIn)
+            *errorMessageIn = errorMessage;
+        else
+            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        return nullptr;
+    }
+    return translateType(typeInfo, currentClass, resolveType, errorMessageIn);
+}
 
 qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValue, bool &ok)
 {
