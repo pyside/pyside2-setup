@@ -1803,7 +1803,8 @@ static inline QString qualifiedFunctionSignatureWithType(const FunctionModelItem
     return result;
 }
 
-static inline QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n)
+static inline QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n,
+                                                const QString &why)
 {
     QString result;
     QTextStream str(&result);
@@ -1811,23 +1812,16 @@ static inline QString msgUnmatchedParameterType(const ArgumentModelItem &arg, in
         << (n + 1);
     if (!arg->name().isEmpty())
         str << " \"" << arg->name() << '"';
+    str << ": " << why;
     return result;
 }
 
-static inline QString msgUnmatchedReturnType(const FunctionModelItem &functionItem)
+static inline QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
+                                             const QString &why)
 {
     return QLatin1String("unmatched return type '")
-        + functionItem->type().toString() + QLatin1Char('\'');
-}
-
-static inline QString msgVoidParameterType(const ArgumentModelItem &arg, int n)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "'void' encountered at parameter #" << (n + 1);
-    if (!arg->name().isEmpty())
-        str << " \"" << arg->name() << '"';
-    return result;
+        + functionItem->type().toString()
+        + QLatin1String("': ") + why;
 }
 
 static QString msgSkippingFunction(const FunctionModelItem &functionItem,
@@ -1992,6 +1986,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     else
         *metaFunction += AbstractMetaAttributes::Protected;
 
+    QString errorMessage;
     switch (metaFunction->functionType()) {
     case AbstractMetaFunction::DestructorFunction:
         break;
@@ -2010,9 +2005,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
         AbstractMetaType *type = nullptr;
         if (!returnType.isVoid()) {
-            type = translateType(returnType);
+            type = translateType(returnType, true, &errorMessage);
             if (!type) {
-                const QString reason = msgUnmatchedReturnType(functionItem);
+                const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
                 m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::UnmatchedReturnType);
@@ -2046,7 +2041,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
             return nullptr;
         }
 
-        AbstractMetaType *metaType = translateType(arg->type());
+        AbstractMetaType *metaType = translateType(arg->type(), true, &errorMessage);
         if (!metaType) {
             // If an invalid argument has a default value, simply remove it
             if (arg->defaultValue()) {
@@ -2063,18 +2058,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
                 break;
             }
             Q_ASSERT(metaType == 0);
-            const QString reason = msgUnmatchedParameterType(arg, i);
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
-            const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
-                + QLatin1String(": ") + reason;
-            m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
-            delete metaFunction;
-            return nullptr;
-        }
-
-        if (metaType == Q_NULLPTR) {
-            const QString reason = msgVoidParameterType(arg, i);
+            const QString reason = msgUnmatchedParameterType(arg, i, errorMessage);
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
             const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
