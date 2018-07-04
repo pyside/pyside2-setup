@@ -101,7 +101,7 @@
         <modify-function signature="kind()const" remove="all" />
         <modify-function signature="isDeepEqual(const QXmlNodeModelIndex&amp;)const" remove="all" />
         <modify-function signature="compareOrder(const QXmlNodeModelIndex &amp;)const" remove="all" />
-        <modify-function signature="sendNamespaces(QAbstractXmlReceiver*)const" remove="all" />
+        <modify-function signature="sendNamespaces(QAbstractXmlReceiver*const)const" remove="all" />
         <modify-function signature="namespaceBindings()const" remove="all" />
         <modify-function signature="namespaceForPrefix(QXmlName::PrefixCode)const" remove="all" />
         <modify-function signature="stringValue()const" remove="all" />

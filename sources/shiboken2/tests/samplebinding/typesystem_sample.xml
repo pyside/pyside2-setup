@@ -1964,7 +1964,7 @@
                 <define-ownership owner="c++"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="acceptSequence(const char*[])">
+        <modify-function signature="acceptSequence(const char*const[])">
             <modify-argument index="1">
                 <replace-type modified-type="PySequence" />
                 <conversion-rule class="native">

@@ -59,16 +59,16 @@
 
   <rejection class="QGLColormap::QGLColormapData"/>
   <rejection class="QGLContext" field-name="currentCtx"/>
-  <rejection class="^QGL.*$" argument-type="^GLboolean( const)?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^GLchar( const)?\*$"/>
-  <rejection class="^QGL.*$" argument-type="GLchar *const const*"/>
-  <rejection class="^QGL.*$" argument-type="^GLenum( const)?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^GLfloat( const)?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^GLfloat( const)?\[.*$"/>
-  <rejection class="^QGL.*$" argument-type="^GLdouble( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLchar ?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLchar ?\*const"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLenum ?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLfloat ?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLfloat ?\[.*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLdouble ?\*$"/>
   <rejection class="^QGL.*$" argument-type="GLintptr"/>
-  <rejection class="^QGL.*$" argument-type="^GLint64( const)?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^GLsizei( const)?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLint64 ?\*$"/>
+  <rejection class="^QGL.*$" argument-type="^(const )?GLsizei ?\*$"/>
 
   <namespace-type name="QGL">
     <enum-type name="FormatOption" flags="FormatOptions" force-integer="yes"/>
@@ -683,16 +683,7 @@
         </inject-code>
     </modify-function>
 
-    <!-- ### TODO: must evaluate if anything other than removal should be done. -->
-    <modify-function signature="setAttributeArray(int,const GLfloat*,int,int)" remove="all" />
-    <modify-function signature="setAttributeArray(const char*,const GLfloat*,int,int)" remove="all" />
-    <modify-function signature="setUniformValueArray(int,const GLfloat*,int,int)" remove="all" />
-    <modify-function signature="setUniformValueArray(const char*,const GLfloat*,int,int)" remove="all" />
-    <!-- ### -->
-
     <!-- ### Use QMatrixZxY overloads -->
-    <modify-function signature="setAttributeValue(int,const GLfloat*,int,int)" remove="all" />
-    <modify-function signature="setAttributeValue(const char*,const GLfloat*,int,int)" remove="all" />
     <modify-function signature="setAttributeArray(int,GLenum,const void*,int,int)" remove="all" since="4.7" />
     <modify-function signature="setAttributeArray(const char*,GLenum,const void*,int,int)" remove="all" since="4.7" />
     <!-- ### -->

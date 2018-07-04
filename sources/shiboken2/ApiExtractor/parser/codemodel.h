@@ -169,6 +169,8 @@ public:
         m_arrayElements = arrayElements;
     }
 
+    void addArrayElement(const QString &a) { m_arrayElements.append(a); }
+
     QVector<TypeInfo> arguments() const { return m_arguments; }
 
     void setArguments(const QVector<TypeInfo> &arguments);
@@ -202,6 +204,10 @@ public:
 #endif
 
     static QString indirectionKeyword(Indirection i);
+
+    static bool stripLeadingConst(QString *s);
+    static bool stripLeadingVolatile(QString *s);
+    static bool stripLeadingQualifier(const QString &qualifier, QString *s);
 
 private:
     static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);

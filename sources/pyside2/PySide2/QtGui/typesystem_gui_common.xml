@@ -97,21 +97,21 @@
   <rejection class="*" function-name="d_func"/>
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="*" field-name="d"/>
-  <rejection class="^QOpenGL.*$" argument-type="^GLboolean( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
-  <rejection class="^QOpenGL.*$" argument-type="GLchar *const const*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^char\*$"/>
-  <rejection class="^QOpenGL.*$" argument-type="^char( const)?\*\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?char ?\*\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="GLintptr"/>
   <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
   <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
-  <rejection class="^QOpenGL.*$" argument-type="^QMatrix.x.( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?QMatrix.x. ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="qopengl_GLintptr"/>
   <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
   <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
-  <rejection class="^QOpenGL.*$" argument-type="^QVector.D( const)?\*$"/>
-  <rejection class="^QOpenGL.*$" argument-type="^void( const)?\*\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
 
   <!--
     Event classes have a lot of non-documented protected fields, those fields
@@ -668,7 +668,7 @@
         %0 = new %TYPE(QPixmap::fromImage(%1));
         </inject-code>
     </add-function>
-    <modify-function signature="QPixmap(const char*[])">
+    <modify-function signature="QPixmap(const char*const[])">
         <modify-argument index="1">
             <replace-type modified-type="PySequence" />
         </modify-argument>
@@ -897,7 +897,7 @@
     <modify-function signature="QImage(const uchar*,int,int,QImage::Format,QImageCleanupFunction,void*)" remove="all" />
     <!-- ### -->
 
-    <modify-function signature="QImage(const char*[])">
+    <modify-function signature="QImage(const char*const[])">
         <modify-argument index="1">
             <replace-type modified-type="PySequence" />
         </modify-argument>

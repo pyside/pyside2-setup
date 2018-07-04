@@ -359,38 +359,6 @@ struct ArrayDimensionResult
     int position;
 };
 
-static ArrayDimensionResult arrayDimensions(const QString &typeName)
-{
-    ArrayDimensionResult result;
-    result.position = typeName.indexOf(QLatin1Char('['));
-    for (int openingPos = result.position; openingPos != -1; ) {
-        const int closingPos = typeName.indexOf(QLatin1Char(']'), openingPos + 1);
-        if (closingPos == -1)
-            break;
-        result.dimensions.append(typeName.midRef(openingPos + 1, closingPos - openingPos - 1));
-        openingPos = typeName.indexOf(QLatin1Char('['), closingPos + 1);
-    }
-    return result;
-}
-
-// Array helpers: Parse "a[2][4]" into a list of dimensions or "" for none
-static QStringList parseArrayArgs(const CXType &type, QString *typeName)
-{
-    const ArrayDimensionResult dimensions = arrayDimensions(*typeName);
-    Q_ASSERT(!dimensions.dimensions.isEmpty());
-
-    QStringList result;
-    // get first dimension from clang, preferably.
-    // "a[]" is seen as pointer by Clang, set special indicator ""
-    const long long size = clang_getArraySize(type);
-    result.append(size >= 0 ? QString::number(size) : QString());
-    // Parse out remaining dimensions
-    for (int i = 1, count = dimensions.dimensions.size(); i < count; ++i)
-        result.append(dimensions.dimensions.at(i).toString());
-    typeName->truncate(dimensions.position);
-    return result;
-}
-
 // Create qualified name "std::list<std::string>" -> ("std", "list<std::string>")
 static QStringList qualifiedName(const QString &t)
 {
@@ -412,6 +380,17 @@ static QStringList qualifiedName(const QString &t)
     return result;
 }
 
+static bool isArrayType(CXTypeKind k)
+{
+    return k == CXType_ConstantArray || k == CXType_IncompleteArray
+        || k == CXType_VariableArray || k == CXType_DependentSizedArray;
+}
+
+static bool isPointerType(CXTypeKind k)
+{
+    return k == CXType_Pointer || k == CXType_LValueReference || k == CXType_RValueReference;
+}
+
 TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
 {
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
@@ -427,50 +406,39 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
     }
 
     TypeInfo typeInfo;
-    QString typeName = fixTypeName(getTypeName(type));
 
-    int indirections = 0;
-    // "int **"
-    for ( ; typeName.endsWith(QLatin1Char('*')) ; ++indirections)
-        typeName.chop(1);
-    typeInfo.setIndirections(indirections);
-    // "int &&"
-    if (typeName.endsWith(QLatin1String("&&"))) {
-        typeName.chop(2);
-        typeInfo.setReferenceType(RValueReference);
-    } else if (typeName.endsWith(QLatin1Char('&'))) { // "int &"
-        typeName.chop(1);
-        typeInfo.setReferenceType(LValueReference);
+    CXType nestedType = type;
+    for (; isArrayType(nestedType.kind); nestedType = clang_getArrayElementType(nestedType)) {
+         const long long size = clang_getArraySize(nestedType);
+         typeInfo.addArrayElement(size >= 0 ? QString::number(size) : QString());
     }
 
-    // "int [3], int[]"
-    if (type.kind == CXType_ConstantArray || type.kind == CXType_IncompleteArray
-        || type.kind == CXType_VariableArray || type.kind == CXType_DependentSizedArray) {
-         typeInfo.setArrayElements(parseArrayArgs(type, &typeName));
+    TypeInfo::Indirections indirections;
+    for (; isPointerType(nestedType.kind); nestedType = clang_getPointeeType(nestedType)) {
+        switch (nestedType.kind) {
+        case CXType_Pointer:
+            indirections.prepend(clang_isConstQualifiedType(nestedType) != 0
+                                 ? Indirection::ConstPointer : Indirection::Pointer);
+            break;
+        case CXType_LValueReference:
+            typeInfo.setReferenceType(LValueReference);
+            break;
+        case CXType_RValueReference:
+            typeInfo.setReferenceType(RValueReference);
+            break;
+        default:
+            break;
+        }
     }
+    typeInfo.setIndirectionsV(indirections);
 
-    bool isConstant = clang_isConstQualifiedType(type) != 0;
-    // A "char *const" parameter, is considered to be const-qualified by Clang, but
-    // not in the TypeInfo sense (corresponds to "char *" and not "const char *").
-    if (type.kind == CXType_Pointer && isConstant && typeName.endsWith(QLatin1String("const"))) {
-        typeName.chop(5);
-        typeName = typeName.trimmed();
-        isConstant = false;
-    }
-    // Clang has been observed to return false for "const int .."
-    if (!isConstant && typeName.startsWith(QLatin1String("const "))) {
-        typeName.remove(0, 6);
-        isConstant = true;
-    }
-    typeInfo.setConstant(isConstant);
+    typeInfo.setConstant(clang_isConstQualifiedType(nestedType) != 0);
+    typeInfo.setVolatile(clang_isVolatileQualifiedType(nestedType) != 0);
 
-    // clang_isVolatileQualifiedType() returns true for "volatile int", but not for "volatile int *"
-    if (typeName.startsWith(QLatin1String("volatile "))) {
-        typeName.remove(0, 9);
-        typeInfo.setVolatile(true);
+    QString typeName = getTypeName(nestedType);
+    while (TypeInfo::stripLeadingConst(&typeName)
+           || TypeInfo::stripLeadingVolatile(&typeName)) {
     }
-
-    typeName = typeName.trimmed();
 
     typeInfo.setQualifiedName(qualifiedName(typeName));
     // 3320:CINDEX_LINKAGE int clang_getNumArgTypes(CXType T); function ptr types?

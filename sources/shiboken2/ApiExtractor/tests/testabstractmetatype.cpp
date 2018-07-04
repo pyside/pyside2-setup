@@ -44,6 +44,12 @@ void TestAbstractMetaType::parsing_data()
         << QString::fromLatin1("int &") << QString::fromLatin1("int&");
     QTest::newRow("pointer")
         << QString::fromLatin1("int **") << QString::fromLatin1("int**");
+    QTest::newRow("const ref")
+        << QString::fromLatin1("const int &") << QString::fromLatin1("const int&");
+    QTest::newRow("const pointer")
+        << QString::fromLatin1("const int **") << QString::fromLatin1("const int**");
+    QTest::newRow("const pointer const")
+        << QString::fromLatin1("const int *const*") << QString::fromLatin1("const int*const*");
 }
 
 void TestAbstractMetaType::parsing()

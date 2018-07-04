@@ -158,7 +158,7 @@
         <enum-type name="Status" />
     </object-type>
     <object-type name="QQmlIncubationController">
-        <modify-function signature="incubateWhile(bool volatile*,int)" allow-thread="yes">
+        <modify-function signature="incubateWhile(volatile bool*,int)" allow-thread="yes">
             <modify-argument index="1">
                 <!-- The replace type is needed to use the VolatileBool_Check macro instead of
                      a template conversion function with "volatile bool" as argument. -->

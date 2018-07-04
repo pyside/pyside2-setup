@@ -198,13 +198,13 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, Cod
 QString TypeInfo::toString() const
 {
     QString tmp;
-
-    tmp += m_qualifiedName.join(QLatin1String("::"));
     if (isConstant())
-        tmp += QLatin1String(" const");
+        tmp += QLatin1String("const ");
 
     if (isVolatile())
-        tmp += QLatin1String(" volatile");
+        tmp += QLatin1String("volatile ");
+
+    tmp += m_qualifiedName.join(QLatin1String("::"));
 
     if (const int instantiationCount = m_instantiations.size()) {
         tmp += QLatin1Char('<');
@@ -276,7 +276,34 @@ bool TypeInfo::operator==(const TypeInfo &other) const
 QString TypeInfo::indirectionKeyword(Indirection i)
 {
     return i == Indirection::Pointer
-        ? QStringLiteral("*") : QStringLiteral("* const");
+        ? QStringLiteral("*") : QStringLiteral("*const");
+}
+
+static inline QString constQualifier() { return QStringLiteral("const"); }
+static inline QString volatileQualifier() { return QStringLiteral("volatile"); }
+
+bool TypeInfo::stripLeadingConst(QString *s)
+{
+    return stripLeadingQualifier(constQualifier(), s);
+}
+
+bool TypeInfo::stripLeadingVolatile(QString *s)
+{
+    return stripLeadingQualifier(volatileQualifier(), s);
+}
+
+bool TypeInfo::stripLeadingQualifier(const QString &qualifier, QString *s)
+{
+    // "const int x"
+    const int qualifierSize = qualifier.size();
+    if (s->size() < qualifierSize + 1 || !s->startsWith(qualifier)
+        || !s->at(qualifierSize).isSpace()) {
+        return false;
+    }
+    s->remove(0, qualifierSize + 1);
+    while (!s->isEmpty() && s->at(0).isSpace())
+        s->remove(0, 1);
+    return true;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
