@@ -288,6 +288,7 @@ class AbstractMetaType
 {
     Q_GADGET
 public:
+    typedef QVector<Indirection> Indirections;
 
     enum TypeUsagePattern {
         InvalidPattern,
@@ -443,16 +444,21 @@ public:
 
     int actualIndirections() const
     {
-        return m_indirections + (m_referenceType == LValueReference ? 1 : 0);
+        return m_indirections.size() + (m_referenceType == LValueReference ? 1 : 0);
     }
-    int indirections() const
-    {
-        return m_indirections;
-    }
+
+    Indirections indirectionsV() const { return m_indirections; }
+    void setIndirectionsV(const Indirections &i) { m_indirections = i; }
+    void clearIndirections() { m_indirections.clear(); }
+
+    // "Legacy"?
+    int indirections() const { return m_indirections.size(); }
     void setIndirections(int indirections)
     {
-        m_indirections = indirections;
+        m_indirections = Indirections(indirections, Indirection::Pointer);
     }
+    void addIndirection(Indirection i = Indirection::Pointer)
+        { m_indirections.append(i); }
 
     void setArrayElementCount(int n)
     {
@@ -541,12 +547,13 @@ private:
     int m_arrayElementCount = -1;
     const AbstractMetaType *m_arrayElementType = nullptr;
     const AbstractMetaType *m_originalTemplateType = nullptr;
+    Indirections m_indirections;
 
     TypeUsagePattern m_pattern = InvalidPattern;
     uint m_constant : 1;
     uint m_cppInstantiation : 1;
-    int m_indirections : 4;
-    uint m_reserved : 26; // unused
+    uint m_reserved : 30; // unused
+
     ReferenceType m_referenceType = NoReference;
     AbstractMetaTypeList m_children;
 

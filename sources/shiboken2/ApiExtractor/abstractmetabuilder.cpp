@@ -2344,7 +2344,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     if (!typeInfo.arrayElements().isEmpty() && !isConstCharStarCase) {
         TypeInfo newInfo;
         //newInfo.setArguments(typeInfo.arguments());
-        newInfo.setIndirections(typeInfo.indirections());
+        newInfo.setIndirectionsV(typeInfo.indirectionsV());
         newInfo.setConstant(typeInfo.isConstant());
         newInfo.setFunctionPointer(typeInfo.isFunctionPointer());
         newInfo.setQualifiedName(typeInfo.qualifiedName());
@@ -2457,7 +2457,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
 
     AbstractMetaType *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
-    metaType->setIndirections(typeInfo.indirections());
+    metaType->setIndirectionsV(typeInfo.indirectionsV());
     metaType->setReferenceType(typeInfo.referenceType());
     metaType->setConstant(typeInfo.isConstant());
     metaType->setOriginalTypeDescription(_typei.toString());
@@ -2842,7 +2842,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
             temporaryType->setTypeEntry(t);
             temporaryType->setConstant(i.isConstant());
             temporaryType->setReferenceType(i.referenceType());
-            temporaryType->setIndirections(i.indirections());
+            temporaryType->setIndirectionsV(i.indirectionsV());
             temporaryType->decideUsagePattern();
             templateTypes << temporaryType;
         } else {

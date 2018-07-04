@@ -140,7 +140,7 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
     __result.setVolatile(__result.isVolatile() || __rhs.isVolatile());
     if (__rhs.referenceType() > __result.referenceType())
         __result.setReferenceType(__rhs.referenceType());
-    __result.setIndirections(__result.indirections() + __rhs.indirections());
+    __result.m_indirections.append(__rhs.m_indirections);
     __result.setArrayElements(__result.arrayElements() + __rhs.arrayElements());
     __result.m_instantiations.append(__rhs.m_instantiations);
 
@@ -149,7 +149,7 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
 
 bool TypeInfo::isVoid() const
 {
-    return m_indirections == 0 && m_referenceType == NoReference
+    return m_indirections.isEmpty() && m_referenceType == NoReference
         && m_arguments.isEmpty() && m_arrayElements.isEmpty()
         && m_instantiations.isEmpty()
         && m_qualifiedName.size() == 1
@@ -218,8 +218,8 @@ QString TypeInfo::toString() const
         tmp += QLatin1Char('>');
     }
 
-    if (indirections())
-        tmp += QString(indirections(), QLatin1Char('*'));
+    for (Indirection i : m_indirections)
+        tmp.append(indirectionKeyword(i));
 
     switch (referenceType()) {
     case NoReference:
@@ -273,6 +273,12 @@ bool TypeInfo::operator==(const TypeInfo &other) const
            && m_instantiations == other.m_instantiations;
 }
 
+QString TypeInfo::indirectionKeyword(Indirection i)
+{
+    return i == Indirection::Pointer
+        ? QStringLiteral("*") : QStringLiteral("* const");
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class It>
 void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
@@ -293,8 +299,11 @@ void TypeInfo::formatDebug(QDebug &d) const
         d << ", [const]";
     if (m_volatile)
         d << ", [volatile]";
-    if (m_indirections)
-        d << ", indirections=" << m_indirections;
+    if (!m_indirections.isEmpty()) {
+        d << ", indirections=";
+        for (auto i : m_indirections)
+            d << ' ' << TypeInfo::indirectionKeyword(i);
+    }
     switch (m_referenceType) {
     case NoReference:
         break;

@@ -167,6 +167,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
     bool colon_prefix = false;
     bool in_array = false;
     QString array;
+    bool seenStar = false;
 
     Scanner::Token tok = scanner.nextToken(errorMessage);
     while (tok != Scanner::NoToken) {
@@ -191,7 +192,8 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
         switch (tok) {
 
         case Scanner::StarToken:
-            ++stack.top()->m_indirections;
+            seenStar = true;
+            stack.top()->addIndirection(Indirection::Pointer);
             break;
 
         case Scanner::AmpersandToken:
@@ -231,7 +233,12 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
             break;
 
         case Scanner::ConstToken:
-            stack.top()->m_constant = true;
+            if (seenStar) { // "int *const": Last indirection is const.
+                Q_ASSERT(!stack.top()->m_indirections.isEmpty());
+                *stack.top()->m_indirections.rbegin() = Indirection::ConstPointer;
+            } else {
+                stack.top()->m_constant = true;
+            }
             break;
 
         case Scanner::OpenParenToken: // function pointers not supported

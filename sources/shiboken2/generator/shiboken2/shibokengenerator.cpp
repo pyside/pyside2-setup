@@ -2299,7 +2299,7 @@ AbstractMetaType* ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const Ty
         return m_metaTypeFromStringCache.value(typeName);
     AbstractMetaType* metaType = new AbstractMetaType;
     metaType->setTypeEntry(typeEntry);
-    metaType->setIndirections(0);
+    metaType->clearIndirections();
     metaType->setReferenceType(NoReference);
     metaType->setConstant(false);
     metaType->decideUsagePattern();

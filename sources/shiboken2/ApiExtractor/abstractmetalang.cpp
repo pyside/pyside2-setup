@@ -31,6 +31,8 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
+#include <parser/codemodel.h>
+
 #ifndef QT_NO_DEBUG_STREAM
 #  include <QtCore/QMetaEnum>
 #  include <QtCore/QMetaObject>
@@ -113,7 +115,6 @@ void AbstractMetaAttributes::assignMetaAttributes(const AbstractMetaAttributes &
 AbstractMetaType::AbstractMetaType() :
     m_constant(false),
     m_cppInstantiation(true),
-    m_indirections(0),
     m_reserved(0)
 {
 }
@@ -156,7 +157,7 @@ AbstractMetaType *AbstractMetaType::copy() const
     cpy->setTypeUsagePattern(typeUsagePattern());
     cpy->setConstant(isConstant());
     cpy->setReferenceType(referenceType());
-    cpy->setIndirections(indirections());
+    cpy->setIndirectionsV(indirectionsV());
     cpy->setInstantiations(instantiations());
     cpy->setArrayElementCount(arrayElementCount());
     cpy->setOriginalTypeDescription(originalTypeDescription());
@@ -291,8 +292,12 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
             d << ", typeEntry=" << at->typeEntry() << ", signature=\""
                 << at->cppSignature() << "\", pattern="
                 << at->typeUsagePattern();
-            if (at->indirections())
-                d << ", indirections=" << at->indirections();
+            const auto indirections = at->indirectionsV();
+            if (!indirections.isEmpty()) {
+                d << ", indirections=";
+                for (auto i : indirections)
+                    d << ' ' << TypeInfo::indirectionKeyword(i);
+            }
             if (at->referenceType())
                 d << ", reftype=" << at->referenceType();
             if (at->isConstant())
@@ -2255,10 +2260,10 @@ QString AbstractMetaType::formatSignature(bool minimal) const
         result += QLatin1String(" >");
     }
 
-    if (!minimal && (m_indirections != 0 || m_referenceType != NoReference))
+    if (!minimal && (!m_indirections.isEmpty() || m_referenceType != NoReference))
         result += QLatin1Char(' ');
-    if (m_indirections)
-        result += QString(m_indirections, QLatin1Char('*'));
+    for (Indirection i : m_indirections)
+        result += TypeInfo::indirectionKeyword(i);
     switch (referenceType()) {
     case NoReference:
         break;

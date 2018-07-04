@@ -41,4 +41,10 @@ enum EnumKind {
     EnumClass      // C++ 11    : enum class Foo { value1, value2 }
 };
 
+enum class Indirection
+{
+    Pointer, // int *
+    ConstPointer // int *const
+};
+
 #endif // CODEMODEL_ENUMS_H

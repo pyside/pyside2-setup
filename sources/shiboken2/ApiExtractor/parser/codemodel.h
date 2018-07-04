@@ -100,6 +100,8 @@ class TypeInfo
 {
     friend class TypeParser;
 public:
+    typedef QVector<Indirection> Indirections;
+
     TypeInfo() : flags(0), m_referenceType(NoReference) {}
 
     QStringList qualifiedName() const
@@ -137,14 +139,16 @@ public:
     ReferenceType referenceType() const { return m_referenceType; }
     void setReferenceType(ReferenceType r) { m_referenceType = r; }
 
-    int indirections() const
-    {
-        return m_indirections;
-    }
+    Indirections indirectionsV() const { return m_indirections; }
+    void setIndirectionsV(const Indirections &i) { m_indirections = i; }
+    void addIndirection(Indirection i) { m_indirections.append(i); }
+
+    // "Legacy", rename?
+    int indirections() const { return m_indirections.size(); }
 
     void setIndirections(int indirections)
     {
-        m_indirections = indirections;
+        m_indirections = Indirections(indirections, Indirection::Pointer);
     }
 
     bool isFunctionPointer() const
@@ -197,6 +201,8 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 
+    static QString indirectionKeyword(Indirection i);
+
 private:
     static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
 
@@ -204,6 +210,7 @@ private:
     QStringList m_arrayElements;
     QVector<TypeInfo> m_arguments;
     QVector<TypeInfo> m_instantiations;
+    Indirections m_indirections;
 
     union {
         uint flags;
@@ -212,8 +219,7 @@ private:
             uint m_constant: 1;
             uint m_volatile: 1;
             uint m_functionPointer: 1;
-            uint m_indirections: 6;
-            uint m_padding: 23;
+            uint m_padding: 29;
         };
     };
 
