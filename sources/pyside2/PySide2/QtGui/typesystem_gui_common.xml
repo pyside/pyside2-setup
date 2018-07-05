@@ -1504,6 +1504,7 @@
   <value-type name="QGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::NoGradient">
       <enum-type name="CoordinateMode"/>
       <enum-type name="InterpolationMode"/>
+      <enum-type name="Preset" since="5.12"/>
       <enum-type name="Spread"/>
       <enum-type name="Type"/>
   </value-type>

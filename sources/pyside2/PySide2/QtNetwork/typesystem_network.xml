@@ -42,6 +42,14 @@
 <typesystem package="PySide2.QtNetwork">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
+    <enum-type name="QDtlsError" since="5.12"/>
+
+    <namespace-type name="QPasswordDigestor" since="5.12">
+        <extra-includes>
+            <include file-name="qpassworddigestor.h" location="global"/>
+        </extra-includes>
+    </namespace-type>
+
     <namespace-type name="QSsl">
         <enum-type name="AlternativeNameEntryType"/>
         <enum-type name="EncodingFormat"/>
@@ -80,6 +88,11 @@
     <value-type name="QDnsMailExchangeRecord"/>
     <value-type name="QDnsServiceRecord"/>
     <value-type name="QDnsTextRecord"/>
+
+    <object-type name="QDtls" since="5.12">
+        <enum-type name="HandshakeState"/>
+    </object-type>
+
     <value-type name="QHstsPolicy" since="5.9">
         <enum-type name="PolicyFlag" flags="PolicyFlags"/>
     </value-type>

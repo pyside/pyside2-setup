@@ -2490,6 +2490,7 @@
     <enum-type name="ButtonSymbols"/>
     <enum-type name="CorrectionMode"/>
     <enum-type name="StepEnabledFlag" flags="StepEnabled"/>
+    <enum-type name="StepType" since="5.12"/>
     <modify-function signature="setLineEdit(QLineEdit*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

@@ -28,6 +28,15 @@ ${QtCore_GEN_DIR}/qbuffer_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
+${QtCore_GEN_DIR}/qcborarray_wrapper.cpp
+${QtCore_GEN_DIR}/qcborerror_wrapper.cpp
+${QtCore_GEN_DIR}/qcbormap_wrapper.cpp
+${QtCore_GEN_DIR}/qcborparsererror_wrapper.cpp
+${QtCore_GEN_DIR}/qcborstreamreader_wrapper.cpp
+${QtCore_GEN_DIR}/qcborstringresultstring_wrapper.cpp
+${QtCore_GEN_DIR}/qcborstringresultbytearray_wrapper.cpp
+${QtCore_GEN_DIR}/qcborstreamwriter_wrapper.cpp
+${QtCore_GEN_DIR}/qcborvalue_wrapper.cpp
 ${QtCore_GEN_DIR}/qcollator_wrapper.cpp
 ${QtCore_GEN_DIR}/qcollatorsortkey_wrapper.cpp
 ${QtCore_GEN_DIR}/qcommandlineoption_wrapper.cpp

@@ -176,6 +176,8 @@
 
   <enum-type name="QtMsgType"/>
 
+  <enum-type name="QCborSimpleType" since="5.12"/>
+  <enum-type name="QCborKnownTags" since="5.12"/>
 
   <primitive-type name="qint8"/>
   <primitive-type name="qint16"/>
@@ -661,6 +663,36 @@
         </target-to-native>
     </conversion-rule>
   </primitive-type>
+
+  <value-type name="QCborError" since="5.12">
+      <enum-type name="Code"/>
+      <include file-name="qcborcommon.h" location="global"/>
+  </value-type>
+
+  <value-type name="QCborParserError" since="5.12">
+      <include file-name="qcborvalue.h" location="global"/>
+  </value-type>
+
+  <value-type name="QCborValue" since="5.12">
+      <enum-type name="EncodingOption" flags="EncodingOptions"/>
+      <enum-type name="DiagnosticNotationOption" flags="DiagnosticNotationOptions"/>
+      <enum-type name="Type"/>
+  </value-type>
+  <value-type name="QCborArray" since="5.12"/>
+  <value-type name="QCborMap" since="5.12"/>
+
+  <object-type name="QCborStreamReader" since="5.12">
+    <enum-type name="StringResultCode"/>
+    <enum-type name="Type"/>
+    <include file-name="qcborstream.h" location="global"/>
+    <value-type name="StringResult" generate="no"/>
+    <modify-function signature="readStringChunk(char*,long long)" remove="all"/>
+  </object-type>
+  <typedef-type name="QCborStringResultString" source="QCborStreamReader::StringResult&lt;QString&gt;"/>
+  <typedef-type name="QCborStringResultByteArray" source="QCborStreamReader::StringResult&lt;QByteArray&gt;"/>
+  <object-type name="QCborStreamWriter" since="5.12">
+    <include file-name="qcborstream.h" location="global"/>
+  </object-type>
 
   <primitive-type name="QJsonObject">
     <conversion-rule>

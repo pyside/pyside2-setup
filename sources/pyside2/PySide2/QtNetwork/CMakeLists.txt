@@ -3,6 +3,7 @@ project(QtNetwork)
 set(QtNetwork_OPTIONAL_SRC )
 set(QtNetwork_DROPPED_ENTRIES )
 
+check_qt_class(QtNetwork QDtls              QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 check_qt_class(QtNetwork QSslCertificate    QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 check_qt_class(QtNetwork QSslCertificateExtension QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 check_qt_class(QtNetwork QSslCipher         QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
@@ -52,6 +53,7 @@ ${QtNetwork_GEN_DIR}/qnetworkproxyquery_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkreply_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkrequest_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworksession_wrapper.cpp
+${QtNetwork_GEN_DIR}/qpassworddigestor_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
