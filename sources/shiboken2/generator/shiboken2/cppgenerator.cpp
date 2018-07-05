@@ -220,6 +220,21 @@ static QString chopType(QString s)
     return s;
 }
 
+// Helper for field setters: Check for "const QWidget *" (settable field),
+// but not "int *const" (read-only field).
+static bool isPointerToConst(const AbstractMetaType *t)
+{
+    const AbstractMetaType::Indirections &indirections = t->indirectionsV();
+    return t->isConstant() && !indirections.isEmpty()
+        && indirections.constLast() != Indirection::ConstPointer;
+}
+
+static inline bool canGenerateFieldSetter(const AbstractMetaField *field)
+{
+    const AbstractMetaType *type = field->type();
+    return !type->isConstant() || isPointerToConst(type);
+}
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -551,7 +566,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
             if (metaField->isStatic())
                 continue;
             writeGetterFunction(s, metaField, classContext);
-            if (!metaField->type()->isConstant())
+            if (canGenerateFieldSetter(metaField))
                 writeSetterFunction(s, metaField, classContext);
             s << endl;
         }
@@ -562,10 +577,12 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
             if (metaField->isStatic())
                 continue;
 
-            bool hasSetter = !metaField->type()->isConstant();
             s << INDENT << "{const_cast<char*>(\"" << metaField->name() << "\"), ";
-            s << cpythonGetterFunctionName(metaField);
-            s << ", " << (hasSetter ? cpythonSetterFunctionName(metaField) : QLatin1String("0"));
+            s << cpythonGetterFunctionName(metaField) << ", ";
+            if (canGenerateFieldSetter(metaField))
+                s << cpythonSetterFunctionName(metaField);
+            else
+                s << '0';
             s << "}," << endl;
         }
         s << INDENT << "{0}  // Sentinel" << endl;
@@ -4224,6 +4241,8 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
         s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);" << endl;
         s << INDENT << cppField << " = cppOut_local";
     } else {
+        if (isPointerToConst(fieldType))
+            s << "const ";
         s << getFullTypeNameWithoutModifiers(fieldType);
         s << QString::fromLatin1("*").repeated(fieldType->indirections()) << "& cppOut_ptr = ";
         s << cppField << ';' << endl;

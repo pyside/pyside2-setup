@@ -39,6 +39,8 @@ class Properties(unittest.TestCase):
         p = QtWidgets.QStyleOptionViewItem()
         self.assertTrue(isinstance(p.locale, QtCore.QLocale))
 
+        # PSYIDE-304, can assign to a "const QWidget *" field
+        p.widget = None
 
 if __name__ == '__main__':
     unittest.main()
