@@ -160,6 +160,43 @@ QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu)
     return result;
 }
 
+QPair<int, int> parseTemplateArgumentList(const QString &l,
+                                          const TemplateArgumentHandler &handler,
+                                          int from)
+{
+    const int ltPos = l.indexOf(QLatin1Char('<'), from);
+    if (ltPos == - 1)
+        return qMakePair(-1, -1);
+    int startPos = ltPos + 1;
+    int level = 1;
+    for (int p = startPos, end = l.size(); p < end; ) {
+        const char c = l.at(p).toLatin1();
+        switch (c) {
+        case ',':
+        case '>':
+            handler(level, l.midRef(startPos, p - startPos).trimmed());
+            ++p;
+            if (c == '>') {
+                if (--level == 0)
+                    return qMakePair(ltPos, p);
+                // Skip over next ',': "a<b<c,d>,e>"
+                for (; p < end && (l.at(p).isSpace() || l.at(p) == QLatin1Char(',')); ++p) {}
+            }
+            startPos = p;
+            break;
+        case '<':
+            handler(level, l.midRef(startPos, p - startPos).trimmed());
+            ++level;
+            startPos = ++p;
+            break;
+        default:
+             ++p;
+            break;
+        }
+    }
+    return qMakePair(-1, -1);
+}
+
 CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds)
 {
     CXDiagnosticSeverity result = CXDiagnostic_Ignored;

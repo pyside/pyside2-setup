@@ -36,6 +36,7 @@
 #include "enumvalue.h"
 
 #include <QtCore/QHash>
+#include <QtCore/QPair>
 #include <QtCore/QSet>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -185,6 +186,8 @@ public:
     void addInstantiation(const TypeInfo &i) { m_instantiations.append(i); }
     void clearInstantiations() { m_instantiations.clear(); }
 
+    QPair<int, int> parseTemplateArgumentList(const QString &l, int from = 0);
+
     bool operator==(const TypeInfo &other) const;
 
     bool operator!=(const TypeInfo &other) const
@@ -210,6 +213,8 @@ public:
     static bool stripLeadingQualifier(const QString &qualifier, QString *s);
 
 private:
+    friend class TypeInfoTemplateArgumentHandler;
+
     static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
 
     QStringList m_qualifiedName;

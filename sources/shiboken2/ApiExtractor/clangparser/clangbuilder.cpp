@@ -183,6 +183,10 @@ public:
     TypeInfo createTypeInfo(const CXType &type) const;
     TypeInfo createTypeInfo(const CXCursor &cursor) const
     { return createTypeInfo(clang_getCursorType(cursor)); }
+    void addTemplateInstantiations(const CXType &type,
+                                   QString *typeName,
+                                   TypeInfo *t) const;
+    bool addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const;
 
     TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor) const;
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
@@ -391,6 +395,54 @@ static bool isPointerType(CXTypeKind k)
     return k == CXType_Pointer || k == CXType_LValueReference || k == CXType_RValueReference;
 }
 
+bool BuilderPrivate::addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const
+{
+    // Template arguments
+    switch (type.kind) {
+    case CXType_Elaborated:
+    case CXType_Record:
+    case CXType_Unexposed:
+        if (const int numTemplateArguments = qMax(0, clang_Type_getNumTemplateArguments(type))) {
+            for (unsigned tpl = 0; tpl < unsigned(numTemplateArguments); ++tpl) {
+                const CXType argType = clang_Type_getTemplateArgumentAsType(type, tpl);
+                // CXType_Invalid is returned when hitting on a specialization
+                // of a non-type template (template <int v>).
+                if (argType.kind == CXType_Invalid)
+                    return false;
+                t->addInstantiation(createTypeInfo(argType));
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return true;
+}
+
+static void dummyTemplateArgumentHandler(int, const QStringRef &) {}
+
+void BuilderPrivate::addTemplateInstantiations(const CXType &type,
+                                               QString *typeName,
+                                               TypeInfo *t) const
+{
+    // In most cases, for templates like "Vector<A>", Clang will give us the
+    // arguments by recursing down the type. However this will fail for example
+    // within template classes (for functions like the copy constructor):
+    // template <class T>
+    // class Vector {
+    //    Vector(const Vector&);
+    // };
+    // In that case, have TypeInfo parse the list from the spelling.
+    // Finally, remove the list "<>" from the type name.
+    const bool parsed = addTemplateInstantiationsRecursion(type, t)
+        && !t->instantiations().isEmpty();
+    const QPair<int, int> pos = parsed
+        ? parseTemplateArgumentList(*typeName, dummyTemplateArgumentHandler)
+        : t->parseTemplateArgumentList(*typeName);
+    if (pos.first != -1 && pos.second != -1 && pos.second > pos.first)
+        typeName->remove(pos.first, pos.second - pos.first);
+}
+
 TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
 {
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
@@ -439,6 +491,11 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
     while (TypeInfo::stripLeadingConst(&typeName)
            || TypeInfo::stripLeadingVolatile(&typeName)) {
     }
+
+    // Obtain template instantiations if the name has '<' (thus excluding
+    // typedefs like "std::string".
+    if (typeName.contains(QLatin1Char('<')))
+        addTemplateInstantiations(nestedType, &typeName, &typeInfo);
 
     typeInfo.setQualifiedName(qualifiedName(typeName));
     // 3320:CINDEX_LINKAGE int clang_getNumArgTypes(CXType T); function ptr types?

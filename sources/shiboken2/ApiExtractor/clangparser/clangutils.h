@@ -34,6 +34,8 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 
+#include <functional>
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 bool operator==(const CXCursor &c1, const CXCursor &c2);
@@ -91,6 +93,14 @@ struct Diagnostic {
 
 QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu);
 CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds);
+
+// Parse a template argument list "a<b<c,d>,e>" and invoke a handler
+// with each match (level and string). Return begin and end of the list.
+typedef std::function<void(int /*level*/, const QStringRef &)> TemplateArgumentHandler;
+
+QPair<int, int> parseTemplateArgumentList(const QString &l,
+                                          const TemplateArgumentHandler &handler,
+                                          int from = 0);
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug, const SourceLocation &);

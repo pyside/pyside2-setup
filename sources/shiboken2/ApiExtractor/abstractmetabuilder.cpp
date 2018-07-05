@@ -2281,15 +2281,13 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
 {
     // 1. Test the type info without resolving typedefs in case this is present in the
     //    type system
-    TypeInfo typei;
     if (resolveType) {
         if (AbstractMetaType *resolved = translateTypeStatic(_typei, currentClass, d, false, errorMessageIn))
             return resolved;
     }
 
-    if (!resolveType) {
-        typei = _typei;
-    } else {
+    TypeInfo typeInfo = _typei;
+    if (resolveType) {
         // Go through all parts of the current scope (including global namespace)
         // to resolve typedefs. The parser does not properly resolve typedefs in
         // the global scope when they are referenced from inside a namespace.
@@ -2297,29 +2295,20 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         // seemed non-trivial
         int i = d ? d->m_scopes.size() - 1 : -1;
         while (i >= 0) {
-            typei = TypeInfo::resolveType(_typei, d->m_scopes.at(i--));
-            if (typei.qualifiedName().join(colonColon()) != _typei.qualifiedName().join(colonColon()))
+            typeInfo = TypeInfo::resolveType(_typei, d->m_scopes.at(i--));
+            if (typeInfo.qualifiedName().join(colonColon()) != _typei.qualifiedName().join(colonColon()))
                 break;
         }
 
     }
 
-    if (typei.isFunctionPointer()) {
+    if (typeInfo.isFunctionPointer()) {
         if (errorMessageIn)
             *errorMessageIn = msgUnableToTranslateType(_typei, QLatin1String("Unsupported function pointer."));
         return nullptr;
     }
 
     QString errorMessage;
-    TypeInfo typeInfo = TypeParser::parse(typei.toString(), &errorMessage);
-    if (typeInfo.qualifiedName().isEmpty()) {
-        errorMessage = msgUnableToTranslateType(_typei, errorMessage);
-        if (errorMessageIn)
-            *errorMessageIn = errorMessage;
-        else
-            qCWarning(lcShiboken,"%s", qPrintable(errorMessage));
-        return 0;
-    }
 
     // 2. Handle arrays.
     // 2.1 Handle char arrays with unspecified size (aka "const char[]") as "const char*" with

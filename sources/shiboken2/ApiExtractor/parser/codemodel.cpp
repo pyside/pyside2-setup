@@ -29,11 +29,15 @@
 
 
 #include "codemodel.h"
+
+#include <clangparser/clangutils.h>
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
 #include <QDebug>
 #include <QDir>
+#include <QtCore/QStack>
 
 // Predicate to find an item by name in a list of QSharedPointer<Item>
 template <class T> class ModelItemNamePredicate : public std::unary_function<bool, QSharedPointer<T> >
@@ -193,6 +197,51 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, Cod
     }
 
     return otherType;
+}
+
+// Handler for clang::parseTemplateArgumentList() that populates
+// TypeInfo::m_instantiations
+class TypeInfoTemplateArgumentHandler :
+    public std::binary_function<void, int, const QStringRef &>
+{
+public:
+    explicit TypeInfoTemplateArgumentHandler(TypeInfo *t)
+    {
+        m_parseStack.append(t);
+    }
+
+    void operator()(int level, const QStringRef &name)
+    {
+        if (level > m_parseStack.size()) {
+            Q_ASSERT(!top()->m_instantiations.isEmpty());
+            m_parseStack.push(&top()->m_instantiations.back());
+        }
+        while (level < m_parseStack.size())
+            m_parseStack.pop();
+        TypeInfo instantiation;
+        instantiation.setQualifiedName(qualifiedName(name));
+        top()->addInstantiation(instantiation);
+   }
+
+private:
+    TypeInfo *top() const { return m_parseStack.back(); }
+
+    static QStringList qualifiedName(const QStringRef &name)
+    {
+        QStringList result;
+        const QVector<QStringRef> nameParts = name.split(QLatin1String("::"));
+        result.reserve(nameParts.size());
+        for (const QStringRef &p : nameParts)
+            result.append(p.toString());
+        return result;
+    }
+
+    QStack<TypeInfo *> m_parseStack;
+};
+
+QPair<int, int> TypeInfo::parseTemplateArgumentList(const QString &l, int from)
+{
+    return clang::parseTemplateArgumentList(l, clang::TemplateArgumentHandler(TypeInfoTemplateArgumentHandler(this)), from);
 }
 
 QString TypeInfo::toString() const
