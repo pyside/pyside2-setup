@@ -49,6 +49,7 @@ public:
         GreaterThanToken,
 
         ConstToken,
+        VolatileToken,
         Identifier,
         NoToken,
         InvalidToken
@@ -137,13 +138,30 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
         }
     }
 
-    if (tok == Identifier && m_pos - m_tokenStart == 5) {
-        if (m_chars[m_tokenStart] == QLatin1Char('c')
-            && m_chars[m_tokenStart + 1] == QLatin1Char('o')
-            && m_chars[m_tokenStart + 2] == QLatin1Char('n')
-            && m_chars[m_tokenStart + 3] == QLatin1Char('s')
-            && m_chars[m_tokenStart + 4] == QLatin1Char('t'))
-            tok = ConstToken;
+    if (tok == Identifier) {
+        switch (m_pos - m_tokenStart) {
+        case 5:
+            if (m_chars[m_tokenStart] == QLatin1Char('c')
+                && m_chars[m_tokenStart + 1] == QLatin1Char('o')
+                && m_chars[m_tokenStart + 2] == QLatin1Char('n')
+                && m_chars[m_tokenStart + 3] == QLatin1Char('s')
+                && m_chars[m_tokenStart + 4] == QLatin1Char('t')) {
+                tok = ConstToken;
+            }
+                break;
+        case 8:
+            if (m_chars[m_tokenStart] == QLatin1Char('v')
+                && m_chars[m_tokenStart + 1] == QLatin1Char('o')
+                && m_chars[m_tokenStart + 2] == QLatin1Char('l')
+                && m_chars[m_tokenStart + 3] == QLatin1Char('a')
+                && m_chars[m_tokenStart + 4] == QLatin1Char('t')
+                && m_chars[m_tokenStart + 5] == QLatin1Char('i')
+                && m_chars[m_tokenStart + 6] == QLatin1Char('l')
+                && m_chars[m_tokenStart + 7] == QLatin1Char('e')) {
+                tok = VolatileToken;
+            }
+            break;
+        }
     }
 
     return tok;
@@ -239,6 +257,10 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
             } else {
                 stack.top()->m_constant = true;
             }
+            break;
+
+        case Scanner::VolatileToken:
+            stack.top()->m_volatile  = true;
             break;
 
         case Scanner::OpenParenToken: // function pointers not supported

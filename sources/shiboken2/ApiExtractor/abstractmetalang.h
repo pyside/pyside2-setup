@@ -437,6 +437,9 @@ public:
         m_constant = constant;
     }
 
+    bool isVolatile() const { return m_volatile; }
+    void setVolatile(bool v) { m_volatile = v; }
+
     bool isConstRef() const;
 
     ReferenceType referenceType() const { return m_referenceType; }
@@ -551,8 +554,9 @@ private:
 
     TypeUsagePattern m_pattern = InvalidPattern;
     uint m_constant : 1;
+    uint m_volatile : 1;
     uint m_cppInstantiation : 1;
-    uint m_reserved : 30; // unused
+    uint m_reserved : 29; // unused
 
     ReferenceType m_referenceType = NoReference;
     AbstractMetaTypeList m_children;

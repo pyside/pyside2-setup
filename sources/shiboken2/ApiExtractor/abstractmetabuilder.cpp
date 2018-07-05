@@ -2346,6 +2346,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         //newInfo.setArguments(typeInfo.arguments());
         newInfo.setIndirectionsV(typeInfo.indirectionsV());
         newInfo.setConstant(typeInfo.isConstant());
+        newInfo.setVolatile(typeInfo.isVolatile());
         newInfo.setFunctionPointer(typeInfo.isFunctionPointer());
         newInfo.setQualifiedName(typeInfo.qualifiedName());
         newInfo.setReferenceType(typeInfo.referenceType());
@@ -2460,6 +2461,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     metaType->setIndirectionsV(typeInfo.indirectionsV());
     metaType->setReferenceType(typeInfo.referenceType());
     metaType->setConstant(typeInfo.isConstant());
+    metaType->setVolatile(typeInfo.isVolatile());
     metaType->setOriginalTypeDescription(_typei.toString());
 
     const auto &templateArguments = typeInfo.instantiations();

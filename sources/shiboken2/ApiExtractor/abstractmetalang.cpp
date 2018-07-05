@@ -114,6 +114,7 @@ void AbstractMetaAttributes::assignMetaAttributes(const AbstractMetaAttributes &
 
 AbstractMetaType::AbstractMetaType() :
     m_constant(false),
+    m_volatile(false),
     m_cppInstantiation(true),
     m_reserved(0)
 {
@@ -156,6 +157,7 @@ AbstractMetaType *AbstractMetaType::copy() const
 
     cpy->setTypeUsagePattern(typeUsagePattern());
     cpy->setConstant(isConstant());
+    cpy->setVolatile(isVolatile());
     cpy->setReferenceType(referenceType());
     cpy->setIndirectionsV(indirectionsV());
     cpy->setInstantiations(instantiations());
@@ -302,6 +304,8 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
                 d << ", reftype=" << at->referenceType();
             if (at->isConstant())
                 d << ", [const]";
+            if (at->isVolatile())
+                d << ", [volatile]";
             if (at->isArray()) {
                 d << ", array of \"" << at->arrayElementType()->cppSignature()
                     << "\", arrayElementCount="  << at->arrayElementCount();
@@ -2237,6 +2241,8 @@ QString AbstractMetaType::formatSignature(bool minimal) const
     QString result;
     if (isConstant())
         result += QLatin1String("const ");
+    if (isVolatile())
+        result += QLatin1String("volatile ");
     if (isArray()) {
         // Build nested array dimensions a[2][3] in correct order
         result += m_arrayElementType->minimalSignature();
