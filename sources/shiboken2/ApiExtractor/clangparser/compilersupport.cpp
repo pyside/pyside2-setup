@@ -95,6 +95,36 @@ static bool runProcess(const QString &program, const QStringList &arguments,
 
 static QByteArray frameworkPath() { return QByteArrayLiteral(" (framework directory)"); }
 
+#if defined(Q_OS_MACOS)
+static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
+{
+    QByteArray homebrewPrefix = qgetenv("HOMEBREW_OPT");
+
+    // If HOMEBREW_OPT is found we assume that the build is happening
+    // inside a brew environment, which means we need to filter out
+    // the -isystem flags added by the brew clang shim. This is needed
+    // because brew passes the Qt include paths as system include paths
+    // and because our parser ignores system headers, Qt classes won't
+    // be found and thus compilation errors will occur.
+    if (homebrewPrefix.isEmpty())
+        return;
+
+    qCInfo(lcShiboken) << "Found HOMEBREW_OPT with value:" << homebrewPrefix
+                       << "Assuming homebrew build environment.";
+
+    HeaderPaths::iterator it = headerPaths.begin();
+    while (it != headerPaths.end()) {
+        if (it->path.startsWith(homebrewPrefix)) {
+            qCInfo(lcShiboken) << "Filtering out homebrew include path: "
+                               << it->path;
+            it = headerPaths.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+#endif
+
 // Determine g++'s internal include paths from the output of
 // g++ -E -x c++ - -v </dev/null
 // Output looks like:
@@ -130,6 +160,10 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
             isIncludeDir = true;
         }
     }
+
+#if defined(Q_OS_MACOS)
+    filterHomebrewHeaderPaths(result);
+#endif
     return result;
 }
 #endif // Q_CC_MSVC
