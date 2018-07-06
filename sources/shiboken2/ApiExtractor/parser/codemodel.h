@@ -552,6 +552,12 @@ public:
     CodeModel::FunctionType functionType() const;
     void setFunctionType(CodeModel::FunctionType functionType);
 
+    bool isDeleted() const;
+    void setDeleted(bool d);
+
+    bool isDeprecated() const;
+    void setDeprecated(bool d);
+
     bool isVirtual() const;
     void setVirtual(bool isVirtual);
 
@@ -587,9 +593,11 @@ private:
     CodeModel::FunctionType m_functionType;
     union {
         struct {
+            uint m_isDeleted: 1;
             uint m_isVirtual: 1;
             uint m_isOverride: 1;
             uint m_isFinal: 1;
+            uint m_isDeprecated: 1;
             uint m_isInline: 1;
             uint m_isAbstract: 1;
             uint m_isExplicit: 1;
@@ -646,6 +654,7 @@ public:
     CodeModel::AccessPolicy accessPolicy() const;
     void setAccessPolicy(CodeModel::AccessPolicy accessPolicy);
 
+    bool hasValues() const { return !m_enumerators.isEmpty(); }
     EnumeratorList enumerators() const;
     void addEnumerator(EnumeratorModelItem item);
 

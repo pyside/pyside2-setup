@@ -260,6 +260,18 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
+    switch (clang_getCursorAvailability(cursor)) {
+    case CXAvailability_Available:
+        break;
+    case CXAvailability_Deprecated:
+        result->setDeprecated(true);
+        break;
+    case CXAvailability_NotAvailable: // "Foo(const Foo&) = delete;"
+        result->setDeleted(true);
+        break;
+    case CXAvailability_NotAccessible:
+        break;
+    }
     return result;
 }
 
@@ -729,7 +741,6 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
         if (!qSharedPointerDynamicCast<_ClassModelItem>(d->m_scopeStack.back()).isNull())
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
-        d->m_scopeStack.back()->addEnum(d->m_currentEnum);
     }
         break;
     case CXCursor_EnumConstantDecl: {
@@ -912,6 +923,10 @@ bool Builder::endToken(const CXCursor &cursor)
         d->m_currentFunctionType = CodeModel::Normal;
         break;
     case CXCursor_EnumDecl:
+        // Add enum only if values were encountered, otherwise assume it
+        // is a forward declaration of an enum class.
+        if (!d->m_currentEnum.isNull() && d->m_currentEnum->hasValues())
+            d->m_scopeStack.back()->addEnum(d->m_currentEnum);
         d->m_currentEnum.clear();
         break;
     case CXCursor_VarDecl:

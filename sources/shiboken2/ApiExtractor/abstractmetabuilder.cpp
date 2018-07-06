@@ -1913,7 +1913,7 @@ bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
 {
-    if (!functionItem->templateParameters().isEmpty())
+    if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
         return nullptr;
     QString functionName = functionItem->name();
     QString className;

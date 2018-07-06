@@ -896,6 +896,26 @@ void _FunctionModelItem::setVariadics(bool isVariadics)
     m_isVariadics = isVariadics;
 }
 
+bool _FunctionModelItem::isDeleted() const
+{
+    return m_isDeleted;
+}
+
+void _FunctionModelItem::setDeleted(bool d)
+{
+    m_isDeleted = d;
+}
+
+bool _FunctionModelItem::isDeprecated() const
+{
+    return m_isDeprecated;
+}
+
+void _FunctionModelItem::setDeprecated(bool d)
+{
+    m_isDeprecated = d;
+}
+
 bool _FunctionModelItem::isVirtual() const
 {
     return m_isVirtual;
@@ -972,12 +992,16 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
 {
     _MemberModelItem::formatDebug(d);
     d << ", type=" << m_functionType;
+    if (m_isDeleted)
+        d << " [deleted!]";
     if (m_isInline)
         d << " [inline]";
     if (m_isVirtual)
         d << " [virtual]";
     if (m_isOverride)
         d << " [override]";
+    if (m_isDeprecated)
+        d << " [deprecated]";
     if (m_isFinal)
         d << " [final]";
     if (m_isAbstract)
