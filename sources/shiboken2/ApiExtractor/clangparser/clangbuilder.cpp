@@ -260,6 +260,18 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
+    switch (clang_getCursorAvailability(cursor)) {
+    case CXAvailability_Available:
+        break;
+    case CXAvailability_Deprecated:
+        result->setDeprecated(true);
+        break;
+    case CXAvailability_NotAvailable: // "Foo(const Foo&) = delete;"
+        result->setDeleted(true);
+        break;
+    case CXAvailability_NotAccessible:
+        break;
+    }
     return result;
 }
 
