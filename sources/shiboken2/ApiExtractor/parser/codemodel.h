@@ -646,6 +646,7 @@ public:
     CodeModel::AccessPolicy accessPolicy() const;
     void setAccessPolicy(CodeModel::AccessPolicy accessPolicy);
 
+    bool hasValues() const { return !m_enumerators.isEmpty(); }
     EnumeratorList enumerators() const;
     void addEnumerator(EnumeratorModelItem item);
 

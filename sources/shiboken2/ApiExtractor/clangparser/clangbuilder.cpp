@@ -729,7 +729,6 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
         if (!qSharedPointerDynamicCast<_ClassModelItem>(d->m_scopeStack.back()).isNull())
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
-        d->m_scopeStack.back()->addEnum(d->m_currentEnum);
     }
         break;
     case CXCursor_EnumConstantDecl: {
@@ -912,6 +911,10 @@ bool Builder::endToken(const CXCursor &cursor)
         d->m_currentFunctionType = CodeModel::Normal;
         break;
     case CXCursor_EnumDecl:
+        // Add enum only if values were encountered, otherwise assume it
+        // is a forward declaration of an enum class.
+        if (!d->m_currentEnum.isNull() && d->m_currentEnum->hasValues())
+            d->m_scopeStack.back()->addEnum(d->m_currentEnum);
         d->m_currentEnum.clear();
         break;
     case CXCursor_VarDecl:
