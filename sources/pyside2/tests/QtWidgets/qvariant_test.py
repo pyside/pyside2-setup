@@ -27,8 +27,10 @@
 #############################################################################
 
 import unittest
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
+from PySide2.QtWidgets import (QApplication, QComboBox, QGraphicsScene,
+    QGraphicsRectItem)
+
+from helper import UsesQApplication
 
 class MyDiagram(QGraphicsScene):
     pass
@@ -37,14 +39,38 @@ class MyItem(QGraphicsRectItem):
     def itemChange(self, change, value):
         return value;
 
-class QGraphicsSceneOnQVariantTest(unittest.TestCase):
+class Sequence(object):
+    # Having the __getitem__ method on a class transform the Python
+    # type to a PySequence.
+    # Before the patch: aa75437f9119d997dd290471ac3e2cc88ca88bf1
+    # "Fix QVariant conversions when using PySequences"
+    # one could not use an object from this class, because internally
+    # we were requiring that the PySequence was finite.
+    def __getitem__(self, key):
+        raise IndexError()
+
+class QGraphicsSceneOnQVariantTest(UsesQApplication):
     """Test storage ot QGraphicsScene into QVariants"""
+    def setUp(self):
+        super(QGraphicsSceneOnQVariantTest, self).setUp()
+        self.s = MyDiagram()
+        self.i = MyItem()
+        self.combo = QComboBox()
+
+    def tearDown(self):
+        del self.s
+        del self.i
+        del self.combo
+        super(QGraphicsSceneOnQVariantTest, self).tearDown()
+
     def testIt(self):
-        app = QApplication([])
-        s = MyDiagram()
-        i = MyItem()
-        s.addItem(i)
-        self.assertEqual(len(s.items()), 1)
+        self.s.addItem(self.i)
+        self.assertEqual(len(self.s.items()), 1)
+
+    def testSequence(self):
+        # PYSIDE-641
+        self.combo.addItem("test", userData=Sequence())
+        self.assertTrue(isinstance(self.combo.itemData(0), Sequence))
 
 if __name__ == '__main__':
     unittest.main()

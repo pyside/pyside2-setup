@@ -71,6 +71,12 @@
     #define PyInt_AsSsize_t(x)  PyLong_AsSsize_t(x)
     #define PyString_Type PyUnicode_Type
 
+    // In Python 3, Py_TPFLAGS_DEFAULT contains Py_TPFLAGS_HAVE_VERSION_TAG,
+    // which will trigger the attribute cache, which is not intended in Qt for Python.
+    // Use a customized Py_TPFLAGS_DEFAULT by defining Py_TPFLAGS_HAVE_VERSION_TAG = 0.
+    #undef Py_TPFLAGS_HAVE_VERSION_TAG
+    #define Py_TPFLAGS_HAVE_VERSION_TAG  (0)
+
 #else
     // Note: if there wasn't for the old-style classes, only a PyNumber_Check would suffice.
     #define SbkNumber_Check(X) \
