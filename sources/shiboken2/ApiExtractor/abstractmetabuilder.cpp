@@ -1937,11 +1937,16 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     if (TypeDatabase::instance()->isFunctionRejected(className, functionName, &rejectReason)) {
         m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
         return 0;
-    }
-    else if (TypeDatabase::instance()->isFunctionRejected(className,
-                                                          functionSignature(functionItem), &rejectReason)) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
-        return 0;
+    } else {
+        const QString &signature = functionSignature(functionItem);
+        const bool rejected =
+            TypeDatabase::instance()->isFunctionRejected(className, signature,
+                                                         &rejectReason);
+        qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
+            << ": Checking rejection for signature \""
+            << signature << "\" for " << className << ": " << rejected;
+        if (rejected)
+            return nullptr;
     }
 
     if (functionItem->isFriend())
