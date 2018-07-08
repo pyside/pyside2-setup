@@ -134,10 +134,9 @@ typedef struct _peptypeobject {
 } PepTypeObject;
 
 // This was a macro error in the limited API from the beginning.
-// It was fixed in Python 3.7 .
-// XXX The commit did go to master, but did not make it to 3.7, yet.
-//#if PY_VERSION_HEX < 0x03070000
-#if PY_VERSION_HEX < 0x03080000
+// It was fixed in Python master, but did make it only in Python 3.8 .
+#define PY_ISSUE33738_SOLVED 0x03080000
+#if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
 #undef PyIndex_Check
 LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 #endif
