@@ -182,12 +182,36 @@ static void detectVulkan(HeaderPaths *headerPaths)
 }
 
 #if defined(Q_CC_GNU)
-static inline bool isRedHat74()
+enum class LinuxDistribution { RedHat, CentOs, Other };
+
+static LinuxDistribution linuxDistribution()
 {
-    if (QSysInfo::productType() != QLatin1String("rhel"))
-        return false;
+    const QString &productType = QSysInfo::productType();
+    if (productType == QLatin1String("rhel"))
+        return LinuxDistribution::RedHat;
+    if (productType == QLatin1String("centos"))
+        return LinuxDistribution::CentOs;
+    return LinuxDistribution::Other;
+}
+
+static bool checkProductVersion(const QVersionNumber &minimum,
+                                const QVersionNumber &excludedMaximum)
+{
     const QVersionNumber osVersion = QVersionNumber::fromString(QSysInfo::productVersion());
-    return osVersion.isNull() || osVersion >= QVersionNumber(7, 4);
+    return osVersion.isNull() || (osVersion >= minimum && osVersion < excludedMaximum);
+}
+
+static inline bool needsGppInternalHeaders()
+{
+    const LinuxDistribution distro = linuxDistribution();
+    switch (distro) {
+    case LinuxDistribution::RedHat:
+    case LinuxDistribution::CentOs:
+        return checkProductVersion(QVersionNumber(7), QVersionNumber(8));
+    case LinuxDistribution::Other:
+        break;
+    }
+    return false;
 }
 #endif // Q_CC_GNU
 
@@ -294,9 +318,10 @@ QByteArrayList emulatedCompilerOptions()
 #endif // NEED_CLANG_BUILTIN_INCLUDES
 
     // Append the c++ include paths since Clang is unable to find <list> etc
-    // on RHEL 7.4 with g++ 6.3. A fix for this has been added to Clang 5.0,
-    // so, the code can be removed once Clang 5.0 is the minimum version.
-    if (isRedHat74()) {
+    // on RHEL 7 with g++ 6.3 or CentOS 7.2.
+    // A fix for this has been added to Clang 5.0, so, the code can be removed
+    // once Clang 5.0 is the minimum version.
+    if (needsGppInternalHeaders()) {
         const HeaderPaths gppPaths = gppInternalIncludePaths(QStringLiteral("g++"));
         for (const HeaderPath &h : gppPaths) {
             if (h.path.contains("c++"))
