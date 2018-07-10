@@ -136,7 +136,7 @@ class PysideBuildWheel(_bdist_wheel):
             # TODO: Add actual distro detection, instead of
             # relying on limited_api option.
             if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize > 2147483647 \
-                         and self.py_limited_api:
+                         and (self.py_limited_api or sys.version_info[0] == 2):
                 plat_name = 'manylinux1_x86_64'
         plat_name = plat_name.replace('-', '_').replace('.', '_')
 
@@ -160,10 +160,11 @@ class PysideBuildWheel(_bdist_wheel):
             supported_tags = pep425tags.get_supported(
                 supplied_platform=plat_name if self.plat_name_supplied else None)
             # XXX switch to this alternate implementation for non-pure:
-            if not self.py_limited_api:
-                assert tag == supported_tags[0], "%s != %s" % (tag, supported_tags[0])
-                assert tag in supported_tags, (
-                              "would build wheel with unsupported tag {}".format(tag))
+            if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64') and sys.version_info[0] == 2):
+                return tag
+            assert tag == supported_tags[0], "%s != %s" % (tag, supported_tags[0])
+            assert tag in supported_tags, (
+                          "would build wheel with unsupported tag {}".format(tag))
         return tag
 
     # Copy of get_tag from bdist_wheel.py, to write a triplet Tag
@@ -179,13 +180,14 @@ class PysideBuildWheel(_bdist_wheel):
 
         # Doesn't work for bdist_wininst
         impl_tag, abi_tag, plat_tag = self.get_tag()
-        limited_api_enabled = OPTION_LIMITED_API and sys.version_info[0] >= 3
+        # To enable pypi upload we are adjusting the wheel name
+        pypi_ready = (OPTION_LIMITED_API and sys.version_info[0] >= 3) or (sys.version_info[0] == 2)
 
         def writeTag(impl):
             for abi in abi_tag.split('.'):
                 for plat in plat_tag.split('.'):
                     msg['Tag'] = '-'.join((impl, abi, plat))
-        if limited_api_enabled:
+        if pypi_ready:
             writeTag(impl_tag)
         else:
             for impl in impl_tag.split('.'):
