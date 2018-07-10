@@ -259,7 +259,9 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
     PyTypeObject *type = reinterpret_cast<PyTypeObject*>(pyObj);
 
     PyObject_GC_UnTrack(pyObj);
+#ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#endif
     if (sotp) {
         if (sotp->user_data && sotp->d_func) {
             sotp->d_func(sotp->user_data);
@@ -272,7 +274,9 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
         delete sotp;
         sotp = nullptr;
     }
+#ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_END(pyObj);
+#endif
 }
 
 PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)
