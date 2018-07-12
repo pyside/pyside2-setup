@@ -747,10 +747,8 @@ public:
     }
 
     // The package
-    virtual QString targetLangPackage() const
-    {
-        return QString();
-    }
+    QString targetLangPackage() const { return m_targetLangPackage; }
+    void setTargetLangPackage(const QString &p) { m_targetLangPackage = p; }
 
     virtual QString qualifiedTargetLangName() const
     {
@@ -891,6 +889,7 @@ public:
     CustomConversion* customConversion() const;
 private:
     QString m_name;
+    QString m_targetLangPackage;
     Type m_type;
     uint m_codeGeneration = GenerateAll;
     CustomFunction m_customConstructor;
@@ -1031,8 +1030,6 @@ public:
         m_preferredTargetLangType = b;
     }
 
-    void setTargetLangPackage(const QString& package);
-    QString targetLangPackage() const override;
 private:
     QString m_targetLangName;
     QString m_targetLangApiName;
@@ -1047,9 +1044,6 @@ class EnumTypeEntry : public TypeEntry
 public:
     explicit EnumTypeEntry(const QString &nspace, const QString &enumName,
                            const QVersionNumber &vr);
-
-    QString targetLangPackage() const override;
-    void setTargetLangPackage(const QString &package);
 
     QString targetLangName() const override;
     QString targetLangQualifier() const;
@@ -1203,8 +1197,6 @@ public:
         m_enum = e;
     }
 
-    QString targetLangPackage() const override;
-
 private:
     QString m_originalName;
     QString m_targetLangName;
@@ -1286,12 +1278,6 @@ public:
     FieldModificationList fieldModifications() const
     {
         return m_fieldMods;
-    }
-
-    QString targetLangPackage() const override;
-    void setTargetLangPackage(const QString &package)
-    {
-        m_package = package;
     }
 
     bool isQObject() const
@@ -1405,7 +1391,6 @@ private:
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
     FieldModificationList m_fieldMods;
-    QString m_package;
     QString m_defaultSuperclass;
     QString m_qualifiedCppName;
     QString m_targetLangName;
@@ -1455,7 +1440,6 @@ public:
 
     QString typeName() const;
     QString targetLangName() const override;
-    QString targetLangPackage() const override;
     QString qualifiedCppName() const override;
 
     static Type containerTypeFromString(QString typeName)

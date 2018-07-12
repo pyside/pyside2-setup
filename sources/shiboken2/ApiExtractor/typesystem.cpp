@@ -616,6 +616,7 @@ void Handler::addFlags(const QString &name, QString flagName,
 {
     FlagsTypeEntry *ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + name + QLatin1Char('>'), since);
     ftype->setOriginator(m_currentEnum);
+    ftype->setTargetLangPackage(m_currentEnum->targetLangPackage());
     // Try to get the guess the qualified flag name
     const int lastSepPos = name.lastIndexOf(colonColon());
     if (lastSepPos >= 0 && !flagName.contains(colonColon()))
@@ -2131,20 +2132,6 @@ void PrimitiveTypeEntry::setPreferredConversion(bool b)
     m_preferredConversion = b;
 }
 
-typedef QHash<const PrimitiveTypeEntry*, QString> PrimitiveTypeEntryTargetLangPackageMap;
-Q_GLOBAL_STATIC(PrimitiveTypeEntryTargetLangPackageMap, primitiveTypeEntryTargetLangPackages);
-
-void PrimitiveTypeEntry::setTargetLangPackage(const QString& package)
-{
-    primitiveTypeEntryTargetLangPackages()->insert(this, package);
-}
-QString PrimitiveTypeEntry::targetLangPackage() const
-{
-    if (!primitiveTypeEntryTargetLangPackages()->contains(this))
-        return this->::TypeEntry::targetLangPackage();
-    return primitiveTypeEntryTargetLangPackages()->value(this);
-}
-
 CodeSnipList TypeEntry::codeSnips() const
 {
     return m_codeSnips;
@@ -2181,11 +2168,6 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
     return mod;
 }
 
-QString ComplexTypeEntry::targetLangPackage() const
-{
-    return m_package;
-}
-
 QString ComplexTypeEntry::targetLangName() const
 {
     return m_targetLangName.isEmpty() ?
@@ -2210,11 +2192,6 @@ QString ComplexTypeEntry::defaultConstructor() const
 bool ComplexTypeEntry::hasDefaultConstructor() const
 {
     return complexTypeEntryDefaultConstructors()->contains(this);
-}
-
-QString ContainerTypeEntry::targetLangPackage() const
-{
-    return QString();
 }
 
 QString ContainerTypeEntry::targetLangName() const
@@ -2289,11 +2266,6 @@ QString FlagsTypeEntry::targetLangApiName() const
 bool FlagsTypeEntry::preferredConversion() const
 {
     return false;
-}
-
-QString FlagsTypeEntry::targetLangPackage() const
-{
-    return m_enum->targetLangPackage();
 }
 
 QString FlagsTypeEntry::qualifiedTargetLangName() const
@@ -2721,16 +2693,6 @@ EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName,
     m_qualifier(nspace),
     m_targetLangName(enumName)
 {
-}
-
-QString EnumTypeEntry::targetLangPackage() const
-{
-    return m_packageName;
-}
-
-void EnumTypeEntry::setTargetLangPackage(const QString &package)
-{
-    m_packageName = package;
 }
 
 QString EnumTypeEntry::targetLangName() const
