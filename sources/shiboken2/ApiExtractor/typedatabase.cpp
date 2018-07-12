@@ -679,33 +679,95 @@ bool TypeDatabase::checkApiVersion(const QString &package,
 }
 
 #ifndef QT_NO_DEBUG_STREAM
+
+#define FORMAT_BOOL(name, var) \
+    if (var) \
+         d << ", [" << name << ']';
+
+#define FORMAT_NONEMPTY_STRING(name, var) \
+    if (!var.isEmpty()) \
+         d << ", " << name << "=\"" << var << '"';
+
+#define FORMAT_LIST_SIZE(name, var) \
+    if (!var.isEmpty()) \
+         d << ", " << var.size() << ' '  << name;
+
+void TypeEntry::formatDebug(QDebug &d) const
+{
+    const QString cppName = qualifiedCppName();
+    d << '"' << m_name << '"';
+    if (m_name != cppName)
+        d << "\", cppName=\"" << cppName << '"';
+    d << ", type=" << m_type << ", codeGeneration=0x"
+        << hex << m_codeGeneration << dec;
+    FORMAT_NONEMPTY_STRING("package", m_targetLangPackage)
+    FORMAT_BOOL("preferredConversion", m_preferredConversion)
+    FORMAT_BOOL("stream", m_stream)
+    FORMAT_LIST_SIZE("codeSnips", m_codeSnips)
+    FORMAT_NONEMPTY_STRING("conversionRule", m_conversionRule)
+    if (!m_version.isNull() && m_version > QVersionNumber(0, 0))
+        d << ", version=" << m_version;
+    if (m_revision)
+        d << ", revision=" << m_revision;
+    if (m_sbkIndex)
+        d << ", sbkIndex=" << m_sbkIndex;
+    if (m_include.isValid())
+        d << ", include=" << m_include;
+    if (const int count = m_extraIncludes.size()) {
+        d << ", extraIncludes[" << count << "]=";
+        for (int i = 0; i < count; ++i) {
+            if (i)
+                d << ", ";
+            d << m_extraIncludes.at(i);
+        }
+    }
+}
+
+void ComplexTypeEntry::formatDebug(QDebug &d) const
+{
+    TypeEntry::formatDebug(d);
+    FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
+    FORMAT_BOOL("QObject", m_qobject)
+    FORMAT_BOOL("polymorphicBase", m_polymorphicBase)
+    FORMAT_BOOL("genericClass", m_genericClass)
+    if (m_typeFlags != 0)
+        d << ", typeFlags=" << m_typeFlags;
+    d << ", copyableFlag=" << m_copyableFlag;
+    FORMAT_NONEMPTY_STRING("defaultSuperclass", m_defaultSuperclass)
+    FORMAT_NONEMPTY_STRING("polymorphicIdValue", m_polymorphicIdValue)
+    FORMAT_NONEMPTY_STRING("held", m_heldTypeValue)
+    FORMAT_NONEMPTY_STRING("lookupName", m_lookupName)
+    FORMAT_NONEMPTY_STRING("targetType", m_targetType)
+    FORMAT_NONEMPTY_STRING("hash", m_hashFunction)
+    FORMAT_LIST_SIZE("addedFunctions", m_addedFunctions)
+    FORMAT_LIST_SIZE("functionMods", m_functionMods)
+    FORMAT_LIST_SIZE("fieldMods", m_fieldMods)
+}
+
+void EnumTypeEntry::formatDebug(QDebug &d) const
+{
+    TypeEntry::formatDebug(d);
+    FORMAT_NONEMPTY_STRING("package", m_packageName)
+    FORMAT_NONEMPTY_STRING("qualifier", m_qualifier)
+    FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
+    FORMAT_NONEMPTY_STRING("lowerBound", m_lowerBound)
+    FORMAT_NONEMPTY_STRING("lupperBound", m_upperBound)
+    FORMAT_BOOL("extensible", m_extensible)
+    FORMAT_BOOL("forceInteger", m_forceInteger)
+    if (m_flags)
+        d << ", flags=(" << m_flags << ')';
+}
+
 QDebug operator<<(QDebug d, const TypeEntry *te)
 {
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
     d << "TypeEntry(";
-    if (te) {
-        const QString name = te->name();
-        const QString cppName = te->qualifiedCppName();
-        d << '"' << name << '"';
-        if (name != cppName)
-            d << "\", cppName=\"" << cppName << '"';
-        d << ", type=" << te->type();
-        if (te->include().isValid())
-            d << ", include=" << te->include();
-        const IncludeList &extraIncludes = te->extraIncludes();
-        if (const int count = extraIncludes.size()) {
-            d << ", extraIncludes[" << count << "]=";
-            for (int i = 0; i < count; ++i) {
-                if (i)
-                    d << ", ";
-                d << extraIncludes.at(i);
-            }
-        }
-    } else {
+    if (te)
+        te->formatDebug(d);
+    else
         d << '0';
-    }
     d << ')';
     return d;
 }

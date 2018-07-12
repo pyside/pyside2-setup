@@ -892,6 +892,10 @@ public:
     bool hasCustomConversion() const;
     void setCustomConversion(CustomConversion* customConversion);
     CustomConversion* customConversion() const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    virtual void formatDebug(QDebug &d) const;
+#endif
 private:
     QString m_name;
     QString m_targetLangPackage;
@@ -1133,6 +1137,9 @@ public:
         m_forceInteger = force;
     }
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
 private:
     QString m_packageName;
     QString m_qualifier;
@@ -1395,6 +1402,9 @@ public:
     void setDefaultConstructor(const QString& defaultConstructor);
     bool hasDefaultConstructor() const;
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
 private:
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
