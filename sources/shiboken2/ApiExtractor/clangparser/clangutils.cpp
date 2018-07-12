@@ -46,6 +46,18 @@ uint qHash(const CXCursor &c, uint seed)
         ^ qHash(c.data[1])  ^ qHash(c.data[2]) ^ seed;
 }
 
+bool operator==(const CXType &t1, const CXType &t2)
+{
+    return t1.kind == t2.kind && t1.data[0] == t2.data[0]
+        && t1.data[1] == t2.data[1];
+}
+
+uint qHash(const CXType &ct, uint seed)
+{
+    return uint(ct.kind) ^ uint(0xFFFFFFFF & quintptr(ct.data[0]))
+        ^ uint(0xFFFFFFFF & quintptr(ct.data[1])) ^ seed;
+}
+
 namespace clang {
 
 SourceLocation getExpansionLocation(const CXSourceLocation &location)

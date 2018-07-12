@@ -146,6 +146,7 @@ class BuilderPrivate {
 public:
     typedef QHash<CXCursor, ClassModelItem> CursorClassHash;
     typedef QHash<CXCursor, TypeDefModelItem> CursorTypedefHash;
+    typedef QHash<CXType, TypeInfo> TypeInfoHash;
 
     explicit BuilderPrivate(BaseVisitor *bv) : m_baseVisitor(bv), m_model(new CodeModel)
     {
@@ -180,6 +181,7 @@ public:
                                      CodeModel::FunctionType t = CodeModel::Normal) const;
     FunctionModelItem createMemberFunction(const CXCursor &cursor) const;
     void qualifyConstructor(const CXCursor &cursor);
+    TypeInfo createTypeInfoHelper(const CXType &type) const; // uncashed
     TypeInfo createTypeInfo(const CXType &type) const;
     TypeInfo createTypeInfo(const CXCursor &cursor) const
     { return createTypeInfo(clang_getCursorType(cursor)); }
@@ -208,6 +210,8 @@ public:
     // (QMetaObject::Connection)
     CursorClassHash m_cursorClassHash;
     CursorTypedefHash m_cursorTypedefHash;
+
+    mutable TypeInfoHash m_typeInfoHash; // Cache type information
 
     ClassModelItem m_currentClass;
     EnumModelItem m_currentEnum;
@@ -260,7 +264,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
         name = fixTypeName(name);
     FunctionModelItem result(new _FunctionModelItem(m_model, name));
     setFileName(cursor, result.data());
-    result->setType(createTypeInfo(clang_getCursorResultType(cursor)));
+    result->setType(createTypeInfoHelper(clang_getCursorResultType(cursor)));
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
@@ -339,7 +343,7 @@ TemplateParameterModelItem BuilderPrivate::createTemplateParameter(const CXCurso
 TemplateParameterModelItem BuilderPrivate::createNonTypeTemplateParameter(const CXCursor &cursor) const
 {
     TemplateParameterModelItem result = createTemplateParameter(cursor);
-    result->setType(createTypeInfo(cursor));
+    result->setType(createTypeInfoHelper(clang_getCursorType(cursor)));
     return result;
 }
 
@@ -409,7 +413,7 @@ bool BuilderPrivate::addTemplateInstantiationsRecursion(const CXType &type, Type
                 // of a non-type template (template <int v>).
                 if (argType.kind == CXType_Invalid)
                     return false;
-                t->addInstantiation(createTypeInfo(argType));
+                t->addInstantiation(createTypeInfoHelper(argType));
             }
         }
         break;
@@ -443,16 +447,16 @@ void BuilderPrivate::addTemplateInstantiations(const CXType &type,
         typeName->remove(pos.first, pos.second - pos.first);
 }
 
-TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
+TypeInfo BuilderPrivate::createTypeInfoHelper(const CXType &type) const
 {
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
         const CXType pointeeType = clang_getPointeeType(type);
         const int argCount = clang_getNumArgTypes(pointeeType);
         if (argCount >= 0) {
-            TypeInfo result = createTypeInfo(clang_getResultType(pointeeType));
+            TypeInfo result = createTypeInfoHelper(clang_getResultType(pointeeType));
             result.setFunctionPointer(true);
             for (int a = 0; a < argCount; ++a)
-                result.addArgument(createTypeInfo(clang_getArgType(pointeeType, unsigned(a))));
+                result.addArgument(createTypeInfoHelper(clang_getArgType(pointeeType, unsigned(a))));
             return result;
         }
     }
@@ -500,6 +504,14 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
     typeInfo.setQualifiedName(qualifiedName(typeName));
     // 3320:CINDEX_LINKAGE int clang_getNumArgTypes(CXType T); function ptr types?
     return typeInfo;
+}
+
+TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
+{
+    TypeInfoHash::iterator it = m_typeInfoHash.find(type);
+    if (it == m_typeInfoHash.end())
+        it = m_typeInfoHash.insert(type, createTypeInfoHelper(type));
+    return it.value();
 }
 
 // extract an expression from the cursor via source

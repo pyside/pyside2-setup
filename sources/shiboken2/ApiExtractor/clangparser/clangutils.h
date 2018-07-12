@@ -41,6 +41,9 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 bool operator==(const CXCursor &c1, const CXCursor &c2);
 uint qHash(const CXCursor &c, uint seed = 0);
 
+bool operator==(const CXType &t1, const CXType &t2);
+uint qHash(const CXType &ct, uint seed);
+
 namespace clang {
 
 QString getCursorKindName(CXCursorKind cursorKind);
