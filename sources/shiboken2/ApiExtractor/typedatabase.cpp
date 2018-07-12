@@ -518,7 +518,10 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
     QXmlStreamReader reader(device);
     Handler handler(this, generate);
-    return handler.parse(reader);
+    const bool result = handler.parse(reader);
+    if (!result)
+        qCWarning(lcShiboken, "%s", qPrintable(handler.errorString()));
+    return result;
 }
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const

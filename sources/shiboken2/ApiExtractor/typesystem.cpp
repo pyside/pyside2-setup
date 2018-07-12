@@ -210,11 +210,6 @@ static QString msgReaderError(const QXmlStreamReader &reader, const QString &wha
     return message;
 }
 
-static QString msgReaderError(const QXmlStreamReader &reader)
-{
-    return msgReaderError(reader, reader.errorString());
-}
-
 static QString msgInvalidVersion(const QStringRef &version, const QString &package = QString())
 {
     QString result;
@@ -238,7 +233,7 @@ bool Handler::parse(QXmlStreamReader &reader)
         switch (reader.readNext()) {
         case QXmlStreamReader::NoToken:
         case QXmlStreamReader::Invalid:
-            qCWarning(lcShiboken).noquote().nospace() << msgReaderError(reader);
+            m_error = msgReaderError(reader, reader.errorString());
             return false;
         case QXmlStreamReader::StartElement:
             if (!startElement(reader.name(), reader.attributes())) {

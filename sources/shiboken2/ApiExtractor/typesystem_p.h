@@ -140,6 +140,8 @@ public:
 
     bool parse(QXmlStreamReader &reader);
 
+    QString errorString() const { return m_error; }
+
 private:
     bool startElement(const QStringRef& localName, const QXmlStreamAttributes& atts);
     bool handleSmartPointerEntry(StackElement *element,
