@@ -53,7 +53,8 @@ namespace TestUtil
         buffer.setData(xmlCode);
         if (!buffer.open(QIODevice::ReadOnly))
             return Q_NULLPTR;
-        td->parseFile(&buffer);
+        if (!td->parseFile(&buffer))
+            return nullptr;
         buffer.close();
         // parse C++ code
         QTemporaryFile tempSource(QDir::tempPath() + QLatin1String("/st_XXXXXX_main.cpp"));
