@@ -263,6 +263,8 @@ static inline QString msgRejectReason(const TypeRejection &r, const QString &nee
         str << " matches class \"" << r.className.pattern() << "\" and \"" << needle
             << "\" matches \"" << r.pattern.pattern() << '"';
         break;
+    case TypeRejection::Invalid:
+        break;
     }
     return result;
 }

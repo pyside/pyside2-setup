@@ -1588,7 +1588,8 @@ struct TypeRejection
         Field,                       // Match className and field name
         Enum,                        // Match className and enum name
         ArgumentType,                // Match className and argument type
-        ReturnType                   // Match className and return type
+        ReturnType,                  // Match className and return type
+        Invalid
     };
 
     QRegularExpression className;
