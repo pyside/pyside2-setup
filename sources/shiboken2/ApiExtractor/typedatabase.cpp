@@ -577,28 +577,15 @@ void TypeDatabase::setDropTypeEntries(QStringList dropTypeEntries)
     m_dropTypeEntries.sort();
 }
 
-// Using std::pair to save some memory
-// the pair means (revision, typeIndex)
-// This global variable exists only because we can't break the ABI
-typedef QHash<const TypeEntry*, std::pair<int, int> > TypeRevisionMap;
-Q_GLOBAL_STATIC(TypeRevisionMap, typeEntryFields);
 static bool computeTypeIndexes = true;
 static int maxTypeIndex;
 
-int getTypeRevision(const TypeEntry* typeEntry)
+static bool typeEntryLessThan(const TypeEntry* t1, const TypeEntry* t2)
 {
-    return typeEntryFields()->value(typeEntry).first;
-}
-
-void setTypeRevision(TypeEntry* typeEntry, int revision)
-{
-    (*typeEntryFields())[typeEntry].first = revision;
-    computeTypeIndexes = true;
-}
-
-static bool compareTypeEntriesByName(const TypeEntry* t1, const TypeEntry* t2)
-{
-    return t1->qualifiedCppName() < t2->qualifiedCppName();
+    if (t1->revision() < t2->revision())
+        return true;
+    return t1->revision() == t2->revision()
+        && t1->qualifiedCppName() < t2->qualifiedCppName();
 }
 
 static void _computeTypeIndexes()
@@ -607,8 +594,11 @@ static void _computeTypeIndexes()
     typedef QMap<int, TypeEntryList> GroupedTypeEntries;
     GroupedTypeEntries groupedEntries;
 
+    TypeEntryList list;
+
     // Group type entries by revision numbers
     const TypeEntryHash &allEntries = tdb->allEntries();
+    list.reserve(allEntries.size());
     for (TypeEntryHash::const_iterator tit = allEntries.cbegin(), end = allEntries.cend(); tit != end; ++tit) {
         for (TypeEntry *entry : tit.value()) {
             if (entry->isPrimitive()
@@ -621,31 +611,33 @@ static void _computeTypeIndexes()
                 || entry->isVoid()
                 || entry->isCustom())
                 continue;
-            groupedEntries[getTypeRevision(entry)] << entry;
+            if (!list.contains(entry)) // Remove duplicates
+                list.append(entry);
         }
     }
+
+    // Sort the type entries by revision, name
+    std::sort(list.begin(), list.end(), typeEntryLessThan);
 
     maxTypeIndex = 0;
-    GroupedTypeEntries::iterator it = groupedEntries.begin();
-    for (; it != groupedEntries.end(); ++it) {
-        // Remove duplicates
-        TypeEntryList::iterator newEnd = std::unique(it.value().begin(), it.value().end());
-        it.value().erase(newEnd, it.value().end());
-        // Sort the type entries by name
-        qSort(it.value().begin(), newEnd, compareTypeEntriesByName);
-
-        for (TypeEntry *entry : qAsConst(it.value())) {
-            (*typeEntryFields())[entry].second = maxTypeIndex++;
-        }
-    }
+    for (TypeEntry *e : qAsConst(list))
+        e->setSbkIndex(maxTypeIndex++);
     computeTypeIndexes = false;
 }
 
-int getTypeIndex(const TypeEntry* typeEntry)
+void TypeEntry::setRevision(int r)
+{
+    if (m_revision != r) {
+        m_revision = r;
+        computeTypeIndexes = true;
+    }
+}
+
+int TypeEntry::sbkIndex() const
 {
     if (computeTypeIndexes)
         _computeTypeIndexes();
-    return typeEntryFields()->value(typeEntry).second;
+    return m_sbkIndex;
 }
 
 int getMaxTypeIndex()

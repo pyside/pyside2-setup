@@ -642,7 +642,7 @@ void Handler::addFlags(const QString &name, QString flagName,
     QString revision = attributes.value(QLatin1String("flags-revision"));
     if (revision.isEmpty())
         revision = attributes.value(QLatin1String("revision"));
-    setTypeRevision(ftype, revision.toInt());
+    ftype->setRevision(revision.toInt());
 }
 
 bool Handler::handleSmartPointerEntry(StackElement *element,
@@ -1098,7 +1098,7 @@ bool Handler::startElement(const QStringRef &n, const QXmlStreamAttributes &atts
 
         if (element->entry) {
             m_database->addType(element->entry);
-            setTypeRevision(element->entry, attributes[QLatin1String("revision")].toInt());
+            element->entry->setRevision(attributes.value(QLatin1String("revision")).toInt());
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Type: %1 was rejected by typesystem").arg(name);

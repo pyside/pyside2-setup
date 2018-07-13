@@ -54,9 +54,6 @@ struct TypeRejection;
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
-void setTypeRevision(TypeEntry* typeEntry, int revision);
-int getTypeRevision(const TypeEntry* typeEntry);
-int getTypeIndex(const TypeEntry* typeEntry);
 int getMaxTypeIndex();
 
 class ContainerTypeEntry;

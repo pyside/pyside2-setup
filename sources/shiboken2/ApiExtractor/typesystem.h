@@ -715,6 +715,11 @@ public:
                && m_codeGeneration != TypeEntry::GenerateNothing;
     }
 
+    int revision() const { return m_revision; }
+    void setRevision(int r); // see typedatabase.cpp
+    int sbkIndex() const;
+    void setSbkIndex(int i) { m_sbkIndex = i; }
+
     virtual QString qualifiedCppName() const
     {
         return m_name;
@@ -904,6 +909,8 @@ private:
     bool m_stream = false;
     QVersionNumber m_version;
     CustomConversion *m_customConversion = nullptr;
+    int m_revision = 0;
+    int m_sbkIndex = 0;
 };
 
 class TypeSystemTypeEntry : public TypeEntry

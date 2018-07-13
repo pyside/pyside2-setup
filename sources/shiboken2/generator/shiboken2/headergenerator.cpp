@@ -297,7 +297,7 @@ void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* 
     if (!typeEntry || !typeEntry->generateCode())
         return;
     s.setFieldAlignment(QTextStream::AlignLeft);
-    int typeIndex = getTypeIndex(typeEntry);
+    const int typeIndex = typeEntry->sbkIndex();
     _writeTypeIndexDefineLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
     if (typeEntry->isComplex()) {
         const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(typeEntry);
