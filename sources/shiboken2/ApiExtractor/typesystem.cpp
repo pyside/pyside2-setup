@@ -2174,24 +2174,17 @@ QString ComplexTypeEntry::targetLangName() const
         TypeEntry::targetLangName() : m_targetLangName;
 }
 
-// The things we do not to break the ABI...
-typedef QHash<const ComplexTypeEntry*, QString> ComplexTypeEntryDefaultConstructorMap;
-Q_GLOBAL_STATIC(ComplexTypeEntryDefaultConstructorMap, complexTypeEntryDefaultConstructors);
-
 void ComplexTypeEntry::setDefaultConstructor(const QString& defaultConstructor)
 {
-    if (!defaultConstructor.isEmpty())
-        complexTypeEntryDefaultConstructors()->insert(this, defaultConstructor);
+    m_defaultConstructor = defaultConstructor;
 }
 QString ComplexTypeEntry::defaultConstructor() const
 {
-    if (!complexTypeEntryDefaultConstructors()->contains(this))
-        return QString();
-    return complexTypeEntryDefaultConstructors()->value(this);
+    return m_defaultConstructor;
 }
 bool ComplexTypeEntry::hasDefaultConstructor() const
 {
-    return complexTypeEntryDefaultConstructors()->contains(this);
+    return !m_defaultConstructor.isEmpty();
 }
 
 QString ContainerTypeEntry::targetLangName() const
@@ -2608,10 +2601,6 @@ bool TypeEntry::isCppPrimitive() const
     return typeName.contains(QLatin1Char(' ')) || primitiveCppTypes().contains(typeName);
 }
 
-// Again, stuff to avoid ABI breakage.
-typedef QHash<const TypeEntry*, CustomConversion*> TypeEntryCustomConversionMap;
-Q_GLOBAL_STATIC(TypeEntryCustomConversionMap, typeEntryCustomConversionMap);
-
 TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumber &vr) :
     m_name(name),
     m_type(t),
@@ -2621,29 +2610,22 @@ TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumbe
 
 TypeEntry::~TypeEntry()
 {
-    if (typeEntryCustomConversionMap()->contains(this)) {
-        CustomConversion* customConversion = typeEntryCustomConversionMap()->value(this);
-        typeEntryCustomConversionMap()->remove(this);
-        delete customConversion;
-    }
+    delete m_customConversion;
 }
 
 bool TypeEntry::hasCustomConversion() const
 {
-    return typeEntryCustomConversionMap()->contains(this);
+    return m_customConversion != nullptr;
 }
+
 void TypeEntry::setCustomConversion(CustomConversion* customConversion)
 {
-    if (customConversion)
-        typeEntryCustomConversionMap()->insert(this, customConversion);
-    else if (typeEntryCustomConversionMap()->contains(this))
-        typeEntryCustomConversionMap()->remove(this);
+    m_customConversion = customConversion;
 }
+
 CustomConversion* TypeEntry::customConversion() const
 {
-    if (typeEntryCustomConversionMap()->contains(this))
-        return typeEntryCustomConversionMap()->value(this);
-    return 0;
+    return m_customConversion;
 }
 
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr) :

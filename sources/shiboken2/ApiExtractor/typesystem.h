@@ -903,6 +903,7 @@ private:
     QString m_conversionRule;
     bool m_stream = false;
     QVersionNumber m_version;
+    CustomConversion *m_customConversion = nullptr;
 };
 
 class TypeSystemTypeEntry : public TypeEntry
@@ -1391,6 +1392,7 @@ private:
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
     FieldModificationList m_fieldMods;
+    QString m_defaultConstructor;
     QString m_defaultSuperclass;
     QString m_qualifiedCppName;
     QString m_targetLangName;
