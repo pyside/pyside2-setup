@@ -885,6 +885,13 @@ class PysideBuild(_build):
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
             return
+        self._patchelf_path = find_executable('patchelf')
+        if self._patchelf_path:
+            if not os.path.isabs(self._patchelf_path):
+                self._patchelf_path = os.path.join(os.getcwd(),
+                                                   self._patchelf_path)
+            log.info("Using {} ...".format(self._patchelf_path))
+            return
         log.info("Building patchelf...")
         module_src_dir = os.path.join(self.sources_dir, "patchelf")
         build_cmd = [
@@ -895,6 +902,7 @@ class PysideBuild(_build):
         ]
         if run_process(build_cmd) != 0:
             raise DistutilsSetupError("Error building patchelf")
+        self._patchelf_path = os.path.join(self.script_dir, "patchelf")
 
     def build_extension(self, extension):
         # calculate the subrepos folder name
@@ -1235,8 +1243,6 @@ class PysideBuild(_build):
             pyside_libs = [lib for lib in os.listdir(
                 package_path) if filter_match(lib, ["*.so", "*.so.*"])]
 
-            patchelf_path = os.path.join(self.script_dir, "patchelf")
-
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1251,7 +1257,7 @@ class PysideBuild(_build):
                     if OPTION_STANDALONE:
                         qt_lib_dir = "$ORIGIN/Qt/lib"
                     final_rpath = local_rpath + ':' + qt_lib_dir
-                cmd = [patchelf_path, '--set-rpath', final_rpath, srcpath]
+                cmd = [self._patchelf_path, '--set-rpath', final_rpath, srcpath]
                 if run_process(cmd) != 0:
                     raise RuntimeError("Error patching rpath in " + srcpath)
 
