@@ -71,14 +71,16 @@ enum CodeSnipPosition {
     CodeSnipPositionPrototypeInitialization,
     CodeSnipPositionConstructorInitialization,
     CodeSnipPositionConstructor,
-    CodeSnipPositionAny
+    CodeSnipPositionAny,
+    CodeSnipPositionInvalid
 };
 
 enum DocModificationMode {
     DocModificationAppend,
     DocModificationPrepend,
     DocModificationReplace,
-    DocModificationXPathReplace
+    DocModificationXPathReplace,
+    DocModificationInvalid
 };
 
 } // namespace TypeSystem

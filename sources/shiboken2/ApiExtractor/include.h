@@ -42,7 +42,8 @@ public:
     enum IncludeType {
         IncludePath,
         LocalPath,
-        TargetLangImport
+        TargetLangImport,
+        InvalidInclude
     };
 
     Include() : m_type(IncludePath) {}

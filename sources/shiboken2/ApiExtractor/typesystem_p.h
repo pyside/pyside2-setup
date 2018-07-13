@@ -151,7 +151,7 @@ private:
     bool endElement(const QStringRef& localName);
     template <class String> // QString/QStringRef
     bool characters(const String &ch);
-    void fetchAttributeValues(const QString &name, const QXmlStreamAttributes &atts,
+    void fetchAttributeValues(const QStringRef &name, const QXmlStreamAttributes &atts,
                               QHash<QString, QString> *acceptedAttributes);
 
     bool importFileElement(const QXmlStreamAttributes &atts);
@@ -172,7 +172,6 @@ private:
     EnumTypeEntry* m_currentEnum;
     QStack<StackElementContext*> m_contextStack;
 
-    QHash<QString, StackElement::ElementType> tagNames;
     QString m_currentSignature;
     QString m_currentPath;
 };

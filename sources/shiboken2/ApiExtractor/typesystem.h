@@ -237,6 +237,7 @@ struct ArgumentModification
 struct Modification
 {
     enum Modifiers {
+        InvalidModifier =       0x0000,
         Private =               0x0001,
         Protected =             0x0002,
         Public =                0x0003,
@@ -398,6 +399,7 @@ struct AddedFunction
 {
     /// Function access types.
     enum Access {
+        InvalidAccess = 0,
         Protected = 0x1,
         Public =    0x2
     };
@@ -1460,26 +1462,6 @@ public:
     QString typeName() const;
     QString targetLangName() const override;
     QString qualifiedCppName() const override;
-
-    static Type containerTypeFromString(QString typeName)
-    {
-        static QHash<QString, Type> m_stringToContainerType;
-        if (m_stringToContainerType.isEmpty()) {
-            m_stringToContainerType.insert(QLatin1String("list"), ListContainer);
-            m_stringToContainerType.insert(QLatin1String("string-list"), StringListContainer);
-            m_stringToContainerType.insert(QLatin1String("linked-list"), LinkedListContainer);
-            m_stringToContainerType.insert(QLatin1String("vector"), VectorContainer);
-            m_stringToContainerType.insert(QLatin1String("stack"), StackContainer);
-            m_stringToContainerType.insert(QLatin1String("queue"), QueueContainer);
-            m_stringToContainerType.insert(QLatin1String("set"), SetContainer);
-            m_stringToContainerType.insert(QLatin1String("map"), MapContainer);
-            m_stringToContainerType.insert(QLatin1String("multi-map"), MultiMapContainer);
-            m_stringToContainerType.insert(QLatin1String("hash"), HashContainer);
-            m_stringToContainerType.insert(QLatin1String("multi-hash"), MultiHashContainer);
-            m_stringToContainerType.insert(QLatin1String("pair"), PairContainer);
-        }
-        return m_stringToContainerType.value(typeName, NoContainer);
-    }
 
 private:
     Type m_type;
