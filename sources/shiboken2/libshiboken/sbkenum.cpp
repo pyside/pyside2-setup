@@ -312,11 +312,15 @@ void SbkEnumTypeDealloc(PyObject* pyObj)
     SbkEnumType* sbkType = reinterpret_cast<SbkEnumType*>(pyObj);
 
     PyObject_GC_UnTrack(pyObj);
+#ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#endif
     if (PepType_SETP(sbkType)->converter) {
         Shiboken::Conversions::deleteConverter(PepType_SETP(sbkType)->converter);
     }
+#ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_END(pyObj);
+#endif
 }
 
 PyObject* SbkEnumTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds)

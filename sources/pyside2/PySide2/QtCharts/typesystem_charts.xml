@@ -47,6 +47,26 @@
       </object-type>
       <object-type name="QAbstractBarSeries" since="5.7">
           <enum-type name="LabelsPosition"/>
+          <modify-function signature="append(QtCharts::QBarSet*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="append(QList&lt;QtCharts::QBarSet*&gt;)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="insert(int,QtCharts::QBarSet*)">
+            <modify-argument index="2">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="take(QtCharts::QBarSet*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
       </object-type>
       <object-type name="QAbstractSeries" since="5.7">
           <enum-type name="SeriesType"/>
@@ -60,27 +80,112 @@
       <object-type name="QBarSet" since="5.7"/>
       <object-type name="QBoxPlotLegendMarker" since="5.7"/>
       <object-type name="QBoxPlotModelMapper" since="5.7"/>
-      <object-type name="QBoxPlotSeries" since="5.7"/>
+      <object-type name="QBoxPlotSeries" since="5.7">
+          <modify-function signature="append(QtCharts::QBoxSet*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="append(QList&lt;QtCharts::QBoxSet*&gt;)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="insert(int,QtCharts::QBoxSet*)">
+            <modify-argument index="2">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="take(QtCharts::QBoxSet*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+      </object-type>
       <object-type name="QBoxSet" since="5.7">
           <enum-type name="ValuePositions"/>
       </object-type>
       <object-type name="QCandlestickLegendMarker" since="5.7"/>
       <object-type name="QCandlestickModelMapper" since="5.7"/>
-      <object-type name="QCandlestickSeries" since="5.7"/>
+      <object-type name="QCandlestickSeries" since="5.7">
+          <modify-function signature="append(QtCharts::QCandlestickSet*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="append(QList&lt;QtCharts::QCandlestickSet*&gt;)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="insert(int,QtCharts::QCandlestickSet*)">
+            <modify-argument index="2">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="take(QtCharts::QCandlestickSet*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+      </object-type>
       <object-type name="QCandlestickSet" since="5.7"/>
-      <object-type name="QCategoryAxis" since="5.7"/>
+      <object-type name="QCategoryAxis" since="5.7">
+          <enum-type name="AxisLabelsPosition"/>
+      </object-type>
       <object-type name="QChart" since="5.7">
           <enum-type name="ChartType"/>
           <enum-type name="ChartTheme"/>
           <enum-type name="AnimationOption" flags="AnimationOptions"/>
-          <modify-function signature="addSeries(QAbstractSeries*)">
+          <modify-function signature="addAxis(QtCharts::QAbstractAxis*,QFlags&lt;Qt::AlignmentFlag&gt;)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="addSeries(QtCharts::QAbstractSeries*)">
               <modify-argument index="1">
                    <parent index="this" action="add"/>
               </modify-argument>
           </modify-function>
+          <modify-function signature="setAxisX(QtCharts::QAbstractAxis*,QtCharts::QAbstractSeries*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+            <modify-argument index="2">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="setAxisY(QtCharts::QAbstractAxis*,QtCharts::QAbstractSeries*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+            <modify-argument index="2">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="removeAxis(QtCharts::QAbstractAxis*)">
+            <inject-code>
+              Shiboken::Object::releaseOwnership(%PYARG_1);
+            </inject-code>
+          </modify-function>
+          <modify-function signature="removeSeries(QtCharts::QAbstractSeries*)">
+            <inject-code>
+              Shiboken::Object::releaseOwnership(%PYARG_1);
+            </inject-code>
+          </modify-function>
       </object-type>
       <object-type name="QChartView" since="5.7">
           <enum-type name="RubberBand" flags="RubberBands"/>
+          <modify-function signature="QChartView(QtCharts::QChart*,QWidget*)">
+              <modify-argument index="1">
+                   <parent index="this" action="add"/>
+              </modify-argument>
+          </modify-function>
+          <modify-function signature="setChart(QtCharts::QChart*)">
+              <modify-argument index="1">
+                   <parent index="this" action="add"/>
+              </modify-argument>
+          </modify-function>
       </object-type>
       <object-type name="QDateTimeAxis" since="5.7"/>
       <object-type name="QHBarModelMapper" since="5.7"/>
@@ -102,12 +207,38 @@
       <object-type name="QPercentBarSeries" since="5.7"/>
       <object-type name="QPieLegendMarker" since="5.7"/>
       <object-type name="QPieModelMapper" since="5.7"/>
-      <object-type name="QPieSeries" since="5.7"/>
       <object-type name="QPieSlice" since="5.7">
           <enum-type name="LabelPosition"/>
       </object-type>
+      <object-type name="QPieSeries" since="5.7">
+          <modify-function signature="append(QtCharts::QPieSlice*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="append(QList&lt;QtCharts::QPieSlice*&gt;)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="insert(int,QtCharts::QPieSlice*)">
+            <modify-argument index="2">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+          <modify-function signature="take(QtCharts::QPieSlice*)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
+      </object-type>
       <object-type name="QPolarChart" since="5.7">
           <enum-type name="PolarOrientation" flags="PolarOrientations"/>
+          <modify-function signature="addAxis(QtCharts::QAbstractAxis*,QtCharts::QPolarChart::PolarOrientation)">
+            <modify-argument index="1">
+              <parent index="this" action="add"/>
+            </modify-argument>
+          </modify-function>
           <!-- Compile error assigning default flags value -->
           <modify-function signature="axes(QFlags&lt;QtCharts::QPolarChart::PolarOrientation&gt;,QtCharts::QAbstractSeries*)const" remove="all"/>
       </object-type>

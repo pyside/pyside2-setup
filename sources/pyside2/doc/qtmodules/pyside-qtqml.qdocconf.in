@@ -1,0 +1,5 @@
+#The index page for QtQml lists only the APIs. Including this qdocconf
+#should also include the text and snippets from the module page
+include(@QT_SRC_DIR@/../qtdeclarative/src/qml/doc/qtqml.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtdeclarative/src/qml/doc
+include(../pyside-config.qdocconf)

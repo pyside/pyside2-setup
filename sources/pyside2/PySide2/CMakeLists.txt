@@ -47,10 +47,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/parser.py" COPYONLY)
 if (PYTHON_VERSION_MAJOR EQUAL 3)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/inspect.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/inspect.py" COPYONLY)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing36.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
 else()
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)

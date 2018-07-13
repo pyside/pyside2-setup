@@ -59,7 +59,7 @@ for _ in "four":
     package_dir = os.path.dirname(package_dir)
 sys.path.insert(0, package_dir)
 if sys.version_info >= (3,):
-    from PySide2.support.signature import inspect
+    import inspect
 else:
     import inspect
     namespace = inspect.__dict__

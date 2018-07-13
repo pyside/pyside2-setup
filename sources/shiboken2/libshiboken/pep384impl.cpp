@@ -449,7 +449,7 @@ check_PepTypeObject_valid(void)
 
 #ifdef Py_LIMITED_API
 
-#if PY_VERSION_HEX < 0x03070000
+#if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
 #include "pep384_issue33738.cpp"
 #endif
 

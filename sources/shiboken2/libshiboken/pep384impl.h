@@ -134,10 +134,9 @@ typedef struct _peptypeobject {
 } PepTypeObject;
 
 // This was a macro error in the limited API from the beginning.
-// It was fixed in Python 3.7 .
-// XXX The commit did go to master, but did not make it to 3.7, yet.
-//#if PY_VERSION_HEX < 0x03070000
-#if PY_VERSION_HEX < 0x03080000
+// It was fixed in Python master, but did make it only in Python 3.8 .
+#define PY_ISSUE33738_SOLVED 0x03080000
+#if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
 #undef PyIndex_Check
 LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 #endif
@@ -286,83 +285,6 @@ typedef struct _pycfunc PyCFunctionObject;
 #ifdef Py_LIMITED_API
 typedef struct _methoddescr PyMethodDescrObject;
 #endif
-
-/*****************************************************************************
- *
- * RESOLVED: pystate.h
- *
- */
-
-/*
- * pystate provides the data structure that is needed for the trashcan
- * algorithm. Unfortunately, it is not included in the limited API.
- * We have two options:
- *
- *  (1) ignore trashcan and live without secured deeply nested structures,
- *  (2) maintain the structure ourselves and make sure it does not change.
- *
- * I have chosen the second option.
- *
- * When a new python version appears, you need to check compatibility of
- * the PyThreadState structure (pystate.h) and the trashcan macros at the
- * end of object.h .
- */
-
-#ifdef Py_LIMITED_API
-
-#define Py_TRASH_MIN_COMPATIBLE 0x03020400
-#define Py_TRASH_MAX_COMPATIBLE 0x0307FFFF
-
-#if PY_VERSION_HEX >= Py_TRASH_MIN_COMPATIBLE && \
-    PY_VERSION_HEX <= Py_TRASH_MAX_COMPATIBLE
-typedef int (*Py_tracefunc)(PyObject *, struct _frame *, int, PyObject *);
-
-// This structure has the trashcan variables since Python 3.2.4.
-// We renamed all but the trashcan fields to make sure that we don't use
-// anything else somewhere.
-
-typedef struct _ts {
-    struct _ts *Pep_prev;
-    struct _ts *Pep_next;
-    PyInterpreterState *Pep_interp;
-
-    struct _frame *Pep_frame;
-    int Pep_recursion_depth;
-    char Pep_overflowed;
-    char Pep_recursion_critical;
-
-    int Pep_tracing;
-    int Pep_use_tracing;
-
-    Py_tracefunc Pep_c_profilefunc;
-    Py_tracefunc Pep_c_tracefunc;
-    PyObject *Pep_c_profileobj;
-    PyObject *Pep_c_traceobj;
-
-    PyObject *Pep_curexc_type;
-    PyObject *Pep_curexc_value;
-    PyObject *Pep_curexc_traceback;
-
-    PyObject *Pep_exc_type;
-    PyObject *Pep_exc_value;
-    PyObject *Pep_exc_traceback;
-
-    PyObject *Pep_dict;
-
-    int Pep_gilstate_counter;
-
-    PyObject *Pep_async_exc;
-    long Pep_thread_id;
-    // These two variables only are of interest to us.
-    int trash_delete_nesting;
-    PyObject *trash_delete_later;
-    // Here we cut away the rest of the reduced structure.
-} PyThreadState;
-#else
-#error *** Please check compatibility of the trashcan code, see Pep.h ***
-#endif
-
-#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
