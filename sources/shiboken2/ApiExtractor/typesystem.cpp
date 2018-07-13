@@ -2573,71 +2573,6 @@ QString ComplexTypeEntry::targetLangApiName() const
 {
     return strings_jobject;
 }
-QString StringTypeEntry::targetLangApiName() const
-{
-    return strings_jobject;
-}
-QString StringTypeEntry::targetLangName() const
-{
-    return strings_String;
-}
-QString StringTypeEntry::targetLangPackage() const
-{
-    return QString();
-}
-
-bool StringTypeEntry::isNativeIdBased() const
-{
-    return false;
-}
-
-CharTypeEntry::CharTypeEntry(const QString &name, const QVersionNumber &vr) :
-    ValueTypeEntry(name, CharType, vr)
-{
-    setCodeGeneration(GenerateNothing);
-}
-
-QString CharTypeEntry::targetLangApiName() const
-{
-    return strings_jchar;
-}
-QString CharTypeEntry::targetLangName() const
-{
-    return strings_char;
-}
-
-QString CharTypeEntry::targetLangPackage() const
-{
-    return QString();
-}
-
-bool CharTypeEntry::isNativeIdBased() const
-{
-    return false;
-}
-
-VariantTypeEntry::VariantTypeEntry(const QString &name, const QVersionNumber &vr) :
-    ValueTypeEntry(name, VariantType, vr)
-{
-}
-
-QString VariantTypeEntry::targetLangApiName() const
-{
-    return strings_jobject;
-}
-QString VariantTypeEntry::targetLangName() const
-{
-    return strings_Object;
-}
-QString VariantTypeEntry::targetLangPackage() const
-{
-    return QString();
-}
-
-bool VariantTypeEntry::isNativeIdBased() const
-{
-    return false;
-}
 
 QString ContainerTypeEntry::typeName() const
 {
@@ -2861,31 +2796,6 @@ ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, const QVersionNumber
     ComplexTypeEntry(name, t, vr)
 {
 }
-
-StringTypeEntry::StringTypeEntry(const QString &name, const QVersionNumber &vr) :
-    ValueTypeEntry(name, StringType, vr)
-{
-    setCodeGeneration(GenerateNothing);
-}
-
-/*
-static void injectCode(ComplexTypeEntry *e,
-                       const char *signature,
-                       const QByteArray &code,
-                       const ArgumentMap &args)
-{
-    CodeSnip snip;
-    snip.language = TypeSystem::NativeCode;
-    snip.position = CodeSnip::Beginning;
-    snip.addCode(QString::fromLatin1(code));
-    snip.argumentMap = args;
-
-    FunctionModification mod;
-    mod.signature = QMetaObject::normalizedSignature(signature);
-    mod.snips << snip;
-    mod.modifiers = Modification::CodeInjection;
-}
-*/
 
 struct CustomConversion::CustomConversionPrivate
 {

@@ -1527,44 +1527,6 @@ protected:
     explicit ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr);
 };
 
-
-class StringTypeEntry : public ValueTypeEntry
-{
-public:
-    explicit StringTypeEntry(const QString &name, const QVersionNumber &vr);
-
-    QString targetLangApiName() const override;
-    QString targetLangName() const override;
-    QString targetLangPackage() const override;
-
-    bool isNativeIdBased() const override;
-};
-
-class CharTypeEntry : public ValueTypeEntry
-{
-public:
-    explicit CharTypeEntry(const QString &name, const QVersionNumber &vr);
-
-    QString targetLangApiName() const override;
-    QString targetLangName() const override;
-    QString targetLangPackage() const override;
-
-    bool isNativeIdBased() const override;
-};
-
-class VariantTypeEntry: public ValueTypeEntry
-{
-public:
-    explicit VariantTypeEntry(const QString &name, const QVersionNumber &vr);
-
-    QString targetLangApiName() const override;
-    QString targetLangName() const override;
-    QString targetLangPackage() const override;
-
-    bool isNativeIdBased() const override;
-};
-
-
 class InterfaceTypeEntry : public ComplexTypeEntry
 {
 public:
