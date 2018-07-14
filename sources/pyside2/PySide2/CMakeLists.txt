@@ -46,6 +46,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/mapping.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/parser.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/enum_sig.py" COPYONLY)
 if (PYTHON_VERSION_MAJOR EQUAL 3)
 else()
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"

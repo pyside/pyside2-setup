@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -82,13 +82,17 @@ sys.path.pop(0)
 # break the Python license decorated files without an encoding line.
 
 # name used in signature.cpp
-def create_signature(props, sig_kind):
+def create_signature(props, key):
     if not props:
         # empty signatures string
         return
     if isinstance(props["multi"], list):
-        return list(create_signature(elem, sig_kind)
+        return list(create_signature(elem, key)
                     for elem in props["multi"])
+    if type(key) is tuple:
+        sig_kind, modifier = key
+    else:
+        sig_kind, modifier = key, None
     varnames = props["varnames"]
     if sig_kind == "method":
         varnames = ("self",) + varnames

@@ -37,6 +37,7 @@
 **
 ****************************************************************************/
 
+#include "sbkpython.h"
 #include "typespec.h"
 #include <structmember.h>
 

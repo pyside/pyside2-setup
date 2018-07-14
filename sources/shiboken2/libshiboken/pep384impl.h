@@ -286,7 +286,7 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 // But this is no problem as we check it's validity for every version.
 
 #define PYTHON_BUFFER_VERSION_COMPATIBLE    (PY_VERSION_HEX >= 0x03030000 && \
-                                             PY_VERSION_HEX <  0X0307FFFF)
+                                             PY_VERSION_HEX <  0x0307FFFF)
 #if !PYTHON_BUFFER_VERSION_COMPATIBLE
 # error Please check the buffer compatibility for this python version!
 #endif
@@ -469,6 +469,12 @@ LIBSHIBOKEN_API PyObject *_Pep_PrivateMangle(PyObject *self, PyObject *name);
 extern LIBSHIBOKEN_API PyTypeObject *PepStaticMethod_TypePtr;
 #else
 #define PepStaticMethod_TypePtr &PyStaticMethod_Type
+#endif
+// Although not PEP specific, we resolve this similar issue, here:
+#if PY_VERSION_HEX < 0x03000000
+extern LIBSHIBOKEN_API PyTypeObject *PepMethodDescr_TypePtr;
+#else
+#define PepMethodDescr_TypePtr &PyMethodDescr_Type
 #endif
 
 /*****************************************************************************
