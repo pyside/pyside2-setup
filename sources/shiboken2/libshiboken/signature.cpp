@@ -129,13 +129,16 @@ static PyObject *
 _get_class_of_cf(PyObject *ob_cf)
 {
     PyObject *selftype = PyCFunction_GET_SELF(ob_cf);
-    if (selftype == NULL)
-        selftype = PyDict_GetItem(pyside_globals->map_dict, (PyObject *)ob_cf);
-    if (selftype == NULL) {
-        if (!PyErr_Occurred())
-            Py_RETURN_NONE;
-        return NULL;
+    if (selftype == nullptr) {
+        selftype = PyDict_GetItem(pyside_globals->map_dict, ob_cf);
+        if (selftype == nullptr) {
+            // This must be an overloaded function that we handled special.
+            Shiboken::AutoDecRef special(Py_BuildValue("(Os)", ob_cf, "overload"));
+            selftype = PyDict_GetItem(pyside_globals->map_dict, special);
+        }
     }
+    assert(selftype);
+
     PyObject *typemod = (PyType_Check(selftype) || PyModule_Check(selftype))
                         ? selftype : (PyObject *)Py_TYPE(selftype);
     // do we support module functions?
@@ -175,19 +178,26 @@ GetClassOfFunc(PyObject *ob)
 }
 
 static PyObject *
-compute_name_key(PyObject *ob)
+get_funcname(PyObject *ob)
 {
-    if (PyType_Check(ob))
-        return GetClassKey(GetClassOfFunc(ob));
     PyObject *func = ob;
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
         func = PyObject_GetAttrString(ob, "__func__");
     else
         Py_INCREF(func);
-    Shiboken::AutoDecRef func_name(PyObject_GetAttrString(func, "__name__"));
+    PyObject *func_name = PyObject_GetAttrString(func, "__name__");
     Py_DECREF(func);
-    if (func_name.isNull())
+    if (func_name == nullptr)
         Py_FatalError("unexpected name problem in compute_name_key");
+    return func_name;
+}
+
+static PyObject *
+compute_name_key(PyObject *ob)
+{
+    if (PyType_Check(ob))
+        return GetClassKey(ob);
+    Shiboken::AutoDecRef func_name(get_funcname(ob));
     Shiboken::AutoDecRef type_key(GetClassKey(GetClassOfFunc(ob)));
     return Py_BuildValue("(OO)", type_key.object(), func_name.object());
 }
@@ -201,9 +211,11 @@ build_name_key_to_func(PyObject *obtype)
     if (meth == 0)
         return 0;
 
+    Shiboken::AutoDecRef type_key(GetClassKey(obtype));
     for (; meth->ml_name != NULL; meth++) {
         Shiboken::AutoDecRef func(PyCFunction_NewEx(meth, obtype, NULL));
-        Shiboken::AutoDecRef name_key(compute_name_key(func));
+        Shiboken::AutoDecRef func_name(get_funcname(func));
+        Shiboken::AutoDecRef name_key(Py_BuildValue("(OO)", type_key.object(), func_name.object()));
         if (func.isNull() || name_key.isNull()
             || PyDict_SetItem(pyside_globals->map_dict, name_key, func) < 0)
             return -1;
@@ -224,7 +236,7 @@ name_key_to_func(PyObject *ob)
         Py_RETURN_NONE;
 
     PyObject *ret = PyDict_GetItem(pyside_globals->map_dict, name_key);
-    if (ret == NULL) {
+    if (ret == nullptr) {
         // do a lazy initialization
         Shiboken::AutoDecRef type_key(GetClassKey(GetClassOfFunc(ob)));
         PyObject *type = PyDict_GetItem(pyside_globals->map_dict,
@@ -233,7 +245,7 @@ name_key_to_func(PyObject *ob)
             Py_RETURN_NONE;
         assert(PyType_Check(type));
         if (build_name_key_to_func(type) < 0)
-            return NULL;
+            return nullptr;
         ret = PyDict_GetItem(pyside_globals->map_dict, name_key);
     }
     Py_XINCREF(ret);
@@ -901,6 +913,12 @@ _build_func_to_type(PyObject *obtype)
             strcat(mangled_name, ".overload");
             if (PyDict_SetItemString(dict, mangled_name, descr) < 0)
                 return -1;
+            if (meth->ml_flags & METH_STATIC) {
+                // This is the special case where a static method is hidden.
+                Shiboken::AutoDecRef special(Py_BuildValue("(Os)", cfunc.object(), "overload"));
+                if (PyDict_SetItem(pyside_globals->map_dict, special, obtype) < 0)
+                    return -1;
+            }
             if (PyDict_SetItemString(pyside_globals->map_dict, mangled_name, obtype) < 0)
                 return -1;
             continue;

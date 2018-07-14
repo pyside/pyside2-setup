@@ -40,20 +40,97 @@
 from __future__ import print_function, absolute_import
 
 """
+init_platform.py
+
 Existence registry
+==================
 
 This is a registry for all existing function signatures.
 One file is generated with all signatures of a platform and version.
+
+The scope has been extended to generate all signatures from the
+shiboken and pysidetest projects.
 """
 
 import sys
 import os
 import re
-import PySide2
 from contextlib import contextmanager
 from textwrap import dedent
 
+script_dir = os.path.normpath(os.path.join(__file__, *".. .. .. .. ..".split()))
+history_dir = os.path.join(script_dir, 'build_history')
+
+# Find out if we have the build dir, already. Then use it.
+look_for = os.path.join("pyside2", "tests", "pysidetest")
+have_build_dir = [x for x in sys.path if x.endswith(look_for)]
+if have_build_dir:
+    all_build_dir = os.path.normpath(os.path.join(have_build_dir[0], "..", "..", ".."))
+elif os.path.exists(history_dir):
+    # Using the last build to find the build dir.
+    # Note: This is not reliable when building in parallel!
+    last_build = max(x for x in os.listdir(history_dir) if x.startswith("20"))
+    fpath = os.path.join(history_dir, last_build, "build_dir.txt")
+    if os.path.exists(fpath):
+        with open(fpath) as f:
+            all_build_dir = f.read().strip()
+else:
+    print(dedent("""
+        Can't find the build dir in the history.
+        Compile again and don't forget to specify "--build-tests".
+        """))
+    sys.exit(1)
+
+if not os.path.exists(os.path.join(all_build_dir, look_for)):
+    print(dedent("""
+        PySide has not been built with tests enabled.
+        Compile again and don't forget to specify "--build-tests".
+        """))
+    sys.exit(1)
+
+pyside_build_dir = os.path.join(all_build_dir, "pyside2")
+shiboken_build_dir = os.path.join(all_build_dir, "shiboken2")
+
+# now we compute all paths:
+def set_ospaths(build_dir):
+    ps = os.pathsep
+    ospath_var = "PATH" if sys.platform == "win32" else "LD_LIBRARY_PATH"
+    old_val = os.environ.get(ospath_var, "")
+    lib_path = [os.path.join(build_dir, "pyside2", "libpyside"),
+                os.path.join(build_dir, "pyside2", "tests", "pysidetest"),
+                os.path.join(build_dir, "shiboken2", "tests", "libminimal"),
+                os.path.join(build_dir, "shiboken2", "tests", "libsample"),
+                os.path.join(build_dir, "shiboken2", "tests", "libother"),
+                os.path.join(build_dir, "shiboken2", "tests", "libsmart"),
+                os.path.join(build_dir, "shiboken2", "libshiboken")]
+    ospath = ps.join(lib_path + old_val.split(ps))
+    os.environ[ospath_var] = ospath
+
+set_ospaths(all_build_dir)
+sys.path[:0] = [os.path.join(shiboken_build_dir, "shibokenmodule"),
+                pyside_build_dir]
+
+import PySide2
+
 all_modules = list("PySide2." + x for x in PySide2.__all__)
+
+# now we should be able to do all imports:
+if not have_build_dir:
+    sys.path.insert(0, os.path.join(pyside_build_dir, "tests", "pysidetest"))
+import testbinding
+all_modules.append("testbinding")
+
+# Note: This is not the shiboken dir as usual, but the binary.
+import shiboken2 as Shiboken
+Shiboken.__name__ = "Shiboken"
+sys.modules["Shiboken"] = sys.modules.pop("shiboken2")
+all_modules.append("Shiboken")
+
+# 'sample' seems to be needed by 'other', so import it first.
+for modname in "minimal sample other smart".split():
+    sys.path.insert(0, os.path.join(shiboken_build_dir, "tests", modname + "binding"))
+    __import__(modname)
+    all_modules.append(modname)
 
 from PySide2.QtCore import __version__
 from PySide2.support.signature.lib.enum_sig import SimplifyingEnumerator
@@ -79,35 +156,34 @@ else:
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
 
-def qtVersion():
+def qt_version():
     return tuple(map(int, __version__.split(".")))
 
-# Format a registry file name for version
-def _registryFileName(version):
+# Format a registry file name for version.
+def _registry_filename(version):
     name = "exists_{}_{}_{}_{}{}.py".format(platform_name,
         version[0], version[1], version[2], "_ci" if is_ci else "")
     return os.path.join(os.path.dirname(__file__), name)
 
-# Return the expected registry file name
-def getRefPath():
-    return _registryFileName(qtVersion())
+# Return the expected registry file name.
+def get_refpath():
+    return _registry_filename(qt_version())
 
 # Return the registry file name, either that of the current
-# version or fall back to a previous patch release
-def getEffectiveRefPath():
-    refpath = getRefPath()
+# version or fall back to a previous patch release.
+def get_effective_refpath():
+    refpath = get_refpath()
     if os.path.exists(refpath):
         return refpath
-    version = qtVersion()
-    majorVersion = version[0]
-    minorVersion = version[1]
-    patchVersion = version[2]
-    while patchVersion >= 0:
-        file = _registryFileName((majorVersion, minorVersion, patchVersion))
+    version = qt_version()
+    major, minor, patch = version[:3]
+    while patch >= 0:
+        file = _registry_filename((major, minor, patch))
         if os.path.exists(file):
             return file
-        patchVersion = patchVersion - 1
+        patch = patch - 1
     return refpath
+
 
 class Formatter(object):
     """
@@ -163,8 +239,9 @@ def enum_all():
         ret.update(enu.module(mod_name))
     return ret
 
+
 def generate_all():
-    refPath = getRefPath()
+    refPath = get_refpath()
     module = os.path.basename(os.path.splitext(refPath)[0])
     with open(refPath, "w") as outfile, open(sourcepath) as f:
         fmt = Formatter(outfile)
@@ -190,10 +267,12 @@ def generate_all():
             enu.module(mod_name)
         fmt.print("# eof")
 
+
 def __main__():
     print("+++ generating {}. You should probably check this file in."
-          .format(getRefPath()))
+          .format(get_refpath()))
     generate_all()
+
 
 if __name__ == "__main__":
     __main__()

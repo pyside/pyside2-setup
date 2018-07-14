@@ -39,17 +39,23 @@
 
 from __future__ import print_function, absolute_import
 
+"""
+existence_test.py
+
+A test that checks all function signatures if they still exist.
+"""
+
 import os
 import sys
 import unittest
 from textwrap import dedent
 from init_platform import (enum_all, generate_all, is_ci,
-   getEffectiveRefPath, getRefPath, qtVersion)
+   get_effective_refpath, get_refpath, qt_version)
 from util import isolate_warnings, check_warnings, suppress_warnings, warn
 from PySide2 import *
 
-refPath = getRefPath()
-effectiveRefPath = getEffectiveRefPath()
+refPath = get_refpath()
+effectiveRefPath = get_effective_refpath()
 effectiveRefPathRoot = os.path.splitext(effectiveRefPath)[0]
 pyc = effectiveRefPathRoot + ".pyc"
 if os.path.exists(pyc) and not os.path.exists(effectiveRefPath):
@@ -132,7 +138,7 @@ class TestSignaturesExists(unittest.TestCase):
 
 tested_versions = (5, 6), (5, 9), (5, 11) #, (5, 12)  # activate this, soon!
 
-if not have_refmodule and is_ci and qtVersion()[:2] in tested_versions:
+if not have_refmodule and is_ci and qt_version()[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):
         """
         This helper class generates the reference file for CI.

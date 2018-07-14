@@ -224,7 +224,7 @@ def download_file_powershell(url, target):
         "[System.Net.CredentialCache]::DefaultCredentials; "
         "(new-object System.Net.WebClient).DownloadFile({}, {})".format(
             url, target))
-    )
+#    )
     cmd = [
         'powershell',
         '-Command',
