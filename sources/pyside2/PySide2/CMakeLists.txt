@@ -8,12 +8,16 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/generate_pyi.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/generate_pyi.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/__init__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/layout.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/layout.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/mapping.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/__init__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"

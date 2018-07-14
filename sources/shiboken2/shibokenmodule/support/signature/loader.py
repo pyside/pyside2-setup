@@ -59,7 +59,6 @@ import os
 import traceback
 import types
 from contextlib import contextmanager
-from distutils.sysconfig import get_python_lib
 
 """
 A note on the import problem (solved):
@@ -111,6 +110,30 @@ def ensure_import_support():
     sys.path.pop(0)
 
 
+# patching inspect's formatting to keep the word "typing":
+def formatannotation(annotation, base_module=None):
+    # if getattr(annotation, '__module__', None) == 'typing':
+    #     return repr(annotation).replace('typing.', '')
+    if isinstance(annotation, type):
+        if annotation.__module__ in ('builtins', base_module):
+            return annotation.__qualname__
+        return annotation.__module__+'.'+annotation.__qualname__
+    return repr(annotation)
+
+# patching __repr__ to disable the __repr__ of typing.TypeVar:
+"""
+    def __repr__(self):
+        if self.__covariant__:
+            prefix = '+'
+        elif self.__contravariant__:
+            prefix = '-'
+        else:
+            prefix = '~'
+        return prefix + self.__name__
+"""
+def _typevar__repr__(self):
+    return "typing." + self.__name__
+
 with ensure_import_support():
     # We store all needed modules in signature_loader.
     # This way, they are always accessible.
@@ -119,6 +142,7 @@ with ensure_import_support():
     if sys.version_info >= (3,):
         import typing
         import inspect
+        inspect.formatannotation = formatannotation
     else:
         import inspect
         namespace = inspect.__dict__
@@ -129,6 +153,7 @@ with ensure_import_support():
         inspect.__doc__ += _doc
         # force inspect to find all attributes. See "heuristic" in pydoc.py!
         inspect.__all__ = list(x for x in dir(inspect) if not x.startswith("_"))
+    typing.TypeVar.__repr__ = _typevar__repr__
 
     def put_into_loader_package(module, loader=signature_loader):
         # Note: the "with" statement hides that we are no longer in a

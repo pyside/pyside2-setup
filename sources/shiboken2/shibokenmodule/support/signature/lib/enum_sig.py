@@ -39,6 +39,16 @@
 
 from __future__ import print_function, absolute_import
 
+"""
+enum_sig.py
+
+Enumerate all signatures of a class.
+
+This module separates the enumeration process from the formatting.
+It is not easy to adhere to this protocol, but in the end, it paid off
+by producing a lot of clarity.
+"""
+
 import sys
 from signature_loader import get_signature, inspect
 
@@ -51,6 +61,7 @@ class ExactEnumerator(object):
     An appropriate formatter should be supplied, if printable output
     is desired.
     """
+
     def __init__(self, formatter, result_type=dict):
         self.fmt = formatter
         self.result_type = result_type
@@ -91,7 +102,8 @@ class ExactEnumerator(object):
                     subclass_name = ".".join((class_name, thing_name))
                     subclasses.append((subclass_name, thing))
                 else:
-                    ret.update(self.function(thing_name, thing))
+                    func_name = thing_name.split(".")[0]   # remove ".overload"
+                    ret.update(self.function(func_name, thing))
             for subclass_name, subclass in subclasses:
                 ret.update(self.klass(subclass_name, subclass))
             return ret
@@ -101,7 +113,7 @@ class ExactEnumerator(object):
         signature = getattr(func, '__signature__', None)
         if signature is not None:
             with self.fmt.function(func_name, signature) as key:
-                ret[key] = str(signature)
+                ret[key] = signature
         return ret
 
 
@@ -133,3 +145,20 @@ class SimplifyingEnumerator(ExactEnumerator):
             with self.fmt.function(func_name, sig) as key:
                 ret[key] = sig
         return ret
+
+class HintingEnumerator(ExactEnumerator):
+    """
+    HintingEnumerator enumerates all signatures in a module slightly changed.
+
+    This class is used for generating complete listings of all signatures for
+    hinting stubs. Only default values are replaced by "...".
+    """
+
+    def function(self, func_name, func):
+        ret = self.result_type()
+        signature = get_signature(func, 'hintingstub')
+        if signature is not None:
+            with self.fmt.function(func_name, signature) as key:
+                ret[key] = signature
+        return ret
+

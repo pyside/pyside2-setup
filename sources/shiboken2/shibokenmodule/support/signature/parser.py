@@ -240,7 +240,7 @@ def fixup_multilines(sig_str):
             if idx > 0:
                 continue
             # remove duplicates
-            multi_lines = list(set(multi_lines))
+            multi_lines = sorted(set(multi_lines))
             # renumber or return a single line
             nmulti = len(multi_lines)
             if nmulti > 1:

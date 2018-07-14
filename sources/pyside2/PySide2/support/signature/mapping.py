@@ -218,6 +218,7 @@ def init_QtCore():
 
 def init_QtGui():
     import PySide2.QtGui
+    from PySide2.QtGui import QPageLayout, QPageSize # 5.12 macOS
     type_map.update({
         "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
         "USHRT_MAX": ushort_max,
@@ -395,6 +396,18 @@ def init_QtWinExtras():
     import PySide2.QtWinExtras
     type_map.update({
         "QList< QWinJumpListItem* >()": [],
+    })
+    return locals()
+
+# from 5.12, macOS
+def init_QtDataVisualization():
+    from PySide2.QtDataVisualization import QtDataVisualization
+    QtDataVisualization.QBarDataRow = typing.List[QtDataVisualization.QBarDataItem]
+    QtDataVisualization.QBarDataArray = typing.List[QtDataVisualization.QBarDataRow]
+    QtDataVisualization.QSurfaceDataRow = typing.List[QtDataVisualization.QSurfaceDataItem]
+    QtDataVisualization.QSurfaceDataArray = typing.List[QtDataVisualization.QSurfaceDataRow]
+    type_map.update({
+        "100.0f": 100.0,
     })
     return locals()
 

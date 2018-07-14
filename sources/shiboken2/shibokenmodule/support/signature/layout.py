@@ -57,6 +57,7 @@ used literally as strings like "signature", "existence", etc.
 
 from textwrap import dedent
 from signature_loader import inspect
+from signature_loader.mapping import ellipsis
 
 
 class SimpleNamespace(object):
@@ -223,7 +224,7 @@ def create_signature(props, key):
     if not layout.defaults:
         defaults = ()
     if layout.ellipsis:
-        defaults = ("...",) * len(defaults)
+        defaults = (ellipsis,) * len(defaults)
     annotations = props["annotations"].copy()
     if not layout.return_annotation and "return" in annotations:
         del annotations["return"]

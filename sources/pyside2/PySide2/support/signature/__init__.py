@@ -41,6 +41,6 @@ from __future__ import print_function, absolute_import
 
 # Trigger initialization phase 2.
 _ = type.__signature__
-from signature_loader import get_signature, inspect
+from signature_loader import get_signature, inspect, typing
 
-__all__ = "get_signature inspect layout mapping lib".split()
+__all__ = "get_signature inspect typing layout mapping lib".split()

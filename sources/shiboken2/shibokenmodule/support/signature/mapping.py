@@ -56,7 +56,10 @@ import pkgutil
 
 from signature_loader import typing
 
-ellipsis = "..."
+class ellipsis(object):
+    def __repr__(self):
+        return "..."
+ellipsis = ellipsis()
 Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
 StringList = typing.List[str]
 IntList = typing.List[int]
