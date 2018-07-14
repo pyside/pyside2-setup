@@ -141,7 +141,9 @@ void callCppDestructor(void* cptr)
  *  Shiboken::importModule is DEPRECATED. Use Shiboken::Module::import() instead.
  */
 SBK_DEPRECATED(LIBSHIBOKEN_API bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr));
-LIBSHIBOKEN_API void        setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads);
+
+// setErrorAboutWrongArguments now gets overload info from the signature module.
+LIBSHIBOKEN_API void        setErrorAboutWrongArguments(PyObject* args, const char* funcName);
 
 namespace ObjectType {
 

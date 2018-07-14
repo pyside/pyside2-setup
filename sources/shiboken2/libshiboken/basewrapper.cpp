@@ -596,42 +596,10 @@ void init()
     shibokenAlreadInitialised = true;
 }
 
-void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const char** cppOverloads)
+// setErrorAboutWrongArguments now gets overload info from the signature module.
+void setErrorAboutWrongArguments(PyObject *args, const char *funcName)
 {
-    std::string msg;
-    std::string params;
-    if (args) {
-        if (PyTuple_Check(args)) {
-            for (Py_ssize_t i = 0, max = PyTuple_GET_SIZE(args); i < max; ++i) {
-                if (i)
-                    params += ", ";
-                PyObject* arg = PyTuple_GET_ITEM(args, i);
-                params += Py_TYPE(arg)->tp_name;
-            }
-        } else {
-            params = Py_TYPE(args)->tp_name;
-        }
-    }
-
-    if (!cppOverloads) {
-        msg = "'" + std::string(funcName) + "' called with wrong argument types: " + params;
-    } else {
-        msg = "'" + std::string(funcName) + "' called with wrong argument types:\n  ";
-        msg += funcName;
-        msg += '(';
-        msg += params;
-        msg += ")\n";
-        msg += "Supported signatures:";
-        for (int i = 0; cppOverloads[i]; ++i) {
-            msg += "\n  ";
-            msg += funcName;
-            msg += '(';
-            msg += cppOverloads[i];
-            msg += ')';
-        }
-    }
-    PyErr_SetString(PyExc_TypeError, msg.c_str());
-
+    SetError_Argument(args, funcName);
 }
 
 class FindBaseTypeVisitor : public HierarchyVisitor

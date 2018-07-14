@@ -63,6 +63,7 @@ class Reloader(Sbk_Reloader):
         Sbk_Reloader.update(self, globals())
 
 update_mapping = Reloader().update
+namespace = globals()  # our module's __dict__, updated
 
 
 def init_QtCore():

@@ -74,6 +74,7 @@ typedef struct safe_globals_struc {
     // init part 2: run module
     PyObject *sigparse_func;
     PyObject *createsig_func;
+    PyObject *seterror_argument_func;
 } safe_globals_struc, *safe_globals;
 
 static safe_globals pyside_globals = 0;
@@ -509,6 +510,9 @@ init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
         goto error;
     p->createsig_func = PyObject_GetAttrString(p->helper_module, "create_signature");
     if (p->createsig_func == NULL)
+        goto error;
+    p->seterror_argument_func = PyObject_GetAttrString(p->helper_module, "seterror_argument");
+    if (p->seterror_argument_func == NULL)
         goto error;
     return 0;
 
@@ -948,6 +952,31 @@ FinishSignatureInitialization(PyObject *module, const char *signatures)
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);
     }
+}
+
+void
+SetError_Argument(PyObject *args, const char *func_name)
+{
+    /*
+     * This function replaces the type error construction with extra
+     * overloads parameter in favor of using the signature module.
+     * Error messages are rare, so we do it completely in Python.
+     */
+    init_module_1();
+    init_module_2();
+    Shiboken::AutoDecRef res(PyObject_CallFunction(
+                                 pyside_globals->seterror_argument_func,
+                                 const_cast<char *>("(Os)"), args, func_name));
+    if (res.isNull()) {
+        PyErr_Print();
+        Py_FatalError("seterror_argument did not receive a result");
+    }
+    PyObject *err, *msg;
+    if (!PyArg_UnpackTuple(res, func_name, 2, 2, &err, &msg)) {
+        PyErr_Print();
+        Py_FatalError("unexpected failure in seterror_argument");
+    }
+    PyErr_SetObject(err, msg);
 }
 
 } //extern "C"
