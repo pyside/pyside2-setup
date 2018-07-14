@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2017 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -37,6 +37,4 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
-
-from signature_loader.enum_sig import *
+# this file intentionally left blank

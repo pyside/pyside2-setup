@@ -39,8 +39,8 @@
 
 from __future__ import print_function, absolute_import
 
-from .loader import inspect
-from PySide2 import QtCore
-if QtCore.QProcess.__signature__:
-    pass   # trigger initialization phase 2, so we can import:
-from signature_loader import get_signature
+# Trigger initialization phase 2.
+_ = type.__signature__
+from signature_loader import get_signature, inspect
+
+__all__ = "get_signature inspect layout mapping lib".split()

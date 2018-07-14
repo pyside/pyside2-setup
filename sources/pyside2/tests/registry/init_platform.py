@@ -56,7 +56,6 @@ from textwrap import dedent
 all_modules = list("PySide2." + x for x in PySide2.__all__)
 
 from PySide2.QtCore import __version__
-
 from PySide2.support.signature.lib.enum_sig import SimplifyingEnumerator
 
 is_py3 = sys.version_info[0] == 3

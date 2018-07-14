@@ -47,115 +47,23 @@ to the Python representation.
 
 The PySide modules are not loaded in advance, but only after they appear
 in sys.modules. This minimizes the loading overhead.
-In principle, we need to re-load the module, when the imports change.
-But it is much easier to do it on demand, when we get an exception.
-See _resolve_value() in singature.py
 """
 
-import sys
-import struct
 import PySide2
-try:
-    import sample
-except ImportError:
-    pass
 
-try:
-    from . import typing
-except ImportError:
-    import typing
+from signature_loader.sbk_mapping import *
 
-ellipsis = "..."
-Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
-StringList = typing.List[str]
-IntList = typing.List[int]
-IntMatrix = typing.List[IntList]
-Variant = typing.Any
-ModelIndexList = typing.List[int]
-QImageCleanupFunction = typing.Callable
-FloatList = typing.List[float]
-FloatMatrix = typing.List[FloatList]
-# Pair could be more specific, but we loose the info in the generator.
-Pair = typing.Tuple[typing.Any, typing.Any]
-MultiMap = typing.DefaultDict[str, typing.List[str]]
+Sbk_Reloader = Reloader
 
-# ulong_max is only 32 bit on windows.
-ulong_max = 2*sys.maxsize+1 if len(struct.pack("L", 1)) != 4 else 0xffffffff
-ushort_max = 0xffff
-
-GL_COLOR_BUFFER_BIT = 0x00004000
-GL_NEAREST = 0x2600
-
-WId = int
-
-# from 5.9
-GL_TEXTURE_2D = 0x0DE1
-GL_RGBA = 0x1908
-
-class _NotCalled(str):
-    """
-    Wrap some text with semantics
-
-    This class is wrapped around text in order to avoid calling it.
-    There are three reasons for this:
-
-      - some instances cannot be created since they are abstract,
-      - some can only be created after qApp was created,
-      - some have an ugly __repr__ with angle brackets in it.
-
-    By using derived classes, good looking instances can be created
-    which can be used to generate source code or .pyi files. When the
-    real object is needed, the wrapper can simply be called.
-    """
-    def __repr__(self):
-        suppress = "PySide2.support.signature.typing."
-        text = self[len(suppress):] if self.startswith(suppress) else self
-        return "{}({})".format(type(self).__name__, text)
-
-    def __call__(self):
-        from .mapping import __dict__ as namespace
-        text = self if self.endswith(")") else self + "()"
-        return eval(text, namespace)
-
-# Some types are abstract. They just show their name.
-class Virtual(_NotCalled):
-    pass
-
-# Other types I simply could not find.
-class Missing(_NotCalled):
-    pass
-
-class Invalid(_NotCalled):
-    pass
-
-# Helper types
-class Default(_NotCalled):
-    pass
-
-class Instance(_NotCalled):
-    pass
-
-
-class Reloader(object):
-    def __init__(self):
-        self.sys_module_count = 0
-        self.uninitialized = PySide2.__all__[:] + ["sample"]
+class Reloader(Sbk_Reloader):
+    _uninitialized = Sbk_Reloader._uninitialized + PySide2.__all__
+    _prefixes = Sbk_Reloader._prefixes + ["PySide2."]
 
     def update(self):
-        if self.sys_module_count == len(sys.modules):
-            return
-        self.sys_module_count = len(sys.modules)
-        g = globals()
-        for mod_name in self.uninitialized[:]:
-            if "PySide2." + mod_name in sys.modules or mod_name == "sample":
-                self.uninitialized.remove(mod_name)
-                proc_name = "init_" + mod_name
-                if proc_name in g:
-                    g.update(g[proc_name]())
-
+        Sbk_Reloader.update(self, globals())
 
 update_mapping = Reloader().update
-type_map = {}
+
 
 def init_QtCore():
     import PySide2.QtCore
@@ -489,24 +397,5 @@ def init_QtWinExtras():
         "QList< QWinJumpListItem* >()": [],
     })
     return locals()
-
-def init_sample():
-    type_map.update({
-        "sample.int": int,
-        "Complex": complex,
-        "sample.OddBool": bool,
-        "sample.bool": bool,
-        "sample.PStr": str,
-        "double[]": FloatList,
-        "OddBool": bool,
-        "PStr": str,
-        "sample.char": Char,
-        "double[][]": FloatMatrix,
-        "int[]": IntList,
-        "int[][]": IntMatrix,
-    })
-    return locals()
-
-# Here was testbinding, actually the source of all evil.
 
 # end of file

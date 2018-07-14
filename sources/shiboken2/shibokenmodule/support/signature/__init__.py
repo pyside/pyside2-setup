@@ -39,4 +39,6 @@
 
 from __future__ import print_function, absolute_import
 
-from signature_loader.enum_sig import *
+# Trigger initialization phase 2.
+_ = type.__signature__
+from signature_loader import get_signature, inspect

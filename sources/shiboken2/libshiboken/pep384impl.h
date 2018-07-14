@@ -63,6 +63,7 @@ extern "C"
  */
 #ifdef Py_LIMITED_API
 // Why the hell is this useful debugging function not allowed?
+// BTW: When used, it breaks on Windows, intentionally!
 LIBSHIBOKEN_API void _PyObject_Dump(PyObject *);
 #endif
 
@@ -467,6 +468,7 @@ LIBSHIBOKEN_API PyObject *_Pep_PrivateMangle(PyObject *self, PyObject *name);
 
 #ifdef Py_LIMITED_API
 extern LIBSHIBOKEN_API PyTypeObject *PepStaticMethod_TypePtr;
+LIBSHIBOKEN_API PyObject *PyStaticMethod_New(PyObject *callable);
 #else
 #define PepStaticMethod_TypePtr &PyStaticMethod_Type
 #endif

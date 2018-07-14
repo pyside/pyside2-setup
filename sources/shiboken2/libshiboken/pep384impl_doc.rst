@@ -283,7 +283,9 @@ written that skips over dotted name parts.
 
 Finally, the function ``_PyObject_Dump`` was excluded from the limited API.
 This is a useful debugging aid that we always want to have available,
-so it is added back, again.
+so it is added back, again. Anyway, we did not reimplement it, and so
+Windows is not supported.
+Therefore, a forgotten debugging call of this functions will break COIN. :-)
 
 
 Using The New Type API

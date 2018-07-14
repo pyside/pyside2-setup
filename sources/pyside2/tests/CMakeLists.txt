@@ -54,6 +54,7 @@ else()
     endif()
     add_subdirectory(registry)
     add_subdirectory(signals)
+    add_subdirectory(support)
 
     foreach(shortname IN LISTS all_module_shortnames)
         message(STATUS "preparing tests for module 'Qt${shortname}'")

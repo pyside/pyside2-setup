@@ -45,7 +45,8 @@ import warnings
 import types
 import keyword
 import functools
-from .mapping import type_map, update_mapping, __dict__ as namespace
+from signature_loader.mapping import (
+    type_map, update_mapping, __dict__ as namespace)
 
 _DEBUG = False
 LIST_KEYWORDS = False
