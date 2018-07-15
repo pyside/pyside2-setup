@@ -165,8 +165,8 @@ namespace QFlags
     PyTypeObject *create(const char* name, PyType_Slot numberMethods[])
     {
         char qualname[200];
-        strcpy(qualname, "PySide2.libpyside.");
-        strcat(qualname, name);
+        // PYSIDE-747: Here we insert now the full class name.
+        strcpy(qualname, name);
         // Careful: PyType_FromSpec does not allocate the string.
         PyType_Spec *newspec = new PyType_Spec;
         newspec->name = strdup(qualname);

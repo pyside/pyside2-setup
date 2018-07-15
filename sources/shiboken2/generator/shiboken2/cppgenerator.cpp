@@ -4483,8 +4483,13 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
     if (!cppEnum->isAnonymous()) {
         FlagsTypeEntry* flags = enumTypeEntry->flags();
         if (flags) {
-            s << INDENT << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\"" << flags->flagsName() << "\", "
-              << cpythonEnumName(cppEnum) << "_number_slots);" << endl;
+            // The following could probably be made nicer:
+            // We need 'flags->flagsName()' with the full module/class path.
+            QString fullPath = getClassTargetFullName(cppEnum);
+            fullPath.truncate(fullPath.lastIndexOf(QLatin1Char('.')) + 1);
+            s << INDENT << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\""
+                << fullPath << flags->flagsName() << "\", "
+                << cpythonEnumName(cppEnum) << "_number_slots);" << endl;
         }
 
         enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
