@@ -348,6 +348,26 @@ custom-type
 
     The **name** attribute is the name of the custom type, e.g., "PyObject".
 
+.. _smart-pointer-type:
+
+smart-pointer-type
+^^^^^^^^^^^^^^^^^^
+
+    The smart pointer type node indicates that the given class is a smart pointer
+    and requires inserting calls to **getter** to access the pointeee.
+    Currently, only the **type** *shared* is supported and the usage is limited
+    to function return values.
+    **ref-count-method** specifies the name of the method used to do reference counting.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <smart-pointer-type name="..."
+                since="..."
+                type="..."
+                getter="..."
+                ref-count-method="..."/>
+            </typesystem>
 
 .. _function:
 
