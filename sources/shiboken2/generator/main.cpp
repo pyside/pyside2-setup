@@ -35,6 +35,7 @@
 #include <iostream>
 #include <apiextractor.h>
 #include <fileout.h>
+#include <typedatabase.h>
 #include "generator.h"
 #include "shibokenconfig.h"
 #include "cppgenerator.h"
@@ -627,7 +628,8 @@ int main(int argc, char *argv[])
     if (!extractor.classCount())
         qCWarning(lcShiboken) << "No C++ classes found!";
 
-    qCDebug(lcShiboken) << extractor;
+    qCDebug(lcShiboken) << extractor << '\n'
+        << *TypeDatabase::instance();
 
     for (const GeneratorPtr &g : qAsConst(generators)) {
         g->setOutputDirectory(outputDirectory);
