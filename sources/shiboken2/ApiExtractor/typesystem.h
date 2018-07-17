@@ -1463,6 +1463,9 @@ public:
     QString targetLangName() const override;
     QString qualifiedCppName() const override;
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
 private:
     Type m_type;
 };

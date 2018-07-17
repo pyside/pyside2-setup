@@ -760,6 +760,12 @@ void EnumTypeEntry::formatDebug(QDebug &d) const
         d << ", flags=(" << m_flags << ')';
 }
 
+void ContainerTypeEntry::formatDebug(QDebug &d) const
+{
+    ComplexTypeEntry::formatDebug(d);
+    d << ", type=" << m_type << ",\"" << typeName() << '"';
+}
+
 QDebug operator<<(QDebug d, const TypeEntry *te)
 {
     QDebugStateSaver saver(d);
