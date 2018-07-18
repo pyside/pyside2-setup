@@ -650,8 +650,6 @@ DeclaredEnumTypes::DeclaredEnumTypes()
 
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
-    std::list<PyTypeObject*>::const_iterator it = m_enumTypes.begin();
-    for (; it != m_enumTypes.end(); ++it) {
         /*
          * PYSIDE-595: This was "delete *it;" before introducing 'PyType_FromSpec'.
          * XXX what should I do now?
@@ -660,8 +658,8 @@ DeclaredEnumTypes::~DeclaredEnumTypes()
          * So right now I am doing nothing. Surely wrong but no crash.
          * See also the comment in function 'createGlobalEnumItem'.
          */
-        //fprintf(stderr, "ttt %d %s\n", Py_REFCNT(*it), *it->tp_name);
-    }
+        // for (PyTypeObject *o : m_enumTypes)
+        //     fprintf(stderr, "ttt %d %s\n", Py_REFCNT(o), o->tp_name);
     m_enumTypes.clear();
 }
 

@@ -118,19 +118,16 @@ static int SbkObject_traverse(PyObject* self, visitproc visit, void* arg)
     //Visit children
     Shiboken::ParentInfo* pInfo = sbkSelf->d->parentInfo;
     if (pInfo) {
-        std::set<SbkObject*>::const_iterator it = pInfo->children.begin();
-        for(; it != pInfo->children.end(); ++it)
-            Py_VISIT(*it);
+        for (SbkObject *c : pInfo->children)
+             Py_VISIT(c);
     }
 
     //Visit refs
     Shiboken::RefCountMap* rInfo = sbkSelf->d->referredObjects;
     if (rInfo) {
-        Shiboken::RefCountMap::const_iterator it = rInfo->begin();
-        for (; it != rInfo->end(); ++it) {
-            std::list<PyObject*>::const_iterator ref = it->second.begin();
-            for(; ref != it->second.end(); ++ref)
-                Py_VISIT(*ref);
+        for (auto it = rInfo->begin(), end = rInfo->end(); it != end; ++it) {
+            for (PyObject *ref : it->second)
+                Py_VISIT(ref);
         }
     }
 
@@ -352,10 +349,9 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     sotp->d_func = nullptr;
     sotp->is_user_type = 1;
 
-    std::list<SbkObjectType*>::const_iterator it = bases.begin();
-    for (; it != bases.end(); ++it) {
-        if (PepType_SOTP(*it)->subtype_init)
-            PepType_SOTP(*it)->subtype_init(newType, args, kwds);
+    for (SbkObjectType *base : bases) {
+        if (PepType_SOTP(base)->subtype_init)
+            PepType_SOTP(base)->subtype_init(newType, args, kwds);
     }
 
     return reinterpret_cast<PyObject*>(newType);
@@ -522,8 +518,7 @@ void DtorCallerVisitor::visit(SbkObjectType* node)
 
 void DtorCallerVisitor::done()
 {
-    std::list<std::pair<void*, SbkObjectType*> >::const_iterator it = m_ptrs.begin();
-    for (; it != m_ptrs.end(); ++it) {
+    for (auto it = m_ptrs.begin(), end = m_ptrs.end(); it != end; ++it) {
         Shiboken::ThreadStateSaver threadSaver;
         threadSaver.save();
         PepType_SOTP(it->second)->cpp_dtor(it->first);
@@ -643,11 +638,9 @@ std::list<SbkObject*> splitPyObject(PyObject* pyObj)
 
 static void decRefPyObjectList(const std::list<PyObject*>& lst, PyObject *skip)
 {
-    std::list<PyObject*>::const_iterator iter = lst.begin();
-    while(iter != lst.end()) {
-        if (*iter != skip)
-            Py_DECREF(*iter);
-        ++iter;
+    for (PyObject *o : lst) {
+        if (o != skip)
+            Py_DECREF(o);
     }
 }
 
@@ -842,12 +835,13 @@ static void setSequenceOwnership(PyObject* pyObj, bool owner)
     if (PySequence_Check(pyObj) && has_length) {
         Py_ssize_t size = PySequence_Size(pyObj);
         if (size > 0) {
-            std::list<SbkObject*> objs = splitPyObject(pyObj);
-            for (auto it = objs.begin(), end = objs.end(); it != end; ++it) {
-                if (owner)
-                    getOwnership(*it);
-                else
-                    releaseOwnership(*it);
+            const auto objs = splitPyObject(pyObj);
+            if (owner) {
+                for (SbkObject *o : objs)
+                    getOwnership(o);
+            } else {
+                for (SbkObject *o : objs)
+                    releaseOwnership(o);
             }
         }
     } else if (Object::checkType(pyObj)) {
@@ -975,10 +969,9 @@ void invalidate(SbkObject* self)
 
 static void recursive_invalidate(PyObject* pyobj, std::set<SbkObject*>& seen)
 {
-    std::list<SbkObject*> objs = splitPyObject(pyobj);
-    std::list<SbkObject*>::const_iterator it = objs.begin();
-    for (; it != objs.end(); it++)
-        recursive_invalidate(*it, seen);
+    const auto objs = splitPyObject(pyobj);
+    for (SbkObject *o : objs)
+        recursive_invalidate(o, seen);
 }
 
 static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen)
@@ -997,29 +990,23 @@ static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen)
     if (self->d->parentInfo) {
         // Create a copy because this list can be changed during the process
         ChildrenList copy = self->d->parentInfo->children;
-        ChildrenList::iterator it = copy.begin();
 
-        for (; it != copy.end(); ++it) {
+        for (SbkObject *child : copy) {
             // invalidate the child
-            recursive_invalidate(*it, seen);
+            recursive_invalidate(child, seen);
 
             // if the parent not is a wrapper class, then remove children from him, because We do not know when this object will be destroyed
             if (!self->d->validCppObject)
-                removeParent(*it, true, true);
+                removeParent(child, true, true);
         }
     }
 
     // If has ref to other objects invalidate all
     if (self->d->referredObjects) {
         RefCountMap& refCountMap = *(self->d->referredObjects);
-        RefCountMap::iterator iter;
-        for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter) {
-            const std::list<PyObject*> lst = iter->second;
-            std::list<PyObject*>::const_iterator it = lst.begin();
-            while(it != lst.end()) {
-                recursive_invalidate(*it, seen);
-                ++it;
-            }
+        for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it) {
+            for (PyObject *o : it->second)
+                recursive_invalidate(o, seen);
         }
     }
 }
@@ -1035,22 +1022,18 @@ void makeValid(SbkObject* self)
 
     // If it is a parent make  all children valid
     if (self->d->parentInfo) {
-        ChildrenList::iterator it = self->d->parentInfo->children.begin();
-        for (; it != self->d->parentInfo->children.end(); ++it)
-            makeValid(*it);
+        for (SbkObject *child : self->d->parentInfo->children)
+            makeValid(child);
     }
 
     // If has ref to other objects make all valid again
     if (self->d->referredObjects) {
         RefCountMap& refCountMap = *(self->d->referredObjects);
         RefCountMap::iterator iter;
-        for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter) {
-            const std::list<PyObject*> lst = iter->second;
-            std::list<PyObject*>::const_iterator it = lst.begin();
-            while(it != lst.end()) {
-                if (Shiboken::Object::checkType(*it))
-                    makeValid(reinterpret_cast<SbkObject*>(*it));
-                ++it;
+        for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it) {
+            for (PyObject *o : it->second) {
+                if (Shiboken::Object::checkType(o))
+                    makeValid(reinterpret_cast<SbkObject *>(o));
             }
         }
     }
@@ -1166,15 +1149,14 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
 
     ChildrenList& children = pInfo->children;
 
-    ChildrenList::iterator childrenEnd = children.end();
-    for (ChildrenList::iterator iChild = children.begin(); iChild != childrenEnd; ++iChild) {
-        if (!((*iChild)->d && (*iChild)->d->cptr))
+    for (SbkObject *child : children) {
+        if (!(child->d && child->d->cptr))
             continue;
-        if ((*iChild)->d->cptr[0] == wrapper->d->cptr[0]) {
-            if (reinterpret_cast<const void *>(Py_TYPE(*iChild)) == reinterpret_cast<const void *>(instanceType))
-                return const_cast<SbkObject *>((*iChild));
+        if (child->d->cptr[0] == wrapper->d->cptr[0]) {
+            if (reinterpret_cast<const void *>(Py_TYPE(child)) == reinterpret_cast<const void *>(instanceType))
+                return child;
             else
-                return findColocatedChild(const_cast<SbkObject *>(*iChild), instanceType);
+                return findColocatedChild(child, instanceType);
         }
     }
     return 0;
@@ -1442,13 +1424,10 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
 
     RefCountMap& refCountMap = *(self->d->referredObjects);
     RefCountMap::iterator iter = refCountMap.find(key);
-    std::list<PyObject*> objects;
     if (iter != refCountMap.end()) {
-        objects = (*iter).second;
-        std::list<PyObject*>::const_iterator found = std::find(objects.begin(), objects.end(), referredObject);
-
+        const auto found = std::find(iter->second.begin(), iter->second.end(), referredObject);
         // skip if objects already exists
-        if (found != objects.end())
+        if (found != iter->second.end())
             return;
     }
 
@@ -1456,13 +1435,13 @@ void keepReference(SbkObject* self, const char* key, PyObject* referredObject, b
         refCountMap[key].push_back(referredObject);
         Py_INCREF(referredObject);
     } else if (!append) {
-        if (objects.size() > 0)
-            decRefPyObjectList(objects, isNone ? 0 : referredObject);
+        if (iter != refCountMap.end() && !iter->second.empty())
+            decRefPyObjectList(iter->second, isNone ? 0 : referredObject);
         if (isNone) {
             if (iter != refCountMap.end())
                 refCountMap.erase(iter);
         } else {
-            objects.clear();
+            RefCountMap::mapped_type objects;
             objects.push_back(referredObject);
             refCountMap[key] = objects;
             Py_INCREF(referredObject);
@@ -1492,9 +1471,8 @@ void clearReferences(SbkObject* self)
         return;
 
     RefCountMap& refCountMap = *(self->d->referredObjects);
-    RefCountMap::iterator iter;
-    for (iter = refCountMap.begin(); iter != refCountMap.end(); ++iter)
-        decRefPyObjectList(iter->second);
+    for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it)
+        decRefPyObjectList(it->second);
     self->d->referredObjects->clear();
 }
 
@@ -1533,9 +1511,8 @@ std::string info(SbkObject* self)
 
     if (self->d->parentInfo && self->d->parentInfo->children.size()) {
         s << "children.......... ";
-        ChildrenList& children = self->d->parentInfo->children;
-        for (ChildrenList::const_iterator it = children.begin(); it != children.end(); ++it) {
-            Shiboken::AutoDecRef child(PyObject_Str(reinterpret_cast<PyObject *>(*it)));
+        for (SbkObject *sbkChild : self->d->parentInfo->children) {
+            Shiboken::AutoDecRef child(PyObject_Str(reinterpret_cast<PyObject *>(sbkChild)));
             s << String::toCString(child) << ' ';
         }
         s << '\n';
@@ -1544,14 +1521,12 @@ std::string info(SbkObject* self)
     if (self->d->referredObjects && self->d->referredObjects->size()) {
         Shiboken::RefCountMap& map = *self->d->referredObjects;
         s << "referred objects.. ";
-        Shiboken::RefCountMap::const_iterator it = map.begin();
-        for (; it != map.end(); ++it) {
+        for (auto it = map.begin(), end = map.end(); it != end; ++it) {
             if (it != map.begin())
                 s << "                   ";
             s << '"' << it->first << "\" => ";
-            std::list<PyObject*>::const_iterator j = it->second.begin();
-            for (; j != it->second.end(); ++j) {
-                Shiboken::AutoDecRef obj(PyObject_Str(*j));
+            for (PyObject *o : it->second) {
+                Shiboken::AutoDecRef obj(PyObject_Str(o));
                 s << String::toCString(obj) << ' ';
             }
             s << ' ';

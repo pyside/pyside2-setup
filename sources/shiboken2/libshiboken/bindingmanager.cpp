@@ -78,14 +78,13 @@ public:
 
         file << "digraph D {\n";
 
-        Edges::const_iterator i = m_edges.begin();
-        for (; i != m_edges.end(); ++i) {
-            SbkObjectType* node1 = i->first;
+        for (auto i = m_edges.begin(), end = m_edges.end(); i != end; ++i) {
+            auto node1 = reinterpret_cast<const PyTypeObject *>(i->first);
             const NodeList& nodeList = i->second;
-            NodeList::const_iterator j = nodeList.begin();
-            for (; j != nodeList.end(); ++j) {
-                file << '"' << reinterpret_cast<PyTypeObject *>(*j)->tp_name << "\" -> \""
-                    << reinterpret_cast<PyTypeObject *>(node1)->tp_name << "\"\n";
+            for (const SbkObjectType *o : nodeList) {
+                auto node2 = reinterpret_cast<const PyTypeObject *>(o);
+                file << '"' << node2->tp_name << "\" -> \""
+                    << node1->tp_name << "\"\n";
             }
         }
         file << "}\n";
@@ -97,9 +96,8 @@ public:
         Edges::const_iterator edgesIt = m_edges.find(type);
         if (edgesIt != m_edges.end()) {
             const NodeList& adjNodes = m_edges.find(type)->second;
-            NodeList::const_iterator i = adjNodes.begin();
-            for (; i != adjNodes.end(); ++i) {
-                SbkObjectType* newType = identifyType(cptr, *i, baseType);
+            for (SbkObjectType *node : adjNodes) {
+                SbkObjectType* newType = identifyType(cptr, node, baseType);
                 if (newType)
                     return newType;
             }
@@ -128,10 +126,9 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
     if (Py_VerboseFlag > 0) {
         fprintf(stderr, "-------------------------------\n");
         fprintf(stderr, "WrapperMap: %p (size: %d)\n", &wrapperMap, (int) wrapperMap.size());
-        WrapperMap::const_iterator iter;
-        for (iter = wrapperMap.begin(); iter != wrapperMap.end(); ++iter) {
-            const SbkObject *sbkObj = iter->second;
-            fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
+        for (auto it = wrapperMap.begin(), end = wrapperMap.end(); it != end; ++it) {
+            const SbkObject *sbkObj = it->second;
+            fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", it->first,
                     static_cast<const void *>(sbkObj),
                     (Py_TYPE(sbkObj))->tp_name,
                     int(reinterpret_cast<const PyObject *>(sbkObj)->ob_refcnt));

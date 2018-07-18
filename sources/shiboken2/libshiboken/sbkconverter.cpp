@@ -246,10 +246,8 @@ PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType *type, PyObject *p
 static inline PythonToCppFunc IsPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)
 {
     assert(pyIn);
-    const ToCppConversionList& convs = converter->toCppConversions;
-    for (ToCppConversionList::const_iterator conv = convs.begin(), end = convs.end(); conv != end; ++conv) {
-        PythonToCppFunc toCppFunc = 0;
-        if ((toCppFunc = (*conv).first(pyIn)))
+    for (const ToCppConversion &c : converter->toCppConversions) {
+        if (PythonToCppFunc toCppFunc = c.first(pyIn))
             return toCppFunc;
     }
     return 0;
@@ -361,7 +359,7 @@ bool isImplicitConversion(SbkObjectType *type, PythonToCppFunc toCppFunc)
     // Note that we don't check if the Python to C++ conversion is in
     // the list of the type's conversions, for it is expected that the
     // caller knows what he's doing.
-    ToCppConversionList::iterator conv = PepType_SOTP(type)->converter->toCppConversions.begin();
+    const auto conv = PepType_SOTP(type)->converter->toCppConversions.cbegin();
     return toCppFunc != (*conv).second;
 }
 
