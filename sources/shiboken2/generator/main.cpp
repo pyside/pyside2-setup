@@ -308,10 +308,10 @@ void printUsage()
         << qMakePair(QLatin1String("drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""),
                      QLatin1String("Semicolon separated list of type system entries (classes, namespaces,\n"
                                    "global functions and enums) to be dropped from generation."))
-        << qMakePair(QLatin1String("-F") + pathSyntax, QString())
+        << qMakePair(QLatin1String("-F<path>"), QString())
         << qMakePair(QLatin1String("framework-include-paths=") + pathSyntax,
                      QLatin1String("Framework include paths used by the C++ parser"))
-        << qMakePair(QLatin1String("-isystem") + pathSyntax, QString())
+        << qMakePair(QLatin1String("-isystem<path>"), QString())
         << qMakePair(QLatin1String("system-include-paths=") + pathSyntax,
                      QLatin1String("System include paths used by the C++ parser"))
         << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
@@ -319,7 +319,7 @@ void printUsage()
         << qMakePair(QLatin1String("-h"), QString())
         << qMakePair(helpOption(),
                      QLatin1String("Display this help and exit"))
-        << qMakePair(QLatin1String("-I") + pathSyntax, QString())
+        << qMakePair(QLatin1String("-I<path>"), QString())
         << qMakePair(QLatin1String("include-paths=") + pathSyntax,
                      QLatin1String("Include paths used by the C++ parser"))
         << qMakePair(languageLevelOption() + QLatin1String("=, -std=<level>"),
@@ -335,7 +335,7 @@ void printUsage()
                                    "Replaces and overrides command line arguments"))
         << qMakePair(QLatin1String("silent"),
                      QLatin1String("Avoid printing any message"))
-        << qMakePair(QLatin1String("-T") + pathSyntax, QString())
+        << qMakePair(QLatin1String("-T<path>"), QString())
         << qMakePair(QLatin1String("typesystem-paths=") + pathSyntax,
                      QLatin1String("Paths used when searching for typesystems"))
         << qMakePair(QLatin1String("version"),
