@@ -449,9 +449,7 @@ _CodeModelItem::_CodeModelItem(CodeModel *model, const QString &name, int kind)
 {
 }
 
-_CodeModelItem::~_CodeModelItem()
-{
-}
+_CodeModelItem::~_CodeModelItem() = default;
 
 int _CodeModelItem::kind() const
 {
@@ -623,9 +621,7 @@ QDebug operator<<(QDebug d, const _CodeModelItem *t)
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-_ClassModelItem::~_ClassModelItem()
-{
-}
+_ClassModelItem::~_ClassModelItem() = default;
 
 TemplateParameterList _ClassModelItem::templateParameters() const
 {
@@ -715,9 +711,7 @@ FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
     return FunctionModelItem();
 }
 
-_ScopeModelItem::~_ScopeModelItem()
-{
-}
+_ScopeModelItem::~_ScopeModelItem() = default;
 
 void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
 {
@@ -926,11 +920,9 @@ void _ArgumentModelItem::formatDebug(QDebug &d) const
 }
 #endif // !QT_NO_DEBUG_STREAM
 // ---------------------------------------------------------------------------
-_FunctionModelItem::~_FunctionModelItem()
-{
-}
+_FunctionModelItem::~_FunctionModelItem() = default;
 
-bool _FunctionModelItem::isSimilar(FunctionModelItem other) const
+bool _FunctionModelItem::isSimilar(const FunctionModelItem &other) const
 {
     if (name() != other->name())
         return false;
@@ -962,7 +954,7 @@ ArgumentList _FunctionModelItem::arguments() const
     return m_arguments;
 }
 
-void _FunctionModelItem::addArgument(ArgumentModelItem item)
+void _FunctionModelItem::addArgument(const ArgumentModelItem& item)
 {
     m_arguments.append(item);
 }
@@ -1182,9 +1174,7 @@ void _EnumModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-_EnumeratorModelItem::~_EnumeratorModelItem()
-{
-}
+_EnumeratorModelItem::~_EnumeratorModelItem() = default;
 
 QString _EnumeratorModelItem::stringValue() const
 {
@@ -1205,9 +1195,7 @@ void _EnumeratorModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-_TemplateParameterModelItem::~_TemplateParameterModelItem()
-{
-}
+_TemplateParameterModelItem::~_TemplateParameterModelItem() = default;
 
 TypeInfo _TemplateParameterModelItem::type() const
 {
@@ -1255,9 +1243,7 @@ CodeModel::AccessPolicy _MemberModelItem::accessPolicy() const
     return m_accessPolicy;
 }
 
-_MemberModelItem::~_MemberModelItem()
-{
-}
+_MemberModelItem::~_MemberModelItem() = default;
 
 void _MemberModelItem::setAccessPolicy(CodeModel::AccessPolicy accessPolicy)
 {

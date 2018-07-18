@@ -94,8 +94,6 @@ static bool typesAreEqual(const AbstractMetaType* typeA, const AbstractMetaType*
  */
 struct OverloadSortData
 {
-    OverloadSortData() : counter(0) {}
-
     /**
      * Adds a typeName into the type map without associating it with
      * a OverloadData. This is done to express type dependencies that could
@@ -121,7 +119,7 @@ struct OverloadSortData
 
     int lastProcessedItemId() { return counter - 1; }
 
-    int counter;
+    int counter = 0;
     QHash<QString, int> map;                // typeName -> id
     QHash<int, OverloadData*> reverseMap;   // id -> OverloadData;
 };
@@ -499,7 +497,8 @@ OverloadData::OverloadData(const AbstractMetaFunctionList& overloads, const Shib
 OverloadData::OverloadData(OverloadData* headOverloadData, const AbstractMetaFunction* func,
                                  const AbstractMetaType* argType, int argPos)
     : m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
-      m_headOverloadData(headOverloadData), m_previousOverloadData(0)
+      m_headOverloadData(headOverloadData), m_previousOverloadData(nullptr),
+      m_generator(nullptr)
 {
     if (func)
         this->addOverload(func);
@@ -808,8 +807,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList&
 {
     int minArgs = 10000;
     int maxArgs = 0;
-    for (int i = 0; i < overloads.size(); i++) {
-        const AbstractMetaFunction* func = overloads[i];
+    for (const AbstractMetaFunction *func : overloads) {
         int origNumArgs = func->arguments().size();
         int removed = numberOfRemovedArguments(func);
         int numArgs = origNumArgs - removed;
@@ -825,7 +823,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList&
                 minArgs = fixedArgIndex;
         }
     }
-    return QPair<int, int>(minArgs, maxArgs);
+    return {minArgs, maxArgs};
 }
 
 bool OverloadData::isSingleArgument(const AbstractMetaFunctionList& overloads)
@@ -840,7 +838,7 @@ bool OverloadData::isSingleArgument(const AbstractMetaFunctionList& overloads)
     return singleArgument;
 }
 
-void OverloadData::dumpGraph(QString filename) const
+void OverloadData::dumpGraph(const QString &filename) const
 {
     QFile file(filename);
     if (file.open(QFile::WriteOnly)) {

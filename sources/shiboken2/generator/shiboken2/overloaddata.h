@@ -114,7 +114,7 @@ public:
     /// Returns true if all overloads have no more than one argument.
     static bool isSingleArgument(const AbstractMetaFunctionList& overloads);
 
-    void dumpGraph(QString filename) const;
+    void dumpGraph(const QString &filename) const;
     QString dumpGraph() const;
 
     bool hasArgumentTypeReplace() const;

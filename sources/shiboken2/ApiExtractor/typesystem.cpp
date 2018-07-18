@@ -2630,10 +2630,7 @@ PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
         return 0;
 
     PrimitiveTypeEntry *baseReferencedTypeEntry = m_referencedTypeEntry->basicReferencedTypeEntry();
-    if (baseReferencedTypeEntry)
-        return baseReferencedTypeEntry;
-    else
-        return m_referencedTypeEntry;
+    return baseReferencedTypeEntry ? baseReferencedTypeEntry : m_referencedTypeEntry;
 }
 
 bool PrimitiveTypeEntry::preferredConversion() const
@@ -2734,10 +2731,7 @@ QString ContainerTypeEntry::qualifiedCppName() const
 QString EnumTypeEntry::targetLangQualifier() const
 {
     TypeEntry *te = TypeDatabase::instance()->findType(m_qualifier);
-    if (te)
-        return te->targetLangName();
-    else
-        return m_qualifier;
+    return te ? te->targetLangName() : m_qualifier;
 }
 
 QString EnumTypeEntry::qualifiedTargetLangName() const
@@ -2794,7 +2788,7 @@ QString fixCppTypeName(const QString &name)
 {
     if (name == QLatin1String("long long"))
         return QLatin1String("qint64");
-    else if (name == QLatin1String("unsigned long long"))
+    if (name == QLatin1String("unsigned long long"))
         return QLatin1String("quint64");
     return name;
 }
@@ -2815,11 +2809,9 @@ QString TemplateInstance::expandCode() const
         result += code;
         result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END");
         return result;
-    } else {
-        qCWarning(lcShiboken).noquote().nospace()
-            << "insert-template referring to non-existing template '" << m_name << '\'';
     }
-
+    qCWarning(lcShiboken).noquote().nospace()
+        << "insert-template referring to non-existing template '" << m_name << '\'';
     return QString();
 }
 
@@ -2835,10 +2827,7 @@ QString CodeSnipAbstract::code() const
 
 QString CodeSnipFragment::code() const
 {
-    if (m_instance)
-        return m_instance->expandCode();
-    else
-        return m_code;
+    return m_instance ? m_instance->expandCode() : m_code;
 }
 
 bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
@@ -3176,10 +3165,9 @@ QString ArrayTypeEntry::targetLangName() const
 
 QString ArrayTypeEntry::targetLangApiName() const
 {
-    if (m_nestedType->isPrimitive())
-        return m_nestedType->targetLangApiName() + QLatin1String("Array");
-    else
-        return QLatin1String("jobjectArray");
+    return m_nestedType->isPrimitive()
+        ? m_nestedType->targetLangApiName() + QLatin1String("Array")
+        : QLatin1String("jobjectArray");
 }
 
 EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName,

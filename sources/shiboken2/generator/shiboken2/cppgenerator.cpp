@@ -3117,8 +3117,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                 bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
                 if (argsClear && !defValModified && !hasConversionRule)
                     continue;
-                else
-                    argsClear = false;
+                argsClear = false;
                 otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
                 if (hasConversionRule)
                     otherArgs.prepend(arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
@@ -3409,7 +3408,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             s << "reinterpret_cast<SbkObject*>(" PYTHON_SELF_VAR "), \"";
             QString varName = arg_mod.referenceCounts.constFirst().varName;
             if (varName.isEmpty())
-                varName = func->minimalSignature() + QString().number(arg_mod.index);
+                varName = func->minimalSignature() + QString::number(arg_mod.index);
 
             s << varName << "\", " << pyArgName
               << (refCount.action == ReferenceCount::Add ? ", true" : "")
@@ -3531,7 +3530,7 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
 
     const FlagsTypeEntry* flags = 0;
     if (enumType->isFlags())
-        flags = reinterpret_cast<const FlagsTypeEntry*>(enumType);
+        flags = static_cast<const FlagsTypeEntry*>(enumType);
 
     s << INDENT << "// Register converter for " << enumFlagName << " '" << enumType->qualifiedCppName() << "'." << endl;
     s << INDENT << '{' << endl;
@@ -3575,7 +3574,7 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
     s << INDENT << '}' << endl;
 
     if (!flags)
-        writeEnumConverterInitialization(s, reinterpret_cast<const EnumTypeEntry*>(enumType)->flags());
+        writeEnumConverterInitialization(s, static_cast<const EnumTypeEntry*>(enumType)->flags());
 }
 
 void CppGenerator::writeContainerConverterInitialization(QTextStream& s, const AbstractMetaType* type)
@@ -3656,10 +3655,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass* metaClass)
     }
 
     const ComplexTypeEntry* baseType = metaClass->typeEntry()->baseContainerType();
-    if (baseType && baseType->isContainer())
-        return true;
-
-    return false;
+    return baseType && baseType->isContainer();
 }
 
 bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass* metaClass)
@@ -3964,7 +3960,6 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream& s, const AbstractMe
         funcs.insert(QLatin1String("__msetitem__"), QString());
     }
 
-    QString baseName = cpythonBaseName(metaClass);
     for (auto it = m_mpFuncs.cbegin(), end = m_mpFuncs.cend(); it != end; ++it) {
         const QString &mpName = it.key();
         if (funcs[mpName].isEmpty())
@@ -4354,7 +4349,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, GeneratorContext &co
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads)
+void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList &overloads)
 {
     Q_ASSERT(!overloads.isEmpty());
     OverloadData overloadData(overloads, this);
@@ -4378,7 +4373,7 @@ void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMeta
         s << "|METH_STATIC";
 }
 
-void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads)
+void CppGenerator::writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList &overloads)
 {
     Q_ASSERT(!overloads.isEmpty());
     const AbstractMetaFunction* func = overloads.constFirst();
@@ -4679,7 +4674,7 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream& s, const Abstr
 }
 
 void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
-                                            QString pyOpName, QString cppOpName)
+                                            const QString &pyOpName, const QString &cppOpName)
 {
     FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
     Q_ASSERT(flagsEntry);
@@ -4704,7 +4699,8 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
 }
 
 void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
-                                           QString pyOpName, QString cppOpName, bool boolResult)
+                                           const QString &pyOpName,
+                                           const QString &cppOpName, bool boolResult)
 {
     FlagsTypeEntry* flagsEntry = cppEnum->typeEntry()->flags();
     Q_ASSERT(flagsEntry);
@@ -5326,7 +5322,7 @@ bool CppGenerator::finishGeneration()
     }
 
     TypeDatabase* typeDb = TypeDatabase::instance();
-    TypeSystemTypeEntry* moduleEntry = reinterpret_cast<TypeSystemTypeEntry*>(typeDb->findType(packageName()));
+    TypeSystemTypeEntry* moduleEntry = static_cast<TypeSystemTypeEntry*>(typeDb->findType(packageName()));
 
     //Extra includes
     s << endl << "// Extra includes" << endl;

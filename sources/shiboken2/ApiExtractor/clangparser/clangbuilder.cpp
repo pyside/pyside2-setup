@@ -832,9 +832,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
                 d->m_currentFunction = d->createMemberFunction(cursor);
                 d->m_scopeStack.back()->addFunction(d->m_currentFunction);
                 break;
-            } else {
-                return Skip; // inline member functions outside class
             }
+            return Skip; // inline member functions outside class
         }
     }
         Q_FALLTHROUGH(); // fall through to free template function.

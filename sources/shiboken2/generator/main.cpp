@@ -386,7 +386,6 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
 {
     const CommandArgumentMap::iterator it = args.find(option);
     if (it != args.end()) {
-        const QString path = it.value();
         const QStringList includePathListList =
             it.value().split(QLatin1String(PATH_SPLITTER), QString::SkipEmptyParts);
         args.erase(it);

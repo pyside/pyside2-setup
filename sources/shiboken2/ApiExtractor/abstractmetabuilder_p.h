@@ -60,7 +60,7 @@ public:
 
     ScopeModelItem currentScope() const { return m_scopes.constLast(); }
 
-    AbstractMetaClass *argumentToClass(ArgumentModelItem);
+    AbstractMetaClass *argumentToClass(const ArgumentModelItem &);
 
     void addAbstractMetaClass(AbstractMetaClass *cls);
     AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
@@ -74,9 +74,9 @@ public:
     bool setupInheritance(AbstractMetaClass *metaClass);
     AbstractMetaClass *traverseNamespace(const FileModelItem &dom,
                                          const NamespaceModelItem &item);
-    AbstractMetaEnum *traverseEnum(EnumModelItem item, AbstractMetaClass *enclosing,
+    AbstractMetaEnum *traverseEnum(const EnumModelItem &item, AbstractMetaClass *enclosing,
                                    const QSet<QString> &enumsDeclarations);
-    void traverseEnums(ScopeModelItem item, AbstractMetaClass *parent,
+    void traverseEnums(const ScopeModelItem &item, AbstractMetaClass *parent,
                        const QStringList &enumsDeclarations);
     AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem,
                                                bool *constructorRejected);
@@ -85,18 +85,18 @@ public:
                                                        bool *constructorRejected);
     void traverseFunctions(ScopeModelItem item, AbstractMetaClass *parent);
     void applyFunctionModifications(AbstractMetaFunction* func);
-    void traverseFields(ScopeModelItem item, AbstractMetaClass *parent);
-    void traverseStreamOperator(FunctionModelItem functionItem);
-    void traverseOperatorFunction(FunctionModelItem item);
+    void traverseFields(const ScopeModelItem &item, AbstractMetaClass *parent);
+    void traverseStreamOperator(const FunctionModelItem &functionItem);
+    void traverseOperatorFunction(const FunctionModelItem &item);
     AbstractMetaFunction* traverseFunction(const AddedFunction &addedFunc);
     AbstractMetaFunction* traverseFunction(const AddedFunction &addedFunc,
                                            AbstractMetaClass *metaClass);
-    AbstractMetaFunction *traverseFunction(FunctionModelItem function);
-    AbstractMetaField *traverseField(VariableModelItem field,
+    AbstractMetaFunction *traverseFunction(const FunctionModelItem &function);
+    AbstractMetaField *traverseField(const VariableModelItem &field,
                                      const AbstractMetaClass *cls);
     void checkFunctionModifications();
-    void registerHashFunction(FunctionModelItem functionItem);
-    void registerToStringCapability(FunctionModelItem functionItem);
+    void registerHashFunction(const FunctionModelItem &functionItem);
+    void registerToStringCapability(const FunctionModelItem &functionItem);
 
     /**
      *   A conversion operator function should not have its owner class as
@@ -118,7 +118,7 @@ public:
     void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                AbstractMetaClass *metaClass);
 
-    QString fixDefaultValue(ArgumentModelItem item, AbstractMetaType *type,
+    QString fixDefaultValue(const ArgumentModelItem &item, AbstractMetaType *type,
                             AbstractMetaFunction *fnc, AbstractMetaClass *,
                             int argumentIndex);
     AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo);

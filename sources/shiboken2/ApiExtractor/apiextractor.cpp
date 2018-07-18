@@ -194,9 +194,9 @@ const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const TypeEntry* type
     if (!typeEntry)
         return 0;
     if (typeEntry->isFlags())
-        return findAbstractMetaEnum(reinterpret_cast<const FlagsTypeEntry*>(typeEntry));
+        return findAbstractMetaEnum(static_cast<const FlagsTypeEntry*>(typeEntry));
     if (typeEntry->isEnum())
-        return findAbstractMetaEnum(reinterpret_cast<const EnumTypeEntry*>(typeEntry));
+        return findAbstractMetaEnum(static_cast<const EnumTypeEntry*>(typeEntry));
     return 0;
 }
 

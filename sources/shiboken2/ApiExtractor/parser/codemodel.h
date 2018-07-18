@@ -568,7 +568,7 @@ public:
 
     ArgumentList arguments() const;
 
-    void addArgument(ArgumentModelItem item);
+    void addArgument(const ArgumentModelItem& item);
 
     CodeModel::FunctionType functionType() const;
     void setFunctionType(CodeModel::FunctionType functionType);
@@ -603,7 +603,7 @@ public:
     bool isVariadics() const;
     void setVariadics(bool isVariadics);
 
-    bool isSimilar(FunctionModelItem other) const;
+    bool isSimilar(const FunctionModelItem &other) const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

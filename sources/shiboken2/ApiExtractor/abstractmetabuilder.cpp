@@ -241,7 +241,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
     }
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(ArgumentModelItem argument)
+AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentModelItem &argument)
 {
     AbstractMetaClass* returned = 0;
     AbstractMetaType *type = translateType(argument->type());
@@ -256,7 +256,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(ArgumentModelItem
 /**
  * Checks the argument of a hash function and flags the type if it is a complex type
  */
-void AbstractMetaBuilderPrivate::registerHashFunction(FunctionModelItem function_item)
+void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &function_item)
 {
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 1) {
@@ -269,12 +269,12 @@ void AbstractMetaBuilderPrivate::registerHashFunction(FunctionModelItem function
  * Check if a class has a debug stream operator that can be used as toString
  */
 
-void AbstractMetaBuilderPrivate::registerToStringCapability(FunctionModelItem function_item)
+void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelItem &function_item)
 {
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 2) {
         if (arguments.at(0)->type().toString() == QLatin1String("QDebug")) {
-            ArgumentModelItem arg = arguments.at(1);
+            const ArgumentModelItem &arg = arguments.at(1);
             if (AbstractMetaClass *cls = argumentToClass(arg)) {
                 if (arg->type().indirections() < 2)
                     cls->setToStringCapability(true);
@@ -283,7 +283,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(FunctionModelItem fu
     }
 }
 
-void AbstractMetaBuilderPrivate::traverseOperatorFunction(FunctionModelItem item)
+void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelItem &item)
 {
     if (item->accessPolicy() != CodeModel::Public)
         return;
@@ -348,7 +348,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(FunctionModelItem item
             setupFunctionDefaults(metaFunction, baseoperandClass);
             baseoperandClass->addFunction(metaFunction);
             Q_ASSERT(!metaFunction->wasPrivate());
-        } else if (metaFunction) {
+        } else {
             delete metaFunction;
         }
 
@@ -356,7 +356,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(FunctionModelItem item
     }
 }
 
-void AbstractMetaBuilderPrivate::traverseStreamOperator(FunctionModelItem item)
+void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item)
 {
     ArgumentList arguments = item->arguments();
     if (arguments.size() == 2 && item->accessPolicy() == CodeModel::Public) {
@@ -404,7 +404,7 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(FunctionModelItem item)
                     funcClass->typeEntry()->addExtraInclude(streamClass->typeEntry()->include());
 
                 m_currentClass = oldCurrentClass;
-            } else if (streamFunction) {
+            } else {
                 delete streamFunction;
             }
 
@@ -848,7 +848,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     return metaClass;
 }
 
-AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumItem,
+AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
                                                            AbstractMetaClass *enclosing,
                                                            const QSet<QString> &enumsDeclarations)
 {
@@ -857,7 +857,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(EnumModelItem enumIte
     TypeEntry* typeEntry = 0;
     if (enumItem->accessPolicy() == CodeModel::Private) {
         QStringList names = enumItem->qualifiedName();
-        QString enumName = names.constLast();
+        const QString &enumName = names.constLast();
         QString nspace;
         if (names.size() > 1)
             nspace = QStringList(names.mid(0, names.size() - 1)).join(colonColon());
@@ -1204,18 +1204,18 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem ite
     m_currentClass = oldCurrentClass;
 }
 
-static inline QString fieldSignatureWithType(VariableModelItem field)
+static inline QString fieldSignatureWithType(const VariableModelItem &field)
 {
     return field->name() + QStringLiteral(" -> ") + field->type().toString();
 }
 
 static inline QString qualifiedFieldSignatureWithType(const QString &className,
-                                                      VariableModelItem field)
+                                                      const VariableModelItem &field)
 {
     return className + colonColon() + fieldSignatureWithType(field);
 }
 
-AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(VariableModelItem field,
+AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModelItem &field,
                                                              const AbstractMetaClass *cls)
 {
     QString fieldName = field->name();
@@ -1272,7 +1272,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(VariableModelItem f
     return metaField;
 }
 
-void AbstractMetaBuilderPrivate::traverseFields(ScopeModelItem scope_item,
+void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item,
                                                 AbstractMetaClass *metaClass)
 {
     const VariableList &variables = scope_item->variables();
@@ -1420,7 +1420,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             }
         } else if (QPropertySpec* reset = metaClass->propertySpecForReset(metaFunction->name())) {
             // Property resetter must be in the form "void name()"
-            if ((!metaFunction->type()) && (metaFunction->arguments().size() == 0)) {
+            if ((!metaFunction->type()) && metaFunction->arguments().isEmpty()) {
                 *metaFunction += AbstractMetaAttributes::PropertyResetter;
                 metaFunction->setPropertySpec(reset);
             }
@@ -1629,7 +1629,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     return true;
 }
 
-void AbstractMetaBuilderPrivate::traverseEnums(ScopeModelItem scopeItem,
+void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
                                                AbstractMetaClass *metaClass,
                                                const QStringList &enumsDeclarations)
 {
@@ -1718,10 +1718,9 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
 
         if (!replacedExpression.isEmpty()) {
-            QString expr = replacedExpression;
             if (!metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
-                metaArg->setDefaultValueExpression(expr);
-                metaArg->setOriginalDefaultValueExpression(expr);
+                metaArg->setDefaultValueExpression(replacedExpression);
+                metaArg->setOriginalDefaultValueExpression(replacedExpression);
 
                 if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
                     m_enumDefaultArguments << QPair<AbstractMetaArgument*, AbstractMetaFunction*>(metaArg, metaFunction);
@@ -1778,7 +1777,7 @@ void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, co
     }
 }
 
-static QString functionSignature(FunctionModelItem functionItem)
+static QString functionSignature(const FunctionModelItem &functionItem)
 {
     QStringList args;
     const ArgumentList &arguments = functionItem->arguments();
@@ -1899,7 +1898,7 @@ bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func
     return true;
 }
 
-AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModelItem functionItem)
+AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem)
 {
     if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
         return nullptr;
@@ -1924,18 +1923,16 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     QString rejectReason;
     if (TypeDatabase::instance()->isFunctionRejected(className, functionName, &rejectReason)) {
         m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
-        return 0;
-    } else {
-        const QString &signature = functionSignature(functionItem);
-        const bool rejected =
-            TypeDatabase::instance()->isFunctionRejected(className, signature,
-                                                         &rejectReason);
-        qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
-            << ": Checking rejection for signature \""
-            << signature << "\" for " << className << ": " << rejected;
-        if (rejected)
-            return nullptr;
+        return nullptr;
     }
+    const QString &signature = functionSignature(functionItem);
+    const bool rejected =
+        TypeDatabase::instance()->isFunctionRejected(className, signature, &rejectReason);
+    qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
+        << ": Checking rejection for signature \"" << signature << "\" for " << className
+        << ": " << rejected;
+    if (rejected)
+        return nullptr;
 
     if (functionItem->isFriend())
         return 0;
@@ -2027,7 +2024,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
     AbstractMetaArgumentList metaArguments;
 
     for (int i = 0; i < arguments.size(); ++i) {
-        ArgumentModelItem arg = arguments.at(i);
+        const ArgumentModelItem &arg = arguments.at(i);
 
         if (TypeDatabase::instance()->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
             m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
@@ -2074,7 +2071,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(FunctionModel
 
     // Find the correct default values
     for (int i = 0, size = metaArguments.size(); i < size; ++i) {
-        ArgumentModelItem arg = arguments.at(i);
+        const ArgumentModelItem &arg = arguments.at(i);
         AbstractMetaArgument* metaArg = metaArguments.at(i);
 
         //use relace-default-expression for set default value
@@ -2228,7 +2225,7 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
 {
     const TypeEntry* type = 0;
     QStringList context = metaClass->qualifiedCppName().split(colonColon());
-    while(!type && (context.size() > 0) ) {
+    while (!type && !context.isEmpty()) {
         type = TypeDatabase::instance()->findType(context.join(colonColon()) + colonColon() + qualifiedName);
         context.removeLast();
     }
@@ -2451,7 +2448,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
 
     const auto &templateArguments = typeInfo.instantiations();
     for (int t = 0, size = templateArguments.size(); t < size; ++t) {
-        TypeInfo ti = templateArguments.at(t);
+        const  TypeInfo &ti = templateArguments.at(t);
         AbstractMetaType *targType = translateTypeStatic(ti, currentClass, d, true, &errorMessage);
         if (!targType) {
             if (errorMessageIn)
@@ -2537,7 +2534,7 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
     return 0;
 }
 
-QString AbstractMetaBuilderPrivate::fixDefaultValue(ArgumentModelItem item,
+QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &item,
                                                     AbstractMetaType *type,
                                                     AbstractMetaFunction *fnc,
                                                     AbstractMetaClass *implementingClass,
@@ -2892,13 +2889,9 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 
         // if the instantiation has a function named the same as an existing
         // function we have shadowing so we need to skip it.
-        bool found = false;
-        for (int i = 0; i < funcs.size(); ++i) {
-            if (funcs.at(i)->name() == f->name()) {
-                found = true;
-                continue;
-            }
-        }
+        const bool found =
+            std::any_of(funcs.cbegin(), funcs.cend(),
+                        [f] (const AbstractMetaFunction *needle) { return needle->name() == f->name(); });
         if (found) {
             delete f;
             continue;
@@ -2943,9 +2936,9 @@ void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
                                                  const QStringList &declarations)
 {
     for (int i = 0; i < declarations.size(); ++i) {
-        QString p = declarations.at(i);
+        const QString &p = declarations.at(i);
 
-        QStringList l = p.split(QLatin1String(" "));
+        QStringList l = p.split(QLatin1Char(' '));
 
 
         QStringList qualifiedScopeName = currentScope()->qualifiedName();

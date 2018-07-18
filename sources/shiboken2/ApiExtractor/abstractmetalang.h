@@ -834,13 +834,13 @@ public:
         return m_explicit;
     }
 
-    static bool isConversionOperator(QString funcName);
+    static bool isConversionOperator(const QString& funcName);
     bool isConversionOperator() const
     {
         return isConversionOperator(originalName());
     }
 
-    static bool isOperatorOverload(QString funcName);
+    static bool isOperatorOverload(const QString& funcName);
     bool isOperatorOverload() const
     {
         return isOperatorOverload(originalName());

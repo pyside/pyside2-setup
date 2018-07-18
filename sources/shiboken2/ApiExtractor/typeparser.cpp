@@ -56,7 +56,7 @@ public:
     };
 
     Scanner(const QString &s)
-            : m_pos(0), m_length(s.length()), m_chars(s.constData())
+            : m_pos(0), m_length(s.length()), m_tokenStart(-1), m_chars(s.constData())
     {
     }
 

@@ -239,8 +239,8 @@ public:
      *   \param arg_count the number of function arguments
      */
     QString functionSignature(const AbstractMetaFunction* func,
-                              QString prepend = QString(),
-                              QString append = QString(),
+                              const QString &prepend = QString(),
+                              const QString &append = QString(),
                               Options options = NoOption,
                               int arg_count = -1) const;
 
@@ -292,16 +292,16 @@ public:
     static QString pythonPrimitiveTypeName(const QString& cppTypeName);
     static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry* type);
 
-    static QString pythonOperatorFunctionName(QString cppOpFuncName);
+    static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
     static QString pythonOperatorFunctionName(const AbstractMetaFunction* func);
-    static QString pythonRichCompareOperatorId(QString cppOpFuncName);
+    static QString pythonRichCompareOperatorId(const QString &cppOpFuncName);
     static QString pythonRichCompareOperatorId(const AbstractMetaFunction* func);
 
     static QString fixedCppTypeName(const CustomConversion::TargetToNativeConversion* toNative);
     static QString fixedCppTypeName(const AbstractMetaType* type);
     static QString fixedCppTypeName(const TypeEntry* type, QString typeName = QString());
 
-    static bool isNumber(QString cpythonApiName);
+    static bool isNumber(const QString &cpythonApiName);
     static bool isNumber(const TypeEntry* type);
     static bool isNumber(const AbstractMetaType* type);
     static bool isPyInt(const TypeEntry* type);
@@ -389,9 +389,10 @@ public:
     QString cpythonSetattroFunctionName(const AbstractMetaClass* metaClass);
     QString cpythonGetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonSetterFunctionName(const AbstractMetaField* metaField);
-    QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass, QString argName = QLatin1String(PYTHON_SELF_VAR));
-    QString cpythonWrapperCPtr(const AbstractMetaType *metaType, QString argName);
-    QString cpythonWrapperCPtr(const TypeEntry* type, QString argName);
+    QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass,
+                               const QString &argName = QLatin1String(PYTHON_SELF_VAR));
+    QString cpythonWrapperCPtr(const AbstractMetaType *metaType, const QString &argName);
+    QString cpythonWrapperCPtr(const TypeEntry* type, const QString &argName);
 
     /// Guesses the scope to where belongs an argument's default value.
     QString guessScopeForDefaultValue(const AbstractMetaFunction *func,
@@ -468,7 +469,6 @@ protected:
     // verify whether the class is copyable
     bool isCopyable(const AbstractMetaClass* metaClass);
 
-    bool m_native_jump_table;
     static QHash<QString, QString> m_pythonPrimitiveTypeName;
     static QHash<QString, QString> m_pythonOperators;
     static QHash<QString, QString> m_formatUnits;

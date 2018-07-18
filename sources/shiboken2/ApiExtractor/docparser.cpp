@@ -50,9 +50,7 @@ DocParser::DocParser()
 #endif
 }
 
-DocParser::~DocParser()
-{
-}
+DocParser::~DocParser() = default;
 
 QString DocParser::getDocumentation(QXmlQuery& xquery, const QString& query,
                                     const DocModificationList& mods) const
@@ -154,13 +152,16 @@ QString DocParser::msgCannotFindDocumentation(const QString &fileName,
 namespace
 {
 
-struct XslResources
+class XslResources
 {
-    xmlDocPtr xmlDoc;
-    xsltStylesheetPtr xslt;
-    xmlDocPtr xslResult;
+    Q_DISABLE_COPY(XslResources)
 
-    XslResources() : xmlDoc(0), xslt(0), xslResult(0) {}
+public:
+    xmlDocPtr xmlDoc = nullptr;
+    xsltStylesheetPtr xslt = nullptr;
+    xmlDocPtr xslResult = nullptr;
+
+    XslResources() = default;
 
     ~XslResources()
     {

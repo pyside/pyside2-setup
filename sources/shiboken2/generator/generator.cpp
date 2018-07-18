@@ -40,8 +40,9 @@
 #include <QDebug>
 #include <typedatabase.h>
 
-struct Generator::GeneratorPrivate {
-    const ApiExtractor* apiextractor;
+struct Generator::GeneratorPrivate
+{
+    const ApiExtractor* apiextractor = nullptr;
     QString outDir;
     // License comment
     QString licenseComment;
@@ -468,7 +469,7 @@ AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType* 
 bool Generator::isObjectType(const TypeEntry* type)
 {
     if (type->isComplex())
-        return Generator::isObjectType((const ComplexTypeEntry*)type);
+        return Generator::isObjectType(static_cast<const ComplexTypeEntry *>(type));
     return type->isObject();
 }
 bool Generator::isObjectType(const ComplexTypeEntry* type)
@@ -586,7 +587,7 @@ QString Generator::minimalConstructor(const AbstractMetaType* type) const
         return QLatin1String("static_cast< ::") + type->typeEntry()->qualifiedCppName() + QLatin1String(" *>(0)");
 
     if (type->typeEntry()->isComplex()) {
-        const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(type->typeEntry());
+        const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(type->typeEntry());
         QString ctor = cType->defaultConstructor();
         if (!ctor.isEmpty())
             return ctor;
@@ -617,7 +618,7 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
         return type->qualifiedCppName() + QLatin1String("(0)");
 
     if (type->isPrimitive()) {
-        QString ctor = reinterpret_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
+        QString ctor = static_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
         // If a non-C++ (i.e. defined by the user) primitive type does not have
         // a default constructor defined by the user, the empty constructor is
         // heuristically returned. If this is wrong the build of the generated
@@ -638,7 +639,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
     if (!metaClass)
         return QString();
 
-    const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(metaClass->typeEntry());
+    const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(metaClass->typeEntry());
     if (cType->hasDefaultConstructor())
         return cType->defaultConstructor();
 

@@ -35,23 +35,17 @@
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 
-namespace
+static QString getSectionKindAttr(const AbstractMetaFunction *func)
 {
-
-QString getSectionKindAttr(const AbstractMetaFunction* func)
-{
-    if (func->isSignal()) {
+    if (func->isSignal())
         return QLatin1String("signal");
-    } else {
-        QString kind = func->isPublic() ? QLatin1String("public") : QLatin1String("protected");
-        if (func->isStatic())
-            kind += QLatin1String("-static");
-        else if (func->isSlot())
-            kind += QLatin1String("-slot");
-        return kind;
-    }
-}
-
+    QString kind = func->isPublic()
+        ? QLatin1String("public") : QLatin1String("protected");
+    if (func->isStatic())
+        kind += QLatin1String("-static");
+    else if (func->isSlot())
+        kind += QLatin1String("-slot");
+    return kind;
 }
 
 Documentation DoxygenParser::retrieveModuleDocumentation()
@@ -77,9 +71,9 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     bool isProperty = false;
 
     QString doxyFilePath;
-    for (int i = 0; i < numPrefixes; ++i) {
+    for (const char *prefix : prefixes) {
         doxyFilePath = documentationDataDirectory() + QLatin1Char('/')
-                       + QLatin1String(prefixes[i]) + doxyFileSuffix;
+                       + QLatin1String(prefix) + doxyFileSuffix;
         if (QFile::exists(doxyFilePath))
             break;
         doxyFilePath.clear();

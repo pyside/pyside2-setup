@@ -36,10 +36,9 @@ QString Include::toString() const
 {
     if (m_type == IncludePath)
         return QLatin1String("#include <") + m_name + QLatin1Char('>');
-    else if (m_type == LocalPath)
+    if (m_type == LocalPath)
         return QLatin1String("#include \"") + m_name + QLatin1Char('"');
-    else
-        return QLatin1String("import ") + m_name + QLatin1Char(';');
+    return QLatin1String("import ") + m_name + QLatin1Char(';');
 }
 
 uint qHash(const Include& inc)

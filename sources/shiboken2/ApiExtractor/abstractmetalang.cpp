@@ -543,18 +543,17 @@ QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStrin
     if (arguments.size() == resolvedArguments.size()) {
         QString signature = name() + QLatin1Char('(') + resolvedArguments.join(QLatin1Char(',')) + QLatin1Char(')');
         return QStringList(TypeDatabase::normalizedSignature(signature));
-    } else {
-        QStringList returned;
-
-        AbstractMetaArgument *argument = arguments.at(resolvedArguments.size());
-        QStringList minimalTypeSignature = argument->type()->minimalSignature().split(QLatin1String("::"));
-        for (int i = 0; i < minimalTypeSignature.size(); ++i) {
-            returned += introspectionCompatibleSignatures(QStringList(resolvedArguments)
-                                                          << QStringList(minimalTypeSignature.mid(minimalTypeSignature.size() - i - 1)).join(QLatin1String("::")));
-        }
-
-        return returned;
     }
+    QStringList returned;
+
+    AbstractMetaArgument *argument = arguments.at(resolvedArguments.size());
+    QStringList minimalTypeSignature = argument->type()->minimalSignature().split(QLatin1String("::"));
+    for (int i = 0; i < minimalTypeSignature.size(); ++i) {
+        returned += introspectionCompatibleSignatures(QStringList(resolvedArguments)
+                                                      << QStringList(minimalTypeSignature.mid(minimalTypeSignature.size() - i - 1)).join(QLatin1String("::")));
+    }
+
+    return returned;
 }
 
 QString AbstractMetaFunction::signature() const
@@ -848,8 +847,9 @@ FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaC
     while (implementor) {
         mods += implementor->typeEntry()->functionModifications(minimalSignature());
         if ((implementor == implementor->baseClass()) ||
-            (implementor == implementingClass() && (mods.size() > 0)))
+            (implementor == implementingClass() && !mods.isEmpty())) {
                 break;
+        }
         const AbstractMetaClassList &interfaces = implementor->interfaces();
         for (const AbstractMetaClass *interface : interfaces)
             mods += this->modifications(interface);
@@ -912,14 +912,14 @@ bool AbstractMetaFunction::hasSignatureModifications() const
     return false;
 }
 
-bool AbstractMetaFunction::isConversionOperator(QString funcName)
+bool AbstractMetaFunction::isConversionOperator(const QString& funcName)
 {
     static const QRegularExpression opRegEx(QStringLiteral("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$"));
     Q_ASSERT(opRegEx.isValid());
     return opRegEx.match(funcName).hasMatch();
 }
 
-bool AbstractMetaFunction::isOperatorOverload(QString funcName)
+bool AbstractMetaFunction::isOperatorOverload(const QString& funcName)
 {
     if (isConversionOperator(funcName))
         return true;
@@ -1762,7 +1762,7 @@ QDebug operator<<(QDebug d, const AbstractMetaEnum *ae)
 
 bool AbstractMetaClass::hasConstructors() const
 {
-    return queryFunctions(Constructors).size();
+    return !queryFunctions(Constructors).isEmpty();
 }
 
 bool AbstractMetaClass::hasCopyConstructor() const
@@ -2041,8 +2041,8 @@ void AbstractMetaClass::fixFunctions()
 {
     if (m_functionsFixed)
         return;
-    else
-        m_functionsFixed = true;
+
+    m_functionsFixed = true;
 
     AbstractMetaClass *superClass = baseClass();
     AbstractMetaFunctionList funcs = functions();
@@ -2085,8 +2085,7 @@ void AbstractMetaClass::fixFunctions()
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
             bool add = (sf->isNormal() || sf->isSignal() || sf->isEmptyFunction());
-            for (int fi = 0; fi < funcs.size(); ++fi) {
-                AbstractMetaFunction *f = funcs.at(fi);
+            for (AbstractMetaFunction *f : funcs) {
                 if (f->isRemovedFromAllLanguages(f->implementingClass()))
                     continue;
 
@@ -2153,7 +2152,8 @@ void AbstractMetaClass::fixFunctions()
                                     if (mod.isNonFinal()) {
                                         hasNonFinalModifier = true;
                                         break;
-                                    } else if (mod.isPrivate()) {
+                                    }
+                                    if (mod.isPrivate()) {
                                         isBaseImplPrivate = true;
                                         break;
                                     }

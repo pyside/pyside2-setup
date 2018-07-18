@@ -303,7 +303,7 @@ QTextStream &operator<<(QTextStream &str, const QtXmlToSphinx::LinkContext &link
 }
 
 QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
-        : m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
+        : m_tableHasHeader(false), m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
 {
     m_handlerMap.insert(QLatin1String("heading"), &QtXmlToSphinx::handleHeadingTag);
     m_handlerMap.insert(QLatin1String("brief"), &QtXmlToSphinx::handleParaTag);
@@ -1511,11 +1511,10 @@ QString QtDocGenerator::fileNameForContext(GeneratorContext &context) const
     const AbstractMetaClass *metaClass = context.metaClass();
     if (!context.forSmartPointer()) {
         return getClassTargetFullName(metaClass, false) + fileNameSuffix();
-    } else {
-        const AbstractMetaType *smartPointerType = context.preciseType();
-        QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNameSuffix();
     }
+    const AbstractMetaType *smartPointerType = context.preciseType();
+    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
+    return fileNameBase + fileNameSuffix();
 }
 
 void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc,
@@ -1532,7 +1531,7 @@ void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc
     } else {
         const QString &value = doc.value();
         const QVector<QStringRef> lines = value.splitRef(QLatin1Char('\n'));
-        int typesystemIndentation = std::numeric_limits<int>().max();
+        int typesystemIndentation = std::numeric_limits<int>::max();
         // check how many spaces must be removed from the beginning of each line
         for (const QStringRef &line : lines) {
             const auto it = std::find_if(line.cbegin(), line.cend(),
@@ -1540,7 +1539,7 @@ void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc
             if (it != line.cend())
                 typesystemIndentation = qMin(typesystemIndentation, int(it - line.cbegin()));
         }
-        if (typesystemIndentation == std::numeric_limits<int>().max())
+        if (typesystemIndentation == std::numeric_limits<int>::max())
             typesystemIndentation = 0;
         for (const QStringRef &line : lines) {
             s << INDENT
@@ -1675,7 +1674,7 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
             functionList << str;
     }
 
-    if ((functionList.size() > 0) || (staticFunctionList.size() > 0)) {
+    if (!functionList.isEmpty() || !staticFunctionList.isEmpty()) {
         QtXmlToSphinx::Table functionTable;
 
         s << endl
@@ -1692,7 +1691,7 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
 
 void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QStringList& functions)
 {
-    if (functions.size() > 0) {
+    if (!functions.isEmpty()) {
         s << title << endl
           << QString(title.size(), QLatin1Char('^')) << endl;
 
@@ -1775,7 +1774,8 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
         writeFormattedText(s, func->documentation(), cppClass);
 }
 
-QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
+QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */,
+                                         const AbstractMetaFunction* func)
 {
     QString ret;
     int optArgs = 0;
@@ -1857,8 +1857,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                 if (row.trimmed().size() == 0) {
                     if (currenRow == 0)
                         continue;
-                    else
-                        s << endl;
+                    s << endl;
                 }
 
                 if (currenRow == 0) {
@@ -2122,7 +2121,7 @@ void QtDocGenerator::writeModuleDocumentation()
 
         s << ".. module:: " << it.key() << endl << endl;
 
-        QString title = it.key();
+        const QString &title = it.key();
         s << title << endl;
         s << Pad('*', title.length()) << endl << endl;
 
@@ -2277,10 +2276,10 @@ bool QtDocGenerator::doSetup()
         qCWarning(lcShiboken) << "Documentation data dir and/or Qt source dir not informed, "
                                  "documentation will not be extracted from Qt sources.";
         return false;
-    } else {
-        m_docParser->setDocumentationDataDirectory(m_docDataDir);
-        m_docParser->setLibrarySourceDirectory(m_libSourceDir);
     }
+
+    m_docParser->setDocumentationDataDirectory(m_docDataDir);
+    m_docParser->setLibrarySourceDirectory(m_libSourceDir);
     return true;
 }
 

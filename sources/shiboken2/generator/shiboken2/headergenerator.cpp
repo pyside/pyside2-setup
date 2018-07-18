@@ -49,11 +49,10 @@ QString HeaderGenerator::fileNameForContext(GeneratorContext &context) const
         QString fileNameBase = metaClass->qualifiedCppName().toLower();
         fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
         return fileNameBase + fileNameSuffix();
-    } else {
-        const AbstractMetaType *smartPointerType = context.preciseType();
-        QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNameSuffix();
     }
+    const AbstractMetaType *smartPointerType = context.preciseType();
+    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
+    return fileNameBase + fileNameSuffix();
 }
 
 void HeaderGenerator::writeCopyCtor(QTextStream& s, const AbstractMetaClass* metaClass) const
@@ -173,7 +172,7 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
             s << INDENT << "void* qt_metacast(const char* _clname) override;" << endl;
         }
 
-        if (m_inheritedOverloads.size()) {
+        if (!m_inheritedOverloads.isEmpty()) {
             s << INDENT << "// Inherited overloads, because the using keyword sux" << endl;
             writeInheritedOverloads(s);
             m_inheritedOverloads.clear();
@@ -230,7 +229,7 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
             QString argName = arg->name();
             const TypeEntry* enumTypeEntry = 0;
             if (arg->type()->isFlags())
-                enumTypeEntry = reinterpret_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
+                enumTypeEntry = static_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
             else if (arg->type()->isEnum())
                 enumTypeEntry = arg->type()->typeEntry();
             if (enumTypeEntry)
@@ -300,7 +299,7 @@ void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* 
     const int typeIndex = typeEntry->sbkIndex();
     _writeTypeIndexDefineLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
     if (typeEntry->isComplex()) {
-        const ComplexTypeEntry* cType = reinterpret_cast<const ComplexTypeEntry*>(typeEntry);
+        const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(typeEntry);
         if (cType->baseContainerType()) {
             const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), cType);
             if (metaClass->templateBaseClass())
@@ -308,7 +307,7 @@ void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* 
         }
     }
     if (typeEntry->isEnum()) {
-        const EnumTypeEntry* ete = reinterpret_cast<const EnumTypeEntry*>(typeEntry);
+        const EnumTypeEntry* ete = static_cast<const EnumTypeEntry*>(typeEntry);
         if (ete->flags())
             writeTypeIndexDefineLine(s, ete->flags());
     }
@@ -580,7 +579,7 @@ void HeaderGenerator::writeInheritedOverloads(QTextStream& s)
             QString argName = arg->name();
             const TypeEntry* enumTypeEntry = 0;
             if (arg->type()->isFlags())
-                enumTypeEntry = reinterpret_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
+                enumTypeEntry = static_cast<const FlagsTypeEntry*>(arg->type()->typeEntry())->originator();
             else if (arg->type()->isEnum())
                 enumTypeEntry = arg->type()->typeEntry();
             if (enumTypeEntry)

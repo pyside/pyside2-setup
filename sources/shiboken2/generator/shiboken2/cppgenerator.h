@@ -234,8 +234,8 @@ private:
     void writeClassDefinition(QTextStream &s,
                               const AbstractMetaClass *metaClass,
                               GeneratorContext &classContext);
-    void writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList overloads);
-    void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList overloads);
+    void writeMethodDefinitionEntry(QTextStream& s, const AbstractMetaFunctionList &overloads);
+    void writeMethodDefinition(QTextStream& s, const AbstractMetaFunctionList &overloads);
     void writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads);
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(QTextStream &s,
@@ -275,9 +275,10 @@ private:
     void writeFlagsNonZero(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsNumberMethodsDefinition(QTextStream& s, const AbstractMetaEnum* cppEnum);
     void writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
-                                  QString pyOpName, QString cppOpName);
+                                  const QString &pyOpName, const QString &cppOpName);
     void writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnum* cppEnum,
-                                 QString pyOpName, QString cppOpName, bool boolResult = false);
+                                 const QString &pyOpName, const QString &cppOpName,
+                                 bool boolResult = false);
 
     /// Writes the function that registers the multiple inheritance information for the classes that need it.
     void writeMultipleInheritanceInitializerFunction(QTextStream& s, const AbstractMetaClass* metaClass);
