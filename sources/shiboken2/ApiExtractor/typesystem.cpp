@@ -400,10 +400,12 @@ static QString msgReaderMessage(const QXmlStreamReader &reader,
     QTextStream str(&message);
     str << type << ": ";
     const QString fileName = readerFileName(reader);
-    if (!fileName.isEmpty())
-        str << "file=" << QDir::toNativeSeparators(fileName) << ", ";
-    str << "line=" << reader.lineNumber() << ", column=" << reader.columnNumber()
-        << ", message=" << what;
+    if (fileName.isEmpty())
+        str << "<stdin>:";
+    else
+        str << QDir::toNativeSeparators(fileName) << ':';
+    str << reader.lineNumber() << ':' << reader.columnNumber()
+        << ": " << what;
     return message;
 }
 
