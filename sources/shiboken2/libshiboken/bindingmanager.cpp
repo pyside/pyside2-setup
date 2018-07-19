@@ -84,8 +84,8 @@ public:
             const NodeList& nodeList = i->second;
             NodeList::const_iterator j = nodeList.begin();
             for (; j != nodeList.end(); ++j) {
-                file << '"' << PepType(*j)->tp_name << "\" -> \""
-                    << PepType(node1)->tp_name << "\"\n";
+                file << '"' << reinterpret_cast<PyTypeObject *>(*j)->tp_name << "\" -> \""
+                    << reinterpret_cast<PyTypeObject *>(node1)->tp_name << "\"\n";
             }
         }
         file << "}\n";
@@ -133,7 +133,7 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
             const SbkObject *sbkObj = iter->second;
             fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", iter->first,
                     static_cast<const void *>(sbkObj),
-                    PepType((Py_TYPE(sbkObj)))->tp_name,
+                    (Py_TYPE(sbkObj))->tp_name,
                     int(reinterpret_cast<const PyObject *>(sbkObj)->ob_refcnt));
         }
         fprintf(stderr, "-------------------------------\n");
@@ -285,14 +285,14 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     if (method && PyMethod_Check(method)
         && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject*>(wrapper)) {
         PyObject* defaultMethod;
-        PyObject* mro = PepType(Py_TYPE(wrapper))->tp_mro;
+        PyObject* mro = Py_TYPE(wrapper)->tp_mro;
 
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
         for (int i = 1; i < PyTuple_GET_SIZE(mro) - 1; i++) {
             PyTypeObject* parent = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(mro, i));
-            if (PepType(parent)->tp_dict) {
-                defaultMethod = PyDict_GetItem(PepType(parent)->tp_dict, pyMethodName);
+            if (parent->tp_dict) {
+                defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
                 if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod) {
                     Py_DECREF(pyMethodName);
                     return method;

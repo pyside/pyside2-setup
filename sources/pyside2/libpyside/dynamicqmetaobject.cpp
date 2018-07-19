@@ -388,7 +388,7 @@ DynamicQMetaObject::DynamicQMetaObject(PyTypeObject* type, const QMetaObject* ba
     d.relatedMetaObjects = NULL;
     d.static_metacall = NULL;
 
-    m_d->m_className = QByteArray(PepType(type)->tp_name).split('.').last();
+    m_d->m_className = QByteArray(type->tp_name).split('.').last();
     m_d->m_methodOffset = base->methodCount() - 1;
     m_d->m_propertyOffset = base->propertyCount() - 1;
     parsePythonType(type);
@@ -591,7 +591,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
     // This enforces registering of all signals and slots at type parsing time, and not later at
     // signal connection time, thus making sure no method indices change which would break
     // existing connections.
-    const PyObject *mro = PepType(type)->tp_mro;
+    const PyObject *mro = type->tp_mro;
     const Py_ssize_t basesCount = PyTuple_GET_SIZE(mro);
     PyTypeObject *qObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     QVector<PyTypeObject *> basesToCheck;
@@ -611,7 +611,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
     // PYSIDE-315: Handle all signals first, in all involved types.
     for (int baseIndex = 0, baseEnd = basesToCheck.size(); baseIndex < baseEnd; ++baseIndex) {
         PyTypeObject *baseType = basesToCheck[baseIndex];
-        PyObject *attrs = PepType(baseType)->tp_dict;
+        PyObject *attrs = baseType->tp_dict;
         PyObject *key = 0;
         PyObject *value = 0;
         Py_ssize_t pos = 0;
@@ -643,7 +643,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
     // We check for this using "is_sorted()". Sorting no longer happens at all.
     for (int baseIndex = 0, baseEnd = basesToCheck.size(); baseIndex < baseEnd; ++baseIndex) {
         PyTypeObject *baseType = basesToCheck[baseIndex];
-        PyObject *attrs = PepType(baseType)->tp_dict;
+        PyObject *attrs = baseType->tp_dict;
         PyObject *key = 0;
         PyObject *value = 0;
         Py_ssize_t pos = 0;

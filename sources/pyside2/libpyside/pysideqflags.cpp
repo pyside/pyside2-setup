@@ -54,7 +54,7 @@ extern "C" {
      */
     struct PySideQFlagsType
     {
-        PepTypeObject type;
+        PyTypeObject type;
     };
 
     #define PYSIDE_QFLAGS(X) reinterpret_cast<PySideQFlagsObject*>(X)

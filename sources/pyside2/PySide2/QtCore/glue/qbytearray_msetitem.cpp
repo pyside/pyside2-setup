@@ -67,7 +67,7 @@ if (PyIndex_Check(_key)) {
             PyErr_SetString(PyExc_ValueError, "bytearray must be of size 1");
             return -1;
         }
-    } else if (PepType(Py_TYPE(_value)) == PepType(SbkPySide2_QtCoreTypes[SBK_QBYTEARRAY_IDX])) {
+    } else if (reinterpret_cast<PyTypeObject *>(Py_TYPE(_value)) == reinterpret_cast<PyTypeObject *>(SbkPySide2_QtCoreTypes[SBK_QBYTEARRAY_IDX])) {
         if (PyObject_Length(_value) != 1) {
             PyErr_SetString(PyExc_ValueError, "QByteArray must be of size 1");
             return -1;
@@ -109,15 +109,15 @@ if (PyIndex_Check(_key)) {
     if (_value == NULL || _value == Py_None) {
         ba = QByteArray();
         value_length = 0;
-    } else if (!(PyBytes_Check(_value) || PyByteArray_Check(_value) || PepType(Py_TYPE(_value)) == PepType(SbkPySide2_QtCoreTypes[SBK_QBYTEARRAY_IDX]))) {
-        PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s", PepType(Py_TYPE(_value))->tp_name);
+    } else if (!(PyBytes_Check(_value) || PyByteArray_Check(_value) || reinterpret_cast<PyTypeObject *>(Py_TYPE(_value)) == reinterpret_cast<PyTypeObject *>(SbkPySide2_QtCoreTypes[SBK_QBYTEARRAY_IDX]))) {
+        PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s", Py_TYPE(_value)->tp_name);
         return -1;
     } else {
         value_length = PyObject_Length(_value);
     }
 
     if (step != 1 && value_length != slicelength) {
-        PyErr_Format(PyExc_ValueError, "attempt to assign %s of size %d to extended slice of size %d",PepType(Py_TYPE(_value))->tp_name, value_length, slicelength);
+        PyErr_Format(PyExc_ValueError, "attempt to assign %s of size %d to extended slice of size %d",Py_TYPE(_value)->tp_name, value_length, slicelength);
         return -1;
     }
 
@@ -151,7 +151,7 @@ if (PyIndex_Check(_key)) {
     }
 } else {
     PyErr_Format(PyExc_TypeError, "QBytearray indices must be integers or slices, not %.200s",
-                  PepType(Py_TYPE(_key))->tp_name);
+                  Py_TYPE(_key)->tp_name);
     return -1;
 }
 

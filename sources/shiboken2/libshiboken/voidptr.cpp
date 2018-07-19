@@ -59,8 +59,8 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     // type cast than to do everything in one line. The bad construct looked
     // like this, actual call forgotten:
     //    SbkVoidPtrObject *self =
-    //        reinterpret_cast<SbkVoidPtrObject *>(PepType(type)->tp_alloc);
-    PyObject *ob = PepType(type)->tp_alloc(type, 0);
+    //        reinterpret_cast<SbkVoidPtrObject *>(type->tp_alloc);
+    PyObject *ob = type->tp_alloc(type, 0);
     SbkVoidPtrObject *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
 
     if (self != 0) {
@@ -194,7 +194,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(%p, %zd, %s)",
-                           PepType((Py_TYPE(sbkObject)))->tp_name,
+                           Py_TYPE(sbkObject)->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -206,7 +206,7 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyBytes_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
-                           PepType((Py_TYPE(sbkObject)))->tp_name,
+                           Py_TYPE(sbkObject)->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);

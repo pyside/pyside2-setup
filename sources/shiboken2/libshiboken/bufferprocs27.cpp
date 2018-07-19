@@ -58,7 +58,7 @@ PyObject_GetBuffer(PyObject *obj, Pep_buffer *view, int flags)
     if (pb == NULL || pb->bf_getbuffer == NULL) {
         PyErr_Format(PyExc_TypeError,
                      "a bytes-like object is required, not '%.100s'",
-                     PepType((Py_TYPE(obj)))->tp_name);
+                     Py_TYPE(obj)->tp_name);
         return -1;
     }
     return (*pb->bf_getbuffer)(obj, view, flags);

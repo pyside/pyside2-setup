@@ -187,7 +187,7 @@ static int
 build_qualname_to_func(PyObject *obtype)
 {
     PyTypeObject *type = (PyTypeObject *)obtype;
-    PyMethodDef *meth = PepType(type)->tp_methods;
+    PyMethodDef *meth = type->tp_methods;
 
     if (meth == 0)
         return 0;
@@ -477,7 +477,7 @@ error:
 static int
 add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
 {
-    PyObject *dict = PepType(type)->tp_dict;
+    PyObject *dict = type->tp_dict;
 
     for (; gsp->name != NULL; gsp++) {
         PyObject *descr;
@@ -593,8 +593,8 @@ static int
 build_func_to_type(PyObject *obtype)
 {
     PyTypeObject *type = (PyTypeObject *)obtype;
-    PyObject *dict = PepType(type)->tp_dict;
-    PyMethodDef *meth = PepType(type)->tp_methods;
+    PyObject *dict = type->tp_dict;
+    PyMethodDef *meth = type->tp_methods;
 
     if (meth == 0)
         return 0;
