@@ -443,6 +443,47 @@ static QString msgReaderError(const QXmlStreamReader &reader, const QString &wha
     return  msgReaderMessage(reader, "Error", what);
 }
 
+static QString msgUnimplementedElementWarning(const QXmlStreamReader &reader,
+                                              const QStringRef &name)
+{
+    const QString message = QLatin1String("The element \"") +
+        name + QLatin1String("\" is not implemented.");
+    return msgReaderMessage(reader, "Warning", message);
+}
+
+static QString msgUnimplementedAttributeWarning(const QXmlStreamReader &reader,
+                                                const QStringRef &name)
+{
+    const QString message = QLatin1String("The attribute \"") +
+        name + QLatin1String("\" is not implemented.");
+    return msgReaderMessage(reader, "Warning", message);
+}
+
+static inline QString msgUnimplementedAttributeWarning(const QXmlStreamReader &reader,
+                                                       const QXmlStreamAttribute &attribute)
+{
+    return msgUnimplementedAttributeWarning(reader, attribute.qualifiedName());
+}
+
+static QString
+    msgUnimplementedAttributeValueWarning(const QXmlStreamReader &reader,
+                                          QStringView name, QStringView value)
+{
+    QString message;
+    QTextStream(&message) << "The value \"" << value
+        << "\" of the attribute \"" << name << "\" is not implemented.";
+    return msgReaderMessage(reader, "Warning", message);
+}
+
+static inline
+    QString msgUnimplementedAttributeValueWarning(const QXmlStreamReader &reader,
+                                                  const QXmlStreamAttribute &attribute)
+{
+    return msgUnimplementedAttributeValueWarning(reader,
+                                                 attribute.qualifiedName(),
+                                                 attribute.value());
+}
+
 static QString msgInvalidVersion(const QStringRef &version, const QString &package = QString())
 {
     QString result;
@@ -999,7 +1040,7 @@ SmartPointerTypeEntry *
 }
 
 PrimitiveTypeEntry *
-    Handler::parsePrimitiveTypeEntry(const QXmlStreamReader &,
+    Handler::parsePrimitiveTypeEntry(const QXmlStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
@@ -1012,6 +1053,8 @@ PrimitiveTypeEntry *
         } else if (name == QLatin1String("target-lang-api-name")) {
             type->setTargetLangApiName(attributes->takeAt(i).value().toString());
         } else if (name == preferredConversionAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             const bool v = convertBoolean(attributes->takeAt(i).value(),
                                           preferredConversionAttribute(), true);
             type->setPreferredConversion(v);
@@ -1073,14 +1116,22 @@ EnumTypeEntry *
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("upper-bound")) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             entry->setUpperBound(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("lower-bound")) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             entry->setLowerBound(attributes->takeAt(i).value().toString());
         } else if (name == forceIntegerAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             const bool v = convertBoolean(attributes->takeAt(i).value(),
                                           forceIntegerAttribute(), false);
             entry->setForceInteger(v);
         } else if (name == extensibleAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             const bool v = convertBoolean(attributes->takeAt(i).value(),
                                           extensibleAttribute(), false);
             entry->setExtensible(v);
@@ -1176,7 +1227,7 @@ FunctionTypeEntry *
     return result;
 }
 
-void Handler::applyComplexTypeAttributes(const QXmlStreamReader &,
+void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
                                          ComplexTypeEntry *ctype,
                                          QXmlStreamAttributes *attributes) const
 {
@@ -1195,6 +1246,8 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &,
         } else if (name == defaultSuperclassAttribute()) {
             ctype->setDefaultSuperclass(attributes->takeAt(i).value().toString());
         } else if (name == genericClassAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             const bool v = convertBoolean(attributes->takeAt(i).value(), genericClassAttribute(), false);
             ctype->setGenericClass(v);
         } else if (name == QLatin1String("target-lang-name")) {
@@ -1207,16 +1260,22 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &,
             const bool v = convertBoolean(attributes->takeAt(i).value(), copyableAttribute(), false);
             ctype->setCopyable(v ? ComplexTypeEntry::CopyableSet : ComplexTypeEntry::NonCopyableSet);
         } else if (name == QLatin1String("held-type")) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             ctype->setHeldType(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("hash-function")) {
             ctype->setHashFunction(attributes->takeAt(i).value().toString());
         } else if (name == forceAbstractAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (convertBoolean(attributes->takeAt(i).value(), forceAbstractAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ForceAbstract);
         } else if (name == deprecatedAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);
         } else if (name == deleteInMainThreadAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::DeleteInMainThread);
         } else if (name == QLatin1String("target-type")) {
@@ -1597,7 +1656,7 @@ bool Handler::parseModifyArgument(const QXmlStreamReader &,
     return true;
 }
 
-bool Handler::parseNoNullPointer(const QXmlStreamReader &,
+bool Handler::parseNoNullPointer(const QXmlStreamReader &reader,
                                  const StackElement &topElement, QXmlStreamAttributes *attributes)
 {
     if (topElement.type != StackElement::ModifyArgument) {
@@ -1611,9 +1670,11 @@ bool Handler::parseNoNullPointer(const QXmlStreamReader &,
     const int defaultValueIndex =
         indexOfAttribute(*attributes, QStringViewLiteral("default-value"));
     if (defaultValueIndex != -1) {
+        const QXmlStreamAttribute attribute = attributes->takeAt(defaultValueIndex);
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgUnimplementedAttributeWarning(reader, attribute)));
         if (lastArgMod.index == 0) {
-            lastArgMod.nullPointerDefaultValue =
-                attributes->takeAt(defaultValueIndex).value().toString();
+            lastArgMod.nullPointerDefaultValue = attribute.value().toString();
         } else {
             qCWarning(lcShiboken)
                 << "default values for null pointer guards are only effective for return values";
@@ -1717,7 +1778,7 @@ bool Handler::parseRemoval(const QXmlStreamReader &,
     return true;
 }
 
-bool Handler::parseRename(const QXmlStreamReader &,
+bool Handler::parseRename(const QXmlStreamReader &reader,
                           StackElement::ElementType type,
                           const StackElement &topElement,
                           QXmlStreamAttributes *attributes)
@@ -1761,6 +1822,10 @@ bool Handler::parseRename(const QXmlStreamReader &,
             m_error = QStringLiteral("Unknown access modifier: '%1'").arg(modifier);
             return false;
         }
+        if (modifierFlag == Modification::Friendly) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeValueWarning(reader, modifierAttribute(), modifier)));
+        }
     }
 
     if (mod)
@@ -1768,7 +1833,7 @@ bool Handler::parseRename(const QXmlStreamReader &,
     return true;
 }
 
-bool Handler::parseModifyField(const QXmlStreamReader &,
+bool Handler::parseModifyField(const QXmlStreamReader &reader,
                                QXmlStreamAttributes *attributes)
 {
     FieldModification fm;
@@ -1781,9 +1846,13 @@ bool Handler::parseModifyField(const QXmlStreamReader &,
             if (!convertRemovalAttribute(attributes->takeAt(i).value(), fm, m_error))
                 return false;
         }  else if (name == readAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (!convertBoolean(attributes->takeAt(i).value(), readAttribute(), true))
                 fm.modifiers &= ~FieldModification::Readable;
         } else if (name == writeAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (!convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true))
                 fm.modifiers &= ~FieldModification::Writable;
         }
@@ -1860,7 +1929,7 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
     return true;
 }
 
-bool Handler::parseModifyFunction(const QXmlStreamReader &,
+bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
 {
@@ -1889,6 +1958,8 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
             rename = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("associated-to")) {
             association = attributes->takeAt(i).value().toString();
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
         } else if (name == removeAttribute()) {
             removal = attributes->takeAt(i).value().toString();
         } else if (name == deprecatedAttribute()) {
@@ -1905,6 +1976,8 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
                 return false;
             }
         } else if (name == virtualSlotAttribute()) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             virtualSlot = convertBoolean(attributes->takeAt(i).value(),
                                          virtualSlotAttribute(), false);
         }
@@ -1933,6 +2006,11 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
         if ((m & (Modification::AccessModifierMask | Modification::FinalMask)) == 0) {
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
+        }
+        if (m == Modification::Final || m == Modification::NonFinal) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedAttributeValueWarning(reader,
+                      accessAttribute(), access)));
         }
         mod.modifiers |= m;
     }
@@ -2002,7 +2080,7 @@ CustomFunction *
     return func;
 }
 
-bool Handler::parseReferenceCount(const QXmlStreamReader &,
+bool Handler::parseReferenceCount(const QXmlStreamReader &reader,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
 {
@@ -2015,12 +2093,20 @@ bool Handler::parseReferenceCount(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == actionAttribute()) {
-            const QStringRef action = attributes->takeAt(i).value();
-            rc.action = referenceCountFromAttribute(action);
-            if (rc.action == ReferenceCount::Invalid) {
-                m_error = QLatin1String("unrecognized value '") + action
+            const QXmlStreamAttribute attribute = attributes->takeAt(i);
+            rc.action = referenceCountFromAttribute(attribute.value());
+            switch (rc.action) {
+            case ReferenceCount::Invalid:
+                m_error = QLatin1String("unrecognized value '") + attribute.value()
                           + QLatin1String("' for action attribute.");
                 return false;
+            case ReferenceCount::AddAll:
+            case ReferenceCount::Ignore:
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgUnimplementedAttributeValueWarning(reader, attribute)));
+                break;
+            default:
+                break;
             }
         } else if (name == QLatin1String("variable-name")) {
             rc.varName = attributes->takeAt(i).value().toString();
@@ -2282,6 +2368,12 @@ bool Handler::startElement(const QXmlStreamReader &reader)
     if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateAll)
         customConversionsForReview.clear();
 
+    if (element->type == StackElement::CustomMetaConstructor
+        || element->type == StackElement::CustomMetaDestructor) {
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgUnimplementedElementWarning(reader, tagName)));
+    }
+
     if (element->type == StackElement::Root
         || element->type == StackElement::NamespaceTypeEntry
         || element->type == StackElement::InterfaceTypeEntry
@@ -2530,6 +2622,8 @@ bool Handler::startElement(const QXmlStreamReader &reader)
         }
             break;
         case StackElement::ArgumentMap:
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnimplementedElementWarning(reader, tagName)));
             if (!parseArgumentMap(reader, topElement, &attributes))
                 return false;
             break;
