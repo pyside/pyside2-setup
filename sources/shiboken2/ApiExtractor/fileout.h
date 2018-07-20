@@ -43,12 +43,8 @@ private:
 public:
     enum State { Failure, Unchanged, Success };
 
-    FileOut(QString name);
-    ~FileOut()
-    {
-        if (!isDone)
-            done();
-    }
+    explicit FileOut(QString name);
+    ~FileOut();
 
     State done();
     State done(QString *errorMessage);

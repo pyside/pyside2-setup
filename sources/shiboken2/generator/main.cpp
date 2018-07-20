@@ -34,6 +34,7 @@
 #include <QtCore/QDir>
 #include <iostream>
 #include <apiextractor.h>
+#include <fileout.h>
 #include "generator.h"
 #include "shibokenconfig.h"
 #include "cppgenerator.h"
@@ -52,6 +53,9 @@ static inline QString frameworkIncludePathOption() { return QStringLiteral("fram
 static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
 static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
+static inline QString diffOption() { return QStringLiteral("diff"); }
+static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
+
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
 typedef QMap<QString, QString> CommandArgumentMap;
@@ -316,6 +320,10 @@ void printUsage()
                      QLatin1String("System include paths used by the C++ parser"))
         << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
                      QLatin1String("generator-set to be used. e.g. qtdoc"))
+        << qMakePair(diffOption(),
+                     QLatin1String("Print a diff of wrapper files"))
+        << qMakePair(dryrunOption(),
+                     QLatin1String("Dry run, do not generate wrapper files"))
         << qMakePair(QLatin1String("-h"), QString())
         << qMakePair(helpOption(),
                      QLatin1String("Display this help and exit"))
@@ -435,6 +443,18 @@ int main(int argc, char *argv[])
         args.erase(ait);
         printUsage();
         return EXIT_SUCCESS;
+    }
+
+    ait = args.find(diffOption());
+    if (ait != args.end()) {
+        args.erase(ait);
+        FileOut::diff = true;
+    }
+
+    ait = args.find(dryrunOption());
+    if (ait != args.end()) {
+        args.erase(ait);
+        FileOut::dummy = true;
     }
 
     QString licenseComment;

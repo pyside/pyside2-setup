@@ -69,6 +69,16 @@ Options
 ``--generation-set``
     Generator set to be used (e.g. qtdoc).
 
+.. _diff:
+
+``--diff``
+    Print a diff of wrapper files.
+
+.. _dryrun:
+
+``--dryrun``
+    Dry run, do not generate wrapper files.
+
 .. _--project-file:
 
 ``--project-file=<file>``

@@ -50,24 +50,25 @@ static const char colorInfo[] = "";
 static const char colorReset[] = "";
 #endif
 
-FileOut::FileOut(QString n):
-        name(n),
-        stream(&tmp),
-        isDone(false)
-{}
+FileOut::FileOut(QString n) :
+    name(std::move(n)),
+    stream(&tmp),
+    isDone(false)
+{
+}
 
-static int* lcsLength(QList<QByteArray> a, QList<QByteArray> b)
+FileOut::~FileOut()
+{
+    if (!isDone)
+        done();
+}
+
+static QVector<int> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
 {
     const int height = a.size() + 1;
     const int width = b.size() + 1;
 
-    int *res = new int[width * height];
-
-    for (int row = 0; row < height; row++)
-        res[width * row] = 0;
-
-    for (int col = 0; col < width; col++)
-        res[col] = 0;
+    QVector<int> res(width * height, 0);
 
     for (int row = 1; row < height; row++) {
         for (int col = 1; col < width; col++) {
@@ -89,88 +90,84 @@ enum Type {
 
 struct Unit
 {
-    Unit(Type type, int pos) :
-            type(type),
-            start(pos),
-            end(pos) {}
-
     Type type;
     int start;
     int end;
 
-    void print(QList<QByteArray> a, QList<QByteArray> b)
-    {
-            if (type == Unchanged) {
-                if ((end - start) > 9) {
-                    for (int i = start; i <= start + 2; i++)
-                        std::printf("  %s\n", a[i].data());
-                    std::printf("%s=\n= %d more lines\n=%s\n", colorInfo, end - start - 6, colorReset);
-                    for (int i = end - 2; i <= end; i++)
-                        std::printf("  %s\n", a[i].data());
-                } else {
-                    for (int i = start; i <= end; i++)
-                        std::printf("  %s\n", a[i].data());
-                }
-            } else if (type == Add) {
-                std::printf("%s", colorAdd);
-                for (int i = start; i <= end; i++)
-                    std::printf("+ %s\n", b[i].data());
-                std::printf("%s", colorReset);
-            } else if (type == Delete) {
-                std::printf("%s", colorDelete);
-                for (int i = start; i <= end; i++)
-                    std::printf("- %s\n", a[i].data());
-                std::printf("%s", colorReset);
-            }
-    }
+    void print(const QByteArrayList &a, const QByteArrayList &b) const;
 };
 
-static QList<Unit*> *unitAppend(QList<Unit*> *res, Type type, int pos)
+void Unit::print(const QByteArrayList &a, const QByteArrayList &b) const
 {
-    if (!res) {
-        res = new QList<Unit*>;
-        res->append(new Unit(type, pos));
-        return res;
-    }
-
-    Unit *last = res->last();
-    if (last->type == type)
-        last->end = pos;
-    else
-        res->append(new Unit(type, pos));
-
-    return res;
-}
-
-static QList<Unit*> *diffHelper(int *lcs, QList<QByteArray> a, QList<QByteArray> b, int row, int col)
-{
-    if (row > 0 && col > 0 && (a[row-1] == b[col-1])) {
-        return unitAppend(diffHelper(lcs, a, b, row - 1, col - 1), Unchanged, row - 1);
-    } else {
-        int width = b.size() + 1;
-        if ((col > 0)
-            && (row == 0 || lcs[width * row + col-1] >= lcs[width *(row-1) + col])) {
-            return unitAppend(diffHelper(lcs, a, b, row, col - 1), Add, col - 1);
-        } else if ((row > 0)
-            && (col == 0 || lcs[width * row + col-1] < lcs[width *(row-1) + col])) {
-            return unitAppend(diffHelper(lcs, a, b, row - 1, col), Delete, row - 1);
+    switch (type) {
+    case Unchanged:
+        if ((end - start) > 9) {
+            for (int i = start; i <= start + 2; i++)
+                std::printf("  %s\n", a.at(i).constData());
+            std::printf("%s=\n= %d more lines\n=%s\n",
+                        colorInfo, end - start - 6, colorReset);
+            for (int i = end - 2; i <= end; i++)
+                std::printf("  %s\n", a.at(i).constData());
+        } else {
+            for (int i = start; i <= end; i++)
+                std::printf("  %s\n", a.at(i).constData());
         }
+        break;
+    case Add:
+        std::fputs(colorAdd, stdout);
+        for (int i = start; i <= end; i++)
+            std::printf("+ %s\n", b.at(i).constData());
+        std::fputs(colorReset, stdout);
+        break;
+    case Delete:
+        std::fputs(colorDelete, stdout);
+        for (int i = start; i <= end; i++)
+            std::printf("- %s\n", a.at(i).constData());
+        std::fputs(colorReset, stdout);
+        break;
     }
-    delete lcs;
-    return 0;
 }
 
-static void diff(QList<QByteArray> a, QList<QByteArray> b)
+static void unitAppend(Type type, int pos, QVector<Unit> *units)
 {
-    QList<Unit*> *res = diffHelper(lcsLength(a, b), a, b, a.size(), b.size());
-    for (int i = 0; i < res->size(); i++) {
-        Unit *unit = res->at(i);
-        unit->print(a, b);
-        delete(unit);
-    }
-    delete(res);
+    if (!units->isEmpty() && units->last().type == type)
+        units->last().end = pos;
+    else
+        units->append(Unit{type, pos, pos});
 }
 
+static QVector<Unit> diffHelper(const QVector<int> &lcs,
+                                const QByteArrayList &a, const QByteArrayList &b,
+                                int row, int col)
+{
+    if (row > 0 && col > 0 && a.at(row - 1) == b.at(col - 1)) {
+        QVector<Unit> result = diffHelper(lcs, a, b, row - 1, col - 1);
+        unitAppend(Unchanged, row - 1, &result);
+        return result;
+    }
+
+    const int width = b.size() + 1;
+    if (col > 0
+        && (row == 0 || lcs.at(width * row + col -1 ) >= lcs.at(width * (row - 1) + col))) {
+        QVector<Unit> result = diffHelper(lcs, a, b, row, col - 1);
+        unitAppend(Add, col - 1, &result);
+        return result;
+    }
+    if (row > 0
+        && (col == 0 || lcs.at(width * row + col-1) < lcs.at(width * (row - 1) + col))) {
+        QVector<Unit> result = diffHelper(lcs, a, b, row - 1, col);
+        unitAppend(Delete, row - 1, &result);
+        return result;
+    }
+    return QVector<Unit>{};
+}
+
+static void diff(const QByteArrayList &a, const QByteArrayList &b)
+{
+    const QVector<Unit> res = diffHelper(lcsLength(a, b), a, b, a.size(), b.size());
+    for (const Unit &unit : res)
+        unit.print(a, b);
+}
 
 FileOut::State FileOut::done()
 {
