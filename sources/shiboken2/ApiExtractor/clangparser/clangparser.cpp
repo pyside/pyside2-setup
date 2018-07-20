@@ -199,7 +199,6 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
 #ifndef Q_OS_WIN
         "-fPIC",
 #endif
-        "-fno-exceptions", // Workaround for clang bug http://reviews.llvm.org/D17988
 #ifdef Q_OS_MACOS
         "-Wno-expansion-to-defined", // Workaround for warnings in Darwin stdlib, see
                                      // https://github.com/darlinghq/darling/issues/204
