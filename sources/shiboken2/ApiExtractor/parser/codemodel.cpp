@@ -979,6 +979,16 @@ void _FunctionModelItem::setVariadics(bool isVariadics)
     m_isVariadics = isVariadics;
 }
 
+bool _FunctionModelItem::isNoExcept() const
+{
+    return m_isNoExcept;
+}
+
+void _FunctionModelItem::setNoExcept(bool n)
+{
+    m_isNoExcept = n;
+}
+
 bool _FunctionModelItem::isDeleted() const
 {
     return m_isDeleted;
@@ -1091,6 +1101,8 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
         d << " [abstract]";
     if (m_isExplicit)
         d << " [explicit]";
+    if (m_isNoExcept)
+        d << " [noexcept]";
     if (m_isInvokable)
         d << " [invokable]";
     formatModelItemList(d, ", arguments=", m_arguments);

@@ -395,6 +395,7 @@ AbstractMetaFunction::AbstractMetaFunction()
       m_reverse(false),
       m_userAdded(false),
       m_explicit(false),
+      m_isNoExcept(false),
       m_pointerOperator(false),
       m_isCallOperator(false)
 {
@@ -514,6 +515,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     if (type())
         cpy->setType(type()->copy());
     cpy->setConstant(isConstant());
+    cpy->setNoExcept(isNoExcept());
 
     for (AbstractMetaArgument *arg : m_arguments)
     cpy->addArgument(arg->copy());
@@ -1100,6 +1102,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " [userAdded]";
     if (m_explicit)
         d << " [explicit]";
+    if (m_isNoExcept)
+        d << " [noexcept]";
     if (m_pointerOperator)
         d << " [operator->]";
     if (m_isCallOperator)

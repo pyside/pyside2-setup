@@ -1941,6 +1941,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     // Additional check for assignment/move assignment down below
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
+    metaFunction->setNoExcept(functionItem->isNoExcept());
 
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
         qCDebug(lcShiboken).noquote().nospace() << " - " << functionName << "()";

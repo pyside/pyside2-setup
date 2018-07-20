@@ -603,7 +603,11 @@ public:
     bool isVariadics() const;
     void setVariadics(bool isVariadics);
 
+
     bool isSimilar(const FunctionModelItem &other) const;
+
+    bool isNoExcept() const;
+    void setNoExcept(bool n);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
@@ -623,6 +627,7 @@ private:
             uint m_isAbstract: 1;
             uint m_isExplicit: 1;
             uint m_isVariadics: 1;
+            uint m_isNoExcept : 1;
             uint m_isInvokable : 1; // Qt
         };
         uint m_flags;

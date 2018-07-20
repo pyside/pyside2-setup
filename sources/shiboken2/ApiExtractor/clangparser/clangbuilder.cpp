@@ -268,6 +268,14 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
+    switch (clang_getCursorExceptionSpecificationType(cursor)) {
+    case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
+    case CXCursor_ExceptionSpecificationKind_ComputedNoexcept:
+        result->setNoExcept(true);
+        break;
+    default:
+        break;
+    }
     switch (clang_getCursorAvailability(cursor)) {
     case CXAvailability_Available:
         break;

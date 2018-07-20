@@ -835,6 +835,10 @@ public:
     }
 
     static bool isConversionOperator(const QString& funcName);
+
+    bool isNoExcept() const { return m_isNoExcept; }
+    void setNoExcept(bool n) { m_isNoExcept = n; }
+
     bool isConversionOperator() const
     {
         return isConversionOperator(originalName());
@@ -1098,6 +1102,7 @@ private:
     uint m_reverse                  : 1;
     uint m_userAdded                : 1;
     uint m_explicit                 : 1;
+    uint m_isNoExcept               : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
 };
