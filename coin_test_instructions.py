@@ -36,9 +36,10 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-from build_scripts.utils import has_option
-from build_scripts.utils import option_value
+from build_scripts.options import has_option
+from build_scripts.options import option_value
 from build_scripts.utils import install_pip_dependencies
+from build_scripts.utils import install_pip_wheel_package
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
@@ -66,7 +67,8 @@ def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-    install_pip_dependencies(env_pip, ["six", "wheel"])
+    install_pip_dependencies(env_pip, ["six", "setuptools"])
+    install_pip_wheel_package(env_pip)
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
                   "--buildno=" + buildnro]

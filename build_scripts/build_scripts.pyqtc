@@ -1,8 +1,10 @@
 __init__.py
+config.py
 main.py
 options.py
 platforms
 qtinfo.py
+setup_runner.py
 utils.py
 wheel_override.py
 platforms/__init__.py
@@ -11,3 +13,6 @@ platforms/macos.py
 platforms/unix.py
 platforms/windows_desktop.py
 ../setup.py
+../coin_build_instructions.py
+../coin_test_instructions.py
+

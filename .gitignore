@@ -1,7 +1,6 @@
 /build
 /dist
 /pyside*_build
-/pyside*_package
 /pyside*_install
 /PySide
 /PySide-*.*.*
@@ -13,3 +12,5 @@ distribute-*.egg
 distribute-*.tar.gz
 explore2
 build_history/2*
+*.qdocconf
+*.qdocconf.in

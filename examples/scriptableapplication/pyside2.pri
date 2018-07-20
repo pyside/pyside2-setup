@@ -1,30 +1,46 @@
 PYSIDE_CONFIG = $$PWD/../utils/pyside2_config.py
 
-PYSIDE2 = $$system(python $$PYSIDE_CONFIG --pyside2)
+SHIBOKEN2_GENERATOR = $$system(python $$PYSIDE_CONFIG --shiboken2-generator-path)
+isEmpty(SHIBOKEN2_GENERATOR): error(Unable to locate the shiboken2-generator package location)
+
+SHIBOKEN2_MODULE = $$system(python $$PYSIDE_CONFIG --shiboken2-module-path)
+isEmpty(SHIBOKEN2_MODULE): error(Unable to locate the shiboken2 package location)
+
+PYSIDE2 = $$system(python $$PYSIDE_CONFIG --pyside2-path)
 isEmpty(PYSIDE2): error(Unable to locate the PySide2 package location)
 
-PYTHON_INCLUDE = $$system(python $$PYSIDE_CONFIG --python-include)
+PYTHON_INCLUDE = $$system(python $$PYSIDE_CONFIG --python-include-path)
 isEmpty(PYTHON_INCLUDE): error(Unable to locate the Python include headers directory)
 
-PYTHON_LFLAGS = $$system(python $$PYSIDE_CONFIG --python-link)
+PYTHON_LFLAGS = $$system(python $$PYSIDE_CONFIG --python-link-flags-qmake)
 isEmpty(PYTHON_LFLAGS): error(Unable to locate the Python library for linking)
 
-PYSIDE2_INCLUDE = $$system(python $$PYSIDE_CONFIG --pyside2-include)
+SHIBOKEN2_INCLUDE = $$system(python $$PYSIDE_CONFIG --shiboken2-generator-include-path)
+isEmpty(SHIBOKEN2_INCLUDE): error(Unable to locate the shiboken include headers directory)
+
+PYSIDE2_INCLUDE = $$system(python $$PYSIDE_CONFIG --pyside2-include-path)
 isEmpty(PYSIDE2_INCLUDE): error(Unable to locate the PySide2 include headers directory)
 
-PYSIDE2_LFLAGS = $$system(python $$PYSIDE_CONFIG --pyside2-link)
+SHIBOKEN2_LFLAGS = $$system(python $$PYSIDE_CONFIG --shiboken2-module-qmake-lflags)
+isEmpty(SHIBOKEN2_LFLAGS): error(Unable to locate the shiboken libraries for linking)
+
+PYSIDE2_LFLAGS = $$system(python $$PYSIDE_CONFIG --pyside2-qmake-lflags)
 isEmpty(PYSIDE2_LFLAGS): error(Unable to locate the PySide2 libraries for linking)
 
-PYSIDE2_SHARED_LIBRARIES = $$system(python $$PYSIDE_CONFIG --pyside2-shared-libraries)
+SHIBOKEN2_SHARED_LIBRARIES = $$system(python $$PYSIDE_CONFIG --shiboken2-module-shared-libraries-qmake)
+isEmpty(SHIBOKEN2_SHARED_LIBRARIES): error(Unable to locate the used shiboken2 module shared libraries)
+
+PYSIDE2_SHARED_LIBRARIES = $$system(python $$PYSIDE_CONFIG --pyside2-shared-libraries-qmake)
 isEmpty(PYSIDE2_SHARED_LIBRARIES): error(Unable to locate the used PySide2 shared libraries)
 
-INCLUDEPATH += "$$PYTHON_INCLUDE" $$PYSIDE2_INCLUDE
-LIBS += $$PYTHON_LFLAGS $$PYSIDE2_LFLAGS
+INCLUDEPATH += "$$PYTHON_INCLUDE" $$PYSIDE2_INCLUDE $$SHIBOKEN2_INCLUDE
+LIBS += $$PYTHON_LFLAGS $$PYSIDE2_LFLAGS $$SHIBOKEN2_LFLAGS
 !build_pass:message(INCLUDEPATH is $$INCLUDEPATH)
 !build_pass:message(LIBS are $$LIBS)
 
 !build_pass:message(Using $$PYSIDE2)
 
 !win32 {
-    QMAKE_RPATHDIR += $$PYSIDE2
+    !build_pass:message(RPATH will include $$PYSIDE2 and $$SHIBOKEN2_MODULE)
+    QMAKE_RPATHDIR += $$PYSIDE2 $$SHIBOKEN2_MODULE
 }
