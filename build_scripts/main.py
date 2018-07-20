@@ -42,6 +42,7 @@ from distutils.version import LooseVersion
 
 import os
 import time
+from .config import config
 from .utils import memoize, get_python_dict
 from .options import *
 
@@ -90,14 +91,10 @@ def get_setuptools_extension_modules():
     extension_modules = [Extension(*extension_args, **extension_kwargs)]
     return extension_modules
 
-# Buildable extensions.
-contained_modules = ['shiboken2', 'pyside2', 'pyside2-tools']
 
 # Git submodules: ["submodule_name",
 #   "location_relative_to_sources_folder"]
 submodules = [["pyside2-tools"]]
-
-pyside_package_dir_name = "pyside_package"
 
 try:
     import setuptools
@@ -108,13 +105,8 @@ except ImportError:
 import sys
 import platform
 import re
-import fnmatch
 
-import difflib # for a close match of dirname and module
-import functools
-
-from distutils import log
-from distutils.errors import DistutilsOptionError
+import distutils.log as log
 from distutils.errors import DistutilsSetupError
 from distutils.sysconfig import get_config_var
 from distutils.sysconfig import get_python_lib
@@ -123,7 +115,7 @@ from distutils.command.build import build as _build
 from distutils.command.build_ext import build_ext as _build_ext
 from distutils.util import get_platform
 
-from setuptools import setup, Extension
+from setuptools import Extension
 from setuptools.command.install import install as _install
 from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
@@ -132,38 +124,39 @@ from setuptools.command.build_py import build_py as _build_py
 
 from .qtinfo import QtInfo
 from .utils import rmtree, detect_clang, copyfile, copydir, run_process_output, run_process
-from .utils import update_env_path, init_msvc_env, filter_match, macos_fix_rpaths_for_library
+from .utils import update_env_path, init_msvc_env, filter_match
+from .utils import macos_fix_rpaths_for_library
+from .utils import linux_fix_rpaths_for_library
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .wheel_override import wheel_module_exists, get_bdist_wheel_override
 
 from textwrap import dedent
 
-# make sure that setup.py is run with an allowed python version
+
 def check_allowed_python_version():
+    """
+    Make sure that setup.py is run with an allowed python version.
+    """
+
     import re
-    pattern = "'Programming Language :: Python :: (\d+)\.(\d+)'"
+    pattern = "Programming Language :: Python :: (\d+)\.(\d+)"
     supported = []
-    with open(setup_py_path) as setup:
-        for line in setup.readlines():
-            found = re.search(pattern, line)
-            if found:
-                major = int(found.group(1))
-                minor = int(found.group(2))
-                supported.append( (major, minor) )
+
+    for line in config.python_version_classifiers:
+        found = re.search(pattern, line)
+        if found:
+            major = int(found.group(1))
+            minor = int(found.group(2))
+            supported.append( (major, minor) )
     this_py = sys.version_info[:2]
     if this_py not in supported:
-        print("only these python versions are supported:", supported)
+        print("Unsupported python version detected. Only these python versions are supported: {}"
+              .format(supported))
         sys.exit(1)
 
-check_allowed_python_version()
 
 qt_src_dir = ''
-
-# This is used automatically by distutils.command.install object, to
-# specify final installation location.
-OPTION_FINAL_INSTALL_PREFIX = option_value("prefix")
-
 
 if OPTION_QT_VERSION is None:
     OPTION_QT_VERSION = "5"
@@ -293,8 +286,7 @@ def get_qt_version():
     qt_version = qtinfo.version
 
     if not qt_version:
-        log.error("Failed to query the Qt version with qmake {0}".format(
-            self.qtinfo.qmake_command))
+        log.error("Failed to query the Qt version with qmake {0}".format(qtinfo.qmake_command))
         sys.exit(1)
 
     if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
@@ -304,12 +296,13 @@ def get_qt_version():
 
     return qt_version
 
+
 def prepare_build():
     if (os.path.isdir(".git") and not OPTION_IGNOREGIT and
             not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD):
         prepare_sub_modules()
-    # Clean up temp and package folders
-    for n in [pyside_package_dir_name, "build"]:
+    # Clean up temp build folder.
+    for n in ["build"]:
         d = os.path.join(setup_script_dir, n)
         if os.path.isdir(d):
             print("Removing {}".format(d))
@@ -318,13 +311,7 @@ def prepare_build():
             except Exception as e:
                 print('***** problem removing "{}"'.format(d))
                 print('ignored error: {}'.format(e))
-    # Prepare package folders
-    ppdn = pyside_package_dir_name
-    absolute_paths = [os.path.join(ppdn, "PySide2"),
-        os.path.join(ppdn, "pyside2uic")]
-    for pkg in absolute_paths:
-        pkg_dir = os.path.join(setup_script_dir, pkg)
-        os.makedirs(pkg_dir)
+
     # locate Qt sources for the documentation
     if OPTION_QT_SRC is None:
         install_prefix = qtinfo.prefix_dir
@@ -389,26 +376,15 @@ class PysideBuildExt(_build_ext):
         pass
 
 
-
-# pyside_build_py and pyside_install_lib are reimplemented to preserve
-# symlinks when distutils / setuptools copy files to various
-# directories through the different build stages.
 class PysideBuildPy(_build_py):
 
     def __init__(self, *args, **kwargs):
         _build_py.__init__(self, *args, **kwargs)
 
-    def build_package_data(self):
-        """Copies files from pyside_package into build/xxx directory"""
 
-        for package, src_dir, build_dir, filenames in self.data_files:
-            for filename in filenames:
-                target = os.path.join(build_dir, filename)
-                self.mkpath(os.path.dirname(target))
-                srcfile = os.path.abspath(os.path.join(src_dir, filename))
-                # Using our own copyfile makes sure to preserve symlinks.
-                copyfile(srcfile, target)
-
+# _install_lib is reimplemented to preserve
+# symlinks when distutils / setuptools copy files to various
+# directories from the setup tools build dir to the install dir.
 class PysideInstallLib(_install_lib):
 
     def __init__(self, *args, **kwargs):
@@ -539,10 +515,12 @@ class PysideBuild(_build):
         py_prefix = get_config_var("prefix")
         if not py_prefix or not os.path.exists(py_prefix):
             py_prefix = sys.prefix
+        self.py_prefix = py_prefix
         if sys.platform == "win32":
             py_scripts_dir = os.path.join(py_prefix, "Scripts")
         else:
             py_scripts_dir = os.path.join(py_prefix, "bin")
+        self.py_scripts_dir = py_scripts_dir
         if py_libdir is None or not os.path.exists(py_libdir):
             if sys.platform == "win32":
                 py_libdir = os.path.join(py_prefix, "libs")
@@ -656,7 +634,7 @@ class PysideBuild(_build):
         qt_version = get_qt_version()
 
         # Update the PATH environment variable
-        additional_paths = [py_scripts_dir, qt_dir]
+        additional_paths = [self.py_scripts_dir, qt_dir]
 
         # Add Clang to path for Windows.
         # Revisit once Clang is bundled with Qt.
@@ -685,19 +663,11 @@ class PysideBuild(_build):
         install_dir = os.path.join(script_dir, prefix() + "_install",
             "{}".format(build_name))
 
-        # Try to ensure that tools built by this script (such as shiboken2)
-        # are found before any that may already be installed on the system.
-        update_env_path([os.path.join(install_dir, 'bin')])
-
-        # Tell cmake to look here for *.cmake files
-        os.environ['CMAKE_PREFIX_PATH'] = install_dir
-
         self.make_path = make_path
         self.make_generator = make_generator
         self.debug = OPTION_DEBUG
         self.script_dir = script_dir
-        self.pyside_package_dir = os.path.join(self.script_dir,
-            pyside_package_dir_name)
+        self.st_build_dir = os.path.join(self.script_dir, self.build_lib)
         self.sources_dir = sources_dir
         self.build_dir = build_dir
         self.install_dir = install_dir
@@ -709,73 +679,11 @@ class PysideBuild(_build):
         self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
         self.build_tests = OPTION_BUILDTESTS
 
-        setuptools_install_prefix = get_python_lib(1)
-        if OPTION_FINAL_INSTALL_PREFIX:
-            setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
-
         # Save the shiboken build dir path for clang deployment
         # purposes.
         self.shiboken_build_dir = os.path.join(self.build_dir, "shiboken2")
 
-        log.info("=" * 30)
-        log.info("Package version: {}".format(get_package_version()))
-        log.info("Build type: {}".format(self.build_type))
-        log.info("Build tests: {}".format(self.build_tests))
-        log.info("-" * 3)
-        log.info("Make path: {}".format(self.make_path))
-        log.info("Make generator: {}".format(self.make_generator))
-        log.info("Make jobs: {}".format(OPTION_JOBS))
-        log.info("-" * 3)
-
-        log.info("setup.py directory: {}".format(self.script_dir))
-        log.info("Build scripts directory: {}".format(build_scripts_dir))
-        log.info("Sources directory: {}".format(self.sources_dir))
-
-        log.info(dedent("""
-        Building PySide2 will create and touch directories
-          in the following order:
-            make build directory (py*_build/*/*) ->
-            make install directory (py*_install/*/*) ->
-            {} directory (pyside_package/*) ->
-            setuptools build directory (build/*/*) ->
-            setuptools install directory
-              (usually path-installed-python/lib/python*/site-packages/*)
-         """).format(pyside_package_dir_name))
-
-        log.info("make build directory: {}".format(self.build_dir))
-        log.info("make install directory: {}".format(self.install_dir))
-        log.info("{} directory: {}".format(pyside_package_dir_name,
-            self.pyside_package_dir))
-        log.info("setuptools build directory: {}".format(
-            os.path.join(self.script_dir, "build")))
-        log.info("setuptools install directory: {}".format(
-            setuptools_install_prefix))
-        log.info("make-installed site-packages directory: {} \n"
-                 "  (only relevant for copying files from "
-                 "'make install directory' to '{} directory'".format(
-                    self.site_packages_dir, pyside_package_dir_name))
-        log.info("-" * 3)
-        log.info("Python executable: {}".format(self.py_executable))
-        log.info("Python includes: {}".format(self.py_include_dir))
-        log.info("Python library: {}".format(self.py_library))
-        log.info("Python prefix: {}".format(py_prefix))
-        log.info("Python scripts: {}".format(py_scripts_dir))
-        log.info("-" * 3)
-        log.info("Qt qmake: {}".format(self.qtinfo.qmake_command))
-        log.info("Qt version: {}".format(self.qtinfo.version))
-        log.info("Qt bins: {}".format(self.qtinfo.bins_dir))
-        log.info("Qt docs: {}".format(self.qtinfo.docs_dir))
-        log.info("Qt plugins: {}".format(self.qtinfo.plugins_dir))
-        log.info("-" * 3)
-        if sys.platform == 'win32':
-            log.info("OpenSSL dll directory: {}".format(OPTION_OPENSSL))
-        if sys.platform == 'darwin':
-            pyside_macos_deployment_target = (
-                PysideBuild.macos_pyside_min_deployment_target()
-                )
-            log.info("MACOSX_DEPLOYMENT_TARGET set to: {}".format(
-                pyside_macos_deployment_target))
-        log.info("=" * 30)
+        self.log_pre_build_info()
 
         # Prepare folders
         if not os.path.exists(self.sources_dir):
@@ -788,9 +696,10 @@ class PysideBuild(_build):
             log.info("Creating install folder {}...".format(self.install_dir))
             os.makedirs(self.install_dir)
 
-        if not OPTION_ONLYPACKAGE:
+        if not (OPTION_ONLYPACKAGE
+                and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
             # Build extensions
-            for ext in contained_modules:
+            for ext in config.get_buildable_extensions():
                 self.build_extension(ext)
 
             if OPTION_BUILDTESTS:
@@ -817,6 +726,67 @@ class PysideBuild(_build):
         else:
             log.info("Skipped preparing and building packages.")
         log.info('*** Build completed')
+
+    def log_pre_build_info(self):
+        if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():
+            return
+
+        setuptools_install_prefix = get_python_lib(1)
+        if OPTION_FINAL_INSTALL_PREFIX:
+            setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
+        log.info("=" * 30)
+        log.info("Package version: {}".format(get_package_version()))
+        log.info("Build type: {}".format(self.build_type))
+        log.info("Build tests: {}".format(self.build_tests))
+        log.info("-" * 3)
+        log.info("Make path: {}".format(self.make_path))
+        log.info("Make generator: {}".format(self.make_generator))
+        log.info("Make jobs: {}".format(OPTION_JOBS))
+        log.info("-" * 3)
+        log.info("setup.py directory: {}".format(self.script_dir))
+        log.info("Build scripts directory: {}".format(build_scripts_dir))
+        log.info("Sources directory: {}".format(self.sources_dir))
+        log.info(dedent("""
+        Building {st_package_name} will create and touch directories
+          in the following order:
+            make build directory (py*_build/*/*) ->
+            make install directory (py*_install/*/*) ->
+            setuptools build directory (build/*/*) ->
+            setuptools install directory
+              (usually path-installed-python/lib/python*/site-packages/*)
+         """).format(st_package_name=config.package_name()))
+        log.info("make build directory: {}".format(self.build_dir))
+        log.info("make install directory: {}".format(self.install_dir))
+        log.info("setuptools build directory: {}".format(self.st_build_dir))
+        log.info("setuptools install directory: {}".format(setuptools_install_prefix))
+        log.info(dedent("""
+        make-installed site-packages directory: {}
+         (only relevant for copying files from 'make install directory'
+                                          to   'setuptools build directory'
+         """).format(
+            self.site_packages_dir))
+        log.info("-" * 3)
+        log.info("Python executable: {}".format(self.py_executable))
+        log.info("Python includes: {}".format(self.py_include_dir))
+        log.info("Python library: {}".format(self.py_library))
+        log.info("Python prefix: {}".format(self.py_prefix))
+        log.info("Python scripts: {}".format(self.py_scripts_dir))
+        log.info("-" * 3)
+        log.info("Qt qmake: {}".format(self.qtinfo.qmake_command))
+        log.info("Qt version: {}".format(self.qtinfo.version))
+        log.info("Qt bins: {}".format(self.qtinfo.bins_dir))
+        log.info("Qt docs: {}".format(self.qtinfo.docs_dir))
+        log.info("Qt plugins: {}".format(self.qtinfo.plugins_dir))
+        log.info("-" * 3)
+        if sys.platform == 'win32':
+            log.info("OpenSSL dll directory: {}".format(OPTION_OPENSSL))
+        if sys.platform == 'darwin':
+            pyside_macos_deployment_target = (
+                PysideBuild.macos_pyside_min_deployment_target()
+            )
+            log.info("MACOSX_DEPLOYMENT_TARGET set to: {}".format(
+                pyside_macos_deployment_target))
+        log.info("=" * 30)
 
     @staticmethod
     def macos_qt_min_deployment_target():
@@ -953,6 +923,17 @@ class PysideBuild(_build):
         cmake_cmd.append("-DPYTHON_EXECUTABLE={}".format(self.py_executable))
         cmake_cmd.append("-DPYTHON_INCLUDE_DIR={}".format(self.py_include_dir))
         cmake_cmd.append("-DPYTHON_LIBRARY={}".format(self.py_library))
+
+        # If a custom shiboken cmake config directory path was provided, pass it to CMake.
+        if OPTION_SHIBOKEN_CONFIG_DIR and config.is_internal_pyside_build():
+            if os.path.exists(OPTION_SHIBOKEN_CONFIG_DIR):
+                log.info("Using custom provided shiboken2 installation: {}"
+                         .format(OPTION_SHIBOKEN_CONFIG_DIR))
+                cmake_cmd.append("-DShiboken2_DIR={}".format(OPTION_SHIBOKEN_CONFIG_DIR))
+            else:
+                log.info("Custom provided shiboken2 installation not found. Path given: {}"
+                         .format(OPTION_SHIBOKEN_CONFIG_DIR))
+
         if OPTION_MODULE_SUBSET:
             module_sub_set = ''
             for m in OPTION_MODULE_SUBSET.split(','):
@@ -1014,20 +995,20 @@ class PysideBuild(_build):
             cmake_cmd.append("-DPYSIDE_QT_CONF_PREFIX={}".format(
                 pyside_qt_conf_prefix))
 
-            # Pass package version to CMake, so this string can be
-            # embedded into _config.py file.
-            package_version = get_package_version()
-            cmake_cmd.append("-DPYSIDE_SETUP_PY_PACKAGE_VERSION={}".format(
-                package_version))
+        # Pass package version to CMake, so this string can be
+        # embedded into _config.py file.
+        package_version = get_package_version()
+        cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_VERSION={}".format(
+            package_version))
 
-            # In case if this is a snapshot build, also pass the
-            # timestamp as a separate value, because it the only
-            # version component that is actually generated by setup.py.
-            timestamp = ''
-            if OPTION_SNAPSHOT_BUILD:
-                timestamp = get_package_timestamp()
-            cmake_cmd.append("-DPYSIDE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(
-                timestamp))
+        # In case if this is a snapshot build, also pass the
+        # timestamp as a separate value, because it is the only
+        # version component that is actually generated by setup.py.
+        timestamp = ''
+        if OPTION_SNAPSHOT_BUILD:
+            timestamp = get_package_timestamp()
+        cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(
+            timestamp))
 
         if extension.lower() in ["shiboken2", "pyside2-tools"]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
@@ -1129,15 +1110,24 @@ class PysideBuild(_build):
         os.chdir(self.script_dir)
 
     def prepare_packages(self):
+        """
+        This will copy all relevant files from the various locations in the "cmake install dir",
+        to the setup tools build dir (which is read from self.build_lib provided by distutils).
+
+        After that setuptools.command.build_py is smart enough to copy everything
+        from the build dir to the install dir (the virtualenv site-packages for example).
+        """
         try:
-            log.info("Preparing packages...")
+            log.info("\nPreparing setup tools build directory.\n")
             vars = {
                 "site_packages_dir": self.site_packages_dir,
                 "sources_dir": self.sources_dir,
                 "install_dir": self.install_dir,
                 "build_dir": self.build_dir,
                 "script_dir": self.script_dir,
-                "pyside_package_dir": self.pyside_package_dir,
+                "st_build_dir": self.st_build_dir,
+                "cmake_package_name": config.package_name(),
+                "st_package_name": config.package_name(),
                 "ssl_libs_dir": OPTION_OPENSSL,
                 "py_version": self.py_version,
                 "qt_version": self.qtinfo.version,
@@ -1151,6 +1141,12 @@ class PysideBuild(_build):
                 "qt_qml_dir": self.qtinfo.qml_dir,
                 "target_arch": self.py_arch,
             }
+
+            # Needed for correct file installation in generator build
+            # case.
+            if config.is_internal_shiboken_generator_build():
+                vars['cmake_package_name'] = config.shiboken_module_option_name
+
             os.chdir(self.script_dir)
 
             if sys.platform == "win32":
@@ -1170,19 +1166,21 @@ class PysideBuild(_build):
     def get_built_pyside_config(self, vars):
         # Get config that contains list of built modules, and
         # SOVERSIONs of the built libraries.
-        pyside_package_dir = vars['pyside_package_dir']
-        config_path = os.path.join(pyside_package_dir, "PySide2", "_config.py")
-        config = get_python_dict(config_path)
-        return config
+        st_build_dir = vars['st_build_dir']
+        config_path = os.path.join(st_build_dir, config.package_name(), "_config.py")
+        temp_config = get_python_dict(config_path)
+        if 'built_modules' not in temp_config:
+            temp_config['built_modules'] = []
+        return temp_config
 
     def is_webengine_built(self, built_modules):
         return ('WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
                                                     or 'WebEngine' in built_modules)
 
-    def prepare_standalone_clang(self, is_win = False):
+    def prepare_standalone_clang(self, is_win=False):
         """
-        Copies the libclang library to the pyside package so that
-        shiboken executable works.
+        Copies the libclang library to the shiboken2-generator
+        package so that the shiboken executable works.
         """
         log.info('Finding path to the libclang shared library.')
         cmake_cmd = [
@@ -1205,47 +1203,54 @@ class PysideBuild(_build):
 
         if not clang_lib_path:
             raise RuntimeError("Could not find the location of the libclang "
-                "library inside the CMake cache file.")
+                               "library inside the CMake cache file.")
 
-        target_name = None
         if is_win:
             # clang_lib_path points to the static import library
             # (lib/libclang.lib), whereas we want to copy the shared
             # library (bin/libclang.dll).
-            clang_lib_path = re.sub(r'lib/libclang.lib$', 'bin/libclang.dll',
-                clang_lib_path)
+            clang_lib_path = re.sub(r'lib/libclang.lib$',
+                                    'bin/libclang.dll',
+                                    clang_lib_path)
         else:
-            if sys.platform != 'darwin' and os.path.islink(clang_lib_path):
-                # On Linux, we get "libclang.so" from CMake which is
-                # a symlink:
-                # libclang.so -> libclang.so.6 -> libclang.so.6.0.
-                # shiboken2 links against libclang.so.6. So, we
-                # determine the target name by resolving just
-                # one symlink (note: os.path.realpath() resolves all).
-                target_name = os.readlink(clang_lib_path)
-            # We want to resolve any symlink on Linux and macOS, and
-            # copy the actual file.
-            clang_lib_path = os.path.realpath(clang_lib_path)
+            # shiboken2 links against libclang.so.6 or a similarly
+            # named library.
+            # If the linked against library is a symlink, resolve
+            # the symlink once (but not all the way to the real
+            # file) on Linux and macOS,
+            # so that we get the path to the "SO version" symlink
+            # (the one used as the install name in the shared library
+            # dependency section).
+            # E.g. On Linux libclang.so -> libclang.so.6 ->
+            # libclang.so.6.0.
+            # "libclang.so.6" is the name we want for the copied file.
+            if os.path.islink(clang_lib_path):
+                link_target = os.readlink(clang_lib_path)
+                if os.path.isabs(link_target):
+                    clang_lib_path = link_target
+                else:
+                    # link_target is relative, transform to absolute.
+                    clang_lib_path = os.path.join(os.path.dirname(clang_lib_path), link_target)
+            clang_lib_path = os.path.abspath(clang_lib_path)
 
-        if not target_name:
-            target_name = os.path.basename(clang_lib_path)
+        # The destination will be the shiboken package folder.
+        vars = {}
+        vars['st_build_dir'] = self.st_build_dir
+        vars['st_package_name'] = config.package_name()
+        destination_dir = "{st_build_dir}/{st_package_name}".format(**vars)
 
-        # Path to directory containing libclang.
-        clang_lib_dir = os.path.dirname(clang_lib_path)
-
-        # The destination will be the package folder near the other
-        # extension modules.
-        destination_dir = "{}/PySide2".format(os.path.join(self.script_dir,
-            'pyside_package'))
         if os.path.exists(clang_lib_path):
-            log.info('Copying libclang shared library {} to the package folder as {}.'.format(
-                     clang_lib_path, target_name))
             basename = os.path.basename(clang_lib_path)
-            destination_path = os.path.join(destination_dir, target_name)
+            log.info('Copying libclang shared library {} to the package folder as {}.'.format(
+                     clang_lib_path, basename))
+            destination_path = os.path.join(destination_dir, basename)
 
             # Need to modify permissions in case file is not writable
             # (a reinstall would cause a permission denied error).
-            copyfile(clang_lib_path, destination_path, make_writable_by_owner=True)
+            copyfile(clang_lib_path,
+                     destination_path,
+                     force_copy_symlink=True,
+                     make_writable_by_owner=True)
         else:
             raise RuntimeError("Error copying libclang library "
                                "from {} to {}. ".format(
@@ -1265,18 +1270,17 @@ class PysideBuild(_build):
                 else:
                     # Add rpath values pointing to $ORIGIN and the
                     # installed qt lib directory.
-                    local_rpath = '$ORIGIN/'
-                    qt_lib_dir = self.qtinfo.libs_dir
+                    final_rpath = self.qtinfo.libs_dir
                     if OPTION_STANDALONE:
-                        qt_lib_dir = "$ORIGIN/Qt/lib"
-                    final_rpath = local_rpath + ':' + qt_lib_dir
-                cmd = [self._patchelf_path, '--set-rpath', final_rpath, srcpath]
-                if run_process(cmd) != 0:
-                    raise RuntimeError("Error patching rpath in " + srcpath)
+                        final_rpath = "$ORIGIN/Qt/lib"
+                override = OPTION_STANDALONE
+                linux_fix_rpaths_for_library(self._patchelf_path, srcpath, final_rpath,
+                                             override=override)
 
         elif sys.platform == 'darwin':
             pyside_libs = [lib for lib in os.listdir(
                 package_path) if filter_match(lib, ["*.so", "*.dylib"])]
+
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1306,15 +1310,6 @@ class PysideBuild(_build):
             rpath_cmd(srcpath)
             print("Patched rpath to '$ORIGIN/' (Linux) or "
                 "updated rpath (OS/X) in {}.".format(srcpath))
-
-
-try:
-    with open(os.path.join(setup_script_dir, 'README.rst')) as f:
-        README = f.read()
-    with open(os.path.join(setup_script_dir, 'CHANGES.rst')) as f:
-        CHANGES = f.read()
-except IOError:
-    README = CHANGES = ''
 
 
 cmd_class_dict = {
