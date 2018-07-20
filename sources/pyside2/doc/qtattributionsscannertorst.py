@@ -55,10 +55,6 @@ rstHeader="""Licenses Used in Qt for Python
 Qt for Python contains some code that is not provided under the
 GNU Lesser General Public License (LGPL) or the Qt Commercial License,
 but rather under specific licenses from the original authors.
-
-Qt for Python contains some code that is not provided under the
-GNU Lesser General Public License (LGPL) or the Qt Commercial License,
-but rather under specific licenses from the original authors.
 The Qt Company gratefully acknowledges these and other contributions
 to Qt for Python. We recommend that programs that use Qt for Python
 also acknowledge these contributions, and quote these license

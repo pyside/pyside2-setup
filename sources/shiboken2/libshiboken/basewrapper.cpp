@@ -1302,7 +1302,7 @@ void removeParent(SbkObject* child, bool giveOwnershipBack, bool keepReference)
 
     ChildrenList& oldBrothers = pInfo->parent->d->parentInfo->children;
     // Verify if this child is part of parent list
-    ChildrenList::iterator iChild = std::find(oldBrothers.begin(), oldBrothers.end(), child);
+    auto iChild = oldBrothers.find(child);
     if (iChild == oldBrothers.end())
         return;
 
