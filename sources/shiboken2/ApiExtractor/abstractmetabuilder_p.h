@@ -65,6 +65,7 @@ public:
     void addAbstractMetaClass(AbstractMetaClass *cls);
     AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
                                        const TypeDefModelItem &typeDef);
+    void traverseTypesystemTypedefs();
     AbstractMetaClass *traverseClass(const FileModelItem &dom,
                                      const ClassModelItem &item);
     AbstractMetaClass *currentTraversedClass(ScopeModelItem item);

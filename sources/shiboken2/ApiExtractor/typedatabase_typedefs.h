@@ -37,6 +37,7 @@ class ContainerTypeEntry;
 class PrimitiveTypeEntry;
 class TemplateEntry;
 class TypeEntry;
+class TypedefEntry;
 
 typedef QVector<TypeEntry *> TypeEntryList;
 typedef QMap<QString, TemplateEntry *> TemplateEntryMap;
@@ -57,6 +58,7 @@ typedef QMultiMap<QString, TypeEntry *> TypeEntryMultiMap;
 typedef QMultiMapConstIteratorRange<QString, TypeEntry *> TypeEntryMultiMapConstIteratorRange;
 
 typedef QMap<QString, TypeEntry *> TypeEntryMap;
+typedef QMap<QString, TypedefEntry *> TypedefEntryMap;
 
 typedef QVector<const ContainerTypeEntry *> ContainerTypeEntryList;
 typedef QVector<const PrimitiveTypeEntry *> PrimitiveTypeEntryList;

@@ -474,6 +474,7 @@ public:
         << "typedef Optional<int> IntOptional;\n";
     QString xml;
     QTextStream(&xml) << xmlPrefix << xmlOptionalDecl << xmlOptionalIntDecl
+        << "<typedef-type name='XmlIntOptional' source='Optional&lt;int&gt;'/>"
         << xmlPostFix;
     QTest::newRow("global-namespace")
         << cpp << xml;
@@ -486,6 +487,7 @@ public:
     QTextStream(&xml) << xmlPrefix
         << "<namespace-type name='Std'>\n" << xmlOptionalDecl
         << "</namespace-type>\n" << xmlOptionalIntDecl
+        << "<typedef-type name='XmlIntOptional' source='Std::Optional&lt;int&gt;'/>"
         << xmlPostFix;
     QTest::newRow("namespace-Std")
         << cpp << xml;
@@ -498,6 +500,7 @@ public:
     QTextStream(&xml) << xmlPrefix
         << "<object-type name='Outer'>\n" << xmlOptionalDecl
         << "</object-type>\n" << xmlOptionalIntDecl
+        << "<typedef-type name='XmlIntOptional' source='Outer::Optional&lt;int&gt;'/>"
         << xmlPostFix;
     QTest::newRow("nested-class")
         << cpp << xml;
@@ -523,17 +526,35 @@ void TestTemplates::testTemplateTypeDefs()
     QVERIFY(optionalInt);
     QCOMPARE(optionalInt->templateBaseClass(), optional);
 
+    // Find the class typedef'ed in the typesystem XML
+    const AbstractMetaClass *xmlOptionalInt =
+        AbstractMetaClass::findClass(classes, QLatin1String("XmlIntOptional"));
+    QVERIFY(xmlOptionalInt);
+    QCOMPARE(xmlOptionalInt->templateBaseClass(), optional);
+
     // Check whether the value() method now has an 'int' return
     const AbstractMetaFunction *valueMethod =
         optionalInt->findFunction(QLatin1String("value"));
     QVERIFY(valueMethod);
     QCOMPARE(valueMethod->type()->cppSignature(), QLatin1String("int"));
 
+    // ditto for typesystem XML
+    const AbstractMetaFunction *xmlValueMethod =
+        xmlOptionalInt->findFunction(QLatin1String("value"));
+    QVERIFY(xmlValueMethod);
+    QCOMPARE(xmlValueMethod->type()->cppSignature(), QLatin1String("int"));
+
     // Check whether the m_value field is of type 'int'
     const AbstractMetaField *valueField =
         optionalInt->findField(QLatin1String("m_value"));
     QVERIFY(valueField);
     QCOMPARE(valueField->type()->cppSignature(), QLatin1String("int"));
+
+    // ditto for typesystem XML
+    const AbstractMetaField *xmlValueField =
+        xmlOptionalInt->findField(QLatin1String("m_value"));
+    QVERIFY(xmlValueField);
+    QCOMPARE(xmlValueField->type()->cppSignature(), QLatin1String("int"));
 }
 
 QTEST_APPLESS_MAIN(TestTemplates)

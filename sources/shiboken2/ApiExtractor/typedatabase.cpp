@@ -307,9 +307,52 @@ bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumN
     return findRejection(m_rejections, TypeRejection::Enum, className, enumName, reason);
 }
 
-void TypeDatabase::addType(TypeEntry *e)
+TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
+                                             QString *errorMessage)
 {
+    QString sourceName = typedefEntry->sourceType();
+    const int lessThanPos = sourceName.indexOf(QLatin1Char('<'));
+    if (lessThanPos != -1)
+        sourceName.truncate(lessThanPos);
+    ComplexTypeEntry *source = nullptr;
+    for (TypeEntry *e : findTypes(sourceName)) {
+        switch (e->type()) {
+        case TypeEntry::BasicValueType:
+        case TypeEntry::ContainerType:
+        case TypeEntry::InterfaceType:
+        case TypeEntry::ObjectType:
+        case TypeEntry::SmartPointerType:
+            source = dynamic_cast<ComplexTypeEntry *>(e);
+            Q_ASSERT(source);
+            break;
+        default:
+            break;
+        }
+    }
+    if (!source) {
+        if (errorMessage)
+            *errorMessage = QLatin1String("Unable to resolve typedef \"")
+                            + typedefEntry->sourceType() + QLatin1Char('"');
+        return nullptr;
+    }
+
+    ComplexTypeEntry *result = static_cast<ComplexTypeEntry *>(source->clone());
+    result->useAsTypedef(typedefEntry);
+    typedefEntry->setSource(source);
+    typedefEntry->setTarget(result);
+    m_typedefEntries.insert(typedefEntry->qualifiedCppName(), typedefEntry);
+    return result;
+}
+
+bool TypeDatabase::addType(TypeEntry *e, QString *errorMessage)
+{
+    if (e->type() == TypeEntry::TypedefType) {
+        e = resolveTypeDefEntry(static_cast<TypedefEntry *>(e), errorMessage);
+        if (Q_UNLIKELY(!e))
+            return false;
+    }
     m_entries.insert(e->qualifiedCppName(), e);
+    return true;
 }
 
 bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName,
@@ -743,6 +786,13 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
     FORMAT_LIST_SIZE("addedFunctions", m_addedFunctions)
     FORMAT_LIST_SIZE("functionMods", m_functionMods)
     FORMAT_LIST_SIZE("fieldMods", m_fieldMods)
+}
+
+void TypedefEntry::formatDebug(QDebug &d) const
+{
+    ComplexTypeEntry::formatDebug(d);
+    d << ", sourceType=\"" << m_sourceType << '"'
+        << ", source=" << m_source << ", target=" << m_target;
 }
 
 void EnumTypeEntry::formatDebug(QDebug &d) const

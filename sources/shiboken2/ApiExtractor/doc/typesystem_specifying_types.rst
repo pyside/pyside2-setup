@@ -329,6 +329,38 @@ container-type
 
     The *optional*  **since** value is used to specify the API version of this container.
 
+typedef-type
+^^^^^^^^^^^^
+
+    The typedef-type allows for specifying typedefs in the typesystem. They
+    are mostly equivalent to spelling out the typedef in the included header, which
+    is often complicated when trying to wrap libraries whose source code cannot be
+    easily extended.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <typedef-type name="..."
+                source="..."
+                since="..."
+        </typesystem>
+
+    The **source** attribute is the source. Example:
+
+    .. code-block:: xml
+
+        <namespace-type name='std'>
+            <value-type name='optional' generate='no'/>\n"
+        </namespace-type>
+        <typedef-type name="IntOptional" source="std::optional&lt;int&gt;"/>
+
+    is equivalent to
+
+    .. code-block:: c++
+
+        typedef std::optional<int> IntOptional;
+
+    The *optional*  **since** value is used to specify the API version of this type.
 
 .. _custom-type:
 

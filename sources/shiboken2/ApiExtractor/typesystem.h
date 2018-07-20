@@ -545,7 +545,8 @@ public:
         CustomType,
         TargetLangType,
         FunctionType,
-        SmartPointerType
+        SmartPointerType,
+        TypedefType
     };
     Q_ENUM(Type)
 
@@ -872,6 +873,8 @@ public:
     CustomConversion* customConversion() const;
 
     virtual TypeEntry *clone() const;
+
+    void useAsTypedef(const TypeEntry *source);
 
 #ifndef QT_NO_DEBUG_STREAM
     virtual void formatDebug(QDebug &d) const;
@@ -1366,6 +1369,8 @@ public:
 
     TypeEntry *clone() const override;
 
+    void useAsTypedef(const ComplexTypeEntry *source);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -1393,6 +1398,36 @@ private:
     QString m_hashFunction;
 
     const ComplexTypeEntry* m_baseContainerType = nullptr;
+};
+
+class TypedefEntry : public ComplexTypeEntry
+{
+public:
+    explicit TypedefEntry(const QString &name,
+                          const QString &sourceType,
+                          const QVersionNumber &vr);
+
+    QString sourceType() const { return m_sourceType; }
+    void setSourceType(const QString &s) { m_sourceType =s; }
+
+    TypeEntry *clone() const override;
+
+    ComplexTypeEntry *source() const { return m_source; }
+    void setSource(ComplexTypeEntry *source) { m_source = source; }
+
+    ComplexTypeEntry *target() const { return m_target; }
+    void setTarget(ComplexTypeEntry *target) { m_target = target; }
+
+#ifndef QT_NO_DEBUG_STREAM
+    virtual void formatDebug(QDebug &d) const override;
+#endif
+protected:
+    TypedefEntry(const TypedefEntry &);
+
+private:
+    QString m_sourceType;
+    ComplexTypeEntry *m_source;
+    ComplexTypeEntry *m_target;
 };
 
 class ContainerTypeEntry : public ComplexTypeEntry

@@ -95,6 +95,7 @@ public:
     TypeEntry* findType(const QString& name) const;
 
     const TypeEntryMultiMap &entries() const { return m_entries; }
+    const TypedefEntryMap  &typedefEntries() const { return m_typedefEntries; }
 
     PrimitiveTypeEntryList primitiveTypes() const;
 
@@ -113,7 +114,7 @@ public:
     bool isReturnTypeRejected(const QString& className, const QString& typeName,
                               QString *reason = nullptr) const;
 
-    void addType(TypeEntry* e);
+    bool addType(TypeEntry* e, QString *errorMessage = nullptr);
 
     FlagsTypeEntry* findFlagsType(const QString& name) const;
     void addFlagsType(FlagsTypeEntry* fte);
@@ -162,10 +163,12 @@ public:
 #endif
 private:
     TypeEntryMultiMapConstIteratorRange findTypes(const QString &name) const;
+    TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
 
     bool m_suppressWarnings;
     TypeEntryMultiMap m_entries;
     TypeEntryMap m_flagsEntries;
+    TypedefEntryMap m_typedefEntries;
     TemplateEntryMap m_templates;
     QVector<QRegularExpression> m_suppressedWarnings;
 

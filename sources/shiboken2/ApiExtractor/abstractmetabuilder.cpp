@@ -514,6 +514,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             addAbstractMetaClass(cls);
     }
 
+    traverseTypesystemTypedefs();
+
     for (const ClassModelItem &item : typeValues)
         traverseClassMembers(item);
 
@@ -1037,6 +1039,22 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     fillAddedFunctions(metaClass);
 
     return metaClass;
+}
+
+// Add the typedef'ed classes
+void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
+{
+    const auto &entries = TypeDatabase::instance()->typedefEntries();
+    for (auto it = entries.begin(), end = entries.end(); it != end; ++it) {
+        TypedefEntry *te = it.value();
+        AbstractMetaClass *metaClass = new AbstractMetaClass;
+        metaClass->setTypeDef(true);
+        metaClass->setTypeEntry(te->target());
+        metaClass->setBaseClassNames(QStringList(te->sourceType()));
+        *metaClass += AbstractMetaAttributes::Public;
+        fillAddedFunctions(metaClass);
+        addAbstractMetaClass(metaClass);
+    }
 }
 
 AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem &dom,

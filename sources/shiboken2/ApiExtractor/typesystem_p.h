@@ -55,6 +55,7 @@ class StackElement
             FunctionTypeEntry           = 0xb,
             CustomTypeEntry             = 0xc,
             SmartPointerTypeEntry       = 0xd,
+            TypedefTypeEntry            = 0xe,
             TypeEntryMask               = 0xf,
 
             // Documentation tags
@@ -177,6 +178,9 @@ private:
     FunctionTypeEntry *
         parseFunctionTypeEntry(const QXmlStreamReader &, const QString &name,
                                const QVersionNumber &since, QXmlStreamAttributes *);
+    TypedefEntry *
+        parseTypedefEntry(const QXmlStreamReader &, const QString &name,
+                          const QVersionNumber &since, QXmlStreamAttributes *);
     void applyComplexTypeAttributes(const QXmlStreamReader &, ComplexTypeEntry *ctype,
                                     QXmlStreamAttributes *) const;
     bool parseRenameFunction(const QXmlStreamReader &, QString *name,

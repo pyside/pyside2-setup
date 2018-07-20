@@ -334,6 +334,33 @@ void HeaderGenerator::writeTypeIndexValueLines(QTextStream& s, const AbstractMet
     }
 }
 
+// Format the typedefs for the typedef entries to be generated
+static void formatTypeDefEntries(QTextStream &s)
+{
+    QVector<const TypedefEntry *> entries;
+    const auto typeDbEntries = TypeDatabase::instance()->typedefEntries();
+    for (auto it = typeDbEntries.cbegin(), end = typeDbEntries.cend(); it != end; ++it) {
+        if (it.value()->generateCode() != 0)
+            entries.append(it.value());
+    }
+    if (entries.isEmpty())
+        return;
+    s << "\n// typedef entries\n";
+    for (const auto e : entries) {
+        const QString name = e->qualifiedCppName();
+        // Fixme: simplify by using nested namespaces in C++ 17.
+        const auto components = name.splitRef(QLatin1String("::"));
+        const int nameSpaceCount = components.size() -  1;
+        for (int n = 0; n < nameSpaceCount; ++n)
+            s << "namespace " << components.at(n) << " {\n";
+        s << "using " << components.constLast() << " = " << e->sourceType() << ";\n";
+        for (int n = 0; n < nameSpaceCount; ++n)
+            s << "}\n";
+    }
+    s << '\n';
+}
+
+
 bool HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module.
@@ -413,6 +440,9 @@ bool HeaderGenerator::finishGeneration()
     _writeTypeIndexValue(macrosStream, QStringLiteral("SBK_%1_CONVERTERS_IDX_COUNT")
                                        .arg(moduleName()), pCount);
     macrosStream << "\n};\n";
+
+    formatTypeDefEntries(macrosStream);
+
     // TODO-CONVERTER ------------------------------------------------------------------------------
 
     macrosStream << "// Macros for type check" << endl;

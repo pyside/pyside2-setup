@@ -91,6 +91,7 @@ static inline QString toAttribute() { return QStringLiteral("to"); }
 static inline QString signatureAttribute() { return QStringLiteral("signature"); }
 static inline QString staticAttribute() { return QStringLiteral("static"); }
 static inline QString threadAttribute() { return QStringLiteral("thread"); }
+static inline QString sourceAttribute() { return QStringLiteral("source"); }
 static inline QString streamAttribute() { return QStringLiteral("stream"); }
 static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
 static inline QString virtualSlotAttribute() { return QStringLiteral("virtual-slot"); }
@@ -348,6 +349,7 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {QStringViewLiteral("suppress-warning"), StackElement::SuppressedWarning},
         {QStringViewLiteral("target-to-native"), StackElement::TargetToNative},
         {QStringViewLiteral("template"), StackElement::Template},
+        {QStringViewLiteral("typedef-type"), StackElement::TypedefTypeEntry},
         {QStringViewLiteral("typesystem"), StackElement::Root},
         {QStringViewLiteral("value-type"), StackElement::ValueTypeEntry},
     };
@@ -1208,6 +1210,27 @@ FunctionTypeEntry *
 
     FunctionTypeEntry *result = reinterpret_cast<FunctionTypeEntry *>(existingType);
     result->addSignature(signature);
+    return result;
+}
+
+TypedefEntry *
+ Handler::parseTypedefEntry(const QXmlStreamReader &, const QString &name,
+                            const QVersionNumber &since,
+                            QXmlStreamAttributes *attributes)
+{
+    if (m_current && m_current->type != StackElement::Root
+        && m_current->type != StackElement::NamespaceTypeEntry) {
+        m_error = QLatin1String("typedef entries must be nested in namespaces or type system.");
+        return nullptr;
+    }
+    const int sourceIndex = indexOfAttribute(*attributes, sourceAttribute());
+    if (sourceIndex == -1) {
+        m_error =  msgMissingAttribute(sourceAttribute());
+        return nullptr;
+    }
+    const QString sourceType = attributes->takeAt(sourceIndex).value().toString();
+    auto result = new TypedefEntry(name, sourceType, since);
+    applyCommonAttributes(result, attributes);
     return result;
 }
 
@@ -2342,13 +2365,18 @@ bool Handler::startElement(const QXmlStreamReader &reader)
                   qPrintable(msgUnimplementedElementWarning(reader, tagName)));
     }
 
-    if (element->type == StackElement::Root
-        || element->type == StackElement::NamespaceTypeEntry
-        || element->type == StackElement::InterfaceTypeEntry
-        || element->type == StackElement::ObjectTypeEntry
-        || element->type == StackElement::ValueTypeEntry
-        || element->type == StackElement::PrimitiveTypeEntry) {
+    switch (element->type) {
+    case StackElement::Root:
+    case StackElement::NamespaceTypeEntry:
+    case StackElement::InterfaceTypeEntry:
+    case StackElement::ObjectTypeEntry:
+    case StackElement::ValueTypeEntry:
+    case StackElement::PrimitiveTypeEntry:
+    case StackElement::TypedefTypeEntry:
         m_contextStack.push(new StackElementContext());
+        break;
+    default:
+        break;
     }
 
     if (element->type & StackElement::TypeEntryMask) {
@@ -2485,12 +2513,21 @@ bool Handler::startElement(const QXmlStreamReader &reader)
             if (Q_UNLIKELY(!element->entry))
                 return false;
             break;
+        case StackElement::TypedefTypeEntry:
+            if (TypedefEntry *te = parseTypedefEntry(reader, name, since, &attributes)) {
+                applyComplexTypeAttributes(reader, te, &attributes);
+                element->entry = te;
+            } else {
+                return false;
+            }
+            break;
         default:
             Q_ASSERT(false);
         };
 
         if (element->entry) {
-            m_database->addType(element->entry);
+            if (!m_database->addType(element->entry, &m_error))
+                return false;
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Type: %1 was rejected by typesystem").arg(name);
@@ -2788,6 +2825,16 @@ bool ComplexTypeEntry::hasDefaultConstructor() const
 TypeEntry *ComplexTypeEntry::clone() const
 {
     return new ComplexTypeEntry(*this);
+}
+
+// Take over parameters relevant for typedefs
+void ComplexTypeEntry::useAsTypedef(const ComplexTypeEntry *source)
+{
+    TypeEntry::useAsTypedef(source);
+    m_qualifiedCppName = source->m_qualifiedCppName;
+    m_targetLangName = source->m_targetLangName;
+    m_lookupName = source->m_lookupName;
+    m_targetType = source->m_targetType;
 }
 
 ComplexTypeEntry::ComplexTypeEntry(const ComplexTypeEntry &) = default;
@@ -3241,6 +3288,15 @@ TypeEntry *TypeEntry::clone() const
     return new TypeEntry(*this);
 }
 
+// Take over parameters relevant for typedefs
+void TypeEntry::useAsTypedef(const TypeEntry *source)
+{
+    m_name = source->m_name;
+    m_targetLangPackage = source->m_targetLangPackage;
+    m_codeGeneration = source->m_codeGeneration;
+    m_version = source->m_version;
+}
+
 TypeEntry::TypeEntry(const TypeEntry &) = default;
 
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr) :
@@ -3351,6 +3407,22 @@ FlagsTypeEntry::FlagsTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, FlagsType, vr)
 {
 }
+
+/* A typedef entry allows for specifying template specializations in the
+ * typesystem XML file. */
+TypedefEntry::TypedefEntry(const QString &name, const QString &sourceType,
+                           const QVersionNumber &vr)  :
+    ComplexTypeEntry(name, TypedefType, vr),
+    m_sourceType(sourceType)
+{
+}
+
+TypeEntry *TypedefEntry::clone() const
+{
+    return new TypedefEntry(*this);
+}
+
+TypedefEntry::TypedefEntry(const TypedefEntry &) = default;
 
 ContainerTypeEntry::ContainerTypeEntry(const QString &name, Type type,
                                        const QVersionNumber &vr) :
