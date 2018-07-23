@@ -83,3 +83,8 @@
     win32
     linux
     darwin
+# PYSIDE-754
+[QtWebEngineCore::web_engine_custom_scheme]
+    win32
+    linux
+    darwin
