@@ -428,6 +428,7 @@ public:
     /// Returns true if the generated code should use the "#define protected public" hack.
     bool avoidProtectedHack() const;
     QString cppApiVariableName(const QString& moduleName = QString()) const;
+    QString pythonModuleObjectName(const QString& moduleName = QString()) const;
     QString convertersVariableName(const QString& moduleName = QString()) const;
     /**
      *  Returns the type index variable name for a given class. If \p alternativeTemplateName is true
@@ -500,6 +501,9 @@ protected:
 
     /// Returns a list of converters for the non wrapper types of the current module.
     QVector<const CustomConversion *> getPrimitiveCustomConversions();
+
+    /// Return a prefix with '_' suitable for names in C++
+    QString moduleCppPrefix(const QString& moduleName = QString()) const;
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);

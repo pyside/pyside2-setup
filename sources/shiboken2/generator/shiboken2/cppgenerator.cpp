@@ -5346,10 +5346,13 @@ bool CppGenerator::finishGeneration()
     s << endl;
 
     s << "// Current module's type array." << endl;
-    s << "PyTypeObject** " << cppApiVariableName() << ';' << endl;
+    s << "PyTypeObject** " << cppApiVariableName() << " = nullptr;" << endl;
+
+    s << "// Current module's PyObject pointer." << endl;
+    s << "PyObject* " << pythonModuleObjectName() << " = nullptr;" << endl;
 
     s << "// Current module's converter array." << endl;
-    s << "SbkConverter** " << convertersVariableName() << ';' << endl;
+    s << "SbkConverter** " << convertersVariableName() << " = nullptr;" << endl;
 
     const CodeSnipList snips = moduleEntry->codeSnips();
 
@@ -5519,6 +5522,9 @@ bool CppGenerator::finishGeneration()
     s << INDENT << "PyObject* module = Shiboken::Module::create(\""  << moduleName() << "\", ";
     s << moduleName() << "_methods);" << endl;
     s << "#endif" << endl << endl;
+
+    s << INDENT << "// Make module available from global scope" << endl;
+    s << INDENT << pythonModuleObjectName() << " = module;" << endl << endl;
 
     //s << INDENT << "// Initialize converters for primitive types." << endl;
     //s << INDENT << "initConverters();" << endl << endl;

@@ -381,6 +381,8 @@ bool HeaderGenerator::finishGeneration()
 
     macrosStream << "// This variable stores all Python types exported by this module." << endl;
     macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
+    macrosStream << "// This variable stores the Python module object exported by this module." << endl;
+    macrosStream << "extern PyObject* " << pythonModuleObjectName() << ';' << endl << endl;
     macrosStream << "// This variable stores all type converters exported by this module." << endl;
     macrosStream << "extern SbkConverter** " << convertersVariableName() << ';' << endl << endl;
 

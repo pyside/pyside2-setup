@@ -2251,9 +2251,7 @@ AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass
 
 QString ShibokenGenerator::getModuleHeaderFileName(const QString& moduleName) const
 {
-    QString result = moduleName.isEmpty() ? packageName() : moduleName;
-    result.replace(QLatin1Char('.'), QLatin1Char('_'));
-    return result.toLower() + QLatin1String("_python.h");
+    return moduleCppPrefix(moduleName).toLower() + QLatin1String("_python.h");
 }
 
 bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
@@ -2544,13 +2542,23 @@ bool ShibokenGenerator::avoidProtectedHack() const
     return m_avoidProtectedHack;
 }
 
+QString ShibokenGenerator::moduleCppPrefix(const QString& moduleName) const
+ {
+    QString result = moduleName.isEmpty() ? packageName() : moduleName;
+    result.replace(QLatin1Char('.'), QLatin1Char('_'));
+    return result;
+}
+
 QString ShibokenGenerator::cppApiVariableName(const QString& moduleName) const
 {
-    QString result = moduleName.isEmpty() ? ShibokenGenerator::packageName() : moduleName;
-    result.replace(QLatin1Char('.'), QLatin1Char('_'));
-    result.prepend(QLatin1String("Sbk"));
-    result.append(QLatin1String("Types"));
-    return result;
+    return QLatin1String("Sbk") + moduleCppPrefix(moduleName)
+        + QLatin1String("Types");
+}
+
+QString ShibokenGenerator::pythonModuleObjectName(const QString& moduleName) const
+{
+    return QLatin1String("Sbk") + moduleCppPrefix(moduleName)
+        + QLatin1String("ModuleObject");
 }
 
 QString ShibokenGenerator::convertersVariableName(const QString& moduleName) const
