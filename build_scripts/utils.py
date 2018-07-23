@@ -1120,8 +1120,8 @@ def run_instruction(instruction, error):
 
 def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
     # Disable unsupported CI configs for now
-    # NOTE: String must match with QT CI's storagesturct thrift
-    if hostOSVer in ["WinRT_10", "MacOS_10_13"]:
+    # NOTE: String must match with QT CI's storagestruct thrift
+    if hostOSVer in ["WinRT_10"]:
         print("Disabled " + hostOSVer + " from Coin configuration")
         return False
    # With 5.11 CI will create two sets of release binaries, one with msvc 2015 and one with msvc 2017
