@@ -74,7 +74,7 @@
     -->
 
   <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default">
-    <enum-type name="OptionType" extensible="yes"/>
+    <enum-type name="OptionType"/>
     <enum-type name="StyleOptionType"/>
     <enum-type name="StyleOptionVersion"/>
   </object-type>
@@ -1267,17 +1267,17 @@
   </object-type>
   <object-type name="QAbstractButton"/>
   <object-type name="QStyle">
-    <enum-type name="ComplexControl" extensible="yes"/>
-    <enum-type name="ContentsType" extensible="yes"/>
-    <enum-type name="ControlElement" extensible="yes"/>
-    <enum-type name="PixelMetric" extensible="yes" />
-    <enum-type name="PrimitiveElement" extensible="yes" />
+    <enum-type name="ComplexControl"/>
+    <enum-type name="ContentsType"/>
+    <enum-type name="ControlElement"/>
+    <enum-type name="PixelMetric"/>
+    <enum-type name="PrimitiveElement"/>
     <enum-type name="RequestSoftwareInputPanel" since="4.6"/>
-    <enum-type name="StandardPixmap" extensible="yes"/>
+    <enum-type name="StandardPixmap"/>
     <enum-type name="StateFlag" flags="State"/>
-    <enum-type name="StyleHint" extensible="yes" />
-    <enum-type name="SubControl" flags="SubControls" extensible="yes" force-integer="yes"/>
-    <enum-type name="SubElement" extensible="yes" />
+    <enum-type name="StyleHint"/>
+    <enum-type name="SubControl" flags="SubControls"/>
+    <enum-type name="SubElement"/>
     <modify-function signature="drawComplexControl(QStyle::ComplexControl,const QStyleOptionComplex*,QPainter*,const QWidget*)const">
       <modify-argument index="3" invalidate-after-use="yes"/>
       <modify-argument index="4">
@@ -1574,7 +1574,6 @@
     <enum-type name="OptimizationFlag" flags="OptimizationFlags"/>
     <enum-type name="ViewportAnchor"/>
     <enum-type name="ViewportUpdateMode"/>
-    <modify-function signature="setupViewport(QWidget*)" access="non-final"/>
     <modify-function signature="setScene(QGraphicsScene*)">
       <modify-argument index="1">
         <reference-count action="set"/>
@@ -2963,7 +2962,7 @@
   </object-type>
   <object-type name="QDesktopWidget"/>
   <object-type name="QFrame">
-      <enum-type name="Shadow" extensible="yes"/>
+      <enum-type name="Shadow"/>
       <enum-type name="Shape"/>
       <enum-type name="StyleMask"/>
   </object-type>

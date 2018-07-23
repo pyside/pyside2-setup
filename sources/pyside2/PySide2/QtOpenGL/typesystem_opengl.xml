@@ -71,7 +71,7 @@
   <rejection class="^QGL.*$" argument-type="^(const )?GLsizei ?\*$"/>
 
   <namespace-type name="QGL">
-    <enum-type name="FormatOption" flags="FormatOptions" force-integer="yes"/>
+    <enum-type name="FormatOption" flags="FormatOptions"/>
     <extra-includes>
         <include file-name="qgl.h" location="global"/>
     </extra-includes>

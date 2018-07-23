@@ -275,7 +275,7 @@
         </extra-includes>
     </value-type>
     <value-type name="QNetworkRequest">
-        <enum-type name="Attribute" extensible="yes"/>
+        <enum-type name="Attribute"/>
         <enum-type name="LoadControl" since="4.7"/>
         <enum-type name="Priority" since="4.7"/>
         <enum-type name="CacheLoadControl"/>

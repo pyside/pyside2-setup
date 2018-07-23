@@ -395,7 +395,6 @@
   <value-type name="QTextFrameFormat" >
     <enum-type name="BorderStyle"/>
     <enum-type name="Position"/>
-    <modify-function signature="isValid()const" access="non-final"/>
   </value-type>
   <value-type name="QTextLength">
       <enum-type name="Type"/>
@@ -403,9 +402,6 @@
   <value-type name="QPainterPath">
     <enum-type name="ElementType"/>
     <value-type name="Element">
-      <modify-field name="x" write="false"/>
-      <modify-field name="y" write="false"/>
-      <modify-field name="type" write="false"/>
       <include file-name="QPainterPath" location="global"/>
     </value-type>
   </value-type>
@@ -554,14 +550,12 @@
     <enum-type name="FontPropertiesInheritanceBehavior"/>
     <enum-type name="UnderlineStyle"/>
     <enum-type name="VerticalAlignment"/>
-    <modify-function signature="isValid()const" access="non-final"/>
   </value-type>
   <value-type name="QTextFormat" >
     <enum-type name="FormatType"/>
     <enum-type name="ObjectTypes"/>
     <enum-type name="PageBreakFlag" flags="PageBreakFlags"/>
     <enum-type name="Property" />
-    <modify-function signature="isValid()const" access="non-final"/>
   </value-type>
   <value-type name="QTextListFormat">
       <enum-type name="Style"/>
@@ -1507,10 +1501,10 @@
       </inject-code>
     </modify-function>
   </value-type>
-  <value-type name="QGradient" force-abstract="yes" polymorphic-id-expression="%1-&gt;type() == QGradient::NoGradient">
+  <value-type name="QGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::NoGradient">
       <enum-type name="CoordinateMode"/>
       <enum-type name="InterpolationMode"/>
-      <enum-type name="Spread" lower-bound="QGradient.PadSpread" upper-bound="QGradient.RepeatSpread"/>
+      <enum-type name="Spread"/>
       <enum-type name="Type"/>
   </value-type>
   <value-type name="QLinearGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::LinearGradient" />
@@ -1835,9 +1829,7 @@
   <suppress-warning text="enum 'QWheelEvent::DefaultDeltasPerStep' does not have a type entry or is not an enum" />
 
   <object-type name="QWindowStateChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WindowStateChange"/>
-  <object-type name="QInputEvent" copyable="false">
-    <modify-function signature="modifiers()const" access="non-final"/>
-  </object-type>
+  <object-type name="QInputEvent" copyable="false"/>
   <object-type name="QKeyEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::KeyPress || %1-&gt;type() == QEvent::KeyRelease || %1-&gt;type() == QEvent::ShortcutOverride">
       <add-function signature="operator!=(QKeySequence::StandardKey)">
           <inject-code class="target">
@@ -2237,7 +2229,6 @@
     </extra-includes>
     <!-- ### "setPaintDevice(QPaintDevice*)" is an internal method. -->
     <modify-function signature="setPaintDevice(QPaintDevice*)" remove="all"/>
-    <modify-field name="state" read="false" write="false"/>
   </object-type>
   <object-type name="QPainter">
     <extra-includes>

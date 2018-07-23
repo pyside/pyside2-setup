@@ -960,7 +960,7 @@
     <enum-type name="InputMethodHint" flags="InputMethodHints" since="4.6"/>
     <enum-type name="InputMethodQuery" flags="InputMethodQueries" />
     <enum-type name="EnterKeyType" since="5.6" />
-    <enum-type name="ItemDataRole" force-integer="yes" />
+    <enum-type name="ItemDataRole"/>
     <enum-type name="ItemFlag" flags="ItemFlags"/>
     <enum-type name="ItemSelectionMode"/>
     <enum-type name="ItemSelectionOperation" since="5.5" />
@@ -2068,7 +2068,7 @@
   </object-type>
 
   <object-type name="QAbstractItemModel">
-    <enum-type name="CheckIndexOption" flags="CheckIndexOptions" class="yes" since="5.11"/>
+    <enum-type name="CheckIndexOption" flags="CheckIndexOptions" since="5.11"/>
     <enum-type name="LayoutChangeHint" />
     <!-- This function was replaced by a added function -->
     <modify-function signature="createIndex(int,int,void*)const" remove="all"/>
@@ -2719,12 +2719,12 @@
             }
         </inject-code>
     </modify-function>
-    <add-function signature="QByteArray(PyByteArray)" allow-thread="yes">>
+    <add-function signature="QByteArray(PyByteArray)">
          <inject-code class="target" position="beginning">
             %0 = new QByteArray(PyByteArray_AsString(%PYARG_1), PyByteArray_Size(%PYARG_1));
         </inject-code>
     </add-function>
-    <add-function signature="QByteArray(PyBytes)" allow-thread="yes">
+    <add-function signature="QByteArray(PyBytes)">
         <inject-code class="target" position="beginning">
             %0 = new QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1));
         </inject-code>
@@ -3479,10 +3479,9 @@
     </modify-function>
   </object-type>
   <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None">
-    <enum-type name="Type" extensible="yes" />
+    <enum-type name="Type"/>
   </object-type>
   <object-type name="QChildEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ChildAdded || %1-&gt;type() == QEvent::ChildPolished || %1-&gt;type() == QEvent::ChildRemoved">
-    <modify-field name="c" read="false" write="false"/>
     <modify-function signature="child()const">
       <modify-argument index="return">
          <define-ownership class="target" owner="default"/>
