@@ -63,7 +63,7 @@ private:
 
 class ObjectTypeLayout;
 class ObjectType;
-typedef std::list<ObjectType*> ObjectTypeList;
+using ObjectTypeList = std::list<ObjectType*>;
 
 class LIBSAMPLE_API ObjectType
 {

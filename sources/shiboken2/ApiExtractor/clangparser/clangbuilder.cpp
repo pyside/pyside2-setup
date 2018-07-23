@@ -190,6 +190,8 @@ public:
                                    TypeInfo *t) const;
     bool addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const;
 
+    void addTypeDef(const CXCursor &cursor, const TypeInfo &ti);
+
     TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor) const;
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
     void addField(const CXCursor &cursor);
@@ -511,6 +513,7 @@ TypeInfo BuilderPrivate::createTypeInfoHelper(const CXType &type) const
 
     typeInfo.setQualifiedName(qualifiedName(typeName));
     // 3320:CINDEX_LINKAGE int clang_getNumArgTypes(CXType T); function ptr types?
+    typeInfo.simplifyStdType();
     return typeInfo;
 }
 
@@ -520,6 +523,16 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
     if (it == m_typeInfoHash.end())
         it = m_typeInfoHash.insert(type, createTypeInfoHelper(type));
     return it.value();
+}
+
+void BuilderPrivate::addTypeDef(const CXCursor &cursor, const TypeInfo &ti)
+{
+    TypeDefModelItem item(new _TypeDefModelItem(m_model, getCursorSpelling(cursor)));
+    setFileName(cursor, item.data());
+    item->setType(ti);
+    item->setScope(m_scope);
+    m_scopeStack.back()->addTypeDef(item);
+    m_cursorTypedefHash.insert(cursor, item);
 }
 
 // extract an expression from the cursor via source
@@ -912,17 +925,14 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     }
         break;
     case CXCursor_TypeAliasDecl:
-    case CXCursor_TypeAliasTemplateDecl: // May contain nested CXCursor_TemplateTypeParameter
-        return Skip;
-    case CXCursor_TypedefDecl: {
-        const QString name = getCursorSpelling(cursor);
-        TypeDefModelItem item(new _TypeDefModelItem(d->m_model, name));
-        setFileName(cursor, item.data());
-        item->setType(d->createTypeInfo(clang_getTypedefDeclUnderlyingType(cursor)));
-        item->setScope(d->m_scope);
-        d->m_scopeStack.back()->addTypeDef(item);
-        d->m_cursorTypedefHash.insert(cursor, item);
+    case CXCursor_TypeAliasTemplateDecl: { // May contain nested CXCursor_TemplateTypeParameter
+        const CXType type = clang_getCanonicalType(clang_getCursorType(cursor));
+        if (type.kind > CXType_Unexposed)
+            d->addTypeDef(cursor, d->createTypeInfo(type));
     }
+        return Skip;
+    case CXCursor_TypedefDecl:
+        d->addTypeDef(cursor, d->createTypeInfo(clang_getTypedefDeclUnderlyingType(cursor)));
         break;
     case CXCursor_TypeRef:
         if (!d->m_currentFunction.isNull()) {

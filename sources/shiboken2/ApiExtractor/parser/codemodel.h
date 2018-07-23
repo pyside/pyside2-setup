@@ -186,6 +186,8 @@ public:
     void addInstantiation(const TypeInfo &i) { m_instantiations.append(i); }
     void clearInstantiations() { m_instantiations.clear(); }
 
+    bool isStdType() const;
+
     QPair<int, int> parseTemplateArgumentList(const QString &l, int from = 0);
 
     bool operator==(const TypeInfo &other) const;
@@ -211,6 +213,8 @@ public:
     static bool stripLeadingConst(QString *s);
     static bool stripLeadingVolatile(QString *s);
     static bool stripLeadingQualifier(const QString &qualifier, QString *s);
+
+    void simplifyStdType();
 
 private:
     friend class TypeInfoTemplateArgumentHandler;

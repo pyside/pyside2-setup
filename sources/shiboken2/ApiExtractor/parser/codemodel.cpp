@@ -355,6 +355,38 @@ bool TypeInfo::stripLeadingQualifier(const QString &qualifier, QString *s)
     return true;
 }
 
+// Helper functionality to simplify a raw standard type as returned by
+// clang_getCanonicalType() for g++ standard containers from
+// "std::__cxx11::list<int, std::allocator<int> >" or
+// "std::__1::list<int, std::allocator<int> >" -> "std::list<int>".
+
+bool TypeInfo::isStdType() const
+{
+    return m_qualifiedName.size() > 1
+        && m_qualifiedName.constFirst() == QLatin1String("std");
+}
+
+static inline bool discardStdType(const QString &name)
+{
+    return name == QLatin1String("allocator") || name == QLatin1String("less");
+}
+
+void TypeInfo::simplifyStdType()
+{
+    if (isStdType()) {
+        if (m_qualifiedName.at(1).startsWith(QLatin1String("__")))
+            m_qualifiedName.removeAt(1);
+        for (int t = m_instantiations.size() - 1; t >= 0; --t) {
+            if (m_instantiations.at(t).isStdType()) {
+                if (discardStdType(m_instantiations.at(t).m_qualifiedName.constLast()))
+                    m_instantiations.removeAt(t);
+                else
+                    m_instantiations[t].simplifyStdType();
+            }
+        }
+    }
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class It>
 void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
