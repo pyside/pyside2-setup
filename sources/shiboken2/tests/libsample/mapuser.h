@@ -58,6 +58,8 @@ public:
 
     inline const std::map<int, ByteArray>& passMapIntValueType(const std::map<int, ByteArray>& arg) { return arg; }
 
+    std::map<int, std::list<std::list<double> > > foo() const;
+
 private:
     std::map<std::string, std::list<int> > m_map;
 };

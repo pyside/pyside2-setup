@@ -67,3 +67,8 @@ MapUser::showMap(std::map<std::string, int> mapping)
         cout << (*it).first << " => " << (*it).second << endl;
 }
 
+std::map<int, std::list<std::list<double> > > MapUser::foo() const
+{
+    std::map<int, std::list<std::list<double> > > result;
+    return result;
+}
