@@ -69,13 +69,8 @@ LIBSHIBOKEN_API void _PyObject_Dump(PyObject *);
 /*
  * There are a few structures that are needed, but cannot be used without
  * breaking the API. We use some heuristics to get those fields anyway
- * and validate that we really found them, see Pepresolve.cpp .
+ * and validate that we really found them, see pep384impl.cpp .
  */
-
-// PepType is just a typecast that allows direct access. This is
-// often better to read than the reversal via the former macro
-// functions PepType_tp_xxx.
-#define PepType(o)                          (reinterpret_cast<PepTypeObject*>(o))
 
 #ifdef Py_LIMITED_API
 
@@ -87,7 +82,7 @@ LIBSHIBOKEN_API void _PyObject_Dump(PyObject *);
  * When we need more fields, we replace it back and add it to the
  * validation.
  */
-typedef struct _peptypeobject {
+typedef struct _typeobject {
     PyVarObject ob_base;
     const char *tp_name;
     Py_ssize_t tp_basicsize;
@@ -131,7 +126,7 @@ typedef struct _peptypeobject {
     PyObject *tp_bases;
     PyObject *tp_mro; /* method resolution order */
 
-} PepTypeObject;
+} PyTypeObject;
 
 // This was a macro error in the limited API from the beginning.
 // It was fixed in Python master, but did make it only in Python 3.8 .
@@ -143,11 +138,9 @@ LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 
 #undef PyObject_IS_GC
 #define PyObject_IS_GC(o) (PyType_IS_GC(Py_TYPE(o)) && \
-    ( PepType(Py_TYPE(o))->tp_is_gc == NULL || \
-      PepType(Py_TYPE(o))->tp_is_gc(o) ))
+    ( Py_TYPE(o)->tp_is_gc == NULL || \
+      Py_TYPE(o)->tp_is_gc(o) ))
 
-#else
-#define PepTypeObject                   PyTypeObject
 #endif // Py_LIMITED_API
 
 struct SbkObjectTypePrivate;
@@ -155,7 +148,7 @@ struct PySideQFlagsTypePrivate;
 struct _SbkGenericTypePrivate;
 
 #define PepHeapType_SIZE \
-    (reinterpret_cast<PepTypeObject*>(&PyType_Type)->tp_basicsize)
+    (reinterpret_cast<PyTypeObject*>(&PyType_Type)->tp_basicsize)
 
 #define _genericTypeExtender(etype) \
     (reinterpret_cast<char*>(etype) + PepHeapType_SIZE)

@@ -315,11 +315,11 @@
     <!-- templates for __repr__ -->
     <template name="repr_code">
         QString format = QString().sprintf("%s(%REPR_FORMAT)",
-            PepType(Py_TYPE(%PYSELF))->tp_name, %REPR_ARGS);
+            Py_TYPE(%PYSELF)->tp_name, %REPR_ARGS);
         %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
     </template>
     <template name="repr_code_matrix">
-        QString format= QString("%1((").arg(PepType(Py_TYPE(%PYSELF))->tp_name);
+        QString format= QString("%1((").arg(Py_TYPE(%PYSELF)->tp_name);
 
         QList&lt; %MATRIX_TYPE &gt; cppArgs;
         %MATRIX_TYPE data[%MATRIX_SIZE];
