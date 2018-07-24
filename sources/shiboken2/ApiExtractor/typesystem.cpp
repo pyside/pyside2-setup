@@ -1504,7 +1504,7 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
     return true;
 }
 
-static bool parseIndex(const QStringRef &index, int *result, QString *errorMessage)
+static bool parseIndex(const QString &index, int *result, QString *errorMessage)
 {
     bool ok = false;
     *result = index.toInt(&ok);
@@ -1513,7 +1513,7 @@ static bool parseIndex(const QStringRef &index, int *result, QString *errorMessa
     return ok;
 }
 
-static bool parseArgumentIndex(const QStringRef &index, int *result, QString *errorMessage)
+static bool parseArgumentIndex(const QString &index, int *result, QString *errorMessage)
 {
     if (index == QLatin1String("return")) {
         *result = 0;
@@ -1537,13 +1537,13 @@ bool Handler::parseModifyArgument(const QXmlStreamReader &,
         return false;
     }
 
-    QStringRef index;
+    QString index;
     QString replaceValue;
     bool resetAfterUse = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
-             index = attributes->takeAt(i).value();
+             index = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("replace-value")) {
             replaceValue = attributes->takeAt(i).value().toString();
         } else if (name == invalidateAfterUseAttribute()) {
@@ -1608,7 +1608,7 @@ bool Handler::parseDefineOwnership(const QXmlStreamReader &,
     }
 
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
-    QStringRef ownership;
+    QString ownership;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
@@ -1619,7 +1619,7 @@ bool Handler::parseDefineOwnership(const QXmlStreamReader &,
                 return false;
             }
         } else if (name == ownershipAttribute()) {
-            ownership = attributes->takeAt(i).value();
+            ownership = attributes->takeAt(i).value().toString();
         }
     }
     const TypeSystem::Ownership owner = ownershipFromFromAttribute(ownership);
@@ -1645,7 +1645,7 @@ bool Handler::parseArgumentMap(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
-            if (!parseIndex(attributes->takeAt(i).value(), &pos, &m_error))
+            if (!parseIndex(attributes->takeAt(i).value().toString(), &pos, &m_error))
                 return false;
             if (pos <= 0) {
                 m_error = QStringLiteral("Argument position %1 must be a positive number").arg(pos);
@@ -1784,7 +1784,7 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
     QString originalSignature;
     QString returnType = QLatin1String("void");
     bool staticFunction = false;
-    QStringRef access;
+    QString access;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("signature")) {
@@ -1795,7 +1795,7 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
             staticFunction = convertBoolean(attributes->takeAt(i).value(),
                                             staticAttribute(), false);
         } else if (name == accessAttribute()) {
-            access = attributes->takeAt(i).value();
+            access = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -1847,8 +1847,8 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
     }
 
     QString originalSignature;
-    QStringRef access;
-    QStringRef removal;
+    QString access;
+    QString removal;
     QString rename;
     QString association;
     bool deprecated = false;
@@ -1860,13 +1860,13 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
         if (name == QLatin1String("signature")) {
             originalSignature = attributes->takeAt(i).value().toString();
         } else if (name == accessAttribute()) {
-            access = attributes->takeAt(i).value();
+            access = attributes->takeAt(i).value().toString();
         } else if (name == renameAttribute()) {
             rename = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("associated-to")) {
             association = attributes->takeAt(i).value().toString();
         } else if (name == removeAttribute()) {
-            removal = attributes->takeAt(i).value();
+            removal = attributes->takeAt(i).value().toString();
         } else if (name == deprecatedAttribute()) {
             deprecated = convertBoolean(attributes->takeAt(i).value(),
                                         deprecatedAttribute(), false);
@@ -2014,7 +2014,7 @@ bool Handler::parseParentOwner(const QXmlStreamReader &,
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
-            const QStringRef index = attributes->takeAt(i).value();
+            const QString index = attributes->takeAt(i).value().toString();
             if (!parseArgumentIndex(index, &ao.index, &m_error))
                 return false;
         } else if (name == actionAttribute()) {
@@ -2128,13 +2128,13 @@ bool Handler::parseInclude(const QXmlStreamReader &,
                            TypeEntry *entry, QXmlStreamAttributes *attributes)
 {
     QString fileName;
-    QStringRef location;
+    QString location;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("file-name"))
             fileName = attributes->takeAt(i).value().toString();
         else if (name == locationAttribute())
-            location = attributes->takeAt(i).value();
+            location = attributes->takeAt(i).value().toString();
     }
     const Include::IncludeType loc = locationFromAttribute(location);
     if (loc == Include::InvalidInclude) {

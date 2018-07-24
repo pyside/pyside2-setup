@@ -269,7 +269,7 @@
     <enum-type name="PanelModality" since="4.6"/>
     <inject-code class="target" position="end">
         PyObject *userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
-        PyDict_SetItemString(PepType(Sbk_QGraphicsItem_TypeF())->tp_dict, "UserType", userTypeConstant);
+        PyDict_SetItemString(reinterpret_cast&lt;PyTypeObject *&gt;(Sbk_QGraphicsItem_TypeF())->tp_dict, "UserType", userTypeConstant);
     </inject-code>
     <modify-function signature="setParentItem(QGraphicsItem*)">
       <modify-argument index="this">

@@ -85,11 +85,11 @@
             <inject-code class="target" position="beginning">
                 if (%CPPSELF.isVariant() || %CPPSELF.isString()) {
                     QString format = QString().sprintf("%s(\"%s\")",
-                            PepType(Py_TYPE(%PYSELF))->tp_name,
+                            Py_TYPE(%PYSELF)->tp_name,
                             qPrintable(%CPPSELF.toString()));
                     %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
                  } else {
-                    %PYARG_0 = Shiboken::String::fromCString(PepType(Py_TYPE(%PYSELF))->tp_name);
+                    %PYARG_0 = Shiboken::String::fromCString(Py_TYPE(%PYSELF)->tp_name);
                 }
             </inject-code>
         </add-function>

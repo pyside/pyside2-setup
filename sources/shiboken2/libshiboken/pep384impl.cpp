@@ -190,9 +190,9 @@ extern "C"
         struct LIBSHIBOKEN_API SbkObject
         {
             PyObject_HEAD
-            PyObject* ob_dict;
-            PyObject* weakreflist;
-            SbkObjectPrivate* d;
+            PyObject *ob_dict;
+            PyObject *weakreflist;
+            SbkObjectPrivate *d;
         };
 
     The first step was to rename the SbkObjectTypePrivate from "d" to
@@ -217,7 +217,7 @@ extern "C"
 
     #define _genericTypeExtender(etype) \
         (reinterpret_cast<char*>(etype) + \
-            (reinterpret_cast<PepTypeObject*>(&PyType_Type))->tp_basicsize)
+            (reinterpret_cast<PepTypeObject *>(&PyType_Type))->tp_basicsize)
 
     #define PepType_SOTP(etype) \
         (*reinterpret_cast<SbkObjectTypePrivate**>(_genericTypeExtender(etype)))
@@ -404,13 +404,13 @@ static PyType_Spec typeprobe_spec = {
 static void
 check_PepTypeObject_valid(void)
 {
-    PyObject *obtype = reinterpret_cast<PyObject*>(&PyType_Type);
-    PyTypeObject *probe_tp_base = reinterpret_cast<PyTypeObject*>(
+    PyObject *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
+    PyTypeObject *probe_tp_base = reinterpret_cast<PyTypeObject *>(
         PyObject_GetAttrString(obtype, "__base__"));
     PyObject *probe_tp_bases = PyObject_GetAttrString(obtype, "__bases__");
-    PepTypeObject *check = reinterpret_cast<PepTypeObject*>(
+    PyTypeObject *check = reinterpret_cast<PyTypeObject *>(
         PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
-    PepTypeObject *typetype = reinterpret_cast<PepTypeObject*>(obtype);
+    PyTypeObject *typetype = reinterpret_cast<PyTypeObject *>(obtype);
     PyObject *w = PyObject_GetAttrString(obtype, "__weakrefoffset__");
     long probe_tp_weakrefoffset = PyLong_AsLong(w);
     PyObject *d = PyObject_GetAttrString(obtype, "__dictoffset__");
@@ -675,8 +675,8 @@ PyTime_FromTime(int hour, int min, int sec, int usec)
 PyObject *
 PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 {
-    PyObject* code = Py_CompileString(str, "pyscript", start);
-    PyObject* ret = NULL;
+    PyObject *code = Py_CompileString(str, "pyscript", start);
+    PyObject *ret = NULL;
 
     if (code != NULL) {
         ret = PyEval_EvalCode(code, globals, locals);
@@ -811,7 +811,7 @@ static PyTypeObject *getStaticMethodType(void)
 const char *
 PepType_GetNameStr(PyTypeObject *type)
 {
-    const char *ret = PepType(type)->tp_name;
+    const char *ret = type->tp_name;
     const char *nodots = strrchr(ret, '.');
     if (nodots)
         ret = nodots + 1;

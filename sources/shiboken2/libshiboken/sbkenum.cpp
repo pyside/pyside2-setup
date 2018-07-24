@@ -63,7 +63,7 @@ struct SbkEnumTypePrivate
 
 struct SbkEnumType
 {
-    PepTypeObject type;
+    PyTypeObject type;
 };
 
 struct SbkEnumObject
@@ -77,9 +77,9 @@ static PyObject* SbkEnumObject_repr(PyObject* self)
 {
     const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
     if (enumObj->ob_name)
-        return Shiboken::String::fromFormat("%s.%s", PepType((Py_TYPE(self)))->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
+        return Shiboken::String::fromFormat("%s.%s", (Py_TYPE(self))->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
     else
-        return Shiboken::String::fromFormat("%s(%ld)", PepType((Py_TYPE(self)))->tp_name, enumObj->ob_value);
+        return Shiboken::String::fromFormat("%s(%ld)", (Py_TYPE(self))->tp_name, enumObj->ob_value);
 }
 
 static PyObject* SbkEnumObject_name(PyObject* self, void*)
@@ -361,7 +361,7 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
 {
     PyObject *key, *value;
     Py_ssize_t pos = 0;
-    PyObject *values = PyDict_GetItemString(PepType(enumType)->tp_dict, const_cast<char*>("values"));
+    PyObject *values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
 
     while (PyDict_Next(values, &pos, &key, &value)) {
         SbkEnumObject *obj = reinterpret_cast<SbkEnumObject *>(value);
@@ -395,10 +395,10 @@ PyTypeObject* createGlobalEnum(PyObject* module, const char* name, const char* f
 PyTypeObject* createScopedEnum(SbkObjectType* scope, const char* name, const char* fullName, const char* cppName, PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = createEnum(fullName, cppName, name, flagsType);
-    if (enumType && PyDict_SetItemString(PepType(scope)->tp_dict, name,
+    if (enumType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, name,
             reinterpret_cast<PyObject *>(enumType)) < 0)
         return nullptr;
-    if (flagsType && PyDict_SetItemString(PepType(scope)->tp_dict,
+    if (flagsType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict,
             PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0)
         return nullptr;
@@ -408,7 +408,7 @@ PyTypeObject* createScopedEnum(SbkObjectType* scope, const char* name, const cha
 static PyObject* createEnumItem(PyTypeObject* enumType, const char* itemName, long itemValue)
 {
     PyObject* enumItem = newItem(enumType, itemValue, itemName);
-    if (PyDict_SetItemString(PepType(enumType)->tp_dict, itemName, enumItem) < 0)
+    if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0)
         return 0;
     Py_DECREF(enumItem);
     return enumItem;
@@ -435,7 +435,7 @@ bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
                           const char *itemName, long itemValue)
 {
     if (PyObject *enumItem = createEnumItem(enumType, itemName, itemValue)) {
-        if (PyDict_SetItemString(PepType(scope)->tp_dict, itemName, enumItem) < 0)
+        if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, itemName, enumItem) < 0)
             return false;
         Py_DECREF(enumItem);
         return true;
@@ -470,10 +470,10 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
     enumObj->ob_value = itemValue;
 
     if (newValue) {
-        PyObject* values = PyDict_GetItemString(PepType(enumType)->tp_dict, const_cast<char*>("values"));
+        PyObject* values = PyDict_GetItemString(enumType->tp_dict, const_cast<char*>("values"));
         if (!values) {
             values = PyDict_New();
-            PyDict_SetItemString(PepType(enumType)->tp_dict, const_cast<char*>("values"), values);
+            PyDict_SetItemString(enumType->tp_dict, const_cast<char*>("values"), values);
             Py_DECREF(values); // ^ values still alive, because setitemstring incref it
         }
         PyDict_SetItemString(values, itemName, reinterpret_cast<PyObject*>(enumObj));
@@ -660,7 +660,7 @@ DeclaredEnumTypes::~DeclaredEnumTypes()
          * So right now I am doing nothing. Surely wrong but no crash.
          * See also the comment in function 'createGlobalEnumItem'.
          */
-        //fprintf(stderr, "ttt %d %s\n", Py_REFCNT(*it), PepType(*it)->tp_name);
+        //fprintf(stderr, "ttt %d %s\n", Py_REFCNT(*it), *it->tp_name);
     }
     m_enumTypes.clear();
 }
