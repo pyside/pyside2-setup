@@ -97,13 +97,6 @@ class Server(QtWidgets.QDialog):
         out.writeUInt16(0)
         fortune = self.fortunes[random.randint(0, len(self.fortunes) - 1)]
 
-        try:
-            # Python v3.
-            fortune = bytes(fortune, encoding='ascii')
-        except:
-            # Python v2.
-            pass
-
         out.writeString(fortune)
         out.device().seek(0)
         out.writeUInt16(block.size() - 2)
