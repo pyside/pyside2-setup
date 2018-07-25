@@ -66,7 +66,7 @@ def prepare_standalone_package_linux(self, executables, vars):
     # dir if necessary. We choose the QtCore lib to inspect, by
     # checking which QtCore library the shiboken2 executable uses.
     if not maybe_icu_libs:
-        copy_icu_libs(resolved_destination_lib_dir)
+        copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
 
     if self.is_webengine_built(built_modules):
         copydir("{qt_lib_execs_dir}",

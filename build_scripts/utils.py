@@ -944,7 +944,7 @@ def find_qt_core_library_glob(lib_dir):
 # ldd for the specified platforms.
 # This has less priority because ICU libs are not used in the default
 # Qt configuration build.
-def copy_icu_libs(destination_lib_dir):
+def copy_icu_libs(patchelf, destination_lib_dir):
     """
     Copy ICU libraries that QtCore depends on,
     to given `destination_lib_dir`.
@@ -983,7 +983,7 @@ def copy_icu_libs(destination_lib_dir):
             copyfile(path, destination, force_copy_symlink=True)
             # Patch the ICU libraries to contain the $ORIGIN rpath
             # value, so that only the local package libraries are used.
-            linux_set_rpaths(destination, '$ORIGIN')
+            linux_set_rpaths(patchelf, destination, '$ORIGIN')
 
         # Patch the QtCore library to find the copied over ICU libraries
         # (if necessary).
@@ -994,18 +994,12 @@ def copy_icu_libs(destination_lib_dir):
             log.info('Patching QtCore library to contain $ORIGIN rpath.')
             rpaths.insert(0, '$ORIGIN')
             new_rpaths_string = ":".join(rpaths)
-            linux_set_rpaths(qt_core_library_path, new_rpaths_string)
+            linux_set_rpaths(patchelf, qt_core_library_path, new_rpaths_string)
 
-def linux_set_rpaths(executable_path, rpath_string):
+def linux_set_rpaths(patchelf, executable_path, rpath_string):
     """ Patches the `executable_path` with a new rpath string. """
 
-    if not hasattr(linux_set_rpaths, "patchelf_path"):
-        script_dir = os.getcwd()
-        patchelf_path = os.path.join(script_dir, "patchelf")
-        setattr(linux_set_rpaths, "patchelf_path", patchelf_path)
-
-    cmd = [linux_set_rpaths.patchelf_path, '--set-rpath',
-        rpath_string, executable_path]
+    cmd = [patchelf, '--set-rpath', rpath_string, executable_path]
 
     if run_process(cmd) != 0:
         raise RuntimeError("Error patching rpath in {}".format(
