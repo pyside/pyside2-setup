@@ -341,7 +341,7 @@ extern "C"
  */
 
 /*
- * Here is the verification code for PepTypeObject.
+ * Here is the verification code for PyTypeObject.
  * We create a type object and check if its fields
  * appear at the right offsets.
  */
@@ -402,7 +402,7 @@ static PyType_Spec typeprobe_spec = {
 };
 
 static void
-check_PepTypeObject_valid(void)
+check_PyTypeObject_valid(void)
 {
     PyObject *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
     PyTypeObject *probe_tp_base = reinterpret_cast<PyTypeObject *>(
@@ -827,7 +827,7 @@ PepType_GetNameStr(PyTypeObject *type)
 void
 Pep384_Init()
 {
-    check_PepTypeObject_valid();
+    check_PyTypeObject_valid();
 #ifdef Py_LIMITED_API
     Pep_GetVerboseFlag();
     PepMethod_TypePtr = getMethodType();

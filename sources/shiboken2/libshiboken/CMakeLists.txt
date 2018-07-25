@@ -51,7 +51,7 @@ qapp_macro.cpp
 pep384impl.cpp
 voidptr.cpp
 typespec.cpp
-bufferprocs27.cpp
+bufferprocs_py37.cpp
 )
 
 get_numpy_location()
@@ -97,7 +97,7 @@ install(FILES
         qapp_macro.h
         voidptr.h
         typespec.h
-        bufferprocs27.h
+        bufferprocs_py37.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
 install(TARGETS libshiboken EXPORT shiboken2
