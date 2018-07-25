@@ -328,7 +328,9 @@ private:
 
     QString writeReprFunction(QTextStream &s, GeneratorContext &context);
 
-    bool hasBoolCast(const AbstractMetaClass* metaClass) const;
+    const AbstractMetaFunction *boolCast(const AbstractMetaClass* metaClass) const;
+    bool hasBoolCast(const AbstractMetaClass* metaClass) const
+    { return boolCast(metaClass) != nullptr; }
 
     // Number protocol structure members names.
     static QHash<QString, QString> m_nbFuncs;

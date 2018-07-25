@@ -326,6 +326,8 @@ struct Modification
 
 struct FunctionModification: public Modification
 {
+    using AllowThread = TypeSystem::AllowThread;
+
     bool isCodeInjection() const
     {
         return modifiers & CodeInjection;
@@ -338,14 +340,9 @@ struct FunctionModification: public Modification
     {
         return m_thread;
     }
-    bool allowThread() const
-    {
-        return m_allowThread;
-    }
-    void setAllowThread(bool allow)
-    {
-        m_allowThread = allow;
-    }
+
+    AllowThread allowThread() const { return m_allowThread; }
+    void setAllowThread(AllowThread allow) { m_allowThread = allow; }
 
     bool matches(const QString &functionSignature) const
     {
@@ -372,7 +369,7 @@ private:
     QString m_originalSignature;
     QRegularExpression m_signaturePattern;
     bool m_thread = false;
-    bool m_allowThread = false;
+    AllowThread m_allowThread = AllowThread::Unspecified;
 };
 
 struct FieldModification: public Modification

@@ -220,6 +220,60 @@ void TestModifyFunction::testWithApiVersion()
     QVERIFY(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::CppOwnership);
 }
 
+void TestModifyFunction::testAllowThread()
+{
+    const char cppCode[] =R"CPP(\
+struct A {
+    void f1();
+    void f2();
+    void f3();
+    int getter1() const;
+    int getter2() const;
+};
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='A'>
+        <modify-function signature='f2()' allow-thread='auto'/>
+        <modify-function signature='f3()' allow-thread='no'/>
+        <modify-function signature='getter2()const' allow-thread='yes'/>
+    </object-type>
+</typesystem>
+)XML";
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false, "0.1"));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
+    QVERIFY(classA);
+
+    // Nothing specified, true
+    const AbstractMetaFunction *f1 = classA->findFunction(QLatin1String("f1"));
+    QVERIFY(f1);
+    QVERIFY(f1->allowThread());
+
+    // 'auto' specified, should be true for nontrivial function
+    const AbstractMetaFunction *f2 = classA->findFunction(QLatin1String("f2"));
+    QVERIFY(f2);
+    QVERIFY(f2->allowThread());
+
+    // 'no' specified, should be false
+    const AbstractMetaFunction *f3 = classA->findFunction(QLatin1String("f3"));
+    QVERIFY(f3);
+    QVERIFY(!f3->allowThread());
+
+    // Nothing specified, should be false for simple getter
+    const AbstractMetaFunction *getter1 = classA->findFunction(QLatin1String("getter1"));
+    QVERIFY(getter1);
+    QVERIFY(!getter1->allowThread());
+
+    // Forced to true simple getter
+    const AbstractMetaFunction *getter2 = classA->findFunction(QLatin1String("getter2"));
+    QVERIFY(getter2);
+    QVERIFY(getter2->allowThread()); // Forced to true simple getter
+}
+
 void TestModifyFunction::testGlobalFunctionModification()
 {
     const char* cppCode ="\

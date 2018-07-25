@@ -55,6 +55,13 @@ enum Language {
     TargetLangAndNativeCode   = TargetLangCode | NativeCode
 };
 
+enum class AllowThread {
+    Allow,
+    Disallow,
+    Auto,
+    Unspecified
+};
+
 enum Ownership {
     InvalidOwnership,
     DefaultOwnership,

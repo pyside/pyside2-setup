@@ -171,6 +171,17 @@ static EnumType functionName(QStringView needle, EnumType defaultValue = default
     return lb != end && *lb == needleEntry ? lb->value : defaultValue; \
 }
 
+ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
+                  allowThreadFromAttribute, TypeSystem::AllowThread::Unspecified)
+    {
+        {QStringViewLiteral("yes"), TypeSystem::AllowThread::Allow},
+        {QStringViewLiteral("true"), TypeSystem::AllowThread::Allow},
+        {QStringViewLiteral("auto"), TypeSystem::AllowThread::Auto},
+        {QStringViewLiteral("no"), TypeSystem::AllowThread::Disallow},
+        {QStringViewLiteral("false"), TypeSystem::AllowThread::Disallow},
+    };
+ENUM_LOOKUP_LINEAR_SEARCH()
+
 ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
                   languageFromAttribute, TypeSystem::NoLanguage)
     {
@@ -363,6 +374,19 @@ static QString msgMissingAttribute(const QString &a)
         + QLatin1String("' missing.");
 }
 
+QTextStream &operator<<(QTextStream &str, const QXmlStreamAttribute &attribute)
+{
+    str << attribute.qualifiedName() << "=\"" << attribute.value() << '"';
+    return str;
+}
+
+static QString msgInvalidAttributeValue(const QXmlStreamAttribute &attribute)
+{
+    QString result;
+    QTextStream(&result) << "Invalid attribute value:" << attribute;
+    return result;
+}
+
 static QString msgUnusedAttributes(const QStringRef &tag, const QXmlStreamAttributes &attributes)
 {
     QString result;
@@ -371,7 +395,7 @@ static QString msgUnusedAttributes(const QStringRef &tag, const QXmlStreamAttrib
     for (int i = 0, size = attributes.size(); i < size; ++i) {
         if (i)
             str << ", ";
-        str << attributes.at(i).qualifiedName() << "=\"" << attributes.at(i).value() << '"';
+        str << attributes.at(i);
     }
     return result;
 }
@@ -1853,7 +1877,7 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
     QString association;
     bool deprecated = false;
     bool isThread = false;
-    bool allowThread = false;
+    TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
     bool virtualSlot = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
@@ -1874,8 +1898,12 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
             isThread = convertBoolean(attributes->takeAt(i).value(),
                                       threadAttribute(), false);
         } else if (name == allowThreadAttribute()) {
-            allowThread = convertBoolean(attributes->takeAt(i).value(),
-                                         allowThreadAttribute(), false);
+            const QXmlStreamAttribute attribute = attributes->takeAt(i);
+            allowThread = allowThreadFromAttribute(attribute.value());
+            if (allowThread == TypeSystem::AllowThread::Unspecified) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
         } else if (name == virtualSlotAttribute()) {
             virtualSlot = convertBoolean(attributes->takeAt(i).value(),
                                          virtualSlotAttribute(), false);
@@ -1924,7 +1952,8 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &,
         mod.association = association;
 
     mod.setIsThread(isThread);
-    mod.setAllowThread(allowThread);
+    if (allowThread != TypeSystem::AllowThread::Unspecified)
+        mod.setAllowThread(allowThread);
     if (virtualSlot)
         mod.modifiers |= Modification::VirtualSlot;
 

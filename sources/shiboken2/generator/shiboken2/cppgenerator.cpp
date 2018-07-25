@@ -186,18 +186,19 @@ QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(c
     return result;
 }
 
-bool CppGenerator::hasBoolCast(const AbstractMetaClass* metaClass) const
+const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass* metaClass) const
 {
     if (!useIsNullAsNbNonZero())
-        return false;
+        return nullptr;
     // TODO: This could be configurable someday
     const AbstractMetaFunction* func = metaClass->findFunction(QLatin1String("isNull"));
     if (!func || !func->type() || !func->type()->typeEntry()->isPrimitive() || !func->isPublic())
-        return false;
+        return nullptr;
     const PrimitiveTypeEntry* pte = static_cast<const PrimitiveTypeEntry*>(func->type()->typeEntry());
     while (pte->referencedTypeEntry())
         pte = pte->referencedTypeEntry();
-    return func && func->isConstant() && pte->name() == QLatin1String("bool") && func->arguments().isEmpty();
+    return func && func->isConstant() && pte->name() == QLatin1String("bool")
+        && func->arguments().isEmpty() ? func : nullptr;
 }
 
 typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
@@ -490,16 +491,20 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         }
     }
 
-    if (hasBoolCast(metaClass)) {
+    if (const AbstractMetaFunction *f = boolCast(metaClass)) {
         ErrorCode errorCode(-1);
         s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject* " PYTHON_SELF_VAR ")" << endl;
         s << '{' << endl;
         writeCppSelfDefinition(s, classContext);
-        s << INDENT << "int result;" << endl;
-        s << INDENT << BEGIN_ALLOW_THREADS << endl;
-        s << INDENT << "result = !" CPP_SELF_VAR "->isNull();" << endl;
-        s << INDENT << END_ALLOW_THREADS << endl;
-        s << INDENT << "return result;" << endl;
+        if (f->allowThread()) {
+            s << INDENT << "int result;" << endl;
+            s << INDENT << BEGIN_ALLOW_THREADS << endl;
+            s << INDENT << "result = !" CPP_SELF_VAR "->isNull();" << endl;
+            s << INDENT << END_ALLOW_THREADS << endl;
+            s << INDENT << "return result;" << endl;
+        } else {
+            s << INDENT << "return !" << CPP_SELF_VAR "->isNull();" << endl;
+        }
         s << '}' << endl << endl;
     }
 
@@ -3270,7 +3275,10 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         }
 
         if (!injectedCodeCallsCppFunction(func)) {
-            s << INDENT << BEGIN_ALLOW_THREADS << endl << INDENT;
+            const bool allowThread = func->allowThread();
+            if (allowThread)
+                s << INDENT << BEGIN_ALLOW_THREADS << endl;
+            s << INDENT;
             if (isCtor) {
                 s << (useVAddr.isEmpty() ?
                       QString::fromLatin1("cptr = %1;").arg(methodCall) : useVAddr) << endl;
@@ -3303,7 +3311,8 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             } else {
                 s << methodCall << ';' << endl;
             }
-            s << INDENT << END_ALLOW_THREADS << endl;
+            if (allowThread)
+                s << INDENT << END_ALLOW_THREADS << endl;
 
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
                 writeConversionRule(s, func, TypeSystem::TargetLangCode, QLatin1String(PYTHON_RETURN_VAR));
@@ -4010,7 +4019,8 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream& s, const AbstractMet
 
     QString baseName = cpythonBaseName(metaClass);
 
-    nb[QLatin1String("bool")] = hasBoolCast(metaClass) ? baseName + QLatin1String("___nb_bool") : QString();
+    if (hasBoolCast(metaClass))
+        nb.insert(QLatin1String("bool"), baseName + QLatin1String("___nb_bool"));
 
     for (QHash<QString, QString>::const_iterator it = m_nbFuncs.cbegin(), end = m_nbFuncs.cend(); it != end; ++it) {
         const QString &nbName = it.key();

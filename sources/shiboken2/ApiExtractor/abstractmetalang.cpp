@@ -735,16 +735,54 @@ bool AbstractMetaFunction::isDeprecated() const
     return false;
 }
 
-bool AbstractMetaFunction::allowThread() const
+// Auto-detect whether a function should be wrapped into
+// Py_BEGIN_ALLOW_THREADS/Py_END_ALLOW_THREADS, that is, temporarily release
+// the GIL (global interpreter lock). Doing so is required for any thread-wait
+// functions, anything that might call a virtual function (potentially
+// reimplemented in Python), and recommended for lengthy I/O or similar.
+// It has performance costs, though.
+bool AbstractMetaFunction::autoDetectAllowThread() const
 {
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
-        if (modification.allowThread())
-            return true;
-    }
-    return false;
+    // Disallow for simple getter functions.
+    const bool maybeGetter = m_constant != 0 && m_type != nullptr
+        && m_arguments.isEmpty();
+    return !maybeGetter;
 }
 
+static QString msgDisallowThread(const AbstractMetaFunction *f)
+{
+    QString result;
+    QTextStream str(&result);
+    str <<"Disallowing threads for ";
+    if (auto c = f->declaringClass())
+        str << c->name() << "::";
+    str << f->name() << "().";
+    return result;
+}
+
+bool AbstractMetaFunction::allowThread() const
+{
+    using AllowThread = TypeSystem::AllowThread;
+
+    if (m_cachedAllowThread < 0) {
+        AllowThread allowThread = AllowThread::Auto;
+        // Find a modification that specifies allowThread
+        const FunctionModificationList &modifications = this->modifications(declaringClass());
+        for (const FunctionModification &modification : modifications) {
+            if (modification.allowThread() != AllowThread::Unspecified) {
+                allowThread = modification.allowThread();
+                break;
+            }
+        }
+
+        m_cachedAllowThread = allowThread == AllowThread::Allow
+            || (allowThread == AllowThread::Auto && autoDetectAllowThread()) ? 1 : 0;
+
+        if (m_cachedAllowThread == 0)
+            qCDebug(lcShiboken).noquote() << msgDisallowThread(this);
+    }
+    return m_cachedAllowThread > 0;
+}
 
 TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int key) const
 {

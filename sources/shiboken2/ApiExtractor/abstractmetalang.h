@@ -1084,6 +1084,8 @@ public:
 #endif
 
 private:
+    bool autoDetectAllowThread() const;
+
     QString m_name;
     QString m_originalName;
     mutable QString m_cachedMinimalSignature;
@@ -1105,6 +1107,7 @@ private:
     uint m_isNoExcept               : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
+    mutable int m_cachedAllowThread = -1;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)

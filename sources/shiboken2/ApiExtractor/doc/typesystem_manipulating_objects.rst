@@ -74,6 +74,7 @@ modify-function
                               since="..."
                               remove="all | c++"
                               access="public | private | protected"
+                              allow-thread="true | auto | false"
                               rename="..." />
          </object-type>
 
@@ -81,6 +82,15 @@ modify-function
     values but including potential const declarations.
 
     The ``since`` attribute specify the API version when this function was modified.
+
+    The ``allow-thread`` attribute specifies whether a function should be wrapped
+    into ``Py_BEGIN_ALLOW_THREADS`` and ``Py_END_ALLOW_THREADS``, that is,
+    temporarily release the GIL (global interpreter lock). Doing so is required
+    for any thread-related  function (wait operations), functions that might call
+    a virtual function (potentially reimplemented in Python), and recommended for
+    lengthy I/O operations or similar. It has performance costs, though.
+    The value ``auto`` means that it will be turned off for functions for which
+    it is deemed to be safe, for example, simple getters.
 
     The ``remove``, ``access`` and ``rename`` attributes are *optional* attributes
     for added convenience; they serve the same purpose as the deprecated tags :ref:`remove`, :ref:`access` and :ref:`rename`.
