@@ -42,67 +42,9 @@
 extern "C"
 {
 
-/***************************************************************************
- ***************************************************************************
-
-
- The signature C extension
- =========================
-
- This module is a C extension for CPython 3.4 and up, and CPython 2.7.
- It's purpose is to provide support for the __signature__ attribute
- of builtin PyCFunction objects.
-
-
- Short excursion on the topic
- ----------------------------
-
- Beginning with CPython 3.5, Python functions began to grow a __signature__
- attribute for normal Python functions. This is totally optional and just
- a nice-to-have feature in Python.
-
- PySide, on the other hand, could use __signature__ very much, because the
- typing info for the 14000+ PySide functions is really missing, and it
- would be nice to have this info available directly in Python.
-
-
- How this code works
- -------------------
-
- The basic idea is to create a dummy Python function and to use the inspect
- module to create a signature object. Then, this object is returned as the
- result of the __signature__ attribute of the real PyCFunction.
-
- There is one thing that really changes Python a bit:
-
-     I added the __signature__ attribute to every function.
-
- That is a little change to Python that does not harm, but it saves us
- tons of code, that was needed in the former versions.
-
- The internal work is done in two steps:
- All functions get their "signature text" when the module is imported.
- The actual signature is created later, when the attribute is really used.
-
- Example:
-
- The PyCFunction 'QtWidgets.QApplication.palette' is interrogated for its
- signature. That means 'pyside_sm_get___signature__()' is called.
- It calls GetSignature_Function which returns the signature if it is found.
-
- There are actually 2 locations where late initialization occurs:
- -  'dict' can be no dict but a tuple. That is the argument tuple that
-    was saved by 'PySide_BuildSignatureArgs' at module load time.
-    If so, then 'pyside_type_init' in 'signature.py' will be called,
-    which parses the string and creates the dict.
- -  'props' can be empty. Then 'create_signature' in 'signature_loader.py'
-    is called, which uses a dummy function to produce a signature instance
-    with the inspect module.
-
- This module is dedicated to our lovebird "Püppi", who died on 2017-09-15.
-
- ****************************************************************************
- ****************************************************************************/
+/*
+ * The documentation is located in file signature_doc.rst
+ */
 
 #include "signature.h"
 #include <structmember.h>
