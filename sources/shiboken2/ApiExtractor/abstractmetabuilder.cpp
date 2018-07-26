@@ -724,6 +724,15 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     std::puts("");
 }
 
+static bool metaEnumLessThan(const AbstractMetaEnum *e1, const AbstractMetaEnum *e2)
+{ return e1->fullName() < e2->fullName(); }
+
+static bool metaClassLessThan(const AbstractMetaClass *c1, const AbstractMetaClass *c2)
+{ return c1->fullName() < c2->fullName(); }
+
+static bool metaFunctionLessThan(const AbstractMetaFunction *f1, const AbstractMetaFunction *f2)
+{ return f1->name() < f2->name(); }
+
 bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
                                 LanguageLevel level,
                                 unsigned clangFlags)
@@ -734,6 +743,14 @@ bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
         qCDebug(lcShiboken) << dom.data();
     d->traverseDom(dom);
+
+    // Ensure that indexes are in alphabetical order, roughly
+    std::sort(d->m_globalEnums.begin(), d->m_globalEnums.end(), metaEnumLessThan);
+    std::sort(d->m_metaClasses.begin(), d->m_metaClasses.end(), metaClassLessThan);
+    std::sort(d->m_templates.begin(), d->m_templates.end(), metaClassLessThan);
+    std::sort(d->m_smartPointers.begin(), d->m_smartPointers.end(), metaClassLessThan);
+    std::sort(d->m_globalFunctions.begin(), d->m_globalFunctions.end(), metaFunctionLessThan);
+
     return true;
 }
 
