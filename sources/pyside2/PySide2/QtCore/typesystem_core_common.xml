@@ -2128,7 +2128,6 @@
 
   <value-type name="QItemSelectionRange" hash-function="qHash">
   </value-type>
-  <primitive-type name="QModelIndexList"/>
   <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
     <extra-includes>
       <include file-name="QItemSelection" location="global"/>

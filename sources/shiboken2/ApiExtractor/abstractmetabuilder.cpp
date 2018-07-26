@@ -187,10 +187,9 @@ static QString msgNoFunctionForModification(const QString &signature,
 
 void AbstractMetaBuilderPrivate::checkFunctionModifications()
 {
-    TypeDatabase *types = TypeDatabase::instance();
-    const SingleTypeEntryHash entryHash = types->entries();
+    const auto &entries = TypeDatabase::instance()->entries();
 
-    for (SingleTypeEntryHash::const_iterator it = entryHash.cbegin(), end = entryHash.cend(); it != end; ++it) {
+    for (auto it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
         const TypeEntry *entry = it.value();
         if (!entry)
             continue;
@@ -580,13 +579,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         if (cls->isAbstract() && !cls->isInterface())
             cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + QLatin1String("$ConcreteWrapper"));
     }
-    const TypeEntryHash allEntries = types->allEntries();
+    const auto &allEntries = types->entries();
     ReportHandler::progress(QLatin1String("Detecting inconsistencies in typesystem..."));
-    for (TypeEntryHash::const_iterator it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
-        for (TypeEntry *entry : it.value()) {
-            if (entry->isPrimitive())
-                continue;
-
+    for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
+        TypeEntry *entry = it.value();
+        if (!entry->isPrimitive()) {
             if ((entry->isValue() || entry->isObject())
                 && !entry->isString()
                 && !entry->isChar()
@@ -2183,8 +2180,8 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
 
     if (!type) {
         QStringList candidates;
-        SingleTypeEntryHash entries = typeDb->entries();
-        for (SingleTypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
+        const auto &entries = typeDb->entries();
+        for (auto it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
             // Let's try to find the type in different scopes.
             if (it.key().endsWith(colonColon() + typeName))
                 candidates.append(it.key());

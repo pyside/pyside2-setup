@@ -66,17 +66,14 @@ Generator::~Generator()
 bool Generator::setup(const ApiExtractor& extractor)
 {
     m_d->apiextractor = &extractor;
-    TypeEntryHash allEntries = TypeDatabase::instance()->allEntries();
+    const auto &allEntries = TypeDatabase::instance()->entries();
     TypeEntry* entryFound = 0;
-    for (TypeEntryHash::const_iterator it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
-        for (TypeEntry *entry : it.value()) {
-            if (entry->type() == TypeEntry::TypeSystemType && entry->generateCode()) {
-                entryFound = entry;
-                break;
-            }
-        }
-        if (entryFound)
+    for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
+        TypeEntry *entry = it.value();
+        if (entry->type() == TypeEntry::TypeSystemType && entry->generateCode()) {
+            entryFound = entry;
             break;
+        }
     }
     if (entryFound)
         m_d->packageName = entryFound->name();

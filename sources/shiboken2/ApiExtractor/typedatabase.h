@@ -58,6 +58,8 @@ int getMaxTypeIndex();
 
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;
+class TypeSystemTypeEntry;
+
 class TypeDatabase
 {
     TypeDatabase();
@@ -88,12 +90,11 @@ public:
     NamespaceTypeEntry* findNamespaceType(const QString& name) const;
     ContainerTypeEntry* findContainerType(const QString& name) const;
     FunctionTypeEntry* findFunctionType(const QString& name) const;
+    const TypeSystemTypeEntry *findTypeSystemType(const QString &name) const;
 
     TypeEntry* findType(const QString& name) const;
 
-    TypeEntryHash allEntries() const { return m_entries; }
-
-    SingleTypeEntryHash entries() const;
+    const TypeEntryMultiMap &entries() const { return m_entries; }
 
     PrimitiveTypeEntryList primitiveTypes() const;
 
@@ -160,12 +161,12 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 private:
-    TypeEntryList findTypes(const QString &name) const;
+    TypeEntryMultiMapConstIteratorRange findTypes(const QString &name) const;
 
     bool m_suppressWarnings;
-    TypeEntryHash m_entries;
-    SingleTypeEntryHash m_flagsEntries;
-    TemplateEntryHash m_templates;
+    TypeEntryMultiMap m_entries;
+    TypeEntryMap m_flagsEntries;
+    TemplateEntryMap m_templates;
     QVector<QRegularExpression> m_suppressedWarnings;
 
     AddedFunctionList m_globalUserFunctions;

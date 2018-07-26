@@ -29,7 +29,7 @@
 #ifndef TYPEDATABASE_TYPEDEFS_H
 #define TYPEDATABASE_TYPEDEFS_H
 
-#include <QtCore/QHash>
+#include <QtCore/QMultiMap>
 #include <QtCore/QString>
 #include <QtCore/QVector>
 
@@ -39,9 +39,24 @@ class TemplateEntry;
 class TypeEntry;
 
 typedef QVector<TypeEntry *> TypeEntryList;
-typedef QHash<QString, TypeEntryList> TypeEntryHash;
-typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
-typedef QHash<QString, TemplateEntry *> TemplateEntryHash;
+typedef QMap<QString, TemplateEntry *> TemplateEntryMap;
+
+template <class Key, class Value>
+struct QMultiMapConstIteratorRange // A range of iterator for a range-based for loop
+{
+    using ConstIterator = typename QMultiMap<Key, Value>::const_iterator;
+
+    ConstIterator begin() const { return m_begin; }
+    ConstIterator end() const { return m_end; }
+
+    ConstIterator m_begin;
+    ConstIterator m_end;
+};
+
+typedef QMultiMap<QString, TypeEntry *> TypeEntryMultiMap;
+typedef QMultiMapConstIteratorRange<QString, TypeEntry *> TypeEntryMultiMapConstIteratorRange;
+
+typedef QMap<QString, TypeEntry *> TypeEntryMap;
 
 typedef QVector<const ContainerTypeEntry *> ContainerTypeEntryList;
 typedef QVector<const PrimitiveTypeEntry *> PrimitiveTypeEntryList;

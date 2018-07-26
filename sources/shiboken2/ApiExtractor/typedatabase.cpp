@@ -166,64 +166,69 @@ ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
     return 0;
 }
 
-FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
+static bool inline useType(const TypeEntry *t)
 {
-    TypeEntry* entry = findType(name);
-    if (entry && entry->type() == TypeEntry::FunctionType)
-        return static_cast<FunctionTypeEntry*>(entry);
-    return 0;
+    return !t->isPrimitive()
+        || static_cast<const PrimitiveTypeEntry *>(t)->preferredTargetLangType();
 }
 
-TypeEntry* TypeDatabase::findType(const QString& name) const
+FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
 {
-    const TypeEntryList &entries = findTypes(name);
+    const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
-        if (entry &&
-            (!entry->isPrimitive() || static_cast<PrimitiveTypeEntry *>(entry)->preferredTargetLangType())) {
-            return entry;
-        }
+        if (entry->type() == TypeEntry::FunctionType && useType(entry))
+            return static_cast<FunctionTypeEntry*>(entry);
     }
     return 0;
 }
 
-TypeEntryList TypeDatabase::findTypes(const QString &name) const
+const TypeSystemTypeEntry *TypeDatabase::findTypeSystemType(const QString &name) const
 {
-    return m_entries.value(name);
+    const auto entries = findTypes(name);
+    for (const TypeEntry *entry : entries) {
+        if (entry->type() == TypeEntry::TypeSystemType)
+            return static_cast<const TypeSystemTypeEntry *>(entry);
+    }
+    return nullptr;
 }
 
-SingleTypeEntryHash TypeDatabase::entries() const
+TypeEntry* TypeDatabase::findType(const QString& name) const
 {
-    TypeEntryHash entries = allEntries();
+    const auto entries = findTypes(name);
+    for (TypeEntry *entry : entries) {
+        if (useType(entry))
+            return entry;
+    }
+    return nullptr;
+}
 
-    SingleTypeEntryHash returned;
-    for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it)
-        returned.insert(it.key(), findType(it.key()));
-
-    return returned;
+TypeEntryMultiMapConstIteratorRange TypeDatabase::findTypes(const QString &name) const
+{
+    const auto lower = m_entries.lowerBound(name);
+    const auto end = m_entries.constEnd();
+    return lower != end && lower.key() == name
+        ? TypeEntryMultiMapConstIteratorRange{lower, m_entries.upperBound(name)}
+        : TypeEntryMultiMapConstIteratorRange{end, end};
 }
 
 PrimitiveTypeEntryList TypeDatabase::primitiveTypes() const
 {
-    TypeEntryHash entries = allEntries();
     PrimitiveTypeEntryList returned;
-    for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        for (TypeEntry *typeEntry : it.value()) {
-            if (typeEntry->isPrimitive())
-                returned.append(static_cast<PrimitiveTypeEntry *>(typeEntry));
-        }
+    for (auto it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
+        TypeEntry *typeEntry = it.value();
+        if (typeEntry->isPrimitive())
+            returned.append(static_cast<PrimitiveTypeEntry *>(typeEntry));
     }
     return returned;
 }
 
 ContainerTypeEntryList TypeDatabase::containerTypes() const
 {
-    TypeEntryHash entries = allEntries();
     ContainerTypeEntryList returned;
-    for (TypeEntryHash::const_iterator it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        for (TypeEntry *typeEntry : it.value()) {
-            if (typeEntry->isContainer())
-                returned.append(static_cast<ContainerTypeEntry *>(typeEntry));
-        }
+    for (auto it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
+        TypeEntry *typeEntry = it.value();
+        if (typeEntry->isContainer())
+            returned.append(static_cast<ContainerTypeEntry *>(typeEntry));
     }
     return returned;
 }
@@ -307,7 +312,7 @@ bool TypeDatabase::isEnumRejected(const QString& className, const QString& enumN
 
 void TypeDatabase::addType(TypeEntry *e)
 {
-    m_entries[e->qualifiedCppName()].append(e);
+    m_entries.insert(e->qualifiedCppName(), e);
 }
 
 bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName,
@@ -341,7 +346,7 @@ FlagsTypeEntry* TypeDatabase::findFlagsType(const QString &name) const
         fte = m_flagsEntries.value(name);
         if (!fte) {
             //last hope, search for flag without scope  inside of flags hash
-            for (SingleTypeEntryHash::const_iterator it = m_flagsEntries.cbegin(), end = m_flagsEntries.cend(); it != end; ++it) {
+            for (auto it = m_flagsEntries.cbegin(), end = m_flagsEntries.cend(); it != end; ++it) {
                 if (it.key().endsWith(name)) {
                     fte = it.value();
                     break;
@@ -528,11 +533,13 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 {
-    const TypeEntryList &entries = findTypes(name);
-
+    const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
-        if (entry && entry->isPrimitive() && static_cast<PrimitiveTypeEntry*>(entry)->preferredTargetLangType())
-            return static_cast<PrimitiveTypeEntry*>(entry);
+        if (entry->isPrimitive()) {
+            PrimitiveTypeEntry *pe = static_cast<PrimitiveTypeEntry *>(entry);
+            if (pe->preferredTargetLangType())
+                return pe;
+        }
     }
 
     return 0;
@@ -540,9 +547,9 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 {
-    const TypeEntryList &entries = findTypes(name);
+    const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
-        if (entry && entry->isComplex())
+        if (entry->isComplex() && useType(entry))
             return static_cast<ComplexTypeEntry*>(entry);
     }
     return 0;
@@ -550,9 +557,9 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 {
-    const TypeEntryList &entries = findTypes(name);
+    const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
-        if (entry && entry->isObject())
+        if (entry && entry->isObject() && useType(entry))
             return static_cast<ObjectTypeEntry*>(entry);
     }
     return 0;
@@ -560,9 +567,9 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 
 NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
 {
-    const TypeEntryList &entries = findTypes(name);
+    const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
-        if (entry && entry->isNamespace())
+        if (entry->isNamespace() && useType(entry))
             return static_cast<NamespaceTypeEntry*>(entry);
     }
     return 0;
@@ -593,29 +600,26 @@ static bool typeEntryLessThan(const TypeEntry* t1, const TypeEntry* t2)
 static void _computeTypeIndexes()
 {
     TypeDatabase* tdb = TypeDatabase::instance();
-    typedef QMap<int, TypeEntryList> GroupedTypeEntries;
-    GroupedTypeEntries groupedEntries;
 
     TypeEntryList list;
 
     // Group type entries by revision numbers
-    const TypeEntryHash &allEntries = tdb->allEntries();
+    const auto &allEntries = tdb->entries();
     list.reserve(allEntries.size());
-    for (TypeEntryHash::const_iterator tit = allEntries.cbegin(), end = allEntries.cend(); tit != end; ++tit) {
-        for (TypeEntry *entry : tit.value()) {
-            if (entry->isPrimitive()
-                || entry->isContainer()
-                || entry->isFunction()
-                || !entry->generateCode()
-                || entry->isEnumValue()
-                || entry->isVarargs()
-                || entry->isTypeSystem()
-                || entry->isVoid()
-                || entry->isCustom())
-                continue;
-            if (!list.contains(entry)) // Remove duplicates
-                list.append(entry);
-        }
+    for (auto  tit = allEntries.cbegin(), end = allEntries.cend(); tit != end; ++tit) {
+        TypeEntry *entry = tit.value();
+        if (entry->isPrimitive()
+            || entry->isContainer()
+            || entry->isFunction()
+            || !entry->generateCode()
+            || entry->isEnumValue()
+            || entry->isVarargs()
+            || entry->isTypeSystem()
+            || entry->isVoid()
+            || entry->isCustom())
+            continue;
+        if (!list.contains(entry)) // Remove duplicates
+            list.append(entry);
     }
 
     // Sort the type entries by revision, name
@@ -797,25 +801,14 @@ QDebug operator<<(QDebug d, const TemplateEntry *te)
 
 void TypeDatabase::formatDebug(QDebug &d) const
 {
-    typedef TypeEntryHash::ConstIterator Eit;
-    typedef SingleTypeEntryHash::ConstIterator Sit;
-    typedef TemplateEntryHash::ConstIterator TplIt;
     d << "TypeDatabase("
       << "entries[" << m_entries.size() << "]=";
-    for (Eit it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it) {
-        const int count = it.value().size();
-        d << '"' << it.key() << "\" [" << count << "]: (";
-        for (int t = 0; t < count; ++t) {
-            if (t)
-                d << ", ";
-            d << it.value().at(t);
-        }
-        d << ")\n";
-    }
+    for (auto it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it)
+        d << "  " << it.value() << '\n';
     if (!m_templates.isEmpty()) {
         d << "templates[" << m_templates.size() << "]=(";
-        const TplIt begin = m_templates.cbegin();
-        for (TplIt it = begin, end = m_templates.cend(); it != end; ++it) {
+        const auto begin = m_templates.cbegin();
+        for (auto  it = begin, end = m_templates.cend(); it != end; ++it) {
             if (it != begin)
                 d << ", ";
             d << it.value();
@@ -824,8 +817,8 @@ void TypeDatabase::formatDebug(QDebug &d) const
     }
     if (!m_flagsEntries.isEmpty()) {
         d << "flags[" << m_flagsEntries.size() << "]=(";
-        const Sit begin = m_flagsEntries.cbegin();
-        for (Sit it = begin, end = m_flagsEntries.cend(); it != end; ++it) {
+        const auto begin = m_flagsEntries.cbegin();
+        for (auto it = begin, end = m_flagsEntries.cend(); it != end; ++it) {
             if (it != begin)
                 d << ", ";
             d << it.value();

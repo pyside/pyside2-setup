@@ -5332,13 +5332,12 @@ bool CppGenerator::finishGeneration()
     }
 
     TypeDatabase* typeDb = TypeDatabase::instance();
-    TypeSystemTypeEntry* moduleEntry = static_cast<TypeSystemTypeEntry*>(typeDb->findType(packageName()));
+    const TypeSystemTypeEntry *moduleEntry = typeDb->findTypeSystemType(packageName());
+    Q_ASSERT(moduleEntry);
 
     //Extra includes
     s << endl << "// Extra includes" << endl;
-    QVector<Include> extraIncludes;
-    if (moduleEntry)
-        extraIncludes = moduleEntry->extraIncludes();
+    QVector<Include> extraIncludes = moduleEntry->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(globalEnums))
         extraIncludes.append(cppEnum->typeEntry()->extraIncludes());
     qSort(extraIncludes.begin(), extraIncludes.end());
@@ -5352,9 +5351,7 @@ bool CppGenerator::finishGeneration()
     s << "// Current module's converter array." << endl;
     s << "SbkConverter** " << convertersVariableName() << ';' << endl;
 
-    CodeSnipList snips;
-    if (moduleEntry)
-        snips = moduleEntry->codeSnips();
+    const CodeSnipList snips = moduleEntry->codeSnips();
 
     // module inject-code native/beginning
     if (!snips.isEmpty()) {

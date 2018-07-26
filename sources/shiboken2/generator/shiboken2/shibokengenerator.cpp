@@ -2483,7 +2483,11 @@ bool ShibokenGenerator::doSetup()
     const AbstractMetaClassList &classList = classes();
     for (const AbstractMetaClass *metaClass : classList)
         getCode(snips, metaClass->typeEntry());
-    getCode(snips, td->findType(packageName()));
+
+    const TypeSystemTypeEntry *moduleEntry = td->findTypeSystemType(packageName());
+    Q_ASSERT(moduleEntry);
+    getCode(snips, moduleEntry);
+
     const FunctionGroupMap &functionGroups = getFunctionGroups();
     for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         for (AbstractMetaFunction *func : it.value())
