@@ -2572,18 +2572,27 @@ static QString processInstantiationsVariableName(const AbstractMetaType* type)
     }
     return res;
 }
+
+static void appendIndexSuffix(QString *s)
+{
+    if (!s->endsWith(QLatin1Char('_')))
+        s->append(QLatin1Char('_'));
+    s->append(QStringLiteral("IDX"));
+}
+
 QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass* metaClass, bool alternativeTemplateName)
 {
     if (alternativeTemplateName) {
         const AbstractMetaClass* templateBaseClass = metaClass->templateBaseClass();
         if (!templateBaseClass)
             return QString();
-        QString base = _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
-        QString instantiations;
+        QString result = QLatin1String("SBK_")
+            + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
         const AbstractMetaTypeList &templateBaseClassInstantiations = metaClass->templateBaseClassInstantiations();
         for (const AbstractMetaType *instantiation : templateBaseClassInstantiations)
-            instantiations += processInstantiationsVariableName(instantiation);
-        return QString::fromLatin1("SBK_%1%2_IDX").arg(base, instantiations);
+            result += processInstantiationsVariableName(instantiation);
+        appendIndexSuffix(&result);
+        return result;
     }
     return getTypeIndexVariableName(metaClass->typeEntry());
 }
@@ -2594,13 +2603,19 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
         if (trueType->basicReferencedTypeEntry())
             type = trueType->basicReferencedTypeEntry();
     }
-    return QString::fromLatin1("SBK_%1_IDX").arg(_fixedCppTypeName(type->qualifiedCppName()).toUpper());
+    QString result = QLatin1String("SBK_")
+        + _fixedCppTypeName(type->qualifiedCppName()).toUpper();
+    appendIndexSuffix(&result);
+    return result;
 }
 QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType* type)
 {
-    return QString::fromLatin1("SBK%1%2_IDX")
-              .arg(type->typeEntry()->isContainer() ? QLatin1Char('_') + moduleName().toUpper() : QString(),
-                   processInstantiationsVariableName(type));
+    QString result = QLatin1String("SBK");
+    if (type->typeEntry()->isContainer())
+        result += QLatin1Char('_') + moduleName().toUpper();
+    result += processInstantiationsVariableName(type);
+    appendIndexSuffix(&result);
+    return result;
 }
 
 bool ShibokenGenerator::verboseErrorMessagesDisabled() const
