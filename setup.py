@@ -248,6 +248,7 @@ setup(
     description = ("Python bindings for the Qt cross-platform application and "
         "UI framework"),
     long_description = README + "\n\n" + CHANGES,
+    long_description_content_type = 'text/markdown',
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
