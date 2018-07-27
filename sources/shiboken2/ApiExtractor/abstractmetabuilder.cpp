@@ -474,7 +474,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const ClassList &typeValues = dom->classes();
     ReportHandler::setProgressReference(typeValues);
     for (const ClassModelItem &item : typeValues) {
-        ReportHandler::progress(QLatin1String("Generating class model..."));
+        ReportHandler::progress(QStringLiteral("Generating class model (%1)...")
+                                .arg(typeValues.size()));
         AbstractMetaClass *cls = traverseClass(dom, item);
         if (!cls)
             continue;
@@ -486,7 +487,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const EnumList &enums = dom->enums();
     ReportHandler::setProgressReference(enums);
     for (const EnumModelItem &item : enums) {
-        ReportHandler::progress(QLatin1String("Generating enum model..."));
+        ReportHandler::progress(QStringLiteral("Generating enum model (%1)...")
+                                .arg(enums.size()));
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
         if (metaEnum) {
             if (metaEnum->typeEntry()->generateCode())
@@ -497,7 +499,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const QSet<NamespaceModelItem> &namespaceTypeValues = dom->uniqueNamespaces();
     ReportHandler::setProgressReference(namespaceTypeValues);
     for (const NamespaceModelItem &item : namespaceTypeValues) {
-        ReportHandler::progress(QLatin1String("Generating namespace model..."));
+        ReportHandler::progress(QStringLiteral("Generating namespace model (%1)...")
+                                .arg(namespaceTypeValues.size()));
         AbstractMetaClass *metaClass = traverseNamespace(dom, item);
         if (metaClass)
             m_metaClasses << metaClass;
@@ -508,7 +511,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const TypeDefList typeDefs = dom->typeDefs();
     ReportHandler::setProgressReference(typeDefs);
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        ReportHandler::progress(QLatin1String("Resolving typedefs..."));
+        ReportHandler::progress(QStringLiteral("Resolving typedefs (%1)...")
+                                .arg(typeDefs.size()));
         AbstractMetaClass* cls = traverseTypeDef(dom, typeDef);
         addAbstractMetaClass(cls);
     }
@@ -580,7 +584,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + QLatin1String("$ConcreteWrapper"));
     }
     const auto &allEntries = types->entries();
-    ReportHandler::progress(QLatin1String("Detecting inconsistencies in typesystem..."));
+    ReportHandler::progress(QStringLiteral("Detecting inconsistencies in typesystem (%1)...")
+                            .arg(allEntries.size()));
     for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
         TypeEntry *entry = it.value();
         if (!entry->isPrimitive()) {
