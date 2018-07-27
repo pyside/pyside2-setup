@@ -422,7 +422,7 @@
             converter.toCpp(pyIn, var.data());
             %out = var;
             </add-conversion>
-            <add-conversion type="PyDict">
+            <add-conversion type="PyDict" check="PyDict_CheckExact(%in)">
             QVariant ret = QVariant_convertToVariantMap(%in);
             %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
