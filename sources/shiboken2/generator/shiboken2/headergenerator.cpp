@@ -283,46 +283,56 @@ void HeaderGenerator::writeFunction(QTextStream& s, const AbstractMetaFunction* 
     }
 }
 
-static void _writeTypeIndexDefineLine(QTextStream& s, const QString& variableName, int typeIndex)
+static void _writeTypeIndexValue(QTextStream& s, const QString& variableName,
+                                 int typeIndex)
 {
-    s << "#define ";
-    s.setFieldWidth(60);
+    s << "    ";
+    s.setFieldWidth(56);
     s << variableName;
     s.setFieldWidth(0);
-    s << ' ' << typeIndex << endl;
+    s << " = " << typeIndex;
 }
-void HeaderGenerator::writeTypeIndexDefineLine(QTextStream& s, const TypeEntry* typeEntry)
+
+static inline void _writeTypeIndexValueLine(QTextStream& s,
+                                            const QString& variableName,
+                                            int typeIndex)
+{
+    _writeTypeIndexValue(s, variableName, typeIndex);
+    s << ",\n";
+}
+
+void HeaderGenerator::writeTypeIndexValueLine(QTextStream& s, const TypeEntry* typeEntry)
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
     s.setFieldAlignment(QTextStream::AlignLeft);
     const int typeIndex = typeEntry->sbkIndex();
-    _writeTypeIndexDefineLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
+    _writeTypeIndexValueLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
     if (typeEntry->isComplex()) {
         const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(typeEntry);
         if (cType->baseContainerType()) {
             const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), cType);
             if (metaClass->templateBaseClass())
-                _writeTypeIndexDefineLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
+                _writeTypeIndexValueLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
         }
     }
     if (typeEntry->isEnum()) {
         const EnumTypeEntry* ete = static_cast<const EnumTypeEntry*>(typeEntry);
         if (ete->flags())
-            writeTypeIndexDefineLine(s, ete->flags());
+            writeTypeIndexValueLine(s, ete->flags());
     }
 }
 
-void HeaderGenerator::writeTypeIndexDefine(QTextStream& s, const AbstractMetaClass* metaClass)
+void HeaderGenerator::writeTypeIndexValueLines(QTextStream& s, const AbstractMetaClass* metaClass)
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
-    writeTypeIndexDefineLine(s, metaClass->typeEntry());
+    writeTypeIndexValueLine(s, metaClass->typeEntry());
     const AbstractMetaEnumList &enums = metaClass->enums();
     for (const AbstractMetaEnum *metaEnum : enums) {
         if (metaEnum->isPrivate())
             continue;
-        writeTypeIndexDefineLine(s, metaEnum->typeEntry());
+        writeTypeIndexValueLine(s, metaEnum->typeEntry());
     }
 }
 
@@ -341,39 +351,34 @@ bool HeaderGenerator::finishGeneration()
 
     Indentation indent(INDENT);
 
-    macrosStream << "// Type indices" << endl;
+    macrosStream << "// Type indices\nenum : int {\n";
     AbstractMetaEnumList globalEnums = this->globalEnums();
     const AbstractMetaClassList &classList = classes();
     for (const AbstractMetaClass *metaClass : classList) {
-        writeTypeIndexDefine(macrosStream, metaClass);
+        writeTypeIndexValueLines(macrosStream, metaClass);
         lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
     }
 
     for (const AbstractMetaEnum *metaEnum : qAsConst(globalEnums))
-        writeTypeIndexDefineLine(macrosStream, metaEnum->typeEntry());
+        writeTypeIndexValueLine(macrosStream, metaEnum->typeEntry());
 
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
     int smartPointerCount = 0;
     const QVector<const AbstractMetaType *> &instantiatedSmartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
-        QString variableName = getTypeIndexVariableName(metaType);
-        macrosStream << "#define ";
-        macrosStream.setFieldWidth(60);
-        macrosStream << variableName;
-        macrosStream.setFieldWidth(0);
-        macrosStream << ' ' << smartPointerCountIndex << " // " << metaType->cppSignature()
-                     << endl;
+        _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(metaType),
+                             smartPointerCountIndex);
+        macrosStream << ", // " << metaType->cppSignature() << endl;
         ++smartPointerCountIndex;
         ++smartPointerCount;
     }
 
+    _writeTypeIndexValue(macrosStream,
+                         QLatin1String("SBK_") + moduleName() + QLatin1String("_IDX_COUNT"),
+                         getMaxTypeIndex() + smartPointerCount);
+    macrosStream << "\n};\n";
 
-    macrosStream << "#define ";
-    macrosStream.setFieldWidth(60);
-    macrosStream << QLatin1String("SBK_") + moduleName() + QLatin1String("_IDX_COUNT");
-    macrosStream.setFieldWidth(0);
-    macrosStream << ' ' << getMaxTypeIndex() + smartPointerCount << endl << endl;
     macrosStream << "// This variable stores all Python types exported by this module." << endl;
     macrosStream << "extern PyTypeObject** " << cppApiVariableName() << ';' << endl << endl;
     macrosStream << "// This variable stores all type converters exported by this module." << endl;
@@ -381,7 +386,7 @@ bool HeaderGenerator::finishGeneration()
 
     // TODO-CONVERTER ------------------------------------------------------------------------------
     // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
-    macrosStream << "// Converter indices" << endl;
+    macrosStream << "// Converter indices\nenum : int {\n";
     const PrimitiveTypeEntryList &primitives = primitiveTypes();
     int pCount = 0;
     for (const PrimitiveTypeEntry *ptype : primitives) {
@@ -392,28 +397,22 @@ bool HeaderGenerator::finishGeneration()
         if (!ptype->generateCode() || !ptype->customConversion())
             continue;
 
-        _writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
+        _writeTypeIndexValueLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
     const QVector<const AbstractMetaType *> &containers = instantiatedContainers();
     for (const AbstractMetaType *container : containers) {
-        //_writeTypeIndexDefineLine(macrosStream, getTypeIndexVariableName(container), pCount);
-        // DEBUG
-        QString variableName = getTypeIndexVariableName(container);
-        macrosStream << "#define ";
-        macrosStream.setFieldWidth(60);
-        macrosStream << variableName;
-        macrosStream.setFieldWidth(0);
-        macrosStream << ' ' << pCount << " // " << container->cppSignature() << endl;
-        // DEBUG
+        _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(container), pCount);
+        macrosStream << ", // " << container->cppSignature() << endl;
         pCount++;
     }
 
     // Because on win32 the compiler will not accept a zero length array.
     if (pCount == 0)
         pCount++;
-    _writeTypeIndexDefineLine(macrosStream, QStringLiteral("SBK_%1_CONVERTERS_IDX_COUNT").arg(moduleName()), pCount);
-    macrosStream << endl;
+    _writeTypeIndexValue(macrosStream, QStringLiteral("SBK_%1_CONVERTERS_IDX_COUNT")
+                                       .arg(moduleName()), pCount);
+    macrosStream << "\n};\n";
     // TODO-CONVERTER ------------------------------------------------------------------------------
 
     macrosStream << "// Macros for type check" << endl;
