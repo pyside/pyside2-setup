@@ -133,21 +133,13 @@ struct EnumLookup
 template <class EnumType, Qt::CaseSensitivity cs>
 bool operator==(const EnumLookup<EnumType, cs> &e1, const EnumLookup<EnumType, cs> &e2)
 {
-#ifdef QTBUG_69389_FIXED
     return e1.name.compare(e2.name, cs) == 0;
-#else
-    return QtPrivate::compareStrings(e1.name, e2.name, cs) == 0;
-#endif
 }
 
 template <class EnumType, Qt::CaseSensitivity cs>
 bool operator<(const EnumLookup<EnumType, cs> &e1, const EnumLookup<EnumType, cs> &e2)
 {
-#ifdef QTBUG_69389_FIXED
     return e1.name.compare(e2.name, cs) < 0;
-#else
-    return QtPrivate::compareStrings(e1.name, e2.name, cs) < 0;
-#endif
 }
 
 // Helper macros to define lookup functions that take a QStringView needle
@@ -3142,7 +3134,7 @@ AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& si
 
 ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t,
                                    const QVersionNumber &vr) :
-    TypeEntry(QString(name).replace(QLatin1String(".*::"), QString()), t, vr),
+    TypeEntry(name, t, vr),
     m_qualifiedCppName(name),
     m_qobject(false),
     m_polymorphicBase(false),

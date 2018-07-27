@@ -476,11 +476,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (const ClassModelItem &item : typeValues) {
         ReportHandler::progress(QStringLiteral("Generating class model (%1)...")
                                 .arg(typeValues.size()));
-        AbstractMetaClass *cls = traverseClass(dom, item);
-        if (!cls)
-            continue;
-
-        addAbstractMetaClass(cls);
+        if (AbstractMetaClass *cls = traverseClass(dom, item))
+            addAbstractMetaClass(cls);
     }
 
     // We need to know all global enums
@@ -513,8 +510,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (const TypeDefModelItem &typeDef : typeDefs) {
         ReportHandler::progress(QStringLiteral("Resolving typedefs (%1)...")
                                 .arg(typeDefs.size()));
-        AbstractMetaClass* cls = traverseTypeDef(dom, typeDef);
-        addAbstractMetaClass(cls);
+        if (AbstractMetaClass *cls = traverseTypeDef(dom, typeDef))
+            addAbstractMetaClass(cls);
     }
 
     for (const ClassModelItem &item : typeValues)
@@ -768,9 +765,6 @@ void AbstractMetaBuilder::setLogDirectory(const QString& logDir)
 
 void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls)
 {
-    if (!cls)
-        return;
-
     cls->setOriginalAttributes(cls->attributes());
     if (cls->typeEntry()->isContainer()) {
         m_templates << cls;
