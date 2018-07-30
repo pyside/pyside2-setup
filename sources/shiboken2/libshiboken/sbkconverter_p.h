@@ -43,11 +43,11 @@
 #include "sbkpython.h"
 #include "sbkconverter.h"
 #include "sbkstring.h"
-#include <list>
 #include <limits>
 #include <typeinfo>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 #include "sbkdbg.h"
 
@@ -55,7 +55,7 @@ extern "C"
 {
 
 typedef std::pair<IsConvertibleToCppFunc, PythonToCppFunc> ToCppConversion;
-typedef std::list<ToCppConversion> ToCppConversionList;
+typedef std::vector<ToCppConversion> ToCppConversionVector;
 
 /**
  *  \internal
@@ -104,7 +104,7 @@ struct SbkConverter
      *  For Object Types, that never have implicit conversions, this
      *  list is always empty.
      */
-    ToCppConversionList     toCppConversions;
+    ToCppConversionVector   toCppConversions;
 };
 
 } // extern "C"

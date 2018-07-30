@@ -43,10 +43,10 @@
 #include "sbkpython.h"
 #include "basewrapper.h"
 
-#include <list>
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <string>
+#include <vector>
 
 struct SbkObject;
 struct SbkObjectType;
@@ -58,7 +58,7 @@ namespace Shiboken
     * This mapping associates a method and argument of an wrapper object with the wrapper of
     * said argument when it needs the binding to help manage its reference count.
     */
-typedef std::map<std::string, std::list<PyObject*> > RefCountMap;
+typedef std::unordered_multimap<std::string, PyObject *> RefCountMap;
 
 /// Linked list of SbkBaseWrapper pointers
 typedef std::set<SbkObject*> ChildrenList;
@@ -153,7 +153,7 @@ namespace Shiboken
 /**
  * Utility function used to transform a PyObject that implements sequence protocol into a std::list.
  **/
-std::list<SbkObject*> splitPyObject(PyObject* pyObj);
+std::vector<SbkObject *> splitPyObject(PyObject* pyObj);
 
 /**
 *   Visitor class used by walkOnClassHierarchy function.
@@ -189,6 +189,8 @@ private:
 class BaseAccumulatorVisitor : public HierarchyVisitor
 {
 public:
+    typedef std::vector<SbkObjectType *> Result;
+
     BaseAccumulatorVisitor() {}
 
     void visit(SbkObjectType* node)
@@ -196,9 +198,9 @@ public:
         m_bases.push_back(node);
     }
 
-    std::list<SbkObjectType*> bases() const { return m_bases; }
+    Result bases() const { return m_bases; }
 private:
-    std::list<SbkObjectType*> m_bases;
+    Result m_bases;
 };
 
 class GetIndexVisitor : public HierarchyVisitor
@@ -226,7 +228,7 @@ public:
     void visit(SbkObjectType* node);
     void done();
 protected:
-    std::list<std::pair<void*, SbkObjectType*> > m_ptrs;
+    std::vector<std::pair<void *, SbkObjectType *> > m_ptrs;
     SbkObject* m_pyObj;
 };
 
@@ -260,7 +262,7 @@ inline int getNumberOfCppBaseClasses(PyTypeObject* baseType)
     return visitor.count();
 }
 
-inline std::list<SbkObjectType*> getCppBaseClasses(PyTypeObject* baseType)
+inline std::vector<SbkObjectType *> getCppBaseClasses(PyTypeObject* baseType)
 {
     BaseAccumulatorVisitor visitor;
     walkThroughClassHierarchy(baseType, &visitor);

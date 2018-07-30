@@ -57,7 +57,7 @@ typedef std::unordered_map<const void *, SbkObject *> WrapperMap;
 class Graph
 {
 public:
-    typedef std::list<SbkObjectType*> NodeList;
+    typedef std::vector<SbkObjectType *> NodeList;
     typedef std::unordered_map<SbkObjectType *, NodeList> Edges;
 
     Edges m_edges;

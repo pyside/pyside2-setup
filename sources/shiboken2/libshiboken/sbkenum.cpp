@@ -47,7 +47,7 @@
 
 #include <string.h>
 #include <cstring>
-#include <list>
+#include <vector>
 
 #define SBK_ENUM(ENUM) reinterpret_cast<SbkEnumObject*>(ENUM)
 
@@ -347,7 +347,7 @@ public:
 private:
     DeclaredEnumTypes(const DeclaredEnumTypes&);
     DeclaredEnumTypes& operator=(const DeclaredEnumTypes&);
-    std::list<PyTypeObject*> m_enumTypes;
+    std::vector<PyTypeObject *> m_enumTypes;
 };
 
 namespace Enum {

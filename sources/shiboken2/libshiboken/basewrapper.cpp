@@ -125,10 +125,8 @@ static int SbkObject_traverse(PyObject* self, visitproc visit, void* arg)
     //Visit refs
     Shiboken::RefCountMap* rInfo = sbkSelf->d->referredObjects;
     if (rInfo) {
-        for (auto it = rInfo->begin(), end = rInfo->end(); it != end; ++it) {
-            for (PyObject *ref : it->second)
-                Py_VISIT(ref);
-        }
+        for (auto it = rInfo->begin(), end = rInfo->end(); it != end; ++it)
+            Py_VISIT(it->second);
     }
 
     if (sbkSelf->ob_dict)
@@ -322,7 +320,7 @@ PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* k
     Shiboken::ObjectType::initPrivateData(newType);
     SbkObjectTypePrivate *sotp = PepType_SOTP(newType);
 
-    std::list<SbkObjectType*> bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
+    const auto bases = Shiboken::getCppBaseClasses(reinterpret_cast<PyTypeObject*>(newType));
     if (bases.size() == 1) {
         SbkObjectTypePrivate *parentType = PepType_SOTP(bases.front());
         sotp->mi_offsets = parentType->mi_offsets;
@@ -449,9 +447,6 @@ void _destroyParentInfo(SbkObject* obj, bool keepReference)
 
 namespace Shiboken
 {
-
-static void decRefPyObjectList(const std::list<PyObject*> &pyObj, PyObject* skip = 0);
-
 static void _walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
 {
     PyObject* bases = currentType->tp_bases;
@@ -618,9 +613,9 @@ class FindBaseTypeVisitor : public HierarchyVisitor
         PyTypeObject* m_typeToFind;
 };
 
-std::list<SbkObject*> splitPyObject(PyObject* pyObj)
+std::vector<SbkObject *> splitPyObject(PyObject* pyObj)
 {
-    std::list<SbkObject*> result;
+    std::vector<SbkObject *> result;
     if (PySequence_Check(pyObj)) {
         AutoDecRef lst(PySequence_Fast(pyObj, "Invalid keep reference object."));
         if (!lst.isNull()) {
@@ -636,12 +631,11 @@ std::list<SbkObject*> splitPyObject(PyObject* pyObj)
     return result;
 }
 
-static void decRefPyObjectList(const std::list<PyObject*>& lst, PyObject *skip)
+template <class Iterator>
+inline void decRefPyObjectList(Iterator i1, Iterator i2)
 {
-    for (PyObject *o : lst) {
-        if (o != skip)
-            Py_DECREF(o);
-    }
+    for (; i1 != i2; ++i1)
+        Py_DECREF(i1->second);
 }
 
 namespace ObjectType
@@ -1004,10 +998,8 @@ static void recursive_invalidate(SbkObject* self, std::set<SbkObject*>& seen)
     // If has ref to other objects invalidate all
     if (self->d->referredObjects) {
         RefCountMap& refCountMap = *(self->d->referredObjects);
-        for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it) {
-            for (PyObject *o : it->second)
-                recursive_invalidate(o, seen);
-        }
+        for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it)
+            recursive_invalidate(it->second, seen);
     }
 }
 
@@ -1031,10 +1023,8 @@ void makeValid(SbkObject* self)
         RefCountMap& refCountMap = *(self->d->referredObjects);
         RefCountMap::iterator iter;
         for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it) {
-            for (PyObject *o : it->second) {
-                if (Shiboken::Object::checkType(o))
-                    makeValid(reinterpret_cast<SbkObject *>(o));
-            }
+            if (Shiboken::Object::checkType(it->second))
+                makeValid(reinterpret_cast<SbkObject *>(it->second));
         }
     }
 }
@@ -1415,54 +1405,56 @@ void* getTypeUserData(SbkObject* wrapper)
     return PepType_SOTP(Py_TYPE(wrapper))->user_data;
 }
 
-void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)
+static inline bool isNone(const PyObject *o)
 {
-    bool isNone = (!referredObject || (referredObject == Py_None));
+    return o == nullptr || o == Py_None;
+}
 
-    if (!self->d->referredObjects)
-        self->d->referredObjects = new Shiboken::RefCountMap;
-
-    RefCountMap& refCountMap = *(self->d->referredObjects);
-    RefCountMap::iterator iter = refCountMap.find(key);
-    if (iter != refCountMap.end()) {
-        const auto found = std::find(iter->second.begin(), iter->second.end(), referredObject);
-        // skip if objects already exists
-        if (found != iter->second.end())
-            return;
-    }
-
-    if (append && !isNone) {
-        refCountMap[key].push_back(referredObject);
-        Py_INCREF(referredObject);
-    } else if (!append) {
-        if (iter != refCountMap.end() && !iter->second.empty())
-            decRefPyObjectList(iter->second, isNone ? 0 : referredObject);
-        if (isNone) {
-            if (iter != refCountMap.end())
-                refCountMap.erase(iter);
-        } else {
-            RefCountMap::mapped_type objects;
-            objects.push_back(referredObject);
-            refCountMap[key] = objects;
-            Py_INCREF(referredObject);
+static void removeRefCountKey(SbkObject* self, const char *key)
+{
+    if (self->d->referredObjects) {
+        const auto iterPair = self->d->referredObjects->equal_range(key);
+        if (iterPair.first != iterPair.second) {
+            decRefPyObjectList(iterPair.first, iterPair.second);
+            self->d->referredObjects->erase(iterPair.first, iterPair.second);
         }
     }
 }
 
-void removeReference(SbkObject* self, const char* key, PyObject* referredObject)
+void keepReference(SbkObject* self, const char* key, PyObject* referredObject, bool append)
 {
-    if (!referredObject || (referredObject == Py_None))
+    if (isNone(referredObject)) {
+        removeRefCountKey(self, key);
         return;
+    }
 
-    if (!self->d->referredObjects)
+    if (!self->d->referredObjects) {
+        self->d->referredObjects =
+            new Shiboken::RefCountMap{RefCountMap::value_type{key, referredObject}};
+        Py_INCREF(referredObject);
         return;
+    }
 
     RefCountMap& refCountMap = *(self->d->referredObjects);
-    RefCountMap::iterator iter = refCountMap.find(key);
-    if (iter != refCountMap.end()) {
-        decRefPyObjectList(iter->second);
-        refCountMap.erase(iter);
+    const auto iterPair = refCountMap.equal_range(key);
+    if (std::any_of(iterPair.first, iterPair.second,
+                    [referredObject](const RefCountMap::value_type &v) { return v.second == referredObject; })) {
+        return;
     }
+
+    if (!append && iterPair.first != iterPair.second) {
+        decRefPyObjectList(iterPair.first, iterPair.second);
+        refCountMap.erase(iterPair.first, iterPair.second);
+    }
+
+    refCountMap.insert(RefCountMap::value_type{key, referredObject});
+    Py_INCREF(referredObject);
+}
+
+void removeReference(SbkObject* self, const char* key, PyObject* referredObject)
+{
+    if (!isNone(referredObject))
+        removeRefCountKey(self, key);
 }
 
 void clearReferences(SbkObject* self)
@@ -1472,25 +1464,26 @@ void clearReferences(SbkObject* self)
 
     RefCountMap& refCountMap = *(self->d->referredObjects);
     for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it)
-        decRefPyObjectList(it->second);
+        Py_DECREF(it->second);
     self->d->referredObjects->clear();
 }
 
 std::string info(SbkObject* self)
 {
     std::ostringstream s;
-    std::list<SbkObjectType*> bases;
 
     if (self->d && self->d->cptr) {
+        std::vector<SbkObjectType *> bases;
         if (ObjectType::isUserType(Py_TYPE(self)))
             bases = getCppBaseClasses(Py_TYPE(self));
         else
             bases.push_back(reinterpret_cast<SbkObjectType*>(Py_TYPE(self)));
 
         s << "C++ address....... ";
-        std::list<SbkObjectType*>::const_iterator it = bases.begin();
-        for (int i = 0; it != bases.end(); ++it, ++i)
-            s << reinterpret_cast<PyTypeObject *>(*it)->tp_name << '/' << self->d->cptr[i] << ' ';
+        for (size_t i = 0, size = bases.size(); i < size; ++i) {
+            auto base = reinterpret_cast<PyTypeObject *>(bases[i]);
+            s << base->tp_name << '/' << self->d->cptr[i] << ' ';
+        }
         s << "\n";
     }
     else {
@@ -1521,15 +1514,16 @@ std::string info(SbkObject* self)
     if (self->d->referredObjects && self->d->referredObjects->size()) {
         Shiboken::RefCountMap& map = *self->d->referredObjects;
         s << "referred objects.. ";
+        std::string lastKey;
         for (auto it = map.begin(), end = map.end(); it != end; ++it) {
-            if (it != map.begin())
-                s << "                   ";
-            s << '"' << it->first << "\" => ";
-            for (PyObject *o : it->second) {
-                Shiboken::AutoDecRef obj(PyObject_Str(o));
-                s << String::toCString(obj) << ' ';
+            if (it->first != lastKey) {
+                if (!lastKey.empty())
+                    s << "                   ";
+                s << '"' << it->first << "\" => ";
+                lastKey = it->first;
             }
-            s << ' ';
+            Shiboken::AutoDecRef obj(PyObject_Str(it->second));
+            s << String::toCString(obj) << ' ';
         }
         s << '\n';
     }
