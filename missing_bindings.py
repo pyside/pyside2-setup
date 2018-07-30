@@ -216,7 +216,7 @@ qt_documentation_website_prefixes['5.6'] = 'http://doc.qt.io/qt-5.6/'
 qt_documentation_website_prefixes['5.8'] = 'http://doc.qt.io/qt-5.8/'
 qt_documentation_website_prefixes['5.9'] = 'http://doc.qt.io/qt-5.9/'
 qt_documentation_website_prefixes['5.10'] = 'http://doc.qt.io/qt-5.10/'
-qt_documentation_website_prefixes['5.11'] = 'http://doc-snapshots.qt.io/qt5-5.11/'
+qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5/'
 qt_documentation_website_prefixes['dev'] = 'http://doc-snapshots.qt.io/qt5-dev/'
 
 
@@ -305,8 +305,8 @@ def log(*pargs, **kw):
 
 log('PySide2 bindings for Qt {}'.format(args.version), style='heading1')
 
-log("""Using Qt version {} documentation to find public API Qt types and test "
-    "if the types are present in the PySide2 package.""".format(args.version))
+log("""Using Qt version {} documentation to find public API Qt types and test
+if the types are present in the PySide2 package.""".format(args.version))
 
 log("""Results are usually stored at
 https://wiki.qt.io/PySide2_Missing_Bindings
