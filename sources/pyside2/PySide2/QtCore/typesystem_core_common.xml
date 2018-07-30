@@ -426,7 +426,7 @@
             QVariant ret = QVariant_convertToVariantMap(%in);
             %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
-            <add-conversion type="PySequence">
+            <add-conversion type="PyList" check="PyList_Check(%in)">
             QVariant ret = QVariant_convertToVariantList(%in);
             %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
