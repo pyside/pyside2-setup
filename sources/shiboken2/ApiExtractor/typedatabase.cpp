@@ -204,11 +204,8 @@ TypeEntry* TypeDatabase::findType(const QString& name) const
 
 TypeEntryMultiMapConstIteratorRange TypeDatabase::findTypes(const QString &name) const
 {
-    const auto lower = m_entries.lowerBound(name);
-    const auto end = m_entries.constEnd();
-    return lower != end && lower.key() == name
-        ? TypeEntryMultiMapConstIteratorRange{lower, m_entries.upperBound(name)}
-        : TypeEntryMultiMapConstIteratorRange{end, end};
+    const auto range = m_entries.equal_range(name);
+    return {range.first, range.second};
 }
 
 PrimitiveTypeEntryList TypeDatabase::primitiveTypes() const
