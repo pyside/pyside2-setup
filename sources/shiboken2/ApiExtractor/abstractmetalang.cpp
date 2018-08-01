@@ -2459,6 +2459,8 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
             d << " [final]";
         if (ac->m_baseClass)
             d << ", inherits \"" << ac->m_baseClass->name() << '"';
+        if (ac->m_templateBaseClass)
+            d << ", inherits template \"" << ac->m_templateBaseClass->name() << '"';
         const AbstractMetaEnumList &enums = ac->enums();
         if (!enums.isEmpty())
             d << ", enums[" << enums.size() << "]=" << enums;
