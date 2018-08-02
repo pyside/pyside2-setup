@@ -397,6 +397,9 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
 
 int main(int argc, char *argv[])
 {
+    // PYSIDE-757: Request a deterministic ordering of QHash in the code model
+    // and type system.
+    qSetGlobalQHashSeed(0);
     QElapsedTimer timer;
     timer.start();
     // needed by qxmlpatterns
