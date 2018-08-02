@@ -57,6 +57,16 @@ QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa)
 }
 #endif // !QT_NO_DEBUG_STREAM
 
+template <class MetaClass>
+MetaClass *findByName(QVector<MetaClass *> haystack, QStringView needle)
+{
+    for (MetaClass *c : haystack) {
+        if (c->name() == needle)
+            return c;
+    }
+    return nullptr;
+}
+
 /*******************************************************************************
  * AbstractMetaVariable
  */
@@ -1117,6 +1127,13 @@ bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
     return a->signature() < b->signature();
 }
 
+AbstractMetaFunction *
+AbstractMetaFunction::find(const AbstractMetaFunctionList &haystack,
+                           const QString &needle)
+{
+    return findByName(haystack, needle);
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 static inline void formatMetaFunctionBrief(QDebug &d, const AbstractMetaFunction *af)
 {
@@ -1513,11 +1530,7 @@ bool AbstractMetaClass::hasFunction(const QString &str) const
 
 const AbstractMetaFunction* AbstractMetaClass::findFunction(const QString& functionName) const
 {
-    for (const AbstractMetaFunction *f : m_functions) {
-        if (f->name() == functionName)
-            return f;
-    }
-    return 0;
+    return AbstractMetaFunction::find(m_functions, functionName);
 }
 
 bool AbstractMetaClass::hasProtectedFunctions() const
@@ -1618,6 +1631,11 @@ AbstractMetaField *AbstractMetaField::copy() const
     return returned;
 }
 
+AbstractMetaField *AbstractMetaField::find(const AbstractMetaFieldList &haystack,
+                                           const QString &needle)
+{
+    return findByName(haystack, needle);
+}
 /*******************************************************************************
  * Indicates that this field has a modification that removes it
  */
@@ -2013,13 +2031,15 @@ void AbstractMetaClass::setInterfaces(const AbstractMetaClassList &interfaces)
     }
 }
 
+AbstractMetaField *AbstractMetaClass::findField(const QString &name) const
+{
+    return AbstractMetaField::find(m_fields, name);
+}
 
 AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
 {
-    for (AbstractMetaEnum *e : qAsConst(m_enums)) {
-        if (e->name() == enumName)
-            return e;
-    }
+    if (AbstractMetaEnum *e = findByName(m_enums, enumName))
+        return e;
 
     if (typeEntry()->designatedInterface())
         return extractInterface()->findEnum(enumName);

@@ -727,6 +727,9 @@ public:
 
     AbstractMetaField *copy() const;
 
+    static AbstractMetaField *
+        find(const AbstractMetaFieldList &haystack, const QString &needle);
+
 private:
     mutable AbstractMetaFunction *m_getter = nullptr;
     mutable AbstractMetaFunction *m_setter = nullptr;
@@ -1079,6 +1082,9 @@ public:
 
     bool isCallOperator() const;
 
+    static AbstractMetaFunction *
+        find(const AbstractMetaFunctionList &haystack, const QString &needle);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebugVerbose(QDebug &d) const;
 #endif
@@ -1408,6 +1414,8 @@ public:
     {
         m_fields << field;
     }
+
+    AbstractMetaField *findField(const QString &name) const;
 
     AbstractMetaEnumList enums() const
     {

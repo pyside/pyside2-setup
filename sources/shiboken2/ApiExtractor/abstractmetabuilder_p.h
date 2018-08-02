@@ -142,9 +142,8 @@ public:
     bool inheritTemplate(AbstractMetaClass *subclass,
                          const AbstractMetaClass *templateClass,
                          const TypeInfo &info);
-    AbstractMetaType *inheritTemplateType(const QVector<AbstractMetaType *> &templateTypes,
-                                          const AbstractMetaType *metaType,
-                                          bool *ok = Q_NULLPTR);
+    AbstractMetaType *inheritTemplateType(const AbstractMetaTypeList &templateTypes,
+                                          const AbstractMetaType *metaType);
 
     bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
     bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);

@@ -2752,52 +2752,48 @@ bool AbstractMetaBuilderPrivate::ancestorHasPrivateCopyConstructor(const Abstrac
     return false;
 }
 
-AbstractMetaType* AbstractMetaBuilderPrivate::inheritTemplateType(const QVector<AbstractMetaType *> &templateTypes,
-                                                                  const AbstractMetaType *metaType,
-                                                                  bool *ok)
+AbstractMetaType *
+    AbstractMetaBuilderPrivate::inheritTemplateType(const AbstractMetaTypeList &templateTypes,
+                                                    const AbstractMetaType *metaType)
 {
-    if (ok)
-        *ok = true;
-    if (!metaType || (!metaType->typeEntry()->isTemplateArgument() && !metaType->hasInstantiations()))
-        return metaType ? metaType->copy() : 0;
+    Q_ASSERT(metaType);
 
-    AbstractMetaType *returned = metaType->copy();
-    returned->setOriginalTemplateType(metaType->copy());
+    QScopedPointer<AbstractMetaType> returned(metaType->copy());
+
+    if (!metaType->typeEntry()->isTemplateArgument() && !metaType->hasInstantiations())
+        return returned.take();
+
+    returned->setOriginalTemplateType(metaType);
 
     if (returned->typeEntry()->isTemplateArgument()) {
         const TemplateArgumentEntry* tae = static_cast<const TemplateArgumentEntry*>(returned->typeEntry());
 
         // If the template is intantiated with void we special case this as rejecting the functions that use this
         // parameter from the instantiation.
-        if (templateTypes.size() <= tae->ordinal() || templateTypes.at(tae->ordinal())->typeEntry()->name() == QLatin1String("void")) {
-            if (ok)
-                *ok = false;
-            return 0;
-        }
+        const AbstractMetaType *templateType = templateTypes.value(tae->ordinal());
+        if (!templateType || templateType->typeEntry()->isVoid())
+            return nullptr;
 
         AbstractMetaType* t = returned->copy();
-        t->setTypeEntry(templateTypes.at(tae->ordinal())->typeEntry());
-        t->setIndirections(templateTypes.at(tae->ordinal())->indirections() + t->indirections() ? 1 : 0);
+        t->setTypeEntry(templateType->typeEntry());
+        t->setIndirections(templateType->indirections() + t->indirections() ? 1 : 0);
         t->decideUsagePattern();
 
-        delete returned;
-        returned = inheritTemplateType(templateTypes, t, ok);
-        if (ok && !(*ok))
-            return 0;
+        return inheritTemplateType(templateTypes, t);
     }
 
     if (returned->hasInstantiations()) {
         AbstractMetaTypeList instantiations = returned->instantiations();
         for (int i = 0; i < instantiations.count(); ++i) {
-            AbstractMetaType *type = instantiations[i];
-            instantiations[i] = inheritTemplateType(templateTypes, type, ok);
-            if (ok && !(*ok))
-                return 0;
+            instantiations[i] =
+                inheritTemplateType(templateTypes, instantiations.at(i));
+            if (!instantiations.at(i))
+                return nullptr;
         }
         returned->setInstantiations(instantiations, true);
     }
 
-    return returned;
+    return returned.take();
 }
 
 bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
@@ -2850,38 +2846,38 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         }
     }
 
-    AbstractMetaFunctionList funcs = subclass->functions();
+    const AbstractMetaFunctionList &subclassFuncs = subclass->functions();
     const AbstractMetaFunctionList &templateClassFunctions = templateClass->functions();
     for (const AbstractMetaFunction *function : templateClassFunctions) {
-        if (function->isModifiedRemoved(TypeSystem::All))
+        // If the function is modified or the instantiation has an equally named
+        // function we have shadowing, so we need to skip it.
+        if (function->isModifiedRemoved(TypeSystem::All)
+            || AbstractMetaFunction::find(subclassFuncs, function->name()) != nullptr) {
             continue;
+        }
 
-        AbstractMetaFunction *f = function->copy();
+        QScopedPointer<AbstractMetaFunction> f(function->copy());
         f->setArguments(AbstractMetaArgumentList());
 
-        bool ok = true;
-        AbstractMetaType *ftype = function->type();
-        f->replaceType(inheritTemplateType(templateTypes, ftype, &ok));
-        if (!ok) {
-            delete f;
-            continue;
+        if (function->type()) { // Non-void
+            AbstractMetaType *returnType = inheritTemplateType(templateTypes, function->type());
+            if (!returnType)
+                continue;
+            f->replaceType(returnType);
         }
 
         const AbstractMetaArgumentList &arguments = function->arguments();
         for (AbstractMetaArgument *argument : arguments) {
-            AbstractMetaType* atype = argument->type();
-
-            AbstractMetaArgument *arg = argument->copy();
-            arg->replaceType(inheritTemplateType(templateTypes, atype, &ok));
-            if (!ok)
+            AbstractMetaType *argType = inheritTemplateType(templateTypes, argument->type());
+            if (!argType)
                 break;
+            AbstractMetaArgument *arg = argument->copy();
+            arg->replaceType(argType);
             f->addArgument(arg);
         }
 
-        if (!ok) {
-            delete f;
+        if (f->arguments().size() < function->arguments().size())
             continue;
-        }
 
         // There is no base class in the target language to inherit from here, so
         // the template instantiation is the class that implements the function.
@@ -2892,23 +2888,11 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         // on the inherited functions.
         f->setDeclaringClass(subclass);
 
-
-        if (f->isConstructor() && subclass->isTypeDef()) {
+        if (f->isConstructor()) {
+            if (!subclass->isTypeDef())
+                continue;
             f->setName(subclass->name());
             f->setOriginalName(subclass->name());
-        } else if (f->isConstructor()) {
-            delete f;
-            continue;
-        }
-
-        // if the instantiation has a function named the same as an existing
-        // function we have shadowing so we need to skip it.
-        const bool found =
-            std::any_of(funcs.cbegin(), funcs.cend(),
-                        [f] (const AbstractMetaFunction *needle) { return needle->name() == f->name(); });
-        if (found) {
-            delete f;
-            continue;
         }
 
         ComplexTypeEntry* te = subclass->typeEntry();
@@ -2935,7 +2919,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
             te->addFunctionModification(mod);
         }
 
-        subclass->addFunction(f);
+        subclass->addFunction(f.take());
     }
 
     subclass->setTemplateBaseClass(templateClass);
