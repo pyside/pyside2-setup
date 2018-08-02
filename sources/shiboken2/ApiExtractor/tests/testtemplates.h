@@ -46,6 +46,8 @@ private slots:
     void testTemplateInheritanceMixedWithNamespaceAndForwardDeclaration();
     void testTypedefOfInstantiationOfTemplateClass();
     void testContainerTypeIncompleteArgument();
+    void testTemplateTypeDefs_data();
+    void testTemplateTypeDefs();
 };
 
 #endif

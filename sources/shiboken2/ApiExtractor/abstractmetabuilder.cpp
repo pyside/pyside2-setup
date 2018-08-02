@@ -2922,6 +2922,26 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         subclass->addFunction(f.take());
     }
 
+    const AbstractMetaFieldList &subClassFields = subclass->fields();
+    const AbstractMetaFieldList &templateClassFields = templateClass->fields();
+    for (const AbstractMetaField *field : templateClassFields) {
+        // If the field is modified or the instantiation has a field named
+        // the same as an existing field we have shadowing, so we need to skip it.
+        if (field->isModifiedRemoved(TypeSystem::All)
+            || field->attributes().testFlag(AbstractMetaAttributes::Static)
+            || AbstractMetaField::find(subClassFields, field->name()) != nullptr) {
+            continue;
+        }
+
+        QScopedPointer<AbstractMetaField> f(field->copy());
+        f->setEnclosingClass(subclass);
+        AbstractMetaType *fieldType = inheritTemplateType(templateTypes, field->type());
+        if (!fieldType)
+            continue;
+        f->replaceType(fieldType);
+        subclass->addField(f.take());
+    }
+
     subclass->setTemplateBaseClass(templateClass);
     subclass->setTemplateBaseClassInstantiations(templateTypes);
     subclass->setInterfaces(templateClass->interfaces());

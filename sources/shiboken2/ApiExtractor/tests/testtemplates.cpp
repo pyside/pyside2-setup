@@ -28,6 +28,7 @@
 
 #include "testtemplates.h"
 #include <QtTest/QTest>
+#include <QtCore/QTextStream>
 #include <QTemporaryFile>
 #include "testutil.h"
 #include <abstractmetalang.h>
@@ -436,6 +437,103 @@ typedef Vector<int> IntVector;
     QCOMPARE(otherMethod->signature(), QLatin1String("otherMethod()"));
     QVERIFY(otherMethod->type());
     QCOMPARE(otherMethod->type()->cppSignature(), QLatin1String("Vector<int >"));
+}
+
+// Perform checks on template inheritance; a typedef of a template class
+// should result in rewritten types.
+void TestTemplates::testTemplateTypeDefs_data()
+{
+    QTest::addColumn<QString>("cpp");
+    QTest::addColumn<QString>("xml");
+
+    const char optionalClassDef[] = R"CPP(
+template<class T> // Some value type similar to std::optional
+class Optional {
+public:
+    T value() const { return m_value; }
+    operator bool() const { return m_success; }
+
+    T m_value;
+    bool m_success  = false;
+};
+)CPP";
+
+    const char xmlPrefix[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <primitive-type name='bool'/>
+)XML";
+
+    const char xmlOptionalDecl[] = "<value-type name='Optional' generate='no'/>\n";
+    const char xmlOptionalIntDecl[] = "<value-type name='IntOptional'/>\n";
+    const char xmlPostFix[] = "</typesystem>\n";
+
+    // Flat, global namespace
+    QString cpp;
+    QTextStream(&cpp) << optionalClassDef
+        << "typedef Optional<int> IntOptional;\n";
+    QString xml;
+    QTextStream(&xml) << xmlPrefix << xmlOptionalDecl << xmlOptionalIntDecl
+        << xmlPostFix;
+    QTest::newRow("global-namespace")
+        << cpp << xml;
+
+    // Typedef from namespace Std
+    cpp.clear();
+    QTextStream(&cpp) << "namespace Std {\n" << optionalClassDef << "}\n"
+        << "typedef Std::Optional<int> IntOptional;\n";
+    xml.clear();
+    QTextStream(&xml) << xmlPrefix
+        << "<namespace-type name='Std'>\n" << xmlOptionalDecl
+        << "</namespace-type>\n" << xmlOptionalIntDecl
+        << xmlPostFix;
+    QTest::newRow("namespace-Std")
+        << cpp << xml;
+
+    // Typedef from nested class
+    cpp.clear();
+    QTextStream(&cpp) << "class Outer {\npublic:\n" << optionalClassDef << "\n};\n"
+        << "typedef Outer::Optional<int> IntOptional;\n";
+    xml.clear();
+    QTextStream(&xml) << xmlPrefix
+        << "<object-type name='Outer'>\n" << xmlOptionalDecl
+        << "</object-type>\n" << xmlOptionalIntDecl
+        << xmlPostFix;
+    QTest::newRow("nested-class")
+        << cpp << xml;
+}
+
+void TestTemplates::testTemplateTypeDefs()
+{
+    QFETCH(QString, cpp);
+    QFETCH(QString, xml);
+
+    const QByteArray cppBa = cpp.toLocal8Bit();
+    const QByteArray xmlBa = xml.toLocal8Bit();
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppBa.constData(), xmlBa.constData(), true));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+
+    const AbstractMetaClass *optional = AbstractMetaClass::findClass(classes, QLatin1String("Optional"));
+    QVERIFY(optional);
+
+    // Find the typedef'ed class
+    const AbstractMetaClass *optionalInt =
+        AbstractMetaClass::findClass(classes, QLatin1String("IntOptional"));
+    QVERIFY(optionalInt);
+    QCOMPARE(optionalInt->templateBaseClass(), optional);
+
+    // Check whether the value() method now has an 'int' return
+    const AbstractMetaFunction *valueMethod =
+        optionalInt->findFunction(QLatin1String("value"));
+    QVERIFY(valueMethod);
+    QCOMPARE(valueMethod->type()->cppSignature(), QLatin1String("int"));
+
+    // Check whether the m_value field is of type 'int'
+    const AbstractMetaField *valueField =
+        optionalInt->findField(QLatin1String("m_value"));
+    QVERIFY(valueField);
+    QCOMPARE(valueField->type()->cppSignature(), QLatin1String("int"));
 }
 
 QTEST_APPLESS_MAIN(TestTemplates)
