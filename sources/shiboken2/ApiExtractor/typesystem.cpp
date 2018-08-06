@@ -2723,6 +2723,13 @@ PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
     return baseReferencedTypeEntry ? baseReferencedTypeEntry : m_referencedTypeEntry;
 }
 
+TypeEntry *PrimitiveTypeEntry::clone() const
+{
+    return new PrimitiveTypeEntry(*this);
+}
+
+PrimitiveTypeEntry::PrimitiveTypeEntry(const PrimitiveTypeEntry &) = default;
+
 CodeSnipList TypeEntry::codeSnips() const
 {
     return m_codeSnips;
@@ -2778,6 +2785,13 @@ bool ComplexTypeEntry::hasDefaultConstructor() const
     return !m_defaultConstructor.isEmpty();
 }
 
+TypeEntry *ComplexTypeEntry::clone() const
+{
+    return new ComplexTypeEntry(*this);
+}
+
+ComplexTypeEntry::ComplexTypeEntry(const ComplexTypeEntry &) = default;
+
 QString ContainerTypeEntry::targetLangName() const
 {
 
@@ -2807,6 +2821,13 @@ QString ContainerTypeEntry::qualifiedCppName() const
         return QLatin1String("QStringList");
     return ComplexTypeEntry::qualifiedCppName();
 }
+
+TypeEntry *ContainerTypeEntry::clone() const
+{
+    return new ContainerTypeEntry(*this);
+}
+
+ContainerTypeEntry::ContainerTypeEntry(const ContainerTypeEntry &) = default;
 
 QString EnumTypeEntry::targetLangQualifier() const
 {
@@ -2838,6 +2859,20 @@ QString FlagsTypeEntry::targetLangApiName() const
 {
     return QLatin1String("jint");
 }
+
+TypeEntry *EnumTypeEntry::clone() const
+{
+    return new EnumTypeEntry(*this);
+}
+
+EnumTypeEntry::EnumTypeEntry(const EnumTypeEntry &) = default;
+
+TypeEntry *FlagsTypeEntry::clone() const
+{
+    return new FlagsTypeEntry(*this);
+}
+
+FlagsTypeEntry::FlagsTypeEntry(const FlagsTypeEntry &) = default;
 
 QString FlagsTypeEntry::qualifiedTargetLangName() const
 {
@@ -3201,25 +3236,60 @@ CustomConversion* TypeEntry::customConversion() const
     return m_customConversion;
 }
 
+TypeEntry *TypeEntry::clone() const
+{
+    return new TypeEntry(*this);
+}
+
+TypeEntry::TypeEntry(const TypeEntry &) = default;
+
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, TypeSystemType, vr)
 {
 }
+
+TypeEntry *TypeSystemTypeEntry::clone() const
+{
+    return new TypeSystemTypeEntry(*this);
+}
+
+TypeSystemTypeEntry::TypeSystemTypeEntry(const TypeSystemTypeEntry &) = default;
 
 VoidTypeEntry::VoidTypeEntry() :
     TypeEntry(QLatin1String("void"), VoidType, QVersionNumber(0, 0))
 {
 }
 
+TypeEntry *VoidTypeEntry::clone() const
+{
+    return new VoidTypeEntry(*this);
+}
+
+VoidTypeEntry::VoidTypeEntry(const VoidTypeEntry &) = default;
+
 VarargsTypeEntry::VarargsTypeEntry() :
     TypeEntry(QLatin1String("..."), VarargsType, QVersionNumber(0, 0))
 {
 }
 
+TypeEntry *VarargsTypeEntry::clone() const
+{
+    return new VarargsTypeEntry(*this);
+}
+
+VarargsTypeEntry::VarargsTypeEntry(const VarargsTypeEntry &) = default;
+
 TemplateArgumentEntry::TemplateArgumentEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, TemplateArgumentType, vr)
 {
 }
+
+TypeEntry *TemplateArgumentEntry::clone() const
+{
+    return new TemplateArgumentEntry(*this);
+}
+
+TemplateArgumentEntry::TemplateArgumentEntry(const TemplateArgumentEntry &) = default;
 
 ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr) :
     TypeEntry(QLatin1String("Array"), ArrayType, vr),
@@ -3239,6 +3309,13 @@ QString ArrayTypeEntry::targetLangApiName() const
         ? m_nestedType->targetLangApiName() + QLatin1String("Array")
         : QLatin1String("jobjectArray");
 }
+
+TypeEntry *ArrayTypeEntry::clone() const
+{
+    return new ArrayTypeEntry(*this);
+}
+
+ArrayTypeEntry::ArrayTypeEntry(const ArrayTypeEntry &) = default;
 
 EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName,
                              const QVersionNumber &vr) :
@@ -3262,6 +3339,13 @@ EnumValueTypeEntry::EnumValueTypeEntry(const QString &name, const QString &value
     m_enclosingEnum(enclosingEnum)
 {
 }
+
+TypeEntry *EnumValueTypeEntry::clone() const
+{
+    return new EnumValueTypeEntry(*this);
+}
+
+EnumValueTypeEntry::EnumValueTypeEntry(const EnumValueTypeEntry &) = default;
 
 FlagsTypeEntry::FlagsTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, FlagsType, vr)
@@ -3288,10 +3372,24 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &name,
 {
 }
 
+TypeEntry *SmartPointerTypeEntry::clone() const
+{
+    return new SmartPointerTypeEntry(*this);
+}
+
+SmartPointerTypeEntry::SmartPointerTypeEntry(const SmartPointerTypeEntry &) = default;
+
 NamespaceTypeEntry::NamespaceTypeEntry(const QString &name, const QVersionNumber &vr) :
     ComplexTypeEntry(name, NamespaceType, vr)
 {
 }
+
+TypeEntry *NamespaceTypeEntry::clone() const
+{
+    return new NamespaceTypeEntry(*this);
+}
+
+NamespaceTypeEntry::NamespaceTypeEntry(const NamespaceTypeEntry &) = default;
 
 ValueTypeEntry::ValueTypeEntry(const QString &name, const QVersionNumber &vr) :
     ComplexTypeEntry(name, BasicValueType, vr)
@@ -3307,6 +3405,13 @@ bool ValueTypeEntry::isNativeIdBased() const
 {
     return true;
 }
+
+TypeEntry *ValueTypeEntry::clone() const
+{
+    return new ValueTypeEntry(*this);
+}
+
+ValueTypeEntry::ValueTypeEntry(const ValueTypeEntry &) = default;
 
 ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr) :
     ComplexTypeEntry(name, t, vr)
@@ -3463,12 +3568,26 @@ QString InterfaceTypeEntry::qualifiedCppName() const
     return ComplexTypeEntry::qualifiedCppName().left(len);
 }
 
+TypeEntry *InterfaceTypeEntry::clone() const
+{
+    return new InterfaceTypeEntry(*this);
+}
+
+InterfaceTypeEntry::InterfaceTypeEntry(const InterfaceTypeEntry &) = default;
+
 FunctionTypeEntry::FunctionTypeEntry(const QString &name, const QString &signature,
                                      const QVersionNumber &vr) :
     TypeEntry(name, FunctionType, vr)
 {
     addSignature(signature);
 }
+
+TypeEntry *FunctionTypeEntry::clone() const
+{
+    return new FunctionTypeEntry(*this);
+}
+
+FunctionTypeEntry::FunctionTypeEntry(const FunctionTypeEntry &) = default;
 
 ObjectTypeEntry::ObjectTypeEntry(const QString &name, const QVersionNumber &vr)
     : ComplexTypeEntry(name, ObjectType, vr)
@@ -3484,3 +3603,10 @@ bool ObjectTypeEntry::isNativeIdBased() const
 {
     return true;
 }
+
+TypeEntry *ObjectTypeEntry::clone() const
+{
+    return new ObjectTypeEntry(*this);
+}
+
+ObjectTypeEntry::ObjectTypeEntry(const ObjectTypeEntry &) = default;

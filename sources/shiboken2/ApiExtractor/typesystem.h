@@ -520,7 +520,6 @@ class CustomConversion;
 
 class TypeEntry
 {
-    Q_DISABLE_COPY(TypeEntry)
     Q_GADGET
 public:
     enum Type {
@@ -872,10 +871,20 @@ public:
     void setCustomConversion(CustomConversion* customConversion);
     CustomConversion* customConversion() const;
 
+    virtual TypeEntry *clone() const;
+
 #ifndef QT_NO_DEBUG_STREAM
     virtual void formatDebug(QDebug &d) const;
 #endif
+
+protected:
+    TypeEntry(const TypeEntry &);
+
 private:
+    TypeEntry &operator=(const TypeEntry &) = delete;
+    TypeEntry &operator=(TypeEntry &&) = delete;
+    TypeEntry(TypeEntry &&) = delete;
+
     QString m_name;
     QString m_targetLangPackage;
     Type m_type;
@@ -899,18 +908,33 @@ class TypeSystemTypeEntry : public TypeEntry
 {
 public:
     explicit TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr);
+
+    TypeEntry *clone() const override;
+
+protected:
+    TypeSystemTypeEntry(const TypeSystemTypeEntry &);
 };
 
 class VoidTypeEntry : public TypeEntry
 {
 public:
     VoidTypeEntry();
+
+    TypeEntry *clone() const override;
+
+protected:
+    VoidTypeEntry(const VoidTypeEntry &);
 };
 
 class VarargsTypeEntry : public TypeEntry
 {
 public:
     VarargsTypeEntry();
+
+    TypeEntry *clone() const override;
+
+protected:
+    VarargsTypeEntry(const VarargsTypeEntry &);
 };
 
 class TemplateArgumentEntry : public TypeEntry
@@ -926,6 +950,11 @@ public:
     {
         m_ordinal = o;
     }
+
+    TypeEntry *clone() const override;
+
+protected:
+    TemplateArgumentEntry(const TemplateArgumentEntry &);
 
 private:
     int m_ordinal = 0;
@@ -947,6 +976,11 @@ public:
 
     QString targetLangName() const override;
     QString targetLangApiName() const override;
+
+    TypeEntry *clone() const override;
+
+protected:
+    ArrayTypeEntry(const ArrayTypeEntry &);
 
 private:
     const TypeEntry *m_nestedType;
@@ -1017,6 +1051,11 @@ public:
         m_preferredTargetLangType = b;
     }
 
+    TypeEntry *clone() const override;
+
+protected:
+    PrimitiveTypeEntry(const PrimitiveTypeEntry &);
+
 private:
     QString m_targetLangName;
     QString m_targetLangApiName;
@@ -1068,9 +1107,13 @@ public:
         return m_rejectedEnums;
     }
 
+    TypeEntry *clone() const override;
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
+protected:
+    EnumTypeEntry(const EnumTypeEntry &);
+
 private:
     QString m_packageName;
     QString m_qualifier;
@@ -1090,6 +1133,12 @@ public:
 
     QString value() const { return m_value; }
     const EnumTypeEntry* enclosingEnum() const { return m_enclosingEnum; }
+
+    TypeEntry *clone() const override;
+
+protected:
+    EnumValueTypeEntry(const EnumValueTypeEntry &);
+
 private:
     QString m_value;
     const EnumTypeEntry* m_enclosingEnum;
@@ -1130,6 +1179,11 @@ public:
     {
         m_enum = e;
     }
+
+    TypeEntry *clone() const override;
+
+protected:
+    FlagsTypeEntry(const FlagsTypeEntry &);
 
 private:
     QString m_originalName;
@@ -1310,9 +1364,14 @@ public:
     void setDefaultConstructor(const QString& defaultConstructor);
     bool hasDefaultConstructor() const;
 
+    TypeEntry *clone() const override;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
+protected:
+    ComplexTypeEntry(const ComplexTypeEntry &);
+
 private:
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
@@ -1368,9 +1427,14 @@ public:
     QString targetLangName() const override;
     QString qualifiedCppName() const override;
 
+    TypeEntry *clone() const override;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
+protected:
+    ContainerTypeEntry(const ContainerTypeEntry &);
+
 private:
     Type m_type;
 };
@@ -1394,6 +1458,11 @@ public:
         return m_refCountMethodName;
     }
 
+    TypeEntry *clone() const override;
+
+protected:
+    SmartPointerTypeEntry(const SmartPointerTypeEntry &);
+
 private:
     QString m_getterName;
     QString m_smartPointerType;
@@ -1404,6 +1473,11 @@ class NamespaceTypeEntry : public ComplexTypeEntry
 {
 public:
     explicit NamespaceTypeEntry(const QString &name, const QVersionNumber &vr);
+
+    TypeEntry *clone() const override;
+
+protected:
+    NamespaceTypeEntry(const NamespaceTypeEntry &);
 };
 
 
@@ -1416,8 +1490,11 @@ public:
 
     bool isNativeIdBased() const override;
 
+    TypeEntry *clone() const override;
+
 protected:
     explicit ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr);
+    ValueTypeEntry(const ValueTypeEntry &);
 };
 
 class InterfaceTypeEntry : public ComplexTypeEntry
@@ -1441,6 +1518,11 @@ public:
 
     bool isNativeIdBased() const override;
     QString qualifiedCppName() const override;
+
+    TypeEntry *clone() const override;
+
+protected:
+    InterfaceTypeEntry(const InterfaceTypeEntry &);
 
 private:
     ObjectTypeEntry *m_origin;
@@ -1466,6 +1548,12 @@ public:
     {
         return m_signatures.contains(signature);
     }
+
+    TypeEntry *clone() const override;
+
+protected:
+    FunctionTypeEntry(const FunctionTypeEntry &);
+
 private:
     QStringList m_signatures;
 };
@@ -1482,6 +1570,11 @@ public:
     }
 
     bool isNativeIdBased() const override;
+
+    TypeEntry *clone() const override;
+
+protected:
+    ObjectTypeEntry(const ObjectTypeEntry &);
 
 private:
     InterfaceTypeEntry *m_interface = nullptr;
