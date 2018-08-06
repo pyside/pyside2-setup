@@ -2,6 +2,12 @@ project(QtGui)
 
 qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
+set(QtGui_OPTIONAL_SRC)
+set(QtGui_DROPPED_ENTRIES)
+
+check_qt_class(QtGui QOpenGLTimeMonitor QtGui_OPTIONAL_SRC QtGui_DROPPED_ENTRIES)
+check_qt_class(QtGui QOpenGLTimerQuery  QtGui_OPTIONAL_SRC QtGui_DROPPED_ENTRIES)
+
 set(QtGui_SRC
 ${QtGui_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
@@ -96,8 +102,6 @@ ${QtGui_GEN_DIR}/qopenglpixeltransferoptions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengltexture_wrapper.cpp
 ${QtGui_GEN_DIR}/qopengltextureblitter_wrapper.cpp
-${QtGui_GEN_DIR}/qopengltimemonitor_wrapper.cpp
-${QtGui_GEN_DIR}/qopengltimerquery_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglversionprofile_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglvertexarrayobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglvertexarrayobject_binder_wrapper.cpp
@@ -203,7 +207,7 @@ ${QtGui_GEN_DIR}/qwhatsthisclickedevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qwheelevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
-
+${QtGui_OPTIONAL_SRC}
 # module is always needed
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )
@@ -237,7 +241,10 @@ create_pyside_module(QtGui
                      QtGui_SOURCE_DIR
                      QtGui_SRC
                      QPYTEXTOBJECT_MOC
-                     ${QtGui_BINARY_DIR}/typesystem_gui.xml)
+                     ${QtGui_BINARY_DIR}/typesystem_gui.xml
+                     ""
+                     ""
+                     QtGui_DROPPED_ENTRIES)
 
 install(FILES ${pyside2_SOURCE_DIR}/qpytextobject.h DESTINATION include/PySide2/QtGui/)
 
