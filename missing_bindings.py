@@ -376,7 +376,14 @@ for module_name in modules_to_test.keys():
     missing_types = []
     for qt_type in types_on_html_page:
         try:
-            pyside_qualified_type = 'pyside_tested_module.' + qt_type
+            pyside_qualified_type = 'pyside_tested_module.'
+
+            if "Charts" in module_name:
+                pyside_qualified_type += 'QtCharts.'
+            elif "DataVisualization" in module_name:
+                pyside_qualified_type += 'QtDataVisualization.'
+
+            pyside_qualified_type += qt_type
             o = eval(pyside_qualified_type)
         except:
             missing_type = qt_type
@@ -385,7 +392,14 @@ for module_name in modules_to_test.keys():
 
             is_present_in_pyqt = False
             try:
-                pyqt_qualified_type = 'pyqt_tested_module.' + qt_type
+                pyqt_qualified_type = 'pyqt_tested_module.'
+
+                if "Charts" in module_name:
+                    pyqt_qualified_type += 'QtCharts.'
+                elif "DataVisualization" in module_name:
+                    pyqt_qualified_type += 'QtDataVisualization.'
+
+                pyqt_qualified_type += qt_type
                 eval(pyqt_qualified_type)
                 missing_type += " (is present in PyQt5)"
                 missing_types_compared_to_pyqt += 1
