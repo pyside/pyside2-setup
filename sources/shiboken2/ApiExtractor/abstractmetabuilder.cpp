@@ -2842,7 +2842,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << "Ignoring template parameter " << templateParamName << " from "
-                << info.toString() << ", because I don't know what it is.";
+                << info.toString() << ". The corresponding type was not found in the typesystem.";
         }
     }
 
