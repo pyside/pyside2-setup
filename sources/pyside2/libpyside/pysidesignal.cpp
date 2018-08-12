@@ -352,8 +352,6 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
         if (isMethod || isFunction) {
             PyObject *function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
             PyCodeObject *objCode = reinterpret_cast<PyCodeObject *>(PyFunction_GET_CODE(function));
-            PyFunctionObject *function_obj = reinterpret_cast<PyFunctionObject *>(function);
-            functionName = Shiboken::String::toCString(PepFunction_GetName(function_obj));
             useSelf = isMethod;
             slotArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
             if (useSelf)

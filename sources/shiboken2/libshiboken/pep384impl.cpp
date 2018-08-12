@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "pep384impl.h"
+#include <autodecref.h>
 
 extern "C"
 {
@@ -465,7 +466,7 @@ _PepUnicode_AsString(PyObject *str)
     /*
      * We need to keep the string alive but cannot borrow the Python object.
      * Ugly easy way out: We re-code as an interned bytes string. This
-     * produces a pseudo-leak as long there are new strings.
+     * produces a pseudo-leak as long as there are new strings.
      * Typically, this function is used for name strings, and the dict size
      * will not grow so much.
      */
@@ -765,13 +766,7 @@ PepFunction_Get(PyObject *ob, const char *name)
     return ret;
 }
 
-/*****************************************************************************
- *
- * Support for funcobject.h
- *
- */
-
-// this became necessary after Windows was activated.
+// This became necessary after Windows was activated.
 
 PyTypeObject *PepFunction_TypePtr = NULL;
 
@@ -816,6 +811,95 @@ PepType_GetNameStr(PyTypeObject *type)
     if (nodots)
         ret = nodots + 1;
     return ret;
+}
+
+/*****************************************************************************
+ *
+ * Extra support for name mangling
+ *
+ */
+
+#ifdef Py_LIMITED_API
+// We keep these definitions local, because they don't work in Python 2.
+#define PyUnicode_GET_LENGTH(op)    PyUnicode_GetLength((PyObject *)(op))
+#define PyUnicode_READ_CHAR(u, i)   PyUnicode_ReadChar((PyObject *)(u), (i))
+#endif
+
+PyObject *
+_Pep_PrivateMangle(PyObject *self, PyObject *name)
+{
+    /*
+     * Name mangling: __private becomes _classname__private.
+     * This function is modelled after _Py_Mangle, but is optimized
+     * a little for our purpose.
+     */
+#if PY_VERSION_HEX < 0X03000000
+    const char *namestr = PyString_AsString(name);
+    if (namestr == NULL || namestr[0] != '_' || namestr[1] != '_') {
+        Py_INCREF(name);
+        return name;
+    }
+    size_t nlen = strlen(namestr);
+    /* Don't mangle __id__ or names with dots. */
+    if ((namestr[nlen-1] == '_' && namestr[nlen-2] == '_')
+        || strchr(namestr, '.')) {
+        Py_INCREF(name);
+        return name;
+    }
+#else
+    if (PyUnicode_READ_CHAR(name, 0) != '_' ||
+        PyUnicode_READ_CHAR(name, 1) != '_') {
+        Py_INCREF(name);
+        return name;
+    }
+    size_t nlen = PyUnicode_GET_LENGTH(name);
+    /* Don't mangle __id__ or names with dots. */
+    if ((PyUnicode_READ_CHAR(name, nlen-1) == '_' &&
+         PyUnicode_READ_CHAR(name, nlen-2) == '_') ||
+        PyUnicode_FindChar(name, '.', 0, nlen, 1) != -1) {
+        Py_INCREF(name);
+        return name;
+    }
+#endif
+    Shiboken::AutoDecRef privateobj(PyObject_GetAttrString(
+        reinterpret_cast<PyObject *>(Py_TYPE(self)), "__name__"));
+#ifndef Py_LIMITED_API
+    return _Py_Mangle(privateobj, name);
+#else
+    // For some reason, _Py_Mangle is not in the Limited API. Why?
+    size_t plen = PyUnicode_GET_LENGTH(privateobj);
+    /* Strip leading underscores from class name */
+    size_t ipriv = 0;
+    while (PyUnicode_READ_CHAR(privateobj, ipriv) == '_')
+        ipriv++;
+    if (ipriv == plen) {
+        Py_INCREF(name);
+        return name; /* Don't mangle if class is just underscores */
+    }
+    plen -= ipriv;
+
+    if (plen + nlen >= PY_SSIZE_T_MAX - 1) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "private identifier too large to be mangled");
+        return NULL;
+    }
+    size_t const amount = ipriv + 1 + plen + nlen;
+    size_t const big_stack = 1000;
+    wchar_t bigbuf[big_stack];
+    wchar_t *resbuf = amount <= big_stack ? bigbuf : (wchar_t *)malloc(sizeof(wchar_t) * amount);
+    if (!resbuf)
+        return 0;
+    /* ident = "_" + priv[ipriv:] + ident # i.e. 1+plen+nlen bytes */
+    resbuf[0] = '_';
+    if (PyUnicode_AsWideChar(privateobj, resbuf + 1, ipriv + plen) < 0)
+        return 0;
+    if (PyUnicode_AsWideChar(name, resbuf + ipriv + plen + 1, nlen) < 0)
+        return 0;
+    PyObject *result = PyUnicode_FromWideChar(resbuf + ipriv, 1 + plen + nlen);
+    if (amount > big_stack)
+        free(resbuf);
+    return result;
+#endif  // Py_LIMITED_API
 }
 
 /*****************************************************************************

@@ -5122,7 +5122,9 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, GeneratorContext &conte
             s << INDENT << "if (Shiboken::Object::isUserType(" PYTHON_SELF_VAR ")) {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyObject* meth = PyDict_GetItem(reinterpret_cast<PyTypeObject *>(Py_TYPE(" PYTHON_SELF_VAR "))->tp_dict, name);" << endl;
+                // PYSIDE-772: Perform optimized name mangling.
+                s << INDENT << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(" PYTHON_SELF_VAR ", name));" << endl;
+                s << INDENT << "PyObject *meth = PyDict_GetItem(Py_TYPE(" PYTHON_SELF_VAR ")->tp_dict, tmp);" << endl;
                 s << INDENT << "if (meth)" << endl;
                 {
                     Indentation indent(INDENT);

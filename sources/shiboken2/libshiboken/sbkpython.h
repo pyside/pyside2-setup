@@ -42,7 +42,13 @@
 
 #include "sbkversion.h"
 
+/*
+ * Python 2 has function _Py_Mangle directly in Python.h .
+ * This creates wrong language binding unless we define 'extern "C"' here.
+ */
+extern "C" {
 #include <Python.h>
+}
 #include <structmember.h>
 // Now we have the usual variables from Python.h .
 #include "python25compat.h"

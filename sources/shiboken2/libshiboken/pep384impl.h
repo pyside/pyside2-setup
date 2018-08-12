@@ -452,6 +452,15 @@ LIBSHIBOKEN_API PyObject *PyTime_FromTime(
 
 /*****************************************************************************
  *
+ * Extra support for name mangling
+ *
+ */
+
+// PYSIDE-772: This function supports the fix, but is not meant as public.
+LIBSHIBOKEN_API PyObject *_Pep_PrivateMangle(PyObject *self, PyObject *name);
+
+/*****************************************************************************
+ *
  * Extra support for signature.cpp
  *
  */
