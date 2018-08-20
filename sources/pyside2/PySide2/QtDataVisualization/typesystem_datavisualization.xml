@@ -118,7 +118,13 @@
     <object-type name="QCategory3DAxis"/>
     <object-type name="QLogValue3DAxisFormatter"/>
     <object-type name="QValue3DAxis"/>
-    <object-type name="QValue3DAxisFormatter"/>
+    <object-type name="QValue3DAxisFormatter">
+      <modify-function signature="populateCopy(QValue3DAxisFormatter&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="QAbstract3DSeries">
       <enum-type name="Mesh"/>
       <enum-type name="SeriesType"/>
@@ -126,9 +132,91 @@
     <object-type name="QAbstractDataProxy">
       <enum-type name="DataType"/>
     </object-type>
-    <object-type name="QBar3DSeries"/>
+    <object-type name="QBar3DSeries">
+      <modify-function signature="setDataProxy(QBarDataProxy*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <value-type name="QBarDataItem"/>
-    <object-type name="QBarDataProxy"/>
+    <object-type name="QBarDataProxy">
+      <modify-function signature="setDataProxy(QBarDataProxy*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="resetArray(QBarDataArray*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="resetArray(QBarDataArray*,const QStringList&amp;const QStringList&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addRow(QBarDataRow*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addRow(QBarDataRow*, const QString&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addRows(QBarDataArray&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addRows(QBarDataArray&amp;, const QString&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertRow(int, QBarDataRow*)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertRow(int, QBarDataRow*, const QString&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertRows(int, QBarDataArray&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertRows(int, QBarDataArray&amp;, const QString&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setRow(int, QBarDataRow*)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setRow(int, QBarDataRow*, const QString&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setRows(int, QBarDataArray&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setRows(int, QBarDataArray&amp;, const QString&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="QCustom3DItem"/>
     <object-type name="QCustom3DLabel"/>
     <object-type name="QCustom3DVolume"/>
@@ -140,28 +228,232 @@
     <object-type name="QItemModelSurfaceDataProxy">
       <enum-type name="MultiMatchBehavior"/>
     </object-type>
-    <object-type name="QScatter3DSeries"/>
+    <object-type name="QScatter3DSeries">
+      <modify-function signature="setDataProxy(QScatterDataProxy*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <value-type name="QScatterDataItem"/>
-    <object-type name="QScatterDataProxy"/>
+    <object-type name="QScatterDataProxy">
+      <modify-function signature="resetArray(QScatterDataArray*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addItem(const QScatterDataItem&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addItems(const QScatterDataArray&amp;)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertItem(int, const QScatterDataItem&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertItems(int, const QScatterDataArray&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setItem(int, const QScatterDataIteItem;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setItems(int, const QScatterDataArray&amp;)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="QSurface3DSeries">
-       <enum-type name="DrawFlag" flags="DrawFlags"/>
+      <enum-type name="DrawFlag" flags="DrawFlags"/>
+      <modify-function signature="QSurface3DSeries(QSurfaceDataProxy*,QObject*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setDataProxy(QSurfaceDataProxy*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
     </object-type>
     <value-type name="QSurfaceDataItem"/>
-    <object-type name="QSurfaceDataProxy"/>
-    <object-type name="Q3DBars"/>
+    <object-type name="QSurfaceDataProxy">
+      <modify-function signature="addRow(QSurfaceDataRow*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="insertRow(int, QSurfaceDataRow*)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setRow(int, QSurfaceDataRow*)">
+        <modify-argument index="2">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="resetArray(QSurfaceDataArray*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
+    <object-type name="Q3DBars">
+      <modify-function signature="addAxis(QAbstract3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="releaseAxis(QAbstract3DAxis*)">
+        <modify-argument index="1">
+          <reference-count action="set"/>
+        </modify-argument>
+        <inject-code>
+          Shiboken::Object::releaseOwnership(%PYARG_1);
+        </inject-code>
+      </modify-function>
+      <modify-function signature="setColumnAxis(QCategory3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setRowAxis(QCategory3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="Q3DCamera">
       <enum-type name="CameraPreset"/>
     </object-type>
     <object-type name="Q3DLight"/>
     <object-type name="Q3DObject"/>
-    <object-type name="Q3DScatter"/>
+    <object-type name="Q3DScatter">
+      <modify-function signature="addAxis(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="releaseAxis(QValue3DAxis*)">
+        <modify-argument index="1">
+          <reference-count action="set"/>
+        </modify-argument>
+        <inject-code>
+          Shiboken::Object::releaseOwnership(%PYARG_1);
+        </inject-code>
+      </modify-function>
+      <modify-function signature="setAxisX(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setAxisY(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setAxisZ(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="Q3DScene"/>
-    <object-type name="Q3DSurface"/>
+    <object-type name="Q3DSurface">
+      <modify-function signature="addAxis(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="releaseAxis(QValue3DAxis*)">
+        <modify-argument index="1">
+          <reference-count action="set"/>
+        </modify-argument>
+        <inject-code>
+          Shiboken::Object::releaseOwnership(%PYARG_1);
+        </inject-code>
+      </modify-function>
+      <modify-function signature="setAxisX(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setAxisY(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setAxisZ(QValue3DAxis*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+    </object-type>
     <object-type name="QAbstract3DGraph">
       <enum-type name="ElementType"/>
       <enum-type name="OptimizationHint" flags="OptimizationHints"/>
       <enum-type name="SelectionFlag" flags="SelectionFlags"/>
       <enum-type name="ShadowQuality"/>
+      <modify-function signature="addCustomItem(QCustom3DItem*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addInputHandler(QAbstract3DInputHandler*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="addTheme(Q3DTheme*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="releaseCustomItem(QCustom3DItem*)">
+        <modify-argument index="1">
+          <reference-count action="set"/>
+        </modify-argument>
+        <inject-code>
+          Shiboken::Object::releaseOwnership(%PYARG_1);
+        </inject-code>
+      </modify-function>
+      <modify-function signature="releaseInputHandler(QAbstract3DInputHandler*)">
+        <modify-argument index="1">
+          <reference-count action="set"/>
+        </modify-argument>
+        <inject-code>
+          Shiboken::Object::releaseOwnership(%PYARG_1);
+        </inject-code>
+      </modify-function>
+      <modify-function signature="releaseTheme(Q3DTheme*)">
+        <modify-argument index="1">
+          <reference-count action="set"/>
+        </modify-argument>
+        <inject-code>
+          Shiboken::Object::releaseOwnership(%PYARG_1);
+        </inject-code>
+      </modify-function>
+      <modify-function signature="setActiveInputHandler(QAbstract3DInputHandler*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="setActiveTheme(Q3DTheme*)">
+        <modify-argument index="1">
+          <parent index="this" action="add"/>
+        </modify-argument>
+      </modify-function>
     </object-type>
     <object-type name="Q3DInputHandler"/>
     <object-type name="QAbstract3DInputHandler">

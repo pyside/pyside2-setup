@@ -53,7 +53,7 @@ extern "C"
 
 // Extracted into bufferprocs27.h
 #ifdef Py_LIMITED_API
-#include "bufferprocs27.h"
+#include "bufferprocs_py37.h"
 #endif
 
 /*****************************************************************************
@@ -136,11 +136,6 @@ typedef struct _typeobject {
 LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 #endif
 
-#undef PyObject_IS_GC
-#define PyObject_IS_GC(o) (PyType_IS_GC(Py_TYPE(o)) && \
-    ( Py_TYPE(o)->tp_is_gc == NULL || \
-      Py_TYPE(o)->tp_is_gc(o) ))
-
 #endif // Py_LIMITED_API
 
 struct SbkObjectTypePrivate;
@@ -148,22 +143,22 @@ struct PySideQFlagsTypePrivate;
 struct _SbkGenericTypePrivate;
 
 #define PepHeapType_SIZE \
-    (reinterpret_cast<PyTypeObject*>(&PyType_Type)->tp_basicsize)
+    (reinterpret_cast<PyTypeObject *>(&PyType_Type)->tp_basicsize)
 
 #define _genericTypeExtender(etype) \
-    (reinterpret_cast<char*>(etype) + PepHeapType_SIZE)
+    (reinterpret_cast<char *>(etype) + PepHeapType_SIZE)
 
 #define PepType_SOTP(etype) \
-    (*reinterpret_cast<SbkObjectTypePrivate**>(_genericTypeExtender(etype)))
+    (*reinterpret_cast<SbkObjectTypePrivate **>(_genericTypeExtender(etype)))
 
 #define PepType_SETP(etype) \
-    (reinterpret_cast<SbkEnumTypePrivate*>(_genericTypeExtender(etype)))
+    (reinterpret_cast<SbkEnumTypePrivate *>(_genericTypeExtender(etype)))
 
 #define PepType_PFTP(etype) \
-    (reinterpret_cast<PySideQFlagsTypePrivate*>(_genericTypeExtender(etype)))
+    (reinterpret_cast<PySideQFlagsTypePrivate *>(_genericTypeExtender(etype)))
 
 #define PepType_SGTP(etype) \
-    (reinterpret_cast<_SbkGenericTypePrivate*>(_genericTypeExtender(etype)))
+    (reinterpret_cast<_SbkGenericTypePrivate *>(_genericTypeExtender(etype)))
 
 // functions used everywhere
 LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
@@ -237,8 +232,8 @@ LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
  */
 #ifdef Py_LIMITED_API
 #define PyTuple_GET_ITEM(op, i)     PyTuple_GetItem((PyObject *)op, i)
-#define PyTuple_GET_SIZE(op)        PyTuple_Size((PyObject *)op)
 #define PyTuple_SET_ITEM(op, i, v)  PyTuple_SetItem(op, i, v)
+#define PyTuple_GET_SIZE(op)        PyTuple_Size((PyObject *)op)
 #endif
 
 /*****************************************************************************
@@ -268,15 +263,6 @@ typedef struct _pycfunc PyCFunctionObject;
     _PepUnicode_AsString(PyObject_GetAttrString((PyObject *)func, "__name__"))
 #else
 #define PepCFunction_GET_NAMESTR(func)        ((func)->m_ml->ml_name)
-#endif
-
-/*****************************************************************************
- *
- * RESOLVED: descrobject.h
- *
- */
-#ifdef Py_LIMITED_API
-typedef struct _methoddescr PyMethodDescrObject;
 #endif
 
 /*****************************************************************************
@@ -380,7 +366,8 @@ LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
  */
 #ifdef Py_LIMITED_API
 /* Bytecode object */
-    // we have to grab the code object from python
+
+// we have to grab the code object from python
 typedef struct _code PyCodeObject;
 
 LIBSHIBOKEN_API int PepCode_Get(PyCodeObject *co, const char *name);

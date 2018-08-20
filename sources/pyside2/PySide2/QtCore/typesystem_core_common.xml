@@ -426,7 +426,7 @@
             QVariant ret = QVariant_convertToVariantMap(%in);
             %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
-            <add-conversion type="PySequence">
+            <add-conversion type="PyList" check="PyList_Check(%in)">
             QVariant ret = QVariant_convertToVariantList(%in);
             %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
             </add-conversion>
@@ -2134,11 +2134,6 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="setSourceModel(QAbstractItemModel*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="QSortFilterProxyModel">
     <!-- ### This reimplementation of "QObject::parent()" is used in C++ only

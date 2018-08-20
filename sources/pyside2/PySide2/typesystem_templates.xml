@@ -50,6 +50,25 @@
         Shiboken::Object::setParent(%PYSELF, $PYARG);
     </template>
 
+    <template name="tuple_ok_retval">
+    %PYARG_0 = PyTuple_New(2);
+    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](ok_));
+    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+    </template>
+    <template name="bool*_fix,arg">
+        bool ok_;
+        %BEGIN_ALLOW_THREADS
+        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2);
+        %END_ALLOW_THREADS
+        <insert-template name="tuple_ok_retval"/>
+    </template>
+    <template name="bool*_fix,arg,arg,arg,arg">
+        bool ok_;
+        %BEGIN_ALLOW_THREADS
+        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3, %4, %5);
+        %END_ALLOW_THREADS
+        <insert-template name="tuple_ok_retval"/>
+    </template>
     <!-- Templates to fix bool* parameters -->
     <template name="tuple_retval_ok">
     %PYARG_0 = PyTuple_New(2);

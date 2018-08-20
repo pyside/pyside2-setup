@@ -600,7 +600,7 @@
             <replace-type modified-type="PyTuple" />
         </modify-argument>
         <inject-code class="target" position="beginning">
-            <insert-template name="fix_bool*,arg"/>
+            <insert-template name="bool*_fix,arg"/>
         </inject-code>
     </modify-function>
     <modify-function signature="getFont(bool*,QFont,QWidget*,QString,QFlags&lt;QFontDialog::FontDialogOption&gt;)">
@@ -611,7 +611,7 @@
             <replace-type modified-type="PyTuple" />
         </modify-argument>
         <inject-code class="target" position="beginning">
-            <insert-template name="fix_bool*,arg,arg,arg,arg"/>
+            <insert-template name="bool*_fix,arg,arg,arg,arg"/>
         </inject-code>
     </modify-function>
   </object-type>

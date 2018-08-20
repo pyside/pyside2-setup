@@ -87,7 +87,9 @@
   <value-type name="QPlaceAttribute"/>
   <value-type name="QPlaceCategory"/>
   <value-type name="QPlaceContactDetail"/>
-  <value-type name="QPlaceContent"/>
+  <value-type name="QPlaceContent">
+      <enum-type name="Type"/>
+  </value-type>
   <value-type name="QPlaceContentRequest"/>
   <object-type name="QPlaceEditorial"/>
   <object-type name="QPlaceImage"/>
@@ -106,7 +108,9 @@
   <object-type name="QPlaceSearchRequest">
       <enum-type name="RelevanceHint"/>
   </object-type>
-  <object-type name="QPlaceSearchResult"/>
+  <object-type name="QPlaceSearchResult">
+      <enum-type name="SearchResultType"/>
+  </object-type>
   <object-type name="QPlaceSearchSuggestionReply"/>
   <value-type name="QPlaceSupplier"/>
 </typesystem>
