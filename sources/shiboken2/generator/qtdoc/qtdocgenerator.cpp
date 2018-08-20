@@ -1323,7 +1323,13 @@ void QtXmlToSphinx::Table::normalize()
 
     //QDoc3 generates tables with wrong number of columns. We have to
     //check and if necessary, merge the last columns.
-    int maxCols = self.at(0).count();
+    int maxCols = -1;
+    for (const auto &row : qAsConst(self)) {
+        if (row.count() > maxCols)
+            maxCols = row.count();
+    }
+    if (maxCols <= 0)
+        return;
     // add col spans
     for (row = 0; row < count(); ++row) {
         for (col = 0; col < at(row).count(); ++col) {
