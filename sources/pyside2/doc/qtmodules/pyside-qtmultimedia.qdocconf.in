@@ -1,3 +1,0 @@
-include(@QT_SRC_DIR@/../qtmultimedia/src/multimedia/doc/qtmultimedia.qdocconf)
-includepaths += -I @QT_SRC_DIR@/../qtmultimedia/src/multimedia/doc
-include(../pyside-config.qdocconf)
