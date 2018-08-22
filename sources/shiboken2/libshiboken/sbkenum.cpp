@@ -524,13 +524,8 @@ copyNumberMethods(PyTypeObject *flagsType,
                   int *pidx)
 {
     int idx = *pidx;
-#ifdef IS_PY3K
-#  define SLOT slot
-#else
-#  define SLOT slot_
-#endif
 #define PUT_SLOT(name) \
-    number_slots[idx].SLOT = (name);                                \
+    number_slots[idx].slot = (name);                                \
     number_slots[idx].pfunc = PyType_GetSlot(flagsType, (name));    \
     ++idx;
 
@@ -593,8 +588,8 @@ newTypeWithName(const char* name,
     newspec->flags = SbkNewType_spec.flags;
     // we must append all the number methods, so rebuild everything:
     int idx = 0;
-    while (SbkNewType_slots[idx].SLOT) {
-        newslots[idx].SLOT = SbkNewType_slots[idx].SLOT;
+    while (SbkNewType_slots[idx].slot) {
+        newslots[idx].slot = SbkNewType_slots[idx].slot;
         newslots[idx].pfunc = SbkNewType_slots[idx].pfunc;
         ++idx;
     }

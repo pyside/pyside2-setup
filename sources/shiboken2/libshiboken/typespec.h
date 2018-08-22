@@ -48,7 +48,7 @@ extern "C"
 {
 
 typedef struct{
-    int slot_; // slot is somehow reserved in Qt   /* slot id, see below */
+    int slot; // slot is somehow reserved in Qt   /* slot id, see below */
     void *pfunc; /* function pointer */
 } PyType_Slot;
 

@@ -174,13 +174,8 @@ namespace QFlags
         newspec->itemsize = SbkNewQFlagsType_spec.itemsize;
         newspec->flags = SbkNewQFlagsType_spec.flags;
         int idx = -1;
-#ifdef IS_PY3K
-#  define SLOT slot
-#else
-#  define SLOT slot_
-#endif
-        while (numberMethods[++idx].SLOT) {
-            assert(SbkNewQFlagsType_slots[idx].SLOT == numberMethods[idx].SLOT);
+        while (numberMethods[++idx].slot) {
+            assert(SbkNewQFlagsType_slots[idx].slot == numberMethods[idx].slot);
             SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
         }
         newspec->slots = SbkNewQFlagsType_spec.slots;
