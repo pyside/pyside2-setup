@@ -42,13 +42,29 @@
 
 #include "sbkversion.h"
 
-#include <Python.h>
-#include <structmember.h>
+// Qt's "slots" macro collides with the "slots" member variables
+// used in some Python structs. For compilers that support push_macro,
+// temporarily undefine it.
+#if defined(slots) && (defined(__GNUC__) || defined(_MSC_VER) || defined(__clang__))
+#  pragma push_macro("slots")
+#  undef slots
+#  include <Python.h>
+#  include <structmember.h>
 // Now we have the usual variables from Python.h .
-#include "python25compat.h"
-#include "shibokenmacros.h"
-#include "pep384impl.h"
-#include "typespec.h"
+#  include "python25compat.h"
+#  include "shibokenmacros.h"
+#  include "pep384impl.h"
+#  include "typespec.h"
+#  pragma pop_macro("slots")
+#else
+#  include <Python.h>
+#  include <structmember.h>
+// Now we have the usual variables from Python.h .
+#  include "python25compat.h"
+#  include "shibokenmacros.h"
+#  include "pep384impl.h"
+#  include "typespec.h"
+#endif
 
 #if PY_MAJOR_VERSION >= 3
     #define IS_PY3K
