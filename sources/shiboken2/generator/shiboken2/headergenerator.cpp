@@ -115,8 +115,6 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
     if (!avoidProtectedHack())
         s << "#define protected public" << endl << endl;
 
-    s << "#include <shiboken.h>" << endl << endl;
-
     //Includes
     s << metaClass->typeEntry()->include() << endl;
 
@@ -474,12 +472,6 @@ bool HeaderGenerator::finishGeneration()
 
     s << "#include <sbkpython.h>" << endl;
     s << "#include <sbkconverter.h>" << endl;
-    s << "#include <sbkenum.h>" << endl;
-    s << "#include <basewrapper.h>" << endl;
-    s << "#include <bindingmanager.h>" << endl;
-    s << "#include <memory>" << endl << endl;
-    if (usePySideExtensions())
-        s << "#include <pysidesignal.h>" << endl;
 
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
     if (!requiredTargetImports.isEmpty()) {

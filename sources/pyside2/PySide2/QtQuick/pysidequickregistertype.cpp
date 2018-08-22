@@ -40,6 +40,7 @@
 #include "pysidequickregistertype.h"
 
 #include <pyside.h>
+#include <shiboken.h>
 
 // Auto generated headers.
 #include "qquickitem_wrapper.h"
