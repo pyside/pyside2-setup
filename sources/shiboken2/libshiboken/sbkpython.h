@@ -48,7 +48,13 @@
 #if defined(slots) && (defined(__GNUC__) || defined(_MSC_VER) || defined(__clang__))
 #  pragma push_macro("slots")
 #  undef slots
+/*
+ * Python 2 has function _Py_Mangle directly in Python.h .
+ * This creates wrong language binding unless we define 'extern "C"' here.
+ */
+extern "C" {
 #  include <Python.h>
+}
 #  include <structmember.h>
 // Now we have the usual variables from Python.h .
 #  include "python25compat.h"
@@ -57,7 +63,9 @@
 #  include "typespec.h"
 #  pragma pop_macro("slots")
 #else
+extern "C" {
 #  include <Python.h>
+}
 #  include <structmember.h>
 // Now we have the usual variables from Python.h .
 #  include "python25compat.h"

@@ -38,301 +38,14 @@
 ****************************************************************************/
 
 #include "pep384impl.h"
+#include <autodecref.h>
 
 extern "C"
 {
 
-/**********************************************************************
- **********************************************************************
-
-
-    The New Type API
-    ================
-
-    After converting everything but the "object.h" file, we could not
-    believe our eyes: it suddenly was clear that we would have no more
-    access to type objects, and even more scary that all types which we
-    use have to be heap types, only!
-
-    For PySide with it's intense use of heap type extensions in various
-    flavors, it seemed to be quite unsolvable. In the end, it was
-    nicely solved, but it took almost 3.5 months to get that right.
-
-    Before we see how this is done, we will explain the differences
-    between the APIs and their consequences.
-
-
-    The Interface
-    -------------
-
-    The old type API of Python knows static types and heap types.
-    Static types are written down as a declaration of a PyTypeObject
-    structure with all its fields filled in. Here is for example
-    the definition of the Python type "object":
-
-        PyTypeObject PyBaseObject_Type = {
-            PyVarObject_HEAD_INIT(&PyType_Type, 0)
-            "object",                                   |* tp_name *|
-            sizeof(PyObject),                           |* tp_basicsize *|
-            0,                                          |* tp_itemsize *|
-            object_dealloc,                             |* tp_dealloc *|
-            0,                                          |* tp_print *|
-            0,                                          |* tp_getattr *|
-            0,                                          |* tp_setattr *|
-            0,                                          |* tp_reserved *|
-            object_repr,                                |* tp_repr *|
-            0,                                          |* tp_as_number *|
-            0,                                          |* tp_as_sequence *|
-            0,                                          |* tp_as_mapping *|
-            (hashfunc)_Py_HashPointer,                  |* tp_hash *|
-            0,                                          |* tp_call *|
-            object_str,                                 |* tp_str *|
-            PyObject_GenericGetAttr,                    |* tp_getattro *|
-            PyObject_GenericSetAttr,                    |* tp_setattro *|
-            0,                                          |* tp_as_buffer *|
-            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   |* tp_flags *|
-            PyDoc_STR("object()\n--\n\nThe most base type"),  |* tp_doc *|
-            0,                                          |* tp_traverse *|
-            0,                                          |* tp_clear *|
-            object_richcompare,                         |* tp_richcompare *|
-            0,                                          |* tp_weaklistoffset *|
-            0,                                          |* tp_iter *|
-            0,                                          |* tp_iternext *|
-            object_methods,                             |* tp_methods *|
-            0,                                          |* tp_members *|
-            object_getsets,                             |* tp_getset *|
-            0,                                          |* tp_base *|
-            0,                                          |* tp_dict *|
-            0,                                          |* tp_descr_get *|
-            0,                                          |* tp_descr_set *|
-            0,                                          |* tp_dictoffset *|
-            object_init,                                |* tp_init *|
-            PyType_GenericAlloc,                        |* tp_alloc *|
-            object_new,                                 |* tp_new *|
-            PyObject_Del,                               |* tp_free *|
-        };
-
-    We can write the same structure in form of a PyType_Spec structure,
-    and there is even a tool that does this for us, but I had to fix a
-    few things because there is little support for this.
-
-    The tool is XXX go home and continue.....
-
-
-
-
-    The Transition To Simpler Types
-    ===============================
-
-    After all code has been converted to the limited API, there is the
-    PyHeapTypeObject remaining as a problem.
-
-    Why a problem? Well, all the type structures in shiboken use
-    special extra fields at the end of the heap type object. This
-    currently enforces knowledge at compile time about how large the
-    heap type object is. In a clean implementation, we would only use
-    the PyTypeObject itself and access the fields "behind" the type
-    by a pointer that is computed at runtime.
-
-
-    Excursion: PepTypeObject
-    ------------------------
-
-    Before we are going into details, let us motivate the existence of
-    the PepTypeObject, an alias to PyTypeObject:
-
-    Originally, we wanted to use PyTypeObject as an opaque type and
-    restrict ourselves to only use the access function PyType_GetSlot.
-    This function allows access to all fields which are supported by
-    the limited API.
-
-    But this is a restriction, because we get no access to tp_dict,
-    which we need to support the signature extension. But we can work
-    around that.
-
-    The real restriction is that PyType_GetSlot only works for heap
-    types. This makes the function quite useless, because we have
-    no access to PyType_Type, which is the most important type "type"
-    in Python. We need that for instance to compute the size of
-    PyHeapTypeObject dynamically.
-
-    With much effort, it is possible to clone PyType_Type as a heap
-    type. But due to a bug in the Pep 384 support, we need
-    access to the nb_index field of a normal type. Cloning does not
-    help because PyNumberMethods fields are not inherited.
-
-    After I realized this dead end, I changed the concept and did not
-    use PyType_GetSlot at all (except in function copyNumberMethods),
-    but created PepTypeObject as a remake of PyTypeObject with only
-    those fields defined that are needed in PySide.
-
-    Is this breakage of the limited API? I don't think so. A special
-    function runs on program startup that checks the correct position
-    of the fields of PepHeapType, although a change in those fields is
-    more than unlikely.
-    The really crucial thing is to no longer use PyHeapTypeObject
-    explicitly because that _does_ change its layout over time.
-
-
-    Diversification
-    ---------------
-
-    There are multiple SbkXXX structures which all use a "d" field
-    for their private data. This makes it not easy to find the right
-    fields when switching between types and objects.
-
-        struct LIBSHIBOKEN_API SbkObjectType
-        {
-            PyHeapTypeObject super;
-            SbkObjectTypePrivate *d;
-        };
-
-        struct LIBSHIBOKEN_API SbkObject
-        {
-            PyObject_HEAD
-            PyObject *ob_dict;
-            PyObject *weakreflist;
-            SbkObjectPrivate *d;
-        };
-
-    The first step was to rename the SbkObjectTypePrivate from "d" to
-    "sotp". It was chosen to be short but easy to remember.
-
-
-    Abstraction
-    -----------
-
-    After renaming the type extension pointers to "sotp", I replaced
-    them by function-like macros which did the special access "behind"
-    the types, instead of those explicit fields. For instance, the
-    expression
-
-        type->sotp->converter
-
-    became
-
-        PepType_SOTP(type)->converter
-
-    The macro expression can be seen here:
-
-    #define _genericTypeExtender(etype) \
-        (reinterpret_cast<char*>(etype) + \
-            (reinterpret_cast<PepTypeObject *>(&PyType_Type))->tp_basicsize)
-
-    #define PepType_SOTP(etype) \
-        (*reinterpret_cast<SbkObjectTypePrivate**>(_genericTypeExtender(etype)))
-
-    It looks complicated, but in the end there is only a single new
-    indirection via PyType_Type, which happens at runtime. This is the
-    key to fulfil what Pep 384 wants: No version-dependent fields.
-
-
-    Simplification
-    --------------
-
-    After all type extension fields were replaced by macro calls, we
-    could remove the version dependent definition
-
-        typedef struct _pepheaptypeobject {
-            union {
-                PepTypeObject ht_type;
-                void *opaque[PY_HEAPTYPE_SIZE];
-            };
-        } PepHeapTypeObject;
-
-    and the version dependent structure
-
-        struct LIBSHIBOKEN_API SbkObjectType
-        {
-            PepHeapTypeObject super;
-            SbkObjectTypePrivate *sotp;
-        };
-
-    could be replaced by the simplified
-
-        struct LIBSHIBOKEN_API SbkObjectType
-        {
-            PepTypeObject type;
-        };
-
-    which is no longer version-dependent.
-
-
-    Verification Of PepTypeObject
-    =============================
-
-    We have introduced PepTypeObject as a new alias for PyTypeObject,
-    and now we need to prove that we are allowed to do so.
-
-    When using the limited API as intended, then types are completely
-    opaque, and access is only through PyType_FromSpec and (from
-    version 3.5 upwards) through PyType_GetSlot.
-
-    Python then uses all the slot definitions in the type description
-    and produces a regular type object.
-
-
-    Unused Information
-    ------------------
-
-    But we know many things about types that are not explicitly said,
-    but they are inherently clear:
-
-     a) The basic structure of a type is always the same, regardless
-        if it is a static type or a heap type.
-
-     b) types are evolving very slowly, and a field is never replaced
-        by another field with different semantics.
-
-    Inherent rule a) gives us the following information: If we calculate
-    the offsets of the fields, then this info is also usable for non-
-    -heap types.
-
-    The validation checks if rule b) is still valid.
-
-
-    How it Works
-    ------------
-
-    The basic idea of the validation is to produce a new type using
-    PyType_FromSpec and to see where in the type structure these fields
-    show up. So we build a PyType_Slot structure with all the fields we
-    are using and make sure that these values are all unique in the
-    type.
-
-    Most fields are not investigated by PyType_FromSpec, and so we
-    simply used some numeric value. Some fields are interpreted, like
-    tp_members. This field must really be a PyMemberDef. And there are
-    tp_base and tp_bases which have to be type objects and lists
-    thereof. It was easiest to not produce these fields from scratch
-    but use them from the "type" object PyType_Type.
-
-    Then one would think to write a function that searches the known
-    values in the opaque type structure.
-
-    But we can do better and use optimistically the observation (b):
-    We simply use the PepTypeObject structure and assume that every
-    field lands exactly where we are awaiting it.
-
-    And that is the whole proof: If we find all the disjoint values at
-    the places where we expect them, thenthis is q.e.d. :)
-
-
-    About tp_dict
-    -------------
-
-    One word about the tp_dict field: This field is a bit special in
-    the proof, since it does not appear in the spec and cannot easily
-    be checked by "type.__dict__" because that creates a dictproxy
-    object. So how do we proove that is really the right dict?
-
-    We have to create that PyMethodDef structure anyway, and instead of
-    leaving it empty, we insert a dummy function. Then we ask the
-    tp_dict field if it has that object in it, and that's q.e.d.
-
-
- *********/
-
+/*
+ * The documentation is located in pep384impl_doc.rst
+ */
 
 /*****************************************************************************
  *
@@ -465,7 +178,7 @@ _PepUnicode_AsString(PyObject *str)
     /*
      * We need to keep the string alive but cannot borrow the Python object.
      * Ugly easy way out: We re-code as an interned bytes string. This
-     * produces a pseudo-leak as long there are new strings.
+     * produces a pseudo-leak as long as there are new strings.
      * Typically, this function is used for name strings, and the dict size
      * will not grow so much.
      */
@@ -765,13 +478,7 @@ PepFunction_Get(PyObject *ob, const char *name)
     return ret;
 }
 
-/*****************************************************************************
- *
- * Support for funcobject.h
- *
- */
-
-// this became necessary after Windows was activated.
+// This became necessary after Windows was activated.
 
 PyTypeObject *PepFunction_TypePtr = NULL;
 
@@ -816,6 +523,95 @@ PepType_GetNameStr(PyTypeObject *type)
     if (nodots)
         ret = nodots + 1;
     return ret;
+}
+
+/*****************************************************************************
+ *
+ * Extra support for name mangling
+ *
+ */
+
+#ifdef Py_LIMITED_API
+// We keep these definitions local, because they don't work in Python 2.
+#define PyUnicode_GET_LENGTH(op)    PyUnicode_GetLength((PyObject *)(op))
+#define PyUnicode_READ_CHAR(u, i)   PyUnicode_ReadChar((PyObject *)(u), (i))
+#endif
+
+PyObject *
+_Pep_PrivateMangle(PyObject *self, PyObject *name)
+{
+    /*
+     * Name mangling: __private becomes _classname__private.
+     * This function is modelled after _Py_Mangle, but is optimized
+     * a little for our purpose.
+     */
+#if PY_VERSION_HEX < 0X03000000
+    const char *namestr = PyString_AsString(name);
+    if (namestr == NULL || namestr[0] != '_' || namestr[1] != '_') {
+        Py_INCREF(name);
+        return name;
+    }
+    size_t nlen = strlen(namestr);
+    /* Don't mangle __id__ or names with dots. */
+    if ((namestr[nlen-1] == '_' && namestr[nlen-2] == '_')
+        || strchr(namestr, '.')) {
+        Py_INCREF(name);
+        return name;
+    }
+#else
+    if (PyUnicode_READ_CHAR(name, 0) != '_' ||
+        PyUnicode_READ_CHAR(name, 1) != '_') {
+        Py_INCREF(name);
+        return name;
+    }
+    size_t nlen = PyUnicode_GET_LENGTH(name);
+    /* Don't mangle __id__ or names with dots. */
+    if ((PyUnicode_READ_CHAR(name, nlen-1) == '_' &&
+         PyUnicode_READ_CHAR(name, nlen-2) == '_') ||
+        PyUnicode_FindChar(name, '.', 0, nlen, 1) != -1) {
+        Py_INCREF(name);
+        return name;
+    }
+#endif
+    Shiboken::AutoDecRef privateobj(PyObject_GetAttrString(
+        reinterpret_cast<PyObject *>(Py_TYPE(self)), "__name__"));
+#ifndef Py_LIMITED_API
+    return _Py_Mangle(privateobj, name);
+#else
+    // For some reason, _Py_Mangle is not in the Limited API. Why?
+    size_t plen = PyUnicode_GET_LENGTH(privateobj);
+    /* Strip leading underscores from class name */
+    size_t ipriv = 0;
+    while (PyUnicode_READ_CHAR(privateobj, ipriv) == '_')
+        ipriv++;
+    if (ipriv == plen) {
+        Py_INCREF(name);
+        return name; /* Don't mangle if class is just underscores */
+    }
+    plen -= ipriv;
+
+    if (plen + nlen >= PY_SSIZE_T_MAX - 1) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "private identifier too large to be mangled");
+        return NULL;
+    }
+    size_t const amount = ipriv + 1 + plen + nlen;
+    size_t const big_stack = 1000;
+    wchar_t bigbuf[big_stack];
+    wchar_t *resbuf = amount <= big_stack ? bigbuf : (wchar_t *)malloc(sizeof(wchar_t) * amount);
+    if (!resbuf)
+        return 0;
+    /* ident = "_" + priv[ipriv:] + ident # i.e. 1+plen+nlen bytes */
+    resbuf[0] = '_';
+    if (PyUnicode_AsWideChar(privateobj, resbuf + 1, ipriv + plen) < 0)
+        return 0;
+    if (PyUnicode_AsWideChar(name, resbuf + ipriv + plen + 1, nlen) < 0)
+        return 0;
+    PyObject *result = PyUnicode_FromWideChar(resbuf + ipriv, 1 + plen + nlen);
+    if (amount > big_stack)
+        free(resbuf);
+    return result;
+#endif  // Py_LIMITED_API
 }
 
 /*****************************************************************************
