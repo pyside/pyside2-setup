@@ -84,7 +84,7 @@ public:
     static int registerMetaMethodGetIndex(QObject* source, const char* signature, QMetaMethod::MethodType type);
 
     // used to discovery metaobject
-    static const QMetaObject* retriveMetaObject(PyObject* self);
+    static const QMetaObject* retrieveMetaObject(PyObject* self);
 
     // Used to discovery if SignalManager was connected with object "destroyed()" signal.
     int countConnectionsWith(const QObject *object);

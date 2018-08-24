@@ -122,14 +122,14 @@ public:
     int refCount(const QObject* link) const;
 
     /**
-     * Use to retrive the unique hash of this GlobalReceiver object
+     * Use to retrieve the unique hash of this GlobalReceiver object
      *
      * @return  a string with a unique id based on GlobalReceiver contents
      **/
     QByteArray hash() const;
 
     /**
-     * Use to retrive the unique hash of the PyObject based on GlobalReceiver rules
+     * Use to retrieve the unique hash of the PyObject based on GlobalReceiver rules
      *
      * @param   callback The Python callable object used to calculate the id
      * @return  a string with a unique id based on GlobalReceiver contents

@@ -617,7 +617,7 @@ bool SignalManager::hasConnectionWith(const QObject *object)
     return m_d->m_globalReceiver.hasConnectionWith(object);
 }
 
-const QMetaObject* SignalManager::retriveMetaObject(PyObject *self)
+const QMetaObject* SignalManager::retrieveMetaObject(PyObject *self)
 {
     Shiboken::GilState gil;
     DynamicQMetaObject *mo = 0;
