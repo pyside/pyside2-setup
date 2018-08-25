@@ -37,5 +37,4 @@
 ##
 #############################################################################
 
-PYSIDE_TEST(signature_test.py)
 PYSIDE_TEST(existence_test.py)
