@@ -49,21 +49,24 @@ from .mapping import type_map, update_mapping, __dict__ as namespace
 
 _DEBUG = False
 
-TYPE_MAP_DOC = """
-    The type_map variable is central for the signature package.
+"""
+parser.py
 
-    PySide has a new function 'CppGenerator::writeSignatureInfo()'
-    that extracts the gathered information about the function arguments
-    and defaults as good as it can. But what PySide generates is still
-    very C-ish and has many constants that Python doesn't understand.
+This module parses the signature text and creates properties for the
+signature objects.
 
-    The function 'try_to_guess()' below understands a lot of PySide's
-    peculiar way to assume local context. If it is able to do the guess,
-    then the result is inserted into the dict, so the search happens
-    not again. For everything that is not covered by these automatic
-    guesses, we provide an entry in 'type_map' that resolves it.
+PySide has a new function 'CppGenerator::writeSignatureInfo()'
+that extracts the gathered information about the function arguments
+and defaults as good as it can. But what PySide generates is still
+very C-ish and has many constants that Python doesn't understand.
 
-    In effect, 'type_map' maps text to real Python objects.
+The function 'try_to_guess()' below understands a lot of PySide's
+peculiar way to assume local context. If it is able to do the guess,
+then the result is inserted into the dict, so the search happens
+not again. For everything that is not covered by these automatic
+guesses, we provide an entry in 'type_map' that resolves it.
+
+In effect, 'type_map' maps text to real Python objects.
 """
 
 def dprint(*args, **kw):

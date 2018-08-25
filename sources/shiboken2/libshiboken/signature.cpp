@@ -107,12 +107,6 @@ extern "C"
 #include "signature.h"
 #include <structmember.h>
 
-#define EXTENSION_ENABLED \
-    PY_VERSION_HEX >= 0x03040000 || \
-    (PY_VERSION_HEX < 0x03000000 && PY_VERSION_HEX >= 0x02070000)
-
-#if EXTENSION_ENABLED
-
 // These constants were needed in former versions of the module:
 #define PYTHON_HAS_QUALNAME             (PY_VERSION_HEX >= 0x03030000)
 #define PYTHON_HAS_UNICODE              (PY_VERSION_HEX >= 0x03000000)
@@ -697,20 +691,14 @@ PySide_BuildSignatureProps(PyObject *classmod)
     return dict;
 }
 
-#endif // EXTENSION_ENABLED
-
 int
 SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
                       const char *signatures)
 {
     int ret;
-#if EXTENSION_ENABLED
     if (PySideType_Ready(type) < 0)
         return -1;
     ret = PySide_BuildSignatureArgs(module, (PyObject *)type, signatures);
-#else
-    ret = PyType_Ready(type);
-#endif
     if (ret < 0) {
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);
@@ -718,7 +706,6 @@ SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
     return ret;
 }
 
-#if EXTENSION_ENABLED
 static int
 PySide_FinishSignatures(PyObject *module, const char *signatures)
 {
@@ -765,17 +752,14 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
     }
     return 0;
 }
-#endif // EXTENSION_ENABLED
 
 void
 FinishSignatureInitialization(PyObject *module, const char *signatures)
 {
-#if EXTENSION_ENABLED
     if (PySide_FinishSignatures(module, signatures) < 0) {
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);
     }
-#endif
 }
 
 } //extern "C"

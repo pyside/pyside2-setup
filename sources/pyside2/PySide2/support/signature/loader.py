@@ -40,13 +40,18 @@
 from __future__ import print_function, absolute_import
 
 """
-This file was originally directly embedded into the C source.
-After it grew more and more, I now prefer to have it as Python file.
-The remaining stub loader is a short string now.
+loader.py
 
 The loader has to lazy-load the signature module and also provides a few
-Python modules that I consider essential and therefore built-in.
-This version does not use an embedded .zip file.
+Python modules to support Python 2.7 .
+
+This file was originally directly embedded into the C source.
+After it grew more and more, I now prefer to have it as Python file.
+The remaining stub loader in the C source is now only a short string.
+
+This version does no longer use an embedded .zip file but is a package.
+The old code without a package but with zip compression can still be found
+at https://codereview.qt-project.org/#/c/203533/ for reference.
 """
 
 import sys
