@@ -69,7 +69,12 @@ else:
     import inspect
     namespace = inspect.__dict__
     from PySide2.support.signature import backport_inspect as inspect
+    _doc = inspect.__doc__
     inspect.__dict__.update(namespace)
+    inspect.__doc__ += _doc
+    # force inspect to find all attributes. See "heuristic" in pydoc.py!
+    inspect.__all__ = list(x for x in dir(inspect) if not x.startswith("_"))
+
 # name used in signature.cpp
 from PySide2.support.signature.parser import pyside_type_init
 sys.path.pop(0)
