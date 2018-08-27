@@ -292,6 +292,9 @@ setup(
     entry_points = {
         'console_scripts': [
             'pyside2-uic = PySide2.scripts.uic:main',
+            'pyside2-rcc = PySide2.scripts.pyside_tool:main',
+            'pyside2-lupdate = PySide2.scripts.pyside_tool:main',
+            'shiboken2 = PySide2.scripts.pyside_tool:main',
         ]
     },
     cmdclass = cmd_class_dict,

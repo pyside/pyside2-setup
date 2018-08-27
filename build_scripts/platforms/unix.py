@@ -88,6 +88,10 @@ def prepare_packages_posix(self, vars):
         "{install_dir}/bin/pyside2-uic",
         "{pyside_package_dir}/PySide2/scripts/uic.py",
         force=False, vars=vars)
+    copyfile(
+        "{install_dir}/bin/pyside_tool.py",
+        "{pyside_package_dir}/PySide2/scripts/pyside_tool.py",
+        force=False, vars=vars)
     # <install>/bin/* -> PySide2/
     executables.extend(copydir(
         "{install_dir}/bin/",

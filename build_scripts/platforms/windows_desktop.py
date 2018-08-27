@@ -113,6 +113,12 @@ def prepare_packages_win32(self, vars):
         "{pyside_package_dir}/PySide2/scripts/uic.py",
         force=False, vars=vars)
 
+    # For setting up entry points
+    copyfile(
+        "{install_dir}/bin/pyside_tool.py",
+        "{pyside_package_dir}/PySide2/scripts/pyside_tool.py",
+        force=False, vars=vars)
+
     # <install>/bin/*.exe,*.dll,*.pdb -> PySide2/
     copydir(
         "{install_dir}/bin/",
