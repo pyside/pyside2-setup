@@ -1,12 +1,5 @@
 project(QtWidgets)
 
-
-set(QtWidgets_OPTIONAL_SRC )
-set(QtWidgets_DROPPED_ENTRIES )
-## XXX check if these conditionals need to be done elsewhere
-check_qt_class(QtWidgets QGtkStyle                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-check_qt_class(QtWidgets QMacStyle                  QtWidgets_OPTIONAL_SRC QtWidgets_DROPPED_ENTRIES)
-
 set(QtWidgets_SRC
 ${QtWidgets_GEN_DIR}/qaccessiblewidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractbutton_wrapper.cpp

@@ -1,23 +1,6 @@
 project(QtNetwork)
 
-set(QtNetwork_OPTIONAL_SRC )
 set(QtNetwork_DROPPED_ENTRIES )
-
-check_qt_class(QtNetwork QDtls              QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslCertificate    QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslCertificateExtension QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslCipher         QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslConfiguration  QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslDiffieHellmanParameters QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-# Problems with operator==(QSslEllipticCurve,QSslEllipticCurve)
-# check_qt_class(QtNetwork QSslEllipticCurve QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslError          QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslKey            QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslPreSharedKeyAuthenticator QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSslSocket         QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-
-check_qt_class(QtNetwork QSctpServer        QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
-check_qt_class(QtNetwork QSctpSocket        QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
 
 set(QtNetwork_SRC
 ${QtNetwork_GEN_DIR}/qabstractnetworkcache_wrapper.cpp
@@ -58,10 +41,57 @@ ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp
-${QtNetwork_OPTIONAL_SRC}
 # module is always needed
 ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )
+
+get_property(QtNetwork_enabled_features  TARGET Qt5::Network PROPERTY INTERFACE_QT_ENABLED_FEATURES)
+get_property(QtNetwork_disabled_features TARGET Qt5::Network PROPERTY INTERFACE_QT_DISABLED_FEATURES)
+
+# ### fixme: For cmake >= 3.3, use if( needle IN_LIST list)
+list(FIND QtNetwork_enabled_features  "ssl"  _sslEnabledIndex)
+list(FIND QtNetwork_disabled_features "dtls" _dtlsDisabledIndex)
+list(FIND QtNetwork_disabled_features "sctp" _sctpDisabledIndex)
+
+if(_sslEnabledIndex EQUAL -1)
+    list(APPEND QtNetwork_DROPPED_ENTRIES QSslCertificate QSslCertificateExtension
+         QSslCipher QSslConfiguration QSslDiffieHellmanParameters QSslError
+         QSslKey QSslPreSharedKeyAuthenticator QSslSocket)
+    message(STATUS "Qt5Network: Dropping SSL classes")
+else()
+    # Problems with operator==(QSslEllipticCurve,QSslEllipticCurve)
+    # check_qt_class(QtNetwork QSslEllipticCurve QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
+    list(APPEND QtNetwork_SRC
+         ${QtNetwork_GEN_DIR}/qsslcertificate_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslcertificateextension_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslcipher_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslconfiguration_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qssldiffiehellmanparameters_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslerror_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslkey_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslpresharedkeyauthenticator_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslsocket_wrapper.cpp)
+    message(STATUS "Qt5Network: Adding SSL classes")
+endif()
+
+if(_dtlsDisabledIndex GREATER -1)
+    list(APPEND QtNetwork_DROPPED_ENTRIES QDtls)
+    message(STATUS "Qt5Network: Dropping DTLS classes")
+else()
+    list(APPEND QtNetwork_SRC
+         ${QtNetwork_GEN_DIR}/qdtls_wrapper.cpp)
+    message(STATUS "Qt5Network: Adding DTLS classes")
+endif()
+
+if(_sctpDisabledIndex GREATER -1)
+    list(APPEND QtNetwork_DROPPED_ENTRIES QSctpServer QSctpSocket)
+    message(STATUS "Qt5Network: Dropping SCTP classes")
+else()
+    list(APPEND QtNetwork_SRC
+         ${QtNetwork_GEN_DIR}/qsctpserver_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsctpsocket_wrapper.cpp)
+    message(STATUS "Qt5Network: Adding SCTP classes")
+endif()
 
 set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
                             ${QtNetwork_BINARY_DIR}
