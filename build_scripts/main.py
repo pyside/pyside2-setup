@@ -1207,6 +1207,7 @@ class PysideBuild(_build):
             raise RuntimeError("Could not find the location of the libclang "
                 "library inside the CMake cache file.")
 
+        target_name = None
         if is_win:
             # clang_lib_path points to the static import library
             # (lib/libclang.lib), whereas we want to copy the shared
@@ -1214,9 +1215,20 @@ class PysideBuild(_build):
             clang_lib_path = re.sub(r'lib/libclang.lib$', 'bin/libclang.dll',
                 clang_lib_path)
         else:
+            if sys.platform != 'darwin' and os.path.islink(clang_lib_path):
+                # On Linux, we get "libclang.so" from CMake which is
+                # a symlink:
+                # libclang.so -> libclang.so.6 -> libclang.so.6.0.
+                # shiboken2 links against libclang.so.6. So, we
+                # determine the target name by resolving just
+                # one symlink (note: os.path.realpath() resolves all).
+                target_name = os.readlink(clang_lib_path)
             # We want to resolve any symlink on Linux and macOS, and
             # copy the actual file.
             clang_lib_path = os.path.realpath(clang_lib_path)
+
+        if not target_name:
+            target_name = os.path.basename(clang_lib_path)
 
         # Path to directory containing libclang.
         clang_lib_dir = os.path.dirname(clang_lib_path)
@@ -1226,9 +1238,10 @@ class PysideBuild(_build):
         destination_dir = "{}/PySide2".format(os.path.join(self.script_dir,
             'pyside_package'))
         if os.path.exists(clang_lib_path):
-            log.info('Copying libclang shared library to the package folder.')
+            log.info('Copying libclang shared library {} to the package folder as {}.'.format(
+                     clang_lib_path, target_name))
             basename = os.path.basename(clang_lib_path)
-            destination_path = os.path.join(destination_dir, basename)
+            destination_path = os.path.join(destination_dir, target_name)
 
             # Need to modify permissions in case file is not writable
             # (a reinstall would cause a permission denied error).

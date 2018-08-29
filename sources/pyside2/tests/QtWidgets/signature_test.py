@@ -39,97 +39,13 @@
 
 from __future__ import print_function, absolute_import
 
-import sys
-import os
 import unittest
-from collections import OrderedDict
-from pprint import pprint
-from util import isolate_warnings, check_warnings
-import PySide2
-
-"""
-This test shows that we have over 14500 signatures,
-and that they all can be created.
-"""
-
-all_modules = list("PySide2." + x for x in PySide2.__all__)
-
-from PySide2.support.signature import parser, inspect
-
-_do_print = (True if os.isatty(sys.stdout.fileno()) or "-v" in sys.argv
-             else False)
-
-def dprint(*args, **kw):
-    if _do_print:
-        print(*args, **kw)
-
-def enum_module(mod_name):
-    __import__(mod_name)
-    count = 0
-    module = sys.modules[mod_name]
-    dprint()
-    dprint("Module", mod_name)
-    members = inspect.getmembers(module, inspect.isclass)
-    for class_name, klass in members:
-        signature = getattr(klass, '__signature__', None)
-        dprint()
-        # class_members = inspect.getmembers(klass)
-        # gives us also the inherited things.
-        dprint("  class {}:".format(class_name))
-        if signature is None:
-            pass # initialization not called?
-        elif isinstance(signature, list):
-            dprint("    with overloading():")
-            for overload in signature:
-                dprint("      def __init__" + str(overload))
-        else:
-            dprint("    def __init__" + str(signature))
-        count += 1
-        have_sig = signature is not None
-        have_members = 0
-        class_members = sorted(list(klass.__dict__.items()))
-        for func_name, func in class_members:
-            signature = getattr(func, '__signature__', None)
-            if signature is not None:
-                if isinstance(signature, list):
-                    dprint("    with overloading():")
-                    for overload in signature:
-                        dprint("      def", func_name + str(overload))
-                else:
-                    dprint("    def", func_name + str(signature))
-                count += 1
-                have_members = count
-        if not have_sig and not have_members:
-            # print at least "pass"
-            dprint("    pass")
-    return count
-
-def enum_all():
-    result = OrderedDict()
-    total = 0
-    for mod_name in all_modules:
-        result[mod_name] = enum_module(mod_name)
-        total += result[mod_name]
-    pprint(result if sys.version_info >= (3,) else list(result.items()),
-           stream=sys.stderr)
-    print("Total", total, file=sys.stderr)
-    return result
+import PySide2.QtCore
+import PySide2.QtWidgets
+from PySide2.support.signature import inspect
 
 
 class PySideSignatureTest(unittest.TestCase):
-    def testAllSignaturesCanBuild(self):
-        with isolate_warnings():
-            # This test touches all attributes
-            result = enum_all()
-            # We omit the number of functions test.
-            # That is replaced by existence_test.py .
-            for mod_name, count in result.items():
-                pass
-            # If an attribute could not be computed, then we will have a warning
-            # in the warningregistry.
-            if check_warnings():
-                raise RuntimeError("There are errors, see above.")
-
     def testSignatureExist(self):
         t1 = type(PySide2.QtCore.QObject.children.__signature__)
         self.assertEqual(t1, inspect.Signature)
@@ -158,7 +74,7 @@ class PySideSignatureTest(unittest.TestCase):
         self.assertTrue(ob1 is ob2)
 
     def testModuleIsInitialized(self):
-        assert PySide2.QtWidgets.QApplication.__signature__ is not None
+        self.assertTrue(PySide2.QtWidgets.QApplication.__signature__ is not None)
 
     def test_NotCalled_is_callable_and_correct(self):
         # A signature that has a default value with some "Default(...)"

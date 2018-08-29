@@ -40,7 +40,7 @@
 from __future__ import print_function, absolute_import
 
 """
-signature_mapping.py
+mapping.py
 
 This module has the mapping from the pyside C-modules view of signatures
 to the Python representation.

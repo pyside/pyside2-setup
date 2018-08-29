@@ -88,6 +88,10 @@ PSF LICENSE AGREEMENT FOR PYTHON 3.7.0
    to be bound by the terms and conditions of this License Agreement.
 """
 
+__doc__ = """
+    signature() - get a Signature object for the callable
+"""
+
 import sys
 from collections import OrderedDict
 

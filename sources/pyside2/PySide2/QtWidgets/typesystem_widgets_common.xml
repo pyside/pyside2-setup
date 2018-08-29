@@ -405,6 +405,11 @@
     <modify-function signature="wheelEvent(QGraphicsSceneWheelEvent*)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
+    <modify-function signature="setGraphicsEffect(QGraphicsEffect*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
     <!-- ### These methods are internal on Qt. -->
     <modify-function signature="supportsExtension(QGraphicsItem::Extension)const" remove="all"/>
     <modify-function signature="setExtension(QGraphicsItem::Extension,QVariant)" remove="all"/>
