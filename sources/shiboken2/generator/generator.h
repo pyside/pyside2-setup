@@ -174,6 +174,66 @@ public:
     /// Returns the classes used to generate the binding code.
     AbstractMetaClassList classes() const;
 
+    /// Returns the output directory
+    QString outputDirectory() const;
+
+    /// Set the output directory
+    void setOutputDirectory(const QString &outDir);
+
+    /**
+     *   Start the code generation, be sure to call setClasses before callign this method.
+     *   For each class it creates a QTextStream, call the write method with the current
+     *   class and the associated text stream, then write the text stream contents if needed.
+     *   \see #write
+     */
+    bool generate();
+
+    /// Returns the license comment to be prepended to each source file generated.
+    QString licenseComment() const;
+
+    /// Sets the license comment to be prepended to each source file generated.
+    void setLicenseComment(const QString &licenseComment);
+
+    /// Returns the generator's name. Used for cosmetic purposes.
+    virtual const char* name() const = 0;
+
+    /**
+     *  Retrieves the name of the currently processed module.
+     *  While package name is a complete package idetification, e.g. 'PySide.QtCore',
+     *  a module name represents the last part of the package, e.g. 'QtCore'.
+     *  If the target language separates the modules with characters other than
+     *  dots ('.') the generator subclass must overload this method.
+     *  \return a string representing the last part of a package name
+     */
+    QString moduleName() const;
+
+    /**
+     *   Retrieves a list of constructors used in implicit conversions
+     *   available on the given type. The TypeEntry must be a value-type
+     *   or else it will return an empty list.
+     *   \param type a TypeEntry that is expected to be a value-type
+     *   \return a list of constructors that could be used as implicit converters
+     */
+    AbstractMetaFunctionList implicitConversions(const TypeEntry* type) const;
+
+    /// Convenience function for implicitConversions(const TypeEntry* type).
+    AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
+
+    /// Check if type is a pointer.
+    static bool isPointer(const AbstractMetaType* type);
+
+    /// Tells if the type or class is an Object (or QObject) Type.
+    static bool isObjectType(const TypeEntry* type);
+    static bool isObjectType(const ComplexTypeEntry* type);
+    static bool isObjectType(const AbstractMetaType* metaType);
+    static bool isObjectType(const AbstractMetaClass* metaClass);
+
+    /// Returns true if the type is a C string (const char*).
+    static bool isCString(const AbstractMetaType* type);
+    /// Returns true if the type is a void pointer.
+    static bool isVoidPointer(const AbstractMetaType* type);
+
+protected:
     /// Returns the classes, topologically ordered, used to generate the binding code.
     ///
     /// The classes are ordered such that derived classes appear later in the list than
@@ -204,30 +264,12 @@ public:
     /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or NULL if not found.
     const AbstractMetaEnum* findAbstractMetaEnum(const AbstractMetaType* metaType) const;
 
-    /// Returns the output directory
-    QString outputDirectory() const;
-
-    /// Set the output directory
-    void setOutputDirectory(const QString &outDir);
-
-    /**
-    *   Start the code generation, be sure to call setClasses before callign this method.
-    *   For each class it creates a QTextStream, call the write method with the current
-    *   class and the associated text stream, then write the text stream contents if needed.
-    *   \see #write
-    */
-    bool generate();
-
-
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
     bool generateFileForContext(GeneratorContext &context);
 
     /// Returns the file base name for a smart pointer.
     QString getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,
                                            const AbstractMetaClass *smartPointerClass) const;
-
-    /// Returns the generator's name. Used for cosmetic purposes.
-    virtual const char* name() const = 0;
 
     /// Returns true if the generator should generate any code for the TypeEntry.
     bool shouldGenerateTypeEntry(const TypeEntry*) const;
@@ -267,55 +309,9 @@ public:
     void replaceTemplateVariables(QString &code, const AbstractMetaFunction *func);
 
     /**
-    *   Returns the license comment to be prepended to each source file generated.
-    */
-    QString licenseComment() const;
-
-    /**
-    *   Sets the license comment to be prepended to each source file generated.
-    */
-    void setLicenseComment(const QString &licenseComment);
-
-    /**
      *   Returns the package name.
      */
     QString packageName() const;
-
-    /**
-     *  Retrieves the name of the currently processed module.
-     *  While package name is a complete package idetification, e.g. 'PySide.QtCore',
-     *  a module name represents the last part of the package, e.g. 'QtCore'.
-     *  If the target language separates the modules with characters other than
-     *  dots ('.') the generator subclass must overload this method.
-     *  \return a string representing the last part of a package name
-     */
-    virtual QString moduleName() const;
-
-    /**
-     *   Retrieves a list of constructors used in implicit conversions
-     *   available on the given type. The TypeEntry must be a value-type
-     *   or else it will return an empty list.
-     *   \param type a TypeEntry that is expected to be a value-type
-     *   \return a list of constructors that could be used as implicit converters
-     */
-    AbstractMetaFunctionList implicitConversions(const TypeEntry* type) const;
-
-    /// Convenience function for implicitConversions(const TypeEntry* type).
-    AbstractMetaFunctionList implicitConversions(const AbstractMetaType* metaType) const;
-
-    /// Check if type is a pointer.
-    static bool isPointer(const AbstractMetaType* type);
-
-    /// Tells if the type or class is an Object (or QObject) Type.
-    static bool isObjectType(const TypeEntry* type);
-    static bool isObjectType(const ComplexTypeEntry* type);
-    static bool isObjectType(const AbstractMetaType* metaType);
-    static bool isObjectType(const AbstractMetaClass* metaClass);
-
-    /// Returns true if the type is a C string (const char*).
-    static bool isCString(const AbstractMetaType* type);
-    /// Returns true if the type is a void pointer.
-    static bool isVoidPointer(const AbstractMetaType* type);
 
     // Returns the full name of the type.
     QString getFullTypeName(const TypeEntry* type) const;
@@ -338,7 +334,6 @@ public:
     QString minimalConstructor(const AbstractMetaType* type) const;
     QString minimalConstructor(const AbstractMetaClass* metaClass) const;
 
-protected:
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass/Type.
      *   \param context the GeneratorContext which contains an AbstractMetaClass or AbstractMetaType

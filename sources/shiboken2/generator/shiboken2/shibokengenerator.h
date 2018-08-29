@@ -71,61 +71,20 @@ class ShibokenGenerator : public Generator
 {
 public:
     ShibokenGenerator();
-    virtual ~ShibokenGenerator();
+    ~ShibokenGenerator() override;
 
-    QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
-                                          const AbstractMetaClass* context, Options opt = NoOption) const;
-
-    /**
-    *   Returns a map with all functions grouped, the function name is used as key.
-    *   Example of return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
-    *   \param scope Where to search for functions, null means all global functions.
-    */
-    QMap<QString, AbstractMetaFunctionList> getFunctionGroups(const AbstractMetaClass* scope = 0);
+    const char *name() const override { return "Shiboken"; }
 
     /**
-    *   Returns all different inherited overloads of func.
-    *   The function can be called multiple times without duplication.
-    *   \param func the metafunction to be searched in subclasses.
-    *   \param seen the function's minimal signatures already seen.
-    */
-    AbstractMetaFunctionList getInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen);
-
-    /**
-    *   Returns all different inherited overloads of func, and includes func as well.
-    *   The function can be called multiple times without duplication.
-    *   \param func the metafunction to be searched in subclasses.
-    *   \param seen the function's minimal signatures already seen.
-    */
-    AbstractMetaFunctionList getFunctionAndInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen);
-
-    /**
-    *   Returns all overloads for a function named \p functionName.
-    *   \param scope scope used to search for overloads.
-    *   \param functionName the function name.
-    */
-    AbstractMetaFunctionList getFunctionOverloads(const AbstractMetaClass* scope, const QString& functionName);
-    /**
-     *   Write a function argument in the C++ in the text stream \p s.
-     *   This function just call \code s << argumentString(); \endcode
-     *   \param s text stream used to write the output.
-     *   \param func the current metafunction.
-     *   \param argument metaargument information to be parsed.
-     *   \param options some extra options.
+     * Helper function to find for argument default value
      */
-    void writeArgument(QTextStream &s,
-                       const AbstractMetaFunction* func,
-                       const AbstractMetaArgument* argument,
-                       Options options = NoOption) const;
-    /**
-     *   Create a QString in the C++ format to an function argument.
-     *   \param func the current metafunction.
-     *   \param argument metaargument information to be parsed.
-     *   \param options some extra options.
-     */
-    QString argumentString(const AbstractMetaFunction* func,
-                           const AbstractMetaArgument* argument,
-                           Options options = NoOption) const;
+    static QString getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
+
+    /// Returns a list of all ancestor classes for the given class.
+    AbstractMetaClassList getAllAncestors(const AbstractMetaClass* metaClass) const;
+
+protected:
+    bool doSetup() override;
 
     void writeArgumentNames(QTextStream &s,
                             const AbstractMetaFunction* func,
@@ -141,14 +100,21 @@ public:
     void writeFunctionArguments(QTextStream &s,
                                 const AbstractMetaFunction* func,
                                 Options options = NoOption) const override;
-    QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
 
-    /// Utility function for writeCodeSnips.
-    typedef QPair<const AbstractMetaArgument*, QString> ArgumentVarReplacementPair;
-    typedef QVector<ArgumentVarReplacementPair> ArgumentVarReplacementList;
-    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
-                                                      bool usePyArgs, TypeSystem::Language language,
-                                                      const AbstractMetaArgument* lastArg);
+    /**
+     *   Returns a map with all functions grouped, the function name is used as key.
+     *   Example of return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
+     *   \param scope Where to search for functions, null means all global functions.
+     */
+    QMap<QString, AbstractMetaFunctionList> getFunctionGroups(const AbstractMetaClass* scope = 0);
+
+    /**
+     *   Returns all different inherited overloads of func, and includes func as well.
+     *   The function can be called multiple times without duplication.
+     *   \param func the metafunction to be searched in subclasses.
+     *   \param seen the function's minimal signatures already seen.
+     */
+    AbstractMetaFunctionList getFunctionAndInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen);
 
     /// Write user's custom code snippets at class or module level.
     void writeCodeSnips(QTextStream& s,
@@ -164,32 +130,8 @@ public:
                         const AbstractMetaFunction* func,
                         const AbstractMetaArgument* lastArg = 0);
 
-    /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
-    QString getCodeSnippets(const QVector<CodeSnip> & codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
-
     /// Replaces variables for the user's custom code at global or class level.
     void processCodeSnip(QString& code, const AbstractMetaClass* context = 0);
-
-    /// Replaces the %CONVERTTOPYTHON type system variable.
-    inline void replaceConvertToPythonTypeSystemVariable(QString& code)
-    {
-        replaceConverterTypeSystemVariable(TypeSystemToPythonFunction, code);
-    }
-    /// Replaces the %CONVERTTOCPP type system variable.
-    inline void replaceConvertToCppTypeSystemVariable(QString& code)
-    {
-        replaceConverterTypeSystemVariable(TypeSystemToCppFunction, code);
-    }
-    /// Replaces the %ISCONVERTIBLE type system variable.
-    inline void replaceIsConvertibleToCppTypeSystemVariable(QString& code)
-    {
-        replaceConverterTypeSystemVariable(TypeSystemIsConvertibleFunction, code);
-    }
-    /// Replaces the %CHECKTYPE type system variable.
-    inline void replaceTypeCheckTypeSystemVariable(QString& code)
-    {
-        replaceConverterTypeSystemVariable(TypeSystemCheckFunction, code);
-    }
 
     /**
      *   Verifies if any of the function's code injections of the "native"
@@ -258,9 +200,6 @@ public:
 
     /// Returns a list of parent classes for a given class.
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass) const;
-
-    /// Returns a list of all ancestor classes for the given class.
-    AbstractMetaClassList getAllAncestors(const AbstractMetaClass* metaClass) const;
 
     const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
@@ -460,25 +399,12 @@ public:
     void writeMinimalConstructorExpression(QTextStream& s, const AbstractMetaType* type, const QString& defaultCtor = QString());
     void writeMinimalConstructorExpression(QTextStream& s, const TypeEntry* type, const QString& defaultCtor = QString());
 
-    /**
-     * Helper function to find for argument default value
-     */
-    static QString getDefaultValue(const AbstractMetaFunction* func, const AbstractMetaArgument* arg);
-protected:
-    bool doSetup() override;
     void collectContainerTypesFromConverterMacros(const QString& code, bool toPythonMacro);
     // verify whether the class is copyable
     bool isCopyable(const AbstractMetaClass* metaClass);
 
-    static QHash<QString, QString> m_pythonPrimitiveTypeName;
-    static QHash<QString, QString> m_pythonOperators;
-    static QHash<QString, QString> m_formatUnits;
-    static QHash<QString, QString> m_tpFuncs;
-    static QStringList m_knownPythonTypes;
-
     void clearTpFuncs();
 
-    const char* name() const { return "Shiboken"; }
 
     /// Initializes correspondences between primitive and Python types.
     static void initPrimitiveTypesCorrespondences();
@@ -502,13 +428,75 @@ protected:
     /// Returns a list of converters for the non wrapper types of the current module.
     QVector<const CustomConversion *> getPrimitiveCustomConversions();
 
-    /// Return a prefix with '_' suitable for names in C++
-    QString moduleCppPrefix(const QString& moduleName = QString()) const;
-
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);
 
     Indentor INDENT;
+
+    static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
+
+    static QHash<QString, QString> m_pythonPrimitiveTypeName;
+    static QHash<QString, QString> m_pythonOperators;
+    static QHash<QString, QString> m_formatUnits;
+    static QHash<QString, QString> m_tpFuncs;
+    static QStringList m_knownPythonTypes;
+
+private:
+    QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
+                                          const AbstractMetaClass* context,
+                                          Options opt = NoOption) const;
+
+    /**
+     *   Returns all different inherited overloads of func.
+     *   The function can be called multiple times without duplication.
+     *   \param func the metafunction to be searched in subclasses.
+     *   \param seen the function's minimal signatures already seen.
+     */
+    AbstractMetaFunctionList getInheritedOverloads(const AbstractMetaFunction *func,
+                                                   QSet<QString> *seen);
+
+    /**
+     *   Returns all overloads for a function named \p functionName.
+     *   \param scope scope used to search for overloads.
+     *   \param functionName the function name.
+     */
+    AbstractMetaFunctionList getFunctionOverloads(const AbstractMetaClass* scope,
+                                                  const QString& functionName);
+    /**
+     *   Write a function argument in the C++ in the text stream \p s.
+     *   This function just call \code s << argumentString(); \endcode
+     *   \param s text stream used to write the output.
+     *   \param func the current metafunction.
+     *   \param argument metaargument information to be parsed.
+     *   \param options some extra options.
+     */
+    void writeArgument(QTextStream &s,
+                       const AbstractMetaFunction* func,
+                       const AbstractMetaArgument* argument,
+                       Options options = NoOption) const;
+    /**
+     *   Create a QString in the C++ format to an function argument.
+     *   \param func the current metafunction.
+     *   \param argument metaargument information to be parsed.
+     *   \param options some extra options.
+     */
+    QString argumentString(const AbstractMetaFunction* func,
+                           const AbstractMetaArgument* argument,
+                           Options options = NoOption) const;
+
+    QString functionReturnType(const AbstractMetaFunction* func, Options options = NoOption) const;
+
+    /// Utility function for writeCodeSnips.
+    typedef QPair<const AbstractMetaArgument*, QString> ArgumentVarReplacementPair;
+    typedef QVector<ArgumentVarReplacementPair> ArgumentVarReplacementList;
+    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
+                                                      bool usePyArgs, TypeSystem::Language language,
+                                                      const AbstractMetaArgument* lastArg);
+
+    /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
+    QString getCodeSnippets(const QVector<CodeSnip> & codeSnips,
+                            TypeSystem::CodeSnipPosition position,
+                            TypeSystem::Language language);
 
     enum TypeSystemConverterVariable {
         TypeSystemCheckFunction = 0,
@@ -519,9 +507,30 @@ protected:
     };
     void replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code);
 
-    static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
+    /// Replaces the %CONVERTTOPYTHON type system variable.
+    inline void replaceConvertToPythonTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemToPythonFunction, code);
+    }
+    /// Replaces the %CONVERTTOCPP type system variable.
+    inline void replaceConvertToCppTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemToCppFunction, code);
+    }
+    /// Replaces the %ISCONVERTIBLE type system variable.
+    inline void replaceIsConvertibleToCppTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemIsConvertibleFunction, code);
+    }
+    /// Replaces the %CHECKTYPE type system variable.
+    inline void replaceTypeCheckTypeSystemVariable(QString& code)
+    {
+        replaceConverterTypeSystemVariable(TypeSystemCheckFunction, code);
+    }
 
-private:
+    /// Return a prefix with '_' suitable for names in C++
+    QString moduleCppPrefix(const QString& moduleName = QString()) const;
+
     bool m_useCtorHeuristic = false;
     bool m_userReturnValueHeuristic = false;
     bool m_usePySideExtensions = false;
