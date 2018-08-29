@@ -704,7 +704,6 @@ void TypeEntry::formatDebug(QDebug &d) const
     d << ", type=" << m_type << ", codeGeneration=0x"
         << hex << m_codeGeneration << dec;
     FORMAT_NONEMPTY_STRING("package", m_targetLangPackage)
-    FORMAT_BOOL("preferredConversion", m_preferredConversion)
     FORMAT_BOOL("stream", m_stream)
     FORMAT_LIST_SIZE("codeSnips", m_codeSnips)
     FORMAT_NONEMPTY_STRING("conversionRule", m_conversionRule)
@@ -738,7 +737,6 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
     d << ", copyableFlag=" << m_copyableFlag;
     FORMAT_NONEMPTY_STRING("defaultSuperclass", m_defaultSuperclass)
     FORMAT_NONEMPTY_STRING("polymorphicIdValue", m_polymorphicIdValue)
-    FORMAT_NONEMPTY_STRING("held", m_heldTypeValue)
     FORMAT_NONEMPTY_STRING("lookupName", m_lookupName)
     FORMAT_NONEMPTY_STRING("targetType", m_targetType)
     FORMAT_NONEMPTY_STRING("hash", m_hashFunction)
@@ -753,10 +751,6 @@ void EnumTypeEntry::formatDebug(QDebug &d) const
     FORMAT_NONEMPTY_STRING("package", m_packageName)
     FORMAT_NONEMPTY_STRING("qualifier", m_qualifier)
     FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
-    FORMAT_NONEMPTY_STRING("lowerBound", m_lowerBound)
-    FORMAT_NONEMPTY_STRING("lupperBound", m_upperBound)
-    FORMAT_BOOL("extensible", m_extensible)
-    FORMAT_BOOL("forceInteger", m_forceInteger)
     if (m_flags)
         d << ", flags=(" << m_flags << ')';
 }

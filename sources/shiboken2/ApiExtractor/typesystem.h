@@ -203,12 +203,6 @@ struct ArgumentModification
 
     QString replace_value;
 
-    // The code to be used to construct a return value when noNullPointers is true and
-    // the returned value is null. If noNullPointers is true and this string is
-    // empty, then the base class implementation will be used (or a default construction
-    // if there is no implementation)
-    QString nullPointerDefaultValue;
-
     // The text of the new default expression of the argument
     QString replacedDefaultExpression;
 
@@ -254,8 +248,7 @@ struct Modification
         CodeInjection =         0x1000,
         Rename =                0x2000,
         Deprecated =            0x4000,
-        ReplaceExpression =     0x8000,
-        VirtualSlot =          0x10000 | NonFinal
+        ReplaceExpression =     0x8000
     };
 
     bool isAccessModifier() const
@@ -289,10 +282,6 @@ struct Modification
     bool isNonFinal() const
     {
         return modifiers & NonFinal;
-    }
-    bool isVirtualSlot() const
-    {
-        return (modifiers & VirtualSlot) == VirtualSlot;
     }
     QString accessModifierString() const;
 
@@ -669,15 +658,6 @@ public:
         return m_type == EnumValue;
     }
 
-    virtual bool preferredConversion() const
-    {
-        return m_preferredConversion;
-    }
-    virtual void setPreferredConversion(bool b)
-    {
-        m_preferredConversion = b;
-    }
-
     bool stream() const
     {
         return m_stream;
@@ -902,7 +882,6 @@ private:
     uint m_codeGeneration = GenerateAll;
     CustomFunction m_customConstructor;
     CustomFunction m_customDestructor;
-    bool m_preferredConversion = true;
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
@@ -1029,9 +1008,6 @@ public:
      */
     PrimitiveTypeEntry* basicReferencedTypeEntry() const;
 
-    bool preferredConversion() const override;
-    void setPreferredConversion(bool b) override;
-
     bool preferredTargetLangType() const
     {
         return m_preferredTargetLangType;
@@ -1045,7 +1021,6 @@ private:
     QString m_targetLangName;
     QString m_targetLangApiName;
     QString m_defaultConstructor;
-    uint m_preferredConversion : 1;
     uint m_preferredTargetLangType : 1;
     PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
 };
@@ -1071,31 +1046,6 @@ public:
         m_qualifier = q;
     }
 
-    bool preferredConversion() const override;
-
-    bool isBoundsChecked() const
-    {
-        return m_lowerBound.isEmpty() && m_upperBound.isEmpty();
-    }
-
-    QString upperBound() const
-    {
-        return m_upperBound;
-    }
-    void setUpperBound(const QString &bound)
-    {
-        m_upperBound = bound;
-    }
-
-    QString lowerBound() const
-    {
-        return m_lowerBound;
-    }
-    void setLowerBound(const QString &bound)
-    {
-        m_lowerBound = bound;
-    }
-
     void setFlags(FlagsTypeEntry *flags)
     {
         m_flags = flags;
@@ -1103,15 +1053,6 @@ public:
     FlagsTypeEntry *flags() const
     {
         return m_flags;
-    }
-
-    bool isExtensible() const
-    {
-        return m_extensible;
-    }
-    void setExtensible(bool is)
-    {
-        m_extensible = is;
     }
 
     bool isEnumValueRejected(const QString &name) const
@@ -1127,15 +1068,6 @@ public:
         return m_rejectedEnums;
     }
 
-    bool forceInteger() const
-    {
-        return m_forceInteger;
-    }
-    void setForceInteger(bool force)
-    {
-        m_forceInteger = force;
-    }
-
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -1144,15 +1076,9 @@ private:
     QString m_qualifier;
     QString m_targetLangName;
 
-    QString m_lowerBound;
-    QString m_upperBound;
-
     QStringList m_rejectedEnums;
 
     FlagsTypeEntry *m_flags = nullptr;
-
-    bool m_extensible = false;
-    bool m_forceInteger = false;
 };
 
 // EnumValueTypeEntry is used for resolving integer type templates
@@ -1177,7 +1103,6 @@ public:
     QString qualifiedTargetLangName() const override;
     QString targetLangName() const override;
     QString targetLangApiName() const override;
-    bool preferredConversion() const override;
 
     QString originalName() const
     {
@@ -1195,11 +1120,6 @@ public:
     void setFlagsName(const QString &name)
     {
         m_targetLangName = name;
-    }
-
-    bool forceInteger() const
-    {
-        return m_enum->forceInteger();
     }
 
     EnumTypeEntry *originator() const
@@ -1222,8 +1142,6 @@ class ComplexTypeEntry : public TypeEntry
 {
 public:
     enum TypeFlag {
-        ForceAbstract      = 0x1,
-        DeleteInMainThread = 0x2,
         Deprecated         = 0x4
     };
     typedef QFlags<TypeFlag> TypeFlags;
@@ -1336,15 +1254,6 @@ public:
         return m_polymorphicIdValue;
     }
 
-    void setHeldType(const QString &value)
-    {
-        m_heldTypeValue = value;
-    }
-    QString heldTypeValue() const
-    {
-        return m_heldTypeValue;
-    }
-
     QString targetType() const
     {
         return m_targetType;
@@ -1418,7 +1327,6 @@ private:
     uint m_genericClass : 1;
 
     QString m_polymorphicIdValue;
-    QString m_heldTypeValue;
     QString m_lookupName;
     QString m_targetType;
     TypeFlags m_typeFlags;

@@ -724,17 +724,6 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
     return false;
 }
 
-bool AbstractMetaFunction::isVirtualSlot() const
-{
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
-        if (modification.isVirtualSlot())
-            return true;
-    }
-
-    return false;
-}
-
 bool AbstractMetaFunction::isDeprecated() const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
@@ -1204,7 +1193,6 @@ AbstractMetaClass::AbstractMetaClass()
     : m_hasVirtuals(false),
       m_isPolymorphic(false),
       m_hasNonpublic(false),
-      m_hasVirtualSlots(false),
       m_hasNonPrivateConstructor(false),
       m_hasPrivateConstructor(false),
       m_functionsFixed(false),
@@ -1428,11 +1416,8 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
 
     for (AbstractMetaFunction *f : qAsConst(m_functions)) {
         f->setOwnerClass(this);
-
-        m_hasVirtualSlots = m_hasVirtualSlots || f->isVirtualSlot();
-        m_hasVirtuals = m_hasVirtuals || f->isVirtualSlot() || hasVirtualDestructor();
-        m_isPolymorphic = m_isPolymorphic || m_hasVirtuals;
-        m_hasNonpublic = m_hasNonpublic || !f->isPublic();
+        if (!f->isPublic())
+            m_hasNonpublic = true;
     }
 }
 
@@ -1466,8 +1451,7 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
     else
         Q_ASSERT(false); //memory leak
 
-    m_hasVirtualSlots |= function->isVirtualSlot();
-    m_hasVirtuals |= function->isVirtual() || function->isVirtualSlot() || hasVirtualDestructor();
+    m_hasVirtuals |= function->isVirtual() || hasVirtualDestructor();
     m_isPolymorphic |= m_hasVirtuals;
     m_hasNonpublic |= !function->isPublic();
 }

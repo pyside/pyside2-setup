@@ -1047,9 +1047,6 @@ PrimitiveTypeEntry *
         } else if (name == preferredConversionAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            const bool v = convertBoolean(attributes->takeAt(i).value(),
-                                          preferredConversionAttribute(), true);
-            type->setPreferredConversion(v);
         } else if (name == preferredTargetLangTypeAttribute()) {
             const bool v = convertBoolean(attributes->takeAt(i).value(),
                                           preferredTargetLangTypeAttribute(), true);
@@ -1110,23 +1107,15 @@ EnumTypeEntry *
         if (name == QLatin1String("upper-bound")) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            entry->setUpperBound(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("lower-bound")) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            entry->setLowerBound(attributes->takeAt(i).value().toString());
         } else if (name == forceIntegerAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            const bool v = convertBoolean(attributes->takeAt(i).value(),
-                                          forceIntegerAttribute(), false);
-            entry->setForceInteger(v);
         } else if (name == extensibleAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            const bool v = convertBoolean(attributes->takeAt(i).value(),
-                                          extensibleAttribute(), false);
-            entry->setExtensible(v);
         } else if (name == flagsAttribute()) {
             flagNames = attributes->takeAt(i).value().toString();
         }
@@ -1254,22 +1243,17 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
         } else if (name == QLatin1String("held-type")) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            ctype->setHeldType(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("hash-function")) {
             ctype->setHashFunction(attributes->takeAt(i).value().toString());
         } else if (name == forceAbstractAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            if (convertBoolean(attributes->takeAt(i).value(), forceAbstractAttribute(), false))
-                ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ForceAbstract);
         } else if (name == deprecatedAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);
         } else if (name == deleteInMainThreadAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
-                ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::DeleteInMainThread);
         } else if (name == QLatin1String("target-type")) {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
         }
@@ -1665,12 +1649,6 @@ bool Handler::parseNoNullPointer(const QXmlStreamReader &reader,
         const QXmlStreamAttribute attribute = attributes->takeAt(defaultValueIndex);
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgUnimplementedAttributeWarning(reader, attribute)));
-        if (lastArgMod.index == 0) {
-            lastArgMod.nullPointerDefaultValue = attribute.value().toString();
-        } else {
-            qCWarning(lcShiboken)
-                << "default values for null pointer guards are only effective for return values";
-        }
     }
     return true;
 }
@@ -1939,7 +1917,6 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
     bool deprecated = false;
     bool isThread = false;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
-    bool virtualSlot = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("signature")) {
@@ -1970,8 +1947,6 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
         } else if (name == virtualSlotAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            virtualSlot = convertBoolean(attributes->takeAt(i).value(),
-                                         virtualSlotAttribute(), false);
         }
     }
 
@@ -2024,8 +1999,6 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
     mod.setIsThread(isThread);
     if (allowThread != TypeSystem::AllowThread::Unspecified)
         mod.setAllowThread(allowThread);
-    if (virtualSlot)
-        mod.modifiers |= Modification::VirtualSlot;
 
     m_contextStack.top()->functionMods << mod;
     return true;
@@ -2724,7 +2697,6 @@ bool Handler::startElement(const QXmlStreamReader &reader)
 
 PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &name, const QVersionNumber &vr) :
     TypeEntry(name, PrimitiveType, vr),
-    m_preferredConversion(true),
     m_preferredTargetLangType(true)
 {
 }
@@ -2746,16 +2718,6 @@ PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
 
     PrimitiveTypeEntry *baseReferencedTypeEntry = m_referencedTypeEntry->basicReferencedTypeEntry();
     return baseReferencedTypeEntry ? baseReferencedTypeEntry : m_referencedTypeEntry;
-}
-
-bool PrimitiveTypeEntry::preferredConversion() const
-{
-    return m_preferredConversion;
-}
-
-void PrimitiveTypeEntry::setPreferredConversion(bool b)
-{
-    m_preferredConversion = b;
 }
 
 CodeSnipList TypeEntry::codeSnips() const
@@ -2869,19 +2831,9 @@ QString EnumTypeEntry::targetLangApiName() const
     return QLatin1String("jint");
 }
 
-bool EnumTypeEntry::preferredConversion() const
-{
-    return false;
-}
-
 QString FlagsTypeEntry::targetLangApiName() const
 {
     return QLatin1String("jint");
-}
-
-bool FlagsTypeEntry::preferredConversion() const
-{
-    return false;
 }
 
 QString FlagsTypeEntry::qualifiedTargetLangName() const

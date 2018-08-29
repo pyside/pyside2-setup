@@ -1025,8 +1025,6 @@ public:
     // Returns the ownership rules for the given argument in the given context
     TypeSystem::Ownership ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int idx) const;
 
-    bool isVirtualSlot() const;
-
     QString typeReplaced(int argument_index) const;
     bool isRemovedFromAllLanguages(const AbstractMetaClass *) const;
     bool isRemovedFrom(const AbstractMetaClass *, TypeSystem::Language language) const;
@@ -1512,11 +1510,6 @@ public:
         m_forceShellClass = on;
     }
 
-    bool hasVirtualSlots() const
-    {
-        return m_hasVirtualSlots;
-    }
-
     /**
     *   Says if the class that declares or inherits a virtual function.
     *   \return true if the class implements or inherits any virtual methods
@@ -1700,7 +1693,6 @@ private:
     uint m_hasVirtuals : 1;
     uint m_isPolymorphic : 1;
     uint m_hasNonpublic : 1;
-    uint m_hasVirtualSlots : 1;
     uint m_hasNonPrivateConstructor : 1;
     uint m_hasPrivateConstructor : 1;
     uint m_functionsFixed : 1;
