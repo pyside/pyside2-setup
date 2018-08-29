@@ -72,8 +72,10 @@
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
 static void* qobjectNextAddr;
 
+QT_BEGIN_NAMESPACE
 extern bool qRegisterResourceData(int, const unsigned char *, const unsigned char *,
         const unsigned char *);
+QT_END_NAMESPACE
 
 namespace PySide
 {
