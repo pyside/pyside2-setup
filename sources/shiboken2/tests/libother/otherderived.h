@@ -55,7 +55,7 @@ public:
     // factory method
     static Abstract* createObject();
 
-    void hideFunction(HideType*) {}
+    void hideFunction(HideType*) override {}
 
 protected:
     inline const char* getClassName() { return className(); }
