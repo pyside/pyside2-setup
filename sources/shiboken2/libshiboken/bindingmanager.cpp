@@ -113,9 +113,8 @@ public:
             if (typeFound != type)
                 *cptr = typeFound;
             return type;
-        } else {
-            return nullptr;
         }
+        return nullptr;
     }
 };
 

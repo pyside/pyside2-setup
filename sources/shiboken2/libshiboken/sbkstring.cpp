@@ -66,10 +66,7 @@ bool check(PyObject* obj)
 
 bool checkChar(PyObject* pyobj)
 {
-    if (check(pyobj) && (len(pyobj) == 1))
-        return true;
-
-    return false;
+    return check(pyobj) && (len(pyobj) == 1);
 }
 
 bool isConvertible(PyObject* obj)

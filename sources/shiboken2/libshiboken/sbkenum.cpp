@@ -373,7 +373,9 @@ PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue)
     return 0;
 }
 
-static PyTypeObject* createEnum(const char* fullName, const char* cppName, const char* shortName, PyTypeObject* flagsType)
+static PyTypeObject* createEnum(const char* fullName, const char* cppName,
+                                const char* /* shortName */,
+                                PyTypeObject* flagsType)
 {
     PyTypeObject* enumType = newTypeWithName(fullName, cppName, flagsType);
     if (PyType_Ready(enumType) < 0)
