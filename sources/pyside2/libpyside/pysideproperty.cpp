@@ -173,7 +173,8 @@ int qpropertyTpInit(PyObject* self, PyObject* args, PyObject* kwds)
                                    "designable", "scriptable", "stored", "user",
                                    "constant", "final", 0};
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOsObbbbbb:QtCore.QProperty", (char**) kwlist,
+                                     "O|OOOOsObbbbbb:QtCore.QProperty",
+                                     const_cast<char**>(kwlist),
                                      /*OO*/     &type, &(pData->fget),
                                      /*OOO*/    &(pData->fset), &(pData->freset), &(pData->fdel),
                                      /*s*/      &(pData->doc),
@@ -197,14 +198,13 @@ int qpropertyTpInit(PyObject* self, PyObject* args, PyObject* kwds)
         Py_XINCREF(pData->fdel);
         Py_XINCREF(pData->notify);
         return 1;
-    } else {
-        pData->fget = 0;
-        pData->fset = 0;
-        pData->freset = 0;
-        pData->fdel = 0;
-        pData->notify = 0;
-        return -1;
     }
+    pData->fget = nullptr;
+    pData->fset = nullptr;
+    pData->freset = nullptr;
+    pData->fdel = nullptr;
+    pData->notify = nullptr;
+    return -1;
 }
 
 void qpropertyDeAlloc(PyObject* self)
@@ -225,10 +225,9 @@ PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
         Py_INCREF(self);
         return self;
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Invalid property usage.");
-        return 0;
     }
+    PyErr_SetString(PyExc_TypeError, "Invalid property usage.");
+    return nullptr;
 }
 
 PyObject* qPropertySetter(PyObject* self, PyObject* callback)
@@ -242,10 +241,9 @@ PyObject* qPropertySetter(PyObject* self, PyObject* callback)
 
         Py_INCREF(callback);
         return callback;
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Invalid property setter agument.");
-        return 0;
     }
+    PyErr_SetString(PyExc_TypeError, "Invalid property setter agument.");
+    return nullptr;
 }
 
 PyObject* qPropertyGetter(PyObject* self, PyObject* callback)
@@ -259,10 +257,9 @@ PyObject* qPropertyGetter(PyObject* self, PyObject* callback)
 
         Py_INCREF(callback);
         return callback;
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Invalid property getter agument.");
-        return 0;
     }
+    PyErr_SetString(PyExc_TypeError, "Invalid property getter agument.");
+    return nullptr;
 }
 
 static int qpropertyTraverse(PyObject* self, visitproc visit, void* arg)

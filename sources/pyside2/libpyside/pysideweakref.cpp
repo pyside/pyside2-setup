@@ -65,7 +65,7 @@ static PyType_Spec PySideCallableObjectType_spec = {
 };
 
 
-static PyTypeObject *PySideCallableObjectTypeF(void)
+static PyTypeObject *PySideCallableObjectTypeF()
 {
     static PyTypeObject *type =
         (PyTypeObject *)PyType_FromSpec(&PySideCallableObjectType_spec);

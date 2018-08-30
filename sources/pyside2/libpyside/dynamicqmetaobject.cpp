@@ -172,8 +172,8 @@ static int blobSize(QLinkedList<QByteArray> &strings)
 static int aggregateParameterCount(const QList<MethodData> &methods)
 {
    int sum = 0;
-   for (int i = 0; i < methods.size(); ++i)
-      sum += methods.at(i).parameterCount() * 2 + 1; // nb_param*2 (type and names) +1 for return type
+   for (const auto &method : methods)
+      sum += method.parameterCount() * 2 + 1; // nb_param*2 (type and names) +1 for return type
    return sum;
 }
 
@@ -425,9 +425,8 @@ int DynamicQMetaObject::addMethod(QMetaMethod::MethodType mtype, const char* sig
     for (; it != m_d->m_methods.end(); ++it) {
         if ((it->signature() == signature) && (it->methodType() == mtype))
             return m_d->m_methodOffset + counter;
-        else if (!it->isValid()) {
+        if (!it->isValid())
             index = counter;
-        }
         counter++;
     }
 
@@ -601,9 +600,8 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
                 || baseType == reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())
                 || baseType == reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type)) {
             continue;
-        } else {
-            basesToCheck.append(baseType);
         }
+        basesToCheck.append(baseType);
     }
 
     // Prepend the actual type that we are parsing.
@@ -776,7 +774,7 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
     m_nullIndex = registerString("", strings); // register a null string
 
     // Write class info.
-    if (m_info.size()) {
+    if (!m_info.isEmpty()) {
         if (data[3] == 0)
             data[3] = index;
 
@@ -821,7 +819,7 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
         PyErr_Clear();
     }
 
-    if (m_methods.size()) {
+    if (!m_methods.empty()) {
         if (data[5] == 0)
             data[5] = index;
 
@@ -829,7 +827,7 @@ void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject
     }
 
     // Write signal/slots parameters.
-    if (m_methods.size()) {
+    if (!m_methods.empty()) {
        for (it = m_methods.begin(); it != m_methods.end(); ++it) {
           QList<QByteArray> paramTypeNames = it->parameterTypes();
           int paramCount = paramTypeNames.size();

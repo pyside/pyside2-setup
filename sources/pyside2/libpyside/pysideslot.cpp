@@ -96,8 +96,10 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     if (emptyTuple == 0)
         emptyTuple = PyTuple_New(0);
 
-    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore." SLOT_DEC_NAME, (char**) kwlist, &argName, &argResult))
+    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore." SLOT_DEC_NAME,
+                                     const_cast<char**>(kwlist), &argName, &argResult)) {
         return 0;
+    }
 
     PySideSlot *data = reinterpret_cast<PySideSlot*>(self);
     for(Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {

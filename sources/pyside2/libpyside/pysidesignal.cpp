@@ -412,8 +412,7 @@ PyObject* signalInstanceConnect(PyObject* self, PyObject* args, PyObject* kwds)
         PyObject* result = PyObject_CallObject(pyMethod, tupleArgs);
         if (result == Py_True || result == Py_False)
             return result;
-        else
-            Py_XDECREF(result);
+        Py_XDECREF(result);
     }
     if (!PyErr_Occurred()) // PYSIDE-79: inverse the logic. A Null return needs an error.
         PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.", source->d->signature);
@@ -661,9 +660,10 @@ char* getTypeName(PyObject* type)
                 typeName = strdup("PyObject");
         }
         return typeName;
-    } else if (type == Py_None) { // Must be checked before as Shiboken::String::check accepts Py_None
+    }
+    if (type == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None
         return strdup("void");
-    } else if (Shiboken::String::check(type)) {
+    if (Shiboken::String::check(type)) {
         const char *result = Shiboken::String::toCString(type);
         if (!strcmp(result, "qreal"))
             result = sizeof(qreal) == sizeof(double) ? "double" : "float";
@@ -835,7 +835,7 @@ template<typename T>
 static typename T::value_type join(T t, const char* sep)
 {
     typename T::value_type res;
-    if (!t.size())
+    if (t.isEmpty())
         return res;
 
     typename T::const_iterator it = t.begin();
@@ -894,7 +894,7 @@ void registerSignals(SbkObjectType* pyObj, const QMetaObject* metaObject)
         self->signaturesSize = 0;
         self->signatures = 0;
         self->signatureAttributes = 0;
-        self->initialized = 0;
+        self->initialized = false;
         self->homonymousMethod = 0;
 
         // Empty signatures comes first! So they will be the default signal signature
@@ -949,9 +949,9 @@ QStringList getArgsFromSignature(const char* signature, bool* isShortCircuit)
 
     if (isShortCircuit)
         *isShortCircuit = !qsignature.contains(QLatin1Char('('));
-    if (qsignature.contains(QLatin1String("()")) || qsignature.contains(QLatin1String("(void)"))) {
+    if (qsignature.contains(QLatin1String("()")) || qsignature.contains(QLatin1String("(void)")))
         return result;
-    } else if (qsignature.contains(QLatin1Char('('))) {
+    if (qsignature.contains(QLatin1Char('('))) {
         static QRegExp regex(QLatin1String(".+\\((.*)\\)"));
         //get args types
         QString types = qsignature;
@@ -1047,9 +1047,8 @@ QString codeCallbackName(PyObject* callback, const QString& funcName)
         PyObject* self = PyMethod_GET_SELF(callback);
         PyObject* func = PyMethod_GET_FUNCTION(callback);
         return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
-    } else {
-        return funcName + QString::number(quint64(callback), 16);
     }
+    return funcName + QString::number(quint64(callback), 16);
 }
 
 } //namespace Signal

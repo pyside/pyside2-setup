@@ -199,7 +199,7 @@ std::size_t getSizeOfQObject(SbkObjectType* type)
     return userData->cppObjSize;
 }
 
-void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, const std::size_t& cppObjSize)
+void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, std::size_t cppObjSize)
 {
     //create DynamicMetaObject based on python type
     TypeUserData* userData = new TypeUserData(reinterpret_cast<PyTypeObject*>(type), base);
@@ -297,7 +297,7 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
                     }
                 }
             }
-            if (signalList.size() > 0) {
+            if (!signalList.empty()) {
                 PyObject* pySignal = reinterpret_cast<PyObject*>(Signal::newObjectFromMethod(self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
                 return pySignal;
@@ -364,7 +364,7 @@ PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type)
     // set and check if it's created after the set call
     QVariant existing = cppSelf->property(invalidatePropertyName);
     if (!existing.isValid()) {
-        QSharedPointer<any_t> shared_with_del((any_t*)cppSelf, invalidatePtr);
+        QSharedPointer<any_t> shared_with_del(reinterpret_cast<any_t*>(cppSelf), invalidatePtr);
         cppSelf->setProperty(invalidatePropertyName, QVariant::fromValue(shared_with_del));
         pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
         if (pyOut) {
