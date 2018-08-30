@@ -197,7 +197,7 @@ BindingManager::~BindingManager()
         while (!m_d->wrapperMapper.empty()) {
             Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void*>(m_d->wrapperMapper.begin()->first));
         }
-        assert(m_d->wrapperMapper.size() == 0);
+        assert(m_d->wrapperMapper.empty());
     }
     delete m_d;
 }

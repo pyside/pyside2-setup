@@ -1531,7 +1531,7 @@ std::string info(SbkObject* self)
         s << String::toCString(parent) << "\n";
     }
 
-    if (self->d->parentInfo && self->d->parentInfo->children.size()) {
+    if (self->d->parentInfo && !self->d->parentInfo->children.empty()) {
         s << "children.......... ";
         ChildrenList& children = self->d->parentInfo->children;
         for (ChildrenList::const_iterator it = children.begin(); it != children.end(); ++it) {
@@ -1541,7 +1541,7 @@ std::string info(SbkObject* self)
         s << '\n';
     }
 
-    if (self->d->referredObjects && self->d->referredObjects->size()) {
+    if (self->d->referredObjects && !self->d->referredObjects->empty()) {
         Shiboken::RefCountMap& map = *self->d->referredObjects;
         s << "referred objects.. ";
         Shiboken::RefCountMap::const_iterator it = map.begin();
