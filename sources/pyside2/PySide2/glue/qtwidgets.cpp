@@ -86,6 +86,26 @@ if (_defaultValue)
 _defaultValue = %PYARG_1;
 // @snippet qitemeditorfactory-setdefaultfactory
 
+// @snippet qformlayout-fix-args
+int _row;
+QFormLayout::ItemRole _role;
+%BEGIN_ALLOW_THREADS
+%CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &_row, &_role);
+%END_ALLOW_THREADS
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
+// @snippet qformlayout-fix-args
+
+// @snippet qfiledialog-return
+%BEGIN_ALLOW_THREADS
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &%5, %6);
+%END_ALLOW_THREADS
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
+// @snippet qfiledialog-return
+
 // @snippet qmenu-addaction-1
 %PYARG_0 = addActionWithPyObject(%CPPSELF, QIcon(), %1, %2, %3);
 // @snippet qmenu-addaction-1

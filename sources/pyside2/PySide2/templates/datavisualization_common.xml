@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+<!--
 /****************************************************************************
 **
 ** Copyright (C) 2018 The Qt Company Ltd.
@@ -36,57 +38,39 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+-->
+<typesystem>
+    <template name="cppqlistofptrtoqvectors_to_py_conversion">
+        const int rowCount = %in.size();
+        PyObject* %out = PyList_New(rowCount);
+        for (int r = 0; r &lt; rowCount; ++r) {
+            const QVector&lt;%INTYPE_0&gt; *row = %in.at(r);
+            const int columnCount = row->size();
+            PyObject *pyRow = PyList_New(columnCount);
+            for (int c = 0; c &lt; columnCount; ++c) {
+                const %INTYPE_0 &amp;cppItem = row->at(c);
+                PyList_SET_ITEM(pyRow, c, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+            }
+            PyList_SET_ITEM(%out, r, pyRow);
+        }
+        return %out;
+    </template>
 
-// @snippet qwebview-page
-SbkObject* _pyReturn = reinterpret_cast<SbkObject*>(%PYARG_0);
-if (!Shiboken::Object::hasParentInfo(_pyReturn))
-    Shiboken::Object::setParent(%PYSELF, %PYARG_0);
-// @snippet qwebview-page
-
-// @snippet qwebelementcollection-len
-return %CPPSELF.count();
-// @snippet qwebelementcollection-len
-
-// @snippet qwebelementcollection-getitem
-if (_i < 0 || _i >= %CPPSELF.count()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return 0;
-}
-QWebElement element = %CPPSELF.at(_i);
-return %CONVERTTOPYTHON[QWebElement](element);
-// @snippet qwebelementcollection-getitem
-
-// @snippet qwebpage-qt-metacall
-static int _signalIndex = -1;
-static QMetaMethod _m;
-
-if (_signalIndex == -1) {
-    _signalIndex = QWebPage::staticMetaObject.indexOfSlot("shouldInterruptJavaScript()")
-    _m = QWebPage::staticMetaObject.method(_signalIndex);
-}
-
-if (_signalIndex == id) {
-    Shiboken::GilState gil;
-    PyObject* self = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(this);
-
-    if (self) {
-        Shiboken::AutoDecRef _pyMethod(PyObject_GetAttrString(self, "shouldInterruptJavaScript"));
-        return PySide::SignalManager::callPythonMetaMethod(_m, args, _pyMethod, false);
-    }
-}
-// @snippet qwebpage-qt-metacall
-
-// @snippet qwebframe-metadata
-%PYARG_0 = PyDict_New();
-const auto &keys = %0.keys();
-for (const auto &_key : keys) {
-    Shiboken::AutoDecRef _pyValueList(PyList_New(0));
-    for (auto it = %0.lowerBound(key), end = %0.upperBound(key); it ! = end; ++it) {
-        Shiboken::AutoDecRef _pyValue(%CONVERTTOPYTHON[QString](it.value));
-        PyList_Append(_pyValueList, _pyValue);
-    }
-
-    Shiboken::AutoDecRef _pyKey(%CONVERTTOPYTHON[QString](_key));
-    PyDict_SetItem(%PYARG_0, _pyKey, _pyValueList);
-}
-// @snippet qwebframe-metadata
+    <template name="py_to_cppqlistofptrtoqvectors_conversion">
+        const int rowCount = int(PySequence_Size(%in));
+        %OUTTYPE &amp;result = %out;
+        result.reserve(rowCount);
+        for (int r = 0; r &lt; rowCount; ++r) {
+            Shiboken::AutoDecRef rowItem(PySequence_GetItem(%in, r));
+            const int columnCount = int(PySequence_Size(rowItem));
+            QVector&lt;%OUTTYPE_0&gt; *row = new QVector&lt;%OUTTYPE_0&gt;;
+            row->reserve(columnCount);
+            for (int c = 0; c &lt; columnCount; ++c) {
+               Shiboken::AutoDecRef pyItem(PySequence_GetItem(rowItem, c));
+               %OUTTYPE_0 v = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
+               row->append(v);
+            }
+            result.append(row);
+        }
+    </template>
+</typesystem>

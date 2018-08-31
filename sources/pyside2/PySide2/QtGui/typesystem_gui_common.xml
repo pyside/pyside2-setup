@@ -41,18 +41,9 @@
 -->
 <typesystem package="PySide2.QtGui">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="templates/core_common.xml" generate="no"/>
+  <load-typesystem name="templates/gui_common.xml" generate="no"/>
 
-  <template name="QFontCharFix">
-    int size = Shiboken::String::len(%PYARG_1);
-    if (size == 1) {
-        const char *str = Shiboken::String::toCString(%PYARG_1);
-        QChar ch(str[0]);
-        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(ch);
-        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-    } else {
-        PyErr_SetString(PyExc_TypeError, "String must have only one character");
-    }
-  </template>
 
   <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
   <function signature="qAlpha(uint)"/>
@@ -554,26 +545,6 @@
     </modify-function>
   </value-type>
 
-  <template name="load_xpm">
-        Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
-        int lineCount = PySequence_Fast_GET_SIZE(strList.object());
-        for (int line = 0; line &lt; lineCount; ++line) {
-            if (!Shiboken::String::check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
-                PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
-                break;
-            }
-        }
-
-        const char **xpm = reinterpret_cast&lt;const char**&gt;(malloc(lineCount * sizeof(const char**)));
-        for (int line = 0; line &lt; lineCount; ++line)
-            xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
-
-        %BEGIN_ALLOW_THREADS
-        %0 = new %TYPE(xpm);
-        %END_ALLOW_THREADS
-
-        free(xpm);
-  </template>
   <value-type name="QPixmap" >
     <!--<conversion-rule>-->
         <!--<target-to-native replace="no">-->
@@ -703,13 +674,6 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <template name="qmatrix_map">
-    %ARG1_TYPE a, b;
-    %CPPSELF.%FUNCTION_NAME(%1, %2, &amp;a, &amp;b);
-    %PYARG_0 = PyTuple_New(2);
-    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](a));
-    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](b));
-    </template>
     <modify-function signature="map(int,int,int*,int*)const">
         <modify-argument index="3">
             <remove-argument />
@@ -791,10 +755,6 @@
       <include file-name="QMatrix" location="global"/>
     </extra-includes>
 
-    <template name="qimage_buffer_constructor">
-        uchar *ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1));
-        %0 = new %TYPE(ptr, %ARGS);
-    </template>
     <modify-function signature="QImage(uchar*,int,int,int,QImage::Format,QImageCleanupFunction,void*)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
@@ -905,48 +865,6 @@
     </extra-includes>
   </value-type>
 
-  <template name="qcolor_repr">
-      switch(%CPPSELF.spec()) {
-        case QColor::Rgb:
-        {
-            qreal r, g, b, a;
-            %CPPSELF.getRgbF(&amp;r, &amp;g, &amp;b, &amp;a);
-            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromRgbF(%.6f, %.6f, %.6f, %.6f)", r, g, b, a);
-            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
-            break;
-        }
-        case QColor::Hsv:
-        {
-            qreal h, s, v, a;
-            %CPPSELF.getHsvF(&amp;h, &amp;s, &amp;v, &amp;a);
-            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromHsvF(%.6f, %.6f, %.6f, %.6f)", h, s, v, a);
-            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
-            break;
-        }
-        case QColor::Cmyk:
-        {
-            qreal c, m, y, k, a;
-            %CPPSELF.getCmykF(&amp;c, &amp;m, &amp;y, &amp;k, &amp;a);
-            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromCmykF(%.6f, %.6f, %.6f, %.6f, %.6f)", c, m, y, k, a);
-            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
-            break;
-        }
-        #if QT_VERSION >= 0x040600
-        case QColor::Hsl:
-        {
-            qreal h, s, l, a;
-            %CPPSELF.getHslF(&amp;h, &amp;s, &amp;l, &amp;a);
-            QString repr = QString().sprintf("PySide2.QtGui.QColor.fromHslF(%.6f, %.6f, %.6f, %.6f)", h, s, l, a);
-            %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
-            break;
-        }
-        #endif
-        default:
-        {
-            %PYARG_0 = Shiboken::String::fromCString("PySide2.QtGui.QColor()");
-        }
-     }
-  </template>
   <value-type name="QColor">
     <enum-type name="NameFormat"/>
     <enum-type name="Spec"/>
@@ -1443,42 +1361,6 @@
     </modify-function>
   </object-type>
 
-  <template name="validator_conversionrule">
-        QValidator::State %out;
-
-        if (PySequence_Check(%PYARG_0)) {
-            Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_0, 0));
-            int size = PySequence_Fast_GET_SIZE(seq.object());
-
-            if (size > 1) {
-                if (%ISCONVERTIBLE[QString](PySequence_Fast_GET_ITEM(seq.object(), 1)))
-                    %1 = %CONVERTTOCPP[QString](PySequence_Fast_GET_ITEM(seq.object(), 1));
-                else
-                    qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to unicode.");
-            }
-
-            if (size > 2) {
-                if (%ISCONVERTIBLE[int](PySequence_Fast_GET_ITEM(seq.object(), 2)))
-                    %2 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(seq.object(), 2));
-                else
-                    qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to int.");
-            }
-            %PYARG_0.reset(PySequence_Fast_GET_ITEM(seq.object(), 0));
-            Py_INCREF(%PYARG_0); // we need to incref, because "%PYARG_0 = ..." will decref the tuple and the tuple will be decrefed again at the end of this scope.
-        }
-
-        // check retrun value
-        if (%ISCONVERTIBLE[QValidator::State](%PYARG_0)) {
-            %out = %CONVERTTOCPP[QValidator::State](%PYARG_0);
-        } else {
-            PyErr_Format(PyExc_TypeError, "Invalid return value in function %s, expected %s, got %s.",
-                        "QValidator.validate",
-                        "PySide2.QtGui.QValidator.State, (PySide2.QtGui.QValidator.State,), (PySide2.QtGui.QValidator.State, unicode) or (PySide2.QtGui.QValidator.State, unicode, int)",
-                        Py_TYPE(pyResult)->tp_name);
-            return QValidator::State();
-        }
-  </template>
-
   <object-type name="QValidator">
     <enum-type name="State"/>
     <modify-function signature="fixup(QString &amp;)const">
@@ -1488,9 +1370,7 @@
       <inject-code class="native" position="end">
         <insert-template name="return_QString_native"/>
       </inject-code>
-      <inject-code class="target" position="end">
-        <insert-template name="return_QString"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qstring-return"/>
     </modify-function>
     <modify-function signature="validate(QString &amp;,int &amp;)const">
       <modify-argument index="return">
@@ -1510,6 +1390,7 @@
   <object-type name="QContextMenuEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ContextMenu">
       <enum-type name="Reason"/>
   </object-type>
+
   <object-type name="QDragEnterEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragEnter"/>
   <object-type name="QDragLeaveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragLeave"/>
   <object-type name="QDragMoveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragMove"/>
@@ -1928,11 +1809,6 @@
     <!-- ### "drawText(...)" is an internal method. -->
     <modify-function signature="drawText(const QPointF&amp;,const QString&amp;,int,int)" remove="all"/>
 
-    <template name="qpainter_drawlist">
-        %BEGIN_ALLOW_THREADS
-        %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size());
-        %END_ALLOW_THREADS
-    </template>
 
     <modify-function signature="drawConvexPolygon(const QPoint*,int)" remove="all"/>
     <add-function signature="drawConvexPolygon(QVector&lt;QPoint>)">
@@ -2905,9 +2781,7 @@
           <modify-argument index="return">
               <replace-type modified-type="QString"/>
           </modify-argument>
-          <inject-code class="target" position="beginning">
-            <insert-template name="glGetString_return_QString"/>
-          </inject-code>
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstring-return"/>
       </modify-function>
   </object-type>
   <object-type name="QOpenGLFunctions" since="5.0">

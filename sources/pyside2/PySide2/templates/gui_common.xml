@@ -1,0 +1,291 @@
+<?xml version="1.0"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem>
+    <template name="QFontCharFix">
+       int size = Shiboken::String::len(%PYARG_1);
+       if (size == 1) {
+           const char *str = Shiboken::String::toCString(%PYARG_1);
+           QChar ch(str[0]);
+           %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(ch);
+           %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+       } else {
+           PyErr_SetString(PyExc_TypeError, "String must have only one character");
+       }
+    </template>
+
+    <template name="load_xpm">
+        Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
+        int lineCount = PySequence_Fast_GET_SIZE(strList.object());
+        for (int line = 0; line &lt; lineCount; ++line) {
+            if (!Shiboken::String::check(PySequence_Fast_GET_ITEM(strList.object(), line))) {
+                PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
+                break;
+            }
+        }
+
+        const char **xpm = reinterpret_cast&lt;const char**&gt;(malloc(lineCount * sizeof(const char**)));
+        for (int line = 0; line &lt; lineCount; ++line)
+            xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
+
+        %BEGIN_ALLOW_THREADS
+        %0 = new %TYPE(xpm);
+        %END_ALLOW_THREADS
+
+        free(xpm);
+    </template>
+
+    <template name="qmatrix_map">
+        %ARG1_TYPE a, b;
+        %CPPSELF.%FUNCTION_NAME(%1, %2, &amp;a, &amp;b);
+        %PYARG_0 = PyTuple_New(2);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](a));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](b));
+    </template>
+
+    <template name="qimage_buffer_constructor">
+        auto ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1));
+        %0 = new %TYPE(ptr, %ARGS);
+    </template>
+
+    <template name="qcolor_repr">
+        switch(%CPPSELF.spec()) {
+          case QColor::Rgb:
+          {
+              qreal r, g, b, a;
+              %CPPSELF.getRgbF(&amp;r, &amp;g, &amp;b, &amp;a);
+              QString repr = QString::asprintf("PySide2.QtGui.QColor.fromRgbF(%.6f, %.6f, %.6f, %.6f)", r, g, b, a);
+              %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+              break;
+          }
+          case QColor::Hsv:
+          {
+              qreal h, s, v, a;
+              %CPPSELF.getHsvF(&amp;h, &amp;s, &amp;v, &amp;a);
+              QString repr = QString::asprintf("PySide2.QtGui.QColor.fromHsvF(%.6f, %.6f, %.6f, %.6f)", h, s, v, a);
+              %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+              break;
+          }
+          case QColor::Cmyk:
+          {
+              qreal c, m, y, k, a;
+              %CPPSELF.getCmykF(&amp;c, &amp;m, &amp;y, &amp;k, &amp;a);
+              QString repr = QString::asprintf("PySide2.QtGui.QColor.fromCmykF(%.6f, %.6f, %.6f, %.6f, %.6f)", c, m, y, k, a);
+              %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+              break;
+          }
+          case QColor::Hsl:
+          {
+              qreal h, s, l, a;
+              %CPPSELF.getHslF(&amp;h, &amp;s, &amp;l, &amp;a);
+              QString repr = QString::asprintf("PySide2.QtGui.QColor.fromHslF(%.6f, %.6f, %.6f, %.6f)", h, s, l, a);
+              %PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+              break;
+          }
+          default:
+          {
+              %PYARG_0 = Shiboken::String::fromCString("PySide2.QtGui.QColor()");
+          }
+       }
+    </template>
+
+    <template name="validator_conversionrule">
+          QValidator::State %out;
+
+          if (PySequence_Check(%PYARG_0)) {
+              Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_0, 0));
+              int size = PySequence_Fast_GET_SIZE(seq.object());
+
+              if (size > 1) {
+                  if (%ISCONVERTIBLE[QString](PySequence_Fast_GET_ITEM(seq.object(), 1)))
+                      %1 = %CONVERTTOCPP[QString](PySequence_Fast_GET_ITEM(seq.object(), 1));
+                  else
+                      qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to unicode.");
+              }
+
+              if (size > 2) {
+                  if (%ISCONVERTIBLE[int](PySequence_Fast_GET_ITEM(seq.object(), 2)))
+                      %2 = %CONVERTTOCPP[int](PySequence_Fast_GET_ITEM(seq.object(), 2));
+                  else
+                      qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to int.");
+              }
+              %PYARG_0.reset(PySequence_Fast_GET_ITEM(seq.object(), 0));
+              Py_INCREF(%PYARG_0); // we need to incref, because "%PYARG_0 = ..." will decref the tuple and the tuple will be decrefed again at the end of this scope.
+          }
+
+          // check retrun value
+          if (%ISCONVERTIBLE[QValidator::State](%PYARG_0)) {
+              %out = %CONVERTTOCPP[QValidator::State](%PYARG_0);
+          } else {
+              PyErr_Format(PyExc_TypeError, "Invalid return value in function %s, expected %s, got %s.",
+                          "QValidator.validate",
+                          "PySide2.QtGui.QValidator.State, (PySide2.QtGui.QValidator.State,), (PySide2.QtGui.QValidator.State, unicode) or (PySide2.QtGui.QValidator.State, unicode, int)",
+                          Py_TYPE(pyResult)->tp_name);
+              return QValidator::State();
+          }
+    </template>
+
+    <template name="qpainter_drawlist">
+        %BEGIN_ALLOW_THREADS
+        %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size());
+        %END_ALLOW_THREADS
+    </template>
+
+    <template name="inplace_add">
+        *%CPPSELF += %1;
+        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+
+    <template name="inplace_sub">
+        *%CPPSELF -= %1;
+        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+
+    <template name="inplace_mult">
+        *%CPPSELF *= %1;
+        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+
+    <template name="inplace_div">
+        *%CPPSELF /= %1;
+        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
+    </template>
+
+    <template name="return_QString_native">
+        if (%ISCONVERTIBLE[QString](%PYARG_0))
+            %1 = %CONVERTTOCPP[QString](%PYARG_0);
+        else
+            qWarning("%TYPE::%FUNCTION_NAME: Argument is not convertible to unicode.");
+    </template>
+
+    <template name="repr_code_matrix">
+        QByteArray format(Py_TYPE(%PYSELF)->tp_name);
+        format += QByteArray("((");
+
+        QList&lt; %MATRIX_TYPE &gt; cppArgs;
+        %MATRIX_TYPE data[%MATRIX_SIZE];
+        %CPPSELF.copyDataTo(data);
+        int matrixSize = %MATRIX_SIZE;
+        for(int size=0; size &lt; matrixSize; size++) {
+            if (size > 0)
+                format += ", ";
+            format += QByteArray::number(data[size]);
+        }
+        format += "))";
+
+        %PYARG_0 = Shiboken::String::fromStringAndSize(format, format.size());
+    </template>
+
+    <template name="reduce_code_matrix">
+        QList&lt; %MATRIX_TYPE &gt; cppArgs;
+        %MATRIX_TYPE data[%MATRIX_SIZE];
+        %CPPSELF.copyDataTo(data);
+        int matrixSize = %MATRIX_SIZE;
+        for(int size=0; size &lt; matrixSize; size++)
+            cppArgs.append(data[size]);
+
+        PyObject *type = PyObject_Type(%PYSELF);
+        PyObject *args = Py_BuildValue("(N)",
+            %CONVERTTOPYTHON[QList&lt;%MATRIX_TYPE&gt; ](cppArgs));
+        %PYARG_0 = Py_BuildValue("(NN)", type, args);
+    </template>
+
+    <template name="matrix_data_function">
+        const float* data = %CPPSELF.constData();
+        PyObject *pyData = PyTuple_New(%MATRIX_SIZE);
+        if (data) {
+            for(int i=0; i &lt; %MATRIX_SIZE; i++)
+                PyTuple_SET_ITEM(pyData, i, %CONVERTTOPYTHON[float](data[i]));
+        }
+        return pyData;
+    </template>
+
+    <template name="matrix_constructor">
+        if (PySequence_Size(%PYARG_1) == %SIZE) {
+            Shiboken::AutoDecRef fast(PySequence_Fast(%PYARG_1,
+                "Failed to parse sequence on %TYPE constructor."));
+            float values[%SIZE];
+            for(int i=0; i &lt; %SIZE; i++) {
+                PyObject *pv = PySequence_Fast_GET_ITEM(fast.object(), i);
+                values[i] = %CONVERTTOCPP[float](pv);
+            }
+            %0 = new %TYPE(values);
+        }
+    </template>
+
+    <template name="glGetString_return_QString">
+        %BEGIN_ALLOW_THREADS
+        const GLubyte *us = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES);
+        const QString s = QString::fromLocal8Bit(reinterpret_cast&lt;const char *&gt;(us));
+        %END_ALLOW_THREADS
+        %PYARG_0 = %CONVERTTOPYTHON[QString](s);
+    </template>
+
+    <template name="fix_args,QRectF*">
+        QRectF rect_;
+        %BEGIN_ALLOW_THREADS
+        %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;rect_);
+        %END_ALLOW_THREADS
+        %PYARG_0 = %CONVERTTOPYTHON[QRectF](rect_);
+    </template>
+
+    <template name="fix_args,QRect*">
+        QRect rect_;
+        %BEGIN_ALLOW_THREADS
+        %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;rect_);
+        %END_ALLOW_THREADS
+        %PYARG_0 = %CONVERTTOPYTHON[QRect](rect_);
+    </template>
+
+    <template name="__next__">
+        if (!%CPPSELF.atEnd()) {
+            %PYARG_0 = %CONVERTTOPYTHON[%CPPSELF_TYPE](*%CPPSELF);
+            ++(*%CPPSELF);
+        }
+    </template>
+
+    <template name="__iter_parent__">
+        %CPPSELF_TYPE _tmp = %CPPSELF.begin();
+        %PYARG_0 = %CONVERTTOPYTHON[%CPPSELF_TYPE](_tmp);
+    </template>
+
+
+</typesystem>

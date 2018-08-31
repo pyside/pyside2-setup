@@ -1008,3 +1008,29 @@ QT_END_NAMESPACE
                                      reinterpret_cast<uchar*>(PyBytes_AS_STRING(%PYARG_4)));
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qt-qunregisterresourcedata
+
+// @snippet use-stream-for-format-security
+// Uses the stream version for security reasons
+// see gcc man page at -Wformat-security
+%FUNCTION_NAME() << %1;
+// @snippet use-stream-for-format-security
+
+// @snippet qresource-registerResource
+ auto ptr = reinterpret_cast<uchar*>(Shiboken::Buffer::getPointer(%PYARG_1));
+ %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast<const uchar*>(ptr), %2);
+ %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet qresource-registerResource
+
+// @snippet qstring-return
+%PYARG_0 = %CONVERTTOPYTHON[QString](%1);
+// @snippet qstring-return
+
+// @snippet stream-write-method
+(*%CPPSELF) << %1;
+// @snippet stream-write-method
+
+// @snippet stream-read-method
+%RETURN_TYPE _cpp_result;
+(*%CPPSELF) >> _cpp_result;
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](_cpp_result);
+// @snippet stream-read-method

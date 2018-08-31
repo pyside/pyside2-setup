@@ -40,8 +40,9 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtXml">
-    <load-typesystem name="typesystem_templates.xml" generate="no"/>
-    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
+    <load-typesystem name="templates/core_common.xml" generate="no" />
+    <load-typesystem name="templates/xml_common.xml" generate="no" />
 
     <rejection class="QXmlAttributes::Attribute"/>
     <rejection class="QDomNode" field-name="impl"/>
@@ -53,19 +54,6 @@
     <value-type name="QDomCharacterData"/>
     <value-type name="QDomComment"/>
 
-    <template name="qdomdocument_setcontent">
-    QString _errorMsg_;
-    int _errorLine_ = 0;
-    int _errorColumn_ = 0;
-    %BEGIN_ALLOW_THREADS
-    bool _ret_ = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;_errorMsg_, &amp;_errorLine_, &amp;_errorColumn_);
-    %END_ALLOW_THREADS
-    %PYARG_0 = PyTuple_New(4);
-    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](_ret_));
-    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](_errorMsg_));
-    PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](_errorLine_));
-    PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](_errorColumn_));
-    </template>
 
     <value-type name="QDomDocument">
         <!-- will be replaced in inject code -->
@@ -85,9 +73,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(const QString&amp;,bool,QString*,int*,int*)">
             <modify-argument index="3">
@@ -105,9 +91,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(QIODevice*,bool,QString*,int*,int*)">
             <modify-argument index="3">
@@ -125,9 +109,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(const QByteArray&amp;,QString*,int*,int*)">
             <modify-argument index="2">
@@ -145,9 +127,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(QIODevice*,QString*,int*,int*)">
             <modify-argument index="2">
@@ -165,9 +145,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(QXmlInputSource*,bool,QString*,int*,int*)">
             <modify-argument index="3">
@@ -185,9 +163,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(QXmlInputSource*,QXmlReader*,QString*,int*,int*)">
             <modify-argument index="3">
@@ -205,9 +181,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
         <modify-function signature="setContent(const QString&amp;,QString*,int*,int*)">
             <modify-argument index="2">
@@ -225,9 +199,7 @@
             <modify-argument index="return">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="qdomdocument_setcontent"/>
-            </inject-code>
+            <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
         </modify-function>
     </value-type>
 
@@ -273,12 +245,6 @@
     <object-type name="QXmlErrorHandler"/>
     <object-type name="QXmlLexicalHandler"/>
 
-    <template name="QXmlEntityResolver_resolveEntity_return_conversion_native">
-        Shiboken::AutoDecRef  _py_ok_(PySequence_GetItem(%PYARG_0, 0));
-        Shiboken::AutoDecRef  _py_ret_(PySequence_GetItem(%PYARG_0, 1));
-        %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ok_);
-        %3 = %CONVERTTOCPP[QXmlInputSource*](_py_ret_);
-    </template>
 
     <object-type name="QXmlEntityResolver">
         <modify-function signature="resolveEntity(const QString&amp;,const QString&amp;,QXmlInputSource*&amp;)">

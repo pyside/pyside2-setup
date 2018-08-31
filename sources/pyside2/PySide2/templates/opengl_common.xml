@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+<!--
 /****************************************************************************
 **
 ** Copyright (C) 2018 The Qt Company Ltd.
@@ -36,57 +38,24 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-// @snippet qwebview-page
-SbkObject* _pyReturn = reinterpret_cast<SbkObject*>(%PYARG_0);
-if (!Shiboken::Object::hasParentInfo(_pyReturn))
-    Shiboken::Object::setParent(%PYSELF, %PYARG_0);
-// @snippet qwebview-page
-
-// @snippet qwebelementcollection-len
-return %CPPSELF.count();
-// @snippet qwebelementcollection-len
-
-// @snippet qwebelementcollection-getitem
-if (_i < 0 || _i >= %CPPSELF.count()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return 0;
-}
-QWebElement element = %CPPSELF.at(_i);
-return %CONVERTTOPYTHON[QWebElement](element);
-// @snippet qwebelementcollection-getitem
-
-// @snippet qwebpage-qt-metacall
-static int _signalIndex = -1;
-static QMetaMethod _m;
-
-if (_signalIndex == -1) {
-    _signalIndex = QWebPage::staticMetaObject.indexOfSlot("shouldInterruptJavaScript()")
-    _m = QWebPage::staticMetaObject.method(_signalIndex);
-}
-
-if (_signalIndex == id) {
-    Shiboken::GilState gil;
-    PyObject* self = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(this);
-
-    if (self) {
-        Shiboken::AutoDecRef _pyMethod(PyObject_GetAttrString(self, "shouldInterruptJavaScript"));
-        return PySide::SignalManager::callPythonMetaMethod(_m, args, _pyMethod, false);
-    }
-}
-// @snippet qwebpage-qt-metacall
-
-// @snippet qwebframe-metadata
-%PYARG_0 = PyDict_New();
-const auto &keys = %0.keys();
-for (const auto &_key : keys) {
-    Shiboken::AutoDecRef _pyValueList(PyList_New(0));
-    for (auto it = %0.lowerBound(key), end = %0.upperBound(key); it ! = end; ++it) {
-        Shiboken::AutoDecRef _pyValue(%CONVERTTOPYTHON[QString](it.value));
-        PyList_Append(_pyValueList, _pyValue);
-    }
-
-    Shiboken::AutoDecRef _pyKey(%CONVERTTOPYTHON[QString](_key));
-    PyDict_SetItem(%PYARG_0, _pyKey, _pyValueList);
-}
-// @snippet qwebframe-metadata
+-->
+<typesystem>
+    <template name="callArrayFunction">
+        Py_ssize_t _size = PySequence_Size(%PYARG_2);
+        if (_size) {
+            $ATTR_TYPE *_list = new $ATTR_TYPE[_size];
+            if (_size) {
+              Shiboken::AutoDecRef fast(PySequence_Fast(%PYARG_2,
+                "Failed to parse sequence with type %VECTOR_TYPE."));
+              for(Py_ssize_t i=0; i &lt; _size; i++) {
+                  PyObject* pv = PySequence_Fast_GET_ITEM(fast.object(), i);
+                  _list[i] = %CONVERTTOCPP[$ATTR_TYPE](pv);
+              }
+            }
+            %CPPSELF.%FUNCTION_NAME(%1, _list, $ARG0);
+            delete[] _list;
+         } else {
+            %CPPSELF.%FUNCTION_NAME(%1, ($ATTR_TYPE*)nullptr, $ARG1);
+         }
+    </template>
+</typesystem>

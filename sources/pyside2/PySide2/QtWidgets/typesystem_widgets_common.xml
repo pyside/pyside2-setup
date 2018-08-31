@@ -40,7 +40,8 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtWidgets">
-  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="templates/core_common.xml" generate="no"/>
+  <load-typesystem name="templates/widgets_common.xml" generate="no"/>
 
 
 
@@ -2297,9 +2298,7 @@
       <modify-argument index="return">
         <replace-type modified-type="QString"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_QString"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qstring-return"/>
     </modify-function>
     <modify-function signature="validate(QString &amp;,int &amp;)const">
       <modify-argument index="return">
@@ -2436,9 +2435,7 @@
         <replace-type modified-type="QString"/>
         <replace-default-expression with="QString()"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qfiledialog-return" />
     </modify-function>
     <modify-function signature="getOpenFileNames(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
       <modify-argument index="return">
@@ -2448,9 +2445,7 @@
         <replace-type modified-type="QString"/>
         <replace-default-expression with="QString()"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qfiledialog-return" />
     </modify-function>
 
     <modify-function signature="getOpenFileUrl(QWidget*,const QString&amp;,const QUrl&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;,const QStringList&amp;)" allow-thread="yes">
@@ -2461,9 +2456,7 @@
         <replace-type modified-type="QString"/>
         <replace-default-expression with="QString()"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qfiledialog-return" />
     </modify-function>
 
     <modify-function signature="getOpenFileUrls(QWidget*,const QString&amp;,const QUrl&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;,const QStringList&amp;)" allow-thread="yes">
@@ -2474,9 +2467,7 @@
         <replace-type modified-type="QString"/>
         <replace-default-expression with="QString()"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qfiledialog-return" />
     </modify-function>
 
     <modify-function signature="getSaveFileName(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
@@ -2487,9 +2478,7 @@
         <replace-type modified-type="QString"/>
         <replace-default-expression with="QString()"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qfiledialog-return" />
     </modify-function>
 
     <modify-function signature="getSaveFileUrl(QWidget*,const QString&amp;,const QUrl&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;,const QStringList&amp;)" allow-thread="yes">
@@ -2500,9 +2489,7 @@
         <replace-type modified-type="QString"/>
         <replace-default-expression with="QString()"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        <insert-template name="return_for_QFileDialog"/>
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qfiledialog-return" />
     </modify-function>
 
   </object-type>
@@ -2979,16 +2966,6 @@
     <enum-type name="ItemRole"/>
     <enum-type name="RowWrapPolicy"/>
 
-    <template name="fix_args,int*,ItemRole*">
-    int _row;
-    QFormLayout::ItemRole _role;
-    %BEGIN_ALLOW_THREADS
-    %CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;_row, &amp;_role);
-    %END_ALLOW_THREADS
-    %PYARG_0 = PyTuple_New(2);
-    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
-    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
-    </template>
 
     <modify-function signature="getLayoutPosition(QLayout*,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
@@ -3000,9 +2977,7 @@
         <modify-argument index="3">
             <remove-argument/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_args,int*,ItemRole*"/>
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qformlayout-fix-args" />
     </modify-function>
     <modify-function signature="getWidgetPosition(QWidget*,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
@@ -3014,9 +2989,7 @@
         <modify-argument index="3">
             <remove-argument/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_args,int*,ItemRole*"/>
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qformlayout-fix-args" />
     </modify-function>
     <modify-function signature="getItemPosition(int,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
@@ -3028,9 +3001,7 @@
         <modify-argument index="3">
             <remove-argument/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_args,int*,ItemRole*"/>
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qformlayout-fix-args" />
     </modify-function>
 
     <modify-function signature="addRow(QWidget*,QWidget*)">

@@ -46,6 +46,7 @@
   <load-typesystem name="QtWebKit/typesystem_webkit.xml" generate="no"/>
   <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
+  <load-typesystem name="templates/webkitwidgets_common.xml" generate="no"/>
 
   <value-type name="QWebDatabase"/>
 
@@ -118,14 +119,7 @@
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
         </modify-argument>
-        <inject-code position="end">
-            <insert-template name="convertFromMultiMap">
-                <replace from="%MAP_NAME" to="%0"/>
-                <replace from="%RETURN_NAME" to="%PYARG_0"/>
-                <replace from="%KEY_TYPE" to="QString"/>
-                <replace from="%VALUE_TYPE" to="QString"/>
-            </insert-template>
-        </inject-code>
+        <inject-code position="end" file="../glue/qtwebkitwidgets.cpp" snippet="qwebframe-metadata" />
     </modify-function>
   </object-type>
 
@@ -150,19 +144,6 @@
     <value-type name="ViewportAttributes"/>
 
     <modify-function signature="extension(QWebPage::Extension,const QWebPage::ExtensionOption*,QWebPage::ExtensionReturn*)">
-        <template name="qwebpage_extension_argument_conversion">
-        PyObject* %out = 0;
-        // Cast the parameters according to the extension type
-        if (extension == QWebPage::ChooseMultipleFilesExtension) {
-            const ChooseMultipleFilesExtension$TYPE_SUFFIX* _in = reinterpret_cast&lt;const ChooseMultipleFilesExtension$TYPE_SUFFIX*>(%in);
-            %out = %CONVERTTOPYTHON[const QWebPage::ChooseMultipleFilesExtension$TYPE_SUFFIX*](_in);
-        #if QT_VERSION >= 0x040600
-        } else if (extension == QWebPage::ErrorPageExtension) {
-            const ErrorPageExtension$TYPE_SUFFIX* _in = reinterpret_cast&lt;const ErrorPageExtension$TYPE_SUFFIX*>(%in);
-            %out = %CONVERTTOPYTHON[const QWebPage::ErrorPageExtension$TYPE_SUFFIX*](_in);
-        #endif
-        }
-        </template>
         <modify-argument index="2" invalidate-after-use="yes">
             <conversion-rule class="target">
                 <insert-template name="qwebpage_extension_argument_conversion">

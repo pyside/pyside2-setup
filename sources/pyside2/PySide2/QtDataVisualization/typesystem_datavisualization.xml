@@ -41,39 +41,8 @@
 -->
 <typesystem package="PySide2.QtDataVisualization">
 
-  <template name="cppqlistofptrtoqvectors_to_py_conversion">
-  const int rowCount = %in.size();
-  PyObject* %out = PyList_New(rowCount);
-  for (int r = 0; r &lt; rowCount; ++r) {
-      const QVector&lt;%INTYPE_0&gt; *row = %in.at(r);
-      const int columnCount = row->size();
-      PyObject *pyRow = PyList_New(columnCount);
-      for (int c = 0; c &lt; columnCount; ++c) {
-          const %INTYPE_0 &amp;cppItem = row->at(c);
-          PyList_SET_ITEM(pyRow, c, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
-      }
-      PyList_SET_ITEM(%out, r, pyRow);
-  }
-  return %out;
-  </template>
-  <template name="py_to_cppqlistofptrtoqvectors_conversion">
-  const int rowCount = int(PySequence_Size(%in));
-  %OUTTYPE &amp;result = %out;
-  result.reserve(rowCount);
-  for (int r = 0; r &lt; rowCount; ++r) {
-      Shiboken::AutoDecRef rowItem(PySequence_GetItem(%in, r));
-      const int columnCount = int(PySequence_Size(rowItem));
-      QVector&lt;%OUTTYPE_0&gt; *row = new QVector&lt;%OUTTYPE_0&gt;;
-      row->reserve(columnCount);
-      for (int c = 0; c &lt; columnCount; ++c) {
-         Shiboken::AutoDecRef pyItem(PySequence_GetItem(rowItem, c));
-         %OUTTYPE_0 v = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
-         row->append(v);
-      }
-      result.append(row);
-  }
-  </template>
-  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="templates/datavisualization_common.xml" generate="no" />
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
   <namespace-type name="QtDataVisualization">
     <primitive-type name="QBarDataArray">
       <include file-name="qbardataproxy.h" location="global"/>
