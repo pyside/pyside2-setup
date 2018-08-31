@@ -43,11 +43,6 @@
 #include "sbkpython.h"
 #include "basewrapper.h"
 
-#ifdef _MSC_VER
-__pragma(warning(push))
-__pragma(warning(disable:4522)) // warning: C4522: 'Shiboken::AutoDecRef': multiple assignment operators specified
-#endif
-
 struct SbkObject;
 namespace Shiboken
 {
@@ -97,20 +92,9 @@ public:
     }
 
     /**
-     * Decref the current borrowed python reference and take the reference
-     * borrowed by \p other, so other.isNull() will return true.
-     */
-    void operator=(AutoDecRef& other)
-    {
-        Py_XDECREF(m_pyObj);
-        m_pyObj = other.m_pyObj;
-        other.m_pyObj = 0;
-    }
-
-    /**
      * Decref the current borrowed python reference and borrow \p other.
      */
-    void operator=(PyObject* other)
+    void reset(PyObject* other)
     {
         Py_XDECREF(m_pyObj);
         m_pyObj = other;

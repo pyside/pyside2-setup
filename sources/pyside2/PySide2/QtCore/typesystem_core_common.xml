@@ -1071,7 +1071,7 @@
             qWarning() &lt;&lt; "Module atexit not found for registering __moduleShutdown";
             PyErr_Clear();
         }else{
-            regFunc = PyObject_GetAttrString(atexit, "register");
+            regFunc.reset(PyObject_GetAttrString(atexit, "register"));
             if (regFunc.isNull()) {
                 qWarning() &lt;&lt; "Function atexit.register not found for registering __moduleShutdown";
                 PyErr_Clear();

@@ -1735,7 +1735,7 @@
                 else
                     qWarning("%TYPE::%FUNCTION_NAME: Second tuple element is not convertible to int.");
             }
-            %PYARG_0 = PySequence_Fast_GET_ITEM(seq.object(), 0);
+            %PYARG_0.reset(PySequence_Fast_GET_ITEM(seq.object(), 0));
             Py_INCREF(%PYARG_0); // we need to incref, because "%PYARG_0 = ..." will decref the tuple and the tuple will be decrefed again at the end of this scope.
         }
 

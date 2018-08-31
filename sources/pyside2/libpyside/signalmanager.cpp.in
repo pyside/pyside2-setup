@@ -205,9 +205,8 @@ QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj)
     in >> repr;
     Shiboken::AutoDecRef pyCode(PyBytes_FromStringAndSize(repr.data(), repr.size()));
     Shiboken::AutoDecRef value(PyObject_CallFunctionObjArgs(eval_func, pyCode.object(), 0));
-    if (!value.object()) {
-        value = Py_None;
-    }
+    if (!value.object())
+        value.reset(Py_None);
     myObj = PyObjectWrapper(value);
     return in;
 }
