@@ -78,13 +78,13 @@ public:
     /**
      * Destructor
      **/
-    ~GlobalReceiverV2();
+    ~GlobalReceiverV2() override;
 
     /**
      * Reimplemented function from QObject
      **/
-    int qt_metacall(QMetaObject::Call call, int id, void** args);
-    const QMetaObject* metaObject() const;
+    int qt_metacall(QMetaObject::Call call, int id, void** args) override;
+    const QMetaObject* metaObject() const override;
 
     /**
      * Add a extra slot to this object

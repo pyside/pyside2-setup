@@ -57,6 +57,7 @@ namespace PySide
 {
 class DynamicSlotData
 {
+    Q_DISABLE_COPY(DynamicSlotData)
     public:
         DynamicSlotData(int id, PyObject* callback, GlobalReceiver* parent);
         void addRef(const QObject* o);

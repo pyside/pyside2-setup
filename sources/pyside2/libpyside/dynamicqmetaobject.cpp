@@ -111,16 +111,13 @@ public:
 
     QMap<QByteArray, QByteArray> m_info;
     QByteArray m_className;
-    bool m_updated; // when the meta data is not update
-    int m_methodOffset;
-    int m_propertyOffset;
-    int m_dataSize;
-    int m_emptyMethod;
-    int m_nullIndex;
 
-    DynamicQMetaObjectPrivate()
-        : m_updated(false), m_methodOffset(0), m_propertyOffset(0),
-          m_dataSize(0), m_emptyMethod(-1), m_nullIndex(0) {}
+    bool m_updated = false; // when the meta data is not update
+    int m_methodOffset = 0;
+    int m_propertyOffset = 0;
+    int m_dataSize = 0;
+    int m_emptyMethod = -1;
+    int m_nullIndex = 0;
 
     int createMetaData(QMetaObject* metaObj, QLinkedList<QByteArray> &strings);
     void updateMetaObject(QMetaObject* metaObj);
@@ -527,7 +524,7 @@ void DynamicQMetaObject::addInfo(const char* key, const char* value)
     m_d->m_info[key] = value;
 }
 
-void DynamicQMetaObject::addInfo(QMap<QByteArray, QByteArray> info)
+void DynamicQMetaObject::addInfo(const QMap<QByteArray, QByteArray> &info)
 {
     QMap<QByteArray, QByteArray>::const_iterator i = info.constBegin();
     while (i != info.constEnd()) {

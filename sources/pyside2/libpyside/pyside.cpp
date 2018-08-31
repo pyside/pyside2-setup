@@ -187,7 +187,8 @@ void destroyQCoreApplication()
 }
 
 struct TypeUserData {
-    TypeUserData(PyTypeObject* type, const QMetaObject* metaobject) : mo(type, metaobject) {}
+    explicit TypeUserData(PyTypeObject* type,  const QMetaObject* metaobject, std::size_t size) :
+        mo(type, metaobject), cppObjSize(size) {}
     DynamicQMetaObject mo;
     std::size_t cppObjSize;
 };
@@ -202,8 +203,8 @@ std::size_t getSizeOfQObject(SbkObjectType* type)
 void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, std::size_t cppObjSize)
 {
     //create DynamicMetaObject based on python type
-    TypeUserData* userData = new TypeUserData(reinterpret_cast<PyTypeObject*>(type), base);
-    userData->cppObjSize = cppObjSize;
+    auto userData =
+        new TypeUserData(reinterpret_cast<PyTypeObject*>(type), base, cppObjSize);
     userData->mo.update();
     Shiboken::ObjectType::setTypeUserData(type, userData, Shiboken::callCppDestructor<TypeUserData>);
 

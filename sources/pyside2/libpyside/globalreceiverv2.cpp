@@ -62,6 +62,7 @@ namespace PySide
 {
 class DynamicSlotDataV2
 {
+    Q_DISABLE_COPY(DynamicSlotDataV2)
     public:
         DynamicSlotDataV2(PyObject* callback, GlobalReceiverV2* parent);
         ~DynamicSlotDataV2();
@@ -189,8 +190,10 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
        Py_DECREF(m_callback);
 }
 
-GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, SharedMap map)
-    : QObject(0), m_metaObject(GLOBAL_RECEIVER_CLASS_NAME, &QObject::staticMetaObject), m_sharedMap(map)
+GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, SharedMap map) :
+    QObject(nullptr),
+    m_metaObject(GLOBAL_RECEIVER_CLASS_NAME, &QObject::staticMetaObject),
+    m_sharedMap(std::move(map))
 {
     m_data = new DynamicSlotDataV2(callback, this);
     m_metaObject.addSlot(RECEIVER_DESTROYED_SLOT_NAME);

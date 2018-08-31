@@ -63,7 +63,7 @@ class PYSIDE_API DestroyListener : public QObject
         static DestroyListener* m_instance;
         DestroyListenerPrivate* m_d;
         DestroyListener(QObject *parent);
-        ~DestroyListener();
+        ~DestroyListener() override;
 };
 
 }//namespace

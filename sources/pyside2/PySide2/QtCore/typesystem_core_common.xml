@@ -424,15 +424,15 @@
             </add-conversion>
             <add-conversion type="PyDict" check="PyDict_CheckExact(%in)">
             QVariant ret = QVariant_convertToVariantMap(%in);
-            %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
+            %out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
             </add-conversion>
             <add-conversion type="PyList" check="PyList_Check(%in)">
             QVariant ret = QVariant_convertToVariantList(%in);
-            %out = ret.isValid() ? ret : QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
+            %out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
             </add-conversion>
             <add-conversion type="PyObject">
             // Is a shiboken type not known by Qt
-            %out = QVariant::fromValue&lt;PySide::PyObjectWrapper&gt;(%in);
+            %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
             </add-conversion>
         </target-to-native>
     </conversion-rule>

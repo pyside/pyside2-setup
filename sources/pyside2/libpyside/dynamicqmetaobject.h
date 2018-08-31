@@ -50,6 +50,7 @@ namespace PySide
 
 class DynamicQMetaObject : public QMetaObject
 {
+    Q_DISABLE_COPY(DynamicQMetaObject)
 public:
     DynamicQMetaObject(const char* className, const QMetaObject* metaObject);
     DynamicQMetaObject(PyTypeObject* type, const QMetaObject* metaobject);
@@ -62,7 +63,7 @@ public:
     int addSlot(const char* slot, const char* type = 0);
     int addProperty(const char* property, PyObject* data);
     void addInfo(const char* key, const char* value);
-    void addInfo(QMap<QByteArray, QByteArray> info);
+    void addInfo(const QMap<QByteArray, QByteArray> &info);
 
     void removeSignal(uint idex);
     void removeSlot(uint index);

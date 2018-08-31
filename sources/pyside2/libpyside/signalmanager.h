@@ -54,7 +54,7 @@ class PYSIDE_API PyObjectWrapper
 {
 public:
     PyObjectWrapper();
-    PyObjectWrapper(PyObject* me);
+    explicit PyObjectWrapper(PyObject* me);
     PyObjectWrapper(const PyObjectWrapper &other);
     ~PyObjectWrapper();
     operator PyObject*() const;
@@ -68,6 +68,7 @@ PYSIDE_API QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj);
 
 class PYSIDE_API SignalManager
 {
+    Q_DISABLE_COPY(SignalManager)
 public:
     static SignalManager& instance();
 
@@ -109,10 +110,6 @@ private:
 
     SignalManager();
     ~SignalManager();
-
-    // disable copy
-    SignalManager(const SignalManager&);
-    SignalManager operator=(const SignalManager&);
 };
 
 }

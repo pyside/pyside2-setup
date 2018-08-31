@@ -1,3 +1,5 @@
+#include <utility>
+
 /****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
@@ -54,14 +56,15 @@ namespace Signal {
     //aux
     class SignalSignature {
     public:
-        SignalSignature() : m_attributes(QMetaMethod::Compatibility) {}
-        SignalSignature(QByteArray parameterTypes) : m_parameterTypes(parameterTypes),
-            m_attributes(QMetaMethod::Compatibility) {}
-        SignalSignature(QByteArray parameterTypes, QMetaMethod::Attributes attributes) :
-            m_parameterTypes(parameterTypes),
+        SignalSignature() = default;
+        explicit SignalSignature(QByteArray parameterTypes) :
+            m_parameterTypes(std::move(parameterTypes)) {}
+        explicit SignalSignature(QByteArray parameterTypes, QMetaMethod::Attributes attributes) :
+            m_parameterTypes(std::move(parameterTypes)),
             m_attributes(attributes) {}
+
         QByteArray m_parameterTypes;
-        QMetaMethod::Attributes m_attributes;
+        QMetaMethod::Attributes m_attributes = QMetaMethod::Compatibility;
     };
 
     static char*        buildSignature(const char*, const char*);
