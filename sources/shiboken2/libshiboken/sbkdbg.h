@@ -63,6 +63,11 @@
 class BaseLogger
 {
 public:
+    BaseLogger(const BaseLogger&) = delete;
+    BaseLogger(BaseLogger&&) = delete;
+    BaseLogger& operator=(const BaseLogger&) = delete;
+    BaseLogger& operator=(BaseLogger&&) = delete;
+
     BaseLogger(std::ostream& output, const char* function, const char* context)
         : m_stream(output), m_function(function), m_context(context) {}
     ~BaseLogger()

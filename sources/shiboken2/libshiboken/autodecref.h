@@ -58,6 +58,11 @@ namespace Shiboken
 struct LIBSHIBOKEN_API AutoDecRef
 {
 public:
+    AutoDecRef(const AutoDecRef&) = delete;
+    AutoDecRef(AutoDecRef&&) = delete;
+    AutoDecRef& operator=(const AutoDecRef&) = delete;
+    AutoDecRef& operator=(AutoDecRef&&) = delete;
+
     /**
      * AutoDecRef constructor.
      * \param pyobj A borrowed reference to a Python object
@@ -112,8 +117,6 @@ public:
     }
 private:
     PyObject* m_pyObj;
-    AutoDecRef(const AutoDecRef&);
-    AutoDecRef& operator=(const AutoDecRef&);
 };
 
 } // namespace Shiboken

@@ -49,6 +49,11 @@ namespace Shiboken
 class LIBSHIBOKEN_API GilState
 {
 public:
+    GilState(const GilState&) = delete;
+    GilState(GilState&&) = delete;
+    GilState& operator=(const GilState&) = delete;
+    GilState& operator=(GilState&&) = delete;
+
     GilState();
     ~GilState();
     void release();

@@ -55,6 +55,11 @@ typedef void (*ObjectVisitor)(SbkObject*, void*);
 class LIBSHIBOKEN_API BindingManager
 {
 public:
+    BindingManager(const BindingManager&) = delete;
+    BindingManager(BindingManager&&) = delete;
+    BindingManager& operator=(const BindingManager&) = delete;
+    BindingManager& operator=(BindingManager&&) = delete;
+
     static BindingManager& instance();
 
     bool hasWrapper(const void *cptr);
@@ -94,10 +99,7 @@ public:
 
 private:
     ~BindingManager();
-    // disable copy
     BindingManager();
-    BindingManager(const BindingManager&);
-    BindingManager& operator=(const BindingManager&);
 
     struct BindingManagerPrivate;
     BindingManagerPrivate* m_d;

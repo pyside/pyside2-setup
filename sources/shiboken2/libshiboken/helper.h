@@ -77,7 +77,12 @@ template<class T>
 class AutoArrayPointer
 {
     public:
-        AutoArrayPointer(int size) { data = new T[size]; }
+        AutoArrayPointer(const AutoArrayPointer&) = delete;
+        AutoArrayPointer(AutoArrayPointer&&) = delete;
+        AutoArrayPointer& operator=(const AutoArrayPointer&) = delete;
+        AutoArrayPointer& operator=(AutoArrayPointer&&) = delete;
+
+        explicit AutoArrayPointer(int size) { data = new T[size]; }
         T& operator[](int pos) { return data[pos]; }
         operator T*() const { return data; }
         ~AutoArrayPointer() { delete[] data; }

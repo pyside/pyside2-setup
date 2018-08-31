@@ -62,9 +62,7 @@ public:
 
     Edges m_edges;
 
-    Graph()
-    {
-    }
+    Graph() = default;
 
     void addEdge(SbkObjectType* from, SbkObjectType* to)
     {

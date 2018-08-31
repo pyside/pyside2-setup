@@ -339,14 +339,17 @@ namespace Shiboken {
 class DeclaredEnumTypes
 {
 public:
+    DeclaredEnumTypes(const DeclaredEnumTypes&) = delete;
+    DeclaredEnumTypes(DeclaredEnumTypes&&) = delete;
+    DeclaredEnumTypes& operator=(const DeclaredEnumTypes&) = delete;
+    DeclaredEnumTypes& operator=(DeclaredEnumTypes&&) = delete;
+
     DeclaredEnumTypes();
     ~DeclaredEnumTypes();
     static DeclaredEnumTypes& instance();
     void addEnumType(PyTypeObject* type);
 
 private:
-    DeclaredEnumTypes(const DeclaredEnumTypes&);
-    DeclaredEnumTypes& operator=(const DeclaredEnumTypes&);
     std::vector<PyTypeObject *> m_enumTypes;
 };
 
@@ -641,9 +644,7 @@ DeclaredEnumTypes& DeclaredEnumTypes::instance()
     return me;
 }
 
-DeclaredEnumTypes::DeclaredEnumTypes()
-{
-}
+DeclaredEnumTypes::DeclaredEnumTypes() = default;
 
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
