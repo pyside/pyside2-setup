@@ -42,6 +42,9 @@
 
 #include <algorithm>
 
+const char *TARGET_CONVERSION_RULE_FLAG = "0";
+const char *NATIVE_CONVERSION_RULE_FLAG = "1";
+
 static QString strings_Object = QLatin1String("Object");
 static QString strings_String = QLatin1String("String");
 static QString strings_char = QLatin1String("char");

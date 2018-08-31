@@ -29,9 +29,7 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
-#define CONV_RULE_OUT_VAR_SUFFIX  "_out"
 #define CPP_ARG                   "cppArg"
-#define CPP_ARG0                  CPP_ARG"0"
 #define CPP_ARG_REMOVED           "removed_" CPP_ARG
 #define CPP_RETURN_VAR            "cppResult"
 #define CPP_SELF_VAR              "cppSelf"
@@ -40,17 +38,12 @@
 #define PYTHON_OVERRIDE_VAR       "pyOverride"
 #define PYTHON_RETURN_VAR         "pyResult"
 #define PYTHON_SELF_VAR           "self"
-#define THREAD_STATE_SAVER_VAR    "threadStateSaver"
-#define BEGIN_ALLOW_THREADS       "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"
-#define END_ALLOW_THREADS         "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"
 #define PYTHON_TO_CPP_VAR         "pythonToCpp"
 #define SMART_POINTER_GETTER      "kSmartPointerGetter"
 
-#define CHECKTYPE_REGEX           "%CHECKTYPE\\[([^\\[]*)\\]\\("
-#define ISCONVERTIBLE_REGEX       "%ISCONVERTIBLE\\[([^\\[]*)\\]\\("
-#define CONVERTTOPYTHON_REGEX     "%CONVERTTOPYTHON\\[([^\\[]*)\\]\\("
-#define CONVERTTOCPP_REGEX        "(\\*?%?[a-zA-Z_][\\w\\.]*(?:\\[[^\\[^<^>]+\\])*)"\
-                                  "(?:\\s+)=(?:\\s+)%CONVERTTOCPP\\[([^\\[]*)\\]\\("
+extern const char *CONV_RULE_OUT_VAR_SUFFIX;
+extern const char *BEGIN_ALLOW_THREADS;
+extern const char *END_ALLOW_THREADS;
 
 #include <generator.h>
 
@@ -432,6 +425,9 @@ protected:
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData& overloadData);
 
     Indentor INDENT;
+
+    const QRegularExpression &convertToCppRegEx() const
+    { return m_typeSystemConvRegEx[TypeSystemToCppFunction]; }
 
     static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
 

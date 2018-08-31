@@ -43,8 +43,8 @@
 #include <QtCore/QVersionNumber>
 
 //Used to identify the conversion rule to avoid break API
-#define TARGET_CONVERSION_RULE_FLAG "0"
-#define NATIVE_CONVERSION_RULE_FLAG "1"
+extern const char *TARGET_CONVERSION_RULE_FLAG;
+extern const char *NATIVE_CONVERSION_RULE_FLAG;
 
 class Indentor;
 

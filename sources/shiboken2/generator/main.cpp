@@ -43,9 +43,9 @@
 #include "qtdocgenerator.h"
 
 #ifdef _WINDOWS
-    #define PATH_SPLITTER ";"
+static const QChar pathSplitter = QLatin1Char(';');
 #else
-    #define PATH_SPLITTER ":"
+static const QChar pathSplitter = QLatin1Char(':');
 #endif
 
 static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
@@ -147,18 +147,18 @@ static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
     }
 
     if (!includePaths.isEmpty())
-        args.insert(includePathOption(), includePaths.join(QLatin1String(PATH_SPLITTER)));
+        args.insert(includePathOption(), includePaths.join(pathSplitter));
 
     if (!frameworkIncludePaths.isEmpty())
         args.insert(frameworkIncludePathOption(),
-                    frameworkIncludePaths.join(QLatin1String(PATH_SPLITTER)));
+                    frameworkIncludePaths.join(pathSplitter));
     if (!systemIncludePaths.isEmpty()) {
         args.insert(systemIncludePathOption(),
-                    systemIncludePaths.join(QLatin1String(PATH_SPLITTER)));
+                    systemIncludePaths.join(pathSplitter));
     }
 
     if (!typesystemPaths.isEmpty())
-        args.insert(typesystemPathOption(), typesystemPaths.join(QLatin1String(PATH_SPLITTER)));
+        args.insert(typesystemPathOption(), typesystemPaths.join(pathSplitter));
     if (!apiVersions.isEmpty())
         args.insert(QLatin1String("api-version"), apiVersions.join(QLatin1Char('|')));
     if (!languageLevel.isEmpty())
@@ -214,7 +214,7 @@ static void addPathOptionValue(const QString &option, const QString &value,
 {
     const CommandArgumentMap::iterator it = args.find(option);
     if (it != args.end())
-        it.value().append(QLatin1String(PATH_SPLITTER) + value);
+        it.value().append(pathSplitter + value);
     else
         args.insert(option, value);
 }
@@ -302,7 +302,9 @@ void printUsage()
     s << "Usage:\n  "
       << "shiboken [options] header-file typesystem-file\n\n"
       << "General options:\n";
-    const QString pathSyntax = QLatin1String("<path>[" PATH_SPLITTER "<path>" PATH_SPLITTER "...]");
+    QString pathSyntax;
+    QTextStream(&pathSyntax) << "<path>[" << pathSplitter << "<path>"
+        << pathSplitter << "...]";
     OptionDescriptions generalOptions = OptionDescriptions()
         << qMakePair(QLatin1String("api-version=<\"package mask\">,<\"version\">"),
                      QLatin1String("Specify the supported api version used to generate the bindings"))
@@ -388,7 +390,7 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
     const CommandArgumentMap::iterator it = args.find(option);
     if (it != args.end()) {
         const QStringList includePathListList =
-            it.value().split(QLatin1String(PATH_SPLITTER), QString::SkipEmptyParts);
+            it.value().split(pathSplitter, QString::SkipEmptyParts);
         args.erase(it);
         for (const QString &s : includePathListList)
             extractor.addIncludePath(HeaderPath{QFile::encodeName(s), headerType});
@@ -540,7 +542,7 @@ int main(int argc, char *argv[])
 
     ait = args.find(QLatin1String("typesystem-paths"));
     if (ait != args.end()) {
-        extractor.addTypesystemSearchPath(ait.value().split(QLatin1String(PATH_SPLITTER)));
+        extractor.addTypesystemSearchPath(ait.value().split(pathSplitter));
         args.erase(ait);
     }
 

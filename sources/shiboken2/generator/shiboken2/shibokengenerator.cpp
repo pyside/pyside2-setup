@@ -40,13 +40,18 @@
 #include <limits>
 #include <memory>
 
-#define NULL_VALUE "NULL"
-#define AVOID_PROTECTED_HACK "avoid-protected-hack"
-#define PARENT_CTOR_HEURISTIC "enable-parent-ctor-heuristic"
-#define RETURN_VALUE_HEURISTIC "enable-return-value-heuristic"
-#define ENABLE_PYSIDE_EXTENSIONS "enable-pyside-extensions"
-#define DISABLE_VERBOSE_ERROR_MESSAGES "disable-verbose-error-messages"
-#define USE_ISNULL_AS_NB_NONZERO "use-isnull-as-nb_nonzero"
+static const char NULL_VALUE[] = "NULL";
+static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
+static const char PARENT_CTOR_HEURISTIC[] = "enable-parent-ctor-heuristic";
+static const char RETURN_VALUE_HEURISTIC[] = "enable-return-value-heuristic";
+static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
+static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-messages";
+static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
+
+const char *CONV_RULE_OUT_VAR_SUFFIX = "_out";
+const char *BEGIN_ALLOW_THREADS =
+    "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS";
+const char *END_ALLOW_THREADS = "PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS";
 
 //static void dumpFunction(AbstractMetaFunctionList lst);
 
@@ -118,6 +123,12 @@ ShibokenGenerator::ShibokenGenerator()
     m_typeSystemConvName[TypeSystemIsConvertibleFunction] = QLatin1String("isConvertible");
     m_typeSystemConvName[TypeSystemToCppFunction]         = QLatin1String("toCpp");
     m_typeSystemConvName[TypeSystemToPythonFunction]      = QLatin1String("toPython");
+
+    const char CHECKTYPE_REGEX[] = R"(%CHECKTYPE\[([^\[]*)\]\()";
+    const char ISCONVERTIBLE_REGEX[] = R"(%ISCONVERTIBLE\[([^\[]*)\]\()";
+    const char CONVERTTOPYTHON_REGEX[] = R"(%CONVERTTOPYTHON\[([^\[]*)\]\()";
+    const char CONVERTTOCPP_REGEX[] =
+        R"((\*?%?[a-zA-Z_][\w\.]*(?:\[[^\[^<^>]+\])*)(?:\s+)=(?:\s+)%CONVERTTOCPP\[([^\[]*)\]\()";
     m_typeSystemConvRegEx[TypeSystemCheckFunction]         = QRegularExpression(QLatin1String(CHECKTYPE_REGEX));
     m_typeSystemConvRegEx[TypeSystemIsConvertibleFunction] = QRegularExpression(QLatin1String(ISCONVERTIBLE_REGEX));
     m_typeSystemConvRegEx[TypeSystemToPythonFunction]      = QRegularExpression(QLatin1String(CONVERTTOPYTHON_REGEX));

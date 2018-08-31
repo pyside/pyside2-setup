@@ -41,6 +41,8 @@
 #include <QtCore/QDebug>
 #include <QMetaType>
 
+static const char CPP_ARG0[] = "cppArg0";
+
 QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
@@ -2918,10 +2920,8 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream& s, const Abs
         const AbstractMetaType* type = containerType->instantiations().at(i);
         QString typeName = getFullTypeName(type);
         if (type->isValue() && isValueTypeWithCopyConstructorOnly(type)) {
-            static const QRegularExpression regex(QLatin1String(CONVERTTOCPP_REGEX));
-            Q_ASSERT(regex.isValid());
             for (int pos = 0; ; ) {
-                const QRegularExpressionMatch match = regex.match(code, pos);
+                const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
                     break;
                 pos = match.capturedEnd();
@@ -4326,14 +4326,16 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, GeneratorContext &co
                         CodeSnipList snips = func->injectedCodeSnips();
                         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, func->arguments().constLast());
                     } else {
-                        QString expression = QString::fromLatin1("%1%2 %3 (%4" CPP_ARG0 ")")
-                                                .arg(func->isPointerOperator() ? QLatin1String("&") : QString(),
-                                                     QLatin1String(CPP_SELF_VAR), op,
-                                                     shouldDereferenceAbstractMetaTypePointer(argType) ? QLatin1String("*") : QString());
                         s << INDENT;
                         if (func->type())
                             s << func->type()->cppSignature() << " " CPP_RETURN_VAR " = ";
-                        s << expression << ';' << endl;
+                        // expression
+                        if (func->isPointerOperator())
+                            s << '&';
+                        s << CPP_SELF_VAR << ' ' << op << '(';
+                        if (shouldDereferenceAbstractMetaTypePointer(argType))
+                            s << '*';
+                        s << CPP_ARG0 << ");" << endl;
                         s << INDENT << PYTHON_RETURN_VAR " = ";
                         if (func->type())
                             writeToPythonConversion(s, func->type(), metaClass, QLatin1String(CPP_RETURN_VAR));
