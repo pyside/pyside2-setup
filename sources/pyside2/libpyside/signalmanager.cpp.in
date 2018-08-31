@@ -142,11 +142,16 @@ PyObjectWrapper::~PyObjectWrapper()
     Py_XDECREF(m_me);
 }
 
+void PyObjectWrapper::reset(PyObject *o)
+{
+    Py_XINCREF(o);
+    Py_XDECREF(m_me);
+    m_me = o;
+}
+
 PyObjectWrapper& PyObjectWrapper::operator=(const PySide::PyObjectWrapper& other)
 {
-    Py_XINCREF(other.m_me);
-    Py_XDECREF(m_me);
-    m_me = other.m_me;
+    reset(other.m_me);
     return *this;
 }
 
@@ -207,7 +212,7 @@ QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj)
     Shiboken::AutoDecRef value(PyObject_CallFunctionObjArgs(eval_func, pyCode.object(), 0));
     if (!value.object())
         value.reset(Py_None);
-    myObj = PyObjectWrapper(value);
+    myObj.reset(value);
     return in;
 }
 

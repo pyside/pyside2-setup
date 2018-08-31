@@ -53,12 +53,19 @@ namespace PySide
 class PYSIDE_API PyObjectWrapper
 {
 public:
+    PyObjectWrapper(PyObjectWrapper&&) = delete;
+    PyObjectWrapper& operator=(PyObjectWrapper &&) = delete;
+
     PyObjectWrapper();
     explicit PyObjectWrapper(PyObject* me);
     PyObjectWrapper(const PyObjectWrapper &other);
+    PyObjectWrapper& operator=(const PyObjectWrapper &other);
+
+    void reset(PyObject *o);
+
     ~PyObjectWrapper();
     operator PyObject*() const;
-    PyObjectWrapper& operator=(const PyObjectWrapper &other);
+
 private:
     PyObject* m_me;
 };
