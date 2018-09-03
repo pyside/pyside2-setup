@@ -48,6 +48,17 @@ static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
 static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-messages";
 static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
 
+const char *CPP_ARG = "cppArg";
+const char *CPP_ARG_REMOVED = "removed_cppArg";
+const char *CPP_RETURN_VAR = "cppResult";
+const char *CPP_SELF_VAR = "cppSelf";
+const char *PYTHON_ARG = "pyArg";
+const char *PYTHON_ARGS = "pyArgs";
+const char *PYTHON_OVERRIDE_VAR = "pyOverride";
+const char *PYTHON_RETURN_VAR = "pyResult";
+const char *PYTHON_TO_CPP_VAR = "pythonToCpp";
+const char *SMART_POINTER_GETTER = "kSmartPointerGetter";
+
 const char *CONV_RULE_OUT_VAR_SUFFIX = "_out";
 const char *BEGIN_ALLOW_THREADS =
     "PyThreadState* _save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS";
@@ -578,7 +589,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
                         fieldName.prepend(prefix);
                         prefix.clear();
                     } else {
-                        fieldName.prepend(QLatin1String(CPP_SELF_VAR "->"));
+                        fieldName.prepend(QLatin1String(CPP_SELF_VAR) + QLatin1String("->"));
                     }
                     value.replace(match.captured(1), fieldName);
                     break;
@@ -1409,7 +1420,7 @@ void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
     if (options & Generator::WriteSelf) {
         s << func->implementingClass()->name() << '&';
         if (!(options & SkipName))
-            s << " " PYTHON_SELF_VAR;
+            s << " self";
     }
 
     int argUsed = 0;
@@ -1653,8 +1664,7 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                 }
                 if (type->typeEntry()->isCustom()) {
                     argValue = usePyArgs
-                               ? QString::fromLatin1(PYTHON_ARGS "[%1]").arg(argPos)
-                               : QLatin1String(PYTHON_ARG);
+                               ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
                 } else {
                     argValue = hasConversionRule
                                ? arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
@@ -1729,7 +1739,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     Q_ASSERT(pyArgsRegex.isValid());
     if (language == TypeSystem::TargetLangCode) {
         if (usePyArgs) {
-            code.replace(pyArgsRegex, QLatin1String(PYTHON_ARGS"[\\1-1]"));
+            code.replace(pyArgsRegex, QLatin1String(PYTHON_ARGS) + QLatin1String("[\\1-1]"));
         } else {
             static const QRegularExpression pyArgsRegexCheck(QStringLiteral("%PYARG_([2-9]+)"));
             Q_ASSERT(pyArgsRegexCheck.isValid());
@@ -1746,8 +1756,10 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
         // Python argument on the binding virtual method.
         static const QRegularExpression pyArgsAttributionRegex(QStringLiteral("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"));
         Q_ASSERT(pyArgsAttributionRegex.isValid());
-        code.replace(pyArgsAttributionRegex, QLatin1String("PyTuple_SET_ITEM(" PYTHON_ARGS ", \\1-1, \\2)"));
-        code.replace(pyArgsRegex, QLatin1String("PyTuple_GET_ITEM(" PYTHON_ARGS ", \\1-1)"));
+        code.replace(pyArgsAttributionRegex, QLatin1String("PyTuple_SET_ITEM(")
+                     + QLatin1String(PYTHON_ARGS) + QLatin1String(", \\1-1, \\2)"));
+        code.replace(pyArgsRegex, QLatin1String("PyTuple_GET_ITEM(")
+                     + QLatin1String(PYTHON_ARGS) + QLatin1String(", \\1-1)"));
     }
 
     // Replace %ARG#_TYPE variables.
@@ -1780,7 +1792,8 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     }
 
     // Replace template variable for self Python object.
-    QString pySelf = (language == TypeSystem::NativeCode) ? QLatin1String("pySelf") : QLatin1String(PYTHON_SELF_VAR);
+    QString pySelf = language == TypeSystem::NativeCode
+        ? QLatin1String("pySelf") : QLatin1String("self");
     code.replace(QLatin1String("%PYSELF"), pySelf);
 
     // Replace template variable for a pointer to C++ of this object.
@@ -2722,4 +2735,10 @@ QString ShibokenGenerator::msgCouldNotFindMinimalConstructor(const QString &wher
 {
     return where + QLatin1String(": Could not find a minimal constructor for type '") + type
        + QLatin1String("'. This will result in a compilation error.");
+}
+
+QString ShibokenGenerator::pythonArgsAt(int i)
+{
+    return QLatin1String(PYTHON_ARGS) + QLatin1Char('[')
+           + QString::number(i) + QLatin1Char(']');
 }

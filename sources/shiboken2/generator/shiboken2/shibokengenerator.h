@@ -29,17 +29,16 @@
 #ifndef SHIBOKENGENERATOR_H
 #define SHIBOKENGENERATOR_H
 
-#define CPP_ARG                   "cppArg"
-#define CPP_ARG_REMOVED           "removed_" CPP_ARG
-#define CPP_RETURN_VAR            "cppResult"
-#define CPP_SELF_VAR              "cppSelf"
-#define PYTHON_ARG                "pyArg"
-#define PYTHON_ARGS               PYTHON_ARG "s"
-#define PYTHON_OVERRIDE_VAR       "pyOverride"
-#define PYTHON_RETURN_VAR         "pyResult"
-#define PYTHON_SELF_VAR           "self"
-#define PYTHON_TO_CPP_VAR         "pythonToCpp"
-#define SMART_POINTER_GETTER      "kSmartPointerGetter"
+extern const char *CPP_ARG;
+extern const char *CPP_ARG_REMOVED;
+extern const char *CPP_RETURN_VAR;
+extern const char *CPP_SELF_VAR;
+extern const char *PYTHON_ARG;
+extern const char *PYTHON_ARGS;
+extern const char *PYTHON_OVERRIDE_VAR;
+extern const char *PYTHON_RETURN_VAR;
+extern const char *PYTHON_TO_CPP_VAR;
+extern const char *SMART_POINTER_GETTER;
 
 extern const char *CONV_RULE_OUT_VAR_SUFFIX;
 extern const char *BEGIN_ALLOW_THREADS;
@@ -322,7 +321,7 @@ protected:
     QString cpythonGetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonSetterFunctionName(const AbstractMetaField* metaField);
     QString cpythonWrapperCPtr(const AbstractMetaClass* metaClass,
-                               const QString &argName = QLatin1String(PYTHON_SELF_VAR));
+                               const QString &argName = QLatin1String("self"));
     QString cpythonWrapperCPtr(const AbstractMetaType *metaType, const QString &argName);
     QString cpythonWrapperCPtr(const TypeEntry* type, const QString &argName);
 
@@ -428,6 +427,8 @@ protected:
 
     const QRegularExpression &convertToCppRegEx() const
     { return m_typeSystemConvRegEx[TypeSystemToCppFunction]; }
+
+    static QString pythonArgsAt(int i);
 
     static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
 
