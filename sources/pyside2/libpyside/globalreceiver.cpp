@@ -44,7 +44,7 @@
 #include <QMetaMethod>
 #include <QDebug>
 #include <QEvent>
-#include <QLinkedList>
+#include <QVector>
 #include <autodecref.h>
 #include <sbkconverter.h>
 #include <gilstate.h>
@@ -78,7 +78,7 @@ class DynamicSlotData
         PyObject* m_pyClass;
         PyObject* m_weakRef;
         GlobalReceiver* m_parent;
-        QLinkedList<const QObject*> m_refs;
+        QVector<const QObject*> m_refs;
 };
 
 }
@@ -181,8 +181,8 @@ void DynamicSlotData::onCallbackDestroyed(void *data)
     //Disconnect all sources
     QMetaMethod m = self->m_parent->metaObject()->method(self->m_id);
     QByteArray methodName = QByteArray::number(m.methodType()).append(m.methodSignature());
-    QLinkedList<const QObject*> sources = self->m_refs;
-    foreach(const QObject* src, sources)
+    const QVector<const QObject*> sources = self->m_refs;
+    for (const QObject* src : sources)
         const_cast<QObject*>(src)->disconnect(self->m_parent, methodName);
     self->m_weakRef = 0;
 }
