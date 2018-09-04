@@ -267,6 +267,8 @@ static const char *linkKeyWord(QtXmlToSphinx::LinkContext::Type type)
         return ":ref:";
     case QtXmlToSphinx::LinkContext::External:
         break;
+    case QtXmlToSphinx::LinkContext::FunctionMask:
+        break;
      }
     return "";
 }

@@ -4312,6 +4312,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   </add-function>
 
   <inject-code class="native" position="beginning">
+    QT_BEGIN_NAMESPACE
     extern bool
     qRegisterResourceData(int,
                         const unsigned char *,
@@ -4323,6 +4324,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
                             const unsigned char *,
                             const unsigned char *,
                             const unsigned char *);
+    QT_END_NAMESPACE
   </inject-code>
   <add-function signature="qRegisterResourceData(int,PyBytes,PyBytes,PyBytes)" return-type="bool">
     <inject-code class="target" position="beginning">

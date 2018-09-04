@@ -1502,7 +1502,7 @@ std::string info(SbkObject* self)
         s << String::toCString(parent) << "\n";
     }
 
-    if (self->d->parentInfo && self->d->parentInfo->children.size()) {
+    if (self->d->parentInfo && !self->d->parentInfo->children.empty()) {
         s << "children.......... ";
         for (SbkObject *sbkChild : self->d->parentInfo->children) {
             Shiboken::AutoDecRef child(PyObject_Str(reinterpret_cast<PyObject *>(sbkChild)));
@@ -1511,7 +1511,7 @@ std::string info(SbkObject* self)
         s << '\n';
     }
 
-    if (self->d->referredObjects && self->d->referredObjects->size()) {
+    if (self->d->referredObjects && !self->d->referredObjects->empty()) {
         Shiboken::RefCountMap& map = *self->d->referredObjects;
         s << "referred objects.. ";
         std::string lastKey;
