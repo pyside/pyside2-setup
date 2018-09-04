@@ -49,7 +49,6 @@
 #include <QString>
 #include <QStringList>
 #include <QList>
-#include <QLinkedList>
 #include <QObject>
 #include <cstring>
 #include <QDebug>
@@ -119,10 +118,12 @@ public:
     int m_emptyMethod = -1;
     int m_nullIndex = 0;
 
-    int createMetaData(QMetaObject* metaObj, QLinkedList<QByteArray> &strings);
+    int createMetaData(QMetaObject* metaObj);
     void updateMetaObject(QMetaObject* metaObj);
-    void writeMethodsData(const QList<MethodData>& methods, unsigned int** data, QLinkedList<QByteArray>& strings, int* prtIndex, int nullIndex, int flags);
-    void writeStringData(char *,  QLinkedList<QByteArray> &strings);
+    void writeMethodsData(const QList<MethodData>& methods, unsigned int** data,
+                          QByteArrayList& strings, int* prtIndex,
+                          int nullIndex, int flags);
+    void writeStringData(char *, const QByteArrayList& strings) const;
     int getPropertyNotifyId(PySideProperty *property) const;
 };
 
@@ -133,36 +134,21 @@ bool sortMethodSignalSlot(const MethodData &m1, const MethodData &m2)
     return false;
 }
 
-static int registerString(const QByteArray& s, QLinkedList<QByteArray>& strings)
+static int registerString(const QByteArray& s, QByteArrayList& strings)
 {
-    int idx = 0;
-    QLinkedList<QByteArray>::const_iterator it = strings.begin();
-    QLinkedList<QByteArray>::const_iterator itEnd = strings.end();
-    while (it != itEnd) {
-        if (strcmp(*it, s) == 0)
-            return idx;
-        ++idx;
-        ++it;
+    int idx = strings.indexOf(s);
+    if (idx == -1) {
+        idx = strings.size();
+        strings.append(s);
     }
-    strings.append(s);
     return idx;
 }
 
-static int blobSize(QLinkedList<QByteArray> &strings)
+static int blobSize(const QByteArrayList &strings)
 {
-   int size = strings.size() * sizeof(QByteArrayData);
-
-   QByteArray str;
-   QByteArray debug_str;
-   foreach (const QByteArray &field, strings) {
-      str.append(field);
-      str.append(char(0));
-
-      debug_str.append(field);
-      debug_str.append('|');
-   }
-   //qDebug()<<debug_str;
-   size += str.size();
+   int size = strings.size() * int(sizeof(QByteArrayData));
+   for (const QByteArray &field : strings)
+       size += field.size() + 1;
    return size;
 }
 
@@ -545,7 +531,7 @@ const QMetaObject* DynamicQMetaObject::update() const
 
 void DynamicQMetaObject::DynamicQMetaObjectPrivate::writeMethodsData(const QList<MethodData>& methods,
                                                                      unsigned int** data,
-                                                                     QLinkedList<QByteArray>& strings,
+                                                                     QByteArrayList& strings,
                                                                      int* prtIndex,
                                                                      int nullIndex,
                                                                      int flags)
@@ -680,7 +666,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
   Allocate the meta data table.
   Returns the index in the table corresponding to the header fields count.
 */
-int DynamicQMetaObject::DynamicQMetaObjectPrivate::createMetaData(QMetaObject* metaObj, QLinkedList<QByteArray> &strings)
+int DynamicQMetaObject::DynamicQMetaObjectPrivate::createMetaData(QMetaObject* metaObj)
 {
     const int n_methods = m_methods.size();
     const int n_properties = m_properties.size();
@@ -720,17 +706,16 @@ int DynamicQMetaObject::DynamicQMetaObjectPrivate::createMetaData(QMetaObject* m
 // The struct consists of an array of QByteArrayData, followed by a char array
 // containing the actual strings. This format must match the one produced by
 // moc (see generator.cpp).
-void DynamicQMetaObject::DynamicQMetaObjectPrivate::writeStringData(char *out,  QLinkedList<QByteArray> &strings)
+void DynamicQMetaObject::DynamicQMetaObjectPrivate::writeStringData(char *out,
+                                                                    const QByteArrayList& strings) const
 {
    Q_ASSERT(!(reinterpret_cast<quintptr>(out) & (Q_ALIGNOF(QByteArrayData)-1)));
 
-   int offsetOfStringdataMember = strings.size() * sizeof(QByteArrayData);
+   const int size = strings.size();
+   const int offsetOfStringdataMember = size * int(sizeof(QByteArrayData));
    int stringdataOffset = 0;
-   int i = 0;
-   foreach(const QByteArray& str, strings) {
-      writeString(out, i, str, offsetOfStringdataMember, stringdataOffset);
-      i++;
-   }
+   for (int i = 0; i < size; ++i)
+      writeString(out, i, strings.at(i), offsetOfStringdataMember, stringdataOffset);
 }
 
 QList<MethodData>::iterator is_sorted_until(QList<MethodData>::iterator first,
@@ -757,18 +742,16 @@ bool is_sorted(QList<MethodData>::iterator first, QList<MethodData>::iterator la
 void DynamicQMetaObject::DynamicQMetaObjectPrivate::updateMetaObject(QMetaObject* metaObj)
 {
     Q_ASSERT(!m_updated);
-    uint *data = const_cast<uint*>(metaObj->d.data);
-    int index = 0;
-    QLinkedList<QByteArray> strings;
     m_dataSize = 0;
 
     // Recompute the size and reallocate memory
     // index is set after the last header field.
-    index = createMetaData(metaObj, strings);
-    data = const_cast<uint*>(metaObj->d.data);
+    int index = createMetaData(metaObj);
+    uint *data = const_cast<uint*>(metaObj->d.data);
 
-    registerString(m_className, strings); // register class string
-    m_nullIndex = registerString("", strings); // register a null string
+    QByteArrayList strings;
+    strings.append(m_className); // register class string
+    m_nullIndex = registerString(QByteArrayLiteral(""), strings); // register a null string
 
     // Write class info.
     if (!m_info.isEmpty()) {
