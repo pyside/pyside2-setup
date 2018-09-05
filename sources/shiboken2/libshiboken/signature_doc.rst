@@ -202,7 +202,7 @@ When this test program is run in COIN, then the warnings are turned into
 errors. The reason is that only in COIN, we have a stable configuration
 of PySide modules that can reliably be compared.
 
-These modules have the name ``exists_{plat}_{version}_ci.py``, and as a big
+These modules have the name ``exists_{platf}_{version}_ci.py``, and as a big
 exception for generated code, these files are *intentionally* checked in.
 
 
@@ -228,10 +228,36 @@ in.
 init_platform.py
 ~~~~~~~~~~~~~~~~
 
-For generating the ``exists_{plat}_{version}.py`` modules, the module
+For generating the ``exists_{platf}_{version}`` modules, the module
 ``pyside2/tests/registry/init_platform.py`` was written. It can be used
 standalone from the commandline, to check the compatibility of some
 changes, directly.
+
+
+scrape_testresults.py
+---------------------
+
+To simplify and automate the process of extracting the ``exists_{platf}_{version}_ci.py``
+files, the script ``pyside2/tests/registry/scrape_testresults.py`` has been written.
+
+This script scans the whole testresults website for PySide, that is::
+
+    https://testresults.qt.io/coin/api/results/pyside/pyside-setup/
+
+On the first scan, the script runs less than 30 minutes. After that, a cache
+is generated and the scan works *much* faster. The test results are placed
+into the folder ``pyside2/tests/registry/testresults/embedded/`` with a
+unique name that allows for easy sorting. Example::
+
+    testresults/embedded/2018_09_10_10_40_34-test_1536891759-exists_linux_5_11_2_ci.py
+
+These files are created only once. If they already exist, they are not touched, again.
+The file `pyside2/tests/registry/known_urls.json`` holds all scanned URLs after
+a successful scan. The ``testresults/embedded`` folder can be kept for reference
+or can be removed. Important is only the json file.
+
+The result of a scan is then directly placed into the ``pyside2/tests/registry/``
+folder. It should be reviewed and then eventually checked in.
 
 
 generate_pyi.py
