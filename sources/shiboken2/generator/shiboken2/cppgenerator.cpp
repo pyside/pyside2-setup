@@ -4227,7 +4227,7 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
 
     AbstractMetaType* fieldType = metaField->type();
 
-    s << INDENT << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << ';' << endl;
+    s << INDENT << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << "{nullptr};" << endl;
     s << INDENT << "if (!";
     writeTypeCheck(s, fieldType, QLatin1String("pyIn"), isNumber(fieldType->typeEntry()));
     s << ") {" << endl;
