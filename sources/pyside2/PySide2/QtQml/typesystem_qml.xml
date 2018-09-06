@@ -217,5 +217,5 @@
       </modify-function>
     </object-type>
     <!-- Suppress anonymous enum warning -->
-    <suppress-warning text="enum 'QmlCurrentSingletonTypeRegistrationVersion' does not have a type entry or is not an enum" />
+    <suppress-warning text="Anonymous enum (QmlCurrentSingletonTypeRegistrationVersion) does not have a type entry"/>
 </typesystem>

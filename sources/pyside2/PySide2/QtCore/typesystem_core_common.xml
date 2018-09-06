@@ -4410,7 +4410,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="enum 'Role' does not have a type entry or is not an enum" />
 
   <!-- Anonymous enum in qtbase/src/corelib/global/qtypeinfo.h -->
-  <suppress-warning text="enum 'Q_RELOCATABLE_TYPE' does not have a type entry or is not an enum" />
+  <suppress-warning text="Anonymous enum (Q_COMPLEX_TYPE, ... , Q_RELOCATABLE_TYPE) does not have a type entry"/>
 
   <!-- Another anonymous enum / value pair in in qtbase/src/corelib/kernel/qcoreapplication.h -->
   <suppress-warning text="no matching enum 'QT_VERSION'" />

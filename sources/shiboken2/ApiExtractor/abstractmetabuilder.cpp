@@ -863,6 +863,66 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     return metaClass;
 }
 
+template <class Stream>
+static void msgFormatEnumType(Stream &str,
+                              const EnumModelItem &enumItem,
+                              const QString &className)
+{
+    switch (enumItem->enumKind()) {
+    case CEnum:
+        str << "Enum '" << enumItem->qualifiedName().join(colonColon()) << '\'';
+        break;
+    case AnonymousEnum: {
+        const EnumeratorList &values = enumItem->enumerators();
+        str << "Anonymous enum (";
+        switch (values.size()) {
+        case 0:
+            break;
+        case 1:
+            str << values.constFirst()->name();
+            break;
+        case 2:
+            str << values.at(0)->name() << ", " << values.at(1)->name();
+            break;
+        default:
+            str << values.at(0)->name() << ", ... , "
+                << values.at(values.size() - 1)->name();
+            break;
+        }
+        str << ')';
+    }
+        break;
+    case EnumClass:
+        str << "Scoped enum '" << enumItem->qualifiedName().join(colonColon()) << '\'';
+        break;
+    }
+    if (!className.isEmpty())
+        str << " (class: " << className << ')';
+}
+
+static inline QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
+                                         const QString &className)
+{
+    QString result;
+    QTextStream str(&result);
+    msgFormatEnumType(str, enumItem, className);
+    str << " does not have a type entry";
+    return result;
+}
+
+static QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
+                                     const QString &className,
+                                     const TypeEntry *t)
+{
+    QString result;
+    QDebug debug(&result); // Use the debug operator for TypeEntry::Type
+    debug.noquote();
+    debug.nospace();
+    msgFormatEnumType(debug, enumItem, className);
+    debug << " is not an enum (type: " << t->type() << ')';
+    return result;
+}
+
 AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
                                                            AbstractMetaClass *enclosing,
                                                            const QSet<QString> &enumsDeclarations)
@@ -907,15 +967,23 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         return 0;
     }
 
-    if ((!typeEntry || !typeEntry->isEnum())) {
-        if (!m_currentClass ||
-                (m_currentClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang)) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("enum '%1' does not have a type entry or is not an enum")
-                              .arg(qualifiedName);
+    const bool rejectionWarning = !m_currentClass
+        || (m_currentClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang);
+
+    if (!typeEntry) {
+        if (rejectionWarning)
+            qCWarning(lcShiboken, "%s", qPrintable(msgNoEnumTypeEntry(enumItem, className)));
+        m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::NotInTypeSystem);
+        return nullptr;
+    }
+
+    if (!typeEntry->isEnum()) {
+        if (rejectionWarning) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgNoEnumTypeConflict(enumItem, className, typeEntry)));
         }
         m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::NotInTypeSystem);
-        return 0;
+        return nullptr;
     }
 
     AbstractMetaEnum *metaEnum = new AbstractMetaEnum;
