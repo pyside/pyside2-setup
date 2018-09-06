@@ -301,7 +301,7 @@ bool Handler::endElement(const QStringRef &localName)
             m_currentDroppedEntry = 0;
             m_currentDroppedEntryDepth = 0;
         } else {
-            ++m_currentDroppedEntryDepth;
+            --m_currentDroppedEntryDepth;
         }
         return true;
     }
