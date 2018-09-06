@@ -43,5 +43,7 @@
 <typesystem package="PySide2.QtX11Extras">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
-    <object-type name="QX11Info" />
+    <object-type name="QX11Info">
+        <enum-type name="PeekOption" flags="PeekOptions" since="5.10"/>
+    </object-type>
 </typesystem>

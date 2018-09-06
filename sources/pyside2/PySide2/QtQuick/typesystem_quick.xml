@@ -104,6 +104,7 @@
         <enum-type name="CreateTextureOption" flags="CreateTextureOptions" />
         <enum-type name="RenderStage" />
         <enum-type name="SceneGraphError" />
+        <enum-type name="TextRenderType" since="5.10"/>
     </object-type>
 
     <object-type name="QSGAbstractRenderer">

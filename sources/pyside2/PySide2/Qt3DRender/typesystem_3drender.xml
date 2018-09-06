@@ -84,6 +84,7 @@
         </object-type>
         <object-type name="QBuffer">
             <enum-type name="AccessType"/>
+            <enum-type name="BufferType"/>
             <enum-type name="UsageType"/>
         </object-type>
         <object-type name="QBufferCapture"/>
