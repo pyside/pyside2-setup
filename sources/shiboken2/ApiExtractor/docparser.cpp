@@ -27,6 +27,7 @@
 ****************************************************************************/
 #include "docparser.h"
 #include "abstractmetalang.h"
+#include "messages.h"
 #include "reporthandler.h"
 #include "typesystem.h"
 #include <QtCore/QDebug>
@@ -107,46 +108,6 @@ AbstractMetaFunctionList DocParser::documentableFunctions(const AbstractMetaClas
     return result;
 }
 
-QString DocParser::msgCannotFindDocumentation(const QString &fileName,
-                                          const char *what, const QString &name,
-                                          const QString &query)
-{
-    QString result;
-    QTextStream(&result) << "Cannot find documentation for " << what
-        << ' ' << name << " in:\n    " << QDir::toNativeSeparators(fileName)
-        << "\n  using query:\n    " << query;
-    return result;
-}
-
-QString DocParser::msgCannotFindDocumentation(const QString &fileName,
-                                              const AbstractMetaClass *metaClass,
-                                              const AbstractMetaFunction *function,
-                                              const QString &query)
-{
-    const QString name = metaClass->name() + QLatin1String("::")
-        + function->minimalSignature();
-    return msgCannotFindDocumentation(fileName, "function", name, query);
-}
-
-QString DocParser::msgCannotFindDocumentation(const QString &fileName,
-                                              const AbstractMetaClass *metaClass,
-                                              const AbstractMetaEnum *e,
-                                              const QString &query)
-{
-    return msgCannotFindDocumentation(fileName, "enum",
-                                      metaClass->name() + QLatin1String("::") + e->name(),
-                                      query);
-}
-
-QString DocParser::msgCannotFindDocumentation(const QString &fileName,
-                                              const AbstractMetaClass *metaClass,
-                                              const AbstractMetaField *f,
-                                              const QString &query)
-{
-    return msgCannotFindDocumentation(fileName, "field",
-                                      metaClass->name() + QLatin1String("::") + f->name(),
-                                      query);
-}
 
 #ifdef HAVE_LIBXSLT
 namespace
@@ -185,27 +146,6 @@ public:
 static inline bool isXpathDocModification(const DocModification &mod)
 {
     return mod.mode() == TypeSystem::DocModificationXPathReplace;
-}
-
-QString msgXpathDocModificationError(const DocModificationList& mods,
-                                     const QString &what)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Error when applying modifications (";
-    for (const DocModification &mod : mods) {
-        if (isXpathDocModification(mod)) {
-            str << '"' << mod.xpath() << "\" -> \"";
-            const QString simplified = mod.code().simplified();
-            if (simplified.size() > 20)
-                str << simplified.leftRef(20) << "...";
-            else
-                str << simplified;
-            str << '"';
-        }
-    }
-    str << "): " << what;
-    return result;
 }
 
 QString DocParser::applyDocModifications(const DocModificationList& mods, const QString& xml) const

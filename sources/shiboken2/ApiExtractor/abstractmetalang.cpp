@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "abstractmetalang.h"
+#include "messages.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
 #include "typesystem.h"
@@ -746,17 +747,6 @@ bool AbstractMetaFunction::autoDetectAllowThread() const
     const bool maybeGetter = m_constant != 0 && m_type != nullptr
         && m_arguments.isEmpty();
     return !maybeGetter;
-}
-
-static QString msgDisallowThread(const AbstractMetaFunction *f)
-{
-    QString result;
-    QTextStream str(&result);
-    str <<"Disallowing threads for ";
-    if (auto c = f->declaringClass())
-        str << c->name() << "::";
-    str << f->name() << "().";
-    return result;
 }
 
 bool AbstractMetaFunction::allowThread() const

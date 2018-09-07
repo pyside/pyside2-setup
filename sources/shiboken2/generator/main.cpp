@@ -36,6 +36,7 @@
 #include <apiextractor.h>
 #include <fileout.h>
 #include <typedatabase.h>
+#include <messages.h>
 #include "generator.h"
 #include "shibokenconfig.h"
 #include "cppgenerator.h"
@@ -60,20 +61,6 @@ static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
 typedef QMap<QString, QString> CommandArgumentMap;
-
-static QString msgLeftOverArguments(const CommandArgumentMap &remainingArgs)
-{
-    QString message;
-    QTextStream str(&message);
-    str << "shiboken: Called with wrong arguments:";
-    for (auto it = remainingArgs.cbegin(), end = remainingArgs.cend(); it != end; ++it) {
-        str << ' ' << it.key();
-        if (!it.value().isEmpty())
-            str << ' ' << it.value();
-    }
-    str << "\nCommand line: " << QCoreApplication::arguments().join(QLatin1Char(' '));
-    return message;
-}
 
 typedef Generator::OptionDescriptions OptionDescriptions;
 
@@ -375,12 +362,6 @@ static inline void errorPrint(const QString& s)
     arguments.pop_front();
     std::cerr << "shiboken: " << qPrintable(s)
         << "\nCommand line: " << qPrintable(arguments.join(QLatin1Char(' '))) << '\n';
-}
-
-static QString msgInvalidVersion(const QString &package, const QString &version)
-{
-    return QLatin1String("Invalid version \"") + version
-        + QLatin1String("\" specified for package ") + package + QLatin1Char('.');
 }
 
 static void parseIncludePathOption(const QString &option, HeaderType headerType,

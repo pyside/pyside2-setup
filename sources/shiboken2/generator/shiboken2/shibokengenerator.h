@@ -430,8 +430,6 @@ protected:
 
     static QString pythonArgsAt(int i);
 
-    static QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
-
     static QHash<QString, QString> m_pythonPrimitiveTypeName;
     static QHash<QString, QString> m_pythonOperators;
     static QHash<QString, QString> m_formatUnits;

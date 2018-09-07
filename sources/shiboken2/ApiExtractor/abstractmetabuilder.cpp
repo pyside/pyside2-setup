@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "abstractmetabuilder_p.h"
+#include "messages.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
 
@@ -157,32 +158,6 @@ AbstractMetaFunctionList AbstractMetaBuilder::globalFunctions() const
 AbstractMetaEnumList AbstractMetaBuilder::globalEnums() const
 {
     return d->m_globalEnums;
-}
-
-static QString msgNoFunctionForModification(const QString &signature,
-                                            const QString &originalSignature,
-                                            const QString &className,
-                                            const QStringList &possibleSignatures,
-                                            const AbstractMetaFunctionList &allFunctions)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "signature '" << signature << '\'';
-    if (!originalSignature.isEmpty() && originalSignature != signature)
-        str << " (specified as '" << originalSignature << "')";
-    str << " for function modification in '"
-        << className << "' not found.";
-    if (possibleSignatures.isEmpty()) {
-        str << " No candidates were found. Member functions: ";
-        for (int f = 0, size = allFunctions.size(); f < size; ++f) {
-            if (f)
-                str << ", ";
-            str << allFunctions.at(f)->minimalSignature();
-        }
-    } else {
-        str << " Possible candidates: " << possibleSignatures.join(QLatin1String(", "));
-    }
-    return result;
 }
 
 void AbstractMetaBuilderPrivate::checkFunctionModifications()
@@ -861,66 +836,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         setInclude(type, namespaceItem->fileName());
 
     return metaClass;
-}
-
-template <class Stream>
-static void msgFormatEnumType(Stream &str,
-                              const EnumModelItem &enumItem,
-                              const QString &className)
-{
-    switch (enumItem->enumKind()) {
-    case CEnum:
-        str << "Enum '" << enumItem->qualifiedName().join(colonColon()) << '\'';
-        break;
-    case AnonymousEnum: {
-        const EnumeratorList &values = enumItem->enumerators();
-        str << "Anonymous enum (";
-        switch (values.size()) {
-        case 0:
-            break;
-        case 1:
-            str << values.constFirst()->name();
-            break;
-        case 2:
-            str << values.at(0)->name() << ", " << values.at(1)->name();
-            break;
-        default:
-            str << values.at(0)->name() << ", ... , "
-                << values.at(values.size() - 1)->name();
-            break;
-        }
-        str << ')';
-    }
-        break;
-    case EnumClass:
-        str << "Scoped enum '" << enumItem->qualifiedName().join(colonColon()) << '\'';
-        break;
-    }
-    if (!className.isEmpty())
-        str << " (class: " << className << ')';
-}
-
-static inline QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
-                                         const QString &className)
-{
-    QString result;
-    QTextStream str(&result);
-    msgFormatEnumType(str, enumItem, className);
-    str << " does not have a type entry";
-    return result;
-}
-
-static QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
-                                     const QString &className,
-                                     const TypeEntry *t)
-{
-    QString result;
-    QDebug debug(&result); // Use the debug operator for TypeEntry::Type
-    debug.noquote();
-    debug.nospace();
-    msgFormatEnumType(debug, enumItem, className);
-    debug << " is not an enum (type: " << t->type() << ')';
-    return result;
 }
 
 AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
@@ -1894,44 +1809,6 @@ static inline QString qualifiedFunctionSignatureWithType(const FunctionModelItem
     result += functionSignature(functionItem);
     return result;
 }
-
-static inline QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n,
-                                                const QString &why)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "unmatched type '" << arg->type().toString() << "' in parameter #"
-        << (n + 1);
-    if (!arg->name().isEmpty())
-        str << " \"" << arg->name() << '"';
-    str << ": " << why;
-    return result;
-}
-
-static inline QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
-                                             const QString &why)
-{
-    return QLatin1String("unmatched return type '")
-        + functionItem->type().toString()
-        + QLatin1String("': ") + why;
-}
-
-static QString msgSkippingFunction(const FunctionModelItem &functionItem,
-                                   const QString &signature, const QString &why)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "skipping ";
-    if (functionItem->isAbstract())
-        str << "abstract ";
-    str << "function '" << signature << "', " << why;
-    if (functionItem->isAbstract()) {
-        str << "\nThis will lead to compilation errors due to not "
-               "being able to instantiate the wrapper.";
-    }
-    return result;
-}
-
 static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeModel::FunctionType ft)
 {
     AbstractMetaFunction::FunctionType result = AbstractMetaFunction::NormalFunction;
@@ -1958,12 +1835,6 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
         break;
     }
     return result;
-}
-
-static inline QString msgCannotSetArrayUsage(const QString &function, int i, const QString &reason)
-{
-    return function +  QLatin1String(": Cannot use parameter ") + QString::number(i + 1)
-        + QLatin1String(" as an array: ") + reason;
 }
 
 bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func,
@@ -2330,33 +2201,6 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
         context.removeLast();
     }
     return type;
-}
-
-static QString msgUnableToTranslateType(const QString &t, const QString &why)
-{
-    return QLatin1String("Unable to translate type \"")
-        + t + QLatin1String("\": ") + why;
-}
-
-static inline QString msgUnableToTranslateType(const TypeInfo &typeInfo,
-                                               const QString &why)
-{
-    return msgUnableToTranslateType(typeInfo.toString(), why);
-}
-
-static inline QString msgCannotFindTypeEntry(const QString &t)
-{
-    return QLatin1String("Cannot find type entry for \"") + t + QLatin1String("\".");
-}
-
-static inline QString msgCannotTranslateTemplateArgument(int i,
-                                                         const TypeInfo &typeInfo,
-                                                         const QString &why)
-{
-    QString result;
-    QTextStream(&result) << "Unable to translate template argument "
-        << (i + 1) << typeInfo.toString() << ": " << why;
-    return result;
 }
 
 AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,

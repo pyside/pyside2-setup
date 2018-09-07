@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "fileout.h"
+#include "messages.h"
 #include "reporthandler.h"
 
 #include <QtCore/QTextCodec>
@@ -176,18 +177,6 @@ FileOut::State FileOut::done()
     if (result == Failure)
          qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
     return result;
-}
-
-QString FileOut::msgCannotOpenForReading(const QFile &f)
-{
-    return QStringLiteral("Failed to open file '%1' for reading: %2")
-           .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
-}
-
-QString FileOut::msgCannotOpenForWriting(const QFile &f)
-{
-    return QStringLiteral("Failed to open file '%1' for writing: %2")
-           .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 
 FileOut::State FileOut::done(QString *errorMessage)

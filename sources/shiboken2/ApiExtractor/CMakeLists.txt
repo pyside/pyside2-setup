@@ -37,6 +37,7 @@ abstractmetabuilder.cpp
 abstractmetalang.cpp
 fileout.cpp
 graph.cpp
+messages.cpp
 reporthandler.cpp
 typeparser.cpp
 typesystem.cpp

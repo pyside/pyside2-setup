@@ -28,6 +28,7 @@
 
 #include "shibokengenerator.h"
 #include <abstractmetalang.h>
+#include <messages.h>
 #include "overloaddata.h"
 #include <reporthandler.h>
 #include <typedatabase.h>
@@ -881,14 +882,6 @@ QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType* type)
            + getTypeIndexVariableName(type) + QLatin1Char(']');
 }
 
-static QString msgUnknownOperator(const AbstractMetaFunction* func)
-{
-    QString result = QLatin1String("Unknown operator: \"") + func->originalName() + QLatin1Char('"');
-    if (const AbstractMetaClass *c = func->implementingClass())
-        result += QLatin1String(" in class: ") + c->name();
-    return result;
-}
-
 static inline QString unknownOperator() { return QStringLiteral("__UNKNOWN_OPERATOR__"); }
 
 QString ShibokenGenerator::fixedCppTypeName(const CustomConversion::TargetToNativeConversion* toNative)
@@ -1700,17 +1693,6 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
     s << INDENT << "// End of code injection" << endl;
 }
 
-static QString msgWrongIndex(const char *varName, const QString &capture, const AbstractMetaFunction *func)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Wrong index for " << varName << " variable (" << capture << ") on ";
-    if (const AbstractMetaClass *c = func->implementingClass())
-        str << c->name() << "::";
-    str << func->signature();
-    return  result;
-}
-
 void ShibokenGenerator::writeCodeSnips(QTextStream& s,
                                        const CodeSnipList& codeSnips,
                                        TypeSystem::CodeSnipPosition position,
@@ -1989,16 +1971,6 @@ static QString getConverterTypeSystemVariableArgument(const QString& code, int p
     return arg;
 }
 typedef QPair<QString, QString> StringPair;
-
-static QString msgCannotFindType(const QString &type, const QString &variable,
-                                 const QString &why)
-{
-    QString result;
-    QTextStream(&result) << "Could not find type '"
-        << type << "' for use in '" << variable << "' conversion: " << why
-        << "\nMake sure to use the full C++ name, e.g. 'Namespace::Class'.";
-    return result;
-}
 
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString& code)
 {
@@ -2287,12 +2259,6 @@ bool ShibokenGenerator::isCopyable(const AbstractMetaClass *metaClass)
         return metaClass->hasCloneOperator();
 
     return metaClass->typeEntry()->copyable() == ComplexTypeEntry::CopyableSet;
-}
-
-static inline QString msgCannotBuildMetaType(const QString &s)
-{
-    return QLatin1String("Unable to build meta type for \"")
-        + s + QLatin1String("\": ");
 }
 
 AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typeSignature,
@@ -2729,12 +2695,6 @@ bool ShibokenGenerator::isCppIntegralPrimitive(const TypeEntry* type)
 bool ShibokenGenerator::isCppIntegralPrimitive(const AbstractMetaType* type)
 {
     return isCppIntegralPrimitive(type->typeEntry());
-}
-
-QString ShibokenGenerator::msgCouldNotFindMinimalConstructor(const QString &where, const QString &type)
-{
-    return where + QLatin1String(": Could not find a minimal constructor for type '") + type
-       + QLatin1String("'. This will result in a compilation error.");
 }
 
 QString ShibokenGenerator::pythonArgsAt(int i)

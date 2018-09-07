@@ -28,6 +28,7 @@
 
 #include "qtdocparser.h"
 #include "abstractmetalang.h"
+#include "messages.h"
 #include "reporthandler.h"
 #include "typesystem.h"
 

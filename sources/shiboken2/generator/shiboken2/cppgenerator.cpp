@@ -31,6 +31,7 @@
 #include "cppgenerator.h"
 #include "overloaddata.h"
 #include <abstractmetalang.h>
+#include <messages.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
 
@@ -763,7 +764,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             if (const AbstractMetaClass *c = func->implementingClass())
                 errorMsg += c->qualifiedCppName() + QLatin1String("::");
             errorMsg += func->signature();
-            errorMsg = ShibokenGenerator::msgCouldNotFindMinimalConstructor(errorMsg, func->type()->cppSignature());
+            errorMsg = msgCouldNotFindMinimalConstructor(errorMsg, func->type()->cppSignature());
             qCWarning(lcShiboken).noquote().nospace() << errorMsg;
             s << endl << INDENT << "#error " << errorMsg << endl;
         }

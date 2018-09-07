@@ -49,9 +49,6 @@ public:
     State done();
     State done(QString *errorMessage);
 
-    static QString msgCannotOpenForReading(const QFile &f);
-    static QString msgCannotOpenForWriting(const QFile &f);
-
     QTextStream stream;
 
     static bool dummy;

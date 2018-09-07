@@ -152,6 +152,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
            + types.join(QLatin1String(", ")) + QLatin1String(" >");
 }
 
+// overloaddata.cpp
 static QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                                    const OverloadData::MetaFunctionList &involvedConversions)
 {

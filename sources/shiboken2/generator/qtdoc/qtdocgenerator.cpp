@@ -28,6 +28,7 @@
 
 #include "qtdocgenerator.h"
 #include <abstractmetalang.h>
+#include <messages.h>
 #include <reporthandler.h>
 #include <typesystem.h>
 #include <qtdocparser.h>
@@ -201,34 +202,6 @@ public:
 private:
     const QString &m_label;
 };
-
-static QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
-                             const QString &tag, const QString &message)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "While handling <";
-    const QStringRef currentTag = reader.name();
-    if (currentTag.isEmpty())
-        str << tag;
-    else
-        str << currentTag;
-    str << "> in " << context << ", line "<< reader.lineNumber()
-        << ": " << message;
-    return result;
-}
-
-static QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &context,
-                                  const QString &tag, const QString &location, const QString &identifier,
-                                  const QString &fallback)
-{
-    QString message = QLatin1String("Falling back to \"")
-        + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"") + location
-        + QLatin1Char('"');
-    if (!identifier.isEmpty())
-        message += QLatin1String(" [") + identifier + QLatin1Char(']');
-    return msgTagWarning(reader, context, tag, message);
-}
 
 struct QtXmlToSphinx::LinkContext
 {
@@ -1302,7 +1275,7 @@ bool QtXmlToSphinx::convertToRst(QtDocGenerator *generator,
     QFile sourceFile(sourceFileName);
     if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         if (errorMessage)
-            *errorMessage = FileOut::msgCannotOpenForReading(sourceFile);
+            *errorMessage = msgCannotOpenForReading(sourceFile);
         return false;
     }
     const QString doc = QString::fromUtf8(sourceFile.readAll());
@@ -2206,7 +2179,7 @@ void QtDocGenerator::writeAdditionalDocumentation()
     QFile additionalDocumentationFile(m_additionalDocumentationList);
     if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCWarning(lcShiboken, "%s",
-                  qPrintable(FileOut::msgCannotOpenForReading(additionalDocumentationFile)));
+                  qPrintable(msgCannotOpenForReading(additionalDocumentationFile)));
         return;
     }
 

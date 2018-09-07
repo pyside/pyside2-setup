@@ -120,22 +120,6 @@ protected:
 
     static AbstractMetaFunctionList documentableFunctions(const AbstractMetaClass *metaClass);
 
-    static QString msgCannotFindDocumentation(const QString &fileName,
-                                              const char *what, const QString &name,
-                                              const QString &query);
-    static QString msgCannotFindDocumentation(const QString &fileName,
-                                              const AbstractMetaClass *metaClass,
-                                              const AbstractMetaFunction *function,
-                                              const QString &query);
-    static QString msgCannotFindDocumentation(const QString &fileName,
-                                              const AbstractMetaClass *metaClass,
-                                              const AbstractMetaEnum *e,
-                                              const QString &query);
-    static QString msgCannotFindDocumentation(const QString &fileName,
-                                              const AbstractMetaClass *metaClass,
-                                              const AbstractMetaField *f,
-                                              const QString &query);
-
 private:
     QString m_packageName;
     QString m_docDataDir;
