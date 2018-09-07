@@ -60,25 +60,19 @@
         <object-type name="QInputSequence"/>
         <object-type name="QInputSettings"/>
         <object-type name="QKeyboardHandler"/>
-        <object-type name="QKeyEvent">
-            <modify-function signature="QKeyEvent(const Qt3DInput::QKeyEvent&amp;)" remove="all"/>
-        </object-type>
+        <object-type name="QKeyEvent"/>
         <object-type name="QLogicalDevice"/>
         <object-type name="QKeyboardDevice"/>
         <object-type name="QMouseDevice">
             <enum-type name="Axis"/>
         </object-type>
-        <!-- Fixme: shiboken2 mistakenly thinks that Qt3DInput::QMouseEvent(::QMouseEvent)
-             is a copy constructor of Qt3DInput::QMouseEvent. Work around by suppressing them -->
         <object-type name="QMouseEvent">
             <enum-type name="Buttons"/>
             <enum-type name="Modifiers"/>
-            <modify-function signature="QMouseEvent(const Qt3DInput::QMouseEvent&amp;)" remove="all"/>
         </object-type>
         <object-type name="QWheelEvent">
             <enum-type name="Buttons"/>
             <enum-type name="Modifiers"/>
-            <modify-function signature="QWheelEvent(const Qt3DInput::QWheelEvent&amp;)" remove="all"/>
         </object-type>
         <object-type name="QMouseHandler"/>
     </namespace-type>
