@@ -78,7 +78,9 @@
             <enum-type name="DeliveryFlag" flags="DeliveryFlags"/>
         </object-type>
         <object-type name="QSkeleton" since="5.10"/>
-        <object-type name="QSkeletonLoader" since="5.10"/>
+        <object-type name="QSkeletonLoader" since="5.10">
+            <enum-type name="Status"/>
+        </object-type>
         <object-type name="QStaticPropertyUpdatedChangeBase"/>
         <object-type name="QStaticPropertyValueAddedChangeBase"/>
         <object-type name="QStaticPropertyValueRemovedChangeBase"/>

@@ -149,7 +149,6 @@
     </object-type>
     <object-type name="QQmlFileSelector" />
     <object-type name="QQmlImageProviderBase">
-        <modify-function signature="QQmlImageProviderBase()" remove="all"/>
         <enum-type name="Flag" flags="Flags" />
         <enum-type name="ImageType" />
     </object-type>

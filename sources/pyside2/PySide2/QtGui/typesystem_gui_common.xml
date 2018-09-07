@@ -3686,7 +3686,9 @@
       <modify-function signature="borderColor(int*)const" remove="all"/>
       <modify-function signature="borderColor(float*)const" remove="all"/>
   </object-type>
-  <object-type name="QOpenGLTextureBlitter"/>
+  <object-type name="QOpenGLTextureBlitter">
+      <enum-type name="Origin"/>
+  </object-type>
   <object-type name="QOpenGLTimeMonitor" since="5.1"/>
   <object-type name="QOpenGLTimerQuery" since="5.1"/>
   <object-type name="QOpenGLWindow" since="5.4">
