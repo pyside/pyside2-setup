@@ -713,14 +713,18 @@ bool Handler::endElement(const QStringRef &localName)
         break;
     }
 
-    if (m_current->type == StackElement::Root
-        || m_current->type == StackElement::NamespaceTypeEntry
-        || m_current->type == StackElement::InterfaceTypeEntry
-        || m_current->type == StackElement::ObjectTypeEntry
-        || m_current->type == StackElement::ValueTypeEntry
-        || m_current->type == StackElement::PrimitiveTypeEntry) {
-        StackElementContext* context = m_contextStack.pop();
-        delete context;
+    switch (m_current->type) {
+    case StackElement::Root:
+    case StackElement::NamespaceTypeEntry:
+    case StackElement::InterfaceTypeEntry:
+    case StackElement::ObjectTypeEntry:
+    case StackElement::ValueTypeEntry:
+    case StackElement::PrimitiveTypeEntry:
+    case StackElement::TypedefTypeEntry:
+        delete m_contextStack.pop();
+        break;
+    default:
+        break;
     }
 
     StackElement *child = m_current;
