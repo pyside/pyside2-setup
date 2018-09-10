@@ -60,6 +60,28 @@ inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
     return arg;
 }
 
+// A helper for writing C++ return statements for either void ("return;")
+// or some return value ("return value;")
+class returnStatement
+{
+public:
+    explicit returnStatement(QString s) : m_returnValue(std::move(s)) {}
+
+    friend QTextStream &operator<<(QTextStream &s, const returnStatement &r);
+
+private:
+    const QString m_returnValue;
+};
+
+QTextStream &operator<<(QTextStream &s, const returnStatement &r)
+{
+    s << "return";
+    if (!r.m_returnValue.isEmpty())
+        s << ' ' << r.m_returnValue;
+    s << ';';
+    return s;
+}
+
 CppGenerator::CppGenerator()
 {
     // Number protocol structure members names
@@ -752,7 +774,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             << QString::fromLatin1("Pure virtual method '%1::%2' must be implement but was "\
                                    "completely removed on type system.")
                                    .arg(func->ownerClass()->name(), func->minimalSignature());
-        s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+        s << INDENT << returnStatement(defaultReturnExpr) << endl;
         s << '}' << endl << endl;
         return;
     }
@@ -771,7 +793,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
     s << INDENT << "if (PyErr_Occurred())" << endl;
     {
         Indentation indentation(INDENT);
-        s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+        s << INDENT << returnStatement(defaultReturnExpr) << endl;
     }
 
     s << INDENT << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR << "(Shiboken::BindingManager::instance().getOverride(this, \"";
@@ -792,7 +814,9 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << funcName;
             s << "()' not implemented.\");" << endl;
-            s << INDENT << "return " << (retType ? defaultReturnExpr : QString());
+            s << INDENT << "return";
+            if (retType)
+                s << ' ' << defaultReturnExpr;
         } else {
             s << INDENT << "gil.release();" << endl;
             s << INDENT;
@@ -897,7 +921,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_Print();" << endl;
-            s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+            s << INDENT << returnStatement(defaultReturnExpr) << endl;
         }
         s << INDENT << '}' << endl;
 
@@ -919,7 +943,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                                        "\"Invalid return value in function %s, expected %s, got %s.\", \"";
                         s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
                         s << ", Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);" << endl;
-                        s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+                        s << INDENT << returnStatement(defaultReturnExpr) << endl;
                     }
                     s << INDENT << '}' << endl;
 
@@ -940,7 +964,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
                                        "\"Invalid return value in function %s, expected %s, got %s.\", \"";
                         s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
                         s << ", Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);" << endl;
-                        s << INDENT << "return " << defaultReturnExpr << ';' << endl;
+                        s << INDENT << returnStatement(defaultReturnExpr) << endl;
                     }
                     s << INDENT << '}' << endl;
 
@@ -1501,7 +1525,7 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
 
             s << qualifiedCppName << " >()))" << endl;
             Indentation indent(INDENT);
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
+            s << INDENT << returnStatement(m_currentErrorCode) << endl << endl;
         }
         // Declare pointer for the underlying C++ object.
         s << INDENT << "::";
@@ -1602,7 +1626,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
                 s << INDENT << "\"'" << metaClass->qualifiedCppName();
             }
             s << "' represents a C++ abstract class and cannot be instantiated\");" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            s << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
         s << INDENT << '}' << endl << endl;
     }
@@ -1633,7 +1657,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     {
         Indentation indent(INDENT);
         s << INDENT << "delete cptr;" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        s << INDENT << returnStatement(m_currentErrorCode) << endl;
     }
     s << INDENT << '}' << endl;
     if (overloadData.maxArgs() > 0) {
@@ -1666,7 +1690,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
         s << INDENT << "if (kwds && !PySide::fillQtProperties(self, metaObject, kwds, argNames, " << argNamesSet.count() << "))" << endl;
         {
             Indentation indentation(INDENT);
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            s << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
     }
 
@@ -1847,7 +1871,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
             {
                 Indentation indent(INDENT);
                 s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): too many arguments\");" << endl;
-                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                s << INDENT << returnStatement(m_currentErrorCode) << endl;
             }
             s << INDENT << '}';
         }
@@ -1860,7 +1884,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
             {
                 Indentation indent(INDENT);
                 s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): not enough arguments\");" << endl;
-                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                s << INDENT << returnStatement(m_currentErrorCode) << endl;
             }
             s << INDENT << '}';
         }
@@ -1897,7 +1921,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << "))" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        s << INDENT << returnStatement(m_currentErrorCode) << endl;
     }
     s << endl;
 }
@@ -2077,7 +2101,7 @@ void CppGenerator::writeErrorSection(QTextStream& s, OverloadData& overloadData)
               << ", 0};" << endl;
         s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", \"" << funcName << "\", overloads);" << endl;
     }
-    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+    s << INDENT << returnStatement(m_currentErrorCode) << endl;
 }
 
 void CppGenerator::writeFunctionReturnErrorCheckSection(QTextStream& s, bool hasReturnValue)
@@ -2090,7 +2114,7 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(QTextStream& s, bool has
         Indentation indent(INDENT);
         if (hasReturnValue)
             s << INDENT << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        s << INDENT << returnStatement(m_currentErrorCode) << endl;
     }
     s << INDENT << '}' << endl;
 }
@@ -2099,7 +2123,7 @@ void CppGenerator::writeInvalidPyObjectCheck(QTextStream& s, const QString& pyOb
 {
     s << INDENT << "if (!Shiboken::Object::isValid(" << pyObj << "))" << endl;
     Indentation indent(INDENT);
-    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+    s << INDENT << returnStatement(m_currentErrorCode) << endl;
 }
 
 static QString pythonToCppConverterForArgumentName(const QString& argumentName)
@@ -2642,7 +2666,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
         s << INDENT << "PyErr_Format(PyExc_TypeError, \"%s is a private method.\", \""
           << func->signature().replace(QLatin1String("::"), QLatin1String("."))
           << "\");" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        s << INDENT << returnStatement(m_currentErrorCode) << endl;
         return;
     }
 
@@ -2988,7 +3012,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream& s, const AbstractMe
             {
                 Indentation indent(INDENT);
                 s << INDENT << pyErrString.arg(arg->name()) << endl;
-                s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                s << INDENT << returnStatement(m_currentErrorCode) << endl;
             }
             s << INDENT << "} else if (value) {" << endl;
             {
@@ -3068,7 +3092,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             Indentation indent(INDENT);
             s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
             s << func->ownerClass()->name() << '.' << func->name() << "()' not implemented.\");" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            s << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
         s << INDENT << "}\n";
     }
@@ -4388,7 +4412,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, GeneratorContext &co
     }
     s << INDENT << baseName << "_RichComparison_TypeError:" << endl;
     s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"operator not implemented.\");" << endl;
-    s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
+    s << INDENT << returnStatement(m_currentErrorCode) << endl << endl;
     s << '}' << endl << endl;
 }
 
@@ -4548,7 +4572,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
         s << INDENT << "if (!" << cpythonTypeNameExt(cppEnum->typeEntry()) << ')' << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl << endl;
+            s << INDENT << returnStatement(m_currentErrorCode) << endl << endl;
         }
     }
 
@@ -4581,7 +4605,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                         << "))->tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
                     {
                         Indentation indent(INDENT);
-                        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                        s << INDENT << returnStatement(m_currentErrorCode) << endl;
                     }
                     s << INDENT << "Py_DECREF(anonEnumItem);" << endl;
                 }
@@ -4591,7 +4615,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
                 s << enumValueText << ") < 0)" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+                    s << INDENT << returnStatement(m_currentErrorCode) << endl;
                 }
             }
             break;
@@ -4602,7 +4626,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             Indentation indent(INDENT);
             s << INDENT << enclosingObjectVariable << ", \"" << enumValue->name() << "\", ";
             s << enumValueText << "))" << endl;
-            s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+            s << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
             break;
         case EnumClass: {
@@ -4611,7 +4635,7 @@ void CppGenerator::writeEnumInitialization(QTextStream& s, const AbstractMetaEnu
             Indentation indent(INDENT);
             s << INDENT << enumVarTypeObj<< ", \"" << enumValue->name() << "\", "
                << enumValueText << "))" << endl
-               << INDENT << "return " << m_currentErrorCode << ';' << endl;
+               << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
             break;
         }
@@ -5835,7 +5859,7 @@ void CppGenerator::writeIndexError(QTextStream& s, const QString& errorMsg)
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_IndexError, \"" << errorMsg << "\");" << endl;
-        s << INDENT << "return " << m_currentErrorCode << ';' << endl;
+        s << INDENT << returnStatement(m_currentErrorCode) << endl;
     }
     s << INDENT << '}' << endl;
 }
