@@ -578,7 +578,11 @@ bool SignalManager::registerMetaMethod(QObject* source, const char* signature, Q
 
 int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signature, QMetaMethod::MethodType type)
 {
-    Q_ASSERT(source);
+    if (!source) {
+        qWarning("SignalManager::registerMetaMethodGetIndex(\"%s\") called with source=nullptr.",
+                 signature);
+        return -1;
+    }
     const QMetaObject* metaObject = source->metaObject();
     int methodIndex = metaObject->indexOfMethod(signature);
     // Create the dynamic signal is needed
