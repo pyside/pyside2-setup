@@ -2653,30 +2653,37 @@ QString  ShibokenGenerator::getDefaultValue(const AbstractMetaFunction* func, co
 
 void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const AbstractMetaType* type, const QString& defaultCtor)
 {
-    if (defaultCtor.isEmpty() && isCppPrimitive(type))
+    if (!defaultCtor.isEmpty()) {
+         s << " = " << defaultCtor;
+         return;
+    }
+    if (isCppPrimitive(type))
         return;
-    QString ctor = defaultCtor.isEmpty() ? minimalConstructor(type) : defaultCtor;
-    if (ctor.isEmpty()) {
+    const auto ctor = minimalConstructor(type);
+    if (ctor.isValid()) {
+        s << ctor.initialization();
+    } else {
         const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->cppSignature());
         qCWarning(lcShiboken()).noquote() << message;
         s << ";\n#error " << message << '\n';
-    } else {
-        s << " = " << ctor;
     }
 }
 
 void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const TypeEntry* type, const QString& defaultCtor)
 {
-    if (defaultCtor.isEmpty() && isCppPrimitive(type))
+    if (!defaultCtor.isEmpty()) {
+         s << " = " << defaultCtor;
+         return;
+    }
+    if (isCppPrimitive(type))
         return;
-    QString ctor = defaultCtor.isEmpty() ? minimalConstructor(type) : defaultCtor;
-
-    if (ctor.isEmpty()) {
+    const auto ctor = minimalConstructor(type);
+    if (ctor.isValid()) {
+        s << ctor.initialization();
+    } else {
         const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->qualifiedCppName());
         qCWarning(lcShiboken()).noquote() << message;
         s << ";\n#error " << message << endl;
-    } else {
-        s << " = " << ctor;
     }
 }
 

@@ -95,6 +95,41 @@ const int alwaysGenerateDestructor = 1;
 const int alwaysGenerateDestructor = 0;
 #endif
 
+class DefaultValue
+{
+public:
+    enum Type
+    {
+        Error,
+        Boolean,
+        CppScalar, // A C++ scalar type (int,..) specified by value()
+        Custom, // A custom constructor/expression, uses value() as is
+        DefaultConstructor, // For classes named value()
+        Enum, // Enum value as specified by value()
+        Pointer, // Pointer of type value()
+        Void  // "", for return values only
+    };
+
+    explicit DefaultValue(Type t = Error, QString value = QString());
+    explicit DefaultValue(QString customValue);
+
+    bool isValid() const { return m_type != Error; }
+
+    QString returnValue() const;
+    QString initialization() const;
+    QString constructorParameter() const;
+
+    QString value() const { return m_value; }
+    void setValue(const QString &value) { m_value = value; }
+
+    Type type() const { return m_type; }
+    void setType(Type type) { m_type = type; }
+
+private:
+    Type m_type;
+    QString m_value;
+};
+
 /**
  * A GeneratorContext object contains a pointer to an AbstractMetaClass and/or a specialized
  * AbstractMetaType, for which code is currently being generated.
@@ -330,9 +365,9 @@ protected:
      *   It will check first for a user defined default constructor.
      *   Returns a null string if it fails.
      */
-    QString minimalConstructor(const TypeEntry* type) const;
-    QString minimalConstructor(const AbstractMetaType* type) const;
-    QString minimalConstructor(const AbstractMetaClass* metaClass) const;
+    DefaultValue minimalConstructor(const TypeEntry* type) const;
+    DefaultValue minimalConstructor(const AbstractMetaType* type) const;
+    DefaultValue minimalConstructor(const AbstractMetaClass* metaClass) const;
 
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass/Type.

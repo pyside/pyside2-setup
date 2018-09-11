@@ -40,6 +40,106 @@
 #include <QDebug>
 #include <typedatabase.h>
 
+/**
+ * DefaultValue is used for storing default values of types for which code is
+ * generated in different contexts:
+ *
+ * Context             | Example: "Class *"            | Example: "Class" with default Constructor
+ * --------------------+-------------------------------+------------------------------------------
+ * Variable            |  var{nullptr};                | var;
+ * initializations     |                               |
+ * --------------------+-------------------------------+------------------------------------------
+ * Return values       | return nullptr;               | return {}
+ * --------------------+-------------------------------+------------------------------------------
+ * constructor         | static_cast<Class *>(nullptr) | Class()
+ * arguments lists     |                               |
+ * (recursive, precise |                               |
+ * matching).          |                               |
+ */
+
+DefaultValue::DefaultValue(Type t, QString value) :
+    m_type(t), m_value(std::move(value))
+{
+}
+
+DefaultValue::DefaultValue(QString customValue) :
+    m_type(Custom), m_value(std::move(customValue))
+{
+}
+
+QString DefaultValue::returnValue() const
+{
+    switch (m_type) {
+    case DefaultValue::Error:
+        return QLatin1String("#error");
+    case DefaultValue::Boolean:
+        return QLatin1String("false");
+    case DefaultValue::CppScalar:
+        return QLatin1String("0");
+    case DefaultValue::Custom:
+    case DefaultValue::Enum:
+        return m_value;
+    case DefaultValue::Pointer:
+        return QLatin1String("nullptr");
+    case DefaultValue::Void:
+        return QString();
+    case DefaultValue::DefaultConstructor:
+        break;
+    }
+    return QLatin1String("{}");
+}
+
+QString DefaultValue::initialization() const
+{
+    switch (m_type) {
+    case DefaultValue::Error:
+        return QLatin1String("#error");
+    case DefaultValue::Boolean:
+        return QLatin1String("{false}");
+    case DefaultValue::CppScalar:
+        return QLatin1String("{0}");
+    case DefaultValue::Custom:
+        return QLatin1String(" = ") + m_value;
+    case DefaultValue::Enum:
+        return QLatin1Char('{') + m_value + QLatin1Char('}');
+    case DefaultValue::Pointer:
+        return QLatin1String("{nullptr}");
+    case DefaultValue::Void:
+        Q_ASSERT(false);
+        break;
+    case DefaultValue::DefaultConstructor:
+        break;
+    }
+    return QString();
+}
+
+QString DefaultValue::constructorParameter() const
+{
+    switch (m_type) {
+    case DefaultValue::Error:
+        return QLatin1String("#error");
+    case DefaultValue::Boolean:
+        return QLatin1String("false");
+    case DefaultValue::CppScalar:
+        return m_value + QLatin1String("(0)");
+    case DefaultValue::Custom:
+    case DefaultValue::Enum:
+        return m_value;
+    case DefaultValue::Pointer:
+        // Be precise here to be able to differentiate between constructors
+        // taking different pointer types, cf
+        // QTreeWidgetItemIterator(QTreeWidget *) and
+        // QTreeWidgetItemIterator(QTreeWidgetItemIterator *).
+        return QLatin1String("static_cast<") + m_value + QLatin1String("*>(nullptr)");
+    case DefaultValue::Void:
+        Q_ASSERT(false);
+        break;
+    case DefaultValue::DefaultConstructor:
+        break;
+    }
+    return m_value + QLatin1String("()");
+}
+
 struct Generator::GeneratorPrivate
 {
     const ApiExtractor* apiextractor = nullptr;
@@ -560,63 +660,72 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type)
     return QLatin1String("::") + typeName;
 }
 
-QString Generator::minimalConstructor(const AbstractMetaType* type) const
+DefaultValue Generator::minimalConstructor(const AbstractMetaType* type) const
 {
     if (!type || (type->referenceType() ==  LValueReference && Generator::isObjectType(type)))
-        return QString();
+        return DefaultValue(DefaultValue::Error);
 
     if (type->isContainer()) {
         QString ctor = type->cppSignature();
-        if (ctor.endsWith(QLatin1Char('*')))
-            return QLatin1String("0");
+        if (ctor.endsWith(QLatin1Char('*'))) {
+            ctor.chop(1);
+            return DefaultValue(DefaultValue::Pointer, ctor.trimmed());
+        }
         if (ctor.startsWith(QLatin1String("const ")))
             ctor.remove(0, sizeof("const ") / sizeof(char) - 1);
         if (ctor.endsWith(QLatin1Char('&'))) {
             ctor.chop(1);
             ctor = ctor.trimmed();
         }
-        return QLatin1String("::") + ctor + QLatin1String("()");
+        return DefaultValue(DefaultValue::DefaultConstructor, QLatin1String("::") + ctor);
     }
 
     if (type->isNativePointer())
-        return QLatin1String("static_cast<") + type->typeEntry()->qualifiedCppName() + QLatin1String(" *>(0)");
+        return DefaultValue(DefaultValue::Pointer, type->typeEntry()->qualifiedCppName());
     if (Generator::isPointer(type))
-        return QLatin1String("static_cast< ::") + type->typeEntry()->qualifiedCppName() + QLatin1String(" *>(0)");
+        return DefaultValue(DefaultValue::Pointer, QLatin1String("::") + type->typeEntry()->qualifiedCppName());
 
     if (type->typeEntry()->isComplex()) {
         const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(type->typeEntry());
-        QString ctor = cType->defaultConstructor();
-        if (!ctor.isEmpty())
-            return ctor;
-        ctor = minimalConstructor(AbstractMetaClass::findClass(classes(), cType));
-        if (type->hasInstantiations())
-            ctor = ctor.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
+        if (cType->hasDefaultConstructor())
+            return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
+        auto ctor = minimalConstructor(AbstractMetaClass::findClass(classes(), cType));
+        if (ctor.isValid() && type->hasInstantiations()) {
+            QString v = ctor.value();
+            v.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
+            ctor.setValue(v);
+        }
         return ctor;
     }
 
     return minimalConstructor(type->typeEntry());
 }
 
-QString Generator::minimalConstructor(const TypeEntry* type) const
+DefaultValue Generator::minimalConstructor(const TypeEntry* type) const
 {
     if (!type)
-        return QString();
+        return DefaultValue(DefaultValue::Error);
 
     if (type->isCppPrimitive()) {
         const QString &name = type->qualifiedCppName();
         return name == QLatin1String("bool")
-            ? QLatin1String("false") : name + QLatin1String("(0)");
+            ? DefaultValue(DefaultValue::Boolean)
+            : DefaultValue(DefaultValue::CppScalar, name);
     }
 
     if (type->isEnum()) {
         const auto enumEntry = static_cast<const EnumTypeEntry *>(type);
         if (const auto *nullValue = enumEntry->nullValue())
-            return nullValue->name();
-        return QLatin1String("static_cast< ::") + type->qualifiedCppName() + QLatin1String(">(0)");
+            return DefaultValue(DefaultValue::Enum, nullValue->name());
+        return DefaultValue(DefaultValue::Custom,
+                            QLatin1String("static_cast< ::") + type->qualifiedCppName()
+                            + QLatin1String(">(0)"));
     }
 
-    if (type->isFlags())
-        return type->qualifiedCppName() + QLatin1String("(0)");
+    if (type->isFlags()) {
+        return DefaultValue(DefaultValue::Custom,
+                            type->qualifiedCppName() + QLatin1String("(0)"));
+    }
 
     if (type->isPrimitive()) {
         QString ctor = static_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
@@ -625,24 +734,31 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
         // heuristically returned. If this is wrong the build of the generated
         // bindings will tell.
         return ctor.isEmpty()
-            ? (QLatin1String("::") + type->qualifiedCppName() + QLatin1String("()"))
-            : ctor;
+            ? DefaultValue(DefaultValue::DefaultConstructor, QLatin1String("::")
+                           + type->qualifiedCppName())
+            : DefaultValue(DefaultValue::Custom, ctor);
     }
 
     if (type->isComplex())
         return minimalConstructor(AbstractMetaClass::findClass(classes(), type));
 
-    return QString();
+    return DefaultValue(DefaultValue::Error);
 }
 
-QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
+static QString constructorCall(const QString &qualifiedCppName, const QStringList &args)
+{
+    return QLatin1String("::") + qualifiedCppName + QLatin1Char('(')
+        + args.join(QLatin1String(", ")) + QLatin1Char(')');
+}
+
+DefaultValue Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
 {
     if (!metaClass)
-        return QString();
+        return DefaultValue(DefaultValue::Error);
 
     const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(metaClass->typeEntry());
     if (cType->hasDefaultConstructor())
-        return cType->defaultConstructor();
+        return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
 
     const AbstractMetaFunctionList &constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     int maxArgs = 0;
@@ -667,7 +783,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
 
     // Empty constructor.
     if (maxArgs == 0)
-        return QLatin1String("::") + qualifiedCppName + QLatin1String("()");
+        return DefaultValue(DefaultValue::DefaultConstructor, QLatin1String("::") + qualifiedCppName);
 
     QVector<const AbstractMetaFunction *> candidates;
 
@@ -699,12 +815,12 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
                 }
 
                 if (type->isCppPrimitive() || type->isEnum() || isPointer(arg->type())) {
-                    QString argValue = minimalConstructor(arg->type());
-                    if (argValue.isEmpty()) {
+                    auto argValue = minimalConstructor(arg->type());
+                    if (!argValue.isValid()) {
                         args.clear();
                         break;
                     }
-                    args << argValue;
+                    args << argValue.constructorParameter();
                 } else {
                     args.clear();
                     break;
@@ -712,7 +828,7 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
             }
 
             if (!args.isEmpty())
-                return QString::fromLatin1("::%1(%2)").arg(qualifiedCppName, args.join(QLatin1String(", ")));
+                return DefaultValue(DefaultValue::Custom, constructorCall(qualifiedCppName, args));
 
             candidates << ctor;
         }
@@ -729,19 +845,18 @@ QString Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
                 args.clear();
                 break;
             }
-            QString argValue = minimalConstructor(arg->type());
-            if (argValue.isEmpty()) {
+            auto argValue = minimalConstructor(arg->type());
+            if (!argValue.isValid()) {
                 args.clear();
                 break;
             }
-            args << argValue;
+            args << argValue.constructorParameter();
         }
-        if (!args.isEmpty()) {
-            return QString::fromLatin1("::%1(%2)").arg(qualifiedCppName, args.join(QLatin1String(", ")));
-        }
+        if (!args.isEmpty())
+            return DefaultValue(DefaultValue::Custom, constructorCall(qualifiedCppName, args));
     }
 
-    return QString();
+    return DefaultValue(DefaultValue::Error);
 }
 
 QString Generator::translateType(const AbstractMetaType *cType,
