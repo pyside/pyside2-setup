@@ -608,8 +608,12 @@ QString Generator::minimalConstructor(const TypeEntry* type) const
             ? QLatin1String("false") : name + QLatin1String("(0)");
     }
 
-    if (type->isEnum())
+    if (type->isEnum()) {
+        const auto enumEntry = static_cast<const EnumTypeEntry *>(type);
+        if (const auto *nullValue = enumEntry->nullValue())
+            return nullValue->name();
         return QLatin1String("static_cast< ::") + type->qualifiedCppName() + QLatin1String(">(0)");
+    }
 
     if (type->isFlags())
         return type->qualifiedCppName() + QLatin1String("(0)");

@@ -1067,6 +1067,8 @@ private:
     PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
 };
 
+class EnumValueTypeEntry;
+
 class EnumTypeEntry : public TypeEntry
 {
 public:
@@ -1087,6 +1089,9 @@ public:
     {
         m_qualifier = q;
     }
+
+    const EnumValueTypeEntry *nullValue() const { return m_nullValue; }
+    void setNullValue(const EnumValueTypeEntry *n) { m_nullValue = n; }
 
     void setFlags(FlagsTypeEntry *flags)
     {
@@ -1121,6 +1126,7 @@ private:
     QString m_packageName;
     QString m_qualifier;
     QString m_targetLangName;
+    const EnumValueTypeEntry *m_nullValue = nullptr;
 
     QStringList m_rejectedEnums;
 

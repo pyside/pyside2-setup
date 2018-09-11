@@ -960,6 +960,15 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     metaEnum->setOriginalAttributes(metaEnum->attributes());
 
     // Register all enum values on Type database
+    QString prefix;
+    if (enclosing) {
+        prefix += enclosing->typeEntry()->qualifiedCppName();
+        prefix += colonColon();
+    }
+    if (enumItem->enumKind() == EnumClass) {
+        prefix += enumItem->name();
+        prefix += colonColon();
+    }
     const EnumeratorList &enumerators = enumItem->enumerators();
     for (const EnumeratorModelItem &e : enumerators) {
         QString name;
@@ -967,11 +976,12 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
             name += enclosing->name();
             name += colonColon();
         }
-        name += e->name();
         EnumValueTypeEntry *enumValue =
-            new EnumValueTypeEntry(name, e->stringValue(),
+            new EnumValueTypeEntry(prefix + e->name(), e->stringValue(),
                                    enumTypeEntry, enumTypeEntry->version());
         TypeDatabase::instance()->addType(enumValue);
+        if (e->value().isNullValue())
+            enumTypeEntry->setNullValue(enumValue);
     }
 
     return metaEnum;
