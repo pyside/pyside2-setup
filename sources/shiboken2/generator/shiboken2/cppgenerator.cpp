@@ -3173,7 +3173,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             bool argsClear = true;
             for (int i = func->arguments().size() - 1; i >= maxArgs + removedArgs; i--) {
                 const AbstractMetaArgument* arg = func->arguments().at(i);
-                bool defValModified = arg->defaultValueExpression() != arg->originalDefaultValueExpression();
+                const bool defValModified = arg->hasModifiedDefaultValueExpression();
                 bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
                 if (argsClear && !defValModified && !hasConversionRule)
                     continue;

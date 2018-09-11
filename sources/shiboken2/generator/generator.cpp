@@ -760,99 +760,50 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass* metaClass) c
     if (cType->hasDefaultConstructor())
         return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
 
+    const QString qualifiedCppName = cType->qualifiedCppName();
+    // Obtain a list of constructors sorted by complexity and number of arguments
+    QMultiMap<int, const AbstractMetaFunction *> candidates;
     const AbstractMetaFunctionList &constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-    int maxArgs = 0;
     for (const AbstractMetaFunction *ctor : constructors) {
-        if (ctor->isUserAdded() || ctor->isPrivate() || ctor->functionType() != AbstractMetaFunction::ConstructorFunction)
-            continue;
-
-        int numArgs = ctor->arguments().size();
-        if (numArgs == 0) {
-            maxArgs = 0;
-            break;
-        }
-        if (numArgs > maxArgs)
-            maxArgs = numArgs;
-    }
-
-    QString qualifiedCppName = metaClass->typeEntry()->qualifiedCppName();
-    QStringList templateTypes;
-    const QVector<TypeEntry *> &templateArguments = metaClass->templateArguments();
-    for (TypeEntry *templateType : templateArguments)
-        templateTypes << templateType->qualifiedCppName();
-
-    // Empty constructor.
-    if (maxArgs == 0)
-        return DefaultValue(DefaultValue::DefaultConstructor, QLatin1String("::") + qualifiedCppName);
-
-    QVector<const AbstractMetaFunction *> candidates;
-
-    // Constructors with C++ primitive types, enums or pointers only.
-    // Start with the ones with fewer arguments.
-    for (int i = 1; i <= maxArgs; ++i) {
-        for (const AbstractMetaFunction *ctor : constructors) {
-            if (ctor->isUserAdded() || ctor->isPrivate() || ctor->functionType() != AbstractMetaFunction::ConstructorFunction)
-                continue;
-
-            const AbstractMetaArgumentList &arguments = ctor->arguments();
-            if (arguments.size() != i)
-                continue;
-
-            QStringList args;
-            for (const AbstractMetaArgument *arg : arguments) {
-                const TypeEntry* type = arg->type()->typeEntry();
-                if (type == metaClass->typeEntry()) {
-                    args.clear();
-                    break;
-                }
-
-                if (!arg->originalDefaultValueExpression().isEmpty()) {
-                    if (!arg->defaultValueExpression().isEmpty()
-                        && arg->defaultValueExpression() != arg->originalDefaultValueExpression()) {
-                        args << arg->defaultValueExpression();
-                    }
-                    break;
-                }
-
-                if (type->isCppPrimitive() || type->isEnum() || isPointer(arg->type())) {
-                    auto argValue = minimalConstructor(arg->type());
-                    if (!argValue.isValid()) {
-                        args.clear();
-                        break;
-                    }
-                    args << argValue.constructorParameter();
-                } else {
-                    args.clear();
-                    break;
-                }
+        if (!ctor->isUserAdded() && !ctor->isPrivate()
+            && ctor->functionType() == AbstractMetaFunction::ConstructorFunction) {
+            // No arguments: Default constructible
+            const auto &arguments = ctor->arguments();
+            if (arguments.isEmpty()) {
+                return DefaultValue(DefaultValue::DefaultConstructor,
+                                    QLatin1String("::") + qualifiedCppName);
             }
-
-            if (!args.isEmpty())
-                return DefaultValue(DefaultValue::Custom, constructorCall(qualifiedCppName, args));
-
-            candidates << ctor;
+            // Examine arguments, exclude functions taking a self parameter
+            bool simple = true;
+            bool suitable = true;
+            for (int i = 0, size = arguments.size();
+                 suitable && i < size && !arguments.at(i)->hasDefaultValueExpression(); ++i) {
+                const AbstractMetaArgument *arg = arguments.at(i);
+                const TypeEntry *aType = arg->type()->typeEntry();
+                suitable &= aType != cType;
+                simple &= aType->isCppPrimitive() || aType->isEnum() || isPointer(arg->type());
+            }
+            if (suitable)
+                candidates.insert(arguments.size() + (simple ? 0 : 100), ctor);
         }
     }
 
-    // Constructors with C++ primitive types, enums, pointers, value types,
-    // and user defined primitive types.
-    // Builds the minimal constructor recursively.
-    for (const AbstractMetaFunction *ctor : qAsConst(candidates)) {
+    for (auto it = candidates.cbegin(), end = candidates.cend(); it != end; ++it) {
+        const AbstractMetaArgumentList &arguments = it.value()->arguments();
         QStringList args;
-        const AbstractMetaArgumentList &arguments = ctor->arguments();
-        for (const AbstractMetaArgument *arg : arguments) {
-            if (arg->type()->typeEntry() == metaClass->typeEntry()) {
-                args.clear();
+        bool ok = true;
+        for (int i =0, size = arguments.size(); ok && i < size; ++i) {
+            const AbstractMetaArgument *arg = arguments.at(i);
+            if (arg->hasDefaultValueExpression()) {
+                if (arg->hasModifiedDefaultValueExpression())
+                    args << arg->defaultValueExpression(); // Spell out modified values
                 break;
             }
             auto argValue = minimalConstructor(arg->type());
-            if (!argValue.isValid()) {
-                args.clear();
-                break;
-            }
+            ok &= argValue.isValid();
             args << argValue.constructorParameter();
         }
-        if (!args.isEmpty())
+        if (ok)
             return DefaultValue(DefaultValue::Custom, constructorCall(qualifiedCppName, args));
     }
 

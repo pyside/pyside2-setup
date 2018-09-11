@@ -2380,7 +2380,10 @@
     </modify-function>
   </object-type>
 
-  <value-type name="QMatrix2x2" since="4.6">
+  <!-- The matrix classes need a default constructor specification since
+       they inherit template class QGenericMatrix<int, int, Type> with (unsupported)
+       non-type template parameters -->
+  <value-type name="QMatrix2x2" since="4.6" default-constructor="QMatrix2x2()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2468,7 +2471,7 @@
     <add-function signature="operator==(const QMatrix2x2&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix2x3" since="4.6">
+  <value-type name="QMatrix2x3" since="4.6" default-constructor="QMatrix2x3()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2538,7 +2541,7 @@
     <add-function signature="operator==(const QMatrix2x3&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix2x4" since="4.6">
+  <value-type name="QMatrix2x4" since="4.6" default-constructor="QMatrix2x4()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2608,7 +2611,7 @@
     <add-function signature="operator==(const QMatrix2x4&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix3x2" since="4.6">
+  <value-type name="QMatrix3x2" since="4.6" default-constructor="QMatrix3x2()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2678,7 +2681,7 @@
     <add-function signature="operator==(const QMatrix3x2&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix3x3" since="4.6">
+  <value-type name="QMatrix3x3" since="4.6" default-constructor="QMatrix3x3()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2748,7 +2751,7 @@
     <add-function signature="operator==(const QMatrix3x3&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix3x4" since="4.6">
+  <value-type name="QMatrix3x4" since="4.6" default-constructor="QMatrix3x4()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2818,7 +2821,7 @@
     <add-function signature="operator==(const QMatrix3x4&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix4x2" since="4.6">
+  <value-type name="QMatrix4x2" since="4.6" default-constructor="QMatrix4x2()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2888,7 +2891,7 @@
     <add-function signature="operator==(const QMatrix4x2&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix4x3" since="4.6">
+  <value-type name="QMatrix4x3" since="4.6" default-constructor="QMatrix4x3()">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2958,7 +2961,7 @@
     <add-function signature="operator==(const QMatrix4x3&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix4x4" since="4.6">
+  <value-type name="QMatrix4x4" since="4.6" default-constructor="QMatrix4x4()">
 
 
     <!-- Qt5: HAIRY TRICK ALERT ahead!

@@ -668,6 +668,13 @@ public:
         m_originalExpression = expr;
     }
 
+    bool hasDefaultValueExpression() const
+    { return !m_originalExpression.isEmpty() || !m_expression.isEmpty(); }
+    bool hasUnmodifiedDefaultValueExpression() const
+    { return !m_originalExpression.isEmpty() && m_originalExpression == m_expression; }
+    bool hasModifiedDefaultValueExpression() const
+    { return !m_expression.isEmpty() && m_originalExpression != m_expression; }
+
     QString toString() const
     {
         return type()->name() + QLatin1Char(' ') + AbstractMetaVariable::name() +
