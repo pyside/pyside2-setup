@@ -4402,7 +4402,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="unhandled enum value: (sizeof(void*)&lt;&lt;3) in QSysInfo::Sizes"/>
   <suppress-warning text="unmatched enum ~0u"/>
   <suppress-warning text="unmatched enum (sizeof(void*)&lt;&lt;3)"/>
-  <suppress-warning text="signature 'setCustomType(float)' for function modification in 'QEasingCurve' not found. Possible candidates: setCustomType(double) in QEasingCurve"/>
+  <suppress-warning text="^signature 'setCustomType(float)' for function modification in 'QEasingCurve' not found.*$"/>
   <suppress-warning text="enum 'enum_4' does not have a type entry or is not an enum" />
   <suppress-warning text="enum 'enum_5' does not have a type entry or is not an enum" />
   <suppress-warning text="enum 'FP_NORMAL' does not have a type entry or is not an enum" />
@@ -4412,11 +4412,11 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="enum 'PM_MessageBoxHeight' does not have a type entry or is not an enum" />
 
   <!-- this function only exists on Windows -->
-  <suppress-warning text="signature 'winEventFilter(MSG*,long*)' for function modification in 'QCoreApplication' not found. Possible candidates:*"/>
+  <suppress-warning text="^signature 'winEventFilter(MSG*,long*)' for function modification in 'QCoreApplication' not found.*"/>
 
   <!-- this is necessary to avoid warning on other modules -->
-  <suppress-warning text="signature 'operator*(QByteArray,const char*)' for function modification in 'QByteArray' not found. Possible candidates:*"/>
-  <suppress-warning text="signature 'operator+(QByteArray,QString)' for function modification in 'QByteArray' not found. Possible candidates:*"/>
+  <suppress-warning text="^signature 'operator*(QByteArray,const char*)' for function modification in 'QByteArray' not found.*"/>
+  <suppress-warning text="^signature 'operator+(QByteArray,QString)' for function modification in 'QByteArray' not found.*"/>
 
   <!-- This enum is intenaly used -->
   <suppress-warning text="enum 'PM_CbaIconHeight' does not have a type entry or is not an enum" />

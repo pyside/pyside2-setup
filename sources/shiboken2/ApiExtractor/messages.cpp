@@ -55,15 +55,17 @@ QString msgNoFunctionForModification(const QString &signature,
         str << " (specified as '" << originalSignature << "')";
     str << " for function modification in '"
         << className << "' not found.";
-    if (possibleSignatures.isEmpty()) {
-        str << " No candidates were found. Member functions: ";
-        for (int f = 0, size = allFunctions.size(); f < size; ++f) {
-            if (f)
-                str << ", ";
-            str << allFunctions.at(f)->minimalSignature();
-        }
-    } else {
-        str << " Possible candidates: " << possibleSignatures.join(QLatin1String(", "));
+    if (!possibleSignatures.isEmpty()) {
+        str << "\n  Possible candidates:\n";
+        for (const auto &s : possibleSignatures)
+            str << "    " << s << '\n';
+    } else if (!allFunctions.isEmpty()) {
+        str << "\n  No candidates were found. Member functions:\n";
+        const int maxCount = qMin(10, allFunctions.size());
+        for (int f = 0; f < maxCount; ++f)
+            str << "    " << allFunctions.at(f)->minimalSignature() << '\n';
+        if (maxCount < allFunctions.size())
+            str << "    ...\n";
     }
     return result;
 }
