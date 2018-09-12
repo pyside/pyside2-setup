@@ -325,7 +325,7 @@ void SignalManager::globalReceiverDisconnectNotify(QObject* source, int slotInde
 
 void SignalManager::addGlobalSlot(const char* slot, PyObject* callback)
 {
-    addGlobalSlotGetIndex(slot, callback);
+    m_d->m_globalReceiver.addSlot(slot, callback);
 }
 
 int SignalManager::addGlobalSlotGetIndex(const char* slot, PyObject* callback)
