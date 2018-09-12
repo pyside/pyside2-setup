@@ -105,6 +105,7 @@ public:
         CppScalar, // A C++ scalar type (int,..) specified by value()
         Custom, // A custom constructor/expression, uses value() as is
         DefaultConstructor, // For classes named value()
+        DefaultConstructorWithDefaultValues, // as DefaultConstructor, but can't return {} though.
         Enum, // Enum value as specified by value()
         Pointer, // Pointer of type value()
         Void  // "", for return values only

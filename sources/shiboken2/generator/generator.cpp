@@ -83,6 +83,8 @@ QString DefaultValue::returnValue() const
         return QLatin1String("nullptr");
     case DefaultValue::Void:
         return QString();
+    case DefaultValue::DefaultConstructorWithDefaultValues:
+        return m_value + QLatin1String("()");
     case DefaultValue::DefaultConstructor:
         break;
     }
@@ -108,6 +110,7 @@ QString DefaultValue::initialization() const
         Q_ASSERT(false);
         break;
     case DefaultValue::DefaultConstructor:
+    case DefaultValue::DefaultConstructorWithDefaultValues:
         break;
     }
     return QString();
@@ -135,6 +138,7 @@ QString DefaultValue::constructorParameter() const
         Q_ASSERT(false);
         break;
     case DefaultValue::DefaultConstructor:
+    case DefaultValue::DefaultConstructorWithDefaultValues:
         break;
     }
     return m_value + QLatin1String("()");
@@ -734,7 +738,7 @@ DefaultValue Generator::minimalConstructor(const TypeEntry* type) const
         // heuristically returned. If this is wrong the build of the generated
         // bindings will tell.
         return ctor.isEmpty()
-            ? DefaultValue(DefaultValue::DefaultConstructor, QLatin1String("::")
+            ? DefaultValue(DefaultValue::DefaultConstructorWithDefaultValues, QLatin1String("::")
                            + type->qualifiedCppName())
             : DefaultValue(DefaultValue::Custom, ctor);
     }
@@ -771,6 +775,11 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass* metaClass) c
             const auto &arguments = ctor->arguments();
             if (arguments.isEmpty()) {
                 return DefaultValue(DefaultValue::DefaultConstructor,
+                                    QLatin1String("::") + qualifiedCppName);
+            }
+            // First argument has unmodified default: Default constructible with values
+            if (arguments.constFirst()->hasUnmodifiedDefaultValueExpression()) {
+                return DefaultValue(DefaultValue::DefaultConstructorWithDefaultValues,
                                     QLatin1String("::") + qualifiedCppName);
             }
             // Examine arguments, exclude functions taking a self parameter
