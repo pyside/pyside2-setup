@@ -207,8 +207,9 @@ GlobalReceiver::~GlobalReceiver()
 
 void GlobalReceiver::connectNotify(QObject* source, int slotId)
 {
-    if (m_slotReceivers.contains(slotId)) {
-        DynamicSlotData* data = m_slotReceivers[slotId];
+    const auto it = m_slotReceivers.constFind(slotId);
+    if (it != m_slotReceivers.cend()) {
+        DynamicSlotData* data = it.value();
         if (!data->hasRefTo(source))
             QObject::connect(source, SIGNAL(destroyed(QObject*)), this, "1" RECEIVER_DESTROYED_SLOT_NAME);
         data->addRef(source);
@@ -217,8 +218,9 @@ void GlobalReceiver::connectNotify(QObject* source, int slotId)
 
 void GlobalReceiver::disconnectNotify(QObject* source, int slotId)
 {
-   if (m_slotReceivers.contains(slotId)) {
-        DynamicSlotData *data = m_slotReceivers[slotId];
+    const auto it = m_slotReceivers.constFind(slotId);
+    if (it != m_slotReceivers.cend()) {
+        DynamicSlotData* data = it.value();
         data->decRef(source);
         if (data->refCount() == 0)
             removeSlot(slotId);
@@ -237,7 +239,7 @@ int GlobalReceiver::addSlot(const char* slot, PyObject* callback)
 {
     int slotId = m_metaObject.addSlot(slot);
     if (!m_slotReceivers.contains(slotId))
-        m_slotReceivers[slotId] = new DynamicSlotData(slotId, callback, this);
+        m_slotReceivers.insert(slotId, new DynamicSlotData(slotId, callback, this));
 
     bool isShortCircuit = true;
     for (int i = 0; slot[i]; ++i) {
@@ -256,8 +258,10 @@ int GlobalReceiver::addSlot(const char* slot, PyObject* callback)
 
 void GlobalReceiver::removeSlot(int slotId)
 {
-    if (m_slotReceivers.contains(slotId)) {
-        delete m_slotReceivers.take(slotId);
+    auto it = m_slotReceivers.find(slotId);
+    if (it != m_slotReceivers.end()) {
+        delete it.value();
+        m_slotReceivers.erase(it);
         m_metaObject.removeSlot(slotId);
         m_shortCircuitSlots.remove(slotId);
     }

@@ -155,9 +155,8 @@ PyObject* DynamicSlotDataV2::callback()
 
 int DynamicSlotDataV2::id(const char* signature) const
 {
-    if (m_signatures.contains(signature))
-        return m_signatures[signature];
-    return -1;
+    const auto it = m_signatures.constFind(signature);
+    return it != m_signatures.cend() ? it.value() : -1;
 }
 
 int DynamicSlotDataV2::addSlot(const char* signature)
