@@ -1875,13 +1875,6 @@
         </inject-code>
     </modify-function>
 
-    <!-- use glue code -->
-    <modify-function signature="drawItems(QPainter*,int,QGraphicsItem**,const QStyleOptionGraphicsItem*,QWidget*)">
-        <modify-argument index="2">
-            <remove-argument/>
-        </modify-argument>
-    </modify-function>
-
     <modify-function signature="clear()">
         <inject-code>
             const QList&lt;QGraphicsItem*> items = %CPPSELF.items();

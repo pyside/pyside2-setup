@@ -1040,11 +1040,6 @@
     <enum-type name="WindowType" flags="WindowFlags"/>
     <enum-type name="CursorMoveStyle" since="4.8" revision="4800"/>
 
-   <!--### These functions are part of QtGui, not QtCore -->
-    <modify-function signature="codecForHtml(const QByteArray&amp;)" remove="all"/>
-    <modify-function signature="mightBeRichText(const QString&amp;)" remove="all"/>
-    <modify-function signature="convertFromPlainText(const QString&amp;,Qt::WhiteSpaceMode)" remove="all"/>
-    <!--### -->
   </namespace-type>
 
   <add-function signature="qAbs(double)" return-type="double">
@@ -2168,9 +2163,6 @@
     </extra-includes>
   </object-type>
   <object-type name="QSortFilterProxyModel">
-    <!-- ### This reimplementation of "QObject::parent()" is used in C++ only
-         when "using QObject::parent;" is not available. It's useless in Python. -->
-    <modify-function signature="parent()const" remove="all"/>
     <extra-includes>
       <include file-name="QItemSelection" location="global"/>
       <include file-name="QStringList" location="global"/>
@@ -3456,31 +3448,6 @@
         <define-ownership owner="c++"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="winEventFilter(MSG*,long*)">
-      <modify-argument index="2">
-        <remove-argument />
-        <conversion-rule class="native">
-            long *%out = new long;
-            %out = 0;
-        </conversion-rule>
-      </modify-argument>
-      <modify-argument index="return">
-        <replace-type modified-type="PyObject"/>
-        <conversion-rule class="native">
-            %RETURN_TYPE %out = false;
-            if (PySequence_Check(%PYARG_0) &amp;&amp; (PySequence_Size(%PYARG_0) == 2)) {
-                Shiboken::AutoDecRef pyResult(PySequence_GetItem(%PYARG_0, 0));
-                %out = %CONVERTTOCPP[bool](pyResult);
-            }
-        </conversion-rule>
-      </modify-argument>
-      <inject-code position="end">
-      %PYARG_0 = PyTuple_New(2);
-      PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
-      PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[long](*result_out));
-      delete result_out;
-      </inject-code>
-    </modify-function>
   </object-type>
   <object-type name="QSettings">
     <enum-type name="Format"/>
@@ -3959,9 +3926,6 @@
     </modify-function>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="enclosingMetaObject()const" remove="all" />
-    <!-- Qt5.5: "template<typename T> static QMetaEnum fromType()" is not understood by the compiler.
-         We therefore ignore this 5.5 addition for now: -->
-    <modify-function signature="fromType()" since="5.5" remove="all" />
   </value-type>
 
   <!-- From Qt4.6 -->
