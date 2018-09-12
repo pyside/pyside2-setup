@@ -68,7 +68,6 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     doxyFileSuffix += QLatin1String(".xml");
 
     const char* prefixes[] = { "class", "struct", "namespace" };
-    const int numPrefixes = sizeof(prefixes) / sizeof(const char*);
     bool isProperty = false;
 
     QString doxyFilePath;

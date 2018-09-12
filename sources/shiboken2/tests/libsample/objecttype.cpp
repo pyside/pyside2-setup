@@ -282,6 +282,7 @@ void ObjectType::callVirtualCreateChild()
     ObjectType* fake_parent = new ObjectType();
     ObjectType* fake_child = createChild(fake_parent);
     assert(fake_child->isPython());
+    (void)fake_child;
     delete fake_parent;
 }
 
