@@ -308,7 +308,7 @@ if "PySide2.QtCore" in sys.modules:
         "QBuffer.writeData": ('str', 'int'),
 
     # class PySide2.QtCore.QByteArray:
-        "QByteArray.__init__": [(), ('PySide2.QtCore.QByteArray',), ('int', 'Union[str, int]'), ('bytes',), ('bytearray',)],
+        "QByteArray.__init__": [(), ('PySide2.QtCore.QByteArray',), ('int', 'Union[str, int]')],
         "QByteArray.__copy__": (),
         "QByteArray.__reduce__": (),
         "QByteArray.append": [('PySide2.QtCore.QByteArray',), ('Union[str, int]',), ('int', 'Union[str, int]')],
@@ -2320,6 +2320,7 @@ if "PySide2.QtCore" in sys.modules:
     # class PySide2.QtCore.QThread:
         "QThread.__init__": ('PySide2.QtCore.QObject',),
         "QThread.currentThread": (),
+        "QThread.currentThreadId": (),
         "QThread.event": ('PySide2.QtCore.QEvent',),
         "QThread.eventDispatcher": (),
         "QThread.exec_": (),
@@ -2793,6 +2794,10 @@ if "PySide2.QtCore" in sys.modules:
         "QXmlStreamWriter.writeStartDocument": [(), ('str',), ('str', 'bool')],
         "QXmlStreamWriter.writeStartElement": [('str',), ('str', 'str')],
         "QXmlStreamWriter.writeTextElement": [('str', 'str'), ('str', 'str', 'str')],
+
+    # class PySide2.QtCore.Qt:
+        "Qt.qt_getEnumMetaObject": [('Alignment',), ('DockWidgetAreas',), ('DropActions',), ('Edges',), ('ImageConversionFlags',), ('InputMethodHints',), ('InputMethodQueries',), ('ItemFlags',), ('KeyboardModifiers',), ('MatchFlags',), ('MouseButtons',), ('Orientations',), ('PySide2.QtCore.Qt.ApplicationAttribute',), ('PySide2.QtCore.Qt.ApplicationState',), ('PySide2.QtCore.Qt.ArrowType',), ('PySide2.QtCore.Qt.AspectRatioMode',), ('PySide2.QtCore.Qt.Axis',), ('PySide2.QtCore.Qt.BGMode',), ('PySide2.QtCore.Qt.BrushStyle',), ('PySide2.QtCore.Qt.CaseSensitivity',), ('PySide2.QtCore.Qt.CheckState',), ('PySide2.QtCore.Qt.ChecksumType',), ('PySide2.QtCore.Qt.ClipOperation',), ('PySide2.QtCore.Qt.ConnectionType',), ('PySide2.QtCore.Qt.ContextMenuPolicy',), ('PySide2.QtCore.Qt.Corner',), ('PySide2.QtCore.Qt.CursorMoveStyle',), ('PySide2.QtCore.Qt.CursorShape',), ('PySide2.QtCore.Qt.DateFormat',), ('PySide2.QtCore.Qt.DayOfWeek',), ('PySide2.QtCore.Qt.DockWidgetArea',), ('PySide2.QtCore.Qt.DropAction',), ('PySide2.QtCore.Qt.Edge',), ('PySide2.QtCore.Qt.EnterKeyType',), ('PySide2.QtCore.Qt.FillRule',), ('PySide2.QtCore.Qt.FocusPolicy',), ('PySide2.QtCore.Qt.FocusReason',), ('PySide2.QtCore.Qt.GestureState',), ('PySide2.QtCore.Qt.GestureType',), ('PySide2.QtCore.Qt.GlobalColor',), ('PySide2.QtCore.Qt.InputMethodHint',), ('PySide2.QtCore.Qt.InputMethodQuery',), ('PySide2.QtCore.Qt.ItemDataRole',), ('PySide2.QtCore.Qt.ItemSelectionMode',), ('PySide2.QtCore.Qt.ItemSelectionOperation',), ('PySide2.QtCore.Qt.Key',), ('PySide2.QtCore.Qt.LayoutDirection',), ('PySide2.QtCore.Qt.MaskMode',), ('PySide2.QtCore.Qt.MouseEventFlag',), ('PySide2.QtCore.Qt.MouseEventSource',), ('PySide2.QtCore.Qt.NativeGestureType',), ('PySide2.QtCore.Qt.Orientation',), ('PySide2.QtCore.Qt.PenCapStyle',), ('PySide2.QtCore.Qt.PenJoinStyle',), ('PySide2.QtCore.Qt.PenStyle',), ('PySide2.QtCore.Qt.ScreenOrientation',), ('PySide2.QtCore.Qt.ScrollBarPolicy',), ('PySide2.QtCore.Qt.ScrollPhase',), ('PySide2.QtCore.Qt.ShortcutContext',), ('PySide2.QtCore.Qt.SizeHint',), ('PySide2.QtCore.Qt.SizeMode',), ('PySide2.QtCore.Qt.SortOrder',), ('PySide2.QtCore.Qt.TabFocusBehavior',), ('PySide2.QtCore.Qt.TextElideMode',), ('PySide2.QtCore.Qt.TextFlag',), ('PySide2.QtCore.Qt.TextFormat',), ('PySide2.QtCore.Qt.TextInteractionFlag',), ('PySide2.QtCore.Qt.TimeSpec',), ('PySide2.QtCore.Qt.TimerType',), ('PySide2.QtCore.Qt.ToolBarArea',), ('PySide2.QtCore.Qt.ToolButtonStyle',), ('PySide2.QtCore.Qt.TransformationMode',), ('PySide2.QtCore.Qt.WidgetAttribute',), ('PySide2.QtCore.Qt.WindowModality',), ('PySide2.QtCore.Qt.WindowState',), ('PySide2.QtCore.Qt.WindowType',), ('ScreenOrientations',), ('TextInteractionFlags',), ('ToolBarAreas',), ('TouchPointStates',), ('WindowFlags',), ('WindowStates',)],
+        "Qt.qt_getEnumName": [('Alignment',), ('DockWidgetAreas',), ('DropActions',), ('Edges',), ('ImageConversionFlags',), ('InputMethodHints',), ('InputMethodQueries',), ('ItemFlags',), ('KeyboardModifiers',), ('MatchFlags',), ('MouseButtons',), ('Orientations',), ('PySide2.QtCore.Qt.ApplicationAttribute',), ('PySide2.QtCore.Qt.ApplicationState',), ('PySide2.QtCore.Qt.ArrowType',), ('PySide2.QtCore.Qt.AspectRatioMode',), ('PySide2.QtCore.Qt.Axis',), ('PySide2.QtCore.Qt.BGMode',), ('PySide2.QtCore.Qt.BrushStyle',), ('PySide2.QtCore.Qt.CaseSensitivity',), ('PySide2.QtCore.Qt.CheckState',), ('PySide2.QtCore.Qt.ChecksumType',), ('PySide2.QtCore.Qt.ClipOperation',), ('PySide2.QtCore.Qt.ConnectionType',), ('PySide2.QtCore.Qt.ContextMenuPolicy',), ('PySide2.QtCore.Qt.Corner',), ('PySide2.QtCore.Qt.CursorMoveStyle',), ('PySide2.QtCore.Qt.CursorShape',), ('PySide2.QtCore.Qt.DateFormat',), ('PySide2.QtCore.Qt.DayOfWeek',), ('PySide2.QtCore.Qt.DockWidgetArea',), ('PySide2.QtCore.Qt.DropAction',), ('PySide2.QtCore.Qt.Edge',), ('PySide2.QtCore.Qt.EnterKeyType',), ('PySide2.QtCore.Qt.FillRule',), ('PySide2.QtCore.Qt.FocusPolicy',), ('PySide2.QtCore.Qt.FocusReason',), ('PySide2.QtCore.Qt.GestureState',), ('PySide2.QtCore.Qt.GestureType',), ('PySide2.QtCore.Qt.GlobalColor',), ('PySide2.QtCore.Qt.InputMethodHint',), ('PySide2.QtCore.Qt.InputMethodQuery',), ('PySide2.QtCore.Qt.ItemDataRole',), ('PySide2.QtCore.Qt.ItemSelectionMode',), ('PySide2.QtCore.Qt.ItemSelectionOperation',), ('PySide2.QtCore.Qt.Key',), ('PySide2.QtCore.Qt.LayoutDirection',), ('PySide2.QtCore.Qt.MaskMode',), ('PySide2.QtCore.Qt.MouseEventFlag',), ('PySide2.QtCore.Qt.MouseEventSource',), ('PySide2.QtCore.Qt.NativeGestureType',), ('PySide2.QtCore.Qt.Orientation',), ('PySide2.QtCore.Qt.PenCapStyle',), ('PySide2.QtCore.Qt.PenJoinStyle',), ('PySide2.QtCore.Qt.PenStyle',), ('PySide2.QtCore.Qt.ScreenOrientation',), ('PySide2.QtCore.Qt.ScrollBarPolicy',), ('PySide2.QtCore.Qt.ScrollPhase',), ('PySide2.QtCore.Qt.ShortcutContext',), ('PySide2.QtCore.Qt.SizeHint',), ('PySide2.QtCore.Qt.SizeMode',), ('PySide2.QtCore.Qt.SortOrder',), ('PySide2.QtCore.Qt.TabFocusBehavior',), ('PySide2.QtCore.Qt.TextElideMode',), ('PySide2.QtCore.Qt.TextFlag',), ('PySide2.QtCore.Qt.TextFormat',), ('PySide2.QtCore.Qt.TextInteractionFlag',), ('PySide2.QtCore.Qt.TimeSpec',), ('PySide2.QtCore.Qt.TimerType',), ('PySide2.QtCore.Qt.ToolBarArea',), ('PySide2.QtCore.Qt.ToolButtonStyle',), ('PySide2.QtCore.Qt.TransformationMode',), ('PySide2.QtCore.Qt.WidgetAttribute',), ('PySide2.QtCore.Qt.WindowModality',), ('PySide2.QtCore.Qt.WindowState',), ('PySide2.QtCore.Qt.WindowType',), ('ScreenOrientations',), ('TextInteractionFlags',), ('ToolBarAreas',), ('TouchPointStates',), ('WindowFlags',), ('WindowStates',)],
 
     # class PySide2.QtCore.QtMsgType:
 
@@ -12555,12 +12560,12 @@ if "PySide2.QtNetwork" in sys.modules:
         "QNetworkAccessManager.head": ('PySide2.QtNetwork.QNetworkRequest',),
         "QNetworkAccessManager.isStrictTransportSecurityEnabled": (),
         "QNetworkAccessManager.networkAccessible": (),
-        "QNetworkAccessManager.post": [('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QIODevice'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtNetwork.QHttpMultiPart')],
+        "QNetworkAccessManager.post": [('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QIODevice')],
         "QNetworkAccessManager.proxy": (),
         "QNetworkAccessManager.proxyFactory": (),
-        "QNetworkAccessManager.put": [('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QIODevice'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtNetwork.QHttpMultiPart')],
+        "QNetworkAccessManager.put": [('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QIODevice')],
         "QNetworkAccessManager.redirectPolicy": (),
-        "QNetworkAccessManager.sendCustomRequest": [('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray', 'PySide2.QtCore.QIODevice'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray', 'PySide2.QtNetwork.QHttpMultiPart')],
+        "QNetworkAccessManager.sendCustomRequest": [('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray', 'PySide2.QtCore.QByteArray'), ('PySide2.QtNetwork.QNetworkRequest', 'PySide2.QtCore.QByteArray', 'PySide2.QtCore.QIODevice')],
         "QNetworkAccessManager.setCache": ('PySide2.QtNetwork.QAbstractNetworkCache',),
         "QNetworkAccessManager.setConfiguration": ('PySide2.QtNetwork.QNetworkConfiguration',),
         "QNetworkAccessManager.setCookieJar": ('PySide2.QtNetwork.QNetworkCookieJar',),
@@ -14349,7 +14354,7 @@ if "PySide2.QtMultimedia" in sys.modules:
         "QMediaResource.videoCodec": (),
 
     # class PySide2.QtMultimedia.QMediaTimeRange:
-        "QMediaTimeRange.__init__": [(), ('PySide2.QtMultimedia.QMediaTimeInterval',), ('PySide2.QtMultimedia.QMediaTimeRange',), ('int', 'int')],
+        "QMediaTimeRange.__init__": [(), ('PySide2.QtMultimedia.QMediaTimeRange',), ('int', 'int')],
         "QMediaTimeRange.__copy__": (),
         "QMediaTimeRange.addInterval": ('int', 'int'),
         "QMediaTimeRange.addTimeRange": ('PySide2.QtMultimedia.QMediaTimeRange',),

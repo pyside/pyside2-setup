@@ -2322,6 +2322,19 @@
 
     <inject-code class="native" file="glue/qobject_findchild.cpp"/>
     <add-function signature="findChild(PyTypeObject*,const QString&amp;)" return-type="PyObject*">
+        <inject-documentation format="target" mode="append">
+        To find the child of a certain QObject, the first argument of this function should be the child's type, and the second the name of the child:
+
+        ::
+
+            ...
+            parent = QWidget()
+            ...
+            # The first argument must be the child type
+            child1 = parent.findChild(QPushButton, "child_button")
+            child2 = parent.findChild(QWidget, "child_widget")
+
+        </inject-documentation>
         <inject-code class="target" position="beginning">
         QObject *child = _findChildHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1);
         %PYARG_0 = %CONVERTTOPYTHON[QObject*](child);
@@ -2334,6 +2347,9 @@
       </modify-argument>
     </add-function>
     <add-function signature="findChildren(PyTypeObject*,const QString&amp;)" return-type="PySequence*" >
+        <inject-documentation format="target" mode="append">
+        Like the method *findChild*, the first parameter should be the child's type.
+        </inject-documentation>
         <inject-code class="target" position="beginning">
             %PYARG_0 = PyList_New(0);
             _findChildrenHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1, %PYARG_0);
