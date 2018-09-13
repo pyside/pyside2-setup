@@ -48,6 +48,7 @@ One file is generated with all signatures of a platform and version.
 
 import sys
 import os
+import re
 import PySide2
 from contextlib import contextmanager
 from textwrap import dedent
@@ -60,7 +61,21 @@ from PySide2.QtCore import __version__
 is_py3 = sys.version_info[0] == 3
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
-platform = 'linux' if sys.platform.startswith('linux') else sys.platform
+if sys.platform.startswith('linux'):
+    # We have to be more specific because we had differences between
+    # RHEL 6.6 and RHEL 7.4 .
+    # Note: The platform module is deprecated. We need to switch to the
+    # distro package, ASAP! The distro has been extracted from Python,
+    # because it changes more often than the Python version.
+    try:
+        import distro
+    except ImportError:
+        import platform as distro
+    platform_name = "".join(distro.linux_distribution()[:2]).lower()
+    platform_name = re.sub('[^0-9a-z]', '', platform_name)
+else:
+    platform_name = sys.platform
+# In the linux case, we need more information.
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
 
@@ -69,7 +84,7 @@ def qtVersion():
 
 # Format a registry file name for version
 def _registryFileName(version):
-    name = "exists_{}_{}_{}_{}{}.py".format(platform,
+    name = "exists_{}_{}_{}_{}{}.py".format(platform_name,
         version[0], version[1], version[2], "_ci" if is_ci else "")
     return os.path.join(os.path.dirname(__file__), name)
 
