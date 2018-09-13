@@ -520,6 +520,10 @@
         <suppress-warning text="skipping function 'ClassWithFunctionPointer::callFunctionPointer', unmatched parameter type 'void (*)(void*)'" />
     </value-type>
 
+    <value-type name="IntArray" generate="no"/>
+    <value-type name="IntArray2"/>
+    <value-type name="IntArray3"/>
+
     <enum-type name="OverloadedFuncEnum"/>
     <!-- BUG:
     renaming the ICOverloadedFuncEnum to the same name

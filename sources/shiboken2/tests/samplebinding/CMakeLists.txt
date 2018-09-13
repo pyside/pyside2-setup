@@ -34,6 +34,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/handleholder_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitconv_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicitbase_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/implicittarget_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/intarray2_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/intarray3_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/intlist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sortedoverload_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/intwrapper_wrapper.cpp

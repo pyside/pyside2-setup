@@ -1134,7 +1134,8 @@ private:
 };
 
 // EnumValueTypeEntry is used for resolving integer type templates
-// like array<EnumValue>.
+// like array<EnumValue>. Note: Dummy entries for integer values will
+// be created for non-type template parameters, where m_enclosingEnum==nullptr.
 class EnumValueTypeEntry : public TypeEntry
 {
 public:

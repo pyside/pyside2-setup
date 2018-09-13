@@ -39,6 +39,7 @@
 #include "echo.h"
 #include "functions.h"
 #include "implicitconv.h"
+#include "nontypetemplate.h"
 #include "overloadsort.h"
 #include "handle.h"
 #include "injectcode.h"

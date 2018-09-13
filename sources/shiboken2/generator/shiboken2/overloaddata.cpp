@@ -147,8 +147,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType* containerTy
     for (const AbstractMetaType *otherType : instantiations)
         types << (otherType == instantiation ? impConv : getTypeName(otherType));
 
-    const ContainerTypeEntry* containerTypeEntry = dynamic_cast<const ContainerTypeEntry*>(containerType->typeEntry());
-    return containerTypeEntry->qualifiedCppName() + QLatin1Char('<')
+    return containerType->typeEntry()->qualifiedCppName() + QLatin1Char('<')
            + types.join(QLatin1String(", ")) + QLatin1String(" >");
 }
 

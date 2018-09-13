@@ -2755,20 +2755,35 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 
     for (const TypeInfo &i : qAsConst(targs)) {
         QString typeName = i.qualifiedName().join(colonColon());
-        QStringList possibleNames;
-        possibleNames << subclass->qualifiedCppName() + colonColon() + typeName;
-        possibleNames << templateClass->qualifiedCppName() + colonColon() + typeName;
-        if (subclass->enclosingClass())
-            possibleNames << subclass->enclosingClass()->qualifiedCppName() + colonColon() + typeName;
-        possibleNames << typeName;
+        TypeDatabase *typeDb = TypeDatabase::instance();
+        TypeEntry *t = nullptr;
+        // Check for a non-type template integer parameter, that is, for a base
+        // "template <int R, int C> Matrix<R, C>" and subclass
+        // "typedef Matrix<2,3> Matrix2x3;". If so, create dummy entries of
+        // EnumValueTypeEntry for the integer values encountered on the fly.
+        const bool isNumber = std::all_of(typeName.cbegin(), typeName.cend(),
+                                          [](QChar c) { return c.isDigit(); });
+        if (isNumber) {
+            t = typeDb->findType(typeName);
+            if (!t) {
+                t = new EnumValueTypeEntry(typeName, typeName, nullptr,
+                                           QVersionNumber(0, 0));
+                t->setCodeGeneration(0);
+                typeDb->addType(t);
+            }
+        } else {
+            QStringList possibleNames;
+            possibleNames << subclass->qualifiedCppName() + colonColon() + typeName;
+            possibleNames << templateClass->qualifiedCppName() + colonColon() + typeName;
+            if (subclass->enclosingClass())
+                possibleNames << subclass->enclosingClass()->qualifiedCppName() + colonColon() + typeName;
+            possibleNames << typeName;
 
-        TypeDatabase* typeDb = TypeDatabase::instance();
-        TypeEntry* t = 0;
-        QString templateParamName;
-        for (const QString &possibleName : qAsConst(possibleNames)) {
-            t = typeDb->findType(possibleName);
-            if (t)
-                break;
+            for (const QString &possibleName : qAsConst(possibleNames)) {
+                t = typeDb->findType(possibleName);
+                if (t)
+                    break;
+            }
         }
 
         if (t) {
@@ -2781,7 +2796,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
             templateTypes << temporaryType;
         } else {
             qCWarning(lcShiboken).noquote().nospace()
-                << "Ignoring template parameter " << templateParamName << " from "
+                << "Ignoring template parameter " << typeName << " from "
                 << info.toString() << ". The corresponding type was not found in the typesystem.";
         }
     }
