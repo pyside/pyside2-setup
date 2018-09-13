@@ -1313,7 +1313,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
             toCppConv = QLatin1Char('*') + cpythonWrapperCPtr(sourceClass->typeEntry(), QLatin1String("pyIn"));
         } else {
             // Constructor that does implicit conversion.
-            if (!conv->typeReplaced(1).isEmpty())
+            if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
                 continue;
             const AbstractMetaType* sourceType = conv->arguments().constFirst()->type();
             typeCheck = cpythonCheckFunction(sourceType);
@@ -1473,7 +1473,7 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
             sourceType = buildAbstractMetaTypeFromAbstractMetaClass(conv->ownerClass());
         } else {
             // Constructor that does implicit conversion.
-            if (!conv->typeReplaced(1).isEmpty())
+            if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
                 continue;
             sourceType = conv->arguments().constFirst()->type();
         }

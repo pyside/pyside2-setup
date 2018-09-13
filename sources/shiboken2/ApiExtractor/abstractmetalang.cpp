@@ -818,6 +818,18 @@ QString AbstractMetaFunction::typeReplaced(int key) const
     return QString();
 }
 
+bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
+{
+    const FunctionModificationList &modifications = this->modifications(declaringClass());
+    for (const FunctionModification &modification : modifications) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods) {
+            if (argumentModification.index == argumentIndex && argumentModification.array != 0)
+                return true;
+        }
+    }
+    return false;
+}
+
 QString AbstractMetaFunction::minimalSignature() const
 {
     if (!m_cachedMinimalSignature.isEmpty())

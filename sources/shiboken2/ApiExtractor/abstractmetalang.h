@@ -1033,6 +1033,7 @@ public:
     TypeSystem::Ownership ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int idx) const;
 
     QString typeReplaced(int argument_index) const;
+    bool isModifiedToArray(int argumentIndex) const;
     bool isRemovedFromAllLanguages(const AbstractMetaClass *) const;
     bool isRemovedFrom(const AbstractMetaClass *, TypeSystem::Language language) const;
     bool argumentRemoved(int) const;
