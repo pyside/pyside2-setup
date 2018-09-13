@@ -2380,10 +2380,12 @@
     </modify-function>
   </object-type>
 
-  <!-- The matrix classes need a default constructor specification since
-       they inherit template class QGenericMatrix<int, int, Type> with (unsupported)
-       non-type template parameters -->
-  <value-type name="QMatrix2x2" since="4.6" default-constructor="QMatrix2x2()">
+  <value-type name="QGenericMatrix" generate="no"/>
+  <value-type name="QMatrix2x2" since="4.6">
+    <modify-function signature="QMatrix2x2(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2415,63 +2417,13 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="4" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix2x2" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix2x2&amp;)" return-type="bool" />
-
-    <template name="inplace_add">
-    *%CPPSELF += %1;
-    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-    <template name="inplace_sub">
-    *%CPPSELF -= %1;
-    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-    <template name="inplace_mult">
-    *%CPPSELF *= %1;
-    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-    <template name="inplace_div">
-    *%CPPSELF /= %1;
-    return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-
-    <add-function signature="operator*=(float)" return-type="QMatrix2x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix2x2&amp;)" return-type="QMatrix2x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix2x2&amp;)" return-type="QMatrix2x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix2x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix2x2&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix2x3" since="4.6" default-constructor="QMatrix2x3()">
+  <value-type name="QMatrix2x3" since="4.6">
+    <modify-function signature="QMatrix2x3(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2503,45 +2455,13 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="6" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix3x2" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix2x3&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix2x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix2x3&amp;)" return-type="QMatrix2x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix2x3&amp;)" return-type="QMatrix2x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix2x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix2x3&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix2x4" since="4.6" default-constructor="QMatrix2x4()">
+  <value-type name="QMatrix2x4" since="4.6">
+    <modify-function signature="QMatrix2x4(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2573,45 +2493,13 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="8" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix4x2" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix2x4&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix2x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix2x4&amp;)" return-type="QMatrix2x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix2x4&amp;)" return-type="QMatrix2x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix2x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix2x4&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix3x2" since="4.6" default-constructor="QMatrix3x2()">
+  <value-type name="QMatrix3x2" since="4.6">
+    <modify-function signature="QMatrix3x2(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2643,45 +2531,13 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="6" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix2x3" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix3x2&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix3x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix3x2&amp;)" return-type="QMatrix3x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix3x2&amp;)" return-type="QMatrix3x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix3x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix3x2&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix3x3" since="4.6" default-constructor="QMatrix3x3()">
+  <value-type name="QMatrix3x3" since="4.6">
+    <modify-function signature="QMatrix3x3(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2713,45 +2569,13 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="9" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix3x3" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix3x3&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix3x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix3x3&amp;)" return-type="QMatrix3x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix3x3&amp;)" return-type="QMatrix3x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix3x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix3x3&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix3x4" since="4.6" default-constructor="QMatrix3x4()">
+  <value-type name="QMatrix3x4" since="4.6">
+    <modify-function signature="QMatrix3x4(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2783,45 +2607,12 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="12" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix4x3" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix3x4&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix3x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix3x4&amp;)" return-type="QMatrix3x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix3x4&amp;)" return-type="QMatrix3x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix3x4" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix3x4&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix4x2" since="4.6" default-constructor="QMatrix4x2()">
+  <value-type name="QMatrix4x2" since="4.6">
+    <modify-function signature="QMatrix4x2(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2853,45 +2644,13 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="8" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix2x4" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix4x2&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix4x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix4x2&amp;)" return-type="QMatrix4x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix4x2&amp;)" return-type="QMatrix4x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix4x2" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix4x2&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix4x3" since="4.6" default-constructor="QMatrix4x3()">
+  <value-type name="QMatrix4x3" since="4.6">
+    <modify-function signature="QMatrix4x3(const float*)">
+      <modify-argument index="1"><array/></modify-argument>
+    </modify-function>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2923,46 +2682,9 @@
         </insert-template>
       </inject-code>
     </add-function>
-    <add-function signature="fill(PyObject*)">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_fill_function">
-          <replace from="%MATRIX_SIZE" to="12" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="transposed()" return-type="PyObject">
-      <inject-code class="target" position="beginning">
-        <insert-template name="matrix_transposed_function">
-          <replace from="%TRANSPOSED_TYPE" to="QMatrix3x4" />
-        </insert-template>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator!=(const QMatrix4x3&amp;)" return-type="bool" />
-    <add-function signature="operator*=(float)" return-type="QMatrix4x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_mult"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator+=(const QMatrix4x3&amp;)" return-type="QMatrix4x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_add"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator-=(const QMatrix4x3&amp;)" return-type="QMatrix4x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_sub"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator/=(float)" return-type="QMatrix4x3" >
-      <inject-code class="target" position="beginning">
-        <insert-template name="inplace_div"/>
-      </inject-code>
-    </add-function>
-    <add-function signature="operator==(const QMatrix4x3&amp;)" return-type="bool" />
   </value-type>
 
-  <value-type name="QMatrix4x4" since="4.6" default-constructor="QMatrix4x4()">
-
+  <value-type name="QMatrix4x4" since="4.6">
 
     <!-- Qt5: HAIRY TRICK ALERT ahead!
         Qt5 partially replaced 'qreal' by float.

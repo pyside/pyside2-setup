@@ -29,7 +29,7 @@
 import unittest
 
 from PySide2.QtCore import QPoint
-from PySide2.QtGui import QMatrix, QMatrix4x4
+from PySide2.QtGui import QMatrix, QMatrix2x2, QMatrix4x4
 
 
 def qpointTimesQMatrix(point, matrix):
@@ -48,6 +48,19 @@ class QMatrixTest(unittest.TestCase):
         matrix = QMatrix(11, 12, 21, 22, 100, 200)
         point = QPoint(3, 3)
         self.assertRaises(TypeError, matrix.__mul__, point)
+
+    def testMatrix2x2(self):
+        matrix = QMatrix2x2([1.0, 2.0, 3.0, 4.0])
+
+        expectedTransposed = QMatrix2x2([1.0, 3.0, 2.0, 4.0])
+        self.assertEqual(matrix.transposed(), expectedTransposed)
+
+        expectedMultiplied = QMatrix2x2([2.0, 4.0, 6.0, 8.0])
+        matrix *= 2.0
+        self.assertEqual(matrix, expectedMultiplied)
+
+        matrix.setToIdentity()
+        self.assertTrue(matrix.isIdentity())
 
     def testMatrix4x4(self):
         self.assertRaises(TypeError, QMatrix4x4, [0.0, 1.0, 2.0, 3.0])

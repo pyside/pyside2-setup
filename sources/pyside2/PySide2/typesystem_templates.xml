@@ -401,16 +401,6 @@
         return pyData;
     </template>
 
-    <template name="matrix_fill_function">
-        float value = %CONVERTTOCPP[float](%PYARG_1);
-        %CPPSELF.fill(value);
-    </template>
-
-    <template name="matrix_transposed_function">
-        %TRANSPOSED_TYPE transp = %CPPSELF.transposed();
-        return %CONVERTTOPYTHON[%TRANSPOSED_TYPE](transp);
-    </template>
-
     <!-- Replace '#' for the argument number you want. -->
     <template name="return_argument">
         Py_INCREF(%PYARG_#);
