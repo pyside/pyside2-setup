@@ -328,6 +328,7 @@ struct A {
 <typesystem package="Foo">
     <primitive-type name='int'/>
     <object-type name='A'>
+        <modify-function signature='throwing()' exception-handling='auto-on'/>
     </object-type>
 </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
@@ -339,14 +340,17 @@ struct A {
     const AbstractMetaFunction *f = classA->findFunction(QStringLiteral("unspecified"));
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
+    QVERIFY(!f->generateExceptionHandling());
 
     f = classA->findFunction(QStringLiteral("nonThrowing"));
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::NoExcept);
+    QVERIFY(!f->generateExceptionHandling());
 
     f = classA->findFunction(QStringLiteral("throwing"));
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
+    QVERIFY(f->generateExceptionHandling());
 }
 
 QTEST_APPLESS_MAIN(TestModifyFunction)

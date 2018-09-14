@@ -407,7 +407,8 @@ AbstractMetaFunction::AbstractMetaFunction()
       m_userAdded(false),
       m_explicit(false),
       m_pointerOperator(false),
-      m_isCallOperator(false)
+      m_isCallOperator(false),
+      m_generateExceptionHandling(false)
 {
 }
 
@@ -526,6 +527,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
         cpy->setType(type()->copy());
     cpy->setConstant(isConstant());
     cpy->setExceptionSpecification(m_exceptionSpecification);
+    cpy->setGenerateExceptionHandling(m_generateExceptionHandling);
 
     for (AbstractMetaArgument *arg : m_arguments)
     cpy->addArgument(arg->copy());
@@ -1153,6 +1155,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " throw(...)";
         break;
     }
+    if (m_generateExceptionHandling)
+        d << "[generate-exception-handling]";
     d << '(';
     for (int i = 0, count = m_arguments.size(); i < count; ++i) {
         if (i)
@@ -1899,6 +1903,11 @@ bool AbstractMetaClass::hasFunction(const AbstractMetaFunction *f) const
     return functions_contains(m_functions, f);
 }
 
+bool AbstractMetaClass::generateExceptionHandling() const
+{
+    return queryFirstFunction(m_functions, AbstractMetaClass::Visible
+                              | AbstractMetaClass::GenerateExceptionHandling) != nullptr;
+}
 /* Goes through the list of functions and returns a list of all
    functions matching all of the criteria in \a query.
  */
@@ -1966,6 +1975,9 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
         return false;
 
     if ((query & OperatorOverloads) && !f->isOperatorOverload())
+        return false;
+
+    if ((query & GenerateExceptionHandling) && !f->generateExceptionHandling())
         return false;
 
     return true;

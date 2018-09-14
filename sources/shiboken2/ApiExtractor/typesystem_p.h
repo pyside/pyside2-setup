@@ -242,6 +242,7 @@ private:
     int m_ignoreDepth = 0;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
+    TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     QString m_error;
     const TypeEntry::CodeGeneration m_generate;
 

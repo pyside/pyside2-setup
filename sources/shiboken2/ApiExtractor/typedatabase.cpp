@@ -784,7 +784,8 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
     FORMAT_BOOL("genericClass", m_genericClass)
     if (m_typeFlags != 0)
         d << ", typeFlags=" << m_typeFlags;
-    d << ", copyableFlag=" << m_copyableFlag;
+    d << ", copyableFlag=" << m_copyableFlag
+        << ", except=" << int(m_exceptionHandling);
     FORMAT_NONEMPTY_STRING("defaultSuperclass", m_defaultSuperclass)
     FORMAT_NONEMPTY_STRING("polymorphicIdValue", m_polymorphicIdValue)
     FORMAT_NONEMPTY_STRING("lookupName", m_lookupName)

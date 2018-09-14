@@ -10,6 +10,7 @@ complex.cpp
 onlycopy.cpp
 derived.cpp
 echo.cpp
+exceptiontest.cpp
 functions.cpp
 handle.cpp
 implicitconv.cpp

@@ -1878,12 +1878,40 @@ bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func
     return true;
 }
 
+static bool generateExceptionHandling(const AbstractMetaFunction *func,
+                                      ExceptionSpecification spec,
+                                      TypeSystem::ExceptionHandling handling)
+{
+    switch (func->functionType()) {
+    case AbstractMetaFunction::CopyConstructorFunction:
+    case AbstractMetaFunction::MoveConstructorFunction:
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
+    case AbstractMetaFunction::DestructorFunction:
+        return false;
+    default:
+        break;
+    }
+    switch (handling) {
+    case TypeSystem::ExceptionHandling::On:
+        return true;
+    case TypeSystem::ExceptionHandling::AutoDefaultToOn:
+        return spec != ExceptionSpecification::NoExcept;
+    case TypeSystem::ExceptionHandling::AutoDefaultToOff:
+        return spec == ExceptionSpecification::Throws;
+    default:
+        break;
+    }
+    return false;
+}
+
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem)
 {
     if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
         return nullptr;
     QString functionName = functionItem->name();
     QString className;
+    TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     if (m_currentClass) {
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
         // and overridden metaObject(), QGADGET helpers
@@ -1892,6 +1920,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
         className = m_currentClass->typeEntry()->qualifiedCppName();
+        exceptionHandling = m_currentClass->typeEntry()->exceptionHandling();
         if (functionName == QLatin1String("metaObject") && className != QLatin1String("QObject"))
             return nullptr;
     }
@@ -2050,6 +2079,19 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     metaFunction->setArguments(metaArguments);
 
+    const FunctionModificationList functionMods = metaFunction->modifications(m_currentClass);
+
+    for (const FunctionModification &mod : functionMods) {
+        if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified) {
+            exceptionHandling = mod.exceptionHandling();
+            break;
+        }
+    }
+
+    metaFunction->setGenerateExceptionHandling(generateExceptionHandling(metaFunction,
+                                                                         functionItem->exceptionSpecification(),
+                                                                         exceptionHandling));
+
     // Find the correct default values
     for (int i = 0, size = metaArguments.size(); i < size; ++i) {
         const ArgumentModelItem &arg = arguments.at(i);
@@ -2060,9 +2102,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         if (m_currentClass) {
             replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
         } else {
-            FunctionModificationList mods = TypeDatabase::instance()->functionModifications(metaFunction->minimalSignature());
-            if (!mods.isEmpty()) {
-                QVector<ArgumentModification> argMods = mods.constFirst().argument_mods;
+            if (!functionMods.isEmpty()) {
+                QVector<ArgumentModification> argMods = functionMods.constFirst().argument_mods;
                 if (!argMods.isEmpty())
                     replacedExpression = argMods.constFirst().replacedDefaultExpression;
             }
@@ -2101,9 +2142,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     if (!metaArguments.isEmpty()) {
-        const FunctionModificationList &mods = metaFunction->modifications(m_currentClass);
-        fixArgumentNames(metaFunction, mods);
-        for (const FunctionModification &mod : mods) {
+        fixArgumentNames(metaFunction, functionMods);
+        for (const FunctionModification &mod : functionMods) {
             for (const ArgumentModification &argMod : mod.argument_mods) {
                 if (argMod.array)
                     setArrayArgumentType(metaFunction, functionItem, argMod.index - 1);

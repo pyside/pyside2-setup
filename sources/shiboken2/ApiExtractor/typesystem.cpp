@@ -64,6 +64,7 @@ static inline QString sinceAttribute() { return QStringLiteral("since"); }
 static inline QString defaultSuperclassAttribute() { return QStringLiteral("default-superclass"); }
 static inline QString deleteInMainThreadAttribute() { return QStringLiteral("delete-in-main-thread"); }
 static inline QString deprecatedAttribute() { return QStringLiteral("deprecated"); }
+static inline QString exceptionHandlingAttribute() { return QStringLiteral("exception-handling"); }
 static inline QString extensibleAttribute() { return QStringLiteral("extensible"); }
 static inline QString flagsAttribute() { return QStringLiteral("flags"); }
 static inline QString forceAbstractAttribute() { return QStringLiteral("force-abstract"); }
@@ -300,6 +301,18 @@ ENUM_LOOKUP_BEGIN(TypeRejection::MatchType, Qt::CaseSensitive,
         {QStringViewLiteral("argument-type"), TypeRejection::ArgumentType},
         {QStringViewLiteral("return-type"), TypeRejection::ReturnType}
     };
+ENUM_LOOKUP_LINEAR_SEARCH()
+
+ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
+                  exceptionHandlingFromAttribute, TypeSystem::ExceptionHandling::Unspecified)
+{
+    {QStringViewLiteral("no"), TypeSystem::ExceptionHandling::Off},
+    {QStringViewLiteral("false"), TypeSystem::ExceptionHandling::Off},
+    {QStringViewLiteral("auto-off"), TypeSystem::ExceptionHandling::AutoDefaultToOff},
+    {QStringViewLiteral("auto-on"), TypeSystem::ExceptionHandling::AutoDefaultToOn},
+    {QStringViewLiteral("yes"), TypeSystem::ExceptionHandling::On},
+    {QStringViewLiteral("true"), TypeSystem::ExceptionHandling::On},
+};
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
@@ -1240,6 +1253,7 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
 {
     bool generate = true;
     ctype->setCopyable(ComplexTypeEntry::Unknown);
+    auto exceptionHandling = m_exceptionHandling;
 
     QString package = m_defaultPackage;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -1266,6 +1280,15 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
         } else if (name == copyableAttribute()) {
             const bool v = convertBoolean(attributes->takeAt(i).value(), copyableAttribute(), false);
             ctype->setCopyable(v ? ComplexTypeEntry::CopyableSet : ComplexTypeEntry::NonCopyableSet);
+        } else if (name == exceptionHandlingAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto v = exceptionHandlingFromAttribute(attribute.value());
+            if (v != TypeSystem::ExceptionHandling::Unspecified) {
+                exceptionHandling = v;
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         } else if (name == QLatin1String("held-type")) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -1284,6 +1307,9 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
             ctype->setTargetType(attributes->takeAt(i).value().toString());
         }
     }
+
+    if (exceptionHandling != TypeSystem::ExceptionHandling::Unspecified)
+         ctype->setExceptionHandling(exceptionHandling);
 
     // The generator code relies on container's package being empty.
     if (ctype->type() != TypeEntry::ContainerType)
@@ -1410,16 +1436,27 @@ bool Handler::parseModifyDocumentation(const QXmlStreamReader &,
     return true;
 }
 
+// m_exceptionHandling
 TypeSystemTypeEntry *Handler::parseRootElement(const QXmlStreamReader &,
                                                const QVersionNumber &since,
                                                QXmlStreamAttributes *attributes)
 {
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
-        if (name == packageAttribute())
+        if (name == packageAttribute()) {
             m_defaultPackage = attributes->takeAt(i).value().toString();
-         else if (name == defaultSuperclassAttribute())
+        } else if (name == defaultSuperclassAttribute()) {
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
+        } else if (name == exceptionHandlingAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto v = exceptionHandlingFromAttribute(attribute.value());
+            if (v != TypeSystem::ExceptionHandling::Unspecified) {
+                m_exceptionHandling = v;
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        }
     }
 
     TypeSystemTypeEntry *moduleEntry =
@@ -1942,6 +1979,7 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
     QString association;
     bool deprecated = false;
     bool isThread = false;
+    TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
@@ -1970,6 +2008,13 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
                 m_error = msgInvalidAttributeValue(attribute);
                 return false;
             }
+        } else if (name == exceptionHandlingAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            exceptionHandling = exceptionHandlingFromAttribute(attribute.value());
+            if (exceptionHandling == TypeSystem::ExceptionHandling::Unspecified) {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         } else if (name == virtualSlotAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -1992,6 +2037,7 @@ bool Handler::parseModifyFunction(const QXmlStreamReader &reader,
     if (!mod.setSignature(signature, &m_error))
         return false;
     mod.setOriginalSignature(originalSignature);
+    mod.setExceptionHandling(exceptionHandling);
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {

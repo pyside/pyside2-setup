@@ -301,6 +301,8 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     // needs the 'set' class from C++ STL.
     if (hasMultipleInheritanceInAncestry(metaClass))
         s << "#include <set>" << endl;
+    if (metaClass->generateExceptionHandling())
+        s << "#include <exception>" << endl;
 
     s << endl << "// module include" << endl << "#include \"" << getModuleHeaderFileName() << '"' << endl;
 
@@ -3077,6 +3079,17 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
     return pyArgName;
 }
 
+static QStringList defaultExceptionHandling()
+{
+    static const QStringList result{
+        QLatin1String("} catch (const std::exception &e) {"),
+        QLatin1String("    PyErr_SetString(PyExc_RuntimeError, e.what());"),
+        QLatin1String("} catch (...) {"),
+        QLatin1String("    PyErr_SetString(PyExc_RuntimeError, \"An unknown exception was caught\");"),
+        QLatin1String("}")};
+    return result;
+}
+
 void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *func,
                                    GeneratorContext &context, int maxArgs)
 {
@@ -3334,8 +3347,17 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
 
         if (!injectedCodeCallsCppFunction(func)) {
             const bool allowThread = func->allowThread();
-            if (allowThread)
+            const bool generateExceptionHandling = func->generateExceptionHandling();
+            if (generateExceptionHandling) {
+                s << INDENT << "try {\n";
+                ++INDENT.indent;
+                if (allowThread) {
+                    s << INDENT << "Shiboken::ThreadStateSaver threadSaver;\n"
+                        << INDENT << "threadSaver.save();\n";
+                }
+            } else if (allowThread) {
                 s << INDENT << BEGIN_ALLOW_THREADS << endl;
+            }
             s << INDENT;
             if (isCtor) {
                 s << (useVAddr.isEmpty() ?
@@ -3369,9 +3391,13 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             } else {
                 s << methodCall << ';' << endl;
             }
-            if (allowThread)
-                s << INDENT << END_ALLOW_THREADS << endl;
 
+            if (allowThread) {
+                s << INDENT << (generateExceptionHandling
+                                ? "threadSaver.restore();" : END_ALLOW_THREADS) << '\n';
+            }
+
+            // Convert result
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
                 writeConversionRule(s, func, TypeSystem::TargetLangCode, QLatin1String(PYTHON_RETURN_VAR));
             } else if (!isCtor && !func->isInplaceOperator() && func->type()
@@ -3384,6 +3410,13 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                     writeToPythonConversion(s, func->type(), func->ownerClass(), QLatin1String(CPP_RETURN_VAR));
                 }
                 s << ';' << endl;
+            }
+
+            if (generateExceptionHandling) { // "catch" code
+                --INDENT.indent;
+                const QStringList handlingCode = defaultExceptionHandling();
+                for (const auto &line : handlingCode)
+                    s << INDENT << line << '\n';
             }
         }
     }

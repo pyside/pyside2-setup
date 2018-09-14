@@ -90,6 +90,14 @@ enum DocModificationMode {
     DocModificationInvalid
 };
 
+enum class ExceptionHandling {
+    Unspecified,
+    Off,
+    AutoDefaultToOff,
+    AutoDefaultToOn,
+    On
+};
+
 } // namespace TypeSystem
 
 #endif // TYPESYSTEM_ENUMS_H

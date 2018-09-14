@@ -75,6 +75,7 @@ modify-function
                               remove="all | c++"
                               access="public | private | protected"
                               allow-thread="true | auto | false"
+                              exception-handling="off | auto-off | auto-on | on"
                               rename="..." />
          </object-type>
 
@@ -91,6 +92,17 @@ modify-function
     lengthy I/O operations or similar. It has performance costs, though.
     The value ``auto`` means that it will be turned off for functions for which
     it is deemed to be safe, for example, simple getters.
+
+    The ``exception-handling`` attribute specifies whether to generate exception
+    handling code (nest the function call into try / catch statements). It accepts
+    the following values:
+
+           * no, false: Do not generate exception handling code
+           * auto-off: Generate exception handling code for functions
+             declaring a non-empty ``throw`` list
+           * auto-on: Generate exception handling code unless function
+             declares ``noexcept``
+           * yes, true: Always generate exception handling code
 
     The ``remove``, ``access`` and ``rename`` attributes are *optional* attributes
     for added convenience; they serve the same purpose as the deprecated tags :ref:`remove`, :ref:`access` and :ref:`rename`.

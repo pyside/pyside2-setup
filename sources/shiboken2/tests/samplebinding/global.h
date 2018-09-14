@@ -37,6 +37,7 @@
 #include "sbkdate.h"
 #include "derived.h"
 #include "echo.h"
+#include "exceptiontest.h"
 #include "functions.h"
 #include "implicitconv.h"
 #include "nontypetemplate.h"

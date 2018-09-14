@@ -346,6 +346,9 @@ struct FunctionModification: public Modification
     void setOriginalSignature(const QString &s) { m_originalSignature = s; }
     QString originalSignature() const { return m_originalSignature; }
 
+    TypeSystem::ExceptionHandling exceptionHandling() const { return m_exceptionHandling; }
+    void setExceptionHandling(TypeSystem::ExceptionHandling e) { m_exceptionHandling = e; }
+
     QString toString() const;
 
     QString association;
@@ -359,6 +362,7 @@ private:
     QRegularExpression m_signaturePattern;
     bool m_thread = false;
     AllowThread m_allowThread = AllowThread::Unspecified;
+    TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
 };
 
 struct FieldModification: public Modification
@@ -1370,6 +1374,9 @@ public:
         return m_baseContainerType;
     }
 
+    TypeSystem::ExceptionHandling exceptionHandling() const { return m_exceptionHandling; }
+    void setExceptionHandling(TypeSystem::ExceptionHandling e) { m_exceptionHandling = e; }
+
     QString defaultConstructor() const;
     void setDefaultConstructor(const QString& defaultConstructor);
     bool hasDefaultConstructor() const;
@@ -1405,6 +1412,8 @@ private:
     QString m_hashFunction;
 
     const ComplexTypeEntry* m_baseContainerType = nullptr;
+    // For class functions
+    TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
 };
 
 class TypedefEntry : public ComplexTypeEntry

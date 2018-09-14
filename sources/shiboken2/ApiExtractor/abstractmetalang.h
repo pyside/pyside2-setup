@@ -849,6 +849,9 @@ public:
     ExceptionSpecification exceptionSpecification() const;
     void setExceptionSpecification(ExceptionSpecification e);
 
+    bool generateExceptionHandling() const { return m_generateExceptionHandling; }
+    void setGenerateExceptionHandling(bool g) { m_generateExceptionHandling = g; }
+
     bool isConversionOperator() const
     {
         return isConversionOperator(originalName());
@@ -1118,6 +1121,7 @@ private:
     uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
+    uint m_generateExceptionHandling: 1;
     mutable int m_cachedAllowThread = -1;
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
 };
@@ -1284,7 +1288,8 @@ public:
         VirtualInCppFunctions        = 0x0020000, // Only functions that are virtual in C++
         VirtualInTargetLangFunctions = 0x0080000, // Only functions which are virtual in TargetLang
         NotRemovedFromTargetLang     = 0x0400000, // Only functions that have not been removed from TargetLang
-        OperatorOverloads            = 0x2000000  // Only functions that are operator overloads
+        OperatorOverloads            = 0x2000000, // Only functions that are operator overloads
+        GenerateExceptionHandling    = 0x4000000
     };
     Q_DECLARE_FLAGS(FunctionQueryOptions, FunctionQueryOption)
     Q_FLAG(FunctionQueryOption)
@@ -1385,6 +1390,8 @@ public:
     {
         return (hasNonPrivateConstructor() || !hasPrivateConstructor()) && !hasPrivateDestructor();
     }
+
+    bool generateExceptionHandling() const;
 
     AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
     static bool queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query);

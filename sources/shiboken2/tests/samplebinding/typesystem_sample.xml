@@ -2392,6 +2392,8 @@
 
     <value-type name="Expression" />
 
+    <object-type name="ExceptionTest" exception-handling="auto-on"/>
+
     <value-type name="ModelIndex" />
     <value-type name="ReferentModelIndex">
         <modify-function signature="operator const ModelIndex&amp;()const">
