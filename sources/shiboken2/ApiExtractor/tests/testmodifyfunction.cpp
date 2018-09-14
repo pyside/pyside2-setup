@@ -312,4 +312,38 @@ void TestModifyFunction::testGlobalFunctionModification()
     QCOMPARE(arg->defaultValueExpression(), QLatin1String("A()"));
 }
 
+void TestModifyFunction::testExceptionSpecification()
+{
+    const char cppCode[] = R"CPP(
+struct A {
+    void unspecified();
+    void nonThrowing() noexcept;
+    void throwing() throw(int);
+};
+)CPP";
+    const char xmlCode[] = R"XML(
+<typesystem package="Foo">
+    <primitive-type name='int'/>
+    <object-type name='A'>
+    </object-type>
+</typesystem>)XML";
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+    QVERIFY(!builder.isNull());
+
+    const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
+    QVERIFY(classA);
+
+    const AbstractMetaFunction *f = classA->findFunction(QStringLiteral("unspecified"));
+    QVERIFY(f);
+    QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
+
+    f = classA->findFunction(QStringLiteral("nonThrowing"));
+    QVERIFY(f);
+    QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::NoExcept);
+
+    f = classA->findFunction(QStringLiteral("throwing"));
+    QVERIFY(f);
+    QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
+}
+
 QTEST_APPLESS_MAIN(TestModifyFunction)

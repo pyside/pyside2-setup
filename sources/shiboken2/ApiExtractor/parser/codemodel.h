@@ -611,7 +611,9 @@ public:
     bool isSimilar(const FunctionModelItem &other) const;
 
     bool isNoExcept() const;
-    void setNoExcept(bool n);
+
+    ExceptionSpecification exceptionSpecification() const;
+    void setExceptionSpecification(ExceptionSpecification e);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
@@ -631,11 +633,11 @@ private:
             uint m_isAbstract: 1;
             uint m_isExplicit: 1;
             uint m_isVariadics: 1;
-            uint m_isNoExcept : 1;
             uint m_isInvokable : 1; // Qt
         };
         uint m_flags;
     };
+    ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
 };
 
 class _VariableModelItem: public _MemberModelItem

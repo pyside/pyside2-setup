@@ -47,4 +47,11 @@ enum class Indirection
     ConstPointer // int *const
 };
 
+enum class ExceptionSpecification
+{
+    Unknown,
+    NoExcept,
+    Throws
+};
+
 #endif // CODEMODEL_ENUMS_H

@@ -406,7 +406,6 @@ AbstractMetaFunction::AbstractMetaFunction()
       m_reverse(false),
       m_userAdded(false),
       m_explicit(false),
-      m_isNoExcept(false),
       m_pointerOperator(false),
       m_isCallOperator(false)
 {
@@ -526,7 +525,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     if (type())
         cpy->setType(type()->copy());
     cpy->setConstant(isConstant());
-    cpy->setNoExcept(isNoExcept());
+    cpy->setExceptionSpecification(m_exceptionSpecification);
 
     for (AbstractMetaArgument *arg : m_arguments)
     cpy->addArgument(arg->copy());
@@ -960,6 +959,16 @@ bool AbstractMetaFunction::isConversionOperator(const QString& funcName)
     return opRegEx.match(funcName).hasMatch();
 }
 
+ExceptionSpecification AbstractMetaFunction::exceptionSpecification() const
+{
+    return m_exceptionSpecification;
+}
+
+void AbstractMetaFunction::setExceptionSpecification(ExceptionSpecification e)
+{
+    m_exceptionSpecification = e;
+}
+
 bool AbstractMetaFunction::isOperatorOverload(const QString& funcName)
 {
     if (isConversionOperator(funcName))
@@ -1133,7 +1142,18 @@ static inline void formatMetaFunctionBrief(QDebug &d, const AbstractMetaFunction
 
 void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
 {
-    d << m_functionType << ' ' << m_type << ' ' << m_name << '(';
+    d << m_functionType << ' ' << m_type << ' ' << m_name;
+    switch (m_exceptionSpecification) {
+    case ExceptionSpecification::Unknown:
+        break;
+    case ExceptionSpecification::NoExcept:
+        d << " noexcept";
+        break;
+    case ExceptionSpecification::Throws:
+        d << " throw(...)";
+        break;
+    }
+    d << '(';
     for (int i = 0, count = m_arguments.size(); i < count; ++i) {
         if (i)
             d << ", ";
@@ -1148,8 +1168,6 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " [userAdded]";
     if (m_explicit)
         d << " [explicit]";
-    if (m_isNoExcept)
-        d << " [noexcept]";
     if (m_pointerOperator)
         d << " [operator->]";
     if (m_isCallOperator)

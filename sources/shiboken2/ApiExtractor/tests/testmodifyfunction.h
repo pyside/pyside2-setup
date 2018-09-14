@@ -42,6 +42,7 @@ class TestModifyFunction : public QObject
         void testRenameArgument();
         void invalidateAfterUse();
         void testGlobalFunctionModification();
+        void testExceptionSpecification();
 };
 
 #endif

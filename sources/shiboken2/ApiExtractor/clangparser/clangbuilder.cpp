@@ -257,6 +257,25 @@ bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
     return true;
 }
 
+static inline ExceptionSpecification exceptionSpecificationFromClang(int ce)
+{
+    switch (ce) {
+    case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
+    case CXCursor_ExceptionSpecificationKind_ComputedNoexcept:
+    case CXCursor_ExceptionSpecificationKind_DynamicNone: // throw()
+        return ExceptionSpecification::NoExcept;
+    case CXCursor_ExceptionSpecificationKind_Dynamic: // throw(t1..)
+    case CXCursor_ExceptionSpecificationKind_MSAny: // throw(...)
+        return ExceptionSpecification::Throws;
+    default:
+        // CXCursor_ExceptionSpecificationKind_None,
+        // CXCursor_ExceptionSpecificationKind_Unevaluated,
+        // CXCursor_ExceptionSpecificationKind_Uninstantiated
+        break;
+    }
+    return ExceptionSpecification::Unknown;
+}
+
 FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
                                                  CodeModel::FunctionType t) const
 {
@@ -270,14 +289,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
-    switch (clang_getCursorExceptionSpecificationType(cursor)) {
-    case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
-    case CXCursor_ExceptionSpecificationKind_ComputedNoexcept:
-        result->setNoExcept(true);
-        break;
-    default:
-        break;
-    }
+    result->setExceptionSpecification(exceptionSpecificationFromClang(clang_getCursorExceptionSpecificationType(cursor)));
     switch (clang_getCursorAvailability(cursor)) {
     case CXAvailability_Available:
         break;

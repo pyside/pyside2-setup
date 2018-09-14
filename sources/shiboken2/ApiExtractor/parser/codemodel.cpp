@@ -1013,12 +1013,17 @@ void _FunctionModelItem::setVariadics(bool isVariadics)
 
 bool _FunctionModelItem::isNoExcept() const
 {
-    return m_isNoExcept;
+    return m_exceptionSpecification == ExceptionSpecification::NoExcept;
 }
 
-void _FunctionModelItem::setNoExcept(bool n)
+ExceptionSpecification _FunctionModelItem::exceptionSpecification() const
 {
-    m_isNoExcept = n;
+    return m_exceptionSpecification;
+}
+
+void _FunctionModelItem::setExceptionSpecification(ExceptionSpecification e)
+{
+    m_exceptionSpecification = e;
 }
 
 bool _FunctionModelItem::isDeleted() const
@@ -1116,7 +1121,7 @@ void _FunctionModelItem::setInvokable(bool isInvokable)
 void _FunctionModelItem::formatDebug(QDebug &d) const
 {
     _MemberModelItem::formatDebug(d);
-    d << ", type=" << m_functionType;
+    d << ", type=" << m_functionType << ", exspec=" << int(m_exceptionSpecification);
     if (m_isDeleted)
         d << " [deleted!]";
     if (m_isInline)
@@ -1133,8 +1138,6 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
         d << " [abstract]";
     if (m_isExplicit)
         d << " [explicit]";
-    if (m_isNoExcept)
-        d << " [noexcept]";
     if (m_isInvokable)
         d << " [invokable]";
     formatModelItemList(d, ", arguments=", m_arguments);

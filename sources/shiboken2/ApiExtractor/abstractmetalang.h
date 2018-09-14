@@ -846,8 +846,8 @@ public:
 
     static bool isConversionOperator(const QString& funcName);
 
-    bool isNoExcept() const { return m_isNoExcept; }
-    void setNoExcept(bool n) { m_isNoExcept = n; }
+    ExceptionSpecification exceptionSpecification() const;
+    void setExceptionSpecification(ExceptionSpecification e);
 
     bool isConversionOperator() const
     {
@@ -1116,10 +1116,10 @@ private:
     uint m_reverse                  : 1;
     uint m_userAdded                : 1;
     uint m_explicit                 : 1;
-    uint m_isNoExcept               : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
     mutable int m_cachedAllowThread = -1;
+    ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
