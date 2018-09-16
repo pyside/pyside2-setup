@@ -133,6 +133,7 @@ from setuptools.command.build_py import build_py as _build_py
 from .qtinfo import QtInfo
 from .utils import rmtree, detect_clang, copyfile, copydir, run_process_output, run_process
 from .utils import update_env_path, init_msvc_env, filter_match, macos_fix_rpaths_for_library
+from .utils import cpu_count
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .wheel_override import wheel_module_exists, get_bdist_wheel_override
@@ -228,7 +229,10 @@ if OPTION_JOBS:
         if not OPTION_JOBS.startswith('-j'):
             OPTION_JOBS = '-j' + OPTION_JOBS
 else:
-    OPTION_JOBS = ''
+    if sys.platform == 'win32' and OPTION_NO_JOM:
+        OPTION_JOBS = ''
+    else:
+        OPTION_JOBS = '-j' + str(cpu_count())
 
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
