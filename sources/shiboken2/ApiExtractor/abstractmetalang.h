@@ -1387,9 +1387,15 @@ public:
     }
 
     AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
+    static bool queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query);
+    static AbstractMetaFunctionList queryFunctionList(const AbstractMetaFunctionList &list,
+                                                      FunctionQueryOptions query);
+    static const AbstractMetaFunction *queryFirstFunction(const AbstractMetaFunctionList &list,
+                                                          FunctionQueryOptions query);
+
     AbstractMetaFunctionList queryFunctions(FunctionQueryOptions query) const;
     AbstractMetaFunctionList functionsInTargetLang() const;
-    inline AbstractMetaFunctionList cppSignalFunctions() const;
+    AbstractMetaFunctionList cppSignalFunctions() const;
     AbstractMetaFunctionList implicitConversions() const;
 
     /**
@@ -1818,12 +1824,5 @@ private:
     const TypeEntry *m_type;
     int m_index = -1;
 };
-
-inline AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
-{
-    return queryFunctions(Signals
-                          | Visible
-                          | NotRemovedFromTargetLang);
-}
 
 #endif // ABSTRACTMETALANG_H

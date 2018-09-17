@@ -1826,7 +1826,7 @@ QDebug operator<<(QDebug d, const AbstractMetaEnum *ae)
 
 bool AbstractMetaClass::hasConstructors() const
 {
-    return !queryFunctions(Constructors).isEmpty();
+    return AbstractMetaClass::queryFirstFunction(m_functions, Constructors) != nullptr;
 }
 
 const AbstractMetaFunction *AbstractMetaClass::copyConstructor() const
@@ -1903,81 +1903,110 @@ bool AbstractMetaClass::hasFunction(const AbstractMetaFunction *f) const
    functions matching all of the criteria in \a query.
  */
 
-AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions query) const
+bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query)
 {
-    AbstractMetaFunctionList functions;
+    if ((query & NotRemovedFromTargetLang)
+        && f->isRemovedFrom(f->implementingClass(), TypeSystem::TargetLangCode)) {
+        return false;
+    }
 
-    for (AbstractMetaFunction *f : m_functions) {
-        if ((query & NotRemovedFromTargetLang) && f->isRemovedFrom(f->implementingClass(), TypeSystem::TargetLangCode))
-            continue;
+    if ((query & NotRemovedFromTargetLang) && f->isVirtual()
+        && f->isRemovedFrom(f->declaringClass(), TypeSystem::TargetLangCode)) {
+        return false;
+    }
 
-        if ((query & NotRemovedFromTargetLang) && f->isVirtual() && f->isRemovedFrom(f->declaringClass(), TypeSystem::TargetLangCode))
-            continue;
+    if ((query & Visible) && f->isPrivate())
+        return false;
 
-        if ((query & Visible) && f->isPrivate())
-            continue;
+    if ((query & VirtualInTargetLangFunctions) && f->isFinalInTargetLang())
+        return false;
 
-        if ((query & VirtualInTargetLangFunctions) && f->isFinalInTargetLang())
-            continue;
+    if ((query & Invisible) && !f->isPrivate())
+        return false;
 
-        if ((query & Invisible) && !f->isPrivate())
-            continue;
+    if ((query & Empty) && !f->isEmptyFunction())
+        return false;
 
-        if ((query & Empty) && !f->isEmptyFunction())
-            continue;
+    if ((query & WasPublic) && !f->wasPublic())
+        return false;
 
-        if ((query & WasPublic) && !f->wasPublic())
-            continue;
+    if ((query & ClassImplements) && f->ownerClass() != f->implementingClass())
+        return false;
 
-        if ((query & ClassImplements) && f->ownerClass() != f->implementingClass())
-            continue;
+    if ((query & FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
+        return false;
 
-        if ((query & FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
-            continue;
+    if ((query & VirtualInCppFunctions) && !f->isVirtual())
+        return false;
 
-        if ((query & VirtualInCppFunctions) && !f->isVirtual())
-            continue;
+    if ((query & Signals) && (!f->isSignal()))
+        return false;
 
-        if ((query & Signals) && (!f->isSignal()))
-            continue;
+    if ((query & Constructors) && (!f->isConstructor() || f->ownerClass() != f->implementingClass()))
+        return false;
 
-        if ((query & Constructors) && (!f->isConstructor() || f->ownerClass() != f->implementingClass()))
-            continue;
+    if (!(query & Constructors) && f->isConstructor())
+        return false;
 
-        if (!(query & Constructors) && f->isConstructor())
-            continue;
-
-        // Destructors are never included in the functions of a class currently
-        /*
+    // Destructors are never included in the functions of a class currently
+    /*
            if ((query & Destructors) && (!f->isDestructor()
                                        || f->ownerClass() != f->implementingClass())
             || f->isDestructor() && (query & Destructors) == 0) {
-            continue;
+            return false;
         }*/
 
-        if ((query & StaticFunctions) && (!f->isStatic() || f->isSignal()))
-            continue;
+    if ((query & StaticFunctions) && (!f->isStatic() || f->isSignal()))
+        return false;
 
-        if ((query & NonStaticFunctions) && (f->isStatic()))
-            continue;
+    if ((query & NonStaticFunctions) && (f->isStatic()))
+        return false;
 
-        if ((query & NormalFunctions) && (f->isSignal()))
-            continue;
+    if ((query & NormalFunctions) && (f->isSignal()))
+        return false;
 
-        if ((query & OperatorOverloads) && !f->isOperatorOverload())
-            continue;
+    if ((query & OperatorOverloads) && !f->isOperatorOverload())
+        return false;
 
-        functions << f;
+    return true;
+}
+
+AbstractMetaFunctionList AbstractMetaClass::queryFunctionList(const AbstractMetaFunctionList &list,
+                                                              FunctionQueryOptions query)
+{
+    AbstractMetaFunctionList result;
+    for (AbstractMetaFunction *f : list) {
+        if (queryFunction(f, query))
+            result.append(f);
     }
+    return result;
+}
 
-    return functions;
+const AbstractMetaFunction *AbstractMetaClass::queryFirstFunction(const AbstractMetaFunctionList &list,
+                                                               FunctionQueryOptions query)
+{
+    AbstractMetaFunctionList result;
+    for (AbstractMetaFunction *f : list) {
+        if (queryFunction(f, query))
+            return f;
+    }
+    return nullptr;
+}
+
+AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions query) const
+{
+    return AbstractMetaClass::queryFunctionList(m_functions, query);
 }
 
 bool AbstractMetaClass::hasSignals() const
 {
-    return cppSignalFunctions().size() > 0;
+    return queryFirstFunction(m_functions, Signals | Visible | NotRemovedFromTargetLang) != nullptr;
 }
 
+AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
+{
+    return queryFunctions(Signals | Visible | NotRemovedFromTargetLang);
+}
 
 /**
  * Adds the specified interface to this class by adding all the
