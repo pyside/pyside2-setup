@@ -1829,24 +1829,19 @@ bool AbstractMetaClass::hasConstructors() const
     return !queryFunctions(Constructors).isEmpty();
 }
 
-bool AbstractMetaClass::hasCopyConstructor() const
+const AbstractMetaFunction *AbstractMetaClass::copyConstructor() const
 {
-    const AbstractMetaFunctionList &ctors = queryFunctions(Constructors);
-    for (const AbstractMetaFunction* ctor : ctors) {
-        if (ctor->functionType() == AbstractMetaFunction::CopyConstructorFunction)
-            return true;
+    for (const AbstractMetaFunction *f : m_functions) {
+        if (f->functionType() == AbstractMetaFunction::CopyConstructorFunction)
+            return f;
     }
-    return false;
+    return nullptr;
 }
 
 bool AbstractMetaClass::hasPrivateCopyConstructor() const
 {
-    const AbstractMetaFunctionList &ctors = queryFunctions(Constructors);
-    for (const AbstractMetaFunction *ctor : ctors) {
-        if (ctor->functionType() == AbstractMetaFunction::CopyConstructorFunction && ctor->isPrivate())
-            return true;
-    }
-    return false;
+    const AbstractMetaFunction *copyCt = copyConstructor();
+    return copyCt && copyCt->isPrivate();
 }
 
 void AbstractMetaClass::addDefaultConstructor()

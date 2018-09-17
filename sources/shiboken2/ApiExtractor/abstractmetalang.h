@@ -1324,7 +1324,8 @@ public:
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
-    bool hasCopyConstructor() const;
+    const AbstractMetaFunction *copyConstructor() const;
+    bool hasCopyConstructor() const { return copyConstructor() != nullptr; }
     bool hasPrivateCopyConstructor() const;
 
     void addDefaultConstructor();

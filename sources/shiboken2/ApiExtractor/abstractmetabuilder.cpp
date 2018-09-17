@@ -2956,8 +2956,8 @@ void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
 
 static AbstractMetaFunction* findCopyCtor(AbstractMetaClass* cls)
 {
-    AbstractMetaFunctionList functions = cls->queryFunctions(AbstractMetaClass::Invisible);
-    functions <<  cls->queryFunctions(AbstractMetaClass::Visible);
+
+    const auto &functions = cls->functions();
 
     for (AbstractMetaFunction *f : qAsConst(functions)) {
         const AbstractMetaFunction::FunctionType t = f->functionType();
