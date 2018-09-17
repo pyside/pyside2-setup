@@ -1,0 +1,13 @@
+__init__.py
+main.py
+options.py
+platforms
+qtinfo.py
+utils.py
+wheel_override.py
+platforms/__init__.py
+platforms/linux.py
+platforms/macos.py
+platforms/unix.py
+platforms/windows_desktop.py
+../setup.py
