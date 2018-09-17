@@ -48,26 +48,25 @@ bool Shiboken::Buffer::checkType(PyObject* pyObj)
 
 void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
 {
-
+    const void* buffer = 0;
 #ifdef IS_PY3K
     Py_buffer view;
     if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
         if (size)
             *size = view.len;
+        buffer = view.buf;
+        PyBuffer_Release(&view);
         return view.buf;
-    } else {
-        return 0;
     }
 #else
-    const void* buffer = 0;
     Py_ssize_t bufferSize = 0;
 
     PyObject_AsReadBuffer(pyObj, &buffer, &bufferSize);
 
     if (size)
         *size = bufferSize;
-    return const_cast<void*>(buffer);
 #endif
+    return const_cast<void*>(buffer);
 }
 
 PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
