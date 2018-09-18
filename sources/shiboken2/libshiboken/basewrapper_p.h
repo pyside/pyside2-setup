@@ -137,6 +137,7 @@ struct SbkObjectTypePrivate
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_* constants.
     // TODO-CONVERTERS: to be deprecated/removed
     int type_behaviour : 2;
+    int delete_in_main_thread : 1;
     /// C++ name
     char* original_name;
     /// Type user data

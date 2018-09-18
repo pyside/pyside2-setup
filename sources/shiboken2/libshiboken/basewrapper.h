@@ -192,6 +192,12 @@ LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDes
 
 LIBSHIBOKEN_API void        initPrivateData(SbkObjectType* self);
 
+enum WrapperFlags
+{
+    InnerClass = 0x1,
+    DeleteInMainThread = 0x2
+};
+
 /**
  *  Initializes a Shiboken wrapper type and adds it to the module,
  *  or to the enclosing class if the type is an inner class.
@@ -217,7 +223,7 @@ LIBSHIBOKEN_API SbkObjectType *introduceWrapperType(PyObject *enclosingObject,
                                                     ObjectDestructor cppObjDtor,
                                                     SbkObjectType *baseType,
                                                     PyObject *baseTypes,
-                                                    bool isInnerClass);
+                                                    unsigned wrapperFlags = 0);
 
 /**
  *  Set the subtype init hook for a type.

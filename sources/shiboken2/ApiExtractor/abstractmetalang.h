@@ -1699,6 +1699,8 @@ public:
         return m_hasToStringCapability;
     }
 
+    bool deleteInMainThread() const;
+
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const QString &name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,

@@ -1613,6 +1613,13 @@ void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList&
     metaClassBaseTemplateInstantiations()->insert(this, instantiations);
 }
 
+// Does any of the base classes require deletion in the main thread?
+bool AbstractMetaClass::deleteInMainThread() const
+{
+    return typeEntry()->deleteInMainThread()
+        || (m_baseClass && m_baseClass->deleteInMainThread());
+}
+
 static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
 {
     for (const AbstractMetaFunction *f : l) {

@@ -90,6 +90,10 @@ class AutoArrayPointer
         T* data;
 };
 
+typedef unsigned long long ThreadId;
+LIBSHIBOKEN_API ThreadId currentThreadId();
+LIBSHIBOKEN_API ThreadId mainThreadId();
+
 /**
  * An utility function used to call PyErr_WarnEx with a formatted message.
  */

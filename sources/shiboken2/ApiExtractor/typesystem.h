@@ -1346,6 +1346,9 @@ public:
         m_genericClass = isGeneric;
     }
 
+    bool deleteInMainThread() const { return m_deleteInMainThread; }
+    void setDeleteInMainThread(bool d) { m_deleteInMainThread = d; }
+
     CopyableFlag copyable() const
     {
         return m_copyableFlag;
@@ -1403,6 +1406,7 @@ private:
     uint m_qobject : 1;
     uint m_polymorphicBase : 1;
     uint m_genericClass : 1;
+    uint m_deleteInMainThread : 1;
 
     QString m_polymorphicIdValue;
     QString m_lookupName;
