@@ -236,16 +236,16 @@ private:
                        StackElement *element, QXmlStreamAttributes *);
 
     TypeDatabase* m_database;
-    StackElement* m_current;
-    StackElement* m_currentDroppedEntry;
-    int m_currentDroppedEntryDepth;
-    int m_ignoreDepth;
+    StackElement* m_current = nullptr;
+    StackElement* m_currentDroppedEntry = nullptr;
+    int m_currentDroppedEntryDepth = 0;
+    int m_ignoreDepth = 0;
     QString m_defaultPackage;
     QString m_defaultSuperclass;
     QString m_error;
-    TypeEntry::CodeGeneration m_generate;
+    const TypeEntry::CodeGeneration m_generate;
 
-    EnumTypeEntry* m_currentEnum;
+    EnumTypeEntry* m_currentEnum = nullptr;
     QStack<StackElementContext*> m_contextStack;
 
     QString m_currentSignature;

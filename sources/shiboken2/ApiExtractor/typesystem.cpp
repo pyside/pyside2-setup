@@ -397,14 +397,10 @@ static QString msgUnusedAttributes(const QStringRef &tag, const QXmlStreamAttrib
     return result;
 }
 
-Handler::Handler(TypeDatabase* database, bool generate)
-            : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
+Handler::Handler(TypeDatabase *database, bool generate) :
+    m_database(database),
+    m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
 {
-    m_currentEnum = 0;
-    m_current = 0;
-    m_currentDroppedEntry = 0;
-    m_currentDroppedEntryDepth = 0;
-    m_ignoreDepth = 0;
 }
 
 static QString readerFileName(const QXmlStreamReader &reader)
