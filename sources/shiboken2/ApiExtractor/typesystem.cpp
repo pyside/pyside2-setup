@@ -1422,8 +1422,8 @@ TypeSystemTypeEntry *Handler::parseRootElement(const QXmlStreamReader &,
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
     }
 
-    TypeSystemTypeEntry* moduleEntry =
-        reinterpret_cast<TypeSystemTypeEntry*>(m_database->findType(m_defaultPackage));
+    TypeSystemTypeEntry *moduleEntry =
+        const_cast<TypeSystemTypeEntry *>(m_database->findTypeSystemType(m_defaultPackage));
     if (!moduleEntry)
         moduleEntry = new TypeSystemTypeEntry(m_defaultPackage, since);
     moduleEntry->setCodeGeneration(m_generate);
