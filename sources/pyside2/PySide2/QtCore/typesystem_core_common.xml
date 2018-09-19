@@ -688,8 +688,8 @@
     <value-type name="StringResult" generate="no"/>
     <modify-function signature="readStringChunk(char*,long long)" remove="all"/>
   </object-type>
-  <typedef-type name="QCborStringResultString" source="QCborStreamReader::StringResult&lt;QString&gt;"/>
-  <typedef-type name="QCborStringResultByteArray" source="QCborStreamReader::StringResult&lt;QByteArray&gt;"/>
+  <typedef-type name="QCborStringResultString" source="QCborStreamReader::StringResult&lt;QString&gt;" since="5.12"/>
+  <typedef-type name="QCborStringResultByteArray" source="QCborStreamReader::StringResult&lt;QByteArray&gt;" since="5.12"/>
   <object-type name="QCborStreamWriter" since="5.12">
     <include file-name="qcborstream.h" location="global"/>
   </object-type>
