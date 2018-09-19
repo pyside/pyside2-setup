@@ -60,6 +60,15 @@ namespace {
     void _destroyParentInfo(SbkObject* obj, bool keepReference);
 }
 
+static void callDestructor(const Shiboken::DtorAccumulatorVisitor::DestructorEntries &dts)
+{
+    for (const auto &e : dts) {
+        Shiboken::ThreadStateSaver threadSaver;
+        threadSaver.save();
+        e.destructor(e.cppInstance);
+    }
+}
+
 extern "C"
 {
 
@@ -212,8 +221,10 @@ static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
     if (canDelete && sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
         SbkObjectTypePrivate *sotp = PepType_SOTP(pyType);
         if (sotp->is_multicpp) {
-            Shiboken::DeallocVisitor visitor(sbkObj);
+            Shiboken::DtorAccumulatorVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(Py_TYPE(pyObj), &visitor);
+            Shiboken::Object::deallocData(sbkObj, true);
+            callDestructor(visitor.entries());
         } else {
             void* cptr = sbkObj->d->cptr[0];
             Shiboken::Object::deallocData(sbkObj, true);
@@ -447,33 +458,21 @@ void _destroyParentInfo(SbkObject* obj, bool keepReference)
 
 namespace Shiboken
 {
-static void _walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
+bool walkThroughClassHierarchy(PyTypeObject *currentType, HierarchyVisitor *visitor)
 {
     PyObject* bases = currentType->tp_bases;
     Py_ssize_t numBases = PyTuple_GET_SIZE(bases);
-    for (int i = 0; i < numBases; ++i) {
+    bool result = false;
+    for (int i = 0; !result && i < numBases; ++i) {
         PyTypeObject* type = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
-
-        if (!PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))) {
-            continue;
-        } else {
+        if (PyType_IsSubtype(type, reinterpret_cast<PyTypeObject*>(SbkObject_TypeF()))) {
             SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(type);
-            if (PepType_SOTP(sbkType)->is_user_type)
-                _walkThroughClassHierarchy(type, visitor);
-            else
-                visitor->visit(sbkType);
+            result = PepType_SOTP(sbkType)->is_user_type
+                     ? walkThroughClassHierarchy(type, visitor) : visitor->visit(sbkType);
         }
-        if (visitor->wasFinished())
-            break;
     }
+    return result;
 }
-
-void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor)
-{
-    _walkThroughClassHierarchy(currentType, visitor);
-    visitor->done();
-}
-
 
 bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 {
@@ -506,24 +505,32 @@ bool importModule(const char* moduleName, PyTypeObject*** cppApiPtr)
 
 // Wrapper metatype and base type ----------------------------------------------------------
 
-void DtorCallerVisitor::visit(SbkObjectType* node)
+HierarchyVisitor::HierarchyVisitor() = default;
+HierarchyVisitor::~HierarchyVisitor() = default;
+
+bool BaseCountVisitor::visit(SbkObjectType *)
 {
-    m_ptrs.push_back(std::make_pair(m_pyObj->d->cptr[m_ptrs.size()], node));
+    m_count++;
+    return false;
 }
 
-void DtorCallerVisitor::done()
+bool BaseAccumulatorVisitor::visit(SbkObjectType *node)
 {
-    for (auto it = m_ptrs.begin(), end = m_ptrs.end(); it != end; ++it) {
-        Shiboken::ThreadStateSaver threadSaver;
-        threadSaver.save();
-        PepType_SOTP(it->second)->cpp_dtor(it->first);
-    }
+    m_bases.push_back(node);
+    return false;
 }
 
-void DeallocVisitor::done()
+bool GetIndexVisitor::visit(SbkObjectType *node)
 {
-    Shiboken::Object::deallocData(m_pyObj, true);
-    DtorCallerVisitor::done();
+    m_index++;
+    return PyType_IsSubtype(reinterpret_cast<PyTypeObject*>(node), m_desiredType);
+}
+
+bool DtorAccumulatorVisitor::visit(SbkObjectType *node)
+{
+    m_entries.push_back(DestructorEntry{PepType_SOTP(node)->cpp_dtor,
+                                        m_pyObject->d->cptr[m_entries.size()]});
+    return false;
 }
 
 namespace Conversions { void init(); }
@@ -597,20 +604,16 @@ void setErrorAboutWrongArguments(PyObject* args, const char* funcName, const cha
 
 class FindBaseTypeVisitor : public HierarchyVisitor
 {
-    public:
-        FindBaseTypeVisitor(PyTypeObject* typeToFind) : m_found(false), m_typeToFind(typeToFind) {}
-        virtual void visit(SbkObjectType* node)
-        {
-            if (reinterpret_cast<PyTypeObject*>(node) == m_typeToFind) {
-                m_found = true;
-                finish();
-            }
-        }
-        bool found() const { return m_found; }
+public:
+    explicit FindBaseTypeVisitor(PyTypeObject *typeToFind) : m_typeToFind(typeToFind) {}
 
-    private:
-        bool m_found;
-        PyTypeObject* m_typeToFind;
+    bool visit(SbkObjectType *node) override
+    {
+        return reinterpret_cast<PyTypeObject*>(node) == m_typeToFind;
+    }
+
+private:
+    PyTypeObject *m_typeToFind;
 };
 
 std::vector<SbkObject *> splitPyObject(PyObject* pyObj)
@@ -654,8 +657,7 @@ bool isUserType(PyTypeObject* type)
 bool canCallConstructor(PyTypeObject* myType, PyTypeObject* ctorType)
 {
     FindBaseTypeVisitor visitor(ctorType);
-    walkThroughClassHierarchy(myType, &visitor);
-    if (!visitor.found()) {
+    if (!walkThroughClassHierarchy(myType, &visitor)) {
         PyErr_Format(PyExc_TypeError, "%s isn't a direct base class of %s", ctorType->tp_name, myType->tp_name);
         return false;
     }
@@ -871,8 +873,9 @@ void callCppDestructors(SbkObject* pyObj)
     PyTypeObject *type = Py_TYPE(pyObj);
     SbkObjectTypePrivate * sotp = PepType_SOTP(type);
     if (sotp->is_multicpp) {
-        Shiboken::DtorCallerVisitor visitor(pyObj);
+        Shiboken::DtorAccumulatorVisitor visitor(pyObj);
         Shiboken::walkThroughClassHierarchy(type, &visitor);
+        callDestructor(visitor.entries());
     } else {
         Shiboken::ThreadStateSaver threadSaver;
         threadSaver.save();

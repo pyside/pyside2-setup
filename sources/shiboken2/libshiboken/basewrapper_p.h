@@ -150,6 +150,17 @@ struct SbkObjectTypePrivate
 
 namespace Shiboken
 {
+
+/**
+ * \internal
+ * Data required to invoke a C++ destructor
+ */
+struct DestructorEntry
+{
+    ObjectDestructor destructor;
+    void *cppInstance;
+};
+
 /**
  * Utility function used to transform a PyObject that implements sequence protocol into a std::list.
  **/
@@ -161,29 +172,26 @@ std::vector<SbkObject *> splitPyObject(PyObject* pyObj);
 class HierarchyVisitor
 {
 public:
-    HierarchyVisitor() : m_wasFinished(false) {}
-    virtual ~HierarchyVisitor() {}
-    virtual void visit(SbkObjectType* node) = 0;
-    virtual void done() {}
-    void finish() { m_wasFinished = true; };
-    bool wasFinished() const { return m_wasFinished; }
-private:
-    bool m_wasFinished;
+    HierarchyVisitor(const HierarchyVisitor &) = delete;
+    HierarchyVisitor(HierarchyVisitor &&) = delete;
+    HierarchyVisitor &operator=(const HierarchyVisitor &) = delete;
+    HierarchyVisitor &operator=(HierarchyVisitor &&) = delete;
+
+    HierarchyVisitor();
+    virtual ~HierarchyVisitor();
+
+    virtual bool visit(SbkObjectType *node) = 0; // return true to terminate
 };
 
 class BaseCountVisitor : public HierarchyVisitor
 {
 public:
-    BaseCountVisitor() : m_count(0) {}
-
-    void visit(SbkObjectType*)
-    {
-        m_count++;
-    }
+    bool visit(SbkObjectType *) override;
 
     int count() const { return m_count; }
+
 private:
-    int m_count;
+    int m_count = 0;
 };
 
 class BaseAccumulatorVisitor : public HierarchyVisitor
@@ -191,14 +199,10 @@ class BaseAccumulatorVisitor : public HierarchyVisitor
 public:
     typedef std::vector<SbkObjectType *> Result;
 
-    BaseAccumulatorVisitor() {}
-
-    void visit(SbkObjectType* node)
-    {
-        m_bases.push_back(node);
-    }
+    bool visit(SbkObjectType *node) override;
 
     Result bases() const { return m_bases; }
+
 private:
     Result m_bases;
 };
@@ -206,38 +210,33 @@ private:
 class GetIndexVisitor : public HierarchyVisitor
 {
 public:
-    GetIndexVisitor(PyTypeObject* desiredType) : m_index(-1), m_desiredType(desiredType) {}
-    virtual void visit(SbkObjectType* node)
-    {
-        m_index++;
-        if (PyType_IsSubtype(reinterpret_cast<PyTypeObject*>(node), m_desiredType))
-            finish();
-    }
+    explicit GetIndexVisitor(PyTypeObject* desiredType) : m_desiredType(desiredType) {}
+
+    bool visit(SbkObjectType *node) override;
+
     int index() const { return m_index; }
 
 private:
-    int m_index;
-    PyTypeObject* m_desiredType;
+    int m_index = -1;
+    PyTypeObject *m_desiredType;
 };
 
-/// Call the destructor of each C++ object held by a Python object
-class DtorCallerVisitor : public HierarchyVisitor
+/// Collect destructors and C++ instances of each C++ object held by a Python
+/// object
+class DtorAccumulatorVisitor : public HierarchyVisitor
 {
 public:
-    DtorCallerVisitor(SbkObject* pyObj) : m_pyObj(pyObj) {}
-    void visit(SbkObjectType* node);
-    void done();
-protected:
-    std::vector<std::pair<void *, SbkObjectType *> > m_ptrs;
-    SbkObject* m_pyObj;
-};
+    explicit DtorAccumulatorVisitor(SbkObject *pyObj) : m_pyObject(pyObj) {}
 
-/// Dealloc of each C++ object held by a Python object, this implies a call to the C++ object destructor
-class DeallocVisitor : public DtorCallerVisitor
-{
-public:
-    DeallocVisitor(SbkObject* pyObj) : DtorCallerVisitor(pyObj) {}
-    void done();
+    bool visit(SbkObjectType *node) override;
+
+    using DestructorEntries = std::vector<DestructorEntry>;
+
+    const DestructorEntries &entries() const { return m_entries; }
+
+private:
+    DestructorEntries m_entries;
+    SbkObject *m_pyObject;
 };
 
 /// \internal Internal function used to walk on classes inheritance trees.
@@ -246,7 +245,7 @@ public:
 *   For each pure Shiboken type found, HiearchyVisitor::visit is called and the algorithm consider
 *   all children of this type as visited.
 */
-void walkThroughClassHierarchy(PyTypeObject* currentType, HierarchyVisitor* visitor);
+bool walkThroughClassHierarchy(PyTypeObject *currentType, HierarchyVisitor *visitor);
 
 inline int getTypeIndexOnHierarchy(PyTypeObject* baseType, PyTypeObject* desiredType)
 {
