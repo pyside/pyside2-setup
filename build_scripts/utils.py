@@ -1124,10 +1124,3 @@ def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
         print("Disabled " + compiler + " to " + targetArch + " from Coin configuration")
         return False
     return True
-
-def cpu_count():
-    try:
-        import multiprocessing
-        return multiprocessing.cpu_count()
-    except (ImportError, NotImplementedError, AttributeError):
-        return 1
