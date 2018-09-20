@@ -1433,8 +1433,8 @@ protected:
 
 private:
     QString m_sourceType;
-    ComplexTypeEntry *m_source;
-    ComplexTypeEntry *m_target;
+    ComplexTypeEntry *m_source = nullptr;
+    ComplexTypeEntry *m_target = nullptr;
 };
 
 class ContainerTypeEntry : public ComplexTypeEntry
