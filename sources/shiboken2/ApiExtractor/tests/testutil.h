@@ -40,13 +40,15 @@ namespace TestUtil
 {
     static AbstractMetaBuilder *parse(const char *cppCode, const char *xmlCode,
                                       bool silent = true,
-                                      const char *apiVersion = Q_NULLPTR,
+                                      const QString &apiVersion = QString(),
                                       const QStringList &dropTypeEntries = QStringList())
     {
         ReportHandler::setSilent(silent);
         TypeDatabase* td = TypeDatabase::instance(true);
-        if (apiVersion && !td->setApiVersion(QLatin1String("*"), QLatin1String(apiVersion)))
-            return Q_NULLPTR;
+        if (apiVersion.isEmpty())
+            TypeDatabase::clearApiVersions();
+        else if (!td->setApiVersion(QLatin1String("*"), apiVersion))
+            return nullptr;
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
         // parse typesystem

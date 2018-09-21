@@ -37,6 +37,8 @@ class TestTypeRevision : public QObject
 
 private slots:
     void testRevisionAttr();
+    void testVersion_data();
+    void testVersion();
 };
 
 #endif

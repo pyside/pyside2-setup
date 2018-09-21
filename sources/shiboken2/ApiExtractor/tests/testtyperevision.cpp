@@ -31,6 +31,7 @@
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <typesystem.h>
+#include <typedatabase.h>
 
 void TestTypeRevision::testRevisionAttr()
 {
@@ -65,6 +66,39 @@ void TestTypeRevision::testRevisionAttr()
     const EnumTypeEntry *revEnumTypeEntry = rev5->typeEntry();
     QCOMPARE(revEnumTypeEntry->revision(), 5);
     QCOMPARE(revEnumTypeEntry->flags()->revision(), 5);
+}
+
+
+void TestTypeRevision::testVersion_data()
+{
+    QTest::addColumn<QString>("version");
+    QTest::addColumn<int>("expectedClassCount");
+
+    QTest::newRow("none") << QString() << 2;
+    QTest::newRow("1.0") << QString::fromLatin1("1.0") << 1;  // Bar20 excluded
+    QTest::newRow("2.0") << QString::fromLatin1("2.0") << 2;
+}
+
+void TestTypeRevision::testVersion()
+{
+    QFETCH(QString, version);
+    QFETCH(int, expectedClassCount);
+
+    const char cppCode[] = R"CPP(
+class Bar {};
+class Bar20 {};
+)CPP";
+    const char xmlCode[] = R"XML(
+<typesystem package="Foo">
+    <value-type name="Bar"/>
+    <value-type name="Bar20" since="2.0"/>
+</typesystem>
+)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, version));
+    QVERIFY(!builder.isNull());
+
+    QCOMPARE(builder->classes().size(), expectedClassCount);
 }
 
 QTEST_APPLESS_MAIN(TestTypeRevision)

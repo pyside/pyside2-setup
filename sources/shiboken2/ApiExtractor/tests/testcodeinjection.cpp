@@ -74,7 +74,8 @@ void TestCodeInjections::testInjectWithValidApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, "1.0"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
+                                                                true, QLatin1String("1.0")));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
@@ -93,7 +94,8 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
         </value-type>\n\
     </typesystem>\n";
 
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, "0.1"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
+                                                                true, QLatin1String("0.1")));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();

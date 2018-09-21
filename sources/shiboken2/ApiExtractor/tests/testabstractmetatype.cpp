@@ -103,7 +103,8 @@ void TestAbstractMetaType::testApiVersionSupported()
         <function signature='justAtest2()' since='1.1'/>\n\
         <function signature='justAtest3()'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false, "1.0"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
+                                                                false, QLatin1String("1.0")));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
@@ -121,7 +122,8 @@ void TestAbstractMetaType::testApiVersionNotSupported()
     const char* xmlCode = "<typesystem package='Foo'>\n\
         <value-type name='object' since='0.1'/>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, "0.1"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
+                                                                true, QLatin1String("0.1")));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();

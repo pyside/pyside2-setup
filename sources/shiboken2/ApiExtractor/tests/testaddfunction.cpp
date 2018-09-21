@@ -366,7 +366,8 @@ void TestAddFunction::testAddFunctionWithApiVersion()
             <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
         </add-function>\n\
     </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, "0.1"));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
+                                                                true, QLatin1String("0.1")));
     QVERIFY(!builder.isNull());
     AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);

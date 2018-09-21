@@ -70,7 +70,8 @@ void TestDropTypeEntries::testDropEntries()
     droppedEntries << QLatin1String("Foo.ObjectB") << QLatin1String("Foo.NamespaceA.InnerClassA");
     droppedEntries << QLatin1String("Foo.NamespaceB") << QLatin1String("Foo.EnumB") << QLatin1String("Foo.funcB()");
     droppedEntries << QLatin1String("Foo.NamespaceA.InnerNamespaceA");
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false, Q_NULLPTR, droppedEntries));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false,
+                                                                QString(), droppedEntries));
     QVERIFY(!builder.isNull());
 
     AbstractMetaClassList classes = builder->classes();
@@ -129,7 +130,8 @@ static const char* xmlCode2 = "\
 void TestDropTypeEntries::testDropEntryWithChildTags()
 {
     QStringList droppedEntries(QLatin1String("Foo.ValueA"));
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false, Q_NULLPTR, droppedEntries));
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false,
+                                                                QString(), droppedEntries));
     QVERIFY(!builder.isNull());
     QVERIFY(!AbstractMetaClass::findClass(builder->classes(), QLatin1String("ValueA")));
 }

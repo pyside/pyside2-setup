@@ -146,9 +146,10 @@ public:
 
     bool parseFile(QIODevice* device, bool generate = true);
 
-    bool setApiVersion(const QString& package, const QString& version);
+    static bool setApiVersion(const QString& package, const QString& version);
+    static void clearApiVersions();
 
-    bool checkApiVersion(const QString &package, const QVersionNumber &version) const;
+    static bool checkApiVersion(const QString &package, const QVersionNumber &version);
 
     bool hasDroppedTypeEntries() const { return !m_dropTypeEntries.isEmpty(); }
 
