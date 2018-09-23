@@ -38,7 +38,7 @@
 #############################################################################
 
 import sys
-from PySide2.support.signature import inspect
+from PySide2.support.signature import inspect, get_signature
 
 
 class ExactEnumerator(object):
@@ -92,26 +92,6 @@ class ExactEnumerator(object):
         return ret
 
 
-def simplify(signature):
-    if isinstance(signature, list):
-        # remove duplicates which still sometimes occour:
-        ret = set(simplify(sig) for sig in signature)
-        return sorted(ret) if len(ret) > 1 else list(ret)[0]
-    ret = []
-    for pv in signature.parameters.values():
-        txt = str(pv)
-        if ":" not in txt:   # 'self' or '*args'
-            continue
-        txt = txt[txt.index(":") + 1:]
-        if "=" in txt:
-            txt = txt[:txt.index("=")]
-        quote = txt[0]
-        if quote in ("'", '"') and txt[-1] == quote:
-            txt = txt[1:-1]
-        ret.append(txt.strip())
-    return tuple(ret)
-
-
 class SimplifyingEnumerator(ExactEnumerator):
     """
     SimplifyingEnumerator enumerates all signatures in a module filtered.
@@ -126,9 +106,8 @@ class SimplifyingEnumerator(ExactEnumerator):
 
     def function(self, func_name, func):
         ret = self.result_type()
-        signature = getattr(func, '__signature__', None)
-        sig = simplify(signature) if signature is not None else None
-        if sig is not None and func_name not in ("next", "__next__"):
-            with self.fmt.function(func_name, sig) as key:
-                ret[key] = sig
+        signature = get_signature(func, 'existence')
+        if signature is not None and func_name not in ("next", "__next__"):
+            with self.fmt.function(func_name, signature) as key:
+                ret[key] = signature
         return ret

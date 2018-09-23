@@ -40,6 +40,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/layout.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/layout.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/loader.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/loader.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"

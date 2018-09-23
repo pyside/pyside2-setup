@@ -80,35 +80,10 @@ from PySide2.support.signature.parser import pyside_type_init
 sys.path.pop(0)
 # Note also that during the tests we have a different encoding that would
 # break the Python license decorated files without an encoding line.
+from PySide2.support.signature import layout
 
 # name used in signature.cpp
 def create_signature(props, key):
-    if not props:
-        # empty signatures string
-        return
-    if isinstance(props["multi"], list):
-        return list(create_signature(elem, key)
-                    for elem in props["multi"])
-    if type(key) is tuple:
-        sig_kind, modifier = key
-    else:
-        sig_kind, modifier = key, None
-    varnames = props["varnames"]
-    if sig_kind == "method":
-        varnames = ("self",) + varnames
-    elif sig_kind == "staticmethod":
-        pass
-    elif sig_kind == "classmethod":
-        varnames = ("klass",) + varnames
-    else:
-        raise SystemError("Methods must be normal, staticmethod or "
-                          "classmethod")
-    argstr = ", ".join(varnames)
-    fakefunc = eval("lambda {}: None".format(argstr))
-    fakefunc.__name__ = props["name"]
-    fakefunc.__defaults__ = props["defaults"]
-    fakefunc.__kwdefaults__ = props["kwdefaults"]
-    fakefunc.__annotations__ = props["annotations"]
-    return inspect._signature_from_function(inspect.Signature, fakefunc)
+    return layout.create_signature(props, key)
 
 # end of file
