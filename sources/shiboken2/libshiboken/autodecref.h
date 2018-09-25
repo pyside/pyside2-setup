@@ -105,9 +105,5 @@ private:
 
 } // namespace Shiboken
 
-#ifdef _MSC_VER
-__pragma(warning(pop))
-#endif
-
 #endif // AUTODECREF_H
 
