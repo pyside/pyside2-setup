@@ -109,6 +109,8 @@ QString msgCannotOpenForReading(const QFile &f);
 
 QString msgCannotOpenForWriting(const QFile &f);
 
+QString msgCannotUseEnumAsInt(const QString &name);
+
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs);
 
 QString msgInvalidVersion(const QString &package, const QString &version);

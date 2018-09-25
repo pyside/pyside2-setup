@@ -96,9 +96,11 @@ LIBSAMPLE_API void doSomethingWithArray(const unsigned char* data, unsigned int 
 
 LIBSAMPLE_API int enumItemAsDefaultValueToIntArgument(int value = ZeroIn);
 
-class SomeClass
+class LIBSAMPLE_API SomeClass
 {
 public:
+    enum class PublicScopedEnum { v1, v2 };
+
     class SomeInnerClass
     {
     public:
@@ -131,6 +133,8 @@ protected:
         ProtectedItem0,
         ProtectedItem1
     };
+
+    PublicScopedEnum protectedMethodReturningPublicScopedEnum() const;
 };
 
 class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough

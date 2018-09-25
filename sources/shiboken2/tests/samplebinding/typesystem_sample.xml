@@ -549,6 +549,7 @@
             <enum-type name="SampleNamespace"/>
         </object-type>
         <value-type name="SomeClass">
+            <enum-type name="PublicScopedEnum"/>
             <value-type name="SomeInnerClass">
                 <object-type name="OkThisIsRecursiveEnough">
                     <enum-type name="NiceEnum" />

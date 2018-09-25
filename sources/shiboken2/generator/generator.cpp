@@ -28,6 +28,7 @@
 
 #include "generator.h"
 #include "abstractmetalang.h"
+#include "messages.h"
 #include "reporthandler.h"
 #include "fileout.h"
 #include "apiextractor.h"
@@ -809,6 +810,25 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass* metaClass) c
     return DefaultValue(DefaultValue::Error);
 }
 
+// Should int be used for a (protected) enum when generating the public wrapper?
+bool Generator::useEnumAsIntForProtectedHack(const AbstractMetaType *metaType) const
+{
+    if (metaType->isFlags())
+        return true;
+    if (!metaType->isEnum())
+        return false;
+    const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(metaType);
+    if (!metaEnum)
+        return true;
+    if (metaEnum->attributes() & AbstractMetaAttributes::Public) // No reason, type is public
+        return false;
+    // Only ordinary C-enums can be used as int, scoped enums fail when used
+    // as function arguments.
+    if (metaEnum->enumKind() == EnumKind::EnumClass)
+        qWarning(lcShiboken, "%s", qPrintable(msgCannotUseEnumAsInt(metaEnum->name())));
+    return true;
+}
+
 QString Generator::translateType(const AbstractMetaType *cType,
                                  const AbstractMetaClass *context,
                                  Options options) const
@@ -826,7 +846,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
         s = QLatin1String("void");
     } else if (cType->isArray()) {
         s = translateType(cType->arrayElementType(), context, options) + QLatin1String("[]");
-    } else if (options & Generator::EnumAsInts && (cType->isEnum() || cType->isFlags())) {
+    } else if ((options & Generator::EnumAsInts) && useEnumAsIntForProtectedHack(cType)) {
         s = QLatin1String("int");
     } else {
         if (options & Generator::OriginalName) {

@@ -291,6 +291,15 @@ QString msgCannotOpenForWriting(const QFile &f)
            .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 
+// generator.cpp
+
+QString msgCannotUseEnumAsInt(const QString &name)
+{
+    return QLatin1String("Cannot convert the protected scoped enum \"") + name
+        + QLatin1String("\" to type int when generating wrappers for the protected hack. "
+                        "Compilation errors may occur when used as a function argument.");
+}
+
 // main.cpp
 
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs)
