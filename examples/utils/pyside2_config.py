@@ -38,7 +38,7 @@
 ##
 #############################################################################
 
-import os, glob, re, sys, imp
+import os, glob, re, sys
 from distutils import sysconfig
 
 usage = """
@@ -67,6 +67,21 @@ def sharedLibrarySuffix():
     # Linux
     else:
         return 'so.*'
+
+def importSuffixes():
+    if (sys.version_info >= (3, 4)):
+        import importlib
+        return importlib.machinery.EXTENSION_SUFFIXES
+    else:
+        import imp
+        result = []
+        for t in imp.get_suffixes():
+            result.append(t[0])
+        return result
+
+def isDebug():
+    debugSuffix = '_d.pyd' if sys.platform == 'win32' else '_d.so'
+    return any([s.endswith(debugSuffix) for s in importSuffixes()])
 
 def sharedLibraryGlobPattern():
     glob = '*.' + sharedLibrarySuffix()
@@ -149,7 +164,7 @@ def pythonLinkData():
     flags = {}
     flags['libdir'] = libdir
     if sys.platform == 'win32':
-        suffix = '_d' if any([tup[0].endswith('_d.pyd') for tup in imp.get_suffixes()]) else ''
+        suffix = '_d' if isDebug() else ''
         flags['lib'] = 'python{}{}'.format(version_no_dots, suffix)
 
     elif sys.platform == 'darwin':
@@ -158,7 +173,7 @@ def pythonLinkData():
     # Linux and anything else
     else:
         if sys.version_info[0] < 3:
-            suffix = '_d' if any([tup[0].endswith('_d.so') for tup in imp.get_suffixes()]) else ''
+            suffix = '_d' if isDebug() else ''
             flags['lib'] = 'python{}{}'.format(version, suffix)
         else:
             flags['lib'] = 'python{}{}'.format(version, sys.abiflags)
