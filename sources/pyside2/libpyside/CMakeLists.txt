@@ -17,6 +17,7 @@ if(${Qt5Quick_FOUND})
     endif()
 endif()
 
+set(QML_PRIVATE_API_SUPPORT 0)
 if(Qt5Qml_FOUND)
     # Used for registering custom QQuickItem classes defined in Python code.
     set(QML_SUPPORT 1)
@@ -28,7 +29,6 @@ if(Qt5Qml_FOUND)
         set(QML_PRIVATE_API_SUPPORT 1)
         set(QML_INCLUDES ${QML_INCLUDES} ${Qt5Qml_PRIVATE_INCLUDE_DIRS})
     else()
-        set(QML_PRIVATE_API_SUPPORT 0)
         message(WARNING "QML private API include files could not be found, support for catching QML exceptions inside Python code will not work.")
     endif()
 else()
@@ -40,13 +40,10 @@ endif()
 
 qt5_wrap_cpp(DESTROYLISTENER_MOC "destroylistener.h")
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/signalmanager.cpp.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/signalmanager.cpp" @ONLY)
-
 set(libpyside_SRC
     dynamicqmetaobject.cpp
     destroylistener.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/signalmanager.cpp
+    signalmanager.cpp
     globalreceiver.cpp
     globalreceiverv2.cpp
     pysideclassinfo.cpp
@@ -107,6 +104,7 @@ endif()
 if(QML_SUPPORT)
     target_compile_definitions(pyside2 PUBLIC PYSIDE_QML_SUPPORT=1)
 endif()
+target_compile_definitions(pyside2 PRIVATE PYSIDE_QML_PRIVATE_API_SUPPORT=${QML_PRIVATE_API_SUPPORT})
 
 if(PYSIDE_QT_CONF_PREFIX)
     set_property(SOURCE pyside.cpp
