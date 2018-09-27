@@ -39,6 +39,7 @@
 
 #include <sbkpython.h>
 #include "pysideclassinfo.h"
+#include "pyside_p.h"
 #include "pysideclassinfo_p.h"
 #include "dynamicqmetaobject.h"
 
@@ -107,9 +108,9 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
     }
 
     if (Shiboken::ObjectType::checkType(reinterpret_cast<PyTypeObject*>(klass))) {
-        PySide::DynamicQMetaObject* mo = reinterpret_cast<PySide::DynamicQMetaObject*>(Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(klass)));
-        if (mo) {
-            mo->addInfo(PySide::ClassInfo::getMap(data));
+        if (void *userData = Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(klass))) {
+            PySide::DynamicQMetaObject &mo = reinterpret_cast<PySide::TypeUserData *>(userData)->mo;
+            mo.addInfo(PySide::ClassInfo::getMap(data));
             pData->m_alreadyWrapped = true;
             validClass = true;
         }

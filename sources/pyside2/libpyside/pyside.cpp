@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "pyside.h"
+#include "pyside_p.h"
 #include "signalmanager.h"
 #include "pysideclassinfo_p.h"
 #include "pysideproperty_p.h"
@@ -188,13 +189,6 @@ void destroyQCoreApplication()
     MakeSingletonQAppWrapper(NULL);
 }
 
-struct TypeUserData {
-    explicit TypeUserData(PyTypeObject* type,  const QMetaObject* metaobject, std::size_t size) :
-        mo(type, metaobject), cppObjSize(size) {}
-    DynamicQMetaObject mo;
-    std::size_t cppObjSize;
-};
-
 std::size_t getSizeOfQObject(SbkObjectType* type)
 {
     using namespace Shiboken::ObjectType;
@@ -231,15 +225,16 @@ void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds 
 
     PyObject* bases = PyTuple_GET_ITEM(args, 1);
     int numBases = PyTuple_GET_SIZE(bases);
-    QMetaObject* baseMo = 0;
+    DynamicQMetaObject *baseMo = nullptr;
     SbkObjectType* qobjBase = 0;
 
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* base = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
         if (PyType_IsSubtype(base, qObjType)) {
-            baseMo = reinterpret_cast<QMetaObject*>(Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(base)));
+            void *typeUserData = Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(base));
+            baseMo = &(reinterpret_cast<TypeUserData *>(typeUserData)->mo);
             qobjBase = reinterpret_cast<SbkObjectType*>(base);
-            reinterpret_cast<DynamicQMetaObject*>(baseMo)->update();
+            baseMo->update();
             break;
         }
     }

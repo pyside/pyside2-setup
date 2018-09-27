@@ -43,6 +43,7 @@
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
 #include "pyside.h"
+#include "pyside_p.h"
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"
 
@@ -643,7 +644,9 @@ const QMetaObject* SignalManager::retrieveMetaObject(PyObject *self)
         mo = reinterpret_cast<DynamicQMetaObject*>(PyCObject_AsVoidPtr(pyMo));
 #endif
     } else {
-        mo = reinterpret_cast<DynamicQMetaObject*>(Shiboken::Object::getTypeUserData(reinterpret_cast<SbkObject*>(self)));
+        void *userData = Shiboken::Object::getTypeUserData(reinterpret_cast<SbkObject*>(self));
+        Q_ASSERT(userData);
+        mo = &(reinterpret_cast<TypeUserData *>(userData)->mo);
     }
 
     mo->update();
