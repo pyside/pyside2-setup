@@ -41,8 +41,10 @@
 #define PYSIDE_PROPERTY_H
 
 #include <pysidemacros.h>
+
 #include <sbkpython.h>
-#include <QObject>
+
+#include <QtCore/QMetaObject>
 
 extern "C"
 {

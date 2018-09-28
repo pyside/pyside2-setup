@@ -42,8 +42,9 @@
 #include "pysideslot_p.h"
 
 #include <shiboken.h>
-#include <QString>
-#include <QMetaObject>
+
+#include <QtCore/QMetaObject>
+#include <QtCore/QString>
 
 #define SLOT_DEC_NAME "Slot"
 

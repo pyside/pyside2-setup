@@ -40,10 +40,7 @@
 #include <sbkpython.h>
 #include "destroylistener.h"
 
-#include <QObject>
 #include <shiboken.h>
-#include <QDebug>
-#include <QMutex>
 
 PySide::DestroyListener* PySide::DestroyListener::m_instance = 0;
 

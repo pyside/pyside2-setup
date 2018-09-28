@@ -41,14 +41,13 @@
 #define GLOBALRECEIVER_V2_H
 
 #include <sbkpython.h>
-#include <QObject>
-#include <QHash>
-#include <QSet>
-#include <QSharedPointer>
-#include <QLinkedList>
-#include <QByteArray>
 
 #include "dynamicqmetaobject.h"
+
+#include <QtCore/QByteArray>
+#include <QtCore/QObject>
+#include <QtCore/QMap>
+#include <QtCore/QSharedPointer>
 
 namespace PySide
 {

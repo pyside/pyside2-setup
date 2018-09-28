@@ -36,14 +36,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include <sbkpython.h>
+
 #include "pysidemetafunction.h"
 #include "pysidemetafunction_p.h"
 
 #include <shiboken.h>
-#include <QObject>
-#include <QMetaMethod>
-#include <QDebug>
+
+#include <QtCore/QMetaMethod>
 
 extern "C"
 {

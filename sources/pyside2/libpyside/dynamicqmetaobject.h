@@ -40,10 +40,10 @@
 #ifndef DYNAMICQMETAOBJECT_H
 #define DYNAMICQMETAOBJECT_H
 
-#include "pysidemacros.h"
 #include <sbkpython.h>
-#include <QMetaObject>
-#include <QMetaMethod>
+
+#include <QtCore/QMetaObject>
+#include <QtCore/QMetaMethod>
 
 namespace PySide
 {

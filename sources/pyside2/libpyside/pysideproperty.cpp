@@ -45,8 +45,6 @@
 #include "pysidesignal_p.h"
 
 #include <shiboken.h>
-#include <QDebug>
-
 
 #define QPROPERTY_CLASS_NAME "Property"
 

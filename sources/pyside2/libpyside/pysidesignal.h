@@ -40,13 +40,16 @@
 #ifndef PYSIDE_SIGNAL_H
 #define PYSIDE_SIGNAL_H
 
-#include <QObject>
-#include <QString>
-#include <QStringList>
-
 #include <pysidemacros.h>
+
 #include <sbkpython.h>
 #include <basewrapper.h>
+
+#include <QtCore/QList>
+#include <QtCore/QMetaMethod>
+
+QT_FORWARD_DECLARE_CLASS(QMetaObject)
+QT_FORWARD_DECLARE_CLASS(QObject)
 
 extern "C"
 {

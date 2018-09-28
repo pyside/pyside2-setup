@@ -41,9 +41,11 @@
 #define PYSIDE_CLASSINFO_H
 
 #include <pysidemacros.h>
+
 #include <sbkpython.h>
-#include <QMap>
-#include <QByteArray>
+
+#include <QtCore/QMap>
+#include <QtCore/QByteArray>
 
 extern "C"
 {

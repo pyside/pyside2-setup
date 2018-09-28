@@ -52,23 +52,24 @@
 #include "destroylistener.h"
 
 #include <autodecref.h>
-#include <qapp_macro.h>
 #include <basewrapper.h>
+#include <bindingmanager.h>
+#include <gilstate.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
-#include <gilstate.h>
-#include <bindingmanager.h>
+#include <qapp_macro.h>
+
+#include <QtCore/QByteArray>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+#include <QtCore/QSharedPointer>
+#include <QtCore/QStack>
+
 #include <algorithm>
-#include <typeinfo>
 #include <cstring>
 #include <cctype>
-#include <QByteArray>
-#include <QCoreApplication>
-#include <QDebug>
-#include <QDir>
-#include <QFileInfo>
-#include <QSharedPointer>
-#include <QStack>
+#include <typeinfo>
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
 static void* qobjectNextAddr;

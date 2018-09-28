@@ -41,8 +41,9 @@
 #define DYNAMICMETAPROPERTY_P_H
 
 #include <sbkpython.h>
-#include <QByteArray>
-#include <QMetaMethod>
+
+#include <QtCore/QByteArray>
+#include <QtCore/QMetaMethod>
 
 #define GLOBAL_RECEIVER_CLASS_NAME "__GlobalReceiver__"
 

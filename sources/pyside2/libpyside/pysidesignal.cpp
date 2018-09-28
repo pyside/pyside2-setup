@@ -1,5 +1,3 @@
-#include <utility>
-
 /****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
@@ -45,7 +43,12 @@
 #include "signalmanager.h"
 
 #include <shiboken.h>
-#include <QDebug>
+
+#include <QtCore/QObject>
+#include <QtCore/QMetaMethod>
+#include <QtCore/QMetaObject>
+
+#include <utility>
 
 #define SIGNAL_CLASS_NAME "Signal"
 #define SIGNAL_INSTANCE_NAME "SignalInstance"

@@ -40,12 +40,11 @@
 #ifndef PYSIDE_METAFUNCTION_H
 #define PYSIDE_METAFUNCTION_H
 
-#include <QObject>
-#include <QString>
-#include <QStringList>
-
 #include <pysidemacros.h>
+
 #include <sbkpython.h>
+
+#include <QtCore/QObject>
 
 extern "C"
 {

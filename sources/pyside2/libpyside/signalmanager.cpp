@@ -47,19 +47,18 @@
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"
 
-#include <QtCore>
-#include <QHash>
-#include <QStringList>
-#include <QMetaMethod>
 #include <autodecref.h>
-#include <gilstate.h>
-#include <QDebug>
-#include <limits>
-#include <algorithm>
 #include <basewrapper.h>
 #include <bindingmanager.h>
+#include <gilstate.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
+
+#include <QtCore/QDebug>
+#include <QtCore/QHash>
+
+#include <algorithm>
+#include <limits>
 
 // These private headers are needed to throw JavaScript exceptions
 #if PYSIDE_QML_PRIVATE_API_SUPPORT

@@ -41,10 +41,12 @@
 #define SIGNALMANAGER_H
 
 #include "pysidemacros.h"
+
 #include <sbkpython.h>
-#include <Qt>
-#include <QStringList>
-#include <QMetaMethod>
+
+#include <QtCore/QMetaMethod>
+
+QT_FORWARD_DECLARE_CLASS(QDataStream)
 
 namespace PySide
 {

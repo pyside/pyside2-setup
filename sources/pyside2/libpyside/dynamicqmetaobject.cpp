@@ -45,16 +45,14 @@
 #include "pysideproperty_p.h"
 #include "pysideslot_p.h"
 
-#include <QByteArray>
-#include <QString>
-#include <QStringList>
-#include <QList>
-#include <QObject>
-#include <cstring>
-#include <QDebug>
-#include <QMetaMethod>
 #include <shiboken.h>
 
+#include <QtCore/QByteArray>
+#include <QtCore/QObject>
+#include <QtCore/QStringList>
+#include <QtCore/QVector>
+
+#include <cstring>
 
 #define EMPTY_META_METHOD "0()"
 

@@ -38,13 +38,13 @@
 ****************************************************************************/
 
 #include <sbkpython.h>
+
 #include "pysideclassinfo.h"
 #include "pyside_p.h"
 #include "pysideclassinfo_p.h"
 #include "dynamicqmetaobject.h"
 
 #include <shiboken.h>
-#include <QDebug>
 
 #define CLASSINFO_CLASS_NAME    "ClassInfo"
 

@@ -41,16 +41,15 @@
 #define PYSIDE_H
 
 #include <sbkpython.h>
+
 #include <pysidemacros.h>
 
 #ifdef PYSIDE_QML_SUPPORT
-#  include <qqml.h>
+#  include <QtQml/qqml.h>
 #endif
 
-#include <QMetaType>
-#include <QHash>
-#include <QList>
-#include <QLoggingCategory>
+#include <QtCore/QMetaType>
+#include <QtCore/QHash>
 
 struct SbkObjectType;
 

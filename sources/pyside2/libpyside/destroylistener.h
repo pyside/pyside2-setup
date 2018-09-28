@@ -40,9 +40,9 @@
 #ifndef PYSIDE_DESTROY_LISTENER
 #define PYSIDE_DESTROY_LISTENER
 
-
-#include <QObject>
 #include "pysidemacros.h"
+
+#include <QtCore/QObject>
 
 namespace PySide
 {

@@ -41,8 +41,8 @@
 #define PYSIDE_METAFUNCTION_P_H
 
 #include <sbkpython.h>
-#include <QList>
-#include <QByteArray>
+
+#include <QtCore/QtGlobal>
 
 QT_BEGIN_NAMESPACE
 class QObject;

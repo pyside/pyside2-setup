@@ -40,15 +40,13 @@
 #include "globalreceiverv2.h"
 #include "dynamicqmetaobject_p.h"
 #include "pysideweakref.h"
+#include "signalmanager.h"
 
-#include <QMetaMethod>
-#include <QDebug>
-#include <QEvent>
-#include <QLinkedList>
 #include <autodecref.h>
 #include <gilstate.h>
 
-#include "signalmanager.h"
+#include <QtCore/QMetaMethod>
+#include <QtCore/QSet>
 
 #define RECEIVER_DESTROYED_SLOT_NAME "__receiverDestroyed__(QObject*)"
 

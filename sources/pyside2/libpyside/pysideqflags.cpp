@@ -38,8 +38,9 @@
 ****************************************************************************/
 
 #include "pysideqflags.h"
-#include <sbkenum.h>
+
 #include <autodecref.h>
+#include <sbkenum.h>
 
 extern "C" {
     struct SbkConverter;
