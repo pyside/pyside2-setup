@@ -944,12 +944,6 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
             qCDebug(lcShiboken) << "   - " << metaEnumValue->name() << " = "
                 << metaEnumValue->value() << " = " << metaEnumValue->value();
         }
-
-        // Add into global register...
-        if (enclosing)
-            m_enumValues[enclosing->name() + colonColon() + metaEnumValue->name()] = metaEnumValue;
-        else
-            m_enumValues[metaEnumValue->name()] = metaEnumValue;
     }
 
     m_enums << metaEnum;
@@ -1745,9 +1739,6 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             if (!metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
                 metaArg->setDefaultValueExpression(replacedExpression);
                 metaArg->setOriginalDefaultValueExpression(replacedExpression);
-
-                if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
-                    m_enumDefaultArguments << QPair<AbstractMetaArgument*, AbstractMetaFunction*>(metaArg, metaFunction);
             }
         }
     }
@@ -2121,10 +2112,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
                 expr = replacedExpression;
             }
             metaArg->setDefaultValueExpression(expr);
-
-            if (metaArg->type()->isEnum() || metaArg->type()->isFlags())
-                m_enumDefaultArguments << QPair<AbstractMetaArgument *, AbstractMetaFunction *>(metaArg, metaFunction);
-
             hasDefaultValue = !expr.isEmpty();
         }
 
@@ -2424,10 +2411,6 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         }
         return nullptr;
     }
-
-    // Used to for diagnostics later...
-    if (d)
-        d->m_usedTypes << type;
 
     // These are only implicit and should not appear in code...
     Q_ASSERT(!type->isInterface());

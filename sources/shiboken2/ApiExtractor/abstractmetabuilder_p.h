@@ -168,8 +168,6 @@ public:
     AbstractMetaFunctionList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 
-    QSet<const TypeEntry *> m_usedTypes;
-
     typedef QMap<QString, AbstractMetaBuilder::RejectReason> RejectMap;
 
     RejectMap m_rejectedClasses;
@@ -178,10 +176,6 @@ public:
     RejectMap m_rejectedFields;
 
     QList<AbstractMetaEnum *> m_enums;
-
-    QList<QPair<AbstractMetaArgument *, AbstractMetaFunction *> > m_enumDefaultArguments;
-
-    QHash<QString, AbstractMetaEnumValue *> m_enumValues;
 
     AbstractMetaClass *m_currentClass;
     QList<ScopeModelItem> m_scopes;
