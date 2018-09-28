@@ -655,7 +655,7 @@ void DynamicQMetaObject::parsePythonType(PyTypeObject *type)
         }
 
         // Register properties
-        foreach (const PropPair &propPair, properties)
+        for (const PropPair &propPair : qAsConst(properties))
             addProperty(propPair.first, propPair.second);
     }
 }

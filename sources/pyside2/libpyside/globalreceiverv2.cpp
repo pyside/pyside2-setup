@@ -285,9 +285,9 @@ int GlobalReceiverV2::refCount(const QObject* link) const
 
 void GlobalReceiverV2::notify()
 {
-    QSet<const QObject*> objs = QSet<const QObject*>::fromList(m_refs);
+    const auto objSet = QSet<const QObject*>::fromList(m_refs);
     Py_BEGIN_ALLOW_THREADS
-    foreach(const QObject* o, objs) {
+    for (const QObject *o : objSet) {
         QMetaObject::disconnect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
         QMetaObject::connect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
     }

@@ -784,7 +784,7 @@ PySideSignalInstance* newObjectFromMethod(PyObject* source, const QList<QMetaMet
 {
     PySideSignalInstance* root = 0;
     PySideSignalInstance* previous = 0;
-    foreach (const QMetaMethod &m, methodList) {
+    for (const QMetaMethod &m : methodList) {
         PySideSignalInstance* item = PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF());
         if (!root)
             root = item;
