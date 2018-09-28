@@ -288,14 +288,8 @@ protected:
     /// Returns all container types found by APIExtractor
     ContainerTypeEntryList containerTypes() const;
 
-    /// Returns an AbstractMetaEnum for a given EnumTypeEntry, or NULL if not found.
-    const AbstractMetaEnum* findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const;
-
     /// Returns an AbstractMetaEnum for a given TypeEntry that is an EnumTypeEntry, or NULL if not found.
     const AbstractMetaEnum* findAbstractMetaEnum(const TypeEntry* typeEntry) const;
-
-    /// Returns an AbstractMetaEnum for the enum related to a given FlagsTypeEntry, or NULL if not found.
-    const AbstractMetaEnum* findAbstractMetaEnum(const FlagsTypeEntry* typeEntry) const;
 
     /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or NULL if not found.
     const AbstractMetaEnum* findAbstractMetaEnum(const AbstractMetaType* metaType) const;

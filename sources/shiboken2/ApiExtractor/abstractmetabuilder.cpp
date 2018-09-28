@@ -160,6 +160,13 @@ AbstractMetaEnumList AbstractMetaBuilder::globalEnums() const
     return d->m_globalEnums;
 }
 
+AbstractMetaEnum *AbstractMetaBuilder::findEnum(const TypeEntry *typeEntry) const
+{
+    if (typeEntry && typeEntry->isFlags())
+        typeEntry = static_cast<const FlagsTypeEntry*>(typeEntry)->originator();
+    return d->m_enums.value(typeEntry);
+}
+
 void AbstractMetaBuilderPrivate::checkFunctionModifications()
 {
     const auto &entries = TypeDatabase::instance()->entries();
@@ -595,17 +602,10 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 const QString name = static_cast<const EnumTypeEntry *>(entry)->targetLangQualifier();
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
-                bool enumFound = false;
-                if (cls) {
-                    enumFound = cls->findEnum(entry->targetLangName());
-                } else { // Global enum
-                    for (AbstractMetaEnum *metaEnum : qAsConst(m_enums)) {
-                        if (metaEnum->typeEntry() == entry) {
-                            enumFound = true;
-                            break;
-                        }
-                    }
-                }
+                const bool enumFound = cls
+                    ? cls->findEnum(entry->targetLangName()) != nullptr
+                    : m_enums.contains(entry);
+
                 if (!enumFound) {
                     entry->setCodeGeneration(TypeEntry::GenerateNothing);
                     qCWarning(lcShiboken).noquote().nospace()
@@ -946,7 +946,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         }
     }
 
-    m_enums << metaEnum;
+    m_enums.insert(typeEntry, metaEnum);
 
     if (!metaEnum->typeEntry()->include().isValid())
         setInclude(metaEnum->typeEntry(), enumItem->fileName());

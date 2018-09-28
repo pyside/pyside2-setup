@@ -87,10 +87,7 @@ public:
     PrimitiveTypeEntryList primitiveTypes() const;
     ContainerTypeEntryList containerTypes() const;
 
-    const AbstractMetaEnum* findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const;
     const AbstractMetaEnum* findAbstractMetaEnum(const TypeEntry* typeEntry) const;
-    const AbstractMetaEnum* findAbstractMetaEnum(const FlagsTypeEntry* typeEntry) const;
-    const AbstractMetaEnum* findAbstractMetaEnum(const AbstractMetaType* metaType) const;
 
     int classCount() const;
 

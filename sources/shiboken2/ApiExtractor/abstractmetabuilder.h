@@ -41,6 +41,7 @@ class AbstractMetaClass;
 class AbstractMetaType;
 class AbstractMetaEnumValue;
 class TypeInfo;
+class TypeEntry;
 
 class AbstractMetaBuilder
 {
@@ -63,6 +64,7 @@ public:
     AbstractMetaClassList smartPointers() const;
     AbstractMetaFunctionList globalFunctions() const;
     AbstractMetaEnumList globalEnums() const;
+    AbstractMetaEnum *findEnum(const TypeEntry *typeEntry) const;
 
     /**
     *   Sorts a list of classes topologically, if an AbstractMetaClass object

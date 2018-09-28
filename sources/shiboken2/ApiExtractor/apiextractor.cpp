@@ -177,41 +177,9 @@ static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClass
     return result;
 }
 
-const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const EnumTypeEntry* typeEntry) const
-{
-    if (!typeEntry)
-        return 0;
-    const AbstractMetaEnumList &globalEnums = m_builder->globalEnums();
-    for (AbstractMetaEnum* metaEnum : globalEnums) {
-        if (metaEnum->typeEntry() == typeEntry)
-            return metaEnum;
-    }
-    return findEnumOnClasses(m_builder->classes(), typeEntry);
-}
-
 const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
 {
-    if (!typeEntry)
-        return 0;
-    if (typeEntry->isFlags())
-        return findAbstractMetaEnum(static_cast<const FlagsTypeEntry*>(typeEntry));
-    if (typeEntry->isEnum())
-        return findAbstractMetaEnum(static_cast<const EnumTypeEntry*>(typeEntry));
-    return 0;
-}
-
-const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const FlagsTypeEntry* typeEntry) const
-{
-    if (!typeEntry)
-        return 0;
-    return findAbstractMetaEnum(typeEntry->originator());
-}
-
-const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const AbstractMetaType* metaType) const
-{
-    if (!metaType)
-        return 0;
-    return findAbstractMetaEnum(metaType->typeEntry());
+    return m_builder->findEnum(typeEntry);
 }
 
 int ApiExtractor::classCount() const

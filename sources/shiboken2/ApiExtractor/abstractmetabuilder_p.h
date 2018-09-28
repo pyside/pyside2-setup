@@ -175,7 +175,7 @@ public:
     RejectMap m_rejectedFunctions;
     RejectMap m_rejectedFields;
 
-    QList<AbstractMetaEnum *> m_enums;
+    QHash<const TypeEntry *, AbstractMetaEnum *> m_enums;
 
     AbstractMetaClass *m_currentClass;
     QList<ScopeModelItem> m_scopes;
