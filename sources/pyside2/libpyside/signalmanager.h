@@ -103,14 +103,6 @@ public:
     // Utility function to call a python method usign args received in qt_metacall
     static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj, bool isShortCuit);
 
-    PYSIDE_DEPRECATED(QObject* globalReceiver());
-    PYSIDE_DEPRECATED(void addGlobalSlot(const char* slot, PyObject* callback));
-    PYSIDE_DEPRECATED(int addGlobalSlotGetIndex(const char* slot, PyObject* callback));
-
-    PYSIDE_DEPRECATED(void globalReceiverConnectNotify(QObject *sender, int slotIndex));
-    PYSIDE_DEPRECATED(void globalReceiverDisconnectNotify(QObject *sender, int slotIndex));
-    PYSIDE_DEPRECATED(bool hasConnectionWith(const QObject *object));
-
 private:
     struct SignalManagerPrivate;
     SignalManagerPrivate* m_d;

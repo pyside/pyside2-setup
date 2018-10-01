@@ -77,7 +77,6 @@
 #define PYSIDE_SLOT '1'
 #define PYSIDE_SIGNAL '2'
 #include "globalreceiverv2.h"
-#include "globalreceiver.h"
 
 #define PYTHON_TYPE "PyObject"
 
@@ -225,9 +224,6 @@ struct SignalManager::SignalManagerPrivate
 {
     SharedMap m_globalReceivers;
 
-    //Deprecated
-    GlobalReceiver m_globalReceiver;
-
     SignalManagerPrivate()
     {
         m_globalReceivers = SharedMap( new QMap<QByteArray, GlobalReceiverV2*>() );
@@ -307,31 +303,6 @@ SignalManager& SignalManager::instance()
 {
     static SignalManager me;
     return me;
-}
-
-QObject* SignalManager::globalReceiver()
-{
-    return &m_d->m_globalReceiver;
-}
-
-void SignalManager::globalReceiverConnectNotify(QObject* source, int slotIndex)
-{
-    m_d->m_globalReceiver.connectNotify(source, slotIndex);
-}
-
-void SignalManager::globalReceiverDisconnectNotify(QObject* source, int slotIndex)
-{
-    m_d->m_globalReceiver.disconnectNotify(source, slotIndex);
-}
-
-void SignalManager::addGlobalSlot(const char* slot, PyObject* callback)
-{
-    m_d->m_globalReceiver.addSlot(slot, callback);
-}
-
-int SignalManager::addGlobalSlotGetIndex(const char* slot, PyObject* callback)
-{
-    return m_d->m_globalReceiver.addSlot(slot, callback);
 }
 
 QObject* SignalManager::globalReceiver(QObject *sender, PyObject *callback)
@@ -621,11 +592,6 @@ int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signa
         }
     }
     return methodIndex;
-}
-
-bool SignalManager::hasConnectionWith(const QObject *object)
-{
-    return m_d->m_globalReceiver.hasConnectionWith(object);
 }
 
 const QMetaObject* SignalManager::retrieveMetaObject(PyObject *self)

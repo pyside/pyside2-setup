@@ -44,7 +44,6 @@ set(libpyside_SRC
     dynamicqmetaobject.cpp
     destroylistener.cpp
     signalmanager.cpp
-    globalreceiver.cpp
     globalreceiverv2.cpp
     pysideclassinfo.cpp
     pysidemetafunction.cpp
@@ -120,7 +119,6 @@ endif()
 set(libpyside_HEADERS
     destroylistener.h
     dynamicqmetaobject.h
-    globalreceiver.h
     pysideclassinfo.h
     pysidemacros.h
     signalmanager.h
