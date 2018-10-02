@@ -53,7 +53,20 @@
  * This creates wrong language binding unless we define 'extern "C"' here.
  */
 extern "C" {
+/*
+ * Python 2 uses the "register" keyword, which is deprecated in C++ 11
+ * and forbidden in C++17.
+ */
+#  if defined(__clang__)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-register"
+#  endif
+
 #  include <Python.h>
+
+#  if defined(__clang__)
+#    pragma clang diagnostic pop
+#  endif
 }
 #  include <structmember.h>
 // Now we have the usual variables from Python.h .
@@ -62,9 +75,24 @@ extern "C" {
 #  include "pep384impl.h"
 #  include "typespec.h"
 #  pragma pop_macro("slots")
+
 #else
+
 extern "C" {
+/*
+ * Python 2 uses the "register" keyword, which is deprecated in C++ 11
+ * and forbidden in C++17.
+ */
+#  if defined(__clang__)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-register"
+#  endif
+
 #  include <Python.h>
+
+#  if defined(__clang__)
+#    pragma clang diagnostic pop
+#  endif
 }
 #  include <structmember.h>
 // Now we have the usual variables from Python.h .
