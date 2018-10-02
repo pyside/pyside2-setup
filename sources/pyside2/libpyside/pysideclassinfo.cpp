@@ -108,8 +108,9 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
     PyTypeObject *klassType = reinterpret_cast<PyTypeObject*>(klass);
     if (Shiboken::ObjectType::checkType(klassType)) {
-        if (PySide::DynamicQMetaObject *mo = PySide::retrieveMetaObject(klassType)) {
-            mo->addInfo(PySide::ClassInfo::getMap(data));
+        if (auto userData = PySide::retrieveTypeUserData(klassType)) {
+            PySide::MetaObjectBuilder &mo = userData->mo;
+            mo.addInfo(PySide::ClassInfo::getMap(data));
             pData->m_alreadyWrapped = true;
             validClass = true;
         }

@@ -55,7 +55,7 @@ struct TypeUserData
     explicit TypeUserData(PyTypeObject* type,  const QMetaObject* metaobject, std::size_t size) :
         mo(type, metaobject), cppObjSize(size) {}
 
-    DynamicQMetaObject mo;
+    MetaObjectBuilder mo;
     std::size_t cppObjSize;
 };
 
@@ -63,8 +63,8 @@ TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj);
 TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj);
 TypeUserData *retrieveTypeUserData(PyObject *pyObj);
 // For QML
-PYSIDE_API DynamicQMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj);
-PYSIDE_API DynamicQMetaObject *retrieveMetaObject(PyObject *pyObj);
+PYSIDE_API const QMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj);
+PYSIDE_API const QMetaObject *retrieveMetaObject(PyObject *pyObj);
 
 } //namespace PySide
 

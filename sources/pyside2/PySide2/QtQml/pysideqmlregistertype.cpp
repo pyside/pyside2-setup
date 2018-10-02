@@ -172,13 +172,13 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.versionMajor = versionMajor;
         type.versionMinor = versionMinor;
         type.elementName = qmlName;
-        type.metaObject = metaObject;
 
         type.extensionObjectCreate = 0;
         type.extensionMetaObject = 0;
         type.customParser = 0;
         ++nextType;
     }
+    type.metaObject = metaObject; // Snapshot may have changed.
 
     int qmlTypeId = QQmlPrivate::qmlregister(QQmlPrivate::TypeRegistration, &type);
     if (qmlTypeId == -1) {

@@ -204,7 +204,7 @@ void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, std::si
     Shiboken::ObjectType::setTypeUserData(type, userData, Shiboken::callCppDestructor<TypeUserData>);
 
     //initialize staticQMetaObject property
-    void* metaObjectPtr = &userData->mo;
+    void *metaObjectPtr = const_cast<QMetaObject *>(userData->mo.update());
     static SbkConverter* converter = Shiboken::Conversions::getConverter("QMetaObject");
     if (!converter)
         return;
@@ -229,13 +229,13 @@ TypeUserData *retrieveTypeUserData(PyObject *pyObj)
     return retrieveTypeUserData(pyTypeObj);
 }
 
-DynamicQMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj)
+const QMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj)
 {
     TypeUserData *userData = retrieveTypeUserData(pyTypeObj);
-    return userData ? &(userData->mo) : nullptr;
+    return userData ? userData->mo.update() : nullptr;
 }
 
-DynamicQMetaObject *retrieveMetaObject(PyObject *pyObj)
+const QMetaObject *retrieveMetaObject(PyObject *pyObj)
 {
     auto pyTypeObj = PyType_Check(pyObj)
         ? reinterpret_cast<PyTypeObject *>(pyObj) : Py_TYPE(pyObj);
@@ -268,8 +268,7 @@ void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds 
         qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.", className.constData());
         return;
     }
-    userData->mo.update();
-    initDynamicMetaObject(type, &userData->mo, userData->cppObjSize);
+    initDynamicMetaObject(type, userData->mo.update(), userData->cppObjSize);
 }
 
 PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* name)

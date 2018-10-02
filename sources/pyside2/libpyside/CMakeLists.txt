@@ -82,7 +82,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${SHIBOKEN_INCLUDE_DIR}
                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                     ${QML_INCLUDES}
-                    ${Qt5Core_INCLUDE_DIRS})
+                    ${Qt5Core_INCLUDE_DIRS}
+                    ${Qt5Core_PRIVATE_INCLUDE_DIRS})
 add_library(pyside2 SHARED ${libpyside_SRC} ${other_files})
 target_link_libraries(pyside2
                       ${SHIBOKEN_PYTHON_LIBRARIES}
