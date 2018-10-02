@@ -48,8 +48,10 @@
 #include <QtCore/QList>
 #include <QtCore/QMetaMethod>
 
-QT_FORWARD_DECLARE_CLASS(QMetaObject)
-QT_FORWARD_DECLARE_CLASS(QObject)
+QT_BEGIN_NAMESPACE
+struct QMetaObject;
+class QObject;
+QT_END_NAMESPACE
 
 extern "C"
 {
