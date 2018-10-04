@@ -192,9 +192,7 @@ void destroyQCoreApplication()
 
 std::size_t getSizeOfQObject(SbkObjectType* type)
 {
-    using namespace Shiboken::ObjectType;
-    TypeUserData* userData = reinterpret_cast<TypeUserData*>(getTypeUserData(reinterpret_cast<SbkObjectType*>(type)));
-    return userData->cppObjSize;
+    return retrieveTypeUserData(type)->cppObjSize;
 }
 
 void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, std::size_t cppObjSize)
@@ -214,6 +212,36 @@ void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, std::si
     PyObject_SetAttrString(reinterpret_cast<PyObject*>(type), "staticMetaObject", pyMetaObject);
 }
 
+TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj)
+{
+    return reinterpret_cast<TypeUserData *>(Shiboken::ObjectType::getTypeUserData(sbkTypeObj));
+}
+
+TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj)
+{
+    return retrieveTypeUserData(reinterpret_cast<SbkObjectType *>(pyTypeObj));
+}
+
+TypeUserData *retrieveTypeUserData(PyObject *pyObj)
+{
+    auto pyTypeObj = PyType_Check(pyObj)
+        ? reinterpret_cast<PyTypeObject *>(pyObj) : Py_TYPE(pyObj);
+    return retrieveTypeUserData(pyTypeObj);
+}
+
+DynamicQMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj)
+{
+    TypeUserData *userData = retrieveTypeUserData(pyTypeObj);
+    return userData ? &(userData->mo) : nullptr;
+}
+
+DynamicQMetaObject *retrieveMetaObject(PyObject *pyObj)
+{
+    auto pyTypeObj = PyType_Check(pyObj)
+        ? reinterpret_cast<PyTypeObject *>(pyObj) : Py_TYPE(pyObj);
+    return retrieveMetaObject(pyTypeObj);
+}
+
 void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base)
 {
     initDynamicMetaObject(type, base, 0);
@@ -226,26 +254,22 @@ void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds 
 
     PyObject* bases = PyTuple_GET_ITEM(args, 1);
     int numBases = PyTuple_GET_SIZE(bases);
-    DynamicQMetaObject *baseMo = nullptr;
-    SbkObjectType* qobjBase = 0;
+
+    TypeUserData *userData = nullptr;
 
     for (int i = 0; i < numBases; ++i) {
         PyTypeObject* base = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
         if (PyType_IsSubtype(base, qObjType)) {
-            void *typeUserData = Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(base));
-            baseMo = &(reinterpret_cast<TypeUserData *>(typeUserData)->mo);
-            qobjBase = reinterpret_cast<SbkObjectType*>(base);
-            baseMo->update();
+            userData = retrieveTypeUserData(base);
             break;
         }
     }
-    if (!baseMo) {
+    if (!userData) {
         qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.", className.constData());
         return;
     }
-
-    TypeUserData* userData = reinterpret_cast<TypeUserData*>(Shiboken::ObjectType::getTypeUserData(qobjBase));
-    initDynamicMetaObject(type, baseMo, userData->cppObjSize);
+    userData->mo.update();
+    initDynamicMetaObject(type, &userData->mo, userData->cppObjSize);
 }
 
 PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* name)
