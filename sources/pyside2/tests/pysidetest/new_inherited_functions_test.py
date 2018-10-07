@@ -32,16 +32,15 @@ import sys
 import os
 import unittest
 
-import PySide2.QtCore
+from PySide2 import *
+for modname, mod in sys.modules.items():
+    # Python 2 leaves "None" in the dict.
+    if modname.startswith("PySide2.") and mod is not None:
+        print("importing", modname)
+        exec("import " + modname)
 
 # This test tests the existence and callability of the newly existing functions,
 # after the inheritance was made complete in the course of PYSIDE-331.
-
-def warn_essential(modname):
-    print(80 * "*")
-    print("*** Warning: '{}' is an essential module! Are you sure to skip it?"
-          .format(modname))
-    print(80 * "*")
 
 new_functions = """
     PySide2.QtCore.QAbstractItemModel().parent()
@@ -52,85 +51,67 @@ new_functions = """
     PySide2.QtCore.QSortFilterProxyModel().parent()
     PySide2.QtCore.QTemporaryFile(tfarg).open(openMode)
 """
-try:
-    modname = "PySide2.QtGui"
-    exec("import " + modname)
-    new_functions += """
-        PySide2.QtGui.QBitmap().transformed(qMatrix,transformationMode)
-        PySide2.QtGui.QStandardItemModel().insertColumn(int,qModelIndex)
-        PySide2.QtGui.QStandardItemModel().parent()
-        # PySide2.QtGui.QTextList(qTextDocument).setFormat(qTextFormat) # Segmentation fault: 11
-        # PySide2.QtGui.QTextTable(qTextDocument).setFormat(qTextFormat) # Segmentation fault: 11
-    """
-except ImportError:
-    warn_essential(modname)
-try:
-    modname = "PySide2.QtWidgets"
-    exec("import " + modname)
-    new_functions += """
-        PySide2.QtWidgets.QAbstractItemView().update()
-        PySide2.QtWidgets.QApplication.palette()
-        PySide2.QtWidgets.QApplication.setFont(qFont)
-        PySide2.QtWidgets.QApplication.setPalette(qPalette)
-        PySide2.QtWidgets.QBoxLayout(direction).addWidget(qWidget)
-        PySide2.QtWidgets.QColorDialog().open()
-        PySide2.QtWidgets.QDirModel().index(int,int,qModelIndex)
-        PySide2.QtWidgets.QDirModel().parent()
-        PySide2.QtWidgets.QFileDialog().open()
-        PySide2.QtWidgets.QFileSystemModel().index(int,int,qModelIndex)
-        PySide2.QtWidgets.QFileSystemModel().parent()
-        PySide2.QtWidgets.QFontDialog().open()
-        PySide2.QtWidgets.QGestureEvent([]).accept()
-        PySide2.QtWidgets.QGestureEvent([]).ignore()
-        PySide2.QtWidgets.QGestureEvent([]).isAccepted()
-        PySide2.QtWidgets.QGestureEvent([]).setAccepted(bool)
-        # PySide2.QtWidgets.QGraphicsView().render(qPaintDevice,qPoint,qRegion,renderFlags) # QPaintDevice: NotImplementedError
-        PySide2.QtWidgets.QGridLayout().addWidget(qWidget)
-        PySide2.QtWidgets.QHeaderView(orientation).initStyleOption(qStyleOptionFrame)
-        PySide2.QtWidgets.QInputDialog().open()
-        PySide2.QtWidgets.QLineEdit().addAction(qAction)
-        PySide2.QtWidgets.QListWidget().closePersistentEditor(qModelIndex)
-        PySide2.QtWidgets.QListWidget().openPersistentEditor(qModelIndex)
-        PySide2.QtWidgets.QMessageBox().open()
-        PySide2.QtWidgets.QPlainTextEdit.find(quintptr)
-        PySide2.QtWidgets.QProgressDialog().open()
-        PySide2.QtWidgets.QStackedLayout().widget()
-        # PySide2.QtWidgets.QStylePainter().begin(qPaintDevice) # QPaintDevice: NotImplementedError
-        PySide2.QtWidgets.QTableWidget().closePersistentEditor(qModelIndex)
-        PySide2.QtWidgets.QTableWidget().openPersistentEditor(qModelIndex)
-        PySide2.QtWidgets.QTextEdit.find(quintptr)
-        PySide2.QtWidgets.QTreeWidget().closePersistentEditor(qModelIndex)
-        PySide2.QtWidgets.QTreeWidget().openPersistentEditor(qModelIndex)
-    """
-except ImportError:
-    warn_essential(modname)
-try:
-    modname = "PySide2.QtPrintSupport"
-    exec("import " + modname)
-    new_functions += """
-        # PySide2.QtPrintSupport.QPageSetupDialog().open() # Segmentation fault: 11
-        # PySide2.QtPrintSupport.QPrintDialog().open() # opens the dialog, but works
-        PySide2.QtPrintSupport.QPrintDialog().printer()
-        PySide2.QtPrintSupport.QPrintPreviewDialog().open() # note: this prints something, but really shouldn't ;-)
-    """
-except ImportError:
-    warn_essential(modname)
-try:
-    import PySide2.QtHelp
-    new_functions += """
-        PySide2.QtHelp.QHelpContentModel().parent()
-        # PySide2.QtHelp.QHelpIndexModel().createIndex(int,int,quintptr) # returned NULL without setting an error
-        # PySide2.QtHelp.QHelpIndexModel().createIndex(int,int,object()) # returned NULL without setting an error
-    """
-except ImportError:
-    pass
-try:
-    import PySide2.QtQuick
-    new_functions += """
-        PySide2.QtQuick.QQuickPaintedItem().update()
-    """
-except ImportError:
-    pass
+
+new_functions += """
+    PySide2.QtGui.QBitmap().transformed(qMatrix,transformationMode)
+    PySide2.QtGui.QStandardItemModel().insertColumn(int,qModelIndex)
+    PySide2.QtGui.QStandardItemModel().parent()
+    # PySide2.QtGui.QTextList(qTextDocument).setFormat(qTextFormat) # Segmentation fault: 11
+    # PySide2.QtGui.QTextTable(qTextDocument).setFormat(qTextFormat) # Segmentation fault: 11
+""" if "PySide2.QtGui" in sys.modules else ""
+
+new_functions += """
+    PySide2.QtWidgets.QAbstractItemView().update()
+    PySide2.QtWidgets.QApplication.palette()
+    PySide2.QtWidgets.QApplication.setFont(qFont)
+    PySide2.QtWidgets.QApplication.setPalette(qPalette)
+    PySide2.QtWidgets.QBoxLayout(direction).addWidget(qWidget)
+    PySide2.QtWidgets.QColorDialog().open()
+    PySide2.QtWidgets.QDirModel().index(int,int,qModelIndex)
+    PySide2.QtWidgets.QDirModel().parent()
+    PySide2.QtWidgets.QFileDialog().open()
+    PySide2.QtWidgets.QFileSystemModel().index(int,int,qModelIndex)
+    PySide2.QtWidgets.QFileSystemModel().parent()
+    PySide2.QtWidgets.QFontDialog().open()
+    PySide2.QtWidgets.QGestureEvent([]).accept()
+    PySide2.QtWidgets.QGestureEvent([]).ignore()
+    PySide2.QtWidgets.QGestureEvent([]).isAccepted()
+    PySide2.QtWidgets.QGestureEvent([]).setAccepted(bool)
+    # PySide2.QtWidgets.QGraphicsView().render(qPaintDevice,qPoint,qRegion,renderFlags) # QPaintDevice: NotImplementedError
+    PySide2.QtWidgets.QGridLayout().addWidget(qWidget)
+    PySide2.QtWidgets.QHeaderView(orientation).initStyleOption(qStyleOptionFrame)
+    PySide2.QtWidgets.QInputDialog().open()
+    PySide2.QtWidgets.QLineEdit().addAction(qAction)
+    PySide2.QtWidgets.QListWidget().closePersistentEditor(qModelIndex)
+    PySide2.QtWidgets.QListWidget().openPersistentEditor(qModelIndex)
+    PySide2.QtWidgets.QMessageBox().open()
+    PySide2.QtWidgets.QPlainTextEdit.find(quintptr)
+    PySide2.QtWidgets.QProgressDialog().open()
+    PySide2.QtWidgets.QStackedLayout().widget()
+    # PySide2.QtWidgets.QStylePainter().begin(qPaintDevice) # QPaintDevice: NotImplementedError
+    PySide2.QtWidgets.QTableWidget().closePersistentEditor(qModelIndex)
+    PySide2.QtWidgets.QTableWidget().openPersistentEditor(qModelIndex)
+    PySide2.QtWidgets.QTextEdit.find(quintptr)
+    PySide2.QtWidgets.QTreeWidget().closePersistentEditor(qModelIndex)
+    PySide2.QtWidgets.QTreeWidget().openPersistentEditor(qModelIndex)
+""" if "PySide2.QtWidgets" in sys.modules else ""
+
+new_functions += """
+    # PySide2.QtPrintSupport.QPageSetupDialog().open() # Segmentation fault: 11
+    # PySide2.QtPrintSupport.QPrintDialog().open() # opens the dialog, but works
+    PySide2.QtPrintSupport.QPrintDialog().printer()
+    PySide2.QtPrintSupport.QPrintPreviewDialog().open() # note: this prints something, but really shouldn't ;-)
+""" if "PySide2.QtPrintSupport" in sys.modules else ""
+
+new_functions += """
+    PySide2.QtHelp.QHelpContentModel().parent()
+    # PySide2.QtHelp.QHelpIndexModel().createIndex(int,int,quintptr) # returned NULL without setting an error
+    # PySide2.QtHelp.QHelpIndexModel().createIndex(int,int,object()) # returned NULL without setting an error
+""" if "PySide2.QtHelp" in sys.modules else ""
+
+new_functions += """
+    PySide2.QtQuick.QQuickPaintedItem().update()
+""" if "PySide2.QtQuick" in sys.modules else ""
 
 
 class MainTest(unittest.TestCase):
