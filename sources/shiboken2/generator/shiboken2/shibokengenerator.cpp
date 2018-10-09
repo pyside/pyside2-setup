@@ -361,7 +361,19 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaType *metaType) const
     return metaType->cppSignature();
 }
 
-QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction* func)
+QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClass)
+{
+    QString fullClassName = metaClass->name();
+    const AbstractMetaClass *enclosing = metaClass->enclosingClass();
+    while (enclosing) {
+        fullClassName.prepend(enclosing->name() + QLatin1Char('.'));
+        enclosing = enclosing->enclosingClass();
+    }
+    fullClassName.prepend(packageName() + QLatin1Char('.'));
+    return fullClassName;
+}
+
+QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *func) //WS
 {
     QString funcName;
     if (func->isOperatorOverload())
@@ -369,11 +381,11 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction* fu
     else
        funcName = func->name();
     if (func->ownerClass()) {
-        QString fullName = func->ownerClass()->fullName();
+        QString fullClassName = fullPythonClassName(func->ownerClass());
         if (func->isConstructor())
-            funcName = fullName;
+            funcName = fullClassName;
         else
-            funcName.prepend(fullName + QLatin1Char('.'));
+            funcName.prepend(fullClassName + QLatin1Char('.'));
     }
     else {
         funcName = packageName() + QLatin1Char('.') + func->name();

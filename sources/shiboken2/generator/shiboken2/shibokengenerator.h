@@ -214,7 +214,8 @@ protected:
     QString wrapperName(const AbstractMetaClass* metaClass) const;
     QString wrapperName(const AbstractMetaType *metaType) const;
 
-    QString fullPythonFunctionName(const AbstractMetaFunction* func);
+    QString fullPythonClassName(const AbstractMetaClass *metaClass);
+    QString fullPythonFunctionName(const AbstractMetaFunction *func); //WS
 
     static QString protectedEnumSurrogateName(const AbstractMetaEnum* metaEnum);
     static QString protectedFieldGetterName(const AbstractMetaField* field);
