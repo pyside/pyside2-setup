@@ -40,7 +40,11 @@ set(generated_sources
 
 
 # ================================== Shiboken detection ======================================
-
+# Use provided python interpreter if given.
+if(NOT python_interpreter)
+    find_program(python_interpreter "python")
+endif()
+message(STATUS "Using python interpreter: ${python_interpreter}")
 
 # Macro to get various pyside / python include / link flags and paths.
 # Uses the not entirely supported utils/pyside2_config.py file.
@@ -52,7 +56,8 @@ macro(pyside2_config option output_var)
     endif()
 
     execute_process(
-      COMMAND python "${CMAKE_SOURCE_DIR}/../utils/pyside2_config.py" ${option}
+      COMMAND ${python_interpreter} "${CMAKE_SOURCE_DIR}/../utils/pyside2_config.py"
+              ${option}
       OUTPUT_VARIABLE ${output_var}
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 

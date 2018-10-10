@@ -1141,3 +1141,13 @@ def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
         print("Disabled " + compiler + " to " + targetArch + " from Coin configuration")
         return False
     return True
+
+
+def get_ci_qmake_path(ci_install_dir, ci_host_os):
+    qmake_path = "--qmake={}".format(ci_install_dir)
+    if ci_host_os == "MacOS":
+        return qmake_path + "/bin/qmake"
+    elif ci_host_os == "Windows":
+        return qmake_path + "\\bin\\qmake.exe"
+    else:
+        return qmake_path + "/bin/qmake"

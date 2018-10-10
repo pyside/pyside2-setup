@@ -45,6 +45,7 @@ from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
 from build_scripts.utils import acceptCITestConfiguration
+from build_scripts.utils import get_ci_qmake_path
 import os
 
 # Values must match COIN thrift
@@ -108,13 +109,8 @@ def call_setup(python_ver):
         cmd += ["bdist_wheel", "--standalone"]
     else:
         cmd += ["build"]
-    if CI_HOST_OS == "MacOS":
-        cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "/bin/qmake"]
-    elif CI_HOST_OS == "Windows":
-
-        cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "\\bin\\qmake.exe"]
-    else:
-        cmd += ["--qmake=" + CI_ENV_INSTALL_DIR + "/bin/qmake"]
+    qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
+    cmd.append(qmake_path)
     cmd += ["--build-tests",
             "--jobs=4",
             "--verbose-build"]
