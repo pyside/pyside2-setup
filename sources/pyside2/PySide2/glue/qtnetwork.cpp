@@ -1,8 +1,6 @@
-<?xml version="1.0"?>
-<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -38,29 +36,45 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
--->
 
-<typesystem package="PySide2.QtHelp">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+// @snippet qudpsocket-readdatagram
+Shiboken::AutoArrayPointer<char> data(%ARGUMENT_NAMES);
+QHostAddress ha;
+quint16 port;
+%BEGIN_ALLOW_THREADS
+%RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(data, %ARGUMENT_NAMES, &ha, &port);
+%END_ALLOW_THREADS
+QByteArray ba(data, retval);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QByteArray](ba));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QHostAddress](ha));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[quint16](port));
+// @snippet qudpsocket-readdatagram
 
-    <value-type name="QHelpContentItem">
-      <modify-function signature="parent()const">
-        <modify-argument index="return">
-          <define-ownership owner="default"/>
-        </modify-argument>
-      </modify-function>
-    </value-type>
-    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
-    <object-type name="QHelpContentWidget"/>
-    <object-type name="QHelpEngine"/>
-    <object-type name="QHelpEngineCore"/>
-    <object-type name="QHelpIndexModel"/>
-    <object-type name="QHelpIndexWidget"/>
-    <object-type name="QHelpSearchEngine"/>
-    <value-type name="QHelpSearchQuery">
-        <enum-type name="FieldName"/>
-    </value-type>
-    <object-type name="QHelpSearchQueryWidget"/>
-    <object-type name="QHelpSearchResult"/>
-    <object-type name="QHelpSearchResultWidget"/>
-</typesystem>
+// @snippet qipv6address-len
+return 16;
+// @snippet qipv6address-len
+
+// @snippet qipv6address-getitem
+if (_i >= 16) {
+    PyErr_SetString(PyExc_IndexError, "index out of bounds");
+    return 0;
+}
+if (_i < 0)
+    _i = 16 - qAbs(_i);
+
+uint item = %CPPSELF.c[_i];
+return %CONVERTTOPYTHON[uint](item);
+// @snippet qipv6address-getitem
+
+// @snippet qipv6address-setitem
+if (_i >= 16) {
+    PyErr_SetString(PyExc_IndexError, "index out of bounds");
+    return -1;
+}
+if (_i < 0)
+    _i = 16 - qAbs(_i);
+quint8 item = %CONVERTTOCPP[quint8](_value);
+%CPPSELF.c[_i] = item;
+return 0;
+// @snippet qipv6address-setitem

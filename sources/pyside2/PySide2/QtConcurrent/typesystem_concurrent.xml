@@ -47,7 +47,7 @@
   <namespace-type name="QtConcurrent" target-type="class">
     <rejection class="QtConcurrent" enum-name="enum_1"/>
     <enum-type name="ReduceOption" flags="ReduceOptions"/>
-    <enum-type name="ThreadFunctionResult" />
+    <enum-type name="ThreadFunctionResult"/>
     <extra-includes>
       <include file-name="qtconcurrentreducekernel.h" location="global"/>
       <include file-name="qtconcurrentthreadengine.h" location="global"/>

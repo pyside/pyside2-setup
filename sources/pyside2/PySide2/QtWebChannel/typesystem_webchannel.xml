@@ -42,7 +42,7 @@
 <typesystem package="PySide2.QtWebChannel">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
-  <object-type name="QWebChannel" />
+  <object-type name="QWebChannel"/>
   <object-type name="QWebChannelAbstractTransport">
     <extra-includes>
       <include file-name="QJsonObject" location="global"/>
@@ -50,6 +50,6 @@
   </object-type>
   <!-- Not sure if this will be useful, but commented out for now because
        the QML module is not yet wrapped.
-  <object-type name="QQmlWebChannel" /> -->
+  <object-type name="QQmlWebChannel"/> -->
 
 </typesystem>

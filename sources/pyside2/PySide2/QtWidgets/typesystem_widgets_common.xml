@@ -180,7 +180,7 @@
   <object-type name="QStyleOptionToolButton" polymorphic-id-expression="%1-&gt;type == QStyleOptionToolButton::Type &amp;&amp; %1-&gt;version == QStyleOptionToolButton::Version">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
-      <enum-type name="ToolButtonFeature" flags="ToolButtonFeatures" />
+      <enum-type name="ToolButtonFeature" flags="ToolButtonFeatures"/>
   </object-type>
   <value-type name="QStyleOptionViewItem" polymorphic-id-expression="%1-&gt;type == QStyleOptionViewItem::Type &amp;&amp; %1-&gt;version == QStyleOptionViewItem::Version">
       <enum-type name="Position"/>
@@ -204,30 +204,21 @@
   <value-type name="QTreeWidgetItemIterator" >
     <modify-function signature="QTreeWidgetItemIterator(QTreeWidget*,QFlags&lt;QTreeWidgetItemIterator::IteratorFlag&gt;)">
         <modify-argument index="this">
-            <parent index="1" action="add" />
+            <parent index="1" action="add"/>
         </modify-argument>
     </modify-function>
 
     <add-function signature="__iter__()" return-type="PyObject*">
       <inject-code class="target" position="beginning">
-        <insert-template name="__iter__" />
+        <insert-template name="__iter__"/>
       </inject-code>
     </add-function>
     <add-function signature="__next__()" return-type="PyObject*">
-      <inject-code class="target" position="beginning">
-      if (**%CPPSELF) {
-          QTreeWidgetItemIterator *%0 = new QTreeWidgetItemIterator((*%CPPSELF)++);
-          %PYARG_0 = %CONVERTTOPYTHON[QTreeWidgetItemIterator*](%0);
-      }
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qtreewidgetitemiterator-next"/>
     </add-function>
 
     <add-function signature="value()" return-type="QTreeWidgetItem*">
-        <inject-code>
-        QTreeWidgetItem *%0 = %CPPSELF.operator*();
-        %PYARG_0 = %CONVERTTOPYTHON[QTreeWidgetItem*](%0);
-        Shiboken::Object::releaseOwnership(%PYARG_0);
-        </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qtreewidgetitemiterator-value"/>
     </add-function>
     <enum-type name="IteratorFlag" flags="IteratorFlags"/>
     <!-- ### See bug 778 -->
@@ -267,26 +258,14 @@
     <enum-type name="GraphicsItemChange"/>
     <enum-type name="GraphicsItemFlag" flags="GraphicsItemFlags"/>
     <enum-type name="PanelModality" since="4.6"/>
-    <inject-code class="target" position="end">
-        PyObject *userTypeConstant =  PyInt_FromLong(QGraphicsItem::UserType);
-        PyDict_SetItemString(reinterpret_cast&lt;PyTypeObject *&gt;(Sbk_QGraphicsItem_TypeF())->tp_dict, "UserType", userTypeConstant);
-    </inject-code>
+    <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qgraphicsitem"/>
     <modify-function signature="setParentItem(QGraphicsItem*)">
       <modify-argument index="this">
         <parent index="1" action="add"/>
       </modify-argument>
     </modify-function>
-    <template name="scene_return_parenting">
-    if (%0) {
-        QObject *parent = %0->parent();
-        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QObject*](parent));
-        Shiboken::Object::setParent(pyParent, %PYARG_0);
-    }
-    </template>
     <modify-function signature="scene()const">
-        <inject-code position="end">
-            <insert-template name="scene_return_parenting"/>
-        </inject-code>
+        <inject-code position="end" file="../glue/qtwidgets.cpp" snippet="qgraphicsitem-scene-return-parenting"/>
         <modify-argument index="this">
           <parent index="return" action="add"/>
         </modify-argument>
@@ -354,13 +333,7 @@
       <modify-argument index="return">
         <replace-type modified-type="(retval, blockingPanel)"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-      QGraphicsItem *item_ = NULL;
-      %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;item_);
-      %PYARG_0 = PyTuple_New(2);
-      PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-      PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QGraphicsItem*](item_));
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qgraphicsitem-isblockedbymodalpanel"/>
     </modify-function>
     <modify-function signature="itemTransform(const QGraphicsItem*,bool*)const">
         <modify-argument index="2">
@@ -371,7 +344,7 @@
             <replace-type modified-type="(QTransform, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
-            <insert-template name="fix_args,bool*" />
+            <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
     <modify-function signature="isObscuredBy(const QGraphicsItem*)const">
@@ -453,7 +426,7 @@
     </modify-function>
     <modify-function signature="viewOptions()const">
       <modify-argument index="return">
-        <replace-default-expression with="QStyleOptionViewItem()" />
+        <replace-default-expression with="QStyleOptionViewItem()"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="model()const">
@@ -537,7 +510,7 @@
   <object-type name="QDialogButtonBox">
     <enum-type name="ButtonLayout"/>
     <enum-type name="ButtonRole"/>
-    <enum-type name="StandardButton" flags="StandardButtons" />
+    <enum-type name="StandardButton" flags="StandardButtons"/>
     <modify-function signature="addButton(QAbstractButton*,QDialogButtonBox::ButtonRole)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -562,7 +535,7 @@
       <enum-type name="Option" flags="Options"/>
   </object-type>
   <object-type name="QWizard">
-    <enum-type name="WizardButton" />
+    <enum-type name="WizardButton"/>
     <enum-type name="WizardOption" flags="WizardOptions"/>
     <enum-type name="WizardPixmap"/>
     <enum-type name="WizardStyle"/>
@@ -602,7 +575,7 @@
             <remove-argument />
         </modify-argument>
         <modify-argument index="return">
-            <replace-type modified-type="PyTuple" />
+            <replace-type modified-type="PyTuple"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="bool*_fix,arg"/>
@@ -613,15 +586,14 @@
             <remove-argument />
         </modify-argument>
         <modify-argument index="return">
-            <replace-type modified-type="PyTuple" />
+            <replace-type modified-type="PyTuple"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="bool*_fix,arg,arg,arg,arg"/>
         </inject-code>
     </modify-function>
   </object-type>
-  <object-type name="QGraphicsEllipseItem">
-  </object-type>
+  <object-type name="QGraphicsEllipseItem"/>
   <object-type name="QGraphicsItemAnimation">
     <modify-function signature="setItem(QGraphicsItem*)">
       <modify-argument index="1">
@@ -638,24 +610,24 @@
     </extra-includes>
   </object-type>
   <object-type name="QGraphicsItemGroup"/>
-  <object-type name="QGraphicsLineItem" />
-  <object-type name="QGraphicsPathItem" />
+  <object-type name="QGraphicsLineItem"/>
+  <object-type name="QGraphicsPathItem"/>
   <object-type name="QGraphicsPixmapItem">
       <enum-type name="ShapeMode"/>
   </object-type>
   <object-type name="QGraphicsPolygonItem"/>
-  <object-type name="QGraphicsRectItem" />
-  <object-type name="QGraphicsSimpleTextItem" />
+  <object-type name="QGraphicsRectItem"/>
+  <object-type name="QGraphicsSimpleTextItem"/>
   <object-type name="QHBoxLayout"/>
   <object-type name="QHeaderView">
-    <enum-type name="ResizeMode" />
+    <enum-type name="ResizeMode"/>
     <modify-function signature="paintSection(QPainter*,QRect,int)const">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
   <object-type name="QItemDelegate">
     <!-- ### "doLayout(...)" is an internal method. -->
-    <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all" />
+    <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all"/>
     <!-- ### "selected(QPixmap,QPalette,bool)" is an internal method. -->
     <modify-function signature="selected(QPixmap,QPalette,bool)const" remove="all"/>
     <!-- ### -->
@@ -687,24 +659,13 @@
       <modify-argument index="2">
         <reference-count action="set"/>
       </modify-argument>
-      <inject-code>
-        Shiboken::Object::releaseOwnership(%PYARG_2);
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qitemeditorfactory-registerEditor"/>
     </modify-function>
     <modify-function signature="setDefaultFactory(QItemEditorFactory*)">
       <modify-argument index="1">
         <define-ownership owner="c++"/>
       </modify-argument>
-      <inject-code>
-        //this function is static we need keep ref to default value, to be able to call python virtual functions
-        static PyObject* _defaultValue = 0;
-        %CPPSELF.%FUNCTION_NAME(%1);
-        Py_INCREF(%PYARG_1);
-        if (_defaultValue)
-            Py_DECREF(_defaultValue);
-
-        _defaultValue = %PYARG_1;
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qitemeditorfactory-setdefaultfactory"/>
     </modify-function>
   </object-type>
   <object-type name="QListView">
@@ -726,10 +687,10 @@
     <modify-function signature="setCentralWidget(QWidget*)">
        <inject-code class="target" position="beginning">
          <insert-template name="replace_child">
-           <replace from="$FUNCTION_GET_OLD" to="centralWidget" />
-           <replace from="$CHILD_TYPE" to="QWidget" />
-           <replace from="$PYARG" to="%PYARG_1" />
-           <replace from="$CPPARG" to="%1" />
+           <replace from="$FUNCTION_GET_OLD" to="centralWidget"/>
+           <replace from="$CHILD_TYPE" to="QWidget"/>
+           <replace from="$PYARG" to="%PYARG_1"/>
+           <replace from="$CPPARG" to="%1"/>
          </insert-template>
        </inject-code>
     </modify-function>
@@ -737,10 +698,10 @@
     <modify-function signature="setMenuBar(QMenuBar*)">
        <inject-code class="target" position="beginning">
          <insert-template name="replace_child">
-           <replace from="$FUNCTION_GET_OLD" to="menuBar" />
-           <replace from="$CHILD_TYPE" to="QMenuBar" />
-           <replace from="$PYARG" to="%PYARG_1" />
-           <replace from="$CPPARG" to="%1" />
+           <replace from="$FUNCTION_GET_OLD" to="menuBar"/>
+           <replace from="$CHILD_TYPE" to="QMenuBar"/>
+           <replace from="$PYARG" to="%PYARG_1"/>
+           <replace from="$CPPARG" to="%1"/>
          </insert-template>
        </inject-code>
    </modify-function>
@@ -748,10 +709,10 @@
    <modify-function signature="setMenuWidget(QWidget*)">
        <inject-code class="target" position="beginning">
          <insert-template name="replace_child">
-           <replace from="$FUNCTION_GET_OLD" to="menuWidget" />
-           <replace from="$CHILD_TYPE" to="QWidget" />
-           <replace from="$PYARG" to="%PYARG_1" />
-           <replace from="$CPPARG" to="%1" />
+           <replace from="$FUNCTION_GET_OLD" to="menuWidget"/>
+           <replace from="$CHILD_TYPE" to="QWidget"/>
+           <replace from="$PYARG" to="%PYARG_1"/>
+           <replace from="$CPPARG" to="%1"/>
          </insert-template>
        </inject-code>
     </modify-function>
@@ -759,10 +720,10 @@
     <modify-function signature="setStatusBar(QStatusBar*)">
        <inject-code class="target" position="beginning">
          <insert-template name="replace_child">
-           <replace from="$FUNCTION_GET_OLD" to="statusBar" />
-           <replace from="$CHILD_TYPE" to="QStatusBar" />
-           <replace from="$PYARG" to="%PYARG_1" />
-           <replace from="$CPPARG" to="%1" />
+           <replace from="$FUNCTION_GET_OLD" to="statusBar"/>
+           <replace from="$CHILD_TYPE" to="QStatusBar"/>
+           <replace from="$PYARG" to="%PYARG_1"/>
+           <replace from="$CPPARG" to="%1"/>
          </insert-template>
        </inject-code>
    </modify-function>
@@ -840,9 +801,9 @@
   <object-type name="QMenu">
     <inject-code class="native" position="beginning" file="glue/qmenu_glue.cpp"/>
 
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes" />
-    <modify-function signature="exec(const QPoint&amp;,QAction*)" rename="exec_" allow-thread="yes" />
-    <modify-function signature="exec(QList&lt;QAction*>,const QPoint&amp;,QAction*,QWidget*)" rename="exec_" allow-thread="yes" />
+    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec(const QPoint&amp;,QAction*)" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="exec(QList&lt;QAction*>,const QPoint&amp;,QAction*,QWidget*)" rename="exec_" allow-thread="yes"/>
     <modify-function signature="addAction(const QString&amp;)">
       <modify-argument index="return">
         <parent index="this" action="add"/>
@@ -885,53 +846,36 @@
       </modify-argument>
     </modify-function>
     <!-- ### "setNoReplayFor(QWidget*)" is an internal method. -->
-    <modify-function signature="setNoReplayFor(QWidget*)" remove="all" />
+    <modify-function signature="setNoReplayFor(QWidget*)" remove="all"/>
 
     <add-function signature="addAction(QString&amp;,PyObject*,QKeySequence&amp;)">
       <modify-argument index="3">
-        <replace-default-expression with="0" />
+        <replace-default-expression with="0"/>
       </modify-argument>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
 
-      <inject-code class="target" position="beginning">
-        %PYARG_0 = addActionWithPyObject(%CPPSELF, QIcon(), %1, %2, %3);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-addaction-1"/>
     </add-function>
 
     <add-function signature="addAction(QIcon&amp;,QString&amp;,PyObject*,QKeySequence&amp;)">
       <modify-argument index="4">
-        <replace-default-expression with="0" />
+        <replace-default-expression with="0"/>
       </modify-argument>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
 
-      <inject-code class="target" position="beginning">
-        %PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2, %3, %4);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-addaction-2"/>
     </add-function>
 
     <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning">
-        %CPPSELF.addAction(%1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-addaction-3"/>
     </add-function>
 
     <modify-function signature="clear()">
-      <inject-code>
-          Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
-          PyObject* pyObj;
-          foreach(QAction* act, %CPPSELF.actions()) {
-            if ((pyObj = (PyObject*)bm.retrieveWrapper(act)) != 0) {
-                Py_INCREF(pyObj);
-                Shiboken::Object::setParent(NULL, pyObj);
-                Shiboken::Object::invalidate(pyObj);
-                Py_DECREF(pyObj);
-            }
-          }
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qmenu-clear"/>
     </modify-function>
 
   </object-type>
@@ -949,9 +893,7 @@
       </modify-argument>
     </modify-function>
     <add-function signature="addAction(const QString&amp;,PyObject*)">
-      <inject-code class="target" position="beginning">
-        %PYARG_0 = addActionWithPyObject(%CPPSELF, %1, %2);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenubar-addaction-1"/>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -983,19 +925,11 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="clear()">
-      <inject-code>
-          foreach(QAction *act, %CPPSELF.actions()) {
-            Shiboken::AutoDecRef pyAct(%CONVERTTOPYTHON[QAction*](act));
-            Shiboken::Object::setParent(NULL, pyAct);
-            Shiboken::Object::invalidate(pyAct);
-          }
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qmenubar-clear"/>
     </modify-function>
 
     <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning">
-        %CPPSELF.addAction(%1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenubar-addaction-2"/>
     </add-function>
 
   </object-type>
@@ -1009,7 +943,7 @@
           </modify-argument>
       </modify-function>
   </object-type>
-  <object-type name="QPushButton" />
+  <object-type name="QPushButton"/>
   <object-type name="QScrollArea">
     <modify-function signature="setWidget(QWidget*)">
       <modify-argument index="1">
@@ -1023,18 +957,8 @@
       <modify-argument index="4">
         <replace-default-expression with="Qt::WindowShortcut"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-        %0 = new %TYPE(%1, %2);
-      </inject-code>
-      <inject-code class="target" position="end">
-        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF,
-            const_cast&lt;char *&gt;("connect"),
-            const_cast&lt;char *&gt;("OsO"),
-            %PYSELF, SIGNAL(activated()), %PYARG_3)
-        );
-        if (!result.isNull())
-            Shiboken::Object::setParent(%PYARG_2, %PYSELF);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qshortcut-1"/>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qshortcut-2"/>
     </add-function>
   </object-type>
   <object-type name="QSpacerItem"/>
@@ -1080,7 +1004,7 @@
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStylePainter" />
+  <object-type name="QStylePainter"/>
   <object-type name="QTableView">
     <modify-function signature="setHorizontalHeader(QHeaderView*)">
       <modify-argument index="1">
@@ -1116,13 +1040,7 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="removeItem(int)">
-      <inject-code class="target" position="beginning">
-        QWidget *_widget = %CPPSELF.widget(%1);
-        if (_widget) {
-            Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](_widget));
-            Shiboken::Object::setParent(0, pyWidget);
-        }
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qtoolbox-removeitem"/>
     </modify-function>
   </object-type>
   <object-type name="QToolButton">
@@ -1211,16 +1129,16 @@
   <object-type name="QWidgetAction">
     <modify-function signature="setDefaultWidget(QWidget*)">
       <modify-argument index="1">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="releaseWidget(QWidget*)">
       <modify-argument index="1">
-        <parent index="this" action="remove" />
+        <parent index="this" action="remove"/>
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QWidgetItem" polymorphic-id-expression="%1-&gt;widget()" />
+  <object-type name="QWidgetItem" polymorphic-id-expression="%1-&gt;widget()"/>
 
   <object-type name="QGraphicsSceneContextMenuEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneContextMenu">
       <enum-type name="Reason"/>
@@ -1236,10 +1154,10 @@
     <!-- ### "setWidget(QWidget*)" is an internal method. -->
     <modify-function signature="setWidget(QWidget*)" remove="all"/>
   </object-type>
-  <object-type name="QGraphicsSceneMoveEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMove" />
-  <object-type name="QGraphicsSceneResizeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneResize" />
-  <object-type name="QGraphicsSceneHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHelp" />
-  <object-type name="QGraphicsSceneHoverEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHoverEnter || %1-&gt;type() == QEvent::GraphicsSceneHoverLeave || %1-&gt;type() == QEvent::GraphicsSceneHoverMove" />
+  <object-type name="QGraphicsSceneMoveEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMove"/>
+  <object-type name="QGraphicsSceneResizeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneResize"/>
+  <object-type name="QGraphicsSceneHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHelp"/>
+  <object-type name="QGraphicsSceneHoverEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHoverEnter || %1-&gt;type() == QEvent::GraphicsSceneHoverLeave || %1-&gt;type() == QEvent::GraphicsSceneHoverMove"/>
   <object-type name="QGraphicsSceneMouseEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMouseDoubleClick || %1-&gt;type() == QEvent::GraphicsSceneMouseMove || %1-&gt;type() == QEvent::GraphicsSceneMousePress || %1-&gt;type() == QEvent::GraphicsSceneMouseRelease"/>
   <object-type name="QGraphicsSceneWheelEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneWheel"/>
 
@@ -1287,27 +1205,27 @@
       <modify-argument index="3" invalidate-after-use="yes"/>
       <modify-argument index="4">
         <replace-default-expression with="0"/>
-        <rename to="widget" />
+        <rename to="widget"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="drawControl(QStyle::ControlElement,const QStyleOption*,QPainter*,const QWidget*)const">
       <modify-argument index="3" invalidate-after-use="yes"/>
       <modify-argument index="4">
         <replace-default-expression with="0"/>
-        <rename to="widget" />
+        <rename to="widget"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="drawPrimitive(QStyle::PrimitiveElement,const QStyleOption*,QPainter*,const QWidget*)const">
       <modify-argument index="3" invalidate-after-use="yes"/>
       <modify-argument index="4">
         <replace-default-expression with="0"/>
-        <rename to="widget" />
+        <rename to="widget"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="hitTestComplexControl(QStyle::ComplexControl,const QStyleOptionComplex*,const QPoint&amp;,const QWidget*)const">
       <modify-argument index="4">
         <replace-default-expression with="0"/>
-        <rename to="widget" />
+        <rename to="widget"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="styleHint(QStyle::StyleHint,const QStyleOption*,const QWidget*,QStyleHintReturn*)const">
@@ -1322,9 +1240,9 @@
   </object-type>
   <object-type name="QColorDialog">
     <enum-type name="ColorDialogOption" flags="ColorDialogOptions"/>
-    <modify-function signature="getColor(const QColor&amp;,QWidget*,const QString&amp;,QFlags&lt;QColorDialog::ColorDialogOption>)" allow-thread="yes" />
+    <modify-function signature="getColor(const QColor&amp;,QWidget*,const QString&amp;,QFlags&lt;QColorDialog::ColorDialogOption>)" allow-thread="yes"/>
     <!-- Qt5: obsolete -->
-    <modify-function signature="getRgba(unsigned int,bool*,QWidget*)" remove="all" />
+    <modify-function signature="getRgba(unsigned int,bool*,QWidget*)" remove="all"/>
   </object-type>
 
   <object-type name="QLayout">
@@ -1336,20 +1254,14 @@
       <modify-argument index="return">
         <define-ownership owner="default"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        addLayoutOwnership(%CPPSELF, %0);
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="addownership-0"/>
     </modify-function>
 
     <modify-function signature="removeWidget(QWidget*)">
-      <inject-code class="target" position="beginning">
-        removeLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="removeownership-1"/>
     </modify-function>
     <modify-function signature="removeItem(QLayoutItem*)">
-      <inject-code class="target" position="beginning">
-        removeLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="removeownership-1"/>
     </modify-function>
 
     <modify-function signature="parentWidget()const">
@@ -1368,35 +1280,25 @@
     </modify-function>
 
     <modify-function signature="addItem(QLayoutItem*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
     <modify-function signature="addWidget(QWidget*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addChildWidget(QWidget*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addChildLayout(QLayout*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="setMenuBar(QWidget*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
     <modify-function signature="getContentsMargins(int*,int*,int*,int*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -1412,20 +1314,18 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int" />
+                <replace from="$TYPE" to="int"/>
             </insert-template>
         </inject-code>
         <inject-code class="native" position="end">
             <insert-template name="fix_native_return_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int" />
+                <replace from="$TYPE" to="int"/>
             </insert-template>
         </inject-code>
     </modify-function>
 
     <add-function signature="setAlignment(QFlags&lt;Qt::AlignmentFlag&gt;)">
-      <inject-code class="target" position="beginning">
-        %CPPSELF.setAlignment(%1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-setalignment"/>
     </add-function>
 
   </object-type>
@@ -1434,53 +1334,37 @@
     <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
     <enum-type name="StackingMode"/>
     <modify-function signature="insertWidget(int,QWidget*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %2);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
     </modify-function>
   </object-type>
 
   <object-type name="QBoxLayout">
     <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
 
-    <enum-type name="Direction" />
+    <enum-type name="Direction"/>
 
     <modify-function signature="addWidget(QWidget*,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
     <modify-function signature="addLayout(QLayout*,int)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
     <modify-function signature="insertWidget(int,QWidget*,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %2);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
     </modify-function>
     <modify-function signature="insertLayout(int,QLayout*,int)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %2);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
     </modify-function>
     <modify-function signature="insertItem(int,QLayoutItem*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %2);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
     </modify-function>
     <modify-function signature="addSpacerItem(QSpacerItem*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="insertSpacerItem(int,QSpacerItem*)">
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %2);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
     </modify-function>
   </object-type>
 
@@ -1490,41 +1374,31 @@
       <modify-argument index="return">
         <define-ownership owner="default"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-        addLayoutOwnership(%CPPSELF, %0);
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="addownership-0"/>
     </modify-function>
     <modify-function signature="addWidget(QWidget*,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
       <modify-argument index="4">
         <rename to="alignment"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addWidget(QWidget*,int,int,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
       <modify-argument index="6">
         <rename to="alignment"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addLayout(QLayout*,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
       <modify-argument index="4">
         <rename to="alignment"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addLayout(QLayout*,int,int,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
       <modify-argument index="6">
         <rename to="alignment"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addItem(QLayoutItem*,int,int,int,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
       <modify-argument index="4">
@@ -1536,13 +1410,11 @@
       <modify-argument index="6">
         <rename to="alignment"/>
       </modify-argument>
-      <inject-code class="target" position="beginning">
-        addLayoutOwnership(%CPPSELF, %1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="getItemPosition(int,int*,int*,int*,int*)const">
         <modify-argument index="return">
-            <replace-type modified-type="PyObject*" />
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="2">
             <remove-argument/>
@@ -1557,15 +1429,7 @@
             <remove-argument/>
             <remove-default-expression/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-        int a, b, c, d;
-        %CPPSELF.%FUNCTION_NAME(%1, &amp;a, &amp;b, &amp;c, &amp;d);
-        %PYARG_0 = PyTuple_New(4);
-        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](a));
-        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](b));
-        PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](c));
-        PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](d));
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qgridlayout-getitemposition"/>
     </modify-function>
   </object-type>
 
@@ -1586,7 +1450,7 @@
     </modify-function>
     <modify-function signature="scene()const">
         <inject-code position="end">
-            <insert-template name="scene_return_parenting"/>
+            <insert-template name="scene-return-parenting"/>
         </inject-code>
         <modify-argument index="return">
             <define-ownership owner="default"/>
@@ -1722,11 +1586,11 @@
     <enum-type name="SceneLayer" flags="SceneLayers"/>
 
     <!-- Qt5: note: this was called 'obsolete'. Is that true? -->
-    <modify-function signature="drawItems(QPainter*,int,QGraphicsItem*[],const QStyleOptionGraphicsItem[],QWidget*)" remove="all" />
+    <modify-function signature="drawItems(QPainter*,int,QGraphicsItem*[],const QStyleOptionGraphicsItem[],QWidget*)" remove="all"/>
 
     <modify-function signature="createItemGroup(const QList&lt;QGraphicsItem*&gt;&amp;)">
         <modify-argument index="1">
-            <parent index="return" action="add" />
+            <parent index="return" action="add"/>
         </modify-argument>
         <modify-argument index="return">
             <define-ownership owner="default"/>
@@ -1734,17 +1598,7 @@
     </modify-function>
 
     <modify-function signature="destroyItemGroup(QGraphicsItemGroup*)">
-        <inject-code>
-        QGraphicsItem* parentItem = %1->parentItem();
-        Shiboken::AutoDecRef parent(%CONVERTTOPYTHON[QGraphicsItem*](parentItem));
-        foreach (QGraphicsItem* item, %1->childItems())
-            Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[QGraphicsItem*](item));
-        %BEGIN_ALLOW_THREADS
-        %CPPSELF.%FUNCTION_NAME(%1);
-        %END_ALLOW_THREADS
-        // the arg was destroyed by Qt.
-        Shiboken::Object::invalidate(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qgraphicsscene-destroyitemgroup"/>
     </modify-function>
 
     <modify-function signature="contextMenuEvent(QGraphicsSceneContextMenuEvent*)">
@@ -1803,97 +1657,81 @@
     </modify-function>
     <modify-function signature="addItem(QGraphicsItem*)">
       <modify-argument index="1">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
 
     <modify-function signature="addEllipse(const QRectF&amp;,const QPen&amp;,const QBrush&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addEllipse(qreal,qreal,qreal,qreal,const QPen&amp;,const QBrush&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
 
     <modify-function signature="addLine(const QLineF&amp;,const QPen&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addLine(qreal,qreal,qreal,qreal,const QPen&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
 
     <modify-function signature="addPath(const QPainterPath&amp;,const QPen&amp;,const QBrush&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addPixmap(const QPixmap&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addPolygon(const QPolygonF&amp;,const QPen&amp;,const QBrush&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addRect(const QRectF&amp;,const QPen&amp;,const QBrush&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addRect(qreal,qreal,qreal,qreal,const QPen&amp;,const QBrush&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
 
     <modify-function signature="addText(const QString&amp;,const QFont&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="addSimpleText(const QString&amp;,const QFont&amp;)">
       <modify-argument index="return">
-        <parent index="this" action="add" />
+        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
 
     <modify-function signature="addWidget(QWidget*,QFlags&lt;Qt::WindowType&gt;)">
         <!-- TODO: Add a keeper attribute to reference-count tag to do what this inject code do. -->
-        <inject-code>
-        %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1, %2);
-        %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-        Shiboken::Object::keepReference((SbkObject*)%PYARG_0, "setWidget(QWidget*)1", %PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qgraphicsscene-addwidget"/>
     </modify-function>
 
     <modify-function signature="clear()">
-        <inject-code>
-            const QList&lt;QGraphicsItem*> items = %CPPSELF.items();
-            Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
-            foreach (QGraphicsItem* item, items) {
-                SbkObject* obj = bm.retrieveWrapper(item);
-                if (obj) {
-                    if (reinterpret_cast&lt;PyObject*&gt;(obj)->ob_refcnt > 1) // If the refcnt is 1 the object will vannish anyway.
-                        Shiboken::Object::invalidate(obj);
-                    Shiboken::Object::removeParent(obj);
-                }
-            }
-            %CPPSELF.%FUNCTION_NAME();
-        </inject-code>
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qgraphicsscene-clear"/>
     </modify-function>
 
     <modify-function signature="removeItem(QGraphicsItem*)">
       <modify-argument index="1">
-        <parent index="this" action="remove" />
+        <parent index="this" action="remove"/>
       </modify-argument>
     </modify-function>
 
@@ -1961,16 +1799,7 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="clear()">
-        <inject-code>
-        QTreeWidgetItem *rootItem = %CPPSELF.invisibleRootItem();
-        Shiboken::BindingManager &amp;bm = Shiboken::BindingManager::instance();
-        for (int i = 0; i &lt; rootItem->childCount(); ++i) {
-            QTreeWidgetItem *item = rootItem->child(i);
-            SbkObject* wrapper = bm.retrieveWrapper(item);
-            if (wrapper)
-                Shiboken::Object::setParent(0, reinterpret_cast&lt;PyObject*&gt;(wrapper));
-        }
-        </inject-code>
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qtreewidget-clear"/>
     </modify-function>
   </object-type>
   <object-type name="QAbstractItemDelegate">
@@ -2136,23 +1965,13 @@
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-          // Only call the parent function if this return some value
-          // the parent can be the TreeWidget
-          if (%0)
-            Shiboken::Object::setParent(%PYARG_0, %PYSELF);
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qtreewidgetitem"/>
     </modify-function>
     <modify-function signature="treeWidget()const">
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
-      <inject-code class="target" position="end">
-          // Only call the parent function if this return some value
-          // the parent can be the TreeWidgetItem
-          if (%0)
-            Shiboken::Object::setParent(%PYARG_0, %PYSELF);
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qtreewidgetitem"/>
     </modify-function>
 
   </object-type>
@@ -2179,20 +1998,7 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="clear()">
-      <inject-code class="target" position="beginning">
-          Shiboken::BindingManager &amp;bm = Shiboken::BindingManager::instance();
-          PyObject *pyObj;
-          for (int i = 0; i &lt; %CPPSELF.count(); i++) {
-            QListWidgetItem *item = %CPPSELF.item(i);
-            if ((pyObj = reinterpret_cast&lt;PyObject*&gt;(bm.retrieveWrapper(item))) != 0) {
-                Py_INCREF(pyObj);
-                Shiboken::Object::setParent(NULL, pyObj);
-                Shiboken::Object::invalidate(pyObj);
-                Py_DECREF(pyObj);
-            }
-          }
-          %CPPSELF.%FUNCTION_NAME();
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlistwidget-clear"/>
     </modify-function>
   </object-type>
 
@@ -2221,7 +2027,7 @@
       <include file-name="QMessageBox" location="global"/>
     </extra-includes>
 
-    <inject-code class="native" file="glue/qwidget_glue.cpp" position="beginning" />
+    <inject-code class="native" file="glue/qwidget_glue.cpp" position="beginning"/>
 
     <enum-type name="RenderFlag" flags="RenderFlags"/>
 
@@ -2378,25 +2184,10 @@
     </modify-function>
 
     <modify-function signature="setStyle(QStyle*)">
-      <inject-code class="target" position="end">
-        Shiboken::Object::keepReference(reinterpret_cast&lt;SbkObject*&gt;(%PYSELF), "__style__",  %PYARG_1);
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qwidget-setstyle"/>
     </modify-function>
     <modify-function signature="style()const">
-      <inject-code class="target" position="end">
-        QStyle* myStyle = %CPPSELF->style();
-        if (myStyle &amp;&amp; qApp) {
-        %PYARG_0 = %CONVERTTOPYTHON[QStyle*](myStyle);
-            QStyle *appStyle = qApp->style();
-            if (appStyle == myStyle) {
-                Shiboken::AutoDecRef pyApp(%CONVERTTOPYTHON[QApplication*](qApp));
-                Shiboken::Object::setParent(pyApp, %PYARG_0);
-                Shiboken::Object::releaseOwnership(%PYARG_0);
-            } else {
-                Shiboken::Object::keepReference(reinterpret_cast&lt;SbkObject*&gt;(%PYSELF), "__style__",  %PYARG_0);
-            }
-        }
-      </inject-code>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qwidget-style"/>
       <modify-argument index="return">
         <define-ownership owner="default"/>
       </modify-argument>
@@ -2416,7 +2207,7 @@
 
     <modify-function signature="getContentsMargins(int*,int*,int*,int*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -2432,12 +2223,12 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int" />
+                <replace from="$TYPE" to="int"/>
             </insert-template>
         </inject-code>
         <inject-code class="native" position="end">
             <insert-template name="fix_native_return_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int" />
+                <replace from="$TYPE" to="int"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -2448,12 +2239,9 @@
     </modify-function>
 
     <modify-function signature="setLayout(QLayout*)">
-      <inject-code class="target" position="beginning">
-        qwidgetSetLayout(%CPPSELF, %1);
-        // %FUNCTION_NAME() - disable generation of function call.
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-setlayout"/>
     </modify-function>
-    <modify-function signature="raise()" rename="raise_" />
+    <modify-function signature="raise()" rename="raise_"/>
     <modify-function signature="setParent(QWidget*,QFlags&lt;Qt::WindowType>)">
       <modify-argument index="this">
         <parent index="1" action="add"/>
@@ -2470,7 +2258,7 @@
   <object-type name="QMessageBox">
     <enum-type name="ButtonRole"/>
     <enum-type name="Icon"/>
-    <enum-type name="StandardButton" flags="StandardButtons" />
+    <enum-type name="StandardButton" flags="StandardButtons"/>
     <modify-function signature="removeButton(QAbstractButton*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -2562,26 +2350,10 @@
 
     <!-- This function need be re-implemented in inject code -->
     <modify-function signature="removeTab(int)">
-    <inject-code class="target" position="beginning">
-        QWidget* tab = %CPPSELF.widget(%1);
-        if (tab) {
-            Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](tab));
-            %CPPSELF.%FUNCTION_NAME(%1);
-        }
-    </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qtabwidget-removetab"/>
     </modify-function>
     <modify-function signature="clear()">
-        <inject-code class="target" position="beginning">
-            Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
-            for (int i = 0; i &lt; %CPPSELF.count(); i++) {
-                QWidget* widget = %CPPSELF.widget(i);
-                if (bm.hasWrapper(widget)) {
-                    Shiboken::AutoDecRef pyWidget(%CONVERTTOPYTHON[QWidget*](widget));
-                    Shiboken::Object::releaseOwnership(pyWidget);
-                }
-            }
-            %CPPSELF.%FUNCTION_NAME();
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qtabwidget-clear"/>
     </modify-function>
   </object-type>
   <object-type name="QDateTimeEdit">
@@ -2593,7 +2365,7 @@
     </modify-function>
   </object-type>
   <object-type name="QSlider">
-      <enum-type name="TickPosition" />
+      <enum-type name="TickPosition"/>
   </object-type>
   <object-type name="QProgressDialog">
     <modify-function signature="setBar(QProgressBar*)">
@@ -2654,8 +2426,8 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="getExistingDirectory(QWidget*,const QString&amp;,const QString&amp;,QFlags&lt;QFileDialog::Option>)" allow-thread="yes" />
-    <modify-function signature="getExistingDirectoryUrl(QWidget*,const QString&amp;,const QUrl&amp;,QFlags&lt;QFileDialog::Option>,const QStringList&amp;)" />
+    <modify-function signature="getExistingDirectory(QWidget*,const QString&amp;,const QString&amp;,QFlags&lt;QFileDialog::Option>)" allow-thread="yes"/>
+    <modify-function signature="getExistingDirectoryUrl(QWidget*,const QString&amp;,const QUrl&amp;,QFlags&lt;QFileDialog::Option>,const QStringList&amp;)"/>
     <modify-function signature="getOpenFileName(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
       <modify-argument index="return">
         <replace-type modified-type="(fileName, selectedFilter)"/>
@@ -2744,8 +2516,8 @@
     <enum-type name="SelectionBehavior"/>
     <enum-type name="ButtonPosition"/>
   </object-type>
-  <object-type name="QRadioButton" />
-  <object-type name="QScrollBar" />
+  <object-type name="QRadioButton"/>
+  <object-type name="QScrollBar"/>
   <object-type name="QAbstractScrollArea">
     <enum-type name="SizeAdjustPolicy"/>
     <modify-function signature="setViewport(QWidget*)">
@@ -2853,7 +2625,7 @@
   <object-type name="QSplitter">
     <modify-function signature="getRange(int,int*,int*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="2">
             <remove-argument/>
@@ -2863,7 +2635,7 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_args,number*,number*">
-                <replace from="$TYPE" to="int" />
+                <replace from="$TYPE" to="int"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -2878,7 +2650,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QGroupBox" />
+  <object-type name="QGroupBox"/>
   <object-type name="QStackedWidget">
     <modify-function signature="addWidget(QWidget*)">
       <modify-argument index="1">
@@ -2902,7 +2674,7 @@
     </modify-function>
   </object-type>
   <object-type name="QSplitterHandle"/>
-  <object-type name="QDial" />
+  <object-type name="QDial"/>
   <object-type name="QKeySequenceEdit"/>
   <object-type name="QLineEdit">
     <enum-type name="ActionPosition"/>
@@ -2917,10 +2689,10 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="del()" rename="del_" />
+    <modify-function signature="del()" rename="del_"/>
     <modify-function signature="getTextMargins(int*,int*,int*,int*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *" />
+            <replace-type modified-type="PyObject *"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -2936,15 +2708,13 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int" />
+                <replace from="$TYPE" to="int"/>
             </insert-template>
         </inject-code>
     </modify-function>
 
     <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning">
-        %CPPSELF.addAction(%1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlineedit-addaction"/>
     </add-function>
 
   </object-type>
@@ -3035,7 +2805,7 @@
   <object-type name="QToolBar">
     <modify-function signature="addAction(QIcon,QString,const QObject*,const char*)">
       <modify-argument index="3">
-        <replace-type modified-type="PyObject" />
+        <replace-type modified-type="PyObject"/>
       </modify-argument>
       <modify-argument index="4">
         <remove-argument />
@@ -3043,20 +2813,11 @@
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
-
-      <inject-code>
-        QAction *action = %CPPSELF.addAction(%1, %2);
-        %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
-        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
-            const_cast&lt;char *&gt;("connect"),
-            const_cast&lt;char *&gt;("OsO"),
-            %PYARG_0, SIGNAL(triggered()), %PYARG_3)
-        );
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qtoolbar-addaction-1"/>
     </modify-function>
     <modify-function signature="addAction(QString,const QObject*,const char*)">
       <modify-argument index="2">
-        <replace-type modified-type="PyObject" />
+        <replace-type modified-type="PyObject"/>
       </modify-argument>
       <modify-argument index="3">
         <remove-argument />
@@ -3064,15 +2825,7 @@
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
-      <inject-code>
-        QAction *action = %CPPSELF.addAction(%1);
-        %PYARG_0 = %CONVERTTOPYTHON[QAction*](action);
-        Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
-            const_cast&lt;char *&gt;("connect"),
-            const_cast&lt;char *&gt;("OsO"),
-            %PYARG_0, SIGNAL(triggered()), %PYARG_2)
-        );
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qtoolbar-addaction-2"/>
     </modify-function>
     <modify-function signature="addAction(const QString&amp;)">
       <modify-argument index="return">
@@ -3085,9 +2838,7 @@
       </modify-argument>
     </modify-function>
     <add-function signature="addAction(QAction*)">
-      <inject-code class="target" position="beginning">
-        %CPPSELF.addAction(%1);
-      </inject-code>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qtoolbar-addaction-3"/>
     </add-function>
     <modify-function signature="addSeparator()">
       <modify-argument index="return">
@@ -3116,30 +2867,7 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="clear()">
-      <inject-code>
-        QList&lt;PyObject* &gt; lst;
-        Shiboken::BindingManager&amp; bm = Shiboken::BindingManager::instance();
-        foreach(QToolButton* child, %CPPSELF.findChildren&lt;QToolButton*&gt;()) {
-            if (bm.hasWrapper(child)) {
-                PyObject* pyChild = %CONVERTTOPYTHON[QToolButton*](child);
-                Shiboken::Object::setParent(0, pyChild);
-                lst &lt;&lt; pyChild;
-            }
-        }
-
-        //Remove actions
-        foreach(QAction *act, %CPPSELF.actions()) {
-            Shiboken::AutoDecRef pyAct(%CONVERTTOPYTHON[QAction*](act));
-            Shiboken::Object::setParent(NULL, pyAct);
-            Shiboken::Object::invalidate(pyAct);
-        }
-
-        %CPPSELF.clear();
-        foreach(PyObject* obj, lst) {
-            Shiboken::Object::invalidate(reinterpret_cast&lt;SbkObject* &gt;(obj));
-            Py_XDECREF(obj);
-        }
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qtoolbar-clear"/>
     </modify-function>
   </object-type>
   <object-type name="QComboBox">
@@ -3221,22 +2949,15 @@
       <include file-name="QLocale" location="global"/>
       <include file-name="QStyle" location="global"/>
     </extra-includes>
-    <modify-function signature="QApplication(int&amp;,char**,int)" access="private" />
+    <modify-function signature="QApplication(int&amp;,char**,int)" access="private"/>
     <add-function signature="QApplication(QStringList)">
-        <inject-code>
-            QApplicationConstructor(%PYSELF, args, &amp;%0);
-        </inject-code>
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-1"/>
     </add-function>
     <add-function signature="QApplication()">
-        <inject-code>
-            PyObject *empty = PyTuple_New(2);
-            if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
-                QApplicationConstructor(%PYSELF, empty, &amp;%0);
-            }
-        </inject-code>
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-2"/>
     </add-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
-    <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning" />
+    <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning"/>
   </object-type>
 
   <object-type name="QCommandLinkButton"/>
@@ -3268,7 +2989,7 @@
 
     <modify-function signature="getLayoutPosition(QLayout*,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="2">
             <remove-argument/>
@@ -3282,7 +3003,7 @@
     </modify-function>
     <modify-function signature="getWidgetPosition(QWidget*,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="2">
             <remove-argument/>
@@ -3296,7 +3017,7 @@
     </modify-function>
     <modify-function signature="getItemPosition(int,int*,QFormLayout::ItemRole*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="2">
             <remove-argument/>
@@ -3417,7 +3138,7 @@
   <object-type name="QGraphicsLayout">
     <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -3433,12 +3154,12 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal" />
+                <replace from="$TYPE" to="qreal"/>
             </insert-template>
         </inject-code>
         <inject-code class="native" position="end">
             <insert-template name="fix_native_return_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal" />
+                <replace from="$TYPE" to="qreal"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -3449,7 +3170,7 @@
   <object-type name="QGraphicsLayoutItem" copyable="false">
     <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -3465,12 +3186,12 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal" />
+                <replace from="$TYPE" to="qreal"/>
             </insert-template>
         </inject-code>
         <inject-code class="native" position="end">
             <insert-template name="fix_native_return_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal" />
+                <replace from="$TYPE" to="qreal"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -3524,20 +3245,14 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="setWidget(QWidget*)">
-      <inject-code>
-          QWidget* _old = %CPPSELF.widget();
-          if (_old)
-             Shiboken::Object::setParent(NULL, %CONVERTTOPYTHON[QWidget*](_old));
-          %CPPSELF.%FUNCTION_NAME(%1);
-          Shiboken::Object::setParent(%PYSELF, %PYARG_1);
-      </inject-code>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qgraphicsproxywidget-setwidget"/>
     </modify-function>
   </object-type>
   <!-- a QObject so main-thread delete redundant -->
   <object-type name="QGraphicsWidget">
     <modify-function signature="getContentsMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="return">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -3554,13 +3269,13 @@
 
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal" />
+                <replace from="$TYPE" to="qreal"/>
             </insert-template>
         </inject-code>
     </modify-function>
     <modify-function signature="getWindowFrameMargins(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="return">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -3577,7 +3292,7 @@
 
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal" />
+                <replace from="$TYPE" to="qreal"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -3649,7 +3364,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_" />
+    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_"/>
   </object-type>
   <object-type name="QStyledItemDelegate">
     <modify-function signature="setItemEditorFactory(QItemEditorFactory*)">
@@ -3733,7 +3448,7 @@
   <!-- The above entries may be present in the system or not. Keep this section organized. -->
 
   <!-- This enum is present on QtCore -->
-  <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared" />
+  <suppress-warning text="enum 'QCoreApplication::ApplicationFlags' is specified in typesystem, but not declared"/>
   <suppress-warning text="QGraphicsEllipseItem::Type' does not have a type entry or is not an enum"/>
   <suppress-warning text="QGraphicsItemGroup::Type' does not have a type entry or is not an enum"/>
   <suppress-warning text="QGraphicsItem::UserType' does not have a type entry or is not an enum"/>

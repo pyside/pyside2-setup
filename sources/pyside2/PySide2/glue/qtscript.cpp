@@ -1,8 +1,6 @@
-<?xml version="1.0"?>
-<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -38,29 +36,39 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
--->
 
-<typesystem package="PySide2.QtHelp">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+// @snippet qscriptvalue-repr
+if (%CPPSELF.isVariant() || %CPPSELF.isString()) {
+    QString format = QString::asprintf("%s(\"%s\")",
+            Py_TYPE(%PYSELF)->tp_name,
+            qPrintable(%CPPSELF.toString()));
+    %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
+ } else {
+    %PYARG_0 = Shiboken::String::fromCString(Py_TYPE(%PYSELF)->tp_name);
+}
+// @snippet qscriptvalue-repr
 
-    <value-type name="QHelpContentItem">
-      <modify-function signature="parent()const">
-        <modify-argument index="return">
-          <define-ownership owner="default"/>
-        </modify-argument>
-      </modify-function>
-    </value-type>
-    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
-    <object-type name="QHelpContentWidget"/>
-    <object-type name="QHelpEngine"/>
-    <object-type name="QHelpEngineCore"/>
-    <object-type name="QHelpIndexModel"/>
-    <object-type name="QHelpIndexWidget"/>
-    <object-type name="QHelpSearchEngine"/>
-    <value-type name="QHelpSearchQuery">
-        <enum-type name="FieldName"/>
-    </value-type>
-    <object-type name="QHelpSearchQueryWidget"/>
-    <object-type name="QHelpSearchResult"/>
-    <object-type name="QHelpSearchResultWidget"/>
-</typesystem>
+// @snippet qscriptvalue-mgetitem
+Shiboken::AutoDecRef key(PyObject_Str(_key));
+QVariant res = %CPPSELF.property(Shiboken::String::toCString(key.object())).toVariant();
+if (res.isValid()) {
+    return %CONVERTTOPYTHON[QVariant](res);
+} else {
+    PyObject* errorType = PyInt_Check(_key) ? PyExc_IndexError : PyExc_KeyError;
+    PyErr_SetString(errorType, "Key not found.");
+    return 0;
+}
+// @snippet qscriptvalue-mgetitem
+
+// @snippet qscriptvalueiterator-next
+if (%CPPSELF.hasNext()) {
+    %CPPSELF.next();
+    QString name = %CPPSELF.name();
+    QVariant value = %CPPSELF.value().toVariant();
+    %PYARG_0 = PyTuple_New(2);
+    PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QString](name));
+    PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QVariant](value));
+} else {
+    PyErr_SetNone(PyExc_StopIteration);
+}
+// @snippet qscriptvalueiterator-next

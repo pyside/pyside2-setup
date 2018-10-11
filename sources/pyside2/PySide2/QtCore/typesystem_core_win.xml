@@ -43,7 +43,7 @@
   <extra-includes>
     <include file-name="windows.h" location="global"/>
   </extra-includes>
-  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject" />
+  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
   <primitive-type name="HWND">
       <!-- Qt5: Add this include there to insert ti in the global qtcore header (needed by qprocess_wrapper) -->
       <include file-name="wtypes.h" location="global"/>
@@ -74,7 +74,7 @@
   </inject-code>
 
   <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
-  <object-type name="QWinEventNotifier" />
+  <object-type name="QWinEventNotifier"/>
   <object-type name="QAbstractEventDispatcher">
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
     <!-- Qt5: had to add this recursive object def. This was crucial to get rid of "pure virtual" -->
@@ -83,8 +83,8 @@
   <object-type name="QSysInfo">
     <enum-type name="Endian"/>
     <enum-type name="Sizes"/>
-    <enum-type name="WinVersion" since="5.5" />
+    <enum-type name="WinVersion" since="5.5"/>
   </object-type>
-  <suppress-warning text="skipping field 'QSysInfo::MacintoshVersion' with unmatched type 'QSysInfo::MacVersion'" />
-  <suppress-warning text="enum 'QSysInfo::MacVersion' does not have a type entry or is not an enum" />
+  <suppress-warning text="skipping field 'QSysInfo::MacintoshVersion' with unmatched type 'QSysInfo::MacVersion'"/>
+  <suppress-warning text="enum 'QSysInfo::MacVersion' does not have a type entry or is not an enum"/>
 </typesystem>

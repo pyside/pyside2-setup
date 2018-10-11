@@ -1,8 +1,6 @@
-<?xml version="1.0"?>
-<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -38,29 +36,10 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
--->
 
-<typesystem package="PySide2.QtHelp">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
-
-    <value-type name="QHelpContentItem">
-      <modify-function signature="parent()const">
-        <modify-argument index="return">
-          <define-ownership owner="default"/>
-        </modify-argument>
-      </modify-function>
-    </value-type>
-    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
-    <object-type name="QHelpContentWidget"/>
-    <object-type name="QHelpEngine"/>
-    <object-type name="QHelpEngineCore"/>
-    <object-type name="QHelpIndexModel"/>
-    <object-type name="QHelpIndexWidget"/>
-    <object-type name="QHelpSearchEngine"/>
-    <value-type name="QHelpSearchQuery">
-        <enum-type name="FieldName"/>
-    </value-type>
-    <object-type name="QHelpSearchQueryWidget"/>
-    <object-type name="QHelpSearchResult"/>
-    <object-type name="QHelpSearchResultWidget"/>
-</typesystem>
+// @snippet upcast
+%BEGIN_ALLOW_THREADS
+QObject* upcastedArg = %CONVERTTOCPP[QObject*](%PYARG_1);
+%CPPSELF.%FUNCTION_NAME(reinterpret_cast< %ARG1_TYPE >(upcastedArg));
+%END_ALLOW_THREADS
+// @snippet upcast

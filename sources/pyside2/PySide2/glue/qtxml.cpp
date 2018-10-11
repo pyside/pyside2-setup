@@ -1,8 +1,6 @@
-<?xml version="1.0"?>
-<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -38,29 +36,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
--->
 
-<typesystem package="PySide2.QtHelp">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
-
-    <value-type name="QHelpContentItem">
-      <modify-function signature="parent()const">
-        <modify-argument index="return">
-          <define-ownership owner="default"/>
-        </modify-argument>
-      </modify-function>
-    </value-type>
-    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
-    <object-type name="QHelpContentWidget"/>
-    <object-type name="QHelpEngine"/>
-    <object-type name="QHelpEngineCore"/>
-    <object-type name="QHelpIndexModel"/>
-    <object-type name="QHelpIndexWidget"/>
-    <object-type name="QHelpSearchEngine"/>
-    <value-type name="QHelpSearchQuery">
-        <enum-type name="FieldName"/>
-    </value-type>
-    <object-type name="QHelpSearchQueryWidget"/>
-    <object-type name="QHelpSearchResult"/>
-    <object-type name="QHelpSearchResultWidget"/>
-</typesystem>
+// @snippet qxmlentityresolver-resolveentity
+QXmlInputSource* _qxmlinputsource_arg_ = nullptr;
+%BEGIN_ALLOW_THREADS
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1, %2, _qxmlinputsource_arg_);
+%END_ALLOW_THREADS
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QXmlInputSource*](_qxmlinputsource_arg_));
+// @snippet qxmlentityresolver-resolveentity

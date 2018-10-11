@@ -40,9 +40,9 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtMultimedia">
-  <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
-  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
-  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no" />
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
 
   <namespace-type name="QAudio">
       <enum-type name="Error"/>
@@ -177,25 +177,15 @@
       <enum-type name="Status"/>
       <modify-function signature="setViewfinder(QVideoWidget*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *" />
+            <replace-type modified-type="QObject *"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-        %BEGIN_ALLOW_THREADS
-        QObject* upcastedArg = %CONVERTTOCPP[QObject*](%PYARG_1);
-        %CPPSELF.%FUNCTION_NAME(reinterpret_cast&lt; %ARG1_TYPE &gt;(upcastedArg));
-        %END_ALLOW_THREADS
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
       <modify-function signature="setViewfinder(QGraphicsVideoItem*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *" />
+            <replace-type modified-type="QObject *"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-        %BEGIN_ALLOW_THREADS
-        QObject* upcastedArg = %CONVERTTOCPP[QObject*](%PYARG_1);
-        %CPPSELF.%FUNCTION_NAME(reinterpret_cast&lt; %ARG1_TYPE &gt;(upcastedArg));
-        %END_ALLOW_THREADS
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
   </object-type>
   <object-type name="QCameraCaptureBufferFormatControl"/>
@@ -282,36 +272,21 @@
       <enum-type name="Error"/>
       <modify-function signature="setVideoOutput(QVideoWidget*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *" />
+            <replace-type modified-type="QObject *"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-        %BEGIN_ALLOW_THREADS
-        QObject* upcastedArg = %CONVERTTOCPP[QObject*](%PYARG_1);
-        %CPPSELF.%FUNCTION_NAME(reinterpret_cast&lt; %ARG1_TYPE &gt;(upcastedArg));
-        %END_ALLOW_THREADS
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
       <modify-function signature="setVideoOutput(QGraphicsVideoItem*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *" />
+            <replace-type modified-type="QObject *"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-        %BEGIN_ALLOW_THREADS
-        QObject* upcastedArg = %CONVERTTOCPP[QObject*](%PYARG_1);
-        %CPPSELF.%FUNCTION_NAME(reinterpret_cast&lt; %ARG1_TYPE &gt;(upcastedArg));
-        %END_ALLOW_THREADS
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
       <modify-function signature="setVideoOutput(QAbstractVideoSurface*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *" />
+            <replace-type modified-type="QObject *"/>
         </modify-argument>
-        <inject-code class="target" position="beginning">
-        %BEGIN_ALLOW_THREADS
-        QObject* upcastedArg = %CONVERTTOCPP[QObject*](%PYARG_1);
-        %CPPSELF.%FUNCTION_NAME(reinterpret_cast&lt; %ARG1_TYPE &gt;(upcastedArg));
-        %END_ALLOW_THREADS
-        </inject-code>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
   </object-type>
   <object-type name="QMediaPlayerControl"/>

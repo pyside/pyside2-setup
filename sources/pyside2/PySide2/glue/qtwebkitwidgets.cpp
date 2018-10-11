@@ -1,8 +1,6 @@
-<?xml version="1.0"?>
-<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -38,29 +36,42 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
--->
 
-<typesystem package="PySide2.QtHelp">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+// @snippet qwebview-page
+SbkObject* _pyReturn = reinterpret_cast<SbkObject*>(%PYARG_0);
+if (!Shiboken::Object::hasParentInfo(_pyReturn))
+    Shiboken::Object::setParent(%PYSELF, %PYARG_0);
+// @snippet qwebview-page
 
-    <value-type name="QHelpContentItem">
-      <modify-function signature="parent()const">
-        <modify-argument index="return">
-          <define-ownership owner="default"/>
-        </modify-argument>
-      </modify-function>
-    </value-type>
-    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
-    <object-type name="QHelpContentWidget"/>
-    <object-type name="QHelpEngine"/>
-    <object-type name="QHelpEngineCore"/>
-    <object-type name="QHelpIndexModel"/>
-    <object-type name="QHelpIndexWidget"/>
-    <object-type name="QHelpSearchEngine"/>
-    <value-type name="QHelpSearchQuery">
-        <enum-type name="FieldName"/>
-    </value-type>
-    <object-type name="QHelpSearchQueryWidget"/>
-    <object-type name="QHelpSearchResult"/>
-    <object-type name="QHelpSearchResultWidget"/>
-</typesystem>
+// @snippet qwebelementcollection-len
+return %CPPSELF.count();
+// @snippet qwebelementcollection-len
+
+// @snippet qwebelementcollection-getitem
+if (_i < 0 || _i >= %CPPSELF.count()) {
+    PyErr_SetString(PyExc_IndexError, "index out of bounds");
+    return 0;
+}
+QWebElement element = %CPPSELF.at(_i);
+return %CONVERTTOPYTHON[QWebElement](element);
+// @snippet qwebelementcollection-getitem
+
+// @snippet qwebpage-qt-metacall
+static int _signalIndex = -1;
+static QMetaMethod _m;
+
+if (_signalIndex == -1) {
+    _signalIndex = QWebPage::staticMetaObject.indexOfSlot("shouldInterruptJavaScript()")
+    _m = QWebPage::staticMetaObject.method(_signalIndex);
+}
+
+if (_signalIndex == id) {
+    Shiboken::GilState gil;
+    PyObject* self = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(this);
+
+    if (self) {
+        Shiboken::AutoDecRef _pyMethod(PyObject_GetAttrString(self, "shouldInterruptJavaScript"));
+        return PySide::SignalManager::callPythonMetaMethod(_m, args, _pyMethod, false);
+    }
+}
+// @snippet qwebpage-qt-metacall

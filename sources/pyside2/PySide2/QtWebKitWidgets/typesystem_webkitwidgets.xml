@@ -66,13 +66,13 @@
   <value-type name="QWebHistoryItem"/>
 
   <value-type name="QWebSecurityOrigin">
-    <enum-type name="SubdomainSetting" />
+    <enum-type name="SubdomainSetting"/>
   </value-type>
 
   <object-type name="QWebSettings">
     <enum-type name="FontFamily"/>
     <enum-type name="FontSize"/>
-    <enum-type name="ThirdPartyCookiePolicy" />
+    <enum-type name="ThirdPartyCookiePolicy"/>
     <enum-type name="WebAttribute"/>
     <enum-type name="WebGraphic"/>
   </object-type>
@@ -87,13 +87,9 @@
         <modify-argument index="return">
             <define-ownership class="target" owner="default"/>
         </modify-argument>
-        <inject-code position="end">
-            SbkObject* _pyReturn = reinterpret_cast&lt;SbkObject*&gt;(%PYARG_0);
-            if (!Shiboken::Object::hasParentInfo(_pyReturn))
-                Shiboken::Object::setParent(%PYSELF, %PYARG_0);
-        </inject-code>
+        <inject-code position="end" file="../glue/qtwebkitwidgets.cpp" snippet="qwebview-page"/>
     </modify-function>
-    <modify-function signature="print(QPrinter*)const" rename="print_" />
+    <modify-function signature="print(QPrinter*)const" rename="print_"/>
   </object-type>
 
   <value-type name="QWebElement" since="4.6">
@@ -102,34 +98,25 @@
 
   <value-type name="QWebElementCollection" since="4.6">
     <add-function signature="__len__">
-        <inject-code>
-        return %CPPSELF.count();
-        </inject-code>
+        <inject-code file="../glue/qtwebkitwidgets.cpp" snippet="qwebelementcollection-len"/>
     </add-function>
     <add-function signature="__getitem__">
-        <inject-code>
-        if (_i &lt; 0 || _i >= %CPPSELF.count()) {
-            PyErr_SetString(PyExc_IndexError, "index out of bounds");
-            return 0;
-        }
-        QWebElement element = %CPPSELF.at(_i);
-        return %CONVERTTOPYTHON[QWebElement](element);
-        </inject-code>
+        <inject-code file="../glue/qtwebkitwidgets.cpp" snippet="qwebelementcollection-getitem"/>
     </add-function>
   </value-type>
 
   <object-type name="QWebFrame">
     <enum-type name="RenderLayer" flags="RenderLayers" since="4.6"/>
-    <enum-type name="ValueOwnership" />
+    <enum-type name="ValueOwnership"/>
     <modify-function signature="addToJavaScriptWindowObject(QString,QObject*,QWebFrame::ValueOwnership)">
       <modify-argument index="2">
           <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="print(QPrinter*)const" rename="print_" />
+    <modify-function signature="print(QPrinter*)const" rename="print_"/>
     <modify-function signature="metaData()const">
         <modify-argument index="return">
-            <replace-type modified-type="PyObject" />
+            <replace-type modified-type="PyObject"/>
         </modify-argument>
         <inject-code position="end">
             <insert-template name="convertFromMultiMap">
@@ -149,18 +136,18 @@
     <enum-type name="FindFlag" flags="FindFlags"/>
     <enum-type name="LinkDelegationPolicy"/>
     <enum-type name="NavigationType"/>
-    <enum-type name="PermissionPolicy" since="4.8" revision="4800" />
-    <enum-type name="VisibilityState" />
+    <enum-type name="PermissionPolicy" since="4.8" revision="4800"/>
+    <enum-type name="VisibilityState"/>
     <enum-type name="WebAction"/>
     <enum-type name="WebWindowType"/>
 
-    <value-type name="ChooseMultipleFilesExtensionOption" />
-    <value-type name="ChooseMultipleFilesExtensionReturn" />
-    <value-type name="ErrorPageExtensionOption" since="4.6" />
-    <value-type name="ErrorPageExtensionReturn" since="4.6" />
-    <value-type name="ExtensionOption" />
-    <value-type name="ExtensionReturn" />
-    <value-type name="ViewportAttributes" />
+    <value-type name="ChooseMultipleFilesExtensionOption"/>
+    <value-type name="ChooseMultipleFilesExtensionReturn"/>
+    <value-type name="ErrorPageExtensionOption" since="4.6"/>
+    <value-type name="ErrorPageExtensionReturn" since="4.6"/>
+    <value-type name="ExtensionOption"/>
+    <value-type name="ExtensionReturn"/>
+    <value-type name="ViewportAttributes"/>
 
     <modify-function signature="extension(QWebPage::Extension,const QWebPage::ExtensionOption*,QWebPage::ExtensionReturn*)">
         <template name="qwebpage_extension_argument_conversion">
@@ -199,7 +186,7 @@
     </modify-function>
     <modify-function signature="networkAccessManager()const">
         <modify-argument index="return">
-            <reference-count action="set" variable-name="setNetworkAccessManager(QNetworkAccessManager*)1" />
+            <reference-count action="set" variable-name="setNetworkAccessManager(QNetworkAccessManager*)1"/>
         </modify-argument>
     </modify-function>
     <modify-function signature="view()const">
@@ -238,24 +225,7 @@
     </modify-function>
 
     <add-function signature="qt_metacall()">
-        <inject-code class="native">
-            static int _signalIndex = -1;
-            static QMetaMethod _m;
-
-            if (_signalIndex == -1) {
-                _signalIndex = QWebPage::staticMetaObject.indexOfSlot("shouldInterruptJavaScript()");
-                _m = QWebPage::staticMetaObject.method(_signalIndex);
-            }
-
-            if (_signalIndex == id) {
-                Shiboken::GilState gil;
-                PyObject* self = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(this);
-                if (self) {
-                    Shiboken::AutoDecRef _pyMethod(PyObject_GetAttrString(self, "shouldInterruptJavaScript"));
-                    return PySide::SignalManager::callPythonMetaMethod(_m, args, _pyMethod, false);
-                }
-            }
-        </inject-code>
+        <inject-code class="native" file="../glue/qtwebkitwidgets.cpp" snippet="qwebpage-qt-metacall"/>
     </add-function>
   </object-type>
 

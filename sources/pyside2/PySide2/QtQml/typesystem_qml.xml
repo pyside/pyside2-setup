@@ -45,7 +45,7 @@
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
 
     <!-- This is to inform the generator that the VolatileBool python type exists -->
-    <custom-type name="VolatileBool" />
+    <custom-type name="VolatileBool"/>
     <primitive-type name="bool volatile" target-lang-api-name="VolatileBool">
         <include file-name="pysideqmlregistertype.h" location="local"/>
         <!-- No conversion rules are specified here, because the generator does not handle
@@ -76,10 +76,7 @@
             Note that it's perfectly reasonable for a library to register types to older versions than the actual version of the library. Indeed, it is normal for the new library to allow QML written to previous versions to continue to work, even if more advanced versions of some of its types are available.
         </inject-documentation>
 
-        <inject-code class="target">
-        int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES);
-        %PYARG_0 = %CONVERTTOPYTHON[int](%0);
-        </inject-code>
+        <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistertype"/>
     </add-function>
 
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
@@ -89,38 +86,33 @@
         </extra-includes>
     </enum-type>
 
-    <inject-code class="target" position="end">
-    PySide::initQmlSupport(module);
-    </inject-code>
+    <inject-code class="target" position="end" file="../glue/qtqml.cpp" snippet="init"/>
 
     <object-type name="QJSEngine">
-        <enum-type name="Extension" flags="Extensions" since="5.6" />
+        <enum-type name="Extension" flags="Extensions" since="5.6"/>
         <add-function signature="toScriptValue(const QVariant&amp;)" return-type="QJSValue">
-            <inject-code class="target" position="end">
-                %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1);
-                return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
-            </inject-code>
+            <inject-code class="target" position="end" file="../glue/qtqml.cpp" snippet="qjsengine-toscriptvalue"/>
         </add-function>
     </object-type>
     <value-type name="QJSValue">
-        <enum-type name="SpecialValue" />
+        <enum-type name="SpecialValue"/>
     </value-type>
-    <object-type name="QJSValueIterator" />
+    <object-type name="QJSValueIterator"/>
     <object-type name="QQmlAbstractUrlInterceptor">
-        <enum-type name="DataType" />
+        <enum-type name="DataType"/>
     </object-type>
-    <object-type name="QQmlApplicationEngine" />
+    <object-type name="QQmlApplicationEngine"/>
     <object-type name="QQmlComponent">
-        <enum-type name="CompilationMode" />
-        <enum-type name="Status" />
+        <enum-type name="CompilationMode"/>
+        <enum-type name="Status"/>
     </object-type>
-    <object-type name="QQmlContext" />
-    <value-type name="QQmlError" />
+    <object-type name="QQmlContext"/>
+    <value-type name="QQmlError"/>
     <object-type name="QQmlDebuggingEnabler">
-        <enum-type name="StartMode" />
+        <enum-type name="StartMode"/>
     </object-type>
     <object-type name="QQmlEngine">
-        <enum-type name="ObjectOwnership" />
+        <enum-type name="ObjectOwnership"/>
         <modify-function signature="addImageProvider(const QString&amp;,QQmlImageProviderBase*)">
           <modify-argument index="2">
             <define-ownership owner="c++"/>
@@ -133,35 +125,35 @@
                 <remove-argument />
             </modify-argument>
             <modify-argument index="return">
-                <replace-type modified-type="PyTuple" />
+                <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
                 <insert-template name="fix_bool*"/>
             </inject-code>
         </modify-function>
     </object-type>
-    <interface-type name="QQmlTypesExtensionInterface" />
-    <interface-type name="QQmlExtensionInterface" />
-    <object-type name="QQmlExtensionPlugin" />
+    <interface-type name="QQmlTypesExtensionInterface"/>
+    <interface-type name="QQmlExtensionInterface"/>
+    <object-type name="QQmlExtensionPlugin"/>
     <!-- Possible qRegisterMetaType issues ? -->
     <object-type name="QQmlFile">
-        <enum-type name="Status" />
+        <enum-type name="Status"/>
     </object-type>
-    <object-type name="QQmlFileSelector" />
+    <object-type name="QQmlFileSelector"/>
     <object-type name="QQmlImageProviderBase">
-        <enum-type name="Flag" flags="Flags" />
-        <enum-type name="ImageType" />
+        <enum-type name="Flag" flags="Flags"/>
+        <enum-type name="ImageType"/>
     </object-type>
     <object-type name="QQmlIncubator">
-        <enum-type name="IncubationMode" />
-        <enum-type name="Status" />
+        <enum-type name="IncubationMode"/>
+        <enum-type name="Status"/>
     </object-type>
     <object-type name="QQmlIncubationController">
         <modify-function signature="incubateWhile(volatile bool*,int)" allow-thread="yes">
             <modify-argument index="1">
                 <!-- The replace type is needed to use the VolatileBool_Check macro instead of
                      a template conversion function with "volatile bool" as argument. -->
-                <replace-type modified-type="VolatileBool" />
+                <replace-type modified-type="VolatileBool"/>
                 <conversion-rule class="native">
                     volatile bool * %out =
                       &amp;((reinterpret_cast&lt;QtQml_VolatileBoolObject *&gt;(%PYARG_1))->flag);
@@ -175,22 +167,22 @@
     allow instantiating or deriving from the class though, given that a separate custom ListProperty
     type is provided by the module. Plus meta type registration would have to be taken into account
     for the QML parts.
-    <value-type name="QQmlListProperty" />-->
-    <value-type name="QQmlListReference" />
-    <interface-type name="QQmlParserStatus" />
+    <value-type name="QQmlListProperty"/>-->
+    <value-type name="QQmlListReference"/>
+    <interface-type name="QQmlParserStatus"/>
     <value-type name="QQmlProperty">
-        <enum-type name="PropertyTypeCategory" />
-        <enum-type name="Type" />
+        <enum-type name="PropertyTypeCategory"/>
+        <enum-type name="Type"/>
     </value-type>
-    <object-type name="QQmlPropertyMap" />
-    <object-type name="QQmlPropertyValueSource" />
+    <object-type name="QQmlPropertyMap"/>
+    <object-type name="QQmlPropertyValueSource"/>
     <value-type name="QQmlScriptString">
         <modify-function signature="numberLiteral(bool*)const" allow-thread="yes">
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>
             <modify-argument index="return">
-                <replace-type modified-type="PyTuple" />
+                <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
                 <insert-template name="fix_bool*"/>
@@ -201,7 +193,7 @@
                 <remove-argument />
             </modify-argument>
             <modify-argument index="return">
-                <replace-type modified-type="PyTuple" />
+                <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
                 <insert-template name="fix_bool*"/>

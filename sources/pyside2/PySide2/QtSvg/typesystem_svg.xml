@@ -42,8 +42,8 @@
 <typesystem package="PySide2.QtSvg">
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
-  <object-type name="QSvgRenderer" />
-  <object-type name="QSvgWidget" />
+  <object-type name="QSvgRenderer"/>
+  <object-type name="QSvgWidget"/>
 
   <object-type name="QSvgGenerator">
     <modify-function signature="setOutputDevice(QIODevice*)">

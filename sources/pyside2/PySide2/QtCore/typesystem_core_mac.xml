@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtCore">
-  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject" />
+  <primitive-type name="Qt::HANDLE" target-lang-api-name="PyObject"/>
   <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
   <object-type name="QAbstractEventDispatcher">
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag>)" allow-thread="yes"/>
@@ -50,8 +50,8 @@
   <object-type name="QSysInfo">
     <enum-type name="Endian"/>
     <enum-type name="Sizes"/>
-    <enum-type name="MacVersion" since="5.5" />
+    <enum-type name="MacVersion" since="5.5"/>
   </object-type>
-  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::WinVersion'" />
-  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum" />
+  <suppress-warning text="skipping field 'QSysInfo::WindowsVersion' with unmatched type 'QSysInfo::WinVersion'"/>
+  <suppress-warning text="enum 'QSysInfo::WinVersion' does not have a type entry or is not an enum"/>
 </typesystem>

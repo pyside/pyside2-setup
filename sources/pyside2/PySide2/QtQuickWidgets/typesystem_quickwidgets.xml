@@ -48,7 +48,7 @@
 
     
     <object-type name="QQuickWidget">
-        <enum-type name="ResizeMode" />
-        <enum-type name="Status" />
+        <enum-type name="ResizeMode"/>
+        <enum-type name="Status"/>
     </object-type>
 </typesystem>

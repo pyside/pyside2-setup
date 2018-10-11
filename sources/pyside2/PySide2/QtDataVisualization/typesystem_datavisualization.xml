@@ -73,7 +73,7 @@
       result.append(row);
   }
   </template>
-  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
   <namespace-type name="QtDataVisualization">
     <primitive-type name="QBarDataArray">
       <include file-name="qbardataproxy.h" location="global"/>
@@ -313,9 +313,7 @@
         <modify-argument index="1">
           <reference-count action="set"/>
         </modify-argument>
-        <inject-code>
-          Shiboken::Object::releaseOwnership(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
       </modify-function>
       <modify-function signature="setColumnAxis(QtDataVisualization::QCategory3DAxis*)">
         <modify-argument index="1">
@@ -343,9 +341,7 @@
         <modify-argument index="1">
           <reference-count action="set"/>
         </modify-argument>
-        <inject-code>
-          Shiboken::Object::releaseOwnership(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
       </modify-function>
       <modify-function signature="setAxisX(QtDataVisualization::QValue3DAxis*)">
         <modify-argument index="1">
@@ -374,9 +370,7 @@
         <modify-argument index="1">
           <reference-count action="set"/>
         </modify-argument>
-        <inject-code>
-          Shiboken::Object::releaseOwnership(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
       </modify-function>
       <modify-function signature="setAxisX(QtDataVisualization::QValue3DAxis*)">
         <modify-argument index="1">
@@ -418,25 +412,19 @@
         <modify-argument index="1">
           <reference-count action="set"/>
         </modify-argument>
-        <inject-code>
-          Shiboken::Object::releaseOwnership(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
       </modify-function>
       <modify-function signature="releaseInputHandler(QtDataVisualization::QAbstract3DInputHandler*)">
         <modify-argument index="1">
           <reference-count action="set"/>
         </modify-argument>
-        <inject-code>
-          Shiboken::Object::releaseOwnership(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
       </modify-function>
       <modify-function signature="releaseTheme(QtDataVisualization::Q3DTheme*)">
         <modify-argument index="1">
           <reference-count action="set"/>
         </modify-argument>
-        <inject-code>
-          Shiboken::Object::releaseOwnership(%PYARG_1);
-        </inject-code>
+        <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
       </modify-function>
       <modify-function signature="setActiveInputHandler(QtDataVisualization::QAbstract3DInputHandler*)">
         <modify-argument index="1">
