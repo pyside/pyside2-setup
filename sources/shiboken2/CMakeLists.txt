@@ -5,9 +5,8 @@ include(CheckIncludeFileCXX)
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake_helpers/
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules/
                       ${CMAKE_MODULE_PATH})
-include(helpers)
 
 find_package(Qt5 5.7 REQUIRED COMPONENTS Core Xml XmlPatterns)
 
@@ -158,8 +157,6 @@ list(GET SHIBOKEN_VERSION_OUTPUT 4 shiboken_PRE_RELEASE_VERSION)
 
 set(shiboken2_VERSION "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}.${shiboken_MICRO_VERSION}")
 set(shiboken2_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VERSION}")
-
-compute_config_py_values(shiboken2_VERSION)
 
 ## For debugging the PYTHON* variables
 message("PYTHONLIBS_FOUND: " ${PYTHONLIBS_FOUND})

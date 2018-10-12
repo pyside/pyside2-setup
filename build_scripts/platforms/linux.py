@@ -37,100 +37,76 @@
 ##
 #############################################################################
 
+from ..options import *
 from ..utils import copydir, copyfile, copy_icu_libs, find_files_using_glob
-from ..config import config
 
-
-def prepare_standalone_package_linux(self, vars):
+def prepare_standalone_package_linux(self, executables, vars):
     built_modules = vars['built_modules']
 
-    constrain_modules = None
-    copy_plugins = True
-    copy_qml = True
-    copy_translations = True
-    copy_qt_conf = True
-    should_copy_icu_libs = True
-
-    if config.is_internal_shiboken_generator_build():
-        constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]
-        copy_plugins = False
-        copy_qml = False
-        copy_translations = False
-        copy_qt_conf = False
-        should_copy_icu_libs = False
-
-    # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
-    destination_lib_dir = "{st_build_dir}/{st_package_name}/Qt/lib"
-
-    accepted_modules = ['libQt5*.so.?']
-    if constrain_modules:
-        accepted_modules = ["libQt5" + module + "*.so.?" for module in constrain_modules]
-    accepted_modules.append("libicu*.so.??")
-
+    # <qt>/lib/* -> <setup>/PySide2/Qt/lib
+    destination_lib_dir = "{pyside_package_dir}/PySide2/Qt/lib"
     copydir("{qt_lib_dir}", destination_lib_dir,
-            filter=accepted_modules,
-            recursive=False, vars=vars, force_copy_symlinks=True)
+        filter=[
+            "libQt5*.so.?",
+            "libicu*.so.??",
+        ],
+        recursive=False, vars=vars, force_copy_symlinks=True)
 
-    if should_copy_icu_libs:
-        # Check if ICU libraries were copied over to the destination
-        # Qt libdir.
-        resolved_destination_lib_dir = destination_lib_dir.format(**vars)
-        maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir,
-            "libicu*")
+    # Check if ICU libraries were copied over to the destination
+    # Qt libdir.
+    resolved_destination_lib_dir = destination_lib_dir.format(**vars)
+    maybe_icu_libs = find_files_using_glob(resolved_destination_lib_dir,
+        "libicu*")
 
-        # If no ICU libraries are present in the Qt libdir (like when
-        # Qt is built against system ICU, or in the Coin CI where ICU
-        # libs are in a different directory) try to find out / resolve
-        # which ICU libs are used by QtCore (if used at all) using a
-        # custom written ldd, and copy the ICU libs to the Pyside Qt
-        # dir if necessary. We choose the QtCore lib to inspect, by
-        # checking which QtCore library the shiboken2 executable uses.
-        if not maybe_icu_libs:
-            copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
+    # If no ICU libraries are present in the Qt libdir (like when
+    # Qt is built against system ICU, or in the Coin CI where ICU
+    # libs are in a different directory) try to find out / resolve
+    # which ICU libs are used by QtCore (if used at all) using a
+    # custom written ldd, and copy the ICU libs to the Pyside Qt
+    # dir if necessary. We choose the QtCore lib to inspect, by
+    # checking which QtCore library the shiboken2 executable uses.
+    if not maybe_icu_libs:
+        copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
 
     if self.is_webengine_built(built_modules):
         copydir("{qt_lib_execs_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/libexec",
+            "{pyside_package_dir}/PySide2/Qt/libexec",
             filter=None,
             recursive=False,
             vars=vars)
 
         copydir("{qt_prefix_dir}/resources",
-            "{st_build_dir}/{st_package_name}/Qt/resources",
+            "{pyside_package_dir}/PySide2/Qt/resources",
             filter=None,
             recursive=False,
             vars=vars)
 
-    if copy_plugins:
-        # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        copydir("{qt_plugins_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/plugins",
-            filter=["*.so"],
-            recursive=True,
-            vars=vars)
+    # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
+    copydir("{qt_plugins_dir}",
+        "{pyside_package_dir}/PySide2/Qt/plugins",
+        filter=["*.so"],
+        recursive=True,
+        vars=vars)
 
-    if copy_qml:
-        # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
-        copydir("{qt_qml_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/qml",
-            filter=None,
-            force=False,
-            recursive=True,
-            ignore=["*.so.debug"],
-            vars=vars)
+    # <qt>/qml/* -> <setup>/PySide2/Qt/qml
+    copydir("{qt_qml_dir}",
+        "{pyside_package_dir}/PySide2/Qt/qml",
+        filter=None,
+        force=False,
+        recursive=True,
+        ignore=["*.so.debug"],
+        vars=vars)
 
-    if copy_translations:
-        # <qt>/translations/* ->
-        # <setup>/{st_package_name}/Qt/translations
-        copydir("{qt_translations_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/translations",
-            filter=["*.qm", "*.pak"],
-            force=False,
-            vars=vars)
+    # <qt>/translations/* -> <setup>/PySide2/Qt/translations
 
-    if copy_qt_conf:
-        # Copy the qt.conf file to libexec.
-        copyfile(
-            "{build_dir}/pyside2/{st_package_name}/qt.conf",
-            "{st_build_dir}/{st_package_name}/Qt/libexec",
-            vars=vars)
+    copydir("{qt_translations_dir}",
+        "{pyside_package_dir}/PySide2/Qt/translations",
+        filter=["*.qm", "*.pak"],
+        force=False,
+        vars=vars)
+
+    # Copy the qt.conf file to libexec.
+    copyfile(
+        "{build_dir}/pyside2/PySide2/qt.conf",
+        "{pyside_package_dir}/PySide2/Qt/libexec",
+        vars=vars)

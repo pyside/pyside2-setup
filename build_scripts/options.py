@@ -38,88 +38,16 @@
 #############################################################################
 
 from __future__ import print_function
-import sys
-import os
 
-
-class Options(object):
-    def __init__(self):
-
-        # Dictionary containing values of all the possible options.
-        self.dict = {}
-
-    def has_option(self, name):
-        """ Returns True if argument '--name' was passed on the command
-        line. """
-        try:
-            sys.argv.remove("--{}".format(name))
-            self.dict[name] = True
-            return True
-        except ValueError:
-            pass
-        return False
-
-    def option_value(self, name, remove=True):
-        """
-        Returns the value of a command line option or environment
-        variable.
-
-        :param name: The name of the command line option or environment
-         variable.
-
-        :param remove: Whether the option and its value should be
-         removed from sys.argv. Useful when there's a need to query for
-         the value and also pass it along to setuptools for example.
-
-        :return: Either the option value or None.
-        """
-        for index, option in enumerate(sys.argv):
-            if option == '--' + name:
-                if index + 1 >= len(sys.argv):
-                    raise RuntimeError("The option {} requires a value".format(option))
-                value = sys.argv[index + 1]
-
-                if remove:
-                    sys.argv[index:index + 2] = []
-
-                self.dict[name] = value
-                return value
-
-            if option.startswith('--' + name + '='):
-                value = option[len(name) + 3:]
-
-                if remove:
-                    sys.argv[index:index + 1] = []
-
-                self.dict[name] = value
-                return value
-
-        env_val = os.getenv(name.upper().replace('-', '_'))
-        self.dict[name] = env_val
-        return env_val
-
-
-options = Options()
-
-
-def has_option(name):
-    return options.has_option(name)
-
-
-def option_value(*args,**kwargs):
-    return options.option_value(*args,**kwargs)
-
+from .utils import has_option, option_value
 
 # Declare options
-OPTION_BUILD_TYPE = option_value("build-type")
-OPTION_INTERNAL_BUILD_TYPE = option_value("internal-build-type")
 OPTION_DEBUG = has_option("debug")
 OPTION_RELWITHDEBINFO = has_option('relwithdebinfo')
 OPTION_QMAKE = option_value("qmake")
 OPTION_QT_VERSION = option_value("qt")
 OPTION_CMAKE = option_value("cmake")
 OPTION_OPENSSL = option_value("openssl")
-OPTION_SHIBOKEN_CONFIG_DIR = option_value("shiboken-config-dir")
 OPTION_ONLYPACKAGE = has_option("only-package")
 OPTION_STANDALONE = has_option("standalone")
 OPTION_MAKESPEC = option_value("make-spec")
@@ -154,7 +82,3 @@ OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
 OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")
 OPTION_LIMITED_API = option_value("limited-api")
 OPTION_PACKAGE_TIMESTAMP = option_value("package-timestamp")
-
-# This is used automatically by distutils.command.install object, to
-# specify the final installation location.
-OPTION_FINAL_INSTALL_PREFIX = option_value("prefix", remove=False)

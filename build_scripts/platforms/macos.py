@@ -37,28 +37,11 @@
 ##
 #############################################################################
 
-import fnmatch
-import os
+import fnmatch, os
 from ..utils import copydir, copyfile, macos_fix_rpaths_for_library
-from ..config import config
 
-
-def prepare_standalone_package_macos(self, vars):
+def prepare_standalone_package_macos(self, executables, vars):
     built_modules = vars['built_modules']
-
-    constrain_modules = None
-    copy_plugins = True
-    copy_qml = True
-    copy_translations = True
-    copy_qt_conf = True
-
-    if config.is_internal_shiboken_generator_build():
-        constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]
-        constrain_frameworks = ['Qt' + name + '.framework' for name in constrain_modules]
-        copy_plugins = False
-        copy_qml = False
-        copy_translations = False
-        copy_qt_conf = False
 
     # Directory filter for skipping unnecessary files.
     def general_dir_filter(dir_name, parent_full_path, dir_full_path):
@@ -69,7 +52,6 @@ def prepare_standalone_package_macos(self, vars):
     # Filter out debug plugins and qml plugins in the
     # debug_and_release config.
     no_copy_debug = True
-
     def file_variant_filter(file_name, file_full_path):
         if self.qtinfo.build_type != 'debug_and_release':
             return True
@@ -77,16 +59,17 @@ def prepare_standalone_package_macos(self, vars):
             return False
         return True
 
-    # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
+    # <qt>/lib/* -> <setup>/PySide2/Qt/lib
     if self.qt_is_framework_build():
-        def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
-            if '.framework' in dir_name:
-                if (dir_name.startswith('QtWebEngine') and
-                        not self.is_webengine_built(built_modules)):
-                    return False
-                if constrain_modules and dir_name not in constrain_frameworks:
-                    return False
+        framework_built_modules = [
+            'Qt' + name + '.framework' for name in built_modules]
 
+        def framework_dir_filter(dir_name, parent_full_path,
+                dir_full_path):
+            if '.framework' in dir_name:
+                if dir_name.startswith('QtWebEngine') and not \
+                            self.is_webengine_built(built_modules):
+                    return False
             if dir_name in ['Headers', 'fonts']:
                 return False
             if dir_full_path.endswith('Versions/Current'):
@@ -101,7 +84,6 @@ def prepare_standalone_package_macos(self, vars):
         # Filter out debug frameworks in the
         # debug_and_release config.
         no_copy_debug = True
-
         def framework_variant_filter(file_name, file_full_path):
             if self.qtinfo.build_type != 'debug_and_release':
                 return True
@@ -111,7 +93,7 @@ def prepare_standalone_package_macos(self, vars):
                 return False
             return True
 
-        copydir("{qt_lib_dir}", "{st_build_dir}/{st_package_name}/Qt/lib",
+        copydir("{qt_lib_dir}", "{pyside_package_dir}/PySide2/Qt/lib",
             recursive=True, vars=vars,
             ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
             dir_filter_function=framework_dir_filter,
@@ -122,7 +104,7 @@ def prepare_standalone_package_macos(self, vars):
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
         if self.is_webengine_built(built_modules):
-            qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(
+            qt_lib_path = "{pyside_package_dir}/PySide2/Qt/lib".format(
                 **vars)
             bundle = "QtWebEngineCore.framework/Helpers/"
             bundle += "QtWebEngineProcess.app"
@@ -138,11 +120,9 @@ def prepare_standalone_package_macos(self, vars):
         if 'WebKit' not in built_modules:
             ignored_modules.extend(['libQt5WebKit*.dylib'])
         accepted_modules = ['libQt5*.5.dylib']
-        if constrain_modules:
-            accepted_modules = ["libQt5" + module + "*.5.dylib" for module in constrain_modules]
 
         copydir("{qt_lib_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/lib",
+            "{pyside_package_dir}/PySide2/Qt/lib",
             filter=accepted_modules,
             ignore=ignored_modules,
             file_filter_function=file_variant_filter,
@@ -150,58 +130,53 @@ def prepare_standalone_package_macos(self, vars):
 
         if self.is_webengine_built(built_modules):
             copydir("{qt_lib_execs_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/libexec",
+                "{pyside_package_dir}/PySide2/Qt/libexec",
                 filter=None,
                 recursive=False,
                 vars=vars)
 
             copydir("{qt_prefix_dir}/resources",
-                "{st_build_dir}/{st_package_name}/Qt/resources",
+                "{pyside_package_dir}/PySide2/Qt/resources",
                 filter=None,
                 recursive=False,
                 vars=vars)
 
             # Fix rpath for WebEngine process executable.
-            qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**vars)
+            pyside_package_dir = vars['pyside_package_dir']
+            qt_libexec_path = "{}/PySide2/Qt/libexec".format(pyside_package_dir)
             binary = "QtWebEngineProcess"
             final_path = os.path.join(qt_libexec_path, binary)
             rpath = "@loader_path/../lib"
             macos_fix_rpaths_for_library(final_path, rpath)
 
-            if copy_qt_conf:
-                # Copy the qt.conf file to libexec.
-                copyfile(
-                    "{build_dir}/pyside2/{st_package_name}/qt.conf",
-                    "{st_build_dir}/{st_package_name}/Qt/libexec",
-                    vars=vars)
+            # Copy the qt.conf file to libexec.
+            copyfile(
+                "{build_dir}/pyside2/PySide2/qt.conf",
+                "{pyside_package_dir}/PySide2/Qt/libexec",
+                vars=vars)
 
-    if copy_plugins:
-        # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
-        copydir("{qt_plugins_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/plugins",
-            filter=["*.dylib"],
-            recursive=True,
-            dir_filter_function=general_dir_filter,
-            file_filter_function=file_variant_filter,
-            vars=vars)
+    # <qt>/plugins/* -> <setup>/PySide2/Qt/plugins
+    copydir("{qt_plugins_dir}",
+        "{pyside_package_dir}/PySide2/Qt/plugins",
+        filter=["*.dylib"],
+        recursive=True,
+        dir_filter_function=general_dir_filter,
+        file_filter_function=file_variant_filter,
+        vars=vars)
 
+    # <qt>/qml/* -> <setup>/PySide2/Qt/qml
+    copydir("{qt_qml_dir}",
+        "{pyside_package_dir}/PySide2/Qt/qml",
+        filter=None,
+        recursive=True,
+        force=False,
+        dir_filter_function=general_dir_filter,
+        file_filter_function=file_variant_filter,
+        vars=vars)
 
-    if copy_qml:
-        # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
-        copydir("{qt_qml_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/qml",
-            filter=None,
-            recursive=True,
-            force=False,
-            dir_filter_function=general_dir_filter,
-            file_filter_function=file_variant_filter,
-            vars=vars)
-
-    if copy_translations:
-        # <qt>/translations/* ->
-        # <setup>/{st_package_name}/Qt/translations
-        copydir("{qt_translations_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/translations",
-            filter=["*.qm", "*.pak"],
-            force=False,
-            vars=vars)
+    # <qt>/translations/* -> <setup>/PySide2/Qt/translations
+    copydir("{qt_translations_dir}",
+        "{pyside_package_dir}/PySide2/Qt/translations",
+        filter=["*.qm", "*.pak"],
+        force=False,
+        vars=vars)

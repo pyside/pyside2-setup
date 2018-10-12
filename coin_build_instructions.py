@@ -36,10 +36,9 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-from build_scripts.options import has_option
-from build_scripts.options import option_value
+from build_scripts.utils import has_option
+from build_scripts.utils import option_value
 from build_scripts.utils import install_pip_dependencies
-from build_scripts.utils import install_pip_wheel_package
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
@@ -99,11 +98,8 @@ def call_setup(python_ver):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-
-    install_pip_dependencies(env_pip, ["six", "setuptools"])
-    install_pip_wheel_package(env_pip)
-
-    cmd = [env_python, "-u", "setup.py"]
+    install_pip_dependencies(env_pip, ["six", "wheel"])
+    cmd = [env_python, "setup.py"]
     if CI_RELEASE_CONF:
         cmd += ["bdist_wheel", "--standalone"]
     else:
@@ -125,23 +121,7 @@ def call_setup(python_ver):
 
     cmd += ["--package-timestamp=" + CI_INTEGRATION_ID]
 
-    env = os.environ
-    if CI_HOST_OS == "MacOS":
-        # On Python 3, setuptools.dist.handle_display_options does some
-        # weird sys.stdout.detach-ing if the stdout encoding is
-        # different from utf-8. This causes issues when running
-        # subprocess.call() because that access the original stdout
-        # object stored in sys.__stdout__ which was detached, and
-        # results in an exception being thrown.
-        # The Coin macOS locale by default is US-ASCII, and that
-        # triggers the above issue. Set the encoding to UTF-8 which
-        # makes sure to skip over the detach-ing code.
-        # Relevant links to the issue:
-        # https://bugs.python.org/issue15216
-        # https://bitbucket.org/tarek/distribute/issues/334/fix-for-311-breaks-packages-that-use
-        # https://github.com/pypa/virtualenv/issues/359
-        env['LC_CTYPE'] = 'UTF-8'
-    run_instruction(cmd, "Failed to run setup.py", initial_env=env)
+    run_instruction(cmd, "Failed to run setup.py")
 
 def run_build_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):

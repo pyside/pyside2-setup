@@ -40,24 +40,4 @@ target_link_libraries(shibokenmodule
 
 add_dependencies(shibokenmodule shiboken2)
 
-install(TARGETS shibokenmodule DESTINATION ${PYTHON_SITE_PACKAGES}/shiboken2)
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
-        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
-       DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")
-
-# Use absolute path instead of relative path, to avoid ninja build errors due to
-# duplicate file dependency inconsistency.
-set(shiboken_version_relative_path "${CMAKE_CURRENT_SOURCE_DIR}/../shiboken_version.py")
-get_filename_component(shiboken_version_path ${shiboken_version_relative_path} ABSOLUTE)
-configure_file("${shiboken_version_path}"
-               "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_module_version.py" @ONLY)
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_shiboken_module_version.py"
-        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")
+install(TARGETS shibokenmodule DESTINATION ${PYTHON_SITE_PACKAGES})

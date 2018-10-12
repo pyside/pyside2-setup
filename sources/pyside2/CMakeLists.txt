@@ -8,10 +8,8 @@ cmake_policy(SET CMP0046 NEW)
 
 project(pysidebindings)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake_helpers/
-                      ${CMAKE_SOURCE_DIR}/cmake/Macros/
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
-include(helpers)
 
 option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
 
@@ -246,7 +244,64 @@ else()
         CACHE STRING "PySide2 version [full]" FORCE)
 endif()
 
-compute_config_py_values(BINDING_API_VERSION)
+string(TIMESTAMP PYSIDE_BUILD_DATE "%Y-%m-%dT%H:%M:%S+00:00" UTC)
+if (PYSIDE_BUILD_DATE)
+    set(PYSIDE_BUILD_DATE "__build_date__ = '${PYSIDE_BUILD_DATE}'")
+endif()
+
+if (PYSIDE_SETUP_PY_PACKAGE_VERSION)
+    set(PYSIDE_SETUP_PY_PACKAGE_VERSION_ASSIGNMENT "__setup_py_package_version__ = '${PYSIDE_SETUP_PY_PACKAGE_VERSION}'")
+    set(FINAL_PACKAGE_VERSION ${PYSIDE_SETUP_PY_PACKAGE_VERSION})
+else()
+    set(FINAL_PACKAGE_VERSION ${BINDING_API_VERSION_FULL})
+endif()
+
+if (PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP)
+    set(PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP_ASSIGNMENT "__setup_py_package_timestamp__ = '${PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP}'")
+else()
+    set(PYSIDE_SETUP_PY_PACKAGE_TIMESTAMP_ASSIGNMENT "__setup_py_package_timestamp__ = ''")
+endif()
+
+find_package(Git)
+if(GIT_FOUND)
+    # Check if current source folder is inside a git repo, so that commit information can be
+    # queried.
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse --git-dir
+      OUTPUT_VARIABLE PYSIDE_SOURCE_IS_INSIDE_REPO
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    if(PYSIDE_SOURCE_IS_INSIDE_REPO)
+        # Force git dates to be UTC-based.
+        set(ENV{TZ} UTC)
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} --no-pager show --date=format-local:%Y-%m-%dT%H:%M:%S+00:00 -s --format=%cd HEAD
+          OUTPUT_VARIABLE PYSIDE_BUILD_COMMIT_DATE
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(PYSIDE_BUILD_COMMIT_DATE)
+            set(PYSIDE_BUILD_COMMIT_DATE "__build_commit_date__ = '${PYSIDE_BUILD_COMMIT_DATE}'")
+        endif()
+        unset(ENV{TZ})
+
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+          OUTPUT_VARIABLE PYSIDE_BUILD_COMMIT_HASH
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(PYSIDE_BUILD_COMMIT_HASH)
+            set(PYSIDE_BUILD_COMMIT_HASH "__build_commit_hash__ = '${PYSIDE_BUILD_COMMIT_HASH}'")
+        endif()
+
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} describe HEAD
+          OUTPUT_VARIABLE PYSIDE_BUILD_COMMIT_HASH_DESCRIBED
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(PYSIDE_BUILD_COMMIT_HASH_DESCRIBED)
+            set(PYSIDE_BUILD_COMMIT_HASH_DESCRIBED "__build_commit_hash_described__ = '${PYSIDE_BUILD_COMMIT_HASH_DESCRIBED}'")
+        endif()
+
+    endif()
+endif()
 
 include(PySideModules)
 
