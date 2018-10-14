@@ -58,6 +58,7 @@ used literally as strings like "signature", "existence", etc.
 from textwrap import dedent
 from .loader import inspect
 
+
 class SimpleNamespace(object):
     # From types.rst, because the builtin is implemented in Python 3, only.
     def __init__(self, **kwargs):
@@ -70,6 +71,7 @@ class SimpleNamespace(object):
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
+
 
 class SignatureLayout(SimpleNamespace):
     """
@@ -140,6 +142,7 @@ typeerror = SignatureLayout(definition=False,
                             return_annotation=False,
                             parameter_names=False)
 
+
 def define_nameless_parameter():
     """
     Create Nameless Parameters
@@ -168,7 +171,9 @@ def define_nameless_parameter():
     body["__str__"] = __str__
     return type(newname, bases, body)
 
+
 NamelessParameter = define_nameless_parameter()
+
 
 def make_signature_nameless(signature):
     """
@@ -178,7 +183,8 @@ def make_signature_nameless(signature):
     The signature looks different, but is totally intact.
     """
     for key in signature.parameters.keys():
-        Signature.parameters[key].__class__ = NamelessParameter
+        signature.parameters[key].__class__ = NamelessParameter
+
 
 def create_signature(props, key):
     if not props:
@@ -193,7 +199,7 @@ def create_signature(props, key):
     else:
         sig_kind, modifier = key, "signature"
 
-    layout = globals()[modifier]  # lookup of the modifier, here
+    layout = globals()[modifier]  # lookup of the modifier in this module
     if not isinstance(layout, SignatureLayout):
         raise SystemError("Modifiers must be names of a SignatureLayout "
                           "instance")
@@ -201,14 +207,16 @@ def create_signature(props, key):
     # this is the basic layout of a signature
     varnames = props["varnames"]
     if layout.definition:
-        if sig_kind == "method":
+        if sig_kind == "function":
+            pass
+        elif sig_kind == "method":
             varnames = ("self",) + varnames
         elif sig_kind == "staticmethod":
             pass
         elif sig_kind == "classmethod":
             varnames = ("klass",) + varnames
         else:
-            raise SystemError("Methods must be normal, staticmethod or "
+            raise SystemError("Methods must be function, method, staticmethod or "
                               "classmethod")
     # calculate the modifications
     defaults = props["defaults"][:]

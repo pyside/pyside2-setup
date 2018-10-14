@@ -56,6 +56,11 @@ import sys
 import struct
 import PySide2
 try:
+    import sample
+except ImportError:
+    pass
+
+try:
     from . import typing
 except ImportError:
     import typing
@@ -64,10 +69,12 @@ ellipsis = "..."
 Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
 StringList = typing.List[str]
 IntList = typing.List[int]
+IntMatrix = typing.List[IntList]
 Variant = typing.Any
 ModelIndexList = typing.List[int]
 QImageCleanupFunction = typing.Callable
-FloatMatrix = typing.List[typing.List[float]]
+FloatList = typing.List[float]
+FloatMatrix = typing.List[FloatList]
 # Pair could be more specific, but we loose the info in the generator.
 Pair = typing.Tuple[typing.Any, typing.Any]
 MultiMap = typing.DefaultDict[str, typing.List[str]]
@@ -132,7 +139,7 @@ class Instance(_NotCalled):
 class Reloader(object):
     def __init__(self):
         self.sys_module_count = 0
-        self.uninitialized = PySide2.__all__[:]
+        self.uninitialized = PySide2.__all__[:] + ["sample"]
 
     def update(self):
         if self.sys_module_count == len(sys.modules):
@@ -140,7 +147,7 @@ class Reloader(object):
         self.sys_module_count = len(sys.modules)
         g = globals()
         for mod_name in self.uninitialized[:]:
-            if "PySide2." + mod_name in sys.modules:
+            if "PySide2." + mod_name in sys.modules or mod_name == "sample":
                 self.uninitialized.remove(mod_name)
                 proc_name = "init_" + mod_name
                 if proc_name in g:
@@ -289,6 +296,7 @@ def init_QtCore():
             "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
         "QVariantMap": dict,
         "PySide2.QtCore.QCborStreamReader.StringResult": typing.AnyStr,
+        "PySide2.QtCore.double": float,
     })
     try:
         type_map.update({
@@ -298,6 +306,7 @@ def init_QtCore():
         # this does not exist on 5.9 ATM.
         pass
     return locals()
+
 
 def init_QtGui():
     import PySide2.QtGui
@@ -327,6 +336,7 @@ def init_QtGui():
         "PySide2.QtGui.QGenericMatrix": Missing("PySide2.QtGui.QGenericMatrix"),
     })
     return locals()
+
 
 def init_QtWidgets():
     import PySide2.QtWidgets
@@ -364,6 +374,7 @@ def init_QtWidgets():
     })
     return locals()
 
+
 def init_QtSql():
     import PySide2.QtSql
     from PySide2.QtSql import QSqlDatabase
@@ -372,6 +383,7 @@ def init_QtSql():
         "QVariant.Invalid": Invalid("PySide2.QtCore.QVariant"), # not sure what I should create, here...
     })
     return locals()
+
 
 def init_QtNetwork():
     import PySide2.QtNetwork
@@ -383,6 +395,7 @@ def init_QtNetwork():
     })
     return locals()
 
+
 def init_QtXmlPatterns():
     import PySide2.QtXmlPatterns
     from PySide2.QtXmlPatterns import QXmlName
@@ -392,6 +405,7 @@ def init_QtXmlPatterns():
     })
     return locals()
 
+
 def init_QtMultimedia():
     import PySide2.QtMultimedia
     import PySide2.QtMultimediaWidgets
@@ -400,6 +414,7 @@ def init_QtMultimedia():
         "QVideoWidget": PySide2.QtMultimediaWidgets.QVideoWidget,
     })
     return locals()
+
 
 def init_QtOpenGL():
     import PySide2.QtOpenGL
@@ -417,6 +432,7 @@ def init_QtOpenGL():
     })
     return locals()
 
+
 def init_QtQml():
     import PySide2.QtQml
     type_map.update({
@@ -429,6 +445,7 @@ def init_QtQml():
     })
     return locals()
 
+
 def init_QtQuick():
     import PySide2.QtQuick
     type_map.update({
@@ -440,12 +457,14 @@ def init_QtQuick():
     })
     return locals()
 
+
 def init_QtScript():
     import PySide2.QtScript
     type_map.update({
         "QScriptValueList()": [],
     })
     return locals()
+
 
 def init_QtTest():
     import PySide2.QtTest
@@ -468,6 +487,23 @@ def init_QtWinExtras():
     import PySide2.QtWinExtras
     type_map.update({
         "QList< QWinJumpListItem* >()": [],
+    })
+    return locals()
+
+def init_sample():
+    type_map.update({
+        "sample.int": int,
+        "Complex": complex,
+        "sample.OddBool": bool,
+        "sample.bool": bool,
+        "sample.PStr": str,
+        "double[]": FloatList,
+        "OddBool": bool,
+        "PStr": str,
+        "sample.char": Char,
+        "double[][]": FloatMatrix,
+        "int[]": IntList,
+        "int[][]": IntMatrix,
     })
     return locals()
 

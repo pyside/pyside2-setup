@@ -21,8 +21,6 @@ def _setupQtDirectories():
     import shiboken2
 
     pyside_package_dir =  os.path.abspath(os.path.dirname(__file__))
-    # Used by signature module.
-    os.environ["PYSIDE_PACKAGE_DIR"] = pyside_package_dir
 
     if sys.platform == 'win32':
         # PATH has to contain the package directory, otherwise plugins

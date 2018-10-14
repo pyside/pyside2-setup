@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "basewrapper.h"
+#include "autodecref.h"
 
 extern "C"
 {
@@ -77,7 +78,9 @@ typedef struct safe_globals_struc {
 
 static safe_globals pyside_globals = 0;
 
-static PyObject *GetSignature_Function(PyCFunctionObject *, const char *);
+static PyObject *GetClassKey(PyObject *ob);
+
+static PyObject *GetSignature_Function(PyObject *, const char *);
 static PyObject *GetSignature_TypeMod(PyObject *, const char *);
 static PyObject *GetSignature_Wrapper(PyObject *, const char *);
 static PyObject *get_signature(PyObject *self, PyObject *args);
@@ -108,24 +111,85 @@ CreateSignature(PyObject *props, PyObject *key)
 static PyObject *
 pyside_cf_get___signature__(PyObject *func, const char *modifier)
 {
-    return GetSignature_Function((PyCFunctionObject *)func, modifier);
+    return GetSignature_Function(func, modifier);
 }
 
 static PyObject *
 pyside_sm_get___signature__(PyObject *sm, const char *modifier)
 {
-    PyObject *func, *ret;
-
-    func = PyObject_GetAttrString(sm, "__func__");
-    ret = GetSignature_Function((PyCFunctionObject *)func, modifier);
-    Py_XDECREF(func);
-    return ret;
+    Shiboken::AutoDecRef func(PyObject_GetAttrString(sm, "__func__"));
+    return GetSignature_Function(func, modifier);
 }
 
-#ifdef Py_LIMITED_API
+static PyObject *
+_get_class_of_cf(PyObject *ob_cf)
+{
+    PyObject *selftype = PyCFunction_GET_SELF(ob_cf);
+    if (selftype == NULL)
+        selftype = PyDict_GetItem(pyside_globals->map_dict, (PyObject *)ob_cf);
+    if (selftype == NULL) {
+        if (!PyErr_Occurred())
+            Py_RETURN_NONE;
+        return NULL;
+    }
+    PyObject *typemod = (PyType_Check(selftype) || PyModule_Check(selftype))
+                        ? selftype : (PyObject *)Py_TYPE(selftype);
+    // do we support module functions?
+    Py_INCREF(typemod);
+    return typemod;
+}
+
+static PyObject *
+_get_class_of_sm(PyObject *ob_sm)
+{
+    Shiboken::AutoDecRef func(PyObject_GetAttrString(ob_sm, "__func__"));
+    return _get_class_of_cf(func);
+}
+
+static PyObject *
+_get_class_of_descr(PyObject *ob)
+{
+    Shiboken::AutoDecRef func_name(PyObject_GetAttrString(ob, "__name__"));
+    return PyObject_GetAttrString(ob, "__objclass__");
+}
+
+static PyObject *
+GetClassOfFunc(PyObject *ob)
+{
+    if (PyType_Check(ob))
+        return ob;
+    if (Py_TYPE(ob) == &PyCFunction_Type)
+        return _get_class_of_cf(ob);
+    if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
+        return _get_class_of_sm(ob);
+    if (Py_TYPE(ob) == PepMethodDescr_TypePtr)
+        return _get_class_of_descr(ob);
+    if (Py_TYPE(ob) == &PyWrapperDescr_Type)
+        return _get_class_of_descr(ob);
+    Py_FatalError("unexpected type in GetClassOfFunc");
+    return nullptr;
+}
+
+static PyObject *
+compute_name_key(PyObject *ob)
+{
+    if (PyType_Check(ob))
+        return GetClassKey(GetClassOfFunc(ob));
+    PyObject *func = ob;
+    if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
+        func = PyObject_GetAttrString(ob, "__func__");
+    else
+        Py_INCREF(func);
+    Shiboken::AutoDecRef func_name(PyObject_GetAttrString(func, "__name__"));
+    Py_DECREF(func);
+    if (func_name.isNull())
+        Py_FatalError("unexpected name problem in compute_name_key");
+    Shiboken::AutoDecRef type_key(GetClassKey(GetClassOfFunc(ob)));
+    return Py_BuildValue("(OO)", type_key.object(), func_name.object());
+}
 
 static int
-build_qualname_to_func(PyObject *obtype)
+build_name_key_to_func(PyObject *obtype)
 {
     PyTypeObject *type = (PyTypeObject *)obtype;
     PyMethodDef *meth = type->tp_methods;
@@ -134,98 +198,53 @@ build_qualname_to_func(PyObject *obtype)
         return 0;
 
     for (; meth->ml_name != NULL; meth++) {
-        PyObject *func = PyCFunction_NewEx(meth, obtype, NULL);
-        PyObject *qualname = PyObject_GetAttrString(func, "__qualname__");
-        if (func == NULL || qualname == NULL) {
+        Shiboken::AutoDecRef func(PyCFunction_NewEx(meth, obtype, NULL));
+        Shiboken::AutoDecRef name_key(compute_name_key(func));
+        if (func.isNull() || name_key.isNull()
+            || PyDict_SetItem(pyside_globals->map_dict, name_key, func) < 0)
             return -1;
-        }
-        if (PyDict_SetItem(pyside_globals->map_dict, qualname, func) < 0) {
-            return -1;
-        }
-        Py_DECREF(func);
-        Py_DECREF(qualname);
     }
     return 0;
 }
 
 static PyObject *
-qualname_to_typename(PyObject *qualname)
-{
-    PyObject *func = PyObject_GetAttrString(qualname, "split");
-    PyObject *list = func ? PyObject_CallFunction(func, (char *)"(s)", ".")
-                          : NULL;
-    PyObject *res = list ? PyList_GetItem(list, 0) : NULL;
-    Py_XINCREF(res);
-    Py_XDECREF(func);
-    Py_XDECREF(list);
-    return res;
-}
-
-static PyObject *
-qualname_to_func(PyObject *ob)
+name_key_to_func(PyObject *ob)
 {
     /*
-     * If we have __qualname__, then we can easily build a mapping
-     * from __qualname__ to PyCFunction. This is necessary when
-     * the limited API does not let us go easily from descriptor
-     * to PyMethodDef.
+     * We build a mapping from name_key to function.
+     * This could also be computed directly, but the Limited API
+     * makes this impossible. So we always build our own mapping.
      */
-    PyObject *ret;
-    PyObject *qualname = PyObject_GetAttrString((PyObject *)ob,
-                                                "__qualname__");
-    if (qualname != NULL) {
-        ret = PyDict_GetItem(pyside_globals->map_dict, qualname);
-        if (ret == NULL) {
-            // do a lazy initialization
-            PyObject *type_name = qualname_to_typename(qualname);
-            PyObject *type = PyDict_GetItem(pyside_globals->map_dict,
-                                            type_name);
-            Py_XDECREF(type_name);
-            if (type == NULL)
-                Py_RETURN_NONE;
-            if (build_qualname_to_func(type) < 0)
-                return NULL;
-            ret = PyDict_GetItem(pyside_globals->map_dict, qualname);
-        }
-        Py_XINCREF(ret);
-        Py_DECREF(qualname);
-    }
-    else
+    Shiboken::AutoDecRef name_key(compute_name_key(ob));
+    if (name_key.isNull())
         Py_RETURN_NONE;
+
+    PyObject *ret = PyDict_GetItem(pyside_globals->map_dict, name_key);
+    if (ret == NULL) {
+        // do a lazy initialization
+        Shiboken::AutoDecRef type_key(GetClassKey(GetClassOfFunc(ob)));
+        PyObject *type = PyDict_GetItem(pyside_globals->map_dict,
+                                        type_key);
+        if (type == nullptr)
+            Py_RETURN_NONE;
+        assert(PyType_Check(type));
+        if (build_name_key_to_func(type) < 0)
+            return NULL;
+        ret = PyDict_GetItem(pyside_globals->map_dict, name_key);
+    }
+    Py_XINCREF(ret);
     return ret;
 }
-#endif
 
 static PyObject *
-pyside_md_get___signature__(PyObject *ob, const char *modifier)
+pyside_md_get___signature__(PyObject *ob_md, const char *modifier)
 {
-    PyObject *func;
-    PyObject *result;
-#ifndef Py_LIMITED_API
-    PyMethodDescrObject *descr = (PyMethodDescrObject *)ob;
-
-# if PYTHON_USES_D_COMMON
-    func = PyCFunction_NewEx(descr->d_method,
-                             (PyObject *)descr->d_common.d_type, NULL);
-# else
-    func = PyCFunction_NewEx(descr->d_method,
-                             (PyObject *)descr->d_type, NULL);
-# endif
-#else
-    /*
-     * With limited access, we cannot use the fields of a method descriptor,
-     * but in Python 3 we have the __qualname__ field which allows us to
-     * grab the method object from our registry.
-     */
-    func = qualname_to_func(ob);
-#endif
-    if (func == Py_None)
+    Shiboken::AutoDecRef func(name_key_to_func(ob_md));
+    if (func.object() == Py_None)
         return Py_None;
-    if (func == NULL)
+    if (func.isNull())
         Py_FatalError("missing mapping in MethodDescriptor");
-    result = pyside_cf_get___signature__(func, modifier);
-    Py_DECREF(func);
-    return result;
+    return pyside_cf_get___signature__(func, modifier);
 }
 
 static PyObject *
@@ -245,30 +264,44 @@ static PyObject *
 GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier);
 
 static PyObject *
-GetSignature_Function(PyCFunctionObject *func, const char *modifier)
+GetClassKey(PyObject *ob)
 {
-    PyObject *typemod, *type_name, *dict, *props, *selftype;
-    PyObject *func_name = PyObject_GetAttrString((PyObject *)func, "__name__");
-    const char *sig_kind;
-    int flags;
+    assert(PyType_Check(ob) || PyModule_Check(ob));
+    /*
+     * We obtain a unique key using the module name and the class name.
+     *
+     * The class name is a bit funny when modules are nested.
+     * Example:
+     *
+     * "sample.Photon.ValueIdentity" is a class.
+     *   name:   "ValueIdentity"
+     *   module: "sample.Photon"
+     *
+     * This is the PyCFunction behavior, as opposed to Python functions.
+     */
+    Shiboken::AutoDecRef class_name(PyObject_GetAttrString(ob, "__name__"));
+    Shiboken::AutoDecRef module_name(PyObject_GetAttrString(ob, "__module__"));
 
-    selftype = PyCFunction_GET_SELF((PyObject *)func);
-    if (selftype == NULL)
-        selftype = PyDict_GetItem(pyside_globals->map_dict, (PyObject *)func);
-    if (selftype == NULL) {
-        if (!PyErr_Occurred())
-            Py_RETURN_NONE;
-        return NULL;
-    }
-    if ((PyType_Check(selftype) || PyModule_Check(selftype)))
-        typemod = selftype;
-    else
-        typemod = (PyObject *)Py_TYPE(selftype);
-    type_name = PyObject_GetAttrString(typemod, "__name__");
-    if (type_name == NULL)
+    if (module_name.isNull())
+        PyErr_Clear();
+
+    // Note: if we have a module, then __module__ is null, and we get
+    // the module name through __name__ .
+    if (class_name.isNull())
+        return nullptr;
+    if (module_name.object())
+        return Py_BuildValue("(OO)", module_name.object(), class_name.object());
+    return Py_BuildValue("O", class_name.object());
+}
+
+static PyObject *
+GetSignature_Function(PyObject *ob_func, const char *modifier)
+{
+    Shiboken::AutoDecRef typemod(GetClassOfFunc(ob_func));
+    Shiboken::AutoDecRef type_key(GetClassKey(typemod));
+    if (type_key.isNull())
         Py_RETURN_NONE;
-    dict = PyDict_GetItem(pyside_globals->arg_dict, type_name);
-    Py_DECREF(type_name);
+    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, type_key);
     if (dict == NULL)
         Py_RETURN_NONE;
     if (PyTuple_Check(dict)) {
@@ -280,31 +313,35 @@ GetSignature_Function(PyCFunctionObject *func, const char *modifier)
         if (dict == NULL)
             Py_RETURN_NONE;
     }
-    props = PyDict_GetItem(dict, func_name);
+    Shiboken::AutoDecRef func_name(PyObject_GetAttrString(ob_func, "__name__"));
+    PyObject *props = !func_name.isNull() ? PyDict_GetItem(dict, func_name) : nullptr;
     if (props == NULL)
         Py_RETURN_NONE;
-    flags = PyCFunction_GET_FLAGS((PyObject *)func);
-    if (flags & METH_CLASS)
+
+    int flags = PyCFunction_GET_FLAGS(ob_func);
+    const char *sig_kind;
+    if (PyModule_Check(typemod))
+        sig_kind = "function";
+    else if (flags & METH_CLASS)
         sig_kind = "classmethod";
     else if (flags & METH_STATIC)
         sig_kind = "staticmethod";
     else
         sig_kind = "method";
-    return GetSignature_Cached(props, sig_kind, modifier);
+    PyObject *ret = GetSignature_Cached(props, sig_kind, modifier);
+    return ret;
 }
 
 static PyObject *
 GetSignature_Wrapper(PyObject *ob, const char *modifier)
 {
-    PyObject *dict, *props;
-    PyObject *func_name = PyObject_GetAttrString(ob, "__name__");
-    PyObject *objclass = PyObject_GetAttrString(ob, "__objclass__");
-    PyObject *class_name = PyObject_GetAttrString(objclass, "__name__");
-    const char *sig_kind;
+    Shiboken::AutoDecRef func_name(PyObject_GetAttrString(ob, "__name__"));
+    Shiboken::AutoDecRef objclass(PyObject_GetAttrString(ob, "__objclass__"));
+    Shiboken::AutoDecRef class_key(GetClassKey(objclass));
 
-    if (func_name == nullptr || objclass == nullptr || class_name == nullptr)
+    if (func_name.isNull() || objclass.isNull() || class_key.isNull())
         return nullptr;
-    dict = PyDict_GetItem(pyside_globals->arg_dict, class_name);
+    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, class_key);
     if (dict == NULL)
         Py_RETURN_NONE;
     if (PyTuple_Check(dict)) {
@@ -316,65 +353,51 @@ GetSignature_Wrapper(PyObject *ob, const char *modifier)
         if (dict == NULL)
             Py_RETURN_NONE;
     }
-    props = PyDict_GetItem(dict, func_name);
-    Py_DECREF(func_name);
-    Py_DECREF(objclass);
-    Py_DECREF(class_name);
+    PyObject *props = PyDict_GetItem(dict, func_name);
     if (props == NULL)
         Py_RETURN_NONE;
-    sig_kind = "method";
-    return GetSignature_Cached(props, sig_kind, modifier);
+    return GetSignature_Cached(props, "method", modifier);
 }
 
 static PyObject *
 GetSignature_TypeMod(PyObject *ob, const char *modifier)
 {
-    PyObject *ob_name, *dict, *props;
-    const char *sig_kind;
+    Shiboken::AutoDecRef ob_name(PyObject_GetAttrString(ob, "__name__"));
+    Shiboken::AutoDecRef ob_key(GetClassKey(ob));
 
-    ob_name = PyObject_GetAttrString(ob, "__name__");
-    dict = PyDict_GetItem(pyside_globals->arg_dict, ob_name);
+    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, ob_key);
     if (dict == NULL)
         Py_RETURN_NONE;
+
     if (PyTuple_Check(dict)) {
         dict = PySide_BuildSignatureProps(ob);
         if (dict == NULL) {
             Py_RETURN_NONE;
         }
     }
-    props = PyDict_GetItem(dict, ob_name);
-    Py_DECREF(ob_name);
+    PyObject *props = PyDict_GetItem(dict, ob_name);
     if (props == NULL)
         Py_RETURN_NONE;
-    sig_kind = "method";
-    return GetSignature_Cached(props, sig_kind, modifier);
+    return GetSignature_Cached(props, "method", modifier);
 }
 
 static PyObject *
 GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier)
 {
-    PyObject *key, *value;
-
-    if (modifier == nullptr)
-        key = Py_BuildValue("s", sig_kind);
-    else
-        key = Py_BuildValue("(ss)", sig_kind, modifier);
-    if (key == nullptr)
-        return nullptr;
-    value = PyDict_GetItem(props, key);
+    Shiboken::AutoDecRef key(modifier == nullptr
+                             ? Py_BuildValue("s", sig_kind)
+                             : Py_BuildValue("(ss)", sig_kind, modifier));
+    PyObject *value = PyDict_GetItem(props, key);
     if (value == nullptr) {
         // we need to compute a signature object
         value = CreateSignature(props, key);
         if (value != nullptr) {
-            if (PyDict_SetItem(props, key, value) < 0) {
+            if (PyDict_SetItem(props, key, value) < 0)
                 // this is an error
-                Py_DECREF(key);
                 return nullptr;
-            }
         }
         else {
             // key not found
-            Py_DECREF(key);
             Py_RETURN_NONE;
         }
     }
@@ -385,15 +408,14 @@ static const char PySide_PythonCode[] =
     "from __future__ import print_function, absolute_import\n" R"~(if True:
 
     import sys, os, traceback
-
-    pyside_package_dir = os.environ.get('PYSIDE_PACKAGE_DIR')
-    if pyside_package_dir is None:
-        # This happens in shiboken running ctest.
-        from distutils.sysconfig import get_python_lib
-        pyside_package_dir = os.path.join(get_python_lib(), 'PySide2')
-    __file__ = os.path.join(pyside_package_dir, 'support', 'signature', 'loader.py')
+    # We avoid imports in phase 1 that could fail. "import shiboken" of the
+    # binary would even crash in FinishSignatureInitialization.
 
     def bootstrap():
+        global __file__
+        import PySide2 as root
+        rp = os.path.realpath(os.path.dirname(root.__file__))
+        __file__ = os.path.join(rp, 'support', 'signature', 'loader.py')
         try:
             with open(__file__) as _f:
                 exec(compile(_f.read(), __file__, 'exec'))
@@ -407,10 +429,9 @@ static const char PySide_PythonCode[] =
 static safe_globals_struc *
 init_phase_1(void)
 {
-    safe_globals_struc *p;
     PyObject *d, *v;
-
-    p = (safe_globals_struc *)malloc(sizeof(safe_globals_struc));
+    safe_globals_struc *p = (safe_globals_struc *)
+                            malloc(sizeof(safe_globals_struc));
     if (p == NULL)
         goto error;
     p->helper_module = PyImport_AddModule((char *) helper_module_name);
@@ -431,11 +452,10 @@ init_phase_1(void)
     if (p->map_dict == NULL)
         goto error;
 
-    // Build a dict for the prepared arguments
+    // build a dict for the prepared arguments
     p->arg_dict = PyDict_New();
-    if (p->arg_dict == NULL)
-        goto error;
-    if (PyObject_SetAttrString(p->helper_module, arg_name, p->arg_dict) < 0)
+    if (p->arg_dict == NULL
+        || PyObject_SetAttrString(p->helper_module, arg_name, p->arg_dict) < 0)
         goto error;
     return p;
 
@@ -450,30 +470,25 @@ init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
     PyObject *bootstrap_func, *v = nullptr;
     PyMethodDef *ml;
 
+    // The single function to be called, but maybe more to come.
+    for (ml = methods; ml->ml_name != NULL; ml++) {
+        v = PyCFunction_NewEx(ml, nullptr, nullptr);
+        if (v == nullptr
+            || PyObject_SetAttrString(p->helper_module, ml->ml_name, v) != 0)
+            goto error;
+        Py_DECREF(v);
+    }
     bootstrap_func = PyObject_GetAttrString(p->helper_module, bootstrap_name);
-    if (bootstrap_func == NULL)
+    if (bootstrap_func == NULL
+        || PyObject_CallFunction(bootstrap_func, (char *)"()") == NULL)
         goto error;
-    if (PyObject_CallFunction(bootstrap_func, (char *)"()") == NULL)
-        goto error;
-    // now the loader is initialized
+    // now the loader should be initialized
     p->sigparse_func = PyObject_GetAttrString(p->helper_module, func_name);
     if (p->sigparse_func == NULL)
         goto error;
     p->createsig_func = PyObject_GetAttrString(p->helper_module, "create_signature");
     if (p->createsig_func == NULL)
         goto error;
-
-    // The single function to be called, but maybe more to come.
-    for (ml = methods; ml->ml_name != NULL; ml++) {
-        v = PyCFunction_NewEx(ml, nullptr, nullptr);
-        if (v == nullptr) {
-            goto error;
-        }
-        if (PyObject_SetAttrString(p->helper_module, ml->ml_name, v) != 0) {
-            goto error;
-        }
-        Py_DECREF(v);
-    }
     return 0;
 
 error:
@@ -485,23 +500,17 @@ error:
 static int
 add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
 {
-    PyObject *dict;
-
     assert(PyType_Check(type));
     PyType_Ready(type);
-    dict = type->tp_dict;
+    PyObject *dict = type->tp_dict;
     for (; gsp->name != NULL; gsp++) {
-        PyObject *descr;
         if (PyDict_GetItemString(dict, gsp->name))
             continue;
-        descr = PyDescr_NewGetSet(type, gsp);
-        if (descr == NULL)
+        Shiboken::AutoDecRef descr(PyDescr_NewGetSet(type, gsp));
+        if (descr.isNull())
             return -1;
-        if (PyDict_SetItemString(dict, gsp->name, descr) < 0) {
-            Py_DECREF(descr);
+        if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
             return -1;
-        }
-        Py_DECREF(descr);
     }
     return 0;
 }
@@ -611,13 +620,12 @@ void handler(int sig) {
 static int
 PySideType_Ready(PyTypeObject *type)
 {
-    PyObject *md, *wd;
     static int init_done = 0;
 
     if (!init_done) {
-        md = PyObject_GetAttrString((PyObject *)&PyString_Type, "split");       // method-descriptor
-        wd = PyObject_GetAttrString((PyObject *)Py_TYPE(Py_True), "__add__");   // wrapper-descriptor
-        if (md == nullptr || wd == nullptr
+        Shiboken::AutoDecRef md(PyObject_GetAttrString((PyObject *)&PyString_Type, "split"));       // method-descriptor
+        Shiboken::AutoDecRef wd(PyObject_GetAttrString((PyObject *)Py_TYPE(Py_True), "__add__"));   // wrapper-descriptor
+        if (md.isNull() || wd.isNull()
             || PyType_Ready(Py_TYPE(md)) < 0
             || add_more_getsets(PepMethodDescr_TypePtr, new_PyMethodDescr_getsets) < 0
             || add_more_getsets(&PyCFunction_Type, new_PyCFunction_getsets) < 0
@@ -626,8 +634,6 @@ PySideType_Ready(PyTypeObject *type)
             || add_more_getsets(Py_TYPE(wd), new_PyWrapperDescr_getsets) < 0
             )
             return -1;
-        Py_DECREF(md);
-        Py_DECREF(wd);
 #ifndef _WIN32
         // We enable the stack trace in CI, only.
         const char *testEnv = getenv("QTEST_ENVIRONMENT");
@@ -637,31 +643,6 @@ PySideType_Ready(PyTypeObject *type)
         init_done = 1;
     }
     return PyType_Ready(type);
-}
-
-static int
-build_func_to_type(PyObject *obtype)
-{
-    PyTypeObject *type = (PyTypeObject *)obtype;
-    PyObject *dict = type->tp_dict;
-    PyMethodDef *meth = type->tp_methods;
-
-    if (meth == 0)
-        return 0;
-
-    for (; meth->ml_name != NULL; meth++) {
-        if (meth->ml_flags & METH_STATIC) {
-            PyObject *descr = PyDict_GetItemString(dict, meth->ml_name);
-            if (descr == NULL)
-                return -1;
-            PyObject *func = PyObject_GetAttrString(descr, "__func__");
-            if (func == NULL ||
-                PyDict_SetItem(pyside_globals->map_dict, func, obtype) < 0)
-                return -1;
-            Py_DECREF(func);
-        }
-    }
-    return 0;
 }
 
 static void
@@ -680,20 +661,26 @@ static int
 PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
                           const char *signatures)
 {
-    PyObject *type_name, *arg_tup;
-    const char *name = NULL;
+    PyObject *type_key, *arg_tup;
 
-    init_module_1();;
+    init_module_1();
     arg_tup = Py_BuildValue("(Os)", type, signatures);
     if (arg_tup == NULL)
         return -1;
-    if (!PyModule_Check(module))
-        return 0;
-    name = PyModule_GetName(module);
-    if (name == NULL)
-        return -1;
-    if (strncmp(name, "PySide2.Qt", 10) != 0)
-        return 0;
+    /*
+     * We either get a module name or the dict of an EnclosingObject.
+     * We can ignore the EnclosingObject since we get full name info
+     * from the type.
+     */
+    if (PyModule_Check(module)) {
+        const char *name = PyModule_GetName(module);
+        if (name == NULL)
+            return -1;
+        if (strcmp(name, "testbinding") == 0)
+            return 0;
+    }
+    else
+        assert(PyDict_Check(module));
     /*
      * Normally, we would now just call the Python function with the
      * arguments and then continue processing.
@@ -705,16 +692,17 @@ PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
      * - by calling the python function late, we can freely import PySide
      *   without recursion problems.
      */
-    type_name = PyObject_GetAttrString(type, "__name__");
-    if (type_name == NULL)
+    type_key = GetClassKey(type);
+    if (type_key == nullptr)
         return -1;
-    if (PyDict_SetItem(pyside_globals->arg_dict, type_name, arg_tup) < 0)
+    if (PyDict_SetItem(pyside_globals->arg_dict, type_key, arg_tup) < 0)
         return -1;
     /*
-     * We record also a mapping from type name to type. This helps to lazily
-     * initialize the Py_LIMITED_API in qualname_to_func().
+     * We record also a mapping from type key to type. This helps to lazily
+     * initialize the Py_LIMITED_API in name_key_to_func().
      */
-    if (PyDict_SetItem(pyside_globals->map_dict, type_name, type) < 0)
+
+    if (PyDict_SetItem(pyside_globals->map_dict, type_key, type) < 0)
         return -1;
     return 0;
 }
@@ -728,18 +716,20 @@ static PyMethodDef signature_methods[] = {
 static void
 init_module_2(void)
 {
-    static int init_done = 0;
+    static int init_done = 0, initializing = 0;
 
     if (!init_done) {
+        if (initializing)
+            Py_FatalError("Init 2 called recursively!");
         init_phase_2(pyside_globals, signature_methods);
         init_done = 1;
+        initializing = 0;
     }
 }
 
 static PyObject *
 PySide_BuildSignatureProps(PyObject *classmod)
 {
-    PyObject *arg_tup, *dict, *type_name;
     /*
      * Here is the second part of the function.
      * This part will be called on-demand when needed by some attribute.
@@ -747,20 +737,19 @@ PySide_BuildSignatureProps(PyObject *classmod)
      * them by the function result.
      */
     init_module_2();
-    type_name = PyObject_GetAttrString(classmod, "__name__");
-    if (type_name == NULL)
-        return NULL;
-    arg_tup = PyDict_GetItem(pyside_globals->arg_dict, type_name);
-    if (arg_tup == NULL)
-        return NULL;
-    dict = PyObject_CallObject(pyside_globals->sigparse_func, arg_tup);
-    if (dict == NULL)
-        return NULL;
+    Shiboken::AutoDecRef type_key(GetClassKey(classmod));
+    if (type_key.isNull())
+        return nullptr;
+    PyObject *arg_tup = PyDict_GetItem(pyside_globals->arg_dict, type_key);
+    if (arg_tup == nullptr)
+        return nullptr;
+    PyObject *dict = PyObject_CallObject(pyside_globals->sigparse_func, arg_tup);
+    if (dict == nullptr)
+        return nullptr;
 
     // We replace the arguments by the result dict.
-    if (PyDict_SetItem(pyside_globals->arg_dict, type_name, dict) < 0)
-        return NULL;
-    Py_DECREF(type_name);
+    if (PyDict_SetItem(pyside_globals->arg_dict, type_key, dict) < 0)
+        return nullptr;
     return dict;
 }
 
@@ -779,17 +768,22 @@ SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
     return ret;
 }
 
+static int _finish_nested_classes(PyObject *dict);
+static int _build_func_to_type(PyObject *obtype);
+
 static int
 PySide_FinishSignatures(PyObject *module, const char *signatures)
 {
-    const char *name = NULL;
+    /*
+     * Initialization of module functions and resolving of static methods.
+     */
 
     // CRUCIAL: Do not call this on "testbinding":
     // The module is different and should not get signatures, anyway.
-    name = PyModule_GetName(module);
+    const char *name = PyModule_GetName(module);
     if (name == NULL)
         return -1;
-    if (strncmp(name, "PySide2.Qt", 10) != 0)
+    if (strcmp(name, "testbinding") == 0)
         return 0;
 
     // we abuse the call for types, since they both have a __name__ attribute.
@@ -797,9 +791,6 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
         return -1;
 
     /*
-     * Python2 does not abuse the 'm_self' field for the type. So we need to
-     * supply this for all static methods.
-     *
      * Note: This function crashed when called from PySide_BuildSignatureArgs.
      * Probably this was too early.
      *
@@ -807,20 +798,72 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
      * to the PyCFunction attributes. Therefore I simplified things
      * and always use our own mapping.
      */
-    {
-        PyObject *key, *value;
-        Py_ssize_t pos = 0;
-        PyObject *dict = PyModule_GetDict(module);
+    PyObject *key, *func, *obdict = PyModule_GetDict(module);
+    Py_ssize_t pos = 0;
 
-        if (dict == NULL)
-            return -1;
+    while (PyDict_Next(obdict, &pos, &key, &func))
+        if (PyCFunction_Check(func))
+            if (PyDict_SetItem(pyside_globals->map_dict, func, module) < 0)
+                return -1;
+    if (_finish_nested_classes(obdict) < 0)
+        return -1;
+    return 0;
+}
 
-        while (PyDict_Next(dict, &pos, &key, &value)) {
-            if (PyType_Check(value)) {
-                PyObject *type = value;
-                if (build_func_to_type(type) < 0)
-                    return -1;
-            }
+static int
+_finish_nested_classes(PyObject *obdict)
+{
+    PyObject *key, *value, *obtype;
+    PyTypeObject *subtype;
+    Py_ssize_t pos = 0;
+
+    if (obdict == NULL)
+        return -1;
+    while (PyDict_Next(obdict, &pos, &key, &value)) {
+        if (PyType_Check(value)) {
+            obtype = value;
+            if (_build_func_to_type(obtype) < 0)
+                return -1;
+            // now continue with nested cases
+            subtype = reinterpret_cast<PyTypeObject *>(obtype);
+            if (_finish_nested_classes(subtype->tp_dict) < 0)
+                return -1;
+        }
+    }
+    return 0;
+}
+
+static int
+_build_func_to_type(PyObject *obtype)
+{
+    /*
+     * There is no general way to directly get the type of a static method.
+     * On Python 3, the type is hidden in an unused pointer in the
+     * PyCFunction structure, but the Limited API does not allow to access
+     * this, either.
+     *
+     * In the end, it was easier to avoid such tricks and build an explicit
+     * mapping from function to type.
+     *
+     * We walk through the method list of the type
+     * and record the mapping from function to this type in a dict.
+     */
+    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
+    PyObject *dict = type->tp_dict;
+    PyMethodDef *meth = type->tp_methods;
+
+    if (meth == 0)
+        return 0;
+
+    for (; meth->ml_name != NULL; meth++) {
+        if (meth->ml_flags & METH_STATIC) {
+            PyObject *descr = PyDict_GetItemString(dict, meth->ml_name);
+            if (descr == NULL)
+                return -1;
+            Shiboken::AutoDecRef func(PyObject_GetAttrString(descr, "__func__"));
+            if (func.isNull() ||
+                PyDict_SetItem(pyside_globals->map_dict, func, obtype) < 0)
+                return -1;
         }
     }
     return 0;
@@ -829,6 +872,12 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
 void
 FinishSignatureInitialization(PyObject *module, const char *signatures)
 {
+    /*
+     * This function is called at the very end of a module
+     * initialization. SbkSpecial_Type_Ready has already been run
+     * with all the types.
+     * We now initialize module functions and resolve static methods.
+     */
     if (PySide_FinishSignatures(module, signatures) < 0) {
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);
