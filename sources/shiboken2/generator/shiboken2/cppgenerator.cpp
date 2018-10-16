@@ -502,7 +502,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
         writeCopyFunction(s, classContext);
-        signatureStream << metaClass->fullName() << ".__copy__()" << endl;
+        signatureStream << fullPythonClassName(metaClass) << ".__copy__()" << endl;
     }
 
     // Write single method definitions
@@ -4947,8 +4947,16 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         else
             s << INDENT << "0," << endl;
 
-        // 9:isInnerClass
-        s << INDENT << (hasEnclosingClass ? "true" : "false") << endl;
+        // 9:wrapperflags
+        QByteArrayList wrapperFlags;
+        if (hasEnclosingClass)
+            wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::InnerClass"));
+        if (metaClass->deleteInMainThread())
+            wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::DeleteInMainThread"));
+        if (wrapperFlags.isEmpty())
+            s << INDENT << '0';
+        else
+            s << INDENT << wrapperFlags.join(" | ");
     }
     s << INDENT << ");" << endl;
     s << INDENT << endl;

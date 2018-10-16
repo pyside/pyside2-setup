@@ -2694,10 +2694,10 @@
 
         The signature "QList<qreal>" is needed by the __reduce__ methods,
         but created by some other object used elsewhere.
-        After the matrix type was changed, "QList<float>" was nowhere created.
+        After the matrix type was changed, "QList<float>" was created nowhere.
 
         I don't know an explicit way to produce the right conversion function, so what I did
-        was to create a dummy function and immediately dele it again.
+        was to create a dummy function and immediately delete it again.
         This has the desired effect of creating the implicitly needed "QList<float>"
         conversion, although the dummy function goes away.
 
@@ -2983,10 +2983,12 @@
     </extra-includes>
   </primitive-type>
 
-  <object-type name="QWindow">
+  <object-type name="QWindow" delete-in-main-thread="true">
     <enum-type name="AncestorMode"/>
     <enum-type name="Visibility"/>
+    <modify-function signature="raise()" rename="raise_" />
   </object-type>
+
   <!-- Qt5: not sure if this needs support, skipped for now -->
   <rejection class="QWindow" function-name="nativeEvent"/>"
 
@@ -3013,7 +3015,6 @@
             }
         </inject-code>
     </add-function>
-    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning" />
 
   </object-type>

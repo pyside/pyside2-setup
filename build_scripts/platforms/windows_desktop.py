@@ -38,11 +38,15 @@
 #############################################################################
 
 import functools
-import os, re, sys
+import os
+import sys
+
+from ..config import config
 from ..options import *
 from ..utils import copydir, copyfile, rmtree, makefile
 from ..utils import regenerate_qt_resources, filter_match
 from ..utils import download_and_extract_7z
+
 
 def prepare_packages_win32(self, vars):
     # For now, debug symbols will not be shipped into the package.
@@ -50,141 +54,209 @@ def prepare_packages_win32(self, vars):
     pdbs = []
     if (self.debug or self.build_type == 'RelWithDebInfo') and copy_pdbs:
         pdbs = ['*.pdb']
-    # <install>/lib/site-packages/PySide2/* -> <setup>/PySide2
+
+    # <install>/lib/site-packages/{st_package_name}/* ->
+    # <setup>/{st_package_name}
+    # This copies the module .pyd files and various .py files
+    # (__init__, config, git version, etc.)
     copydir(
-        "{site_packages_dir}/PySide2",
-        "{pyside_package_dir}/PySide2",
+        "{site_packages_dir}/{st_package_name}",
+        "{st_build_dir}/{st_package_name}",
         vars=vars)
+
+    if config.is_internal_shiboken_module_build():
+        # <build>/shiboken2/doc/html/* ->
+        #   <setup>/{st_package_name}/docs/shiboken2
+        copydir(
+            "{build_dir}/shiboken2/doc/html",
+            "{st_build_dir}/{st_package_name}/docs/shiboken2",
+            force=False, vars=vars)
+
+        # <install>/bin/*.dll -> {st_package_name}/
+        copydir(
+            "{install_dir}/bin/",
+            "{st_build_dir}/{st_package_name}",
+            filter=["shiboken*.dll"],
+            recursive=False, vars=vars)
+
+        # <install>/lib/*.lib -> {st_package_name}/
+        copydir(
+            "{install_dir}/lib/",
+            "{st_build_dir}/{st_package_name}",
+            filter=["shiboken*.lib"],
+            recursive=False, vars=vars)
+
+        # @TODO: Fix this .pdb file not to overwrite release
+        # {shibokengenerator}.pdb file.
+        # Task-number: PYSIDE-615
+        copydir(
+            "{build_dir}/shiboken2/shibokenmodule",
+            "{st_build_dir}/{st_package_name}",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
+        # pdb files for libshiboken and libpyside
+        copydir(
+            "{build_dir}/shiboken2/libshiboken",
+            "{st_build_dir}/{st_package_name}",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
+    if config.is_internal_shiboken_generator_build():
+        # <install>/bin/*.dll -> {st_package_name}/
+        copydir(
+            "{install_dir}/bin/",
+            "{st_build_dir}/{st_package_name}",
+            filter=["shiboken*.exe"],
+            recursive=False, vars=vars)
+
+        # Used to create scripts directory.
+        makefile(
+            "{st_build_dir}/{st_package_name}/scripts/shiboken_tool.py",
+            vars=vars)
+
+        # For setting up setuptools entry points.
+        copyfile(
+            "{install_dir}/bin/shiboken_tool.py",
+            "{st_build_dir}/{st_package_name}/scripts/shiboken_tool.py",
+            force=False, vars=vars)
+
+        # @TODO: Fix this .pdb file not to overwrite release
+        # {shibokenmodule}.pdb file.
+        # Task-number: PYSIDE-615
+        copydir(
+            "{build_dir}/shiboken2/generator",
+            "{st_build_dir}/{st_package_name}",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
+    if config.is_internal_shiboken_generator_build() or config.is_internal_pyside_build():
+        # <install>/include/* -> <setup>/{st_package_name}/include
+        copydir(
+            "{install_dir}/include/{cmake_package_name}",
+            "{st_build_dir}/{st_package_name}/include",
+            vars=vars)
+
+    if config.is_internal_pyside_build():
+        # <build>/pyside2/{st_package_name}/*.pdb ->
+        # <setup>/{st_package_name}
+        copydir(
+            "{build_dir}/pyside2/{st_package_name}",
+            "{st_build_dir}/{st_package_name}",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
+        # <install>/lib/site-packages/pyside2uic/* ->
+        #   <setup>/pyside2uic
+        copydir(
+            "{site_packages_dir}/pyside2uic",
+            "{st_build_dir}/pyside2uic",
+            force=False, vars=vars)
+        if sys.version_info[0] > 2:
+            rmtree("{st_build_dir}/pyside2uic/port_v2".format(**vars))
+        else:
+            rmtree("{st_build_dir}/pyside2uic/port_v3".format(**vars))
+
+        # <install>/bin/pyside2-uic -> {st_package_name}/scripts/uic.py
+        makefile(
+            "{st_build_dir}/{st_package_name}/scripts/__init__.py",
+            vars=vars)
+        copyfile(
+            "{install_dir}/bin/pyside2-uic",
+            "{st_build_dir}/{st_package_name}/scripts/uic.py",
+            force=False, vars=vars)
+
+        # For setting up setuptools entry points
+        copyfile(
+            "{install_dir}/bin/pyside_tool.py",
+            "{st_build_dir}/{st_package_name}/scripts/pyside_tool.py",
+            force=False, vars=vars)
+
+        # <install>/bin/*.exe,*.dll -> {st_package_name}/
+        copydir(
+            "{install_dir}/bin/",
+            "{st_build_dir}/{st_package_name}",
+            filter=["pyside*.exe", "pyside*.dll"],
+            recursive=False, vars=vars)
+
+        # <install>/lib/*.lib -> {st_package_name}/
+        copydir(
+            "{install_dir}/lib/",
+            "{st_build_dir}/{st_package_name}",
+            filter=["pyside*.lib"],
+            recursive=False, vars=vars)
+
+        # <install>/share/{st_package_name}/typesystems/* ->
+        #   <setup>/{st_package_name}/typesystems
+        copydir(
+            "{install_dir}/share/{st_package_name}/typesystems",
+            "{st_build_dir}/{st_package_name}/typesystems",
+            vars=vars)
+
+        # <source>/pyside2/{st_package_name}/support/* ->
+        #   <setup>/{st_package_name}/support/*
+        copydir(
+            "{build_dir}/pyside2/{st_package_name}/support",
+            "{st_build_dir}/{st_package_name}/support",
+            vars=vars)
+
+        copydir(
+            "{build_dir}/pyside2/libpyside",
+            "{st_build_dir}/{st_package_name}",
+            filter=pdbs,
+            recursive=False, vars=vars)
+
+        if not OPTION_NOEXAMPLES:
+            # examples/* -> <setup>/{st_package_name}/examples
+            copydir(os.path.join(self.script_dir, "examples"),
+                    "{st_build_dir}/{st_package_name}/examples",
+                    force=False, vars=vars)
+            # Re-generate examples Qt resource files for Python 3
+            # compatibility
+            if sys.version_info[0] == 3:
+                examples_path = "{st_build_dir}/{st_package_name}/examples".format(
+                    **vars)
+                pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(
+                    **vars)
+                pyside_rcc_options = '-py3'
+                regenerate_qt_resources(examples_path, pyside_rcc_path,
+                    pyside_rcc_options)
+
+        if vars['ssl_libs_dir']:
+            # <ssl_libs>/* -> <setup>/{st_package_name}/openssl
+            copydir("{ssl_libs_dir}", "{st_build_dir}/{st_package_name}/openssl",
+                filter=[
+                    "libeay32.dll",
+                    "ssleay32.dll"],
+                force=False, vars=vars)
+
+    if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
+        copy_qt_artifacts(self, copy_pdbs, vars)
+
+
+def copy_qt_artifacts(self, copy_pdbs, vars):
     built_modules = self.get_built_pyside_config(vars)['built_modules']
 
-    # <build>/pyside2/PySide2/*.pdb -> <setup>/PySide2
-    copydir(
-        "{build_dir}/pyside2/PySide2",
-        "{pyside_package_dir}/PySide2",
-        filter=pdbs,
-        recursive=False, vars=vars)
+    constrain_modules = None
+    copy_plugins = True
+    copy_qml = True
+    copy_translations = True
+    copy_qt_conf = True
+    copy_qt_permanent_artifacts = True
+    copy_msvc_redist = False
+    copy_clang = False
 
-    # <build>/shiboken2/doc/html/* ->
-    #   <setup>/PySide2/docs/shiboken2
-    copydir(
-        "{build_dir}/shiboken2/doc/html",
-        "{pyside_package_dir}/PySide2/docs/shiboken2",
-        force=False, vars=vars)
+    if config.is_internal_shiboken_generator_build():
+        constrain_modules = ["Core", "Network", "Xml", "XmlPatterns"]
+        copy_plugins = False
+        copy_qml = False
+        copy_translations = False
+        copy_qt_conf = False
+        copy_qt_permanent_artifacts = False
+        copy_msvc_redist = True
+        copy_clang = True
 
-    # <install>/lib/site-packages/shiboken2.pyd ->
-    #   <setup>/PySide2/shiboken2.pyd
-    shiboken_module_name = 'shiboken2.pyd'
-    shiboken_src_path = "{site_packages_dir}".format(**vars)
-    maybe_shiboken_names = [f for f in os.listdir(shiboken_src_path)
-                            if re.match(r'shiboken.*\.pyd', f)]
-    if maybe_shiboken_names:
-        shiboken_module_name = maybe_shiboken_names[0]
-    vars.update({'shiboken_module_name': shiboken_module_name})
-    copyfile(
-        "{site_packages_dir}/{shiboken_module_name}",
-        "{pyside_package_dir}/PySide2/{shiboken_module_name}",
-        vars=vars)
-    # @TODO: Fix this .pdb file not to overwrite release
-    # {shibokengenerator}.pdb file.
-    # Task-number: PYSIDE-615
-    copydir(
-        "{build_dir}/shiboken2/shibokenmodule",
-        "{pyside_package_dir}/PySide2",
-        filter=pdbs,
-        recursive=False, vars=vars)
-
-    # <install>/lib/site-packages/pyside2uic/* ->
-    #   <setup>/pyside2uic
-    copydir(
-        "{site_packages_dir}/pyside2uic",
-        "{pyside_package_dir}/pyside2uic",
-        force=False, vars=vars)
-    if sys.version_info[0] > 2:
-        rmtree("{pyside_package_dir}/pyside2uic/port_v2".format(**vars))
-    else:
-        rmtree("{pyside_package_dir}/pyside2uic/port_v3".format(**vars))
-
-    # <install>/bin/pyside2-uic -> PySide2/scripts/uic.py
-    makefile(
-        "{pyside_package_dir}/PySide2/scripts/__init__.py",
-        vars=vars)
-    copyfile(
-        "{install_dir}/bin/pyside2-uic",
-        "{pyside_package_dir}/PySide2/scripts/uic.py",
-        force=False, vars=vars)
-
-    # For setting up entry points
-    copyfile(
-        "{install_dir}/bin/pyside_tool.py",
-        "{pyside_package_dir}/PySide2/scripts/pyside_tool.py",
-        force=False, vars=vars)
-
-    # <install>/bin/*.exe,*.dll,*.pdb -> PySide2/
-    copydir(
-        "{install_dir}/bin/",
-        "{pyside_package_dir}/PySide2",
-        filter=["*.exe", "*.dll"],
-        recursive=False, vars=vars)
-    # @TODO: Fix this .pdb file not to overwrite release
-    # {shibokenmodule}.pdb file.
-    # Task-number: PYSIDE-615
-    copydir(
-        "{build_dir}/shiboken2/generator",
-        "{pyside_package_dir}/PySide2",
-        filter=pdbs,
-        recursive=False, vars=vars)
-
-    # <install>/lib/*.lib -> PySide2/
-    copydir(
-        "{install_dir}/lib/",
-        "{pyside_package_dir}/PySide2",
-        filter=["*.lib"],
-        recursive=False, vars=vars)
-
-    # <install>/share/PySide2/typesystems/* ->
-    #   <setup>/PySide2/typesystems
-    copydir(
-        "{install_dir}/share/PySide2/typesystems",
-        "{pyside_package_dir}/PySide2/typesystems",
-        vars=vars)
-
-    # <install>/include/* -> <setup>/PySide2/include
-    copydir(
-        "{install_dir}/include",
-        "{pyside_package_dir}/PySide2/include",
-        vars=vars)
-
-    # <source>/pyside2/PySide2/support/* ->
-    #   <setup>/PySide2/support/*
-    copydir(
-        "{build_dir}/pyside2/PySide2/support",
-        "{pyside_package_dir}/PySide2/support",
-        vars=vars)
-
-    if not OPTION_NOEXAMPLES:
-        # examples/* -> <setup>/PySide2/examples
-        copydir(os.path.join(self.script_dir, "examples"),
-                "{pyside_package_dir}/PySide2/examples",
-                force=False, vars=vars)
-        # Re-generate examples Qt resource files for Python 3
-        # compatibility
-        if sys.version_info[0] == 3:
-            examples_path = "{pyside_package_dir}/PySide2/examples".format(
-                **vars)
-            pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(
-                **vars)
-            pyside_rcc_options = '-py3'
-            regenerate_qt_resources(examples_path, pyside_rcc_path,
-                pyside_rcc_options)
-
-    # <ssl_libs>/* -> <setup>/PySide2/openssl
-    copydir("{ssl_libs_dir}", "{pyside_package_dir}/PySide2/openssl",
-        filter=[
-            "libeay32.dll",
-            "ssleay32.dll"],
-        force=False, vars=vars)
-
-    # <qt>/bin/*.dll and Qt *.exe -> <setup>/PySide2
+    # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
     qt_artifacts_permanent = [
         "opengl*.dll",
         "d3d*.dll",
@@ -195,6 +267,7 @@ def prepare_packages_win32(self, vars):
         "lconvert.exe",
         "qtdiag.exe"
     ]
+
     # MSVC redistributable
     msvc_redist = [
         "concrt140.dll",
@@ -218,8 +291,14 @@ def prepare_packages_win32(self, vars):
     else:
         egl_suffix = ''
     qt_artifacts_egl = [a.format(egl_suffix) for a in qt_artifacts_egl]
-    qt_artifacts_permanent += qt_artifacts_egl
-    qt_artifacts_permanent += msvc_redist
+
+    artifacts = []
+    if copy_qt_permanent_artifacts:
+        artifacts += qt_artifacts_permanent
+        artifacts += qt_artifacts_egl
+
+    if copy_msvc_redist:
+        artifacts += msvc_redist
 
     # Extract Qt dependency dll's when building on Qt CI
     # There is no proper CI env variable, so using agent launch params
@@ -231,15 +310,22 @@ def prepare_packages_win32(self, vars):
             zip_file = "pyside_qt_deps_32.7z"
         download_and_extract_7z(redist_url + zip_file, "{qt_bin_dir}".format(**vars))
 
-    copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
-        filter=qt_artifacts_permanent,
-        recursive=False, vars=vars)
+    if artifacts:
+        copydir("{qt_bin_dir}",
+                "{st_build_dir}/{st_package_name}",
+                filter=artifacts, recursive=False, vars=vars)
 
-    # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/PySide2 part two
+    # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
     # File filter to copy only debug or only release files.
-    qt_dll_patterns = ["Qt5*{}.dll", "lib*{}.dll"]
-    if copy_pdbs:
-        qt_dll_patterns += ["Qt5*{}.pdb", "lib*{}.pdb"]
+    if constrain_modules:
+        qt_dll_patterns = ["Qt5" + x + "{}.dll" for x in constrain_modules]
+        if copy_pdbs:
+            qt_dll_patterns += ["Qt5" + x + "{}.pdb" for x in constrain_modules]
+    else:
+        qt_dll_patterns = ["Qt5*{}.dll", "lib*{}.dll"]
+        if copy_pdbs:
+            qt_dll_patterns += ["Qt5*{}.pdb", "lib*{}.pdb"]
+
     def qt_build_config_filter(patterns, file_name, file_full_path):
         release = [a.format('') for a in patterns]
         debug = [a.format('d') for a in patterns]
@@ -289,56 +375,60 @@ def prepare_packages_win32(self, vars):
         return False
 
     qt_dll_filter = functools.partial(qt_build_config_filter,
-        qt_dll_patterns)
-    copydir("{qt_bin_dir}", "{pyside_package_dir}/PySide2",
-        file_filter_function=qt_dll_filter,
-        recursive=False, vars=vars)
+                                      qt_dll_patterns)
+    copydir("{qt_bin_dir}",
+            "{st_build_dir}/{st_package_name}",
+            file_filter_function=qt_dll_filter,
+            recursive=False, vars=vars)
 
-    # <qt>/plugins/* -> <setup>/PySide2/plugins
-    plugin_dll_patterns = ["*{}.dll"]
-    pdb_pattern = "*{}.pdb"
-    if copy_pdbs:
-        plugin_dll_patterns += [pdb_pattern]
-    plugin_dll_filter = functools.partial(qt_build_config_filter,
-        plugin_dll_patterns)
-    copydir("{qt_plugins_dir}", "{pyside_package_dir}/PySide2/plugins",
-        file_filter_function=plugin_dll_filter,
-        vars=vars)
+    if copy_plugins:
+        # <qt>/plugins/* -> <setup>/{st_package_name}/plugins
+        plugin_dll_patterns = ["*{}.dll"]
+        pdb_pattern = "*{}.pdb"
+        if copy_pdbs:
+            plugin_dll_patterns += [pdb_pattern]
+        plugin_dll_filter = functools.partial(qt_build_config_filter,
+            plugin_dll_patterns)
+        copydir("{qt_plugins_dir}", "{st_build_dir}/{st_package_name}/plugins",
+            file_filter_function=plugin_dll_filter,
+            vars=vars)
 
-    # <qt>/translations/* -> <setup>/PySide2/translations
-    copydir("{qt_translations_dir}",
-        "{pyside_package_dir}/PySide2/translations",
-        filter=["*.qm", "*.pak"],
-        force=False,
-        vars=vars)
+    if copy_translations:
+        # <qt>/translations/* -> <setup>/{st_package_name}/translations
+        copydir("{qt_translations_dir}",
+            "{st_build_dir}/{st_package_name}/translations",
+            filter=["*.qm", "*.pak"],
+            force=False,
+            vars=vars)
 
-    # <qt>/qml/* -> <setup>/PySide2/qml
-    qml_dll_patterns = ["*{}.dll"]
-    qml_ignore_patterns = qml_dll_patterns + [pdb_pattern]
-    qml_ignore = [a.format('') for a in qml_ignore_patterns]
+    if copy_qml:
+        # <qt>/qml/* -> <setup>/{st_package_name}/qml
+        qml_dll_patterns = ["*{}.dll"]
+        qml_ignore_patterns = qml_dll_patterns + [pdb_pattern]
+        qml_ignore = [a.format('') for a in qml_ignore_patterns]
 
-    # Copy all files that are not dlls and pdbs (.qml, qmldir).
-    copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
-        ignore=qml_ignore,
-        force=False,
-        recursive=True,
-        vars=vars)
+        # Copy all files that are not dlls and pdbs (.qml, qmldir).
+        copydir("{qt_qml_dir}", "{st_build_dir}/{st_package_name}/qml",
+            ignore=qml_ignore,
+            force=False,
+            recursive=True,
+            vars=vars)
 
-    if copy_pdbs:
-        qml_dll_patterns += [pdb_pattern]
-    qml_dll_filter = functools.partial(qt_build_config_filter,
-        qml_dll_patterns)
+        if copy_pdbs:
+            qml_dll_patterns += [pdb_pattern]
+        qml_dll_filter = functools.partial(qt_build_config_filter,
+            qml_dll_patterns)
 
-    # Copy all dlls (and possibly pdbs).
-    copydir("{qt_qml_dir}", "{pyside_package_dir}/PySide2/qml",
-        file_filter_function=qml_dll_filter,
-        force=False,
-        recursive=True,
-        vars=vars)
+        # Copy all dlls (and possibly pdbs).
+        copydir("{qt_qml_dir}", "{st_build_dir}/{st_package_name}/qml",
+            file_filter_function=qml_dll_filter,
+            force=False,
+            recursive=True,
+            vars=vars)
 
     if self.is_webengine_built(built_modules):
         copydir("{qt_prefix_dir}/resources",
-            "{pyside_package_dir}/PySide2/resources",
+            "{st_build_dir}/{st_package_name}/resources",
             filter=None,
             recursive=False,
             vars=vars)
@@ -346,26 +436,16 @@ def prepare_packages_win32(self, vars):
         filter = 'QtWebEngineProcess{}.exe'.format(
             'd' if self.debug else '')
         copydir("{qt_bin_dir}",
-            "{pyside_package_dir}/PySide2",
+            "{st_build_dir}/{st_package_name}",
             filter=[filter],
             recursive=False, vars=vars)
 
-    # Copy the qt.conf file to prefix dir.
-    copyfile(
-        "{build_dir}/pyside2/PySide2/qt.conf",
-        "{pyside_package_dir}/PySide2",
-        vars=vars)
+    if copy_qt_conf:
+        # Copy the qt.conf file to prefix dir.
+        copyfile(
+            "{build_dir}/pyside2/{st_package_name}/qt.conf",
+            "{st_build_dir}/{st_package_name}",
+            vars=vars)
 
-    self.prepare_standalone_clang(is_win=True)
-
-    # pdb files for libshiboken and libpyside
-    copydir(
-        "{build_dir}/shiboken2/libshiboken",
-        "{pyside_package_dir}/PySide2",
-        filter=pdbs,
-        recursive=False, vars=vars)
-    copydir(
-        "{build_dir}/pyside2/libpyside",
-        "{pyside_package_dir}/PySide2",
-        filter=pdbs,
-        recursive=False, vars=vars)
+    if copy_clang:
+        self.prepare_standalone_clang(is_win=True)

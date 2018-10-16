@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -77,10 +77,15 @@ typedef struct safe_globals_struc {
 
 static safe_globals pyside_globals = 0;
 
-static PyObject *GetSignature_Function(PyCFunctionObject *);
-static PyObject *GetSignature_TypeMod(PyObject *);
+static PyObject *GetSignature_Function(PyCFunctionObject *, const char *);
+static PyObject *GetSignature_TypeMod(PyObject *, const char *);
+static PyObject *GetSignature_Wrapper(PyObject *, const char *);
+static PyObject *get_signature(PyObject *self, PyObject *args);
 
 static PyObject *PySide_BuildSignatureProps(PyObject *class_mod);
+
+static void init_module_1(void);
+static void init_module_2(void);
 
 const char helper_module_name[] = "signature_loader";
 const char bootstrap_name[] = "bootstrap";
@@ -88,7 +93,7 @@ const char arg_name[] = "pyside_arg_dict";
 const char func_name[] = "pyside_type_init";
 
 static PyObject *
-CreateSignature(PyObject *props, const char *sig_kind)
+CreateSignature(PyObject *props, PyObject *key)
 {
     /*
      * Here is the new function to create all signatures. It simply calls
@@ -97,22 +102,22 @@ CreateSignature(PyObject *props, const char *sig_kind)
      * to support '_signature_is_functionlike()'.
      */
     return PyObject_CallFunction(pyside_globals->createsig_func,
-                                 (char *)"(Os)", props, sig_kind);
+                                 (char *)"(OO)", props, key);
 }
 
 static PyObject *
-pyside_cf_get___signature__(PyObject *func)
+pyside_cf_get___signature__(PyObject *func, const char *modifier)
 {
-    return GetSignature_Function((PyCFunctionObject *)func);
+    return GetSignature_Function((PyCFunctionObject *)func, modifier);
 }
 
 static PyObject *
-pyside_sm_get___signature__(PyObject *sm)
+pyside_sm_get___signature__(PyObject *sm, const char *modifier)
 {
     PyObject *func, *ret;
 
     func = PyObject_GetAttrString(sm, "__func__");
-    ret = GetSignature_Function((PyCFunctionObject *)func);
+    ret = GetSignature_Function((PyCFunctionObject *)func, modifier);
     Py_XDECREF(func);
     return ret;
 }
@@ -192,7 +197,7 @@ qualname_to_func(PyObject *ob)
 #endif
 
 static PyObject *
-pyside_md_get___signature__(PyObject *ob)
+pyside_md_get___signature__(PyObject *ob, const char *modifier)
 {
     PyObject *func;
     PyObject *result;
@@ -218,21 +223,31 @@ pyside_md_get___signature__(PyObject *ob)
         return Py_None;
     if (func == NULL)
         Py_FatalError("missing mapping in MethodDescriptor");
-    result = pyside_cf_get___signature__(func);
+    result = pyside_cf_get___signature__(func, modifier);
     Py_DECREF(func);
     return result;
 }
 
 static PyObject *
-pyside_tp_get___signature__(PyObject *typemod)
+pyside_wd_get___signature__(PyObject *ob, const char *modifier)
 {
-    return GetSignature_TypeMod(typemod);
+    return GetSignature_Wrapper(ob, modifier);
 }
 
 static PyObject *
-GetSignature_Function(PyCFunctionObject *func)
+pyside_tp_get___signature__(PyObject *typemod, const char *modifier)
 {
-    PyObject *typemod, *type_name, *dict, *props, *value, *selftype;
+    return GetSignature_TypeMod(typemod, modifier);
+}
+
+// forward
+static PyObject *
+GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier);
+
+static PyObject *
+GetSignature_Function(PyCFunctionObject *func, const char *modifier)
+{
+    PyObject *typemod, *type_name, *dict, *props, *selftype;
     PyObject *func_name = PyObject_GetAttrString((PyObject *)func, "__name__");
     const char *sig_kind;
     int flags;
@@ -241,12 +256,8 @@ GetSignature_Function(PyCFunctionObject *func)
     if (selftype == NULL)
         selftype = PyDict_GetItem(pyside_globals->map_dict, (PyObject *)func);
     if (selftype == NULL) {
-        if (!PyErr_Occurred()) {
-            PyErr_Format(PyExc_SystemError,
-                "the signature for \"%s\" should exist",
-                PepCFunction_GET_NAMESTR(func)
-                );
-        }
+        if (!PyErr_Occurred())
+            Py_RETURN_NONE;
         return NULL;
     }
     if ((PyType_Check(selftype) || PyModule_Check(selftype)))
@@ -279,24 +290,46 @@ GetSignature_Function(PyCFunctionObject *func)
         sig_kind = "staticmethod";
     else
         sig_kind = "method";
-    value = PyDict_GetItemString(props, sig_kind);
-    if (value == NULL) {
-        // we need to compute a signature object
-        value = CreateSignature(props, sig_kind);
-        if (value != NULL) {
-            if (PyDict_SetItemString(props, sig_kind, value) < 0)
-                return NULL;
-        }
-        else
-            Py_RETURN_NONE;
-    }
-    return Py_INCREF(value), value;
+    return GetSignature_Cached(props, sig_kind, modifier);
 }
 
 static PyObject *
-GetSignature_TypeMod(PyObject *ob)
+GetSignature_Wrapper(PyObject *ob, const char *modifier)
 {
-    PyObject *ob_name, *dict, *props, *value;
+    PyObject *dict, *props;
+    PyObject *func_name = PyObject_GetAttrString(ob, "__name__");
+    PyObject *objclass = PyObject_GetAttrString(ob, "__objclass__");
+    PyObject *class_name = PyObject_GetAttrString(objclass, "__name__");
+    const char *sig_kind;
+
+    if (func_name == nullptr || objclass == nullptr || class_name == nullptr)
+        return nullptr;
+    dict = PyDict_GetItem(pyside_globals->arg_dict, class_name);
+    if (dict == NULL)
+        Py_RETURN_NONE;
+    if (PyTuple_Check(dict)) {
+        /*
+         * We do the initialization lazily.
+         * This has also the advantage that we can freely import PySide.
+         */
+        dict = PySide_BuildSignatureProps(objclass);
+        if (dict == NULL)
+            Py_RETURN_NONE;
+    }
+    props = PyDict_GetItem(dict, func_name);
+    Py_DECREF(func_name);
+    Py_DECREF(objclass);
+    Py_DECREF(class_name);
+    if (props == NULL)
+        Py_RETURN_NONE;
+    sig_kind = "method";
+    return GetSignature_Cached(props, sig_kind, modifier);
+}
+
+static PyObject *
+GetSignature_TypeMod(PyObject *ob, const char *modifier)
+{
+    PyObject *ob_name, *dict, *props;
     const char *sig_kind;
 
     ob_name = PyObject_GetAttrString(ob, "__name__");
@@ -314,37 +347,62 @@ GetSignature_TypeMod(PyObject *ob)
     if (props == NULL)
         Py_RETURN_NONE;
     sig_kind = "method";
-    value = PyDict_GetItemString(props, sig_kind);
-    if (value == NULL) {
+    return GetSignature_Cached(props, sig_kind, modifier);
+}
+
+static PyObject *
+GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier)
+{
+    PyObject *key, *value;
+
+    if (modifier == nullptr)
+        key = Py_BuildValue("s", sig_kind);
+    else
+        key = Py_BuildValue("(ss)", sig_kind, modifier);
+    if (key == nullptr)
+        return nullptr;
+    value = PyDict_GetItem(props, key);
+    if (value == nullptr) {
         // we need to compute a signature object
-        value = CreateSignature(props, sig_kind);
-        if (value != NULL) {
-            if (PyDict_SetItemString(props, sig_kind, value) < 0)
-                return NULL;
+        value = CreateSignature(props, key);
+        if (value != nullptr) {
+            if (PyDict_SetItem(props, key, value) < 0) {
+                // this is an error
+                Py_DECREF(key);
+                return nullptr;
+            }
         }
-        else
+        else {
+            // key not found
+            Py_DECREF(key);
             Py_RETURN_NONE;
+        }
     }
     return Py_INCREF(value), value;
 }
 
-
 static const char PySide_PythonCode[] =
-    "from __future__ import print_function, absolute_import\n"
-    "import sys, os, traceback\n"
+    "from __future__ import print_function, absolute_import\n" R"~(if True:
 
-    "pyside_package_dir = os.environ.get('PYSIDE_PACKAGE_DIR', '.')\n"
-    "__file__ = os.path.join(pyside_package_dir, 'support', 'signature', 'loader.py')\n"
+    import sys, os, traceback
 
-    "def bootstrap():\n"
-    "    try:\n"
-    "        with open(__file__) as _f:\n"
-    "            exec(compile(_f.read(), __file__, 'exec'))\n"
-    "    except Exception as e:\n"
-    "        print('Exception:', e)\n"
-    "        traceback.print_exc(file=sys.stdout)\n"
-    "    globals().update(locals())\n"
-     ;
+    pyside_package_dir = os.environ.get('PYSIDE_PACKAGE_DIR')
+    if pyside_package_dir is None:
+        # This happens in shiboken running ctest.
+        from distutils.sysconfig import get_python_lib
+        pyside_package_dir = os.path.join(get_python_lib(), 'PySide2')
+    __file__ = os.path.join(pyside_package_dir, 'support', 'signature', 'loader.py')
+
+    def bootstrap():
+        try:
+            with open(__file__) as _f:
+                exec(compile(_f.read(), __file__, 'exec'))
+        except Exception as e:
+            print('Exception:', e)
+            traceback.print_exc(file=sys.stdout)
+        globals().update(locals())
+
+    )~";
 
 static safe_globals_struc *
 init_phase_1(void)
@@ -387,9 +445,10 @@ error:
 }
 
 static int
-init_phase_2(safe_globals_struc *p)
+init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 {
-    PyObject *bootstrap_func;
+    PyObject *bootstrap_func, *v = nullptr;
+    PyMethodDef *ml;
 
     bootstrap_func = PyObject_GetAttrString(p->helper_module, bootstrap_name);
     if (bootstrap_func == NULL)
@@ -403,9 +462,22 @@ init_phase_2(safe_globals_struc *p)
     p->createsig_func = PyObject_GetAttrString(p->helper_module, "create_signature");
     if (p->createsig_func == NULL)
         goto error;
+
+    // The single function to be called, but maybe more to come.
+    for (ml = methods; ml->ml_name != NULL; ml++) {
+        v = PyCFunction_NewEx(ml, nullptr, nullptr);
+        if (v == nullptr) {
+            goto error;
+        }
+        if (PyObject_SetAttrString(p->helper_module, ml->ml_name, v) != 0) {
+            goto error;
+        }
+        Py_DECREF(v);
+    }
     return 0;
 
 error:
+    Py_XDECREF(v);
     PyErr_SetString(PyExc_SystemError, "could not initialize part 2");
     return -1;
 }
@@ -413,8 +485,11 @@ error:
 static int
 add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
 {
-    PyObject *dict = type->tp_dict;
+    PyObject *dict;
 
+    assert(PyType_Check(type));
+    PyType_Ready(type);
+    dict = type->tp_dict;
     for (; gsp->name != NULL; gsp++) {
         PyObject *descr;
         if (PyDict_GetItemString(dict, gsp->name))
@@ -463,6 +538,45 @@ static PyGetSetDef new_PyType_getsets[] = {
     {0}
 };
 
+static PyGetSetDef new_PyWrapperDescr_getsets[] = {
+    {(char *) "__signature__", (getter)pyside_wd_get___signature__},
+    {0}
+};
+
+////////////////////////////////////////////////////////////////////////////
+//
+// get_signature  --  providing a superior interface
+//
+// Additionally to the interface via __signature__, we also provide
+// a general function, which allows for different signature layouts.
+// The "modifier" argument is a string that is passed in from loader.py .
+// Configuration what the modifiers mean is completely in Python.
+//
+
+static PyObject *
+get_signature(PyObject *self, PyObject *args)
+{
+    PyObject *ob;
+    const char *modifier = nullptr;
+
+    init_module_1();
+    init_module_2();
+
+    if (!PyArg_ParseTuple(args, "O|s", &ob, &modifier))
+        return NULL;
+    if (Py_TYPE(ob) == &PyCFunction_Type)
+        return pyside_cf_get___signature__(ob, modifier);
+    if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
+        return pyside_sm_get___signature__(ob, modifier);
+    if (Py_TYPE(ob) == PepMethodDescr_TypePtr)
+        return pyside_md_get___signature__(ob, modifier);
+    if (PyType_Check(ob))
+        return pyside_tp_get___signature__(ob, modifier);
+    if (Py_TYPE(ob) == &PyWrapperDescr_Type)
+        return pyside_wd_get___signature__(ob, modifier);
+    Py_RETURN_NONE;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 //
 // This special Type_Ready does certain initializations earlier with
@@ -497,23 +611,23 @@ void handler(int sig) {
 static int
 PySideType_Ready(PyTypeObject *type)
 {
-    PyObject *md;
+    PyObject *md, *wd;
     static int init_done = 0;
 
     if (!init_done) {
-        // Python2 does not expose certain types. We look them up:
-        // PyMethodDescr_Type       'type(str.__dict__["split"])'
-        // PyClassMethodDescr_Type. 'type(dict.__dict__["fromkeys"])'
-        // The latter is not needed until we use class methods in PySide.
-        md = PyObject_GetAttrString((PyObject *)&PyString_Type, "split");
-        if (md == NULL
+        md = PyObject_GetAttrString((PyObject *)&PyString_Type, "split");       // method-descriptor
+        wd = PyObject_GetAttrString((PyObject *)Py_TYPE(Py_True), "__add__");   // wrapper-descriptor
+        if (md == nullptr || wd == nullptr
             || PyType_Ready(Py_TYPE(md)) < 0
-            || add_more_getsets(Py_TYPE(md), new_PyMethodDescr_getsets) < 0
+            || add_more_getsets(PepMethodDescr_TypePtr, new_PyMethodDescr_getsets) < 0
             || add_more_getsets(&PyCFunction_Type, new_PyCFunction_getsets) < 0
             || add_more_getsets(PepStaticMethod_TypePtr, new_PyStaticMethod_getsets) < 0
-            || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0)
+            || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0
+            || add_more_getsets(Py_TYPE(wd), new_PyWrapperDescr_getsets) < 0
+            )
             return -1;
         Py_DECREF(md);
+        Py_DECREF(wd);
 #ifndef _WIN32
         // We enable the stack trace in CI, only.
         const char *testEnv = getenv("QTEST_ENVIRONMENT");
@@ -550,20 +664,26 @@ build_func_to_type(PyObject *obtype)
     return 0;
 }
 
+static void
+init_module_1(void)
+{
+    static int init_done = 0;
+
+    if (!init_done) {
+        pyside_globals = init_phase_1();
+        if (pyside_globals != nullptr)
+            init_done = 1;
+    }
+}
+
 static int
 PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
                           const char *signatures)
 {
     PyObject *type_name, *arg_tup;
     const char *name = NULL;
-    static int init_done = 0;
 
-    if (!init_done) {
-        pyside_globals = init_phase_1();
-        if (pyside_globals == NULL)
-            return -1;
-        init_done = 1;
-    }
+    init_module_1();;
     arg_tup = Py_BuildValue("(Os)", type, signatures);
     if (arg_tup == NULL)
         return -1;
@@ -599,23 +719,34 @@ PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
     return 0;
 }
 
+static PyMethodDef signature_methods[] = {
+    {"get_signature", (PyCFunction)get_signature, METH_VARARGS,
+        "get the __signature__, but pass an optional string parameter"},
+    {NULL, NULL}
+};
+
+static void
+init_module_2(void)
+{
+    static int init_done = 0;
+
+    if (!init_done) {
+        init_phase_2(pyside_globals, signature_methods);
+        init_done = 1;
+    }
+}
+
 static PyObject *
 PySide_BuildSignatureProps(PyObject *classmod)
 {
     PyObject *arg_tup, *dict, *type_name;
-    static int init_done = 0;
-
-    if (!init_done) {
-        if (init_phase_2(pyside_globals) < 0)
-            return NULL;
-        init_done = 1;
-    }
     /*
      * Here is the second part of the function.
      * This part will be called on-demand when needed by some attribute.
      * We simply pick up the arguments that we stored here and replace
      * them by the function result.
      */
+    init_module_2();
     type_name = PyObject_GetAttrString(classmod, "__name__");
     if (type_name == NULL)
         return NULL;

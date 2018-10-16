@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -80,31 +80,10 @@ from PySide2.support.signature.parser import pyside_type_init
 sys.path.pop(0)
 # Note also that during the tests we have a different encoding that would
 # break the Python license decorated files without an encoding line.
+from PySide2.support.signature import layout
 
 # name used in signature.cpp
-def create_signature(props, sig_kind):
-    if not props:
-        # empty signatures string
-        return
-    if isinstance(props["multi"], list):
-        return list(create_signature(elem, sig_kind)
-                    for elem in props["multi"])
-    varnames = props["varnames"]
-    if sig_kind == "method":
-        varnames = ("self",) + varnames
-    elif sig_kind == "staticmethod":
-        pass
-    elif sig_kind == "classmethod":
-        varnames = ("klass",) + varnames
-    else:
-        raise SystemError("Methods must be normal, staticmethod or "
-                          "classmethod")
-    argstr = ", ".join(varnames)
-    fakefunc = eval("lambda {}: None".format(argstr))
-    fakefunc.__name__ = props["name"]
-    fakefunc.__defaults__ = props["defaults"]
-    fakefunc.__kwdefaults__ = props["kwdefaults"]
-    fakefunc.__annotations__ = props["annotations"]
-    return inspect._signature_from_function(inspect.Signature, fakefunc)
+def create_signature(props, key):
+    return layout.create_signature(props, key)
 
 # end of file

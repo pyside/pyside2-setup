@@ -36,13 +36,15 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
-from build_scripts.utils import has_option
-from build_scripts.utils import option_value
+from build_scripts.options import has_option
+from build_scripts.options import option_value
 from build_scripts.utils import install_pip_dependencies
+from build_scripts.utils import install_pip_wheel_package
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import acceptCITestConfiguration
+from build_scripts.utils import get_ci_qmake_path
 import os
 
 # Values must match COIN thrift
@@ -66,11 +68,20 @@ def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-    install_pip_dependencies(env_pip, ["six", "wheel"])
+    install_pip_dependencies(env_pip, ["six", "setuptools"])
+    install_pip_wheel_package(env_pip)
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
                   "--buildno=" + buildnro]
     run_instruction(cmd, "Failed to run testrunner.py")
+
+    qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
+
+    # Try to install built wheels, and build some buildable examples.
+    if CI_RELEASE_CONF:
+        wheel_tester_path = os.path.join("testing", "wheel_tester.py")
+        cmd = [env_python, wheel_tester_path, qmake_path]
+        run_instruction(cmd, "Error while running wheel_tester.py")
 
 def run_test_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -48,6 +48,7 @@ import functools
 from .mapping import type_map, update_mapping, __dict__ as namespace
 
 _DEBUG = False
+LIST_KEYWORDS = False
 
 """
 parser.py
@@ -119,6 +120,8 @@ def _parse_line(line):
     for arg in arglist:
         name, ann = arg.split(":")
         if name in keyword.kwlist:
+            if LIST_KEYWORDS:
+                print("KEYWORD", ret)
             name = name + "_"
         if "=" in ann:
             ann, default = ann.split("=")
@@ -130,6 +133,10 @@ def _parse_line(line):
     multi = ret["multi"]
     if multi is not None:
         ret["multi"] = int(multi)
+    funcname = ret["funcname"]
+    parts = funcname.split(".")
+    if parts[-1] in keyword.kwlist:
+        ret["funcname"] = funcname + "_"
     return ret
 
 def make_good_value(thing, valtype):
@@ -192,8 +199,14 @@ def calculate_props(line):
     arglist = res["arglist"]
     annotations = {}
     _defaults = []
-    for tup in arglist:
+    for idx, tup in enumerate(arglist):
         name, ann = tup[:2]
+        if ann == "...":
+            name = "*args"
+            # copy the fields back :()
+            ann = 'NULL' # maps to None
+            tup = name, ann
+            arglist[idx] = tup
         annotations[name] = _resolve_type(ann, line)
         if len(tup) == 3:
             default = _resolve_value(tup[2], ann, line)
@@ -214,6 +227,31 @@ def calculate_props(line):
     props["multi"] = res["multi"]
     return props
 
+def fixup_multilines(sig_str):
+    lines = list(line.strip() for line in sig_str.strip().splitlines())
+    res = []
+    multi_lines = []
+    for line in lines:
+        multi = re.match(r"([0-9]+):", line)
+        if multi:
+            idx, rest = int(multi.group(1)), line[multi.end():]
+            multi_lines.append(rest)
+            if idx > 0:
+                continue
+            # remove duplicates
+            multi_lines = list(set(multi_lines))
+            # renumber or return a single line
+            nmulti = len(multi_lines)
+            if nmulti > 1:
+                for idx, line in enumerate(multi_lines):
+                    res.append("{}:{}".format(nmulti-idx-1, line))
+            else:
+                res.append(multi_lines[0])
+            multi_lines = []
+        else:
+            res.append(line)
+    return res
+
 def pyside_type_init(typemod, sig_str):
     dprint()
     if type(typemod) is types.ModuleType:
@@ -222,9 +260,10 @@ def pyside_type_init(typemod, sig_str):
         dprint("Initialization of type '{}.{}'".format(typemod.__module__,
                                                        typemod.__name__))
     update_mapping()
+    lines = fixup_multilines(sig_str)
     ret = {}
     multi_props = []
-    for line in sig_str.strip().splitlines():
+    for line in lines:
         props = calculate_props(line)
         shortname = props["name"]
         multi = props["multi"]
@@ -232,10 +271,10 @@ def pyside_type_init(typemod, sig_str):
             ret[shortname] = props
             dprint(props)
         else:
-            fullname = props.pop("fullname")
             multi_props.append(props)
             if multi > 0:
                 continue
+            fullname = props.pop("fullname")
             multi_props = {"multi": multi_props, "fullname": fullname}
             ret[shortname] = multi_props
             dprint(multi_props)

@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -46,7 +46,7 @@ This module has the mapping from the pyside C-modules view of signatures
 to the Python representation.
 
 The PySide modules are not loaded in advance, but only after they appear
-in sys.modules. This minimises the loading overhead.
+in sys.modules. This minimizes the loading overhead.
 In principle, we need to re-load the module, when the imports change.
 But it is much easier to do it on demand, when we get an exception.
 See _resolve_value() in singature.py
@@ -71,7 +71,6 @@ FloatMatrix = typing.List[typing.List[float]]
 # Pair could be more specific, but we loose the info in the generator.
 Pair = typing.Tuple[typing.Any, typing.Any]
 MultiMap = typing.DefaultDict[str, typing.List[str]]
-Text = typing.Text
 
 # ulong_max is only 32 bit on windows.
 ulong_max = 2*sys.maxsize+1 if len(struct.pack("L", 1)) != 4 else 0xffffffff
@@ -153,7 +152,7 @@ type_map = {}
 
 def init_QtCore():
     import PySide2.QtCore
-    from PySide2.QtCore import Qt, QUrl, QDir, QGenericArgument
+    from PySide2.QtCore import Qt, QUrl, QDir
     from PySide2.QtCore import QRect, QSize, QPoint, QLocale, QByteArray
     from PySide2.QtCore import QMarginsF # 5.9
     try:
@@ -201,9 +200,8 @@ def init_QtCore():
         "ULONG_MAX": ulong_max,
         "quintptr": int,
         "PyCallable": typing.Callable,
-        "...": ellipsis, # no idea how this should be translated... maybe so?
         "PyTypeObject": type,
-        "PySequence": typing.Sequence,
+        "PySequence": typing.Iterable,  # important for numpy
         "qptrdiff": int,
         "true": True,
         "Qt.HANDLE": int, # be more explicit with some consts?
@@ -242,7 +240,7 @@ def init_QtCore():
             "QDir.SortFlags(QDir.Name | QDir.IgnoreCase)"),
         "PyBytes": bytes,
         "PyByteArray": bytearray,
-        "PyUnicode": Text,
+        "PyUnicode": typing.Text,
         "signed long": int,
         "PySide2.QtCore.int": int,
         "PySide2.QtCore.char": StringList, # A 'char **' is a list of strings.
@@ -259,13 +257,13 @@ def init_QtCore():
         "float[][]": FloatMatrix, # 5.9
         "PySide2.QtCore.unsigned int": int, # 5.9 Ubuntu
         "PySide2.QtCore.long long": int, # 5.9, MSVC 15
-        "QGenericArgument(nullptr)": QGenericArgument(None), # 5.10
+        "QGenericArgument(nullptr)": ellipsis, # 5.10
         "QModelIndex()": Invalid("PySide2.QtCore.QModelIndex"), # repr is btw. very wrong, fix it?!
-        "QGenericArgument((0))": None, # 5.6, RHEL 6.6. Is that ok?
-        "QGenericArgument()": None,
-        "QGenericArgument(0)": None,
-        "QGenericArgument(NULL)": None, # 5.6, MSVC
-        "QGenericArgument(Q_NULLPTR)": None,
+        "QGenericArgument((0))": ellipsis, # 5.6, RHEL 6.6. Is that ok?
+        "QGenericArgument()": ellipsis,
+        "QGenericArgument(0)": ellipsis,
+        "QGenericArgument(NULL)": ellipsis, # 5.6, MSVC
+        "QGenericArgument(Q_NULLPTR)": ellipsis,
         "zero(PySide2.QtCore.QObject)": None,
         "zero(PySide2.QtCore.QThread)": None,
         "zero(quintptr)": 0,
@@ -289,6 +287,8 @@ def init_QtCore():
         "zero(PySide2.QtCore.QEvent.Type)": None,
         "CheckIndexOption.NoOption": Instance(
             "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
+        "QVariantMap": dict,
+        "PySide2.QtCore.QCborStreamReader.StringResult": typing.AnyStr,
     })
     try:
         type_map.update({
@@ -301,7 +301,6 @@ def init_QtCore():
 
 def init_QtGui():
     import PySide2.QtGui
-    from PySide2.QtGui import QPageLayout, QPageSize # 5.9
     type_map.update({
         "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
         "USHRT_MAX": ushort_max,
@@ -313,7 +312,7 @@ def init_QtGui():
         "GL_COLOR_BUFFER_BIT": GL_COLOR_BUFFER_BIT,
         "GL_NEAREST": GL_NEAREST,
         "WId": WId,
-        "PySide2.QtGui.QPlatformSurface": Virtual("PySide2.QtGui.QPlatformSurface"), # hmm...
+        "PySide2.QtGui.QPlatformSurface": int, # a handle
         "QList< QTouchEvent.TouchPoint >()": [], # XXX improve?
         "QPixmap()": Default("PySide2.QtGui.QPixmap"), # can't create without qApp
         "PySide2.QtCore.uint8_t": int, # macOS 5.9
@@ -325,6 +324,7 @@ def init_QtGui():
         "zero(PySide2.QtGui.QTextLayout.FormatRange)": None,
         "zero(PySide2.QtGui.QTouchDevice)": None,
         "zero(PySide2.QtGui.QScreen)": None,
+        "PySide2.QtGui.QGenericMatrix": Missing("PySide2.QtGui.QGenericMatrix"),
     })
     return locals()
 
@@ -396,7 +396,6 @@ def init_QtMultimedia():
     import PySide2.QtMultimedia
     import PySide2.QtMultimediaWidgets
     type_map.update({
-        "QVariantMap": dict,
         "QGraphicsVideoItem": PySide2.QtMultimediaWidgets.QGraphicsVideoItem,
         "QVideoWidget": PySide2.QtMultimediaWidgets.QVideoWidget,
     })

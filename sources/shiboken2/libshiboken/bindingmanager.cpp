@@ -136,8 +136,11 @@ static void showWrapperMap(const WrapperMap& wrapperMap)
 #endif
 
 struct BindingManager::BindingManagerPrivate {
+    using DestructorEntries = std::vector<DestructorEntry>;
+
     WrapperMap wrapperMapper;
     Graph classHierarchy;
+    DestructorEntries deleteInMainThread;
     bool destroying;
 
     BindingManagerPrivate() : destroying(false) {}
@@ -247,6 +250,18 @@ void BindingManager::releaseWrapper(SbkObject* sbkObj)
         }
     }
     sbkObj->d->validCppObject = false;
+}
+
+void BindingManager::runDeletionInMainThread()
+{
+    for (const DestructorEntry &e : m_d->deleteInMainThread)
+        e.destructor(e.cppInstance);
+    m_d->deleteInMainThread.clear();
+}
+
+void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
+{
+    m_d->deleteInMainThread.push_back(e);
 }
 
 SbkObject* BindingManager::retrieveWrapper(const void* cptr)

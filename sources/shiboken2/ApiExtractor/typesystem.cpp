@@ -1301,8 +1301,8 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
             if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);
         } else if (name == deleteInMainThreadAttribute()) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
+            if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
+                ctype->setDeleteInMainThread(true);
         } else if (name == QLatin1String("target-type")) {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
         }
@@ -3221,7 +3221,8 @@ ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t,
     m_qualifiedCppName(name),
     m_qobject(false),
     m_polymorphicBase(false),
-    m_genericClass(false)
+    m_genericClass(false),
+    m_deleteInMainThread(false)
 {
 }
 

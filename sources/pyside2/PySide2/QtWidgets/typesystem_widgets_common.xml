@@ -2196,7 +2196,7 @@
     </modify-function>
   </object-type>
 
-  <object-type name="QWidget">
+  <object-type name="QWidget" delete-in-main-thread="true">
     <!-- Qt5: remove native event for now -->
     <modify-function signature="nativeEvent(const QByteArray &amp;,void*,long*)" remove="all" />
 

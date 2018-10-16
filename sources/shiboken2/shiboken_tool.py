@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #############################################################################
 ##
 ## Copyright (C) 2018 The Qt Company Ltd.
@@ -36,11 +38,16 @@
 ## $QT_END_LICENSE$
 ##
 #############################################################################
+import sys
+import os
+import subprocess
 
-from __future__ import print_function, absolute_import
+def main():
+    # The tools listed as entrypoints in setup.py are copied to 'scripts/..'
+    cmd = os.path.join("..", os.path.basename(sys.argv[0]))
+    command = [os.path.join(os.path.dirname(os.path.realpath(__file__)), cmd)]
+    command.extend(sys.argv[1:])
+    sys.exit(subprocess.call(command))
 
-from .loader import inspect
-from PySide2 import QtCore
-if QtCore.QProcess.__signature__:
-    pass   # trigger initialization
-from signature_loader import get_signature
+if __name__ == "__main__":
+     main()

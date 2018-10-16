@@ -782,6 +782,7 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
     FORMAT_BOOL("QObject", m_qobject)
     FORMAT_BOOL("polymorphicBase", m_polymorphicBase)
     FORMAT_BOOL("genericClass", m_genericClass)
+    FORMAT_BOOL("deleteInMainThread", m_deleteInMainThread)
     if (m_typeFlags != 0)
         d << ", typeFlags=" << m_typeFlags;
     d << ", copyableFlag=" << m_copyableFlag

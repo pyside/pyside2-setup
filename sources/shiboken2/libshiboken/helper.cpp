@@ -41,6 +41,12 @@
 #include "sbkstring.h"
 #include <stdarg.h>
 
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include <pthread.h>
+#endif
+
 namespace Shiboken
 {
 
@@ -139,6 +145,26 @@ int warning(PyObject* category, int stacklevel, const char* format, ...)
     va_end(args2);
     va_end(args);
     return result;
+}
+
+ThreadId currentThreadId()
+{
+#if defined(_WIN32)
+    return GetCurrentThreadId();
+#elif defined(__APPLE_CC__)
+    return reinterpret_cast<ThreadId>(pthread_self());
+#else
+    return pthread_self();
+#endif
+}
+
+// Internal, used by init() from main thread
+static ThreadId _mainThreadId{0};
+void _initMainThreadId() { _mainThreadId =  currentThreadId(); }
+
+ThreadId mainThreadId()
+{
+    return _mainThreadId;
 }
 
 } // namespace Shiboken

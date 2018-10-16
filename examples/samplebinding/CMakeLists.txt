@@ -40,7 +40,11 @@ set(generated_sources
 
 
 # ================================== Shiboken detection ======================================
-
+# Use provided python interpreter if given.
+if(NOT python_interpreter)
+    find_program(python_interpreter "python")
+endif()
+message(STATUS "Using python interpreter: ${python_interpreter}")
 
 # Macro to get various pyside / python include / link flags and paths.
 # Uses the not entirely supported utils/pyside2_config.py file.
@@ -52,7 +56,8 @@ macro(pyside2_config option output_var)
     endif()
 
     execute_process(
-      COMMAND python "${CMAKE_SOURCE_DIR}/../utils/pyside2_config.py" ${option}
+      COMMAND ${python_interpreter} "${CMAKE_SOURCE_DIR}/../utils/pyside2_config.py"
+              ${option}
       OUTPUT_VARIABLE ${output_var}
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -64,14 +69,15 @@ macro(pyside2_config option output_var)
     endif()
 endmacro()
 
-# Query for the shiboken path, Python path, include paths and linker flags.
-pyside2_config(--pyside2 pyside2_path)
-pyside2_config(--python-include python_include_dir)
-pyside2_config(--shiboken-include shiboken_include_dir 1)
-pyside2_config(--shiboken-shared-libraries-cmake shiboken_shared_libraries 0)
-pyside2_config(--python-link-cmake python_linking_data 0)
+# Query for the shiboken generator path, Python path, include paths and linker flags.
+pyside2_config(--shiboken2-module-path shiboken2_module_path)
+pyside2_config(--shiboken2-generator-path shiboken2_generator_path)
+pyside2_config(--python-include-path python_include_dir)
+pyside2_config(--shiboken2-generator-include-path shiboken_include_dir 1)
+pyside2_config(--shiboken2-module-shared-libraries-cmake shiboken_shared_libraries 0)
+pyside2_config(--python-link-flags-cmake python_linking_data 0)
 
-set(shiboken_path "${pyside2_path}/shiboken2${CMAKE_EXECUTABLE_SUFFIX}")
+set(shiboken_path "${shiboken2_generator_path}/shiboken2${CMAKE_EXECUTABLE_SUFFIX}")
 if(NOT EXISTS ${shiboken_path})
     message(FATAL_ERROR "Shiboken executable not found at path: ${shiboken_path}")
 endif()
@@ -87,7 +93,7 @@ endif()
 # Enable rpaths so that the built shared libraries find their dependencies.
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${pyside2_path} ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_INSTALL_RPATH ${shiboken2_module_path} ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # =============================================================================================
 # !!! End of dubious section.

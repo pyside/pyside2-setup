@@ -39,17 +39,13 @@
 
 import sys
 import os
-import stat
 import re
 import stat
 import errno
-import time
 import shutil
 import subprocess
 import fnmatch
-import glob
 import itertools
-import popenasync
 import glob
 
 # There is no urllib.request in Python2
@@ -58,42 +54,14 @@ try:
 except ImportError:
     import urllib
 
-from distutils import log
+import distutils.log as log
 from distutils.errors import DistutilsOptionError
 from distutils.errors import DistutilsSetupError
-from distutils.spawn import spawn
-from distutils.spawn import DistutilsExecError
 
 try:
     WindowsError
 except NameError:
     WindowsError = None
-
-
-def has_option(name):
-    try:
-        sys.argv.remove("--{}".format(name))
-        return True
-    except ValueError:
-        pass
-    return False
-
-
-def option_value(name):
-    for index, option in enumerate(sys.argv):
-        if option == '--' + name:
-            if index+1 >= len(sys.argv):
-                raise DistutilsOptionError("The option {} requires a "
-                    "value".format(option))
-            value = sys.argv[index+1]
-            sys.argv[index:index+2] = []
-            return value
-        if option.startswith('--' + name + '='):
-            value = option[len(name)+3:]
-            sys.argv[index:index+1] = []
-            return value
-    env_val = os.getenv(name.upper().replace('-', '_'))
-    return env_val
 
 
 def filter_match(name, patterns):
@@ -182,7 +150,6 @@ def find_vcdir(version):
     """
     from distutils.msvc9compiler import VS_BASE
     from distutils.msvc9compiler import Reg
-    from distutils import log
     vsbase = VS_BASE % version
     try:
         productdir = Reg.get_value(r"{}\Setup\VC".format(vsbase), "productdir")
@@ -416,13 +383,15 @@ def rmtree(dirname, ignore=False):
             os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
             func(path)
         else:
-            raise
+            raise IOError
     shutil.rmtree(dirname, ignore_errors=ignore, onerror=handle_remove_readonly)
 
 def run_process_output(args, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
-    std_out = subprocess.Popen(args, env = initial_env, universal_newlines = 1,
+    std_out = subprocess.Popen(args,
+                               env = initial_env,
+                               universal_newlines = 1,
                               stdout=subprocess.PIPE).stdout
     result = []
     for raw_line in std_out.readlines():
@@ -431,53 +400,21 @@ def run_process_output(args, initial_env=None):
     return result
 
 def run_process(args, initial_env=None):
-    def _log(buffer, check_new_line=False):
-        ends_with_new_line = False
-        if buffer.endswith('\n'):
-            ends_with_new_line = True
-        if check_new_line and buffer.find('\n') == -1:
-            return buffer
-        lines = buffer.splitlines()
-        buffer = ''
-        if check_new_line and not ends_with_new_line:
-            buffer = lines[-1]
-            lines = lines[:-1]
-        for line in lines:
-            log.info(line.rstrip('\r'))
-        return buffer
-    _log("Running process in {0}: {1}".format(os.getcwd(),
-        " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args])))
-
-    if sys.platform != "win32":
-        try:
-            spawn(args)
-            return 0
-        except DistutilsExecError:
-            return -1
-
-    shell = False
-    if sys.platform == "win32":
-        shell = True
+    """
+    Run process until completion and return the process exit code.
+    Prints both stdout and stderr to the console.
+    No output is captured.
+    """
+    log.info("Running process in directory {0}: command {1}".format(
+        os.getcwd(),
+        " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args]))
+    )
 
     if initial_env is None:
         initial_env = os.environ
 
-    proc = popenasync.Popen(args,
-        stdin = subprocess.PIPE,
-        stdout = subprocess.PIPE,
-        stderr = subprocess.STDOUT,
-        universal_newlines = 1,
-        shell = shell,
-        env = initial_env)
-
-    log_buffer = None;
-    while proc.poll() is None:
-        log_buffer = _log(proc.read_async(wait=0.1, e=0))
-    if log_buffer:
-        _log(log_buffer)
-
-    proc.wait()
-    return proc.returncode
+    exit_code = subprocess.call(args, stderr=subprocess.STDOUT, env=initial_env)
+    return exit_code
 
 
 def get_environment_from_batch_command(env_cmd, initial=None):
@@ -665,6 +602,9 @@ def macos_get_rpaths(libpath):
         ctr += 3
     return rpaths
 
+def macos_add_rpath(rpath, library_path):
+    back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
+        rpath=rpath, library_path=library_path))
 
 def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
     """ Adds required rpath load commands to given library.
@@ -703,8 +643,7 @@ def macos_fix_rpaths_for_library(library_path, qt_lib_dir):
             break
 
     if needs_loader_path and "@loader_path" not in existing_rpath_commands:
-        back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
-                  rpath="@loader_path", library_path=library_path))
+        macos_add_rpath("@loader_path", library_path)
 
     # If the library depends on a Qt library, add an rpath load comment
     # pointing to the Qt lib directory.
@@ -738,8 +677,7 @@ def macos_add_qt_rpath(library_path, qt_lib_dir,
             break
 
     if needs_qt_rpath:
-        back_tick('install_name_tool -add_rpath {rpath} {library_path}'.format(
-                  rpath=qt_lib_dir, library_path=library_path))
+        macos_add_rpath(qt_lib_dir, library_path)
 
 # Find an executable specified by a glob pattern ('foo*') in the OS path
 def find_glob_in_path(pattern):
@@ -996,6 +934,17 @@ def copy_icu_libs(patchelf, destination_lib_dir):
             new_rpaths_string = ":".join(rpaths)
             linux_set_rpaths(patchelf, qt_core_library_path, new_rpaths_string)
 
+
+def linux_run_read_elf(executable_path):
+    cmd = "readelf -d {}".format(executable_path)
+    (out, err, code) = back_tick(cmd, True)
+    if code != 0:
+        raise RuntimeError("Running `readelf -d {}` failed with error "
+                           "output:\n {}. ".format(executable_path, err))
+    lines = split_and_strip(out)
+    return lines
+
+
 def linux_set_rpaths(patchelf, executable_path, rpath_string):
     """ Patches the `executable_path` with a new rpath string. """
 
@@ -1005,18 +954,32 @@ def linux_set_rpaths(patchelf, executable_path, rpath_string):
         raise RuntimeError("Error patching rpath in {}".format(
             executable_path))
 
+
+def linux_get_dependent_libraries(executable_path):
+    """
+    Returns a list of libraries that executable_path depends on.
+    """
+
+    lines = linux_run_read_elf(executable_path)
+    pattern = re.compile(r"^.+?\(NEEDED\).+?\[(.+?)\]$")
+
+    library_lines = []
+    for line in lines:
+        match = pattern.search(line)
+        if match:
+            library_line = match.group(1)
+            library_lines.append(library_line)
+
+    return library_lines
+
+
 def linux_get_rpaths(executable_path):
     """
     Returns a list of run path values embedded in the executable or just
     an empty list.
     """
 
-    cmd = "readelf -d {}".format(executable_path)
-    (out, err, code) = back_tick(cmd, True)
-    if code != 0:
-        raise RuntimeError("Running `readelf -d {}` failed with error "
-            "output:\n {}. ".format(executable_path, err))
-    lines = split_and_strip(out)
+    lines = linux_run_read_elf(executable_path)
     pattern = re.compile(r"^.+?\(RUNPATH\).+?\[(.+?)\]$")
 
     rpath_line = None
@@ -1033,6 +996,7 @@ def linux_get_rpaths(executable_path):
 
     return rpaths
 
+
 def rpaths_has_origin(rpaths):
     """
     Return True if the specified list of rpaths has an "$ORIGIN" value
@@ -1047,6 +1011,39 @@ def rpaths_has_origin(rpaths):
         if match:
             return True
     return False
+
+
+def linux_needs_qt_rpath(executable_path):
+    """
+    Returns true if library_path depends on Qt libraries.
+    """
+
+    dependencies = linux_get_dependent_libraries(executable_path)
+
+    # Check if any library dependencies are Qt libraries (hacky).
+    needs_qt_rpath = False
+    for dep in dependencies:
+        if 'Qt' in dep:
+            needs_qt_rpath = True
+            break
+    return needs_qt_rpath
+
+
+def linux_fix_rpaths_for_library(patchelf, executable_path, qt_rpath, override=False):
+    """
+    Adds or overrides required rpaths in given executable / library.
+    """
+    rpaths = ['$ORIGIN/']
+    existing_rpaths = []
+    if not override:
+        existing_rpaths = linux_get_rpaths(executable_path)
+        rpaths.extend(existing_rpaths)
+
+    if linux_needs_qt_rpath(executable_path) and qt_rpath not in existing_rpaths:
+        rpaths.append(qt_rpath)
+
+    rpaths_string = ':'.join(rpaths)
+    linux_set_rpaths(patchelf, executable_path, rpaths_string)
 
 def memoize(function):
     """
@@ -1076,9 +1073,27 @@ def get_python_dict(python_script_path):
             "file: {}.".format(python_script_path))
         raise
 
-def install_pip_dependencies(env_pip, packages):
+def install_pip_wheel_package(env_pip):
+    # Need to install an unreleased wheel version, due to a bug that
+    # will generate a wheel which will not be installable.
+    # See https://github.com/pypa/wheel/issues/263
+    wheel_url = "git+https://github.com/pypa/wheel.git@fbf3e3ada64d36ca7bb9c1422f5a1ccdba7e4dcf"
+    install_pip_package_from_url_specifier(env_pip, wheel_url)
+
+def install_pip_package_from_url_specifier(env_pip, url, upgrade=True):
+    args = [env_pip, "install", url]
+    if upgrade:
+        args.append("--upgrade")
+    args.append(url)
+    run_instruction(args, "Failed to install {}".format(url))
+
+def install_pip_dependencies(env_pip, packages, upgrade=True):
     for p in packages:
-        run_instruction([env_pip, "install", p], "Failed to install " + p)
+        args = [env_pip, "install"]
+        if upgrade:
+            args.append("--upgrade")
+        args.append(p)
+        run_instruction(args, "Failed to install " + p)
 
 def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
     _pExe = "python"
@@ -1105,9 +1120,11 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
             _pExe = "python3"
     return(_pExe, _env, env_pip, env_python)
 
-def run_instruction(instruction, error):
+def run_instruction(instruction, error, initial_env=None):
+    if initial_env is None:
+        initial_env = os.environ
     print("Running Coin instruction: " + ' '.join(str(e) for e in instruction))
-    result = subprocess.call(instruction)
+    result = subprocess.call(instruction, env=initial_env)
     if result != 0:
         print("ERROR : " + error)
         exit(result)
@@ -1124,3 +1141,13 @@ def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
         print("Disabled " + compiler + " to " + targetArch + " from Coin configuration")
         return False
     return True
+
+
+def get_ci_qmake_path(ci_install_dir, ci_host_os):
+    qmake_path = "--qmake={}".format(ci_install_dir)
+    if ci_host_os == "MacOS":
+        return qmake_path + "/bin/qmake"
+    elif ci_host_os == "Windows":
+        return qmake_path + "\\bin\\qmake.exe"
+    else:
+        return qmake_path + "/bin/qmake"

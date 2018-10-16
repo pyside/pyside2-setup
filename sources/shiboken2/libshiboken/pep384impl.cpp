@@ -398,7 +398,10 @@ PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
     return ret;
 }
 
+#endif // Py_LIMITED_API
+
 // This is only a simple local helper that returns a computed variable.
+// Used also in Python 2.
 static PyObject *
 PepRun_GetResult(const char *command, const char *resvar)
 {
@@ -414,6 +417,8 @@ PepRun_GetResult(const char *command, const char *resvar)
     Py_DECREF(d);
     return res;
 }
+
+#ifdef Py_LIMITED_API
 
 /*****************************************************************************
  *
@@ -499,12 +504,25 @@ PyTypeObject *PepStaticMethod_TypePtr = NULL;
 
 static PyTypeObject *getStaticMethodType(void)
 {
+    // this works for Python 3, only
+    //    "StaticMethodType = type(str.__dict__['maketrans'])\n";
     static const char prog[] =
-        "StaticMethodType = type(str.__dict__['maketrans'])\n";
-    return (PyTypeObject *) PepRun_GetResult(prog, "StaticMethodType");
+        "from xxsubtype import spamlist\n"
+        "StaticMethod_Type = type(spamlist.__dict__['staticmeth'])\n";
+    return (PyTypeObject *) PepRun_GetResult(prog, "StaticMethod_Type");
 }
-
 #endif // Py_LIMITED_API
+
+#if PY_VERSION_HEX < 0x03000000
+PyTypeObject *PepMethodDescr_TypePtr = NULL;
+
+static PyTypeObject *getMethodDescrType(void)
+{
+    static const char prog[] =
+        "MethodDescr_Type = type(str.split)\n";
+    return (PyTypeObject *) PepRun_GetResult(prog, "MethodDescr_Type");
+}
+#endif
 
 /*****************************************************************************
  *
@@ -629,6 +647,9 @@ Pep384_Init()
     PepMethod_TypePtr = getMethodType();
     PepFunction_TypePtr = getFunctionType();
     PepStaticMethod_TypePtr = getStaticMethodType();
+#endif
+#if PY_VERSION_HEX < 0x03000000
+    PepMethodDescr_TypePtr = getMethodDescrType();
 #endif
 }
 

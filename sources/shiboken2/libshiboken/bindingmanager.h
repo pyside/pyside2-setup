@@ -50,6 +50,8 @@ struct SbkObjectType;
 namespace Shiboken
 {
 
+struct DestructorEntry;
+
 typedef void (*ObjectVisitor)(SbkObject*, void*);
 
 class LIBSHIBOKEN_API BindingManager
@@ -66,6 +68,9 @@ public:
 
     void registerWrapper(SbkObject* pyObj, void* cptr);
     void releaseWrapper(SbkObject* wrapper);
+
+    void runDeletionInMainThread();
+    void addToDeletionInMainThread(const DestructorEntry &);
 
     SbkObject* retrieveWrapper(const void* cptr);
     PyObject* getOverride(const void* cptr, const char* methodName);

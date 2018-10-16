@@ -40,6 +40,7 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
+#include "helper.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkstring.h"
@@ -190,6 +191,12 @@ SbkObjectType *SbkObject_TypeF(void)
     return reinterpret_cast<SbkObjectType *>(type);
 }
 
+static int mainThreadDeletionHandler(void *)
+{
+    if (Py_IsInitialized())
+        Shiboken::BindingManager::instance().runDeletionInMainThread();
+    return 0;
+}
 
 static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
 {
@@ -218,8 +225,27 @@ static void SbkDeallocWrapperCommon(PyObject* pyObj, bool canDelete)
         PyObject_ClearWeakRefs(pyObj);
 
     // If I have ownership and is valid delete C++ pointer
-    if (canDelete && sbkObj->d->hasOwnership && sbkObj->d->validCppObject) {
-        SbkObjectTypePrivate *sotp = PepType_SOTP(pyType);
+    SbkObjectTypePrivate *sotp{nullptr};
+    canDelete &= sbkObj->d->hasOwnership && sbkObj->d->validCppObject;
+    if (canDelete) {
+        sotp = PepType_SOTP(pyType);
+        if (sotp->delete_in_main_thread && Shiboken::currentThreadId() != Shiboken::mainThreadId()) {
+            auto &bindingManager = Shiboken::BindingManager::instance();
+            if (sotp->is_multicpp) {
+                 Shiboken::DtorAccumulatorVisitor visitor(sbkObj);
+                 Shiboken::walkThroughClassHierarchy(Py_TYPE(pyObj), &visitor);
+                 for (const auto &e : visitor.entries())
+                     bindingManager.addToDeletionInMainThread(e);
+            } else {
+                Shiboken::DestructorEntry e{sotp->cpp_dtor, sbkObj->d->cptr[0]};
+                bindingManager.addToDeletionInMainThread(e);
+            }
+            Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
+            canDelete = false;
+        }
+    }
+
+    if (canDelete) {
         if (sotp->is_multicpp) {
             Shiboken::DtorAccumulatorVisitor visitor(sbkObj);
             Shiboken::walkThroughClassHierarchy(Py_TYPE(pyObj), &visitor);
@@ -533,6 +559,8 @@ bool DtorAccumulatorVisitor::visit(SbkObjectType *node)
     return false;
 }
 
+void _initMainThreadId(); // helper.cpp
+
 namespace Conversions { void init(); }
 
 void init()
@@ -540,6 +568,8 @@ void init()
     static bool shibokenAlreadInitialised = false;
     if (shibokenAlreadInitialised)
         return;
+
+    _initMainThreadId();
 
     Conversions::init();
 
@@ -735,7 +765,7 @@ introduceWrapperType(PyObject *enclosingObject,
                      ObjectDestructor cppObjDtor,
                      SbkObjectType *baseType,
                      PyObject *baseTypes,
-                     bool isInnerClass)
+                     unsigned wrapperFlags)
 {
     if (baseType) {
         typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType);
@@ -760,10 +790,14 @@ introduceWrapperType(PyObject *enclosingObject,
         return nullptr;
 
     initPrivateData(type);
+    auto sotp = PepType_SOTP(type);
+    if (wrapperFlags & DeleteInMainThread)
+        sotp->delete_in_main_thread = 1;
+
     setOriginalName(type, originalName);
     setDestructorFunction(type, cppObjDtor);
 
-    if (isInnerClass) {
+    if (wrapperFlags & InnerClass) {
         if (PyDict_SetItemString(enclosingObject, typeName, reinterpret_cast<PyObject *>(type)) == 0)
             return type;
         else
