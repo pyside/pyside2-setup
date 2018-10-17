@@ -43,9 +43,13 @@ from __future__ import print_function
 This is a distutils setup-script for the Qt for Python project
 
 To build both shiboken2 and PySide2 simply execute:
-  python setup.py build
+
+    python setup.py build
+
 or
-  python setup.py install
+
+    python setup.py install
+
 to build and install into your current Python installation.
 
 The same setup.py script is used to build all the components of the
@@ -55,16 +59,22 @@ project:
   - PySide2
   - pyside2-tools
 
-Optionally, one can specify the location of qmake and cmake if it is
-not on the current PATH with:
+Preferably, a Qt (build) environment should be used to automatically
+pick up the associated `qmake`, but optionally one can specify the
+location of `qmake` and `cmake` if it is not in the current PATH with:
+
     --qmake=/path/to/qt/bin/qmake
+
 and
+
     --cmake=/path/to/bin/cmake
+
 respectively.
 
 By default, all of the above is built when no special options are
 passed to the script. You can use the --build-type parameter to specify
 which things should be built:
+
   --build-type=shiboken2 - build / package only the python module
   --build-type=shiboken2-generator - build / package the generator
                                      executable
@@ -75,14 +85,18 @@ which things should be built:
 
 When building PySide2, optionally, one can specify the location of the
 shiboken2 cmake config path if it is not on the current PATH with:
+
      --shiboken-config-dir=/path/to/shiboken/cmake/config/dir
+
 This is useful if you did a cmake installation of shiboken2 into
 a custom location.
 
 For Windows, if OpenSSL support is required, it's necessary to specify
 the directory path that contains the OpenSSL shared libraries
 "libeay32.dll" and "ssleay32.dll", for example:
+
     --openssl=C:\OpenSSL-Win64\bin
+
 This will make sure that the libraries are copied into the PySide2
 package and are found by the QtNetwork module.
 
@@ -108,7 +122,7 @@ e.g.:
 
 * First, we create a bdist_wheel from a full PySide2 build:
 
-  python setup.py bdist_wheel --qmake=c:\Qt\5.9\bin\qmake.exe
+  python setup.py bdist_wheel --qmake=c:\Qt\5.12\bin\qmake.exe
     --cmake=c:\tools\cmake\bin\cmake.exe
     --openssl=c:\libs\OpenSSL32bit\bin
 
@@ -116,7 +130,7 @@ e.g.:
   `--only-package`:
 
   python setup.py bdist_egg --only-package
-    --qmake=c:\Qt\5.9\bin\qmake.exe
+    --qmake=c:\Qt\5.12\bin\qmake.exe
     --cmake=c:\tools\cmake\bin\cmake.exe
     --openssl=c:\libs\OpenSSL32bit\bin
 
@@ -140,40 +154,40 @@ DEVELOPMENT OPTIONS:
 For development purposes the following options might be of use, when
 using `setup.py build`:
 
-  --module-subset allows for specifying the Qt modules to be built.
-    A minimal set is: --module-subset=Core,Gui,Test,Widgets
-  --skip-modules allows for specifying the Qt modules that will be
-    skipped during the build process.
-    For example: --skip-modules=WebEngineCore,WebEngineWidgets
-  --reuse-build option allows recompiling only the modified sources and
-        not the whole world, shortening development iteration time,
-  --skip-cmake will reuse the already generated Makefiles (or
-        equivalents), instead of invoking, CMake to update the
-        Makefiles (note, CMake should be ran at least once to generate
-        the files),
-  --skip-make-install will not run make install (or equivalent) for
-        each module built,
-  --skip-packaging will skip creation of the python package,
   --ignore-git will skip the fetching and checkout steps for
         supermodule and all submodules.
-  --verbose-build will output the compiler invocation with command line
-        arguments, etc.
-  --sanitize-address will build the project with address sanitizer
-    enabled (Linux or macOS only).
-  --skip-docs skip the documentation generation.
   --limited-api=yes|no  default yes if applicable
         Set or clear the limited API flag. Ignored for Python 2.
+  --module-subset allows for specifying the Qt modules to be built.
+    A minimal set is: --module-subset=Core,Gui,Test,Widgets
   --package-timestamp allows specifying the timestamp that will be
         used as part of the version number for a snapshot package.
         For example given --package-timestamp=1529646276
         the package version will be 5.x.y.dev1529646276.
+  --reuse-build option allows recompiling only the modified sources and
+        not the whole world, shortening development iteration time.
+  --sanitize-address will build the project with address sanitizer.
+  --skip-cmake will reuse the already generated Makefiles (or
+        equivalents), instead of invoking, CMake to update the
+        Makefiles (note, CMake should be ran at least once to generate
+        the files).
+  --skip-docs skip the documentation generation.
+  --skip-make-install will not run make install (or equivalent) for
+        each module built.
+  --skip-modules allows for specifying the Qt modules that will be
+    skipped during the build process.
+    For example: --skip-modules=WebEngineCore,WebEngineWidgets
+  --skip-packaging will skip creation of the python package,
+    enabled (Linux or macOS only).
+  --verbose-build will output the compiler invocation with command line
+        arguments, etc.
 
 REQUIREMENTS:
 
-* Python: 2.7 and 3.3+ are supported
+* Python: 2.7 and 3.5+ are supported
 * CMake: Specify the path to cmake with `--cmake` option or add cmake
   to the system path.
-* Qt: 5.9 and 5.11 are supported. Specify the path to qmake with
+* Qt: 5.11+ is supported. Specify the path to qmake with
   `--qmake` option or add qmake to the system path.
 
 OPTIONAL:
@@ -189,9 +203,11 @@ OPTIONAL:
 
     You can specify the location of the OpenSSL DLLs with the
     following option:
+
         --openssl=</path/to/openssl/bin-directory>.
 
     You can download OpenSSL for Windows here:
+
         http://slproweb.com/products/Win32OpenSSL.html (*)
 
     Official Qt packages do not link to the SSL library directly, but
@@ -211,11 +227,12 @@ OPTIONAL:
           shared libraries, are not currently compatible with
           standalone PySide2 packages.
 
-    (*) Revised on 21.06.2018
+    (*) Revised on 2018.10.24
 
 * macOS SDK:
     You can specify which macOS SDK should be used for compilation with
     the option:
+
         --macos-sysroot=</path/to/sdk>.
 
     e.g.: "--macos-sysroot=/Applications/Xcode.app/.../Developer/SDKs/MacOSX10.12.sdk/"
@@ -223,6 +240,7 @@ OPTIONAL:
 * macOS minimum deployment target:
     You can specify a custom macOS minimum deployment target with the
     option:
+
         --macos-deployment-target=<value>
 
     e.g.: "--macos-deployment-target=10.10"
@@ -242,7 +260,8 @@ OPTIONAL:
                  an older OS version.
 """
 
-import os, sys
+import os
+import sys
 
 # Change the current directory to setup.py's dir.
 try:
