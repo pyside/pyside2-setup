@@ -544,8 +544,7 @@ def back_tick(cmd, ret_err=False):
     return out, err.strip(), retcode
 
 
-MACOS_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version '
-                        '[\d.]+\)')
+MACOS_OUTNAME_RE = re.compile(r'\(compatibility version [\d.]+, current version [\d.]+\)')
 
 def macos_get_install_names(libpath):
     """
@@ -692,7 +691,7 @@ def find_glob_in_path(pattern):
 
 # Locate the most recent version of llvm_config in the path.
 def find_llvm_config():
-    version_re = re.compile('(\d+)\.(\d+)\.(\d+)')
+    version_re = re.compile(r'(\d+)\.(\d+)\.(\d+)')
     result = None
     last_version_string = '000000'
     for llvm_config in find_glob_in_path('llvm-config*'):
