@@ -8,12 +8,10 @@ cmake_policy(SET CMP0046 NEW)
 
 project(pysidebindings)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake_helpers/
-                      ${CMAKE_SOURCE_DIR}/cmake/Macros/
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_helpers/
+                      ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
 include(helpers)
-
-option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
 
 # Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
 if (QUIET_BUILD)
@@ -21,7 +19,7 @@ if (QUIET_BUILD)
 endif()
 
 # Override message not to display info messages when doing a quiet build.
-if (QUIET_BUILD)
+if (QUIET_BUILD AND is_pyside2_superproject_build)
     function(message)
         list(GET ARGV 0 MessageType)
         if (MessageType STREQUAL FATAL_ERROR OR
@@ -34,15 +32,7 @@ if (QUIET_BUILD)
     endfunction()
 endif()
 
-if (USE_PYTHON_VERSION)
-    find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
-    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
-else()
-    find_package(PythonInterp 2.7)
-    find_package(PythonLibs 2.7)
-endif()
-
-set(PYSIDE_VERSION_FILE_PATH "${CMAKE_SOURCE_DIR}/pyside_version.py")
+set(PYSIDE_VERSION_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/pyside_version.py")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   ${PYSIDE_VERSION_FILE_PATH}
 )
@@ -63,111 +53,28 @@ list(GET PYSIDE_VERSION_OUTPUT 3 BINDING_API_PRE_RELEASE_VERSION_TYPE)
 # the number of the pre release (alpha1, beta3, rc7, etc.)
 list(GET PYSIDE_VERSION_OUTPUT 4 BINDING_API_PRE_RELEASE_VERSION)
 
-macro(get_python_extension_suffix)
-  # Result of imp.get_suffixes() depends on the platform, but generally looks something like:
-  # [('.cpython-34m-x86_64-linux-gnu.so', 'rb', 3), ('.cpython-34m.so', 'rb', 3),
-  # ('.abi3.so', 'rb', 3), ('.so', 'rb', 3), ('.py', 'r', 1), ('.pyc', 'rb', 2)]
-  # We pick the first most detailed one, strip of the file extension part.
-
-  execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import imp, re
-       first_suffix = imp.get_suffixes()[0][0]
-       res = re.search(r'^(.+)\\.', first_suffix)
-       if res:
-           first_suffix = res.group(1)
-       else:
-           first_suffix = ''
-       print(first_suffix)
-       "
-    OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
-endmacro()
-
-
-if (NOT PYTHON_EXTENSION_SUFFIX)
-  get_python_extension_suffix()
-endif()
-
-# On Windows, PYTHON_LIBRARIES can be a list. Example:
-#    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
-# On other platforms, this result is not used at all.
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-        for lib in '${PYTHON_LIBRARIES}'.split(';'):
-            if '/' in lib:
-                prefix, py = lib.rsplit( '/', 1)
-                if py.startswith('python3'):
-                    print(prefix + '/python3.lib')
-                    break
-        "
-    OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 if (WIN32)
     set(PATH_SEP "\;")
 else()
     set(PATH_SEP ":")
 endif()
 
-option(FORCE_LIMITED_API "Enable the limited API." "yes")
+find_package(Shiboken2 2.0.0 REQUIRED)
 
-set(PYTHON_LIMITED_API 0)
-if(FORCE_LIMITED_API STREQUAL "yes")
-    # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
-    if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
-        add_definitions("-DPy_LIMITED_API=0x03050000")
-        set(PYTHON_LIMITED_API 1)
-    endif()
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})
 endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions("-DNDEBUG")
 endif()
 
-if (PYTHON_LIMITED_API)
-    if (WIN32 AND NOT EXISTS "${PYTHON_LIMITED_LIBRARIES}")
-        message(FATAL_ERROR "The Limited API was enabled, but ${PYTHON_LIMITED_LIBRARIES} was not found!")
-    endif()
+if (SHIBOKEN_PYTHON_LIMITED_API)
     message(STATUS "******************************************************")
-    message(STATUS "** Limited API enabled ${PYTHON_LIMITED_LIBRARIES}")
+    message(STATUS "** PySide2 Limited API enabled.")
     message(STATUS "******************************************************")
 endif()
 
-if (NOT PYTHON_CONFIG_SUFFIX)
-  if (PYTHON_VERSION_MAJOR EQUAL 2)
-      set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-      if (PYTHON_EXTENSION_SUFFIX)
-          set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
-      endif()
-  elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-      if (PYTHON_LIMITED_API)
-          if(WIN32)
-              set(PYTHON_EXTENSION_SUFFIX "")
-          else()
-              set(PYTHON_EXTENSION_SUFFIX ".abi3")
-          endif()
-      endif()
-      set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
-  endif()
-endif()
-
-if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
-  set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
-
-  # Append a "v" to disambiguate the python version and the pyside version in the
-  # shared library file name.
-  if (APPLE AND PYTHON_VERSION_MAJOR EQUAL 2)
-      set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_SHARED_LIBRARY_SUFFIX}v")
-  endif()
-endif()
-
-
-message(STATUS "PYTHON_EXTENSION_SUFFIX:      ${PYTHON_EXTENSION_SUFFIX}")
-message(STATUS "PYTHON_CONFIG_SUFFIX:         ${PYTHON_CONFIG_SUFFIX}")
-message(STATUS "PYTHON_SHARED_LIBRARY_SUFFIX: ${PYTHON_SHARED_LIBRARY_SUFFIX}")
-
-find_package(Shiboken2 2.0.0 REQUIRED)
 find_package(Qt5 5.12 REQUIRED COMPONENTS Core)
 add_definitions(${Qt5Core_DEFINITIONS})
 
@@ -188,7 +95,7 @@ endif()
 option(BUILD_TESTS "Build tests." TRUE)
 option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
+set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 if(CMAKE_HOST_APPLE)
     set(ALTERNATIVE_QT_INCLUDE_DIR "" CACHE PATH "Deprecated. CMake now finds the proper include dir itself.")
     set(OSX_USE_LIBCPP "OFF" CACHE BOOL "Explicitly link the libc++ standard library (useful for osx deployment targets lower than 10.9.")
@@ -231,7 +138,6 @@ else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     option(ENABLE_GCC_OPTIMIZATION "Enable specific GCC flags to optimization library size and performance. Only available on Release Mode" 0)
     if(ENABLE_GCC_OPTIMIZATION)
-        set(CMAKE_BUILD_TYPE Release)
         set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os -Wl,-O1")
         if(NOT CMAKE_HOST_APPLE)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--hash-style=gnu")
@@ -248,10 +154,6 @@ else()
     endif()
 endif()
 message(STATUS "*** computed QT_INCLUDE_DIR as ${QT_INCLUDE_DIR}")
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})
-endif()
 
 set(BINDING_NAME PySide2)
 
@@ -441,13 +343,17 @@ message(STATUS "Detected OS: ${AUTO_OS}")
 # Define supported Qt Version
 set(SUPPORTED_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")
 
+
 # uninstall target
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake"
                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
                IMMEDIATE @ONLY)
-add_custom_target(uninstall "${CMAKE_COMMAND}"
-                  -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
+# When opening super project, prevent redefinition of uninstall target.
+if (NOT TARGET uninstall)
+    add_custom_target(uninstall "${CMAKE_COMMAND}"
+                      -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+endif()
 
 if (NOT PYTHON_SITE_PACKAGES)
     execute_process(

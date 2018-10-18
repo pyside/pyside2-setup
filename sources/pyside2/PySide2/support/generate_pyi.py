@@ -279,13 +279,6 @@ def generate_all_pyi(outpath, options):
         sys.path[0:0] = sys_path
         pypath = ps.join(sys_path)
         os.environ["PYTHONPATH"] = pypath
-    if options.lib_path:
-        # the path changes are automatically propagated to subprocesses
-        ospath_var = "PATH" if sys.platform == "win32" else "LD_LIBRARY_PATH"
-        old_val = os.environ.get(ospath_var, "")
-        lib_path = [os.path.normpath(_) for _ in options.lib_path]
-        ospath = ps.join(lib_path + old_val.split(ps))
-        os.environ[ospath_var] = ospath
 
     # now we can import
     global PySide2, inspect, HintingEnumerator
@@ -336,8 +329,6 @@ if __name__ == "__main__":
         help="the output directory (default = binary location)")
     parser_run.add_argument("--sys-path", nargs="+",
         help="a list of strings prepended to sys.path")
-    parser_run.add_argument("--lib-path", nargs="+",
-        help="a list of strings prepended to LD_LIBRARY_PATH (unix) or PATH (windows)")
     options = parser.parse_args()
     if options.command == "run":
         if options.quiet:

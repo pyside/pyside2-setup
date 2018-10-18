@@ -103,7 +103,7 @@ add_custom_target(apidoc
 configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 add_custom_target("docrsts"
-    COMMAND ${SHIBOKEN_BINARY} --generator-set=qtdoc ${docHeader}
+    COMMAND Shiboken2::shiboken2 --generator-set=qtdoc ${docHeader}
             --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
             --api-version=${SUPPORTED_QT_VERSION}
             --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"

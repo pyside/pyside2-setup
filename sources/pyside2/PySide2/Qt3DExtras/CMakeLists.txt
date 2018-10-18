@@ -56,17 +56,13 @@ set(Qt3DExtras_include_dirs
                      ${Qt53DCore_INCLUDE_DIRS}
                      ${Qt53DRender_INCLUDE_DIRS}
                      ${Qt53DExtras_INCLUDE_DIRS}
-                     ${SHIBOKEN_INCLUDE_DIR}
                      ${libpyside_SOURCE_DIR}
-                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${Qt3DCore_GEN_DIR}
                      ${Qt3DRender_GEN_DIR})
 
 set(Qt3DExtras_libraries pyside2
-                     ${SHIBOKEN_PYTHON_LIBRARIES}
-                     ${SHIBOKEN_LIBRARY}
                      ${Qt53DExtras_LIBRARIES})
 
 set(Qt3DExtras_deps Qt3DRender)

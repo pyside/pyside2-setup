@@ -16,13 +16,10 @@ set(QtX11Extras_include_dirs ${QtX11Extras_SOURCE_DIR}
                         ${Qt5Gui_INCLUDE_DIRS}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
-                        ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                        ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR})
 
 set(QtX11Extras_libraries pyside2
                         ${Qt5X11Extras_LIBRARIES}
-                        ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${Qt5Core_LIBRARIES}
                         ${Qt5Gui_LIBRARIES})
 

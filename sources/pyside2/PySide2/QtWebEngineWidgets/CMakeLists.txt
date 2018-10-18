@@ -26,9 +26,7 @@ set(QtWebEngineWidgets_include_dirs
                             ${Qt5Network_INCLUDE_DIRS}
                             ${Qt5WebChannel_INCLUDE_DIRS}
                             ${Qt5WebEngineWidgets_INCLUDE_DIRS}
-                            ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
-                            ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
                             ${QtWidgets_GEN_DIR}
@@ -38,8 +36,6 @@ set(QtWebEngineWidgets_include_dirs
                             ${QtWebEngineCore_GEN_DIR}
                             )
 set(QtWebEngineWidgets_libraries      pyside2
-                            ${SHIBOKEN_PYTHON_LIBRARIES}
-                            ${SHIBOKEN_LIBRARY}
                             ${Qt5WebEngineWidgets_LIBRARIES}
                             ${Qt5Network_LIBRARIES}
                             ${Qt5WebChannel_LIBRARIES}

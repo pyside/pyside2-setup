@@ -46,15 +46,11 @@ set(QtDataVisualization_include_dirs ${QtDataVisualization_SOURCE_DIR}
                           ${Qt5Core_INCLUDE_DIRS}
                           ${Qt5Gui_INCLUDE_DIRS}
                           ${Qt5DataVisualization_INCLUDE_DIRS}
-                          ${SHIBOKEN_INCLUDE_DIR}
                           ${libpyside_SOURCE_DIR}
-                          ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                           ${QtCore_GEN_DIR}
                           ${QtGui_GEN_DIR})
 
 set(QtDataVisualization_libraries    pyside2
-                          ${SHIBOKEN_PYTHON_LIBRARIES}
-                          ${SHIBOKEN_LIBRARY}
                           ${Qt5DataVisualization_LIBRARIES}
                           ${Qt5Core_LIBRARIES}
                           ${Qt5Gui_LIBRARIES})

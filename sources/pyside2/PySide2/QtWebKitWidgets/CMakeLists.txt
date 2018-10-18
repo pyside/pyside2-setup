@@ -39,9 +39,7 @@ set(QtWebKitWidgets_include_dirs
                             ${Qt5PrintSupport_INCLUDE_DIRS}
                             ${Qt5Network_INCLUDE_DIRS}
                             ${Qt5WebKitWidgets_INCLUDE_DIRS}
-                            ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
-                            ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
                             ${QtWidgets_GEN_DIR}
@@ -50,8 +48,6 @@ set(QtWebKitWidgets_include_dirs
                             ${QtNetwork_GEN_DIR}
                             )
 set(QtWebKitWidgets_libraries      pyside2
-                            ${SHIBOKEN_PYTHON_LIBRARIES}
-                            ${SHIBOKEN_LIBRARY}
                             ${Qt5WebKit_LIBRARIES}
                             ${Qt5WebKitWidgets_LIBRARIES}
                             ${Qt5Network_LIBRARIES}

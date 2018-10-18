@@ -119,6 +119,13 @@ def call_setup(python_ver):
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 
+    # Due to certain older CMake versions generating very long paths
+    # (at least with CMake 3.6.2) when using the export() function,
+    # pass the shorter paths option on Windows so we don't hit
+    # the path character length limit (260).
+    if CI_HOST_OS == "Windows":
+        cmd += ["--shorter-paths"]
+
     cmd += ["--package-timestamp=" + CI_INTEGRATION_ID]
 
     env = os.environ

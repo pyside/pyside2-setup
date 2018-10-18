@@ -13,8 +13,6 @@ set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 ${Qt5Widgets_INCLUDE_DIRS}
                                 ${Qt5Script_INCLUDE_DIRS}
                                 ${Qt5ScriptTools_INCLUDE_DIRS}
-                                ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                                ${SHIBOKEN_INCLUDE_DIR}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 ${QtGui_GEN_DIR}
@@ -23,7 +21,6 @@ set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 )
 
 set(QtScriptTools_libraries pyside2
-                            ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             ${Qt5Gui_LIBRARIES}
                             ${Qt5Widgets_LIBRARIES}

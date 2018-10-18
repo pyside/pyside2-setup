@@ -27,6 +27,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shiboken2
                     )
 
 add_executable(shiboken2 ${shiboken2_SRC})
+add_executable(Shiboken2::shiboken2 ALIAS shiboken2)
 add_dependencies(shiboken2 apiextractor)
 set_target_properties(shiboken2 PROPERTIES OUTPUT_NAME shiboken2${shiboken2_SUFFIX})
 target_link_libraries(shiboken2
@@ -37,7 +38,9 @@ target_link_libraries(shiboken2
 
 configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h" @ONLY)
 
-install(TARGETS shiboken2 DESTINATION bin)
+install(TARGETS shiboken2
+        EXPORT Shiboken2Targets
+        DESTINATION bin)
 
 set(shiboken_generator_package_name "shiboken2_generator")
 

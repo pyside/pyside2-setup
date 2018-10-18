@@ -655,8 +655,13 @@ class PysideBuild(_build):
 
         update_env_path(additional_paths)
 
-        build_name = "py{}-qt{}-{}-{}".format(py_version, qt_version,
-            platform.architecture()[0], build_type.lower())
+        # Used for test blacklists and registry test.
+        self.build_classifiers = "py{}-qt{}-{}-{}".format(py_version, qt_version,
+                                     platform.architecture()[0], build_type.lower())
+        if OPTION_SHORTER_PATHS:
+            build_name = "p{}".format(py_version)
+        else:
+            build_name = self.build_classifiers
 
         script_dir = setup_script_dir
         sources_dir = os.path.join(script_dir, "sources")
@@ -714,6 +719,7 @@ class PysideBuild(_build):
                 fpath = os.path.join(unique_dir, 'build_dir.txt')
                 with open(fpath, 'w') as f:
                     print(build_dir, file=f)
+                    print(self.build_classifiers, file=f)
                 log.info("Created {}".format(build_history))
 
         if not OPTION_SKIP_PACKAGING:

@@ -5,13 +5,13 @@ include(CheckIncludeFileCXX)
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake_helpers/
-                      ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake_helpers/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/data/")
+
 include(helpers)
+include(shiboken_helpers)
 
 find_package(Qt5 5.12 REQUIRED COMPONENTS Core Xml XmlPatterns)
-
-add_definitions(${Qt5Core_DEFINITIONS})
 
 option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
@@ -36,11 +36,9 @@ if (QUIET_BUILD)
 endif()
 
 if (USE_PYTHON_VERSION)
-    find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
-    find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
+    shiboken_find_required_python(${USE_PYTHON_VERSION})
 else()
-    find_package(PythonInterp 2.7)
-    find_package(PythonLibs 2.7)
+    shiboken_find_required_python()
 endif()
 
 macro(get_python_arch)
@@ -153,7 +151,7 @@ if (NOT CLANG_INCLUDE_FOUND)
         package? (e.g. libclang-6.0-dev)")
 endif()
 
-set(SHIBOKEN_VERSION_FILE_PATH "${CMAKE_SOURCE_DIR}/shiboken_version.py")
+set(SHIBOKEN_VERSION_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shiboken_version.py")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   ${SHIBOKEN_VERSION_FILE_PATH}
 )
@@ -219,34 +217,7 @@ endif()
 option(FORCE_LIMITED_API "Enable the limited API." "yes")
 set(PYTHON_LIMITED_API 0)
 
-# On Windows, PYTHON_LIBRARIES can be a list. Example:
-#    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
-# On other platforms, this result is not used at all.
-execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-        for lib in '${PYTHON_LIBRARIES}'.split(';'):
-            if '/' in lib:
-                prefix, py = lib.rsplit('/', 1)
-                if py.startswith('python3'):
-                    print(prefix + '/python3.lib')
-                    break
-        "
-    OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if(FORCE_LIMITED_API STREQUAL "yes")
-    if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
-        # GREATER_EQUAL is available only from cmake 3.7 on. We mean python 3.5 .
-        add_definitions("-DPy_LIMITED_API=0x03050000")
-        set(PYTHON_LIMITED_API 1)
-    endif()
-    if(WIN32)
-        if (${PYTHON_VERSION_MAJOR} EQUAL 3 AND ${PYTHON_VERSION_MINOR} GREATER 4)
-            # PYSIDE-560: XXX maybe add an option to setup.py as override
-            set(SBK_PYTHON_LIBRARIES ${PYTHON_LIMITED_LIBRARIES})
-        endif()
-    endif()
-endif()
+shiboken_check_if_limited_api()
 
 if (PYTHON_LIMITED_API)
     if (WIN32 AND NOT EXISTS "${PYTHON_LIMITED_LIBRARIES}")
@@ -270,8 +241,10 @@ if (NOT PYTHON_CONFIG_SUFFIX)
           else()
               set(PYTHON_EXTENSION_SUFFIX ".abi3")
           endif()
+          set(PYTHON_CONFIG_SUFFIX ".abi3")
+      else()
+          set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
       endif()
-      set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
   endif()
 endif()
 
@@ -285,6 +258,10 @@ if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
   endif()
 endif()
 
+if (NOT PYTHON_CONFIG_SUFFIX)
+    message(FATAL_ERROR
+        "PYTHON_CONFIG_SUFFIX is empty. It should never be empty. Please file a bug report.")
+endif()
 
 message(STATUS "PYTHON_EXTENSION_SUFFIX:      ${PYTHON_EXTENSION_SUFFIX}")
 message(STATUS "PYTHON_CONFIG_SUFFIX:         ${PYTHON_CONFIG_SUFFIX}")
@@ -318,7 +295,6 @@ else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     option(ENABLE_GCC_OPTIMIZATION "Enable specific GCC flags to optimization library size and performance. Only available on Release Mode" 0)
     if(ENABLE_GCC_OPTIMIZATION)
-        set(CMAKE_BUILD_TYPE Release)
         set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Os -Wl,-O1")
         if(NOT CMAKE_HOST_APPLE)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--hash-style=gnu")
@@ -334,7 +310,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
+set(LIB_INSTALL_DIR "lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
+set(BIN_INSTALL_DIR "bin" CACHE PATH "The subdirectory relative to the install prefix where dlls will be installed (default is /bin)" FORCE)
 
 if (WIN32)
     set(PATH_SEP "\;")
@@ -408,16 +385,15 @@ execute_process(
     OUTPUT_VARIABLE PYTHON_WITH_COUNT_ALLOCS
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(SHIBOKEN_BUILD_TYPE "Release")
-
-# We do not want to link against the python shared / static library on Linux and macOS.
-# The dynamic linker will pick up the python symbols at runtime automatically.
-# On Windows we do need to link against the python.lib import library.
-if (NOT SBK_PYTHON_LIBRARIES)
-    set(SBK_PYTHON_LIBRARIES "")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(SHIBOKEN_BUILD_TYPE "Release")
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(SHIBOKEN_BUILD_TYPE "Debug")
+
     if(NOT PYTHON_DEBUG_LIBRARIES)
         message(WARNING "Python debug shared library not found; assuming python was built with shared library support disabled.")
     endif()
@@ -425,38 +401,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(NOT PYTHON_WITH_DEBUG)
         message(WARNING "Compiling shiboken2 with debug enabled, but the python executable was not compiled with debug support.")
     else()
-        add_definitions("-DPy_DEBUG")
-        set(SBK_ADD_PY_DEBUG_DEFINITION "add_definitions(\"-DPy_DEBUG\")")
         set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION " -DPy_DEBUG")
     endif()
 
     if (PYTHON_WITH_COUNT_ALLOCS)
-        add_definitions("-DCOUNT_ALLOCS")
-        set(SBK_ADD_PY_DEBUG_DEFINITION "${SBK_ADD_PY_DEBUG_DEFINITION} \nadd_definitions(\"-DCOUNT_ALLOCS\")")
         set(SBK_PKG_CONFIG_PY_DEBUG_DEFINITION "${SBK_PKG_CONFIG_PY_DEBUG_DEFINITION} -DCOUNT_ALLOCS")
     endif()
-
-    if(WIN32 AND NOT SBK_PYTHON_LIBRARIES)
-        set(SBK_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
-    endif()
-    set(SHIBOKEN_BUILD_TYPE "Debug")
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_definitions("-DNDEBUG")
-    if(WIN32 AND NOT SBK_PYTHON_LIBRARIES)
-        set(SBK_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
-    endif()
-endif()
-
-
-if(APPLE)
-    set(SBK_PYTHON_LIBRARIES "-undefined dynamic_lookup")
-endif()
-if(CMAKE_VERSION VERSION_LESS 2.8)
-    set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_PATH})
-else()
-    set(SBK_PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIRS})
 endif()
 
 add_subdirectory(ApiExtractor)

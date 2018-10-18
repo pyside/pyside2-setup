@@ -18,8 +18,6 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${Qt5Xml_INCLUDE_DIRS}
                             ${Qt5Designer_INCLUDE_DIRS}
                             ${Qt5UiTools_INCLUDE_DIRS}
-                            ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                            ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
                             ${plugins_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
@@ -29,7 +27,6 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             )
 set(QtUiTools_libraries     pyside2
                             uiplugin
-                            ${SHIBOKEN_PYTHON_LIBRARIES}
                             ${Qt5UiTools_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             ${Qt5Gui_LIBRARIES}

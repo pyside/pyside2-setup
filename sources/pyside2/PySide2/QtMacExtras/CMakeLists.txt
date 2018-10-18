@@ -16,13 +16,10 @@ set(QtMacExtras_include_dirs ${QtMacExtras_SOURCE_DIR}
                         ${Qt5Gui_INCLUDE_DIRS}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
-                        ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                        ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR})
 
 set(QtMacExtras_libraries pyside2
                         ${Qt5MacExtras_LIBRARIES}
-                        ${SHIBOKEN_PYTHON_LIBRARIES}
                         ${Qt5Core_LIBRARIES}
                         ${Qt5Gui_LIBRARIES})
 

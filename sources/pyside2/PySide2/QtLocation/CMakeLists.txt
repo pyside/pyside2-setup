@@ -56,15 +56,11 @@ set(QtLocation_include_dirs ${QtLocation_SOURCE_DIR}
                             ${QtLocation_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
                             ${Qt5Location_INCLUDE_DIRS}
-                            ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
-                            ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtPositioning_GEN_DIR})
 
 set(QtLocation_libraries pyside2
-                         ${SHIBOKEN_PYTHON_LIBRARIES}
-                         ${SHIBOKEN_LIBRARY}
                          ${Qt5Location_LIBRARIES})
 
 set(QtLocation_deps QtCore QtPositioning)

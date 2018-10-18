@@ -17,10 +17,6 @@ if (NOT DISABLE_DOCSTRINGS)
     endif()
 endif()
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
 if(BUILD_TESTS)
     set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
 endif ()

@@ -9,10 +9,7 @@ set(ui_plugin_moc
     customwidget.h
     customwidgets.h
 )
-
-include_directories(${Qt5Designer_INCLUDE_DIRS}
-                    ${SHIBOKEN_INCLUDE_DIR}
-                    ${SHIBOKEN_PYTHON_INCLUDE_DIR})
+include_directories(${Qt5Designer_INCLUDE_DIRS})
 
 qt5_wrap_cpp(MOC_FILES ${ui_plugin_moc})
 add_library(uiplugin STATIC ${ui_plugin_src} ${MOC_FILES})
@@ -27,8 +24,7 @@ endif()
 
 target_link_libraries(uiplugin
                       ${Qt5UiTools_LIBRARY}
-                      ${SHIBOKEN_LIBRARY}
-                      ${SHIBOKEN_PYTHON_LIBRARY})
+                      Shiboken2::libshiboken)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_DEBUG_POSTFIX})
 else()
