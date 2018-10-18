@@ -1,5 +1,6 @@
 <RCC>
     <qresource>
         <file>utf8code.txt</file>
+        <file>injectedcode.txt</file>
     </qresource>
 </RCC>

@@ -90,6 +90,7 @@ static inline QString writeAttribute() { return QStringLiteral("write"); }
 static inline QString replaceAttribute() { return QStringLiteral("replace"); }
 static inline QString toAttribute() { return QStringLiteral("to"); }
 static inline QString signatureAttribute() { return QStringLiteral("signature"); }
+static inline QString snippetAttribute() { return QStringLiteral("snippet"); }
 static inline QString staticAttribute() { return QStringLiteral("static"); }
 static inline QString threadAttribute() { return QStringLiteral("thread"); }
 static inline QString sourceAttribute() { return QStringLiteral("source"); }
@@ -126,6 +127,31 @@ static bool setRejectionRegularExpression(const QString &patternIn,
         return false;
     }
     return true;
+}
+
+// Extract a snippet from a file within annotation "// @snippet label".
+static QString extractSnippet(const QString &code, const QString &snippetLabel)
+{
+    if (snippetLabel.isEmpty())
+        return code;
+    const QString pattern = QStringLiteral(R"(^\s*//\s*@snippet\s+)")
+        + QRegularExpression::escape(snippetLabel)
+        + QStringLiteral(R"(\s*$)");
+    const QRegularExpression snippetRe(pattern);
+    Q_ASSERT(snippetRe.isValid());
+
+    bool useLine = false;
+    QString result;
+    const auto lines = code.splitRef(QLatin1Char('\n'));
+    for (const QStringRef &line : lines) {
+        if (snippetRe.match(line).hasMatch()) {
+            useLine = !useLine;
+            if (!useLine)
+                break; // End of snippet reached
+        } else if (useLine)
+            result += line.toString() + QLatin1Char('\n');
+    }
+    return result;
 }
 
 template <class EnumType, Qt::CaseSensitivity cs = Qt::CaseInsensitive>
@@ -1546,6 +1572,7 @@ bool Handler::parseCustomConversion(const QXmlStreamReader &,
     }
 
     QString sourceFile;
+    QString snippetLabel;
     TypeSystem::Language lang = TypeSystem::NativeCode;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
@@ -1558,6 +1585,8 @@ bool Handler::parseCustomConversion(const QXmlStreamReader &,
             }
         } else if (name == QLatin1String("file")) {
             sourceFile = attributes->takeAt(i).value().toString();
+        } else if (name == snippetAttribute()) {
+            snippetLabel = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -1585,7 +1614,9 @@ bool Handler::parseCustomConversion(const QXmlStreamReader &,
 
             QFile conversionSource(sourceFile);
             if (conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                topElement.entry->setConversionRule(QLatin1String(conversionFlag) + QString::fromUtf8(conversionSource.readAll()));
+                const QString conversionRule =
+                    extractSnippet(QString::fromUtf8(conversionSource.readAll()), snippetLabel);
+                topElement.entry->setConversionRule(QLatin1String(conversionFlag) + conversionRule);
             } else {
                 qCWarning(lcShiboken).noquote().nospace()
                     << "File containing conversion code for "
@@ -2197,6 +2228,7 @@ bool Handler::parseInjectCode(const QXmlStreamReader &,
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionBeginning;
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
     QString fileName;
+    QString snippetLabel;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
@@ -2215,6 +2247,8 @@ bool Handler::parseInjectCode(const QXmlStreamReader &,
             }
         } else if (name == QLatin1String("file")) {
             fileName = attributes->takeAt(i).value().toString();
+        } else if (name == snippetAttribute()) {
+            snippetLabel = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -2235,7 +2269,7 @@ bool Handler::parseInjectCode(const QXmlStreamReader &,
                                                 "// START of custom code block [file: ");
                 content += fileName;
                 content += QLatin1String("]\n");
-                content += QString::fromUtf8(codeFile.readAll());
+                content += extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel);
                 content += QLatin1String("\n// END of custom code block [file: ");
                 content += fileName;
                 content += QLatin1String("]\n// ========================================================================\n");
