@@ -399,7 +399,7 @@ def run_process_output(args, initial_env=None):
         result.append(line.rstrip())
     return result
 
-def run_process(args, initial_env=None):
+def run_process(args, initial_env=None, redirect_stderr_to_stdout=True):
     """
     Run process until completion and return the process exit code.
     Prints both stdout and stderr to the console.
@@ -413,7 +413,12 @@ def run_process(args, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
 
-    exit_code = subprocess.call(args, stderr=subprocess.STDOUT, env=initial_env)
+    kwargs = {}
+    kwargs['env'] = initial_env
+    if redirect_stderr_to_stdout:
+        kwargs['stderr'] = subprocess.STDOUT
+
+    exit_code = subprocess.call(args, **kwargs)
     return exit_code
 
 
