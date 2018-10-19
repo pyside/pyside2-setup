@@ -33,6 +33,7 @@
 #include <QtCore/QTextCodec>
 #include <QtCore/QFileInfo>
 #include <QtCore/QDir>
+#include <QtCore/QDebug>
 
 #include <cstdio>
 
@@ -230,4 +231,19 @@ FileOut::State FileOut::done(QString *errorMessage)
     }
 
     return Success;
+}
+
+void FileOut::touchFile(const QString &filePath)
+{
+    QFile toucher(filePath);
+    qint64 size = toucher.size();
+    if (!toucher.open(QIODevice::ReadWrite)) {
+        qCWarning(lcShiboken).noquote().nospace()
+                << QStringLiteral("Failed to touch file '%1'")
+                   .arg(QDir::toNativeSeparators(filePath));
+        return;
+    }
+    toucher.resize(size+1);
+    toucher.resize(size);
+    toucher.close();
 }
