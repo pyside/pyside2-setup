@@ -5732,19 +5732,7 @@ bool CppGenerator::finishGeneration()
 
     s << "SBK_MODULE_INIT_FUNCTION_END" << endl;
 
-    switch (file.done()) {
-    case FileOut::Failure:
-        return false;
-    case FileOut::Unchanged:
-        // Even if contents is unchanged, the last file modification time should be updated,
-        // so that the build system can rely on the fact the generated file is up-to-date.
-        file.touch();
-        break;
-    case FileOut::Success:
-        break;
-    }
-
-    return true;
+    return file.done() != FileOut::Failure;
 }
 
 static ArgumentOwner getArgumentOwner(const AbstractMetaFunction* func, int argIndex)
