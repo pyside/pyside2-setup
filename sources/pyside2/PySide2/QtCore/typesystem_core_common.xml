@@ -686,7 +686,10 @@
     <enum-type name="Type"/>
     <include file-name="qcborstream.h" location="global"/>
     <value-type name="StringResult" generate="no"/>
+    <!-- 64bit (qsizetype = long long) -->
     <modify-function signature="readStringChunk(char*,long long)" remove="all"/>
+    <!-- 32bit (qsizetype = int) -->
+    <modify-function signature="readStringChunk(char*,int)" remove="all"/>
   </object-type>
   <typedef-type name="QCborStringResultString" source="QCborStreamReader::StringResult&lt;QString&gt;" since="5.12"/>
   <typedef-type name="QCborStringResultByteArray" source="QCborStreamReader::StringResult&lt;QByteArray&gt;" since="5.12"/>
@@ -4387,6 +4390,8 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <suppress-warning text="enum 'enum_5' does not have a type entry or is not an enum" />
   <suppress-warning text="enum 'FP_NORMAL' does not have a type entry or is not an enum" />
   <suppress-warning text="Shadowing: *" />
+  <!-- QCborStreamReader: Suppress warnings about 32/64bit signatures not found depending on qsizetype -->
+  <suppress-warning text="^signature 'readStringChunk\(char.*in 'QCborStreamReader' not found.*$"/>
 
   <!-- this enum is defined on Qt global header but only used in QtGui module -->
   <suppress-warning text="enum 'PM_MessageBoxHeight' does not have a type entry or is not an enum" />
