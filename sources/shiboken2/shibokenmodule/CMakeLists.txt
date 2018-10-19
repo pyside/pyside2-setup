@@ -12,7 +12,9 @@ set(shibokenmodule_TYPESYSTEM
 ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_shiboken.xml
 )
 
-add_custom_command(OUTPUT ${sample_SRC}
+add_custom_command(
+OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+BYPRODUCTS ${sample_SRC}
 # Note: shiboken2 is an executable target. By not specifying its explicit
 # path, CMAKE figures it out, itself!
 # This fixes an issue with Visual Studio, see https://github.com/PySide/shiboken2/pull/11
@@ -39,6 +41,7 @@ target_link_libraries(shibokenmodule
                       libshiboken)
 
 add_dependencies(shibokenmodule shiboken2)
+create_generator_target(shibokenmodule)
 
 install(TARGETS shibokenmodule DESTINATION ${PYTHON_SITE_PACKAGES}/shiboken2)
 

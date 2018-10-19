@@ -80,7 +80,8 @@ macro(create_pyside_module
 
     get_filename_component(pyside_binary_dir ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 
-    add_custom_command(OUTPUT ${${module_sources}}
+    add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+                        BYPRODUCTS ${${module_sources}}
                         COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
                         "${pyside2_BINARY_DIR}/${module_name}_global.h"
                         --include-paths=${shiboken_include_dirs}
@@ -112,6 +113,7 @@ macro(create_pyside_module
     if(${module_deps})
         add_dependencies(${module_name} ${${module_deps}})
     endif()
+    create_generator_target(${module_name})
 
     # install
     install(TARGETS ${module_name} LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/PySide2)
