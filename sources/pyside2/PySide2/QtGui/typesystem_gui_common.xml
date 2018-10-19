@@ -602,6 +602,18 @@
     <modify-function signature="operator!()const" remove="all"/>
 
     <modify-function signature="loadFromData(const uchar*,uint,const char*,QFlags&lt;Qt::ImageConversionFlag&gt;)">
+        <inject-documentation format="target" mode="append">
+        This method must be used with an QPixmap object, not the class:
+
+        ::
+
+            # Wrong
+            pixmap = QPixmap.loadFromData(...)
+
+            # Right
+            pixmap = QPixmap().loadFromData(...)
+
+        </inject-documentation>
       <modify-argument index="1">
         <replace-type modified-type="PyBytes"/>
         <conversion-rule class="native">
