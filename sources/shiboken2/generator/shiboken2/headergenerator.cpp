@@ -32,6 +32,8 @@
 #include <reporthandler.h>
 #include <fileout.h>
 
+#include <algorithm>
+
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
 #include <QtCore/QVariant>
@@ -378,7 +380,12 @@ bool HeaderGenerator::finishGeneration()
 
     macrosStream << "// Type indices\nenum : int {\n";
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    const AbstractMetaClassList &classList = classes();
+    AbstractMetaClassList classList = classes();
+
+    std::sort(classList.begin(), classList.end(), [](AbstractMetaClass *a, AbstractMetaClass* b) {
+        return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
+    });
+
     for (const AbstractMetaClass *metaClass : classList) {
         writeTypeIndexValueLines(macrosStream, metaClass);
         lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
