@@ -60,7 +60,7 @@ R"(<typesystem package="Foo">
     QCOMPARE(docMods[1].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));
     QCOMPARE(docMods[1].signature(), QString());
     QtDocParser docParser;
-    docParser.setDocumentationDataDirectory(QDir::currentPath());
+    docParser.setDocumentationDataDirectory(QLatin1String(":"));
     docParser.fillDocumentation(classA);
 
     const QString actualDocSimplified = classA->documentation().value().simplified();

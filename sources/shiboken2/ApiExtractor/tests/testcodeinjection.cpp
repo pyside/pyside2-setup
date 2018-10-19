@@ -40,13 +40,11 @@ void TestCodeInjections::testReadFileUtf8()
     int argc = 0;
     char *argv[] = {NULL};
     QCoreApplication app(argc, argv);
-    QString filePath = QDir::currentPath();
     QString xmlCode = QLatin1String("\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
-            <conversion-rule file='") + filePath + QLatin1String("/utf8code.txt'/>\n\
-            <inject-code class='target' file='") + filePath
-        + QLatin1String("/utf8code.txt'/>\n\
+            <conversion-rule file=':/utf8code.txt'/>\n\
+            <inject-code class='target' file=':/utf8code.txt'/>\n\
         </value-type>\n\
         <value-type name='A::B'/>\n\
     </typesystem>\n");
