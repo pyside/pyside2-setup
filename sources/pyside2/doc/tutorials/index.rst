@@ -1,5 +1,5 @@
-PySide examples and tutorials
-*****************************
+Qt for Python examples and tutorials
+*************************************
 
 A collection of examples and tutorials with "walkthrough" guides are
 provided with |project| to help new users get started. These
