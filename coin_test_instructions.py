@@ -87,10 +87,6 @@ def run_test_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
-    if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
-        print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
-        exit()
-
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
     # We didn't build for Python 2 in win

@@ -4,15 +4,19 @@ Getting Started
 
 To get started with |project|, install the following prerequisites:
 
-* Python v3.5 or later
-* libclang v3.9 or later
-* Optional: a virtual environment, such as `venv <https://docs.python.org/3/library/venv.html>`_ or `virtualenv <https://virtualenv.pypa.io/en/stable/installation>`_
+* Python 3.5+ or 2.7
+* libclang 5.0+ (for Qt 5.11) or 6.0+ (for Qt 5.12)
+* Recommended: a virtual environment, such as `venv <https://docs.python.org/3/library/venv.html>`_ or `virtualenv <https://virtualenv.pypa.io/en/stable/installation>`_
 
 With these installed, you are ready to install the |project|
 packages using the pip wheel. Run the following command from your command
 prompt to install::
 
- python -m pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.11/latest pyside2 --trusted-host download.qt.io
+    pip install PySide2 # For the latest version on PyPi
+
+or::
+
+    pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.12/latest pyside2 --trusted-host download.qt.io
 
 Now that you have |project| installed, you can test your setup by running the following Python
 constructs to print version information:
@@ -44,15 +48,11 @@ guide you through the development process:
             def __init__(self):
                 super().__init__()
 
-                self.hello = ["Hallo Welt", "你好，世界", "Hei maailma",\
-                    "Hola Mundo", "Привет мир"]
+                self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
 
                 self.button = QtWidgets.QPushButton("Click me!")
                 self.text = QtWidgets.QLabel("Hello World")
                 self.text.setAlignment(QtCore.Qt.AlignCenter)
-
-                self.text.setFont(QtGui.QFont("Titillium", 30))
-                self.button.setFont(QtGui.QFont("Titillium", 20))
 
                 self.layout = QtWidgets.QVBoxLayout()
                 self.layout.addWidget(self.text)

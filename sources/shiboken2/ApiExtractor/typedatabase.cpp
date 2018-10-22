@@ -474,12 +474,13 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
         pattern.append(QLatin1Char('$'));
     }
 
-    const QRegularExpression expression(pattern);
+    QRegularExpression expression(pattern);
     if (!expression.isValid()) {
         *errorMessage = QLatin1String("Invalid message pattern \"") + warning
             + QLatin1String("\": ") + expression.errorString();
         return false;
     }
+    expression.setPatternOptions(expression.patternOptions() | QRegularExpression::MultilineOption);
 
     m_suppressedWarnings.append(expression);
     return true;

@@ -97,8 +97,7 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         return 0;
     }
 
-    PyObject* klass;
-    klass = PyTuple_GetItem(args, 0);
+    PyObject *klass = PyTuple_GetItem(args, 0);
     bool validClass = false;
 
     // This will sometimes segfault if you mistakenly use it on a function declaration
@@ -107,10 +106,10 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         return 0;
     }
 
-    if (Shiboken::ObjectType::checkType(reinterpret_cast<PyTypeObject*>(klass))) {
-        if (void *userData = Shiboken::ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType*>(klass))) {
-            PySide::DynamicQMetaObject &mo = reinterpret_cast<PySide::TypeUserData *>(userData)->mo;
-            mo.addInfo(PySide::ClassInfo::getMap(data));
+    PyTypeObject *klassType = reinterpret_cast<PyTypeObject*>(klass);
+    if (Shiboken::ObjectType::checkType(klassType)) {
+        if (PySide::DynamicQMetaObject *mo = PySide::retrieveMetaObject(klassType)) {
+            mo->addInfo(PySide::ClassInfo::getMap(data));
             pData->m_alreadyWrapped = true;
             validClass = true;
         }

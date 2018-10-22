@@ -46,8 +46,14 @@ public:
     explicit FileOut(QString name);
     ~FileOut();
 
+    QString filePath() const { return name; }
+
     State done();
     State done(QString *errorMessage);
+
+    void touch() { touchFile(name); }
+
+    static void touchFile(const QString &filePath);
 
     QTextStream stream;
 

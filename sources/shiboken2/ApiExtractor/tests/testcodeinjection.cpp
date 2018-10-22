@@ -34,19 +34,43 @@
 #include <abstractmetalang.h>
 #include <typesystem.h>
 
-void TestCodeInjections::testReadFileUtf8()
+void TestCodeInjections::testReadFile_data()
 {
+    QTest::addColumn<QString>("filePath");
+    QTest::addColumn<QString>("snippet");
+    QTest::addColumn<QString>("expected");
+
+    QTest::newRow("utf8")
+        << QString::fromLatin1(":/utf8code.txt")
+        << QString()
+        << QString::fromUtf8("\xC3\xA1\xC3\xA9\xC3\xAD\xC3\xB3\xC3\xBA");
+
+    QTest::newRow("snippet")
+        << QString::fromLatin1(":/injectedcode.txt")
+        << QString::fromLatin1("label")
+        << QString::fromLatin1("code line");
+}
+
+void TestCodeInjections::testReadFile()
+{
+    QFETCH(QString, filePath);
+    QFETCH(QString, snippet);
+    QFETCH(QString, expected);
+
     const char* cppCode ="struct A {};\n";
     int argc = 0;
     char *argv[] = {NULL};
     QCoreApplication app(argc, argv);
-    QString filePath = QDir::currentPath();
+
+    QString attribute = QLatin1String("file='") + filePath + QLatin1Char('\'');
+    if (!snippet.isEmpty())
+        attribute += QLatin1String(" snippet='") + snippet + QLatin1Char('\'');
+
     QString xmlCode = QLatin1String("\
     <typesystem package=\"Foo\">\n\
         <value-type name='A'>\n\
-            <conversion-rule file='") + filePath + QLatin1String("/utf8code.txt'/>\n\
-            <inject-code class='target' file='") + filePath
-        + QLatin1String("/utf8code.txt'/>\n\
+            <conversion-rule ") + attribute + QLatin1String("/>\n\
+            <inject-code class='target' ") + attribute + QLatin1String("/>\n\
         </value-type>\n\
         <value-type name='A::B'/>\n\
     </typesystem>\n");
@@ -56,10 +80,9 @@ void TestCodeInjections::testReadFileUtf8()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
     QString code = classA->typeEntry()->codeSnips().first().code();
-    QString utf8Data = QString::fromUtf8("\xC3\xA1\xC3\xA9\xC3\xAD\xC3\xB3\xC3\xBA");
-    QVERIFY(code.indexOf(utf8Data) != -1);
+    QVERIFY(code.indexOf(expected) != -1);
     code = classA->typeEntry()->conversionRule();
-    QVERIFY(code.indexOf(utf8Data) != -1);
+    QVERIFY(code.indexOf(expected) != -1);
 }
 
 void TestCodeInjections::testInjectWithValidApiVersion()

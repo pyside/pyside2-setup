@@ -11,6 +11,9 @@ inject-code
     given type or function, and it is a child of the :ref:`object-type`, :ref:`value-type`,
     :ref:`modify-function` and :ref:`add-function` nodes.
 
+    The code can be embedded into XML (be careful to use the correct XML entities
+    for characters like '<', '>', '&'):
+
     .. code-block:: xml
 
          <value-type>
@@ -20,6 +23,18 @@ inject-code
              </inject-code>
          </value-type>
 
+    or obtained from an external file:
+
+    .. code-block:: xml
+
+         <value-type>
+             <inject-code class="native | target | target-declaration"
+                 position="beginning | end" since="..."
+                 file="external_source.cpp"
+                 snippet="label"/>
+         </value-type>
+
+
     The ``class`` attribute specifies which module of the generated code that
     will be affected by the code injection. The ``class`` attribute accepts the
     following values:
@@ -28,12 +43,24 @@ inject-code
         * target: The binding code
         * target-declaration: The code will be injected into the generated header
           file containing the c++ wrapper class definition.
+        * file: The file name
+        * snippet: The snippet label (optional)
 
     If the ``position`` attribute is set to *beginning* (the default), the code
     is inserted at the beginning of the function. If it is set to *end*, the code
     is inserted at the end of the function.
 
     The ``since`` attribute specify the API version where this code was injected.
+
+    If a ``snippet`` label is given, the code between annotations of the form
+
+    .. code-block:: c++
+
+        // @snippet label
+        ...
+        // @snippet label
+
+    will be extracted.
 
 modify-field
 ^^^^^^^^^^^^
@@ -152,3 +179,4 @@ conversion-rule
 
     .. note:: You can also use the conversion-rule node to specify :ref:`how the conversion of a single function argument should be done in a function <conversion-rule>`.
 
+    The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).

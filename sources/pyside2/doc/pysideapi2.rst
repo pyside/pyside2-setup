@@ -1,11 +1,14 @@
 .. _pysideapi2:
 
-|pymodname| API
-***************
+Qt for Python API
+*******************
 
 One of the goals of |pymodname| is to be API compatible with PyQt5,
 with certain exceptions. For example, |pymodname| will not export C++ components
 that are marked as deprecated by Qt.
+
+The latest considerations and known issues will be also reported
+in the `wiki <https://wiki.qt.io/Qt_for_Python/Considerations>`_.
 
 __hash__() function return value
 ================================

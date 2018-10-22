@@ -143,10 +143,6 @@ def run_build_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
-    if CI_HOST_ARCH == "X86_64" and CI_TARGET_ARCH == "X86":
-        print("Disabled 32 bit build on 64 bit from Coin configuration, until toolchains provisioned")
-        exit()
-
     # Uses default python, hopefully we have python2 installed on all hosts
     # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
     if CI_HOST_OS != "Windows":

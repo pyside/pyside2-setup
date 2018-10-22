@@ -44,6 +44,7 @@
 
 // pyside
 #include <pyside.h>
+#include <pyside_p.h>
 #include <pysideproperty.h>
 
 // auto generated headers
@@ -126,8 +127,7 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         return -1;
     }
 
-    QMetaObject *metaObject = reinterpret_cast<QMetaObject *>(
-                ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType *>(pyObj)));
+    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
     Q_ASSERT(metaObject);
 
     QQmlPrivate::RegisterType type;

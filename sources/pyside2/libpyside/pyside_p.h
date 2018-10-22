@@ -40,7 +40,11 @@
 #ifndef PYSIDE_P_H
 #define PYSIDE_P_H
 
+#include <pysidemacros.h>
+
 #include <dynamicqmetaobject.h>
+
+struct SbkObjectType;
 
 namespace PySide
 {
@@ -54,6 +58,13 @@ struct TypeUserData
     DynamicQMetaObject mo;
     std::size_t cppObjSize;
 };
+
+TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj);
+TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj);
+TypeUserData *retrieveTypeUserData(PyObject *pyObj);
+// For QML
+PYSIDE_API DynamicQMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj);
+PYSIDE_API DynamicQMetaObject *retrieveMetaObject(PyObject *pyObj);
 
 } //namespace PySide
 

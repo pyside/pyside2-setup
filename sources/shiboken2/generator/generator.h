@@ -57,7 +57,7 @@ class ContainerTypeEntry;
 class Indentor;
 
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
-void verifyDirectoryFor(const QFile &file);
+void verifyDirectoryFor(const QString &file);
 
 QString getClassTargetFullName(const AbstractMetaClass* metaClass, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePackageName = true);
