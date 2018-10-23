@@ -424,31 +424,35 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     const PyObject *mro = type->tp_mro;
     const Py_ssize_t basesCount = PyTuple_GET_SIZE(mro);
     PyTypeObject *qObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-    QVector<PyTypeObject *> basesToCheck;
+
+    std::vector<PyTypeObject *> basesToCheck;
+    // Prepend the actual type that we are parsing.
+    basesToCheck.reserve(1u + basesCount);
+    basesToCheck.push_back(type);
+
+    auto sbkObjTypeF = reinterpret_cast<PyTypeObject *>(SbkObject_TypeF());
+    auto baseObjType = reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type);
     for (Py_ssize_t i = 0; i < basesCount; ++i) {
-        PyTypeObject *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
-        if (PyType_IsSubtype(baseType, qObjectType)
-                || baseType == reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())
-                || baseType == reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type)) {
-            continue;
+        auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
+        if (baseType != sbkObjTypeF && baseType != baseObjType
+            && PyType_IsSubtype(baseType, qObjectType) == 0) {
+            basesToCheck.push_back(baseType);
         }
-        basesToCheck.append(baseType);
     }
 
-    // Prepend the actual type that we are parsing.
-    basesToCheck.prepend(type);
     // PYSIDE-315: Handle all signals first, in all involved types.
-    for (int baseIndex = 0, baseEnd = basesToCheck.size(); baseIndex < baseEnd; ++baseIndex) {
-        PyTypeObject *baseType = basesToCheck[baseIndex];
+    // Leave the properties to be registered after signals because they may depend on
+    // notify signals.
+    for (PyTypeObject *baseType : basesToCheck) {
         PyObject *attrs = baseType->tp_dict;
-        PyObject *key = 0;
-        PyObject *value = 0;
+        PyObject *key = nullptr;
+        PyObject *value = nullptr;
         Py_ssize_t pos = 0;
 
         while (PyDict_Next(attrs, &pos, &key, &value)) {
             if (Signal::checkType(value)) {
                 // Register signals.
-                PySideSignal *data = reinterpret_cast<PySideSignal *>(value);
+                auto data = reinterpret_cast<PySideSignal *>(value);
                 const char *signalName = Shiboken::String::toCString(key);
                 data->signalName = strdup(signalName);
                 QByteArray sig;
@@ -470,23 +474,17 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // PYSIDE-315: Now take care of the rest.
     // Signals and slots should be separated, unless the types are modified, later.
     // We check for this using "is_sorted()". Sorting no longer happens at all.
-    for (int baseIndex = 0, baseEnd = basesToCheck.size(); baseIndex < baseEnd; ++baseIndex) {
-        PyTypeObject *baseType = basesToCheck[baseIndex];
+    for (PyTypeObject *baseType : basesToCheck) {
         PyObject *attrs = baseType->tp_dict;
-        PyObject *key = 0;
-        PyObject *value = 0;
+        PyObject *key = nullptr;
+        PyObject *value = nullptr;
         Py_ssize_t pos = 0;
-
-        typedef std::pair<const char *, PyObject *> PropPair;
-        QVector<PropPair> properties;
 
         while (PyDict_Next(attrs, &pos, &key, &value)) {
             if (Property::checkType(value)) {
-                // Leave the properties to be registered after signals because they may depend on
-                // notify signals.
-                int index = m_baseObject->indexOfProperty(Shiboken::String::toCString(key));
+                const int index = m_baseObject->indexOfProperty(Shiboken::String::toCString(key));
                 if (index == -1)
-                    properties << PropPair(Shiboken::String::toCString(key), value);
+                    addProperty(Shiboken::String::toCString(key), value);
             } else if (PyFunction_Check(value)) {
                 // Register slots.
                 if (PyObject_HasAttr(value, slotAttrName)) {
@@ -501,21 +499,16 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                             type = signature.left(spacePos);
                             signature.remove(0, spacePos + 1);
                         }
-                        int index = m_baseObject->indexOfSlot(signature);
+                        const int index = m_baseObject->indexOfSlot(signature);
                         if (index == -1) {
-                            if (type.isEmpty() || type == "void") {
+                            if (type.isEmpty() || type == "void")
                                 addSlot(signature);
-                            } else {
+                            else
                                 addSlot(signature, type);
-                            }
                         }
                     }
                 }
             }
         }
-
-        // Register properties
-        for (const PropPair &propPair : qAsConst(properties))
-            addProperty(propPair.first, propPair.second);
     }
 }
