@@ -21,5 +21,10 @@ Tutorials
 .. toctree::
     :maxdepth: 2
 
+    basictutorial/widgets.rst
+    basictutorial/qml.rst
+    basictutorial/clickablebutton.rst
+    basictutorial/dialog.rst
+    basictutorial/uifiles.rst
     qmltutorial/index.rst
     qmladvancedtutorial/index.rst
