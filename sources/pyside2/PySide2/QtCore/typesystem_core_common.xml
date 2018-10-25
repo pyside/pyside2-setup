@@ -938,9 +938,6 @@
   <rejection class="" enum-name="QtValidLicenseForGuiModule"/>
   <rejection class="" enum-name="QtValidLicenseForScriptModule"/>
   <rejection class="" enum-name="QtValidLicenseForHelpModule"/>
-  <rejection class="QAbstractEventDispatcher" function-name="filterEvent"/>
-  <rejection class="QAbstractEventDispatcher" function-name="filterNativeEvent"/>
-  <rejection class="QAbstractEventDispatcher" function-name="setEventFilter"/>
   <!-- Internal -->
   <rejection class="QAbstractFileEngine"/> <!--
   <rejection class="QAbstractFileEngine" function-name="endEntryList"/>
@@ -2978,6 +2975,26 @@
   <object-type name="QXmlStreamEntityResolver"/>
 
   <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
+  <object-type name="QAbstractNativeEventFilter">
+    <!-- see QWidget::nativeEvent(), QWindow::nativeEvent() -->
+    <modify-function signature="nativeEventFilter(const QByteArray&amp;,void*,long*)">
+      <modify-argument index="3">
+        <remove-argument/>
+        <conversion-rule class="native">
+            <insert-template name="return_native_eventfilter_conversion_variables"/>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyObject"/>
+        <conversion-rule class="native">
+            <insert-template name="return_native_eventfilter_conversion"/>
+        </conversion-rule>
+      </modify-argument>
+      <inject-code position="end">
+          <insert-template name="return_native_eventfilter"/>
+      </inject-code>
+    </modify-function>
+  </object-type>
 
   <object-type name="QEventLoop">
       <enum-type name="ProcessEventsFlag" flags="ProcessEventsFlags"/>

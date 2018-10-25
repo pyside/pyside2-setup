@@ -16,6 +16,7 @@ ${QtCore_GEN_DIR}/qabstracteventdispatcher_timerinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracteventdispatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractitemmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractlistmodel_wrapper.cpp
+${QtCore_GEN_DIR}/qabstractnativeeventfilter_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstractstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qabstracttablemodel_wrapper.cpp
