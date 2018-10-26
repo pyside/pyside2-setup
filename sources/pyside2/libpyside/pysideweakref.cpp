@@ -53,7 +53,7 @@ static PyObject* CallableObject_call(PyObject* callable_object, PyObject* args, 
 
 static PyType_Slot PySideCallableObjectType_slots[] = {
     {Py_tp_call, (void *)CallableObject_call},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideCallableObjectType_spec = {

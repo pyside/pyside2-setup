@@ -109,17 +109,15 @@ LIBSHIBOKEN_API PyObject* SbkObjectTpNew(PyTypeObject* subtype, PyObject*, PyObj
 LIBSHIBOKEN_API PyObject* SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
 
 /**
- *  PYSIDE-595: Use a null deallocator instead of nullptr.
+ *  PYSIDE-832: Use object_dealloc instead of nullptr.
  *
  *  When moving to heaptypes, we were struck by a special default behavior of
  *  PyType_FromSpecWithBases that inserts subtype_dealloc when tp_dealloc is
- *  nullptr. To prevent inserting this, we use a null deallocator that is there
- *  as a placeholder.
- *
- *  The same holds for a null tp_new. We use one that raises the right error.
+ *  nullptr. But the default before conversion to heaptypes was to assign
+ *  object_dealloc. This seems to be a bug in the Limited API.
  */
-LIBSHIBOKEN_API void SbkDummyDealloc(PyObject*);
-LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject*, PyObject*);
+LIBSHIBOKEN_API void object_dealloc(PyObject *);
+LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *);
 
 } // extern "C"
 

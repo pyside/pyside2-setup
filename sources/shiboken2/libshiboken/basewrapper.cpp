@@ -416,8 +416,10 @@ PyObject* SbkQAppTpNew(PyTypeObject* subtype, PyObject *, PyObject *)
 }
 
 void
-SbkDummyDealloc(PyObject *)
-{}
+object_dealloc(PyObject *self)
+{
+    Py_TYPE(self)->tp_free(self);
+}
 
 PyObject *
 SbkDummyNew(PyTypeObject *type, PyObject*, PyObject*)

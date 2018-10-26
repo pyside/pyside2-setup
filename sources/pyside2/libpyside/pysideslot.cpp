@@ -66,7 +66,7 @@ static PyType_Slot PySideSlotType_slots[] = {
     {Py_tp_call, (void *)slotCall},
     {Py_tp_init, (void *)slotTpInit},
     {Py_tp_new, (void *)PyType_GenericNew},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideSlotType_spec = {
