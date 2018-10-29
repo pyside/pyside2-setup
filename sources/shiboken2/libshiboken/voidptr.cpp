@@ -224,7 +224,7 @@ static PyType_Slot SbkVoidPtrType_slots[] = {
     {Py_tp_richcompare, (void *)SbkVoidPtrObject_richcmp},
     {Py_tp_init, (void *)SbkVoidPtrObject_init},
     {Py_tp_new, (void *)SbkVoidPtrObject_new},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec SbkVoidPtrType_spec = {
