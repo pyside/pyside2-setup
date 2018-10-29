@@ -61,7 +61,7 @@ static PyType_Slot PySideClassInfoType_slots[] = {
     {Py_tp_init, (void *)classInfoTpInit},
     {Py_tp_new, (void *)classInfoTpNew},
     {Py_tp_free, (void *)classInfoFree},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideClassInfoType_spec = {

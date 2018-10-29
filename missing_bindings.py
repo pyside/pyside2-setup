@@ -106,7 +106,7 @@ modules_to_test['QtX11Extras'] = 'qtx11extras-module.html'
 modules_to_test['QtWinExtras'] = 'qtwinextras-module.html'
 modules_to_test['QtXml'] = 'qtxml-module.html'
 modules_to_test['QtXmlPatterns'] = 'qtxmlpatterns-module.html'
-modules_to_test['QtCharts'] = 'qt-charts-module.html'
+modules_to_test['QtCharts'] = 'qtcharts-module.html'
 modules_to_test['QtDataVisualization'] = 'qtdatavisualization-module.html'
 
 types_to_ignore = set()
@@ -216,7 +216,7 @@ qt_documentation_website_prefixes['5.6'] = 'http://doc.qt.io/qt-5.6/'
 qt_documentation_website_prefixes['5.8'] = 'http://doc.qt.io/qt-5.8/'
 qt_documentation_website_prefixes['5.9'] = 'http://doc.qt.io/qt-5.9/'
 qt_documentation_website_prefixes['5.10'] = 'http://doc.qt.io/qt-5.10/'
-qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5/'
+qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5.11/'
 qt_documentation_website_prefixes['dev'] = 'http://doc-snapshots.qt.io/qt5-dev/'
 
 
@@ -347,8 +347,12 @@ for module_name in modules_to_test.keys():
         continue
 
     try:
+        pyqt_module_name = module_name
+        if module_name == "QtCharts":
+            pyqt_module_name = module_name[:-1]
+
         pyqt_tested_module = getattr(__import__(pyqt_package_name,
-            fromlist=[module_name]), module_name)
+            fromlist=[pyqt_module_name]), pyqt_module_name)
     except Exception as e:
         log("\nCould not load {}.{} for comparison. "
             "Received error: {}.\n".format(pyqt_package_name, module_name,
@@ -378,13 +382,13 @@ for module_name in modules_to_test.keys():
         try:
             pyside_qualified_type = 'pyside_tested_module.'
 
-            if "Charts" in module_name:
+            if "QtCharts" == module_name:
                 pyside_qualified_type += 'QtCharts.'
             elif "DataVisualization" in module_name:
                 pyside_qualified_type += 'QtDataVisualization.'
 
             pyside_qualified_type += qt_type
-            o = eval(pyside_qualified_type)
+            eval(pyside_qualified_type)
         except:
             missing_type = qt_type
             missing_types_count += 1

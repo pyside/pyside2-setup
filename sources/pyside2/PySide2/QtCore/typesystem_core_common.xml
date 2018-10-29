@@ -74,6 +74,10 @@
     <function signature="qVersion()" />
     <function signature="qrand()" />
     <function signature="qsrand(uint)" />
+    <function signature="qCompress(const uchar*,int,int)"/>
+    <function signature="qCompress(const QByteArray&amp;,int)"/>
+    <function signature="qUncompress(const uchar*,int)"/>
+    <function signature="qUncompress(const QByteArray&amp;)"/>
 
     <inject-code class="native" position="beginning">
       #include &lt;pyside.h&gt;

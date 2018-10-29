@@ -235,7 +235,7 @@ void propListTpFree(void* self)
 static PyType_Slot PropertyListType_slots[] = {
     {Py_tp_init, (void *)propListTpInit},
     {Py_tp_free, (void *)propListTpFree},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec PropertyListType_spec = {
@@ -449,7 +449,7 @@ static PyType_Slot QtQml_VolatileBoolType_slots[] = {
     {Py_tp_str, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_str)},
     {Py_tp_methods, (void *)QtQml_VolatileBoolObject_methods},
     {Py_tp_new, (void *)QtQml_VolatileBoolObject_new},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec QtQml_VolatileBoolType_spec = {
