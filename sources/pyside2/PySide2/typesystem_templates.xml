@@ -372,6 +372,8 @@
         if (PySequence_Check(%PYARG_0) &amp;&amp; (PySequence_Size(%PYARG_0) == 2)) {
             Shiboken::AutoDecRef pyItem(PySequence_GetItem(%PYARG_0, 0));
             %out = %CONVERTTOCPP[bool](pyItem);
+            Shiboken::AutoDecRef pyResultItem(PySequence_GetItem(pyResult, 1));
+            *result = %CONVERTTOCPP[long](pyResultItem);
         }
     </template>
 
