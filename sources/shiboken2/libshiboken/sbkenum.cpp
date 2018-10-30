@@ -512,7 +512,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_nb_index, (void *)enum_int},
     {Py_tp_richcompare, (void *)enum_richcompare},
     {Py_tp_hash, (void *)enum_hash},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec SbkNewType_spec = {

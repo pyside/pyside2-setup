@@ -90,7 +90,7 @@ namespace {
     static void destroyMetaObject(PyObject* obj)
     {
         void* ptr = PyCapsule_GetPointer(obj, 0);
-        PySide::DynamicQMetaObject* meta = reinterpret_cast<PySide::DynamicQMetaObject*>(ptr);
+        auto meta = reinterpret_cast<PySide::MetaObjectBuilder*>(ptr);
         SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
         if (wrapper)
             Shiboken::BindingManager::instance().releaseWrapper(wrapper);
@@ -100,7 +100,7 @@ namespace {
 #else
     static void destroyMetaObject(void* obj)
     {
-        PySide::DynamicQMetaObject* meta = reinterpret_cast<PySide::DynamicQMetaObject*>(obj);
+        auto meta = reinterpret_cast<PySide::MetaObjectBuilder*>(obj);
         SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
         if (wrapper)
             Shiboken::BindingManager::instance().releaseWrapper(wrapper);
@@ -549,6 +549,19 @@ bool SignalManager::registerMetaMethod(QObject* source, const char* signature, Q
     return (ret != -1);
 }
 
+static MetaObjectBuilder *metaBuilderFromDict(PyObject* dict)
+{
+    if (!dict || !PyDict_Contains(dict, metaObjectAttr))
+        return nullptr;
+
+    PyObject *pyBuilder = PyDict_GetItem(dict, metaObjectAttr);
+#ifdef IS_PY3K
+    return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
+#else
+    return reinterpret_cast<MetaObjectBuilder *>(PyCObject_AsVoidPtr(pyBuilder));
+#endif
+}
+
 int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signature, QMetaMethod::MethodType type)
 {
     if (!source) {
@@ -565,13 +578,13 @@ int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signa
             qWarning() << "Invalid Signal signature:" << signature;
             return -1;
         } else {
-            DynamicQMetaObject *dmo = 0;
             PyObject *pySelf = reinterpret_cast<PyObject*>(self);
             PyObject* dict = self->ob_dict;
+            MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
 
             // Create a instance meta object
-            if (!dict || !PyDict_Contains(dict, metaObjectAttr)) {
-                dmo = new DynamicQMetaObject(Py_TYPE(pySelf), metaObject);
+            if (!dmo) {
+                dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
 #ifdef IS_PY3K
                 PyObject* pyDmo = PyCapsule_New(dmo, 0, destroyMetaObject);
 #else
@@ -580,8 +593,6 @@ int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signa
 
                 PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
                 Py_DECREF(pyDmo);
-            } else {
-                dmo = reinterpret_cast<DynamicQMetaObject*>(const_cast<QMetaObject*>(metaObject));
             }
 
             if (type == QMetaMethod::Signal)
@@ -596,24 +607,13 @@ int SignalManager::registerMetaMethodGetIndex(QObject* source, const char* signa
 const QMetaObject* SignalManager::retrieveMetaObject(PyObject *self)
 {
     Shiboken::GilState gil;
-    DynamicQMetaObject *mo = 0;
     Q_ASSERT(self);
 
-    PyObject* dict = reinterpret_cast<SbkObject*>(self)->ob_dict;
-    if (dict && PyDict_Contains(dict, metaObjectAttr)) {
-        PyObject *pyMo = PyDict_GetItem(dict, metaObjectAttr);
+    MetaObjectBuilder *builder = metaBuilderFromDict(reinterpret_cast<SbkObject*>(self)->ob_dict);
+    if (!builder)
+        builder = &(retrieveTypeUserData(self)->mo);
 
-#ifdef IS_PY3K
-        mo = reinterpret_cast<DynamicQMetaObject*>(PyCapsule_GetPointer(pyMo, 0));
-#else
-        mo = reinterpret_cast<DynamicQMetaObject*>(PyCObject_AsVoidPtr(pyMo));
-#endif
-    } else {
-        mo = PySide::retrieveMetaObject(self);
-    }
-
-    mo->update();
-    return mo;
+    return builder->update();
 }
 
 namespace {

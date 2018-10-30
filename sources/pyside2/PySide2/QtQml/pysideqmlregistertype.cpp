@@ -172,13 +172,13 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.versionMajor = versionMajor;
         type.versionMinor = versionMinor;
         type.elementName = qmlName;
-        type.metaObject = metaObject;
 
         type.extensionObjectCreate = 0;
         type.extensionMetaObject = 0;
         type.customParser = 0;
         ++nextType;
     }
+    type.metaObject = metaObject; // Snapshot may have changed.
 
     int qmlTypeId = QQmlPrivate::qmlregister(QQmlPrivate::TypeRegistration, &type);
     if (qmlTypeId == -1) {
@@ -235,7 +235,7 @@ void propListTpFree(void* self)
 static PyType_Slot PropertyListType_slots[] = {
     {Py_tp_init, (void *)propListTpInit},
     {Py_tp_free, (void *)propListTpFree},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec PropertyListType_spec = {
@@ -449,7 +449,7 @@ static PyType_Slot QtQml_VolatileBoolType_slots[] = {
     {Py_tp_str, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_str)},
     {Py_tp_methods, (void *)QtQml_VolatileBoolObject_methods},
     {Py_tp_new, (void *)QtQml_VolatileBoolObject_new},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec QtQml_VolatileBoolType_spec = {

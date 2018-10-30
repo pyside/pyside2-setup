@@ -2197,8 +2197,24 @@
   </object-type>
 
   <object-type name="QWidget" delete-in-main-thread="true">
-    <!-- Qt5: remove native event for now -->
-    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,long*)" remove="all" />
+    <!-- see QWindow::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
+    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,long*)">
+      <modify-argument index="3">
+        <remove-argument/>
+        <conversion-rule class="native">
+            <insert-template name="return_native_eventfilter_conversion_variables"/>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyObject"/>
+        <conversion-rule class="native">
+            <insert-template name="return_native_eventfilter_conversion"/>
+        </conversion-rule>
+      </modify-argument>
+      <inject-code position="end">
+          <insert-template name="return_native_eventfilter"/>
+      </inject-code>
+    </modify-function>
 
     <extra-includes>
       <include file-name="QIcon" location="global"/>

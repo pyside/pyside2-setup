@@ -40,7 +40,12 @@
 from __future__ import print_function
 import sys
 import os
+import warnings
 
+
+def _warn_multiple_option(option):
+    w = 'Option "{}" occurs multiple times on the command line.'.format(option)
+    warnings.warn(w)
 
 class Options(object):
     def __init__(self):
@@ -51,13 +56,13 @@ class Options(object):
     def has_option(self, name):
         """ Returns True if argument '--name' was passed on the command
         line. """
-        try:
-            sys.argv.remove("--{}".format(name))
-            self.dict[name] = True
-            return True
-        except ValueError:
-            pass
-        return False
+        option = '--' + name
+        count = sys.argv.count(option)
+        for i in range(count):
+           sys.argv.remove(option)
+        if count > 1:
+            _warn_multiple_option(option)
+        return count > 0
 
     def option_value(self, name, remove=True):
         """
@@ -73,30 +78,36 @@ class Options(object):
 
         :return: Either the option value or None.
         """
-        for index, option in enumerate(sys.argv):
-            if option == '--' + name:
-                if index + 1 >= len(sys.argv):
-                    raise RuntimeError("The option {} requires a value".format(option))
-                value = sys.argv[index + 1]
+        option = '--' + name
+        single_option_prefix = option + '='
+        value = None
+        for index in reversed(range(len(sys.argv))):
+            arg = sys.argv[index]
+            if arg == option:
+                if value:
+                    _warn_multiple_option(option)
+                else:
+                    if index + 1 >= len(sys.argv):
+                        raise RuntimeError("The option {} requires a value".format(option))
+                    value = sys.argv[index + 1]
 
                 if remove:
                     sys.argv[index:index + 2] = []
 
-                self.dict[name] = value
-                return value
-
-            if option.startswith('--' + name + '='):
-                value = option[len(name) + 3:]
+            elif arg.startswith(single_option_prefix):
+                if value:
+                    _warn_multiple_option(option)
+                else:
+                    value = arg[len(single_option_prefix):]
 
                 if remove:
                     sys.argv[index:index + 1] = []
 
-                self.dict[name] = value
-                return value
+        if value is None:
+            value = os.getenv(name.upper().replace('-', '_'))
 
-        env_val = os.getenv(name.upper().replace('-', '_'))
-        self.dict[name] = env_val
-        return env_val
+        self.dict[name] = value
+        return value
 
 
 options = Options()

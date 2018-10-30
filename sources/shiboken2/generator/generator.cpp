@@ -395,20 +395,7 @@ bool Generator::generateFileForContext(GeneratorContext &context)
 
     generateClass(fileOut.stream, context);
 
-    FileOut::State state = fileOut.done();
-    switch (state) {
-    case FileOut::Failure:
-        return false;
-    case FileOut::Unchanged:
-        // Even if contents is unchanged, the last file modification time should be updated,
-        // so that the build system can rely on the fact the generated file is up-to-date.
-        fileOut.touch();
-        break;
-    case FileOut::Success:
-        break;
-    }
-
-    return true;
+    return fileOut.done() != FileOut::Failure;
 }
 
 QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,

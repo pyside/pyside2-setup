@@ -45,7 +45,9 @@
     <namespace-type name="Qt3DInput">
         <object-type name="QAbstractActionInput"/>
         <object-type name="QAbstractAxisInput"/>
-        <object-type name="QAbstractPhysicalDevice"/>
+        <object-type name="QAbstractPhysicalDevice">
+            <enum-type name="DeviceStatus"/>
+        </object-type>
         <object-type name="QAction"/>
         <object-type name="QActionInput"/>
         <object-type name="QAnalogAxisInput"/>
@@ -57,12 +59,17 @@
         <object-type name="QButtonAxisInput"/>
         <object-type name="QInputAspect"/>
         <object-type name="QInputChord"/>
+        <!-- On windows this raises the following error:
+        type 'Qt3DInput::QInputDeviceIntegration' is specified in typesystem, but not defined.
+        This could potentially lead to compilation errors.
+        <object-type name="QInputDeviceIntegration"/>
+        -->
         <object-type name="QInputSequence"/>
         <object-type name="QInputSettings"/>
+        <object-type name="QKeyboardDevice"/>
         <object-type name="QKeyboardHandler"/>
         <object-type name="QKeyEvent"/>
         <object-type name="QLogicalDevice"/>
-        <object-type name="QKeyboardDevice"/>
         <object-type name="QMouseDevice">
             <enum-type name="Axis"/>
         </object-type>
@@ -75,5 +82,11 @@
             <enum-type name="Modifiers"/>
         </object-type>
         <object-type name="QMouseHandler"/>
+        <!-- On windows this raise the following error:
+        qt3dinput_module_wrapper.cpp.obj : error LNK2019:
+        unresolved external symbol "void __cdecl init_Qt3DInput_QPhysicalDeviceCreatedChangeBase(struct _object *)"
+        (?init_Qt3DInput_QPhysicalDeviceCreatedChangeBase@@YAXPAU_object@@@Z) referenced in function _PyInit_Qt3DInput
+        <object-type name="QPhysicalDeviceCreatedChangeBase"/>
+        -->
     </namespace-type>
 </typesystem>
