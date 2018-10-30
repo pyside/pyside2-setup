@@ -434,8 +434,7 @@ public:
         : _ScopeModelItem(model, name, kind) {}
     ~_NamespaceModelItem();
 
-    NamespaceList namespaces() const { return m_namespaces; }
-    QSet<NamespaceModelItem> uniqueNamespaces() const;
+    const NamespaceList &namespaces() const { return m_namespaces; }
 
     void addNamespace(NamespaceModelItem item);
 

@@ -475,7 +475,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         }
     }
 
-    const QSet<NamespaceModelItem> &namespaceTypeValues = dom->uniqueNamespaces();
+    const auto &namespaceTypeValues = dom->namespaces();
     ReportHandler::setProgressReference(namespaceTypeValues);
     for (const NamespaceModelItem &item : namespaceTypeValues) {
         ReportHandler::progress(QStringLiteral("Generating namespace model (%1)...")
@@ -817,8 +817,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     }
 
     // Traverse namespaces recursively
-    const QSet<NamespaceModelItem> &innerNamespaces = namespaceItem->uniqueNamespaces();
-    for (const NamespaceModelItem &ni : innerNamespaces) {
+    for (const NamespaceModelItem &ni : namespaceItem->namespaces()) {
         AbstractMetaClass* mjc = traverseNamespace(dom, ni);
         if (mjc) {
             metaClass->addInnerClass(mjc);
@@ -1215,8 +1214,7 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem ite
     traverseScopeMembers(item, metaClass);
 
     // Inner namespaces
-    const QSet<NamespaceModelItem> &innerNamespaces = item->uniqueNamespaces();
-    for (const NamespaceModelItem &ni : innerNamespaces)
+    for (const NamespaceModelItem &ni : item->namespaces())
         traverseNamespaceMembers(ni);
 
     m_currentClass = oldCurrentClass;
