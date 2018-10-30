@@ -95,7 +95,7 @@ For Windows, if OpenSSL support is required, it's necessary to specify
 the directory path that contains the OpenSSL shared libraries
 "libeay32.dll" and "ssleay32.dll", for example:
 
-    --openssl=C:\OpenSSL-Win64\bin
+    --openssl=C:\\OpenSSL-Win64\\bin
 
 This will make sure that the libraries are copied into the PySide2
 package and are found by the QtNetwork module.
@@ -122,17 +122,17 @@ e.g.:
 
 * First, we create a bdist_wheel from a full PySide2 build:
 
-  python setup.py bdist_wheel --qmake=c:\Qt\5.12\bin\qmake.exe
-    --cmake=c:\tools\cmake\bin\cmake.exe
-    --openssl=c:\libs\OpenSSL32bit\bin
+  python setup.py bdist_wheel --qmake=c:\\Qt\\5.12\\bin\\qmake.exe
+    --cmake=c:\\tools\\cmake\\bin\\cmake.exe
+    --openssl=c:\\libs\\OpenSSL32bit\\bin
 
 * Then, we create a bdist_egg reusing the PySide2 build with option
   `--only-package`:
 
   python setup.py bdist_egg --only-package
-    --qmake=c:\Qt\5.12\bin\qmake.exe
-    --cmake=c:\tools\cmake\bin\cmake.exe
-    --openssl=c:\libs\OpenSSL32bit\bin
+    --qmake=c:\\Qt\\5.12\\bin\\qmake.exe
+    --cmake=c:\\tools\\cmake\\bin\\cmake.exe
+    --openssl=c:\\libs\\OpenSSL32bit\\bin
 
 You can use the option `--qt-conf-prefix` to pass a path relative to
 the PySide2 installed package, which will be embedded into an
