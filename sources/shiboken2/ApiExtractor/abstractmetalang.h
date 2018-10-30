@@ -1486,6 +1486,12 @@ public:
         return m_enclosingClass;
     }
 
+    /**
+     *   \return the namespace from another package which this namespace extends.
+     */
+    AbstractMetaClass *extendedNamespace() const { return m_extendedNamespace; }
+    void setExtendedNamespace(AbstractMetaClass *e) { m_extendedNamespace = e; }
+
     void setEnclosingClass(AbstractMetaClass *cl)
     {
         m_enclosingClass = cl;
@@ -1729,6 +1735,8 @@ private:
 
     const AbstractMetaClass *m_enclosingClass = nullptr;
     AbstractMetaClass *m_baseClass = nullptr;
+    AbstractMetaClass *m_extendedNamespace = nullptr;
+
     const AbstractMetaClass *m_templateBaseClass = nullptr;
     AbstractMetaFunctionList m_functions;
     AbstractMetaFieldList m_fields;

@@ -885,15 +885,13 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             appendDiagnostic(d);
             return Error;
         }
-        // If possible, continue existing namespace (as otherwise, all headers
-        // where a namespace is continued show up in the type database).
+        // Treat namespaces separately to allow for extending namespaces
+        // in subsequent modules.
         NamespaceModelItem namespaceItem = parentNamespaceItem->findNamespace(name);
-        if (namespaceItem.isNull()) {
-            namespaceItem.reset(new _NamespaceModelItem(d->m_model, name));
-            setFileName(cursor, namespaceItem.data());
-            namespaceItem->setScope(d->m_scope);
-            parentNamespaceItem->addNamespace(namespaceItem);
-        }
+        namespaceItem.reset(new _NamespaceModelItem(d->m_model, name));
+        setFileName(cursor, namespaceItem.data());
+        namespaceItem->setScope(d->m_scope);
+        parentNamespaceItem->addNamespace(namespaceItem);
         d->pushScope(namespaceItem);
     }
         break;

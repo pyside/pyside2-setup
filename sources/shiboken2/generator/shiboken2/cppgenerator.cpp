@@ -4892,7 +4892,11 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
 
 QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const
 {
-    QString initFunctionName = metaClass->qualifiedCppName();
+    QString initFunctionName;
+    // Disambiguate namespaces per module to allow for extending them.
+    if (metaClass->isNamespace())
+        initFunctionName += moduleName();
+    initFunctionName += metaClass->qualifiedCppName();
     initFunctionName.replace(QLatin1String("::"), QLatin1String("_"));
     return initFunctionName;
 }
@@ -4996,9 +5000,11 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         }
 
         // 7:baseType
-        if (metaClass->baseClass()) {
+        const auto base = metaClass->isNamespace()
+            ? metaClass->extendedNamespace() : metaClass->baseClass();
+        if (base) {
             s << INDENT << "reinterpret_cast<SbkObjectType *>("
-                << cpythonTypeNameExt(metaClass->baseClass()->typeEntry()) << ")," << endl;
+                << cpythonTypeNameExt(base->typeEntry()) << ")," << endl;
         } else {
             s << INDENT << "0," << endl;
         }

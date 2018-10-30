@@ -34,6 +34,7 @@
 #include <QtCore/QVector>
 
 class ContainerTypeEntry;
+class NamespaceTypeEntry;
 class PrimitiveTypeEntry;
 class TemplateEntry;
 class TypeEntry;
@@ -61,6 +62,7 @@ typedef QMap<QString, TypeEntry *> TypeEntryMap;
 typedef QMap<QString, TypedefEntry *> TypedefEntryMap;
 
 typedef QVector<const ContainerTypeEntry *> ContainerTypeEntryList;
+using NamespaceTypeEntryList = QVector<NamespaceTypeEntry *>;
 typedef QVector<const PrimitiveTypeEntry *> PrimitiveTypeEntryList;
 
 #endif // TYPEDATABASE_TYPEDEFS_H
