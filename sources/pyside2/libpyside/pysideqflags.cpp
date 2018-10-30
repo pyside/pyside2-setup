@@ -152,7 +152,7 @@ namespace QFlags
 #endif
         {Py_tp_new, (void *)PySideQFlagsNew},
         {Py_tp_richcompare, (void *)PySideQFlagsRichCompare},
-        {Py_tp_dealloc, (void *)SbkDummyDealloc},
+        {Py_tp_dealloc, (void *)object_dealloc},
         {0, 0}
     };
     static PyType_Spec SbkNewQFlagsType_spec = {

@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import sys
 import unittest
 
 from PySide2.QtWidgets import QWidget, QMainWindow
@@ -34,6 +35,17 @@ from helper import UsesQApplication
 class QWidgetInherit(QMainWindow):
     def __init__(self):
         QWidget.__init__(self)
+
+class NativeEventTestWidget(QWidget):
+
+    nativeEventCount = 0
+
+    def __init__(self):
+        QWidget.__init__(self)
+
+    def nativeEvent(self, eventType, message):
+        self.nativeEventCount = self.nativeEventCount + 1
+        return [False, 0]
 
 class QWidgetTest(UsesQApplication):
 
@@ -44,12 +56,19 @@ class QWidgetVisible(UsesQApplication):
 
     def testBasic(self):
         # Also related to bug #244, on existence of setVisible'''
-        widget = QWidget()
+        widget = NativeEventTestWidget()
         self.assertTrue(not widget.isVisible())
         widget.setVisible(True)
         self.assertTrue(widget.isVisible())
         self.assertTrue(widget.winId() is not 0)
-
+        # skip this test on macOS since no native events are received
+        if sys.platform == 'darwin':
+            return
+        for i in range(10):
+            if widget.nativeEventCount > 0:
+                break
+            self.app.processEvents()
+        self.assertTrue(widget.nativeEventCount > 0)
 
 if __name__ == '__main__':
     unittest.main()

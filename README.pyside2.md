@@ -2,52 +2,70 @@
 
 ### Introduction
 
-PySide is the [Python Qt bindings project](http://wiki.qt.io/PySide2), providing
-access to the complete Qt 5.x framework as well as to generator tools for rapidly
-generating bindings for any C++ libraries.
+PySide is the [Python Qt bindings project](http://wiki.qt.io/Qt_for_Python),
+providing access to the complete Qt 5.12+ framework as well as to generator
+tools for rapidly generating Python bindings for any C++ libraries.
 
 The PySide project is developed in the open, with all facilities you'd expect
 from any modern OSS project such as all code in a git repository and an open
 design process. We welcome any contribution conforming to the
 [Qt Contribution Agreement](https://www.qt.io/contributionagreement/).
 
+### Installation
 
-PySide 2 supports Qt5. For building, please read about
-[getting started](https://wiki.qt.io/PySide2_GettingStarted).
-Then download the sources by running
+Since the release of the [Technical Preview](https://blog.qt.io/blog/2018/06/13/qt-python-5-11-released/)
+it is possible to install via `pip`, both from Qt's servers
+and [PyPi](https://pypi.org/project/PySide2/):
 
-    git clone https://code.qt.io/pyside/pyside-setup
-
-### Building
+    pip install PySide2
 
 #### Dependencies
 
-PySide versions following 5.6 use a C++ parser based on
-[Clang](http://clang.org/). The Clang library (C-bindings), version 3.9 or
+PySide versions following 5.12 use a C++ parser based on
+[Clang](http://clang.org/). The Clang library (C-bindings), version 6.0 or
 higher is required for building. Prebuilt versions of it can be downloaded from
 [download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
 
 After unpacking the archive, set the environment variable *LLVM_INSTALL_DIR* to
 point to the folder containing the *include* and *lib* directories of Clang:
 
-    7z x .../libclang-release_39-linux-Rhel7.2-gcc5.3-x86_64.7z
+    7z x .../libclang-release_60-linux-Rhel7.2-gcc5.3-x86_64-clazy.7z
     export LLVM_INSTALL_DIR=$PWD/libclang
 
 On Windows:
 
-    7z x .../libclang-release_39-windows-vs2015_64.7z
+    7z x .../libclang-release_60-windows-vs2015_64-clazy.7z
     SET LLVM_INSTALL_DIR=%CD%\libclang
 
-#### Build Instructions
+### Building from source
 
-You might consider using a virtual environment as described at
-[getting started](https://wiki.qt.io/PySide2_GettingStarted).
-You should be able to build:
+For building PySide2 from scratch, please read about
+[getting started](https://wiki.qt.io/Qt_for_Python/GettingStarted).
+This process will include getting the code:
 
+    git clone https://code.qt.io/pyside/pyside-setup
     cd pyside-setup
-    python setup.py install
+    git branch --track 5.12 origin/5.12
+    git checkout 5.12
 
-The setup script will try to find the location of the qmake tool of the Qt
-version to be used and the cmake build tool in the path. Non-standard
-locations can be specified by the *--qmake=path_to_qmake* or
-*--cmake=path_to_cmake* command line options.
+then install the dependencies, and following the instructions per platform.
+A common build command will look like:
+
+    python setup.py install --qmake=<path/to/qmake/> --jobs=8 --build-tests
+
+You can obtain more information about the options to build PySide
+and Shiboken in [our wiki](https://wiki.qt.io/Qt_for_Python/).
+
+### Documentation and Bugs
+
+You can find more information about the PySide2 module API in the
+[official Qt for Python documentation](https://doc.qt.io/qtforpython/).
+
+If you come across any issue, please file a bug report at our
+[JIRA tracker](https://bugreports.qt.io/projects/PYSIDE) following
+our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
+
+### Community
+
+Check *#qt-pyside*, our official IRC channel on FreeNode,
+or contact us via our [mailing list](http://lists.qt-project.org/mailman/listinfo/pyside).

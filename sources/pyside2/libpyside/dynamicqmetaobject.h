@@ -45,39 +45,37 @@
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
 
+class MetaObjectBuilderPrivate;
+
 namespace PySide
 {
 
-class DynamicQMetaObject : public QMetaObject
+class MetaObjectBuilder
 {
-    Q_DISABLE_COPY(DynamicQMetaObject)
+    Q_DISABLE_COPY(MetaObjectBuilder)
 public:
-    DynamicQMetaObject(const char* className, const QMetaObject* metaObject);
-    DynamicQMetaObject(PyTypeObject* type, const QMetaObject* metaobject);
-    ~DynamicQMetaObject();
+    MetaObjectBuilder(const char *className, const QMetaObject *metaObject);
 
+    MetaObjectBuilder(PyTypeObject *type, const QMetaObject *metaObject);
+    ~MetaObjectBuilder();
 
-    int addMethod(QMetaMethod::MethodType mtype, const char* signature, const char* type);
-    void removeMethod(QMetaMethod::MethodType mtype, uint index);
-    int addSignal(const char* signal, const char* type = 0);
-    int addSlot(const char* slot, const char* type = 0);
-    int addProperty(const char* property, PyObject* data);
-    void addInfo(const char* key, const char* value);
+    int indexOfMethod(QMetaMethod::MethodType mtype, const QByteArray &signature) const;
+    int indexOfProperty(const QByteArray &name) const;
+    int addSlot(const char *signature);
+    int addSlot(const char *signature, const char *type);
+    int addSignal(const char *signature);
+    void removeMethod(QMetaMethod::MethodType mtype, int index);
+    int addProperty(const char *property, PyObject *data);
+    void addInfo(const char *key, const char *value);
     void addInfo(const QMap<QByteArray, QByteArray> &info);
 
-    void removeSignal(uint idex);
-    void removeSlot(uint index);
-    void removeProperty(uint index);
+    void removeProperty(int index);
 
-    const QMetaObject* update() const;
+    const QMetaObject *update();
 
 private:
-    class DynamicQMetaObjectPrivate;
-    DynamicQMetaObjectPrivate* m_d;
-
-    void parsePythonType(PyTypeObject *type);
+    MetaObjectBuilderPrivate *m_d;
 };
-
 
 }
 #endif

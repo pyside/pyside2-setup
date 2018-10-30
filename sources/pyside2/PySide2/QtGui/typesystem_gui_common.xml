@@ -2987,10 +2987,25 @@
     <enum-type name="AncestorMode"/>
     <enum-type name="Visibility"/>
     <modify-function signature="raise()" rename="raise_" />
+    <!-- see QWidget::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
+    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,long*)">
+      <modify-argument index="3">
+        <remove-argument/>
+        <conversion-rule class="native">
+            <insert-template name="return_native_eventfilter_conversion_variables"/>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="return">
+        <replace-type modified-type="PyObject"/>
+        <conversion-rule class="native">
+            <insert-template name="return_native_eventfilter_conversion"/>
+        </conversion-rule>
+      </modify-argument>
+      <inject-code position="end">
+          <insert-template name="return_native_eventfilter"/>
+      </inject-code>
+    </modify-function>
   </object-type>
-
-  <!-- Qt5: not sure if this needs support, skipped for now -->
-  <rejection class="QWindow" function-name="nativeEvent"/>"
 
   <object-type name="QGuiApplication">
     <extra-includes>

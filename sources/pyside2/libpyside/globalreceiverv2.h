@@ -135,8 +135,11 @@ public:
      **/
     static QByteArray hash(PyObject* callback);
 
+    const MetaObjectBuilder &metaObjectBuilder() const { return m_metaObject; }
+    MetaObjectBuilder &metaObjectBuilder() { return m_metaObject; }
+
 private:
-    DynamicQMetaObject m_metaObject;
+    MetaObjectBuilder m_metaObject;
     DynamicSlotDataV2 *m_data;
     QList<const QObject*> m_refs;
     SharedMap m_sharedMap;

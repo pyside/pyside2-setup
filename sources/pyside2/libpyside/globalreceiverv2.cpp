@@ -160,10 +160,8 @@ int DynamicSlotDataV2::id(const char* signature) const
 int DynamicSlotDataV2::addSlot(const char* signature)
 {
     int index = id(signature);
-    if (index == -1) {
-        DynamicQMetaObject *dmo = const_cast<DynamicQMetaObject*>(reinterpret_cast<const DynamicQMetaObject*>(m_parent->metaObject()));
-        index = m_signatures[signature] = dmo->addSlot(signature);
-    }
+    if (index == -1)
+        index = m_signatures[signature] = m_parent->metaObjectBuilder().addSlot(signature);
     return index;
 }
 
@@ -202,7 +200,7 @@ GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, SharedMap map) :
         DESTROY_SIGNAL_ID = QObject::staticMetaObject.indexOfSignal("destroyed(QObject*)");
 
     if (DESTROY_SLOT_ID == 0)
-        DESTROY_SLOT_ID = m_metaObject.indexOfSlot(RECEIVER_DESTROYED_SLOT_NAME);
+        DESTROY_SLOT_ID = m_metaObject.indexOfMethod(QMetaMethod::Slot, RECEIVER_DESTROYED_SLOT_NAME);
 
 
 }
@@ -306,7 +304,7 @@ QByteArray GlobalReceiverV2::hash(PyObject* callback)
 
 const QMetaObject* GlobalReceiverV2::metaObject() const
 {
-    return m_metaObject.update();
+    return const_cast<GlobalReceiverV2 *>(this)->m_metaObject.update();
 }
 
 int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)

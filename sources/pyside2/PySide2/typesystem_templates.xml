@@ -361,6 +361,26 @@
         Py_INCREF(%PYARG_0);
     </template>
 
+    <!-- Helpers for modifying "bool nativeEventFilter(QByteArray, void*, long *result)"
+         to return a tuple of bool,long -->
+    <template name="return_native_eventfilter_conversion_variables">
+        long resultVar{0};
+        long *%out = &amp;resultVar;
+    </template>
+    <template name="return_native_eventfilter_conversion">
+        %RETURN_TYPE %out = false;
+        if (PySequence_Check(%PYARG_0) &amp;&amp; (PySequence_Size(%PYARG_0) == 2)) {
+            Shiboken::AutoDecRef pyItem(PySequence_GetItem(%PYARG_0, 0));
+            %out = %CONVERTTOCPP[bool](pyItem);
+        }
+    </template>
+
+    <template name="return_native_eventfilter">
+        %PYARG_0 = PyTuple_New(2);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[long](*result_out));
+    </template>
+
     <!-- templates for __reduce__ -->
     <template name="reduce_code">
         %PYARG_0 = Py_BuildValue("(N(%REDUCE_FORMAT))", PyObject_Type(%PYSELF), %REDUCE_ARGS);

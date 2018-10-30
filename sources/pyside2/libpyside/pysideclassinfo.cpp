@@ -61,7 +61,7 @@ static PyType_Slot PySideClassInfoType_slots[] = {
     {Py_tp_init, (void *)classInfoTpInit},
     {Py_tp_new, (void *)classInfoTpNew},
     {Py_tp_free, (void *)classInfoFree},
-    {Py_tp_dealloc, (void *)SbkDummyDealloc},
+    {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideClassInfoType_spec = {
@@ -108,8 +108,9 @@ PyObject *classCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
     PyTypeObject *klassType = reinterpret_cast<PyTypeObject*>(klass);
     if (Shiboken::ObjectType::checkType(klassType)) {
-        if (PySide::DynamicQMetaObject *mo = PySide::retrieveMetaObject(klassType)) {
-            mo->addInfo(PySide::ClassInfo::getMap(data));
+        if (auto userData = PySide::retrieveTypeUserData(klassType)) {
+            PySide::MetaObjectBuilder &mo = userData->mo;
+            mo.addInfo(PySide::ClassInfo::getMap(data));
             pData->m_alreadyWrapped = true;
             validClass = true;
         }

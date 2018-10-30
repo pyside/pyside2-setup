@@ -66,7 +66,9 @@ make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
 make_path(testbinding_typesystem_path ${pyside2_SOURCE_DIR}
                                       ${pyside2_BINARY_DIR})
 
-add_custom_command(OUTPUT ${testbinding_SRC}
+add_custom_command(
+OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
+BYPRODUCTS ${testbinding_SRC}
 COMMAND ${SHIBOKEN_BINARY} ${GENERATOR_EXTRA_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/pysidetest_global.h
         --include-paths=${testbinding_include_dirs}
@@ -116,6 +118,7 @@ target_link_libraries(testbinding
                       ${SBK_PYTHON_LIBRARIES})
 
 add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets pysidetest)
+create_generator_target(testbinding)
 
 PYSIDE_TEST(decoratedslot_test.py)
 # Will always crash when built against Qt 5.6, no point in running it.
