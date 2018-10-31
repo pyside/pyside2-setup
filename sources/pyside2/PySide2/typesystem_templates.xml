@@ -203,7 +203,7 @@
     </template>
 
     <template name="fix_char*">
-    char val_;
+    char val_{};
     %BEGIN_ALLOW_THREADS
     %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;val_);
     %END_ALLOW_THREADS

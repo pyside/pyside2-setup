@@ -3035,9 +3035,8 @@
     </modify-function>
     <modify-function signature="readData(char*,qint64)">
         <inject-code class="target">
-            QByteArray ba;
-            ba.resize(%2);
-            %CPPSELF.%FUNCTION_NAME(ba.data(), ba.size());
+            QByteArray ba(1 + int(%2), char(0));
+            %CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
             %PYARG_0 = Shiboken::String::fromCString(ba.constData());
         </inject-code>
         <modify-argument index="1">
@@ -3059,9 +3058,8 @@
     </modify-function>
     <modify-function signature="readLineData(char*,qint64)">
         <inject-code class="target">
-            QByteArray ba;
-            ba.resize(%2);
-            %CPPSELF.%FUNCTION_NAME(ba.data(), ba.size());
+            QByteArray ba(1 + int(%2), char(0));
+            %CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
             %PYARG_0 = Shiboken::String::fromCString(ba.constData());
         </inject-code>
         <modify-argument index="1">
