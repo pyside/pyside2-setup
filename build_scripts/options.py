@@ -47,6 +47,12 @@ def _warn_multiple_option(option):
     w = 'Option "{}" occurs multiple times on the command line.'.format(option)
     warnings.warn(w)
 
+def _warn_deprecated_option(option, replacement=None):
+    w = 'Option "{}" is deprecated and may be removed in a future release.'.format(option)
+    if replacement:
+        w = '{}\nUse "{}" instead.'.format(w, replacement)
+    warnings.warn(w)
+
 class Options(object):
     def __init__(self):
 
@@ -64,7 +70,7 @@ class Options(object):
             _warn_multiple_option(option)
         return count > 0
 
-    def option_value(self, name, remove=True):
+    def option_value(self, name, short_option_name=None, remove=True):
         """
         Returns the value of a command line option or environment
         variable.
@@ -79,11 +85,12 @@ class Options(object):
         :return: Either the option value or None.
         """
         option = '--' + name
+        short_option = '-' + short_option_name if short_option_name else None
         single_option_prefix = option + '='
         value = None
         for index in reversed(range(len(sys.argv))):
             arg = sys.argv[index]
-            if arg == option:
+            if arg == option or short_option and arg == short_option:
                 if value:
                     _warn_multiple_option(option)
                 else:
@@ -140,7 +147,11 @@ OPTION_SKIP_DOCS = has_option("skip-docs")
 # don't include pyside2-examples
 OPTION_NOEXAMPLES = has_option("no-examples")
 # number of parallel build jobs
-OPTION_JOBS = option_value('jobs')
+OPTION_JOBS = option_value('parallel', short_option_name='j')
+_deprecated_option_jobs = option_value('jobs')
+if _deprecated_option_jobs:
+    _warn_deprecated_option('jobs', 'parallel')
+    OPTION_JOBS = _deprecated_option_jobs
 # Legacy, not used any more.
 OPTION_JOM = has_option('jom')
 # Do not use jom instead of nmake with msvc

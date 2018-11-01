@@ -140,7 +140,7 @@ def check_allowed_python_version():
     """
 
     import re
-    pattern = "Programming Language :: Python :: (\d+)\.(\d+)"
+    pattern = r'Programming Language :: Python :: (\d+)\.(\d+)'
     supported = []
 
     for line in config.python_version_classifiers:

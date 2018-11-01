@@ -887,14 +887,6 @@ _NamespaceModelItem::~_NamespaceModelItem()
 {
 }
 
-QSet<NamespaceModelItem> _NamespaceModelItem::uniqueNamespaces() const
-{
-    QSet<NamespaceModelItem> result;
-    for (const NamespaceModelItem &n : m_namespaces)
-        result.insert(n);
-    return result;
-}
-
 void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
 {
     m_namespaces.append(item);
