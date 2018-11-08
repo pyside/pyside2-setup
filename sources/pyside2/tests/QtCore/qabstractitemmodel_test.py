@@ -34,14 +34,12 @@ from PySide2.QtCore import *
 class MyModel (QAbstractListModel):
     pass
 
-class Foo:
-    pass
 
 class TestQModelIndexInternalPointer(unittest.TestCase):
 
     def testInternalPointer(self):
         m = MyModel()
-        foo = Foo()
+        foo = QObject()
         idx = m.createIndex(0,0, foo)
         check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
                                   | QAbstractItemModel.CheckIndexOption.DoNotUseParent
