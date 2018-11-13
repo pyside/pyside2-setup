@@ -50,6 +50,8 @@
 #include <vector>
 
 #define SBK_ENUM(ENUM) reinterpret_cast<SbkEnumObject*>(ENUM)
+#define SBK_TYPE_CHECK(o) (strcmp(Py_TYPE(Py_TYPE(o))->tp_name, "Shiboken.EnumType") == 0)
+typedef PyObject* (*enum_func)(PyObject*, PyObject*);
 
 extern "C"
 {
@@ -75,7 +77,7 @@ struct SbkEnumObject
 
 static PyObject* SbkEnumObject_repr(PyObject* self)
 {
-    const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
+    const SbkEnumObject *enumObj = SBK_ENUM(self);
     if (enumObj->ob_name)
         return Shiboken::String::fromFormat("%s.%s", (Py_TYPE(self))->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
     else
@@ -84,7 +86,7 @@ static PyObject* SbkEnumObject_repr(PyObject* self)
 
 static PyObject* SbkEnumObject_name(PyObject* self, void*)
 {
-    SbkEnumObject *enum_self = reinterpret_cast<SbkEnumObject *>(self);
+    SbkEnumObject *enum_self = SBK_ENUM(self);
 
     if (enum_self->ob_name == NULL)
         Py_RETURN_NONE;
@@ -113,6 +115,43 @@ static PyObject* SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
     return reinterpret_cast<PyObject*>(self);
 }
 
+static PyObject* enum_op(enum_func f, PyObject *a, PyObject *b) {
+    PyObject *valA = a;
+    PyObject *valB = b;
+    PyObject *result = nullptr;
+    bool enumA = false;
+    bool enumB = false;
+
+    // We are not allowing floats
+    if (!PyFloat_Check(valA) && !PyFloat_Check(valB)) {
+        // Check if both variables are SbkEnumObject
+        if (SBK_TYPE_CHECK(valA)) {
+            valA = PyLong_FromLong(SBK_ENUM(valA)->ob_value);
+            enumA = true;
+        }
+        if (SBK_TYPE_CHECK(valB)) {
+            valB = PyLong_FromLong(SBK_ENUM(valB)->ob_value);
+            enumB = true;
+        }
+    }
+
+    // Without an enum we are not supporting the operation
+    if (!(enumA || enumB)) {
+        Py_INCREF(Py_NotImplemented);
+        return Py_NotImplemented;
+    } else {
+        result = f(valA, valB);
+    }
+
+    // Decreasing the reference of the used variables a and b.
+    if (enumA)
+        Py_DECREF(valA);
+    if (enumB)
+        Py_DECREF(valB);
+
+    return result;
+}
+
 /* Notes:
  *   On Py3k land we use long type when using integer numbers. However, on older
  *   versions of Python (version 2) we need to convert it to int type,
@@ -126,48 +165,19 @@ static PyObject* enum_int(PyObject* v)
     return PyInt_FromLong(SBK_ENUM(v)->ob_value);
 }
 
-static long getNumberValue(PyObject* v)
-{
-    PyObject* number = PyNumber_Long(v);
-    long result = PyLong_AsLong(number);
-    Py_XDECREF(number);
-    return result;
-}
-
 static PyObject* enum_and(PyObject* self, PyObject* b)
 {
-    if (!PyNumber_Check(b)) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
-    }
-
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(b);
-    return PyInt_FromLong(valA & valB);
+    return enum_op(PyNumber_And, self, b);
 }
 
 static PyObject* enum_or(PyObject* self, PyObject* b)
 {
-    if (!PyNumber_Check(b)) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
-    }
-
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(b);
-    return PyInt_FromLong(valA | valB);
+return enum_op(PyNumber_Or, self, b);
 }
 
 static PyObject* enum_xor(PyObject* self, PyObject* b)
 {
-    if (!PyNumber_Check(b)) {
-        Py_INCREF(Py_NotImplemented);
-        return Py_NotImplemented;
-    }
-
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(b);
-    return PyInt_FromLong(valA ^ valB);
+    return enum_op(PyNumber_Xor, self, b);
 }
 
 static int enum_bool(PyObject* v)
@@ -177,72 +187,63 @@ static int enum_bool(PyObject* v)
 
 static PyObject* enum_add(PyObject* self, PyObject* v)
 {
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(v);
-    return PyInt_FromLong(valA + valB);
+    return enum_op(PyNumber_Add, self, v);
 }
 
 static PyObject* enum_subtract(PyObject* self, PyObject* v)
 {
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(v);
-    return PyInt_FromLong(valA - valB);
+    return enum_op(PyNumber_Subtract, self, v);
 }
 
 static PyObject* enum_multiply(PyObject* self, PyObject* v)
 {
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(v);
-    return PyInt_FromLong(valA * valB);
+return enum_op(PyNumber_Multiply, self, v);
 }
 
 #ifndef IS_PY3K
 static PyObject* enum_divide(PyObject* self, PyObject* v)
 {
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(v);
-    return PyLong_FromLong(valA / valB);
+    return enum_op(PyNumber_Divide, self, v);
 }
 #endif
 
 static PyObject* enum_richcompare(PyObject* self, PyObject* other, int op)
 {
-    int result = 0;
-    if (!PyNumber_Check(other)) {
+    PyObject *valA = self;
+    PyObject *valB = other;
+    PyObject *result = nullptr;
+    bool enumA = false;
+    bool enumB = false;
+
+    // We are not allowing floats
+    if (!PyFloat_Check(valA) && !PyFloat_Check(valB)) {
+
+        // Check if both variables are SbkEnumObject
+        if (SBK_TYPE_CHECK(valA)) {
+            valA = PyLong_FromLong(SBK_ENUM(valA)->ob_value);
+            enumA = true;
+        }
+        if (SBK_TYPE_CHECK(valB)) {
+            valB = PyLong_FromLong(SBK_ENUM(valB)->ob_value);
+            enumB =true;
+        }
+    }
+
+    // Without an enum we are not supporting the operation
+    if (!(enumA || enumB)) {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
+    } else {
+        result = PyObject_RichCompare(valA, valB, op);
     }
 
-    long valA = SBK_ENUM(self)->ob_value;
-    long valB = getNumberValue(other);
+    // Decreasing the reference of the used variables a and b.
+    if (enumA)
+        Py_DECREF(valA);
+    if (enumB)
+        Py_DECREF(valB);
 
-    switch (op) {
-    case Py_EQ:
-        result = (valA == valB);
-        break;
-    case Py_NE:
-        result = (valA != valB);
-        break;
-    case Py_LE:
-        result = (valA <= valB);
-        break;
-    case Py_GE:
-        result = (valA >= valB);
-        break;
-    case Py_LT:
-        result = (valA < valB);
-        break;
-    case Py_GT:
-        result = (valA > valB);
-        break;
-    default:
-        PyErr_BadArgument();
-        return NULL;
-    }
-    if (result)
-        Py_RETURN_TRUE;
-    else
-        Py_RETURN_FALSE;
+    return result;
 }
 
 static Py_hash_t enum_hash(PyObject* pyObj)

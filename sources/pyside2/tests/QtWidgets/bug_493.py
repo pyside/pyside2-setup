@@ -32,7 +32,7 @@ from PySide2.QtWidgets import QApplication
 import unittest
 
 
-class TestBug569(unittest.TestCase):
+class TestBug493(unittest.TestCase):
 
     def testIt(self):
         # We need a qapp otherwise Qt will crash when trying to detect the
@@ -42,10 +42,8 @@ class TestBug569(unittest.TestCase):
         ev2 = QKeyEvent(QEvent.KeyRelease, Qt.Key_Copy, Qt.NoModifier)
         ks = QKeySequence.Delete
 
-        self.assertEqual(ev1, ks)
-        self.assertEqual(ks, ev1)
-        self.assertNotEqual(ev2, ks)
-        self.assertNotEqual(ks, ev2)
+        self.assertTrue(ev1.matches(ks))
+        self.assertFalse(ev2.matches(ks))
 
 if __name__ == '__main__':
     unittest.main()

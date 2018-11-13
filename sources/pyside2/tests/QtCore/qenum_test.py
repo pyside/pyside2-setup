@@ -49,6 +49,24 @@ class TestEnum(unittest.TestCase):
     def testToIntInFunction(self):
         self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
 
+    def testOperations(self):
+        k = Qt.Key.Key_1
+
+        # Integers
+        self.assertEqual(k + 2, 2 + k)
+        self.assertEqual(k - 2, -(2 - k))
+        self.assertEqual(k * 2, 2 * k)
+
+        # Floats
+        with self.assertRaises(TypeError):
+            a = k+2.0
+
+        with self.assertRaises(TypeError):
+            a = k-2.0
+
+        with self.assertRaises(TypeError):
+            a = k*2.0
+
 class TestQFlags(unittest.TestCase):
     def testToItn(self):
         om = QIODevice.NotOpen
