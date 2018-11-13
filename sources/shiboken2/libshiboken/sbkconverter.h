@@ -341,6 +341,7 @@ LIBSHIBOKEN_API bool pythonTypeIsWrapperType(const SbkConverter *converter);
 #define SBK_UNSIGNEDLONG_IDX           14
 #define SBK_UNSIGNEDSHORT_IDX          15
 #define SBK_VOIDPTR_IDX                16
+#define SBK_NULLPTR_T_IDX              17
 
 template<typename T> SbkConverter* PrimitiveTypeConverter() { return 0; }
 template<> inline SbkConverter* PrimitiveTypeConverter<PY_LONG_LONG>() { return primitiveTypeConverter(SBK_PY_LONG_LONG_IDX); }
@@ -360,6 +361,7 @@ template<> inline SbkConverter* PrimitiveTypeConverter<unsigned int>() { return 
 template<> inline SbkConverter* PrimitiveTypeConverter<unsigned long>() { return primitiveTypeConverter(SBK_UNSIGNEDLONG_IDX); }
 template<> inline SbkConverter* PrimitiveTypeConverter<unsigned short>() { return primitiveTypeConverter(SBK_UNSIGNEDSHORT_IDX); }
 template<> inline SbkConverter* PrimitiveTypeConverter<void*>() { return primitiveTypeConverter(SBK_VOIDPTR_IDX); }
+template<> inline SbkConverter* PrimitiveTypeConverter<std::nullptr_t>() { return primitiveTypeConverter(SBK_NULLPTR_T_IDX); }
 
 } // namespace Shiboken::Conversions
 
@@ -386,6 +388,7 @@ template<> inline PyTypeObject* SbkType<unsigned char>() { return &PyInt_Type; }
 template<> inline PyTypeObject* SbkType<unsigned int>() { return &PyLong_Type; }
 template<> inline PyTypeObject* SbkType<unsigned long>() { return &PyLong_Type; }
 template<> inline PyTypeObject* SbkType<unsigned short>() { return &PyInt_Type; }
+template<> inline PyTypeObject* SbkType<std::nullptr_t>() { return Py_TYPE(&_Py_NoneStruct); }
 
 } // namespace Shiboken
 
