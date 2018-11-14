@@ -1,11 +1,10 @@
 Table of contents
 *****************
 .. toctree::
-    :numbered:
     :maxdepth: 3
 
-    faq.rst
     overview.rst
+    samplebinding.rst
     commandlineoptions.rst
     projectfile.rst
     typesystemvariables.rst
@@ -15,3 +14,4 @@ Table of contents
     ownership.rst
     wordsofadvice.rst
     shibokenmodule.rst
+    faq.rst

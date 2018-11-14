@@ -102,8 +102,7 @@ Qt Modules
         Provides classes to create and use state machines from SCXML files.
 
 |project| also comes with the
-:doc:`Shiboken2 <shiboken2:contents>` generator that outputs C++ code
-for CPython extensions.
+:doc:`Shiboken2 <shiboken2:index>` CPython binding code generator.
 
 .. toctree::
     :maxdepth: 2
