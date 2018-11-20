@@ -37,6 +37,8 @@
 ##
 #############################################################################
 
+from __future__ import print_function, absolute_import
+
 import sys
 from PySide2.support.signature import inspect, get_signature
 
@@ -58,7 +60,11 @@ class ExactEnumerator(object):
         with self.fmt.module(mod_name):
             module = sys.modules[mod_name]
             members = inspect.getmembers(module, inspect.isclass)
+            functions = inspect.getmembers(module, inspect.isroutine)
             ret = self.result_type()
+            self.fmt.class_name = None
+            for func_name, func in functions:
+                ret.update(self.function(func_name, func))
             for class_name, klass in members:
                 ret.update(self.klass(class_name, klass))
             return ret
@@ -79,8 +85,15 @@ class ExactEnumerator(object):
             # class_members = inspect.getmembers(klass)
             # gives us also the inherited things.
             class_members = sorted(list(klass.__dict__.items()))
-            for func_name, func in class_members:
-                ret.update(self.function(func_name, func))
+            subclasses = []
+            for thing_name, thing in class_members:
+                if inspect.isclass(thing):
+                    subclass_name = ".".join((class_name, thing_name))
+                    subclasses.append((subclass_name, thing))
+                else:
+                    ret.update(self.function(thing_name, thing))
+            for subclass_name, subclass in subclasses:
+                ret.update(self.klass(subclass_name, subclass))
             return ret
 
     def function(self, func_name, func):
@@ -92,6 +105,27 @@ class ExactEnumerator(object):
         return ret
 
 
+def simplify(signature):
+    if isinstance(signature, list):
+        # remove duplicates which still sometimes occour:
+        ret = set(simplify(sig) for sig in signature)
+        return sorted(ret) if len(ret) > 1 else list(ret)[0]
+    ret = []
+    for pv in signature.parameters.values():
+        txt = str(pv)
+        if ":" not in txt:   # 'self' or '*args'
+            continue
+        txt = txt[txt.index(":") + 1:]
+        if "=" in txt:
+            txt = txt[:txt.index("=")]
+        quote = txt[0]
+        if quote in ("'", '"') and txt[-1] == quote:
+            txt = txt[1:-1]
+        ret.append(txt.strip())
+    return tuple(ret)
+
+
+### disabled for now:
 class SimplifyingEnumerator(ExactEnumerator):
     """
     SimplifyingEnumerator enumerates all signatures in a module filtered.
@@ -109,5 +143,27 @@ class SimplifyingEnumerator(ExactEnumerator):
         signature = get_signature(func, 'existence')
         if signature is not None and func_name not in ("next", "__next__"):
             with self.fmt.function(func_name, signature) as key:
-                ret[key] = signature
+                ret[key] = str(signature)
+        return ret
+
+
+class SimplifyingEnumerator(ExactEnumerator):
+    """
+    SimplifyingEnumerator enumerates all signatures in a module filtered.
+
+    There are no default values, no variable
+    names and no self parameter. Only types are present after simplification.
+    The functions 'next' resp. '__next__' are removed
+    to make the output identical for Python 2 and 3.
+    An appropriate formatter should be supplied, if printable output
+    is desired.
+    """
+
+    def function(self, func_name, func):
+        ret = self.result_type()
+        signature = getattr(func, '__signature__', None)
+        sig = simplify(signature) if signature is not None else None
+        if sig is not None and func_name not in ("next", "__next__", "__div__"):
+            with self.fmt.function(func_name, sig) as key:
+                ret[key] = sig
         return ret

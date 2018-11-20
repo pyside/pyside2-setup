@@ -143,7 +143,10 @@ class Formatter(object):
 
     @contextmanager
     def function(self, func_name, signature):
-        key = viskey = "{}.{}".format(self.class_name, func_name)
+        if self.class_name is None:
+            key = viskey = "{}".format(func_name)
+        else:
+            key = viskey = "{}.{}".format(self.class_name, func_name)
         if key.endswith("lY"):
             # Some classes like PySide2.QtGui.QContextMenuEvent have functions
             # globalX and the same with Y. The gerrit robot thinks that this
@@ -176,8 +179,9 @@ def generate_all():
             This file contains the simplified signatures for all functions in PySide
             for module '{}'. There are no default values, no variable
             names and no self parameter. Only types are present after simplification.
-            The functions 'next' resp. '__next__' are removed
-            to make the output identical for Python 2 and 3.
+            The functions 'next' resp. '__next__' are removed to make the output
+            identical for Python 2 and 3. '__div__' is also removed,
+            since it exists in Python 2, only.
             """
             '''.format(module)))
         fmt.print("import sys")

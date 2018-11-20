@@ -159,4 +159,4 @@ html_show_sourcelink = False
 # If nonempty, this is the file name suffix for HTML files (e.g. ".xhtml").
 #html_file_suffix = ''
 
-intersphinx_mapping = {'apiextractor': ('@CMAKE_BINARY_DIR@/ApiExtractor/doc/html','@CMAKE_BINARY_DIR@/ApiExtractor/doc/html/objects.inv')}
+intersphinx_mapping = {'apiextractor': ('ApiExtractor','@CMAKE_BINARY_DIR@/ApiExtractor/doc/html/objects.inv')}

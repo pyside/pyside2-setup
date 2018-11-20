@@ -78,7 +78,8 @@ void init()
         Primitive<unsigned int>::createConverter(),
         Primitive<unsigned long>::createConverter(),
         Primitive<unsigned short>::createConverter(),
-        VoidPtr::createConverter()
+        VoidPtr::createConverter(),
+        Primitive<std::nullptr_t>::createConverter()
     };
     PrimitiveTypeConverters = primitiveTypeConverters;
 
@@ -100,6 +101,7 @@ void init()
     converters["unsigned long"] = primitiveTypeConverters[SBK_UNSIGNEDLONG_IDX];
     converters["unsigned short"] = primitiveTypeConverters[SBK_UNSIGNEDSHORT_IDX];
     converters["void*"] = primitiveTypeConverters[SBK_VOIDPTR_IDX];
+    converters["std::nullptr_t"] = primitiveTypeConverters[SBK_NULLPTR_T_IDX];
 
     initArrayConverters();
 }

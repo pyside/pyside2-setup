@@ -33,6 +33,7 @@
 import sys
 import unittest
 from PySide2.QtCore import *
+from PySide2.support import VoidPtr
 
 class MyModel (QAbstractListModel):
     pass
@@ -50,22 +51,22 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
 
     def testInternalPointer(self):
         #Test QAbstractListModel.createIndex and
-        #QModelIndex.internalPointer with regular
-        #Python objects
-        idx = self.model.createIndex(0, 0, "Hello")
-        self.assertEqual("Hello", idx.internalPointer())
-        a = [1, 2, 3]
-        idx = self.model.createIndex(0, 0, a)
-        self.assertEqual(a, idx.internalPointer())
+        #QModelIndex.internalPointer
+        obj = QObject()
+        obj_ptr = VoidPtr(obj)
+        idx = self.model.createIndex(0, 0, obj)
+        i = idx.internalPointer()
+        self.assertEqual(int(obj_ptr), int(i))
 
     def testReferenceCounting(self):
         #Test reference counting when retrieving data with
         #QModelIndex.internalPointer
-        a = [1, 2, 3]
-        a_refcnt = sys.getrefcount(a)
-        idx = self.model.createIndex(0, 0, a)
+        o = QObject()
+        o_refcnt = sys.getrefcount(o)
+        idx = self.model.createIndex(0, 0, o)
         ptr = idx.internalPointer()
-        self.assertEqual(sys.getrefcount(a), a_refcnt + 1)
+        self.assertEqual(sys.getrefcount(o), o_refcnt)
+
 
     def testIndexForDefaultDataArg(self):
         #Test QAbstractListModel.createIndex with a default

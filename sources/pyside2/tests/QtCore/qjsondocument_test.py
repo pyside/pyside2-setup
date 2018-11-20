@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2018 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -28,40 +28,29 @@
 ##
 #############################################################################
 
+'''Test cases for QJsonDocument/nullptr_t'''
+
 import unittest
-from PySide2.QtCore import *
+from PySide2.QtCore import QJsonDocument
+import py3kcompat as py3k
 
-class MyModel (QAbstractListModel):
-    pass
+class QJsonDocumentTest(unittest.TestCase):
 
+    def testToVariant(self):
+        a = QJsonDocument.fromJson(b'{"test": null}')
+        self.assertIsInstance(a, QJsonDocument)
+        if py3k.IS_PY3K:
+            self.assertEqual(str(a.toVariant()), "{'test': None}")
+        else:
+            self.assertEqual(str(a.toVariant()), "{u'test': None}")
 
-class TestQModelIndexInternalPointer(unittest.TestCase):
+        b = QJsonDocument.fromJson(b'{"test": [null]}')
+        self.assertIsInstance(b, QJsonDocument)
+        if py3k.IS_PY3K:
+            self.assertEqual(str(b.toVariant()), "{'test': [None]}")
+        else:
+            self.assertEqual(str(b.toVariant()), "{u'test': [None]}")
 
-    def testInternalPointer(self):
-        m = MyModel()
-        foo = QObject()
-        idx = m.createIndex(0,0, foo)
-        check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
-                                  | QAbstractItemModel.CheckIndexOption.DoNotUseParent
-                                  | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
-        self.assertTrue(check)
-
-    def testPassQPersistentModelIndexAsQModelIndex(self):
-        # Related to bug #716
-        m = MyModel()
-        idx = QPersistentModelIndex()
-        m.span(idx)
-
-    def testQIdentityProxyModel(self):
-        sourceModel = QStringListModel(['item1', 'item2'])
-        sourceIndex = sourceModel.index(0, 0)
-        sourceData = str(sourceModel.data(sourceIndex, Qt.DisplayRole))
-        proxyModel = QIdentityProxyModel()
-        proxyModel.setSourceModel(sourceModel)
-        proxyIndex = proxyModel.mapFromSource(sourceIndex)
-        proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
-        self.assertEqual(sourceData, proxyData)
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -5415,10 +5415,10 @@ bool CppGenerator::finishGeneration()
     s << "#include <sbkpython.h>" << endl;
     s << "#include <shiboken.h>" << endl;
     s << "#include <algorithm>" << endl;
+    s << "#include <signature.h>" << endl;
     if (usePySideExtensions()) {
         s << includeQDebug;
         s << "#include <pyside.h>" << endl;
-        s << "#include <signature.h>" << endl;
         s << "#include <qapp_macro.h>" << endl;
     }
 
@@ -5714,22 +5714,25 @@ bool CppGenerator::finishGeneration()
 
         // cleanup staticMetaObject attribute
         s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl << endl;
-
-        // PYSIDE-510: Create a signatures string for the introspection feature.
-        s << "// The signatures string for the global functions." << endl;
-        s << "// Multiple signatures have their index \"n:\" in front." << endl;
-        s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
-        QString line;
-        while (signatureStream.readLineInto(&line))
-            s << INDENT << '"' << line << "\\n\"" << endl;
-        s << ';' << endl;
-        // finish the rest of __signature__ initialization.
-        s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
-            << "_SignaturesString);" << endl;
-        // initialize the qApp module.
-        s << INDENT << "NotifyModuleForQApp(module);" << endl << endl;
     }
 
+    // PYSIDE-510: Create a signatures string for the introspection feature.
+    s << "// The signatures string for the global functions." << endl;
+    s << "// Multiple signatures have their index \"n:\" in front." << endl;
+    s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
+    QString line;
+    while (signatureStream.readLineInto(&line))
+        s << INDENT << '"' << line << "\\n\"" << endl;
+    s << ';' << endl;
+    // finish the rest of __signature__ initialization.
+    s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
+        << "_SignaturesString);" << endl;
+
+    if (usePySideExtensions()) {
+        // initialize the qApp module.
+        s << INDENT << "NotifyModuleForQApp(module);" << endl;
+    }
+    s << endl;
     s << "SBK_MODULE_INIT_FUNCTION_END" << endl;
 
     return file.done() != FileOut::Failure;

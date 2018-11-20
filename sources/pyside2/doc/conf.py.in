@@ -169,4 +169,4 @@ html_show_sourcelink = False
 
 # Link to the shiboken2 sphinx project to enable linking
 # between the two projects.
-intersphinx_mapping = {'shiboken2': ('../../../shiboken2/doc/html','../../../shiboken2/doc/html/objects.inv')}
+intersphinx_mapping = {'shiboken2': ('shiboken2','@CMAKE_BINARY_DIR@/../shiboken2/doc/html/objects.inv')}

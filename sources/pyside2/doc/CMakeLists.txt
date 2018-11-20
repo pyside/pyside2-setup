@@ -87,6 +87,16 @@ add_custom_target(qdoc
 add_custom_target(apidoc
                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
                   COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/rst html
+                  #copying shiboken2 and ApiExtractor doc htmls
+                  COMMENT "Copying over the Shiboken2 and ApiExtractor doc HTMLs..."
+                  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+                  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2/ApiExtractor
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory
+                          ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken2/doc/html
+                          ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory
+                          ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken2/ApiExtractor/doc/html
+                          ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2/ApiExtractor
                  )
 
 # create conf.py based on conf.py.in
@@ -128,7 +138,6 @@ add_dependencies(docrsts qdoc)
 #     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_INSTALL_PREFIX}/share/devhelp/books"
 #     COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_INSTALL_PREFIX}/share/doc/${BINDING_NAME}/html" "${CMAKE_INSTALL_PREFIX}/share/devhelp/books/${BINDING_NAME}"
 # )
-
 #install files
 add_custom_target(apidocinstall
     COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/share/doc/PySide2-${BINDING_API_VERSION} && cp -rv ${CMAKE_CURRENT_BINARY_DIR}/html/* ${CMAKE_INSTALL_PREFIX}/share/doc/PySide-${BINDING_API_VERSION}

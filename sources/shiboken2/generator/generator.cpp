@@ -124,8 +124,13 @@ QString DefaultValue::constructorParameter() const
         return QLatin1String("#error");
     case DefaultValue::Boolean:
         return QLatin1String("false");
-    case DefaultValue::CppScalar:
-        return m_value + QLatin1String("(0)");
+    case DefaultValue::CppScalar: {
+        // PYSIDE-846: Use static_cast in case of "unsigned long" and similar
+        const QString cast = m_value.contains(QLatin1Char(' '))
+            ? QLatin1String("static_cast<") + m_value + QLatin1Char('>')
+            : m_value;
+        return cast + QLatin1String("(0)");
+    }
     case DefaultValue::Custom:
     case DefaultValue::Enum:
         return m_value;

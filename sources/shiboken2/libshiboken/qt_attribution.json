@@ -7,6 +7,6 @@
     "Homepage": "http://www.python.org/",
     "Version": "3.7.0",
     "License": "PSF LICENSE AGREEMENT FOR PYTHON 3.7.0",
-    "LicenseFile": "bufferprocs27.h",
+    "LicenseFile": "bufferprocs_py37.h",
     "Copyright": "© Copyright 2001-2018, Python Software Foundation."
 }

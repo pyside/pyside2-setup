@@ -533,6 +533,36 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     }
 };
 
+// nullptr_t
+template <>
+struct Primitive<std::nullptr_t> : TwoPrimitive<std::nullptr_t>
+{
+    static PyObject* toPython(const void* cppIn)
+    {
+        return Py_None;
+    }
+    static void toCpp(PyObject *, void *cppOut)
+    {
+        *reinterpret_cast<std::nullptr_t*>(cppOut) = nullptr;
+    }
+    static PythonToCppFunc isConvertible(PyObject* pyIn)
+    {
+        if (pyIn == Py_None)
+            return toCpp;
+        return nullptr;
+    }
+    static void otherToCpp(PyObject* pyIn, void* cppOut)
+    {
+        *reinterpret_cast<std::nullptr_t*>(cppOut) = nullptr;
+    }
+    static PythonToCppFunc isOtherConvertible(PyObject* pyIn)
+    {
+        if (pyIn == nullptr)
+            return otherToCpp;
+        return nullptr;
+    }
+};
+
 namespace Shiboken {
 namespace Conversions {
 SbkConverter *createConverterObject(PyTypeObject *type,
