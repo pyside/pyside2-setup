@@ -43,7 +43,7 @@ from distutils.version import LooseVersion
 import os
 import time
 from .config import config
-from .utils import memoize, get_python_dict
+from .utils import memoize, get_python_dict, set_quiet
 from .options import *
 
 setup_script_dir = os.getcwd()
@@ -911,8 +911,11 @@ class PysideBuild(_build):
         module_src_dir = os.path.join(self.sources_dir, extension)
 
         # Build module
-        cmake_cmd = [
-            OPTION_CMAKE,
+        cmake_cmd = [OPTION_CMAKE]
+        if OPTION_QUIET:
+            set_quiet(True)
+            cmake_cmd.append('--quiet')
+        cmake_cmd += [
             "-G", self.make_generator,
             "-DBUILD_TESTS={}".format(self.build_tests),
             "-DQt5Help_DIR={}".format(self.qtinfo.docs_dir),
@@ -1308,8 +1311,9 @@ class PysideBuild(_build):
             if not os.path.exists(srcpath):
                 continue
             rpath_cmd(srcpath)
-            print("Patched rpath to '$ORIGIN/' (Linux) or "
-                "updated rpath (OS/X) in {}.".format(srcpath))
+            if not OPTION_QUIET:
+                print("Patched rpath to '$ORIGIN/' (Linux) or "
+                      "updated rpath (OS/X) in {}.".format(srcpath))
 
 
 cmd_class_dict = {
