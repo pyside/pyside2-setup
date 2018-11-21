@@ -54,7 +54,7 @@ list(FIND QtNetwork_disabled_features "dtls" _dtlsDisabledIndex)
 list(FIND QtNetwork_disabled_features "sctp" _sctpDisabledIndex)
 
 if(_sslEnabledIndex EQUAL -1)
-    list(APPEND QtNetwork_DROPPED_ENTRIES QSslCertificate QSslCertificateExtension
+    list(APPEND QtNetwork_DROPPED_ENTRIES QOcspResponse QSslCertificate QSslCertificateExtension
          QSslCipher QSslConfiguration QSslDiffieHellmanParameters QSslError
          QSslKey QSslPreSharedKeyAuthenticator QSslSocket)
     message(STATUS "Qt5Network: Dropping SSL classes")
@@ -71,6 +71,10 @@ else()
          ${QtNetwork_GEN_DIR}/qsslkey_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslpresharedkeyauthenticator_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslsocket_wrapper.cpp)
+     if (Qt5Network_VERSION VERSION_EQUAL 5.13.0 OR Qt5Network_VERSION VERSION_GREATER 5.13.0)
+         list(APPEND QtNetwork_SRC
+              ${QtNetwork_GEN_DIR}/qocspresponse_wrapper.cpp)
+     endif()
     message(STATUS "Qt5Network: Adding SSL classes")
 endif()
 

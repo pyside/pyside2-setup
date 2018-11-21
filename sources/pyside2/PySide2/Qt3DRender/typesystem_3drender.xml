@@ -56,6 +56,7 @@
             <enum-type name="CubeMapFace"/>
             <enum-type name="ComparisonFunction"/>
             <enum-type name="ComparisonMode"/>
+            <enum-type name="HandleType" since="5.13"/>
             <enum-type name="Filter"/>
             <enum-type name="Status"/>
             <enum-type name="Target"/>
@@ -102,7 +103,9 @@
         </object-type>
         <object-type name="QClipPlane"/>
         <object-type name="QColorMask"/>
-        <object-type name="QComputeCommand"/>
+        <object-type name="QComputeCommand">
+            <enum-type name="RunType" since="5.13"/>
+        </object-type>
         <object-type name="QCullFace">
             <enum-type name="CullingMode"/>
         </object-type>
@@ -202,12 +205,16 @@
         <object-type name="QScissorTest"/>
         <object-type name="QScreenRayCaster" since="5.11"/>
         <object-type name="QSeamlessCubemap"/>
+        <object-type name="QSetFence" since="5.13">
+            <enum-type name="HandleType"/>
+        </object-type>
         <object-type name="QShaderData"/>
         <object-type name="QShaderProgram">
             <enum-type name="ShaderType"/>
             <enum-type name="Status"/>
         </object-type>
         <object-type name="QShaderProgramBuilder" since="5.10"/>
+        <object-type name="QSharedGLTexture" since="5.13"/>
         <object-type name="QSortPolicy">
             <enum-type name="SortType"/>
         </object-type>
@@ -252,5 +259,8 @@
             <enum-type name="WrapMode"/>
         </object-type>
         <object-type name="QViewport"/>
+        <object-type name="QWaitFence" since="5.13">
+            <enum-type name="HandleType"/>
+        </object-type>
     </namespace-type>
 </typesystem>

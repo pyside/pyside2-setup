@@ -17,6 +17,13 @@ ${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 )
 
+if (Qt5Help_VERSION VERSION_EQUAL 5.13.0 OR Qt5Help_VERSION VERSION_GREATER 5.13.0)
+    list(APPEND QtHelp_SRC
+         ${QtHelp_GEN_DIR}/qcompressedhelpinfo_wrapper.cpp
+         ${QtHelp_GEN_DIR}/qhelpfilterdata_wrapper.cpp
+         ${QtHelp_GEN_DIR}/qhelpfilterengine_wrapper.cpp)
+endif()
+
 set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtHelp_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
