@@ -112,7 +112,7 @@ def call_setup(python_ver):
     qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
     cmd.append(qmake_path)
     cmd += ["--build-tests",
-            "--jobs=4",
+            "--parallel=4",
             "--verbose-build"]
     if python_ver == "3":
         cmd += ["--limited-api=yes"]
