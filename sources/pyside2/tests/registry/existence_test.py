@@ -136,7 +136,7 @@ class TestSignaturesExists(unittest.TestCase):
                     warn(msgMultiSignatureCount(key, found_sigs[key], value))
             self.assertTrue(check_warnings())
 
-tested_versions = (5, 6), (5, 9), (5, 11) #, (5, 12)  # activate this, soon!
+tested_versions = (5, 6), (5, 9), (5, 11), (5, 12)
 
 if not have_refmodule and is_ci and qt_version()[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):
