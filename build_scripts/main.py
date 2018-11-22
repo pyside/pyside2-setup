@@ -50,14 +50,17 @@ setup_script_dir = os.getcwd()
 build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
 setup_py_path = os.path.join(setup_script_dir, "setup.py")
 
+start_time = int(time.time())
+
+def elapsed():
+    return int(time.time()) - start_time
+
 @memoize
 def get_package_timestamp():
     """ In a Coin CI build the returned timestamp will be the
         Coin integration id timestamp. For regular builds it's
         just the current timestamp or a user provided one."""
-    if OPTION_PACKAGE_TIMESTAMP:
-        return OPTION_PACKAGE_TIMESTAMP
-    return int(time.time())
+    return OPTION_PACKAGE_TIMESTAMP if OPTION_PACKAGE_TIMESTAMP else start_time
 
 @memoize
 def get_package_version():
@@ -347,7 +350,7 @@ class PysideInstall(_install):
 
     def run(self):
         _install.run(self)
-        log.info('*** Install completed')
+        log.info('*** Install completed ({}s)'.format(elapsed()))
 
 class PysideDevelop(_develop):
 
@@ -725,7 +728,7 @@ class PysideBuild(_build):
             _build.run(self)
         else:
             log.info("Skipped preparing and building packages.")
-        log.info('*** Build completed')
+        log.info('*** Build completed ({}s)'.format(elapsed()))
 
     def log_pre_build_info(self):
         if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():
