@@ -3208,6 +3208,122 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
 }
 
 #ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const ReferenceCount &r)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "ReferenceCount(" << r.varName << ", action=" << r.action << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const CodeSnip &s)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "CodeSnip(language=" << s.language << ", position=" << s.position << ", \"";
+    for (const auto &f : s.codeList) {
+        const QString &code = f.code();
+        const auto lines = code.splitRef(QLatin1Char('\n'));
+        for (int i = 0, size = lines.size(); i < size; ++i) {
+            if (i)
+                d << "\\n";
+            d << lines.at(i).trimmed();
+        }
+    }
+    d << '"';
+    if (!s.argumentMap.isEmpty()) {
+        d << ", argumentMap{";
+        for (auto it = s.argumentMap.cbegin(), end = s.argumentMap.cend(); it != end; ++it)
+            d << it.key() << "->\"" << it.value() << '"';
+        d << '}';
+    }
+    d << ')';
+    return d;
+}
+
+void Modification::formatDebug(QDebug &d) const
+{
+    d << "modifiers=" << hex << showbase << modifiers << noshowbase << dec;
+    if (removal)
+      d << ", removal";
+    if (!renamedToName.isEmpty())
+        d << ", renamedToName=\"" << renamedToName << '"';
+}
+
+void FunctionModification::formatDebug(QDebug &d) const
+{
+    if (m_signature.isEmpty())
+        d << "pattern=\"" << m_signaturePattern.pattern();
+    else
+        d << "signature=\"" << m_signature;
+    d << "\", ";
+    Modification::formatDebug(d);
+    if (!association.isEmpty())
+        d << ", association=\"" << association << '"';
+    if (m_allowThread != TypeSystem::AllowThread::Unspecified)
+        d << ", allowThread=" << int(m_allowThread);
+    if (m_thread)
+        d << ", thread";
+    if (m_exceptionHandling != TypeSystem::ExceptionHandling::Unspecified)
+        d << ", exceptionHandling=" << int(m_exceptionHandling);
+    if (!snips.isEmpty())
+        d << ", snips=(" << snips << ')';
+    if (!argument_mods.isEmpty())
+        d << ", argument_mods=(" << argument_mods << ')';
+}
+
+QDebug operator<<(QDebug d, const ArgumentOwner &a)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "ArgumentOwner(index=" << a.index << ", action=" << a.action << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const ArgumentModification &a)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "ArgumentModification(index=" << a.index;
+    if (a.removedDefaultExpression)
+        d << ", removedDefaultExpression";
+    if (a.removed)
+        d << ", removed";
+    if (a.noNullPointers)
+        d << ", noNullPointers";
+    if (a.array)
+        d << ", array";
+    if (!a.referenceCounts.isEmpty())
+        d << ", referenceCounts=" << a.referenceCounts;
+    if (!a.modified_type.isEmpty())
+        d << ", modified_type=\"" << a.modified_type << '"';
+    if (!a.replace_value.isEmpty())
+        d << ", replace_value=\"" << a.replace_value << '"';
+    if (!a.replacedDefaultExpression.isEmpty())
+        d << ", replacedDefaultExpression=\"" << a.replacedDefaultExpression << '"';
+    if (!a.ownerships.isEmpty())
+        d << ", ownerships=" << a.ownerships;
+    if (!a.renamed_to.isEmpty())
+        d << ", renamed_to=\"" << a.renamed_to << '"';
+     d << ", owner=" << a.owner << ')';
+    return  d;
+}
+
+QDebug operator<<(QDebug d, const FunctionModification &fm)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "FunctionModification(";
+    fm.formatDebug(d);
+    d << ')';
+    return d;
+}
+
 QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti)
 {
     QDebugStateSaver saver(d);
