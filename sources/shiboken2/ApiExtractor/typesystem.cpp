@@ -1632,6 +1632,21 @@ bool Handler::parseCustomConversion(const QXmlStreamReader &,
     return true;
 }
 
+bool Handler::parseNativeToTarget(const QXmlStreamReader &,
+                                  const StackElement &topElement,
+                                  QXmlStreamAttributes *attributes)
+{
+    if (topElement.type != StackElement::ConversionRule) {
+        m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
+        return false;
+    }
+    CodeSnip snip;
+    if (!readFileSnippet(attributes, &snip))
+        return false;
+    m_contextStack.top()->codeSnips.append(snip);
+    return true;
+}
+
 bool Handler::parseAddConversion(const QXmlStreamReader &,
                                  const StackElement &topElement,
                                  QXmlStreamAttributes *attributes)
@@ -1642,6 +1657,9 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
     }
     QString sourceTypeName;
     QString typeCheck;
+    CodeSnip snip;
+    if (!readFileSnippet(attributes, &snip))
+        return false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type"))
@@ -1654,7 +1672,7 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
         return false;
     }
     m_current->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
-    m_contextStack.top()->codeSnips << CodeSnip();
+    m_contextStack.top()->codeSnips.append(snip);
     return true;
 }
 
@@ -2670,11 +2688,8 @@ bool Handler::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::NativeToTarget:
-            if (topElement.type != StackElement::ConversionRule) {
-                m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
+            if (!parseNativeToTarget(reader, topElement, &attributes))
                 return false;
-            }
-            m_contextStack.top()->codeSnips << CodeSnip();
             break;
         case StackElement::TargetToNative: {
             if (topElement.type != StackElement::ConversionRule) {

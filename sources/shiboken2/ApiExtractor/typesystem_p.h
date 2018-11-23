@@ -198,6 +198,8 @@ private:
                                QXmlStreamAttributes *);
     bool parseAddConversion(const QXmlStreamReader &, const StackElement &topElement,
                             QXmlStreamAttributes *);
+    bool parseNativeToTarget(const QXmlStreamReader &, const StackElement &topElement,
+                             QXmlStreamAttributes *attributes);
     bool parseModifyArgument(const QXmlStreamReader &, const StackElement &topElement,
                              QXmlStreamAttributes *attributes);
     bool parseNoNullPointer(const QXmlStreamReader &, const StackElement &topElement,
