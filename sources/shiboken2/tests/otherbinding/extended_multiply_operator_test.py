@@ -57,7 +57,7 @@ class PointOperationsWithNumber(unittest.TestCase):
         '''sample.Point * other.Number'''
         pt = Point(2, 7)
         num = Number(11)
-        self.assertEqual(pt * num, pt * 11)
+        self.assertEqual(pt * num.value(), pt * 11)
 
 if __name__ == '__main__':
     unittest.main()

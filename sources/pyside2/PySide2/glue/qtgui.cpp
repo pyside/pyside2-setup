@@ -435,6 +435,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 %END_ALLOW_THREADS
 // @snippet qpainter-drawpolygon
 
+// @snippet qmatrix-map-point
+QPoint p(%CPPSELF.%FUNCTION_NAME(%1));
+%PYARG_0 = %CONVERTTOPYTHON[QPoint](p);
+// @snippet qmatrix-map-point
+
 // @snippet qmatrix4x4
 if (PySequence_Size(%PYARG_1) == 16) {
     float values[16];

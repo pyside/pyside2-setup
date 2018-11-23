@@ -732,6 +732,12 @@
             <insert-template name="qmatrix_map"/>
         </inject-code>
     </modify-function>
+    <modify-function signature="map(const QPoint&amp;)const">
+        <modify-argument index="return">
+          <replace-type modified-type="QPoint"/>
+        </modify-argument>
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-map-point" />
+    </modify-function>
     <modify-function signature="inverted(bool*)const">
       <modify-argument index="1">
         <remove-argument/>
@@ -3100,5 +3106,3 @@
   <object-type name="QStyleHints"/>
 
 </typesystem>
-
-

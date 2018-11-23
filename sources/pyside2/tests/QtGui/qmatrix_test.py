@@ -42,7 +42,7 @@ class QMatrixTest(unittest.TestCase):
     def testMatrix(self):
         matrix = QMatrix(11, 12, 21, 22, 100, 200)
         point = QPoint(3, 3)
-        self.assertEqual(point * matrix, qpointTimesQMatrix(point, matrix))
+        self.assertEqual(matrix.map(point), qpointTimesQMatrix(point, matrix))
 
     def testMatrixWithWrongType(self):
         matrix = QMatrix(11, 12, 21, 22, 100, 200)
