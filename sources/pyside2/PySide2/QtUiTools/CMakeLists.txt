@@ -6,6 +6,11 @@ ${QtUiTools_GEN_DIR}/quiloader_wrapper.cpp
 ${QtUiTools_GEN_DIR}/qtuitools_module_wrapper.cpp
 )
 
+set(QtUiTools_glue_sources
+    "${QtUiTools_SOURCE_DIR}/glue/plugins.h"
+    "${QtUiTools_SOURCE_DIR}/glue/uitools_loadui.cpp"
+)
+
 set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${QtUiTools_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
@@ -38,4 +43,7 @@ create_pyside_module(QtUiTools
                      QtUiTools_deps
                      QtUiTools_SOURCE_DIR
                      QtUiTools_SRC
-                     "")
+                     ""
+                     ""
+                     ""
+                     QtUiTools_glue_sources)

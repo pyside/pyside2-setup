@@ -3,6 +3,7 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=@LIB_INSTALL_DIR@
 includedir=@CMAKE_INSTALL_PREFIX@/include/PySide2@pyside2_SUFFIX@
 typesystemdir=@CMAKE_INSTALL_PREFIX@/share/PySide2@pyside2_SUFFIX@/typesystems
+gluedir=@CMAKE_INSTALL_PREFIX@/share/PySide2@pyside2_SUFFIX@/glue
 pythonpath=@PYTHON_SITE_PACKAGES@
 
 Name: PySide2@pyside2_SUFFIX@

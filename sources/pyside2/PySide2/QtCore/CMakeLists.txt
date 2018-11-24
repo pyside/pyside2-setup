@@ -180,6 +180,17 @@ ${SPECIFIC_OS_FILES}
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
 
+set(QtCore_glue_sources
+    "${QtCore_SOURCE_DIR}/glue/qbytearray_bufferprotocol.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qbytearray_mgetitem.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qbytearray_msetitem.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qcoreapplication_init.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"
+    "${QtCore_SOURCE_DIR}/glue/qobject_connect.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qobject_findchild.cpp"
+)
+
 configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
                "${QtCore_BINARY_DIR}/typesystem_core.xml" @ONLY)
 
@@ -202,5 +213,8 @@ create_pyside_module(QtCore
                      QtCore_SOURCE_DIR
                      QtCore_SRC
                      QtCore_gluecode
-                     ${QtCore_BINARY_DIR}/typesystem_core.xml)
+                     ${QtCore_BINARY_DIR}/typesystem_core.xml
+                     ""
+                     QtCore_glue_sources
+                     )
 
