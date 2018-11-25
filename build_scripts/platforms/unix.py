@@ -184,6 +184,14 @@ def prepare_packages_posix(self, vars):
             "{st_build_dir}/{st_package_name}/support",
             vars=vars)
 
+        # <source>/pyside2/{st_package_name}/*.pyi ->
+        #   <setup>/{st_package_name}/*.pyi
+        copydir(
+            "{build_dir}/pyside2/{st_package_name}",
+            "{st_build_dir}/{st_package_name}",
+            filter=["*.pyi"],
+            vars=vars)
+
         if not OPTION_NOEXAMPLES:
             # examples/* -> <setup>/{st_package_name}/examples
             copydir(os.path.join(self.script_dir, "examples"),

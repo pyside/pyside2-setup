@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 #############################################################################
 ##
 ## Copyright (C) 2018 The Qt Company Ltd.
@@ -49,14 +50,15 @@ import sys
 import os
 import io
 import re
-import PySide2
 import subprocess
 import argparse
 from contextlib import contextmanager
 from textwrap import dedent
 
-from PySide2.support.signature import inspect
-from PySide2.support.signature.lib.enum_sig import HintingEnumerator
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("generate_pyi")
 
 
 # Make sure not to get .pyc in Python2.
@@ -101,8 +103,9 @@ class Formatter(Writer):
         self.print("# Module", mod_name)
         self.print("import shiboken2 as Shiboken")
         from PySide2.support.signature import typing
-        typing_str = "from PySide2.support.signature import typing"
-        self.print(typing_str)
+        self.print("from PySide2.support.signature import typing")
+        self.print("from PySide2.support.signature.mapping import (")
+        self.print("    Virtual, Missing, Invalid, Default, Instance)")
         self.print()
         self.print("class Object(object): pass")
         self.print()
@@ -174,68 +177,151 @@ def find_imports(text):
     return [imp for imp in PySide2.__all__ if imp + "." in text]
 
 
+def safe_create(filename):
+    pid = os.getpid()
+    locname = "{filename}.{pid}".format(**locals())
+    f = io.open(locname, "w")  # do not close for atomic rename on Linux
+    if sys.platform == "win32":
+        f.close()
+    try:
+        os.rename(locname, filename)
+        logger.debug("{pid}:File {filename} created".format(**locals()))
+        if sys.platform == "win32":
+            f = io.open(filename, "w")
+        return f
+    except OSError:
+        logger.debug("{pid}:Could not rename {locname} to {filename}"
+                     .format(**locals()))
+        try:
+            os.remove(locname)
+        except OSError as e:
+            logger.warning("{pid}: unexpected os.remove error in safe_create: {e}"
+                           .format(**locals()))
+        return None
+
+
 def generate_pyi(import_name, outpath, options):
+    """
+    Generates a .pyi file.
+
+    Returns 1 If the result is valid, else 0.
+    """
+    pid = os.getpid()
     plainname = import_name.split(".")[-1]
     if not outpath:
         outpath = os.path.dirname(PySide2.__file__)
     outfilepath = os.path.join(outpath, plainname + ".pyi")
     if options.skip and os.path.exists(outfilepath):
-        return
+        logger.debug("{pid}:Skipped existing: {outfilepath}".format(**locals()))
+        return 1
+    workpath = outfilepath + ".working"
+    if os.path.exists(workpath):
+        return 0
+    realfile = safe_create(workpath)
+    if not realfile:
+        return 0
+
     try:
-        __import__(import_name)
-    except ImportError:
-        return
+        top = __import__(import_name)
+        obj = getattr(top, plainname)
+        if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
+            raise ImportError("We do not accept a namespace as module {plainname}"
+                              .format(**locals()))
+        module = sys.modules[import_name]
 
-    module = sys.modules[import_name]
-    mod_fullname = module.__file__
-    outfile = io.StringIO()
-    fmt = Formatter(outfile)
-    enu = HintingEnumerator(fmt)
-    fmt.print(get_license_text())
-    need_imports = not USE_PEP563
-    if USE_PEP563:
-        fmt.print("from __future__ import annotations")
+        outfile = io.StringIO()
+        fmt = Formatter(outfile)
+        enu = HintingEnumerator(fmt)
+        fmt.print(get_license_text())  # which has encoding, already
+        need_imports = not USE_PEP563
+        if USE_PEP563:
+            fmt.print("from __future__ import annotations")
+            fmt.print()
+        fmt.print(dedent('''\
+            """
+            This file contains the exact signatures for all functions in module
+            {import_name}, except for defaults which are replaced by "...".
+            """
+            '''.format(**locals())))
+        enu.module(import_name)
         fmt.print()
-    fmt.print(dedent('''\
-        """
-        This file contains the exact signatures for all functions in PySide
-        for module '{mod_fullname}',
-        except for defaults which are replaced by "...".
-        """
-        '''.format(**locals())))
-    enu.module(import_name)
-    fmt.print("# eof")
-    with io.open(outfilepath, "w") as realfile:
-        wr = Writer(realfile)
-        outfile.seek(0)
-        while True:
-            line = outfile.readline()
-            if not line:
-                break
-            line = line.rstrip()
-            # we remove the IMPORTS marker and insert imports if needed
-            if line == "IMPORTS":
-                if need_imports:
-                    for mod_name in find_imports(outfile.getvalue()):
-                        imp = "PySide2." + mod_name
-                        if imp != import_name:
-                            wr.print("import " + imp)
-                wr.print("import " + import_name)
-                wr.print()
-                wr.print()
-            else:
-                wr.print(line)
+        fmt.print("# eof")
 
-    print(outfilepath, file=sys.stderr)
+    except ImportError as e:
+        logger.debug("{pid}:Import problem with module {plainname}: {e}".format(**locals()))
+        try:
+            os.remove(workpath)
+        except OSError as e:
+            logger.warning("{pid}: unexpected os.remove error in generate_pyi: {e}"
+                           .format(**locals()))
+        return 0
+
+    wr = Writer(realfile)
+    outfile.seek(0)
+    while True:
+        line = outfile.readline()
+        if not line:
+            break
+        line = line.rstrip()
+        # we remove the IMPORTS marker and insert imports if needed
+        if line == "IMPORTS":
+            if need_imports:
+                for mod_name in find_imports(outfile.getvalue()):
+                    imp = "PySide2." + mod_name
+                    if imp != import_name:
+                        wr.print("import " + imp)
+            wr.print("import " + import_name)
+            wr.print()
+            wr.print()
+        else:
+            wr.print(line)
+    realfile.close()
+
+    if os.path.exists(outfilepath):
+        os.remove(outfilepath)
+    try:
+        os.rename(workpath, outfilepath)
+    except OSError:
+        logger.warning("{pid}: probable duplicate generated: {outfilepath}"#
+                       .format(**locals()))
+        return 0
+    logger.info("Generated: {outfilepath}".format(**locals()))
     if sys.version_info[0] == 3:
         # Python 3: We can check the file directly if the syntax is ok.
         subprocess.check_output([sys.executable, outfilepath])
+    return 1
 
 
 def generate_all_pyi(outpath, options):
+    ps = os.pathsep
+    if options.sys_path:
+        # make sure to propagate the paths from sys_path to subprocesses
+        sys_path = [os.path.normpath(_) for _ in options.sys_path]
+        sys.path[0:0] = sys_path
+        pypath = ps.join(sys_path)
+        os.environ["PYTHONPATH"] = pypath
+    if options.lib_path:
+        # the path changes are automatically propagated to subprocesses
+        ospath_var = "PATH" if sys.platform == "win32" else "LD_LIBRARY_PATH"
+        old_val = os.environ.get(ospath_var, "")
+        lib_path = [os.path.normpath(_) for _ in options.lib_path]
+        ospath = ps.join(lib_path + old_val.split(ps))
+        os.environ[ospath_var] = ospath
+
+    # now we can import
+    global PySide2, inspect, HintingEnumerator
+    import PySide2
+    from PySide2.support.signature import inspect
+    from PySide2.support.signature.lib.enum_sig import HintingEnumerator
+
+    valid = 0
     for mod_name in PySide2.__all__:
         import_name = "PySide2."  + mod_name
-        generate_pyi(import_name, outpath, options)
+        valid += generate_pyi(import_name, outpath, options)
+
+    npyi = len(PySide2.__all__)
+    if valid == npyi:
+        logger.info("+++ All {npyi} .pyi files have been created.".format(**locals()))
 
 
 if __name__ == "__main__":
@@ -245,14 +331,20 @@ if __name__ == "__main__":
     parser_run = subparsers.add_parser("run",
         help="run the generation",
         description="This script generates the .pyi file for all PySide modules.")
-    parser_run.add_argument("--skip", action="store_true", help="skip already generated files")
-    parser_run.add_argument("--outpath", help="the outout folder. Default = location of binaries.")
+    parser_run.add_argument("--skip", action="store_true",
+        help="skip existing files")
+    parser_run.add_argument("--outpath",
+        help="the output directory (default = binary location)")
+    parser_run.add_argument("--sys-path", nargs="+",
+        help="a list of strings prepended to sys.path")
+    parser_run.add_argument("--lib-path", nargs="+",
+        help="a list of strings prepended to LD_LIBRARY_PATH (unix) or PATH (windows)")
     options = parser.parse_args()
     if options.command == "run":
         outpath = options.outpath
         if outpath and not os.path.exists(outpath):
             os.makedirs(outpath)
-            print("+++ Created path {outpath}".format(**locals()))
+            logger.info("+++ Created path {outpath}".format(**locals()))
         generate_all_pyi(outpath, options=options)
     else:
         parser_run.print_help()

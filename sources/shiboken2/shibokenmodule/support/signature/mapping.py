@@ -104,7 +104,7 @@ class _NotCalled(str):
     real object is needed, the wrapper can simply be called.
     """
     def __repr__(self):
-        suppress = "PySide2.support.signature.typing."
+        suppress = "support.signature.typing."
         text = self[len(suppress):] if self.startswith(suppress) else self
         return "{}({})".format(type(self).__name__, text)
 
@@ -119,7 +119,8 @@ class Virtual(_NotCalled):
 
 # Other types I simply could not find.
 class Missing(_NotCalled):
-    pass
+    def __repr__(self):
+        return '{}("{}")'.format(type(self).__name__, self)
 
 class Invalid(_NotCalled):
     pass
@@ -148,7 +149,14 @@ class Reloader(object):
             g = globals()
         for mod_name in self.uninitialized[:]:
             for prefix in self._prefixes:
-                if prefix + mod_name in sys.modules:
+                import_name = prefix + mod_name
+                if import_name in sys.modules:
+                    # check if this is a real module
+                    obj = sys.modules[import_name]
+                    if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
+                        raise ImportError("Module '{mod_name}' is at most a "
+                                          "namespace!".format(**locals()))
+                    # module is real
                     self.uninitialized.remove(mod_name)
                     proc_name = "init_" + mod_name
                     if proc_name in g:

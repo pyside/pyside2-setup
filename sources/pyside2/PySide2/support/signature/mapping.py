@@ -315,8 +315,7 @@ def init_QtXmlPatterns():
     return locals()
 
 
-def init_QtMultimedia():
-    import PySide2.QtMultimedia
+def init_QtMultimediaWidgets():
     import PySide2.QtMultimediaWidgets
     type_map.update({
         "QGraphicsVideoItem": PySide2.QtMultimediaWidgets.QGraphicsVideoItem,
@@ -386,7 +385,6 @@ def init_QtTest():
 def init_QtWebEngineWidgets():
     import PySide2.QtWebEngineWidgets
     type_map.update({
-        "PySide2.QtTest.QTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
         "zero(PySide2.QtWebEngineWidgets.QWebEnginePage.FindFlags)": 0,
     })
     return locals()

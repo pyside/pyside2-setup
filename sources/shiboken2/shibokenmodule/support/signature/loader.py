@@ -146,7 +146,8 @@ with ensure_import_support():
     else:
         import inspect
         namespace = inspect.__dict__
-        from support.signature import typing
+        from support.signature import typing27 as typing
+        typing.__name__ = "typing"
         from support.signature import backport_inspect as inspect
         _doc = inspect.__doc__
         inspect.__dict__.update(namespace)

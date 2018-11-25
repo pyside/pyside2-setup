@@ -81,6 +81,10 @@ class ExactEnumerator(object):
             return ret
 
     def klass(self, class_name, klass):
+        if not "Shiboken" in repr(klass.mro()):
+            # don't look into any foreign classes!
+            ret = self.result_type()
+            return ret
         bases_list = []
         for base in klass.__bases__:
             name = base.__name__

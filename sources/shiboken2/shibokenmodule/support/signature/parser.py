@@ -76,6 +76,7 @@ def dprint(*args, **kw):
         import pprint
         for arg in args:
             pprint.pprint(arg)
+            sys.stdout.flush()
 
 def _parse_line(line):
     line_re = r"""

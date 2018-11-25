@@ -120,6 +120,8 @@ pyside_sm_get___signature__(PyObject *sm, const char *modifier)
 {
     init_module_2();
     Shiboken::AutoDecRef func(PyObject_GetAttrString(sm, "__func__"));
+    if (Py_TYPE(func) == PepFunction_TypePtr)
+        Py_RETURN_NONE;
     return GetSignature_Function(func, modifier);
 }
 
@@ -299,28 +301,38 @@ GetClassKey(PyObject *ob)
     return Py_BuildValue("O", class_name.object());
 }
 
+static PyObject *empty_dict = nullptr;
+
+static PyObject *
+TypeKey_to_PropsDict(PyObject *type_key, PyObject *obtype)
+{
+    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, type_key);
+    if (dict == nullptr) {
+        if (empty_dict == nullptr)
+            empty_dict = PyDict_New();
+        dict = empty_dict;
+    }
+    if (PyTuple_Check(dict))
+        dict = PySide_BuildSignatureProps(obtype);
+    return dict;
+}
+
 static PyObject *
 GetSignature_Function(PyObject *ob_func, const char *modifier)
 {
+    // make sure that we look into PyCFunction, only...
+    if (Py_TYPE(ob_func) == PepFunction_TypePtr)
+        Py_RETURN_NONE;
     Shiboken::AutoDecRef typemod(GetClassOfFunc(ob_func));
     Shiboken::AutoDecRef type_key(GetClassKey(typemod));
     if (type_key.isNull())
         Py_RETURN_NONE;
-    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, type_key);
-    if (dict == NULL)
-        Py_RETURN_NONE;
-    if (PyTuple_Check(dict)) {
-        /*
-         * We do the initialization lazily.
-         * This has also the advantage that we can freely import PySide.
-         */
-        dict = PySide_BuildSignatureProps(typemod);
-        if (dict == NULL)
-            Py_RETURN_NONE;
-    }
+    PyObject *dict = TypeKey_to_PropsDict(type_key, typemod);
+    if (dict == nullptr)
+        return nullptr;
     Shiboken::AutoDecRef func_name(PyObject_GetAttrString(ob_func, "__name__"));
     PyObject *props = !func_name.isNull() ? PyDict_GetItem(dict, func_name) : nullptr;
-    if (props == NULL)
+    if (props == nullptr)
         Py_RETURN_NONE;
 
     int flags = PyCFunction_GET_FLAGS(ob_func);
@@ -333,8 +345,7 @@ GetSignature_Function(PyObject *ob_func, const char *modifier)
         sig_kind = "staticmethod";
     else
         sig_kind = "method";
-    PyObject *ret = GetSignature_Cached(props, sig_kind, modifier);
-    return ret;
+    return GetSignature_Cached(props, sig_kind, modifier);
 }
 
 static PyObject *
@@ -346,20 +357,11 @@ GetSignature_Wrapper(PyObject *ob, const char *modifier)
 
     if (func_name.isNull() || objclass.isNull() || class_key.isNull())
         return nullptr;
-    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, class_key);
-    if (dict == NULL)
-        Py_RETURN_NONE;
-    if (PyTuple_Check(dict)) {
-        /*
-         * We do the initialization lazily.
-         * This has also the advantage that we can freely import PySide.
-         */
-        dict = PySide_BuildSignatureProps(objclass);
-        if (dict == NULL)
-            Py_RETURN_NONE;
-    }
+    PyObject *dict = TypeKey_to_PropsDict(class_key, objclass);
+    if (dict == nullptr)
+        return nullptr;
     PyObject *props = PyDict_GetItem(dict, func_name);
-    if (props == NULL)
+    if (props == nullptr)
         Py_RETURN_NONE;
     return GetSignature_Cached(props, "method", modifier);
 }
@@ -370,18 +372,11 @@ GetSignature_TypeMod(PyObject *ob, const char *modifier)
     Shiboken::AutoDecRef ob_name(PyObject_GetAttrString(ob, "__name__"));
     Shiboken::AutoDecRef ob_key(GetClassKey(ob));
 
-    PyObject *dict = PyDict_GetItem(pyside_globals->arg_dict, ob_key);
-    if (dict == NULL)
-        Py_RETURN_NONE;
-
-    if (PyTuple_Check(dict)) {
-        dict = PySide_BuildSignatureProps(ob);
-        if (dict == NULL) {
-            Py_RETURN_NONE;
-        }
-    }
+    PyObject *dict = TypeKey_to_PropsDict(ob_key, ob);
+    if (dict == nullptr)
+        return nullptr;
     PyObject *props = PyDict_GetItem(dict, ob_name);
-    if (props == NULL)
+    if (props == nullptr)
         Py_RETURN_NONE;
     return GetSignature_Cached(props, "method", modifier);
 }
@@ -587,6 +582,9 @@ get_signature(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "O|s", &ob, &modifier))
         return NULL;
+    if (Py_TYPE(ob) == PepFunction_TypePtr)
+        Py_RETURN_NONE;
+
     if (Py_TYPE(ob) == &PyCFunction_Type)
         return pyside_cf_get___signature__(ob, modifier);
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
@@ -723,14 +721,13 @@ static PyMethodDef signature_methods[] = {
 static void
 init_module_2(void)
 {
-    static int init_done = 0, initializing = 0;
+    static int init_done = 0;
 
     if (!init_done) {
-        if (initializing)
-            Py_FatalError("Init 2 called recursively!");
-        init_phase_2(pyside_globals, signature_methods);
+        // Phase 2 will call __init__.py which touches a signature, itself.
+        // Therefore we set init_done prior to init_phase_2().
         init_done = 1;
-        initializing = 0;
+        init_phase_2(pyside_globals, signature_methods);
     }
 }
 
@@ -751,8 +748,14 @@ PySide_BuildSignatureProps(PyObject *classmod)
     if (arg_tup == nullptr)
         return nullptr;
     PyObject *dict = PyObject_CallObject(pyside_globals->sigparse_func, arg_tup);
-    if (dict == nullptr)
-        return nullptr;
+    if (dict == nullptr) {
+        if (PyErr_Occurred())
+            return nullptr;
+        // No error: return an empty dict.
+        if (empty_dict == nullptr)
+            empty_dict = PyDict_New();
+        return empty_dict;
+    }
 
     // We replace the arguments by the result dict.
     if (PyDict_SetItem(pyside_globals->arg_dict, type_key, dict) < 0)
