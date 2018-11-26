@@ -6,9 +6,25 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/global.h.in"
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/generate_pyi.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/generate_pyi.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/layout.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/layout.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/mapping.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/enum_sig.py" COPYONLY)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
-              "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
+               "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
 
 # Use absolute path instead of relative path, to avoid ninja build errors due to
 # duplicate file dependency inconsistency.
@@ -38,27 +54,6 @@ endif()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/__init__.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/layout.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/layout.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/loader.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/loader.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/mapping.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/parser.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/__init__.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/enum_sig.py" COPYONLY)
-if (PYTHON_VERSION_MAJOR EQUAL 3)
-else()
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing27.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
-endif()
 
 # now compile all modules.
 file(READ "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" pyside2_global_contents)

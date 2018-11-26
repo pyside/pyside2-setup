@@ -193,7 +193,11 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
 
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    #ifdef IS_PY3K
+    PyObject *s = PyUnicode_FromFormat("%s(%p, %zd, %s)",
+    #else
     PyObject *s = PyBytes_FromFormat("%s(%p, %zd, %s)",
+    #endif
                            Py_TYPE(sbkObject)->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
@@ -205,7 +209,11 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    #ifdef IS_PY3K
+    PyObject *s = PyUnicode_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
+    #else
     PyObject *s = PyBytes_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
+    #endif
                            Py_TYPE(sbkObject)->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,

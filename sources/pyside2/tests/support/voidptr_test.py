@@ -27,7 +27,7 @@
 #############################################################################
 
 import unittest
-from PySide2 import shiboken2
+import shiboken2 as shiboken
 from PySide2.support import VoidPtr
 from PySide2.QtCore import QByteArray
 
@@ -40,7 +40,7 @@ class PySide2Support(unittest.TestCase):
         # or another VoidPtr object.
         ba = QByteArray(b"Hello world")
         voidptr = VoidPtr(ba)
-        self.assertIsInstance(voidptr, shiboken2.VoidPtr)
+        self.assertIsInstance(voidptr, shiboken.VoidPtr)
 
 if __name__ == '__main__':
     unittest.main()

@@ -88,3 +88,6 @@
     win32
     linux
     darwin
+
+[QtPositioning::positioning]
+    win32

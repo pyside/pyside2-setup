@@ -746,6 +746,20 @@ bool TypeDatabase::checkApiVersion(const QString &package,
     if (!var.isEmpty()) \
          d << ", " << var.size() << ' '  << name;
 
+template <class Container, class Separator>
+static void formatList(QDebug &d, const char *name, const Container &c, Separator sep)
+{
+    if (const int size = c.size()) {
+        d << ", " << name << '[' << size << "]=(";
+        for (int i = 0; i < size; ++i) {
+            if (i)
+                d << sep;
+             d << c.at(i);
+        }
+        d << ')';
+    }
+}
+
 void TypeEntry::formatDebug(QDebug &d) const
 {
     const QString cppName = qualifiedCppName();
@@ -766,14 +780,7 @@ void TypeEntry::formatDebug(QDebug &d) const
         d << ", sbkIndex=" << m_sbkIndex;
     if (m_include.isValid())
         d << ", include=" << m_include;
-    if (const int count = m_extraIncludes.size()) {
-        d << ", extraIncludes[" << count << "]=";
-        for (int i = 0; i < count; ++i) {
-            if (i)
-                d << ", ";
-            d << m_extraIncludes.at(i);
-        }
-    }
+    formatList(d, "extraIncludes", m_extraIncludes, ", ");
 }
 
 void ComplexTypeEntry::formatDebug(QDebug &d) const
@@ -794,7 +801,7 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
     FORMAT_NONEMPTY_STRING("targetType", m_targetType)
     FORMAT_NONEMPTY_STRING("hash", m_hashFunction)
     FORMAT_LIST_SIZE("addedFunctions", m_addedFunctions)
-    FORMAT_LIST_SIZE("functionMods", m_functionMods)
+    formatList(d, "functionMods", m_functionMods, ", ");
     FORMAT_LIST_SIZE("fieldMods", m_fieldMods)
 }
 
@@ -876,7 +883,9 @@ void TypeDatabase::formatDebug(QDebug &d) const
         }
         d << ")\n";
     }
-    d <<"\nglobalUserFunctions=" << m_globalUserFunctions << ')';
+    d <<"\nglobalUserFunctions=" << m_globalUserFunctions << '\n';
+    formatList(d, "globalFunctionMods", m_functionMods, '\n');
+    d << ')';
 }
 
 QDebug operator<<(QDebug d, const TypeDatabase &db)

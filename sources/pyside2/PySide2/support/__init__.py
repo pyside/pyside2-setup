@@ -37,12 +37,4 @@
 ##
 #############################################################################
 
-# Import VoidPtr type to expose it under PySide2.support.VoidPtr
-try:
-    # The normal import statement when PySide2 is installed.
-    from PySide2.shiboken2 import VoidPtr
-except ImportError:
-    # When running make test in shiboken build dir, or when running testrunner.py,
-    # shiboken2 is not part of the PySide2 module, so it needs to be imported as a standalone
-    # module.
-    from shiboken2 import VoidPtr
+from shiboken2 import VoidPtr

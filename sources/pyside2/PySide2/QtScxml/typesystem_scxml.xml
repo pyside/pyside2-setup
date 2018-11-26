@@ -52,7 +52,13 @@
     <object-type name="QScxmlInvokableService"/>
     <object-type name="QScxmlInvokableServiceFactory"/>
     <object-type name="QScxmlStaticScxmlServiceFactory"/>
-    <object-type name="QScxmlStateMachine"/>
+    <object-type name="QScxmlStateMachine">
+        <modify-function signature="submitEvent(QScxmlEvent*)">
+            <modify-argument index="1">
+                <define-ownership owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
     <object-type name="QScxmlTableData"/>
     <object-type name="QScxmlDataModel" since="5.12">
         <!-- Needs to have exports fixed -->

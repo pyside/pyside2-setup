@@ -38,7 +38,7 @@
 ****************************************************************************/
 
 #include "pep384impl.h"
-#include <autodecref.h>
+#include "autodecref.h"
 
 extern "C"
 {
@@ -502,7 +502,8 @@ static PyTypeObject *getFunctionType(void)
 
 PyTypeObject *PepStaticMethod_TypePtr = NULL;
 
-static PyTypeObject *getStaticMethodType(void)
+static PyTypeObject *
+getStaticMethodType(void)
 {
     // this works for Python 3, only
     //    "StaticMethodType = type(str.__dict__['maketrans'])\n";
@@ -511,12 +512,31 @@ static PyTypeObject *getStaticMethodType(void)
         "StaticMethod_Type = type(spamlist.__dict__['staticmeth'])\n";
     return (PyTypeObject *) PepRun_GetResult(prog, "StaticMethod_Type");
 }
+
+typedef struct {
+    PyObject_HEAD
+    PyObject *sm_callable;
+    PyObject *sm_dict;
+} staticmethod;
+
+PyObject *
+PyStaticMethod_New(PyObject *callable)
+{
+    staticmethod *sm = (staticmethod *)
+        PyType_GenericAlloc(PepStaticMethod_TypePtr, 0);
+    if (sm != NULL) {
+        Py_INCREF(callable);
+        sm->sm_callable = callable;
+    }
+    return (PyObject *)sm;
+}
 #endif // Py_LIMITED_API
 
 #if PY_VERSION_HEX < 0x03000000
 PyTypeObject *PepMethodDescr_TypePtr = NULL;
 
-static PyTypeObject *getMethodDescrType(void)
+static PyTypeObject *
+getMethodDescrType(void)
 {
     static const char prog[] =
         "MethodDescr_Type = type(str.split)\n";

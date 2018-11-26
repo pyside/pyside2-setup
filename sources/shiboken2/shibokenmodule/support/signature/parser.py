@@ -45,7 +45,8 @@ import warnings
 import types
 import keyword
 import functools
-from .mapping import type_map, update_mapping, __dict__ as namespace
+from signature_loader.mapping import (
+    type_map, update_mapping, __dict__ as namespace)
 
 _DEBUG = False
 LIST_KEYWORDS = False
@@ -239,7 +240,7 @@ def fixup_multilines(sig_str):
             if idx > 0:
                 continue
             # remove duplicates
-            multi_lines = list(set(multi_lines))
+            multi_lines = sorted(set(multi_lines))
             # renumber or return a single line
             nmulti = len(multi_lines)
             if nmulti > 1:

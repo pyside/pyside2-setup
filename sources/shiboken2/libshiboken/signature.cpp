@@ -111,12 +111,14 @@ CreateSignature(PyObject *props, PyObject *key)
 static PyObject *
 pyside_cf_get___signature__(PyObject *func, const char *modifier)
 {
+    init_module_2();
     return GetSignature_Function(func, modifier);
 }
 
 static PyObject *
 pyside_sm_get___signature__(PyObject *sm, const char *modifier)
 {
+    init_module_2();
     Shiboken::AutoDecRef func(PyObject_GetAttrString(sm, "__func__"));
     return GetSignature_Function(func, modifier);
 }
@@ -239,6 +241,7 @@ name_key_to_func(PyObject *ob)
 static PyObject *
 pyside_md_get___signature__(PyObject *ob_md, const char *modifier)
 {
+    init_module_2();
     Shiboken::AutoDecRef func(name_key_to_func(ob_md));
     if (func.object() == Py_None)
         return Py_None;
@@ -250,12 +253,14 @@ pyside_md_get___signature__(PyObject *ob_md, const char *modifier)
 static PyObject *
 pyside_wd_get___signature__(PyObject *ob, const char *modifier)
 {
+    init_module_2();
     return GetSignature_Wrapper(ob, modifier);
 }
 
 static PyObject *
 pyside_tp_get___signature__(PyObject *typemod, const char *modifier)
 {
+    init_module_2();
     return GetSignature_TypeMod(typemod, modifier);
 }
 
@@ -407,14 +412,23 @@ GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier)
 static const char PySide_PythonCode[] =
     "from __future__ import print_function, absolute_import\n" R"~(if True:
 
+    # This is becoming the 'signature_loader' module.
+
     import sys, os, traceback
     # We avoid imports in phase 1 that could fail. "import shiboken" of the
     # binary would even crash in FinishSignatureInitialization.
 
     def bootstrap():
         global __file__
-        import PySide2 as root
+        try:
+            import shiboken2 as root
+        except ImportError:
+            # uninstalled case without ctest, try only this one which has __init__:
+            from shibokenmodule import shiboken2 as root
         rp = os.path.realpath(os.path.dirname(root.__file__))
+        # This can be the shiboken2 directory or the binary module, so search.
+        while len(rp) > 3 and not os.path.exists(os.path.join(rp, 'support')):
+            rp = os.path.abspath(os.path.join(rp, '..'))
         __file__ = os.path.join(rp, 'support', 'signature', 'loader.py')
         try:
             with open(__file__) as _f:
@@ -493,6 +507,7 @@ init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 
 error:
     Py_XDECREF(v);
+    PyErr_Print();
     PyErr_SetString(PyExc_SystemError, "could not initialize part 2");
     return -1;
 }
@@ -569,7 +584,6 @@ get_signature(PyObject *self, PyObject *args)
     const char *modifier = nullptr;
 
     init_module_1();
-    init_module_2();
 
     if (!PyArg_ParseTuple(args, "O|s", &ob, &modifier))
         return NULL;
@@ -618,7 +632,7 @@ void handler(int sig) {
 #endif // _WIN32
 
 static int
-PySideType_Ready(PyTypeObject *type)
+PySide_PatchTypes(void)
 {
     static int init_done = 0;
 
@@ -642,7 +656,7 @@ PySideType_Ready(PyTypeObject *type)
 #endif // _WIN32
         init_done = 1;
     }
-    return PyType_Ready(type);
+    return 0;
 }
 
 static void
@@ -672,14 +686,7 @@ PySide_BuildSignatureArgs(PyObject *module, PyObject *type,
      * We can ignore the EnclosingObject since we get full name info
      * from the type.
      */
-    if (PyModule_Check(module)) {
-        const char *name = PyModule_GetName(module);
-        if (name == NULL)
-            return -1;
-        if (strcmp(name, "testbinding") == 0)
-            return 0;
-    }
-    else
+    if (!PyModule_Check(module))
         assert(PyDict_Check(module));
     /*
      * Normally, we would now just call the Python function with the
@@ -758,7 +765,7 @@ SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
                       const char *signatures)
 {
     int ret;
-    if (PySideType_Ready(type) < 0)
+    if (PyType_Ready(type) < 0)
         return -1;
     ret = PySide_BuildSignatureArgs(module, (PyObject *)type, signatures);
     if (ret < 0) {
@@ -778,13 +785,9 @@ PySide_FinishSignatures(PyObject *module, const char *signatures)
      * Initialization of module functions and resolving of static methods.
      */
 
-    // CRUCIAL: Do not call this on "testbinding":
-    // The module is different and should not get signatures, anyway.
     const char *name = PyModule_GetName(module);
     if (name == NULL)
         return -1;
-    if (strcmp(name, "testbinding") == 0)
-        return 0;
 
     // we abuse the call for types, since they both have a __name__ attribute.
     if (PySide_BuildSignatureArgs(module, module, signatures) < 0)
@@ -846,7 +849,8 @@ _build_func_to_type(PyObject *obtype)
      * mapping from function to type.
      *
      * We walk through the method list of the type
-     * and record the mapping from function to this type in a dict.
+     * and record the mapping from static method to this type in a dict.
+     * We also check for hidden methods, see below.
      */
     PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyObject *dict = type->tp_dict;
@@ -856,13 +860,51 @@ _build_func_to_type(PyObject *obtype)
         return 0;
 
     for (; meth->ml_name != NULL; meth++) {
-        if (meth->ml_flags & METH_STATIC) {
-            PyObject *descr = PyDict_GetItemString(dict, meth->ml_name);
-            if (descr == NULL)
+        /*
+         * It is possible that a method is overwritten by another
+         * attribute with the same name. This case was obviously provoked
+         * explicitly in "testbinding.TestObject.staticMethodDouble",
+         * where instead of the method a "PySide2.QtCore.Signal" object
+         * was in the dict.
+         * This overlap is also found in regular PySide under
+         * "PySide2.QtCore.QProcess.error" where again a signal object is
+         * returned. These hidden methods will be opened for the
+         * signature module by adding them under the name
+         * "{name}.overload".
+         */
+        PyObject *descr = PyDict_GetItemString(dict, meth->ml_name);
+        const char *look_attr = meth->ml_flags & METH_STATIC ? "__func__" : "__name__";
+        int check_name = meth->ml_flags & METH_STATIC ? 0 : 1;
+        if (descr == NULL)
+            return -1;
+
+        // We first check all methods if one is hidden by something else.
+        Shiboken::AutoDecRef look(PyObject_GetAttrString(descr, look_attr));
+        Shiboken::AutoDecRef given(Py_BuildValue("s", meth->ml_name));
+        if (look.isNull()
+            || (check_name && PyObject_RichCompareBool(look, given, Py_EQ) != 1)) {
+            PyErr_Clear();
+            Shiboken::AutoDecRef cfunc(PyCFunction_NewEx(meth, (PyObject*)type, NULL));
+            if (cfunc.isNull())
                 return -1;
-            Shiboken::AutoDecRef func(PyObject_GetAttrString(descr, "__func__"));
-            if (func.isNull() ||
-                PyDict_SetItem(pyside_globals->map_dict, func, obtype) < 0)
+            if (meth->ml_flags & METH_STATIC)
+                descr = PyStaticMethod_New(cfunc);
+            else
+                descr = PyDescr_NewMethod(type, meth);
+            if (descr == nullptr)
+                return -1;
+            char mangled_name[200];
+            strcpy(mangled_name, meth->ml_name);
+            strcat(mangled_name, ".overload");
+            if (PyDict_SetItemString(dict, mangled_name, descr) < 0)
+                return -1;
+            if (PyDict_SetItemString(pyside_globals->map_dict, mangled_name, obtype) < 0)
+                return -1;
+            continue;
+        }
+        // Then we insert the mapping for static methods.
+        if (meth->ml_flags & METH_STATIC) {
+            if (PyDict_SetItem(pyside_globals->map_dict, look, obtype) < 0)
                 return -1;
         }
     }
@@ -873,11 +915,14 @@ void
 FinishSignatureInitialization(PyObject *module, const char *signatures)
 {
     /*
-     * This function is called at the very end of a module
-     * initialization. SbkSpecial_Type_Ready has already been run
-     * with all the types.
-     * We now initialize module functions and resolve static methods.
+     * This function is called at the very end of a module initialization.
+     * We now patch certain types to support the __signature__ attribute,
+     * initialize module functions and resolve static methods.
+     *
+     * Still, it is not possible to call init phase 2 from here,
+     * because the import is still running. Do it from Python!
      */
+    PySide_PatchTypes();
     if (PySide_FinishSignatures(module, signatures) < 0) {
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);

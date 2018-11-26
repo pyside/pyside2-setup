@@ -89,7 +89,7 @@ Options
 ``--no-examples``
     Don't include PySide examples in PySide distribution
 
-``--jobs``
+``--parallel``
     Specify the number of parallel build jobs
 
 ``--jom``

@@ -308,6 +308,10 @@ struct Modification
         return removal != TypeSystem::NoLanguage;
     }
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const;
+#endif
+
     QString renamedToName;
     uint modifiers = 0;
     TypeSystem::Language removal = TypeSystem::NoLanguage;
@@ -351,6 +355,10 @@ struct FunctionModification: public Modification
 
     QString toString() const;
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const;
+#endif
+
     QString association;
     CodeSnipList snips;
 
@@ -364,6 +372,13 @@ private:
     AllowThread m_allowThread = AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const ReferenceCount &);
+QDebug operator<<(QDebug d, const ArgumentOwner &a);
+QDebug operator<<(QDebug d, const ArgumentModification &a);
+QDebug operator<<(QDebug d, const FunctionModification &fm);
+#endif
 
 struct FieldModification: public Modification
 {

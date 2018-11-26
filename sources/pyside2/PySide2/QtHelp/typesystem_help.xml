@@ -41,7 +41,7 @@
 -->
 
 <typesystem package="PySide2.QtHelp">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
     <value-type name="QHelpContentItem">
       <modify-function signature="parent()const">
@@ -52,7 +52,7 @@
     </value-type>
     <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
     <object-type name="QHelpContentWidget"/>
-    <object-type name="QHelpEngine" />
+    <object-type name="QHelpEngine"/>
     <object-type name="QHelpEngineCore"/>
     <object-type name="QHelpIndexModel"/>
     <object-type name="QHelpIndexWidget"/>

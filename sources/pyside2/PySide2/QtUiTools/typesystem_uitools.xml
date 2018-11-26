@@ -41,20 +41,18 @@
 -->
 
 <typesystem package="PySide2.QtUiTools">
-    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
-    <load-typesystem name="QtXml/typesystem_xml.xml" generate="no" />
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+    <load-typesystem name="QtXml/typesystem_xml.xml" generate="no"/>
 
     <object-type name="QUiLoader">
       <extra-includes>
         <include file-name="glue/plugins.h" location="local"/>
       </extra-includes>
       <inject-code class="native" position="beginning" file="glue/uitools_loadui.cpp"/>
-      <inject-code>
-          Q_IMPORT_PLUGIN(PyCustomWidgets);
-      </inject-code>
+      <inject-code file="../glue/qtuitools.cpp" snippet="quiloader"/>
       <add-function signature="registerCustomWidget(PyObject*)" return-type="void">
          <modify-argument index="1">
-            <rename to="customWidgetType" />
+            <rename to="customWidgetType"/>
          </modify-argument>
          <inject-documentation format="target" mode="append">
          Registers a Python created custom widget to QUiLoader, so it can be recognized when
@@ -87,10 +85,7 @@
 
             # ...
          </inject-documentation>
-         <inject-code class="target" position="beginning">
-             registerCustomWidget(%PYARG_1);
-             %CPPSELF.addPluginPath(""); // force reload widgets
-         </inject-code>
+         <inject-code class="target" position="beginning" file="../glue/qtuitools.cpp" snippet="quiloader-registercustomwidget"/>
       </add-function>
       <modify-function signature="createAction(QObject*,const QString&amp;)">
         <modify-argument index="return">
@@ -119,31 +114,25 @@
 
       <modify-function signature="load(QIODevice*,QWidget*)">
         <modify-argument index="2">
-          <replace-default-expression with="0" />
-          <rename to="parentWidget" />
+          <replace-default-expression with="0"/>
+          <rename to="parentWidget"/>
         </modify-argument>
         <modify-argument index="return">
            <define-ownership class="target" owner="target"/>
         </modify-argument>
-        <inject-code>
-            // Avoid calling the original function: %CPPSELF.%FUNCTION_NAME()
-            %PYARG_0 = QUiLoadedLoadUiFromDevice(%CPPSELF, %1, %2);
-        </inject-code>
+        <inject-code file="../glue/qtuitools.cpp" snippet="quiloader-load-1"/>
      </modify-function>
 
       <!-- Syntax sugar -->
       <add-function signature="load(QString,QWidget*)" return-type="QWidget*">
         <modify-argument index="2">
-          <replace-default-expression with="0" />
-          <rename to="parentWidget" />
+          <replace-default-expression with="0"/>
+          <rename to="parentWidget"/>
         </modify-argument>
         <modify-argument index="return">
           <define-ownership class="target" owner="target"/>
         </modify-argument>
-        <inject-code>
-            // Avoid calling the original function: %CPPSELF.%FUNCTION_NAME()
-            %PYARG_0 = QUiLoaderLoadUiFromFileName(%CPPSELF, %1, %2);
-        </inject-code>
+        <inject-code file="../glue/qtuitools.cpp" snippet="quiloader-load-2"/>
       </add-function>
     </object-type>
 
