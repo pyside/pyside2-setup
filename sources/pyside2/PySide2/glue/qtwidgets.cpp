@@ -266,6 +266,14 @@ if (myStyle && qApp) {
 }
 // @snippet qwidget-style
 
+// @snippet qapplication-setStyle
+if (qApp) {
+    Shiboken::AutoDecRef pyApp(%CONVERTTOPYTHON[QApplication*](qApp));
+    Shiboken::Object::setParent(pyApp, %PYARG_1);
+    Shiboken::Object::releaseOwnership(%PYARG_1);
+}
+// @snippet qapplication-setStyle
+
 // @snippet qwidget-setlayout
 qwidgetSetLayout(%CPPSELF, %1);
 // %FUNCTION_NAME() - disable generation of function call.

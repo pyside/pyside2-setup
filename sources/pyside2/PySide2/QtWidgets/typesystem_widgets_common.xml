@@ -2956,6 +2956,9 @@
     <add-function signature="QApplication()">
         <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-2"/>
     </add-function>
+    <modify-function signature="setStyle(QStyle*)">
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qapplication-setStyle"/>
+    </modify-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning"/>
   </object-type>
