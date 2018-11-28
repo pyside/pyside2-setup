@@ -43,6 +43,7 @@ from build_scripts.config import config
 from build_scripts.main import get_package_version, get_setuptools_extension_modules
 from build_scripts.main import cmd_class_dict
 from build_scripts.options import OPTION_BUILD_TYPE, OPTION_INTERNAL_BUILD_TYPE
+from build_scripts.options import OPTION_QUIET
 from build_scripts.utils import run_process
 
 from setuptools import setup
@@ -105,7 +106,8 @@ class SetupRunner(object):
                            cmd_class_dict=cmd_class_dict,
                            package_version=get_package_version(),
                            ext_modules=get_setuptools_extension_modules(),
-                           setup_script_dir=self.setup_script_dir)
+                           setup_script_dir=self.setup_script_dir,
+                           quiet=OPTION_QUIET)
 
         # This is an internal invocation of setup.py, so start actual
         # build.

@@ -15,6 +15,25 @@ include(helpers)
 
 option(USE_PYTHON_VERSION "Use specific python version to build pyside2." "")
 
+# Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
+if (QUIET_BUILD)
+    set(CMAKE_INSTALL_MESSAGE NEVER)
+endif()
+
+# Override message not to display info messages when doing a quiet build.
+if (QUIET_BUILD)
+    function(message)
+        list(GET ARGV 0 MessageType)
+        if (MessageType STREQUAL FATAL_ERROR OR
+            MessageType STREQUAL SEND_ERROR OR
+            MessageType STREQUAL WARNING OR
+            MessageType STREQUAL AUTHOR_WARNING)
+                list(REMOVE_AT ARGV 0)
+                _message(${MessageType} "${ARGV}")
+        endif()
+    endfunction()
+endif()
+
 if (USE_PYTHON_VERSION)
     find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
     find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)
@@ -252,7 +271,26 @@ include(PySideModules)
 
 macro(COLLECT_MODULE_IF_FOUND shortname)
     set(name "Qt5${shortname}")
-    find_package(${name})
+
+    # Determine essential/optional/missing
+    set(module_state "missing")
+    list(FIND ALL_ESSENTIAL_MODULES "${shortname}" essentialIndex)
+    if(${essentialIndex} EQUAL -1)
+        list(FIND ALL_OPTIONAL_MODULES "${shortname}" optionalIndex)
+        if(NOT ${optionalIndex} EQUAL -1)
+            set(module_state "optional")
+        endif()
+    else()
+        set(module_state "essential")
+    endif()
+
+    # Silence warnings when optional packages are not found when doing a quiet build.
+    set(quiet_argument "")
+    if (QUIET_BUILD AND "${module_state}" STREQUAL "optional")
+        set(quiet_argument "QUIET")
+    endif()
+
+    find_package(${name} ${quiet_argument})
     # If package is found, _name_found will be equal to 1
     set(_name_found "${name}_FOUND")
     # _name_dir will keep the path to the directory where the CMake rules were found
@@ -275,18 +313,6 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
     # e.g: ~/qt5.9-install/qtbase/lib/cmake/Qt5Script or /usr/lib64/cmake/Qt5Script
     get_filename_component(_module_dir "${${_name_dir}}" ABSOLUTE)
     string(FIND "${_module_dir}" "${_core_abs_dir}" found_basepath)
-
-    # Determine essential/optional/missing
-    set(module_state "missing")
-    list(FIND ALL_ESSENTIAL_MODULES "${shortname}" essentialIndex)
-    if(${essentialIndex} EQUAL -1)
-        list(FIND ALL_OPTIONAL_MODULES "${shortname}" optionalIndex)
-        if(NOT ${optionalIndex} EQUAL -1)
-            set(module_state "optional")
-        endif()
-    else()
-        set(module_state "essential")
-    endif()
 
     # If the module was found, and also the module path is the same as the
     # Qt5Core base path, we will generate the list with the modules to be installed

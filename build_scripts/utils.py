@@ -58,16 +58,11 @@ import distutils.log as log
 from distutils.errors import DistutilsOptionError
 from distutils.errors import DistutilsSetupError
 
-_verbose = True
-
 try:
     WindowsError
 except NameError:
     WindowsError = None
 
-def set_quiet(quiet):
-    global _verbose
-    _verbose = not quiet
 
 def filter_match(name, patterns):
     for pattern in patterns:
@@ -259,8 +254,7 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
         return
 
     if not os.path.islink(src) or force_copy_symlink:
-        if _verbose:
-            log.info("Copying file {} to {}.".format(src, dst))
+        log.info("Copying file {} to {}.".format(src, dst))
         shutil.copy2(src, dst)
         if make_writable_by_owner:
             make_file_writable_by_owner(dst)
@@ -276,9 +270,8 @@ def copyfile(src, dst, force=True, vars=None, force_copy_symlink=False,
                 os.chdir(target_dir)
                 if os.path.exists(link_name):
                     os.remove(link_name)
-                if _verbose:
-                    log.info("Symlinking {} -> {} in {}.".format(link_name,
-                             link_target, target_dir))
+                log.info("Symlinking {} -> {} in {}.".format(link_name,
+                         link_target, target_dir))
                 os.symlink(link_target, link_name)
             except OSError:
                 log.error("{} -> {}: Error creating symlink".format(link_name,
@@ -298,8 +291,7 @@ def makefile(dst, content=None, vars=None):
             content = content.format(**vars)
         dst = dst.format(**vars)
 
-    if _verbose:
-        log.info("Making file {}.".format(dst))
+    log.info("Making file {}.".format(dst))
 
     dstdir = os.path.dirname(dst)
     if not os.path.exists(dstdir):
@@ -330,9 +322,8 @@ def copydir(src, dst, filter=None, ignore=None, force=True, recursive=True,
             "filter={}. ignore={}.".format(src, dst, filter, ignore))
         return []
 
-    if _verbose:
-        log.info("Copying tree {} to {}. filter={}. ignore={}.".format(src,
-                 dst, filter, ignore))
+    log.info("Copying tree {} to {}. filter={}. ignore={}.".format(src,
+             dst, filter, ignore))
 
     names = os.listdir(src)
 
@@ -414,10 +405,9 @@ def run_process(args, initial_env=None, redirect_stderr_to_stdout=True):
     Prints both stdout and stderr to the console.
     No output is captured.
     """
-    if _verbose:
-        log.info("Running process in directory {0}: command {1}".format(
-                 os.getcwd(),
-                 " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args]))
+    log.info("Running process in directory {0}: command {1}".format(
+             os.getcwd(),
+             " ".join([(" " in x and '"{0}"'.format(x) or x) for x in args]))
     )
 
     if initial_env is None:
@@ -503,9 +493,8 @@ def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
             srcname_split = srcname.rsplit('.qrc', 1)
             dstname = '_rc.py'.join(srcname_split)
             if os.path.exists(dstname):
-                if _verbose:
-                    log.info('Regenerating {} from {}'.format(dstname,
-                             os.path.basename(srcname)))
+                log.info('Regenerating {} from {}'.format(dstname,
+                         os.path.basename(srcname)))
                 run_process([pyside_rcc_path,
                              pyside_rcc_options,
                              srcname, '-o', dstname])
