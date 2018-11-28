@@ -71,11 +71,10 @@ set(Qt3DExtras_libraries pyside2
 
 set(Qt3DExtras_deps Qt3DRender)
 
-create_pyside_module(Qt3DExtras
-                     Qt3DExtras_include_dirs
-                     Qt3DExtras_libraries
-                     Qt3DExtras_deps
-                     Qt3DExtras_SOURCE_DIR
-                     Qt3DExtras_SRC
-                     ""
-                     ${Qt3DExtras_BINARY_DIR}/typesystem_3dextras.xml)
+create_pyside_module(NAME Qt3DExtras
+                     INCLUDE_DIRS Qt3DExtras_include_dirs
+                     LIBRARIES Qt3DExtras_libraries
+                     DEPS Qt3DExtras_deps
+                     TYPESYSTEM_PATH Qt3DExtras_SOURCE_DIR
+                     SOURCES Qt3DExtras_SRC
+                     TYPESYSTEM_NAME ${Qt3DExtras_BINARY_DIR}/typesystem_3dextras.xml)

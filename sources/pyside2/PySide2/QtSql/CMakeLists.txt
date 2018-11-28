@@ -45,10 +45,9 @@ set(QtSql_libraries     pyside2
                         ${Qt5Sql_LIBRARIES})
 set(QtSql_deps QtWidgets)
 
-create_pyside_module(QtSql
-                     QtSql_include_dirs
-                     QtSql_libraries
-                     QtSql_deps
-                     QtSql_SOURCE_DIR
-                     QtSql_SRC
-                     "")
+create_pyside_module(NAME QtSql
+                     INCLUDE_DIRS QtSql_include_dirs
+                     LIBRARIES QtSql_libraries
+                     DEPS QtSql_deps
+                     TYPESYSTEM_PATH QtSql_SOURCE_DIR
+                     SOURCES QtSql_SRC)

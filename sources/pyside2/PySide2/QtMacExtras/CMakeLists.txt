@@ -28,10 +28,9 @@ set(QtMacExtras_libraries pyside2
 
 set(QtMacExtras_deps QtCore QtGui)
 
-create_pyside_module(QtMacExtras
-                     QtMacExtras_include_dirs
-                     QtMacExtras_libraries
-                     QtMacExtras_deps
-                     QtMacExtras_SOURCE_DIR
-                     QtMacExtras_SRC
-                     "")
+create_pyside_module(NAME QtMacExtras
+                     INCLUDE_DIRS QtMacExtras_include_dirs
+                     LIBRARIES QtMacExtras_libraries
+                     DEPS QtMacExtras_deps
+                     TYPESYSTEM_PATH QtMacExtras_SOURCE_DIR
+                     SOURCES QtMacExtras_SRC)

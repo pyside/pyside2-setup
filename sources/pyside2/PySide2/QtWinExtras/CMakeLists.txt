@@ -36,10 +36,9 @@ set(QtWinExtras_libraries pyside2
 
 set(QtWinExtras_deps QtCore QtGui)
 
-create_pyside_module(QtWinExtras
-                     QtWinExtras_include_dirs
-                     QtWinExtras_libraries
-                     QtWinExtras_deps
-                     QtWinExtras_SOURCE_DIR
-                     QtWinExtras_SRC
-                     "")
+create_pyside_module(NAME QtWinExtras
+                     INCLUDE_DIRS QtWinExtras_include_dirs
+                     LIBRARIES QtWinExtras_libraries
+                     DEPS QtWinExtras_deps
+                     TYPESYSTEM_PATH QtWinExtras_SOURCE_DIR
+                     SOURCES QtWinExtras_SRC)

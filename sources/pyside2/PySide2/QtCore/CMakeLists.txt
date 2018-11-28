@@ -200,15 +200,14 @@ set(QtCore_libraries  pyside2
                       ${SHIBOKEN_LIBRARY}
                       ${Qt5Core_LIBRARIES}
                       )
-create_pyside_module(QtCore
-                     QtCore_include_dirs
-                     QtCore_libraries
-                     ""
-                     QtCore_SOURCE_DIR
-                     QtCore_SRC
-                     QtCore_gluecode
-                     ${QtCore_BINARY_DIR}/typesystem_core.xml
-                     ""
-                     QtCore_glue_sources
+
+create_pyside_module(NAME QtCore
+                     INCLUDE_DIRS QtCore_include_dirs
+                     LIBRARIES QtCore_libraries
+                     TYPESYSTEM_PATH QtCore_SOURCE_DIR
+                     SOURCES QtCore_SRC
+                     STATIC_SOURCES QtCore_gluecode
+                     TYPESYSTEM_NAME ${QtCore_BINARY_DIR}/typesystem_core.xml
+                     GLUE_SOURCES QtCore_glue_sources
                      )
 

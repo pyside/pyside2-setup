@@ -125,10 +125,9 @@ set(QtMultimedia_libraries  pyside2
                             )
 set(QtMultimedia_deps QtCore QtGui QtNetwork)
 
-create_pyside_module(QtMultimedia
-                     QtMultimedia_include_dirs
-                     QtMultimedia_libraries
-                     QtMultimedia_deps
-                     QtMultimedia_SOURCE_DIR
-                     QtMultimedia_SRC
-                     "")
+create_pyside_module(NAME QtMultimedia
+                     INCLUDE_DIRS QtMultimedia_include_dirs
+                     LIBRARIES QtMultimedia_libraries
+                     DEPS QtMultimedia_deps
+                     TYPESYSTEM_PATH QtMultimedia_SOURCE_DIR
+                     SOURCES QtMultimedia_SRC)

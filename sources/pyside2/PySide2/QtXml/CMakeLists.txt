@@ -52,10 +52,9 @@ set(QtXml_libraries         pyside2
                             ${Qt5Xml_LIBRARIES})
 set(QtXml_deps QtCore)
 
-create_pyside_module(QtXml
-                     QtXml_include_dirs
-                     QtXml_libraries
-                     QtXml_deps
-                     QtXml_SOURCE_DIR
-                     QtXml_SRC
-                     "")
+create_pyside_module(NAME QtXml
+                     INCLUDE_DIRS QtXml_include_dirs
+                     LIBRARIES QtXml_libraries
+                     DEPS QtXml_deps
+                     TYPESYSTEM_PATH QtXml_SOURCE_DIR
+                     SOURCES QtXml_SRC)

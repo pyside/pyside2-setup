@@ -29,11 +29,10 @@ set(QtWebKit_libraries      pyside2
                             ${Qt5Core_LIBRARIES}
                             )
 set(QtWebKit_deps QtGui QtNetwork)
-create_pyside_module(QtWebKit
-                     QtWebKit_include_dirs
-                     QtWebKit_libraries
-                     QtWebKit_deps
-                     QtWebKit_SOURCE_DIR
-                     QtWebKit_SRC
-                     "")
+create_pyside_module(NAME QtWebKit
+                     INCLUDE_DIRS QtWebKit_include_dirs
+                     LIBRARIES QtWebKit_libraries
+                     DEPS QtWebKit_deps
+                     TYPESYSTEM_PATH QtWebKit_SOURCE_DIR
+                     SOURCES QtWebKit_SRC)
 

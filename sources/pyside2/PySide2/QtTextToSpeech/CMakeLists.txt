@@ -26,10 +26,9 @@ set(QtTextToSpeech_libraries    pyside2
 
 set(QtTextToSpeech_deps QtCore QtMultimedia)
 
-create_pyside_module(QtTextToSpeech
-                     QtTextToSpeech_include_dirs
-                     QtTextToSpeech_libraries
-                     QtTextToSpeech_deps
-                     QtTextToSpeech_SOURCE_DIR
-                     QtTextToSpeech_SRC
-                     "")
+create_pyside_module(NAME QtTextToSpeech
+                     INCLUDE_DIRS QtTextToSpeech_include_dirs
+                     LIBRARIES QtTextToSpeech_libraries
+                     DEPS QtTextToSpeech_deps
+                     TYPESYSTEM_PATH QtTextToSpeech_SOURCE_DIR
+                     SOURCES QtTextToSpeech_SRC)

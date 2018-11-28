@@ -32,10 +32,9 @@ set(QtSvg_libraries     pyside2
                         )
 set(QtSvg_deps QtWidgets)
 
-create_pyside_module(QtSvg
-                     QtSvg_include_dirs
-                     QtSvg_libraries
-                     QtSvg_deps
-                     QtSvg_SOURCE_DIR
-                     QtSvg_SRC
-                     "")
+create_pyside_module(NAME QtSvg
+                     INCLUDE_DIRS QtSvg_include_dirs
+                     LIBRARIES QtSvg_libraries
+                     DEPS QtSvg_deps
+                     TYPESYSTEM_PATH QtSvg_SOURCE_DIR
+                     SOURCES QtSvg_SRC)

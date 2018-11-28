@@ -27,11 +27,10 @@ set(QtWebEngineCore_libraries pyside2
                             ${Qt5Core_LIBRARIES}
                             )
 set(QtWebEngineCore_deps QtCore)
-create_pyside_module(QtWebEngineCore
-                     QtWebEngineCore_include_dirs
-                     QtWebEngineCore_libraries
-                     QtWebEngineCore_deps
-                     QtWebEngineCore_SOURCE_DIR
-                     QtWebEngineCore_SRC
-                     "")
+create_pyside_module(NAME QtWebEngineCore
+                     INCLUDE_DIRS QtWebEngineCore_include_dirs
+                     LIBRARIES QtWebEngineCore_libraries
+                     DEPS QtWebEngineCore_deps
+                     TYPESYSTEM_PATH QtWebEngineCore_SOURCE_DIR
+                     SOURCES QtWebEngineCore_SRC)
 

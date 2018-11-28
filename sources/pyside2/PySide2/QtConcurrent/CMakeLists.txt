@@ -22,10 +22,9 @@ set(QtConcurrent_libraries  pyside2
                             )
 set(QtConcurrent_deps QtCore)
 
-create_pyside_module(QtConcurrent
-                     QtConcurrent_include_dirs
-                     QtConcurrent_libraries
-                     QtConcurrent_deps
-                     QtConcurrent_SOURCE_DIR
-                     QtConcurrent_SRC
-                     "")
+create_pyside_module(NAME QtConcurrent
+                     INCLUDE_DIRS QtConcurrent_include_dirs
+                     LIBRARIES QtConcurrent_libraries
+                     DEPS QtConcurrent_deps
+                     TYPESYSTEM_PATH QtConcurrent_SOURCE_DIR
+                     SOURCES QtConcurrent_SRC)

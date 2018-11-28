@@ -32,10 +32,9 @@ set(QtWebSockets_libraries    pyside2
 
 set(QtWebSockets_deps QtNetwork)
 
-create_pyside_module(QtWebSockets
-                     QtWebSockets_include_dirs
-                     QtWebSockets_libraries
-                     QtWebSockets_deps
-                     QtWebSockets_SOURCE_DIR
-                     QtWebSockets_SRC
-                     "")
+create_pyside_module(NAME QtWebSockets
+                     INCLUDE_DIRS QtWebSockets_include_dirs
+                     LIBRARIES QtWebSockets_libraries
+                     DEPS QtWebSockets_deps
+                     TYPESYSTEM_PATH QtWebSockets_SOURCE_DIR
+                     SOURCES QtWebSockets_SRC)

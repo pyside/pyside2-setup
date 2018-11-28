@@ -39,10 +39,9 @@ set(QtHelp_libraries  pyside2
 
 set(QtHelp_deps QtWidgets)
 
-create_pyside_module(QtHelp
-                     QtHelp_include_dirs
-                     QtHelp_libraries
-                     QtHelp_deps
-                     QtHelp_SOURCE_DIR
-                     QtHelp_SRC
-                     "")
+create_pyside_module(NAME QtHelp
+                     INCLUDE_DIRS QtHelp_include_dirs
+                     LIBRARIES QtHelp_libraries
+                     DEPS QtHelp_deps
+                     TYPESYSTEM_PATH QtHelp_SOURCE_DIR
+                     SOURCES QtHelp_SRC)

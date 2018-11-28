@@ -231,13 +231,10 @@ set(QtWidgets_libraries pyside2
                         )
 set(QtWidgets_deps QtGui)
 
-create_pyside_module(QtWidgets
-                     QtWidgets_include_dirs
-                     QtWidgets_libraries
-                     QtWidgets_deps
-                     QtWidgets_SOURCE_DIR
-                     QtWidgets_SRC
-                     ""
-                     ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml
-                     ""
-                     "")
+create_pyside_module(NAME QtWidgets
+                     INCLUDE_DIRS QtWidgets_include_dirs
+                     LIBRARIES QtWidgets_libraries
+                     DEPS QtWidgets_deps
+                     TYPESYSTEM_PATH QtWidgets_SOURCE_DIR
+                     SOURCES QtWidgets_SRC
+                     TYPESYSTEM_NAME ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml)

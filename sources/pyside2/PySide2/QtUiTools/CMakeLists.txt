@@ -36,13 +36,10 @@ set(QtUiTools_libraries     pyside2
                             ${Qt5Widgets_LIBRARIES}
                             )
 set(QtUiTools_deps QtWidgets QtXml)
-create_pyside_module(QtUiTools
-                     QtUiTools_include_dirs
-                     QtUiTools_libraries
-                     QtUiTools_deps
-                     QtUiTools_SOURCE_DIR
-                     QtUiTools_SRC
-                     ""
-                     ""
-                     ""
-                     QtUiTools_glue_sources)
+create_pyside_module(NAME QtUiTools
+                     INCLUDE_DIRS QtUiTools_include_dirs
+                     LIBRARIES QtUiTools_libraries
+                     DEPS QtUiTools_deps
+                     TYPESYSTEM_PATH QtUiTools_SOURCE_DIR
+                     SOURCES QtUiTools_SRC
+                     GLUE_SOURCES QtUiTools_glue_sources)

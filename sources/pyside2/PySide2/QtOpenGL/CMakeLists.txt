@@ -37,10 +37,9 @@ set(QtOpenGL_libraries      pyside2
                             ${Qt5OpenGL_LIBRARIES})
 set(QtOpenGL_deps QtWidgets)
 
-create_pyside_module(QtOpenGL
-                    QtOpenGL_include_dirs
-                    QtOpenGL_libraries
-                    QtOpenGL_deps
-                    QtOpenGL_SOURCE_DIR
-                    QtOpenGL_SRC
-                    "")
+create_pyside_module(NAME QtOpenGL
+                     INCLUDE_DIRS QtOpenGL_include_dirs
+                     LIBRARIES QtOpenGL_libraries
+                     DEPS QtOpenGL_deps
+                     TYPESYSTEM_PATH QtOpenGL_SOURCE_DIR
+                     SOURCES QtOpenGL_SRC)

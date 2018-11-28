@@ -95,12 +95,10 @@ set(QtSensors_libraries pyside2
 
 set(QtSensors_deps QtCore)
 
-create_pyside_module(QtSensors
-                     QtSensors_include_dirs
-                     QtSensors_libraries
-                     QtSensors_deps
-                     QtSensors_SOURCE_DIR
-                     QtSensors_SRC
-                     ""
-                     ""
-                     QtSensors_DROPPED_ENTRIES)
+create_pyside_module(NAME QtSensors
+                     INCLUDE_DIRS QtSensors_include_dirs
+                     LIBRARIES QtSensors_libraries
+                     DEPS QtSensors_deps
+                     TYPESYSTEM_PATH QtSensors_SOURCE_DIR
+                     SOURCES QtSensors_SRC
+                     DROPPED_ENTRIES QtSensors_DROPPED_ENTRIES)

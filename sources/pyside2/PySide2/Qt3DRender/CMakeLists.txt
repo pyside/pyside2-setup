@@ -145,11 +145,10 @@ set(Qt3DRender_libraries pyside2
 
 set(Qt3DRender_deps Qt3DCore)
 
-create_pyside_module(Qt3DRender
-                     Qt3DRender_include_dirs
-                     Qt3DRender_libraries
-                     Qt3DRender_deps
-                     Qt3DRender_SOURCE_DIR
-                     Qt3DRender_SRC
-                     ""
-                     ${Qt3DRender_BINARY_DIR}/typesystem_3drender.xml)
+create_pyside_module(NAME Qt3DRender
+                     INCLUDE_DIRS Qt3DRender_include_dirs
+                     LIBRARIES Qt3DRender_libraries
+                     DEPS Qt3DRender_deps
+                     TYPESYSTEM_PATH Qt3DRender_SOURCE_DIR
+                     SOURCES Qt3DRender_SRC
+                     TYPESYSTEM_NAME ${Qt3DRender_BINARY_DIR}/typesystem_3drender.xml)

@@ -84,10 +84,10 @@ set(QtQuick_libraries pyside2
 
 set(QtQuick_deps QtGui QtNetwork QtQml)
 
-create_pyside_module(QtQuick
-                     QtQuick_include_dirs
-                     QtQuick_libraries
-                     QtQuick_deps
-                     QtQuick_SOURCE_DIR
-                     QtQuick_SRC
-                     QtQuick_registerType)
+create_pyside_module(NAME QtQuick
+                     INCLUDE_DIRS QtQuick_include_dirs
+                     LIBRARIES QtQuick_libraries
+                     DEPS QtQuick_deps
+                     TYPESYSTEM_PATH QtQuick_SOURCE_DIR
+                     SOURCES QtQuick_SRC
+                     STATIC_SOURCES QtQuick_registerType)

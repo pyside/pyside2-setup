@@ -35,11 +35,10 @@ set(QtXmlPatterns_libraries     pyside2
                                 ${Qt5XmlPatterns_LIBRARIES})
 set(QtXmlPatterns_deps QtCore)
 
-create_pyside_module(QtXmlPatterns
-                     QtXmlPatterns_include_dirs
-                     QtXmlPatterns_libraries
-                     QtXmlPatterns_deps
-                     QtXmlPatterns_SOURCE_DIR
-                     QtXmlPatterns_SRC
-                     "")
+create_pyside_module(NAME QtXmlPatterns
+                     INCLUDE_DIRS QtXmlPatterns_include_dirs
+                     LIBRARIES QtXmlPatterns_libraries
+                     DEPS QtXmlPatterns_deps
+                     TYPESYSTEM_PATH QtXmlPatterns_SOURCE_DIR
+                     SOURCES QtXmlPatterns_SRC)
 
