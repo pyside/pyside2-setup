@@ -43,21 +43,6 @@ macro(create_pyside_module
         set(typesystem_path ${typesystem_name})
     endif()
 
-    # check for class files that were commented away.
-    if(DEFINED ${module_sources}_skipped_files)
-        if(DEFINED PYTHON3_EXECUTABLE)
-            set(_python_interpreter "${PYTHON3_EXECUTABLE}")
-        else()
-            set(_python_interpreter "${PYTHON_EXECUTABLE}")
-        endif()
-        if(NOT _python_interpreter)
-            message(FATAL_ERROR "*** we need a python interpreter for postprocessing!")
-        endif()
-        set(_python_postprocessor "${_python_interpreter}" "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py")
-    else()
-        set(_python_postprocessor "")
-    endif()
-
     # Create typesystem XML dependencies list, so that whenever they change, shiboken is invoked
     # automatically.
     # First add the main file.
@@ -116,7 +101,6 @@ macro(create_pyside_module
                         ${typesystem_path}
                         --api-version=${SUPPORTED_QT_VERSION}
                         --drop-type-entries="${dropped_entries}"
-                        COMMAND ${_python_postprocessor}
                         DEPENDS ${total_type_system_files}
                                 ${glue_sources}
                                 ${${module_name}_glue_dependency}
