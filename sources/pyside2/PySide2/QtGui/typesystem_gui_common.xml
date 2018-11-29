@@ -2534,7 +2534,7 @@
     <add-function signature="QGuiApplication()">
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-2"/>
     </add-function>
-    <inject-code class="native" file="glue/qguiapplication_init.cpp" position="beginning"/>
+    <inject-code class="native" position="beginning" file="../glue/qtgui.cpp" snippet="qguiapplication-init"/>
 
   </object-type>
 

@@ -75,7 +75,7 @@ static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
         }
         // Do not resolve types to value type
         if (valueType)
-            return 0;
+            return nullptr;
         // Find in base types. First check tp_bases, and only after check tp_base, because
         // tp_base does not always point to the first base class, but rather to the first
         // that has added any python fields or slots to its object layout.
@@ -93,7 +93,7 @@ static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
         }
     }
     *typeId = 0;
-    return 0;
+    return nullptr;
 }
 static QVariant QVariant_convertToValueList(PyObject *list)
 {
@@ -224,8 +224,8 @@ static QStack<PyObject*> globalPostRoutineFunctions;
 void globalPostRoutineCallback()
 {
     Shiboken::GilState state;
-    foreach (PyObject *callback, globalPostRoutineFunctions) {
-        Shiboken::AutoDecRef result(PyObject_CallObject(callback, NULL));
+    for (auto *callback : globalPostRoutineFunctions) {
+        Shiboken::AutoDecRef result(PyObject_CallObject(callback, nullptr));
         Py_DECREF(callback);
     }
     globalPostRoutineFunctions.clear();
@@ -258,6 +258,197 @@ for (int i = 0; i < 3; ++i)
 PyModule_AddObject(module, "__version_info__", pyQtVersion);
 PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qt-version
+
+// @snippet qobject-connect
+static bool isDecorator(PyObject* method, PyObject* self)
+{
+    Shiboken::AutoDecRef methodName(PyObject_GetAttrString(method, "__name__"));
+    if (!PyObject_HasAttr(self, methodName))
+        return true;
+    Shiboken::AutoDecRef otherMethod(PyObject_GetAttr(self, methodName));
+    return PyMethod_GET_FUNCTION(otherMethod.object()) != PyMethod_GET_FUNCTION(method);
+}
+
+static bool getReceiver(QObject *source, const char* signal, PyObject* callback, QObject** receiver, PyObject** self, QByteArray* callbackSig)
+{
+    bool forceGlobalReceiver = false;
+    if (PyMethod_Check(callback)) {
+        *self = PyMethod_GET_SELF(callback);
+        if (%CHECKTYPE[QObject*](*self))
+            *receiver = %CONVERTTOCPP[QObject*](*self);
+        forceGlobalReceiver = isDecorator(callback, *self);
+    } else if (PyCFunction_Check(callback)) {
+        *self = PyCFunction_GET_SELF(callback);
+        if (*self && %CHECKTYPE[QObject*](*self))
+            *receiver = %CONVERTTOCPP[QObject*](*self);
+    } else if (PyCallable_Check(callback)) {
+        // Ok, just a callable object
+        *receiver = nullptr;
+        *self = nullptr;
+    }
+
+    bool usingGlobalReceiver = !*receiver || forceGlobalReceiver;
+
+    // Check if this callback is a overwrite of a non-virtual Qt slot.
+    if (!usingGlobalReceiver && receiver && self) {
+        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
+        const QMetaObject* metaObject = (*receiver)->metaObject();
+        int slotIndex = metaObject->indexOfSlot(callbackSig->constData());
+        if (slotIndex != -1 && slotIndex < metaObject->methodOffset() && PyMethod_Check(callback))
+            usingGlobalReceiver = true;
+    }
+
+    if (usingGlobalReceiver) {
+        PySide::SignalManager& signalManager = PySide::SignalManager::instance();
+        *receiver = signalManager.globalReceiver(source, callback);
+        *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
+    }
+
+    return usingGlobalReceiver;
+}
+
+static bool qobjectConnect(QObject* source, const char* signal, QObject* receiver, const char* slot, Qt::ConnectionType type)
+{
+    if (!signal || !slot)
+        return false;
+
+    if (!PySide::Signal::checkQtSignal(signal))
+        return false;
+    signal++;
+
+    if (!PySide::SignalManager::registerMetaMethod(source, signal, QMetaMethod::Signal))
+        return false;
+
+    bool isSignal = PySide::Signal::isQtSignal(slot);
+    slot++;
+    PySide::SignalManager::registerMetaMethod(receiver, slot, isSignal ? QMetaMethod::Signal : QMetaMethod::Slot);
+    bool connection;
+    Py_BEGIN_ALLOW_THREADS
+    connection = QObject::connect(source, signal - 1, receiver, slot - 1, type);
+    Py_END_ALLOW_THREADS
+    return connection;
+}
+
+static bool qobjectConnect(QObject* source, QMetaMethod signal, QObject* receiver, QMetaMethod slot, Qt::ConnectionType type)
+{
+   return qobjectConnect(source, signal.methodSignature(), receiver, slot.methodSignature(), type);
+}
+
+static bool qobjectConnectCallback(QObject* source, const char* signal, PyObject* callback, Qt::ConnectionType type)
+{
+    if (!signal || !PySide::Signal::checkQtSignal(signal))
+        return false;
+    signal++;
+
+    int signalIndex = PySide::SignalManager::registerMetaMethodGetIndex(source, signal, QMetaMethod::Signal);
+    if (signalIndex == -1)
+        return false;
+
+    PySide::SignalManager& signalManager = PySide::SignalManager::instance();
+
+    // Extract receiver from callback
+    QObject* receiver = nullptr;
+    PyObject* self = nullptr;
+    QByteArray callbackSig;
+    bool usingGlobalReceiver = getReceiver(source, signal, callback, &receiver, &self, &callbackSig);
+    if (receiver == nullptr && self == nullptr)
+        return false;
+
+    const QMetaObject* metaObject = receiver->metaObject();
+    const char* slot = callbackSig.constData();
+    int slotIndex = metaObject->indexOfSlot(slot);
+    QMetaMethod signalMethod = metaObject->method(signalIndex);
+
+    if (slotIndex == -1) {
+        if (!usingGlobalReceiver && self && !Shiboken::Object::hasCppWrapper((SbkObject*)self)) {
+            qWarning("You can't add dynamic slots on an object originated from C++.");
+            if (usingGlobalReceiver)
+                signalManager.releaseGlobalReceiver(source, receiver);
+
+            return false;
+        }
+
+        if (usingGlobalReceiver)
+            slotIndex = signalManager.globalReceiverSlotIndex(receiver, slot);
+        else
+            slotIndex = PySide::SignalManager::registerMetaMethodGetIndex(receiver, slot, QMetaMethod::Slot);
+
+        if (slotIndex == -1) {
+            if (usingGlobalReceiver)
+                signalManager.releaseGlobalReceiver(source, receiver);
+
+            return false;
+        }
+    }
+    bool connection;
+    Py_BEGIN_ALLOW_THREADS
+    connection = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
+    Py_END_ALLOW_THREADS
+    if (connection) {
+        if (usingGlobalReceiver)
+            signalManager.notifyGlobalReceiver(receiver);
+        #ifndef AVOID_PROTECTED_HACK
+            source->connectNotify(signalMethod); //Qt5: QMetaMethod instead of char*
+        #else
+            // Need to cast to QObjectWrapper* and call the public version of
+            // connectNotify when avoiding the protected hack.
+            reinterpret_cast<QObjectWrapper*>(source)->connectNotify(signalMethod); //Qt5: QMetaMethod instead of char*
+        #endif
+
+        return connection;
+    }
+
+    if (usingGlobalReceiver)
+        signalManager.releaseGlobalReceiver(source, receiver);
+
+    return false;
+}
+
+
+static bool qobjectDisconnectCallback(QObject* source, const char* signal, PyObject* callback)
+{
+    if (!PySide::Signal::checkQtSignal(signal))
+        return false;
+
+    PySide::SignalManager& signalManager = PySide::SignalManager::instance();
+
+    // Extract receiver from callback
+    QObject* receiver = nullptr;
+    PyObject* self = nullptr;
+    QByteArray callbackSig;
+    QMetaMethod slotMethod;
+    bool usingGlobalReceiver = getReceiver(nullptr, signal, callback, &receiver, &self, &callbackSig);
+    if (receiver == nullptr && self == nullptr)
+        return false;
+
+    const QMetaObject* metaObject = receiver->metaObject();
+    int signalIndex = source->metaObject()->indexOfSignal(++signal);
+    int slotIndex = -1;
+
+    slotIndex = metaObject->indexOfSlot(callbackSig);
+    slotMethod = metaObject->method(slotIndex);
+
+    bool disconnected;
+    Py_BEGIN_ALLOW_THREADS
+    disconnected = QMetaObject::disconnectOne(source, signalIndex, receiver, slotIndex);
+    Py_END_ALLOW_THREADS
+
+    if (disconnected) {
+        if (usingGlobalReceiver)
+            signalManager.releaseGlobalReceiver(source, receiver);
+
+        #ifndef AVOID_PROTECTED_HACK
+            source->disconnectNotify(slotMethod); //Qt5: QMetaMethod instead of char*
+        #else
+            // Need to cast to QObjectWrapper* and call the public version of
+            // connectNotify when avoiding the protected hack.
+            reinterpret_cast<QObjectWrapper*>(source)->disconnectNotify(slotMethod); //Qt5: QMetaMethod instead of char*
+        #endif
+        return true;
+    }
+    return false;
+}
+// @snippet qobject-connect
 
 // @snippet qobject-connect-1
 // %FUNCTION_NAME() - disable generation of function call.
@@ -514,10 +705,51 @@ qRegisterMetaType<QVector<int> >("QVector<int>");
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-metaobject
 
-// @snippet qobject-findchild
+// @snippet qobject-findchild-1
+static QObject* _findChildHelper(const QObject* parent, const QString& name, PyTypeObject* desiredType)
+{
+    for (auto *child : parent->children()) {
+        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject*](child));
+        if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType)
+            && (name.isNull() || name == child->objectName())) {
+            return child;
+        }
+    }
+
+    for (auto *child : parent->children()) {
+        QObject *obj = _findChildHelper(child, name, desiredType);
+        if (obj)
+            return obj;
+    }
+    return nullptr;
+}
+
+static inline bool _findChildrenComparator(const QObject*& child, const QRegExp& name)
+{
+    return name.indexIn(child->objectName()) != -1;
+}
+
+static inline bool _findChildrenComparator(const QObject*& child, const QString& name)
+{
+    return name.isNull() || name == child->objectName();
+}
+
+template<typename T>
+static void _findChildrenHelper(const QObject* parent, const T& name, PyTypeObject* desiredType, PyObject* result)
+{
+    for (const auto *child : parent->children()) {
+        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject*](child));
+        if (PyType_IsSubtype(Py_TYPE(pyChild), desiredType) && _findChildrenComparator(child, name))
+            PyList_Append(result, pyChild);
+        _findChildrenHelper(child, name, desiredType, result);
+    }
+}
+// @snippet qobject-findchild-1
+
+// @snippet qobject-findchild-2
 QObject *child = _findChildHelper(%CPPSELF, %2, (PyTypeObject*)%PYARG_1);
 %PYARG_0 = %CONVERTTOPYTHON[QObject*](child);
-// @snippet qobject-findchild
+// @snippet qobject-findchild-2
 
 // @snippet qobject-findchildren-1
 %PYARG_0 = PyList_New(0);
@@ -559,6 +791,214 @@ if (ret > 0 && ((strcmp(%1, SIGNAL(destroyed())) == 0) || (strcmp(%1, SIGNAL(des
 %1.replace(*%CPPSELF, %2);
 %PYARG_0 = %CONVERTTOPYTHON[QString](%1);
 // @snippet qregexp-replace
+
+// @snippet qbytearray-mgetitem
+if (PyIndex_Check(_key)) {
+    Py_ssize_t _i;
+    _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
+    if (_i < 0 || _i >= %CPPSELF.size()) {
+        PyErr_SetString(PyExc_IndexError, "index out of bounds");
+        return 0;
+    } else {
+        char res[2];
+        res[0] = %CPPSELF.at(_i);
+        res[1] = 0;
+        return PyBytes_FromStringAndSize(res, 1);
+    }
+} else if (PySlice_Check(_key)) {
+    Py_ssize_t start, stop, step, slicelength, cur;
+
+#ifdef IS_PY3K
+    PyObject *key = _key;
+#else
+    PySliceObject *key = reinterpret_cast<PySliceObject *>(_key);
+#endif
+    if (PySlice_GetIndicesEx(key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
+        return nullptr;
+    }
+
+    QByteArray ba;
+    if (slicelength <= 0) {
+        return %CONVERTTOPYTHON[QByteArray](ba);
+    } else if (step == 1) {
+        Py_ssize_t max = %CPPSELF.count();
+        start = qBound(Py_ssize_t(0), start, max);
+        stop = qBound(Py_ssize_t(0), stop, max);
+        QByteArray ba;
+        if (start < stop)
+            ba = %CPPSELF.mid(start, stop - start);
+        return %CONVERTTOPYTHON[QByteArray](ba);
+    } else {
+        QByteArray ba;
+        for (cur = start; slicelength > 0; cur += static_cast<size_t>(step), slicelength--) {
+            ba.append(%CPPSELF.at(cur));
+        }
+        return %CONVERTTOPYTHON[QByteArray](ba);
+    }
+} else {
+    PyErr_Format(PyExc_TypeError,
+                 "list indices must be integers or slices, not %.200s",
+                 Py_TYPE(_key)->tp_name);
+    return nullptr;
+}
+// @snippet qbytearray-mgetitem
+
+// @snippet qbytearray-msetitem
+if (PyIndex_Check(_key)) {
+    Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
+    if (_i == -1 && PyErr_Occurred())
+        return -1;
+
+    if (_i < 0)
+        _i += %CPPSELF.count();
+
+    if (_i < 0 || _i >= %CPPSELF.size()) {
+        PyErr_SetString(PyExc_IndexError, "QByteArray index out of range");
+        return -1;
+    }
+
+    // Provide more specific error message for bytes/str, bytearray, QByteArray respectively
+#ifdef IS_PY3K
+    if (PyBytes_Check(_value)) {
+        if (Py_SIZE(_value) != 1) {
+            PyErr_SetString(PyExc_ValueError, "bytes must be of size 1");
+#else
+    if (PyString_CheckExact(_value)) {
+        if (Py_SIZE(_value) != 1) {
+            PyErr_SetString(PyExc_ValueError, "str must be of size 1");
+#endif
+            return -1;
+        }
+    } else if (PyByteArray_Check(_value)) {
+        if (Py_SIZE(_value) != 1) {
+            PyErr_SetString(PyExc_ValueError, "bytearray must be of size 1");
+            return -1;
+        }
+    } else if (reinterpret_cast<PyTypeObject *>(Py_TYPE(_value)) == reinterpret_cast<PyTypeObject *>(SbkPySide2_QtCoreTypes[SBK_QBYTEARRAY_IDX])) {
+        if (PyObject_Length(_value) != 1) {
+            PyErr_SetString(PyExc_ValueError, "QByteArray must be of size 1");
+            return -1;
+        }
+    } else {
+#ifdef IS_PY3K
+        PyErr_SetString(PyExc_ValueError, "a bytes, bytearray, QByteArray of size 1 is required");
+#else
+        PyErr_SetString(PyExc_ValueError, "a str, bytearray, QByteArray of size 1 is required");
+#endif
+        return -1;
+    }
+
+    // Not support int or long.
+    %CPPSELF.remove(_i, 1);
+    PyObject *args = Py_BuildValue("(nO)", _i, _value);
+    PyObject *result = Sbk_QByteArrayFunc_insert(self, args);
+    Py_DECREF(args);
+    Py_XDECREF(result);
+    return !result ? -1 : 0;
+} else if (PySlice_Check(_key)) {
+    Py_ssize_t start, stop, step, slicelength, value_length;
+
+#ifdef IS_PY3K
+    PyObject *key = _key;
+#else
+    PySliceObject *key = reinterpret_cast<PySliceObject *>(_key);
+#endif
+    if (PySlice_GetIndicesEx(key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
+        return -1;
+    }
+    // The parameter candidates are: bytes/str, bytearray, QByteArray itself.
+    // Not support iterable which contains ints between 0~255
+
+    // case 1: value is nullpre, means delete the items within the range
+    // case 2: step is 1, means shrink or expanse
+    // case 3: step is not 1, then the number of slots have to equal the number of items in _value
+    QByteArray ba;
+    if (_value == nullptr || _value == Py_None) {
+        ba = QByteArray();
+        value_length = 0;
+    } else if (!(PyBytes_Check(_value) || PyByteArray_Check(_value) || reinterpret_cast<PyTypeObject *>(Py_TYPE(_value)) == reinterpret_cast<PyTypeObject *>(SbkPySide2_QtCoreTypes[SBK_QBYTEARRAY_IDX]))) {
+        PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s", Py_TYPE(_value)->tp_name);
+        return -1;
+    } else {
+        value_length = PyObject_Length(_value);
+    }
+
+    if (step != 1 && value_length != slicelength) {
+        PyErr_Format(PyExc_ValueError, "attempt to assign %s of size %d to extended slice of size %d",Py_TYPE(_value)->tp_name, value_length, slicelength);
+        return -1;
+    }
+
+    if (step != 1) {
+        int i = start;
+        for (int j = 0; j < slicelength; j++) {
+            PyObject *item = PyObject_GetItem(_value, PyLong_FromLong(j));
+            QByteArray temp;
+#ifdef IS_PY3K
+            if (PyLong_Check(item)) {
+#else
+            if (PyLong_Check(item) || PyInt_Check(item)) {
+#endif
+                int overflow;
+                long ival = PyLong_AsLongAndOverflow(item, &overflow);
+                // Not suppose to bigger than 255 because only bytes, bytearray, QByteArray were accept
+                const char *el = reinterpret_cast<const char*>(&ival);
+                temp = QByteArray(el);
+            } else {
+                temp = %CONVERTTOCPP[QByteArray](item);
+            }
+
+            %CPPSELF.replace(i, 1, temp);
+            i += step;
+        }
+        return 0;
+    } else {
+        ba = %CONVERTTOCPP[QByteArray](_value);
+        %CPPSELF.replace(start, slicelength, ba);
+        return 0;
+    }
+} else {
+    PyErr_Format(PyExc_TypeError, "QBytearray indices must be integers or slices, not %.200s",
+                  Py_TYPE(_key)->tp_name);
+    return -1;
+}
+// @snippet qbytearray-msetitem
+
+// @snippet qbytearray-bufferprotocol
+#if PY_VERSION_HEX < 0x03000000
+
+// QByteArray buffer protocol functions
+// see: http://www.python.org/dev/peps/pep-3118/
+
+extern "C" {
+
+static Py_ssize_t SbkQByteArray_segcountproc(PyObject* self, Py_ssize_t* lenp)
+{
+    if (lenp)
+        *lenp = Py_TYPE(self)->tp_as_sequence->sq_length(self);
+    return 1;
+}
+
+static Py_ssize_t SbkQByteArray_readbufferproc(PyObject* self, Py_ssize_t segment, void** ptrptr)
+{
+    if (segment || !Shiboken::Object::isValid(self))
+        return -1;
+
+    QByteArray* cppSelf = %CONVERTTOCPP[QByteArray*](self);
+    *ptrptr = reinterpret_cast<void*>(cppSelf->data());
+    return cppSelf->size();
+}
+
+PyBufferProcs SbkQByteArrayBufferProc = {
+    /*bf_getreadbuffer*/  &SbkQByteArray_readbufferproc,
+    /*bf_getwritebuffer*/ (writebufferproc) &SbkQByteArray_readbufferproc,
+    /*bf_getsegcount*/    &SbkQByteArray_segcountproc,
+    /*bf_getcharbuffer*/  (charbufferproc) &SbkQByteArray_readbufferproc
+};
+
+}
+
+#endif
+// @snippet qbytearray-bufferprotocol
 
 // @snippet qbytearray-operatorplus-1
 QByteArray ba = QByteArray(PyBytes_AS_STRING(%PYARG_1), PyBytes_GET_SIZE(%PYARG_1)) + *%CPPSELF;
@@ -635,8 +1075,8 @@ if (PyUnicode_CheckExact(%PYARG_1)) {
 
 // @snippet qbytearray-repr
 PyObject *aux = PyBytes_FromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
-if (aux == NULL) {
-    return NULL;
+if (aux == nullptr) {
+    return nullptr;
 }
 QByteArray b(Py_TYPE(%PYSELF)->tp_name);
 #ifdef IS_PY3K
@@ -685,8 +1125,8 @@ if (PyBytes_Check(%PYARG_1)) {
 
 // @snippet qbytearray-str
 PyObject *aux = PyBytes_FromStringAndSize(%CPPSELF.constData(), %CPPSELF.size());
-if (aux == NULL) {
-    return NULL;
+if (aux == nullptr) {
+    return nullptr;
 }
 #ifdef IS_PY3K
     %PYARG_0 = PyObject_Repr(aux);
@@ -845,6 +1285,20 @@ long result;
 %PYARG_0 = %CONVERTTOPYTHON[long](result);
 // @snippet qprocess-pid
 
+// @snippet qcoreapplication-init
+static void QCoreApplicationConstructor(PyObject *self, PyObject *pyargv, QCoreApplicationWrapper **cptr)
+{
+    static int argc;
+    static char **argv;
+    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
+        *cptr = new QCoreApplicationWrapper(argc, argv);
+        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
+        PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
+    }
+}
+// @snippet qcoreapplication-init
+
 // @snippet qcoreapplication-1
 QCoreApplicationConstructor(%PYSELF, args, &%0);
 // @snippet qcoreapplication-1
@@ -959,7 +1413,7 @@ QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSign
 
 // @snippet qstatemachine-configuration
 %PYARG_0 = PySet_New(0);
-foreach (QAbstractState *abs_state, %CPPSELF.configuration()) {
+for (auto *abs_state : %CPPSELF.configuration()) {
         Shiboken::AutoDecRef obj(%CONVERTTOPYTHON[QAbstractState*](abs_state));
         Shiboken::Object::setParent(self, obj);
         PySet_Add(%PYARG_0, obj);
@@ -968,7 +1422,7 @@ foreach (QAbstractState *abs_state, %CPPSELF.configuration()) {
 
 // @snippet qstatemachine-defaultanimations
 %PYARG_0 = PyList_New(0);
-foreach (QAbstractAnimation *abs_anim, %CPPSELF.defaultAnimations()) {
+for (auto *abs_anim : %CPPSELF.defaultAnimations()) {
         Shiboken::AutoDecRef obj(%CONVERTTOPYTHON[QAbstractAnimation*](abs_anim));
         Shiboken::Object::setParent(self, obj);
         PyList_Append(%PYARG_0, obj);

@@ -1607,7 +1607,7 @@
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-3"/>
     </modify-function>
-    <inject-code class="native" position="beginning" file="glue/qobject_connect.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect"/>
     <add-function signature="connect(const QObject*,const char*,PyCallable*,Qt::ConnectionType)" return-type="bool" static="yes">
         <modify-argument index="4">
             <rename to="type"/>
@@ -1642,7 +1642,7 @@
     </add-function>
 
 
-    <inject-code class="native" file="glue/qobject_findchild.cpp"/>
+    <inject-code class="native" file="../glue/qtcore.cpp" snippet="qobject-findchild-1"/>
     <add-function signature="findChild(PyTypeObject*,const QString&amp;)" return-type="PyObject*">
         <inject-documentation format="target" mode="append">
         To find the child of a certain QObject, the first argument of this function should be the child's type, and the second the name of the child:
@@ -1657,7 +1657,7 @@
             child2 = parent.findChild(QWidget, "child_widget")
 
         </inject-documentation>
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchild"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchild-2"/>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -1961,7 +1961,7 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-3"/>
     </add-function>
     <!-- buffer protocol -->
-    <inject-code class="native" position="beginning" file="glue/qbytearray_bufferprotocol.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-bufferprotocol"/>
     <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qbytearray-py3"/>
 
    <modify-function signature="data()">
@@ -2114,13 +2114,13 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-getitem"/>
     </add-function>
     <add-function signature="__mgetitem__">
-        <inject-code class="target" position="beginning" file="glue/qbytearray_mgetitem.cpp"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-mgetitem"/>
     </add-function>
     <add-function signature="__setitem__">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-setitem"/>
     </add-function>
     <add-function signature="__msetitem__">
-        <inject-code class="target" position="beginning" file="glue/qbytearray_msetitem.cpp"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-msetitem"/>
     </add-function>
   </value-type>
   <value-type name="QTextBoundaryFinder">
@@ -2515,7 +2515,7 @@
       <modify-argument index="2" invalidate-after-use="yes"/>
     </modify-function>
     <modify-function signature="QCoreApplication(int &amp;,char **,int)" access="private"/>
-    <inject-code class="native" file="glue/qcoreapplication_init.cpp" position="beginning"/>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qcoreapplication-init"/>
     <modify-function signature="postEvent(QObject*,QEvent*,int)">
       <modify-argument index="2">
         <define-ownership owner="c++"/>

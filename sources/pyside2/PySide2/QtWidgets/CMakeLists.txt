@@ -207,14 +207,6 @@ ${SPECIFIC_OS_FILES}
 ${QtWidgets_GEN_DIR}/qtwidgets_module_wrapper.cpp
 )
 
-set(QtWidgets_glue_sources
-    "${QtWidgets_SOURCE_DIR}/glue/qapplication_init.cpp"
-    "${QtWidgets_SOURCE_DIR}/glue/qlayout_help_functions.cpp"
-    "${QtWidgets_SOURCE_DIR}/glue/qmenu_glue.cpp"
-    "${QtWidgets_SOURCE_DIR}/glue/qmenubar_glue.cpp"
-    "${QtWidgets_SOURCE_DIR}/glue/qwidget_glue.cpp"
-)
-
 configure_file("${QtWidgets_SOURCE_DIR}/typesystem_widgets.xml.in"
                "${QtWidgets_BINARY_DIR}/typesystem_widgets.xml" @ONLY)
 
@@ -248,4 +240,4 @@ create_pyside_module(QtWidgets
                      ""
                      ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml
                      ""
-                     QtWidgets_glue_sources)
+                     "")

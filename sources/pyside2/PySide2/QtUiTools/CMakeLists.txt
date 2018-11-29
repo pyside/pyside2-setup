@@ -8,7 +8,6 @@ ${QtUiTools_GEN_DIR}/qtuitools_module_wrapper.cpp
 
 set(QtUiTools_glue_sources
     "${QtUiTools_SOURCE_DIR}/glue/plugins.h"
-    "${QtUiTools_SOURCE_DIR}/glue/uitools_loadui.cpp"
 )
 
 set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}

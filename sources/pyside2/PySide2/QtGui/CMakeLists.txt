@@ -222,10 +222,6 @@ else()
     message(STATUS "Qt5Gui: Adding Desktop OpenGL classes")
 endif()
 
-set(QtGui_glue_sources
-    "${QtGui_SOURCE_DIR}/glue/qguiapplication_init.cpp"
-)
-
 configure_file("${QtGui_SOURCE_DIR}/typesystem_gui.xml.in"
                "${QtGui_BINARY_DIR}/typesystem_gui.xml" @ONLY)
 
@@ -257,7 +253,7 @@ create_pyside_module(QtGui
                      QPYTEXTOBJECT_MOC
                      ${QtGui_BINARY_DIR}/typesystem_gui.xml
                      QtGui_DROPPED_ENTRIES
-                     QtGui_glue_sources)
+                     "")
 
 install(FILES ${pyside2_SOURCE_DIR}/qpytextobject.h DESTINATION include/PySide2/QtGui/)
 

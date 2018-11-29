@@ -800,7 +800,7 @@
     </modify-function>
   </object-type>
   <object-type name="QMenu">
-    <inject-code class="native" position="beginning" file="glue/qmenu_glue.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenu-glue"/>
 
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <modify-function signature="exec(const QPoint&amp;,QAction*)" rename="exec_" allow-thread="yes"/>
@@ -882,7 +882,7 @@
   </object-type>
 
   <object-type name="QMenuBar">
-    <inject-code class="native" position="beginning" file="glue/qmenubar_glue.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qmenubar-glue"/>
     <modify-function signature="addAction(const QString&amp;)">
       <modify-argument index="return">
         <parent index="this" action="add"/>
@@ -1247,7 +1247,7 @@
   </object-type>
 
   <object-type name="QLayout">
-    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
 
     <enum-type name="SizeConstraint"/>
 
@@ -1332,7 +1332,7 @@
   </object-type>
 
   <object-type name="QStackedLayout">
-    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
     <enum-type name="StackingMode"/>
     <modify-function signature="insertWidget(int,QWidget*)">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
@@ -1340,7 +1340,7 @@
   </object-type>
 
   <object-type name="QBoxLayout">
-    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
 
     <enum-type name="Direction"/>
 
@@ -1370,7 +1370,7 @@
   </object-type>
 
   <object-type name="QGridLayout">
-    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
     <modify-function signature="itemAtPosition (int,int)const">
       <modify-argument index="return">
         <define-ownership owner="default"/>
@@ -2028,7 +2028,7 @@
       <include file-name="QMessageBox" location="global"/>
     </extra-includes>
 
-    <inject-code class="native" file="glue/qwidget_glue.cpp" position="beginning"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-glue"/>
 
     <enum-type name="RenderFlag" flags="RenderFlags"/>
 
@@ -2947,7 +2947,7 @@
       <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qapplication-setStyle"/>
     </modify-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
-    <inject-code class="native" file="glue/qapplication_init.cpp" position="beginning"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qapplication-init"/>
   </object-type>
 
   <object-type name="QCommandLinkButton"/>
@@ -2960,7 +2960,7 @@
     </modify-function>
   </object-type>
   <object-type name="QFormLayout">
-    <inject-code class="native" position="beginning" file="glue/qlayout_help_functions.cpp"/>
+    <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
 
     <enum-type name="FieldGrowthPolicy"/>
     <enum-type name="ItemRole"/>
