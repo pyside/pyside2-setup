@@ -203,13 +203,9 @@
 
   <primitive-type name="WId" target-lang-api-name="PyLong">
     <conversion-rule>
-      <native-to-target>
-      return PyLong_FromVoidPtr(reinterpret_cast&lt;void *&gt;(%in));
-      </native-to-target>
+      <native-to-target file="../glue/qtgui.cpp" snippet="return-pylong-voidptr"/>
       <target-to-native>
-        <add-conversion type="PyLong">
-          %out = reinterpret_cast&lt;%OUTTYPE&gt;(PyLong_AsVoidPtr(%in));
-        </add-conversion>
+        <add-conversion type="PyLong" file="../glue/qtgui.cpp" snippet="conversion-pylong"/>
       </target-to-native>
     </conversion-rule>
   </primitive-type>

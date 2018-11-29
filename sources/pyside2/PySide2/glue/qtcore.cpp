@@ -37,6 +37,10 @@
 **
 ****************************************************************************/
 
+/*********************************************************************
+ * INJECT CODE
+ ********************************************************************/
+
 // @snippet include-pyside
 #include <pyside.h>
 // @snippet include-pyside
@@ -1034,3 +1038,278 @@ QT_END_NAMESPACE
 (*%CPPSELF) >> _cpp_result;
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](_cpp_result);
 // @snippet stream-read-method
+
+/*********************************************************************
+ * CONVERSIONS
+ ********************************************************************/
+
+// @snippet conversion-pybool
+%out = %OUTTYPE(%in == Py_True);
+// @snippet conversion-pybool
+
+// @snippet conversion-pylong
+%out = %OUTTYPE(PyLong_AsLong(%in));
+// @snippet conversion-pylong
+
+// @snippet conversion-pylong-unsigned
+%out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
+// @snippet conversion-pylong-unsigned
+
+// @snippet conversion-pyunicode
+#ifndef Py_LIMITED_API
+Py_UNICODE* unicode = PyUnicode_AS_UNICODE(%in);
+# if defined(Py_UNICODE_WIDE)
+// cast as Py_UNICODE can be a different type
+%out = QString::fromUcs4((const uint*)unicode);
+# else
+%out = QString::fromUtf16((const ushort*)unicode, PyUnicode_GET_SIZE(%in));
+# endif
+#else
+wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
+%out = QString::fromWCharArray(temp);
+PyMem_Free(temp);
+#endif
+// @snippet conversion-pyunicode
+
+// @snippet conversion-pystring
+#ifndef IS_PY3K
+const char* str = %CONVERTTOCPP[const char*](%in);
+%out = %OUTTYPE(str);
+#endif
+// @snippet conversion-pystring
+
+// @snippet conversion-pynone
+%out = %OUTTYPE();
+// @snippet conversion-pynone
+
+// @snippet conversion-pystring-char
+char c = %CONVERTTOCPP[char](%in);
+%out = %OUTTYPE(c);
+// @snippet conversion-pystring-char
+
+// @snippet conversion-pyint
+int i = %CONVERTTOCPP[int](%in);
+%out = %OUTTYPE(i);
+// @snippet conversion-pyint
+
+// @snippet conversion-qlonglong
+qlonglong in = %CONVERTTOCPP[qlonglong](%in);
+%out = %OUTTYPE(in);
+// @snippet conversion-qlonglong
+
+// @snippet conversion-qstring
+QString in = %CONVERTTOCPP[QString](%in);
+%out = %OUTTYPE(in);
+// @snippet conversion-qstring
+
+// @snippet conversion-qbytearray
+QByteArray in = %CONVERTTOCPP[QByteArray](%in);
+%out = %OUTTYPE(in);
+// @snippet conversion-qbytearray
+
+// @snippet conversion-pyfloat
+double in = %CONVERTTOCPP[double](%in);
+%out = %OUTTYPE(in);
+// @snippet conversion-pyfloat
+
+// @snippet conversion-sbkobject
+// a class supported by QVariant?
+int typeCode;
+const char *typeName = QVariant_resolveMetaType(Py_TYPE(%in), &typeCode);
+if (!typeCode || !typeName)
+    return;
+QVariant var(typeCode, (void*)0);
+Shiboken::Conversions::SpecificConverter converter(typeName);
+converter.toCpp(pyIn, var.data());
+%out = var;
+// @snippet conversion-sbkobject
+
+// @snippet conversion-pydict
+QVariant ret = QVariant_convertToVariantMap(%in);
+%out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
+// @snippet conversion-pydict
+
+// @snippet conversion-pylist
+QVariant ret = QVariant_convertToVariantList(%in);
+%out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
+// @snippet conversion-pylist
+
+// @snippet conversion-pyobject
+// Is a shiboken type not known by Qt
+%out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
+// @snippet conversion-pyobject
+
+// @snippet conversion-qvariant-invalid
+%out = QVariant::Invalid;
+// @snippet conversion-qvariant-invalid
+
+// @snippet conversion-qvariant-pytypeobject
+const char *typeName;
+if (Shiboken::String::checkType(reinterpret_cast<PyTypeObject *>(%in)))
+    typeName = "QString";
+else if (%in == reinterpret_cast<PyObject*>(&PyFloat_Type))
+    typeName = "double"; // float is a UserType in QVariant.
+else if (%in == reinterpret_cast<PyObject*>(&PyLong_Type))
+    typeName = "int";    // long is a UserType in QVariant.
+else if (Py_TYPE(%in) == SbkObjectType_TypeF())
+    typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType*)%in);
+else
+    typeName = reinterpret_cast<PyTypeObject *>(%in)->tp_name;
+%out = QVariant::nameToType(typeName);
+// @snippet conversion-qvariant-pytypeobject
+
+// @snippet conversion-qvariant-pystring
+%out = QVariant::nameToType(Shiboken::String::toCString(%in));
+// @snippet conversion-qvariant-pystring
+
+// @snippet conversion-qvariant-pydict
+%out = QVariant::nameToType("QVariantMap");
+// @snippet conversion-qvariant-pydict
+
+// @snippet conversion-qvariant-pysequence
+%out = QVariantType_isStringList(%in) ? QVariant::StringList : QVariant::List;
+// @snippet conversion-qvariant-pysequence
+
+// @snippet conversion-qjsonobject-pydict
+QVariant dict = QVariant_convertToVariantMap(%in);
+QJsonValue val = QJsonValue::fromVariant(dict);
+%out = val.toObject();
+// @snippet conversion-qjsonobject-pydict
+
+// @snippet conversion-qpair-pysequence
+%out.first = %CONVERTTOCPP[%OUTTYPE_0](PySequence_Fast_GET_ITEM(%in, 0));
+%out.second = %CONVERTTOCPP[%OUTTYPE_1](PySequence_Fast_GET_ITEM(%in, 1));
+// @snippet conversion-qpair-pysequence
+
+// @snippet conversion-qdate-pydate
+int day = PyDateTime_GET_DAY(%in);
+int month = PyDateTime_GET_MONTH(%in);
+int year = PyDateTime_GET_YEAR(%in);
+%out = %OUTTYPE(year, month, day);
+// @snippet conversion-qdate-pydate
+
+// @snippet conversion-qdatetime-pydatetime
+int day = PyDateTime_GET_DAY(%in);
+int month = PyDateTime_GET_MONTH(%in);
+int year = PyDateTime_GET_YEAR(%in);
+int hour = PyDateTime_DATE_GET_HOUR(%in);
+int min = PyDateTime_DATE_GET_MINUTE(%in);
+int sec = PyDateTime_DATE_GET_SECOND(%in);
+int usec = PyDateTime_DATE_GET_MICROSECOND(%in);
+%out = %OUTTYPE(QDate(year, month, day), QTime(hour, min, sec, usec/1000));
+// @snippet conversion-qdatetime-pydatetime
+
+// @snippet conversion-qtime-pytime
+int hour = PyDateTime_TIME_GET_HOUR(%in);
+int min = PyDateTime_TIME_GET_MINUTE(%in);
+int sec = PyDateTime_TIME_GET_SECOND(%in);
+int usec = PyDateTime_TIME_GET_MICROSECOND(%in);
+%out = %OUTTYPE(hour, min, sec, usec/1000);
+// @snippet conversion-qtime-pytime
+
+// @snippet conversion-qbytearray-pybytes
+#ifdef IS_PY3K
+%out = %OUTTYPE(PyBytes_AS_STRING(%in), PyBytes_GET_SIZE(%in));
+#else
+%out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
+#endif
+// @snippet conversion-qbytearray-pybytes
+
+// @snippet conversion-qbytearray-pybytearray
+%out = %OUTTYPE(PyByteArray_AsString(%in), PyByteArray_Size(%in));
+// @snippet conversion-qbytearray-pybytearray
+
+// @snippet conversion-qbytearray-pystring
+%out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
+// @snippet conversion-qbytearray-pystring
+
+/*********************************************************************
+ * NATIVE TO TARGET CONVERSIONS
+ ********************************************************************/
+
+// @snippet return-pybool
+return PyBool_FromLong((bool)%in);
+// @snippet return-pybool
+
+// @snippet return-pylong
+return PyLong_FromLong(%in);
+// @snippet return-pylong
+
+// @snippet return-pylong-unsigned
+return PyLong_FromUnsignedLong(%in);
+// @snippet return-pylong-unsigned
+
+// @snippet return-pyunicode
+QByteArray ba = %in.toUtf8();
+return PyUnicode_FromStringAndSize(ba.constData(), ba.size());
+// @snippet return-pyunicode
+
+// @snippet return-pyunicode-qstringref
+ const int N = %in.length();
+ wchar_t *str = new wchar_t[N];
+ %in.toString().toWCharArray(str);
+ PyObject *%out = PyUnicode_FromWideChar(str, N);
+ delete[] str;
+ return %out;
+// @snippet return-pyunicode-qstringref
+
+// @snippet return-pyunicode-qchar
+wchar_t c = (wchar_t)%in.unicode();
+return PyUnicode_FromWideChar(&c, 1);
+// @snippet return-pyunicode-qchar
+
+// @snippet return-qvariant
+if (!%in.isValid())
+    Py_RETURN_NONE;
+
+if (qstrcmp(%in.typeName(), "QVariantList") == 0) {
+    QList<QVariant> var = %in.value<QVariantList>();
+    return %CONVERTTOPYTHON[QList<QVariant>](var);
+}
+
+if (qstrcmp(%in.typeName(), "QStringList") == 0) {
+    QStringList var = %in.value<QStringList>();
+    return %CONVERTTOPYTHON[QList<QString>](var);
+}
+
+if (qstrcmp(%in.typeName(), "QVariantMap") == 0) {
+    QMap<QString, QVariant> var = %in.value<QVariantMap>();
+    return %CONVERTTOPYTHON[QMap<QString, QVariant>](var);
+}
+
+Shiboken::Conversions::SpecificConverter converter(cppInRef.typeName());
+if (converter) {
+   void *ptr = cppInRef.data();
+   return converter.toPython(ptr);
+}
+PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s'.", %in.typeName());
+return 0;
+// @snippet return-qvariant
+
+// @snippet return-qvariant-type
+const char *typeName = QVariant::typeToName(%in);
+PyObject *%out;
+PyTypeObject *pyType = nullptr;
+if (typeName)
+    pyType = Shiboken::Conversions::getPythonTypeObject(typeName);
+%out = pyType ? (reinterpret_cast<PyObject*>(pyType)) : Py_None;
+Py_INCREF(%out);
+return %out;
+// @snippet return-qvariant-type
+
+// @snippet return-qjsonobject
+// The QVariantMap returned by QJsonObject seems to cause a segfault, so
+// using QJsonObject.toVariantMap() won't work.
+// Wrapping it in a QJsonValue first allows it to work
+QJsonValue val(%in);
+QVariant ret = val.toVariant();
+
+return %CONVERTTOPYTHON[QVariant](ret);
+// @snippet return-qjsonobject
+
+// @snippet return-qpair
+PyObject *%out = PyTuple_New(2);
+PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
+PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
+return %out;
+// @snippet return-qpair

@@ -206,13 +206,9 @@
 
   <primitive-type name="bool" target-lang-api-name="PyBool">
     <conversion-rule>
-        <native-to-target>
-        return PyBool_FromLong((bool)%in);
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pybool"/>
         <target-to-native>
-            <add-conversion type="PyBool">
-            %out = %OUTTYPE(%in == Py_True);
-            </add-conversion>
+            <add-conversion type="PyBool" file="../glue/qtcore.cpp" snippet="conversion-pybool"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
@@ -220,37 +216,25 @@
   <!-- Qt5: add the new pointer-ish types -->
   <primitive-type name="qintptr" target-lang-api-name="PyLong">
     <conversion-rule>
-        <native-to-target>
-        return PyLong_FromLong(%in);
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong"/>
         <target-to-native>
-            <add-conversion type="PyLong">
-            %out = %OUTTYPE(PyLong_AsLong(%in));
-            </add-conversion>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
   <primitive-type name="quintptr" target-lang-api-name="PyLong">
     <conversion-rule>
-        <native-to-target>
-        return PyLong_FromUnsignedLong(%in);
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong-unsigned"/>
         <target-to-native>
-            <add-conversion type="PyLong">
-            %out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
-            </add-conversion>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong-unsigned"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
   <primitive-type name="qptrdiff" target-lang-api-name="PyLong">
     <conversion-rule>
-        <native-to-target>
-        return PyLong_FromLong(%in);
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong"/>
         <target-to-native>
-            <add-conversion type="PyLong">
-            %out = %OUTTYPE(PyLong_AsLong(%in));
-            </add-conversion>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
@@ -260,201 +244,61 @@
   <primitive-type name="QString" target-lang-api-name="PyUnicode">
     <include file-name="QString" location="global"/>
     <conversion-rule>
-        <native-to-target>
-        QByteArray ba = %in.toUtf8();
-        PyObject *%out = PyUnicode_FromStringAndSize(ba.constData(), ba.size());
-        return %out;
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode"/>
         <target-to-native>
-            <add-conversion type="PyUnicode">
-            #ifndef Py_LIMITED_API
-            Py_UNICODE* unicode = PyUnicode_AS_UNICODE(%in);
-            # if defined(Py_UNICODE_WIDE)
-            // cast as Py_UNICODE can be a different type
-            %out = QString::fromUcs4((const uint*)unicode);
-            # else
-            %out = QString::fromUtf16((const ushort*)unicode, PyUnicode_GET_SIZE(%in));
-            # endif
-            #else
-            wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
-            %out = QString::fromWCharArray(temp);
-            PyMem_Free(temp);
-            #endif
-            </add-conversion>
-            <add-conversion type="PyString" check="py2kStrCheck(%in)">
-            #ifndef IS_PY3K
-            const char* str = %CONVERTTOCPP[const char*](%in);
-            %out = %OUTTYPE(str);
-            #endif
-            </add-conversion>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
+            <add-conversion type="PyUnicode" file="../glue/qtcore.cpp" snippet="conversion-pyunicode"/>
+            <add-conversion type="PyString" check="py2kStrCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-pystring"/>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
 
   <primitive-type name="QStringRef">
     <conversion-rule>
-        <native-to-target>
-        const int N = %in.toString().length();
-        wchar_t *str = new wchar_t[N];
-        %in.toString().toWCharArray(str);
-        PyObject *%out = PyUnicode_FromWideChar(str, N);
-        delete[] str;
-        return %out;
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-qstringref"/>
     </conversion-rule>
   </primitive-type>
   <primitive-type name="QChar">
     <conversion-rule>
-        <native-to-target>
-        wchar_t c = (wchar_t)%in.unicode();
-        return PyUnicode_FromWideChar(&amp;c, 1);
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-qchar"/>
         <target-to-native>
-            <add-conversion type="PyString" check="Shiboken::String::checkChar(%in)">
-            char c = %CONVERTTOCPP[char](%in);
-            %out = %OUTTYPE(c);
-            </add-conversion>
-            <add-conversion type="PyInt">
-            int i = %CONVERTTOCPP[int](%in);
-            %out = %OUTTYPE(i);
-            </add-conversion>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
+            <add-conversion type="PyString" check="Shiboken::String::checkChar(%in)" file="../glue/qtcore.cpp" snippet="conversion-pystring-char"/>
+            <add-conversion type="PyInt" file="../glue/qtcore.cpp" snippet="conversion-pyint"/>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
 
   <primitive-type name="QVariant" target-lang-api-name="PyObject">
     <conversion-rule>
-        <native-to-target>
-        if (!%in.isValid())
-            Py_RETURN_NONE;
-
-        if (qstrcmp(%in.typeName(), "QVariantList") == 0) {
-            QList&lt;QVariant&gt; var = %in.value&lt;QVariantList&gt;();
-            return %CONVERTTOPYTHON[QList&lt;QVariant&gt;](var);
-        }
-
-        if (qstrcmp(%in.typeName(), "QStringList") == 0) {
-            QStringList var = %in.value&lt;QStringList&gt;();
-            return %CONVERTTOPYTHON[QList&lt;QString&gt;](var);
-        }
-
-        if (qstrcmp(%in.typeName(), "QVariantMap") == 0) {
-            QMap&lt;QString, QVariant&gt; var = %in.value&lt;QVariantMap&gt;();
-            return %CONVERTTOPYTHON[QMap&lt;QString, QVariant&gt;](var);
-        }
-
-        Shiboken::Conversions::SpecificConverter converter(cppInRef.typeName());
-        if (converter) {
-           void *ptr = cppInRef.data();
-           return converter.toPython(ptr);
-        }
-        PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s'.", %in.typeName());
-        return 0;
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-qvariant"/>
         <target-to-native>
-            <add-conversion type="PyBool">
-            %out = %OUTTYPE(%in == Py_True);
-            </add-conversion>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
-            <add-conversion type="QString" check="Shiboken::String::check(%in)">
-            QString in = %CONVERTTOCPP[QString](%in);
-            %out = %OUTTYPE(in);
-            </add-conversion>
-            <add-conversion type="QByteArray">
-            QByteArray in = %CONVERTTOCPP[QByteArray](%in);
-            %out = %OUTTYPE(in);
-            </add-conversion>
-            <add-conversion type="PyFloat" check="PyFloat_CheckExact(%in)">
-            double in = %CONVERTTOCPP[double](%in);
-            %out = %OUTTYPE(in);
-            </add-conversion>
+            <add-conversion type="PyBool" file="../glue/qtcore.cpp" snippet="conversion-pybool"/>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
+            <add-conversion type="QString" check="Shiboken::String::check(%in)" file="../glue/qtcore.cpp" snippet="conversion-qstring"/>
+            <add-conversion type="QByteArray" file="../glue/qtcore.cpp" snippet="conversion-qbytearray"/>
+            <add-conversion type="PyFloat" check="PyFloat_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pyfloat"/>
             <!-- Using PyLong instead of PyInt to support Python2 and 3-->
-            <add-conversion type="PyInt" check="PyInt_CheckExact(%in)">
-            qlonglong in = %CONVERTTOCPP[qlonglong](%in);
-            %out = %OUTTYPE(in);
-            </add-conversion>
-            <add-conversion type="PyLong" check="PyLong_CheckExact(%in)">
-            qlonglong in = %CONVERTTOCPP[qlonglong](%in);
-            %out = %OUTTYPE(in);
-            </add-conversion>
-            <add-conversion type="SbkEnumType">
-            int in = %CONVERTTOCPP[int](%in);
-            %out = %OUTTYPE(in);
-            </add-conversion>
-            <add-conversion type="SbkObject">
-            // a class supported by QVariant?
-            int typeCode;
-            const char *typeName = QVariant_resolveMetaType(Py_TYPE(%in), &amp;typeCode);
-            if (!typeCode || !typeName)
-                return;
-            QVariant var(typeCode, (void*)0);
-            Shiboken::Conversions::SpecificConverter converter(typeName);
-            converter.toCpp(pyIn, var.data());
-            %out = var;
-            </add-conversion>
-            <add-conversion type="PyDict" check="PyDict_CheckExact(%in)">
-            QVariant ret = QVariant_convertToVariantMap(%in);
-            %out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
-            </add-conversion>
-            <add-conversion type="PyList" check="PyList_Check(%in)">
-            QVariant ret = QVariant_convertToVariantList(%in);
-            %out = ret.isValid() ? ret : QVariant::fromValue(PySide::PyObjectWrapper(%in));
-            </add-conversion>
-            <add-conversion type="PyObject">
-            // Is a shiboken type not known by Qt
-            %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
-            </add-conversion>
+            <add-conversion type="PyInt" check="PyInt_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-qlonglong"/>
+            <add-conversion type="PyLong" check="PyLong_CheckExact(%in)"  file="../glue/qtcore.cpp" snippet="conversion-qlonglong"/>
+            <add-conversion type="SbkEnumType" file="../glue/qtcore.cpp" snippet="conversion-pyint"/>
+            <add-conversion type="SbkObject" file="../glue/qtcore.cpp" snippet="conversion-sbkobject"/>
+            <add-conversion type="PyDict" check="PyDict_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pydict"/>
+            <add-conversion type="PyList" check="PyList_Check(%in)" file="../glue/qtcore.cpp" snippet="conversion-pylist"/>
+            <add-conversion type="PyObject" file="../glue/qtcore.cpp" snippet="conversion-pyobject"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qvariant-conversion"/>
   <primitive-type name="QVariant::Type" default-constructor="QVariant::Invalid">
     <conversion-rule>
-        <native-to-target>
-        const char *typeName = QVariant::typeToName(%in);
-        PyObject *%out;
-        PyTypeObject *pyType = nullptr;
-        if (typeName)
-            pyType = Shiboken::Conversions::getPythonTypeObject(typeName);
-        %out = pyType ? (reinterpret_cast&lt;PyObject*&gt;(pyType)) : Py_None;
-        Py_INCREF(%out);
-        return %out;
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-qvariant-type"/>
         <target-to-native>
-            <add-conversion type="Py_None">
-            %out = QVariant::Invalid;
-            </add-conversion>
-            <add-conversion type="PyTypeObject">
-            const char *typeName;
-            if (Shiboken::String::checkType(reinterpret_cast&lt;PyTypeObject *&gt;(%in)))
-                typeName = "QString";
-            else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyFloat_Type))
-                typeName = "double"; // float is a UserType in QVariant.
-            else if (%in == reinterpret_cast&lt;PyObject*&gt;(&amp;PyLong_Type))
-                typeName = "int";    // long is a UserType in QVariant.
-            else if (Py_TYPE(%in) == SbkObjectType_TypeF())
-                typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType*)%in);
-            else
-                typeName = reinterpret_cast&lt;PyTypeObject *&gt;(%in)->tp_name;
-            %out = QVariant::nameToType(typeName);
-            </add-conversion>
-            <add-conversion type="PyString" check="Shiboken::String::check(%in)">
-            %out = QVariant::nameToType(Shiboken::String::toCString(%in));
-            </add-conversion>
-            <add-conversion type="PyDict" check="PyDict_Check(%in) &amp;&amp; QVariantType_checkAllStringKeys(%in)">
-            %out = QVariant::nameToType("QVariantMap");
-            </add-conversion>
-            <add-conversion type="PySequence">
-            %out = QVariantType_isStringList(%in) ? QVariant::StringList : QVariant::List;
-            </add-conversion>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-qvariant-invalid"/>
+            <add-conversion type="PyTypeObject" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pytypeobject"/>
+            <add-conversion type="PyString" check="Shiboken::String::check(%in)" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pystring"/>
+            <add-conversion type="PyDict" check="PyDict_Check(%in) &amp;&amp; QVariantType_checkAllStringKeys(%in)" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pydict"/>
+            <add-conversion type="PySequence" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pysequence"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
@@ -515,22 +359,9 @@
 
   <primitive-type name="QJsonObject">
     <conversion-rule>
-        <native-to-target>
-        // The QVariantMap returned by QJsonObject seems to cause a segfault, so
-        // using QJsonObject.toVariantMap() won't work.
-        // Wrapping it in a QJsonValue first allows it to work
-        QJsonValue val(%in);
-        QVariant ret = val.toVariant();
-
-        return %CONVERTTOPYTHON[QVariant](ret);
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-qjsonobject"/>
         <target-to-native>
-            <add-conversion type="PyDict">
-            QVariant dict = QVariant_convertToVariantMap(%in);
-            QJsonValue val = QJsonValue::fromVariant(dict);
-
-            %out = val.toObject();
-            </add-conversion>
+            <add-conversion type="PyDict" file="../glue/qtcore.cpp" snippet="conversion-qjsonobject-pydict"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>
@@ -683,17 +514,9 @@
   <container-type name="QPair" type="pair">
     <include file-name="QPair" location="global"/>
     <conversion-rule>
-        <native-to-target>
-        PyObject *%out = PyTuple_New(2);
-        PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
-        PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
-        return %out;
-        </native-to-target>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-qpair"/>
         <target-to-native>
-            <add-conversion type="PySequence">
-            %out.first = %CONVERTTOCPP[%OUTTYPE_0](PySequence_Fast_GET_ITEM(%in, 0));
-            %out.second = %CONVERTTOCPP[%OUTTYPE_1](PySequence_Fast_GET_ITEM(%in, 1));
-            </add-conversion>
+            <add-conversion type="PySequence" file="../glue/qtcore.cpp" snippet="conversion-qpair-pysequence"/>
         </target-to-native>
     </conversion-rule>
   </container-type>
@@ -995,15 +818,8 @@
     </inject-code>
     <conversion-rule>
         <target-to-native>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
-            <add-conversion type="PyDate" check="PyDateTime_ImportAndCheck(%in)">
-            int day = PyDateTime_GET_DAY(%in);
-            int month = PyDateTime_GET_MONTH(%in);
-            int year = PyDateTime_GET_YEAR(%in);
-            %out = %OUTTYPE(year, month, day);
-            </add-conversion>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
+            <add-conversion type="PyDate" check="PyDateTime_ImportAndCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-qdate-pydate"/>
         </target-to-native>
     </conversion-rule>
     <extra-includes>
@@ -1063,19 +879,8 @@
     </inject-code>
     <conversion-rule>
         <target-to-native>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
-            <add-conversion type="PyDateTime" check="PyDateTime_ImportAndCheck(%in)">
-            int day = PyDateTime_GET_DAY(%in);
-            int month = PyDateTime_GET_MONTH(%in);
-            int year = PyDateTime_GET_YEAR(%in);
-            int hour = PyDateTime_DATE_GET_HOUR(%in);
-            int min = PyDateTime_DATE_GET_MINUTE(%in);
-            int sec = PyDateTime_DATE_GET_SECOND(%in);
-            int usec = PyDateTime_DATE_GET_MICROSECOND(%in);
-            %out = %OUTTYPE(QDate(year, month, day), QTime(hour, min, sec, usec/1000));
-            </add-conversion>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
+            <add-conversion type="PyDateTime" check="PyDateTime_ImportAndCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-qdatetime-pydatetime"/>
         </target-to-native>
     </conversion-rule>
     <extra-includes>
@@ -1398,16 +1203,8 @@
     </inject-code>
     <conversion-rule>
         <target-to-native>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
-            <add-conversion type="PyTime" check="PyDateTime_ImportAndCheck(%in)">
-            int hour = PyDateTime_TIME_GET_HOUR(%in);
-            int min = PyDateTime_TIME_GET_MINUTE(%in);
-            int sec = PyDateTime_TIME_GET_SECOND(%in);
-            int usec = PyDateTime_TIME_GET_MICROSECOND(%in);
-            %out = %OUTTYPE(hour, min, sec, usec/1000);
-            </add-conversion>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
+            <add-conversion type="PyTime" check="PyDateTime_ImportAndCheck(%in)" file="../glue/qtcore.cpp" snippet="conversion-qtime-pytime"/>
         </target-to-native>
     </conversion-rule>
 
@@ -2045,22 +1842,10 @@
     <enum-type name="Base64Option" flags="Base64Options" since="5.2"/>
     <conversion-rule>
         <target-to-native>
-            <add-conversion type="Py_None">
-            %out = %OUTTYPE();
-            </add-conversion>
-            <add-conversion type="PyBytes">
-            #ifdef IS_PY3K
-            %out = %OUTTYPE(PyBytes_AS_STRING(%in), PyBytes_GET_SIZE(%in));
-            #else
-            %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
-            #endif
-            </add-conversion>
-            <add-conversion type="PyByteArray">
-            %out = %OUTTYPE(PyByteArray_AsString(%in), PyByteArray_Size(%in));
-            </add-conversion>
-            <add-conversion type="PyString" check="Shiboken::String::check(%in) &amp;&amp; !PyUnicode_Check(%in)">
-            %out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
-            </add-conversion>
+            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
+            <add-conversion type="PyBytes" file="../glue/qtcore.cpp" snippet="conversion-qbytearray-pybytes"/>
+            <add-conversion type="PyByteArray" file="../glue/qtcore.cpp" snippet="conversion-qbytearray-pybytearray"/>
+            <add-conversion type="PyString" check="Shiboken::String::check(%in) &amp;&amp; !PyUnicode_Check(%in)" file="../glue/qtcore.cpp" snippet="conversion-qbytearray-pystring"/>
         </target-to-native>
     </conversion-rule>
 

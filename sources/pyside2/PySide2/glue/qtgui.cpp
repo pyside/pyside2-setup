@@ -37,6 +37,10 @@
 **
 ****************************************************************************/
 
+/*********************************************************************
+ * INJECT CODE
+ ********************************************************************/
+
 // @snippet qtransform-quadtoquad
 QTransform _result;
 if (QTransform::quadToQuad(%1, %2, _result)) {
@@ -492,8 +496,18 @@ if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
 }
 // @snippet qguiapplication-2
 
-// @snippet qtransform-quadtoquad
-// @snippet qtransform-quadtoquad
+/*********************************************************************
+ * CONVERSIONS
+ ********************************************************************/
 
-// @snippet qtransform-quadtosquare
-// @snippet qtransform-quadtosquare
+// @snippet conversion-pylong
+%out = reinterpret_cast<%OUTTYPE>(PyLong_AsVoidPtr(%in));
+// @snippet conversion-pylong
+
+/*********************************************************************
+ * NATIVE TO TARGET CONVERSIONS
+ ********************************************************************/
+
+// @snippet return-pylong-voidptr
+return PyLong_FromVoidPtr(reinterpret_cast<void *>(%in));
+// @snippet return-pylong-voidptr
