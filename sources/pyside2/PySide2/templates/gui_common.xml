@@ -287,5 +287,26 @@
         %PYARG_0 = %CONVERTTOPYTHON[%CPPSELF_TYPE](_tmp);
     </template>
 
+    <template name="const_char_pybuffer">
+        PyObject *%out = Shiboken::Buffer::newObject(%in, size);
+    </template>
+
+    <template name="pybuffer_const_char">
+        Py_ssize_t bufferLen;
+        char *%out = reinterpret_cast&lt;char*&gt;(Shiboken::Buffer::getPointer(%PYARG_1, &amp;bufferLen));
+    </template>
+
+    <template name="uint_remove">
+        uint %out = bufferLen;
+    </template>
+
+    <template name="pybytes_const_uchar">
+        const uchar *%out = reinterpret_cast&lt;const uchar*>(PyBytes_AS_STRING(%PYARG_1));
+    </template>
+
+    <template name="pybytes_uint">
+          uint %out = static_cast&lt;uint>(PyBytes_Size(%PYARG_1));
+    </template>
+
 
 </typesystem>

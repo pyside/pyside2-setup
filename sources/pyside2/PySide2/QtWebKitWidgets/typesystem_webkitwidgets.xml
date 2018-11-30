@@ -185,22 +185,16 @@
       <modify-argument index="4">
         <remove-argument />
         <conversion-rule class="native">
-        QString _local;
-        QString* %4 = &amp;_local;
+            <insert-template name="qstring_remove"/>
         </conversion-rule>
       </modify-argument>
       <modify-argument index="return">
           <replace-type modified-type="PySequence"/>
           <conversion-rule class="native">
-          Shiboken::AutoDecRef pyRes(PySequence_GetItem(%PYARG_0, 0));
-          Shiboken::AutoDecRef pyStr(PySequence_GetItem(%PYARG_0, 1));
-          %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](pyRes);
-          *%4 = %CONVERTTOCPP[QString](pyStr);
+                <insert-template name="pysequence_qstring"/>
           </conversion-rule>
           <conversion-rule class="target">
-          %PYARG_0 = PyTuple_New(2);
-          PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
-          PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](*%4));
+              <insert-template name="qstring_pytuple"/>
           </conversion-rule>
       </modify-argument>
     </modify-function>

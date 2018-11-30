@@ -1479,46 +1479,29 @@
         <modify-argument index="2">
             <remove-argument/>
             <conversion-rule class="native">
-              int %out = PySequence_Size(%PYARG_1);
+                <insert-template name="pysequencesize_int"/>
             </conversion-rule>
         </modify-argument>
 
         <modify-argument index="3">
             <replace-type modified-type="PySequence"/>
             <conversion-rule class="native">
-                int numItems = PySequence_Size(%PYARG_1);
-                Shiboken::AutoArrayPointer&lt;QGraphicsItem*&gt; %out(numItems);
-                for (int i=0; i &lt; numItems; i++) {
-                    %out[i] = %CONVERTTOCPP[QGraphicsItem*](PySequence_Fast_GET_ITEM(%PYARG_1, i));
-                }
+                <insert-template name="qgraphicsitem_pysequence"/>
             </conversion-rule>
 
             <conversion-rule class="target">
-                Shiboken::AutoDecRef object(PyList_New(0));
-                for (int i=0, max=numItems; i &lt; max; i++) {
-                    PyList_Append(object, %CONVERTTOPYTHON[QGraphicsItem*](%in[i]));
-                }
-                PyObject *%out = object.object();
+                <insert-template name="qgraphicsitem_pyobject"/>
             </conversion-rule>
         </modify-argument>
 
         <modify-argument index="4">
             <replace-type modified-type="PySequence"/>
             <conversion-rule class="target">
-                Shiboken::AutoDecRef option_object(PyList_New(0));
-                for (int i=0, max=numItems; i &lt; max; i++) {
-                    const QStyleOptionGraphicsItem* item = &amp;%in[i];
-                    PyList_Append(option_object, %CONVERTTOPYTHON[QStyleOptionGraphicsItem](item));
-                }
-                PyObject* %out = option_object.object();
+                <insert-template name="qstyleoptiongraphicsitem_pyobject"/>
             </conversion-rule>
 
             <conversion-rule class="native">
-                int numOptions = PySequence_Size(%PYARG_2);
-                Shiboken::AutoArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
-                for (int i=0; i &lt; numOptions; i++) {
-                    %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](PySequence_Fast_GET_ITEM(%PYARG_1, i));
-                }
+                <insert-template name="pysequence_qstyleoptiongraphicsitem"/>
             </conversion-rule>
         </modify-argument>
     </modify-function>

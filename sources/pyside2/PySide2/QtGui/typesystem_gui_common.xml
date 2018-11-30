@@ -412,17 +412,16 @@
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
             <conversion-rule class="target">
-                PyObject *%out = Shiboken::Buffer::newObject(%in, size);
+                <insert-template name="const_char_pybuffer"/>
             </conversion-rule>
             <conversion-rule class="native">
-                Py_ssize_t bufferLen;
-                char *%out = reinterpret_cast&lt;char*&gt;(Shiboken::Buffer::getPointer(%PYARG_1, &amp;bufferLen));
+                <insert-template name="pybuffer_const_char"/>
             </conversion-rule>
         </modify-argument>
         <modify-argument index="2">
             <remove-argument/>
             <conversion-rule class="native">
-                uint %out = bufferLen;
+                <insert-template name="uint_remove"/>
             </conversion-rule>
         </modify-argument>
     </modify-function>
@@ -584,13 +583,13 @@
       <modify-argument index="1">
         <replace-type modified-type="PyBytes"/>
         <conversion-rule class="native">
-          const uchar *%out = reinterpret_cast&lt;const uchar*>(PyBytes_AS_STRING(%PYARG_1));
+            <insert-template name="pybytes_const_uchar"/>
         </conversion-rule>
       </modify-argument>
       <modify-argument index="2">
         <remove-argument/>
         <conversion-rule class="native">
-          uint %out = static_cast&lt;uint>(PyBytes_Size(%PYARG_1));
+            <insert-template name="pybytes_uint"/>
         </conversion-rule>
       </modify-argument>
     </modify-function>

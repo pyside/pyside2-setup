@@ -52,4 +52,22 @@
         }
     </template>
 
+    <template name="qstring_remove">
+        QString _local;
+        QString* %4 = &amp;_local;
+    </template>
+
+    <template name="pysequence_qstring">
+        Shiboken::AutoDecRef pyRes(PySequence_GetItem(%PYARG_0, 0));
+        Shiboken::AutoDecRef pyStr(PySequence_GetItem(%PYARG_0, 1));
+        %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](pyRes);
+        *%4 = %CONVERTTOCPP[QString](pyStr);
+    </template>
+
+    <template name="qstring_pytuple">
+        %PYARG_0 = PyTuple_New(2);
+        PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+        PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](*%4));
+    </template>
+
 </typesystem>
