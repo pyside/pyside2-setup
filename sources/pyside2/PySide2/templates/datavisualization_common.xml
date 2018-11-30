@@ -1,6 +1,8 @@
+<?xml version="1.0"?>
+<!--
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -36,15 +38,39 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+-->
+<typesystem>
+    <template name="cppqlistofptrtoqvectors_to_py_conversion">
+        const int rowCount = %in.size();
+        PyObject* %out = PyList_New(rowCount);
+        for (int r = 0; r &lt; rowCount; ++r) {
+            const QVector&lt;%INTYPE_0&gt; *row = %in.at(r);
+            const int columnCount = row->size();
+            PyObject *pyRow = PyList_New(columnCount);
+            for (int c = 0; c &lt; columnCount; ++c) {
+                const %INTYPE_0 &amp;cppItem = row->at(c);
+                PyList_SET_ITEM(pyRow, c, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+            }
+            PyList_SET_ITEM(%out, r, pyRow);
+        }
+        return %out;
+    </template>
 
-static void QCoreApplicationConstructor(PyObject *self, PyObject *pyargv, QCoreApplicationWrapper **cptr)
-{
-    static int argc;
-    static char **argv;
-    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
-    if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
-        *cptr = new QCoreApplicationWrapper(argc, argv);
-        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
-        PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
-    }
-}
+    <template name="py_to_cppqlistofptrtoqvectors_conversion">
+        const int rowCount = int(PySequence_Size(%in));
+        %OUTTYPE &amp;result = %out;
+        result.reserve(rowCount);
+        for (int r = 0; r &lt; rowCount; ++r) {
+            Shiboken::AutoDecRef rowItem(PySequence_GetItem(%in, r));
+            const int columnCount = int(PySequence_Size(rowItem));
+            QVector&lt;%OUTTYPE_0&gt; *row = new QVector&lt;%OUTTYPE_0&gt;;
+            row->reserve(columnCount);
+            for (int c = 0; c &lt; columnCount; ++c) {
+               Shiboken::AutoDecRef pyItem(PySequence_GetItem(rowItem, c));
+               %OUTTYPE_0 v = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
+               row->append(v);
+            }
+            result.append(row);
+        }
+    </template>
+</typesystem>

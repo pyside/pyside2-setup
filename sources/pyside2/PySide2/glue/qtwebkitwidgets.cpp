@@ -75,3 +75,18 @@ if (_signalIndex == id) {
     }
 }
 // @snippet qwebpage-qt-metacall
+
+// @snippet qwebframe-metadata
+%PYARG_0 = PyDict_New();
+const auto &keys = %0.keys();
+for (const auto &_key : keys) {
+    Shiboken::AutoDecRef _pyValueList(PyList_New(0));
+    for (auto it = %0.lowerBound(key), end = %0.upperBound(key); it ! = end; ++it) {
+        Shiboken::AutoDecRef _pyValue(%CONVERTTOPYTHON[QString](it.value));
+        PyList_Append(_pyValueList, _pyValue);
+    }
+
+    Shiboken::AutoDecRef _pyKey(%CONVERTTOPYTHON[QString](_key));
+    PyDict_SetItem(%PYARG_0, _pyKey, _pyValueList);
+}
+// @snippet qwebframe-metadata

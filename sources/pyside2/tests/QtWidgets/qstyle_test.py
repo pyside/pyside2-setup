@@ -26,6 +26,7 @@
 ##
 #############################################################################
 
+import sys
 import unittest
 from helper import UsesQApplication
 
@@ -77,6 +78,13 @@ class SetStyleTest(UsesQApplication):
         while not label.windowHandle().isExposed():
            QApplication.instance().processEvents()
         self.assertTrue(proxyStyle.polished > 0)
+
+    def testSetStyleOwnership(self):
+        style = QStyleFactory.create(QStyleFactory.keys()[0])
+        self.assertEqual(sys.getrefcount(style), 2)
+        QApplication.instance().setStyle(style)
+        self.assertEqual(sys.getrefcount(style), 3)
+
 
 if __name__ == '__main__':
     unittest.main()

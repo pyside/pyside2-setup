@@ -18,6 +18,10 @@ ${QtScript_GEN_DIR}/qscriptvalueiterator_wrapper.cpp
 ${QtScript_GEN_DIR}/qtscript_module_wrapper.cpp
 )
 
+set(QtScript_glue_sources
+    "${QtScript_SOURCE_DIR}/qscript_value_iterator_glue.cpp"
+)
+
 set(QtScript_include_dirs   ${QtScript_SOURCE_DIR}
                             ${QtScript_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
@@ -39,4 +43,7 @@ create_pyside_module(QtScript
                      QtScript_deps
                      QtScript_SOURCE_DIR
                      QtScript_SRC
-                     "")
+                     ""
+                     ""
+                     ""
+                     QtScript_glue_sources)

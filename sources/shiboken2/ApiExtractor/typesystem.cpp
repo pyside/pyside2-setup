@@ -29,6 +29,7 @@
 #include "typesystem.h"
 #include "typesystem_p.h"
 #include "typedatabase.h"
+#include "messages.h"
 #include "reporthandler.h"
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -1631,6 +1632,21 @@ bool Handler::parseCustomConversion(const QXmlStreamReader &,
     return true;
 }
 
+bool Handler::parseNativeToTarget(const QXmlStreamReader &,
+                                  const StackElement &topElement,
+                                  QXmlStreamAttributes *attributes)
+{
+    if (topElement.type != StackElement::ConversionRule) {
+        m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
+        return false;
+    }
+    CodeSnip snip;
+    if (!readFileSnippet(attributes, &snip))
+        return false;
+    m_contextStack.top()->codeSnips.append(snip);
+    return true;
+}
+
 bool Handler::parseAddConversion(const QXmlStreamReader &,
                                  const StackElement &topElement,
                                  QXmlStreamAttributes *attributes)
@@ -1641,6 +1657,9 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
     }
     QString sourceTypeName;
     QString typeCheck;
+    CodeSnip snip;
+    if (!readFileSnippet(attributes, &snip))
+        return false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type"))
@@ -1653,7 +1672,7 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
         return false;
     }
     m_current->entry->customConversion()->addTargetToNativeConversion(sourceTypeName, typeCheck);
-    m_contextStack.top()->codeSnips << CodeSnip();
+    m_contextStack.top()->codeSnips.append(snip);
     return true;
 }
 
@@ -2213,6 +2232,46 @@ bool Handler::parseParentOwner(const QXmlStreamReader &,
     return true;
 }
 
+bool Handler::readFileSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip)
+{
+    QString fileName;
+    QString snippetLabel;
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const QStringRef name = attributes->at(i).qualifiedName();
+        if (name == QLatin1String("file")) {
+            fileName = attributes->takeAt(i).value().toString();
+        } else if (name == snippetAttribute()) {
+            snippetLabel = attributes->takeAt(i).value().toString();
+        }
+    }
+    if (fileName.isEmpty())
+        return true;
+    const QString resolved = m_database->modifiedTypesystemFilepath(fileName, m_currentPath);
+    if (!QFile::exists(resolved)) {
+        m_error = QLatin1String("File for inject code not exist: ")
+            + QDir::toNativeSeparators(fileName);
+        return false;
+    }
+    QFile codeFile(resolved);
+    if (!codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
+        m_error = msgCannotOpenForReading(codeFile);
+        return false;
+    }
+    QString source = fileName;
+    if (!snippetLabel.isEmpty())
+        source += QLatin1String(" (") + snippetLabel + QLatin1Char(')');
+    QString content;
+    QTextStream str(&content);
+    str << "// ========================================================================\n"
+           "// START of custom code block [file: "
+        << source << "]\n"
+        << extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel)
+        << "\n// END of custom code block [file: " << source
+        << "]\n// ========================================================================\n";
+    snip->addCode(content);
+    return true;
+}
+
 bool Handler::parseInjectCode(const QXmlStreamReader &,
                               const StackElement &topElement,
                               StackElement* element, QXmlStreamAttributes *attributes)
@@ -2227,8 +2286,9 @@ bool Handler::parseInjectCode(const QXmlStreamReader &,
 
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionBeginning;
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
-    QString fileName;
-    QString snippetLabel;
+    CodeSnip snip;
+    if (!readFileSnippet(attributes, &snip))
+        return false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
@@ -2245,43 +2305,11 @@ bool Handler::parseInjectCode(const QXmlStreamReader &,
                 m_error = QStringLiteral("Invalid position: '%1'").arg(value);
                 return false;
             }
-        } else if (name == QLatin1String("file")) {
-            fileName = attributes->takeAt(i).value().toString();
-        } else if (name == snippetAttribute()) {
-            snippetLabel = attributes->takeAt(i).value().toString();
         }
     }
 
-    CodeSnip snip;
     snip.position = position;
     snip.language = lang;
-    bool in_file = false;
-
-    // Handler constructor....
-    if (m_generate != TypeEntry::GenerateForSubclass &&
-        m_generate != TypeEntry::GenerateNothing &&
-        !fileName.isEmpty()) {
-        const QString resolved = m_database->modifiedTypesystemFilepath(fileName, m_currentPath);
-        if (QFile::exists(resolved)) {
-            QFile codeFile(resolved);
-            if (codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
-                QString content = QLatin1String("// ========================================================================\n"
-                                                "// START of custom code block [file: ");
-                content += fileName;
-                content += QLatin1String("]\n");
-                content += extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel);
-                content += QLatin1String("\n// END of custom code block [file: ");
-                content += fileName;
-                content += QLatin1String("]\n// ========================================================================\n");
-                snip.addCode(content);
-                in_file = true;
-            }
-        } else {
-            qCWarning(lcShiboken).noquote().nospace()
-                << "File for inject code not exist: " << QDir::toNativeSeparators(fileName);
-        }
-
-    }
 
     if (snip.language == TypeSystem::Interface
         && topElement.type != StackElement::InterfaceTypeEntry) {
@@ -2298,7 +2326,7 @@ bool Handler::parseInjectCode(const QXmlStreamReader &,
 
         FunctionModification &mod = m_contextStack.top()->functionMods.last();
         mod.snips << snip;
-        if (in_file)
+        if (!snip.code().isEmpty())
             mod.modifiers |= FunctionModification::CodeInjection;
         element->type = StackElement::InjectCodeInFunction;
     } else if (topElement.type == StackElement::Root) {
@@ -2660,11 +2688,8 @@ bool Handler::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::NativeToTarget:
-            if (topElement.type != StackElement::ConversionRule) {
-                m_error = QLatin1String("Native to Target conversion code can only be specified for custom conversion rules.");
+            if (!parseNativeToTarget(reader, topElement, &attributes))
                 return false;
-            }
-            m_contextStack.top()->codeSnips << CodeSnip();
             break;
         case StackElement::TargetToNative: {
             if (topElement.type != StackElement::ConversionRule) {

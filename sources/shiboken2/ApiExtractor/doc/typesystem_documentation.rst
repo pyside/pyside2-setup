@@ -30,9 +30,9 @@ modify-documentation
 ^^^^^^^^^^^^^^^^^^^^
 
     The modify-documentation node allows you to change the auto-generated
-    documentation. API Extractor transforms XML's from qdoc3 (the Qt documentation
-    tool) into .rst files to be processed later using Sphinx. So you can modify
-    the XML before the transformation occur.
+    documentation. API Extractor transforms XML's from qdoc (the Qt documentation
+    tool) into .rst files to be processed later using Sphinx. You can modify
+    the XML before the transformation takes place.
 
     .. code-block:: xml
 

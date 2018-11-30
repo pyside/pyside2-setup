@@ -238,4 +238,6 @@ create_pyside_module(QtWidgets
                      QtWidgets_SOURCE_DIR
                      QtWidgets_SRC
                      ""
-                     ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml)
+                     ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml
+                     ""
+                     "")

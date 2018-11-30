@@ -14,7 +14,11 @@ macro(create_pyside_module
       module_deps
       module_typesystem_path
       module_sources
-      module_static_sources)
+      module_static_sources
+      #module_typesystem_name
+      #module_dropped_entries
+      #module_glue_sources
+      )
     string(TOLOWER ${module_name} _module)
     string(REGEX REPLACE ^qt "" _module ${_module})
     if(${ARGC} GREATER 7)
@@ -27,26 +31,16 @@ macro(create_pyside_module
     else()
         set (dropped_entries "")
     endif()
+    if(${ARGC} GREATER 9)
+        set (glue_sources "${${ARGV9}}")
+    else()
+        set (glue_sources "")
+    endif()
 
     if (NOT EXISTS ${typesystem_name})
         set(typesystem_path ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_${_module}.xml)
     else()
         set(typesystem_path ${typesystem_name})
-    endif()
-
-    # check for class files that were commented away.
-    if(DEFINED ${module_sources}_skipped_files)
-        if(DEFINED PYTHON3_EXECUTABLE)
-            set(_python_interpreter "${PYTHON3_EXECUTABLE}")
-        else()
-            set(_python_interpreter "${PYTHON_EXECUTABLE}")
-        endif()
-        if(NOT _python_interpreter)
-            message(FATAL_ERROR "*** we need a python interpreter for postprocessing!")
-        endif()
-        set(_python_postprocessor "${_python_interpreter}" "${CMAKE_CURRENT_BINARY_DIR}/filter_init.py")
-    else()
-        set(_python_postprocessor "")
     endif()
 
     # Create typesystem XML dependencies list, so that whenever they change, shiboken is invoked
@@ -80,6 +74,21 @@ macro(create_pyside_module
 
     get_filename_component(pyside_binary_dir ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 
+    # Install module glue files.
+    string(TOLOWER ${module_name} lower_module_name)
+    set(${module_name}_glue "${CMAKE_CURRENT_SOURCE_DIR}/../glue/${lower_module_name}.cpp")
+    set(${module_name}_glue_dependency "")
+    if(EXISTS ${${module_name}_glue})
+        install(FILES ${${module_name}_glue} DESTINATION share/PySide2${pyside2_SUFFIX}/glue)
+        set(${module_name}_glue_dependency ${${module_name}_glue})
+    endif()
+
+    # Install standalone glue files into typesystems subfolder, so that the resolved relative
+    # paths remain correct.
+    if (glue_sources)
+        install(FILES ${glue_sources} DESTINATION share/PySide2${pyside2_SUFFIX}/typesystems/glue)
+    endif()
+
     add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
                         BYPRODUCTS ${${module_sources}}
                         COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
@@ -92,8 +101,9 @@ macro(create_pyside_module
                         ${typesystem_path}
                         --api-version=${SUPPORTED_QT_VERSION}
                         --drop-type-entries="${dropped_entries}"
-                        COMMAND ${_python_postprocessor}
                         DEPENDS ${total_type_system_files}
+                                ${glue_sources}
+                                ${${module_name}_glue_dependency}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_name}...")
 
@@ -117,7 +127,6 @@ macro(create_pyside_module
 
     # install
     install(TARGETS ${module_name} LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/PySide2)
-    string(TOLOWER ${module_name} lower_module_name)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_name}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_name}/)
     file(GLOB typesystem_files ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_*.xml ${typesystem_path})

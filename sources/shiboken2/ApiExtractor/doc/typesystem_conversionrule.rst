@@ -63,6 +63,7 @@ native-to-target
     **%INTYPE_#**, should be replaced by the types used in the container template
     (e.g. **%INTYPE_0** correspondes to **"int"** for **"list<int>"**).
 
+    The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).
 
 .. _target-to-native:
 
@@ -110,4 +111,6 @@ add-conversion
    attribute, but it isn't unusual that some special check is needed. The variables
    **%in**, **%out**, **%INTYPE**, **%INTYPE_#**, and **%OUTTYPE**, must be provided by
    the generator as in the ``native-to-target`` tag.
+
+   The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).
 

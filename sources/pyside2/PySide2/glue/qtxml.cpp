@@ -46,3 +46,18 @@ QXmlInputSource* _qxmlinputsource_arg_ = nullptr;
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QXmlInputSource*](_qxmlinputsource_arg_));
 // @snippet qxmlentityresolver-resolveentity
+
+// @snippet qdomdocument-setcontent
+QString _errorMsg_;
+int _errorLine_ = 0;
+int _errorColumn_ = 0;
+%BEGIN_ALLOW_THREADS
+bool _ret_ = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &_errorMsg_, &_errorLine_,
+    &_errorColumn_);
+%END_ALLOW_THREADS
+%PYARG_0 = PyTuple_New(4);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](_ret_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](_errorMsg_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](_errorLine_));
+PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](_errorColumn_));
+// @snippet qdomdocument-setcontent

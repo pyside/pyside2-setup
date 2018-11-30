@@ -88,21 +88,14 @@ class TestRunner(object):
                 os.environ['PATH'] = clang_bin_dir + os.pathsep + path
                 print("Adding %s as detected by %s to PATH" % (clang_bin_dir, clang_dir[1]))
 
-    def _find_ctest(self):
+    def _find_ctest_in_file(self, file_name):
         """
-        Find ctest in the Makefile
-
-        We no longer use make, but the ctest command directly.
-        It is convenient to look for the ctest program using the Makefile.
-        This serves us two purposes:
-
-          - there is no dependency of the PATH variable,
-          - each project is checked whether ctest was configured.
+        Helper for _find_ctest() that finds the ctest binary in a build
+        system file (ninja, Makefile).
         """
-        make_path = os.path.join(self.test_dir, "Makefile")
         look_for = "--force-new-ctest-process"
         line = None
-        with open(make_path) as makefile:
+        with open(file_name) as makefile:
             for line in makefile:
                 if look_for in line:
                     break
@@ -120,6 +113,25 @@ class TestRunner(object):
         assert line, "Did not find {}".format(look_for)
         ctest = re.search(r'(\S+|"([^"]+)")\s+' + look_for, line).groups()
         return ctest[1] or ctest[0]
+
+    def _find_ctest(self):
+        """
+        Find ctest in a build system file (ninja, Makefile)
+
+        We no longer use make, but the ctest command directly.
+        It is convenient to look for the ctest program using the Makefile.
+        This serves us two purposes:
+
+          - there is no dependency of the PATH variable,
+          - each project is checked whether ctest was configured.
+        """
+        candidate_files = ["Makefile", "build.ninja"]
+        for candidate in candidate_files:
+            path = os.path.join(self.test_dir, candidate)
+            if os.path.exists(path):
+                return self._find_ctest_in_file(path)
+        raise RuntimeError('Cannot find any of the build system files {}.'.format(
+                           ', '.join(candidate_files)))
 
     def _setup(self):
         self.ctestCommand = self._find_ctest()

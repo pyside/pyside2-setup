@@ -48,7 +48,7 @@
       <extra-includes>
         <include file-name="glue/plugins.h" location="local"/>
       </extra-includes>
-      <inject-code class="native" position="beginning" file="glue/uitools_loadui.cpp"/>
+      <inject-code class="native" position="beginning" file="../glue/qtuitools.cpp" snippet="uitools-loadui"/>
       <inject-code file="../glue/qtuitools.cpp" snippet="quiloader"/>
       <add-function signature="registerCustomWidget(PyObject*)" return-type="void">
          <modify-argument index="1">

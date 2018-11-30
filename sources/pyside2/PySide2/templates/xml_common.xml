@@ -1,6 +1,8 @@
+<?xml version="1.0"?>
+<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -36,27 +38,21 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+-->
+<typesystem>
 
-inline PyObject*
-addActionWithPyObject(QMenuBar* self, const QString& text, PyObject* callback)
-{
-    QAction* act = new QAction(text, self);
+    <template name="QXmlEntityResolver_resolveEntity_return_conversion_native">
+        Shiboken::AutoDecRef  _py_ok_(PySequence_GetItem(%PYARG_0, 0));
+        Shiboken::AutoDecRef  _py_ret_(PySequence_GetItem(%PYARG_0, 1));
+        %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ok_);
+        %3 = %CONVERTTOCPP[QXmlInputSource*](_py_ret_);
+    </template>
 
-    self->addAction(act);
+    <template name="fix_virtual_method_return_value_and_bool*">
+        Shiboken::AutoDecRef _py_ret_(PySequence_GetItem(%PYARG_0, 0));
+        Shiboken::AutoDecRef _py_ok_(PySequence_GetItem(%PYARG_0, 1));
+        %RETURN_TYPE %out = %CONVERTTOCPP[%RETURN_TYPE](_py_ret_);
+        *%2 = %CONVERTTOCPP[bool](_py_ok_);
+    </template>
 
-    PyObject* pyAct = %CONVERTTOPYTHON[QAction*](act);
-    PyObject* result = PyObject_CallMethod(pyAct,
-                                           const_cast<char *>("connect"),
-                                           const_cast<char *>("OsO"),
-                                           pyAct,
-                                           SIGNAL(triggered(bool)), callback);
-
-    if (result == 0 || result == Py_False) {
-        if (result)
-            Py_DECREF(result);
-        Py_DECREF(pyAct);
-        return 0;
-    }
-
-    return pyAct;
-}
+</typesystem>

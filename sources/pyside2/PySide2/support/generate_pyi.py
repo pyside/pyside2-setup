@@ -57,7 +57,7 @@ from textwrap import dedent
 
 from PySide2.support.signature import inspect
 from PySide2.support.signature.lib.enum_sig import HintingEnumerator
-from PySide2 import *  # all modules
+
 
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
@@ -70,14 +70,21 @@ indent = " " * 4
 class Writer(object):
     def __init__(self, outfile):
         self.outfile = outfile
+        self.history = [True, True]
 
     def print(self, *args, **kw):
+        # controlling too much blank lines
         if self.outfile:
-            if args == ():
-                # This is a Python 2.7 glitch.
+            if args == () or args == ("",):
+                # Python 2.7 glitch: Empty tuples have wrong encoding.
+                # But we use that to skip too many blank lines:
+                if self.history[-2:] == [True, True]:
+                    return
                 print("", file=self.outfile, **kw)
+                self.history.append(True)
             else:
                 print(*args, file=self.outfile, **kw)
+                self.history.append(False)
 
 
 class Formatter(Writer):
@@ -167,13 +174,20 @@ def find_imports(text):
     return [imp for imp in PySide2.__all__ if imp + "." in text]
 
 
-def generate_pyi(mod_name, outpath):
-    module = sys.modules[mod_name]
-    mod_fullname = module.__file__
-    plainname = os.path.basename(mod_fullname).split(".")[0]
+def generate_pyi(import_name, outpath, options):
+    plainname = import_name.split(".")[-1]
     if not outpath:
-        outpath = os.path.dirname(mod_fullname)
+        outpath = os.path.dirname(PySide2.__file__)
     outfilepath = os.path.join(outpath, plainname + ".pyi")
+    if options.skip and os.path.exists(outfilepath):
+        return
+    try:
+        __import__(import_name)
+    except ImportError:
+        return
+
+    module = sys.modules[import_name]
+    mod_fullname = module.__file__
     outfile = io.StringIO()
     fmt = Formatter(outfile)
     enu = HintingEnumerator(fmt)
@@ -189,7 +203,7 @@ def generate_pyi(mod_name, outpath):
         except for defaults which are replaced by "...".
         """
         '''.format(**locals())))
-    enu.module(mod_name)
+    enu.module(import_name)
     fmt.print("# eof")
     with io.open(outfilepath, "w") as realfile:
         wr = Writer(realfile)
@@ -202,11 +216,11 @@ def generate_pyi(mod_name, outpath):
             # we remove the IMPORTS marker and insert imports if needed
             if line == "IMPORTS":
                 if need_imports:
-                    for imp in find_imports(outfile.getvalue()):
-                        imp = "PySide2." + imp
-                        if imp != mod_name:
+                    for mod_name in find_imports(outfile.getvalue()):
+                        imp = "PySide2." + mod_name
+                        if imp != import_name:
                             wr.print("import " + imp)
-                wr.print("import " + mod_name)
+                wr.print("import " + import_name)
                 wr.print()
                 wr.print()
             else:
@@ -218,22 +232,28 @@ def generate_pyi(mod_name, outpath):
         subprocess.check_output([sys.executable, outfilepath])
 
 
-def generate_all_pyi(outpath=None):
+def generate_all_pyi(outpath, options):
     for mod_name in PySide2.__all__:
-        generate_pyi("PySide2." + mod_name, outpath)
+        import_name = "PySide2."  + mod_name
+        generate_pyi(import_name, outpath, options)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="This script generates the .pyi file for all PySide modules.")
-    subparsers = parser.add_subparsers(dest="command", metavar="", title="required argument")
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command")
     # create the parser for the "run" command
-    parser_run = subparsers.add_parser("run", help="run the generation")
-    parser_run.add_argument("--outpath")
-    args = parser.parse_args()
-    outpath = args.outpath
-    if not outpath or os.path.exists(outpath):
-        generate_all_pyi(args.outpath)
+    parser_run = subparsers.add_parser("run",
+        help="run the generation",
+        description="This script generates the .pyi file for all PySide modules.")
+    parser_run.add_argument("--skip", action="store_true", help="skip already generated files")
+    parser_run.add_argument("--outpath", help="the outout folder. Default = location of binaries.")
+    options = parser.parse_args()
+    if options.command == "run":
+        outpath = options.outpath
+        if outpath and not os.path.exists(outpath):
+            os.makedirs(outpath)
+            print("+++ Created path {outpath}".format(**locals()))
+        generate_all_pyi(outpath, options=options)
     else:
-        print("Please create the directory {outpath} before generating.".format(**locals()))
-
+        parser_run.print_help()
+        sys.exit(1)

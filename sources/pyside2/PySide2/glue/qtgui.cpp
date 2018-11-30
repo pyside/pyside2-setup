@@ -37,6 +37,10 @@
 **
 ****************************************************************************/
 
+/*********************************************************************
+ * INJECT CODE
+ ********************************************************************/
+
 // @snippet qtransform-quadtoquad
 QTransform _result;
 if (QTransform::quadToQuad(%1, %2, _result)) {
@@ -113,7 +117,7 @@ if (doc) {
 
 // @snippet qpolygon-reduce
 PyObject *points = PyList_New(%CPPSELF.count());
-for (int i = 0, max = %CPPSELF.count(); i < max; ++i){
+for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
     int x, y;
     %CPPSELF.point(i, &x, &y);
     QPoint pt = QPoint(x, y);
@@ -435,6 +439,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 %END_ALLOW_THREADS
 // @snippet qpainter-drawpolygon
 
+// @snippet qmatrix-map-point
+QPoint p(%CPPSELF.%FUNCTION_NAME(%1));
+%PYARG_0 = %CONVERTTOPYTHON[QPoint](p);
+// @snippet qmatrix-map-point
+
 // @snippet qmatrix4x4
 if (PySequence_Size(%PYARG_1) == 16) {
     float values[16];
@@ -476,6 +485,20 @@ PyErr_SetString(PyExc_IndexError, "Invalid matrix index.");
 return 0;
 // @snippet qmatrix4x4-mgetitem
 
+// @snippet qguiapplication-init
+static void QGuiApplicationConstructor(PyObject *self, PyObject *pyargv, QGuiApplicationWrapper **cptr)
+{
+    static int argc;
+    static char **argv;
+    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
+        *cptr = new QGuiApplicationWrapper(argc, argv, 0);
+        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
+        PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
+    }
+}
+// @snippet qguiapplication-init
+
 // @snippet qguiapplication-1
 QGuiApplicationConstructor(%PYSELF, args, &%0);
 // @snippet qguiapplication-1
@@ -487,8 +510,18 @@ if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
 }
 // @snippet qguiapplication-2
 
-// @snippet qtransform-quadtoquad
-// @snippet qtransform-quadtoquad
+/*********************************************************************
+ * CONVERSIONS
+ ********************************************************************/
 
-// @snippet qtransform-quadtosquare
-// @snippet qtransform-quadtosquare
+// @snippet conversion-pylong
+%out = reinterpret_cast<%OUTTYPE>(PyLong_AsVoidPtr(%in));
+// @snippet conversion-pylong
+
+/*********************************************************************
+ * NATIVE TO TARGET CONVERSIONS
+ ********************************************************************/
+
+// @snippet return-pylong-voidptr
+return PyLong_FromVoidPtr(reinterpret_cast<void *>(%in));
+// @snippet return-pylong-voidptr

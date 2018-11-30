@@ -1,6 +1,8 @@
+<?xml version="1.0"?>
+<!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -36,29 +38,24 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-inline PyObject* addActionWithPyObject(QMenu* self, const QIcon& icon, const QString& text, PyObject* callback, const QKeySequence& shortcut)
-{
-    QAction* act = new QAction(text, self);
-
-    if (!icon.isNull())
-        act->setIcon(icon);
-
-    if (!shortcut.isEmpty())
-        act->setShortcut(shortcut);
-
-    self->addAction(act);
-
-    PyObject* pyAct = %CONVERTTOPYTHON[QAction*](act);
-    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct,
-                                                    const_cast<char *>("connect"),
-                                                    const_cast<char *>("OsO"),
-                                                    pyAct,
-                                                    SIGNAL(triggered()), callback));
-    if (result.isNull()) {
-        Py_DECREF(pyAct);
-        return 0;
-    }
-
-    return pyAct;
-}
+-->
+<typesystem>
+    <template name="callArrayFunction">
+        Py_ssize_t _size = PySequence_Size(%PYARG_2);
+        if (_size) {
+            $ATTR_TYPE *_list = new $ATTR_TYPE[_size];
+            if (_size) {
+              Shiboken::AutoDecRef fast(PySequence_Fast(%PYARG_2,
+                "Failed to parse sequence with type %VECTOR_TYPE."));
+              for(Py_ssize_t i=0; i &lt; _size; i++) {
+                  PyObject* pv = PySequence_Fast_GET_ITEM(fast.object(), i);
+                  _list[i] = %CONVERTTOCPP[$ATTR_TYPE](pv);
+              }
+            }
+            %CPPSELF.%FUNCTION_NAME(%1, _list, $ARG0);
+            delete[] _list;
+         } else {
+            %CPPSELF.%FUNCTION_NAME(%1, ($ATTR_TYPE*)nullptr, $ARG1);
+         }
+    </template>
+</typesystem>

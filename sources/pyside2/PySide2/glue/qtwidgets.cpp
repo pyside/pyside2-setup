@@ -37,6 +37,10 @@
 **
 ****************************************************************************/
 
+/*********************************************************************
+ * INJECT CODE
+ ********************************************************************/
+
 // @snippet qtreewidgetitemiterator-next
 if (**%CPPSELF) {
     QTreeWidgetItemIterator *%0 = new QTreeWidgetItemIterator((*%CPPSELF)++);
@@ -86,6 +90,54 @@ if (_defaultValue)
 _defaultValue = %PYARG_1;
 // @snippet qitemeditorfactory-setdefaultfactory
 
+// @snippet qformlayout-fix-args
+int _row;
+QFormLayout::ItemRole _role;
+%BEGIN_ALLOW_THREADS
+%CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &_row, &_role);
+%END_ALLOW_THREADS
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
+// @snippet qformlayout-fix-args
+
+// @snippet qfiledialog-return
+%BEGIN_ALLOW_THREADS
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &%5, %6);
+%END_ALLOW_THREADS
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
+// @snippet qfiledialog-return
+
+// @snippet qmenu-glue
+inline PyObject* addActionWithPyObject(QMenu* self, const QIcon& icon, const QString& text, PyObject* callback, const QKeySequence& shortcut)
+{
+    QAction* act = self->addAction(text);
+
+    if (!icon.isNull())
+        act->setIcon(icon);
+
+    if (!shortcut.isEmpty())
+        act->setShortcut(shortcut);
+
+    self->addAction(act);
+
+    PyObject* pyAct = %CONVERTTOPYTHON[QAction*](act);
+    Shiboken::AutoDecRef result(PyObject_CallMethod(pyAct,
+                                                    const_cast<char *>("connect"),
+                                                    const_cast<char *>("OsO"),
+                                                    pyAct,
+                                                    SIGNAL(triggered()), callback));
+    if (result.isNull()) {
+        Py_DECREF(pyAct);
+        return nullptr;
+    }
+
+    return pyAct;
+}
+// @snippet qmenu-glue
+
 // @snippet qmenu-addaction-1
 %PYARG_0 = addActionWithPyObject(%CPPSELF, QIcon(), %1, %2, %3);
 // @snippet qmenu-addaction-1
@@ -101,7 +153,7 @@ _defaultValue = %PYARG_1;
 // @snippet qmenu-clear
 Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();
 const auto &actions = %CPPSELF.actions();
-for (QAction *act : actions) {
+for (auto *act : actions) {
     if (auto wrapper = bm.retrieveWrapper(act)) {
         auto pyObj = reinterpret_cast<PyObject *>(wrapper);
         Py_INCREF(pyObj);
@@ -112,9 +164,35 @@ for (QAction *act : actions) {
 }
 // @snippet qmenu-clear
 
+// @snippet qmenubar-glue
+inline PyObject*
+addActionWithPyObject(QMenuBar* self, const QString& text, PyObject* callback)
+{
+    QAction* act = self->addAction(text);
+
+    self->addAction(act);
+
+    PyObject* pyAct = %CONVERTTOPYTHON[QAction*](act);
+    PyObject* result = PyObject_CallMethod(pyAct,
+                                           const_cast<char *>("connect"),
+                                           const_cast<char *>("OsO"),
+                                           pyAct,
+                                           SIGNAL(triggered(bool)), callback);
+
+    if (result == nullptr || result == Py_False) {
+        if (result)
+            Py_DECREF(result);
+        Py_DECREF(pyAct);
+        return nullptr;
+    }
+
+    return pyAct;
+}
+// @snippet qmenubar-glue
+
 // @snippet qmenubar-clear
 const auto &actions = %CPPSELF.actions();
-for (QAction *act : actions) {
+for (auto *act : actions) {
   Shiboken::AutoDecRef pyAct(%CONVERTTOPYTHON[QAction*](act));
   Shiboken::Object::setParent(NULL, pyAct);
   Shiboken::Object::invalidate(pyAct);
@@ -151,6 +229,131 @@ if (_widget) {
 }
 // @snippet qtoolbox-removeitem
 
+// @snippet qlayout-help-functions
+void addLayoutOwnership(QLayout* layout, QLayoutItem* item);
+void removeLayoutOwnership(QLayout* layout, QWidget* widget);
+
+inline QByteArray retrieveObjectName(PyObject* obj)
+{
+    Shiboken::AutoDecRef objName(PyObject_Str(obj));
+    return Shiboken::String::toCString(objName);
+}
+
+inline void addLayoutOwnership(QLayout* layout, QWidget* widget)
+{
+    //transfer ownership to parent widget
+    QWidget *lw = layout->parentWidget();
+    QWidget *pw = widget->parentWidget();
+
+   Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QWidget*](widget));
+
+    //Transfer parent to layout widget
+    if (pw && lw && pw != lw)
+        Shiboken::Object::setParent(0, pyChild);
+
+    if (!lw && !pw) {
+        //keep the reference while the layout is orphan
+        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget*](layout));
+        Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(pyParent.object()), retrieveObjectName(pyParent).data(), pyChild, true);
+    } else {
+        if (!lw)
+            lw = pw;
+        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget*](lw));
+        Shiboken::Object::setParent(pyParent, pyChild);
+    }
+}
+
+inline void addLayoutOwnership(QLayout* layout, QLayout* other)
+{
+    //transfer all children widgets from other to layout parent widget
+    QWidget* parent = layout->parentWidget();
+    if (!parent) {
+        //keep the reference while the layout is orphan
+        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout*](layout));
+        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayout*](other));
+        Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(pyParent.object()), retrieveObjectName(pyParent).data(), pyChild, true);
+        return;
+    }
+
+    for (int i=0, i_max=other->count(); i < i_max; i++) {
+        QLayoutItem* item = other->itemAt(i);
+        if (PyErr_Occurred() || !item)
+            return;
+        addLayoutOwnership(layout, item);
+    }
+
+    Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout*](layout));
+    Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayout*](other));
+    Shiboken::Object::setParent(pyParent, pyChild);
+}
+
+inline void addLayoutOwnership(QLayout* layout, QLayoutItem* item)
+{
+    if (!item)
+        return;
+
+    QWidget* w = item->widget();
+    if (w)
+        addLayoutOwnership(layout, w);
+    else {
+        QLayout* l = item->layout();
+        if (l)
+            addLayoutOwnership(layout, l);
+    }
+
+    Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout*](layout));
+    Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayoutItem*](item));
+    Shiboken::Object::setParent(pyParent, pyChild);
+}
+
+static void removeWidgetFromLayout(QLayout* layout, QWidget* widget)
+{
+    QWidget* parent = widget->parentWidget();
+
+    if (!parent) {
+        //remove reference on layout
+        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget*](layout));
+        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QWidget*](widget));
+        Shiboken::Object::removeReference(reinterpret_cast<SbkObject*>(pyParent.object()), retrieveObjectName(pyParent).data(), pyChild);
+    } else {
+        //give the ownership to parent
+        Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget*](parent));
+        Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QWidget*](widget));
+        Shiboken::Object::setParent(pyParent, pyChild);
+    }
+}
+
+inline void removeLayoutOwnership(QLayout* layout, QLayoutItem* item)
+{
+    QWidget* w = item->widget();
+    if (w)
+        removeWidgetFromLayout(layout, w);
+    else {
+        QLayout* l = item->layout();
+        if (l && item != l)
+            removeLayoutOwnership(layout, l);
+    }
+
+    Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayoutItem*](item));
+    Shiboken::Object::invalidate(pyChild);
+    Shiboken::Object::setParent(0, pyChild);
+}
+
+inline void removeLayoutOwnership(QLayout* layout, QWidget* widget)
+{
+    if (!widget)
+        return;
+
+    for (int i=0, i_max=layout->count(); i < i_max; i++) {
+        QLayoutItem* item = layout->itemAt(i);
+        if (PyErr_Occurred() || !item)
+            return;
+        if (item->widget() == widget)
+            removeLayoutOwnership(layout, item);
+    }
+}
+// @snippet qlayout-help-functions
+
 // @snippet qlayout-setalignment
 %CPPSELF.setAlignment(%1);
 // @snippet qlayout-setalignment
@@ -185,7 +388,7 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](d));
 QGraphicsItem* parentItem = %1->parentItem();
 Shiboken::AutoDecRef parent(%CONVERTTOPYTHON[QGraphicsItem*](parentItem));
 const auto &childItems = %1->childItems();
-for (QGraphicsItem *item : childItems)
+for (auto *item : childItems)
     Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[QGraphicsItem*](item));
 %BEGIN_ALLOW_THREADS
 %CPPSELF.%FUNCTION_NAME(%1);
@@ -203,7 +406,7 @@ Shiboken::Object::keepReference((SbkObject*)%PYARG_0, "setWidget(QWidget*)1", %P
 // @snippet qgraphicsscene-clear
 const QList<QGraphicsItem*> items = %CPPSELF.items();
 Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();
-for (QGraphicsItem *item : items) {
+for (auto *item : items) {
     SbkObject* obj = bm.retrieveWrapper(item);
     if (obj) {
         if (reinterpret_cast<PyObject*>(obj)->ob_refcnt > 1) // If the refcnt is 1 the object will vannish anyway.
@@ -217,7 +420,7 @@ for (QGraphicsItem *item : items) {
 // @snippet qtreewidget-clear
 QTreeWidgetItem *rootItem = %CPPSELF.invisibleRootItem();
 Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
-for (int i = 0; i < rootItem->childCount(); ++i) {
+for (int i = 0, i_count = rootItem->childCount(); i < i_count; ++i) {
     QTreeWidgetItem *item = rootItem->child(i);
     SbkObject* wrapper = bm.retrieveWrapper(item);
     if (wrapper)
@@ -247,6 +450,72 @@ for (int i = 0, count = %CPPSELF.count(); i < count; ++i) {
 %CPPSELF.%FUNCTION_NAME();
 // @snippet qlistwidget-clear
 
+// @snippet qwidget-glue
+static QString retrieveObjectName(PyObject *obj)
+{
+    Shiboken::AutoDecRef objName(PyObject_Str(obj));
+    return QString(Shiboken::String::toCString(objName));
+}
+
+
+// Transfer objects ownership from layout to widget
+static inline void qwidgetReparentLayout(QWidget *parent, QLayout *layout)
+{
+    Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget*](parent));
+
+    for (int i=0, i_count = layout->count(); i < i_count; i++) {
+        QLayoutItem* item = layout->itemAt(i);
+        if (PyErr_Occurred() || !item)
+            return;
+
+        QWidget* w = item->widget();
+        if (w) {
+            QWidget* pw = w->parentWidget();
+            if (pw != parent) {
+                Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QWidget*](w));
+                Shiboken::Object::setParent(pyParent, pyChild);
+            }
+        } else {
+            QLayout* l = item->layout();
+            if (l)
+                qwidgetReparentLayout(parent, l);
+        }
+    }
+
+    Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayout*](layout));
+    Shiboken::Object::setParent(pyParent, pyChild);
+    //remove previous references
+    Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(pyChild.object()), qPrintable(retrieveObjectName(pyChild)), Py_None);
+}
+
+static inline void qwidgetSetLayout(QWidget *self, QLayout *layout)
+{
+    if (!layout || self->layout())
+        return;
+
+    QObject* oldParent = layout->parent();
+    if (oldParent && oldParent != self) {
+        if (oldParent->isWidgetType()) {
+            // remove old parent policy
+            Shiboken::AutoDecRef pyLayout(%CONVERTTOPYTHON[QLayout*](layout));
+            Shiboken::Object::setParent(Py_None, pyLayout);
+        } else {
+            PyErr_Format(PyExc_RuntimeError, "QWidget::setLayout: Attempting to set QLayout \"%s\" on %s \"%s\", when the QLayout already has a parent",
+                          qPrintable(layout->objectName()), self->metaObject()->className(), qPrintable(self->objectName()));
+            return;
+        }
+    }
+
+    if (oldParent != self) {
+        qwidgetReparentLayout(self, layout);
+        if (PyErr_Occurred())
+            return;
+
+        self->setLayout(layout);
+    }
+}
+// @snippet qwidget-glue
+
 // @snippet qwidget-setstyle
 Shiboken::Object::keepReference(reinterpret_cast<SbkObject*>(%PYSELF), "__style__",  %PYARG_1);
 // @snippet qwidget-setstyle
@@ -265,6 +534,28 @@ if (myStyle && qApp) {
     }
 }
 // @snippet qwidget-style
+
+// @snippet qapplication-init
+static void QApplicationConstructor(PyObject *self, PyObject *pyargv, QApplicationWrapper **cptr)
+{
+    static int argc;
+    static char **argv;
+    PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
+    if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
+        *cptr = new QApplicationWrapper(argc, argv, 0);
+        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
+        PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
+    }
+}
+// @snippet qapplication-init
+
+// @snippet qapplication-setStyle
+if (qApp) {
+    Shiboken::AutoDecRef pyApp(%CONVERTTOPYTHON[QApplication*](qApp));
+    Shiboken::Object::setParent(pyApp, %PYARG_1);
+    Shiboken::Object::releaseOwnership(%PYARG_1);
+}
+// @snippet qapplication-setStyle
 
 // @snippet qwidget-setlayout
 qwidgetSetLayout(%CPPSELF, %1);
@@ -323,7 +614,7 @@ Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
 QList<PyObject* > lst;
 Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();
 const auto &toolButtonChildren = %CPPSELF.findChildren<QToolButton*>();
-for (QToolButton *child : toolButtonChildren) {
+for (auto *child : toolButtonChildren) {
     if (bm.hasWrapper(child)) {
         PyObject* pyChild = %CONVERTTOPYTHON[QToolButton*](child);
         Shiboken::Object::setParent(0, pyChild);
@@ -333,14 +624,14 @@ for (QToolButton *child : toolButtonChildren) {
 
 //Remove actions
 const auto &actions = %CPPSELF.actions();
-for (QAction *act : actions) {
+for (auto *act : actions) {
     Shiboken::AutoDecRef pyAct(%CONVERTTOPYTHON[QAction*](act));
     Shiboken::Object::setParent(NULL, pyAct);
     Shiboken::Object::invalidate(pyAct);
 }
 
 %CPPSELF.clear();
-for (PyObject *obj : lst) {
+for (auto *obj : lst) {
     Shiboken::Object::invalidate(reinterpret_cast<SbkObject* >(obj));
     Py_XDECREF(obj);
 }
@@ -363,3 +654,11 @@ if (_old)
 %CPPSELF.%FUNCTION_NAME(%1);
 Shiboken::Object::setParent(%PYSELF, %PYARG_1);
 // @snippet qgraphicsproxywidget-setwidget
+
+/*********************************************************************
+ * CONVERSIONS
+ ********************************************************************/
+
+/*********************************************************************
+ * NATIVE TO TARGET CONVERSIONS
+ ********************************************************************/

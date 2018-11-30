@@ -193,6 +193,13 @@ def prepare_packages_win32(self, vars):
             "{st_build_dir}/{st_package_name}/typesystems",
             vars=vars)
 
+        # <install>/share/{st_package_name}/glue/* ->
+        #   <setup>/{st_package_name}/glue
+        copydir(
+            "{install_dir}/share/{st_package_name}/glue",
+            "{st_build_dir}/{st_package_name}/glue",
+            vars=vars)
+
         # <source>/pyside2/{st_package_name}/support/* ->
         #   <setup>/{st_package_name}/support/*
         copydir(

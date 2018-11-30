@@ -22,7 +22,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/__init__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/enum_sig.py" COPYONLY)
-
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
 
@@ -94,8 +93,19 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_git_pyside_version.py"
         DESTINATION "${PYTHON_SITE_PACKAGES}/${BINDING_NAME}${pyside2_SUFFIX}")
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_templates.xml
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/core_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/gui_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/widgets_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/datavisualization_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/opengl_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/webkitwidgets_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/xml_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h
         DESTINATION include/${BINDING_NAME}${pyside2_SUFFIX})
-

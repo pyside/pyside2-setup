@@ -1764,6 +1764,7 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
     s << endl;
 
     /*
+     * This code is intended for shift operations only:
      * Make sure reverse <</>> operators defined in other classes (specially from other modules)
      * are called. A proper and generic solution would require an reengineering in the operator
      * system like the extended converters.
@@ -1778,7 +1779,9 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
                                        && rfunc->isOperatorOverload();
     if (callExtendedReverseOperator) {
         QString revOpName = ShibokenGenerator::pythonOperatorFunctionName(rfunc).insert(2, QLatin1Char('r'));
-        if (rfunc->isBinaryOperator()) {
+        // For custom classes, operations like __radd__ and __rmul__
+        // will enter an infinite loop.
+        if (rfunc->isBinaryOperator() && revOpName.contains(QLatin1String("shift"))) {
             s << INDENT << "if (!isReverse" << endl;
             {
                 Indentation indent(INDENT);

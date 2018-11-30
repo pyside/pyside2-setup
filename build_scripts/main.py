@@ -201,20 +201,16 @@ if not os.path.exists(OPTION_CMAKE):
     print("'{}' does not exist.".format(OPTION_CMAKE))
     sys.exit(1)
 
-if sys.platform == "win32":
-    if OPTION_MAKESPEC is None:
-        OPTION_MAKESPEC = "msvc"
-    if not OPTION_MAKESPEC in ["msvc", "mingw"]:
-        print("Invalid option --make-spec. Available values are {}".format(
-            ["msvc", "mingw"]))
-        sys.exit(1)
-else:
-    if OPTION_MAKESPEC is None:
-        OPTION_MAKESPEC = "make"
-    if not OPTION_MAKESPEC in ["make"]:
-        print("Invalid option --make-spec. Available values are {}".format(
-            ["make"]))
-        sys.exit(1)
+# First element is default
+available_mkspecs = ["msvc", "mingw", "ninja"] if sys.platform == "win32" else ["make", "ninja"]
+
+if OPTION_MAKESPEC is None:
+    OPTION_MAKESPEC = available_mkspecs[0]
+
+if not OPTION_MAKESPEC in available_mkspecs:
+    print('Invalid option --make-spec "{}". Available values are {}'.format(
+          OPTION_MAKESPEC, available_mkspecs))
+    sys.exit(1)
 
 if OPTION_JOBS:
     if sys.platform == 'win32' and OPTION_NO_JOM:
@@ -491,6 +487,9 @@ class PysideBuild(_build):
             elif OPTION_MAKESPEC == "mingw":
                 make_name = "mingw32-make"
                 make_generator = "MinGW Makefiles"
+            elif OPTION_MAKESPEC == "ninja":
+                make_name = "ninja"
+                make_generator = "Ninja"
             else:
                 raise DistutilsSetupError(
                     "Invalid option --make-spec.")
@@ -1107,7 +1106,9 @@ class PysideBuild(_build):
                 log.info("Waiting 1 second, to ensure installation is "
                     "successful...")
                 time.sleep(1)
-            if run_process([self.make_path, "install/fast"]) != 0:
+            # ninja: error: unknown target 'install/fast'
+            target = 'install/fast' if self.make_generator != 'Ninja' else 'install'
+            if run_process([self.make_path, target]) != 0:
                 raise DistutilsSetupError("Error pseudo installing {}".format(
                     extension))
         else:
