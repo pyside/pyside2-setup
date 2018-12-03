@@ -2,13 +2,14 @@ SampleBinding Example
 ***********************
 
 The example showcases how you can generate CPython-based binding code for a
-C++ library using Shiboken. The C++ library is called Universe,
-with two classes: Icecream and Truck. Icecreams are characterized
-by their flavor, and Truck serves as a vehicle of Icecream distribution for
-kids in a neighborhood.
+C++ library using Shiboken. The C++ library is called :code:`Universe`,
+with two classes: :code:`Icecream` and :code:`Truck`. Ice creams are
+characterized by their flavor, and :code:`Truck` serves as a vehicle of
+:code:`Icecream` distribution for kids in a neighborhood.
 
 First, let's look at the definition of the two classes:
-.. code-block::
+
+.. code-block:: cpp
    :caption: icecream.h
 
     class Icecream
@@ -23,8 +24,7 @@ First, let's look at the definition of the two classes:
         std::string m_flavor;
     };
 
-and then truck.h:
-.. code-block:: c++
+.. code-block:: cpp
    :caption: truck.h
 
     class Truck {
@@ -52,17 +52,19 @@ and then truck.h:
         std::vector m_flavors;
     };
 
-Here is a summary of what the Universe library includes:
+Here is a summary of what the :code:`Universe` library includes:
 
-* The Icecream polymorphic type, which is intended to be overridden.
-* The getFlavor() method returns the flavor depending on the actual derived
-  type.
-* The Truck value type that contains owned pointers, hence the copy
+* The :code:`Icecream` polymorphic type, which is intended to be overridden.
+* The :code:`Icecream::getFlavor()` method returns the flavor depending on the
+  actual derived type.
+* The :code:`Truck` value type that contains pointers, hence the copy
   constructor.
-* Truck stores the Icecream objects in a vector, which can be modified via
-  addIcecreamFlavor().
-* The Truck’s arrival message can be customized using setArrivalMessage().
-* The deliver() method tells us if the ice cream delivery was successful.
+* :code:`Truck` stores the :code:`Icecream` objects in a vector, which can be
+  modified via :code:`Truck::addIcecreamFlavor()`.
+* The :code:`Truck’s` arrival message can be customized using its
+  :code:`setArrivalMessage()` method.
+* The :code:`Truck::deliver()` method tells us if the ice cream delivery was
+  successful.
 
 Shiboken typesystem
 ====================
@@ -70,7 +72,7 @@ Shiboken typesystem
 Now that the library definitions are in place, Shiboken generator needs a header
 file that includes the types we are interested in:
 
-.. code-block:: c
+.. code-block:: cpp
    :caption: bindings.h
 
     #ifndef BINDINGS_H
@@ -82,7 +84,7 @@ file that includes the types we are interested in:
 In addition, Shiboken also requires an XML-based typesystem file that defines the
 relationship between C++ and Python types:
 
-.. code-block::
+.. code-block:: xml
    :caption: bindings.xml
 
     <?xml version="1.0"?>
@@ -105,9 +107,9 @@ relationship between C++ and Python types:
         </value-type>
     </typesystem>
 
-The first important thing to notice here is that we declare "bool" and
-"std::string" as primitive types. These types are used by some of the C++
-methods as parameters or return types, so Shiboken must know about them.
+The first important thing to notice here is that we declare :code:`"bool"` and
+:code:`"std::string"` as primitive types. These types are used by some of the
+C++ methods as parameters or return types, so Shiboken must know about them.
 It can then generate relevant conversion code between C++ and Python, although
 most C++ primitive types are handled by Shiboken without additional code.
 
@@ -134,19 +136,20 @@ object (like QWidgets).
 In our case, the :code:`clone()` method is only called inside the C++ library,
 and we assume that the C++ code takes care of releasing the cloned object.
 
-As for :code:`addIcecreamFlavor()`, we know that a Truck owns the Icecream
-object, and will remove it once the Truck is destroyed. That's why the
-ownership is set to “c++” in the typesystem file, so that the C++ objects
-are not deleted when the corresponding Python names go out of scope.
+As for :code:`addIcecreamFlavor()`, we know that a :code:`Truck` owns the
+:code:`Icecream` object, and will remove it once the :code:`Truck` is
+destroyed. That's why the ownership is set to “c++” in the typesystem file,
+so that the C++ objects are not deleted when the corresponding Python names
+go out of scope.
 
 Building
 =========
 
-To build the Universe custom library and then generate bindings for it, use
-the :file:`CMakeLists.txt` file provided with the example. You can reuse the
+To build the :code:`Universe` custom library and then generate bindings for it,
+use the :file:`CMakeLists.txt` file provided with the example. You can reuse the
 file for your own libraries with minor changes.
 
-Now, run the command :command:`cmake .` from the prompt to configure the
+Now, run the command :command:`"cmake ."` from the prompt to configure the
 project and build with the toolchain of your choice (we recommend the
 ‘(N)Makefiles’ generator though).
 
@@ -161,8 +164,8 @@ build instructions.
 Using the Python module
 ========================
 
-The following script uses the Universe module, derives a few types from
-Icecream, implements virtual methods, instantiates objects, and much more:
+The following script uses the :code:`Universe` module, derives a few types from
+:code:`Icecream`, implements virtual methods, instantiates objects, and much more:
 
 .. code-block:: python
    :caption: main.py
@@ -224,12 +227,12 @@ Icecream, implements virtual methods, instantiates objects, and much more:
             print("Now everyone got the flavor they wanted!")
             special_truck.leave()
 
-After importing the classes from the Universe module, it derives two types from
-Icecream for different “flavors”. It then creates a :code:`truck` to deliver
-some regular flavored Icecreams and two special ones.
+After importing the classes from the :code:`Universe` module, it derives two
+types from :code:`Icecream` for different “flavors”. It then creates a
+:code:`truck` to deliver some regular flavored Icecreams and two special ones.
 
-If the delivery fails, a new truck is created with the old flavors copied over,
-and a new *magical* flavor that will surely satisfy all customers.
+If the delivery fails, a new :code:`truck` is created with the old flavors
+copied over, and a new *magical* flavor that will surely satisfy all customers.
 
 The script above shows how to derive from C++ types, override virtual methods,
 create and destroy objects, and more. Try running it to see if the ice creams
