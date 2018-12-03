@@ -2515,6 +2515,12 @@
           <insert-template name="return_native_eventfilter"/>
       </inject-code>
     </modify-function>
+    <modify-function signature="fromWinId(WId)">
+      <modify-argument index="1">
+          <replace-type modified-type="long"/>
+      </modify-argument>
+      <inject-code file="../glue/qtgui.cpp" snippet="qwindow-fromWinId"/>
+    </modify-function>
   </object-type>
 
   <object-type name="QGuiApplication">
@@ -2971,7 +2977,14 @@
       <modify-function signature="glyphIndexesForChars(const QChar*,int,quint32*,int*)const" remove="all"/>
   </value-type>
   <object-type name="QRasterWindow"/>
-  <object-type name="QScreen"/>
+  <object-type name="QScreen">
+      <modify-function signature="grabWindow(WId,int,int,int,int)">
+        <modify-argument index="1">
+            <replace-type modified-type="long"/>
+        </modify-argument>
+        <inject-code file="../glue/qtgui.cpp" snippet="qscreen-grabWindow"/>
+      </modify-function>
+  </object-type>
   <object-type name="QStyleHints"/>
 
 </typesystem>
