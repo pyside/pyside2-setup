@@ -159,7 +159,7 @@ class Formatter(Writer):
 
     def _function(self, func_name, signature, spaces):
         # this would be nicer to get somehow together with the signature
-        is_meth = re.match("\((\w*)", str(signature)).group(1) == "self"
+        is_meth = re.match(r"\((\w*)", str(signature)).group(1) == "self"
         if self.class_name and not is_meth:
             self.print('{spaces}@staticmethod'.format(**locals()))
         self.print('{spaces}def {func_name}{signature}: ...'.format(**locals()))
