@@ -51,4 +51,41 @@
         Shiboken::Object::setParent(%PYSELF, $PYARG);
     </template>
 
+    <template name="qgraphicsitem_pysequence">
+        int numItems = PySequence_Size(%PYARG_1);
+        Shiboken::AutoArrayPointer&lt;QGraphicsItem*&gt; %out(numItems);
+        for (int i=0; i &lt; numItems; i++) {
+            %out[i] = %CONVERTTOCPP[QGraphicsItem*](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+        }
+    </template>
+
+    <template name="qgraphicsitem_pyobject">
+        Shiboken::AutoDecRef object(PyList_New(0));
+        for (int i=0, max=numItems; i &lt; max; i++) {
+            PyList_Append(object, %CONVERTTOPYTHON[QGraphicsItem*](%in[i]));
+        }
+        PyObject *%out = object.object();
+    </template>
+
+    <template name="qstyleoptiongraphicsitem_pyobject">
+        Shiboken::AutoDecRef option_object(PyList_New(0));
+        for (int i=0, max=numItems; i &lt; max; i++) {
+            const QStyleOptionGraphicsItem* item = &amp;%in[i];
+            PyList_Append(option_object, %CONVERTTOPYTHON[QStyleOptionGraphicsItem](item));
+        }
+        PyObject* %out = option_object.object();
+    </template>
+
+    <template name="pysequence_qstyleoptiongraphicsitem">
+        int numOptions = PySequence_Size(%PYARG_2);
+        Shiboken::AutoArrayPointer&lt;QStyleOptionGraphicsItem&gt; %out(numOptions);
+        for (int i=0; i &lt; numOptions; i++) {
+            %out[i] = %CONVERTTOCPP[QStyleOptionGraphicsItem](PySequence_Fast_GET_ITEM(%PYARG_1, i));
+        }
+    </template>
+
+    <template name="pysequencesize_int">
+        int %out = PySequence_Size(%PYARG_1);
+    </template>
+
 </typesystem>

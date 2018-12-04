@@ -1493,6 +1493,53 @@ QT_END_NAMESPACE
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](_cpp_result);
 // @snippet stream-read-method
 
+// @snippet return-qstring-ref
+QString &res = *%0;
+%PYARG_0 = %CONVERTTOPYTHON[QString](res);
+// @snippet return-qstring-ref
+
+// @snippet return-readData
+%RETURN_TYPE %0 = 0;
+if (PyBytes_Check(%PYARG_0)) {
+    %0 = PyBytes_GET_SIZE((PyObject*)%PYARG_0);
+    memcpy(%1, PyBytes_AS_STRING((PyObject*)%PYARG_0), %0);
+} else if (Shiboken::String::check(%PYARG_0)) {
+    %0 = Shiboken::String::len((PyObject*)%PYARG_0);
+    memcpy(%1, Shiboken::String::toCString((PyObject*)%PYARG_0), %0);
+}
+// @snippet return-readData
+
+// @snippet qiodevice-readData
+QByteArray ba(1 + int(%2), char(0));
+%CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
+%PYARG_0 = Shiboken::String::fromCString(ba.constData());
+// @snippet qiodevice-readData
+
+// @snippet qt-module-shutdown
+{ // Avoid name clash
+    Shiboken::AutoDecRef regFunc((PyObject*)NULL);
+    Shiboken::AutoDecRef atexit(Shiboken::Module::import("atexit"));
+    if (atexit.isNull()) {
+        qWarning("Module atexit not found for registering __moduleShutdown");
+        PyErr_Clear();
+    }else{
+        regFunc.reset(PyObject_GetAttrString(atexit, "register"));
+        if (regFunc.isNull()) {
+            qWarning("Function atexit.register not found for registering __moduleShutdown");
+            PyErr_Clear();
+        }
+    }
+    if (!atexit.isNull() && !regFunc.isNull()){
+        PyObject *shutDownFunc = PyObject_GetAttrString(module, "__moduleShutdown");
+        Shiboken::AutoDecRef args(PyTuple_New(1));
+        PyTuple_SET_ITEM(args, 0, shutDownFunc);
+        Shiboken::AutoDecRef retval(PyObject_Call(regFunc, args, 0));
+        Q_ASSERT(!retval.isNull());
+    }
+}
+// @snippet qt-module-shutdown
+
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

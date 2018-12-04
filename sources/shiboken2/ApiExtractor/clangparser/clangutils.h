@@ -32,6 +32,7 @@
 #include <clang-c/Index.h>
 #include <QtCore/QPair>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QVector>
 
 #include <functional>

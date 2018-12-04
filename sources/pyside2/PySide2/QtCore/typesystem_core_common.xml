@@ -670,30 +670,7 @@
   <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qt-version"/>
 
   <!-- WARNING: There is an issue when adding this code to an external file -->
-  <inject-code class="target" position="end">
-    { // Avoid name clash
-        Shiboken::AutoDecRef regFunc((PyObject*)NULL);
-        Shiboken::AutoDecRef atexit(Shiboken::Module::import("atexit"));
-        if (atexit.isNull()) {
-            qWarning() &lt;&lt; "Module atexit not found for registering __moduleShutdown";
-            PyErr_Clear();
-        }else{
-            regFunc.reset(PyObject_GetAttrString(atexit, "register"));
-            if (regFunc.isNull()) {
-                qWarning() &lt;&lt; "Function atexit.register not found for registering __moduleShutdown";
-                PyErr_Clear();
-            }
-        }
-        if (!atexit.isNull() &amp;&amp; !regFunc.isNull()){
-            PyObject *shutDownFunc = PyObject_GetAttrString(module, "__moduleShutdown");
-            Shiboken::AutoDecRef args(PyTuple_New(1));
-            PyTuple_SET_ITEM(args, 0, shutDownFunc);
-            Shiboken::AutoDecRef retval(PyObject_Call(regFunc, args, 0));
-            Q_ASSERT(!retval.isNull());
-        }
-    }
-  </inject-code>
-
+  <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qt-module-shutdown"/>
   <add-function signature="__moduleShutdown()">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="moduleshutdown"/>
   </add-function>
@@ -2224,56 +2201,24 @@
         </inject-code>
     </modify-function>
     <modify-function signature="readData(char*,qint64)">
-        <!-- placing this injected code in the snippet files breaks the
-        propagation of this method to the QAbstractSocket and QLocalSocket
-        classes -->
-        <inject-code class="target">
-            QByteArray ba(1 + int(%2), char(0));
-            %CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
-            %PYARG_0 = Shiboken::String::fromCString(ba.constData());
-        </inject-code>
+        <inject-code class="target" file="../glue/qtcore.cpp" snippet="qiodevice-readData"/>
         <modify-argument index="1">
             <remove-argument />
         </modify-argument>
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
-            <conversion-rule class="native">
-                %RETURN_TYPE %out = 0;
-                if (PyBytes_Check(%PYARG_0)) {
-                    %out = PyBytes_GET_SIZE((PyObject*)%PYARG_0);
-                    memcpy(%1, PyBytes_AS_STRING((PyObject*)%PYARG_0), %out);
-                } else if (Shiboken::String::check(%PYARG_0)) {
-                    %out = Shiboken::String::len((PyObject*)%PYARG_0);
-                    memcpy(%1, Shiboken::String::toCString((PyObject*)%PYARG_0), %out);
-                }
-            </conversion-rule>
         </modify-argument>
+        <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="return-readData"/>
     </modify-function>
     <modify-function signature="readLineData(char*,qint64)">
-        <!-- placing this injected code in the snippet files breaks the
-        propagation of this method to the QAbstractSocket and QLocalSocket
-        classes -->
-        <inject-code class="target">
-            QByteArray ba(1 + int(%2), char(0));
-            %CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
-            %PYARG_0 = Shiboken::String::fromCString(ba.constData());
-        </inject-code>
+        <inject-code class="target" file="../glue/qtcore.cpp" snippet="qiodevice-readData"/>
         <modify-argument index="1">
             <remove-argument />
         </modify-argument>
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
-            <conversion-rule class="native">
-                %RETURN_TYPE %out = 0;
-                if (PyBytes_Check(%PYARG_0)) {
-                    %out = PyBytes_GET_SIZE((PyObject*)%PYARG_0);
-                    memcpy(%1, PyBytes_AS_STRING((PyObject*)%PYARG_0), %out);
-                } else if (Shiboken::String::check(%PYARG_0)) {
-                    %out = Shiboken::String::len((PyObject*)%PYARG_0);
-                    memcpy(%1, Shiboken::String::toCString((PyObject*)%PYARG_0), %out);
-                }
-            </conversion-rule>
         </modify-argument>
+        <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="return-readData"/>
     </modify-function>
   </object-type>
   <object-type name="QCryptographicHash">
@@ -2768,13 +2713,7 @@
     <modify-function signature="operator&gt;&gt;(QString&amp;)" remove="all"/>
 
     <modify-function signature="string()const">
-      <modify-argument index="return">
-        <!--<replace-type modified-type="QString"/>-->
-        <conversion-rule class="target">
-        QString &amp;res = *%0;
-        %PYARG_0 = %CONVERTTOPYTHON[QString](res);
-        </conversion-rule>
-      </modify-argument>
+      <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="return-qstring-ref"/>
     </modify-function>
 
     <modify-function signature="flush()" allow-thread="yes"/>
@@ -2804,7 +2743,7 @@
     </modify-function>
 
     <modify-function signature="globalInstance()" >
-      <inject-code position="end" file="../glue/qtcore.cpp" snippet="releaseownership"/>
+      <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="releaseownership"/>
     </modify-function>
   </object-type>
   <value-type name="QXmlStreamAttribute"/>

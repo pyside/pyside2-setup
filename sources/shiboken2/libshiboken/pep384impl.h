@@ -333,10 +333,11 @@ LIBSHIBOKEN_API PyObject *PepFunction_Get(PyObject *, const char *);
 #define PyFunction_Check(op)        (Py_TYPE(op) == PepFunction_TypePtr)
 #define PyFunction_GET_CODE(func)   PyFunction_GetCode(func)
 
-#define PyFunction_GetCode(func)        PepFunction_Get((PyObject *)func, "__code__")
-#define PepFunction_GetName(func)    PepFunction_Get((PyObject *)func, "__name__")
+#define PyFunction_GetCode(func)    PepFunction_Get((PyObject *)func, "__code__")
+#define PepFunction_GetName(func)   PepFunction_Get((PyObject *)func, "__name__")
 #else
-#define PepFunction_GetName(func)    (((PyFunctionObject *)func)->func_name)
+#define PepFunction_TypePtr         (&PyFunction_Type)
+#define PepFunction_GetName(func)   (((PyFunctionObject *)func)->func_name)
 #endif
 
 /*****************************************************************************

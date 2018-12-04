@@ -74,7 +74,7 @@ else()
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing27.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing.py" COPYONLY)
+                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing27.py" COPYONLY)
 endif()
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/support"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")

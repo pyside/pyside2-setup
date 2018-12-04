@@ -207,6 +207,14 @@ def prepare_packages_win32(self, vars):
             "{st_build_dir}/{st_package_name}/support",
             vars=vars)
 
+        # <source>/pyside2/{st_package_name}/*.pyi ->
+        #   <setup>/{st_package_name}/*.pyi
+        copydir(
+            "{build_dir}/pyside2/{st_package_name}",
+            "{st_build_dir}/{st_package_name}",
+            filter=["*.pyi"],
+            vars=vars)
+
         copydir(
             "{build_dir}/pyside2/libpyside",
             "{st_build_dir}/{st_package_name}",

@@ -41,4 +41,7 @@ from __future__ import print_function, absolute_import
 
 # Trigger initialization phase 2.
 _ = type.__signature__
-from signature_loader import get_signature, inspect, typing
+
+## from signature_loader import get_signature, inspect, typing
+# This causes a recursion in Python 2!
+# We do everything from signature_loader, instead.
