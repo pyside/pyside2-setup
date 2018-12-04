@@ -52,7 +52,7 @@ from PySide2.QtGui import (QVector3D, QOpenGLFunctions, QOpenGLVertexArrayObject
     QOpenGLShaderProgram, QMatrix4x4, QOpenGLShader, QOpenGLContext, QSurfaceFormat)
 from PySide2.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout, QSlider,
     QOpenGLWidget)
-from PySide2.shiboken2 import VoidPtr
+from shiboken2 import VoidPtr
 
 try:
     from OpenGL import GL
