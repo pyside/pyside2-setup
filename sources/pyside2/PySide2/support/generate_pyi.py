@@ -177,29 +177,6 @@ def find_imports(text):
     return [imp for imp in PySide2.__all__ if imp + "." in text]
 
 
-def safe_create(filename):
-    pid = os.getpid()
-    locname = "{filename}.{pid}".format(**locals())
-    f = io.open(locname, "w")  # do not close for atomic rename on Linux
-    if sys.platform == "win32":
-        f.close()
-    try:
-        os.rename(locname, filename)
-        logger.debug("{pid}:File {filename} created".format(**locals()))
-        if sys.platform == "win32":
-            f = io.open(filename, "w")
-        return f
-    except OSError:
-        logger.debug("{pid}:Could not rename {locname} to {filename}"
-                     .format(**locals()))
-        try:
-            os.remove(locname)
-        except OSError as e:
-            logger.warning("{pid}: unexpected os.remove error in safe_create: {e}"
-                           .format(**locals()))
-        return None
-
-
 def generate_pyi(import_name, outpath, options):
     """
     Generates a .pyi file.
@@ -208,18 +185,11 @@ def generate_pyi(import_name, outpath, options):
     """
     pid = os.getpid()
     plainname = import_name.split(".")[-1]
-    if not outpath:
-        outpath = os.path.dirname(PySide2.__file__)
     outfilepath = os.path.join(outpath, plainname + ".pyi")
     if options.skip and os.path.exists(outfilepath):
-        logger.debug("{pid}:Skipped existing: {outfilepath}".format(**locals()))
+        logger.debug("{pid}:Skipped existing: {op}"
+                     .format(op=os.path.basename(outfilepath), **locals()))
         return 1
-    workpath = outfilepath + ".working"
-    if os.path.exists(workpath):
-        return 0
-    realfile = safe_create(workpath)
-    if not realfile:
-        return 0
 
     try:
         top = __import__(import_name)
@@ -249,47 +219,46 @@ def generate_pyi(import_name, outpath, options):
 
     except ImportError as e:
         logger.debug("{pid}:Import problem with module {plainname}: {e}".format(**locals()))
-        try:
-            os.remove(workpath)
-        except OSError as e:
-            logger.warning("{pid}: unexpected os.remove error in generate_pyi: {e}"
-                           .format(**locals()))
         return 0
 
-    wr = Writer(realfile)
-    outfile.seek(0)
-    while True:
-        line = outfile.readline()
-        if not line:
-            break
-        line = line.rstrip()
-        # we remove the IMPORTS marker and insert imports if needed
-        if line == "IMPORTS":
-            if need_imports:
-                for mod_name in find_imports(outfile.getvalue()):
-                    imp = "PySide2." + mod_name
-                    if imp != import_name:
-                        wr.print("import " + imp)
-            wr.print("import " + import_name)
-            wr.print()
-            wr.print()
-        else:
-            wr.print(line)
-    realfile.close()
-
-    if os.path.exists(outfilepath):
-        os.remove(outfilepath)
-    try:
-        os.rename(workpath, outfilepath)
-    except OSError:
-        logger.warning("{pid}: probable duplicate generated: {outfilepath}"#
-                       .format(**locals()))
-        return 0
+    with open(outfilepath, "w") as realfile:
+        wr = Writer(realfile)
+        outfile.seek(0)
+        while True:
+            line = outfile.readline()
+            if not line:
+                break
+            line = line.rstrip()
+            # we remove the IMPORTS marker and insert imports if needed
+            if line == "IMPORTS":
+                if need_imports:
+                    for mod_name in find_imports(outfile.getvalue()):
+                        imp = "PySide2." + mod_name
+                        if imp != import_name:
+                            wr.print("import " + imp)
+                wr.print("import " + import_name)
+                wr.print()
+                wr.print()
+            else:
+                wr.print(line)
     logger.info("Generated: {outfilepath}".format(**locals()))
     if sys.version_info[0] == 3:
         # Python 3: We can check the file directly if the syntax is ok.
         subprocess.check_output([sys.executable, outfilepath])
     return 1
+
+
+@contextmanager
+def single_process(lockdir):
+    try:
+        os.mkdir(lockdir)
+        try:
+            yield lockdir
+        finally:
+            # make sure to cleanup, even if we leave with CTRL-C
+            os.rmdir(lockdir)
+    except OSError:
+        yield None
 
 
 def generate_all_pyi(outpath, options):
@@ -315,13 +284,18 @@ def generate_all_pyi(outpath, options):
     from PySide2.support.signature.lib.enum_sig import HintingEnumerator
 
     valid = 0
-    for mod_name in PySide2.__all__:
-        import_name = "PySide2."  + mod_name
-        valid += generate_pyi(import_name, outpath, options)
+    if not outpath:
+        outpath = os.path.dirname(PySide2.__file__)
+    lockdir = os.path.join(outpath, "generate_pyi.lockfile")
+    with single_process(lockdir) as locked:
+        if locked:
+            for mod_name in PySide2.__all__:
+                import_name = "PySide2." + mod_name
+                valid += generate_pyi(import_name, outpath, options)
 
-    npyi = len(PySide2.__all__)
-    if valid == npyi:
-        logger.info("+++ All {npyi} .pyi files have been created.".format(**locals()))
+            npyi = len(PySide2.__all__)
+            if valid == npyi:
+                logger.info("+++ All {npyi} .pyi files have been created.".format(**locals()))
 
 
 if __name__ == "__main__":
