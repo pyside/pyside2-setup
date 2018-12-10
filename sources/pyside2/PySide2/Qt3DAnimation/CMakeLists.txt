@@ -45,11 +45,10 @@ set(Qt3DAnimation_libraries pyside2
 
 set(Qt3DAnimation_deps Qt3DRender)
 
-create_pyside_module(Qt3DAnimation
-                     Qt3DAnimation_include_dirs
-                     Qt3DAnimation_libraries
-                     Qt3DAnimation_deps
-                     Qt3DAnimation_SOURCE_DIR
-                     Qt3DAnimation_SRC
-                     ""
-                     ${Qt3DAnimation_BINARY_DIR}/typesystem_3danimation.xml)
+create_pyside_module(NAME Qt3DAnimation
+                     INCLUDE_DIRS Qt3DAnimation_include_dirs
+                     LIBRARIES Qt3DAnimation_libraries
+                     DEPS Qt3DAnimation_deps
+                     TYPESYSTEM_PATH Qt3DAnimation_SOURCE_DIR
+                     SOURCES Qt3DAnimation_SRC
+                     TYPESYSTEM_NAME ${Qt3DAnimation_BINARY_DIR}/typesystem_3danimation.xml)

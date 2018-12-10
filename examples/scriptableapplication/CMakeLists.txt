@@ -12,7 +12,7 @@ project(scriptableapplication)
 set(CMAKE_CXX_STANDARD 11)
 
 # Find required Qt packages.
-find_package(Qt5 5.9 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt5 5.12 REQUIRED COMPONENTS Core Gui Widgets)
 
 # Use provided python interpreter if given.
 if(NOT python_interpreter)

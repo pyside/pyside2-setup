@@ -81,10 +81,9 @@ set(QtCharts_libraries    pyside2
 
 set(QtCharts_deps QtCore QtGui QtWidgets)
 
-create_pyside_module(QtCharts
-                     QtCharts_include_dirs
-                     QtCharts_libraries
-                     QtCharts_deps
-                     QtCharts_SOURCE_DIR
-                     QtCharts_SRC
-                     "")
+create_pyside_module(NAME QtCharts
+                     INCLUDE_DIRS QtCharts_include_dirs
+                     LIBRARIES QtCharts_libraries
+                     DEPS QtCharts_deps
+                     TYPESYSTEM_PATH QtCharts_SOURCE_DIR
+                     SOURCES QtCharts_SRC)

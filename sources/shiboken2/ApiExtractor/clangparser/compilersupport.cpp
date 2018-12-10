@@ -239,11 +239,11 @@ static QByteArray noStandardIncludeOption() { return QByteArrayLiteral("-nostdin
 #endif
 
 #if NEED_CLANG_BUILTIN_INCLUDES
-static QString findClang()
+static QString findClangLibDir()
 {
     for (const char *envVar : {"LLVM_INSTALL_DIR", "CLANG_INSTALL_DIR"}) {
         if (qEnvironmentVariableIsSet(envVar)) {
-            const QString path = QFile::decodeName(qgetenv(envVar));
+            const QString path = QFile::decodeName(qgetenv(envVar)) + QLatin1String("/lib");
             if (QFileInfo::exists(path))
                 return path;
         }
@@ -252,7 +252,7 @@ static QString findClang()
         QStandardPaths::findExecutable(QLatin1String("llvm-config"));
     if (!llvmConfig.isEmpty()) {
         QByteArray stdOut;
-        if (runProcess(llvmConfig, QStringList{QLatin1String("--prefix")}, &stdOut)) {
+        if (runProcess(llvmConfig, QStringList{QLatin1String("--libdir")}, &stdOut)) {
             const QString path = QFile::decodeName(stdOut.trimmed());
             if (QFileInfo::exists(path))
                 return path;
@@ -264,11 +264,11 @@ static QString findClang()
 static QString findClangBuiltInIncludesDir()
 {
     // Find the include directory of the highest version.
-    const QString clangPath = findClang();
-    if (!clangPath.isEmpty()) {
+    const QString clangPathLibDir = findClangLibDir();
+    if (!clangPathLibDir.isEmpty()) {
         QString candidate;
         QVersionNumber lastVersionNumber(1, 0, 0);
-        QDir clangDir(clangPath + QLatin1String("/lib/clang"));
+        QDir clangDir(clangPathLibDir + QLatin1String("/clang"));
         const QFileInfoList versionDirs =
             clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for (const QFileInfo &fi : versionDirs) {

@@ -46,11 +46,10 @@ set(Qt3DInput_libraries pyside2
 
 set(Qt3DInput_deps Qt3DCore)
 
-create_pyside_module(Qt3DInput
-                     Qt3DInput_include_dirs
-                     Qt3DInput_libraries
-                     Qt3DInput_deps
-                     Qt3DInput_SOURCE_DIR
-                     Qt3DInput_SRC
-                     ""
-                     ${Qt3DInput_BINARY_DIR}/typesystem_3dinput.xml)
+create_pyside_module(NAME Qt3DInput
+                     INCLUDE_DIRS Qt3DInput_include_dirs
+                     LIBRARIES Qt3DInput_libraries
+                     DEPS Qt3DInput_deps
+                     TYPESYSTEM_PATH Qt3DInput_SOURCE_DIR
+                     SOURCES Qt3DInput_SRC
+                     TYPESYSTEM_NAME ${Qt3DInput_BINARY_DIR}/typesystem_3dinput.xml)

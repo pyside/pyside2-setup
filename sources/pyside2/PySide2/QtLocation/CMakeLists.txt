@@ -69,12 +69,10 @@ set(QtLocation_libraries pyside2
 
 set(QtLocation_deps QtCore QtPositioning)
 
-create_pyside_module(QtLocation
-                     QtLocation_include_dirs
-                     QtLocation_libraries
-                     QtLocation_deps
-                     QtLocation_SOURCE_DIR
-                     QtLocation_SRC
-                     ""
-                     ""
-                     QtLocation_DROPPED_ENTRIES)
+create_pyside_module(NAME QtLocation
+                     INCLUDE_DIRS QtLocation_include_dirs
+                     LIBRARIES QtLocation_libraries
+                     DEPS QtLocation_deps
+                     TYPESYSTEM_PATH QtLocation_SOURCE_DIR
+                     SOURCES QtLocation_SRC
+                     DROPPED_ENTRIES QtLocation_DROPPED_ENTRIES)

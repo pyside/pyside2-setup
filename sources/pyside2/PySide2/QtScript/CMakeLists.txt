@@ -37,13 +37,10 @@ set(QtScript_libraries      pyside2
                             ${Qt5Core_LIBRARIES}
                             ${Qt5Script_LIBRARIES})
 set(QtScript_deps QtCore)
-create_pyside_module(QtScript
-                     QtScript_include_dirs
-                     QtScript_libraries
-                     QtScript_deps
-                     QtScript_SOURCE_DIR
-                     QtScript_SRC
-                     ""
-                     ""
-                     ""
-                     QtScript_glue_sources)
+create_pyside_module(NAME QtScript
+                     INCLUDE_DIRS QtScript_include_dirs
+                     LIBRARIES QtScript_libraries
+                     DEPS QtScript_deps
+                     TYPESYSTEM_PATH QtScript_SOURCE_DIR
+                     SOURCES QtScript_SRC
+                     GLUE_SOURCES QtScript_glue_sources)

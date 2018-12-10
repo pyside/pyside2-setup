@@ -28,10 +28,9 @@ set(QtX11Extras_libraries pyside2
 
 set(QtX11Extras_deps QtCore QtGui)
 
-create_pyside_module(QtX11Extras
-                     QtX11Extras_include_dirs
-                     QtX11Extras_libraries
-                     QtX11Extras_deps
-                     QtX11Extras_SOURCE_DIR
-                     QtX11Extras_SRC
-                     "")
+create_pyside_module(NAME QtX11Extras
+                     INCLUDE_DIRS QtX11Extras_include_dirs
+                     LIBRARIES QtX11Extras_libraries
+                     DEPS QtX11Extras_deps
+                     TYPESYSTEM_PATH QtX11Extras_SOURCE_DIR
+                     SOURCES QtX11Extras_SRC)

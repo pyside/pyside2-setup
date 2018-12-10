@@ -59,12 +59,15 @@ class Options(object):
         # Dictionary containing values of all the possible options.
         self.dict = {}
 
-    def has_option(self, name):
+    def has_option(self, name, remove=True):
         """ Returns True if argument '--name' was passed on the command
         line. """
         option = '--' + name
         count = sys.argv.count(option)
-        for i in range(count):
+        remove_count = count
+        if not remove and count > 0:
+            remove_count -= 1
+        for i in range(remove_count):
            sys.argv.remove(option)
         if count > 1:
             _warn_multiple_option(option)
@@ -120,8 +123,8 @@ class Options(object):
 options = Options()
 
 
-def has_option(name):
-    return options.has_option(name)
+def has_option(*args, **kwargs):
+    return options.has_option(*args, **kwargs)
 
 
 def option_value(*args,**kwargs):
@@ -171,7 +174,7 @@ OPTION_MODULE_SUBSET = option_value("module-subset")
 OPTION_RPATH_VALUES = option_value("rpath")
 OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
 OPTION_QT_SRC = option_value("qt-src-dir")
-OPTION_QUIET = has_option('quiet')
+OPTION_QUIET = has_option('quiet', remove=False)
 OPTION_VERBOSE_BUILD = has_option("verbose-build")
 OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
 OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")

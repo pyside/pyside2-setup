@@ -99,7 +99,8 @@ class Config(object):
 
     def init_config(self, build_type=None, internal_build_type=None,
                     cmd_class_dict=None, package_version=None,
-                    ext_modules=None, setup_script_dir=None):
+                    ext_modules=None, setup_script_dir=None,
+                    quiet=False):
         """
         Sets up the global singleton config which is used in many parts
         of the setup process.
@@ -134,6 +135,11 @@ class Config(object):
         setup_kwargs['zip_safe'] = False
         setup_kwargs['cmdclass'] = cmd_class_dict
         setup_kwargs['version'] = package_version
+
+        if quiet:
+            # Tells distutils / setuptools to be quiet, and only print warnings or errors.
+            # Makes way less noise in the terminal when building.
+            setup_kwargs['verbose'] = 0
 
         # Setting these two keys is still a bit of a discussion point.
         # In general not setting them will allow using "build" and

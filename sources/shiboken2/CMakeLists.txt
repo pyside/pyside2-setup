@@ -16,6 +16,25 @@ add_definitions(${Qt5Core_DEFINITIONS})
 option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
 
+# Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
+if (QUIET_BUILD)
+    set(CMAKE_INSTALL_MESSAGE NEVER)
+endif()
+
+# Override message not to display info messages when doing a quiet build.
+if (QUIET_BUILD)
+    function(message)
+        list(GET ARGV 0 MessageType)
+        if (MessageType STREQUAL FATAL_ERROR OR
+            MessageType STREQUAL SEND_ERROR OR
+            MessageType STREQUAL WARNING OR
+            MessageType STREQUAL AUTHOR_WARNING)
+                list(REMOVE_AT ARGV 0)
+                _message(${MessageType} "${ARGV}")
+        endif()
+    endfunction()
+endif()
+
 if (USE_PYTHON_VERSION)
     find_package(PythonInterp ${USE_PYTHON_VERSION} REQUIRED)
     find_package(PythonLibs ${USE_PYTHON_VERSION} REQUIRED)

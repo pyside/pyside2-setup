@@ -48,11 +48,10 @@ set(QtWebEngineWidgets_libraries      pyside2
                             ${Qt5Core_LIBRARIES}
                             )
 set(QtWebEngineWidgets_deps QtGui QtWidgets QtNetwork QtWebChannel)
-create_pyside_module(QtWebEngineWidgets
-                     QtWebEngineWidgets_include_dirs
-                     QtWebEngineWidgets_libraries
-                     QtWebEngineWidgets_deps
-                     QtWebEngineWidgets_SOURCE_DIR
-                     QtWebEngineWidgets_SRC
-                     "")
+create_pyside_module(NAME QtWebEngineWidgets
+                     INCLUDE_DIRS QtWebEngineWidgets_include_dirs
+                     LIBRARIES QtWebEngineWidgets_libraries
+                     DEPS QtWebEngineWidgets_deps
+                     TYPESYSTEM_PATH QtWebEngineWidgets_SOURCE_DIR
+                     SOURCES QtWebEngineWidgets_SRC)
 

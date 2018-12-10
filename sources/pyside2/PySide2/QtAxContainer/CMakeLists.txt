@@ -36,11 +36,10 @@ set(QtAxContainer_libraries pyside2
 
 set(QtAxContainer_deps QtWidgets)
 
-create_pyside_module(QtAxContainer
-                     QtAxContainer_include_dirs
-                     QtAxContainer_libraries
-                     QtAxContainer_deps
-                     QtAxContainer_SOURCE_DIR
-                     QtAxContainer_SRC
-                     ""
-                     ${QtAxContainer_BINARY_DIR}/typesystem_axcontainer.xml)
+create_pyside_module(NAME QtAxContainer
+                     INCLUDE_DIRS QtAxContainer_include_dirs
+                     LIBRARIES QtAxContainer_libraries
+                     DEPS QtAxContainer_deps
+                     TYPESYSTEM_PATH QtAxContainer_SOURCE_DIR
+                     SOURCES QtAxContainer_SRC
+                     TYPESYSTEM_NAME ${QtAxContainer_BINARY_DIR}/typesystem_axcontainer.xml)

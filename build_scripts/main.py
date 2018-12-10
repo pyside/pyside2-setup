@@ -43,7 +43,7 @@ from distutils.version import LooseVersion
 import os
 import time
 from .config import config
-from .utils import memoize, get_python_dict, set_quiet
+from .utils import memoize, get_python_dict
 from .options import *
 
 setup_script_dir = os.getcwd()
@@ -304,7 +304,7 @@ def prepare_build():
     for n in ["build"]:
         d = os.path.join(setup_script_dir, n)
         if os.path.isdir(d):
-            print("Removing {}".format(d))
+            log.info("Removing {}".format(d))
             try:
                 rmtree(d)
             except Exception as e:
@@ -346,7 +346,7 @@ class PysideInstall(_install):
 
     def run(self):
         _install.run(self)
-        log.info('*** Install completed ({}s)'.format(elapsed()))
+        print('*** Install completed ({}s)'.format(elapsed()))
 
 class PysideDevelop(_develop):
 
@@ -727,7 +727,7 @@ class PysideBuild(_build):
             _build.run(self)
         else:
             log.info("Skipped preparing and building packages.")
-        log.info('*** Build completed ({}s)'.format(elapsed()))
+        print('*** Build completed ({}s)'.format(elapsed()))
 
     def log_pre_build_info(self):
         if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():
@@ -915,8 +915,14 @@ class PysideBuild(_build):
         # Build module
         cmake_cmd = [OPTION_CMAKE]
         if OPTION_QUIET:
-            set_quiet(True)
-            cmake_cmd.append('--quiet')
+            # Pass a special custom option, to allow printing a lot less information when doing
+            # a quiet build.
+            cmake_cmd.append('-DQUIET_BUILD=1')
+            if self.make_generator == "Unix Makefiles":
+                # Hide progress messages for each built source file.
+                # Doesn't seem to work if set within the cmake files themselves.
+                cmake_cmd.append('-DCMAKE_RULE_MESSAGES=0')
+
         cmake_cmd += [
             "-G", self.make_generator,
             "-DBUILD_TESTS={}".format(self.build_tests),
@@ -1315,9 +1321,8 @@ class PysideBuild(_build):
             if not os.path.exists(srcpath):
                 continue
             rpath_cmd(srcpath)
-            if not OPTION_QUIET:
-                print("Patched rpath to '$ORIGIN/' (Linux) or "
-                      "updated rpath (OS/X) in {}.".format(srcpath))
+            log.info("Patched rpath to '$ORIGIN/' (Linux) or "
+                     "updated rpath (OS/X) in {}.".format(srcpath))
 
 
 cmd_class_dict = {

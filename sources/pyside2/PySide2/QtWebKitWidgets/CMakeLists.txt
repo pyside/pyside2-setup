@@ -60,11 +60,10 @@ set(QtWebKitWidgets_libraries      pyside2
                             ${Qt5Core_LIBRARIES}
                             )
 set(QtWebKitWidgets_deps QtWidgets QtPrintSupport QtNetwork)
-create_pyside_module(QtWebKitWidgets
-                     QtWebKitWidgets_include_dirs
-                     QtWebKitWidgets_libraries
-                     QtWebKitWidgets_deps
-                     QtWebKitWidgets_SOURCE_DIR
-                     QtWebKitWidgets_SRC
-                     "")
+create_pyside_module(NAME QtWebKitWidgets
+                     INCLUDE_DIRS QtWebKitWidgets_include_dirs
+                     LIBRARIES QtWebKitWidgets_libraries
+                     DEPS QtWebKitWidgets_deps
+                     TYPESYSTEM_PATH QtWebKitWidgets_SOURCE_DIR
+                     SOURCES QtWebKitWidgets_SRC)
 

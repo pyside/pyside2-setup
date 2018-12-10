@@ -56,10 +56,10 @@ set(QtQml_libraries pyside2
 
 set(QtQml_deps QtGui QtNetwork)
 
-create_pyside_module(QtQml
-                     QtQml_include_dirs
-                     QtQml_libraries
-                     QtQml_deps
-                     QtQml_SOURCE_DIR
-                     QtQml_SRC
-                     QtQml_registerType)
+create_pyside_module(NAME QtQml
+                     INCLUDE_DIRS QtQml_include_dirs
+                     LIBRARIES QtQml_libraries
+                     DEPS QtQml_deps
+                     TYPESYSTEM_PATH QtQml_SOURCE_DIR
+                     SOURCES QtQml_SRC
+                     STATIC_SOURCES QtQml_registerType)

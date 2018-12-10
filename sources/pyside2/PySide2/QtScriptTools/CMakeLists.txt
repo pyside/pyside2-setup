@@ -32,10 +32,9 @@ set(QtScriptTools_libraries pyside2
 
 set(QtScriptTools_deps QtCore QtScript QtGui QtWidgets)
 
-create_pyside_module(QtScriptTools
-                     QtScriptTools_include_dirs
-                     QtScriptTools_libraries
-                     QtScriptTools_deps
-                     QtScriptTools_SOURCE_DIR
-                     QtScriptTools_SRC
-                     "")
+create_pyside_module(NAME QtScriptTools
+                     INCLUDE_DIRS QtScriptTools_include_dirs
+                     LIBRARIES QtScriptTools_libraries
+                     DEPS QtScriptTools_deps
+                     TYPESYSTEM_PATH QtScriptTools_SOURCE_DIR
+                     SOURCES QtScriptTools_SRC)

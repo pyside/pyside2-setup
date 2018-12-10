@@ -35,10 +35,9 @@ set(QtPrintSupport_libraries    pyside2
                                 ${Qt5PrintSupport_LIBRARIES}
                                 )
 set(QtPrintSupport_deps QtWidgets)
-create_pyside_module(QtPrintSupport
-                     QtPrintSupport_include_dirs
-                     QtPrintSupport_libraries
-                     QtPrintSupport_deps
-                     QtPrintSupport_SOURCE_DIR
-                     QtPrintSupport_SRC
-                     "")
+create_pyside_module(NAME QtPrintSupport
+                     INCLUDE_DIRS QtPrintSupport_include_dirs
+                     LIBRARIES QtPrintSupport_libraries
+                     DEPS QtPrintSupport_deps
+                     TYPESYSTEM_PATH QtPrintSupport_SOURCE_DIR
+                     SOURCES QtPrintSupport_SRC)
