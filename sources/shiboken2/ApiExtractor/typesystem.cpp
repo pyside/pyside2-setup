@@ -3053,23 +3053,20 @@ QString fixCppTypeName(const QString &name)
 QString TemplateInstance::expandCode() const
 {
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);
-    if (templateEntry) {
-        typedef QHash<QString, QString>::const_iterator ConstIt;
-        QString code = templateEntry->code();
-        for (ConstIt it = replaceRules.begin(), end = replaceRules.end(); it != end; ++it)
-            code.replace(it.key(), it.value());
-        while (!code.isEmpty() && code.at(code.size() - 1).isSpace())
-            code.chop(1);
-        QString result = QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START");
-        if (!code.startsWith(QLatin1Char('\n')))
-            result += QLatin1Char('\n');
-        result += code;
-        result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END");
-        return result;
-    }
-    qCWarning(lcShiboken).noquote().nospace()
-        << "insert-template referring to non-existing template '" << m_name << '\'';
-    return QString();
+    if (!templateEntry)
+        qFatal("<insert-template> referring to non-existing template '%s'.", qPrintable(m_name));
+
+    QString code = templateEntry->code();
+    for (auto it = replaceRules.cbegin(), end = replaceRules.cend(); it != end; ++it)
+        code.replace(it.key(), it.value());
+    while (!code.isEmpty() && code.at(code.size() - 1).isSpace())
+        code.chop(1);
+    QString result = QLatin1String("// TEMPLATE - ") + m_name + QLatin1String(" - START");
+    if (!code.startsWith(QLatin1Char('\n')))
+        result += QLatin1Char('\n');
+    result += code;
+    result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END");
+    return result;
 }
 
 
