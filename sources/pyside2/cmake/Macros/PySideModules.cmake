@@ -157,12 +157,16 @@ macro(create_pyside_module)
     create_generator_target(${module_NAME})
 
     # build type hinting stubs
+    set(generate_pyi_options run --skip --sys-path "${CMAKE_BINARY_DIR}"
+        "${CMAKE_BINARY_DIR}/../shiboken2/shibokenmodule"
+        --lib-path "${CMAKE_BINARY_DIR}/libpyside"
+        "${CMAKE_BINARY_DIR}/../shiboken2/libshiboken")
+    if (QUIET_BUILD)
+        list(APPEND generate_pyi_options "--quiet")
+    endif()
     add_custom_command( TARGET ${module_NAME} POST_BUILD
                         COMMAND "${SHIBOKEN_PYTHON_INTERPRETER}"
-                        "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" run --skip
-                        --sys-path "${CMAKE_BINARY_DIR}" "${CMAKE_BINARY_DIR}/../shiboken2/shibokenmodule"
-                        --lib-path "${CMAKE_BINARY_DIR}/libpyside" "${CMAKE_BINARY_DIR}/../shiboken2/libshiboken"
-                        )
+                        "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
     # install
     install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide2")
 

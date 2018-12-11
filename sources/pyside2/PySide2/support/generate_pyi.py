@@ -307,6 +307,7 @@ if __name__ == "__main__":
         description="This script generates the .pyi file for all PySide modules.")
     parser_run.add_argument("--skip", action="store_true",
         help="skip existing files")
+    parser_run.add_argument("--quiet", action="store_true", help="Run quietly")
     parser_run.add_argument("--outpath",
         help="the output directory (default = binary location)")
     parser_run.add_argument("--sys-path", nargs="+",
@@ -315,6 +316,8 @@ if __name__ == "__main__":
         help="a list of strings prepended to LD_LIBRARY_PATH (unix) or PATH (windows)")
     options = parser.parse_args()
     if options.command == "run":
+        if options.quiet:
+            logger.setLevel(logging.WARNING)
         outpath = options.outpath
         if outpath and not os.path.exists(outpath):
             os.makedirs(outpath)
