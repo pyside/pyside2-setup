@@ -831,6 +831,23 @@ void setTypeUserData(SbkObjectType* type, void* userData, DeleteUserDataFunc d_f
     sotp->d_func = d_func;
 }
 
+// Try to find the exact type of cptr.
+SbkObjectType *typeForTypeName(const char *typeName)
+{
+    SbkObjectType *result{};
+    if (typeName) {
+        if (PyTypeObject *pyType = Shiboken::Conversions::getPythonTypeObject(typeName))
+            result = reinterpret_cast<SbkObjectType*>(pyType);
+    }
+    return result;
+}
+
+bool hasSpecialCastFunction(SbkObjectType *sbkType)
+{
+    const SbkObjectTypePrivate *d = PepType_SOTP(sbkType);
+    return d != nullptr && d->mi_specialcast != nullptr;
+}
+
 } // namespace ObjectType
 
 
@@ -1191,7 +1208,6 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
     return 0;
 }
 
-
 PyObject *newObject(SbkObjectType* instanceType,
                     void* cptr,
                     bool hasOwnership,
@@ -1200,13 +1216,9 @@ PyObject *newObject(SbkObjectType* instanceType,
 {
     // Try to find the exact type of cptr.
     if (!isExactType) {
-        PyTypeObject* exactType = 0;
-        if (typeName) {
-            exactType = Shiboken::Conversions::getPythonTypeObject(typeName);
-            if (exactType)
-                instanceType = reinterpret_cast<SbkObjectType*>(exactType);
-        }
-        if (!exactType)
+        if (SbkObjectType *exactType = ObjectType::typeForTypeName(typeName))
+            instanceType = exactType;
+        else
             instanceType = BindingManager::instance().resolveType(&cptr, instanceType);
     }
 

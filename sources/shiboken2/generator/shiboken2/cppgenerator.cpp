@@ -50,6 +50,30 @@ QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
 QString CppGenerator::m_currentErrorCode(QLatin1String("0"));
 
+static const char typeNameFunc[] = R"CPP(
+template <class T>
+static const char *typeNameOf(const T &t)
+{
+    const char *typeName =  typeid(t).name();
+    auto size = std::strlen(typeName);
+#if defined(Q_CC_MSVC) // MSVC: "class QPaintDevice * __ptr64"
+    if (auto lastStar = strchr(typeName, '*')) {
+        // MSVC: "class QPaintDevice * __ptr64"
+        while (*--lastStar == ' ') {
+        }
+        size = lastStar - typeName + 1;
+    }
+#else // g++, Clang: "QPaintDevice *" -> "P12QPaintDevice"
+    if (size > 2 && typeName[0] == 'P' && std::isdigit(typeName[1]))
+        ++typeName;
+#endif
+    char *result = new char[size + 1];
+    result[size] = '\0';
+    strncpy(result, typeName, size);
+    return result;
+}
+)CPP";
+
 // utility functions
 inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
 {
@@ -336,6 +360,8 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         s << inc.toString() << endl;
     s << endl;
 
+    s << "\n#include <cctype>\n#include <cstring>\n";
+
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
 
@@ -351,7 +377,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         }
     }
 
-    s << endl;
+    s << endl << endl << typeNameFunc << endl;
 
     // Create string literal for smart pointer getter method.
     if (classContext.forSmartPointer()) {
@@ -1226,9 +1252,19 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
             c << INDENT << "return pyOut;" << endl;
         }
         c << INDENT << '}' << endl;
-        c << INDENT << "const char* typeName = typeid(*((" << typeName << "*)cppIn)).name();" << endl;
-        c << INDENT << "return Shiboken::Object::newObject(" << cpythonType;
-        c << ", const_cast<void*>(cppIn), false, false, typeName);";
+        c << INDENT   << "bool changedTypeName = false;\n"
+            << INDENT << "auto tCppIn = reinterpret_cast<const " << typeName << " *>(cppIn);\n"
+            << INDENT << "const char *typeName = typeid(*tCppIn).name();\n"
+            << INDENT << "auto sbkType = Shiboken::ObjectType::typeForTypeName(typeName);\n"
+            << INDENT << "if (sbkType && Shiboken::ObjectType::hasSpecialCastFunction(sbkType)) {\n"
+            << INDENT << "    typeName = typeNameOf(tCppIn);\n"
+            << INDENT << "    changedTypeName = true;\n"
+            << INDENT << " }\n"
+            << INDENT << "PyObject *result = Shiboken::Object::newObject(" << cpythonType
+            <<           ", const_cast<void*>(cppIn), false, /* exactType */ changedTypeName, typeName);\n"
+            << INDENT << "if (changedTypeName)\n"
+            << INDENT << "    delete [] typeName;\n"
+            << INDENT << "return result;";
     }
     std::swap(targetTypeName, sourceTypeName);
     writeCppToPythonFunction(s, code, sourceTypeName, targetTypeName);
