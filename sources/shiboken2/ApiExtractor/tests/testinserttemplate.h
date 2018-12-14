@@ -37,8 +37,6 @@ class TestInsertTemplate : public QObject
     private slots:
         void testInsertTemplateOnClassInjectCode();
         void testInsertTemplateOnModuleInjectCode();
-        void testInvalidTypeSystemTemplate();
-        void testValidAndInvalidTypeSystemTemplate();
 };
 
 #endif

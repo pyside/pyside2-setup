@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 ############################################################################
 ##
@@ -45,14 +44,18 @@
 
 import sys
 import re
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import (QFile, Qt, QTextStream)
+from PySide2.QtGui import (QColor, QFont, QKeySequence, QSyntaxHighlighter,
+    QTextCharFormat)
+from PySide2.QtWidgets import (QAction, qApp, QApplication, QFileDialog, QMainWindow,
+    QMenu, QMenuBar, QPlainTextEdit)
 
 import syntaxhighlighter_rc
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, parent=None):
-        QtWidgets.QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
 
         self.highlighter = Highlighter()
 
@@ -65,114 +68,84 @@ class MainWindow(QtWidgets.QMainWindow):
     def newFile(self):
         self.editor.clear()
 
-    def openFile(self, path=""):
+    def openFile(self, path = ""):
         fileName = path
 
-        if fileName=="":
-            fileName,_ = QtWidgets.QFileDialog.getOpenFileName(self, self.tr("Open File"), "",
-                                                         "qmake Files (*.pro *.prf *.pri)")
+        if not fileName:
+            fileName, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), "",
+                                                      "qmake Files (*.pro *.prf *.pri)")
 
-        if fileName!="":
-            inFile = QtCore.QFile(fileName)
-            if inFile.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
-                self.editor.setPlainText(str(inFile.readAll()))
+        if fileName:
+            inFile = QFile(fileName)
+            if inFile.open(QFile.ReadOnly | QFile.Text):
+                stream = QTextStream(inFile)
+                self.editor.setPlainText(stream.readAll())
 
     def setupEditor(self):
-        variableFormat = QtGui.QTextCharFormat()
-        variableFormat.setFontWeight(QtGui.QFont.Bold)
-        variableFormat.setForeground(QtCore.Qt.blue)
+        variableFormat = QTextCharFormat()
+        variableFormat.setFontWeight(QFont.Bold)
+        variableFormat.setForeground(Qt.blue)
         self.highlighter.addMapping("\\b[A-Z_]+\\b", variableFormat)
 
-        singleLineCommentFormat = QtGui.QTextCharFormat()
-        singleLineCommentFormat.setBackground(QtGui.QColor("#77ff77"))
+        singleLineCommentFormat = QTextCharFormat()
+        singleLineCommentFormat.setBackground(QColor("#77ff77"))
         self.highlighter.addMapping("#[^\n]*", singleLineCommentFormat)
 
-        quotationFormat = QtGui.QTextCharFormat()
-        quotationFormat.setBackground(QtCore.Qt.cyan)
-        quotationFormat.setForeground(QtCore.Qt.blue)
+        quotationFormat = QTextCharFormat()
+        quotationFormat.setBackground(Qt.cyan)
+        quotationFormat.setForeground(Qt.blue)
         self.highlighter.addMapping("\".*\"", quotationFormat)
 
-        functionFormat = QtGui.QTextCharFormat()
+        functionFormat = QTextCharFormat()
         functionFormat.setFontItalic(True)
-        functionFormat.setForeground(QtCore.Qt.blue)
+        functionFormat.setForeground(Qt.blue)
         self.highlighter.addMapping("\\b[a-z0-9_]+\\(.*\\)", functionFormat)
 
-        font = QtGui.QFont()
+        font = QFont()
         font.setFamily("Courier")
         font.setFixedPitch(True)
         font.setPointSize(10)
 
-        self.editor = QtWidgets.QTextEdit()
+        self.editor = QPlainTextEdit()
         self.editor.setFont(font)
-        self.highlighter.addToDocument(self.editor.document())
+        self.highlighter.setDocument(self.editor.document())
 
     def setupFileMenu(self):
-        fileMenu = QtWidgets.QMenu(self.tr("&File"), self)
-        self.menuBar().addMenu(fileMenu)
+        fileMenu = self.menuBar().addMenu(self.tr("&File"))
 
-        newFileAct = QtWidgets.QAction(self.tr("&New..."), self)
-        newFileAct.setShortcut(QtGui.QKeySequence(self.tr("Ctrl+N", "File|New")))
-        self.connect(newFileAct, QtCore.SIGNAL("triggered()"), self.newFile)
-        fileMenu.addAction(newFileAct)
+        newFileAct = fileMenu.addAction(self.tr("&New..."))
+        newFileAct.setShortcut(QKeySequence(QKeySequence.New))
+        newFileAct.triggered.connect(self.newFile)
 
-        openFileAct = QtWidgets.QAction(self.tr("&Open..."), self)
-        openFileAct.setShortcut(QtGui.QKeySequence(self.tr("Ctrl+O", "File|Open")))
-        self.connect(openFileAct, QtCore.SIGNAL("triggered()"), self.openFile)
-        fileMenu.addAction(openFileAct)
+        openFileAct = fileMenu.addAction(self.tr("&Open..."))
+        openFileAct.setShortcut(QKeySequence(QKeySequence.Open))
+        openFileAct.triggered.connect(self.openFile)
 
-        fileMenu.addAction(self.tr("E&xit"), QtWidgets.qApp, QtCore.SLOT("quit()"),
-                           QtGui.QKeySequence(self.tr("Ctrl+Q", "File|Exit")))
+        quitAct = fileMenu.addAction(self.tr("E&xit"))
+        quitAct.setShortcut(QKeySequence(QKeySequence.Quit))
+        quitAct.triggered.connect(self.close)
+
+        helpMenu = self.menuBar().addMenu("&Help")
+        helpMenu.addAction("About &Qt", qApp.aboutQt)
 
 
-class Highlighter(QtCore.QObject):
+class Highlighter(QSyntaxHighlighter):
     def __init__(self, parent=None):
-        QtCore.QObject.__init__(self, parent)
+        QSyntaxHighlighter.__init__(self, parent)
 
         self.mappings = {}
-
-    def addToDocument(self, doc):
-        self.connect(doc, QtCore.SIGNAL("contentsChange(int, int, int)"), self.highlight)
 
     def addMapping(self, pattern, format):
         self.mappings[pattern] = format
 
-    def highlight(self, position, removed, added):
-        doc = self.sender()
-
-        block = doc.findBlock(position)
-        if not block.isValid():
-            return
-
-        if added > removed:
-            endBlock = doc.findBlock(position + added)
-        else:
-            endBlock = block
-
-        while block.isValid() and not (endBlock < block):
-            self.highlightBlock(block)
-            block = block.next()
-
-    def highlightBlock(self, block):
-        layout = block.layout()
-        text = block.text()
-
-        overrides = []
-
+    def highlightBlock(self, text):
         for pattern in self.mappings:
             for m in re.finditer(pattern,text):
-                range = QtGui.QTextLayout.FormatRange()
                 s,e = m.span()
-                range.start = s
-                range.length = e-s
-                range.format = self.mappings[pattern]
-                overrides.append(range)
-
-        layout.setAdditionalFormats(overrides)
-        block.document().markContentsDirty(block.position(), block.length())
-
+                self.setFormat(s, e - s, self.mappings[pattern])
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = MainWindow()
     window.resize(640, 512)
     window.show()

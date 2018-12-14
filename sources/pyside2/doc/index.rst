@@ -4,7 +4,16 @@
 The |project| product enables the use of Qt5 APIs in Python applications. It
 lets Python developers utilize the full potential of Qt, using the |pymodname| module.
 The |pymodname| module provides access to the individual Qt modules such as QtCore,
-QtGui, and so on. The following is the list of supported Qt5 modules:
+QtGui, and so on. |project| also comes with the :doc:`Shiboken2 <shiboken2:index>`
+CPython binding code generator, which can be used to generate Python bindings for
+your C or C++ code.
+
+.. toctree::
+    :name: mastertoc
+    :maxdepth: 2
+
+    contents.rst
+    Known issues <https://wiki.qt.io/Qt_for_Python/Considerations>
 
 Qt Modules
 ===========
@@ -100,11 +109,3 @@ Qt Modules
         Provides access to sensor hardware via QML and Python interfaces and a motion gesture recognition API for devices.
      - `Qt Scxml <PySide2/QtScxml/index.html>`_
         Provides classes to create and use state machines from SCXML files.
-
-|project| also comes with the
-:doc:`Shiboken2 <shiboken2:index>` CPython binding code generator.
-
-.. toctree::
-    :maxdepth: 2
-
-    contents.rst
