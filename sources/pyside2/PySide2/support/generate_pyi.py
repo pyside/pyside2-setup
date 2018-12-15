@@ -181,7 +181,13 @@ def generate_pyi(import_name, outpath, options):
     """
     Generates a .pyi file.
 
-    Returns 1 If the result is valid, else 0.
+    Returns 1 If the result is valid, -1 if the result existed already
+    and was skipped, else 0.
+
+    This function will get called during a PySide build, and many concurrent
+    process might try to create .pyi files. We let only one process at a
+    time work on these files, but it will still be different processes which
+    do the work.
     """
     pid = os.getpid()
     plainname = import_name.split(".")[-1]
@@ -189,7 +195,7 @@ def generate_pyi(import_name, outpath, options):
     if options.skip and os.path.exists(outfilepath):
         logger.debug("{pid}:Skipped existing: {op}"
                      .format(op=os.path.basename(outfilepath), **locals()))
-        return 1
+        return -1
 
     try:
         top = __import__(import_name)
@@ -283,7 +289,7 @@ def generate_all_pyi(outpath, options):
     from PySide2.support.signature import inspect
     from PySide2.support.signature.lib.enum_sig import HintingEnumerator
 
-    valid = 0
+    valid = check = 0
     if not outpath:
         outpath = os.path.dirname(PySide2.__file__)
     lockdir = os.path.join(outpath, "generate_pyi.lockfile")
@@ -291,10 +297,14 @@ def generate_all_pyi(outpath, options):
         if locked:
             for mod_name in PySide2.__all__:
                 import_name = "PySide2." + mod_name
-                valid += generate_pyi(import_name, outpath, options)
+                step = generate_pyi(import_name, outpath, options)
+                valid += abs(step)
+                check += step
 
             npyi = len(PySide2.__all__)
-            if valid == npyi:
+            # Prevent too many messages when '--reuse-build' is used. We check that
+            # all files are created, but at least one was really computed.
+            if valid == npyi and check != -npyi:
                 logger.info("+++ All {npyi} .pyi files have been created.".format(**locals()))
 
 
