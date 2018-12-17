@@ -5,7 +5,6 @@
     :maxdepth: 2
 
     gettingstarted.rst
-    modules.rst
     tutorials/index.rst
     pysideapi2.rst
     pysideversion.rst
