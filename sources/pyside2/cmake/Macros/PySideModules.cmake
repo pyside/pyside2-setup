@@ -170,9 +170,9 @@ macro(create_pyside_module)
     # install
     install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide2")
 
-    install(DIRECTORY "${CMAKE_BINARY_DIR}/" DESTINATION "${PYTHON_SITE_PACKAGES}"
-            OPTIONAL
-            FILES_MATCHING PATTERN "*.pyi")
+    file(GLOB hinting_stub_files RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/PySide2" "${CMAKE_CURRENT_BINARY_DIR}/PySide2/*.pyi")
+    install(FILES ${hinting_stub_files}
+            DESTINATION "${PYTHON_SITE_PACKAGES}/PySide2")
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PySide2/${module_NAME}/pyside2_${lower_module_name}_python.h
             DESTINATION include/PySide2${pyside2_SUFFIX}/${module_NAME}/)
