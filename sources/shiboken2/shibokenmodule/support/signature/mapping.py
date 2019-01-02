@@ -88,6 +88,7 @@ WId = int
 GL_TEXTURE_2D = 0x0DE1
 GL_RGBA = 0x1908
 
+
 class _NotCalled(str):
     """
     Wrap some text with semantics
@@ -104,7 +105,7 @@ class _NotCalled(str):
     real object is needed, the wrapper can simply be called.
     """
     def __repr__(self):
-        suppress = "support.signature.typing."
+        suppress = "support.signature.typing27."
         text = self[len(suppress):] if self.startswith(suppress) else self
         return "{}({})".format(type(self).__name__, text)
 
@@ -113,14 +114,20 @@ class _NotCalled(str):
         text = self if self.endswith(")") else self + "()"
         return eval(text, namespace)
 
+USE_PEP563 = sys.version_info[:2] >= (3, 7)
+
+
 # Some types are abstract. They just show their name.
 class Virtual(_NotCalled):
     pass
 
 # Other types I simply could not find.
 class Missing(_NotCalled):
-    def __repr__(self):
-        return '{}("{}")'.format(type(self).__name__, self)
+    if not USE_PEP563:
+        # The string must be quoted, because the object does not exist.
+        def __repr__(self):
+            return '{}("{}")'.format(type(self).__name__, self)
+
 
 class Invalid(_NotCalled):
     pass
@@ -129,12 +136,20 @@ class Invalid(_NotCalled):
 class Default(_NotCalled):
     pass
 
+
 class Instance(_NotCalled):
     pass
 
 
 class Reloader(object):
-    _uninitialized = ["sample"]
+    """
+    Reloder class
+
+    This is a singleton class which provides the update function for the
+    shiboken and PySide classes.
+    """
+    ## Note: We needed to rename shiboken2 in order to avoid a name clash.
+    _uninitialized = "Shiboken minimal sample other smart".split()
     _prefixes = [""]
 
     def __init__(self):
@@ -142,6 +157,14 @@ class Reloader(object):
         self.uninitialized = self._uninitialized
 
     def update(self, g=None):
+        """
+        update is responsible to import all modules from shiboken and PySide
+        which are already in sys.modules.
+        The purpose is to follow all user imports without introducing new
+        ones.
+        This function is called by pyside_type_init to adapt imports
+        when the number of imported modules has changed.
+        """
         if self.sys_module_count == len(sys.modules):
             return
         self.sys_module_count = len(sys.modules)
@@ -160,6 +183,14 @@ class Reloader(object):
                     self.uninitialized.remove(mod_name)
                     proc_name = "init_" + mod_name
                     if proc_name in g:
+                        # Do the 'import {import_name}' first.
+                        # 'top' is PySide2 when we do 'import PySide.QtCore'
+                        # or Shiboken if we do 'import Shiboken'.
+                        # Convince yourself that these two lines below have the same
+                        # global effect as "import Shiboken" or "import PySide2.QtCore".
+                        top = __import__(import_name)
+                        g[top.__name__] = top
+                        # Modules are in place, we can update the type_map.
                         g.update(g[proc_name]())
 
 
@@ -167,8 +198,23 @@ update_mapping = Reloader().update
 type_map = {}
 
 
+def init_Shiboken():
+    type_map.update({
+        "shiboken2.bool": bool,
+        "size_t": int,
+        "PyType": type,
+    })
+    return locals()
+
+
+def init_minimal():
+    type_map.update({
+        "MinBool": bool,
+    })
+    return locals()
+
+
 def init_sample():
-    import sample
     import datetime
     type_map.update({
         "sample.int": int,
@@ -204,6 +250,22 @@ def init_sample():
         "PyDate": datetime.date,
         "ZeroIn": 0,
         "Point[]": PointList,
+    })
+    return locals()
+
+
+def init_other():
+    import numbers
+    type_map.update({
+        "other.Number": numbers.Number,
+        "other.ExtendsNoImplicitConversion": Missing("other.ExtendsNoImplicitConversion"),
+    })
+    return locals()
+
+
+def init_smart():
+    type_map.update({
+        "smart.SharedPtr": Missing("smart.SharedPtr"),  # bad object "SharedPtr<Obj >"
     })
     return locals()
 

@@ -63,6 +63,11 @@
   <object-type name="QWebEngineUrlRequestJob">
     <enum-type name="Error"/>
   </object-type>
+  <value-type name="QWebEngineUrlScheme" since="5.12">
+      <enum-type name="Syntax"/>
+      <enum-type name="SpecialPort"/>
+      <enum-type name="Flag" flags="Flags"/>
+  </value-type>
 
   <object-type name="QWebEngineUrlSchemeHandler"/>
 

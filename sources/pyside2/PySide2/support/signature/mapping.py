@@ -56,7 +56,7 @@ from signature_loader.sbk_mapping import *
 Sbk_Reloader = Reloader
 
 class Reloader(Sbk_Reloader):
-    _uninitialized = Sbk_Reloader._uninitialized + PySide2.__all__
+    _uninitialized = Sbk_Reloader._uninitialized + PySide2.__all__ + ["testbinding"]
     _prefixes = Sbk_Reloader._prefixes + ["PySide2."]
 
     def update(self):
@@ -66,7 +66,6 @@ update_mapping = Reloader().update
 
 
 def init_QtCore():
-    import PySide2.QtCore
     from PySide2.QtCore import Qt, QUrl, QDir
     from PySide2.QtCore import QRect, QSize, QPoint, QLocale, QByteArray
     from PySide2.QtCore import QMarginsF # 5.9
@@ -217,7 +216,6 @@ def init_QtCore():
 
 
 def init_QtGui():
-    import PySide2.QtGui
     from PySide2.QtGui import QPageLayout, QPageSize # 5.12 macOS
     type_map.update({
         "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
@@ -248,7 +246,6 @@ def init_QtGui():
 
 
 def init_QtWidgets():
-    import PySide2.QtWidgets
     from PySide2.QtWidgets import QWidget, QMessageBox, QStyleOption, QStyleHintReturn, QStyleOptionComplex
     from PySide2.QtWidgets import QGraphicsItem, QStyleOptionGraphicsItem # 5.9
     GraphicsItemList = typing.List[QGraphicsItem]
@@ -285,7 +282,6 @@ def init_QtWidgets():
 
 
 def init_QtSql():
-    import PySide2.QtSql
     from PySide2.QtSql import QSqlDatabase
     type_map.update({
         "QLatin1String(defaultConnection)": QSqlDatabase.defaultConnection,
@@ -295,7 +291,6 @@ def init_QtSql():
 
 
 def init_QtNetwork():
-    import PySide2.QtNetwork
     type_map.update({
         "QMultiMap": MultiMap,
         "zero(unsigned short)": 0,
@@ -306,7 +301,6 @@ def init_QtNetwork():
 
 
 def init_QtXmlPatterns():
-    import PySide2.QtXmlPatterns
     from PySide2.QtXmlPatterns import QXmlName
     type_map.update({
         "QXmlName.PrefixCode": Missing("PySide2.QtXmlPatterns.QXmlName.PrefixCode"),
@@ -315,7 +309,7 @@ def init_QtXmlPatterns():
     return locals()
 
 
-def init_QtMultimediaWidgets():
+def init_QtMultimedia():
     import PySide2.QtMultimediaWidgets
     type_map.update({
         "QGraphicsVideoItem": PySide2.QtMultimediaWidgets.QGraphicsVideoItem,
@@ -325,7 +319,6 @@ def init_QtMultimediaWidgets():
 
 
 def init_QtOpenGL():
-    import PySide2.QtOpenGL
     type_map.update({
         "GLuint": int,
         "GLenum": int,
@@ -342,7 +335,6 @@ def init_QtOpenGL():
 
 
 def init_QtQml():
-    import PySide2.QtQml
     type_map.update({
         "QJSValueList()": [],
         "PySide2.QtQml.bool volatile": bool,
@@ -355,7 +347,6 @@ def init_QtQml():
 
 
 def init_QtQuick():
-    import PySide2.QtQuick
     type_map.update({
         "PySide2.QtQuick.QSharedPointer": int,
         "PySide2.QtCore.uint": int,
@@ -367,7 +358,6 @@ def init_QtQuick():
 
 
 def init_QtScript():
-    import PySide2.QtScript
     type_map.update({
         "QScriptValueList()": [],
     })
@@ -375,7 +365,6 @@ def init_QtScript():
 
 
 def init_QtTest():
-    import PySide2.QtTest
     type_map.update({
         "PySide2.QtTest.QTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
     })
@@ -383,7 +372,6 @@ def init_QtTest():
 
 # from 5.9
 def init_QtWebEngineWidgets():
-    import PySide2.QtWebEngineWidgets
     type_map.update({
         "zero(PySide2.QtWebEngineWidgets.QWebEnginePage.FindFlags)": 0,
     })
@@ -391,7 +379,6 @@ def init_QtWebEngineWidgets():
 
 # from 5.6, MSVC
 def init_QtWinExtras():
-    import PySide2.QtWinExtras
     type_map.update({
         "QList< QWinJumpListItem* >()": [],
     })
@@ -406,6 +393,13 @@ def init_QtDataVisualization():
     QtDataVisualization.QSurfaceDataArray = typing.List[QtDataVisualization.QSurfaceDataRow]
     type_map.update({
         "100.0f": 100.0,
+    })
+    return locals()
+
+
+def init_testbinding():
+    type_map.update({
+        "testbinding.PySideCPP2.TestObjectWithoutNamespace": testbinding.TestObjectWithoutNamespace,
     })
     return locals()
 
