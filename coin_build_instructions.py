@@ -122,21 +122,6 @@ def call_setup(python_ver):
     cmd += ["--package-timestamp=" + CI_INTEGRATION_ID]
 
     env = os.environ
-    if CI_HOST_OS == "MacOS":
-        # On Python 3, setuptools.dist.handle_display_options does some
-        # weird sys.stdout.detach-ing if the stdout encoding is
-        # different from utf-8. This causes issues when running
-        # subprocess.call() because that access the original stdout
-        # object stored in sys.__stdout__ which was detached, and
-        # results in an exception being thrown.
-        # The Coin macOS locale by default is US-ASCII, and that
-        # triggers the above issue. Set the encoding to UTF-8 which
-        # makes sure to skip over the detach-ing code.
-        # Relevant links to the issue:
-        # https://bugs.python.org/issue15216
-        # https://bitbucket.org/tarek/distribute/issues/334/fix-for-311-breaks-packages-that-use
-        # https://github.com/pypa/virtualenv/issues/359
-        env['LC_CTYPE'] = 'UTF-8'
     run_instruction(cmd, "Failed to run setup.py", initial_env=env)
 
 def run_build_instructions():

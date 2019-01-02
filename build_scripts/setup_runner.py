@@ -148,7 +148,7 @@ class SetupRunner(object):
         for cmd in self.invocations_list:
             cmd_as_string = " ".join(cmd)
             print("\nRunning process: {}\n".format(cmd_as_string))
-            exit_code = run_process(cmd, redirect_stderr_to_stdout=False)
+            exit_code = run_process(cmd)
             if exit_code != 0:
                 msg = textwrap.dedent("""
                     setup.py invocation failed with exit code: {}.\n\n
