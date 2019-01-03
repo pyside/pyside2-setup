@@ -448,6 +448,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
         QSet<QString> seenSignatures;
+        bool staticEncountered = false;
         for (AbstractMetaFunction *func : it.value()) {
             if (!func->isAssignmentOperator()
                 && !func->usesRValueReferences()
@@ -460,6 +461,19 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                 // But when a function is both in a class and inherited in a subclass,
                 // then we need to search through all subclasses and collect the new signatures.
                 overloads << getFunctionAndInheritedOverloads(func, &seenSignatures);
+                if (func->isStatic())
+                    staticEncountered = true;
+            }
+        }
+        // PYSIDE-886: If the method does not have any static overloads declared
+        // in the class in question, remove all inherited static methods as setting
+        // METH_STATIC in that case can cause crashes for the instance methods.
+        // Manifested as crash when calling QPlainTextEdit::find() (clash with
+        // static QWidget::find(WId)).
+        if (!staticEncountered) {
+            for (int i = overloads.size() - 1; i >= 0; --i) {
+                if (overloads.at(i)->isStatic())
+                    delete overloads.takeAt(i);
             }
         }
 
