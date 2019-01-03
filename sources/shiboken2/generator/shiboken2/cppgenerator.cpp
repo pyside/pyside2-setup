@@ -2452,8 +2452,15 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
     s << INDENT << "// Overloaded function decisor" << endl;
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     const OverloadData::MetaFunctionList &functionOverloads = overloadData.overloadsWithoutRepetition();
-    for (int i = 0; i < functionOverloads.count(); i++)
-        s << INDENT << "// " << i << ": " << functionOverloads.at(i)->minimalSignature() << endl;
+    for (int i = 0; i < functionOverloads.count(); i++) {
+        const auto func = functionOverloads.at(i);
+        s << INDENT << "// " << i << ": ";
+        if (func->isStatic())
+            s << "static ";
+        if (const auto *decl = func->declaringClass())
+            s << decl->name() << "::";
+        s << func->minimalSignature() << endl;
+    }
     writeOverloadedFunctionDecisorEngine(s, &overloadData);
     s << endl;
 
