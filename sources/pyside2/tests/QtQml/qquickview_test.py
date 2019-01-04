@@ -33,6 +33,7 @@ import unittest
 from helper import adjust_filename, TimedQApplication
 
 from PySide2.QtCore import QUrl, QObject, Property, Slot
+from PySide2.QtQml import QtQml
 from PySide2.QtQuick import QQuickView
 
 class MyObject(QObject):
@@ -66,7 +67,10 @@ class TestQQuickView(TimedQApplication):
         view.show()
 
         self.assertEqual(view.status(), QQuickView.Ready)
-
+        rootObject = view.rootObject()
+        self.assertTrue(rootObject)
+        self.assertTrue(QtQml.qmlEngine(rootObject))
+        self.assertTrue(QtQml.qmlContext(rootObject))
 
     def testModelExport(self):
         view = QQuickView()

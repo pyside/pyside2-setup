@@ -54,6 +54,9 @@
              in generator tests folder. -->
     </primitive-type>
 
+    <!-- For qmlEngine(const QObject*), qmlContext(const QObject*) in qqml.h -->
+    <namespace-type name="QtQml"/>
+
     <add-function signature="qmlRegisterType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
         <inject-documentation format="target" mode="append">
             This function registers the Python type in the QML system with the name qmlName, in the library imported from uri having the version number composed from versionMajor and versionMinor.
