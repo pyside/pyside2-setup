@@ -1987,6 +1987,26 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << endl;
 }
 
+void CppGenerator::writeCppSelfAssigment(QTextStream &s, const GeneratorContext &context,
+                                         const QString &className, bool cppSelfAsReference,
+                                         bool useWrapperClass)
+{
+    static const QString pythonSelfVar = QLatin1String("self");
+    if (cppSelfAsReference)
+        s << className << "& ";
+    s << CPP_SELF_VAR << " = ";
+    if (cppSelfAsReference)
+        s << '*';
+    if (useWrapperClass)
+        s << "static_cast<" << className << " *>(";
+    if (!context.forSmartPointer())
+       s << cpythonWrapperCPtr(context.metaClass(), pythonSelfVar);
+    else
+       s << cpythonWrapperCPtr(context.preciseType(), pythonSelfVar);
+    if (useWrapperClass)
+        s << ')';
+}
+
 void CppGenerator::writeCppSelfDefinition(QTextStream &s,
                                           GeneratorContext &context,
                                           bool hasStaticOverload,
@@ -2003,26 +2023,9 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
         className = context.preciseType()->cppSignature();
     }
 
-    QString cppSelfAttribution;
-    QString pythonSelfVar = QLatin1String("self");
-    QString cpythonWrapperCPtrResult;
-    if (!context.forSmartPointer())
-        cpythonWrapperCPtrResult = cpythonWrapperCPtr(metaClass, pythonSelfVar);
-    else
-        cpythonWrapperCPtrResult = cpythonWrapperCPtr(context.preciseType(), pythonSelfVar);
-
-    if (cppSelfAsReference) {
-        QString cast = useWrapperClass ? QString::fromLatin1("(%1*)").arg(className) : QString();
-        cppSelfAttribution = QString::fromLatin1("%1& %2 = *(%3%4)")
-                                .arg(className, QLatin1String(CPP_SELF_VAR), cast,
-                                     cpythonWrapperCPtrResult);
-    } else {
-        s << INDENT << className << "* " << CPP_SELF_VAR << " = 0;" << endl;
+    if (!cppSelfAsReference) {
+        s << INDENT << className << "* " << CPP_SELF_VAR << " = nullptr;" << endl;
         writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
-        cppSelfAttribution = QString::fromLatin1("%1 = %2%3")
-                                .arg(QLatin1String(CPP_SELF_VAR),
-                                     (useWrapperClass ? QString::fromLatin1("(%1*)").arg(className) : QString()),
-                                     cpythonWrapperCPtrResult);
     }
 
     // Checks if the underlying C++ object is valid.
@@ -2031,14 +2034,18 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
         {
             Indentation indent(INDENT);
             writeInvalidPyObjectCheck(s, QLatin1String("self"));
-            s << INDENT << cppSelfAttribution << ';' << endl;
+            s << INDENT;
+            writeCppSelfAssigment(s, context, className, cppSelfAsReference, useWrapperClass);
+            s << ';' << endl;
         }
         s << INDENT << '}' << endl;
         return;
     }
 
     writeInvalidPyObjectCheck(s, QLatin1String("self"));
-    s << INDENT << cppSelfAttribution << ';' << endl;
+    s << INDENT;
+    writeCppSelfAssigment(s, context, className, cppSelfAsReference, useWrapperClass);
+    s << ';' << endl;
 }
 
 void CppGenerator::writeCppSelfDefinition(QTextStream &s,
