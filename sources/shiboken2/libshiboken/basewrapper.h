@@ -238,6 +238,20 @@ LIBSHIBOKEN_API void        setSubTypeInitHook(SbkObjectType* self, SubTypeInitH
 LIBSHIBOKEN_API void*       getTypeUserData(SbkObjectType* self);
 LIBSHIBOKEN_API void        setTypeUserData(SbkObjectType* self, void* userData, DeleteUserDataFunc d_func);
 
+/**
+ * Return an instance of SbkObjectType for a C++ type name as determined by
+ * typeinfo().name().
+ * \param typeName Type name
+ * \since 5.12
+ */
+LIBSHIBOKEN_API SbkObjectType *typeForTypeName(const char *typeName);
+
+/**
+ *  Returns whether SbkObjectType has a special cast function (multiple inheritance)
+ * \param sbkType Sbk type
+ * \since 5.12
+ */
+LIBSHIBOKEN_API bool hasSpecialCastFunction(SbkObjectType *sbkType);
 }
 
 namespace Object {

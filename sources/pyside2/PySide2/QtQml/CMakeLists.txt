@@ -30,6 +30,7 @@ ${QtQml_GEN_DIR}/qqmlpropertymap_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlpropertyvaluesource_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlscriptstring_wrapper.cpp
 ${QtQml_GEN_DIR}/qqmlnetworkaccessmanagerfactory_wrapper.cpp
+${QtQml_GEN_DIR}/qtqml_wrapper.cpp
 # module is always needed
 ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 )

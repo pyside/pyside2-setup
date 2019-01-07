@@ -73,6 +73,9 @@ private:
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
                             GeneratorContext &classContext);
     void writeArgumentsInitializer(QTextStream& s, OverloadData& overloadData);
+    void writeCppSelfAssigment(QTextStream &s, const GeneratorContext &context,
+                               const QString &className, bool cppSelfAsReference,
+                               bool useWrapperClass);
     void writeCppSelfDefinition(QTextStream &s,
                                 const AbstractMetaFunction *func,
                                 GeneratorContext &context,

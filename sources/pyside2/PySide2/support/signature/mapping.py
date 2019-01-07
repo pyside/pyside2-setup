@@ -311,6 +311,8 @@ def init_QtXmlPatterns():
 
 def init_QtMultimedia():
     import PySide2.QtMultimediaWidgets
+    # Check if foreign import is valid. See mapping.py in shiboken2.
+    check_module(PySide2.QtMultimediaWidgets)
     type_map.update({
         "QGraphicsVideoItem": PySide2.QtMultimediaWidgets.QGraphicsVideoItem,
         "QVideoWidget": PySide2.QtMultimediaWidgets.QVideoWidget,

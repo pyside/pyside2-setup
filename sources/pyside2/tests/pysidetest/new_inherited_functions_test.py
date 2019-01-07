@@ -85,15 +85,16 @@ new_functions += """
     PySide2.QtWidgets.QListWidget().closePersistentEditor(qModelIndex)
     PySide2.QtWidgets.QListWidget().openPersistentEditor(qModelIndex)
     PySide2.QtWidgets.QMessageBox().open()
-    PySide2.QtWidgets.QPlainTextEdit.find(quintptr)
+    PySide2.QtWidgets.QPlainTextEdit().find(findStr)
     PySide2.QtWidgets.QProgressDialog().open()
     PySide2.QtWidgets.QStackedLayout().widget()
     # PySide2.QtWidgets.QStylePainter().begin(qPaintDevice) # QPaintDevice: NotImplementedError
     PySide2.QtWidgets.QTableWidget().closePersistentEditor(qModelIndex)
     PySide2.QtWidgets.QTableWidget().openPersistentEditor(qModelIndex)
-    PySide2.QtWidgets.QTextEdit.find(quintptr)
+    PySide2.QtWidgets.QTextEdit().find(findStr)
     PySide2.QtWidgets.QTreeWidget().closePersistentEditor(qModelIndex)
     PySide2.QtWidgets.QTreeWidget().openPersistentEditor(qModelIndex)
+    PySide2.QtWidgets.QWidget.find(quintptr)
 """ if "PySide2.QtWidgets" in sys.modules else ""
 
 new_functions += """
@@ -130,6 +131,7 @@ class MainTest(unittest.TestCase):
         int = 42
         qint64 = 42
         tfarg = os.path.join(PySide2.QtCore.QDir.tempPath(), "XXXXXX.tmp")
+        findStr = 'bla'
         orientation = PySide2.QtCore.Qt.Orientation()
         openMode = PySide2.QtCore.QIODevice.OpenMode(PySide2.QtCore.QIODevice.ReadOnly)
         qModelIndex = PySide2.QtCore.QModelIndex()

@@ -50,6 +50,30 @@ QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
 QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
 QString CppGenerator::m_currentErrorCode(QLatin1String("0"));
 
+static const char typeNameFunc[] = R"CPP(
+template <class T>
+static const char *typeNameOf(const T &t)
+{
+    const char *typeName =  typeid(t).name();
+    auto size = std::strlen(typeName);
+#if defined(Q_CC_MSVC) // MSVC: "class QPaintDevice * __ptr64"
+    if (auto lastStar = strchr(typeName, '*')) {
+        // MSVC: "class QPaintDevice * __ptr64"
+        while (*--lastStar == ' ') {
+        }
+        size = lastStar - typeName + 1;
+    }
+#else // g++, Clang: "QPaintDevice *" -> "P12QPaintDevice"
+    if (size > 2 && typeName[0] == 'P' && std::isdigit(typeName[1]))
+        ++typeName;
+#endif
+    char *result = new char[size + 1];
+    result[size] = '\0';
+    strncpy(result, typeName, size);
+    return result;
+}
+)CPP";
+
 // utility functions
 inline AbstractMetaType* getTypeWithoutContainer(AbstractMetaType* arg)
 {
@@ -336,6 +360,8 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         s << inc.toString() << endl;
     s << endl;
 
+    s << "\n#include <cctype>\n#include <cstring>\n";
+
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
 
@@ -351,7 +377,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         }
     }
 
-    s << endl;
+    s << endl << endl << typeNameFunc << endl;
 
     // Create string literal for smart pointer getter method.
     if (classContext.forSmartPointer()) {
@@ -422,6 +448,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
         QSet<QString> seenSignatures;
+        bool staticEncountered = false;
         for (AbstractMetaFunction *func : it.value()) {
             if (!func->isAssignmentOperator()
                 && !func->usesRValueReferences()
@@ -434,6 +461,19 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                 // But when a function is both in a class and inherited in a subclass,
                 // then we need to search through all subclasses and collect the new signatures.
                 overloads << getFunctionAndInheritedOverloads(func, &seenSignatures);
+                if (func->isStatic())
+                    staticEncountered = true;
+            }
+        }
+        // PYSIDE-886: If the method does not have any static overloads declared
+        // in the class in question, remove all inherited static methods as setting
+        // METH_STATIC in that case can cause crashes for the instance methods.
+        // Manifested as crash when calling QPlainTextEdit::find() (clash with
+        // static QWidget::find(WId)).
+        if (!staticEncountered) {
+            for (int i = overloads.size() - 1; i >= 0; --i) {
+                if (overloads.at(i)->isStatic())
+                    delete overloads.takeAt(i);
             }
         }
 
@@ -1226,9 +1266,19 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
             c << INDENT << "return pyOut;" << endl;
         }
         c << INDENT << '}' << endl;
-        c << INDENT << "const char* typeName = typeid(*((" << typeName << "*)cppIn)).name();" << endl;
-        c << INDENT << "return Shiboken::Object::newObject(" << cpythonType;
-        c << ", const_cast<void*>(cppIn), false, false, typeName);";
+        c << INDENT   << "bool changedTypeName = false;\n"
+            << INDENT << "auto tCppIn = reinterpret_cast<const " << typeName << " *>(cppIn);\n"
+            << INDENT << "const char *typeName = typeid(*tCppIn).name();\n"
+            << INDENT << "auto sbkType = Shiboken::ObjectType::typeForTypeName(typeName);\n"
+            << INDENT << "if (sbkType && Shiboken::ObjectType::hasSpecialCastFunction(sbkType)) {\n"
+            << INDENT << "    typeName = typeNameOf(tCppIn);\n"
+            << INDENT << "    changedTypeName = true;\n"
+            << INDENT << " }\n"
+            << INDENT << "PyObject *result = Shiboken::Object::newObject(" << cpythonType
+            <<           ", const_cast<void*>(cppIn), false, /* exactType */ changedTypeName, typeName);\n"
+            << INDENT << "if (changedTypeName)\n"
+            << INDENT << "    delete [] typeName;\n"
+            << INDENT << "return result;";
     }
     std::swap(targetTypeName, sourceTypeName);
     writeCppToPythonFunction(s, code, sourceTypeName, targetTypeName);
@@ -1937,6 +1987,26 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
     s << endl;
 }
 
+void CppGenerator::writeCppSelfAssigment(QTextStream &s, const GeneratorContext &context,
+                                         const QString &className, bool cppSelfAsReference,
+                                         bool useWrapperClass)
+{
+    static const QString pythonSelfVar = QLatin1String("self");
+    if (cppSelfAsReference)
+        s << className << "& ";
+    s << CPP_SELF_VAR << " = ";
+    if (cppSelfAsReference)
+        s << '*';
+    if (useWrapperClass)
+        s << "static_cast<" << className << " *>(";
+    if (!context.forSmartPointer())
+       s << cpythonWrapperCPtr(context.metaClass(), pythonSelfVar);
+    else
+       s << cpythonWrapperCPtr(context.preciseType(), pythonSelfVar);
+    if (useWrapperClass)
+        s << ')';
+}
+
 void CppGenerator::writeCppSelfDefinition(QTextStream &s,
                                           GeneratorContext &context,
                                           bool hasStaticOverload,
@@ -1953,26 +2023,9 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
         className = context.preciseType()->cppSignature();
     }
 
-    QString cppSelfAttribution;
-    QString pythonSelfVar = QLatin1String("self");
-    QString cpythonWrapperCPtrResult;
-    if (!context.forSmartPointer())
-        cpythonWrapperCPtrResult = cpythonWrapperCPtr(metaClass, pythonSelfVar);
-    else
-        cpythonWrapperCPtrResult = cpythonWrapperCPtr(context.preciseType(), pythonSelfVar);
-
-    if (cppSelfAsReference) {
-        QString cast = useWrapperClass ? QString::fromLatin1("(%1*)").arg(className) : QString();
-        cppSelfAttribution = QString::fromLatin1("%1& %2 = *(%3%4)")
-                                .arg(className, QLatin1String(CPP_SELF_VAR), cast,
-                                     cpythonWrapperCPtrResult);
-    } else {
-        s << INDENT << className << "* " << CPP_SELF_VAR << " = 0;" << endl;
+    if (!cppSelfAsReference) {
+        s << INDENT << className << "* " << CPP_SELF_VAR << " = nullptr;" << endl;
         writeUnusedVariableCast(s, QLatin1String(CPP_SELF_VAR));
-        cppSelfAttribution = QString::fromLatin1("%1 = %2%3")
-                                .arg(QLatin1String(CPP_SELF_VAR),
-                                     (useWrapperClass ? QString::fromLatin1("(%1*)").arg(className) : QString()),
-                                     cpythonWrapperCPtrResult);
     }
 
     // Checks if the underlying C++ object is valid.
@@ -1981,14 +2034,18 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
         {
             Indentation indent(INDENT);
             writeInvalidPyObjectCheck(s, QLatin1String("self"));
-            s << INDENT << cppSelfAttribution << ';' << endl;
+            s << INDENT;
+            writeCppSelfAssigment(s, context, className, cppSelfAsReference, useWrapperClass);
+            s << ';' << endl;
         }
         s << INDENT << '}' << endl;
         return;
     }
 
     writeInvalidPyObjectCheck(s, QLatin1String("self"));
-    s << INDENT << cppSelfAttribution << ';' << endl;
+    s << INDENT;
+    writeCppSelfAssigment(s, context, className, cppSelfAsReference, useWrapperClass);
+    s << ';' << endl;
 }
 
 void CppGenerator::writeCppSelfDefinition(QTextStream &s,
@@ -2452,8 +2509,15 @@ void CppGenerator::writeOverloadedFunctionDecisor(QTextStream& s, const Overload
     s << INDENT << "// Overloaded function decisor" << endl;
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     const OverloadData::MetaFunctionList &functionOverloads = overloadData.overloadsWithoutRepetition();
-    for (int i = 0; i < functionOverloads.count(); i++)
-        s << INDENT << "// " << i << ": " << functionOverloads.at(i)->minimalSignature() << endl;
+    for (int i = 0; i < functionOverloads.count(); i++) {
+        const auto func = functionOverloads.at(i);
+        s << INDENT << "// " << i << ": ";
+        if (func->isStatic())
+            s << "static ";
+        if (const auto *decl = func->declaringClass())
+            s << decl->name() << "::";
+        s << func->minimalSignature() << endl;
+    }
     writeOverloadedFunctionDecisorEngine(s, &overloadData);
     s << endl;
 

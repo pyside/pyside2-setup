@@ -175,10 +175,7 @@ class Reloader(object):
                 import_name = prefix + mod_name
                 if import_name in sys.modules:
                     # check if this is a real module
-                    obj = sys.modules[import_name]
-                    if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
-                        raise ImportError("Module '{mod_name}' is at most a "
-                                          "namespace!".format(**locals()))
+                    check_module(sys.modules[import_name])
                     # module is real
                     self.uninitialized.remove(mod_name)
                     proc_name = "init_" + mod_name
@@ -192,6 +189,16 @@ class Reloader(object):
                         g[top.__name__] = top
                         # Modules are in place, we can update the type_map.
                         g.update(g[proc_name]())
+
+def check_module(mod):
+    # During a build, there exist the modules already as directories,
+    # although the '*.so' was not yet created. This causes a problem
+    # in Python 3, because it accepts folders as namespace modules
+    # without enforcing an '__init__.py'.
+    if not getattr(mod, "__file__", None) or os.path.isdir(mod.__file__):
+        mod_name = mod.__name__
+        raise ImportError("Module '{mod_name}' is at most a namespace!"
+                          .format(**locals()))
 
 
 update_mapping = Reloader().update

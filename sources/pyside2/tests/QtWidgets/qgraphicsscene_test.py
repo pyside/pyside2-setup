@@ -32,14 +32,14 @@ import unittest
 import gc
 
 from PySide2.QtCore import QPointF
-from PySide2.QtGui import QPolygonF, QPixmap, QPainterPath, QTransform
+from PySide2.QtGui import QPolygonF, QPixmap, QPainterPath, QTransform, QWindow
 from PySide2.QtWidgets import QApplication, QPushButton
 from PySide2.QtWidgets import QGraphicsScene
 from PySide2.QtWidgets import QGraphicsEllipseItem, QGraphicsLineItem
 from PySide2.QtWidgets import QGraphicsPathItem, QGraphicsPixmapItem
 from PySide2.QtWidgets import QGraphicsPolygonItem, QGraphicsRectItem
 from PySide2.QtWidgets import QGraphicsSimpleTextItem, QGraphicsTextItem
-from PySide2.QtWidgets import QGraphicsProxyWidget
+from PySide2.QtWidgets import QGraphicsProxyWidget, QGraphicsView
 
 from helper import UsesQApplication
 
@@ -51,6 +51,19 @@ class Constructor(unittest.TestCase):
         obj = QGraphicsScene()
         self.assertTrue(isinstance(obj, QGraphicsScene))
 
+# Test for PYSIDE-868: Test whether painter.device() can be accessed
+# correctly. This was crashing when the underlying QPaintDevice was a
+# QWidget due to handling multiple inheritance incorrectly.
+class CustomScene(QGraphicsScene):
+    def __init__(self, parent = None):
+        super(CustomScene, self).__init__(parent)
+        self.dpi = 0
+
+    def drawBackground(self, painter, rect):
+        self.dpi = painter.device().physicalDpiX()
+
+    def drawForeground(self, painter, rect):
+        self.dpi = painter.device().physicalDpiX()
 
 class ConstructorWithRect(unittest.TestCase):
     '''QGraphicsScene qrect constructor and related sizes'''
@@ -191,6 +204,14 @@ class TestGraphicsGroup(UsesQApplication):
         self.assertEqual(i2.scene(), scene)
         scene.destroyItemGroup(group)
         self.assertRaises(RuntimeError, group.type)
+
+    def testCustomScene(self): # For PYSIDE-868, see above
+        scene = CustomScene()
+        view = QGraphicsView(scene)
+        view.show()
+        while scene.dpi == 0:
+           QApplication.instance().processEvents()
+        view.hide()
 
 
 if __name__ == '__main__':

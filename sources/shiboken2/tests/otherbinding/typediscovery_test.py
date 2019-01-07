@@ -51,14 +51,16 @@ class TypeDiscoveryTest(unittest.TestCase):
     def testMultipleInheritance(self):
         obj = OtherMultipleDerived.createObject("Base1");
         self.assertEqual(type(obj), Base1)
+        # PYSIDE-868: In case of multiple inheritance, a factory
+        # function will return the base class wrapper.
         obj = OtherMultipleDerived.createObject("MDerived1");
-        self.assertEqual(type(obj), MDerived1)
+        self.assertEqual(type(obj), Base1)
         obj = OtherMultipleDerived.createObject("SonOfMDerived1");
-        self.assertEqual(type(obj), SonOfMDerived1)
+        self.assertEqual(type(obj), Base1)
         obj = OtherMultipleDerived.createObject("MDerived3");
-        self.assertEqual(type(obj), MDerived3)
+        self.assertEqual(type(obj), Base1)
         obj = OtherMultipleDerived.createObject("OtherMultipleDerived");
-        self.assertEqual(type(obj), OtherMultipleDerived)
+        self.assertEqual(type(obj), Base1)
 
 if __name__ == '__main__':
     unittest.main()
