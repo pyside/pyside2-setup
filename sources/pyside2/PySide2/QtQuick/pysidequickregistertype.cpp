@@ -145,7 +145,7 @@ void registerTypeIfInheritsFromClass(
 }
 
 bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
-                               const char *qmlName, QQmlPrivate::RegisterType *type)
+                       const char *qmlName, bool creatable, const char *noCreationReason, QQmlPrivate::RegisterType *type)
 {
     using namespace Shiboken;
 
@@ -186,7 +186,8 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
         return false;
 
     type->structVersion = 0;
-    type->create = createQuickItem;
+    type->create = creatable ? createQuickItem : nullptr;
+    type->noCreationReason = noCreationReason;
     type->userdata = pyObj;
     type->uri = uri;
     type->version = QTypeRevision::fromVersion(versionMajor, versionMinor);

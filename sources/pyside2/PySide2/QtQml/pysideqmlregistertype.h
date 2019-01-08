@@ -70,7 +70,7 @@ void initQmlSupport(PyObject *module);
  * \return the metatype id of the registered type.
  */
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
-                    const char *qmlName);
+                    const char *qmlName, const char *noCreationReason = nullptr, bool creatable = true);
 
 /**
  * PySide implementation of qmlRegisterType<T> function.

@@ -144,9 +144,11 @@ PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_t
 
 #ifdef PYSIDE_QML_SUPPORT
 // Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
-typedef bool (*QuickRegisterItemFunction)(PyObject *pyObj, const char *uri, int versionMajor,
-                                 int versionMinor, const char *qmlName,
-                                 QQmlPrivate::RegisterType *);
+using QuickRegisterItemFunction =
+    bool (*)(PyObject *pyObj, const char *uri, int versionMajor,
+             int versionMinor, const char *qmlName,
+             bool creatable, const char *noCreationReason,
+             QQmlPrivate::RegisterType *);
 PYSIDE_API QuickRegisterItemFunction getQuickRegisterItemFunction();
 PYSIDE_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
 #endif // PYSIDE_QML_SUPPORT
@@ -169,4 +171,3 @@ PYSIDE_API bool registerInternalQtConf();
 
 
 #endif // PYSIDE_H
-

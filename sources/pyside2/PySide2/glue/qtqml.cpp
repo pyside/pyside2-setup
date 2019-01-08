@@ -57,6 +57,11 @@ int %0 = PySide::qmlRegisterSingletonType(nullptr, %ARGUMENT_NAMES, false, true)
 %PYARG_0 = %CONVERTTOPYTHON[int](%0);
 // @snippet qmlregistersingletontype_qjsvalue
 
+// @snippet qmlregisteruncreatabletype
+int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES, false);
+%PYARG_0 = %CONVERTTOPYTHON[int](%0);
+// @snippet qmlregisteruncreatabletype
+
 // @snippet init
 PySide::initQmlSupport(module);
 // @snippet init

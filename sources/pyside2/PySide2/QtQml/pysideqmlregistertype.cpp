@@ -73,7 +73,8 @@ static void createInto(void *memory, void *type)
 }
 
 int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
-                            int versionMinor, const char *qmlName)
+                            int versionMinor, const char *qmlName, const char *noCreationReason,
+                            bool creatable)
 {
     using namespace Shiboken;
 
@@ -97,8 +98,9 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
 #ifdef PYSIDE_QML_SUPPORT
     QuickRegisterItemFunction quickRegisterItemFunction = getQuickRegisterItemFunction();
     if (quickRegisterItemFunction) {
-        registered = quickRegisterItemFunction(pyObj, uri, versionMajor, versionMinor,
-                                               qmlName, &type);
+        registered =
+            quickRegisterItemFunction(pyObj, uri, versionMajor, versionMinor,
+                                      qmlName, creatable, noCreationReason, &type);
     }
 #endif
 
@@ -126,7 +128,8 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         int objectSize = static_cast<int>(PySide::getSizeOfQObject(
                                               reinterpret_cast<SbkObjectType *>(pyObj)));
         type.objectSize = objectSize;
-        type.create = createInto;
+        type.create = creatable ? createInto : nullptr;
+        type.noCreationReason = noCreationReason;
         type.userdata = pyObj;
         type.uri = uri;
         type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
