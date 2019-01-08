@@ -1207,9 +1207,18 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     c << INDENT << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));" << endl;
     c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
     c << "(QFlag((int)PyLong_AsLong(pyLong.object())));" << endl;
+
+    // PYSIDE-898: Include an additional condition to detect if the type of the
+    // enum corresponds to the object that is being evaluated.
+    // Using only `PyNumber_Check(...)` is too permissive,
+    // then we would have been unable to detect the difference between
+    // a PolarOrientation and Qt::AlignmentFlag, which was the main
+    // issue of the bug.
+    const QString numberCondition = QStringLiteral("PyNumber_Check(pyIn) && ") + pyTypeCheck;
     writePythonToCppFunction(s, code, QLatin1String("number"), flagsTypeName);
-    writeIsPythonConvertibleToCppFunction(s, QLatin1String("number"), flagsTypeName,
-                                          QLatin1String("PyNumber_Check(pyIn)"));
+    writeIsPythonConvertibleToCppFunction(s, QLatin1String("number"), flagsTypeName, numberCondition);
+
+
 }
 
 void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaClass *metaClass,
