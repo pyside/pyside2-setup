@@ -40,6 +40,7 @@
 #include "pysidequickregistertype.h"
 
 #include <pyside.h>
+#include <pyside_p.h>
 #include <shiboken.h>
 
 // Auto generated headers.
@@ -122,7 +123,7 @@ void registerTypeIfInheritsFromClass(
         PyTypeObject *typeToRegister,
         const QByteArray &typePointerName,
         const QByteArray &typeListName,
-        QMetaObject *typeMetaObject,
+        const QMetaObject *typeMetaObject,
         QQmlPrivate::RegisterType *type,
         bool &registered)
 {
@@ -199,9 +200,7 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
         return false;
 
     // Used inside macros to register the type.
-    QMetaObject *metaObject =
-            reinterpret_cast<QMetaObject *>(
-                ObjectType::getTypeUserData(reinterpret_cast<SbkObjectType *>(pyObj)));
+    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObj);
     Q_ASSERT(metaObject);
 
 
