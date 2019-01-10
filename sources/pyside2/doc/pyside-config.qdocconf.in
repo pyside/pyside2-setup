@@ -1,6 +1,8 @@
 buildversion              = @PYSIDE_QT_VERSION@
 navigation.homepage       = Qt for Python
 
+macro.nullptr           = "\\c{None}"
+
 outputdir                 = @DOC_DATA_DIR@
 outputformats             = WebXML
 WebXML.quotinginformation = true
