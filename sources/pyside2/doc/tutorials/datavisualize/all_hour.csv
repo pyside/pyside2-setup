@@ -1,0 +1,8 @@
+time,latitude,longitude,depth,mag,magType,nst,gap,dmin,rms,net,id,updated,place,type,horizontalError,depthError,magError,magNst,status,locationSource,magSource
+2019-01-10T12:11:24.810Z,34.1281662,-117.7754974,4.46,1.18,ml,22,69,0.04475,0.13,ci,ci38421072,2019-01-10T12:13:30.138Z,"3km NNW of La Verne, CA",earthquake,0.3,0.55,0.246,6,automatic,ci,ci
+2019-01-10T12:04:26.320Z,19.4433327,-155.6159973,0.72,1.79,md,22,99,0.04026,0.3,hv,hv70763571,2019-01-10T12:07:28.690Z,"26km E of Honaunau-Napoopoo, Hawaii",earthquake,0.6,1.79,0.28,6,automatic,hv,hv
+2019-01-10T11:57:48.980Z,33.3225,-116.3931667,4.84,0.62,ml,15,211,0.05776,0.16,ci,ci38421064,2019-01-10T12:01:29.166Z,"8km NNW of Borrego Springs, CA",earthquake,0.71,0.68,0.111,11,automatic,ci,ci
+2019-01-10T11:52:09.490Z,38.8356667,-122.8366699,1.28,2.74,md,25,77,0.003061,0.04,nc,nc73131566,2019-01-10T12:14:02.757Z,"10km NW of The Geysers, CA",earthquake,0.19,0.29,0.06,7,automatic,nc,nc
+2019-01-10T11:25:44.854Z,65.1082,-149.3701,20.6,2.1,ml,,,,1.02,ak,ak019gq2oer,2019-01-10T11:37:07.060Z,"60km NNW of North Nenana, Alaska",earthquake,,0.3,,,automatic,ak,ak
+2019-01-10T11:25:23.786Z,69.1518,-144.4977,10.4,3.7,ml,,,,0.74,ak,ak019gq2ndz,2019-01-10T11:47:11.284Z,"114km SSW of Kaktovik, Alaska",earthquake,,1.6,,,reviewed,ak,ak
+2019-01-10T11:16:11.761Z,61.3318,-150.0708,20.1,2.7,ml,,,,0.83,ak,ak019gq0ozj,2019-01-10T11:29:24.610Z,"15km NW of Anchorage, Alaska",earthquake,,0.4,,,automatic,ak,ak
