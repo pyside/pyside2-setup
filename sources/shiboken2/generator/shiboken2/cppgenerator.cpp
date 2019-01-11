@@ -962,7 +962,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
 
     if (!injectedCodeCallsPythonOverride(func)) {
         s << INDENT;
-        s << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << "(PyObject_Call(" << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", NULL));" << endl;
+        s << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << "(PyObject_Call("
+            << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));" << endl;
 
         s << INDENT << "// An error happened in python code!" << endl;
         s << INDENT << "if (" << PYTHON_RETURN_VAR << ".isNull()) {" << endl;
@@ -1090,7 +1091,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << INDENT << "if (QObject::d_ptr->metaObject)" << endl
       << INDENT << INDENT << "return QObject::d_ptr->dynamicMetaObject();" << endl;
     s << INDENT << "SbkObject* pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);" << endl;
-    s << INDENT << "if (pySelf == NULL)" << endl;
+    s << INDENT << "if (pySelf == nullptr)" << endl;
     s << INDENT << INDENT << "return " << metaClass->qualifiedCppName() << "::metaObject();" << endl;
     s << INDENT << "return PySide::SignalManager::retrieveMetaObject(reinterpret_cast<PyObject*>(pySelf));" << endl;
     s << '}' << endl << endl;
@@ -1099,7 +1100,7 @@ void CppGenerator::writeMetaObjectMethod(QTextStream& s, const AbstractMetaClass
     s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void** args)" << endl;
     s << "{" << endl;
 
-    AbstractMetaFunction *func = NULL;
+    AbstractMetaFunction *func = nullptr;
     AbstractMetaFunctionList list = metaClass->queryFunctionsByName(QLatin1String("qt_metacall"));
     if (list.size() == 1)
         func = list[0];
@@ -2682,7 +2683,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
                 // When an argument is removed from a method signature and no other means of calling
                 // the method are provided (as with code injection) the generator must abort.
                 qFatal(qPrintable(QString::fromLatin1("No way to call '%1::%2' with the modifications described in the type system.")
-                                                      .arg(func->ownerClass()->name(), func->signature())), NULL);
+                                                      .arg(func->ownerClass()->name(), func->signature())));
             }
             removedArgs++;
             continue;
@@ -2779,9 +2780,9 @@ void CppGenerator::writeCppToPythonFunction(QTextStream& s, const AbstractMetaTy
 {
     const CustomConversion* customConversion = containerType->typeEntry()->customConversion();
     if (!customConversion) {
-        qFatal(qPrintable(QString::fromLatin1("Can't write the C++ to Python conversion function for container type '%1' - "\
-                                  "no conversion rule was defined for it in the type system.")
-                             .arg(containerType->typeEntry()->qualifiedCppName())), NULL);
+        qFatal("Can't write the C++ to Python conversion function for container type '%s' - "\
+               "no conversion rule was defined for it in the type system.",
+               qPrintable(containerType->typeEntry()->qualifiedCppName()));
     }
     if (!containerType->typeEntry()->isContainer()) {
         writeCppToPythonFunction(s, customConversion);
@@ -2906,9 +2907,9 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream& s,
     }
     if (typeCheck.isEmpty()) {
         if (!toNative->sourceType() || toNative->sourceType()->isPrimitive()) {
-            qFatal(qPrintable(QString::fromLatin1("User added implicit conversion for C++ type '%1' must provide either an input "\
-                                      "type check function or a non primitive type entry.")
-                                 .arg(targetType->qualifiedCppName())), NULL);
+            qFatal("User added implicit conversion for C++ type '%s' must provide either an input "\
+                   "type check function or a non primitive type entry.",
+                   qPrintable(targetType->qualifiedCppName()));
 
         }
         typeCheck = QString::fromLatin1("PyObject_TypeCheck(%in, %1)").arg(cpythonTypeNameExt(toNative->sourceType()));
@@ -5259,7 +5260,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, GeneratorContext &conte
         s << INDENT << "} else {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "if (!PyErr_ExceptionMatches(PyExc_AttributeError)) return NULL;" << endl;
+            s << INDENT << "if (!PyErr_ExceptionMatches(PyExc_AttributeError)) return nullptr;" << endl;
             s << INDENT << "PyErr_Clear();" << endl;
 
             s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for "
@@ -5286,7 +5287,7 @@ void CppGenerator::writeGetattroFunction(QTextStream& s, GeneratorContext &conte
                 s << INDENT << "PyErr_Format(PyExc_AttributeError," << endl;
                 s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\"," << endl;
                 s << INDENT << "             tp->tp_name, PyBytes_AS_STRING(name));" << endl;
-                s << INDENT << "return NULL;" << endl;
+                s << INDENT << "return nullptr;" << endl;
             }
             s << INDENT << "} else {" << endl;
             {
