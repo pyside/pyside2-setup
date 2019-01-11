@@ -2,11 +2,11 @@
 
 ### Introduction
 
-PySide is the [Python Qt bindings project](http://wiki.qt.io/Qt_for_Python),
-providing access to the complete Qt 5.12+ framework as well as to generator
-tools for rapidly generating Python bindings for any C++ libraries.
+PySide2 is the official Python module from the
+[Qt for Python project](http://wiki.qt.io/Qt_for_Python),
+which provides access to the complete Qt 5.12+ framework.
 
-The PySide project is developed in the open, with all facilities you'd expect
+The Qt for Python project is developed in the open, with all facilities you'd expect
 from any modern OSS project such as all code in a git repository and an open
 design process. We welcome any contribution conforming to the
 [Qt Contribution Agreement](https://www.qt.io/contributionagreement/).
@@ -21,7 +21,7 @@ and [PyPi](https://pypi.org/project/PySide2/):
 
 #### Dependencies
 
-PySide versions following 5.12 use a C++ parser based on
+PySide2 versions following 5.12 use a C++ parser based on
 [Clang](http://clang.org/). The Clang library (C-bindings), version 6.0 or
 higher is required for building. Prebuilt versions of it can be downloaded from
 [download.qt.io](http://download.qt.io/development_releases/prebuilt/libclang/).
@@ -51,7 +51,7 @@ This process will include getting the code:
 then install the dependencies, and following the instructions per platform.
 A common build command will look like:
 
-    python setup.py install --qmake=<path/to/qmake/> --jobs=8 --build-tests
+    python setup.py install --qmake=<path/to/qmake/> --parallel=8 --build-tests
 
 You can obtain more information about the options to build PySide
 and Shiboken in [our wiki](https://wiki.qt.io/Qt_for_Python/).

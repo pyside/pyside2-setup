@@ -1,4 +1,4 @@
-# shiboken2-generator
+# Shiboken2-generator
 
 Shiboken is the generator used by the Qt for Python project.
 It outputs C++ code for CPython extensions, which can be compiled
