@@ -125,7 +125,7 @@ class Config(object):
 
         setup_kwargs = {}
         setup_kwargs['long_description'] = self.get_long_description()
-        setup_kwargs['long_description_content_type'] = 'text/markdown',
+        setup_kwargs['long_description_content_type'] = 'text/markdown'
         setup_kwargs['keywords'] = 'Qt'
         setup_kwargs['author'] = 'Qt for Python Team'
         setup_kwargs['author_email'] = 'pyside@qt-project.org'
@@ -207,8 +207,7 @@ class Config(object):
 
         elif self.internal_build_type == self.pyside_option_name:
             setup_kwargs['name'] = self.pyside_st_name
-            setup_kwargs['description'] = ("Python bindings for the Qt cross-platform application"
-                                           " and UI framework"),
+            setup_kwargs['description'] = "Python bindings for the Qt cross-platform application and UI framework"
             setup_kwargs['install_requires'] = [self.shiboken_module_st_name]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
