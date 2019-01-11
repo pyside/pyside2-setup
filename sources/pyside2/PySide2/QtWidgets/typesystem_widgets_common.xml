@@ -660,7 +660,7 @@
       <modify-argument index="2">
         <reference-count action="set"/>
       </modify-argument>
-      <inject-code file="../glue/qtwidgets.cpp" snippet="qitemeditorfactory-registerEditor"/>
+      <inject-code file="../glue/qtwidgets.cpp" snippet="qitemeditorfactory-registereditor"/>
     </modify-function>
     <modify-function signature="setDefaultFactory(QItemEditorFactory*)">
       <modify-argument index="1">
