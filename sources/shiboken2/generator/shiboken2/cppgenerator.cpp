@@ -3766,6 +3766,29 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass* metaClass)
     return false;
 }
 
+struct pyTypeSlotEntry
+{
+    explicit pyTypeSlotEntry(const char *name, const QString &function) :
+        m_name(name), m_function(function) {}
+
+    const char *m_name;
+    const QString &m_function;
+};
+
+QTextStream &operator<<(QTextStream &str, const pyTypeSlotEntry &e)
+{
+    str << '{' << e.m_name << ',';
+    const int padding = qMax(0, 18 - int(strlen(e.m_name)));
+    for (int p = 0; p < padding; ++p)
+        str << ' ';
+    if (e.m_function.isEmpty())
+        str << NULL_PTR;
+    else
+        str << "reinterpret_cast<void*>(" << e.m_function << ')';
+    str << "},\n";
+    return str;
+}
+
 void CppGenerator::writeClassDefinition(QTextStream &s,
                                         const AbstractMetaClass *metaClass,
                                         GeneratorContext &classContext)
@@ -3774,11 +3797,11 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     QString tp_init;
     QString tp_new;
     QString tp_dealloc;
-    QString tp_hash(QLatin1Char('0'));
-    QString tp_call = tp_hash;
+    QString tp_hash;
+    QString tp_call;
     QString cppClassName = metaClass->qualifiedCppName();
     const QString className = chopType(cpythonTypeName(metaClass));
-    QString baseClassName(QLatin1Char('0'));
+    QString baseClassName;
     AbstractMetaFunctionList ctors;
     const AbstractMetaFunctionList &allCtors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
     for (AbstractMetaFunction *f : allCtors) {
@@ -3799,7 +3822,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      QLatin1String("SbkDeallocWrapperWithPrivateDtor") :
                      QLatin1String("object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */");
-        tp_init = QLatin1String("0");
+        tp_init.clear();
     } else {
         QString deallocClassName;
         if (shouldGenerateCppWrapper(metaClass))
@@ -3810,11 +3833,12 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
             tp_dealloc = QLatin1String("&SbkDeallocQAppWrapper");
         else
             tp_dealloc = QLatin1String("&SbkDeallocWrapper");
-        tp_init = (onlyPrivCtor || ctors.isEmpty()) ? QLatin1String("0") : cpythonFunctionName(ctors.constFirst());
+        if (!onlyPrivCtor && !ctors.isEmpty())
+            tp_init = cpythonFunctionName(ctors.constFirst());
     }
 
-    QString tp_getattro(QLatin1Char('0'));
-    QString tp_setattro = tp_getattro;
+    QString tp_getattro;
+    QString tp_setattro;
     if (usePySideExtensions() && (metaClass->qualifiedCppName() == QLatin1String("QObject"))) {
         tp_getattro = cpythonGetattroFunctionName(metaClass);
         tp_setattro = cpythonSetattroFunctionName(metaClass);
@@ -3851,11 +3875,11 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
         tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
     }
 
-    QString tp_richcompare = QString(QLatin1Char('0'));
+    QString tp_richcompare;
     if (!metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload())
         tp_richcompare = cpythonBaseName(metaClass) + QLatin1String("_richcompare");
 
-    QString tp_getset = QString(QLatin1Char('0'));
+    QString tp_getset;
     if (shouldGenerateGetSetList(metaClass) && !classContext.forSmartPointer())
         tp_getset = cpythonGettersSettersDefinitionName(metaClass);
 
@@ -3866,7 +3890,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
         if (m_tpFuncs.contains(func->name()))
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
-    if (m_tpFuncs[QLatin1String("__repr__")] == QLatin1String("0")
+    if (m_tpFuncs.value(QLatin1String("__repr__")).isEmpty()
         && !metaClass->isQObject()
         && metaClass->hasToStringCapability()) {
         m_tpFuncs[QLatin1String("__repr__")] = writeReprFunction(s, classContext);
@@ -3909,23 +3933,23 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     s << "}" << endl;
     s << endl;
     s << "static PyType_Slot " << className << "_slots[] = {" << endl;
-    s << INDENT << "{Py_tp_base,        (void *)0}, // inserted by introduceWrapperType" << endl;
-    s << INDENT << "{Py_tp_dealloc,     (void *)" << tp_dealloc << "}," << endl;
-    s << INDENT << "{Py_tp_repr,        (void *)" << m_tpFuncs[QLatin1String("__repr__")] << "}," << endl;
-    s << INDENT << "{Py_tp_hash,        (void *)" << tp_hash << "}," << endl;
-    s << INDENT << "{Py_tp_call,        (void *)" << tp_call << "}," << endl;
-    s << INDENT << "{Py_tp_str,         (void *)" << m_tpFuncs[QLatin1String("__str__")] << "}," << endl;
-    s << INDENT << "{Py_tp_getattro,    (void *)" << tp_getattro << "}," << endl;
-    s << INDENT << "{Py_tp_setattro,    (void *)" << tp_setattro << "}," << endl;
-    s << INDENT << "{Py_tp_traverse,    (void *)" << className << "_traverse}," << endl;
-    s << INDENT << "{Py_tp_clear,       (void *)" << className << "_clear}," << endl;
-    s << INDENT << "{Py_tp_richcompare, (void *)" << tp_richcompare << "}," << endl;
-    s << INDENT << "{Py_tp_iter,        (void *)" << m_tpFuncs[QLatin1String("__iter__")] << "}," << endl;
-    s << INDENT << "{Py_tp_iternext,    (void *)" << m_tpFuncs[QLatin1String("__next__")] << "}," << endl;
-    s << INDENT << "{Py_tp_methods,     (void *)" << className << "_methods}," << endl;
-    s << INDENT << "{Py_tp_getset,      (void *)" << tp_getset << "}," << endl;
-    s << INDENT << "{Py_tp_init,        (void *)" << tp_init << "}," << endl;
-    s << INDENT << "{Py_tp_new,         (void *)" << tp_new << "}," << endl;
+    s << INDENT << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType" << endl;
+    s << INDENT << pyTypeSlotEntry("Py_tp_dealloc", tp_dealloc)
+        << INDENT << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(QLatin1String("__repr__")))
+        << INDENT << pyTypeSlotEntry("Py_tp_hash", tp_hash)
+        << INDENT << pyTypeSlotEntry("Py_tp_call", tp_call)
+        << INDENT << pyTypeSlotEntry("Py_tp_str", m_tpFuncs.value(QLatin1String("__str__")))
+        << INDENT << pyTypeSlotEntry("Py_tp_getattro", tp_getattro)
+        << INDENT << pyTypeSlotEntry("Py_tp_setattro", tp_setattro)
+        << INDENT << pyTypeSlotEntry("Py_tp_traverse", className + QLatin1String("_traverse"))
+        << INDENT << pyTypeSlotEntry("Py_tp_clear", className + QLatin1String("_clear"))
+        << INDENT << pyTypeSlotEntry("Py_tp_richcompare", tp_richcompare)
+        << INDENT << pyTypeSlotEntry("Py_tp_iter", m_tpFuncs.value(QLatin1String("__iter__")))
+        << INDENT << pyTypeSlotEntry("Py_tp_iternext", m_tpFuncs.value(QLatin1String("__next__")))
+        << INDENT << pyTypeSlotEntry("Py_tp_methods", className + QLatin1String("_methods"))
+        << INDENT << pyTypeSlotEntry("Py_tp_getset", tp_getset)
+        << INDENT << pyTypeSlotEntry("Py_tp_init", tp_init)
+        << INDENT << pyTypeSlotEntry("Py_tp_new", tp_new);
     if (supportsSequenceProtocol(metaClass)) {
         s << INDENT << "// type supports sequence protocol" << endl;
         writeTypeAsSequenceDefinition(s, metaClass);

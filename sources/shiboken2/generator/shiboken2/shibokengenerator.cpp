@@ -151,10 +151,10 @@ ShibokenGenerator::~ShibokenGenerator() = default;
 
 void ShibokenGenerator::clearTpFuncs()
 {
-    m_tpFuncs.insert(QLatin1String("__str__"), QLatin1String("0"));
-    m_tpFuncs.insert(QLatin1String("__repr__"), QLatin1String("0"));
-    m_tpFuncs.insert(QLatin1String("__iter__"), QLatin1String("0"));
-    m_tpFuncs.insert(QLatin1String("__next__"), QLatin1String("0"));
+    m_tpFuncs.insert(QLatin1String("__str__"), QString());
+    m_tpFuncs.insert(QLatin1String("__repr__"), QString());
+    m_tpFuncs.insert(QLatin1String("__iter__"), QString());
+    m_tpFuncs.insert(QLatin1String("__next__"), QString());
 }
 
 void ShibokenGenerator::initPrimitiveTypesCorrespondences()
