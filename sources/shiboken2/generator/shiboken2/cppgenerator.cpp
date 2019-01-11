@@ -552,8 +552,10 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     // Write methods definition
     s << "static PyMethodDef " << className << "_methods[] = {" << endl;
     s << methodsDefinitions << endl;
-    if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer())
-        s << INDENT << "{\"__copy__\", (PyCFunction)" << className << "___copy__" << ", METH_NOARGS}," << endl;
+    if (metaClass->typeEntry()->isValue() || metaClass->typeEntry()->isSmartPointer()) {
+        s << INDENT << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
+            << ", METH_NOARGS}," << endl;
+    }
     s << INDENT << '{' << NULL_PTR << ", " << NULL_PTR << "} // Sentinel" << endl;
     s << "};" << endl << endl;
 
@@ -1157,11 +1159,12 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
     }
     QString code;
     QTextStream c(&code);
-    c << INDENT << "*((" << cppTypeName << "*)cppOut) = ";
+    c << INDENT << "*reinterpret_cast<" << cppTypeName << "*>(cppOut) =\n"
+        << INDENT << "    ";
     if (enumType->isFlags())
-        c << cppTypeName << "(QFlag((int)PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject*>(pyIn))))";
+        c << cppTypeName << "(QFlag(int(PySide::QFlags::getValue(reinterpret_cast<PySideQFlagsObject*>(pyIn)))))";
     else
-        c << "(" << cppTypeName << ") Shiboken::Enum::getValue(pyIn)";
+        c << "static_cast<" << cppTypeName << ">(Shiboken::Enum::getValue(pyIn))";
     c << ';' << endl;
     writePythonToCppFunction(s, code, typeName, typeName);
 
@@ -1174,11 +1177,12 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
         << cppTypeName << " *>(cppIn));" << endl;
     c << INDENT;
     c << "return ";
-    if (enumType->isFlags())
-        c << "reinterpret_cast<PyObject*>(PySide::QFlags::newObject(castCppIn, " << enumPythonType << "))";
-
-    else
+    if (enumType->isFlags()) {
+        c << "reinterpret_cast<PyObject*>(PySide::QFlags::newObject(castCppIn, "
+            << enumPythonType << "))";
+    } else {
         c << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn)";
+    }
     c << ';' << endl;
     writeCppToPythonFunction(s, code, typeName, typeName);
     s << endl;
@@ -1196,8 +1200,9 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
 
     code.clear();
     cppTypeName = getFullTypeName(flags).trimmed();
-    c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
-    c << "(QFlag((int)Shiboken::Enum::getValue(pyIn)));" << endl;
+    c << INDENT << "*reinterpret_cast<" << cppTypeName << "*>(cppOut) =\n"
+      << INDENT << "    " << cppTypeName
+      << "(QFlag(int(Shiboken::Enum::getValue(pyIn))));" << endl;
 
     QString flagsTypeName = fixedCppTypeName(flags);
     writePythonToCppFunction(s, code, typeName, flagsTypeName);
@@ -1205,9 +1210,9 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream& s, const TypeEntry* 
 
     code.clear();
     c << INDENT << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));" << endl;
-    c << INDENT << "*((" << cppTypeName << "*)cppOut) = " << cppTypeName;
-    c << "(QFlag((int)PyLong_AsLong(pyLong.object())));" << endl;
-
+    c << INDENT << "*reinterpret_cast<" << cppTypeName << "*>(cppOut) =\n"
+      << INDENT << "    " << cppTypeName
+      << "(QFlag(int(PyLong_AsLong(pyLong.object()))));" << endl;
     // PYSIDE-898: Include an additional condition to detect if the type of the
     // enum corresponds to the object that is being evaluated.
     // Using only `PyNumber_Check(...)` is too permissive,
@@ -1257,7 +1262,8 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     writePythonToCppFunction(s, code, sourceTypeName, targetTypeName);
 
     // "Is convertible" function for the Python object to C++ pointer conversion.
-    QString pyTypeCheck = QStringLiteral("PyObject_TypeCheck(pyIn, (PyTypeObject*)%1)").arg(cpythonType);
+    const QString pyTypeCheck = QLatin1String("PyObject_TypeCheck(pyIn, reinterpret_cast<PyTypeObject*>(")
+        + cpythonType + QLatin1String("))");
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, pyTypeCheck, QString(), true);
     s << endl;
 
@@ -1266,9 +1272,10 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     code.clear();
     if (usePySideExtensions() && metaClass->isQObject())
     {
-        c << INDENT << "return PySide::getWrapperForQObject((" << typeName << "*)cppIn, " << cpythonType << ");" << endl;
+        c << INDENT << "return PySide::getWrapperForQObject(reinterpret_cast<"
+            << typeName << "*>(const_cast<void*>(cppIn)), " << cpythonType << ");" << endl;
     } else {
-        c << INDENT << "PyObject* pyOut = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(cppIn);" << endl;
+        c << INDENT << "auto pyOut = reinterpret_cast<PyObject*>(Shiboken::BindingManager::instance().retrieveWrapper(cppIn));" << endl;
         c << INDENT << "if (pyOut) {" << endl;
         {
             Indentation indent(INDENT);
@@ -1316,8 +1323,9 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     else
         computedWrapperName = wrapperName(classContext.preciseType());
 
-    c << INDENT << "return Shiboken::Object::newObject(" << cpythonType << ", new ::" << computedWrapperName;
-    c << "(*((" << typeName << "*)cppIn)), true, true);";
+    c << INDENT << "return Shiboken::Object::newObject(" << cpythonType
+        << ", new ::" << computedWrapperName << "(*reinterpret_cast<const "
+        << typeName << "*>(cppIn)), true, true);";
     writeCppToPythonFunction(s, code, sourceTypeName, targetTypeName);
     s << endl;
 
@@ -1338,7 +1346,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     else
         wrappedCPtrExpression = cpythonWrapperCPtr(classContext.preciseType(), pyInVariable);
 
-    c << INDENT << "*((" << typeName << "*)cppOut) = *"
+    c << INDENT << "*reinterpret_cast<" << typeName << "*>(cppOut) = *"
         << wrappedCPtrExpression << ';';
     writePythonToCppFunction(s, code, sourceTypeName, targetTypeName);
 
@@ -2778,7 +2786,8 @@ void CppGenerator::writeCppToPythonFunction(QTextStream& s, const QString& code,
 
 static void replaceCppToPythonVariables(QString& code, const QString& typeName)
 {
-    code.prepend(QString::fromLatin1("%1& cppInRef = *((%1*)cppIn);\n").arg(typeName));
+    code.prepend(QLatin1String("auto &cppInRef = *reinterpret_cast<")
+                 + typeName + QLatin1String("*>(const_cast<void *>(cppIn));\n"));
     code.replace(QLatin1String("%INTYPE"), typeName);
     code.replace(QLatin1String("%OUTTYPE"), QLatin1String("PyObject*"));
     code.replace(QLatin1String("%in"), QLatin1String("cppInRef"));
@@ -2869,8 +2878,9 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream& s,
         conversion = QLatin1Char('*') + cpythonWrapperCPtr(sourceType->typeEntry(), QLatin1String("pyIn"));
     if (!preConversion.isEmpty())
         c << INDENT << preConversion << endl;
-    c << INDENT << QString::fromLatin1("*((%1*)cppOut) = %1(%2);")
-                            .arg(getFullTypeName(targetType->typeEntry()), conversion);
+    const QString fullTypeName = getFullTypeName(targetType->typeEntry());
+    c << INDENT << "*reinterpret_cast<" << fullTypeName << "*>(cppOut) = "
+        << fullTypeName << '(' << conversion << ");";
     QString sourceTypeName = fixedCppTypeName(sourceType);
     QString targetTypeName = fixedCppTypeName(targetType);
     writePythonToCppFunction(s, code, sourceTypeName, targetTypeName);
@@ -2896,7 +2906,8 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream& s,
     code.replace(QLatin1String("%INTYPE"), inType);
     code.replace(QLatin1String("%OUTTYPE"), targetType->qualifiedCppName());
     code.replace(QLatin1String("%in"), QLatin1String("pyIn"));
-    code.replace(QLatin1String("%out"), QString::fromLatin1("*((%1*)cppOut)").arg(getFullTypeName(targetType)));
+    code.replace(QLatin1String("%out"),
+                 QLatin1String("*reinterpret_cast<") + getFullTypeName(targetType) + QLatin1String("*>(cppOut)"));
 
     QString sourceTypeName = fixedCppTypeName(toNative);
     QString targetTypeName = fixedCppTypeName(targetType);
@@ -2949,7 +2960,8 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream& s, const Abs
     QString cppTypeName = getFullTypeNameWithoutModifiers(containerType);
     QString code;
     QTextStream c(&code);
-    c << INDENT << QString::fromLatin1("%1& cppOutRef = *((%1*)cppOut);").arg(cppTypeName) << endl;
+    c << INDENT << "auto &cppOutRef = *reinterpret_cast<"
+        << cppTypeName << "*>(cppOut);\n";
     code.append(toCppConversions.constFirst()->conversion());
     for (int i = 0; i < containerType->instantiations().count(); ++i) {
         const AbstractMetaType* type = containerType->instantiations().at(i);
@@ -3314,8 +3326,12 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
 
                         mc << func->originalName();
                     } else {
-                        if (!func->isStatic())
-                            mc << "((::" << wrapperName(func->ownerClass()) << "*) " << CPP_SELF_VAR << ")->";
+                        if (!func->isStatic()) {
+                            const auto *owner = func->ownerClass();
+                            const bool directInheritance = context.metaClass() == owner;
+                            mc << (directInheritance ? "static_cast" : "reinterpret_cast")
+                                << "<::" << wrapperName(owner) << "*>(" << CPP_SELF_VAR << ")->";
+                        }
 
                         if (!func->isAbstract())
                             mc << (func->isProtected() ? wrapperName(func->ownerClass()) :
@@ -4225,9 +4241,9 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
 
     QString cppField;
     if (avoidProtectedHack() && metaField->isProtected()) {
-        cppField = QString::fromLatin1("((%1*)%2)->%3()")
-                .arg(wrapperName(metaField->enclosingClass()), QLatin1String(CPP_SELF_VAR),
-                     protectedFieldGetterName(metaField));
+        QTextStream(&cppField) << "static_cast<"
+            << wrapperName(metaField->enclosingClass()) << "*>("
+            << CPP_SELF_VAR << ")->" << protectedFieldGetterName(metaField) << "()";
     } else {
         cppField = QLatin1String(CPP_SELF_VAR) + QLatin1String("->") + metaField->name();
         if (newWrapperSameObject) {
@@ -4270,7 +4286,8 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
         s << INDENT << "else if (Shiboken::BindingManager::instance().hasWrapper(" << cppField << ")) {" << "\n";
         {
             Indentation indent(INDENT);
-            s << INDENT << "pyOut = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(" << cppField << ");" << "\n";
+            s << INDENT << "pyOut = reinterpret_cast<PyObject*>(Shiboken::BindingManager::instance().retrieveWrapper("
+                << cppField << "));" << "\n";
             s << INDENT << "Py_IncRef(pyOut);" << "\n";
             s << INDENT << "return pyOut;" << "\n";
         }
@@ -4329,9 +4346,9 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
         s << getFullTypeNameWithoutModifiers(fieldType);
         s << (fieldType->indirections() == 1 ? "*" : "") << " cppOut;" << endl;
         s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);" << endl;
-        s << INDENT << QString::fromLatin1("((%1*)%2)->%3(cppOut)")
-                .arg(wrapperName(metaField->enclosingClass()),
-                     QLatin1String(CPP_SELF_VAR), protectedFieldSetterName(metaField));
+        s << INDENT << "static_cast<" << wrapperName(metaField->enclosingClass())
+            << "*>(" << CPP_SELF_VAR << ")->" << protectedFieldSetterName(metaField)
+            << "(cppOut)";
     } else if (isCppIntegralPrimitive(fieldType) || fieldType->typeEntry()->isEnum() || fieldType->typeEntry()->isFlags()) {
         s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ';' << endl;
         s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);" << endl;
@@ -4485,7 +4502,8 @@ void CppGenerator::writeMethodDefinitionEntry(QTextStream& s, const AbstractMeta
     int min = overloadData.minArgs();
     int max = overloadData.maxArgs();
 
-    s << '"' << func->name() << "\", (PyCFunction)" << cpythonFunctionName(func) << ", ";
+    s << '"' << func->name() << "\", reinterpret_cast<PyCFunction>("
+        << cpythonFunctionName(func) << "), ";
     if ((min == max) && (max < 2) && !usePyArgs) {
         if (max == 0)
             s << "METH_NOARGS";
@@ -4812,11 +4830,15 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream& s, const AbstractMetaEn
     AbstractMetaType* flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << "::" << flagsEntry->originalName() << " cppResult, " << CPP_SELF_VAR << ", cppArg;" << endl;
     s << "#ifdef IS_PY3K" << endl;
-    s << INDENT << CPP_SELF_VAR << " = (::" << flagsEntry->originalName() << ")(int)PyLong_AsLong(self);" << endl;
-    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")(int)PyLong_AsLong(" << PYTHON_ARG << ");" << endl;
+    s << INDENT << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
+        << ">(int(PyLong_AsLong(self)));" << endl;
+    s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName() << ">(int(PyLong_AsLong("
+        << PYTHON_ARG << ")));" << endl;
     s << "#else" << endl;
-    s << INDENT << CPP_SELF_VAR << " = (::" << flagsEntry->originalName() << ")(int)PyInt_AsLong(self);" << endl;
-    s << INDENT << "cppArg = (" << flagsEntry->originalName() << ")(int)PyInt_AsLong(" << PYTHON_ARG << ");" << endl;
+    s << INDENT << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
+        << ">(int(PyInt_AsLong(self)));" << endl;
+    s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName()
+        << ">(int(PyInt_AsLong(" << PYTHON_ARG << ")));" << endl;
     s << "#endif" << endl << endl;
     s << INDENT << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;" << endl;
     s << INDENT << "return ";
@@ -4895,15 +4917,16 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     QString pyTypeBasesVariable = chopType(pyTypeName) + QLatin1String("_Type_bases");
     const AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
     if (metaClass->baseClassNames().size() > 1) {
-        s << INDENT << "PyObject* " << pyTypeBasesVariable << " = PyTuple_Pack(" << baseClasses.size() << ',' << endl;
-        QStringList bases;
-        for (const AbstractMetaClass *base : baseClasses)
-            bases << QLatin1String("(PyObject*)") + cpythonTypeNameExt(base->typeEntry());
+        s << INDENT << "PyObject* " << pyTypeBasesVariable
+            << " = PyTuple_Pack(" << baseClasses.size() << ',' << endl;
         Indentation indent(INDENT);
-        QString separator;
-        QTextStream sep(&separator);
-        sep << "," << endl << INDENT;
-        s << INDENT << bases.join(separator) << ");" << endl << endl;
+        for (int i = 0, size = baseClasses.size(); i < size; ++i) {
+            if (i)
+                s << "," << endl;
+            s << INDENT << "reinterpret_cast<PyObject*>("
+                << cpythonTypeNameExt(baseClasses.at(i)->typeEntry()) << ')';
+        }
+        s << ");" << endl << endl;
     }
 
     // Create type and insert it in the module or enclosing class.
