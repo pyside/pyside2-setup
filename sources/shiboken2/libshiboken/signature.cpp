@@ -75,6 +75,7 @@ typedef struct safe_globals_struc {
     PyObject *sigparse_func;
     PyObject *createsig_func;
     PyObject *seterror_argument_func;
+    PyObject *make_helptext_func;
 } safe_globals_struc, *safe_globals;
 
 static safe_globals pyside_globals = 0;
@@ -136,13 +137,15 @@ _get_class_of_cf(PyObject *ob_cf)
             // This must be an overloaded function that we handled special.
             Shiboken::AutoDecRef special(Py_BuildValue("(Os)", ob_cf, "overload"));
             selftype = PyDict_GetItem(pyside_globals->map_dict, special);
+            if (selftype == nullptr) {
+                // This is probably a module function. We will return type(None).
+                selftype = Py_None;
+            }
         }
     }
-    assert(selftype);
 
     PyObject *typemod = (PyType_Check(selftype) || PyModule_Check(selftype))
                         ? selftype : (PyObject *)Py_TYPE(selftype);
-    // do we support module functions?
     Py_INCREF(typemod);
     return typemod;
 }
@@ -514,6 +517,9 @@ init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
     p->seterror_argument_func = PyObject_GetAttrString(p->helper_module, "seterror_argument");
     if (p->seterror_argument_func == NULL)
         goto error;
+    p->make_helptext_func = PyObject_GetAttrString(p->helper_module, "make_helptext");
+    if (p->make_helptext_func == NULL)
+        goto error;
     return 0;
 
 error:
@@ -524,20 +530,50 @@ error:
 }
 
 static int
-add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
+_fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_gsp)
 {
+    PyGetSetDef *gsp = type->tp_getset;
+    if (gsp != nullptr) {
+        for (; gsp->name != NULL; gsp++) {
+            if (strcmp(gsp->name, name) == 0) {
+                new_gsp->set = gsp->set;
+                new_gsp->doc = gsp->doc;
+                new_gsp->closure = gsp->closure;
+                return 1;
+            }
+        }
+    }
+    // staticmethod has just a __doc__ in the class
+    assert(strcmp(type->tp_name, "staticmethod") == 0);
+    return 0;
+}
+
+static int
+add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **old_descr)
+{
+    /*
+     * This function is used to assign a new __signature__ attribute,
+     * and also to override a __doc__ attribute.
+     */
     assert(PyType_Check(type));
     PyType_Ready(type);
     PyObject *dict = type->tp_dict;
     for (; gsp->name != NULL; gsp++) {
-        if (PyDict_GetItemString(dict, gsp->name))
-            continue;
+        PyObject *have_descr = PyDict_GetItemString(dict, gsp->name);
+        if (have_descr != nullptr) {
+            assert(strcmp(gsp->name, "__doc__") == 0);
+            Py_INCREF(have_descr);
+            *old_descr = have_descr;
+            if (!_fixup_getset(type, gsp->name, gsp))
+                continue;
+        }
         Shiboken::AutoDecRef descr(PyDescr_NewGetSet(type, gsp));
         if (descr.isNull())
             return -1;
         if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
             return -1;
     }
+    PyType_Modified(type);
     return 0;
 }
 
@@ -553,28 +589,91 @@ add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp)
 // Please note that in fact we are modifying 'type', the metaclass of all
 // objects, because we add new functionality.
 //
+// Addendum 2019-01-12: We now also compute a docstring from the signature.
+//
+
+// keep the original __doc__ functions
+static PyObject *old_cf_doc_descr = 0;
+static PyObject *old_sm_doc_descr = 0;
+static PyObject *old_md_doc_descr = 0;
+static PyObject *old_tp_doc_descr = 0;
+static PyObject *old_wd_doc_descr = 0;
+
+static int handle_doc_in_progress = 0;
+
+static PyObject *
+handle_doc(PyObject *ob, PyObject *old_descr)
+{
+    init_module_1();
+    init_module_2();
+    Shiboken::AutoDecRef ob_type(GetClassOfFunc(ob));
+    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(ob_type.object());
+    if (handle_doc_in_progress || strncmp(type->tp_name, "PySide2.", 8) != 0)
+        return PyObject_CallMethod(old_descr, const_cast<char *>("__get__"), const_cast<char *>("(O)"), ob);
+    handle_doc_in_progress++;
+    PyObject *res = PyObject_CallFunction(
+                        pyside_globals->make_helptext_func,
+                        const_cast<char *>("(O)"), ob);
+    handle_doc_in_progress--;
+    if (res == nullptr) {
+        PyErr_Print();
+        Py_FatalError("handle_doc did not receive a result");
+    }
+    return res;
+}
+
+static PyObject *
+pyside_cf_get___doc__(PyObject *cf) {
+    return handle_doc(cf, old_cf_doc_descr);
+}
+
+static PyObject *
+pyside_sm_get___doc__(PyObject *sm) {
+    return handle_doc(sm, old_sm_doc_descr);
+}
+
+static PyObject *
+pyside_md_get___doc__(PyObject *md) {
+    return handle_doc(md, old_md_doc_descr);
+}
+
+static PyObject *
+pyside_tp_get___doc__(PyObject *tp) {
+    return handle_doc(tp, old_tp_doc_descr);
+}
+
+static PyObject *
+pyside_wd_get___doc__(PyObject *wd) {
+    return handle_doc(wd, old_wd_doc_descr);
+}
+
 static PyGetSetDef new_PyCFunction_getsets[] = {
-    {(char *) "__signature__", (getter)pyside_cf_get___signature__},
+    {const_cast<char *>("__signature__"), (getter)pyside_cf_get___signature__},
+    {const_cast<char *>("__doc__"), (getter)pyside_cf_get___doc__},
     {0}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
-    {(char *) "__signature__", (getter)pyside_sm_get___signature__},
+    {const_cast<char *>("__signature__"), (getter)pyside_sm_get___signature__},
+    {const_cast<char *>("__doc__"), (getter)pyside_sm_get___doc__},
     {0}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
-    {(char *) "__signature__", (getter)pyside_md_get___signature__},
+    {const_cast<char *>("__signature__"), (getter)pyside_md_get___signature__},
+    {const_cast<char *>("__doc__"), (getter)pyside_md_get___doc__},
     {0}
 };
 
 static PyGetSetDef new_PyType_getsets[] = {
-    {(char *) "__signature__", (getter)pyside_tp_get___signature__},
+    {const_cast<char *>("__signature__"), (getter)pyside_tp_get___signature__},
+    {const_cast<char *>("__doc__"), (getter)pyside_tp_get___doc__},
     {0}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
-    {(char *) "__signature__", (getter)pyside_wd_get___signature__},
+    {const_cast<char *>("__signature__"), (getter)pyside_wd_get___signature__},
+    {const_cast<char *>("__doc__"), (getter)pyside_wd_get___doc__},
     {0}
 };
 
@@ -655,11 +754,11 @@ PySide_PatchTypes(void)
         Shiboken::AutoDecRef wd(PyObject_GetAttrString((PyObject *)Py_TYPE(Py_True), "__add__"));   // wrapper-descriptor
         if (md.isNull() || wd.isNull()
             || PyType_Ready(Py_TYPE(md)) < 0
-            || add_more_getsets(PepMethodDescr_TypePtr, new_PyMethodDescr_getsets) < 0
-            || add_more_getsets(&PyCFunction_Type, new_PyCFunction_getsets) < 0
-            || add_more_getsets(PepStaticMethod_TypePtr, new_PyStaticMethod_getsets) < 0
-            || add_more_getsets(&PyType_Type, new_PyType_getsets) < 0
-            || add_more_getsets(Py_TYPE(wd), new_PyWrapperDescr_getsets) < 0
+            || add_more_getsets(PepMethodDescr_TypePtr,  new_PyMethodDescr_getsets,  &old_md_doc_descr) < 0
+            || add_more_getsets(&PyCFunction_Type,       new_PyCFunction_getsets,    &old_cf_doc_descr) < 0
+            || add_more_getsets(PepStaticMethod_TypePtr, new_PyStaticMethod_getsets, &old_sm_doc_descr) < 0
+            || add_more_getsets(&PyType_Type,            new_PyType_getsets,         &old_tp_doc_descr) < 0
+            || add_more_getsets(Py_TYPE(wd),             new_PyWrapperDescr_getsets, &old_wd_doc_descr) < 0
             )
             return -1;
 #ifndef _WIN32

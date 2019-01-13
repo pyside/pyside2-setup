@@ -121,4 +121,20 @@ def seterror_argument(args, func_name):
     # We don't raise the error here, to avoid the loader in the traceback.
     return TypeError, msg
 
+
+def make_helptext(func):
+    existing_doc = func.__doc__
+    sigs = get_signature(func)
+    if not sigs:
+        return existing_doc
+    if type(sigs) != list:
+        sigs = [sigs]
+    try:
+        func_name = func.__name__
+    except AttribureError:
+        func_name = func.__func__.__name__
+    sigtext = "\n".join(func_name + str(sig) for sig in sigs)
+    msg = sigtext + "\n\n" + existing_doc if existing_doc else sigtext
+    return msg
+
 # end of file
