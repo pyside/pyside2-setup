@@ -260,6 +260,13 @@
         %PYARG_0 = Shiboken::String::fromCString(qPrintable(format));
     </template>
 
+    <template name="return_internal_pointer">
+        %PYARG_0 = reinterpret_cast&lt;PyObject*>(%CPPSELF.%FUNCTION_NAME());
+        if (!%PYARG_0)
+            %PYARG_0 = Py_None;
+        Py_INCREF(%PYARG_0);
+    </template>
+
     <!-- Helpers for modifying "bool nativeEventFilter(QByteArray, void*, long *result)"
          to return a tuple of bool,long -->
     <template name="return_native_eventfilter_conversion_variables">

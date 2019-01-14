@@ -47,6 +47,7 @@ extern "C"
 
 LIBSHIBOKEN_API int SbkSpecial_Type_Ready(PyObject *, PyTypeObject *, const char *); //WS
 LIBSHIBOKEN_API void FinishSignatureInitialization(PyObject *, const char *);
+LIBSHIBOKEN_API void SetError_Argument(PyObject *, const char *);
 
 } // extern "C"
 

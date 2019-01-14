@@ -203,6 +203,7 @@ def check_module(mod):
 
 update_mapping = Reloader().update
 type_map = {}
+namespace = globals()  # our module's __dict__
 
 
 def init_Shiboken():

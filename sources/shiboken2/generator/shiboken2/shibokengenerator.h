@@ -33,6 +33,7 @@ extern const char *CPP_ARG;
 extern const char *CPP_ARG_REMOVED;
 extern const char *CPP_RETURN_VAR;
 extern const char *CPP_SELF_VAR;
+extern const char *NULL_PTR;
 extern const char *PYTHON_ARG;
 extern const char *PYTHON_ARGS;
 extern const char *PYTHON_OVERRIDE_VAR;
@@ -200,7 +201,7 @@ protected:
     void writeToCppConversion(QTextStream& s, const AbstractMetaType* type, const AbstractMetaClass* context, const QString& inArgName, const QString& outArgName);
     void writeToCppConversion(QTextStream& s, const AbstractMetaClass* metaClass, const QString& inArgName, const QString& outArgName);
 
-    /// Returns true if the argument is a pointer that rejects NULL values.
+    /// Returns true if the argument is a pointer that rejects nullptr values.
     bool shouldRejectNullPointerArgument(const AbstractMetaFunction* func, int argIndex);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
@@ -208,7 +209,7 @@ protected:
 
     /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
     static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList& enumList, const AbstractMetaClass* metaClass);
-    /// Returns the enclosing class for an enum, or NULL if it should be global.
+    /// Returns the enclosing class for an enum, or nullptr if it should be global.
     const AbstractMetaClass* getProperEnclosingClassForEnum(const AbstractMetaEnum* metaEnum);
 
     QString wrapperName(const AbstractMetaClass* metaClass) const;
@@ -299,7 +300,7 @@ protected:
      *  \param type     A string representing the type to be discovered.
      *  \param metaType A pointer to an AbstractMetaType pointer, to where write a new meta type object
      *                  if one is produced from the \p type string. This object must be deallocated by
-     *                  the caller. It will set the target variable to NULL, is \p type is a Python type.
+     *                  the caller. It will set the target variable to nullptr, is \p type is a Python type.
      *  \return A custom check if \p type is a custom type, or an empty string if \p metaType
      *          receives an existing type object.
      */
@@ -377,9 +378,10 @@ protected:
 
     /**
      *   Builds an AbstractMetaType object from a QString.
-     *   Returns NULL if no type could be built from the string.
+     *   Returns nullptr if no type could be built from the string.
      *   \param typeSignature The string describing the type to be built.
-     *   \return A new AbstractMetaType object that must be deleted by the caller, or a NULL pointer in case of failure.
+     *   \return A new AbstractMetaType object that must be deleted by the caller,
+     *           or a nullptr pointer in case of failure.
      */
     AbstractMetaType *buildAbstractMetaTypeFromString(QString typeSignature,
                                                       QString *errorMessage = nullptr);

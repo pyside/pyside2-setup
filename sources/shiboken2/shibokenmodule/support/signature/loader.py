@@ -181,6 +181,8 @@ with ensure_import_support():
         mapping = sbk_mapping
         mapping.__name__ = "mapping"
     put_into_loader_package(mapping)
+    from support.signature import errorhandler
+    put_into_loader_package(errorhandler)
     from support.signature import layout
     put_into_loader_package(layout)
     from support.signature.lib import enum_sig

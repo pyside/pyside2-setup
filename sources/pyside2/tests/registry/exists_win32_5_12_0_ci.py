@@ -159,7 +159,7 @@ if "PySide2.QtCore" in sys.modules:
         "QAbstractItemModel.changePersistentIndexList": ('typing.List', 'typing.List'),
         "QAbstractItemModel.checkIndex": ('PySide2.QtCore.QModelIndex', 'PySide2.QtCore.QAbstractItemModel.CheckIndexOptions'),
         "QAbstractItemModel.columnCount": ('PySide2.QtCore.QModelIndex',),
-        "QAbstractItemModel.createIndex": ('int', 'int', 'int'),
+        "QAbstractItemModel.createIndex": [('int', 'int', 'int'), ('int', 'int', 'object')],
         "QAbstractItemModel.data": ('PySide2.QtCore.QModelIndex', 'int'),
         "QAbstractItemModel.decodeData": ('int', 'int', 'PySide2.QtCore.QModelIndex', 'PySide2.QtCore.QDataStream'),
         "QAbstractItemModel.dropMimeData": ('PySide2.QtCore.QMimeData', 'PySide2.QtCore.Qt.DropAction', 'int', 'int', 'PySide2.QtCore.QModelIndex'),
@@ -15335,7 +15335,7 @@ if "PySide2.QtHelp" in sys.modules:
         "QHelpEngineCore.unregisterDocumentation": ('str',),
 
     # class PySide2.QtHelp.QHelpIndexModel:
-        "QHelpIndexModel.createIndex": [('int', 'int', 'int'), ('str',)],
+        "QHelpIndexModel.createIndex": [('int', 'int', 'int'), ('int', 'int', 'object'), ('str',)],
         "QHelpIndexModel.filter": ('str', 'str'),
         "QHelpIndexModel.isCreatingIndex": (),
         "QHelpIndexModel.linksForKeyword": ('str',),

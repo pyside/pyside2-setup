@@ -53,6 +53,8 @@ static inline QString titleAttribute() { return QStringLiteral("title"); }
 static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
 static inline QString briefAttribute() { return QStringLiteral("brief"); }
 
+static inline QString none() { return QStringLiteral("None"); }
+
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
     // Constructors go to separate section
@@ -1787,11 +1789,13 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
                        || defValue.startsWith(QLatin1String("QList"))) {
                 defValue = QLatin1String("list()");
             } else if (defValue == QLatin1String("QVariant()")) {
-                defValue = QLatin1String("None");
+                defValue = none();
             } else {
                 defValue.replace(QLatin1String("::"), QLatin1String("."));
-                if (defValue == QLatin1String("0") && (arg->type()->isQObject() || arg->type()->isObject()))
-                    defValue = QLatin1String("None");
+                if (defValue == QLatin1String("nullptr"))
+                    defValue = none();
+                else if (defValue == QLatin1String("0") && (arg->type()->isQObject() || arg->type()->isObject()))
+                    defValue = none();
             }
             ret += QLatin1Char('=') + defValue;
         }

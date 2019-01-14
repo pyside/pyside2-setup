@@ -43,13 +43,15 @@ class DecisorTest(unittest.TestCase):
         This can trigger the bug #262, which means using an argument
         not provided by the user.'''
         pt = Point()
-        self.assertRaises(TypeError, SampleNamespace.forceDecisorSideA, pt)
+        # This exception may move from a TypeError to a ValueError.
+        self.assertRaises((TypeError, ValueError), SampleNamespace.forceDecisorSideA, pt)
 
     def testCallWithInvalidParametersSideB(self):
         '''Same as the previous test, but with an integer as first argument,
         just to complicate things for the overload method decisor.'''
         pt = Point()
-        self.assertRaises(TypeError, SampleNamespace.forceDecisorSideB, 1, pt)
+        # This exception may move from a TypeError to a ValueError.
+        self.assertRaises((TypeError, ValueError), SampleNamespace.forceDecisorSideB, 1, pt)
 
     def testDecideCallWithInheritance(self):
         '''Call methods overloads that receive parent and inheritor classes' instances.'''

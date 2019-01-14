@@ -59,7 +59,7 @@ void TestCodeInjections::testReadFile()
 
     const char* cppCode ="struct A {};\n";
     int argc = 0;
-    char *argv[] = {NULL};
+    char *argv[] = {nullptr};
     QCoreApplication app(argc, argv);
 
     QString attribute = QLatin1String("file='") + filePath + QLatin1Char('\'');

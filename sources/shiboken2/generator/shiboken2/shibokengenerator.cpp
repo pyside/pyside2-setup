@@ -41,7 +41,6 @@
 #include <limits>
 #include <memory>
 
-static const char NULL_VALUE[] = "NULL";
 static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
 static const char PARENT_CTOR_HEURISTIC[] = "enable-parent-ctor-heuristic";
 static const char RETURN_VALUE_HEURISTIC[] = "enable-return-value-heuristic";
@@ -53,6 +52,7 @@ const char *CPP_ARG = "cppArg";
 const char *CPP_ARG_REMOVED = "removed_cppArg";
 const char *CPP_RETURN_VAR = "cppResult";
 const char *CPP_SELF_VAR = "cppSelf";
+const char *NULL_PTR = "nullptr";
 const char *PYTHON_ARG = "pyArg";
 const char *PYTHON_ARGS = "pyArgs";
 const char *PYTHON_OVERRIDE_VAR = "pyOverride";
@@ -151,10 +151,10 @@ ShibokenGenerator::~ShibokenGenerator() = default;
 
 void ShibokenGenerator::clearTpFuncs()
 {
-    m_tpFuncs.insert(QLatin1String("__str__"), QLatin1String("0"));
-    m_tpFuncs.insert(QLatin1String("__repr__"), QLatin1String("0"));
-    m_tpFuncs.insert(QLatin1String("__iter__"), QLatin1String("0"));
-    m_tpFuncs.insert(QLatin1String("__next__"), QLatin1String("0"));
+    m_tpFuncs.insert(QLatin1String("__str__"), QString());
+    m_tpFuncs.insert(QLatin1String("__repr__"), QString());
+    m_tpFuncs.insert(QLatin1String("__iter__"), QString());
+    m_tpFuncs.insert(QLatin1String("__next__"), QString());
 }
 
 void ShibokenGenerator::initPrimitiveTypesCorrespondences()
@@ -1396,7 +1396,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
     {
         QString default_value = argument->originalDefaultValueExpression();
         if (default_value == QLatin1String("NULL"))
-            default_value = QLatin1String(NULL_VALUE);
+            default_value = QLatin1String(NULL_PTR);
 
         //WORKAROUND: fix this please
         if (default_value.startsWith(QLatin1String("new ")))

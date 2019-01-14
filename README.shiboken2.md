@@ -1,7 +1,7 @@
-# shiboken2 module
+# Shiboken2 module
 
-The purpose of the shiboken2 Python module is to access information
-related to the binding generation that could be used to integrate
+The purpose of the [shiboken2 Python module](https://wiki.qt.io/Qt_for_Python/Shiboken)
+is to access information related to the binding generation that could be used to integrate
 C++ programs to Python, or even to get useful information to debug
 an application.
 
