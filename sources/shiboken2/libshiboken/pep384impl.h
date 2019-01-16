@@ -113,7 +113,7 @@ typedef struct _typeobject {
     void *X26; // iternextfunc tp_iternext;
     struct PyMethodDef *tp_methods;
     void *X28; // struct PyMemberDef *tp_members;
-    void *X29; // struct PyGetSetDef *tp_getset;
+    struct PyGetSetDef *tp_getset;
     struct _typeobject *tp_base;
     PyObject *tp_dict;
     descrgetfunc tp_descr_get;

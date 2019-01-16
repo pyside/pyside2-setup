@@ -201,4 +201,8 @@ def create_signature(props, key):
 def seterror_argument(args, func_name):
     return errorhandler.seterror_argument(args, func_name)
 
+# name used in signature.cpp
+def make_helptext(func):
+    return errorhandler.make_helptext(func)
+
 # end of file

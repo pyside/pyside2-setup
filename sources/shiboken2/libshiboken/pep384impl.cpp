@@ -77,17 +77,22 @@ static struct PyMethodDef probe_methoddef[] = {
     {0}
 };
 
+static PyGetSetDef probe_getseters[] = {
+    {0}  /* Sentinel */
+};
+
 #define probe_tp_call       make_dummy(1)
 #define probe_tp_str        make_dummy(2)
 #define probe_tp_traverse   make_dummy(3)
 #define probe_tp_clear      make_dummy(4)
 #define probe_tp_methods    probe_methoddef
-#define probe_tp_descr_get  make_dummy(6)
-#define probe_tp_init       make_dummy(7)
-#define probe_tp_alloc      make_dummy(8)
-#define probe_tp_new        make_dummy(9)
-#define probe_tp_free       make_dummy(10)
-#define probe_tp_is_gc      make_dummy(11)
+#define probe_tp_getset     probe_getseters
+#define probe_tp_descr_get  make_dummy(7)
+#define probe_tp_init       make_dummy(8)
+#define probe_tp_alloc      make_dummy(9)
+#define probe_tp_new        make_dummy(10)
+#define probe_tp_free       make_dummy(11)
+#define probe_tp_is_gc      make_dummy(12)
 
 #define probe_tp_name       "type.probe"
 #define probe_tp_basicsize  make_dummy_int(42)
@@ -98,6 +103,7 @@ static PyType_Slot typeprobe_slots[] = {
     {Py_tp_traverse,    probe_tp_traverse},
     {Py_tp_clear,       probe_tp_clear},
     {Py_tp_methods,     probe_tp_methods},
+    {Py_tp_getset,      probe_tp_getset},
     {Py_tp_descr_get,   probe_tp_descr_get},
     {Py_tp_init,        probe_tp_init},
     {Py_tp_alloc,       probe_tp_alloc},
@@ -138,6 +144,7 @@ check_PyTypeObject_valid(void)
         || probe_tp_clear           != check->tp_clear
         || probe_tp_weakrefoffset   != typetype->tp_weaklistoffset
         || probe_tp_methods         != check->tp_methods
+        || probe_tp_getset          != check->tp_getset
         || probe_tp_base            != typetype->tp_base
         || !PyDict_Check(check->tp_dict)
         || !PyDict_GetItemString(check->tp_dict, "dummy")

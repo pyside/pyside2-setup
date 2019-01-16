@@ -399,10 +399,9 @@ def run_process_output(args, initial_env=None):
         result.append(line.rstrip())
     return result
 
-def run_process(args, initial_env=None, redirect_stderr_to_stdout=True):
+def run_process(args, initial_env=None):
     """
     Run process until completion and return the process exit code.
-    Prints both stdout and stderr to the console.
     No output is captured.
     """
     log.info("Running process in directory {0}: command {1}".format(
@@ -415,8 +414,6 @@ def run_process(args, initial_env=None, redirect_stderr_to_stdout=True):
 
     kwargs = {}
     kwargs['env'] = initial_env
-    if redirect_stderr_to_stdout:
-        kwargs['stderr'] = subprocess.STDOUT
 
     exit_code = subprocess.call(args, **kwargs)
     return exit_code
