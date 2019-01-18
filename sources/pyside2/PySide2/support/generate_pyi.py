@@ -52,6 +52,7 @@ import io
 import re
 import subprocess
 import argparse
+import glob
 from contextlib import contextmanager
 from textwrap import dedent
 
@@ -68,6 +69,9 @@ sourcepath = os.path.splitext(__file__)[0] + ".py"
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
 
 indent = " " * 4
+is_py3 = sys.version_info[0] == 3
+is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
+
 
 class Writer(object):
     def __init__(self, outfile):
@@ -248,7 +252,7 @@ def generate_pyi(import_name, outpath, options):
             else:
                 wr.print(line)
     logger.info("Generated: {outfilepath}".format(**locals()))
-    if sys.version_info[0] == 3:
+    if is_py3:
         # Python 3: We can check the file directly if the syntax is ok.
         subprocess.check_output([sys.executable, outfilepath])
     return 1
@@ -295,6 +299,16 @@ def generate_all_pyi(outpath, options):
     lockdir = os.path.join(outpath, "generate_pyi.lockfile")
     with single_process(lockdir) as locked:
         if locked:
+            if is_ci:
+                # When COIN is running, we sometimes get racing conditions with
+                # the windows manifest tool which wants access to a module that
+                # we already have imported. But when we wait until all binaries
+                # are created, that cannot happen, because we are then the last
+                # process, and the tool has already been run.
+                bin_pattern = "Qt*.pyd" if sys.platform == "win32" else "Qt*.so"
+                search = os.path.join(PySide2.__path__[0], bin_pattern)
+                if len(glob.glob(search)) < len(PySide2.__all__):
+                    return
             for mod_name in PySide2.__all__:
                 import_name = "PySide2." + mod_name
                 step = generate_pyi(import_name, outpath, options)
