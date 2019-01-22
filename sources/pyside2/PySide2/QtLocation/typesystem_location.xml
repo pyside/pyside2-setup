@@ -54,6 +54,9 @@
   </object-type>
   <value-type name="QGeoRouteSegment"/>
   <object-type name="QGeoServiceProvider">
+      <!-- Temporary workaround until qtlocation:8fbab5c949bf0fe1ec5e1e452a9c475681d7edc4 has landed -->
+      <modify-function signature="loaderError()const" remove="all"/>
+      <modify-function signature="loaderErrorString()const" remove="all"/>
       <enum-type name="Error"/>
       <enum-type name="RoutingFeature" flags="RoutingFeatures"/>
       <enum-type name="GeocodingFeature" flags="GeocodingFeatures"/>

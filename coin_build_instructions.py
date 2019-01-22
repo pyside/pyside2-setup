@@ -128,6 +128,11 @@ def run_build_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
+    # Remove some environment variables that impact cmake
+    for env_var in ['CC', 'CXX']:
+        if os.environ.get(env_var):
+            del os.environ[env_var]
+
     # Uses default python, hopefully we have python2 installed on all hosts
     # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
     if CI_HOST_OS != "Windows":
