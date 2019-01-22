@@ -87,6 +87,11 @@ def run_test_instructions():
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
+    # Remove some environment variables that impact cmake
+    for env_var in ['CC', 'CXX']:
+        if os.environ.get(env_var):
+            del os.environ[env_var]
+
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
     # We didn't build for Python 2 in win
