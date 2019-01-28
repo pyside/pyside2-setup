@@ -1367,17 +1367,21 @@ static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, cons
 }
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
-                                                                       bool *constructorRejected)
+                                                                       AbstractMetaClass::Attributes *constructorAttributes)
 {
-    *constructorRejected = false;
+    *constructorAttributes = 0;
     AbstractMetaFunctionList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
     for (const FunctionModelItem &function : scopeFunctionList) {
-        if (AbstractMetaFunction *metaFunction = traverseFunction(function))
+        if (AbstractMetaFunction *metaFunction = traverseFunction(function)) {
             result.append(metaFunction);
-        else if (function->functionType() == CodeModel::Constructor)
-            *constructorRejected = true;
+        } else if (function->functionType() == CodeModel::Constructor) {
+            auto arguments = function->arguments();
+            *constructorAttributes |= AbstractMetaAttributes::HasRejectedConstructor;
+            if (arguments.isEmpty() || arguments.constFirst()->defaultValue())
+                *constructorAttributes |= AbstractMetaAttributes::HasRejectedDefaultConstructor;
+        }
     }
     return result;
 }
@@ -1408,12 +1412,10 @@ private:
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
 {
-    bool constructorRejected = false;
+    AbstractMetaAttributes::Attributes constructorAttributes;
     const AbstractMetaFunctionList functions =
-        classFunctionList(scopeItem, &constructorRejected);
-
-    if (constructorRejected)
-        *metaClass += AbstractMetaAttributes::HasRejectedConstructor;
+        classFunctionList(scopeItem, &constructorAttributes);
+    metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
     for (AbstractMetaFunction *metaFunction : functions){
         metaFunction->setOriginalAttributes(metaFunction->attributes());

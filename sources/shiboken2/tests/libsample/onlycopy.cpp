@@ -28,16 +28,42 @@
 
 #include "onlycopy.h"
 
-OnlyCopy::OnlyCopy(const OnlyCopy& other)
+class OnlyCopyPrivate
 {
-    m_value = other.m_value;
+public:
+    explicit OnlyCopyPrivate(int v = 0) : value(v) {}
+
+    int value;
+};
+
+OnlyCopy::OnlyCopy(int value) : d(new OnlyCopyPrivate(value))
+{
+
+}
+
+OnlyCopy::OnlyCopy(OnlyCopyPrivate *dIn) : d(dIn)
+{
+}
+
+OnlyCopy::~OnlyCopy()
+{
+    delete d;
+}
+
+OnlyCopy::OnlyCopy(const OnlyCopy& other) : d(new OnlyCopyPrivate(other.value()))
+{
 }
 
 OnlyCopy&
 OnlyCopy::operator=(const OnlyCopy& other)
 {
-    m_value = other.m_value;
+    d->value = other.d->value;
     return *this;
+}
+
+int OnlyCopy::value() const
+{
+    return d->value;
 }
 
 OnlyCopy

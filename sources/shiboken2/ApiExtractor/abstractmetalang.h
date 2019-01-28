@@ -133,13 +133,14 @@ public:
         Invokable                   = 0x00040000,
 
         HasRejectedConstructor      = 0x00080000,
+        HasRejectedDefaultConstructor = 0x00100000,
 
-        FinalCppClass               = 0x00100000,
-        VirtualCppMethod            = 0x00200000,
-        OverriddenCppMethod         = 0x00400000,
-        FinalCppMethod              = 0x00800000,
+        FinalCppClass               = 0x00200000,
+        VirtualCppMethod            = 0x00400000,
+        OverriddenCppMethod         = 0x00800000,
+        FinalCppMethod              = 0x01000000,
         // Add by meta builder (implicit constructors, inherited methods, etc)
-        AddedMethod                 = 0x01000000
+        AddedMethod                 = 0x02000000
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)
