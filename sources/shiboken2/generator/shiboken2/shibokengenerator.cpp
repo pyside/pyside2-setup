@@ -1055,12 +1055,26 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaCla
 {
     if (!metaClass || !metaClass->typeEntry()->isValue())
         return false;
-    if ((metaClass->attributes() & AbstractMetaAttributes::HasRejectedConstructor) != 0)
+    if (metaClass->attributes().testFlag(AbstractMetaAttributes::HasRejectedDefaultConstructor))
         return false;
-    AbstractMetaFunctionList ctors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-    if (ctors.count() != 1)
-        return false;
-    return ctors.constFirst()->functionType() == AbstractMetaFunction::CopyConstructorFunction;
+    const AbstractMetaFunctionList ctors =
+        metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    bool copyConstructorFound = false;
+    for (auto ctor : ctors) {
+        switch (ctor->functionType()) {
+        case AbstractMetaFunction::ConstructorFunction:
+            return false;
+        case AbstractMetaFunction::CopyConstructorFunction:
+            copyConstructorFound = true;
+            break;
+        case AbstractMetaFunction::MoveConstructorFunction:
+            break;
+        default:
+            Q_ASSERT(false);
+            break;
+        }
+    }
+    return copyConstructorFound;
 }
 
 bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const TypeEntry* type) const

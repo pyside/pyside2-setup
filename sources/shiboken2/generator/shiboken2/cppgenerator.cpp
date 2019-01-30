@@ -1923,6 +1923,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream& s, OverloadData& overl
 {
     const AbstractMetaFunction* rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);" << endl;
+    writeUnusedVariableCast(s, QLatin1String("numArgs"));
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
