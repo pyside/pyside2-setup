@@ -3,7 +3,7 @@ project(QtWebEngineWidgets)
 set(QtWebEngineWidgets_SRC
 ${QtWebEngineWidgets_GEN_DIR}/qwebenginecertificateerror_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebenginedownloaditem_wrapper.cpp
-#${QtWebEngineWidgets_GEN_DIR}/qwebenginehistory_wrapper.cpp
+${QtWebEngineWidgets_GEN_DIR}/qwebenginehistory_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebenginehistoryitem_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebenginepage_wrapper.cpp
 ${QtWebEngineWidgets_GEN_DIR}/qwebengineprofile_wrapper.cpp

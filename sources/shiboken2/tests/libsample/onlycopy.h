@@ -32,20 +32,24 @@
 #include "libsamplemacros.h"
 #include <list>
 
-// These classes simulate a situation found in
-// QtWebKit's QWebDatabase and QWebSecurityOrigin.
+// These classes simulate a situation found in QWebEngineHistoryItem.
+
+class OnlyCopyPrivate;
 
 class LIBSAMPLE_API OnlyCopy
 {
 public:
     OnlyCopy(const OnlyCopy& other);
     OnlyCopy& operator=(const OnlyCopy& other);
-    int value() const { return m_value; }
-    static int getValue(OnlyCopy onlyCopy) { return onlyCopy.m_value; }
-    static int getValueFromReference(const OnlyCopy& onlyCopy) { return onlyCopy.m_value; }
+    ~OnlyCopy();
+
+    int value() const;
+    static int getValue(OnlyCopy onlyCopy) { return onlyCopy.value(); }
+    static int getValueFromReference(const OnlyCopy& onlyCopy) { return onlyCopy.value(); }
 private:
-    int m_value;
-    OnlyCopy(int value) : m_value(value) {};
+    OnlyCopyPrivate *d;
+    explicit OnlyCopy(int value);
+    explicit OnlyCopy(OnlyCopyPrivate *d); // rejected due to unknown OnlyCopyPrivate
     friend class FriendOfOnlyCopy;
 };
 

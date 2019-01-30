@@ -924,7 +924,8 @@ if (PyIndex_Check(_key)) {
     }
 
     if (step != 1 && value_length != slicelength) {
-        PyErr_Format(PyExc_ValueError, "attempt to assign %s of size %d to extended slice of size %d",Py_TYPE(_value)->tp_name, value_length, slicelength);
+        PyErr_Format(PyExc_ValueError, "attempt to assign %s of size %d to extended slice of size %d",
+                     Py_TYPE(_value)->tp_name, int(value_length), int(slicelength));
         return -1;
     }
 
