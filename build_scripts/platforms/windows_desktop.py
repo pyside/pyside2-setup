@@ -245,8 +245,44 @@ def prepare_packages_win32(self, vars):
                     "ssleay32.dll"],
                 force=False, vars=vars)
 
+    if config.is_internal_shiboken_module_build():
+        # The C++ std library dlls need to be packaged with the
+        # shiboken module, because libshiboken uses C++ code.
+        copy_msvc_redist_files(vars, "{build_dir}/msvc_redist".format(**vars))
+
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
         copy_qt_artifacts(self, copy_pdbs, vars)
+
+
+def copy_msvc_redist_files(vars, redist_target_path):
+    # MSVC redistributable file list.
+    msvc_redist = [
+        "concrt140.dll",
+        "msvcp140.dll",
+        "ucrtbase.dll",
+        "vcamp140.dll",
+        "vccorlib140.dll",
+        "vcomp140.dll",
+        "vcruntime140.dll"
+    ]
+
+    # Make a directory where the files should be extracted.
+    if not os.path.exists(redist_target_path):
+        os.makedirs(redist_target_path)
+
+    # Extract Qt dependency dlls when building on Qt CI.
+    # There is no proper CI env variable, so using agent launch params.
+    in_coin = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
+    if in_coin is not None:
+        redist_url = "http://download.qt.io/development_releases/prebuilt/vcredist/"
+        zip_file = "pyside_qt_deps_64.7z"
+        if "{target_arch}".format(**vars) == "32":
+            zip_file = "pyside_qt_deps_32.7z"
+        download_and_extract_7z(redist_url + zip_file, redist_target_path)
+
+    copydir(redist_target_path,
+            "{st_build_dir}/{st_package_name}",
+            filter=msvc_redist, recursive=False, vars=vars)
 
 
 def copy_qt_artifacts(self, copy_pdbs, vars):
@@ -283,17 +319,6 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         "qtdiag.exe"
     ]
 
-    # MSVC redistributable
-    msvc_redist = [
-        "concrt140.dll",
-        "msvcp140.dll",
-        "ucrtbase.dll",
-        "vcamp140.dll",
-        "vccorlib140.dll",
-        "vcomp140.dll" ,
-        "vcruntime140.dll"
-    ]
-
     # Choose which EGL library variants to copy.
     qt_artifacts_egl = [
         "libEGL{}.dll",
@@ -313,17 +338,11 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         artifacts += qt_artifacts_egl
 
     if copy_msvc_redist:
-        artifacts += msvc_redist
-
-    # Extract Qt dependency dll's when building on Qt CI
-    # There is no proper CI env variable, so using agent launch params
-    in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
-    if in_coin is not None:
-        redist_url = "http://download.qt.io/development_releases/prebuilt/vcredist//"
-        zip_file = "pyside_qt_deps_64.7z"
-        if "{target_arch}".format(**vars) == "32":
-            zip_file = "pyside_qt_deps_32.7z"
-        download_and_extract_7z(redist_url + zip_file, "{qt_bin_dir}".format(**vars))
+        # The target path has to be qt_bin_dir at the moment,
+        # because the extracted archive also contains the opengl32sw
+        # and the d3dcompiler dlls, which are copied not by this
+        # function, but by the copydir below.
+        copy_msvc_redist_files(vars, "{qt_bin_dir}".format(**vars))
 
     if artifacts:
         copydir("{qt_bin_dir}",
