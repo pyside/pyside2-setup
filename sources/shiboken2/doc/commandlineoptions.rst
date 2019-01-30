@@ -69,6 +69,11 @@ Options
 ``--generation-set``
     Generator set to be used (e.g. qtdoc).
 
+.. _skip-deprecated:
+
+``--skip-deprecated``
+    Skip deprecated functions.
+
 .. _diff:
 
 ``--diff``

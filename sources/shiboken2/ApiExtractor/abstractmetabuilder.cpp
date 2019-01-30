@@ -112,7 +112,8 @@ static QStringList parseTemplateType(const QString& name) {
 }
 
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() : m_currentClass(0),
-    m_logDirectory(QLatin1String(".") + QDir::separator())
+    m_logDirectory(QLatin1String(".") + QDir::separator()),
+    m_skipDeprecated(false)
 {
 }
 
@@ -1937,7 +1938,17 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (functionItem->isFriend())
         return 0;
 
+    const bool deprecated = functionItem->isDeprecated();
+    if (deprecated && m_skipDeprecated) {
+        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + QLatin1String(" is deprecated."),
+                                   AbstractMetaBuilder::GenerationDisabled);
+        return nullptr;
+    }
+
     AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
+    if (deprecated)
+        *metaFunction += AbstractMetaAttributes::Deprecated;
+
     // Additional check for assignment/move assignment down below
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
@@ -3075,6 +3086,10 @@ static void writeRejectLogFile(const QString &name,
             s << "Incompatible API";
             break;
 
+        case AbstractMetaBuilder::Deprecated:
+            s << "Deprecated";
+            break;
+
         default:
             s << "unknown reason";
             break;
@@ -3239,6 +3254,11 @@ AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractM
 void AbstractMetaBuilder::setGlobalHeader(const QString& globalHeader)
 {
     d->m_globalHeader = QFileInfo(globalHeader);
+}
+
+void AbstractMetaBuilder::setSkipDeprecated(bool value)
+{
+    d->m_skipDeprecated = value;
 }
 
 void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &fileName) const

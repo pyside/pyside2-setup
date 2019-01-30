@@ -2656,6 +2656,12 @@ void CppGenerator::writeFunctionCalls(QTextStream &s, const OverloadData &overlo
                 {
                     Indentation indent(INDENT);
                     writeSingleFunctionCall(s, overloadData, func, context);
+                    if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated)) {
+                        s << INDENT << "PyErr_WarnEx(PyExc_DeprecationWarning, \"";
+                        if (auto cls = context.metaClass())
+                            s << cls->name() << '.';
+                        s << func->signature() << " is deprecated\", 1);\n";
+                    }
                     s << INDENT << "break;" << endl;
                 }
                 s << INDENT << '}' << endl;

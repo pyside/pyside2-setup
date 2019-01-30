@@ -185,6 +185,7 @@ public:
 
     QString m_logDirectory;
     QFileInfo m_globalHeader;
+    bool m_skipDeprecated;
 };
 
 #endif // ABSTRACTMETBUILDER_P_H
