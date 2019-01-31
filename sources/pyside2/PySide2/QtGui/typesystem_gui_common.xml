@@ -2574,7 +2574,7 @@
       <modify-function signature="glEndTransformFeedback()" remove="all"/>
       <modify-function signature="glPauseTransformFeedback()" remove="all"/>
       <modify-function signature="glResumeTransformFeedback()" remove="all"/>
-      <modify-function signature="^glClearBuffer.*\(.*$">
+      <modify-function signature="^glClearBuffer.*\(.*\*.*$">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
       <modify-function signature="glDeleteProgramPipelines(int,const unsigned int*)">
