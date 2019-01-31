@@ -572,6 +572,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         TypeEntry *entry = it.value();
         if (!entry->isPrimitive()) {
             if ((entry->isValue() || entry->isObject())
+                && !types->shouldDropTypeEntry(entry->qualifiedCppName())
                 && !entry->isString()
                 && !entry->isChar()
                 && !entry->isContainer()
