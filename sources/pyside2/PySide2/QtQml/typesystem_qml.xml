@@ -98,6 +98,7 @@
         </add-function>
     </object-type>
     <value-type name="QJSValue">
+        <enum-type name="ErrorType" since="5.12"/>
         <enum-type name="SpecialValue"/>
     </value-type>
     <object-type name="QJSValueIterator"/>
