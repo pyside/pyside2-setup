@@ -45,7 +45,6 @@
     <namespace-type name="Qt3DCore">
         <enum-type name="ChangeFlag" flags="ChangeFlags"/>
         <object-type name="QAbstractAspect"/>
-        <object-type name="QAbstractEngine"/>
         <object-type name="QAbstractSkeleton" since="5.10"/>
         <object-type name="QArmature" since="5.10"/>
         <object-type name="QAspectEngine">
@@ -110,10 +109,5 @@
             <!-- Disambiguate from QtGui/qtransform.h -->
             <include file-name="Qt3DCore/qtransform.h" location="global"/>
         </object-type>
-        <namespace-type name="Quick">
-            <object-type name="QQmlAspectEngine">
-              <enum-type name="Status"/>
-            </object-type>
-        </namespace-type>
     </namespace-type>
 </typesystem>
