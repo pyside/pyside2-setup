@@ -14,3 +14,4 @@ explore2
 build_history/2*
 *.qdocconf
 *.qdocconf.in
+__pycache__

@@ -39,6 +39,7 @@
 
 import os
 import sys
+import fnmatch
 from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
 
@@ -193,10 +194,14 @@ def prepare_packages_posix(self, vars):
             vars=vars)
 
         if not OPTION_NOEXAMPLES:
+            def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
+                if fnmatch.fnmatch(dir_name, "__pycache__"):
+                    return False
+                return True
             # examples/* -> <setup>/{st_package_name}/examples
             copydir(os.path.join(self.script_dir, "examples"),
                     "{st_build_dir}/{st_package_name}/examples",
-                    force=False, vars=vars)
+                    force=False, vars=vars, dir_filter_function=pycache_dir_filter)
             # Re-generate examples Qt resource files for Python 3
             # compatibility
             if sys.version_info[0] == 3:
