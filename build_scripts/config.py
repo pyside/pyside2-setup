@@ -192,12 +192,12 @@ class Config(object):
 
         if self.internal_build_type == self.shiboken_module_option_name:
             setup_kwargs['name'] = self.shiboken_module_st_name
-            setup_kwargs['description'] = "Python / C++ bindings helper module",
+            setup_kwargs['description'] = "Python / C++ bindings helper module"
             setup_kwargs['entry_points'] = {}
 
         elif self.internal_build_type == self.shiboken_generator_option_name:
             setup_kwargs['name'] = self.shiboken_generator_st_name
-            setup_kwargs['description'] = "Python / C++ bindings generator",
+            setup_kwargs['description'] = "Python / C++ bindings generator"
             setup_kwargs['install_requires'] = [self.shiboken_module_st_name]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
