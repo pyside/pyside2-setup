@@ -4573,7 +4573,11 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         QStringList args;
         const AbstractMetaArgumentList &arguments = f->arguments();
         for (const AbstractMetaArgument *arg : arguments)  {
+            AbstractMetaType *argType = getTypeWithoutContainer(arg->type());
             QString strArg = resolveRetOrArgType(arg->type());
+            // PYSIDE-921: Handle container returntypes correctly.
+            if (argType != arg->type())
+                strArg += QLatin1Char('[') + resolveRetOrArgType(argType) + QLatin1Char(']');
             if (!arg->defaultValueExpression().isEmpty()) {
                 strArg += QLatin1Char('=');
                 QString e = arg->defaultValueExpression();
@@ -4587,10 +4591,12 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         // mark the multiple signatures as such, to make it easier to generate different code
         if (multiple)
             s << idx-- << ':';
-        // now calculate the return type.
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
         AbstractMetaType *returnType = getTypeWithoutContainer(f->type());
-        if (returnType)
+        // PYSIDE-921: Handle container returntypes correctly.
+        if (returnType != f->type())
+            s << "->" << resolveRetOrArgType(f->type()) << '[' << resolveRetOrArgType(returnType) << ']';
+        else if (returnType)
             s << "->" << resolveRetOrArgType(returnType);
         s << endl;
     }

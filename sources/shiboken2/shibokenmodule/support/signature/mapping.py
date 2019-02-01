@@ -55,12 +55,13 @@ import os
 import pkgutil
 
 from signature_loader import typing
+from signature_loader.typing import TypeVar, Generic
 
 class ellipsis(object):
     def __repr__(self):
         return "..."
+
 ellipsis = ellipsis()
-Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
 StringList = typing.List[str]
 IntList = typing.List[int]
 Point = typing.Tuple[float, float]
@@ -69,10 +70,72 @@ IntMatrix = typing.List[IntList]
 Variant = typing.Any
 ModelIndexList = typing.List[int]
 QImageCleanupFunction = typing.Callable
-FloatList = typing.List[float]
-FloatMatrix = typing.List[FloatList]
-# Pair could be more specific, but we loose the info in the generator.
-Pair = typing.Tuple[typing.Any, typing.Any]
+
+# First time installing our own Pair type into typing.
+T = TypeVar('T')
+S = TypeVar('S')
+
+class Pair(Generic[T, S]):
+    __module__ = "typing"
+
+typing.Pair = Pair
+
+
+# Building our own Char type, which is much nicer than
+# Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
+
+# Copied from the six module:
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(type):
+
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+
+        @classmethod
+        def __prepare__(cls, name, this_bases):
+            return meta.__prepare__(name, bases)
+    return type.__new__(metaclass, 'temporary_class', (), {})
+
+class _CharMeta(type):
+    def __repr__(self):
+        return '%s.%s' % (self.__module__, self.__name__)
+
+
+class Char(with_metaclass(_CharMeta)):
+    """
+    From http://doc.qt.io/qt-5/qchar.html :
+
+    In Qt, Unicode characters are 16-bit entities without any markup or
+    structure. This class represents such an entity. It is lightweight,
+    so it can be used everywhere. Most compilers treat it like an
+    unsigned short.
+
+    Here, we provide a simple implementation just to avoid long aliases.
+    """
+    __module__ = "typing"
+
+    def __init__(self, code):
+        if isinstance(code, int):
+            self.code = code & 0xffff
+        else:
+            self.code = ord(code)
+
+    def __add__(self, other):
+        return chr(self.code) + other
+
+    def __radd__(self, other):
+        return other + chr(self.code)
+
+    def __repr__(self):
+        return "typing.Char({})".format(self.code)
+
+typing.Char = Char
+
+
 MultiMap = typing.DefaultDict[str, typing.List[str]]
 
 # ulong_max is only 32 bit on windows.
@@ -205,6 +268,13 @@ update_mapping = Reloader().update
 type_map = {}
 namespace = globals()  # our module's __dict__
 
+type_map.update({
+    "QList": typing.List,
+    "QVector": typing.List,
+    "QSet": typing.Set,
+    "QPair": Pair,
+    })
+
 
 def init_Shiboken():
     type_map.update({
@@ -225,18 +295,16 @@ def init_minimal():
 def init_sample():
     import datetime
     type_map.update({
+        "double": float,
         "sample.int": int,
         "Complex": complex,
         "sample.OddBool": bool,
         "sample.bool": bool,
         "sample.PStr": str,
-        "double[]": FloatList,
         "OddBool": bool,
         "PStr": str,
+        "char": Char,
         "sample.char": Char,
-        "double[][]": FloatMatrix,
-        "int[]": IntList,
-        "int[][]": IntMatrix,
         "sample.Point": Point,
         "sample.ObjectType": object,
         "std.string": str,
@@ -257,7 +325,6 @@ def init_sample():
         "zero(sample.bool)": False,
         "PyDate": datetime.date,
         "ZeroIn": 0,
-        "Point[]": PointList,
     })
     return locals()
 
