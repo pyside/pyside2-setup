@@ -86,6 +86,14 @@
         <insert-template name="tuple_retval_ok"/>
     </template>
 
+    <template name="fix_args,arg,bool*">
+        bool ok_;
+        %BEGIN_ALLOW_THREADS
+        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, &amp;ok_);
+        %END_ALLOW_THREADS
+        <insert-template name="tuple_retval_ok"/>
+    </template>
+
     <template name="fix_arg,bool*,arg">
         bool ok_;
         %BEGIN_ALLOW_THREADS
