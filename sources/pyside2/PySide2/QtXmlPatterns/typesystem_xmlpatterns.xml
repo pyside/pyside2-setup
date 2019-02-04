@@ -86,7 +86,7 @@
     <rejection class="QXmlNodeModelIndex" function-name="sequencedTypedValue"/>
     <rejection class="QXmlNodeModelIndex" function-name="iterate"/>
     <!-- ### This enum isn't part of Qt public API -->
-    <suppress-warning text="enum 'QXmlNodeModelIndex::Axis' does not have a type entry or is not an enum"/>
+    <suppress-warning text="Enum 'QXmlNodeModelIndex::Axis' (class: QXmlNodeModelIndex) does not have a type entry"/>
     <value-type name="QXmlNodeModelIndex">
         <enum-type name="DocumentOrder"/>
         <enum-type name="NodeKind"/>

@@ -55,6 +55,7 @@
   <object-type name="QWebEngineDownloadItem">
     <enum-type name="DownloadInterruptReason"/>
     <enum-type name="DownloadState"/>
+    <enum-type name="DownloadType"/>
     <enum-type name="SavePageFormat"/>
   </object-type>
 

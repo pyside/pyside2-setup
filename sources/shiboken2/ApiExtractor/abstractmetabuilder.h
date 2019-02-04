@@ -53,6 +53,7 @@ public:
         UnmatchedArgumentType,
         UnmatchedReturnType,
         ApiIncompatible,
+        Deprecated,
         NoReason
     };
 
@@ -86,6 +87,8 @@ public:
     *   filled.
     */
     void setGlobalHeader(const QString& globalHeader);
+
+    void setSkipDeprecated(bool value);
 
     static AbstractMetaType *translateType(const TypeInfo &_typei,
                                            AbstractMetaClass *currentClass = nullptr,

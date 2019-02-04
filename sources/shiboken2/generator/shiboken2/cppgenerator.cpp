@@ -705,7 +705,7 @@ void CppGenerator::writeConstructorNative(QTextStream& s, const AbstractMetaFunc
                            OriginalTypeDescription | SkipDefaultValues);
     s << " : ";
     writeFunctionCall(s, func);
-    s << " {" << endl;
+    s << endl << "{" << endl;
     const AbstractMetaArgument* lastArg = func->arguments().isEmpty() ? 0 : func->arguments().constLast();
     writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
     s << INDENT << "// ... middle" << endl;
@@ -2656,6 +2656,12 @@ void CppGenerator::writeFunctionCalls(QTextStream &s, const OverloadData &overlo
                 {
                     Indentation indent(INDENT);
                     writeSingleFunctionCall(s, overloadData, func, context);
+                    if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated)) {
+                        s << INDENT << "PyErr_WarnEx(PyExc_DeprecationWarning, \"";
+                        if (auto cls = context.metaClass())
+                            s << cls->name() << '.';
+                        s << func->signature() << " is deprecated\", 1);\n";
+                    }
                     s << INDENT << "break;" << endl;
                 }
                 s << INDENT << '}' << endl;

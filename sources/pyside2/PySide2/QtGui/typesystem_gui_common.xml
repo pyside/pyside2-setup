@@ -2574,8 +2574,11 @@
       <modify-function signature="glEndTransformFeedback()" remove="all"/>
       <modify-function signature="glPauseTransformFeedback()" remove="all"/>
       <modify-function signature="glResumeTransformFeedback()" remove="all"/>
-      <modify-function signature="^glClearBuffer.*\(.*$">
+      <modify-function signature="^glClearBuffer.*\(.*\*.*$">
           <modify-argument index="3"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="glDebugMessageControl(unsigned int,unsigned int,unsigned int,int,const unsigned int*,unsigned char)">
+          <modify-argument index="5"><array/></modify-argument>
       </modify-function>
       <modify-function signature="glDeleteProgramPipelines(int,const unsigned int*)">
           <modify-argument index="2"><array/></modify-argument>
@@ -2742,6 +2745,12 @@
       <modify-function signature="glSamplerParameteriv(unsigned int,unsigned int,const int*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
+      <modify-function signature="^glSamplerParameterI?u?[fi]v\(.*$">
+          <modify-argument index="3"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="^glTexParameterI?u?[fi]v\(.*$">
+         <modify-argument index="3"><array/></modify-argument>
+      </modify-function>
       <modify-function signature="glUniform1uiv(int,int,const unsigned int*)">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
@@ -2822,7 +2831,7 @@
       <modify-function signature="^glGen[A-Z].*s\(.*$">
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
-      <modify-function signature="^gl(Get)?TexParameter[fi]v\(.*$">
+      <modify-function signature="^gl(Get)?TexParameterI?u?[fi]v\(.*$">
          <modify-argument index="3"><array/></modify-argument>
       </modify-function>
       <modify-function signature="^glUniformMatrix\dfv\(.*$">
@@ -2844,6 +2853,9 @@
           <inject-code class="target" position="beginning">
             <insert-template name="glGetString_return_QString"/>
           </inject-code>
+      </modify-function>
+      <modify-function signature="glShaderBinary(int,const unsigned int*,unsigned int,const void *,int)">
+          <modify-argument index="2"><array/></modify-argument>
       </modify-function>
   </object-type>
   <object-type name="QAbstractOpenGLFunctions" since="5.1"/>

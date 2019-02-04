@@ -57,6 +57,7 @@ static inline QString typesystemPathOption() { return QStringLiteral("typesystem
 static inline QString helpOption() { return QStringLiteral("help"); }
 static inline QString diffOption() { return QStringLiteral("diff"); }
 static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
+static inline QString skipDeprecatedOption() { return QStringLiteral("skip-deprecated"); }
 
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
@@ -310,6 +311,8 @@ void printUsage()
                      QLatin1String("System include paths used by the C++ parser"))
         << qMakePair(QLatin1String("generator-set=<\"generator module\">"),
                      QLatin1String("generator-set to be used. e.g. qtdoc"))
+        << qMakePair(skipDeprecatedOption(),
+                     QLatin1String("Skip deprecated functions"))
         << qMakePair(diffOption(),
                      QLatin1String("Print a diff of wrapper files"))
         << qMakePair(dryrunOption(),
@@ -475,6 +478,11 @@ int main(int argc, char *argv[])
     // Create and set-up API Extractor
     ApiExtractor extractor;
     extractor.setLogDirectory(outputDirectory);
+    ait = args.find(skipDeprecatedOption());
+    if (ait != args.end()) {
+        extractor.setSkipDeprecated(true);
+        args.erase(ait);
+    }
 
     ait = args.find(QLatin1String("silent"));
     if (ait != args.end()) {

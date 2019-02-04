@@ -45,9 +45,7 @@
     <namespace-type name="Qt3DInput">
         <object-type name="QAbstractActionInput"/>
         <object-type name="QAbstractAxisInput"/>
-        <object-type name="QAbstractPhysicalDevice">
-            <enum-type name="DeviceStatus"/>
-        </object-type>
+        <object-type name="QAbstractPhysicalDevice"/>
         <object-type name="QAction"/>
         <object-type name="QActionInput"/>
         <object-type name="QAnalogAxisInput"/>

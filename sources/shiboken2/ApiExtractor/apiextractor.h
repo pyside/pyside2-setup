@@ -66,6 +66,7 @@ public:
     void setCppFileName(const QString& cppFileName);
     QString cppFileName() const { return m_cppFileName; }
     void setDebugLevel(ReportHandler::DebugLevel debugLevel);
+    void setSkipDeprecated(bool value);
     void setSuppressWarnings(bool value);
     void setSilent(bool value);
     void addTypesystemSearchPath(const QString& path);
@@ -99,6 +100,7 @@ private:
     AbstractMetaBuilder* m_builder;
     QString m_logDirectory;
     LanguageLevel m_languageLevel = LanguageLevel::Default;
+    bool m_skipDeprecated = false;
 
     // disable copy
     ApiExtractor(const ApiExtractor&);

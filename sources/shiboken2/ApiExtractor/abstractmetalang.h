@@ -140,7 +140,8 @@ public:
         OverriddenCppMethod         = 0x00800000,
         FinalCppMethod              = 0x01000000,
         // Add by meta builder (implicit constructors, inherited methods, etc)
-        AddedMethod                 = 0x02000000
+        AddedMethod                 = 0x02000000,
+        Deprecated                  = 0x04000000
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)

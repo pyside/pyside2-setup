@@ -43,7 +43,6 @@
 <typesystem package="PySide2.Qt3DRender">
     <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
     <namespace-type name="Qt3DRender">
-        <object-type name="AssimpImporter"/>
         <object-type name="PropertyReaderInterface"/>
         <object-type name="QAbstractFunctor"/>
         <object-type name="QAbstractLight">
@@ -133,8 +132,6 @@
             <enum-type name="Api"/>
             <enum-type name="OpenGLProfile"/>
         </object-type>
-        <object-type name="GLTFImporter"/>
-        <object-type name="GLTFExporter"/>
         <object-type name="QLayer"/>
         <object-type name="QLayerFilter">
             <enum-type name="FilterMode"/>

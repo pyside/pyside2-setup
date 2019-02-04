@@ -43,11 +43,12 @@ import sys
 
 from bookmarkwidget import BookmarkWidget
 from webengineview import WebEngineView
+from historywindow import HistoryWindow
 from PySide2 import QtCore
 from PySide2.QtCore import QPoint, Qt, QUrl
 from PySide2.QtWidgets import (QAction, QMenu, QTabBar, QTabWidget)
 from PySide2.QtWebEngineWidgets import (QWebEngineDownloadItem,
-    QWebEnginePage, QWebEngineProfile)
+    QWebEngineHistory, QWebEnginePage, QWebEngineProfile)
 
 class BrowserTabWidget(QTabWidget):
     """Enables having several tabs with QWebEngineView."""
@@ -61,6 +62,7 @@ class BrowserTabWidget(QTabWidget):
         self.setTabsClosable(True)
         self._window_factory_function = window_factory_function
         self._webengineviews = []
+        self._history_windows = {} # map WebengineView to HistoryWindow
         self.currentChanged.connect(self._current_changed)
         self.tabCloseRequested.connect(self.handle_tab_close_request)
         self._actions_enabled = {}
@@ -165,6 +167,24 @@ class BrowserTabWidget(QTabWidget):
     def select_all(self):
         self._trigger_action(QWebEnginePage.SelectAll)
 
+    def show_history(self):
+        index = self.currentIndex()
+        if index >= 0:
+            webengineview = self._webengineviews[index]
+            history_window = self._history_windows.get(webengineview)
+            if not history_window:
+                history = webengineview.page().history()
+                history_window = HistoryWindow(history, self)
+                history_window.open_url.connect(self.load)
+                history_window.setWindowFlags(history_window.windowFlags()
+                                              | Qt.Window)
+                history_window.setWindowTitle('History')
+                self._history_windows[webengineview] = history_window
+            else:
+                history_window.refresh()
+            history_window.show()
+            history_window.raise_()
+
     def zoom_factor(self):
         return self._webengineviews[0].zoomFactor() if self._webengineviews else 1.0
 
@@ -200,7 +220,10 @@ class BrowserTabWidget(QTabWidget):
 
     def handle_tab_close_request(self, index):
         if (index >= 0 and self.count() > 1):
-            self._webengineviews.remove(self._webengineviews[index])
+            webengineview = self._webengineviews[index]
+            if self._history_windows.get(webengineview):
+                del self._history_windows[webengineview]
+            self._webengineviews.remove(webengineview)
             self.removeTab(index)
 
     def close_current_tab(self):
