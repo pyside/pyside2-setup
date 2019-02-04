@@ -844,6 +844,10 @@ static void setSequenceOwnership(PyObject* pyObj, bool owner)
 {
 
     bool has_length = true;
+
+    if (!pyObj)
+        return;
+
     if (PySequence_Size(pyObj) < 0) {
         PyErr_Clear();
         has_length = false;
