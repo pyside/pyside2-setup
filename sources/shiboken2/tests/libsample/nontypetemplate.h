@@ -37,6 +37,7 @@
 template <int Size> class IntArray
 {
 public:
+    explicit IntArray(const int *data) { std::copy(data, data + Size, m_array); }
     explicit IntArray(int v) { std::fill(m_array, m_array + Size, v); }
 
     int sum() const { return std::accumulate(m_array, m_array + Size, int(0)); }

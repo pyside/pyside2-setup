@@ -488,6 +488,7 @@ public:
     QString cppSignature() const;
 
     AbstractMetaType *copy() const;
+    bool applyArrayModification(QString *errorMessage);
 
     const TypeEntry *typeEntry() const
     {
