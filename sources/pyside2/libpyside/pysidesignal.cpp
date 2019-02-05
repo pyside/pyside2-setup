@@ -48,6 +48,7 @@
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaObject>
 
+#include <algorithm>
 #include <utility>
 
 #define SIGNAL_CLASS_NAME "Signal"
@@ -904,7 +905,7 @@ void registerSignals(SbkObjectType* pyObj, const QMetaObject* metaObject)
         self->homonymousMethod = 0;
 
         // Empty signatures comes first! So they will be the default signal signature
-        qStableSort(it.value().begin(), it.value().end(), &compareSignals);
+        std::stable_sort(it.value().begin(), it.value().end(), &compareSignals);
         SignalSigMap::mapped_type::const_iterator j = it.value().begin();
         SignalSigMap::mapped_type::const_iterator endJ = it.value().end();
         for (; j != endJ; ++j) {

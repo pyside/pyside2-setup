@@ -43,6 +43,10 @@
 #include <QtCore/QDebug>
 #include <QMetaType>
 
+#include <algorithm>
+
+#include <algorithm>
+
 static const char CPP_ARG0[] = "cppArg0";
 
 QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
@@ -355,7 +359,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     QVector<Include> includes = metaClass->typeEntry()->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(classEnums))
         includes.append(cppEnum->typeEntry()->extraIncludes());
-    qSort(includes.begin(), includes.end());
+    std::sort(includes.begin(), includes.end());
     for (const Include &inc : qAsConst(includes))
         s << inc.toString() << endl;
     s << endl;
@@ -1680,7 +1684,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
             }
         }
         QStringList argNamesList = argNamesSet.toList();
-        qSort(argNamesList.begin(), argNamesList.end());
+        std::sort(argNamesList.begin(), argNamesList.end());
         if (argNamesList.isEmpty()) {
             s << INDENT << "const char** argNames{};" << endl;
         } else {
@@ -5503,7 +5507,7 @@ bool CppGenerator::finishGeneration()
     QVector<Include> extraIncludes = moduleEntry->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(globalEnums))
         extraIncludes.append(cppEnum->typeEntry()->extraIncludes());
-    qSort(extraIncludes.begin(), extraIncludes.end());
+    std::sort(extraIncludes.begin(), extraIncludes.end());
     for (const Include &inc : qAsConst(extraIncludes))
         s << inc;
     s << endl;

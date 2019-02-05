@@ -1582,7 +1582,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
 
     //Function list
     AbstractMetaFunctionList functionList = metaClass->functions();
-    qSort(functionList.begin(), functionList.end(), functionSort);
+    std::sort(functionList.begin(), functionList.end(), functionSort);
 
     s << endl
         << "Detailed Description\n"
@@ -1678,7 +1678,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
         s << title << endl
           << QString(title.size(), QLatin1Char('^')) << endl;
 
-        qSort(functions);
+        std::sort(functions.begin(), functions.end());
 
         s << ".. container:: function_list" << endl << endl;
         Indentation indentation(INDENT);
@@ -2051,7 +2051,7 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
     QMutableMapIterator<QChar, QStringList> it(tocMap);
     while (it.hasNext()) {
         it.next();
-        qSort(it.value());
+        std::sort(it.value().begin(), it.value().end());
 
         if (i)
             ss << endl;
