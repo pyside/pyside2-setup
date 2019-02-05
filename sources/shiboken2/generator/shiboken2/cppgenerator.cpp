@@ -5067,7 +5067,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     for (AbstractMetaClass *innerClass : innerClasses)
         lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
 
-    ErrorCode errorCode(QString::null);
+    ErrorCode errorCode(QString::fromLatin1(""));
     writeEnumsInitialization(s, classEnums);
 
     if (metaClass->hasSignals())

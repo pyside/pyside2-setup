@@ -156,7 +156,7 @@ static QString lastNameSegment(QString name)
 
 QString AbstractMetaType::name() const
 {
-    if (m_name.isNull())
+    if (m_name.isEmpty())
         m_name = lastNameSegment(m_typeEntry->targetLangName());
     return m_name;
 }
