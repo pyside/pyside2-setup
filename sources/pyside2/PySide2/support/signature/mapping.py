@@ -52,6 +52,7 @@ in sys.modules. This minimizes the loading overhead.
 import PySide2
 
 from signature_loader.sbk_mapping import *
+from signature_loader.sbk_mapping import _NotCalled
 
 Sbk_Reloader = Reloader
 
