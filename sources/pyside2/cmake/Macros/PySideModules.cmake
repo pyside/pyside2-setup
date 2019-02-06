@@ -175,10 +175,14 @@ macro(create_pyside_module)
     if (QUIET_BUILD)
         list(APPEND generate_pyi_options "--quiet")
     endif()
-    add_custom_command( TARGET ${module_NAME} POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E env ${ld_prefix}
-                        "${SHIBOKEN_PYTHON_INTERPRETER}"
-                        "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
+
+    # Add target to generate pyi file, which depends on the module target.
+    add_custom_target("${module_NAME}_pyi" ALL
+                      COMMAND ${CMAKE_COMMAND} -E env ${ld_prefix}
+                      "${SHIBOKEN_PYTHON_INTERPRETER}"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
+    add_dependencies("${module_NAME}_pyi" ${module_NAME})
+
     # install
     install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide2")
 
