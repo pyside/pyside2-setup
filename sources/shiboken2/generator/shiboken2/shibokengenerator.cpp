@@ -870,14 +870,14 @@ QString ShibokenGenerator::converterObject(const TypeEntry* type)
 
     if (type->isArray()) {
         qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
-        return QString::null;
+        return QString();
     }
 
     /* the typedef'd primitive types case */
     const PrimitiveTypeEntry* pte = dynamic_cast<const PrimitiveTypeEntry*>(type);
     if (!pte) {
         qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
-        return QString::null;
+        return QString();
     }
     if (pte->basicReferencedTypeEntry())
         pte = pte->basicReferencedTypeEntry();
@@ -1457,7 +1457,7 @@ void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
 QString ShibokenGenerator::functionReturnType(const AbstractMetaFunction* func, Options options) const
 {
     QString modifiedReturnType = QString(func->typeReplaced(0));
-    if (!modifiedReturnType.isNull() && !(options & OriginalTypeDescription))
+    if (!modifiedReturnType.isEmpty() && !(options & OriginalTypeDescription))
         return modifiedReturnType;
     return translateType(func->type(), func->implementingClass(), options);
 }
@@ -1821,7 +1821,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
 
         if (func->isVirtual() && !func->isAbstract() && (!avoidProtectedHack() || !func->isProtected())) {
             QString methodCallArgs = getArgumentsFromMethodCall(code);
-            if (!methodCallArgs.isNull()) {
+            if (!methodCallArgs.isEmpty()) {
                 const QString pattern = QStringLiteral("%CPPSELF.%FUNCTION_NAME(%1)").arg(methodCallArgs);
                 if (func->name() == QLatin1String("metaObject")) {
                     QString wrapperClassName = wrapperName(func->ownerClass());

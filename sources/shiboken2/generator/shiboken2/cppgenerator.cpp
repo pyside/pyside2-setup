@@ -43,6 +43,10 @@
 #include <QtCore/QDebug>
 #include <QMetaType>
 
+#include <algorithm>
+
+#include <algorithm>
+
 static const char CPP_ARG0[] = "cppArg0";
 
 QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
@@ -355,7 +359,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     QVector<Include> includes = metaClass->typeEntry()->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(classEnums))
         includes.append(cppEnum->typeEntry()->extraIncludes());
-    qSort(includes.begin(), includes.end());
+    std::sort(includes.begin(), includes.end());
     for (const Include &inc : qAsConst(includes))
         s << inc.toString() << endl;
     s << endl;
@@ -1680,7 +1684,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
             }
         }
         QStringList argNamesList = argNamesSet.toList();
-        qSort(argNamesList.begin(), argNamesList.end());
+        std::sort(argNamesList.begin(), argNamesList.end());
         if (argNamesList.isEmpty()) {
             s << INDENT << "const char** argNames{};" << endl;
         } else {
@@ -4573,7 +4577,11 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         QStringList args;
         const AbstractMetaArgumentList &arguments = f->arguments();
         for (const AbstractMetaArgument *arg : arguments)  {
+            AbstractMetaType *argType = getTypeWithoutContainer(arg->type());
             QString strArg = resolveRetOrArgType(arg->type());
+            // PYSIDE-921: Handle container returntypes correctly.
+            if (argType != arg->type())
+                strArg += QLatin1Char('[') + resolveRetOrArgType(argType) + QLatin1Char(']');
             if (!arg->defaultValueExpression().isEmpty()) {
                 strArg += QLatin1Char('=');
                 QString e = arg->defaultValueExpression();
@@ -4587,10 +4595,12 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         // mark the multiple signatures as such, to make it easier to generate different code
         if (multiple)
             s << idx-- << ':';
-        // now calculate the return type.
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
         AbstractMetaType *returnType = getTypeWithoutContainer(f->type());
-        if (returnType)
+        // PYSIDE-921: Handle container returntypes correctly.
+        if (returnType != f->type())
+            s << "->" << resolveRetOrArgType(f->type()) << '[' << resolveRetOrArgType(returnType) << ']';
+        else if (returnType)
             s << "->" << resolveRetOrArgType(returnType);
         s << endl;
     }
@@ -5057,7 +5067,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     for (AbstractMetaClass *innerClass : innerClasses)
         lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
 
-    ErrorCode errorCode(QString::null);
+    ErrorCode errorCode(QString::fromLatin1(""));
     writeEnumsInitialization(s, classEnums);
 
     if (metaClass->hasSignals())
@@ -5497,7 +5507,7 @@ bool CppGenerator::finishGeneration()
     QVector<Include> extraIncludes = moduleEntry->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(globalEnums))
         extraIncludes.append(cppEnum->typeEntry()->extraIncludes());
-    qSort(extraIncludes.begin(), extraIncludes.end());
+    std::sort(extraIncludes.begin(), extraIncludes.end());
     for (const Include &inc : qAsConst(extraIncludes))
         s << inc;
     s << endl;

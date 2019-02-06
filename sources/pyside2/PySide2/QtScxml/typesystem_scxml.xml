@@ -63,6 +63,15 @@
     <object-type name="QScxmlDataModel" since="5.12">
         <!-- Needs to have exports fixed -->
         <interface-type name="ForeachLoopBody" since="5.12"/>
+        <modify-function signature="^evaluateTo(String|Bool|Variant)\(.*bool ?\*.*$">
+            <modify-argument index="2">
+              <remove-default-expression/>
+              <remove-argument/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+              <insert-template name="fix_args,arg,bool*"/>
+            </inject-code>
+        </modify-function>
     </object-type>
     <object-type name="QScxmlEcmaScriptDataModel" since="5.12"/>
     <value-type name="QScxmlError"/>

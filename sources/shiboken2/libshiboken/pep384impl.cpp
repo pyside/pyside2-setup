@@ -409,6 +409,7 @@ PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 
 // This is only a simple local helper that returns a computed variable.
 // Used also in Python 2.
+#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x03000000
 static PyObject *
 PepRun_GetResult(const char *command, const char *resvar)
 {
@@ -424,6 +425,7 @@ PepRun_GetResult(const char *command, const char *resvar)
     Py_DECREF(d);
     return res;
 }
+#endif // Py_LIMITED_API || Python 2
 
 #ifdef Py_LIMITED_API
 

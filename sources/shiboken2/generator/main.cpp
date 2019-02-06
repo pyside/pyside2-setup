@@ -171,7 +171,7 @@ static CommandArgumentMap getInitializedArguments()
         }
     }
 
-    if (projectFileName.isNull())
+    if (projectFileName.isEmpty())
         return args;
 
     if (!QFile::exists(projectFileName)) {

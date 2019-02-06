@@ -4433,7 +4433,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix.translate": ('float', 'float'),
 
     # class PySide2.QtGui.QMatrix2x2:
-        "QMatrix2x2.__init__": [(), ('PySide2.QtGui.QMatrix2x2',), ('float',), ('typing.Iterable',)],
+        "QMatrix2x2.__init__": [(), ('PySide2.QtGui.QMatrix2x2',), ('typing.Iterable',)],
         "QMatrix2x2.__call__": ('int', 'int'),
         "QMatrix2x2.__copy__": (),
         "QMatrix2x2.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4449,7 +4449,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix2x2.transposed": (),
 
     # class PySide2.QtGui.QMatrix2x3:
-        "QMatrix2x3.__init__": [(), ('PySide2.QtGui.QMatrix2x3',), ('float',), ('typing.Iterable',)],
+        "QMatrix2x3.__init__": [(), ('PySide2.QtGui.QMatrix2x3',), ('typing.Iterable',)],
         "QMatrix2x3.__call__": ('int', 'int'),
         "QMatrix2x3.__copy__": (),
         "QMatrix2x3.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4465,7 +4465,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix2x3.transposed": (),
 
     # class PySide2.QtGui.QMatrix2x4:
-        "QMatrix2x4.__init__": [(), ('PySide2.QtGui.QMatrix2x4',), ('float',), ('typing.Iterable',)],
+        "QMatrix2x4.__init__": [(), ('PySide2.QtGui.QMatrix2x4',), ('typing.Iterable',)],
         "QMatrix2x4.__call__": ('int', 'int'),
         "QMatrix2x4.__copy__": (),
         "QMatrix2x4.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4481,7 +4481,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix2x4.transposed": (),
 
     # class PySide2.QtGui.QMatrix3x2:
-        "QMatrix3x2.__init__": [(), ('PySide2.QtGui.QMatrix3x2',), ('float',), ('typing.Iterable',)],
+        "QMatrix3x2.__init__": [(), ('PySide2.QtGui.QMatrix3x2',), ('typing.Iterable',)],
         "QMatrix3x2.__call__": ('int', 'int'),
         "QMatrix3x2.__copy__": (),
         "QMatrix3x2.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4497,7 +4497,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix3x2.transposed": (),
 
     # class PySide2.QtGui.QMatrix3x3:
-        "QMatrix3x3.__init__": [(), ('PySide2.QtGui.QMatrix3x3',), ('float',), ('typing.Iterable',)],
+        "QMatrix3x3.__init__": [(), ('PySide2.QtGui.QMatrix3x3',), ('typing.Iterable',)],
         "QMatrix3x3.__call__": ('int', 'int'),
         "QMatrix3x3.__copy__": (),
         "QMatrix3x3.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4513,7 +4513,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix3x3.transposed": (),
 
     # class PySide2.QtGui.QMatrix3x4:
-        "QMatrix3x4.__init__": [(), ('PySide2.QtGui.QMatrix3x4',), ('float',), ('typing.Iterable',)],
+        "QMatrix3x4.__init__": [(), ('PySide2.QtGui.QMatrix3x4',), ('typing.Iterable',)],
         "QMatrix3x4.__call__": ('int', 'int'),
         "QMatrix3x4.__copy__": (),
         "QMatrix3x4.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4529,7 +4529,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix3x4.transposed": (),
 
     # class PySide2.QtGui.QMatrix4x2:
-        "QMatrix4x2.__init__": [(), ('PySide2.QtGui.QMatrix4x2',), ('float',), ('typing.Iterable',)],
+        "QMatrix4x2.__init__": [(), ('PySide2.QtGui.QMatrix4x2',), ('typing.Iterable',)],
         "QMatrix4x2.__call__": ('int', 'int'),
         "QMatrix4x2.__copy__": (),
         "QMatrix4x2.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),
@@ -4538,7 +4538,6 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix4x2.__reduce__": (),
         "QMatrix4x2.__repr__": (),
         "QMatrix4x2.constData": (),
-        "QMatrix4x2.copyDataTo": ('float',),
         "QMatrix4x2.data": (),
         "QMatrix4x2.fill": ('float',),
         "QMatrix4x2.isIdentity": (),
@@ -4546,7 +4545,7 @@ if "PySide2.QtGui" in sys.modules:
         "QMatrix4x2.transposed": (),
 
     # class PySide2.QtGui.QMatrix4x3:
-        "QMatrix4x3.__init__": [(), ('PySide2.QtGui.QMatrix4x3',), ('float',), ('typing.Iterable',)],
+        "QMatrix4x3.__init__": [(), ('PySide2.QtGui.QMatrix4x3',), ('typing.Iterable',)],
         "QMatrix4x3.__call__": ('int', 'int'),
         "QMatrix4x3.__copy__": (),
         "QMatrix4x3.__iadd__": ('Missing("PySide2.QtGui.QGenericMatrix")',),

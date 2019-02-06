@@ -98,7 +98,6 @@ def init_QtCore():
         "unsigned long long": int,
         "unsigned short": int,
         "QStringList": StringList,
-        "QList": list,
         "QChar": Char,
         "signed char": Char,
         "QVariant": Variant,
@@ -106,11 +105,8 @@ def init_QtCore():
         "QStringRef": str,
         "QString()": "",
         "QModelIndexList": ModelIndexList,
-        "QPair": Pair,
         "unsigned char": Char,
-        "QSet": set, # seems _not_ to work
-        "QVector": list,
-        "QJsonObject": dict, # seems to work
+        "QJsonObject": typing.Dict[str, PySide2.QtCore.QJsonValue],
         "QStringList()": [],
         "ULONG_MAX": ulong_max,
         "quintptr": int,
@@ -120,12 +116,12 @@ def init_QtCore():
         "qptrdiff": int,
         "true": True,
         "Qt.HANDLE": int, # be more explicit with some consts?
-        "list of QAbstractState": list, # how to use typing.List when we don't have QAbstractState?
-        "list of QAbstractAnimation": list, # dto.
+        "list of QAbstractState": typing.List[PySide2.QtCore.QAbstractState],
+        "list of QAbstractAnimation": typing.List[PySide2.QtCore.QAbstractAnimation],
         "QVariant()": Invalid(Variant),
-        "QMap": dict,
+        "QMap": typing.Dict,
         "PySide2.QtCore.bool": bool,
-        "QHash": dict,
+        "QHash": typing.Dict,
         "PySide2.QtCore.QChar": Char,
         "PySide2.QtCore.qreal": float,
         "PySide2.QtCore.float": float,
@@ -159,7 +155,6 @@ def init_QtCore():
         "signed long": int,
         "PySide2.QtCore.int": int,
         "PySide2.QtCore.char": StringList, # A 'char **' is a list of strings.
-        "char[]": StringList, # 5.9
         "unsigned long int": int, # 5.6, RHEL 6.6
         "unsigned short int": int, # 5.6, RHEL 6.6
         "4294967295UL": 4294967295, # 5.6, RHEL 6.6
@@ -169,7 +164,6 @@ def init_QtCore():
         "nullptr": None, # 5.9
         "uint64_t": int, # 5.9
         "PySide2.QtCore.uint32_t": int, # 5.9
-        "float[][]": FloatMatrix, # 5.9
         "PySide2.QtCore.unsigned int": int, # 5.9 Ubuntu
         "PySide2.QtCore.long long": int, # 5.9, MSVC 15
         "QGenericArgument(nullptr)": ellipsis, # 5.10
@@ -202,7 +196,7 @@ def init_QtCore():
         "zero(PySide2.QtCore.QEvent.Type)": None,
         "CheckIndexOption.NoOption": Instance(
             "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
-        "QVariantMap": dict,
+        "QVariantMap": typing.Dict[str, Variant],
         "PySide2.QtCore.QCborStreamReader.StringResult": typing.AnyStr,
         "PySide2.QtCore.double": float,
     })
@@ -249,8 +243,6 @@ def init_QtGui():
 def init_QtWidgets():
     from PySide2.QtWidgets import QWidget, QMessageBox, QStyleOption, QStyleHintReturn, QStyleOptionComplex
     from PySide2.QtWidgets import QGraphicsItem, QStyleOptionGraphicsItem # 5.9
-    GraphicsItemList = typing.List[QGraphicsItem]
-    StyleOptionGraphicsItemList = typing.List[QStyleOptionGraphicsItem]
     type_map.update({
         "QMessageBox.StandardButtons(Yes | No)": Instance(
             "QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No)"),
@@ -265,8 +257,6 @@ def init_QtWidgets():
         "SO_Default": QStyleOption.SO_Default,
         "SH_Default": QStyleHintReturn.SH_Default,
         "SO_Complex": QStyleOptionComplex.SO_Complex,
-        "QGraphicsItem[]": GraphicsItemList,
-        "QStyleOptionGraphicsItem[]": StyleOptionGraphicsItemList,
         "zero(PySide2.QtWidgets.QWidget)": None,
         "zero(PySide2.QtWidgets.QGraphicsItem)": None,
         "zero(PySide2.QtCore.QEvent)": None,
@@ -286,7 +276,7 @@ def init_QtSql():
     from PySide2.QtSql import QSqlDatabase
     type_map.update({
         "QLatin1String(defaultConnection)": QSqlDatabase.defaultConnection,
-        "QVariant.Invalid": Invalid("PySide2.QtCore.QVariant"), # not sure what I should create, here...
+        "QVariant.Invalid": Invalid("Variant"), # not sure what I should create, here...
     })
     return locals()
 
@@ -342,7 +332,7 @@ def init_QtQml():
         "QJSValueList()": [],
         "PySide2.QtQml.bool volatile": bool,
         # from 5.9
-        "QVariantHash()": {},
+        "QVariantHash()": typing.Dict[str, Variant],  # XXX sorted?
         "zero(PySide2.QtQml.QQmlContext)": None,
         "zero(PySide2.QtQml.QQmlEngine)": None,
     })

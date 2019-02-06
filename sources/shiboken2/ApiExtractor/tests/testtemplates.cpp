@@ -111,7 +111,7 @@ namespace Namespace {
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
-    QVERIFY(classB->baseClassName().isNull());
+    QVERIFY(classB->baseClassName().isEmpty());
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("foo"));
     AbstractMetaType* argType = func->arguments().first()->type();
     QCOMPARE(argType->instantiations().count(), 1);
@@ -300,7 +300,7 @@ template<SomeEnum type> struct Future {};
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
-    QVERIFY(classB->baseClassName().isNull());
+    QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
     QCOMPARE(classB->functions().count(), 3);
 }
@@ -338,7 +338,7 @@ template<SomeEnum type> struct Future {};
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("Namespace::B"));
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
-    QVERIFY(classB->baseClassName().isNull());
+    QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
     QCOMPARE(classB->functions().count(), 3);
 }

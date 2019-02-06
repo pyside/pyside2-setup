@@ -756,11 +756,11 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         // Fall back to C++ snippet when "path" attribute is present.
         // Also read fallback snippet when comparison is desired.
         QString fallbackCode;
-        if ((pythonCode.isNull() || snippetComparison())
+        if ((pythonCode.isEmpty() || snippetComparison())
             && reader.attributes().hasAttribute(fallbackPathAttribute())) {
             const QString fallback = reader.attributes().value(fallbackPathAttribute()).toString();
             if (QFileInfo::exists(fallback)) {
-                if (pythonCode.isNull())
+                if (pythonCode.isEmpty())
                     qCWarning(lcShiboken, "%s", qPrintable(msgFallbackWarning(reader, m_context, m_lastTagName, location, identifier, fallback)));
                 fallbackCode = readFromLocation(fallback, identifier, &errorMessage);
                 if (!errorMessage.isEmpty())
@@ -775,7 +775,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
             m_output << INDENT << "::\n\n";
 
         Indentation indentation(INDENT);
-        const QString code = pythonCode.isNull() ? fallbackCode : pythonCode;
+        const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
         if (code.isEmpty())
             m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>" << endl;
         else
@@ -1582,7 +1582,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
 
     //Function list
     AbstractMetaFunctionList functionList = metaClass->functions();
-    qSort(functionList.begin(), functionList.end(), functionSort);
+    std::sort(functionList.begin(), functionList.end(), functionSort);
 
     s << endl
         << "Detailed Description\n"
@@ -1678,7 +1678,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
         s << title << endl
           << QString(title.size(), QLatin1Char('^')) << endl;
 
-        qSort(functions);
+        std::sort(functions.begin(), functions.end());
 
         s << ".. container:: function_list" << endl << endl;
         Indentation indentation(INDENT);
@@ -2051,7 +2051,7 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
     QMutableMapIterator<QChar, QStringList> it(tocMap);
     while (it.hasNext()) {
         it.next();
-        qSort(it.value());
+        std::sort(it.value().begin(), it.value().end());
 
         if (i)
             ss << endl;

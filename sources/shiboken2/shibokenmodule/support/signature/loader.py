@@ -148,6 +148,15 @@ with ensure_import_support():
         namespace = inspect.__dict__
         from support.signature import typing27 as typing
         typing.__name__ = "typing"
+        # Fix the module names in typing if possible. This is important since
+        # the typing names should be I/O compatible, so that typing.Dict
+        # shows itself as "typing.Dict".
+        for name, obj in typing.__dict__.items():
+            if hasattr(obj, "__module__"):
+                try:
+                    obj.__module__ = "typing"
+                except (TypeError, AttributeError):
+                    pass
         from support.signature import backport_inspect as inspect
         _doc = inspect.__doc__
         inspect.__dict__.update(namespace)

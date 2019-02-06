@@ -733,6 +733,8 @@ def detect_clang():
         clang_dir = clang_dir.replace('_ARCH_', arch)
     return (clang_dir, source)
 
+_7z_binary = None
+
 def download_and_extract_7z(fileurl, target):
     """ Downloads 7z file from fileurl and extract to target  """
     print("Downloading fileUrl {} ".format(fileurl))
@@ -744,9 +746,17 @@ def download_and_extract_7z(fileurl, target):
         raise RuntimeError(' Error downloading {}'.format(fileurl))
 
     try:
+        global _7z_binary
         outputDir = "-o" + target
-        print("calling 7z x {} {}".format(localfile, outputDir))
-        subprocess.call(["7z", "x", "-y", localfile, outputDir])
+        if not _7z_binary:
+            if sys.platform == 'win32':
+                candidate = 'c:\\Program Files\\7-Zip\\7z.exe'
+                if os.path.exists(candidate):
+                   _7z_binary = candidate
+            if not _7z_binary:
+                _7z_binary = '7z'
+        print("calling {} x {} {}".format(_7z_binary, localfile, outputDir))
+        subprocess.call([_7z_binary, "x", "-y", localfile, outputDir])
     except:
         raise RuntimeError(' Error extracting {}'.format(localfile))
 

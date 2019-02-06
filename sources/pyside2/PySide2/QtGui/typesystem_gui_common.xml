@@ -1927,9 +1927,7 @@
 
   <value-type name="QGenericMatrix" generate="no"/>
   <value-type name="QMatrix2x2" since="4.6">
-    <modify-function signature="QMatrix2x2(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix2x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -1965,9 +1963,7 @@
   </value-type>
 
   <value-type name="QMatrix2x3" since="4.6">
-    <modify-function signature="QMatrix2x3(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix2x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2003,9 +1999,7 @@
   </value-type>
 
   <value-type name="QMatrix2x4" since="4.6">
-    <modify-function signature="QMatrix2x4(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix2x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2041,9 +2035,7 @@
   </value-type>
 
   <value-type name="QMatrix3x2" since="4.6">
-    <modify-function signature="QMatrix3x2(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix3x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2079,9 +2071,7 @@
   </value-type>
 
   <value-type name="QMatrix3x3" since="4.6">
-    <modify-function signature="QMatrix3x3(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix3x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2117,9 +2107,7 @@
   </value-type>
 
   <value-type name="QMatrix3x4" since="4.6">
-    <modify-function signature="QMatrix3x4(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix3x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2155,9 +2143,8 @@
   </value-type>
 
   <value-type name="QMatrix4x2" since="4.6">
-    <modify-function signature="QMatrix4x2(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix4x2(const float*)" remove="all"/>
+    <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2192,9 +2179,7 @@
   </value-type>
 
   <value-type name="QMatrix4x3" since="4.6">
-    <modify-function signature="QMatrix4x3(const float*)">
-      <modify-argument index="1"><array/></modify-argument>
-    </modify-function>
+    <modify-function signature="QMatrix4x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -2738,12 +2723,6 @@
       </modify-function>
       <modify-function signature="glProgramUniformMatrix4x3fv(unsigned int,int,int,unsigned char,const float*)">
           <modify-argument index="5"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="glSamplerParameterfv(unsigned int,unsigned int,const float*)">
-          <modify-argument index="3"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="glSamplerParameteriv(unsigned int,unsigned int,const int*)">
-          <modify-argument index="3"><array/></modify-argument>
       </modify-function>
       <modify-function signature="^glSamplerParameterI?u?[fi]v\(.*$">
           <modify-argument index="3"><array/></modify-argument>

@@ -45,7 +45,8 @@ import warnings
 import types
 import keyword
 import functools
-from signature_loader.mapping import type_map, update_mapping, namespace
+from signature_loader.mapping import (type_map, update_mapping, namespace,
+    typing, Missing)
 
 _DEBUG = False
 LIST_KEYWORDS = False
@@ -191,7 +192,35 @@ def _resolve_value(thing, valtype, line):
         """.format(thing, line), RuntimeWarning)
     return thing
 
+def _resolve_arraytype(thing, line):
+    thing = thing[:-2]
+    if thing.endswith("[]"):
+        thing = _resolve_arraytype(thing, line)
+    # this mapping is in shiboken
+    thing = "QList[" + thing + "]"
+    return thing
+
+def to_string(thing):
+    if isinstance(thing, str):
+        return thing
+    if hasattr(thing, "__name__"):
+        dot = "." in str(type(thing))
+        return thing.__module__ + "." + thing.__name__ if dot else thing.__name__
+    # Note: This captures things from the typing module:
+    return str(thing)
+
 def _resolve_type(thing, line):
+    if thing.endswith("[]"):
+        thing = _resolve_arraytype(thing, line)
+    if "[" in thing:
+        # Handle a container return type. (see PYSIDE-921 in cppgenerator.cpp)
+        contr, thing = re.match(r"(.*?)\[(.*?)\]$", thing).groups()
+        contr = to_string(_resolve_type(contr, line))
+        thing = to_string(_resolve_type(thing, line))
+        result = "{contr}[{thing}]".format(**locals())
+        if not isinstance(thing, Missing):
+            result = eval(result, namespace)
+        return result
     return _resolve_value(thing, None, line)
 
 def calculate_props(line):

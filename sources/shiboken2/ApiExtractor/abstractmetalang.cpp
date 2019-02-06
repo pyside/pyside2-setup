@@ -42,6 +42,10 @@
 #include <QtCore/QRegularExpression>
 #include <QtCore/QStack>
 
+#include <algorithm>
+
+#include <algorithm>
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa)
 {
@@ -152,7 +156,7 @@ static QString lastNameSegment(QString name)
 
 QString AbstractMetaType::name() const
 {
-    if (m_name.isNull())
+    if (m_name.isEmpty())
         m_name = lastNameSegment(m_typeEntry->targetLangName());
     return m_name;
 }
@@ -1428,7 +1432,7 @@ bool AbstractMetaClass::hasLogicalOperatorOverload() const
 
 void AbstractMetaClass::sortFunctions()
 {
-    qSort(m_functions.begin(), m_functions.end(), function_sorter);
+    std::sort(m_functions.begin(), m_functions.end(), function_sorter);
 }
 
 void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
