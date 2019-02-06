@@ -68,7 +68,7 @@ def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-    install_pip_dependencies(env_pip, ["six", "setuptools"])
+    install_pip_dependencies(env_pip, ["numpy", "PyOpenGL", "setuptools", "six"])
     install_pip_wheel_package(env_pip)
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
