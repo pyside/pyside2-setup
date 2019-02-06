@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake_helpers/
                       ${CMAKE_MODULE_PATH})
 include(helpers)
 
-find_package(Qt5 5.7 REQUIRED COMPONENTS Core Xml XmlPatterns)
+find_package(Qt5 5.12 REQUIRED COMPONENTS Core Xml XmlPatterns)
 
 add_definitions(${Qt5Core_DEFINITIONS})
 
