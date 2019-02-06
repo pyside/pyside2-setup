@@ -1,4 +1,3 @@
 [submodule "sources/pyside2-tools"]
 	path = sources/pyside2-tools
-	branch = 5.9
 	url = ../pyside-tools.git
