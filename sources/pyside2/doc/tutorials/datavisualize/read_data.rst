@@ -1,4 +1,4 @@
-Chapter 1: Reading data from a CSV
+Chapter 1 - Reading data from a CSV
 ===================================
 
 There are several ways to read data from a CSV file. The following are the most

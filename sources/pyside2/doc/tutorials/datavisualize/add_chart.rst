@@ -9,10 +9,12 @@ The placeholder for a plot is a QChartView, and inside that Widget you can
 place a QChart. As a first step, try including only this without any data to
 plot.
 
-Make the following changes to :code:`main_widget.py` from the previous chapter
-to add a QChartView:
+Make the following highlighted changes to :code:`main_widget.py` from the
+previous chapter to add a QChartView:
 
 .. literalinclude:: datavisualize5/main_widget.py
    :linenos:
-   :diff: datavisualize4/main_widget.py
+   :lines: 40-
+   :emphasize-lines: 2-3,6,22-37,48-51
+
 

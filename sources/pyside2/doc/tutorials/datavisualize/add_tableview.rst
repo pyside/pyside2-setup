@@ -47,20 +47,22 @@ CustomTableModel.
 .. literalinclude:: datavisualize4/main_widget.py
    :language: python
    :linenos:
-   :emphasize-lines: 56-61
+   :emphasize-lines: 12-17
    :lines: 40-
 
-You also need these minor changes to the :code:`main_window.py` and
+You also need minor changes to the :code:`main_window.py` and
 :code:`main.py` from chapter 3 to include the Widget inside the
-MainWindow:
+MainWindow.
+
+In the following snippets you'll see those changes highlighted:
 
 .. literalinclude:: datavisualize4/main_window.py
    :language: python
    :linenos:
-   :diff: datavisualize3/main_window.py
+   :emphasize-lines: 8,11
 
 .. literalinclude:: datavisualize4/main.py
    :language: python
    :linenos:
-   :diff: datavisualize3/main.py
+   :emphasize-lines: 46-47
 

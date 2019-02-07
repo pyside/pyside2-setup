@@ -18,13 +18,13 @@ The Date column provides data in UTC format (for example,
 defining the structure of the string. Additionally, you can adapt the time
 based on the timezone you are in, using QTimeZone.
 
-The following script filters and formatts the CSV data as described earlier:
+The following script filters and formats the CSV data as described earlier:
 
 .. literalinclude:: datavisualize2/main.py
    :language: python
    :linenos:
    :emphasize-lines: 44,47-69
-   :line: 40-
+   :lines: 40-
 
 Now that you have a tuple of QDateTime and float data, try improving the
 output further. That's what you'll learn in the following chapters.
