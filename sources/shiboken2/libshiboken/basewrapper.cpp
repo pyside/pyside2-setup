@@ -101,6 +101,15 @@ PyTypeObject *SbkObjectType_TypeF(void)
         SbkObjectType_Type_spec.basicsize =
             PepHeapType_SIZE + sizeof(SbkObjectTypePrivate);
         type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkObjectType_Type_spec));
+#if PY_VERSION_HEX < 0x03000000
+        // PYSIDE-816: Python 2.7 has a bad check for Py_TPFLAGS_HEAPTYPE in
+        // typeobject.c func tp_new_wrapper. In Python 3 it was updated after
+        // the transition to the new type API, but not in 2.7 . Fortunately,
+        // the types did not change much when transitioning to heaptypes. We
+        // pretend that this type is a normal type in 2.7 and hope that this
+        // has no bad effect.
+        type->tp_flags &= ~Py_TPFLAGS_HEAPTYPE;
+#endif
     }
     return type;
 }
@@ -290,6 +299,10 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
     SbkObjectTypePrivate *sotp = PepType_SOTP(pyObj);
     PyTypeObject *type = reinterpret_cast<PyTypeObject*>(pyObj);
 
+#if PY_VERSION_HEX < 0x03000000
+    // PYSIDE-816: Restore the heap type flag. Better safe than sorry.
+    type->tp_flags |= Py_TPFLAGS_HEAPTYPE;
+#endif
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_BEGIN(pyObj);

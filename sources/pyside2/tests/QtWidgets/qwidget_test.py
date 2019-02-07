@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -51,6 +51,11 @@ class QWidgetTest(UsesQApplication):
 
     def testInheritance(self):
         self.assertRaises(TypeError, QWidgetInherit)
+
+    if sys.version_info[0] < 3:
+        def testCallType_Issue_816(self):
+            thing = type(QWidget).__new__(type(QWidget), "", (), {})
+            self.assertEqual(repr(thing), "<class '__main__.'>")
 
 class QWidgetVisible(UsesQApplication):
 
