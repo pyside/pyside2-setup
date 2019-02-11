@@ -737,11 +737,16 @@ _7z_binary = None
 
 def download_and_extract_7z(fileurl, target):
     """ Downloads 7z file from fileurl and extract to target  """
-    print("Downloading fileUrl {} ".format(fileurl))
     info = ""
-    try:
-        localfile, info = urllib.urlretrieve(fileurl)
-    except:
+    localfile = None
+    for i in range(1, 10):
+        try:
+            print("Downloading fileUrl {}, attempt #{}".format(fileurl, i))
+            localfile, info = urllib.urlretrieve(fileurl)
+            break
+        except:
+            pass
+    if not localfile:
         print("Error downloading {} : {}".format(fileurl, info))
         raise RuntimeError(' Error downloading {}'.format(fileurl))
 
