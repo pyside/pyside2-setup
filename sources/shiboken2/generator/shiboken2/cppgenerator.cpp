@@ -369,6 +369,9 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
 
+    if (usePySideExtensions())
+        s << "\nQT_WARNING_DISABLE_DEPRECATED\n";
+
     // Use class base namespace
     {
         const AbstractMetaClass *context = metaClass->enclosingClass();
