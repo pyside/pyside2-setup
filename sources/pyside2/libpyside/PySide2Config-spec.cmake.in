@@ -1,19 +1,16 @@
-#  PYSIDE_INCLUDE_DIR   - Directories to include to use PySide2
-#  PYSIDE_LIBRARY       - Files to link against to use PySide2
 #  PYSIDE_PYTHONPATH    - Path to where the PySide2 Python module files could be found
 #  PYSIDE_TYPESYSTEMS   - Type system files that should be used by other bindings extending PySide2
+#  PYSIDE_GLUE          - Path to module glue files.
 
-SET(PYSIDE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/PySide2@pyside2_SUFFIX@")
-# Platform specific library names
-if(MSVC)
-    SET(PYSIDE_LIBRARY "@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@pyside2@pyside2_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@@PYTHON_SHARED_LIBRARY_SUFFIX@.lib")
-elseif(CYGWIN)
-    SET(PYSIDE_LIBRARY "@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@pyside2@pyside2_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@@PYTHON_SHARED_LIBRARY_SUFFIX@@CMAKE_IMPORT_LIBRARY_SUFFIX@")
-elseif(WIN32)
-    SET(PYSIDE_LIBRARY "@CMAKE_INSTALL_PREFIX@/bin/@CMAKE_SHARED_LIBRARY_PREFIX@pyside2@pyside2_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@@PYTHON_SHARED_LIBRARY_SUFFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@")
-else()
-    SET(PYSIDE_LIBRARY "@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@pyside2@pyside2_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@@PYTHON_SHARED_LIBRARY_SUFFIX@@CMAKE_SHARED_LIBRARY_SUFFIX@")
+@PACKAGE_INIT@
+
+# Import targets only when using an installed PySide2 config file (so not during a regular
+# PySide2 build, or during a super project build).
+if (NOT TARGET PySide2::pyside2)
+    include("${CMAKE_CURRENT_LIST_DIR}/PySide2Targets.cmake")
 endif()
-SET(PYSIDE_PYTHONPATH "@PYTHON_SITE_PACKAGES@")
-SET(PYSIDE_TYPESYSTEMS "@CMAKE_INSTALL_PREFIX@/share/PySide2@pyside2_SUFFIX@/typesystems")
-SET(PYSIDE_GLUE "@CMAKE_INSTALL_PREFIX@/share/PySide2@pyside2_SUFFIX@/glue")
+
+# Set relocatable variables.
+set_and_check(PYSIDE_PYTHONPATH "@PACKAGE_PYSIDE_PYTHONPATH@")
+set_and_check(PYSIDE_TYPESYSTEMS "@PACKAGE_PYSIDE_TYPESYSTEMS@")
+set_and_check(PYSIDE_GLUE "@PACKAGE_PYSIDE_GLUE@")

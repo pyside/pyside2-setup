@@ -20,14 +20,10 @@ set(QtWebEngineCore_include_dirs
                             ${QtWebEngineCore_SOURCE_DIR}
                             ${QtWebEngineCore_BINARY_DIR}
                             ${Qt5Core_INCLUDE_DIRS}
-                            ${SHIBOKEN_INCLUDE_DIR}
                             ${libpyside_SOURCE_DIR}
-                            ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                             ${QtCore_GEN_DIR}
                             )
 set(QtWebEngineCore_libraries pyside2
-                            ${SHIBOKEN_PYTHON_LIBRARIES}
-                            ${SHIBOKEN_LIBRARY}
                             ${Qt5WebEngineCore_LIBRARIES}
                             ${Qt5Core_LIBRARIES}
                             )

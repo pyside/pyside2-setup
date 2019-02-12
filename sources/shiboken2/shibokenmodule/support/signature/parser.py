@@ -46,7 +46,7 @@ import types
 import keyword
 import functools
 from signature_loader.mapping import (type_map, update_mapping, namespace,
-    typing, Missing)
+    typing, _NotCalled)
 
 _DEBUG = False
 LIST_KEYWORDS = False
@@ -218,7 +218,7 @@ def _resolve_type(thing, line):
         contr = to_string(_resolve_type(contr, line))
         thing = to_string(_resolve_type(thing, line))
         result = "{contr}[{thing}]".format(**locals())
-        if not isinstance(thing, Missing):
+        if not isinstance(thing, _NotCalled):
             result = eval(result, namespace)
         return result
     return _resolve_value(thing, None, line)

@@ -28,7 +28,6 @@ COMMENT "Running generator for 'other' test binding..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
-                    ${SBK_PYTHON_INCLUDE_DIR}
                     ${libother_SOURCE_DIR}
                     ${libsample_SOURCE_DIR}
                     ${libsample_SOURCE_DIR}/..
@@ -46,7 +45,6 @@ endif()
 target_link_libraries(other
                       libother
                       libsample
-                      ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
 add_dependencies(other sample)

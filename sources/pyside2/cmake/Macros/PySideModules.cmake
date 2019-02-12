@@ -121,7 +121,7 @@ macro(create_pyside_module)
 
     add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
                         BYPRODUCTS ${${module_SOURCES}}
-                        COMMAND "${SHIBOKEN_BINARY}" ${GENERATOR_EXTRA_FLAGS}
+                        COMMAND Shiboken2::shiboken2 ${GENERATOR_EXTRA_FLAGS}
                         "${pyside2_BINARY_DIR}/${module_NAME}_global.h"
                         --include-paths=${shiboken_include_dirs}
                         ${shiboken_framework_include_dirs_option}
@@ -142,7 +142,7 @@ macro(create_pyside_module)
                                       ${${module_STATIC_SOURCES}})
     set_target_properties(${module_NAME} PROPERTIES
                           PREFIX ""
-                          OUTPUT_NAME "${module_NAME}${PYTHON_EXTENSION_SUFFIX}"
+                          OUTPUT_NAME "${module_NAME}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
                           LIBRARY_OUTPUT_DIRECTORY ${pyside2_BINARY_DIR})
     if(WIN32)
         set_target_properties(${module_NAME} PROPERTIES SUFFIX ".pyd")
@@ -151,22 +151,38 @@ macro(create_pyside_module)
     endif()
 
     target_link_libraries(${module_NAME} ${${module_LIBRARIES}})
+    target_link_libraries(${module_NAME} Shiboken2::libshiboken)
     if(${module_DEPS})
         add_dependencies(${module_NAME} ${${module_DEPS}})
     endif()
     create_generator_target(${module_NAME})
 
     # build type hinting stubs
-    set(generate_pyi_options run --skip --sys-path "${CMAKE_BINARY_DIR}"
-        "${CMAKE_BINARY_DIR}/../shiboken2/shibokenmodule"
-        --lib-path "${CMAKE_BINARY_DIR}/libpyside"
-        "${CMAKE_BINARY_DIR}/../shiboken2/libshiboken")
+
+    # Need to set the LD_ env vars before invoking the script, because it might use build-time
+    # libraries instead of install time libraries.
+    if (WIN32)
+        set(ld_prefix "PATH=")
+    elseif(APPLE)
+        set(ld_prefix "DYLD_LIBRARY_PATH=")
+    else()
+        set(ld_prefix "LD_LIBRARY_PATH=")
+    endif()
+    set(ld_prefix "${ld_prefix}${pysidebindings_BINARY_DIR}/libpyside${PATH_SEP}${SHIBOKEN_SHARED_LIBRARY_DIR}")
+    set(generate_pyi_options run --skip --sys-path
+        "${pysidebindings_BINARY_DIR}"
+        "${SHIBOKEN_PYTHON_MODULE_DIR}")
     if (QUIET_BUILD)
         list(APPEND generate_pyi_options "--quiet")
     endif()
-    add_custom_command( TARGET ${module_NAME} POST_BUILD
-                        COMMAND "${SHIBOKEN_PYTHON_INTERPRETER}"
-                        "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
+
+    # Add target to generate pyi file, which depends on the module target.
+    add_custom_target("${module_NAME}_pyi" ALL
+                      COMMAND ${CMAKE_COMMAND} -E env ${ld_prefix}
+                      "${SHIBOKEN_PYTHON_INTERPRETER}"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/../support/generate_pyi.py" ${generate_pyi_options})
+    add_dependencies("${module_NAME}_pyi" ${module_NAME})
+
     # install
     install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide2")
 

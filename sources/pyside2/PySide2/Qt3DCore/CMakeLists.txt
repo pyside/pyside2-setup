@@ -50,16 +50,12 @@ set(Qt3DCore_include_dirs
                      ${Qt5Gui_INCLUDE_DIRS}
                      ${Qt5Network_INCLUDE_DIRS}
                      ${Qt53DCore_INCLUDE_DIRS}
-                     ${SHIBOKEN_INCLUDE_DIR}
                      ${libpyside_SOURCE_DIR}
-                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${QtNetwork_GEN_DIR})
 
 set(Qt3DCore_libraries pyside2
-                     ${SHIBOKEN_PYTHON_LIBRARIES}
-                     ${SHIBOKEN_LIBRARY}
                      ${Qt53DCore_LIBRARIES})
 
 set(Qt3DCore_deps QtGui QtNetwork)

@@ -21,16 +21,12 @@ set(QtAxContainer_include_dirs
                      ${Qt5Core_INCLUDE_DIRS}
                      ${Qt5Gui_INCLUDE_DIRS}
                      ${Qt5Widgets_INCLUDE_DIRS}
-                     ${SHIBOKEN_INCLUDE_DIR}
                      ${libpyside_SOURCE_DIR}
-                     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${QtWidgets_GEN_DIR})
 
 set(QtAxContainer_libraries pyside2
-                     ${SHIBOKEN_PYTHON_LIBRARIES}
-                     ${SHIBOKEN_LIBRARY}
                      ${Qt5AxContainer_LIBRARIES}
                      ${Qt5AxBase_LIBRARIES})
 

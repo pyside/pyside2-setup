@@ -191,13 +191,9 @@ configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}
-                        ${SHIBOKEN_INCLUDE_DIR}
                         ${libpyside_SOURCE_DIR}
-                        ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                         )
 set(QtCore_libraries  pyside2
-                      ${SHIBOKEN_PYTHON_LIBRARIES}
-                      ${SHIBOKEN_LIBRARY}
                       ${Qt5Core_LIBRARIES}
                       )
 

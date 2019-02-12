@@ -56,19 +56,49 @@ bufferprocs_py37.cpp
 
 get_numpy_location()
 
-set(libshiboken_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SBK_PYTHON_INCLUDE_DIR})
-
 if (NOT "${PYTHON_NUMPY_LOCATION}" STREQUAL "")
-    set(libshiboken_INCLUDES ${libshiboken_INCLUDES} ${PYTHON_NUMPY_LOCATION}/core/include)
-    set(libshiboken_SRC ${libshiboken_SRC} sbknumpyarrayconverter.cpp)
-    add_definitions(-DHAVE_NUMPY -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+    list(APPEND libshiboken_SRC sbknumpyarrayconverter.cpp)
 endif()
 
 set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES} ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
-include_directories(${libshiboken_INCLUDES})
 add_library(libshiboken SHARED ${libshiboken_SRC})
-target_link_libraries(libshiboken ${SBK_PYTHON_LIBRARIES})
+add_library(Shiboken2::libshiboken ALIAS libshiboken)
+
+target_include_directories(libshiboken PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  $<INSTALL_INTERFACE:include/shiboken2>
+)
+
+if (NOT "${PYTHON_NUMPY_LOCATION}" STREQUAL "")
+    target_include_directories(libshiboken PRIVATE ${PYTHON_NUMPY_LOCATION}/core/include)
+    target_compile_definitions(libshiboken PRIVATE -DHAVE_NUMPY
+                                           PRIVATE -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+
+endif()
+
+shiboken_compute_python_includes()
+# On Windows we need to link against the python.lib import library.
+# On macOS and Linux we don't link against the python shared / static library,
+# the dynamic linker will pick up the python symbols at runtime automatically.
+shiboken_compute_python_libraries()
+
+if(PYTHON_LIMITED_API)
+    target_compile_definitions(libshiboken PUBLIC "-DPy_LIMITED_API=0x03050000")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(PYTHON_WITH_DEBUG)
+        target_compile_definitions(libshiboken PUBLIC "-DPy_DEBUG")
+    endif()
+    if (PYTHON_WITH_COUNT_ALLOCS)
+        target_compile_definitions(libshiboken PUBLIC "-DCOUNT_ALLOCS")
+    endif()
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_definitions(libshiboken PUBLIC "-DNDEBUG")
+endif()
+
 set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken2${shiboken2_SUFFIX}${PYTHON_SHARED_LIBRARY_SUFFIX}"
                                              VERSION ${libshiboken_VERSION}
                                              SOVERSION ${libshiboken_SOVERSION}
@@ -100,7 +130,9 @@ install(FILES
         bufferprocs_py37.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
-install(TARGETS libshiboken EXPORT shiboken2
+install(TARGETS libshiboken EXPORT Shiboken2Targets
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                             RUNTIME DESTINATION bin)
+install(EXPORT Shiboken2Targets NAMESPACE Shiboken2::
+        DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken2-${shiboken2_VERSION})

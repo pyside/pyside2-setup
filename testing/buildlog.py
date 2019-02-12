@@ -42,10 +42,11 @@ from __future__ import print_function
 import os
 import sys
 from collections import namedtuple
+from textwrap import dedent
 
 from .helper import script_dir
 
-LogEntry = namedtuple("LogEntry", ["log_dir", "build_dir"])
+LogEntry = namedtuple("LogEntry", ["log_dir", "build_dir", "build_classifiers"])
 
 
 class BuildLog(object):
@@ -68,7 +69,22 @@ class BuildLog(object):
                 print("Warning: %s not found, skipped" % fpath)
                 continue
             with open(fpath) as f:
-                build_dir = f.read().strip()
+                f_contents = f.read().strip()
+                f_contents_split = f_contents.splitlines()
+                try:
+                    if len(f_contents_split) == 2:
+                        build_dir = f_contents_split[0]
+                        build_classifiers = f_contents_split[1]
+                    else:
+                        build_dir = f_contents_split[0]
+                        build_classifiers = ""
+                except IndexError:
+                    print(dedent("""
+                        Error: There was an issue finding the build dir and its
+                        characteristics, in the following considered file: '{}'
+                    """.format(fpath)))
+                    sys.exit(1)
+
                 if not os.path.exists(build_dir):
                     rel_dir, low_part = os.path.split(build_dir)
                     rel_dir, two_part = os.path.split(rel_dir)
@@ -79,7 +95,7 @@ class BuildLog(object):
                         else:
                             print("Warning: missing build dir %s" % build_dir)
                             continue
-            entry = LogEntry(log_dir, build_dir)
+            entry = LogEntry(log_dir, build_dir, build_classifiers)
             build_history.append(entry)
         # we take the latest build for now.
         build_history.sort()
@@ -105,10 +121,14 @@ class BuildLog(object):
         # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
         platform = 'linux' if sys.platform.startswith('linux') else sys.platform
         res = [platform]
-        # the rest must be guessed from the given filename
-        path = self.selected.build_dir
-        base = os.path.basename(path)
-        res.extend(base.split('-'))
+        if self.selected.build_classifiers:
+            # Use classifier string encoded into build_dir.txt file.
+            res.extend(self.selected.build_classifiers.split('-'))
+        else:
+            # the rest must be guessed from the given filename
+            path = self.selected.build_dir
+            base = os.path.basename(path)
+            res.extend(base.split('-'))
         # add all the python and qt subkeys
         for entry in res:
             parts = entry.split(".")

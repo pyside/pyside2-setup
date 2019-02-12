@@ -180,6 +180,7 @@ OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
 OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")
 OPTION_LIMITED_API = option_value("limited-api")
 OPTION_PACKAGE_TIMESTAMP = option_value("package-timestamp")
+OPTION_SHORTER_PATHS = has_option("shorter-paths")
 
 # This is used automatically by distutils.command.install object, to
 # specify the final installation location.

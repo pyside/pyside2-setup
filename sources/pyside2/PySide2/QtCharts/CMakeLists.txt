@@ -64,16 +64,12 @@ set(QtCharts_include_dirs ${QtCharts_SOURCE_DIR}
                           ${Qt5Gui_INCLUDE_DIRS}
                           ${Qt5Widgets_INCLUDE_DIRS}
                           ${Qt5Charts_INCLUDE_DIRS}
-                          ${SHIBOKEN_INCLUDE_DIR}
                           ${libpyside_SOURCE_DIR}
-                          ${SHIBOKEN_PYTHON_INCLUDE_DIR}
                           ${QtCore_GEN_DIR}
                           ${QtGui_GEN_DIR}
                           ${QtWidgets_GEN_DIR})
 
 set(QtCharts_libraries    pyside2
-                          ${SHIBOKEN_PYTHON_LIBRARIES}
-                          ${SHIBOKEN_LIBRARY}
                           ${Qt5Charts_LIBRARIES}
                           ${Qt5Core_LIBRARIES}
                           ${Qt5Gui_LIBRARIES}

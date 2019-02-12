@@ -73,7 +73,13 @@ elif os.path.exists(history_dir):
     fpath = os.path.join(history_dir, last_build, "build_dir.txt")
     if os.path.exists(fpath):
         with open(fpath) as f:
-            all_build_dir = f.read().strip()
+            f_contents = f.read().strip()
+            f_contents_split = f_contents.splitlines()
+            try:
+                all_build_dir = f_contents_split[0]
+            except IndexError:
+                print("Error: can't find the build dir in the given file '{}'".format(fpath))
+                sys.exit(1)
 else:
     print(dedent("""
         Can't find the build dir in the history.

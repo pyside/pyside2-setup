@@ -8,8 +8,8 @@ else()
    # tests/QtWidgets/qstandarditemmodel_test.py needs shiboken2
    # tests/QtWidgets/qlabel_test.py needs shiboken2
    if(WIN32)
-        set(TEST_PYTHONPATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/tests/util;${CMAKE_BINARY_DIR}/tests/pysidetest;${CMAKE_BINARY_DIR}/../shiboken2/shibokenmodule;$ENV{PYTHONPATH}")
-        set(TEST_LIBRARY_PATH   "${libpyside_BINARY_DIR};${pysidetest_BINARY_DIR};${SHIBOKEN_INCLUDE_DIR}/../../bin;$ENV{PATH}")
+        set(TEST_PYTHONPATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/tests/util;${CMAKE_BINARY_DIR}/tests/pysidetest;${SHIBOKEN_PYTHON_MODULE_DIR};$ENV{PYTHONPATH}")
+        set(TEST_LIBRARY_PATH   "${libpyside_BINARY_DIR};${pysidetest_BINARY_DIR};${SHIBOKEN_SHARED_LIBRARY_DIR};$ENV{PATH}")
         set(LIBRARY_PATH_VAR    "PATH")
         string(REPLACE "\\" "/" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
         string(REPLACE "\\" "/" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")

@@ -1618,12 +1618,16 @@ double in = %CONVERTTOCPP[double](%in);
 // a class supported by QVariant?
 int typeCode;
 const char *typeName = QVariant_resolveMetaType(Py_TYPE(%in), &typeCode);
-if (!typeCode || !typeName)
-    return;
-QVariant var(typeCode, (void*)0);
-Shiboken::Conversions::SpecificConverter converter(typeName);
-converter.toCpp(pyIn, var.data());
-%out = var;
+if (!typeCode || !typeName) {
+    // If the type was not encountered, return a default PyObjectWrapper
+    %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
+}
+else {
+    QVariant var(typeCode, (void*)0);
+    Shiboken::Conversions::SpecificConverter converter(typeName);
+    converter.toCpp(pyIn, var.data());
+    %out = var;
+}
 // @snippet conversion-sbkobject
 
 // @snippet conversion-pydict

@@ -26,7 +26,6 @@ COMMENT "Running generator for 'shiboken2'..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
-                    ${SBK_PYTHON_INCLUDE_DIR}
                     ${libshiboken_SOURCE_DIR}
                     ${libshiboken_BINARY_DIR})
 add_library(shibokenmodule MODULE ${sample_SRC})
@@ -37,7 +36,6 @@ if(WIN32)
     set_property(TARGET shibokenmodule PROPERTY SUFFIX ".pyd")
 endif()
 target_link_libraries(shibokenmodule
-                      ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 
 add_dependencies(shibokenmodule shiboken2)

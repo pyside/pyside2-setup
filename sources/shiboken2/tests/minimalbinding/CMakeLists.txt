@@ -26,7 +26,6 @@ COMMENT "Running generator for 'minimal' test binding..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}
-                    ${SBK_PYTHON_INCLUDE_DIR}
                     ${libminimal_SOURCE_DIR}
                     ${libshiboken_SOURCE_DIR}
                     ${libshiboken_BINARY_DIR})
@@ -38,6 +37,5 @@ if(WIN32)
 endif()
 target_link_libraries(minimal
                       libminimal
-                      ${SBK_PYTHON_LIBRARIES}
                       libshiboken)
 create_generator_target(minimal)
