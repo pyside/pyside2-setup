@@ -198,7 +198,7 @@ class Config(object):
         elif self.internal_build_type == self.shiboken_generator_option_name:
             setup_kwargs['name'] = self.shiboken_generator_st_name
             setup_kwargs['description'] = "Python / C++ bindings generator"
-            setup_kwargs['install_requires'] = [self.shiboken_module_st_name]
+            setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
                     'shiboken2 = {}.scripts.shiboken_tool:main'.format(self.package_name()),
@@ -208,7 +208,7 @@ class Config(object):
         elif self.internal_build_type == self.pyside_option_name:
             setup_kwargs['name'] = self.pyside_st_name
             setup_kwargs['description'] = "Python bindings for the Qt cross-platform application and UI framework"
-            setup_kwargs['install_requires'] = [self.shiboken_module_st_name]
+            setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
                     'pyside2-uic = {}.scripts.uic:main'.format(self.package_name()),
