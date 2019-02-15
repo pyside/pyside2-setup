@@ -252,6 +252,10 @@ def generate_all_pyi(outpath, options):
     from PySide2.support.signature import inspect
     from PySide2.support.signature.lib.enum_sig import HintingEnumerator
 
+    # propagate USE_PEP563 to the mapping module.
+    # Perhaps this can be automated?
+    PySide2.support.signature.mapping.USE_PEP563 = USE_PEP563
+
     outpath = outpath or os.path.dirname(PySide2.__file__)
     name_list = PySide2.__all__ if options.modules == ["all"] else options.modules
     errors = ", ".join(set(name_list) - set(PySide2.__all__))
