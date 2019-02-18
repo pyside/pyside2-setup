@@ -13,6 +13,9 @@ ${QtPrintSupport_GEN_DIR}/qprintpreviewwidget_wrapper.cpp
 ${QtPrintSupport_GEN_DIR}/qtprintsupport_module_wrapper.cpp
 )
 
+configure_file("${QtPrintSupport_SOURCE_DIR}/typesystem_printsupport.xml.in"
+               "${QtPrintSupport_BINARY_DIR}/typesystem_printsupport.xml" @ONLY)
+
 set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${QtPrintSupport_BINARY_DIR}
                                 ${Qt5Core_INCLUDE_DIRS}
@@ -36,4 +39,5 @@ create_pyside_module(NAME QtPrintSupport
                      LIBRARIES QtPrintSupport_libraries
                      DEPS QtPrintSupport_deps
                      TYPESYSTEM_PATH QtPrintSupport_SOURCE_DIR
-                     SOURCES QtPrintSupport_SRC)
+                     SOURCES QtPrintSupport_SRC
+                     TYPESYSTEM_NAME ${QtPrintSupport_BINARY_DIR}/typesystem_printsupport.xml)
