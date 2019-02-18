@@ -104,6 +104,12 @@
     <extra-includes>
       <include file-name="QPrinterInfo" location="global"/>
     </extra-includes>
+    <!-- fixme: Check if this is still required in Qt 6:
+        bool QPagedPaintDevice::setPageSize(QPageSize)
+        void QPagedPaintDevice::setPageSize(QPagedPaintDevice::PageSize) -->
+    <add-function signature="setPageSize(const QPageSize&amp;)" return-type="bool">
+        <inject-code file="../glue/qtprintsupport.cpp" snippet="setpagesize" />
+    </add-function>
   </object-type>
 
   <object-type name="QPrintPreviewDialog"/>
