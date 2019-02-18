@@ -156,5 +156,24 @@ class SmartPointerTests(unittest.TestCase):
         integer = ptrToInteger.data()
         self.assertTrue(integer)
 
+    def testListOfSmartPointers(self):
+        # Create the main object
+        o = Obj()
+
+        # Create a list of shared objects
+        ptrToObjList = o.giveSharedPtrToObjList(10)
+        self.assertEqual(len(ptrToObjList), 10)
+        self.assertEqual(objCount(), 11)
+
+        # Remove one from the list
+        ptrToObjList.pop()
+        self.assertEqual(len(ptrToObjList), 9)
+        self.assertEqual(objCount(), 10)
+
+        # clear and delete all objects in the list
+        ptrToObjList.clear()
+        self.assertEqual(len(ptrToObjList), 0)
+        self.assertEqual(objCount(), 1)
+
 if __name__ == '__main__':
     unittest.main()

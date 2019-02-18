@@ -62,6 +62,15 @@ SharedPtr<Obj> Obj::giveSharedPtrToObj()
     return o;
 }
 
+std::vector<SharedPtr<Obj> > Obj::giveSharedPtrToObjList(int size)
+{
+    std::vector<SharedPtr<Obj> > r;
+    for (int i=0; i < size; i++)
+        r.push_back(giveSharedPtrToObj());
+    return r;
+}
+
+
 SharedPtr<Integer> Obj::giveSharedPtrToInteger()
 {
     SharedPtr<Integer> o(new Integer);
