@@ -68,6 +68,12 @@ SharedPtr<Integer> Obj::giveSharedPtrToInteger()
     return o;
 }
 
+SharedPtr<Smart::Integer2> Obj::giveSharedPtrToInteger2()
+{
+    SharedPtr<Smart::Integer2> o(new Smart::Integer2);
+    return o;
+}
+
 int Obj::takeSharedPtrToObj(SharedPtr<Obj> pObj)
 {
     pObj->printObj();
@@ -171,4 +177,14 @@ bool Registry::shouldPrint() const
 void Registry::setShouldPrint(bool flag)
 {
     m_printStuff = flag;
+}
+
+Smart::Integer2::Integer2()
+    : Integer ()
+{
+}
+
+Smart::Integer2::Integer2(const Smart::Integer2 &other)
+    : Integer (other)
+{
 }
