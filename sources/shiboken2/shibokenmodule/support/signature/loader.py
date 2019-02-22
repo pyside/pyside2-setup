@@ -134,6 +134,21 @@ def formatannotation(annotation, base_module=None):
 def _typevar__repr__(self):
     return "typing." + self.__name__
 
+# Note also that during the tests we have a different encoding that would
+# break the Python license decorated files without an encoding line.
+
+# name used in signature.cpp
+def create_signature(props, key):
+    return layout.create_signature(props, key)
+
+# name used in signature.cpp
+def seterror_argument(args, func_name):
+    return errorhandler.seterror_argument(args, func_name)
+
+# name used in signature.cpp
+def make_helptext(func):
+    return errorhandler.make_helptext(func)
+
 with ensure_import_support():
     # We store all needed modules in signature_loader.
     # This way, they are always accessible.
@@ -197,21 +212,10 @@ with ensure_import_support():
     from support.signature.lib import enum_sig
     put_into_loader_package(enum_sig)
     from support.signature.parser import pyside_type_init
+    put_into_loader_package(pyside_type_init)
+    put_into_loader_package(create_signature)
+    put_into_loader_package(seterror_argument)
+    put_into_loader_package(make_helptext)
 
-
-# Note also that during the tests we have a different encoding that would
-# break the Python license decorated files without an encoding line.
-
-# name used in signature.cpp
-def create_signature(props, key):
-    return layout.create_signature(props, key)
-
-# name used in signature.cpp
-def seterror_argument(args, func_name):
-    return errorhandler.seterror_argument(args, func_name)
-
-# name used in signature.cpp
-def make_helptext(func):
-    return errorhandler.make_helptext(func)
 
 # end of file

@@ -445,8 +445,11 @@ static const char PySide_PythonCode[] =
             with open(__file__) as _f:
                 exec(compile(_f.read(), __file__, 'exec'))
         except Exception as e:
-            print('Exception:', e)
-            traceback.print_exc(file=sys.stdout)
+            try:
+                from shiboken2.support.signature import loader
+            except:
+                print('Exception:', e)
+                traceback.print_exc(file=sys.stdout)
         globals().update(locals())
 
     )~";
