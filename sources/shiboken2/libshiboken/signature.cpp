@@ -169,7 +169,7 @@ GetClassOfFunc(PyObject *ob)
 {
     if (PyType_Check(ob))
         return ob;
-    if (Py_TYPE(ob) == &PyCFunction_Type)
+    if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
         return _get_class_of_cf(ob);
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
         return _get_class_of_sm(ob);
@@ -703,7 +703,7 @@ get_signature(PyObject *self, PyObject *args)
     if (Py_TYPE(ob) == PepFunction_TypePtr)
         Py_RETURN_NONE;
 
-    if (Py_TYPE(ob) == &PyCFunction_Type)
+    if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
         return pyside_cf_get___signature__(ob, modifier);
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
         return pyside_sm_get___signature__(ob, modifier);
