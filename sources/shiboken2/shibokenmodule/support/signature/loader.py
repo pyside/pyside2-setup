@@ -158,6 +158,10 @@ with ensure_import_support():
         import typing
         import inspect
         inspect.formatannotation = formatannotation
+        if sys.version_info[:2] == (3, 5):
+            # PYSIDE-953: Use a newer contextlib.
+            from support.signature import contextlib36 as contextlib
+            sys.modules["contextlib"] = contextlib
     else:
         import inspect
         namespace = inspect.__dict__
