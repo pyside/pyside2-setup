@@ -515,7 +515,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                     // Replace the return type of the raw pointer getter method with the actual
                     // return type.
                     QString innerTypeName =
-                            classContext.preciseType()->getSmartPointerInnerType()->name();
+                            classContext.preciseType()->getSmartPointerInnerType()->cppSignature();
                     QString pointerToInnerTypeName = innerTypeName + QLatin1Char('*');
                     // @TODO: This possibly leaks, but there are a bunch of other places where this
                     // is done, so this will be fixed in bulk with all the other cases, because the

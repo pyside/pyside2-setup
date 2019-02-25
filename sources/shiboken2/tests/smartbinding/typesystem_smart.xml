@@ -17,7 +17,9 @@
 
     <object-type name="Obj" />
     <value-type name="Integer" />
-
+    <namespace-type name="Smart" generate="no">
+        <value-type name="Integer2" />
+    </namespace-type>
     <!-- Just used to silence the warnings that shiboken doens't know what to do with this type -->
     <custom-type name="RefData" />
 </typesystem>

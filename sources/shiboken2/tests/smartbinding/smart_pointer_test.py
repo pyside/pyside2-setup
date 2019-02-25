@@ -143,5 +143,18 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 0)
         self.assertEqual(integerCount(), 0)
 
+    def testSmartPointersWithNamespace(self):
+        # Create the main object
+        o = Obj()
+        self.assertEqual(objCount(), 1)
+
+        # Create a shared pointer to an Integer together with an Integer.
+        ptrToInteger = o.giveSharedPtrToInteger2()
+        self.assertEqual(objCount(), 1)
+        self.assertEqual(integerCount(), 2)
+
+        integer = ptrToInteger.data()
+        self.assertTrue(integer)
+
 if __name__ == '__main__':
     unittest.main()
