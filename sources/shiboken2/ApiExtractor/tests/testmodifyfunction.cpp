@@ -315,23 +315,108 @@ void TestModifyFunction::testGlobalFunctionModification()
     QCOMPARE(arg->defaultValueExpression(), QLatin1String("A()"));
 }
 
-void TestModifyFunction::testExceptionSpecification()
+void TestModifyFunction::testScopedModifications_data()
 {
-    const char cppCode[] = R"CPP(
-struct A {
+    QTest::addColumn<QByteArray>("cppCode");
+    QTest::addColumn<QByteArray>("xmlCode");
+    QTest::addColumn<bool>("expectedGenerateUnspecified");
+    QTest::addColumn<bool>("expectedGenerateNonThrowing");
+    QTest::addColumn<bool>("expectedGenerateThrowing");
+
+    const QByteArray cppCode = R"CPP(
+struct Base {
+};
+
+struct A : public Base {
     void unspecified();
     void nonThrowing() noexcept;
     void throwing() throw(int);
 };
 )CPP";
-    const char xmlCode[] = R"XML(
-<typesystem package="Foo">
+
+    // Default: Off
+    QTest::newRow("none")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package= 'Foo'>
     <primitive-type name='int'/>
+    <object-type name='Base'/>
+    <object-type name='A'/>
+</typesystem>)XML")
+         << false << false << false;
+
+    // Modify one function
+    QTest::newRow("modify-function1")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='Base'/>
     <object-type name='A'>
         <modify-function signature='throwing()' exception-handling='auto-on'/>
     </object-type>
-</typesystem>)XML";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
+</typesystem>)XML")
+         << false << false << true;
+
+    // Flip defaults by modifying functions
+    QTest::newRow("modify-function2")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='Base'/>
+    <object-type name='A'>
+        <modify-function signature='unspecified()' exception-handling='auto-on'/>
+        <modify-function signature='throwing()' exception-handling='off'/>
+    </object-type>
+</typesystem>)XML")
+         << true << false << false;
+
+    // Activate on type system level
+    QTest::newRow("typesystem-on")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package='Foo' exception-handling='auto-on'>
+    <primitive-type name='int'/>
+    <object-type name='Base'/>
+    <object-type name='A'/>
+</typesystem>)XML")
+         << true << false << true;
+
+    // Activate on class level
+    QTest::newRow("class-on")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='Base'/>
+    <object-type name='A' exception-handling='auto-on'/>
+</typesystem>)XML")
+         << true << false << true;
+
+    // Override value on class level
+    QTest::newRow("override-class-on")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='Base'/>
+    <object-type name='A' exception-handling='auto-on'>
+        <modify-function signature='throwing()' exception-handling='no'/>
+    </object-type>
+</typesystem>)XML")
+         << true << false << false;
+}
+
+void TestModifyFunction::testScopedModifications()
+{
+    QFETCH(QByteArray, cppCode);
+    QFETCH(QByteArray, xmlCode);
+    QFETCH(bool, expectedGenerateUnspecified);
+    QFETCH(bool, expectedGenerateNonThrowing);
+    QFETCH(bool, expectedGenerateThrowing);
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode.constData(), false));
     QVERIFY(!builder.isNull());
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
@@ -340,17 +425,17 @@ struct A {
     const AbstractMetaFunction *f = classA->findFunction(QStringLiteral("unspecified"));
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
-    QVERIFY(!f->generateExceptionHandling());
+    QCOMPARE(f->generateExceptionHandling(), expectedGenerateUnspecified);
 
     f = classA->findFunction(QStringLiteral("nonThrowing"));
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::NoExcept);
-    QVERIFY(!f->generateExceptionHandling());
+    QCOMPARE(f->generateExceptionHandling(), expectedGenerateNonThrowing);
 
     f = classA->findFunction(QStringLiteral("throwing"));
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
-    QVERIFY(f->generateExceptionHandling());
+    QCOMPARE(f->generateExceptionHandling(), expectedGenerateThrowing);
 }
 
 QTEST_APPLESS_MAIN(TestModifyFunction)
