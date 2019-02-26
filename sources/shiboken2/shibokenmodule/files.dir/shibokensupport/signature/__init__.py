@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -39,4 +39,6 @@
 
 from __future__ import print_function, absolute_import
 
-from signature_loader.enum_sig import *
+# from shibokensupport.signature import get_signature, inspect, typing
+# This gives a problem with Python 2. We do it in the loader, instead.
+__all__ = "get_signature inspect typing layout mapping lib".split()

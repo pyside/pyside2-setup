@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -56,8 +56,8 @@ used literally as strings like "signature", "existence", etc.
 """
 
 from textwrap import dedent
-from signature_loader import inspect
-from signature_loader.mapping import ellipsis
+from shibokensupport.signature import inspect
+from shibokensupport.signature.mapping import ellipsis
 
 
 class SimpleNamespace(object):

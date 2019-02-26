@@ -92,11 +92,6 @@ static PyObject *PySide_BuildSignatureProps(PyObject *class_mod);
 static void init_module_1(void);
 static void init_module_2(void);
 
-const char helper_module_name[] = "signature_loader";
-const char bootstrap_name[] = "bootstrap";
-const char arg_name[] = "pyside_arg_dict";
-const char func_name[] = "pyside_type_init";
-
 static PyObject *
 CreateSignature(PyObject *props, PyObject *key)
 {
@@ -423,6 +418,10 @@ GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier)
     return Py_INCREF(value), value;
 }
 
+// const char *PySide_SignatureModule[] = {
+// #include "embed/signature.inc"
+//     };
+
 static const char PySide_PythonCode[] =
     "from __future__ import print_function, absolute_import\n" R"~(if True:
 
@@ -438,21 +437,18 @@ static const char PySide_PythonCode[] =
             import shiboken2 as root
         except ImportError:
             # uninstalled case without ctest, try only this one which has __init__:
-            from shibokenmodule import shiboken2 as root
+            import shibokenmodule as root
         rp = os.path.realpath(os.path.dirname(root.__file__))
         # This can be the shiboken2 directory or the binary module, so search.
-        while len(rp) > 3 and not os.path.exists(os.path.join(rp, 'support')):
+        while len(rp) > 3 and not os.path.exists(os.path.join(rp, 'files.dir')):
             rp = os.path.abspath(os.path.join(rp, '..'))
-        __file__ = os.path.join(rp, 'support', 'signature', 'loader.py')
+        __file__ = os.path.join(rp, 'files.dir', 'shibokensupport', 'signature', 'loader.py')
         try:
             with open(__file__) as _f:
                 exec(compile(_f.read(), __file__, 'exec'))
         except Exception as e:
-            try:
-                from shiboken2.support.signature import loader
-            except:
-                print('Exception:', e)
-                traceback.print_exc(file=sys.stdout)
+            print('Exception:', e)
+            traceback.print_exc(file=sys.stdout)
         globals().update(locals())
 
     )~";
@@ -465,7 +461,7 @@ init_phase_1(void)
                             malloc(sizeof(safe_globals_struc));
     if (p == NULL)
         goto error;
-    p->helper_module = PyImport_AddModule((char *) helper_module_name);
+    p->helper_module = PyImport_AddModule((char *) "signature_loader");
     if (p->helper_module == NULL)
         goto error;
 
@@ -486,7 +482,7 @@ init_phase_1(void)
     // build a dict for the prepared arguments
     p->arg_dict = PyDict_New();
     if (p->arg_dict == NULL
-        || PyObject_SetAttrString(p->helper_module, arg_name, p->arg_dict) < 0)
+        || PyObject_SetAttrString(p->helper_module, "pyside_arg_dict", p->arg_dict) < 0)
         goto error;
     return p;
 
@@ -509,12 +505,12 @@ init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
             goto error;
         Py_DECREF(v);
     }
-    bootstrap_func = PyObject_GetAttrString(p->helper_module, bootstrap_name);
+    bootstrap_func = PyObject_GetAttrString(p->helper_module, "bootstrap");
     if (bootstrap_func == NULL
         || PyObject_CallFunction(bootstrap_func, (char *)"()") == NULL)
         goto error;
     // now the loader should be initialized
-    p->sigparse_func = PyObject_GetAttrString(p->helper_module, func_name);
+    p->sigparse_func = PyObject_GetAttrString(p->helper_module, "pyside_type_init");
     if (p->sigparse_func == NULL)
         goto error;
     p->createsig_func = PyObject_GetAttrString(p->helper_module, "create_signature");

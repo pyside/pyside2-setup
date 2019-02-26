@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -45,13 +45,8 @@ loader.py
 The loader has to lazy-load the signature module and also provides a few
 Python modules to support Python 2.7 .
 
-This file was originally directly embedded into the C source.
-After it grew more and more, I now prefer to have it as Python file.
-The remaining stub loader in the C source is now only a short string.
-
-This version does no longer use an embedded .zip file but is a package.
-The old code without a package but with zip compression can still be found
-at https://codereview.qt-project.org/#/c/203533/ for reference.
+This version uses both a normal directory, but has also an embedded zip file
+as a fallback solution.
 """
 
 import sys
@@ -85,29 +80,28 @@ except NameError:
     ModuleNotFoundError = ImportError
 
 @contextmanager
-def ensure_import_support():
-    # Make sure that we always have the shiboken containing package first.
-    # This is sometimes hidden by the ctest paths.
-    # We adjust the path in a way that the support folder comes first.
-    # This can be in "shiboken2/support" or in "shibokenmodule/support",
-    # so we use the "support" folder as toplevel.
+def ensure_import_shibokensupport():
+    # Make sure that we always have the shibokensupport containing package first.
+    # Also remove any prior loaded module of this name, just in case.
     sbk_support_dir = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
+    assert os.path.basename(sbk_support_dir) == "files.dir"
     sys.path.insert(0, sbk_support_dir)
-    sbk = "shiboken2"
-    save_sbk = sys.modules.pop(sbk) if sbk in sys.modules else None
-    # make sure that we get at the support folder
+
+    sbk = "shibokensupport"
+    if sbk in sys.modules:
+        del sys.modules[sbk]
+    for key in list(key for key in sys.modules if key.startswith(sbk + ".")):
+        del sys.modules[key]
     try:
-        import support
+        import shibokensupport
         yield
     except Exception as e:
-        print("Problem importing support:")
+        print("Problem importing shibokensupport:")
         print(e)
         traceback.print_exc()
         sys.stdout.flush()
         sys.exit(-1)
-    if save_sbk:
-        sys.modules[sbk] = save_sbk
-    sys.path.pop(0)
+    sys.path.remove(sbk_support_dir)
 
 
 # patching inspect's formatting to keep the word "typing":
@@ -117,7 +111,7 @@ def formatannotation(annotation, base_module=None):
     if isinstance(annotation, type):
         if annotation.__module__ in ('builtins', base_module):
             return annotation.__qualname__
-        return annotation.__module__+'.'+annotation.__qualname__
+        return annotation.__module__ + '.' + annotation.__qualname__
     return repr(annotation)
 
 # patching __repr__ to disable the __repr__ of typing.TypeVar:
@@ -149,10 +143,11 @@ def seterror_argument(args, func_name):
 def make_helptext(func):
     return errorhandler.make_helptext(func)
 
-with ensure_import_support():
-    # We store all needed modules in signature_loader.
-    # This way, they are always accessible.
+with ensure_import_shibokensupport():
     import signature_loader
+    import shibokensupport.signature
+    shibokensupport.signature.get_signature = signature_loader.get_signature
+    del signature_loader  # protect this dir, too?
 
     if sys.version_info >= (3,):
         import typing
@@ -161,7 +156,7 @@ with ensure_import_support():
     else:
         import inspect
         namespace = inspect.__dict__
-        from support.signature import typing27 as typing
+        from shibokensupport.signature import typing27 as typing
         typing.__name__ = "typing"
         # Fix the module names in typing if possible. This is important since
         # the typing names should be I/O compatible, so that typing.Dict
@@ -172,7 +167,7 @@ with ensure_import_support():
                     obj.__module__ = "typing"
                 except (TypeError, AttributeError):
                     pass
-        from support.signature import backport_inspect as inspect
+        from shibokensupport.signature import backport_inspect as inspect
         _doc = inspect.__doc__
         inspect.__dict__.update(namespace)
         inspect.__doc__ += _doc
@@ -180,42 +175,21 @@ with ensure_import_support():
         inspect.__all__ = list(x for x in dir(inspect) if not x.startswith("_"))
     typing.TypeVar.__repr__ = _typevar__repr__
 
-    def put_into_loader_package(module, loader=signature_loader):
-        # Note: the "with" statement hides that we are no longer in a
-        # global context, but inside ensure_import_support. Therefore,
-        # we need to explicitly pass the signature_loader in.
-
+    def put_into_package(module, package):
         # take the last component of the module name
         name = module.__name__.rsplit(".", 1)[-1]
-        # allow access as signature_loader.typing
-        setattr(loader, name, module)
+        # allow access as {package}.typing
+        setattr(package, name, module)
         # put into sys.modules as a package to allow all import options
-        fullname = "{}.{}".format(loader.__name__, name)
+        fullname = "{}.{}".format(package.__name__, name)
         sys.modules[fullname] = module
 
-    put_into_loader_package(typing)
-    put_into_loader_package(inspect)
-    from support.signature import mapping as sbk_mapping
-    sbk_mapping.__name__ = "sbk_mapping"
-    put_into_loader_package(sbk_mapping)
-    # We may or may not use PySide.
-    try:
-        from PySide2.support.signature import mapping
-    except ModuleNotFoundError:
-        mapping = sbk_mapping
-        mapping.__name__ = "mapping"
-    put_into_loader_package(mapping)
-    from support.signature import errorhandler
-    put_into_loader_package(errorhandler)
-    from support.signature import layout
-    put_into_loader_package(layout)
-    from support.signature.lib import enum_sig
-    put_into_loader_package(enum_sig)
-    from support.signature.parser import pyside_type_init
-    put_into_loader_package(pyside_type_init)
-    put_into_loader_package(create_signature)
-    put_into_loader_package(seterror_argument)
-    put_into_loader_package(make_helptext)
-
+    put_into_package(typing, shibokensupport.signature)
+    put_into_package(inspect, shibokensupport.signature)
+    from shibokensupport.signature import mapping
+    from shibokensupport.signature import errorhandler
+    from shibokensupport.signature import layout
+    from shibokensupport.signature.lib import enum_sig
+    from shibokensupport.signature.parser import pyside_type_init
 
 # end of file

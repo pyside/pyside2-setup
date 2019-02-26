@@ -51,32 +51,32 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/__init__.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/__init__.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/errorhandler.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/errorhandler.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/layout.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/layout.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/loader.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/loader.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/mapping.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/mapping.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/parser.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/parser.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/__init__.py" COPYONLY)
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"
-               "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/enum_sig.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/errorhandler.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/errorhandler.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/layout.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/layout.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/loader.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/loader.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/mapping.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/mapping.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/parser.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/parser.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/lib/__init__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/lib/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/lib/enum_sig.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/lib/enum_sig.py" COPYONLY)
 if (PYTHON_VERSION_MAJOR EQUAL 3)
 else()
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/typing27.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/support/signature/typing27.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/backport_inspect.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/backport_inspect.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/typing27.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/typing27.py" COPYONLY)
 endif()
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/support"
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/files.dir"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__init__.py"
