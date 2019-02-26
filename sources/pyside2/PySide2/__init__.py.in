@@ -19,9 +19,6 @@ def _setupQtDirectories():
     # loads the libraries into the process memory beforehand, and
     # thus takes care of it for us.
     import shiboken2
-    # We might be running from CTest and missing shiboken2.__init__,
-    # so here it is again: Help Python2 by pre-loading modules.
-    import sys, zipfile, base64, marshal, io
     #   Trigger signature initialization.
     type.__signature__
 

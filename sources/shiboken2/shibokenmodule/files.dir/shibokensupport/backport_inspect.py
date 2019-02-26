@@ -111,10 +111,9 @@ CO_NOFREE       = 0x0040
 
 # This function was changed: 'builtins' and 'qualname' don't exist.
 # We use '__builtin__' and '__name__' instead.
-# It is further changed because we use a local copy of typing
 def formatannotation(annotation, base_module=None):
-    if getattr(annotation, '__module__', None) == 'support.signature.typing27':
-        return repr(annotation).replace('support.signature.typing27', 'typing')
+    if getattr(annotation, '__module__', None) == 'typing':
+        return repr(annotation).replace('typing.', '')
     if isinstance(annotation, type):
         if annotation.__module__ in ('__builtin__', base_module):
             return annotation.__name__
@@ -378,7 +377,7 @@ class Parameter(object):
 
         # Add annotation and default value
         if self._annotation is not _empty:
-            formatted = '{}:{}'.format(formatted,
+            formatted = '{}: {}'.format(formatted,
                                        formatannotation(self._annotation))
 
         if self._default is not _empty:
@@ -892,65 +891,3 @@ class Signature(object):
 def signature(obj, follow_wrapped=True):
     """Get a signature object for the passed callable."""
     return Signature.from_callable(obj, follow_wrapped=follow_wrapped)
-
-
-def _main():
-    """ Logic for inspecting an object given at command line """
-    import argparse
-    import importlib
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'object',
-         help="The object to be analysed. "
-              "It supports the 'module:qualname' syntax")
-    parser.add_argument(
-        '-d', '--details', action='store_true',
-        help='Display info about the module rather than its source code')
-
-    args = parser.parse_args()
-
-    target = args.object
-    mod_name, has_attrs, attrs = target.partition(":")
-    try:
-        obj = module = importlib.import_module(mod_name)
-    except Exception as exc:
-        msg = "Failed to import {} ({}: {})".format(mod_name,
-                                                    type(exc).__name__,
-                                                    exc)
-        print(msg, file=sys.stderr)
-        exit(2)
-
-    if has_attrs:
-        parts = attrs.split(".")
-        obj = module
-        for part in parts:
-            obj = getattr(obj, part)
-
-    if module.__name__ in sys.builtin_module_names:
-        print("Can't get info for builtin modules.", file=sys.stderr)
-        exit(1)
-
-    if args.details:
-        print('Target: {}'.format(target))
-        print('Origin: {}'.format(getsourcefile(module)))
-        print('Cached: {}'.format(module.__cached__))
-        if obj is module:
-            print('Loader: {}'.format(repr(module.__loader__)))
-            if hasattr(module, '__path__'):
-                print('Submodule search path: {}'.format(module.__path__))
-        else:
-            try:
-                __, lineno = findsource(obj)
-            except Exception:
-                pass
-            else:
-                print('Line: {}'.format(lineno))
-
-        print('\n')
-    else:
-        print(getsource(obj))
-
-
-if __name__ == "__main__":
-    _main()

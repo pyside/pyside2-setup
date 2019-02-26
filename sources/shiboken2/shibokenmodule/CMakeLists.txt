@@ -71,10 +71,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/
                "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/lib/enum_sig.py" COPYONLY)
 if (PYTHON_VERSION_MAJOR EQUAL 3)
 else()
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/backport_inspect.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/backport_inspect.py" COPYONLY)
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/typing27.py"
-                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/typing27.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/backport_inspect.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/backport_inspect.py" COPYONLY)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/typing27.py"
+                   "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/typing27.py" COPYONLY)
 endif()
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/files.dir"
         DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")

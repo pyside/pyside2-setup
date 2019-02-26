@@ -1,3 +1,6 @@
+# This Python file uses the following encoding: utf-8
+# It has been edited by fix-complaints.py .
+
 #############################################################################
 ##
 ## Copyright (C) 2019 The Qt Company Ltd.
@@ -42,14 +45,15 @@ from __future__ import print_function, absolute_import
 """
 fix-complaints.py
 
-This module fixes the buildbot messages of external python modules.
+This module fixes the buildbot messages of external python files.
 Run it once after copying a new version. It is idem-potent, unless
 you are changing messages (what I did, of course :-) .
 """
 
 import os
+import glob
 
-patched_modules = "backport_inspect typing27"
+patched_file_patterns = "backport_inspect.py typing27.py python_minilib_*.py"
 
 offending_words = {
     "behavio""ur": "behavior",
@@ -79,9 +83,12 @@ def patch_file(fname):
             f.write("".join(lines))
 
 def doit():
-    dir = os.path.dirname(__file__)
-    for name in patched_modules.split():
-        fname = os.path.join(dir, name + ".py")
+    dirname = os.path.dirname(__file__)
+    patched_files = []
+    for name in patched_file_patterns.split():
+        pattern = os.path.join(dirname, name)
+        patched_files += glob.glob(pattern)
+    for fname in patched_files:
         print("Working on", fname)
         patch_file(fname)
 

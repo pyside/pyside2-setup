@@ -107,14 +107,14 @@ class Formatter(Writer):
         self.mod_name = mod_name
         self.print("# Module", mod_name)
         self.print("import PySide2")
-        self.print("import shiboken2 as Shiboken")
-        from shibokensupport.signature import typing
-        self.print("from shibokensupport.signature import typing")
-        self.print("from shibokensupport.signature.mapping import (")
+        from PySide2.support.signature import typing
+        self.print("from PySide2.support.signature import typing")
+        self.print("from PySide2.support.signature.mapping import (")
         self.print("    Virtual, Missing, Invalid, Default, Instance)")
         self.print()
         self.print("class Object(object): pass")
         self.print()
+        self.print("import shiboken2 as Shiboken")
         self.print("Shiboken.Object = Object")
         self.print()
         # This line will be replaced by the missing imports.
@@ -289,8 +289,8 @@ def generate_all_pyi(outpath, options):
     # now we can import
     global PySide2, inspect, HintingEnumerator
     import PySide2
-    from shibokensupport.signature import inspect
-    from shibokensupport.signature.lib.enum_sig import HintingEnumerator
+    from PySide2.support.signature import inspect
+    from PySide2.support.signature.lib.enum_sig import HintingEnumerator
 
     valid = check = 0
     if not outpath:

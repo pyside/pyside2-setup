@@ -52,7 +52,6 @@ in sys.modules. This minimizes the loading overhead.
 import sys
 import struct
 import os
-import pkgutil
 
 from shibokensupport.signature import typing
 from shibokensupport.signature.typing import TypeVar, Generic
@@ -168,9 +167,7 @@ class _NotCalled(str):
     real object is needed, the wrapper can simply be called.
     """
     def __repr__(self):
-        suppress = "support.signature.typing27."
-        text = self[len(suppress):] if self.startswith(suppress) else self
-        return "{}({})".format(type(self).__name__, text)
+        return "{}({})".format(type(self).__name__, self)
 
     def __call__(self):
         from shibokensupport.signature.mapping import __dict__ as namespace
@@ -346,6 +343,7 @@ def init_other():
 def init_smart():
     type_map.update({
         "smart.SharedPtr": Missing("smart.SharedPtr"),  # bad object "SharedPtr<Obj >"
+        "smart.Smart.Integer2": int,
     })
     return locals()
 

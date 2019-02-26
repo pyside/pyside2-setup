@@ -26,14 +26,16 @@ endif()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sbkversion.h.in"
                "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h" @ONLY)
-# configure_file("${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_loader.py"
-#                "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_loader.py" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_bootstrap.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap.py" @ONLY)
 
-# add_custom_command(
-#     OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature.inc"
-#     COMMAND ${PYTHON_EXECUTABLE} -E
-#             "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
-#             --cmake-dir "${CMAKE_CURRENT_BINARY_DIR}/embed")
+add_custom_command(
+    OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap.inc"
+    OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature.inc"
+    COMMAND ${PYTHON_EXECUTABLE} -E
+            "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
+            --cmake-dir "${CMAKE_CURRENT_BINARY_DIR}/embed"
+            --limited-api ${PYTHON_LIMITED_API})
 
 set(libshiboken_MAJOR_VERSION ${shiboken_MAJOR_VERSION})
 set(libshiboken_MINOR_VERSION ${shiboken_MINOR_VERSION})
@@ -60,7 +62,8 @@ pep384impl.cpp
 voidptr.cpp
 typespec.cpp
 bufferprocs_py37.cpp
-# embed/signature.inc
+embed/signature_bootstrap.inc
+embed/signature.inc
 )
 
 get_numpy_location()
