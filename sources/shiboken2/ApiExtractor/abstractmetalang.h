@@ -851,8 +851,7 @@ public:
     ExceptionSpecification exceptionSpecification() const;
     void setExceptionSpecification(ExceptionSpecification e);
 
-    bool generateExceptionHandling() const { return m_generateExceptionHandling; }
-    void setGenerateExceptionHandling(bool g) { m_generateExceptionHandling = g; }
+    bool generateExceptionHandling() const;
 
     bool isConversionOperator() const
     {
@@ -1096,6 +1095,10 @@ public:
     static AbstractMetaFunction *
         find(const AbstractMetaFunctionList &haystack, const QString &needle);
 
+    // for the meta builder only
+    void setExceptionHandlingModification(TypeSystem::ExceptionHandling em)
+    { m_exceptionHandlingModification = em;  }
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebugVerbose(QDebug &d) const;
 #endif
@@ -1123,9 +1126,9 @@ private:
     uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
-    uint m_generateExceptionHandling: 1;
     mutable int m_cachedAllowThread = -1;
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
+    TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)

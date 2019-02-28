@@ -72,6 +72,26 @@ MetaClass *findByName(QVector<MetaClass *> haystack, QStringView needle)
     return nullptr;
 }
 
+// Helper for recursing the base classes of an AbstractMetaClass.
+// Returns the class for which the predicate is true.
+template <class Predicate>
+const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
+                                               Predicate pred)
+{
+    if (pred(klass))
+        return klass;
+    if (auto base = klass->baseClass()) {
+        if (auto r = recurseClassHierarchy(base, pred))
+            return r;
+    }
+    const auto interfaces = klass->interfaces();
+    for (auto i : interfaces) {
+        if (auto r = recurseClassHierarchy(i, pred))
+            return r;
+    }
+    return nullptr;
+}
+
 /*******************************************************************************
  * AbstractMetaVariable
  */
@@ -411,8 +431,7 @@ AbstractMetaFunction::AbstractMetaFunction()
       m_userAdded(false),
       m_explicit(false),
       m_pointerOperator(false),
-      m_isCallOperator(false),
-      m_generateExceptionHandling(false)
+      m_isCallOperator(false)
 {
 }
 
@@ -531,7 +550,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
         cpy->setType(type()->copy());
     cpy->setConstant(isConstant());
     cpy->setExceptionSpecification(m_exceptionSpecification);
-    cpy->setGenerateExceptionHandling(m_generateExceptionHandling);
+    cpy->setExceptionHandlingModification(m_exceptionHandlingModification);
 
     for (AbstractMetaArgument *arg : m_arguments)
     cpy->addArgument(arg->copy());
@@ -975,6 +994,54 @@ void AbstractMetaFunction::setExceptionSpecification(ExceptionSpecification e)
     m_exceptionSpecification = e;
 }
 
+static inline TypeSystem::ExceptionHandling exceptionMod(const AbstractMetaClass *klass)
+{
+    return klass->typeEntry()->exceptionHandling();
+}
+
+static inline bool hasExceptionMod(const AbstractMetaClass *klass)
+{
+    return exceptionMod(klass) != TypeSystem::ExceptionHandling::Unspecified;
+}
+
+bool AbstractMetaFunction::generateExceptionHandling() const
+{
+    switch (m_functionType) {
+    case AbstractMetaFunction::CopyConstructorFunction:
+    case AbstractMetaFunction::MoveConstructorFunction:
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
+    case AbstractMetaFunction::DestructorFunction:
+        return false;
+    default:
+        break;
+    }
+
+    auto exceptionHandlingModification = m_exceptionHandlingModification;
+    // If there is no modification on the function, check for a base class.
+    if (m_class && exceptionHandlingModification == TypeSystem::ExceptionHandling::Unspecified) {
+        if (auto base = recurseClassHierarchy(m_class, hasExceptionMod))
+            exceptionHandlingModification = exceptionMod(base);
+    }
+
+    bool result = false;
+    switch (exceptionHandlingModification) {
+    case TypeSystem::ExceptionHandling::On:
+        result = true;
+        break;
+    case TypeSystem::ExceptionHandling::AutoDefaultToOn:
+        result = m_exceptionSpecification != ExceptionSpecification::NoExcept;
+        break;
+    case TypeSystem::ExceptionHandling::AutoDefaultToOff:
+        result = m_exceptionSpecification == ExceptionSpecification::Throws;
+        break;
+    case TypeSystem::ExceptionHandling::Unspecified:
+    case TypeSystem::ExceptionHandling::Off:
+        break;
+    }
+    return result;
+}
+
 bool AbstractMetaFunction::isOperatorOverload(const QString& funcName)
 {
     if (isConversionOperator(funcName))
@@ -1159,8 +1226,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " throw(...)";
         break;
     }
-    if (m_generateExceptionHandling)
-        d << "[generate-exception-handling]";
+    if (m_exceptionHandlingModification != TypeSystem::ExceptionHandling::Unspecified)
+        d << " exeption-mod " << int(m_exceptionHandlingModification);
     d << '(';
     for (int i = 0, count = m_arguments.size(); i < count; ++i) {
         if (i)

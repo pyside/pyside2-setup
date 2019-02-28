@@ -394,6 +394,17 @@ struct A : public Base {
 </typesystem>)XML")
          << true << false << true;
 
+    // Activate on base class level
+    QTest::newRow("baseclass-on")
+        << cppCode
+        << QByteArray(R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <object-type name='Base' exception-handling='auto-on'/>
+    <object-type name='A'/>
+</typesystem>)XML")
+         << true << false << true;
+
     // Override value on class level
     QTest::newRow("override-class-on")
         << cppCode
