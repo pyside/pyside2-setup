@@ -222,6 +222,8 @@ void TestModifyFunction::testWithApiVersion()
     QVERIFY(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0) != TypeSystem::CppOwnership);
 }
 
+// Modifications on class/typesystem level are tested below
+// in testScopedModifications().
 void TestModifyFunction::testAllowThread()
 {
     const char cppCode[] =R"CPP(\
@@ -315,6 +317,8 @@ void TestModifyFunction::testGlobalFunctionModification()
     QCOMPARE(arg->defaultValueExpression(), QLatin1String("A()"));
 }
 
+// Tests modifications of exception handling and allow-thread
+// on various levels.
 void TestModifyFunction::testScopedModifications_data()
 {
     QTest::addColumn<QByteArray>("cppCode");
@@ -322,6 +326,7 @@ void TestModifyFunction::testScopedModifications_data()
     QTest::addColumn<bool>("expectedGenerateUnspecified");
     QTest::addColumn<bool>("expectedGenerateNonThrowing");
     QTest::addColumn<bool>("expectedGenerateThrowing");
+    QTest::addColumn<bool>("expectedAllowThread");
 
     const QByteArray cppCode = R"CPP(
 struct Base {
@@ -343,7 +348,8 @@ struct A : public Base {
     <object-type name='Base'/>
     <object-type name='A'/>
 </typesystem>)XML")
-         << false << false << false;
+         << false << false << false // exception
+         << true; // allowthread
 
     // Modify one function
     QTest::newRow("modify-function1")
@@ -356,7 +362,8 @@ struct A : public Base {
         <modify-function signature='throwing()' exception-handling='auto-on'/>
     </object-type>
 </typesystem>)XML")
-         << false << false << true;
+         << false << false << true // exception
+         << true; // allowthread
 
     // Flip defaults by modifying functions
     QTest::newRow("modify-function2")
@@ -370,18 +377,20 @@ struct A : public Base {
         <modify-function signature='throwing()' exception-handling='off'/>
     </object-type>
 </typesystem>)XML")
-         << true << false << false;
+         << true << false << false // exception
+         << true; // allowthread
 
     // Activate on type system level
     QTest::newRow("typesystem-on")
         << cppCode
         << QByteArray(R"XML(
-<typesystem package='Foo' exception-handling='auto-on'>
+<typesystem package='Foo' exception-handling='auto-on' allow-thread='no'>
     <primitive-type name='int'/>
     <object-type name='Base'/>
     <object-type name='A'/>
 </typesystem>)XML")
-         << true << false << true;
+         << true << false << true // exception
+         << false; // allowthread
 
     // Activate on class level
     QTest::newRow("class-on")
@@ -390,9 +399,10 @@ struct A : public Base {
 <typesystem package='Foo'>
     <primitive-type name='int'/>
     <object-type name='Base'/>
-    <object-type name='A' exception-handling='auto-on'/>
+    <object-type name='A' exception-handling='auto-on' allow-thread='no'/>
 </typesystem>)XML")
-         << true << false << true;
+         << true << false << true // exception
+         << false; // allowthread
 
     // Activate on base class level
     QTest::newRow("baseclass-on")
@@ -400,10 +410,11 @@ struct A : public Base {
         << QByteArray(R"XML(
 <typesystem package='Foo'>
     <primitive-type name='int'/>
-    <object-type name='Base' exception-handling='auto-on'/>
+    <object-type name='Base' exception-handling='auto-on' allow-thread='no'/>
     <object-type name='A'/>
 </typesystem>)XML")
-         << true << false << true;
+         << true << false << true // exception
+         << false; // allowthread
 
     // Override value on class level
     QTest::newRow("override-class-on")
@@ -416,7 +427,8 @@ struct A : public Base {
         <modify-function signature='throwing()' exception-handling='no'/>
     </object-type>
 </typesystem>)XML")
-         << true << false << false;
+         << true << false << false // exception
+         << true; // allowthread
 }
 
 void TestModifyFunction::testScopedModifications()
@@ -426,6 +438,7 @@ void TestModifyFunction::testScopedModifications()
     QFETCH(bool, expectedGenerateUnspecified);
     QFETCH(bool, expectedGenerateNonThrowing);
     QFETCH(bool, expectedGenerateThrowing);
+    QFETCH(bool, expectedAllowThread);
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode.constData(), false));
     QVERIFY(!builder.isNull());
@@ -437,6 +450,7 @@ void TestModifyFunction::testScopedModifications()
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateUnspecified);
+    QCOMPARE(f->allowThread(), expectedAllowThread);
 
     f = classA->findFunction(QStringLiteral("nonThrowing"));
     QVERIFY(f);

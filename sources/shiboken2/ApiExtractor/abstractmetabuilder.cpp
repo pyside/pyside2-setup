@@ -2058,6 +2058,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     for (const FunctionModification &mod : functionMods) {
         if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified)
             metaFunction->setExceptionHandlingModification(mod.exceptionHandling());
+        else if (mod.allowThread() != TypeSystem::AllowThread::Unspecified)
+            metaFunction->setAllowThreadModification(mod.allowThread());
     }
 
     // Find the correct default values

@@ -550,6 +550,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
         cpy->setType(type()->copy());
     cpy->setConstant(isConstant());
     cpy->setExceptionSpecification(m_exceptionSpecification);
+    cpy->setAllowThreadModification(m_allowThreadModification);
     cpy->setExceptionHandlingModification(m_exceptionHandlingModification);
 
     for (AbstractMetaArgument *arg : m_arguments)
@@ -773,28 +774,40 @@ bool AbstractMetaFunction::autoDetectAllowThread() const
     return !maybeGetter;
 }
 
+static inline TypeSystem::AllowThread allowThreadMod(const AbstractMetaClass *klass)
+{
+    return klass->typeEntry()->allowThread();
+}
+
+static inline bool hasAllowThreadMod(const AbstractMetaClass *klass)
+{
+    return allowThreadMod(klass) != TypeSystem::AllowThread::Unspecified;
+}
+
 bool AbstractMetaFunction::allowThread() const
 {
-    using AllowThread = TypeSystem::AllowThread;
-
-    if (m_cachedAllowThread < 0) {
-        AllowThread allowThread = AllowThread::Auto;
-        // Find a modification that specifies allowThread
-        const FunctionModificationList &modifications = this->modifications(declaringClass());
-        for (const FunctionModification &modification : modifications) {
-            if (modification.allowThread() != AllowThread::Unspecified) {
-                allowThread = modification.allowThread();
-                break;
-            }
-        }
-
-        m_cachedAllowThread = allowThread == AllowThread::Allow
-            || (allowThread == AllowThread::Auto && autoDetectAllowThread()) ? 1 : 0;
-
-        if (m_cachedAllowThread == 0)
-            qCDebug(lcShiboken).noquote() << msgDisallowThread(this);
+    auto allowThreadModification = m_allowThreadModification;
+    // If there is no modification on the function, check for a base class.
+    if (m_class && allowThreadModification == TypeSystem::AllowThread::Unspecified) {
+        if (auto base = recurseClassHierarchy(m_class, hasAllowThreadMod))
+            allowThreadModification = allowThreadMod(base);
     }
-    return m_cachedAllowThread > 0;
+
+    bool result = true;
+    switch (allowThreadModification) {
+    case TypeSystem::AllowThread::Disallow:
+        result = false;
+        break;
+    case TypeSystem::AllowThread::Allow:
+        break;
+    case TypeSystem::AllowThread::Auto:
+    case TypeSystem::AllowThread::Unspecified:
+        result = autoDetectAllowThread();
+        break;
+    }
+    if (!result)
+        qCDebug(lcShiboken).noquote() << msgDisallowThread(this);
+    return result;
 }
 
 TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int key) const

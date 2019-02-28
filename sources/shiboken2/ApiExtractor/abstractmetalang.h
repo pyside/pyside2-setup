@@ -1096,6 +1096,8 @@ public:
         find(const AbstractMetaFunctionList &haystack, const QString &needle);
 
     // for the meta builder only
+    void setAllowThreadModification(TypeSystem::AllowThread am)
+    { m_allowThreadModification = am; }
     void setExceptionHandlingModification(TypeSystem::ExceptionHandling em)
     { m_exceptionHandlingModification = em;  }
 
@@ -1126,8 +1128,8 @@ private:
     uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
-    mutable int m_cachedAllowThread = -1;
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
+    TypeSystem::AllowThread m_allowThreadModification = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
 };
 

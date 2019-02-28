@@ -1281,6 +1281,7 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
     bool generate = true;
     ctype->setCopyable(ComplexTypeEntry::Unknown);
     auto exceptionHandling = m_exceptionHandling;
+    auto allowThread = m_allowThread;
 
     QString package = m_defaultPackage;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -1316,6 +1317,15 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
+        } else if (name == allowThreadAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto v = allowThreadFromAttribute(attribute.value());
+            if (v != TypeSystem::AllowThread::Unspecified) {
+                allowThread = v;
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
         } else if (name == QLatin1String("held-type")) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -1337,6 +1347,8 @@ void Handler::applyComplexTypeAttributes(const QXmlStreamReader &reader,
 
     if (exceptionHandling != TypeSystem::ExceptionHandling::Unspecified)
          ctype->setExceptionHandling(exceptionHandling);
+    if (allowThread != TypeSystem::AllowThread::Unspecified)
+        ctype->setAllowThread(allowThread);
 
     // The generator code relies on container's package being empty.
     if (ctype->type() != TypeEntry::ContainerType)
@@ -1479,6 +1491,15 @@ TypeSystemTypeEntry *Handler::parseRootElement(const QXmlStreamReader &,
             const auto v = exceptionHandlingFromAttribute(attribute.value());
             if (v != TypeSystem::ExceptionHandling::Unspecified) {
                 m_exceptionHandling = v;
+            } else {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        } else if (name == allowThreadAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto v = allowThreadFromAttribute(attribute.value());
+            if (v != TypeSystem::AllowThread::Unspecified) {
+                m_allowThread = v;
             } else {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
