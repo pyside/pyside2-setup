@@ -53,13 +53,6 @@ import re
 import subprocess
 import argparse
 import glob
-# PYSIDE-953: Use a newer contextlib for Python 3.5
-skip_creation = False
-if sys.version_info[:2] == (3, 5):
-    try:
-        import PySide2.support.signature  # gets new contextlib
-    except:
-        skip_creation = True
 from contextlib import contextmanager
 from textwrap import dedent
 
@@ -279,9 +272,6 @@ def single_process(lockdir):
 
 
 def generate_all_pyi(outpath, options):
-    if skip_creation:
-        logger.warn("Sorry, we cannot create .pyi files with Python 3.5 while PySide")
-        logger.warn(" is not installed. Please run it by hand!")
     ps = os.pathsep
     if options.sys_path:
         # make sure to propagate the paths from sys_path to subprocesses
