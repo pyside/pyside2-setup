@@ -207,6 +207,7 @@ public:
     void printObj();
     Integer takeInteger(Integer val);
     SharedPtr<Obj> giveSharedPtrToObj();
+    std::vector<SharedPtr<Obj> > giveSharedPtrToObjList(int size);
     SharedPtr<Integer> giveSharedPtrToInteger();
     SharedPtr<Smart::Integer2> giveSharedPtrToInteger2();
     int takeSharedPtrToObj(SharedPtr<Obj> pObj);

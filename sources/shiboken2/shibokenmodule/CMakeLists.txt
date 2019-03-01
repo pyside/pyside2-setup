@@ -70,6 +70,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/__init__.py"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/lib/enum_sig.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/signature/lib/enum_sig.py" COPYONLY)
 if (PYTHON_VERSION_MAJOR EQUAL 3)
+    if (PYTHON_VERSION_MINOR EQUAL 5)
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/contextlib36.py"
+                       "${CMAKE_CURRENT_BINARY_DIR}/support/signature/contextlib36.py" COPYONLY)
+    endif()
 else()
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/signature/backport_inspect.py"
                    "${CMAKE_CURRENT_BINARY_DIR}/support/signature/backport_inspect.py" COPYONLY)

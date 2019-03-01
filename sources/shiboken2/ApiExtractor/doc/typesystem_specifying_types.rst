@@ -11,7 +11,7 @@ typesystem
 
     .. code-block:: xml
 
-        <typesystem package="..." default-superclass="..." exception-handling="...">
+        <typesystem package="..." default-superclass="..." allow-thread="..." exception-handling="...">
         </typesystem>
 
     The **package** attribute is a string describing the package to be used,
@@ -19,8 +19,9 @@ typesystem
     The *optional* **default-superclass** attribute is the canonical C++ base class
     name of all objects, e.g., "object".
 
-    The *optional* **exception-handling** attribute specifies the default exception
-    handling mode of all objects (see :ref:`modify-function`).
+    The *optional* attributes **allow-thread** and **exception-handling**
+    specify the default handling for the corresponding function modification
+    (see :ref:`modify-function`).
 
 load-typesystem
 ^^^^^^^^^^^^^^^
@@ -219,6 +220,7 @@ value-type
         <typesystem>
             <value-type  name="..." since="..."
              copyable="yes | no"
+             allow-thread="..."
              exception-handling="..."
              hash-function="..."
              stream="yes | no"
@@ -247,8 +249,9 @@ value-type
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
 
-    The *optional* **exception-handling** attribute specifies the default exception
-    handling mode of all functions (see :ref:`modify-function`).
+    The *optional* attributes **allow-thread** and **exception-handling**
+    specify the default handling for the corresponding function modification
+    (see :ref:`modify-function`).
 
 .. _object-type:
 
@@ -265,6 +268,7 @@ object-type
             <object-type name="..."
              since="..."
              copyable="yes | no"
+             allow-thread="..."
              exception-handling="..."
              hash-function="..."
              stream="yes | no"
@@ -286,8 +290,9 @@ object-type
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
 
-    The *optional* **exception-handling** attribute specifies the default exception
-    handling mode of all functions (see :ref:`modify-function`).
+    The *optional* attributes **allow-thread** and **exception-handling**
+    specify the default handling for the corresponding function modification
+    (see :ref:`modify-function`).
 
 interface-type
 ^^^^^^^^^^^^^^

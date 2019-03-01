@@ -1395,6 +1395,9 @@ public:
     TypeSystem::ExceptionHandling exceptionHandling() const { return m_exceptionHandling; }
     void setExceptionHandling(TypeSystem::ExceptionHandling e) { m_exceptionHandling = e; }
 
+    TypeSystem::AllowThread allowThread() const { return m_allowThread; }
+    void setAllowThread(TypeSystem::AllowThread allowThread) { m_allowThread = allowThread; }
+
     QString defaultConstructor() const;
     void setDefaultConstructor(const QString& defaultConstructor);
     bool hasDefaultConstructor() const;
@@ -1433,6 +1436,7 @@ private:
     const ComplexTypeEntry* m_baseContainerType = nullptr;
     // For class functions
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
+    TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
 };
 
 class TypedefEntry : public ComplexTypeEntry

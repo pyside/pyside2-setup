@@ -1,12 +1,12 @@
 |project|
 *************
 
-The |project| product enables the use of Qt5 APIs in Python applications. It
-lets Python developers utilize the full potential of Qt, using the |pymodname| module.
-The |pymodname| module provides access to the individual Qt modules such as QtCore,
-QtGui, and so on. |project| also comes with the :doc:`Shiboken2 <shiboken2:index>`
-CPython binding code generator, which can be used to generate Python bindings for
-your C or C++ code.
+|project| offers Python bindings for Qt, enabling the use of Qt5 APIs in Python
+applications. It lets Python developers utilize the full potential of Qt, using
+the |pymodname| module. The |pymodname| module provides access to the individual
+Qt modules such as QtCore, QtGui, and so on. |project| also comes with the
+:doc:`Shiboken2 <shiboken2:index>` CPython binding code generator, which can be
+used to generate Python bindings for your C or C++ code.
 
 .. toctree::
     :name: mastertoc

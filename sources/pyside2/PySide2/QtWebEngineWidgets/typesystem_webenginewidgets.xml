@@ -46,6 +46,7 @@
   <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
   <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
   <load-typesystem name="QtWebEngineCore/typesystem_webenginecore.xml" generate="no"/>
+  <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
 
 
   <object-type name="QWebEngineCertificateError">
