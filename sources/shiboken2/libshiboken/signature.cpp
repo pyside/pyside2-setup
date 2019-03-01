@@ -167,8 +167,11 @@ _get_class_of_descr(PyObject *ob)
 static PyObject *
 GetClassOfFunc(PyObject *ob)
 {
-    if (PyType_Check(ob))
+    if (PyType_Check(ob)) {
+        // PySide-928: The type case must do refcounting like the others as well.
+        Py_INCREF(ob);
         return ob;
+    }
     if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
         return _get_class_of_cf(ob);
     if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
@@ -535,6 +538,10 @@ error:
 static int
 _fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_gsp)
 {
+    /*
+     * This function pre-fills all fields of the new gsp. We then
+     * insert the changed values.
+     */
     PyGetSetDef *gsp = type->tp_getset;
     if (gsp != nullptr) {
         for (; gsp->name != NULL; gsp++) {
@@ -542,7 +549,7 @@ _fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_gsp)
                 new_gsp->set = gsp->set;
                 new_gsp->doc = gsp->doc;
                 new_gsp->closure = gsp->closure;
-                return 1;
+                return 1;  // success
             }
         }
     }
