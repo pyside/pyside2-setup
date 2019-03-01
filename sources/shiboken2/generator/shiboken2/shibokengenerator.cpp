@@ -2683,7 +2683,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream& s, const 
          s << " = " << defaultCtor;
          return;
     }
-    if (isCppPrimitive(type))
+    if (isCppPrimitive(type) || type->isSmartPointer())
         return;
     const auto ctor = minimalConstructor(type);
     if (ctor.isValid()) {

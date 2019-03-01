@@ -5535,6 +5535,8 @@ bool CppGenerator::finishGeneration()
     // cleanup staticMetaObject attribute
     if (usePySideExtensions()) {
         s << "void cleanTypesAttributes(void) {" << endl;
+        s << INDENT << "if (PY_VERSION_HEX >= 0x03000000 && PY_VERSION_HEX < 0x03060000)" << endl;
+        s << INDENT << "    return; // testbinding crashes in Python 3.5 when hasattr touches types!" << endl;
         s << INDENT << "for (int i = 0, imax = SBK_" << moduleName() << "_IDX_COUNT; i < imax; i++) {" << endl;
         {
             Indentation indentation(INDENT);

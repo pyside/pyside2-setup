@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -49,7 +49,7 @@ you are changing messages (what I did, of course :-) .
 
 import os
 
-patched_modules = "backport_inspect typing27"
+patched_modules = "backport_inspect typing27 contextlib36"
 
 offending_words = {
     "behavio""ur": "behavior",

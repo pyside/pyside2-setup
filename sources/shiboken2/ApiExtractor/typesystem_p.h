@@ -246,6 +246,7 @@ private:
     QString m_defaultPackage;
     QString m_defaultSuperclass;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
+    TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
     QString m_error;
     const TypeEntry::CodeGeneration m_generate;
 

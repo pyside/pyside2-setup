@@ -5,6 +5,36 @@
     <primitive-type name="float" />
     <primitive-type name="bool" />
 
+    <template name="cpplist_to_pylist_convertion">
+        PyObject *%out = PyList_New(int(%in.size()));
+        int idx  = 0;
+        for (const auto &amp;cppItem : %in)
+            PyList_SET_ITEM(%out, idx++, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
+        return %out;
+    </template>
+    <template name="pyseq_to_cpplist_convertion">
+        Shiboken::AutoDecRef seq(PySequence_Fast(%in, 0));
+        for (int i = 0, size = PySequence_Fast_GET_SIZE(seq.object()); i &lt; size; ++i) {
+            PyObject* pyItem = PySequence_Fast_GET_ITEM(seq.object(), i);
+            %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
+            %out.push_back(cppItem);
+        }
+    </template>
+    <container-type name="std::vector" type="list">
+        <include file-name="list" location="global"/>
+        <conversion-rule>
+            <native-to-target>
+                <insert-template name="cpplist_to_pylist_convertion"/>
+            </native-to-target>
+            <target-to-native>
+                <add-conversion type="PySequence">
+                    <insert-template name="pyseq_to_cpplist_convertion"/>
+                </add-conversion>
+            </target-to-native>
+        </conversion-rule>
+    </container-type>
+
+
     <!-- Used in tests to check what C++ objects are allocated. -->
     <object-type name="Registry" />
 

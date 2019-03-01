@@ -1871,40 +1871,12 @@ bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func
     return true;
 }
 
-static bool generateExceptionHandling(const AbstractMetaFunction *func,
-                                      ExceptionSpecification spec,
-                                      TypeSystem::ExceptionHandling handling)
-{
-    switch (func->functionType()) {
-    case AbstractMetaFunction::CopyConstructorFunction:
-    case AbstractMetaFunction::MoveConstructorFunction:
-    case AbstractMetaFunction::AssignmentOperatorFunction:
-    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
-    case AbstractMetaFunction::DestructorFunction:
-        return false;
-    default:
-        break;
-    }
-    switch (handling) {
-    case TypeSystem::ExceptionHandling::On:
-        return true;
-    case TypeSystem::ExceptionHandling::AutoDefaultToOn:
-        return spec != ExceptionSpecification::NoExcept;
-    case TypeSystem::ExceptionHandling::AutoDefaultToOff:
-        return spec == ExceptionSpecification::Throws;
-    default:
-        break;
-    }
-    return false;
-}
-
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem)
 {
     if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
         return nullptr;
     QString functionName = functionItem->name();
     QString className;
-    TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     if (m_currentClass) {
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
         // and overridden metaObject(), QGADGET helpers
@@ -1913,7 +1885,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
         className = m_currentClass->typeEntry()->qualifiedCppName();
-        exceptionHandling = m_currentClass->typeEntry()->exceptionHandling();
         if (functionName == QLatin1String("metaObject") && className != QLatin1String("QObject"))
             return nullptr;
     }
@@ -2085,15 +2056,11 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     const FunctionModificationList functionMods = metaFunction->modifications(m_currentClass);
 
     for (const FunctionModification &mod : functionMods) {
-        if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified) {
-            exceptionHandling = mod.exceptionHandling();
-            break;
-        }
+        if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified)
+            metaFunction->setExceptionHandlingModification(mod.exceptionHandling());
+        else if (mod.allowThread() != TypeSystem::AllowThread::Unspecified)
+            metaFunction->setAllowThreadModification(mod.allowThread());
     }
-
-    metaFunction->setGenerateExceptionHandling(generateExceptionHandling(metaFunction,
-                                                                         functionItem->exceptionSpecification(),
-                                                                         exceptionHandling));
 
     // Find the correct default values
     for (int i = 0, size = metaArguments.size(); i < size; ++i) {
