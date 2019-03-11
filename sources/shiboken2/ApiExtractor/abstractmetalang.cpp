@@ -1285,6 +1285,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " [userAdded]";
     if (m_explicit)
         d << " [explicit]";
+    if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
+        d << " [deprecated]";
     if (m_pointerOperator)
         d << " [operator->]";
     if (m_isCallOperator)
@@ -2637,6 +2639,8 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
         d << '"' << ac->fullName() << '"';
         if (ac->attributes() & AbstractMetaAttributes::FinalCppClass)
             d << " [final]";
+        if (ac->attributes().testFlag(AbstractMetaAttributes::Deprecated))
+            d << " [deprecated]";
         if (ac->m_baseClass)
             d << ", inherits \"" << ac->m_baseClass->name() << '"';
         if (ac->m_templateBaseClass)

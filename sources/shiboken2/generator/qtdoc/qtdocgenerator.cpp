@@ -190,6 +190,12 @@ static QTextStream &operator<<(QTextStream &s, const rstVersionAdded &v)
     return s;
 }
 
+static QByteArray rstDeprecationNote(const char *what)
+{
+    return QByteArrayLiteral(".. note:: This ")
+        + what + QByteArrayLiteral(" is deprecated.\n\n");
+}
+
 // RST anchor string: Anything else but letters, numbers, '_' or '.' replaced by '-'
 static inline bool isValidRstLabelChar(QChar c)
 {
@@ -1594,6 +1600,8 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     const auto version = versionOf(metaClass->typeEntry());
     if (!version.isNull())
         s << rstVersionAdded(version);
+    if (metaClass->attributes().testFlag(AbstractMetaAttributes::Deprecated))
+        s << rstDeprecationNote("class");
 
     writeFunctionList(s, metaClass);
 
@@ -1760,6 +1768,8 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
         const auto version = versionOf(func->typeEntry());
         if (!version.isNull())
             s << indent1 << rstVersionAdded(version);
+        if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated))
+            s << indent1 << rstDeprecationNote("constructor");
 
         const AbstractMetaArgumentList &arguments = func->arguments();
         for (AbstractMetaArgument *arg : arguments) {
@@ -2044,6 +2054,8 @@ void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppC
         const auto version = versionOf(func->typeEntry());
         if (!version.isNull())
             s << INDENT << rstVersionAdded(version);
+        if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated))
+            s << INDENT << rstDeprecationNote("function");
     }
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
