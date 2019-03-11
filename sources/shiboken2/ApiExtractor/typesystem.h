@@ -46,8 +46,6 @@
 extern const char *TARGET_CONVERSION_RULE_FLAG;
 extern const char *NATIVE_CONVERSION_RULE_FLAG;
 
-class Indentor;
-
 class AbstractMetaType;
 QT_BEGIN_NAMESPACE
 class QDebug;

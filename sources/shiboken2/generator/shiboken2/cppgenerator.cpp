@@ -2091,10 +2091,7 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
         QString checkFunc = cpythonCheckFunction(func->ownerClass()->typeEntry());
         s << INDENT << "bool isReverse = " << checkFunc << PYTHON_ARG << ')' << endl;
         {
-            Indentation indent1(INDENT);
-            Indentation indent2(INDENT);
-            Indentation indent3(INDENT);
-            Indentation indent4(INDENT);
+            Indentation indent1(INDENT, 4);
             s << INDENT << "&& !" << checkFunc << "self);" << endl;
         }
         s << INDENT << "if (isReverse)" << endl;
