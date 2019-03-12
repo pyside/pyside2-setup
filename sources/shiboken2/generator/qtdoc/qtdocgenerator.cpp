@@ -167,12 +167,27 @@ static QTextStream &ensureEndl(QTextStream &s)
     return s;
 }
 
-static void formatSince(QTextStream &s, const char *what, const TypeEntry *te)
+static inline QVersionNumber versionOf(const TypeEntry *te)
 {
-    if (te && te->version() > QVersionNumber(0, 0)) {
-        s << ".. note:: This " << what << " was introduced in Qt "
-            << te->version().toString() << '.' << endl;
+    if (te) {
+        const auto version = te->version();
+        if (!version.isNull() && version > QVersionNumber(0, 0))
+            return version;
     }
+    return QVersionNumber();
+}
+
+struct rstVersionAdded
+{
+    explicit rstVersionAdded(const QVersionNumber &v) : m_version(v) {}
+
+    const QVersionNumber m_version;
+};
+
+static QTextStream &operator<<(QTextStream &s, const rstVersionAdded &v)
+{
+    s << ".. versionadded:: "<< v.m_version.toString() << "\n\n";
+    return s;
 }
 
 // RST anchor string: Anything else but letters, numbers, '_' or '.' replaced by '-'
@@ -1576,7 +1591,9 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
 
     writeInheritedByList(s, metaClass, classes());
 
-    formatSince(s, "class", metaClass->typeEntry());
+    const auto version = versionOf(metaClass->typeEntry());
+    if (!version.isNull())
+        s << rstVersionAdded(version);
 
     writeFunctionList(s, metaClass);
 
@@ -1608,7 +1625,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
         else
             s <<  ".. method:: ";
 
-        writeFunction(s, true, metaClass, func);
+        writeFunction(s, metaClass, func);
     }
 
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, 0);
@@ -1697,7 +1714,9 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
     for (AbstractMetaEnum *en : enums) {
         s << section_title << getClassTargetFullName(cppClass) << '.' << en->name() << endl << endl;
         writeFormattedText(s, en->documentation(), cppClass);
-        formatSince(s, "enum", en->typeEntry());
+        const auto version = versionOf(en->typeEntry());
+        if (!version.isNull())
+            s << rstVersionAdded(version);
     }
 
 }
@@ -1717,7 +1736,6 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
 void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* cppClass)
 {
     static const QString sectionTitle = QLatin1String(".. class:: ");
-    static const QString sectionTitleSpace = QString(sectionTitle.size(), QLatin1Char(' '));
 
     AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
     for (int i = lst.size() - 1; i >= 0; --i) {
@@ -1728,14 +1746,21 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     bool first = true;
     QHash<QString, AbstractMetaArgument*> arg_map;
 
+    IndentorBase<1> indent1;
+    indent1.indent = INDENT.total();
     for (AbstractMetaFunction *func : qAsConst(lst)) {
+        s << indent1;
         if (first) {
             first = false;
             s << sectionTitle;
-        } else {
-            s << sectionTitleSpace;
+            indent1.indent += sectionTitle.size();
         }
-        writeFunction(s, false, cppClass, func);
+        s << functionSignature(cppClass, func) << "\n\n";
+
+        const auto version = versionOf(func->typeEntry());
+        if (!version.isNull())
+            s << indent1 << rstVersionAdded(version);
+
         const AbstractMetaArgumentList &arguments = func->arguments();
         for (AbstractMetaArgument *arg : arguments) {
             if (!arg_map.contains(arg->name())) {
@@ -1747,7 +1772,7 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     s << endl;
 
     for (QHash<QString, AbstractMetaArgument*>::const_iterator it = arg_map.cbegin(), end = arg_map.cend(); it != end; ++it) {
-        Indentation indentation(INDENT);
+        Indentation indentation(INDENT, 2);
         writeParameterType(s, cppClass, it.value());
     }
 
@@ -1910,7 +1935,7 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
     return didSomething;
 }
 
-void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
+QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
     QString className;
     if (!func->isConstructor())
@@ -1922,7 +1947,8 @@ void QtDocGenerator::writeFunctionSignature(QTextStream& s, const AbstractMetaCl
     if (!funcName.startsWith(className))
         funcName = className + funcName;
 
-    s << funcName << "(" << parseArgDocStyle(cppClass, func) << ")";
+    return funcName + QLatin1Char('(') + parseArgDocStyle(cppClass, func)
+        + QLatin1Char(')');
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
@@ -1976,8 +2002,6 @@ void QtDocGenerator::writeParameterType(QTextStream& s, const AbstractMetaClass*
 void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
                                                  const AbstractMetaFunction *func)
 {
-    Indentation indentation(INDENT);
-
     s << endl;
     const AbstractMetaArgumentList &funcArgs = func->arguments();
     for (AbstractMetaArgument *arg : funcArgs) {
@@ -2009,22 +2033,23 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
     s << endl;
 }
 
-void QtDocGenerator::writeFunction(QTextStream& s, bool writeDoc, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
+void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
+                                   const AbstractMetaFunction* func)
 {
-    writeFunctionSignature(s, cppClass, func);
-    s << endl;
+    s << functionSignature(cppClass, func) << "\n\n";
 
-    formatSince(s, "method", func->typeEntry());
-
-    if (writeDoc) {
-        s << endl;
+    {
+        Indentation indentation(INDENT);
         writeFunctionParametersType(s, cppClass, func);
-        s << endl;
-        writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
-        if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func))
-            writeFormattedText(s, func->documentation(), cppClass);
-        writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
+        const auto version = versionOf(func->typeEntry());
+        if (!version.isNull())
+            s << INDENT << rstVersionAdded(version);
     }
+
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func))
+        writeFormattedText(s, func->documentation(), cppClass);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
 }
 
 static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4)
