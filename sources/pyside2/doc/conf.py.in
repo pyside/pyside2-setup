@@ -18,7 +18,8 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@')
 sys.path.append('@pyside_BINARY_DIR@')
-sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@/../../../examples/webenginewidgets/tabbedbrowser')
+if @HAS_WEBENGINE_WIDGETS@:
+    sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@/../../../examples/webenginewidgets/tabbedbrowser')
 
 # -- General configuration -----------------------------------------------------
 
