@@ -55,6 +55,13 @@ static inline QString briefAttribute() { return QStringLiteral("brief"); }
 
 static inline QString none() { return QStringLiteral("None"); }
 
+static void stripPythonQualifiers(QString *s)
+{
+    const int lastSep = s->lastIndexOf(QLatin1Char('.'));
+    if (lastSep != -1)
+        s->remove(0, lastSep + 1);
+}
+
 static bool shouldSkip(const AbstractMetaFunction* func)
 {
     // Constructors go to separate section
@@ -1034,20 +1041,17 @@ static QString fixLinkText(const QtXmlToSphinx::LinkContext *linkContext,
         || linkContext->type == QtXmlToSphinx::LinkContext::Reference) {
         return linktext;
     }
-    // For the language reference documentation, clear the link text if it matches
-    // the function/class/enumeration name.
-    linktext.replace(QLatin1String("::"), QLatin1String("."));
+    // For the language reference documentation, strip the module name.
+    // Clear the link text if that matches the function/class/enumeration name.
+    const int lastSep = linktext.lastIndexOf(QLatin1String("::"));
+    if (lastSep != -1)
+        linktext.remove(0, lastSep + 2);
+    else
+         stripPythonQualifiers(&linktext);
     if (linkContext->linkRef == linktext)
         return QString();
     if ((linkContext->type & QtXmlToSphinx::LinkContext::FunctionMask) != 0
         && (linkContext->linkRef + QLatin1String("()")) == linktext) {
-        return QString();
-    }
-    const QStringRef item = linkContext->linkRef.splitRef(QLatin1Char('.')).constLast();
-    if (item == linktext)
-        return QString();
-    if ((linkContext->type & QtXmlToSphinx::LinkContext::FunctionMask) != 0
-        && (item + QLatin1String("()")) == linktext) {
         return QString();
     }
     return  linktext;
@@ -1964,17 +1968,18 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, con
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
 {
     QString strType;
-    if (type->name() == QLatin1String("QString")) {
+    const QString name = type->name();
+    if (name == QLatin1String("QString")) {
         strType = QLatin1String("unicode");
-    } else if (type->name() == QLatin1String("QVariant")) {
+    } else if (name == QLatin1String("QVariant")) {
         strType = QLatin1String("object");
-    } else if (type->name() == QLatin1String("QStringList")) {
+    } else if (name == QLatin1String("QStringList")) {
         strType = QLatin1String("list of strings");
-    } else if (type->isConstant() && type->name() == QLatin1String("char") && type->indirections() == 1) {
+    } else if (type->isConstant() && name == QLatin1String("char") && type->indirections() == 1) {
         strType = QLatin1String("str");
-    } else if (type->name().startsWith(QLatin1String("unsigned short"))) {
+    } else if (name.startsWith(QLatin1String("unsigned short"))) {
         strType = QLatin1String("int");
-    } else if (type->name().startsWith(QLatin1String("unsigned "))) { // uint and ulong
+    } else if (name.startsWith(QLatin1String("unsigned "))) { // uint and ulong
         strType = QLatin1String("long");
     } else if (type->isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
@@ -1998,7 +2003,7 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, cons
             refTag = QLatin1String("attr");
         else
             refTag = QLatin1String("class");
-        strType = QLatin1Char(':') + refTag + QLatin1String(":`") + type->fullName() + QLatin1Char('`');
+        strType = QLatin1Char(':') + refTag + QLatin1String(":`") + name + QLatin1Char('`');
     }
     return strType;
 }
@@ -2196,7 +2201,7 @@ void QtDocGenerator::writeModuleDocumentation()
             Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
             if (moduleDoc.format() == Documentation::Native) {
                 QString context = it.key();
-                context.remove(0, context.lastIndexOf(QLatin1Char('.')) + 1);
+                stripPythonQualifiers(&context);
                 QtXmlToSphinx x(this, moduleDoc.value(), context);
                 s << x;
             } else {
