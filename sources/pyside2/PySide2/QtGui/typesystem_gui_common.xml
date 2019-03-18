@@ -2925,6 +2925,9 @@
       <modify-function signature="borderColor(unsigned int*)const" remove="all"/>
       <modify-function signature="borderColor(int*)const" remove="all"/>
       <modify-function signature="borderColor(float*)const" remove="all"/>
+      <!-- Work around link error introduced by qtbase/d15b02ff291e3124d9bb8ac3b06b704c292f52ab, can be removed once
+           qtbase/1bfabe35d8178c93e66acef21c01e08980f9ed0d has landed -->
+      <modify-function signature="setData(int,int,int,int,int,int,int,QOpenGLTexture::PixelFormat,QOpenGLTexture::PixelType,const void*,QOpenGLPixelTransferOptions*const)" remove="all"/>
   </object-type>
   <object-type name="QOpenGLTextureBlitter">
       <enum-type name="Origin"/>
