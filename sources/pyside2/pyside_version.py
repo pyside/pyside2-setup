@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -38,7 +38,7 @@
 #############################################################################
 
 major_version = "5"
-minor_version = "13"
+minor_version = "14"
 patch_version = "0"
 
 # For example: "a", "b", "rc"
