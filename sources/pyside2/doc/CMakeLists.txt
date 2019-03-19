@@ -28,6 +28,8 @@ configure_file("pyside-config.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/pyside-con
 file(READ "${pyside2_BINARY_DIR}/pyside2_global.h" docHeaderContents)
 file(READ "typesystem_doc.xml.in" typeSystemDocXmlContents)
 
+set(HAS_WEBENGINE_WIDGETS 0)
+
 foreach(moduleIn ${all_module_shortnames})
     string(TOLOWER "${moduleIn}" lowerModuleIn)
     set(docConf "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-qt${lowerModuleIn}.qdocconf.in")
@@ -45,6 +47,7 @@ foreach(moduleIn ${all_module_shortnames})
             set(modules Multimedia "${moduleIn}")
         elseif ("${moduleIn}" STREQUAL "WebEngineWidgets")
             set(modules WebEngine WebEngineCore "${moduleIn}")
+            set(HAS_WEBENGINE_WIDGETS 1)
         else()
             set(modules "${moduleIn}")
         endif()

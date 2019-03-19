@@ -207,6 +207,35 @@ AbstractMetaType *AbstractMetaType::copy() const
     return cpy;
 }
 
+// For applying the <array> function argument modification: change into a type
+// where "int *" becomes "int[]".
+bool AbstractMetaType::applyArrayModification(QString *errorMessage)
+{
+    if (m_pattern == AbstractMetaType::NativePointerAsArrayPattern) {
+        *errorMessage = QLatin1String("<array> modification already applied.");
+        return false;
+    }
+    if (m_arrayElementType != nullptr)  {
+        QTextStream(errorMessage) << "The type \"" << cppSignature()
+            << "\" is an array of " << m_arrayElementType->name() << '.';
+        return false;
+    }
+    if (m_indirections.isEmpty()) {
+        QTextStream(errorMessage) << "The type \"" << cppSignature()
+            << "\" does not have indirections.";
+        return false;
+    }
+    // Element type to be used for ArrayHandle<>, strip constness.
+    auto elementType = copy();
+    elementType->m_indirections.pop_front();
+    elementType->setConstant(false);
+    elementType->setVolatile(false);
+    elementType->decideUsagePattern();
+    m_arrayElementType = elementType;
+    setTypeUsagePattern(AbstractMetaType::NativePointerAsArrayPattern);
+    return true;
+}
+
 AbstractMetaTypeCList AbstractMetaType::nestedArrayTypes() const
 {
     AbstractMetaTypeCList result;
@@ -1256,6 +1285,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " [userAdded]";
     if (m_explicit)
         d << " [explicit]";
+    if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
+        d << " [deprecated]";
     if (m_pointerOperator)
         d << " [operator->]";
     if (m_isCallOperator)
@@ -2608,6 +2639,8 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
         d << '"' << ac->fullName() << '"';
         if (ac->attributes() & AbstractMetaAttributes::FinalCppClass)
             d << " [final]";
+        if (ac->attributes().testFlag(AbstractMetaAttributes::Deprecated))
+            d << " [deprecated]";
         if (ac->m_baseClass)
             d << ", inherits \"" << ac->m_baseClass->name() << '"';
         if (ac->m_templateBaseClass)

@@ -30,6 +30,7 @@
 #include <reporthandler.h>
 #include <graph.h>
 #include "overloaddata.h"
+#include "indentor.h"
 #include "shibokengenerator.h"
 
 #include <QtCore/QDir>
@@ -857,13 +858,14 @@ static inline QString toHtml(QString s)
 
 QString OverloadData::dumpGraph() const
 {
-    QString indent(4, QLatin1Char(' '));
+    Indentor INDENT;
+    Indentation indent(INDENT);
     QString result;
     QTextStream s(&result);
     if (m_argPos == -1) {
         const AbstractMetaFunction* rfunc = referenceFunction();
         s << "digraph OverloadedFunction {" << endl;
-        s << indent << "graph [fontsize=12 fontname=freemono labelloc=t splines=true overlap=false rankdir=LR];" << endl;
+        s << INDENT << "graph [fontsize=12 fontname=freemono labelloc=t splines=true overlap=false rankdir=LR];" << endl;
 
         // Shows all function signatures
         s << "legend [fontsize=9 fontname=freemono shape=rect label=\"";
@@ -878,7 +880,7 @@ QString OverloadData::dumpGraph() const
         s << "\"];" << endl;
 
         // Function box title
-        s << indent << '"' << rfunc->name() << "\" [shape=plaintext style=\"filled,bold\" margin=0 fontname=freemono fillcolor=white penwidth=1 ";
+        s << INDENT << '"' << rfunc->name() << "\" [shape=plaintext style=\"filled,bold\" margin=0 fontname=freemono fillcolor=white penwidth=1 ";
         s << "label=<<table border=\"0\" cellborder=\"0\" cellpadding=\"3\" bgcolor=\"white\">";
         s << "<tr><td bgcolor=\"black\" align=\"center\" cellpadding=\"6\" colspan=\"2\"><font color=\"white\">";
         if (rfunc->ownerClass())
@@ -931,14 +933,14 @@ QString OverloadData::dumpGraph() const
         s << "</table>> ];" << endl;
 
         for (const OverloadData *pd : m_nextOverloadData)
-            s << indent << '"' << rfunc->name() << "\" -> " << pd->dumpGraph();
+            s << INDENT << '"' << rfunc->name() << "\" -> " << pd->dumpGraph();
 
         s << "}" << endl;
     } else {
         QString argId = QLatin1String("arg_") + QString::number(quintptr(this));
         s << argId << ';' << endl;
 
-        s << indent << '"' << argId << "\" [shape=\"plaintext\" style=\"filled,bold\" margin=\"0\" fontname=\"freemono\" fillcolor=\"white\" penwidth=1 ";
+        s << INDENT << '"' << argId << "\" [shape=\"plaintext\" style=\"filled,bold\" margin=\"0\" fontname=\"freemono\" fillcolor=\"white\" penwidth=1 ";
         s << "label=<<table border=\"0\" cellborder=\"0\" cellpadding=\"3\" bgcolor=\"white\">";
 
         // Argument box title
@@ -982,7 +984,7 @@ QString OverloadData::dumpGraph() const
         s << "</table>>];" << endl;
 
         for (const OverloadData *pd : m_nextOverloadData)
-            s << indent << argId << " -> " << pd->dumpGraph();
+            s << INDENT << argId << " -> " << pd->dumpGraph();
     }
     return result;
 }

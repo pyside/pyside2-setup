@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the test suite of Qt for Python.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -26,27 +26,60 @@
 **
 ****************************************************************************/
 
-#ifndef NONTYPETEMPLATE_H
-#define NONTYPETEMPLATE_H
+#ifndef INDENTOR_H
+#define INDENTOR_H
 
-#include "libsamplemacros.h"
+#include <QtCore/QTextStream>
 
-#include <algorithm>
-#include <numeric>
+/**
+* Utility class to store the indentation level, use it in a QTextStream.
+*/
 
-template <int Size> class IntArray
+template <int tabWidth>
+class IndentorBase
 {
 public:
-    explicit IntArray(const int *data) { std::copy(data, data + Size, m_array); }
-    explicit IntArray(int v) { std::fill(m_array, m_array + Size, v); }
+    int total() const { return tabWidth * indent; }
 
-    int sum() const { return std::accumulate(m_array, m_array + Size, int(0)); }
-
-private:
-    int m_array[Size];
+    int indent = 0;
 };
 
-typedef IntArray<2> IntArray2;
-typedef IntArray<3> IntArray3;
+using Indentor = IndentorBase<4>;
+using Indentor1 = IndentorBase<1>;
 
-#endif // NONTYPETEMPLATE_H
+/**
+*   Class that use the RAII idiom to set and unset the indentation level.
+*/
+
+template <int tabWidth>
+class IndentationBase
+{
+public:
+    using Indentor = IndentorBase<tabWidth>;
+
+    IndentationBase(Indentor &indentor, int count = 1) : m_count(count), indentor(indentor)
+    {
+        indentor.indent += m_count;
+    }
+
+    ~IndentationBase()
+    {
+        indentor.indent -= m_count;
+    }
+
+private:
+    const int m_count;
+    Indentor &indentor;
+};
+
+using Indentation = IndentationBase<4>;
+
+template <int tabWidth>
+inline QTextStream &operator <<(QTextStream &s, const IndentorBase<tabWidth> &indentor)
+{
+    for (int i = 0, total = indentor.total(); i < total; ++i)
+        s << ' ';
+    return s;
+}
+
+#endif // GENERATOR_H

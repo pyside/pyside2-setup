@@ -1,0 +1,4 @@
+{
+    "files": ["../testrunner.py", "blacklist.py", "buildlog.py", "command.py",
+              "helper.py", "__init__.py", "parser.py", "runner.py", "wheel_tester.py"]
+}

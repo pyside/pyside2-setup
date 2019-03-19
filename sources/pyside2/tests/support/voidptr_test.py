@@ -38,9 +38,21 @@ class PySide2Support(unittest.TestCase):
         # a C++ object, a wrapped Shiboken Object type,
         # an object implementing the Python Buffer interface,
         # or another VoidPtr object.
-        ba = QByteArray(b"Hello world")
-        voidptr = VoidPtr(ba)
-        self.assertIsInstance(voidptr, shiboken.VoidPtr)
+
+        # Original content
+        b = b"Hello world"
+        ba = QByteArray(b)
+        vp = VoidPtr(ba, ba.size())
+        self.assertIsInstance(vp, shiboken.VoidPtr)
+
+        # Create QByteArray from voidptr byte interpretation
+        nba = QByteArray.fromRawData(vp.toBytes())
+        # Compare original bytes to toBytes()
+        self.assertTrue(b, vp.toBytes())
+        # Compare original with new QByteArray data
+        self.assertTrue(b, nba.data())
+        # Convert original and new to str
+        self.assertTrue(str(b), str(nba))
 
 if __name__ == '__main__':
     unittest.main()

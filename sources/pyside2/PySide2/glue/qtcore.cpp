@@ -965,13 +965,33 @@ if (PyIndex_Check(_key)) {
 // @snippet qbytearray-msetitem
 
 // @snippet qbytearray-bufferprotocol
-#if PY_VERSION_HEX < 0x03000000
-
+extern "C" {
 // QByteArray buffer protocol functions
 // see: http://www.python.org/dev/peps/pep-3118/
 
-extern "C" {
+static int SbkQByteArray_getbufferproc(PyObject* obj, Py_buffer *view, int flags)
+{
+    if (!view || !Shiboken::Object::isValid(obj))
+        return -1;
 
+    QByteArray* cppSelf = %CONVERTTOCPP[QByteArray*](obj);
+    view->obj = obj;
+    view->buf = reinterpret_cast<void*>(cppSelf->data());
+    view->len = cppSelf->size();
+    view->readonly = 0;
+    view->itemsize = 1;
+    view->format = const_cast<char*>("c");
+    view->ndim = 1;
+    view->shape = NULL;
+    view->strides = &view->itemsize;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+
+    Py_XINCREF(obj);
+    return 0;
+}
+
+#if PY_VERSION_HEX < 0x03000000
 static Py_ssize_t SbkQByteArray_segcountproc(PyObject* self, Py_ssize_t* lenp)
 {
     if (lenp)
@@ -993,12 +1013,18 @@ PyBufferProcs SbkQByteArrayBufferProc = {
     /*bf_getreadbuffer*/  &SbkQByteArray_readbufferproc,
     /*bf_getwritebuffer*/ (writebufferproc) &SbkQByteArray_readbufferproc,
     /*bf_getsegcount*/    &SbkQByteArray_segcountproc,
-    /*bf_getcharbuffer*/  (charbufferproc) &SbkQByteArray_readbufferproc
+    /*bf_getcharbuffer*/  (charbufferproc) &SbkQByteArray_readbufferproc,
+    /*bf_getbuffer*/  (getbufferproc)SbkQByteArray_getbufferproc,
+};
+#else
+
+static PyBufferProcs SbkQByteArrayBufferProc = {
+    /*bf_getbuffer*/  (getbufferproc)SbkQByteArray_getbufferproc,
+    /*bf_releasebuffer*/ (releasebufferproc)0,
 };
 
-}
-
 #endif
+}
 // @snippet qbytearray-bufferprotocol
 
 // @snippet qbytearray-operatorplus-1
@@ -1110,8 +1136,14 @@ if (PyBytes_Check(%PYARG_1)) {
 
 // @snippet qbytearray-py3
 #if PY_VERSION_HEX < 0x03000000
-    Shiboken::SbkType<QByteArray>()->tp_as_buffer = &SbkQByteArrayBufferProc;
-    Shiboken::SbkType<QByteArray>()->tp_flags |= Py_TPFLAGS_HAVE_GETCHARBUFFER;
+Shiboken::SbkType<QByteArray>()->tp_as_buffer = &SbkQByteArrayBufferProc;
+Shiboken::SbkType<QByteArray>()->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#else
+#ifdef Py_LIMITED_API
+PepType_AS_BUFFER(Shiboken::SbkType<QByteArray>()) = &SbkQByteArrayBufferProc;
+#else
+Shiboken::SbkType<QByteArray>()->tp_as_buffer = &SbkQByteArrayBufferProc;
+#endif
 #endif
 // @snippet qbytearray-py3
 

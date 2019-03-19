@@ -28,6 +28,14 @@
 ##
 #############################################################################
 
+hasNumPy = False
+
+try:
+    import numpy
+    hasNumPy = True
+except ImportError:
+    pass
+
 import unittest
 
 from sample import IntArray2, IntArray3
@@ -39,6 +47,13 @@ class NonTypeTemplateTest(unittest.TestCase):
         self.assertEqual(array2.sum(), 6)
         array3 = IntArray3(5)
         self.assertEqual(array3.sum(), 15)
+
+    def testArrayInitializer(self):
+        if not hasNumPy:
+            return
+        array3 = IntArray3(numpy.array([1, 2, 3], dtype = 'int32'))
+        self.assertEqual(array3.sum(), 6)
+
 
 if __name__ == '__main__':
     unittest.main()

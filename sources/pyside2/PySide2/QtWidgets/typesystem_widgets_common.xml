@@ -610,7 +610,13 @@
       <include file-name="QPair" location="global"/>
     </extra-includes>
   </object-type>
-  <object-type name="QGraphicsItemGroup"/>
+  <object-type name="QGraphicsItemGroup">
+    <modify-function signature="addToGroup(QGraphicsItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
   <object-type name="QGraphicsLineItem"/>
   <object-type name="QGraphicsPathItem"/>
   <object-type name="QGraphicsPixmapItem">
