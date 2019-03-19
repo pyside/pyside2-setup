@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -71,6 +71,7 @@ from build_scripts.utils import find_glob_in_path
 from build_scripts.utils import run_process
 from build_scripts.utils import rmtree
 import distutils.log as log
+import platform
 
 log.set_verbosity(1)
 
@@ -203,6 +204,22 @@ def generate_build_qmake():
     log.info("")
 
 
+def compile_using_pyinstaller():
+    src_path = os.path.join("..", "hello.py")
+    exit_code = run_process([sys.executable, "-m", "PyInstaller",
+        "--name=hello_app", "--console", "--log-level=DEBUG",
+        src_path])
+    if exit_code:
+        # raise RuntimeError("Failure while compiling script using PyInstaller.")
+        print("PYINST: Failure while compiling script using PyInstaller.")
+        print("PYINST:   sys.version         = {}".format(sys.version.splitlines()[0]))
+        print("PYINST:   platform.platform() = {}".format(platform.platform()))
+        print("PYINST: See the error message above.")
+        return False
+    log.info("")
+    return True
+
+
 def run_make():
     args = []
     if is_unix():
@@ -232,6 +249,14 @@ def run_make_install():
     log.info("")
 
 
+def run_compiled_script(binary_path):
+    args = [binary_path]
+    exit_code = run_process(args)
+    if exit_code:
+        raise RuntimeError("Failure while executing compiled script: {}".format(binary_path))
+    log.info("")
+
+
 def execute_script(script_path):
     args = [sys.executable, script_path]
     exit_code = run_process(args)
@@ -256,6 +281,20 @@ def prepare_build_folder(src_path, build_folder_name):
 
 def try_build_examples():
     examples_dir = get_examples_dir()
+
+    # This script should better go to the last place, here.
+    # But because it is most likely to break, we put it here for now.
+    log.info("Attempting to build hello.py using PyInstaller.")
+    # PyInstaller is loaded by coin_build_instructions.py, but not when
+    # testing directly this script.
+    src_path = os.path.join(examples_dir, "installer_test")
+    prepare_build_folder(src_path, "pyinstaller")
+
+    # Currently, there are bugs in the COIN setup.
+    # That is currently not the subject of this test:
+    if compile_using_pyinstaller():
+        run_compiled_script(os.path.join(src_path,
+                            "pyinstaller", "dist", "hello_app", "hello_app"))
 
     log.info("Attempting to build and run samplebinding using cmake.")
     src_path = os.path.join(examples_dir, "samplebinding")

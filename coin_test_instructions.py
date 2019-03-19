@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -68,7 +68,7 @@ def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-    install_pip_dependencies(env_pip, ["numpy", "PyOpenGL", "setuptools", "six"])
+    install_pip_dependencies(env_pip, ["numpy", "PyOpenGL", "setuptools", "six", "pyinstaller"])
     install_pip_wheel_package(env_pip)
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",

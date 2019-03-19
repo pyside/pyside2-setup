@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -149,7 +149,7 @@ def shared_library_suffix():
 
 def import_suffixes():
     if (sys.version_info >= (3, 4)):
-        import importlib
+        import importlib.machinery
         return importlib.machinery.EXTENSION_SUFFIXES
     else:
         import imp
