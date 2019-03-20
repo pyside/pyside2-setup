@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -41,8 +41,29 @@ from __future__ import print_function, absolute_import
 
 """
 existence_test.py
+-----------------
 
 A test that checks all function signatures if they still exist.
+
+Definition of the rules used:
+=============================
+
+Any entry
+---------
+
+    Exists in file      Exists in Binary     Result
+            +               +                   ok
+            +               -                   error
+            -               +                   ok
+
+List entry
+----------
+
+     Arity in file      Arity in Binary      Result
+            n               n                   ok
+            n               < n                 error
+            n               > n                 ok
+
 """
 
 import os
@@ -87,16 +108,6 @@ if have_refmodule and not hasattr(sig_exists, "dict"):
     os.unlink(effectiveRefPath)
     have_refmodule = False
 
-def formatSignatures(signatures):
-    result = ''
-    for s in signatures:
-        result += ' ({})'.format(','.join(s))
-    return result
-
-def msgMultiSignatureCount(key, actual, expected):
-    return "multi-signature count mismatch for '{}'. Actual {} [{}] vs. expected {} [{}]')".format(key,
-        len(actual), formatSignatures(actual),
-        len(expected), formatSignatures(expected))
 
 @unittest.skipIf(not have_refmodule,
                  "not activated for this platform or version")
@@ -107,38 +118,93 @@ class TestSignaturesExists(unittest.TestCase):
     file. Simply run init_platform.py and add the generated file to the
     repository.
     """
+
+    @staticmethod
+    def _do_the_test(found_sigs):
+
+        def multi_signature_msg(key, actual, expect):
+            len_act = len(actual) if type(actual) is list else 1
+            len_exp = len(expect) if type(expect) is list else 1
+            return ("multi-signature count mismatch for '{key}'. "
+                    "Actual {len_act} {actual} vs. expected {len_exp} {expect}')"
+                    .format(**locals()))
+
+        for key, value in sig_exists.dict.items():
+            name = key.rsplit(".", 1)[-1]
+            if name in ("next", "__next__"): # ignore problematic cases
+                continue
+            if key not in found_sigs:
+                warn("missing key: '{}'".format(key))
+            else:
+                found_val = found_sigs[key]
+                if type(value) is list and (
+                        type(found_val) is tuple or
+                        len(found_val) < len(value)):
+                    # We check that nothing got lost. But it is ok when an older
+                    # registry file does not know all variants, yet!
+                    warn(multi_signature_msg(key, found_val, value))
+
     def test_signatures(self):
         found_sigs = enum_all()
         with isolate_warnings():
-            for key, value in sig_exists.dict.items():
-                name = key.rsplit(".", 1)[-1]
-                if name in ("next", "__next__"): # ignore problematic cases
-                    continue
-                if key not in found_sigs:
-                    warn("missing key: '{}'".format(key))
-                elif isinstance(value, list) and len(value) > len(found_sigs[key]):
-                    # We check that nothing got lost. But it is ok when an older
-                    # registry file does not have all variants, yet!
-                    warn(msgMultiSignatureCount(key, found_sigs[key], value))
+            self._do_the_test(found_sigs)
             if is_ci and check_warnings():
                 raise RuntimeError("There are errors, see above.")
 
     def test_error_is_raised(self):
         found_sigs = enum_all()
-        # make sure that errors are actually raised
-        found_sigs.pop(list(found_sigs.keys())[42])
+        # Make sure that errors are actually raised.
+        search = list(found_sigs.keys())
+        pos = 42  # arbitrary and historycal, could be 0 as well
+
+        # We try all variants:
+        while type(found_sigs[search[pos]]) is not tuple:
+            pos += 1
+        tuple_key = search[pos]
+        while type(found_sigs[search[pos]]) is not list:
+            pos += 1
+        list_key = search[pos]
+
+        test_sigs = found_sigs.copy()
+        test_sigs.pop(tuple_key)
         with isolate_warnings(), suppress_warnings():
-            for key, value in sig_exists.dict.items():
-                name = key.rsplit(".", 1)[-1]
-                if name in ("next", "__next__"): # ignore problematic cases
-                    continue
-                if key not in found_sigs:
-                    warn("missing key: '{}'".format(key))
-                elif isinstance(value, list) and len(value) > len(found_sigs[key]):
-                    # We check that nothing got lost. But it is ok when an older
-                    # registry file does not have all variants, yet!
-                    warn(msgMultiSignatureCount(key, found_sigs[key], value))
-            self.assertTrue(check_warnings())
+            self._do_the_test(test_sigs)
+            self.assertTrue(check_warnings(), "you warn about too few entries")
+
+        test_sigs = found_sigs.copy()
+        test_sigs["whatnot"] = ("nothing", "real")
+        with isolate_warnings(), suppress_warnings():
+            self._do_the_test(test_sigs)
+            self.assertFalse(check_warnings(), "you ignore too many entries")
+
+        test_sigs = found_sigs.copy()
+        repl = test_sigs[list_key]
+        repl.pop(0)
+        test_sigs[list_key] = repl
+        with isolate_warnings(), suppress_warnings():
+            self._do_the_test(test_sigs)
+            # An arity that is now missing is an error.
+            self.assertTrue(check_warnings(), "you warn when arity got smaller")
+
+        test_sigs = found_sigs.copy()
+        repl = test_sigs[list_key]
+        repl = repl[0]
+        assert type(repl) is tuple
+        test_sigs[list_key] = repl
+        with isolate_warnings(), suppress_warnings():
+            self._do_the_test(test_sigs)
+            # An arity that is now missing is an error.
+            self.assertTrue(check_warnings(), "you warn when list degraded to tuple")
+
+        test_sigs = found_sigs.copy()
+        repl = test_sigs[list_key]
+        repl = repl + repl
+        test_sigs[list_key] = repl
+        with isolate_warnings(), suppress_warnings():
+            self._do_the_test(test_sigs)
+            # More arities are ignored, because we might test an older version.
+            self.assertFalse(check_warnings(), "you ignore when arity got bigger")
+
 
 tested_versions = (5, 6), (5, 9), (5, 11), (5, 12)
 
