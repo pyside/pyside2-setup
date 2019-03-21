@@ -216,7 +216,7 @@ class Dialog(QtWidgets.QDialog):
             self.colorLabel.setAutoFillBackground(True)
 
     def setFont(self):
-        font, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(self.fontLabel.text()), self)
+        ok, font = QtWidgets.QFontDialog.getFont(QtGui.QFont(self.fontLabel.text()), self)
         if ok:
             self.fontLabel.setText(font.key())
             self.fontLabel.setFont(font)
