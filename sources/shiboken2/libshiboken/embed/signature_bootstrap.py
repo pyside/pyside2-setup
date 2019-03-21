@@ -109,7 +109,7 @@ def bootstrap():
         import shibokenmodule as root
     rp = os.path.realpath(os.path.dirname(root.__file__))
     # This can be the shiboken2 directory or the binary module, so search.
-    look_for = "files.dir"
+    look_for = os.path.join("files.dir", "shibokensupport", "signature", "loader.py")
     while len(rp) > 3 and not os.path.exists(os.path.join(rp, look_for)):
         rp = os.path.abspath(os.path.join(rp, ".."))
 
@@ -118,12 +118,14 @@ def bootstrap():
     use_embedding = bool(getattr(sys, embedding_var, False))
     # We keep the zip file for inspection if the sys variable has been set.
     keep_zipfile = hasattr(sys, embedding_var)
-    real_dir = os.path.join(rp, look_for)
+    loader_path = os.path.join(rp, look_for)
+    files_dir = os.path.abspath(os.path.join(loader_path, "..", "..", ".."))
+    assert files_dir.endswith("files.dir")
 
     # We report in sys what we used. We could put more here as well.
-    if not os.path.exists(real_dir):
+    if not os.path.exists(loader_path):
         use_embedding = True
-    support_path = prepare_zipfile() if use_embedding else real_dir
+    support_path = prepare_zipfile() if use_embedding else files_dir
     setattr(sys, embedding_var, use_embedding)
 
     try:
