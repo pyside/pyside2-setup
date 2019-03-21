@@ -2091,10 +2091,7 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
         QString checkFunc = cpythonCheckFunction(func->ownerClass()->typeEntry());
         s << INDENT << "bool isReverse = " << checkFunc << PYTHON_ARG << ')' << endl;
         {
-            Indentation indent1(INDENT);
-            Indentation indent2(INDENT);
-            Indentation indent3(INDENT);
-            Indentation indent4(INDENT);
+            Indentation indent1(INDENT, 4);
             s << INDENT << "&& !" << checkFunc << "self);" << endl;
         }
         s << INDENT << "if (isReverse)" << endl;
@@ -5536,7 +5533,7 @@ bool CppGenerator::finishGeneration()
     if (usePySideExtensions()) {
         s << "void cleanTypesAttributes(void) {" << endl;
         s << INDENT << "if (PY_VERSION_HEX >= 0x03000000 && PY_VERSION_HEX < 0x03060000)" << endl;
-        s << INDENT << "    return; // testbinding crashes in Python 3.5 when hasattr touches types!" << endl;
+        s << INDENT << "    return; // PYSIDE-953: testbinding crashes in Python 3.5 when hasattr touches types!" << endl;
         s << INDENT << "for (int i = 0, imax = SBK_" << moduleName() << "_IDX_COUNT; i < imax; i++) {" << endl;
         {
             Indentation indentation(INDENT);

@@ -130,25 +130,23 @@ class ThemeWidget(QWidget):
 
     def populate_themebox(self):
         theme = self.ui.themeComboBox
-        qchart = QtCharts.QChart
 
-        theme.addItem("Light", qchart.ChartThemeLight)
-        theme.addItem("Blue Cerulean", qchart.ChartThemeBlueCerulean)
-        theme.addItem("Dark", qchart.ChartThemeDark)
-        theme.addItem("Brown Sand", qchart.ChartThemeBrownSand)
-        theme.addItem("Blue NCS", qchart.ChartThemeBlueNcs)
-        theme.addItem("High Contrast", qchart.ChartThemeHighContrast)
-        theme.addItem("Blue Icy", qchart.ChartThemeBlueIcy)
-        theme.addItem("Qt", qchart.ChartThemeQt)
+        theme.addItem("Light", QtCharts.QChart.ChartThemeLight)
+        theme.addItem("Blue Cerulean", QtCharts.QChart.ChartThemeBlueCerulean)
+        theme.addItem("Dark", QtCharts.QChart.ChartThemeDark)
+        theme.addItem("Brown Sand", QtCharts.QChart.ChartThemeBrownSand)
+        theme.addItem("Blue NCS", QtCharts.QChart.ChartThemeBlueNcs)
+        theme.addItem("High Contrast", QtCharts.QChart.ChartThemeHighContrast)
+        theme.addItem("Blue Icy", QtCharts.QChart.ChartThemeBlueIcy)
+        theme.addItem("Qt", QtCharts.QChart.ChartThemeQt)
 
     def populate_animationbox(self):
         animated = self.ui.animatedComboBox
-        qchart = QtCharts.QChart
 
-        animated.addItem("No Animations", qchart.NoAnimation)
-        animated.addItem("GridAxis Animations", qchart.GridAxisAnimations)
-        animated.addItem("Series Animations", qchart.SeriesAnimations)
-        animated.addItem("All Animations", qchart.AllAnimations)
+        animated.addItem("No Animations", QtCharts.QChart.NoAnimation)
+        animated.addItem("GridAxis Animations", QtCharts.QChart.GridAxisAnimations)
+        animated.addItem("Series Animations", QtCharts.QChart.SeriesAnimations)
+        animated.addItem("All Animations", QtCharts.QChart.AllAnimations)
 
     def populate_legendbox(self):
         legend = self.ui.legendComboBox
@@ -294,47 +292,46 @@ class ThemeWidget(QWidget):
 
         idx = self.ui.themeComboBox.currentIndex()
         theme = self.ui.themeComboBox.itemData(idx)
-        qchart = QtCharts.QChart
 
         if len(self.charts):
             chart_theme = self.charts[0].chart().theme()
             if chart_theme != theme:
                 for chart_view in self.charts:
                     if theme == 0:
-                        theme_name = qchart.ChartThemeLight
+                        theme_name = QtCharts.QChart.ChartThemeLight
                     elif theme == 1:
-                        theme_name = qchart.ChartThemeBlueCerulean
+                        theme_name = QtCharts.QChart.ChartThemeBlueCerulean
                     elif theme == 2:
-                        theme_name = qchart.ChartThemeDark
+                        theme_name = QtCharts.QChart.ChartThemeDark
                     elif theme == 3:
-                        theme_name = qchart.ChartThemeBrownSand
+                        theme_name = QtCharts.QChart.ChartThemeBrownSand
                     elif theme == 4:
-                        theme_name = qchart.ChartThemeBlueNcs
+                        theme_name = QtCharts.QChart.ChartThemeBlueNcs
                     elif theme == 5:
-                        theme_name = qchart.ChartThemeHighContrast
+                        theme_name = QtCharts.QChart.ChartThemeHighContrast
                     elif theme == 6:
-                        theme_name = qchart.ChartThemeBlueIcy
+                        theme_name = QtCharts.QChart.ChartThemeBlueIcy
                     elif theme == 7:
-                        theme_name = qchart.ChartThemeQt
+                        theme_name = QtCharts.QChart.ChartThemeQt
                     else:
-                        theme_name = qchart.ChartThemeLight
+                        theme_name = QtCharts.QChart.ChartThemeLight
 
                     chart_view.chart().setTheme(theme_name)
 
                 # Set palette colors based on selected theme
-                if theme == qchart.ChartThemeLight:
+                if theme == QtCharts.QChart.ChartThemeLight:
                     set_colors(QColor(0xf0f0f0), QColor(0x404044))
-                elif theme == qchart.ChartThemeDark:
+                elif theme == QtCharts.QChart.ChartThemeDark:
                     set_colors(QColor(0x121218), QColor(0xd6d6d6))
-                elif theme == qchart.ChartThemeBlueCerulean:
+                elif theme == QtCharts.QChart.ChartThemeBlueCerulean:
                     set_colors(QColor(0x40434a), QColor(0xd6d6d6))
-                elif theme == qchart.ChartThemeBrownSand:
+                elif theme == QtCharts.QChart.ChartThemeBrownSand:
                     set_colors(QColor(0x9e8965), QColor(0x404044))
-                elif theme == qchart.ChartThemeBlueNcs:
+                elif theme == QtCharts.QChart.ChartThemeBlueNcs:
                     set_colors(QColor(0x018bba), QColor(0x404044))
-                elif theme == qchart.ChartThemeHighContrast:
+                elif theme == QtCharts.QChart.ChartThemeHighContrast:
                     set_colors(QColor(0xffab03), QColor(0x181818))
-                elif theme == qchart.ChartThemeBlueIcy:
+                elif theme == QtCharts.QChart.ChartThemeBlueIcy:
                     set_colors(QColor(0xcee7f0), QColor(0x404044))
                 else:
                     set_colors(QColor(0xf0f0f0), QColor(0x404044))
@@ -354,7 +351,16 @@ class ThemeWidget(QWidget):
             animation_options = chart.animationOptions()
             if animation_options != options:
                 for chart_view in self.charts:
-                    chart_view.chart().setAnimationOptions(options)
+                    options_name = QtCharts.QChart.NoAnimation
+                    if options == 0:
+                        options_name = QtCharts.QChart.NoAnimation
+                    elif options == 1:
+                        options_name = QtCharts.QChart.GridAxisAnimations
+                    elif options == 2:
+                        options_name = QtCharts.QChart.SeriesAnimations
+                    elif options == 3:
+                        options_name = QtCharts.QChart.AllAnimations
+                    chart_view.chart().setAnimationOptions(options_name)
 
         # Update legend alignment
         idx = self.ui.legendComboBox.currentIndex()
@@ -365,7 +371,16 @@ class ThemeWidget(QWidget):
                 chart_view.chart().legend().hide()
         else:
             for chart_view in self.charts:
-                chart_view.chart().legend().setAlignment(alignment)
+                alignment_name = Qt.AlignTop
+                if alignment == 32:
+                    alignment_name = Qt.AlignTop
+                elif alignment == 64:
+                    alignment_name = Qt.AlignBottom
+                elif alignment == 1:
+                    alignment_name = Qt.AlignLeft
+                elif alignment == 2:
+                    alignment_name = Qt.AlignRight
+                chart_view.chart().legend().setAlignment(alignment_name)
                 chart_view.chart().legend().show()
 
 

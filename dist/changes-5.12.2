@@ -1,0 +1,48 @@
+Qt for Python 5.12.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ - [PYSIDE-934] Added a method to VoidPtr called toBytes() to get the bytes representation.
+ - [PYSIDE-95] Added ownership transfer for QGraphicsItemGroup.addToGroup
+ - [PYSIDE-928][PYSIDE-937][PYSIDE-943] Fixing a refcounting bug shown by __doc__ handling
+ - [PYSIIDE-931] Added the attribute 'allow-thread' to the type system and class entries.
+ - [PYSIDE-947] Fixed conversions of list of smart pointers to python
+ - [PYSIDE-953] Preventing Python 3.5 from crashing the build
+ - [PYSIDE-940] Added setPageSize new signature to QPageSize
+ - [PYSIDE-950] Allowed subclassing PyCFunction in extension modules
+ - [PYSIDE-938] Set the proper parent when overloading QUiLoader.addAction()
+ - Added common QPrintSupport typesystem for QWebEngine
+ - [PYSIDE-942] Fixed an error when importing signatures in frozen executables
+ - [PYSIDE-948] Fixed problem when using smart pointers with namespaces
+ - [PYSIDE-45] Added support for using PyObject wrapper when an invalid QVariant is used
+ - [PYSIDE-922] Added pyObj check for the setSequenceOwnership
+ - [PYSIDE-919] Modernized the cmake build process
+ - [PYSIDE-924] Propagated Property attributes to the MetaObject
+ - Improved the type hints for containers
+ - [PYSIDE-906] Added missing classes QWebEngineHistory and WebEngineHistoryItem
+ - Added QtRemoteObject classes
+ - Added a script to generate a debug log in windows called debug_windows.py
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - Fixed many build warnings on shiboken and pyside
+ - Extended the exception handling test in shiboken
+ - [PYSIDE-929] Added dependency version for shiboken2
+ - [PYSIDE-914] Including MSVC dlls in the shiboken module package

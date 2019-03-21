@@ -1,0 +1,45 @@
+Qt for Python 5.12.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ - [PYSIDE-878] Added binding for QWebEngineUrlScheme which was missing
+ - Completed the signature introspection
+ - Activated existence_test.py for 5.12
+ - [PYSIDE-868] Fixed a crash related to multiple inheritance
+ - [PYSIDE-886] Fixed crash when mixing static overloads with instance methods in derived classes
+ - [PYSIDE-892] Added free functions from namespace QtQml
+ - Fixed a rare type hint racing condition
+ - Used helper function for accessing the meta object in quick type registration for libpyside
+ - [PYSIDE-883] Fixed regression related to removing createIndex method that uses PyObject*
+ - [PYSIDE-882] Avoided the creation of empty build directories in the install tree
+ - Produced TypeError messages using the signature module
+ - Replaced nullptr by None in signatures in the documentation
+ - Updated and fixed the Slot documentation
+ - Added \nullptr macro definition in the documentation
+ - [PYSIDE-874] Fixed wrong METADATA for generated wheels
+ - [PYSIDE-898] Improved check when a QFlag<Enum> is found
+ - [PYSIDE-790] Fixed a crash when overriding QAbstractNativeEventFilter.QAbstractNativeEventFilter()
+ - Added support for the help() function using the signature module
+ - [PYSIDE-880] Fixed an issue on the setup.py when running under non-UTF8 locale
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - Make signatures in overload decisor code more verbose in shiboken
+ - [PYSIDE-914] Included MSVC dlls in the shiboken module package

@@ -43,6 +43,8 @@
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
     <enum-type name="QDtlsError" since="5.12"/>
+    <enum-type name="QOcspCertificateStatus" since="5.13"/>
+    <enum-type name="QOcspRevocationReason" since="5.13"/>
 
     <namespace-type name="QPasswordDigestor" since="5.12">
         <extra-includes>
@@ -118,6 +120,7 @@
             </inject-code>
         </modify-function>
     </object-type>
+    <value-type name="QOcspResponse" since="5.13"/>
     <object-type name="QTcpSocket"/>
     <object-type name="QUdpSocket">
         <modify-function signature="readDatagram(char*,qint64,QHostAddress*,quint16*)" allow-thread="yes">

@@ -89,7 +89,6 @@ class AddressBook(QtWidgets.QWidget):
         self.addressText.setReadOnly(True)
 
         self.addButton = QtWidgets.QPushButton("&Add")
-        self.addButton.show()
         self.submitButton = QtWidgets.QPushButton("&Submit")
         self.submitButton.hide()
         self.cancelButton = QtWidgets.QPushButton("&Cancel")

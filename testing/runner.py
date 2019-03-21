@@ -102,7 +102,7 @@ class TestRunner(object):
             else:
                 # We have probably forgotten to build the tests.
                 # Give a nice error message with a shortened but exact path.
-                rel_path = os.path.relpath(make_path)
+                rel_path = os.path.relpath(file_name)
                 msg = dedent("""\n
                     {line}
                     **  ctest is not in '{}'.

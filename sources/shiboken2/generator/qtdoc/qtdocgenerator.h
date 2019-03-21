@@ -239,8 +239,9 @@ private:
 
     void writeFields(QTextStream &s, const AbstractMetaClass *cppClass);
     void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
-    void writeFunctionSignature(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
-    void writeFunction(QTextStream& s, bool writeDoc, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
+    QString functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
+    void writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
+                       const AbstractMetaFunction* func);
     void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunction* func);
     void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);

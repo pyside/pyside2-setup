@@ -18,7 +18,8 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@')
 sys.path.append('@pyside_BINARY_DIR@')
-sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@/../../../examples/webenginewidgets/tabbedbrowser')
+if @HAS_WEBENGINE_WIDGETS@:
+    sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@/../../../examples/webenginewidgets/tabbedbrowser')
 
 # -- General configuration -----------------------------------------------------
 
@@ -170,3 +171,5 @@ html_show_sourcelink = False
 # Link to the shiboken2 sphinx project to enable linking
 # between the two projects.
 intersphinx_mapping = {'shiboken2': ('shiboken2','@CMAKE_BINARY_DIR@/../shiboken2/doc/html/objects.inv')}
+
+add_module_names = False

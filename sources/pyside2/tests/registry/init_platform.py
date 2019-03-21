@@ -55,8 +55,7 @@ shiboken and pysidetest projects.
 import sys
 import os
 import re
-# PYSIDE-953: Use a newer contextlib for Python 3.5
-# from contextlib import contextmanager
+from contextlib import contextmanager
 from textwrap import dedent
 
 script_dir = os.path.normpath(os.path.join(__file__, *".. .. .. .. ..".split()))
@@ -118,9 +117,6 @@ sys.path[:0] = [os.path.join(shiboken_build_dir, "shibokenmodule"),
                 pyside_build_dir]
 
 import PySide2
-# PYSIDE-953: Use a newer contextlib for Python 3.5
-import PySide2.support.signature  # new contextlib
-from contextlib import contextmanager
 
 all_modules = list("PySide2." + x for x in PySide2.__all__)
 

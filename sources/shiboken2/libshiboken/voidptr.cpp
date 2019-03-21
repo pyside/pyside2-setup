@@ -95,13 +95,6 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
         sbkSelf->size = sbkOther->size;
         sbkSelf->isWritable = sbkOther->isWritable;
     }
-    // Shiboken::Object wrapper.
-    else if (Shiboken::Object::checkType(addressObject)) {
-        SbkObject *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
-        sbkSelf->cptr = sbkOther->d->cptr[0];
-        sbkSelf->size = size;
-        sbkSelf->isWritable = isWritable > 0 ? true : false;
-    }
     // Python buffer interface.
     else if (PyObject_CheckBuffer(addressObject)) {
         Py_buffer bufferView;
@@ -111,26 +104,41 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
             return 0;
 
         sbkSelf->cptr = bufferView.buf;
-        sbkSelf->size = bufferView.len;
+        sbkSelf->size = bufferView.len > 0 ? bufferView.len : size;
         sbkSelf->isWritable = bufferView.readonly > 0 ? false : true;
 
         // Release the buffer.
         PyBuffer_Release(&bufferView);
     }
-    // An integer representing an address.
-    else {
-        void *cptr = PyLong_AsVoidPtr(addressObject);
-        if (PyErr_Occurred()) {
-            PyErr_SetString(PyExc_TypeError,
-                            "Creating a VoidPtr object requires an address of a C++ object, "
-                            "a wrapped Shiboken Object type, "
-                            "an object implementing the Python Buffer interface, "
-                            "or another VoidPtr object.");
-            return -1;
-        }
-        sbkSelf->cptr = cptr;
+    // Shiboken::Object wrapper.
+    else if (Shiboken::Object::checkType(addressObject)) {
+        SbkObject *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
+        sbkSelf->cptr = sbkOther->d->cptr[0];
         sbkSelf->size = size;
         sbkSelf->isWritable = isWritable > 0 ? true : false;
+    }
+    // An integer representing an address.
+    else {
+        if (addressObject == Py_None) {
+            sbkSelf->cptr = nullptr;
+            sbkSelf->size = 0;
+            sbkSelf->isWritable = false;
+        }
+
+        else {
+            void *cptr = PyLong_AsVoidPtr(addressObject);
+            if (PyErr_Occurred()) {
+                PyErr_SetString(PyExc_TypeError,
+                                "Creating a VoidPtr object requires an address of a C++ object, "
+                                "a wrapped Shiboken Object type, "
+                                "an object implementing the Python Buffer interface, "
+                                "or another VoidPtr object.");
+                return -1;
+            }
+            sbkSelf->cptr = cptr;
+            sbkSelf->size = size;
+            sbkSelf->isWritable = isWritable > 0 ? true : false;
+        }
     }
 
     return 0;
@@ -173,6 +181,24 @@ PyObject *SbkVoidPtrObject_int(PyObject *v)
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     return PyLong_FromVoidPtr(sbkObject->cptr);
 }
+
+PyObject *toBytes(PyObject *self, PyObject *args)
+{
+    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
+    if (sbkObject->size < 0) {
+        PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
+        return nullptr;
+    }
+    PyObject *bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char*>(sbkObject->cptr),
+                                                sbkObject->size);
+    Py_XINCREF(bytes);
+    return bytes;
+}
+
+static struct PyMethodDef SbkVoidPtrObject_methods[] = {
+    {"toBytes", toBytes, METH_NOARGS},
+    {0}
+};
 
 static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
 {
@@ -233,6 +259,7 @@ static PyType_Slot SbkVoidPtrType_slots[] = {
     {Py_tp_init, (void *)SbkVoidPtrObject_init},
     {Py_tp_new, (void *)SbkVoidPtrObject_new},
     {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_methods, (void *)SbkVoidPtrObject_methods},
     {0, 0}
 };
 static PyType_Spec SbkVoidPtrType_spec = {

@@ -761,6 +761,7 @@
     </modify-function>
   </value-type>
   <object-type name="QResource">
+    <enum-type name="Compression" since="5.13"/>
     <modify-function signature="data()const">
         <inject-documentation format="target">
             Returns a read only buffer object pointing to the segment of data that this resource represents. If the resource is compressed the data returns is compressed and qUncompress() must be used to access the data. If the resource is a directory None is returned.
@@ -1530,6 +1531,7 @@
       <include file-name="QSize" location="global"/>
     </extra-includes>
   </object-type>
+  <object-type name="QConcatenateTablesProxyModel" since="5.13"/>
   <object-type name="QSortFilterProxyModel">
     <extra-includes>
       <include file-name="QItemSelection" location="global"/>
@@ -1547,6 +1549,7 @@
     <!--### End of obsolete section -->
   </object-type>
   <object-type name="QIdentityProxyModel"/>
+  <object-type name="QTransposeProxyModel" since="5.13"/>
   <!-- QObject is created manually -->
   <object-type name="QObject">
     <extra-includes>

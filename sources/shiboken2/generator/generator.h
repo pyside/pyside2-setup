@@ -29,6 +29,7 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
+#include "indentor.h"
 #include <abstractmetalang_typedefs.h>
 #include <typedatabase_typedefs.h>
 #include <dependency.h>
@@ -54,7 +55,6 @@ QT_END_NAMESPACE
 
 class PrimitiveTypeEntry;
 class ContainerTypeEntry;
-class Indentor;
 
 QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor);
 void verifyDirectoryFor(const QString &file);
@@ -416,42 +416,6 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
 typedef QSharedPointer<Generator> GeneratorPtr;
 typedef QVector<GeneratorPtr> Generators;
-
-/**
-* Utility class to store the identation level, use it in a QTextStream.
-*/
-class Indentor
-{
-public:
-    Indentor() : indent(0) {}
-    int indent;
-};
-
-/**
-*   Class that use the RAII idiom to set and unset the identation level.
-*/
-class Indentation
-{
-public:
-    Indentation(Indentor &indentor) : indentor(indentor)
-    {
-        indentor.indent++;
-    }
-    ~Indentation()
-    {
-        indentor.indent--;
-    }
-
-private:
-    Indentor &indentor;
-};
-
-inline QTextStream &operator <<(QTextStream &s, const Indentor &indentor)
-{
-    for (int i = 0; i < indentor.indent; ++i)
-        s << "    ";
-    return s;
-}
 
 #endif // GENERATOR_H
 

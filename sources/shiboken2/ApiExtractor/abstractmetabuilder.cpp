@@ -1840,34 +1840,27 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
     return result;
 }
 
-bool AbstractMetaBuilderPrivate::setArrayArgumentType(AbstractMetaFunction *func,
-                                                      const FunctionModelItem &functionItem,
-                                                      int i)
+// Apply the <array> modifications of the arguments
+static bool applyArrayArgumentModifications(const FunctionModificationList &functionMods,
+                                            AbstractMetaFunction *func,
+                                            QString *errorMessage)
 {
-    if (i < 0 || i >= func->arguments().size()) {
-        qCWarning(lcShiboken).noquote()
-            << msgCannotSetArrayUsage(func->minimalSignature(), i,
-                                      QLatin1String("Index out of range."));
-        return false;
+    for (const FunctionModification &mod : functionMods) {
+        for (const ArgumentModification &argMod : mod.argument_mods) {
+            if (argMod.array) {
+                const int i = argMod.index - 1;
+                if (i < 0 || i >= func->arguments().size()) {
+                    *errorMessage = msgCannotSetArrayUsage(func->minimalSignature(), i,
+                                                           QLatin1String("Index out of range."));
+                    return false;
+                }
+                if (!func->arguments().at(i)->type()->applyArrayModification(errorMessage)) {
+                    *errorMessage = msgCannotSetArrayUsage(func->minimalSignature(), i, *errorMessage);
+                    return false;
+                }
+            }
+        }
     }
-    AbstractMetaType *metaType = func->arguments().at(i)->type();
-    if (metaType->indirections() == 0) {
-        qCWarning(lcShiboken).noquote()
-            << msgCannotSetArrayUsage(func->minimalSignature(), i,
-                                      QLatin1String("Type does not have indirections."));
-        return false;
-    }
-    TypeInfo elementType = functionItem->arguments().at(i)->type();
-    elementType.setIndirections(elementType.indirections() - 1);
-    AbstractMetaType *element = translateType(elementType);
-    if (element == nullptr) {
-        qCWarning(lcShiboken).noquote()
-           << msgCannotSetArrayUsage(func->minimalSignature(), i,
-                                     QLatin1String("Cannot translate element type ") + elementType.toString());
-        return false;
-    }
-    metaType->setArrayElementType(element);
-    metaType->setTypeUsagePattern(AbstractMetaType::NativePointerAsArrayPattern);
     return true;
 }
 
@@ -2109,11 +2102,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     if (!metaArguments.isEmpty()) {
         fixArgumentNames(metaFunction, functionMods);
-        for (const FunctionModification &mod : functionMods) {
-            for (const ArgumentModification &argMod : mod.argument_mods) {
-                if (argMod.array)
-                    setArrayArgumentType(metaFunction, functionItem, argMod.index - 1);
-            }
+        QString errorMessage;
+        if (!applyArrayArgumentModifications(functionMods, metaFunction, &errorMessage)) {
+            qCWarning(lcShiboken, "While traversing %s: %s",
+                      qPrintable(className), qPrintable(errorMessage));
         }
     }
 
@@ -2744,6 +2736,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 {
     QVector<TypeInfo> targs = info.instantiations();
     QVector<AbstractMetaType *> templateTypes;
+    QString errorMessage;
 
     if (subclass->isTypeDef()) {
         subclass->setHasCloneOperator(templateClass->hasCloneOperator());
@@ -2876,6 +2869,13 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
             te->addFunctionModification(mod);
         }
 
+
+        if (!applyArrayArgumentModifications(f->modifications(subclass), f.data(),
+                                             &errorMessage)) {
+            qCWarning(lcShiboken, "While specializing %s (%s): %s",
+                      qPrintable(subclass->name()), qPrintable(templateClass->name()),
+                      qPrintable(errorMessage));
+        }
         subclass->addFunction(f.take());
     }
 
