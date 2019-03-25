@@ -150,6 +150,7 @@ private:
     void handleUnknownTag(QXmlStreamReader& reader);
     void handleUselessTag(QXmlStreamReader& reader);
     void handleAnchorTag(QXmlStreamReader& reader);
+    void handleRstPassTroughTag(QXmlStreamReader& reader);
 
     LinkContext *handleLinkStart(const QString &type, QString ref) const;
     void handleLinkText(LinkContext *linkContext, const QString &linktext) const;

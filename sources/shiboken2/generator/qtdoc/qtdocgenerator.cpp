@@ -52,6 +52,8 @@ static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString titleAttribute() { return QStringLiteral("title"); }
 static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
 static inline QString briefAttribute() { return QStringLiteral("brief"); }
+static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
+static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
 
 static inline QString none() { return QStringLiteral("None"); }
 
@@ -336,6 +338,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert(QLatin1String("code"), &QtXmlToSphinx::handleCodeTag);
     m_handlerMap.insert(QLatin1String("badcode"), &QtXmlToSphinx::handleCodeTag);
     m_handlerMap.insert(QLatin1String("legalese"), &QtXmlToSphinx::handleCodeTag);
+    m_handlerMap.insert(QLatin1String("rst"), &QtXmlToSphinx::handleRstPassTroughTag);
     m_handlerMap.insert(QLatin1String("section"), &QtXmlToSphinx::handleAnchorTag);
     m_handlerMap.insert(QLatin1String("quotefile"), &QtXmlToSphinx::handleQuoteFileTag);
 
@@ -1274,6 +1277,12 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
    }
 }
 
+void QtXmlToSphinx::handleRstPassTroughTag(QXmlStreamReader& reader)
+{
+    if (reader.tokenType() == QXmlStreamReader::Characters)
+        m_output << reader.text();
+}
+
 void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
@@ -1578,6 +1587,30 @@ static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaCl
     s << classes.join(QLatin1String(", ")) << endl << endl;
 }
 
+// Extract the <brief> section from a WebXML (class) documentation and remove it
+// from the source.
+static bool extractBrief(Documentation *sourceDoc, Documentation *brief)
+{
+    if (sourceDoc->format() != Documentation::Native)
+        return false;
+    QString value = sourceDoc->value();
+    const int briefStart = value.indexOf(briefStartElement());
+    if (briefStart < 0)
+        return false;
+    const int briefEnd = value.indexOf(briefEndElement(), briefStart + briefStartElement().size());
+    if (briefEnd < briefStart)
+        return false;
+    const int briefLength = briefEnd + briefEndElement().size() - briefStart;
+    brief->setFormat(Documentation::Native);
+    QString briefValue = value.mid(briefStart, briefLength);
+    briefValue.insert(briefValue.size() - briefEndElement().size(),
+                      QLatin1String("<rst> More_...</rst>"));
+    brief->setValue(briefValue);
+    value.remove(briefStart, briefLength);
+    sourceDoc->setValue(value);
+    return true;
+}
+
 void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 {
     AbstractMetaClass *metaClass = classContext.metaClass();
@@ -1594,6 +1627,11 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
 
     s << className << endl;
     s << Pad('*', className.count()) << endl << endl;
+
+    auto documentation = metaClass->documentation();
+    Documentation brief;
+    if (extractBrief(&documentation, &brief))
+        writeFormattedText(s, brief, metaClass);
 
     s << ".. inheritance-diagram:: " << getClassTargetFullName(metaClass, true) << endl
       << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
@@ -1615,11 +1653,12 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
 
     s << endl
         << "Detailed Description\n"
-           "--------------------\n\n";
+           "--------------------\n\n"
+        << ".. _More:\n";
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, 0);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, 0))
-        writeFormattedText(s, metaClass->documentation(), metaClass);
+        writeFormattedText(s, documentation, metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass);
