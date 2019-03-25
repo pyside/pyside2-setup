@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -45,8 +45,8 @@ import warnings
 import types
 import keyword
 import functools
-from signature_loader.mapping import (type_map, update_mapping, namespace,
-    typing, _NotCalled)
+from shibokensupport.signature.mapping import (type_map, update_mapping,
+    namespace, typing, _NotCalled)
 
 _DEBUG = False
 LIST_KEYWORDS = False

@@ -139,7 +139,7 @@ for modname in "minimal sample other smart".split():
     all_modules.append(modname)
 
 from PySide2.QtCore import __version__
-from PySide2.support.signature.lib.enum_sig import SimplifyingEnumerator
+from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator
 
 is_py3 = sys.version_info[0] == 3
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"

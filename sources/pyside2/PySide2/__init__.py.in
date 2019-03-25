@@ -19,6 +19,8 @@ def _setupQtDirectories():
     # loads the libraries into the process memory beforehand, and
     # thus takes care of it for us.
     import shiboken2
+    #   Trigger signature initialization.
+    type.__signature__
 
     pyside_package_dir =  os.path.abspath(os.path.dirname(__file__))
 
