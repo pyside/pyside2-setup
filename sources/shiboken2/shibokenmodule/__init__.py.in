@@ -3,7 +3,7 @@ __version_info__ = (@shiboken_MAJOR_VERSION@, @shiboken_MINOR_VERSION@, @shiboke
 
 # PYSIDE-932: Python 2 cannot import 'zipfile' for embedding while being imported, itself.
 # We simply pre-load all imports for the signature extension.
-import sys, zipfile, base64, marshal, io
+import sys, zipfile, base64, marshal, io, contextlib
 
 from .shiboken2 import *
 
