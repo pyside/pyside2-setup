@@ -55,6 +55,7 @@ import argparse
 import glob
 from contextlib import contextmanager
 from textwrap import dedent
+import traceback
 
 
 import logging
@@ -105,7 +106,7 @@ class Formatter(Writer):
     def module(self, mod_name):
         self.mod_name = mod_name
         self.print("# Module", mod_name)
-        self.print("import shiboken2 as Shiboken")
+        self.print("import PySide2")
         from PySide2.support.signature import typing
         self.print("from PySide2.support.signature import typing")
         self.print("from PySide2.support.signature.mapping import (")
@@ -113,6 +114,7 @@ class Formatter(Writer):
         self.print()
         self.print("class Object(object): pass")
         self.print()
+        self.print("import shiboken2 as Shiboken")
         self.print("Shiboken.Object = Object")
         self.print()
         # This line will be replaced by the missing imports.
@@ -254,7 +256,11 @@ def generate_pyi(import_name, outpath, options):
     logger.info("Generated: {outfilepath}".format(**locals()))
     if is_py3:
         # Python 3: We can check the file directly if the syntax is ok.
-        subprocess.check_output([sys.executable, outfilepath])
+        try:
+            subprocess.check_output([sys.executable, outfilepath])
+        except Exception as e:
+            print("+++ Problem executing test, although it works")
+            traceback.print_exc(file=sys.stdout)
     return 1
 
 

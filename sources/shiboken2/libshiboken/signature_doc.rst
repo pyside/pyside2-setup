@@ -50,7 +50,7 @@ result of the ``__signature__`` attribute of the real ``PyCFunction`` object.
 
 There is one thing that really changes Python a bit:
 
-*   I added the ``__signature__`` attribute to every function.
+*   We added the ``__signature__`` attribute to every function.
 
 That is a little change to Python that does not harm, but it saves us
 tons of code, that was needed in the early versions of the module.
@@ -59,9 +59,9 @@ The internal work is done in two steps:
 
 *   All functions of a class get the *signature text* when the module is imported.
     This is only a very small overhead added to the startup time. It is a single
-    string for the whole class.
+    string for each whole class.
 *   The actual signature object is created later, when the attribute is really
-    accessed. Signatures are cached and only created on first access.
+    requested. Signatures are cached and only created on first access.
 
 Example:
 
@@ -76,10 +76,12 @@ Why this Code is Fast
 It costs a little time (maybe 4 seconds) to run througs every single signature
 object, since these are more than 15000 Python objects. But all the signature
 objects will be rarely accessed but in special applications.
-The normal case are only a few accesses, and these work pretty fast.
+The normal case are only a few accesses, and these are working pretty fast.
 
 The key to make this signature module fast is to avoid computation as much as
-possible. When no signature objects are used, then no time is lost in initialization.
+possible. When no signature objects are used, then almost no time is lost in
+initialization. Only the above mentioned strings and some support modules are
+additionally loaded on ``import PySide2``.
 When it comes to signature usage, then late initialization is used and cached.
 This technique is also known as *full laziness* in haskell.
 
@@ -107,15 +109,27 @@ The C++ code involved with the signature module is completely in the file
 shiboken2/libshiboken/signature.cpp . All other functionality is implemented in
 the ``signature`` Python package. It has the following structure::
 
-    pyside2/PySide2/support/signature/__init__.py
-                                      loader.py
-                                      parser.py
-                                      mapping.py
-                                      typing27.py
-                                      backport_inspect.py
+    shiboken2/files.dir/shibokensupport/
+                                        backport_inspect.py
+                                        python_minilib_2_7.py
+                                        python_minilib_3_5.py
+                                        python_minilib_3_6.py
+                                        python_minilib_3_7.py
 
-Really important are the **parser**, **mapping** and **loader** modules. The rest is
-needed to create Python 2 compatibility.
+                                        signature/
+                                                  loader.py
+                                                  parser.py
+                                                  mapping.py
+                                                  errorhandler.py
+                                                  layout.py
+
+                                                  lib/
+                                                      enum_sig.py
+
+
+Really important are the **parser**, **mapping**, **errorhandler**, **enum_sig**,
+**layout** and **loader** modules. The rest is needed to create Python 2 compatibility
+or be compatible with embedding and installers.
 
 
 loader.py
@@ -141,6 +155,34 @@ The purpose of the mapping module is maintaining a list of replacement strings
 that map from the *signature text* in C to the property strings that Python
 needs. A lot of mappings are resolved by rather complex expressions in ``parser.py``,
 but a few hundred cases are better to spell explicitly, here.
+
+
+errorhandler.py
+~~~~~~~~~~~~~~~
+
+Since ``Qt For Python 5.12``, we no longer use the builtin type error messages from C++.
+Instead, we get much better results with the signature module. At the same time,
+this enforced supporting shiboken as well, and the signature module was no longer
+optional.
+
+
+enum_sig.py
+~~~~~~~~~~~
+
+The diverse applications of the signature module all needed to iterate over modules,
+classes and functions. In order to centralize this enumeration, the process has
+been factored out as a context manager. The user has only to supply functions
+that do the actual formatting.
+
+See for example the .pyi generator ``pyside2/PySide2/support/generate_pyi.py``.
+
+
+layout.py
+~~~~~~~~~
+
+As more applications used the signature module, different formatting of signatures
+was needed. To support that, we created the function ``create_signature``, which
+has a parameter to choose from some prefefined layouts.
 
 
 *typing27.py*
@@ -276,19 +318,21 @@ This serves as an extra challenge that has a very positive effect on
 the completeness and correctness of signatures.
 
 
-Future Extension
-----------------
+Current Extensions
+------------------
 
 Before the signature module was written, there already existed the concept of
-signatures, but in a more C++ - centric way. From that time, there still exist
+signatures, but in a more C++ - centric way. From that time, there existed
 the error messages, which are created when a function gets wrong argument types.
 
-These error messages should be replaced by text generated on demand by
+These error messages were replaced by text generated on demand by
 the signature module, in order to be more consistent and correct.
+This was implemented in ``Qt For Python 5.12.0``.
 
-Additionally, the ``__doc__`` attribute of PySide methods is not set, yet.
-It would be easy to get a nice ``help()`` feature by creating signatures
+Additionally, the ``__doc__`` attribute of PySide methods was not set.
+It was easy to get a nice ``help()`` feature by creating signatures
 as default content for docstrings.
+This was implemented in ``Qt For Python 5.12.1``.
 
 
 Literature

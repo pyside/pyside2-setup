@@ -1,9 +1,9 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of Qt for Python.
+## This file is part of PySide2.
 ##
 ## $QT_BEGIN_LICENSE:LGPL$
 ## Commercial License Usage
@@ -37,10 +37,38 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
+import unittest
 
-# Trigger initialization phase 2.
-_ = type.__signature__
-from signature_loader import get_signature, inspect, typing
+# This test tests the embedding feature of PySide.
+# Normally, embedding is only used when necessary.
+# By setting the variable "pyside_uses_embedding",
+# we enforce usage of embedding.
 
-__all__ = "get_signature inspect typing layout mapping lib".split()
+
+class EmbeddingTest(unittest.TestCase):
+
+    # def test_pyside_normal(self):
+    #     import sys
+    #     self.assertFalse(hasattr(sys, "pyside_uses_embedding"))
+    #     import PySide2
+    #     # everything has to be imported
+    #     self.assertTrue("PySide2.support.signature" in sys.modules)
+    #     # there should be a variale in sys, now (no idea if set)
+    #     self.assertTrue(hasattr(sys, "pyside_uses_embedding"))
+
+    # Unfortunately, I see no way how to shut things enough down
+    # to trigger a second initiatization. Therefore, only one test :-/
+    def test_pyside_embedding(self):
+        import sys, os
+        self.assertFalse(hasattr(sys, "pyside_uses_embedding"))
+        sys.pyside_uses_embedding = "anything true"
+        import PySide2
+        # everything has to be imported
+        self.assertTrue("PySide2.support.signature" in sys.modules)
+        self.assertEqual(sys.pyside_uses_embedding, True)
+        dn = os.path.dirname
+        name = os.path.basename(dn(dn(dn(PySide2.support.signature.__file__))))
+        self.assertTrue(name.startswith("embedded.") and name.endswith(".zip"))
+
+if __name__ == '__main__':
+    unittest.main()

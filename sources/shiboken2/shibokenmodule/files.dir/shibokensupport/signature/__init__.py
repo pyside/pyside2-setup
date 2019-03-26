@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -37,4 +37,6 @@
 ##
 #############################################################################
 
-# this file intentionally left blank
+from __future__ import print_function, absolute_import
+
+__all__ = "get_signature layout mapping lib".split()

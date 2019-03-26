@@ -56,8 +56,9 @@ enough to produce a useful ValueError.
 This matter will be improved in a later version.
 """
 
-from signature_loader import get_signature, inspect
-from signature_loader.mapping import update_mapping, namespace
+from shibokensupport.signature import inspect
+from shibokensupport.signature import get_signature
+from shibokensupport.signature.mapping import update_mapping, namespace
 from textwrap import dedent
 
 

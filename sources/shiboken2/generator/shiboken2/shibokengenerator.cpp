@@ -1491,6 +1491,9 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
     if (func->isConstant() && !(options & Generator::ExcludeMethodConst))
         s << " const";
 
+    if (func->exceptionSpecification() == ExceptionSpecification::NoExcept)
+        s << " noexcept";
+
     return result;
 }
 

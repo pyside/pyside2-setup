@@ -42,7 +42,7 @@ from __future__ import print_function, absolute_import
 import unittest
 import PySide2.QtCore
 import PySide2.QtWidgets
-from PySide2.support.signature import inspect
+from shibokensupport.signature import inspect
 
 
 class PySideSignatureTest(unittest.TestCase):

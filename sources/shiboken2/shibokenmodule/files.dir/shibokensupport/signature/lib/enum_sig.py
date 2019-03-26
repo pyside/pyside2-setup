@@ -50,7 +50,8 @@ by producing a lot of clarity.
 """
 
 import sys
-from signature_loader import get_signature, inspect
+from shibokensupport.signature import inspect
+from shibokensupport.signature import get_signature
 
 
 class ExactEnumerator(object):

@@ -116,7 +116,9 @@ class TestSignaturesExists(unittest.TestCase):
                     continue
                 if key not in found_sigs:
                     warn("missing key: '{}'".format(key))
-                elif isinstance(value, list) and len(value) != len(found_sigs[key]):
+                elif isinstance(value, list) and len(value) > len(found_sigs[key]):
+                    # We check that nothing got lost. But it is ok when an older
+                    # registry file does not have all variants, yet!
                     warn(msgMultiSignatureCount(key, found_sigs[key], value))
             if is_ci and check_warnings():
                 raise RuntimeError("There are errors, see above.")
@@ -132,7 +134,9 @@ class TestSignaturesExists(unittest.TestCase):
                     continue
                 if key not in found_sigs:
                     warn("missing key: '{}'".format(key))
-                elif isinstance(value, list) and len(value) != len(found_sigs[key]):
+                elif isinstance(value, list) and len(value) > len(found_sigs[key]):
+                    # We check that nothing got lost. But it is ok when an older
+                    # registry file does not have all variants, yet!
                     warn(msgMultiSignatureCount(key, found_sigs[key], value))
             self.assertTrue(check_warnings())
 
