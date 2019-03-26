@@ -176,19 +176,13 @@ Generator::~Generator()
 bool Generator::setup(const ApiExtractor& extractor)
 {
     m_d->apiextractor = &extractor;
-    const auto &allEntries = TypeDatabase::instance()->entries();
-    TypeEntry* entryFound = 0;
-    for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
-        TypeEntry *entry = it.value();
-        if (entry->type() == TypeEntry::TypeSystemType && entry->generateCode()) {
-            entryFound = entry;
-            break;
-        }
-    }
-    if (entryFound)
-        m_d->packageName = entryFound->name();
-    else
+    const auto moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
+    if (!moduleEntry || !moduleEntry->generateCode()) {
         qCWarning(lcShiboken) << "Couldn't find the package name!!";
+        return false;
+    }
+
+    m_d->packageName = moduleEntry->name();
 
     collectInstantiatedContainersAndSmartPointers();
 

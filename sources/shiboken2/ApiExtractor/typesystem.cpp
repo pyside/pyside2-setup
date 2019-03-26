@@ -1509,7 +1509,8 @@ TypeSystemTypeEntry *Handler::parseRootElement(const QXmlStreamReader &,
 
     TypeSystemTypeEntry *moduleEntry =
         const_cast<TypeSystemTypeEntry *>(m_database->findTypeSystemType(m_defaultPackage));
-    if (!moduleEntry)
+    const bool add = moduleEntry == nullptr;
+    if (add)
         moduleEntry = new TypeSystemTypeEntry(m_defaultPackage, since);
     moduleEntry->setCodeGeneration(m_generate);
 
@@ -1517,8 +1518,8 @@ TypeSystemTypeEntry *Handler::parseRootElement(const QXmlStreamReader &,
          m_generate == TypeEntry::GenerateNothing) && !m_defaultPackage.isEmpty())
         TypeDatabase::instance()->addRequiredTargetImport(m_defaultPackage);
 
-    if (!moduleEntry->qualifiedCppName().isEmpty())
-        m_database->addType(moduleEntry);
+    if (add)
+        m_database->addTypeSystemType(moduleEntry);
     return moduleEntry;
 }
 
