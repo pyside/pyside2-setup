@@ -4894,16 +4894,18 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream& s, const AbstractMetaEnu
     s << '}' << endl << endl;
 }
 
+QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const
+{
+    QString initFunctionName = metaClass->qualifiedCppName();
+    initFunctionName.replace(QLatin1String("::"), QLatin1String("_"));
+    return initFunctionName;
+}
+
 QString CppGenerator::getInitFunctionName(GeneratorContext &context) const
 {
-    QString initFunctionName;
-    if (!context.forSmartPointer()) {
-        initFunctionName = context.metaClass()->qualifiedCppName();
-        initFunctionName.replace(QLatin1String("::"), QLatin1String("_"));
-    } else {
-        initFunctionName = getFilteredCppSignatureString(context.preciseType()->cppSignature());
-    }
-    return initFunctionName;
+    return !context.forSmartPointer()
+        ? getSimpleClassInitFunctionName(context.metaClass())
+        : getFilteredCppSignatureString(context.preciseType()->cppSignature());
 }
 
 void CppGenerator::writeClassRegister(QTextStream &s,
@@ -5441,15 +5443,19 @@ bool CppGenerator::finishGeneration()
         if (!shouldGenerate(cls))
             continue;
 
-        s_classInitDecl << "void init_" << cls->qualifiedCppName().replace(QLatin1String("::"), QLatin1String("_")) << "(PyObject* module);" << endl;
+        const QString initFunctionName = QLatin1String("init_") + getSimpleClassInitFunctionName(cls);
 
-        QString defineStr = QLatin1String("init_") + cls->qualifiedCppName().replace(QLatin1String("::"), QLatin1String("_"));
+        s_classInitDecl << "void " << initFunctionName << "(PyObject* module);" << endl;
 
-        if (cls->enclosingClass() && (cls->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass))
-            defineStr += QLatin1String("(reinterpret_cast<PyTypeObject *>(") + cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) + QLatin1String(")->tp_dict);");
-        else
-            defineStr += QLatin1String("(module);");
-        s_classPythonDefines << INDENT << defineStr << endl;
+        s_classPythonDefines << INDENT << initFunctionName;
+        if (cls->enclosingClass()
+            && (cls->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)) {
+            s_classPythonDefines << "(reinterpret_cast<PyTypeObject *>("
+                << cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) << ")->tp_dict);";
+        } else {
+            s_classPythonDefines << "(module);";
+        }
+        s_classPythonDefines << endl;
     }
 
     // Initialize smart pointer types.

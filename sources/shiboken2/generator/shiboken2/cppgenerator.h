@@ -229,6 +229,7 @@ private:
                          GeneratorContext &context, int maxArgs = 0);
 
     QString getInitFunctionName(GeneratorContext &context) const;
+    QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const;
 
     void writeClassRegister(QTextStream &s,
                             const AbstractMetaClass *metaClass,
