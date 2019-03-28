@@ -3088,7 +3088,6 @@ void AbstractMetaBuilderPrivate::dumpLog() const
 AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClass *cppClass,
                                                                            const Dependencies &additionalDependencies) const
 {
-    QLinkedList<int> unmappedResult;
     QHash<QString, int> map;
     QHash<int, AbstractMetaClass*> reverseMap;
 
@@ -3175,7 +3174,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     }
 
     AbstractMetaClassList result;
-    unmappedResult = graph.topologicalSort();
+    const auto unmappedResult = graph.topologicalSort();
     if (unmappedResult.isEmpty() && graph.nodeCount()) {
         QTemporaryFile tempFile;
         tempFile.setAutoRemove(false);
