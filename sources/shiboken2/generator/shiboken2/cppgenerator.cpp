@@ -5430,12 +5430,13 @@ bool CppGenerator::finishGeneration()
     //We need move QMetaObject register before QObject
     Dependencies additionalDependencies;
     const AbstractMetaClassList &allClasses = classes();
-    if (AbstractMetaClass::findClass(allClasses, qObjectClassName()) != Q_NULLPTR
-        && AbstractMetaClass::findClass(allClasses, qMetaObjectClassName()) != Q_NULLPTR) {
-        Dependency dependency;
-        dependency.parent = qMetaObjectClassName();
-        dependency.child = qObjectClassName();
-        additionalDependencies.append(dependency);
+    if (auto qObjectClass = AbstractMetaClass::findClass(allClasses, qObjectClassName())) {
+        if (auto qMetaObjectClass = AbstractMetaClass::findClass(allClasses, qMetaObjectClassName())) {
+            Dependency dependency;
+            dependency.parent = qMetaObjectClass;
+            dependency.child = qObjectClass;
+            additionalDependencies.append(dependency);
+        }
     }
     const AbstractMetaClassList lst = classesTopologicalSorted(additionalDependencies);
 

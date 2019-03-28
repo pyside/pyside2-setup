@@ -68,12 +68,10 @@ public:
     AbstractMetaEnum *findEnum(const TypeEntry *typeEntry) const;
 
     /**
-    *   Sorts a list of classes topologically, if an AbstractMetaClass object
-    *   is passed the list of classes will be its inner classes, otherwise
-    *   the list will be the module global classes.
+    *   Sorts a list of classes topologically.
     *   \return a list of classes sorted topologically
     */
-    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR,
+    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
 
     bool build(const QByteArrayList &arguments,

@@ -52,7 +52,7 @@ public:
     void traverseDom(const FileModelItem &dom);
 
     void dumpLog() const;
-    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClass *cppClass = Q_NULLPTR,
+    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
     ScopeModelItem popScope() { return m_scopes.takeLast(); }
 
