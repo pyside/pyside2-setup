@@ -40,8 +40,8 @@
 ##
 #############################################################################
 
-from PySide2 import QtCore, QtGui, QtWidgets
 from __future__ import unicode_literals
+from PySide2 import QtCore, QtGui, QtWidgets
 
 import classwizard_rc
 
