@@ -7,7 +7,6 @@
     gettingstarted.rst
     tutorials/index.rst
     pysideapi2.rst
-    pysideversion.rst
     licenses.rst
 
 Module Index
