@@ -26,7 +26,5 @@ Tutorials
     basictutorial/clickablebutton.rst
     basictutorial/dialog.rst
     basictutorial/uifiles.rst
-    qmltutorial/index.rst
-    qmladvancedtutorial/index.rst
     datavisualize/index.rst
     qmlapp/qmlapplication.rst
