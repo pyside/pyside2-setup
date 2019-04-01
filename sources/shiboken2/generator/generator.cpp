@@ -421,7 +421,7 @@ bool Generator::generate()
 
     for (const AbstractMetaType *type : qAsConst(m_d->instantiatedSmartPointers)) {
         AbstractMetaClass *smartPointerClass =
-                AbstractMetaClass::findClass(m_d->apiextractor->smartPointers(), type->name());
+                AbstractMetaClass::findClass(m_d->apiextractor->smartPointers(), type->typeEntry());
         GeneratorContext context(smartPointerClass, type, true);
         if (!generateFileForContext(context))
             return false;

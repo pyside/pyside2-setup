@@ -3076,7 +3076,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         AbstractMetaType *returnType = getTypeWithoutContainer(funcType);
         if (returnType) {
             pyArgName = QLatin1String(PYTHON_RETURN_VAR);
-            *wrappedClass = AbstractMetaClass::findClass(classes(), returnType->typeEntry()->name());
+            *wrappedClass = AbstractMetaClass::findClass(classes(), returnType->typeEntry());
         } else {
             QString message = QLatin1String("Invalid Argument index (0, return value) on function modification: ")
                 + (funcType ? funcType->name() : QLatin1String("void")) + QLatin1Char(' ');
@@ -3090,7 +3090,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         AbstractMetaType* argType = getTypeWithoutContainer(func->arguments().at(realIndex)->type());
 
         if (argType) {
-            *wrappedClass = AbstractMetaClass::findClass(classes(), argType->typeEntry()->name());
+            *wrappedClass = AbstractMetaClass::findClass(classes(), argType->typeEntry());
             if (argIndex == 1
                 && !func->isConstructor()
                 && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))

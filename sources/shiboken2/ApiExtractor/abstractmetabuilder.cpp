@@ -192,7 +192,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             QString name = signature.trimmed();
             name.truncate(name.indexOf(QLatin1Char('(')));
 
-            AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry->qualifiedCppName());
+            AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
             if (!clazz)
                 continue;
 
@@ -229,7 +229,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentMod
     AbstractMetaType *type = translateType(argument->type());
     if (type && type->typeEntry() && type->typeEntry()->isComplex()) {
         const TypeEntry *entry = type->typeEntry();
-        returned = AbstractMetaClass::findClass(m_metaClasses, entry->name());
+        returned = AbstractMetaClass::findClass(m_metaClasses, entry);
     }
     delete type;
     return returned;
@@ -579,7 +579,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 && !entry->isCustom()
                 && !entry->isVariant()
                 && (entry->generateCode() & TypeEntry::GenerateTargetLang)
-                && !AbstractMetaClass::findClass(m_metaClasses, entry->qualifiedCppName())) {
+                && !AbstractMetaClass::findClass(m_metaClasses, entry)) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
                                       .arg(entry->qualifiedCppName());
