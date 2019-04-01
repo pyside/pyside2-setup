@@ -28,3 +28,4 @@ Tutorials
     basictutorial/uifiles.rst
     datavisualize/index.rst
     qmlapp/qmlapplication.rst
+    qmlintegration/qmlintegration.rst
