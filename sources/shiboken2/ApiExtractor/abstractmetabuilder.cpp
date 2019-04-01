@@ -460,7 +460,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         ReportHandler::progress(QStringLiteral("Generating class model (%1)...")
                                 .arg(typeValues.size()));
         if (AbstractMetaClass *cls = traverseClass(dom, item))
-            addAbstractMetaClass(cls);
+            addAbstractMetaClass(cls, item.data());
     }
 
     // We need to know all global enums
@@ -481,9 +481,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (const NamespaceModelItem &item : namespaceTypeValues) {
         ReportHandler::progress(QStringLiteral("Generating namespace model (%1)...")
                                 .arg(namespaceTypeValues.size()));
-        AbstractMetaClass *metaClass = traverseNamespace(dom, item);
-        if (metaClass)
-            m_metaClasses << metaClass;
+        if (AbstractMetaClass *metaClass = traverseNamespace(dom, item))
+            addAbstractMetaClass(metaClass, item.data());
     }
 
     // Go through all typedefs to see if we have defined any
@@ -494,7 +493,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         ReportHandler::progress(QStringLiteral("Resolving typedefs (%1)...")
                                 .arg(typeDefs.size()));
         if (AbstractMetaClass *cls = traverseTypeDef(dom, typeDef))
-            addAbstractMetaClass(cls);
+            addAbstractMetaClass(cls, typeDef.data());
     }
 
     traverseTypesystemTypedefs();
@@ -702,7 +701,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         m_globalFunctions << metaFunc;
     }
 
-    std::puts("");
+    m_itemToClass.clear();
 }
 
 static bool metaEnumLessThan(const AbstractMetaEnum *e1, const AbstractMetaEnum *e2)
@@ -742,9 +741,11 @@ void AbstractMetaBuilder::setLogDirectory(const QString& logDir)
        d->m_logDirectory.append(QDir::separator());
 }
 
-void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls)
+void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
+                                                      const _CodeModelItem *item)
 {
     cls->setOriginalAttributes(cls->attributes());
+    m_itemToClass.insert(item, cls);
     if (cls->typeEntry()->isContainer()) {
         m_templates << cls;
     } else if (cls->typeEntry()->isSmartPointer()) {
@@ -802,7 +803,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
-            addAbstractMetaClass(mjc);
+            addAbstractMetaClass(mjc, cls.data());
         }
     }
 
@@ -814,7 +815,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         if (cls) {
             metaClass->addInnerClass(cls);
             cls->setEnclosingClass(metaClass);
-            addAbstractMetaClass(cls);
+            addAbstractMetaClass(cls, typeDef.data());
         }
     }
 
@@ -824,7 +825,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
-            addAbstractMetaClass(mjc);
+            addAbstractMetaClass(mjc, ni.data());
         }
     }
 
@@ -1041,7 +1042,7 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
         metaClass->setBaseClassNames(QStringList(te->sourceType()));
         *metaClass += AbstractMetaAttributes::Public;
         fillAddedFunctions(metaClass);
-        addAbstractMetaClass(metaClass);
+        addAbstractMetaClass(metaClass, nullptr);
     }
 }
 
@@ -1130,7 +1131,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
             if (cl) {
                 cl->setEnclosingClass(metaClass);
                 metaClass->addInnerClass(cl);
-                m_metaClasses << cl;
+                addAbstractMetaClass(cl, ci.data());
             }
         }
 
@@ -1143,7 +1144,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         AbstractMetaClass *cls = traverseTypeDef(dom, typeDef);
         if (cls) {
             cls->setEnclosingClass(metaClass);
-            addAbstractMetaClass(cls);
+            addAbstractMetaClass(cls, typeDef.data());
         }
     }
 
@@ -1170,27 +1171,9 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(ScopeModelItem item,
         traverseClassMembers(ci);
 }
 
-AbstractMetaClass* AbstractMetaBuilderPrivate::currentTraversedClass(ScopeModelItem item)
-{
-    QString className = stripTemplateArgs(item->name());
-    QString fullClassName = className;
-
-    // This is an inner class
-    if (m_currentClass)
-        fullClassName = stripTemplateArgs(m_currentClass->typeEntry()->qualifiedCppName()) + colonColon() + fullClassName;
-
-    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, fullClassName);
-    if (!metaClass)
-        metaClass = AbstractMetaClass::findClass(m_templates, fullClassName);
-
-    if (!metaClass)
-        metaClass = AbstractMetaClass::findClass(m_smartPointers, fullClassName);
-    return metaClass;
-}
-
 void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
 {
-    AbstractMetaClass* metaClass = currentTraversedClass(item);
+    AbstractMetaClass* metaClass = m_itemToClass.value(item.data());
     if (!metaClass)
         return;
 
@@ -1205,7 +1188,7 @@ void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
 
 void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem item)
 {
-    AbstractMetaClass* metaClass = currentTraversedClass(item);
+    AbstractMetaClass* metaClass = m_itemToClass.value(item.data());
     if (!metaClass)
         return;
 

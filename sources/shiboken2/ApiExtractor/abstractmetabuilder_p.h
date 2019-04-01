@@ -62,13 +62,12 @@ public:
 
     AbstractMetaClass *argumentToClass(const ArgumentModelItem &);
 
-    void addAbstractMetaClass(AbstractMetaClass *cls);
+    void addAbstractMetaClass(AbstractMetaClass *cls, const _CodeModelItem *item);
     AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
                                        const TypeDefModelItem &typeDef);
     void traverseTypesystemTypedefs();
     AbstractMetaClass *traverseClass(const FileModelItem &dom,
                                      const ClassModelItem &item);
-    AbstractMetaClass *currentTraversedClass(ScopeModelItem item);
     void traverseScopeMembers(ScopeModelItem item, AbstractMetaClass *metaClass);
     void traverseClassMembers(ClassModelItem scopeItem);
     void traverseNamespaceMembers(NamespaceModelItem scopeItem);
@@ -163,6 +162,7 @@ public:
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;
     AbstractMetaClassList m_smartPointers;
+    QHash<const _CodeModelItem *, AbstractMetaClass *> m_itemToClass;
     AbstractMetaFunctionList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 
