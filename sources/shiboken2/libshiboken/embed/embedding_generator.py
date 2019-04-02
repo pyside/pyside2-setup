@@ -128,6 +128,7 @@ def create_zipfile(limited_api):
     tmp.seek(0)
     with open(inc_name, "w") as inc:
         _embed_file(tmp, inc)
+    tmp.close()
     # also generate a simple embeddable .pyc file for signature_bootstrap.pyc
     boot_name = "signature_bootstrap.py" if limited_api else "signature_bootstrap.pyc"
     with open(boot_name, "rb") as ldr, open("signature_bootstrap.inc", "w") as inc:
