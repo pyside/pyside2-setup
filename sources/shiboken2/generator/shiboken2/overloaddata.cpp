@@ -426,7 +426,7 @@ void OverloadData::sortNextOverloads()
     }
 
     // sort the overloads topologically based on the dependency graph.
-    const QLinkedList<int> unmappedResult = graph.topologicalSort();
+    const auto unmappedResult = graph.topologicalSort();
     if (unmappedResult.isEmpty()) {
         QString funcName = referenceFunction()->name();
         if (referenceFunction()->ownerClass())

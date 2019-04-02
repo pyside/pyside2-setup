@@ -74,7 +74,9 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
     AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.isEmpty());
 
-    TypeEntry* module = TypeDatabase::instance()->findType(QLatin1String("Foo"));
+    const TypeSystemTypeEntry *module = TypeDatabase::instance()->defaultTypeSystemType();
+    QVERIFY(module);
+    QCOMPARE(module->name(), QLatin1String("Foo"));
     QVERIFY(module);
     QCOMPARE(module->codeSnips().count(), 1);
     QString code = module->codeSnips().first().code().trimmed();

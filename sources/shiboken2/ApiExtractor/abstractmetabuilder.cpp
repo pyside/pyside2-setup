@@ -669,7 +669,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     checkFunctionModifications();
 
     // sort all classes topologically
-    m_metaClasses = classesTopologicalSorted();
+    m_metaClasses = classesTopologicalSorted(m_metaClasses);
 
     for (AbstractMetaClass* cls : qAsConst(m_metaClasses)) {
 //         setupEquals(cls);
@@ -681,7 +681,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         if (!cls->typeEntry()->codeGeneration() || cls->innerClasses().size() < 2)
             continue;
 
-        cls->setInnerClasses(classesTopologicalSorted(cls));
+        cls->setInnerClasses(classesTopologicalSorted(cls->innerClasses()));
     }
 
     dumpLog();
@@ -3085,27 +3085,37 @@ void AbstractMetaBuilderPrivate::dumpLog() const
     writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_fields.log"), m_rejectedFields);
 }
 
-AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClass *cppClass,
+using ClassIndexHash = QHash<AbstractMetaClass *, int>;
+
+static ClassIndexHash::ConstIterator findByTypeEntry(const ClassIndexHash &map,
+                                                     const TypeEntry *typeEntry)
+{
+    auto it = map.cbegin();
+    for (auto end = map.cend(); it != end; ++it) {
+        if (it.key()->typeEntry() == typeEntry)
+            break;
+    }
+    return it;
+}
+
+AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                                            const Dependencies &additionalDependencies) const
 {
-    QLinkedList<int> unmappedResult;
-    QHash<QString, int> map;
-    QHash<int, AbstractMetaClass*> reverseMap;
-
-    const AbstractMetaClassList& classList = cppClass ? cppClass->innerClasses() : m_metaClasses;
+    ClassIndexHash map;
+    QHash<int, AbstractMetaClass *> reverseMap;
 
     int i = 0;
     for (AbstractMetaClass *clazz : classList) {
-        if (map.contains(clazz->qualifiedCppName()))
+        if (map.contains(clazz))
             continue;
-        map[clazz->qualifiedCppName()] = i;
-        reverseMap[i] = clazz;
+        map.insert(clazz, i);
+        reverseMap.insert(i, clazz);
         i++;
     }
 
     Graph graph(map.count());
 
-    for (const Dependency &dep : additionalDependencies) {
+    for (const auto &dep : additionalDependencies) {
         const int parentIndex = map.value(dep.parent, -1);
         const int childIndex = map.value(dep.child, -1);
         if (parentIndex >= 0 && childIndex >= 0) {
@@ -3113,18 +3123,17 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << "AbstractMetaBuilder::classesTopologicalSorted(): Invalid additional dependency: "
-                << dep.child << " -> " << dep.parent << '.';
+                << dep.child->name() << " -> " << dep.parent->name() << '.';
         }
     }
 
-    // TODO choose a better name to these regexs
-    static const QRegularExpression regex1(QStringLiteral("\\(.*\\)"));
-    Q_ASSERT(regex1.isValid());
-    static const QRegularExpression regex2(QStringLiteral("::.*"));
-    Q_ASSERT(regex2.isValid());
     for (AbstractMetaClass *clazz : classList) {
-        if (clazz->enclosingClass() && map.contains(clazz->enclosingClass()->qualifiedCppName()))
-            graph.addEdge(map[clazz->enclosingClass()->qualifiedCppName()], map[clazz->qualifiedCppName()]);
+        const int classIndex = map.value(clazz);
+        if (auto enclosing = clazz->enclosingClass()) {
+            const auto enclosingIt = map.constFind(const_cast< AbstractMetaClass *>(enclosing));
+            if (enclosingIt!= map.cend())
+                graph.addEdge(enclosingIt.value(), classIndex);
+        }
 
         const AbstractMetaClassList &bases = getBaseClasses(clazz);
         for (AbstractMetaClass *baseClass : bases) {
@@ -3132,58 +3141,39 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
             if (clazz->baseClass() == baseClass)
                 clazz->setBaseClass(baseClass);
 
-            if (map.contains(baseClass->qualifiedCppName()))
-                graph.addEdge(map[baseClass->qualifiedCppName()], map[clazz->qualifiedCppName()]);
+            const auto baseIt = map.constFind(baseClass);
+            if (baseIt!= map.cend())
+                graph.addEdge(baseIt.value(), classIndex);
         }
 
         const AbstractMetaFunctionList &functions = clazz->functions();
         for (AbstractMetaFunction *func : functions) {
             const AbstractMetaArgumentList &arguments = func->arguments();
             for (AbstractMetaArgument *arg : arguments) {
-                // check methods with default args
-                QString defaultExpression = arg->originalDefaultValueExpression();
-                if (!defaultExpression.isEmpty()) {
-                    if (defaultExpression == QLatin1String("0") && arg->type()->isValue())
-                        defaultExpression = arg->type()->name();
-
-                    defaultExpression.remove(regex1);
-                    defaultExpression.remove(regex2);
-                }
-                if (!defaultExpression.isEmpty()) {
-                    QString exprClassName = clazz->qualifiedCppName() + colonColon() + defaultExpression;
-                    if (!map.contains(exprClassName)) {
-                        bool found = false;
-                        for (AbstractMetaClass *baseClass : bases) {
-                            exprClassName = baseClass->qualifiedCppName() + colonColon() + defaultExpression;
-                            if (map.contains(exprClassName)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            if (map.contains(defaultExpression))
-                                exprClassName = defaultExpression;
-                            else
-                                exprClassName.clear();
-                        }
+                // Check methods with default args: If a class is instantiated by value,
+                // ("QString s = QString()"), add a dependency.
+                if (!arg->originalDefaultValueExpression().isEmpty()
+                    && arg->type()->isValue()) {
+                    auto typeEntry = arg->type()->typeEntry();
+                    if (typeEntry->isComplex() && typeEntry != clazz->typeEntry()) {
+                        auto ait = findByTypeEntry(map, typeEntry);
+                            if (ait != map.cend() && ait.key()->enclosingClass() != clazz)
+                                graph.addEdge(ait.value(), classIndex);
                     }
-                    if (!exprClassName.isEmpty() && exprClassName != clazz->qualifiedCppName())
-                        graph.addEdge(map[exprClassName], map[clazz->qualifiedCppName()]);
                 }
             }
         }
     }
 
     AbstractMetaClassList result;
-    unmappedResult = graph.topologicalSort();
+    const auto unmappedResult = graph.topologicalSort();
     if (unmappedResult.isEmpty() && graph.nodeCount()) {
-        QTemporaryFile tempFile;
+        QTemporaryFile tempFile(QDir::tempPath() + QLatin1String("/cyclic_depXXXXXX.dot"));
         tempFile.setAutoRemove(false);
         tempFile.open();
         QHash<int, QString> hash;
-        QHash<QString, int>::iterator it = map.begin();
-        for (; it != map.end(); ++it)
-            hash[it.value()] = it.key();
+        for (auto it = map.cbegin(), end = map.cend(); it != end; ++it)
+            hash.insert(it.value(), it.key()->qualifiedCppName());
         graph.dumpDot(hash, tempFile.fileName());
         qCWarning(lcShiboken).noquote().nospace()
             << "Cyclic dependency found! Graph can be found at "
@@ -3199,10 +3189,10 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     return result;
 }
 
-AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClass *cppClass,
+AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                                     const Dependencies &additionalDependencies) const
 {
-    return d->classesTopologicalSorted(cppClass, additionalDependencies);
+    return d->classesTopologicalSorted(classList, additionalDependencies);
 }
 
 AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractMetaArgumentList &list)

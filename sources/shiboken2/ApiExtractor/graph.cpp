@@ -29,7 +29,6 @@
 #include "graph.h"
 #include <QVector>
 #include <QDebug>
-#include <QLinkedList>
 #include <QSet>
 #include <iterator>
 #include <algorithm>
@@ -48,7 +47,7 @@ struct Graph::GraphPrivate
     {
     }
 
-    void dfsVisit(int node, QLinkedList<int>& result, QVector<Color>& colors) const
+    void dfsVisit(int node, Graph::Indexes &result, QVector<Color> &colors) const
     {
         colors[node] = GRAY;
         EdgeIterator it = edges[node].begin();
@@ -59,7 +58,7 @@ struct Graph::GraphPrivate
                 return;
         }
         colors[node] = BLACK;
-        result.push_front(node);
+        result.append(node);
     }
 };
 
@@ -77,10 +76,12 @@ int Graph::nodeCount() const
     return m_d->edges.size();
 }
 
-QLinkedList<int> Graph::topologicalSort() const
+Graph::Indexes Graph::topologicalSort() const
 {
-    int nodeCount = Graph::nodeCount();
-    QLinkedList<int> result;
+    const int nodeCount = Graph::nodeCount();
+    Indexes result;
+    result.reserve(nodeCount);
+
     QVector<GraphPrivate::Color> colors(nodeCount, GraphPrivate::WHITE);
 
     for (int i = 0; i < nodeCount; ++i) {
@@ -88,9 +89,10 @@ QLinkedList<int> Graph::topologicalSort() const
             m_d->dfsVisit(i, result, colors);
     }
 
-    // Not a DAG!
-    if (result.size() != nodeCount)
-        return QLinkedList<int>();
+    if (result.size() == nodeCount)
+        std::reverse(result.begin(), result.end());
+    else
+        result.clear(); // Not a DAG!
     return result;
 }
 

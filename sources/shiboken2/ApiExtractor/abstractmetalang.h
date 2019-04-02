@@ -95,6 +95,8 @@ public:
         return m_format;
     }
 
+    void setFormat(Format f) { m_format = f; }
+
 private:
     QString m_data;
     Format m_format = Documentation::Native;

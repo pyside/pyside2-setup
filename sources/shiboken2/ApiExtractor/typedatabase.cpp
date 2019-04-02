@@ -182,14 +182,29 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
     return 0;
 }
 
+void TypeDatabase::addTypeSystemType(const TypeSystemTypeEntry *e)
+{
+    m_typeSystemEntries.append(e);
+}
+
 const TypeSystemTypeEntry *TypeDatabase::findTypeSystemType(const QString &name) const
 {
-    const auto entries = findTypes(name);
-    for (const TypeEntry *entry : entries) {
-        if (entry->type() == TypeEntry::TypeSystemType)
-            return static_cast<const TypeSystemTypeEntry *>(entry);
+    for (auto entry : m_typeSystemEntries) {
+        if (entry->name() == name)
+            return entry;
     }
     return nullptr;
+}
+
+const TypeSystemTypeEntry *TypeDatabase::defaultTypeSystemType() const
+{
+    return m_typeSystemEntries.value(0, nullptr);
+}
+
+QString TypeDatabase::defaultPackageName() const
+{
+    Q_ASSERT(!m_typeSystemEntries.isEmpty());
+    return m_typeSystemEntries.constFirst()->name();
 }
 
 TypeEntry* TypeDatabase::findType(const QString& name) const
