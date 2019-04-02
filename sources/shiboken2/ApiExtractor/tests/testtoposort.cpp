@@ -33,23 +33,22 @@
 
 void TestTopoSort::testTopoSort()
 {
-    QLinkedList<int> result;
     {
         Graph g(3);
         g.addEdge(1, 2);
         g.addEdge(0, 1);
-        result = g.topologicalSort();
+        const auto result = g.topologicalSort();
         QCOMPARE(result.size(), 3);
-        QLinkedList<int>::iterator it = result.begin();
+        auto it = result.begin();
         QCOMPARE(*it, 0);
         QCOMPARE(*(++it), 1);
         QCOMPARE(*(++it), 2);
     }
     {
         Graph g(2);
-        result = g.topologicalSort();
+        const auto result = g.topologicalSort();
         QCOMPARE(result.size(), 2);
-        QLinkedList<int>::iterator it = result.begin();
+        auto it = result.begin();
         QCOMPARE(*it, 1);
         QCOMPARE(*(++it), 0);
     }
@@ -61,7 +60,7 @@ void TestTopoSort::testCiclicGraph()
     g.addEdge(0, 1);
     g.addEdge(1, 2);
     g.addEdge(2, 0);
-    QLinkedList<int> result = g.topologicalSort();
+    const auto result = g.topologicalSort();
     QVERIFY(result.isEmpty());
 }
 

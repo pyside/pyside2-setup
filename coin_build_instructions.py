@@ -116,6 +116,8 @@ def call_setup(python_ver):
             "--verbose-build"]
     if python_ver == "3":
         cmd += ["--limited-api=yes"]
+    else:
+        cmd += ["--skip-docs"] # 1.4.2019: errors in sphinx_build on openSUSE 4.2
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 

@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
@@ -40,6 +40,7 @@
 ##
 #############################################################################
 
+from __future__ import unicode_literals
 from PySide2 import QtCore, QtGui, QtWidgets
 
 import classwizard_rc
@@ -127,7 +128,7 @@ class ClassWizard(QtWidgets.QWizard):
                     "Cannot write file %s:\n%s" % (headerFile.fileName(), headerFile.errorString()))
             return
 
-        headerFile.write(str(block))
+        headerFile.write(QtCore.QByteArray(block.encode("utf-8")))
 
         block = ''
 
@@ -180,7 +181,7 @@ class ClassWizard(QtWidgets.QWizard):
                     "Cannot write file %s:\n%s" % (implementationFile.fileName(), implementationFile.errorString()))
             return
 
-        implementationFile.write(str(block))
+        implementationFile.write(QtCore.QByteArray(block.encode("utf-8")))
 
         super(ClassWizard, self).accept()
 

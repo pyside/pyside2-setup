@@ -2,13 +2,21 @@
 Getting Started
 ===============
 
-To get started with |project|, install the following prerequisites:
+To develop with |project|, you must install Python, Clang, and |project|.
+
+Preparing for the Installation
+==============================
+
+Before you can install |project|, you must install the following software:
 
 * Python 3.5+ or 2.7
 * libclang 5.0+ (for Qt 5.11) or 6.0+ (for Qt 5.12)
 * Recommended: a virtual environment, such as `venv <https://docs.python.org/3/library/venv.html>`_ or `virtualenv <https://virtualenv.pypa.io/en/stable/installation>`_
 
-With these installed, you are ready to install the |project|
+Installing |project|
+====================
+
+After you have installed the required software, you are ready to install the |project|
 packages using the pip wheel. Run the following command from your command
 prompt to install::
 
@@ -18,12 +26,18 @@ or::
 
     pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.12/latest pyside2 --trusted-host download.qt.io
 
+Testing the Installation
+========================
+
 Now that you have |project| installed, you can test your setup by running the following Python
 constructs to print version information:
 
 .. include:: pysideversion.rst
    :start-line: 5
    :end-line: 32
+
+Creating a Simple Application
+=============================
 
 Your |project| setup is ready, so try exploring it further by developing a simple application
 that prints "Hello World" in several languages. The following instructions will

@@ -91,6 +91,8 @@ public:
     ContainerTypeEntry* findContainerType(const QString& name) const;
     FunctionTypeEntry* findFunctionType(const QString& name) const;
     const TypeSystemTypeEntry *findTypeSystemType(const QString &name) const;
+    const TypeSystemTypeEntry *defaultTypeSystemType() const;
+    QString defaultPackageName() const;
 
     TypeEntry* findType(const QString& name) const;
 
@@ -115,6 +117,7 @@ public:
                               QString *reason = nullptr) const;
 
     bool addType(TypeEntry* e, QString *errorMessage = nullptr);
+    void addTypeSystemType(const TypeSystemTypeEntry *e);
 
     FlagsTypeEntry* findFlagsType(const QString& name) const;
     void addFlagsType(FlagsTypeEntry* fte);
@@ -172,6 +175,7 @@ private:
     TypedefEntryMap m_typedefEntries;
     TemplateEntryMap m_templates;
     QVector<QRegularExpression> m_suppressedWarnings;
+    QVector<const TypeSystemTypeEntry *> m_typeSystemEntries; // maintain order, default is first.
 
     AddedFunctionList m_globalUserFunctions;
     FunctionModificationList m_functionMods;

@@ -29,7 +29,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <QLinkedList>
+#include <QVector>
 #include <QHash>
 #include <QString>
 
@@ -37,6 +37,8 @@
 class Graph
 {
 public:
+    using Indexes = QVector<int>;
+
     /// Create a new graph with \p numNodes nodes.
     Graph(int numNodes);
     ~Graph();
@@ -60,9 +62,10 @@ public:
 
     /**
     *   Topologically sort this graph.
-    *   \return A collection with all nodes topologically sorted or an empty collection if a ciclic dependency was found.
+    *   \return A collection with all nodes topologically sorted or an empty collection if a cyclic
+    *   dependency was found.
     */
-    QLinkedList<int> topologicalSort() const;
+    Indexes topologicalSort() const;
 private:
 
     struct GraphPrivate;
