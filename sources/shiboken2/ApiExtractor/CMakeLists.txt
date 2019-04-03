@@ -81,7 +81,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${Qt5Xml_INCLUDE_DIRS}
                     )
 
-add_subdirectory(doc)
 add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
 target_link_libraries(apiextractor
                       ${Qt5Xml_LIBRARIES}
