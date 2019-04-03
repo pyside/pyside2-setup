@@ -28,7 +28,6 @@
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
-#include <QLinkedList>
 #include <QLibrary>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
@@ -83,8 +82,6 @@ static void printOptions(QTextStream& s, const OptionDescriptions& options)
         }
     }
 }
-
-typedef void (*getGeneratorsFunc)(QLinkedList<Generator*>*);
 
 static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
 {
