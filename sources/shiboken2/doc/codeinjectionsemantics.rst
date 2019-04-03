@@ -2,8 +2,8 @@
 Code Injection Semantics
 ************************
 
-:std:doc:`API Extractor <apiextractor:overview>` provides the
-:ref:`inject-code <apiextractor:inject-code>` tag
+:std:doc:`API Extractor <overview>` provides the
+:ref:`inject-code <inject-code>` tag
 allowing the user to put custom written code to on specific locations of the generated code.
 Yet this is only part of what is needed to generate proper binding code, where the custom code
 should be written to depends upon the technology used on the generated binding code.

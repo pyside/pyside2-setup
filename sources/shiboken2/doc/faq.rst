@@ -45,7 +45,7 @@ What do I have to do to create my bindings?
 -------------------------------------------
 
 Most of the work is already done by the API Extractor.
-The developer creates a :std:doc:`typesystem <apiextractor:typesystem>`
+The developer creates a :std:doc:`typesystem <typesystem>`
 file with any customization wanted in
 the generated code, like removing classes or changing method signatures.
 The generator will output the *.h* and *.cpp* files with the CPython code that

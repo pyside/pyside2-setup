@@ -5508,7 +5508,7 @@ bool CppGenerator::finishGeneration()
     }
 
     TypeDatabase* typeDb = TypeDatabase::instance();
-    const TypeSystemTypeEntry *moduleEntry = typeDb->findTypeSystemType(packageName());
+    const TypeSystemTypeEntry *moduleEntry = typeDb->defaultTypeSystemType();
     Q_ASSERT(moduleEntry);
 
     //Extra includes

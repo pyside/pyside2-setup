@@ -156,7 +156,7 @@ struct Generator::GeneratorPrivate
     QString outDir;
     // License comment
     QString licenseComment;
-    QString packageName;
+    QString moduleName;
     QStringList instantiatedContainersNames;
     QStringList instantiatedSmartPointerNames;
     QVector<const AbstractMetaType *> instantiatedContainers;
@@ -181,8 +181,6 @@ bool Generator::setup(const ApiExtractor& extractor)
         qCWarning(lcShiboken) << "Couldn't find the package name!!";
         return false;
     }
-
-    m_d->packageName = moduleEntry->name();
 
     collectInstantiatedContainersAndSmartPointers();
 
@@ -356,13 +354,16 @@ void Generator::setLicenseComment(const QString& licenseComment)
 
 QString Generator::packageName() const
 {
-    return m_d->packageName;
+    return TypeDatabase::instance()->defaultPackageName();
 }
 
 QString Generator::moduleName() const
 {
-    QString& pkgName = m_d->packageName;
-    return QString(pkgName).remove(0, pkgName.lastIndexOf(QLatin1Char('.')) + 1);
+    if (m_d->moduleName.isEmpty()) {
+        m_d->moduleName = packageName();
+        m_d->moduleName.remove(0, m_d->moduleName.lastIndexOf(QLatin1Char('.')) + 1);
+    }
+    return m_d->moduleName;
 }
 
 QString Generator::outputDirectory() const
@@ -859,11 +860,12 @@ QString Generator::subDirectoryForClass(const AbstractMetaClass* clazz) const
     return subDirectoryForPackage(clazz->package());
 }
 
-QString Generator::subDirectoryForPackage(QString packageName) const
+QString Generator::subDirectoryForPackage(QString packageNameIn) const
 {
-    if (packageName.isEmpty())
-        packageName = m_d->packageName;
-    return QString(packageName).replace(QLatin1Char('.'), QDir::separator());
+    if (packageNameIn.isEmpty())
+        packageNameIn = packageName();
+    packageNameIn.replace(QLatin1Char('.'), QDir::separator());
+    return packageNameIn;
 }
 
 template<typename T>

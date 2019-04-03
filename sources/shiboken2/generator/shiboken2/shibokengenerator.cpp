@@ -2489,7 +2489,6 @@ static void getCode(QStringList& code, const TypeEntry* type)
 
 bool ShibokenGenerator::doSetup()
 {
-    TypeDatabase* td = TypeDatabase::instance();
     QStringList snips;
     const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList)
@@ -2501,7 +2500,7 @@ bool ShibokenGenerator::doSetup()
     for (const AbstractMetaClass *metaClass : classList)
         getCode(snips, metaClass->typeEntry());
 
-    const TypeSystemTypeEntry *moduleEntry = td->findTypeSystemType(packageName());
+    const TypeSystemTypeEntry *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
     Q_ASSERT(moduleEntry);
     getCode(snips, moduleEntry);
 

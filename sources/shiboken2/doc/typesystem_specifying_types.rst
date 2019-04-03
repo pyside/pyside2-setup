@@ -358,7 +358,7 @@ typedef-type
         <typesystem>
             <typedef-type name="..."
                 source="..."
-                since="..."
+                since="..." />
         </typesystem>
 
     The **source** attribute is the source. Example:

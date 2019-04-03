@@ -1,5 +1,5 @@
-The API Extractor Type System
-*****************************
+Type System Reference
+*********************
 
 The typesystem is used by a binding generator or any other software using the APIExtractor library
 to map a C++ library API onto a higher level language.

@@ -15,3 +15,4 @@ Table of contents
     wordsofadvice.rst
     shibokenmodule.rst
     faq.rst
+    typesystem.rst
