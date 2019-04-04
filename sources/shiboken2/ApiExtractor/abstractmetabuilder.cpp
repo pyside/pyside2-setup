@@ -3197,16 +3197,60 @@ void AbstractMetaBuilder::setGlobalHeader(const QString& globalHeader)
     d->m_globalHeader = QFileInfo(globalHeader);
 }
 
+void AbstractMetaBuilder::setHeaderPaths(const HeaderPaths &hp)
+{
+    for (const auto & h: hp) {
+        if (h.type != HeaderType::Framework && h.type != HeaderType::FrameworkSystem)
+            d->m_headerPaths.append(QFile::decodeName(h.path));
+    }
+}
+
 void AbstractMetaBuilder::setSkipDeprecated(bool value)
 {
     d->m_skipDeprecated = value;
 }
 
+// PYSIDE-975: When receiving an absolute path name from the code model, try
+// to resolve it against the include paths set on shiboken in order to recreate
+// relative paths like #include <foo/bar.h>.
+
+static inline bool isFileSystemSlash(QChar c)
+{
+    return c == QLatin1Char('/') || c == QLatin1Char('\\');
+}
+
+static bool matchHeader(const QString &headerPath, const QString &fileName)
+{
+#if defined(Q_OS_WIN) || defined(Q_OS_DARWIN)
+    static const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+    static const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+    const int pathSize = headerPath.size();
+    return fileName.size() > pathSize
+        && isFileSystemSlash(fileName.at(pathSize))
+        && fileName.startsWith(headerPath, caseSensitivity);
+}
+
 void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &fileName) const
 {
-    QFileInfo info(fileName);
-    if (m_globalHeader.fileName() != info.fileName())
-        te->setInclude(Include(Include::IncludePath, info.fileName()));
+    auto it = m_resolveIncludeHash.find(fileName);
+    if (it == m_resolveIncludeHash.end()) {
+        QFileInfo info(fileName);
+        if (m_globalHeader.fileName() == info.fileName())
+            return;
+
+        int bestMatchLength = 0;
+        for (const auto &headerPath : m_headerPaths) {
+            if (headerPath.size() > bestMatchLength && matchHeader(headerPath, fileName))
+                bestMatchLength = headerPath.size();
+        }
+        const QString include = bestMatchLength > 0
+            ? fileName.right(fileName.size() - bestMatchLength - 1)
+            : info.fileName();
+        it = m_resolveIncludeHash.insert(fileName, {Include::IncludePath, include});
+    }
+    te->setInclude(it.value());
 }
 
 #ifndef QT_NO_DEBUG_STREAM

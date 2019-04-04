@@ -183,6 +183,8 @@ public:
 
     QString m_logDirectory;
     QFileInfo m_globalHeader;
+    QStringList m_headerPaths;
+    mutable QHash<QString, Include> m_resolveIncludeHash;
     bool m_skipDeprecated;
 };
 

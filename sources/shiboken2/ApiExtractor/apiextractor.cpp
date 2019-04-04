@@ -224,6 +224,7 @@ bool ApiExtractor::run()
     m_builder->setLogDirectory(m_logDirectory);
     m_builder->setGlobalHeader(m_cppFileName);
     m_builder->setSkipDeprecated(m_skipDeprecated);
+    m_builder->setHeaderPaths(m_includePaths);
     QByteArrayList arguments;
     arguments.reserve(m_includePaths.size() + 1);
     for (const HeaderPath &headerPath : qAsConst(m_includePaths))
