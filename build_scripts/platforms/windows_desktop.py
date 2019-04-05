@@ -283,6 +283,8 @@ def copy_msvc_redist_files(vars, redist_target_path):
         if "{target_arch}".format(**vars) == "32":
             zip_file = "pyside_qt_deps_32.7z"
         download_and_extract_7z(redist_url + zip_file, redist_target_path)
+    else:
+        print("Qt dependency DLLs (MSVC redist) will not be downloaded and extracted.")
 
     copydir(redist_target_path,
             "{st_build_dir}/{st_package_name}",
