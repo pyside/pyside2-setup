@@ -276,8 +276,8 @@ def copy_msvc_redist_files(vars, redist_target_path):
         os.makedirs(redist_target_path)
 
     # Extract Qt dependency dlls when building on Qt CI.
-    in_coin = os.environ.get("QTEST_ENVIRONMENT", None) == "ci"
-    if in_coin:
+    in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
+    if in_coin is not None:
         redist_url = "http://download.qt.io/development_releases/prebuilt/vcredist/"
         zip_file = "pyside_qt_deps_64.7z"
         if "{target_arch}".format(**vars) == "32":
