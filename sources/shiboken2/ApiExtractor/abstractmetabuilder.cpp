@@ -2874,19 +2874,17 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
                                                  const QStringList &declarations)
 {
+    const QStringList scopes = currentScope()->qualifiedName();
+
     for (int i = 0; i < declarations.size(); ++i) {
-        const QString &p = declarations.at(i);
+        const auto propertyTokens = declarations.at(i).splitRef(QLatin1Char(' '));
 
-        QStringList l = p.split(QLatin1Char(' '));
-
-
-        QStringList qualifiedScopeName = currentScope()->qualifiedName();
-        AbstractMetaType* type = 0;
-        QString scope;
-        for (int j = qualifiedScopeName.size(); j >= 0; --j) {
-            scope = j > 0 ? QStringList(qualifiedScopeName.mid(0, j)).join(colonColon()) + colonColon() : QString();
+        AbstractMetaType *type = nullptr;
+        for (int j = scopes.size(); j >= 0; --j) {
+            QStringList qualifiedName = scopes.mid(0, j);
+            qualifiedName.append(propertyTokens.at(0).toString());
             TypeInfo info;
-            info.setQualifiedName((scope + l.at(0)).split(colonColon()));
+            info.setQualifiedName(qualifiedName);
 
             type = translateType(info, metaClass);
             if (type)
@@ -2896,23 +2894,23 @@ void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
         if (!type) {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Unable to decide type of property: '%1' in class '%2'")
-                                  .arg(l.at(0), metaClass->name());
+                                  .arg(propertyTokens.at(0).toString(), metaClass->name());
             continue;
         }
 
         QPropertySpec* spec = new QPropertySpec(type->typeEntry());
-        spec->setName(l.at(1));
+        spec->setName(propertyTokens.at(1).toString());
         spec->setIndex(i);
 
-        for (int pos = 2; pos + 1 < l.size(); pos += 2) {
-            if (l.at(pos) == QLatin1String("READ"))
-                spec->setRead(l.at(pos + 1));
-            else if (l.at(pos) == QLatin1String("WRITE"))
-                spec->setWrite(l.at(pos + 1));
-            else if (l.at(pos) == QLatin1String("DESIGNABLE"))
-                spec->setDesignable(l.at(pos + 1));
-            else if (l.at(pos) == QLatin1String("RESET"))
-                spec->setReset(l.at(pos + 1));
+        for (int pos = 2; pos + 1 < propertyTokens.size(); pos += 2) {
+            if (propertyTokens.at(pos) == QLatin1String("READ"))
+                spec->setRead(propertyTokens.at(pos + 1).toString());
+            else if (propertyTokens.at(pos) == QLatin1String("WRITE"))
+                spec->setWrite(propertyTokens.at(pos + 1).toString());
+            else if (propertyTokens.at(pos) == QLatin1String("DESIGNABLE"))
+                spec->setDesignable(propertyTokens.at(pos + 1).toString());
+            else if (propertyTokens.at(pos) == QLatin1String("RESET"))
+                spec->setReset(propertyTokens.at(pos + 1).toString());
         }
 
         metaClass->addPropertySpec(spec);
