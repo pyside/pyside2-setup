@@ -759,9 +759,10 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
 AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
                                                                  const NamespaceModelItem &namespaceItem)
 {
-    QString namespaceName =
-        (!m_namespacePrefix.isEmpty() ? m_namespacePrefix + colonColon() : QString())
-        + namespaceItem->name();
+    QString namespaceName = currentScope()->qualifiedName().join(colonColon());
+    if (!namespaceName.isEmpty())
+        namespaceName.append(colonColon());
+    namespaceName.append(namespaceItem->name());
     NamespaceTypeEntry *type = TypeDatabase::instance()->findNamespaceType(namespaceName);
 
     if (TypeDatabase::instance()->isClassRejected(namespaceName)) {
@@ -788,7 +789,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     traverseEnums(namespaceItem, metaClass, namespaceItem->enumsDeclarations());
 
     pushScope(namespaceItem);
-    m_namespacePrefix = currentScope()->qualifiedName().join(colonColon());
 
     const ClassList &classes = namespaceItem->classes();
     for (const ClassModelItem &cls : classes) {
@@ -823,7 +823,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     }
 
     popScope();
-    m_namespacePrefix = currentScope()->qualifiedName().join(colonColon());
 
     if (!type->include().isValid())
         setInclude(type, namespaceItem->fileName());

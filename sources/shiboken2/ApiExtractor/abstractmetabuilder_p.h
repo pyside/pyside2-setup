@@ -186,7 +186,6 @@ public:
     QHash<const TypeEntry *, AbstractMetaEnum *> m_enums;
 
     QList<ScopeModelItem> m_scopes;
-    QString m_namespacePrefix;
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 
