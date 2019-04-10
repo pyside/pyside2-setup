@@ -802,7 +802,6 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
 {
     TypeEntry::formatDebug(d);
     FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
-    FORMAT_BOOL("QObject", m_qobject)
     FORMAT_BOOL("polymorphicBase", m_polymorphicBase)
     FORMAT_BOOL("genericClass", m_genericClass)
     FORMAT_BOOL("deleteInMainThread", m_deleteInMainThread)

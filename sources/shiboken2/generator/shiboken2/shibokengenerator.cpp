@@ -729,8 +729,7 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction* func,
 
         if (!func->typeReplaced(arg->argumentIndex() + 1).isEmpty()) {
             result += QLatin1Char(objType);
-        } else if (arg->type()->isQObject()
-            || arg->type()->isObject()
+        } else if (arg->type()->isObject()
             || arg->type()->isValue()
             || arg->type()->isValuePointer()
             || arg->type()->isNativePointer()

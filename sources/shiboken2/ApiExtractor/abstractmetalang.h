@@ -301,7 +301,6 @@ public:
         EnumPattern,
         ValuePattern,
         ObjectPattern,
-        QObjectPattern,
         ValuePointerPattern,
         NativePointerPattern,
         NativePointerAsArrayPattern, // "int*" as "int[]"
@@ -374,12 +373,6 @@ public:
     bool isEnum() const
     {
         return m_pattern == EnumPattern;
-    }
-
-    // returns true if the type is used as a QObject *
-    bool isQObject() const
-    {
-        return m_pattern == QObjectPattern;
     }
 
     // returns true if the type is used as an object, e.g. Xxx *

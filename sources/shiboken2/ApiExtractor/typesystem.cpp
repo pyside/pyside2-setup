@@ -3413,7 +3413,6 @@ ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t,
                                    const QVersionNumber &vr) :
     TypeEntry(name, t, vr),
     m_qualifiedCppName(name),
-    m_qobject(false),
     m_polymorphicBase(false),
     m_genericClass(false),
     m_deleteInMainThread(false)

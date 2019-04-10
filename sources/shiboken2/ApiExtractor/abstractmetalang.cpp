@@ -288,8 +288,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isObject()) {
         if (indirections() == 0 && m_referenceType == NoReference)
             return ValuePattern;
-        return static_cast<const ComplexTypeEntry *>(m_typeEntry)->isQObject()
-            ? QObjectPattern : ObjectPattern;
+        return ObjectPattern;
     }
 
     if (m_typeEntry->isContainer() && indirections() == 0)
@@ -322,8 +321,7 @@ void AbstractMetaType::decideUsagePattern()
         // const-references to pointers can be passed as pointers
         setReferenceType(NoReference);
         setConstant(false);
-        pattern = static_cast<const ComplexTypeEntry *>(m_typeEntry)->isQObject()
-            ? QObjectPattern : ObjectPattern;
+        pattern = ObjectPattern;
     }
     setTypeUsagePattern(pattern);
 }
@@ -1636,9 +1634,14 @@ bool AbstractMetaClass::isNamespace() const
     return m_typeEntry->isNamespace();
 }
 
+static bool qObjectPredicate(const AbstractMetaClass *c)
+{
+    return c->qualifiedCppName() == QLatin1String("QObject");
+}
+
 bool AbstractMetaClass::isQObject() const
 {
-    return m_typeEntry->isQObject();
+    return qObjectPredicate(this) || recurseClassHierarchy(this, qObjectPredicate) != nullptr;
 }
 
 QString AbstractMetaClass::qualifiedCppName() const

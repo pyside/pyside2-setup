@@ -907,7 +907,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             QTextStream ac(&argConv);
             const PrimitiveTypeEntry* argType = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
             bool convert = argType->isObject()
-                            || arg->type()->isQObject()
                             || argType->isValue()
                             || arg->type()->isValuePointer()
                             || arg->type()->isNativePointer()

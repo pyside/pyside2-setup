@@ -85,7 +85,6 @@ void TestAbstractMetaType::testConstCharPtrType()
     QVERIFY(!rtype->isObject());
     QVERIFY(!rtype->isPrimitive()); // const char* differs from char, so it's not considered a primitive type by apiextractor
     QVERIFY(rtype->isNativePointer());
-    QVERIFY(!rtype->isQObject());
     QCOMPARE(rtype->referenceType(), NoReference);
     QVERIFY(!rtype->isValue());
     QVERIFY(!rtype->isValuePointer());
@@ -159,7 +158,6 @@ void TestAbstractMetaType::testCharType()
     QVERIFY(!rtype->isObject());
     QVERIFY(rtype->isPrimitive());
     QVERIFY(!rtype->isNativePointer());
-    QVERIFY(!rtype->isQObject());
     QCOMPARE(rtype->referenceType(), NoReference);
     QVERIFY(!rtype->isValue());
     QVERIFY(!rtype->isValuePointer());

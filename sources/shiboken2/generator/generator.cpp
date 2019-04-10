@@ -538,7 +538,7 @@ bool Generator::isObjectType(const TypeEntry* type)
 }
 bool Generator::isObjectType(const ComplexTypeEntry* type)
 {
-    return type->isObject() || type->isQObject();
+    return type->isObject();
 }
 bool Generator::isObjectType(const AbstractMetaClass* metaClass)
 {

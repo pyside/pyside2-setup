@@ -158,9 +158,6 @@ public:
     bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
     bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
 
-    void fixQObjectForScope(const FileModelItem &dom, const TypeDatabase *types,
-                            const NamespaceModelItem &item);
-
     void sortLists();
     AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
     void setInclude(TypeEntry *te, const QString &fileName) const;

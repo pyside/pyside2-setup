@@ -1284,15 +1284,6 @@ public:
         return m_fieldMods;
     }
 
-    bool isQObject() const
-    {
-        return m_qobject;
-    }
-    void setQObject(bool qobject)
-    {
-        m_qobject = qobject;
-    }
-
     QString defaultSuperclass() const
     {
         return m_defaultSuperclass;
@@ -1410,7 +1401,6 @@ private:
     QString m_qualifiedCppName;
     QString m_targetLangName;
 
-    uint m_qobject : 1;
     uint m_polymorphicBase : 1;
     uint m_genericClass : 1;
     uint m_deleteInMainThread : 1;

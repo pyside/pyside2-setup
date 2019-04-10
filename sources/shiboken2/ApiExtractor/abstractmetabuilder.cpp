@@ -391,27 +391,6 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     }
 }
 
-void AbstractMetaBuilderPrivate::fixQObjectForScope(const FileModelItem &dom,
-                                                    const TypeDatabase *types,
-                                                    const NamespaceModelItem &scope)
-{
-    const ClassList &scopeClasses = scope->classes();
-    for (const ClassModelItem &item : scopeClasses) {
-        QString qualifiedName = item->qualifiedName().join(colonColon());
-        TypeEntry* entry = types->findType(qualifiedName);
-        if (entry) {
-            if (isQObject(dom, qualifiedName) && entry->isComplex())
-                static_cast<ComplexTypeEntry *>(entry)->setQObject(true);
-        }
-    }
-
-    const NamespaceList &namespaces = scope->namespaces();
-    for (const NamespaceModelItem &n : namespaces) {
-        if (scope != n)
-            fixQObjectForScope(dom, types, n);
-    }
-}
-
 void AbstractMetaBuilderPrivate::sortLists()
 {
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses))
@@ -446,9 +425,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const TypeDatabase *types = TypeDatabase::instance();
 
     pushScope(dom);
-
-    // fix up QObject's in the type system..
-    fixQObjectForScope(dom, types, dom);
 
     // Start the generation...
     const ClassList &typeValues = dom->classes();
@@ -1003,9 +979,6 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     if (!type)
         return 0;
 
-    if (type->isObject())
-        static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(dom, stripTemplateArgs(typeDef->type().qualifiedName().join(colonColon()))));
-
     AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
@@ -1068,9 +1041,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         m_rejectedClasses.insert(fullClassName, reason);
         return 0;
     }
-
-    if (type->isObject())
-        ((ObjectTypeEntry*)type)->setQObject(isQObject(dom, fullClassName));
 
     AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeEntry(type);
@@ -1435,12 +1405,6 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction)) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("signal '%1' in class '%2' is overloaded.")
-                                      .arg(metaFunction->name(), metaClass->name());
-            }
-
-            if (metaFunction->isSignal() && !metaClass->isQObject()) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("signal '%1' in non-QObject class '%2'")
                                       .arg(metaFunction->name(), metaClass->name());
             }
 
@@ -2537,38 +2501,6 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
 
     return expr;
 }
-
-bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QString &qualifiedName)
-{
-    if (qualifiedName == QLatin1String("QObject"))
-        return true;
-
-    ClassModelItem classItem = dom->findClass(qualifiedName);
-
-    if (!classItem) {
-        QStringList names = qualifiedName.split(colonColon());
-        NamespaceModelItem ns = dom;
-        for (int i = 0; i < names.size() - 1 && ns; ++i)
-            ns = ns->findNamespace(names.at(i));
-        if (ns && names.size() >= 2)
-            classItem = ns->findClass(names.at(names.size() - 1));
-    }
-
-    if (!classItem)
-        return false;
-
-    if (classItem->extendsClass(QLatin1String("QObject")))
-        return true;
-
-    const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
-    for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
-        if (isQObject(dom, baseClass.name))
-            return true;
-    }
-
-    return false;
-}
-
 
 bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)
 {
