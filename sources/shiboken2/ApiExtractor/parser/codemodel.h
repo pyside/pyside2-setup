@@ -82,7 +82,7 @@ public:
     void addFile(FileModelItem item);
     FileModelItem findFile(const QString &name) const;
 
-    CodeModelItem findItem(const QStringList &qualifiedName, CodeModelItem scope) const;
+    CodeModelItem findItem(const QStringList &qualifiedName, const ScopeModelItem &scope) const;
 
 private:
     FileList m_files;
@@ -202,7 +202,7 @@ public:
     QString toString() const;
 
     static TypeInfo combine(const TypeInfo &__lhs, const TypeInfo &__rhs);
-    static TypeInfo resolveType(TypeInfo const &__type, CodeModelItem __scope);
+    static TypeInfo resolveType(TypeInfo const &__type, const ScopeModelItem &__scope);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
@@ -219,7 +219,7 @@ public:
 private:
     friend class TypeInfoTemplateArgumentHandler;
 
-    static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, CodeModelItem __scope);
+    static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, const ScopeModelItem &__scope);
 
     QStringList m_qualifiedName;
     QStringList m_arrayElements;
