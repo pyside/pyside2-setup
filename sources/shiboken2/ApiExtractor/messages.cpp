@@ -167,6 +167,12 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
     return result;
 }
 
+QString msgCannotResolveEntity(const QString &name, const QString &reason)
+{
+    return QLatin1String("Cannot resolve entity \"") + name
+        + QLatin1String("\": ") + reason;
+}
+
 QString msgCannotSetArrayUsage(const QString &function, int i, const QString &reason)
 {
     return function +  QLatin1String(": Cannot use parameter ")

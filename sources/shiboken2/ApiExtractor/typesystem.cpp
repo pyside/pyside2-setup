@@ -40,6 +40,7 @@
 #include <QtCore/QStringAlgorithms>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
+#include <QtCore/QXmlStreamEntityResolver>
 
 #include <algorithm>
 
@@ -439,11 +440,74 @@ static QString msgUnusedAttributes(const QStringRef &tag, const QXmlStreamAttrib
     return result;
 }
 
+// QXmlStreamEntityResolver::resolveEntity(publicId, systemId) is not
+// implemented; resolve via undeclared entities instead.
+class TypeSystemEntityResolver : public QXmlStreamEntityResolver
+{
+public:
+    explicit TypeSystemEntityResolver(const QString &currentPath) :
+        m_currentPath(currentPath) {}
+
+    QString resolveUndeclaredEntity(const QString &name) override;
+
+private:
+    QString readFile(const QString &entityName, QString *errorMessage) const;
+
+    const QString m_currentPath;
+    QHash<QString, QString> m_cache;
+};
+
+QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *errorMessage) const
+{
+    QString fileName = entityName;
+    if (!fileName.contains(QLatin1Char('.')))
+        fileName += QLatin1String(".xml");
+    QString path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
+    if (!QFileInfo::exists(path)) // PySide2-specific hack
+        fileName.prepend(QLatin1String("typesystem_"));
+    path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
+    if (!QFileInfo::exists(path)) {
+        *errorMessage = QLatin1String("Unable to resolve: ") + entityName;
+        return QString();
+    }
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        *errorMessage = msgCannotOpenForReading(file);
+        return QString();
+    }
+    QString result = QString::fromUtf8(file.readAll()).trimmed();
+    // Remove license header comments on which QXmlStreamReader chokes
+    if (result.startsWith(QLatin1String("<!--"))) {
+        const int commentEnd = result.indexOf(QLatin1String("-->"));
+        if (commentEnd != -1) {
+            result.remove(0, commentEnd + 3);
+            result = result.trimmed();
+        }
+    }
+    return result;
+}
+
+QString TypeSystemEntityResolver::resolveUndeclaredEntity(const QString &name)
+{
+    auto it = m_cache.find(name);
+    if (it == m_cache.end()) {
+        QString errorMessage;
+        it = m_cache.insert(name, readFile(name, &errorMessage));
+        if (it.value().isEmpty()) { // The parser will fail and display the line number.
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgCannotResolveEntity(name, errorMessage)));
+        }
+    }
+    return it.value();
+}
+
 Handler::Handler(TypeDatabase *database, bool generate) :
     m_database(database),
     m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
 {
 }
+
+Handler::~Handler() = default;
 
 static QString readerFileName(const QXmlStreamReader &reader)
 {
@@ -584,6 +648,8 @@ bool Handler::parse(QXmlStreamReader &reader)
     const QString fileName = readerFileName(reader);
     if (!fileName.isEmpty())
         m_currentPath = QFileInfo(fileName).absolutePath();
+    m_entityResolver.reset(new TypeSystemEntityResolver(m_currentPath));
+    reader.setEntityResolver(m_entityResolver.data());
 
     while (!reader.atEnd()) {
         switch (reader.readNext()) {
