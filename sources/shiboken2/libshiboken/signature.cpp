@@ -61,6 +61,7 @@ extern "C"
 #define PYTHON_NEEDS_ITERATOR_FLAG      (!PYTHON_IS_PYTHON3)
 #define PYTHON_EXPOSES_METHODDESCR      (PYTHON_IS_PYTHON3)
 #define PYTHON_NO_TYPE_IN_FUNCTIONS     (!PYTHON_IS_PYTHON3 || Py_LIMITED_API)
+#define PYTHON_HAS_INT_AND_LONG         (!PYTHON_IS_PYTHON3)
 
 // These constants are still in use:
 #define PYTHON_USES_D_COMMON            (PY_VERSION_HEX >= 0x03020000)
@@ -326,7 +327,7 @@ TypeKey_to_PropsDict(PyObject *type_key, PyObject *obtype)
         dict = empty_dict;
     }
     if (!PyDict_Check(dict))
-        dict = PySide_BuildSignatureProps(obtype);
+        dict = PySide_BuildSignatureProps(type_key);
     return dict;
 }
 
@@ -821,16 +822,23 @@ init_module_1(void)
 }
 
 static int
-PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signatures)
+PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signatures[])
 {
     init_module_1();
     Shiboken::AutoDecRef type_key(GetTypeKey(obtype_mod));
-    Shiboken::AutoDecRef arg_tup(Py_BuildValue("(Os)", obtype_mod, signatures));
-    if (type_key.isNull() || arg_tup.isNull()
-        || PyDict_SetItem(pyside_globals->arg_dict, type_key, arg_tup) < 0)
+    /*
+     * PYSIDE-996: Avoid string overflow in MSVC, which has a limit of
+     * 2**15 unicode characters (64 K memory).
+     * Instead of one huge string, we take a ssize_t that is the
+     * address of a string array. It will not be turned into a real
+     * string list until really used by Python. This is quite optimal.
+     */
+    Shiboken::AutoDecRef numkey(Py_BuildValue("n", signatures));
+    if (type_key.isNull() || numkey.isNull()
+        || PyDict_SetItem(pyside_globals->arg_dict, type_key, numkey) < 0)
         return -1;
     /*
-     * We also record a mapping from type key to type/module. This helps to
+     * We record also a mapping from type key to type/module. This helps to
      * lazily initialize the Py_LIMITED_API in name_key_to_func().
      */
     return PyDict_SetItem(pyside_globals->map_dict, type_key, obtype_mod) == 0 ? 0 : -1;
@@ -856,7 +864,26 @@ init_module_2(void)
 }
 
 static PyObject *
-PySide_BuildSignatureProps(PyObject *obtype_mod)
+_address_to_stringlist(PyObject *numkey)
+{
+    ssize_t address = PyNumber_AsSsize_t(numkey, PyExc_ValueError);
+    if (address == -1 && PyErr_Occurred())
+        return nullptr;
+    char **sig_strings = reinterpret_cast<char **>(address);
+    PyObject *res_list = PyList_New(0);
+    if (res_list == nullptr)
+        return nullptr;
+    for (; *sig_strings != nullptr; ++sig_strings) {
+        char *sig_str = *sig_strings;
+        Shiboken::AutoDecRef pystr(Py_BuildValue("s", sig_str));
+        if (pystr.isNull() || PyList_Append(res_list, pystr) < 0)
+            return nullptr;
+    }
+    return res_list;
+}
+
+static PyObject *
+PySide_BuildSignatureProps(PyObject *type_key)
 {
     /*
      * Here is the second part of the function.
@@ -865,11 +892,14 @@ PySide_BuildSignatureProps(PyObject *obtype_mod)
      * them by the function result.
      */
     init_module_2();
-    Shiboken::AutoDecRef type_key(GetTypeKey(obtype_mod));
-    if (type_key.isNull())
+    if (type_key == nullptr)
         return nullptr;
-    PyObject *arg_tup = PyDict_GetItem(pyside_globals->arg_dict, type_key);
-    if (arg_tup == nullptr)
+    PyObject *numkey = PyDict_GetItem(pyside_globals->arg_dict, type_key);
+    Shiboken::AutoDecRef strings(_address_to_stringlist(numkey));
+    if (strings.isNull())
+        return nullptr;
+    Shiboken::AutoDecRef arg_tup(Py_BuildValue("(OO)", type_key, strings.object()));
+    if (arg_tup.isNull())
         return nullptr;
     PyObject *dict = PyObject_CallObject(pyside_globals->pyside_type_init_func, arg_tup);
     if (dict == nullptr) {
@@ -890,7 +920,7 @@ static int _finish_nested_classes(PyObject *dict);
 static int _build_func_to_type(PyObject *obtype);
 
 static int
-PySide_FinishSignatures(PyObject *module, const char *signatures)
+PySide_FinishSignatures(PyObject *module, const char *signatures[])
 {
     /*
      * Initialization of module functions and resolving of static methods.
@@ -1030,7 +1060,7 @@ _build_func_to_type(PyObject *obtype)
 
 int
 SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
-                      const char *signatures)
+                      const char *signatures[])
 {
     if (PyType_Ready(type) < 0)
         return -1;
@@ -1044,7 +1074,7 @@ SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
 }
 
 void
-FinishSignatureInitialization(PyObject *module, const char *signatures)
+FinishSignatureInitialization(PyObject *module, const char *signatures[])
 {
     /*
      * This function is called at the very end of a module initialization.

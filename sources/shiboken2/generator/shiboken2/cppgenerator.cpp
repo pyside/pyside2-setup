@@ -664,7 +664,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                 s << NULL_PTR;
             s << "}," << endl;
         }
-        s << INDENT << '{' << NULL_PTR << "}  // Sentinel" << endl;
+        s << INDENT << '{' << NULL_PTR << "} // Sentinel" << endl;
         s << "};" << endl << endl;
     }
 
@@ -4924,11 +4924,11 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     // PYSIDE-510: Create a signatures string for the introspection feature.
     s << "// The signatures string for the functions." << endl;
     s << "// Multiple signatures have their index \"n:\" in front." << endl;
-    s << "const char " << initFunctionName << "_SignaturesString[] = \"\"" << endl;
+    s << "static const char *" << initFunctionName << "_SignatureStrings[] = {" << endl;
     QString line;
     while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\\n\"" << endl;
-    s << ';' << endl << endl;
+        s << INDENT << '"' << line << "\"," << endl;
+    s << INDENT << NULL_PTR << "}; // Sentinel" << endl << endl;
     s << "void init_" << initFunctionName;
     s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
     s << '{' << endl;
@@ -4981,8 +4981,8 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         // 4:typeSpec
         s << INDENT << '&' << chopType(pyTypeName) << "_spec," << endl;
 
-        // 5:signaturesString
-        s << INDENT << initFunctionName << "_SignaturesString," << endl;
+        // 5:signatureStrings
+        s << INDENT << initFunctionName << "_SignatureStrings," << endl;
 
         // 6:cppObjDtor
         s << INDENT;
@@ -5661,11 +5661,11 @@ bool CppGenerator::finishGeneration()
     // PYSIDE-510: Create a signatures string for the introspection feature.
     s << "// The signatures string for the global functions." << endl;
     s << "// Multiple signatures have their index \"n:\" in front." << endl;
-    s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
+    s << "static const char *" << moduleName() << "_SignatureStrings[] = {" << endl;
     QString line;
     while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\\n\"" << endl;
-    s << INDENT << ';' << endl << endl;
+        s << INDENT << '"' << line << "\"," << endl;
+    s << INDENT << NULL_PTR << "}; // Sentinel" << endl << endl;
 
     s << "SBK_MODULE_INIT_FUNCTION_BEGIN(" << moduleName() << ")" << endl;
 
@@ -5799,7 +5799,7 @@ bool CppGenerator::finishGeneration()
 
     // finish the rest of __signature__ initialization.
     s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
-        << "_SignaturesString);" << endl;
+        << "_SignatureStrings);" << endl;
 
     if (usePySideExtensions()) {
         // initialize the qApp module.
