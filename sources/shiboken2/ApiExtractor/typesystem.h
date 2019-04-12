@@ -1269,7 +1269,7 @@ public:
     {
         m_addedFunctions = addedFunctions;
     }
-    void addNewFunction(const AddedFunction &addedFunction)
+    void addNewFunction(const AddedFunctionPtr &addedFunction)
     {
         m_addedFunctions << addedFunction;
     }

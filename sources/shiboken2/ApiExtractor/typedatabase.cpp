@@ -430,8 +430,8 @@ void TypeDatabase::addGlobalUserFunctions(const AddedFunctionList &functions)
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
 {
     AddedFunctionList addedFunctions;
-    for (const AddedFunction &func : m_globalUserFunctions) {
-        if (func.name() == name)
+    for (const AddedFunctionPtr &func : m_globalUserFunctions) {
+        if (func->name() == name)
             addedFunctions.append(func);
     }
     return addedFunctions;

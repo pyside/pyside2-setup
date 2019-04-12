@@ -94,8 +94,8 @@ public:
                                 AbstractMetaClass *currentClass);
     void traverseOperatorFunction(const FunctionModelItem &item,
                                   AbstractMetaClass *currentClass);
-    AbstractMetaFunction* traverseFunction(const AddedFunction &addedFunc);
-    AbstractMetaFunction* traverseFunction(const AddedFunction &addedFunc,
+    AbstractMetaFunction* traverseFunction(const AddedFunctionPtr &addedFunc);
+    AbstractMetaFunction* traverseFunction(const AddedFunctionPtr &addedFunc,
                                            AbstractMetaClass *metaClass);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
                                            AbstractMetaClass *currentClass);

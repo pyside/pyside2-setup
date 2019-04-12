@@ -662,11 +662,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     // Functions added to the module on the type system.
     const AddedFunctionList &globalUserFunctions = types->globalUserFunctions();
-    for (const AddedFunction &addedFunc : globalUserFunctions) {
+    for (const AddedFunctionPtr &addedFunc : globalUserFunctions) {
         AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
         if (Q_UNLIKELY(!metaFunc)) {
             qFatal("Unable to traverse added global function \"%s\".",
-                   qPrintable(addedFunc.name()));
+                   qPrintable(addedFunc->name()));
         }
         metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
         m_globalFunctions << metaFunc;
@@ -1431,10 +1431,10 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
 {
     // Add the functions added by the typesystem
     const AddedFunctionList &addedFunctions = metaClass->typeEntry()->addedFunctions();
-    for (const AddedFunction &addedFunc : addedFunctions) {
+    for (const AddedFunctionPtr &addedFunc : addedFunctions) {
         if (!traverseFunction(addedFunc, metaClass)) {
                 qFatal("Unable to traverse function \"%s\" added to \"%s\".",
-                       qPrintable(addedFunc.name()), qPrintable(metaClass->name()));
+                       qPrintable(addedFunc->name()), qPrintable(metaClass->name()));
         }
     }
 }
@@ -1588,29 +1588,29 @@ void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
     }
 }
 
-AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunction& addedFunc)
+AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc)
 {
     return traverseFunction(addedFunc, 0);
 }
 
-AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunction& addedFunc,
+AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc,
                                                                    AbstractMetaClass *metaClass)
 {
     AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
-    metaFunction->setConstant(addedFunc.isConstant());
-    metaFunction->setName(addedFunc.name());
-    metaFunction->setOriginalName(addedFunc.name());
+    metaFunction->setConstant(addedFunc->isConstant());
+    metaFunction->setName(addedFunc->name());
+    metaFunction->setOriginalName(addedFunc->name());
     AbstractMetaClass::Attributes visibility =
-        addedFunc.access() == AddedFunction::Public
+        addedFunc->access() == AddedFunction::Public
         ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
     metaFunction->setVisibility(visibility);
     metaFunction->setUserAdded(true);
-    AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
+    AbstractMetaAttributes::Attribute isStatic = addedFunc->isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
     metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::FinalInTargetLang | isStatic);
-    metaFunction->setType(translateType(addedFunc.returnType()));
+    metaFunction->setType(translateType(addedFunc->returnType()));
 
 
-    QVector<AddedFunction::TypeInfo> args = addedFunc.arguments();
+    QVector<AddedFunction::TypeInfo> args = addedFunc->arguments();
     AbstractMetaArgumentList metaArguments;
 
     for (int i = 0; i < args.count(); ++i) {
@@ -1620,7 +1620,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken,
                       "Unable to translate type \"%s\" of argument %d of added function \"%s\".",
-                      qPrintable(typeInfo.name), i + 1, qPrintable(addedFunc.name()));
+                      qPrintable(typeInfo.name), i + 1, qPrintable(addedFunc->name()));
             delete metaFunction;
             return nullptr;
         }

@@ -31,6 +31,7 @@
 
 #include <QtCore/QHash>
 #include <QtCore/QList>
+#include <QtCore/QSharedPointer>
 #include <QtCore/QVector>
 
 class CodeSnip;
@@ -40,7 +41,8 @@ struct AddedFunction;
 struct FieldModification;
 struct FunctionModification;
 
-typedef QVector<AddedFunction> AddedFunctionList;
+using AddedFunctionPtr = QSharedPointer<AddedFunction>;
+using AddedFunctionList = QVector<AddedFunctionPtr>;
 typedef QVector<CodeSnip> CodeSnipList;
 typedef QVector<DocModification> DocModificationList;
 typedef QVector<FieldModification> FieldModificationList;

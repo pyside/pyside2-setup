@@ -2009,8 +2009,8 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
         return false;
     }
 
-    AddedFunction func(signature, returnType);
-    func.setStatic(staticFunction);
+    AddedFunctionPtr func(new AddedFunction(signature, returnType));
+    func->setStatic(staticFunction);
     if (!signature.contains(QLatin1Char('(')))
         signature += QLatin1String("()");
     m_currentSignature = signature;
@@ -2021,7 +2021,7 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
         }
-        func.setAccess(a);
+        func->setAccess(a);
     }
 
     m_contextStack.top()->addedFunctions << func;
