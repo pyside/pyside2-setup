@@ -373,7 +373,7 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClas
     return fullClassName;
 }
 
-QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *func) //WS
+QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *func)
 {
     QString funcName;
     if (func->isOperatorOverload())

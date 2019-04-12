@@ -750,12 +750,8 @@ introduceWrapperType(PyObject *enclosingObject,
                      PyObject *baseTypes,
                      unsigned wrapperFlags)
 {
-    if (baseType) {
-        typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType);
-    }
-    else {
-        typeSpec->slots[0].pfunc = reinterpret_cast<void *>(SbkObject_TypeF());
-    }
+    typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType ? baseType : SbkObject_TypeF());
+
     PyObject *heaptype = PyType_FromSpecWithBases(typeSpec, baseTypes);
     Py_TYPE(heaptype) = SbkObjectType_TypeF();
     Py_INCREF(Py_TYPE(heaptype));
@@ -779,20 +775,14 @@ introduceWrapperType(PyObject *enclosingObject,
 
     setOriginalName(type, originalName);
     setDestructorFunction(type, cppObjDtor);
+    PyObject *ob_type = reinterpret_cast<PyObject *>(type);
 
-    if (wrapperFlags & InnerClass) {
-        if (PyDict_SetItemString(enclosingObject, typeName, reinterpret_cast<PyObject *>(type)) == 0)
-            return type;
-        else
-            return nullptr;
-    }
+    if (wrapperFlags & InnerClass)
+        return PyDict_SetItemString(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
 
-    //PyModule_AddObject steals type's reference.
-    Py_INCREF(reinterpret_cast<PyObject *>(type));
-    if (PyModule_AddObject(enclosingObject, typeName, reinterpret_cast<PyObject *>(type)) == 0) {
-        return type;
-    }
-    return nullptr;
+    // PyModule_AddObject steals type's reference.
+    Py_INCREF(ob_type);
+    return PyModule_AddObject(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
 }
 
 void setSubTypeInitHook(SbkObjectType* type, SubTypeInitHook func)

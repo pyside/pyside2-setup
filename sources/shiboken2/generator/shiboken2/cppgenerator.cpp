@@ -5656,7 +5656,17 @@ bool CppGenerator::finishGeneration()
     s << "    /* m_clear    */ nullptr," << endl;
     s << "    /* m_free     */ nullptr" << endl;
     s << "};" << endl << endl;
-    s << "#endif" << endl;
+    s << "#endif" << endl << endl;
+
+    // PYSIDE-510: Create a signatures string for the introspection feature.
+    s << "// The signatures string for the global functions." << endl;
+    s << "// Multiple signatures have their index \"n:\" in front." << endl;
+    s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
+    QString line;
+    while (signatureStream.readLineInto(&line))
+        s << INDENT << '"' << line << "\\n\"" << endl;
+    s << INDENT << ';' << endl << endl;
+
     s << "SBK_MODULE_INIT_FUNCTION_BEGIN(" << moduleName() << ")" << endl;
 
     ErrorCode errorCode(QLatin1String("SBK_MODULE_INIT_ERROR"));
@@ -5787,14 +5797,6 @@ bool CppGenerator::finishGeneration()
         s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl << endl;
     }
 
-    // PYSIDE-510: Create a signatures string for the introspection feature.
-    s << "// The signatures string for the global functions." << endl;
-    s << "// Multiple signatures have their index \"n:\" in front." << endl;
-    s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
-    QString line;
-    while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\\n\"" << endl;
-    s << ';' << endl;
     // finish the rest of __signature__ initialization.
     s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
         << "_SignaturesString);" << endl;

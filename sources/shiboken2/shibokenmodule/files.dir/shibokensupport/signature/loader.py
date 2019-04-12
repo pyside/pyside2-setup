@@ -119,7 +119,6 @@ from shibokensupport import signature
 signature.get_signature = signature_bootstrap.get_signature
 del signature_bootstrap
 
-
 def _get_modname(mod):
     return mod.__spec__.name if getattr(mod, "__spec__", None) else mod.__name__
 
