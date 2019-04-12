@@ -476,6 +476,8 @@ struct AddedFunction
         return m_isStatic;
     }
 
+    FunctionModificationList modifications;
+
 private:
     QString m_name;
     QVector<TypeInfo> m_arguments;

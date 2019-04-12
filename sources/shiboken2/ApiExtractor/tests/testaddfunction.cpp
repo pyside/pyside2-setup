@@ -265,7 +265,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 
     QCOMPARE(addedFuncs.size(), 1);
 
-    FunctionModificationList mods = typeDb->functionModifications(QLatin1String("func(int,int)"));
+    const FunctionModificationList mods = addedFuncs.constFirst()->modifications;
 
     QCOMPARE(mods.size(), 1);
     QVERIFY(mods.first().isCodeInjection());

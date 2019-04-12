@@ -783,6 +783,7 @@ public:
     Q_FLAG(CompareResultFlag)
 
     AbstractMetaFunction();
+    explicit AbstractMetaFunction(const AddedFunctionPtr &addedFunc);
     ~AbstractMetaFunction();
 
     QString name() const
@@ -1003,14 +1004,7 @@ public:
     }
 
     /// Returns true if the AbstractMetaFunction was added by the user via the type system description.
-    bool isUserAdded() const
-    {
-        return m_userAdded;
-    }
-    void setUserAdded(bool userAdded)
-    {
-        m_userAdded = userAdded;
-    }
+    bool isUserAdded() const { return !m_addedFunction.isNull(); }
 
     QString toString() const
     {
@@ -1118,9 +1112,9 @@ private:
     const AbstractMetaClass *m_declaringClass = nullptr;
     QPropertySpec *m_propertySpec = nullptr;
     AbstractMetaArgumentList m_arguments;
+    AddedFunctionPtr m_addedFunction;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
-    uint m_userAdded                : 1;
     uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;

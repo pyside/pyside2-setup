@@ -132,6 +132,7 @@ struct StackElementContext
     FunctionModificationList functionMods;
     FieldModificationList fieldMods;
     DocModificationList docModifications;
+    int addedFunctionModificationIndex = -1;
 };
 
 class Handler

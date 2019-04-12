@@ -674,6 +674,17 @@ bool Handler::endElement(const QStringRef &localName)
         }
     }
     break;
+    case StackElement::AddFunction: {
+        // Leaving add-function: Assign all modifications to the added function
+        StackElementContext *top = m_contextStack.top();
+        const int modIndex = top->addedFunctionModificationIndex;
+        top->addedFunctionModificationIndex = -1;
+        Q_ASSERT(modIndex >= 0);
+        Q_ASSERT(!top->addedFunctions.isEmpty());
+        while (modIndex < top->functionMods.size())
+            top->addedFunctions.last()->modifications.append(top->functionMods.takeAt(modIndex));
+    }
+        break;
     case StackElement::NativeToTarget:
     case StackElement::AddConversion: {
         CustomConversion* customConversion = static_cast<TypeEntry*>(m_current->entry)->customConversion();
@@ -2025,6 +2036,8 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
     }
 
     m_contextStack.top()->addedFunctions << func;
+    m_contextStack.top()->addedFunctionModificationIndex =
+        m_contextStack.top()->functionMods.size();
 
     FunctionModification mod;
     if (!mod.setSignature(m_currentSignature, &m_error))

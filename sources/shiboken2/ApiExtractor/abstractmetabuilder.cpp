@@ -1596,17 +1596,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc,
                                                                    AbstractMetaClass *metaClass)
 {
-    AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
-    metaFunction->setConstant(addedFunc->isConstant());
-    metaFunction->setName(addedFunc->name());
-    metaFunction->setOriginalName(addedFunc->name());
-    AbstractMetaClass::Attributes visibility =
-        addedFunc->access() == AddedFunction::Public
-        ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
-    metaFunction->setVisibility(visibility);
-    metaFunction->setUserAdded(true);
-    AbstractMetaAttributes::Attribute isStatic = addedFunc->isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
-    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::FinalInTargetLang | isStatic);
+    AbstractMetaFunction *metaFunction = new AbstractMetaFunction(addedFunc);
     metaFunction->setType(translateType(addedFunc->returnType()));
 
 
