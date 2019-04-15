@@ -71,26 +71,32 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 
 void TestAddFunction::testAddFunction()
 {
-    const char cppCode[] = "struct B {}; struct A { void a(int); };\n";
-    const char xmlCode[] = "\
-    <typesystem package='Foo'>\n\
-        <primitive-type name='int'/>\n\
-        <primitive-type name='float'/>\n\
-        <value-type name='B'/>\n\
-        <value-type name='A'>\n\
-            <add-function signature='b(int, float = 4.6, const B&amp;)' return-type='int' access='protected'>\n\
-            </add-function>\n\
-        </value-type>\n\
-    </typesystem>\n";
+    const char cppCode[] = R"CPP(
+struct B {};
+struct A {
+    void a(int);
+};)CPP";
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <primitive-type name='float'/>
+    <value-type name='B'/>
+    <value-type name='A'>
+        <add-function signature='b(int, float = 4.6, const B&amp;)' return-type='int' access='protected'/>
+        <add-function signature='operator()(int)' return-type='int' access='public'/>
+    </value-type>
+</typesystem>)XML";
+
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     TypeDatabase* typeDb = TypeDatabase::instance();
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 4); // default ctor, default copy ctor, func a() and the added function
+    QCOMPARE(classA->functions().count(), 5); // default ctor, default copy ctor, func a() and the added functions
 
-    AbstractMetaFunction* addedFunc = classA->functions().last();
+    auto addedFunc = classA->findFunction(QLatin1String("b"));
+    QVERIFY(addedFunc);
     QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Protected);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QVERIFY(addedFunc->isUserAdded());
@@ -109,6 +115,9 @@ void TestAddFunction::testAddFunction()
     QCOMPARE(args[0]->type()->typeEntry(), returnType->typeEntry());
     QCOMPARE(args[1]->defaultValueExpression(), QLatin1String("4.6"));
     QCOMPARE(args[2]->type()->typeEntry(), typeDb->findType(QLatin1String("B")));
+
+    auto addedCallOperator = classA->findFunction(QLatin1String("operator()"));
+    QVERIFY(addedCallOperator);
 }
 
 void TestAddFunction::testAddFunctionConstructor()

@@ -105,6 +105,8 @@ static inline QString yesAttributeValue() { return QStringLiteral("yes"); }
 static inline QString trueAttributeValue() { return QStringLiteral("true"); }
 static inline QString falseAttributeValue() { return QStringLiteral("false"); }
 
+static inline QString callOperator() { return QStringLiteral("operator()"); }
+
 static QVector<CustomConversion *> customConversionsForReview;
 
 // Set a regular expression for rejection from text. By legacy, those are fixed
@@ -3244,7 +3246,10 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
     Q_ASSERT(!returnType.isEmpty());
     m_returnType = parseType(returnType);
     signature = signature.trimmed();
-    int endPos = signature.indexOf(QLatin1Char('('));
+    // Skip past "operator()(...)"
+    const int parenStartPos = signature.startsWith(callOperator())
+        ? callOperator().size() : 0;
+    int endPos = signature.indexOf(QLatin1Char('('), parenStartPos);
     if (endPos < 0) {
         m_isConst = false;
         m_name = signature;
