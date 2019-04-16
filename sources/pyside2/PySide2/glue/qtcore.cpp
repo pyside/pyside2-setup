@@ -1139,11 +1139,7 @@ if (PyBytes_Check(%PYARG_1)) {
 Shiboken::SbkType<QByteArray>()->tp_as_buffer = &SbkQByteArrayBufferProc;
 Shiboken::SbkType<QByteArray>()->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #else
-#ifdef Py_LIMITED_API
 PepType_AS_BUFFER(Shiboken::SbkType<QByteArray>()) = &SbkQByteArrayBufferProc;
-#else
-Shiboken::SbkType<QByteArray>()->tp_as_buffer = &SbkQByteArrayBufferProc;
-#endif
 #endif
 // @snippet qbytearray-py3
 
