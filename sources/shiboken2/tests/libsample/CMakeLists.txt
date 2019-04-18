@@ -51,8 +51,8 @@ expression.cpp
 filter.cpp
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-add_definitions("-DLIBSAMPLE_BUILD")
 add_library(libsample SHARED ${libsample_SRC})
+target_include_directories(libsample PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(libsample PRIVATE LIBSAMPLE_BUILD)
 set_property(TARGET libsample PROPERTY PREFIX "")
 

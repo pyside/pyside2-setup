@@ -7,12 +7,10 @@ otherobjecttype.cpp
 othermultiplederived.cpp
 )
 
-add_definitions("-DLIBOTHER_BUILD")
 add_library(libother SHARED ${libother_SRC})
+target_include_directories(libother PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(libother PRIVATE LIBOTHER_BUILD)
+target_link_libraries(libother PUBLIC libsample)
 set_property(TARGET libother PROPERTY PREFIX "")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${libsample_SOURCE_DIR}
-                    ${libsample_SOURCE_DIR}/..)
-target_link_libraries(libother libsample)
 

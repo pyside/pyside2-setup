@@ -3,26 +3,7 @@ project(apiextractor)
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
-set(USE_LIBXSLT 0)
-if (NOT DISABLE_DOCSTRINGS)
-    if (LIBXSLT_FOUND AND LIBXML2_FOUND)
-        add_definitions(-DHAVE_LIBXSLT)
-        set (USE_LIBXSLT 1)
-    else()
-        message(WARNING
-                "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
-    endif()
-endif()
-
-if(BUILD_TESTS)
-    set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
-endif ()
-
-set(QT_USE_QTCORE 1)
-set(QT_USE_QTXML 1)
-add_definitions(-DQT_PLUGIN)
-add_definitions(-DQT_SHARED)
-add_definitions(-DRXX_ALLOCATOR_INIT_0)
+set(CMAKE_AUTOMOC ON)
 
 set(apiextractor_SRC
 apiextractor.cpp
@@ -47,45 +28,37 @@ parser/codemodel.cpp
 parser/enumvalue.cpp
 )
 
-set(APIEXTRACTOR_EXTRA_INCLUDES ${CLANG_EXTRA_INCLUDES})
-set(APIEXTRACTOR_EXTRA_LIBRARIES ${CLANG_EXTRA_LIBRARIES})
+add_library(apiextractor STATIC ${apiextractor_SRC})
+target_include_directories(apiextractor PRIVATE ${CLANG_EXTRA_INCLUDES}
+                                                ${CMAKE_CURRENT_SOURCE_DIR}
+                                                ${CMAKE_CURRENT_BINARY_DIR}
+                                                ${CMAKE_CURRENT_SOURCE_DIR}/parser
+                                                ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp)
+target_link_libraries(apiextractor PUBLIC Qt5::Core)
+target_link_libraries(apiextractor PRIVATE ${CLANG_EXTRA_LIBRARIES})
 
 if (NOT DISABLE_DOCSTRINGS)
-    set(apiextractor_SRC
-        ${apiextractor_SRC}
-        docparser.cpp
-        doxygenparser.cpp
-        qtdocparser.cpp
-    )
-    set(APIEXTRACTOR_EXTRA_INCLUDES ${APIEXTRACTOR_EXTRA_INCLUDES})
-    set(APIEXTRACTOR_EXTRA_LIBRARIES ${APIEXTRACTOR_EXTRA_LIBRARIES})
-    if (USE_LIBXSLT)
-        list(APPEND APIEXTRACTOR_EXTRA_INCLUDES ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
-        list(APPEND APIEXTRACTOR_EXTRA_LIBRARIES ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
+    target_sources(apiextractor PRIVATE docparser.cpp
+                                        doxygenparser.cpp
+                                        qtdocparser.cpp)
+    target_link_libraries(apiextractor PUBLIC Qt5::Xml Qt5::XmlPatterns)
+
+    if (LIBXSLT_FOUND AND LIBXML2_FOUND)
+        target_compile_definitions(apiextractor PUBLIC HAVE_LIBXSLT)
+        target_include_directories(apiextractor
+                                   PRIVATE ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+        target_link_libraries(apiextractor
+                              PRIVATE ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
+    else()
+        message(WARNING
+                "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
     endif()
 endif()
 
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
-set(CMAKE_AUTOMOC ON)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/parser
-                    ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
-                    ${APIEXTRACTOR_EXTRA_INCLUDES}
-                    ${Qt5Core_INCLUDE_DIRS}
-                    ${Qt5Xml_INCLUDE_DIRS}
-                    )
-
-add_library(apiextractor STATIC ${apiextractor_SRC} ${apiextractor_RCCS_SRC})
-target_link_libraries(apiextractor
-                      ${Qt5Xml_LIBRARIES}
-                      ${Qt5XmlPatterns_LIBRARIES}
-                      ${APIEXTRACTOR_EXTRA_LIBRARIES}
-                      )
-
 if (BUILD_TESTS)
+    set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
     enable_testing()
     add_subdirectory(tests)
 endif()

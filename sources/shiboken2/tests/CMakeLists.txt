@@ -1,6 +1,3 @@
-find_package(Qt5 REQUIRED COMPONENTS Core)
-include_directories(${Qt5Core_INCLUDE_DIRS})
-
 add_subdirectory(libminimal)
 if(NOT DEFINED MINIMAL_TESTS)
     add_subdirectory(libsample)
