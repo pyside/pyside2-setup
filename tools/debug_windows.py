@@ -154,17 +154,22 @@ def get_installed_windows_kits():
     roots_key = r"SOFTWARE\Microsoft\Windows Kits\Installed Roots"
     log.info("Searching for Windows kits in registry path: "
              "{}".format(roots_key))
-    roots = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, roots_key, 0,
-                           winreg.KEY_READ)
+
     kits = []
     pattern = re.compile(r'KitsRoot(\d+)')
+    try:
+        roots = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, roots_key, 0,
+                               winreg.KEY_READ)
 
-    for (name, value, value_type) in sub_values(roots):
-        if value_type == winreg.REG_SZ and name.startswith('KitsRoot'):
-            match = pattern.search(name)
-            if match:
-                version = match.group(1)
-                kits.append({'version': version, 'value': value})
+        for (name, value, value_type) in sub_values(roots):
+            if value_type == winreg.REG_SZ and name.startswith('KitsRoot'):
+                match = pattern.search(name)
+                if match:
+                    version = match.group(1)
+                    kits.append({'version': version, 'value': value})
+
+    except WindowsError as e:
+        log.exception(e)
 
     if not kits:
         log.error(dedent("""
