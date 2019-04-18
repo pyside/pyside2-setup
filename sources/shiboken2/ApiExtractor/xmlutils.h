@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -25,29 +25,29 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef XMLUTILS_H
+#define XMLUTILS_H
 
-#ifndef QTDOCPARSER_H
-#define QTDOCPARSER_H
+#include <QtCore/QSharedPointer>
+#include <QtCore/QString>
 
-#include "docparser.h"
-
-class QtDocParser : public DocParser
+class XQuery
 {
 public:
-    QtDocParser() {}
-    void fillDocumentation(AbstractMetaClass* metaClass) override;
-    Documentation retrieveModuleDocumentation() override;
-    Documentation retrieveModuleDocumentation(const QString& name) override;
+    Q_DISABLE_COPY(XQuery);
 
-private:
-    QString queryFunctionDocumentation(const QString &sourceFileName,
-                                       const AbstractMetaClass* metaClass,
-                                       const QString &classQuery,
-                                       const  AbstractMetaFunction *func,
-                                       const DocModificationList &signedModifs,
-                                       const XQueryPtr &xquery,
-                                       QString *errorMessage);
+    virtual ~XQuery();
+
+    QString evaluate(QString xPathExpression, QString *errorMessage);
+
+    static QSharedPointer<XQuery> create(const QString &focus, QString *errorMessage);
+
+protected:
+    XQuery();
+
+    virtual QString doEvaluate(const QString &xPathExpression, QString *errorMessage) = 0;
 };
 
-#endif // QTDOCPARSER_H
+QString xsl_transform(const QString &xml, const QString &xsl, QString *errorMessage);
 
+#endif // XMLUTILS_H

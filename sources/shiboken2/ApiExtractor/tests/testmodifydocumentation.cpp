@@ -29,6 +29,7 @@
 #include "testmodifydocumentation.h"
 
 #include <QCoreApplication>
+#include <QtCore/QTemporaryDir>
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
@@ -59,8 +60,16 @@ R"(<typesystem package="Foo">
     QCOMPARE(docMods[0].signature(), QString());
     QCOMPARE(docMods[1].code().trimmed(), QLatin1String("<para>Some changed contents here</para>"));
     QCOMPARE(docMods[1].signature(), QString());
+
+    // Create a temporary directory for the documentation file since libxml2
+    // cannot handle Qt resources.
+    QTemporaryDir tempDir(QDir::tempPath() + QLatin1String("/shiboken_testmodifydocXXXXXX"));
+    QVERIFY2(tempDir.isValid(), qPrintable(tempDir.errorString()));
+    const QString docFileName = QLatin1String("a.xml");
+    QVERIFY(QFile::copy(QLatin1String(":/") + docFileName, tempDir.filePath(docFileName)));
+
     QtDocParser docParser;
-    docParser.setDocumentationDataDirectory(QLatin1String(":"));
+    docParser.setDocumentationDataDirectory(tempDir.path());
     docParser.fillDocumentation(classA);
 
     const QString actualDocSimplified = classA->documentation().value().simplified();

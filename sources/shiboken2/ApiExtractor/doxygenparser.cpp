@@ -31,8 +31,8 @@
 #include "messages.h"
 #include "reporthandler.h"
 #include "typesystem.h"
+#include "xmlutils.h"
 
-#include <QtXmlPatterns/QXmlQuery>
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 
@@ -86,8 +86,13 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             <<  "/{struct|class|namespace}"<< doxyFileSuffix;
         return;
     }
-    QXmlQuery xquery;
-    xquery.setFocus(QUrl(doxyFilePath));
+
+    QString errorMessage;
+    XQueryPtr xquery = XQuery::create(doxyFilePath, &errorMessage);
+    if (xquery.isNull()) {
+        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        return;
+    }
 
     // Get class documentation
     const QString classQuery = QLatin1String("/doxygen/compounddef/detaileddescription");
@@ -190,8 +195,12 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
         return Documentation();
     }
 
-    QXmlQuery xquery;
-    xquery.setFocus(QUrl(sourceFile));
+    QString errorMessage;
+    XQueryPtr xquery = XQuery::create(sourceFile, &errorMessage);
+    if (xquery.isNull()) {
+        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        return {};
+    }
 
     // Module documentation
     QString query = QLatin1String("/doxygen/compounddef/detaileddescription");

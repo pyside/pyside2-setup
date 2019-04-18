@@ -24,7 +24,12 @@ if(BUILD_TESTS)
     find_package(Qt5Test 5.12 REQUIRED)
 endif()
 
-if(NOT Qt5XmlPatterns_FOUND OR NOT Qt5Xml_FOUND)
+set(HAS_LIBXSLT 0)
+if (LIBXSLT_FOUND AND LIBXML2_FOUND)
+    set(HAS_LIBXSLT 1)
+endif()
+
+if(NOT Qt5XmlPatterns_FOUND AND NOT HAS_LIBXSLT)
     set(DISABLE_DOCSTRINGS TRUE)
     message(WARNING
             "Documentation will not be built due to missing dependency (no Qt5XmlPatterns found).")
