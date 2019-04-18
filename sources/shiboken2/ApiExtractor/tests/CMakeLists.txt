@@ -1,8 +1,6 @@
 find_package(Qt5Core)
 find_package(Qt5Gui)
 find_package(Qt5Test)
-find_package(Qt5Xml)
-find_package(Qt5XmlPatterns)
 
 set(CMAKE_AUTORCC ON)
 

@@ -2,18 +2,15 @@ project(apiextractor)
 
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
-find_package(LibXml2 2.6.32)
-find_package(LibXslt 1.1.19)
 
-option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
-
-set (USE_LIBXSLT 0)
+set(USE_LIBXSLT 0)
 if (NOT DISABLE_DOCSTRINGS)
     if (LIBXSLT_FOUND AND LIBXML2_FOUND)
         add_definitions(-DHAVE_LIBXSLT)
         set (USE_LIBXSLT 1)
     else()
-        message(WARNING "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
+        message(WARNING
+                "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
     endif()
 endif()
 
