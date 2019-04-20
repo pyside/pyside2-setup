@@ -92,7 +92,7 @@ def create_zipfile(limited_api):
     flag = '-b' if sys.version_info >= (3,) else ''
     os.chdir(work_dir)
 
-    # Limited API: Remove all left-over py[co] files first, in case we use '--reuse-build'.
+    # Remove all left-over py[co] and other files first, in case we use '--reuse-build'.
     # Note that we could improve that with the PyZipfile function to use .pyc files
     # in different folders, but that makes only sense when COIN allows us to have
     # multiple Python versions in parallel.
@@ -100,9 +100,9 @@ def create_zipfile(limited_api):
     for root, dirs, files in os.walk(work_dir):
         for name in files:
             fpath = os.path.join(root, name)
-            if name.endswith(".pyc") or name.endswith(".pyo"):
+            ew = name.endswith
+            if ew(".pyc") or ew(".pyo") or ew(".zip") or ew(".inc"):
                 os.remove(fpath)
-
     # We copy every Python file into this dir, but only for the right version.
     # For testing in the source dir, we need to filter.
     if sys.version_info[0] == 3:
