@@ -29,11 +29,11 @@ Frequently Asked Questions
 **Does PySide2 have support for embedded Linux (Raspberry Pi, i.MX6 etc)?**
   Not at the moment.
 
-**There are three wheels (pyside2, shiboken2, and shiboken2_generator)
-  what is the different between them?**
+**There are three wheels (pyside2, shiboken2, and shiboken2_generator), what is the different between them?**
 
   Before the official release, everything was in one big wheel, but it made sense to split
   the projects in three different wheels:
+
    * **pyside2**: contains all the PySide2 modules to use the Qt framework.
      Also depends on the shiboken2 module.
    * **shiboken2**: contains the shiboken2 module with helper functions for PySide2.

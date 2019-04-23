@@ -5,6 +5,7 @@ Web Browser Example
 The example demonstrates the power and simplicity offered by |project| to developers.
 It uses several |pymodname| submodules to offer a fluid and modern-looking UI that
 is apt for a web browser. The application offers the following features:
+
     * Tab-based browsing experience using QTabWidget.
     * Download manager using a QProgressBar and QWebEngineDownloadItem.
     * Bookmark manager using QTreeView.
