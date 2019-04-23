@@ -206,9 +206,12 @@ def generate_build_qmake():
 
 def compile_using_pyinstaller():
     src_path = os.path.join("..", "hello.py")
-    exit_code = run_process([sys.executable, "-m", "PyInstaller",
-        "--name=hello_app", "--console", "--log-level=DEBUG",
-        src_path])
+    spec_path = os.path.join("..", "hello_app.spec")
+    exit_code = run_process([sys.executable, "-m", "PyInstaller", spec_path])
+        # to create the spec file, this setting was used:
+        #"--name=hello_app", "--console", "--log-level=DEBUG", src_path])
+        # By using a spec file, we avoid all the probing that might disturb certain
+        # platforms and also save some analysis time.
     if exit_code:
         # raise RuntimeError("Failure while compiling script using PyInstaller.")
         print("PYINST: Failure while compiling script using PyInstaller.")
