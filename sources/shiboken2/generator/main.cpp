@@ -373,8 +373,10 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
         const QStringList includePathListList =
             it.value().split(pathSplitter, QString::SkipEmptyParts);
         args.erase(it);
-        for (const QString &s : includePathListList)
-            extractor.addIncludePath(HeaderPath{QFile::encodeName(s), headerType});
+        for (const QString &s : includePathListList) {
+            auto path = QFile::encodeName(QDir::cleanPath(s));
+            extractor.addIncludePath(HeaderPath{path, headerType});
+        }
     }
 }
 

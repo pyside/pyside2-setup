@@ -3,6 +3,30 @@ Specifying Types
 
 .. _typesystem:
 
+Including Snippets
+^^^^^^^^^^^^^^^^^^
+
+There might be repetitive XML code, for example function modifications that
+need to be done on classes that are not related by type inheritance.
+It is possible to split out such snippets and include them via an entity reference.
+
+.. code-block:: xml
+
+    <typesystem>
+        <object-type name="A">
+            &common_function_modifications;
+        </object-type>
+        <object-type name="B">
+            &common_function_modifications;
+        </object-type>
+    </typesystem>
+
+The entity name is interpreted as file name (with suffix **xml**) appended and resolved
+in the type system paths passed as command line argument.
+
+Note that this is not a standard externally parsed entity due to the limitations
+of the underlying parser.
+
 typesystem
 ^^^^^^^^^^
 

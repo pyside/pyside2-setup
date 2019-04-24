@@ -83,37 +83,35 @@ FileModelItem CodeModel::findFile(const QString &name) const
     return findModelItem(m_files, name);
 }
 
-CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, CodeModelItem scope) const
+static CodeModelItem findRecursion(const ScopeModelItem &scope,
+                                   const QStringList &qualifiedName, int segment = 0)
 {
-    for (int i = 0; i < qualifiedName.size(); ++i) {
-        // ### Extend to look for members etc too.
-        const QString &name = qualifiedName.at(i);
-
-        if (NamespaceModelItem ns = qSharedPointerDynamicCast<_NamespaceModelItem>(scope)) {
-            if (NamespaceModelItem tmp_ns = ns->findNamespace(name)) {
-                scope = tmp_ns;
-                continue;
-            }
-        }
-
-        if (ScopeModelItem ss = qSharedPointerDynamicCast<_ScopeModelItem>(scope)) {
-            if (ClassModelItem cs = ss->findClass(name)) {
-                scope = cs;
-            } else if (EnumModelItem es = ss->findEnum(name)) {
-                if (i == qualifiedName.size() - 1)
-                    return es;
-            } else if (TypeDefModelItem tp = ss->findTypeDef(name)) {
-                if (i == qualifiedName.size() - 1)
-                    return tp;
-            } else {
-                // If we don't find the name in the scope chain we
-                // need to return an empty item to indicate failure...
-                return CodeModelItem();
+    const QString &nameSegment = qualifiedName.at(segment);
+    if (segment == qualifiedName.size() - 1) { // Leaf item
+        if (ClassModelItem cs = scope->findClass(nameSegment))
+            return cs;
+        if (EnumModelItem es = scope->findEnum(nameSegment))
+            return es;
+        if (TypeDefModelItem tp = scope->findTypeDef(nameSegment))
+            return tp;
+        return CodeModelItem();
+    }
+    if (auto nestedClass = scope->findClass(nameSegment))
+        return findRecursion(nestedClass, qualifiedName, segment + 1);
+    if (auto namespaceItem = qSharedPointerDynamicCast<_NamespaceModelItem>(scope)) {
+        for (const auto &nestedNamespace : namespaceItem->namespaces()) {
+            if (nestedNamespace->name() == nameSegment) {
+                if (auto item = findRecursion(nestedNamespace, qualifiedName, segment + 1))
+                    return item;
             }
         }
     }
+    return CodeModelItem();
+}
 
-    return scope;
+CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, const ScopeModelItem &scope) const
+{
+    return findRecursion(scope, qualifiedName);
 }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -160,7 +158,7 @@ bool TypeInfo::isVoid() const
         && m_qualifiedName.constFirst() == QLatin1String("void");
 }
 
-TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
+TypeInfo TypeInfo::resolveType(TypeInfo const &__type, const ScopeModelItem &__scope)
 {
     CodeModel *__model = __scope->model();
     Q_ASSERT(__model != 0);
@@ -168,7 +166,7 @@ TypeInfo TypeInfo::resolveType(TypeInfo const &__type, CodeModelItem __scope)
     return TypeInfo::resolveType(__model->findItem(__type.qualifiedName(), __scope),  __type, __scope);
 }
 
-TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, CodeModelItem __scope)
+TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, const ScopeModelItem &__scope)
 {
     // Copy the type and replace with the proper qualified name. This
     // only makes sence to do if we're actually getting a resolved

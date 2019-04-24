@@ -11,6 +11,7 @@ click it.
 Let's start by importing the necessary PySide2 classes and python
 `sys` module:
 ::
+
     import sys
     from PySide2.QtWidgets import QApplication, QPushButton
     from PySide2.QtCore import Slot
@@ -31,12 +32,14 @@ console:
 Now, as mentioned in previous examples you must create the
 `QApplication` to run your PySide2 code:
 ::
+
     # Create the Qt Application
     app = QApplication(sys.argv)
 
 Let's create the clickable button, which is a `QPushButton` instance.
 To label the button, we pass a python string to the constructor:
 ::
+
     # Create a button
     button = QPushButton("Click me")
 
@@ -52,11 +55,13 @@ The `QPushButton` has a predefined signal called **clicked**, which
 is triggered every time the button is clicked. We'll connect this
 signal to the `say_hello()` function:
 ::
+
     # Connect the button to the function
     button.clicked.connect(say_hello)
 
 Finally, we show the button and start the Qt main loop:
 ::
+
     # Show the button
     button.show()
     # Run the main Qt loop
@@ -64,6 +69,7 @@ Finally, we show the button and start the Qt main loop:
 
 Here is the complete code for this example:
 ::
+
     #!/usr/bin/python
 
     import sys

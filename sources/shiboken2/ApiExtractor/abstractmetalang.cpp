@@ -288,8 +288,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isObject()) {
         if (indirections() == 0 && m_referenceType == NoReference)
             return ValuePattern;
-        return static_cast<const ComplexTypeEntry *>(m_typeEntry)->isQObject()
-            ? QObjectPattern : ObjectPattern;
+        return ObjectPattern;
     }
 
     if (m_typeEntry->isContainer() && indirections() == 0)
@@ -322,8 +321,7 @@ void AbstractMetaType::decideUsagePattern()
         // const-references to pointers can be passed as pointers
         setReferenceType(NoReference);
         setConstant(false);
-        pattern = static_cast<const ComplexTypeEntry *>(m_typeEntry)->isQObject()
-            ? QObjectPattern : ObjectPattern;
+        pattern = ObjectPattern;
     }
     setTypeUsagePattern(pattern);
 }
@@ -454,10 +452,32 @@ QDebug operator<<(QDebug d, const AbstractMetaArgument *aa)
  * AbstractMetaFunction
  */
 
+AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
+    AbstractMetaFunction()
+{
+    m_addedFunction = addedFunc;
+    setConstant(addedFunc->isConstant());
+    setName(addedFunc->name());
+    setOriginalName(addedFunc->name());
+    auto atts = attributes() | AbstractMetaAttributes::FinalInTargetLang;
+    switch (addedFunc->access()) {
+    case AddedFunction::InvalidAccess:
+        break;
+    case AddedFunction::Protected:
+        atts |= AbstractMetaAttributes::Protected;
+        break;
+    case AddedFunction::Public:
+        atts |= AbstractMetaAttributes::Public;
+        break;
+    }
+    if (addedFunc->isStatic())
+        atts |= AbstractMetaFunction::Static;
+    setAttributes(atts);
+}
+
 AbstractMetaFunction::AbstractMetaFunction()
     : m_constant(false),
       m_reverse(false),
-      m_userAdded(false),
       m_explicit(false),
       m_pointerOperator(false),
       m_isCallOperator(false)
@@ -581,6 +601,7 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     cpy->setExceptionSpecification(m_exceptionSpecification);
     cpy->setAllowThreadModification(m_allowThreadModification);
     cpy->setExceptionHandlingModification(m_exceptionHandlingModification);
+    cpy->m_addedFunction = m_addedFunction;
 
     for (AbstractMetaArgument *arg : m_arguments)
     cpy->addArgument(arg->copy());
@@ -944,6 +965,8 @@ QString AbstractMetaFunction::debugSignature() const
 
 FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass* implementor) const
 {
+    if (!m_addedFunction.isNull())
+        return m_addedFunction->modifications;
     if (!implementor)
         implementor = ownerClass();
 
@@ -1281,7 +1304,7 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " [const]";
     if (m_reverse)
         d << " [reverse]";
-    if (m_userAdded)
+    if (isUserAdded())
         d << " [userAdded]";
     if (m_explicit)
         d << " [explicit]";
@@ -1636,9 +1659,14 @@ bool AbstractMetaClass::isNamespace() const
     return m_typeEntry->isNamespace();
 }
 
+static bool qObjectPredicate(const AbstractMetaClass *c)
+{
+    return c->qualifiedCppName() == QLatin1String("QObject");
+}
+
 bool AbstractMetaClass::isQObject() const
 {
-    return m_typeEntry->isQObject();
+    return qObjectPredicate(this) || recurseClassHierarchy(this, qObjectPredicate) != nullptr;
 }
 
 QString AbstractMetaClass::qualifiedCppName() const

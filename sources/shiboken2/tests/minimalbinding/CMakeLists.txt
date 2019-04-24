@@ -24,18 +24,13 @@ WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'minimal' test binding..."
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_SOURCE_DIR}
-                    ${libminimal_SOURCE_DIR}
-                    ${libshiboken_SOURCE_DIR}
-                    ${libshiboken_BINARY_DIR})
 add_library(minimal MODULE ${minimal_SRC})
+target_include_directories(minimal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(minimal PUBLIC libminimal libshiboken)
 set_property(TARGET minimal PROPERTY PREFIX "")
 set_property(TARGET minimal PROPERTY OUTPUT_NAME "minimal${PYTHON_EXTENSION_SUFFIX}")
 if(WIN32)
     set_property(TARGET minimal PROPERTY SUFFIX ".pyd")
 endif()
-target_link_libraries(minimal
-                      libminimal
-                      libshiboken)
+
 create_generator_target(minimal)

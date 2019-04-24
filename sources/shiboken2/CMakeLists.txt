@@ -11,10 +11,24 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/data/")
 include(helpers)
 include(shiboken_helpers)
 
-find_package(Qt5 5.12 REQUIRED COMPONENTS Core Xml XmlPatterns)
-
 option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
+option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
+
+find_package(Qt5 5.12 REQUIRED COMPONENTS Core)
+find_package(Qt5Xml 5.12)
+find_package(Qt5XmlPatterns 5.12)
+find_package(LibXml2 2.6.32)
+find_package(LibXslt 1.1.19)
+if(BUILD_TESTS)
+    find_package(Qt5Test 5.12 REQUIRED)
+endif()
+
+if(NOT Qt5XmlPatterns_FOUND OR NOT Qt5Xml_FOUND)
+    set(DISABLE_DOCSTRINGS TRUE)
+    message(WARNING
+            "Documentation will not be built due to missing dependency (no Qt5XmlPatterns found).")
+endif()
 
 # Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
 if (QUIET_BUILD)

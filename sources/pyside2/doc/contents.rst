@@ -8,6 +8,7 @@
     faq.rst
     gettingstarted.rst
     tutorials/index.rst
+    deployment.rst
     pysideapi2.rst
     licenses.rst
 

@@ -111,7 +111,7 @@ static QStringList parseTemplateType(const QString& name) {
     return result;
 }
 
-AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() : m_currentClass(0),
+AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
     m_logDirectory(QLatin1String(".") + QDir::separator()),
     m_skipDeprecated(false)
 {
@@ -192,7 +192,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             QString name = signature.trimmed();
             name.truncate(name.indexOf(QLatin1Char('(')));
 
-            AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry->qualifiedCppName());
+            AbstractMetaClass *clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
             if (!clazz)
                 continue;
 
@@ -223,13 +223,14 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
     }
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentModelItem &argument)
+AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentModelItem &argument,
+                                                               AbstractMetaClass *currentClass)
 {
     AbstractMetaClass* returned = 0;
-    AbstractMetaType *type = translateType(argument->type());
+    AbstractMetaType *type = translateType(argument->type(), currentClass);
     if (type && type->typeEntry() && type->typeEntry()->isComplex()) {
         const TypeEntry *entry = type->typeEntry();
-        returned = AbstractMetaClass::findClass(m_metaClasses, entry->name());
+        returned = AbstractMetaClass::findClass(m_metaClasses, entry);
     }
     delete type;
     return returned;
@@ -238,11 +239,12 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentMod
 /**
  * Checks the argument of a hash function and flags the type if it is a complex type
  */
-void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &function_item)
+void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &function_item,
+                                                      AbstractMetaClass *currentClass)
 {
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 1) {
-        if (AbstractMetaClass *cls = argumentToClass(arguments.at(0)))
+        if (AbstractMetaClass *cls = argumentToClass(arguments.at(0), currentClass))
             cls->setHasHashFunction(true);
     }
 }
@@ -251,13 +253,14 @@ void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &f
  * Check if a class has a debug stream operator that can be used as toString
  */
 
-void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelItem &function_item)
+void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelItem &function_item,
+                                                            AbstractMetaClass *currentClass)
 {
     ArgumentList arguments = function_item->arguments();
     if (arguments.size() == 2) {
         if (arguments.at(0)->type().toString() == QLatin1String("QDebug")) {
             const ArgumentModelItem &arg = arguments.at(1);
-            if (AbstractMetaClass *cls = argumentToClass(arg)) {
+            if (AbstractMetaClass *cls = argumentToClass(arg, currentClass)) {
                 if (arg->type().indirections() < 2)
                     cls->setToStringCapability(true);
             }
@@ -265,28 +268,28 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
     }
 }
 
-void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelItem &item)
+void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelItem &item,
+                                                          AbstractMetaClass *currentClass)
 {
     if (item->accessPolicy() != CodeModel::Public)
         return;
 
     ArgumentList arguments = item->arguments();
-    AbstractMetaClass* baseoperandClass;
     bool firstArgumentIsSelf = true;
     bool unaryOperator = false;
 
-    baseoperandClass = argumentToClass(arguments.at(0));
+    auto baseoperandClass = argumentToClass(arguments.at(0), currentClass);
 
     if (arguments.size() == 1) {
         unaryOperator = true;
     } else if (!baseoperandClass
                || !(baseoperandClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang)) {
-        baseoperandClass = argumentToClass(arguments.at(1));
+        baseoperandClass = argumentToClass(arguments.at(1), currentClass);
         firstArgumentIsSelf = false;
     } else {
-        AbstractMetaType *type = translateType(item->type());
+        AbstractMetaType *type = translateType(item->type(), currentClass);
         const TypeEntry *retType = type ? type->typeEntry() : nullptr;
-        AbstractMetaClass* otherArgClass = argumentToClass(arguments.at(1));
+        AbstractMetaClass *otherArgClass = argumentToClass(arguments.at(1), currentClass);
         if (otherArgClass && retType
             && (retType->isValue() || retType->isObject())
             && retType != baseoperandClass->typeEntry()
@@ -298,9 +301,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     }
 
     if (baseoperandClass) {
-        AbstractMetaClass* oldCurrentClass = m_currentClass;
-        m_currentClass = baseoperandClass;
-        AbstractMetaFunction *metaFunction = traverseFunction(item);
+        AbstractMetaFunction *metaFunction = traverseFunction(item, baseoperandClass);
         if (metaFunction) {
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
@@ -333,22 +334,19 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
         } else {
             delete metaFunction;
         }
-
-        m_currentClass = oldCurrentClass;
     }
 }
 
-void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item)
+void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item,
+                                                        AbstractMetaClass *currentClass)
 {
     ArgumentList arguments = item->arguments();
     if (arguments.size() == 2 && item->accessPolicy() == CodeModel::Public) {
-        AbstractMetaClass* streamClass = argumentToClass(arguments.at(0));
-        AbstractMetaClass* streamedClass = argumentToClass(arguments.at(1));
+        AbstractMetaClass *streamClass = argumentToClass(arguments.at(0), currentClass);
+        AbstractMetaClass *streamedClass = argumentToClass(arguments.at(1), currentClass);
 
         if (streamClass && streamedClass && (streamClass->isStream())) {
-            AbstractMetaClass *oldCurrentClass = m_currentClass;
-            m_currentClass = streamedClass;
-            AbstractMetaFunction *streamFunction = traverseFunction(item);
+            AbstractMetaFunction *streamFunction = traverseFunction(item, streamedClass);
 
             if (streamFunction) {
                 streamFunction->setFunctionType(AbstractMetaFunction::GlobalScopeFunction);
@@ -385,33 +383,11 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
                 else
                     funcClass->typeEntry()->addExtraInclude(streamClass->typeEntry()->include());
 
-                m_currentClass = oldCurrentClass;
             } else {
                 delete streamFunction;
             }
 
         }
-    }
-}
-
-void AbstractMetaBuilderPrivate::fixQObjectForScope(const FileModelItem &dom,
-                                                    const TypeDatabase *types,
-                                                    const NamespaceModelItem &scope)
-{
-    const ClassList &scopeClasses = scope->classes();
-    for (const ClassModelItem &item : scopeClasses) {
-        QString qualifiedName = item->qualifiedName().join(colonColon());
-        TypeEntry* entry = types->findType(qualifiedName);
-        if (entry) {
-            if (isQObject(dom, qualifiedName) && entry->isComplex())
-                static_cast<ComplexTypeEntry *>(entry)->setQObject(true);
-        }
-    }
-
-    const NamespaceList &namespaces = scope->namespaces();
-    for (const NamespaceModelItem &n : namespaces) {
-        if (scope != n)
-            fixQObjectForScope(dom, types, n);
     }
 }
 
@@ -450,17 +426,14 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     pushScope(dom);
 
-    // fix up QObject's in the type system..
-    fixQObjectForScope(dom, types, dom);
-
     // Start the generation...
     const ClassList &typeValues = dom->classes();
     ReportHandler::setProgressReference(typeValues);
     for (const ClassModelItem &item : typeValues) {
         ReportHandler::progress(QStringLiteral("Generating class model (%1)...")
                                 .arg(typeValues.size()));
-        if (AbstractMetaClass *cls = traverseClass(dom, item))
-            addAbstractMetaClass(cls);
+        if (AbstractMetaClass *cls = traverseClass(dom, item, nullptr))
+            addAbstractMetaClass(cls, item.data());
     }
 
     // We need to know all global enums
@@ -481,9 +454,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (const NamespaceModelItem &item : namespaceTypeValues) {
         ReportHandler::progress(QStringLiteral("Generating namespace model (%1)...")
                                 .arg(namespaceTypeValues.size()));
-        AbstractMetaClass *metaClass = traverseNamespace(dom, item);
-        if (metaClass)
-            m_metaClasses << metaClass;
+        if (AbstractMetaClass *metaClass = traverseNamespace(dom, item))
+            addAbstractMetaClass(metaClass, item.data());
     }
 
     // Go through all typedefs to see if we have defined any
@@ -493,8 +465,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (const TypeDefModelItem &typeDef : typeDefs) {
         ReportHandler::progress(QStringLiteral("Resolving typedefs (%1)...")
                                 .arg(typeDefs.size()));
-        if (AbstractMetaClass *cls = traverseTypeDef(dom, typeDef))
-            addAbstractMetaClass(cls);
+        if (AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, nullptr))
+            addAbstractMetaClass(cls, typeDef.data());
     }
 
     traverseTypesystemTypedefs();
@@ -515,7 +487,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         if (!funcEntry || !funcEntry->generateCode())
             continue;
 
-        AbstractMetaFunction* metaFunc = traverseFunction(func);
+        AbstractMetaFunction* metaFunc = traverseFunction(func, nullptr);
         if (!metaFunc)
             continue;
 
@@ -579,7 +551,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 && !entry->isCustom()
                 && !entry->isVariant()
                 && (entry->generateCode() & TypeEntry::GenerateTargetLang)
-                && !AbstractMetaClass::findClass(m_metaClasses, entry->qualifiedCppName())) {
+                && !AbstractMetaClass::findClass(m_metaClasses, entry)) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
                                       .arg(entry->qualifiedCppName());
@@ -622,13 +594,13 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     {
         const FunctionList &hashFunctions = dom->findFunctions(QLatin1String("qHash"));
         for (const FunctionModelItem &item : hashFunctions)
-            registerHashFunction(item);
+            registerHashFunction(item, nullptr);
     }
 
     {
         const FunctionList &streamOps = dom->findFunctions(QLatin1String("operator<<"));
         for (const FunctionModelItem &item : streamOps)
-            registerToStringCapability(item);
+            registerToStringCapability(item, nullptr);
     }
 
     {
@@ -656,14 +628,14 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         binaryOperators.append(dom->findFunctions(QStringLiteral("operator>")));
 
         for (const FunctionModelItem &item : qAsConst(binaryOperators))
-            traverseOperatorFunction(item);
+            traverseOperatorFunction(item, nullptr);
     }
 
     {
         const FunctionList streamOperators = dom->findFunctions(QLatin1String("operator<<"))
             + dom->findFunctions(QLatin1String("operator>>"));
         for (const FunctionModelItem &item : streamOperators)
-            traverseStreamOperator(item);
+            traverseStreamOperator(item, nullptr);
     }
 
     checkFunctionModifications();
@@ -688,21 +660,19 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     sortLists();
 
-    m_currentClass = 0;
-
     // Functions added to the module on the type system.
     const AddedFunctionList &globalUserFunctions = types->globalUserFunctions();
-    for (const AddedFunction &addedFunc : globalUserFunctions) {
+    for (const AddedFunctionPtr &addedFunc : globalUserFunctions) {
         AbstractMetaFunction* metaFunc = traverseFunction(addedFunc);
         if (Q_UNLIKELY(!metaFunc)) {
             qFatal("Unable to traverse added global function \"%s\".",
-                   qPrintable(addedFunc.name()));
+                   qPrintable(addedFunc->name()));
         }
         metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
         m_globalFunctions << metaFunc;
     }
 
-    std::puts("");
+    m_itemToClass.clear();
 }
 
 static bool metaEnumLessThan(const AbstractMetaEnum *e1, const AbstractMetaEnum *e2)
@@ -742,9 +712,11 @@ void AbstractMetaBuilder::setLogDirectory(const QString& logDir)
        d->m_logDirectory.append(QDir::separator());
 }
 
-void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls)
+void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
+                                                      const _CodeModelItem *item)
 {
     cls->setOriginalAttributes(cls->attributes());
+    m_itemToClass.insert(item, cls);
     if (cls->typeEntry()->isContainer()) {
         m_templates << cls;
     } else if (cls->typeEntry()->isSmartPointer()) {
@@ -763,9 +735,10 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls)
 AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
                                                                  const NamespaceModelItem &namespaceItem)
 {
-    QString namespaceName =
-        (!m_namespacePrefix.isEmpty() ? m_namespacePrefix + colonColon() : QString())
-        + namespaceItem->name();
+    QString namespaceName = currentScope()->qualifiedName().join(colonColon());
+    if (!namespaceName.isEmpty())
+        namespaceName.append(colonColon());
+    namespaceName.append(namespaceItem->name());
     NamespaceTypeEntry *type = TypeDatabase::instance()->findNamespaceType(namespaceName);
 
     if (TypeDatabase::instance()->isClassRejected(namespaceName)) {
@@ -784,8 +757,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
 
     *metaClass += AbstractMetaAttributes::Public;
 
-    m_currentClass = metaClass;
-
     if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
         qCDebug(lcShiboken)
             << QStringLiteral("namespace '%1.%2'").arg(metaClass->package(), namespaceItem->name());
@@ -794,15 +765,14 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     traverseEnums(namespaceItem, metaClass, namespaceItem->enumsDeclarations());
 
     pushScope(namespaceItem);
-    m_namespacePrefix = currentScope()->qualifiedName().join(colonColon());
 
     const ClassList &classes = namespaceItem->classes();
     for (const ClassModelItem &cls : classes) {
-        AbstractMetaClass* mjc = traverseClass(dom, cls);
+        AbstractMetaClass* mjc = traverseClass(dom, cls, metaClass);
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
-            addAbstractMetaClass(mjc);
+            addAbstractMetaClass(mjc, cls.data());
         }
     }
 
@@ -810,11 +780,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = namespaceItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef);
+        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, metaClass);
         if (cls) {
             metaClass->addInnerClass(cls);
             cls->setEnclosingClass(metaClass);
-            addAbstractMetaClass(cls);
+            addAbstractMetaClass(cls, typeDef.data());
         }
     }
 
@@ -824,14 +794,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
-            addAbstractMetaClass(mjc);
+            addAbstractMetaClass(mjc, ni.data());
         }
     }
 
-    m_currentClass = 0;
-
     popScope();
-    m_namespacePrefix = currentScope()->qualifiedName().join(colonColon());
 
     if (!type->include().isValid())
         setInclude(type, namespaceItem->fileName());
@@ -872,8 +839,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     QString enumName = enumItem->name();
 
     QString className;
-    if (m_currentClass)
-        className = m_currentClass->typeEntry()->qualifiedCppName();
+    if (enclosing)
+        className = enclosing->typeEntry()->qualifiedCppName();
 
     QString rejectReason;
     if (TypeDatabase::instance()->isEnumRejected(className, enumName, &rejectReason)) {
@@ -883,8 +850,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         return 0;
     }
 
-    const bool rejectionWarning = !m_currentClass
-        || (m_currentClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang);
+    const bool rejectionWarning = !enclosing
+        || (enclosing->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang);
 
     if (!typeEntry) {
         if (rejectionWarning)
@@ -983,15 +950,16 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
 }
 
 AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &dom,
-                                                               const TypeDefModelItem &typeDef)
+                                                               const TypeDefModelItem &typeDef,
+                                                               AbstractMetaClass *currentClass)
 {
     TypeDatabase* types = TypeDatabase::instance();
     QString className = stripTemplateArgs(typeDef->name());
 
     QString fullClassName = className;
     // we have an inner class
-    if (m_currentClass) {
-        fullClassName = stripTemplateArgs(m_currentClass->typeEntry()->qualifiedCppName())
+    if (currentClass) {
+        fullClassName = stripTemplateArgs(currentClass->typeEntry()->qualifiedCppName())
                           + colonColon() + fullClassName;
     }
 
@@ -1010,9 +978,6 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     ComplexTypeEntry* type = types->findComplexType(fullClassName);
     if (!type)
         return 0;
-
-    if (type->isObject())
-        static_cast<ObjectTypeEntry *>(type)->setQObject(isQObject(dom, stripTemplateArgs(typeDef->type().qualifiedName().join(colonColon()))));
 
     AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeDef(true);
@@ -1041,19 +1006,20 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
         metaClass->setBaseClassNames(QStringList(te->sourceType()));
         *metaClass += AbstractMetaAttributes::Public;
         fillAddedFunctions(metaClass);
-        addAbstractMetaClass(metaClass);
+        addAbstractMetaClass(metaClass, nullptr);
     }
 }
 
 AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem &dom,
-                                                             const ClassModelItem &classItem)
+                                                             const ClassModelItem &classItem,
+                                                             AbstractMetaClass *currentClass)
 {
     QString className = stripTemplateArgs(classItem->name());
     QString fullClassName = className;
 
     // we have inner an class
-    if (m_currentClass) {
-        fullClassName = stripTemplateArgs(m_currentClass->typeEntry()->qualifiedCppName())
+    if (currentClass) {
+        fullClassName = stripTemplateArgs(currentClass->typeEntry()->qualifiedCppName())
                           + colonColon() + fullClassName;
     }
 
@@ -1076,9 +1042,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         return 0;
     }
 
-    if (type->isObject())
-        ((ObjectTypeEntry*)type)->setQObject(isQObject(dom, fullClassName));
-
     AbstractMetaClass *metaClass = new AbstractMetaClass;
     metaClass->setTypeEntry(type);
 
@@ -1096,9 +1059,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     *metaClass += AbstractMetaAttributes::Public;
     if (type->stream())
         metaClass->setStream(true);
-
-    AbstractMetaClass* oldCurrentClass = m_currentClass;
-    m_currentClass = metaClass;
 
     if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
         const QString message = type->isContainer()
@@ -1126,11 +1086,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     {
         const ClassList &innerClasses = classItem->classes();
         for (const ClassModelItem &ci : innerClasses) {
-            AbstractMetaClass *cl = traverseClass(dom, ci);
+            AbstractMetaClass *cl = traverseClass(dom, ci, metaClass);
             if (cl) {
                 cl->setEnclosingClass(metaClass);
                 metaClass->addInnerClass(cl);
-                m_metaClasses << cl;
+                addAbstractMetaClass(cl, ci.data());
             }
         }
 
@@ -1140,15 +1100,12 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = classItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef);
+        AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, metaClass);
         if (cls) {
             cls->setEnclosingClass(metaClass);
-            addAbstractMetaClass(cls);
+            addAbstractMetaClass(cls, typeDef.data());
         }
     }
-
-
-    m_currentClass = oldCurrentClass;
 
     // Set the default include file name
     if (!type->include().isValid())
@@ -1170,47 +1127,21 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(ScopeModelItem item,
         traverseClassMembers(ci);
 }
 
-AbstractMetaClass* AbstractMetaBuilderPrivate::currentTraversedClass(ScopeModelItem item)
-{
-    QString className = stripTemplateArgs(item->name());
-    QString fullClassName = className;
-
-    // This is an inner class
-    if (m_currentClass)
-        fullClassName = stripTemplateArgs(m_currentClass->typeEntry()->qualifiedCppName()) + colonColon() + fullClassName;
-
-    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, fullClassName);
-    if (!metaClass)
-        metaClass = AbstractMetaClass::findClass(m_templates, fullClassName);
-
-    if (!metaClass)
-        metaClass = AbstractMetaClass::findClass(m_smartPointers, fullClassName);
-    return metaClass;
-}
-
 void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
 {
-    AbstractMetaClass* metaClass = currentTraversedClass(item);
+    AbstractMetaClass* metaClass = m_itemToClass.value(item.data());
     if (!metaClass)
         return;
 
-    AbstractMetaClass* oldCurrentClass = m_currentClass;
-    m_currentClass = metaClass;
-
     // Class members
     traverseScopeMembers(item, metaClass);
-
-    m_currentClass = oldCurrentClass;
 }
 
 void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem item)
 {
-    AbstractMetaClass* metaClass = currentTraversedClass(item);
+    AbstractMetaClass* metaClass = m_itemToClass.value(item.data());
     if (!metaClass)
         return;
-
-    AbstractMetaClass* oldCurrentClass = m_currentClass;
-    m_currentClass = metaClass;
 
     // Namespace members
     traverseScopeMembers(item, metaClass);
@@ -1219,7 +1150,6 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem ite
     for (const NamespaceModelItem &ni : item->namespaces())
         traverseNamespaceMembers(ni);
 
-    m_currentClass = oldCurrentClass;
 }
 
 static inline QString fieldSignatureWithType(const VariableModelItem &field)
@@ -1234,10 +1164,10 @@ static inline QString qualifiedFieldSignatureWithType(const QString &className,
 }
 
 AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModelItem &field,
-                                                             const AbstractMetaClass *cls)
+                                                             AbstractMetaClass *cls)
 {
     QString fieldName = field->name();
-    QString className = m_currentClass->typeEntry()->qualifiedCppName();
+    QString className = cls->typeEntry()->qualifiedCppName();
 
     // Ignore friend decl.
     if (field->isFriend())
@@ -1259,14 +1189,14 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
     metaField->setEnclosingClass(cls);
 
     TypeInfo fieldType = field->type();
-    AbstractMetaType *metaType = translateType(fieldType);
+    AbstractMetaType *metaType = translateType(fieldType, cls);
 
     if (!metaType) {
         const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(colonColon());
-        if (m_currentClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang) {
+        if (cls->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang) {
             qCWarning(lcShiboken).noquote().nospace()
                  << QStringLiteral("skipping field '%1::%2' with unmatched type '%3'")
-                                   .arg(m_currentClass->name(), fieldName, type);
+                                   .arg(cls->name(), fieldName, type);
         }
         delete metaField;
         return 0;
@@ -1369,14 +1299,15 @@ static bool _compareAbstractMetaFunctions(const AbstractMetaFunction* func, cons
 }
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
-                                                                       AbstractMetaClass::Attributes *constructorAttributes)
+                                                                       AbstractMetaClass::Attributes *constructorAttributes,
+                                                                       AbstractMetaClass *currentClass)
 {
     *constructorAttributes = 0;
     AbstractMetaFunctionList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
     for (const FunctionModelItem &function : scopeFunctionList) {
-        if (AbstractMetaFunction *metaFunction = traverseFunction(function)) {
+        if (AbstractMetaFunction *metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (function->functionType() == CodeModel::Constructor) {
             auto arguments = function->arguments();
@@ -1416,7 +1347,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
 {
     AbstractMetaAttributes::Attributes constructorAttributes;
     const AbstractMetaFunctionList functions =
-        classFunctionList(scopeItem, &constructorAttributes);
+        classFunctionList(scopeItem, &constructorAttributes, metaClass);
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
     for (AbstractMetaFunction *metaFunction : functions){
@@ -1477,12 +1408,6 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                       .arg(metaFunction->name(), metaClass->name());
             }
 
-            if (metaFunction->isSignal() && !metaClass->isQObject()) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("signal '%1' in non-QObject class '%2'")
-                                      .arg(metaFunction->name(), metaClass->name());
-            }
-
             if (metaFunction->isConversionOperator())
                 fixReturnTypeOfConversionOperator(metaFunction);
 
@@ -1506,10 +1431,10 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
 {
     // Add the functions added by the typesystem
     const AddedFunctionList &addedFunctions = metaClass->typeEntry()->addedFunctions();
-    for (const AddedFunction &addedFunc : addedFunctions) {
+    for (const AddedFunctionPtr &addedFunc : addedFunctions) {
         if (!traverseFunction(addedFunc, metaClass)) {
                 qFatal("Unable to traverse function \"%s\" added to \"%s\".",
-                       qPrintable(addedFunc.name()), qPrintable(metaClass->name()));
+                       qPrintable(addedFunc->name()), qPrintable(metaClass->name()));
         }
     }
 }
@@ -1663,29 +1588,19 @@ void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
     }
 }
 
-AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunction& addedFunc)
+AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc)
 {
     return traverseFunction(addedFunc, 0);
 }
 
-AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunction& addedFunc,
+AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc,
                                                                    AbstractMetaClass *metaClass)
 {
-    AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
-    metaFunction->setConstant(addedFunc.isConstant());
-    metaFunction->setName(addedFunc.name());
-    metaFunction->setOriginalName(addedFunc.name());
-    AbstractMetaClass::Attributes visibility =
-        addedFunc.access() == AddedFunction::Public
-        ? AbstractMetaAttributes::Public : AbstractMetaAttributes::Protected;
-    metaFunction->setVisibility(visibility);
-    metaFunction->setUserAdded(true);
-    AbstractMetaAttributes::Attribute isStatic = addedFunc.isStatic() ? AbstractMetaFunction::Static : AbstractMetaFunction::None;
-    metaFunction->setAttributes(metaFunction->attributes() | AbstractMetaAttributes::FinalInTargetLang | isStatic);
-    metaFunction->setType(translateType(addedFunc.returnType()));
+    AbstractMetaFunction *metaFunction = new AbstractMetaFunction(addedFunc);
+    metaFunction->setType(translateType(addedFunc->returnType()));
 
 
-    QVector<AddedFunction::TypeInfo> args = addedFunc.arguments();
+    QVector<AddedFunction::TypeInfo> args = addedFunc->arguments();
     AbstractMetaArgumentList metaArguments;
 
     for (int i = 0; i < args.count(); ++i) {
@@ -1695,7 +1610,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken,
                       "Unable to translate type \"%s\" of argument %d of added function \"%s\".",
-                      qPrintable(typeInfo.name), i + 1, qPrintable(addedFunc.name()));
+                      qPrintable(typeInfo.name), i + 1, qPrintable(addedFunc->name()));
             delete metaFunction;
             return nullptr;
         }
@@ -1734,11 +1649,11 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
         //use relace-default-expression for set default value
         QString replacedExpression;
-        if (m_currentClass)
-            replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
+        if (metaClass)
+            replacedExpression = metaFunction->replacedDefaultExpression(metaClass, i + 1);
 
         if (!replacedExpression.isEmpty()) {
-            if (!metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
+            if (!metaFunction->removedDefaultExpression(metaClass, i + 1)) {
                 metaArg->setDefaultValueExpression(replacedExpression);
                 metaArg->setOriginalDefaultValueExpression(replacedExpression);
             }
@@ -1747,7 +1662,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
     if (!metaArguments.isEmpty())
-        fixArgumentNames(metaFunction, metaFunction->modifications(m_currentClass));
+        fixArgumentNames(metaFunction, metaFunction->modifications(metaClass));
 
     if (metaClass) {
         const AbstractMetaArgumentList fargs = metaFunction->arguments();
@@ -1864,20 +1779,21 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
     return true;
 }
 
-AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem)
+AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
+                                                                   AbstractMetaClass *currentClass)
 {
     if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
         return nullptr;
     QString functionName = functionItem->name();
     QString className;
-    if (m_currentClass) {
+    if (currentClass) {
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
         // and overridden metaObject(), QGADGET helpers
         if (functionName == QLatin1String("qt_check_for_QGADGET_macro")
             || functionName.startsWith(QLatin1String("qt_meta"))) {
             return nullptr;
         }
-        className = m_currentClass->typeEntry()->qualifiedCppName();
+        className = currentClass->typeEntry()->qualifiedCppName();
         if (functionName == QLatin1String("metaObject") && className != QLatin1String("QObject"))
             return nullptr;
     }
@@ -1960,7 +1876,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         break;
     case AbstractMetaFunction::ConstructorFunction:
         metaFunction->setExplicit(functionItem->isExplicit());
-        metaFunction->setName(m_currentClass->name());
+        metaFunction->setName(currentClass->name());
         break;
     default: {
         TypeInfo returnType = functionItem->type();
@@ -1973,7 +1889,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
         AbstractMetaType *type = nullptr;
         if (!returnType.isVoid()) {
-            type = translateType(returnType, true, &errorMessage);
+            type = translateType(returnType, currentClass, true, &errorMessage);
             if (!type) {
                 const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
                 qCWarning(lcShiboken, "%s",
@@ -2009,12 +1925,12 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        AbstractMetaType *metaType = translateType(arg->type(), true, &errorMessage);
+        AbstractMetaType *metaType = translateType(arg->type(), currentClass, true, &errorMessage);
         if (!metaType) {
             // If an invalid argument has a default value, simply remove it
             if (arg->defaultValue()) {
-                if (!m_currentClass
-                    || (m_currentClass->typeEntry()->codeGeneration()
+                if (!currentClass
+                    || (currentClass->typeEntry()->codeGeneration()
                         & TypeEntry::GenerateTargetLang)) {
                     qCWarning(lcShiboken).noquote().nospace()
                     << "Stripping argument #" << (i + 1) << " of "
@@ -2046,7 +1962,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     metaFunction->setArguments(metaArguments);
 
-    const FunctionModificationList functionMods = metaFunction->modifications(m_currentClass);
+    const FunctionModificationList functionMods = metaFunction->modifications(currentClass);
 
     for (const FunctionModification &mod : functionMods) {
         if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified)
@@ -2062,8 +1978,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
         //use relace-default-expression for set default value
         QString replacedExpression;
-        if (m_currentClass) {
-            replacedExpression = metaFunction->replacedDefaultExpression(m_currentClass, i + 1);
+        if (currentClass) {
+            replacedExpression = metaFunction->replacedDefaultExpression(currentClass, i + 1);
         } else {
             if (!functionMods.isEmpty()) {
                 QVector<ArgumentModification> argMods = functionMods.constFirst().argument_mods;
@@ -2075,10 +1991,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         bool hasDefaultValue = false;
         if (arg->defaultValue() || !replacedExpression.isEmpty()) {
             QString expr = arg->defaultValueExpression();
-            expr = fixDefaultValue(arg, metaArg->type(), metaFunction, m_currentClass, i);
+            expr = fixDefaultValue(arg, metaArg->type(), metaFunction, currentClass, i);
             metaArg->setOriginalDefaultValueExpression(expr);
 
-            if (metaFunction->removedDefaultExpression(m_currentClass, i + 1)) {
+            if (metaFunction->removedDefaultExpression(currentClass, i + 1)) {
                 expr.clear();
             } else if (!replacedExpression.isEmpty()) {
                 expr = replacedExpression;
@@ -2092,7 +2008,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             && !metaArg->hasName()
             && !metaFunction->isOperatorOverload()
             && !metaFunction->isSignal()
-            && metaFunction->argumentName(i+1, false, m_currentClass).isEmpty()) {
+            && metaFunction->argumentName(i + 1, false, currentClass).isEmpty()) {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Argument %1 on function '%2::%3' has default expression but does not have name.")
                                   .arg(i+1).arg(className, metaFunction->minimalSignature());
@@ -2110,9 +2026,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     // Determine class special functions
-    if (m_currentClass && metaFunction->arguments().size() == 1) {
+    if (currentClass && metaFunction->arguments().size() == 1) {
         const AbstractMetaType *argType = metaFunction->arguments().constFirst()->type();
-        if (argType->typeEntry() == m_currentClass->typeEntry() && argType->indirections() == 0) {
+        if (argType->typeEntry() == currentClass->typeEntry() && argType->indirections() == 0) {
             if (metaFunction->name() == QLatin1String("operator=")) {
                 switch (argType->referenceType()) {
                 case NoReference:
@@ -2212,10 +2128,11 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
 }
 
 AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
+                                                            AbstractMetaClass *currentClass,
                                                             bool resolveType,
                                                             QString *errorMessage)
 {
-    return translateTypeStatic(_typei, m_currentClass, this, resolveType, errorMessage);
+    return translateTypeStatic(_typei, currentClass, this, resolveType, errorMessage);
 }
 
 AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
@@ -2575,38 +2492,6 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
     return expr;
 }
 
-bool AbstractMetaBuilderPrivate::isQObject(const FileModelItem &dom, const QString &qualifiedName)
-{
-    if (qualifiedName == QLatin1String("QObject"))
-        return true;
-
-    ClassModelItem classItem = dom->findClass(qualifiedName);
-
-    if (!classItem) {
-        QStringList names = qualifiedName.split(colonColon());
-        NamespaceModelItem ns = dom;
-        for (int i = 0; i < names.size() - 1 && ns; ++i)
-            ns = ns->findNamespace(names.at(i));
-        if (ns && names.size() >= 2)
-            classItem = ns->findClass(names.at(names.size() - 1));
-    }
-
-    if (!classItem)
-        return false;
-
-    if (classItem->extendsClass(QLatin1String("QObject")))
-        return true;
-
-    const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
-    for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
-        if (isQObject(dom, baseClass.name))
-            return true;
-    }
-
-    return false;
-}
-
-
 bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)
 {
     CodeModelItem item = dom->model()->findItem(qualified_name, dom);
@@ -2910,21 +2795,19 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
                                                  const QStringList &declarations)
 {
+    const QStringList scopes = currentScope()->qualifiedName();
+
     for (int i = 0; i < declarations.size(); ++i) {
-        const QString &p = declarations.at(i);
+        const auto propertyTokens = declarations.at(i).splitRef(QLatin1Char(' '));
 
-        QStringList l = p.split(QLatin1Char(' '));
-
-
-        QStringList qualifiedScopeName = currentScope()->qualifiedName();
-        AbstractMetaType* type = 0;
-        QString scope;
-        for (int j = qualifiedScopeName.size(); j >= 0; --j) {
-            scope = j > 0 ? QStringList(qualifiedScopeName.mid(0, j)).join(colonColon()) + colonColon() : QString();
+        AbstractMetaType *type = nullptr;
+        for (int j = scopes.size(); j >= 0; --j) {
+            QStringList qualifiedName = scopes.mid(0, j);
+            qualifiedName.append(propertyTokens.at(0).toString());
             TypeInfo info;
-            info.setQualifiedName((scope + l.at(0)).split(colonColon()));
+            info.setQualifiedName(qualifiedName);
 
-            type = translateType(info);
+            type = translateType(info, metaClass);
             if (type)
                 break;
         }
@@ -2932,23 +2815,23 @@ void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
         if (!type) {
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("Unable to decide type of property: '%1' in class '%2'")
-                                  .arg(l.at(0), metaClass->name());
+                                  .arg(propertyTokens.at(0).toString(), metaClass->name());
             continue;
         }
 
         QPropertySpec* spec = new QPropertySpec(type->typeEntry());
-        spec->setName(l.at(1));
+        spec->setName(propertyTokens.at(1).toString());
         spec->setIndex(i);
 
-        for (int pos = 2; pos + 1 < l.size(); pos += 2) {
-            if (l.at(pos) == QLatin1String("READ"))
-                spec->setRead(l.at(pos + 1));
-            else if (l.at(pos) == QLatin1String("WRITE"))
-                spec->setWrite(l.at(pos + 1));
-            else if (l.at(pos) == QLatin1String("DESIGNABLE"))
-                spec->setDesignable(l.at(pos + 1));
-            else if (l.at(pos) == QLatin1String("RESET"))
-                spec->setReset(l.at(pos + 1));
+        for (int pos = 2; pos + 1 < propertyTokens.size(); pos += 2) {
+            if (propertyTokens.at(pos) == QLatin1String("READ"))
+                spec->setRead(propertyTokens.at(pos + 1).toString());
+            else if (propertyTokens.at(pos) == QLatin1String("WRITE"))
+                spec->setWrite(propertyTokens.at(pos + 1).toString());
+            else if (propertyTokens.at(pos) == QLatin1String("DESIGNABLE"))
+                spec->setDesignable(propertyTokens.at(pos + 1).toString());
+            else if (propertyTokens.at(pos) == QLatin1String("RESET"))
+                spec->setReset(propertyTokens.at(pos + 1).toString());
         }
 
         metaClass->addPropertySpec(spec);
@@ -3214,16 +3097,60 @@ void AbstractMetaBuilder::setGlobalHeader(const QString& globalHeader)
     d->m_globalHeader = QFileInfo(globalHeader);
 }
 
+void AbstractMetaBuilder::setHeaderPaths(const HeaderPaths &hp)
+{
+    for (const auto & h: hp) {
+        if (h.type != HeaderType::Framework && h.type != HeaderType::FrameworkSystem)
+            d->m_headerPaths.append(QFile::decodeName(h.path));
+    }
+}
+
 void AbstractMetaBuilder::setSkipDeprecated(bool value)
 {
     d->m_skipDeprecated = value;
 }
 
+// PYSIDE-975: When receiving an absolute path name from the code model, try
+// to resolve it against the include paths set on shiboken in order to recreate
+// relative paths like #include <foo/bar.h>.
+
+static inline bool isFileSystemSlash(QChar c)
+{
+    return c == QLatin1Char('/') || c == QLatin1Char('\\');
+}
+
+static bool matchHeader(const QString &headerPath, const QString &fileName)
+{
+#if defined(Q_OS_WIN) || defined(Q_OS_DARWIN)
+    static const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+    static const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+    const int pathSize = headerPath.size();
+    return fileName.size() > pathSize
+        && isFileSystemSlash(fileName.at(pathSize))
+        && fileName.startsWith(headerPath, caseSensitivity);
+}
+
 void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &fileName) const
 {
-    QFileInfo info(fileName);
-    if (m_globalHeader.fileName() != info.fileName())
-        te->setInclude(Include(Include::IncludePath, info.fileName()));
+    auto it = m_resolveIncludeHash.find(fileName);
+    if (it == m_resolveIncludeHash.end()) {
+        QFileInfo info(fileName);
+        if (m_globalHeader.fileName() == info.fileName())
+            return;
+
+        int bestMatchLength = 0;
+        for (const auto &headerPath : m_headerPaths) {
+            if (headerPath.size() > bestMatchLength && matchHeader(headerPath, fileName))
+                bestMatchLength = headerPath.size();
+        }
+        const QString include = bestMatchLength > 0
+            ? fileName.right(fileName.size() - bestMatchLength - 1)
+            : info.fileName();
+        it = m_resolveIncludeHash.insert(fileName, {Include::IncludePath, include});
+    }
+    te->setInclude(it.value());
 }
 
 #ifndef QT_NO_DEBUG_STREAM

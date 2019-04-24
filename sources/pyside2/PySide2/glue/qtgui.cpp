@@ -115,6 +115,16 @@ if (doc) {
 }
 // @snippet qtextblock-userdata
 
+// @snippet qopenglshaderprogram_setuniformvalue_float
+float value = %2;
+%CPPSELF.setUniformValue(%1, value);
+// @snippet qopenglshaderprogram_setuniformvalue_float
+
+// @snippet qopenglshaderprogram_setuniformvalue_int
+int value = %2;
+%CPPSELF.setUniformValue(%1, value);
+// @snippet qopenglshaderprogram_setuniformvalue_int
+
 // @snippet qpolygon-reduce
 PyObject *points = PyList_New(%CPPSELF.count());
 for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){

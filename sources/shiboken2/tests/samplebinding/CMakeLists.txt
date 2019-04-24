@@ -137,19 +137,14 @@ WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'sample' test binding..."
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_SOURCE_DIR}
-                    ${libsample_SOURCE_DIR}
-                    ${libshiboken_SOURCE_DIR}
-                    ${libshiboken_BINARY_DIR})
 add_library(sample MODULE ${sample_SRC})
+target_include_directories(sample PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(sample PUBLIC libsample libshiboken)
 set_property(TARGET sample PROPERTY PREFIX "")
 set_property(TARGET sample PROPERTY OUTPUT_NAME "sample${PYTHON_EXTENSION_SUFFIX}")
 
 if(WIN32)
     set_property(TARGET sample PROPERTY SUFFIX ".pyd")
 endif()
-target_link_libraries(sample
-                      libsample
-                      libshiboken)
+
 create_generator_target(sample)

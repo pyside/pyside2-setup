@@ -3,14 +3,9 @@ project(shibokenmodule)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shibokenmodule.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/shibokenmodule.txt" @ONLY)
 
+set(sample_SRC ${CMAKE_CURRENT_BINARY_DIR}/shiboken2/shiboken2_module_wrapper.cpp)
 
-set(sample_SRC
-${CMAKE_CURRENT_BINARY_DIR}/shiboken2/shiboken2_module_wrapper.cpp
-)
-
-set(shibokenmodule_TYPESYSTEM
-${CMAKE_CURRENT_SOURCE_DIR}/typesystem_shiboken.xml
-)
+set(shibokenmodule_TYPESYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_shiboken.xml)
 
 add_custom_command(
 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
@@ -24,19 +19,16 @@ WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 COMMENT "Running generator for 'shiboken2'..."
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_SOURCE_DIR}
-                    ${libshiboken_SOURCE_DIR}
-                    ${libshiboken_BINARY_DIR})
 add_library(shibokenmodule MODULE ${sample_SRC})
+target_include_directories(shibokenmodule PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                                                  ${CMAKE_SOURCE_DIR})
 set_property(TARGET shibokenmodule PROPERTY PREFIX "")
 set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "shiboken2${PYTHON_EXTENSION_SUFFIX}")
 
 if(WIN32)
     set_property(TARGET shibokenmodule PROPERTY SUFFIX ".pyd")
 endif()
-target_link_libraries(shibokenmodule
-                      libshiboken)
+target_link_libraries(shibokenmodule PUBLIC libshiboken)
 
 add_dependencies(shibokenmodule shiboken2)
 create_generator_target(shibokenmodule)
