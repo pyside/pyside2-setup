@@ -46,6 +46,7 @@ from build_scripts.utils import rmtree
 from build_scripts.utils import acceptCITestConfiguration
 from build_scripts.utils import get_ci_qmake_path
 import os
+import sys
 
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")
@@ -77,8 +78,8 @@ def call_testrunner(python_ver, buildnro):
 
     qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
 
-    # Try to install built wheels, and build some buildable examples.
-    if CI_RELEASE_CONF:
+    # Try to install built wheels, and build some buildable examples (except macOS/Python 2.16)
+    if CI_RELEASE_CONF and CI_HOST_OS != 'MacOS' or sys.version_info[0] == 3:
         wheel_tester_path = os.path.join("testing", "wheel_tester.py")
         cmd = [env_python, wheel_tester_path, qmake_path]
         run_instruction(cmd, "Error while running wheel_tester.py")
