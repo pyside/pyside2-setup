@@ -664,7 +664,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
                 s << NULL_PTR;
             s << "}," << endl;
         }
-        s << INDENT << '{' << NULL_PTR << "}  // Sentinel" << endl;
+        s << INDENT << '{' << NULL_PTR << "} // Sentinel" << endl;
         s << "};" << endl << endl;
     }
 
@@ -907,7 +907,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream&s, const AbstractMetaFun
             QTextStream ac(&argConv);
             const PrimitiveTypeEntry* argType = (const PrimitiveTypeEntry*) arg->type()->typeEntry();
             bool convert = argType->isObject()
-                            || arg->type()->isQObject()
                             || argType->isValue()
                             || arg->type()->isValuePointer()
                             || arg->type()->isNativePointer()
@@ -3076,7 +3075,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         AbstractMetaType *returnType = getTypeWithoutContainer(funcType);
         if (returnType) {
             pyArgName = QLatin1String(PYTHON_RETURN_VAR);
-            *wrappedClass = AbstractMetaClass::findClass(classes(), returnType->typeEntry()->name());
+            *wrappedClass = AbstractMetaClass::findClass(classes(), returnType->typeEntry());
         } else {
             QString message = QLatin1String("Invalid Argument index (0, return value) on function modification: ")
                 + (funcType ? funcType->name() : QLatin1String("void")) + QLatin1Char(' ');
@@ -3090,7 +3089,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction* func, in
         AbstractMetaType* argType = getTypeWithoutContainer(func->arguments().at(realIndex)->type());
 
         if (argType) {
-            *wrappedClass = AbstractMetaClass::findClass(classes(), argType->typeEntry()->name());
+            *wrappedClass = AbstractMetaClass::findClass(classes(), argType->typeEntry());
             if (argIndex == 1
                 && !func->isConstructor()
                 && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
@@ -4925,11 +4924,11 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     // PYSIDE-510: Create a signatures string for the introspection feature.
     s << "// The signatures string for the functions." << endl;
     s << "// Multiple signatures have their index \"n:\" in front." << endl;
-    s << "const char " << initFunctionName << "_SignaturesString[] = \"\"" << endl;
+    s << "static const char *" << initFunctionName << "_SignatureStrings[] = {" << endl;
     QString line;
     while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\\n\"" << endl;
-    s << ';' << endl << endl;
+        s << INDENT << '"' << line << "\"," << endl;
+    s << INDENT << NULL_PTR << "}; // Sentinel" << endl << endl;
     s << "void init_" << initFunctionName;
     s << "(PyObject* " << enclosingObjectVariable << ")" << endl;
     s << '{' << endl;
@@ -4982,8 +4981,8 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         // 4:typeSpec
         s << INDENT << '&' << chopType(pyTypeName) << "_spec," << endl;
 
-        // 5:signaturesString
-        s << INDENT << initFunctionName << "_SignaturesString," << endl;
+        // 5:signatureStrings
+        s << INDENT << initFunctionName << "_SignatureStrings," << endl;
 
         // 6:cppObjDtor
         s << INDENT;
@@ -5657,7 +5656,17 @@ bool CppGenerator::finishGeneration()
     s << "    /* m_clear    */ nullptr," << endl;
     s << "    /* m_free     */ nullptr" << endl;
     s << "};" << endl << endl;
-    s << "#endif" << endl;
+    s << "#endif" << endl << endl;
+
+    // PYSIDE-510: Create a signatures string for the introspection feature.
+    s << "// The signatures string for the global functions." << endl;
+    s << "// Multiple signatures have their index \"n:\" in front." << endl;
+    s << "static const char *" << moduleName() << "_SignatureStrings[] = {" << endl;
+    QString line;
+    while (signatureStream.readLineInto(&line))
+        s << INDENT << '"' << line << "\"," << endl;
+    s << INDENT << NULL_PTR << "}; // Sentinel" << endl << endl;
+
     s << "SBK_MODULE_INIT_FUNCTION_BEGIN(" << moduleName() << ")" << endl;
 
     ErrorCode errorCode(QLatin1String("SBK_MODULE_INIT_ERROR"));
@@ -5788,17 +5797,9 @@ bool CppGenerator::finishGeneration()
         s << INDENT << "PySide::registerCleanupFunction(cleanTypesAttributes);" << endl << endl;
     }
 
-    // PYSIDE-510: Create a signatures string for the introspection feature.
-    s << "// The signatures string for the global functions." << endl;
-    s << "// Multiple signatures have their index \"n:\" in front." << endl;
-    s << "const char " << moduleName() << "_SignaturesString[] = \"\"" << endl;
-    QString line;
-    while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\\n\"" << endl;
-    s << ';' << endl;
     // finish the rest of __signature__ initialization.
     s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
-        << "_SignaturesString);" << endl;
+        << "_SignatureStrings);" << endl;
 
     if (usePySideExtensions()) {
         // initialize the qApp module.

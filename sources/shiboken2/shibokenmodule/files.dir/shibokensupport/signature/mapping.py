@@ -418,6 +418,9 @@ def init_QtCore():
         "PySide2.QtCore.quint32": int,
         "PySide2.QtCore.quint64": int,
         "PySide2.QtCore.quint8": int,
+        "PySide2.QtCore.short": int,
+        "PySide2.QtCore.unsigned short": int,
+        "PySide2.QtCore.signed char": Char,
         "PySide2.QtCore.uchar": Char,
         "PySide2.QtCore.unsigned char": Char, # 5.9
         "PySide2.QtCore.long": int,

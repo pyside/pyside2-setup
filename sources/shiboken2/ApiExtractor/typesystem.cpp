@@ -40,6 +40,7 @@
 #include <QtCore/QStringAlgorithms>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
+#include <QtCore/QXmlStreamEntityResolver>
 
 #include <algorithm>
 
@@ -104,6 +105,8 @@ static inline QString noAttributeValue() { return QStringLiteral("no"); }
 static inline QString yesAttributeValue() { return QStringLiteral("yes"); }
 static inline QString trueAttributeValue() { return QStringLiteral("true"); }
 static inline QString falseAttributeValue() { return QStringLiteral("false"); }
+
+static inline QString callOperator() { return QStringLiteral("operator()"); }
 
 static QVector<CustomConversion *> customConversionsForReview;
 
@@ -437,11 +440,74 @@ static QString msgUnusedAttributes(const QStringRef &tag, const QXmlStreamAttrib
     return result;
 }
 
+// QXmlStreamEntityResolver::resolveEntity(publicId, systemId) is not
+// implemented; resolve via undeclared entities instead.
+class TypeSystemEntityResolver : public QXmlStreamEntityResolver
+{
+public:
+    explicit TypeSystemEntityResolver(const QString &currentPath) :
+        m_currentPath(currentPath) {}
+
+    QString resolveUndeclaredEntity(const QString &name) override;
+
+private:
+    QString readFile(const QString &entityName, QString *errorMessage) const;
+
+    const QString m_currentPath;
+    QHash<QString, QString> m_cache;
+};
+
+QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *errorMessage) const
+{
+    QString fileName = entityName;
+    if (!fileName.contains(QLatin1Char('.')))
+        fileName += QLatin1String(".xml");
+    QString path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
+    if (!QFileInfo::exists(path)) // PySide2-specific hack
+        fileName.prepend(QLatin1String("typesystem_"));
+    path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
+    if (!QFileInfo::exists(path)) {
+        *errorMessage = QLatin1String("Unable to resolve: ") + entityName;
+        return QString();
+    }
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        *errorMessage = msgCannotOpenForReading(file);
+        return QString();
+    }
+    QString result = QString::fromUtf8(file.readAll()).trimmed();
+    // Remove license header comments on which QXmlStreamReader chokes
+    if (result.startsWith(QLatin1String("<!--"))) {
+        const int commentEnd = result.indexOf(QLatin1String("-->"));
+        if (commentEnd != -1) {
+            result.remove(0, commentEnd + 3);
+            result = result.trimmed();
+        }
+    }
+    return result;
+}
+
+QString TypeSystemEntityResolver::resolveUndeclaredEntity(const QString &name)
+{
+    auto it = m_cache.find(name);
+    if (it == m_cache.end()) {
+        QString errorMessage;
+        it = m_cache.insert(name, readFile(name, &errorMessage));
+        if (it.value().isEmpty()) { // The parser will fail and display the line number.
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgCannotResolveEntity(name, errorMessage)));
+        }
+    }
+    return it.value();
+}
+
 Handler::Handler(TypeDatabase *database, bool generate) :
     m_database(database),
     m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
 {
 }
+
+Handler::~Handler() = default;
 
 static QString readerFileName(const QXmlStreamReader &reader)
 {
@@ -582,6 +648,8 @@ bool Handler::parse(QXmlStreamReader &reader)
     const QString fileName = readerFileName(reader);
     if (!fileName.isEmpty())
         m_currentPath = QFileInfo(fileName).absolutePath();
+    m_entityResolver.reset(new TypeSystemEntityResolver(m_currentPath));
+    reader.setEntityResolver(m_entityResolver.data());
 
     while (!reader.atEnd()) {
         switch (reader.readNext()) {
@@ -674,6 +742,17 @@ bool Handler::endElement(const QStringRef &localName)
         }
     }
     break;
+    case StackElement::AddFunction: {
+        // Leaving add-function: Assign all modifications to the added function
+        StackElementContext *top = m_contextStack.top();
+        const int modIndex = top->addedFunctionModificationIndex;
+        top->addedFunctionModificationIndex = -1;
+        Q_ASSERT(modIndex >= 0);
+        Q_ASSERT(!top->addedFunctions.isEmpty());
+        while (modIndex < top->functionMods.size())
+            top->addedFunctions.last()->modifications.append(top->functionMods.takeAt(modIndex));
+    }
+        break;
     case StackElement::NativeToTarget:
     case StackElement::AddConversion: {
         CustomConversion* customConversion = static_cast<TypeEntry*>(m_current->entry)->customConversion();
@@ -2009,8 +2088,8 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
         return false;
     }
 
-    AddedFunction func(signature, returnType);
-    func.setStatic(staticFunction);
+    AddedFunctionPtr func(new AddedFunction(signature, returnType));
+    func->setStatic(staticFunction);
     if (!signature.contains(QLatin1Char('(')))
         signature += QLatin1String("()");
     m_currentSignature = signature;
@@ -2021,10 +2100,12 @@ bool Handler::parseAddFunction(const QXmlStreamReader &,
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
         }
-        func.setAccess(a);
+        func->setAccess(a);
     }
 
     m_contextStack.top()->addedFunctions << func;
+    m_contextStack.top()->addedFunctionModificationIndex =
+        m_contextStack.top()->functionMods.size();
 
     FunctionModification mod;
     if (!mod.setSignature(m_currentSignature, &m_error))
@@ -3231,7 +3312,10 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
     Q_ASSERT(!returnType.isEmpty());
     m_returnType = parseType(returnType);
     signature = signature.trimmed();
-    int endPos = signature.indexOf(QLatin1Char('('));
+    // Skip past "operator()(...)"
+    const int parenStartPos = signature.startsWith(callOperator())
+        ? callOperator().size() : 0;
+    int endPos = signature.indexOf(QLatin1Char('('), parenStartPos);
     if (endPos < 0) {
         m_isConst = false;
         m_name = signature;
@@ -3413,7 +3497,6 @@ ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t,
                                    const QVersionNumber &vr) :
     TypeEntry(name, t, vr),
     m_qualifiedCppName(name),
-    m_qobject(false),
     m_polymorphicBase(false),
     m_genericClass(false),
     m_deleteInMainThread(false)
@@ -3481,6 +3564,20 @@ static const QSet<QString> &primitiveCppTypes()
             result.insert(QLatin1String(cppType));
     }
     return result;
+}
+
+void TypeEntry::setInclude(const Include &inc)
+{
+    // This is a workaround for preventing double inclusion of the QSharedPointer implementation
+    // header, which does not use header guards. In the previous parser this was not a problem
+    // because the Q_QDOC define was set, and the implementation header was never included.
+    if (inc.name().endsWith(QLatin1String("qsharedpointer_impl.h"))) {
+        QString path = inc.name();
+        path.remove(QLatin1String("_impl"));
+        m_include = Include(inc.type(), path);
+    } else {
+        m_include = inc;
+    }
 }
 
 bool TypeEntry::isCppPrimitive() const

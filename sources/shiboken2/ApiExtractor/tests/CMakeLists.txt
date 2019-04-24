@@ -1,9 +1,3 @@
-find_package(Qt5Core)
-find_package(Qt5Gui)
-find_package(Qt5Test)
-find_package(Qt5Xml)
-find_package(Qt5XmlPatterns)
-
 set(CMAKE_AUTORCC ON)
 
 macro(declare_test testname)
@@ -15,19 +9,13 @@ macro(declare_test testname)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${testname}.qrc")
         list(APPEND SOURCES "${testname}.qrc")
     endif ()
+
     add_executable(${testname} ${SOURCES})
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                        ${CMAKE_CURRENT_BINARY_DIR}
-                        ${apiextractor_SOURCE_DIR}
-                        ${Qt5Test_INCLUDE_DIRS}
-                        )
-    link_directories(${APIEXTRACTOR_EXTRA_LINK_DIRECTORIES})
-    target_link_libraries(${testname}
-                          ${Qt5XmlPatterns_LIBRARIES}
-                          ${Qt5Test_LIBRARIES}
-                          ${Qt5Core_LIBRARIES}
-                          ${Qt5Gui_LIBRARIES}
-                          apiextractor)
+    target_include_directories(${testname} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                                                   ${CMAKE_CURRENT_BINARY_DIR}
+                                                   ${apiextractor_SOURCE_DIR}
+                                                   )
+    target_link_libraries(${testname} PRIVATE apiextractor Qt5::Test)
     add_test(${testname} ${testname})
     if (INSTALL_TESTS)
         install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${testname}

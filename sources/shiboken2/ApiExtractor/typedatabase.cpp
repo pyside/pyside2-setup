@@ -430,8 +430,8 @@ void TypeDatabase::addGlobalUserFunctions(const AddedFunctionList &functions)
 AddedFunctionList TypeDatabase::findGlobalUserFunctions(const QString& name) const
 {
     AddedFunctionList addedFunctions;
-    for (const AddedFunction &func : m_globalUserFunctions) {
-        if (func.name() == name)
+    for (const AddedFunctionPtr &func : m_globalUserFunctions) {
+        if (func->name() == name)
             addedFunctions.append(func);
     }
     return addedFunctions;
@@ -802,7 +802,6 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
 {
     TypeEntry::formatDebug(d);
     FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
-    FORMAT_BOOL("QObject", m_qobject)
     FORMAT_BOOL("polymorphicBase", m_polymorphicBase)
     FORMAT_BOOL("genericClass", m_genericClass)
     FORMAT_BOOL("deleteInMainThread", m_deleteInMainThread)

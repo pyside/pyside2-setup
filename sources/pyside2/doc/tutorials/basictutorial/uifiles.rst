@@ -15,6 +15,7 @@ Add a `QPushButton` to the center of the centralwidget.
 
 Your file (mainwindow.ui) should look something like this:
 ::
+
     <?xml version="1.0" encoding="UTF-8"?>
     <ui version="4.0">
      <class>MainWindow</class>
@@ -79,11 +80,13 @@ Another option to interact with a **UI file** is to generate a Python
 class from it. This is possible thanks to the `pyside2-uic` tool.
 To use this tool, you need to run the following command on a console:
 ::
+
     pyside2-uic mainwindow.ui > ui_mainwindow.py
 
 We redirect all the output of the command to a file called `ui_mainwindow.py`,
 which will be imported directly:
 ::
+
     from ui_mainwindow import Ui_MainWindow
 
 Now to use it, we should create a personalized class for our widget
@@ -91,6 +94,7 @@ to **setup** this generated design.
 
 To understand the idea, let's take a look at the whole code:
 ::
+
     import sys
     from PySide2.QtWidgets import QApplication, QMainWindow
     from PySide2.QtCore import QFile
@@ -115,6 +119,7 @@ examples, and our new basic class contains only two new lines
 that are in charge of loading the generated python class from the UI
 file:
 ::
+
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
 
@@ -127,6 +132,7 @@ Loading it directly
 To load the UI file directly, we will need a class from the **QtUiTools**
 module:
 ::
+
     from PySide2.QtUiTools import QUiLoader
 
 The `QUiLoader` lets us load the **ui file** dynamically
@@ -141,6 +147,7 @@ and use it right away:
 
 The complete code of this example looks like this:
 ::
+
     # File: main.py
     import sys
     from PySide2.QtUiTools import QUiLoader
@@ -163,4 +170,5 @@ The complete code of this example looks like this:
 Then to execute it we just need to run the following on a
 command prompt:
 ::
+
     python main.py

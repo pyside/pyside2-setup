@@ -1872,7 +1872,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
                 defValue.replace(QLatin1String("::"), QLatin1String("."));
                 if (defValue == QLatin1String("nullptr"))
                     defValue = none();
-                else if (defValue == QLatin1String("0") && (arg->type()->isQObject() || arg->type()->isObject()))
+                else if (defValue == QLatin1String("0") && arg->type()->isObject())
                     defValue = none();
             }
             ret += QLatin1Char('=') + defValue;

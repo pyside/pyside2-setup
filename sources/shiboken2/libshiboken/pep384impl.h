@@ -316,6 +316,7 @@ LIBSHIBOKEN_API void PyBuffer_Release(Pep_buffer *view);
 #else
 
 #define Pep_buffer                          Py_buffer
+#define PepType_AS_BUFFER(type)             ((type)->tp_as_buffer)
 
 #endif /* Py_LIMITED_API */
 

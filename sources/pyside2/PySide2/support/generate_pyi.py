@@ -256,11 +256,7 @@ def generate_pyi(import_name, outpath, options):
     logger.info("Generated: {outfilepath}".format(**locals()))
     if is_py3:
         # Python 3: We can check the file directly if the syntax is ok.
-        try:
-            subprocess.check_output([sys.executable, outfilepath])
-        except Exception as e:
-            print("+++ Problem executing test, although it works")
-            traceback.print_exc(file=sys.stdout)
+        subprocess.check_output([sys.executable, outfilepath])
     return 1
 
 

@@ -68,6 +68,8 @@ QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
 QString msgSkippingFunction(const FunctionModelItem &functionItem,
                             const QString &signature, const QString &why);
 
+QString msgCannotResolveEntity(const QString &name, const QString &reason);
+
 QString msgCannotSetArrayUsage(const QString &function, int i, const QString &reason);
 
 QString msgUnableToTranslateType(const QString &t, const QString &why);

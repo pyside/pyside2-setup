@@ -10,6 +10,7 @@ Let us just start with a simple stub that creates and shows
 a dialog. This stub is updated during the course of this
 tutorial, but you can use this stub as is if you need to:
 ::
+
     import sys
     from PySide2.QtWidgets import QApplication, QDialog, QLineEdit, QPushButton
 
@@ -49,6 +50,7 @@ enter their name, and a `QPushButton` that prints the contents of
 the `QLineEdit`.
 So, let's add the following code to the `init()` method of our Form:
 ::
+
     # Create widgets
     self.edit = QLineEdit("Write my name here..")
     self.button = QPushButton("Show Greetings")
@@ -64,6 +66,7 @@ in your application. In this case, let's use `QVBoxLayout` to lay out
 the widgets vertically. Add the following code to the `init()` method,
 after creating the widgets:
 ::
+
     # Create layout and add widgets
     layout = QVBoxLayout()
     layout.addWidget(self.edit)
@@ -82,6 +85,7 @@ Finally, we just have to add a function to our custom **Form**
 and *connect* our button to it. Our function will be a part of
 the Form, so you have to add it after the `init()` function:
 ::
+
     # Greets the user
     def greetings(self):
         print ("Hello {}".format(self.edit.text()))
@@ -94,6 +98,7 @@ Now that we have everything, we just need to *connect* the
 `QPushButton` to the `Form.greetings()` method. To do so, add the
 following line to the `init()` method:
 ::
+
     # Add button signal to greetings slot
     self.button.clicked.connect(self.greetings)
 
@@ -105,6 +110,7 @@ Complete code
 
 Here is the complete code for this tutorial:
 ::
+
     import sys
     from PySide2.QtWidgets import (QLineEdit, QPushButton, QApplication,
         QVBoxLayout, QDialog)

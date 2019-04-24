@@ -476,6 +476,8 @@ struct AddedFunction
         return m_isStatic;
     }
 
+    FunctionModificationList modifications;
+
 private:
     QString m_name;
     QVector<TypeInfo> m_arguments;
@@ -835,16 +837,7 @@ public:
     {
         return m_include;
     }
-    void setInclude(const Include &inc)
-    {
-        // This is a workaround for preventing double inclusion of the QSharedPointer implementation
-        // header, which does not use header guards. In the previous parser this was not a problem
-        // because the Q_QDOC define was set, and the implementation header was never included.
-        if (inc.name() == QLatin1String("qsharedpointer_impl.h"))
-            m_include = Include(inc.type(), QLatin1String("qsharedpointer.h"));
-        else
-            m_include = inc;
-    }
+    void setInclude(const Include &inc);
 
     // Replace conversionRule arg to CodeSnip in future version
     /// Set the type convertion rule
@@ -1278,7 +1271,7 @@ public:
     {
         m_addedFunctions = addedFunctions;
     }
-    void addNewFunction(const AddedFunction &addedFunction)
+    void addNewFunction(const AddedFunctionPtr &addedFunction)
     {
         m_addedFunctions << addedFunction;
     }
@@ -1291,15 +1284,6 @@ public:
     FieldModificationList fieldModifications() const
     {
         return m_fieldMods;
-    }
-
-    bool isQObject() const
-    {
-        return m_qobject;
-    }
-    void setQObject(bool qobject)
-    {
-        m_qobject = qobject;
     }
 
     QString defaultSuperclass() const
@@ -1419,7 +1403,6 @@ private:
     QString m_qualifiedCppName;
     QString m_targetLangName;
 
-    uint m_qobject : 1;
     uint m_polymorphicBase : 1;
     uint m_genericClass : 1;
     uint m_deleteInMainThread : 1;

@@ -30,6 +30,7 @@
 #define ABSTRACTMETABUILDER_H
 
 #include "abstractmetalang_typedefs.h"
+#include "header_paths.h"
 #include "dependency.h"
 
 #include "clangparser/compilersupport.h"
@@ -85,6 +86,7 @@ public:
     *   filled.
     */
     void setGlobalHeader(const QString& globalHeader);
+    void setHeaderPaths(const HeaderPaths &h);
 
     void setSkipDeprecated(bool value);
 

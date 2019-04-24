@@ -224,7 +224,6 @@ def _resolve_type(thing, line):
     return _resolve_value(thing, None, line)
 
 def calculate_props(line):
-    line = line.strip()
     res = _parse_line(line)
     arglist = res["arglist"]
     annotations = {}
@@ -257,8 +256,7 @@ def calculate_props(line):
     props["multi"] = res["multi"]
     return props
 
-def fixup_multilines(sig_str):
-    lines = list(line.strip() for line in sig_str.strip().splitlines())
+def fixup_multilines(lines):
     res = []
     multi_lines = []
     for line in lines:
@@ -282,15 +280,11 @@ def fixup_multilines(sig_str):
             res.append(line)
     return res
 
-def pyside_type_init(typemod, sig_str):
+def pyside_type_init(type_key, sig_strings):
     dprint()
-    if type(typemod) is types.ModuleType:
-        dprint("Initialization of module '{}'".format(typemod.__name__))
-    else:
-        dprint("Initialization of type '{}.{}'".format(typemod.__module__,
-                                                       typemod.__name__))
+    dprint("Initialization of type key '{}'".format(type_key))
     update_mapping()
-    lines = fixup_multilines(sig_str)
+    lines = fixup_multilines(sig_strings)
     ret = {}
     multi_props = []
     for line in lines:
