@@ -624,7 +624,10 @@ int main(int argc, char *argv[])
     for (const GeneratorPtr &g : qAsConst(generators)) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
-         if (!g->setup(extractor) || !g->generate()) {
+        ReportHandler::startProgress(QByteArray("Running ") + g->name() + "...");
+        const bool ok = g->setup(extractor) && g->generate();
+        ReportHandler::endProgress();
+         if (!ok) {
              errorPrint(QLatin1String("Error running generator: ")
                         + QLatin1String(g->name()) + QLatin1Char('.'));
              return EXIT_FAILURE;

@@ -48,15 +48,8 @@ public:
 
     static int suppressedCount();
 
-    template <typename T>
-    static void setProgressReference(T collection)
-    {
-        setProgressReference(collection.count());
-    }
-
-    static void setProgressReference(int max);
-
-    static void progress(const QString &str, ...);
+    static void startProgress(const QByteArray &str);
+    static void endProgress();
 
     static bool isDebug(DebugLevel level)
     { return debugLevel() >= level; }
