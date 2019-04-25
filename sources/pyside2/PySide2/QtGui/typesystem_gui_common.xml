@@ -2906,12 +2906,7 @@
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
       <!-- Add explicit signatures for the setUniformValue functions -->
-      <modify-function signature="setUniformValue(const char*, GLfloat)" remove="all"/>
-      <modify-function signature="setUniformValue(const char*, GLint)" remove="all"/>
-      <modify-function signature="setUniformValue(const char*, GLuint)" remove="all"/>
-      <modify-function signature="setUniformValue(int, GLfloat)" remove="all"/>
-      <modify-function signature="setUniformValue(int, GLint)" remove="all"/>
-      <modify-function signature="setUniformValue(int, GLuint)" remove="all"/>
+      <modify-function signature="^setUniformValue\(const char\*,(float|int|uint)\)$" remove="all"/>
       <!-- No need for a signature for GLuint, since Qt (internally) calls the same function: glUniform1i -->
       <add-function signature="setUniformValue1f(const char*, float)" return-type="void">
           <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
