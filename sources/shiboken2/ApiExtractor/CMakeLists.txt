@@ -26,6 +26,7 @@ clangparser/clangutils.cpp
 # Old parser
 parser/codemodel.cpp
 parser/enumvalue.cpp
+xmlutils.cpp
 )
 
 add_library(apiextractor STATIC ${apiextractor_SRC})
@@ -37,19 +38,26 @@ target_include_directories(apiextractor PRIVATE ${CLANG_EXTRA_INCLUDES}
 target_link_libraries(apiextractor PUBLIC Qt5::Core)
 target_link_libraries(apiextractor PRIVATE ${CLANG_EXTRA_LIBRARIES})
 
+if (HAS_LIBXSLT)
+    target_compile_definitions(apiextractor PUBLIC HAVE_LIBXSLT)
+    target_sources(apiextractor PRIVATE xmlutils_libxslt.cpp)
+    target_include_directories(apiextractor
+                               PRIVATE ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+    target_link_libraries(apiextractor
+                          PRIVATE ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
+endif()
+
+if (Qt5XmlPatterns_FOUND)
+    target_compile_definitions(apiextractor PUBLIC HAVE_QTXMLPATTERNS)
+    target_sources(apiextractor PRIVATE xmlutils_qt.cpp)
+    target_link_libraries(apiextractor PUBLIC Qt5::Xml Qt5::XmlPatterns)
+endif()
+
 if (NOT DISABLE_DOCSTRINGS)
     target_sources(apiextractor PRIVATE docparser.cpp
                                         doxygenparser.cpp
                                         qtdocparser.cpp)
-    target_link_libraries(apiextractor PUBLIC Qt5::Xml Qt5::XmlPatterns)
-
-    if (LIBXSLT_FOUND AND LIBXML2_FOUND)
-        target_compile_definitions(apiextractor PUBLIC HAVE_LIBXSLT)
-        target_include_directories(apiextractor
-                                   PRIVATE ${LIBXSLT_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
-        target_link_libraries(apiextractor
-                              PRIVATE ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
-    else()
+    if (NOT HAS_LIBXSLT)
         message(WARNING
                 "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
     endif()

@@ -31,8 +31,8 @@
 #include "messages.h"
 #include "reporthandler.h"
 #include "typesystem.h"
+#include "xmlutils.h"
 
-#include <QtXmlPatterns/QXmlQuery>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
@@ -161,7 +161,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
                                                 const QString &classQuery,
                                                 const  AbstractMetaFunction *func,
                                                 const DocModificationList &signedModifs,
-                                                QXmlQuery &xquery,
+                                                const XQueryPtr &xquery,
                                                 QString *errorMessage)
 {
     DocModificationList funcModifs;
@@ -231,9 +231,13 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
         return;
     }
 
-    QXmlQuery xquery;
     const QString sourceFileName = sourceFile.absoluteFilePath();
-    xquery.setFocus(QUrl::fromLocalFile(sourceFileName));
+    QString errorMessage;
+    XQueryPtr xquery = XQuery::create(sourceFileName, &errorMessage);
+    if (xquery.isNull()) {
+        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        return;
+    }
 
     QString className = metaClass->name();
 
@@ -258,7 +262,6 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     metaClass->setDocumentation(doc);
 
     //Functions Documentation
-    QString errorMessage;
     const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
     for (AbstractMetaFunction *func : funcs) {
         const QString documentation =
@@ -324,8 +327,12 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
         return Documentation();
     }
 
-    QXmlQuery xquery;
-    xquery.setFocus(QUrl(sourceFile));
+    QString errorMessage;
+    XQueryPtr xquery = XQuery::create(sourceFile, &errorMessage);
+    if (xquery.isNull()) {
+        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        return {};
+    }
 
     // Module documentation
     QString query = QLatin1String("/WebXML/document/module[@name=\"")

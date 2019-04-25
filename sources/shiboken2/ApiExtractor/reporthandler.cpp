@@ -29,6 +29,7 @@
 #include "reporthandler.h"
 #include "typesystem.h"
 #include "typedatabase.h"
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QSet>
 #include <cstring>
 #include <cstdarg>
@@ -56,6 +57,7 @@ static QString m_prefix;
 static int m_step_size = 0;
 static int m_step = -1;
 static int m_step_warning = 0;
+static QElapsedTimer m_timer;
 
 Q_LOGGING_CATEGORY(lcShiboken, "qt.shiboken")
 
@@ -69,6 +71,7 @@ static void printProgress()
 void ReportHandler::install()
 {
     qInstallMessageHandler(ReportHandler::messageOutput);
+    m_timer.start();
 }
 
 ReportHandler::DebugLevel ReportHandler::debugLevel()
@@ -156,4 +159,18 @@ void ReportHandler::progress(const QString& str, ...)
         printProgress();
         m_step_warning = 0;
     }
+}
+
+QByteArray ReportHandler::doneMessage()
+{
+    QByteArray result = "Done, " + m_prefix.toUtf8() + ' ';
+    const qint64 elapsed = m_timer.elapsed();
+    result += elapsed > 5000
+        ? QByteArray::number(elapsed / 1000) + 's'
+        : QByteArray::number(elapsed) + "ms";
+    if (m_warningCount)
+        result += ", " + QByteArray::number(m_warningCount) + " warnings";
+    if (m_suppressedCount)
+        result += " (" + QByteArray::number(m_suppressedCount) + " known issues)";
+    return  result;
 }
