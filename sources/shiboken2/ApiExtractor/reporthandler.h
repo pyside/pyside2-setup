@@ -66,6 +66,8 @@ public:
 
     static void setPrefix(const QString &p);
 
+    static QByteArray doneMessage();
+
 private:
     static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };
