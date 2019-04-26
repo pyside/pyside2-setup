@@ -54,6 +54,7 @@ extern const char *END_ALLOW_THREADS;
 class DocParser;
 class CodeSnip;
 class OverloadData;
+struct GeneratorClassInfoCacheEntry;
 
 QT_FORWARD_DECLARE_CLASS(QTextStream)
 
@@ -63,6 +64,8 @@ QT_FORWARD_DECLARE_CLASS(QTextStream)
 class ShibokenGenerator : public Generator
 {
 public:
+    using FunctionGroups = QMap<QString, AbstractMetaFunctionList>; // Sorted
+
     ShibokenGenerator();
     ~ShibokenGenerator() override;
 
@@ -99,7 +102,8 @@ protected:
      *   Example of return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
      *   \param scope Where to search for functions, null means all global functions.
      */
-    QMap<QString, AbstractMetaFunctionList> getFunctionGroups(const AbstractMetaClass* scope = 0);
+    FunctionGroups getGlobalFunctionGroups() const;
+    static FunctionGroups getFunctionGroups(const AbstractMetaClass *scope);
 
     /**
      *   Returns all different inherited overloads of func, and includes func as well.
@@ -440,6 +444,10 @@ protected:
     static QStringList m_knownPythonTypes;
 
 private:
+    static const GeneratorClassInfoCacheEntry &getGeneratorClassInfo(const AbstractMetaClass *scope);
+    static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClass *scope);
+    static bool classNeedsGetattroFunctionImpl(const AbstractMetaClass *metaClass);
+
     QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
                                           const AbstractMetaClass* context,
                                           Options opt = NoOption) const;

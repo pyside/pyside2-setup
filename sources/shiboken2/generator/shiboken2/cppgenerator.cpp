@@ -453,8 +453,8 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     s << endl << "// Target ---------------------------------------------------------" << endl << endl;
     s << "extern \"C\" {" << endl;
-    const FunctionGroupMap &functionGroups = getFunctionGroups(metaClass);
-    for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
+    const auto &functionGroups = getFunctionGroups(metaClass);
+    for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
         QSet<QString> seenSignatures;
         bool staticEncountered = false;
@@ -5404,8 +5404,8 @@ bool CppGenerator::finishGeneration()
 
     Indentation indent(INDENT);
 
-    const FunctionGroupMap &functionGroups = getFunctionGroups();
-    for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
+    const auto functionGroups = getGlobalFunctionGroups();
+    for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
         for (AbstractMetaFunction *func : it.value()) {
             if (!func->isModifiedRemoved()) {
@@ -5824,7 +5824,10 @@ bool CppGenerator::writeParentChildManagement(QTextStream& s, const AbstractMeta
     const int numArgs = func->arguments().count();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
 
-    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(getFunctionGroups(func->implementingClass())[func->name()], this));
+    const auto &groups = func->implementingClass()
+        ? getFunctionGroups(func->implementingClass())
+        : getGlobalFunctionGroups();
+    bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(OverloadData(groups[func->name()], this));
 
     ArgumentOwner argOwner = getArgumentOwner(func, argIndex);
     ArgumentOwner::Action action = argOwner.action;
