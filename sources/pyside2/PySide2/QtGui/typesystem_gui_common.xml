@@ -43,6 +43,7 @@
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
   <load-typesystem name="templates/core_common.xml" generate="no"/>
   <load-typesystem name="templates/gui_common.xml" generate="no"/>
+  <load-typesystem name="templates/openglfunctions_common.xml" generate="no"/>
 
 
   <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>

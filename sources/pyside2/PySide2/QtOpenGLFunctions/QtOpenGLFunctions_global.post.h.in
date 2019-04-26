@@ -1,0 +1,61 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 as published by the Free Software
+** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+#include <QtGui/qtgui-config.h>
+// OpenGL functions are not in the QtGui module header
+#if QT_CONFIG(opengl)
+#  include <QtGui/qopenglfunctions_1_0.h>
+#  include <QtGui/qopenglfunctions_1_1.h>
+#  include <QtGui/qopenglfunctions_1_2.h>
+#  include <QtGui/qopenglfunctions_1_3.h>
+#  include <QtGui/qopenglfunctions_1_4.h>
+#  include <QtGui/qopenglfunctions_1_5.h>
+#  include <QtGui/qopenglfunctions_2_0.h>
+#  include <QtGui/qopenglfunctions_2_1.h>
+#  include <QtGui/qopenglfunctions_3_0.h>
+#  include <QtGui/qopenglfunctions_3_1.h>
+#  include <QtGui/qopenglfunctions_3_2_compatibility.h>
+#  include <QtGui/qopenglfunctions_3_2_core.h>
+#  include <QtGui/qopenglfunctions_3_3_compatibility.h>
+#  include <QtGui/qopenglfunctions_3_3_core.h>
+#  include <QtGui/qopenglfunctions_4_0_compatibility.h>
+#  include <QtGui/qopenglfunctions_4_0_core.h>
+#  include <QtGui/qopenglfunctions_4_1_compatibility.h>
+#  include <QtGui/qopenglfunctions_4_1_core.h>
+#  include <QtGui/qopenglfunctions_4_2_compatibility.h>
+#  include <QtGui/qopenglfunctions_4_2_core.h>
+#  include <QtGui/qopenglfunctions_4_3_compatibility.h>
+#  include <QtGui/qopenglfunctions_4_3_core.h>
+#  include <QtGui/qopenglfunctions_4_4_compatibility.h>
+#  include <QtGui/qopenglfunctions_4_4_core.h>
+#  include <QtGui/qopenglfunctions_4_5_compatibility.h>
+#  include <QtGui/qopenglfunctions_4_5_core.h>
+#endif
+#if QT_CONFIG(opengles2)
+#  include <QtGui/qopenglfunctions_es2.h>
+#endif

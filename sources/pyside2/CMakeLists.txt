@@ -173,7 +173,10 @@ include(PySideModules)
 
 macro(COLLECT_MODULE_IF_FOUND shortname)
     set(name "Qt5${shortname}")
-
+    set(_qt_module_name "${name}")
+    if ("${shortname}" STREQUAL "OpenGLFunctions")
+        set(_qt_module_name "Qt5Gui")
+    endif()
     # Determine essential/optional/missing
     set(module_state "missing")
     list(FIND ALL_ESSENTIAL_MODULES "${shortname}" essentialIndex)
@@ -192,12 +195,12 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
         set(quiet_argument "QUIET")
     endif()
 
-    find_package(${name} ${quiet_argument})
+    find_package(${_qt_module_name} ${quiet_argument})
     # If package is found, _name_found will be equal to 1
-    set(_name_found "${name}_FOUND")
+    set(_name_found "${_qt_module_name}_FOUND")
     # _name_dir will keep the path to the directory where the CMake rules were found
     # e.g: ~/qt5.9-install/qtbase/lib/cmake/Qt5Core or /usr/lib64/cmake/Qt5Core
-    set(_name_dir "${name}_DIR")
+    set(_name_dir "${_qt_module_name}_DIR")
     # Qt5Core will set the base path to check if all the modules are on the same
     # directory, to avoid CMake looking in another path.
     # This will be saved in a global variable at the beginning of the modules
@@ -256,7 +259,7 @@ endif()
 
 # Collect all optional modules.
 set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia
-MultimediaWidgets OpenGL Positioning Location Qml Quick QuickWidgets RemoteObjects Scxml Script ScriptTools Sensors TextToSpeech Charts Svg DataVisualization)
+MultimediaWidgets OpenGL OpenGLFunctions Positioning Location Qml Quick QuickWidgets RemoteObjects Scxml Script ScriptTools Sensors TextToSpeech Charts Svg DataVisualization)
 find_package(Qt5UiTools)
 if(Qt5UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)

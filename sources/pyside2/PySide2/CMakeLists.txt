@@ -43,7 +43,11 @@ file(READ "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" pyside2_global_contents
 
 foreach(shortname IN LISTS all_module_shortnames)
     set(name "Qt5${shortname}")
-    HAS_QT_MODULE(${name}_FOUND Qt${shortname})
+    set(_qt_module_name "${name}")
+    if ("${shortname}" STREQUAL "OpenGLFunctions")
+        set(_qt_module_name "Qt5Gui")
+    endif()
+    HAS_QT_MODULE(${_qt_module_name}_FOUND Qt${shortname})
 
     # Create a module header consisting of pyside2_global.h and the module
     # include. Note: The contents of pyside2_global.h must be copied instead of
@@ -59,7 +63,7 @@ foreach(shortname IN LISTS all_module_shortnames)
     endif()
     set(module_header_content "${module_header_content}\n${pyside2_global_contents}")
     # AxContainer/AxServer from Active Qt do not have module headers
-    if(NOT "${shortname}" STREQUAL "AxContainer")
+    if(NOT "${shortname}" STREQUAL "AxContainer" AND NOT "${shortname}" STREQUAL "OpenGLFunctions")
         set(module_header_content "${module_header_content}\n#include <Qt${shortname}/Qt${shortname}>")
     endif()
     set(post_header "${CMAKE_CURRENT_BINARY_DIR}/Qt${shortname}/Qt${shortname}_global.post.h")
@@ -86,6 +90,8 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/widgets_common.xml
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/datavisualization_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/opengl_common.xml
+        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/openglfunctions_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/webkitwidgets_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
