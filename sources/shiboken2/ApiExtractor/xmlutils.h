@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -25,51 +25,29 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef XMLUTILS_H
+#define XMLUTILS_H
 
-#ifndef REPORTHANDLER_H
-#define REPORTHANDLER_H
+#include <QtCore/QSharedPointer>
+#include <QtCore/QString>
 
-#include <QLoggingCategory>
-#include <QString>
-
-Q_DECLARE_LOGGING_CATEGORY(lcShiboken)
-
-class ReportHandler
+class XQuery
 {
 public:
-    enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };
+    Q_DISABLE_COPY(XQuery);
 
-    static void install();
+    virtual ~XQuery();
 
-    static DebugLevel debugLevel();
-    static void setDebugLevel(DebugLevel level);
+    QString evaluate(QString xPathExpression, QString *errorMessage);
 
-    static int warningCount();
+    static QSharedPointer<XQuery> create(const QString &focus, QString *errorMessage);
 
-    static int suppressedCount();
+protected:
+    XQuery();
 
-    template <typename T>
-    static void setProgressReference(T collection)
-    {
-        setProgressReference(collection.count());
-    }
-
-    static void setProgressReference(int max);
-
-    static void progress(const QString &str, ...);
-
-    static bool isDebug(DebugLevel level)
-    { return debugLevel() >= level; }
-
-    static bool isSilent();
-    static void setSilent(bool silent);
-
-    static void setPrefix(const QString &p);
-
-    static QByteArray doneMessage();
-
-private:
-    static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    virtual QString doEvaluate(const QString &xPathExpression, QString *errorMessage) = 0;
 };
 
-#endif // REPORTHANDLER_H
+QString xsl_transform(const QString &xml, const QString &xsl, QString *errorMessage);
+
+#endif // XMLUTILS_H

@@ -45,7 +45,7 @@ private:
                                        const QString &classQuery,
                                        const  AbstractMetaFunction *func,
                                        const DocModificationList &signedModifs,
-                                       QXmlQuery &xquery,
+                                       const XQueryPtr &xquery,
                                        QString *errorMessage);
 };
 
