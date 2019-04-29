@@ -39,15 +39,15 @@
 
 major_version = "5"
 minor_version = "12"
-patch_version = "2"
+patch_version = "3"
 
 # For example: "a", "b", "rc"
 # (which means "alpha", "beta", "release candidate").
 # An empty string means the generated package will be an official release.
-pre_release_version_type = "a"
+pre_release_version_type = ""
 
 # For example: "1", "2" (which means "beta1", "beta2", if type is "b").
-pre_release_version = "1"
+pre_release_version = ""
 
 if __name__ == '__main__':
     # Used by CMake.
