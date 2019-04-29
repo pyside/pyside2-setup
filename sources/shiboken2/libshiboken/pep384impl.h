@@ -201,7 +201,12 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 
 LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
 
+#if PY_VERSION_HEX < 0x03000000
 #define PyUnicode_GET_SIZE(op)      PyUnicode_GetSize((PyObject *)(op))
+#else
+// PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength
+#define PyUnicode_GET_SIZE(op)      PyUnicode_GetLength((PyObject *)(op))
+#endif
 
 #else
 #define _PepUnicode_AsString     PyUnicode_AsUTF8
