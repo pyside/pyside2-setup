@@ -323,7 +323,7 @@ def call_command_under_cdb_with_gflags(executable_path, args):
     snippets = find_error_like_snippets(out_decoded)
     print_error_snippets(snippets)
 
-    log.info("Finished processing.\n !!! Full log can be found at: "
+    log.info("Finished processing.\n !!! Full log can be found at:\n"
              "{}".format(verbose_log_file_name))
 
 
