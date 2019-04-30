@@ -330,8 +330,8 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     // The multiple inheritance initialization function
     // needs the 'set' class from C++ STL.
-    if (hasMultipleInheritanceInAncestry(metaClass))
-        s << "#include <set>" << endl;
+    if (getMultipleInheritingClass(metaClass) != nullptr)
+        s << "#include <algorithm>\n#include <set>\n";
     if (metaClass->generateExceptionHandling())
         s << "#include <exception>" << endl;
 
@@ -3553,11 +3553,18 @@ QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass
     const AbstractMetaClassList &baseClases = getBaseClasses(metaClass);
     if (!baseClases.isEmpty()) {
         for (const AbstractMetaClass *baseClass : baseClases) {
-            result.append(QString::fromLatin1("((size_t) static_cast<const %1*>(class_ptr)) - base")
-                                              .arg(baseClass->qualifiedCppName()));
-            result.append(QString::fromLatin1("((size_t) static_cast<const %1*>((%2*)((void*)class_ptr))) - base")
-                                              .arg(baseClass->qualifiedCppName(), metaClass->qualifiedCppName()));
+            QString offset;
+            QTextStream(&offset) << "reinterpret_cast<uintptr_t>(static_cast<const "
+                << baseClass->qualifiedCppName() << "*>(class_ptr)) - base";
+            result.append(offset);
+            offset.clear();
+            QTextStream(&offset) << "reinterpret_cast<uintptr_t>(static_cast<const "
+                << baseClass->qualifiedCppName() << "*>(static_cast<const "
+                << metaClass->qualifiedCppName()
+                << "*>(static_cast<const void*>(class_ptr)))) - base";
+            result.append(offset);
         }
+
         for (const AbstractMetaClass *baseClass : baseClases)
             result.append(getAncestorMultipleInheritance(baseClass));
     }
@@ -3579,25 +3586,17 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(QTextStream& s, c
     {
         Indentation indent(INDENT);
         s << INDENT << "std::set<int> offsets;" << endl;
-        s << INDENT << "std::set<int>::iterator it;" << endl;
-        s << INDENT << "const " << className << "* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
-        s << INDENT << "size_t base = (size_t) class_ptr;" << endl;
+        s << INDENT << "const auto* class_ptr = reinterpret_cast<const " << className << "*>(cptr);" << endl;
+        s << INDENT << "const auto base = reinterpret_cast<uintptr_t>(class_ptr);" << endl;
 
         for (const QString &ancestor : ancestors)
-            s << INDENT << "offsets.insert(" << ancestor << ");" << endl;
+            s << INDENT << "offsets.insert(int(" << ancestor << "));" << endl;
 
         s << endl;
         s << INDENT << "offsets.erase(0);" << endl;
         s << endl;
 
-        s << INDENT << "int i = 0;" << endl;
-        s << INDENT << "for (it = offsets.begin(); it != offsets.end(); it++) {" << endl;
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "mi_offsets[i] = *it;" << endl;
-            s << INDENT << "i++;" << endl;
-        }
-        s << INDENT << '}' << endl;
+        s << INDENT << "std::copy(offsets.cbegin(), offsets.cend(), mi_offsets);\n";
     }
     s << INDENT << '}' << endl;
     s << INDENT << "return mi_offsets;" << endl;
@@ -3748,8 +3747,6 @@ void CppGenerator::writeExtendedConverterInitialization(QTextStream& s, const Ty
 
 QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractMetaClass* metaClass)
 {
-    if (!hasMultipleInheritanceInAncestry(metaClass))
-        return QString();
     return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
 }
 

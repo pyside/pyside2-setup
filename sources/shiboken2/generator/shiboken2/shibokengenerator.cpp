@@ -2178,15 +2178,6 @@ bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction* fun
     return false;
 }
 
-bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass)
-{
-    if (!metaClass || metaClass->baseClassNames().isEmpty())
-        return false;
-    if (metaClass->baseClassNames().size() > 1)
-        return true;
-    return hasMultipleInheritanceInAncestry(metaClass->baseClass());
-}
-
 bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* metaClass)
 {
     return getGeneratorClassInfo(metaClass).needsGetattroFunction;
@@ -2269,7 +2260,7 @@ AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass*
 const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass* metaClass)
 {
     if (!metaClass || metaClass->baseClassNames().isEmpty())
-        return 0;
+        return nullptr;
     if (metaClass->baseClassNames().size() > 1)
         return metaClass;
     return getMultipleInheritingClass(metaClass->baseClass());

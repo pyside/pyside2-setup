@@ -183,8 +183,8 @@ protected:
                               Options options = NoOption,
                               int arg_count = -1) const;
 
-    /// Returns true if there are cases of multiple inheritance in any of its ancestors.
-    bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
+    /// Returns the top-most class that has multiple inheritance in the ancestry.
+    static const AbstractMetaClass *getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
     /// Returns true if the class needs to have a getattro function.
     bool classNeedsGetattroFunction(const AbstractMetaClass* metaClass);
@@ -197,8 +197,6 @@ protected:
 
     /// Returns a list of parent classes for a given class.
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass) const;
-
-    const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                  const AbstractMetaClass* context, const QString& argumentName);
