@@ -1726,7 +1726,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
         }
         {
             Indentation indentation(INDENT);
-            s << INDENT << "Shiboken::ObjectType::copyMultimpleheritance(type, myType);" << endl;
+            s << INDENT << "Shiboken::ObjectType::copyMultipleInheritance(type, myType);" << endl;
         }
         if (!metaClass->isAbstract())
             s << INDENT << '}' << endl << endl;
@@ -5047,7 +5047,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         if (miClass == metaClass) {
             s << multipleInheritanceInitializerFunctionName(miClass) << ";" << endl;
         } else {
-            s << "Shiboken::ObjectType::getMultipleIheritanceFunction(reinterpret_cast<SbkObjectType*>(";
+            s << "Shiboken::ObjectType::getMultipleInheritanceFunction(reinterpret_cast<SbkObjectType*>(";
             s << cpythonTypeNameExt(miClass->typeEntry()) << "));" << endl;
         }
         s << INDENT << "Shiboken::ObjectType::setMultipleInheritanceFunction(";
