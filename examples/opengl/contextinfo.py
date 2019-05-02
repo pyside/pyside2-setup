@@ -173,7 +173,11 @@ class RenderWindow(QWindow):
             if self.timer is None:
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.slotTimer)
+            if not self.timer.isActive():
                 self.timer.start(10)
+        else:
+            if self.timer and self.timer.isActive():
+                self.timer.stop()
 
     def render(self):
         if not self.context.makeCurrent(self):
