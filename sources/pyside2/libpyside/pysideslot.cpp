@@ -147,10 +147,10 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
             data->slotName = strdup(Shiboken::String::toCString(funcName));
         }
 
-
-        QByteArray returnType = QMetaObject::normalizedType(data->resultType);
-        QByteArray signature = QString().sprintf("%s(%s)", data->slotName, data->args).toUtf8();
-        signature = returnType + " " + signature;
+        const QByteArray returnType = QMetaObject::normalizedType(data->resultType);
+        const QByteArray signature =
+            returnType + ' ' + const_cast<const char *>(data->slotName)
+            + '(' + const_cast<const char *>(data->args) + ')';
 
         if (!pySlotName)
             pySlotName = Shiboken::String::fromCString(PYSIDE_SLOT_LIST_ATTR);
