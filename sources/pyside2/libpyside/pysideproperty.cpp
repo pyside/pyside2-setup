@@ -152,11 +152,6 @@ static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
 {
     PySideProperty* me = reinterpret_cast<PySideProperty*>(subtype->tp_alloc(subtype, 0));
     me->d = new PySidePropertyPrivate;
-    memset(me->d, 0, sizeof(PySidePropertyPrivate));
-    PySidePropertyPrivate* pData = me->d;
-    pData->designable = true;
-    pData->scriptable = true;
-    pData->stored = true;
     return reinterpret_cast<PyObject *>(me);
 }
 
@@ -170,21 +165,29 @@ int qpropertyTpInit(PyObject* self, PyObject* args, PyObject* kwds)
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
                                    "designable", "scriptable", "stored", "user",
                                    "constant", "final", 0};
+    char *doc{};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOsObbbbbb:QtCore.QProperty",
                                      const_cast<char**>(kwlist),
                                      /*OO*/     &type, &(pData->fget),
                                      /*OOO*/    &(pData->fset), &(pData->freset), &(pData->fdel),
-                                     /*s*/      &(pData->doc),
+                                     /*s*/      &doc,
                                      /*O*/      &(pData->notify),
                                      /*bbbbbb*/ &(pData->designable), &(pData->scriptable), &(pData->stored), &(pData->user), &(pData->constant), &(pData->final))) {
         return 0;
     }
 
+    if (doc) {
+        pData->doc = doc;
+        free(doc);
+    } else {
+        pData->doc.clear();
+    }
 
     pData->typeName = PySide::Signal::getTypeName(type);
 
-    if (!pData->typeName)
+    if (pData->typeName.isEmpty())
         PyErr_SetString(PyExc_TypeError, "Invalid property type or type name.");
     else if (pData->constant && (pData->fset || pData->notify))
         PyErr_SetString(PyExc_TypeError, "A constant property cannot have a WRITE method or a NOTIFY signal.");
@@ -287,9 +290,6 @@ static int qpropertyClear(PyObject* self)
     Py_CLEAR(data->notify);
 
 
-    free(data->typeName);
-    free(data->doc);
-    free(data->notifySignature);
     delete data;
     reinterpret_cast<PySideProperty*>(self)->d = 0;
     return 0;
@@ -459,13 +459,14 @@ bool isFinal(const PySideProperty* self)
 
 const char* getNotifyName(PySideProperty* self)
 {
-    if (!self->d->notifySignature) {
+    if (self->d->notifySignature.isEmpty()) {
         PyObject* str = PyObject_Str(self->d->notify);
-        self->d->notifySignature = strdup(Shiboken::String::toCString(str));
+        self->d->notifySignature = Shiboken::String::toCString(str);
         Py_DECREF(str);
     }
 
-    return self->d->notifySignature;
+    return self->d->notifySignature.isEmpty()
+        ? nullptr : self->d->notifySignature.constData();
 }
 
 void setMetaCallHandler(PySideProperty* self, MetaCallHandler handler)
@@ -475,7 +476,7 @@ void setMetaCallHandler(PySideProperty* self, MetaCallHandler handler)
 
 void setTypeName(PySideProperty* self, const char* typeName)
 {
-    self->d->typeName = strdup(typeName);
+    self->d->typeName = typeName;
 }
 
 void setUserData(PySideProperty* self, void* data)
