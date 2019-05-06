@@ -38,6 +38,9 @@ class CppGenerator : public ShibokenGenerator
 {
 public:
     CppGenerator();
+
+    const char *name() const override { return "Source generator"; }
+
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;

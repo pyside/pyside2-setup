@@ -200,6 +200,9 @@ def get_cdb_and_gflags_path(kits):
     bits = 'x64' if (sys.maxsize > 2 ** 32) else 'x32'
     debuggers_path = path.join(first_path_path, 'Debuggers', bits)
     cdb_path = path.join(debuggers_path, 'cdb.exe')
+    if not path.exists(cdb_path): # Try for older "Debugging Tools" packages
+        debuggers_path = "C:\\Program Files\\Debugging Tools for Windows (x64)"
+        cdb_path = path.join(debuggers_path, 'cdb.exe')
 
     if not path.exists(cdb_path):
         log.error("Couldn't find cdb.exe at: {}.".format(cdb_path))
@@ -320,7 +323,7 @@ def call_command_under_cdb_with_gflags(executable_path, args):
     snippets = find_error_like_snippets(out_decoded)
     print_error_snippets(snippets)
 
-    log.info("Finished processing.\n !!! Full log can be found at: "
+    log.info("Finished processing.\n !!! Full log can be found at:\n"
              "{}".format(verbose_log_file_name))
 
 

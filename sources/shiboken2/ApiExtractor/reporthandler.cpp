@@ -52,21 +52,12 @@ static int m_warningCount = 0;
 static int m_suppressedCount = 0;
 static ReportHandler::DebugLevel m_debugLevel = ReportHandler::NoDebug;
 static QSet<QString> m_reportedWarnings;
-static QString m_progressBuffer;
 static QString m_prefix;
-static int m_step_size = 0;
-static int m_step = -1;
+static bool m_withinProgress = false;
 static int m_step_warning = 0;
 static QElapsedTimer m_timer;
 
 Q_LOGGING_CATEGORY(lcShiboken, "qt.shiboken")
-
-static void printProgress()
-{
-    std::printf("%s", m_progressBuffer.toUtf8().data());
-    std::fflush(stdout);
-    m_progressBuffer.clear();
-}
 
 void ReportHandler::install()
 {
@@ -92,12 +83,6 @@ int ReportHandler::suppressedCount()
 int ReportHandler::warningCount()
 {
     return m_warningCount;
-}
-
-void ReportHandler::setProgressReference(int max)
-{
-    m_step_size = max;
-    m_step = -1;
 }
 
 bool ReportHandler::isSilent()
@@ -136,38 +121,45 @@ void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &cont
     fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, message)));
 }
 
-void ReportHandler::progress(const QString& str, ...)
+static QByteArray timeStamp()
+{
+    const qint64 elapsed = m_timer.elapsed();
+    return elapsed > 5000
+        ? QByteArray::number(elapsed / 1000) + 's'
+        : QByteArray::number(elapsed) + "ms";
+}
+
+void ReportHandler::startProgress(const QByteArray& str)
 {
     if (m_silent)
         return;
 
-    if (m_step == -1) {
-        QTextStream buf(&m_progressBuffer);
-        buf.setFieldWidth(45);
-        buf.setFieldAlignment(QTextStream::AlignLeft);
-        buf << str;
-        printProgress();
-        m_step = 0;
-    }
-    m_step++;
-    if (m_step >= m_step_size) {
-        if (m_step_warning == 0) {
-            m_progressBuffer = QLatin1String("[" COLOR_GREEN "OK" COLOR_END "]\n");
-        } else {
-            m_progressBuffer = QLatin1String("[" COLOR_YELLOW "WARNING" COLOR_END "]\n");
-        }
-        printProgress();
-        m_step_warning = 0;
-    }
+    if (m_withinProgress)
+        endProgress();
+
+    m_withinProgress = true;
+    const auto ts = '[' + timeStamp() + ']';
+    std::printf("%s %8s %-60s", qPrintable(m_prefix), ts.constData(), str.constData());
+    std::fflush(stdout);
+}
+
+void ReportHandler::endProgress()
+{
+    if (m_silent)
+        return;
+
+    m_withinProgress = false;
+    const char *endMessage = m_step_warning == 0
+        ?  "[" COLOR_GREEN "OK" COLOR_END "]\n"
+        : "[" COLOR_YELLOW "WARNING" COLOR_END "]\n";
+    std::fputs(endMessage, stdout);
+    std::fflush(stdout);
+    m_step_warning = 0;
 }
 
 QByteArray ReportHandler::doneMessage()
 {
-    QByteArray result = "Done, " + m_prefix.toUtf8() + ' ';
-    const qint64 elapsed = m_timer.elapsed();
-    result += elapsed > 5000
-        ? QByteArray::number(elapsed / 1000) + 's'
-        : QByteArray::number(elapsed) + "ms";
+    QByteArray result = "Done, " + m_prefix.toUtf8() + ' ' + timeStamp();
     if (m_warningCount)
         result += ", " + QByteArray::number(m_warningCount) + " warnings";
     if (m_suppressedCount)

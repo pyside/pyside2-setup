@@ -234,9 +234,11 @@ def prefix():
         name = "pyside"
     name += str(sys.version_info[0])
     if OPTION_DEBUG:
-        name += 'd'
+        name += "d"
     if is_debug_python():
-        name += 'p'
+        name += "p"
+    if OPTION_LIMITED_API == "yes" and sys.version_info[0] == 3:
+        name += "a"
     return name
 
 # Initialize, pull and checkout submodules

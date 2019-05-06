@@ -41,10 +41,13 @@
 
 """PySide2 port of the opengl/contextinfo example from Qt v5.x"""
 
+from argparse import ArgumentParser, RawTextHelpFormatter
 import numpy
 import sys
+from textwrap import dedent
 
-from PySide2.QtCore import QLibraryInfo, QSize, QTimer, Qt
+
+from PySide2.QtCore import QCoreApplication, QLibraryInfo, QSize, QTimer, Qt
 from PySide2.QtGui import (QMatrix4x4, QOpenGLBuffer, QOpenGLContext, QOpenGLShader,
     QOpenGLShaderProgram, QOpenGLVertexArrayObject, QSurfaceFormat, QWindow)
 from PySide2.QtWidgets import (QApplication, QHBoxLayout, QMessageBox, QPlainTextEdit,
@@ -61,49 +64,55 @@ except ImportError:
     messageBox.exec_()
     sys.exit(1)
 
-vertexShaderSource110 = """
-#version 110
-attribute highp vec4 posAttr;
-attribute lowp vec4 colAttr;
-varying lowp vec4 col;
-uniform highp mat4 matrix;
-void main() {
-   col = colAttr;
-   gl_Position = matrix * posAttr;
-}
-"""
+vertexShaderSource110 = dedent("""
+    // version 110
+    attribute highp vec4 posAttr;
+    attribute lowp vec4 colAttr;
+    varying lowp vec4 col;
+    uniform highp mat4 matrix;
+    void main() {
+       col = colAttr;
+       gl_Position = matrix * posAttr;
+    }
+    """)
 
-fragmentShaderSource110 = """
-#version 110
-varying lowp vec4 col;
-void main() {
-   gl_FragColor = col;
-}
-"""
+fragmentShaderSource110 = dedent("""
+    // version 110
+    varying lowp vec4 col;
+    void main() {
+       gl_FragColor = col;
+    }
+    """)
 
-vertexShaderSource = """
-#version 150
-in vec4 posAttr;
-in vec4 colAttr;
-out vec4 col;
-uniform mat4 matrix;
-void main() {
-   col = colAttr;
-   gl_Position = matrix * posAttr;
-}
-"""
+vertexShaderSource = dedent("""
+    // version 150
+    in vec4 posAttr;
+    in vec4 colAttr;
+    out vec4 col;
+    uniform mat4 matrix;
+    void main() {
+       col = colAttr;
+       gl_Position = matrix * posAttr;
+    }
+    """)
 
-fragmentShaderSource = """
-#version 150
-in vec4 col;
-out vec4 fragColor;
-void main() {
-   fragColor = col;
-}
-"""
+fragmentShaderSource = dedent("""
+    // version 150
+    in vec4 col;
+    out vec4 fragColor;
+    void main() {
+       fragColor = col;
+    }
+    """)
 
 vertices = numpy.array([0, 0.707, -0.5, -0.5, 0.5, -0.5], dtype = numpy.float32)
 colors = numpy.array([1, 0, 0, 0, 1, 0, 0, 0, 1], dtype = numpy.float32)
+
+
+def print_surface_format(surface_format):
+    profile_name = 'core' if surface_format.profile() == QSurfaceFormat.CoreProfile else 'compatibility'
+    return "{} version {}.{}".format(profile_name,
+        surface_format.majorVersion(), surface_format.minorVersion())
 
 class RenderWindow(QWindow):
     def __init__(self, format):
@@ -173,7 +182,11 @@ class RenderWindow(QWindow):
             if self.timer is None:
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.slotTimer)
+            if not self.timer.isActive():
                 self.timer.start(10)
+        else:
+            if self.timer and self.timer.isActive():
+                self.timer.stop()
 
     def render(self):
         if not self.context.makeCurrent(self):
@@ -184,7 +197,9 @@ class RenderWindow(QWindow):
             functions.glClearColor(0, 0, 0, 1)
             self.initGl()
 
-        functions.glViewport(0, 0, self.width(), self.height())
+        retinaScale = self.devicePixelRatio()
+        functions.glViewport(0, 0, self.width() * retinaScale,
+                             self.height() * retinaScale)
         functions.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         self.program.bind()
@@ -217,10 +232,13 @@ class RenderWindow(QWindow):
         if not self.context.makeCurrent(self):
             raise Exception("makeCurrent() failed")
         functions = self.context.functions()
-        text = "Vendor: {}\nRenderer: {}\nVersion: {}\nShading language: {}".format(
+        text = """Vendor: {}\nRenderer: {}\nVersion: {}\nShading language: {}
+\nContext Format: {}\n\nSurface Format: {}""".format(
                functions.glGetString(GL.GL_VENDOR), functions.glGetString(GL.GL_RENDERER),
                functions.glGetString(GL.GL_VERSION),
-               functions.glGetString(GL.GL_SHADING_LANGUAGE_VERSION))
+               functions.glGetString(GL.GL_SHADING_LANGUAGE_VERSION),
+               print_surface_format(self.context.format()),
+               print_surface_format(self.format()))
         self.context.doneCurrent()
         return text
 
@@ -243,6 +261,21 @@ class MainWindow(QWidget):
         self.plainTextEdit.setPlainText(text)
 
 if __name__ == '__main__':
+    parser = ArgumentParser(description="contextinfo", formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--gles', '-g', action='store_true',
+                        help='Use OpenGL ES')
+    parser.add_argument('--software', '-s', action='store_true',
+                        help='Use Software OpenGL')
+    parser.add_argument('--desktop', '-d', action='store_true',
+                        help='Use Desktop OpenGL')
+    options = parser.parse_args()
+    if options.gles:
+        QCoreApplication.setAttribute(Qt.AA_UseOpenGLES)
+    elif options.software:
+        QCoreApplication.setAttribute(Qt.AA_UseSoftwareOpenGL)
+    elif options.desktop:
+        QCoreApplication.setAttribute(Qt.AA_UseDesktopOpenGL)
+
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()

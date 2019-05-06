@@ -41,34 +41,31 @@
 #define PYSIDE_QPROPERTY_P_H
 
 #include <sbkpython.h>
+#include <QtCore/QByteArray>
 #include <QMetaObject>
 #include "pysideproperty.h"
 
 struct PySideProperty;
 
-extern "C"
+struct PySidePropertyPrivate
 {
-
-struct PySidePropertyPrivate {
-    char* typeName;
-    PySide::Property::MetaCallHandler metaCallHandler;
-    PyObject* fget;
-    PyObject* fset;
-    PyObject* freset;
-    PyObject* fdel;
-    PyObject* notify;
-    char* notifySignature;
-    char* doc;
-    bool designable;
-    bool scriptable;
-    bool stored;
-    bool user;
-    bool constant;
-    bool final;
-    void* userData;
+    QByteArray typeName;
+    PySide::Property::MetaCallHandler metaCallHandler = nullptr;
+    PyObject *fget = nullptr;
+    PyObject *fset = nullptr;
+    PyObject *freset = nullptr;
+    PyObject *fdel = nullptr;
+    PyObject *notify = nullptr;
+    QByteArray notifySignature;
+    QByteArray doc;
+    bool designable = true;
+    bool scriptable = true;
+    bool stored = true;
+    bool user = false;
+    bool constant = false;
+    bool final = false;
+    void *userData = nullptr;
 };
-
-} // extern "C"
 
 namespace PySide { namespace Property {
 

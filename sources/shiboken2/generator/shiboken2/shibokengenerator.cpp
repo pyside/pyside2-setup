@@ -118,6 +118,16 @@ static QString resolveScopePrefix(const AbstractMetaEnum *metaEnum,
     return resolveScopePrefix(parts, value);
 }
 
+struct GeneratorClassInfoCacheEntry
+{
+    ShibokenGenerator::FunctionGroups functionGroups;
+    bool needsGetattroFunction = false;
+};
+
+using GeneratorClassInfoCache = QHash<const AbstractMetaClass *, GeneratorClassInfoCacheEntry>;
+
+Q_GLOBAL_STATIC(GeneratorClassInfoCache, generatorClassInfoCache)
+
 ShibokenGenerator::ShibokenGenerator()
 {
     if (m_pythonPrimitiveTypeName.isEmpty())
@@ -1739,7 +1749,10 @@ void ShibokenGenerator::writeCodeSnips(QTextStream& s,
             argsRemoved++;
     }
 
-    OverloadData od(getFunctionGroups(func->implementingClass())[func->name()], this);
+    const auto &groups = func->implementingClass()
+        ? getFunctionGroups(func->implementingClass())
+        : getGlobalFunctionGroups();
+    OverloadData od(groups[func->name()], this);
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(od);
 
     // Replace %PYARG_# variables.
@@ -2165,26 +2178,19 @@ bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction* fun
     return false;
 }
 
-bool ShibokenGenerator::hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass)
+bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* metaClass)
 {
-    if (!metaClass || metaClass->baseClassNames().isEmpty())
-        return false;
-    if (metaClass->baseClassNames().size() > 1)
-        return true;
-    return hasMultipleInheritanceInAncestry(metaClass->baseClass());
+    return getGeneratorClassInfo(metaClass).needsGetattroFunction;
 }
 
-typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
-typedef FunctionGroupMap::const_iterator FunctionGroupMapIt;
-
-bool ShibokenGenerator::classNeedsGetattroFunction(const AbstractMetaClass* metaClass)
+bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClass* metaClass)
 {
     if (!metaClass)
         return false;
     if (metaClass->typeEntry()->isSmartPointer())
         return true;
-    const FunctionGroupMap &functionGroup = getFunctionGroups(metaClass);
-    for (FunctionGroupMapIt it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
+    const auto &functionGroup = getFunctionGroups(metaClass);
+    for (auto it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
         AbstractMetaFunctionList overloads;
         for (AbstractMetaFunction *func : qAsConst(it.value())) {
             if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
@@ -2212,8 +2218,8 @@ AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStatic
 {
     AbstractMetaFunctionList methods;
     if (metaClass) {
-        const FunctionGroupMap &functionGroups = getFunctionGroups(metaClass);
-        for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
+        const auto &functionGroups = getFunctionGroups(metaClass);
+        for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
             AbstractMetaFunctionList overloads;
             for (AbstractMetaFunction *func : qAsConst(it.value())) {
                 if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
@@ -2254,7 +2260,7 @@ AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass*
 const AbstractMetaClass* ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass* metaClass)
 {
     if (!metaClass || metaClass->baseClassNames().isEmpty())
-        return 0;
+        return nullptr;
     if (metaClass->baseClassNames().size() > 1)
         return metaClass;
     return getMultipleInheritingClass(metaClass->baseClass());
@@ -2358,23 +2364,56 @@ static bool isGroupable(const AbstractMetaFunction* func)
     return true;
 }
 
-QMap< QString, AbstractMetaFunctionList > ShibokenGenerator::getFunctionGroups(const AbstractMetaClass* scope)
+ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() const
 {
-    AbstractMetaFunctionList lst = scope ? scope->functions() : globalFunctions();
+    const AbstractMetaFunctionList &lst = globalFunctions();
+    FunctionGroups results;
+    for (AbstractMetaFunction *func : lst) {
+        if (isGroupable(func))
+            results[func->name()].append(func);
+    }
+    return results;
+}
 
-    QMap<QString, AbstractMetaFunctionList> results;
-    for (AbstractMetaFunction *func : qAsConst(lst)) {
+const GeneratorClassInfoCacheEntry &ShibokenGenerator::getGeneratorClassInfo(const AbstractMetaClass *scope)
+{
+    auto cache = generatorClassInfoCache();
+    auto it = cache->find(scope);
+    if (it == cache->end()) {
+        it = cache->insert(scope, {});
+        it.value().functionGroups = getFunctionGroupsImpl(scope);
+        it.value().needsGetattroFunction = classNeedsGetattroFunctionImpl(scope);
+    }
+    return it.value();
+}
+
+ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroups(const AbstractMetaClass *scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).functionGroups;
+}
+
+ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClass *scope)
+{
+    const AbstractMetaFunctionList &lst = scope->functions();
+
+    FunctionGroups results;
+    for (AbstractMetaFunction *func : lst) {
         if (isGroupable(func)) {
-            AbstractMetaFunctionList &list = results[func->name()];
-            // If there are virtuals methods in the mix (PYSIDE-570,
-            // QFileSystemModel::index(QString,int) and
-            // QFileSystemModel::index(int,int,QModelIndex)) override, make sure
-            // the overriding method of the most-derived class is seen first
-            // and inserted into the "seenSignatures" set.
-            if (func->isVirtual())
-                list.prepend(func);
-            else
-                list.append(func);
+            auto it = results.find(func->name());
+            if (it == results.end()) {
+                results.insert(func->name(), AbstractMetaFunctionList(1, func));
+            } else {
+                // If there are virtuals methods in the mix (PYSIDE-570,
+                // QFileSystemModel::index(QString,int) and
+                // QFileSystemModel::index(int,int,QModelIndex)) override, make sure
+                // the overriding method of the most-derived class is seen first
+                // and inserted into the "seenSignatures" set.
+                if (func->isVirtual())
+                    it.value().prepend(func);
+                else
+                    it.value().append(func);
+            }
         }
     }
     return results;
@@ -2503,8 +2542,8 @@ bool ShibokenGenerator::doSetup()
     Q_ASSERT(moduleEntry);
     getCode(snips, moduleEntry);
 
-    const FunctionGroupMap &functionGroups = getFunctionGroups();
-    for (FunctionGroupMapIt it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
+    const auto &functionGroups = getGlobalFunctionGroups();
+    for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
         for (AbstractMetaFunction *func : it.value())
             getCode(snips, func->injectedCodeSnips());
     }
