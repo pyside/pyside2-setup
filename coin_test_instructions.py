@@ -38,6 +38,7 @@
 #############################################################################
 from build_scripts.options import has_option
 from build_scripts.options import option_value
+from build_scripts.utils import get_python_dict
 from build_scripts.utils import install_pip_dependencies
 from build_scripts.utils import install_pip_wheel_package
 from build_scripts.utils import get_qtci_virtualEnv
@@ -64,6 +65,14 @@ if _ci_features is not None:
 
 CI_RELEASE_CONF = has_option("packaging")
 
+def get_package_version():
+    """ Returns the version string for the PySide2 package. """
+    pyside_version_py = os.path.join(os.path.dirname(__file__),
+                                     "sources", "pyside2", "pyside_version.py")
+    dict = get_python_dict(pyside_version_py)
+    return (int(dict['major_version']), int(dict['minor_version']),
+            int(dict['patch_version']))
+
 def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
@@ -78,7 +87,9 @@ def call_testrunner(python_ver, buildnro):
     qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
 
     # Try to install built wheels, and build some buildable examples.
-    if CI_RELEASE_CONF:
+    # Fixme: Skip wheel testing for Qt >= 5.14 until
+    # qt5/09f28e9e1d989a70c876138a4cf24e35c67e0fbb has landed in dev
+    if CI_RELEASE_CONF and get_package_version()[1] < 14:
         wheel_tester_path = os.path.join("testing", "wheel_tester.py")
         cmd = [env_python, wheel_tester_path, qmake_path]
         run_instruction(cmd, "Error while running wheel_tester.py")
