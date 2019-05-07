@@ -50,3 +50,8 @@
 <modify-function signature="^glTextureParameterI?u?[fi]v\(.*$">
     <modify-argument index="3"><array/></modify-argument>
 </modify-function>
+<modify-function signature="glVertexArrayVertexBuffers(unsigned int, unsigned int,int,const unsigned int *,const long *,const int *)">
+    <modify-argument index="4"><array/></modify-argument>
+    <modify-argument index="5"><array/></modify-argument>
+    <modify-argument index="6"><array/></modify-argument>
+</modify-function>
