@@ -711,7 +711,7 @@ void setTypeDiscoveryFunctionV2(SbkObjectType* type, TypeDiscoveryFuncV2 func)
     PepType_SOTP(type)->type_discovery = func;
 }
 
-void copyMultimpleheritance(SbkObjectType* type, SbkObjectType* other)
+void copyMultipleInheritance(SbkObjectType *type, SbkObjectType *other)
 {
     PepType_SOTP(type)->mi_init = PepType_SOTP(other)->mi_init;
     PepType_SOTP(type)->mi_offsets = PepType_SOTP(other)->mi_offsets;
@@ -723,7 +723,7 @@ void setMultipleInheritanceFunction(SbkObjectType* type, MultipleInheritanceInit
     PepType_SOTP(type)->mi_init = function;
 }
 
-MultipleInheritanceInitFunction getMultipleIheritanceFunction(SbkObjectType* type)
+MultipleInheritanceInitFunction getMultipleInheritanceFunction(SbkObjectType *type)
 {
     return PepType_SOTP(type)->mi_init;
 }

@@ -54,6 +54,7 @@ extern const char *END_ALLOW_THREADS;
 class DocParser;
 class CodeSnip;
 class OverloadData;
+struct GeneratorClassInfoCacheEntry;
 
 QT_FORWARD_DECLARE_CLASS(QTextStream)
 
@@ -63,6 +64,8 @@ QT_FORWARD_DECLARE_CLASS(QTextStream)
 class ShibokenGenerator : public Generator
 {
 public:
+    using FunctionGroups = QMap<QString, AbstractMetaFunctionList>; // Sorted
+
     ShibokenGenerator();
     ~ShibokenGenerator() override;
 
@@ -99,7 +102,8 @@ protected:
      *   Example of return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
      *   \param scope Where to search for functions, null means all global functions.
      */
-    QMap<QString, AbstractMetaFunctionList> getFunctionGroups(const AbstractMetaClass* scope = 0);
+    FunctionGroups getGlobalFunctionGroups() const;
+    static FunctionGroups getFunctionGroups(const AbstractMetaClass *scope);
 
     /**
      *   Returns all different inherited overloads of func, and includes func as well.
@@ -179,8 +183,8 @@ protected:
                               Options options = NoOption,
                               int arg_count = -1) const;
 
-    /// Returns true if there are cases of multiple inheritance in any of its ancestors.
-    bool hasMultipleInheritanceInAncestry(const AbstractMetaClass* metaClass);
+    /// Returns the top-most class that has multiple inheritance in the ancestry.
+    static const AbstractMetaClass *getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
     /// Returns true if the class needs to have a getattro function.
     bool classNeedsGetattroFunction(const AbstractMetaClass* metaClass);
@@ -193,8 +197,6 @@ protected:
 
     /// Returns a list of parent classes for a given class.
     AbstractMetaClassList getBaseClasses(const AbstractMetaClass* metaClass) const;
-
-    const AbstractMetaClass* getMultipleInheritingClass(const AbstractMetaClass* metaClass);
 
     void writeToPythonConversion(QTextStream& s, const AbstractMetaType* type,
                                  const AbstractMetaClass* context, const QString& argumentName);
@@ -440,6 +442,10 @@ protected:
     static QStringList m_knownPythonTypes;
 
 private:
+    static const GeneratorClassInfoCacheEntry &getGeneratorClassInfo(const AbstractMetaClass *scope);
+    static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClass *scope);
+    static bool classNeedsGetattroFunctionImpl(const AbstractMetaClass *metaClass);
+
     QString translateTypeForWrapperMethod(const AbstractMetaType* cType,
                                           const AbstractMetaClass* context,
                                           Options opt = NoOption) const;

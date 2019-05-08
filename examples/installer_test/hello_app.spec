@@ -59,7 +59,14 @@ a = Analysis(['hello.py'],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
-             excludes=[],
+             # 2019-04-28
+             # This hack circumvents a side effect of Python 2.7.16 which leads to a failure
+             # in 'hook-_tkinter.py'. The error is reported. Until it is fixed, we circumvent
+             # the problem by this exclude.
+             # This effect is triggered by installing 'numpy'. It is somewhat special since
+             # the problem does not show up in Python 3.7 . tkinter would have the same
+             # problem on Python 3.7, but numpy would not trigger it for some reason.
+             excludes=['FixTk', 'tcl', 'tk', '_tkinter', 'tkinter', 'Tkinter'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,

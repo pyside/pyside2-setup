@@ -18,11 +18,22 @@ properly handle the data structures or types.
 The final outcome of this process is a set of wrappers written in CPython,
 which can be used as a module in your python code.
 
-Refer to the following topics for more information and examples:
+Table of contents
+*****************
 
 .. toctree::
    :maxdepth: 1
 
-   overview
-   samplebinding
-   contents
+   overview.rst
+   samplebinding.rst
+   commandlineoptions.rst
+   projectfile.rst
+   typesystemvariables.rst
+   typeconverters.rst
+   codeinjectionsemantics.rst
+   sequenceprotocol.rst
+   ownership.rst
+   wordsofadvice.rst
+   shibokenmodule.rst
+   faq.rst
+   typesystem.rst

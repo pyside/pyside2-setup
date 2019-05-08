@@ -1,115 +1,152 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'form.ui'
-#
-# Created: Wed Feb 16 22:14:47 2011
-#      by: pyside-uic 0.2.6 running on PySide 1.0.0~beta5
-#
-# WARNING! All changes made in this file will be lost!
+################################################################################
+## Form generated from reading UI file 'form.ui'
+##
+## Created by: Qt User Interface Compiler version 5.14.0
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
+    QRect, QSize, QUrl, Qt)
+from PySide2.QtGui import (QColor, QFont, QIcon, QPixmap)
+from PySide2.QtWidgets import *
 
 class Ui_Form(object):
     def setupUi(self, Form):
-        Form.setObjectName("Form")
+        if Form.objectName():
+            Form.setObjectName(u"Form")
         Form.resize(545, 471)
-        self.gridLayout = QtWidgets.QGridLayout(Form)
-        self.gridLayout.setObjectName("gridLayout")
-        self.easingCurvePicker = QtWidgets.QListWidget(Form)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
+        self.gridLayout = QGridLayout(Form);
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.easingCurvePicker = QListWidget(Form)
+        self.easingCurvePicker.setObjectName(u"easingCurvePicker")
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(self.easingCurvePicker.sizePolicy().hasHeightForWidth())
         self.easingCurvePicker.setSizePolicy(sizePolicy)
-        self.easingCurvePicker.setMaximumSize(QtCore.QSize(16777215, 120))
-        self.easingCurvePicker.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.easingCurvePicker.setMovement(QtWidgets.QListView.Static)
+        self.easingCurvePicker.setMaximumSize(QSize(16777215, 120))
+        self.easingCurvePicker.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.easingCurvePicker.setMovement(QListView.Static)
         self.easingCurvePicker.setProperty("isWrapping", False)
-        self.easingCurvePicker.setViewMode(QtWidgets.QListView.IconMode)
+        self.easingCurvePicker.setViewMode(QListView.IconMode)
         self.easingCurvePicker.setSelectionRectVisible(False)
-        self.easingCurvePicker.setObjectName("easingCurvePicker")
-        self.gridLayout.addWidget(self.easingCurvePicker, 0, 0, 1, 2)
-        self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.groupBox_2 = QtWidgets.QGroupBox(Form)
-        self.groupBox_2.setObjectName("groupBox_2")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.groupBox_2)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.lineRadio = QtWidgets.QRadioButton(self.groupBox_2)
-        self.lineRadio.setChecked(True)
-        self.lineRadio.setObjectName("lineRadio")
-        self.buttonGroup = QtWidgets.QButtonGroup(Form)
-        self.buttonGroup.setObjectName("buttonGroup")
+
+        self.gridLayout.addWidget(self.easingCurvePicker, 0, 0, 1, 2);
+
+        self.verticalLayout = QVBoxLayout();
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.groupBox_2 = QGroupBox(Form)
+        self.groupBox_2.setObjectName(u"groupBox_2")
+        self.verticalLayout_2 = QVBoxLayout(self.groupBox_2);
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.lineRadio = QRadioButton(self.groupBox_2)
+        self.buttonGroup = QButtonGroup(Form)
+        self.buttonGroup.setObjectName(u"buttonGroup")
+        self.buttonGroup.setExclusive(False)
         self.buttonGroup.addButton(self.lineRadio)
-        self.verticalLayout_2.addWidget(self.lineRadio)
-        self.circleRadio = QtWidgets.QRadioButton(self.groupBox_2)
-        self.circleRadio.setObjectName("circleRadio")
+        self.lineRadio.setObjectName(u"lineRadio")
+        self.lineRadio.setChecked(True)
+
+        self.verticalLayout_2.addWidget(self.lineRadio);
+
+        self.circleRadio = QRadioButton(self.groupBox_2)
         self.buttonGroup.addButton(self.circleRadio)
-        self.verticalLayout_2.addWidget(self.circleRadio)
-        self.verticalLayout.addWidget(self.groupBox_2)
-        self.groupBox = QtWidgets.QGroupBox(Form)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
-        self.groupBox.setSizePolicy(sizePolicy)
-        self.groupBox.setObjectName("groupBox")
-        self.formLayout = QtWidgets.QFormLayout(self.groupBox)
-        self.formLayout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
-        self.formLayout.setObjectName("formLayout")
-        self.label = QtWidgets.QLabel(self.groupBox)
-        self.label.setObjectName("label")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label)
-        self.periodSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
+        self.circleRadio.setObjectName(u"circleRadio")
+
+        self.verticalLayout_2.addWidget(self.circleRadio);
+
+
+        self.verticalLayout.addWidget(self.groupBox_2);
+
+        self.groupBox = QGroupBox(Form)
+        self.groupBox.setObjectName(u"groupBox")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
+        self.groupBox.setSizePolicy(sizePolicy1)
+        self.formLayout = QFormLayout(self.groupBox);
+        self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        self.label = QLabel(self.groupBox)
+        self.label.setObjectName(u"label")
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label);
+
+        self.periodSpinBox = QDoubleSpinBox(self.groupBox)
+        self.periodSpinBox.setObjectName(u"periodSpinBox")
         self.periodSpinBox.setEnabled(False)
-        self.periodSpinBox.setMinimum(-1.0)
-        self.periodSpinBox.setSingleStep(0.1)
-        self.periodSpinBox.setProperty("value", -1.0)
-        self.periodSpinBox.setObjectName("periodSpinBox")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.periodSpinBox)
-        self.label_2 = QtWidgets.QLabel(self.groupBox)
-        self.label_2.setObjectName("label_2")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_2)
-        self.amplitudeSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
+        self.periodSpinBox.setMinimum(-1.000000000000000)
+        self.periodSpinBox.setSingleStep(0.100000000000000)
+        self.periodSpinBox.setValue(-1.000000000000000)
+
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.periodSpinBox);
+
+        self.label_2 = QLabel(self.groupBox)
+        self.label_2.setObjectName(u"label_2")
+
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2);
+
+        self.amplitudeSpinBox = QDoubleSpinBox(self.groupBox)
+        self.amplitudeSpinBox.setObjectName(u"amplitudeSpinBox")
         self.amplitudeSpinBox.setEnabled(False)
-        self.amplitudeSpinBox.setMinimum(-1.0)
-        self.amplitudeSpinBox.setSingleStep(0.1)
-        self.amplitudeSpinBox.setProperty("value", -1.0)
-        self.amplitudeSpinBox.setObjectName("amplitudeSpinBox")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.amplitudeSpinBox)
-        self.label_3 = QtWidgets.QLabel(self.groupBox)
-        self.label_3.setObjectName("label_3")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_3)
-        self.overshootSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
+        self.amplitudeSpinBox.setMinimum(-1.000000000000000)
+        self.amplitudeSpinBox.setSingleStep(0.100000000000000)
+        self.amplitudeSpinBox.setValue(-1.000000000000000)
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.amplitudeSpinBox);
+
+        self.label_3 = QLabel(self.groupBox)
+        self.label_3.setObjectName(u"label_3")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3);
+
+        self.overshootSpinBox = QDoubleSpinBox(self.groupBox)
+        self.overshootSpinBox.setObjectName(u"overshootSpinBox")
         self.overshootSpinBox.setEnabled(False)
-        self.overshootSpinBox.setMinimum(-1.0)
-        self.overshootSpinBox.setSingleStep(0.1)
-        self.overshootSpinBox.setProperty("value", -1.0)
-        self.overshootSpinBox.setObjectName("overshootSpinBox")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.overshootSpinBox)
-        self.verticalLayout.addWidget(self.groupBox)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem)
-        self.gridLayout.addLayout(self.verticalLayout, 1, 0, 1, 1)
-        self.graphicsView = QtWidgets.QGraphicsView(Form)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
-        self.graphicsView.setSizePolicy(sizePolicy)
-        self.graphicsView.setObjectName("graphicsView")
-        self.gridLayout.addWidget(self.graphicsView, 1, 1, 1, 1)
+        self.overshootSpinBox.setMinimum(-1.000000000000000)
+        self.overshootSpinBox.setSingleStep(0.100000000000000)
+        self.overshootSpinBox.setValue(-1.000000000000000)
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.overshootSpinBox);
+
+
+        self.verticalLayout.addWidget(self.groupBox);
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding);
+
+        self.verticalLayout.addItem(self.verticalSpacer);
+
+
+        self.gridLayout.addLayout(self.verticalLayout, 1, 0, 1, 1);
+
+        self.graphicsView = QGraphicsView(Form)
+        self.graphicsView.setObjectName(u"graphicsView")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
+        self.graphicsView.setSizePolicy(sizePolicy2)
+
+        self.gridLayout.addWidget(self.graphicsView, 1, 1, 1, 1);
+
 
         self.retranslateUi(Form)
-        QtCore.QMetaObject.connectSlotsByName(Form)
+
+        QMetaObject.connectSlotsByName(Form)
+    # setupUi
 
     def retranslateUi(self, Form):
-        Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "Easing curves", None))
-        self.groupBox_2.setTitle(QtWidgets.QApplication.translate("Form", "Path type", None))
-        self.lineRadio.setText(QtWidgets.QApplication.translate("Form", "Line", None))
-        self.circleRadio.setText(QtWidgets.QApplication.translate("Form", "Circle", None))
-        self.groupBox.setTitle(QtWidgets.QApplication.translate("Form", "Properties", None))
-        self.label.setText(QtWidgets.QApplication.translate("Form", "Period", None))
-        self.label_2.setText(QtWidgets.QApplication.translate("Form", "Amplitude", None))
-        self.label_3.setText(QtWidgets.QApplication.translate("Form", "Overshoot", None))
+        Form.setWindowTitle(QCoreApplication.translate("Form", u"Easing curves", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Path type", None))
+        self.lineRadio.setText(QCoreApplication.translate("Form", u"Line", None))
+        self.circleRadio.setText(QCoreApplication.translate("Form", u"Circle", None))
+        self.groupBox.setTitle(QCoreApplication.translate("Form", u"Properties", None))
+        self.label.setText(QCoreApplication.translate("Form", u"Period", None))
+        self.label_2.setText(QCoreApplication.translate("Form", u"Amplitude", None))
+        self.label_3.setText(QCoreApplication.translate("Form", u"Overshoot", None))
+    # retranslateUi
 

@@ -464,16 +464,9 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
             if (Signal::checkType(value)) {
                 // Register signals.
                 auto data = reinterpret_cast<PySideSignal *>(value);
-                const char *signalName = Shiboken::String::toCString(key);
-                data->signalName = strdup(signalName);
-                QByteArray sig;
-                sig.reserve(128);
-                for (int i = 0; i < data->signaturesSize; ++i) {
-                    sig = signalName;
-                    sig += '(';
-                    if (data->signatures[i])
-                        sig += data->signatures[i];
-                    sig += ')';
+                data->data->signalName = Shiboken::String::toCString(key);
+                for (const auto &s : data->data->signatures) {
+                    const auto sig = data->data->signalName + '(' + s.signature + ')';
                     if (m_baseObject->indexOfSignal(sig) == -1)
                         m_builder->addSignal(sig);
                 }

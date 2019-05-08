@@ -184,9 +184,9 @@ LIBSHIBOKEN_API void        setOriginalName(SbkObjectType* self, const char* nam
 LIBSHIBOKEN_API const char* getOriginalName(SbkObjectType* self);
 
 LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(SbkObjectType* self, TypeDiscoveryFuncV2 func);
-LIBSHIBOKEN_API void        copyMultimpleheritance(SbkObjectType* self, SbkObjectType* other);
+LIBSHIBOKEN_API void        copyMultipleInheritance(SbkObjectType *self, SbkObjectType *other);
 LIBSHIBOKEN_API void        setMultipleInheritanceFunction(SbkObjectType* self, MultipleInheritanceInitFunction func);
-LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleIheritanceFunction(SbkObjectType* self);
+LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleInheritanceFunction(SbkObjectType *self);
 
 LIBSHIBOKEN_API void        setDestructorFunction(SbkObjectType* self, ObjectDestructor func);
 

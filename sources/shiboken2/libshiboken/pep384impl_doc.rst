@@ -70,7 +70,8 @@ supported. We redefined it as macro ``Py_VerboseFlag`` which calls ``Pep_Verbose
 unicodeobject.h
 ---------------
 
-The macro ``PyUnicode_GET_SIZE`` was redefined to call into ``PyUnicode_GetSize``.
+The macro ``PyUnicode_GET_SIZE`` was redefined to call into ``PyUnicode_GetSize``
+for Python 2, and ``PyUnicode_GetLength`` for Python 3.
 Function ``_PyUnicode_AsString`` is unavailable and was replaced by a macro
 that calls ``_PepUnicode_AsString``. The implementation was a bit involved,
 and it would be better to change the code and replace this function.

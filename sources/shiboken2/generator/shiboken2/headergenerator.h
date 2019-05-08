@@ -42,6 +42,9 @@ class HeaderGenerator : public ShibokenGenerator
 {
 public:
     OptionDescriptions options() const override { return OptionDescriptions(); }
+
+    const char *name() const override { return "Header generator"; }
+
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;

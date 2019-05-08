@@ -428,20 +428,20 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     // Start the generation...
     const ClassList &typeValues = dom->classes();
-    ReportHandler::setProgressReference(typeValues);
+
+    ReportHandler::startProgress("Generating class model ("
+                                 + QByteArray::number(typeValues.size()) + ")...");
     for (const ClassModelItem &item : typeValues) {
-        ReportHandler::progress(QStringLiteral("Generating class model (%1)...")
-                                .arg(typeValues.size()));
         if (AbstractMetaClass *cls = traverseClass(dom, item, nullptr))
             addAbstractMetaClass(cls, item.data());
     }
 
     // We need to know all global enums
     const EnumList &enums = dom->enums();
-    ReportHandler::setProgressReference(enums);
+
+    ReportHandler::startProgress("Generating enum model ("
+                                 + QByteArray::number(enums.size()) + ")...");
     for (const EnumModelItem &item : enums) {
-        ReportHandler::progress(QStringLiteral("Generating enum model (%1)...")
-                                .arg(enums.size()));
         AbstractMetaEnum *metaEnum = traverseEnum(item, 0, QSet<QString>());
         if (metaEnum) {
             if (metaEnum->typeEntry()->generateCode())
@@ -450,10 +450,9 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     }
 
     const auto &namespaceTypeValues = dom->namespaces();
-    ReportHandler::setProgressReference(namespaceTypeValues);
+    ReportHandler::startProgress("Generating namespace model ("
+                                 + QByteArray::number(namespaceTypeValues.size()) + ")...");
     for (const NamespaceModelItem &item : namespaceTypeValues) {
-        ReportHandler::progress(QStringLiteral("Generating namespace model (%1)...")
-                                .arg(namespaceTypeValues.size()));
         if (AbstractMetaClass *metaClass = traverseNamespace(dom, item))
             addAbstractMetaClass(metaClass, item.data());
     }
@@ -461,10 +460,9 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = dom->typeDefs();
-    ReportHandler::setProgressReference(typeDefs);
+    ReportHandler::startProgress("Resolving typedefs ("
+                                 + QByteArray::number(typeDefs.size()) + ")...");
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        ReportHandler::progress(QStringLiteral("Resolving typedefs (%1)...")
-                                .arg(typeDefs.size()));
         if (AbstractMetaClass *cls = traverseTypeDef(dom, typeDef, nullptr))
             addAbstractMetaClass(cls, typeDef.data());
     }
@@ -506,16 +504,14 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         m_globalFunctions << metaFunc;
     }
 
-    ReportHandler::setProgressReference(m_metaClasses);
+    ReportHandler::startProgress("Fixing class inheritance...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        ReportHandler::progress(QLatin1String("Fixing class inheritance..."));
         if (!cls->isInterface() && !cls->isNamespace())
             setupInheritance(cls);
     }
 
-    ReportHandler::setProgressReference(m_metaClasses);
+    ReportHandler::startProgress("Detecting inconsistencies in class model...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        ReportHandler::progress(QLatin1String("Detecting inconsistencies in class model..."));
         cls->fixFunctions();
 
         if (!cls->typeEntry()) {
@@ -538,8 +534,9 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + QLatin1String("$ConcreteWrapper"));
     }
     const auto &allEntries = types->entries();
-    ReportHandler::progress(QStringLiteral("Detecting inconsistencies in typesystem (%1)...")
-                            .arg(allEntries.size()));
+
+    ReportHandler::startProgress("Detecting inconsistencies in typesystem ("
+                                 + QByteArray::number(allEntries.size()) + ")...");
     for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
         TypeEntry *entry = it.value();
         if (!entry->isPrimitive()) {
@@ -638,7 +635,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             traverseStreamOperator(item, nullptr);
     }
 
+    ReportHandler::startProgress("Checking inconsistencies in function modifications...");
+
     checkFunctionModifications();
+
+    ReportHandler::startProgress("Writing log files...");
 
     // sort all classes topologically
     m_metaClasses = classesTopologicalSorted(m_metaClasses);
@@ -673,6 +674,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     }
 
     m_itemToClass.clear();
+
+    ReportHandler::endProgress();
 }
 
 static bool metaEnumLessThan(const AbstractMetaEnum *e1, const AbstractMetaEnum *e2)

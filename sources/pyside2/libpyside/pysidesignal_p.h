@@ -42,40 +42,51 @@
 
 #include <sbkpython.h>
 
+#include <QtCore/QByteArray>
+#include <QtCore/QVector>
+
+struct PySideSignalData
+{
+    struct Signature
+    {
+        QByteArray signature;
+        int attributes;
+    };
+
+    QByteArray signalName;
+    QVector<Signature> signatures;
+};
+
 extern "C"
 {
     extern PyTypeObject *PySideSignalTypeF(void);
 
     struct PySideSignal {
         PyObject_HEAD
-        bool initialized;
-        char* signalName;
-        char** signatures;
-        int* signatureAttributes;
-        int signaturesSize;
+        PySideSignalData *data;
         PyObject* homonymousMethod;
     };
 
     struct PySideSignalInstance;
-    struct PySideSignalInstancePrivate {
-        char* signalName;
-        char* signature;
-        int attributes;
-        PyObject* source;
-        PyObject* homonymousMethod;
-        PySideSignalInstance* next;
-    };
-
-
 }; //extern "C"
+
+struct PySideSignalInstancePrivate
+{
+    QByteArray signalName;
+    QByteArray signature;
+    int attributes = 0;
+    PyObject *source = nullptr;
+    PyObject *homonymousMethod = nullptr;
+    PySideSignalInstance *next = nullptr;
+};
 
 namespace PySide { namespace Signal {
 
     void            init(PyObject* module);
     bool            connect(PyObject* source, const char* signal, PyObject* callback);
-    char*           getTypeName(PyObject*);
-    const char**    getSignatures(PyObject* self, int *size);
+    QByteArray      getTypeName(PyObject *);
     QString         codeCallbackName(PyObject* callback, const QString& funcName);
+    QByteArray      voidType();
 
 }} //namespace PySide
 
