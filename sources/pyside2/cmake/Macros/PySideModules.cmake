@@ -182,7 +182,7 @@ macro(create_pyside_module)
         make_path(path_value "${path_value}")
         string(APPEND ld_prefix "${PATH_SEP}${path_value}")
     endif()
-    set(generate_pyi_options run --skip --sys-path
+    set(generate_pyi_options ${module_NAME} --sys-path
         "${pysidebindings_BINARY_DIR}"
         "${SHIBOKEN_PYTHON_MODULE_DIR}")
     if (QUIET_BUILD)
