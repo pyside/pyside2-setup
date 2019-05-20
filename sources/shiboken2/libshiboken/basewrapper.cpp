@@ -94,6 +94,92 @@ static PyType_Spec SbkObjectType_Type_spec = {
 };
 
 
+#if PY_VERSION_HEX < 0x03000000
+/*****************************************************************************
+ *
+ * PYSIDE-816: Workaround for Python 2.7
+ *
+ * This is an add-on for function typeobject.c:tp_new_wrapper from Python 2.7 .
+ * Problem:
+ * In Python 3.X, tp_new_wrapper uses this check:
+
+    while (staticbase && (staticbase->tp_new == slot_tp_new))
+
+ * In Python 2.7, it uses this, instead:
+
+    while (staticbase && (staticbase->tp_flags & Py_TPFLAGS_HEAPTYPE))
+
+ * The problem is that heap types have this unwanted dependency.
+ * But we cannot get at static slot_tp_new, and so we have to use
+ * the original function and patch Py_TPFLAGS_HEAPTYPE away during the call.
+ */
+
+static PyCFunction old_tp_new_wrapper = nullptr;
+
+static PyObject *
+tp_new_wrapper(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(self);
+    Py_ssize_t orig_flags = type->tp_flags;
+    type->tp_flags &= ~Py_TPFLAGS_HEAPTYPE;
+    PyObject *ret = reinterpret_cast<ternaryfunc>(old_tp_new_wrapper)(self, args, kwds);
+    type->tp_flags = orig_flags;
+    return ret;
+}
+
+// This is intentionally the new docstring of Python 3.7 .
+static struct PyMethodDef tp_new_methoddef[] = {
+    {"__new__", (PyCFunction)tp_new_wrapper, METH_VARARGS|METH_KEYWORDS,
+     PyDoc_STR("__new__($type, *args, **kwargs)\n--\n\n"
+               "Create and return a new object.  "
+               "See help(type) for accurate signature.")},
+    {0}
+};
+
+static int
+get_old_tp_new_wrapper(void)
+{
+    // We get the old tp_new_wrapper from any initialized type.
+    PyTypeObject *type = &PyType_Type;
+    PyObject *dict = type->tp_dict;
+    PyObject *key, *func = nullptr;
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(dict, &pos, &key, &func)) {
+        char *name = PyString_AsString(key);
+        if (strcmp(name, "__new__") == 0) {
+            break;
+        }
+    }
+    if (func == nullptr)
+        return -1;
+    PyCFunctionObject *pycf_ob = reinterpret_cast<PyCFunctionObject *>(func);
+    old_tp_new_wrapper = pycf_ob->m_ml->ml_meth;
+    return 0;
+}
+
+static int
+add_tp_new_wrapper(PyTypeObject *type)
+{
+    // get the original tp_new_wrapper
+    if (old_tp_new_wrapper == nullptr && get_old_tp_new_wrapper() < 0)
+        return -1;
+    // initialize tp_dict
+    if (type->tp_dict == nullptr)
+        type->tp_dict = PyDict_New();
+    if (type->tp_dict == nullptr)
+        return -1;
+    PyObject *ob_type = reinterpret_cast<PyObject *>(type);
+    Shiboken::AutoDecRef func(PyCFunction_New(tp_new_methoddef, ob_type));
+    if (func.isNull())
+        return -1;
+    if (PyDict_SetItemString(type->tp_dict, "__new__", func))
+        return -1;
+    return 0;
+}
+/*****************************************************************************/
+#endif // PY_VERSION_HEX < 0x03000000
+
+
 PyTypeObject *SbkObjectType_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
@@ -102,13 +188,8 @@ PyTypeObject *SbkObjectType_TypeF(void)
             PepHeapType_SIZE + sizeof(SbkObjectTypePrivate);
         type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkObjectType_Type_spec));
 #if PY_VERSION_HEX < 0x03000000
-        // PYSIDE-816: Python 2.7 has a bad check for Py_TPFLAGS_HEAPTYPE in
-        // typeobject.c func tp_new_wrapper. In Python 3 it was updated after
-        // the transition to the new type API, but not in 2.7 . Fortunately,
-        // the types did not change much when transitioning to heaptypes. We
-        // pretend that this type is a normal type in 2.7 and hope that this
-        // has no bad effect.
-        type->tp_flags &= ~Py_TPFLAGS_HEAPTYPE;
+        if (add_tp_new_wrapper(type) < 0)
+            return nullptr;
 #endif
     }
     return type;
@@ -299,10 +380,6 @@ void SbkObjectTypeDealloc(PyObject* pyObj)
     SbkObjectTypePrivate *sotp = PepType_SOTP(pyObj);
     PyTypeObject *type = reinterpret_cast<PyTypeObject*>(pyObj);
 
-#if PY_VERSION_HEX < 0x03000000
-    // PYSIDE-816: Restore the heap type flag. Better safe than sorry.
-    type->tp_flags |= Py_TPFLAGS_HEAPTYPE;
-#endif
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
