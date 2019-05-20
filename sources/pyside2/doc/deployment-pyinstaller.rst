@@ -122,3 +122,52 @@ an executable inside the `dist/` directory that you can execute::
 
     cd dist/
     ./MyApplication
+
+
+Current Caveats To Be Aware Of
+==============================
+
+
+PyInstaller Problem
+-------------------
+
+As already mentioned, `PyInstaller` will pick a system installation of PySide2 or
+Shiboken2 instead of your virtualenv version without notice, if it exists.
+This may be no problem if those PySide2 or shiboken2 versions are the same.
+
+If you are working with different versions, this can result in frustrating sessions,
+when you think you are testing a new version, but `PyInstaller`
+is silently working with a different, older version.
+
+
+Problem with numpy in Python 2.7.16
+-----------------------------------
+
+A recent problem of PyInstaller is the appearance of Python 2.7.16 .
+This Python version creates a problem that is known from Python 3 as a `Tcl/Tk` problem.
+This does rarely show up in Python 3 because `Tcl/Tk` is seldom used with `PyInstaller.
+
+On Python 2.7.16, this problem is very much visible, since many people are using numpy.
+For some reason, installing `numpy` creates a dependency of `Tcl/Tk`, which can
+be circumvented only by explicitly excluding `Tcl/Tk` related things by adding
+this line to the analysis section of the spec-file::
+
+    excludes=['FixTk', 'tcl', 'tk', '_tkinter', 'tkinter', 'Tkinter'],
+
+
+Safety Instructions
+-------------------
+
+o When using `PyInstaller` with `virtualenv`, make sure that there is no system
+  installation of PySide2 or shiboken2.
+
+o Before compiling, use `pip -uninstall pyside2 shiboken2 -y` multiple times, until
+  none of the programs is found anymore.
+
+o Pip is usually a good tool. But to be 100 % sure, you should directly remove
+  the PySide2 and shiboken2 folders from site-packages.
+
+o Be sure to use the right version of pip. The safest way to really run the right
+  pip, use the Python that you mean: Instead of the pip command, better use::
+
+    <path/to/your/>python -m pip

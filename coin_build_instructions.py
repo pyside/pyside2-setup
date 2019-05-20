@@ -101,7 +101,7 @@ def call_setup(python_ver):
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
 
-    install_pip_dependencies(env_pip, ["numpy", "setuptools", "sphinx", "six"])
+    install_pip_dependencies(env_pip, ["pip", "numpy", "setuptools", "sphinx", "six"])
     install_pip_wheel_package(env_pip)
 
     cmd = [env_python, "-u", "setup.py"]
@@ -116,8 +116,6 @@ def call_setup(python_ver):
             "--verbose-build"]
     if python_ver == "3":
         cmd += ["--limited-api=yes"]
-    else:
-        cmd += ["--skip-docs"] # 1.4.2019: errors in sphinx_build on openSUSE 4.2
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
 
