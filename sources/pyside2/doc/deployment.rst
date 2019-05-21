@@ -12,6 +12,7 @@ The options for a project are:
  3. Freezing the application in a single binary file, or into a directory.
 
 For the **third** option, there are many available tools:
+ * `fbs <https://build-system.fman.io/>`_,
  * `PyInstaller <https://www.pyinstaller.org/>`_,
  * `cx_Freeze <https://anthony-tuininga.github.io/cx_Freeze/>`_,
  * `py2exe <http://www.py2exe.org/>`_,
@@ -26,13 +27,14 @@ The following table summarizes the above mentioned tools support:
 ===========   =======   =====   =====   =======
 Name          License   Linux   macOS   Windows
 ===========   =======   =====   =====   =======
+fbs           GPL       yes     yes     yes
+PyInstaller   GPL       yes     yes     yes
+cx_Freeze     MIT       yes     yes     yes
 py2exe        MIT       no      no      yes
 py2app        MIT       no      yes     no
-cx_Freeze     MIT       yes     yes     yes
-PyInstaller   GPL       yes     yes     yes
 ===========   =======   =====   =====   =======
 
-From the table we can see that only *cx_Freeze* and *PyInstaller*
+From the table we can see that only *fbs*, *cx_Freeze* and *PyInstaller*
 meet our requirements.
 
 All tools are command-line based, and it could become
@@ -65,6 +67,6 @@ described tools.
     :name: mastertoc
     :maxdepth: 2
 
+    deployment-fbs.rst
     deployment-pyinstaller.rst
     deployment-cxfreeze.rst
-    deployment-fbs.rst
