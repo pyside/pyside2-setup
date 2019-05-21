@@ -1,0 +1,5 @@
+{
+    "files": ["main.py", "bookdelegate.py", "bookwindow.py",
+              "createdb.py", "books.qrc", "bookwindow.ui",
+              "images/star.png"]
+}

@@ -14,9 +14,9 @@ options.
 Preparation
 ===========
 
-Installing `fbs` can be done via **pip**::
+Installing `fbs` (>= 0.7.6) can be done via **pip**::
 
-    pip install fbs pyinstaller==3.4
+    pip install fbs
 
 If you are using a virtual environment, remember to activate it before
 installing it.
@@ -62,18 +62,12 @@ The main file will be under the `python` directory, and its content by default i
 
     import sys
 
-    class AppContext(ApplicationContext):           # 1. Subclass ApplicationContext
-        def run(self):                              # 2. Implement run()
-            window = QMainWindow()
-            version = self.build_settings['version']
-            window.setWindowTitle("MyApp v" + version)
-            window.resize(250, 150)
-            window.show()
-            return self.app.exec_()                 # 3. End run() with this line
-
     if __name__ == '__main__':
-        appctxt = AppContext()                      # 4. Instantiate the subclass
-        exit_code = appctxt.run()                   # 5. Invoke run()
+        appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
+        window = QMainWindow()
+        window.resize(250, 150)
+        window.show()
+        exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
         sys.exit(exit_code)
 
 The example will show an empty `QMainWindow`, and you can execute it by running::

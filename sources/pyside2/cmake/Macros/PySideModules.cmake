@@ -169,6 +169,19 @@ macro(create_pyside_module)
         set(ld_prefix "LD_LIBRARY_PATH=")
     endif()
     set(ld_prefix "${ld_prefix}${pysidebindings_BINARY_DIR}/libpyside${PATH_SEP}${SHIBOKEN_SHARED_LIBRARY_DIR}")
+
+    # On Windows we also need to propagate the whole environment PATH value, because pyside modules
+    # import Qt, and the Qt modules are found from PATH.
+    if(WIN32)
+        # Get the value of PATH with CMake separators.
+        file(TO_CMAKE_PATH "$ENV{PATH}" path_value)
+
+        # Replace the CMake list separators with "\;"s, to avoid the PATH values being
+        # interpreted as CMake list elements, we actually want to pass the whole string separated
+        # by ";" to the command line.
+        make_path(path_value "${path_value}")
+        string(APPEND ld_prefix "${PATH_SEP}${path_value}")
+    endif()
     set(generate_pyi_options run --skip --sys-path
         "${pysidebindings_BINARY_DIR}"
         "${SHIBOKEN_PYTHON_MODULE_DIR}")
