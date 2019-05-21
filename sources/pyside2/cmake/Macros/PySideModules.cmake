@@ -162,25 +162,36 @@ macro(create_pyside_module)
     # Need to set the LD_ env vars before invoking the script, because it might use build-time
     # libraries instead of install time libraries.
     if (WIN32)
-        set(ld_prefix "PATH=")
+        set(ld_prefix_var_name "PATH")
     elseif(APPLE)
-        set(ld_prefix "DYLD_LIBRARY_PATH=")
+        set(ld_prefix_var_name "DYLD_LIBRARY_PATH")
     else()
-        set(ld_prefix "LD_LIBRARY_PATH=")
+        set(ld_prefix_var_name "LD_LIBRARY_PATH")
     endif()
-    set(ld_prefix "${ld_prefix}${pysidebindings_BINARY_DIR}/libpyside${PATH_SEP}${SHIBOKEN_SHARED_LIBRARY_DIR}")
+    set(ld_prefix "${ld_prefix_var_name}=${pysidebindings_BINARY_DIR}/libpyside${PATH_SEP}${SHIBOKEN_SHARED_LIBRARY_DIR}")
 
-    # On Windows we also need to propagate the whole environment PATH value, because pyside modules
-    # import Qt, and the Qt modules are found from PATH.
+    # Append any existing ld_prefix values, so existing PATH, LD_LIBRARY_PATH, etc.
+    # On Windows it is needed because pyside modules import Qt,
+    # and the Qt modules are found from PATH.
+    # On Linux and macOS, existing values might be set to find system libraries correctly.
+    # For example on openSUSE when compiling with icc, libimf.so from Intel has to be found.
     if(WIN32)
         # Get the value of PATH with CMake separators.
-        file(TO_CMAKE_PATH "$ENV{PATH}" path_value)
+        file(TO_CMAKE_PATH "$ENV{${ld_prefix_var_name}}" path_value)
 
         # Replace the CMake list separators with "\;"s, to avoid the PATH values being
         # interpreted as CMake list elements, we actually want to pass the whole string separated
         # by ";" to the command line.
-        make_path(path_value "${path_value}")
-        string(APPEND ld_prefix "${PATH_SEP}${path_value}")
+        if(path_value)
+            make_path(path_value "${path_value}")
+            string(APPEND ld_prefix "${PATH_SEP}${path_value}")
+        endif()
+    else()
+        # Handles both macOS and Linux.
+        set(env_value "$ENV{${ld_prefix_var_name}}")
+        if(env_value)
+            string(APPEND ld_prefix ":${env_value}")
+        endif()
     endif()
     set(generate_pyi_options ${module_NAME} --sys-path
         "${pysidebindings_BINARY_DIR}"
