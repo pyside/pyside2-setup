@@ -1582,8 +1582,9 @@ void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
                                                const QStringList &enumsDeclarations)
 {
     const EnumList &enums = scopeItem->enums();
+    const QSet<QString> enumsDeclarationSet(enumsDeclarations.cbegin(), enumsDeclarations.cend());
     for (const EnumModelItem &enumItem : enums) {
-        AbstractMetaEnum* metaEnum = traverseEnum(enumItem, metaClass, QSet<QString>::fromList(enumsDeclarations));
+        AbstractMetaEnum* metaEnum = traverseEnum(enumItem, metaClass, enumsDeclarationSet);
         if (metaEnum) {
             metaClass->addEnum(metaEnum);
             metaEnum->setEnclosingClass(metaClass);

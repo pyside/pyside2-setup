@@ -576,7 +576,7 @@ QStringList OverloadData::returnTypes() const
         else
             retTypes << QLatin1String("void");
     }
-    return QStringList(retTypes.toList());
+    return retTypes.values();
 }
 
 bool OverloadData::hasNonVoidReturnType() const

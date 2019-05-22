@@ -1687,7 +1687,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
                 argNamesSet << arg->name();
             }
         }
-        QStringList argNamesList = argNamesSet.toList();
+        QStringList argNamesList = argNamesSet.values();
         std::sort(argNamesList.begin(), argNamesList.end());
         if (argNamesList.isEmpty()) {
             s << INDENT << "const char** argNames{};" << endl;
