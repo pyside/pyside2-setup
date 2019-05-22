@@ -63,43 +63,59 @@ def add_author(q, name, birthdate):
     q.exec_()
     return q.lastInsertId()
 
+BOOKS_SQL = """
+    create table books(id integer primary key, title varchar, author integer,
+                       genre integer, year integer, rating integer)
+    """
+AUTHORS_SQL = """
+    create table authors(id integer primary key, name varchar, birthdate date)
+    """
+GENRES_SQL = """
+    create table genres(id integer primary key, name varchar)
+    """
+INSERT_AUTHOR_SQL = """
+    insert into authors(name, birthdate) values(?, ?)
+    """
+INSERT_GENRE_SQL = """
+    insert into genres(name) values(?)
+    """
+INSERT_BOOK_SQL = """
+    insert into books(title, year, author, genre, rating)
+                values(?, ?, ?, ?, ?)
+    """
 
 def init_db():
+    """
+    init_db()
+    Initializes the database.
+    If tables "books" and "authors" are already in the database, do nothing.
+    Return value: None or raises ValueError
+    The error value is the QtSql error instance.
+    """
+    def check(func, *args):
+        if not func(*args):
+            raise ValueError(func.__self__.lastError())
     db = QSqlDatabase.addDatabase("QSQLITE")
     db.setDatabaseName(":memory:")
 
-    if not db.open():
-        return db.lastError()
-
-    tables = db.tables()
-    for table in tables:
-        if table == "books" and table == "authors":
-            return QSqlError()
+    check(db.open)
 
     q = QSqlQuery()
-    if not q.exec_("create table books(id integer primary key, title varchar, author integer, "
-            "genre integer, year integer, rating integer)"):
-        return q.lastError()
-    if not q.exec_("create table authors(id integer primary key, name varchar, birthdate date)"):
-        return q.lastError()
-    if not q.exec_("create table genres(id integer primary key, name varchar)"):
-        return q.lastError()
+    check(q.exec_,BOOKS_SQL)
+    check(q.exec_,AUTHORS_SQL)
+    check(q.exec_,GENRES_SQL)
+    check(q.prepare,INSERT_AUTHOR_SQL)
 
-    if not q.prepare("insert into authors(name, birthdate) values(?, ?)"):
-        return q.lastError()
     asimovId = add_author(q, "Isaac Asimov", datetime(1920, 2, 1))
     greeneId = add_author(q, "Graham Greene", datetime(1904, 10, 2))
     pratchettId = add_author(q, "Terry Pratchett", datetime(1948, 4, 28))
 
-    if not q.prepare("insert into genres(name) values(?)"):
-        return q.lastError()
+    check(q.prepare,INSERT_GENRE_SQL)
     sfiction = add_genre(q, "Science Fiction")
     fiction = add_genre(q, "Fiction")
     fantasy = add_genre(q, "Fantasy")
 
-    if not q.prepare("insert into books(title, year, author, genre, rating) "
-            "values(?, ?, ?, ?, ?)"):
-        return q.lastError()
+    check(q.prepare,INSERT_BOOK_SQL)
     add_book(q, "Foundation", 1951, asimovId, sfiction, 3)
     add_book(q, "Foundation and Empire", 1952, asimovId, sfiction, 4)
     add_book(q, "Second Foundation", 1953, asimovId, sfiction, 3)
@@ -113,5 +129,3 @@ def init_db():
     add_book(q, "Guards! Guards!", 1989, pratchettId, fantasy, 3)
     add_book(q, "Night Watch", 2002, pratchettId, fantasy, 3)
     add_book(q, "Going Postal", 2004, pratchettId, fantasy, 3)
-
-    return QSqlError()
