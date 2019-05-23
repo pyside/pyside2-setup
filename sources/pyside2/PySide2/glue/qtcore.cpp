@@ -1340,18 +1340,17 @@ if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
 // @snippet qcoreapplication-2
 
 // @snippet qcoreapplication-instance
-QCoreApplication *app = QCoreApplication::instance();
 PyObject *pyApp = Py_None;
-if (app) {
+if (qApp) {
     pyApp = reinterpret_cast<PyObject*>(
-        Shiboken::BindingManager::instance().retrieveWrapper(app));
+        Shiboken::BindingManager::instance().retrieveWrapper(qApp));
     if (!pyApp)
-        pyApp = %CONVERTTOPYTHON[QCoreApplication*](app);
+        pyApp = %CONVERTTOPYTHON[QCoreApplication*](qApp);
         // this will keep app live after python exit (extra ref)
 }
 // PYSIDE-571: make sure that we return the singleton "None"
 if (pyApp == Py_None)
-    Py_DECREF(MakeSingletonQAppWrapper(0)); // here qApp and instance() diverge
+    Py_DECREF(MakeSingletonQAppWrapper(nullptr)); // here qApp and instance() diverge
 %PYARG_0 = pyApp;
 Py_XINCREF(%PYARG_0);
 // @snippet qcoreapplication-instance

@@ -5806,7 +5806,7 @@ bool CppGenerator::finishGeneration()
 
     if (usePySideExtensions()) {
         // initialize the qApp module.
-        s << INDENT << "NotifyModuleForQApp(module);" << endl;
+        s << INDENT << "NotifyModuleForQApp(module, qApp);" << endl;
     }
     s << endl;
     s << "SBK_MODULE_INIT_FUNCTION_END" << endl;
