@@ -360,6 +360,8 @@ protected:
     explicit _ScopeModelItem(CodeModel *model, const QString &name, int kind = __node_kind)
         : _CodeModelItem(model, name, kind) {}
 
+    void appendScope(const _ScopeModelItem &other);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatScopeItemsDebug(QDebug &d) const;
 #endif
@@ -439,6 +441,8 @@ public:
     void addNamespace(NamespaceModelItem item);
 
     NamespaceModelItem findNamespace(const QString &name) const;
+
+    void appendNamespace(const _NamespaceModelItem &other);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

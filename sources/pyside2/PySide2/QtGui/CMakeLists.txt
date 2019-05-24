@@ -197,6 +197,7 @@ ${QtGui_GEN_DIR}/qtouchdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_touchpoint_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtransform_wrapper.cpp
+${QtGui_GEN_DIR}/qt_wrapper.cpp
 ${QtGui_GEN_DIR}/qvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qvector2d_wrapper.cpp
 ${QtGui_GEN_DIR}/qvector3d_wrapper.cpp

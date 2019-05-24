@@ -773,6 +773,16 @@ void _ScopeModelItem::addEnum(EnumModelItem item)
     m_enums.append(item);
 }
 
+void _ScopeModelItem::appendScope(const _ScopeModelItem &other)
+{
+    m_classes += other.m_classes;
+    m_enums += other.m_enums;
+    m_typeDefs += other.m_typeDefs;
+    m_variables += other.m_variables;
+    m_functions += other.m_functions;
+    m_enumsDeclarations += other.m_enumsDeclarations;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class Hash>
 static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h,
@@ -897,6 +907,12 @@ NamespaceModelItem _NamespaceModelItem::findNamespace(const QString &name) const
 
 _FileModelItem::~_FileModelItem()
 {
+}
+
+void  _NamespaceModelItem::appendNamespace(const _NamespaceModelItem &other)
+{
+    appendScope(other);
+    m_namespaces += other.m_namespaces;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
