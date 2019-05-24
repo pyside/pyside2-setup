@@ -126,8 +126,7 @@ static bool setRejectionRegularExpression(const QString &patternIn,
         pattern = QLatin1Char('^') + QRegularExpression::escape(patternIn) + QLatin1Char('$');
     re->setPattern(pattern);
     if (!re->isValid()) {
-        *errorMessage = QLatin1String("Invalid pattern \"") + patternIn
-            + QLatin1String("\": ") + re->errorString();
+        *errorMessage = msgInvalidRegularExpression(patternIn, re->errorString());
         return false;
     }
     return true;
@@ -1284,6 +1283,47 @@ ObjectTypeEntry *
     otype->setDesignatedInterface(itype);
     itype->setOrigin(otype);
     return otype;
+}
+
+NamespaceTypeEntry *
+    Handler::parseNamespaceTypeEntry(const QXmlStreamReader &reader,
+                                     const QString &name, const QVersionNumber &since,
+                                     QXmlStreamAttributes *attributes)
+{
+    QScopedPointer<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since));
+    applyCommonAttributes(result.data(), attributes);
+    applyComplexTypeAttributes(reader, result.data(), attributes);
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const QStringRef attributeName = attributes->at(i).qualifiedName();
+        if (attributeName == QLatin1String("files")) {
+            const QString pattern = attributes->takeAt(i).value().toString();
+            QRegularExpression re(pattern);
+            if (!re.isValid()) {
+                m_error = msgInvalidRegularExpression(pattern, re.errorString());
+                return nullptr;
+            }
+            result->setFilePattern(re);
+        } else if (attributeName == QLatin1String("extends")) {
+            const auto extendsPackageName = attributes->takeAt(i).value();
+            auto allEntries = TypeDatabase::instance()->findNamespaceTypes(name);
+            auto extendsIt = std::find_if(allEntries.cbegin(), allEntries.cend(),
+                                          [extendsPackageName] (const NamespaceTypeEntry *e) {
+                                              return e->targetLangPackage() == extendsPackageName;
+                                          });
+            if (extendsIt == allEntries.cend()) {
+                m_error = msgCannotFindNamespaceToExtend(name, extendsPackageName);
+                return nullptr;
+            }
+            result->setExtends(*extendsIt);
+        }
+    }
+
+    if (result->extends() && !result->hasPattern()) {
+        m_error = msgExtendingNamespaceRequiresPattern(name);
+        return nullptr;
+    }
+
+    return result.take();
 }
 
 ValueTypeEntry *
@@ -2631,7 +2671,7 @@ bool Handler::startElement(const QXmlStreamReader &reader)
         if (element->type != StackElement::PrimitiveTypeEntry
             && element->type != StackElement::FunctionTypeEntry) {
             TypeEntry *tmp = m_database->findType(name);
-            if (tmp)
+            if (tmp && !tmp->isNamespace())
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("Duplicate type entry: '%1'").arg(name);
         }
@@ -2710,9 +2750,10 @@ bool Handler::startElement(const QXmlStreamReader &reader)
            }
            break;
         case StackElement::NamespaceTypeEntry:
-            element->entry = new NamespaceTypeEntry(name, since);
-            applyCommonAttributes(element->entry, &attributes);
-            applyComplexTypeAttributes(reader, static_cast<ComplexTypeEntry *>(element->entry), &attributes);
+            if (auto entry = parseNamespaceTypeEntry(reader, name, since, &attributes))
+                element->entry = entry;
+            else
+                return false;
             break;
         case StackElement::ObjectTypeEntry:
             element->entry = new ObjectTypeEntry(name, since);
@@ -3799,7 +3840,20 @@ TypeEntry *NamespaceTypeEntry::clone() const
     return new NamespaceTypeEntry(*this);
 }
 
+void NamespaceTypeEntry::setFilePattern(const QRegularExpression &r)
+{
+    m_filePattern = r;
+    m_hasPattern = !m_filePattern.pattern().isEmpty();
+    if (m_hasPattern)
+        m_filePattern.optimize();
+}
+
 NamespaceTypeEntry::NamespaceTypeEntry(const NamespaceTypeEntry &) = default;
+
+bool NamespaceTypeEntry::matchesFile(const QString &needle) const
+{
+    return m_filePattern.match(needle).hasMatch();
+}
 
 ValueTypeEntry::ValueTypeEntry(const QString &name, const QVersionNumber &vr) :
     ComplexTypeEntry(name, BasicValueType, vr)

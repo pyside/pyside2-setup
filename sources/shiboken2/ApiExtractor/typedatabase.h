@@ -87,7 +87,8 @@ public:
     PrimitiveTypeEntry* findPrimitiveType(const QString& name) const;
     ComplexTypeEntry* findComplexType(const QString& name) const;
     ObjectTypeEntry* findObjectType(const QString& name) const;
-    NamespaceTypeEntry* findNamespaceType(const QString& name) const;
+    NamespaceTypeEntryList findNamespaceTypes(const QString& name) const;
+    NamespaceTypeEntry *findNamespaceType(const QString& name, const QString &fileName = QString()) const;
     ContainerTypeEntry* findContainerType(const QString& name) const;
     FunctionTypeEntry* findFunctionType(const QString& name) const;
     const TypeSystemTypeEntry *findTypeSystemType(const QString &name) const;

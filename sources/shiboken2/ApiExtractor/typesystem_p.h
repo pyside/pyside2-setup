@@ -175,6 +175,12 @@ private:
         parseFlagsEntry(const QXmlStreamReader &, EnumTypeEntry *enumEntry,
                         const QString &name, QString flagName,
                         const QVersionNumber &since, QXmlStreamAttributes *);
+
+    NamespaceTypeEntry *
+        parseNamespaceTypeEntry(const QXmlStreamReader &,
+                                const QString &name, const QVersionNumber &since,
+                                QXmlStreamAttributes *attributes);
+
     ObjectTypeEntry *
         parseInterfaceTypeEntry(const QXmlStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);
