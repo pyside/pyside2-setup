@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -52,16 +52,9 @@ import io
 import re
 import subprocess
 import argparse
-import glob
-import math
 from contextlib import contextmanager
 from textwrap import dedent
-import traceback
-
-
 import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("generate_pyi")
 
 
 # Make sure not to get .pyc in Python2.
@@ -73,6 +66,10 @@ USE_PEP563 = sys.version_info[:2] >= (3, 7)
 indent = " " * 4
 is_py3 = sys.version_info[0] == 3
 is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
+is_debug = is_ci or os.environ.get("QTEST_ENVIRONMENT")
+
+logging.basicConfig(level=logging.DEBUG if is_debug else logging.INFO)
+logger = logging.getLogger("generate_pyi")
 
 
 class Writer(object):
@@ -118,7 +115,7 @@ class Formatter(Writer):
         self.print("import shiboken2 as Shiboken")
         self.print("Shiboken.Object = Object")
         self.print()
-        # This line will be replaced by the missing imports.
+        # This line will be replaced by the missing imports postprocess.
         self.print("IMPORTS")
         yield
 
@@ -184,83 +181,36 @@ def find_imports(text):
     return [imp for imp in PySide2.__all__ if imp + "." in text]
 
 
-_cache = {}
-
-def check_if_skipable(outfilepath):
-    # A file can be skipped if it exists, and if it's file time is not
-    # older than this script or any of its dependencies.
-    def _do_find_newest_module():
-        newest = 0
-        for obj in sys.modules.values():
-            if getattr(obj, "__file__", None) and os.path.isfile(obj.__file__):
-                sourcepath = os.path.splitext(obj.__file__)[0] + ".py"
-                if os.path.exists(sourcepath):
-                    newest = max(os.path.getmtime(sourcepath), newest)
-        return newest
-
-    def find_newest_module():
-        cache_name = "newest_module"
-        if cache_name not in _cache:
-            _cache[cache_name] = _do_find_newest_module()
-        return _cache[cache_name]
-
-    if os.path.exists(outfilepath):
-        stamp = os.path.getmtime(outfilepath)
-        if stamp >= find_newest_module():
-            return True
-    return False
-
-
 def generate_pyi(import_name, outpath, options):
     """
     Generates a .pyi file.
-
-    Returns 1 If the result is valid, -1 if the result existed already
-    and was skipped, else 0.
-
-    This function will get called during a PySide build, and many concurrent
-    process might try to create .pyi files. We let only one process at a
-    time work on these files, but it will still be different processes which
-    do the work.
     """
-    pid = os.getpid()
     plainname = import_name.split(".")[-1]
     outfilepath = os.path.join(outpath, plainname + ".pyi")
-    if options.skip and check_if_skipable(outfilepath):
-        logger.debug("{pid}:Skipped existing: {op}"
-                     .format(op=os.path.basename(outfilepath), **locals()))
-        return -1
+    top = __import__(import_name)
+    obj = getattr(top, plainname)
+    if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
+        raise ModuleNotFoundError("We do not accept a namespace as module "
+                                  "{plainname}".format(**locals()))
+    module = sys.modules[import_name]
 
-    try:
-        top = __import__(import_name)
-        obj = getattr(top, plainname)
-        if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
-            raise ImportError("We do not accept a namespace as module {plainname}"
-                              .format(**locals()))
-        module = sys.modules[import_name]
-
-        outfile = io.StringIO()
-        fmt = Formatter(outfile)
-        enu = HintingEnumerator(fmt)
-        fmt.print(get_license_text())  # which has encoding, already
-        need_imports = not USE_PEP563
-        if USE_PEP563:
-            fmt.print("from __future__ import annotations")
-            fmt.print()
-        fmt.print(dedent('''\
-            """
-            This file contains the exact signatures for all functions in module
-            {import_name}, except for defaults which are replaced by "...".
-            """
-            '''.format(**locals())))
-        enu.module(import_name)
+    outfile = io.StringIO()
+    fmt = Formatter(outfile)
+    fmt.print(get_license_text())  # which has encoding, already
+    need_imports = not USE_PEP563
+    if USE_PEP563:
+        fmt.print("from __future__ import annotations")
         fmt.print()
-        fmt.print("# eof")
-
-    except ImportError as e:
-        logger.debug("{pid}:Import problem with module {plainname}: {e}".format(**locals()))
-        return 0
-
+    fmt.print(dedent('''\
+        """
+        This file contains the exact signatures for all functions in module
+        {import_name}, except for defaults which are replaced by "...".
+        """
+        '''.format(**locals())))
+    HintingEnumerator(fmt).module(import_name)
+    fmt.print()
+    fmt.print("# eof")
+    # Postprocess: resolve the imports
     with open(outfilepath, "w") as realfile:
         wr = Writer(realfile)
         outfile.seek(0)
@@ -282,23 +232,9 @@ def generate_pyi(import_name, outpath, options):
             else:
                 wr.print(line)
     logger.info("Generated: {outfilepath}".format(**locals()))
-    if is_py3:
+    if is_py3 and (options.check or is_ci):
         # Python 3: We can check the file directly if the syntax is ok.
         subprocess.check_output([sys.executable, outfilepath])
-    return 1
-
-
-@contextmanager
-def single_process(lockdir):
-    try:
-        os.mkdir(lockdir)
-        try:
-            yield lockdir
-        finally:
-            # make sure to cleanup, even if we leave with CTRL-C
-            os.rmdir(lockdir)
-    except OSError:
-        yield None
 
 
 def generate_all_pyi(outpath, options):
@@ -316,69 +252,40 @@ def generate_all_pyi(outpath, options):
     from PySide2.support.signature import inspect
     from PySide2.support.signature.lib.enum_sig import HintingEnumerator
 
-    valid = check = 0
-    if not outpath:
-        outpath = os.path.dirname(PySide2.__file__)
-    lockdir = os.path.join(outpath, "generate_pyi.lockdir")
-
-    pyi_var = "GENERATE_PYI_RECURSE {}".format(math.pi)  # should not be set by anybody
-    if not os.environ.get(pyi_var, ""):
-        # To catch a possible crash, we run as a subprocess:
-        os.environ[pyi_var] = "yes"
-        ret = subprocess.call([sys.executable] + sys.argv)
-        if ret and os.path.exists(lockdir):
-            os.rmdir(lockdir)
-        sys.exit(ret)
-    # We are the subprocess. Do the real work.
-    with single_process(lockdir) as locked:
-        if locked:
-            if is_ci:
-                # When COIN is running, we sometimes get racing conditions with
-                # the windows manifest tool which wants access to a module that
-                # we already have imported. But when we wait until all binaries
-                # are created, that cannot happen, because we are then the last
-                # process, and the tool has already been run.
-                bin_pattern = "Qt*.pyd" if sys.platform == "win32" else "Qt*.so"
-                search = os.path.join(PySide2.__path__[0], bin_pattern)
-                if len(glob.glob(search)) < len(PySide2.__all__):
-                    return
-            for mod_name in PySide2.__all__:
-                import_name = "PySide2." + mod_name
-                step = generate_pyi(import_name, outpath, options)
-                valid += abs(step)
-                check += step
-
-            npyi = len(PySide2.__all__)
-            # Prevent too many messages when '--reuse-build' is used. We check that
-            # all files are created, but at least one was really computed.
-            if valid == npyi and check != -npyi:
-                logger.info("+++ All {npyi} .pyi files have been created.".format(**locals()))
+    outpath = outpath or os.path.dirname(PySide2.__file__)
+    name_list = PySide2.__all__ if options.modules == ["all"] else options.modules
+    errors = ", ".join(set(name_list) - set(PySide2.__all__))
+    if errors:
+        raise ImportError("The module(s) '{errors}' do not exist".format(**locals()))
+    quirk1, quirk2 = "QtMultimedia", "QtMultimediaWidgets"
+    if name_list == [quirk1]:
+        logger.debug("Note: We must defer building of {quirk1}.pyi until {quirk2} "
+                     "is available".format(**locals()))
+        name_list = []
+    elif name_list == [quirk2]:
+        name_list = [quirk1, quirk2]
+    for mod_name in name_list:
+        import_name = "PySide2." + mod_name
+        generate_pyi(import_name, outpath, options)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(dest="command")
-    # create the parser for the "run" command
-    parser_run = subparsers.add_parser("run",
-        help="run the generation",
+    parser = argparse.ArgumentParser(
         description="This script generates the .pyi file for all PySide modules.")
-    parser_run.add_argument("--skip", action="store_true",
-        help="skip existing files")
-    parser_run.add_argument("--quiet", action="store_true", help="Run quietly")
-    parser_run.add_argument("--outpath",
+    parser.add_argument("modules", nargs="+",
+        help="'all' or the names of modules to build (QtCore QtGui etc.)")
+    parser.add_argument("--quiet", action="store_true", help="Run quietly")
+    parser.add_argument("--check", action="store_true", help="Test the output if on Python 3")
+    parser.add_argument("--outpath",
         help="the output directory (default = binary location)")
-    parser_run.add_argument("--sys-path", nargs="+",
+    parser.add_argument("--sys-path", nargs="+",
         help="a list of strings prepended to sys.path")
     options = parser.parse_args()
-    if options.command == "run":
-        if options.quiet:
-            logger.setLevel(logging.WARNING)
-        outpath = options.outpath
-        if outpath and not os.path.exists(outpath):
-            os.makedirs(outpath)
-            logger.info("+++ Created path {outpath}".format(**locals()))
-        generate_all_pyi(outpath, options=options)
-    else:
-        parser_run.print_help()
-        sys.exit(1)
+    if options.quiet:
+        logger.setLevel(logging.WARNING)
+    outpath = options.outpath
+    if outpath and not os.path.exists(outpath):
+        os.makedirs(outpath)
+        logger.info("+++ Created path {outpath}".format(**locals()))
+    generate_all_pyi(outpath, options=options)
 # eof

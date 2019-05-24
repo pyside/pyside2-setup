@@ -1531,10 +1531,28 @@ public:
 
     TypeEntry *clone() const override;
 
+    const NamespaceTypeEntry *extends() const { return m_extends; }
+    void setExtends(const NamespaceTypeEntry *e)  { m_extends = e; }
+
+    const QRegularExpression &filePattern() const { return m_filePattern; } // restrict files
+    void setFilePattern(const QRegularExpression &r);
+
+    bool hasPattern() const { return m_hasPattern; }
+
+    bool matchesFile(const QString &needle) const;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
 protected:
     NamespaceTypeEntry(const NamespaceTypeEntry &);
-};
 
+private:
+    QRegularExpression m_filePattern;
+    const NamespaceTypeEntry *m_extends = nullptr;
+    bool m_hasPattern = false;
+};
 
 class ValueTypeEntry : public ComplexTypeEntry
 {

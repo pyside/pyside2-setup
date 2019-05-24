@@ -452,10 +452,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     const auto &namespaceTypeValues = dom->namespaces();
     ReportHandler::startProgress("Generating namespace model ("
                                  + QByteArray::number(namespaceTypeValues.size()) + ")...");
-    for (const NamespaceModelItem &item : namespaceTypeValues) {
-        if (AbstractMetaClass *metaClass = traverseNamespace(dom, item))
-            addAbstractMetaClass(metaClass, item.data());
-    }
+    for (const NamespaceModelItem &item : namespaceTypeValues)
+        traverseNamespace(dom, item);
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
@@ -742,23 +740,38 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     if (!namespaceName.isEmpty())
         namespaceName.append(colonColon());
     namespaceName.append(namespaceItem->name());
-    NamespaceTypeEntry *type = TypeDatabase::instance()->findNamespaceType(namespaceName);
 
     if (TypeDatabase::instance()->isClassRejected(namespaceName)) {
         m_rejectedClasses.insert(namespaceName, AbstractMetaBuilder::GenerationDisabled);
         return 0;
     }
 
+    auto type = TypeDatabase::instance()->findNamespaceType(namespaceName, namespaceItem->fileName());
     if (!type) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("namespace '%1' does not have a type entry").arg(namespaceName);
         return 0;
     }
 
-    AbstractMetaClass* metaClass = new AbstractMetaClass;
-    metaClass->setTypeEntry(type);
-
-    *metaClass += AbstractMetaAttributes::Public;
+    // Continue populating namespace?
+    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, type);
+    if (!metaClass) {
+        metaClass = new AbstractMetaClass;
+        metaClass->setTypeEntry(type);
+        *metaClass += AbstractMetaAttributes::Public;
+        addAbstractMetaClass(metaClass, namespaceItem.data());
+        if (auto extendsType = type->extends()) {
+            AbstractMetaClass *extended = AbstractMetaClass::findClass(m_metaClasses, extendsType);
+            if (!extended) {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgNamespaceToBeExtendedNotFound(extendsType->name(), extendsType->targetLangPackage())));
+                return nullptr;
+            }
+            metaClass->setExtendedNamespace(extended);
+        }
+    } else {
+        m_itemToClass.insert(namespaceItem.data(), metaClass);
+    }
 
     if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
         qCDebug(lcShiboken)
@@ -797,7 +810,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         if (mjc) {
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
-            addAbstractMetaClass(mjc, ni.data());
         }
     }
 
@@ -3073,6 +3085,30 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     }
 
     return result;
+}
+
+void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
+{
+    // For purposes of type lookup, join all namespaces of the same name
+    // within the parent item.
+    QVector<NamespaceModelItem> candidates;
+    const QString name = item->name();
+    if (!m_scopes.isEmpty()) {
+        for (const auto &n : m_scopes.constLast()->namespaces()) {
+            if (n->name() == name)
+                candidates.append(n);
+        }
+    }
+    if (candidates.size() > 1) {
+        NamespaceModelItem joined(new _NamespaceModelItem(m_scopes.constLast()->model(),
+                                                          name, _CodeModelItem::Kind_Namespace));
+        joined->setScope(item->scope());
+        for (const auto &n : candidates)
+            joined->appendNamespace(*n);
+        m_scopes << joined;
+    } else {
+        m_scopes << item;
+    }
 }
 
 AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClassList &classList,

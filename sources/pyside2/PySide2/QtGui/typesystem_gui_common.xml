@@ -202,6 +202,11 @@
   <rejection class="QActionGroup" function-name="selected"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
 
+  <!-- For Qt::mightBeRichText(QString), Qt::convertFromPlainText(QString,Qt::WhiteSpaceMode)
+       Match on files from '/QtGui/' (shadow build) or '/gui/' (developer build)
+       or '/QtGui.framework' (macOS) -->
+  <namespace-type name="Qt" files="^.*/(gui|QtGui)[/.].*\.h$" extends="PySide2.QtCore"/>
+
   <primitive-type name="WId" target-lang-api-name="PyLong">
     <conversion-rule>
       <native-to-target file="../glue/qtgui.cpp" snippet="return-pylong-voidptr"/>
