@@ -56,9 +56,9 @@ public:
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
     ScopeModelItem popScope() { return m_scopes.takeLast(); }
 
-    void pushScope(ScopeModelItem item) { m_scopes << item; }
+    void pushScope(const NamespaceModelItem &item);
 
-    ScopeModelItem currentScope() const { return m_scopes.constLast(); }
+    NamespaceModelItem currentScope() const { return m_scopes.constLast(); }
 
     AbstractMetaClass *argumentToClass(const ArgumentModelItem &,
                                        AbstractMetaClass *currentClass);
@@ -182,7 +182,7 @@ public:
 
     QHash<const TypeEntry *, AbstractMetaEnum *> m_enums;
 
-    QList<ScopeModelItem> m_scopes;
+    QList<NamespaceModelItem> m_scopes;
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 

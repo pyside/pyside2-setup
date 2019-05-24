@@ -85,6 +85,8 @@ QString msgCannotTranslateTemplateArgument(int i,
 
 QString msgDisallowThread(const AbstractMetaFunction *f);
 
+QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QString &packageName);
+
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
                                    const QString &query);
@@ -116,6 +118,13 @@ QString msgCannotUseEnumAsInt(const QString &name);
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs);
 
 QString msgInvalidVersion(const QString &package, const QString &version);
+
+QString msgCannotFindNamespaceToExtend(const QString &name,
+                                       const QStringRef &extendsPackage);
+
+QString msgExtendingNamespaceRequiresPattern(const QString &name);
+
+QString msgInvalidRegularExpression(const QString &pattern, const QString &why);
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const QVector<const AbstractMetaFunction *> &involvedConversions);

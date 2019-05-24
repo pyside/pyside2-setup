@@ -206,8 +206,6 @@ QString msgCannotTranslateTemplateArgument(int i,
     return result;
 }
 
-// abstractmetalang.cpp
-
 QString msgDisallowThread(const AbstractMetaFunction *f)
 {
     QString result;
@@ -217,6 +215,13 @@ QString msgDisallowThread(const AbstractMetaFunction *f)
         str << c->name() << "::";
     str << f->name() << "().";
     return result;
+}
+
+QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QString &packageName)
+{
+    return QLatin1String("The namespace '") + namespaceName
+        + QLatin1String("' to be extended cannot be found in package ")
+        + packageName + QLatin1Char('.');
 }
 
 // docparser.cpp
@@ -419,6 +424,26 @@ QString msgRejectReason(const TypeRejection &r, const QString &needle)
         break;
     }
     return result;
+}
+
+// typesystem.cpp
+
+QString msgCannotFindNamespaceToExtend(const QString &name,
+                                       const QStringRef &extendsPackage)
+{
+    return QLatin1String("Cannot find namespace ") + name
+        + QLatin1String(" in package ") + extendsPackage;
+}
+
+QString msgExtendingNamespaceRequiresPattern(const QString &name)
+{
+    return QLatin1String("Namespace ") + name
+        + QLatin1String(" requires a file pattern since it extends another namespace.");
+}
+
+QString msgInvalidRegularExpression(const QString &pattern, const QString &why)
+{
+    return QLatin1String("Invalid pattern \"") + pattern + QLatin1String("\": ") + why;
 }
 
 // qtdocgenerator.cpp

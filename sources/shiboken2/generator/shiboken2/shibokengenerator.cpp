@@ -2667,8 +2667,14 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
         if (trueType->basicReferencedTypeEntry())
             type = trueType->basicReferencedTypeEntry();
     }
-    QString result = QLatin1String("SBK_")
-        + _fixedCppTypeName(type->qualifiedCppName()).toUpper();
+    QString result = QLatin1String("SBK_");
+    // Disambiguate namespaces per module to allow for extending them.
+    if (type->isNamespace()) {
+        QString package = type->targetLangPackage();
+        const int dot = package.lastIndexOf(QLatin1Char('.'));
+        result += package.rightRef(package.size() - (dot + 1));
+    }
+    result += _fixedCppTypeName(type->qualifiedCppName()).toUpper();
     appendIndexSuffix(&result);
     return result;
 }

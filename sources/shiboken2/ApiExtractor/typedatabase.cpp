@@ -621,14 +621,33 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
     return 0;
 }
 
-NamespaceTypeEntry* TypeDatabase::findNamespaceType(const QString& name) const
+NamespaceTypeEntryList TypeDatabase::findNamespaceTypes(const QString& name) const
 {
+    NamespaceTypeEntryList result;
     const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
-        if (entry->isNamespace() && useType(entry))
-            return static_cast<NamespaceTypeEntry*>(entry);
+        if (entry->isNamespace())
+            result.append(static_cast<NamespaceTypeEntry*>(entry));
     }
-    return 0;
+    return result;
+}
+
+NamespaceTypeEntry *TypeDatabase::findNamespaceType(const QString& name,
+                                                    const QString &fileName) const
+{
+    const auto entries = findNamespaceTypes(name);
+    // Preferably check on matching file name first, if a pattern was given.
+    if (!fileName.isEmpty()) {
+        for (NamespaceTypeEntry *entry : entries) {
+            if (entry->hasPattern() && entry->matchesFile(fileName))
+                return entry;
+        }
+    }
+    for (NamespaceTypeEntry *entry : entries) {
+        if (!entry->hasPattern())
+            return entry;
+    }
+    return nullptr;
 }
 
 bool TypeDatabase::shouldDropTypeEntry(const QString& fullTypeName) const
@@ -834,6 +853,13 @@ void EnumTypeEntry::formatDebug(QDebug &d) const
     FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
     if (m_flags)
         d << ", flags=(" << m_flags << ')';
+}
+
+void NamespaceTypeEntry::formatDebug(QDebug &d) const
+{
+    ComplexTypeEntry::formatDebug(d);
+    auto pattern = m_filePattern.pattern();
+    FORMAT_NONEMPTY_STRING("pattern", pattern)
 }
 
 void ContainerTypeEntry::formatDebug(QDebug &d) const
