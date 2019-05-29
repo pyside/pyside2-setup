@@ -2511,11 +2511,12 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="value(const QString&amp;,const QVariant&amp;)const">
-        <inject-documentation mode="append" format="target">
-            .. warning:: QSettings.value can return different types (QVariant types) depending on the platform it's running on, so the safest way to use it is always casting the result to the desired type, e.g.: int(settings.value("myKey"))
-        </inject-documentation>
-    </modify-function>
+    <!-- PYSIDE-1010:
+    We remove the original implementation of value() to include the optional parameter -->
+    <modify-function signature="value(const QString&amp;,const QVariant&amp;)const" remove="all"/>
+    <add-function signature="value(const QString&amp;, const QVariant&amp; @defaultValue@ = 0, PyObject* @type@ = 0)" return-type="PyObject*">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qsettings-value"/>
+    </add-function>
   </object-type>
   <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None">
     <enum-type name="Type"/>
