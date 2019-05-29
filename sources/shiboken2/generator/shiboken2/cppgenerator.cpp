@@ -214,8 +214,7 @@ QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(c
                                                                                uint queryIn)
 {
     // ( func_name, num_args ) => func_list
-    typedef QMap<QPair<QString, int >, AbstractMetaFunctionList> ResultMap;
-    ResultMap results;
+    QMap<QPair<QString, int>, AbstractMetaFunctionList> results;
     const AbstractMetaClass::OperatorQueryOptions query(queryIn);
     const AbstractMetaFunctionList &funcs = metaClass->operatorOverloads(query);
     for (AbstractMetaFunction *func : funcs) {
@@ -237,7 +236,7 @@ QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(c
     }
     QVector<AbstractMetaFunctionList> result;
     result.reserve(results.size());
-    for (ResultMap::const_iterator it = results.cbegin(), end = results.cend(); it != end; ++it)
+    for (auto it = results.cbegin(), end = results.cend(); it != end; ++it)
         result.append(it.value());
     return result;
 }
@@ -257,8 +256,7 @@ const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass *meta
         && func->arguments().isEmpty() ? func : nullptr;
 }
 
-typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
-typedef FunctionGroupMap::const_iterator FunctionGroupMapIt;
+using FunctionGroupMap = QMap<QString, AbstractMetaFunctionList>;
 
 // Prevent ELF symbol qt_version_tag from being generated into the source
 static const char includeQDebug[] =
@@ -3765,11 +3763,9 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
     return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
 }
 
-typedef QHash<QString, QPair<QString, QString> >::const_iterator ProtocolIt;
-
 bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
 {
-    for (ProtocolIt it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
+    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
         if (metaClass->hasFunction(it.key()))
             return true;
     }
@@ -3787,7 +3783,7 @@ bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass)
 
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
 {
-    for (ProtocolIt it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
+    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
         if (metaClass->hasFunction(it.key()))
             return true;
     }
@@ -4074,7 +4070,7 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractM
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    for (ProtocolIt it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
+    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
         const QString &funcName = it.key();
         const AbstractMetaFunction *func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QString();
@@ -4107,7 +4103,7 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream &s, const AbstractMe
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    for (ProtocolIt it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
+    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
         const QString &funcName = it.key();
         const AbstractMetaFunction *func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QLatin1String("0");

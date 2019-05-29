@@ -51,7 +51,7 @@
 
 static SbkConverter **PrimitiveTypeConverters;
 
-typedef std::unordered_map<std::string, SbkConverter *> ConvertersMap;
+using ConvertersMap = std::unordered_map<std::string, SbkConverter *>;
 static ConvertersMap converters;
 
 namespace Shiboken {

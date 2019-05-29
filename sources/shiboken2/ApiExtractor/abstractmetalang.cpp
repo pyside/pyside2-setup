@@ -1732,7 +1732,7 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
     return nullptr;
 }
 
-typedef QHash<const AbstractMetaClass *, AbstractMetaTypeList> AbstractMetaClassBaseTemplateInstantiationsMap;
+using AbstractMetaClassBaseTemplateInstantiationsMap = QHash<const AbstractMetaClass *, AbstractMetaTypeList>;
 Q_GLOBAL_STATIC(AbstractMetaClassBaseTemplateInstantiationsMap, metaClassBaseTemplateInstantiations);
 
 bool AbstractMetaClass::hasTemplateBaseClassInstantiations() const

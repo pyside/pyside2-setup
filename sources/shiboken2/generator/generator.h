@@ -173,8 +173,8 @@ private:
 class Generator
 {
 public:
-    typedef QPair<QString, QString> OptionDescription;
-    typedef QVector<OptionDescription> OptionDescriptions;
+    using OptionDescription = QPair<QString, QString>;
+    using OptionDescriptions = QVector<OptionDescription>;
 
     /// Optiosn used around the generator code
     enum Option {
@@ -414,8 +414,8 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
-typedef QSharedPointer<Generator> GeneratorPtr;
-typedef QVector<GeneratorPtr> Generators;
+using GeneratorPtr = QSharedPointer<Generator>;
+using Generators = QVector<GeneratorPtr>;
 
 #endif // GENERATOR_H
 

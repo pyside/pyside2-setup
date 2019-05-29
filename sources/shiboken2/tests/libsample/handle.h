@@ -33,14 +33,14 @@
 
 /* See http://bugs.pyside.org/show_bug.cgi?id=1105. */
 namespace Foo {
-    typedef unsigned long HANDLE;
+    using HANDLE = unsigned long;
 }
 
 class LIBSAMPLE_API OBJ
 {
 };
 
-typedef OBJ* HANDLE;
+using HANDLE = OBJ *;
 
 class LIBSAMPLE_API HandleHolder
 {
@@ -63,7 +63,7 @@ private:
 };
 
 struct LIBSAMPLE_API PrimitiveStruct {};
-typedef struct PrimitiveStruct* PrimitiveStructPtr;
+using PrimitiveStructPtr = struct PrimitiveStruct *;
 struct LIBSAMPLE_API PrimitiveStructPointerHolder
 {
     PrimitiveStructPtr primitiveStructPtr;

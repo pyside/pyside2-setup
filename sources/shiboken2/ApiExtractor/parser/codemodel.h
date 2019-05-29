@@ -101,7 +101,7 @@ class TypeInfo
 {
     friend class TypeParser;
 public:
-    typedef QVector<Indirection> Indirections;
+    using Indirections = QVector<Indirection>;
 
     TypeInfo() : flags(0), m_referenceType(NoReference) {}
 

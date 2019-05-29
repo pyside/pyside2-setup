@@ -55,7 +55,7 @@ QT_END_NAMESPACE
 class EnumTypeEntry;
 class FlagsTypeEntry;
 
-typedef QMap<int, QString> ArgumentMap;
+using ArgumentMap = QMap<int, QString>;
 
 class TemplateInstance;
 
@@ -1225,7 +1225,7 @@ public:
     enum TypeFlag {
         Deprecated         = 0x4
     };
-    typedef QFlags<TypeFlag> TypeFlags;
+    Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 
     enum CopyableFlag {
         CopyableSet,
@@ -1426,6 +1426,8 @@ private:
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ComplexTypeEntry::TypeFlags)
 
 class TypedefEntry : public ComplexTypeEntry
 {
@@ -1722,7 +1724,7 @@ public:
     bool replaceOriginalTargetToNativeConversions() const;
     void setReplaceOriginalTargetToNativeConversions(bool replaceOriginalTargetToNativeConversions);
 
-    typedef QVector<TargetToNativeConversion*> TargetToNativeConversions;
+    using TargetToNativeConversions = QVector<TargetToNativeConversion *>;
     bool hasTargetToNativeConversions() const;
     TargetToNativeConversions& targetToNativeConversions();
     const TargetToNativeConversions& targetToNativeConversions() const;

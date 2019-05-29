@@ -173,7 +173,7 @@ public:
     AbstractMetaFunctionList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 
-    typedef QMap<QString, AbstractMetaBuilder::RejectReason> RejectMap;
+    using RejectMap = QMap<QString, AbstractMetaBuilder::RejectReason>;
 
     RejectMap m_rejectedClasses;
     RejectMap m_rejectedEnums;

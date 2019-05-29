@@ -256,13 +256,11 @@ void ApiExtractor::setLanguageLevel(const LanguageLevel languageLevel)
 template <class Container>
 static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
 {
-    typedef typename Container::const_iterator ConstIt;
     if (c.isEmpty())
         return;
-    const ConstIt begin = c.begin();
-    const ConstIt end = c.end();
+    const auto begin = c.begin();
     d << "\n  " << key << '[' << c.size() << "]=(";
-    for (ConstIt it = begin; it != end; ++it) {
+    for (auto it = begin, end = c.end(); it != end; ++it) {
         if (it != begin)
             d << ", ";
         d << *it;

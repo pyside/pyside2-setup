@@ -90,7 +90,7 @@ class AutoArrayPointer
         T *data;
 };
 
-typedef unsigned long long ThreadId;
+using ThreadId = unsigned long long;
 LIBSHIBOKEN_API ThreadId currentThreadId();
 LIBSHIBOKEN_API ThreadId mainThreadId();
 

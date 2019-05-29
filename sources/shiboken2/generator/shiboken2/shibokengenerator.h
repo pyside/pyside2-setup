@@ -418,7 +418,7 @@ protected:
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
-    typedef QHash<const TypeEntry *, QVector<const AbstractMetaClass *> > ExtendedConverterData;
+    using ExtendedConverterData = QHash<const TypeEntry *, QVector<const AbstractMetaClass *> >;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
 
@@ -491,9 +491,9 @@ private:
     QString functionReturnType(const AbstractMetaFunction *func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
-    typedef QPair<const AbstractMetaArgument *, QString> ArgumentVarReplacementPair;
-    typedef QVector<ArgumentVarReplacementPair> ArgumentVarReplacementList;
-    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction *func,
+    using ArgumentVarReplacementPair = QPair<const AbstractMetaArgument *, QString>;
+    using ArgumentVarReplacementList = QVector<ArgumentVarReplacementPair>;
+    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
                                                       bool usePyArgs, TypeSystem::Language language,
                                                       const AbstractMetaArgument *lastArg);
 
@@ -542,7 +542,7 @@ private:
     bool m_useIsNullAsNbNonZero = false;
     bool m_avoidProtectedHack = false;
 
-    typedef QHash<QString, AbstractMetaType *> AbstractMetaTypeCache;
+    using AbstractMetaTypeCache = QHash<QString, AbstractMetaType *>;
     AbstractMetaTypeCache m_metaTypeFromStringCache;
 
     /// Type system converter variable replacement names and regular expressions.

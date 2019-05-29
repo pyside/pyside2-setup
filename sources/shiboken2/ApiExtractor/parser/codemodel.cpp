@@ -53,9 +53,8 @@ private:
 template <class T>
 static QSharedPointer<T> findModelItem(const QVector<QSharedPointer<T> > &list, const QString &name)
 {
-    typedef typename QVector<QSharedPointer<T> >::const_iterator It;
-    const It it = std::find_if(list.begin(), list.end(), ModelItemNamePredicate<T>(name));
-    return it != list.end() ? *it : QSharedPointer<T>();
+    const auto it = std::find_if(list.cbegin(), list.cend(), ModelItemNamePredicate<T>(name));
+    return it != list.cend() ? *it : QSharedPointer<T>();
 }
 
 // ---------------------------------------------------------------------------
@@ -800,12 +799,10 @@ static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h,
                             const char *separator = ", ",
                             bool trailingNewLine = false)
 {
-    typedef typename Hash::ConstIterator HashIterator;
     if (!h.isEmpty()) {
         d << prefix << '[' << h.size() << "](";
-        const HashIterator begin = h.begin();
-        const HashIterator end = h.end();
-        for (HashIterator it = begin; it != end; ++it) { // Omit the names as they are repeated
+        const auto begin = h.cbegin();
+        for (auto it = begin, end = h.cend(); it != end; ++it) { // Omit the names as they are repeated
             if (it != begin)
                 d << separator;
             d << it.value().data();

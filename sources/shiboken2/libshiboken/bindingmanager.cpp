@@ -52,13 +52,13 @@
 namespace Shiboken
 {
 
-typedef std::unordered_map<const void *, SbkObject *> WrapperMap;
+using WrapperMap = std::unordered_map<const void *, SbkObject *>;
 
 class Graph
 {
 public:
-    typedef std::vector<SbkObjectType *> NodeList;
-    typedef std::unordered_map<SbkObjectType *, NodeList> Edges;
+    using NodeList = std::vector<SbkObjectType *>;
+    using Edges = std::unordered_map<SbkObjectType *, NodeList>;
 
     Edges m_edges;
 

@@ -73,7 +73,7 @@ struct SourceLocation
 
 SourceLocation getExpansionLocation(const CXSourceLocation &location);
 
-typedef QPair<SourceLocation, SourceLocation> SourceRange;
+using SourceRange =QPair<SourceLocation, SourceLocation>;
 
 SourceLocation getCursorLocation(const CXCursor &cursor);
 CXString getFileNameFromLocation(const CXSourceLocation &location);
@@ -100,7 +100,7 @@ CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds);
 
 // Parse a template argument list "a<b<c,d>,e>" and invoke a handler
 // with each match (level and string). Return begin and end of the list.
-typedef std::function<void(int /*level*/, const QStringRef &)> TemplateArgumentHandler;
+using TemplateArgumentHandler = std::function<void (int, const QStringRef &)>;
 
 QPair<int, int> parseTemplateArgumentList(const QString &l,
                                           const TemplateArgumentHandler &handler,

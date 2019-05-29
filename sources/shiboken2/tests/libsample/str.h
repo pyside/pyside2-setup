@@ -71,7 +71,7 @@ private:
 LIBSAMPLE_API Str operator+(int number, const Str& str);
 LIBSAMPLE_API unsigned int strHash(const Str& str);
 
-typedef Str PStr;
+using PStr = Str;
 LIBSAMPLE_API void changePStr(PStr* pstr, const char* suffix);
 LIBSAMPLE_API void duplicatePStr(PStr *pstr = nullptr);
 

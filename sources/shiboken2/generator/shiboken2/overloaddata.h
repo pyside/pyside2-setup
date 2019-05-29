@@ -38,12 +38,12 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 class ShibokenGenerator;
 
 class OverloadData;
-typedef QVector<OverloadData *> OverloadDataList;
+using OverloadDataList = QVector<OverloadData *>;
 
 class OverloadData
 {
 public:
-    typedef QVector<const AbstractMetaFunction *> MetaFunctionList;
+    using MetaFunctionList = QVector<const AbstractMetaFunction *>;
 
     OverloadData(const AbstractMetaFunctionList &overloads, const ShibokenGenerator *generator);
     ~OverloadData();

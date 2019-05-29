@@ -93,8 +93,8 @@ template class LIBSAMPLE_API TemplateBase<IdentityType>;
 template class LIBSAMPLE_API TemplateBase<DuplicatorType>;
 #endif
 
-typedef TemplateBase<IdentityType> ValueIdentity;
-typedef TemplateBase<DuplicatorType> ValueDuplicator;
+using ValueIdentity = TemplateBase<IdentityType>;
+using ValueDuplicator = TemplateBase<DuplicatorType>;
 
 LIBSAMPLE_API int callCalculateForValueDuplicatorPointer(ValueDuplicator* value);
 LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator& value);

@@ -51,8 +51,8 @@ static QString wildcardToRegExp(QString w)
     return w;
 }
 
-typedef QPair<QRegularExpression, QVersionNumber> ApiVersion;
-typedef QVector<ApiVersion> ApiVersions;
+using ApiVersion =QPair<QRegularExpression, QVersionNumber>;
+using ApiVersions = QVector<ApiVersion>;
 
 Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
@@ -85,7 +85,7 @@ struct IntTypeNormalizationEntry
     QString replacement;
 };
 
-typedef QVector<IntTypeNormalizationEntry> IntTypeNormalizationEntries;
+using IntTypeNormalizationEntries = QVector<IntTypeNormalizationEntry>;
 
 static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
 {

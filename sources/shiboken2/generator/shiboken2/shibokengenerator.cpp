@@ -2011,7 +2011,7 @@ static QString getConverterTypeSystemVariableArgument(const QString &code, int p
         qFatal("Unbalanced parenthesis on type system converter variable call.");
     return arg;
 }
-typedef QPair<QString, QString> StringPair;
+using StringPair = QPair<QString, QString>;
 
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable, QString &code)
 {

@@ -3198,13 +3198,12 @@ template <class Container>
 static void debugFormatSequence(QDebug &d, const char *key, const Container& c,
                                 const char *separator = ", ")
 {
-    typedef typename Container::const_iterator ConstIt;
     if (c.isEmpty())
         return;
-    const ConstIt begin = c.begin();
-    const ConstIt end = c.end();
+    const auto begin = c.begin();
+    const auto end = c.end();
     d << "\n  " << key << '[' << c.size() << "]=(";
-    for (ConstIt it = begin; it != end; ++it) {
+    for (auto it = begin; it != end; ++it) {
         if (it != begin)
             d << separator;
         d << *it;

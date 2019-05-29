@@ -69,7 +69,7 @@ class LIBSAMPLE_API ObjectType
 {
 public:
     // ### Fixme: Use uintptr_t in C++ 11
-    typedef size_t Identifier;
+    using Identifier = size_t;
 
     explicit ObjectType(ObjectType *parent = nullptr);
     virtual ~ObjectType();

@@ -59,9 +59,9 @@ static inline QString skipDeprecatedOption() { return QStringLiteral("skip-depre
 
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
-typedef QMap<QString, QString> CommandArgumentMap;
+using CommandArgumentMap = QMap<QString, QString>;
 
-typedef Generator::OptionDescriptions OptionDescriptions;
+using OptionDescriptions = Generator::OptionDescriptions;
 
 static void printOptions(QTextStream &s, const OptionDescriptions &options)
 {

@@ -54,8 +54,8 @@
 extern "C"
 {
 
-typedef std::pair<IsConvertibleToCppFunc, PythonToCppFunc> ToCppConversion;
-typedef std::vector<ToCppConversion> ToCppConversionVector;
+using ToCppConversion = std::pair<IsConvertibleToCppFunc, PythonToCppFunc>;
+using ToCppConversionVector = std::vector<ToCppConversion>;
 
 /**
  *  \internal

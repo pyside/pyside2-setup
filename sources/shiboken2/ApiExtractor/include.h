@@ -88,6 +88,6 @@ QTextStream& operator<<(QTextStream& out, const Include& include);
 QDebug operator<<(QDebug d, const Include &i);
 #endif
 
-typedef QVector<Include> IncludeList;
+using IncludeList = QVector<Include>;
 
 #endif

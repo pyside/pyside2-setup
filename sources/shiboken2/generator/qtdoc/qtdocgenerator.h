@@ -67,7 +67,7 @@ public:
         TableCell(const char* text) : data(QLatin1String(text)) {}
     };
 
-    typedef QList<TableCell> TableRow;
+    using TableRow = QList<TableCell>;
     class Table : public QList<TableRow>
     {
         public:

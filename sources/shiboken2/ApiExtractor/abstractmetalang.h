@@ -292,7 +292,7 @@ class AbstractMetaType
 {
     Q_GADGET
 public:
-    typedef QVector<Indirection> Indirections;
+    using Indirections = QVector<Indirection>;
 
     enum TypeUsagePattern {
         InvalidPattern,

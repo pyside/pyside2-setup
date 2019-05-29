@@ -43,10 +43,10 @@
 #include <unordered_map>
 
 /// This hash maps module objects to arrays of Python types.
-typedef std::unordered_map<PyObject *, PyTypeObject **> ModuleTypesMap;
+using ModuleTypesMap = std::unordered_map<PyObject *, PyTypeObject **> ;
 
 /// This hash maps module objects to arrays of converters.
-typedef std::unordered_map<PyObject *, SbkConverter **> ModuleConvertersMap;
+using ModuleConvertersMap = std::unordered_map<PyObject *, SbkConverter **>;
 
 /// All types produced in imported modules are mapped here.
 static ModuleTypesMap moduleTypes;

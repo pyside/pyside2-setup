@@ -2110,7 +2110,7 @@ void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppC
 
 static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4)
 {
-    typedef QMap<QChar, QStringList> TocMap;
+    using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
     QChar Q = QLatin1Char('Q');
     QChar idx;
