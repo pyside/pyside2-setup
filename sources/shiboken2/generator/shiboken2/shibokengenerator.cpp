@@ -1510,18 +1510,18 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
                                            const AbstractMetaFunction *func,
                                            Options options) const
 {
-    AbstractMetaArgumentList arguments = func->arguments();
+    const AbstractMetaArgumentList arguments = func->arguments();
     int argCount = 0;
-    for (int j = 0, max = arguments.size(); j < max; j++) {
-
-        if ((options & Generator::SkipRemovedArguments) && (func->argumentRemoved(arguments.at(j)->argumentIndex()+1)))
+    for (auto argument : arguments) {
+        const int index = argument->argumentIndex() + 1;
+        if ((options & Generator::SkipRemovedArguments) && (func->argumentRemoved(index)))
             continue;
 
-        s << ((argCount > 0) ? ", " : "") << arguments.at(j)->name();
+        s << ((argCount > 0) ? ", " : "") << argument->name();
 
         if (((options & Generator::VirtualCall) == 0)
-            && (!func->conversionRule(TypeSystem::NativeCode, arguments.at(j)->argumentIndex() + 1).isEmpty()
-                || !func->conversionRule(TypeSystem::TargetLangCode, arguments.at(j)->argumentIndex() + 1).isEmpty())
+            && (!func->conversionRule(TypeSystem::NativeCode, index).isEmpty()
+                || !func->conversionRule(TypeSystem::TargetLangCode, index).isEmpty())
             && !func->isConstructor()) {
            s << CONV_RULE_OUT_VAR_SUFFIX;
         }

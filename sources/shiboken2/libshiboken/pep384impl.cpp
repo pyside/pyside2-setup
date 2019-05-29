@@ -67,7 +67,7 @@ datetime_struc *PyDateTimeAPI = NULL;
 #endif
 
 static PyObject *
-dummy_func(PyObject *self, PyObject *args)
+dummy_func(PyObject * /* self */, PyObject * /* args */)
 {
     Py_RETURN_NONE;
 }
@@ -121,7 +121,7 @@ static PyType_Spec typeprobe_spec = {
 };
 
 static void
-check_PyTypeObject_valid(void)
+check_PyTypeObject_valid()
 {
     auto *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
     auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(

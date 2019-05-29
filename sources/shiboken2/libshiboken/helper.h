@@ -44,7 +44,7 @@
 #include "shibokenmacros.h"
 #include "autodecref.h"
 
-#define SBK_UNUSED(x)   (void)x;
+#define SBK_UNUSED(x)   (void)(x);
 
 namespace Shiboken
 {

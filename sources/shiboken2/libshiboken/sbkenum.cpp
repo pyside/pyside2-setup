@@ -233,9 +233,8 @@ static PyObject *enum_richcompare(PyObject *self, PyObject *other, int op)
     if (!(enumA || enumB)) {
         Py_INCREF(Py_NotImplemented);
         return Py_NotImplemented;
-    } else {
-        result = PyObject_RichCompare(valA, valB, op);
     }
+    result = PyObject_RichCompare(valA, valB, op);
 
     // Decreasing the reference of the used variables a and b.
     if (enumA)

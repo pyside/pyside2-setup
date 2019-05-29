@@ -963,7 +963,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     return metaEnum;
 }
 
-AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &dom,
+AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &,
                                                                const TypeDefModelItem &typeDef,
                                                                AbstractMetaClass *currentClass)
 {
@@ -1128,7 +1128,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     return metaClass;
 }
 
-void AbstractMetaBuilderPrivate::traverseScopeMembers(ScopeModelItem item,
+void AbstractMetaBuilderPrivate::traverseScopeMembers(const ScopeModelItem &item,
                                                       AbstractMetaClass *metaClass)
 {
     // Classes/Namespace members
@@ -1141,7 +1141,7 @@ void AbstractMetaBuilderPrivate::traverseScopeMembers(ScopeModelItem item,
         traverseClassMembers(ci);
 }
 
-void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
+void AbstractMetaBuilderPrivate::traverseClassMembers(const ClassModelItem &item)
 {
     AbstractMetaClass *metaClass = m_itemToClass.value(item.data());
     if (!metaClass)
@@ -1151,7 +1151,7 @@ void AbstractMetaBuilderPrivate::traverseClassMembers(ClassModelItem item)
     traverseScopeMembers(item, metaClass);
 }
 
-void AbstractMetaBuilderPrivate::traverseNamespaceMembers(NamespaceModelItem item)
+void AbstractMetaBuilderPrivate::traverseNamespaceMembers(const NamespaceModelItem &item)
 {
     AbstractMetaClass *metaClass = m_itemToClass.value(item.data());
     if (!metaClass)
@@ -1372,7 +1372,8 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
         QPropertySpec *read = nullptr;
         if (!metaFunction->isSignal() && (read = metaClass->propertySpecForRead(metaFunction->name()))) {
             // Property reader must be in the form "<type> name()"
-            if (metaFunction->type() && (read->type() == metaFunction->type()->typeEntry()) && (metaFunction->arguments().size() == 0)) {
+            if (metaFunction->type() && (read->type() == metaFunction->type()->typeEntry())
+                && metaFunction->arguments().isEmpty()) {
                 *metaFunction += AbstractMetaAttributes::PropertyReader;
                 metaFunction->setPropertySpec(read);
             }

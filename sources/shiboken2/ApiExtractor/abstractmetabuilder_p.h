@@ -43,6 +43,8 @@ class TypeDatabase;
 class AbstractMetaBuilderPrivate
 {
 public:
+    Q_DISABLE_COPY(AbstractMetaBuilderPrivate)
+
     AbstractMetaBuilderPrivate();
     ~AbstractMetaBuilderPrivate();
 
@@ -71,9 +73,9 @@ public:
     AbstractMetaClass *traverseClass(const FileModelItem &dom,
                                      const ClassModelItem &item,
                                      AbstractMetaClass *currentClass);
-    void traverseScopeMembers(ScopeModelItem item, AbstractMetaClass *metaClass);
-    void traverseClassMembers(ClassModelItem scopeItem);
-    void traverseNamespaceMembers(NamespaceModelItem scopeItem);
+    void traverseScopeMembers(const ScopeModelItem &item, AbstractMetaClass *metaClass);
+    void traverseClassMembers(const ClassModelItem &scopeItem);
+    void traverseNamespaceMembers(const NamespaceModelItem &scopeItem);
     bool setupInheritance(AbstractMetaClass *metaClass);
     AbstractMetaClass *traverseNamespace(const FileModelItem &dom,
                                          const NamespaceModelItem &item);

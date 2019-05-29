@@ -62,16 +62,13 @@ TypeDatabase::TypeDatabase()
     addType(new VarargsTypeEntry());
 }
 
-TypeDatabase::~TypeDatabase()
-{
-}
+TypeDatabase::~TypeDatabase() = default;
 
 TypeDatabase* TypeDatabase::instance(bool newInstance)
 {
     static TypeDatabase *db = nullptr;
     if (!db || newInstance) {
-        if (db)
-            delete db;
+        delete db;
         db = new TypeDatabase;
     }
     return db;
@@ -93,10 +90,8 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
     static bool firstTime = true;
     if (firstTime) {
         firstTime = false;
-        static const char *intTypes[] = {"char", "short", "int", "long"};
-        const size_t size = sizeof(intTypes) / sizeof(intTypes[0]);
-        for (size_t i = 0; i < size; ++i) {
-            const QString intType = QLatin1String(intTypes[i]);
+        for (auto t : {"char", "short", "int", "long"}) {
+            const QString intType = QLatin1String(t);
             if (!TypeDatabase::instance()->findType(QLatin1Char('u') + intType)) {
                 IntTypeNormalizationEntry entry;
                 entry.replacement = QStringLiteral("unsigned ") + intType;
@@ -115,8 +110,8 @@ QString TypeDatabase::normalizedSignature(const QString &signature)
 
     if (instance() && signature.contains(QLatin1String("unsigned"))) {
         const IntTypeNormalizationEntries &entries = intTypeNormalizationEntries();
-        for (int i = 0, size = entries.size(); i < size; ++i)
-            normalized.replace(entries.at(i).regex, entries.at(i).replacement);
+        for (const auto &entry : entries)
+            normalized.replace(entry.regex, entry.replacement);
     }
 
     return normalized;
@@ -146,10 +141,7 @@ void TypeDatabase::addTypesystemPath(const QString& typesystem_paths)
 IncludeList TypeDatabase::extraIncludes(const QString& className) const
 {
     ComplexTypeEntry* typeEntry = findComplexType(className);
-    if (typeEntry)
-        return typeEntry->extraIncludes();
-    else
-        return IncludeList();
+    return typeEntry ? typeEntry->extraIncludes() : IncludeList();
 }
 
 ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const

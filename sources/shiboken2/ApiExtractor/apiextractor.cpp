@@ -116,7 +116,7 @@ void ApiExtractor::setSilent ( bool value )
 
 bool ApiExtractor::setApiVersion(const QString& package, const QString &version)
 {
-    return TypeDatabase::instance()->setApiVersion(package, version);
+    return TypeDatabase::setApiVersion(package, version);
 }
 
 void ApiExtractor::setDropTypeEntries(QString dropEntries)
@@ -247,7 +247,7 @@ LanguageLevel ApiExtractor::languageLevel() const
     return m_languageLevel;
 }
 
-void ApiExtractor::setLanguageLevel(const LanguageLevel languageLevel)
+void ApiExtractor::setLanguageLevel(LanguageLevel languageLevel)
 {
     m_languageLevel = languageLevel;
 }

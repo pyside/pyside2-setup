@@ -34,7 +34,7 @@
 class DoxygenParser : public DocParser
 {
 public:
-    DoxygenParser()  {}
+    DoxygenParser() = default;
     void fillDocumentation(AbstractMetaClass *metaClass) override;
     Documentation retrieveModuleDocumentation() override;
     Documentation retrieveModuleDocumentation(const QString& name) override;

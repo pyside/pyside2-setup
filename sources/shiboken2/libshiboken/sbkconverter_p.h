@@ -537,7 +537,7 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
 template <>
 struct Primitive<std::nullptr_t> : TwoPrimitive<std::nullptr_t>
 {
-    static PyObject *toPython(const void *cppIn)
+    static PyObject *toPython(const void * /* cppIn */)
     {
         return Py_None;
     }
@@ -551,7 +551,7 @@ struct Primitive<std::nullptr_t> : TwoPrimitive<std::nullptr_t>
             return toCpp;
         return nullptr;
     }
-    static void otherToCpp(PyObject *pyIn, void *cppOut)
+    static void otherToCpp(PyObject * /* pyIn */, void *cppOut)
     {
         *reinterpret_cast<std::nullptr_t *>(cppOut) = nullptr;
     }

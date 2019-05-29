@@ -50,6 +50,8 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 class CodeModel
 {
 public:
+    Q_DISABLE_COPY(CodeModel)
+
     enum AccessPolicy {
         Public,
         Protected,
@@ -79,7 +81,7 @@ public:
     FileList files() const { return m_files; }
     NamespaceModelItem globalNamespace() const;
 
-    void addFile(FileModelItem item);
+    void addFile(const FileModelItem &item);
     FileModelItem findFile(const QString &name) const;
 
     CodeModelItem findItem(const QStringList &qualifiedName, const ScopeModelItem &scope) const;
@@ -87,10 +89,6 @@ public:
 private:
     FileList m_files;
     NamespaceModelItem m_globalNamespace;
-
-private:
-    CodeModel(const CodeModel &other);
-    void operator = (const CodeModel &other);
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -334,11 +332,11 @@ public:
     TypeDefList typeDefs() const { return m_typeDefs; }
     VariableList variables() const { return m_variables; }
 
-    void addClass(ClassModelItem item);
-    void addEnum(EnumModelItem item);
-    void addFunction(FunctionModelItem item);
-    void addTypeDef(TypeDefModelItem item);
-    void addVariable(VariableModelItem item);
+    void addClass(const ClassModelItem &item);
+    void addEnum(const EnumModelItem &item);
+    void addFunction(const FunctionModelItem &item);
+    void addTypeDef(const TypeDefModelItem &item);
+    void addVariable(const VariableModelItem &item);
 
     ClassModelItem findClass(const QString &name) const;
     EnumModelItem findEnum(const QString &name) const;
@@ -349,7 +347,7 @@ public:
     void addEnumsDeclaration(const QString &enumsDeclaration);
     QStringList enumsDeclarations() const { return m_enumsDeclarations; }
 
-    FunctionModelItem declaredFunction(FunctionModelItem item);
+    FunctionModelItem declaredFunction(const FunctionModelItem &item);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
@@ -692,7 +690,7 @@ public:
 
     bool hasValues() const { return !m_enumerators.isEmpty(); }
     EnumeratorList enumerators() const;
-    void addEnumerator(EnumeratorModelItem item);
+    void addEnumerator(const EnumeratorModelItem &item);
 
     EnumKind enumKind() const { return m_enumKind; }
     void setEnumKind(EnumKind kind) { m_enumKind = kind; }

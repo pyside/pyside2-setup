@@ -105,7 +105,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 
         sbkSelf->cptr = bufferView.buf;
         sbkSelf->size = bufferView.len > 0 ? bufferView.len : size;
-        sbkSelf->isWritable = bufferView.readonly > 0 ? false : true;
+        sbkSelf->isWritable = bufferView.readonly <= 0;
 
         // Release the buffer.
         PyBuffer_Release(&bufferView);
@@ -115,7 +115,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
         auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
         sbkSelf->cptr = sbkOther->d->cptr[0];
         sbkSelf->size = size;
-        sbkSelf->isWritable = isWritable > 0 ? true : false;
+        sbkSelf->isWritable = isWritable > 0;
     }
     // An integer representing an address.
     else {
@@ -137,7 +137,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
             }
             sbkSelf->cptr = cptr;
             sbkSelf->size = size;
-            sbkSelf->isWritable = isWritable > 0 ? true : false;
+            sbkSelf->isWritable = isWritable > 0;
         }
     }
 

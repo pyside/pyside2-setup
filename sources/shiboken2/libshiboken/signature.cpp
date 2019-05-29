@@ -795,7 +795,7 @@ get_signature_intern(PyObject *ob, const char *modifier)
 }
 
 static PyObject *
-get_signature(PyObject *self, PyObject *args)
+get_signature(PyObject * /* self */, PyObject *args)
 {
     PyObject *ob;
     const char *modifier = nullptr;
@@ -1123,7 +1123,7 @@ _build_func_to_type(PyObject *obtype)
 }
 
 int
-SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
+SbkSpecial_Type_Ready(PyObject * /* module */, PyTypeObject *type,
                       const char *signatures[])
 {
     if (PyType_Ready(type) < 0)

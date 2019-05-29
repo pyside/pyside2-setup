@@ -37,6 +37,8 @@
 class Graph
 {
 public:
+    Q_DISABLE_COPY(Graph)
+
     using Indexes = QVector<int>;
 
     /// Create a new graph with \p numNodes nodes.

@@ -548,6 +548,10 @@ class TypeEntry
 {
     Q_GADGET
 public:
+    TypeEntry &operator=(const TypeEntry &) = delete;
+    TypeEntry &operator=(TypeEntry &&) = delete;
+    TypeEntry(TypeEntry &&) = delete;
+
     enum Type {
         PrimitiveType,
         VoidType,
@@ -901,10 +905,6 @@ protected:
     TypeEntry(const TypeEntry &);
 
 private:
-    TypeEntry &operator=(const TypeEntry &) = delete;
-    TypeEntry &operator=(TypeEntry &&) = delete;
-    TypeEntry(TypeEntry &&) = delete;
-
     QString m_name;
     QString m_targetLangPackage;
     Type m_type;
@@ -1366,7 +1366,7 @@ public:
     {
         return m_hashFunction;
     }
-    void setHashFunction(QString hashFunction)
+    void setHashFunction(const QString &hashFunction)
     {
         m_hashFunction = hashFunction;
     }
@@ -1448,7 +1448,7 @@ public:
     void setTarget(ComplexTypeEntry *target) { m_target = target; }
 
 #ifndef QT_NO_DEBUG_STREAM
-    virtual void formatDebug(QDebug &d) const override;
+    void formatDebug(QDebug &d) const override;
 #endif
 protected:
     TypedefEntry(const TypedefEntry &);

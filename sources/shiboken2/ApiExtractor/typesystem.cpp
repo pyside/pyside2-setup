@@ -1650,8 +1650,8 @@ bool Handler::loadTypesystem(const QXmlStreamReader &,
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == nameAttribute())
             typeSystemName = attributes->takeAt(i).value().toString();
-         else if (name == generateAttribute())
-            generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
+        else if (name == generateAttribute())
+           generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
     }
     if (typeSystemName.isEmpty()) {
             m_error = QLatin1String("No typesystem name specified");
@@ -1804,8 +1804,8 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type"))
              sourceTypeName = attributes->takeAt(i).value().toString();
-         else if (name == QLatin1String("check"))
-            typeCheck = attributes->takeAt(i).value().toString();
+        else if (name == QLatin1String("check"))
+           typeCheck = attributes->takeAt(i).value().toString();
     }
     if (sourceTypeName.isEmpty()) {
         m_error = QLatin1String("Target to Native conversions must specify the input type with the 'type' attribute.");
@@ -3042,9 +3042,10 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
 
 FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
 {
-    for (int i = 0; i < m_fieldMods.size(); ++i)
-        if (m_fieldMods.at(i).name == name)
-            return m_fieldMods.at(i);
+    for (const auto &fieldMod : m_fieldMods) {
+        if (fieldMod.name == name)
+            return fieldMod;
+    }
     FieldModification mod;
     mod.name = name;
     mod.modifiers = FieldModification::Readable | FieldModification::Writable;

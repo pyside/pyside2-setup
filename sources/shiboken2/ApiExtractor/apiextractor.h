@@ -58,6 +58,8 @@ QT_END_NAMESPACE
 class ApiExtractor
 {
 public:
+    Q_DISABLE_COPY(ApiExtractor)
+
     ApiExtractor();
     ~ApiExtractor();
 
@@ -78,7 +80,7 @@ public:
     bool setApiVersion(const QString& package, const QString& version);
     void setDropTypeEntries(QString dropEntries);
     LanguageLevel languageLevel() const;
-    void setLanguageLevel(const LanguageLevel languageLevel);
+    void setLanguageLevel(LanguageLevel languageLevel);
 
     AbstractMetaEnumList globalEnums() const;
     AbstractMetaFunctionList globalFunctions() const;
@@ -102,12 +104,10 @@ private:
     LanguageLevel m_languageLevel = LanguageLevel::Default;
     bool m_skipDeprecated = false;
 
-    // disable copy
-    ApiExtractor(const ApiExtractor&);
-    ApiExtractor& operator=(const ApiExtractor&);
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug d, const ApiExtractor &ae);
 #endif
 };
 
 #endif // APIEXTRACTOR_H
+

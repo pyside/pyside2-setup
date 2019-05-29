@@ -47,7 +47,7 @@ namespace TestUtil
         TypeDatabase* td = TypeDatabase::instance(true);
         if (apiVersion.isEmpty())
             TypeDatabase::clearApiVersions();
-        else if (!td->setApiVersion(QLatin1String("*"), apiVersion))
+        else if (!TypeDatabase::setApiVersion(QLatin1String("*"), apiVersion))
             return nullptr;
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;

@@ -1260,10 +1260,8 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
         if (!(child->d && child->d->cptr))
             continue;
         if (child->d->cptr[0] == wrapper->d->cptr[0]) {
-            if (reinterpret_cast<const void *>(Py_TYPE(child)) == reinterpret_cast<const void *>(instanceType))
-                return child;
-            else
-                return findColocatedChild(child, instanceType);
+            return reinterpret_cast<const void *>(Py_TYPE(child)) == reinterpret_cast<const void *>(instanceType)
+                ? child : findColocatedChild(child, instanceType);
         }
     }
     return nullptr;

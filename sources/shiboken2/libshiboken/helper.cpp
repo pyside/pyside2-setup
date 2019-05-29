@@ -109,9 +109,8 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
             delete[] array;
             return nullptr;
-        } else {
-            array[i] = PyInt_AsLong(item);
         }
+        array[i] = PyInt_AsLong(item);
     }
 
     if (zeroTerminated)

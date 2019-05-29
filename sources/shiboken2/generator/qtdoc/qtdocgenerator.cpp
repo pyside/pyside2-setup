@@ -528,7 +528,6 @@ static QString resolveFile(const QStringList &locations, const QString &path)
 QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QString &path,
                                          const QString &identifier, QString *errorMessage)
 {
-    QString result;
     QString resolvedPath;
     if (path.endsWith(QLatin1String(".cpp"))) {
         const QString pySnippet = path.left(path.size() - 3) + QLatin1String("py");
@@ -919,7 +918,8 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
     if (token == QXmlStreamReader::StartElement) {
         listType = webXmlListType(reader.attributes().value(QLatin1String("type")));
         if (listType == EnumeratedList) {
-            m_currentTable << (TableRow() << "Constant" << "Description");
+            m_currentTable << TableRow{TableCell(QLatin1String("Constant")),
+                                       TableCell(QLatin1String("Description"))};
             m_tableHasHeader = true;
         }
         INDENT.indent--;
@@ -1910,7 +1910,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
 
             QString codeBlock = code.mid(startBlock, endBlock - startBlock);
             const QStringList rows = codeBlock.split(QLatin1Char('\n'));
-            int currenRow = 0;
+            int currentRow = 0;
             int offset = 0;
 
             for (QString row : rows) {
@@ -1918,25 +1918,24 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                     row.remove(invalidString);
 
                 if (row.trimmed().size() == 0) {
-                    if (currenRow == 0)
+                    if (currentRow == 0)
                         continue;
                     s << endl;
                 }
 
-                if (currenRow == 0) {
+                if (currentRow == 0) {
                     //find offset
-                    for (int i=0, i_max = row.size(); i < i_max; i++) {
-                        if (row[i] == QLatin1Char(' '))
+                    for (auto c : row) {
+                        if (c == QLatin1Char(' '))
                             offset++;
-                        else if (row[i] == QLatin1Char('\n'))
+                        else if (c == QLatin1Char('\n'))
                             offset = 0;
                         else
                             break;
                     }
                 }
-                row = row.mid(offset);
-                s << row << endl;
-                currenRow++;
+                s << row.midRef(offset) << endl;
+                currentRow++;
             }
 
             code = code.mid(endBlock+endMarkup.size());

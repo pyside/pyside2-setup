@@ -1709,25 +1709,27 @@ bool AbstractMetaClass::hasProtectedMembers() const
 
 QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
 {
-    for (int i = 0; i < m_propertySpecs.size(); ++i)
-        if (name == m_propertySpecs.at(i)->read())
-            return m_propertySpecs.at(i);
+    for (const auto &propertySpec : m_propertySpecs) {
+        if (name == propertySpec->read())
+            return propertySpec;
+    }
     return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForWrite(const QString &name) const
 {
-    for (int i = 0; i < m_propertySpecs.size(); ++i)
-        if (name == m_propertySpecs.at(i)->write())
-            return m_propertySpecs.at(i);
+    for (const auto &propertySpec : m_propertySpecs) {
+        if (name == propertySpec->write())
+            return propertySpec;
+    }
     return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) const
 {
-    for (int i = 0; i < m_propertySpecs.size(); ++i) {
-        if (name == m_propertySpecs.at(i)->reset())
-            return m_propertySpecs.at(i);
+    for (const auto &propertySpec : m_propertySpecs) {
+        if (name == propertySpec->reset())
+            return propertySpec;
     }
     return nullptr;
 }
@@ -2324,9 +2326,7 @@ void AbstractMetaClass::fixFunctions()
         }
 
         QSet<AbstractMetaFunction *> funcsToAdd;
-        for (int sfi = 0; sfi < superFuncs.size(); ++sfi) {
-            AbstractMetaFunction *sf = superFuncs.at(sfi);
-
+        for (auto sf : qAsConst(superFuncs)) {
             if (sf->isRemovedFromAllLanguages(sf->implementingClass()))
                 continue;
 
@@ -2601,8 +2601,8 @@ AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassL
     const QVector<QStringRef> lst = name.splitRef(QLatin1String("::"));
 
     if (lst.size() > 1) {
-        const QStringRef prefixName = lst.at(0);
-        const QStringRef enumName = lst.at(1);
+        const QStringRef &prefixName = lst.at(0);
+        const QStringRef &enumName = lst.at(1);
         if (AbstractMetaClass *cl = findClass(classes, prefixName.toString()))
             return cl->findEnumValue(enumName.toString());
     }

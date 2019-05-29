@@ -72,8 +72,9 @@ private:
 
     void writeMethodWrapperPreamble(QTextStream &s, OverloadData &overloadData,
                                     GeneratorContext &context);
-    void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads, GeneratorContext &classContext);
-    void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
+    void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
+                                 GeneratorContext &classContext);
+    void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
                             GeneratorContext &classContext);
     void writeArgumentsInitializer(QTextStream &s, OverloadData &overloadData);
     void writeCppSelfAssigment(QTextStream &s, const GeneratorContext &context,
@@ -94,8 +95,10 @@ private:
     /// Writes the check section for the validity of wrapped C++ objects.
     void writeInvalidPyObjectCheck(QTextStream &s, const QString &pyObj);
 
-    void writeTypeCheck(QTextStream &s, const AbstractMetaType *argType, QString argumentName, bool isNumber = false, QString customType = QString(), bool rejectNull = false);
-    void writeTypeCheck(QTextStream &s, const OverloadData *overloadData, QString argumentName);
+    void writeTypeCheck(QTextStream &s, const AbstractMetaType *argType, const QString &argumentName,
+                        bool isNumber = false, const QString &customType = QString(),
+                        bool rejectNull = false);
+    void writeTypeCheck(QTextStream& s, const OverloadData *overloadData, QString argumentName);
 
     void writeTypeDiscoveryFunction(QTextStream &s, const AbstractMetaClass *metaClass);
 
@@ -213,7 +216,7 @@ private:
                                              const AbstractMetaType *targetType,
                                              QString typeCheck = QString(),
                                              QString conversion = QString(),
-                                             QString preConversion = QString());
+                                             const QString &preConversion = QString());
     /// Writes a pair of Python to C++ conversion and check functions for implicit conversions.
     void writePythonToCppConversionFunctions(QTextStream &s,
                                              const CustomConversion::TargetToNativeConversion *toNative,

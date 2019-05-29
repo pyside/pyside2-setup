@@ -203,11 +203,10 @@ QString CppGenerator::fileNameForContext(GeneratorContext &context) const
         QString fileNameBase = metaClass->qualifiedCppName().toLower();
         fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
         return fileNameBase + fileNameSuffix();
-    } else {
-        const AbstractMetaType *smartPointerType = context.preciseType();
-        QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNameSuffix();
     }
+    const AbstractMetaType *smartPointerType = context.preciseType();
+    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
+    return fileNameBase + fileNameSuffix();
 }
 
 QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
@@ -1660,7 +1659,7 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
     }
 }
 
-void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
+void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
                                            GeneratorContext &classContext)
 {
     ErrorCode errorCode(-1);
@@ -1821,7 +1820,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
+void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
                                       GeneratorContext &classContext)
 {
     OverloadData overloadData(overloads, this);
@@ -2148,7 +2147,9 @@ static QString pythonToCppConverterForArgumentName(const QString &argumentName)
     return result;
 }
 
-void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argType, QString argumentName, bool isNumber, QString customType, bool rejectNull)
+void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argType,
+                                  const QString &argumentName, bool isNumber,
+                                  const QString &customType, bool rejectNull)
 {
     QString customCheck;
     if (!customType.isEmpty()) {
@@ -2401,8 +2402,8 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
 static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rule,
                                          TypeSystem::Language /* conversionLanguage */,
                                          TypeSystem::Language snippetLanguage,
-                                         QString outputName = QString(),
-                                         QString inputName = QString())
+                                         const QString &outputName = QString(),
+                                         const QString &inputName = QString())
 {
     if (rule.isEmpty())
         return;
@@ -2511,10 +2512,11 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
         s << "; // " << referenceFunction->minimalSignature() << endl;
         return;
 
+    }
     // To decide if a method call is possible at this point the current overload
     // data object cannot be the head, since it is just an entry point, or a root,
     // for the tree of arguments and it does not represent a valid method call.
-    } else if (!parentOverloadData->isHeadOverloadData()) {
+    if (!parentOverloadData->isHeadOverloadData()) {
         bool isLastArgument = parentOverloadData->nextOverloadData().isEmpty();
         bool signatureFound = parentOverloadData->overloads().size() == 1;
 
@@ -2877,7 +2879,7 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s,
                                                        const AbstractMetaType *targetType,
                                                        QString typeCheck,
                                                        QString conversion,
-                                                       QString preConversion)
+                                                       const QString &preConversion)
 {
     QString sourcePyType = cpythonTypeNameExt(sourceType);
 

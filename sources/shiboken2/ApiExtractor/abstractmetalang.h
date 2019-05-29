@@ -72,7 +72,7 @@ public:
         Target
     };
 
-    Documentation() {}
+    Documentation() = default;
 
     Documentation(const QString& value, Format fmt = Documentation::Native)
             : m_data(value.trimmed()), m_format(fmt) {}
@@ -105,9 +105,10 @@ private:
 
 class AbstractMetaAttributes
 {
-    Q_DISABLE_COPY(AbstractMetaAttributes)
     Q_GADGET
 public:
+    Q_DISABLE_COPY(AbstractMetaAttributes)
+
     AbstractMetaAttributes();
     virtual ~AbstractMetaAttributes();
 
@@ -592,8 +593,7 @@ public:
     }
     void replaceType(AbstractMetaType *type)
     {
-        if (m_type)
-            delete m_type;
+        delete m_type;
         m_type = type;
     }
 
@@ -902,8 +902,7 @@ public:
 
     void replaceType(AbstractMetaType *type)
     {
-        if (m_type)
-            delete m_type;
+        delete m_type;
         m_type = type;
     }
 
@@ -1132,7 +1131,7 @@ QDebug operator<<(QDebug d, const AbstractMetaFunction *af);
 class AbstractMetaEnumValue
 {
 public:
-    AbstractMetaEnumValue() {}
+    AbstractMetaEnumValue() = default;
 
     EnumValue value() const
     {
@@ -1507,7 +1506,7 @@ public:
         m_innerClasses << cl;
     }
 
-    void setInnerClasses(AbstractMetaClassList innerClasses)
+    void setInnerClasses(const AbstractMetaClassList &innerClasses)
     {
         m_innerClasses = innerClasses;
     }
