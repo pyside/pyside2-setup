@@ -94,6 +94,30 @@ void init(PyObject *module)
     SignalManager::instance();
 }
 
+static bool _setProperty(PyObject* qObj, PyObject *name, PyObject *value, bool *accept)
+{
+    QByteArray propName(Shiboken::String::toCString(name));
+    propName[0] = std::toupper(propName[0]);
+    propName.prepend("set");
+
+    Shiboken::AutoDecRef propSetter(PyObject_GetAttrString(qObj, propName.constData()));
+    if (!propSetter.isNull()) {
+        *accept = true;
+        Shiboken::AutoDecRef args(PyTuple_Pack(1, value));
+        Shiboken::AutoDecRef retval(PyObject_CallObject(propSetter, args));
+        if (retval.isNull())
+            return false;
+    } else {
+        Shiboken::AutoDecRef attr(PyObject_GenericGetAttr(qObj, name));
+        if (PySide::Property::checkType(attr)) {
+            *accept = true;
+            if (PySide::Property::setValue(reinterpret_cast<PySideProperty*>(attr.object()), qObj, value) < 0)
+                return false;
+        }
+    }
+    return true;
+}
+
 bool fillQtProperties(PyObject* qObj, const QMetaObject* metaObj, PyObject* kwds, const char** blackList, unsigned int blackListSize)
 {
 
@@ -103,28 +127,27 @@ bool fillQtProperties(PyObject* qObj, const QMetaObject* metaObj, PyObject* kwds
     while (PyDict_Next(kwds, &pos, &key, &value)) {
         if (!blackListSize || !std::binary_search(blackList, blackList + blackListSize, std::string(Shiboken::String::toCString(key)))) {
             QByteArray propName(Shiboken::String::toCString(key));
+            bool accept = false;
             if (metaObj->indexOfProperty(propName) != -1) {
-                propName[0] = std::toupper(propName[0]);
-                propName.prepend("set");
-
-                Shiboken::AutoDecRef propSetter(PyObject_GetAttrString(qObj, propName.constData()));
-                if (!propSetter.isNull()) {
-                    Shiboken::AutoDecRef args(PyTuple_Pack(1, value));
-                    Shiboken::AutoDecRef retval(PyObject_CallObject(propSetter, args));
-                } else {
-                    PyObject* attr = PyObject_GenericGetAttr(qObj, key);
-                    if (PySide::Property::checkType(attr))
-                        PySide::Property::setValue(reinterpret_cast<PySideProperty*>(attr), qObj, value);
-                }
+                if (!_setProperty(qObj, key, value, &accept))
+                    return false;
             } else {
                 propName.append("()");
                 if (metaObj->indexOfSignal(propName) != -1) {
+                    accept = true;
                     propName.prepend('2');
-                    PySide::Signal::connect(qObj, propName, value);
-                } else {
-                    PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal", propName.constData());
+                    if (!PySide::Signal::connect(qObj, propName, value))
+                        return false;
+                }
+            }
+            if (!accept) {
+                // PYSIDE-1019: Allow any existing attribute in the constructor.
+                if (!_setProperty(qObj, key, value, &accept))
                     return false;
-                };
+            }
+            if (!accept) {
+                PyErr_Format(PyExc_AttributeError, "'%S' is not a Qt property or a signal", key);
+                return false;
             }
         }
     }
