@@ -46,17 +46,21 @@ void TestAddFunction::testParsingFuncNameAndConstness()
     QCOMPARE(retval.isReference, false);
 
     // test with a ugly template as argument and other ugly stuff
-    const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *, const type3* const    )   const ";
+    const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *@my_name@, const type3* const    )   const ";
     AddedFunction f2(QLatin1String(sig2), QLatin1String("const Abc<int& , C<char*> *   >  * *"));
     QCOMPARE(f2.name(), QLatin1String("_fu__nc_"));
-    QVector< AddedFunction::TypeInfo > args = f2.arguments();
+    const auto &args = f2.arguments();
     QCOMPARE(args.count(), 4);
     retval = f2.returnType();
     QCOMPARE(retval.name, QLatin1String("Abc<int& , C<char*> *   >"));
     QCOMPARE(retval.indirections, 2);
     QCOMPARE(retval.isConstant, true);
     QCOMPARE(retval.isReference, false);
-    retval = args[2];
+    retval = args.at(2).typeInfo;
+    QVERIFY(args.at(0).name.isEmpty());
+    QVERIFY(args.at(1).name.isEmpty());
+    QCOMPARE(args.at(2).name, QLatin1String("my_name"));
+    QVERIFY(args.at(3).name.isEmpty());
     QCOMPARE(retval.name, QLatin1String("Abc<int& , C<char*> *   >"));
     QCOMPARE(retval.indirections, 2);
     QCOMPARE(retval.isConstant, true);
