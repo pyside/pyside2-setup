@@ -62,7 +62,7 @@ endif()
 find_package(Shiboken2 2.0.0 REQUIRED)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE ${SHIBOKEN_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE "${SHIBOKEN_BUILD_TYPE}" CACHE STRING "Build Type")
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")

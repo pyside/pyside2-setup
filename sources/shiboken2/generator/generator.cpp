@@ -28,6 +28,7 @@
 
 #include "generator.h"
 #include "abstractmetalang.h"
+#include "parser/codemodel.h"
 #include "messages.h"
 #include "reporthandler.h"
 #include "fileout.h"
@@ -911,6 +912,7 @@ QString getClassTargetFullName(const AbstractMetaType *metaType, bool includePac
 
 QString getFilteredCppSignatureString(QString signature)
 {
+    TypeInfo::stripQualifiers(&signature); // for const refs to smart pointers
     signature.replace(QLatin1String("::"), QLatin1String("_"));
     signature.replace(QLatin1Char('<'), QLatin1Char('_'));
     signature.replace(QLatin1Char('>'), QLatin1Char('_'));

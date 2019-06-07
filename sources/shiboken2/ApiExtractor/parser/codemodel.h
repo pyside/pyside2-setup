@@ -213,6 +213,7 @@ public:
     static bool stripLeadingConst(QString *s);
     static bool stripLeadingVolatile(QString *s);
     static bool stripLeadingQualifier(const QString &qualifier, QString *s);
+    static void stripQualifiers(QString *s);
 
     void simplifyStdType();
 

@@ -353,6 +353,17 @@ bool TypeInfo::stripLeadingQualifier(const QString &qualifier, QString *s)
     return true;
 }
 
+// Strip all const/volatile/*/&
+void TypeInfo::stripQualifiers(QString *s)
+{
+    stripLeadingConst(s);
+    stripLeadingVolatile(s);
+    while (s->endsWith(QLatin1Char('&')) || s->endsWith(QLatin1Char('*'))
+        || s->endsWith(QLatin1Char(' '))) {
+        s->chop(1);
+    }
+}
+
 // Helper functionality to simplify a raw standard type as returned by
 // clang_getCanonicalType() for g++ standard containers from
 // "std::__cxx11::list<int, std::allocator<int> >" or

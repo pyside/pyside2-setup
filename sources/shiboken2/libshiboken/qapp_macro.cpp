@@ -67,7 +67,9 @@ qApp_module_index(PyObject *module)
     return ret;
 }
 
-#define Py_NONE_TYPE Py_TYPE(Py_None)
+#define PYTHON_IS_PYTHON3               (PY_VERSION_HEX >= 0x03000000)
+#define PYTHON_IS_PYTHON2               (!PYTHON_IS_PYTHON3)
+#define Py_NONE_TYPE                    Py_TYPE(Py_None)
 
 #if PYTHON_IS_PYTHON3
 #  define BRACE_OPEN {
@@ -156,6 +158,31 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
     return qApp_content;
 }
 
+#if PYTHON_IS_PYTHON2
+
+// Install support in Py_NONE_TYPE for Python 2: 'bool(qApp) == False'.
+static int
+none_bool(PyObject *v)
+{
+    return 0;
+}
+
+static PyNumberMethods none_as_number = {
+    nullptr,                                            /* nb_add */
+    nullptr,                                            /* nb_subtract */
+    nullptr,                                            /* nb_multiply */
+    nullptr,                                            /* nb_divide */
+    nullptr,                                            /* nb_remainder */
+    nullptr,                                            /* nb_divmod */
+    nullptr,                                            /* nb_power */
+    nullptr,                                            /* nb_negative */
+    nullptr,                                            /* nb_positive */
+    nullptr,                                            /* nb_absolute */
+    reinterpret_cast<inquiry>(none_bool),               /* nb_nonzero */
+};
+
+#endif
+
 static int
 setup_qApp_var(PyObject *module)
 {
@@ -163,6 +190,9 @@ setup_qApp_var(PyObject *module)
     static int init_done = 0;
 
     if (!init_done) {
+#if PYTHON_IS_PYTHON2
+        Py_NONE_TYPE->tp_as_number = &none_as_number;
+#endif
         qApp_var = Py_BuildValue("s", "qApp");
         if (qApp_var == NULL)
             return -1;

@@ -71,6 +71,7 @@ typedef struct safe_globals_struc {
     PyObject *helper_module;
     PyObject *arg_dict;
     PyObject *map_dict;
+    PyObject *value_dict;  // for writing signatures
     // init part 2: run module
     PyObject *pyside_type_init_func;
     PyObject *create_signature_func;
@@ -86,6 +87,7 @@ static PyObject *GetSignature_Function(PyObject *, const char *);
 static PyObject *GetSignature_TypeMod(PyObject *, const char *);
 static PyObject *GetSignature_Wrapper(PyObject *, const char *);
 static PyObject *get_signature(PyObject *self, PyObject *args);
+static PyObject *get_signature_intern(PyObject *ob, const char *modifier);
 
 static PyObject *PySide_BuildSignatureProps(PyObject *class_mod);
 
@@ -105,11 +107,36 @@ CreateSignature(PyObject *props, PyObject *key)
                                  const_cast<char *>("(OO)"), props, key);
 }
 
+typedef PyObject *(*signaturefunc)(PyObject *, const char *);
+
+static PyObject *
+_get_written_signature(signaturefunc sf, PyObject *ob, const char *modifier)
+{
+    /*
+     * Be a writable Attribute, but have a computed value.
+     *
+     * If a signature has not been written, call the signature function.
+     * If it has been written, return the written value.
+     * After __del__ was called, the function value re-appears.
+     *
+     * Note: This serves also for the new version that does not allow any
+     * assignment if we have a computed value. We only need to check if
+     * a computed value exists and then forbid writing.
+     * See pyside_set___signature
+     */
+    PyObject *ret = PyDict_GetItem(pyside_globals->value_dict, ob);
+    if (ret == nullptr) {
+        return ob == nullptr ? nullptr : sf(ob, modifier);
+    }
+    Py_INCREF(ret);
+    return ret;
+}
+
 static PyObject *
 pyside_cf_get___signature__(PyObject *func, const char *modifier)
 {
     init_module_2();
-    return GetSignature_Function(func, modifier);
+    return _get_written_signature(GetSignature_Function, func, modifier);
 }
 
 static PyObject *
@@ -118,8 +145,8 @@ pyside_sm_get___signature__(PyObject *sm, const char *modifier)
     init_module_2();
     Shiboken::AutoDecRef func(PyObject_GetAttrString(sm, "__func__"));
     if (Py_TYPE(func) == PepFunction_TypePtr)
-        Py_RETURN_NONE;
-    return GetSignature_Function(func, modifier);
+        return PyObject_GetAttrString(func, "__signature__");
+    return _get_written_signature(GetSignature_Function, func, modifier);
 }
 
 static PyObject *
@@ -270,14 +297,14 @@ static PyObject *
 pyside_wd_get___signature__(PyObject *ob, const char *modifier)
 {
     init_module_2();
-    return GetSignature_Wrapper(ob, modifier);
+    return _get_written_signature(GetSignature_Wrapper, ob, modifier);
 }
 
 static PyObject *
 pyside_tp_get___signature__(PyObject *obtype_mod, const char *modifier)
 {
     init_module_2();
-    return GetSignature_TypeMod(obtype_mod, modifier);
+    return _get_written_signature(GetSignature_TypeMod, obtype_mod, modifier);
 }
 
 // forward
@@ -510,6 +537,12 @@ init_phase_1(void)
         if (p->arg_dict == nullptr
             || PyObject_SetAttrString(p->helper_module, "pyside_arg_dict", p->arg_dict) < 0)
             goto error;
+
+        // build a dict for assigned signature values
+        p->value_dict = PyDict_New();
+        if (p->value_dict == nullptr)
+            goto error;
+
         return p;
     }
 error:
@@ -682,33 +715,56 @@ pyside_wd_get___doc__(PyObject *wd) {
     return handle_doc(wd, old_wd_doc_descr);
 }
 
+// the default setter for all objects
+static int
+pyside_set___signature__(PyObject *op, PyObject *value)
+{
+    // By this additional check, this function refuses write access.
+    if (get_signature_intern(op, nullptr)) {
+        PyErr_Format(PyExc_AttributeError,
+                     "Attribute '__signature__' of '%.50s' object is not writable",
+                     Py_TYPE(op)->tp_name);
+        return -1;
+    }
+    int ret = value == nullptr
+            ? PyDict_DelItem(pyside_globals->value_dict, op)
+            : PyDict_SetItem(pyside_globals->value_dict, op, value);
+    Py_XINCREF(value);
+    return ret;
+}
+
 static PyGetSetDef new_PyCFunction_getsets[] = {
-    {const_cast<char *>("__signature__"), (getter)pyside_cf_get___signature__},
     {const_cast<char *>("__doc__"), (getter)pyside_cf_get___doc__},
+    {const_cast<char *>("__signature__"), (getter)pyside_cf_get___signature__,
+                                          (setter)pyside_set___signature__},
     {0}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
-    {const_cast<char *>("__signature__"), (getter)pyside_sm_get___signature__},
     {const_cast<char *>("__doc__"), (getter)pyside_sm_get___doc__},
+    {const_cast<char *>("__signature__"), (getter)pyside_sm_get___signature__,
+                                          (setter)pyside_set___signature__},
     {0}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
-    {const_cast<char *>("__signature__"), (getter)pyside_md_get___signature__},
     {const_cast<char *>("__doc__"), (getter)pyside_md_get___doc__},
+    {const_cast<char *>("__signature__"), (getter)pyside_md_get___signature__,
+                                          (setter)pyside_set___signature__},
     {0}
 };
 
 static PyGetSetDef new_PyType_getsets[] = {
-    {const_cast<char *>("__signature__"), (getter)pyside_tp_get___signature__},
     {const_cast<char *>("__doc__"), (getter)pyside_tp_get___doc__},
+    {const_cast<char *>("__signature__"), (getter)pyside_tp_get___signature__,
+                                          (setter)pyside_set___signature__},
     {0}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
-    {const_cast<char *>("__signature__"), (getter)pyside_wd_get___signature__},
     {const_cast<char *>("__doc__"), (getter)pyside_wd_get___doc__},
+    {const_cast<char *>("__signature__"), (getter)pyside_wd_get___signature__,
+                                          (setter)pyside_set___signature__},
     {0}
 };
 
@@ -723,6 +779,22 @@ static PyGetSetDef new_PyWrapperDescr_getsets[] = {
 //
 
 static PyObject *
+get_signature_intern(PyObject *ob, const char *modifier)
+{
+    if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
+        return pyside_cf_get___signature__(ob, modifier);
+    if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
+        return pyside_sm_get___signature__(ob, modifier);
+    if (Py_TYPE(ob) == PepMethodDescr_TypePtr)
+        return pyside_md_get___signature__(ob, modifier);
+    if (PyType_Check(ob))
+        return pyside_tp_get___signature__(ob, modifier);
+    if (Py_TYPE(ob) == &PyWrapperDescr_Type)
+        return pyside_wd_get___signature__(ob, modifier);
+    return nullptr;
+}
+
+static PyObject *
 get_signature(PyObject *self, PyObject *args)
 {
     PyObject *ob;
@@ -734,17 +806,9 @@ get_signature(PyObject *self, PyObject *args)
         return nullptr;
     if (Py_TYPE(ob) == PepFunction_TypePtr)
         Py_RETURN_NONE;
-
-    if (PyType_IsSubtype(Py_TYPE(ob), &PyCFunction_Type))
-        return pyside_cf_get___signature__(ob, modifier);
-    if (Py_TYPE(ob) == PepStaticMethod_TypePtr)
-        return pyside_sm_get___signature__(ob, modifier);
-    if (Py_TYPE(ob) == PepMethodDescr_TypePtr)
-        return pyside_md_get___signature__(ob, modifier);
-    if (PyType_Check(ob))
-        return pyside_tp_get___signature__(ob, modifier);
-    if (Py_TYPE(ob) == &PyWrapperDescr_Type)
-        return pyside_wd_get___signature__(ob, modifier);
+    PyObject *ret = get_signature_intern(ob, modifier);
+    if (ret != nullptr)
+        return ret;
     Py_RETURN_NONE;
 }
 
