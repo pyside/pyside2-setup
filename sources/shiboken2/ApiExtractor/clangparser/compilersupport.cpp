@@ -189,7 +189,7 @@ static LinuxDistribution linuxDistribution()
     const QString &productType = QSysInfo::productType();
     if (productType == QLatin1String("rhel"))
         return LinuxDistribution::RedHat;
-    if (productType == QLatin1String("centos"))
+    if (productType.compare(QLatin1String("centos"), Qt::CaseInsensitive) == 0)
         return LinuxDistribution::CentOs;
     return LinuxDistribution::Other;
 }
@@ -207,7 +207,7 @@ static inline bool needsGppInternalHeaders()
     switch (distro) {
     case LinuxDistribution::RedHat:
     case LinuxDistribution::CentOs:
-        return checkProductVersion(QVersionNumber(7), QVersionNumber(8));
+        return checkProductVersion(QVersionNumber(6, 10), QVersionNumber(8));
     case LinuxDistribution::Other:
         break;
     }
@@ -288,6 +288,18 @@ static QString findClangBuiltInIncludesDir()
 }
 #endif // NEED_CLANG_BUILTIN_INCLUDES
 
+#if defined(Q_CC_CLANG) || defined(Q_CC_GNU)
+static QString compilerFromCMake(const QString &defaultCompiler)
+{
+#  ifdef CMAKE_CXX_COMPILER
+    Q_UNUSED(defaultCompiler)
+    return QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
+#else
+    return defaultCompiler;
+#  endif
+}
+#endif // Q_CC_CLANG, Q_CC_GNU
+
 // Returns clang options needed for emulating the host compiler
 QByteArrayList emulatedCompilerOptions()
 {
@@ -297,7 +309,7 @@ QByteArrayList emulatedCompilerOptions()
     result.append(QByteArrayLiteral("-fms-compatibility-version=19"));
     result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
 #elif defined(Q_CC_CLANG)
-    HeaderPaths headerPaths = gppInternalIncludePaths(QStringLiteral("clang++"));
+    HeaderPaths headerPaths = gppInternalIncludePaths(compilerFromCMake(QStringLiteral("clang++")));
     result.append(noStandardIncludeOption());
 #elif defined(Q_CC_GNU)
     HeaderPaths headerPaths;
@@ -322,10 +334,12 @@ QByteArrayList emulatedCompilerOptions()
     // A fix for this has been added to Clang 5.0, so, the code can be removed
     // once Clang 5.0 is the minimum version.
     if (needsGppInternalHeaders()) {
-        const HeaderPaths gppPaths = gppInternalIncludePaths(QStringLiteral("g++"));
+        const HeaderPaths gppPaths = gppInternalIncludePaths(compilerFromCMake(QStringLiteral("g++")));
         for (const HeaderPath &h : gppPaths) {
-            if (h.path.contains("c++"))
+            if (h.path.contains("c++")
+                || h.path.contains("sysroot")) { // centOS
                 headerPaths.append(h);
+            }
         }
     }
 #else

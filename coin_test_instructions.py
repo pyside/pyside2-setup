@@ -61,7 +61,6 @@ _ci_features = option_value("features")
 if _ci_features is not None:
     for f in _ci_features.split(', '):
         CI_FEATURES.append(f)
-
 CI_RELEASE_CONF = has_option("packaging")
 
 def call_testrunner(python_ver, buildnro):

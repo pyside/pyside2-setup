@@ -40,7 +40,7 @@ class qAppMacroTest(unittest.TestCase):
         except ImportError:
             QtWidgets = QtGui = QtCore
         # qApp is in the builtins
-        qApp
+        self.assertEqual(bool(qApp), False)
         # and also in certain PySide modules
         QtCore.qApp, QtGui.qApp, QtWidgets.qApp
         # and they are all the same

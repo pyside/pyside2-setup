@@ -157,7 +157,7 @@ macro(shiboken_compute_python_libraries)
     # If the resulting variable
     # contains a "debug;X;optimized;Y" list like described in shiboken_check_if_limited_api,
     # make sure to pick just one, so that the final generator expressions are valid.
-    shiboken_get_library_for_current_config("${SHIBOKEN_PYTHON_LIBRARIES}" ${CMAKE_BUILD_TYPE} "SHIBOKEN_PYTHON_LIBRARIES")
+    shiboken_get_library_for_current_config("${SHIBOKEN_PYTHON_LIBRARIES}" "${CMAKE_BUILD_TYPE}" "SHIBOKEN_PYTHON_LIBRARIES")
 
     if(APPLE)
         set(SHIBOKEN_PYTHON_LIBRARIES "-undefined dynamic_lookup")

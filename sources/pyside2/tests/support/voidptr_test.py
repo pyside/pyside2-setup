@@ -54,6 +54,11 @@ class PySide2Support(unittest.TestCase):
         # Convert original and new to str
         self.assertTrue(str(b), str(nba))
 
+        # Modify nba through a memoryview of vp
+        mv = memoryview(vp)
+        self.assertFalse(mv.readonly)
+        mv[6:11] = b'void*'
+        self.assertEqual(str(ba), str(b"Hello void*"))
+
 if __name__ == '__main__':
     unittest.main()
-
