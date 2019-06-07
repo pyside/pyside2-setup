@@ -88,7 +88,7 @@ static SbkObject _Py_ChameleonQAppWrapper_Struct = {
 };
 
 static PyObject *qApp_var = nullptr;
-static PyObject *qApp_content = (PyObject *)&_Py_ChameleonQAppWrapper_Struct;
+static PyObject *qApp_content = reinterpret_cast<PyObject *>(&_Py_ChameleonQAppWrapper_Struct);
 static PyObject *qApp_moduledicts[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
 static int qApp_var_ref = 0;
 static int qApp_content_ref = 0;

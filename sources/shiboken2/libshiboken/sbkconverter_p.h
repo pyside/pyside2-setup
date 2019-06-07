@@ -331,7 +331,7 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
 {
     static PyObject *toPython(const void *cppIn)
     {
-        return PyLong_FromUnsignedLongLong(*reinterpret_cast<const unsigned PY_LONG_LONG *>(cppIn));
+        return PyLong_FromUnsignedLongLong(*static_cast<const unsigned PY_LONG_LONG *>(cppIn));
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {

@@ -224,7 +224,7 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
         int *offset = d->mi_offsets;
         while (*offset != -1) {
             if (*offset > 0)
-                m_d->assignWrapper(pyObj, reinterpret_cast<void *>((std::size_t) cptr + (*offset)));
+                m_d->assignWrapper(pyObj, reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cptr) + *offset));
             offset++;
         }
     }
@@ -244,7 +244,7 @@ void BindingManager::releaseWrapper(SbkObject *sbkObj)
             int *offset = d->mi_offsets;
             while (*offset != -1) {
                 if (*offset > 0)
-                    m_d->releaseWrapper(reinterpret_cast<void *>((std::size_t) cptr + (*offset)), sbkObj);
+                    m_d->releaseWrapper(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cptr) + *offset), sbkObj);
                 offset++;
             }
         }

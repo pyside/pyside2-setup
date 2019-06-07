@@ -287,7 +287,7 @@ PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType *type, PyObject 
 void nonePythonToCppNullPtr(PyObject *, void *cppOut)
 {
     assert(cppOut);
-    *reinterpret_cast<void **>(cppOut) = nullptr;
+    *static_cast<void **>(cppOut) = nullptr;
 }
 
 void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
@@ -568,7 +568,7 @@ PyObject *SpecificConverter::toPython(const void *cppIn)
     case CopyConversion:
         return copyToPython(m_converter, cppIn);
     case PointerConversion:
-        return pointerToPython(m_converter, *((const void **)cppIn));
+        return pointerToPython(m_converter, *static_cast<const void * const *>(cppIn));
     case ReferenceConversion:
         return referenceToPython(m_converter, cppIn);
     default:

@@ -86,13 +86,12 @@ static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
 };
 
 static PyType_Slot SbkObjectType_Type_slots[] = {
-    {Py_tp_dealloc, (void *)SbkObjectTypeDealloc},
-    {Py_tp_setattro, (void *)PyObject_GenericSetAttr},
-    {Py_tp_base, (void *)&PyType_Type},
-    {Py_tp_alloc, (void *)PyType_GenericAlloc},
-    {Py_tp_getset, (void *)SbkObjectType_Type_getsetlist},
-    {Py_tp_new, (void *)SbkObjectTypeTpNew},
-    {Py_tp_free, (void *)PyObject_GC_Del},
+    {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectTypeDealloc)},
+    {Py_tp_setattro, reinterpret_cast<void *>(PyObject_GenericSetAttr)},
+    {Py_tp_base, static_cast<void *>(&PyType_Type)},
+    {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
+    {Py_tp_new, reinterpret_cast<void *>(SbkObjectTypeTpNew)},
+    {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
     {0, nullptr}
 };
 static PyType_Spec SbkObjectType_Type_spec = {
@@ -261,11 +260,11 @@ static int SbkObject_clear(PyObject *self)
 }
 
 static PyType_Slot SbkObject_Type_slots[] = {
-    {Py_tp_dealloc, (void *)SbkDeallocWrapperWithPrivateDtor},
-    {Py_tp_traverse, (void *)SbkObject_traverse},
-    {Py_tp_clear, (void *)SbkObject_clear},
+    {Py_tp_dealloc, reinterpret_cast<void *>(SbkDeallocWrapperWithPrivateDtor)},
+    {Py_tp_traverse, reinterpret_cast<void *>(SbkObject_traverse)},
+    {Py_tp_clear, reinterpret_cast<void *>(SbkObject_clear)},
     // unsupported: {Py_tp_weaklistoffset, (void *)offsetof(SbkObject, weakreflist)},
-    {Py_tp_getset, (void *)SbkObjectGetSetList},
+    {Py_tp_getset, reinterpret_cast<void *>(SbkObjectGetSetList)},
     // unsupported: {Py_tp_dictoffset, (void *)offsetof(SbkObject, ob_dict)},
     {0, nullptr}
 };
@@ -427,7 +426,7 @@ PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *k
     PyObject *dict;
     static const char *kwlist[] = { "name", "bases", "dict", nullptr};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sO!O!:sbktype", (char **)kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sO!O!:sbktype", const_cast<char **>(kwlist),
                                      &name,
                                      &PyTuple_Type, &pyBases,
                                      &PyDict_Type, &dict))

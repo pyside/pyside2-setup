@@ -275,7 +275,7 @@ static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
     view->itemsize = 1;
     view->format = nullptr;
     if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
-        view->format = "B";
+        view->format = const_cast<char *>("B");
     view->ndim = 1;
     view->shape = nullptr;
     if ((flags & PyBUF_ND) == PyBUF_ND)
@@ -354,7 +354,7 @@ PyTypeObject *SbkVoidPtrTypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type)
-        type = (PyTypeObject *)PyType_FromSpec(&SbkVoidPtrType_spec);
+        type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkVoidPtrType_spec));
 
 #if PY_VERSION_HEX < 0x03000000
     type->tp_as_buffer = &SbkVoidPtrObjectBufferProc;
