@@ -8,14 +8,20 @@ ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractclipanimator_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractclipblendnode_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qadditiveclipblend_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationaspect_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcallback_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationclip_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcliploader_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcontroller_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationgroup_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qblendedclipanimator_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qclipanimator_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qclock_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qkeyframe_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qkeyframeanimation_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qlerpclipblend_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qmorphinganimation_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qmorphtarget_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qskeletonmapping_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qvertexblendanimation_wrapper.cpp
 # module is always needed
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_module_wrapper.cpp)

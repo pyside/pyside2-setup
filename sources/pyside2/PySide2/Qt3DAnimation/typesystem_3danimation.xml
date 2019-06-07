@@ -53,10 +53,21 @@
         <object-type name="QAbstractClipBlendNode"/>
         <object-type name="QAdditiveClipBlend"/>
         <object-type name="QAnimationAspect"/>
+        <object-type name="QAnimationCallback">
+            <enum-type name="Flag"/>
+        </object-type>
+        <object-type name="QAnimationClip"/>
+        <object-type name="QAnimationClipLoader">
+            <enum-type name="Status"/>
+        </object-type>
         <object-type name="QAnimationController"/>
         <object-type name="QAnimationGroup"/>
         <object-type name="QBlendedClipAnimator"/>
         <object-type name="QClipAnimator"/>
+        <object-type name="QClock"/>
+        <object-type name="QKeyFrame">
+            <enum-type name="InterpolationType"/>
+        </object-type>
         <object-type name="QKeyframeAnimation">
             <enum-type name="RepeatMode"/>
         </object-type>
@@ -65,6 +76,7 @@
             <enum-type name="Method"/>
         </object-type>
         <object-type name="QMorphTarget"/>
+        <object-type name="QSkeletonMapping"/>
         <object-type name="QVertexBlendAnimation"/>
     </namespace-type>
 </typesystem>

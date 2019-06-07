@@ -1,9 +1,12 @@
 Include(icecc.cmake)
-project(shiboken2)
-include(CheckIncludeFileCXX)
 
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
+
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type")
+
+project(shiboken2)
+include(CheckIncludeFileCXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake_helpers/")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/data/")
@@ -404,11 +407,7 @@ execute_process(
     OUTPUT_VARIABLE PYTHON_WITH_COUNT_ALLOCS
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-set(SHIBOKEN_BUILD_TYPE "Release")
+set(SHIBOKEN_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SHIBOKEN_BUILD_TYPE "Debug")

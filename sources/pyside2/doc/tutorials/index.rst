@@ -27,5 +27,6 @@ Tutorials
     basictutorial/dialog.rst
     basictutorial/uifiles.rst
     datavisualize/index.rst
+    expenses/expenses.rst
     qmlapp/qmlapplication.rst
     qmlintegration/qmlintegration.rst

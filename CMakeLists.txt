@@ -1,7 +1,9 @@
-project(pyside2_super_project)
-
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
+
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Type")
+
+project(pyside2_super_project)
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR "In-source builds are not allowed.")
