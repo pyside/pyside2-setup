@@ -108,6 +108,7 @@ static bool _setProperty(PyObject* qObj, PyObject *name, PyObject *value, bool *
         if (retval.isNull())
             return false;
     } else {
+        PyErr_Clear();
         Shiboken::AutoDecRef attr(PyObject_GenericGetAttr(qObj, name));
         if (PySide::Property::checkType(attr)) {
             *accept = true;

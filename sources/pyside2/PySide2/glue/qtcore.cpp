@@ -1211,8 +1211,8 @@ QByteArray ba(1 + int(%2), char(0));
 // @snippet qcryptographichash-adddata
 
 // @snippet qsocketnotifier
-Shiboken::AutoDecRef socket(%PYARG_1);
-if (!socket.isNull()) {
+PyObject *socket = %PYARG_1;
+if (socket != nullptr) {
     // We use qintptr as PyLong, but we check for int
     // since it is currently an alias to be Python2 compatible.
     // Internally, ints are qlonglongs.
