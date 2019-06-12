@@ -229,18 +229,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar().showMessage("File loaded", 2000)
 
     def saveFile(self, fileName):
-        file = QtCore.QFile(fileName)
-        if not file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
-            QtWidgets.QMessageBox.warning(self, "Application",
-                    "Cannot write file %s:\n%s." % (fileName, file.errorString()))
-            return False
-
-        outf = QtCore.QTextStream(file)
+        error = None
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-        # FIXME: Once file is out of scope, the file is empty, instead of having text.
-        outf << self.textEdit.toPlainText()
+        file = QtCore.QSaveFile(fileName)
+        if file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+            outf = QtCore.QTextStream(file)
+            outf << self.textEdit.toPlainText()
+            if not file.commit():
+                error = "Cannot write file %s:\n%s." % (fileName, file.errorString())
+        else:
+            error = "Cannot open file %s:\n%s." % (fileName, file.errorString())
         QtWidgets.QApplication.restoreOverrideCursor()
+
+        if error:
+            QtWidgets.QMessageBox.warning(self, "Application", error)
+            return False
 
         self.setCurrentFile(fileName)
         self.statusBar().showMessage("File saved", 2000)
