@@ -219,9 +219,12 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
     const AbstractMetaTypeList &instantiations = type->instantiations();
     for (const AbstractMetaType* t : instantiations)
         addInstantiatedContainersAndSmartPointers(t, context);
-    if (!type->typeEntry()->isContainer() && !type->typeEntry()->isSmartPointer())
+    const auto typeEntry = type->typeEntry();
+    const bool isContainer = typeEntry->isContainer();
+    if (!isContainer
+        && !(typeEntry->isSmartPointer() && typeEntry->generateCode())) {
         return;
-    bool isContainer = type->typeEntry()->isContainer();
+    }
     if (type->hasTemplateChildren()) {
         QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
         QString warning =
