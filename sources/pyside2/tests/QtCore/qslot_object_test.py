@@ -42,7 +42,7 @@ class objTest(QtCore.QObject):
 
     def slot(self):
         global qApp
- 
+
         self.ok = True
         qApp.quit()
 
@@ -51,8 +51,8 @@ class objTest(QtCore.QObject):
 class slotTest(unittest.TestCase):
     def quit_app(self):
         global qApp
-       
-        qApp.quit() 
+
+        qApp.quit()
 
     def testBasic(self):
         global qApp

@@ -75,7 +75,7 @@ class ReferenceCount(UsesQApplication):
         global destroyedPol
 
         self.beforeTest()
-        
+
         rect = self.scene.addRect(10.0, 10.0, 10.0, 10.0)
         self.assertTrue(isinstance(rect, QGraphicsRectItem))
 
