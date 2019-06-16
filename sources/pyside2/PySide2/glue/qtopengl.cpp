@@ -39,7 +39,7 @@
 
 // @snippet qglbuffer-allocate
 int size = (%2 < 0) ? %1.size() : %2;
-%CPPSELF.allocate((const void*) %1.data(), size);
+%CPPSELF.allocate(static_cast<const void *>(%1.data()), size);
 // @snippet qglbuffer-allocate
 
 // @snippet qglbuffer-read
@@ -47,7 +47,7 @@ char *data = new char[%3];
 bool result = %CPPSELF.read(%1, data, %3);
 QByteArray ret;
 if (result)
-    ret.append((const char*)data, %3);
+    ret.append(data, %3);
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[bool](result));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QByteArray](ret));
@@ -56,12 +56,12 @@ delete[] data;
 
 // @snippet qglbuffer-write
 int size = (%3 < 0) ? %2.size() : %3;
-%CPPSELF.write(%1, (const void*) %2.data(), size);
+%CPPSELF.write(%1, static_cast<const void *>(%2.data()), size);
 // @snippet qglbuffer-write
 
 // @snippet qglbuffer-map
 Py_ssize_t dataSize = %CPPSELF.size();
-void* data = %CPPSELF.map(%1);
+void *data = %CPPSELF.map(%1);
 
 if (!data) {
     Py_INCREF(Py_None);

@@ -43,21 +43,20 @@
 
 struct PyCustomWidgetPrivate
 {
-    PyObject* pyObject;
+    PyObject *pyObject;
     bool initialized;
 };
 
 struct PyCustomWidgetsPrivate
 {
-    QList<QDesignerCustomWidgetInterface*> widgets;
+    QList<QDesignerCustomWidgetInterface *> widgets;
     ~PyCustomWidgetsPrivate();
 };
 
 
 PyCustomWidgetsPrivate::~PyCustomWidgetsPrivate()
 {
-    foreach(QDesignerCustomWidgetInterface* iface, widgets)
-        delete iface;
+    qDeleteAll(widgets);
     widgets.clear();
 }
 
@@ -71,12 +70,12 @@ PyCustomWidgets::~PyCustomWidgets()
     delete m_data;
 }
 
-void PyCustomWidgets::registerWidgetType(PyObject* widget)
+void PyCustomWidgets::registerWidgetType(PyObject *widget)
 {
     m_data->widgets.append(new PyCustomWidget(widget));
 }
 
-QList<QDesignerCustomWidgetInterface*> PyCustomWidgets::customWidgets() const
+QList<QDesignerCustomWidgetInterface *> PyCustomWidgets::customWidgets() const
 {
     return m_data->widgets;
 }

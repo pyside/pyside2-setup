@@ -54,7 +54,7 @@ extern "C"
     struct PYSIDE_API PySideMetaFunction
     {
         PyObject_HEAD
-        PySideMetaFunctionPrivate* d;
+        PySideMetaFunctionPrivate *d;
     };
 }; //extern "C"
 
@@ -67,7 +67,7 @@ namespace PySide { namespace MetaFunction {
  * @param   methodIndex The index of this function on MetaObject
  * @return  Return a new reference of PySideMetaFunction
  **/
-PYSIDE_API PySideMetaFunction*  newObject(QObject* obj, int methodIndex);
+PYSIDE_API PySideMetaFunction *newObject(QObject *obj, int methodIndex);
 
 } //namespace MetaFunction
 } //namespace PySide

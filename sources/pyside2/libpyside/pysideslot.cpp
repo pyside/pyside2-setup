@@ -64,8 +64,8 @@ typedef struct
 extern "C"
 {
 
-static int slotTpInit(PyObject*, PyObject*, PyObject*);
-static PyObject* slotCall(PyObject*, PyObject*, PyObject*);
+static int slotTpInit(PyObject *, PyObject *, PyObject *);
+static PyObject *slotCall(PyObject *, PyObject *, PyObject *);
 
 // Class Definition -----------------------------------------------
 static PyType_Slot PySideSlotType_slots[] = {
@@ -94,20 +94,20 @@ static PyTypeObject *PySideSlotTypeF(void)
 
 int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 {
-    static PyObject *emptyTuple = 0;
-    static const char *kwlist[] = {"name", "result", 0};
-    char* argName = 0;
-    PyObject* argResult = 0;
+    static PyObject *emptyTuple = nullptr;
+    static const char *kwlist[] = {"name", "result", nullptr};
+    char *argName = nullptr;
+    PyObject *argResult = nullptr;
 
     if (emptyTuple == 0)
         emptyTuple = PyTuple_New(0);
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore." SLOT_DEC_NAME,
-                                     const_cast<char**>(kwlist), &argName, &argResult)) {
+                                     const_cast<char **>(kwlist), &argName, &argResult)) {
         return 0;
     }
 
-    PySideSlot *data = reinterpret_cast<PySideSlot*>(self);
+    PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
     if (!data->slotData)
         data->slotData = new SlotData;
     for(Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
@@ -133,13 +133,13 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 
 PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    static PyObject* pySlotName = 0;
-    PyObject* callback;
+    static PyObject *pySlotName = nullptr;
+    PyObject *callback;
     callback = PyTuple_GetItem(args, 0);
     Py_INCREF(callback);
 
     if (PyFunction_Check(callback)) {
-        PySideSlot *data = reinterpret_cast<PySideSlot*>(self);
+        PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
 
         if (!data->slotData)
             data->slotData = new SlotData;
@@ -179,7 +179,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 namespace PySide { namespace Slot {
 
-void init(PyObject* module)
+void init(PyObject *module)
 {
     if (PyType_Ready(PySideSlotTypeF()) < 0)
         return;

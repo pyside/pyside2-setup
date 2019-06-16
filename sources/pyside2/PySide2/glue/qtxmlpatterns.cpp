@@ -38,6 +38,6 @@
 ****************************************************************************/
 
 // @snippet qxmlschemavalidator-schema
-QXmlSchema* %0 = new QXmlSchema(%CPPSELF.schema());
-%PYARG_0 = %CONVERTTOPYTHON[QXmlSchema*](%0);
+QXmlSchema *%0 = new QXmlSchema(%CPPSELF.schema());
+%PYARG_0 = %CONVERTTOPYTHON[QXmlSchema *](%0);
 // @snippet qxmlschemavalidator-schema

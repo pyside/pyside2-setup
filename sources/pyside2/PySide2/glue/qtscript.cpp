@@ -54,7 +54,7 @@ QVariant res = %CPPSELF.property(Shiboken::String::toCString(key.object())).toVa
 if (res.isValid()) {
     return %CONVERTTOPYTHON[QVariant](res);
 } else {
-    PyObject* errorType = PyInt_Check(_key) ? PyExc_IndexError : PyExc_KeyError;
+    PyObject *errorType = PyInt_Check(_key) ? PyExc_IndexError : PyExc_KeyError;
     PyErr_SetString(errorType, "Key not found.");
     return 0;
 }

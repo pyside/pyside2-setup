@@ -599,17 +599,16 @@ offsetof(PyHeapTypeObject, as_sequence.sq_slice),
 PyObject *
 PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
 {
-    PyHeapTypeObject *res = (PyHeapTypeObject*)PyType_GenericAlloc(&PyType_Type, 0);
+    auto res = reinterpret_cast<PyHeapTypeObject *>(PyType_GenericAlloc(&PyType_Type, 0));
     PyTypeObject *type, *base;
     PyObject *modname;
-    char *s;
-    char *res_start = (char*)res;
+    auto res_start = reinterpret_cast<char *>(res);
     PyType_Slot *slot;
 
     /* Set the type name and qualname */
-    s = (char *)strrchr(spec->name, '.'); // C++11
+    auto s = const_cast<char *>(strrchr(spec->name, '.')); // C++11
     if (s == NULL)
-        s = (char*)spec->name;
+        s = const_cast<char *>(spec->name);
     else
         s++;
 
@@ -686,7 +685,7 @@ PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
         if (slot->slot == Py_tp_base || slot->slot == Py_tp_bases)
             /* Processed above */
             continue;
-        *(void**)(res_start + slotoffsets[slot->slot]) = slot->pfunc;
+        *reinterpret_cast<void **>(res_start + slotoffsets[slot->slot]) = slot->pfunc;
 
         /* need to make a copy of the docstring slot, which usually
            points to a static string literal */
@@ -746,7 +745,7 @@ PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
             goto fail;
     }
 
-    return (PyObject*)res;
+    return reinterpret_cast<PyObject *>(res);
 
  fail:
     Py_DECREF(res);
@@ -770,7 +769,7 @@ PyType_GetSlot(PyTypeObject *type, int slot)
         /* Extension module requesting slot from a future version */
         return NULL;
     }
-    return  *(void**)(((char*)type) + slotoffsets[slot]);
+    return  *reinterpret_cast<void **>(reinterpret_cast<char *>(type) + slotoffsets[slot]);
 }
 
 } // extern "C"

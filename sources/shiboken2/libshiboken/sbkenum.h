@@ -57,14 +57,14 @@ struct SbkEnumTypePrivate;
 namespace Shiboken
 {
 
-inline bool isShibokenEnum(PyObject* pyObj)
+inline bool isShibokenEnum(PyObject *pyObj)
 {
     return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
 }
 
 namespace Enum
 {
-    LIBSHIBOKEN_API bool check(PyObject* obj);
+    LIBSHIBOKEN_API bool check(PyObject *obj);
     /**
      *  Creates a new enum type (and its flags type, if any is given)
      *  and registers it to Python and adds it to \p module.
@@ -75,17 +75,17 @@ namespace Enum
      *  \param flagsType    Optional Python type for the flags associated with the enum.
      *  \return The new enum type or NULL if it fails.
      */
-    LIBSHIBOKEN_API PyTypeObject* createGlobalEnum(PyObject* module,
-                                                   const char* name,
-                                                   const char* fullName,
-                                                   const char* cppName,
-                                                   PyTypeObject* flagsType = 0);
+    LIBSHIBOKEN_API PyTypeObject *createGlobalEnum(PyObject *module,
+                                                   const char *name,
+                                                   const char *fullName,
+                                                   const char *cppName,
+                                                   PyTypeObject *flagsType = nullptr);
     /// This function does the same as createGlobalEnum, but adds the enum to a Shiboken type or namespace.
-    LIBSHIBOKEN_API PyTypeObject* createScopedEnum(SbkObjectType* scope,
-                                                   const char* name,
-                                                   const char* fullName,
-                                                   const char* cppName,
-                                                   PyTypeObject* flagsType = 0);
+    LIBSHIBOKEN_API PyTypeObject *createScopedEnum(SbkObjectType *scope,
+                                                   const char *name,
+                                                   const char *fullName,
+                                                   const char *cppName,
+                                                   PyTypeObject *flagsType = nullptr);
 
     /**
      *  Creates a new enum item for a given enum type and adds it to \p module.
@@ -95,25 +95,25 @@ namespace Enum
      *  \param itemValue Numerical value of the enum item.
      *  \return true if everything goes fine, false if it fails.
      */
-    LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject* enumType, PyObject* module, const char* itemName, long itemValue);
+    LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module, const char *itemName, long itemValue);
     /// This function does the same as createGlobalEnumItem, but adds the enum to a Shiboken type or namespace.
     LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
                                               const char *itemName, long itemValue);
-    LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject* enumType, SbkObjectType* scope, const char* itemName, long itemValue);
+    LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, SbkObjectType *scope, const char *itemName, long itemValue);
 
-    LIBSHIBOKEN_API PyObject* newItem(PyTypeObject* enumType, long itemValue, const char* itemName = 0);
+    LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, long itemValue, const char *itemName = 0);
 
-    LIBSHIBOKEN_API PyTypeObject* newTypeWithName(const char* name, const char* cppName,
+    LIBSHIBOKEN_API PyTypeObject *newTypeWithName(const char *name, const char *cppName,
                                                   PyTypeObject *numbers_fromFlag=nullptr);
-    LIBSHIBOKEN_API const char* getCppName(PyTypeObject* type);
+    LIBSHIBOKEN_API const char *getCppName(PyTypeObject *type);
 
-    LIBSHIBOKEN_API long getValue(PyObject* enumItem);
-    LIBSHIBOKEN_API PyObject* getEnumItemFromValue(PyTypeObject* enumType, long itemValue);
+    LIBSHIBOKEN_API long getValue(PyObject *enumItem);
+    LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue);
 
     /// Sets the enum's type converter.
-    LIBSHIBOKEN_API void setTypeConverter(PyTypeObject* enumType, SbkConverter* converter);
+    LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *enumType, SbkConverter *converter);
     /// Returns the converter assigned to the enum \p type.
-    LIBSHIBOKEN_API SbkConverter* getTypeConverter(PyTypeObject* enumType);
+    LIBSHIBOKEN_API SbkConverter *getTypeConverter(PyTypeObject *enumType);
 }
 
 } // namespace Shiboken

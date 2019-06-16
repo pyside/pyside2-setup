@@ -52,16 +52,16 @@ class PYSIDE_API DestroyListener : public QObject
 {
     Q_OBJECT
     public:
-        PYSIDE_DEPRECATED(static DestroyListener* instance());
+        PYSIDE_DEPRECATED(static DestroyListener *instance());
         static void destroy();
-        void listen(QObject* obj);
+        void listen(QObject *obj);
 
     public Q_SLOTS:
-        void onObjectDestroyed(QObject* obj);
+        void onObjectDestroyed(QObject *obj);
 
     private:
-        static DestroyListener* m_instance;
-        DestroyListenerPrivate* m_d;
+        static DestroyListener *m_instance;
+        DestroyListenerPrivate *m_d;
         DestroyListener(QObject *parent);
         ~DestroyListener() override;
 };

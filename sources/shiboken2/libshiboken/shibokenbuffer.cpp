@@ -41,14 +41,14 @@
 #include <cstdlib>
 #include <cstring>
 
-bool Shiboken::Buffer::checkType(PyObject* pyObj)
+bool Shiboken::Buffer::checkType(PyObject *pyObj)
 {
     return PyObject_CheckReadBuffer(pyObj) != 0;
 }
 
-void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
+void *Shiboken::Buffer::getPointer(PyObject *pyObj, Py_ssize_t *size)
 {
-    const void* buffer = 0;
+    const void *buffer = nullptr;
 #ifdef IS_PY3K
     Py_buffer view;
     if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
@@ -67,10 +67,10 @@ void* Shiboken::Buffer::getPointer(PyObject* pyObj, Py_ssize_t* size)
     if (size)
         *size = bufferSize;
 #endif
-    return const_cast<void*>(buffer);
+    return const_cast<void *>(buffer);
 }
 
-PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
+PyObject *Shiboken::Buffer::newObject(void *memory, Py_ssize_t size, Type type)
 {
     if (size == 0)
         Py_RETURN_NONE;
@@ -93,7 +93,7 @@ PyObject* Shiboken::Buffer::newObject(void* memory, Py_ssize_t size, Type type)
 #endif
 }
 
-PyObject* Shiboken::Buffer::newObject(const void* memory, Py_ssize_t size)
+PyObject *Shiboken::Buffer::newObject(const void *memory, Py_ssize_t size)
 {
-    return newObject(const_cast<void*>(memory), size, ReadOnly);
+    return newObject(const_cast<void *>(memory), size, ReadOnly);
 }
