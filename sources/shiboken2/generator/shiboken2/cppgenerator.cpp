@@ -3686,14 +3686,29 @@ void CppGenerator::writeEnumConverterInitialization(QTextStream& s, const TypeEn
         }
 
         s << INDENT << "Shiboken::Enum::setTypeConverter(" << enumPythonType << ", converter);" << endl;
-        QStringList cppSignature = enumType->qualifiedCppName().split(QLatin1String("::"), QString::SkipEmptyParts);
-        while (!cppSignature.isEmpty()) {
-            QString signature = cppSignature.join(QLatin1String("::"));
-            s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"";
-            if (flags)
-                s << "QFlags<";
-            s << signature << "\");" << endl;
-            cppSignature.removeFirst();
+
+        QString signature = enumType->qualifiedCppName();
+        // Replace "QFlags<Class::Option>" by "Class::Options"
+        if (flags && signature.startsWith(QLatin1String("QFlags<")) && signature.endsWith(QLatin1Char('>'))) {
+            signature.chop(1);
+            signature.remove(0, 7);
+            const int lastQualifierPos = signature.lastIndexOf(QLatin1String("::"));
+            if (lastQualifierPos != -1) {
+                signature.replace(lastQualifierPos + 2, signature.size() - lastQualifierPos - 2,
+                                  flags->flagsName());
+            } else {
+                signature = flags->flagsName();
+            }
+        }
+
+        while (true) {
+            s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \""
+                << signature << "\");\n";
+            const int qualifierPos = signature.indexOf(QLatin1String("::"));
+            if (qualifierPos != -1)
+                signature.remove(0, qualifierPos + 2);
+            else
+                break;
         }
     }
     s << INDENT << '}' << endl;
