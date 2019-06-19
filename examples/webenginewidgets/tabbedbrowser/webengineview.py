@@ -79,7 +79,7 @@ class WebEngineView(QWebEngineView):
     def is_web_action_enabled(self, web_action):
         return self.page().action(web_action).isEnabled()
 
-    def create_window(self, window_type):
+    def createWindow(self, window_type):
         if window_type == QWebEnginePage.WebBrowserTab or window_type == QWebEnginePage.WebBrowserBackgroundTab:
             return self._tab_factory_func()
         return self._window_factory_func()

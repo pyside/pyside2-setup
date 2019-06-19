@@ -593,10 +593,8 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream& s, const AbstractMetaCla
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaType *metaType)
 {
-    QString signature = metaType->cppSignature();
-    TypeInfo::stripQualifiers(&signature); // for const refs to smart pointers
-    s <<  "template<> inline PyTypeObject *SbkType< ::" << signature << " >() "
-       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(metaType) << "); }\n";
+    s <<  "template<> inline PyTypeObject* SbkType< ::" << metaType->cppSignature() << " >() "
+      <<  "{ return reinterpret_cast<PyTypeObject*>(" << cpythonTypeNameExt(metaType) << "); }\n";
 }
 
 void HeaderGenerator::writeInheritedOverloads(QTextStream& s)
