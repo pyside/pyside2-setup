@@ -3279,7 +3279,9 @@ QString FunctionModification::toString() const
     return str;
 }
 
-static AddedFunction::TypeInfo parseType(const QString& signature, int startPos = 0, int* endPos = 0)
+static AddedFunction::TypeInfo parseType(const QString& signature,
+                                         int startPos = 0, int *endPos = nullptr,
+                                         QString *argumentName = nullptr)
 {
     AddedFunction::TypeInfo result;
     static const QRegularExpression regex(QLatin1String("\\w"));
@@ -3330,6 +3332,19 @@ static AddedFunction::TypeInfo parseType(const QString& signature, int startPos 
         paramString.remove(0, sizeof("const")/sizeof(char));
         paramString = paramString.trimmed();
     }
+
+    // Extract argument name from "T<bla,blub>* @foo@"
+    const int nameStartPos = paramString.indexOf(QLatin1Char('@'));
+    if (nameStartPos != -1) {
+        const int nameEndPos = paramString.indexOf(QLatin1Char('@'), nameStartPos + 1);
+        if (nameEndPos > nameStartPos) {
+            if (argumentName)
+                *argumentName = paramString.mid(nameStartPos + 1, nameEndPos - nameStartPos - 1);
+            paramString.remove(nameStartPos, nameEndPos - nameStartPos + 1);
+            paramString = paramString.trimmed();
+        }
+    }
+
     // check reference
     if (paramString.endsWith(QLatin1Char('&'))) {
         result.isReference = true;
@@ -3364,9 +3379,10 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
         m_name = signature.left(endPos).trimmed();
         int signatureLength = signature.length();
         while (endPos < signatureLength) {
-            TypeInfo arg = parseType(signature, endPos, &endPos);
+            QString argumentName;
+            TypeInfo arg = parseType(signature, endPos, &endPos, &argumentName);
             if (!arg.name.isEmpty())
-                m_arguments.append(arg);
+                m_arguments.append({argumentName, arg});
             // end of parameters...
             if (signature[endPos] == QLatin1Char(')'))
                 break;
@@ -3508,6 +3524,19 @@ QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti)
     d << ti.name;
     if (!ti.defaultValue.isEmpty())
         d << " = " << ti.defaultValue;
+    d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const AddedFunction::Argument &a)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "Argument(";
+    d << a.typeInfo;
+    if (!a.name.isEmpty())
+        d << ' ' << a.name;
     d << ')';
     return d;
 }

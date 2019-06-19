@@ -43,7 +43,7 @@
 """PySide2 port of the widgets/draganddrop/draggabletext example from Qt v5.x, originating from PyQt"""
 
 from PySide2.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper,
-        QSize, QTextStream, Qt)
+        QSaveFile, QSize, QTextStream, Qt)
 from PySide2.QtGui import QIcon, QKeySequence
 from PySide2.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow,
         QMdiArea, QMessageBox, QTextEdit, QWidget)
@@ -100,17 +100,21 @@ class MdiChild(QTextEdit):
         return self.saveFile(fileName)
 
     def saveFile(self, fileName):
-        file = QFile(fileName)
-
-        if not file.open(QFile.WriteOnly | QFile.Text):
-            QMessageBox.warning(self, "MDI",
-                    "Cannot write file %s:\n%s." % (fileName, file.errorString()))
-            return False
-
-        outstr = QTextStream(file)
+        error = None
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        outstr << self.toPlainText()
+        file = QSaveFile(fileName)
+        if file.open(QFile.WriteOnly | QFile.Text):
+            outstr = QTextStream(file)
+            outstr << self.toPlainText()
+            if not file.commit():
+                error = "Cannot write file %s:\n%s." % (fileName, file.errorString())
+        else:
+            error = "Cannot open file %s:\n%s." % (fileName, file.errorString())
         QApplication.restoreOverrideCursor()
+
+        if error:
+            QMessageBox.warning(self, "MDI", error)
+            return False
 
         self.setCurrentFile(fileName)
         return True

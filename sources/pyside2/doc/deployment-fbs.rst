@@ -3,8 +3,8 @@
 ===============
 
 `fbs <https://build-system.fman.io>`_ provides a powerful environment for packaging,
-creating installers, and signing your application, but also for managing the application's updates.
-Since it is based on PyInstaller, it currently supports Linux, macOS, and Windows.
+creating installers, and signing your application. It also lets you manage updates to
+your application. As it is based on PyInstaller, it supports Linux, macOS, and Windows.
 
 You can read the `official tutorial <https://github.com/mherrmann/fbs-tutorial>`_ for more
 details on how to use `fbs`, or check the
@@ -26,12 +26,12 @@ After the installation, you will be able to use the `fbs` executable.
 Starting a new project
 ======================
 
-`fbs` provides nice features that allow you to create a base
+`fbs` provides nice features that lets you create a base
 project structure by executing the following command::
 
     fbs startproject
 
-This process will prompt you to answer many questions to configure the details
+This command prompts you to answer a few questions to configure the details
 of your project, like:
 
  * Application name
@@ -39,8 +39,8 @@ of your project, like:
  * Qt bindings (PySide2 or PyQt5)
  * Bundle indentified (for macOS)
 
-After the process finishes, you will have a `src/` directory that
-will contain the following structure::
+After it finishes, you will have a `src/` directory that
+contains the following structure::
 
     └── src
         ├── build
@@ -52,10 +52,11 @@ will contain the following structure::
             │   └── mac
             └── python
 
-Inside the `settings` directory you can find a couple of `json` files
-that you can edit to include more information about your project.
+Inside the `settings` directory, you will find a couple of `json` files
+that can be edited to include more information about your project.
 
-The main file will be under the `python` directory, and its content by default is::
+The `main` file will be under the `python` directory, and its content
+by default is::
 
     from fbs_runtime.application_context import ApplicationContext
     from PySide2.QtWidgets import QMainWindow
@@ -70,7 +71,8 @@ The main file will be under the `python` directory, and its content by default i
         exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
         sys.exit(exit_code)
 
-The example will show an empty `QMainWindow`, and you can execute it by running::
+This example shows an empty `QMainWindow`. You can run it using the
+following command::
 
     fbs run
 
@@ -78,23 +80,24 @@ Freezing the application
 ========================
 
 Once you verify that the application is properly working,
-you can continue with the freezing process::
+you can continue with the freezing process using the following
+command::
 
     fbs freeze
 
 After the process finishes, you will get a message stating the location
-of your executable, e.g.::
+of your executable. For example::
 
     Done. You can now run `target/MyApp/MyApp`. If that doesn't work, see
     https://build-system.fman.io/troubleshooting.
 
 
-Then executing the application will result in the same window
-you saw with the `fbs run` command::
+You can now try running the application, which will result in the same
+window that you saw with the `fbs run` command::
 
     cd target/MyApp/
     ./MyApp
 
-.. note:: This is the case for Linux. For other platforms like macOS, you will need to
-          enter the directory: `target/MyApp.app/Contents/MacOS`, and for
-          Windows you will find a `MyApp.exe` executable.
+.. note:: This is the case for Linux. For other platforms like macOS,
+   you need to enter the directory: `target/MyApp.app/Contents/macOS`,
+   and for Windows find the `MyApp.exe` executable.

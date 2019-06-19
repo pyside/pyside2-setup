@@ -208,25 +208,20 @@ class Reloader(object):
     This is a singleton class which provides the update function for the
     shiboken and PySide classes.
     """
-    _uninitialized = "Shiboken minimal sample other smart".split()
-    _prefixes = [""]
-    try:
-        import PySide2
-        _uninitialized += PySide2.__all__ + ["testbinding"]
-        _prefixes += ["PySide2."]
-    except ImportError:
-        pass
-
     def __init__(self):
         self.sys_module_count = 0
-        self.uninitialized = self._uninitialized
+
+    @staticmethod
+    def module_valid(mod):
+        if getattr(mod, "__file__", None) and not os.path.isdir(mod.__file__):
+            ending = os.path.splitext(mod.__file__)[-1]
+            return ending not in (".py", ".pyc", ".pyo", ".pyi")
+        return False
 
     def update(self):
         """
-        update is responsible to import all modules from shiboken and PySide
-        which are already in sys.modules.
-        The purpose is to follow all user imports without introducing new
-        ones.
+        'update' imports all binary modules which are already in sys.modules.
+        The reason is to follow all user imports without introducing new ones.
         This function is called by pyside_type_init to adapt imports
         when the number of imported modules has changed.
         """
@@ -234,36 +229,31 @@ class Reloader(object):
             return
         self.sys_module_count = len(sys.modules)
         g = globals()
-        for mod_name in self.uninitialized[:]:
-            for prefix in self._prefixes:
-                import_name = prefix + mod_name
-                if import_name in sys.modules:
-                    # check if this is a real module
-                    check_module(sys.modules[import_name])
-                    # module is real
-                    self.uninitialized.remove(mod_name)
-                    proc_name = "init_" + mod_name
-                    if proc_name in g:
-                        # Do the 'import {import_name}' first.
-                        # 'top' is PySide2 when we do 'import PySide.QtCore'
-                        # or Shiboken if we do 'import Shiboken'.
-                        # Convince yourself that these two lines below have the same
-                        # global effect as "import Shiboken" or "import PySide2.QtCore".
-                        top = __import__(import_name)
-                        g[top.__name__] = top
-                        # Modules are in place, we can update the type_map.
-                        g.update(g[proc_name]())
+        # PYSIDE-1009: Try to recognize unknown modules in errorhandler.py
+        candidates = list(mod_name for mod_name in sys.modules
+                          if self.module_valid(sys.modules[mod_name]))
+        for mod_name in candidates:
+            # 'top' is PySide2 when we do 'import PySide.QtCore'
+            # or Shiboken if we do 'import Shiboken'.
+            # Convince yourself that these two lines below have the same
+            # global effect as "import Shiboken" or "import PySide2.QtCore".
+            top = __import__(mod_name)
+            g[top.__name__] = top
+            proc_name = "init_" + mod_name.replace(".", "_")
+            if proc_name in g:
+                # Modules are in place, we can update the type_map.
+                g.update(g.pop(proc_name)())
+
 
 def check_module(mod):
     # During a build, there exist the modules already as directories,
     # although the '*.so' was not yet created. This causes a problem
     # in Python 3, because it accepts folders as namespace modules
     # without enforcing an '__init__.py'.
-    if not getattr(mod, "__file__", None) or os.path.isdir(mod.__file__):
+    if not Reloader.module_valid(mod):
         mod_name = mod.__name__
-        raise ImportError("Module '{mod_name}' is at most a namespace!"
+        raise ImportError("Module '{mod_name}' is not a binary module!"
                           .format(**locals()))
-
 
 update_mapping = Reloader().update
 type_map = {}
@@ -274,6 +264,7 @@ type_map.update({
     "QVector": typing.List,
     "QSet": typing.Set,
     "QPair": Pair,
+    "QMap": typing.Dict,
     })
 
 
@@ -348,7 +339,7 @@ def init_smart():
     return locals()
 
 # The PySide Part
-def init_QtCore():
+def init_PySide2_QtCore():
     from PySide2.QtCore import Qt, QUrl, QDir
     from PySide2.QtCore import QRect, QSize, QPoint, QLocale, QByteArray
     from PySide2.QtCore import QMarginsF # 5.9
@@ -401,7 +392,6 @@ def init_QtCore():
         "list of QAbstractState": typing.List[PySide2.QtCore.QAbstractState],
         "list of QAbstractAnimation": typing.List[PySide2.QtCore.QAbstractAnimation],
         "QVariant()": Invalid(Variant),
-        "QMap": typing.Dict,
         "PySide2.QtCore.bool": bool,
         "QHash": typing.Dict,
         "PySide2.QtCore.QChar": Char,
@@ -495,7 +485,7 @@ def init_QtCore():
     return locals()
 
 
-def init_QtGui():
+def init_PySide2_QtGui():
     from PySide2.QtGui import QPageLayout, QPageSize # 5.12 macOS
     type_map.update({
         "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
@@ -525,7 +515,7 @@ def init_QtGui():
     return locals()
 
 
-def init_QtWidgets():
+def init_PySide2_QtWidgets():
     from PySide2.QtWidgets import QWidget, QMessageBox, QStyleOption, QStyleHintReturn, QStyleOptionComplex
     from PySide2.QtWidgets import QGraphicsItem, QStyleOptionGraphicsItem # 5.9
     type_map.update({
@@ -557,7 +547,7 @@ def init_QtWidgets():
     return locals()
 
 
-def init_QtSql():
+def init_PySide2_QtSql():
     from PySide2.QtSql import QSqlDatabase
     type_map.update({
         "QLatin1String(defaultConnection)": QSqlDatabase.defaultConnection,
@@ -566,7 +556,7 @@ def init_QtSql():
     return locals()
 
 
-def init_QtNetwork():
+def init_PySide2_QtNetwork():
     type_map.update({
         "QMultiMap": MultiMap,
         "zero(unsigned short)": 0,
@@ -576,7 +566,7 @@ def init_QtNetwork():
     return locals()
 
 
-def init_QtXmlPatterns():
+def init_PySide2_QtXmlPatterns():
     from PySide2.QtXmlPatterns import QXmlName
     type_map.update({
         "QXmlName.PrefixCode": Missing("PySide2.QtXmlPatterns.QXmlName.PrefixCode"),
@@ -585,7 +575,7 @@ def init_QtXmlPatterns():
     return locals()
 
 
-def init_QtMultimedia():
+def init_PySide2_QtMultimedia():
     import PySide2.QtMultimediaWidgets
     # Check if foreign import is valid. See mapping.py in shiboken2.
     check_module(PySide2.QtMultimediaWidgets)
@@ -596,7 +586,7 @@ def init_QtMultimedia():
     return locals()
 
 
-def init_QtOpenGL():
+def init_PySide2_QtOpenGL():
     type_map.update({
         "GLuint": int,
         "GLenum": int,
@@ -612,7 +602,7 @@ def init_QtOpenGL():
     return locals()
 
 
-def init_QtQml():
+def init_PySide2_QtQml():
     type_map.update({
         "QJSValueList()": [],
         "PySide2.QtQml.bool volatile": bool,
@@ -624,7 +614,7 @@ def init_QtQml():
     return locals()
 
 
-def init_QtQuick():
+def init_PySide2_QtQuick():
     type_map.update({
         "PySide2.QtQuick.QSharedPointer": int,
         "PySide2.QtCore.uint": int,
@@ -635,35 +625,35 @@ def init_QtQuick():
     return locals()
 
 
-def init_QtScript():
+def init_PySide2_QtScript():
     type_map.update({
         "QScriptValueList()": [],
     })
     return locals()
 
 
-def init_QtTest():
+def init_PySide2_QtTest():
     type_map.update({
         "PySide2.QtTest.QTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
     })
     return locals()
 
 # from 5.9
-def init_QtWebEngineWidgets():
+def init_PySide2_QtWebEngineWidgets():
     type_map.update({
         "zero(PySide2.QtWebEngineWidgets.QWebEnginePage.FindFlags)": 0,
     })
     return locals()
 
 # from 5.6, MSVC
-def init_QtWinExtras():
+def init_PySide2_QtWinExtras():
     type_map.update({
         "QList< QWinJumpListItem* >()": [],
     })
     return locals()
 
 # from 5.12, macOS
-def init_QtDataVisualization():
+def init_PySide2_QtDataVisualization():
     from PySide2.QtDataVisualization import QtDataVisualization
     QtDataVisualization.QBarDataRow = typing.List[QtDataVisualization.QBarDataItem]
     QtDataVisualization.QBarDataArray = typing.List[QtDataVisualization.QBarDataRow]

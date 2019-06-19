@@ -2681,11 +2681,8 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry* type)
 QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType* type)
 {
     QString result = QLatin1String("SBK");
-    const auto *typeEntry = type->typeEntry();
-    if (typeEntry->isContainer()
-        || typeEntry->isSmartPointer()) { // PYSIDE-1024
+    if (type->typeEntry()->isContainer())
         result += QLatin1Char('_') + moduleName().toUpper();
-    }
     result += processInstantiationsVariableName(type);
     appendIndexSuffix(&result);
     return result;

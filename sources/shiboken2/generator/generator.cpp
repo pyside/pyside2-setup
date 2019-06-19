@@ -219,9 +219,12 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
     const AbstractMetaTypeList &instantiations = type->instantiations();
     for (const AbstractMetaType* t : instantiations)
         addInstantiatedContainersAndSmartPointers(t, context);
-    if (!type->typeEntry()->isContainer() && !type->typeEntry()->isSmartPointer())
+    const auto typeEntry = type->typeEntry();
+    const bool isContainer = typeEntry->isContainer();
+    if (!isContainer
+        && !(typeEntry->isSmartPointer() && typeEntry->generateCode())) {
         return;
-    bool isContainer = type->typeEntry()->isContainer();
+    }
     if (type->hasTemplateChildren()) {
         QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
         QString warning =
@@ -244,6 +247,13 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
         // Is smart pointer.
         if (!m_d->instantiatedSmartPointerNames.contains(typeName)) {
             m_d->instantiatedSmartPointerNames.append(typeName);
+            if (type->isConstant() || type->referenceType() != NoReference) {
+                // Strip a "const QSharedPtr<Foo> &" or similar to "QSharedPtr<Foo>" (PYSIDE-1016)
+                auto fixedType = type->copy();
+                fixedType->setReferenceType(NoReference);
+                fixedType->setConstant(false);
+                type = fixedType;
+            }
             m_d->instantiatedSmartPointers.append(type);
         }
     }
@@ -912,7 +922,6 @@ QString getClassTargetFullName(const AbstractMetaType *metaType, bool includePac
 
 QString getFilteredCppSignatureString(QString signature)
 {
-    TypeInfo::stripQualifiers(&signature); // for const refs to smart pointers
     signature.replace(QLatin1String("::"), QLatin1String("_"));
     signature.replace(QLatin1Char('<'), QLatin1Char('_'));
     signature.replace(QLatin1Char('>'), QLatin1Char('_'));

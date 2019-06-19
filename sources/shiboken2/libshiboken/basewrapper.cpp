@@ -76,11 +76,21 @@ extern "C"
 static void SbkObjectTypeDealloc(PyObject* pyObj);
 static PyObject* SbkObjectTypeTpNew(PyTypeObject* metatype, PyObject* args, PyObject* kwds);
 
+// PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
+// explicitly pass __doc__. For __signature__ it _did_ actually work, because
+// it was not existing before. We add them both for clarity.
+static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
+    {const_cast<char*>("__signature__"), (getter)Sbk_TypeGet___signature__},
+    {const_cast<char*>("__doc__"),       (getter)Sbk_TypeGet___doc__},
+    {nullptr}  // Sentinel
+};
+
 static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_dealloc, (void *)SbkObjectTypeDealloc},
     {Py_tp_setattro, (void *)PyObject_GenericSetAttr},
     {Py_tp_base, (void *)&PyType_Type},
     {Py_tp_alloc, (void *)PyType_GenericAlloc},
+    {Py_tp_getset, (void *)SbkObjectType_Type_getsetlist},
     {Py_tp_new, (void *)SbkObjectTypeTpNew},
     {Py_tp_free, (void *)PyObject_GC_Del},
     {0, 0}
