@@ -1180,4 +1180,24 @@ SetError_Argument(PyObject *args, const char *func_name)
     PyErr_SetObject(err, msg);
 }
 
+/*
+ * Support for the metatype SbkObjectType_Type's tp_getset.
+ *
+ * This was not necessary for __signature__, because PyType_Type inherited it.
+ * But the __doc__ attribute existed already by inheritance, and calling
+ * PyType_Modified() is not supported. So we added the getsets explicitly
+ * to the metatype.
+ */
+
+PyObject *
+Sbk_TypeGet___signature__(PyObject *ob, const char *modifier)
+{
+    return pyside_tp_get___signature__(ob, modifier);
+}
+
+PyObject *Sbk_TypeGet___doc__(PyObject *ob)
+{
+    return pyside_tp_get___doc__(ob);
+}
+
 } //extern "C"

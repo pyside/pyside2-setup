@@ -424,6 +424,12 @@ struct AddedFunction
         bool isReference = false;
     };
 
+    struct Argument
+    {
+        QString name;
+        TypeInfo typeInfo;
+    };
+
     /// Creates a new AddedFunction with a signature and a return type.
     explicit AddedFunction(QString signature, const QString &returnType);
     AddedFunction() = default;
@@ -453,7 +459,7 @@ struct AddedFunction
     }
 
     /// Returns a list of argument type infos.
-    QVector<TypeInfo> arguments() const
+    const QVector<Argument> &arguments() const
     {
         return m_arguments;
     }
@@ -480,7 +486,7 @@ struct AddedFunction
 
 private:
     QString m_name;
-    QVector<TypeInfo> m_arguments;
+    QVector<Argument> m_arguments;
     TypeInfo m_returnType;
     Access m_access = Protected;
     bool m_isConst = false;
@@ -489,6 +495,7 @@ private:
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti);
+QDebug operator<<(QDebug d, const AddedFunction::Argument &a);
 QDebug operator<<(QDebug d, const AddedFunction &af);
 #endif
 

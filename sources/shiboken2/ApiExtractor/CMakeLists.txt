@@ -33,8 +33,7 @@ add_library(apiextractor STATIC ${apiextractor_SRC})
 target_include_directories(apiextractor PRIVATE ${CLANG_EXTRA_INCLUDES}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}
                                                 ${CMAKE_CURRENT_BINARY_DIR}
-                                                ${CMAKE_CURRENT_SOURCE_DIR}/parser
-                                                ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp)
+                                                ${CMAKE_CURRENT_SOURCE_DIR}/parser)
 target_link_libraries(apiextractor PUBLIC Qt5::Core)
 target_link_libraries(apiextractor PRIVATE ${CLANG_EXTRA_LIBRARIES})
 

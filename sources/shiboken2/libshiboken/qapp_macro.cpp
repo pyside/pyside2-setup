@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "basewrapper.h"
+#include "autodecref.h"
 
 extern "C"
 {
@@ -93,13 +94,14 @@ static int qApp_var_ref = 0;
 static int qApp_content_ref = 0;
 
 static int
-reset_qApp_var()
+reset_qApp_var(void)
 {
     PyObject **mod_ptr;
 
-    for (mod_ptr = qApp_moduledicts; *mod_ptr != NULL; mod_ptr++) {
+    for (mod_ptr = qApp_moduledicts; *mod_ptr != nullptr; mod_ptr++) {
         // We respect whatever the user may have set.
-        if (PyDict_GetItem(*mod_ptr, qApp_var) == NULL) {
+        PyObject *existing = PyDict_GetItem(*mod_ptr, qApp_var);
+        if (existing == nullptr || Py_TYPE(existing) == Py_NONE_TYPE) {
             if (PyDict_SetItem(*mod_ptr, qApp_var, qApp_content) < 0)
                 return -1;
         }
@@ -135,8 +137,13 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
     if (Py_REFCNT(qApp_content) > qApp_content_ref)
         qApp_content_ref = Py_REFCNT(qApp_content);
 
-    if (Py_TYPE(qApp_content) != Py_NONE_TYPE)
+    if (Py_TYPE(qApp_content) != Py_NONE_TYPE) {
+        // Remove the "_" variable which might hold a reference to qApp.
+        Shiboken::AutoDecRef pymain(PyImport_ImportModule("__main__"));
+        if (pymain.object() && PyObject_HasAttrString(pymain.object(), "_"))
+            PyObject_DelAttrString(pymain.object(), "_");
         Py_REFCNT(qApp_var) = 1; // fuse is armed...
+    }
     if (type == Py_NONE_TYPE) {
         // Debug mode showed that we need to do more than just remove the
         // reference. To keep everything in the right order, it is easiest
@@ -149,8 +156,8 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
         Py_TYPE(qApp_content) = Py_NONE_TYPE;
         Py_REFCNT(qApp_var) = qApp_var_ref;
         Py_REFCNT(qApp_content) = Py_REFCNT(Py_None);
-        if (__moduleShutdown != NULL)
-            Py_DECREF(PyObject_CallFunction(__moduleShutdown, (char *)"()"));
+        if (__moduleShutdown != nullptr)
+            Py_XDECREF(PyObject_CallFunction(__moduleShutdown, const_cast<char *>("()")));
     }
     else
         (void)PyObject_INIT(qApp_content, type);
@@ -216,9 +223,29 @@ setup_qApp_var(PyObject *module)
 }
 
 void
-NotifyModuleForQApp(PyObject *module)
+NotifyModuleForQApp(PyObject *module, void *qApp)
 {
     setup_qApp_var(module);
+    /*
+     * PYSIDE-571: Check if an QApplication instance exists before the import.
+     * This happens in scriptableapplication and application_test.py .
+     *
+     * Crucial Observation
+     * ===================
+     *
+     * A Q*Application object from C++ does not have a wrapper or constructor
+     * like instances created by Python. It makes no sense to support
+     * deletion or special features like qApp resurrection.
+     *
+     * Therefore, the implementation is very simple and just redirects the
+     * qApp_contents variable and assigns the instance, instead of vice-versa.
+     */
+    if (qApp != nullptr) {
+        Shiboken::AutoDecRef pycore(PyImport_ImportModule("PySide2.QtCore"));
+        Shiboken::AutoDecRef coreapp(PyObject_GetAttrString(pycore, "QCoreApplication"));
+        qApp_content = PyObject_CallMethod(coreapp, "instance", "");
+        reset_qApp_var();
+    }
 }
 
 
