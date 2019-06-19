@@ -1616,11 +1616,11 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     metaFunction->setType(translateType(addedFunc->returnType()));
 
 
-    QVector<AddedFunction::TypeInfo> args = addedFunc->arguments();
+    const auto &args = addedFunc->arguments();
     AbstractMetaArgumentList metaArguments;
 
     for (int i = 0; i < args.count(); ++i) {
-        AddedFunction::TypeInfo& typeInfo = args[i];
+        const AddedFunction::TypeInfo& typeInfo = args.at(i).typeInfo;
         AbstractMetaArgument *metaArg = new AbstractMetaArgument;
         AbstractMetaType *type = translateType(typeInfo);
         if (Q_UNLIKELY(!type)) {
@@ -1631,6 +1631,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             return nullptr;
         }
         type->decideUsagePattern();
+        if (!args.at(i).name.isEmpty())
+            metaArg->setName(args.at(i).name);
         metaArg->setType(type);
         metaArg->setArgumentIndex(i);
         metaArg->setDefaultValueExpression(typeInfo.defaultValue);

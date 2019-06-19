@@ -2,10 +2,9 @@
 |project| & cx_Freeze
 =====================
 
-`cx_Freeze <https://anthony-tuininga.github.io/cx_Freeze/>`_ allows you to freeze your Python
-application into executables.
-The supported platforms are Linux, macOS, Windows, FreeBSD, among others.
-
+`cx_Freeze <https://anthony-tuininga.github.io/cx_Freeze/>`_ lets you
+freeze your Python application into executables. The supported
+platforms are Linux, macOS, Windows, FreeBSD, among others.
 
 You can read the `official documentation <https://cx-freeze.readthedocs.io/en/latest/index.html>`_
 to clarify any further question, and remember to contribute to
@@ -15,7 +14,7 @@ if you find any, or contributing to `their development <https://bitbucket.org/an
 Preparation
 ===========
 
-Installing `cx_Freeze` can be done via **pip**::
+Installing `cx_Freeze` can be done using **pip**::
 
     pip install cx_freeze
 
@@ -34,7 +33,7 @@ There are three options to work with `cx_Freeze`:
  2. Creating `setup.py` script to build the project.
  3. Using the module classes directly (for advanced purposes).
 
-We will cover the first two uses cases.
+The following sections cover the first two use cases.
 
 Creating an example
 -------------------
@@ -83,15 +82,16 @@ Now, consider the following simple script, named `hello.py`::
 Using `cxfreeze` executable
 ---------------------------
 
-The command line to proceed will look like this::
+Now that we have an application, try freezing it with the following
+command::
 
     cxfreeze hello.py
 
-This command will create a `dist/` directory that will contain the
-executable and a `lib/` directory including all the shared libraries.
+This command creates a `dist/` directory containing the executable.
+and a `lib/` directory containing all the shared libraries.
 
-To launch the application, you need to just go to the `dist/` directory
-and execute the file::
+To launch the application, go to the `dist/` directory and execute
+the file::
 
     cd dist/
     ./main
@@ -100,7 +100,7 @@ and execute the file::
 Using a setuptools script
 -------------------------
 
-For this process, you will need an additional script called `setup.py`::
+For this process, you need an additional script called `setup.py`::
 
     import sys
     from cx_Freeze import setup, Executable
@@ -110,18 +110,18 @@ For this process, you will need an additional script called `setup.py`::
           description = "My GUI App",
           executables = [Executable("hello.py")])
 
-After that, you need to build the project using it::
+Now, build the project using it::
 
     python setup.py build
 
-This step will create a `build/` directory with the following structure::
+This step creates a `build/` directory with the following structure::
 
     build
     └── exe.linux-x86_64-3.7
         └── lib
         └── main
 
-The first directory inside `build/` will depend on the platform
+The first directory inside `build/` depends on the platform
 you are using, in this case a `x86_64` Linux using Python 3.7.
 The structure is the same as previously described, and you can simply
 enter the directory and execute the file::

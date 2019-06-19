@@ -157,6 +157,13 @@ add-function
 
     The ``since`` attribute specify the API version when this function was added.
 
+    Within the signature, names for the function parameters can be specified by
+    enclosing them within the delimiter *@*:
+
+    .. code-block:: c++
+
+        void foo(int @parameter1@,float)
+
 .. _conversion-rule-on-types:
 
 conversion-rule
