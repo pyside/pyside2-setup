@@ -3384,7 +3384,7 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
             if (!arg.name.isEmpty())
                 m_arguments.append({argumentName, arg});
             // end of parameters...
-            if (signature[endPos] == QLatin1Char(')'))
+            if (endPos >= signatureLength || signature[endPos] == QLatin1Char(')'))
                 break;
         }
         // is const?
