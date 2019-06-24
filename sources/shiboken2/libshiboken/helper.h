@@ -60,7 +60,7 @@ namespace Shiboken
 * \note The argv array is allocated using new operator and each item is allocated using malloc.
 * \returns True on sucess, false otherwise.
 */
-LIBSHIBOKEN_API bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName = 0);
+LIBSHIBOKEN_API bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defaultAppName = nullptr);
 
 /**
  * Convert a python sequence into a heap-allocated array of ints.
@@ -68,7 +68,7 @@ LIBSHIBOKEN_API bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, 
  * \returns The newly allocated array or NULL in case of error or empty sequence. Check with PyErr_Occurred
  *          if it was successfull.
  */
-LIBSHIBOKEN_API int* sequenceToIntArray(PyObject* obj, bool zeroTerminated = false);
+LIBSHIBOKEN_API int *sequenceToIntArray(PyObject *obj, bool zeroTerminated = false);
 
 /**
  *  Creates and automatically deallocates C++ arrays.
@@ -77,17 +77,17 @@ template<class T>
 class AutoArrayPointer
 {
     public:
-        AutoArrayPointer(const AutoArrayPointer&) = delete;
-        AutoArrayPointer(AutoArrayPointer&&) = delete;
-        AutoArrayPointer& operator=(const AutoArrayPointer&) = delete;
-        AutoArrayPointer& operator=(AutoArrayPointer&&) = delete;
+        AutoArrayPointer(const AutoArrayPointer &) = delete;
+        AutoArrayPointer(AutoArrayPointer &&) = delete;
+        AutoArrayPointer &operator=(const AutoArrayPointer &) = delete;
+        AutoArrayPointer &operator=(AutoArrayPointer &&) = delete;
 
         explicit AutoArrayPointer(int size) { data = new T[size]; }
-        T& operator[](int pos) { return data[pos]; }
-        operator T*() const { return data; }
+        T &operator[](int pos) { return data[pos]; }
+        operator T *() const { return data; }
         ~AutoArrayPointer() { delete[] data; }
     private:
-        T* data;
+        T *data;
 };
 
 typedef unsigned long long ThreadId;
@@ -97,7 +97,7 @@ LIBSHIBOKEN_API ThreadId mainThreadId();
 /**
  * An utility function used to call PyErr_WarnEx with a formatted message.
  */
-LIBSHIBOKEN_API int warning(PyObject* category, int stacklevel, const char* format, ...);
+LIBSHIBOKEN_API int warning(PyObject *category, int stacklevel, const char *format, ...);
 
 } // namespace Shiboken
 

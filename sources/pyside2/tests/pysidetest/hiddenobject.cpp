@@ -38,7 +38,7 @@ bool HiddenObject::wasCalled()
     return m_called;
 }
 
-QObject* getHiddenObject()
+QObject *getHiddenObject()
 {
     return new HiddenObject();
 }

@@ -48,14 +48,14 @@
 #include <QFile>
 #include <QWidget>
 
-static void createChildrenNameAttributes(PyObject* root, QObject* object)
+static void createChildrenNameAttributes(PyObject *root, QObject *object)
 {
     for (auto *child : object->children()) {
         const QByteArray name = child->objectName().toLocal8Bit();
 
         if (!name.isEmpty() && !name.startsWith("_") && !name.startsWith("qt_")) {
             if (!PyObject_HasAttrString(root, name.constData())) {
-                Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject*](child));
+                Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
                 PyObject_SetAttrString(root, name.constData(), pyChild);
             }
             createChildrenNameAttributes(root, child);
@@ -64,15 +64,15 @@ static void createChildrenNameAttributes(PyObject* root, QObject* object)
     }
 }
 
-static PyObject* QUiLoadedLoadUiFromDevice(QUiLoader* self, QIODevice* dev, QWidget* parent)
+static PyObject *QUiLoadedLoadUiFromDevice(QUiLoader *self, QIODevice *dev, QWidget *parent)
 {
-    QWidget* wdg = self->load(dev, parent);
+    QWidget *wdg = self->load(dev, parent);
 
     if (wdg) {
-        PyObject* pyWdg = %CONVERTTOPYTHON[QWidget*](wdg);
+        PyObject *pyWdg = %CONVERTTOPYTHON[QWidget *](wdg);
         createChildrenNameAttributes(pyWdg, wdg);
         if (parent) {
-            Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget*](parent));
+            Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget *](parent));
             Shiboken::Object::setParent(pyParent, pyWdg);
         }
         return pyWdg;
@@ -83,7 +83,7 @@ static PyObject* QUiLoadedLoadUiFromDevice(QUiLoader* self, QIODevice* dev, QWid
     return nullptr;
 }
 
-static PyObject* QUiLoaderLoadUiFromFileName(QUiLoader* self, const QString& uiFile, QWidget* parent)
+static PyObject *QUiLoaderLoadUiFromFileName(QUiLoader *self, const QString &uiFile, QWidget *parent)
 {
     QFile fd(uiFile);
     return QUiLoadedLoadUiFromDevice(self, &fd, parent);

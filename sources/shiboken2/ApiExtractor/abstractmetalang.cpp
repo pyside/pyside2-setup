@@ -963,7 +963,7 @@ QString AbstractMetaFunction::debugSignature() const
     return result;
 }
 
-FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass* implementor) const
+FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass *implementor) const
 {
     if (!m_addedFunction.isNull())
         return m_addedFunction->modifications;
@@ -1042,7 +1042,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
     return false;
 }
 
-bool AbstractMetaFunction::isConversionOperator(const QString& funcName)
+bool AbstractMetaFunction::isConversionOperator(const QString &funcName)
 {
     static const QRegularExpression opRegEx(QStringLiteral("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$"));
     Q_ASSERT(opRegEx.isValid());
@@ -1107,7 +1107,7 @@ bool AbstractMetaFunction::generateExceptionHandling() const
     return result;
 }
 
-bool AbstractMetaFunction::isOperatorOverload(const QString& funcName)
+bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
 {
     if (isConversionOperator(funcName))
         return true;
@@ -1679,7 +1679,7 @@ bool AbstractMetaClass::hasFunction(const QString &str) const
     return findFunction(str);
 }
 
-const AbstractMetaFunction* AbstractMetaClass::findFunction(const QString& functionName) const
+const AbstractMetaFunction *AbstractMetaClass::findFunction(const QString &functionName) const
 {
     return AbstractMetaFunction::find(m_functions, functionName);
 }
@@ -1732,7 +1732,7 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
     return 0;
 }
 
-typedef QHash<const AbstractMetaClass*, AbstractMetaTypeList> AbstractMetaClassBaseTemplateInstantiationsMap;
+typedef QHash<const AbstractMetaClass *, AbstractMetaTypeList> AbstractMetaClassBaseTemplateInstantiationsMap;
 Q_GLOBAL_STATIC(AbstractMetaClassBaseTemplateInstantiationsMap, metaClassBaseTemplateInstantiations);
 
 bool AbstractMetaClass::hasTemplateBaseClassInstantiations() const
@@ -1749,7 +1749,7 @@ AbstractMetaTypeList AbstractMetaClass::templateBaseClassInstantiations() const
     return metaClassBaseTemplateInstantiations()->value(this);
 }
 
-void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList& instantiations)
+void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList &instantiations)
 {
     if (!templateBaseClass())
         return;
@@ -2018,20 +2018,20 @@ void AbstractMetaClass::addDefaultConstructor()
 
 void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
 {
-    AbstractMetaFunction* f = new AbstractMetaFunction;
+    auto f = new AbstractMetaFunction;
     f->setOriginalName(name());
     f->setName(name());
     f->setOwnerClass(this);
     f->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
     f->setDeclaringClass(this);
 
-    AbstractMetaType* argType = new AbstractMetaType;
+    auto argType = new AbstractMetaType;
     argType->setTypeEntry(typeEntry());
     argType->setReferenceType(LValueReference);
     argType->setConstant(true);
     argType->setTypeUsagePattern(AbstractMetaType::ValuePattern);
 
-    AbstractMetaArgument* arg = new AbstractMetaArgument;
+    auto arg = new AbstractMetaArgument;
     arg->setType(argType);
     arg->setName(name());
     f->addArgument(arg);
@@ -2647,9 +2647,9 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
 }
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
-                                                const TypeEntry* typeEntry)
+                                                const TypeEntry *typeEntry)
 {
-    for (AbstractMetaClass* c : classes) {
+    for (AbstractMetaClass *c : classes) {
         if (c->typeEntry() == typeEntry)
             return c;
     }

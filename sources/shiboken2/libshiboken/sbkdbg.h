@@ -63,20 +63,20 @@
 class BaseLogger
 {
 public:
-    BaseLogger(const BaseLogger&) = delete;
-    BaseLogger(BaseLogger&&) = delete;
-    BaseLogger& operator=(const BaseLogger&) = delete;
-    BaseLogger& operator=(BaseLogger&&) = delete;
+    BaseLogger(const BaseLogger &) = delete;
+    BaseLogger(BaseLogger &&) = delete;
+    BaseLogger &operator=(const BaseLogger &) = delete;
+    BaseLogger &operator=(BaseLogger &&) = delete;
 
-    BaseLogger(std::ostream& output, const char* function, const char* context)
+    BaseLogger(std::ostream &output, const char *function, const char *context)
         : m_stream(output), m_function(function), m_context(context) {}
     ~BaseLogger()
     {
         m_stream << std::endl;
     }
-    std::ostream& operator()() { return m_stream; };
+    std::ostream &operator()() { return m_stream; };
     template <typename T>
-    std::ostream& operator<<(const T& t)
+    std::ostream &operator<<(const T &t)
     {
         m_stream << '[';
         if (m_context[0])
@@ -84,24 +84,24 @@ public:
         return m_stream << COLOR_WHITE << m_function << COLOR_END << "] " << t;
     }
 private:
-    std::ostream& m_stream;
-    const char* m_function;
-    const char* m_context;
+    std::ostream &m_stream;
+    const char *m_function;
+    const char *m_context;
 };
 
-inline std::ostream& operator<<(std::ostream& out, PyObject* obj)
+inline std::ostream &operator<<(std::ostream &out, PyObject *obj)
 {
-    PyObject* repr = Shiboken::Object::isValid(obj, false) ? PyObject_Repr(obj) : 0;
+    PyObject *repr = Shiboken::Object::isValid(obj, false) ? PyObject_Repr(obj) : 0;
     if (repr) {
 #ifdef IS_PY3K
-        PyObject* str = PyUnicode_AsUTF8String(repr);
+        PyObject *str = PyUnicode_AsUTF8String(repr);
         Py_DECREF(repr);
         repr = str;
 #endif
         out << PyBytes_AS_STRING(repr);
         Py_DECREF(repr);
     } else {
-        out << reinterpret_cast<void*>(obj);
+        out << reinterpret_cast<void *>(obj);
     }
     return out;
 }
@@ -109,7 +109,7 @@ inline std::ostream& operator<<(std::ostream& out, PyObject* obj)
 class _SbkDbg : public BaseLogger
 {
 public:
-    _SbkDbg(const char* function, const char* context = "") : BaseLogger(std::cout, function, context) {}
+    _SbkDbg(const char *function, const char *context = "") : BaseLogger(std::cout, function, context) {}
 };
 
 #ifdef __GNUG__
@@ -122,7 +122,7 @@ public:
 
 struct SbkDbg {
     template <typename T>
-    SbkDbg& operator<<(const T&) { return *this; }
+    SbkDbg &operator<<(const T &) { return *this; }
 };
 
 #endif

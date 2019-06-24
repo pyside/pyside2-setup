@@ -72,7 +72,7 @@
 #include <typeinfo>
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
-static void* qobjectNextAddr;
+static void *qobjectNextAddr;
 
 QT_BEGIN_NAMESPACE
 extern bool qRegisterResourceData(int, const unsigned char *, const unsigned char *,
@@ -94,7 +94,7 @@ void init(PyObject *module)
     SignalManager::instance();
 }
 
-static bool _setProperty(PyObject* qObj, PyObject *name, PyObject *value, bool *accept)
+static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *accept)
 {
     QByteArray propName(Shiboken::String::toCString(name));
     propName[0] = std::toupper(propName[0]);
@@ -112,14 +112,14 @@ static bool _setProperty(PyObject* qObj, PyObject *name, PyObject *value, bool *
         Shiboken::AutoDecRef attr(PyObject_GenericGetAttr(qObj, name));
         if (PySide::Property::checkType(attr)) {
             *accept = true;
-            if (PySide::Property::setValue(reinterpret_cast<PySideProperty*>(attr.object()), qObj, value) < 0)
+            if (PySide::Property::setValue(reinterpret_cast<PySideProperty *>(attr.object()), qObj, value) < 0)
                 return false;
         }
     }
     return true;
 }
 
-bool fillQtProperties(PyObject* qObj, const QMetaObject* metaObj, PyObject* kwds, const char** blackList, unsigned int blackListSize)
+bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds, const char **blackList, unsigned int blackListSize)
 {
 
     PyObject *key, *value;
@@ -170,11 +170,11 @@ void runCleanupFunctions()
     PySide::DestroyListener::destroy();
 }
 
-static void destructionVisitor(SbkObject* pyObj, void* data)
+static void destructionVisitor(SbkObject *pyObj, void *data)
 {
-    void** realData = reinterpret_cast<void**>(data);
-    SbkObject* pyQApp = reinterpret_cast<SbkObject*>(realData[0]);
-    PyTypeObject* pyQObjectType = reinterpret_cast<PyTypeObject*>(realData[1]);
+    auto realData = reinterpret_cast<void **>(data);
+    auto pyQApp = reinterpret_cast<SbkObject *>(realData[0]);
+    auto pyQObjectType = reinterpret_cast<PyTypeObject *>(realData[1]);
 
     if (pyObj != pyQApp && PyObject_TypeCheck(pyObj, pyQObjectType)) {
         if (Shiboken::Object::hasOwnership(pyObj) && Shiboken::Object::isValid(pyObj, false)) {
@@ -190,17 +190,17 @@ static void destructionVisitor(SbkObject* pyObj, void* data)
 
 void destroyQCoreApplication()
 {
-    QCoreApplication* app = QCoreApplication::instance();
+    QCoreApplication *app = QCoreApplication::instance();
     if (!app)
         return;
     SignalManager::instance().clear();
 
-    Shiboken::BindingManager& bm = Shiboken::BindingManager::instance();
-    SbkObject* pyQApp = bm.retrieveWrapper(app);
-    PyTypeObject* pyQObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
+    SbkObject *pyQApp = bm.retrieveWrapper(app);
+    PyTypeObject *pyQObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     assert(pyQObjectType);
 
-    void* data[2] = {pyQApp, pyQObjectType};
+    void *data[2] = {pyQApp, pyQObjectType};
     bm.visitAllPyObjects(&destructionVisitor, &data);
 
     // in the end destroy app
@@ -214,26 +214,26 @@ void destroyQCoreApplication()
     MakeSingletonQAppWrapper(NULL);
 }
 
-std::size_t getSizeOfQObject(SbkObjectType* type)
+std::size_t getSizeOfQObject(SbkObjectType *type)
 {
     return retrieveTypeUserData(type)->cppObjSize;
 }
 
-void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base, std::size_t cppObjSize)
+void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base, std::size_t cppObjSize)
 {
     //create DynamicMetaObject based on python type
     auto userData =
-        new TypeUserData(reinterpret_cast<PyTypeObject*>(type), base, cppObjSize);
+        new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
     userData->mo.update();
     Shiboken::ObjectType::setTypeUserData(type, userData, Shiboken::callCppDestructor<TypeUserData>);
 
     //initialize staticQMetaObject property
     void *metaObjectPtr = const_cast<QMetaObject *>(userData->mo.update());
-    static SbkConverter* converter = Shiboken::Conversions::getConverter("QMetaObject");
+    static SbkConverter *converter = Shiboken::Conversions::getConverter("QMetaObject");
     if (!converter)
         return;
     Shiboken::AutoDecRef pyMetaObject(Shiboken::Conversions::pointerToPython(converter, metaObjectPtr));
-    PyObject_SetAttrString(reinterpret_cast<PyObject*>(type), "staticMetaObject", pyMetaObject);
+    PyObject_SetAttrString(reinterpret_cast<PyObject *>(type), "staticMetaObject", pyMetaObject);
 }
 
 TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj)
@@ -266,23 +266,23 @@ const QMetaObject *retrieveMetaObject(PyObject *pyObj)
     return retrieveMetaObject(pyTypeObj);
 }
 
-void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base)
+void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base)
 {
     initDynamicMetaObject(type, base, 0);
 }
 
 void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds */)
 {
-    PyTypeObject* qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    PyTypeObject *qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     QByteArray className(Shiboken::String::toCString(PyTuple_GET_ITEM(args, 0)));
 
-    PyObject* bases = PyTuple_GET_ITEM(args, 1);
+    PyObject *bases = PyTuple_GET_ITEM(args, 1);
     int numBases = PyTuple_GET_SIZE(bases);
 
     TypeUserData *userData = nullptr;
 
     for (int i = 0; i < numBases; ++i) {
-        PyTypeObject* base = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(bases, i));
+        auto base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, i));
         if (PyType_IsSubtype(base, qObjType)) {
             userData = retrieveTypeUserData(base);
             break;
@@ -295,14 +295,14 @@ void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds 
     initDynamicMetaObject(type, userData->mo.update(), userData->cppObjSize);
 }
 
-PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* name)
+PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
 {
-    PyObject* attr = PyObject_GenericGetAttr(self, name);
-    if (!Shiboken::Object::isValid(reinterpret_cast<SbkObject*>(self), false))
+    PyObject *attr = PyObject_GenericGetAttr(self, name);
+    if (!Shiboken::Object::isValid(reinterpret_cast<SbkObject *>(self), false))
         return attr;
 
     if (attr && Property::checkType(attr)) {
-        PyObject *value = Property::getValue(reinterpret_cast<PySideProperty*>(attr), self);
+        PyObject *value = Property::getValue(reinterpret_cast<PySideProperty *>(attr), self);
         Py_DECREF(attr);
         if (!value)
             return 0;
@@ -312,17 +312,17 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
 
     //mutate native signals to signal instance type
     if (attr && PyObject_TypeCheck(attr, PySideSignalTypeF())) {
-        PyObject* signal = reinterpret_cast<PyObject*>(Signal::initialize(reinterpret_cast<PySideSignal*>(attr), name, self));
-        PyObject_SetAttr(self, name, reinterpret_cast<PyObject*>(signal));
+        PyObject *signal = reinterpret_cast<PyObject *>(Signal::initialize(reinterpret_cast<PySideSignal *>(attr), name, self));
+        PyObject_SetAttr(self, name, reinterpret_cast<PyObject *>(signal));
         return signal;
     }
 
     //search on metaobject (avoid internal attributes started with '__')
     if (!attr) {
-        const char* cname = Shiboken::String::toCString(name);
+        const char *cname = Shiboken::String::toCString(name);
         uint cnameLen = qstrlen(cname);
         if (std::strncmp("__", cname, 2)) {
-            const QMetaObject* metaObject = cppSelf->metaObject();
+            const QMetaObject *metaObject = cppSelf->metaObject();
             //signal
             QList<QMetaMethod> signalList;
             for(int i=0, i_max = metaObject->methodCount(); i < i_max; i++) {
@@ -334,7 +334,7 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
                     if (method.methodType() == QMetaMethod::Signal) {
                         signalList.append(method);
                     } else {
-                        PySideMetaFunction* func = MetaFunction::newObject(cppSelf, i);
+                        PySideMetaFunction *func = MetaFunction::newObject(cppSelf, i);
                         if (func) {
                             PyObject *result = reinterpret_cast<PyObject *>(func);
                             PyObject_SetAttr(self, name, result);
@@ -344,7 +344,7 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
                 }
             }
             if (!signalList.empty()) {
-                PyObject* pySignal = reinterpret_cast<PyObject*>(Signal::newObjectFromMethod(self, signalList));
+                PyObject *pySignal = reinterpret_cast<PyObject *>(Signal::newObjectFromMethod(self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
                 return pySignal;
             }
@@ -353,24 +353,24 @@ PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* nam
     return attr;
 }
 
-bool inherits(PyTypeObject* objType, const char* class_name)
+bool inherits(PyTypeObject *objType, const char *class_name)
 {
     if (strcmp(objType->tp_name, class_name) == 0)
         return true;
 
-    PyTypeObject* base = objType->tp_base;
+    PyTypeObject *base = objType->tp_base;
     if (base == 0)
         return false;
 
     return inherits(base, class_name);
 }
 
-void* nextQObjectMemoryAddr()
+void *nextQObjectMemoryAddr()
 {
     return qobjectNextAddr;
 }
 
-void setNextQObjectMemoryAddr(void* addr)
+void setNextQObjectMemoryAddr(void *addr)
 {
     qobjectNextAddr = addr;
 }
@@ -379,27 +379,27 @@ void setNextQObjectMemoryAddr(void* addr)
 
 // A QSharedPointer is used with a deletion function to invalidate a pointer
 // when the property value is cleared.  This should be a QSharedPointer with
-// a void* pointer, but that isn't allowed
+// a void *pointer, but that isn't allowed
 typedef char any_t;
 Q_DECLARE_METATYPE(QSharedPointer<any_t>);
 
 namespace PySide
 {
 
-static void invalidatePtr(any_t* object)
+static void invalidatePtr(any_t *object)
 {
     Shiboken::GilState state;
 
-    SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(object);
+    SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(object);
     if (wrapper != NULL)
         Shiboken::BindingManager::instance().releaseWrapper(wrapper);
 }
 
 static const char invalidatePropertyName[] = "_PySideInvalidatePtr";
 
-PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type)
+PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type)
 {
-    PyObject* pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
+    PyObject *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
     if (pyOut) {
         Py_INCREF(pyOut);
         return pyOut;
@@ -410,7 +410,7 @@ PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type)
     // set and check if it's created after the set call
     QVariant existing = cppSelf->property(invalidatePropertyName);
     if (!existing.isValid()) {
-        QSharedPointer<any_t> shared_with_del(reinterpret_cast<any_t*>(cppSelf), invalidatePtr);
+        QSharedPointer<any_t> shared_with_del(reinterpret_cast<any_t *>(cppSelf), invalidatePtr);
         cppSelf->setProperty(invalidatePropertyName, QVariant::fromValue(shared_with_del));
         pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
         if (pyOut) {
@@ -419,7 +419,7 @@ PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type)
         }
     }
 
-    const char* typeName = typeid(*cppSelf).name();
+    const char *typeName = typeid(*cppSelf).name();
     pyOut = Shiboken::Object::newObject(sbk_type, cppSelf, false, false, typeName);
 
     return pyOut;
@@ -509,7 +509,7 @@ bool registerInternalQtConf()
 #if PY_MAJOR_VERSION >= 3
             QString::fromWCharArray(Py_GetProgramFullPath());
 #else
-            // Python 2 unfortunately returns a char* array instead of a wchar*, which means that on
+            // Python 2 unfortunately returns a char * array instead of a wchar *, which means that on
             // Windows if the executable path contains unicode characters, the returned path will be
             // invalid. We can't use QCoreApplication::applicationFilePath because it requires an
             // existing QCoreApplication instance despite being a static method.

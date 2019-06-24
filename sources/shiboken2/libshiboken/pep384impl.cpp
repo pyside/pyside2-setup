@@ -59,8 +59,8 @@ extern "C"
  * appear at the right offsets.
  */
 
-#define make_dummy_int(x)   (x * sizeof(void*))
-#define make_dummy(x)       (reinterpret_cast<void*>(make_dummy_int(x)))
+#define make_dummy_int(x)   (x * sizeof(void *))
+#define make_dummy(x)       (reinterpret_cast<void *>(make_dummy_int(x)))
 
 #ifdef Py_LIMITED_API
 datetime_struc *PyDateTimeAPI = NULL;

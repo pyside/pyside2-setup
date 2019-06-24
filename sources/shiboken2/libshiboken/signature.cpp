@@ -831,7 +831,7 @@ void handler(int sig) {
     void *array[30];
     size_t size;
 
-    // get void*'s for all entries on the stack
+    // get void *'s for all entries on the stack
     size = backtrace(array, 30);
 
     // print out all the frames to stderr
@@ -1089,7 +1089,7 @@ _build_func_to_type(PyObject *obtype)
             || (check_name && PyObject_RichCompareBool(look, given, Py_EQ) != 1)) {
             PyErr_Clear();
             Shiboken::AutoDecRef cfunc(PyCFunction_NewEx(meth,
-                                     reinterpret_cast<PyObject*>(type), nullptr));
+                                     reinterpret_cast<PyObject *>(type), nullptr));
             if (cfunc.isNull())
                 return -1;
             if (meth->ml_flags & METH_STATIC)

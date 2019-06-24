@@ -43,11 +43,11 @@
 
 struct PyCustomWidgetPrivate
 {
-    PyObject* pyObject;
+    PyObject *pyObject;
     bool initialized;
 };
 
-PyCustomWidget::PyCustomWidget(PyObject* objectType)
+PyCustomWidget::PyCustomWidget(PyObject *objectType)
     : m_data(new PyCustomWidgetPrivate())
 {
     m_data->pyObject = objectType;
@@ -104,13 +104,13 @@ QString PyCustomWidget::whatsThis() const
     return QString();
 }
 
-QWidget* PyCustomWidget::createWidget(QWidget* parent)
+QWidget *PyCustomWidget::createWidget(QWidget *parent)
 {
     //Create a python instance and return cpp object
-    PyObject* pyParent;
+    PyObject *pyParent;
     bool unkowParent = false;
     if (parent) {
-        pyParent = reinterpret_cast<PyObject*>(Shiboken::BindingManager::instance().retrieveWrapper(parent));
+        pyParent = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(parent));
         if (pyParent) {
             Py_INCREF(pyParent);
         } else {
@@ -127,22 +127,22 @@ QWidget* PyCustomWidget::createWidget(QWidget* parent)
     PyTuple_SET_ITEM(pyArgs, 0, pyParent); //tuple will keep pyParent reference
 
     //Call python constructor
-    SbkObject* result = reinterpret_cast<SbkObject*>(PyObject_CallObject(m_data->pyObject, pyArgs));
+    auto result = reinterpret_cast<SbkObject *>(PyObject_CallObject(m_data->pyObject, pyArgs));
 
-    QWidget* widget = 0;
+    QWidget *widget = nullptr;
     if (result) {
         if (unkowParent) //if parent does not exists in python, transfer the ownership to cpp
             Shiboken::Object::releaseOwnership(result);
         else
-            Shiboken::Object::setParent(pyParent, reinterpret_cast<PyObject*>(result));
+            Shiboken::Object::setParent(pyParent, reinterpret_cast<PyObject *>(result));
 
-        widget = reinterpret_cast<QWidget*>(Shiboken::Object::cppPointer(result, Py_TYPE(result)));
+        widget = reinterpret_cast<QWidget *>(Shiboken::Object::cppPointer(result, Py_TYPE(result)));
     }
 
     return widget;
 }
 
-void PyCustomWidget::initialize(QDesignerFormEditorInterface* core)
+void PyCustomWidget::initialize(QDesignerFormEditorInterface *core)
 {
     m_data->initialized = true;
 }

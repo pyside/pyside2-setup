@@ -74,7 +74,7 @@ template <class T>
 class ArrayHandle
 {
     ArrayHandle(const ArrayHandle &) = delete;
-    ArrayHandle& operator=(const ArrayHandle &) = delete;
+    ArrayHandle &operator=(const ArrayHandle &) = delete;
 public:
     ArrayHandle() {}
     ~ArrayHandle() { destroy(); }
@@ -84,7 +84,7 @@ public:
 
     size_t size() const { return m_size; }
     T *data() const { return m_data; }
-    operator T*() const { return m_data; }
+    operator T *() const { return m_data; }
 
 private:
     void destroy();
@@ -108,7 +108,7 @@ public:
 
     Array2Handle() {}
 
-    operator RowType*() const { return m_rows; }
+    operator RowType *() const { return m_rows; }
 
     void setData(RowType *d) { m_rows = d; }
 

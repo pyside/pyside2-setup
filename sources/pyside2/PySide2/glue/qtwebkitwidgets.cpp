@@ -38,7 +38,7 @@
 ****************************************************************************/
 
 // @snippet qwebview-page
-SbkObject* _pyReturn = reinterpret_cast<SbkObject*>(%PYARG_0);
+auto _pyReturn = reinterpret_cast<SbkObject *>(%PYARG_0);
 if (!Shiboken::Object::hasParentInfo(_pyReturn))
     Shiboken::Object::setParent(%PYSELF, %PYARG_0);
 // @snippet qwebview-page
@@ -67,7 +67,7 @@ if (_signalIndex == -1) {
 
 if (_signalIndex == id) {
     Shiboken::GilState gil;
-    PyObject* self = (PyObject*)Shiboken::BindingManager::instance().retrieveWrapper(this);
+    auto self = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(this));
 
     if (self) {
         Shiboken::AutoDecRef _pyMethod(PyObject_GetAttrString(self, "shouldInterruptJavaScript"));

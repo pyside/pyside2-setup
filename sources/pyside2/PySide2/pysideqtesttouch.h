@@ -66,28 +66,28 @@ namespace QTest
             if (commitWhenDestroyed)
                 commit();
         }
-        PySideQTouchEventSequence* press(int touchId, const QPoint &pt, QWindow *window = 0)
+        PySideQTouchEventSequence *press(int touchId, const QPoint &pt, QWindow *window = nullptr)
         {
             QTouchEvent::TouchPoint &p = point(touchId);
             p.setScreenPos(mapToScreen(window, pt));
             p.setState(Qt::TouchPointPressed);
             return this;
         }
-        PySideQTouchEventSequence* move(int touchId, const QPoint &pt, QWindow *window = 0)
+        PySideQTouchEventSequence *move(int touchId, const QPoint &pt, QWindow *window = nullptr)
         {
             QTouchEvent::TouchPoint &p = point(touchId);
             p.setScreenPos(mapToScreen(window, pt));
             p.setState(Qt::TouchPointMoved);
             return this;
         }
-        PySideQTouchEventSequence* release(int touchId, const QPoint &pt, QWindow *window = 0)
+        PySideQTouchEventSequence *release(int touchId, const QPoint &pt, QWindow *window = nullptr)
         {
             QTouchEvent::TouchPoint &p = point(touchId);
             p.setScreenPos(mapToScreen(window, pt));
             p.setState(Qt::TouchPointReleased);
             return this;
         }
-        PySideQTouchEventSequence* stationary(int touchId)
+        PySideQTouchEventSequence *stationary(int touchId)
         {
             QTouchEvent::TouchPoint &p = pointOrPreviousPoint(touchId);
             p.setState(Qt::TouchPointStationary);
@@ -95,7 +95,7 @@ namespace QTest
         }
 
 #ifdef QT_WIDGETS_LIB
-        PySideQTouchEventSequence* press(int touchId, const QPoint &pt, QWidget *widget = 0)
+        PySideQTouchEventSequence *press(int touchId, const QPoint &pt, QWidget *widget = nullptr)
         {
             QTouchEvent::TouchPoint &p = point(touchId);
             p.setScreenPos(mapToScreen(widget, pt));
@@ -103,7 +103,7 @@ namespace QTest
             return this;
         }
 
-        PySideQTouchEventSequence* move(int touchId, const QPoint &pt, QWidget *widget = 0)
+        PySideQTouchEventSequence *move(int touchId, const QPoint &pt, QWidget *widget = nullptr)
         {
             QTouchEvent::TouchPoint &p = point(touchId);
             p.setScreenPos(mapToScreen(widget, pt));
@@ -111,7 +111,7 @@ namespace QTest
             return this;
         }
 
-        PySideQTouchEventSequence* release(int touchId, const QPoint &pt, QWidget *widget = 0)
+        PySideQTouchEventSequence *release(int touchId, const QPoint &pt, QWidget *widget = nullptr)
         {
             QTouchEvent::TouchPoint &p = point(touchId);
             p.setScreenPos(mapToScreen(widget, pt));
@@ -198,14 +198,14 @@ private:
         QTouchDevice *device;
         bool commitWhenDestroyed;
 #ifdef QT_WIDGETS_LIB
-        friend PySideQTouchEventSequence* generateTouchEvent(QWidget *, QTouchDevice*, bool);
+        friend PySideQTouchEventSequence *generateTouchEvent(QWidget *, QTouchDevice *, bool);
 #endif
-        friend PySideQTouchEventSequence* generateTouchEvent(QWindow *, QTouchDevice*, bool);
+        friend PySideQTouchEventSequence *generateTouchEvent(QWindow *, QTouchDevice *, bool);
     };
 
 #ifdef QT_WIDGETS_LIB
     inline
-    PySideQTouchEventSequence* generateTouchEvent(QWidget *widget,
+    PySideQTouchEventSequence *generateTouchEvent(QWidget *widget,
                                                   QTouchDevice *device,
                                                   bool autoCommit = true)
     {
@@ -213,7 +213,7 @@ private:
     }
 #endif
     inline
-    PySideQTouchEventSequence* generateTouchEvent(QWindow *window,
+    PySideQTouchEventSequence *generateTouchEvent(QWindow *window,
                                                   QTouchDevice *device,
                                                   bool autoCommit = true)
     {

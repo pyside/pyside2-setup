@@ -50,11 +50,11 @@ QT_END_NAMESPACE
 
 namespace PySide { namespace MetaFunction {
 
-    void init(PyObject* module);
+    void init(PyObject *module);
     /**
      * Does a Qt metacall on a QObject
      */
-    bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal = 0);
+    bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal = nullptr);
 
 } //namespace MetaFunction
 } //namespace PySide

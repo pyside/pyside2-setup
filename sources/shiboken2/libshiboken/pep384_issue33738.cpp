@@ -114,7 +114,7 @@ typedef struct _oldtypeobject {
 
 int PyIndex_Check(PyObject *obj)
 {
-    PyOldTypeObject *type = reinterpret_cast<PyOldTypeObject*>(Py_TYPE(obj));
+    PyOldTypeObject *type = reinterpret_cast<PyOldTypeObject *>(Py_TYPE(obj));
     return type->tp_as_number != NULL &&
            type->tp_as_number->nb_index != NULL;
 }
