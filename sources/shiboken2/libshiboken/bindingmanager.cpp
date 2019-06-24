@@ -64,7 +64,7 @@ public:
 
     Graph() = default;
 
-    void addEdge(SbkObjectType* from, SbkObjectType* to)
+    void addEdge(SbkObjectType *from, SbkObjectType *to)
     {
         m_edges[from].push_back(to);
     }
@@ -78,7 +78,7 @@ public:
 
         for (auto i = m_edges.begin(), end = m_edges.end(); i != end; ++i) {
             auto node1 = reinterpret_cast<const PyTypeObject *>(i->first);
-            const NodeList& nodeList = i->second;
+            const NodeList &nodeList = i->second;
             for (const SbkObjectType *o : nodeList) {
                 auto node2 = reinterpret_cast<const PyTypeObject *>(o);
                 file << '"' << node2->tp_name << "\" -> \""
@@ -89,13 +89,13 @@ public:
     }
 #endif
 
-    SbkObjectType* identifyType(void** cptr, SbkObjectType* type, SbkObjectType* baseType) const
+    SbkObjectType *identifyType(void **cptr, SbkObjectType *type, SbkObjectType *baseType) const
     {
         Edges::const_iterator edgesIt = m_edges.find(type);
         if (edgesIt != m_edges.end()) {
-            const NodeList& adjNodes = m_edges.find(type)->second;
+            const NodeList &adjNodes = m_edges.find(type)->second;
             for (SbkObjectType *node : adjNodes) {
-                SbkObjectType* newType = identifyType(cptr, node, baseType);
+                SbkObjectType *newType = identifyType(cptr, node, baseType);
                 if (newType)
                     return newType;
             }
@@ -106,7 +106,7 @@ public:
         }
         if (typeFound) {
             // This "typeFound != type" is needed for backwards compatibility with old modules using a newer version of
-            // libshiboken because old versions of type_discovery function used to return a SbkObjectType* instead of
+            // libshiboken because old versions of type_discovery function used to return a SbkObjectType *instead of
             // a possible variation of the C++ instance pointer (*cptr).
             if (typeFound != type)
                 *cptr = typeFound;
@@ -118,7 +118,7 @@ public:
 
 
 #ifndef NDEBUG
-static void showWrapperMap(const WrapperMap& wrapperMap)
+static void showWrapperMap(const WrapperMap &wrapperMap)
 {
     if (Py_VerboseFlag > 0) {
         fprintf(stderr, "-------------------------------\n");
@@ -144,12 +144,12 @@ struct BindingManager::BindingManagerPrivate {
     bool destroying;
 
     BindingManagerPrivate() : destroying(false) {}
-    bool releaseWrapper(void* cptr, SbkObject* wrapper);
-    void assignWrapper(SbkObject* wrapper, const void* cptr);
+    bool releaseWrapper(void *cptr, SbkObject *wrapper);
+    void assignWrapper(SbkObject *wrapper, const void *cptr);
 
 };
 
-bool BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr, SbkObject* wrapper)
+bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject *wrapper)
 {
     // The wrapper argument is checked to ensure that the correct wrapper is released.
     // Returns true if the correct wrapper is found and released.
@@ -162,7 +162,7 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void* cptr, SbkObject
     return false;
 }
 
-void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject* wrapper, const void* cptr)
+void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, const void *cptr)
 {
     assert(cptr);
     WrapperMap::iterator iter = wrapperMapper.find(cptr);
@@ -192,27 +192,27 @@ BindingManager::~BindingManager()
      * shutting down. */
     if (Py_IsInitialized()) {  // ensure the interpreter is still valid
         while (!m_d->wrapperMapper.empty()) {
-            Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void*>(m_d->wrapperMapper.begin()->first));
+            Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void *>(m_d->wrapperMapper.begin()->first));
         }
         assert(m_d->wrapperMapper.empty());
     }
     delete m_d;
 }
 
-BindingManager& BindingManager::instance() {
+BindingManager &BindingManager::instance() {
     static BindingManager singleton;
     return singleton;
 }
 
-bool BindingManager::hasWrapper(const void* cptr)
+bool BindingManager::hasWrapper(const void *cptr)
 {
     return m_d->wrapperMapper.find(cptr) != m_d->wrapperMapper.end();
 }
 
-void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
+void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 {
-    SbkObjectType* instanceType = reinterpret_cast<SbkObjectType*>(Py_TYPE(pyObj));
-    SbkObjectTypePrivate* d = PepType_SOTP(instanceType);
+    auto instanceType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyObj));
+    SbkObjectTypePrivate *d = PepType_SOTP(instanceType);
 
     if (!d)
         return;
@@ -221,27 +221,27 @@ void BindingManager::registerWrapper(SbkObject* pyObj, void* cptr)
         d->mi_offsets = d->mi_init(cptr);
     m_d->assignWrapper(pyObj, cptr);
     if (d->mi_offsets) {
-        int* offset = d->mi_offsets;
+        int *offset = d->mi_offsets;
         while (*offset != -1) {
             if (*offset > 0)
-                m_d->assignWrapper(pyObj, reinterpret_cast<void*>((std::size_t) cptr + (*offset)));
+                m_d->assignWrapper(pyObj, reinterpret_cast<void *>((std::size_t) cptr + (*offset)));
             offset++;
         }
     }
 }
 
-void BindingManager::releaseWrapper(SbkObject* sbkObj)
+void BindingManager::releaseWrapper(SbkObject *sbkObj)
 {
-    SbkObjectType* sbkType = reinterpret_cast<SbkObjectType*>(Py_TYPE(sbkObj));
-    SbkObjectTypePrivate* d = PepType_SOTP(sbkType);
+    auto sbkType = reinterpret_cast<SbkObjectType *>(Py_TYPE(sbkObj));
+    SbkObjectTypePrivate *d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
 
-    void** cptrs = reinterpret_cast<SbkObject*>(sbkObj)->d->cptr;
+    void ** cptrs = reinterpret_cast<SbkObject *>(sbkObj)->d->cptr;
     for (int i = 0; i < numBases; ++i) {
         unsigned char *cptr = reinterpret_cast<unsigned char *>(cptrs[i]);
         m_d->releaseWrapper(cptr, sbkObj);
         if (d && d->mi_offsets) {
-            int* offset = d->mi_offsets;
+            int *offset = d->mi_offsets;
             while (*offset != -1) {
                 if (*offset > 0)
                     m_d->releaseWrapper(reinterpret_cast<void *>((std::size_t) cptr + (*offset)), sbkObj);
@@ -264,7 +264,7 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
     m_d->deleteInMainThread.push_back(e);
 }
 
-SbkObject* BindingManager::retrieveWrapper(const void* cptr)
+SbkObject *BindingManager::retrieveWrapper(const void *cptr)
 {
     WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
@@ -272,34 +272,34 @@ SbkObject* BindingManager::retrieveWrapper(const void* cptr)
     return iter->second;
 }
 
-PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
+PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
 {
-    SbkObject* wrapper = retrieveWrapper(cptr);
+    SbkObject *wrapper = retrieveWrapper(cptr);
     // The refcount can be 0 if the object is dieing and someone called
     // a virtual method from the destructor
     if (!wrapper || reinterpret_cast<const PyObject *>(wrapper)->ob_refcnt == 0)
         return 0;
 
     if (wrapper->ob_dict) {
-        PyObject* method = PyDict_GetItemString(wrapper->ob_dict, methodName);
+        PyObject *method = PyDict_GetItemString(wrapper->ob_dict, methodName);
         if (method) {
             Py_INCREF(reinterpret_cast<PyObject *>(method));
             return method;
         }
     }
 
-    PyObject* pyMethodName = Shiboken::String::fromCString(methodName);
+    PyObject *pyMethodName = Shiboken::String::fromCString(methodName);
     PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
     if (method && PyMethod_Check(method)
-        && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject*>(wrapper)) {
-        PyObject* defaultMethod;
-        PyObject* mro = Py_TYPE(wrapper)->tp_mro;
+        && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
+        PyObject *defaultMethod;
+        PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
         for (int i = 1; i < PyTuple_GET_SIZE(mro) - 1; i++) {
-            PyTypeObject* parent = reinterpret_cast<PyTypeObject*>(PyTuple_GET_ITEM(mro, i));
+            PyTypeObject *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
             if (parent->tp_dict) {
                 defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
                 if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod) {
@@ -315,34 +315,34 @@ PyObject* BindingManager::getOverride(const void* cptr, const char* methodName)
     return 0;
 }
 
-void BindingManager::addClassInheritance(SbkObjectType* parent, SbkObjectType* child)
+void BindingManager::addClassInheritance(SbkObjectType *parent, SbkObjectType *child)
 {
     m_d->classHierarchy.addEdge(parent, child);
 }
 
-SbkObjectType* BindingManager::resolveType(void* cptr, SbkObjectType* type)
+SbkObjectType *BindingManager::resolveType(void *cptr, SbkObjectType *type)
 {
     return resolveType(&cptr, type);
 }
 
-SbkObjectType* BindingManager::resolveType(void** cptr, SbkObjectType* type)
+SbkObjectType *BindingManager::resolveType(void **cptr, SbkObjectType *type)
 {
-    SbkObjectType* identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
+    SbkObjectType *identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
     return identifiedType ? identifiedType : type;
 }
 
-std::set<PyObject*> BindingManager::getAllPyObjects()
+std::set<PyObject *> BindingManager::getAllPyObjects()
 {
-    std::set<PyObject*> pyObjects;
-    const WrapperMap& wrappersMap = m_d->wrapperMapper;
+    std::set<PyObject *> pyObjects;
+    const WrapperMap &wrappersMap = m_d->wrapperMapper;
     WrapperMap::const_iterator it = wrappersMap.begin();
     for (; it != wrappersMap.end(); ++it)
-        pyObjects.insert(reinterpret_cast<PyObject*>(it->second));
+        pyObjects.insert(reinterpret_cast<PyObject *>(it->second));
 
     return pyObjects;
 }
 
-void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void* data)
+void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
 {
     WrapperMap copy = m_d->wrapperMapper;
     for (WrapperMap::iterator it = copy.begin(); it != copy.end(); ++it) {

@@ -189,7 +189,7 @@ PyObject *toBytes(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
         return nullptr;
     }
-    PyObject *bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char*>(sbkObject->cptr),
+    PyObject *bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char *>(sbkObject->cptr),
                                                 sbkObject->size);
     Py_XINCREF(bytes);
     return bytes;
@@ -290,17 +290,17 @@ static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 #if PY_VERSION_HEX < 0x03000000
 
-static Py_ssize_t SbkVoidPtrObject_readbufferproc(PyObject* self, Py_ssize_t segment, void** ptrptr)
+static Py_ssize_t SbkVoidPtrObject_readbufferproc(PyObject *self, Py_ssize_t segment, void **ptrptr)
 {
     if (segment || !Shiboken::Object::isValid(self))
         return -1;
 
     SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
-    *ptrptr = reinterpret_cast<void*>(sbkObject->cptr);
+    *ptrptr = reinterpret_cast<void *>(sbkObject->cptr);
     return sbkObject->size;
 }
 
-static Py_ssize_t SbkVoidPtrObject_segcountproc(PyObject* self, Py_ssize_t* lenp)
+static Py_ssize_t SbkVoidPtrObject_segcountproc(PyObject *self, Py_ssize_t *lenp)
 {
     if (lenp) {
         SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);

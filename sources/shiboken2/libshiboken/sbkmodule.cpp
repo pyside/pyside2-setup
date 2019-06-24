@@ -57,10 +57,10 @@ namespace Shiboken
 namespace Module
 {
 
-PyObject* import(const char* moduleName)
+PyObject *import(const char *moduleName)
 {
-    PyObject* sysModules = PyImport_GetModuleDict();
-    PyObject* module = PyDict_GetItemString(sysModules, moduleName);
+    PyObject *sysModules = PyImport_GetModuleDict();
+    PyObject *module = PyDict_GetItemString(sysModules, moduleName);
     if (module)
         Py_INCREF(module);
     else
@@ -72,37 +72,37 @@ PyObject* import(const char* moduleName)
     return module;
 }
 
-PyObject* create(const char* moduleName, void* moduleData)
+PyObject *create(const char *moduleName, void *moduleData)
 {
     Shiboken::init();
 #ifndef IS_PY3K
     return Py_InitModule(moduleName, reinterpret_cast<PyMethodDef *>(moduleData));
 #else
-    return PyModule_Create(reinterpret_cast<PyModuleDef*>(moduleData));
+    return PyModule_Create(reinterpret_cast<PyModuleDef *>(moduleData));
 #endif
 }
 
-void registerTypes(PyObject* module, PyTypeObject** types)
+void registerTypes(PyObject *module, PyTypeObject **types)
 {
     ModuleTypesMap::iterator iter = moduleTypes.find(module);
     if (iter == moduleTypes.end())
         moduleTypes.insert(std::make_pair(module, types));
 }
 
-PyTypeObject** getTypes(PyObject* module)
+PyTypeObject **getTypes(PyObject *module)
 {
     ModuleTypesMap::iterator iter = moduleTypes.find(module);
     return (iter == moduleTypes.end()) ? 0 : iter->second;
 }
 
-void registerTypeConverters(PyObject* module, SbkConverter** converters)
+void registerTypeConverters(PyObject *module, SbkConverter **converters)
 {
     ModuleConvertersMap::iterator iter = moduleConverters.find(module);
     if (iter == moduleConverters.end())
         moduleConverters.insert(std::make_pair(module, converters));
 }
 
-SbkConverter** getTypeConverters(PyObject* module)
+SbkConverter **getTypeConverters(PyObject *module)
 {
     ModuleConvertersMap::iterator iter = moduleConverters.find(module);
     return (iter == moduleConverters.end()) ? 0 : iter->second;

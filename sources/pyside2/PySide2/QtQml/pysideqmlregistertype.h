@@ -47,7 +47,7 @@ struct SbkObjectType;
 namespace PySide
 {
 
-extern void* nextQmlElementMemoryAddr;
+extern void *nextQmlElementMemoryAddr;
 
 /**
  * Init the QML support doing things like registering QtQml.ListProperty and create the necessary stuff for
@@ -55,7 +55,7 @@ extern void* nextQmlElementMemoryAddr;
  *
  * \param module QtQml python module
  */
-void initQmlSupport(PyObject* module);
+void initQmlSupport(PyObject *module);
 
 /**
  * PySide implementation of qmlRegisterType<T> function.

@@ -42,7 +42,7 @@
 
 #include <shiboken.h>
 
-PySide::DestroyListener* PySide::DestroyListener::m_instance = 0;
+PySide::DestroyListener *PySide::DestroyListener::m_instance = nullptr;
 
 namespace PySide
 {
@@ -53,7 +53,7 @@ struct DestroyListenerPrivate
 };
 
 
-DestroyListener* DestroyListener::instance()
+DestroyListener *DestroyListener::instance()
 {
     if (!m_instance)
         m_instance = new DestroyListener(0);
@@ -71,19 +71,19 @@ void DestroyListener::destroy()
 
 void DestroyListener::listen(QObject *obj)
 {
-    SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(obj);
+    SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(obj);
     if (!wrapper) // avoid problem with multiple inheritance
         return;
 
     if (Py_IsInitialized() == 0)
         onObjectDestroyed(obj);
     else
-        QObject::connect(obj, SIGNAL(destroyed(QObject*)), this, SLOT(onObjectDestroyed(QObject*)), Qt::DirectConnection);
+        QObject::connect(obj, SIGNAL(destroyed(QObject *)), this, SLOT(onObjectDestroyed(QObject *)), Qt::DirectConnection);
 }
 
-void DestroyListener::onObjectDestroyed(QObject* obj)
+void DestroyListener::onObjectDestroyed(QObject *obj)
 {
-    SbkObject* wrapper = Shiboken::BindingManager::instance().retrieveWrapper(obj);
+    SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(obj);
     if (wrapper) //make sure the object exists before destroy
         Shiboken::Object::destroy(wrapper, obj);
 }

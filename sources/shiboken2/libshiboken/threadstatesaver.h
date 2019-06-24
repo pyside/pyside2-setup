@@ -49,17 +49,17 @@ namespace Shiboken
 class LIBSHIBOKEN_API ThreadStateSaver
 {
 public:
-    ThreadStateSaver(const ThreadStateSaver&) = delete;
-    ThreadStateSaver(ThreadStateSaver&&) = delete;
-    ThreadStateSaver &operator=(const ThreadStateSaver&) = delete;
-    ThreadStateSaver &operator=(ThreadStateSaver&&) = delete;
+    ThreadStateSaver(const ThreadStateSaver &) = delete;
+    ThreadStateSaver(ThreadStateSaver &&) = delete;
+    ThreadStateSaver &operator=(const ThreadStateSaver &) = delete;
+    ThreadStateSaver &operator=(ThreadStateSaver &&) = delete;
 
     ThreadStateSaver();
     ~ThreadStateSaver();
     void save();
     void restore();
 private:
-    PyThreadState* m_threadState;
+    PyThreadState *m_threadState;
 };
 
 } // namespace Shiboken
