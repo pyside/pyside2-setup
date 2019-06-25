@@ -82,7 +82,7 @@ SourceRange getCursorRange(const CXCursor &cursor);
 struct Diagnostic {
     enum  Source { Clang, Other };
 
-    Diagnostic() : source(Clang) {}
+    Diagnostic() = default;
     // Clang
     static Diagnostic fromCXDiagnostic(CXDiagnostic cd);
     // Other
@@ -91,8 +91,8 @@ struct Diagnostic {
     QString message;
     QStringList childMessages;
     SourceLocation location;
-    Source source;
-    CXDiagnosticSeverity severity;
+    Source source = Clang;
+    CXDiagnosticSeverity severity = CXDiagnostic_Warning;
 };
 
 QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu);

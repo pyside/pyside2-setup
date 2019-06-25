@@ -147,7 +147,7 @@ private:
  */
 class GeneratorContext {
 public:
-    GeneratorContext() : m_metaClass(0), m_preciseClassType(0), m_forSmartPointer(false) {}
+    GeneratorContext() = default;
     GeneratorContext(AbstractMetaClass *metaClass,
                      const AbstractMetaType *preciseType = 0,
                      bool forSmartPointer = false)
@@ -161,9 +161,9 @@ public:
     const AbstractMetaType *preciseType() const { return m_preciseClassType; }
 
 private:
-    AbstractMetaClass *m_metaClass;
-    const AbstractMetaType *m_preciseClassType;
-    bool m_forSmartPointer;
+    AbstractMetaClass *m_metaClass = nullptr;
+    const AbstractMetaType *m_preciseClassType = nullptr;
+    bool m_forSmartPointer = false;
 };
 
 /**

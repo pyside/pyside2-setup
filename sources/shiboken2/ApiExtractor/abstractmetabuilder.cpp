@@ -112,8 +112,7 @@ static QStringList parseTemplateType(const QString &name) {
 }
 
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
-    m_logDirectory(QLatin1String(".") + QDir::separator()),
-    m_skipDeprecated(false)
+    m_logDirectory(QLatin1String(".") + QDir::separator())
 {
 }
 

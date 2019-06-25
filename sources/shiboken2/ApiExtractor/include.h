@@ -46,7 +46,7 @@ public:
         InvalidInclude
     };
 
-    Include() : m_type(IncludePath) {}
+    Include() = default;
     Include(IncludeType t, const QString &nam) : m_type(t), m_name(nam) {};
 
     bool isValid() const
@@ -78,7 +78,7 @@ public:
 
     friend uint qHash(const Include&);
     private:
-        IncludeType m_type;
+        IncludeType m_type = IncludePath;
         QString m_name;
 };
 

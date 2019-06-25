@@ -190,7 +190,7 @@ public:
     QFileInfo m_globalHeader;
     QStringList m_headerPaths;
     mutable QHash<QString, Include> m_resolveIncludeHash;
-    bool m_skipDeprecated;
+    bool m_skipDeprecated = false;
 };
 
 #endif // ABSTRACTMETBUILDER_P_H

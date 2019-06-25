@@ -42,9 +42,7 @@
 namespace Shiboken
 {
 
-ThreadStateSaver::ThreadStateSaver()
-        : m_threadState(0)
-    {}
+ThreadStateSaver::ThreadStateSaver() = default;
 
 ThreadStateSaver::~ThreadStateSaver()
 {

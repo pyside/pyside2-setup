@@ -170,7 +170,7 @@ private:
     TypeEntryMultiMapConstIteratorRange findTypes(const QString &name) const;
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
 
-    bool m_suppressWarnings;
+    bool m_suppressWarnings = true;
     TypeEntryMultiMap m_entries;
     TypeEntryMap m_flagsEntries;
     TypedefEntryMap m_typedefEntries;

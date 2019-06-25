@@ -43,7 +43,7 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
-ApiExtractor::ApiExtractor() : m_builder(0)
+ApiExtractor::ApiExtractor()
 {
     // Environment TYPESYSTEMPATH
     QString envTypesystemPaths = QFile::decodeName(qgetenv("TYPESYSTEMPATH"));

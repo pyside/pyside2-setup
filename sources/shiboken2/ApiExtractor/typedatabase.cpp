@@ -56,7 +56,7 @@ typedef QVector<ApiVersion> ApiVersions;
 
 Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
-TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
+TypeDatabase::TypeDatabase()
 {
     addType(new VoidTypeEntry());
     addType(new VarargsTypeEntry());

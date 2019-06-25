@@ -97,7 +97,7 @@ private:
     QString m_typeSystemFileName;
     QString m_cppFileName;
     HeaderPaths m_includePaths;
-    AbstractMetaBuilder* m_builder;
+    AbstractMetaBuilder* m_builder = nullptr;
     QString m_logDirectory;
     LanguageLevel m_languageLevel = LanguageLevel::Default;
     bool m_skipDeprecated = false;

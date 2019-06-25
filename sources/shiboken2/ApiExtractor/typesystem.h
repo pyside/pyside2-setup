@@ -186,9 +186,9 @@ public:
 struct ArgumentModification
 {
     ArgumentModification() : removedDefaultExpression(false), removed(false),
-        noNullPointers(false), array(false) {}
+        noNullPointers(false), resetAfterUse(false), array(false) {}
     explicit ArgumentModification(int idx) : index(idx), removedDefaultExpression(false), removed(false),
-              noNullPointers(false), array(false) {}
+              noNullPointers(false), resetAfterUse(false), array(false) {}
 
     // Should the default expression be removed?
 
@@ -1605,7 +1605,7 @@ protected:
     InterfaceTypeEntry(const InterfaceTypeEntry &);
 
 private:
-    ObjectTypeEntry *m_origin;
+    ObjectTypeEntry *m_origin = nullptr;
 };
 
 
@@ -1675,7 +1675,7 @@ struct TypeRejection
 
     QRegularExpression className;
     QRegularExpression pattern;
-    MatchType matchType;
+    MatchType matchType = Invalid;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
