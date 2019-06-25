@@ -351,7 +351,7 @@ TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
         return nullptr;
     }
 
-    ComplexTypeEntry *result = static_cast<ComplexTypeEntry *>(source->clone());
+    auto *result = static_cast<ComplexTypeEntry *>(source->clone());
     result->useAsTypedef(typedefEntry);
     typedefEntry->setSource(source);
     typedefEntry->setTarget(result);
@@ -592,7 +592,7 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
     const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
         if (entry->isPrimitive()) {
-            PrimitiveTypeEntry *pe = static_cast<PrimitiveTypeEntry *>(entry);
+            auto *pe = static_cast<PrimitiveTypeEntry *>(entry);
             if (pe->preferredTargetLangType())
                 return pe;
         }

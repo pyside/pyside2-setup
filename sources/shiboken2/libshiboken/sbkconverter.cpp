@@ -206,7 +206,7 @@ PyObject *referenceToPython(const SbkConverter *converter, const void *cppIn)
 {
     assert(cppIn);
 
-    PyObject *pyOut = reinterpret_cast<PyObject *>(BindingManager::instance().retrieveWrapper(cppIn));
+    auto *pyOut = reinterpret_cast<PyObject *>(BindingManager::instance().retrieveWrapper(cppIn));
     if (pyOut) {
         Py_INCREF(pyOut);
         return pyOut;
@@ -295,7 +295,7 @@ void *cppPointer(PyTypeObject *desiredType, SbkObject *pyIn)
     assert(pyIn);
     if (!ObjectType::checkType(desiredType))
         return pyIn;
-    SbkObjectType *inType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyIn));
+    auto *inType = reinterpret_cast<SbkObjectType *>(Py_TYPE(pyIn));
     if (ObjectType::hasCast(inType))
         return ObjectType::cast(inType, pyIn, desiredType);
     return Object::cppPointer(pyIn, desiredType);
@@ -367,7 +367,7 @@ bool isImplicitConversion(SbkObjectType *type, PythonToCppFunc toCppFunc)
 
 void registerConverterName(SbkConverter *converter , const char *typeName)
 {
-    ConvertersMap::iterator iter = converters.find(typeName);
+    auto iter = converters.find(typeName);
     if (iter == converters.end())
         converters.insert(std::make_pair(typeName, converter));
 }

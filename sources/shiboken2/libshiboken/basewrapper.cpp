@@ -207,7 +207,7 @@ PyTypeObject *SbkObjectType_TypeF(void)
 
 static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
 {
-    SbkObject *obj = reinterpret_cast<SbkObject *>(pObj);
+    auto *obj = reinterpret_cast<SbkObject *>(pObj);
     if (!obj->ob_dict)
         obj->ob_dict = PyDict_New();
     if (!obj->ob_dict)
@@ -223,7 +223,7 @@ static PyGetSetDef SbkObjectGetSetList[] = {
 
 static int SbkObject_traverse(PyObject *self, visitproc visit, void *arg)
 {
-    SbkObject *sbkSelf = reinterpret_cast<SbkObject *>(self);
+    auto *sbkSelf = reinterpret_cast<SbkObject *>(self);
 
     //Visit children
     Shiboken::ParentInfo *pInfo = sbkSelf->d->parentInfo;
@@ -246,7 +246,7 @@ static int SbkObject_traverse(PyObject *self, visitproc visit, void *arg)
 
 static int SbkObject_clear(PyObject *self)
 {
-    SbkObject *sbkSelf = reinterpret_cast<SbkObject *>(self);
+    auto *sbkSelf = reinterpret_cast<SbkObject *>(self);
 
     Shiboken::Object::removeParent(sbkSelf);
 
@@ -300,7 +300,7 @@ static int mainThreadDeletionHandler(void *)
 
 static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
 {
-    SbkObject *sbkObj = reinterpret_cast<SbkObject *>(pyObj);
+    auto *sbkObj = reinterpret_cast<SbkObject *>(pyObj);
     PyTypeObject *pyType = Py_TYPE(pyObj);
 
     // Need to decref the type if this is the dealloc func; if type
@@ -449,8 +449,8 @@ PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *k
     }
 
     // The meta type creates a new type when the Python programmer extends a wrapped C++ class.
-    newfunc type_new = reinterpret_cast<newfunc>(PyType_Type.tp_new);
-    SbkObjectType *newType = reinterpret_cast<SbkObjectType *>(type_new(metatype, args, kwds));
+    auto type_new = reinterpret_cast<newfunc>(PyType_Type.tp_new);
+    auto *newType = reinterpret_cast<SbkObjectType *>(type_new(metatype, args, kwds));
     if (!newType)
         return nullptr;
 
@@ -842,7 +842,7 @@ introduceWrapperType(PyObject *enclosingObject,
     PyObject *heaptype = PyType_FromSpecWithBases(typeSpec, baseTypes);
     Py_TYPE(heaptype) = SbkObjectType_TypeF();
     Py_INCREF(Py_TYPE(heaptype));
-    SbkObjectType *type = reinterpret_cast<SbkObjectType *>(heaptype);
+    auto *type = reinterpret_cast<SbkObjectType *>(heaptype);
     if (baseType) {
         if (baseTypes) {
             for (int i = 0; i < PySequence_Fast_GET_SIZE(baseTypes); ++i)
@@ -862,7 +862,7 @@ introduceWrapperType(PyObject *enclosingObject,
 
     setOriginalName(type, originalName);
     setDestructorFunction(type, cppObjDtor);
-    PyObject *ob_type = reinterpret_cast<PyObject *>(type);
+    auto *ob_type = reinterpret_cast<PyObject *>(type);
 
     if (wrapperFlags & InnerClass)
         return PyDict_SetItemString(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
@@ -1044,7 +1044,7 @@ void getOwnership(PyObject *pyObj)
 void releaseOwnership(SbkObject *self)
 {
     // skip if the ownership have already moved to c++
-    SbkObjectType *selfType = reinterpret_cast<SbkObjectType *>(Py_TYPE(self));
+    auto *selfType = reinterpret_cast<SbkObjectType *>(Py_TYPE(self));
     if (!self->d->hasOwnership || Shiboken::Conversions::pythonTypeIsValueType(PepType_SOTP(selfType)->converter))
         return;
 

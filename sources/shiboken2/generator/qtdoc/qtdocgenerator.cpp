@@ -387,7 +387,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
 
 void QtXmlToSphinx::pushOutputBuffer()
 {
-    QString* buffer = new QString();
+    auto *buffer = new QString();
     m_buffers << buffer;
     m_output.setString(buffer);
 }
@@ -981,7 +981,7 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
 {
     ref.replace(QLatin1String("::"), QLatin1String("."));
     ref.remove(QLatin1String("()"));
-    LinkContext *result = new LinkContext(ref);
+    auto *result = new LinkContext(ref);
 
     if (m_insideBold)
         result->flags |= LinkContext::InsideBold;

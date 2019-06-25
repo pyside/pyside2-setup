@@ -390,7 +390,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     // Create string literal for smart pointer getter method.
     if (classContext.forSmartPointer()) {
-        const SmartPointerTypeEntry *typeEntry =
+        const auto *typeEntry =
                 static_cast<const SmartPointerTypeEntry *>(classContext.preciseType()
                                                            ->typeEntry());
         QString rawGetter = typeEntry->getter();
@@ -509,7 +509,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         else if (!rfunc->isOperatorOverload()) {
 
             if (classContext.forSmartPointer()) {
-                const SmartPointerTypeEntry *smartPointerTypeEntry =
+                const auto *smartPointerTypeEntry =
                         static_cast<const SmartPointerTypeEntry *>(
                             classContext.preciseType()->typeEntry());
 

@@ -61,7 +61,7 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     //    SbkVoidPtrObject *self =
     //        reinterpret_cast<SbkVoidPtrObject *>(type->tp_alloc);
     PyObject *ob = type->tp_alloc(type, 0);
-    SbkVoidPtrObject *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
+    auto *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
 
     if (self != nullptr) {
         self->cptr = nullptr;
@@ -80,7 +80,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
     PyObject *addressObject;
     Py_ssize_t size = -1;
     int isWritable = 0;
-    SbkVoidPtrObject *sbkSelf = reinterpret_cast<SbkVoidPtrObject *>(self);
+    auto *sbkSelf = reinterpret_cast<SbkVoidPtrObject *>(self);
 
     static const char *kwlist[] = {"address", "size", "writeable", nullptr};
 
@@ -90,7 +90,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 
     // Void pointer.
     if (SbkVoidPtr_Check(addressObject)) {
-        SbkVoidPtrObject *sbkOther = reinterpret_cast<SbkVoidPtrObject *>(addressObject);
+        auto *sbkOther = reinterpret_cast<SbkVoidPtrObject *>(addressObject);
         sbkSelf->cptr = sbkOther->cptr;
         sbkSelf->size = sbkOther->size;
         sbkSelf->isWritable = sbkOther->isWritable;
@@ -112,7 +112,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
     }
     // Shiboken::Object wrapper.
     else if (Shiboken::Object::checkType(addressObject)) {
-        SbkObject *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
+        auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
         sbkSelf->cptr = sbkOther->d->cptr[0];
         sbkSelf->size = size;
         sbkSelf->isWritable = isWritable > 0 ? true : false;
@@ -178,13 +178,13 @@ PyObject *SbkVoidPtrObject_richcmp(PyObject *obj1, PyObject *obj2, int op)
 
 PyObject *SbkVoidPtrObject_int(PyObject *v)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     return PyLong_FromVoidPtr(sbkObject->cptr);
 }
 
 PyObject *toBytes(PyObject *self, PyObject *args)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
     if (sbkObject->size < 0) {
         PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
         return nullptr;
@@ -202,7 +202,7 @@ static struct PyMethodDef SbkVoidPtrObject_methods[] = {
 
 static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     if (sbkObject->size < 0) {
         PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
         return -1;
@@ -218,7 +218,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 {
 
 
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     #ifdef IS_PY3K
     PyObject *s = PyUnicode_FromFormat("%s(%p, %zd, %s)",
     #else
@@ -234,7 +234,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
 PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     #ifdef IS_PY3K
     PyObject *s = PyUnicode_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
     #else
@@ -254,7 +254,7 @@ static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
     if (view == nullptr)
         return -1;
 
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(obj);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(obj);
     if (sbkObject->size < 0)
         return -1;
 
@@ -410,7 +410,7 @@ static PyObject *toPython(const void *cppIn)
 
 static void VoidPtrToCpp(PyObject *pyIn, void *cppOut)
 {
-    SbkVoidPtrObject *sbkIn = reinterpret_cast<SbkVoidPtrObject *>(pyIn);
+    auto *sbkIn = reinterpret_cast<SbkVoidPtrObject *>(pyIn);
     *reinterpret_cast<void **>(cppOut) = sbkIn->cptr;
 }
 
@@ -421,7 +421,7 @@ static PythonToCppFunc VoidPtrToCppIsConvertible(PyObject *pyIn)
 
 static void SbkObjectToCpp(PyObject *pyIn, void *cppOut)
 {
-    SbkObject *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
+    auto *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
     *reinterpret_cast<void **>(cppOut) = sbkIn->d->cptr[0];
 }
 

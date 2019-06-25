@@ -69,7 +69,7 @@ namespace TestUtil
         arguments.append(QFile::encodeName(tempSource.fileName()));
         tempSource.write(cppCode, qint64(strlen(cppCode)));
         tempSource.close();
-        AbstractMetaBuilder *builder = new AbstractMetaBuilder;
+        auto *builder = new AbstractMetaBuilder;
         if (!builder->build(arguments)) {
             delete builder;
             return Q_NULLPTR;

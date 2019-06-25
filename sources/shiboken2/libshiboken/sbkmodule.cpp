@@ -84,27 +84,27 @@ PyObject *create(const char *moduleName, void *moduleData)
 
 void registerTypes(PyObject *module, PyTypeObject **types)
 {
-    ModuleTypesMap::iterator iter = moduleTypes.find(module);
+    auto iter = moduleTypes.find(module);
     if (iter == moduleTypes.end())
         moduleTypes.insert(std::make_pair(module, types));
 }
 
 PyTypeObject **getTypes(PyObject *module)
 {
-    ModuleTypesMap::iterator iter = moduleTypes.find(module);
+    auto iter = moduleTypes.find(module);
     return (iter == moduleTypes.end()) ? 0 : iter->second;
 }
 
 void registerTypeConverters(PyObject *module, SbkConverter **converters)
 {
-    ModuleConvertersMap::iterator iter = moduleConverters.find(module);
+    auto iter = moduleConverters.find(module);
     if (iter == moduleConverters.end())
         moduleConverters.insert(std::make_pair(module, converters));
 }
 
 SbkConverter **getTypeConverters(PyObject *module)
 {
-    ModuleConvertersMap::iterator iter = moduleConverters.find(module);
+    auto iter = moduleConverters.find(module);
     return (iter == moduleConverters.end()) ? 0 : iter->second;
 }
 

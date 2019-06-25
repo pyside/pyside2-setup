@@ -234,7 +234,7 @@ compute_name_key(PyObject *ob)
 static int
 build_name_key_to_func(PyObject *obtype)
 {
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyMethodDef *meth = type->tp_methods;
 
     if (meth == nullptr)
@@ -457,7 +457,7 @@ static safe_globals_struc *
 init_phase_1(void)
 {
     {
-        safe_globals_struc *p = reinterpret_cast<safe_globals_struc *>
+        auto *p = reinterpret_cast<safe_globals_struc *>
                                     (malloc(sizeof(safe_globals_struc)));
         if (p == nullptr)
             goto error;
@@ -675,7 +675,7 @@ handle_doc(PyObject *ob, PyObject *old_descr)
     init_module_1();
     init_module_2();
     Shiboken::AutoDecRef ob_type(GetClassOfFunc(ob));
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(ob_type.object());
+    auto *type = reinterpret_cast<PyTypeObject *>(ob_type.object());
     if (handle_doc_in_progress || strncmp(type->tp_name, "PySide2.", 8) != 0)
         return PyObject_CallMethod(old_descr, const_cast<char *>("__get__"), const_cast<char *>("(O)"), ob);
     handle_doc_in_progress++;
@@ -1056,7 +1056,7 @@ _build_func_to_type(PyObject *obtype)
      * and record the mapping from static method to this type in a dict.
      * We also check for hidden methods, see below.
      */
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyObject *dict = type->tp_dict;
     PyMethodDef *meth = type->tp_methods;
 
@@ -1128,7 +1128,7 @@ SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
 {
     if (PyType_Ready(type) < 0)
         return -1;
-    PyObject *ob_type = reinterpret_cast<PyObject *>(type);
+    auto *ob_type = reinterpret_cast<PyObject *>(type);
     int ret = PySide_BuildSignatureArgs(ob_type, signatures);
     if (ret < 0) {
         PyErr_Print();

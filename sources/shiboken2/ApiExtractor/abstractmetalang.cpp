@@ -188,7 +188,7 @@ QString AbstractMetaType::fullName() const
 
 AbstractMetaType *AbstractMetaType::copy() const
 {
-    AbstractMetaType *cpy = new AbstractMetaType;
+    auto *cpy = new AbstractMetaType;
 
     cpy->setTypeUsagePattern(typeUsagePattern());
     cpy->setConstant(isConstant());
@@ -427,7 +427,7 @@ void AbstractMetaArgument::assignMetaArgument(const AbstractMetaArgument &other)
 
 AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
-    AbstractMetaArgument *copy = new AbstractMetaArgument;
+    auto *copy = new AbstractMetaArgument;
     copy->assignMetaArgument(*this);
     return copy;
 }
@@ -587,7 +587,7 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
 
 AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
-    AbstractMetaFunction *cpy = new AbstractMetaFunction;
+    auto *cpy = new AbstractMetaFunction;
     cpy->assignMetaAttributes(*this);
     cpy->setName(name());
     cpy->setOriginalName(originalName());
@@ -1406,7 +1406,7 @@ AbstractMetaClass *AbstractMetaClass::extractInterface()
     Q_ASSERT(typeEntry()->designatedInterface());
 
     if (!m_extractedInterface) {
-        AbstractMetaClass *iface = new AbstractMetaClass;
+        auto *iface = new AbstractMetaClass;
         iface->setAttributes(attributes());
         iface->setBaseClass(nullptr);
 
@@ -1782,7 +1782,7 @@ AbstractMetaField::~AbstractMetaField()
 
 AbstractMetaField *AbstractMetaField::copy() const
 {
-    AbstractMetaField *returned = new AbstractMetaField;
+    auto *returned = new AbstractMetaField;
     returned->assignMetaVariable(*this);
     returned->assignMetaAttributes(*this);
     returned->setEnclosingClass(nullptr);
@@ -1822,7 +1822,7 @@ static QString upCaseFirst(const QString &str)
 static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QString &name,
                                           AbstractMetaAttributes::Attributes type)
 {
-    AbstractMetaFunction *f = new AbstractMetaFunction;
+    auto *f = new AbstractMetaFunction;
 
     f->setName(name);
     f->setOriginalName(name);
@@ -1880,7 +1880,7 @@ const AbstractMetaFunction *AbstractMetaField::setter() const
                                 QLatin1String("set") + upCaseFirst(name()),
                                 AbstractMetaAttributes::SetterFunction);
         AbstractMetaArgumentList arguments;
-        AbstractMetaArgument *argument = new AbstractMetaArgument;
+        auto *argument = new AbstractMetaArgument;
         argument->setType(type()->copy());
         argument->setName(name());
         arguments.append(argument);
@@ -2000,7 +2000,7 @@ bool AbstractMetaClass::hasPrivateCopyConstructor() const
 
 void AbstractMetaClass::addDefaultConstructor()
 {
-    AbstractMetaFunction *f = new AbstractMetaFunction;
+    auto *f = new AbstractMetaFunction;
     f->setOriginalName(name());
     f->setName(name());
     f->setOwnerClass(this);
@@ -2265,7 +2265,7 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
     Q_ASSERT(metaClass);
     const TypeEntry *entry = (type ? type->typeEntry() : nullptr);
     if (entry && entry->isComplex()) {
-        const ComplexTypeEntry *centry = static_cast<const ComplexTypeEntry *>(entry);
+        const auto *centry = static_cast<const ComplexTypeEntry *>(entry);
         ComplexTypeEntry *class_entry = metaClass->typeEntry();
         if (class_entry && centry->include().isValid())
             class_entry->addExtraInclude(centry->include());

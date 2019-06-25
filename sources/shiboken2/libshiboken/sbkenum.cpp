@@ -86,7 +86,7 @@ static PyObject *SbkEnumObject_repr(PyObject *self)
 
 static PyObject *SbkEnumObject_name(PyObject *self, void *)
 {
-    SbkEnumObject *enum_self = SBK_ENUM(self);
+    auto *enum_self = SBK_ENUM(self);
 
     if (enum_self->ob_name == nullptr)
         Py_RETURN_NONE;
@@ -326,7 +326,7 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
 
 PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
-    newfunc type_new = reinterpret_cast<newfunc>(PyType_GetSlot(&PyType_Type, Py_tp_new));
+    auto type_new = reinterpret_cast<newfunc>(PyType_GetSlot(&PyType_Type, Py_tp_new));
     auto newType = reinterpret_cast<SbkEnumType *>(type_new(metatype, args, kwds));
     if (!newType)
         return nullptr;
@@ -368,7 +368,7 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
     PyObject *values = PyDict_GetItemString(enumType->tp_dict, const_cast<char *>("values"));
 
     while (PyDict_Next(values, &pos, &key, &value)) {
-        SbkEnumObject *obj = reinterpret_cast<SbkEnumObject *>(value);
+        auto *obj = reinterpret_cast<SbkEnumObject *>(value);
         if (obj->ob_value == itemValue) {
             Py_INCREF(obj);
             return value;
@@ -587,7 +587,7 @@ newTypeWithName(const char *name,
 {
     // Careful: PyType_FromSpec does not allocate the string.
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
-    PyType_Spec *newspec = new PyType_Spec;
+    auto *newspec = new PyType_Spec;
     newspec->name = strdup(name);
     newspec->basicsize = SbkNewType_spec.basicsize;
     newspec->itemsize = SbkNewType_spec.itemsize;
@@ -602,11 +602,11 @@ newTypeWithName(const char *name,
     if (numbers_fromFlag)
         copyNumberMethods(numbers_fromFlag, newslots, &idx);
     newspec->slots = newslots;
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(newspec));
+    auto *type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(newspec));
     Py_TYPE(type) = SbkEnumType_TypeF();
     Py_INCREF(Py_TYPE(type));
 
-    SbkEnumType *enumType = reinterpret_cast<SbkEnumType *>(type);
+    auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     PepType_SETP(enumType)->cppName = cppName;
     PepType_SETP(enumType)->converterPtr = &PepType_SETP(enumType)->converter;
     DeclaredEnumTypes::instance().addEnumType(type);

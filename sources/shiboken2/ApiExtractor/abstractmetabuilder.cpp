@@ -883,7 +883,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         return nullptr;
     }
 
-    AbstractMetaEnum *metaEnum = new AbstractMetaEnum;
+    auto *metaEnum = new AbstractMetaEnum;
     metaEnum->setEnumKind(enumItem->enumKind());
     metaEnum->setSigned(enumItem->isSigned());
     if (enumsDeclarations.contains(qualifiedName)
@@ -891,7 +891,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         metaEnum->setHasQEnumsDeclaration(true);
     }
 
-    EnumTypeEntry *enumTypeEntry = static_cast<EnumTypeEntry *>(typeEntry);
+    auto *enumTypeEntry = static_cast<EnumTypeEntry *>(typeEntry);
     metaEnum->setTypeEntry(enumTypeEntry);
     switch (enumItem->accessPolicy()) {
     case CodeModel::Public:
@@ -914,7 +914,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     const EnumeratorList &enums = enumItem->enumerators();
     for (const EnumeratorModelItem &value : enums) {
 
-        AbstractMetaEnumValue *metaEnumValue = new AbstractMetaEnumValue;
+        auto *metaEnumValue = new AbstractMetaEnumValue;
         metaEnumValue->setName(value->name());
         // Deciding the enum value...
 
@@ -993,7 +993,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelIt
     if (!type)
         return nullptr;
 
-    AbstractMetaClass *metaClass = new AbstractMetaClass;
+    auto *metaClass = new AbstractMetaClass;
     metaClass->setTypeDef(true);
     metaClass->setTypeEntry(type);
     metaClass->setBaseClassNames(QStringList(typeDef->type().toString()));
@@ -1014,7 +1014,7 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
     const auto &entries = TypeDatabase::instance()->typedefEntries();
     for (auto it = entries.begin(), end = entries.end(); it != end; ++it) {
         TypedefEntry *te = it.value();
-        AbstractMetaClass *metaClass = new AbstractMetaClass;
+        auto *metaClass = new AbstractMetaClass;
         metaClass->setTypeDef(true);
         metaClass->setTypeEntry(te->target());
         metaClass->setBaseClassNames(QStringList(te->sourceType()));
@@ -1056,7 +1056,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         return nullptr;
     }
 
-    AbstractMetaClass *metaClass = new AbstractMetaClass;
+    auto *metaClass = new AbstractMetaClass;
     metaClass->setTypeEntry(type);
 
     if (classItem->isFinal())
@@ -1198,7 +1198,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
     }
 
 
-    AbstractMetaField *metaField = new AbstractMetaField;
+    auto *metaField = new AbstractMetaField;
     metaField->setName(fieldName);
     metaField->setEnclosingClass(cls);
 
@@ -1282,7 +1282,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     if (!retType)
         return;
 
-    AbstractMetaType *metaType = new AbstractMetaType;
+    auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(retType);
     metaFunction->replaceType(metaType);
 }
@@ -1610,7 +1610,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc,
                                                                    AbstractMetaClass *metaClass)
 {
-    AbstractMetaFunction *metaFunction = new AbstractMetaFunction(addedFunc);
+    auto *metaFunction = new AbstractMetaFunction(addedFunc);
     metaFunction->setType(translateType(addedFunc->returnType()));
 
 
@@ -1619,7 +1619,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
     for (int i = 0; i < args.count(); ++i) {
         const AddedFunction::TypeInfo& typeInfo = args.at(i).typeInfo;
-        AbstractMetaArgument *metaArg = new AbstractMetaArgument;
+        auto *metaArg = new AbstractMetaArgument;
         AbstractMetaType *type = translateType(typeInfo);
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken,
@@ -1842,7 +1842,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         return nullptr;
     }
 
-    AbstractMetaFunction *metaFunction = new AbstractMetaFunction;
+    auto *metaFunction = new AbstractMetaFunction;
     if (deprecated)
         *metaFunction += AbstractMetaAttributes::Deprecated;
 
@@ -1968,7 +1968,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        AbstractMetaArgument *metaArgument = new AbstractMetaArgument;
+        auto *metaArgument = new AbstractMetaArgument;
 
         metaArgument->setType(metaType);
         metaArgument->setName(arg->name());
@@ -2115,7 +2115,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
         qFatal("%s", qPrintable(msg));
     }
 
-    AbstractMetaType *metaType = new AbstractMetaType;
+    auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
     if (typeInfo.isReference)
@@ -2229,7 +2229,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         }
 
         for (int i = typeInfo.arrayElements().size() - 1; i >= 0; --i) {
-            AbstractMetaType *arrayType = new AbstractMetaType;
+            auto *arrayType = new AbstractMetaType;
             arrayType->setArrayElementType(elementType);
             const QString &arrayElement = typeInfo.arrayElements().at(i);
             if (!arrayElement.isEmpty()) {
@@ -2319,7 +2319,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     // These are only implicit and should not appear in code...
     Q_ASSERT(!type->isInterface());
 
-    AbstractMetaType *metaType = new AbstractMetaType;
+    auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
     metaType->setIndirectionsV(typeInfo.indirectionsV());
     metaType->setReferenceType(typeInfo.referenceType());
@@ -2601,7 +2601,7 @@ AbstractMetaType *
     returned->setOriginalTemplateType(metaType);
 
     if (returned->typeEntry()->isTemplateArgument()) {
-        const TemplateArgumentEntry* tae = static_cast<const TemplateArgumentEntry*>(returned->typeEntry());
+        const auto *tae = static_cast<const TemplateArgumentEntry*>(returned->typeEntry());
 
         // If the template is intantiated with void we special case this as rejecting the functions that use this
         // parameter from the instantiation.
@@ -2683,7 +2683,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         }
 
         if (t) {
-            AbstractMetaType *temporaryType = new AbstractMetaType;
+            auto *temporaryType = new AbstractMetaType;
             temporaryType->setTypeEntry(t);
             temporaryType->setConstant(i.isConstant());
             temporaryType->setReferenceType(i.referenceType());
@@ -2835,7 +2835,7 @@ void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
             continue;
         }
 
-        QPropertySpec* spec = new QPropertySpec(type->typeEntry());
+        auto *spec = new QPropertySpec(type->typeEntry());
         spec->setName(propertyTokens.at(1).toString());
         spec->setIndex(i);
 

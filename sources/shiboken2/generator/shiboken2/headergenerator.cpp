@@ -310,7 +310,7 @@ void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *t
     const int typeIndex = typeEntry->sbkIndex();
     _writeTypeIndexValueLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
     if (typeEntry->isComplex()) {
-        const ComplexTypeEntry *cType = static_cast<const ComplexTypeEntry *>(typeEntry);
+        const auto *cType = static_cast<const ComplexTypeEntry *>(typeEntry);
         if (cType->baseContainerType()) {
             const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), cType);
             if (metaClass->templateBaseClass())

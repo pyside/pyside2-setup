@@ -123,13 +123,13 @@ static PyType_Spec typeprobe_spec = {
 static void
 check_PyTypeObject_valid(void)
 {
-    PyObject *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
-    PyTypeObject *probe_tp_base = reinterpret_cast<PyTypeObject *>(
+    auto *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
+    auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(
         PyObject_GetAttrString(obtype, "__base__"));
     PyObject *probe_tp_bases = PyObject_GetAttrString(obtype, "__bases__");
-    PyTypeObject *check = reinterpret_cast<PyTypeObject *>(
+    auto *check = reinterpret_cast<PyTypeObject *>(
         PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
-    PyTypeObject *typetype = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *typetype = reinterpret_cast<PyTypeObject *>(obtype);
     PyObject *w = PyObject_GetAttrString(obtype, "__weakrefoffset__");
     long probe_tp_weakrefoffset = PyLong_AsLong(w);
     PyObject *d = PyObject_GetAttrString(obtype, "__dictoffset__");
