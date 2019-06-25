@@ -88,7 +88,7 @@ static PyObject *SbkEnumObject_name(PyObject *self, void *)
 {
     SbkEnumObject *enum_self = SBK_ENUM(self);
 
-    if (enum_self->ob_name == NULL)
+    if (enum_self->ob_name == nullptr)
         Py_RETURN_NONE;
 
     Py_INCREF(enum_self->ob_name);
@@ -99,18 +99,18 @@ static PyObject *SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
 {
     long itemValue = 0;
     if (!PyArg_ParseTuple(args, "|l:__new__", &itemValue))
-        return 0;
+        return nullptr;
 
     SbkEnumObject *self = PyObject_New(SbkEnumObject, type);
     if (!self)
-        return 0;
+        return nullptr;
     self->ob_value = itemValue;
     PyObject *item = Shiboken::Enum::getEnumItemFromValue(type, itemValue);
     if (item) {
-        self->ob_name = SbkEnumObject_name(item, 0);
+        self->ob_name = SbkEnumObject_name(item, nullptr);
         Py_XDECREF(item);
     } else {
-        self->ob_name = 0;
+        self->ob_name = nullptr;
     }
     return reinterpret_cast<PyObject *>(self);
 }
@@ -256,7 +256,7 @@ static Py_hash_t enum_hash(PyObject *pyObj)
 
 static PyGetSetDef SbkEnumGetSetList[] = {
     {const_cast<char *>("name"), &SbkEnumObject_name, nullptr, nullptr, nullptr},
-    {0, 0, 0, 0, 0} // Sentinel
+    {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
 static void SbkEnumTypeDealloc(PyObject *pyObj);
@@ -286,7 +286,7 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_alloc, (void *)PyType_GenericAlloc},
     {Py_tp_new, (void *)SbkEnumTypeTpNew},
     {Py_tp_free, (void *)PyObject_GC_Del},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
     "Shiboken.EnumType",
@@ -329,7 +329,7 @@ PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwd
     newfunc type_new = reinterpret_cast<newfunc>(PyType_GetSlot(&PyType_Type, Py_tp_new));
     auto newType = reinterpret_cast<SbkEnumType *>(type_new(metatype, args, kwds));
     if (!newType)
-        return 0;
+        return nullptr;
     return reinterpret_cast<PyObject *>(newType);
 }
 
@@ -374,7 +374,7 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
             return value;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 static PyTypeObject *createEnum(const char *fullName, const char *cppName,
@@ -383,7 +383,7 @@ static PyTypeObject *createEnum(const char *fullName, const char *cppName,
 {
     PyTypeObject *enumType = newTypeWithName(fullName, cppName, flagsType);
     if (PyType_Ready(enumType) < 0)
-        return 0;
+        return nullptr;
     return enumType;
 }
 
@@ -391,10 +391,10 @@ PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *f
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, name, flagsType);
     if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0)
-        return 0;
+        return nullptr;
     if (flagsType && PyModule_AddObject(module, PepType_GetNameStr(flagsType),
             reinterpret_cast<PyObject *>(flagsType)) < 0)
-        return 0;
+        return nullptr;
     return enumType;
 }
 
@@ -415,7 +415,7 @@ static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, lo
 {
     PyObject *enumItem = newItem(enumType, itemValue, itemName);
     if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0)
-        return 0;
+        return nullptr;
     Py_DECREF(enumItem);
     return enumItem;
 }
@@ -470,9 +470,9 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
 
     enumObj = PyObject_New(SbkEnumObject, enumType);
     if (!enumObj)
-        return 0;
+        return nullptr;
 
-    enumObj->ob_name = itemName ? PyBytes_FromString(itemName) : 0;
+    enumObj->ob_name = itemName ? PyBytes_FromString(itemName) : nullptr;
     enumObj->ob_value = itemValue;
 
     if (newValue) {
@@ -514,7 +514,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_tp_richcompare, (void *)enum_richcompare},
     {Py_tp_hash, (void *)enum_hash},
     {Py_tp_dealloc, (void *)object_dealloc},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec SbkNewType_spec = {
     "missing Enum name", // to be inserted later

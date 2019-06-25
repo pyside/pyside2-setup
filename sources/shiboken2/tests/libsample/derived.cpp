@@ -54,7 +54,7 @@ Derived::pureVirtual()
 void*
 Derived::pureVirtualReturningVoidPtr()
 {
-    return 0;
+    return nullptr;
 }
 
 void
@@ -100,7 +100,7 @@ Derived::otherOverloaded(int a, double b)
 
 struct SecretClass : public Abstract {
     virtual void pureVirtual() {}
-    virtual void* pureVirtualReturningVoidPtr() { return 0; }
+    virtual void *pureVirtualReturningVoidPtr() { return nullptr; }
     virtual PrintFormat returnAnEnum() { return Short; }
     void hideFunction(HideType*){};
 private:

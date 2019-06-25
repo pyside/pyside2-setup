@@ -119,7 +119,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QVERIFY(toNative);
     QCOMPARE(toNative->sourceTypeName(), QLatin1String("TargetNone"));
     QVERIFY(toNative->isCustomType());
-    QCOMPARE(toNative->sourceType(), (const TypeEntry*)0);
+    QCOMPARE(toNative->sourceType(), nullptr);
     QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("%IN == Target_None"));
     QCOMPARE(toNative->conversion().simplified(),
              QLatin1String("DoThat(); DoSomething(); %OUT = A();"));
@@ -138,7 +138,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QVERIFY(toNative);
     QCOMPARE(toNative->sourceTypeName(), QLatin1String("String"));
     QVERIFY(toNative->isCustomType());
-    QCOMPARE(toNative->sourceType(), (const TypeEntry*)0);
+    QCOMPARE(toNative->sourceType(), nullptr);
     QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("String_Check(%IN)"));
     QCOMPARE(toNative->conversion().trimmed(), QLatin1String("%OUT = new A(String_AsString(%IN), String_GetSize(%IN));"));
 }
@@ -183,7 +183,7 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
     QVERIFY(toNative);
     QCOMPARE(toNative->sourceTypeName(), QLatin1String("TargetDate"));
     QVERIFY(toNative->isCustomType());
-    QCOMPARE(toNative->sourceType(), (const TypeEntry*)0);
+    QCOMPARE(toNative->sourceType(), nullptr);
     QCOMPARE(toNative->sourceTypeCheck(), QLatin1String("TargetDate_Check(%IN)"));
     QCOMPARE(toNative->conversion().trimmed(),
              QLatin1String("if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n%OUT = new Date(TargetDate_Day(%IN), TargetDate_Month(%IN), TargetDate_Year(%IN));"));

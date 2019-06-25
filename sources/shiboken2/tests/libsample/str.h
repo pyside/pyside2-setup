@@ -49,7 +49,7 @@ public:
     char get_char(int pos) const;
     bool set_char(int pos, char ch);
 
-    int toInt(bool* ok = 0, int base = 10) const;
+    int toInt(bool *ok = nullptr, int base = 10) const;
 
     void show() const;
 
@@ -73,6 +73,6 @@ LIBSAMPLE_API unsigned int strHash(const Str& str);
 
 typedef Str PStr;
 LIBSAMPLE_API void changePStr(PStr* pstr, const char* suffix);
-LIBSAMPLE_API void duplicatePStr(PStr* pstr = 0);
+LIBSAMPLE_API void duplicatePStr(PStr *pstr = nullptr);
 
 #endif // STR_H

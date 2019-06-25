@@ -340,7 +340,7 @@ void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumLi
 static const AbstractMetaClass *getProperEnclosingClass(const AbstractMetaClass *metaClass)
 {
     if (!metaClass)
-        return 0;
+        return nullptr;
 
     if (metaClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
         return metaClass;
@@ -1252,7 +1252,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool gene
 
 QString ShibokenGenerator::guessCPythonCheckFunction(const QString &type, AbstractMetaType **metaType)
 {
-    *metaType = 0;
+    *metaType = nullptr;
     if (type == QLatin1String("PyTypeObject"))
         return QLatin1String("PyType_Check");
 

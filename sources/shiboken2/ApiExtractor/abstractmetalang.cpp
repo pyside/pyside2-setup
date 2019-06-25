@@ -198,9 +198,9 @@ AbstractMetaType *AbstractMetaType::copy() const
     cpy->setInstantiations(instantiations());
     cpy->setArrayElementCount(arrayElementCount());
     cpy->setOriginalTypeDescription(originalTypeDescription());
-    cpy->setOriginalTemplateType(originalTemplateType() ? originalTemplateType()->copy() : 0);
+    cpy->setOriginalTemplateType(originalTemplateType() ? originalTemplateType()->copy() : nullptr);
 
-    cpy->setArrayElementType(arrayElementType() ? arrayElementType()->copy() : 0);
+    cpy->setArrayElementType(arrayElementType() ? arrayElementType()->copy() : nullptr);
 
     cpy->setTypeEntry(typeEntry());
 
@@ -519,7 +519,7 @@ bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
 */
 AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
 {
-    CompareResult result = 0;
+    CompareResult result = nullptr;
 
     // Enclosing class...
     if (ownerClass() == other->ownerClass())
@@ -1408,7 +1408,7 @@ AbstractMetaClass *AbstractMetaClass::extractInterface()
     if (!m_extractedInterface) {
         AbstractMetaClass *iface = new AbstractMetaClass;
         iface->setAttributes(attributes());
-        iface->setBaseClass(0);
+        iface->setBaseClass(nullptr);
 
         iface->setTypeEntry(typeEntry()->designatedInterface());
 
@@ -1712,7 +1712,7 @@ QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
     for (int i = 0; i < m_propertySpecs.size(); ++i)
         if (name == m_propertySpecs.at(i)->read())
             return m_propertySpecs.at(i);
-    return 0;
+    return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForWrite(const QString &name) const
@@ -1720,7 +1720,7 @@ QPropertySpec *AbstractMetaClass::propertySpecForWrite(const QString &name) cons
     for (int i = 0; i < m_propertySpecs.size(); ++i)
         if (name == m_propertySpecs.at(i)->write())
             return m_propertySpecs.at(i);
-    return 0;
+    return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) const
@@ -1729,7 +1729,7 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
         if (name == m_propertySpecs.at(i)->reset())
             return m_propertySpecs.at(i);
     }
-    return 0;
+    return nullptr;
 }
 
 typedef QHash<const AbstractMetaClass *, AbstractMetaTypeList> AbstractMetaClassBaseTemplateInstantiationsMap;
@@ -2263,7 +2263,7 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
         return;
 
     Q_ASSERT(metaClass);
-    const TypeEntry *entry = (type ? type->typeEntry() : 0);
+    const TypeEntry *entry = (type ? type->typeEntry() : nullptr);
     if (entry && entry->isComplex()) {
         const ComplexTypeEntry *centry = static_cast<const ComplexTypeEntry *>(entry);
         ComplexTypeEntry *class_entry = metaClass->typeEntry();
@@ -2589,7 +2589,7 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &class
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
                               .arg(className, entry->qualifiedCppName());
-        return 0;
+        return nullptr;
     }
 
     return metaClass->findEnum(enumName);
@@ -2626,7 +2626,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
                                                 const QString &name)
 {
     if (name.isEmpty())
-        return 0;
+        return nullptr;
 
     for (AbstractMetaClass *c : classes) {
         if (c->qualifiedCppName() == name)
@@ -2643,7 +2643,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
             return c;
     }
 
-    return 0;
+    return nullptr;
 }
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
@@ -2653,7 +2653,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
         if (c->typeEntry() == typeEntry)
             return c;
     }
-    return 0;
+    return nullptr;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

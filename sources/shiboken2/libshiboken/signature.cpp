@@ -79,7 +79,7 @@ typedef struct safe_globals_struc {
     PyObject *make_helptext_func;
 } safe_globals_struc, *safe_globals;
 
-static safe_globals pyside_globals = 0;
+static safe_globals pyside_globals = nullptr;
 
 static PyObject *GetTypeKey(PyObject *ob);
 
@@ -237,7 +237,7 @@ build_name_key_to_func(PyObject *obtype)
     PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyMethodDef *meth = type->tp_methods;
 
-    if (meth == 0)
+    if (meth == nullptr)
         return 0;
 
     Shiboken::AutoDecRef type_key(GetTypeKey(obtype));
@@ -661,11 +661,11 @@ add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **old_descr)
 //
 
 // keep the original __doc__ functions
-static PyObject *old_cf_doc_descr = 0;
-static PyObject *old_sm_doc_descr = 0;
-static PyObject *old_md_doc_descr = 0;
-static PyObject *old_tp_doc_descr = 0;
-static PyObject *old_wd_doc_descr = 0;
+static PyObject *old_cf_doc_descr = nullptr;
+static PyObject *old_sm_doc_descr = nullptr;
+static PyObject *old_md_doc_descr = nullptr;
+static PyObject *old_tp_doc_descr = nullptr;
+static PyObject *old_wd_doc_descr = nullptr;
 
 static int handle_doc_in_progress = 0;
 
@@ -737,35 +737,35 @@ static PyGetSetDef new_PyCFunction_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_cf_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_cf_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_sm_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_sm_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_md_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_md_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyType_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_tp_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_tp_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_wd_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_wd_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1060,7 +1060,7 @@ _build_func_to_type(PyObject *obtype)
     PyObject *dict = type->tp_dict;
     PyMethodDef *meth = type->tp_methods;
 
-    if (meth == 0)
+    if (meth == nullptr)
         return 0;
 
     for (; meth->ml_name != nullptr; meth++) {

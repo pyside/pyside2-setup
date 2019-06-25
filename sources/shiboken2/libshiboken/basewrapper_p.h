@@ -67,7 +67,7 @@ using ChildrenList = std::set<SbkObject *>;
 struct ParentInfo
 {
     /// Default ctor.
-    ParentInfo() : parent(0), hasWrapperRef(false) {}
+    ParentInfo() : parent(nullptr), hasWrapperRef(false) {}
     /// Pointer to parent object.
     SbkObject *parent;
     /// List of object children.
@@ -105,9 +105,9 @@ struct SbkObjectPrivate
     ~SbkObjectPrivate()
     {
         delete parentInfo;
-        parentInfo = 0;
+        parentInfo = nullptr;
         delete referredObjects;
-        referredObjects = 0;
+        referredObjects = nullptr;
     }
 };
 

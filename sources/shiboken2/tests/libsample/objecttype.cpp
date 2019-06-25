@@ -35,7 +35,7 @@
 
 using namespace std;
 
-ObjectType::ObjectType(ObjectType* parent) : m_parent(0), m_layout(0), m_call_id(-1)
+ObjectType::ObjectType(ObjectType* parent) : m_parent(nullptr), m_layout(nullptr), m_call_id(-1)
 {
     setParent(parent);
 }
@@ -66,7 +66,7 @@ ObjectType::removeChild(ObjectType* child)
     ObjectTypeList::iterator child_iter = std::find(m_children.begin(), m_children.end(), child);
     if (child_iter != m_children.end()) {
         m_children.erase(child_iter);
-        child->m_parent = 0;
+        child->m_parent = nullptr;
     }
 }
 
@@ -74,15 +74,15 @@ ObjectType*
 ObjectType::takeChild(ObjectType* child)
 {
     if (!child)
-        return 0;
+        return nullptr;
 
     ObjectTypeList::iterator child_iter = std::find(m_children.begin(), m_children.end(), child);
     if (child_iter != m_children.end()) {
         m_children.erase(child_iter);
-        child->m_parent = 0;
+        child->m_parent = nullptr;
         return child;
     }
-    return 0;
+    return nullptr;
 }
 
 ObjectType*
@@ -101,7 +101,7 @@ ObjectType::findChild(const Str& name)
         if ((*child_iter)->objectName() == name)
             return *child_iter;
     }
-    return 0;
+    return nullptr;
 }
 
 void
@@ -218,8 +218,8 @@ ObjectTypeLayout* ObjectType::takeLayout()
 {
     ObjectTypeLayout* l = layout();
     if (!l)
-        return 0;
-    m_layout = 0;
+        return nullptr;
+    m_layout = nullptr;
     l->setParent(0);
     return l;
 }

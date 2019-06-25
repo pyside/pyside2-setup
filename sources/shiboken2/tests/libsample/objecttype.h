@@ -71,7 +71,7 @@ public:
     // ### Fixme: Use uintptr_t in C++ 11
     typedef size_t Identifier;
 
-    explicit ObjectType(ObjectType* parent = 0);
+    explicit ObjectType(ObjectType *parent = nullptr);
     virtual ~ObjectType();
 
     // factory method

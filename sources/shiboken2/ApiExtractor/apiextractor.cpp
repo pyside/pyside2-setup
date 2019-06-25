@@ -168,7 +168,7 @@ ContainerTypeEntryList ApiExtractor::containerTypes() const
 
 static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClasses, const EnumTypeEntry* typeEntry)
 {
-    const AbstractMetaEnum* result = 0;
+    const AbstractMetaEnum *result = nullptr;
     for (const AbstractMetaClass* metaClass : qAsConst(metaClasses)) {
         const AbstractMetaEnumList &enums = metaClass->enums();
         for (const AbstractMetaEnum *metaEnum : enums) {

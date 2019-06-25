@@ -112,11 +112,11 @@ struct SbkConverter
 template<typename T, typename MaxLimitType, bool isSigned>
 struct OverFlowCheckerBase {
     static void formatOverFlowMessage(const MaxLimitType &value,
-                                      const std::string *valueAsString = 0)
+                                      const std::string *valueAsString = nullptr)
     {
         std::ostringstream str;
         str << "libshiboken: Overflow: Value ";
-        if (valueAsString != 0 && !valueAsString->empty())
+        if (valueAsString != nullptr && !valueAsString->empty())
             str << *valueAsString;
         else
             str << value;
@@ -261,27 +261,27 @@ struct IntPrimitive : TwoPrimitive<INT>
         double result = PyFloat_AS_DOUBLE(pyIn);
         // If cast to long directly it could overflow silently.
         if (OverFlowChecker<INT>::check(result, pyIn))
-            PyErr_SetObject(PyExc_OverflowError, 0);
+            PyErr_SetObject(PyExc_OverflowError, nullptr);
         *reinterpret_cast<INT * >(cppOut) = static_cast<INT>(result);
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {
         if (PyFloat_Check(pyIn))
             return toCpp;
-        return 0;
+        return nullptr;
     }
     static void otherToCpp(PyObject *pyIn, void *cppOut)
     {
         PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
         if (OverFlowChecker<INT>::check(result, pyIn))
-            PyErr_SetObject(PyExc_OverflowError, 0);
+            PyErr_SetObject(PyExc_OverflowError, nullptr);
         *reinterpret_cast<INT * >(cppOut) = static_cast<INT>(result);
     }
     static PythonToCppFunc isOtherConvertible(PyObject *pyIn)
     {
         if (SbkNumber_Check(pyIn))
             return otherToCpp;
-        return 0;
+        return nullptr;
     }
 };
 template <> struct Primitive<int> : IntPrimitive<int> {};
@@ -322,7 +322,7 @@ struct Primitive<PY_LONG_LONG> : OnePrimitive<PY_LONG_LONG>
     {
         if (SbkNumber_Check(pyIn))
             return toCpp;
-        return 0;
+        return nullptr;
     }
 };
 
@@ -339,7 +339,7 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
         if (PyLong_Check(pyIn)) {
             unsigned PY_LONG_LONG result = PyLong_AsUnsignedLongLong(pyIn);
             if (OverFlowChecker<unsigned PY_LONG_LONG, unsigned PY_LONG_LONG>::check(result, pyIn))
-                PyErr_SetObject(PyExc_OverflowError, 0);
+                PyErr_SetObject(PyExc_OverflowError, nullptr);
             *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) = result;
         }
         else {
@@ -366,7 +366,7 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
     {
         if (SbkNumber_Check(pyIn))
             return toCpp;
-        return 0;
+        return nullptr;
     }
 };
 
@@ -387,7 +387,7 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
     {
         if (PyInt_Check(pyIn) || PyLong_Check(pyIn))
             return toCpp;
-        return 0;
+        return nullptr;
     }
     static void otherToCpp(PyObject *pyIn, void *cppOut)
     {
@@ -397,7 +397,7 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
     {
         if (SbkNumber_Check(pyIn))
             return otherToCpp;
-        return 0;
+        return nullptr;
     }
 };
 template <> struct Primitive<float> : FloatPrimitive<float> {};
@@ -416,7 +416,7 @@ struct Primitive<bool> : OnePrimitive<bool>
     {
         if (SbkNumber_Check(pyIn))
             return toCpp;
-        return 0;
+        return nullptr;
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
@@ -437,20 +437,20 @@ struct CharPrimitive : IntPrimitive<CHAR>
     {
         if (Shiboken::String::checkChar(pyIn))
             return toCpp;
-        return 0;
+        return nullptr;
     }
     static void otherToCpp(PyObject *pyIn, void *cppOut)
     {
         PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
         if (OverFlowChecker<CHAR>::check(result, pyIn))
-            PyErr_SetObject(PyExc_OverflowError, 0);
+            PyErr_SetObject(PyExc_OverflowError, nullptr);
         *reinterpret_cast<CHAR *>(cppOut) = CHAR(result);
     }
     static PythonToCppFunc isOtherConvertible(PyObject *pyIn)
     {
         if (SbkNumber_Check(pyIn))
             return otherToCpp;
-        return 0;
+        return nullptr;
     }
     static SbkConverter *createConverter()
     {
@@ -484,13 +484,13 @@ struct Primitive<const char *> : TwoPrimitive<const char *>
     }
     static void toCpp(PyObject *, void *cppOut)
     {
-        *((const char **)cppOut) = 0;
+        *((const char **)cppOut) = nullptr;
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {
         if (pyIn == Py_None)
             return toCpp;
-        return 0;
+        return nullptr;
     }
     static void otherToCpp(PyObject *pyIn, void *cppOut)
     {
@@ -500,7 +500,7 @@ struct Primitive<const char *> : TwoPrimitive<const char *>
     {
         if (Shiboken::String::check(pyIn))
             return otherToCpp;
-        return 0;
+        return nullptr;
     }
 };
 
@@ -519,7 +519,7 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     {
         if (pyIn == Py_None)
             return toCpp;
-        return 0;
+        return nullptr;
     }
     static void otherToCpp(PyObject *pyIn, void *cppOut)
     {
@@ -529,7 +529,7 @@ struct Primitive<std::string> : TwoPrimitive<std::string>
     {
         if (Shiboken::String::check(pyIn))
             return otherToCpp;
-        return 0;
+        return nullptr;
     }
 };
 

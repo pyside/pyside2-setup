@@ -74,11 +74,11 @@ dummy_func(PyObject *self, PyObject *args)
 
 static struct PyMethodDef probe_methoddef[] = {
     {"dummy", dummy_func, METH_NOARGS},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef probe_getseters[] = {
-    {0}  /* Sentinel */
+    {nullptr}  /* Sentinel */
 };
 
 #define probe_tp_call       make_dummy(1)
@@ -110,7 +110,7 @@ static PyType_Slot typeprobe_slots[] = {
     {Py_tp_new,         probe_tp_new},
     {Py_tp_free,        probe_tp_free},
     {Py_tp_is_gc,       probe_tp_is_gc},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec typeprobe_spec = {
     probe_tp_name,

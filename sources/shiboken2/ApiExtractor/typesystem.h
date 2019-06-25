@@ -770,7 +770,7 @@ public:
 
     virtual InterfaceTypeEntry *designatedInterface() const
     {
-        return 0;
+        return nullptr;
     }
 
     void setCustomConstructor(const CustomFunction &func)

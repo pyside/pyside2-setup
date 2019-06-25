@@ -117,7 +117,7 @@ public:
     double callDifferenceOfPointCoordinates(const Point* pt, bool* ok) { return differenceOfPointCoordinates(pt, ok); }
 
     // Sets an ObjectType in the argument and returns true.
-    bool nonConversionRuleForArgumentWithDefaultValue(ObjectType** object = 0);
+    bool nonConversionRuleForArgumentWithDefaultValue(ObjectType **object = nullptr);
     ObjectType* getObject() const { return m_object; }
 
     // Inject code with a %CONVERTTOPYTHON that receives an user's primitive type.

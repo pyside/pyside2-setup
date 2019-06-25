@@ -118,7 +118,7 @@ protected:
                         const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
-                        const AbstractMetaClass *context = 0);
+                        const AbstractMetaClass *context = nullptr);
     /// Write user's custom code snippets at function level.
     void writeCodeSnips(QTextStream &s,
                         const QVector<CodeSnip> & codeSnips,
@@ -312,8 +312,8 @@ protected:
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument *metaArg, bool genericNumberType = false);
 
     QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass);
-    QString cpythonToCppConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = 0);
-    QString cpythonToPythonConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = 0);
+    QString cpythonToCppConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = nullptr);
+    QString cpythonToPythonConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = nullptr);
     QString cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass);
     QString cpythonToPythonConversionFunction(const TypeEntry *type);
 

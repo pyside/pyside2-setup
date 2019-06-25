@@ -149,7 +149,7 @@ class GeneratorContext {
 public:
     GeneratorContext() = default;
     GeneratorContext(AbstractMetaClass *metaClass,
-                     const AbstractMetaType *preciseType = 0,
+                     const AbstractMetaType *preciseType = nullptr,
                      bool forSmartPointer = false)
         : m_metaClass(metaClass),
         m_preciseClassType(preciseType),

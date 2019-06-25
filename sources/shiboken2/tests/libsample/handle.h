@@ -45,7 +45,7 @@ typedef OBJ* HANDLE;
 class LIBSAMPLE_API HandleHolder
 {
 public:
-    explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
+    explicit HandleHolder(HANDLE ptr = nullptr) : m_handle(ptr) {}
     explicit HandleHolder(Foo::HANDLE val): m_handle2(val) {}
 
     inline void set(HANDLE ptr) { HANDLE tmp; tmp = m_handle;  m_handle = tmp; }

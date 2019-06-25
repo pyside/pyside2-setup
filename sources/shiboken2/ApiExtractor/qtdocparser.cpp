@@ -212,7 +212,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     const AbstractMetaClass* context = metaClass->enclosingClass();
     while(context) {
-        if (context->enclosingClass() == 0)
+        if (context->enclosingClass() == nullptr)
             break;
         context = context->enclosingClass();
     }

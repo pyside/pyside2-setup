@@ -49,7 +49,7 @@ BlackBox::keepObjectType(ObjectType* object)
     m_ticket++;
     std::pair<int, ObjectType*> item(m_ticket, object);
     m_objects.insert(item);
-    object->setParent(0);
+    object->setParent(nullptr);
 
     return m_ticket;
 }
@@ -63,7 +63,7 @@ BlackBox::retrieveObjectType(int ticket)
         m_objects.erase(it);
         return second;
     }
-    return 0;
+    return nullptr;
 }
 
 void
@@ -93,7 +93,7 @@ BlackBox::retrievePoint(int ticket)
         m_points.erase(it);
         return second;
     }
-    return 0;
+    return nullptr;
 }
 
 void

@@ -161,7 +161,7 @@ bool TypeInfo::isVoid() const
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, const ScopeModelItem &__scope)
 {
     CodeModel *__model = __scope->model();
-    Q_ASSERT(__model != 0);
+    Q_ASSERT(__model != nullptr);
 
     return TypeInfo::resolveType(__model->findItem(__type.qualifiedName(), __scope),  __type, __scope);
 }

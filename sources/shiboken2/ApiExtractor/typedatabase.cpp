@@ -68,7 +68,7 @@ TypeDatabase::~TypeDatabase()
 
 TypeDatabase* TypeDatabase::instance(bool newInstance)
 {
-    static TypeDatabase* db = 0;
+    static TypeDatabase *db = nullptr;
     if (!db || newInstance) {
         if (db)
             delete db;
@@ -163,7 +163,7 @@ ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
     TypeEntry* type_entry = findType(template_name);
     if (type_entry && type_entry->isContainer())
         return static_cast<ContainerTypeEntry*>(type_entry);
-    return 0;
+    return nullptr;
 }
 
 static bool inline useType(const TypeEntry *t)
@@ -179,7 +179,7 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
         if (entry->type() == TypeEntry::FunctionType && useType(entry))
             return static_cast<FunctionTypeEntry*>(entry);
     }
-    return 0;
+    return nullptr;
 }
 
 void TypeDatabase::addTypeSystemType(const TypeSystemTypeEntry *e)
@@ -598,7 +598,7 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
@@ -608,7 +608,7 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
         if (entry->isComplex() && useType(entry))
             return static_cast<ComplexTypeEntry*>(entry);
     }
-    return 0;
+    return nullptr;
 }
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
@@ -618,7 +618,7 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
         if (entry && entry->isObject() && useType(entry))
             return static_cast<ObjectTypeEntry*>(entry);
     }
-    return 0;
+    return nullptr;
 }
 
 NamespaceTypeEntryList TypeDatabase::findNamespaceTypes(const QString& name) const

@@ -60,7 +60,7 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
         defaultAppName = "PySideApplication";
 
     // Check all items
-    Shiboken::AutoDecRef args(PySequence_Fast(argList, 0));
+    Shiboken::AutoDecRef args(PySequence_Fast(argList, nullptr));
     int numArgs = int(PySequence_Fast_GET_SIZE(argList));
     for (int i = 0; i < numArgs; ++i) {
         PyObject *item = PyList_GET_ITEM(args.object(), i);
@@ -83,7 +83,7 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
     } else {
         for (int i = 0; i < numArgs; ++i) {
             PyObject *item = PyList_GET_ITEM(args.object(), i);
-            char *string = 0;
+            char *string = nullptr;
             if (Shiboken::String::check(item)) {
                 string = strdup(Shiboken::String::toCString(item));
             }
@@ -98,7 +98,7 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
 {
     AutoDecRef seq(PySequence_Fast(obj, "Sequence of ints expected"));
     if (seq.isNull())
-        return 0;
+        return nullptr;
 
     Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
     int *array = new int[size + (zeroTerminated ? 1 : 0)];
@@ -108,7 +108,7 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
         if (!PyInt_Check(item)) {
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
             delete[] array;
-            return 0;
+            return nullptr;
         } else {
             array[i] = PyInt_AsLong(item);
         }
@@ -133,7 +133,7 @@ int warning(PyObject *category, int stacklevel, const char *format, ...)
 #endif
 
     // check the necessary memory
-    int size = vsnprintf(NULL, 0, format, args) + 1;
+    int size = vsnprintf(nullptr, 0, format, args) + 1;
     auto message = new char[size];
     int result = 0;
     if (message) {

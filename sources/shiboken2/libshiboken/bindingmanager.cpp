@@ -155,7 +155,7 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject
     // Returns true if the correct wrapper is found and released.
     // If wrapper argument is NULL, no such check is performed.
     WrapperMap::iterator iter = wrapperMapper.find(cptr);
-    if (iter != wrapperMapper.end() && (wrapper == 0 || iter->second == wrapper)) {
+    if (iter != wrapperMapper.end() && (wrapper == nullptr || iter->second == wrapper)) {
         wrapperMapper.erase(iter);
         return true;
     }
@@ -268,7 +268,7 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr)
 {
     WrapperMap::iterator iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
-        return 0;
+        return nullptr;
     return iter->second;
 }
 
@@ -278,7 +278,7 @@ PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
     // The refcount can be 0 if the object is dieing and someone called
     // a virtual method from the destructor
     if (!wrapper || reinterpret_cast<const PyObject *>(wrapper)->ob_refcnt == 0)
-        return 0;
+        return nullptr;
 
     if (wrapper->ob_dict) {
         PyObject *method = PyDict_GetItemString(wrapper->ob_dict, methodName);
@@ -312,7 +312,7 @@ PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
 
     Py_XDECREF(method);
     Py_DECREF(pyMethodName);
-    return 0;
+    return nullptr;
 }
 
 void BindingManager::addClassInheritance(SbkObjectType *parent, SbkObjectType *child)

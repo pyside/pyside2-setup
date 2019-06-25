@@ -51,7 +51,7 @@ void TestReverseOperators::testReverseSum()
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 4);
 
-    const AbstractMetaFunction* reverseOp = 0;
+    const AbstractMetaFunction* reverseOp = nullptr;
     const AbstractMetaFunction* normalOp = 0;
     for (const AbstractMetaFunction *func : classA->functions()) {
         if (func->name() == QLatin1String("operator+")) {
@@ -100,8 +100,8 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QVERIFY(classB);
     QCOMPARE(classB->functions().count(), 4);
 
-    const AbstractMetaFunction* reverseOp = 0;
-    const AbstractMetaFunction* normalOp = 0;
+    const AbstractMetaFunction *reverseOp = nullptr;
+    const AbstractMetaFunction *normalOp = nullptr;
     for (const AbstractMetaFunction *func : classB->functions()) {
         if (func->name() == QLatin1String("operator+")) {
             if (func->isReverseOperator())

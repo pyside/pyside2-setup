@@ -427,7 +427,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
 {
     const QStringRef currentClass = m_context.splitRef(QLatin1Char('.')).constLast();
 
-    const AbstractMetaClass* metaClass = 0;
+    const AbstractMetaClass *metaClass = nullptr;
     const AbstractMetaClassList &classes = m_generator->classes();
     for (const AbstractMetaClass *cls : classes) {
         if (cls->name() == currentClass) {
@@ -444,7 +444,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
                 funcList.append(func);
         }
 
-        const AbstractMetaClass* implementingClass = 0;
+        const AbstractMetaClass *implementingClass = nullptr;
         for (const AbstractMetaFunction *func : qAsConst(funcList)) {
             implementingClass = func->implementingClass();
             if (implementingClass->name() == currentClass)
@@ -1503,7 +1503,7 @@ static QString getFuncName(const AbstractMetaFunction* cppFunc) {
     return result;
 }
 
-QtDocGenerator::QtDocGenerator() : m_docParser(0)
+QtDocGenerator::QtDocGenerator() : m_docParser(nullptr)
 {
 }
 
@@ -1656,8 +1656,8 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
            "--------------------\n\n"
         << ".. _More:\n";
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, 0);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, 0))
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
         writeFormattedText(s, documentation, metaClass);
 
     if (!metaClass->isNamespace())
@@ -1679,7 +1679,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
         writeFunction(s, metaClass, func);
     }
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, 0);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, nullptr);
 }
 
 void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass)

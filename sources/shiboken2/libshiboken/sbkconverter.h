@@ -151,7 +151,7 @@ LIBSHIBOKEN_API SbkConverter *createConverter(SbkObjectType *type,
                                               PythonToCppFunc toCppPointerConvFunc,
                                               IsConvertibleToCppFunc toCppPointerCheckFunc,
                                               CppToPythonFunc pointerToPythonFunc,
-                                              CppToPythonFunc copyToPythonFunc = 0);
+                                              CppToPythonFunc copyToPythonFunc = nullptr);
 
 /**
  *  Creates a converter for a non wrapper type (primitive or container type).
@@ -343,7 +343,7 @@ LIBSHIBOKEN_API bool pythonTypeIsWrapperType(const SbkConverter *converter);
 #define SBK_VOIDPTR_IDX                16
 #define SBK_NULLPTR_T_IDX              17
 
-template<typename T> SbkConverter *PrimitiveTypeConverter() { return 0; }
+template<typename T> SbkConverter *PrimitiveTypeConverter() { return nullptr; }
 template<> inline SbkConverter *PrimitiveTypeConverter<PY_LONG_LONG>() { return primitiveTypeConverter(SBK_PY_LONG_LONG_IDX); }
 template<> inline SbkConverter *PrimitiveTypeConverter<bool>() { return primitiveTypeConverter(SBK_BOOL_IDX_1); }
 template<> inline SbkConverter *PrimitiveTypeConverter<char>() { return primitiveTypeConverter(SBK_CHAR_IDX); }
@@ -371,7 +371,7 @@ template<> inline SbkConverter *PrimitiveTypeConverter<std::nullptr_t>() { retur
 *   T isn't a C++ primitive type.
 *   \see SpecialCastFunction
 */
-template<typename T> PyTypeObject *SbkType() { return 0; }
+template<typename T> PyTypeObject *SbkType() { return nullptr; }
 
 // Below are the template specializations for C++ primitive types.
 template<> inline PyTypeObject *SbkType<PY_LONG_LONG>() { return &PyLong_Type; }

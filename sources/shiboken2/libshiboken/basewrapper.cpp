@@ -93,7 +93,7 @@ static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_getset, (void *)SbkObjectType_Type_getsetlist},
     {Py_tp_new, (void *)SbkObjectTypeTpNew},
     {Py_tp_free, (void *)PyObject_GC_Del},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec SbkObjectType_Type_spec = {
     "Shiboken.ObjectType",
@@ -211,14 +211,14 @@ static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
     if (!obj->ob_dict)
         obj->ob_dict = PyDict_New();
     if (!obj->ob_dict)
-        return 0;
+        return nullptr;
     Py_INCREF(obj->ob_dict);
     return obj->ob_dict;
 }
 
 static PyGetSetDef SbkObjectGetSetList[] = {
-    {const_cast<char *>("__dict__"), SbkObjectGetDict, 0, 0, 0},
-    {0, 0, 0, 0, 0} // Sentinel
+    {const_cast<char *>("__dict__"), SbkObjectGetDict, nullptr, nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
 static int SbkObject_traverse(PyObject *self, visitproc visit, void *arg)
@@ -267,7 +267,7 @@ static PyType_Slot SbkObject_Type_slots[] = {
     // unsupported: {Py_tp_weaklistoffset, (void *)offsetof(SbkObject, weakreflist)},
     {Py_tp_getset, (void *)SbkObjectGetSetList},
     // unsupported: {Py_tp_dictoffset, (void *)offsetof(SbkObject, ob_dict)},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec SbkObject_Type_spec = {
     "Shiboken.Object",
@@ -377,7 +377,7 @@ void SbkDeallocQAppWrapper(PyObject *pyObj)
 {
     SbkDeallocWrapper(pyObj);
     // PYSIDE-571: make sure to create a singleton deleted qApp.
-    MakeSingletonQAppWrapper(NULL);
+    MakeSingletonQAppWrapper(nullptr);
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject *self)
@@ -431,7 +431,7 @@ PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *k
                                      &name,
                                      &PyTuple_Type, &pyBases,
                                      &PyDict_Type, &dict))
-        return NULL;
+        return nullptr;
 
     for (int i=0, i_max=PyTuple_GET_SIZE(pyBases); i < i_max; i++) {
         PyObject *baseType = PyTuple_GET_ITEM(pyBases, i);
@@ -452,7 +452,7 @@ PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *k
     newfunc type_new = reinterpret_cast<newfunc>(PyType_Type.tp_new);
     SbkObjectType *newType = reinterpret_cast<SbkObjectType *>(type_new(metatype, args, kwds));
     if (!newType)
-        return 0;
+        return nullptr;
 
     Shiboken::ObjectType::initPrivateData(newType);
     SbkObjectTypePrivate *sotp = PepType_SOTP(newType);
@@ -543,7 +543,7 @@ PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
     }
 #endif
     auto self = reinterpret_cast<SbkObject *>(MakeSingletonQAppWrapper(subtype));
-    return self == 0 ? 0 : _setupNew(self, subtype);
+    return self == nullptr ? nullptr : _setupNew(self, subtype);
 }
 
 void
@@ -622,7 +622,7 @@ bool importModule(const char *moduleName, PyTypeObject *** cppApiPtr)
 
 #ifdef IS_PY3K
     if (PyCapsule_CheckExact(cppApi))
-        *cppApiPtr = reinterpret_cast<PyTypeObject **>(PyCapsule_GetPointer(cppApi, 0));
+        *cppApiPtr = reinterpret_cast<PyTypeObject **>(PyCapsule_GetPointer(cppApi, nullptr));
 #else
     // Python 2.6 doesn't have PyCapsule API, so let's keep usign PyCObject on all Python 2.x
     if (PyCObject_Check(cppApi))
@@ -766,7 +766,7 @@ bool canCallConstructor(PyTypeObject *myType, PyTypeObject *ctorType)
 
 bool hasCast(SbkObjectType *type)
 {
-    return PepType_SOTP(type)->mi_specialcast != 0;
+    return PepType_SOTP(type)->mi_specialcast != nullptr;
 }
 
 void *cast(SbkObjectType *sourceType, SbkObject *obj, PyTypeObject *targetType)
@@ -1007,7 +1007,7 @@ void callCppDestructors(SbkObject *pyObj)
     }
 
     delete[] pyObj->d->cptr;
-    pyObj->d->cptr = 0;
+    pyObj->d->cptr = nullptr;
     pyObj->d->validCppObject = false;
 }
 
@@ -1155,7 +1155,7 @@ void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
         idx = getTypeIndexOnHierarchy(type, desiredType);
     if (pyObj->d->cptr)
         return pyObj->d->cptr[idx];
-    return 0;
+    return nullptr;
 }
 
 std::vector<void *> cppPointers(SbkObject *pyObj)
@@ -1175,7 +1175,7 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
     if (PepType_SOTP(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
 
-    const bool alreadyInitialized = sbkObj->d->cptr[idx] != 0;
+    const bool alreadyInitialized = sbkObj->d->cptr[idx] != nullptr;
     if (alreadyInitialized)
         PyErr_SetString(PyExc_RuntimeError, "You can't initialize an object twice!");
     else
@@ -1249,11 +1249,11 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
         return wrapper;
 
     if (!(wrapper->d && wrapper->d->cptr))
-        return 0;
+        return nullptr;
 
     ParentInfo *pInfo = wrapper->d->parentInfo;
     if (!pInfo)
-        return 0;
+        return nullptr;
 
     ChildrenList &children = pInfo->children;
 
@@ -1267,7 +1267,7 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
                 return findColocatedChild(child, instanceType);
         }
     }
-    return 0;
+    return nullptr;
 }
 
 PyObject *newObject(SbkObjectType *instanceType,
@@ -1286,7 +1286,7 @@ PyObject *newObject(SbkObjectType *instanceType,
 
     bool shouldCreate = true;
     bool shouldRegister = true;
-    SbkObject *self = 0;
+    SbkObject *self = nullptr;
 
     // Some logic to ensure that colocated child field does not overwrite the parent
     if (BindingManager::instance().hasWrapper(cptr)) {
@@ -1313,7 +1313,7 @@ PyObject *newObject(SbkObjectType *instanceType,
     }
 
     if (shouldCreate) {
-        self = reinterpret_cast<SbkObject *>(SbkObjectTpNew(reinterpret_cast<PyTypeObject *>(instanceType), 0, 0));
+        self = reinterpret_cast<SbkObject *>(SbkObjectTpNew(reinterpret_cast<PyTypeObject *>(instanceType), nullptr, nullptr));
         self->d->cptr[0] = cptr;
         self->d->hasOwnership = hasOwnership;
         self->d->validCppObject = 1;
@@ -1328,7 +1328,7 @@ PyObject *newObject(SbkObjectType *instanceType,
 
 void destroy(SbkObject *self)
 {
-    destroy(self, 0);
+    destroy(self, nullptr);
 }
 
 void destroy(SbkObject *self, void *cppData)
@@ -1369,7 +1369,7 @@ void destroy(SbkObject *self, void *cppData)
 
         // the cpp object instance was deleted
         delete[] self->d->cptr;
-        self->d->cptr = 0;
+        self->d->cptr = nullptr;
     }
 
     // After this point the object can be death do not use the self pointer bellow
@@ -1393,7 +1393,7 @@ void removeParent(SbkObject *child, bool giveOwnershipBack, bool keepReference)
 
     oldBrothers.erase(iChild);
 
-    pInfo->parent = 0;
+    pInfo->parent = nullptr;
 
     // This will keep the wrapper reference, will wait for wrapper destruction to remove that
     if (keepReference &&
@@ -1427,7 +1427,7 @@ void setParent(PyObject *parent, PyObject *child)
      * follows the sequence protocol.
      */
     if (PySequence_Check(child) && !Object::checkType(child)) {
-        Shiboken::AutoDecRef seq(PySequence_Fast(child, 0));
+        Shiboken::AutoDecRef seq(PySequence_Fast(child, nullptr));
         for (Py_ssize_t i = 0, max = PySequence_Size(seq); i < max; ++i)
             setParent(parent, PySequence_Fast_GET_ITEM(seq.object(), i));
         return;
@@ -1492,7 +1492,7 @@ void deallocData(SbkObject *self, bool cleanup)
         // Remove from BindingManager
         Shiboken::BindingManager::instance().releaseWrapper(self);
         delete[] self->d->cptr;
-        self->d->cptr = 0;
+        self->d->cptr = nullptr;
         // delete self->d; PYSIDE-205: wrong!
     }
     delete self->d; // PYSIDE-205: always delete d.

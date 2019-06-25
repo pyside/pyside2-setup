@@ -587,7 +587,7 @@ public:
     }
     void setType(AbstractMetaType *type)
     {
-        Q_ASSERT(m_type == 0);
+        Q_ASSERT(m_type == nullptr);
         m_type = type;
     }
     void replaceType(AbstractMetaType *type)
@@ -896,7 +896,7 @@ public:
     }
     void setType(AbstractMetaType *type)
     {
-        Q_ASSERT(m_type == 0);
+        Q_ASSERT(m_type == nullptr);
         m_type = type;
     }
 
@@ -1053,12 +1053,12 @@ public:
     *   \return true if there is some modification to function signature
     */
     bool hasSignatureModifications() const;
-    FunctionModificationList modifications(const AbstractMetaClass* implementor = 0) const;
+    FunctionModificationList modifications(const AbstractMetaClass* implementor = nullptr) const;
 
     /**
      * Return the argument name if there is a modification the renamed value will be returned
      */
-    QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = 0) const;
+    QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = nullptr) const;
 
     void setPropertySpec(QPropertySpec *spec)
     {

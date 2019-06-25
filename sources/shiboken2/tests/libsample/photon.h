@@ -116,7 +116,7 @@ LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorT
 class Pointer
 {
 public:
-    Pointer() PHOTON_NOEXCEPT : px(0) {}
+    Pointer() PHOTON_NOEXCEPT : px(nullptr) {}
     Pointer(int* p) : px(p) {}
 
     void reset() PHOTON_NOEXCEPT { Pointer().swap(*this); }

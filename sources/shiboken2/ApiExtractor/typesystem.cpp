@@ -698,7 +698,7 @@ bool Handler::endElement(const QStringRef &localName)
         if (m_currentDroppedEntryDepth == 1) {
             m_current = m_currentDroppedEntry->parent;
             delete m_currentDroppedEntry;
-            m_currentDroppedEntry = 0;
+            m_currentDroppedEntry = nullptr;
             m_currentDroppedEntryDepth = 0;
         } else {
             --m_currentDroppedEntryDepth;
@@ -785,7 +785,7 @@ bool Handler::endElement(const QStringRef &localName)
     case StackElement::EnumTypeEntry:
         m_current->entry->setDocModification(m_contextStack.top()->docModifications);
         m_contextStack.top()->docModifications = DocModificationList();
-        m_currentEnum = 0;
+        m_currentEnum = nullptr;
         break;
     case StackElement::Template:
         m_database->addTemplate(m_current->value.templateEntry);
@@ -2807,7 +2807,7 @@ bool Handler::startElement(const QXmlStreamReader &reader)
             return false;
         }
 
-        StackElement topElement = !m_current ? StackElement(0) : *m_current;
+        StackElement topElement = !m_current ? StackElement(nullptr) : *m_current;
         element->entry = topElement.entry;
 
         switch (element->type) {
@@ -3003,7 +3003,7 @@ QString PrimitiveTypeEntry::targetLangApiName() const
 PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
 {
     if (!m_referencedTypeEntry)
-        return 0;
+        return nullptr;
 
     PrimitiveTypeEntry *baseReferencedTypeEntry = m_referencedTypeEntry->basicReferencedTypeEntry();
     return baseReferencedTypeEntry ? baseReferencedTypeEntry : m_referencedTypeEntry;
@@ -3926,7 +3926,7 @@ struct CustomConversion::CustomConversionPrivate
 struct CustomConversion::TargetToNativeConversion::TargetToNativeConversionPrivate
 {
     TargetToNativeConversionPrivate()
-        : sourceType(0)
+        : sourceType(nullptr)
     {
     }
     const TypeEntry* sourceType;

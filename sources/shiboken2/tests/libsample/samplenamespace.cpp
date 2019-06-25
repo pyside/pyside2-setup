@@ -78,7 +78,7 @@ getNumber(Option opt)
             retval = rand() % 100;
             break;
         case UnixTime:
-            retval = (int) time(0);
+            retval = (int) time(nullptr);
             break;
         default:
             retval = 0;

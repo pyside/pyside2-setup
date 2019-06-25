@@ -117,7 +117,7 @@ private:
      */
     void writeArgumentConversion(QTextStream &s, const AbstractMetaType *argType,
                                  const QString &argName, const QString &pyArgName,
-                                 const AbstractMetaClass *context = 0,
+                                 const AbstractMetaClass *context = nullptr,
                                  const QString &defaultValue = QString(),
                                  bool castArgumentAsUnused = false);
 
@@ -138,7 +138,7 @@ private:
                                         const AbstractMetaType *type,
                                         const QString &pyIn,
                                         const QString &cppOut,
-                                        const AbstractMetaClass *context = 0,
+                                        const AbstractMetaClass *context = nullptr,
                                         const QString &defaultValue = QString());
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
