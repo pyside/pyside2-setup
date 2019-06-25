@@ -42,7 +42,6 @@ from build_scripts.utils import install_pip_dependencies
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
-from build_scripts.utils import acceptCITestConfiguration
 from build_scripts.utils import get_ci_qmake_path
 import os
 
@@ -82,9 +81,6 @@ def call_testrunner(python_ver, buildnro):
         run_instruction(cmd, "Error while running wheel_tester.py")
 
 def run_test_instructions():
-    if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
-        exit()
-
     # Remove some environment variables that impact cmake
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
@@ -97,7 +93,7 @@ def run_test_instructions():
         call_testrunner("", str(testRun))
         testRun =+ 1
     # We know that second build was with python3
-    if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
+    if CI_RELEASE_CONF:
         call_testrunner("3", str(testRun))
 
 if __name__ == "__main__":
