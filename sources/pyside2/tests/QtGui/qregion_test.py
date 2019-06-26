@@ -38,7 +38,7 @@ class QRegionTest(UsesQApplication):
     def testFunctionUnit(self):
         r = QRegion(0, 0, 10, 10)
         r2 = QRegion(5, 5, 10, 10)
- 
+
         ru = r.united(r2)
         self.assertTrue(ru.contains(QPoint(0,0)))
         self.assertTrue(ru.contains(QPoint(5,5)))

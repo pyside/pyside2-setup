@@ -40,7 +40,7 @@ bool
 VirtualMethods::createStr(const char* text, Str*& ret)
 {
     if (!text) {
-        ret = 0;
+        ret = nullptr;
         return false;
     }
 

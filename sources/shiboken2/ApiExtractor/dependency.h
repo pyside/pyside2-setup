@@ -42,6 +42,6 @@ struct Dependency {
     AbstractMetaClass *child;
 };
 
-typedef QVector<Dependency> Dependencies;
+using Dependencies = QVector<Dependency>;
 
 #endif // DEPENDENCY_H

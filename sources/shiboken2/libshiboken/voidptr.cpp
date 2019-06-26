@@ -61,10 +61,10 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     //    SbkVoidPtrObject *self =
     //        reinterpret_cast<SbkVoidPtrObject *>(type->tp_alloc);
     PyObject *ob = type->tp_alloc(type, 0);
-    SbkVoidPtrObject *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
+    auto *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
 
-    if (self != 0) {
-        self->cptr = 0;
+    if (self != nullptr) {
+        self->cptr = nullptr;
         self->size = -1;
         self->isWritable = false;
     }
@@ -80,9 +80,9 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
     PyObject *addressObject;
     Py_ssize_t size = -1;
     int isWritable = 0;
-    SbkVoidPtrObject *sbkSelf = reinterpret_cast<SbkVoidPtrObject *>(self);
+    auto *sbkSelf = reinterpret_cast<SbkVoidPtrObject *>(self);
 
-    static const char *kwlist[] = {"address", "size", "writeable", 0};
+    static const char *kwlist[] = {"address", "size", "writeable", nullptr};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|ni", const_cast<char **>(kwlist),
                                      &addressObject, &size, &isWritable))
@@ -90,7 +90,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 
     // Void pointer.
     if (SbkVoidPtr_Check(addressObject)) {
-        SbkVoidPtrObject *sbkOther = reinterpret_cast<SbkVoidPtrObject *>(addressObject);
+        auto *sbkOther = reinterpret_cast<SbkVoidPtrObject *>(addressObject);
         sbkSelf->cptr = sbkOther->cptr;
         sbkSelf->size = sbkOther->size;
         sbkSelf->isWritable = sbkOther->isWritable;
@@ -105,17 +105,17 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 
         sbkSelf->cptr = bufferView.buf;
         sbkSelf->size = bufferView.len > 0 ? bufferView.len : size;
-        sbkSelf->isWritable = bufferView.readonly > 0 ? false : true;
+        sbkSelf->isWritable = bufferView.readonly <= 0;
 
         // Release the buffer.
         PyBuffer_Release(&bufferView);
     }
     // Shiboken::Object wrapper.
     else if (Shiboken::Object::checkType(addressObject)) {
-        SbkObject *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
+        auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
         sbkSelf->cptr = sbkOther->d->cptr[0];
         sbkSelf->size = size;
-        sbkSelf->isWritable = isWritable > 0 ? true : false;
+        sbkSelf->isWritable = isWritable > 0;
     }
     // An integer representing an address.
     else {
@@ -137,7 +137,7 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
             }
             sbkSelf->cptr = cptr;
             sbkSelf->size = size;
-            sbkSelf->isWritable = isWritable > 0 ? true : false;
+            sbkSelf->isWritable = isWritable > 0;
         }
     }
 
@@ -147,8 +147,8 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 PyObject *SbkVoidPtrObject_richcmp(PyObject *obj1, PyObject *obj2, int op)
 {
     PyObject *result = Py_False;
-    void *cptr1 = 0;
-    void *cptr2 = 0;
+    void *cptr1 = nullptr;
+    void *cptr2 = nullptr;
     bool validObjects = true;
 
     if (SbkVoidPtr_Check(obj1))
@@ -178,13 +178,13 @@ PyObject *SbkVoidPtrObject_richcmp(PyObject *obj1, PyObject *obj2, int op)
 
 PyObject *SbkVoidPtrObject_int(PyObject *v)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     return PyLong_FromVoidPtr(sbkObject->cptr);
 }
 
 PyObject *toBytes(PyObject *self, PyObject *args)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
     if (sbkObject->size < 0) {
         PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
         return nullptr;
@@ -197,12 +197,12 @@ PyObject *toBytes(PyObject *self, PyObject *args)
 
 static struct PyMethodDef SbkVoidPtrObject_methods[] = {
     {"toBytes", toBytes, METH_NOARGS},
-    {0}
+    {nullptr}
 };
 
 static Py_ssize_t SbkVoidPtrObject_length(PyObject *v)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     if (sbkObject->size < 0) {
         PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
         return -1;
@@ -218,7 +218,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 {
 
 
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     #ifdef IS_PY3K
     PyObject *s = PyUnicode_FromFormat("%s(%p, %zd, %s)",
     #else
@@ -234,7 +234,7 @@ PyObject *SbkVoidPtrObject_repr(PyObject *v)
 
 PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     #ifdef IS_PY3K
     PyObject *s = PyUnicode_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
     #else
@@ -251,10 +251,10 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 
 static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
-    if (view == NULL)
+    if (view == nullptr)
         return -1;
 
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(obj);
+    auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(obj);
     if (sbkObject->size < 0)
         return -1;
 
@@ -273,18 +273,18 @@ static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
     view->len = sbkObject->size;
     view->readonly = readonly;
     view->itemsize = 1;
-    view->format = NULL;
+    view->format = nullptr;
     if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
-        view->format = "B";
+        view->format = const_cast<char *>("B");
     view->ndim = 1;
-    view->shape = NULL;
+    view->shape = nullptr;
     if ((flags & PyBUF_ND) == PyBUF_ND)
         view->shape = &(view->len);
-    view->strides = NULL;
+    view->strides = nullptr;
     if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
         view->strides = &(view->itemsize);
-    view->suboffsets = NULL;
-    view->internal = NULL;
+    view->suboffsets = nullptr;
+    view->internal = nullptr;
     return 0;
 }
 
@@ -321,7 +321,7 @@ PyBufferProcs SbkVoidPtrObjectBufferProc = {
 
 static PyBufferProcs SbkVoidPtrObjectBufferProc = {
     (getbufferproc)SbkVoidPtrObject_getbuffer,   // bf_getbuffer
-    (releasebufferproc)0                         // bf_releasebuffer
+    (releasebufferproc)nullptr                         // bf_releasebuffer
 };
 
 #endif
@@ -337,7 +337,7 @@ static PyType_Slot SbkVoidPtrType_slots[] = {
     {Py_tp_new, (void *)SbkVoidPtrObject_new},
     {Py_tp_dealloc, (void *)object_dealloc},
     {Py_tp_methods, (void *)SbkVoidPtrObject_methods},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec SbkVoidPtrType_spec = {
     "shiboken2.libshiboken.VoidPtr",
@@ -354,7 +354,7 @@ PyTypeObject *SbkVoidPtrTypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type)
-        type = (PyTypeObject *)PyType_FromSpec(&SbkVoidPtrType_spec);
+        type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkVoidPtrType_spec));
 
 #if PY_VERSION_HEX < 0x03000000
     type->tp_as_buffer = &SbkVoidPtrObjectBufferProc;
@@ -410,24 +410,24 @@ static PyObject *toPython(const void *cppIn)
 
 static void VoidPtrToCpp(PyObject *pyIn, void *cppOut)
 {
-    SbkVoidPtrObject *sbkIn = reinterpret_cast<SbkVoidPtrObject *>(pyIn);
+    auto *sbkIn = reinterpret_cast<SbkVoidPtrObject *>(pyIn);
     *reinterpret_cast<void **>(cppOut) = sbkIn->cptr;
 }
 
 static PythonToCppFunc VoidPtrToCppIsConvertible(PyObject *pyIn)
 {
-    return SbkVoidPtr_Check(pyIn) ? VoidPtrToCpp : 0;
+    return SbkVoidPtr_Check(pyIn) ? VoidPtrToCpp : nullptr;
 }
 
 static void SbkObjectToCpp(PyObject *pyIn, void *cppOut)
 {
-    SbkObject *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
+    auto *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
     *reinterpret_cast<void **>(cppOut) = sbkIn->d->cptr[0];
 }
 
 static PythonToCppFunc SbkObjectToCppIsConvertible(PyObject *pyIn)
 {
-    return Shiboken::Object::checkType(pyIn) ? SbkObjectToCpp : 0;
+    return Shiboken::Object::checkType(pyIn) ? SbkObjectToCpp : nullptr;
 }
 
 static void PythonBufferToCpp(PyObject *pyIn, void *cppOut)
@@ -453,14 +453,14 @@ static PythonToCppFunc PythonBufferToCppIsConvertible(PyObject *pyIn)
 
         // Bail out if the object can't provide a simple contiguous buffer.
         if (PyObject_GetBuffer(pyIn, &bufferView, PyBUF_SIMPLE) < 0)
-            return 0;
+            return nullptr;
 
         // Release the buffer.
         PyBuffer_Release(&bufferView);
 
         return PythonBufferToCpp;
     }
-    return 0;
+    return nullptr;
 }
 
 SbkConverter *createConverter()

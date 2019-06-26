@@ -75,14 +75,14 @@ public:
         Py_XDECREF(m_pyObj);
     }
 
-    inline bool isNull() const { return m_pyObj == 0; }
+    inline bool isNull() const { return m_pyObj == nullptr; }
     /// Returns the pointer of the Python object being held.
     inline PyObject *object() { return m_pyObj; }
     inline operator PyObject *() { return m_pyObj; }
 #ifndef Py_LIMITED_API
     inline operator PyTupleObject *() { return reinterpret_cast<PyTupleObject *>(m_pyObj); }
 #endif
-    inline operator bool() const { return m_pyObj != 0; }
+    inline operator bool() const { return m_pyObj != nullptr; }
     inline PyObject *operator->() { return m_pyObj; }
 
     template<typename T>

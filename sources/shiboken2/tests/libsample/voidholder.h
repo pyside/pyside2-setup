@@ -34,7 +34,7 @@
 class VoidHolder
 {
 public:
-    explicit VoidHolder(void* ptr = 0) : m_ptr(ptr) {}
+    explicit VoidHolder(void *ptr = nullptr) : m_ptr(ptr) {}
     ~VoidHolder() {}
     inline void* voidPointer() { return m_ptr; }
     inline static void* gimmeMeSomeVoidPointer()

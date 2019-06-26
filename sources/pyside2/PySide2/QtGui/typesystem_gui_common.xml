@@ -903,7 +903,7 @@
     <!-- get* methods. Inject code -->
     <modify-function signature="getCmyk(int*,int*,int*,int*,int*)">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -930,7 +930,7 @@
     </modify-function>
     <modify-function signature="getCmykF(qreal*,qreal*,qreal*,qreal*,qreal*)">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -957,7 +957,7 @@
     </modify-function>
     <modify-function signature="getHsl(int*,int*,int*,int*)const" since="4.6">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -980,7 +980,7 @@
     </modify-function>
     <modify-function signature="getHslF(qreal*,qreal*,qreal*,qreal*)const" since="4.6">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -1003,7 +1003,7 @@
     </modify-function>
     <modify-function signature="getHsv(int*,int*,int*,int*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -1026,7 +1026,7 @@
     </modify-function>
     <modify-function signature="getHsvF(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -1049,7 +1049,7 @@
     </modify-function>
     <modify-function signature="getRgb(int*,int*,int*,int*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>
@@ -1072,7 +1072,7 @@
     </modify-function>
     <modify-function signature="getRgbF(qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
-            <replace-type modified-type="PyObject *"/>
+            <replace-type modified-type="PyObject*"/>
         </modify-argument>
         <modify-argument index="1">
             <remove-argument/>

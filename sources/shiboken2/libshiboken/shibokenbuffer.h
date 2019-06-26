@@ -77,7 +77,7 @@ namespace Buffer
      *
      * If the \p pyObj is a non-contiguous buffer a Python error is set.
      */
-    LIBSHIBOKEN_API void *getPointer(PyObject *pyObj, Py_ssize_t *size = 0);
+    LIBSHIBOKEN_API void *getPointer(PyObject *pyObj, Py_ssize_t *size = nullptr);
 
 } // namespace Buffer
 } // namespace Shiboken

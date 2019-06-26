@@ -101,7 +101,7 @@ namespace Enum
                                               const char *itemName, long itemValue);
     LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, SbkObjectType *scope, const char *itemName, long itemValue);
 
-    LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, long itemValue, const char *itemName = 0);
+    LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, long itemValue, const char *itemName = nullptr);
 
     LIBSHIBOKEN_API PyTypeObject *newTypeWithName(const char *name, const char *cppName,
                                                   PyTypeObject *numbers_fromFlag=nullptr);

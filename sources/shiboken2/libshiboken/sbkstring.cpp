@@ -95,7 +95,7 @@ PyObject *fromCString(const char *value, int len)
 const char *toCString(PyObject *str, Py_ssize_t *len)
 {
     if (str == Py_None)
-        return NULL;
+        return nullptr;
     if (PyUnicode_Check(str)) {
         if (len) {
             // We need to encode the unicode string into utf8 to know the size of returned char *.
@@ -119,7 +119,7 @@ const char *toCString(PyObject *str, Py_ssize_t *len)
             *len = PyBytes_GET_SIZE(str);
         return PyBytes_AS_STRING(str);
     }
-    return 0;
+    return nullptr;
 }
 
 bool concat(PyObject **val1, PyObject *val2)

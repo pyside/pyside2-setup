@@ -387,7 +387,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
 
 void QtXmlToSphinx::pushOutputBuffer()
 {
-    QString* buffer = new QString();
+    auto *buffer = new QString();
     m_buffers << buffer;
     m_output.setString(buffer);
 }
@@ -427,7 +427,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
 {
     const QStringRef currentClass = m_context.splitRef(QLatin1Char('.')).constLast();
 
-    const AbstractMetaClass* metaClass = 0;
+    const AbstractMetaClass *metaClass = nullptr;
     const AbstractMetaClassList &classes = m_generator->classes();
     for (const AbstractMetaClass *cls : classes) {
         if (cls->name() == currentClass) {
@@ -444,7 +444,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
                 funcList.append(func);
         }
 
-        const AbstractMetaClass* implementingClass = 0;
+        const AbstractMetaClass *implementingClass = nullptr;
         for (const AbstractMetaFunction *func : qAsConst(funcList)) {
             implementingClass = func->implementingClass();
             if (implementingClass->name() == currentClass)
@@ -528,7 +528,6 @@ static QString resolveFile(const QStringList &locations, const QString &path)
 QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QString &path,
                                          const QString &identifier, QString *errorMessage)
 {
-    QString result;
     QString resolvedPath;
     if (path.endsWith(QLatin1String(".cpp"))) {
         const QString pySnippet = path.left(path.size() - 3) + QLatin1String("py");
@@ -919,7 +918,8 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
     if (token == QXmlStreamReader::StartElement) {
         listType = webXmlListType(reader.attributes().value(QLatin1String("type")));
         if (listType == EnumeratedList) {
-            m_currentTable << (TableRow() << "Constant" << "Description");
+            m_currentTable << TableRow{TableCell(QLatin1String("Constant")),
+                                       TableCell(QLatin1String("Description"))};
             m_tableHasHeader = true;
         }
         INDENT.indent--;
@@ -981,7 +981,7 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
 {
     ref.replace(QLatin1String("::"), QLatin1String("."));
     ref.remove(QLatin1String("()"));
-    LinkContext *result = new LinkContext(ref);
+    auto *result = new LinkContext(ref);
 
     if (m_insideBold)
         result->flags |= LinkContext::InsideBold;
@@ -1503,7 +1503,7 @@ static QString getFuncName(const AbstractMetaFunction* cppFunc) {
     return result;
 }
 
-QtDocGenerator::QtDocGenerator() : m_docParser(0)
+QtDocGenerator::QtDocGenerator() : m_docParser(nullptr)
 {
 }
 
@@ -1656,8 +1656,8 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
            "--------------------\n\n"
         << ".. _More:\n";
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, 0);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, 0))
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
         writeFormattedText(s, documentation, metaClass);
 
     if (!metaClass->isNamespace())
@@ -1679,7 +1679,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
         writeFunction(s, metaClass, func);
     }
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, 0);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, nullptr);
 }
 
 void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass)
@@ -1910,7 +1910,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
 
             QString codeBlock = code.mid(startBlock, endBlock - startBlock);
             const QStringList rows = codeBlock.split(QLatin1Char('\n'));
-            int currenRow = 0;
+            int currentRow = 0;
             int offset = 0;
 
             for (QString row : rows) {
@@ -1918,25 +1918,24 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                     row.remove(invalidString);
 
                 if (row.trimmed().size() == 0) {
-                    if (currenRow == 0)
+                    if (currentRow == 0)
                         continue;
                     s << endl;
                 }
 
-                if (currenRow == 0) {
+                if (currentRow == 0) {
                     //find offset
-                    for (int i=0, i_max = row.size(); i < i_max; i++) {
-                        if (row[i] == QLatin1Char(' '))
+                    for (auto c : row) {
+                        if (c == QLatin1Char(' '))
                             offset++;
-                        else if (row[i] == QLatin1Char('\n'))
+                        else if (c == QLatin1Char('\n'))
                             offset = 0;
                         else
                             break;
                     }
                 }
-                row = row.mid(offset);
-                s << row << endl;
-                currenRow++;
+                s << row.midRef(offset) << endl;
+                currentRow++;
             }
 
             code = code.mid(endBlock+endMarkup.size());
@@ -2110,7 +2109,7 @@ void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppC
 
 static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4)
 {
-    typedef QMap<QChar, QStringList> TocMap;
+    using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
     QChar Q = QLatin1Char('Q');
     QChar idx;

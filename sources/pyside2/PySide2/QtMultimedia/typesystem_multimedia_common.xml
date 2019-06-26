@@ -177,13 +177,13 @@
       <enum-type name="Status"/>
       <modify-function signature="setViewfinder(QVideoWidget*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *"/>
+            <replace-type modified-type="QObject*"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
       <modify-function signature="setViewfinder(QGraphicsVideoItem*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *"/>
+            <replace-type modified-type="QObject*"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
@@ -272,13 +272,13 @@
       <enum-type name="Error"/>
       <modify-function signature="setVideoOutput(QVideoWidget*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *"/>
+            <replace-type modified-type="QObject*"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>
       <modify-function signature="setVideoOutput(QGraphicsVideoItem*)">
         <modify-argument index="1">
-            <replace-type modified-type="QObject *"/>
+            <replace-type modified-type="QObject*"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
       </modify-function>

@@ -93,8 +93,8 @@ template class LIBSAMPLE_API TemplateBase<IdentityType>;
 template class LIBSAMPLE_API TemplateBase<DuplicatorType>;
 #endif
 
-typedef TemplateBase<IdentityType> ValueIdentity;
-typedef TemplateBase<DuplicatorType> ValueDuplicator;
+using ValueIdentity = TemplateBase<IdentityType>;
+using ValueDuplicator = TemplateBase<DuplicatorType>;
 
 LIBSAMPLE_API int callCalculateForValueDuplicatorPointer(ValueDuplicator* value);
 LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator& value);
@@ -116,7 +116,7 @@ LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorT
 class Pointer
 {
 public:
-    Pointer() PHOTON_NOEXCEPT : px(0) {}
+    Pointer() PHOTON_NOEXCEPT : px(nullptr) {}
     Pointer(int* p) : px(p) {}
 
     void reset() PHOTON_NOEXCEPT { Pointer().swap(*this); }

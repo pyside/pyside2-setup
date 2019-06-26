@@ -43,7 +43,6 @@ namespace Shiboken
 {
 
 GilState::GilState()
-    : m_locked(false)
 {
     if (Py_IsInitialized()) {
         m_gstate = PyGILState_Ensure();

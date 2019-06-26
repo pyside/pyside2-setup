@@ -254,7 +254,7 @@ void OverloadData::sortNextOverloads()
             // be called. In the case of primitive types, list<double> must come before list<int>.
             if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
                 for (const QString &primitive : qAsConst(nonIntegerPrimitives))
-                    sortData.mapType(getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive));
+                    sortData.mapType(getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive));
             } else {
                 const AbstractMetaFunctionList &funcs = m_generator->implicitConversions(instantiation);
                 for (const AbstractMetaFunction *function : funcs)
@@ -346,7 +346,7 @@ void OverloadData::sortNextOverloads()
 
                 if (instantiation->isPrimitive() && (signedIntegerPrimitives.contains(instantiation->name()))) {
                     for (const QString &primitive : qAsConst(nonIntegerPrimitives)) {
-                        QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, 0, primitive);
+                        QString convertibleTypeName = getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive);
                         if (!graph.containsEdge(targetTypeId, sortData.map[convertibleTypeName])) // Avoid cyclic dependency.
                             graph.addEdge(sortData.map[convertibleTypeName], targetTypeId);
                     }
@@ -467,8 +467,8 @@ void OverloadData::sortNextOverloads()
  *
  */
 OverloadData::OverloadData(const AbstractMetaFunctionList &overloads, const ShibokenGenerator *generator)
-    : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(0),
-    m_headOverloadData(this), m_previousOverloadData(0), m_generator(generator)
+    : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(nullptr),
+    m_headOverloadData(this), m_previousOverloadData(nullptr), m_generator(generator)
 {
     for (const AbstractMetaFunction *func : overloads) {
         m_overloads.append(func);
@@ -658,7 +658,7 @@ const AbstractMetaFunction *OverloadData::referenceFunction() const
 const AbstractMetaArgument *OverloadData::argument(const AbstractMetaFunction *func) const
 {
     if (isHeadOverloadData() || !m_overloads.contains(func))
-        return 0;
+        return nullptr;
 
     int argPos = 0;
     int removed = 0;
@@ -757,7 +757,7 @@ const AbstractMetaFunction *OverloadData::getFunctionWithDefaultValue() const
         if (!ShibokenGenerator::getDefaultValue(func, func->arguments().at(m_argPos + removedArgs)).isEmpty())
             return func;
     }
-    return 0;
+    return nullptr;
 }
 
 QVector<int> OverloadData::invalidArgumentLengths() const

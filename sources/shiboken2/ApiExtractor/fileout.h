@@ -41,6 +41,8 @@ private:
     QString name;
 
 public:
+    Q_DISABLE_COPY(FileOut)
+
     enum State { Failure, Unchanged, Success };
 
     explicit FileOut(QString name);

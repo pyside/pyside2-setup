@@ -153,7 +153,7 @@ void registerTypeIfInheritsFromClass(
                       ::Construct,
                     sizeof(QQmlListProperty<WrapperClass>),
                     static_cast< ::QFlags<QMetaType::TypeFlag> >(
-                        QtPrivate::QMetaTypeTypeFlags<QQmlListProperty<WrapperClass> >::Flags),                    
+                        QtPrivate::QMetaTypeTypeFlags<QQmlListProperty<WrapperClass> >::Flags),
                     nullptr);
         if (lstType == -1) {
             PyErr_Format(PyExc_TypeError, "Meta type registration of \"%s\" for QML usage failed.",

@@ -46,7 +46,7 @@ public:
         InvalidInclude
     };
 
-    Include() : m_type(IncludePath) {}
+    Include() = default;
     Include(IncludeType t, const QString &nam) : m_type(t), m_name(nam) {};
 
     bool isValid() const
@@ -78,7 +78,7 @@ public:
 
     friend uint qHash(const Include&);
     private:
-        IncludeType m_type;
+        IncludeType m_type = IncludePath;
         QString m_name;
 };
 
@@ -88,6 +88,6 @@ QTextStream& operator<<(QTextStream& out, const Include& include);
 QDebug operator<<(QDebug d, const Include &i);
 #endif
 
-typedef QVector<Include> IncludeList;
+using IncludeList = QVector<Include>;
 
 #endif

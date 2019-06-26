@@ -34,7 +34,7 @@
 class SimpleFile_p
 {
 public:
-    SimpleFile_p(const char* filename) : m_descriptor(0), m_size(0)
+    SimpleFile_p(const char* filename) : m_descriptor(nullptr), m_size(0)
     {
         m_filename = strdup(filename);
     }
@@ -73,7 +73,7 @@ long SimpleFile::size()
 bool
 SimpleFile::open()
 {
-    if ((p->m_descriptor = fopen(p->m_filename, "rb")) == 0)
+    if ((p->m_descriptor = fopen(p->m_filename, "rb")) == nullptr)
         return false;
 
     fseek(p->m_descriptor, 0, SEEK_END);
@@ -88,7 +88,7 @@ SimpleFile::close()
 {
     if (p->m_descriptor) {
         fclose(p->m_descriptor);
-        p->m_descriptor = 0;
+        p->m_descriptor = nullptr;
     }
 }
 

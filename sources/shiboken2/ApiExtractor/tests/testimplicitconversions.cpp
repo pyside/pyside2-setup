@@ -151,7 +151,7 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     AbstractMetaFunctionList externalConvOps = classA->externalConversionOperators();
     QCOMPARE(externalConvOps.count(), 1);
 
-    const AbstractMetaFunction* convOp = 0;
+    const AbstractMetaFunction *convOp = nullptr;
     for (const AbstractMetaFunction *func : classB->functions()) {
         if (func->isConversionOperator())
             convOp = func;

@@ -38,8 +38,7 @@
 struct Graph::GraphPrivate
 {
     enum Color { WHITE, GRAY, BLACK };
-    typedef QVector<QSet<int> > Edges;
-    typedef QSet<int>::const_iterator EdgeIterator;
+    using Edges = QVector<QSet<int> >;
 
     Edges edges;
 
@@ -50,11 +49,10 @@ struct Graph::GraphPrivate
     void dfsVisit(int node, Graph::Indexes &result, QVector<Color> &colors) const
     {
         colors[node] = GRAY;
-        EdgeIterator it = edges[node].begin();
-        for (; it != edges[node].end(); ++it) {
-            if (colors[*it] == WHITE)
-                dfsVisit(*it, result, colors);
-            else if (colors[*it] == GRAY) // This is not a DAG!
+        for (const auto &c : edges.at(node)) {
+            if (colors[c] == WHITE)
+                dfsVisit(c, result, colors);
+            else if (colors[c] == GRAY) // This is not a DAG!
                 return;
         }
         colors[node] = BLACK;

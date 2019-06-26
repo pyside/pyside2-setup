@@ -44,7 +44,7 @@
 #include "shibokenmacros.h"
 #include "autodecref.h"
 
-#define SBK_UNUSED(x)   (void)x;
+#define SBK_UNUSED(x)   (void)(x);
 
 namespace Shiboken
 {
@@ -90,7 +90,7 @@ class AutoArrayPointer
         T *data;
 };
 
-typedef unsigned long long ThreadId;
+using ThreadId = unsigned long long;
 LIBSHIBOKEN_API ThreadId currentThreadId();
 LIBSHIBOKEN_API ThreadId mainThreadId();
 

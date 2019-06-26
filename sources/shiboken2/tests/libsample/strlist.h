@@ -60,6 +60,6 @@ private:
     CtorEnum m_ctorUsed;
 };
 
-typedef StrList PStrList;
+using PStrList = StrList;
 
 #endif // STRLIST_H
