@@ -144,9 +144,9 @@ static bool isSigned(CXTypeKind kind)
 
 class BuilderPrivate {
 public:
-    typedef QHash<CXCursor, ClassModelItem> CursorClassHash;
-    typedef QHash<CXCursor, TypeDefModelItem> CursorTypedefHash;
-    typedef QHash<CXType, TypeInfo> TypeInfoHash;
+    using CursorClassHash = QHash<CXCursor, ClassModelItem>;
+    using CursorTypedefHash = QHash<CXCursor, TypeDefModelItem>;
+    using TypeInfoHash = QHash<CXType, TypeInfo>;
 
     explicit BuilderPrivate(BaseVisitor *bv) : m_baseVisitor(bv), m_model(new CodeModel)
     {
@@ -645,11 +645,9 @@ static inline CXCursor definitionFromTypeRef(const CXCursor &typeRefCursor)
 template <class Item> // ArgumentModelItem, VariableModelItem
 void BuilderPrivate::qualifyTypeDef(const CXCursor &typeRefCursor, const QSharedPointer<Item> &item) const
 {
-    typedef typename CursorTypedefHash::const_iterator ConstIt;
-
     TypeInfo type = item->type();
     if (type.qualifiedName().size() == 1) { // item's type is unqualified.
-        const ConstIt it = m_cursorTypedefHash.constFind(definitionFromTypeRef(typeRefCursor));
+        const auto it = m_cursorTypedefHash.constFind(definitionFromTypeRef(typeRefCursor));
         if (it != m_cursorTypedefHash.constEnd() && !it.value()->scope().isEmpty()) {
             type.setQualifiedName(it.value()->scope() + type.qualifiedName());
             item->setType(type);

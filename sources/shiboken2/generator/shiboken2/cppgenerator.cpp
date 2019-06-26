@@ -203,19 +203,17 @@ QString CppGenerator::fileNameForContext(GeneratorContext &context) const
         QString fileNameBase = metaClass->qualifiedCppName().toLower();
         fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
         return fileNameBase + fileNameSuffix();
-    } else {
-        const AbstractMetaType *smartPointerType = context.preciseType();
-        QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
-        return fileNameBase + fileNameSuffix();
     }
+    const AbstractMetaType *smartPointerType = context.preciseType();
+    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
+    return fileNameBase + fileNameSuffix();
 }
 
 QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
                                                                                uint queryIn)
 {
     // ( func_name, num_args ) => func_list
-    typedef QMap<QPair<QString, int >, AbstractMetaFunctionList> ResultMap;
-    ResultMap results;
+    QMap<QPair<QString, int>, AbstractMetaFunctionList> results;
     const AbstractMetaClass::OperatorQueryOptions query(queryIn);
     const AbstractMetaFunctionList &funcs = metaClass->operatorOverloads(query);
     for (AbstractMetaFunction *func : funcs) {
@@ -237,7 +235,7 @@ QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(c
     }
     QVector<AbstractMetaFunctionList> result;
     result.reserve(results.size());
-    for (ResultMap::const_iterator it = results.cbegin(), end = results.cend(); it != end; ++it)
+    for (auto it = results.cbegin(), end = results.cend(); it != end; ++it)
         result.append(it.value());
     return result;
 }
@@ -257,8 +255,7 @@ const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass *meta
         && func->arguments().isEmpty() ? func : nullptr;
 }
 
-typedef QMap<QString, AbstractMetaFunctionList> FunctionGroupMap;
-typedef FunctionGroupMap::const_iterator FunctionGroupMapIt;
+using FunctionGroupMap = QMap<QString, AbstractMetaFunctionList>;
 
 // Prevent ELF symbol qt_version_tag from being generated into the source
 static const char includeQDebug[] =
@@ -390,7 +387,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     // Create string literal for smart pointer getter method.
     if (classContext.forSmartPointer()) {
-        const SmartPointerTypeEntry *typeEntry =
+        const auto *typeEntry =
                 static_cast<const SmartPointerTypeEntry *>(classContext.preciseType()
                                                            ->typeEntry());
         QString rawGetter = typeEntry->getter();
@@ -509,7 +506,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         else if (!rfunc->isOperatorOverload()) {
 
             if (classContext.forSmartPointer()) {
-                const SmartPointerTypeEntry *smartPointerTypeEntry =
+                const auto *smartPointerTypeEntry =
                         static_cast<const SmartPointerTypeEntry *>(
                             classContext.preciseType()->typeEntry());
 
@@ -1426,7 +1423,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
                 pc << INDENT << getFullTypeNameWithoutModifiers(sourceType) << " cppIn";
                 writeMinimalConstructorExpression(pc, sourceType);
                 pc << ';' << endl;
-                writeToCppConversion(pc, sourceType, 0, QLatin1String("pyIn"), QLatin1String("cppIn"));
+                writeToCppConversion(pc, sourceType, nullptr, QLatin1String("pyIn"), QLatin1String("cppIn"));
                 pc << ';';
                 toCppConv.append(QLatin1String("cppIn"));
             } else if (!isWrapperType(sourceType)) {
@@ -1662,7 +1659,7 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
     }
 }
 
-void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
+void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
                                            GeneratorContext &classContext)
 {
     ErrorCode errorCode(-1);
@@ -1823,7 +1820,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     s << '}' << endl << endl;
 }
 
-void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList overloads,
+void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
                                       GeneratorContext &classContext)
 {
     OverloadData overloadData(overloads, this);
@@ -2150,7 +2147,9 @@ static QString pythonToCppConverterForArgumentName(const QString &argumentName)
     return result;
 }
 
-void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argType, QString argumentName, bool isNumber, QString customType, bool rejectNull)
+void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argType,
+                                  const QString &argumentName, bool isNumber,
+                                  const QString &customType, bool rejectNull)
 {
     QString customCheck;
     if (!customType.isEmpty()) {
@@ -2265,7 +2264,7 @@ const AbstractMetaType *CppGenerator::getArgumentType(const AbstractMetaFunction
     if (argPos < 0 || argPos > func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("Argument index for function '%1' out of range.").arg(func->signature());
-        return 0;
+        return nullptr;
     }
 
     const AbstractMetaType *argType = nullptr;
@@ -2403,8 +2402,8 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
 static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rule,
                                          TypeSystem::Language /* conversionLanguage */,
                                          TypeSystem::Language snippetLanguage,
-                                         QString outputName = QString(),
-                                         QString inputName = QString())
+                                         const QString &outputName = QString(),
+                                         const QString &inputName = QString())
 {
     if (rule.isEmpty())
         return;
@@ -2513,10 +2512,11 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
         s << "; // " << referenceFunction->minimalSignature() << endl;
         return;
 
+    }
     // To decide if a method call is possible at this point the current overload
     // data object cannot be the head, since it is just an entry point, or a root,
     // for the tree of arguments and it does not represent a valid method call.
-    } else if (!parentOverloadData->isHeadOverloadData()) {
+    if (!parentOverloadData->isHeadOverloadData()) {
         bool isLastArgument = parentOverloadData->nextOverloadData().isEmpty();
         bool signatureFound = parentOverloadData->overloads().size() == 1;
 
@@ -2600,7 +2600,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
                 || od->nextOverloadData().size() != 1
                 || od->overloads().size() != od->nextOverloadData().constFirst()->overloads().size()) {
                 overloadData = od;
-                od = 0;
+                od = nullptr;
             } else {
                 od = od->nextOverloadData().constFirst();
             }
@@ -2879,7 +2879,7 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s,
                                                        const AbstractMetaType *targetType,
                                                        QString typeCheck,
                                                        QString conversion,
-                                                       QString preConversion)
+                                                       const QString &preConversion)
 {
     QString sourcePyType = cpythonTypeNameExt(sourceType);
 
@@ -3065,7 +3065,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
 
 QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex, const AbstractMetaClass **wrappedClass)
 {
-    *wrappedClass = 0;
+    *wrappedClass = nullptr;
     QString pyArgName;
     if (argIndex == -1) {
         pyArgName = QLatin1String("self");
@@ -3765,11 +3765,9 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
     return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
 }
 
-typedef QHash<QString, QPair<QString, QString> >::const_iterator ProtocolIt;
-
 bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
 {
-    for (ProtocolIt it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
+    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
         if (metaClass->hasFunction(it.key()))
             return true;
     }
@@ -3787,7 +3785,7 @@ bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass)
 
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
 {
-    for (ProtocolIt it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
+    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
         if (metaClass->hasFunction(it.key()))
             return true;
     }
@@ -4074,7 +4072,7 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractM
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    for (ProtocolIt it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
+    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
         const QString &funcName = it.key();
         const AbstractMetaFunction *func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QString();
@@ -4107,7 +4105,7 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream &s, const AbstractMe
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    for (ProtocolIt it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
+    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
         const QString &funcName = it.key();
         const AbstractMetaFunction *func = metaClass->findFunction(funcName);
         funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QLatin1String("0");
@@ -4872,7 +4870,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
     s << "#endif" << endl << endl;
     s << INDENT << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;" << endl;
     s << INDENT << "return ";
-    writeToPythonConversion(s, flagsType, 0, QLatin1String("cppResult"));
+    writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));
     s << ';' << endl;
     s << '}' << endl << endl;
 }
@@ -4900,7 +4898,7 @@ void CppGenerator::writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnu
     if (boolResult)
         s << "PyBool_FromLong(cppResult)";
     else
-        writeToPythonConversion(s, flagsType, 0, QLatin1String("cppResult"));
+        writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));
     s << ';' << endl;
     s << '}' << endl << endl;
 }
@@ -5479,7 +5477,7 @@ bool CppGenerator::finishGeneration()
     // Initialize smart pointer types.
     const QVector<const AbstractMetaType *> &smartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType *metaType : smartPtrs) {
-        GeneratorContext context(0, metaType, true);
+        GeneratorContext context(nullptr, metaType, true);
         QString initFunctionName = getInitFunctionName(context);
         s_classInitDecl << "void init_" << initFunctionName << "(PyObject *module);" << endl;
         QString defineStr = QLatin1String("init_") + initFunctionName;

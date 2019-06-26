@@ -79,7 +79,7 @@ typedef struct safe_globals_struc {
     PyObject *make_helptext_func;
 } safe_globals_struc, *safe_globals;
 
-static safe_globals pyside_globals = 0;
+static safe_globals pyside_globals = nullptr;
 
 static PyObject *GetTypeKey(PyObject *ob);
 
@@ -234,10 +234,10 @@ compute_name_key(PyObject *ob)
 static int
 build_name_key_to_func(PyObject *obtype)
 {
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyMethodDef *meth = type->tp_methods;
 
-    if (meth == 0)
+    if (meth == nullptr)
         return 0;
 
     Shiboken::AutoDecRef type_key(GetTypeKey(obtype));
@@ -457,7 +457,7 @@ static safe_globals_struc *
 init_phase_1(void)
 {
     {
-        safe_globals_struc *p = reinterpret_cast<safe_globals_struc *>
+        auto *p = reinterpret_cast<safe_globals_struc *>
                                     (malloc(sizeof(safe_globals_struc)));
         if (p == nullptr)
             goto error;
@@ -661,11 +661,11 @@ add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **old_descr)
 //
 
 // keep the original __doc__ functions
-static PyObject *old_cf_doc_descr = 0;
-static PyObject *old_sm_doc_descr = 0;
-static PyObject *old_md_doc_descr = 0;
-static PyObject *old_tp_doc_descr = 0;
-static PyObject *old_wd_doc_descr = 0;
+static PyObject *old_cf_doc_descr = nullptr;
+static PyObject *old_sm_doc_descr = nullptr;
+static PyObject *old_md_doc_descr = nullptr;
+static PyObject *old_tp_doc_descr = nullptr;
+static PyObject *old_wd_doc_descr = nullptr;
 
 static int handle_doc_in_progress = 0;
 
@@ -675,7 +675,7 @@ handle_doc(PyObject *ob, PyObject *old_descr)
     init_module_1();
     init_module_2();
     Shiboken::AutoDecRef ob_type(GetClassOfFunc(ob));
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(ob_type.object());
+    auto *type = reinterpret_cast<PyTypeObject *>(ob_type.object());
     if (handle_doc_in_progress || strncmp(type->tp_name, "PySide2.", 8) != 0)
         return PyObject_CallMethod(old_descr, const_cast<char *>("__get__"), const_cast<char *>("(O)"), ob);
     handle_doc_in_progress++;
@@ -737,35 +737,35 @@ static PyGetSetDef new_PyCFunction_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_cf_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_cf_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyStaticMethod_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_sm_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_sm_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyMethodDescr_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_md_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_md_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyType_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_tp_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_tp_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef new_PyWrapperDescr_getsets[] = {
     {const_cast<char *>("__doc__"), (getter)pyside_wd_get___doc__},
     {const_cast<char *>("__signature__"), (getter)pyside_wd_get___signature__,
                                           (setter)pyside_set___signature__},
-    {0}
+    {nullptr}
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -795,7 +795,7 @@ get_signature_intern(PyObject *ob, const char *modifier)
 }
 
 static PyObject *
-get_signature(PyObject *self, PyObject *args)
+get_signature(PyObject * /* self */, PyObject *args)
 {
     PyObject *ob;
     const char *modifier = nullptr;
@@ -1056,11 +1056,11 @@ _build_func_to_type(PyObject *obtype)
      * and record the mapping from static method to this type in a dict.
      * We also check for hidden methods, see below.
      */
-    PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *type = reinterpret_cast<PyTypeObject *>(obtype);
     PyObject *dict = type->tp_dict;
     PyMethodDef *meth = type->tp_methods;
 
-    if (meth == 0)
+    if (meth == nullptr)
         return 0;
 
     for (; meth->ml_name != nullptr; meth++) {
@@ -1123,12 +1123,12 @@ _build_func_to_type(PyObject *obtype)
 }
 
 int
-SbkSpecial_Type_Ready(PyObject *module, PyTypeObject *type,
+SbkSpecial_Type_Ready(PyObject * /* module */, PyTypeObject *type,
                       const char *signatures[])
 {
     if (PyType_Ready(type) < 0)
         return -1;
-    PyObject *ob_type = reinterpret_cast<PyObject *>(type);
+    auto *ob_type = reinterpret_cast<PyObject *>(type);
     int ret = PySide_BuildSignatureArgs(ob_type, signatures);
     if (ret < 0) {
         PyErr_Print();

@@ -51,27 +51,24 @@ static QString wildcardToRegExp(QString w)
     return w;
 }
 
-typedef QPair<QRegularExpression, QVersionNumber> ApiVersion;
-typedef QVector<ApiVersion> ApiVersions;
+using ApiVersion =QPair<QRegularExpression, QVersionNumber>;
+using ApiVersions = QVector<ApiVersion>;
 
 Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
-TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
+TypeDatabase::TypeDatabase()
 {
     addType(new VoidTypeEntry());
     addType(new VarargsTypeEntry());
 }
 
-TypeDatabase::~TypeDatabase()
-{
-}
+TypeDatabase::~TypeDatabase() = default;
 
 TypeDatabase* TypeDatabase::instance(bool newInstance)
 {
-    static TypeDatabase* db = 0;
+    static TypeDatabase *db = nullptr;
     if (!db || newInstance) {
-        if (db)
-            delete db;
+        delete db;
         db = new TypeDatabase;
     }
     return db;
@@ -85,7 +82,7 @@ struct IntTypeNormalizationEntry
     QString replacement;
 };
 
-typedef QVector<IntTypeNormalizationEntry> IntTypeNormalizationEntries;
+using IntTypeNormalizationEntries = QVector<IntTypeNormalizationEntry>;
 
 static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
 {
@@ -93,10 +90,8 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
     static bool firstTime = true;
     if (firstTime) {
         firstTime = false;
-        static const char *intTypes[] = {"char", "short", "int", "long"};
-        const size_t size = sizeof(intTypes) / sizeof(intTypes[0]);
-        for (size_t i = 0; i < size; ++i) {
-            const QString intType = QLatin1String(intTypes[i]);
+        for (auto t : {"char", "short", "int", "long"}) {
+            const QString intType = QLatin1String(t);
             if (!TypeDatabase::instance()->findType(QLatin1Char('u') + intType)) {
                 IntTypeNormalizationEntry entry;
                 entry.replacement = QStringLiteral("unsigned ") + intType;
@@ -115,8 +110,8 @@ QString TypeDatabase::normalizedSignature(const QString &signature)
 
     if (instance() && signature.contains(QLatin1String("unsigned"))) {
         const IntTypeNormalizationEntries &entries = intTypeNormalizationEntries();
-        for (int i = 0, size = entries.size(); i < size; ++i)
-            normalized.replace(entries.at(i).regex, entries.at(i).replacement);
+        for (const auto &entry : entries)
+            normalized.replace(entry.regex, entry.replacement);
     }
 
     return normalized;
@@ -146,10 +141,7 @@ void TypeDatabase::addTypesystemPath(const QString& typesystem_paths)
 IncludeList TypeDatabase::extraIncludes(const QString& className) const
 {
     ComplexTypeEntry* typeEntry = findComplexType(className);
-    if (typeEntry)
-        return typeEntry->extraIncludes();
-    else
-        return IncludeList();
+    return typeEntry ? typeEntry->extraIncludes() : IncludeList();
 }
 
 ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
@@ -163,7 +155,7 @@ ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
     TypeEntry* type_entry = findType(template_name);
     if (type_entry && type_entry->isContainer())
         return static_cast<ContainerTypeEntry*>(type_entry);
-    return 0;
+    return nullptr;
 }
 
 static bool inline useType(const TypeEntry *t)
@@ -179,7 +171,7 @@ FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
         if (entry->type() == TypeEntry::FunctionType && useType(entry))
             return static_cast<FunctionTypeEntry*>(entry);
     }
-    return 0;
+    return nullptr;
 }
 
 void TypeDatabase::addTypeSystemType(const TypeSystemTypeEntry *e)
@@ -351,7 +343,7 @@ TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
         return nullptr;
     }
 
-    ComplexTypeEntry *result = static_cast<ComplexTypeEntry *>(source->clone());
+    auto *result = static_cast<ComplexTypeEntry *>(source->clone());
     result->useAsTypedef(typedefEntry);
     typedefEntry->setSource(source);
     typedefEntry->setTarget(result);
@@ -592,13 +584,13 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
     const auto entries = findTypes(name);
     for (TypeEntry *entry : entries) {
         if (entry->isPrimitive()) {
-            PrimitiveTypeEntry *pe = static_cast<PrimitiveTypeEntry *>(entry);
+            auto *pe = static_cast<PrimitiveTypeEntry *>(entry);
             if (pe->preferredTargetLangType())
                 return pe;
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
@@ -608,7 +600,7 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
         if (entry->isComplex() && useType(entry))
             return static_cast<ComplexTypeEntry*>(entry);
     }
-    return 0;
+    return nullptr;
 }
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
@@ -618,7 +610,7 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
         if (entry && entry->isObject() && useType(entry))
             return static_cast<ObjectTypeEntry*>(entry);
     }
-    return 0;
+    return nullptr;
 }
 
 NamespaceTypeEntryList TypeDatabase::findNamespaceTypes(const QString& name) const

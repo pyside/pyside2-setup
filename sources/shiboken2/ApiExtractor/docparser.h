@@ -43,6 +43,8 @@ class XQuery;
 class DocParser
 {
 public:
+    Q_DISABLE_COPY(DocParser)
+
     using XQueryPtr = QSharedPointer<XQuery>;
 
     DocParser();

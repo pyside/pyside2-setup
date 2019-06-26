@@ -72,7 +72,7 @@ public:
         Target
     };
 
-    Documentation() {}
+    Documentation() = default;
 
     Documentation(const QString& value, Format fmt = Documentation::Native)
             : m_data(value.trimmed()), m_format(fmt) {}
@@ -105,9 +105,10 @@ private:
 
 class AbstractMetaAttributes
 {
-    Q_DISABLE_COPY(AbstractMetaAttributes)
     Q_GADGET
 public:
+    Q_DISABLE_COPY(AbstractMetaAttributes)
+
     AbstractMetaAttributes();
     virtual ~AbstractMetaAttributes();
 
@@ -292,7 +293,7 @@ class AbstractMetaType
 {
     Q_GADGET
 public:
-    typedef QVector<Indirection> Indirections;
+    using Indirections = QVector<Indirection>;
 
     enum TypeUsagePattern {
         InvalidPattern,
@@ -587,13 +588,12 @@ public:
     }
     void setType(AbstractMetaType *type)
     {
-        Q_ASSERT(m_type == 0);
+        Q_ASSERT(m_type == nullptr);
         m_type = type;
     }
     void replaceType(AbstractMetaType *type)
     {
-        if (m_type)
-            delete m_type;
+        delete m_type;
         m_type = type;
     }
 
@@ -896,14 +896,13 @@ public:
     }
     void setType(AbstractMetaType *type)
     {
-        Q_ASSERT(m_type == 0);
+        Q_ASSERT(m_type == nullptr);
         m_type = type;
     }
 
     void replaceType(AbstractMetaType *type)
     {
-        if (m_type)
-            delete m_type;
+        delete m_type;
         m_type = type;
     }
 
@@ -1053,12 +1052,12 @@ public:
     *   \return true if there is some modification to function signature
     */
     bool hasSignatureModifications() const;
-    FunctionModificationList modifications(const AbstractMetaClass* implementor = 0) const;
+    FunctionModificationList modifications(const AbstractMetaClass* implementor = nullptr) const;
 
     /**
      * Return the argument name if there is a modification the renamed value will be returned
      */
-    QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = 0) const;
+    QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = nullptr) const;
 
     void setPropertySpec(QPropertySpec *spec)
     {
@@ -1132,7 +1131,7 @@ QDebug operator<<(QDebug d, const AbstractMetaFunction *af);
 class AbstractMetaEnumValue
 {
 public:
-    AbstractMetaEnumValue() {}
+    AbstractMetaEnumValue() = default;
 
     EnumValue value() const
     {
@@ -1507,7 +1506,7 @@ public:
         m_innerClasses << cl;
     }
 
-    void setInnerClasses(AbstractMetaClassList innerClasses)
+    void setInnerClasses(const AbstractMetaClassList &innerClasses)
     {
         m_innerClasses = innerClasses;
     }

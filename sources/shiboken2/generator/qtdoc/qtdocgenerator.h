@@ -59,21 +59,19 @@ public:
 
     struct TableCell
     {
-        short rowSpan;
-        short colSpan;
+        short rowSpan = 0;
+        short colSpan = 0;
         QString data;
 
-        TableCell(const QString& text = QString()) : rowSpan(0), colSpan(0), data(text) {}
-        TableCell(const char* text) : rowSpan(0), colSpan(0), data(QLatin1String(text)) {}
+        TableCell(const QString& text = QString()) : data(text) {}
+        TableCell(const char* text) : data(QLatin1String(text)) {}
     };
 
-    typedef QList<TableCell> TableRow;
+    using TableRow = QList<TableCell>;
     class Table : public QList<TableRow>
     {
         public:
-            Table() : m_hasHeader(false), m_normalized(false)
-            {
-            }
+            Table() = default;
 
             void enableHeader(bool enable)
             {
@@ -98,8 +96,8 @@ public:
             }
 
         private:
-            bool m_hasHeader;
-            bool m_normalized;
+            bool m_hasHeader = false;
+            bool m_normalized = false;
     };
 
     QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context = QString());

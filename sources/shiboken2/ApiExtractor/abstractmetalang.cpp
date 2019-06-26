@@ -188,7 +188,7 @@ QString AbstractMetaType::fullName() const
 
 AbstractMetaType *AbstractMetaType::copy() const
 {
-    AbstractMetaType *cpy = new AbstractMetaType;
+    auto *cpy = new AbstractMetaType;
 
     cpy->setTypeUsagePattern(typeUsagePattern());
     cpy->setConstant(isConstant());
@@ -198,9 +198,9 @@ AbstractMetaType *AbstractMetaType::copy() const
     cpy->setInstantiations(instantiations());
     cpy->setArrayElementCount(arrayElementCount());
     cpy->setOriginalTypeDescription(originalTypeDescription());
-    cpy->setOriginalTemplateType(originalTemplateType() ? originalTemplateType()->copy() : 0);
+    cpy->setOriginalTemplateType(originalTemplateType() ? originalTemplateType()->copy() : nullptr);
 
-    cpy->setArrayElementType(arrayElementType() ? arrayElementType()->copy() : 0);
+    cpy->setArrayElementType(arrayElementType() ? arrayElementType()->copy() : nullptr);
 
     cpy->setTypeEntry(typeEntry());
 
@@ -427,7 +427,7 @@ void AbstractMetaArgument::assignMetaArgument(const AbstractMetaArgument &other)
 
 AbstractMetaArgument *AbstractMetaArgument::copy() const
 {
-    AbstractMetaArgument *copy = new AbstractMetaArgument;
+    auto *copy = new AbstractMetaArgument;
     copy->assignMetaArgument(*this);
     return copy;
 }
@@ -519,7 +519,7 @@ bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
 */
 AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
 {
-    CompareResult result = 0;
+    CompareResult result = nullptr;
 
     // Enclosing class...
     if (ownerClass() == other->ownerClass())
@@ -587,7 +587,7 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
 
 AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
-    AbstractMetaFunction *cpy = new AbstractMetaFunction;
+    auto *cpy = new AbstractMetaFunction;
     cpy->assignMetaAttributes(*this);
     cpy->setName(name());
     cpy->setOriginalName(originalName());
@@ -1406,9 +1406,9 @@ AbstractMetaClass *AbstractMetaClass::extractInterface()
     Q_ASSERT(typeEntry()->designatedInterface());
 
     if (!m_extractedInterface) {
-        AbstractMetaClass *iface = new AbstractMetaClass;
+        auto *iface = new AbstractMetaClass;
         iface->setAttributes(attributes());
-        iface->setBaseClass(0);
+        iface->setBaseClass(nullptr);
 
         iface->setTypeEntry(typeEntry()->designatedInterface());
 
@@ -1709,30 +1709,32 @@ bool AbstractMetaClass::hasProtectedMembers() const
 
 QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
 {
-    for (int i = 0; i < m_propertySpecs.size(); ++i)
-        if (name == m_propertySpecs.at(i)->read())
-            return m_propertySpecs.at(i);
-    return 0;
+    for (const auto &propertySpec : m_propertySpecs) {
+        if (name == propertySpec->read())
+            return propertySpec;
+    }
+    return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForWrite(const QString &name) const
 {
-    for (int i = 0; i < m_propertySpecs.size(); ++i)
-        if (name == m_propertySpecs.at(i)->write())
-            return m_propertySpecs.at(i);
-    return 0;
+    for (const auto &propertySpec : m_propertySpecs) {
+        if (name == propertySpec->write())
+            return propertySpec;
+    }
+    return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) const
 {
-    for (int i = 0; i < m_propertySpecs.size(); ++i) {
-        if (name == m_propertySpecs.at(i)->reset())
-            return m_propertySpecs.at(i);
+    for (const auto &propertySpec : m_propertySpecs) {
+        if (name == propertySpec->reset())
+            return propertySpec;
     }
-    return 0;
+    return nullptr;
 }
 
-typedef QHash<const AbstractMetaClass *, AbstractMetaTypeList> AbstractMetaClassBaseTemplateInstantiationsMap;
+using AbstractMetaClassBaseTemplateInstantiationsMap = QHash<const AbstractMetaClass *, AbstractMetaTypeList>;
 Q_GLOBAL_STATIC(AbstractMetaClassBaseTemplateInstantiationsMap, metaClassBaseTemplateInstantiations);
 
 bool AbstractMetaClass::hasTemplateBaseClassInstantiations() const
@@ -1782,7 +1784,7 @@ AbstractMetaField::~AbstractMetaField()
 
 AbstractMetaField *AbstractMetaField::copy() const
 {
-    AbstractMetaField *returned = new AbstractMetaField;
+    auto *returned = new AbstractMetaField;
     returned->assignMetaVariable(*this);
     returned->assignMetaAttributes(*this);
     returned->setEnclosingClass(nullptr);
@@ -1822,7 +1824,7 @@ static QString upCaseFirst(const QString &str)
 static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QString &name,
                                           AbstractMetaAttributes::Attributes type)
 {
-    AbstractMetaFunction *f = new AbstractMetaFunction;
+    auto *f = new AbstractMetaFunction;
 
     f->setName(name);
     f->setOriginalName(name);
@@ -1880,7 +1882,7 @@ const AbstractMetaFunction *AbstractMetaField::setter() const
                                 QLatin1String("set") + upCaseFirst(name()),
                                 AbstractMetaAttributes::SetterFunction);
         AbstractMetaArgumentList arguments;
-        AbstractMetaArgument *argument = new AbstractMetaArgument;
+        auto *argument = new AbstractMetaArgument;
         argument->setType(type()->copy());
         argument->setName(name());
         arguments.append(argument);
@@ -2000,7 +2002,7 @@ bool AbstractMetaClass::hasPrivateCopyConstructor() const
 
 void AbstractMetaClass::addDefaultConstructor()
 {
-    AbstractMetaFunction *f = new AbstractMetaFunction;
+    auto *f = new AbstractMetaFunction;
     f->setOriginalName(name());
     f->setName(name());
     f->setOwnerClass(this);
@@ -2263,9 +2265,9 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
         return;
 
     Q_ASSERT(metaClass);
-    const TypeEntry *entry = (type ? type->typeEntry() : 0);
+    const TypeEntry *entry = (type ? type->typeEntry() : nullptr);
     if (entry && entry->isComplex()) {
-        const ComplexTypeEntry *centry = static_cast<const ComplexTypeEntry *>(entry);
+        const auto *centry = static_cast<const ComplexTypeEntry *>(entry);
         ComplexTypeEntry *class_entry = metaClass->typeEntry();
         if (class_entry && centry->include().isValid())
             class_entry->addExtraInclude(centry->include());
@@ -2324,9 +2326,7 @@ void AbstractMetaClass::fixFunctions()
         }
 
         QSet<AbstractMetaFunction *> funcsToAdd;
-        for (int sfi = 0; sfi < superFuncs.size(); ++sfi) {
-            AbstractMetaFunction *sf = superFuncs.at(sfi);
-
+        for (auto sf : qAsConst(superFuncs)) {
             if (sf->isRemovedFromAllLanguages(sf->implementingClass()))
                 continue;
 
@@ -2589,7 +2589,7 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &class
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
                               .arg(className, entry->qualifiedCppName());
-        return 0;
+        return nullptr;
     }
 
     return metaClass->findEnum(enumName);
@@ -2601,8 +2601,8 @@ AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassL
     const QVector<QStringRef> lst = name.splitRef(QLatin1String("::"));
 
     if (lst.size() > 1) {
-        const QStringRef prefixName = lst.at(0);
-        const QStringRef enumName = lst.at(1);
+        const QStringRef &prefixName = lst.at(0);
+        const QStringRef &enumName = lst.at(1);
         if (AbstractMetaClass *cl = findClass(classes, prefixName.toString()))
             return cl->findEnumValue(enumName.toString());
     }
@@ -2626,7 +2626,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
                                                 const QString &name)
 {
     if (name.isEmpty())
-        return 0;
+        return nullptr;
 
     for (AbstractMetaClass *c : classes) {
         if (c->qualifiedCppName() == name)
@@ -2643,7 +2643,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
             return c;
     }
 
-    return 0;
+    return nullptr;
 }
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
@@ -2653,7 +2653,7 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
         if (c->typeEntry() == typeEntry)
             return c;
     }
-    return 0;
+    return nullptr;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

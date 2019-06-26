@@ -53,9 +53,8 @@ private:
 template <class T>
 static QSharedPointer<T> findModelItem(const QVector<QSharedPointer<T> > &list, const QString &name)
 {
-    typedef typename QVector<QSharedPointer<T> >::const_iterator It;
-    const It it = std::find_if(list.begin(), list.end(), ModelItemNamePredicate<T>(name));
-    return it != list.end() ? *it : QSharedPointer<T>();
+    const auto it = std::find_if(list.cbegin(), list.cend(), ModelItemNamePredicate<T>(name));
+    return it != list.cend() ? *it : QSharedPointer<T>();
 }
 
 // ---------------------------------------------------------------------------
@@ -64,16 +63,14 @@ CodeModel::CodeModel() : m_globalNamespace(new _NamespaceModelItem(this))
 {
 }
 
-CodeModel::~CodeModel()
-{
-}
+CodeModel::~CodeModel() = default;
 
 NamespaceModelItem CodeModel::globalNamespace() const
 {
     return m_globalNamespace;
 }
 
-void CodeModel::addFile(FileModelItem item)
+void CodeModel::addFile(const FileModelItem &item)
 {
     m_files.append(item);
 }
@@ -161,7 +158,7 @@ bool TypeInfo::isVoid() const
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, const ScopeModelItem &__scope)
 {
     CodeModel *__model = __scope->model();
-    Q_ASSERT(__model != 0);
+    Q_ASSERT(__model != nullptr);
 
     return TypeInfo::resolveType(__model->findItem(__type.qualifiedName(), __scope),  __type, __scope);
 }
@@ -724,7 +721,7 @@ static void formatModelItemList(QDebug &d, const char *prefix, const List &l,
 
 void _ClassModelItem::formatDebug(QDebug &d) const
 {
-    _CodeModelItem::formatDebug(d);
+    _ScopeModelItem::formatDebug(d);
     if (!m_baseClasses.isEmpty()) {
         if (m_final)
             d << " [final]";
@@ -742,7 +739,7 @@ void _ClassModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-FunctionModelItem _ScopeModelItem::declaredFunction(FunctionModelItem item)
+FunctionModelItem _ScopeModelItem::declaredFunction(const FunctionModelItem &item)
 {
     for (const FunctionModelItem &fun : qAsConst(m_functions)) {
         if (fun->name() == item->name() && fun->isSimilar(item))
@@ -759,27 +756,27 @@ void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
     m_enumsDeclarations << enumsDeclaration;
 }
 
-void _ScopeModelItem::addClass(ClassModelItem item)
+void _ScopeModelItem::addClass(const ClassModelItem &item)
 {
     m_classes.append(item);
 }
 
-void _ScopeModelItem::addFunction(FunctionModelItem item)
+void _ScopeModelItem::addFunction(const FunctionModelItem &item)
 {
     m_functions.append(item);
 }
 
-void _ScopeModelItem::addVariable(VariableModelItem item)
+void _ScopeModelItem::addVariable(const VariableModelItem &item)
 {
     m_variables.append(item);
 }
 
-void _ScopeModelItem::addTypeDef(TypeDefModelItem item)
+void _ScopeModelItem::addTypeDef(const TypeDefModelItem &item)
 {
     m_typeDefs.append(item);
 }
 
-void _ScopeModelItem::addEnum(EnumModelItem item)
+void _ScopeModelItem::addEnum(const EnumModelItem &item)
 {
     m_enums.append(item);
 }
@@ -800,12 +797,10 @@ static void formatScopeHash(QDebug &d, const char *prefix, const Hash &h,
                             const char *separator = ", ",
                             bool trailingNewLine = false)
 {
-    typedef typename Hash::ConstIterator HashIterator;
     if (!h.isEmpty()) {
         d << prefix << '[' << h.size() << "](";
-        const HashIterator begin = h.begin();
-        const HashIterator end = h.end();
-        for (HashIterator it = begin; it != end; ++it) { // Omit the names as they are repeated
+        const auto begin = h.cbegin();
+        for (auto it = begin, end = h.cend(); it != end; ++it) { // Omit the names as they are repeated
             if (it != begin)
                 d << separator;
             d << it.value().data();
@@ -916,9 +911,7 @@ NamespaceModelItem _NamespaceModelItem::findNamespace(const QString &name) const
     return findModelItem(m_namespaces, name);
 }
 
-_FileModelItem::~_FileModelItem()
-{
-}
+_FileModelItem::~_FileModelItem() = default;
 
 void  _NamespaceModelItem::appendNamespace(const _NamespaceModelItem &other)
 {
@@ -1188,9 +1181,7 @@ CodeModel::AccessPolicy _EnumModelItem::accessPolicy() const
     return m_accessPolicy;
 }
 
-_EnumModelItem::~_EnumModelItem()
-{
-}
+_EnumModelItem::~_EnumModelItem() = default;
 
 void _EnumModelItem::setAccessPolicy(CodeModel::AccessPolicy accessPolicy)
 {
@@ -1202,7 +1193,7 @@ EnumeratorList _EnumModelItem::enumerators() const
     return m_enumerators;
 }
 
-void _EnumModelItem::addEnumerator(EnumeratorModelItem item)
+void _EnumModelItem::addEnumerator(const EnumeratorModelItem &item)
 {
     m_enumerators.append(item);
 }

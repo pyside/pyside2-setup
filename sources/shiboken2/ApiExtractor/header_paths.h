@@ -67,6 +67,6 @@ public:
     }
 };
 
-typedef QList<HeaderPath> HeaderPaths;
+using HeaderPaths = QList<HeaderPath>;
 
 #endif // HEADER_PATHS_H

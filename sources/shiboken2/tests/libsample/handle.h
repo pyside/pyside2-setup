@@ -33,19 +33,19 @@
 
 /* See http://bugs.pyside.org/show_bug.cgi?id=1105. */
 namespace Foo {
-    typedef unsigned long HANDLE;
+    using HANDLE = unsigned long;
 }
 
 class LIBSAMPLE_API OBJ
 {
 };
 
-typedef OBJ* HANDLE;
+using HANDLE = OBJ *;
 
 class LIBSAMPLE_API HandleHolder
 {
 public:
-    explicit HandleHolder(HANDLE ptr = 0) : m_handle(ptr) {}
+    explicit HandleHolder(HANDLE ptr = nullptr) : m_handle(ptr) {}
     explicit HandleHolder(Foo::HANDLE val): m_handle2(val) {}
 
     inline void set(HANDLE ptr) { HANDLE tmp; tmp = m_handle;  m_handle = tmp; }
@@ -63,7 +63,7 @@ private:
 };
 
 struct LIBSAMPLE_API PrimitiveStruct {};
-typedef struct PrimitiveStruct* PrimitiveStructPtr;
+using PrimitiveStructPtr = struct PrimitiveStruct *;
 struct LIBSAMPLE_API PrimitiveStructPointerHolder
 {
     PrimitiveStructPtr primitiveStructPtr;

@@ -134,7 +134,7 @@ public:
     const AbstractMetaClass *f = AbstractMetaClass::findClass(classes, QLatin1String("F"));
     QVERIFY(f);
 
-    AbstractMetaClass* no_class = 0;
+    AbstractMetaClass* no_class = nullptr;
 
     QCOMPARE(a->baseClass(), no_class);
     QCOMPARE(b->baseClass(), a);

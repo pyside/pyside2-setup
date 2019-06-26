@@ -59,7 +59,7 @@ public:
     void save();
     void restore();
 private:
-    PyThreadState *m_threadState;
+    PyThreadState *m_threadState = nullptr;
 };
 
 } // namespace Shiboken

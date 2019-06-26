@@ -43,7 +43,7 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
-ApiExtractor::ApiExtractor() : m_builder(0)
+ApiExtractor::ApiExtractor()
 {
     // Environment TYPESYSTEMPATH
     QString envTypesystemPaths = QFile::decodeName(qgetenv("TYPESYSTEMPATH"));
@@ -116,7 +116,7 @@ void ApiExtractor::setSilent ( bool value )
 
 bool ApiExtractor::setApiVersion(const QString& package, const QString &version)
 {
-    return TypeDatabase::instance()->setApiVersion(package, version);
+    return TypeDatabase::setApiVersion(package, version);
 }
 
 void ApiExtractor::setDropTypeEntries(QString dropEntries)
@@ -168,7 +168,7 @@ ContainerTypeEntryList ApiExtractor::containerTypes() const
 
 static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClasses, const EnumTypeEntry* typeEntry)
 {
-    const AbstractMetaEnum* result = 0;
+    const AbstractMetaEnum *result = nullptr;
     for (const AbstractMetaClass* metaClass : qAsConst(metaClasses)) {
         const AbstractMetaEnumList &enums = metaClass->enums();
         for (const AbstractMetaEnum *metaEnum : enums) {
@@ -247,7 +247,7 @@ LanguageLevel ApiExtractor::languageLevel() const
     return m_languageLevel;
 }
 
-void ApiExtractor::setLanguageLevel(const LanguageLevel languageLevel)
+void ApiExtractor::setLanguageLevel(LanguageLevel languageLevel)
 {
     m_languageLevel = languageLevel;
 }
@@ -256,13 +256,11 @@ void ApiExtractor::setLanguageLevel(const LanguageLevel languageLevel)
 template <class Container>
 static void debugFormatSequence(QDebug &d, const char *key, const Container& c)
 {
-    typedef typename Container::const_iterator ConstIt;
     if (c.isEmpty())
         return;
-    const ConstIt begin = c.begin();
-    const ConstIt end = c.end();
+    const auto begin = c.begin();
     d << "\n  " << key << '[' << c.size() << "]=(";
-    for (ConstIt it = begin; it != end; ++it) {
+    for (auto it = begin, end = c.end(); it != end; ++it) {
         if (it != begin)
             d << ", ";
         d << *it;

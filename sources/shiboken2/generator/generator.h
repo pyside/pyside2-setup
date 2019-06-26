@@ -147,9 +147,9 @@ private:
  */
 class GeneratorContext {
 public:
-    GeneratorContext() : m_metaClass(0), m_preciseClassType(0), m_forSmartPointer(false) {}
+    GeneratorContext() = default;
     GeneratorContext(AbstractMetaClass *metaClass,
-                     const AbstractMetaType *preciseType = 0,
+                     const AbstractMetaType *preciseType = nullptr,
                      bool forSmartPointer = false)
         : m_metaClass(metaClass),
         m_preciseClassType(preciseType),
@@ -161,9 +161,9 @@ public:
     const AbstractMetaType *preciseType() const { return m_preciseClassType; }
 
 private:
-    AbstractMetaClass *m_metaClass;
-    const AbstractMetaType *m_preciseClassType;
-    bool m_forSmartPointer;
+    AbstractMetaClass *m_metaClass = nullptr;
+    const AbstractMetaType *m_preciseClassType = nullptr;
+    bool m_forSmartPointer = false;
 };
 
 /**
@@ -173,8 +173,8 @@ private:
 class Generator
 {
 public:
-    typedef QPair<QString, QString> OptionDescription;
-    typedef QVector<OptionDescription> OptionDescriptions;
+    using OptionDescription = QPair<QString, QString>;
+    using OptionDescriptions = QVector<OptionDescription>;
 
     /// Optiosn used around the generator code
     enum Option {
@@ -414,8 +414,8 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
-typedef QSharedPointer<Generator> GeneratorPtr;
-typedef QVector<GeneratorPtr> Generators;
+using GeneratorPtr = QSharedPointer<Generator>;
+using Generators = QVector<GeneratorPtr>;
 
 #endif // GENERATOR_H
 

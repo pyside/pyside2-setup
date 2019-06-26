@@ -118,7 +118,7 @@ protected:
                         const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
-                        const AbstractMetaClass *context = 0);
+                        const AbstractMetaClass *context = nullptr);
     /// Write user's custom code snippets at function level.
     void writeCodeSnips(QTextStream &s,
                         const QVector<CodeSnip> & codeSnips,
@@ -312,8 +312,8 @@ protected:
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument *metaArg, bool genericNumberType = false);
 
     QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass);
-    QString cpythonToCppConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = 0);
-    QString cpythonToPythonConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = 0);
+    QString cpythonToCppConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = nullptr);
+    QString cpythonToPythonConversionFunction(const AbstractMetaType *type, const AbstractMetaClass *context = nullptr);
     QString cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass);
     QString cpythonToPythonConversionFunction(const TypeEntry *type);
 
@@ -418,7 +418,7 @@ protected:
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
-    typedef QHash<const TypeEntry *, QVector<const AbstractMetaClass *> > ExtendedConverterData;
+    using ExtendedConverterData = QHash<const TypeEntry *, QVector<const AbstractMetaClass *> >;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
 
@@ -491,9 +491,9 @@ private:
     QString functionReturnType(const AbstractMetaFunction *func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
-    typedef QPair<const AbstractMetaArgument *, QString> ArgumentVarReplacementPair;
-    typedef QVector<ArgumentVarReplacementPair> ArgumentVarReplacementList;
-    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction *func,
+    using ArgumentVarReplacementPair = QPair<const AbstractMetaArgument *, QString>;
+    using ArgumentVarReplacementList = QVector<ArgumentVarReplacementPair>;
+    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
                                                       bool usePyArgs, TypeSystem::Language language,
                                                       const AbstractMetaArgument *lastArg);
 
@@ -542,7 +542,7 @@ private:
     bool m_useIsNullAsNbNonZero = false;
     bool m_avoidProtectedHack = false;
 
-    typedef QHash<QString, AbstractMetaType *> AbstractMetaTypeCache;
+    using AbstractMetaTypeCache = QHash<QString, AbstractMetaType *>;
     AbstractMetaTypeCache m_metaTypeFromStringCache;
 
     /// Type system converter variable replacement names and regular expressions.

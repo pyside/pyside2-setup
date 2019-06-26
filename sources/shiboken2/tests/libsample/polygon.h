@@ -37,7 +37,7 @@
 class LIBSAMPLE_API Polygon
 {
 public:
-    typedef std::list<Point> PointList;
+    using PointList = std::list<Point>;
 
     Polygon() {}
     Polygon(double x, double y);

@@ -58,7 +58,7 @@ namespace Shiboken
     * This mapping associates a method and argument of an wrapper object with the wrapper of
     * said argument when it needs the binding to help manage its reference count.
     */
-typedef std::unordered_multimap<std::string, PyObject *> RefCountMap;
+using RefCountMap = std::unordered_multimap<std::string, PyObject *> ;
 
 /// Linked list of SbkBaseWrapper pointers
 using ChildrenList = std::set<SbkObject *>;
@@ -67,7 +67,7 @@ using ChildrenList = std::set<SbkObject *>;
 struct ParentInfo
 {
     /// Default ctor.
-    ParentInfo() : parent(0), hasWrapperRef(false) {}
+    ParentInfo() : parent(nullptr), hasWrapperRef(false) {}
     /// Pointer to parent object.
     SbkObject *parent;
     /// List of object children.
@@ -105,9 +105,9 @@ struct SbkObjectPrivate
     ~SbkObjectPrivate()
     {
         delete parentInfo;
-        parentInfo = 0;
+        parentInfo = nullptr;
         delete referredObjects;
-        referredObjects = 0;
+        referredObjects = nullptr;
     }
 };
 
@@ -198,7 +198,7 @@ private:
 class BaseAccumulatorVisitor : public HierarchyVisitor
 {
 public:
-    typedef std::vector<SbkObjectType *> Result;
+    using Result = std::vector<SbkObjectType *>;
 
     bool visit(SbkObjectType *node) override;
 

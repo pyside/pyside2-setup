@@ -87,9 +87,9 @@ static SbkObject _Py_ChameleonQAppWrapper_Struct = {
     BRACE_CLOSE
 };
 
-static PyObject *qApp_var = NULL;
-static PyObject *qApp_content = (PyObject *)&_Py_ChameleonQAppWrapper_Struct;
-static PyObject *qApp_moduledicts[5] = {0, 0, 0, 0, 0};
+static PyObject *qApp_var = nullptr;
+static PyObject *qApp_content = reinterpret_cast<PyObject *>(&_Py_ChameleonQAppWrapper_Struct);
+static PyObject *qApp_moduledicts[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
 static int qApp_var_ref = 0;
 static int qApp_content_ref = 0;
 
@@ -120,17 +120,17 @@ reset_qApp_var(void)
 PyObject *
 MakeSingletonQAppWrapper(PyTypeObject *type)
 {
-    if (type == NULL)
+    if (type == nullptr)
         type = Py_NONE_TYPE;
     if (!(type == Py_NONE_TYPE || Py_TYPE(qApp_content) == Py_NONE_TYPE)) {
         const char *res_name = PepType_GetNameStr(Py_TYPE(qApp_content));
         const char *type_name = PepType_GetNameStr(type);
         PyErr_Format(PyExc_RuntimeError, "Please destroy the %s singleton before"
             " creating a new %s instance.", res_name, type_name);
-        return NULL;
+        return nullptr;
     }
     if (reset_qApp_var() < 0)
-        return NULL;
+        return nullptr;
     // always know the max of the refs
     if (Py_REFCNT(qApp_var) > qApp_var_ref)
         qApp_var_ref = Py_REFCNT(qApp_var);
@@ -201,7 +201,7 @@ setup_qApp_var(PyObject *module)
         Py_NONE_TYPE->tp_as_number = &none_as_number;
 #endif
         qApp_var = Py_BuildValue("s", "qApp");
-        if (qApp_var == NULL)
+        if (qApp_var == nullptr)
             return -1;
         // This is a borrowed reference
         qApp_moduledicts[0] = PyEval_GetBuiltins();

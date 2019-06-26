@@ -188,8 +188,8 @@ inline const Size operator/(const Size& s, double div)
     return Size(s.m_width / div, s.m_height / div);
 }
 
-typedef double real;
-typedef unsigned short ushort;
+using real = double;
+using ushort = unsigned short;
 class LIBSAMPLE_API SizeF
 {
 public:
