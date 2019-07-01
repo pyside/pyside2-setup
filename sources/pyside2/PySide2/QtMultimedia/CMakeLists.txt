@@ -26,16 +26,16 @@ ${QtMultimedia_GEN_DIR}/qcameracapturebufferformatcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameracapturedestinationcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameracontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraexposurecontrol_wrapper.cpp
-# Private destructor: ${QtMultimedia_GEN_DIR}/qcameraexposure_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcameraexposure_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerafeedbackcontrol_wrapper.cpp
-# Private destructor: ${${QtMultimedia_GEN_DIR}/qcamerafocus_wrapper.cpp
-# needs enums from QCameraFocus ${QtMultimedia_GEN_DIR}/qcameraflashcontrol_wrapper.cpp
-# needs enums from QCameraFocus ${QtMultimedia_GEN_DIR}/qcamerafocuscontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcamerafocus_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcameraflashcontrol_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcamerafocuscontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerafocuszone_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_frameraterange_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimagecapturecontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimagecapture_wrapper.cpp
-# Private destructor: ${QtMultimedia_GEN_DIR}/qcameraimageprocessing_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcameraimageprocessing_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraimageprocessingcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerainfocontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamerainfo_wrapper.cpp
