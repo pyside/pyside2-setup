@@ -190,10 +190,6 @@ static QVariant QVariant_convertToVariantList(PyObject *list)
 }
 // @snippet qvariant-conversion
 
-// @snippet qvariantmap-register
-Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QTCORE_QMAP_QSTRING_QVARIANT_IDX], "QVariantMap");
-// @snippet qvariantmap-register
-
 // @snippet qvariantmap-check
 static bool QVariantType_isStringList(PyObject *list)
 {
@@ -519,6 +515,7 @@ PySide::runCleanupFunctions();
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "unicode");
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QTCORE_QLIST_QVARIANT_IDX], "QVariantList");
+Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QTCORE_QMAP_QSTRING_QVARIANT_IDX], "QVariantMap");
 
 PySide::registerInternalQtConf();
 PySide::init(module);

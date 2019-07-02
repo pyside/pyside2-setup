@@ -303,8 +303,6 @@
     </conversion-rule>
   </primitive-type>
 
-  <primitive-type name="QVariantMap" target-lang-api-name="PyDict"/>
-  <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qvariantmap-register"/>
   <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qvariantmap-check"/>
   <primitive-type name="QStringList">
     <include file-name="QStringList" location="global"/>

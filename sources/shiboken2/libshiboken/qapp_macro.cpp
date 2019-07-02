@@ -240,11 +240,13 @@ NotifyModuleForQApp(PyObject *module, void *qApp)
      * Therefore, the implementation is very simple and just redirects the
      * qApp_contents variable and assigns the instance, instead of vice-versa.
      */
-    if (qApp != nullptr) {
-        Shiboken::AutoDecRef pycore(PyImport_ImportModule("PySide2.QtCore"));
-        Shiboken::AutoDecRef coreapp(PyObject_GetAttrString(pycore, "QCoreApplication"));
-        qApp_content = PyObject_CallMethod(coreapp, "instance", "");
-        reset_qApp_var();
+    PyObject *coreDict = qApp_moduledicts[1];
+    if (qApp != nullptr && coreDict != nullptr) {
+        PyObject *coreApp = PyDict_GetItemString(coreDict, "QCoreApplication");
+        if (coreApp != nullptr) {
+            qApp_content = PyObject_CallMethod(coreApp, "instance", "");
+            reset_qApp_var();
+        }
     }
 }
 
