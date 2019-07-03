@@ -88,6 +88,10 @@
     win32
     linux
     darwin
-
+# In addition to a pre-existing windows failure,
+# qtlocation/ac899dcc40bb3ad09307583fb7e6befd45a77b33 / QTBUG-66304 introduced
+# a failure in 5.14
 [QtPositioning::positioning]
     win32
+    linux
+    darwin
