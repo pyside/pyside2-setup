@@ -59,11 +59,11 @@ static inline QString skipDeprecatedOption() { return QStringLiteral("skip-depre
 
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 
-typedef QMap<QString, QString> CommandArgumentMap;
+using CommandArgumentMap = QMap<QString, QString>;
 
-typedef Generator::OptionDescriptions OptionDescriptions;
+using OptionDescriptions = Generator::OptionDescriptions;
 
-static void printOptions(QTextStream& s, const OptionDescriptions& options)
+static void printOptions(QTextStream &s, const OptionDescriptions &options)
 {
     s.setFieldAlignment(QTextStream::AlignLeft);
     for (const auto &od : options) {
@@ -82,7 +82,7 @@ static void printOptions(QTextStream& s, const OptionDescriptions& options)
     }
 }
 
-static bool processProjectFile(QFile& projectFile, QMap<QString, QString>& args)
+static bool processProjectFile(QFile &projectFile, QMap<QString, QString> &args)
 {
     QByteArray line = projectFile.readLine().trimmed();
     if (line.isEmpty() || line != "[generator-project]")
@@ -355,7 +355,7 @@ static inline void printVerAndBanner()
     std::cout << "Copyright (C) 2016 The Qt Company Ltd." << std::endl;
 }
 
-static inline void errorPrint(const QString& s)
+static inline void errorPrint(const QString &s)
 {
     QStringList arguments = QCoreApplication::arguments();
     arguments.pop_front();

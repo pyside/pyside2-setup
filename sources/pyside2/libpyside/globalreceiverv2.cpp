@@ -62,27 +62,27 @@ class DynamicSlotDataV2
 {
     Q_DISABLE_COPY(DynamicSlotDataV2)
     public:
-        DynamicSlotDataV2(PyObject* callback, GlobalReceiverV2* parent);
+        DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent);
         ~DynamicSlotDataV2();
 
-        int addSlot(const char* signature);
-        int id(const char* signature) const;
-        PyObject* callback();
+        int addSlot(const char *signature);
+        int id(const char *signature) const;
+        PyObject *callback();
         QByteArray hash() const;
         void notify();
 
-        static void onCallbackDestroyed(void* data);
+        static void onCallbackDestroyed(void *data);
         static QByteArray hash(PyObject *callback);
 
 
     private:
         bool m_isMethod;
-        PyObject* m_callback;
-        PyObject* m_pythonSelf;
-        PyObject* m_pyClass;
-        PyObject* m_weakRef;
+        PyObject *m_callback;
+        PyObject *m_pythonSelf;
+        PyObject *m_pyClass;
+        PyObject *m_weakRef;
         QMap<QByteArray, int> m_signatures;
-        GlobalReceiverV2* m_parent;
+        GlobalReceiverV2 *m_parent;
         QByteArray m_hash;
 };
 
@@ -90,7 +90,7 @@ class DynamicSlotDataV2
 
 using namespace PySide;
 
-DynamicSlotDataV2::DynamicSlotDataV2(PyObject* callback, GlobalReceiverV2* parent)
+DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent)
     : m_pythonSelf(0), m_pyClass(0), m_weakRef(0), m_parent(parent)
 {
     Shiboken::GilState gil;
@@ -124,7 +124,7 @@ QByteArray DynamicSlotDataV2::hash() const
     return m_hash;
 }
 
-QByteArray DynamicSlotDataV2::hash(PyObject* callback)
+QByteArray DynamicSlotDataV2::hash(PyObject *callback)
 {
     Shiboken::GilState gil;
     if (PyMethod_Check(callback)) {
@@ -134,9 +134,9 @@ QByteArray DynamicSlotDataV2::hash(PyObject* callback)
     return QByteArray::number(qlonglong(PyObject_Hash(callback)));
 }
 
-PyObject* DynamicSlotDataV2::callback()
+PyObject *DynamicSlotDataV2::callback()
 {
-    PyObject* callback = m_callback;
+    PyObject *callback = m_callback;
 
     //create a callback based on method data
     if (m_isMethod)
@@ -151,13 +151,13 @@ PyObject* DynamicSlotDataV2::callback()
     return callback;
 }
 
-int DynamicSlotDataV2::id(const char* signature) const
+int DynamicSlotDataV2::id(const char *signature) const
 {
     const auto it = m_signatures.constFind(signature);
     return it != m_signatures.cend() ? it.value() : -1;
 }
 
-int DynamicSlotDataV2::addSlot(const char* signature)
+int DynamicSlotDataV2::addSlot(const char *signature)
 {
     int index = id(signature);
     if (index == -1)
@@ -167,7 +167,7 @@ int DynamicSlotDataV2::addSlot(const char* signature)
 
 void DynamicSlotDataV2::onCallbackDestroyed(void *data)
 {
-    DynamicSlotDataV2* self = reinterpret_cast<DynamicSlotDataV2*>(data);
+    auto self = reinterpret_cast<DynamicSlotDataV2 *>(data);
     self->m_weakRef = 0;
     Py_BEGIN_ALLOW_THREADS
     delete self->m_parent;
@@ -222,12 +222,12 @@ GlobalReceiverV2::~GlobalReceiverV2()
     delete data;
 }
 
-int GlobalReceiverV2::addSlot(const char* signature)
+int GlobalReceiverV2::addSlot(const char *signature)
 {
     return m_data->addSlot(signature);
 }
 
-void GlobalReceiverV2::incRef(const QObject* link)
+void GlobalReceiverV2::incRef(const QObject *link)
 {
     if (link) {
         if (!m_refs.contains(link)) {
@@ -247,7 +247,7 @@ void GlobalReceiverV2::incRef(const QObject* link)
     }
 }
 
-void GlobalReceiverV2::decRef(const QObject* link)
+void GlobalReceiverV2::decRef(const QObject *link)
 {
     if (m_refs.empty())
         return;
@@ -273,7 +273,7 @@ void GlobalReceiverV2::decRef(const QObject* link)
 
 }
 
-int GlobalReceiverV2::refCount(const QObject* link) const
+int GlobalReceiverV2::refCount(const QObject *link) const
 {
     if (link)
         return m_refs.count(link);
@@ -283,7 +283,7 @@ int GlobalReceiverV2::refCount(const QObject* link) const
 
 void GlobalReceiverV2::notify()
 {
-    const QSet<const QObject*> objSet(m_refs.cbegin(), m_refs.cend());
+    const QSet<const QObject *> objSet(m_refs.cbegin(), m_refs.cend());
     Py_BEGIN_ALLOW_THREADS
     for (const QObject *o : objSet) {
         QMetaObject::disconnect(o, DESTROY_SIGNAL_ID, this, DESTROY_SLOT_ID);
@@ -297,17 +297,17 @@ QByteArray GlobalReceiverV2::hash() const
     return m_data->hash();
 }
 
-QByteArray GlobalReceiverV2::hash(PyObject* callback)
+QByteArray GlobalReceiverV2::hash(PyObject *callback)
 {
     return DynamicSlotDataV2::hash(callback);
 }
 
-const QMetaObject* GlobalReceiverV2::metaObject() const
+const QMetaObject *GlobalReceiverV2::metaObject() const
 {
     return const_cast<GlobalReceiverV2 *>(this)->m_metaObject.update();
 }
 
-int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)
+int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
 {
     Shiboken::GilState gil;
     Q_ASSERT(call == QMetaObject::InvokeMetaMethod);
@@ -328,7 +328,7 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void** args)
     if (id == DESTROY_SLOT_ID) {
         if (m_refs.empty())
             return -1;
-        QObject *obj = *reinterpret_cast<QObject**>(args[1]);
+        auto obj = *reinterpret_cast<QObject **>(args[1]);
         incRef(); //keep the object live (safe ref)
         m_refs.removeAll(obj); // remove all refs to this object
         decRef(); //remove the safe ref

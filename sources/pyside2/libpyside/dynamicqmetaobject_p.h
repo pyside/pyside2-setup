@@ -58,19 +58,19 @@ namespace PySide
          * \param signature method signature
          * \param type method return type
          */
-        MethodData(QMetaMethod::MethodType mtype, 
-                   const QByteArray& signature, 
-                   const QByteArray& rtype = QByteArray("void"));
+        MethodData(QMetaMethod::MethodType mtype,
+                   const QByteArray &signature,
+                   const QByteArray &rtype = QByteArray("void"));
         void clear();
         bool isValid() const;
-        const QByteArray& signature() const { return m_signature; }
-        const QByteArray& returnType() const { return m_rtype; }
+        const QByteArray &signature() const { return m_signature; }
+        const QByteArray &returnType() const { return m_rtype; }
         QMetaMethod::MethodType methodType() const { return m_mtype; }
         //Qt5 moc: now we have to store method parameter names, count, type
         QList<QByteArray> parameterTypes() const;
         int parameterCount() const;
         QByteArray name() const;
-        bool operator==(const MethodData& other) const;
+        bool operator==(const MethodData &other) const;
 
     private:
         QByteArray m_signature;
@@ -84,22 +84,22 @@ namespace PySide
     public:
         PropertyData();
         PropertyData(const char *name, int cachedNotifyId = 0, PySideProperty *data = 0);
-        const QByteArray& name() const { return m_name; }
+        const QByteArray &name() const { return m_name; }
         PySideProperty *data() const { return m_data; }
         QByteArray type() const;
         uint flags() const;
         bool isValid() const;
         int cachedNotifyId() const;
-        bool operator==(const PropertyData& other) const;
-        bool operator==(const char* name) const;
+        bool operator==(const PropertyData &other) const;
+        bool operator==(const char *name) const;
 
     private:
         QByteArray m_name;
         int m_cachedNotifyId;
-        PySideProperty* m_data;
+        PySideProperty *m_data;
     };
 
-inline bool MethodData::operator==(const MethodData& other) const
+inline bool MethodData::operator==(const MethodData &other) const
 {
     return m_mtype == other.methodType() && m_signature == other.signature();
 }

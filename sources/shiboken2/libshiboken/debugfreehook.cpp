@@ -107,8 +107,8 @@ static int DebugAllocHook(int nAllocType, void *pvData,
 #endif // _WIN32 && _DEBUG
 
 #ifdef __GLIBC__
-static void (*lastFreeHook)(void* ptr, const void* caller);
-static void DebugFreeHook(void* ptr, const void* caller)
+static void (*lastFreeHook)(void *ptr, const void *caller);
+static void DebugFreeHook(void *ptr, const void *caller)
 {
     testPointerBeingFreed(ptr);
 
@@ -150,7 +150,7 @@ void debugInstallFreeHook(void)
 #endif
 
 #ifdef __APPLE__
-    malloc_zone_t* zone = malloc_default_zone();
+    malloc_zone_t *zone = malloc_default_zone();
     assert(zone != NULL);
     //remove the write protection from the zone struct
     if (zone->version >= 8) {
@@ -176,7 +176,7 @@ void debugRemoveFreeHook(void)
 #endif
 
 #ifdef __APPLE__
-    malloc_zone_t* zone = malloc_default_zone();
+    malloc_zone_t *zone = malloc_default_zone();
     assert(zone != NULL);
     //remove the write protection from the zone struct
     if (zone->version >= 8) {

@@ -14,9 +14,13 @@ visualize data from a CSV in a line chart.
 .. toctree::
    :glob:
    :titlesonly:
-   :reversed:
 
-   *
+   read*
+   filter*
+   add_main*
+   add_tab*
+   add_chart*
+   plot*
 
 You can download the sources from :download:`here <datavisualize.tar.bz2>`.
 

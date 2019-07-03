@@ -49,13 +49,13 @@ extern "C"
 
 struct PySideMetaFunctionPrivate
 {
-    QObject* qobject;
+    QObject *qobject;
     int methodIndex;
 };
 
 //methods
-static void         functionFree(void*);
-static PyObject*    functionCall(PyObject*, PyObject*, PyObject*);
+static void functionFree(void *);
+static PyObject *functionCall(PyObject *, PyObject *, PyObject *);
 
 static PyType_Slot PySideMetaFunctionType_slots[] = {
     {Py_tp_call, (void *)functionCall},
@@ -83,15 +83,15 @@ PyTypeObject *PySideMetaFunctionTypeF(void)
 
 void functionFree(void *self)
 {
-    PySideMetaFunction* function = reinterpret_cast<PySideMetaFunction*>(self);
+    PySideMetaFunction *function = reinterpret_cast<PySideMetaFunction *>(self);
     delete function->d;
 }
 
 PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    PySideMetaFunction* function = reinterpret_cast<PySideMetaFunction*>(self);
+    PySideMetaFunction *function = reinterpret_cast<PySideMetaFunction *>(self);
 
-    PyObject* retVal;
+    PyObject *retVal;
     if (!PySide::MetaFunction::call(function->d->qobject, function->d->methodIndex, args, &retVal))
         return 0;
     return retVal;
@@ -101,7 +101,7 @@ PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 namespace PySide { namespace MetaFunction {
 
-void init(PyObject* module)
+void init(PyObject *module)
 {
     if (PyType_Ready(PySideMetaFunctionTypeF()) < 0)
         return;
@@ -109,7 +109,7 @@ void init(PyObject* module)
     PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunctionTypeF()));
 }
 
-PySideMetaFunction* newObject(QObject* source, int methodIndex)
+PySideMetaFunction *newObject(QObject *source, int methodIndex)
 {
     if (methodIndex >= source->metaObject()->methodCount())
         return 0;
@@ -117,7 +117,7 @@ PySideMetaFunction* newObject(QObject* source, int methodIndex)
     QMetaMethod method = source->metaObject()->method(methodIndex);
     if ((method.methodType() == QMetaMethod::Slot) ||
         (method.methodType() == QMetaMethod::Method)) {
-        PySideMetaFunction* function = PyObject_New(PySideMetaFunction, PySideMetaFunctionTypeF());
+        PySideMetaFunction *function = PyObject_New(PySideMetaFunction, PySideMetaFunctionTypeF());
         function->d = new PySideMetaFunctionPrivate();
         function->d->qobject = source;
         function->d->methodIndex = methodIndex;
@@ -126,7 +126,7 @@ PySideMetaFunction* newObject(QObject* source, int methodIndex)
     return 0;
 }
 
-bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
+bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
 {
 
     QMetaMethod method = self->metaObject()->method(methodIndex);
@@ -150,11 +150,11 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
         return false;
     }
 
-    QVariant* methValues = new QVariant[numArgs];
-    void** methArgs = new void*[numArgs];
+    QVariant *methValues = new QVariant[numArgs];
+    void **methArgs = new void *[numArgs];
 
     // Prepare room for return type
-    const char* returnType = method.typeName();
+    const char *returnType = method.typeName();
     if (returnType && std::strcmp("void", returnType))
         argTypes.prepend(returnType);
     else
@@ -162,7 +162,7 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
 
     int i;
     for (i = 0; i < numArgs; ++i) {
-        const QByteArray& typeName = argTypes[i];
+        const QByteArray &typeName = argTypes.at(i);
         // This must happen only when the method hasn't return type.
         if (typeName.isEmpty()) {
             methArgs[i] = 0;
@@ -204,7 +204,7 @@ bool call(QObject* self, int methodIndex, PyObject* args, PyObject** retVal)
 
         if (retVal) {
             if (methArgs[0]) {
-                static SbkConverter* qVariantTypeConverter = Shiboken::Conversions::getConverter("QVariant");
+                static SbkConverter *qVariantTypeConverter = Shiboken::Conversions::getConverter("QVariant");
                 Q_ASSERT(qVariantTypeConverter);
                 *retVal = Shiboken::Conversions::copyToPython(qVariantTypeConverter, &methValues[0]);
             } else {

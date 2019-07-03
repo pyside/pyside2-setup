@@ -43,12 +43,12 @@ struct Diagnostic;
 
 class SourceFileCache {
 public:
-    typedef QPair<const char *, const char *> Snippet;
+    using Snippet = QPair<const char *, const char *>;
 
     Snippet getCodeSnippet(const CXCursor &cursor);
 
 private:
-    typedef QHash<QString, QByteArray> FileBufferCache;
+    using FileBufferCache = QHash<QString, QByteArray>;
 
     FileBufferCache m_fileBufferCache;
 };
@@ -56,8 +56,8 @@ private:
 class BaseVisitor {
     Q_DISABLE_COPY(BaseVisitor)
 public:
-    typedef QVector<Diagnostic> Diagnostics;
-    typedef SourceFileCache::Snippet CodeSnippet;
+    using Diagnostics = QVector<Diagnostic>;
+    using CodeSnippet = SourceFileCache::Snippet;
 
     enum StartTokenResult { Error, Skip, Recurse };
 

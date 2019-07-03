@@ -46,7 +46,7 @@
 extern "C"
 {
 
-typedef PythonToCppFunc (*IsArrayConvertibleToCppFunc)(PyObject*, int dim1, int dim2);
+typedef PythonToCppFunc (*IsArrayConvertibleToCppFunc)(PyObject *, int dim1, int dim2);
 /**
  *  \internal
  *  Private structure of SbkArrayConverter.

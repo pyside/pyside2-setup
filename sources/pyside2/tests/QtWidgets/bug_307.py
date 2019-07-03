@@ -37,9 +37,9 @@ class Test (QApplication) :
     def __init__(self, argv) :
         super(Test, self).__init__(argv)
         self._called = False
-        
+
     def called(self):
-        self._called = True        
+        self._called = True
 
 
 class QApplicationSignalsTest(unittest.TestCase):
@@ -49,6 +49,6 @@ class QApplicationSignalsTest(unittest.TestCase):
         app.connect(button, SIGNAL("clicked()"), app.called)
         button.click()
         self.assertTrue(app._called)
-        
+
 if __name__ == '__main__':
     unittest.main()

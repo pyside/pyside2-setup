@@ -35,8 +35,8 @@
 class LIBSAMPLE_API ObjectModel : public ObjectType
 {
 public:
-    explicit ObjectModel(ObjectType* parent = 0)
-        : ObjectType(parent), m_data(0)
+    explicit ObjectModel(ObjectType *parent = nullptr)
+        : ObjectType(parent), m_data(nullptr)
     {}
 
     void setData(ObjectType* data);

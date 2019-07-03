@@ -62,7 +62,7 @@
 
 // All registered python types and their creation functions.
 static PyObject *pyTypes[PYSIDE_MAX_QUICK_TYPES];
-static void (*createFuncs[PYSIDE_MAX_QUICK_TYPES])(void*);
+static void (*createFuncs[PYSIDE_MAX_QUICK_TYPES])(void *);
 
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
@@ -154,7 +154,7 @@ void registerTypeIfInheritsFromClass(
                     sizeof(QQmlListProperty<WrapperClass>),
                     static_cast< ::QFlags<QMetaType::TypeFlag> >(
                         QtPrivate::QMetaTypeTypeFlags<QQmlListProperty<WrapperClass> >::Flags),
-                    static_cast<QMetaObject*>(0));
+                    nullptr);
         if (lstType == -1) {
             PyErr_Format(PyExc_TypeError, "Meta type registration of \"%s\" for QML usage failed.",
                          typeListName.constData());

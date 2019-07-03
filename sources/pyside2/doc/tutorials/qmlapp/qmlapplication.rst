@@ -129,5 +129,4 @@ Related information
 ********************
 
 * `QML Reference <https://doc.qt.io/qt-5/qmlreference.html>`_
-* :doc:`../qmltutorial/index`
-* :doc:`../qmladvancedtutorial/index`
+* :doc:`../qmlintegration/qmlintegration`

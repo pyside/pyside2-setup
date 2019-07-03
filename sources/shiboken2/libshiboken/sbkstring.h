@@ -53,18 +53,18 @@ namespace Shiboken
 {
 namespace String
 {
-    LIBSHIBOKEN_API bool check(PyObject* obj);
-    LIBSHIBOKEN_API bool checkType(PyTypeObject* obj);
-    LIBSHIBOKEN_API bool checkChar(PyObject* obj);
-    LIBSHIBOKEN_API bool isConvertible(PyObject* obj);
-    LIBSHIBOKEN_API PyObject* fromCString(const char* value);
-    LIBSHIBOKEN_API PyObject* fromCString(const char* value, int len);
-    LIBSHIBOKEN_API const char* toCString(PyObject* str, Py_ssize_t* len = 0);
-    LIBSHIBOKEN_API bool concat(PyObject** val1, PyObject* val2);
-    LIBSHIBOKEN_API PyObject* fromFormat(const char* format, ...);
-    LIBSHIBOKEN_API PyObject* fromStringAndSize(const char* str, Py_ssize_t size);
-    LIBSHIBOKEN_API int compare(PyObject* val1, const char* val2);
-    LIBSHIBOKEN_API Py_ssize_t len(PyObject* str);
+    LIBSHIBOKEN_API bool check(PyObject *obj);
+    LIBSHIBOKEN_API bool checkType(PyTypeObject *obj);
+    LIBSHIBOKEN_API bool checkChar(PyObject *obj);
+    LIBSHIBOKEN_API bool isConvertible(PyObject *obj);
+    LIBSHIBOKEN_API PyObject *fromCString(const char *value);
+    LIBSHIBOKEN_API PyObject *fromCString(const char *value, int len);
+    LIBSHIBOKEN_API const char *toCString(PyObject *str, Py_ssize_t *len = nullptr);
+    LIBSHIBOKEN_API bool concat(PyObject **val1, PyObject *val2);
+    LIBSHIBOKEN_API PyObject *fromFormat(const char *format, ...);
+    LIBSHIBOKEN_API PyObject *fromStringAndSize(const char *str, Py_ssize_t size);
+    LIBSHIBOKEN_API int compare(PyObject *val1, const char *val2);
+    LIBSHIBOKEN_API Py_ssize_t len(PyObject *str);
 
 } // namespace String
 } // namespace Shiboken

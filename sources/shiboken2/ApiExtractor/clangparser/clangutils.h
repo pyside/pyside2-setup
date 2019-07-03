@@ -73,7 +73,7 @@ struct SourceLocation
 
 SourceLocation getExpansionLocation(const CXSourceLocation &location);
 
-typedef QPair<SourceLocation, SourceLocation> SourceRange;
+using SourceRange =QPair<SourceLocation, SourceLocation>;
 
 SourceLocation getCursorLocation(const CXCursor &cursor);
 CXString getFileNameFromLocation(const CXSourceLocation &location);
@@ -82,7 +82,7 @@ SourceRange getCursorRange(const CXCursor &cursor);
 struct Diagnostic {
     enum  Source { Clang, Other };
 
-    Diagnostic() : source(Clang) {}
+    Diagnostic() = default;
     // Clang
     static Diagnostic fromCXDiagnostic(CXDiagnostic cd);
     // Other
@@ -91,8 +91,8 @@ struct Diagnostic {
     QString message;
     QStringList childMessages;
     SourceLocation location;
-    Source source;
-    CXDiagnosticSeverity severity;
+    Source source = Clang;
+    CXDiagnosticSeverity severity = CXDiagnostic_Warning;
 };
 
 QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu);
@@ -100,7 +100,7 @@ CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds);
 
 // Parse a template argument list "a<b<c,d>,e>" and invoke a handler
 // with each match (level and string). Return begin and end of the list.
-typedef std::function<void(int /*level*/, const QStringRef &)> TemplateArgumentHandler;
+using TemplateArgumentHandler = std::function<void (int, const QStringRef &)>;
 
 QPair<int, int> parseTemplateArgumentList(const QString &l,
                                           const TemplateArgumentHandler &handler,

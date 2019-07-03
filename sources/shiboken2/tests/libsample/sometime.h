@@ -70,7 +70,7 @@ public:
     NumArgs somethingCompletelyDifferent();
     NumArgs somethingCompletelyDifferent(int h, int m,
                                          ImplicitConv ic = ImplicitConv::CtorThree,
-                                         ObjectType* type = 0);
+                                         ObjectType *type = nullptr);
 
     Str toString() const;
     bool operator==(const Time& other) const;

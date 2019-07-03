@@ -50,7 +50,7 @@ protected:
     inline int protectedSum(int a0, int a1) { return a0 + a1; }
     inline int modifiedProtectedSum(int a0, int a1) { return a0 + a1; }
     inline static const char* protectedStatic() { return "protectedStatic"; }
-    inline const char* dataTypeName(void *data = 0) const { return "pointer"; }
+    inline const char* dataTypeName(void *data = nullptr) const { return "pointer"; }
     inline const char* dataTypeName(int data) const { return "integer"; }
 
 private:
@@ -130,8 +130,8 @@ public:
         : protectedValueTypeProperty(Point(0, 0)),
           protectedProperty(0),
           protectedEnumProperty(Event::NO_EVENT),
-          protectedValueTypePointerProperty(0),
-          protectedObjectTypeProperty(0)
+          protectedValueTypePointerProperty(nullptr),
+          protectedObjectTypeProperty(nullptr)
     {}
 protected:
     // This is deliberately the first member to test wrapper registration

@@ -59,7 +59,7 @@ class TestQObjectConnectNotify(UsesQCoreApplication):
     '''Test case for QObject::connectNotify'''
     def setUp(self):
         UsesQCoreApplication.setUp(self)
-        self.called = False             
+        self.called = False
 
     def tearDown(self):
         UsesQCoreApplication.tearDown(self)

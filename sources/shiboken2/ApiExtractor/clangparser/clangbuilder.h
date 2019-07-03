@@ -39,6 +39,8 @@ class BuilderPrivate;
 
 class Builder : public BaseVisitor {
 public:
+    Q_DISABLE_COPY(Builder)
+
     Builder();
     ~Builder();
 

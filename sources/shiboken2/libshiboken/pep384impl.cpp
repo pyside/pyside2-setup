@@ -59,26 +59,26 @@ extern "C"
  * appear at the right offsets.
  */
 
-#define make_dummy_int(x)   (x * sizeof(void*))
-#define make_dummy(x)       (reinterpret_cast<void*>(make_dummy_int(x)))
+#define make_dummy_int(x)   (x * sizeof(void *))
+#define make_dummy(x)       (reinterpret_cast<void *>(make_dummy_int(x)))
 
 #ifdef Py_LIMITED_API
 datetime_struc *PyDateTimeAPI = NULL;
 #endif
 
 static PyObject *
-dummy_func(PyObject *self, PyObject *args)
+dummy_func(PyObject * /* self */, PyObject * /* args */)
 {
     Py_RETURN_NONE;
 }
 
 static struct PyMethodDef probe_methoddef[] = {
     {"dummy", dummy_func, METH_NOARGS},
-    {0}
+    {nullptr}
 };
 
 static PyGetSetDef probe_getseters[] = {
-    {0}  /* Sentinel */
+    {nullptr}  /* Sentinel */
 };
 
 #define probe_tp_call       make_dummy(1)
@@ -110,7 +110,7 @@ static PyType_Slot typeprobe_slots[] = {
     {Py_tp_new,         probe_tp_new},
     {Py_tp_free,        probe_tp_free},
     {Py_tp_is_gc,       probe_tp_is_gc},
-    {0, 0}
+    {0, nullptr}
 };
 static PyType_Spec typeprobe_spec = {
     probe_tp_name,
@@ -121,15 +121,15 @@ static PyType_Spec typeprobe_spec = {
 };
 
 static void
-check_PyTypeObject_valid(void)
+check_PyTypeObject_valid()
 {
-    PyObject *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
-    PyTypeObject *probe_tp_base = reinterpret_cast<PyTypeObject *>(
+    auto *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
+    auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(
         PyObject_GetAttrString(obtype, "__base__"));
     PyObject *probe_tp_bases = PyObject_GetAttrString(obtype, "__bases__");
-    PyTypeObject *check = reinterpret_cast<PyTypeObject *>(
+    auto *check = reinterpret_cast<PyTypeObject *>(
         PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
-    PyTypeObject *typetype = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *typetype = reinterpret_cast<PyTypeObject *>(obtype);
     PyObject *w = PyObject_GetAttrString(obtype, "__weakrefoffset__");
     long probe_tp_weakrefoffset = PyLong_AsLong(w);
     PyObject *d = PyObject_GetAttrString(obtype, "__dictoffset__");

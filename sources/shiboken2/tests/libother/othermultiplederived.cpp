@@ -45,6 +45,6 @@ Base1* OtherMultipleDerived::createObject(const std::string& objName)
         return new MDerived3;
     else if (objName == "OtherMultipleDerived")
         return new OtherMultipleDerived;
-    return 0;
+    return nullptr;
 }
 

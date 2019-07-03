@@ -46,13 +46,13 @@
 namespace Shiboken {
 namespace Conversions {
 
-static SbkConverter* createConverterObject(PyTypeObject* type,
+static SbkConverter *createConverterObject(PyTypeObject *type,
                                            PythonToCppFunc toCppPointerConvFunc,
                                            IsConvertibleToCppFunc toCppPointerCheckFunc,
                                            CppToPythonFunc pointerToPythonFunc,
                                            CppToPythonFunc copyToPythonFunc)
 {
-    SbkConverter* converter = new SbkConverter;
+    SbkConverter *converter = new SbkConverter;
     converter->pythonType = type;
 
     converter->pointerToPython = pointerToPythonFunc;
@@ -64,20 +64,20 @@ static SbkConverter* createConverterObject(PyTypeObject* type,
     return converter;
 }
 
-SbkConverter* createConverter(SbkObjectType* type,
+SbkConverter *createConverter(SbkObjectType *type,
                               PythonToCppFunc toCppPointerConvFunc,
                               IsConvertibleToCppFunc toCppPointerCheckFunc,
                               CppToPythonFunc pointerToPythonFunc,
                               CppToPythonFunc copyToPythonFunc)
 {
-    SbkConverter* converter = createConverterObject((PyTypeObject*)type,
+    SbkConverter *converter = createConverterObject(reinterpret_cast<PyTypeObject *>(type),
                                                     toCppPointerConvFunc, toCppPointerCheckFunc,
                                                     pointerToPythonFunc, copyToPythonFunc);
     type->d->converter = converter;
     return converter;
 }
 
-void deleteConverter(SbkConverter* converter)
+void deleteConverter(SbkConverter *converter)
 {
     if (converter) {
         converter->toCppConversions.clear();
@@ -85,44 +85,44 @@ void deleteConverter(SbkConverter* converter)
     }
 }
 
-void addPythonToCppValueConversion(SbkConverter* converter,
+void addPythonToCppValueConversion(SbkConverter *converter,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)
 {
     converter->toCppConversions.push_back(std::make_pair(isConvertibleToCppFunc, pythonToCppFunc));
 }
-void addPythonToCppValueConversion(SbkObjectType* type,
+void addPythonToCppValueConversion(SbkObjectType *type,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)
 {
     addPythonToCppValueConversion(type->d->converter, pythonToCppFunc, isConvertibleToCppFunc);
 }
 
-PyObject* pointerToPython(SbkObjectType* type, const void* cppIn)
+PyObject *pointerToPython(SbkObjectType *type, const void *cppIn)
 {
     if (!cppIn)
         Py_RETURN_NONE;
     return type->d->converter->pointerToPython(cppIn);
 }
 
-static inline PyObject* CopyCppToPython(SbkConverter* converter, const void* cppIn)
+static inline PyObject *CopyCppToPython(SbkConverter *converter, const void *cppIn)
 {
     assert(cppIn);
     return converter->copyToPython(cppIn);
 }
-PyObject* copyToPython(SbkObjectType* type, const void* cppIn)
+PyObject *copyToPython(SbkObjectType *type, const void *cppIn)
 {
     return CopyCppToPython(type->d->converter, cppIn);
 }
-PyObject* toPython(SbkConverter* converter, const void* cppIn)
+PyObject *toPython(SbkConverter *converter, const void *cppIn)
 {
     return CopyCppToPython(converter, cppIn);
 }
 
-PyObject* referenceToPython(SbkObjectType* type, const void* cppIn)
+PyObject *referenceToPython(SbkObjectType *type, const void *cppIn)
 {
     assert(cppIn);
-    PyObject* pyOut = (PyObject*)BindingManager::instance().retrieveWrapper(cppIn);
+    PyObject *pyOut = (PyObject *)BindingManager::instance().retrieveWrapper(cppIn);
     if (pyOut) {
         Py_INCREF(pyOut);
         return pyOut;
@@ -134,16 +134,16 @@ PyObject* referenceToPython(SbkObjectType* type, const void* cppIn)
     return type->d->converter->pointerToPython(cppIn);
 }
 
-PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType* type, PyObject* pyIn)
+PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType *type, PyObject *pyIn)
 {
     assert(pyIn);
     return type->d->converter->toCppPointerConversion.first(pyIn);
 }
 
-static inline PythonToCppFunc IsPythonToCppConvertible(SbkConverter* converter, PyObject* pyIn)
+static inline PythonToCppFunc IsPythonToCppConvertible(SbkConverter *converter, PyObject *pyIn)
 {
     assert(pyIn);
-    ToCppConversionList& convs = converter->toCppConversions;
+    ToCppConversionList &convs = converter->toCppConversions;
     for (ToCppConversionList::iterator conv = convs.begin(); conv != convs.end(); ++conv) {
         PythonToCppFunc toCppFunc = 0;
         if ((toCppFunc = (*conv).first(pyIn)))
@@ -151,16 +151,16 @@ static inline PythonToCppFunc IsPythonToCppConvertible(SbkConverter* converter, 
     }
     return 0;
 }
-PythonToCppFunc isPythonToCppValueConvertible(SbkObjectType* type, PyObject* pyIn)
+PythonToCppFunc isPythonToCppValueConvertible(SbkObjectType *type, PyObject *pyIn)
 {
     return IsPythonToCppConvertible(type->d->converter, pyIn);
 }
-PythonToCppFunc isPythonToCppConvertible(SbkConverter* converter, PyObject* pyIn)
+PythonToCppFunc isPythonToCppConvertible(SbkConverter *converter, PyObject *pyIn)
 {
     return IsPythonToCppConvertible(converter, pyIn);
 }
 
-PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType* type, PyObject* pyIn)
+PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType *type, PyObject *pyIn)
 {
     if (pyIn != Py_None) {
         PythonToCppFunc toCpp = isPythonToCppPointerConvertible(type, pyIn);
@@ -170,24 +170,27 @@ PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType* type, PyObject*
     return isPythonToCppValueConvertible(type, pyIn);
 }
 
-void nonePythonToCppNullPtr(PyObject*, void* cppOut)
+void nonePythonToCppNullPtr(PyObject *, void *cppOut)
 {
     assert(cppOut);
-    *((void**)cppOut) = 0;
+    *reinterpret_cast<void **>(cppOut) = nullptr;
 }
 
-void pythonToCppPointer(SbkObjectType* type, PyObject* pyIn, void* cppOut)
+void pythonToCppPointer(SbkObjectType *type, PyObject *pyIn, void *cppOut)
 {
     assert(pyIn);
     assert(cppOut);
-    SbkObjectType* inType = (SbkObjectType*)Py_TYPE(pyIn);
-    if (ObjectType::hasCast(inType))
-        *((void**)cppOut) = ObjectType::cast(inType, (SbkObject*)pyIn, (PyTypeObject*)type);
-    else
-        *((void**)cppOut) = Object::cppPointer((SbkObject*)pyIn, (PyTypeObject*)type);
+    SbkObjectType *inType = (SbkObjectType *)Py_TYPE(pyIn);
+    if (ObjectType::hasCast(inType)) {
+        *reinterpret_cast<void **>(cppOut) =
+            ObjectType::cast(inType, reinterpret_cast<SbkObject *>(pyIn), reinterpret_cast<PyTypeObject *>(type));
+    } else {
+        *reinterpret_cast<void **>(cppOut) =
+           Object::cppPointer(reinterpret_cast<SbkObject *>(pyIn), reinterpret_cast<PyTypeObject *>(type));
+    }
 }
 
-bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCppFunc)
+bool isImplicitConversion(SbkObjectType *type, PythonToCppFunc toCppFunc)
 {
     // This is the Object Type or Value Type conversion that only
     // retrieves the C++ pointer held in the Python wrapper.

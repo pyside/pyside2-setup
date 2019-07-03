@@ -58,11 +58,8 @@ class BookWindow(QMainWindow, Ui_BookWindow):
         QMainWindow.__init__(self)
         self.setupUi(self)
 
-        #check for SQL errors
-        err = createdb.init_db()
-        if err.type() is not QSqlError.NoError:
-            showError(err)
-            return
+        #Initialize db
+        createdb.init_db()
 
         model = QSqlRelationalTableModel(self.bookTable)
         model.setEditStrategy(QSqlTableModel.OnManualSubmit)

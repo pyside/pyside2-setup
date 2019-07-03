@@ -74,7 +74,7 @@ public:
     inline int id() { return m_id; }
 
     // factory method
-    inline static Abstract* createObject() { return 0; }
+    inline static Abstract* createObject() { return nullptr; }
 
     // method that receives an Object Type
     inline static int getObjectId(Abstract* obj) { return obj->id(); }

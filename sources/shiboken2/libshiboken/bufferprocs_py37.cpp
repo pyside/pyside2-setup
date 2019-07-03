@@ -147,19 +147,18 @@ PyBuffer_IsContiguous(const Pep_buffer *view, char order)
 }
 
 
-void*
+void *
 PyBuffer_GetPointer(Pep_buffer *view, Py_ssize_t *indices)
 {
-    char* pointer;
     int i;
-    pointer = (char *)view->buf;
+    auto pointer = reinterpret_cast<char *>(view->buf);
     for (i = 0; i < view->ndim; i++) {
         pointer += view->strides[i]*indices[i];
         if ((view->suboffsets != NULL) && (view->suboffsets[i] >= 0)) {
-            pointer = *((char**)pointer) + view->suboffsets[i];
+            pointer = *reinterpret_cast<char **>(pointer) + view->suboffsets[i];
         }
     }
-    return (void*)pointer;
+    return pointer;
 }
 
 
@@ -221,7 +220,7 @@ PyBuffer_FromContiguous(Pep_buffer *view, void *buf, Py_ssize_t len, char fort)
         PyErr_NoMemory();
         return -1;
     }
-    for (k=0; k<view->ndim;k++) {
+    for (k=0; k<view->ndim; k++) {
         indices[k] = 0;
     }
 

@@ -55,7 +55,7 @@ QT_END_NAMESPACE
 class EnumTypeEntry;
 class FlagsTypeEntry;
 
-typedef QMap<int, QString> ArgumentMap;
+using ArgumentMap = QMap<int, QString>;
 
 class TemplateInstance;
 
@@ -186,9 +186,9 @@ public:
 struct ArgumentModification
 {
     ArgumentModification() : removedDefaultExpression(false), removed(false),
-        noNullPointers(false), array(false) {}
+        noNullPointers(false), resetAfterUse(false), array(false) {}
     explicit ArgumentModification(int idx) : index(idx), removedDefaultExpression(false), removed(false),
-              noNullPointers(false), array(false) {}
+              noNullPointers(false), resetAfterUse(false), array(false) {}
 
     // Should the default expression be removed?
 
@@ -548,6 +548,10 @@ class TypeEntry
 {
     Q_GADGET
 public:
+    TypeEntry &operator=(const TypeEntry &) = delete;
+    TypeEntry &operator=(TypeEntry &&) = delete;
+    TypeEntry(TypeEntry &&) = delete;
+
     enum Type {
         PrimitiveType,
         VoidType,
@@ -770,7 +774,7 @@ public:
 
     virtual InterfaceTypeEntry *designatedInterface() const
     {
-        return 0;
+        return nullptr;
     }
 
     void setCustomConstructor(const CustomFunction &func)
@@ -901,10 +905,6 @@ protected:
     TypeEntry(const TypeEntry &);
 
 private:
-    TypeEntry &operator=(const TypeEntry &) = delete;
-    TypeEntry &operator=(TypeEntry &&) = delete;
-    TypeEntry(TypeEntry &&) = delete;
-
     QString m_name;
     QString m_targetLangPackage;
     Type m_type;
@@ -1225,7 +1225,7 @@ public:
     enum TypeFlag {
         Deprecated         = 0x4
     };
-    typedef QFlags<TypeFlag> TypeFlags;
+    Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 
     enum CopyableFlag {
         CopyableSet,
@@ -1366,7 +1366,7 @@ public:
     {
         return m_hashFunction;
     }
-    void setHashFunction(QString hashFunction)
+    void setHashFunction(const QString &hashFunction)
     {
         m_hashFunction = hashFunction;
     }
@@ -1427,6 +1427,8 @@ private:
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(ComplexTypeEntry::TypeFlags)
+
 class TypedefEntry : public ComplexTypeEntry
 {
 public:
@@ -1446,7 +1448,7 @@ public:
     void setTarget(ComplexTypeEntry *target) { m_target = target; }
 
 #ifndef QT_NO_DEBUG_STREAM
-    virtual void formatDebug(QDebug &d) const override;
+    void formatDebug(QDebug &d) const override;
 #endif
 protected:
     TypedefEntry(const TypedefEntry &);
@@ -1605,7 +1607,7 @@ protected:
     InterfaceTypeEntry(const InterfaceTypeEntry &);
 
 private:
-    ObjectTypeEntry *m_origin;
+    ObjectTypeEntry *m_origin = nullptr;
 };
 
 
@@ -1675,7 +1677,7 @@ struct TypeRejection
 
     QRegularExpression className;
     QRegularExpression pattern;
-    MatchType matchType;
+    MatchType matchType = Invalid;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -1722,7 +1724,7 @@ public:
     bool replaceOriginalTargetToNativeConversions() const;
     void setReplaceOriginalTargetToNativeConversions(bool replaceOriginalTargetToNativeConversions);
 
-    typedef QVector<TargetToNativeConversion*> TargetToNativeConversions;
+    using TargetToNativeConversions = QVector<TargetToNativeConversion *>;
     bool hasTargetToNativeConversions() const;
     TargetToNativeConversions& targetToNativeConversions();
     const TargetToNativeConversions& targetToNativeConversions() const;

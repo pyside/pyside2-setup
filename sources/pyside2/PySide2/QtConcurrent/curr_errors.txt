@@ -3,7 +3,7 @@ Generating enum model...                     [OK]
 Generating namespace model...                [WARNING]
     enum 'QtConcurrent::ThreadFunctionResult' does not have a type entry or is not an enum
     enum 'QtConcurrent::ReduceQueueThrottleLimit' does not have a type entry or is not an enum
-    
+
 
 Resolving typedefs...                        [OK]
 Fixing class inheritance...                  [OK]
@@ -14,7 +14,7 @@ Done, 2 warnings (506 known issues)
 Scanning dependencies of target QtConcurrent
 [ 21%] Building CXX object PySide/QtConcurrent/CMakeFiles/QtConcurrent.dir/PySide/QtConcurrent/qtconcurrent_module_wrapper.cpp.o
 In file included from /Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtConcurrent/PySide/QtConcurrent/qtconcurrent_module_wrapper.cpp:30:
-/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtConcurrent/PySide/QtConcurrent/pyside_qtconcurrent_python.h:44:10: fatal error: 
+/Users/tismer/src/pyside-setup2/pyside_build/py3.4-qt5.4.2-64bit-debug/pyside/PySide/QtConcurrent/PySide/QtConcurrent/pyside_qtconcurrent_python.h:44:10: fatal error:
       'qtconcurrentexception.h' file not found
 #include <qtconcurrentexception.h>
          ^

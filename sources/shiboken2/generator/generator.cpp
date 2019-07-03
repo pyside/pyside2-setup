@@ -153,7 +153,7 @@ QString DefaultValue::constructorParameter() const
 
 struct Generator::GeneratorPrivate
 {
-    const ApiExtractor* apiextractor = nullptr;
+    const ApiExtractor *apiextractor = nullptr;
     QString outDir;
     // License comment
     QString licenseComment;
@@ -174,7 +174,7 @@ Generator::~Generator()
     delete m_d;
 }
 
-bool Generator::setup(const ApiExtractor& extractor)
+bool Generator::setup(const ApiExtractor &extractor)
 {
     m_d->apiextractor = &extractor;
     const auto moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
@@ -188,7 +188,7 @@ bool Generator::setup(const ApiExtractor& extractor)
     return doSetup();
 }
 
-QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType* type)
+QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType *type)
 {
     const QString signature = type->cppSignature();
     if (!type->typeEntry()->isContainer() && !type->typeEntry()->isSmartPointer())
@@ -217,7 +217,7 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
     if (!type)
         return;
     const AbstractMetaTypeList &instantiations = type->instantiations();
-    for (const AbstractMetaType* t : instantiations)
+    for (const AbstractMetaType *t : instantiations)
         addInstantiatedContainersAndSmartPointers(t, context);
     const auto typeEntry = type->typeEntry();
     const bool isContainer = typeEntry->isContainer();
@@ -298,7 +298,7 @@ QVector<const AbstractMetaType *> Generator::instantiatedContainers() const
     return m_d->instantiatedContainers;
 }
 
-QVector<const AbstractMetaType*> Generator::instantiatedSmartPointers() const
+QVector<const AbstractMetaType *> Generator::instantiatedSmartPointers() const
 {
     return m_d->instantiatedSmartPointers;
 }
@@ -343,12 +343,12 @@ ContainerTypeEntryList Generator::containerTypes() const
     return m_d->apiextractor->containerTypes();
 }
 
-const AbstractMetaEnum* Generator::findAbstractMetaEnum(const TypeEntry* typeEntry) const
+const AbstractMetaEnum *Generator::findAbstractMetaEnum(const TypeEntry *typeEntry) const
 {
     return m_d->apiextractor->findAbstractMetaEnum(typeEntry);
 }
 
-const AbstractMetaEnum* Generator::findAbstractMetaEnum(const AbstractMetaType* metaType) const
+const AbstractMetaEnum *Generator::findAbstractMetaEnum(const AbstractMetaType *metaType) const
 {
     return m_d->apiextractor->findAbstractMetaEnum(metaType->typeEntry());
 }
@@ -358,7 +358,7 @@ QString Generator::licenseComment() const
     return m_d->licenseComment;
 }
 
-void Generator::setLicenseComment(const QString& licenseComment)
+void Generator::setLicenseComment(const QString &licenseComment)
 {
     m_d->licenseComment = licenseComment;
 }
@@ -440,12 +440,12 @@ bool Generator::generate()
     return finishGeneration();
 }
 
-bool Generator::shouldGenerateTypeEntry(const TypeEntry* type) const
+bool Generator::shouldGenerateTypeEntry(const TypeEntry *type) const
 {
     return type->codeGeneration() & TypeEntry::GenerateTargetLang;
 }
 
-bool Generator::shouldGenerate(const AbstractMetaClass* metaClass) const
+bool Generator::shouldGenerate(const AbstractMetaClass *metaClass) const
 {
     return shouldGenerateTypeEntry(metaClass->typeEntry());
 }
@@ -490,7 +490,7 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
     }
 }
 
-QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
+QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
 {
     // detect number of spaces before the first character
     const QStringList lst(code.split(QLatin1Char('\n')));
@@ -527,7 +527,7 @@ QTextStream& formatCode(QTextStream &s, const QString& code, Indentor &indentor)
     return s;
 }
 
-AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry* type) const
+AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry *type) const
 {
     if (type->isValue()) {
         if (const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), type))
@@ -536,52 +536,52 @@ AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry* type) c
     return AbstractMetaFunctionList();
 }
 
-AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType* metaType) const
+AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType *metaType) const
 {
     return implicitConversions(metaType->typeEntry());
 }
 
-bool Generator::isObjectType(const TypeEntry* type)
+bool Generator::isObjectType(const TypeEntry *type)
 {
     if (type->isComplex())
         return Generator::isObjectType(static_cast<const ComplexTypeEntry *>(type));
     return type->isObject();
 }
-bool Generator::isObjectType(const ComplexTypeEntry* type)
+bool Generator::isObjectType(const ComplexTypeEntry *type)
 {
     return type->isObject();
 }
-bool Generator::isObjectType(const AbstractMetaClass* metaClass)
+bool Generator::isObjectType(const AbstractMetaClass *metaClass)
 {
     return Generator::isObjectType(metaClass->typeEntry());
 }
-bool Generator::isObjectType(const AbstractMetaType* metaType)
+bool Generator::isObjectType(const AbstractMetaType *metaType)
 {
     return isObjectType(metaType->typeEntry());
 }
 
-bool Generator::isPointer(const AbstractMetaType* type)
+bool Generator::isPointer(const AbstractMetaType *type)
 {
     return type->indirections() > 0
             || type->isNativePointer()
             || type->isValuePointer();
 }
 
-bool Generator::isCString(const AbstractMetaType* type)
+bool Generator::isCString(const AbstractMetaType *type)
 {
     return type->isNativePointer()
             && type->indirections() == 1
             && type->name() == QLatin1String("char");
 }
 
-bool Generator::isVoidPointer(const AbstractMetaType* type)
+bool Generator::isVoidPointer(const AbstractMetaType *type)
 {
     return type->isNativePointer()
             && type->indirections() == 1
             && type->name() == QLatin1String("void");
 }
 
-QString Generator::getFullTypeName(const TypeEntry* type) const
+QString Generator::getFullTypeName(const TypeEntry *type) const
 {
     QString result = type->qualifiedCppName();
     if (type->isArray())
@@ -591,7 +591,7 @@ QString Generator::getFullTypeName(const TypeEntry* type) const
     return result;
 }
 
-QString Generator::getFullTypeName(const AbstractMetaType* type) const
+QString Generator::getFullTypeName(const AbstractMetaType *type) const
 {
     if (isCString(type))
         return QLatin1String("const char*");
@@ -607,12 +607,12 @@ QString Generator::getFullTypeName(const AbstractMetaType* type) const
     return typeName + QString::fromLatin1("*").repeated(type->indirections());
 }
 
-QString Generator::getFullTypeName(const AbstractMetaClass* metaClass) const
+QString Generator::getFullTypeName(const AbstractMetaClass *metaClass) const
 {
     return QLatin1String("::") + metaClass->qualifiedCppName();
 }
 
-QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type) const
+QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType *type) const
 {
     if (isCString(type))
         return QLatin1String("const char*");
@@ -638,7 +638,7 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType* type)
     return QLatin1String("::") + typeName;
 }
 
-DefaultValue Generator::minimalConstructor(const AbstractMetaType* type) const
+DefaultValue Generator::minimalConstructor(const AbstractMetaType *type) const
 {
     if (!type || (type->referenceType() ==  LValueReference && Generator::isObjectType(type)))
         return DefaultValue(DefaultValue::Error);
@@ -664,7 +664,7 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType* type) const
         return DefaultValue(DefaultValue::Pointer, QLatin1String("::") + type->typeEntry()->qualifiedCppName());
 
     if (type->typeEntry()->isComplex()) {
-        const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(type->typeEntry());
+        auto cType = static_cast<const ComplexTypeEntry *>(type->typeEntry());
         if (cType->hasDefaultConstructor())
             return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
         auto ctor = minimalConstructor(AbstractMetaClass::findClass(classes(), cType));
@@ -679,7 +679,7 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType* type) const
     return minimalConstructor(type->typeEntry());
 }
 
-DefaultValue Generator::minimalConstructor(const TypeEntry* type) const
+DefaultValue Generator::minimalConstructor(const TypeEntry *type) const
 {
     if (!type)
         return DefaultValue(DefaultValue::Error);
@@ -706,7 +706,7 @@ DefaultValue Generator::minimalConstructor(const TypeEntry* type) const
     }
 
     if (type->isPrimitive()) {
-        QString ctor = static_cast<const PrimitiveTypeEntry*>(type)->defaultConstructor();
+        QString ctor = static_cast<const PrimitiveTypeEntry *>(type)->defaultConstructor();
         // If a non-C++ (i.e. defined by the user) primitive type does not have
         // a default constructor defined by the user, the empty constructor is
         // heuristically returned. If this is wrong the build of the generated
@@ -729,12 +729,12 @@ static QString constructorCall(const QString &qualifiedCppName, const QStringLis
         + args.join(QLatin1String(", ")) + QLatin1Char(')');
 }
 
-DefaultValue Generator::minimalConstructor(const AbstractMetaClass* metaClass) const
+DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) const
 {
     if (!metaClass)
         return DefaultValue(DefaultValue::Error);
 
-    const ComplexTypeEntry* cType = static_cast<const ComplexTypeEntry*>(metaClass->typeEntry());
+    auto cType = static_cast<const ComplexTypeEntry *>(metaClass->typeEntry());
     if (cType->hasDefaultConstructor())
         return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
 
@@ -845,7 +845,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
                     s = s.remove(index, constLen);
             }
         } else if (options & Generator::ExcludeConst || options & Generator::ExcludeReference) {
-            AbstractMetaType* copyType = cType->copy();
+            AbstractMetaType *copyType = cType->copy();
 
             if (options & Generator::ExcludeConst)
                 copyType->setConstant(false);
@@ -866,7 +866,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
 }
 
 
-QString Generator::subDirectoryForClass(const AbstractMetaClass* clazz) const
+QString Generator::subDirectoryForClass(const AbstractMetaClass *clazz) const
 {
     return subDirectoryForPackage(clazz->package());
 }
@@ -880,10 +880,10 @@ QString Generator::subDirectoryForPackage(QString packageNameIn) const
 }
 
 template<typename T>
-static QString getClassTargetFullName_(const T* t, bool includePackageName)
+static QString getClassTargetFullName_(const T *t, bool includePackageName)
 {
     QString name = t->name();
-    const AbstractMetaClass* context = t->enclosingClass();
+    const AbstractMetaClass *context = t->enclosingClass();
     while (context) {
         name.prepend(QLatin1Char('.'));
         name.prepend(context->name());
@@ -896,12 +896,12 @@ static QString getClassTargetFullName_(const T* t, bool includePackageName)
     return name;
 }
 
-QString getClassTargetFullName(const AbstractMetaClass* metaClass, bool includePackageName)
+QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName)
 {
     return getClassTargetFullName_(metaClass, includePackageName);
 }
 
-QString getClassTargetFullName(const AbstractMetaEnum* metaEnum, bool includePackageName)
+QString getClassTargetFullName(const AbstractMetaEnum *metaEnum, bool includePackageName)
 {
     return getClassTargetFullName_(metaEnum, includePackageName);
 }

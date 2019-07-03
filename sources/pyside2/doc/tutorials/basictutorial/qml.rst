@@ -3,7 +3,7 @@ Your First Application Using PySide2 and QtQuick/QML
 
 QML is a declarative language that lets you develop applications
 faster than with traditional languages. It is ideal for designing the
-UI of your applicataion because of its declarative nature. In QML, a
+UI of your application because of its declarative nature. In QML, a
 user interface is specified as a tree of objects with properties. In
 this tutorial, we will show how to make a simple "Hello World"
 application with PySide2 and QML.

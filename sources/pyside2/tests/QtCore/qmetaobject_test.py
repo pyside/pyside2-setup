@@ -60,7 +60,7 @@ class qmetaobject_test(unittest.TestCase):
         f = QFile()
         fm = f.metaObject()
         self.assertEqual(m.methodCount(), fm.methodCount())
-    """        
+    """
 
     def test_DynamicSlotSignal(self):
         o = DynObject()

@@ -118,19 +118,19 @@ overloadedFunc(double val)
 char*
 returnNullPrimitivePointer()
 {
-    return 0;
+    return nullptr;
 }
 
 ObjectType*
 returnNullObjectTypePointer()
 {
-    return 0;
+    return nullptr;
 }
 
 Event*
 returnNullValueTypePointer()
 {
-    return 0;
+    return nullptr;
 }
 
 unsigned int

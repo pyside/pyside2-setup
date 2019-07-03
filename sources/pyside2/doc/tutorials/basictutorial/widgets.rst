@@ -32,8 +32,7 @@ After the creation of the application object, we have created a
     # This HTML approach will be valid too!
     label = QLabel("<font color=red size=40>Hello World!</font>")
 
-.. note:: After the creation of the label, we are calling the
-method `show()` to show the label.
+.. note:: After creating the label, we call `show()` on it.
 
 Finally, we call `app.exec_()` to enter the Qt main loop and start
 to execute the Qt code. In reality, it is only here where the label

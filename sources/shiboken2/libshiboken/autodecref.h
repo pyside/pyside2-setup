@@ -53,21 +53,21 @@ namespace Shiboken
 struct LIBSHIBOKEN_API AutoDecRef
 {
 public:
-    AutoDecRef(const AutoDecRef&) = delete;
-    AutoDecRef(AutoDecRef&&) = delete;
-    AutoDecRef& operator=(const AutoDecRef&) = delete;
-    AutoDecRef& operator=(AutoDecRef&&) = delete;
+    AutoDecRef(const AutoDecRef &) = delete;
+    AutoDecRef(AutoDecRef &&) = delete;
+    AutoDecRef &operator=(const AutoDecRef &) = delete;
+    AutoDecRef &operator=(AutoDecRef &&) = delete;
 
     /**
      * AutoDecRef constructor.
      * \param pyobj A borrowed reference to a Python object
      */
-    explicit AutoDecRef(PyObject* pyObj) : m_pyObj(pyObj) {}
+    explicit AutoDecRef(PyObject *pyObj) : m_pyObj(pyObj) {}
     /**
      * AutoDecRef constructor.
      * \param pyobj A borrowed reference to a Python object
      */
-    explicit AutoDecRef(SbkObject* pyObj) : m_pyObj(reinterpret_cast<PyObject*>(pyObj)) {}
+    explicit AutoDecRef(SbkObject *pyObj) : m_pyObj(reinterpret_cast<PyObject *>(pyObj)) {}
 
     /// Decref the borrowed python reference
     ~AutoDecRef()
@@ -75,15 +75,15 @@ public:
         Py_XDECREF(m_pyObj);
     }
 
-    inline bool isNull() const { return m_pyObj == 0; }
+    inline bool isNull() const { return m_pyObj == nullptr; }
     /// Returns the pointer of the Python object being held.
-    inline PyObject* object() { return m_pyObj; }
-    inline operator PyObject*() { return m_pyObj; }
+    inline PyObject *object() { return m_pyObj; }
+    inline operator PyObject *() { return m_pyObj; }
 #ifndef Py_LIMITED_API
-    inline operator PyTupleObject*() { return reinterpret_cast<PyTupleObject*>(m_pyObj); }
+    inline operator PyTupleObject *() { return reinterpret_cast<PyTupleObject *>(m_pyObj); }
 #endif
-    inline operator bool() const { return m_pyObj != 0; }
-    inline PyObject* operator->() { return m_pyObj; }
+    inline operator bool() const { return m_pyObj != nullptr; }
+    inline PyObject *operator->() { return m_pyObj; }
 
     template<typename T>
     T cast()
@@ -94,13 +94,13 @@ public:
     /**
      * Decref the current borrowed python reference and borrow \p other.
      */
-    void reset(PyObject* other)
+    void reset(PyObject *other)
     {
         Py_XDECREF(m_pyObj);
         m_pyObj = other;
     }
 private:
-    PyObject* m_pyObj;
+    PyObject *m_pyObj;
 };
 
 } // namespace Shiboken

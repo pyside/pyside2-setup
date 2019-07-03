@@ -138,7 +138,7 @@ static bool isPrimitiveArray(PyObject *pyIn, int expectedNpType)
 {
     if (!PyArray_Check(pyIn))
         return false;
-    PyArrayObject *pya = reinterpret_cast<PyArrayObject *>(pyIn);
+    auto *pya = reinterpret_cast<PyArrayObject *>(pyIn);
     if (debugNumPy) {
         std::cerr << __FUNCTION__ << "(expectedNpType=" << expectedNpType;
         if (const char *name = npTypeName(expectedNpType))
@@ -176,7 +176,7 @@ static inline bool primitiveArrayCheck1(PyObject *pyIn, int expectedNpType, int 
     if (!isPrimitiveArray<1>(pyIn, expectedNpType))
         return false;
     if (expectedSize >= 0) {
-        PyArrayObject *pya = reinterpret_cast<PyArrayObject *>(pyIn);
+        auto *pya = reinterpret_cast<PyArrayObject *>(pyIn);
         const int size = int(PyArray_DIMS(pya)[0]);
         if (size < expectedSize) {
             warning(PyExc_RuntimeWarning, 0, "A numpy array of size %d was passed to a function expects %d.",
@@ -191,8 +191,8 @@ static inline bool primitiveArrayCheck1(PyObject *pyIn, int expectedNpType, int 
 template <class T>
 static void convertArray1(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<T> *handle = reinterpret_cast<ArrayHandle<T> *>(cppOut);
-    PyArrayObject *pya = reinterpret_cast<PyArrayObject *>(pyIn);
+    auto *handle = reinterpret_cast<ArrayHandle<T> *>(cppOut);
+    auto *pya = reinterpret_cast<PyArrayObject *>(pyIn);
     const npy_intp size = PyArray_DIMS(pya)[0];
     if (debugNumPy)
         std::cerr << __FUNCTION__ << ' ' << size << '\n';
@@ -204,8 +204,8 @@ template <class T>
 static void convertArray2(PyObject *pyIn, void *cppOut)
 {
     typedef typename Array2Handle<T, 1>::RowType RowType;
-    Array2Handle<T, 1> *handle = reinterpret_cast<Array2Handle<T, 1> *>(cppOut);
-    PyArrayObject *pya = reinterpret_cast<PyArrayObject *>(pyIn);
+    auto *handle = reinterpret_cast<Array2Handle<T, 1> *>(cppOut);
+    auto *pya = reinterpret_cast<PyArrayObject *>(pyIn);
     handle->setData(reinterpret_cast<RowType *>(PyArray_DATA(pya)));
 }
 
@@ -220,7 +220,7 @@ static inline bool primitiveArrayCheck2(PyObject *pyIn, int expectedNpType, int 
     if (!isPrimitiveArray<2>(pyIn, expectedNpType))
         return false;
     if (expectedDim2 >= 0) {
-        PyArrayObject *pya = reinterpret_cast<PyArrayObject *>(pyIn);
+        auto *pya = reinterpret_cast<PyArrayObject *>(pyIn);
         const int dim1 = int(PyArray_DIMS(pya)[0]);
         const int dim2 = int(PyArray_DIMS(pya)[1]);
         if (dim1 != expectedDim1 || dim2 != expectedDim2) {

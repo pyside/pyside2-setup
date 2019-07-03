@@ -510,7 +510,7 @@ Handler::~Handler() = default;
 
 static QString readerFileName(const QXmlStreamReader &reader)
 {
-    const QFile *file = qobject_cast<const QFile *>(reader.device());
+    const auto *file = qobject_cast<const QFile *>(reader.device());
     return file != nullptr ? file->fileName() : QString();
 }
 
@@ -698,7 +698,7 @@ bool Handler::endElement(const QStringRef &localName)
         if (m_currentDroppedEntryDepth == 1) {
             m_current = m_currentDroppedEntry->parent;
             delete m_currentDroppedEntry;
-            m_currentDroppedEntry = 0;
+            m_currentDroppedEntry = nullptr;
             m_currentDroppedEntryDepth = 0;
         } else {
             --m_currentDroppedEntryDepth;
@@ -728,7 +728,7 @@ bool Handler::endElement(const QStringRef &localName)
     case StackElement::ValueTypeEntry:
     case StackElement::InterfaceTypeEntry:
     case StackElement::NamespaceTypeEntry: {
-        ComplexTypeEntry *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
+        auto *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
         centry->setAddedFunctions(m_contextStack.top()->addedFunctions);
         centry->setFunctionModifications(m_contextStack.top()->functionMods);
         centry->setFieldModifications(m_contextStack.top()->fieldMods);
@@ -785,7 +785,7 @@ bool Handler::endElement(const QStringRef &localName)
     case StackElement::EnumTypeEntry:
         m_current->entry->setDocModification(m_contextStack.top()->docModifications);
         m_contextStack.top()->docModifications = DocModificationList();
-        m_currentEnum = 0;
+        m_currentEnum = nullptr;
         break;
     case StackElement::Template:
         m_database->addTemplate(m_current->value.templateEntry);
@@ -1148,8 +1148,7 @@ SmartPointerTypeEntry *
         return nullptr;
     }
 
-    SmartPointerTypeEntry *type =
-        new SmartPointerTypeEntry(name, getter, smartPointerType, refCountMethodName, since);
+    auto *type = new SmartPointerTypeEntry(name, getter, smartPointerType, refCountMethodName, since);
     applyCommonAttributes(type, attributes);
     return type;
 }
@@ -1159,7 +1158,7 @@ PrimitiveTypeEntry *
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
-    PrimitiveTypeEntry *type = new PrimitiveTypeEntry(name, since);
+    auto *type = new PrimitiveTypeEntry(name, since);
     applyCommonAttributes(type, attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
@@ -1203,7 +1202,7 @@ ContainerTypeEntry *
         m_error = QLatin1String("there is no container of type ") + typeName.toString();
         return nullptr;
     }
-    ContainerTypeEntry *type = new ContainerTypeEntry(name, containerType, since);
+    auto *type = new ContainerTypeEntry(name, containerType, since);
     applyCommonAttributes(type, attributes);
     return type;
 }
@@ -1220,7 +1219,7 @@ EnumTypeEntry *
         scope = fullName.left(sep);
         name = fullName.right(fullName.size() - sep - 2);
     }
-    EnumTypeEntry *entry = new EnumTypeEntry(scope, name, since);
+    auto *entry = new EnumTypeEntry(scope, name, since);
     applyCommonAttributes(entry, attributes);
     entry->setTargetLangPackage(m_defaultPackage);
 
@@ -1258,7 +1257,7 @@ ObjectTypeEntry *
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
-    ObjectTypeEntry *otype = new ObjectTypeEntry(name, since);
+    auto *otype = new ObjectTypeEntry(name, since);
     applyCommonAttributes(otype, attributes);
     QString targetLangName = name;
     bool generate = true;
@@ -1331,7 +1330,7 @@ ValueTypeEntry *
                                  const QString &name, const QVersionNumber &since,
                                  QXmlStreamAttributes *attributes)
 {
-    ValueTypeEntry *typeEntry = new ValueTypeEntry(name, since);
+    auto *typeEntry = new ValueTypeEntry(name, since);
     applyCommonAttributes(typeEntry, attributes);
     const int defaultCtIndex =
         indexOfAttribute(*attributes, QStringViewLiteral("default-constructor"));
@@ -1356,7 +1355,7 @@ FunctionTypeEntry *
     TypeEntry *existingType = m_database->findType(name);
 
     if (!existingType) {
-        FunctionTypeEntry *result = new FunctionTypeEntry(name, signature, since);
+        auto *result = new FunctionTypeEntry(name, signature, since);
         applyCommonAttributes(result, attributes);
         return result;
     }
@@ -1367,7 +1366,7 @@ FunctionTypeEntry *
         return nullptr;
     }
 
-    FunctionTypeEntry *result = reinterpret_cast<FunctionTypeEntry *>(existingType);
+    auto *result = reinterpret_cast<FunctionTypeEntry *>(existingType);
     result->addSignature(signature);
     return result;
 }
@@ -1626,7 +1625,7 @@ TypeSystemTypeEntry *Handler::parseRootElement(const QXmlStreamReader &,
         }
     }
 
-    TypeSystemTypeEntry *moduleEntry =
+    auto *moduleEntry =
         const_cast<TypeSystemTypeEntry *>(m_database->findTypeSystemType(m_defaultPackage));
     const bool add = moduleEntry == nullptr;
     if (add)
@@ -1651,8 +1650,8 @@ bool Handler::loadTypesystem(const QXmlStreamReader &,
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == nameAttribute())
             typeSystemName = attributes->takeAt(i).value().toString();
-         else if (name == generateAttribute())
-            generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
+        else if (name == generateAttribute())
+           generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
     }
     if (typeSystemName.isEmpty()) {
             m_error = QLatin1String("No typesystem name specified");
@@ -1768,7 +1767,7 @@ bool Handler::parseCustomConversion(const QXmlStreamReader &,
         }
     }
 
-    CustomConversion* customConversion = new CustomConversion(m_current->entry);
+    auto *customConversion = new CustomConversion(m_current->entry);
     customConversionsForReview.append(customConversion);
     return true;
 }
@@ -1805,8 +1804,8 @@ bool Handler::parseAddConversion(const QXmlStreamReader &,
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type"))
              sourceTypeName = attributes->takeAt(i).value().toString();
-         else if (name == QLatin1String("check"))
-            typeCheck = attributes->takeAt(i).value().toString();
+        else if (name == QLatin1String("check"))
+           typeCheck = attributes->takeAt(i).value().toString();
     }
     if (sourceTypeName.isEmpty()) {
         m_error = QLatin1String("Target to Native conversions must specify the input type with the 'type' attribute.");
@@ -2305,7 +2304,7 @@ CustomFunction *
         else if (name == QLatin1String("param-name"))
             paramName = attributes->takeAt(i).value().toString();
     }
-    CustomFunction *func = new CustomFunction(functionName);
+    auto *func = new CustomFunction(functionName);
     func->paramName = paramName;
     return func;
 }
@@ -2604,7 +2603,7 @@ bool Handler::startElement(const QXmlStreamReader &reader)
         return true;
     }
 
-    StackElement* element = new StackElement(m_current);
+    auto *element = new StackElement(m_current);
     element->type = elementType;
 
     if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateAll)
@@ -2807,7 +2806,7 @@ bool Handler::startElement(const QXmlStreamReader &reader)
             return false;
         }
 
-        StackElement topElement = !m_current ? StackElement(0) : *m_current;
+        StackElement topElement = !m_current ? StackElement(nullptr) : *m_current;
         element->entry = topElement.entry;
 
         switch (element->type) {
@@ -3003,7 +3002,7 @@ QString PrimitiveTypeEntry::targetLangApiName() const
 PrimitiveTypeEntry *PrimitiveTypeEntry::basicReferencedTypeEntry() const
 {
     if (!m_referencedTypeEntry)
-        return 0;
+        return nullptr;
 
     PrimitiveTypeEntry *baseReferencedTypeEntry = m_referencedTypeEntry->basicReferencedTypeEntry();
     return baseReferencedTypeEntry ? baseReferencedTypeEntry : m_referencedTypeEntry;
@@ -3043,9 +3042,10 @@ FunctionModificationList ComplexTypeEntry::functionModifications(const QString &
 
 FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
 {
-    for (int i = 0; i < m_fieldMods.size(); ++i)
-        if (m_fieldMods.at(i).name == name)
-            return m_fieldMods.at(i);
+    for (const auto &fieldMod : m_fieldMods) {
+        if (fieldMod.name == name)
+            return fieldMod;
+    }
     FieldModification mod;
     mod.name = name;
     mod.modifiers = FieldModification::Readable | FieldModification::Writable;
@@ -3384,7 +3384,7 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
             if (!arg.name.isEmpty())
                 m_arguments.append({argumentName, arg});
             // end of parameters...
-            if (signature[endPos] == QLatin1Char(')'))
+            if (endPos >= signatureLength || signature[endPos] == QLatin1Char(')'))
                 break;
         }
         // is const?
@@ -3926,7 +3926,7 @@ struct CustomConversion::CustomConversionPrivate
 struct CustomConversion::TargetToNativeConversion::TargetToNativeConversionPrivate
 {
     TargetToNativeConversionPrivate()
-        : sourceType(0)
+        : sourceType(nullptr)
     {
     }
     const TypeEntry* sourceType;
