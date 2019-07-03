@@ -119,7 +119,7 @@ QString BaseVisitor::getCodeSnippetString(const CXCursor &cursor)
 static CXChildVisitResult
     visitorCallback(CXCursor cursor, CXCursor /* parent */, CXClientData clientData)
 {
-    BaseVisitor *bv = reinterpret_cast<BaseVisitor *>(clientData);
+    auto *bv = reinterpret_cast<BaseVisitor *>(clientData);
 
     const CXSourceLocation location = clang_getCursorLocation(cursor);
     if (!bv->visitLocation(location))

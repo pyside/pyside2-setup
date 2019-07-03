@@ -72,7 +72,7 @@ if (QTransform::squareToQuad(%1, _result)) {
 // @snippet qtransform-squaretoquad
 
 // @snippet qbitmap-fromdata
-uchar *buffer = reinterpret_cast<uchar*>(Shiboken::Buffer::getPointer(%PYARG_2));
+uchar *buffer = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_2));
 QBitmap %0 = QBitmap::fromData(%1, buffer, %3);
 %PYARG_0 = %CONVERTTOPYTHON[QBitmap](%0);
 // @snippet qbitmap-fromdata
@@ -102,7 +102,7 @@ return %CONVERTTOPYTHON[int](item);
 // @snippet qtextblock-setuserdata
 const QTextDocument *doc = %CPPSELF.document();
 if (doc) {
-    Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument*](doc));
+    Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument *](doc));
     Shiboken::Object::setParent(pyDocument, %PYARG_1);
 }
 // @snippet qtextblock-setuserdata
@@ -110,7 +110,7 @@ if (doc) {
 // @snippet qtextblock-userdata
 const QTextDocument *doc = %CPPSELF.document();
 if (doc) {
-    Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument*](doc));
+    Shiboken::AutoDecRef pyDocument(%CONVERTTOPYTHON[QTextDocument *](doc));
     Shiboken::Object::setParent(pyDocument, %PYARG_0);
 }
 // @snippet qtextblock-userdata
@@ -138,7 +138,7 @@ for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
 // @snippet qpolygon-operatorlowerlower
 // %FUNCTION_NAME()
 *%CPPSELF << %1;
-%PYARG_0 = %CONVERTTOPYTHON[QPolygon*](%CPPSELF);
+%PYARG_0 = %CONVERTTOPYTHON[QPolygon *](%CPPSELF);
 // @snippet qpolygon-operatorlowerlower
 
 // @snippet qpixmap
@@ -372,7 +372,7 @@ if (%CPPSELF.%FUNCTION_NAME(%1, &p)) {
 // Clear parent from the old child
 QStandardItem *_i = %CPPSELF->child(%1, %2);
 if (_i) {
-    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem *](_i);
     Shiboken::Object::setParent(nullptr, _pyI);
 }
 // @snippet qstandarditem-setchild-1
@@ -381,7 +381,7 @@ if (_i) {
 // Clear parent from the old child
 QStandardItem *_i = %CPPSELF->child(%1);
 if (_i) {
-    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem *](_i);
     Shiboken::Object::setParent(nullptr, _pyI);
 }
 // @snippet qstandarditem-setchild-2
@@ -395,7 +395,7 @@ bool ret = !(&%CPPSELF == %1);
 // Clear parent from the old child
 QStandardItem *_i = %CPPSELF->item(%1, %2);
 if (_i) {
-    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem *](_i);
     Shiboken::Object::setParent(nullptr, _pyI);
 }
 // @snippet qstandarditemmodel-setitem-1
@@ -404,7 +404,7 @@ if (_i) {
 // Clear parent from the old child
 QStandardItem *_i = %CPPSELF->item(%1);
 if (_i) {
-    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem *](_i);
     Shiboken::Object::setParent(nullptr, _pyI);
 }
 // @snippet qstandarditemmodel-setitem-2
@@ -413,7 +413,7 @@ if (_i) {
 // Clear parent from the old child
 QStandardItem *_i = %CPPSELF->verticalHeaderItem(%1);
 if (_i) {
-    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem*](_i);
+    PyObject *_pyI = %CONVERTTOPYTHON[QStandardItem *](_i);
     Shiboken::Object::setParent(nullptr, _pyI);
 }
 // @snippet qstandarditemmodel-setverticalheaderitem
@@ -503,7 +503,7 @@ static void QGuiApplicationConstructor(PyObject *self, PyObject *pyargv, QGuiApp
     PyObject *stringlist = PyTuple_GET_ITEM(pyargv, 0);
     if (Shiboken::listToArgcArgv(stringlist, &argc, &argv, "PySideApp")) {
         *cptr = new QGuiApplicationWrapper(argc, argv, 0);
-        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject*>(self));
+        Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(self));
         PySide::registerCleanupFunction(&PySide::destroyQCoreApplication);
     }
 }

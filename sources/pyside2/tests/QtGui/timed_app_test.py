@@ -28,7 +28,7 @@
 
 import unittest
 
-from helper import TimedQApplication 
+from helper import TimedQApplication
 
 class TestTimedApp(TimedQApplication):
     '''Simple test case for TimedQApplication'''

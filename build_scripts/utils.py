@@ -1089,13 +1089,6 @@ def get_python_dict(python_script_path):
             "file: {}.".format(python_script_path))
         raise
 
-def install_pip_wheel_package(env_pip):
-    # Need to install an unreleased wheel version, due to a bug that
-    # will generate a wheel which will not be installable.
-    # See https://github.com/pypa/wheel/issues/263
-    wheel_url = "git+https://github.com/pypa/wheel.git@fbf3e3ada64d36ca7bb9c1422f5a1ccdba7e4dcf"
-    install_pip_package_from_url_specifier(env_pip, wheel_url)
-
 def install_pip_package_from_url_specifier(env_pip, url, upgrade=True):
     args = [env_pip, "install", url]
     if upgrade:

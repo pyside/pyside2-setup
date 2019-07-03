@@ -38,7 +38,7 @@ class ObjectModel;
 class LIBSAMPLE_API ObjectView : public ObjectType
 {
 public:
-    ObjectView(ObjectModel* model = 0, ObjectType* parent = 0)
+    ObjectView(ObjectModel *model = nullptr, ObjectType *parent = nullptr)
         : ObjectType(parent), m_model(model)
     {}
 

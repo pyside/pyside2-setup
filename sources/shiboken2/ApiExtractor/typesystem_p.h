@@ -114,7 +114,7 @@ class StackElement
             ArgumentModifiers           = 0xff000000
         };
 
-        StackElement(StackElement *p) : entry(0), type(None), parent(p) { }
+        StackElement(StackElement *p) : entry(nullptr), type(None), parent(p) { }
 
         TypeEntry* entry;
         ElementType type;

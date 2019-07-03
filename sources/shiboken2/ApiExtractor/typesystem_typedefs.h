@@ -43,9 +43,9 @@ struct FunctionModification;
 
 using AddedFunctionPtr = QSharedPointer<AddedFunction>;
 using AddedFunctionList = QVector<AddedFunctionPtr>;
-typedef QVector<CodeSnip> CodeSnipList;
-typedef QVector<DocModification> DocModificationList;
-typedef QVector<FieldModification> FieldModificationList;
-typedef QVector<FunctionModification> FunctionModificationList;
+using CodeSnipList = QVector<CodeSnip>;
+using DocModificationList = QVector<DocModification>;
+using FieldModificationList = QVector<FieldModification>;
+using FunctionModificationList = QVector<FunctionModification>;
 
 #endif // TYPESYSTEM_TYPEDEFS_H

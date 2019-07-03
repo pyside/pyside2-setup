@@ -6,7 +6,7 @@ Fixing class inheritance...                  [OK]
 Detecting inconsistencies in class model...  [OK]
 [OK]
     type 'QPyTextObject' is specified in typesystem, but not defined. This could potentially lead to compilation errors.
-    
+
 
 
 Done, 1 warnings (1051 known issues)

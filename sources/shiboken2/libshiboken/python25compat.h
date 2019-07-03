@@ -48,9 +48,9 @@
  */
 
 #if PY_VERSION_HEX < 0x02060000
-#define Py_REFCNT(ob) (((PyObject*)(ob))->ob_refcnt)
-#define Py_TYPE(ob)   (((PyObject*)(ob))->ob_type)
-#define Py_SIZE(ob)   (((PyVarObject*)(ob))->ob_size)
+#define Py_REFCNT(ob) (((PyObject *)(ob))->ob_refcnt)
+#define Py_TYPE(ob)   (((PyObject *)(ob))->ob_type)
+#define Py_SIZE(ob)   (((PyVarObject *)(ob))->ob_size)
 #define PyVarObject_HEAD_INIT(type, size) \
         PyObject_HEAD_INIT(type) size,
 #define PyType_Modified(t)
@@ -90,7 +90,7 @@ typedef struct {
 #define PyBytes_Concat PyString_Concat
 #define PyBytes_Size PyString_Size
 
-inline PyObject* PyUnicode_FromString(const char* s)
+inline PyObject *PyUnicode_FromString(const char *s)
 {
     std::size_t len = std::strlen(s);
     return PyUnicode_DecodeUTF8(s, len, 0);

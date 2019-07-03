@@ -42,7 +42,7 @@ class TestFontDialog(TimedQApplication):
 
     def testGetFontQDialog(self):
         QtWidgets.QFontDialog.getFont(QtGui.QFont("FreeSans",10))
-    
+
     def testGetFontQDialogQString(self):
         QtWidgets.QFontDialog.getFont(QtGui.QFont("FreeSans",10), None, "Select font")
 

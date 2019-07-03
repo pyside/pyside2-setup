@@ -64,7 +64,7 @@ struct SbkConverter;
  *
  *  C++ -> Python
  */
-typedef PyObject* (*CppToPythonFunc)(const void*);
+typedef PyObject *(*CppToPythonFunc)(const void *);
 
 /**
  *  This function converts a Python object to a C++ value, it may be
@@ -77,7 +77,7 @@ typedef PyObject* (*CppToPythonFunc)(const void*);
  *
  *  Python -> C++
  */
-typedef void (*PythonToCppFunc)(PyObject*,void*);
+typedef void (*PythonToCppFunc)(PyObject *,void *);
 
 /**
  *  Checks if the Python object passed in the argument is convertible to a
@@ -88,7 +88,7 @@ typedef void (*PythonToCppFunc)(PyObject*,void*);
  *
  *  Python -> C++ ?
  */
-typedef PythonToCppFunc (*IsConvertibleToCppFunc)(PyObject*);
+typedef PythonToCppFunc (*IsConvertibleToCppFunc)(PyObject *);
 
 } // extern "C"
 
@@ -105,22 +105,22 @@ namespace Conversions {
  *  \param copyToPythonFunc      Function to convert a C++ object to a Python \p type, copying the object.
  *  \returns                     The new converter referred by the wrapper \p type.
  */
-LIBSHIBOKEN_API SbkConverter* createConverter(SbkObjectType* type,
+LIBSHIBOKEN_API SbkConverter *createConverter(SbkObjectType *type,
                                               PythonToCppFunc toCppPointerConvFunc,
                                               IsConvertibleToCppFunc toCppPointerCheckFunc,
                                               CppToPythonFunc pointerToPythonFunc,
                                               CppToPythonFunc copyToPythonFunc = 0);
 
-LIBSHIBOKEN_API void deleteConverter(SbkConverter* converter);
+LIBSHIBOKEN_API void deleteConverter(SbkConverter *converter);
 
 /**
  *  Adds a new conversion of a Python object to a C++ value.
  *  This is used in copy and implicit conversions.
  */
-LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkConverter* converter,
+LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkConverter *converter,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
-LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkObjectType* type,
+LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkObjectType *type,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
 
@@ -130,19 +130,19 @@ LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkObjectType* type,
  *  Retrieves the Python wrapper object for the given \p cppIn C++ pointer object.
  *  This function is used only for Value and Object Types.
  *  Example usage:
- *      TYPE* var;
- *      PyObject* pyVar = pointerToPython(SBKTYPE, &var);
+ *      TYPE *var;
+ *      PyObject *pyVar = pointerToPython(SBKTYPE, &var);
  */
-LIBSHIBOKEN_API PyObject* pointerToPython(SbkObjectType* type, const void* cppIn);
+LIBSHIBOKEN_API PyObject *pointerToPython(SbkObjectType *type, const void *cppIn);
 
 /**
  *  Retrieves the Python wrapper object for the given C++ value pointed by \p cppIn.
  *  This function is used only for Value Types.
  *  Example usage:
  *      TYPE var;
- *      PyObject* pyVar = copyToPython(SBKTYPE, &var);
+ *      PyObject *pyVar = copyToPython(SBKTYPE, &var);
  */
-LIBSHIBOKEN_API PyObject* copyToPython(SbkObjectType* type, const void* cppIn);
+LIBSHIBOKEN_API PyObject *copyToPython(SbkObjectType *type, const void *cppIn);
 
 // TODO:WRITEDOCSTRING - used only for Value Types - cppIn must point to a value
 /**
@@ -150,41 +150,41 @@ LIBSHIBOKEN_API PyObject* copyToPython(SbkObjectType* type, const void* cppIn);
  *  This function is used only for Value and Object Types.
  *  It differs from pointerToPython() for not checking for a NULL pointer.
  *  Example usage:
- *      TYPE& var = SOMETHING;
- *      PyObject* pyVar = copyToPython(SBKTYPE, &var);
+ *      TYPE &var = SOMETHING;
+ *      PyObject *pyVar = copyToPython(SBKTYPE, &var);
  */
-LIBSHIBOKEN_API PyObject* referenceToPython(SbkObjectType* type, const void* cppIn);
+LIBSHIBOKEN_API PyObject *referenceToPython(SbkObjectType *type, const void *cppIn);
 
 // TODO:WRITEDOCSTRING - used only for Primitives and Containers (and Value Types) - cppIn must point to a primitive, container or value type
 /// This is the same as copyToPython function.
-LIBSHIBOKEN_API PyObject* toPython(SbkConverter* converter, const void* cppIn);
+LIBSHIBOKEN_API PyObject *toPython(SbkConverter *converter, const void *cppIn);
 
 // Python -> C++ convertibility checks -----------------------------------------------------
 
 // TODO:WRITEDOCSTRING
-LIBSHIBOKEN_API PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType* type, PyObject* pyIn);
+LIBSHIBOKEN_API PythonToCppFunc isPythonToCppPointerConvertible(SbkObjectType *type, PyObject *pyIn);
 
 // TODO:WRITEDOCSTRING- Returns a Python to C++ conversion function if true, or NULL if false.
-LIBSHIBOKEN_API PythonToCppFunc isPythonToCppValueConvertible(SbkObjectType* type, PyObject* pyIn);
+LIBSHIBOKEN_API PythonToCppFunc isPythonToCppValueConvertible(SbkObjectType *type, PyObject *pyIn);
 
 // TODO:WRITEDOCSTRING- Returns a Python to C++ conversion function if true, or NULL if false.
-LIBSHIBOKEN_API PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType* type, PyObject* pyIn);
+LIBSHIBOKEN_API PythonToCppFunc isPythonToCppReferenceConvertible(SbkObjectType *type, PyObject *pyIn);
 
 /// This is the same as isPythonToCppValueConvertible function.
-LIBSHIBOKEN_API PythonToCppFunc isPythonToCppConvertible(SbkConverter* converter, PyObject* pyIn);
+LIBSHIBOKEN_API PythonToCppFunc isPythonToCppConvertible(SbkConverter *converter, PyObject *pyIn);
 
 // Python -> C++ ---------------------------------------------------------------------------
 
 // TODO:WRITEDOCSTRING - function used by the generated [TYPE]_PythonToCpp_[TYPE]_PTR
-LIBSHIBOKEN_API void pythonToCppPointer(SbkObjectType* type, PyObject* pyIn, void* cppOut);
+LIBSHIBOKEN_API void pythonToCppPointer(SbkObjectType *type, PyObject *pyIn, void *cppOut);
 
 // TODO:WRITEDOCSTRING - function used by the generated isConvertible when the PyObject is None,
 // making a C++ NULL pointer the result of the toCpp function call.
 // DRAFT: When the Python object is a Py_None, it's C++ conversion is always a NULL pointer.
-LIBSHIBOKEN_API void nonePythonToCppNullPtr(PyObject*, void* cppOut);
+LIBSHIBOKEN_API void nonePythonToCppNullPtr(PyObject *, void *cppOut);
 
 // TODO:WRITEDOCSTRING - tells if \p toCpp is an implicit conversion.
-LIBSHIBOKEN_API bool isImplicitConversion(SbkObjectType* type, PythonToCppFunc toCpp);
+LIBSHIBOKEN_API bool isImplicitConversion(SbkObjectType *type, PythonToCppFunc toCpp);
 
 } } // namespace Shiboken::Conversions
 

@@ -39,7 +39,7 @@
 class LIBSAMPLE_API ListUser
 {
 public:
-    typedef std::list<Point*> PointList;
+    using PointList = std::list<Point *>;
 
     enum ListOfSomething {
         ListOfPoint,

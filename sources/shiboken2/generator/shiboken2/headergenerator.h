@@ -48,22 +48,22 @@ public:
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(GeneratorContext &context) const override;
-    void generateClass(QTextStream& s, GeneratorContext &classContext) override;
+    void generateClass(QTextStream &s, GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:
-    void writeCopyCtor(QTextStream &s, const AbstractMetaClass* metaClass) const;
-    void writeProtectedFieldAccessors(QTextStream& s, const AbstractMetaField* field) const;
-    void writeFunction(QTextStream& s, const AbstractMetaFunction* func);
-    void writeSbkTypeFunction(QTextStream& s, const AbstractMetaEnum* cppEnum);
-    void writeSbkTypeFunction(QTextStream& s, const AbstractMetaClass* cppClass);
+    void writeCopyCtor(QTextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField *field) const;
+    void writeFunction(QTextStream &s, const AbstractMetaFunction *func);
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum *cppEnum);
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass);
     void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType *metaType);
-    void writeTypeIndexValueLine(QTextStream& s, const TypeEntry* typeEntry);
-    void writeTypeIndexValueLines(QTextStream& s, const AbstractMetaClass* metaClass);
-    void writeProtectedEnumSurrogate(QTextStream& s, const AbstractMetaEnum* cppEnum);
-    void writeInheritedOverloads(QTextStream& s);
+    void writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry);
+    void writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass);
+    void writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum *cppEnum);
+    void writeInheritedOverloads(QTextStream &s);
 
-    QSet<const AbstractMetaFunction*> m_inheritedOverloads;
+    QSet<const AbstractMetaFunction *> m_inheritedOverloads;
 };
 
 #endif // HEADERGENERATOR_H

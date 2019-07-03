@@ -49,17 +49,17 @@ namespace Shiboken
 class LIBSHIBOKEN_API GilState
 {
 public:
-    GilState(const GilState&) = delete;
-    GilState(GilState&&) = delete;
-    GilState& operator=(const GilState&) = delete;
-    GilState& operator=(GilState&&) = delete;
+    GilState(const GilState &) = delete;
+    GilState(GilState &&) = delete;
+    GilState &operator=(const GilState &) = delete;
+    GilState &operator=(GilState &&) = delete;
 
     GilState();
     ~GilState();
     void release();
 private:
     PyGILState_STATE m_gstate;
-    bool m_locked;
+    bool m_locked = false;
 };
 
 } // namespace Shiboken

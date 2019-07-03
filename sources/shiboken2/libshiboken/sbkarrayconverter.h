@@ -73,10 +73,13 @@ enum : int {
 template <class T>
 class ArrayHandle
 {
+public:
     ArrayHandle(const ArrayHandle &) = delete;
     ArrayHandle& operator=(const ArrayHandle &) = delete;
-public:
-    ArrayHandle() {}
+    ArrayHandle(ArrayHandle &&) = delete;
+    ArrayHandle& operator=(ArrayHandle &&) = delete;
+
+    ArrayHandle() = default;
     ~ArrayHandle() { destroy(); }
 
     void allocate(Py_ssize_t size);
@@ -84,7 +87,7 @@ public:
 
     size_t size() const { return m_size; }
     T *data() const { return m_data; }
-    operator T*() const { return m_data; }
+    operator T *() const { return m_data; }
 
 private:
     void destroy();
@@ -106,9 +109,9 @@ class Array2Handle
 public:
     typedef T RowType[columns];
 
-    Array2Handle() {}
+    Array2Handle() = default;
 
-    operator RowType*() const { return m_rows; }
+    operator RowType *() const { return m_rows; }
 
     void setData(RowType *d) { m_rows = d; }
 

@@ -39,13 +39,13 @@ class AbstractMetaEnumValue;
 class AbstractMetaFunction;
 class AbstractMetaType;
 
-typedef QVector<AbstractMetaArgument *> AbstractMetaArgumentList;
-typedef QVector<AbstractMetaClass *> AbstractMetaClassList;
-typedef QVector<AbstractMetaEnum *> AbstractMetaEnumList;
-typedef QVector<AbstractMetaEnumValue *> AbstractMetaEnumValueList;
-typedef QVector<AbstractMetaField *> AbstractMetaFieldList;
-typedef QVector<AbstractMetaFunction *> AbstractMetaFunctionList;
-typedef QVector<AbstractMetaType *> AbstractMetaTypeList;
-typedef QVector<const AbstractMetaType *> AbstractMetaTypeCList;
+using AbstractMetaArgumentList = QVector<AbstractMetaArgument *>;
+using AbstractMetaClassList = QVector<AbstractMetaClass *>;
+using AbstractMetaEnumList = QVector<AbstractMetaEnum *>;
+using AbstractMetaEnumValueList = QVector<AbstractMetaEnumValue *>;
+using AbstractMetaFieldList = QVector<AbstractMetaField *>;
+using AbstractMetaFunctionList = QVector<AbstractMetaFunction *>;
+using AbstractMetaTypeList = QVector<AbstractMetaType *>;
+using AbstractMetaTypeCList = QVector<const AbstractMetaType *>;
 
 #endif // ABSTRACTMETALANG_TYPEDEFS_H

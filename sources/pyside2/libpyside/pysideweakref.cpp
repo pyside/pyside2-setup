@@ -46,10 +46,10 @@ typedef struct {
     PyObject_HEAD
     /* Type-specific fields go here. */
     PySideWeakRefFunction weakref_func;
-    void*  user_data;
+    void *user_data;
 } PySideCallableObject;
 
-static PyObject* CallableObject_call(PyObject* callable_object, PyObject* args, PyObject* kw);
+static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject *kw);
 
 static PyType_Slot PySideCallableObjectType_slots[] = {
     {Py_tp_call, (void *)CallableObject_call},
@@ -57,7 +57,7 @@ static PyType_Slot PySideCallableObjectType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideCallableObjectType_spec = {
-    const_cast<char*>("PySide.Callable"),
+    const_cast<char *>("PySide.Callable"),
     sizeof(PySideCallableObject),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -74,7 +74,7 @@ static PyTypeObject *PySideCallableObjectTypeF()
 
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject * /* kw */)
 {
-    PySideCallableObject* obj = reinterpret_cast<PySideCallableObject *>(callable_object);
+    PySideCallableObject *obj = reinterpret_cast<PySideCallableObject *>(callable_object);
     obj->weakref_func(obj->user_data);
 
     Py_XDECREF(PyTuple_GET_ITEM(args, 0)); //kill weak ref object
@@ -83,7 +83,7 @@ static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, 
 
 namespace PySide { namespace WeakRef {
 
-PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
+PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
 {
     if (obj == Py_None)
         return 0;
@@ -94,11 +94,11 @@ PyObject* create(PyObject* obj, PySideWeakRefFunction func, void* userData)
         PyType_Ready(PySideCallableObjectTypeF());
     }
 
-    PySideCallableObject* callable = PyObject_New(PySideCallableObject, PySideCallableObjectTypeF());
+    PySideCallableObject *callable = PyObject_New(PySideCallableObject, PySideCallableObjectTypeF());
     if (!callable || PyErr_Occurred())
         return 0;
 
-    PyObject* weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
+    PyObject *weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
     if (!weak || PyErr_Occurred())
         return 0;
 

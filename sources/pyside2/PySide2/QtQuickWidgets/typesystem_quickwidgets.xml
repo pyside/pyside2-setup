@@ -46,7 +46,7 @@
     <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
-    
+
     <object-type name="QQuickWidget">
         <enum-type name="ResizeMode"/>
         <enum-type name="Status"/>

@@ -39,7 +39,6 @@
 from build_scripts.options import has_option
 from build_scripts.options import option_value
 from build_scripts.utils import install_pip_dependencies
-from build_scripts.utils import install_pip_wheel_package
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
@@ -101,8 +100,7 @@ def call_setup(python_ver):
     rmtree(_env, True)
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
 
-    install_pip_dependencies(env_pip, ["pip", "numpy", "setuptools", "sphinx", "six"])
-    install_pip_wheel_package(env_pip)
+    install_pip_dependencies(env_pip, ["pip", "numpy", "setuptools", "sphinx", "six", "wheel"])
 
     cmd = [env_python, "-u", "setup.py"]
     if CI_RELEASE_CONF:

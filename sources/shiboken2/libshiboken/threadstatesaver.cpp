@@ -42,9 +42,7 @@
 namespace Shiboken
 {
 
-ThreadStateSaver::ThreadStateSaver()
-        : m_threadState(0)
-    {}
+ThreadStateSaver::ThreadStateSaver() = default;
 
 ThreadStateSaver::~ThreadStateSaver()
 {
@@ -61,7 +59,7 @@ void ThreadStateSaver::restore()
 {
     if (m_threadState) {
         PyEval_RestoreThread(m_threadState);
-        m_threadState = 0;
+        m_threadState = nullptr;
     }
 }
 

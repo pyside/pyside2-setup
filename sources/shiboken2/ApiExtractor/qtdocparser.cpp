@@ -54,7 +54,7 @@ static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgum
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
         // to "Qt::Alignment" as seen by qdoc.
-        const FlagsTypeEntry *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType->typeEntry());
+        const auto *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType->typeEntry());
         QString name = flagsEntry->qualifiedCppName();
         if (name.endsWith(QLatin1Char('>')) && name.startsWith(QLatin1String("QFlags<"))) {
             const int lastColon = name.lastIndexOf(QLatin1Char(':'));
@@ -212,7 +212,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     const AbstractMetaClass* context = metaClass->enclosingClass();
     while(context) {
-        if (context->enclosingClass() == 0)
+        if (context->enclosingClass() == nullptr)
             break;
         context = context->enclosingClass();
     }

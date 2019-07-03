@@ -58,18 +58,18 @@ namespace Buffer
      * Creates a new Python buffer pointing to a contiguous memory block at
      * \p memory of size \p size.
      */
-    LIBSHIBOKEN_API PyObject* newObject(void* memory, Py_ssize_t size, Type type);
+    LIBSHIBOKEN_API PyObject *newObject(void *memory, Py_ssize_t size, Type type);
 
     /**
      * Creates a new <b>read only</b> Python buffer pointing to a contiguous memory block at
      * \p memory of size \p size.
      */
-    LIBSHIBOKEN_API PyObject* newObject(const void* memory, Py_ssize_t size);
+    LIBSHIBOKEN_API PyObject *newObject(const void *memory, Py_ssize_t size);
 
     /**
      * Check if is ok to use \p pyObj as argument in all function under Shiboken::Buffer namespace.
      */
-    LIBSHIBOKEN_API bool checkType(PyObject* pyObj);
+    LIBSHIBOKEN_API bool checkType(PyObject *pyObj);
 
     /**
      * Returns a pointer to the memory pointed by the buffer \p pyObj, \p size is filled with the buffer
@@ -77,7 +77,7 @@ namespace Buffer
      *
      * If the \p pyObj is a non-contiguous buffer a Python error is set.
      */
-    LIBSHIBOKEN_API void* getPointer(PyObject* pyObj, Py_ssize_t* size = 0);
+    LIBSHIBOKEN_API void *getPointer(PyObject *pyObj, Py_ssize_t *size = nullptr);
 
 } // namespace Buffer
 } // namespace Shiboken

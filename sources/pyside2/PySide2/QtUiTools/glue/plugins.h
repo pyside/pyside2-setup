@@ -43,13 +43,14 @@
 #include <QPluginLoader>
 #include "customwidgets.h"
 
-inline void registerCustomWidget(PyObject* obj)
+inline void registerCustomWidget(PyObject *obj)
 {
-    static PyCustomWidgets* plugin = 0;
+    static PyCustomWidgets *plugin = nullptr;
 
     if (plugin == 0) {
-        foreach(QObject* o, QPluginLoader::staticInstances()) {
-            plugin = qobject_cast<PyCustomWidgets*>(o);
+        const auto &instances = QPluginLoader::staticInstances();
+        for (QObject *o : instances) {
+            plugin = qobject_cast<PyCustomWidgets *>(o);
             if (plugin)
                 break;
         }

@@ -50,7 +50,7 @@ class ProxyObject(QtCore.QObject):
     @QtCore.Slot(str)
     def receivedObject(self, name):
         self._receivedName = name
- 
+
 
 class TestConnectionWithInvalidSignature(TimedQApplication):
 

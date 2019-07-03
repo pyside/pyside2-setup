@@ -47,7 +47,7 @@ namespace TestUtil
         TypeDatabase* td = TypeDatabase::instance(true);
         if (apiVersion.isEmpty())
             TypeDatabase::clearApiVersions();
-        else if (!td->setApiVersion(QLatin1String("*"), apiVersion))
+        else if (!TypeDatabase::setApiVersion(QLatin1String("*"), apiVersion))
             return nullptr;
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
@@ -69,7 +69,7 @@ namespace TestUtil
         arguments.append(QFile::encodeName(tempSource.fileName()));
         tempSource.write(cppCode, qint64(strlen(cppCode)));
         tempSource.close();
-        AbstractMetaBuilder *builder = new AbstractMetaBuilder;
+        auto *builder = new AbstractMetaBuilder;
         if (!builder->build(arguments)) {
             delete builder;
             return Q_NULLPTR;

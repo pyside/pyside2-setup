@@ -83,7 +83,7 @@ inline void convertPySequence(PyObject *pyIn, Converter c, T *out)
 // Internal, for usage by numpy
 SbkArrayConverter *createArrayConverter(IsArrayConvertibleToCppFunc toCppCheckFunc)
 {
-    SbkArrayConverter *result = new SbkArrayConverter;
+    auto *result = new SbkArrayConverter;
     result->toCppConversions.push_back(toCppCheckFunc);
     return result;
 }
@@ -115,7 +115,7 @@ static short toShort(PyObject *pyIn) { return short(PyLong_AsLong(pyIn)); }
 
 static void sequenceToCppShortArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<short> *handle = reinterpret_cast<ArrayHandle<short> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<short> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, toShort, handle->data());
 }
@@ -148,7 +148,7 @@ static short toUnsignedShort(PyObject *pyIn) { return static_cast<unsigned short
 
 static void sequenceToCppUnsignedShortArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<unsigned short> *handle = reinterpret_cast<ArrayHandle<unsigned short> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<unsigned short> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, toUnsignedShort, handle->data());
 }
@@ -160,7 +160,7 @@ static PythonToCppFunc sequenceToCppUnsignedShortArrayCheck(PyObject *pyIn, int 
 
 static void sequenceToCppIntArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<int> *handle = reinterpret_cast<ArrayHandle<int> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<int> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, _PepLong_AsInt, handle->data());
 }
@@ -172,7 +172,7 @@ static PythonToCppFunc sequenceToCppIntArrayCheck(PyObject *pyIn, int dim1, int 
 
 static void sequenceToCppUnsignedArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<unsigned> *handle = reinterpret_cast<ArrayHandle<unsigned> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<unsigned> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, PyLong_AsUnsignedLong, handle->data());
 }
@@ -184,7 +184,7 @@ static PythonToCppFunc sequenceToCppUnsignedArrayCheck(PyObject *pyIn, int dim1,
 
 static void sequenceToCppLongLongArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<long long> *handle = reinterpret_cast<ArrayHandle<long long> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<long long> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, PyLong_AsLongLong, handle->data());
 }
@@ -196,7 +196,7 @@ static PythonToCppFunc sequenceToCppLongLongArrayCheck(PyObject *pyIn, int dim1,
 
 static void sequenceToCppUnsignedLongLongArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<unsigned long long> *handle = reinterpret_cast<ArrayHandle<unsigned long long> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<unsigned long long> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, PyLong_AsUnsignedLongLong, handle->data());
 }
@@ -218,7 +218,7 @@ static inline bool floatArrayCheck(PyObject *pyIn, int expectedSize = -1)
 
 static void sequenceToCppDoubleArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<double> *handle = reinterpret_cast<ArrayHandle<double> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<double> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, PyFloat_AsDouble, handle->data());
 }
@@ -227,7 +227,7 @@ static inline float pyToFloat(PyObject *pyIn) { return float(PyFloat_AsDouble(py
 
 static void sequenceToCppFloatArray(PyObject *pyIn, void *cppOut)
 {
-    ArrayHandle<float> *handle = reinterpret_cast<ArrayHandle<float> *>(cppOut);
+    auto *handle = reinterpret_cast<ArrayHandle<float> *>(cppOut);
     handle->allocate(PySequence_Size(pyIn));
     convertPySequence(pyIn, pyToFloat, handle->data());
 }

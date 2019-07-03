@@ -51,7 +51,7 @@ namespace Shiboken
 {
 
 // PySide-510: Changed from PySequence to PyList, which is correct.
-bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defaultAppName)
+bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defaultAppName)
 {
     if (!PyList_Check(argList))
         return false;
@@ -60,10 +60,10 @@ bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defa
         defaultAppName = "PySideApplication";
 
     // Check all items
-    Shiboken::AutoDecRef args(PySequence_Fast(argList, 0));
+    Shiboken::AutoDecRef args(PySequence_Fast(argList, nullptr));
     int numArgs = int(PySequence_Fast_GET_SIZE(argList));
     for (int i = 0; i < numArgs; ++i) {
-        PyObject* item = PyList_GET_ITEM(args.object(), i);
+        PyObject *item = PyList_GET_ITEM(args.object(), i);
         if (!PyBytes_Check(item) && !PyUnicode_Check(item))
             return false;
     }
@@ -73,17 +73,17 @@ bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defa
         numArgs = 1;
 
     *argc = numArgs;
-    *argv = new char*[*argc];
+    *argv = new char *[*argc];
 
     if (hasEmptyArgList) {
         // Try to get the script name
-        PyObject* globals = PyEval_GetGlobals();
-        PyObject* appName = PyDict_GetItemString(globals, "__file__");
+        PyObject *globals = PyEval_GetGlobals();
+        PyObject *appName = PyDict_GetItemString(globals, "__file__");
         (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
     } else {
         for (int i = 0; i < numArgs; ++i) {
-            PyObject* item = PyList_GET_ITEM(args.object(), i);
-            char* string = 0;
+            PyObject *item = PyList_GET_ITEM(args.object(), i);
+            char *string = nullptr;
             if (Shiboken::String::check(item)) {
                 string = strdup(Shiboken::String::toCString(item));
             }
@@ -94,24 +94,23 @@ bool listToArgcArgv(PyObject* argList, int* argc, char*** argv, const char* defa
     return true;
 }
 
-int* sequenceToIntArray(PyObject* obj, bool zeroTerminated)
+int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
 {
     AutoDecRef seq(PySequence_Fast(obj, "Sequence of ints expected"));
     if (seq.isNull())
-        return 0;
+        return nullptr;
 
     Py_ssize_t size = PySequence_Fast_GET_SIZE(seq.object());
-    int* array = new int[size + (zeroTerminated ? 1 : 0)];
+    int *array = new int[size + (zeroTerminated ? 1 : 0)];
 
     for (int i = 0; i < size; i++) {
-        PyObject* item = PySequence_Fast_GET_ITEM(seq.object(), i);
+        PyObject *item = PySequence_Fast_GET_ITEM(seq.object(), i);
         if (!PyInt_Check(item)) {
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
             delete[] array;
-            return 0;
-        } else {
-            array[i] = PyInt_AsLong(item);
+            return nullptr;
         }
+        array[i] = PyInt_AsLong(item);
     }
 
     if (zeroTerminated)
@@ -121,7 +120,7 @@ int* sequenceToIntArray(PyObject* obj, bool zeroTerminated)
 }
 
 
-int warning(PyObject* category, int stacklevel, const char* format, ...)
+int warning(PyObject *category, int stacklevel, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -133,8 +132,8 @@ int warning(PyObject* category, int stacklevel, const char* format, ...)
 #endif
 
     // check the necessary memory
-    int size = vsnprintf(NULL, 0, format, args) + 1;
-    char* message = new char[size];
+    int size = vsnprintf(nullptr, 0, format, args) + 1;
+    auto message = new char[size];
     int result = 0;
     if (message) {
         // format the message

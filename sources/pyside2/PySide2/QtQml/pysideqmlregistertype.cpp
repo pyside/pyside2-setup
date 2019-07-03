@@ -54,19 +54,19 @@
 #ifndef PYSIDE_MAX_QML_TYPES
 // Maximum number of different Qt QML types the user can export to QML using
 // qmlRegisterType. This limit exists because the QML engine instantiates objects
-// by calling a function with one argument (a void* pointer where the object should
+// by calling a function with one argument (a void *pointer where the object should
 // be created), and thus does not allow us to choose which object to create. Thus
 // we create a C++ factory function for each new registered type at compile time.
 #define PYSIDE_MAX_QML_TYPES 50
 #endif
 
 // Forward declarations.
-static void propListMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call,
+static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call,
                              void **args);
 
 // All registered python types and their creation functions.
-static PyObject* pyTypes[PYSIDE_MAX_QML_TYPES];
-static void (*createFuncs[PYSIDE_MAX_QML_TYPES])(void*);
+static PyObject *pyTypes[PYSIDE_MAX_QML_TYPES];
+static void (*createFuncs[PYSIDE_MAX_QML_TYPES])(void *);
 
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
@@ -74,12 +74,12 @@ static QMutex nextQmlElementMutex;
 template<int N>
 struct ElementFactoryBase
 {
-    static void createInto(void* memory)
+    static void createInto(void *memory)
     {
         QMutexLocker locker(&nextQmlElementMutex);
         PySide::setNextQObjectMemoryAddr(memory);
         Shiboken::GilState state;
-        PyObject* obj = PyObject_CallObject(pyTypes[N], 0);
+        PyObject *obj = PyObject_CallObject(pyTypes[N], 0);
         if (!obj || PyErr_Occurred())
             PyErr_Print();
         PySide::setNextQObjectMemoryAddr(0);
@@ -152,7 +152,7 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         pyTypes[nextType] = pyObj;
 
         // FIXME: Fix this to assign new type ids each time.
-        type.typeId = qMetaTypeId<QObject*>();
+        type.typeId = qMetaTypeId<QObject *>();
         type.listId = qMetaTypeId<QQmlListProperty<QObject> >();
         type.attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<QObject>();
         type.attachedPropertiesMetaObject = QQmlPrivate::attachedPropertiesMetaObject<QObject>();
@@ -194,22 +194,22 @@ extern "C"
 // This is the user data we store in the property.
 struct QmlListProperty
 {
-    PyTypeObject* type;
-    PyObject* append;
-    PyObject* at;
-    PyObject* clear;
-    PyObject* count;
+    PyTypeObject *type;
+    PyObject *append;
+    PyObject *at;
+    PyObject *clear;
+    PyObject *count;
 };
 
-static int propListTpInit(PyObject* self, PyObject* args, PyObject* kwds)
+static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
     static const char *kwlist[] = {"type", "append", "at", "clear", "count", 0};
-    PySideProperty* pySelf = reinterpret_cast<PySideProperty*>(self);
-    QmlListProperty* data = new QmlListProperty;
+    PySideProperty *pySelf = reinterpret_cast<PySideProperty *>(self);
+    QmlListProperty *data = new QmlListProperty;
     memset(data, 0, sizeof(QmlListProperty));
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "OO|OOO:QtQml.ListProperty", (char**) kwlist,
+                                     "OO|OOO:QtQml.ListProperty", (char **) kwlist,
                                      &data->type,
                                      &data->append,
                                      &data->at,
@@ -224,10 +224,10 @@ static int propListTpInit(PyObject* self, PyObject* args, PyObject* kwds)
     return 1;
 }
 
-void propListTpFree(void* self)
+void propListTpFree(void *self)
 {
-    PySideProperty* pySelf = reinterpret_cast<PySideProperty*>(self);
-    delete reinterpret_cast<QmlListProperty*>(PySide::Property::userData(pySelf));
+    auto pySelf = reinterpret_cast<PySideProperty *>(self);
+    delete reinterpret_cast<QmlListProperty *>(PySide::Property::userData(pySelf));
     // calls base type constructor
     Py_TYPE(pySelf)->tp_base->tp_free(self);
 }
@@ -266,10 +266,10 @@ void propListAppender(QQmlListProperty<QObject> *propList, QObject *item)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
-    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], item));
+    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], item));
 
-    QmlListProperty* data = reinterpret_cast<QmlListProperty*>(propList->data);
+    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->append, args));
 
     if (PyErr_Occurred())
@@ -282,9 +282,9 @@ int propListCount(QQmlListProperty<QObject> *propList)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
 
-    QmlListProperty* data = reinterpret_cast<QmlListProperty*>(propList->data);
+    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->count, args));
 
     // Check return type
@@ -303,17 +303,17 @@ QObject *propListAt(QQmlListProperty<QObject> *propList, int index)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(2));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
     PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<int>(), &index));
 
-    QmlListProperty* data = reinterpret_cast<QmlListProperty*>(propList->data);
+    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->at, args));
 
     QObject *result = 0;
     if (PyErr_Occurred())
         PyErr_Print();
     else if (PyType_IsSubtype(Py_TYPE(retVal), data->type))
-        Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], retVal, &result);
+        Shiboken::Conversions::pythonToCppPointer((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], retVal, &result);
     return result;
 }
 
@@ -323,9 +323,9 @@ void propListClear(QQmlListProperty<QObject> * propList)
     Shiboken::GilState state;
 
     Shiboken::AutoDecRef args(PyTuple_New(1));
-    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
 
-    QmlListProperty* data = reinterpret_cast<QmlListProperty*>(propList->data);
+    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->clear, args));
 
     if (PyErr_Occurred())
@@ -333,18 +333,18 @@ void propListClear(QQmlListProperty<QObject> * propList)
 }
 
 // qt_metacall specialization for ListProperties
-static void propListMetaCall(PySideProperty* pp, PyObject* self, QMetaObject::Call call, void** args)
+static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call, void **args)
 {
     if (call != QMetaObject::ReadProperty)
         return;
 
-    QmlListProperty* data = reinterpret_cast<QmlListProperty*>(PySide::Property::userData(pp));
-    QObject* qobj;
-    Shiboken::Conversions::pythonToCppPointer((SbkObjectType*)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], self, &qobj);
+    auto data = reinterpret_cast<QmlListProperty *>(PySide::Property::userData(pp));
+    QObject *qobj;
+    Shiboken::Conversions::pythonToCppPointer((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], self, &qobj);
     QQmlListProperty<QObject> declProp(qobj, data, &propListAppender, &propListCount, &propListAt, &propListClear);
 
     // Copy the data to the memory location requested by the meta call
-    void* v = args[0];
+    void *v = args[0];
     *reinterpret_cast<QQmlListProperty<QObject> *>(v) = declProp;
 }
 
@@ -469,7 +469,7 @@ PyTypeObject *QtQml_VolatileBoolTypeF(void)
     return type;
 }
 
-void PySide::initQmlSupport(PyObject* module)
+void PySide::initQmlSupport(PyObject *module)
 {
     ElementFactory<PYSIDE_MAX_QML_TYPES - 1>::init();
 

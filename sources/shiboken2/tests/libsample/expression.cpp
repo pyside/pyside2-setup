@@ -30,18 +30,18 @@
 #include "expression.h"
 #include <sstream>
 
-Expression::Expression() : m_value(0), m_operation(None), m_operand1(0), m_operand2(0)
+Expression::Expression() : m_value(0), m_operation(None), m_operand1(nullptr), m_operand2(nullptr)
 {
 }
 
-Expression::Expression(int number) : m_value(number), m_operation(None), m_operand1(0), m_operand2(0)
+Expression::Expression(int number) : m_value(number), m_operation(None), m_operand1(nullptr), m_operand2(nullptr)
 {
 }
 
 Expression::Expression(const Expression& other)
 {
-    m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : 0;
-    m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : 0;
+    m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : nullptr;
+    m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : nullptr;
     m_value = other.m_value;
     m_operation = other.m_operation;
 }
@@ -50,8 +50,8 @@ Expression& Expression::operator=(const Expression& other)
 {
     delete m_operand1;
     delete m_operand2;
-    m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : 0;
-    m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : 0;
+    m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : nullptr;
+    m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : nullptr;
     m_operation = other.m_operation;
     m_value = other.m_value;
     return *this;

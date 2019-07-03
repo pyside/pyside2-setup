@@ -52,36 +52,36 @@ namespace Shiboken
 
 struct DestructorEntry;
 
-typedef void (*ObjectVisitor)(SbkObject*, void*);
+typedef void (*ObjectVisitor)(SbkObject *, void *);
 
 class LIBSHIBOKEN_API BindingManager
 {
 public:
-    BindingManager(const BindingManager&) = delete;
-    BindingManager(BindingManager&&) = delete;
-    BindingManager& operator=(const BindingManager&) = delete;
-    BindingManager& operator=(BindingManager&&) = delete;
+    BindingManager(const BindingManager &) = delete;
+    BindingManager(BindingManager &&) = delete;
+    BindingManager &operator=(const BindingManager &) = delete;
+    BindingManager &operator=(BindingManager &&) = delete;
 
-    static BindingManager& instance();
+    static BindingManager &instance();
 
     bool hasWrapper(const void *cptr);
 
-    void registerWrapper(SbkObject* pyObj, void* cptr);
-    void releaseWrapper(SbkObject* wrapper);
+    void registerWrapper(SbkObject *pyObj, void *cptr);
+    void releaseWrapper(SbkObject *wrapper);
 
     void runDeletionInMainThread();
     void addToDeletionInMainThread(const DestructorEntry &);
 
-    SbkObject* retrieveWrapper(const void* cptr);
-    PyObject* getOverride(const void* cptr, const char* methodName);
+    SbkObject *retrieveWrapper(const void *cptr);
+    PyObject *getOverride(const void *cptr, const char *methodName);
 
-    void addClassInheritance(SbkObjectType* parent, SbkObjectType* child);
+    void addClassInheritance(SbkObjectType *parent, SbkObjectType *child);
     /**
-     * \deprecated Use \fn resolveType(void**, SbkObjectType*), this version is broken when used with multiple inheritance
+     * \deprecated Use \fn resolveType(void **, SbkObjectType *), this version is broken when used with multiple inheritance
      *             because the \p cptr pointer of the discovered type may be different of the given \p cptr in case
      *             of multiple inheritance
      */
-    SBK_DEPRECATED(SbkObjectType* resolveType(void* cptr, SbkObjectType* type));
+    SBK_DEPRECATED(SbkObjectType *resolveType(void *cptr, SbkObjectType *type));
     /**
      * Try to find the correct type of *cptr knowing that it's at least of type \p type.
      * In case of multiple inheritance this function may change the contents of cptr.
@@ -89,9 +89,9 @@ public:
      * \param type type of *cptr
      * \warning This function is slow, use it only as last resort.
      */
-    SbkObjectType* resolveType(void** cptr, SbkObjectType* type);
+    SbkObjectType *resolveType(void **cptr, SbkObjectType *type);
 
-    std::set<PyObject*> getAllPyObjects();
+    std::set<PyObject *> getAllPyObjects();
 
     /**
      * Calls the function \p visitor for each object registered on binding manager.
@@ -100,14 +100,14 @@ public:
      * \param visitor function called for each object.
      * \param data user data passed as second argument to the visitor function.
      */
-    void visitAllPyObjects(ObjectVisitor visitor, void* data);
+    void visitAllPyObjects(ObjectVisitor visitor, void *data);
 
 private:
     ~BindingManager();
     BindingManager();
 
     struct BindingManagerPrivate;
-    BindingManagerPrivate* m_d;
+    BindingManagerPrivate *m_d;
 };
 
 } // namespace Shiboken

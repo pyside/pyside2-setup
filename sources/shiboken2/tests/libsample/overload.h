@@ -83,7 +83,7 @@ public:
     FunctionEnum wrapperIntIntOverloads(const Polygon& arg0, int arg1, int arg2) { return Function1; }
 
     // Similar to QImage constructor
-    FunctionEnum strBufferOverloads(const Str& arg0, const char* arg1 = 0, bool arg2 = true) { return Function0; }
+    FunctionEnum strBufferOverloads(const Str &arg0, const char *arg1 = nullptr, bool arg2 = true) { return Function0; }
     FunctionEnum strBufferOverloads(unsigned char* arg0, int arg1) { return Function1; }
     FunctionEnum strBufferOverloads() { return Function2; }
 

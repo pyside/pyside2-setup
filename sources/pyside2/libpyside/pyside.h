@@ -76,7 +76,7 @@ inline uint hash(const T& value)
  * \param kwds key->value dictonary.
  * \return True if everything goes well, false with a Python error setted otherwise.
  */
-PYSIDE_API bool fillQtProperties(PyObject* qObj, const QMetaObject* metaObj, PyObject* kwds, const char** blackList, unsigned int blackListSize);
+PYSIDE_API bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds, const char **blackList, unsigned int blackListSize);
 
 /**
 *   If the type \p T was registered on Qt meta type system with Q_DECLARE_METATYPE macro, this class will initialize
@@ -99,13 +99,13 @@ template<typename T>
 struct initQtMetaType<T, false> {
 };
 
-PYSIDE_DEPRECATED(PYSIDE_API void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base));
-PYSIDE_API void initDynamicMetaObject(SbkObjectType* type, const QMetaObject* base,
+PYSIDE_DEPRECATED(PYSIDE_API void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base));
+PYSIDE_API void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base,
                                       std::size_t cppObjSize);
-PYSIDE_API void initQObjectSubType(SbkObjectType* type, PyObject* args, PyObject* kwds);
+PYSIDE_API void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject *kwds);
 
 /// Return the size in bytes of a type that inherits QObject.
-PYSIDE_API std::size_t getSizeOfQObject(SbkObjectType* type);
+PYSIDE_API std::size_t getSizeOfQObject(SbkObjectType *type);
 
 typedef void (*CleanupFunction)(void);
 
@@ -127,7 +127,7 @@ PYSIDE_API void destroyQCoreApplication();
  * \param name Name of the argument which the function will try retrieve from MetaData
  * \return The Python object which contains the Data obtained in metaObject or the Python attribute related with name
  */
-PYSIDE_API PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, PyObject* name);
+PYSIDE_API PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
 
 /**
  * Check if self inherits from class_name
@@ -135,12 +135,12 @@ PYSIDE_API PyObject* getMetaDataFromQObject(QObject* cppSelf, PyObject* self, Py
  * \param class_name strict with the class name
  * \return Returns true if self object inherits from class_name, otherwise returns false
  */
-PYSIDE_API bool inherits(PyTypeObject* self, const char* class_name);
+PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
 
-PYSIDE_API void* nextQObjectMemoryAddr();
-PYSIDE_API void setNextQObjectMemoryAddr(void* addr);
+PYSIDE_API void *nextQObjectMemoryAddr();
+PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 
-PYSIDE_API PyObject* getWrapperForQObject(QObject* cppSelf, SbkObjectType* sbk_type);
+PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, SbkObjectType *sbk_type);
 
 #ifdef PYSIDE_QML_SUPPORT
 // Used by QtQuick module to notify QtQml that custom QtQuick items can be registered.
