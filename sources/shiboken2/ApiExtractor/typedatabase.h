@@ -101,6 +101,8 @@ public:
     QString defaultPackageName() const;
 
     TypeEntry *findType(const QString &name) const;
+    TypeEntries findTypes(const QString &name) const;
+    TypeEntries findCppTypes(const QString &name) const;
 
     const TypeEntryMultiMap &entries() const { return m_entries; }
     const TypedefEntryMap  &typedefEntries() const { return m_typedefEntries; }
@@ -172,7 +174,9 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 private:
-    TypeEntryMultiMapConstIteratorRange findTypes(const QString &name) const;
+    TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
+    template <class Predicate>
+    TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
 
     bool m_suppressWarnings = true;

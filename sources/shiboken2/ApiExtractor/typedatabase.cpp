@@ -185,7 +185,7 @@ static bool inline useType(const TypeEntry *t)
 
 FunctionTypeEntry* TypeDatabase::findFunctionType(const QString& name) const
 {
-    const auto entries = findTypes(name);
+    const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (entry->type() == TypeEntry::FunctionType && useType(entry))
             return static_cast<FunctionTypeEntry*>(entry);
@@ -220,7 +220,7 @@ QString TypeDatabase::defaultPackageName() const
 
 TypeEntry* TypeDatabase::findType(const QString& name) const
 {
-    const auto entries = findTypes(name);
+    const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (useType(entry))
             return entry;
@@ -228,7 +228,54 @@ TypeEntry* TypeDatabase::findType(const QString& name) const
     return nullptr;
 }
 
-TypeEntryMultiMapConstIteratorRange TypeDatabase::findTypes(const QString &name) const
+template <class Predicate>
+TypeEntries TypeDatabase::findTypesHelper(const QString &name, Predicate pred) const
+{
+    TypeEntries result;
+    const auto entries = findTypeRange(name);
+    for (TypeEntry *entry : entries) {
+        if (pred(entry))
+            result.append(entry);
+    }
+    return result;
+}
+
+TypeEntries TypeDatabase::findTypes(const QString &name) const
+{
+    return findTypesHelper(name, useType);
+}
+
+static bool useCppType(const TypeEntry *t)
+{
+    bool result = false;
+    switch (t->type()) {
+    case TypeEntry::PrimitiveType:
+    case TypeEntry::VoidType:
+    case TypeEntry::FlagsType:
+    case TypeEntry::EnumType:
+    case TypeEntry::TemplateArgumentType:
+    case TypeEntry::BasicValueType:
+    case TypeEntry::ContainerType:
+    case TypeEntry::InterfaceType:
+    case TypeEntry::ObjectType:
+    case TypeEntry::ArrayType:
+    case TypeEntry::CustomType:
+    case TypeEntry::SmartPointerType:
+    case TypeEntry::TypedefType:
+        result = useType(t);
+        break;
+    default:
+        break;
+    }
+    return result;
+}
+
+TypeEntries TypeDatabase::findCppTypes(const QString &name) const
+{
+    return findTypesHelper(name, useCppType);
+}
+
+TypeEntryMultiMapConstIteratorRange TypeDatabase::findTypeRange(const QString &name) const
 {
     const auto range = m_entries.equal_range(name);
     return {range.first, range.second};
@@ -341,7 +388,7 @@ TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
     if (lessThanPos != -1)
         sourceName.truncate(lessThanPos);
     ComplexTypeEntry *source = nullptr;
-    for (TypeEntry *e : findTypes(sourceName)) {
+    for (TypeEntry *e : findTypeRange(sourceName)) {
         switch (e->type()) {
         case TypeEntry::BasicValueType:
         case TypeEntry::ContainerType:
@@ -600,7 +647,7 @@ bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 
 PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 {
-    const auto entries = findTypes(name);
+    const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (entry->isPrimitive()) {
             auto *pe = static_cast<PrimitiveTypeEntry *>(entry);
@@ -614,7 +661,7 @@ PrimitiveTypeEntry *TypeDatabase::findPrimitiveType(const QString& name) const
 
 ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 {
-    const auto entries = findTypes(name);
+    const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (entry->isComplex() && useType(entry))
             return static_cast<ComplexTypeEntry*>(entry);
@@ -624,7 +671,7 @@ ComplexTypeEntry* TypeDatabase::findComplexType(const QString& name) const
 
 ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 {
-    const auto entries = findTypes(name);
+    const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (entry && entry->isObject() && useType(entry))
             return static_cast<ObjectTypeEntry*>(entry);
@@ -635,7 +682,7 @@ ObjectTypeEntry* TypeDatabase::findObjectType(const QString& name) const
 NamespaceTypeEntryList TypeDatabase::findNamespaceTypes(const QString& name) const
 {
     NamespaceTypeEntryList result;
-    const auto entries = findTypes(name);
+    const auto entries = findTypeRange(name);
     for (TypeEntry *entry : entries) {
         if (entry->isNamespace())
             result.append(static_cast<NamespaceTypeEntry*>(entry));
@@ -905,6 +952,17 @@ void ContainerTypeEntry::formatDebug(QDebug &d) const
 {
     ComplexTypeEntry::formatDebug(d);
     d << ", type=" << m_type << ",\"" << typeName() << '"';
+}
+
+void SmartPointerTypeEntry::formatDebug(QDebug &d) const
+{
+    ComplexTypeEntry::formatDebug(d);
+    if (!m_instantiations.isEmpty()) {
+        d << ", instantiations[" << m_instantiations.size() << "]=(";
+        for (auto i : m_instantiations)
+            d << i->name() << ',';
+        d << ')';
+    }
 }
 
 QDebug operator<<(QDebug d, const TypeEntry *te)

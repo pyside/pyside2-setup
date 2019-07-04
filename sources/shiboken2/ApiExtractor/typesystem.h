@@ -1465,6 +1465,8 @@ private:
 class SmartPointerTypeEntry : public ComplexTypeEntry
 {
 public:
+    using Instantiations = QVector<const TypeEntry *>;
+
     explicit SmartPointerTypeEntry(const QString &entryName,
                                    const QString &getterName,
                                    const QString &smartPointerType,
@@ -1484,6 +1486,12 @@ public:
 
     TypeEntry *clone() const override;
 
+    Instantiations instantiations() const { return m_instantiations; }
+    void setInstantiations(const Instantiations &i) { m_instantiations = i; }
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
 protected:
     SmartPointerTypeEntry(const SmartPointerTypeEntry &);
 
@@ -1491,6 +1499,7 @@ private:
     QString m_getterName;
     QString m_smartPointerType;
     QString m_refCountMethodName;
+    Instantiations m_instantiations;
 };
 
 class NamespaceTypeEntry : public ComplexTypeEntry

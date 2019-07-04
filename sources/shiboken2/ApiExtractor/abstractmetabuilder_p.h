@@ -146,6 +146,9 @@ public:
                                                  AbstractMetaBuilderPrivate *d = nullptr,
                                                  TranslateTypeFlags flags = {},
                                                  QString *errorMessageIn = nullptr);
+    static TypeEntries findTypeEntries(const QString &qualifiedName, const QString &name,
+                                       AbstractMetaClass *currentClass = nullptr,
+                                       AbstractMetaBuilderPrivate *d = nullptr);
 
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 

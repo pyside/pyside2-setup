@@ -2550,13 +2550,19 @@ void ShibokenGenerator::collectContainerTypesFromConverterMacros(const QString &
     QString convMacro = toPythonMacro ? QLatin1String("%CONVERTTOPYTHON[") : QLatin1String("%CONVERTTOCPP[");
     int offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
     int start = 0;
+    QString errorMessage;
     while ((start = code.indexOf(convMacro, start)) != -1) {
         int end = code.indexOf(QLatin1Char(']'), start);
         start += offset;
         if (code.at(start) != QLatin1Char('%')) {
             QString typeString = code.mid(start, end - start);
-            AbstractMetaType *type = buildAbstractMetaTypeFromString(typeString);
-            addInstantiatedContainersAndSmartPointers(type, type->originalTypeDescription());
+            if (AbstractMetaType *type =
+                    buildAbstractMetaTypeFromString(typeString, &errorMessage)) {
+                addInstantiatedContainersAndSmartPointers(type, type->originalTypeDescription());
+            } else {
+                qFatal("%s: Cannot translate type \"%s\": %s", __FUNCTION__,
+                       qPrintable(typeString), qPrintable(errorMessage));
+            }
         }
         start = end;
     }

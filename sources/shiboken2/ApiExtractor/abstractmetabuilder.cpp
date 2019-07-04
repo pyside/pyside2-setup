@@ -2096,6 +2096,52 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
     return type;
 }
 
+// Helper for translateTypeStatic()
+TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
+                                                        const QString &name,
+                                                        AbstractMetaClass *currentClass,
+                                                        AbstractMetaBuilderPrivate *d)
+{
+    // 5.1 - Try first using the current scope
+    if (currentClass) {
+        if (auto type = findTypeEntryUsingContext(currentClass, qualifiedName))
+            return {type};
+
+        // 5.1.1 - Try using the class parents' scopes
+        if (d && !currentClass->baseClassNames().isEmpty()) {
+            const AbstractMetaClassList &baseClasses = d->getBaseClasses(currentClass);
+            for (const AbstractMetaClass *cls : baseClasses) {
+                if (auto type = findTypeEntryUsingContext(cls, qualifiedName))
+                    return {type};
+            }
+        }
+    }
+
+    // 5.2 - Try without scope
+    auto types = TypeDatabase::instance()->findCppTypes(qualifiedName);
+    if (!types.isEmpty())
+        return types;
+
+    // 6. No? Try looking it up as a flags type
+    if (auto type = TypeDatabase::instance()->findFlagsType(qualifiedName))
+        return {type};
+
+    // 7. No? Try looking it up as a container type
+    if (auto type = TypeDatabase::instance()->findContainerType(name))
+        return {type};
+
+    // 8. No? Check if the current class is a template and this type is one
+    //    of the parameters.
+    if (currentClass) {
+        const QVector<TypeEntry *> &template_args = currentClass->templateArguments();
+        for (TypeEntry *te : template_args) {
+            if (te->name() == qualifiedName)
+                return {te};
+        }
+    }
+    return {};
+}
+
 AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
                                                             AbstractMetaClass *currentClass,
                                                             TranslateTypeFlags flags,
@@ -2228,47 +2274,8 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         typeInfo.clearInstantiations();
     }
 
-    const TypeEntry *type = nullptr;
-    // 5. Try to find the type
-
-    // 5.1 - Try first using the current scope
-    if (currentClass) {
-        type = findTypeEntryUsingContext(currentClass, qualifiedName);
-
-        // 5.1.1 - Try using the class parents' scopes
-        if (!type && d && !currentClass->baseClassNames().isEmpty()) {
-            const AbstractMetaClassList &baseClasses = d->getBaseClasses(currentClass);
-            for (const AbstractMetaClass *cls : baseClasses) {
-                type = findTypeEntryUsingContext(cls, qualifiedName);
-                if (type)
-                    break;
-            }
-        }
-    }
-
-    // 5.2 - Try without scope
-    if (!type)
-        type = TypeDatabase::instance()->findType(qualifiedName);
-
-    // 6. No? Try looking it up as a flags type
-    if (!type)
-        type = TypeDatabase::instance()->findFlagsType(qualifiedName);
-
-    // 7. No? Try looking it up as a container type
-    if (!type)
-        type = TypeDatabase::instance()->findContainerType(name);
-
-    // 8. No? Check if the current class is a template and this type is one
-    //    of the parameters.
-    if (!type && currentClass) {
-        const QVector<TypeEntry *> &template_args = currentClass->templateArguments();
-        for (TypeEntry *te : template_args) {
-            if (te->name() == qualifiedName)
-                type = te;
-        }
-    }
-
-    if (!type) {
+    const TypeEntries types = findTypeEntries(qualifiedName, name, currentClass, d);
+    if (types.isEmpty()) {
         if (errorMessageIn) {
             *errorMessageIn =
                 msgUnableToTranslateType(_typei, msgCannotFindTypeEntry(qualifiedName));
@@ -2276,8 +2283,33 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         return nullptr;
     }
 
+    const TypeEntry *type = types.constFirst();
+    const TypeEntry::Type typeEntryType = type->type();
+
     // These are only implicit and should not appear in code...
-    Q_ASSERT(!type->isInterface());
+    if (typeEntryType == TypeEntry::InterfaceType) {
+        if (errorMessageIn)
+            *errorMessageIn = msgInterfaceTypeFound(qualifiedName);
+
+        return nullptr;
+    }
+
+    if (types.size() > 1) {
+        const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
+                                          [typeEntryType](const TypeEntry *e) {
+            return e->type() == typeEntryType; });
+        if (!sameType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgAmbiguousVaryingTypesFound(qualifiedName, types);
+            return nullptr;
+        }
+        // Ambiguous primitive types are possible (when including type systems).
+        if (typeEntryType != TypeEntry::PrimitiveType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgAmbiguousTypesFound(qualifiedName, types);
+            return nullptr;
+        }
+    }
 
     auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
