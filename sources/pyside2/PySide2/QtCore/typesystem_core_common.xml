@@ -171,7 +171,6 @@
   <primitive-type name="quint16"/>
   <primitive-type name="quint32"/>
   <primitive-type name="quint64"/>
-  <primitive-type name="bool"/>
   <primitive-type name="double"/>
   <primitive-type name="qreal"/>
   <primitive-type name="float"/>
