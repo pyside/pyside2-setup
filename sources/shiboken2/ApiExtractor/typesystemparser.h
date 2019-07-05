@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -25,12 +25,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef TYPESYSTEM_P_H
-#define TYPESYSTEM_P_H
+#ifndef TYPESYSTEMPARSER_H
+#define TYPESYSTEMPARSER_H
 
-#include <QStack>
-#include <QtCore/QScopedPointer>
 #include "typesystem.h"
+
+#include <QtCore/QStack>
+#include <QtCore/QScopedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamReader)
@@ -137,13 +138,13 @@ struct StackElementContext
     int addedFunctionModificationIndex = -1;
 };
 
-class Handler
+class TypeSystemParser
 {
 public:
-    Q_DISABLE_COPY(Handler)
+    Q_DISABLE_COPY(TypeSystemParser)
 
-    Handler(TypeDatabase* database, bool generate);
-    ~Handler();
+    TypeSystemParser(TypeDatabase* database, bool generate);
+    ~TypeSystemParser();
 
     bool parse(QXmlStreamReader &reader);
 
@@ -270,4 +271,4 @@ private:
     QScopedPointer<TypeSystemEntityResolver> m_entityResolver;
 };
 
-#endif
+#endif // TYPESYSTEMPARSER_H

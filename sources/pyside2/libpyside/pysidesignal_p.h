@@ -55,6 +55,7 @@ struct PySideSignalData
 
     QByteArray signalName;
     QVector<Signature> signatures;
+    QByteArrayList *signalArguments;
 };
 
 extern "C"
@@ -64,7 +65,7 @@ extern "C"
     struct PySideSignal {
         PyObject_HEAD
         PySideSignalData *data;
-        PyObject* homonymousMethod;
+        PyObject *homonymousMethod;
     };
 
     struct PySideSignalInstance;
