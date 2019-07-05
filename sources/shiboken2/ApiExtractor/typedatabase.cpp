@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -28,7 +28,7 @@
 
 #include "typedatabase.h"
 #include "typesystem.h"
-#include "typesystem_p.h"
+#include "typesystemparser.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
@@ -572,7 +572,7 @@ bool TypeDatabase::parseFile(const QString &filename, const QString &currentPath
 bool TypeDatabase::parseFile(QIODevice* device, bool generate)
 {
     QXmlStreamReader reader(device);
-    Handler handler(this, generate);
+    TypeSystemParser handler(this, generate);
     const bool result = handler.parse(reader);
     if (!result)
         qCWarning(lcShiboken, "%s", qPrintable(handler.errorString()));

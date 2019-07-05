@@ -203,14 +203,15 @@ PyTypeObject *PySideSignalInstanceTypeF(void)
 int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
     static PyObject *emptyTuple = nullptr;
-    static const char *kwlist[] = {"name", nullptr};
+    static const char *kwlist[] = {"name", "arguments", nullptr};
     char *argName = nullptr;
+    PyObject *argArguments = nullptr;
 
     if (emptyTuple == 0)
         emptyTuple = PyTuple_New(0);
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kwds,
-        "|s:QtCore." SIGNAL_CLASS_NAME, const_cast<char **>(kwlist), &argName))
+        "|sO:QtCore." SIGNAL_CLASS_NAME, const_cast<char **>(kwlist), &argName, &argArguments))
         return 0;
 
     bool tupledArgs = false;
@@ -219,6 +220,24 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         data->data = new PySideSignalData;
     if (argName)
         data->data->signalName = argName;
+
+    data->data->signalArguments = new QByteArrayList();
+    if (argArguments && PySequence_Check(argArguments)) {
+        Py_ssize_t argument_size = PySequence_Size(argArguments);
+        for (Py_ssize_t i = 0; i < argument_size; ++i) {
+            PyObject *item = PySequence_GetItem(argArguments, i);
+#ifdef IS_PY3K
+            PyObject *strObj = PyUnicode_AsUTF8String(item);
+            char *s = PyBytes_AsString(strObj);
+            Py_DECREF(strObj);
+#else
+            char *s = PyBytes_AsString(item);
+#endif
+            Py_DECREF(item);
+            if (s != nullptr)
+                data->data->signalArguments->append(QByteArray(s));
+        }
+    }
 
     for (Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
         PyObject *arg = PyTuple_GET_ITEM(args, i);
