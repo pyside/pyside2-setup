@@ -15,6 +15,7 @@ messages.cpp
 reporthandler.cpp
 typeparser.cpp
 typesystem.cpp
+typesystemparser.cpp
 include.cpp
 typedatabase.cpp
 # Clang

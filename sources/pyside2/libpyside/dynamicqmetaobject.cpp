@@ -467,8 +467,17 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 data->data->signalName = Shiboken::String::toCString(key);
                 for (const auto &s : data->data->signatures) {
                     const auto sig = data->data->signalName + '(' + s.signature + ')';
-                    if (m_baseObject->indexOfSignal(sig) == -1)
-                        m_builder->addSignal(sig);
+                    if (m_baseObject->indexOfSignal(sig) == -1) {
+                        // Registering the parameterNames to the QMetaObject (PYSIDE-634)
+                        // from:
+                        //     Signal(..., arguments=['...', ...]
+                        // the arguments are now on data-data->signalArguments
+                        if (!data->data->signalArguments->isEmpty()) {
+                            m_builder->addSignal(sig).setParameterNames(*data->data->signalArguments);
+                        } else {
+                            m_builder->addSignal(sig);
+                        }
+                    }
                 }
             }
         }
