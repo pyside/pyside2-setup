@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="other">
     <load-typesystem name="typesystem_sample.xml" generate="no" />
+    <load-typesystem name="typesystem_smart.xml" generate="no" />
 
     <object-type name="OtherObjectType" />
     <object-type name="OtherDerived" />
@@ -8,6 +9,10 @@
 
     <value-type name="ExtendsNoImplicitConversion" />
     <value-type name="Number" />
+
+    <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
+                        instantiations="Str"/>
+    <value-type name="SmartPtrTester"/>
 
     <suppress-warning text="signature 'operator!=(ByteArray,const char*)' for function modification in 'ByteArray' not found." />
     <suppress-warning text="signature 'operator+(ByteArray,const char*)' for function modification in 'ByteArray' not found." />

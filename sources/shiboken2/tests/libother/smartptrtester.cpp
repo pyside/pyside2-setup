@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,11 +26,30 @@
 **
 ****************************************************************************/
 
-#include "../samplebinding/global.h"
-#include "extendsnoimplicitconversion.h"
-#include "number.h"
-#include "otherderived.h"
-#include "otherobjecttype.h"
-#include "othermultiplederived.h"
 #include "smartptrtester.h"
 
+SharedPtr<Str> SmartPtrTester::createSharedPtrStr(const char *what)
+{
+    return SharedPtr<Str>(new Str(what));
+}
+
+std::string SmartPtrTester::valueOfSharedPtrStr(const SharedPtr<Str> &str)
+{
+    return str->cstring();
+}
+
+SharedPtr<Integer> SmartPtrTester::createSharedPtrInteger(int v)
+{
+    auto i = SharedPtr<Integer>(new Integer);
+    i->m_int = v;
+    return i;
+}
+
+int SmartPtrTester::valueOfSharedPtrInteger(const SharedPtr<Integer> &v)
+{
+    return v->m_int;
+}
+
+void SmartPtrTester::fiddleInt(const SharedPtr<int> &) // no binding, should not cause errors
+{
+}

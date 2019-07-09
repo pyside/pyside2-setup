@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,11 +26,24 @@
 **
 ****************************************************************************/
 
-#include "../samplebinding/global.h"
-#include "extendsnoimplicitconversion.h"
-#include "number.h"
-#include "otherderived.h"
-#include "otherobjecttype.h"
-#include "othermultiplederived.h"
-#include "smartptrtester.h"
+#ifndef SMARTPTRTESTER_H
+#define SMARTPTRTESTER_H
 
+#include "libothermacros.h"
+
+#include <smart.h>
+#include <str.h>
+
+class LIBOTHER_API SmartPtrTester
+{
+public:
+    SharedPtr<Str> createSharedPtrStr(const char *what);
+    std::string valueOfSharedPtrStr(const SharedPtr<Str> &);
+
+    SharedPtr<Integer> createSharedPtrInteger(int v);
+    int valueOfSharedPtrInteger(const SharedPtr<Integer> &);
+
+    void fiddleInt(const SharedPtr<int> &);
+};
+
+#endif // SMARTPTRTESTER_H

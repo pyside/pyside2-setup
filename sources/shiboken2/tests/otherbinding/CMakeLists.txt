@@ -10,6 +10,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/number_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/otherderived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/othermultiplederived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/otherobjecttype_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/other/sharedptr_str_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/other/smartptrtester_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/other_module_wrapper.cpp
 )
 
@@ -28,8 +30,9 @@ COMMENT "Running generator for 'other' test binding..."
 
 add_library(other MODULE ${other_SRC})
 target_include_directories(other PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                                         ${sample_BINARY_DIR}/sample)
-target_link_libraries(other PUBLIC libother libsample libshiboken)
+                                         ${sample_BINARY_DIR}/sample
+                                         ${smart_BINARY_DIR}/smart)
+target_link_libraries(other PUBLIC libother libsample libsmart libshiboken)
 set_property(TARGET other PROPERTY PREFIX "")
 set_property(TARGET other PROPERTY OUTPUT_NAME "other${PYTHON_EXTENSION_SUFFIX}")
 
@@ -38,6 +41,6 @@ if(WIN32)
 endif()
 
 
-add_dependencies(other sample)
+add_dependencies(other sample smart)
 create_generator_target(other)
 
