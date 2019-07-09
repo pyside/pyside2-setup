@@ -101,10 +101,10 @@ def init_db():
     check(db.open)
 
     q = QSqlQuery()
-    check(q.exec_,BOOKS_SQL)
-    check(q.exec_,AUTHORS_SQL)
-    check(q.exec_,GENRES_SQL)
-    check(q.prepare,INSERT_AUTHOR_SQL)
+    check(q.exec_, BOOKS_SQL)
+    check(q.exec_, AUTHORS_SQL)
+    check(q.exec_, GENRES_SQL)
+    check(q.prepare, INSERT_AUTHOR_SQL)
 
     asimovId = add_author(q, "Isaac Asimov", datetime(1920, 2, 1))
     greeneId = add_author(q, "Graham Greene", datetime(1904, 10, 2))
