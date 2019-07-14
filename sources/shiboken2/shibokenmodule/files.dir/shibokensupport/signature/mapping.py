@@ -225,7 +225,7 @@ class Reloader(object):
         self.sys_module_count = len(sys.modules)
         g = globals()
         # PYSIDE-1009: Try to recognize unknown modules in errorhandler.py
-        candidates = list(mod_name for mod_name in sys.modules
+        candidates = list(mod_name for mod_name in sys.modules.copy()
                           if self.module_valid(sys.modules[mod_name]))
         for mod_name in candidates:
             # 'top' is PySide2 when we do 'import PySide.QtCore'
