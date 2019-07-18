@@ -1052,6 +1052,10 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         reason = AbstractMetaBuilder::GenerationDisabled;
     }
     if (reason != AbstractMetaBuilder::NoReason) {
+        if (fullClassName.isEmpty()) {
+            QTextStream(&fullClassName) << "anonymous struct at " << classItem->fileName()
+                << ':' << classItem->startLine();
+        }
         m_rejectedClasses.insert(fullClassName, reason);
         return nullptr;
     }

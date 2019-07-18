@@ -1996,6 +1996,21 @@ class DefaultDict(collections.defaultdict, MutableMapping[KT, VT]):
         return _generic_new(collections.defaultdict, cls, *args, **kwds)
 
 
+############################
+# Insertion by CT 2019-02-21
+#
+class OrderedDict(collections.OrderedDict, MutableMapping[KT, VT]):
+    __slots__ = ()
+    __extra__ = collections.OrderedDict
+
+    def __new__(cls, *args, **kwds):
+        if cls._gorg is OrderedDict:
+            return collections.OrderedDict(*args, **kwds)
+        return _generic_new(collections.OrderedDict, cls, *args, **kwds)
+#
+############################
+
+
 class Counter(collections.Counter, Dict[T, int]):
     __slots__ = ()
     __extra__ = collections.Counter

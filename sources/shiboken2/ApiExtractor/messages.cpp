@@ -311,6 +311,23 @@ QString msgCannotUseEnumAsInt(const QString &name)
                         "Compilation errors may occur when used as a function argument.");
 }
 
+QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Types of receiver variable ('" << varType
+         << "') and %%CONVERTTOCPP type system variable ('" << conversionType
+         << "') differ";
+    QString strippedVarType = varType;
+    QString strippedConversionType = conversionType;
+    TypeInfo::stripQualifiers(&strippedVarType);
+    TypeInfo::stripQualifiers(&strippedConversionType);
+    if (strippedVarType == strippedConversionType)
+        str << " in qualifiers. Please make sure the type is a distinct token";
+    str << '.';
+    return result;
+}
+
 // main.cpp
 
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs)
