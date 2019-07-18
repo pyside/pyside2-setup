@@ -26,42 +26,52 @@
 ##
 #############################################################################
 
+'''Test cases for QDate'''
+
 import unittest
-from helper import adjust_filename, TimedQApplication
-from PySide2.QtQuick import QQuickView
-from PySide2.QtCore import QObject, Signal, Slot, QUrl, QTimer, Property
 
-class Obj(QObject):
-    def __init__(self):
-        QObject.__init__(self)
-        self.value = 0
+import os
+from helper import adjust_filename
+import py3kcompat as py3k
+from PySide2.QtCore import QSettings
 
-    sumResult = Signal(int, name="sumResult", arguments=['sum'])
+class TestQSettings(unittest.TestCase):
+    def testConversions(self):
+        file_path = adjust_filename('qsettings_test.ini', __file__)
+        settings = QSettings(file_path, QSettings.IniFormat)
 
-    @Slot(int, int)
-    def sum(self, arg1, arg2):
-        self.sumResult.emit(arg1 + arg2)
+        r = settings.value('var1')
+        self.assertEqual(type(r), list)
 
-    @Slot(str)
-    def sendValue(self, s):
-        self.value = int(s)
+        r = settings.value('var2')
+        if py3k.IS_PY3K:
+            self.assertEqual(type(r), str)
+        else:
+            self.assertEqual(type(r), unicode)
+
+        r = settings.value('var2', type=list)
+        self.assertEqual(type(r), list)
 
 
-class TestConnectionWithQml(TimedQApplication):
+    def testDefaultValueConversion(self):
+        settings = QSettings('foo.ini', QSettings.IniFormat)
+        r = settings.value('lala', 22)
+        if py3k.IS_PY3K:
+            self.assertEqual(type(r), int)
+        else:
+            self.assertEqual(type(r), long)
 
-    def testSignalArguments(self):
-        view = QQuickView()
-        obj = Obj()
+        r = settings.value('lala', 22, type=str)
+        self.assertEqual(type(r), str)
 
-        context = view.rootContext()
-        context.setContextProperty("o", obj)
-        view.setSource(QUrl.fromLocalFile(adjust_filename('signal_arguments.qml', __file__)))
-        root = view.rootObject()
-        self.assertTrue(root)
-        button = root.findChild(QObject, "button")
-        view.show()
-        button.clicked.emit()
-        self.assertEqual(obj.value, 42)
+        r = settings.value('lala', 22, type=bytes)
+        self.assertEqual(type(r), bytes)
+
+        r = settings.value('lala', 22, type=int)
+        self.assertEqual(type(r), int)
+
+        r = settings.value('lala', 22, type=float)
+        self.assertEqual(type(r), float)
 
 if __name__ == '__main__':
     unittest.main()
