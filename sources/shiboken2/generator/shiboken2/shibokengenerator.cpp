@@ -149,6 +149,8 @@ ShibokenGenerator::ShibokenGenerator()
     const char CHECKTYPE_REGEX[] = R"(%CHECKTYPE\[([^\[]*)\]\()";
     const char ISCONVERTIBLE_REGEX[] = R"(%ISCONVERTIBLE\[([^\[]*)\]\()";
     const char CONVERTTOPYTHON_REGEX[] = R"(%CONVERTTOPYTHON\[([^\[]*)\]\()";
+    // Capture a '*' leading the variable name into the target
+    // so that "*valuePtr = %CONVERTTOCPP..." works as expected.
     const char CONVERTTOCPP_REGEX[] =
         R"((\*?%?[a-zA-Z_][\w\.]*(?:\[[^\[^<^>]+\])*)(?:\s+)=(?:\s+)%CONVERTTOCPP\[([^\[]*)\]\()";
     m_typeSystemConvRegEx[TypeSystemCheckFunction]         = QRegularExpression(QLatin1String(CHECKTYPE_REGEX));
@@ -2044,10 +2046,9 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 varType = miniNormalizer(varType);
                 QString varName = list.at(1).trimmed();
                 if (!varType.isEmpty()) {
-                    if (varType != conversionType->cppSignature()) {
-                        qFatal("Types of receiver variable ('%s') and %%CONVERTTOCPP type system variable ('%s') differ.",
-                               qPrintable(varType), qPrintable(conversionType->cppSignature()));
-                    }
+                    const QString conversionSignature = conversionType->cppSignature();
+                    if (varType != conversionSignature)
+                        qFatal("%s", qPrintable(msgConversionTypesDiffer(varType, conversionSignature)));
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, conversionType);
                     c << ';' << endl;
