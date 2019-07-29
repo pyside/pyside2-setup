@@ -3032,18 +3032,21 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
     s << INDENT << "if (kwds) {" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "PyObject *";
+        s << INDENT << "PyObject *keyName = nullptr;" << endl;
+        s << INDENT << "PyObject *value = nullptr;" << endl;
         for (const AbstractMetaArgument *arg : args) {
             int pyArgIndex = arg->argumentIndex() - OverloadData::numberOfRemovedArguments(func, arg->argumentIndex());
             QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
-            s << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
+            s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg->name() << "\");" << endl;
+            s << INDENT << "if (PyDict_Contains(kwds, keyName)) {" << endl;
+            s << INDENT << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
             s << INDENT << "if (value && " << pyArgName << ") {" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << pyErrString.arg(arg->name()) << endl;
                 s << INDENT << returnStatement(m_currentErrorCode) << endl;
             }
-            s << INDENT << "} else if (value) {" << endl;
+            s << INDENT << INDENT << "} else if (value) {" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << pyArgName << " = value;" << endl;
@@ -3058,6 +3061,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
             s << INDENT << '}' << endl;
             if (arg != args.constLast())
                 s << INDENT;
+            s << "}" << endl;
         }
     }
     s << INDENT << '}' << endl;

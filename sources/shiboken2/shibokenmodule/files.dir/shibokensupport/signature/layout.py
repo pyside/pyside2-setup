@@ -58,20 +58,7 @@ used literally as strings like "signature", "existence", etc.
 from textwrap import dedent
 from shibokensupport.signature import inspect
 from shibokensupport.signature.mapping import ellipsis
-
-
-class SimpleNamespace(object):
-    # From types.rst, because the builtin is implemented in Python 3, only.
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-    def __repr__(self):
-        keys = sorted(self.__dict__)
-        items = ("{}={!r}".format(k, self.__dict__[k]) for k in keys)
-        return "{}({})".format(type(self).__name__, ", ".join(items))
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+from shibokensupport.signature.lib.tool import SimpleNamespace
 
 
 class SignatureLayout(SimpleNamespace):
