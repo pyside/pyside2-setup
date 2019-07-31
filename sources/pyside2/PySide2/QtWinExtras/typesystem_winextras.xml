@@ -43,6 +43,10 @@
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
 
+    <namespace-type name="QtWin">
+        <enum-type name="HBitmapFormat"/>
+        <enum-type name="WindowFlip3DPolicy"/>
+    </namespace-type>
     <object-type name="QWinEvent" since="5.2"/>
     <object-type name="QWinColorizationChangeEvent" since="5.2"/>
     <object-type name="QWinCompositionChangeEvent" since="5.2"/>
