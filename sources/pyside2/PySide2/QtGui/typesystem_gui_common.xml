@@ -1117,6 +1117,7 @@
     <modify-function signature="boundingRect(QRectF,int,QString,int,int*)const">
       <modify-argument index="5">
           <replace-type modified-type="PyObject"/>
+          <array/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qfontmetricsf-boundingrect"/>
     </modify-function>
@@ -1124,6 +1125,7 @@
     <modify-function signature="size(int,QString,int,int*)const">
       <modify-argument index="4">
           <replace-type modified-type="PyObject"/>
+          <array/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qfontmetricsf-size"/>
     </modify-function>
@@ -1150,7 +1152,8 @@
 
     <modify-function signature="boundingRect(int,int,int,int,int,QString,int,int*)const">
       <modify-argument index="8">
-        <replace-type modified-type="PyObject"/>
+          <replace-type modified-type="PyObject"/>
+          <array/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qfontmetrics-boundingrect-1"/>
     </modify-function>
@@ -1158,6 +1161,7 @@
     <modify-function signature="boundingRect(QRect,int,QString,int,int*)const">
       <modify-argument index="5">
           <replace-type modified-type="PyObject"/>
+          <array/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qfontmetrics-boundingrect-2"/>
     </modify-function>
@@ -1165,6 +1169,7 @@
     <modify-function signature="size(int,QString,int,int*)const">
       <modify-argument index="4">
           <replace-type modified-type="PyObject"/>
+          <array/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qfontmetrics-size"/>
     </modify-function>
@@ -1935,6 +1940,7 @@
   <value-type name="QMatrix2x2" since="4.6">
     <modify-function signature="QMatrix2x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -1971,6 +1977,7 @@
   <value-type name="QMatrix2x3" since="4.6">
     <modify-function signature="QMatrix2x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2007,6 +2014,7 @@
   <value-type name="QMatrix2x4" since="4.6">
     <modify-function signature="QMatrix2x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2043,6 +2051,7 @@
   <value-type name="QMatrix3x2" since="4.6">
     <modify-function signature="QMatrix3x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2079,6 +2088,7 @@
   <value-type name="QMatrix3x3" since="4.6">
     <modify-function signature="QMatrix3x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2115,6 +2125,7 @@
   <value-type name="QMatrix3x4" since="4.6">
     <modify-function signature="QMatrix3x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2151,6 +2162,7 @@
   <value-type name="QMatrix4x2" since="4.6">
     <modify-function signature="QMatrix4x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2187,6 +2199,7 @@
   <value-type name="QMatrix4x3" since="4.6">
     <modify-function signature="QMatrix4x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
+    <modify-function signature="constData()const" remove="all"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
@@ -2267,6 +2280,7 @@
     <modify-function signature="QMatrix4x4(const float*)">
       <modify-argument index="1">
         <replace-type modified-type="PySequence"/>
+        <array/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qmatrix4x4"/>
     </modify-function>
@@ -2734,7 +2748,7 @@
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
       <modify-function signature="^glTexParameterI?u?[fi]v\(.*$">
-         <modify-argument index="3"><array/></modify-argument>
+          <modify-argument index="3"><array/></modify-argument>
       </modify-function>
       <modify-function signature="glUniform1uiv(int,int,const unsigned int*)">
           <modify-argument index="3"><array/></modify-argument>

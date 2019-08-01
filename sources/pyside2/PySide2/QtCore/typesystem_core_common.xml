@@ -2299,8 +2299,10 @@
   <object-type name="QRandomGenerator" since="5.10">
       <modify-function signature="global()" rename="global_" allow-thread="yes"/>
       <modify-function signature="operator()()" remove="all"/>
+      <modify-function signature="generate(quint32*,quint32*)" remove="all"/>
   </object-type>
   <object-type name="QRandomGenerator64" since="5.10">
+      <modify-function signature="global()" rename="global_" allow-thread="yes"/>
       <modify-function signature="operator()()" remove="all"/>
   </object-type>
   <object-type name="QSemaphore">
