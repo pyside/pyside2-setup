@@ -4,7 +4,7 @@
 
 div.admonition {
     margin: 1em 0 1em;
-    padding: 7px;
+    padding: 0;
 }
 
 div.admonition dt {
@@ -43,6 +43,7 @@ div.warning {
 div.seealso {
     background-color: #ffffcc;
     border: 1px solid #ffff66;
+    padding: 3px 0px 3px 10px;
 }
 
 div.note {
@@ -291,13 +292,21 @@ tt.descname {
 
 #functions ul, #virtual-functions ul, #slots ul, #signals ul, #static-functions ul {
     list-style: none;
-    margin: 0px;
-    padding: 10px;
+    margin: 0;
+    padding: 0;
     border: 1px solid #ddd;
     background-color: #f4f4f4;
-    -moz-border-radius:10px;
-    -webkit-border-radius:10px;
-    -khtml-border-radius:10px;
+}
+
+#functions p, #virtual-functions p, #slots p, #signals p, #static-functions p {
+    margin: 0;
+    padding: 0;
+}
+
+#functions li, #virtual-functions li, #slots li, #signals li, #static-functions li {
+    margin: 5px;
+    padding: 0;
+    font-size: 90%;
 }
 
 #synopsis span.pre {
@@ -312,11 +321,63 @@ tt.descname {
     margin: 0px;
     margin-bottom: 10px;
     padding: 10px;
-    border: 1px solid #ddd;
+    font-weight: bold;
     background-color: #f4f4f4;
-    -moz-border-radius:10px;
-    -webkit-border-radius:10px;
-    -khtml-border-radius:10px;
+}
+
+#detailed-description .class .field-odd,
+#detailed-description .method .field-odd,
+#detailed-description .staticmethod .field-odd,
+#detailed-description .attribute .field-odd  {
+    margin: 0;
+    padding: 1px;
+    background-color: #ffffff;
+
+}
+
+#detailed-description .class .field-even,
+#detailed-description .method .field-even,
+#detailed-description .staticmethod .field-even,
+#detailed-description .attribute .field-even  {
+    margin: 0;
+    padding: 1px;
+    background-color: #ffffff;
+}
+
+#detailed-description .class .field-odd li,
+#detailed-description .method .field-odd li,
+#detailed-description .staticmethod .field-odd li,
+#detailed-description .attribute .field-odd li {
+    list-style-type: '';
+    margin: 0;
+    padding: 0;
+
+}
+
+#detailed-description .class .field-even li,
+#detailed-description .method .field-even li,
+#detailed-description .staticmethod .field-even li,
+#detailed-description .attribute .field-even li {
+    list-style-type: '';
+    margin: 0;
+    padding: 0;
+}
+
+#detailed-description .class .field-odd p,
+#detailed-description .method .field-odd p,
+#detailed-description .staticmethod .field-odd p,
+#detailed-description .attribute .field-odd  p{
+    margin: 0;
+    margin-left: 20px;
+
+}
+
+#detailed-description .class .field-even p,
+#detailed-description .method .field-even p,
+#detailed-description .staticmethod .field-even p,
+#detailed-description .attribute .field-even p{
+    margin: 0;
+    margin-left: 20px;
 }
 
 .document dl.attribute,
@@ -1056,9 +1117,15 @@ div.multi-column div {
 }
 .col-2 h2,.toc h3,.sidebar-content h2,
 .sidebar-content h3,.sectionlist h2,
+.sphinxsidebar {
+  position: fixed;
+  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
 .sphinxsidebar h3 {
-  font-weight:400;
-  margin-bottom:1em
+  font-weight: bold;
+  margin-bottom:1em;
 }
 .toc h3 a {
   color:#404244
