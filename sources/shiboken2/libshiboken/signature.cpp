@@ -77,6 +77,7 @@ typedef struct safe_globals_struc {
     PyObject *create_signature_func;
     PyObject *seterror_argument_func;
     PyObject *make_helptext_func;
+    PyObject *finish_import_func;
 } safe_globals_struc, *safe_globals;
 
 static safe_globals pyside_globals = nullptr;
@@ -543,6 +544,9 @@ init_phase_1(void)
         if (p->value_dict == nullptr)
             goto error;
 
+        // This function will be disabled until phase 2 is done.
+        p->finish_import_func = nullptr;
+
         return p;
     }
 error:
@@ -585,6 +589,10 @@ init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
         p->make_helptext_func = PyObject_GetAttrString(loader, "make_helptext");
         if (p->make_helptext_func == nullptr)
             goto error;
+        p->finish_import_func = PyObject_GetAttrString(loader, "finish_import");
+        if (p->finish_import_func == nullptr)
+            goto error;
+        return 0;
         return 0;
     }
 error:
@@ -1014,7 +1022,16 @@ PySide_FinishSignatures(PyObject *module, const char *signatures[])
                 return -1;
     if (_finish_nested_classes(obdict) < 0)
         return -1;
-    return 0;
+    // The finish_import function will not work the first time since phase 2
+    // was not yet run. But that is ok, because the first import is always for
+    // the shiboken module (or a test module).
+    if (pyside_globals->finish_import_func == nullptr) {
+        assert(strncmp(name, "PySide2.", 8) != 0);
+        return 0;
+    }
+    Shiboken::AutoDecRef ret(PyObject_CallFunction(
+        pyside_globals->finish_import_func, const_cast<char *>("(O)"), module));
+    return ret.isNull() ? -1 : 0;
 }
 
 static int

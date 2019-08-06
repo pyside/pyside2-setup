@@ -29,6 +29,10 @@
 import unittest
 
 from helper import TimedQApplication
+from PySide2.support import deprecated
+from PySide2.support.signature import importhandler
+from PySide2 import QtGui
+
 
 class TestTimedApp(TimedQApplication):
     '''Simple test case for TimedQApplication'''
@@ -36,6 +40,21 @@ class TestTimedApp(TimedQApplication):
     def testFoo(self):
         #Simple test of TimedQApplication
         self.app.exec_()
+
+
+def fix_for_QtGui(QtGui):
+    QtGui.something = 42
+
+class TestPatchingFramework(unittest.TestCase):
+    """Simple test that verifies that deprecated.py works"""
+
+    deprecated.fix_for_QtGui = fix_for_QtGui
+
+    def test_patch_works(self):
+        something = "something"
+        self.assertFalse(hasattr(QtGui, something))
+        importhandler.finish_import(QtGui)
+        self.assertTrue(hasattr(QtGui, something))
 
 if __name__ == '__main__':
     unittest.main()

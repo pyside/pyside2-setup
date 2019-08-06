@@ -53,6 +53,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/
                "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/layout.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/loader.py"
                "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/loader.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/importhandler.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/importhandler.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/mapping.py"
                "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/signature/mapping.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/parser.py"

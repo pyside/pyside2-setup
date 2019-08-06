@@ -37,6 +37,10 @@ endif()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/__init__.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/generate_pyi.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/generate_pyi.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/deprecated.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/deprecated.py" COPYONLY)
 
 # now compile all modules.
 file(READ "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" pyside2_global_contents)
