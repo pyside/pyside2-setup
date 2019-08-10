@@ -70,30 +70,27 @@ import os
 import sys
 import unittest
 from textwrap import dedent
-from init_platform import (enum_all, generate_all, is_ci,
-   get_effective_refpath, get_refpath, qt_version)
-from util import isolate_warnings, check_warnings, suppress_warnings, warn
+from init_platform import enum_all, generate_all
+from util import (isolate_warnings, check_warnings, suppress_warnings, warn,
+                  is_ci, qt_version, get_script_dir, get_effective_refpath,
+                  get_refpath, import_refmodule)
 from PySide2 import *
 
 refPath = get_refpath()
 effectiveRefPath = get_effective_refpath()
-effectiveRefPathRoot = os.path.splitext(effectiveRefPath)[0]
-pyc = effectiveRefPathRoot + ".pyc"
+pyc = os.path.splitext(effectiveRefPath)[0] + ".pyc"
 if os.path.exists(pyc) and not os.path.exists(effectiveRefPath):
     # on Python2 the pyc file would be imported
     os.unlink(pyc)
-module = os.path.basename(effectiveRefPathRoot)
 
 if refPath != effectiveRefPath:
     print("*** Falling back to ", effectiveRefPath, " since expected ",
         refPath, " does not exist")
 
-home_dir = effectiveRefPath
-for _ in "abcde":
-    home_dir = os.path.dirname(home_dir)
-shortpath = os.path.relpath(effectiveRefPath, home_dir)
+script_dir = get_script_dir()
+shortpath = os.path.relpath(effectiveRefPath, script_dir)
 try:
-    exec("import {} as sig_exists".format(module))
+    sig_exists = import_refmodule()
     print("found:", shortpath)
     have_refmodule = True
 except ImportError:

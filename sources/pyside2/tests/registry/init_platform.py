@@ -54,9 +54,9 @@ shiboken and pysidetest projects.
 
 import sys
 import os
-import re
 from contextlib import contextmanager
 from textwrap import dedent
+from util import get_script_dir
 
 def qt_build():
     result = '<Unknown build of Qt>'
@@ -67,7 +67,7 @@ def qt_build():
         pass
     return result
 
-script_dir = os.path.normpath(os.path.join(__file__, *".. .. .. .. ..".split()))
+script_dir = get_script_dir()
 history_dir = os.path.join(script_dir, 'build_history')
 
 # Find out if we have the build dir, already. Then use it.
@@ -127,7 +127,7 @@ sys.path[:0] = [os.path.join(shiboken_build_dir, "shibokenmodule"),
 
 import PySide2
 
-all_modules = list("PySide2." + x for x in PySide2.__all__)
+all_modules = list("PySide2." + _ for _ in PySide2.__all__)
 
 # now we should be able to do all imports:
 if not have_build_dir:
@@ -147,61 +147,10 @@ for modname in "minimal sample other smart".split():
     __import__(modname)
     all_modules.append(modname)
 
-from PySide2.QtCore import __version__
 from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator
 
-is_py3 = sys.version_info[0] == 3
-is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
-# Python2 legacy: Correct 'linux2' to 'linux', recommended way.
-if sys.platform.startswith('linux'):
-    # We have to be more specific because we had differences between
-    # RHEL 6.6 and RHEL 7.4 .
-    # Note: The platform module is deprecated. We need to switch to the
-    # distro package, ASAP! The distro has been extracted from Python,
-    # because it changes more often than the Python version.
-    try:
-        import distro
-    except ImportError:
-        import platform as distro
-    platform_name = "".join(distro.linux_distribution()[:2]).lower()
-    # this currently happens on opensuse in 5.14:
-    if not platform_name:
-        # We intentionally crash when that last resort is also absent:
-        platform_name = os.environ["MACHTYPE"]
-    platform_name = re.sub('[^0-9a-z]', '_', platform_name)
-else:
-    platform_name = sys.platform
-# In the linux case, we need more information.
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
-
-def qt_version():
-    return tuple(map(int, __version__.split(".")))
-
-# Format a registry file name for version.
-def _registry_filename(version):
-    name = "exists_{}_{}_{}_{}{}.py".format(platform_name,
-        version[0], version[1], version[2], "_ci" if is_ci else "")
-    return os.path.join(os.path.dirname(__file__), name)
-
-# Return the expected registry file name.
-def get_refpath():
-    return _registry_filename(qt_version())
-
-# Return the registry file name, either that of the current
-# version or fall back to a previous patch release.
-def get_effective_refpath():
-    refpath = get_refpath()
-    if os.path.exists(refpath):
-        return refpath
-    version = qt_version()
-    major, minor, patch = version[:3]
-    while patch >= 0:
-        file = _registry_filename((major, minor, patch))
-        if os.path.exists(file):
-            return file
-        patch = patch - 1
-    return refpath
 
 
 class Formatter(object):
