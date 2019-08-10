@@ -197,7 +197,7 @@ class _Parameterized(object):
 class ResultVariable(_Parameterized):
     pass
 
-# Mark the primitive variables to become Sequence, Iterator or List
+# Mark the primitive variables to become Sequence, Iterable or List
 # (decided in the parser).
 class ArrayLikeVariable(_Parameterized):
     pass

@@ -61,6 +61,7 @@ PyObject *code();
 PyObject *dictoffset();
 PyObject *func();
 PyObject *func_kind();
+PyObject *iter();
 PyObject *module();
 PyObject *mro();
 PyObject *new_();

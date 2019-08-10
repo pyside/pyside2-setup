@@ -1255,6 +1255,11 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool gene
 QString ShibokenGenerator::guessCPythonCheckFunction(const QString &type, AbstractMetaType **metaType)
 {
     *metaType = nullptr;
+    // PYSIDE-795: We abuse PySequence for iterables.
+    // This part handles the overrides in the XML files.
+    if (type == QLatin1String("PySequence"))
+        return QLatin1String("Shiboken::String::checkIterable");
+
     if (type == QLatin1String("PyTypeObject"))
         return QLatin1String("PyType_Check");
 

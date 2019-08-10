@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "sbkstring.h"
+#include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
 #include <vector>
@@ -47,6 +48,12 @@ namespace Shiboken
 
 namespace String
 {
+
+// PYSIDE-795: Redirecting PySequence to Iterable
+bool checkIterable(PyObject *obj)
+{
+    return PyObject_HasAttr(obj, Shiboken::PyMagicName::iter());
+}
 
 bool checkType(PyTypeObject *type)
 {

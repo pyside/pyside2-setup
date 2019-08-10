@@ -2155,6 +2155,8 @@ void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argTyp
     QString customCheck;
     if (!customType.isEmpty()) {
         AbstractMetaType *metaType;
+        // PYSIDE-795: Note: XML-Overrides are handled in this shibokengenerator function!
+        // This enables iterables for QMatrix4x4 for instance.
         customCheck = guessCPythonCheckFunction(customType, &metaType);
         if (metaType)
             argType = metaType;
@@ -2940,6 +2942,9 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s,
             typeCheck = QLatin1String("PyType_Check(%in)");
         else if (pyTypeName == QLatin1String("PyObject"))
             typeCheck = QLatin1String("PyObject_TypeCheck(%in, &PyBaseObject_Type)");
+        // PYSIDE-795: We abuse PySequence for iterables
+        else if (pyTypeName == QLatin1String("PySequence"))
+            typeCheck = QLatin1String("Shiboken::String::checkIterable(%in)");
         else if (pyTypeName.startsWith(QLatin1String("Py")))
             typeCheck = pyTypeName + QLatin1String("_Check(%in)");
     }
