@@ -730,7 +730,9 @@ static int
 pyside_set___signature__(PyObject *op, PyObject *value)
 {
     // By this additional check, this function refuses write access.
-    if (get_signature_intern(op, nullptr)) {
+    // We consider both nullptr and Py_None as not been written.
+    Shiboken::AutoDecRef has_val(get_signature_intern(op, nullptr));
+    if (!(has_val.isNull() || has_val == Py_None)) {
         PyErr_Format(PyExc_AttributeError,
                      "Attribute '__signature__' of '%.50s' object is not writable",
                      Py_TYPE(op)->tp_name);
