@@ -61,24 +61,12 @@ class ellipsis(object):
         return "..."
 
 ellipsis = ellipsis()
-StringList = typing.List[str]
-IntList = typing.List[int]
 Point = typing.Tuple[float, float]
-PointList = typing.List[Point]
-IntMatrix = typing.List[IntList]
 Variant = typing.Any
 ModelIndexList = typing.List[int]
 QImageCleanupFunction = typing.Callable
 
-# First time installing our own Pair type into typing.
-T = TypeVar('T')
-S = TypeVar('S')
-
-class Pair(Generic[T, S]):
-    __module__ = "typing"
-
-typing.Pair = Pair
-
+_S = TypeVar("_S")
 
 # Building our own Char type, which is much nicer than
 # Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
@@ -174,7 +162,12 @@ class _NotCalled(str):
         text = self if self.endswith(")") else self + "()"
         return eval(text, namespace)
 
-USE_PEP563 = sys.version_info[:2] >= (3, 7)
+USE_PEP563 = False
+# Note: we cannot know if this feature has been imported.
+# Otherwise it would be "sys.version_info[:2] >= (3, 7)".
+# We *can* eventually inspect sys.modules and look if
+# the calling module has this future statement set,
+# but should we do that?
 
 
 # Some types are abstract. They just show their name.
@@ -183,10 +176,11 @@ class Virtual(_NotCalled):
 
 # Other types I simply could not find.
 class Missing(_NotCalled):
-    if not USE_PEP563:
-        # The string must be quoted, because the object does not exist.
-        def __repr__(self):
-            return '{}("{}")'.format(type(self).__name__, self)
+    # The string must be quoted, because the object does not exist.
+    def __repr__(self):
+        if USE_PEP563:
+            return _NotCalled.__repr__(self)
+        return '{}("{}")'.format(type(self).__name__, self)
 
 
 class Invalid(_NotCalled):
@@ -199,6 +193,27 @@ class Default(_NotCalled):
 
 class Instance(_NotCalled):
     pass
+
+# Parameterized primitive variables
+class _Parameterized(object):
+    def __init__(self, type):
+        self.type = type
+        self.__name__ = self.__class__.__name__
+
+    def __repr__(self):
+        return "{}({})".format(
+            type(self).__name__, self.type.__name__)
+
+# Mark the primitive variables to be moved into the result.
+class ResultVariable(_Parameterized):
+    pass
+
+# Mark the primitive variables to become Sequence, Iterator or List
+# (decided in the parser).
+class ArrayLikeVariable(_Parameterized):
+    pass
+
+StringList = ArrayLikeVariable(str)
 
 
 class Reloader(object):
@@ -230,7 +245,7 @@ class Reloader(object):
         self.sys_module_count = len(sys.modules)
         g = globals()
         # PYSIDE-1009: Try to recognize unknown modules in errorhandler.py
-        candidates = list(mod_name for mod_name in sys.modules
+        candidates = list(mod_name for mod_name in sys.modules.copy()
                           if self.module_valid(sys.modules[mod_name]))
         for mod_name in candidates:
             # 'top' is PySide2 when we do 'import PySide.QtCore'
@@ -260,20 +275,130 @@ type_map = {}
 namespace = globals()  # our module's __dict__
 
 type_map.update({
-    "QList": typing.List,
-    "QVector": typing.List,
-    "QSet": typing.Set,
-    "QPair": Pair,
+    "bool": bool,
+    "char": Char,
+    "char*": str,
+    "char*const": str,
+    "double": float,
+    "float": float,
+    "int": int,
+    "List": ArrayLikeVariable,
+    "long": int,
+    "PyCallable": typing.Callable,
+    "PyObject": object,
+    "PySequence": typing.Iterable,  # important for numpy
+    "PyTypeObject": type,
+    "QChar": Char,
+    "QHash": typing.Dict,
+    "qint16": int,
+    "qint32": int,
+    "qint64": int,
+    "qint8": int,
+    "qintptr": int,
+    "QList": ArrayLikeVariable,
+    "qlonglong": int,
     "QMap": typing.Dict,
+    "QPair": typing.Tuple,
+    "qptrdiff": int,
+    "qreal": float,
+    "QSet": typing.Set,
+    "QString": str,
+    "QStringList": StringList,
+    "quint16": int,
+    "quint32": int,
+    "quint32": int,
+    "quint64": int,
+    "quint8": int,
+    "quintptr": int,
+    "qulonglong": int,
+    "QVariant": Variant,
+    "QVector": typing.List,
+    "real": float,
+    "short": int,
+    "signed char": Char,
+    "signed long": int,
+    "std.list": typing.List,
+    "std.map": typing.Dict,
+    "std.pair": typing.Tuple,
+    "std.vector": typing.List,
+    "str": str,
+    "true": True,
+    "Tuple": typing.Tuple,
+    "uchar": Char,
+    "uchar*": str,
+    "uint": int,
+    "ulong": int,
+    "ULONG_MAX": ulong_max,
+    "unsigned char": Char, # 5.9
+    "unsigned char*": str,
+    "unsigned int": int,
+    "unsigned long int": int, # 5.6, RHEL 6.6
+    "unsigned long long": int,
+    "unsigned long": int,
+    "unsigned short int": int, # 5.6, RHEL 6.6
+    "unsigned short": int,
+    "ushort": int,
+    "void": int, # be more specific?
+    "WId": WId,
+    "zero(bytes)": b"",
+    "zero(Char)": 0,
+    "zero(float)": 0,
+    "zero(int)": 0,
+    "zero(object)": None,
+    "zero(str)": "",
+    "zero(typing.Any)": None,
+    })
+
+type_map.update({
+    # Handling variables declared as array:
+    "array double*"         : ArrayLikeVariable(float),
+    "array float*"          : ArrayLikeVariable(float),
+    "array GLint*"          : ArrayLikeVariable(int),
+    "array GLuint*"         : ArrayLikeVariable(int),
+    "array int*"            : ArrayLikeVariable(int),
+    "array long long*"      : ArrayLikeVariable(int),
+    "array short*"          : ArrayLikeVariable(int),
+    "array signed char*"    : bytes,
+    "array unsigned char*"  : bytes,
+    "array unsigned int*"   : ArrayLikeVariable(int),
+    "array unsigned short*" : ArrayLikeVariable(int),
+    })
+
+type_map.update({
+    # Special cases:
+    "char*"         : bytes,
+    "QChar*"        : bytes,
+    "quint32*"      : int,        # only for QRandomGenerator
+    "quint8*"       : bytearray,  # only for QCborStreamReader and QCborValue
+    "uchar*"        : bytes,
+    "unsigned char*": bytes,
+    })
+
+type_map.update({
+    # Handling variables that are returned, eventually as Tuples:
+    "bool*"         : ResultVariable(bool),
+    "float*"        : ResultVariable(float),
+    "int*"          : ResultVariable(int),
+    "long long*"    : ResultVariable(int),
+    "long*"         : ResultVariable(int),
+    "PStr*"         : ResultVariable(str),  # module sample
+    "qint32*"       : ResultVariable(int),
+    "qint64*"       : ResultVariable(int),
+    "qreal*"        : ResultVariable(float),
+    "QString*"      : ResultVariable(str),
+    "quint16*"      : ResultVariable(int),
+    "uint*"         : ResultVariable(int),
+    "unsigned int*" : ResultVariable(int),
+    "QStringList*"  : ResultVariable(StringList),
     })
 
 
 # The Shiboken Part
 def init_Shiboken():
     type_map.update({
+        "PyType": type,
         "shiboken2.bool": bool,
         "size_t": int,
-        "PyType": type,
     })
     return locals()
 
@@ -288,36 +413,34 @@ def init_minimal():
 def init_sample():
     import datetime
     type_map.update({
-        "double": float,
-        "sample.int": int,
+        "char": Char,
+        "char**": typing.List[str],
         "Complex": complex,
-        "sample.OddBool": bool,
-        "sample.bool": bool,
-        "sample.PStr": str,
+        "double": float,
+        "Foo.HANDLE": int,
+        "HANDLE": int,
+        "Null": None,
+        "ObjectType.Identifier": Missing("sample.ObjectType.Identifier"),
         "OddBool": bool,
         "PStr": str,
-        "char": Char,
-        "sample.char": Char,
-        "sample.Point": Point,
-        "sample.ObjectType": object,
-        "std.string": str,
-        "HANDLE": int,
-        "Foo.HANDLE": int,
-        "sample.Photon.TemplateBase": Missing("sample.Photon.TemplateBase"),
-        "ObjectType.Identifier": Missing("sample.ObjectType.Identifier"),
-        "zero(HANDLE)": 0,
-        "Null": None,
-        "zero(sample.ObjectType)": None,
-        "std.size_t": int,
-        'Str("<unknown>")': "<unknown>",
-        'Str("<unk")': "<unk",
-        'Str("nown>")': "nown>",
-        "zero(sample.ObjectModel)": None,
-        "sample.unsigned char": Char,
-        "sample.double": float,
-        "zero(sample.bool)": False,
         "PyDate": datetime.date,
+        "sample.bool": bool,
+        "sample.char": Char,
+        "sample.double": float,
+        "sample.int": int,
+        "sample.ObjectType": object,
+        "sample.OddBool": bool,
+        "sample.Photon.TemplateBase[Photon.DuplicatorType]": sample.Photon.ValueDuplicator,
+        "sample.Photon.TemplateBase[Photon.IdentityType]": sample.Photon.ValueIdentity,
+        "sample.Point": Point,
+        "sample.PStr": str,
+        "sample.unsigned char": Char,
+        "std.size_t": int,
+        "std.string": str,
         "ZeroIn": 0,
+        'Str("<unk")': "<unk",
+        'Str("<unknown>")': "<unknown>",
+        'Str("nown>")': "nown>",
     })
     return locals()
 
@@ -325,18 +448,24 @@ def init_sample():
 def init_other():
     import numbers
     type_map.update({
-        "other.Number": numbers.Number,
         "other.ExtendsNoImplicitConversion": Missing("other.ExtendsNoImplicitConversion"),
+        "other.Number": numbers.Number,
     })
     return locals()
 
 
 def init_smart():
+    # This missing type should be defined in module smart. We cannot set it to Missing()
+    # because it is a container type. Therefore, we supply a surrogate:
+    global SharedPtr
+    class SharedPtr(Generic[_S]):
+        __module__ = "smart"
+    smart.SharedPtr = SharedPtr
     type_map.update({
-        "smart.SharedPtr": Missing("smart.SharedPtr"),  # bad object "SharedPtr<Obj >"
         "smart.Smart.Integer2": int,
     })
     return locals()
+
 
 # The PySide Part
 def init_PySide2_QtCore():
@@ -349,131 +478,53 @@ def init_PySide2_QtCore():
     except ImportError:
         pass
     type_map.update({
-        "str": str,
-        "int": int,
-        "QString": str,
-        "bool": bool,
-        "PyObject": object,
-        "void": int, # be more specific?
-        "char": Char,
-        "'%'": "%",
         "' '": " ",
-        "false": False,
-        "double": float,
+        "'%'": "%",
         "'g'": "g",
-        "long long": int,
-        "unsigned int": int, # should we define an unsigned type?
-        "Q_NULLPTR": None,
-        "long": int,
-        "float": float,
-        "short": int,
-        "unsigned long": int,
-        "unsigned long long": int,
-        "unsigned short": int,
-        "QStringList": StringList,
-        "QChar": Char,
-        "signed char": Char,
-        "QVariant": Variant,
-        "QVariant.Type": type, # not so sure here...
-        "QStringRef": str,
-        "QString()": "",
-        "QModelIndexList": ModelIndexList,
-        "unsigned char": Char,
-        "QJsonObject": typing.Dict[str, PySide2.QtCore.QJsonValue],
-        "QStringList()": [],
-        "ULONG_MAX": ulong_max,
-        "quintptr": int,
-        "PyCallable": typing.Callable,
-        "PyTypeObject": type,
-        "PySequence": typing.Iterable,  # important for numpy
-        "qptrdiff": int,
-        "true": True,
-        "Qt.HANDLE": int, # be more explicit with some consts?
-        "list of QAbstractState": typing.List[PySide2.QtCore.QAbstractState],
+        "4294967295UL": 4294967295, # 5.6, RHEL 6.6
+        "CheckIndexOption.NoOption": Instance(
+            "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
+        "false": False,
         "list of QAbstractAnimation": typing.List[PySide2.QtCore.QAbstractAnimation],
-        "QVariant()": Invalid(Variant),
-        "PySide2.QtCore.bool": bool,
-        "QHash": typing.Dict,
-        "PySide2.QtCore.QChar": Char,
-        "PySide2.QtCore.qreal": float,
-        "PySide2.QtCore.float": float,
-        "PySide2.QtCore.qint16": int,
-        "PySide2.QtCore.qint32": int,
-        "PySide2.QtCore.qint64": int,
-        "PySide2.QtCore.qint8": int,
-        "PySide2.QtCore.QString": str,
-        "PySide2.QtCore.QStringList": StringList,
-        "PySide2.QtCore.QVariant": Variant,
-        "PySide2.QtCore.quint16": int,
-        "PySide2.QtCore.quint32": int,
-        "PySide2.QtCore.quint64": int,
-        "PySide2.QtCore.quint8": int,
-        "PySide2.QtCore.short": int,
-        "PySide2.QtCore.unsigned short": int,
-        "PySide2.QtCore.signed char": Char,
-        "PySide2.QtCore.uchar": Char,
-        "PySide2.QtCore.unsigned char": Char, # 5.9
-        "PySide2.QtCore.long": int,
+        "list of QAbstractState": typing.List[PySide2.QtCore.QAbstractState],
+        "long long": int,
+        "NULL": None, # 5.6, MSVC
+        "nullptr": None, # 5.9
+        "PyByteArray": bytearray,
+        "PyBytes": bytes,
+        "PySide2.QtCore.QCborStreamReader.StringResult[PySide2.QtCore.QByteArray]":
+            PySide2.QtCore.QCborStringResultByteArray,
+        "PySide2.QtCore.QCborStreamReader.StringResult[QString]":
+            PySide2.QtCore.QCborStringResultString,
         "PySide2.QtCore.QUrl.ComponentFormattingOptions":
             PySide2.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
-        "QUrl.FormattingOptions(PrettyDecoded)": Instance(
-            "QUrl.FormattingOptions(QUrl.PrettyDecoded)"),
-        # from 5.9
+        "PyUnicode": typing.Text,
+        "Q_NULLPTR": None,
         "QDir.Filters(AllEntries | NoDotAndDotDot)": Instance(
             "QDir.Filters(QDir.AllEntries | QDir.NoDotAndDotDot)"),
-        "NULL": None, # 5.6, MSVC
         "QDir.SortFlags(Name | IgnoreCase)": Instance(
             "QDir.SortFlags(QDir.Name | QDir.IgnoreCase)"),
-        "PyBytes": bytes,
-        "PyByteArray": bytearray,
-        "PyUnicode": typing.Text,
-        "signed long": int,
-        "PySide2.QtCore.int": int,
-        "PySide2.QtCore.char": StringList, # A 'char **' is a list of strings.
-        "unsigned long int": int, # 5.6, RHEL 6.6
-        "unsigned short int": int, # 5.6, RHEL 6.6
-        "4294967295UL": 4294967295, # 5.6, RHEL 6.6
-        "PySide2.QtCore.int32_t": int, # 5.9
-        "PySide2.QtCore.int64_t": int, # 5.9
-        "UnsignedShortType": int, # 5.9
-        "nullptr": None, # 5.9
-        "uint64_t": int, # 5.9
-        "PySide2.QtCore.uint32_t": int, # 5.9
-        "PySide2.QtCore.unsigned int": int, # 5.9 Ubuntu
-        "PySide2.QtCore.long long": int, # 5.9, MSVC 15
-        "QGenericArgument(nullptr)": ellipsis, # 5.10
-        "QModelIndex()": Invalid("PySide2.QtCore.QModelIndex"), # repr is btw. very wrong, fix it?!
         "QGenericArgument((0))": ellipsis, # 5.6, RHEL 6.6. Is that ok?
         "QGenericArgument()": ellipsis,
         "QGenericArgument(0)": ellipsis,
         "QGenericArgument(NULL)": ellipsis, # 5.6, MSVC
+        "QGenericArgument(nullptr)": ellipsis, # 5.10
         "QGenericArgument(Q_NULLPTR)": ellipsis,
-        "zero(PySide2.QtCore.QObject)": None,
-        "zero(PySide2.QtCore.QThread)": None,
-        "zero(quintptr)": 0,
-        "zero(str)": "",
-        "zero(int)": 0,
-        "zero(PySide2.QtCore.QState)": None,
-        "zero(PySide2.QtCore.bool)": False,
-        "zero(PySide2.QtCore.int)": 0,
-        "zero(void)": None,
-        "zero(long long)": 0,
-        "zero(PySide2.QtCore.QAbstractItemModel)": None,
-        "zero(PySide2.QtCore.QJsonParseError)": None,
-        "zero(double)": 0.0,
-        "zero(PySide2.QtCore.qint64)": 0,
-        "zero(PySide2.QtCore.QTextCodec.ConverterState)": None,
-        "zero(long long)": 0,
-        "zero(QImageCleanupFunction)": None,
-        "zero(unsigned int)": 0,
-        "zero(PySide2.QtCore.QPoint)": Default("PySide2.QtCore.QPoint"),
-        "zero(unsigned char)": 0,
-        "zero(PySide2.QtCore.QEvent.Type)": None,
-        "CheckIndexOption.NoOption": Instance(
-            "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
+        "QJsonObject": typing.Dict[str, PySide2.QtCore.QJsonValue],
+        "QModelIndex()": Invalid("PySide2.QtCore.QModelIndex"), # repr is btw. very wrong, fix it?!
+        "QModelIndexList": ModelIndexList,
+        "QModelIndexList": ModelIndexList,
+        "QString()": "",
+        "QStringList()": [],
+        "QStringRef": str,
+        "QStringRef": str,
+        "Qt.HANDLE": int, # be more explicit with some constants?
+        "QUrl.FormattingOptions(PrettyDecoded)": Instance(
+            "QUrl.FormattingOptions(QUrl.PrettyDecoded)"),
+        "QVariant()": Invalid(Variant),
+        "QVariant.Type": type, # not so sure here...
         "QVariantMap": typing.Dict[str, Variant],
-        "PySide2.QtCore.QCborStreamReader.StringResult": typing.AnyStr,
-        "PySide2.QtCore.double": float,
+        "QVariantMap": typing.Dict[str, Variant],
     })
     try:
         type_map.update({
@@ -488,29 +539,17 @@ def init_PySide2_QtCore():
 def init_PySide2_QtGui():
     from PySide2.QtGui import QPageLayout, QPageSize # 5.12 macOS
     type_map.update({
-        "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
-        "USHRT_MAX": ushort_max,
         "0.0f": 0.0,
         "1.0f": 1.0,
-        "uint32_t": int,
-        "uint8_t": int,
-        "int32_t": int,
         "GL_COLOR_BUFFER_BIT": GL_COLOR_BUFFER_BIT,
         "GL_NEAREST": GL_NEAREST,
-        "WId": WId,
-        "PySide2.QtGui.QPlatformSurface": int, # a handle
-        "QList< QTouchEvent.TouchPoint >()": [], # XXX improve?
+        "int32_t": int,
         "QPixmap()": Default("PySide2.QtGui.QPixmap"), # can't create without qApp
-        "PySide2.QtCore.uint8_t": int, # macOS 5.9
-        "zero(uint32_t)": 0,
-        "zero(PySide2.QtGui.QWindow)": None,
-        "zero(PySide2.QtGui.QOpenGLContext)": None,
-        "zero(PySide2.QtGui.QRegion)": None,
-        "zero(PySide2.QtGui.QPaintDevice)": None,
-        "zero(PySide2.QtGui.QTextLayout.FormatRange)": None,
-        "zero(PySide2.QtGui.QTouchDevice)": None,
-        "zero(PySide2.QtGui.QScreen)": None,
-        "PySide2.QtGui.QGenericMatrix": Missing("PySide2.QtGui.QGenericMatrix"),
+        "QPlatformSurface*": int, # a handle
+        "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
+        "uint32_t": int,
+        "uint8_t": int,
+        "USHRT_MAX": ushort_max,
     })
     return locals()
 
@@ -523,26 +562,12 @@ def init_PySide2_QtWidgets():
             "QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No)"),
         "QWidget.RenderFlags(DrawWindowBackground | DrawChildren)": Instance(
             "QWidget.RenderFlags(QWidget.DrawWindowBackground | QWidget.DrawChildren)"),
-        "static_cast<Qt.MatchFlags>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
-            "Qt.MatchFlags(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
-        "QVector< int >()": [],
-        "WId": WId,
-        # from 5.9
-        "Type": PySide2.QtWidgets.QListWidgetItem.Type,
-        "SO_Default": QStyleOption.SO_Default,
         "SH_Default": QStyleHintReturn.SH_Default,
         "SO_Complex": QStyleOptionComplex.SO_Complex,
-        "zero(PySide2.QtWidgets.QWidget)": None,
-        "zero(PySide2.QtWidgets.QGraphicsItem)": None,
-        "zero(PySide2.QtCore.QEvent)": None,
-        "zero(PySide2.QtWidgets.QStyleOption)": None,
-        "zero(PySide2.QtWidgets.QStyleHintReturn)": None,
-        "zero(PySide2.QtWidgets.QGraphicsLayoutItem)": None,
-        "zero(PySide2.QtWidgets.QListWidget)": None,
-        "zero(PySide2.QtGui.QKeySequence)": None,
-        "zero(PySide2.QtWidgets.QAction)": None,
-        "zero(PySide2.QtWidgets.QUndoCommand)": None,
-        "zero(WId)": 0,
+        "SO_Default": QStyleOption.SO_Default,
+        "static_cast<Qt.MatchFlags>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
+            "Qt.MatchFlags(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
+        "Type": PySide2.QtWidgets.QListWidgetItem.Type,
     })
     return locals()
 
@@ -557,20 +582,20 @@ def init_PySide2_QtSql():
 
 
 def init_PySide2_QtNetwork():
+    best_structure = typing.OrderedDict if getattr(typing, "OrderedDict", None) else typing.Dict
     type_map.update({
-        "QMultiMap": MultiMap,
-        "zero(unsigned short)": 0,
-        "zero(PySide2.QtCore.QIODevice)": None,
-        "zero(QList)": [],
+        "QMultiMap[PySide2.QtNetwork.QSsl.AlternativeNameEntryType, QString]":
+            best_structure[PySide2.QtNetwork.QSsl.AlternativeNameEntryType, typing.List[str]],
     })
+    del best_structure
     return locals()
 
 
 def init_PySide2_QtXmlPatterns():
     from PySide2.QtXmlPatterns import QXmlName
     type_map.update({
+        "QXmlName.NamespaceCode": Missing("PySide2.QtXmlPatterns.QXmlName.NamespaceCode"),
         "QXmlName.PrefixCode": Missing("PySide2.QtXmlPatterns.QXmlName.PrefixCode"),
-        "QXmlName.NamespaceCode": Missing("PySide2.QtXmlPatterns.QXmlName.NamespaceCode")
     })
     return locals()
 
@@ -581,6 +606,7 @@ def init_PySide2_QtMultimedia():
     check_module(PySide2.QtMultimediaWidgets)
     type_map.update({
         "QGraphicsVideoItem": PySide2.QtMultimediaWidgets.QGraphicsVideoItem,
+        "qint64": int,
         "QVideoWidget": PySide2.QtMultimediaWidgets.QVideoWidget,
     })
     return locals()
@@ -588,16 +614,11 @@ def init_PySide2_QtMultimedia():
 
 def init_PySide2_QtOpenGL():
     type_map.update({
-        "GLuint": int,
-        "GLenum": int,
-        "GLint": int,
         "GLbitfield": int,
-        "PySide2.QtOpenGL.GLint": int,
-        "PySide2.QtOpenGL.GLuint": int,
+        "GLenum": int,
         "GLfloat": float, # 5.6, MSVC 15
-        "zero(PySide2.QtOpenGL.QGLContext)": None,
-        "zero(GLenum)": 0,
-        "zero(PySide2.QtOpenGL.QGLWidget)": None,
+        "GLint": int,
+        "GLuint": int,
     })
     return locals()
 
@@ -605,22 +626,16 @@ def init_PySide2_QtOpenGL():
 def init_PySide2_QtQml():
     type_map.update({
         "QJSValueList()": [],
-        "PySide2.QtQml.bool volatile": bool,
-        # from 5.9
-        "QVariantHash()": typing.Dict[str, Variant],  # XXX sorted?
-        "zero(PySide2.QtQml.QQmlContext)": None,
-        "zero(PySide2.QtQml.QQmlEngine)": None,
+        "QVariantHash()": typing.Dict[str, Variant],    # from 5.9
     })
     return locals()
 
 
 def init_PySide2_QtQuick():
     type_map.update({
-        "PySide2.QtQuick.QSharedPointer": int,
-        "PySide2.QtCore.uint": int,
-        "T": int,
-        "zero(PySide2.QtQuick.QQuickItem)": None,
-        "zero(GLuint)": 0,
+        "PySide2.QtQuick.QSharedPointer[PySide2.QtQuick.QQuickItemGrabResult]":
+            PySide2.QtQuick.QQuickItemGrabResult,
+        "UnsignedShortType": int,
     })
     return locals()
 
@@ -634,14 +649,8 @@ def init_PySide2_QtScript():
 
 def init_PySide2_QtTest():
     type_map.update({
+        "PySide2.QtTest.QTest.PySideQTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
         "PySide2.QtTest.QTouchEventSequence": PySide2.QtTest.QTest.QTouchEventSequence,
-    })
-    return locals()
-
-# from 5.9
-def init_PySide2_QtWebEngineWidgets():
-    type_map.update({
-        "zero(PySide2.QtWebEngineWidgets.QWebEnginePage.FindFlags)": 0,
     })
     return locals()
 
@@ -661,6 +670,10 @@ def init_PySide2_QtDataVisualization():
     QtDataVisualization.QSurfaceDataArray = typing.List[QtDataVisualization.QSurfaceDataRow]
     type_map.update({
         "100.0f": 100.0,
+        "QtDataVisualization.QBarDataArray": QtDataVisualization.QBarDataArray,
+        "QtDataVisualization.QBarDataArray*": QtDataVisualization.QBarDataArray,
+        "QtDataVisualization.QSurfaceDataArray": QtDataVisualization.QSurfaceDataArray,
+        "QtDataVisualization.QSurfaceDataArray*": QtDataVisualization.QSurfaceDataArray,
     })
     return locals()
 

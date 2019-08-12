@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -483,6 +483,8 @@ public:
 
     QString cppSignature() const;
 
+    QString pythonSignature() const;
+
     AbstractMetaType *copy() const;
     bool applyArrayModification(QString *errorMessage);
 
@@ -540,12 +542,14 @@ public:
 private:
     TypeUsagePattern determineUsagePattern() const;
     QString formatSignature(bool minimal) const;
+    QString formatPythonSignature(bool minimal) const;
 
     const TypeEntry *m_typeEntry = nullptr;
     AbstractMetaTypeList m_instantiations;
     QString m_package;
     mutable QString m_name;
     mutable QString m_cachedCppSignature;
+    mutable QString m_cachedPythonSignature;
     QString m_originalTypeDescription;
 
     int m_arrayElementCount = -1;

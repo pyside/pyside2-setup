@@ -126,6 +126,29 @@ Variables
   Replaced by a |project| conversion call that converts a Python variable
   to a C++ variable of the type indicated by ``CPPTYPE``.
 
+   Typically, this is a variable assignment:
+
+      .. code-block:: c++
+
+         double value = %CONVERTTOCPP[double](pyValue);
+
+   Pointer assignments are also possible:
+
+      .. code-block:: c++
+
+         void f(double *valuePtr)
+         {
+             *valuePtr = %CONVERTTOCPP[double](pyValue);
+
+   Note however, that for variable definitions, the type must
+   be a space-delimited token:
+
+      .. code-block:: c++
+
+         double * valuePtr = %CONVERTTOCPP[double](pyValue);
+
+   since it otherwise would be indistinguishable from the pointer assignment
+   above.
 
 .. _converttopython:
 

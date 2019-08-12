@@ -287,6 +287,7 @@ public:
     FileModelItem file() const;
 
     void getStartPosition(int *line, int *column);
+    int startLine() const { return m_startLine; }
     void setStartPosition(int line, int column);
 
     void getEndPosition(int *line, int *column);

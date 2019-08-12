@@ -221,6 +221,7 @@
     <modify-function signature="setUniformValueArray(int,const GLint*,int)" rename="setUniformValueArrayInt">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence"/>
+            <array/>
         </modify-argument>
         <modify-argument index="3">
              <remove-argument />
@@ -237,6 +238,7 @@
     <modify-function signature="setUniformValueArray(int,const GLuint*,int)" rename="setUniformValueArrayUint">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence"/>
+            <array/>
         </modify-argument>
         <modify-argument index="3">
              <remove-argument />
@@ -445,6 +447,7 @@
     <modify-function signature="setUniformValueArray(const char*,const GLint*,int)" rename="setUniformValueArrayInt">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence"/>
+            <array/>
         </modify-argument>
         <modify-argument index="3">
              <remove-argument />
@@ -461,6 +464,7 @@
     <modify-function signature="setUniformValueArray(const char*,const GLuint*,int)" rename="setUniformValueArrayUint">
         <modify-argument index="2" >
             <replace-type modified-type="PySequence"/>
+            <array/>
         </modify-argument>
         <modify-argument index="3">
              <remove-argument />

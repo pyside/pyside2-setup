@@ -53,6 +53,7 @@ directory (e.g. setup.py bdist_wheel was already executed).
 """
 from __future__ import print_function, absolute_import
 
+from argparse import ArgumentParser, RawTextHelpFormatter
 import os, sys
 
 try:
@@ -327,12 +328,13 @@ def try_build_examples():
     run_make()
 
 
-def run_wheel_tests():
+def run_wheel_tests(install_wheels):
     wheels_dir = get_wheels_dir()
     py_version = sys.version_info[0]
 
-    log.info("Attempting to install wheels.\n")
-    try_install_wheels(wheels_dir, py_version)
+    if install_wheels:
+        log.info("Attempting to install wheels.\n")
+        try_install_wheels(wheels_dir, py_version)
 
     log.info("Attempting to build examples.\n")
     try_build_examples()
@@ -341,4 +343,10 @@ def run_wheel_tests():
 
 
 if __name__ == "__main__":
-    run_wheel_tests()
+    parser = ArgumentParser(description="wheel_tester",
+                           formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--no-install-wheels', '-n', action='store_true',
+                        help='Do not install wheels'
+                             ' (for developer builds with virtualenv)')
+    options = parser.parse_args()
+    run_wheel_tests(not options.no_install_wheels)
