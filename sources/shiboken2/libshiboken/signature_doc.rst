@@ -73,8 +73,8 @@ It calls ``GetSignature_Function`` which returns the signature if it is found.
 Why this Code is Fast
 ---------------------
 
-It costs a little time (maybe 4 seconds) to run througs every single signature
-object, since these are more than 15000 Python objects. But all the signature
+It costs a little time (maybe 6 seconds) to run througs every single signature
+object, since these are more than 25000 Python objects. But all the signature
 objects will be rarely accessed but in special applications.
 The normal case are only a few accesses, and these are working pretty fast.
 
@@ -111,10 +111,6 @@ the ``signature`` Python package. It has the following structure::
 
     shiboken2/files.dir/shibokensupport/
                                         backport_inspect.py
-                                        python_minilib_2_7.py
-                                        python_minilib_3_5.py
-                                        python_minilib_3_6.py
-                                        python_minilib_3_7.py
 
                                         signature/
                                                   loader.py
@@ -125,6 +121,8 @@ the ``signature`` Python package. It has the following structure::
 
                                                   lib/
                                                       enum_sig.py
+                                                      tool.py
+
 
 
 Really important are the **parser**, **mapping**, **errorhandler**, **enum_sig**,

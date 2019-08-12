@@ -1,6 +1,7 @@
 project(QtWinExtras)
 
 set(QtWinExtras_SRC
+${QtWinExtras_GEN_DIR}/qtwin_wrapper.cpp
 ${QtWinExtras_GEN_DIR}/qwincolorizationchangeevent_wrapper.cpp
 ${QtWinExtras_GEN_DIR}/qwincompositionchangeevent_wrapper.cpp
 ${QtWinExtras_GEN_DIR}/qwinevent_wrapper.cpp

@@ -3032,18 +3032,21 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
     s << INDENT << "if (kwds) {" << endl;
     {
         Indentation indent(INDENT);
-        s << INDENT << "PyObject *";
+        s << INDENT << "PyObject *keyName = nullptr;" << endl;
+        s << INDENT << "PyObject *value = nullptr;" << endl;
         for (const AbstractMetaArgument *arg : args) {
             int pyArgIndex = arg->argumentIndex() - OverloadData::numberOfRemovedArguments(func, arg->argumentIndex());
             QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
-            s << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
+            s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg->name() << "\");" << endl;
+            s << INDENT << "if (PyDict_Contains(kwds, keyName)) {" << endl;
+            s << INDENT << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
             s << INDENT << "if (value && " << pyArgName << ") {" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << pyErrString.arg(arg->name()) << endl;
                 s << INDENT << returnStatement(m_currentErrorCode) << endl;
             }
-            s << INDENT << "} else if (value) {" << endl;
+            s << INDENT << INDENT << "} else if (value) {" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << pyArgName << " = value;" << endl;
@@ -3058,6 +3061,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
             s << INDENT << '}' << endl;
             if (arg != args.constLast())
                 s << INDENT;
+            s << "}" << endl;
         }
     }
     s << INDENT << '}' << endl;
@@ -4558,23 +4562,6 @@ void CppGenerator::writeMethodDefinition(QTextStream &s, const AbstractMetaFunct
     s << ',' << endl;
 }
 
-static QString resolveRetOrArgType(const AbstractMetaType *someType)
-{
-    QString strRetArg;
-    if (CppGenerator::isCString(someType)) {
-        strRetArg = QLatin1String("str");
-    } else if (someType->isPrimitive()) {
-        auto ptp = static_cast<const PrimitiveTypeEntry *>(someType->typeEntry());
-        while (ptp->referencedTypeEntry())
-            ptp = ptp->referencedTypeEntry();
-        strRetArg = ptp->name();
-    } else {
-        strRetArg = someType->fullName();
-    }
-    strRetArg.replace(QLatin1String("::"), QLatin1String("."));
-    return strRetArg;
-}
-
 void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads)
 {
     OverloadData overloadData(overloads, this);
@@ -4588,11 +4575,7 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         QStringList args;
         const AbstractMetaArgumentList &arguments = f->arguments();
         for (const AbstractMetaArgument *arg : arguments)  {
-            AbstractMetaType *argType = getTypeWithoutContainer(arg->type());
-            QString strArg = resolveRetOrArgType(arg->type());
-            // PYSIDE-921: Handle container returntypes correctly.
-            if (argType != arg->type())
-                strArg += QLatin1Char('[') + resolveRetOrArgType(argType) + QLatin1Char(']');
+            QString strArg = arg->type()->pythonSignature();
             if (!arg->defaultValueExpression().isEmpty()) {
                 strArg += QLatin1Char('=');
                 QString e = arg->defaultValueExpression();
@@ -4607,12 +4590,8 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         if (multiple)
             s << idx-- << ':';
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
-        AbstractMetaType *returnType = getTypeWithoutContainer(f->type());
-        // PYSIDE-921: Handle container returntypes correctly.
-        if (returnType != f->type())
-            s << "->" << resolveRetOrArgType(f->type()) << '[' << resolveRetOrArgType(returnType) << ']';
-        else if (returnType)
-            s << "->" << resolveRetOrArgType(returnType);
+        if (f->type())
+            s << "->" << f->type()->pythonSignature();
         s << endl;
     }
 }

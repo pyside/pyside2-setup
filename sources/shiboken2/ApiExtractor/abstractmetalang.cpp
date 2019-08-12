@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -266,6 +266,15 @@ QString AbstractMetaType::cppSignature() const
     if (m_cachedCppSignature.isEmpty())
         m_cachedCppSignature = formatSignature(false);
     return m_cachedCppSignature;
+}
+
+QString AbstractMetaType::pythonSignature() const
+{
+    // PYSIDE-921: Handle container returntypes correctly.
+    // This is now a clean reimplementation.
+    if (m_cachedPythonSignature.isEmpty())
+        m_cachedPythonSignature = formatPythonSignature(false);
+    return m_cachedPythonSignature;
 }
 
 AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() const
@@ -2552,6 +2561,58 @@ QString AbstractMetaType::formatSignature(bool minimal) const
         result += QLatin1String("&&");
         break;
     }
+    return result;
+}
+
+QString AbstractMetaType::formatPythonSignature(bool minimal) const
+{
+    /*
+     * This is a version of the above, more suitable for Python.
+     * We avoid extra keywords that are not needed in Python.
+     * We prepend the package name, unless it is a primitive type.
+     *
+     * Primitive types like 'int', 'char' etc.:
+     * When we have a primitive with an indirection, we use that '*'
+     * character for later postprocessing, since those indirections
+     * need to be modified into a result tuple.
+     */
+    QString result;
+    if (m_pattern == AbstractMetaType::NativePointerAsArrayPattern)
+        result += QLatin1String("array ");
+    // We no longer use the "const" qualifier for heuristics. Instead,
+    // NativePointerAsArrayPattern indicates when we have <array> in XML.
+    // if (m_typeEntry->isPrimitive() && isConstant())
+    //     result += QLatin1String("const ");
+    if (!m_typeEntry->isPrimitive() && !package().isEmpty())
+        result += package() + QLatin1Char('.');
+    if (isArray()) {
+        // Build nested array dimensions a[2][3] in correct order
+        result += m_arrayElementType->formatPythonSignature(true);
+        const int arrayPos = result.indexOf(QLatin1Char('['));
+        if (arrayPos != -1)
+            result.insert(arrayPos, formatArraySize(m_arrayElementCount));
+        else
+            result.append(formatArraySize(m_arrayElementCount));
+    } else {
+        result += typeEntry()->qualifiedCppName();
+    }
+    if (!m_instantiations.isEmpty()) {
+        result += QLatin1Char('[');
+        for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
+            if (i > 0)
+                result += QLatin1String(", ");
+            result += m_instantiations.at(i)->formatPythonSignature(true);
+        }
+        result += QLatin1Char(']');
+    }
+    if (m_typeEntry->isPrimitive())
+        for (Indirection i : m_indirections)
+            result += TypeInfo::indirectionKeyword(i);
+    // If it is a flags type, we replace it with the full name:
+    // "PySide2.QtCore.Qt.ItemFlags" instead of "PySide2.QtCore.QFlags<Qt.ItemFlag>"
+    if (m_typeEntry->isFlags())
+        result = fullName();
+    result.replace(QLatin1String("::"), QLatin1String("."));
     return result;
 }
 
