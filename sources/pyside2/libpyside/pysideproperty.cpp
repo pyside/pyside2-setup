@@ -175,7 +175,7 @@ int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                      /*s*/      &doc,
                                      /*O*/      &(pData->notify),
                                      /*bbbbbb*/ &(pData->designable), &(pData->scriptable), &(pData->stored), &(pData->user), &(pData->constant), &(pData->final))) {
-        return 0;
+        return -1;
     }
 
     if (doc) {
@@ -198,7 +198,7 @@ int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         Py_XINCREF(pData->freset);
         Py_XINCREF(pData->fdel);
         Py_XINCREF(pData->notify);
-        return 1;
+        return 0;
     }
     pData->fget = nullptr;
     pData->fset = nullptr;

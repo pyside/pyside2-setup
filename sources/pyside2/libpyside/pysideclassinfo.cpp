@@ -161,7 +161,7 @@ int classInfoTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         }
     }
 
-    return PyErr_Occurred() ? -1 : 1;
+    return PyErr_Occurred() ? -1 : 0;
 }
 
 void classInfoFree(void *self)

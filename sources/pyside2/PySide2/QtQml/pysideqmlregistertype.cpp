@@ -215,13 +215,13 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                      &data->at,
                                      &data->clear,
                                      &data->count)) {
-        return 0;
+        return -1;
     }
     PySide::Property::setMetaCallHandler(pySelf, &propListMetaCall);
     PySide::Property::setTypeName(pySelf, "QQmlListProperty<QObject>");
     PySide::Property::setUserData(pySelf, data);
 
-    return 1;
+    return 0;
 }
 
 void propListTpFree(void *self)

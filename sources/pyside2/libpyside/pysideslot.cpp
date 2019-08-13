@@ -104,7 +104,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore." SLOT_DEC_NAME,
                                      const_cast<char **>(kwlist), &argName, &argResult)) {
-        return 0;
+        return -1;
     }
 
     PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
@@ -128,7 +128,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     data->slotData->resultType = argResult
         ? PySide::Signal::getTypeName(argResult) : PySide::Signal::voidType();
 
-    return 1;
+    return 0;
 }
 
 PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)

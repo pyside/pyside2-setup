@@ -212,7 +212,7 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kwds,
         "|sO:QtCore." SIGNAL_CLASS_NAME, const_cast<char **>(kwlist), &argName, &argArguments))
-        return 0;
+        return -1;
 
     bool tupledArgs = false;
     PySideSignal *data = reinterpret_cast<PySideSignal *>(self);
@@ -257,7 +257,7 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                     PySide::Signal::SignalSignature(sig));
     }
 
-    return 1;
+    return 0;
 }
 
 void signalFree(void *self)
