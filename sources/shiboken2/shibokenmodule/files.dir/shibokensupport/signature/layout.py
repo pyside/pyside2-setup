@@ -174,6 +174,13 @@ def make_signature_nameless(signature):
         signature.parameters[key].__class__ = NamelessParameter
 
 
+_POSITIONAL_ONLY         = inspect._POSITIONAL_ONLY
+_POSITIONAL_OR_KEYWORD   = inspect._POSITIONAL_OR_KEYWORD
+_VAR_POSITIONAL          = inspect._VAR_POSITIONAL
+_KEYWORD_ONLY            = inspect._KEYWORD_ONLY
+_VAR_KEYWORD             = inspect._VAR_KEYWORD
+_empty                   = inspect._empty
+
 def create_signature(props, key):
     if not props:
         # empty signatures string
@@ -204,8 +211,8 @@ def create_signature(props, key):
         elif sig_kind == "classmethod":
             varnames = ("klass",) + varnames
         else:
-            raise SystemError("Methods must be function, method, staticmethod or "
-                              "classmethod")
+            raise SystemError("Methods must be function, method, staticmethod"
+                              " or classmethod")
     # calculate the modifications
     defaults = props["defaults"][:]
     if not layout.defaults:
@@ -216,14 +223,25 @@ def create_signature(props, key):
     if not layout.return_annotation and "return" in annotations:
         del annotations["return"]
 
-    # attach parameters to a fake function and build a signature
-    argstr = ", ".join(varnames)
-    fakefunc = eval("lambda {}: None".format(argstr))
-    fakefunc.__name__ = props["name"]
-    fakefunc.__defaults__ = defaults
-    fakefunc.__kwdefaults__ = props["kwdefaults"]
-    fakefunc.__annotations__ = annotations
-    sig = inspect._signature_from_function(inspect.Signature, fakefunc)
+    # Build a signature.
+    kind = inspect._POSITIONAL_OR_KEYWORD
+    params = []
+    for idx, name in enumerate(varnames):
+        if name.startswith("**"):
+            kind = _VAR_KEYWORD
+        elif name.startswith("*"):
+            kind = _VAR_POSITIONAL
+        ann = annotations.get(name, _empty)
+        name = name.lstrip("*")
+        defpos = idx - len(varnames) + len(defaults)
+        default = defaults[defpos] if defpos >= 0 else _empty
+        param = inspect.Parameter(name, kind, annotation=ann, default=default)
+        params.append(param)
+        if kind == _VAR_POSITIONAL:
+            kind = _KEYWORD_ONLY
+    sig = inspect.Signature(params,
+           return_annotation=annotations.get('return', _empty),
+           __validate_parameters__=False)
 
     # the special case of nameless parameters
     if not layout.parameter_names:

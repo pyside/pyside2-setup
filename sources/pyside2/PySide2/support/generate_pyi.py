@@ -141,7 +141,7 @@ class Formatter(Writer):
             self.outfile.seek(here)
             self.outfile.truncate()
             # Note: we cannot use class_str when we have no body.
-            self.print("{spaces}class {class_name}: ...".format(**locals()))
+            self.print("{spaces}class {class_str}: ...".format(**locals()))
         if "<" in class_name:
             # This is happening in QtQuick for some reason:
             ## class QSharedPointer<QQuickItemGrabResult >:
@@ -167,6 +167,13 @@ class Formatter(Writer):
         if self.class_name and not is_meth:
             self.print('{spaces}@staticmethod'.format(**locals()))
         self.print('{spaces}def {func_name}{signature}: ...'.format(**locals()))
+
+    @contextmanager
+    def enum(self, class_name, enum_name, value):
+        spaces = self.spaces
+        hexval = hex(value)
+        self.print("{spaces}{enum_name:20}: {class_name} = ... # {hexval}".format(**locals()))
+        yield
 
 
 def get_license_text():
@@ -247,10 +254,10 @@ def generate_all_pyi(outpath, options):
         os.environ["PYTHONPATH"] = pypath
 
     # now we can import
-    global PySide2, inspect, HintingEnumerator
+    global PySide2, inspect, HintingEnumerator, EnumType
     import PySide2
     from PySide2.support.signature import inspect
-    from PySide2.support.signature.lib.enum_sig import HintingEnumerator
+    from PySide2.support.signature.lib.enum_sig import HintingEnumerator, EnumType
 
     # propagate USE_PEP563 to the mapping module.
     # Perhaps this can be automated?

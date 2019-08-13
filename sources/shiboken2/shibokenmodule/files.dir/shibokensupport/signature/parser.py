@@ -116,7 +116,7 @@ def _parse_line(line):
                 print("KEYWORD", ret)
             name = name + "_"
         if "=" in ann:
-            ann, default = ann.split("=")
+            ann, default = ann.split("=", 1)
             tup = name, ann, default
         else:
             tup = name, ann
@@ -167,9 +167,11 @@ def try_to_guess(thing, valtype):
 
 def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
-        if valtype.startswith("PySide2."):
+        if valtype.startswith("PySide2.") or valtype.startswith("typing."):
             return None
-        name = type_map[valtype].__name__
+        mapped = type_map[valtype]
+        # typing.Any: '_SpecialForm' object has no attribute '__name__'
+        name = mapped.__name__ if hasattr(mapped, "__name__") else str(mapped)
         thing = "zero({})".format(name)
     if thing in type_map:
         return type_map[thing]
@@ -275,9 +277,9 @@ def calculate_props(line):
     for idx, tup in enumerate(arglist):
         name, ann = tup[:2]
         if ann == "...":
-            name = "*args"
-            # copy the fields back :()
-            ann = 'NULL' # maps to None
+            name = "*args" if name.startswith("arg_") else "*" + name
+            # copy the pathed fields back
+            ann = 'nullptr'     # maps to None
             tup = name, ann
             arglist[idx] = tup
         annotations[name] = _resolve_type(ann, line, 0)

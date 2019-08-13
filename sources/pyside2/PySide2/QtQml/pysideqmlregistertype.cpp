@@ -41,6 +41,7 @@
 
 // shiboken
 #include <shiboken.h>
+#include <signature.h>
 
 // pyside
 #include <pyside.h>
@@ -469,12 +470,22 @@ PyTypeObject *QtQml_VolatileBoolTypeF(void)
     return type;
 }
 
+static const char *PropertyList_SignatureStrings[] = {
+    "PySide2.QtQml.ListProperty(type:type,append:typing.Callable,"
+        "at:typing.Callable=None,clear:typing.Callable=None,count:typing.Callable=None)",
+    nullptr}; // Sentinel
+
+static const char *VolatileBool_SignatureStrings[] = {
+    "PySide2.QtQml.VolatileBool.get()->bool",
+    "PySide2.QtQml.VolatileBool.set(a:object)",
+    nullptr}; // Sentinel
+
 void PySide::initQmlSupport(PyObject *module)
 {
     ElementFactory<PYSIDE_MAX_QML_TYPES - 1>::init();
 
     // Export QmlListProperty type
-    if (PyType_Ready(PropertyListTypeF()) < 0) {
+    if (SbkSpecial_Type_Ready(module, PropertyListTypeF(), PropertyList_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing PropertyList type.";
         return;
@@ -484,7 +495,7 @@ void PySide::initQmlSupport(PyObject *module)
     PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
                        reinterpret_cast<PyObject *>(PropertyListTypeF()));
 
-    if (PyType_Ready(QtQml_VolatileBoolTypeF()) < 0) {
+    if (SbkSpecial_Type_Ready(module, QtQml_VolatileBoolTypeF(), VolatileBool_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing VolatileBool type.";
         return;

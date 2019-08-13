@@ -67,6 +67,10 @@ ModelIndexList = typing.List[int]
 QImageCleanupFunction = typing.Callable
 StringList = typing.List[str]
 
+# unfortunately, typing.Optional[t] expands to typing.Union[t, NoneType]
+# Until we can force it to create Optional[t] again, we use this.
+NoneType = type(None)
+
 _S = TypeVar("_S")
 
 # Building our own Char type, which is much nicer than
@@ -316,6 +320,7 @@ type_map.update({
     "zero(int)": 0,
     "zero(object)": None,
     "zero(str)": "",
+    "...": "...",
     })
 
 
@@ -345,6 +350,7 @@ def init_sample():
         "Foo.HANDLE": int,
         "HANDLE": int,
         "Null": None,
+        "nullptr": None,
         "ObjectType.Identifier": Missing("sample.ObjectType.Identifier"),
         "OddBool": bool,
         "PStr": str,

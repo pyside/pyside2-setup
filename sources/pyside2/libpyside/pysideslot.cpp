@@ -45,8 +45,7 @@
 
 #include <QtCore/QMetaObject>
 #include <QtCore/QString>
-
-#define SLOT_DEC_NAME "Slot"
+#include <signature.h>
 
 struct SlotData
 {
@@ -76,7 +75,7 @@ static PyType_Slot PySideSlotType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideSlotType_spec = {
-    "PySide2.QtCore." SLOT_DEC_NAME,
+    "PySide2.QtCore.Slot",
     sizeof(PySideSlot),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -102,7 +101,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     if (emptyTuple == 0)
         emptyTuple = PyTuple_New(0);
 
-    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore." SLOT_DEC_NAME,
+    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore.Slot",
                                      const_cast<char **>(kwlist), &argName, &argResult)) {
         return -1;
     }
@@ -177,15 +176,20 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 } // extern "C"
 
-namespace PySide { namespace Slot {
+namespace PySide {
+namespace Slot {
+
+static const char *Slot_SignatureStrings[] = {
+    "PySide2.QtCore.Slot(*types:type,name:str=nullptr,result:str=nullptr)->typing.Callable[...,typing.Optional[str]]",
+    nullptr}; // Sentinel
 
 void init(PyObject *module)
 {
-    if (PyType_Ready(PySideSlotTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySideSlotTypeF(), Slot_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySideSlotTypeF());
-    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(PySideSlotTypeF()));
+    PyModule_AddObject(module, "Slot", reinterpret_cast<PyObject *>(PySideSlotTypeF()));
 }
 
 } // namespace Slot

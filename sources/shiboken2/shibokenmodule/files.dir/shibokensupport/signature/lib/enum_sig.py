@@ -52,6 +52,11 @@ by producing a lot of clarity.
 import sys
 from shibokensupport.signature import inspect
 from shibokensupport.signature import get_signature
+try:
+    from PySide2.QtCore import Qt
+    EnumType = type(Qt.Key)
+except ImportError:
+    EnumType = None
 
 
 class ExactEnumerator(object):
@@ -82,7 +87,8 @@ class ExactEnumerator(object):
             return ret
 
     def klass(self, class_name, klass):
-        if not "Shiboken" in repr(klass.mro()):
+        modname = klass.__module__
+        if not (modname.startswith("PySide2") or modname.startswith("shiboken2")):
             # don't look into any foreign classes!
             ret = self.result_type()
             return ret
@@ -111,6 +117,8 @@ class ExactEnumerator(object):
                     ret.update(self.function(func_name, thing))
             for subclass_name, subclass in subclasses:
                 ret.update(self.klass(subclass_name, subclass))
+                if isinstance(subclass, EnumType):
+                    self.enum(subclass)
             return ret
 
     def function(self, func_name, func):
@@ -120,6 +128,16 @@ class ExactEnumerator(object):
             with self.fmt.function(func_name, signature) as key:
                 ret[key] = signature
         return ret
+
+    def enum(self, subclass):
+        if not hasattr(self.fmt, "enum"):
+            # this is an optional feature
+            return
+        class_name = subclass.__name__
+        for enum_name, value in subclass.__dict__.items():
+            if type(type(value)) is EnumType:
+                with self.fmt.enum(class_name, enum_name, int(value)):
+                    pass
 
 
 def stringify(signature):
