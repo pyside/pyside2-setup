@@ -118,5 +118,13 @@ class ObjectTypeTest(unittest.TestCase):
 
         self.assertLess(abs(before - after), 5)
 
+    def testInvalidProperty(self):
+        o = ObjectType()
+        try:
+            o.typo
+            self.assertFail()
+        except AttributeError as error:
+            self.assertEqual(error.args[0], "'sample.ObjectType' object has no attribute 'typo'")
+
 if __name__ == '__main__':
     unittest.main()
