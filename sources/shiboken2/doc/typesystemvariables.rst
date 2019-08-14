@@ -150,6 +150,8 @@ Variables
    since it otherwise would be indistinguishable from the pointer assignment
    above.
 
+   It is possible to use "auto" as type.
+
 .. _converttopython:
 
 **%CONVERTTOPYTHON[CPPTYPE]**

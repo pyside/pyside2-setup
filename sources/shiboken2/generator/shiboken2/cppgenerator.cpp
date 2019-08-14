@@ -5387,7 +5387,7 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &conte
                 s << INDENT << "PyTypeObject *tp = Py_TYPE(self);" << endl;
                 s << INDENT << "PyErr_Format(PyExc_AttributeError," << endl;
                 s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\"," << endl;
-                s << INDENT << "             tp->tp_name, PyBytes_AS_STRING(name));" << endl;
+                s << INDENT << "             tp->tp_name, Shiboken::String::toCString(name));" << endl;
                 s << INDENT << "return nullptr;" << endl;
             }
             s << INDENT << "} else {" << endl;

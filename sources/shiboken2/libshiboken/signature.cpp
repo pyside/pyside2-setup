@@ -187,8 +187,12 @@ _get_class_of_descr(PyObject *ob)
 }
 
 static PyObject *
-GetClassOfFunc(PyObject *ob)
+GetClassOrModOf(PyObject *ob)
 {
+    /*
+     * Return the type or module of a function or type.
+     * The purpose is finally to use the name of the object.
+     */
     if (PyType_Check(ob)) {
         // PySide-928: The type case must do refcounting like the others as well.
         Py_INCREF(ob);
@@ -202,7 +206,7 @@ GetClassOfFunc(PyObject *ob)
         return _get_class_of_descr(ob);
     if (Py_TYPE(ob) == &PyWrapperDescr_Type)
         return _get_class_of_descr(ob);
-    Py_FatalError("unexpected type in GetClassOfFunc");
+    Py_FatalError("unexpected type in GetClassOrModOf");
     return nullptr;
 }
 
@@ -227,7 +231,7 @@ compute_name_key(PyObject *ob)
     if (PyType_Check(ob))
         return GetTypeKey(ob);
     Shiboken::AutoDecRef func_name(get_funcname(ob));
-    Shiboken::AutoDecRef type_key(GetTypeKey(GetClassOfFunc(ob)));
+    Shiboken::AutoDecRef type_key(GetTypeKey(GetClassOrModOf(ob)));
     return Py_BuildValue("(OO)", type_key.object(), func_name.object());
 }
 
@@ -267,7 +271,7 @@ name_key_to_func(PyObject *ob)
     PyObject *ret = PyDict_GetItem(pyside_globals->map_dict, name_key);
     if (ret == nullptr) {
         // do a lazy initialization
-        Shiboken::AutoDecRef type_key(GetTypeKey(GetClassOfFunc(ob)));
+        Shiboken::AutoDecRef type_key(GetTypeKey(GetClassOrModOf(ob)));
         PyObject *type = PyDict_GetItem(pyside_globals->map_dict,
                                         type_key);
         if (type == nullptr)
@@ -364,7 +368,7 @@ GetSignature_Function(PyObject *obfunc, const char *modifier)
     // make sure that we look into PyCFunction, only...
     if (Py_TYPE(obfunc) == PepFunction_TypePtr)
         Py_RETURN_NONE;
-    Shiboken::AutoDecRef obtype_mod(GetClassOfFunc(obfunc));
+    Shiboken::AutoDecRef obtype_mod(GetClassOrModOf(obfunc));
     Shiboken::AutoDecRef type_key(GetTypeKey(obtype_mod));
     if (type_key.isNull())
         Py_RETURN_NONE;
@@ -674,10 +678,16 @@ handle_doc(PyObject *ob, PyObject *old_descr)
 {
     init_module_1();
     init_module_2();
-    Shiboken::AutoDecRef ob_type(GetClassOfFunc(ob));
-    auto *type = reinterpret_cast<PyTypeObject *>(ob_type.object());
-    if (handle_doc_in_progress || strncmp(type->tp_name, "PySide2.", 8) != 0)
-        return PyObject_CallMethod(old_descr, const_cast<char *>("__get__"), const_cast<char *>("(O)"), ob);
+    Shiboken::AutoDecRef ob_type_mod(GetClassOrModOf(ob));
+    const char *name;
+    if (PyModule_Check(ob_type_mod))
+        name = PyModule_GetName(ob_type_mod);
+    else
+        name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
+    if (handle_doc_in_progress || name == nullptr
+        || strncmp(name, "PySide2.", 8) != 0)
+        return PyObject_CallMethod(old_descr, const_cast<char *>("__get__"),
+            const_cast<char *>("(O)"), ob);
     handle_doc_in_progress++;
     PyObject *res = PyObject_CallFunction(
                         pyside_globals->make_helptext_func,
