@@ -449,7 +449,8 @@ bool Generator::generate()
 
 bool Generator::shouldGenerateTypeEntry(const TypeEntry *type) const
 {
-    return type->codeGeneration() & TypeEntry::GenerateTargetLang;
+    return (type->codeGeneration() & TypeEntry::GenerateTargetLang)
+        && NamespaceTypeEntry::isVisibleScope(type);
 }
 
 bool Generator::shouldGenerate(const AbstractMetaClass *metaClass) const
@@ -893,8 +894,12 @@ static QString getClassTargetFullName_(const T *t, bool includePackageName)
     QString name = t->name();
     const AbstractMetaClass *context = t->enclosingClass();
     while (context) {
-        name.prepend(QLatin1Char('.'));
-        name.prepend(context->name());
+        // If the type was marked as 'visible=false' we should not use it in
+        // the type name
+        if (NamespaceTypeEntry::isVisibleScope(context->typeEntry())) {
+            name.prepend(QLatin1Char('.'));
+            name.prepend(context->name());
+        }
         context = context->enclosingClass();
     }
     if (includePackageName) {

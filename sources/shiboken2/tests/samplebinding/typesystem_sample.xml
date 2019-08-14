@@ -543,8 +543,9 @@
 
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
 
-    <namespace-type name="Invisible" generate="no">
+    <namespace-type name="Invisible" visible="no">
         <enum-type name="EnumOnNamespace" />
+        <value-type name="ObjectOnInvisibleNamespace" />
     </namespace-type>
 
     <namespace-type name="SampleNamespace">

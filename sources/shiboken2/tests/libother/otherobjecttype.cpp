@@ -34,3 +34,13 @@ operator<<(Collector& collector, const OtherObjectType& obj)
     collector << obj.identifier()*2;
     return collector;
 }
+
+int OtherObjectType::enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum value)
+{
+    return static_cast<int>(value);
+}
+
+int OtherObjectType::enumAsIntForInvisibleNamespace(Invisible::EnumOnNamespace value)
+{
+    return static_cast<int>(value);
+}

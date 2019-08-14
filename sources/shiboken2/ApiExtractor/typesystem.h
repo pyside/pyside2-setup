@@ -1535,6 +1535,11 @@ public:
 
     bool matchesFile(const QString &needle) const;
 
+    bool isVisible() const;
+    void setVisibility(TypeSystem::Visibility v) { m_visibility = v; }
+
+    static bool isVisibleScope(const TypeEntry *e);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -1545,6 +1550,7 @@ protected:
 private:
     QRegularExpression m_filePattern;
     const NamespaceTypeEntry *m_extends = nullptr;
+    TypeSystem::Visibility m_visibility = TypeSystem::Visibility::Auto;
     bool m_hasPattern = false;
 };
 

@@ -326,7 +326,8 @@ void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *t
 
 void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass)
 {
-    if (!metaClass->typeEntry()->generateCode())
+    auto typeEntry = metaClass->typeEntry();
+    if (!typeEntry->generateCode() || !NamespaceTypeEntry::isVisibleScope(typeEntry))
         return;
     writeTypeIndexValueLine(s, metaClass->typeEntry());
     const AbstractMetaEnumList &enums = metaClass->enums();

@@ -5511,9 +5511,8 @@ bool CppGenerator::finishGeneration()
     const AbstractMetaClassList &classList = classes();
     for (const AbstractMetaClass *metaClass : classList) {
         const AbstractMetaClass *encClass = metaClass->enclosingClass();
-        if (encClass && encClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
-            continue;
-        lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
+        if (!encClass || !NamespaceTypeEntry::isVisibleScope(encClass->typeEntry()))
+            lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
     }
 
     TypeDatabase *typeDb = TypeDatabase::instance();

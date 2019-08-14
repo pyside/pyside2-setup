@@ -326,7 +326,7 @@ void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumLi
 {
     Q_ASSERT(metaClass);
     // if a scope is not to be generated, collect its enums into the parent scope
-    if (metaClass->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass) {
+    if (!NamespaceTypeEntry::isVisibleScope(metaClass->typeEntry())) {
         const AbstractMetaEnumList &enums = metaClass->enums();
         for (AbstractMetaEnum *metaEnum : enums) {
             if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode()
@@ -360,7 +360,8 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClas
     QString fullClassName = metaClass->name();
     const AbstractMetaClass *enclosing = metaClass->enclosingClass();
     while (enclosing) {
-        fullClassName.prepend(enclosing->name() + QLatin1Char('.'));
+        if (NamespaceTypeEntry::isVisibleScope(enclosing->typeEntry()))
+            fullClassName.prepend(enclosing->name() + QLatin1Char('.'));
         enclosing = enclosing->enclosingClass();
     }
     fullClassName.prepend(packageName() + QLatin1Char('.'));

@@ -148,6 +148,7 @@ namespace-type
 
         <typesystem>
             <namespace-type name="..."
+                visible="true | auto | false"
                 generate="yes | no"
                 package="..."
                 since="..."
@@ -156,8 +157,16 @@ namespace-type
 
     The **name** attribute is the name of the namespace, e.g., "Qt".
 
-    The *optional* **generate** attribute is used to inform if you need to prepend
-    the given namespace into each generated class. Its default value is **yes**.
+    The *optional* **visible** attribute is used specify whether the
+    namespace is visible in the target language name. Its default value is
+    **auto**. It means that normal namespaces are visible, but inline namespaces
+    (as introduced in C++ 11) will not be visible.
+
+    The detection of inline namespaces requires shiboken to be built
+    using LLVM 9.0.
+
+    The *optional* **generate** is a legacy attribute. Specifying
+    **no** is equivalent to **visible="false"**.
 
     The **package** attribute can be used to override the package of the type system.
 

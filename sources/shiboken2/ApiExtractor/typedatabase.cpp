@@ -848,6 +848,7 @@ void NamespaceTypeEntry::formatDebug(QDebug &d) const
     ComplexTypeEntry::formatDebug(d);
     auto pattern = m_filePattern.pattern();
     FORMAT_NONEMPTY_STRING("pattern", pattern)
+    d << ",visibility=" << m_visibility;
 }
 
 void ContainerTypeEntry::formatDebug(QDebug &d) const

@@ -1861,12 +1861,8 @@ const AbstractMetaFunction *AbstractMetaField::setter() const
 const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
 {
     auto result = m_enclosingClass;
-    while (result) {
-        auto typeEntry = result->typeEntry();
-        if (typeEntry->codeGeneration() != TypeEntry::GenerateForSubclass)
-            break;
+    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
         result = result->enclosingClass();
-    }
     return result;
 }
 

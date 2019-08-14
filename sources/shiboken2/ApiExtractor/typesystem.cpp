@@ -704,11 +704,13 @@ QString TypeEntry::buildTargetLangName() const
 {
     QString result = m_entryName;
     for (auto p = parent(); p && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
-        if (!result.isEmpty())
-            result.prepend(QLatin1Char('.'));
-        QString n = p->m_entryName;
-        n.replace(QLatin1String("::"), QLatin1String(".")); // Primitive types may have "std::"
-        result.prepend(n);
+        if (NamespaceTypeEntry::isVisibleScope(p)) {
+            if (!result.isEmpty())
+                result.prepend(QLatin1Char('.'));
+            QString n = p->m_entryName;
+            n.replace(QLatin1String("::"), QLatin1String(".")); // Primitive types may have "std::"
+            result.prepend(n);
+        }
     }
     return result;
 }
@@ -957,6 +959,18 @@ NamespaceTypeEntry::NamespaceTypeEntry(const NamespaceTypeEntry &) = default;
 bool NamespaceTypeEntry::matchesFile(const QString &needle) const
 {
     return m_filePattern.match(needle).hasMatch();
+}
+
+bool NamespaceTypeEntry::isVisible() const
+{
+    return m_visibility == TypeSystem::Visibility::Visible
+        || m_visibility == TypeSystem::Visibility::Auto;
+}
+
+bool NamespaceTypeEntry::isVisibleScope(const TypeEntry *e)
+{
+    return e->type() != TypeEntry::NamespaceType
+        || static_cast<const NamespaceTypeEntry *>(e)->isVisible();
 }
 
 ValueTypeEntry::ValueTypeEntry(const QString &entryName, const QVersionNumber &vr,

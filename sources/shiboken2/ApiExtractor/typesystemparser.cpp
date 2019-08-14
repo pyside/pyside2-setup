@@ -93,6 +93,7 @@ static inline QString sourceAttribute() { return QStringLiteral("source"); }
 static inline QString streamAttribute() { return QStringLiteral("stream"); }
 static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
 static inline QString virtualSlotAttribute() { return QStringLiteral("virtual-slot"); }
+static inline QString visibleAttribute() { return QStringLiteral("visible"); }
 static inline QString enumIdentifiedByValueAttribute() { return QStringLiteral("identified-by-value"); }
 
 static inline QString noAttributeValue() { return QStringLiteral("no"); }
@@ -388,6 +389,17 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"value-type", StackElement::ValueTypeEntry},
     };
 ENUM_LOOKUP_BINARY_SEARCH()
+
+ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
+                  visibilityFromAttribute, TypeSystem::Visibility::Unspecified)
+{
+    {u"no", TypeSystem::Visibility::Invisible},
+    {u"false", TypeSystem::Visibility::Invisible},
+    {u"auto", TypeSystem::Visibility::Auto},
+    {u"yes", TypeSystem::Visibility::Visible},
+    {u"true", TypeSystem::Visibility::Visible},
+};
+ENUM_LOOKUP_LINEAR_SEARCH()
 
 static int indexOfAttribute(const QXmlStreamAttributes &atts,
                             QStringView name)
@@ -1304,8 +1316,8 @@ NamespaceTypeEntry *
     if (!checkRootElement())
         return nullptr;
     QScopedPointer<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
+    auto visibility = TypeSystem::Visibility::Unspecified;
     applyCommonAttributes(result.data(), attributes);
-    applyComplexTypeAttributes(reader, result.data(), attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef attributeName = attributes->at(i).qualifiedName();
         if (attributeName == QLatin1String("files")) {
@@ -1328,8 +1340,23 @@ NamespaceTypeEntry *
                 return nullptr;
             }
             result->setExtends(*extendsIt);
+        } else if (attributeName == visibleAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            visibility = visibilityFromAttribute(attribute.value());
+            if (visibility == TypeSystem::Visibility::Unspecified) {
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgInvalidAttributeValue(attribute)));
+            }
+        } else if (attributeName == generateAttribute()) {
+            if (!convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true))
+                visibility = TypeSystem::Visibility::Invisible;
         }
     }
+
+    if (visibility != TypeSystem::Visibility::Unspecified)
+        result->setVisibility(visibility);
+    // Handle legacy "generate" before the common handling
+    applyComplexTypeAttributes(reader, result.data(), attributes);
 
     if (result->extends() && !result->hasPattern()) {
         m_error = msgExtendingNamespaceRequiresPattern(name);
