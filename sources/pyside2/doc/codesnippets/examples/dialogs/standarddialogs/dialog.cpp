@@ -49,32 +49,32 @@
 ****************************************************************************/
 
 //! [0]
-    i = QInputDialog().getInteger(self, self.tr("QInputDialog().getInteger()"),
-                                     self.tr("Percentage:"), 25, 0, 100, 1, ok)
+    i, ok = QInputDialog().getInteger(self, "QInputDialog().getInteger()",
+                                     "Percentage:", 25, 0, 100, 1)
     if ok:
-        self.integerLabel.setText(self.tr("%1%").arg(i))
+        self.integerLabel.setText("{}%".format(i))
 //! [0]
 
 //! [1]
-    d = QInputDialog().getDouble(self, self.tr("QInputDialog().getDouble()"),
-                                       self.tr("Amount:"), 37.56, -10000, 10000, 2, ok)
+    d, ok = QInputDialog().getDouble(self, "QInputDialog().getDouble()",
+                                       "Amount:", 37.56, -10000, 10000, 2)
     if ok:
-        doubleLabel.setText(QString("$%1").arg(d))
+        doubleLabel.setText("${}".format())
 //! [1]
 
 //! [2]
-    items = [self.tr("Spring"), self.tr("Summer"), self.tr("Fall"), self.tr("Winter")]
+    items = ["Spring", "Summer", "Fall", "Winter"]
 
-    item = QInputDialog().getItem(self, self.tr("QInputDialog().getItem()"),
-                                         selftr("Season:"), items, 0, False, ok)
+    item, ok = QInputDialog().getItem(self, "QInputDialog().getItem()",
+                                         "Season:", items, 0, False)
     if ok and not item.isEmpty():
         itemLabel.setText(item)
 //! [2]
 
 //! [3]
-    text = QInputDialog::getText(self, self.tr("QInputDialog().getText()"),
-                                         self.tr("User name:"), QLineEdit.Normal,
-                                         QDir().home().dirName(), ok)
+    text, ok = QInputDialog().getText(self, "QInputDialog().getText()",
+                                         "User name:", QLineEdit.Normal,
+                                         QDir().home().dirName())
     if ok and text:
         textLabel.setText(text)
 //! [3]
