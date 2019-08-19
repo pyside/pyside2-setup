@@ -174,6 +174,7 @@ class Config(object):
             'Environment :: Win32 (MS Windows)',
             'Intended Audience :: Developers',
             'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+            'License :: Other/Proprietary License',
             'Operating System :: MacOS :: MacOS X',
             'Operating System :: POSIX',
             'Operating System :: POSIX :: Linux',
