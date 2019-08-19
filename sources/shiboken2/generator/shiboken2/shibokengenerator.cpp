@@ -2047,7 +2047,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 QString varName = list.at(1).trimmed();
                 if (!varType.isEmpty()) {
                     const QString conversionSignature = conversionType->cppSignature();
-                    if (varType != conversionSignature)
+                    if (varType != QLatin1String("auto") && varType != conversionSignature)
                         qFatal("%s", qPrintable(msgConversionTypesDiffer(varType, conversionSignature)));
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, conversionType);
