@@ -1289,7 +1289,7 @@ Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
 PyObject *pyTimer = reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>())->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, 0);
 reinterpret_cast<PyTypeObject *>(Shiboken::SbkType<QTimer>())->tp_init(pyTimer, emptyTuple, 0);
 
-QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
+auto timer = %CONVERTTOCPP[QTimer *](pyTimer);
 //XXX  /|\ omitting this space crashes shiboken!
 Shiboken::AutoDecRef result(
     PyObject_CallMethod(pyTimer,
@@ -1484,8 +1484,7 @@ if (PySide::SignalManager::registerMetaMethod(%1, signalName.mid(1).toLatin1().d
 if (!PyObject_TypeCheck(%1, PySideSignalInstanceTypeF()))
     goto Sbk_%TYPEFunc_%FUNCTION_NAME_TypeError;
 PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%1);
-QObject * sender = %CONVERTTOCPP[QObject *](PySide::Signal::getObject(signalInstance));
-//XXX   /|\ omitting this space crashes shiboken!
+auto sender = %CONVERTTOCPP[QObject *](PySide::Signal::getObject(signalInstance));
 QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSignature(signalInstance),%2);
 %PYARG_0 = %CONVERTTOPYTHON[QSignalTransition *](%0);
 // @snippet qstate-addtransition-2

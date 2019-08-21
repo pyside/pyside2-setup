@@ -40,7 +40,6 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtPrintSupport">
-    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
     <load-typesystem name="QtPrintSupport/typesystem_printsupport_common.xml" generate="yes"/>
 </typesystem>
