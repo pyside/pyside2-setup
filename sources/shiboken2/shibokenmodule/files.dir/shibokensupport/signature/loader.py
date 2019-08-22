@@ -151,12 +151,18 @@ def list_modules(message):
         print("  {:23}".format(name), repr(module)[:70])
 
 
+orig_typing = True
 if sys.version_info >= (3,):
     import typing
     import inspect
     inspect.formatannotation = formatannotation
 else:
-    from shibokensupport import typing27 as typing
+    if "typing" not in sys.modules:
+        orig_typing = False
+        from shibokensupport import typing27 as typing
+        sys.modules["typing"] = typing
+    else:
+        import typing
     import inspect
     namespace = inspect.__dict__
     from shibokensupport import backport_inspect as inspect
@@ -196,7 +202,7 @@ def move_into_pyside_package():
     put_into_package(PySide2.support.signature, parser)
     put_into_package(PySide2.support.signature.lib, enum_sig)
 
-    put_into_package(PySide2.support.signature, typing)
+    put_into_package(None if orig_typing else PySide2.support.signature, typing)
     put_into_package(PySide2.support.signature, inspect)
 
 from shibokensupport.signature import mapping
