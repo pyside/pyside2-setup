@@ -99,7 +99,7 @@ CreateSignature(PyObject *props, PyObject *key)
 {
     /*
      * Here is the new function to create all signatures. It simply calls
-     * into Python and creates a signature object for a dummy-function.
+     * into Python and creates a signature object directly.
      * This is so much simpler than using all the attributes explicitly
      * to support '_signature_is_functionlike()'.
      */
@@ -313,7 +313,7 @@ pyside_tp_get___signature__(PyObject *obtype_mod, const char *modifier)
 
 // forward
 static PyObject *
-GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier);
+GetSignature_Cached(PyObject *props, const char *func_kind, const char *modifier);
 
 static PyObject *
 GetTypeKey(PyObject *ob)
@@ -381,16 +381,16 @@ GetSignature_Function(PyObject *obfunc, const char *modifier)
         Py_RETURN_NONE;
 
     int flags = PyCFunction_GET_FLAGS(obfunc);
-    const char *sig_kind;
+    const char *func_kind;
     if (PyModule_Check(obtype_mod))
-        sig_kind = "function";
+        func_kind = "function";
     else if (flags & METH_CLASS)
-        sig_kind = "classmethod";
+        func_kind = "classmethod";
     else if (flags & METH_STATIC)
-        sig_kind = "staticmethod";
+        func_kind = "staticmethod";
     else
-        sig_kind = "method";
-    return GetSignature_Cached(props, sig_kind, modifier);
+        func_kind = "method";
+    return GetSignature_Cached(props, func_kind, modifier);
 }
 
 static PyObject *
@@ -427,11 +427,15 @@ GetSignature_TypeMod(PyObject *ob, const char *modifier)
 }
 
 static PyObject *
-GetSignature_Cached(PyObject *props, const char *sig_kind, const char *modifier)
+GetSignature_Cached(PyObject *props, const char *func_kind, const char *modifier)
 {
+    // Special case: We want to know the func_kind.
+    if (modifier && strcmp(modifier, "__func_kind__") == 0)
+        return Py_BuildValue("s", func_kind);
+
     Shiboken::AutoDecRef key(modifier == nullptr
-                             ? Py_BuildValue("s", sig_kind)
-                             : Py_BuildValue("(ss)", sig_kind, modifier));
+                             ? Py_BuildValue("s", func_kind)
+                             : Py_BuildValue("(ss)", func_kind, modifier));
     PyObject *value = PyDict_GetItem(props, key);
     if (value == nullptr) {
         // we need to compute a signature object

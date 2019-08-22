@@ -56,7 +56,7 @@ used literally as strings like "signature", "existence", etc.
 """
 
 from textwrap import dedent
-from shibokensupport.signature import inspect
+from shibokensupport.signature import inspect, typing
 from shibokensupport.signature.mapping import ellipsis
 from shibokensupport.signature.lib.tool import SimpleNamespace
 
@@ -162,6 +162,35 @@ def define_nameless_parameter():
 
 NamelessParameter = define_nameless_parameter()
 
+"""
+Note on the "Optional" feature:
+
+When an annotation has a default value that is None, then the
+type has to be wrapped into "typing.Optional".
+
+Note that only the None value creates an Optional expression,
+because the None leaves the domain of the variable.
+Defaults like integer values are ignored: They stay in the domain.
+
+That information would be lost when we use the "..." convention.
+
+Note that the typing module has the remarkable expansion
+
+    Optional[T]    is    Variant[T, NoneType]
+
+We want to avoid that when generating the .pyi file.
+This is done by a regex in generate_pyi.py .
+The following would work in Python 3, but this is a version-dependent
+hack that also won't work in Python 2 and would be _very_ complex.
+"""
+# import sys
+# if sys.version_info[0] == 3:
+#     class hugo(list):pass
+#     typing._normalize_alias["hugo"] = "Optional"
+#     Optional = typing._alias(hugo, typing.T, inst=False)
+# else:
+#     Optional = typing.Optional
+
 
 def make_signature_nameless(signature):
     """
@@ -217,8 +246,6 @@ def create_signature(props, key):
     defaults = props["defaults"][:]
     if not layout.defaults:
         defaults = ()
-    if layout.ellipsis:
-        defaults = (ellipsis,) * len(defaults)
     annotations = props["annotations"].copy()
     if not layout.return_annotation and "return" in annotations:
         del annotations["return"]
@@ -235,6 +262,10 @@ def create_signature(props, key):
         name = name.lstrip("*")
         defpos = idx - len(varnames) + len(defaults)
         default = defaults[defpos] if defpos >= 0 else _empty
+        if default is None:
+            ann = typing.Optional[ann]
+        if default is not _empty and layout.ellipsis:
+            default = ellipsis
         param = inspect.Parameter(name, kind, annotation=ann, default=default)
         params.append(param)
         if kind == _VAR_POSITIONAL:
