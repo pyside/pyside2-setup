@@ -3,7 +3,7 @@
 /* -- admonitions -- */
 
 div.admonition {
-    margin: 1em 0 1em;
+    margin: 1.5em 0 1.5em;
     padding: 0;
 }
 
@@ -19,6 +19,23 @@ p.admonition-title {
     margin: 0px 10px 5px 0px;
     font-weight: bold;
 }
+
+div.admonition code {
+    font-family: inherit;
+}
+
+p.admonition-title + p {
+    padding-left: 1em;
+}
+
+div.admonition a:after {
+    content: ', ';
+}
+
+div.admonition a:last-child:after {
+    content: '';
+}
+
 .body {
     width: 100%
 }
@@ -35,19 +52,21 @@ div.body p.centered {
     margin-top: 25px;
 }
 
+div.warning, div.seealso, div.note {
+    padding: 6px 0px 6px 10px;
+    border: none;
+}
+
 div.warning {
     background-color: #ffe4e4;
-    border: 1px solid #f66;
 }
 
 div.seealso {
-    background-color: #ffffcc;
-    border: 1px solid #ffff66;
-    padding: 3px 0px 3px 10px;
+    background-color: #fff2d6;
 }
 
 div.note {
-    border: 1px solid #e3e3e3;
+    background-color: #f3f3f4;
 }
 
 table.docutils {
@@ -92,7 +111,7 @@ h2 em {
 .body blockquote {
     border: none;
     padding-left: 0;
-    margin-bottom: 2em;
+    margin-bottom: 1.5em;
 }
 
 .sphinxsidebar {
@@ -147,11 +166,8 @@ h2 em {
     display: block;
     padding: 5px;
     margin: 0 10px 10px 0;
-    border: 1px solid #ddd;
-    background-color: #f4f4f4;
-    -moz-border-radius:6px;
-    -webkit-border-radius:6px;
-    -khtml-border-radius:6px;
+    border: none;
+    background-color: #e2e2e2;
 }
 
 .section .docutils.container td {
@@ -291,11 +307,11 @@ tt.descname {
 }
 
 #functions ul, #virtual-functions ul, #slots ul, #signals ul, #static-functions ul {
-    list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 6px;
     border: 1px solid #ddd;
-    background-color: #f4f4f4;
+    border-radius: 0;
+    background-color: #e2e2e2;
 }
 
 #functions p, #virtual-functions p, #slots p, #signals p, #static-functions p {
@@ -304,6 +320,7 @@ tt.descname {
 }
 
 #functions li, #virtual-functions li, #slots li, #signals li, #static-functions li {
+    list-style: none;
     margin: 5px;
     padding: 0;
     font-size: 90%;
@@ -322,7 +339,23 @@ tt.descname {
     margin-bottom: 10px;
     padding: 10px;
     font-weight: bold;
-    background-color: #f4f4f4;
+    background-color: #e2e2e2;
+    border: none;
+    border-radius: 0;
+}
+
+#detailed-description dd > blockquote,
+#detailed-description dd > .field-list {
+    font-family: 'Droid Sans Mono';
+    font-size: small;
+    border-left: 10px solid #e2e2e2;
+    padding-left: 10px;
+    margin-bottom: 1.5em;
+}
+
+#detailed-description dd > blockquote blockquote {
+    border: none;
+    padding: 0;
 }
 
 #detailed-description .class .field-odd,
@@ -330,7 +363,7 @@ tt.descname {
 #detailed-description .staticmethod .field-odd,
 #detailed-description .attribute .field-odd  {
     margin: 0;
-    padding: 1px;
+    padding: 1px 0 0 0;
     background-color: #ffffff;
 
 }
@@ -340,7 +373,7 @@ tt.descname {
 #detailed-description .staticmethod .field-even,
 #detailed-description .attribute .field-even  {
     margin: 0;
-    padding: 1px;
+    padding: 1px 0 0 0;
     background-color: #ffffff;
 }
 
@@ -348,7 +381,7 @@ tt.descname {
 #detailed-description .method .field-odd li,
 #detailed-description .staticmethod .field-odd li,
 #detailed-description .attribute .field-odd li {
-    list-style-type: '';
+    list-style: none;
     margin: 0;
     padding: 0;
 
@@ -358,7 +391,7 @@ tt.descname {
 #detailed-description .method .field-even li,
 #detailed-description .staticmethod .field-even li,
 #detailed-description .attribute .field-even li {
-    list-style-type: '';
+    list-style: none;
     margin: 0;
     padding: 0;
 }
@@ -380,6 +413,21 @@ tt.descname {
     margin-left: 20px;
 }
 
+#detailed-description .class .field-odd p:last-child,
+#detailed-description .method .field-odd p:last-child,
+#detailed-description .staticmethod .field-odd p:last-child,
+#detailed-description .attribute .field-odd  p:last-child {
+    margin-bottom: 10px;
+
+}
+
+#detailed-description .class .field-even p:last-child,
+#detailed-description .method .field-even p:last-child,
+#detailed-description .staticmethod .field-even p:last-child,
+#detailed-description .attribute .field-even p:last-child{
+    margin-bottom: 10px;
+}
+
 .document dl.attribute,
 .document dl.class,
 .document dl.method,
@@ -392,6 +440,10 @@ tt.descname {
 .document dl.method dd,
 .document dl.staticmethod dd {
     padding-left: 1em;
+}
+
+#detailed-description .attribute td:nth-child(1) {
+    font-family: 'Droid Sans Mono';
 }
 
 /* Qt theme */
@@ -1516,6 +1568,10 @@ span.wrap:active {
 }
 code,.codelike {
   font-family:"Droid Sans Mono"
+}
+#detailed-description .function dt > code,
+#detailed-description .function dt > em {
+  font-weight:bold
 }
 h3.fn code {
   font-size:0.75em;
