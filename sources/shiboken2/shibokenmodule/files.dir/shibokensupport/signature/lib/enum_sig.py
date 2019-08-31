@@ -52,11 +52,6 @@ by producing a lot of clarity.
 import sys
 from shibokensupport.signature import inspect
 from shibokensupport.signature import get_signature
-try:
-    from PySide2.QtCore import Qt
-    EnumType = type(Qt.Key)
-except ImportError:
-    EnumType = None
 
 
 class ExactEnumerator(object):
@@ -69,6 +64,14 @@ class ExactEnumerator(object):
     """
 
     def __init__(self, formatter, result_type=dict):
+        global EnumType
+        try:
+            # Lazy import
+            from PySide2.QtCore import Qt
+            EnumType = type(Qt.Key)
+        except ImportError:
+            EnumType = None
+
         self.fmt = formatter
         self.result_type = result_type
         self.fmt.level = 0

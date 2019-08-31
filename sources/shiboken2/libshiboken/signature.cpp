@@ -455,11 +455,11 @@ GetSignature_Cached(PyObject *props, const char *func_kind, const char *modifier
 }
 
 static const char *PySide_CompressedSignaturePackage[] = {
-#include "embed/signature.inc"
+#include "embed/signature_inc.h"
     };
 
 static const unsigned char PySide_SignatureLoader[] = {
-#include "embed/signature_bootstrap.inc"
+#include "embed/signature_bootstrap_inc.h"
     };
 
 static safe_globals_struc *

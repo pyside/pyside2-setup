@@ -264,6 +264,7 @@ type_map = {}
 namespace = globals()  # our module's __dict__
 
 type_map.update({
+    "...": ellipsis,
     "bool": bool,
     "char": Char,
     "char*": str,
@@ -326,6 +327,7 @@ type_map.update({
     "unsigned long": int,
     "unsigned short int": int, # 5.6, RHEL 6.6
     "unsigned short": int,
+    "Unspecified": None,
     "ushort": int,
     "void": int, # be more specific?
     "WId": WId,
