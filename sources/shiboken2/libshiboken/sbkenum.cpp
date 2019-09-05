@@ -412,6 +412,13 @@ PyTypeObject *createScopedEnum(SbkObjectType *scope, const char *name, const cha
 
 static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, long itemValue)
 {
+    char mangled[20];
+    if (strcmp(itemName, "None") == 0
+            || strcmp(itemName, "False") == 0 || strcmp(itemName, "True") == 0) {
+        strcpy(mangled, itemName);
+        strcat(mangled, "_");
+        itemName = mangled;
+    }
     PyObject *enumItem = newItem(enumType, itemValue, itemName);
     if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0)
         return nullptr;

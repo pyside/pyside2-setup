@@ -45,8 +45,7 @@
 #include "dynamicqmetaobject.h"
 
 #include <shiboken.h>
-
-#define CLASSINFO_CLASS_NAME    "ClassInfo"
+#include <signature.h>
 
 extern "C"
 {
@@ -65,7 +64,7 @@ static PyType_Slot PySideClassInfoType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideClassInfoType_spec = {
-    "PySide2.QtCore." CLASSINFO_CLASS_NAME,
+    "PySide2.QtCore.ClassInfo",
     sizeof(PySideClassInfo),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -161,7 +160,7 @@ int classInfoTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         }
     }
 
-    return PyErr_Occurred() ? -1 : 1;
+    return PyErr_Occurred() ? -1 : 0;
 }
 
 void classInfoFree(void *self)
@@ -179,13 +178,17 @@ void classInfoFree(void *self)
 
 namespace PySide { namespace ClassInfo {
 
+static const char *ClassInfo_SignatureStrings[] = {
+    "PySide2.QtCore.ClassInfo(**info:typing.Dict[str,str])",
+    nullptr}; // Sentinel
+
 void init(PyObject *module)
 {
-    if (PyType_Ready(PySideClassInfoTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySideClassInfoTypeF(), ClassInfo_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySideClassInfoTypeF());
-    PyModule_AddObject(module, CLASSINFO_CLASS_NAME, reinterpret_cast<PyObject *>(PySideClassInfoTypeF()));
+    PyModule_AddObject(module, "ClassInfo", reinterpret_cast<PyObject *>(PySideClassInfoTypeF()));
 }
 
 bool checkType(PyObject *pyObj)

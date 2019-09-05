@@ -44,7 +44,7 @@
 #include <QMetaObject>
 #include "pysideclassinfo.h"
 
-#define __INFO_ATTR_NAME__      "__classInfo__"
+#define __INFO_ATTR_NAME__      "__classInfo__"  // not used! ???
 
 struct PySideClassInfo;
 

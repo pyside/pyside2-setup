@@ -1056,7 +1056,7 @@ class PysideBuild(_build):
                     OPTION_MACOS_SYSROOT))
             else:
                 latest_sdk_path = run_process_output(['xcrun',
-                    '--show-sdk-path'])
+                    '--sdk', 'macosx', '--show-sdk-path'])
                 if latest_sdk_path:
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(

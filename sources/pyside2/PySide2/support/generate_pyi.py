@@ -100,6 +100,38 @@ class Formatter(Writer):
     The separation in formatter and enumerator is done to keep the
     unrelated tasks of enumeration and formatting apart.
     """
+    def __init__(self, *args):
+        Writer.__init__(self, *args)
+        # patching __repr__ to disable the __repr__ of typing.TypeVar:
+        """
+            def __repr__(self):
+                if self.__covariant__:
+                    prefix = '+'
+                elif self.__contravariant__:
+                    prefix = '-'
+                else:
+                    prefix = '~'
+                return prefix + self.__name__
+        """
+        def _typevar__repr__(self):
+            return "typing." + self.__name__
+        typing.TypeVar.__repr__ = _typevar__repr__
+
+        # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
+        # I tried hard to replace typing.Optional by a simple override, but
+        # this became _way_ too much.
+        # See also the comment in layout.py .
+        brace_pat = build_brace_pattern(3)
+        pattern = (r"\b Union \s* \[ \s* {brace_pat} \s*, \s* NoneType \s* \]"
+                   .format(**locals()))
+        replace = r"Optional[\1]"
+        optional_searcher = re.compile(pattern, flags=re.VERBOSE)
+        def optional_replacer(source):
+            return optional_searcher.sub(replace, str(source))
+        self.optional_replacer = optional_replacer
+        # self.level is maintained by enum_sig.py
+        # self.after_enum() is a one-shot set by enum_sig.py .
+
     @contextmanager
     def module(self, mod_name):
         self.mod_name = mod_name
@@ -121,27 +153,22 @@ class Formatter(Writer):
 
     @contextmanager
     def klass(self, class_name, class_str):
-        self.class_name = class_name
-        spaces = ""
+        spaces = indent * self.level
         while "." in class_name:
-            spaces += indent
             class_name = class_name.split(".", 1)[-1]
             class_str = class_str.split(".", 1)[-1]
         self.print()
-        if not spaces:
+        if self.level == 0:
             self.print()
         here = self.outfile.tell()
         self.print("{spaces}class {class_str}:".format(**locals()))
-        self.print()
         pos = self.outfile.tell()
-        self.spaces = spaces
         yield
         if pos == self.outfile.tell():
             # we have not written any function
             self.outfile.seek(here)
             self.outfile.truncate()
-            # Note: we cannot use class_str when we have no body.
-            self.print("{spaces}class {class_name}: ...".format(**locals()))
+            self.print("{spaces}class {class_str}: ...".format(**locals()))
         if "<" in class_name:
             # This is happening in QtQuick for some reason:
             ## class QSharedPointer<QQuickItemGrabResult >:
@@ -150,23 +177,33 @@ class Formatter(Writer):
             self.outfile.truncate()
 
     @contextmanager
-    def function(self, func_name, signature):
+    def function(self, func_name, signature, modifier=None):
+        if self.after_enum() or func_name == "__init__":
+            self.print()
         key = func_name
-        spaces = indent + self.spaces if self.class_name else ""
+        spaces = indent * self.level
         if type(signature) == type([]):
             for sig in signature:
                 self.print('{spaces}@typing.overload'.format(**locals()))
-                self._function(func_name, sig, spaces)
+                self._function(func_name, sig, modifier, spaces)
         else:
-            self._function(func_name, signature, spaces)
+            self._function(func_name, signature, modifier, spaces)
+        if func_name == "__init__":
+            self.print()
         yield key
 
-    def _function(self, func_name, signature, spaces):
-        # this would be nicer to get somehow together with the signature
-        is_meth = re.match(r"\((\w*)", str(signature)).group(1) == "self"
-        if self.class_name and not is_meth:
-            self.print('{spaces}@staticmethod'.format(**locals()))
+    def _function(self, func_name, signature, modifier, spaces):
+        if modifier:
+            self.print('{spaces}@{modifier}'.format(**locals()))
+        signature = self.optional_replacer(signature)
         self.print('{spaces}def {func_name}{signature}: ...'.format(**locals()))
+
+    @contextmanager
+    def enum(self, class_name, enum_name, value):
+        spaces = indent * self.level
+        hexval = hex(value)
+        self.print("{spaces}{enum_name:25}: {class_name} = ... # {hexval}".format(**locals()))
+        yield
 
 
 def get_license_text():
@@ -247,10 +284,11 @@ def generate_all_pyi(outpath, options):
         os.environ["PYTHONPATH"] = pypath
 
     # now we can import
-    global PySide2, inspect, HintingEnumerator
+    global PySide2, inspect, typing, HintingEnumerator, build_brace_pattern
     import PySide2
-    from PySide2.support.signature import inspect
+    from PySide2.support.signature import inspect, typing
     from PySide2.support.signature.lib.enum_sig import HintingEnumerator
+    from PySide2.support.signature.lib.tool import build_brace_pattern
 
     # propagate USE_PEP563 to the mapping module.
     # Perhaps this can be automated?

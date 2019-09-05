@@ -85,20 +85,6 @@ def formatannotation(annotation, base_module=None):
         return annotation.__module__ + '.' + annotation.__qualname__
     return repr(annotation)
 
-# patching __repr__ to disable the __repr__ of typing.TypeVar:
-"""
-    def __repr__(self):
-        if self.__covariant__:
-            prefix = '+'
-        elif self.__contravariant__:
-            prefix = '-'
-        else:
-            prefix = '~'
-        return prefix + self.__name__
-"""
-def _typevar__repr__(self):
-    return "typing." + self.__name__
-
 # Note also that during the tests we have a different encoding that would
 # break the Python license decorated files without an encoding line.
 
@@ -160,12 +146,18 @@ def list_modules(message):
         print("  {:23}".format(name), repr(module)[:70])
 
 
+orig_typing = True
 if sys.version_info >= (3,):
     import typing
     import inspect
     inspect.formatannotation = formatannotation
 else:
-    from shibokensupport import typing27 as typing
+    if "typing" not in sys.modules:
+        orig_typing = False
+        from shibokensupport import typing27 as typing
+        sys.modules["typing"] = typing
+    else:
+        import typing
     import inspect
     namespace = inspect.__dict__
     from shibokensupport import backport_inspect as inspect
@@ -174,7 +166,6 @@ else:
     inspect.__doc__ += _doc
     # force inspect to find all attributes. See "heuristic" in pydoc.py!
     inspect.__all__ = list(x for x in dir(inspect) if not x.startswith("_"))
-typing.TypeVar.__repr__ = _typevar__repr__
 
 # Fix the module names in typing if possible. This is important since
 # the typing names should be I/O compatible, so that typing.Dict
@@ -206,7 +197,7 @@ def move_into_pyside_package():
     put_into_package(PySide2.support.signature, importhandler)
     put_into_package(PySide2.support.signature.lib, enum_sig)
 
-    put_into_package(PySide2.support.signature, typing)
+    put_into_package(None if orig_typing else PySide2.support.signature, typing)
     put_into_package(PySide2.support.signature, inspect)
 
 from shibokensupport.signature import mapping
