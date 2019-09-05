@@ -45,8 +45,7 @@
 #include "pysidesignal_p.h"
 
 #include <shiboken.h>
-
-#define QPROPERTY_CLASS_NAME "Property"
+#include <signature.h>
 
 extern "C"
 {
@@ -82,7 +81,7 @@ static PyType_Slot PySidePropertyType_slots[] = {
 };
 // Dotted modulename is crucial for PyType_FromSpec to work. Is this name right?
 static PyType_Spec PySidePropertyType_spec = {
-    "PySide2.QtCore." QPROPERTY_CLASS_NAME,
+    "PySide2.QtCore.Property",
     sizeof(PySideProperty),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_BASETYPE,
@@ -175,7 +174,7 @@ int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                      /*s*/      &doc,
                                      /*O*/      &(pData->notify),
                                      /*bbbbbb*/ &(pData->designable), &(pData->scriptable), &(pData->stored), &(pData->user), &(pData->constant), &(pData->final))) {
-        return 0;
+        return -1;
     }
 
     if (doc) {
@@ -198,7 +197,7 @@ int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         Py_XINCREF(pData->freset);
         Py_XINCREF(pData->fdel);
         Py_XINCREF(pData->notify);
-        return 1;
+        return 0;
     }
     pData->fget = nullptr;
     pData->fset = nullptr;
@@ -321,13 +320,24 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
 
 namespace PySide { namespace Property {
 
+static const char *Property_SignatureStrings[] = {
+    "PySide2.QtCore.Property(type:type,fget:typing.Callable=None,fset:typing.Callable=None,"
+        "freset:typing.Callable=None,fdel:typing.Callable=None,doc:str=None,"
+        "notify:typing.Callable=None,designable:bool=True,scriptable:bool=True,"
+        "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)",
+    "PySide2.QtCore.Property.getter(func:typing.Callable)",
+    "PySide2.QtCore.Property.read(func:typing.Callable)",
+    "PySide2.QtCore.Property.setter(func:typing.Callable)",
+    "PySide2.QtCore.Property.write(func:typing.Callable)",
+    nullptr}; // Sentinel
+
 void init(PyObject *module)
 {
-    if (PyType_Ready(PySidePropertyTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySidePropertyTypeF(), Property_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySidePropertyTypeF());
-    PyModule_AddObject(module, QPROPERTY_CLASS_NAME, reinterpret_cast<PyObject *>(PySidePropertyTypeF()));
+    PyModule_AddObject(module, "Property", reinterpret_cast<PyObject *>(PySidePropertyTypeF()));
 }
 
 bool checkType(PyObject *pyObj)
