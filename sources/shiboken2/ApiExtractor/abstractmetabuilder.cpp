@@ -1915,7 +1915,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
         AbstractMetaType *type = nullptr;
         if (!returnType.isVoid()) {
-            type = translateType(returnType, currentClass, true, &errorMessage);
+            type = translateType(returnType, currentClass, {}, &errorMessage);
             if (!type) {
                 const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
                 qCWarning(lcShiboken, "%s",
@@ -1951,7 +1951,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        AbstractMetaType *metaType = translateType(arg->type(), currentClass, true, &errorMessage);
+        AbstractMetaType *metaType = translateType(arg->type(), currentClass, {}, &errorMessage);
         if (!metaType) {
             // If an invalid argument has a default value, simply remove it
             if (arg->defaultValue()) {
@@ -2155,22 +2155,27 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
 
 AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
                                                             AbstractMetaClass *currentClass,
-                                                            bool resolveType,
+                                                            TranslateTypeFlags flags,
                                                             QString *errorMessage)
 {
-    return translateTypeStatic(_typei, currentClass, this, resolveType, errorMessage);
+    return translateTypeStatic(_typei, currentClass, this, flags, errorMessage);
 }
 
 AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
                                                                   AbstractMetaClass *currentClass,
                                                                   AbstractMetaBuilderPrivate *d,
-                                                                  bool resolveType,
+                                                                  TranslateTypeFlags flags,
                                                                   QString *errorMessageIn)
 {
     // 1. Test the type info without resolving typedefs in case this is present in the
     //    type system
+    const bool resolveType = !flags.testFlag(AbstractMetaBuilder::DontResolveType);
     if (resolveType) {
-        if (AbstractMetaType *resolved = translateTypeStatic(_typei, currentClass, d, false, errorMessageIn))
+        AbstractMetaType *resolved =
+            translateTypeStatic(_typei, currentClass, d,
+                                flags | AbstractMetaBuilder::DontResolveType,
+                                errorMessageIn);
+        if (resolved)
             return resolved;
     }
 
@@ -2229,7 +2234,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         newInfo.setReferenceType(typeInfo.referenceType());
         newInfo.setVolatile(typeInfo.isVolatile());
 
-        AbstractMetaType *elementType = translateTypeStatic(newInfo, currentClass, d, true, &errorMessage);
+        AbstractMetaType *elementType = translateTypeStatic(newInfo, currentClass, d, flags, &errorMessage);
         if (!elementType) {
             if (errorMessageIn) {
                 errorMessage.prepend(QLatin1String("Unable to translate array element: "));
@@ -2340,7 +2345,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     const auto &templateArguments = typeInfo.instantiations();
     for (int t = 0, size = templateArguments.size(); t < size; ++t) {
         const  TypeInfo &ti = templateArguments.at(t);
-        AbstractMetaType *targType = translateTypeStatic(ti, currentClass, d, true, &errorMessage);
+        AbstractMetaType *targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
         if (!targType) {
             if (errorMessageIn)
                 *errorMessageIn = msgCannotTranslateTemplateArgument(t, ti, errorMessage);
@@ -2362,17 +2367,17 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
 
 AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei,
                                                      AbstractMetaClass *currentClass,
-                                                     bool resolveType,
+                                                     TranslateTypeFlags flags,
                                                      QString *errorMessage)
 {
     return AbstractMetaBuilderPrivate::translateTypeStatic(_typei, currentClass,
-                                                           nullptr, resolveType,
+                                                           nullptr, flags,
                                                            errorMessage);
 }
 
 AbstractMetaType *AbstractMetaBuilder::translateType(const QString &t,
                                                      AbstractMetaClass *currentClass,
-                                                     bool resolveType,
+                                                     TranslateTypeFlags flags,
                                                      QString *errorMessageIn)
 {
     QString errorMessage;
@@ -2385,7 +2390,7 @@ AbstractMetaType *AbstractMetaBuilder::translateType(const QString &t,
             qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
         return nullptr;
     }
-    return translateType(typeInfo, currentClass, resolveType, errorMessageIn);
+    return translateType(typeInfo, currentClass, flags, errorMessageIn);
 }
 
 qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringValue, bool &ok)
