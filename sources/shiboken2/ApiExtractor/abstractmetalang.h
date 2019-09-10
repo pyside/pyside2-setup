@@ -302,6 +302,11 @@ public:
     };
     Q_ENUM(TypeUsagePattern)
 
+    enum ComparisonFlag {
+        ConstRefMatchesValue = 0x1
+    };
+    Q_DECLARE_FLAGS(ComparisonFlags, ComparisonFlag);
+
     AbstractMetaType();
     ~AbstractMetaType();
 
@@ -428,7 +433,8 @@ public:
     bool isVolatile() const { return m_volatile; }
     void setVolatile(bool v) { m_volatile = v; }
 
-    bool isConstRef() const;
+    bool passByConstRef() const;
+    bool passByValue() const;
 
     ReferenceType referenceType() const { return m_referenceType; }
     void setReferenceType(ReferenceType ref) { m_referenceType = ref; }
@@ -527,7 +533,7 @@ public:
 
     bool hasTemplateChildren() const;
 
-    bool equals(const AbstractMetaType &rhs) const;
+    bool compare(const AbstractMetaType &rhs, ComparisonFlags = {}) const;
 
 private:
     TypeUsagePattern determineUsagePattern() const;
@@ -558,10 +564,12 @@ private:
     Q_DISABLE_COPY(AbstractMetaType)
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaType::ComparisonFlags);
+
 inline bool operator==(const AbstractMetaType &t1, const AbstractMetaType &t2)
-{ return t1.equals(t2); }
+{ return t1.compare(t2); }
 inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
-{ return !t1.equals(t2); }
+{ return !t1.compare(t2); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType *at);

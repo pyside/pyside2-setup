@@ -1284,27 +1284,37 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     metaFunction->replaceType(metaType);
 }
 
-static bool _compareAbstractMetaTypes(const AbstractMetaType *type, const AbstractMetaType *other)
+static bool _compareAbstractMetaTypes(const AbstractMetaType *type,
+                                      const AbstractMetaType *other,
+                                      AbstractMetaType::ComparisonFlags flags = {})
 {
     return (type != nullptr) == (other != nullptr)
-        && (type == nullptr || *type == *other);
+        && (type == nullptr || type->compare(*other, flags));
 }
 
-static bool _compareAbstractMetaFunctions(const AbstractMetaFunction *func, const AbstractMetaFunction *other)
+static bool _compareAbstractMetaFunctions(const AbstractMetaFunction *func,
+                                          const AbstractMetaFunction *other,
+                                          AbstractMetaType::ComparisonFlags argumentFlags = {})
 {
     if (!func && !other)
         return true;
     if (!func || !other)
         return false;
-    if (func->arguments().count() != other->arguments().count()
+    if (func->name() != other->name())
+        return false;
+    const int argumentsCount = func->arguments().count();
+    if (argumentsCount != other->arguments().count()
         || func->isConstant() != other->isConstant()
         || func->isStatic() != other->isStatic()
         || !_compareAbstractMetaTypes(func->type(), other->type())) {
         return false;
     }
-    for (int i = 0; i < func->arguments().count(); ++i) {
-        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(), other->arguments().at(i)->type()))
+    for (int i = 0; i < argumentsCount; ++i) {
+        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(),
+                                       other->arguments().at(i)->type(),
+                                       argumentFlags)) {
             return false;
+        }
     }
     return true;
 }
@@ -1329,29 +1339,6 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const Sco
     }
     return result;
 }
-
-// For template classes, entries with more specific types may exist from out-of-
-// line definitions. If there is a declaration which matches it after fixing
-// the parameters, remove it as duplicate. For example:
-// template class<T> Vector { public:
-//     Vector(const Vector &rhs);
-// };
-// template class<T>
-// Vector<T>::Vector(const Vector<T>&) {} // More specific, remove declaration.
-
-class DuplicatingFunctionPredicate : public std::unary_function<bool, const AbstractMetaFunction *> {
-public:
-    explicit DuplicatingFunctionPredicate(const AbstractMetaFunction *f) : m_function(f) {}
-
-    bool operator()(const AbstractMetaFunction *rhs) const
-    {
-        return rhs != m_function && rhs->name() == m_function->name()
-            && _compareAbstractMetaFunctions(m_function, rhs);
-    }
-
-private:
-    const AbstractMetaFunction *m_function;
-};
 
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
