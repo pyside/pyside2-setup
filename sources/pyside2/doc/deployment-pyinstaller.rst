@@ -108,7 +108,7 @@ execute the program::
     ./MyApplication
 
 .. note:: The directory inside `dist/` and the executable will have
-the same name.
+          the same name.
 
 If you prefer to have everything bundled into one executable,
 without the shared libraries next to it, you can use the option
@@ -160,16 +160,16 @@ section of the spec-file::
 Safety Instructions
 -------------------
 
-o When using `PyInstaller` with `virtualenv`, make sure that there is no system
+- When using `PyInstaller` with `virtualenv`, make sure that there is no system
   installation of PySide2 or shiboken2.
 
-o Before compiling, use `pip -uninstall pyside2 shiboken2 -y` multiple times, until
+- Before compiling, use `pip -uninstall pyside2 shiboken2 -y` multiple times, until
   none of the programs are found anymore.
 
-o Pip is usually a good tool. But to be 100 % sure, you should directly remove
+- Pip is usually a good tool. But to be 100 % sure, you should directly remove
   the PySide2 and shiboken2 folders from site-packages.
 
-o Be sure to use the right version of pip. The safest way to really run the right
+- Be sure to use the right version of pip. The safest way to really run the right
   pip, is to use the Python that you mean: Instead of the pip command, better use::
 
     <path/to/your/>python -m pip
