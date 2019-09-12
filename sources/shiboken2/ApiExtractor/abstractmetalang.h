@@ -1691,14 +1691,20 @@ public:
         return m_stream;
     }
 
-    void setToStringCapability(bool value)
+    void setToStringCapability(bool value, uint indirections = 0)
     {
         m_hasToStringCapability = value;
+        m_toStringCapabilityIndirections = indirections;
     }
 
     bool hasToStringCapability() const
     {
         return m_hasToStringCapability;
+    }
+
+    uint toStringCapabilityIndirections() const
+    {
+        return m_toStringCapabilityIndirections;
     }
 
     bool deleteInMainThread() const;
@@ -1753,6 +1759,7 @@ private:
 //     FunctionModelItem m_qDebugStreamFunction;
 
     bool m_stream = false;
+    uint m_toStringCapabilityIndirections = 0;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)

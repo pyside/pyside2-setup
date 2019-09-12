@@ -33,6 +33,7 @@
 #include <QApplication>
 #include <QMetaType>
 #include <QVariant>
+#include <QDebug>
 #ifdef pysidetest_EXPORTS
 #define PYSIDE_EXPORTS 1
 #endif
@@ -81,6 +82,7 @@ private:
     int m_idValue;
     QList<QObject*> m_children;
 };
+PYSIDE_API QDebug operator<<(QDebug dbg, TestObject &testObject);
 
 
 typedef int PySideInt;
@@ -104,6 +106,16 @@ signals:
     void emitSignalWithNamespace(PySideCPP::TestObjectWithNamespace* obj);
     void emitSignalWithTypedef(PySideInt val);
 };
+PYSIDE_API QDebug operator<<(QDebug dbg, TestObjectWithNamespace &testObject);
+
+class PYSIDE_API TestObject2WithNamespace :  public QObject
+{
+    Q_OBJECT
+public:
+    TestObject2WithNamespace(QObject* parent) : QObject(parent) {}
+    QString name() { return "TestObject2WithNamespace"; }
+};
+PYSIDE_API QDebug operator<<(QDebug dbg, TestObject2WithNamespace& testObject);
 
 
 } // Namespace PySideCPP

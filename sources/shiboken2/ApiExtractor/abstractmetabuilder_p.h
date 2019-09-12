@@ -106,6 +106,7 @@ public:
     void checkFunctionModifications();
     void registerHashFunction(const FunctionModelItem &functionItem,
                               AbstractMetaClass *currentClass);
+    void registerToStringCapabilityIn(const NamespaceModelItem &namespaceItem);
     void registerToStringCapability(const FunctionModelItem &functionItem,
                                     AbstractMetaClass *currentClass);
 

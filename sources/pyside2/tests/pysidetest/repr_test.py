@@ -1,8 +1,9 @@
-# This Python file uses the following encoding: utf-8
+# -*- coding: utf-8 -*-
 
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2019 Andreas Beckermann
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -39,27 +40,44 @@
 ##
 #############################################################################
 
-'''
-Unit tests for attribute cache in Python 3
+import unittest
+from testbinding import PySideCPP, TestObject
 
-This is the original code from the bug report
-https://bugreports.qt.io/browse/PYSIDE-60
-'''
+class QObjectDerivedReprTest(unittest.TestCase):
+    """Test the __repr__ implementation of QObject derived classes"""
 
-from PySide2.QtCore import QObject
+    def testReprWithoutNamespace(self):
+        """Test that classes outside a namespace that have a operator<<(QDebug,...) defined use that
+        for __repr__"""
+        t = TestObject(123)
 
+        # We don't define __str__, so str(q) should call __repr__
+        self.assertEqual(t.__repr__(), str(t))
 
-class A(QObject):
-    instance = 1
+        # __repr__ should use the operator<<(QDebug,...) implementation
+        self.assertIn('TestObject(id=123)', str(t))
 
-    @classmethod
-    def test(cls):
-        cls.instance
-        cls.instance = cls()
-        assert "<__main__.A(0x" in repr(cls.__dict__['instance'])
-        assert "<__main__.A(0x" in repr(cls.instance)
-        assert "<__main__.A(0x" in repr(type.__getattribute__(cls, 'instance'))
+    def testReprWithNamespace(self):
+        """Test that classes inside a namespace that have a operator<<(QDebug,...) defined use that
+        for __repr__"""
+        t = PySideCPP.TestObjectWithNamespace(None)
 
+        # We don't define __str__, so str(q) should call __repr__
+        self.assertEqual(t.__repr__(), str(t))
 
-if __name__ == "__main__":
-    A.test()
+        # __repr__ should use the operator<<(QDebug,...) implementation
+        self.assertIn('TestObjectWithNamespace("TestObjectWithNamespace")', str(t))
+
+    def testReprInject(self):
+        """Test that injecting __repr__ via typesystem overrides the operator<<(QDebug, ...)"""
+        t = PySideCPP.TestObject2WithNamespace(None)
+
+        # We don't define __str__, so str(q) should call __repr__
+        self.assertEqual(t.__repr__(), str(t))
+
+        # __repr__ should use the operator<<(QDebug,...) implementation
+        self.assertEqual(str(t), "TestObject2WithNamespace(injected_repr)")
+
+if __name__ == '__main__':
+    unittest.main()
+

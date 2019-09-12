@@ -52,3 +52,25 @@ void TestObject::emitSignalWithTypedefValue(int value)
 {
     emit signalWithTypedefValue(TypedefValue(value));
 }
+
+QDebug operator<<(QDebug dbg, TestObject& testObject)
+{
+    QDebugStateSaver saver(dbg);
+    dbg.nospace() << "TestObject(id=" << testObject.idValue() << ") ";
+    return dbg;
+}
+
+namespace PySideCPP {
+    QDebug operator<<(QDebug dbg, TestObjectWithNamespace& testObject)
+    {
+        QDebugStateSaver saver(dbg);
+        dbg.nospace() << "TestObjectWithNamespace(" << testObject.name() << ") ";
+        return dbg;
+    }
+    QDebug operator<<(QDebug dbg, TestObject2WithNamespace& testObject)
+    {
+        QDebugStateSaver saver(dbg);
+        dbg.nospace() << "TestObject2WithNamespace(" << testObject.name() << ") ";
+        return dbg;
+    }
+}

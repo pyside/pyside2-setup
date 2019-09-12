@@ -30,6 +30,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/intvalue_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_testobjectwithnamespace_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_testobject2withnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp2_testobjectwithoutnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
@@ -142,3 +143,4 @@ PYSIDE_TEST(signal_slot_warning.py)
 PYSIDE_TEST(all_modules_load_test.py)
 PYSIDE_TEST(qapp_like_a_macro_test.py)
 PYSIDE_TEST(embedding_test.py)
+PYSIDE_TEST(repr_test.py)
