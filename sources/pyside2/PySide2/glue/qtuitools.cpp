@@ -54,9 +54,10 @@ static void createChildrenNameAttributes(PyObject *root, QObject *object)
         const QByteArray name = child->objectName().toLocal8Bit();
 
         if (!name.isEmpty() && !name.startsWith("_") && !name.startsWith("qt_")) {
-            if (!PyObject_HasAttrString(root, name.constData())) {
+            Shiboken::AutoDecRef attrName(Py_BuildValue("s", name.constData()));
+            if (!PyObject_HasAttr(root, attrName)) {
                 Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QObject *](child));
-                PyObject_SetAttrString(root, name.constData(), pyChild);
+                PyObject_SetAttr(root, attrName, pyChild);
             }
             createChildrenNameAttributes(root, child);
         }

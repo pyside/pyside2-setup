@@ -1860,18 +1860,19 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
         // For custom classes, operations like __radd__ and __rmul__
         // will enter an infinite loop.
         if (rfunc->isBinaryOperator() && revOpName.contains(QLatin1String("shift"))) {
+            s << INDENT << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"" << revOpName << "\"));" << endl;
             s << INDENT << "if (!isReverse" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << "&& Shiboken::Object::checkType(" << PYTHON_ARG << ")" << endl;
                 s << INDENT << "&& !PyObject_TypeCheck(" << PYTHON_ARG << ", self->ob_type)" << endl;
-                s << INDENT << "&& PyObject_HasAttrString(" << PYTHON_ARG << ", const_cast<char *>(\"" << revOpName << "\"))) {" << endl;
+                s << INDENT << "&& PyObject_HasAttr(" << PYTHON_ARG << ", attrName)) {" << endl;
 
                 // This PyObject_CallMethod call will emit lots of warnings like
                 // "deprecated conversion from string constant to char *" during compilation
                 // due to the method name argument being declared as "char *" instead of "const char *"
                 // issue 6952 http://bugs.python.org/issue6952
-                s << INDENT << "PyObject *revOpMethod = PyObject_GetAttrString(" << PYTHON_ARG << ", const_cast<char *>(\"" << revOpName << "\"));" << endl;
+                s << INDENT << "PyObject *revOpMethod = PyObject_GetAttr(" << PYTHON_ARG << ", attrName);" << endl;
                 s << INDENT << "if (revOpMethod && PyCallable_Check(revOpMethod)) {" << endl;
                 {
                     Indentation indent(INDENT);
@@ -3039,29 +3040,31 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
             QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
             s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg->name() << "\");" << endl;
             s << INDENT << "if (PyDict_Contains(kwds, keyName)) {" << endl;
-            s << INDENT << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
-            s << INDENT << "if (value && " << pyArgName << ") {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << pyErrString.arg(arg->name()) << endl;
-                s << INDENT << returnStatement(m_currentErrorCode) << endl;
-            }
-            s << INDENT << INDENT << "} else if (value) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << pyArgName << " = value;" << endl;
-                s << INDENT << "if (!";
-                writeTypeCheck(s, arg->type(), pyArgName, isNumber(arg->type()->typeEntry()), func->typeReplaced(arg->argumentIndex() + 1));
-                s << ')' << endl;
+                s << INDENT << "value = PyDict_GetItem(kwds, keyName);" << endl;
+                s << INDENT << "if (value && " << pyArgName << ") {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;" << endl;
+                    s << INDENT << pyErrString.arg(arg->name()) << endl;
+                    s << INDENT << returnStatement(m_currentErrorCode) << endl;
                 }
+                s << INDENT << '}' << endl;
+                s << INDENT << "if (value) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << pyArgName << " = value;" << endl;
+                    s << INDENT << "if (!";
+                    writeTypeCheck(s, arg->type(), pyArgName, isNumber(arg->type()->typeEntry()), func->typeReplaced(arg->argumentIndex() + 1));
+                    s << ')' << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;" << endl;
+                    }
+                }
+                s << INDENT << '}' << endl;
             }
             s << INDENT << '}' << endl;
-            if (arg != args.constLast())
-                s << INDENT;
-            s << "}" << endl;
         }
     }
     s << INDENT << '}' << endl;
@@ -5541,10 +5544,11 @@ bool CppGenerator::finishGeneration()
         {
             Indentation indentation(INDENT);
             s << INDENT << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);" << endl;
-            s << INDENT << "if (pyType && PyObject_HasAttrString(pyType, \"staticMetaObject\"))"<< endl;
+            s << INDENT << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"staticMetaObject\"));" << endl;
+            s << INDENT << "if (pyType && PyObject_HasAttr(pyType, attrName))"<< endl;
             {
                 Indentation indentation(INDENT);
-                s << INDENT << "PyObject_SetAttrString(pyType, \"staticMetaObject\", Py_None);" << endl;
+                s << INDENT << "PyObject_SetAttr(pyType, attrName, Py_None);" << endl;
             }
         }
         s << INDENT << "}" << endl;
