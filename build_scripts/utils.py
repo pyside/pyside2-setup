@@ -1148,7 +1148,7 @@ def run_instruction(instruction, error, initial_env=None):
 def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
     # Disable unsupported CI configs for now
     # NOTE: String must match with QT CI's storagestruct thrift
-    if hostOSVer in ["WinRT_10", "WebAssembly", "Ubuntu_18_04"] \
+    if hostOSVer in ["WinRT_10", "WebAssembly", "Ubuntu_18_04", "Android_ANY"] \
         or hostOSVer.startswith("SLES_"):
         print("Disabled " + hostOSVer + " from Coin configuration")
         return False
