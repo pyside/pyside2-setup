@@ -213,8 +213,8 @@ class Config(object):
             setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
-                    'pyside2-uic = {}.scripts.uic:main'.format(self.package_name()),
-                    'pyside2-rcc = {}.scripts.pyside_tool:main'.format(self.package_name()),
+                    'pyside2-uic = {}.scripts.pyside_tool:uic'.format(self.package_name()),
+                    'pyside2-rcc = {}.scripts.pyside_tool:rcc'.format(self.package_name()),
                     'pyside2-lupdate = {}.scripts.pyside_tool:main'.format(self.package_name()),
                 ]
             }
@@ -288,9 +288,6 @@ class Config(object):
         if self.internal_build_type == self.pyside_option_name:
             return [
                 config.package_name(),
-                'pyside2uic',
-                'pyside2uic.Compiler',
-                'pyside2uic.port_v{}'.format(sys.version_info[0])
             ]
         elif self.internal_build_type == self.shiboken_module_option_name:
             return [self.package_name()]
@@ -321,7 +318,6 @@ class Config(object):
         elif self.is_internal_pyside_build():
             return {
                 self.package_name(): "sources/pyside2/PySide2",
-                "pyside2uic": "sources/pyside2-tools/pyside2uic"
             }
         else:
             return {}
