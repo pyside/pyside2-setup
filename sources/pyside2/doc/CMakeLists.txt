@@ -70,6 +70,11 @@ foreach(moduleIn ${all_module_shortnames})
     endif()
 endforeach()
 
+#Appending the additional qdocconf that describes the pyside-examples
+#doc project.
+configure_file("qtmodules/pyside-examples.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-examples.qdocconf" @ONLY)
+file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/pyside-examples.qdocconf\n")
+
 set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n</typesystem>\n")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml" "${typeSystemDocXmlContents}")
 
@@ -82,7 +87,10 @@ set(QDOC_TYPESYSTEM_PATH "${pyside2_SOURCE_DIR}${PATH_SEP}${pyside2_BINARY_DIR}"
 
 add_custom_target(qdoc
                 # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
-                COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc QT_VERSION=1.0.0 QT_VER=1.0 QT_VERSION_TAG=100
+                COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc
+                QT_VERSION=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
+                QT_VER=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}
+                QT_VERSION_TAG=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
                 qdoc pyside.qdocconf -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
                 COMMENT "Running qdoc against Qt source code..."
                 SOURCE "pyside.qdocconf")

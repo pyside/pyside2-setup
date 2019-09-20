@@ -14,6 +14,7 @@ Examples and demos
    :maxdepth: 1
 
    examples/tabbedbrowser.rst
+   ../pyside-examples/all-pyside-examples.rst
 
 Tutorials
 ==========
