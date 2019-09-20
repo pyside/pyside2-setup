@@ -43,12 +43,6 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
-#if PY_MAJOR_VERSION >= 3
-    #define SBK_BYTES_NAME "bytes"
-#else
-    #define SBK_BYTES_NAME "str"
-#endif
-
 namespace Shiboken
 {
 namespace String

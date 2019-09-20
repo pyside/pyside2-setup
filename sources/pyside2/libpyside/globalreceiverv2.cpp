@@ -187,7 +187,7 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
 
 GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, SharedMap map) :
     QObject(nullptr),
-    m_metaObject(GLOBAL_RECEIVER_CLASS_NAME, &QObject::staticMetaObject),
+    m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject),
     m_sharedMap(std::move(map))
 {
     m_data = new DynamicSlotDataV2(callback, this);

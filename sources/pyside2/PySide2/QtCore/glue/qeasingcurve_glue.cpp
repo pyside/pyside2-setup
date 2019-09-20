@@ -44,7 +44,6 @@
 
 #include "glue/qeasingcurve_glue.h"
 
-#define __ECF_ATT_NAME__        "__ecf__"
 #define MAX_CUSTOM_FUNCTIONS    10
 
 static void deleteData(void *data);
@@ -122,7 +121,7 @@ PySideEasingCurveFunctor::~PySideEasingCurveFunctor()
 {
 
     CustomFunctionsData::m_list[m_index].m_obj = 0;
-    PyObject_SetAttrString(m_parent, __ECF_ATT_NAME__, Py_None);
+    PyObject_SetAttrString(m_parent, "__ecf__", Py_None);
 }
 
 qreal PySideEasingCurveFunctor::operator()(qreal progress)
@@ -147,13 +146,13 @@ PyObject *PySideEasingCurveFunctor::callable()
 
 PyObject *PySideEasingCurveFunctor::callable(PyObject *parent)
 {
-    return PyObject_GetAttrString(parent, __ECF_ATT_NAME__);
+    return PyObject_GetAttrString(parent, "__ecf__");
 }
 
 PySideEasingCurveFunctor::PySideEasingCurveFunctor(int index, PyObject *parent, PyObject *pyFunc)
     : m_parent(parent), m_func(pyFunc), m_index(index)
 {
-    PyObject_SetAttrString(m_parent, __ECF_ATT_NAME__, m_func);
+    PyObject_SetAttrString(m_parent, "__ecf__", m_func);
     PySide::WeakRef::create(m_parent, deleteData, this);
 }
 

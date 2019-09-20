@@ -77,8 +77,6 @@
 #define PYSIDE_SIGNAL '2'
 #include "globalreceiverv2.h"
 
-#define PYTHON_TYPE "PyObject"
-
 namespace {
     static PyObject *metaObjectAttr = 0;
 
@@ -268,15 +266,15 @@ SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
     using namespace Shiboken;
 
     // Register PyObject type to use in queued signal and slot connections
-    qRegisterMetaType<PyObjectWrapper>(PYTHON_TYPE);
-    qRegisterMetaTypeStreamOperators<PyObjectWrapper>(PYTHON_TYPE);
+    qRegisterMetaType<PyObjectWrapper>("PyObject");
+    qRegisterMetaTypeStreamOperators<PyObjectWrapper>("PyObject");
     qRegisterMetaTypeStreamOperators<PyObjectWrapper>("PyObjectWrapper");
     qRegisterMetaTypeStreamOperators<PyObjectWrapper>("PySide::PyObjectWrapper");
 
     SbkConverter *converter = Shiboken::Conversions::createConverter(&PyBaseObject_Type, nullptr);
     Shiboken::Conversions::setCppPointerToPythonFunction(converter, PyObject_PTR_CppToPython_PyObject);
     Shiboken::Conversions::setPythonToCppPointerFunctions(converter, PyObject_PythonToCpp_PyObject_PTR, is_PyObject_PythonToCpp_PyObject_PTR_Convertible);
-    Shiboken::Conversions::registerConverterName(converter, PYTHON_TYPE);
+    Shiboken::Conversions::registerConverterName(converter, "PyObject");
     Shiboken::Conversions::registerConverterName(converter, "object");
     Shiboken::Conversions::registerConverterName(converter, "PyObjectWrapper");
     Shiboken::Conversions::registerConverterName(converter, "PySide::PyObjectWrapper");
