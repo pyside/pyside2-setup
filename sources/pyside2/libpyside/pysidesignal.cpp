@@ -40,6 +40,7 @@
 #include <sbkpython.h>
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "pysidestaticstrings.h"
 #include "signalmanager.h"
 
 #include <shiboken.h>
@@ -412,7 +413,8 @@ PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "connect"));
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+                                                       PySide::PyName::qtConnect()));
         if (pyMethod.isNull()) { // PYSIDE-79: check if pyMethod exists.
             PyErr_SetString(PyExc_RuntimeError, "method 'connect' vanished!");
             return 0;
@@ -465,7 +467,8 @@ PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
     for (Py_ssize_t i = 0, max = PyTuple_Size(args); i < max; i++)
         PyList_Append(pyArgs, PyTuple_GetItem(args, i));
 
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "emit"));
+    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+                                                   PySide::PyName::qtEmit()));
 
     Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
     return PyObject_CallObject(pyMethod, tupleArgs);
@@ -530,7 +533,8 @@ PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "disconnect"));
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+                                                       PySide::PyName::qtDisconnect()));
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
         if (!result || result == Py_True)
             return result;
@@ -756,7 +760,8 @@ void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySideSignal
 
 bool connect(PyObject *source, const char *signal, PyObject *callback)
 {
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source, "connect"));
+    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source,
+                                                   PySide::PyName::qtConnect()));
     if (pyMethod.isNull())
         return false;
 

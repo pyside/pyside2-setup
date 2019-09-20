@@ -53,6 +53,7 @@
 #include <gilstate.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
+#include <sbkstaticstrings.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
@@ -169,7 +170,7 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
     Shiboken::GilState gil;
     if (!reduce_func) {
         Shiboken::AutoDecRef pickleModule(PyImport_ImportModule("pickle"));
-        reduce_func = PyObject_GetAttrString(pickleModule, "dumps");
+        reduce_func = PyObject_GetAttr(pickleModule, Shiboken::PyName::dumps());
     }
     Shiboken::AutoDecRef repr(PyObject_CallFunctionObjArgs(reduce_func, (PyObject *)myObj, NULL));
     if (repr.object()) {
@@ -200,7 +201,7 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
     Shiboken::GilState gil;
     if (!eval_func) {
         Shiboken::AutoDecRef pickleModule(PyImport_ImportModule("pickle"));
-        eval_func = PyObject_GetAttrString(pickleModule, "loads");
+        eval_func = PyObject_GetAttr(pickleModule, Shiboken::PyName::loads());
     }
 
     QByteArray repr;
