@@ -1023,6 +1023,8 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
             result->type = LinkContext::External;
         else
             result->type = LinkContext::Reference;
+    } else if (type == QLatin1String("external")) {
+        result->type = LinkContext::External;
     } else {
         result->type = LinkContext::Reference;
     }
