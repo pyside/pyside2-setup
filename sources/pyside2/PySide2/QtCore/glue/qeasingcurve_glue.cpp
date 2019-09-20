@@ -121,7 +121,7 @@ PySideEasingCurveFunctor::~PySideEasingCurveFunctor()
 {
 
     CustomFunctionsData::m_list[m_index].m_obj = 0;
-    PyObject_SetAttrString(m_parent, "__ecf__", Py_None);
+    PyObject_SetAttr(m_parent, Shiboken::PyMagicName::ecf(), Py_None);
 }
 
 qreal PySideEasingCurveFunctor::operator()(qreal progress)
@@ -146,13 +146,13 @@ PyObject *PySideEasingCurveFunctor::callable()
 
 PyObject *PySideEasingCurveFunctor::callable(PyObject *parent)
 {
-    return PyObject_GetAttrString(parent, "__ecf__");
+    return PyObject_GetAttr(parent, Shiboken::PyMagicName::ecf());
 }
 
 PySideEasingCurveFunctor::PySideEasingCurveFunctor(int index, PyObject *parent, PyObject *pyFunc)
     : m_parent(parent), m_func(pyFunc), m_index(index)
 {
-    PyObject_SetAttrString(m_parent, "__ecf__", m_func);
+    PyObject_SetAttr(m_parent, Shiboken::PyMagicName::ecf(), m_func);
     PySide::WeakRef::create(m_parent, deleteData, this);
 }
 

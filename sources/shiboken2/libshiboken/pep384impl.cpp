@@ -39,6 +39,8 @@
 
 #include "pep384impl.h"
 #include "autodecref.h"
+#include "sbkstaticstrings.h"
+#include "sbkstaticstrings_p.h"
 
 extern "C"
 {
@@ -125,16 +127,16 @@ check_PyTypeObject_valid()
 {
     auto *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
     auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(
-        PyObject_GetAttrString(obtype, "__base__"));
-    PyObject *probe_tp_bases = PyObject_GetAttrString(obtype, "__bases__");
+        PyObject_GetAttr(obtype, Shiboken::PyMagicName::base()));
+    auto *probe_tp_bases = PyObject_GetAttr(obtype, Shiboken::PyMagicName::bases());
     auto *check = reinterpret_cast<PyTypeObject *>(
         PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
     auto *typetype = reinterpret_cast<PyTypeObject *>(obtype);
-    PyObject *w = PyObject_GetAttrString(obtype, "__weakrefoffset__");
+    PyObject *w = PyObject_GetAttr(obtype, Shiboken::PyMagicName::weakrefoffset());
     long probe_tp_weakrefoffset = PyLong_AsLong(w);
-    PyObject *d = PyObject_GetAttrString(obtype, "__dictoffset__");
+    PyObject *d = PyObject_GetAttr(obtype, Shiboken::PyMagicName::dictoffset());
     long probe_tp_dictoffset = PyLong_AsLong(d);
-    PyObject *probe_tp_mro = PyObject_GetAttrString(obtype, "__mro__");
+    PyObject *probe_tp_mro = PyObject_GetAttr(obtype, Shiboken::PyMagicName::mro());
     if (false
         || strcmp(probe_tp_name, check->tp_name) != 0
         || probe_tp_basicsize       != check->tp_basicsize
@@ -416,9 +418,10 @@ PepRun_GetResult(const char *command, const char *resvar)
     PyObject *d, *v, *res;
 
     d = PyDict_New();
-    if (d == NULL || PyDict_SetItemString(d, "__builtins__",
-                                          PyEval_GetBuiltins()) < 0)
-        return NULL;
+    if (d == nullptr
+        || PyDict_SetItem(d, Shiboken::PyMagicName::builtins(), PyEval_GetBuiltins()) < 0) {
+        return nullptr;
+    }
     v = PyRun_String(command, Py_file_input, d, d);
     res = v ? PyDict_GetItemString(d, resvar) : NULL;
     Py_XDECREF(v);
@@ -457,7 +460,7 @@ PyMethod_New(PyObject *func, PyObject *self)
 PyObject *
 PyMethod_Function(PyObject *im)
 {
-    PyObject *ret = PyObject_GetAttrString(im, "__func__");
+    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::func());
 
     // We have to return a borrowed reference.
     Py_DECREF(ret);
@@ -467,7 +470,7 @@ PyMethod_Function(PyObject *im)
 PyObject *
 PyMethod_Self(PyObject *im)
 {
-    PyObject *ret = PyObject_GetAttrString(im, "__self__");
+    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::self());
 
     // We have to return a borrowed reference.
     // If we don't obey that here, then we get a test error!
@@ -620,8 +623,8 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
         return name;
     }
 #endif
-    Shiboken::AutoDecRef privateobj(PyObject_GetAttrString(
-        reinterpret_cast<PyObject *>(Py_TYPE(self)), "__name__"));
+    Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
+        reinterpret_cast<PyObject *>(Py_TYPE(self)), Shiboken::PyMagicName::name()));
 #ifndef Py_LIMITED_API
     return _Py_Mangle(privateobj, name);
 #else

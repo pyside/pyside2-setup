@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,24 +37,55 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
-
-#include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
 #include "sbkstaticstrings.h"
-#include "shibokenmacros.h"
-#include "shibokenbuffer.h"
+#include "sbkstaticstrings_p.h"
+#include "sbkstring.h"
 
-#endif // SHIBOKEN_H
+#define STATIC_STRING_IMPL(funcName, value) \
+PyObject *funcName() \
+{ \
+    static PyObject *const s = Shiboken::String::createStaticString(value); \
+    return s; \
+}
 
+namespace Shiboken
+{
+namespace PyName {
+// exported:
+STATIC_STRING_IMPL(dumps, "dumps")
+STATIC_STRING_IMPL(loads, "loads")
+
+// Internal:
+STATIC_STRING_IMPL(classmethod, "classmethod")
+STATIC_STRING_IMPL(compile, "compile");
+STATIC_STRING_IMPL(function, "function")
+STATIC_STRING_IMPL(marshal, "marshal")
+STATIC_STRING_IMPL(method, "method")
+STATIC_STRING_IMPL(overload, "overload")
+STATIC_STRING_IMPL(staticmethod, "staticmethod")
+} // namespace PyName
+
+namespace PyMagicName {
+// exported:
+STATIC_STRING_IMPL(class_, "__class__")
+STATIC_STRING_IMPL(ecf, "__ecf__")
+STATIC_STRING_IMPL(file, "__file__")
+STATIC_STRING_IMPL(module, "__module__")
+STATIC_STRING_IMPL(name, "__name__")
+
+// Internal:
+STATIC_STRING_IMPL(base, "__base__")
+STATIC_STRING_IMPL(bases, "__bases__")
+STATIC_STRING_IMPL(builtins, "__builtins__")
+STATIC_STRING_IMPL(code, "__code__")
+STATIC_STRING_IMPL(dictoffset, "__dictoffset__")
+STATIC_STRING_IMPL(func, "__func__")
+STATIC_STRING_IMPL(func_kind, "__func_kind__")
+STATIC_STRING_IMPL(mro, "__mro__")
+STATIC_STRING_IMPL(new_, "__new__")
+STATIC_STRING_IMPL(objclass, "__objclass__")
+STATIC_STRING_IMPL(self, "__self__")
+STATIC_STRING_IMPL(signature, "__signature__")
+STATIC_STRING_IMPL(weakrefoffset, "__weakrefoffset__")
+} // namespace PyMagicName
+} // namespace Shiboken

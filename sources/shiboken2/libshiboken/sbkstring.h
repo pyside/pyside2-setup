@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -59,6 +59,7 @@ namespace String
     LIBSHIBOKEN_API PyObject *fromStringAndSize(const char *str, Py_ssize_t size);
     LIBSHIBOKEN_API int compare(PyObject *val1, const char *val2);
     LIBSHIBOKEN_API Py_ssize_t len(PyObject *str);
+    LIBSHIBOKEN_API PyObject *createStaticString(const char *str);
 
 } // namespace String
 } // namespace Shiboken

@@ -308,7 +308,7 @@ PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qobject-connect
 static bool isDecorator(PyObject *method, PyObject *self)
 {
-    Shiboken::AutoDecRef methodName(PyObject_GetAttrString(method, "__name__"));
+    Shiboken::AutoDecRef methodName(PyObject_GetAttr(method, Shiboken::PyMagicName::name()));
     if (!PyObject_HasAttr(self, methodName))
         return true;
     Shiboken::AutoDecRef otherMethod(PyObject_GetAttr(self, methodName));
@@ -811,8 +811,8 @@ _findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %P
 // @snippet qobject-tr
 QString result;
 if (QCoreApplication::instance()) {
-    PyObject *klass = PyObject_GetAttrString(%PYSELF, "__class__");
-    PyObject *cname = PyObject_GetAttrString(klass, "__name__");
+    PyObject *klass = PyObject_GetAttr(%PYSELF, Shiboken::PyMagicName::class_());
+    PyObject *cname = PyObject_GetAttr(klass, Shiboken::PyMagicName::name());
     result = QString(QCoreApplication::instance()->translate(Shiboken::String::toCString(cname),
                                                         /*   %1, %2, QCoreApplication::CodecForTr, %3)); */
                                                              %1, %2, %3));

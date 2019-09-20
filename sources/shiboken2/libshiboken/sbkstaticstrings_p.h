@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,24 +37,36 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
-
 #include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
-#include "sbkstaticstrings.h"
 #include "shibokenmacros.h"
-#include "shibokenbuffer.h"
 
-#endif // SHIBOKEN_H
-
+namespace Shiboken
+{
+namespace PyName
+{
+PyObject *classmethod();
+PyObject *compile();
+PyObject *function();
+PyObject *marshal();
+PyObject *method();
+PyObject *overload();
+PyObject *staticmethod();
+} // namespace PyName
+namespace PyMagicName
+{
+PyObject *base();
+PyObject *bases();
+PyObject *builtins();
+PyObject *code();
+PyObject *dictoffset();
+PyObject *func();
+PyObject *func_kind();
+PyObject *module();
+PyObject *mro();
+PyObject *new_();
+PyObject *objclass();
+PyObject *self();
+PyObject *signature();
+PyObject *weakrefoffset();
+} // namespace PyMagicName
+} // namespace Shiboken

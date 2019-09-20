@@ -53,6 +53,7 @@ sbkconverter.cpp
 sbkenum.cpp
 sbkmodule.cpp
 sbkstring.cpp
+sbkstaticstrings.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 shibokenbuffer.cpp
@@ -129,6 +130,7 @@ install(FILES
         python25compat.h
         sbkdbg.h
         sbkstring.h
+        sbkstaticstrings.h
         shiboken.h
         shibokenmacros.h
         threadstatesaver.h

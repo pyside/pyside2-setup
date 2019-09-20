@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -39,6 +39,8 @@
 
 #include "sbkstring.h"
 #include "autodecref.h"
+
+#include <vector>
 
 namespace Shiboken
 {
@@ -200,6 +202,64 @@ Py_ssize_t len(PyObject *str)
     return 0;
 }
 
-} // namespace String
+///////////////////////////////////////////////////////////////////////
+//
+// Implementation of efficient Python strings
+// ------------------------------------------
+//
+// Instead of repetitively executing
+//
+//     PyObject *attr = PyObject_GetAttrString(obj, "__name__");
+//
+// a helper of the form
+//
+// PyObject *name()
+// {
+//    static PyObject *const s = Shiboken::String::createStaticString("__name__");
+//    return result;
+// }
+//
+// can now be implemented, which registers the string into a static set avoiding
+// repetitive string creation. The resulting code looks like:
+//
+//     PyObject *attr = PyObject_GetAttr(obj, name());
+//
+// Missing:
+// There is no finalization for the string structures, yet.
+// But this is a global fault in shiboken. We are missing a true
+// finalization like in all other modules.
 
+using StaticStrings = std::vector<PyObject *>;
+
+static StaticStrings &staticStrings()
+{
+    static StaticStrings result;
+    return result;
+}
+
+PyObject *createStaticString(const char *str)
+{
+#if PY_VERSION_HEX >= 0x03000000
+    PyObject *result = PyUnicode_InternFromString(str);
+#else
+    PyObject *result = PyString_InternFromString(str);
+#endif
+    if (result == nullptr) {
+        // This error is never checked, but also very unlikely. Report and exit.
+        PyErr_Print();
+        Py_FatalError("unexpected error in createStaticString()");
+    }
+    staticStrings().push_back(result);
+    return result;
+}
+
+void finalizeStaticStrings() // Currently unused
+{
+    auto &list = staticStrings();
+    for (auto s : list)
+        Py_DECREF(s);
+    list.clear();
+}
+
+} // namespace String
 } // namespace Shiboken

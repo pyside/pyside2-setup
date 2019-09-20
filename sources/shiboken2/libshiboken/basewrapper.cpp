@@ -44,6 +44,7 @@
 #include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkstring.h"
+#include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 #include "gilstate.h"
 #include <string>
@@ -160,11 +161,9 @@ patch_tp_new_wrapper(PyTypeObject *type)
      * The old tp_new_wrapper is added to all types that have tp_new.
      * We patch that with a version that ignores the heaptype flag.
      */
-    static PyObject *__new__ = nullptr;
+    auto newMethod = Shiboken::PyMagicName::new_();
     if (old_tp_new_wrapper == nullptr) {
-        if ((__new__ = Py_BuildValue("s", "__new__")) == nullptr)
-            return -1;
-        PyObject *func = PyDict_GetItem(PyType_Type.tp_dict, __new__);
+        PyObject *func = PyDict_GetItem(PyType_Type.tp_dict, newMethod);
         PyCFunctionObject *pycf_ob = reinterpret_cast<PyCFunctionObject *>(func);
         old_tp_new_wrapper = reinterpret_cast<ternaryfunc>(pycf_ob->m_ml->ml_meth);
     }
@@ -172,7 +171,7 @@ patch_tp_new_wrapper(PyTypeObject *type)
     Py_ssize_t i, n = PyTuple_GET_SIZE(mro);
     for (i = 0; i < n; i++) {
         type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
-        PyObject *existing = PyDict_GetItem(type->tp_dict, __new__);
+        PyObject *existing = PyDict_GetItem(type->tp_dict, newMethod);
         if (existing && PyCFunction_Check(existing)
                      && type->tp_flags & Py_TPFLAGS_HEAPTYPE) {
             auto *pycf_ob = reinterpret_cast<PyCFunctionObject *>(existing);
@@ -182,7 +181,7 @@ patch_tp_new_wrapper(PyTypeObject *type)
             if (existing_wrapper == old_tp_new_wrapper) {
                 PyObject *ob_type = reinterpret_cast<PyObject *>(type);
                 Shiboken::AutoDecRef func(PyCFunction_New(tp_new_methoddef, ob_type));
-                if (func.isNull() || PyDict_SetItem(type->tp_dict, __new__, func))
+                if (func.isNull() || PyDict_SetItem(type->tp_dict, newMethod, func))
                     return -1;
             }
         }

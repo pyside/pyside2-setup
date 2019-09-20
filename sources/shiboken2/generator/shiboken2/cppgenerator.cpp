@@ -6018,7 +6018,7 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
         Indentation indent(INDENT);
         s << INDENT << "str.replace(0, idx, Py_TYPE(self)->tp_name);" << endl;
     }
-    s << INDENT << "PyObject *mod = PyDict_GetItemString(Py_TYPE(self)->tp_dict, \"__module__\");" << endl;
+    s << INDENT << "PyObject *mod = PyDict_GetItem(Py_TYPE(self)->tp_dict, Shiboken::PyMagicName::module());" << endl;
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
     // is always prepended to the type name. Therefore the strchr check:
     s << INDENT << "if (mod && !strchr(str, '.'))" << endl;

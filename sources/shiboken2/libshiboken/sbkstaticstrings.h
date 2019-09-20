@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,24 +37,29 @@
 **
 ****************************************************************************/
 
-#ifndef SHIBOKEN_H
-#define SHIBOKEN_H
+#ifndef SBKSTATICSTRINGS_H
+#define SBKSTATICSTRINGS_H
 
 #include "sbkpython.h"
-#include "autodecref.h"
-#include "basewrapper.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
-#include "threadstatesaver.h"
-#include "helper.h"
-#include "sbkarrayconverter.h"
-#include "sbkconverter.h"
-#include "sbkenum.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
-#include "sbkstaticstrings.h"
 #include "shibokenmacros.h"
-#include "shibokenbuffer.h"
 
-#endif // SHIBOKEN_H
+namespace Shiboken
+{
+// Some often-used strings
+namespace PyName
+{
+LIBSHIBOKEN_API PyObject *dumps();
+LIBSHIBOKEN_API PyObject *loads();
+} // namespace PyName
 
+namespace PyMagicName
+{
+LIBSHIBOKEN_API PyObject *class_();
+LIBSHIBOKEN_API PyObject *ecf();
+LIBSHIBOKEN_API PyObject *file();
+LIBSHIBOKEN_API PyObject *module();
+LIBSHIBOKEN_API PyObject *name();
+} // namespace PyMagicName
+} // namespace Shiboken
+
+#endif // SBKSTATICSTRINGS_H
