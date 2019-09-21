@@ -103,8 +103,10 @@ except SyntaxError:
     print("*** not a python file, removed:", shortpath)
     os.unlink(effectiveRefPath)
     have_refmodule = False
-if have_refmodule and not hasattr(sig_exists, "dict"):
-    print("*** wrong module without 'dict', removed:", shortpath)
+dict_name = "sig_dict"
+if have_refmodule and not hasattr(sig_exists, dict_name):
+    print("*** wrong module without '{dict_name}', removed:"
+          .format(**locals()), shortpath)
     os.unlink(effectiveRefPath)
     have_refmodule = False
 
@@ -129,12 +131,12 @@ class TestSignaturesExists(unittest.TestCase):
                     "Actual {len_act} {actual} vs. expected {len_exp} {expect}')"
                     .format(**locals()))
 
-        for key, value in sig_exists.dict.items():
+        for key, value in sig_exists.sig_dict.items():
             name = key.rsplit(".", 1)[-1]
             if name in ("next", "__next__"): # ignore problematic cases
                 continue
             if key not in found_sigs:
-                warn("missing key: '{}'".format(key))
+                warn("missing key: '{}'".format(key), stacklevel=3)
             else:
                 found_val = found_sigs[key]
                 if type(value) is list and (
@@ -142,7 +144,7 @@ class TestSignaturesExists(unittest.TestCase):
                         len(found_val) < len(value)):
                     # We check that nothing got lost. But it is ok when an older
                     # registry file does not know all variants, yet!
-                    warn(multi_signature_msg(key, found_val, value))
+                    warn(multi_signature_msg(key, found_val, value), stacklevel=3)
 
     def test_signatures(self):
         found_sigs = enum_all()
@@ -206,7 +208,7 @@ class TestSignaturesExists(unittest.TestCase):
             self.assertFalse(check_warnings(), "you ignore when arity got bigger")
 
 
-tested_versions = (5, 6), (5, 9), (5, 11), (5, 12)
+tested_versions = (5, 6), (5, 9), (5, 11), (5, 12), (5, 14)
 
 if not have_refmodule and is_ci and qt_version()[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):

@@ -161,14 +161,11 @@ class Formatter(Writer):
         if self.level == 0:
             self.print()
         here = self.outfile.tell()
-        self.print("{spaces}class {class_str}:".format(**locals()))
-        pos = self.outfile.tell()
-        yield
-        if pos == self.outfile.tell():
-            # we have not written any function
-            self.outfile.seek(here)
-            self.outfile.truncate()
+        if self.have_body:
+            self.print("{spaces}class {class_str}:".format(**locals()))
+        else:
             self.print("{spaces}class {class_str}: ...".format(**locals()))
+        yield
         if "<" in class_name:
             # This is happening in QtQuick for some reason:
             ## class QSharedPointer<QQuickItemGrabResult >:

@@ -91,7 +91,7 @@ def check_warnings():
                     return True
     return False
 
-def warn(message, category=None, stacklevel=1):
+def warn(message, category=None, stacklevel=2):
     """Issue a warning with the default 'RuntimeWarning'"""
     if category is None:
         category = UserWarning

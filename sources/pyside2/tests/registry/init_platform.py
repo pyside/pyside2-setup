@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -201,39 +201,41 @@ class Formatter(object):
     """
     def __init__(self, outfile):
         self.outfile = outfile
+        self.last_level = 0
 
     def print(self, *args, **kw):
         print(*args, file=self.outfile, **kw) if self.outfile else None
 
     @contextmanager
     def module(self, mod_name):
-        self.mod_name = mod_name
         self.print("")
         self.print("# Module", mod_name)
-        self.print('if "{}" in sys.modules:'.format(mod_name))
-        self.print("    dict.update({")
+        self.print("sig_dict.update({")
         yield
-        self.print("    })")
+        self.print('    }}) if "{mod_name}" in sys.modules else None'.format(**locals()))
 
     @contextmanager
     def klass(self, class_name, class_str):
-        self.class_name = class_name
         self.print()
-        self.print("    # class {}.{}:".format(self.mod_name, class_name))
+        self.print("# class {self.mod_name}.{class_name}:".format(**locals()))
         yield
 
     @contextmanager
     def function(self, func_name, signature):
-        if self.class_name is None:
-            key = viskey = "{}".format(func_name)
+        if self.last_level > self.level:
+            self.print()
+        self.last_level = self.level
+        class_name = self.class_name
+        if class_name is None:
+            key = viskey = "{self.mod_name}.{func_name}".format(**locals())
         else:
-            key = viskey = "{}.{}".format(self.class_name, func_name)
+            key = viskey = "{self.mod_name}.{class_name}.{func_name}".format(**locals())
         if key.endswith("lY"):
             # Some classes like PySide2.QtGui.QContextMenuEvent have functions
             # globalX and the same with Y. The gerrit robot thinks that this
             # is a badly written "globally". Convince it by hiding this word.
             viskey = viskey[:-1] + '""Y'
-        self.print('        "{}": {},'.format(viskey, signature))
+        self.print('    "{viskey}": {signature},'.format(**locals()))
         yield key
 
 
@@ -268,7 +270,7 @@ def generate_all():
             '''.format(module)))
         fmt.print("import sys")
         fmt.print("")
-        fmt.print("dict = {}")
+        fmt.print("sig_dict = {}")
         for mod_name in all_modules:
             enu.module(mod_name)
         fmt.print("# eof")

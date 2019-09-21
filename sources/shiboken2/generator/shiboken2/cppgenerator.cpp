@@ -4611,6 +4611,15 @@ void CppGenerator::writeEnumsInitialization(QTextStream &s, AbstractMetaEnumList
     }
 }
 
+static QString mangleName(QString name)
+{
+    if (   name == QLatin1String("None")
+        || name == QLatin1String("False")
+        || name == QLatin1String("True"))
+        name += QLatin1Char('_');
+    return name;
+}
+
 void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnum *cppEnum)
 {
     const AbstractMetaClass *enclosingClass = getProperEnclosingClassForEnum(cppEnum);
@@ -4690,7 +4699,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
                     Indentation indent(INDENT);
                     s << INDENT << "PyObject *anonEnumItem = PyInt_FromLong(" << enumValueText << ");" << endl;
                     s << INDENT << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(reinterpret_cast<SbkObjectType *>(" << enclosingObjectVariable
-                        << "))->tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
+                        << "))->tp_dict, \"" << mangleName(enumValue->name()) << "\", anonEnumItem) < 0)" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << returnStatement(m_currentErrorCode) << endl;
@@ -4699,7 +4708,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
                 }
                 s << INDENT << '}' << endl;
             } else {
-                s << INDENT << "if (PyModule_AddIntConstant(module, \"" << enumValue->name() << "\", ";
+                s << INDENT << "if (PyModule_AddIntConstant(module, \"" << mangleName(enumValue->name()) << "\", ";
                 s << enumValueText << ") < 0)" << endl;
                 {
                     Indentation indent(INDENT);
@@ -4712,7 +4721,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem" : "createGlobalEnumItem");
             s << '(' << enumVarTypeObj << ',' << endl;
             Indentation indent(INDENT);
-            s << INDENT << enclosingObjectVariable << ", \"" << enumValue->name() << "\", ";
+            s << INDENT << enclosingObjectVariable << ", \"" << mangleName(enumValue->name()) << "\", ";
             s << enumValueText << "))" << endl;
             s << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
@@ -4721,7 +4730,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             s << INDENT << "if (!Shiboken::Enum::createScopedEnumItem("
                 << enumVarTypeObj << ',' << endl;
             Indentation indent(INDENT);
-            s << INDENT << enumVarTypeObj<< ", \"" << enumValue->name() << "\", "
+            s << INDENT << enumVarTypeObj<< ", \"" << mangleName(enumValue->name()) << "\", "
                << enumValueText << "))" << endl
                << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
