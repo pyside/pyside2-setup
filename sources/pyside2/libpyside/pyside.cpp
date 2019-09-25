@@ -147,7 +147,8 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds
                     return false;
             }
             if (!accept) {
-                PyErr_Format(PyExc_AttributeError, "'%S' is not a Qt property or a signal", key);
+                PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal",
+                             propName.constData());
                 return false;
             }
         }
