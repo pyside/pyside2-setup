@@ -155,7 +155,11 @@ if sys.platform.startswith('linux'):
     except ImportError:
         import platform as distro
     platform_name = "".join(distro.linux_distribution()[:2]).lower()
-    platform_name = re.sub('[^0-9a-z]', '', platform_name)
+    # this currently happens on opensuse in 5.14:
+    if not platform_name:
+        # We intentionally crash when that last resort is also absent:
+        platform_name = os.environ["MACHTYPE"]
+    platform_name = re.sub('[^0-9a-z]', '_', platform_name)
 else:
     platform_name = sys.platform
 # In the linux case, we need more information.

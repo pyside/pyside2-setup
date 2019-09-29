@@ -117,7 +117,7 @@ def find_all_links(text, url, ignore=()):
     names = list(row["href"] for row in lis)
     names = list(name for name in names if name not in ignore)
     for name in names:
-        if not re.match("^[A-Za-z0-9_\-.]+/?$", name):
+        if not re.match(r"^[A-Za-z0-9_\-.]+/?$", name):
             print("Unexpected character in link:", name)
             # Not clear how to terminate the pool quick and clean.
             # We crash badly in handle_suburl_tup, ugly but works.
@@ -144,8 +144,17 @@ def read_url(url):
 def get_timestamp(text):
     # agent:2018/06/29 15:02:15
     global stop_all
-    ts = text[6 : 6 + 19]
-    ts = re.sub('[^0-9]','_', ts)
+    prefix = "\nagent:"
+    try:
+        startpos = text.index(prefix)
+    except ValueError:
+        print("this is not the usual format of COIN log files")
+        stop_all = True
+        raise
+    startpos += len(prefix)
+    text = text[startpos : startpos + 80]
+    ts = text[:19]
+    ts = re.sub(r'[^0-9]', '_', ts)
     # check that it is a valid time stamp
     try:
         datetime.strptime(ts, "%Y_%m_%d_%H_%M_%S")
@@ -156,7 +165,14 @@ def get_timestamp(text):
     return ts
 
 def write_data(name, text):
-    ts = get_timestamp(text)
+    try:
+        ts = get_timestamp(text)
+    except ValueError:
+        print()
+        print(name)
+        print()
+        print(text)
+        raise
     lines = text.split("\n")
     for idx, line in enumerate(lines):
         if "BEGIN_FILE" in line:
@@ -171,7 +187,7 @@ def write_data(name, text):
     while lines[-1] == "":
         lines.pop()
     text = "\n".join(lines) + "\n"
-    modname = re.search("'(..*?)'", text).group(1)
+    modname = re.search(r"'(..*?)'", text).group(1)
     fn = os.path.join(test_path, f"{ts}-{name}-{modname}.py")
     if os.path.exists(fn):
         # do not change the file, we want to skip it
@@ -187,14 +203,14 @@ def update_license(text):
     text = my_text[:my_end_license] + text[end_license:]
     return text
 
-def eval_data():
+def eval_data(force=False):
     """
     Read all found files, sort them and keep the latest version.
     """
     files = []
     for entry in os.scandir(test_path):
         if "exists_" in entry.name and entry.name.endswith(".py"):
-            if os.path.getmtime(entry.path) >= start_time:
+            if force or os.path.getmtime(entry.path) >= start_time:
                 # this file is newly created
                 files.append(entry.path)
     files.sort()
@@ -209,6 +225,7 @@ def eval_data():
         name = os.path.join(target_path, fn + ".py")
         with open(name, "w") as f:
             f.write(update_license(results[fn]))
+        print("+++ generated:", name)
     return len(results)
 
 def handle_suburl(idx, n, url, level):
@@ -328,14 +345,22 @@ if __name__ == "__main__":
             Warning: On the first call, this script may take almost 30 minutes to run.
             Subsequent calls are *much* faster due to caching.
 
+            {os.path.basename(my_name)} [-h] eval
+
+            Enforces evaluation when a scan did not complete yet.
+
             For more information, see the file
                 sources/shiboken2/libshiboken/signature_doc.rst
             """))
     subparsers = parser.add_subparsers(dest="command", metavar="", title="required argument")
     # create the parser for the "scan" command
-    parser_test = subparsers.add_parser("scan", help="run the scan")
+    parser_scan = subparsers.add_parser("scan", help="run the scan")
+    parser_eval = subparsers.add_parser("eval", help="force evaluation")
     args = parser.parse_args()
     if not args.command:
         parser.print_usage()
         exit(1)
-    get_test_results("https://testresults.qt.io/coin/api/results/pyside/pyside-setup/")
+    if args.command == "scan":
+        get_test_results("https://testresults.qt.io/coin/api/results/pyside/pyside-setup/")
+    elif args.command == "eval":
+        eval_data(force=True)

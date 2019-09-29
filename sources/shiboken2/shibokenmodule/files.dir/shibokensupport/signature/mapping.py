@@ -348,6 +348,7 @@ type_map.update({
     "array GLuint*"         : ArrayLikeVariable(int),
     "array int*"            : ArrayLikeVariable(int),
     "array long long*"      : ArrayLikeVariable(int),
+    "array long*"           : ArrayLikeVariable(int),
     "array short*"          : ArrayLikeVariable(int),
     "array signed char*"    : bytes,
     "array unsigned char*"  : bytes,
