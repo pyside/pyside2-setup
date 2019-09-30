@@ -219,6 +219,23 @@ QString msgCannotFindTypeEntry(const QString &t)
     return QLatin1String("Cannot find type entry for \"") + t + QLatin1String("\".");
 }
 
+QString msgCannotFindTypeEntryForSmartPointer(const QString &t, const QString &smartPointerType)
+{
+    return QLatin1String("Cannot find type entry \"") + t
+        + QLatin1String("\" for instantiation of \"") + smartPointerType + QLatin1String("\".");
+}
+
+QString msgInvalidSmartPointerType(const TypeInfo &i)
+{
+    return QLatin1String("Invalid smart pointer type \"") + i.toString() + QLatin1String("\".");
+}
+
+QString msgCannotFindSmartPointerInstantion(const TypeInfo &i)
+{
+    return QLatin1String("Cannot find instantiation of smart pointer type for \"")
+        + i.toString() + QLatin1String("\".");
+}
+
 QString msgCannotTranslateTemplateArgument(int i,
                                            const TypeInfo &typeInfo,
                                            const QString &why)

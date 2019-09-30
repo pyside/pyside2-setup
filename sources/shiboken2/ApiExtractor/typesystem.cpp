@@ -956,6 +956,11 @@ TypeEntry *SmartPointerTypeEntry::clone() const
 
 SmartPointerTypeEntry::SmartPointerTypeEntry(const SmartPointerTypeEntry &) = default;
 
+bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntry *e) const
+{
+    return m_instantiations.isEmpty() || m_instantiations.contains(e);
+}
+
 NamespaceTypeEntry::NamespaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                        const TypeEntry *parent) :
     ComplexTypeEntry(entryName, NamespaceType, vr, parent)

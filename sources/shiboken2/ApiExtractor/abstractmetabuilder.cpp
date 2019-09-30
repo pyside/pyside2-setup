@@ -2286,25 +2286,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         return nullptr;
     }
 
-    if (types.size() > 1) {
-        const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
-                                          [typeEntryType](const TypeEntry *e) {
-            return e->type() == typeEntryType; });
-        if (!sameType) {
-            if (errorMessageIn)
-                *errorMessageIn = msgAmbiguousVaryingTypesFound(qualifiedName, types);
-            return nullptr;
-        }
-        // Ambiguous primitive types are possible (when including type systems).
-        if (typeEntryType != TypeEntry::PrimitiveType) {
-            if (errorMessageIn)
-                *errorMessageIn = msgAmbiguousTypesFound(qualifiedName, types);
-            return nullptr;
-        }
-    }
-
-    auto *metaType = new AbstractMetaType;
-    metaType->setTypeEntry(type);
+    QScopedPointer<AbstractMetaType> metaType(new AbstractMetaType);
     metaType->setIndirectionsV(typeInfo.indirectionsV());
     metaType->setReferenceType(typeInfo.referenceType());
     metaType->setConstant(typeInfo.isConstant());
@@ -2318,12 +2300,58 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         if (!targType) {
             if (errorMessageIn)
                 *errorMessageIn = msgCannotTranslateTemplateArgument(t, ti, errorMessage);
-            delete metaType;
             return nullptr;
         }
 
         metaType->addInstantiation(targType, true);
     }
+
+    if (types.size() > 1) {
+        const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
+                                          [typeEntryType](const TypeEntry *e) {
+            return e->type() == typeEntryType; });
+        if (!sameType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgAmbiguousVaryingTypesFound(qualifiedName, types);
+            return nullptr;
+        }
+        // Ambiguous primitive/smart pointer types are possible (when
+        // including type systems).
+        if (typeEntryType != TypeEntry::PrimitiveType
+            && typeEntryType != TypeEntry::SmartPointerType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgAmbiguousTypesFound(qualifiedName, types);
+            return nullptr;
+        }
+    }
+
+    if (typeEntryType == TypeEntry::SmartPointerType) {
+        // Find a matching instantiation
+        if (metaType->instantiations().size() != 1) {
+            if (errorMessageIn)
+                *errorMessageIn = msgInvalidSmartPointerType(_typei);
+            return nullptr;
+        }
+        auto instantiationType = metaType->instantiations().constFirst()->typeEntry();
+        if (instantiationType->type() == TypeEntry::TemplateArgumentType) {
+            // Member functions of the template itself, SharedPtr(const SharedPtr &)
+            type = instantiationType;
+        } else {
+            auto it = std::find_if(types.cbegin(), types.cend(),
+                                   [instantiationType](const TypeEntry *e) {
+                auto smartPtr = static_cast<const SmartPointerTypeEntry *>(e);
+                return smartPtr->matchesInstantiation(instantiationType);
+            });
+            if (it == types.cend()) {
+                if (errorMessageIn)
+                    *errorMessageIn = msgCannotFindSmartPointerInstantion(_typei);
+                return nullptr;
+            }
+            type =*it;
+        }
+    }
+
+    metaType->setTypeEntry(type);
 
     // The usage pattern *must* be decided *after* the possible template
     // instantiations have been determined, or else the absence of
@@ -2331,7 +2359,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     // AbstractMetaType::cppSignature().
     metaType->decideUsagePattern();
 
-    return metaType;
+    return metaType.take();
 }
 
 AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei,

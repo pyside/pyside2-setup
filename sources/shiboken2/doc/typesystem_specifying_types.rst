@@ -445,6 +445,14 @@ smart-pointer-type
     to function return values.
     **ref-count-method** specifies the name of the method used to do reference counting.
 
+    The *optional* attribute **instantiations** specifies for which instantiations
+    of the smart pointer wrappers will be generated (comma-separated list).
+    By default, this will happen for all instantiations found by code parsing.
+    This might be a problem when linking different modules, since wrappers for the
+    same instantiation might be generated into different modules, which then clash.
+    Providing an instantiations list makes it possible to specify which wrappers
+    will be generated into specific modules.
+
     .. code-block:: xml
 
         <typesystem>
@@ -452,7 +460,8 @@ smart-pointer-type
                 since="..."
                 type="..."
                 getter="..."
-                ref-count-method="..."/>
+                ref-count-method="..."
+                instantiations="..."/>
             </typesystem>
 
 .. _function:

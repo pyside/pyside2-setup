@@ -31,6 +31,7 @@
 #include "typesystem.h"
 
 #include <QtCore/QStack>
+#include <QtCore/QHash>
 #include <QtCore/QScopedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
@@ -152,6 +153,8 @@ public:
     QString errorString() const { return m_error; }
 
 private:
+    bool parseXml(QXmlStreamReader &reader);
+    bool setupSmartPointerInstantiations();
     bool startElement(const QXmlStreamReader &reader);
     SmartPointerTypeEntry *parseSmartPointerEntry(const QXmlStreamReader &,
                                                   const QString &name,
@@ -273,6 +276,7 @@ private:
     QString m_currentSignature;
     QString m_currentPath;
     QScopedPointer<TypeSystemEntityResolver> m_entityResolver;
+    QHash<SmartPointerTypeEntry *, QString> m_smartPointerInstantiations;
 };
 
 #endif // TYPESYSTEMPARSER_H

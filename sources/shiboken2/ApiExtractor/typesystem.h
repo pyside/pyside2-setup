@@ -1488,6 +1488,7 @@ public:
 
     Instantiations instantiations() const { return m_instantiations; }
     void setInstantiations(const Instantiations &i) { m_instantiations = i; }
+    bool matchesInstantiation(const TypeEntry *e) const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

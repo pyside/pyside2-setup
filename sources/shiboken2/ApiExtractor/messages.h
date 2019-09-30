@@ -83,6 +83,10 @@ QString msgUnableToTranslateType(const TypeInfo &typeInfo,
 
 QString msgCannotFindTypeEntry(const QString &t);
 
+QString msgCannotFindTypeEntryForSmartPointer(const QString &t, const QString &smartPointerType);
+QString msgInvalidSmartPointerType(const TypeInfo &i);
+QString msgCannotFindSmartPointerInstantion(const TypeInfo &i);
+
 QString msgCannotTranslateTemplateArgument(int i,
                                            const TypeInfo &typeInfo,
                                            const QString &why);
