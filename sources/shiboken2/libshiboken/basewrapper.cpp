@@ -164,6 +164,7 @@ patch_tp_new_wrapper(PyTypeObject *type)
     auto newMethod = Shiboken::PyMagicName::new_();
     if (old_tp_new_wrapper == nullptr) {
         PyObject *func = PyDict_GetItem(PyType_Type.tp_dict, newMethod);
+        assert(func);
         PyCFunctionObject *pycf_ob = reinterpret_cast<PyCFunctionObject *>(func);
         old_tp_new_wrapper = reinterpret_cast<ternaryfunc>(pycf_ob->m_ml->ml_meth);
     }
