@@ -71,11 +71,6 @@ public:
 
     const char *name() const override { return "Shiboken"; }
 
-    /**
-     * Helper function to find for argument default value
-     */
-    static QString getDefaultValue(const AbstractMetaFunction *func, const AbstractMetaArgument *arg);
-
     /// Returns a list of all ancestor classes for the given class.
     AbstractMetaClassList getAllAncestors(const AbstractMetaClass *metaClass) const;
 

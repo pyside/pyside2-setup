@@ -520,7 +520,7 @@ void OverloadData::addOverload(const AbstractMetaFunction *func)
     for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
         if (func->argumentRemoved(i + 1))
             continue;
-        if (!ShibokenGenerator::getDefaultValue(func, func->arguments().at(i)).isEmpty()) {
+        if (func->arguments().at(i)->hasDefaultValueExpression()) {
             int fixedArgIndex = i - removed;
             if (fixedArgIndex < m_headOverloadData->m_minArgs)
                 m_headOverloadData->m_minArgs = fixedArgIndex;
@@ -754,7 +754,7 @@ const AbstractMetaFunction *OverloadData::getFunctionWithDefaultValue() const
             if (func->argumentRemoved(i + 1))
                 removedArgs++;
         }
-        if (!ShibokenGenerator::getDefaultValue(func, func->arguments().at(m_argPos + removedArgs)).isEmpty())
+        if (func->arguments().at(m_argPos + removedArgs)->hasDefaultValueExpression())
             return func;
     }
     return nullptr;
@@ -771,7 +771,7 @@ QVector<int> OverloadData::invalidArgumentLengths() const
             if (func->argumentRemoved(i+1)) {
                 offset++;
             } else {
-                if (!ShibokenGenerator::getDefaultValue(func, args[i]).isEmpty())
+                if (args.at(i)->hasDefaultValueExpression())
                     validArgLengths << i-offset;
             }
         }
@@ -820,7 +820,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList 
             if (func->argumentRemoved(j + 1))
                 continue;
             int fixedArgIndex = j - removed;
-            if (fixedArgIndex < minArgs && !ShibokenGenerator::getDefaultValue(func, func->arguments().at(j)).isEmpty())
+            if (fixedArgIndex < minArgs && func->arguments().at(j)->hasDefaultValueExpression())
                 minArgs = fixedArgIndex;
         }
     }
@@ -967,7 +967,7 @@ QString OverloadData::dumpGraph() const
             const AbstractMetaArgument *arg = argument(func);
             if (!arg)
                 continue;
-            QString argDefault = ShibokenGenerator::getDefaultValue(func, arg);
+            QString argDefault = arg->defaultValueExpression();
             if (!argDefault.isEmpty() ||
                 argDefault != arg->originalDefaultValueExpression()) {
                 s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
@@ -1038,7 +1038,7 @@ bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunction *func)
     for (const AbstractMetaArgument *arg : arguments) {
         if (func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
-        if (!ShibokenGenerator::getDefaultValue(func, arg).isEmpty())
+        if (arg->hasDefaultValueExpression())
             return true;
     }
     return false;
@@ -1049,7 +1049,7 @@ AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const Abstr
     AbstractMetaArgumentList args;
     const AbstractMetaArgumentList &arguments = func->arguments();
     for (AbstractMetaArgument *arg : arguments) {
-        if (ShibokenGenerator::getDefaultValue(func, arg).isEmpty()
+        if (!arg->hasDefaultValueExpression()
             || func->argumentRemoved(arg->argumentIndex() + 1))
             continue;
         args << arg;

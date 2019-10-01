@@ -571,7 +571,7 @@ QString ShibokenGenerator::guessScopeForDefaultFlagsValue(const AbstractMetaFunc
 QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction *func,
                                                      const AbstractMetaArgument *arg) const
 {
-    QString value = getDefaultValue(func, arg);
+    QString value = arg->defaultValueExpression();
 
     if (value.isEmpty())
         return QString();
@@ -2706,22 +2706,6 @@ bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadD
            || (maxArgs > 1)
            || overloadData.referenceFunction()->isConstructor()
            || overloadData.hasArgumentWithDefaultValue();
-}
-
-QString  ShibokenGenerator::getDefaultValue(const AbstractMetaFunction *func, const AbstractMetaArgument *arg)
-{
-    if (!arg->defaultValueExpression().isEmpty())
-        return arg->defaultValueExpression();
-
-    //Check modifications
-    const FunctionModificationList &mods = func->modifications();
-    for (const FunctionModification &m : mods) {
-        for (const ArgumentModification &am : m.argument_mods) {
-            if (am.index == (arg->argumentIndex() + 1))
-                return am.replacedDefaultExpression;
-        }
-    }
-    return QString();
 }
 
 void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const AbstractMetaType *type, const QString &defaultCtor)
