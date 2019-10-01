@@ -1612,6 +1612,26 @@ void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
     }
 }
 
+static void applyDefaultExpressionModifications(const FunctionModificationList &functionMods,
+                                                int i, AbstractMetaArgument *metaArg)
+{
+    // use replace/remove-default-expression for set default value
+    for (const auto &modification : functionMods) {
+        for (const auto &argumentModification : modification.argument_mods) {
+            if (argumentModification.index == i + 1) {
+                if (argumentModification.removedDefaultExpression) {
+                    metaArg->setDefaultValueExpression(QString());
+                    break;
+                }
+                if (!argumentModification.replacedDefaultExpression.isEmpty()) {
+                    metaArg->setDefaultValueExpression(argumentModification.replacedDefaultExpression);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc)
 {
     return traverseFunction(addedFunc, nullptr);
@@ -1670,20 +1690,13 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
 
     // Find the correct default values
+    const FunctionModificationList functionMods = metaFunction->modifications(metaClass);
     for (int i = 0; i < metaArguments.size(); ++i) {
         AbstractMetaArgument* metaArg = metaArguments.at(i);
 
-        //use relace-default-expression for set default value
-        QString replacedExpression;
-        if (metaClass)
-            replacedExpression = metaFunction->replacedDefaultExpression(metaClass, i + 1);
-
-        if (!replacedExpression.isEmpty()) {
-            if (!metaFunction->removedDefaultExpression(metaClass, i + 1)) {
-                metaArg->setDefaultValueExpression(replacedExpression);
-                metaArg->setOriginalDefaultValueExpression(replacedExpression);
-            }
-        }
+        // use replace-default-expression for set default value
+        applyDefaultExpressionModifications(functionMods, i, metaArg);
+        metaArg->setOriginalDefaultValueExpression(metaArg->defaultValueExpression()); // appear unmodified
     }
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
@@ -2002,35 +2015,16 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         const ArgumentModelItem &arg = arguments.at(i);
         AbstractMetaArgument* metaArg = metaArguments.at(i);
 
-        //use relace-default-expression for set default value
-        QString replacedExpression;
-        if (currentClass) {
-            replacedExpression = metaFunction->replacedDefaultExpression(currentClass, i + 1);
-        } else {
-            if (!functionMods.isEmpty()) {
-                QVector<ArgumentModification> argMods = functionMods.constFirst().argument_mods;
-                if (!argMods.isEmpty())
-                    replacedExpression = argMods.constFirst().replacedDefaultExpression;
-            }
-        }
+        const QString originalDefaultExpression =
+            fixDefaultValue(arg, metaArg->type(), metaFunction, currentClass, i);
 
-        bool hasDefaultValue = false;
-        if (arg->defaultValue() || !replacedExpression.isEmpty()) {
-            QString expr = arg->defaultValueExpression();
-            expr = fixDefaultValue(arg, metaArg->type(), metaFunction, currentClass, i);
-            metaArg->setOriginalDefaultValueExpression(expr);
+        metaArg->setOriginalDefaultValueExpression(originalDefaultExpression);
+        metaArg->setDefaultValueExpression(originalDefaultExpression);
 
-            if (metaFunction->removedDefaultExpression(currentClass, i + 1)) {
-                expr.clear();
-            } else if (!replacedExpression.isEmpty()) {
-                expr = replacedExpression;
-            }
-            metaArg->setDefaultValueExpression(expr);
-            hasDefaultValue = !expr.isEmpty();
-        }
+        applyDefaultExpressionModifications(functionMods, i, metaArg);
 
         //Check for missing argument name
-        if (hasDefaultValue
+        if (!metaArg->defaultValueExpression().isEmpty()
             && !metaArg->hasName()
             && !metaFunction->isOperatorOverload()
             && !metaFunction->isSignal()
@@ -2436,10 +2430,10 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
                                                     AbstractMetaClass *implementingClass,
                                                     int /* argumentIndex */)
 {
-    QString functionName = fnc->name();
-    QString className = implementingClass ? implementingClass->qualifiedCppName() : QString();
-
     QString expr = item->defaultValueExpression();
+    if (expr.isEmpty())
+        return expr;
+
     if (type) {
         if (type->isPrimitive()) {
             if (type->name() == QLatin1String("boolean")) {
@@ -2513,11 +2507,12 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
             }
         }
     } else {
+        const QString className = implementingClass ? implementingClass->qualifiedCppName() : QString();
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("undefined type for default value '%3' of argument in function '%1', class '%2'")
-                              .arg(functionName, className, item->defaultValueExpression());
+                              .arg(fnc->name(), className, item->defaultValueExpression());
 
-        expr = QString();
+        expr.clear();
     }
 
     return expr;

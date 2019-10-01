@@ -1020,8 +1020,6 @@ public:
 
     AbstractMetaFunction *copy() const;
 
-    QString replacedDefaultExpression(const AbstractMetaClass *cls, int idx) const;
-    bool removedDefaultExpression(const AbstractMetaClass *cls, int idx) const;
     QString conversionRule(TypeSystem::Language language, int idx) const;
     QVector<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
     ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
@@ -1034,9 +1032,6 @@ public:
     bool isRemovedFromAllLanguages(const AbstractMetaClass *) const;
     bool isRemovedFrom(const AbstractMetaClass *, TypeSystem::Language language) const;
     bool argumentRemoved(int) const;
-
-    QString argumentReplaced(int key) const;
-
     /**
     *   Verifies if any modification to the function is an inject code.
     *   \return true if there is inject code modifications to the function.
