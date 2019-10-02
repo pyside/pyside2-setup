@@ -149,3 +149,19 @@ Modifications::nonConversionRuleForArgumentWithDefaultValue(ObjectType** object)
         *object = m_object;
     return true;
 }
+
+void Modifications::setEnumValue(TestEnum e)
+{
+    m_enumValue = e;
+}
+
+Modifications::TestEnum Modifications::enumValue() const
+{
+    return m_enumValue;
+}
+
+Modifications::TestEnum Modifications::defaultEnumValue() const
+{
+    return TestEnumValue2;
+}
+

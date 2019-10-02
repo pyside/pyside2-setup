@@ -956,6 +956,7 @@
 
     <object-type name="Modifications">
         <enum-type name="OverloadedModFunc"/>
+        <enum-type name="TestEnum"/>
 
         <modify-function signature="overloaded(int, bool, int, double)">
             <modify-argument index="2">
@@ -1286,6 +1287,11 @@
           %RETURN_TYPE %0 = !%CPPSELF.%FUNCTION_NAME(%1);
           %PYARG_0 = %CONVERTTOPYTHON[OddBool](%0);
           </inject-code>
+        </modify-function>
+        <modify-function signature="setEnumValue(Modifications::TestEnum)">
+          <modify-argument index="1">
+            <replace-default-expression with="cppSelf->defaultEnumValue()"/>
+          </modify-argument>
         </modify-function>
     </object-type>
 

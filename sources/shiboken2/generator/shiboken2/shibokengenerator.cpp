@@ -573,11 +573,11 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
 {
     QString value = getDefaultValue(func, arg);
 
-    if (value.isEmpty())
-        return QString();
-
-    if (isPointer(arg->type()))
+    if (value.isEmpty()
+        || arg->hasModifiedDefaultValueExpression()
+        || isPointer(arg->type())) {
         return value;
+    }
 
     static const QRegularExpression enumValueRegEx(QStringLiteral("^([A-Za-z_]\\w*)?$"));
     Q_ASSERT(enumValueRegEx.isValid());

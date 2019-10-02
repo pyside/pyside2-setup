@@ -220,5 +220,15 @@ class ModificationsTest(unittest.TestCase):
         self.assertTrue(isinstance(res, float))
         self.assertEqual(res, em.increment)
 
+    def testDefaultValueModifications(self):
+        # PSYIDE-1095: setEnumValue() has the default value modified to
+        # calling defaultEnumValue() which returns Modifications.TestEnumValue2.
+        # This used to generated broken code since defaultEnumValue() was
+        # qualified by the enum scope.
+        modifications = Modifications()
+        modifications.setEnumValue()
+        self.assertEqual(modifications.enumValue(), Modifications.TestEnumValue2)
+
+
 if __name__ == '__main__':
     unittest.main()
