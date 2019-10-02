@@ -671,7 +671,9 @@ public:
     }
 
     bool hasDefaultValueExpression() const
-    { return !m_originalExpression.isEmpty() || !m_expression.isEmpty(); }
+    { return !m_expression.isEmpty(); }
+    bool hasOriginalDefaultValueExpression() const
+    { return !m_originalExpression.isEmpty(); }
     bool hasUnmodifiedDefaultValueExpression() const
     { return !m_originalExpression.isEmpty() && m_originalExpression == m_expression; }
     bool hasModifiedDefaultValueExpression() const
