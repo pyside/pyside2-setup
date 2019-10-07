@@ -2303,8 +2303,9 @@ void QtDocGenerator::writeAdditionalDocumentation()
             if (fi.isFile()) {
                 const QString rstFileName = fi.baseName() + rstSuffix;
                 const QString rstFile = targetDir + QLatin1Char('/') + rstFileName;
+                const QString context = targetDir.mid(targetDir.lastIndexOf(QLatin1Char('/')) + 1);
                 if (QtXmlToSphinx::convertToRst(this, fi.absoluteFilePath(),
-                                                rstFile, QString(), &errorMessage)) {
+                                                rstFile, context, &errorMessage)) {
                     ++successCount;
                     qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
                         << " converted " << fi.fileName()
