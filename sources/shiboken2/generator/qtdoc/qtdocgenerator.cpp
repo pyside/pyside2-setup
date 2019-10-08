@@ -349,6 +349,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert(QLatin1String("skipto"), &QtXmlToSphinx::handleIgnoredTag);
     m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleTargetTag);
     m_handlerMap.insert(QLatin1String("page"), &QtXmlToSphinx::handlePageTag);
+    m_handlerMap.insert(QLatin1String("group"), &QtXmlToSphinx::handlePageTag);
 
     // useless tags
     m_handlerMap.insert(QLatin1String("description"), &QtXmlToSphinx::handleUselessTag);
@@ -1230,10 +1231,11 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
         m_output << rstLabel(title.toString());
 
     const QStringRef fullTitle = reader.attributes().value(fullTitleAttribute());
-    if (!fullTitle.isEmpty()) {
-        const int size = writeEscapedRstText(m_output, fullTitle);
-        m_output << endl << Pad('*', size) << endl << endl;
-    }
+    const int size = fullTitle.isEmpty()
+       ? writeEscapedRstText(m_output, title)
+       : writeEscapedRstText(m_output, fullTitle);
+
+    m_output << endl << Pad('*', size) << endl << endl;
 
     const QStringRef brief = reader.attributes().value(briefAttribute());
     if (!brief.isEmpty())
