@@ -51,6 +51,11 @@ public:
         Overloaded_ibPP
     };
 
+    enum TestEnum {
+        TestEnumValue1,
+        TestEnumValue2
+    };
+
     // those overloaded methods should be heavily modified
     // to push the overload decisor to its limits
     inline OverloadedModFunc overloaded(int a0, bool b0, int c0, double d0) { return Overloaded_ibid; }
@@ -123,8 +128,13 @@ public:
     // Inject code with a %CONVERTTOPYTHON that receives an user's primitive type.
     static inline OddBool passOddBool(OddBool ob) { return ob; }
 
+    void setEnumValue(TestEnum e = TestEnumValue1);
+    TestEnum enumValue() const;
+    TestEnum defaultEnumValue() const;
+
 private:
     ObjectType* m_object;
+    TestEnum m_enumValue = TestEnumValue1;
 };
 
 class LIBSAMPLE_API AbstractModifications : public Modifications

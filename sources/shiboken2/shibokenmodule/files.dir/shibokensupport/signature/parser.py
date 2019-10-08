@@ -106,7 +106,8 @@ def _parse_line(line):
         $
         """
     ret = SimpleNamespace(**re.match(line_re, line, re.VERBOSE).groupdict())
-    argstr = ret.arglist
+    # PYSIDE-1095: Handle arbitrary default expressions
+    argstr = ret.arglist.replace("->", ".deref.")
     arglist = _parse_arglist(argstr)
     args = []
     for arg in arglist:

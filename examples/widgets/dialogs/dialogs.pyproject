@@ -1,0 +1,4 @@
+{
+    "files": ["findfiles.py", "standarddialogs.py", "extension.py",
+              "trivialwizard.py"]
+}
