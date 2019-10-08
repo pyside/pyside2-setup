@@ -63,6 +63,11 @@ if _ci_features is not None:
     for f in _ci_features.split(', '):
         CI_FEATURES.append(f)
 CI_RELEASE_CONF = has_option("packaging")
+CI_TEST_PHASE = option_value("phase")
+if CI_TEST_PHASE not in ["ALL", "BUILD", "WHEEL"]:
+    CI_TEST_PHASE = "ALL"
+
+
 
 def get_current_script_path():
     """ Returns the absolute path containing this script. """
@@ -95,20 +100,20 @@ def is_snapshot_build():
         return True
     return False
 
-def call_setup(python_ver):
+def call_setup(python_ver, phase):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
-    rmtree(_env, True)
-    run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
 
-    install_pip_dependencies(env_pip, ["pip", "numpy", "setuptools", "sphinx", "six", "wheel"])
+    if phase in ["BUILD"]:
+        rmtree(_env, True)
+        run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
+        install_pip_dependencies(env_pip, ["pip", "numpy", "setuptools", "sphinx", "six", "wheel"])
 
     cmd = [env_python, "-u", "setup.py"]
-    if CI_RELEASE_CONF:
-        cmd += ["bdist_wheel", "--standalone"]
-    else:
-        cmd += ["build"]
-    qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
-    cmd.append(qmake_path)
+    if phase in ["BUILD"]:
+        cmd += ["build", "--standalone", "--skip-packaging"]
+    elif phase in ["WHEEL"] or CI_RELEASE_CONF:
+        cmd += ["bdist_wheel", "--reuse-build", "--standalone", "--skip-cmake", "--skip-make-install", "--only-package"]
+
     cmd += ["--build-tests",
             "--parallel=4",
             "--verbose-build"]
@@ -116,6 +121,9 @@ def call_setup(python_ver):
         cmd += ["--limited-api=yes"]
     if is_snapshot_build():
         cmd += ["--snapshot-build"]
+
+    qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
+    cmd.append(qmake_path)
 
     # Due to certain older CMake versions generating very long paths
     # (at least with CMake 3.6.2) when using the export() function,
@@ -127,9 +135,20 @@ def call_setup(python_ver):
     cmd += ["--package-timestamp=" + CI_INTEGRATION_ID]
 
     env = os.environ
-    run_instruction(cmd, "Failed to run setup.py", initial_env=env)
+    run_instruction(cmd, "Failed to run setup.py for build", initial_env=env)
 
-def run_build_instructions():
+
+def run_build_instructions(phase):
+
+    # Uses default python, hopefully we have python2 installed on all hosts
+    # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
+    if CI_HOST_OS != "Windows":
+        call_setup("", phase)
+    # In case of packaging build, we have to build also python3 wheel
+    if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
+        call_setup("3", phase)
+
+if __name__ == "__main__":
     if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
         exit()
 
@@ -138,14 +157,8 @@ def run_build_instructions():
         if os.environ.get(env_var):
             del os.environ[env_var]
 
-    # Uses default python, hopefully we have python2 installed on all hosts
-    # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
-    if CI_HOST_OS != "Windows":
-        call_setup("")
+    if CI_TEST_PHASE in ["ALL", "BUILD"]:
+        run_build_instructions("BUILD")
 
-    # In case of packaging build, we have to build also python3 wheel
-    if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
-        call_setup("3")
-
-if __name__ == "__main__":
-    run_build_instructions()
+    if CI_TEST_PHASE in ["ALL", "WHEEL"]:
+        run_build_instructions("WHEEL")
