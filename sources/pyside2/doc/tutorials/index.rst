@@ -30,3 +30,4 @@ Tutorials
     expenses/expenses.rst
     qmlapp/qmlapplication.rst
     qmlintegration/qmlintegration.rst
+    portingguide/index.rst
