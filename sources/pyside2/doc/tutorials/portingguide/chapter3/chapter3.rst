@@ -106,7 +106,7 @@ to generate ``rc_books.py``.
    pyside2-rcc books.qrc > rc_books.py
 
 Once you have the Python script generated, make the
-following changes to ``main.py`` and ``bookdelegate.py``:
+following changes to ``bookdelegate.py`` and ``main.py``:
 
 .. literalinclude:: bookdelegate.py
    :diff: ../chapter2/bookdelegate.py
