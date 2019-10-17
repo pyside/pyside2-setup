@@ -92,6 +92,9 @@
   <value-type name="QVideoFrame">
       <enum-type name="FieldType"/>
       <enum-type name="PixelFormat"/>
+      <modify-function signature="bits()">
+        <inject-code file="../glue/qtmultimedia.cpp" snippet="qvideoframe-bits"/>
+      </modify-function>
       <modify-function signature="bits(int)" remove="all"/>
       <modify-function signature="bits(int)const" remove="all"/>
   </value-type>

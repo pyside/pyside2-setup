@@ -44,3 +44,10 @@ QObject * upcastedArg = %CONVERTTOCPP[QObject *](%PYARG_1);
 %CPPSELF.%FUNCTION_NAME(reinterpret_cast< %ARG1_TYPE >(upcastedArg));
 %END_ALLOW_THREADS
 // @snippet upcast
+
+// @snippet qvideoframe-bits
+%BEGIN_ALLOW_THREADS
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
+%END_ALLOW_THREADS
+%PYARG_0 = Shiboken::Buffer::newObject(%0, %CPPSELF.bytesPerLine() * %CPPSELF.height(), Shiboken::Buffer::ReadWrite);
+// @snippet qvideoframe-bits
