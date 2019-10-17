@@ -512,8 +512,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     ReportHandler::startProgress("Fixing class inheritance...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        if (!cls->isInterface() && !cls->isNamespace())
+        if (!cls->isInterface() && !cls->isNamespace()) {
             setupInheritance(cls);
+            if (!cls->hasVirtualDestructor() && cls->baseClass()
+                && cls->baseClass()->hasVirtualDestructor())
+                cls->setHasVirtualDestructor(true);
+        }
     }
 
     ReportHandler::startProgress("Detecting inconsistencies in class model...");
