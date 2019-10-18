@@ -705,7 +705,7 @@ class PysideBuild(_build):
             log.info("Creating install folder {}...".format(self.install_dir))
             os.makedirs(self.install_dir)
 
-        if not (OPTION_ONLYPACKAGE
+        if (not OPTION_ONLYPACKAGE
                 and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
             # Build extensions
             for ext in config.get_buildable_extensions():
