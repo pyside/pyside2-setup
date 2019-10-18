@@ -107,5 +107,5 @@ application and PySide2 integration:
 
    .. image:: textproperties_material.png
 
-You can download `view.qml <view.qml>`_ and `main.py <main.py>`_
-to try this example.
+You can :download:`view.qml <view.qml>` and
+:download:`main.py <main.py>` to try this example.

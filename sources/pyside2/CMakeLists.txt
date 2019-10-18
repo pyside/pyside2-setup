@@ -179,6 +179,7 @@ string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION}")
 
 list(GET qt_version_helper 0 QT_VERSION_MAJOR)
 list(GET qt_version_helper 1 QT_VERSION_MINOR)
+list(GET qt_version_helper 2 QT_VERSION_PATCH)
 unset(qt_version_helper)
 
 set(PYSIDE_QT_VERSION "${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" CACHE STRING "Qt version used to compile PySide" FORCE)
