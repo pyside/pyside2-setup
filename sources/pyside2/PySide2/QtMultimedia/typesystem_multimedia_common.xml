@@ -82,7 +82,13 @@
   <object-type name="QAbstractVideoSurface">
       <enum-type name="Error"/>
   </object-type>
-  <object-type name="QAbstractVideoFilter"/>
+  <object-type name="QAbstractVideoFilter">
+      <modify-function signature="createFilterRunnable()">
+        <modify-argument index="return">
+            <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+    </modify-function>
+  </object-type>
   <value-type name="QVideoFrame">
       <enum-type name="FieldType"/>
       <enum-type name="PixelFormat"/>
