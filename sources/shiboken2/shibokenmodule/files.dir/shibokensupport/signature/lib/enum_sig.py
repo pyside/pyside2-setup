@@ -96,11 +96,6 @@ class ExactEnumerator(object):
             return ret
 
     def klass(self, class_name, klass):
-        modname = klass.__module__
-        if not (modname.startswith("PySide2") or modname.startswith("shiboken2")):
-            # don't look into any foreign classes!
-            ret = self.result_type()
-            return ret
         bases_list = []
         for base in klass.__bases__:
             name = base.__name__
