@@ -58,6 +58,15 @@ import re
 from contextlib import contextmanager
 from textwrap import dedent
 
+def qt_build():
+    result = '<Unknown build of Qt>'
+    try:
+        from PySide2.QtCore import QLibraryInfo
+        result = QLibraryInfo.build()
+    except:
+        pass
+    return result
+
 script_dir = os.path.normpath(os.path.join(__file__, *".. .. .. .. ..".split()))
 history_dir = os.path.join(script_dir, 'build_history')
 
@@ -262,16 +271,22 @@ def generate_all():
         license_line = next((lno for lno, line in enumerate(lines)
                              if "$QT_END_LICENSE$" in line))
         fmt.print("".join(lines[:license_line + 3]))
+        version = sys.version.replace('\n', ' ')
+        build = qt_build()
         fmt.print(dedent('''\
             """
             This file contains the simplified signatures for all functions in PySide
-            for module '{}'. There are no default values, no variable
-            names and no self parameter. Only types are present after simplification.
-            The functions 'next' resp. '__next__' are removed to make the output
+            for module '{module}' using
+            Python {version}
+            {build}
+
+            There are no default values, no variable names and no self
+            parameter. Only types are present after simplification. The
+            functions 'next' resp. '__next__' are removed to make the output
             identical for Python 2 and 3. '__div__' is also removed,
             since it exists in Python 2, only.
             """
-            '''.format(module)))
+            '''.format(**locals())))
         fmt.print("import sys")
         fmt.print("")
         fmt.print("sig_dict = {}")
