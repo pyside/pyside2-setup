@@ -361,6 +361,7 @@ if __name__ == "__main__":
         parser.print_usage()
         exit(1)
     if args.command == "scan":
+        # Using this from the intranet require an internal URL
         get_test_results("https://testresults.qt.io/coin/api/results/pyside/pyside-setup/")
     elif args.command == "eval":
         eval_data(force=True)
