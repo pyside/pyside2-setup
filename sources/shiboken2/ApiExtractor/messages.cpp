@@ -475,6 +475,11 @@ QString msgInvalidRegularExpression(const QString &pattern, const QString &why)
     return QLatin1String("Invalid pattern \"") + pattern + QLatin1String("\": ") + why;
 }
 
+QString msgNoRootTypeSystemEntry()
+{
+    return QLatin1String("Type system entry appears out of order, there does not seem to be a root type system element.");
+}
+
 // qtdocgenerator.cpp
 
 QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,

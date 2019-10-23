@@ -543,6 +543,7 @@ private:
 };
 
 class CustomConversion;
+class TypeSystemTypeEntry;
 
 class TypeEntry
 {
@@ -591,7 +592,8 @@ public:
     };
     Q_ENUM(CodeGeneration)
 
-    explicit TypeEntry(const QString &name, Type t, const QVersionNumber &vr);
+    explicit TypeEntry(const QString &name, Type t, const QVersionNumber &vr,
+                       const TypeEntry *parent);
 
     virtual ~TypeEntry();
 
@@ -599,6 +601,11 @@ public:
     {
         return m_type;
     }
+
+    const TypeEntry *parent() const { return m_parent; }
+    void setParent(const TypeEntry *p) { m_parent = p; }
+    const TypeSystemTypeEntry *typeSystemTypeEntry() const;
+
     bool isPrimitive() const
     {
         return m_type == PrimitiveType;
@@ -899,6 +906,7 @@ protected:
     TypeEntry(const TypeEntry &);
 
 private:
+    const TypeEntry *m_parent;
     QString m_name;
     QString m_targetLangPackage;
     CustomFunction m_customConstructor;
@@ -920,7 +928,8 @@ private:
 class TypeSystemTypeEntry : public TypeEntry
 {
 public:
-    explicit TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr,
+                                 const TypeEntry *parent);
 
     TypeEntry *clone() const override;
 
@@ -953,7 +962,8 @@ protected:
 class TemplateArgumentEntry : public TypeEntry
 {
 public:
-    explicit TemplateArgumentEntry(const QString &name, const QVersionNumber &vr);
+    explicit TemplateArgumentEntry(const QString &name, const QVersionNumber &vr,
+                                   const TypeEntry *parent);
 
     int ordinal() const
     {
@@ -976,7 +986,8 @@ private:
 class ArrayTypeEntry : public TypeEntry
 {
 public:
-    explicit ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr);
+    explicit ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr,
+                            const TypeEntry *parent);
 
     void setNestedTypeEntry(TypeEntry *nested)
     {
@@ -1003,7 +1014,8 @@ private:
 class PrimitiveTypeEntry : public TypeEntry
 {
 public:
-    explicit PrimitiveTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit PrimitiveTypeEntry(const QString &name, const QVersionNumber &vr,
+                                const TypeEntry *parent);
 
     QString targetLangName() const override;
     void setTargetLangName(const QString &targetLangName)
@@ -1083,7 +1095,8 @@ class EnumTypeEntry : public TypeEntry
 {
 public:
     explicit EnumTypeEntry(const QString &nspace, const QString &enumName,
-                           const QVersionNumber &vr);
+                           const QVersionNumber &vr,
+                           const TypeEntry *parent);
 
     QString targetLangName() const override;
     QString targetLangQualifier() const;
@@ -1149,7 +1162,10 @@ private:
 class EnumValueTypeEntry : public TypeEntry
 {
 public:
-    explicit EnumValueTypeEntry(const QString& name, const QString& value, const EnumTypeEntry* enclosingEnum, const QVersionNumber &vr);
+    explicit EnumValueTypeEntry(const QString& name, const QString& value,
+                                const EnumTypeEntry* enclosingEnum,
+                                const QVersionNumber &vr,
+                                const TypeEntry *parent);
 
     QString value() const { return m_value; }
     const EnumTypeEntry* enclosingEnum() const { return m_enclosingEnum; }
@@ -1167,7 +1183,8 @@ private:
 class FlagsTypeEntry : public TypeEntry
 {
 public:
-    explicit FlagsTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit FlagsTypeEntry(const QString &name, const QVersionNumber &vr,
+                            const TypeEntry *parent);
 
     QString qualifiedTargetLangName() const override;
     QString targetLangName() const override;
@@ -1226,7 +1243,8 @@ public:
         Unknown
     };
 
-    explicit ComplexTypeEntry(const QString &name, Type t, const QVersionNumber &vr);
+    explicit ComplexTypeEntry(const QString &name, Type t, const QVersionNumber &vr,
+                              const TypeEntry *parent);
 
     bool isComplex() const override;
 
@@ -1427,7 +1445,8 @@ class TypedefEntry : public ComplexTypeEntry
 public:
     explicit TypedefEntry(const QString &name,
                           const QString &sourceType,
-                          const QVersionNumber &vr);
+                          const QVersionNumber &vr,
+                          const TypeEntry *parent);
 
     QString sourceType() const { return m_sourceType; }
     void setSourceType(const QString &s) { m_sourceType =s; }
@@ -1473,7 +1492,8 @@ public:
     };
     Q_ENUM(Type)
 
-    explicit ContainerTypeEntry(const QString &name, Type type, const QVersionNumber &vr);
+    explicit ContainerTypeEntry(const QString &name, Type type, const QVersionNumber &vr,
+                                const TypeEntry *parent);
 
     Type type() const
     {
@@ -1503,7 +1523,8 @@ public:
                                    const QString &getterName,
                                    const QString &smartPointerType,
                                    const QString &refCountMethodName,
-                                   const QVersionNumber &vr);
+                                   const QVersionNumber &vr,
+                                   const TypeEntry *parent);
 
     QString getter() const
     {
@@ -1529,7 +1550,8 @@ private:
 class NamespaceTypeEntry : public ComplexTypeEntry
 {
 public:
-    explicit NamespaceTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit NamespaceTypeEntry(const QString &name, const QVersionNumber &vr,
+                                const TypeEntry *parent);
 
     TypeEntry *clone() const override;
 
@@ -1559,7 +1581,8 @@ private:
 class ValueTypeEntry : public ComplexTypeEntry
 {
 public:
-    explicit ValueTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit ValueTypeEntry(const QString &name, const QVersionNumber &vr,
+                            const TypeEntry *parent);
 
     bool isValue() const override;
 
@@ -1568,14 +1591,16 @@ public:
     TypeEntry *clone() const override;
 
 protected:
-    explicit ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr);
+    explicit ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr,
+                            const TypeEntry *parent);
     ValueTypeEntry(const ValueTypeEntry &);
 };
 
 class InterfaceTypeEntry : public ComplexTypeEntry
 {
 public:
-    explicit InterfaceTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit InterfaceTypeEntry(const QString &name, const QVersionNumber &vr,
+                                const TypeEntry *parent);
 
     static QString interfaceName(const QString &name)
     {
@@ -1608,7 +1633,8 @@ class FunctionTypeEntry : public TypeEntry
 {
 public:
     explicit FunctionTypeEntry(const QString& name, const QString& signature,
-                               const QVersionNumber &vr);
+                               const QVersionNumber &vr,
+                               const TypeEntry *parent);
     void addSignature(const QString& signature)
     {
         m_signatures << signature;
@@ -1636,7 +1662,8 @@ private:
 class ObjectTypeEntry : public ComplexTypeEntry
 {
 public:
-    explicit ObjectTypeEntry(const QString &name, const QVersionNumber &vr);
+    explicit ObjectTypeEntry(const QString &name, const QVersionNumber &vr,
+                             const TypeEntry *parent);
 
     InterfaceTypeEntry *designatedInterface() const override;
     void setDesignatedInterface(InterfaceTypeEntry *entry)

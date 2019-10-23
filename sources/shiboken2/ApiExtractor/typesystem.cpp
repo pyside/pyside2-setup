@@ -43,8 +43,9 @@ static QString strings_jobject = QLatin1String("jobject");
 
 static inline QString callOperator() { return QStringLiteral("operator()"); }
 
-PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &name, const QVersionNumber &vr) :
-    TypeEntry(name, PrimitiveType, vr),
+PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &name, const QVersionNumber &vr,
+                                       const TypeEntry *parent) :
+    TypeEntry(name, PrimitiveType, vr, parent),
     m_preferredTargetLangType(true)
 {
 }
@@ -617,8 +618,9 @@ AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& si
 }
 
 ComplexTypeEntry::ComplexTypeEntry(const QString &name, TypeEntry::Type t,
-                                   const QVersionNumber &vr) :
-    TypeEntry(name, t, vr),
+                                   const QVersionNumber &vr,
+                                   const TypeEntry *parent) :
+    TypeEntry(name, t, vr, parent),
     m_qualifiedCppName(name),
     m_polymorphicBase(false),
     m_genericClass(false),
@@ -717,7 +719,9 @@ bool TypeEntry::isCppPrimitive() const
     return typeName.contains(QLatin1Char(' ')) || primitiveCppTypes().contains(typeName);
 }
 
-TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumber &vr) :
+TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumber &vr,
+                     const TypeEntry *parent) :
+    m_parent(parent),
     m_name(name),
     m_version(vr),
     m_type(t)
@@ -727,6 +731,15 @@ TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumbe
 TypeEntry::~TypeEntry()
 {
     delete m_customConversion;
+}
+
+const TypeSystemTypeEntry *TypeEntry::typeSystemTypeEntry() const
+{
+    for (auto e = this; e; e = e->parent()) {
+        if (e->type() == TypeEntry::TypeSystemType)
+            return static_cast<const TypeSystemTypeEntry *>(e);
+    }
+    return nullptr;
 }
 
 bool TypeEntry::hasCustomConversion() const
@@ -760,8 +773,9 @@ void TypeEntry::useAsTypedef(const TypeEntry *source)
 
 TypeEntry::TypeEntry(const TypeEntry &) = default;
 
-TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr) :
-    TypeEntry(name, TypeSystemType, vr)
+TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &name, const QVersionNumber &vr,
+                                         const TypeEntry *parent) :
+    TypeEntry(name, TypeSystemType, vr, parent)
 {
 }
 
@@ -773,7 +787,7 @@ TypeEntry *TypeSystemTypeEntry::clone() const
 TypeSystemTypeEntry::TypeSystemTypeEntry(const TypeSystemTypeEntry &) = default;
 
 VoidTypeEntry::VoidTypeEntry() :
-    TypeEntry(QLatin1String("void"), VoidType, QVersionNumber(0, 0))
+    TypeEntry(QLatin1String("void"), VoidType, QVersionNumber(0, 0), nullptr)
 {
 }
 
@@ -785,7 +799,7 @@ TypeEntry *VoidTypeEntry::clone() const
 VoidTypeEntry::VoidTypeEntry(const VoidTypeEntry &) = default;
 
 VarargsTypeEntry::VarargsTypeEntry() :
-    TypeEntry(QLatin1String("..."), VarargsType, QVersionNumber(0, 0))
+    TypeEntry(QLatin1String("..."), VarargsType, QVersionNumber(0, 0), nullptr)
 {
 }
 
@@ -796,8 +810,9 @@ TypeEntry *VarargsTypeEntry::clone() const
 
 VarargsTypeEntry::VarargsTypeEntry(const VarargsTypeEntry &) = default;
 
-TemplateArgumentEntry::TemplateArgumentEntry(const QString &name, const QVersionNumber &vr) :
-    TypeEntry(name, TemplateArgumentType, vr)
+TemplateArgumentEntry::TemplateArgumentEntry(const QString &name, const QVersionNumber &vr,
+                                             const TypeEntry *parent) :
+    TypeEntry(name, TemplateArgumentType, vr, parent)
 {
 }
 
@@ -808,8 +823,9 @@ TypeEntry *TemplateArgumentEntry::clone() const
 
 TemplateArgumentEntry::TemplateArgumentEntry(const TemplateArgumentEntry &) = default;
 
-ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr) :
-    TypeEntry(QLatin1String("Array"), ArrayType, vr),
+ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumber &vr,
+                               const TypeEntry *parent) :
+    TypeEntry(QLatin1String("Array"), ArrayType, vr, parent),
     m_nestedType(nested_type)
 {
     Q_ASSERT(m_nestedType);
@@ -835,9 +851,10 @@ TypeEntry *ArrayTypeEntry::clone() const
 ArrayTypeEntry::ArrayTypeEntry(const ArrayTypeEntry &) = default;
 
 EnumTypeEntry::EnumTypeEntry(const QString &nspace, const QString &enumName,
-                             const QVersionNumber &vr) :
+                             const QVersionNumber &vr,
+                             const TypeEntry *parent) :
     TypeEntry(nspace.isEmpty() ? enumName : nspace + QLatin1String("::") + enumName,
-              EnumType, vr),
+              EnumType, vr, parent),
     m_qualifier(nspace),
     m_targetLangName(enumName)
 {
@@ -850,8 +867,8 @@ QString EnumTypeEntry::targetLangName() const
 
 EnumValueTypeEntry::EnumValueTypeEntry(const QString &name, const QString &value,
                                        const EnumTypeEntry *enclosingEnum,
-                                       const QVersionNumber &vr) :
-    TypeEntry(name, TypeEntry::EnumValue, vr),
+                                       const QVersionNumber &vr, const TypeEntry *parent) :
+    TypeEntry(name, TypeEntry::EnumValue, vr, parent),
     m_value(value),
     m_enclosingEnum(enclosingEnum)
 {
@@ -864,16 +881,17 @@ TypeEntry *EnumValueTypeEntry::clone() const
 
 EnumValueTypeEntry::EnumValueTypeEntry(const EnumValueTypeEntry &) = default;
 
-FlagsTypeEntry::FlagsTypeEntry(const QString &name, const QVersionNumber &vr) :
-    TypeEntry(name, FlagsType, vr)
+FlagsTypeEntry::FlagsTypeEntry(const QString &name, const QVersionNumber &vr,
+                               const TypeEntry *parent) :
+    TypeEntry(name, FlagsType, vr, parent)
 {
 }
 
 /* A typedef entry allows for specifying template specializations in the
  * typesystem XML file. */
 TypedefEntry::TypedefEntry(const QString &name, const QString &sourceType,
-                           const QVersionNumber &vr)  :
-    ComplexTypeEntry(name, TypedefType, vr),
+                           const QVersionNumber &vr, const TypeEntry *parent) :
+    ComplexTypeEntry(name, TypedefType, vr, parent),
     m_sourceType(sourceType)
 {
 }
@@ -886,8 +904,9 @@ TypeEntry *TypedefEntry::clone() const
 TypedefEntry::TypedefEntry(const TypedefEntry &) = default;
 
 ContainerTypeEntry::ContainerTypeEntry(const QString &name, Type type,
-                                       const QVersionNumber &vr) :
-    ComplexTypeEntry(name, ContainerType, vr),
+                                       const QVersionNumber &vr,
+                                       const TypeEntry *parent) :
+    ComplexTypeEntry(name, ContainerType, vr, parent),
     m_type(type)
 {
     setCodeGeneration(GenerateForSubclass);
@@ -897,8 +916,8 @@ SmartPointerTypeEntry::SmartPointerTypeEntry(const QString &name,
                                              const QString &getterName,
                                              const QString &smartPointerType,
                                              const QString &refCountMethodName,
-                                             const QVersionNumber &vr) :
-    ComplexTypeEntry(name, SmartPointerType, vr),
+                                             const QVersionNumber &vr, const TypeEntry *parent) :
+    ComplexTypeEntry(name, SmartPointerType, vr, parent),
     m_getterName(getterName),
     m_smartPointerType(smartPointerType),
     m_refCountMethodName(refCountMethodName)
@@ -912,8 +931,9 @@ TypeEntry *SmartPointerTypeEntry::clone() const
 
 SmartPointerTypeEntry::SmartPointerTypeEntry(const SmartPointerTypeEntry &) = default;
 
-NamespaceTypeEntry::NamespaceTypeEntry(const QString &name, const QVersionNumber &vr) :
-    ComplexTypeEntry(name, NamespaceType, vr)
+NamespaceTypeEntry::NamespaceTypeEntry(const QString &name, const QVersionNumber &vr,
+                                       const TypeEntry *parent) :
+    ComplexTypeEntry(name, NamespaceType, vr, parent)
 {
 }
 
@@ -937,8 +957,9 @@ bool NamespaceTypeEntry::matchesFile(const QString &needle) const
     return m_filePattern.match(needle).hasMatch();
 }
 
-ValueTypeEntry::ValueTypeEntry(const QString &name, const QVersionNumber &vr) :
-    ComplexTypeEntry(name, BasicValueType, vr)
+ValueTypeEntry::ValueTypeEntry(const QString &name, const QVersionNumber &vr,
+                               const TypeEntry *parent) :
+    ComplexTypeEntry(name, BasicValueType, vr, parent)
 {
 }
 
@@ -959,8 +980,9 @@ TypeEntry *ValueTypeEntry::clone() const
 
 ValueTypeEntry::ValueTypeEntry(const ValueTypeEntry &) = default;
 
-ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr) :
-    ComplexTypeEntry(name, t, vr)
+ValueTypeEntry::ValueTypeEntry(const QString &name, Type t, const QVersionNumber &vr,
+                               const TypeEntry *parent) :
+    ComplexTypeEntry(name, t, vr, parent)
 {
 }
 
@@ -1098,8 +1120,9 @@ void CustomConversion::TargetToNativeConversion::setConversion(const QString& co
     m_d->conversion = conversion;
 }
 
-InterfaceTypeEntry::InterfaceTypeEntry(const QString &name, const QVersionNumber &vr) :
-    ComplexTypeEntry(name, InterfaceType, vr)
+InterfaceTypeEntry::InterfaceTypeEntry(const QString &name, const QVersionNumber &vr,
+                                       const TypeEntry *parent) :
+    ComplexTypeEntry(name, InterfaceType, vr, parent)
 {
 }
 
@@ -1122,8 +1145,9 @@ TypeEntry *InterfaceTypeEntry::clone() const
 InterfaceTypeEntry::InterfaceTypeEntry(const InterfaceTypeEntry &) = default;
 
 FunctionTypeEntry::FunctionTypeEntry(const QString &name, const QString &signature,
-                                     const QVersionNumber &vr) :
-    TypeEntry(name, FunctionType, vr)
+                                     const QVersionNumber &vr,
+                                     const TypeEntry *parent) :
+    TypeEntry(name, FunctionType, vr, parent)
 {
     addSignature(signature);
 }
@@ -1135,8 +1159,9 @@ TypeEntry *FunctionTypeEntry::clone() const
 
 FunctionTypeEntry::FunctionTypeEntry(const FunctionTypeEntry &) = default;
 
-ObjectTypeEntry::ObjectTypeEntry(const QString &name, const QVersionNumber &vr)
-    : ComplexTypeEntry(name, ObjectType, vr)
+ObjectTypeEntry::ObjectTypeEntry(const QString &name, const QVersionNumber &vr,
+                                 const TypeEntry *parent)
+    : ComplexTypeEntry(name, ObjectType, vr, parent)
 {
 }
 

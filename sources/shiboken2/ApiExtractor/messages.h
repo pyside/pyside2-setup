@@ -131,6 +131,8 @@ QString msgExtendingNamespaceRequiresPattern(const QString &name);
 
 QString msgInvalidRegularExpression(const QString &pattern, const QString &why);
 
+QString msgNoRootTypeSystemEntry();
+
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const QVector<const AbstractMetaFunction *> &involvedConversions);
 

@@ -162,6 +162,8 @@ private:
 
     bool importFileElement(const QXmlStreamAttributes &atts);
 
+    const TypeEntry *currentParentTypeEntry() const;
+    bool checkRootElement();
     void applyCommonAttributes(TypeEntry *type, QXmlStreamAttributes *attributes) const;
     PrimitiveTypeEntry *
         parsePrimitiveTypeEntry(const QXmlStreamReader &, const QString &name,
