@@ -11,6 +11,7 @@
     deployment.rst
     pysideapi2.rst
     licenses.rst
+    modules.rst
 
 Module Index
 ============

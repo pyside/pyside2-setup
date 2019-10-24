@@ -40,3 +40,17 @@ A simple Hello World example in PySide2 looks like this:
           label = QLabel("Hello World")
           label.show()
           sys.exit(app.exec_())
+
+
+Additional overviews
+--------------------
+
+These additional topics provide detailed information about
+several Qt-specific features:
+
+.. toctree::
+   :titlesonly:
+   :glob:
+
+   overviews/*
+
