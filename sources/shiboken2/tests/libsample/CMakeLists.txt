@@ -36,6 +36,7 @@ pointf.cpp
 polygon.cpp
 protected.cpp
 reference.cpp
+renaming.cpp
 sample.cpp
 samplenamespace.cpp
 sbkdate.cpp

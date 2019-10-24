@@ -2432,6 +2432,9 @@
         <modify-function signature="dummy(std::list&lt;std::pair&lt;BlackBox *, BlackBox *&gt; &gt; &amp;)" rename="dummy_method" />
     </object-type>
 
+    <value-type name="ToBeRenamedValue" target-lang-name="RenamedValue"/>
+    <value-type name="RenamedUser"/>
+
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
     <suppress-warning text="Pure virtual method &quot;Abstract::hideFunction(HideType*)&quot; must be implement but was completely removed on typesystem." />

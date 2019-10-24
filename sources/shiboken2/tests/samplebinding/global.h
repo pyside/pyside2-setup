@@ -75,6 +75,7 @@
 #include "protected.h"
 #include "rect.h"
 #include "reference.h"
+#include "renaming.h"
 #include "removednamespaces.h"
 #include "sample.h"
 #include "samplenamespace.h"

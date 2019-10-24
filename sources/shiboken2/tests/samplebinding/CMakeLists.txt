@@ -94,6 +94,8 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/rect_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/rectf_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/reference_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/referentmodelindex_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/toberenamedvalue_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/renameduser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sample_sample_wrapper.cpp
