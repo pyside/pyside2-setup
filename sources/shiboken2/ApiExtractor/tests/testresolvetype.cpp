@@ -44,13 +44,15 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
             C* method();\n\
         };\n\
     };";
-    const char* xmlCode = "\n\
-    <typesystem package='Foo'>\n\
-        <namespace-type name='A'/>\n\
-        <value-type name='A::B'/>\n\
-        <value-type name='A::B::C'/>\n\
-        <value-type name='A::D'/>\n\
-    </typesystem>";
+    const char* xmlCode = R"XML(
+    <typesystem package='Foo'>
+        <namespace-type name='A'>
+            <value-type name='B'>
+                <value-type name='C'/>
+            </value-type>
+            <value-type name='D'/>
+        </namespace-type>
+    </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();

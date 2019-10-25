@@ -2844,9 +2844,9 @@
     <include file-name="qobjectdefs.h" location="global"/>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="connect(const QObject*,int,const QObject*,int,int,int*)" remove="all"/>
-  </object-type>
-  <object-type name="QMetaObject::Connection">
-    <include file-name="qobjectdefs.h" location="global"/>
+      <object-type name="Connection">
+        <include file-name="qobjectdefs.h" location="global"/>
+      </object-type>
   </object-type>
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->
