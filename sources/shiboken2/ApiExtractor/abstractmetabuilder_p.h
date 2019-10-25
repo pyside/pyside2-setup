@@ -56,7 +56,7 @@ public:
     void dumpLog() const;
     AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
-    ScopeModelItem popScope() { return m_scopes.takeLast(); }
+    NamespaceModelItem popScope() { return m_scopes.takeLast(); }
 
     void pushScope(const NamespaceModelItem &item);
 
