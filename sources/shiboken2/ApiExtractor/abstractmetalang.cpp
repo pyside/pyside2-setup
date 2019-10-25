@@ -166,19 +166,9 @@ QString AbstractMetaType::package() const
     return m_typeEntry->targetLangPackage();
 }
 
-static QString lastNameSegment(QString name)
-{
-    const int index = name.lastIndexOf(QStringLiteral("::"));
-    if (index >= 0)
-        name.remove(0, index + 2);
-    return name;
-}
-
 QString AbstractMetaType::name() const
 {
-    if (m_name.isEmpty())
-        m_name = lastNameSegment(m_typeEntry->targetLangName());
-    return m_name;
+    return m_typeEntry->targetLangEntryName();
 }
 
 QString AbstractMetaType::fullName() const
@@ -1598,7 +1588,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
 
 QString AbstractMetaClass::name() const
 {
-    return lastNameSegment(m_typeEntry->targetLangName());
+    return m_typeEntry->targetLangEntryName();
 }
 
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
@@ -2549,7 +2539,7 @@ QString AbstractMetaType::formatPythonSignature(bool minimal) const
         else
             result.append(formatArraySize(m_arrayElementCount));
     } else {
-        result += typeEntry()->qualifiedCppName();
+        result += typeEntry()->targetLangName();
     }
     if (!m_instantiations.isEmpty()) {
         result += QLatin1Char('[');
@@ -2778,7 +2768,7 @@ AbstractMetaEnumValue *AbstractMetaEnum::findEnumValue(const QString &value) con
 
 QString AbstractMetaEnum::name() const
 {
-    return m_typeEntry->targetLangName();
+    return m_typeEntry->targetLangEntryName();
 }
 
 QString AbstractMetaEnum::qualifier() const

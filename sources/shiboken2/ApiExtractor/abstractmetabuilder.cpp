@@ -539,9 +539,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                     cls->addDefaultCopyConstructor(ancestorHasPrivateCopyConstructor(cls));
             }
         }
-
-        if (cls->isAbstract() && !cls->isInterface())
-            cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + QLatin1String("$ConcreteWrapper"));
     }
     const auto &allEntries = types->entries();
 
@@ -584,7 +581,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
                 const bool enumFound = cls
-                    ? cls->findEnum(entry->targetLangName()) != nullptr
+                    ? cls->findEnum(entry->targetLangEntryName()) != nullptr
                     : m_enums.contains(entry);
 
                 if (!enumFound) {

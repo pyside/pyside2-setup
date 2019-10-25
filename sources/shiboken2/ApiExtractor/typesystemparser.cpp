@@ -81,6 +81,7 @@ static inline QString preferredTargetLangTypeAttribute() { return QStringLiteral
 static inline QString removeAttribute() { return QStringLiteral("remove"); }
 static inline QString renameAttribute() { return QStringLiteral("rename"); }
 static inline QString readAttribute() { return QStringLiteral("read"); }
+static inline QString targetLangNameAttribute() { return QStringLiteral("target-lang-name"); }
 static inline QString writeAttribute() { return QStringLiteral("write"); }
 static inline QString replaceAttribute() { return QStringLiteral("replace"); }
 static inline QString toAttribute() { return QStringLiteral("to"); }
@@ -1087,11 +1088,12 @@ FlagsTypeEntry *
     applyCommonAttributes(ftype, attributes);
 
     QStringList lst = flagName.split(colonColon());
+    const QString targetLangFlagName = QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1Char('.'));
     const QString &targetLangQualifier = enumEntry->targetLangQualifier();
-    if (QStringList(lst.mid(0, lst.size() - 1)).join(colonColon()) != targetLangQualifier) {
+    if (targetLangFlagName != targetLangQualifier) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("enum %1 and flags %2 (%3) differ in qualifiers")
-                              .arg(targetLangQualifier, lst.constFirst(), flagName);
+                              .arg(targetLangQualifier, lst.constFirst(), targetLangFlagName);
     }
 
     ftype->setFlagsName(lst.constLast());
@@ -1174,8 +1176,8 @@ PrimitiveTypeEntry *
     applyCommonAttributes(type, attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("target-lang-name")) {
-             type->setTargetLangName(attributes->takeAt(i).value().toString());
+        if (name == targetLangNameAttribute()) {
+            type->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("target-lang-api-name")) {
             type->setTargetLangApiName(attributes->takeAt(i).value().toString());
         } else if (name == preferredConversionAttribute()) {
@@ -1190,8 +1192,6 @@ PrimitiveTypeEntry *
         }
     }
 
-    if (type->targetLangName().isEmpty())
-        type->setTargetLangName(type->name());
     if (type->targetLangApiName().isEmpty())
         type->setTargetLangApiName(type->name());
     type->setTargetLangPackage(m_defaultPackage);
@@ -1274,7 +1274,7 @@ ObjectTypeEntry *
     bool generate = true;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("target-lang-name")) {
+        if (name == targetLangNameAttribute()) {
             targetLangName = attributes->takeAt(i).value().toString();
         } else if (name == generateAttribute()) {
             generate = convertBoolean(attributes->takeAt(i).value(),
@@ -1284,6 +1284,7 @@ ObjectTypeEntry *
 
     auto itype = new InterfaceTypeEntry(InterfaceTypeEntry::interfaceName(targetLangName),
                                         since, currentParentTypeEntry());
+    itype->setTargetLangName(targetLangName);
 
     if (generate)
         itype->setCodeGeneration(m_generate);
@@ -1436,7 +1437,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             const bool v = convertBoolean(attributes->takeAt(i).value(), genericClassAttribute(), false);
             ctype->setGenericClass(v);
-        } else if (name == QLatin1String("target-lang-name")) {
+        } else if (name == targetLangNameAttribute()) {
             ctype->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("polymorphic-base")) {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());

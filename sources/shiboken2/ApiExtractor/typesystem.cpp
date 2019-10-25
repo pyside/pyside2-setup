@@ -50,11 +50,6 @@ PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &entryName, const QVersionN
 {
 }
 
-QString PrimitiveTypeEntry::targetLangName() const
-{
-    return m_targetLangName;
-}
-
 QString PrimitiveTypeEntry::targetLangApiName() const
 {
     return m_targetLangApiName;
@@ -119,12 +114,6 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
     return mod;
 }
 
-QString ComplexTypeEntry::targetLangName() const
-{
-    return m_targetLangName.isEmpty() ?
-        TypeEntry::targetLangName() : m_targetLangName;
-}
-
 void ComplexTypeEntry::setDefaultConstructor(const QString& defaultConstructor)
 {
     m_defaultConstructor = defaultConstructor;
@@ -148,35 +137,10 @@ void ComplexTypeEntry::useAsTypedef(const ComplexTypeEntry *source)
 {
     TypeEntry::useAsTypedef(source);
     m_qualifiedCppName = source->m_qualifiedCppName;
-    m_targetLangName = source->m_targetLangName;
-    m_lookupName = source->m_lookupName;
     m_targetType = source->m_targetType;
 }
 
 ComplexTypeEntry::ComplexTypeEntry(const ComplexTypeEntry &) = default;
-
-QString ContainerTypeEntry::targetLangName() const
-{
-
-    switch (m_type) {
-    case StringListContainer: return QLatin1String("QStringList");
-    case ListContainer: return QLatin1String("QList");
-    case LinkedListContainer: return QLatin1String("QLinkedList");
-    case VectorContainer: return QLatin1String("QVector");
-    case StackContainer: return QLatin1String("QStack");
-    case QueueContainer: return QLatin1String("QQueue");
-    case SetContainer: return QLatin1String("QSet");
-    case MapContainer: return QLatin1String("QMap");
-    case MultiMapContainer: return QLatin1String("QMultiMap");
-    case HashContainer: return QLatin1String("QHash");
-    case MultiHashContainer: return QLatin1String("QMultiHash");
-    case PairContainer: return QLatin1String("QPair");
-    default:
-        qWarning("bad type... %d", m_type);
-        break;
-    }
-    return QString();
-}
 
 QString ContainerTypeEntry::qualifiedCppName() const
 {
@@ -200,21 +164,6 @@ QString EnumTypeEntry::targetLangQualifier() const
             return te->targetLangName();
     }
     return q;
-}
-
-QString EnumTypeEntry::qualifiedTargetLangName() const
-{
-    QString qualifiedName;
-    QString pkg = targetLangPackage();
-    QString qualifier = targetLangQualifier();
-
-    if (!pkg.isEmpty())
-        qualifiedName += pkg + QLatin1Char('.');
-    if (!qualifier.isEmpty())
-        qualifiedName += qualifier + QLatin1Char('.');
-    qualifiedName += targetLangName();
-
-    return qualifiedName;
 }
 
 QString EnumTypeEntry::qualifier() const
@@ -247,17 +196,6 @@ TypeEntry *FlagsTypeEntry::clone() const
 }
 
 FlagsTypeEntry::FlagsTypeEntry(const FlagsTypeEntry &) = default;
-
-QString FlagsTypeEntry::qualifiedTargetLangName() const
-{
-    return targetLangPackage() + QLatin1Char('.') + m_enum->targetLangQualifier()
-        + QLatin1Char('.') + targetLangName();
-}
-
-QString FlagsTypeEntry::targetLangName() const
-{
-    return m_targetLangName;
-}
 
 QString TemplateInstance::expandCode() const
 {
@@ -650,11 +588,6 @@ bool ComplexTypeEntry::isComplex() const
     return true;
 }
 
-QString ComplexTypeEntry::lookupName() const
-{
-    return m_lookupName.isEmpty() ? targetLangName() : m_lookupName;
-}
-
 QString ComplexTypeEntry::targetLangApiName() const
 {
     return strings_jobject;
@@ -760,6 +693,42 @@ const TypeSystemTypeEntry *TypeEntry::typeSystemTypeEntry() const
     return nullptr;
 }
 
+QString TypeEntry::targetLangName() const
+{
+    if (m_cachedTargetLangName.isEmpty())
+        m_cachedTargetLangName = buildTargetLangName();
+    return m_cachedTargetLangName;
+}
+
+QString TypeEntry::buildTargetLangName() const
+{
+    QString result = m_entryName;
+    for (auto p = parent(); p && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
+        if (!result.isEmpty())
+            result.prepend(QLatin1Char('.'));
+        QString n = p->m_entryName;
+        n.replace(QLatin1String("::"), QLatin1String(".")); // Primitive types may have "std::"
+        result.prepend(n);
+    }
+    return result;
+}
+
+QString TypeEntry::targetLangEntryName() const
+{
+    if (m_cachedTargetLangEntryName.isEmpty()) {
+        m_cachedTargetLangEntryName = targetLangName();
+        const int lastDot = m_cachedTargetLangEntryName.lastIndexOf(QLatin1Char('.'));
+        if (lastDot != -1)
+            m_cachedTargetLangEntryName.remove(0, lastDot + 1);
+    }
+    return m_cachedTargetLangEntryName;
+}
+
+QString TypeEntry::qualifiedTargetLangName() const
+{
+    return targetLangPackage() + QLatin1Char('.') + targetLangName();
+}
+
 bool TypeEntry::hasCustomConversion() const
 {
     return m_customConversion != nullptr;
@@ -850,7 +819,7 @@ ArrayTypeEntry::ArrayTypeEntry(const TypeEntry *nested_type, const QVersionNumbe
     Q_ASSERT(m_nestedType);
 }
 
-QString ArrayTypeEntry::targetLangName() const
+QString ArrayTypeEntry::buildTargetLangName() const
 {
     return m_nestedType->targetLangName() + QLatin1String("[]");
 }
@@ -872,14 +841,8 @@ ArrayTypeEntry::ArrayTypeEntry(const ArrayTypeEntry &) = default;
 EnumTypeEntry::EnumTypeEntry(const QString &entryName,
                              const QVersionNumber &vr,
                              const TypeEntry *parent) :
-    TypeEntry(entryName, EnumType, vr, parent),
-    m_targetLangName(entryName)
+    TypeEntry(entryName, EnumType, vr, parent)
 {
-}
-
-QString EnumTypeEntry::targetLangName() const
-{
-    return m_targetLangName;
 }
 
 EnumValueTypeEntry::EnumValueTypeEntry(const QString &name, const QString &value,
@@ -904,6 +867,13 @@ FlagsTypeEntry::FlagsTypeEntry(const QString &entryName, const QVersionNumber &v
                                const TypeEntry *parent) :
     TypeEntry(entryName, FlagsType, vr, parent)
 {
+}
+
+QString FlagsTypeEntry::buildTargetLangName() const
+{
+    QString on = m_originalName;
+    on.replace(QLatin1String("::"), QLatin1String("."));
+    return on;
 }
 
 ConstantValueTypeEntry::ConstantValueTypeEntry(const QString& name,
