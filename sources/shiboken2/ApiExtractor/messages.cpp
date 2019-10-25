@@ -480,6 +480,12 @@ QString msgNoRootTypeSystemEntry()
     return QLatin1String("Type system entry appears out of order, there does not seem to be a root type system element.");
 }
 
+QString msgIncorrectlyNestedName(const QString &name)
+{
+    return QLatin1String("Nesting types by specifying '::' is no longer supported (")
+           + name + QLatin1String(").");
+}
+
 // qtdocgenerator.cpp
 
 QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,

@@ -838,13 +838,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     TypeEntry *typeEntry = nullptr;
     const TypeEntry *enclosingTypeEntry = enclosing ? enclosing->typeEntry() : nullptr;
     if (enumItem->accessPolicy() == CodeModel::Private) {
-        QStringList names = enumItem->qualifiedName();
-        const QString &enumName = names.constLast();
-        QString nspace;
-        if (names.size() > 1)
-            nspace = QStringList(names.mid(0, names.size() - 1)).join(colonColon());
-        typeEntry = new EnumTypeEntry(nspace, enumName, QVersionNumber(0, 0),
-                                      enclosingTypeEntry);
+        typeEntry = new EnumTypeEntry(enumItem->qualifiedName().constLast(),
+                                      QVersionNumber(0, 0), enclosingTypeEntry);
         TypeDatabase::instance()->addType(typeEntry);
     } else if (enumItem->enumKind() != AnonymousEnum) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
@@ -947,26 +942,13 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     metaEnum->setOriginalAttributes(metaEnum->attributes());
 
     // Register all enum values on Type database
-    QString prefix;
-    if (enclosing) {
-        prefix += enclosing->typeEntry()->qualifiedCppName();
-        prefix += colonColon();
-    }
-    if (enumItem->enumKind() == EnumClass) {
-        prefix += enumItem->name();
-        prefix += colonColon();
-    }
+    const bool isScopedEnum = enumItem->enumKind() == EnumClass;
     const EnumeratorList &enumerators = enumItem->enumerators();
     for (const EnumeratorModelItem &e : enumerators) {
-        QString name;
-        if (enclosing) {
-            name += enclosing->name();
-            name += colonColon();
-        }
-        EnumValueTypeEntry *enumValue =
-            new EnumValueTypeEntry(prefix + e->name(), e->stringValue(),
-                                   enumTypeEntry, enumTypeEntry->version(),
-                                   enumTypeEntry->parent());
+        auto enumValue =
+            new EnumValueTypeEntry(e->name(), e->stringValue(),
+                                   enumTypeEntry, isScopedEnum,
+                                   enumTypeEntry->version());
         TypeDatabase::instance()->addType(enumValue);
         if (e->value().isNullValue())
             enumTypeEntry->setNullValue(enumValue);
@@ -2681,9 +2663,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         if (isNumber) {
             t = typeDb->findType(typeName);
             if (!t) {
-                t = new EnumValueTypeEntry(typeName, typeName, nullptr,
-                                           QVersionNumber(0, 0),
-                                           subclass->typeEntry()->parent());
+                t = new ConstantValueTypeEntry(typeName, subclass->typeEntry()->typeSystemTypeEntry());
                 t->setCodeGeneration(0);
                 typeDb->addType(t);
             }

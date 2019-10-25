@@ -841,7 +841,6 @@ void EnumTypeEntry::formatDebug(QDebug &d) const
 {
     TypeEntry::formatDebug(d);
     FORMAT_NONEMPTY_STRING("package", m_packageName)
-    FORMAT_NONEMPTY_STRING("qualifier", m_qualifier)
     FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
     if (m_flags)
         d << ", flags=(" << m_flags << ')';

@@ -1064,34 +1064,34 @@ void TypeSystemParser::applyCommonAttributes(TypeEntry *type, QXmlStreamAttribut
 
 FlagsTypeEntry *
     TypeSystemParser::parseFlagsEntry(const QXmlStreamReader &,
-                             EnumTypeEntry *enumEntry,
-                             const QString &name, QString flagName,
+                             EnumTypeEntry *enumEntry, QString flagName,
                              const QVersionNumber &since,
                              QXmlStreamAttributes *attributes)
 
 {
     if (!checkRootElement())
         return nullptr;
-    auto ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + name + QLatin1Char('>'),
+    auto ftype = new FlagsTypeEntry(QLatin1String("QFlags<") + enumEntry->name() + QLatin1Char('>'),
                                     since,
                                     currentParentTypeEntry()->typeSystemTypeEntry());
     ftype->setOriginator(enumEntry);
     ftype->setTargetLangPackage(enumEntry->targetLangPackage());
-    // Try to get the guess the qualified flag name
-    const int lastSepPos = name.lastIndexOf(colonColon());
-    if (lastSepPos >= 0 && !flagName.contains(colonColon()))
-        flagName.prepend(name.left(lastSepPos + 2));
+    // Try toenumEntry get the guess the qualified flag name
+    if (!flagName.contains(colonColon())) {
+        auto eq = enumEntry->qualifier();
+        if (!eq.isEmpty())
+            flagName.prepend(eq + colonColon());
+    }
 
     ftype->setOriginalName(flagName);
     applyCommonAttributes(ftype, attributes);
-    QString n = ftype->originalName();
 
-    QStringList lst = n.split(colonColon());
+    QStringList lst = flagName.split(colonColon());
     const QString &targetLangQualifier = enumEntry->targetLangQualifier();
     if (QStringList(lst.mid(0, lst.size() - 1)).join(colonColon()) != targetLangQualifier) {
         qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("enum %1 and flags %2 differ in qualifiers")
-                              .arg(targetLangQualifier, lst.constFirst());
+            << QStringLiteral("enum %1 and flags %2 (%3) differ in qualifiers")
+                              .arg(targetLangQualifier, lst.constFirst(), flagName);
     }
 
     ftype->setFlagsName(lst.constLast());
@@ -1223,19 +1223,12 @@ ContainerTypeEntry *
 
 EnumTypeEntry *
     TypeSystemParser::parseEnumTypeEntry(const QXmlStreamReader &reader,
-                                const QString &fullName, const QVersionNumber &since,
+                                const QString &name, const QVersionNumber &since,
                                 QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
-    QString scope;
-    QString name = fullName;
-    const int sep = fullName.lastIndexOf(colonColon());
-    if (sep != -1) {
-        scope = fullName.left(sep);
-        name = fullName.right(fullName.size() - sep - 2);
-    }
-    auto *entry = new EnumTypeEntry(scope, name, since, currentParentTypeEntry());
+    auto *entry = new EnumTypeEntry(name, since, currentParentTypeEntry());
     applyCommonAttributes(entry, attributes);
     entry->setTargetLangPackage(m_defaultPackage);
 
@@ -1263,7 +1256,7 @@ EnumTypeEntry *
     if (!flagNames.isEmpty()) {
         const QStringList &flagNameList = flagNames.split(QLatin1Char(','));
         for (const QString &flagName : flagNameList)
-            parseFlagsEntry(reader, entry, fullName, flagName.trimmed(), since, attributes);
+            parseFlagsEntry(reader, entry, flagName.trimmed(), since, attributes);
     }
     return entry;
 }
@@ -2668,6 +2661,12 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             }
         }
+        // Allow for primitive and/or std:: types only, else require proper nesting.
+        if (element->type != StackElement::PrimitiveTypeEntry && name.contains(QLatin1Char(':'))
+            && !name.contains(QLatin1String("std::"))) {
+            m_error = msgIncorrectlyNestedName(name);
+            return false;
+        }
 
         if (m_database->hasDroppedTypeEntries()) {
             QString identifier = getNamePrefix(element) + QLatin1Char('.');
@@ -2714,13 +2713,6 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             }
         }
-
-        // Fix type entry name using nesting information.
-        if (element->type & StackElement::TypeEntryMask
-            && element->parent && element->parent->type != StackElement::Root) {
-            name = element->parent->entry->name() + colonColon() + name;
-        }
-
 
         if (name.isEmpty()) {
             m_error = QLatin1String("no 'name' attribute specified");

@@ -133,6 +133,8 @@ QString msgInvalidRegularExpression(const QString &pattern, const QString &why);
 
 QString msgNoRootTypeSystemEntry();
 
+QString msgIncorrectlyNestedName(const QString &name);
+
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const QVector<const AbstractMetaFunction *> &involvedConversions);
 
