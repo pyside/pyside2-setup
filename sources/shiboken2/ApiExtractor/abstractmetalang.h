@@ -704,24 +704,25 @@ private:
     friend class AbstractMetaClass;
 };
 
+class EnclosingClassMixin {
+public:
+    const AbstractMetaClass *enclosingClass() const { return m_enclosingClass; }
+    void setEnclosingClass(const AbstractMetaClass *cls) { m_enclosingClass = cls; }
+    const AbstractMetaClass *targetLangEnclosingClass() const;
+
+private:
+     const AbstractMetaClass *m_enclosingClass = nullptr;
+};
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaArgument *aa);
 #endif
 
-class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes
+class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes, public EnclosingClassMixin
 {
 public:
     AbstractMetaField();
     ~AbstractMetaField();
-
-    const AbstractMetaClass *enclosingClass() const
-    {
-        return m_class;
-    }
-    void setEnclosingClass(const AbstractMetaClass *cls)
-    {
-        m_class = cls;
-    }
 
     const AbstractMetaFunction *getter() const;
     const AbstractMetaFunction *setter() const;
@@ -741,7 +742,6 @@ public:
 private:
     mutable AbstractMetaFunction *m_getter = nullptr;
     mutable AbstractMetaFunction *m_setter = nullptr;
-    const AbstractMetaClass *m_class = nullptr;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -1179,7 +1179,7 @@ private:
     Documentation m_doc;
 };
 
-class AbstractMetaEnum : public AbstractMetaAttributes
+class AbstractMetaEnum : public AbstractMetaAttributes, public EnclosingClassMixin
 {
 public:
     AbstractMetaEnum();
@@ -1234,23 +1234,12 @@ public:
         m_typeEntry = entry;
     }
 
-    AbstractMetaClass *enclosingClass() const
-    {
-        return m_class;
-    }
-
-    void setEnclosingClass(AbstractMetaClass *c)
-    {
-        m_class = c;
-    }
-
     bool isSigned() const { return m_signed; }
     void setSigned(bool s) { m_signed = s; }
 
 private:
     AbstractMetaEnumValueList m_enumValues;
     EnumTypeEntry *m_typeEntry = nullptr;
-    AbstractMetaClass *m_class = nullptr;
 
     EnumKind m_enumKind = CEnum;
     uint m_hasQenumsDeclaration : 1;
@@ -1261,7 +1250,7 @@ private:
 QDebug operator<<(QDebug d, const AbstractMetaEnum *ae);
 #endif
 
-class AbstractMetaClass : public AbstractMetaAttributes
+class AbstractMetaClass : public AbstractMetaAttributes, public EnclosingClassMixin
 {
     Q_GADGET
 public:
@@ -1477,21 +1466,11 @@ public:
 
     void setBaseClass(AbstractMetaClass *base_class);
 
-    const AbstractMetaClass *enclosingClass() const
-    {
-        return m_enclosingClass;
-    }
-
     /**
      *   \return the namespace from another package which this namespace extends.
      */
     AbstractMetaClass *extendedNamespace() const { return m_extendedNamespace; }
     void setExtendedNamespace(AbstractMetaClass *e) { m_extendedNamespace = e; }
-
-    void setEnclosingClass(AbstractMetaClass *cl)
-    {
-        m_enclosingClass = cl;
-    }
 
     const AbstractMetaClassList& innerClasses() const
     {

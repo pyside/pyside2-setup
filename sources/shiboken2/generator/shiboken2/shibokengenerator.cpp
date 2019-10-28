@@ -337,22 +337,6 @@ void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumLi
     }
 }
 
-static const AbstractMetaClass *getProperEnclosingClass(const AbstractMetaClass *metaClass)
-{
-    if (!metaClass)
-        return nullptr;
-
-    if (metaClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
-        return metaClass;
-
-    return getProperEnclosingClass(metaClass->enclosingClass());
-}
-
-const AbstractMetaClass *ShibokenGenerator::getProperEnclosingClassForEnum(const AbstractMetaEnum *metaEnum)
-{
-    return getProperEnclosingClass(metaEnum->enclosingClass());
-}
-
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
 {
     if (shouldGenerateCppWrapper(metaClass)) {

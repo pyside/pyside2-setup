@@ -206,8 +206,6 @@ protected:
 
     /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
     static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass);
-    /// Returns the enclosing class for an enum, or nullptr if it should be global.
-    const AbstractMetaClass *getProperEnclosingClassForEnum(const AbstractMetaEnum *metaEnum);
 
     QString wrapperName(const AbstractMetaClass *metaClass) const;
     QString wrapperName(const AbstractMetaType *metaType) const;

@@ -4628,9 +4628,8 @@ static QString mangleName(QString name)
 
 void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnum *cppEnum)
 {
-    const AbstractMetaClass *enclosingClass = getProperEnclosingClassForEnum(cppEnum);
-    const AbstractMetaClass *upper = enclosingClass ? enclosingClass->enclosingClass() : nullptr;
-    bool hasUpperEnclosingClass = upper && upper->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass;
+    const AbstractMetaClass *enclosingClass = cppEnum->targetLangEnclosingClass();
+    bool hasUpperEnclosingClass = enclosingClass && enclosingClass->targetLangEnclosingClass() != nullptr;
     const EnumTypeEntry *enumTypeEntry = cppEnum->typeEntry();
     QString enclosingObjectVariable;
     if (enclosingClass)
@@ -4925,9 +4924,8 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 {
     const ComplexTypeEntry *classTypeEntry = metaClass->typeEntry();
 
-    const AbstractMetaClass *enc = metaClass->enclosingClass();
-    bool hasEnclosingClass = enc && enc->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass;
-    QString enclosingObjectVariable = hasEnclosingClass ? QLatin1String("enclosingClass") : QLatin1String("module");
+    const AbstractMetaClass *enc = metaClass->targetLangEnclosingClass();
+    QString enclosingObjectVariable = enc ? QLatin1String("enclosingClass") : QLatin1String("module");
 
     QString pyTypeName = cpythonTypeName(metaClass);
     QString initFunctionName = getInitFunctionName(classContext);
@@ -5027,7 +5025,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 
         // 9:wrapperflags
         QByteArrayList wrapperFlags;
-        if (hasEnclosingClass)
+        if (enc)
             wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::InnerClass"));
         if (metaClass->deleteInMainThread())
             wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::DeleteInMainThread"));
@@ -5461,10 +5459,9 @@ bool CppGenerator::finishGeneration()
         s_classInitDecl << "void " << initFunctionName << "(PyObject *module);" << endl;
 
         s_classPythonDefines << INDENT << initFunctionName;
-        if (cls->enclosingClass()
-            && (cls->enclosingClass()->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)) {
+        if (auto enclosing = cls->targetLangEnclosingClass()) {
             s_classPythonDefines << "(reinterpret_cast<PyTypeObject *>("
-                << cpythonTypeNameExt(cls->enclosingClass()->typeEntry()) << ")->tp_dict);";
+                << cpythonTypeNameExt(enclosing->typeEntry()) << ")->tp_dict);";
         } else {
             s_classPythonDefines << "(module);";
         }
