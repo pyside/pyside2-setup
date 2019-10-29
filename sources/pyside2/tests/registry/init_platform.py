@@ -56,7 +56,7 @@ import sys
 import os
 from contextlib import contextmanager
 from textwrap import dedent
-from util import get_script_dir
+from util import get_refpath, get_script_dir
 
 def qt_build():
     result = '<Unknown build of Qt>'
