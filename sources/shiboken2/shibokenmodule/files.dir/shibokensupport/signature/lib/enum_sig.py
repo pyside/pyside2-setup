@@ -100,11 +100,6 @@ class ExactEnumerator(object):
             return ret
 
     def klass(self, class_name, klass):
-        modname = klass.__module__
-        if not (modname.startswith("PySide2") or modname.startswith("shiboken2")):
-            # don't look into any foreign classes!
-            ret = self.result_type()
-            return ret
         bases_list = []
         for base in klass.__bases__:
             name = base.__name__
@@ -147,6 +142,12 @@ class ExactEnumerator(object):
                     with self.fmt.enum(class_name, enum_name, int(value)):
                         pass
             for subclass_name, subclass in subclasses:
+                if klass == subclass:
+                    # this is a side effect of the typing module for Python 2.7
+                    # via the "._gorg" property, which we can safely ignore.
+                    print("Warning: {class_name} points to itself via {subclass_name}, skipped!"
+                          .format(**locals()))
+                    continue
                 ret.update(self.klass(subclass_name, subclass))
                 self.fmt.class_name = class_name
             ret.update(self.function("__init__", klass))
