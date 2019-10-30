@@ -66,7 +66,7 @@ In this example, ``func()`` would treat ``var`` as a local
 name without the ``global`` statement.  This would lead to
 a ``NameError`` in the ``value is None`` handling, on
 accessing ``var``. For more information about this, see
- `Python refernce documentation <python refdoc>`_.
+`Python refernce documentation <python refdoc>`_.
 
 .. _python refdoc: https://docs.python.org/3/reference/simple_stmts.html#the-global-statement
 
@@ -128,7 +128,8 @@ Here are a few important ones that you must be aware of:
   equivalent for this is the `@Slot`` decorator just before the
   function definition. This is necessary to register the slots
   with the QtMetaObject.
-* **QString, QVariant, and other types**:
+* **QString, QVariant, and other types**
+
   - Qt for Python does not provide access to QString and
     QVariant. You must use Python's native types instead.
   - QChar and QStringRef are represented as Python strings,
@@ -141,6 +142,7 @@ Here are a few important ones that you must be aware of:
     renamed to bin_(), hex_(), and oct_() respectively. This
     should avoid name conflicts with Python's built-in
     functions.
+
 * **QByteArray**: A QByteArray is treated as a list of
   bytes without encoding. The equivalent type in Python
   varies; Python 2 uses "str" type, whereas Python 3 uses

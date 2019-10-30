@@ -1,6 +1,5 @@
-=======================
 |project| & PyInstaller
-=======================
+#######################
 
 `PyInstaller <https://www.pyinstaller.org/>`_ lets you freeze your python
 application into a stand-alone executable.
@@ -143,9 +142,9 @@ version.
 Problem with numpy in Python 2.7.16
 -----------------------------------
 
-A recent problem of PyInstaller is the appearance of Python 2.7.16.
-This Python version creates a problem that is known from Python 3
-as a `Tcl/Tk` problem. This does rarely show up in Python 3 because
+A recent problem of PyInstaller is the Python 2 release, that is
+v2.7.16. This Python version creates a problem that is known from
+Python 3 as a `Tcl/Tk` problem. It rarely shows up in Python 3 as
 `Tcl/Tk` is seldom used with `PyInstaller.
 
 On Python 2.7.16, this problem is very much visible, as many are

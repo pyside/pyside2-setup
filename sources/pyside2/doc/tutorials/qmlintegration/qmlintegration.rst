@@ -31,7 +31,7 @@ application and PySide2 integration:
    .. literalinclude:: main.py
       :linenos:
       :lines: 98-108
-      :emphasize-lines: 103,107
+      :emphasize-lines: 6,9
 
    Notice that we specify the name of the context property, **con**,
    and also we explicitly load our QML file.
@@ -47,7 +47,7 @@ application and PySide2 integration:
    .. literalinclude:: view.qml
       :linenos:
       :lines: 85-93
-      :emphasize-lines: 89-91
+      :emphasize-lines: 5-7
 
    The properties *Italic*, *Bold*, and *Underline* are mutually
    exclusive, this means only one can be active at any time.
@@ -64,7 +64,7 @@ application and PySide2 integration:
    .. literalinclude:: main.py
       :linenos:
       :lines: 79-84
-      :emphasize-lines: 82,84
+      :emphasize-lines: 4,6
 
    Returning *True* or *False* allows you to activate and deactivate
    the properties of the QML UI elements.
@@ -98,10 +98,10 @@ application and PySide2 integration:
    .. literalinclude:: main.py
       :linenos:
       :lines: 41-48
-      :emphasize-lines: 48
+      :emphasize-lines: 8
 
-      You can read more about this configuration file
-      `here <https://doc.qt.io/qt-5/qtquickcontrols2-configuration.html>`_.
+   You can read more about this configuration file
+   `here <https://doc.qt.io/qt-5/qtquickcontrols2-configuration.html>`_.
 
    The final look of your application will be:
 

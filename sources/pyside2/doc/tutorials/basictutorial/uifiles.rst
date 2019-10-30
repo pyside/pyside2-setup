@@ -78,14 +78,12 @@ Generating a Python class
 
 Another option to interact with a **UI file** is to generate a Python
 class from it. This is possible thanks to the `pyside2-uic` tool.
-To use this tool, you need to run the following command on a console:
-::
+To use this tool, you need to run the following command on a console::
 
     pyside2-uic mainwindow.ui > ui_mainwindow.py
 
 We redirect all the output of the command to a file called `ui_mainwindow.py`,
-which will be imported directly:
-::
+which will be imported directly::
 
     from ui_mainwindow import Ui_MainWindow
 
@@ -93,7 +91,8 @@ Now to use it, we should create a personalized class for our widget
 to **setup** this generated design.
 
 To understand the idea, let's take a look at the whole code:
-::
+
+.. code-block:: python
 
     import sys
     from PySide2.QtWidgets import QApplication, QMainWindow
@@ -118,26 +117,32 @@ What is inside the *if* statement is already known from the previous
 examples, and our new basic class contains only two new lines
 that are in charge of loading the generated python class from the UI
 file:
-::
+
+.. code-block:: python
 
     self.ui = Ui_MainWindow()
     self.ui.setupUi(self)
 
-.. note:: You must run `pyside2-uic` again every time you make changes
-to the **UI file**.
+.. note::
+
+  You must run `pyside2-uic` again every time you make changes
+  to the **UI file**.
 
 Loading it directly
 ====================
 
 To load the UI file directly, we will need a class from the **QtUiTools**
 module:
-::
+
+.. code-block:: python
 
     from PySide2.QtUiTools import QUiLoader
 
 The `QUiLoader` lets us load the **ui file** dynamically
 and use it right away:
-::
+
+.. code-block:: python
+
     ui_file = QFile("mainwindow.ui")
     ui_file.open(QFile.ReadOnly)
 
@@ -146,7 +151,8 @@ and use it right away:
     window.show()
 
 The complete code of this example looks like this:
-::
+
+.. code-block:: python
 
     # File: main.py
     import sys
@@ -169,6 +175,7 @@ The complete code of this example looks like this:
 
 Then to execute it we just need to run the following on a
 command prompt:
-::
+
+.. code-block:: python
 
     python main.py
