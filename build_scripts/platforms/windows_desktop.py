@@ -222,7 +222,7 @@ def prepare_packages_win32(self, vars):
                     **vars)
                 pyside_rcc_path = "{install_dir}/bin/rcc.exe".format(
                     **vars)
-                pyside_rcc_options = '-g python'
+                pyside_rcc_options = ['-g', 'python']
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
 

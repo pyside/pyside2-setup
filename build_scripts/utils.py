@@ -492,9 +492,9 @@ def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
             if os.path.exists(dstname):
                 log.info('Regenerating {} from {}'.format(dstname,
                          os.path.basename(srcname)))
-                run_process([pyside_rcc_path,
-                             pyside_rcc_options,
-                             srcname, '-o', dstname])
+                run_process([pyside_rcc_path] +
+                             pyside_rcc_options
+                             + [srcname, '-o', dstname])
 
 
 def back_tick(cmd, ret_err=False):

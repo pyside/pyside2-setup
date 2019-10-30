@@ -194,7 +194,7 @@ def prepare_packages_posix(self, vars):
                     **vars)
                 pyside_rcc_path = "{install_dir}/bin/rcc".format(
                     **vars)
-                pyside_rcc_options = '-g python'
+                pyside_rcc_options = ['-g', 'python']
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
 
