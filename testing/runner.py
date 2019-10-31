@@ -185,15 +185,18 @@ class TestRunner(object):
 
             # 'for line in input:' would read into too large chunks
             labelled = True
+            # make sure that this text is not found in a traceback of the runner!
+            text_a = "BEGIN" "_FILE"
+            text_z = "END" "_FILE"
             while True:
                 line = input.readline()
                 if not line:
                     break
-                if line.startswith('BEGIN_FILE'):
+                if line.startswith(text_a):
                     labelled = False
                 txt = line.rstrip()
                 xprint(label, txt) if label and labelled else xprint(txt)
-                if line.startswith('END_FILE'):
+                if line.startswith(text_z):
                     labelled = True
 
         tee_src = dedent("""\

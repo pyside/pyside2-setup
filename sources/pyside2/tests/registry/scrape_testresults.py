@@ -246,7 +246,9 @@ def handle_suburl(idx, n, url, level):
                 test_name = sub_url.split("/")[-2]
                 print(os.getpid(), test_name)
                 response = read_url(sub_url)
-                if response and "BEGIN_FILE" in response.text:
+                txt = response.text if response else ''
+                if "BEGIN_FILE" in txt and not "'BEGIN_FILE'" in txt:
+                    # find the text, but not a traceback with that text
                     print(os.getpid(), test_name, "FOUND!")
                     write_data(test_name, response.text)
                 else:
