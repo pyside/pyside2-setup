@@ -1236,10 +1236,6 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
        : writeEscapedRstText(m_output, fullTitle);
 
     m_output << endl << Pad('*', size) << endl << endl;
-
-    const QStringRef brief = reader.attributes().value(briefAttribute());
-    if (!brief.isEmpty())
-        m_output << escape(brief) << endl << endl;
 }
 
 void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
@@ -1625,7 +1621,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
 
-    s << ".. module:: " << metaClass->package() << endl;
+    s << ".. currentmodule:: " << metaClass->package() << endl;
     QString className = getClassTargetFullName(metaClass, false);
     s << ".. _" << className << ":" << endl << endl;
 

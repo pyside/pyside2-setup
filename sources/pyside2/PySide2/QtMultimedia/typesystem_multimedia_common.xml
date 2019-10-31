@@ -82,10 +82,19 @@
   <object-type name="QAbstractVideoSurface">
       <enum-type name="Error"/>
   </object-type>
-  <object-type name="QAbstractVideoFilter"/>
+  <object-type name="QAbstractVideoFilter">
+      <modify-function signature="createFilterRunnable()">
+        <modify-argument index="return">
+            <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+    </modify-function>
+  </object-type>
   <value-type name="QVideoFrame">
       <enum-type name="FieldType"/>
       <enum-type name="PixelFormat"/>
+      <modify-function signature="bits()">
+        <inject-code file="../glue/qtmultimedia.cpp" snippet="qvideoframe-bits"/>
+      </modify-function>
       <modify-function signature="bits(int)" remove="all"/>
       <modify-function signature="bits(int)const" remove="all"/>
   </value-type>

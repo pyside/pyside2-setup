@@ -3941,9 +3941,10 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
     if (m_tpFuncs.value(QLatin1String("__repr__")).isEmpty()
-        && !metaClass->isQObject()
         && metaClass->hasToStringCapability()) {
-        m_tpFuncs[QLatin1String("__repr__")] = writeReprFunction(s, classContext);
+        m_tpFuncs[QLatin1String("__repr__")] = writeReprFunction(s,
+                classContext,
+                metaClass->toStringCapabilityIndirections());
     }
 
     // class or some ancestor has multiple inheritance
@@ -5999,7 +6000,9 @@ void CppGenerator::writeIndexError(QTextStream &s, const QString &errorMsg)
     s << INDENT << '}' << endl;
 }
 
-QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &context)
+QString CppGenerator::writeReprFunction(QTextStream &s,
+                                        GeneratorContext &context,
+                                        uint indirections)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     QString funcName = cpythonBaseName(metaClass) + QLatin1String("__repr__");
@@ -6012,7 +6015,7 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
     s << INDENT << "buffer.open(QBuffer::ReadWrite);" << endl;
     s << INDENT << "QDebug dbg(&buffer);" << endl;
     s << INDENT << "dbg << ";
-    if (metaClass->typeEntry()->isValue())
+    if (metaClass->typeEntry()->isValue() || indirections == 0)
          s << '*';
     s << CPP_SELF_VAR << ';' << endl;
     s << INDENT << "buffer.close();" << endl;

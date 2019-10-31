@@ -43,7 +43,11 @@
 
 bool Shiboken::Buffer::checkType(PyObject *pyObj)
 {
+#ifdef IS_PY3K
+    return PyObject_CheckBuffer(pyObj) != 0;
+#else
     return PyObject_CheckReadBuffer(pyObj) != 0;
+#endif
 }
 
 void *Shiboken::Buffer::getPointer(PyObject *pyObj, Py_ssize_t *size)

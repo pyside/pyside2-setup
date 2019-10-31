@@ -336,7 +336,7 @@ private:
     /// Helper function for writeStdListWrapperMethods.
     void writeIndexError(QTextStream &s, const QString &errorMsg);
 
-    QString writeReprFunction(QTextStream &s, GeneratorContext &context);
+    QString writeReprFunction(QTextStream &s, GeneratorContext &context, uint indirections);
 
     const AbstractMetaFunction *boolCast(const AbstractMetaClass *metaClass) const;
     bool hasBoolCast(const AbstractMetaClass *metaClass) const

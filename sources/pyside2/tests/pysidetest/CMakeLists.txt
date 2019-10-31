@@ -30,6 +30,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/intvalue_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_testobjectwithnamespace_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp_testobject2withnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/pysidecpp2_testobjectwithoutnamespace_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
@@ -137,6 +138,7 @@ PYSIDE_TEST(new_inherited_functions_test.py)
 PYSIDE_TEST(notify_id.py)
 PYSIDE_TEST(qapp_like_a_macro_test.py)
 PYSIDE_TEST(qvariant_test.py)
+PYSIDE_TEST(repr_test.py)
 PYSIDE_TEST(signal_slot_warning.py)
 PYSIDE_TEST(signalandnamespace_test.py)
 PYSIDE_TEST(signalemissionfrompython_test.py)

@@ -40,6 +40,7 @@ private slots:
     void testDtorIsPrivate();
     void testDtorIsProtected();
     void testDtorIsVirtual();
+    void testDtorFromBaseIsVirtual();
     void testClassWithVirtualDtorIsPolymorphic();
 };
 

@@ -248,6 +248,15 @@ void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &f
     }
 }
 
+void AbstractMetaBuilderPrivate::registerToStringCapabilityIn(const NamespaceModelItem &nsItem)
+{
+    const FunctionList &streamOps = nsItem->findFunctions(QLatin1String("operator<<"));
+    for (const FunctionModelItem &item : streamOps)
+        registerToStringCapability(item, nullptr);
+    for (const NamespaceModelItem &ni : nsItem->namespaces())
+        registerToStringCapabilityIn(ni);
+}
+
 /**
  * Check if a class has a debug stream operator that can be used as toString
  */
@@ -261,7 +270,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
             const ArgumentModelItem &arg = arguments.at(1);
             if (AbstractMetaClass *cls = argumentToClass(arg, currentClass)) {
                 if (arg->type().indirections() < 2)
-                    cls->setToStringCapability(true);
+                    cls->setToStringCapability(true, arg->type().indirections());
             }
         }
     }
@@ -503,8 +512,12 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     ReportHandler::startProgress("Fixing class inheritance...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        if (!cls->isInterface() && !cls->isNamespace())
+        if (!cls->isInterface() && !cls->isNamespace()) {
             setupInheritance(cls);
+            if (!cls->hasVirtualDestructor() && cls->baseClass()
+                && cls->baseClass()->hasVirtualDestructor())
+                cls->setHasVirtualDestructor(true);
+        }
     }
 
     ReportHandler::startProgress("Detecting inconsistencies in class model...");
@@ -591,11 +604,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             registerHashFunction(item, nullptr);
     }
 
-    {
-        const FunctionList &streamOps = dom->findFunctions(QLatin1String("operator<<"));
-        for (const FunctionModelItem &item : streamOps)
-            registerToStringCapability(item, nullptr);
-    }
+    registerToStringCapabilityIn(dom);
 
     {
         FunctionList binaryOperators = dom->findFunctions(QStringLiteral("operator=="));
