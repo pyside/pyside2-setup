@@ -324,18 +324,16 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaCl
 
 void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass)
 {
-    if (!metaClass)
-        return;
-
+    Q_ASSERT(metaClass);
+    // if a scope is not to be generated, collect its enums into the parent scope
     if (metaClass->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass) {
         const AbstractMetaEnumList &enums = metaClass->enums();
-        for (const AbstractMetaEnum *metaEnum : enums) {
-            if (metaEnum->isPrivate() || metaEnum->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass)
-                continue;
-            if (!enumList.contains(const_cast<AbstractMetaEnum *>(metaEnum)))
-                enumList.append(const_cast<AbstractMetaEnum *>(metaEnum));
+        for (AbstractMetaEnum *metaEnum : enums) {
+            if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode()
+                && !enumList.contains(metaEnum)) {
+                enumList.append(metaEnum);
+            }
         }
-        lookForEnumsInClassesNotToBeGenerated(enumList, metaClass->enclosingClass());
     }
 }
 
