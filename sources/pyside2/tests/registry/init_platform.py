@@ -219,6 +219,7 @@ def generate_all():
         lines = f.readlines()
         license_line = next((lno for lno, line in enumerate(lines)
                              if "$QT_END_LICENSE$" in line))
+        fmt.print("#recreate       # uncomment this to enforce generation")
         fmt.print("".join(lines[:license_line + 3]))
         version = sys.version.replace('\n', ' ')
         build = qt_build()
