@@ -438,6 +438,9 @@ public:
 
     const NamespaceList &namespaces() const { return m_namespaces; }
 
+     NamespaceType type() const { return m_type; }
+     void setType(NamespaceType t) { m_type = t; }
+
     void addNamespace(NamespaceModelItem item);
 
     NamespaceModelItem findNamespace(const QString &name) const;
@@ -450,6 +453,7 @@ public:
 
 private:
     NamespaceList m_namespaces;
+    NamespaceType m_type = NamespaceType::Default;
 };
 
 class _FileModelItem: public _NamespaceModelItem

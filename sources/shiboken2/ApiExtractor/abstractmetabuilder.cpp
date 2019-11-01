@@ -757,6 +757,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
             << QStringLiteral("namespace '%1' does not have a type entry").arg(namespaceName);
         return nullptr;
     }
+    type->setInlineNamespace(namespaceItem->type() == NamespaceType::Inline);
 
     // Continue populating namespace?
     AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, type);

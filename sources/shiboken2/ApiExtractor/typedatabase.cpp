@@ -849,6 +849,8 @@ void NamespaceTypeEntry::formatDebug(QDebug &d) const
     auto pattern = m_filePattern.pattern();
     FORMAT_NONEMPTY_STRING("pattern", pattern)
     d << ",visibility=" << m_visibility;
+    if (m_inlineNamespace)
+        d << "[inline]";
 }
 
 void ContainerTypeEntry::formatDebug(QDebug &d) const

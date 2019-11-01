@@ -765,6 +765,17 @@ static CodeModel::ClassType codeModelClassTypeFromCursor(CXCursorKind kind)
     return result;
 }
 
+static NamespaceType namespaceType(const CXCursor &cursor)
+{
+    if (clang_Cursor_isAnonymous(cursor))
+        return NamespaceType::Anonymous;
+#if CINDEX_VERSION_MAJOR > 0 || CINDEX_VERSION_MINOR >= 59
+    if (clang_Cursor_isInlineNamespace(cursor))
+        return NamespaceType::Inline;
+#endif
+    return NamespaceType::Default;
+}
+
 BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
 {
     switch (cursor.kind) {
@@ -890,6 +901,9 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     case CXCursor_Namespace: {
+        const auto type = namespaceType(cursor);
+        if (type == NamespaceType::Anonymous)
+            return Skip;
         const QString name = getCursorSpelling(cursor);
         const NamespaceModelItem parentNamespaceItem = qSharedPointerDynamicCast<_NamespaceModelItem>(d->m_scopeStack.back());
         if (parentNamespaceItem.isNull()) {
@@ -906,6 +920,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         namespaceItem.reset(new _NamespaceModelItem(d->m_model, name));
         setFileName(cursor, namespaceItem.data());
         namespaceItem->setScope(d->m_scope);
+        namespaceItem->setType(type);
         parentNamespaceItem->addNamespace(namespaceItem);
         d->pushScope(namespaceItem);
     }

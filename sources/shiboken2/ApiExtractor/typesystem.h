@@ -1538,6 +1538,10 @@ public:
     bool isVisible() const;
     void setVisibility(TypeSystem::Visibility v) { m_visibility = v; }
 
+    // C++ 11 inline namespace, from code model
+    bool isInlineNamespace() const { return m_inlineNamespace; }
+    void setInlineNamespace(bool i) { m_inlineNamespace = i; }
+
     static bool isVisibleScope(const TypeEntry *e);
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -1552,6 +1556,7 @@ private:
     const NamespaceTypeEntry *m_extends = nullptr;
     TypeSystem::Visibility m_visibility = TypeSystem::Visibility::Auto;
     bool m_hasPattern = false;
+    bool m_inlineNamespace = false;
 };
 
 class ValueTypeEntry : public ComplexTypeEntry

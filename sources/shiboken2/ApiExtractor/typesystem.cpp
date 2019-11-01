@@ -964,7 +964,7 @@ bool NamespaceTypeEntry::matchesFile(const QString &needle) const
 bool NamespaceTypeEntry::isVisible() const
 {
     return m_visibility == TypeSystem::Visibility::Visible
-        || m_visibility == TypeSystem::Visibility::Auto;
+        || (m_visibility == TypeSystem::Visibility::Auto && !m_inlineNamespace);
 }
 
 bool NamespaceTypeEntry::isVisibleScope(const TypeEntry *e)

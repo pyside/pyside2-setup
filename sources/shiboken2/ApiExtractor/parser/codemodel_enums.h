@@ -54,4 +54,11 @@ enum class ExceptionSpecification
     Throws
 };
 
+enum class NamespaceType
+{
+    Default,
+    Anonymous,
+    Inline
+};
+
 #endif // CODEMODEL_ENUMS_H
