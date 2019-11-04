@@ -492,9 +492,9 @@ def regenerate_qt_resources(src, pyside_rcc_path, pyside_rcc_options):
             if os.path.exists(dstname):
                 log.info('Regenerating {} from {}'.format(dstname,
                          os.path.basename(srcname)))
-                run_process([pyside_rcc_path,
-                             pyside_rcc_options,
-                             srcname, '-o', dstname])
+                run_process([pyside_rcc_path] +
+                             pyside_rcc_options
+                             + [srcname, '-o', dstname])
 
 
 def back_tick(cmd, ret_err=False):
@@ -1141,7 +1141,7 @@ def run_instruction(instruction, error, initial_env=None):
 def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
     # Disable unsupported CI configs for now
     # NOTE: String must match with QT CI's storagestruct thrift
-    if hostOSVer in ["WinRT_10", "WebAssembly", "Ubuntu_18_04"] \
+    if hostOSVer in ["WinRT_10", "WebAssembly", "Ubuntu_18_04", "Android_ANY"] \
         or hostOSVer.startswith("SLES_"):
         print("Disabled " + hostOSVer + " from Coin configuration")
         return False

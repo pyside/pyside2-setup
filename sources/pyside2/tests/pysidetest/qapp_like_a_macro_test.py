@@ -33,7 +33,10 @@ import PySide2
 # It also uses the qApp variable to finish the instance and start over.
 
 class qAppMacroTest(unittest.TestCase):
+    _test_1093_is_first = True
+
     def test_qApp_is_like_a_macro_and_can_restart(self):
+        self._test_1093_is_first = False
         from PySide2 import QtCore
         try:
             from PySide2 import QtGui, QtWidgets
@@ -71,6 +74,21 @@ class qAppMacroTest(unittest.TestCase):
         self.assertEqual(QtCore.QCoreApplication.instance(), QtCore.qApp)
         # and they are again all the same
         self.assertTrue(qApp is QtCore.qApp is QtGui.qApp is QtWidgets.qApp)
+
+    def test_1093(self):
+        # Test that without creating a QApplication staticMetaObject still exists.
+        # Please see https://bugreports.qt.io/browse/PYSIDE-1093 for explanation.
+        # Note: This test must run first, otherwise we would be mislead!
+        assert self._test_1093_is_first
+        from PySide2 import QtCore
+        self.assertTrue(QtCore.QObject.staticMetaObject is not None)
+        app = QtCore.QCoreApplication.instance()
+        self.assertTrue(QtCore.QObject.staticMetaObject is not None)
+        if app is None:
+            app = QtCore.QCoreApplication([])
+        self.assertTrue(QtCore.QObject.staticMetaObject is not None)
+        del __builtins__.qApp
+
 
 if __name__ == '__main__':
     unittest.main()

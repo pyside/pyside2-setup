@@ -45,6 +45,7 @@
 #include "pysideproperty.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "pysidestaticstrings.h"
 #include "pysideslot_p.h"
 #include "pysidemetafunction_p.h"
 #include "pysidemetafunction.h"
@@ -57,6 +58,7 @@
 #include <gilstate.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
+#include <sbkstaticstrings.h>
 #include <qapp_macro.h>
 
 #include <QtCore/QByteArray>
@@ -147,7 +149,8 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds
                     return false;
             }
             if (!accept) {
-                PyErr_Format(PyExc_AttributeError, "'%S' is not a Qt property or a signal", key);
+                PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal",
+                             propName.constData());
                 return false;
             }
         }
@@ -233,7 +236,8 @@ void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base, std::si
     if (!converter)
         return;
     Shiboken::AutoDecRef pyMetaObject(Shiboken::Conversions::pointerToPython(converter, metaObjectPtr));
-    PyObject_SetAttrString(reinterpret_cast<PyObject *>(type), "staticMetaObject", pyMetaObject);
+    PyObject_SetAttr(reinterpret_cast<PyObject *>(type),
+                     PySide::PyName::qtStaticMetaObject(), pyMetaObject);
 }
 
 TypeUserData *retrieveTypeUserData(SbkObjectType *sbkTypeObj)
@@ -539,7 +543,7 @@ bool registerInternalQtConf()
     // Querying __file__ should be done only for modules that have finished their initialization.
     // Thus querying for the top-level PySide2 package works for us whenever any Qt-wrapped module
     // is loaded.
-    PyObject *pysideInitFilePath = PyObject_GetAttrString(pysideModule, "__file__");
+    PyObject *pysideInitFilePath = PyObject_GetAttr(pysideModule, Shiboken::PyMagicName::file());
     Py_DECREF(pysideModule);
     if (!pysideInitFilePath)
         return false;

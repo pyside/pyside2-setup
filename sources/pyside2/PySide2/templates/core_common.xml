@@ -339,9 +339,16 @@
     </template>
 
     <template name="pyseq_to_cpplist_conversion">
-    for (int i = 0, size = PySequence_Size(%in); i &lt; size; i++) {
-
-        Shiboken::AutoDecRef pyItem(PySequence_GetItem(%in, i));
+    // PYSIDE-795: Turn all sequences into iterables.
+    Shiboken::AutoDecRef it(PyObject_GetIter(%in));
+    PyObject *(*iternext)(PyObject *) = *Py_TYPE(it)->tp_iternext;
+    for (;;) {
+        Shiboken::AutoDecRef pyItem(iternext(it));
+        if (pyItem.isNull()) {
+            if (PyErr_Occurred() &amp;&amp; PyErr_ExceptionMatches(PyExc_StopIteration))
+                PyErr_Clear();
+            break;
+        }
         %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
         %out &lt;&lt; cppItem;
     }
@@ -358,10 +365,20 @@
     </template>
 
     <template name="pyseq_to_cppvector_conversion">
-    int vectorSize = PySequence_Size(%in);
-    %out.reserve(vectorSize);
-    for (int idx = 0; idx &lt; vectorSize; ++idx) {
-        Shiboken::AutoDecRef pyItem(PySequence_GetItem(%in, idx));
+    // PYSIDE-795: Turn all sequences into iterables.
+    if (PySequence_Check(%in)) {
+        int vectorSize = PySequence_Size(%in);
+        %out.reserve(vectorSize);
+    }
+    Shiboken::AutoDecRef it(PyObject_GetIter(%in));
+    PyObject *(*iternext)(PyObject *) = *Py_TYPE(it)->tp_iternext;
+    for (;;) {
+        Shiboken::AutoDecRef pyItem(iternext(it));
+        if (pyItem.isNull()) {
+            if (PyErr_Occurred() &amp;&amp; PyErr_ExceptionMatches(PyExc_StopIteration))
+                PyErr_Clear();
+            break;
+        }
         %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
         %out.push_back(cppItem);
     }

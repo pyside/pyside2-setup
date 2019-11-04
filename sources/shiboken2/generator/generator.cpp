@@ -760,7 +760,7 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
             bool simple = true;
             bool suitable = true;
             for (int i = 0, size = arguments.size();
-                 suitable && i < size && !arguments.at(i)->hasDefaultValueExpression(); ++i) {
+                 suitable && i < size && !arguments.at(i)->hasOriginalDefaultValueExpression(); ++i) {
                 const AbstractMetaArgument *arg = arguments.at(i);
                 const TypeEntry *aType = arg->type()->typeEntry();
                 suitable &= aType != cType;
@@ -777,11 +777,12 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
         bool ok = true;
         for (int i =0, size = arguments.size(); ok && i < size; ++i) {
             const AbstractMetaArgument *arg = arguments.at(i);
-            if (arg->hasDefaultValueExpression()) {
-                if (arg->hasModifiedDefaultValueExpression())
-                    args << arg->defaultValueExpression(); // Spell out modified values
+            if (arg->hasModifiedDefaultValueExpression()) {
+                args << arg->defaultValueExpression(); // Spell out modified values
                 break;
             }
+            if (arg->hasOriginalDefaultValueExpression())
+                break;
             auto argValue = minimalConstructor(arg->type());
             ok &= argValue.isValid();
             args << argValue.constructorParameter();

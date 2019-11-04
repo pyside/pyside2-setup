@@ -88,7 +88,7 @@ def create_zipfile(limited_api):
     and make a chunked base64 encoded file from it.
     """
     zip_name = "signature.zip"
-    inc_name = "signature.inc"
+    inc_name = "signature_inc.h"
     flag = '-b' if sys.version_info >= (3,) else ''
     os.chdir(work_dir)
 
@@ -131,7 +131,7 @@ def create_zipfile(limited_api):
     tmp.close()
     # also generate a simple embeddable .pyc file for signature_bootstrap.pyc
     boot_name = "signature_bootstrap.py" if limited_api else "signature_bootstrap.pyc"
-    with open(boot_name, "rb") as ldr, open("signature_bootstrap.inc", "w") as inc:
+    with open(boot_name, "rb") as ldr, open("signature_bootstrap_inc.h", "w") as inc:
         _embed_bytefile(ldr, inc, limited_api)
     os.chdir(cur_dir)
 

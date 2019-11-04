@@ -118,25 +118,9 @@ def prepare_packages_posix(self, vars):
             vars=vars)
 
     if config.is_internal_pyside_build():
-        # <install>/lib/site-packages/pyside2uic/* ->
-        #   <setup>/pyside2uic
-        copydir(
-            "{site_packages_dir}/pyside2uic",
-            "{st_build_dir}/pyside2uic",
-            force=False, vars=vars)
-        if sys.version_info[0] > 2:
-            rmtree("{st_build_dir}/pyside2uic/port_v2".format(**vars))
-        else:
-            rmtree("{st_build_dir}/pyside2uic/port_v3".format(**vars))
-
-        # <install>/bin/pyside2-uic -> {st_package_name}/scripts/uic.py
         makefile(
             "{st_build_dir}/{st_package_name}/scripts/__init__.py",
             vars=vars)
-        copyfile(
-            "{install_dir}/bin/pyside2-uic",
-            "{st_build_dir}/{st_package_name}/scripts/uic.py",
-            force=False, vars=vars)
 
         # For setting up setuptools entry points
         copyfile(
@@ -150,9 +134,23 @@ def prepare_packages_posix(self, vars):
             "{st_build_dir}/{st_package_name}",
             filter=[
                 "pyside2-lupdate",
-                "pyside2-rcc",
+                "uic",
+                "rcc",
             ],
             recursive=False, vars=vars))
+
+        # Copying designer
+        if sys.platform == "darwin":
+            executables.extend(copydir(
+                "{install_dir}/bin/Designer.app",
+                "{st_build_dir}/{st_package_name}/Designer.app",
+                filter=None,
+                recursive=True, vars=vars))
+        else:
+            copyfile(
+                "{install_dir}/bin/designer",
+                "{st_build_dir}/{st_package_name}/designer",
+                force=False, vars=vars)
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
@@ -207,9 +205,9 @@ def prepare_packages_posix(self, vars):
             if sys.version_info[0] == 3:
                 examples_path = "{st_build_dir}/{st_package_name}/examples".format(
                     **vars)
-                pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(
+                pyside_rcc_path = "{install_dir}/bin/rcc".format(
                     **vars)
-                pyside_rcc_options = '-py3'
+                pyside_rcc_options = ['-g', 'python']
                 regenerate_qt_resources(examples_path, pyside_rcc_path,
                     pyside_rcc_options)
 

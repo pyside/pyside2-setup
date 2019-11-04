@@ -37,6 +37,13 @@
 
     <namespace-type name="PySideCPP">
         <object-type name="TestObjectWithNamespace"/>
+        <object-type name="TestObject2WithNamespace">
+            <add-function signature="__repr__" return-type="PyObject*">
+                <inject-code class="target" position="beginning">
+                    %PYARG_0 = Shiboken::String::fromCString("TestObject2WithNamespace(injected_repr)");
+                </inject-code>
+            </add-function>
+        </object-type>
     </namespace-type>
 
     <namespace-type name="PySideCPP2" generate="no">

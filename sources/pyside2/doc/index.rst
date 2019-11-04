@@ -24,23 +24,23 @@ Basic modules
 -------------
   These are the main modules that will help you build a Widget based UI.
 
-  `Qt Core <PySide2/QtCore/index.html>`_
+  :mod:`Qt Core <PySide2.QtCore>`
     Provides core non-GUI functionality, like signal and slots, properties, base classes of item models, serialization, etc.
-  `Qt Gui <PySide2/QtGui/index.html>`_
+  :mod:`Qt Gui <PySide2.QtGui>`
     Extends QtCore with GUI functionality: Events, windows and screens, OpenGL and raster-based 2D painting, images.
-  `Qt Widgets <PySide2/QtWidgets/index.html>`_
+  :mod:`Qt Widgets <PySide2.QtWidgets>`
     Ready to use Widgets for your application, including also graphical elements for your UI.
 
 QML and Qt Quick
 ----------------
-  If you want to use the `Qml Language <https://doc.qt.io/qt-5/qmlapplications.html>`, these
+  If you want to use the `Qml Language <https://doc.qt.io/qt-5.qmlapplications>`, these
   modules will help you interact with it from Python.
 
-  `Qt Qml <PySide2/QtQml/index.html>`_
+  :mod:`Qt Qml <PySide2.QtQml>`
     Base Python API to interact with the QML module.
-  `Qt Quick <PySide2/QtQuick/index.html>`_
+  :mod:`Qt Quick <PySide2.QtQuick>`
     Provides classes for embedding Qt Quick in Qt applications.
-  `Qt QuickWidgets <PySide2/QtQuickWidgets/index.html>`_
+  :mod:`Qt QuickWidgets <PySide2.QtQuickWidgets>`
     Provides the QQuickWidget class for embedding Qt Quick in widget-based applications.
 
 Data visualization
@@ -49,9 +49,9 @@ Data visualization
   Charts, diagrams, animations: these modules provide a large amount
   of classes that can help you include these elements in your UI.
 
-  `Qt Charts <PySide2/QtCharts/index.html>`_
+  :mod:`Qt Charts <PySide2.QtCharts>`
     Provides a set of easy to use chart components.
-  `Qt DataVisualization <PySide2/QtDataVisualization/index.html>`_
+  :mod:`Qt DataVisualization <PySide2.QtDataVisualization>`
     Provides a way to visualize data in 3D as bar, scatter, and surface graphs.
 
 Multimedia
@@ -60,9 +60,9 @@ Multimedia
   Audio, video, and hardware interaction: check these modules if you are
   looking for multimedia solutions.
 
-  `Qt Multimedia <PySide2/QtMultimedia/index.html>`_
+  :mod:`Qt Multimedia <PySide2.QtMultimedia>`
     Provides low-level multimedia functionality.
-  `Qt MultimediaWidgets <PySide2/QtMultimediaWidgets/index.html>`_
+  :mod:`Qt MultimediaWidgets <PySide2.QtMultimediaWidgets>`
     Provides the widget-based multimedia API.
 
 WebEngine
@@ -71,9 +71,9 @@ WebEngine
   If your project is based on a browser or the features around web
   based applications, these modules will help you to interact with them.
 
-  `Qt WebEngineWidgets <PySide2/QtWebEngineWidgets/index.html>`_
+  :mod:`Qt WebEngineWidgets <PySide2.QtWebEngineWidgets>`
     Provides widgets that can handle web content.
-  `Qt WebChannel <PySide2/QtWebChannel/index.html>`_
+  :mod:`Qt WebChannel <PySide2.QtWebChannel>`
     Enables peer-to-peer communication between a server and a client
     (HTML/JavaScript or QML application).
 
@@ -83,5 +83,5 @@ All the modules
   There are many other modules currently supported by |pymodname|,
   here you can find a complete list of them.
 
-  `Check all the modules <modules.html>`_
+  :doc:`Check all the modules <modules>`
    Display a table with all the currently supported Qt modules.

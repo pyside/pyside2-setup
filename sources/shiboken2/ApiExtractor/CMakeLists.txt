@@ -30,6 +30,22 @@ parser/enumvalue.cpp
 xmlutils.cpp
 )
 
+find_package(Qt5XmlPatterns 5.12)
+find_package(Qt5Xml 5.12)
+find_package(LibXml2 2.6.32)
+find_package(LibXslt 1.1.19)
+
+set(HAS_LIBXSLT 0)
+if (LIBXSLT_FOUND AND LIBXML2_FOUND)
+    set(HAS_LIBXSLT 1)
+endif()
+
+if(NOT Qt5XmlPatterns_FOUND AND NOT HAS_LIBXSLT)
+    set(DISABLE_DOCSTRINGS TRUE)
+    message(WARNING
+            "Documentation will not be built due to missing dependency (no Qt5XmlPatterns found).")
+endif()
+
 add_library(apiextractor STATIC ${apiextractor_SRC})
 target_include_directories(apiextractor PRIVATE ${CLANG_EXTRA_INCLUDES}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}
@@ -68,6 +84,7 @@ target_compile_definitions(apiextractor PRIVATE CMAKE_CXX_COMPILER="${CMAKE_CXX_
 set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "The subdirectory relative to the install prefix where libraries will be installed (default is /lib${LIB_SUFFIX})" FORCE)
 
 if (BUILD_TESTS)
+    find_package(Qt5Test 5.12 REQUIRED)
     set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
     enable_testing()
     add_subdirectory(tests)

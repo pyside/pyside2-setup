@@ -56,9 +56,9 @@ class A(QObject):
     def test(cls):
         cls.instance
         cls.instance = cls()
-        assert "<__main__.A object " in repr(cls.__dict__['instance'])
-        assert "<__main__.A object " in repr(cls.instance)
-        assert "<__main__.A object " in repr(type.__getattribute__(cls, 'instance'))
+        assert "<__main__.A(0x" in repr(cls.__dict__['instance'])
+        assert "<__main__.A(0x" in repr(cls.instance)
+        assert "<__main__.A(0x" in repr(type.__getattribute__(cls, 'instance'))
 
 
 if __name__ == "__main__":

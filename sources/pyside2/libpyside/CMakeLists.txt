@@ -53,6 +53,7 @@ set(libpyside_SRC
     pysideqflags.cpp
     pysideweakref.cpp
     pyside.cpp
+    pysidestaticstrings.cpp
     ${DESTROYLISTENER_MOC}
 )
 
@@ -130,6 +131,7 @@ set(libpyside_HEADERS
     pysidemacros.h
     signalmanager.h
     pyside.h
+    pysidestaticstrings.h
     pysidemetafunction.h
     pysidesignal.h
     pysideproperty.h

@@ -349,6 +349,7 @@ QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, cons
     m_handlerMap.insert(QLatin1String("skipto"), &QtXmlToSphinx::handleIgnoredTag);
     m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleTargetTag);
     m_handlerMap.insert(QLatin1String("page"), &QtXmlToSphinx::handlePageTag);
+    m_handlerMap.insert(QLatin1String("group"), &QtXmlToSphinx::handlePageTag);
 
     // useless tags
     m_handlerMap.insert(QLatin1String("description"), &QtXmlToSphinx::handleUselessTag);
@@ -1023,6 +1024,8 @@ QtXmlToSphinx::LinkContext *QtXmlToSphinx::handleLinkStart(const QString &type, 
             result->type = LinkContext::External;
         else
             result->type = LinkContext::Reference;
+    } else if (type == QLatin1String("external")) {
+        result->type = LinkContext::External;
     } else {
         result->type = LinkContext::Reference;
     }
@@ -1228,14 +1231,11 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
         m_output << rstLabel(title.toString());
 
     const QStringRef fullTitle = reader.attributes().value(fullTitleAttribute());
-    if (!fullTitle.isEmpty()) {
-        const int size = writeEscapedRstText(m_output, fullTitle);
-        m_output << endl << Pad('*', size) << endl << endl;
-    }
+    const int size = fullTitle.isEmpty()
+       ? writeEscapedRstText(m_output, title)
+       : writeEscapedRstText(m_output, fullTitle);
 
-    const QStringRef brief = reader.attributes().value(briefAttribute());
-    if (!brief.isEmpty())
-        m_output << escape(brief) << endl << endl;
+    m_output << endl << Pad('*', size) << endl << endl;
 }
 
 void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
@@ -1621,7 +1621,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
 
-    s << ".. module:: " << metaClass->package() << endl;
+    s << ".. currentmodule:: " << metaClass->package() << endl;
     QString className = getClassTargetFullName(metaClass, false);
     s << ".. _" << className << ":" << endl << endl;
 
@@ -2301,8 +2301,9 @@ void QtDocGenerator::writeAdditionalDocumentation()
             if (fi.isFile()) {
                 const QString rstFileName = fi.baseName() + rstSuffix;
                 const QString rstFile = targetDir + QLatin1Char('/') + rstFileName;
+                const QString context = targetDir.mid(targetDir.lastIndexOf(QLatin1Char('/')) + 1);
                 if (QtXmlToSphinx::convertToRst(this, fi.absoluteFilePath(),
-                                                rstFile, QString(), &errorMessage)) {
+                                                rstFile, context, &errorMessage)) {
                     ++successCount;
                     qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
                         << " converted " << fi.fileName()

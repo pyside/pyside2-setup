@@ -69,6 +69,39 @@ void TestDtorInformation::testDtorIsVirtual()
     QCOMPARE(AbstractMetaClass::findClass(classes, QLatin1String("Subject"))->hasVirtualDestructor(), true);
 }
 
+void TestDtorInformation::testDtorFromBaseIsVirtual()
+{
+    const char* cppCode = R"CPP(class ControlBase { public: ~ControlBase() {} };
+class Control : public ControlBase {};
+class SubjectBase { public: virtual ~SubjectBase() {} };
+class Subject : public SubjectBase {};
+)CPP";
+    const char* xmlCode = R"XML(<typesystem package="Foo"><value-type name="ControlBase"/>
+<value-type name="Control"/>"
+<value-type name="SubjectBase"/>"
+<value-type name="Subject"/>
+</typesystem>
+)XML";
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    QCOMPARE(classes.count(), 4);
+
+    auto klass = AbstractMetaClass::findClass(classes, QLatin1String("ControlBase"));
+    QVERIFY(klass);
+    QVERIFY(!klass->hasVirtualDestructor());
+    klass = AbstractMetaClass::findClass(classes, QLatin1String("Control"));
+    QVERIFY(klass);
+    QVERIFY(!klass->hasVirtualDestructor());
+
+    klass = AbstractMetaClass::findClass(classes, QLatin1String("SubjectBase"));
+    QVERIFY(klass);
+    QVERIFY(klass->hasVirtualDestructor());
+    klass = AbstractMetaClass::findClass(classes, QLatin1String("Subject"));
+    QVERIFY(klass);
+    QVERIFY(klass->hasVirtualDestructor());
+}
+
 void TestDtorInformation::testClassWithVirtualDtorIsPolymorphic()
 {
     const char* cppCode ="class Control { public: virtual ~Control() {} }; class Subject { protected: virtual ~Subject() {} };";

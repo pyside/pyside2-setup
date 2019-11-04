@@ -731,37 +731,6 @@ ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClass *cls, 
     return ArgumentOwner();
 }
 
-
-QString AbstractMetaFunction::replacedDefaultExpression(const AbstractMetaClass *cls, int key) const
-{
-    const FunctionModificationList &modifications = this->modifications(cls);
-    for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
-            if (argumentModification.index == key
-                && !argumentModification.replacedDefaultExpression.isEmpty()) {
-                return argumentModification.replacedDefaultExpression;
-            }
-        }
-    }
-
-    return QString();
-}
-
-bool AbstractMetaFunction::removedDefaultExpression(const AbstractMetaClass *cls, int key) const
-{
-    const FunctionModificationList &modifications = this->modifications(cls);
-    for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
-            if (argumentModification.index == key
-                && argumentModification.removedDefaultExpression) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
 QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int key) const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
@@ -774,19 +743,6 @@ QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int 
                 if (snip.language == language && !snip.code().isEmpty())
                     return snip.code();
             }
-        }
-    }
-
-    return QString();
-}
-
-QString AbstractMetaFunction::argumentReplaced(int key) const
-{
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
-            if (argumentModification.index == key && !argumentModification.replace_value.isEmpty())
-                return argumentModification.replace_value;
         }
     }
 

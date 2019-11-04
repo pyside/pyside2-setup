@@ -1,6 +1,5 @@
-==========
 Deployment
-==========
+##########
 
 Deploying or freezing an application is a crucial part of many Python projects.
 Most large projects are not based on a single Python file, so
@@ -11,12 +10,23 @@ Here are a few distribution options that you could use:
  2. Building a proper `Python package (wheel) <https://packaging.python.org/>`_.
  3. Freezing the application into a single binary file or a directory.
 
+.. _fbs: https://build-system.fman.io/
+
+.. _pyinstaller: https://www.pyinstaller.org/
+
+.. _cxfreeze: https://anthony-tuininga.github.io/cx_Freeze/
+
+.. _py2exe: http://www.py2exe.org/
+
+.. _py2app: https://py2app.readthedocs.io/en/latest/
+
 If you choose the **third** option, consider using one of these tools:
- * `fbs <https://build-system.fman.io/>`_,
- * `PyInstaller <https://www.pyinstaller.org/>`_,
- * `cx_Freeze <https://anthony-tuininga.github.io/cx_Freeze/>`_,
- * `py2exe <http://www.py2exe.org/>`_,
- * `py2app <https://py2app.readthedocs.io/en/latest/>`_,
+ * `fbs`_
+ * `PyInstaller <pyinstaller>`_
+ * `cx_Freeze <cxfreeze>`_
+ * `py2exe`_
+ * `py2app`_
+
 
 |project| is a cross-platform framework,
 so we would like to focus on solutions that work on the three
@@ -53,8 +63,9 @@ that allows the user to install the application step-by-step.
 Here you can find a set of tutorials on how to use the previously
 described tools.
 
-.. note:: Deployment is supported only from Qt for Python 5.12.2 and
-later.
+.. note::
+
+   Deployment is supported only from Qt for Python 5.12.2 and later.
 
 .. toctree::
     :name: mastertoc

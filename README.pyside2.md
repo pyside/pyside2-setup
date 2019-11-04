@@ -69,3 +69,9 @@ our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
 
 Check *#qt-pyside*, our official IRC channel on FreeNode,
 or contact us via our [mailing list](http://lists.qt-project.org/mailman/listinfo/pyside).
+
+### Licensing
+
+PySide2 is available under both Open Source (LGPLv3/GPLv2) and commercial license.
+Using PyPi is the recommended installation source, because the content of the wheels is valid for both cases.
+For more information, refer to the [Qt Licensing page](https://www.qt.io/licensing/).
