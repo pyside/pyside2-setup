@@ -455,10 +455,12 @@ QPoint p(%CPPSELF.%FUNCTION_NAME(%1));
 // @snippet qmatrix-map-point
 
 // @snippet qmatrix4x4
-if (PySequence_Size(%PYARG_1) == 16) {
+// PYSIDE-795: All PySequences can be made iterable with PySequence_Fast.
+Shiboken::AutoDecRef seq(PySequence_Fast(%PYARG_1, "Can't turn into sequence"));
+if (PySequence_Size(seq) == 16) {
     float values[16];
     for (int i=0; i < 16; ++i) {
-        PyObject *pv = PySequence_Fast_GET_ITEM(%PYARG_1, i);
+        PyObject *pv = PySequence_Fast_GET_ITEM(seq.object(), i);
         values[i] = PyFloat_AsDouble(pv);
     }
 

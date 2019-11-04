@@ -671,7 +671,9 @@ public:
     }
 
     bool hasDefaultValueExpression() const
-    { return !m_originalExpression.isEmpty() || !m_expression.isEmpty(); }
+    { return !m_expression.isEmpty(); }
+    bool hasOriginalDefaultValueExpression() const
+    { return !m_originalExpression.isEmpty(); }
     bool hasUnmodifiedDefaultValueExpression() const
     { return !m_originalExpression.isEmpty() && m_originalExpression == m_expression; }
     bool hasModifiedDefaultValueExpression() const
@@ -1020,8 +1022,6 @@ public:
 
     AbstractMetaFunction *copy() const;
 
-    QString replacedDefaultExpression(const AbstractMetaClass *cls, int idx) const;
-    bool removedDefaultExpression(const AbstractMetaClass *cls, int idx) const;
     QString conversionRule(TypeSystem::Language language, int idx) const;
     QVector<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
     ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
@@ -1034,9 +1034,6 @@ public:
     bool isRemovedFromAllLanguages(const AbstractMetaClass *) const;
     bool isRemovedFrom(const AbstractMetaClass *, TypeSystem::Language language) const;
     bool argumentRemoved(int) const;
-
-    QString argumentReplaced(int key) const;
-
     /**
     *   Verifies if any modification to the function is an inject code.
     *   \return true if there is inject code modifications to the function.
@@ -1695,14 +1692,20 @@ public:
         return m_stream;
     }
 
-    void setToStringCapability(bool value)
+    void setToStringCapability(bool value, uint indirections = 0)
     {
         m_hasToStringCapability = value;
+        m_toStringCapabilityIndirections = indirections;
     }
 
     bool hasToStringCapability() const
     {
         return m_hasToStringCapability;
+    }
+
+    uint toStringCapabilityIndirections() const
+    {
+        return m_toStringCapabilityIndirections;
     }
 
     bool deleteInMainThread() const;
@@ -1757,6 +1760,7 @@ private:
 //     FunctionModelItem m_qDebugStreamFunction;
 
     bool m_stream = false;
+    uint m_toStringCapabilityIndirections = 0;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)

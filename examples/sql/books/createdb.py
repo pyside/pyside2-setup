@@ -39,8 +39,7 @@
 #############################################################################
 
 from PySide2.QtSql import QSqlDatabase, QSqlError, QSqlQuery
-from datetime import datetime
-
+from datetime import date
 
 def add_book(q, title, year, authorId, genreId, rating):
     q.addBindValue(title)
@@ -59,7 +58,7 @@ def add_genre(q, name):
 
 def add_author(q, name, birthdate):
     q.addBindValue(name)
-    q.addBindValue(birthdate)
+    q.addBindValue(str(birthdate))
     q.exec_()
     return q.lastInsertId()
 
@@ -68,7 +67,7 @@ BOOKS_SQL = """
                        genre integer, year integer, rating integer)
     """
 AUTHORS_SQL = """
-    create table authors(id integer primary key, name varchar, birthdate date)
+    create table authors(id integer primary key, name varchar, birthdate text)
     """
 GENRES_SQL = """
     create table genres(id integer primary key, name varchar)
@@ -106,9 +105,9 @@ def init_db():
     check(q.exec_, GENRES_SQL)
     check(q.prepare, INSERT_AUTHOR_SQL)
 
-    asimovId = add_author(q, "Isaac Asimov", datetime(1920, 2, 1))
-    greeneId = add_author(q, "Graham Greene", datetime(1904, 10, 2))
-    pratchettId = add_author(q, "Terry Pratchett", datetime(1948, 4, 28))
+    asimovId = add_author(q, "Isaac Asimov", date(1920, 2, 1))
+    greeneId = add_author(q, "Graham Greene", date(1904, 10, 2))
+    pratchettId = add_author(q, "Terry Pratchett", date(1948, 4, 28))
 
     check(q.prepare,INSERT_GENRE_SQL)
     sfiction = add_genre(q, "Science Fiction")

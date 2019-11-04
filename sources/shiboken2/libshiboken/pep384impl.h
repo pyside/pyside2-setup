@@ -110,7 +110,7 @@ typedef struct _typeobject {
     void *X23; // richcmpfunc tp_richcompare;
     Py_ssize_t tp_weaklistoffset;
     void *X25; // getiterfunc tp_iter;
-    void *X26; // iternextfunc tp_iternext;
+    iternextfunc tp_iternext;
     struct PyMethodDef *tp_methods;
     void *X28; // struct PyMemberDef *tp_members;
     struct PyGetSetDef *tp_getset;

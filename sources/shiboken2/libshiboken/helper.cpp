@@ -39,6 +39,7 @@
 
 #include "helper.h"
 #include "sbkstring.h"
+#include "sbkstaticstrings.h"
 #include <stdarg.h>
 
 #ifdef _WIN32
@@ -78,7 +79,7 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
     if (hasEmptyArgList) {
         // Try to get the script name
         PyObject *globals = PyEval_GetGlobals();
-        PyObject *appName = PyDict_GetItemString(globals, "__file__");
+        PyObject *appName = PyDict_GetItem(globals, Shiboken::PyMagicName::file());
         (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
     } else {
         for (int i = 0; i < numArgs; ++i) {

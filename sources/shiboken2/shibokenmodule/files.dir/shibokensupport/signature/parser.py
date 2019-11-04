@@ -106,7 +106,8 @@ def _parse_line(line):
         $
         """
     ret = SimpleNamespace(**re.match(line_re, line, re.VERBOSE).groupdict())
-    argstr = ret.arglist
+    # PYSIDE-1095: Handle arbitrary default expressions
+    argstr = ret.arglist.replace("->", ".deref.")
     arglist = _parse_arglist(argstr)
     args = []
     for arg in arglist:
@@ -116,7 +117,7 @@ def _parse_line(line):
                 print("KEYWORD", ret)
             name = name + "_"
         if "=" in ann:
-            ann, default = ann.split("=")
+            ann, default = ann.split("=", 1)
             tup = name, ann, default
         else:
             tup = name, ann
@@ -167,7 +168,7 @@ def try_to_guess(thing, valtype):
 
 def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
-        if valtype.startswith("PySide2."):
+        if valtype.startswith("PySide2.") or valtype.startswith("typing."):
             return None
         map = type_map[valtype]
         # typing.Any: '_SpecialForm' object has no attribute '__name__'
@@ -315,9 +316,9 @@ def calculate_props(line):
     for idx, tup in enumerate(arglist):
         name, ann = tup[:2]
         if ann == "...":
-            name = "*args"
-            # copy the fields back :()
-            ann = 'NULL' # maps to None
+            name = "*args" if name.startswith("arg_") else "*" + name
+            # copy the pathed fields back
+            ann = 'nullptr'     # maps to None
             tup = name, ann
             arglist[idx] = tup
         annotations[name] = _resolve_type(ann, line, 0, handle_argvar)

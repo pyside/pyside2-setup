@@ -317,7 +317,10 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         s << "#include <pyside.h>" << endl;
         s << "#include <destroylistener.h>" << endl;
         s << "#include <qapp_macro.h>" << endl;
-    }
+        s << endl;
+        s << "QT_WARNING_DISABLE_DEPRECATED" << endl;
+        s << endl;
+     }
 
     s << "#include <typeinfo>" << endl;
     if (usePySideExtensions() && metaClass->isQObject()) {
@@ -367,9 +370,6 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 
     if (metaClass->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated)
         s << "#Deprecated" << endl;
-
-    if (usePySideExtensions())
-        s << "\nQT_WARNING_DISABLE_DEPRECATED\n";
 
     // Use class base namespace
     {
@@ -1860,18 +1860,19 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
         // For custom classes, operations like __radd__ and __rmul__
         // will enter an infinite loop.
         if (rfunc->isBinaryOperator() && revOpName.contains(QLatin1String("shift"))) {
+            s << INDENT << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"" << revOpName << "\"));" << endl;
             s << INDENT << "if (!isReverse" << endl;
             {
                 Indentation indent(INDENT);
                 s << INDENT << "&& Shiboken::Object::checkType(" << PYTHON_ARG << ")" << endl;
                 s << INDENT << "&& !PyObject_TypeCheck(" << PYTHON_ARG << ", self->ob_type)" << endl;
-                s << INDENT << "&& PyObject_HasAttrString(" << PYTHON_ARG << ", const_cast<char *>(\"" << revOpName << "\"))) {" << endl;
+                s << INDENT << "&& PyObject_HasAttr(" << PYTHON_ARG << ", attrName)) {" << endl;
 
                 // This PyObject_CallMethod call will emit lots of warnings like
                 // "deprecated conversion from string constant to char *" during compilation
                 // due to the method name argument being declared as "char *" instead of "const char *"
                 // issue 6952 http://bugs.python.org/issue6952
-                s << INDENT << "PyObject *revOpMethod = PyObject_GetAttrString(" << PYTHON_ARG << ", const_cast<char *>(\"" << revOpName << "\"));" << endl;
+                s << INDENT << "PyObject *revOpMethod = PyObject_GetAttr(" << PYTHON_ARG << ", attrName);" << endl;
                 s << INDENT << "if (revOpMethod && PyCallable_Check(revOpMethod)) {" << endl;
                 {
                     Indentation indent(INDENT);
@@ -2154,6 +2155,8 @@ void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argTyp
     QString customCheck;
     if (!customType.isEmpty()) {
         AbstractMetaType *metaType;
+        // PYSIDE-795: Note: XML-Overrides are handled in this shibokengenerator function!
+        // This enables iterables for QMatrix4x4 for instance.
         customCheck = guessCPythonCheckFunction(customType, &metaType);
         if (metaType)
             argType = metaType;
@@ -2939,6 +2942,9 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s,
             typeCheck = QLatin1String("PyType_Check(%in)");
         else if (pyTypeName == QLatin1String("PyObject"))
             typeCheck = QLatin1String("PyObject_TypeCheck(%in, &PyBaseObject_Type)");
+        // PYSIDE-795: We abuse PySequence for iterables
+        else if (pyTypeName == QLatin1String("PySequence"))
+            typeCheck = QLatin1String("Shiboken::String::checkIterable(%in)");
         else if (pyTypeName.startsWith(QLatin1String("Py")))
             typeCheck = pyTypeName + QLatin1String("_Check(%in)");
     }
@@ -3039,29 +3045,31 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
             QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
             s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg->name() << "\");" << endl;
             s << INDENT << "if (PyDict_Contains(kwds, keyName)) {" << endl;
-            s << INDENT << "value = PyDict_GetItemString(kwds, \"" << arg->name() << "\");" << endl;
-            s << INDENT << "if (value && " << pyArgName << ") {" << endl;
             {
                 Indentation indent(INDENT);
-                s << INDENT << pyErrString.arg(arg->name()) << endl;
-                s << INDENT << returnStatement(m_currentErrorCode) << endl;
-            }
-            s << INDENT << INDENT << "} else if (value) {" << endl;
-            {
-                Indentation indent(INDENT);
-                s << INDENT << pyArgName << " = value;" << endl;
-                s << INDENT << "if (!";
-                writeTypeCheck(s, arg->type(), pyArgName, isNumber(arg->type()->typeEntry()), func->typeReplaced(arg->argumentIndex() + 1));
-                s << ')' << endl;
+                s << INDENT << "value = PyDict_GetItem(kwds, keyName);" << endl;
+                s << INDENT << "if (value && " << pyArgName << ") {" << endl;
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;" << endl;
+                    s << INDENT << pyErrString.arg(arg->name()) << endl;
+                    s << INDENT << returnStatement(m_currentErrorCode) << endl;
                 }
+                s << INDENT << '}' << endl;
+                s << INDENT << "if (value) {" << endl;
+                {
+                    Indentation indent(INDENT);
+                    s << INDENT << pyArgName << " = value;" << endl;
+                    s << INDENT << "if (!";
+                    writeTypeCheck(s, arg->type(), pyArgName, isNumber(arg->type()->typeEntry()), func->typeReplaced(arg->argumentIndex() + 1));
+                    s << ')' << endl;
+                    {
+                        Indentation indent(INDENT);
+                        s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;" << endl;
+                    }
+                }
+                s << INDENT << '}' << endl;
             }
             s << INDENT << '}' << endl;
-            if (arg != args.constLast())
-                s << INDENT;
-            s << "}" << endl;
         }
     }
     s << INDENT << '}' << endl;
@@ -3933,9 +3941,10 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
     if (m_tpFuncs.value(QLatin1String("__repr__")).isEmpty()
-        && !metaClass->isQObject()
         && metaClass->hasToStringCapability()) {
-        m_tpFuncs[QLatin1String("__repr__")] = writeReprFunction(s, classContext);
+        m_tpFuncs[QLatin1String("__repr__")] = writeReprFunction(s,
+                classContext,
+                metaClass->toStringCapabilityIndirections());
     }
 
     // class or some ancestor has multiple inheritance
@@ -4608,6 +4617,15 @@ void CppGenerator::writeEnumsInitialization(QTextStream &s, AbstractMetaEnumList
     }
 }
 
+static QString mangleName(QString name)
+{
+    if (   name == QLatin1String("None")
+        || name == QLatin1String("False")
+        || name == QLatin1String("True"))
+        name += QLatin1Char('_');
+    return name;
+}
+
 void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnum *cppEnum)
 {
     const AbstractMetaClass *enclosingClass = getProperEnclosingClassForEnum(cppEnum);
@@ -4687,7 +4705,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
                     Indentation indent(INDENT);
                     s << INDENT << "PyObject *anonEnumItem = PyInt_FromLong(" << enumValueText << ");" << endl;
                     s << INDENT << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(reinterpret_cast<SbkObjectType *>(" << enclosingObjectVariable
-                        << "))->tp_dict, \"" << enumValue->name() << "\", anonEnumItem) < 0)" << endl;
+                        << "))->tp_dict, \"" << mangleName(enumValue->name()) << "\", anonEnumItem) < 0)" << endl;
                     {
                         Indentation indent(INDENT);
                         s << INDENT << returnStatement(m_currentErrorCode) << endl;
@@ -4696,7 +4714,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
                 }
                 s << INDENT << '}' << endl;
             } else {
-                s << INDENT << "if (PyModule_AddIntConstant(module, \"" << enumValue->name() << "\", ";
+                s << INDENT << "if (PyModule_AddIntConstant(module, \"" << mangleName(enumValue->name()) << "\", ";
                 s << enumValueText << ") < 0)" << endl;
                 {
                     Indentation indent(INDENT);
@@ -4709,7 +4727,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem" : "createGlobalEnumItem");
             s << '(' << enumVarTypeObj << ',' << endl;
             Indentation indent(INDENT);
-            s << INDENT << enclosingObjectVariable << ", \"" << enumValue->name() << "\", ";
+            s << INDENT << enclosingObjectVariable << ", \"" << mangleName(enumValue->name()) << "\", ";
             s << enumValueText << "))" << endl;
             s << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
@@ -4718,7 +4736,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             s << INDENT << "if (!Shiboken::Enum::createScopedEnumItem("
                 << enumVarTypeObj << ',' << endl;
             Indentation indent(INDENT);
-            s << INDENT << enumVarTypeObj<< ", \"" << enumValue->name() << "\", "
+            s << INDENT << enumVarTypeObj<< ", \"" << mangleName(enumValue->name()) << "\", "
                << enumValueText << "))" << endl
                << INDENT << returnStatement(m_currentErrorCode) << endl;
         }
@@ -5541,10 +5559,11 @@ bool CppGenerator::finishGeneration()
         {
             Indentation indentation(INDENT);
             s << INDENT << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);" << endl;
-            s << INDENT << "if (pyType && PyObject_HasAttrString(pyType, \"staticMetaObject\"))"<< endl;
+            s << INDENT << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"staticMetaObject\"));" << endl;
+            s << INDENT << "if (pyType && PyObject_HasAttr(pyType, attrName))"<< endl;
             {
                 Indentation indentation(INDENT);
-                s << INDENT << "PyObject_SetAttrString(pyType, \"staticMetaObject\", Py_None);" << endl;
+                s << INDENT << "PyObject_SetAttr(pyType, attrName, Py_None);" << endl;
             }
         }
         s << INDENT << "}" << endl;
@@ -5981,7 +6000,9 @@ void CppGenerator::writeIndexError(QTextStream &s, const QString &errorMsg)
     s << INDENT << '}' << endl;
 }
 
-QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &context)
+QString CppGenerator::writeReprFunction(QTextStream &s,
+                                        GeneratorContext &context,
+                                        uint indirections)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     QString funcName = cpythonBaseName(metaClass) + QLatin1String("__repr__");
@@ -5994,7 +6015,7 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
     s << INDENT << "buffer.open(QBuffer::ReadWrite);" << endl;
     s << INDENT << "QDebug dbg(&buffer);" << endl;
     s << INDENT << "dbg << ";
-    if (metaClass->typeEntry()->isValue())
+    if (metaClass->typeEntry()->isValue() || indirections == 0)
          s << '*';
     s << CPP_SELF_VAR << ';' << endl;
     s << INDENT << "buffer.close();" << endl;
@@ -6005,7 +6026,8 @@ QString CppGenerator::writeReprFunction(QTextStream &s, GeneratorContext &contex
         Indentation indent(INDENT);
         s << INDENT << "str.replace(0, idx, Py_TYPE(self)->tp_name);" << endl;
     }
-    s << INDENT << "PyObject *mod = PyDict_GetItemString(Py_TYPE(self)->tp_dict, \"__module__\");" << endl;
+    s << INDENT << "str = str.trimmed();" << endl;
+    s << INDENT << "PyObject *mod = PyDict_GetItem(Py_TYPE(self)->tp_dict, Shiboken::PyMagicName::module());" << endl;
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
     // is always prepended to the type name. Therefore the strchr check:
     s << INDENT << "if (mod && !strchr(str, '.'))" << endl;

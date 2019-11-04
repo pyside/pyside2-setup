@@ -66,12 +66,13 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTextStream>
 
-static const char defaultScript[] =
-    "print(\"Hello, world\")\n"
-    "mainWindow.testFunction1()\n";
+static const char defaultScript[] = R"(
+print("Hello, world")
+mainWindow.testFunction1()
+)";
 
 MainWindow::MainWindow()
-    : m_scriptEdit(new QPlainTextEdit(QLatin1String(defaultScript), this))
+    : m_scriptEdit(new QPlainTextEdit(QString::fromLatin1(defaultScript).trimmed(), this))
 {
     setWindowTitle(tr("Scriptable Application"));
 

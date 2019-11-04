@@ -1,6 +1,5 @@
-=======================
 |project| & PyInstaller
-=======================
+#######################
 
 `PyInstaller <https://www.pyinstaller.org/>`_ lets you freeze your python
 application into a stand-alone executable.
@@ -108,7 +107,7 @@ execute the program::
     ./MyApplication
 
 .. note:: The directory inside `dist/` and the executable will have
-the same name.
+          the same name.
 
 If you prefer to have everything bundled into one executable,
 without the shared libraries next to it, you can use the option
@@ -143,9 +142,9 @@ version.
 Problem with numpy in Python 2.7.16
 -----------------------------------
 
-A recent problem of PyInstaller is the appearance of Python 2.7.16.
-This Python version creates a problem that is known from Python 3
-as a `Tcl/Tk` problem. This does rarely show up in Python 3 because
+A recent problem of PyInstaller is the Python 2 release, that is
+v2.7.16. This Python version creates a problem that is known from
+Python 3 as a `Tcl/Tk` problem. It rarely shows up in Python 3 as
 `Tcl/Tk` is seldom used with `PyInstaller.
 
 On Python 2.7.16, this problem is very much visible, as many are
@@ -160,16 +159,16 @@ section of the spec-file::
 Safety Instructions
 -------------------
 
-o When using `PyInstaller` with `virtualenv`, make sure that there is no system
+- When using `PyInstaller` with `virtualenv`, make sure that there is no system
   installation of PySide2 or shiboken2.
 
-o Before compiling, use `pip -uninstall pyside2 shiboken2 -y` multiple times, until
+- Before compiling, use `pip -uninstall pyside2 shiboken2 -y` multiple times, until
   none of the programs are found anymore.
 
-o Pip is usually a good tool. But to be 100 % sure, you should directly remove
+- Pip is usually a good tool. But to be 100 % sure, you should directly remove
   the PySide2 and shiboken2 folders from site-packages.
 
-o Be sure to use the right version of pip. The safest way to really run the right
+- Be sure to use the right version of pip. The safest way to really run the right
   pip, is to use the Python that you mean: Instead of the pip command, better use::
 
     <path/to/your/>python -m pip

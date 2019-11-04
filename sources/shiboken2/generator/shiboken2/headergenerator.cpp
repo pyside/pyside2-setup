@@ -454,6 +454,11 @@ bool HeaderGenerator::finishGeneration()
     // TODO-CONVERTER ------------------------------------------------------------------------------
 
     macrosStream << "// Macros for type check" << endl;
+
+    if (usePySideExtensions()) {
+        typeFunctions << "QT_WARNING_PUSH" << endl;
+        typeFunctions << "QT_WARNING_DISABLE_DEPRECATED" << endl;
+    }
     for (const AbstractMetaEnum *cppEnum : qAsConst(globalEnums)) {
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
@@ -489,6 +494,8 @@ bool HeaderGenerator::finishGeneration()
         includes << classType->include();
         writeSbkTypeFunction(typeFunctions, metaType);
     }
+    if (usePySideExtensions())
+        typeFunctions << "QT_WARNING_POP" << endl;
 
     QString moduleHeaderFileName(outputDirectory()
                                  + QDir::separator() + subDirectoryForPackage(packageName())

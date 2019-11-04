@@ -5,7 +5,9 @@ As with any other programming framework,
 you start with the traditional "Hello World" program.
 
 Here is a simple example of a Hello World application in PySide2:
-::
+
+.. code-block:: python
+
     import sys
     from PySide2.QtWidgets import QApplication, QLabel
 
@@ -22,13 +24,17 @@ After the imports, you create a `QApplication` instance. As Qt can
 receive arguments from command line, you may pass any argument to
 the QApplication object. Usually, you don't need to pass any
 arguments so you can leave it as is, or use the following approach:
-::
+
+.. code-block:: python
+
     app = QApplication([])
 
 After the creation of the application object, we have created a
 `QLabel` object. A `QLabel` is a widget that can present text
 (simple or rich, like html), and images:
-::
+
+.. code-block:: python
+
     # This HTML approach will be valid too!
     label = QLabel("<font color=red size=40>Hello World!</font>")
 

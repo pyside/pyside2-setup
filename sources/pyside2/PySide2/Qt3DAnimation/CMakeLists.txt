@@ -4,6 +4,7 @@ set(Qt3DAnimation_SRC
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractanimation_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractanimationclip_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractchannelmapping_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractclipanimator_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractclipblendnode_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qadditiveclipblend_wrapper.cpp

@@ -55,15 +55,55 @@ class TestQSettings(unittest.TestCase):
 
     def testDefaultValueConversion(self):
         settings = QSettings('foo.ini', QSettings.IniFormat)
-        r = settings.value('lala', 22)
+        settings.setValue('zero_value', 0)
+        settings.setValue('empty_list', [])
+        settings.setValue('bool1', False)
+        settings.setValue('bool2', True)
+        del settings
+
+        # Loading values already set
+        settings = QSettings('foo.ini', QSettings.IniFormat)
+
+        # Getting value that doesn't exist
+        r = settings.value("variable")
+        self.assertEqual(type(r), type(None))
+
+        # Handling zero value
+        r = settings.value('zero_value')
         if py3k.IS_PY3K:
             self.assertEqual(type(r), int)
         else:
             self.assertEqual(type(r), long)
 
-        r = settings.value('lala', 22, type=str)
-        self.assertEqual(type(r), str)
+        r = settings.value('zero_value', type=int)
+        self.assertEqual(type(r), int)
 
+        # Empty list
+        r = settings.value('empty_list')
+        self.assertTrue(len(r) == 0)
+        self.assertEqual(type(r), list)
+
+        r = settings.value('empty_list', type=list)
+        self.assertTrue(len(r) == 0)
+        self.assertEqual(type(r), list)
+
+        # Booleans
+        r = settings.value('bool1')
+        self.assertEqual(type(r), bool)
+
+        r = settings.value('bool2')
+        self.assertEqual(type(r), bool)
+
+        r = settings.value('bool1', type=bool)
+        self.assertEqual(type(r), bool)
+
+        r = settings.value('bool2', type=int)
+        self.assertEqual(type(r), int)
+
+        r = settings.value('bool2', type=bool)
+        self.assertEqual(type(r), bool)
+
+        # Not set variable, but with default value
         r = settings.value('lala', 22, type=bytes)
         self.assertEqual(type(r), bytes)
 

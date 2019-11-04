@@ -1,0 +1,4 @@
+{
+    "files": ["easing.qrc", "ui_form.py", "easing.py", "easing_rc.py",
+              "form.ui"]
+}

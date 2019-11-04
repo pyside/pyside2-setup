@@ -14,6 +14,7 @@ Examples and demos
    :maxdepth: 1
 
    examples/tabbedbrowser.rst
+   ../pyside-examples/all-pyside-examples.rst
 
 Tutorials
 ==========
@@ -30,3 +31,4 @@ Tutorials
     expenses/expenses.rst
     qmlapp/qmlapplication.rst
     qmlintegration/qmlintegration.rst
+    portingguide/index.rst

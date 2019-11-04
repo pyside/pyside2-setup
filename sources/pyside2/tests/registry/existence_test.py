@@ -70,30 +70,27 @@ import os
 import sys
 import unittest
 from textwrap import dedent
-from init_platform import (enum_all, generate_all, is_ci,
-   get_effective_refpath, get_refpath, qt_version)
-from util import isolate_warnings, check_warnings, suppress_warnings, warn
+from init_platform import enum_all, generate_all
+from util import (isolate_warnings, check_warnings, suppress_warnings, warn,
+                  is_ci, qt_version, get_script_dir, get_effective_refpath,
+                  get_refpath, import_refmodule)
 from PySide2 import *
 
 refPath = get_refpath()
 effectiveRefPath = get_effective_refpath()
-effectiveRefPathRoot = os.path.splitext(effectiveRefPath)[0]
-pyc = effectiveRefPathRoot + ".pyc"
+pyc = os.path.splitext(effectiveRefPath)[0] + ".pyc"
 if os.path.exists(pyc) and not os.path.exists(effectiveRefPath):
     # on Python2 the pyc file would be imported
     os.unlink(pyc)
-module = os.path.basename(effectiveRefPathRoot)
 
 if refPath != effectiveRefPath:
     print("*** Falling back to ", effectiveRefPath, " since expected ",
         refPath, " does not exist")
 
-home_dir = effectiveRefPath
-for _ in "abcde":
-    home_dir = os.path.dirname(home_dir)
-shortpath = os.path.relpath(effectiveRefPath, home_dir)
+script_dir = get_script_dir()
+shortpath = os.path.relpath(effectiveRefPath, script_dir)
 try:
-    exec("import {} as sig_exists".format(module))
+    sig_exists = import_refmodule()
     print("found:", shortpath)
     have_refmodule = True
 except ImportError:
@@ -103,8 +100,10 @@ except SyntaxError:
     print("*** not a python file, removed:", shortpath)
     os.unlink(effectiveRefPath)
     have_refmodule = False
-if have_refmodule and not hasattr(sig_exists, "dict"):
-    print("*** wrong module without 'dict', removed:", shortpath)
+dict_name = "sig_dict"
+if have_refmodule and not hasattr(sig_exists, dict_name):
+    print("*** wrong module without '{dict_name}', removed:"
+          .format(**locals()), shortpath)
     os.unlink(effectiveRefPath)
     have_refmodule = False
 
@@ -129,12 +128,12 @@ class TestSignaturesExists(unittest.TestCase):
                     "Actual {len_act} {actual} vs. expected {len_exp} {expect}')"
                     .format(**locals()))
 
-        for key, value in sig_exists.dict.items():
+        for key, value in sig_exists.sig_dict.items():
             name = key.rsplit(".", 1)[-1]
             if name in ("next", "__next__"): # ignore problematic cases
                 continue
             if key not in found_sigs:
-                warn("missing key: '{}'".format(key))
+                warn("missing key: '{}'".format(key), stacklevel=3)
             else:
                 found_val = found_sigs[key]
                 if type(value) is list and (
@@ -142,7 +141,7 @@ class TestSignaturesExists(unittest.TestCase):
                         len(found_val) < len(value)):
                     # We check that nothing got lost. But it is ok when an older
                     # registry file does not know all variants, yet!
-                    warn(multi_signature_msg(key, found_val, value))
+                    warn(multi_signature_msg(key, found_val, value), stacklevel=3)
 
     def test_signatures(self):
         found_sigs = enum_all()
@@ -206,7 +205,7 @@ class TestSignaturesExists(unittest.TestCase):
             self.assertFalse(check_warnings(), "you ignore when arity got bigger")
 
 
-tested_versions = (5, 6), (5, 9), (5, 11), (5, 12)
+tested_versions = (5, 6), (5, 9), (5, 11), (5, 12), (5, 14)
 
 if not have_refmodule and is_ci and qt_version()[:2] in tested_versions:
     class TestFor_CI_Init(unittest.TestCase):

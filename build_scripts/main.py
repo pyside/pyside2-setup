@@ -705,7 +705,7 @@ class PysideBuild(_build):
             log.info("Creating install folder {}...".format(self.install_dir))
             os.makedirs(self.install_dir)
 
-        if not (OPTION_ONLYPACKAGE
+        if (not OPTION_ONLYPACKAGE
                 and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
             # Build extensions
             for ext in config.get_buildable_extensions():
@@ -1056,7 +1056,7 @@ class PysideBuild(_build):
                     OPTION_MACOS_SYSROOT))
             else:
                 latest_sdk_path = run_process_output(['xcrun',
-                    '--show-sdk-path'])
+                    '--sdk', 'macosx', '--show-sdk-path'])
                 if latest_sdk_path:
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(

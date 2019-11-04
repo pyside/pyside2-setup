@@ -40,6 +40,7 @@
 #include <sbkpython.h>
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "pysidestaticstrings.h"
 #include "signalmanager.h"
 
 #include <shiboken.h>
@@ -47,12 +48,11 @@
 #include <QtCore/QObject>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaObject>
+#include <signature.h>
 
 #include <algorithm>
 #include <utility>
 
-#define SIGNAL_CLASS_NAME "Signal"
-#define SIGNAL_INSTANCE_NAME "SignalInstance"
 #define QT_SIGNAL_SENTINEL '2'
 
 namespace PySide {
@@ -101,35 +101,35 @@ static PyObject *signalCall(PyObject *, PyObject *, PyObject *);
 static PyObject *metaSignalCheck(PyObject *, PyObject *);
 
 
-static PyMethodDef Signal_methods[] = {
-    {"__instancecheck__", (PyCFunction)metaSignalCheck, METH_O, NULL},
+static PyMethodDef MetaSignal_methods[] = {
+    {"__instancecheck__", (PyCFunction)metaSignalCheck, METH_O|METH_STATIC, NULL},
     {0, 0, 0, 0}
 };
 
-static PyType_Slot PySideSignalMetaType_slots[] = {
-    {Py_tp_methods, (void *)Signal_methods},
+static PyType_Slot PySideMetaSignalType_slots[] = {
+    {Py_tp_methods, (void *)MetaSignal_methods},
     {Py_tp_base, (void *)&PyType_Type},
     {Py_tp_free, (void *)PyObject_GC_Del},
     {Py_tp_dealloc, (void *)object_dealloc},
     {0, 0}
 };
-static PyType_Spec PySideSignalMetaType_spec = {
+static PyType_Spec PySideMetaSignalType_spec = {
     "PySide2.QtCore.MetaSignal",
     0,
     // sizeof(PyHeapTypeObject) is filled in by PyType_FromSpecWithBases
     // which calls PyType_Ready which calls inherit_special.
     0,
     Py_TPFLAGS_DEFAULT,
-    PySideSignalMetaType_slots,
+    PySideMetaSignalType_slots,
 };
 
 
-PyTypeObject *PySideSignalMetaTypeF(void)
+PyTypeObject *PySideMetaSignalTypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
         PyObject *bases = Py_BuildValue("(O)", &PyType_Type);
-        type = (PyTypeObject *)PyType_FromSpecWithBases(&PySideSignalMetaType_spec, bases);
+        type = (PyTypeObject *)PyType_FromSpecWithBases(&PySideMetaSignalType_spec, bases);
         Py_XDECREF(bases);
     }
     return type;
@@ -146,7 +146,7 @@ static PyType_Slot PySideSignalType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideSignalType_spec = {
-    "PySide2.QtCore." SIGNAL_CLASS_NAME,
+    "PySide2.QtCore.Signal",
     sizeof(PySideSignal),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -160,7 +160,7 @@ PyTypeObject *PySideSignalTypeF(void)
     if (!type) {
         type = (PyTypeObject *)PyType_FromSpec(&PySideSignalType_spec);
         PyTypeObject *hold = Py_TYPE(type);
-        Py_TYPE(type) = PySideSignalMetaTypeF();
+        Py_TYPE(type) = PySideMetaSignalTypeF();
         Py_INCREF(Py_TYPE(type));
         Py_DECREF(hold);
     }
@@ -185,7 +185,7 @@ static PyType_Slot PySideSignalInstanceType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideSignalInstanceType_spec = {
-    "PySide2.QtCore." SIGNAL_INSTANCE_NAME,
+    "PySide2.QtCore.SignalInstance",
     sizeof(PySideSignalInstance),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -211,8 +211,8 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         emptyTuple = PyTuple_New(0);
 
     if (!PyArg_ParseTupleAndKeywords(emptyTuple, kwds,
-        "|sO:QtCore." SIGNAL_CLASS_NAME, const_cast<char **>(kwlist), &argName, &argArguments))
-        return 0;
+        "|sO:QtCore.Signal", const_cast<char **>(kwlist), &argName, &argArguments))
+        return -1;
 
     bool tupledArgs = false;
     PySideSignal *data = reinterpret_cast<PySideSignal *>(self);
@@ -257,7 +257,7 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                     PySide::Signal::SignalSignature(sig));
     }
 
-    return 1;
+    return 0;
 }
 
 void signalFree(void *self)
@@ -317,7 +317,7 @@ PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
     static const char *kwlist[] = {"slot", "type", nullptr};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-        "O|O:" SIGNAL_INSTANCE_NAME, const_cast<char **>(kwlist), &slot, &type))
+        "O|O:SignalInstance", const_cast<char **>(kwlist), &slot, &type))
         return 0;
 
     PySideSignalInstance *source = reinterpret_cast<PySideSignalInstance *>(self);
@@ -413,7 +413,8 @@ PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "connect"));
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+                                                       PySide::PyName::qtConnect()));
         if (pyMethod.isNull()) { // PYSIDE-79: check if pyMethod exists.
             PyErr_SetString(PyExc_RuntimeError, "method 'connect' vanished!");
             return 0;
@@ -466,7 +467,8 @@ PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
     for (Py_ssize_t i = 0, max = PyTuple_Size(args); i < max; i++)
         PyList_Append(pyArgs, PyTuple_GetItem(args, i));
 
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "emit"));
+    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+                                                   PySide::PyName::qtEmit()));
 
     Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
     return PyObject_CallObject(pyMethod, tupleArgs);
@@ -531,7 +533,8 @@ PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
 
     if (match) {
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
-        Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source->d->source, "disconnect"));
+        Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
+                                                       PySide::PyName::qtDisconnect()));
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
         if (!result || result == Py_True)
             return result;
@@ -585,9 +588,9 @@ PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw)
     return PyCFunction_Call(homonymousMethod, args, kw);
 }
 
-static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *args)
+static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *arg)
 {
-    if (PyType_IsSubtype(Py_TYPE(args), PySideSignalInstanceTypeF()))
+    if (PyType_IsSubtype(Py_TYPE(arg), PySideSignalInstanceTypeF()))
         Py_RETURN_TRUE;
     else
         Py_RETURN_FALSE;
@@ -598,21 +601,36 @@ static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *args)
 namespace PySide {
 namespace Signal {
 
+static const char *MetaSignal_SignatureStrings[] = {
+    "PySide2.QtCore.MetaSignal.__instancecheck__(object:object)->bool",
+    nullptr}; // Sentinel
+
+static const char *Signal_SignatureStrings[] = {
+    "PySide2.QtCore.Signal(*types:type,name:str=nullptr,arguments:str=nullptr)",
+    nullptr}; // Sentinel
+
+static const char *SignalInstance_SignatureStrings[] = {
+    "PySide2.QtCore.SignalInstance.connect(slot:object,type:type=nullptr)",
+    "PySide2.QtCore.SignalInstance.disconnect(slot:object=nullptr)",
+    "PySide2.QtCore.SignalInstance.emit(*args:typing.Any)",
+    nullptr}; // Sentinel
+
 void init(PyObject *module)
 {
-    if (PyType_Ready(PySideSignalMetaTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySideMetaSignalTypeF(), MetaSignal_SignatureStrings) < 0)
         return;
-
-    if (PyType_Ready(PySideSignalTypeF()) < 0)
-        return;
-
     Py_INCREF(PySideSignalTypeF());
-    PyModule_AddObject(module, SIGNAL_CLASS_NAME, reinterpret_cast<PyObject *>(PySideSignalTypeF()));
+    PyModule_AddObject(module, "MetaSignal", reinterpret_cast<PyObject *>(PySideMetaSignalTypeF()));
 
-    if (PyType_Ready(PySideSignalInstanceTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySideSignalTypeF(), Signal_SignatureStrings) < 0)
         return;
+    Py_INCREF(PySideSignalTypeF());
+    PyModule_AddObject(module, "Signal", reinterpret_cast<PyObject *>(PySideSignalTypeF()));
 
+    if (SbkSpecial_Type_Ready(module, PySideSignalInstanceTypeF(), SignalInstance_SignatureStrings) < 0)
+        return;
     Py_INCREF(PySideSignalInstanceTypeF());
+    PyModule_AddObject(module, "SignalInstance", reinterpret_cast<PyObject *>(PySideSignalInstanceTypeF()));
 }
 
 bool checkType(PyObject *pyObj)
@@ -742,7 +760,8 @@ void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySideSignal
 
 bool connect(PyObject *source, const char *signal, PyObject *callback)
 {
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(source, "connect"));
+    Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source,
+                                                   PySide::PyName::qtConnect()));
     if (pyMethod.isNull())
         return false;
 
