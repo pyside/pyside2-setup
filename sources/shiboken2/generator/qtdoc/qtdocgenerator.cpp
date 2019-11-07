@@ -2193,11 +2193,19 @@ void QtDocGenerator::writeModuleDocumentation()
 
         /* Avoid showing "Detailed Description for *every* class in toc tree */
         Indentation indentation(INDENT);
+        // Store the it.key() in a QString so that it can be stripped off unwanted
+        // information when neeeded. For example, the RST files in the extras directory
+        // doesn't include the PySide# prefix in their names.
+        const QString moduleName = it.key();
+        const int lastIndex = moduleName.lastIndexOf(QLatin1Char('.'));
 
         // Search for extra-sections
         if (!m_extraSectionDir.isEmpty()) {
             QDir extraSectionDir(m_extraSectionDir);
-            QStringList fileList = extraSectionDir.entryList(QStringList() << (it.key() + QLatin1String("?*.rst")), QDir::Files);
+            if (!extraSectionDir.exists())
+                qCWarning(lcShiboken) << m_extraSectionDir << "doesn't exist";
+
+            QStringList fileList = extraSectionDir.entryList(QStringList() << (moduleName.mid(lastIndex + 1) + QLatin1String("?*.rst")), QDir::Files);
             QStringList::iterator it2 = fileList.begin();
             for (; it2 != fileList.end(); ++it2) {
                 QString origFileName(*it2);
@@ -2231,7 +2239,7 @@ void QtDocGenerator::writeModuleDocumentation()
         s << "--------------------" << endl << endl;
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
-        QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + it.key() + QLatin1String(".rst"));
+        QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + moduleName.mid(lastIndex + 1) + QLatin1String(".rst"));
         if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
             s << moduleDoc.readAll();
             moduleDoc.close();
