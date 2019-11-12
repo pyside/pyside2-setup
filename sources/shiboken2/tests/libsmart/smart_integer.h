@@ -26,12 +26,27 @@
 **
 ****************************************************************************/
 
-#ifndef SMART_H
-#define SMART_H
+#ifndef SMART_INTEGER_H
+#define SMART_INTEGER_H
 
-#include "smart_sharedptr.h"
-#include "smart_integer.h"
-#include "smart_obj.h"
-#include "smart_registry.h"
+#include "libsmartmacros.h"
 
-#endif // SMART_H
+class LIB_SMART_API Integer {
+public:
+    Integer();
+    Integer(const Integer &other);
+    Integer &operator=(const Integer &other);
+    ~Integer();
+    void printInteger();
+    int m_int;
+};
+
+namespace Smart {
+class LIB_SMART_API Integer2 : public Integer {
+public:
+    Integer2();
+    Integer2(const Integer2 &other);
+};
+} // namespace Smart
+
+#endif // SMART_INTEGER_H

@@ -26,12 +26,35 @@
 **
 ****************************************************************************/
 
-#ifndef SMART_H
-#define SMART_H
+#ifndef SMART_OBJ_H
+#define SMART_OBJ_H
 
+#include "libsmartmacros.h"
 #include "smart_sharedptr.h"
-#include "smart_integer.h"
-#include "smart_obj.h"
-#include "smart_registry.h"
 
-#endif // SMART_H
+#include <vector>
+
+class Integer;
+class Obj;
+namespace Smart { class Integer2; }
+
+// Couldn't name it Object because it caused some namespace clashes.
+class LIB_SMART_API Obj {
+public:
+    Obj();
+    virtual ~Obj();
+
+    void printObj();
+    Integer takeInteger(Integer val);
+    SharedPtr<Obj> giveSharedPtrToObj();
+    std::vector<SharedPtr<Obj> > giveSharedPtrToObjList(int size);
+    SharedPtr<Integer> giveSharedPtrToInteger();
+    SharedPtr<Smart::Integer2> giveSharedPtrToInteger2();
+    int takeSharedPtrToObj(SharedPtr<Obj> pObj);
+    int takeSharedPtrToInteger(SharedPtr<Integer> pInt);
+
+    int m_integer;
+    Integer *m_internalInteger;
+};
+
+#endif // SMART_OBJ_H
