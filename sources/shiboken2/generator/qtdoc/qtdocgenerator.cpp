@@ -438,15 +438,15 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
     }
 
     if (metaClass) {
-        QList<const AbstractMetaFunction*> funcList;
+        AbstractMetaFunctionList funcList;
         const AbstractMetaFunctionList &methods = metaClass->queryFunctionsByName(methodName);
-        for (const AbstractMetaFunction *func : methods) {
+        for (AbstractMetaFunction *func : methods) {
             if (methodName == func->name())
                 funcList.append(func);
         }
 
         const AbstractMetaClass *implementingClass = nullptr;
-        for (const AbstractMetaFunction *func : qAsConst(funcList)) {
+        for (AbstractMetaFunction *func : qAsConst(funcList)) {
             implementingClass = func->implementingClass();
             if (implementingClass->name() == currentClass)
                 break;
