@@ -246,7 +246,14 @@ NotifyModuleForQApp(PyObject *module, void *qApp)
      * qApp_contents variable and assigns the instance, instead of vice-versa.
      */
     PyObject *coreDict = qApp_moduledicts[1];
-    if (qApp != nullptr && coreDict != nullptr) {
+    if (coreDict == nullptr) {
+        // PYSIDE-1135: Make sure that at least QtCore gets imported.
+        // That problem exists when a derived instance is created in C++.
+        qApp_moduledicts[1] = Py_None; // anything != nullptr during import
+        coreDict = PyImport_ImportModule("PySide2.QtCore");
+        qApp_moduledicts[1] = coreDict;
+    }
+    if (qApp != nullptr && coreDict != nullptr && coreDict != Py_None) {
         PyObject *coreApp = PyDict_GetItemString(coreDict, "QCoreApplication");
         if (coreApp != nullptr) {
             qApp_content = PyObject_CallMethod(coreApp, "instance", "");
