@@ -149,6 +149,7 @@ def git_command(versions: List[str], pattern: str):
     command += " {}..{}".format(versions[0], versions[1])
     command += " | git cat-file --batch"
     command += " | grep -o -E \"^[0-9a-f]{40}\""
+    task_number_re = re.compile(r'^.*-(\d+)\s*$')
     print("{}: {}".format(git_command.__name__, command), file=sys.stderr)
     out_sha1, err = Popen(command, stdout=PIPE, shell=True).communicate()
     if err:
@@ -168,20 +169,25 @@ def git_command(versions: List[str], pattern: str):
 
         if not task:
             continue
+        task_number = -1
+        task_number_match = task_number_re.match(task)
+        if task_number_match:
+            task_number = int(task_number_match.group(1))
+        entry = {"title": title, "task": task, "task-number": task_number}
         if "shiboken" in title:
             if sha not in shiboken2_commits:
-                shiboken2_commits[sha] = {"title": title, "task": task}
+                shiboken2_commits[sha] = entry
         else:
             if sha not in pyside2_commits:
-                pyside2_commits[sha] = {"title": title, "task": task}
+                pyside2_commits[sha] = entry
 
 
 def create_fixes_log(versions: List[str]) -> None:
-    git_command(versions, "Fixes")
+    git_command(versions, "Fixes: ")
 
 
 def create_task_log(versions: List[str]) -> None:
-    git_command(versions, "Task-number")
+    git_command(versions, "Task-number: ")
 
 
 def gen_list(d: Dict[str, Dict[str, str]]) -> str:
@@ -192,9 +198,7 @@ def gen_list(d: Dict[str, Dict[str, str]]) -> str:
 
 
 def sort_dict(d: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
-    return dict(sorted(d.items(),
-        key=lambda kv: "{:5d}".format(
-            int(kv[1]['task'].replace("PYSIDE-", "")))))
+    return dict(sorted(d.items(), key=lambda kv: kv[1]['task-number']))
 
 
 if __name__ == "__main__":
