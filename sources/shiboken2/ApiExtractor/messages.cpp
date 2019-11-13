@@ -328,6 +328,18 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
     return result;
 }
 
+QString msgCannotFindSmartPointer(const QString &instantiationType,
+                                  const AbstractMetaClassList &pointers)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to find smart pointer type for " << instantiationType << " (known types:";
+    for (auto t : pointers)
+        str << ' ' << t->fullName();
+    str << ").";
+    return result;
+}
+
 // main.cpp
 
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs)

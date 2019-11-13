@@ -117,6 +117,9 @@ QString msgCannotUseEnumAsInt(const QString &name);
 
 QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType);
 
+QString msgCannotFindSmartPointer(const QString &instantiationType,
+                                  const AbstractMetaClassList &pointers);
+
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs);
 
 QString msgInvalidVersion(const QString &package, const QString &version);
