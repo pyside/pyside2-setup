@@ -61,6 +61,7 @@ static inline QString deleteInMainThreadAttribute() { return QStringLiteral("del
 static inline QString deprecatedAttribute() { return QStringLiteral("deprecated"); }
 static inline QString exceptionHandlingAttribute() { return QStringLiteral("exception-handling"); }
 static inline QString extensibleAttribute() { return QStringLiteral("extensible"); }
+static inline QString fileNameAttribute() { return QStringLiteral("file-name"); }
 static inline QString flagsAttribute() { return QStringLiteral("flags"); }
 static inline QString forceAbstractAttribute() { return QStringLiteral("force-abstract"); }
 static inline QString forceIntegerAttribute() { return QStringLiteral("force-integer"); }
@@ -382,6 +383,7 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"replace-type", StackElement::ReplaceType},
         {u"smart-pointer-type", StackElement::SmartPointerTypeEntry},
         {u"suppress-warning", StackElement::SuppressedWarning},
+        {u"system-include", StackElement::SystemInclude},
         {u"target-to-native", StackElement::TargetToNative},
         {u"template", StackElement::Template},
         {u"typedef-type", StackElement::TypedefTypeEntry},
@@ -2536,7 +2538,7 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
     QString location;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
-        if (name == QLatin1String("file-name"))
+        if (name == fileNameAttribute())
             fileName = attributes->takeAt(i).value().toString();
         else if (name == locationAttribute())
             location = attributes->takeAt(i).value().toString();
@@ -2561,6 +2563,18 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
         di->setInclude(entry->include());
         di->setExtraIncludes(entry->extraIncludes());
     }
+    return true;
+}
+
+bool TypeSystemParser::parseSystemInclude(const QXmlStreamReader &,
+                                          QXmlStreamAttributes *attributes)
+{
+    const int index = indexOfAttribute(*attributes, fileNameAttribute());
+    if (index == -1) {
+        m_error = msgMissingAttribute(fileNameAttribute());
+        return false;
+    }
+    TypeDatabase::instance()->addSystemInclude(attributes->takeAt(index).value().toString());
     return true;
 }
 
@@ -2849,6 +2863,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                         || element->type == StackElement::LoadTypesystem
                         || element->type == StackElement::InjectCode
                         || element->type == StackElement::ExtraIncludes
+                        || element->type == StackElement::SystemInclude
                         || element->type == StackElement::ConversionRule
                         || element->type == StackElement::AddFunction
                         || element->type == StackElement::Template;
@@ -2999,6 +3014,10 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             break;
         case StackElement::Rejection:
             if (!addRejection(m_database, &attributes, &m_error))
+                return false;
+            break;
+        case StackElement::SystemInclude:
+            if (!parseSystemInclude(reader, &attributes))
                 return false;
             break;
         case StackElement::Template: {

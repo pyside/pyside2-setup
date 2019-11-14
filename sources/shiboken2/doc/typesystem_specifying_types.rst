@@ -471,3 +471,18 @@ function
     The function tag has two *optional* attributes: **since**, whose value is used to specify
     the API version of this function, and **rename**, to modify the function name.
 
+.. _system_include:
+
+system-include
+^^^^^^^^^^^^^^
+
+    The optional **system-include** specifies the name of a system include
+    file to be parsed. Normally, include files considered to be system
+    include files are skipped by the C++ code parser. Its primary use case
+    is exposing classes from the STL library.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <system-include file-name="memory"/>
+        </typesystem>

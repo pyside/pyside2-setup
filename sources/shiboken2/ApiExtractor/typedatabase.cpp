@@ -144,6 +144,11 @@ IncludeList TypeDatabase::extraIncludes(const QString& className) const
     return typeEntry ? typeEntry->extraIncludes() : IncludeList();
 }
 
+void TypeDatabase::addSystemInclude(const QString &name)
+{
+    m_systemIncludes.append(name.toUtf8());
+}
+
 ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
 {
     QString template_name = name;

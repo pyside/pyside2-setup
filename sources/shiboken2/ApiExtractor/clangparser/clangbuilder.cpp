@@ -222,6 +222,7 @@ public:
     FunctionModelItem m_currentFunction;
     ArgumentModelItem m_currentArgument;
     VariableModelItem m_currentField;
+    QByteArrayList m_systemIncludes;
 
     int m_anonymousEnumCount = 0;
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
@@ -720,6 +721,12 @@ bool BuilderPrivate::visitHeader(const char *cFileName) const
         return true;
     }
 #endif // Q_OS_MACOS
+    if (baseName) {
+        for (const auto &systemInclude : m_systemIncludes) {
+            if (systemInclude == baseName)
+                return true;
+        }
+    }
     return false;
 }
 
@@ -740,6 +747,11 @@ bool Builder::visitLocation(const CXSourceLocation &location) const
         clang_disposeString(cxFileName);
     }
     return result;
+}
+
+void Builder::setSystemIncludes(const QByteArrayList &systemIncludes)
+{
+    d->m_systemIncludes = systemIncludes;
 }
 
 FileModelItem Builder::dom() const

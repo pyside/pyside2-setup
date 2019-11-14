@@ -86,6 +86,7 @@ class StackElement
             NativeToTarget              = 0x1100,
             TargetToNative              = 0x1200,
             AddConversion               = 0x1300,
+            SystemInclude               = 0x1400,
             SimpleMask                  = 0x3f00,
 
             // Code snip tags (0x1000, 0x2000, ... , 0xf000)
@@ -247,6 +248,7 @@ private:
                           StackElement* element, QXmlStreamAttributes *);
      bool parseInclude(const QXmlStreamReader &, const StackElement &topElement,
                        TypeEntry *entry, QXmlStreamAttributes *);
+     bool parseSystemInclude(const QXmlStreamReader &, QXmlStreamAttributes *);
      TemplateInstance
          *parseTemplateInstanceEnum(const QXmlStreamReader &, const StackElement &topElement,
                                     QXmlStreamAttributes *);
