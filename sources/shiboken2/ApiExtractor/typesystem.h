@@ -836,13 +836,7 @@ public:
     {
         m_extraIncludes = includes;
     }
-    void addExtraInclude(const Include &include)
-    {
-        if (!m_includesUsed.value(include.name(), false)) {
-            m_extraIncludes << include;
-            m_includesUsed[include.name()] = true;
-        }
-    }
+    void addExtraInclude(const Include &newInclude);
 
     Include include() const
     {
@@ -907,21 +901,20 @@ protected:
 private:
     QString m_name;
     QString m_targetLangPackage;
-    Type m_type;
-    uint m_codeGeneration = GenerateAll;
     CustomFunction m_customConstructor;
     CustomFunction m_customDestructor;
     CodeSnipList m_codeSnips;
     DocModificationList m_docModifications;
     IncludeList m_extraIncludes;
     Include m_include;
-    QHash<QString, bool> m_includesUsed;
     QString m_conversionRule;
-    bool m_stream = false;
     QVersionNumber m_version;
     CustomConversion *m_customConversion = nullptr;
+    uint m_codeGeneration = GenerateAll;
     int m_revision = 0;
     int m_sbkIndex = 0;
+    Type m_type;
+    bool m_stream = false;
 };
 
 class TypeSystemTypeEntry : public TypeEntry

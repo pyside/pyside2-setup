@@ -80,6 +80,12 @@ CodeSnipList TypeEntry::codeSnips() const
     return m_codeSnips;
 }
 
+void TypeEntry::addExtraInclude(const Include &newInclude)
+{
+    if (!m_extraIncludes.contains(newInclude))
+        m_extraIncludes.append(newInclude);
+}
+
 QString Modification::accessModifierString() const
 {
     if (isPrivate()) return QLatin1String("private");
@@ -713,8 +719,8 @@ bool TypeEntry::isCppPrimitive() const
 
 TypeEntry::TypeEntry(const QString &name, TypeEntry::Type t, const QVersionNumber &vr) :
     m_name(name),
-    m_type(t),
-    m_version(vr)
+    m_version(vr),
+    m_type(t)
 {
 }
 
