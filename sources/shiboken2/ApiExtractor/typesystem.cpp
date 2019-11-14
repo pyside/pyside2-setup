@@ -241,19 +241,6 @@ QString FlagsTypeEntry::targetLangName() const
     return m_targetLangName;
 }
 
-/*!
- * The Visual Studio 2002 compiler doesn't support these symbols,
- * which our typedefs unforntuatly expand to.
- */
-QString fixCppTypeName(const QString &name)
-{
-    if (name == QLatin1String("long long"))
-        return QLatin1String("qint64");
-    if (name == QLatin1String("unsigned long long"))
-        return QLatin1String("quint64");
-    return name;
-}
-
 QString TemplateInstance::expandCode() const
 {
     TemplateEntry *templateEntry = TypeDatabase::instance()->findTemplate(m_name);

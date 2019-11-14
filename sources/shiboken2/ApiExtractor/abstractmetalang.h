@@ -249,19 +249,9 @@ public:
         return m_originalAttributes & Private;
     }
 
-    bool wasProtected() const
-    {
-        return m_originalAttributes & Protected;
-    }
-
     bool wasPublic() const
     {
         return m_originalAttributes & Public;
-    }
-
-    bool wasFriendly() const
-    {
-        return m_originalAttributes & Friendly;
     }
 
     void setDocumentation(const Documentation& doc)
@@ -892,7 +882,6 @@ public:
 
     QString minimalSignature() const;
     QString debugSignature() const; // including virtual/override/final, etc., for debugging only.
-    QStringList possibleIntrospectionCompatibleSignatures() const;
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
 
@@ -1530,11 +1519,6 @@ public:
     bool hasSignals() const;
     bool inheritsFrom(const AbstractMetaClass *other) const;
 
-    void setForceShellClass(bool on)
-    {
-        m_forceShellClass = on;
-    }
-
     /**
     *   Says if the class that declares or inherits a virtual function.
     *   \return true if the class implements or inherits any virtual methods
@@ -1732,7 +1716,6 @@ private:
     uint m_hasPrivateDestructor : 1;
     uint m_hasProtectedDestructor : 1;
     uint m_hasVirtualDestructor : 1;
-    uint m_forceShellClass : 1;
     uint m_hasHashFunction : 1;
     uint m_hasEqualsOperator : 1;
     uint m_hasCloneOperator : 1;

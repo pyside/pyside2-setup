@@ -100,6 +100,13 @@ except SyntaxError:
     print("*** not a python file, removed:", shortpath)
     os.unlink(effectiveRefPath)
     have_refmodule = False
+except NameError as e:
+    if "recreate" in e.args[0]:
+        print("*** explicit request to recreate:", shortpath)
+    else:
+        print("*** unexpected NameError:", e, "- creating", shortpath)
+    os.unlink(effectiveRefPath)
+    have_refmodule = False
 dict_name = "sig_dict"
 if have_refmodule and not hasattr(sig_exists, dict_name):
     print("*** wrong module without '{dict_name}', removed:"

@@ -1684,8 +1684,6 @@ struct TypeRejection
 QDebug operator<<(QDebug d, const TypeRejection &r);
 #endif
 
-QString fixCppTypeName(const QString &name);
-
 class CustomConversion
 {
 public:

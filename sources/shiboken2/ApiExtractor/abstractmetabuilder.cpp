@@ -1418,13 +1418,6 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             metaClass->setHasNonPrivateConstructor(true);
         }
 
-        // Classes with virtual destructors should always have a shell class
-        // (since we aren't registering the destructors, we need this extra check)
-        if (metaFunction->isDestructor() && metaFunction->isVirtual()
-            && metaFunction->visibility() != AbstractMetaAttributes::Private) {
-            metaClass->setForceShellClass(true);
-        }
-
         if (!metaFunction->isDestructor()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
 

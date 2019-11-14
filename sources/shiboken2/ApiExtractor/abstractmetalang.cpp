@@ -1326,7 +1326,6 @@ AbstractMetaClass::AbstractMetaClass()
       m_hasPrivateDestructor(false),
       m_hasProtectedDestructor(false),
       m_hasVirtualDestructor(false),
-      m_forceShellClass(false),
       m_hasHashFunction(false),
       m_hasEqualsOperator(false),
       m_hasCloneOperator(false),
