@@ -1,55 +1,49 @@
 |project| & PyInstaller
 #######################
 
-`PyInstaller <https://www.pyinstaller.org/>`_ lets you freeze your python
-application into a stand-alone executable.
-The supported platforms are Linux, macOS, Windows, FreeBSD, and others.
+`PyInstaller <https://www.pyinstaller.org/>`_ lets you freeze your python application into a
+stand-alone executable. This installer supports Linux, macOS, Windows, and more; and is also
+compatible with 3rd-party Python modules, such as |pymodname|.
 
-One of the main goals of `PyInstaller` is to be compatible with 3rd-party
-Python modules, for example: |pymodname|.
-
-You can read the `official documentation <https://www.pyinstaller.org/documentation.html>`_
-to clarify any further question, and remember to contribute to
-`the project <https://github.com/pyinstaller/pyinstaller>`_
-by filing issues if you find any, or contributing to their development.
+For more details, see the `official documentation <https://www.pyinstaller.org/documentation.html>`_.
 
 Preparation
 ===========
 
-Installing `PyInstaller` can be done using **pip**::
+Install the `PyInstaller` via **pip** with the following command::
 
     pip install pyinstaller
 
-If you are using a virtual environment, remember to activate it before
-installing `PyInstaller` into it.
+If you're using a virtual environment, remember to activate it before installing `PyInstaller`.
 
-After the installation, the `pyinstaller` binary will be located in the `bin/`
-directory of your virtual environment, or where your Python executable is located.
-If that directory is not in your `PATH`, include the whole path when executing `pyinstaller`.
+After installation, the `pyinstaller` binary is located in your virtual environment's `bin/`
+directory, or where your Python executable is located. If that directory isn't in your `PATH`,
+include the whole path when you run `pyinstaller`.
 
 .. warning:: If you already have a PySide2 or Shiboken2 version installed in your
-   system path, PyInstaller will pick them instead of your virtual environment
-   version.
+   system path, PyInstaller uses them instead of your virtual environment version.
 
-Freezing an application
+Freeze an application
 =======================
 
-`PyInstaller` has many options that you can use.
-To learn more about them you can just run `pyinstaller -h`.
+`PyInstaller` has many options that you can use. To list them all, run `pyinstaller -h`.
 
-Two main features are the option to package the whole project
-(including the shared libraries) into one executable file (`--onefile`),
-and to place it in a directory containing the libraries.
+There are two main features:
 
-Additionally, for Windows you can enable opening a console during the
-execution with the option, `-c` (or equivalent `--console` or `--nowindowed`).
-Further, you can specify to not open such console window
-on macOS and Windows with the option, `-w` (or equivalent `--windowed` or `--noconsole`).
+ * the option to package the whole project (including shared libraries) into one executable file
+   (`--onefile`)
+ * the option to place it in a directory containing the libraries
 
-Creating an example
--------------------
+Additionally, on Windows when the command is running, you can open a console with the `-c` option
+(or `--console` or `--nowindowed` equivalent).
 
-Now, consider the following simple script, named `hello.py`::
+Otherwise, you can specify to not open such a console window on macOS and Windows with the `-w`
+option (or `--windowed` or `--noconsole` equivalent).
+
+Create an example
+-----------------
+
+Now, consider the following script, named `hello.py`::
 
     import sys
     import random
@@ -90,68 +84,58 @@ Now, consider the following simple script, named `hello.py`::
         sys.exit(app.exec_())
 
 
-As it has a UI, you will use the `--windowed` option.
+Since it has a UI, you use the `--windowed` option.
 
 The command line to proceed looks like this::
 
     pyinstaller --name="MyApplication" --windowed hello.py
 
-This process creates a `dist/` and `build/` directory.
-The application executable and the required shared libraries are
-placed in `dist/MyApplication`.
+This process creates two directories: `dist/` and `build/`. The application executable and the
+required shared libraries are placed in `dist/MyApplication`.
 
-To run the application you can go to `dist/MyApplication` and
-execute the program::
+To run the application, go to `dist/MyApplication` and run the program::
 
     cd dist/MyApplication/
     ./MyApplication
 
-.. note:: The directory inside `dist/` and the executable will have
-          the same name.
+.. note:: The directory inside `dist/` and the executable have the same name.
 
-If you prefer to have everything bundled into one executable,
-without the shared libraries next to it, you can use the option
-`--onefile`::
+Use the `--onefile` option if you prefer to have everything bundled into one executable, without
+the shared libraries next to it::
 
     pyinstaller --name="MyApplication" --windowed --onefile hello.py
 
-This process takes a bit longer, but in the end you will have one
-executable in the `dist/` directory::
+This process takes a bit longer, but in the end you have one executable in the `dist/` directory::
 
     cd dist/
     ./MyApplication
 
 
-Current Caveats To Be Aware Of
-==============================
+Some Caveats
+============
 
 
-PyInstaller Problem
--------------------
+PyInstaller Issue
+-----------------
 
-As already mentioned, `PyInstaller` will pick a system installation
-of PySide2 or Shiboken2 instead of your virtualenv version without
-notice, if it exists. This may not be a problem if those two
-versions are the same.
+As mentioned before, if available, `PyInstaller` picks a system installation of PySide2 or
+Shiboken2 instead of your `virtualenv` version without notice. This is negligible if those
+two versions are the same.
 
-If you are working with different versions, this can result in
-frustrating debugging sessions. You could think you are testing the
-latest version, but `PyInstaller` could be working with an older
+If you're working with different versions, this can result in frustrating debugging sessions
+when you think you are testing the latest version, but `PyInstaller` is working with an older
 version.
 
-Problem with numpy in Python 2.7.16
------------------------------------
+Issue with numpy in Python 2.7.16
+---------------------------------
 
-A recent problem of PyInstaller is the Python 2 release, that is
-v2.7.16. This Python version creates a problem that is known from
-Python 3 as a `Tcl/Tk` problem. It rarely shows up in Python 3 as
-`Tcl/Tk` is seldom used with `PyInstaller.
+A recent issue with PyInstaller is the appearance of Python 2.7.16. This Python version creates
+an issue that is known from Python 3 as a `Tcl/Tk` problem. This rarely shows up in Python 3
+because `Tcl/Tk` is seldom used with `PyInstaller`.
 
-On Python 2.7.16, this problem is very much visible, as many are
-using numpy. For some reason, installing `numpy` creates a
-dependency to `Tcl/Tk`, which can be circumvented only by explicitly
-excluding `Tcl/Tk` related things by adding this line to the analysis
-section of the spec-file::
+On Python 2.7.16, this problem is common, as many developers use numpy. For some reason,
+installing `numpy` creates a dependency to `Tcl/Tk`, which can be circumvented only by explicitly
+excluding `Tcl/Tk` by adding this line to spec-file's analysis section::
 
     excludes=['FixTk', 'tcl', 'tk', '_tkinter', 'tkinter', 'Tkinter'],
 
