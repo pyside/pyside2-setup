@@ -2676,6 +2676,60 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
 }
 
 #ifndef QT_NO_DEBUG_STREAM
+
+void AbstractMetaClass::format(QDebug &d) const
+{
+    if (d.verbosity() > 2)
+        d << static_cast<const void *>(this) << ", ";
+    d << '"' << qualifiedCppName();
+    if (const int count = m_templateArgs.size()) {
+        for (int i = 0; i < count; ++i)
+            d << (i ? ',' : '<') << m_templateArgs.at(i)->qualifiedCppName();
+        d << '>';
+    }
+    d << '"';
+    if (isNamespace())
+        d << " [namespace]";
+    if (attributes() & AbstractMetaAttributes::FinalCppClass)
+        d << " [final]";
+    if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
+        d << " [deprecated]";
+    if (m_baseClass)
+        d << ", inherits \"" << m_baseClass->name() << '"';
+    if (auto templateBase = templateBaseClass()) {
+        const auto instantiatedTypes = templateBaseClassInstantiations();
+        d << ", instantiates \"" << templateBase->name();
+        for (int i = 0, count = instantiatedTypes.size(); i < count; ++i)
+            d << (i ? ',' : '<') << instantiatedTypes.at(i)->name();
+        d << ">\"";
+    }
+}
+
+void AbstractMetaClass::formatMembers(QDebug &d) const
+{
+    if (!m_enums.isEmpty())
+        d << ", enums[" << m_enums.size() << "]=" << m_enums;
+    if (!m_functions.isEmpty()) {
+        const int count = m_functions.size();
+        d << ", functions=[" << count << "](";
+        for (int i = 0; i < count; ++i) {
+            if (i)
+                d << ", ";
+            formatMetaFunctionBrief(d, m_functions.at(i));
+        }
+        d << ')';
+    }
+    if (const int count = m_fields.size()) {
+        d << ", fields=[" << count << "](";
+        for (int i = 0; i < count; ++i) {
+            if (i)
+                d << ", ";
+            formatMetaField(d, m_fields.at(i));
+        }
+        d << ')';
+    }
+}
+
 QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
 {
     QDebugStateSaver saver(d);
@@ -2683,57 +2737,9 @@ QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
     d.nospace();
     d << "AbstractMetaClass(";
     if (ac) {
-        d << '"' << ac->fullName() << '"';
-        if (ac->attributes() & AbstractMetaAttributes::FinalCppClass)
-            d << " [final]";
-        if (ac->attributes().testFlag(AbstractMetaAttributes::Deprecated))
-            d << " [deprecated]";
-        if (ac->m_baseClass)
-            d << ", inherits \"" << ac->m_baseClass->name() << '"';
-        if (ac->m_templateBaseClass)
-            d << ", inherits template \"" << ac->m_templateBaseClass->name() << '"';
-        const AbstractMetaEnumList &enums = ac->enums();
-        if (!enums.isEmpty())
-            d << ", enums[" << enums.size() << "]=" << enums;
-        const AbstractMetaFunctionList &functions = ac->functions();
-        if (!functions.isEmpty()) {
-            const int count = functions.size();
-            d << ", functions=[" << count << "](";
-            for (int i = 0; i < count; ++i) {
-                if (i)
-                    d << ", ";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-                if (d.verbosity() > 2)
-                    d << functions.at(i);
-                else
-#endif
-                    formatMetaFunctionBrief(d, functions.at(i));
-            }
-            d << ')';
-        }
-        const AbstractMetaFieldList &fields = ac->fields();
-        if (!fields.isEmpty()) {
-            const int count = fields.size();
-            d << ", fields=[" << count << "](";
-            for (int i = 0; i < count; ++i) {
-                if (i)
-                    d << ", ";
-                formatMetaField(d, fields.at(i));
-            }
-            d << ')';
-        }
-        const auto &templateArguments = ac->templateArguments();
-        if (const int count = templateArguments.size()) {
-            d << ", templateArguments=[" << count << "](";
-            for (int i = 0; i < count; ++i) {
-                if (i)
-                    d << ", ";
-                d << templateArguments.at(i);
-            }
-            d << ')';
-        }
-
-
+        ac->format(d);
+        if (d.verbosity() > 2)
+            ac->formatMembers(d);
     } else {
         d << '0';
     }

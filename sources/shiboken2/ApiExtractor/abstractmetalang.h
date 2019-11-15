@@ -1712,6 +1712,8 @@ public:
 
 private:
 #ifndef QT_NO_DEBUG_STREAM
+    void format(QDebug &d) const;
+    void formatMembers(QDebug &d) const;
     friend QDebug operator<<(QDebug d, const AbstractMetaClass *ac);
 #endif
     uint m_hasVirtuals : 1;
