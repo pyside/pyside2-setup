@@ -72,6 +72,7 @@ Modules=$(MinimalModules),Multimedia
 Modules-pyside-setup-minimal=$(MinimalModules)
 """
 
+
 def which(needle):
     """Perform a path search"""
     needles = [needle]
@@ -86,6 +87,7 @@ def which(needle):
                 return binary
     return None
 
+
 def execute(args):
     """Execute a command and print to log"""
     log_string = '[{}] {}'.format(os.path.basename(os.getcwd()), ' '.join(args))
@@ -94,30 +96,33 @@ def execute(args):
     if exit_code != 0:
         raise RuntimeError('FAIL({}): {}'.format(exit_code, log_string))
 
+
 def run_git(args):
     """Run git in the current directory and its submodules"""
-    args.insert(0, git) # run in repo
+    args.insert(0, git)  # run in repo
     execute(args)  # run for submodules
     module_args = [git, "submodule", "foreach"]
     module_args.extend(args)
     execute(module_args)
 
+
 def expand_reference(dict, value):
     """Expand references to other keys in config files $(name) by value."""
     pattern = re.compile(r"\$\([^)]+\)")
     while True:
-       match = pattern.match(value)
-       if not match:
-           break
-       key = match.group(0)[2:-1]
-       value = value[:match.start(0)] + dict[key] + value[match.end(0):]
+        match = pattern.match(value)
+        if not match:
+            break
+        key = match.group(0)[2:-1]
+        value = value[:match.start(0)] + dict[key] + value[match.end(0):]
     return value
+
 
 """
 Config file handling, cache and read function
 """
-
 config_dict = {}
+
 
 def read_config_file(fileName):
     global config_dict
@@ -136,6 +141,7 @@ def read_config_file(fileName):
                     value += f.readline().rstrip()
                 config_dict[key] = expand_reference(config_dict, value)
 
+
 def read_tool_config(key):
     """
     Read a value from the '$HOME/.qp5_tool' configuration file. When given
@@ -147,11 +153,13 @@ def read_tool_config(key):
     repo_value = config_dict.get(key + '-' + base_dir)
     return repo_value if repo_value else config_dict.get(key)
 
+
 def read_config_build_arguments():
     value = read_tool_config('BuildArguments')
     if value:
         return re.split(r'\s+', value)
-    return default_build_args;
+    return default_build_args
+
 
 def read_config_modules_argument():
     value = read_tool_config('Modules')
@@ -159,9 +167,11 @@ def read_config_modules_argument():
         return '--module-subset=' + value
     return None
 
+
 def read_config_python_binary():
     binary = read_tool_config('Python')
     return binary if binary else 'python'
+
 
 def get_config_file():
     home = os.getenv('HOME')
@@ -182,6 +192,7 @@ def get_config_file():
             config_file = os.path.join(home, '.' + config_file_name)
     return config_file
 
+
 def get_options(desc):
     parser = ArgumentParser(description=desc, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--reset', '-r', action='store_true',
@@ -198,6 +209,7 @@ def get_options(desc):
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
 
     return parser.parse_args()
+
 
 if __name__ == '__main__':
 

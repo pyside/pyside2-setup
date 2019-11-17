@@ -81,8 +81,8 @@ def prepare_standalone_package_macos(self, vars):
     if self.qt_is_framework_build():
         def framework_dir_filter(dir_name, parent_full_path, dir_full_path):
             if '.framework' in dir_name:
-                if (dir_name.startswith('QtWebEngine') and
-                        not self.is_webengine_built(built_modules)):
+                if (dir_name.startswith('QtWebEngine')
+                        and not self.is_webengine_built(built_modules)):
                     return False
                 if constrain_modules and dir_name not in constrain_frameworks:
                     return False
@@ -95,8 +95,7 @@ def prepare_standalone_package_macos(self, vars):
                 return False
             if dir_full_path.endswith('Versions/5/Helpers'):
                 return False
-            return general_dir_filter(dir_name, parent_full_path,
-                dir_full_path)
+            return general_dir_filter(dir_name, parent_full_path, dir_full_path)
 
         # Filter out debug frameworks in the
         # debug_and_release config.
@@ -112,18 +111,17 @@ def prepare_standalone_package_macos(self, vars):
             return True
 
         copydir("{qt_lib_dir}", "{st_build_dir}/{st_package_name}/Qt/lib",
-            recursive=True, vars=vars,
-            ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
-            dir_filter_function=framework_dir_filter,
-            file_filter_function=framework_variant_filter)
+                recursive=True, vars=vars,
+                ignore=["*.la", "*.a", "*.cmake", "*.pc", "*.prl"],
+                dir_filter_function=framework_dir_filter,
+                file_filter_function=framework_variant_filter)
 
         # Fix rpath for WebEngine process executable. The already
         # present rpath does not work because it assumes a symlink
         # from Versions/5/Helpers, thus adding two more levels of
         # directory hierarchy.
         if self.is_webengine_built(built_modules):
-            qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(
-                **vars)
+            qt_lib_path = "{st_build_dir}/{st_package_name}/Qt/lib".format(**vars)
             bundle = "QtWebEngineCore.framework/Helpers/"
             bundle += "QtWebEngineProcess.app"
             binary = "Contents/MacOS/QtWebEngineProcess"
@@ -142,24 +140,24 @@ def prepare_standalone_package_macos(self, vars):
             accepted_modules = ["libQt5" + module + "*.5.dylib" for module in constrain_modules]
 
         copydir("{qt_lib_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/lib",
-            filter=accepted_modules,
-            ignore=ignored_modules,
-            file_filter_function=file_variant_filter,
-            recursive=True, vars=vars, force_copy_symlinks=True)
+                "{st_build_dir}/{st_package_name}/Qt/lib",
+                filter=accepted_modules,
+                ignore=ignored_modules,
+                file_filter_function=file_variant_filter,
+                recursive=True, vars=vars, force_copy_symlinks=True)
 
         if self.is_webengine_built(built_modules):
             copydir("{qt_lib_execs_dir}",
-                "{st_build_dir}/{st_package_name}/Qt/libexec",
-                filter=None,
-                recursive=False,
-                vars=vars)
+                    "{st_build_dir}/{st_package_name}/Qt/libexec",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
 
             copydir("{qt_prefix_dir}/resources",
-                "{st_build_dir}/{st_package_name}/Qt/resources",
-                filter=None,
-                recursive=False,
-                vars=vars)
+                    "{st_build_dir}/{st_package_name}/Qt/resources",
+                    filter=None,
+                    recursive=False,
+                    vars=vars)
 
             # Fix rpath for WebEngine process executable.
             qt_libexec_path = "{st_build_dir}/{st_package_name}/Qt/libexec".format(**vars)
@@ -178,30 +176,29 @@ def prepare_standalone_package_macos(self, vars):
     if copy_plugins:
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         copydir("{qt_plugins_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/plugins",
-            filter=["*.dylib"],
-            recursive=True,
-            dir_filter_function=general_dir_filter,
-            file_filter_function=file_variant_filter,
-            vars=vars)
-
+                "{st_build_dir}/{st_package_name}/Qt/plugins",
+                filter=["*.dylib"],
+                recursive=True,
+                dir_filter_function=general_dir_filter,
+                file_filter_function=file_variant_filter,
+                vars=vars)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
         copydir("{qt_qml_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/qml",
-            filter=None,
-            recursive=True,
-            force=False,
-            dir_filter_function=general_dir_filter,
-            file_filter_function=file_variant_filter,
-            vars=vars)
+                "{st_build_dir}/{st_package_name}/Qt/qml",
+                filter=None,
+                recursive=True,
+                force=False,
+                dir_filter_function=general_dir_filter,
+                file_filter_function=file_variant_filter,
+                vars=vars)
 
     if copy_translations:
         # <qt>/translations/* ->
         # <setup>/{st_package_name}/Qt/translations
         copydir("{qt_translations_dir}",
-            "{st_build_dir}/{st_package_name}/Qt/translations",
-            filter=["*.qm", "*.pak"],
-            force=False,
-            vars=vars)
+                "{st_build_dir}/{st_package_name}/Qt/translations",
+                filter=["*.qm", "*.pak"],
+                force=False,
+                vars=vars)

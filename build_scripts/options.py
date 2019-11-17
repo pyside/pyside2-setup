@@ -44,14 +44,15 @@ import warnings
 
 
 def _warn_multiple_option(option):
-    w = 'Option "{}" occurs multiple times on the command line.'.format(option)
-    warnings.warn(w)
+    warnings.warn('Option "{}" occurs multiple times on the command line.'.format(option))
+
 
 def _warn_deprecated_option(option, replacement=None):
     w = 'Option "{}" is deprecated and may be removed in a future release.'.format(option)
     if replacement:
         w = '{}\nUse "{}" instead.'.format(w, replacement)
     warnings.warn(w)
+
 
 class Options(object):
     def __init__(self):
@@ -62,13 +63,13 @@ class Options(object):
     def has_option(self, name, remove=True):
         """ Returns True if argument '--name' was passed on the command
         line. """
-        option = '--' + name
+        option = '--{}'.format(name)
         count = sys.argv.count(option)
         remove_count = count
         if not remove and count > 0:
             remove_count -= 1
         for i in range(remove_count):
-           sys.argv.remove(option)
+            sys.argv.remove(option)
         if count > 1:
             _warn_multiple_option(option)
         return count > 0
@@ -127,8 +128,8 @@ def has_option(*args, **kwargs):
     return options.has_option(*args, **kwargs)
 
 
-def option_value(*args,**kwargs):
-    return options.option_value(*args,**kwargs)
+def option_value(*args, **kwargs):
+    return options.option_value(*args, **kwargs)
 
 
 # Declare options

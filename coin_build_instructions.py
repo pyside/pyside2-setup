@@ -101,6 +101,9 @@ def is_snapshot_build():
     return False
 
 def call_setup(python_ver, phase):
+    print("call_setup")
+    print("python_ver", python_ver)
+    print("phase", phase)
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
 
     if phase in ["BUILD"]:

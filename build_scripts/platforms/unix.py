@@ -45,7 +45,7 @@ from .macos import prepare_standalone_package_macos
 
 from ..config import config
 from ..options import *
-from ..utils import copydir, copyfile, rmtree, makefile
+from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources
 
 
@@ -203,13 +203,10 @@ def prepare_packages_posix(self, vars):
             # Re-generate examples Qt resource files for Python 3
             # compatibility
             if sys.version_info[0] == 3:
-                examples_path = "{st_build_dir}/{st_package_name}/examples".format(
-                    **vars)
-                pyside_rcc_path = "{install_dir}/bin/rcc".format(
-                    **vars)
+                examples_path = "{st_build_dir}/{st_package_name}/examples".format(**vars)
+                pyside_rcc_path = "{install_dir}/bin/rcc".format(**vars)
                 pyside_rcc_options = ['-g', 'python']
-                regenerate_qt_resources(examples_path, pyside_rcc_path,
-                    pyside_rcc_options)
+                regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 
     # Copy Qt libs to package
     if OPTION_STANDALONE:

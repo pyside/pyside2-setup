@@ -41,7 +41,8 @@
 wheel_module_exists = False
 
 try:
-    import os, sys
+    import os
+    import sys
 
     from distutils import log as logger
     from wheel import pep425tags
@@ -60,6 +61,7 @@ except Exception as e:
     print('***** Exception while trying to prepare bdist_wheel override class: {}. '
           'Skipping wheel overriding.'.format(e))
 
+
 def get_bdist_wheel_override(params):
     if wheel_module_exists:
         class PysideBuildWheelDecorated(PysideBuildWheel):
@@ -69,6 +71,7 @@ def get_bdist_wheel_override(params):
         return PysideBuildWheelDecorated
     else:
         return None
+
 
 class PysideBuildWheel(_bdist_wheel):
     def __init__(self, *args, **kwargs):
@@ -101,8 +104,7 @@ class PysideBuildWheel(_bdist_wheel):
         qt_version = self.params['qt_version']
         package_version = self.params['package_version']
         wheel_version = "{}-{}".format(package_version, qt_version)
-        components = (_safer_name(self.distribution.get_name()),
-            wheel_version)
+        components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
             components += (self.build_number,)
         return '-'.join(components)
@@ -135,8 +137,9 @@ class PysideBuildWheel(_bdist_wheel):
             # pypi).
             # TODO: Add actual distro detection, instead of
             # relying on limited_api option.
-            if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize > 2147483647 \
-                         and (self.py_limited_api or sys.version_info[0] == 2):
+            if (plat_name in ('linux-x86_64', 'linux_x86_64')
+                    and sys.maxsize > 2147483647
+                    and (self.py_limited_api or sys.version_info[0] == 2)):
                 plat_name = 'manylinux1_x86_64'
         plat_name = plat_name.replace('-', '_').replace('.', '_')
 
@@ -163,8 +166,7 @@ class PysideBuildWheel(_bdist_wheel):
             if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64') and sys.version_info[0] == 2):
                 return tag
             assert tag == supported_tags[0], "%s != %s" % (tag, supported_tags[0])
-            assert tag in supported_tags, (
-                          "would build wheel with unsupported tag {}".format(tag))
+            assert tag in supported_tags, ("would build wheel with unsupported tag {}".format(tag))
         return tag
 
     # Copy of get_tag from bdist_wheel.py, to write a triplet Tag
@@ -201,4 +203,3 @@ class PysideBuildWheel(_bdist_wheel):
 
 if not wheel_module_exists:
     del PysideBuildWheel
-
