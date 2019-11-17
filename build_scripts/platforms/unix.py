@@ -44,7 +44,7 @@ from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
 
 from ..config import config
-from ..options import *
+from ..options import OPTION
 from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources
 
@@ -191,7 +191,7 @@ def prepare_packages_posix(self, vars):
             filter=["*.pyi"],
             vars=vars)
 
-        if not OPTION_NOEXAMPLES:
+        if not OPTION["NOEXAMPLES"]:
             def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if fnmatch.fnmatch(dir_name, "__pycache__"):
                     return False
@@ -209,7 +209,7 @@ def prepare_packages_posix(self, vars):
                 regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 
     # Copy Qt libs to package
-    if OPTION_STANDALONE:
+    if OPTION["STANDALONE"]:
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
             vars['built_modules'] = generated_config['built_modules']
             if sys.platform == 'darwin':

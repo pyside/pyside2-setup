@@ -65,8 +65,7 @@ this_dir = os.path.dirname(this_file)
 setup_script_dir = os.path.abspath(os.path.join(this_dir, '..'))
 sys.path.append(setup_script_dir)
 
-from build_scripts.options import OPTION_QMAKE
-from build_scripts.options import OPTION_CMAKE
+from build_scripts.options import OPTION
 
 from build_scripts.utils import find_files_using_glob
 from build_scripts.utils import find_glob_in_path
@@ -79,11 +78,11 @@ log.set_verbosity(1)
 
 
 def find_executable_qmake():
-    return find_executable('qmake', OPTION_QMAKE)
+    return find_executable('qmake', OPTION["QMAKE"])
 
 
 def find_executable_cmake():
-    return find_executable('cmake', OPTION_CMAKE)
+    return find_executable('cmake', OPTION["CMAKE"])
 
 
 def find_executable(executable, command_line_value):

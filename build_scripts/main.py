@@ -44,7 +44,7 @@ import os
 import time
 from .config import config
 from .utils import memoize, get_python_dict
-from .options import *
+from .options import OPTION
 
 setup_script_dir = os.getcwd()
 build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
@@ -62,7 +62,7 @@ def get_package_timestamp():
     """ In a Coin CI build the returned timestamp will be the
         Coin integration id timestamp. For regular builds it's
         just the current timestamp or a user provided one."""
-    return OPTION_PACKAGE_TIMESTAMP if OPTION_PACKAGE_TIMESTAMP else start_time
+    return OPTION["PACKAGE_TIMESTAMP"] if OPTION["PACKAGE_TIMESTAMP"] else start_time
 
 
 @memoize
@@ -81,7 +81,7 @@ def get_package_version():
 
     # Add the current timestamp to the version number, to suggest it
     # is a development snapshot build.
-    if OPTION_SNAPSHOT_BUILD:
+    if OPTION["SNAPSHOT_BUILD"]:
         final_version += ".dev{}".format(get_package_timestamp())
     return final_version
 
@@ -93,7 +93,7 @@ def get_setuptools_extension_modules():
     # future.
     extension_args = ('QtCore', [])
     extension_kwargs = {}
-    if OPTION_LIMITED_API:
+    if OPTION["LIMITED_API"]:
         extension_kwargs['py_limited_api'] = True
     extension_modules = [Extension(*extension_args, **extension_kwargs)]
     return extension_modules
@@ -164,29 +164,29 @@ def check_allowed_python_version():
 
 qt_src_dir = ''
 
-if OPTION_QT_VERSION is None:
-    OPTION_QT_VERSION = "5"
-if OPTION_QMAKE is None:
-    OPTION_QMAKE = find_executable("qmake-qt5")
-if OPTION_QMAKE is None:
-    OPTION_QMAKE = find_executable("qmake")
+if OPTION["QT_VERSION"] is None:
+    OPTION["QT_VERSION"] = "5"
+if OPTION["QMAKE"] is None:
+    OPTION["QMAKE"] = find_executable("qmake-qt5")
+if OPTION["QMAKE"] is None:
+    OPTION["QMAKE"] = find_executable("qmake")
 
 # make qtinfo.py independent of relative paths.
-if OPTION_QMAKE is not None and os.path.exists(OPTION_QMAKE):
-    OPTION_QMAKE = os.path.abspath(OPTION_QMAKE)
-if OPTION_CMAKE is not None and os.path.exists(OPTION_CMAKE):
-    OPTION_CMAKE = os.path.abspath(OPTION_CMAKE)
+if OPTION["QMAKE"] is not None and os.path.exists(OPTION["QMAKE"]):
+    OPTION["QMAKE"] = os.path.abspath(OPTION["QMAKE"])
+if OPTION["CMAKE"] is not None and os.path.exists(OPTION["CMAKE"]):
+    OPTION["CMAKE"] = os.path.abspath(OPTION["CMAKE"])
 
 QMAKE_COMMAND = None
 # Checking whether qmake executable exists
-if OPTION_QMAKE is not None and os.path.exists(OPTION_QMAKE):
+if OPTION["QMAKE"] is not None and os.path.exists(OPTION["QMAKE"]):
     # Looking whether qmake path is a link and whether the link exists
-    if os.path.islink(OPTION_QMAKE) and os.path.lexists(OPTION_QMAKE):
+    if os.path.islink(OPTION["QMAKE"]) and os.path.lexists(OPTION["QMAKE"]):
         # Set -qt=X here.
-        if "qtchooser" in os.readlink(OPTION_QMAKE):
-            QMAKE_COMMAND = [OPTION_QMAKE, "-qt={}".format(OPTION_QT_VERSION)]
+        if "qtchooser" in os.readlink(OPTION["QMAKE"]):
+            QMAKE_COMMAND = [OPTION["QMAKE"], "-qt={}".format(OPTION["QT_VERSION"])]
 if not QMAKE_COMMAND:
-    QMAKE_COMMAND = [OPTION_QMAKE]
+    QMAKE_COMMAND = [OPTION["QMAKE"]]
 
 if len(QMAKE_COMMAND) == 0 or QMAKE_COMMAND[0] is None:
     print("qmake could not be found.")
@@ -194,36 +194,36 @@ if len(QMAKE_COMMAND) == 0 or QMAKE_COMMAND[0] is None:
 if not os.path.exists(QMAKE_COMMAND[0]):
     print("'{}' does not exist.".format(QMAKE_COMMAND[0]))
     sys.exit(1)
-if OPTION_CMAKE is None:
-    OPTION_CMAKE = find_executable("cmake")
+if OPTION["CMAKE"] is None:
+    OPTION["CMAKE"] = find_executable("cmake")
 
-if OPTION_CMAKE is None:
+if OPTION["CMAKE"] is None:
     print("cmake could not be found.")
     sys.exit(1)
-if not os.path.exists(OPTION_CMAKE):
-    print("'{}' does not exist.".format(OPTION_CMAKE))
+if not os.path.exists(OPTION["CMAKE"]):
+    print("'{}' does not exist.".format(OPTION["CMAKE"]))
     sys.exit(1)
 
 # First element is default
 available_mkspecs = ["msvc", "mingw", "ninja"] if sys.platform == "win32" else ["make", "ninja"]
 
-if OPTION_MAKESPEC is None:
-    OPTION_MAKESPEC = available_mkspecs[0]
+if OPTION["MAKESPEC"] is None:
+    OPTION["MAKESPEC"] = available_mkspecs[0]
 
-if OPTION_MAKESPEC not in available_mkspecs:
-    print('Invalid option --make-spec "{}". Available values are {}'.format(OPTION_MAKESPEC,
+if OPTION["MAKESPEC"] not in available_mkspecs:
+    print('Invalid option --make-spec "{}". Available values are {}'.format(OPTION["MAKESPEC"],
                                                                             available_mkspecs))
     sys.exit(1)
 
-if OPTION_JOBS:
-    if sys.platform == 'win32' and OPTION_NO_JOM:
+if OPTION["JOBS"]:
+    if sys.platform == 'win32' and OPTION["NO_JOM"]:
         print("Option --jobs can only be used with jom on Windows.")
         sys.exit(1)
     else:
-        if not OPTION_JOBS.startswith('-j'):
-            OPTION_JOBS = '-j' + OPTION_JOBS
+        if not OPTION["JOBS"].startswith('-j'):
+            OPTION["JOBS"] = '-j' + OPTION["JOBS"]
 else:
-    OPTION_JOBS = ''
+    OPTION["JOBS"] = ''
 
 
 def is_debug_python():
@@ -238,11 +238,11 @@ def prefix():
     else:
         name = "pyside"
     name += str(sys.version_info[0])
-    if OPTION_DEBUG:
+    if OPTION["DEBUG"]:
         name += "d"
     if is_debug_python():
         name += "p"
-    if OPTION_LIMITED_API == "yes" and sys.version_info[0] == 3:
+    if OPTION["LIMITED_API"] == "yes" and sys.version_info[0] == 3:
         name += "a"
     return name
 
@@ -305,8 +305,8 @@ def get_qt_version():
 
 
 def prepare_build():
-    if (os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE
-            and not OPTION_REUSE_BUILD):
+    if (os.path.isdir(".git") and not OPTION["IGNOREGIT"] and not OPTION["ONLYPACKAGE"]
+            and not OPTION["REUSE_BUILD"]):
         prepare_sub_modules()
     # Clean up temp build folder.
     for n in ["build"]:
@@ -320,7 +320,7 @@ def prepare_build():
                 print('ignored error: {}'.format(e))
 
     # locate Qt sources for the documentation
-    if OPTION_QT_SRC is None:
+    if OPTION["QT_SRC"] is None:
         install_prefix = qtinfo.prefix_dir
         if install_prefix:
             global qt_src_dir
@@ -462,25 +462,25 @@ class PysideBuild(_build):
         log.info("Python architecture is {}".format(platform_arch))
         self.py_arch = platform_arch[:-3]
 
-        build_type = "Debug" if OPTION_DEBUG else "Release"
-        if OPTION_RELWITHDEBINFO:
+        build_type = "Debug" if OPTION["DEBUG"] else "Release"
+        if OPTION["RELWITHDEBINFO"]:
             build_type = 'RelWithDebInfo'
 
         # Check env
         make_path = None
         make_generator = None
-        if not OPTION_ONLYPACKAGE:
-            if OPTION_MAKESPEC == "make":
+        if not OPTION["ONLYPACKAGE"]:
+            if OPTION["MAKESPEC"] == "make":
                 make_name = "make"
                 make_generator = "Unix Makefiles"
-            elif OPTION_MAKESPEC == "msvc":
+            elif OPTION["MAKESPEC"] == "msvc":
                 nmake_path = find_executable("nmake")
                 if nmake_path is None or not os.path.exists(nmake_path):
                     log.info("nmake not found. Trying to initialize the MSVC env...")
                     init_msvc_env(platform_arch, build_type)
                     nmake_path = find_executable("nmake")
                     assert(nmake_path is not None and os.path.exists(nmake_path))
-                jom_path = None if OPTION_NO_JOM else find_executable("jom")
+                jom_path = None if OPTION["NO_JOM"] else find_executable("jom")
                 if jom_path is not None and os.path.exists(jom_path):
                     log.info("jom was found in {}".format(jom_path))
                     make_name = "jom"
@@ -489,13 +489,13 @@ class PysideBuild(_build):
                     log.info("nmake was found in {}".format(nmake_path))
                     make_name = "nmake"
                     make_generator = "NMake Makefiles"
-                    if OPTION_JOBS:
+                    if OPTION["JOBS"]:
                         msg = "Option --jobs can only be used with 'jom' on Windows."
                         raise DistutilsSetupError(msg)
-            elif OPTION_MAKESPEC == "mingw":
+            elif OPTION["MAKESPEC"] == "mingw":
                 make_name = "mingw32-make"
                 make_generator = "MinGW Makefiles"
-            elif OPTION_MAKESPEC == "ninja":
+            elif OPTION["MAKESPEC"] == "ninja":
                 make_name = "ninja"
                 make_generator = "Ninja"
             else:
@@ -505,12 +505,12 @@ class PysideBuild(_build):
                 raise DistutilsSetupError("You need the program '{}' on your system path to "
                                           "compile PySide2.".format(make_name))
 
-            if OPTION_CMAKE is None or not os.path.exists(OPTION_CMAKE):
+            if OPTION["CMAKE"] is None or not os.path.exists(OPTION["CMAKE"]):
                 raise DistutilsSetupError("Failed to find cmake."
                                           " Please specify the path to cmake with "
                                           "--cmake parameter.")
 
-        if OPTION_QMAKE is None or not os.path.exists(OPTION_QMAKE):
+        if OPTION["QMAKE"] is None or not os.path.exists(OPTION["QMAKE"]):
             raise DistutilsSetupError("Failed to find qmake. "
                                       "Please specify the path to qmake with --qmake parameter.")
 
@@ -542,7 +542,7 @@ class PysideBuild(_build):
         if build_type == "Debug":
             dbg_postfix = "_d"
         if sys.platform == "win32":
-            if OPTION_MAKESPEC == "mingw":
+            if OPTION["MAKESPEC"] == "mingw":
                 static_lib_name = "libpython{}{}.a".format(
                     py_version.replace(".", ""), dbg_postfix)
                 py_library = os.path.join(py_libdir, static_lib_name)
@@ -629,7 +629,7 @@ class PysideBuild(_build):
                 log.error("Failed to locate a dynamic Python library, using {}".format(py_library))
 
         self.qtinfo = qtinfo
-        qt_dir = os.path.dirname(OPTION_QMAKE)
+        qt_dir = os.path.dirname(OPTION["QMAKE"])
         qt_version = get_qt_version()
 
         # Update the PATH environment variable
@@ -656,7 +656,7 @@ class PysideBuild(_build):
         self.build_classifiers = "py{}-qt{}-{}-{}".format(py_version, qt_version,
                                                           platform.architecture()[0],
                                                           build_type.lower())
-        if OPTION_SHORTER_PATHS:
+        if OPTION["SHORTER_PATHS"]:
             build_name = "p{}".format(py_version)
         else:
             build_name = self.build_classifiers
@@ -668,7 +668,7 @@ class PysideBuild(_build):
 
         self.make_path = make_path
         self.make_generator = make_generator
-        self.debug = OPTION_DEBUG
+        self.debug = OPTION["DEBUG"]
         self.script_dir = script_dir
         self.st_build_dir = os.path.join(self.script_dir, self.build_lib)
         self.sources_dir = sources_dir
@@ -680,7 +680,7 @@ class PysideBuild(_build):
         self.py_version = py_version
         self.build_type = build_type
         self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
-        self.build_tests = OPTION_BUILDTESTS
+        self.build_tests = OPTION["BUILDTESTS"]
 
         # Save the shiboken build dir path for clang deployment
         # purposes.
@@ -699,13 +699,13 @@ class PysideBuild(_build):
             log.info("Creating install folder {}...".format(self.install_dir))
             os.makedirs(self.install_dir)
 
-        if (not OPTION_ONLYPACKAGE
+        if (not OPTION["ONLYPACKAGE"]
                 and not config.is_internal_shiboken_generator_build_and_part_of_top_level_all()):
             # Build extensions
             for ext in config.get_buildable_extensions():
                 self.build_extension(ext)
 
-            if OPTION_BUILDTESTS:
+            if OPTION["BUILDTESTS"]:
                 # we record the latest successful build and note the
                 # build directory for supporting the tests.
                 timestamp = time.strftime('%Y-%m-%d_%H%M%S')
@@ -718,7 +718,7 @@ class PysideBuild(_build):
                     print(self.build_classifiers, file=f)
                 log.info("Created {}".format(build_history))
 
-        if not OPTION_SKIP_PACKAGING:
+        if not OPTION["SKIP_PACKAGING"]:
             # Build patchelf if needed
             self.build_patchelf()
 
@@ -736,8 +736,8 @@ class PysideBuild(_build):
             return
 
         setuptools_install_prefix = get_python_lib(1)
-        if OPTION_FINAL_INSTALL_PREFIX:
-            setuptools_install_prefix = OPTION_FINAL_INSTALL_PREFIX
+        if OPTION["FINAL_INSTALL_PREFIX"]:
+            setuptools_install_prefix = OPTION["FINAL_INSTALL_PREFIX"]
         log.info("=" * 30)
         log.info("Package version: {}".format(get_package_version()))
         log.info("Build type: {}".format(self.build_type))
@@ -745,7 +745,7 @@ class PysideBuild(_build):
         log.info("-" * 3)
         log.info("Make path: {}".format(self.make_path))
         log.info("Make generator: {}".format(self.make_generator))
-        log.info("Make jobs: {}".format(OPTION_JOBS))
+        log.info("Make jobs: {}".format(OPTION["JOBS"]))
         log.info("-" * 3)
         log.info("setup.py directory: {}".format(self.script_dir))
         log.info("Build scripts directory: {}".format(build_scripts_dir))
@@ -783,7 +783,7 @@ class PysideBuild(_build):
         log.info("Qt plugins: {}".format(self.qtinfo.plugins_dir))
         log.info("-" * 3)
         if sys.platform == 'win32':
-            log.info("OpenSSL dll directory: {}".format(OPTION_OPENSSL))
+            log.info("OpenSSL dll directory: {}".format(OPTION["OPENSSL"]))
         if sys.platform == 'darwin':
             pyside_macos_deployment_target = (
                 PysideBuild.macos_pyside_min_deployment_target()
@@ -815,7 +815,7 @@ class PysideBuild(_build):
         """
         python_target = get_config_var('MACOSX_DEPLOYMENT_TARGET') or None
         qt_target = PysideBuild.macos_qt_min_deployment_target()
-        setup_target = OPTION_MACOS_DEPLOYMENT_TARGET
+        setup_target = OPTION["MACOS_DEPLOYMENT_TARGET"]
 
         qt_target_split = [int(x) for x in qt_target.split('.')]
         if python_target:
@@ -825,7 +825,7 @@ class PysideBuild(_build):
 
         message = ("Can't set MACOSX_DEPLOYMENT_TARGET value to {} because "
                    "{} was built with minimum deployment target set to {}.")
-        # setup.py provided OPTION_MACOS_DEPLOYMENT_TARGET value takes
+        # setup.py provided OPTION["MACOS_DEPLOYMENT_TARGET"] value takes
         # precedence.
         if setup_target:
             if python_target and setup_target_split < python_target_split:
@@ -885,7 +885,7 @@ class PysideBuild(_build):
 
         module_build_exists = os.path.exists(module_build_dir)
         if module_build_exists:
-            if not OPTION_REUSE_BUILD:
+            if not OPTION["REUSE_BUILD"]:
                 log.info("Deleting module build folder {}...".format(module_build_dir))
                 try:
                     rmtree(module_build_dir)
@@ -902,8 +902,8 @@ class PysideBuild(_build):
         module_src_dir = os.path.join(self.sources_dir, extension)
 
         # Build module
-        cmake_cmd = [OPTION_CMAKE]
-        if OPTION_QUIET:
+        cmake_cmd = [OPTION["CMAKE"]]
+        if OPTION["QUIET"]:
             # Pass a special custom option, to allow printing a lot less information when doing
             # a quiet build.
             cmake_cmd.append('-DQUIET_BUILD=1')
@@ -925,27 +925,27 @@ class PysideBuild(_build):
         cmake_cmd.append("-DPYTHON_LIBRARY={}".format(self.py_library))
 
         # If a custom shiboken cmake config directory path was provided, pass it to CMake.
-        if OPTION_SHIBOKEN_CONFIG_DIR and config.is_internal_pyside_build():
-            if os.path.exists(OPTION_SHIBOKEN_CONFIG_DIR):
+        if OPTION["SHIBOKEN_CONFIG_DIR"] and config.is_internal_pyside_build():
+            if os.path.exists(OPTION["SHIBOKEN_CONFIG_DIR"]):
                 log.info("Using custom provided shiboken2 installation: {}"
-                         .format(OPTION_SHIBOKEN_CONFIG_DIR))
-                cmake_cmd.append("-DShiboken2_DIR={}".format(OPTION_SHIBOKEN_CONFIG_DIR))
+                         .format(OPTION["SHIBOKEN_CONFIG_DIR"]))
+                cmake_cmd.append("-DShiboken2_DIR={}".format(OPTION["SHIBOKEN_CONFIG_DIR"]))
             else:
                 log.info("Custom provided shiboken2 installation not found. Path given: {}"
-                         .format(OPTION_SHIBOKEN_CONFIG_DIR))
+                         .format(OPTION["SHIBOKEN_CONFIG_DIR"]))
 
-        if OPTION_MODULE_SUBSET:
+        if OPTION["MODULE_SUBSET"]:
             module_sub_set = ''
-            for m in OPTION_MODULE_SUBSET.split(','):
+            for m in OPTION["MODULE_SUBSET"].split(','):
                 if m.startswith('Qt'):
                     m = m[2:]
                 if module_sub_set:
                     module_sub_set += ';'
                 module_sub_set += m
             cmake_cmd.append("-DMODULES={}".format(module_sub_set))
-        if OPTION_SKIP_MODULES:
+        if OPTION["SKIP_MODULES"]:
             skip_modules = ''
-            for m in OPTION_SKIP_MODULES.split(','):
+            for m in OPTION["SKIP_MODULES"].split(','):
                 if m.startswith('Qt'):
                     m = m[2:]
                 if skip_modules:
@@ -953,7 +953,7 @@ class PysideBuild(_build):
                 skip_modules += m
             cmake_cmd.append("-DSKIP_MODULES={}".format(skip_modules))
         # Add source location for generating documentation
-        cmake_src_dir = OPTION_QT_SRC if OPTION_QT_SRC else qt_src_dir
+        cmake_src_dir = OPTION["QT_SRC"] if OPTION["QT_SRC"] else qt_src_dir
         cmake_cmd.append("-DQT_SRC_DIR={}".format(cmake_src_dir))
         log.info("Qt Source dir: {}".format(cmake_src_dir))
 
@@ -961,20 +961,20 @@ class PysideBuild(_build):
             cmake_cmd.append("-DPYTHON_DEBUG_LIBRARY={}".format(
                 self.py_library))
 
-        if OPTION_LIMITED_API == "yes":
+        if OPTION["LIMITED_API"] == "yes":
             cmake_cmd.append("-DFORCE_LIMITED_API=yes")
-        elif OPTION_LIMITED_API == "no":
+        elif OPTION["LIMITED_API"] == "no":
             cmake_cmd.append("-DFORCE_LIMITED_API=no")
-        elif not OPTION_LIMITED_API:
+        elif not OPTION["LIMITED_API"]:
             pass
         else:
             raise DistutilsSetupError("option limited-api must be 'yes' or 'no' "
                                       "(default yes if applicable, i.e. python version >= 3.5)")
 
-        if OPTION_VERBOSE_BUILD:
+        if OPTION["VERBOSE_BUILD"]:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
 
-        if OPTION_SANITIZE_ADDRESS:
+        if OPTION["SANITIZE_ADDRESS"]:
             # Some simple sanity checking. Only use at your own risk.
             if (sys.platform.startswith('linux')
                     or sys.platform.startswith('darwin')):
@@ -984,10 +984,10 @@ class PysideBuild(_build):
 
         if extension.lower() == "pyside2":
             pyside_qt_conf_prefix = ''
-            if OPTION_QT_CONF_PREFIX:
-                pyside_qt_conf_prefix = OPTION_QT_CONF_PREFIX
+            if OPTION["QT_CONF_PREFIX"]:
+                pyside_qt_conf_prefix = OPTION["QT_CONF_PREFIX"]
             else:
-                if OPTION_STANDALONE:
+                if OPTION["STANDALONE"]:
                     pyside_qt_conf_prefix = '"Qt"'
                 if sys.platform == 'win32':
                     pyside_qt_conf_prefix = '"."'
@@ -1003,7 +1003,7 @@ class PysideBuild(_build):
         # timestamp as a separate value, because it is the only
         # version component that is actually generated by setup.py.
         timestamp = ''
-        if OPTION_SNAPSHOT_BUILD:
+        if OPTION["SNAPSHOT_BUILD"]:
             timestamp = get_package_timestamp()
         cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(timestamp))
 
@@ -1013,11 +1013,11 @@ class PysideBuild(_build):
                 cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
 
         if sys.platform == 'darwin':
-            if OPTION_MACOS_ARCH:
+            if OPTION["MACOS_ARCH"]:
                 # also tell cmake which architecture to use
-                cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION_MACOS_ARCH))
+                cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION["MACOS_ARCH"]))
 
-            if OPTION_MACOS_USE_LIBCPP:
+            if OPTION["MACOS_USE_LIBCPP"]:
                 # Explicitly link the libc++ standard library (useful
                 # for macOS deployment targets lower than 10.9).
                 # This is not on by default, because most libraries and
@@ -1028,9 +1028,9 @@ class PysideBuild(_build):
                 # option is a no-op in those cases.
                 cmake_cmd.append("-DOSX_USE_LIBCPP=ON")
 
-            if OPTION_MACOS_SYSROOT:
+            if OPTION["MACOS_SYSROOT"]:
                 cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(
-                                 OPTION_MACOS_SYSROOT))
+                                 OPTION["MACOS_SYSROOT"]))
             else:
                 latest_sdk_path = run_process_output(['xcrun', '--sdk', 'macosx',
                                                       '--show-sdk-path'])
@@ -1051,7 +1051,7 @@ class PysideBuild(_build):
             cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
-        if not OPTION_SKIP_CMAKE:
+        if not OPTION["SKIP_CMAKE"]:
             log.info("Configuring module {} ({})...".format(extension, module_src_dir))
             if run_process(cmake_cmd) != 0:
                 raise DistutilsSetupError("Error configuring {}".format(extension))
@@ -1061,12 +1061,12 @@ class PysideBuild(_build):
 
         log.info("Compiling module {}...".format(extension))
         cmd_make = [self.make_path]
-        if OPTION_JOBS:
-            cmd_make.append(OPTION_JOBS)
+        if OPTION["JOBS"]:
+            cmd_make.append(OPTION["JOBS"])
         if run_process(cmd_make) != 0:
             raise DistutilsSetupError("Error compiling {}".format(extension))
 
-        if not OPTION_SKIP_DOCS:
+        if not OPTION["SKIP_DOCS"]:
             if extension.lower() == "shiboken2":
                 try:
                     # Check if sphinx is installed to proceed.
@@ -1081,7 +1081,7 @@ class PysideBuild(_build):
         else:
             log.info("Skipped documentation generation")
 
-        if not OPTION_SKIP_MAKE_INSTALL:
+        if not OPTION["SKIP_MAKE_INSTALL"]:
             log.info("Installing module {}...".format(extension))
             # Need to wait a second, so installed file timestamps are
             # older than build file timestamps.
@@ -1119,7 +1119,7 @@ class PysideBuild(_build):
                 "st_build_dir": self.st_build_dir,
                 "cmake_package_name": config.package_name(),
                 "st_package_name": config.package_name(),
-                "ssl_libs_dir": OPTION_OPENSSL,
+                "ssl_libs_dir": OPTION["OPENSSL"],
                 "py_version": self.py_version,
                 "qt_version": self.qtinfo.version,
                 "qt_bin_dir": self.qtinfo.bins_dir,
@@ -1141,7 +1141,7 @@ class PysideBuild(_build):
             os.chdir(self.script_dir)
 
             if sys.platform == "win32":
-                vars['dbg_postfix'] = OPTION_DEBUG and "_d" or ""
+                vars['dbg_postfix'] = OPTION["DEBUG"] and "_d" or ""
                 return prepare_packages_win32(self, vars)
             else:
                 return prepare_packages_posix(self, vars)
@@ -1176,7 +1176,7 @@ class PysideBuild(_build):
         """
         log.info('Finding path to the libclang shared library.')
         cmake_cmd = [
-            OPTION_CMAKE,
+            OPTION["CMAKE"],
             "-L",         # Lists variables
             "-N",         # Just inspects the cache (faster)
             "--build",    # Specifies the build dir
@@ -1256,15 +1256,15 @@ class PysideBuild(_build):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
                 # automatically added one.
-                if OPTION_RPATH_VALUES:
-                    final_rpath = OPTION_RPATH_VALUES
+                if OPTION["RPATH_VALUES"]:
+                    final_rpath = OPTION["RPATH_VALUES"]
                 else:
                     # Add rpath values pointing to $ORIGIN and the
                     # installed qt lib directory.
                     final_rpath = self.qtinfo.libs_dir
-                    if OPTION_STANDALONE:
+                    if OPTION["STANDALONE"]:
                         final_rpath = "$ORIGIN/Qt/lib"
-                override = OPTION_STANDALONE
+                override = OPTION["STANDALONE"]
                 linux_fix_rpaths_for_library(self._patchelf_path, srcpath, final_rpath,
                                              override=override)
 
@@ -1276,10 +1276,10 @@ class PysideBuild(_build):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
                 # automatically added one.
-                if OPTION_RPATH_VALUES:
-                    final_rpath = OPTION_RPATH_VALUES
+                if OPTION["RPATH_VALUES"]:
+                    final_rpath = OPTION["RPATH_VALUES"]
                 else:
-                    if OPTION_STANDALONE:
+                    if OPTION["STANDALONE"]:
                         final_rpath = "@loader_path/Qt/lib"
                     else:
                         final_rpath = self.qtinfo.libs_dir
