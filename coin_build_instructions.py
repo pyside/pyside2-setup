@@ -44,9 +44,10 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
-from build_scripts.utils import acceptCITestConfiguration
 from build_scripts.utils import get_ci_qmake_path
 import os
+import datetime
+import calendar
 
 # Values must match COIN thrift
 CI_HOST_OS = option_value("os")
@@ -57,7 +58,8 @@ CI_HOST_OS_VER = option_value("osVer")
 CI_ENV_INSTALL_DIR = option_value("instdir")
 CI_ENV_AGENT_DIR = option_value("agentdir")
 CI_COMPILER = option_value("compiler")
-CI_INTEGRATION_ID = option_value("coinIntegrationId")
+CI_INTEGRATION_ID = option_value("coinIntegrationId") or \
+    str(calendar.timegm(datetime.datetime.now().timetuple()))
 CI_FEATURES = []
 _ci_features = option_value("features")
 if _ci_features is not None:
@@ -132,8 +134,6 @@ def call_setup(python_ver):
     run_instruction(cmd, "Failed to run setup.py", initial_env=env)
 
 def run_build_instructions():
-    if not acceptCITestConfiguration(CI_HOST_OS, CI_HOST_OS_VER, CI_TARGET_ARCH, CI_COMPILER):
-        exit()
 
     # Remove some environment variables that impact cmake
     for env_var in ['CC', 'CXX']:

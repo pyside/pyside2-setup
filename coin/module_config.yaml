@@ -1,0 +1,505 @@
+version: 1
+accept_configuration:
+  condition: and
+  conditions:
+    - condition: property  # No cross compilation
+      property: host.os
+      equals_property: target.os
+    - condition: property  # qtnamespace is not supported
+      property: configureArgs
+      not_contains_value: -qtnamespace
+    - condition: property  # no-widgets is notsupported
+      property: configureArgs
+      not_contains_value: -no-widgets
+    - condition: property  # no-gui is not supported
+      property: configureArgs
+      not_contains_value: -no-gui
+    - condition: property   # Following configs are not supported
+      property: target.osVersion
+      not_in_values: [OPENSUSE_13_01, QEMU, WebAssembly, Ubuntu_18_04, SLES_12, SLES_15]
+    - condition: property  # MibnGW and msvc2015 are not supported
+      property: target.compiler
+      not_in_values: [Mingw73, MSVC2015]
+
+set_environment: &set_environment
+  type: Group
+  instructions:
+    - type: EnvironmentVariable
+      variableName: TARGET_ARCHITECTURE
+      variableValue: amd64
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86_64
+          - condition: property
+            property: host.os
+            equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: TARGET_ARCHITECTURE
+      variableValue: amd64_x86
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86
+          - condition: property
+            property: host.os
+            equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: MAKEFLAGS
+      variableValue: ""
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: AppendToEnvironmentVariable
+      variableName: PATH
+      variableValue: ;%CI_JOM_PATH%
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
+      variableValue: "\\Users\\qt\\work\\install\\bin;"
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: ICC64_18_LDLP
+      variableValue: /opt/intel/lib/intel64
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: EnvironmentVariable
+      variableName: ICC64_18_PATH # Seems a bit hard to maintain
+      variableValue: /opt/intel/compilers_and_libraries_2018.1.163/linux/bin/intel64:/opt/intel/bin
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: AppendToEnvironmentVariable
+      variableName: LD_LIBRARY_PATH
+      variableValue: :/opt/intel/lib/intel64
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: AppendToEnvironmentVariable
+      variableName: PATH
+      variableValue: ":{{.Env.ICC64_18_PATH}}"
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: EnvironmentVariable
+      variableName: QT_MODULE_TO_TEST
+      variableValue: "pyside/pyside-setup"
+      enable_if:
+         condition: property
+         property: features
+         contains_value: LicenseCheck
+
+find_path_to_msvc_compiler: &find_path_to_msvc_compiler
+     type: Group
+     enable_if:
+       condition: property
+       property: host.os
+       equals_value: Windows
+     instructions:
+       - type: EnvironmentVariable
+         variableName: VC_SCRIPT
+         variableValue: "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+         enable_if:
+           condition: property
+           property: host.compiler
+           equals_value: MSVC2017
+       - type: EnvironmentVariable
+         variableName: VC_SCRIPT
+         variableValue: "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2019\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+         enable_if:
+           condition: property
+           property: host.compiler
+           equals_value: MSVC2019
+       - type: WriteFile
+         fileContents: "call \"{{.Env.VC_SCRIPT}}\" {{.Env.TARGET_ARCHITECTURE}} \r\ncmd /c %*"
+         filename: "c:\\users\\qt\\MSVC.bat"
+         fileMode: 420
+         enable_if:
+           condition: property
+           property: host.os
+           equals_value: Windows
+
+run_instructions: &run_instructions
+     type: Group
+     instructions:
+       - type: ExecuteCommand
+         command: python -u coin_build_instructions.py --os=MacOS --packaging --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: MacOS
+             - condition: property
+               property: features
+               contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute build instructions on osx
+       - type: ExecuteCommand
+         command: python -u coin_build_instructions.py --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: MacOS
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute build instructions on osx
+       - type: ExecuteCommand
+         command: python -u coin_build_instructions.py --os=Linux --packaging --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 14400
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Linux
+             - condition: property
+               property: features
+               contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute build instructions on Linux
+       - type: ExecuteCommand
+         command: python -u coin_build_instructions.py --os=Linux --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 14400
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Linux
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute build instructions on Linux
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --packaging --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: features
+               contains_value: Packaging
+             - condition: property
+               property: target.arch
+               equals_property: host.arch
+         userMessageOnFailure: >
+              Failed to execute build instructions on 64 bit Windows
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+             - condition: property
+               property: target.arch
+               equals_property: host.arch
+         userMessageOnFailure: >
+              Failed to execute build instructions on 64 bit Windows
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --packaging --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: features
+               contains_value: Packaging
+             - condition: property
+               property: target.arch
+               equals_value: X86
+         userMessageOnFailure: >
+              Failed to execute 32 bit build instructions on 64 bit Windows
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+             - condition: property
+               property: target.arch
+               equals_value: X86
+         userMessageOnFailure: >
+              Failed to execute 32 bit build instructions on 64 bit Windows
+run_test_instructions: &run_test_instructions
+     type: Group
+     enable_if:
+       condition: property
+       property: features
+       not_contains_value: LicenseCheck
+     instructions:
+       - type: ExecuteCommand
+         command: python -u coin_test_instructions.py --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: MacOS
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute test instructions on osx
+       - type: ExecuteCommand
+         command: python -u coin_test_instructions.py --packaging --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: MacOS
+             - condition: property
+               property: features
+               contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute test instructions on osx
+       - type: ExecuteCommand
+         command: python -u coin_test_instructions.py --os=Linux --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 14400
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Linux
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute test instructions on Linux
+       - type: ExecuteCommand
+         command: python -u coin_test_instructions.py --packaging --os=Linux --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 14400
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Linux
+             - condition: property
+               property: features
+               contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute test instructions on Linux
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: target.arch
+               equals_property: host.arch
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute test instructions on 64 bit Windows
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: target.arch
+               equals_value: X86
+             - condition: property
+               property: features
+               not_contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute test instructions on 64 bit Windows
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --packaging --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: target.arch
+               equals_property: host.arch
+             - condition: property
+               property: features
+               contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute 32 bit test instructions on 64 bit Windows
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --packaging --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: and
+           conditions:
+             - condition: property
+               property: host.os
+               equals_value: Windows
+             - condition: property
+               property: target.arch
+               equals_value: X86
+             - condition: property
+               property: features
+               contains_value: Packaging
+         userMessageOnFailure: >
+              Failed to execute 32 bit test instructions on 64 bit Windows
+
+relocate_pyside: &relocate_pyside
+     type: Group
+     enable_if:
+       condition: property
+       property: features
+       not_contains_value: LicenseCheck
+     instructions:
+       - type: ChangeDirectory
+         directory: "{{.AgentWorkingDir}}/pyside"
+         maxTimeInSeconds: 300
+         maxTimeBetweenOutput: 120
+         userMessageOnFailure: >
+              Failed to change to pyside dir
+       - type: ExecuteCommand
+         command: c:\\users\\qt\\MSVC.bat rd /s /q pyside-setup
+         maxTimeInSeconds: 300
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: property
+           property: host.os
+           equals_value: Windows
+         userMessageOnFailure: >
+              Failed to remove pyside-setup dir
+       - type: ExecuteCommand
+         command: /bin/rm -rf pyside-setup
+         maxTimeInSeconds: 300
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: property
+           property: host.os
+           not_equals_value: Windows
+         userMessageOnFailure: >
+              Failed to remove pyside-setup dir
+       - type: InstallBinaryArchive
+         relativeStoragePath: "{{.Env.MODULE_ARTIFACTS_RELATIVE_STORAGE_PATH}}/artifacts.tar.gz"
+         directory: "pyside"
+         maxTimeInSeconds: 1200
+         maxTimeBetweenOutput: 1200
+       - type: ChangeDirectory
+         directory: "{{.AgentWorkingDir}}\\pyside\\pyside-setup"
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: property
+           property: host.os
+           equals_value: Windows
+         userMessageOnFailure: >
+              Failed to install binary artifacts
+       - type: ChangeDirectory
+         directory: "{{.AgentWorkingDir}}/pyside/pyside-setup"
+         maxTimeInSeconds: 7200
+         maxTimeBetweenOutput: 120
+         enable_if:
+           condition: property
+           property: host.os
+           not_equals_value: Windows
+         userMessageOnFailure: >
+              Failed to change to pyside-setup dir
+
+upload_pyside: &upload_pyside
+     type: Group
+     instructions:
+       - type: UploadArtifact
+         archiveDirectory: "{{.AgentWorkingDir}}\\pyside"
+         transferType: UploadModuleBuildArtifact
+         maxTimeInSeconds: 1200
+         maxTimeBetweenOutput: 1200
+         enable_if:
+           condition: property
+           property: host.os
+           equals_value: Windows
+       - type: UploadArtifact
+         archiveDirectory: "{{.AgentWorkingDir}}/pyside"
+         transferType: UploadModuleBuildArtifact
+         maxTimeInSeconds: 1200
+         maxTimeBetweenOutput: 1200
+         enable_if:
+           condition: property
+           property: host.os
+           not_equals_value: Windows
+
+
+build_instructions:
+      - *set_environment
+      - *find_path_to_msvc_compiler
+      - *run_instructions
+      - *upload_pyside
+test_instructions:
+      - *set_environment
+      - *find_path_to_msvc_compiler
+      - *relocate_pyside
+      - *run_test_instructions
+
