@@ -138,6 +138,11 @@ if (Qt53DRender_VERSION VERSION_EQUAL 5.14.0 OR Qt53DRender_VERSION VERSION_GREA
         ${Qt3DRender_GEN_DIR}/qt3drender_qshaderimage_wrapper.cpp)
 endif()
 
+if (Qt53DRender_VERSION VERSION_EQUAL 5.15.0 OR Qt53DRender_VERSION VERSION_GREATER 5.15.0)
+    list(APPEND Qt3DRender_SRC
+        ${Qt3DRender_GEN_DIR}/qt3drender_qrendercapabilities_wrapper.cpp)
+endif()
+
 set(Qt3DRender_include_dirs
                      ${Qt3DRender_SOURCE_DIR}
                      ${Qt3DRender_BINARY_DIR}
