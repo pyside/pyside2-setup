@@ -117,6 +117,9 @@ QString msgCannotUseEnumAsInt(const QString &name);
 
 QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType);
 
+QString msgCannotFindSmartPointer(const QString &instantiationType,
+                                  const AbstractMetaClassList &pointers);
+
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs);
 
 QString msgInvalidVersion(const QString &package, const QString &version);
@@ -127,6 +130,8 @@ QString msgCannotFindNamespaceToExtend(const QString &name,
 QString msgExtendingNamespaceRequiresPattern(const QString &name);
 
 QString msgInvalidRegularExpression(const QString &pattern, const QString &why);
+
+QString msgNoRootTypeSystemEntry();
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const QVector<const AbstractMetaFunction *> &involvedConversions);

@@ -430,9 +430,16 @@ bool Generator::generate()
             return false;
     }
 
+    const auto smartPointers = m_d->apiextractor->smartPointers();
     for (const AbstractMetaType *type : qAsConst(m_d->instantiatedSmartPointers)) {
         AbstractMetaClass *smartPointerClass =
-                AbstractMetaClass::findClass(m_d->apiextractor->smartPointers(), type->typeEntry());
+            AbstractMetaClass::findClass(smartPointers, type->typeEntry());
+        if (!smartPointerClass) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgCannotFindSmartPointer(type->cppSignature(),
+                                                           smartPointers)));
+            return false;
+        }
         GeneratorContext context(smartPointerClass, type, true);
         if (!generateFileForContext(context))
             return false;

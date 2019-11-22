@@ -328,6 +328,18 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
     return result;
 }
 
+QString msgCannotFindSmartPointer(const QString &instantiationType,
+                                  const AbstractMetaClassList &pointers)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to find smart pointer type for " << instantiationType << " (known types:";
+    for (auto t : pointers)
+        str << ' ' << t->fullName();
+    str << ").";
+    return result;
+}
+
 // main.cpp
 
 QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs)
@@ -461,6 +473,11 @@ QString msgExtendingNamespaceRequiresPattern(const QString &name)
 QString msgInvalidRegularExpression(const QString &pattern, const QString &why)
 {
     return QLatin1String("Invalid pattern \"") + pattern + QLatin1String("\": ") + why;
+}
+
+QString msgNoRootTypeSystemEntry()
+{
+    return QLatin1String("Type system entry appears out of order, there does not seem to be a root type system element.");
 }
 
 // qtdocgenerator.cpp

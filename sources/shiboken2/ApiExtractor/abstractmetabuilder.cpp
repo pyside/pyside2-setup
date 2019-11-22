@@ -836,13 +836,15 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     QString qualifiedName = enumItem->qualifiedName().join(colonColon());
 
     TypeEntry *typeEntry = nullptr;
+    const TypeEntry *enclosingTypeEntry = enclosing ? enclosing->typeEntry() : nullptr;
     if (enumItem->accessPolicy() == CodeModel::Private) {
         QStringList names = enumItem->qualifiedName();
         const QString &enumName = names.constLast();
         QString nspace;
         if (names.size() > 1)
             nspace = QStringList(names.mid(0, names.size() - 1)).join(colonColon());
-        typeEntry = new EnumTypeEntry(nspace, enumName, QVersionNumber(0, 0));
+        typeEntry = new EnumTypeEntry(nspace, enumName, QVersionNumber(0, 0),
+                                      enclosingTypeEntry);
         TypeDatabase::instance()->addType(typeEntry);
     } else if (enumItem->enumKind() != AnonymousEnum) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
@@ -862,8 +864,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     QString enumName = enumItem->name();
 
     QString className;
-    if (enclosing)
-        className = enclosing->typeEntry()->qualifiedCppName();
+    if (enclosingTypeEntry)
+        className = enclosingTypeEntry->qualifiedCppName();
 
     QString rejectReason;
     if (TypeDatabase::instance()->isEnumRejected(className, enumName, &rejectReason)) {
@@ -963,7 +965,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         }
         EnumValueTypeEntry *enumValue =
             new EnumValueTypeEntry(prefix + e->name(), e->stringValue(),
-                                   enumTypeEntry, enumTypeEntry->version());
+                                   enumTypeEntry, enumTypeEntry->version(),
+                                   enumTypeEntry->parent());
         TypeDatabase::instance()->addType(enumValue);
         if (e->value().isNullValue())
             enumTypeEntry->setNullValue(enumValue);
@@ -1097,9 +1100,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     TemplateParameterList template_parameters = classItem->templateParameters();
     QVector<TypeEntry *> template_args;
     template_args.clear();
+    auto argumentParent = metaClass->typeEntry()->typeSystemTypeEntry();
     for (int i = 0; i < template_parameters.size(); ++i) {
         const TemplateParameterModelItem &param = template_parameters.at(i);
-        TemplateArgumentEntry *param_type = new TemplateArgumentEntry(param->name(), type->version());
+        auto param_type = new TemplateArgumentEntry(param->name(), type->version(),
+                                                    argumentParent);
         param_type->setOrdinal(i);
         template_args.append(param_type);
     }
@@ -2251,7 +2256,9 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
                 if (_ok)
                     arrayType->setArrayElementCount(int(elems));
             }
-            arrayType->setTypeEntry(new ArrayTypeEntry(elementType->typeEntry() , elementType->typeEntry()->version()));
+            auto elementTypeEntry = elementType->typeEntry();
+            arrayType->setTypeEntry(new ArrayTypeEntry(elementTypeEntry, elementTypeEntry->version(),
+                                                       elementTypeEntry->parent()));
             arrayType->decideUsagePattern();
 
             elementType = arrayType;
@@ -2675,7 +2682,8 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
             t = typeDb->findType(typeName);
             if (!t) {
                 t = new EnumValueTypeEntry(typeName, typeName, nullptr,
-                                           QVersionNumber(0, 0));
+                                           QVersionNumber(0, 0),
+                                           subclass->typeEntry()->parent());
                 t->setCodeGeneration(0);
                 typeDb->addType(t);
             }

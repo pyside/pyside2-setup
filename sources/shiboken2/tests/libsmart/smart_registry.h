@@ -26,12 +26,43 @@
 **
 ****************************************************************************/
 
-#ifndef SMART_H
-#define SMART_H
+#ifndef SMART_REGISTRY_H
+#define SMART_REGISTRY_H
 
-#include "smart_sharedptr.h"
-#include "smart_integer.h"
-#include "smart_obj.h"
-#include "smart_registry.h"
+#include <vector>
 
-#endif // SMART_H
+#include "libsmartmacros.h"
+
+class Obj;
+class Integer;
+
+// Used to track which C++ objects are alive.
+class LIB_SMART_API Registry {
+public:
+    static Registry *getInstance();
+    ~Registry();
+
+    Registry(const Registry &) = delete;
+    Registry &operator=(const Registry &) = delete;
+    Registry(Registry &&) = delete;
+    Registry &operator=(Registry &&) = delete;
+
+    void add(Obj *p);
+    void add(Integer *p);
+    void remove(Obj *p);
+    void remove(Integer *p);
+    int countObjects() const;
+    int countIntegers() const;
+    bool shouldPrint() const;
+    void setShouldPrint(bool flag);
+
+protected:
+    Registry();
+
+private:
+    std::vector<Obj *> m_objects;
+    std::vector<Integer *> m_integers;
+    bool m_printStuff = false;
+};
+
+#endif // SMART_REGISTRY_H

@@ -37,6 +37,7 @@
 
 #include <QSet>
 #include <QFileInfo>
+#include <QVector>
 
 class TypeDatabase;
 
@@ -187,7 +188,7 @@ public:
 
     QHash<const TypeEntry *, AbstractMetaEnum *> m_enums;
 
-    QList<NamespaceModelItem> m_scopes;
+    QVector<NamespaceModelItem> m_scopes;
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 

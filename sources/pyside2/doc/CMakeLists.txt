@@ -96,7 +96,6 @@ add_custom_target(qdoc
                 SOURCE "pyside.qdocconf")
 
 add_custom_target(apidoc
-                  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
                   COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/rst html
                   #copying shiboken2 (including ApiExtractor) doc htmls
                   COMMENT "Copying over the Shiboken2 doc HTMLs..."
@@ -110,6 +109,7 @@ add_custom_target(apidoc
 configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 add_custom_target("docrsts"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
     COMMAND Shiboken2::shiboken2 --generator-set=qtdoc ${docHeader}
             --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
             --api-version=${SUPPORTED_QT_VERSION}
@@ -117,9 +117,9 @@ add_custom_target("docrsts"
             --library-source-dir=${QT_SRC_DIR}
             --documentation-data-dir=${DOC_DATA_DIR}/webxml
             --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
-            --documentation-code-snippets-dir=${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/examples
-            --documentation-extra-sections-dir=${CMAKE_CURRENT_SOURCE_DIR}/extras
-            --additional-documentation=${CMAKE_CURRENT_LIST_DIR}/additionaldocs.lst
+            --documentation-code-snippets-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/examples
+            --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
+            --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
             ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
     WORKING_DIRECTORY ${${module}_SOURCE_DIR}
     COMMENT "Running generator to generate documentation..."
