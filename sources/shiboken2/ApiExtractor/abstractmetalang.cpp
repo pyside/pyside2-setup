@@ -531,7 +531,7 @@ bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
 */
 AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
 {
-    CompareResult result = nullptr;
+    CompareResult result;
 
     // Enclosing class...
     if (ownerClass() == other->ownerClass())

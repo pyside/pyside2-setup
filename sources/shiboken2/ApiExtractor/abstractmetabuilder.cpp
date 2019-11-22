@@ -1215,7 +1215,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
 
     metaField->setType(metaType);
 
-    AbstractMetaAttributes::Attributes attr = nullptr;
+    AbstractMetaAttributes::Attributes attr;
     if (field->isStatic())
         attr |= AbstractMetaAttributes::Static;
 
@@ -1323,7 +1323,7 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const Sco
                                                                        AbstractMetaClass::Attributes *constructorAttributes,
                                                                        AbstractMetaClass *currentClass)
 {
-    *constructorAttributes = nullptr;
+    *constructorAttributes = {};
     AbstractMetaFunctionList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
