@@ -2209,7 +2209,7 @@ void QtDocGenerator::writeModuleDocumentation()
             QStringList::iterator it2 = fileList.begin();
             for (; it2 != fileList.end(); ++it2) {
                 QString origFileName(*it2);
-                it2->remove(0, it.key().count() + 1);
+                it2->remove(0, moduleName.indexOf(QLatin1Char('.')));
                 QString newFilePath = outputDir + QLatin1Char('/') + *it2;
                 if (QFile::exists(newFilePath))
                     QFile::remove(newFilePath);
