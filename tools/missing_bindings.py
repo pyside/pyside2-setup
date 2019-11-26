@@ -77,6 +77,7 @@ modules_to_test['QtMultimediaWidgets'] = 'qtmultimediawidgets-module.html'
 modules_to_test['QtNetwork'] = 'qtnetwork-module.html'
 modules_to_test['QtQml'] = 'qtqml-module.html'
 modules_to_test['QtQuick'] = 'qtquick-module.html'
+modules_to_test['QtQuickWidgets'] = 'qtquickwidgets-module.html'
 modules_to_test['QtSql'] = 'qtsql-module.html'
 modules_to_test['QtTest'] = 'qttest-module.html'
 modules_to_test['QtWidgets'] = 'qtwidgets-module.html'
@@ -89,16 +90,17 @@ modules_to_test['Qt3DRender'] = 'qt3drender-module.html'
 modules_to_test['Qt3DAnimation'] = 'qt3danimation-module.html'
 modules_to_test['Qt3DExtras'] = 'qt3dextras-module.html'
 modules_to_test['QtConcurrent'] = 'qtconcurrent-module.html'
-modules_to_test['QtNetworkAuth'] = 'qtnetworkauth-module.html'
+#modules_to_test['QtNetworkAuth'] = 'qtnetworkauth-module.html'
 modules_to_test['QtHelp'] = 'qthelp-module.html'
 modules_to_test['QtLocation'] = 'qtlocation-module.html'
 modules_to_test['QtPrintSupport'] = 'qtprintsupport-module.html'
-modules_to_test['QtSCXML'] = 'qtscxml-module.html'
-modules_to_test['QtSpeech'] = 'qtspeech-module.html'
+modules_to_test['QtScxml'] = 'qtscxml-module.html'
+#modules_to_test['QtSpeech'] = 'qtspeech-module.html'
 modules_to_test['QtSvg'] = 'qtsvg-module.html'
 modules_to_test['QtUiTools'] = 'qtuitools-module.html'
 modules_to_test['QtWebChannel'] = 'qtwebchannel-module.html'
 modules_to_test['QtWebEngine'] = 'qtwebengine-module.html'
+modules_to_test['QtWebEngineCore'] = 'qtwebenginecore-module.html'
 modules_to_test['QtWebEngineWidgets'] = 'qtwebenginewidgets-module.html'
 modules_to_test['QtWebSockets'] = 'qtwebsockets-module.html'
 modules_to_test['QtMacExtras'] = 'qtmacextras-module.html'
@@ -108,7 +110,12 @@ modules_to_test['QtXml'] = 'qtxml-module.html'
 modules_to_test['QtXmlPatterns'] = 'qtxmlpatterns-module.html'
 modules_to_test['QtCharts'] = 'qtcharts-module.html'
 modules_to_test['QtDataVisualization'] = 'qtdatavisualization-module.html'
-
+modules_to_test['QtOpenGL'] = 'qtopengl-module.html'
+modules_to_test['QtPositioning'] = 'qtpositioning-module.html'
+modules_to_test['QtRemoteObjects'] = 'qtremoteobjects-module.html'
+modules_to_test['QtScript'] = 'qtscript-module.html'
+modules_to_test['QtScriptTools'] = 'qtscripttools-module.html'
+modules_to_test['QtSensors'] = 'qtsensors-module.html'
 types_to_ignore = set()
 # QtCore
 types_to_ignore.add('QFlag')
@@ -219,6 +226,8 @@ qt_documentation_website_prefixes['5.10'] = 'http://doc.qt.io/qt-5.10/'
 qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5.11/'
 qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5.11/'
 qt_documentation_website_prefixes['5.12'] = 'http://doc.qt.io/qt-5.12/'
+qt_documentation_website_prefixes['5.13'] = 'http://doc.qt.io/qt-5.13/'
+qt_documentation_website_prefixes['5.14'] = 'http://doc.qt.io/qt-5/'
 qt_documentation_website_prefixes['dev'] = 'http://doc-snapshots.qt.io/qt5-dev/'
 
 
@@ -242,7 +251,7 @@ parser.add_argument("module",
 parser.add_argument("--qt-version",
                     "-v",
                     default='5.12',
-                    choices=['5.6', '5.9', '5.11', '5.12', 'dev'],
+                    choices=['5.6', '5.9', '5.11', '5.12', '5.13', '5.14', 'dev'],
                     type=str,
                     dest='version',
                     help="the Qt version to use to check for types")
