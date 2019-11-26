@@ -50,6 +50,9 @@ protected:
     bool finishGeneration() override;
 
 private:
+    void writeInitFunc(QTextStream &declStr, QTextStream &callStr,
+                       const Indentor &indent, const QString &initFunctionName,
+                       const TypeEntry *enclosingEntry = nullptr);
     void writeConstructorNative(QTextStream &s, const AbstractMetaFunction *func);
     void writeDestructorNative(QTextStream &s, const AbstractMetaClass *metaClass);
 

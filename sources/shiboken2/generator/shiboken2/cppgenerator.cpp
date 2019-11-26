@@ -5397,6 +5397,25 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &conte
     s << '}' << endl;
 }
 
+// Write declaration and invocation of the init function for the module init
+// function.
+void CppGenerator::writeInitFunc(QTextStream &declStr, QTextStream &callStr,
+                                 const Indentor &indent, const QString &initFunctionName,
+                                 const TypeEntry *enclosingEntry)
+{
+    const bool hasParent =
+        enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
+    declStr << "void init_" << initFunctionName << "(PyObject *"
+        << (hasParent ? "enclosingClass" : "module") << ");\n";
+    callStr << indent << "init_" << initFunctionName;
+    if (hasParent) {
+        callStr << "(reinterpret_cast<PyTypeObject *>("
+            << cpythonTypeNameExt(enclosingEntry) << ")->tp_dict);\n";
+    } else {
+        callStr << "(module);\n";
+    }
+}
+
 bool CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
@@ -5451,32 +5470,20 @@ bool CppGenerator::finishGeneration()
     const AbstractMetaClassList lst = classesTopologicalSorted(additionalDependencies);
 
     for (const AbstractMetaClass *cls : lst){
-        if (!shouldGenerate(cls))
-            continue;
-
-        const QString initFunctionName = QLatin1String("init_") + getSimpleClassInitFunctionName(cls);
-
-        s_classInitDecl << "void " << initFunctionName << "(PyObject *module);" << endl;
-
-        s_classPythonDefines << INDENT << initFunctionName;
-        if (auto enclosing = cls->targetLangEnclosingClass()) {
-            s_classPythonDefines << "(reinterpret_cast<PyTypeObject *>("
-                << cpythonTypeNameExt(enclosing->typeEntry()) << ")->tp_dict);";
-        } else {
-            s_classPythonDefines << "(module);";
+        if (shouldGenerate(cls)) {
+            writeInitFunc(s_classInitDecl, s_classPythonDefines, INDENT,
+                          getSimpleClassInitFunctionName(cls),
+                          cls->typeEntry()->targetLangEnclosingEntry());
         }
-        s_classPythonDefines << endl;
     }
 
     // Initialize smart pointer types.
     const QVector<const AbstractMetaType *> &smartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType *metaType : smartPtrs) {
         GeneratorContext context(nullptr, metaType, true);
-        QString initFunctionName = getInitFunctionName(context);
-        s_classInitDecl << "void init_" << initFunctionName << "(PyObject *module);" << endl;
-        QString defineStr = QLatin1String("init_") + initFunctionName;
-        defineStr += QLatin1String("(module);");
-        s_classPythonDefines << INDENT << defineStr << endl;
+        writeInitFunc(s_classInitDecl, s_classPythonDefines, INDENT,
+                      getInitFunctionName(context),
+                      metaType->typeEntry()->targetLangEnclosingEntry());
     }
 
     QString moduleFileName(outputDirectory() + QLatin1Char('/') + subDirectoryForPackage(packageName()));

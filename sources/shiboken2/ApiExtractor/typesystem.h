@@ -606,6 +606,8 @@ public:
     const TypeEntry *parent() const { return m_parent; }
     void setParent(const TypeEntry *p) { m_parent = p; }
     const TypeSystemTypeEntry *typeSystemTypeEntry() const;
+    // cf AbstractMetaClass::targetLangEnclosingClass()
+    const TypeEntry *targetLangEnclosingEntry() const;
 
     bool isPrimitive() const
     {

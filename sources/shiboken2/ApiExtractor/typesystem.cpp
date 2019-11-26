@@ -693,6 +693,16 @@ const TypeSystemTypeEntry *TypeEntry::typeSystemTypeEntry() const
     return nullptr;
 }
 
+const TypeEntry *TypeEntry::targetLangEnclosingEntry() const
+{
+    auto result = m_parent;
+    while (result && result->type() != TypeEntry::TypeSystemType
+           && !NamespaceTypeEntry::isVisibleScope(result)) {
+        result = result->parent();
+    }
+    return result;
+}
+
 QString TypeEntry::targetLangName() const
 {
     if (m_cachedTargetLangName.isEmpty())
@@ -754,6 +764,8 @@ TypeEntry *TypeEntry::clone() const
 // Take over parameters relevant for typedefs
 void TypeEntry::useAsTypedef(const TypeEntry *source)
 {
+    // XML Typedefs are in the global namespace for now.
+    m_parent = source->typeSystemTypeEntry();
     m_entryName = source->m_entryName;
     m_name = source->m_name;
     m_targetLangPackage = source->m_targetLangPackage;
