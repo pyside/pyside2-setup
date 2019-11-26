@@ -41,6 +41,9 @@
 -->
 <typesystem package="PySide2.QtCharts">
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+  <!-- PYSIDE-1101 Removing inherited method to avoid argument conflict
+  on the QChart::scroll overload -->
+  <rejection class="QGraphicsItem" function-name="scroll"/>
   <namespace-type name="QtCharts">
       <object-type name="QAbstractAxis" since="5.7">
           <enum-type name="AxisType"/>
