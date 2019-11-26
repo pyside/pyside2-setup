@@ -714,7 +714,7 @@ PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     if (PyType_Ready(type) < 0)
         goto fail;
 
-    // no ht_hached_keys in Python 2
+    // no ht_cached_keys in Python 2
     // if (type->tp_dictoffset) {
     //     res->ht_cached_keys = _PyDict_NewKeysForClass();
     // }

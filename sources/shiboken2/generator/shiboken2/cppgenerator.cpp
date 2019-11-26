@@ -3871,7 +3871,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
         tp_dealloc = metaClass->hasPrivateDestructor() ?
                      QLatin1String("SbkDeallocWrapperWithPrivateDtor") :
-                     QLatin1String("object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */");
+                     QLatin1String("Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */");
         tp_init.clear();
     } else {
         QString deallocClassName;
