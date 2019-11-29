@@ -81,7 +81,6 @@ if (typeObj) {
                 for (int i = 0; i < valuesSize; i++) {
                     PyObject *item = PyUnicode_FromString(valuesList[i].data());
                     PyList_SET_ITEM(list, i, item);
-                    Py_DECREF(item);
                 }
                 %PYARG_0 = list;
 
@@ -110,15 +109,23 @@ if (typeObj) {
         float asFloat = out.toFloat();
         %PYARG_0 = PyFloat_FromDouble(asFloat);
     } else if (typeObj == &PyBool_Type) {
-        %PYARG_0 = out.toBool() ? Py_True : Py_False;
+        if (out.toBool()) {
+            Py_INCREF(Py_True);
+            %PYARG_0 = Py_True;
+        } else {
+            Py_INCREF(Py_False);
+            %PYARG_0 = Py_False;
+        }
     }
     // TODO: PyDict_Type and PyTuple_Type
 }
 else {
-    if (!out.isValid())
+    if (!out.isValid()) {
+        Py_INCREF(Py_None);
         %PYARG_0 = Py_None;
-    else
+    } else {
         %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
+    }
 }
 
 // @snippet qsettings-value

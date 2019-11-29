@@ -52,8 +52,10 @@ setup_py_path = os.path.join(setup_script_dir, "setup.py")
 
 start_time = int(time.time())
 
+
 def elapsed():
     return int(time.time()) - start_time
+
 
 @memoize
 def get_package_timestamp():
@@ -61,6 +63,7 @@ def get_package_timestamp():
         Coin integration id timestamp. For regular builds it's
         just the current timestamp or a user provided one."""
     return OPTION_PACKAGE_TIMESTAMP if OPTION_PACKAGE_TIMESTAMP else start_time
+
 
 @memoize
 def get_package_version():
@@ -82,6 +85,7 @@ def get_package_version():
         final_version += ".dev{}".format(get_package_timestamp())
     return final_version
 
+
 def get_setuptools_extension_modules():
     # Setting py_limited_api on the extension is the "correct" thing
     # to do, but it doesn't actually do anything, because we
@@ -95,8 +99,7 @@ def get_setuptools_extension_modules():
     return extension_modules
 
 
-# Git submodules: ["submodule_name",
-#   "location_relative_to_sources_folder"]
+# Git submodules: ["submodule_name", "location_relative_to_sources_folder"]
 submodules = [["pyside2-tools"]]
 
 try:
@@ -151,7 +154,7 @@ def check_allowed_python_version():
         if found:
             major = int(found.group(1))
             minor = int(found.group(2))
-            supported.append( (major, minor) )
+            supported.append((major, minor))
     this_py = sys.version_info[:2]
     if this_py not in supported:
         print("Unsupported python version detected. Only these python versions are supported: {}"
@@ -207,9 +210,9 @@ available_mkspecs = ["msvc", "mingw", "ninja"] if sys.platform == "win32" else [
 if OPTION_MAKESPEC is None:
     OPTION_MAKESPEC = available_mkspecs[0]
 
-if not OPTION_MAKESPEC in available_mkspecs:
-    print('Invalid option --make-spec "{}". Available values are {}'.format(
-          OPTION_MAKESPEC, available_mkspecs))
+if OPTION_MAKESPEC not in available_mkspecs:
+    print('Invalid option --make-spec "{}". Available values are {}'.format(OPTION_MAKESPEC,
+                                                                            available_mkspecs))
     sys.exit(1)
 
 if OPTION_JOBS:
@@ -222,8 +225,10 @@ if OPTION_JOBS:
 else:
     OPTION_JOBS = ''
 
+
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
+
 
 # Return a prefix suitable for the _install/_build directory
 def prefix():
@@ -240,6 +245,7 @@ def prefix():
     if OPTION_LIMITED_API == "yes" and sys.version_info[0] == 3:
         name += "a"
     return name
+
 
 # Initialize, pull and checkout submodules
 def prepare_sub_modules():
@@ -263,13 +269,11 @@ def prepare_sub_modules():
     if need_init_sub_modules:
         git_update_cmd = ["git", "submodule", "update", "--init"]
         if run_process(git_update_cmd) != 0:
-            m = ("Failed to initialize the git submodules: "
-                "update --init failed")
+            m = "Failed to initialize the git submodules: update --init failed"
             raise DistutilsSetupError(m)
         git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "--all"]
         if run_process(git_pull_cmd) != 0:
-            m = ("Failed to initialize the git submodules: "
-                "git fetch --all failed")
+            m = "Failed to initialize the git submodules: git fetch --all failed"
             raise DistutilsSetupError(m)
     else:
         print("All submodules present.")
@@ -279,9 +283,11 @@ def prepare_sub_modules():
         m = "Failed to checkout the correct git submodules SHA1s."
         raise DistutilsSetupError(m)
 
+
 # Single global instance of QtInfo to be used later in multiple code
 # paths.
 qtinfo = QtInfo(QMAKE_COMMAND)
+
 
 def get_qt_version():
     qt_version = qtinfo.version
@@ -291,16 +297,16 @@ def get_qt_version():
         sys.exit(1)
 
     if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
-        log.error("Incompatible Qt version detected: {}. "
-            "A Qt version >= 5.7 is required.".format(qt_version))
+        log.error("Incompatible Qt version detected: {}. A Qt version >= 5.7 is "
+                  "required.".format(qt_version))
         sys.exit(1)
 
     return qt_version
 
 
 def prepare_build():
-    if (os.path.isdir(".git") and not OPTION_IGNOREGIT and
-            not OPTION_ONLYPACKAGE and not OPTION_REUSE_BUILD):
+    if (os.path.isdir(".git") and not OPTION_IGNOREGIT and not OPTION_ONLYPACKAGE
+            and not OPTION_REUSE_BUILD):
         prepare_sub_modules()
     # Clean up temp build folder.
     for n in ["build"]:
@@ -321,15 +327,15 @@ def prepare_build():
             # In-source, developer build
             if install_prefix.endswith("qtbase"):
                 qt_src_dir = install_prefix
-            else: # SDK: Use 'Src' directory
-                qt_src_dir = os.path.join(os.path.dirname(install_prefix),
-                    'Src', 'qtbase')
+            else:  # SDK: Use 'Src' directory
+                qt_src_dir = os.path.join(os.path.dirname(install_prefix), 'Src', 'qtbase')
+
 
 class PysideInstall(_install):
     def __init__(self, *args, **kwargs):
         _install.__init__(self, *args, **kwargs)
 
-    def initialize_options (self):
+    def initialize_options(self):
         _install.initialize_options(self)
 
         if sys.platform == 'darwin':
@@ -350,6 +356,7 @@ class PysideInstall(_install):
         _install.run(self)
         print('*** Install completed ({}s)'.format(elapsed()))
 
+
 class PysideDevelop(_develop):
 
     def __init__(self, *args, **kwargs):
@@ -359,6 +366,7 @@ class PysideDevelop(_develop):
         self.run_command("build")
         _develop.run(self)
 
+
 class PysideBdistEgg(_bdist_egg):
 
     def __init__(self, *args, **kwargs):
@@ -367,6 +375,7 @@ class PysideBdistEgg(_bdist_egg):
     def run(self):
         self.run_command("build")
         _bdist_egg.run(self)
+
 
 class PysideBuildExt(_build_ext):
 
@@ -399,13 +408,12 @@ class PysideInstallLib(_install_lib):
 
         if os.path.isdir(self.build_dir):
             # Using our own copydir makes sure to preserve symlinks.
-            outfiles = copydir(os.path.abspath(self.build_dir),
-                os.path.abspath(self.install_dir))
+            outfiles = copydir(os.path.abspath(self.build_dir), os.path.abspath(self.install_dir))
         else:
-            self.warn("'{}' does not exist -- "
-                "no Python modules to install".format(self.build_dir))
+            self.warn("'{}' does not exist -- no Python modules to install".format(self.build_dir))
             return
         return outfiles
+
 
 class PysideBuild(_build):
 
@@ -468,12 +476,10 @@ class PysideBuild(_build):
             elif OPTION_MAKESPEC == "msvc":
                 nmake_path = find_executable("nmake")
                 if nmake_path is None or not os.path.exists(nmake_path):
-                    log.info("nmake not found. "
-                        "Trying to initialize the MSVC env...")
+                    log.info("nmake not found. Trying to initialize the MSVC env...")
                     init_msvc_env(platform_arch, build_type)
                     nmake_path = find_executable("nmake")
-                    assert(nmake_path is not None and
-                        os.path.exists(nmake_path))
+                    assert(nmake_path is not None and os.path.exists(nmake_path))
                 jom_path = None if OPTION_NO_JOM else find_executable("jom")
                 if jom_path is not None and os.path.exists(jom_path):
                     log.info("jom was found in {}".format(jom_path))
@@ -493,23 +499,20 @@ class PysideBuild(_build):
                 make_name = "ninja"
                 make_generator = "Ninja"
             else:
-                raise DistutilsSetupError(
-                    "Invalid option --make-spec.")
+                raise DistutilsSetupError("Invalid option --make-spec.")
             make_path = find_executable(make_name)
             if make_path is None or not os.path.exists(make_path):
-                raise DistutilsSetupError("You need the program '{}' on your "
-                    "system path to compile PySide2.".format(make_name))
+                raise DistutilsSetupError("You need the program '{}' on your system path to "
+                                          "compile PySide2.".format(make_name))
 
             if OPTION_CMAKE is None or not os.path.exists(OPTION_CMAKE):
-                raise DistutilsSetupError(
-                    "Failed to find cmake."
-                    " Please specify the path to cmake with "
-                    "--cmake parameter.")
+                raise DistutilsSetupError("Failed to find cmake."
+                                          " Please specify the path to cmake with "
+                                          "--cmake parameter.")
 
         if OPTION_QMAKE is None or not os.path.exists(OPTION_QMAKE):
-            raise DistutilsSetupError(
-                "Failed to find qmake."
-                " Please specify the path to qmake with --qmake parameter.")
+            raise DistutilsSetupError("Failed to find qmake. "
+                                      "Please specify the path to qmake with --qmake parameter.")
 
         # Prepare parameters
         py_executable = sys.executable
@@ -534,8 +537,7 @@ class PysideBuild(_build):
             if sys.platform == "win32":
                 py_include_dir = os.path.join(py_prefix, "include")
             else:
-                py_include_dir = os.path.join(py_prefix,
-                    "include/python{}".format(py_version))
+                py_include_dir = os.path.join(py_prefix, "include/python{}".format(py_version))
         dbg_postfix = ""
         if build_type == "Debug":
             dbg_postfix = "_d"
@@ -554,7 +556,7 @@ class PysideBuild(_build):
                 lib_exts.append('.dylib')
             if sys.version_info[0] > 2:
                 lib_suff = getattr(sys, 'abiflags', None)
-            else: # Python 2
+            else:  # Python 2
                 lib_suff = ''
             lib_exts.append('.so.1')
             # Suffix for OpenSuSE 13.01
@@ -573,8 +575,7 @@ class PysideBuild(_build):
             python_library_found = False
             libs_tried = []
             for lib_ext in lib_exts:
-                lib_name = "libpython{}{}{}".format(py_version, lib_suff,
-                    lib_ext)
+                lib_name = "libpython{}{}{}".format(py_version, lib_suff, lib_ext)
                 py_library = os.path.join(py_libdir, lib_name)
                 if os.path.exists(py_library):
                     python_library_found = True
@@ -592,15 +593,12 @@ class PysideBuild(_build):
                     # /System/Library/Frameworks/Python.framework/Versions/2.6/lib
                     # to
                     # /System/Library/Frameworks/Python.framework/Versions/2.6/Python
-                    possible_framework_path = os.path.realpath(
-                        os.path.join(py_libdir, '..'))
-                    possible_framework_version = os.path.basename(
-                        possible_framework_path)
-                    possible_framework_library = os.path.join(
-                        possible_framework_path, 'Python')
+                    possible_framework_path = os.path.realpath(os.path.join(py_libdir, '..'))
+                    possible_framework_version = os.path.basename(possible_framework_path)
+                    possible_framework_library = os.path.join(possible_framework_path, 'Python')
 
-                    if (possible_framework_version == '2.6' and
-                            os.path.exists(possible_framework_library)):
+                    if (possible_framework_version == '2.6'
+                            and os.path.exists(possible_framework_library)):
                         py_library = possible_framework_library
                         python_library_found = True
                     else:
@@ -614,8 +612,7 @@ class PysideBuild(_build):
                         try_py_libdir = os.path.join(py_libdir, py_multiarch)
                         libs_tried = []
                         for lib_ext in lib_exts:
-                            lib_name = "libpython{}{}{}".format(
-                                py_version, lib_suff, lib_ext)
+                            lib_name = "libpython{}{}{}".format(py_version, lib_suff, lib_ext)
                             py_library = os.path.join(try_py_libdir, lib_name)
                             if os.path.exists(py_library):
                                 py_libdir = try_py_libdir
@@ -625,13 +622,11 @@ class PysideBuild(_build):
 
             if not python_library_found:
                 raise DistutilsSetupError(
-                    "Failed to locate the Python library with {}".format(
-                        ", ".join(libs_tried)))
+                    "Failed to locate the Python library with {}".format(", ".join(libs_tried)))
 
             if py_library.endswith('.a'):
                 # Python was compiled as a static library
-                log.error("Failed to locate a dynamic Python library, "
-                    "using {}".format(py_library))
+                log.error("Failed to locate a dynamic Python library, using {}".format(py_library))
 
         self.qtinfo = qtinfo
         qt_dir = os.path.dirname(OPTION_QMAKE)
@@ -642,14 +637,14 @@ class PysideBuild(_build):
 
         # Add Clang to path for Windows.
         # Revisit once Clang is bundled with Qt.
-        if (sys.platform == "win32" and
-                LooseVersion(self.qtinfo.version) >= LooseVersion("5.7.0")):
+        if (sys.platform == "win32"
+                and LooseVersion(self.qtinfo.version) >= LooseVersion("5.7.0")):
             clang_dir = detect_clang()
             if clang_dir[0]:
                 clangBinDir = os.path.join(clang_dir[0], 'bin')
-                if not clangBinDir in os.environ.get('PATH'):
-                    log.info("Adding {} as detected by {} to PATH".format(
-                        clangBinDir, clang_dir[1]))
+                if clangBinDir not in os.environ.get('PATH'):
+                    log.info("Adding {} as detected by {} to PATH".format(clangBinDir,
+                                                                          clang_dir[1]))
                     additional_paths.append(clangBinDir)
             else:
                 raise DistutilsSetupError("Failed to detect Clang when checking "
@@ -659,7 +654,8 @@ class PysideBuild(_build):
 
         # Used for test blacklists and registry test.
         self.build_classifiers = "py{}-qt{}-{}-{}".format(py_version, qt_version,
-                                     platform.architecture()[0], build_type.lower())
+                                                          platform.architecture()[0],
+                                                          build_type.lower())
         if OPTION_SHORTER_PATHS:
             build_name = "p{}".format(py_version)
         else:
@@ -667,10 +663,8 @@ class PysideBuild(_build):
 
         script_dir = setup_script_dir
         sources_dir = os.path.join(script_dir, "sources")
-        build_dir = os.path.join(script_dir, prefix() + "_build",
-            "{}".format(build_name))
-        install_dir = os.path.join(script_dir, prefix() + "_install",
-            "{}".format(build_name))
+        build_dir = os.path.join(script_dir, prefix() + "_build", "{}".format(build_name))
+        install_dir = os.path.join(script_dir, prefix() + "_install", "{}".format(build_name))
 
         self.make_path = make_path
         self.make_generator = make_generator
@@ -803,8 +797,7 @@ class PysideBuild(_build):
         target = qtinfo.macos_min_deployment_target
 
         if not target:
-            raise DistutilsSetupError("Failed to query for Qt's "
-                "QMAKE_MACOSX_DEPLOYMENT_TARGET.")
+            raise DistutilsSetupError("Failed to query for Qt's QMAKE_MACOSX_DEPLOYMENT_TARGET.")
         return target
 
     @staticmethod
@@ -831,24 +824,23 @@ class PysideBuild(_build):
             setup_target_split = [int(x) for x in setup_target.split('.')]
 
         message = ("Can't set MACOSX_DEPLOYMENT_TARGET value to {} because "
-                  "{} was built with minimum deployment target set to {}.")
+                   "{} was built with minimum deployment target set to {}.")
         # setup.py provided OPTION_MACOS_DEPLOYMENT_TARGET value takes
         # precedence.
         if setup_target:
             if python_target and setup_target_split < python_target_split:
-                raise DistutilsSetupError(message.format(setup_target,
-                    "Python", python_target))
+                raise DistutilsSetupError(message.format(setup_target, "Python",
+                                                         python_target))
             if setup_target_split < qt_target_split:
-                raise DistutilsSetupError(message.format(setup_target,
-                    "Qt", qt_target))
+                raise DistutilsSetupError(message.format(setup_target, "Qt",
+                                                         qt_target))
             # All checks clear, use setup.py provided value.
             return setup_target
 
         # Setup.py value not provided,
         # use same value as provided by Qt.
         if python_target:
-            maximum_target = '.'.join([str(e) for e in max(python_target_split,
-                qt_target_split)])
+            maximum_target = '.'.join([str(e) for e in max(python_target_split, qt_target_split)])
         else:
             maximum_target = qt_target
         return maximum_target
@@ -868,18 +860,12 @@ class PysideBuild(_build):
         self._patchelf_path = find_executable('patchelf')
         if self._patchelf_path:
             if not os.path.isabs(self._patchelf_path):
-                self._patchelf_path = os.path.join(os.getcwd(),
-                                                   self._patchelf_path)
+                self._patchelf_path = os.path.join(os.getcwd(), self._patchelf_path)
             log.info("Using {} ...".format(self._patchelf_path))
             return
         log.info("Building patchelf...")
         module_src_dir = os.path.join(self.sources_dir, "patchelf")
-        build_cmd = [
-            "g++",
-            "{}/patchelf.cc".format(module_src_dir),
-            "-o",
-            "patchelf",
-        ]
+        build_cmd = ["g++", "{}/patchelf.cc".format(module_src_dir), "-o", "patchelf"]
         if run_process(build_cmd) != 0:
             raise DistutilsSetupError("Error building patchelf")
         self._patchelf_path = os.path.join(self.script_dir, "patchelf")
@@ -891,30 +877,25 @@ class PysideBuild(_build):
 
         # Prepare folders
         os.chdir(self.build_dir)
-        module_build_dir = os.path.join(self.build_dir,  extension)
-        skipflag_file = module_build_dir + '-skip'
+        module_build_dir = os.path.join(self.build_dir, extension)
+        skipflag_file = "{} -skip".format(module_build_dir)
         if os.path.exists(skipflag_file):
-            log.info("Skipping {} because {} exists".format(extension,
-                skipflag_file))
+            log.info("Skipping {} because {} exists".format(extension, skipflag_file))
             return
 
         module_build_exists = os.path.exists(module_build_dir)
         if module_build_exists:
             if not OPTION_REUSE_BUILD:
-                log.info("Deleting module build folder {}...".format(
-                    module_build_dir))
+                log.info("Deleting module build folder {}...".format(module_build_dir))
                 try:
                     rmtree(module_build_dir)
                 except Exception as e:
-                    print('***** problem removing "{}"'.format(
-                        module_build_dir))
+                    print('***** problem removing "{}"'.format(module_build_dir))
                     print('ignored error: {}'.format(e))
             else:
-                log.info("Reusing module build folder {}...".format(
-                    module_build_dir))
+                log.info("Reusing module build folder {}...".format(module_build_dir))
         if not os.path.exists(module_build_dir):
-            log.info("Creating module build folder {}...".format(
-                module_build_dir))
+            log.info("Creating module build folder {}...".format(module_build_dir))
             os.makedirs(module_build_dir)
         os.chdir(module_build_dir)
 
@@ -995,12 +976,11 @@ class PysideBuild(_build):
 
         if OPTION_SANITIZE_ADDRESS:
             # Some simple sanity checking. Only use at your own risk.
-            if (sys.platform.startswith('linux') or
-                    sys.platform.startswith('darwin')):
+            if (sys.platform.startswith('linux')
+                    or sys.platform.startswith('darwin')):
                 cmake_cmd.append("-DSANITIZE_ADDRESS=ON")
             else:
-                raise DistutilsSetupError("Address sanitizer can only be used "
-                    "on Linux and macOS.")
+                raise DistutilsSetupError("Address sanitizer can only be used on Linux and macOS.")
 
         if extension.lower() == "pyside2":
             pyside_qt_conf_prefix = ''
@@ -1017,8 +997,7 @@ class PysideBuild(_build):
         # Pass package version to CMake, so this string can be
         # embedded into _config.py file.
         package_version = get_package_version()
-        cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_VERSION={}".format(
-            package_version))
+        cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_VERSION={}".format(package_version))
 
         # In case if this is a snapshot build, also pass the
         # timestamp as a separate value, because it is the only
@@ -1026,8 +1005,7 @@ class PysideBuild(_build):
         timestamp = ''
         if OPTION_SNAPSHOT_BUILD:
             timestamp = get_package_timestamp()
-        cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(
-            timestamp))
+        cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(timestamp))
 
         if extension.lower() in ["shiboken2", "pyside2-tools"]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
@@ -1037,8 +1015,7 @@ class PysideBuild(_build):
         if sys.platform == 'darwin':
             if OPTION_MACOS_ARCH:
                 # also tell cmake which architecture to use
-                cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(
-                    OPTION_MACOS_ARCH))
+                cmake_cmd.append("-DCMAKE_OSX_ARCHITECTURES:STRING={}".format(OPTION_MACOS_ARCH))
 
             if OPTION_MACOS_USE_LIBCPP:
                 # Explicitly link the libc++ standard library (useful
@@ -1053,10 +1030,10 @@ class PysideBuild(_build):
 
             if OPTION_MACOS_SYSROOT:
                 cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(
-                    OPTION_MACOS_SYSROOT))
+                                 OPTION_MACOS_SYSROOT))
             else:
-                latest_sdk_path = run_process_output(['xcrun',
-                    '--sdk', 'macosx', '--show-sdk-path'])
+                latest_sdk_path = run_process_output(['xcrun', '--sdk', 'macosx',
+                                                      '--show-sdk-path'])
                 if latest_sdk_path:
                     latest_sdk_path = latest_sdk_path[0]
                     cmake_cmd.append("-DCMAKE_OSX_SYSROOT={}".format(
@@ -1070,18 +1047,14 @@ class PysideBuild(_build):
             # interpreter sysconfig value.
             # Doing so could break the detected clang include paths
             # for example.
-            deployment_target = \
-                PysideBuild.macos_pyside_min_deployment_target()
-            cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(
-                deployment_target))
+            deployment_target = PysideBuild.macos_pyside_min_deployment_target()
+            cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
         if not OPTION_SKIP_CMAKE:
-            log.info("Configuring module {} ({})...".format(extension,
-                module_src_dir))
+            log.info("Configuring module {} ({})...".format(extension, module_src_dir))
             if run_process(cmake_cmd) != 0:
-                raise DistutilsSetupError("Error configuring {}".format(
-                    extension))
+                raise DistutilsSetupError("Error configuring {}".format(extension))
         else:
             log.info("Reusing old configuration for module {} ({})...".format(
                 extension, module_src_dir))
@@ -1101,14 +1074,12 @@ class PysideBuild(_build):
 
                     log.info("Generating Shiboken documentation")
                     if run_process([self.make_path, "doc"]) != 0:
-                        raise DistutilsSetupError(
-                            "Error generating documentation for {}".format(
-                                extension))
+                        raise DistutilsSetupError("Error generating documentation "
+                                                  "for {}".format(extension))
                 except ImportError:
                     log.info("Sphinx not found, skipping documentation build")
         else:
             log.info("Skipped documentation generation")
-
 
         if not OPTION_SKIP_MAKE_INSTALL:
             log.info("Installing module {}...".format(extension))
@@ -1117,8 +1088,7 @@ class PysideBuild(_build):
             # See https://gitlab.kitware.com/cmake/cmake/issues/16155
             # for issue details.
             if sys.platform == 'darwin':
-                log.info("Waiting 1 second, to ensure installation is "
-                    "successful...")
+                log.info("Waiting 1 second, to ensure installation is successful...")
                 time.sleep(1)
             # ninja: error: unknown target 'install/fast'
             target = 'install/fast' if self.make_generator != 'Ninja' else 'install'
@@ -1195,8 +1165,9 @@ class PysideBuild(_build):
         return temp_config
 
     def is_webengine_built(self, built_modules):
-        return ('WebEngineWidgets' in built_modules or 'WebEngineCore' in built_modules
-                                                    or 'WebEngine' in built_modules)
+        return ('WebEngineWidgets' in built_modules
+                or 'WebEngineCore' in built_modules
+                or 'WebEngine' in built_modules)
 
     def prepare_standalone_clang(self, is_win=False):
         """
@@ -1274,8 +1245,7 @@ class PysideBuild(_build):
                      make_writable_by_owner=True)
         else:
             raise RuntimeError("Error copying libclang library "
-                               "from {} to {}. ".format(
-                                    clang_lib_path, destination_dir))
+                               "from {} to {}. ".format(clang_lib_path, destination_dir))
 
     def update_rpath(self, package_path, executables):
         if sys.platform.startswith('linux'):
@@ -1316,8 +1286,7 @@ class PysideBuild(_build):
                 macos_fix_rpaths_for_library(srcpath, final_rpath)
 
         else:
-            raise RuntimeError('Not configured for platform ' +
-                               sys.platform)
+            raise RuntimeError('Not configured for platform {}'.format(sys.platform))
 
         pyside_libs.extend(executables)
 

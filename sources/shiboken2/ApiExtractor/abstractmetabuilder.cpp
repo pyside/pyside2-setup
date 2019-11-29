@@ -539,9 +539,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                     cls->addDefaultCopyConstructor(ancestorHasPrivateCopyConstructor(cls));
             }
         }
-
-        if (cls->isAbstract() && !cls->isInterface())
-            cls->typeEntry()->setLookupName(cls->typeEntry()->targetLangName() + QLatin1String("$ConcreteWrapper"));
     }
     const auto &allEntries = types->entries();
 
@@ -584,7 +581,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
                 const bool enumFound = cls
-                    ? cls->findEnum(entry->targetLangName()) != nullptr
+                    ? cls->findEnum(entry->targetLangEntryName()) != nullptr
                     : m_enums.contains(entry);
 
                 if (!enumFound) {
@@ -838,13 +835,8 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     TypeEntry *typeEntry = nullptr;
     const TypeEntry *enclosingTypeEntry = enclosing ? enclosing->typeEntry() : nullptr;
     if (enumItem->accessPolicy() == CodeModel::Private) {
-        QStringList names = enumItem->qualifiedName();
-        const QString &enumName = names.constLast();
-        QString nspace;
-        if (names.size() > 1)
-            nspace = QStringList(names.mid(0, names.size() - 1)).join(colonColon());
-        typeEntry = new EnumTypeEntry(nspace, enumName, QVersionNumber(0, 0),
-                                      enclosingTypeEntry);
+        typeEntry = new EnumTypeEntry(enumItem->qualifiedName().constLast(),
+                                      QVersionNumber(0, 0), enclosingTypeEntry);
         TypeDatabase::instance()->addType(typeEntry);
     } else if (enumItem->enumKind() != AnonymousEnum) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
@@ -947,26 +939,13 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     metaEnum->setOriginalAttributes(metaEnum->attributes());
 
     // Register all enum values on Type database
-    QString prefix;
-    if (enclosing) {
-        prefix += enclosing->typeEntry()->qualifiedCppName();
-        prefix += colonColon();
-    }
-    if (enumItem->enumKind() == EnumClass) {
-        prefix += enumItem->name();
-        prefix += colonColon();
-    }
+    const bool isScopedEnum = enumItem->enumKind() == EnumClass;
     const EnumeratorList &enumerators = enumItem->enumerators();
     for (const EnumeratorModelItem &e : enumerators) {
-        QString name;
-        if (enclosing) {
-            name += enclosing->name();
-            name += colonColon();
-        }
-        EnumValueTypeEntry *enumValue =
-            new EnumValueTypeEntry(prefix + e->name(), e->stringValue(),
-                                   enumTypeEntry, enumTypeEntry->version(),
-                                   enumTypeEntry->parent());
+        auto enumValue =
+            new EnumValueTypeEntry(e->name(), e->stringValue(),
+                                   enumTypeEntry, isScopedEnum,
+                                   enumTypeEntry->version());
         TypeDatabase::instance()->addType(enumValue);
         if (e->value().isNullValue())
             enumTypeEntry->setNullValue(enumValue);
@@ -1305,27 +1284,37 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     metaFunction->replaceType(metaType);
 }
 
-static bool _compareAbstractMetaTypes(const AbstractMetaType *type, const AbstractMetaType *other)
+static bool _compareAbstractMetaTypes(const AbstractMetaType *type,
+                                      const AbstractMetaType *other,
+                                      AbstractMetaType::ComparisonFlags flags = {})
 {
     return (type != nullptr) == (other != nullptr)
-        && (type == nullptr || *type == *other);
+        && (type == nullptr || type->compare(*other, flags));
 }
 
-static bool _compareAbstractMetaFunctions(const AbstractMetaFunction *func, const AbstractMetaFunction *other)
+static bool _compareAbstractMetaFunctions(const AbstractMetaFunction *func,
+                                          const AbstractMetaFunction *other,
+                                          AbstractMetaType::ComparisonFlags argumentFlags = {})
 {
     if (!func && !other)
         return true;
     if (!func || !other)
         return false;
-    if (func->arguments().count() != other->arguments().count()
+    if (func->name() != other->name())
+        return false;
+    const int argumentsCount = func->arguments().count();
+    if (argumentsCount != other->arguments().count()
         || func->isConstant() != other->isConstant()
         || func->isStatic() != other->isStatic()
         || !_compareAbstractMetaTypes(func->type(), other->type())) {
         return false;
     }
-    for (int i = 0; i < func->arguments().count(); ++i) {
-        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(), other->arguments().at(i)->type()))
+    for (int i = 0; i < argumentsCount; ++i) {
+        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(),
+                                       other->arguments().at(i)->type(),
+                                       argumentFlags)) {
             return false;
+        }
     }
     return true;
 }
@@ -1350,29 +1339,6 @@ AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const Sco
     }
     return result;
 }
-
-// For template classes, entries with more specific types may exist from out-of-
-// line definitions. If there is a declaration which matches it after fixing
-// the parameters, remove it as duplicate. For example:
-// template class<T> Vector { public:
-//     Vector(const Vector &rhs);
-// };
-// template class<T>
-// Vector<T>::Vector(const Vector<T>&) {} // More specific, remove declaration.
-
-class DuplicatingFunctionPredicate : public std::unary_function<bool, const AbstractMetaFunction *> {
-public:
-    explicit DuplicatingFunctionPredicate(const AbstractMetaFunction *f) : m_function(f) {}
-
-    bool operator()(const AbstractMetaFunction *rhs) const
-    {
-        return rhs != m_function && rhs->name() == m_function->name()
-            && _compareAbstractMetaFunctions(m_function, rhs);
-    }
-
-private:
-    const AbstractMetaFunction *m_function;
-};
 
 void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
@@ -2681,9 +2647,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         if (isNumber) {
             t = typeDb->findType(typeName);
             if (!t) {
-                t = new EnumValueTypeEntry(typeName, typeName, nullptr,
-                                           QVersionNumber(0, 0),
-                                           subclass->typeEntry()->parent());
+                t = new ConstantValueTypeEntry(typeName, subclass->typeEntry()->typeSystemTypeEntry());
                 t->setCodeGeneration(0);
                 typeDb->addType(t);
             }

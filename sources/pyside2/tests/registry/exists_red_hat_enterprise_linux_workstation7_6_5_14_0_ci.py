@@ -34994,7 +34994,7 @@ sig_dict.update({
     "PySide2.QtCharts.QtCharts.QChart.removeAllSeries": (),
     "PySide2.QtCharts.QtCharts.QChart.removeAxis": ('PySide2.QtCharts.QtCharts.QAbstractAxis',),
     "PySide2.QtCharts.QtCharts.QChart.removeSeries": ('PySide2.QtCharts.QtCharts.QAbstractSeries',),
-    "PySide2.QtCharts.QtCharts.QChart.scroll": [('float', 'float'), ('float', 'float', 'PySide2.QtCore.QRectF')],
+    "PySide2.QtCharts.QtCharts.QChart.scroll": ('float', 'float'),
     "PySide2.QtCharts.QtCharts.QChart.series": (),
     "PySide2.QtCharts.QtCharts.QChart.setAnimationDuration": ('int',),
     "PySide2.QtCharts.QtCharts.QChart.setAnimationEasingCurve": ('PySide2.QtCore.QEasingCurve',),

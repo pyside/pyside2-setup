@@ -55,8 +55,9 @@
 
     <object-type name="QQuickAsyncImageProvider" since="5.6"/>
 
-    <object-type name="QQuickFramebufferObject"/>
-    <object-type name="QQuickFramebufferObject::Renderer"/>
+    <object-type name="QQuickFramebufferObject">
+        <object-type name="Renderer"/>
+    </object-type>
 
     <object-type name="QQuickTextureFactory"/>
     <object-type name="QQuickImageProvider"/>
@@ -122,12 +123,12 @@
         <enum-type name="AttributeType" since="5.8"/>
         <enum-type name="DrawingMode" since="5.8"/>
         <enum-type name="Type" since="5.8"/>
+        <value-type name="Attribute"/>
+        <value-type name="AttributeSet"/>
+        <value-type name="ColoredPoint2D"/>
+        <value-type name="Point2D"/>
+        <value-type name="TexturedPoint2D"/>
     </object-type>
-    <value-type name="QSGGeometry::Attribute"/>
-    <value-type name="QSGGeometry::AttributeSet"/>
-    <value-type name="QSGGeometry::ColoredPoint2D"/>
-    <value-type name="QSGGeometry::Point2D"/>
-    <value-type name="QSGGeometry::TexturedPoint2D"/>
     <object-type name="QSGGeometryNode"/>
 
     <!-- QSGMaterialShader doesn't compile because of const char * char * types not being recognized

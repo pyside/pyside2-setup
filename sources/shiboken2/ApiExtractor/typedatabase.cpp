@@ -793,7 +793,8 @@ void TypeEntry::formatDebug(QDebug &d) const
     if (m_name != cppName)
         d << "\", cppName=\"" << cppName << '"';
     d << ", type=" << m_type << ", codeGeneration=0x"
-        << hex << m_codeGeneration << dec;
+        << hex << m_codeGeneration << dec
+        << ", target=\"" << targetLangName() << '"';
     FORMAT_NONEMPTY_STRING("package", m_targetLangPackage)
     FORMAT_BOOL("stream", m_stream)
     FORMAT_LIST_SIZE("codeSnips", m_codeSnips)
@@ -812,7 +813,6 @@ void TypeEntry::formatDebug(QDebug &d) const
 void ComplexTypeEntry::formatDebug(QDebug &d) const
 {
     TypeEntry::formatDebug(d);
-    FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
     FORMAT_BOOL("polymorphicBase", m_polymorphicBase)
     FORMAT_BOOL("genericClass", m_genericClass)
     FORMAT_BOOL("deleteInMainThread", m_deleteInMainThread)
@@ -822,7 +822,6 @@ void ComplexTypeEntry::formatDebug(QDebug &d) const
         << ", except=" << int(m_exceptionHandling);
     FORMAT_NONEMPTY_STRING("defaultSuperclass", m_defaultSuperclass)
     FORMAT_NONEMPTY_STRING("polymorphicIdValue", m_polymorphicIdValue)
-    FORMAT_NONEMPTY_STRING("lookupName", m_lookupName)
     FORMAT_NONEMPTY_STRING("targetType", m_targetType)
     FORMAT_NONEMPTY_STRING("hash", m_hashFunction)
     FORMAT_LIST_SIZE("addedFunctions", m_addedFunctions)
@@ -840,9 +839,6 @@ void TypedefEntry::formatDebug(QDebug &d) const
 void EnumTypeEntry::formatDebug(QDebug &d) const
 {
     TypeEntry::formatDebug(d);
-    FORMAT_NONEMPTY_STRING("package", m_packageName)
-    FORMAT_NONEMPTY_STRING("qualifier", m_qualifier)
-    FORMAT_NONEMPTY_STRING("targetLangName", m_targetLangName)
     if (m_flags)
         d << ", flags=(" << m_flags << ')';
 }

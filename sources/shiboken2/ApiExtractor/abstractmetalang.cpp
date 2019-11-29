@@ -166,19 +166,9 @@ QString AbstractMetaType::package() const
     return m_typeEntry->targetLangPackage();
 }
 
-static QString lastNameSegment(QString name)
-{
-    const int index = name.lastIndexOf(QStringLiteral("::"));
-    if (index >= 0)
-        name.remove(0, index + 2);
-    return name;
-}
-
 QString AbstractMetaType::name() const
 {
-    if (m_name.isEmpty())
-        m_name = lastNameSegment(m_typeEntry->targetLangName());
-    return m_name;
+    return m_typeEntry->targetLangEntryName();
 }
 
 QString AbstractMetaType::fullName() const
@@ -256,9 +246,14 @@ AbstractMetaTypeCList AbstractMetaType::nestedArrayTypes() const
     return result;
 }
 
-bool AbstractMetaType::isConstRef() const
+bool AbstractMetaType::passByConstRef() const
 {
     return isConstant() && m_referenceType == LValueReference && indirections() == 0;
+}
+
+bool AbstractMetaType::passByValue() const
+{
+    return m_referenceType == NoReference && indirections() == 0;
 }
 
 QString AbstractMetaType::cppSignature() const
@@ -282,7 +277,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isTemplateArgument() || m_referenceType == RValueReference)
         return InvalidPattern;
 
-    if (m_typeEntry->isPrimitive() && (actualIndirections() == 0 || isConstRef()))
+    if (m_typeEntry->isPrimitive() && (actualIndirections() == 0 || passByConstRef()))
         return PrimitivePattern;
 
     if (m_typeEntry->isVoid())
@@ -291,7 +286,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isVarargs())
         return VarargsPattern;
 
-    if (m_typeEntry->isEnum() && (actualIndirections() == 0 || isConstRef()))
+    if (m_typeEntry->isEnum() && (actualIndirections() == 0 || passByConstRef()))
         return EnumPattern;
 
     if (m_typeEntry->isObject()) {
@@ -306,7 +301,7 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isSmartPointer() && indirections() == 0)
         return SmartPointerPattern;
 
-    if (m_typeEntry->isFlags() && (actualIndirections() == 0 || isConstRef()))
+    if (m_typeEntry->isFlags() && (actualIndirections() == 0 || passByConstRef()))
         return FlagsPattern;
 
     if (m_typeEntry->isArray())
@@ -352,21 +347,29 @@ bool AbstractMetaType::hasTemplateChildren() const
     return false;
 }
 
-bool AbstractMetaType::equals(const AbstractMetaType &rhs) const
+bool AbstractMetaType::compare(const AbstractMetaType &rhs, ComparisonFlags flags) const
 {
-    if (m_typeEntry != rhs.m_typeEntry || m_constant != rhs.m_constant
-        || m_referenceType != rhs.m_referenceType
+    if (m_typeEntry != rhs.m_typeEntry
         || m_indirections != rhs.m_indirections
         || m_instantiations.size() != rhs.m_instantiations.size()
         || m_arrayElementCount != rhs.m_arrayElementCount) {
         return false;
     }
+
+    if (m_constant != rhs.m_constant || m_referenceType != rhs.m_referenceType) {
+        if (!flags.testFlag(ConstRefMatchesValue)
+            || !(passByValue() || passByConstRef())
+            || !(rhs.passByValue() || rhs.passByConstRef())) {
+            return false;
+        }
+    }
+
     if ((m_arrayElementType != nullptr) != (rhs.m_arrayElementType != nullptr)
-        || (m_arrayElementType != nullptr && !m_arrayElementType->equals(*rhs.m_arrayElementType))) {
+        || (m_arrayElementType != nullptr && !m_arrayElementType->compare(*rhs.m_arrayElementType, flags))) {
         return false;
     }
     for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
-        if (!m_instantiations.at(i)->equals(*rhs.m_instantiations.at(i)))
+        if (!m_instantiations.at(i)->compare(*rhs.m_instantiations.at(i), flags))
                 return false;
     }
     return true;
@@ -1598,7 +1601,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
 
 QString AbstractMetaClass::name() const
 {
-    return lastNameSegment(m_typeEntry->targetLangName());
+    return m_typeEntry->targetLangEntryName();
 }
 
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
@@ -2549,7 +2552,7 @@ QString AbstractMetaType::formatPythonSignature(bool minimal) const
         else
             result.append(formatArraySize(m_arrayElementCount));
     } else {
-        result += typeEntry()->qualifiedCppName();
+        result += typeEntry()->targetLangName();
     }
     if (!m_instantiations.isEmpty()) {
         result += QLatin1Char('[');
@@ -2778,7 +2781,7 @@ AbstractMetaEnumValue *AbstractMetaEnum::findEnumValue(const QString &value) con
 
 QString AbstractMetaEnum::name() const
 {
-    return m_typeEntry->targetLangName();
+    return m_typeEntry->targetLangEntryName();
 }
 
 QString AbstractMetaEnum::qualifier() const
