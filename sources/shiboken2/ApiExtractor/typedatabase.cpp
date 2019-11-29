@@ -798,7 +798,7 @@ void TypeEntry::formatDebug(QDebug &d) const
     if (m_name != cppName)
         d << "\", cppName=\"" << cppName << '"';
     d << ", type=" << m_type << ", codeGeneration=0x"
-        << hex << m_codeGeneration << dec
+        << Qt::hex << m_codeGeneration << Qt::dec
         << ", target=\"" << targetLangName() << '"';
     FORMAT_NONEMPTY_STRING("package", m_targetLangPackage)
     FORMAT_BOOL("stream", m_stream)

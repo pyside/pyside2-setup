@@ -433,7 +433,7 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
 
 void Modification::formatDebug(QDebug &d) const
 {
-    d << "modifiers=" << hex << showbase << modifiers << noshowbase << dec;
+    d << "modifiers=" << Qt::hex << Qt::showbase << modifiers << Qt::noshowbase << Qt::dec;
     if (removal)
       d << ", removal";
     if (!renamedToName.isEmpty())
