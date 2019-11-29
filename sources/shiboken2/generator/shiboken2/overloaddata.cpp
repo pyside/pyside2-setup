@@ -864,8 +864,8 @@ QString OverloadData::dumpGraph() const
     QTextStream s(&result);
     if (m_argPos == -1) {
         const AbstractMetaFunction *rfunc = referenceFunction();
-        s << "digraph OverloadedFunction {" << endl;
-        s << INDENT << "graph [fontsize=12 fontname=freemono labelloc=t splines=true overlap=false rankdir=LR];" << endl;
+        s << "digraph OverloadedFunction {\n";
+        s << INDENT << "graph [fontsize=12 fontname=freemono labelloc=t splines=true overlap=false rankdir=LR];\n";
 
         // Shows all function signatures
         s << "legend [fontsize=9 fontname=freemono shape=rect label=\"";
@@ -877,7 +877,7 @@ QString OverloadData::dumpGraph() const
                 s << "void";
             s << ' ' << toHtml(func->minimalSignature()) << "\\l";
         }
-        s << "\"];" << endl;
+        s << "\"];\n";
 
         // Function box title
         s << INDENT << '"' << rfunc->name() << "\" [shape=plaintext style=\"filled,bold\" margin=0 fontname=freemono fillcolor=white penwidth=1 ";
@@ -930,15 +930,15 @@ QString OverloadData::dumpGraph() const
             s << 'f' << functionNumber(func) << ' ';
         s << "</td></tr>";
 
-        s << "</table>> ];" << endl;
+        s << "</table>> ];\n";
 
         for (const OverloadData *pd : m_nextOverloadData)
             s << INDENT << '"' << rfunc->name() << "\" -> " << pd->dumpGraph();
 
-        s << "}" << endl;
+        s << "}\n";
     } else {
         QString argId = QLatin1String("arg_") + QString::number(quintptr(this));
-        s << argId << ';' << endl;
+        s << argId << ";\n";
 
         s << INDENT << '"' << argId << "\" [shape=\"plaintext\" style=\"filled,bold\" margin=\"0\" fontname=\"freemono\" fillcolor=\"white\" penwidth=1 ";
         s << "label=<<table border=\"0\" cellborder=\"0\" cellpadding=\"3\" bgcolor=\"white\">";
@@ -981,7 +981,7 @@ QString OverloadData::dumpGraph() const
             }
         }
 
-        s << "</table>>];" << endl;
+        s << "</table>>];\n";
 
         for (const OverloadData *pd : m_nextOverloadData)
             s << INDENT << argId << " -> " << pd->dumpGraph();

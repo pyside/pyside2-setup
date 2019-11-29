@@ -227,7 +227,7 @@ public:
 
     friend QTextStream &operator<<(QTextStream &str, const rstLabel &a)
     {
-        str << ".. _" << toRstLabel(a.m_label) << ':' << endl << endl;
+        str << ".. _" << toRstLabel(a.m_label) << ":\n\n";
         return str;
     }
 
@@ -808,7 +808,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         Indentation indentation(INDENT);
         const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
         if (code.isEmpty())
-            m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>" << endl;
+            m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>\n";
         else
             formatSnippet(m_output, INDENT, code);
         m_output << endl;
@@ -1188,7 +1188,7 @@ void QtXmlToSphinx::handleCodeTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        m_output << INDENT << "::" << endl << endl;
+        m_output << INDENT << "::\n\n";
         INDENT.indent++;
     } else if (token == QXmlStreamReader::Characters) {
         const QVector<QStringRef> lst(reader.text().split(QLatin1Char('\n')));
@@ -1296,7 +1296,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         m_output << INDENT << "::\n\n";
         Indentation indentation(INDENT);
         if (code.isEmpty())
-            m_output << INDENT << "<Code snippet \"" << location << "\" not found>" << endl;
+            m_output << INDENT << "<Code snippet \"" << location << "\" not found>\n";
         else
             formatCode(m_output, code, INDENT);
         m_output << endl;
@@ -1458,11 +1458,10 @@ void QtXmlToSphinx::Table::format (QTextStream& s) const
             }
             for ( ; j < headerColumnCount; ++j) // pad
                 s << '|' << Pad(' ', colWidths.at(j));
-            s << '|' << endl;
+            s << "|\n";
         }
     }
-    s << INDENT << horizontalLine << endl;
-    s << endl;
+    s << INDENT << horizontalLine << endl << endl;
 }
 
 static QString getFuncName(const AbstractMetaFunction* cppFunc) {
@@ -1635,7 +1634,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
         writeFormattedText(s, brief, metaClass);
 
     s << ".. inheritance-diagram:: " << getClassTargetFullName(metaClass, true) << endl
-      << "    :parts: 2" << endl << endl; // TODO: This would be a parameter in the future...
+      << "    :parts: 2\n\n"; // TODO: This would be a parameter in the future...
 
 
     writeInheritedByList(s, metaClass, classes());
@@ -1652,8 +1651,7 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     AbstractMetaFunctionList functionList = metaClass->functions();
     std::sort(functionList.begin(), functionList.end(), functionSort);
 
-    s << endl
-        << "Detailed Description\n"
+    s << "\nDetailed Description\n"
            "--------------------\n\n"
         << ".. _More:\n";
 
@@ -1729,9 +1727,7 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
     if (!functionList.isEmpty() || !staticFunctionList.isEmpty()) {
         QtXmlToSphinx::Table functionTable;
 
-        s << endl
-          << "Synopsis" << endl
-          << "--------" << endl << endl;
+        s << "\nSynopsis\n--------\n\n";
 
         writeFunctionBlock(s, QLatin1String("Functions"), functionList);
         writeFunctionBlock(s, QLatin1String("Virtual functions"), virtualList);
@@ -1749,7 +1745,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
 
         std::sort(functions.begin(), functions.end());
 
-        s << ".. container:: function_list" << endl << endl;
+        s << ".. container:: function_list\n\n";
         Indentation indentation(INDENT);
         for (const QString &func : qAsConst(functions))
             s << INDENT << '*' << ' ' << func << endl;
@@ -2140,10 +2136,10 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
         if (i)
             ss << endl;
 
-        ss << "**" << it.key() << "**" << endl << endl;
+        ss << "**" << it.key() << "**\n\n";
         i += 2; // a letter title is equivalent to two entries in space
         for (const QString &item : qAsConst(it.value())) {
-            ss << "* :doc:`" << item << "`" << endl;
+            ss << "* :doc:`" << item << "`\n";
             ++i;
 
             // end of column detected!
@@ -2165,7 +2161,7 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
     }
     table.appendRow(row);
     table.normalize();
-    s << ".. container:: pysidetoc" << endl << endl;
+    s << ".. container:: pysidetoc\n\n";
     s << table;
 }
 
@@ -2227,19 +2223,18 @@ void QtDocGenerator::writeModuleDocumentation()
 
         writeFancyToc(s, it.value());
 
-        s << INDENT << ".. container:: hide" << endl << endl;
+        s << INDENT << ".. container:: hide\n\n";
         {
             Indentation indentation(INDENT);
-            s << INDENT << ".. toctree::" << endl;
+            s << INDENT << ".. toctree::\n";
             Indentation deeperIndentation(INDENT);
-            s << INDENT << ":maxdepth: 1" << endl << endl;
+            s << INDENT << ":maxdepth: 1\n\n";
             for (const QString &className : qAsConst(it.value()))
                 s << INDENT << className << endl;
             s << endl << endl;
         }
 
-        s << "Detailed Description" << endl;
-        s << "--------------------" << endl << endl;
+        s << "Detailed Description\n--------------------\n\n";
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
         QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + moduleName.mid(lastIndex + 1) + QLatin1String(".rst"));

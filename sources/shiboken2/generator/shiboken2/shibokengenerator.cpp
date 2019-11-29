@@ -1548,7 +1548,7 @@ void ShibokenGenerator::writeFunctionCall(QTextStream &s,
 
 void ShibokenGenerator::writeUnusedVariableCast(QTextStream &s, const QString &variableName)
 {
-    s << INDENT << "SBK_UNUSED(" << variableName<< ')' << endl;
+    s << INDENT << "SBK_UNUSED(" << variableName<< ")\n";
 }
 
 AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaClass *metaClass)
@@ -1731,9 +1731,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     if (code.isEmpty())
         return;
     processCodeSnip(code, context);
-    s << INDENT << "// Begin code injection" << endl;
+    s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection" << endl;
+    s << INDENT << "// End of code injection\n";
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream &s,
@@ -1958,9 +1958,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     replaceTemplateVariables(code, func);
 
     processCodeSnip(code);
-    s << INDENT << "// Begin code injection" << endl;
+    s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection" << endl;
+    s << INDENT << "// End of code injection\n";
 }
 
 // Returns true if the string is an expression,
@@ -2054,7 +2054,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                         qFatal("%s", qPrintable(msgConversionTypesDiffer(varType, conversionSignature)));
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, conversionType);
-                    c << ';' << endl;
+                    c << ";\n";
                     Indentation indent(INDENT);
                     c << INDENT;
                 }
