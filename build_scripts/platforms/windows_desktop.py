@@ -43,7 +43,7 @@ import sys
 import fnmatch
 
 from ..config import config
-from ..options import *
+from ..options import OPTION
 from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources, filter_match
 from ..utils import download_and_extract_7z
@@ -206,7 +206,7 @@ def prepare_packages_win32(self, vars):
             filter=pdbs,
             recursive=False, vars=vars)
 
-        if not OPTION_NOEXAMPLES:
+        if not OPTION["NOEXAMPLES"]:
             def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if fnmatch.fnmatch(dir_name, "__pycache__"):
                     return False

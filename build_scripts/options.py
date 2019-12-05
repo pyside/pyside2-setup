@@ -133,56 +133,57 @@ def option_value(*args, **kwargs):
 
 
 # Declare options
-OPTION_BUILD_TYPE = option_value("build-type")
-OPTION_INTERNAL_BUILD_TYPE = option_value("internal-build-type")
-OPTION_DEBUG = has_option("debug")
-OPTION_RELWITHDEBINFO = has_option('relwithdebinfo')
-OPTION_QMAKE = option_value("qmake")
-OPTION_QT_VERSION = option_value("qt")
-OPTION_CMAKE = option_value("cmake")
-OPTION_OPENSSL = option_value("openssl")
-OPTION_SHIBOKEN_CONFIG_DIR = option_value("shiboken-config-dir")
-OPTION_ONLYPACKAGE = has_option("only-package")
-OPTION_STANDALONE = has_option("standalone")
-OPTION_MAKESPEC = option_value("make-spec")
-OPTION_IGNOREGIT = has_option("ignore-git")
-# don't generate documentation
-OPTION_SKIP_DOCS = has_option("skip-docs")
-# don't include pyside2-examples
-OPTION_NOEXAMPLES = has_option("no-examples")
-# number of parallel build jobs
-OPTION_JOBS = option_value('parallel', short_option_name='j')
+OPTION = {
+    "BUILD_TYPE": option_value("build-type"),
+    "INTERNAL_BUILD_TYPE": option_value("internal-build-type"),
+    "DEBUG": has_option("debug"),
+    "RELWITHDEBINFO": has_option('relwithdebinfo'),
+    "QMAKE": option_value("qmake"),
+    "QT_VERSION": option_value("qt"),
+    "CMAKE": option_value("cmake"),
+    "OPENSSL": option_value("openssl"),
+    "SHIBOKEN_CONFIG_DIR": option_value("shiboken-config-dir"),
+    "ONLYPACKAGE": has_option("only-package"),
+    "STANDALONE": has_option("standalone"),
+    "MAKESPEC": option_value("make-spec"),
+    "IGNOREGIT": has_option("ignore-git"),
+    # don't generate documentation
+    "SKIP_DOCS": has_option("skip-docs"),
+    # don't include pyside2-examples
+    "NOEXAMPLES": has_option("no-examples"),
+    # number of parallel build jobs
+    "JOBS": option_value('parallel', short_option_name='j'),
+    # Legacy, not used any more.
+    "JOM": has_option('jom'),
+    # Do not use jom instead of nmake with msvc
+    "NO_JOM": has_option('no-jom'),
+    "BUILDTESTS": has_option("build-tests"),
+    "MACOS_ARCH": option_value("macos-arch"),
+    "MACOS_USE_LIBCPP": has_option("macos-use-libc++"),
+    "MACOS_SYSROOT": option_value("macos-sysroot"),
+    "MACOS_DEPLOYMENT_TARGET": option_value("macos-deployment-target"),
+    "XVFB": has_option("use-xvfb"),
+    "REUSE_BUILD": has_option("reuse-build"),
+    "SKIP_CMAKE": has_option("skip-cmake"),
+    "SKIP_MAKE_INSTALL": has_option("skip-make-install"),
+    "SKIP_PACKAGING": has_option("skip-packaging"),
+    "SKIP_MODULES": option_value("skip-modules"),
+    "MODULE_SUBSET": option_value("module-subset"),
+    "RPATH_VALUES": option_value("rpath"),
+    "QT_CONF_PREFIX": option_value("qt-conf-prefix"),
+    "QT_SRC": option_value("qt-src-dir"),
+    "QUIET": has_option('quiet', remove=False),
+    "VERBOSE_BUILD": has_option("verbose-build"),
+    "SANITIZE_ADDRESS": has_option("sanitize-address"),
+    "SNAPSHOT_BUILD": has_option("snapshot-build"),
+    "LIMITED_API": option_value("limited-api"),
+    "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
+    "SHORTER_PATHS": has_option("shorter-paths"),
+    # This is used automatically by distutils.command.install object, to
+    # specify the final installation location.
+    "FINAL_INSTALL_PREFIX": option_value("prefix", remove=False),
+}
 _deprecated_option_jobs = option_value('jobs')
 if _deprecated_option_jobs:
     _warn_deprecated_option('jobs', 'parallel')
-    OPTION_JOBS = _deprecated_option_jobs
-# Legacy, not used any more.
-OPTION_JOM = has_option('jom')
-# Do not use jom instead of nmake with msvc
-OPTION_NO_JOM = has_option('no-jom')
-OPTION_BUILDTESTS = has_option("build-tests")
-OPTION_MACOS_ARCH = option_value("macos-arch")
-OPTION_MACOS_USE_LIBCPP = has_option("macos-use-libc++")
-OPTION_MACOS_SYSROOT = option_value("macos-sysroot")
-OPTION_MACOS_DEPLOYMENT_TARGET = option_value("macos-deployment-target")
-OPTION_XVFB = has_option("use-xvfb")
-OPTION_REUSE_BUILD = has_option("reuse-build")
-OPTION_SKIP_CMAKE = has_option("skip-cmake")
-OPTION_SKIP_MAKE_INSTALL = has_option("skip-make-install")
-OPTION_SKIP_PACKAGING = has_option("skip-packaging")
-OPTION_SKIP_MODULES = option_value("skip-modules")
-OPTION_MODULE_SUBSET = option_value("module-subset")
-OPTION_RPATH_VALUES = option_value("rpath")
-OPTION_QT_CONF_PREFIX = option_value("qt-conf-prefix")
-OPTION_QT_SRC = option_value("qt-src-dir")
-OPTION_QUIET = has_option('quiet', remove=False)
-OPTION_VERBOSE_BUILD = has_option("verbose-build")
-OPTION_SANITIZE_ADDRESS = has_option("sanitize-address")
-OPTION_SNAPSHOT_BUILD = has_option("snapshot-build")
-OPTION_LIMITED_API = option_value("limited-api")
-OPTION_PACKAGE_TIMESTAMP = option_value("package-timestamp")
-OPTION_SHORTER_PATHS = has_option("shorter-paths")
-
-# This is used automatically by distutils.command.install object, to
-# specify the final installation location.
-OPTION_FINAL_INSTALL_PREFIX = option_value("prefix", remove=False)
+    OPTION["JOBS"] = _deprecated_option_jobs

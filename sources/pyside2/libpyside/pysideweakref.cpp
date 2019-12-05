@@ -53,7 +53,7 @@ static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, 
 
 static PyType_Slot PySideCallableObjectType_slots[] = {
     {Py_tp_call, (void *)CallableObject_call},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideCallableObjectType_spec = {
@@ -94,9 +94,15 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
         PyType_Ready(PySideCallableObjectTypeF());
     }
 
-    PySideCallableObject *callable = PyObject_New(PySideCallableObject, PySideCallableObjectTypeF());
+    PyTypeObject *type = PySideCallableObjectTypeF();
+    PySideCallableObject *callable = PyObject_New(PySideCallableObject, type);
     if (!callable || PyErr_Occurred())
         return 0;
+    if (!PepRuntime_38_flag) {
+        // PYSIDE-939: Handling references correctly.
+        // Workaround for Python issue 35810; no longer necessary in Python 3.8
+        Py_INCREF(type);
+    }
 
     PyObject *weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
     if (!weak || PyErr_Occurred())

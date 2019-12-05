@@ -49,6 +49,7 @@ PyObject *compile();
 PyObject *function();
 PyObject *marshal();
 PyObject *method();
+PyObject *mro();
 PyObject *overload();
 PyObject *staticmethod();
 } // namespace PyName

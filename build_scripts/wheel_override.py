@@ -53,7 +53,7 @@ try:
     from email.generator import Generator
     from wheel import __version__ as wheel_version
 
-    from .options import *
+    from .options import OPTION
 
     wheel_module_exists = True
 except Exception as e:
@@ -87,7 +87,7 @@ class PysideBuildWheel(_bdist_wheel):
 
         # When limited API is requested, notify bdist_wheel to
         # create a properly named package.
-        limited_api_enabled = OPTION_LIMITED_API and sys.version_info[0] >= 3
+        limited_api_enabled = OPTION["LIMITED_API"] and sys.version_info[0] >= 3
         if limited_api_enabled:
             self.py_limited_api = "cp35.cp36.cp37.cp38"
 
@@ -183,7 +183,7 @@ class PysideBuildWheel(_bdist_wheel):
         # Doesn't work for bdist_wininst
         impl_tag, abi_tag, plat_tag = self.get_tag()
         # To enable pypi upload we are adjusting the wheel name
-        pypi_ready = (OPTION_LIMITED_API and sys.version_info[0] >= 3) or (sys.version_info[0] == 2)
+        pypi_ready = (OPTION["LIMITED_API"] and sys.version_info[0] >= 3) or (sys.version_info[0] == 2)
 
         def writeTag(impl):
             for abi in abi_tag.split('.'):
