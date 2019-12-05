@@ -61,6 +61,7 @@ STATIC_STRING_IMPL(compile, "compile");
 STATIC_STRING_IMPL(function, "function")
 STATIC_STRING_IMPL(marshal, "marshal")
 STATIC_STRING_IMPL(method, "method")
+STATIC_STRING_IMPL(mro, "mro")
 STATIC_STRING_IMPL(overload, "overload")
 STATIC_STRING_IMPL(staticmethod, "staticmethod")
 } // namespace PyName

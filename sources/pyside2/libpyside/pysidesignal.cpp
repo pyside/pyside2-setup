@@ -110,7 +110,7 @@ static PyType_Slot PySideMetaSignalType_slots[] = {
     {Py_tp_methods, (void *)MetaSignal_methods},
     {Py_tp_base, (void *)&PyType_Type},
     {Py_tp_free, (void *)PyObject_GC_Del},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideMetaSignalType_spec = {
@@ -142,7 +142,7 @@ static PyType_Slot PySideSignalType_slots[] = {
     {Py_tp_init, (void *)signalTpInit},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)signalFree},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideSignalType_spec = {
@@ -181,7 +181,7 @@ static PyType_Slot PySideSignalInstanceType_slots[] = {
     {Py_tp_methods, (void *)SignalInstance_methods},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)signalInstanceFree},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideSignalInstanceType_spec = {
@@ -619,7 +619,7 @@ void init(PyObject *module)
 {
     if (SbkSpecial_Type_Ready(module, PySideMetaSignalTypeF(), MetaSignal_SignatureStrings) < 0)
         return;
-    Py_INCREF(PySideSignalTypeF());
+    Py_INCREF(PySideMetaSignalTypeF());
     PyModule_AddObject(module, "MetaSignal", reinterpret_cast<PyObject *>(PySideMetaSignalTypeF()));
 
     if (SbkSpecial_Type_Ready(module, PySideSignalTypeF(), Signal_SignatureStrings) < 0)

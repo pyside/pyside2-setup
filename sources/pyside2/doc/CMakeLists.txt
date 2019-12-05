@@ -137,19 +137,9 @@ add_dependencies(apidoc docrsts licensedocrsts)
 add_dependencies(licensedocrsts docrsts)
 add_dependencies(docrsts qdoc)
 
-# #create devhelp file
-# add_custom_target(apidevhelp
-#     COMMAND python;${CMAKE_CURRENT_SOURCE_DIR}/pyhtml2devhelp.py;${CMAKE_BINARY_DIR}/apidoc/html;index.html >
-#             ${CMAKE_BINARY_DIR}/apidoc/html/PySide.devhelp;${BINDING_API_VERSION}&&;
-#             gzip;-9v;-f;${CMAKE_BINARY_DIR}/apidoc/html/PySide.devhelp
-#     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_INSTALL_PREFIX}/share/devhelp/books"
-#     COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_INSTALL_PREFIX}/share/doc/${BINDING_NAME}/html" "${CMAKE_INSTALL_PREFIX}/share/devhelp/books/${BINDING_NAME}"
-# )
 #install files
 add_custom_target(apidocinstall
     COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/share/doc/PySide2-${BINDING_API_VERSION} && cp -rv ${CMAKE_CURRENT_BINARY_DIR}/html/* ${CMAKE_INSTALL_PREFIX}/share/doc/PySide-${BINDING_API_VERSION}
 )
 
 add_dependencies(apidocinstall apidoc)
-# add_dependencies(apidocinstall apidevhelp)
-

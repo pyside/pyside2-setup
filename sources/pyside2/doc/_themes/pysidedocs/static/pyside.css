@@ -1020,7 +1020,8 @@ body {
   color:#404244;
 }
 ol,ul {
-  list-style:none
+  list-style-type: square;
+  color: #17a81a;
 }
 .body ol,.body ul {
   margin-top:0.75em;
@@ -1463,7 +1464,7 @@ div.pre {
   height:auto
 }
 pre, .LegaleseLeft {
-  background-color:#3a4055;
+  background-color:#222840;
   color:#fff;
   display:block;
   font-family:"Droid Sans Mono";
@@ -1544,6 +1545,13 @@ pre span.wrap {
   margin:4px;
   opacity:0.65
 }
+
+span.pre {
+    color: #09102d;
+    background-color: #e4e4e4;
+    padding: 3px;
+}
+
 span.wrap:hover {
   opacity:1
 }
@@ -2012,4 +2020,53 @@ a.plink, a.headerlink {
 }
 a.plink::before {
   content:'\00B6'
+}
+
+table.special {
+    border: 3px;
+    padding: 0px;
+    border-collapse: separate;
+    border-spacing: 20px;
+    line-height: 1.5em;
+}
+
+.special p {
+    text-align: center;
+    color: #3a4055;
+}
+
+.special a {
+    display: block;
+    border-bottom: 0;
+    text-decoration: none;
+}
+
+.special a:hover {
+    border-bottom: 0;
+    text-decoration: none;
+}
+
+.special strong {
+    color: #17a81a;
+    font-size: 110%;
+    font-weight: normal;
+}
+
+table.special th,
+table.special td {
+    border: 1px solid #888;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 6px;
+    padding-right: 5px;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+}
+
+.special td:hover {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-bottom: 4px solid #41cd52;
 }

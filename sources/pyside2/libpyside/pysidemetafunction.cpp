@@ -62,7 +62,7 @@ static PyType_Slot PySideMetaFunctionType_slots[] = {
     {Py_tp_call, (void *)functionCall},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)functionFree},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideMetaFunctionType_spec = {
