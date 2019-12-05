@@ -40,3 +40,12 @@ Documentation
           <td><a href="shiboken2/index.html" style="display: block;"><p><strong>Shiboken</strong><br/>Generate C++ to Python binding.</p></a></td>
         </tr>
     </table>
+
+.. toctree::
+   :hidden:
+   :glob:
+
+   contents.rst
+   gettingstarted*
+   pyside-examples/pyside2examples*
+   overviews/*

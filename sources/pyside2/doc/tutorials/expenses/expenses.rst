@@ -32,7 +32,7 @@ The base structure for a `QApplication` is located inside the `if __name__ == "_
 code block.
 
 .. code-block:: python
-   :dedent: 4
+   :linenos:
 
      if __name__ == "__main__":
          app = QApplication([])

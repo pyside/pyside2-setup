@@ -4,19 +4,25 @@ Getting Started on macOS
 Requirements
 ------------
 
- * Qt package from `here`_ or a custom build of Qt (preferably Qt 5.12 or greater)
+ * Qt package from `here`_ or a custom build of Qt (preferably
+   Qt 5.12 or greater)
  * A Python interpreter (version Python 3.5+ or Python 2.7).
-
-  * You can use the one provided by HomeBrew, or you can get python from the `official website`_.
+   You can use the one provided by HomeBrew, or you can get
+   python from the `official website`_.
  * `XCode`_ 8.2 (macOS 10.11), 8.3.3 (macOS 10.12), 9 (macOS 10.13), 10.1 (macOS 10.14)
  * `CMake`_  version 3.1 or greater
  * Git version 2 or greater
- * `libclang_` from your system or from the `precompiled Qt packages`_ is recommended.
+ * `libclang`_ from your system or the prebuilt version from the
+   ``Qt Downloads`` page is recommended.
  * ``virtualenv`` is strongly recommended, but optional.
  * ``sphinx`` package for the documentation (optional).
- * Depending on your OS, other dependencies packages might be required:
+ * Depending on your OS, the following dependencies might also
+   be required:
 
-  * ``libgl-dev, python-dev, python-distutils, and python-setuptools``.
+  * ``libgl-dev``,
+  * ``python-dev``,
+  * ``python-distutils``,
+  * and ``python-setuptools``.
 
 .. _XCode: https://developer.apple.com/xcode/
 .. _here: https://qt.io/download
