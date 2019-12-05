@@ -58,6 +58,8 @@
 #include "qapp_macro.h"
 #include "voidptr.h"
 
+#include <iostream>
+
 #if defined(__APPLE__)
 #include <dlfcn.h>
 #endif
@@ -917,8 +919,11 @@ introduceWrapperType(PyObject *enclosingObject,
         }
     }
     // PYSIDE-510: Here is the single change to support signatures.
-    if (SbkSpecial_Type_Ready(enclosingObject, reinterpret_cast<PyTypeObject *>(type), signatureStrings) < 0)
+    if (SbkSpecial_Type_Ready(enclosingObject, reinterpret_cast<PyTypeObject *>(type), signatureStrings) < 0) {
+        std::cerr << "Warning: " << __FUNCTION__ << " returns nullptr for "
+            << typeName << '/' << originalName << " due to SbkSpecial_Type_Ready() failing\n";
         return nullptr;
+    }
 
     initPrivateData(type);
     auto sotp = PepType_SOTP(type);
@@ -934,7 +939,13 @@ introduceWrapperType(PyObject *enclosingObject,
 
     // PyModule_AddObject steals type's reference.
     Py_INCREF(ob_type);
-    return PyModule_AddObject(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
+    if (PyModule_AddObject(enclosingObject, typeName, ob_type) != 0) {
+        std::cerr << "Warning: " << __FUNCTION__ << " returns nullptr for "
+            << typeName << '/' << originalName << " due to PyModule_AddObject(enclosingObject="
+            << enclosingObject << ",ob_type=" << ob_type << ") failing\n";
+        return nullptr;
+    }
+    return type;
 }
 
 void setSubTypeInitHook(SbkObjectType *type, SubTypeInitHook func)
