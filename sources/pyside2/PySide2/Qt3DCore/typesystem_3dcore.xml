@@ -48,6 +48,7 @@
         <object-type name="QAbstractSkeleton" since="5.10"/>
         <object-type name="QArmature" since="5.10"/>
         <object-type name="QAspectEngine">
+          <enum-type name="RunMode" since="5.14"/>
           <modify-function signature="registerAspect(Qt3DCore::QAbstractAspect*)">
             <modify-argument index="this">
               <parent index="1" action="add"/>

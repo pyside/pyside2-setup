@@ -53,6 +53,7 @@
 #include <gilstate.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
+#include <sbkstaticstrings.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
@@ -76,8 +77,6 @@
 #define PYSIDE_SLOT '1'
 #define PYSIDE_SIGNAL '2'
 #include "globalreceiverv2.h"
-
-#define PYTHON_TYPE "PyObject"
 
 namespace {
     static PyObject *metaObjectAttr = 0;
@@ -171,7 +170,7 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
     Shiboken::GilState gil;
     if (!reduce_func) {
         Shiboken::AutoDecRef pickleModule(PyImport_ImportModule("pickle"));
-        reduce_func = PyObject_GetAttrString(pickleModule, "dumps");
+        reduce_func = PyObject_GetAttr(pickleModule, Shiboken::PyName::dumps());
     }
     Shiboken::AutoDecRef repr(PyObject_CallFunctionObjArgs(reduce_func, (PyObject *)myObj, NULL));
     if (repr.object()) {
@@ -202,7 +201,7 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
     Shiboken::GilState gil;
     if (!eval_func) {
         Shiboken::AutoDecRef pickleModule(PyImport_ImportModule("pickle"));
-        eval_func = PyObject_GetAttrString(pickleModule, "loads");
+        eval_func = PyObject_GetAttr(pickleModule, Shiboken::PyName::loads());
     }
 
     QByteArray repr;
@@ -268,15 +267,15 @@ SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
     using namespace Shiboken;
 
     // Register PyObject type to use in queued signal and slot connections
-    qRegisterMetaType<PyObjectWrapper>(PYTHON_TYPE);
-    qRegisterMetaTypeStreamOperators<PyObjectWrapper>(PYTHON_TYPE);
+    qRegisterMetaType<PyObjectWrapper>("PyObject");
+    qRegisterMetaTypeStreamOperators<PyObjectWrapper>("PyObject");
     qRegisterMetaTypeStreamOperators<PyObjectWrapper>("PyObjectWrapper");
     qRegisterMetaTypeStreamOperators<PyObjectWrapper>("PySide::PyObjectWrapper");
 
     SbkConverter *converter = Shiboken::Conversions::createConverter(&PyBaseObject_Type, nullptr);
     Shiboken::Conversions::setCppPointerToPythonFunction(converter, PyObject_PTR_CppToPython_PyObject);
     Shiboken::Conversions::setPythonToCppPointerFunctions(converter, PyObject_PythonToCpp_PyObject_PTR, is_PyObject_PythonToCpp_PyObject_PTR_Convertible);
-    Shiboken::Conversions::registerConverterName(converter, PYTHON_TYPE);
+    Shiboken::Conversions::registerConverterName(converter, "PyObject");
     Shiboken::Conversions::registerConverterName(converter, "object");
     Shiboken::Conversions::registerConverterName(converter, "PyObjectWrapper");
     Shiboken::Conversions::registerConverterName(converter, "PySide::PyObjectWrapper");

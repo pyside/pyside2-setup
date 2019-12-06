@@ -1,87 +1,42 @@
 |project|
-*************
+*********
 
-|project| offers Python bindings for Qt, enabling the use of Qt5 APIs in Python
-applications. It lets Python developers utilize the full potential of Qt, using
-the |pymodname| module.
+**Qt for Python** offers the official Python bindings for `Qt`_ (`PySide2`_),
+enabling the use of its APIs in Python applications, and a binding generator tool (`Shiboken2`_)
+which can be used to expose C++ projects into Python.
 
-The |pymodname| module provides access to the individual
-Qt modules such as QtCore, QtGui, and so on. |project| also comes with the
-:doc:`Shiboken2 <shiboken2:index>` CPython binding code generator, which can be
-used to generate Python bindings for your C or C++ code.
+|project| is available under the LGPLv3/GPLv3 and the Qt commercial license.
 
-.. toctree::
-    :name: mastertoc
-    :maxdepth: 2
+.. _Qt: https://doc.qt.io
+.. _PySide2: quickstart.html
+.. _Shiboken2: shiboken2/index.html
 
-    contents.rst
-    Known issues <https://wiki.qt.io/Qt_for_Python/Considerations>
+Documentation
+=============
 
-Qt Modules
-===========
+.. raw:: html
 
-Basic modules
--------------
-  These are the main modules that will help you build a Widget based UI.
+    <table class="special">
+        <colgroup>
+            <col style="width: 33%" />
+            <col style="width: 33%" />
+            <col style="width: 33%" />
+        </colgroup>
+        <tr>
+          <td><a href="quickstart.html"><p><strong>Check It Out!</strong><br/>Write your first Qt app.</p></a></td>
+          <td><a href="gettingstarted.html"><p><strong>Getting Started</strong><br/>Install and build from source.</p></a></td>
+          <td><a href="api.html"><p><strong>API Docs</strong><br/>Qt for Python API reference.</p></a></td>
+        </tr>
 
-  `Qt Core <PySide2/QtCore/index.html>`_
-    Provides core non-GUI functionality, like signal and slots, properties, base classes of item models, serialization, etc.
-  `Qt Gui <PySide2/QtGui/index.html>`_
-    Extends QtCore with GUI functionality: Events, windows and screens, OpenGL and raster-based 2D painting, images.
-  `Qt Widgets <PySide2/QtWidgets/index.html>`_
-    Ready to use Widgets for your application, including also graphical elements for your UI.
+        <tr>
+          <td><a href="tutorials/index.html"><p><strong>Tutorials</strong><br/>Learn with step-by-step guides.</p></a></td>
+          <td><a href="examples/index.html"><p><strong>Examples</strong><br/>Check all the available examples.</p></a></td>
+          <td><a href="videos.html"><p><strong>Videos</strong><br/>Watch webinars, Talks, and more.</p></a></td>
+        </tr>
 
-QML and Qt Quick
-----------------
-  If you want to use the `Qml Language <https://doc.qt.io/qt-5/qmlapplications.html>`, these
-  modules will help you interact with it from Python.
-
-  `Qt Qml <PySide2/QtQml/index.html>`_
-    Base Python API to interact with the QML module.
-  `Qt Quick <PySide2/QtQuick/index.html>`_
-    Provides classes for embedding Qt Quick in Qt applications.
-  `Qt QuickWidgets <PySide2/QtQuickWidgets/index.html>`_
-    Provides the QQuickWidget class for embedding Qt Quick in widget-based applications.
-
-Data visualization
-------------------
-
-  Charts, diagrams, animations: these modules provide a large amount
-  of classes that can help you include these elements in your UI.
-
-  `Qt Charts <PySide2/QtCharts/index.html>`_
-    Provides a set of easy to use chart components.
-  `Qt DataVisualization <PySide2/QtDataVisualization/index.html>`_
-    Provides a way to visualize data in 3D as bar, scatter, and surface graphs.
-
-Multimedia
------------
-
-  Audio, video, and hardware interaction: check these modules if you are
-  looking for multimedia solutions.
-
-  `Qt Multimedia <PySide2/QtMultimedia/index.html>`_
-    Provides low-level multimedia functionality.
-  `Qt MultimediaWidgets <PySide2/QtMultimediaWidgets/index.html>`_
-    Provides the widget-based multimedia API.
-
-WebEngine
----------
-
-  If your project is based on a browser or the features around web
-  based applications, these modules will help you to interact with them.
-
-  `Qt WebEngineWidgets <PySide2/QtWebEngineWidgets/index.html>`_
-    Provides widgets that can handle web content.
-  `Qt WebChannel <PySide2/QtWebChannel/index.html>`_
-    Enables peer-to-peer communication between a server and a client
-    (HTML/JavaScript or QML application).
-
-All the modules
----------------
-
-  There are many other modules currently supported by |pymodname|,
-  here you can find a complete list of them.
-
-  `Check all the modules <modules.html>`_
-   Display a table with all the currently supported Qt modules.
+        <tr>
+          <td><a href="deployment.html" style="display: block;"><p><strong>Deployment</strong><br/>Learn to deploy your apps.</p></a></td>
+          <td><a href="considerations.html" style="display: block;"><p><strong>Considerations</strong><br/>API differences and known issues.</p></a></td>
+          <td><a href="shiboken2/index.html" style="display: block;"><p><strong>Shiboken</strong><br/>Generate C++ to Python binding.</p></a></td>
+        </tr>
+    </table>

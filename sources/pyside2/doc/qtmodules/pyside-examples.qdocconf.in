@@ -1,0 +1,12 @@
+include(@QT_SRC_DIR@/doc/global/qt-module-defaults.qdocconf)
+
+project = Pyside2Examples
+description = Qt for Python Examples
+version = $QT_VERSION
+
+sourcedirs += @CMAKE_CURRENT_SOURCE_DIR@/pyside-examples
+exampledirs = @CMAKE_CURRENT_SOURCE_DIR@/../../../examples
+examples.fileextensions += *.py *.pyproject
+imagedirs += @CMAKE_CURRENT_SOURCE_DIR@/pyside-examples/images
+url.examples = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree/examples/\1?h=$QT_VER"
+include(../pyside-config.qdocconf)

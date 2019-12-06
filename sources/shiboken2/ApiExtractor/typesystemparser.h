@@ -86,6 +86,7 @@ class StackElement
             NativeToTarget              = 0x1100,
             TargetToNative              = 0x1200,
             AddConversion               = 0x1300,
+            SystemInclude               = 0x1400,
             SimpleMask                  = 0x3f00,
 
             // Code snip tags (0x1000, 0x2000, ... , 0xf000)
@@ -162,6 +163,8 @@ private:
 
     bool importFileElement(const QXmlStreamAttributes &atts);
 
+    const TypeEntry *currentParentTypeEntry() const;
+    bool checkRootElement();
     void applyCommonAttributes(TypeEntry *type, QXmlStreamAttributes *attributes) const;
     PrimitiveTypeEntry *
         parsePrimitiveTypeEntry(const QXmlStreamReader &, const QString &name,
@@ -174,8 +177,8 @@ private:
                            const QVersionNumber &since, QXmlStreamAttributes *);
     FlagsTypeEntry *
         parseFlagsEntry(const QXmlStreamReader &, EnumTypeEntry *enumEntry,
-                        const QString &name, QString flagName,
-                        const QVersionNumber &since, QXmlStreamAttributes *);
+                        QString flagName, const QVersionNumber &since,
+                        QXmlStreamAttributes *);
 
     NamespaceTypeEntry *
         parseNamespaceTypeEntry(const QXmlStreamReader &,
@@ -245,6 +248,7 @@ private:
                           StackElement* element, QXmlStreamAttributes *);
      bool parseInclude(const QXmlStreamReader &, const StackElement &topElement,
                        TypeEntry *entry, QXmlStreamAttributes *);
+     bool parseSystemInclude(const QXmlStreamReader &, QXmlStreamAttributes *);
      TemplateInstance
          *parseTemplateInstanceEnum(const QXmlStreamReader &, const StackElement &topElement,
                                     QXmlStreamAttributes *);

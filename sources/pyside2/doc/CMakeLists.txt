@@ -70,6 +70,11 @@ foreach(moduleIn ${all_module_shortnames})
     endif()
 endforeach()
 
+#Appending the additional qdocconf that describes the pyside-examples
+#doc project.
+configure_file("qtmodules/pyside-examples.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/qtmodules/pyside-examples.qdocconf" @ONLY)
+file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/qtmodules/pyside-examples.qdocconf\n")
+
 set(typeSystemDocXmlContents "${typeSystemDocXmlContents}\n</typesystem>\n")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml" "${typeSystemDocXmlContents}")
 
@@ -82,13 +87,15 @@ set(QDOC_TYPESYSTEM_PATH "${pyside2_SOURCE_DIR}${PATH_SEP}${pyside2_BINARY_DIR}"
 
 add_custom_target(qdoc
                 # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
-                COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc QT_VERSION=1.0.0 QT_VER=1.0 QT_VERSION_TAG=100
+                COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc
+                QT_VERSION=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
+                QT_VER=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}
+                QT_VERSION_TAG=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
                 qdoc pyside.qdocconf -single-exec -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
                 COMMENT "Running qdoc against Qt source code..."
                 SOURCE "pyside.qdocconf")
 
 add_custom_target(apidoc
-                  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
                   COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/rst html
                   #copying shiboken2 (including ApiExtractor) doc htmls
                   COMMENT "Copying over the Shiboken2 doc HTMLs..."
@@ -102,6 +109,7 @@ add_custom_target(apidoc
 configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 add_custom_target("docrsts"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
     COMMAND Shiboken2::shiboken2 --generator-set=qtdoc ${docHeader}
             --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
             --api-version=${SUPPORTED_QT_VERSION}
@@ -109,9 +117,9 @@ add_custom_target("docrsts"
             --library-source-dir=${QT_SRC_DIR}
             --documentation-data-dir=${DOC_DATA_DIR}/webxml
             --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
-            --documentation-code-snippets-dir=${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_SOURCE_DIR}/codesnippets/examples
-            --documentation-extra-sections-dir=${CMAKE_CURRENT_SOURCE_DIR}/extras
-            --additional-documentation=${CMAKE_CURRENT_LIST_DIR}/additionaldocs.lst
+            --documentation-code-snippets-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/doc/src/snippets${PATH_SEP}${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets/examples
+            --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
+            --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
             ${CMAKE_CURRENT_BINARY_DIR}/typesystem_doc.xml
     WORKING_DIRECTORY ${${module}_SOURCE_DIR}
     COMMENT "Running generator to generate documentation..."
@@ -129,19 +137,9 @@ add_dependencies(apidoc docrsts licensedocrsts)
 add_dependencies(licensedocrsts docrsts)
 add_dependencies(docrsts qdoc)
 
-# #create devhelp file
-# add_custom_target(apidevhelp
-#     COMMAND python;${CMAKE_CURRENT_SOURCE_DIR}/pyhtml2devhelp.py;${CMAKE_BINARY_DIR}/apidoc/html;index.html >
-#             ${CMAKE_BINARY_DIR}/apidoc/html/PySide.devhelp;${BINDING_API_VERSION}&&;
-#             gzip;-9v;-f;${CMAKE_BINARY_DIR}/apidoc/html/PySide.devhelp
-#     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_INSTALL_PREFIX}/share/devhelp/books"
-#     COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_INSTALL_PREFIX}/share/doc/${BINDING_NAME}/html" "${CMAKE_INSTALL_PREFIX}/share/devhelp/books/${BINDING_NAME}"
-# )
 #install files
 add_custom_target(apidocinstall
     COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/share/doc/PySide2-${BINDING_API_VERSION} && cp -rv ${CMAKE_CURRENT_BINARY_DIR}/html/* ${CMAKE_INSTALL_PREFIX}/share/doc/PySide-${BINDING_API_VERSION}
 )
 
 add_dependencies(apidocinstall apidoc)
-# add_dependencies(apidocinstall apidevhelp)
-

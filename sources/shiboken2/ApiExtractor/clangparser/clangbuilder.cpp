@@ -40,7 +40,7 @@
 #include <QtCore/QStack>
 #include <QtCore/QVector>
 
-#include <string.h>
+#include <cstring>
 #include <ctype.h>
 
 #if QT_VERSION < 0x050800
@@ -202,6 +202,8 @@ public:
     template <class Item>
     void qualifyTypeDef(const CXCursor &typeRefCursor, const QSharedPointer<Item> &item) const;
 
+    bool visitHeader(const char *cFileName) const;
+
     BaseVisitor *m_baseVisitor;
     CodeModel *m_model;
 
@@ -220,6 +222,7 @@ public:
     FunctionModelItem m_currentFunction;
     ArgumentModelItem m_currentArgument;
     VariableModelItem m_currentField;
+    QByteArrayList m_systemIncludes;
 
     int m_anonymousEnumCount = 0;
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
@@ -665,30 +668,67 @@ Builder::~Builder()
     delete d;
 }
 
-static inline bool compareHeaderName(const char *haystack, const char *needle)
+static const char *cBaseName(const char *fileName)
 {
-    const char *lastSlash = strrchr(haystack, '/');
+    const char *lastSlash = std::strrchr(fileName, '/');
 #ifdef Q_OS_WIN
     if (lastSlash == nullptr)
-        lastSlash = strrchr(haystack, '\\');
+        lastSlash = std::strrchr(fileName, '\\');
 #endif
-    if (lastSlash == nullptr)
-        lastSlash = haystack;
-    else
-        ++lastSlash;
+    return lastSlash != nullptr ? (lastSlash + 1) : fileName;
+}
+
+static inline bool cCompareFileName(const char *f1, const char *f2)
+{
 #ifdef Q_OS_WIN
-   return _stricmp(lastSlash, needle) == 0;
+   return _stricmp(f1, f2) == 0;
 #else
-    return strcmp(lastSlash, needle) == 0;
+    return std::strcmp(f1, f2) == 0;
 #endif
 }
 
 #ifdef Q_OS_UNIX
-static bool cStringStartsWith(const char *prefix, const char *str)
+template<size_t N>
+static bool cStringStartsWith(const char *str, const char (&prefix)[N])
 {
-    return strncmp(prefix, str, strlen(prefix)) == 0;
+    return std::strncmp(prefix, str, N - 1) == 0;
 }
 #endif
+
+bool BuilderPrivate::visitHeader(const char *cFileName) const
+{
+    // Resolve OpenGL typedefs although the header is considered a system header.
+    const char *baseName = cBaseName(cFileName);
+    if (cCompareFileName(baseName, "gl.h"))
+        return true;
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    if (cStringStartsWith(cFileName, "/usr/include/stdint.h"))
+        return true;
+#endif
+#ifdef Q_OS_LINUX
+    if (cStringStartsWith(cFileName, "/usr/include/stdlib.h")
+        || cStringStartsWith(cFileName, "/usr/include/sys/types.h")) {
+        return true;
+    }
+#endif // Q_OS_LINUX
+#ifdef Q_OS_MACOS
+    // Parse the following system headers to get the correct typdefs for types like
+    // int32_t, which are used in the macOS implementation of OpenGL framework.
+    if (cCompareFileName(baseName, "gltypes.h")
+        || cStringStartsWith(cFileName, "/usr/include/_types")
+        || cStringStartsWith(cFileName, "/usr/include/_types")
+        || cStringStartsWith(cFileName, "/usr/include/sys/_types")) {
+        return true;
+    }
+#endif // Q_OS_MACOS
+    if (baseName) {
+        for (const auto &systemInclude : m_systemIncludes) {
+            if (systemInclude == baseName)
+                return true;
+        }
+    }
+    return false;
+}
 
 bool Builder::visitLocation(const CXSourceLocation &location) const
 {
@@ -701,28 +741,17 @@ bool Builder::visitLocation(const CXSourceLocation &location) const
     clang_getExpansionLocation(location, &file, &line, &column, &offset);
     const CXString cxFileName = clang_getFileName(file);
     // Has been observed to be 0 for invalid locations
+    bool result = false;
     if (const char *cFileName = clang_getCString(cxFileName)) {
-        // Resolve OpenGL typedefs although the header is considered a system header.
-        const bool visitHeader = compareHeaderName(cFileName, "gl.h")
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-                || cStringStartsWith("/usr/include/stdint.h", cFileName)
-#endif
-#if defined(Q_OS_LINUX)
-                || cStringStartsWith("/usr/include/stdlib.h", cFileName)
-                || cStringStartsWith("/usr/include/sys/types.h", cFileName)
-#elif defined(Q_OS_MACOS)
-                // Parse the following system headers to get the correct typdefs for types like
-                // int32_t, which are used in the macOS implementation of OpenGL framework.
-                || compareHeaderName(cFileName, "gltypes.h")
-                || cStringStartsWith("/usr/include/_types", cFileName)
-                || cStringStartsWith("/usr/include/sys/_types", cFileName)
-#endif
-                ;
+        result = d->visitHeader(cFileName);
         clang_disposeString(cxFileName);
-        if (visitHeader)
-            return true;
     }
-    return false;
+    return result;
+}
+
+void Builder::setSystemIncludes(const QByteArrayList &systemIncludes)
+{
+    d->m_systemIncludes = systemIncludes;
 }
 
 FileModelItem Builder::dom() const
@@ -746,6 +775,17 @@ static CodeModel::ClassType codeModelClassTypeFromCursor(CXCursorKind kind)
     else if (kind == CXCursor_StructDecl)
         result = CodeModel::Struct;
     return result;
+}
+
+static NamespaceType namespaceType(const CXCursor &cursor)
+{
+    if (clang_Cursor_isAnonymous(cursor))
+        return NamespaceType::Anonymous;
+#if CINDEX_VERSION_MAJOR > 0 || CINDEX_VERSION_MINOR >= 59
+    if (clang_Cursor_isInlineNamespace(cursor))
+        return NamespaceType::Inline;
+#endif
+    return NamespaceType::Default;
 }
 
 BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
@@ -873,6 +913,9 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     case CXCursor_Namespace: {
+        const auto type = namespaceType(cursor);
+        if (type == NamespaceType::Anonymous)
+            return Skip;
         const QString name = getCursorSpelling(cursor);
         const NamespaceModelItem parentNamespaceItem = qSharedPointerDynamicCast<_NamespaceModelItem>(d->m_scopeStack.back());
         if (parentNamespaceItem.isNull()) {
@@ -889,6 +932,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         namespaceItem.reset(new _NamespaceModelItem(d->m_model, name));
         setFileName(cursor, namespaceItem.data());
         namespaceItem->setScope(d->m_scope);
+        namespaceItem->setType(type);
         parentNamespaceItem->addNamespace(namespaceItem);
         d->pushScope(namespaceItem);
     }

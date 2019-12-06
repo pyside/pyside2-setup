@@ -186,6 +186,13 @@ if (Qt5Core_VERSION VERSION_EQUAL 5.13.0 OR Qt5Core_VERSION VERSION_GREATER 5.13
          ${QtCore_GEN_DIR}/qtransposeproxymodel_wrapper.cpp)
 endif()
 
+if (Qt5Core_VERSION VERSION_EQUAL 5.14.0 OR Qt5Core_VERSION VERSION_GREATER 5.14.0)
+    list(APPEND QtCore_SRC
+         ${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
+         ${QtCore_GEN_DIR}/qcalendar_yearmonthday_wrapper.cpp
+         ${QtCore_GEN_DIR}/qrecursivemutex_wrapper.cpp)
+endif()
+
 set(QtCore_glue_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"

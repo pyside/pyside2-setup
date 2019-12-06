@@ -148,6 +148,7 @@ namespace-type
 
         <typesystem>
             <namespace-type name="..."
+                visible="true | auto | false"
                 generate="yes | no"
                 package="..."
                 since="..."
@@ -156,8 +157,16 @@ namespace-type
 
     The **name** attribute is the name of the namespace, e.g., "Qt".
 
-    The *optional* **generate** attribute is used to inform if you need to prepend
-    the given namespace into each generated class. Its default value is **yes**.
+    The *optional* **visible** attribute is used specify whether the
+    namespace is visible in the target language name. Its default value is
+    **auto**. It means that normal namespaces are visible, but inline namespaces
+    (as introduced in C++ 11) will not be visible.
+
+    The detection of inline namespaces requires shiboken to be built
+    using LLVM 9.0.
+
+    The *optional* **generate** is a legacy attribute. Specifying
+    **no** is equivalent to **visible="false"**.
 
     The **package** attribute can be used to override the package of the type system.
 
@@ -462,3 +471,18 @@ function
     The function tag has two *optional* attributes: **since**, whose value is used to specify
     the API version of this function, and **rename**, to modify the function name.
 
+.. _system_include:
+
+system-include
+^^^^^^^^^^^^^^
+
+    The optional **system-include** specifies the name of a system include
+    file to be parsed. Normally, include files considered to be system
+    include files are skipped by the C++ code parser. Its primary use case
+    is exposing classes from the STL library.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <system-include file-name="memory"/>
+        </typesystem>

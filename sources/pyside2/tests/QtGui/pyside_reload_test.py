@@ -41,8 +41,8 @@ sys.path.append(workdir)
 
 def reload_module(moduleName):
     if py3k.IS_PY3K:
-        import imp
-        imp.reload(moduleName)
+        import importlib
+        importlib.reload(moduleName)
     else:
         reload(moduleName)
 
@@ -53,8 +53,8 @@ def increment_module_value():
     modfile.close()
     if not sys.dont_write_bytecode:
         if py3k.IS_PY3K:
-            import imp
-            cacheFile = imp.cache_from_source(dst)
+            import importlib.util
+            cacheFile = importlib.util.cache_from_source(dst)
         else:
             cacheFile = dst + 'c'
         os.remove(cacheFile)

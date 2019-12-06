@@ -47,6 +47,7 @@
             <enum-type name="AnimationType"/>
         </object-type>
         <object-type name="QAbstractAnimationClip"/>
+        <object-type name="QAbstractChannelMapping"/>
         <object-type name="QAbstractClipAnimator">
             <enum-type name="Loops"/>
         </object-type>

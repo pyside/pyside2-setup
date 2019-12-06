@@ -52,6 +52,7 @@
 #include "sbkenum.h"
 #include "sbkmodule.h"
 #include "sbkstring.h"
+#include "sbkstaticstrings.h"
 #include "shibokenmacros.h"
 #include "shibokenbuffer.h"
 

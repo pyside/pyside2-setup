@@ -61,9 +61,9 @@ QString HeaderGenerator::fileNameForContext(GeneratorContext &context) const
 void HeaderGenerator::writeCopyCtor(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     s << INDENT <<  wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName() << "& self)";
-    s << " : " << metaClass->qualifiedCppName() << "(self)" << endl;
-    s << INDENT << "{" << endl;
-    s << INDENT << "}" << endl << endl;
+    s << " : " << metaClass->qualifiedCppName() << "(self)\n";
+    s << INDENT << "{\n";
+    s << INDENT << "}\n\n";
 }
 
 void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField *field) const
@@ -84,11 +84,11 @@ void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const Abstrac
       << (useReference ? " *" : " ")
       << ' ' << protectedFieldGetterName(field) << "()"
       << " { return "
-      << (useReference ? " &" : " ") << "this->" << fieldName << "; }" << endl;
+      << (useReference ? " &" : " ") << "this->" << fieldName << "; }\n";
 
     // Set function
     s << INDENT << "inline void " << protectedFieldSetterName(field) << '(' << fieldType << " value)"
-      << " { " << fieldName << " = value; }" << endl;
+      << " { " << fieldName << " = value; }\n";
 }
 
 void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
@@ -112,14 +112,14 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
     QString innerHeaderGuard;
 
     // Header
-    s << "#ifndef SBK_" << outerHeaderGuard << "_H" << endl;
-    s << "#define SBK_" << outerHeaderGuard << "_H" << endl << endl;
+    s << "#ifndef SBK_" << outerHeaderGuard << "_H\n";
+    s << "#define SBK_" << outerHeaderGuard << "_H\n\n";
 
     if (!avoidProtectedHack())
-        s << "#define protected public" << endl << endl;
+        s << "#define protected public\n\n";
 
     //Includes
-    s << metaClass->typeEntry()->include() << endl;
+    s << metaClass->typeEntry()->include() << Qt::endl;
 
     if (shouldGenerateCppWrapper(metaClass) &&
         usePySideExtensions() && metaClass->isQObject())
@@ -127,16 +127,16 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
 
     while (shouldGenerateCppWrapper(metaClass)) {
         if (!innerHeaderGuard.isEmpty()) {
-            s << "#  ifndef SBK_" << innerHeaderGuard << "_H" << endl;
-            s << "#  define SBK_" << innerHeaderGuard << "_H" << endl << endl;
-            s << "// Inherited base class:" << endl;
+            s << "#  ifndef SBK_" << innerHeaderGuard << "_H\n";
+            s << "#  define SBK_" << innerHeaderGuard << "_H\n\n";
+            s << "// Inherited base class:\n";
         }
 
         // Class
         s << "class " << wrapperName;
         s << " : public " << metaClass->qualifiedCppName();
 
-        s << endl << '{' << endl << "public:" << endl;
+        s << "\n{\npublic:\n";
 
         const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
         for (AbstractMetaFunction *func : funcs) {
@@ -160,8 +160,8 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
             s << INDENT;
             if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
                 s << "// C++11: need to declare (unimplemented) destructor because "
-                     "the base class destructor is private." << endl;
-            s << '~' << wrapperName << "();" << endl;
+                     "the base class destructor is private.\n";
+            s << '~' << wrapperName << "();\n";
         }
 
         writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode);
@@ -169,22 +169,22 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && usePySideExtensions() && metaClass->isQObject()) {
             s << "public:\n";
-            s << INDENT << "int qt_metacall(QMetaObject::Call call, int id, void **args) override;" << endl;
-            s << INDENT << "void *qt_metacast(const char *_clname) override;" << endl;
+            s << INDENT << "int qt_metacall(QMetaObject::Call call, int id, void **args) override;\n";
+            s << INDENT << "void *qt_metacast(const char *_clname) override;\n";
         }
 
         if (!m_inheritedOverloads.isEmpty()) {
-            s << INDENT << "// Inherited overloads, because the using keyword sux" << endl;
+            s << INDENT << "// Inherited overloads, because the using keyword sux\n";
             writeInheritedOverloads(s);
             m_inheritedOverloads.clear();
         }
 
         if (usePySideExtensions())
-            s << INDENT << "static void pysideInitQtMetaTypes();" << endl;
+            s << INDENT << "static void pysideInitQtMetaTypes();\n";
 
-        s << "};" << endl << endl;
+        s << "};\n\n";
         if (!innerHeaderGuard.isEmpty())
-            s << "#  endif // SBK_" << innerHeaderGuard << "_H" << endl << endl;
+            s << "#  endif // SBK_" << innerHeaderGuard << "_H\n\n";
 
         // PYSIDE-500: Use also includes for inherited wrapper classes, because
         // without the protected hack, we sometimes need to cast inherited wrappers.
@@ -202,7 +202,7 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         innerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     }
 
-    s << "#endif // SBK_" << outerHeaderGuard << "_H" << endl << endl;
+    s << "#endif // SBK_" << outerHeaderGuard << "_H\n\n";
 }
 
 void HeaderGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction *func)
@@ -238,7 +238,7 @@ void HeaderGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction *
             args << argName;
         }
         s << args.join(QLatin1String(", ")) << ')';
-        s << "; }" << endl;
+        s << "; }\n";
     }
 
     // pure virtual functions need a default implementation
@@ -263,7 +263,7 @@ void HeaderGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction *
 
         if (virtualFunc)
             s << " override";
-        s << ';' << endl;
+        s << ";\n";
         // Check if this method hide other methods in base classes
         const AbstractMetaFunctionList &ownerFuncs = func->ownerClass()->functions();
         for (const AbstractMetaFunction *f : ownerFuncs) {
@@ -326,7 +326,8 @@ void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *t
 
 void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass)
 {
-    if (!metaClass->typeEntry()->generateCode())
+    auto typeEntry = metaClass->typeEntry();
+    if (!typeEntry->generateCode() || !NamespaceTypeEntry::isVisibleScope(typeEntry))
         return;
     writeTypeIndexValueLine(s, metaClass->typeEntry());
     const AbstractMetaEnumList &enums = metaClass->enums();
@@ -402,7 +403,7 @@ bool HeaderGenerator::finishGeneration()
     for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
         _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(metaType),
                              smartPointerCountIndex);
-        macrosStream << ", // " << metaType->cppSignature() << endl;
+        macrosStream << ", // " << metaType->cppSignature() << Qt::endl;
         ++smartPointerCountIndex;
         ++smartPointerCount;
     }
@@ -412,12 +413,12 @@ bool HeaderGenerator::finishGeneration()
                          getMaxTypeIndex() + smartPointerCount);
     macrosStream << "\n};\n";
 
-    macrosStream << "// This variable stores all Python types exported by this module." << endl;
-    macrosStream << "extern PyTypeObject **" << cppApiVariableName() << ';' << endl << endl;
-    macrosStream << "// This variable stores the Python module object exported by this module." << endl;
-    macrosStream << "extern PyObject *" << pythonModuleObjectName() << ';' << endl << endl;
-    macrosStream << "// This variable stores all type converters exported by this module." << endl;
-    macrosStream << "extern SbkConverter **" << convertersVariableName() << ';' << endl << endl;
+    macrosStream << "// This variable stores all Python types exported by this module.\n";
+    macrosStream << "extern PyTypeObject **" << cppApiVariableName() << ";\n\n";
+    macrosStream << "// This variable stores the Python module object exported by this module.\n";
+    macrosStream << "extern PyObject *" << pythonModuleObjectName() << ";\n\n";
+    macrosStream << "// This variable stores all type converters exported by this module.\n";
+    macrosStream << "extern SbkConverter **" << convertersVariableName() << ";\n\n";
 
     // TODO-CONVERTER ------------------------------------------------------------------------------
     // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
@@ -438,7 +439,7 @@ bool HeaderGenerator::finishGeneration()
     const QVector<const AbstractMetaType *> &containers = instantiatedContainers();
     for (const AbstractMetaType *container : containers) {
         _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(container), pCount);
-        macrosStream << ", // " << container->cppSignature() << endl;
+        macrosStream << ", // " << container->cppSignature() << Qt::endl;
         pCount++;
     }
 
@@ -453,7 +454,12 @@ bool HeaderGenerator::finishGeneration()
 
     // TODO-CONVERTER ------------------------------------------------------------------------------
 
-    macrosStream << "// Macros for type check" << endl;
+    macrosStream << "// Macros for type check\n";
+
+    if (usePySideExtensions()) {
+        typeFunctions << "QT_WARNING_PUSH\n";
+        typeFunctions << "QT_WARNING_DISABLE_DEPRECATED\n";
+    }
     for (const AbstractMetaEnum *cppEnum : qAsConst(globalEnums)) {
         if (cppEnum->isAnonymous() || cppEnum->isPrivate())
             continue;
@@ -489,6 +495,8 @@ bool HeaderGenerator::finishGeneration()
         includes << classType->include();
         writeSbkTypeFunction(typeFunctions, metaType);
     }
+    if (usePySideExtensions())
+        typeFunctions << "QT_WARNING_POP\n";
 
     QString moduleHeaderFileName(outputDirectory()
                                  + QDir::separator() + subDirectoryForPackage(packageName())
@@ -499,61 +507,61 @@ bool HeaderGenerator::finishGeneration()
     FileOut file(moduleHeaderFileName);
     QTextStream &s = file.stream;
     // write license comment
-    s << licenseComment() << endl << endl;
+    s << licenseComment() << Qt::endl << Qt::endl;
 
-    s << "#ifndef " << includeShield << endl;
-    s << "#define " << includeShield << endl<< endl;
+    s << "#ifndef " << includeShield << Qt::endl;
+    s << "#define " << includeShield << Qt::endl << Qt::endl;
     if (!avoidProtectedHack()) {
-        s << "//workaround to access protected functions" << endl;
-        s << "#define protected public" << endl << endl;
+        s << "//workaround to access protected functions\n";
+        s << "#define protected public\n\n";
     }
 
-    s << "#include <sbkpython.h>" << endl;
-    s << "#include <sbkconverter.h>" << endl;
+    s << "#include <sbkpython.h>\n";
+    s << "#include <sbkconverter.h>\n";
 
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();
     if (!requiredTargetImports.isEmpty()) {
-        s << "// Module Includes" << endl;
+        s << "// Module Includes\n";
         for (const QString &requiredModule : qAsConst(requiredTargetImports))
-            s << "#include <" << getModuleHeaderFileName(requiredModule) << ">" << endl;
-        s << endl;
+            s << "#include <" << getModuleHeaderFileName(requiredModule) << ">\n";
+        s << Qt::endl;
     }
 
-    s << "// Binded library includes" << endl;
+    s << "// Bound library includes\n";
     for (const Include &include : qAsConst(includes))
         s << include;
 
     if (!primitiveTypes().isEmpty()) {
-        s << "// Conversion Includes - Primitive Types" << endl;
+        s << "// Conversion Includes - Primitive Types\n";
         const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
         for (const PrimitiveTypeEntry *ptype : primitiveTypeList)
             s << ptype->include();
-        s << endl;
+        s << Qt::endl;
     }
 
     if (!containerTypes().isEmpty()) {
-        s << "// Conversion Includes - Container Types" << endl;
+        s << "// Conversion Includes - Container Types\n";
         const ContainerTypeEntryList &containerTypeList = containerTypes();
         for (const ContainerTypeEntry *ctype : containerTypeList)
             s << ctype->include();
-        s << endl;
+        s << Qt::endl;
     }
 
-    s << macros << endl;
+    s << macros << Qt::endl;
 
     if (!protectedEnumSurrogates.isEmpty()) {
-        s << "// Protected enum surrogates" << endl;
-        s << protectedEnumSurrogates << endl;
+        s << "// Protected enum surrogates\n";
+        s << protectedEnumSurrogates << Qt::endl;
     }
 
-    s << "namespace Shiboken" << endl << '{' << endl << endl;
+    s << "namespace Shiboken\n{\n\n";
 
     s << "// PyType functions, to get the PyObjectType for a type T\n";
-    s << sbkTypeFunctions << endl;
+    s << sbkTypeFunctions << Qt::endl;
 
-    s << "} // namespace Shiboken" << endl << endl;
+    s << "} // namespace Shiboken\n\n";
 
-    s << "#endif // " << includeShield << endl << endl;
+    s << "#endif // " << includeShield << Qt::endl << Qt::endl;
 
     return file.done() != FileOut::Failure;
 }
@@ -561,7 +569,7 @@ bool HeaderGenerator::finishGeneration()
 void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum *cppEnum)
 {
     if (avoidProtectedHack() && cppEnum->isProtected())
-        s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};" << endl;
+        s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};\n";
 }
 
 void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum *cppEnum)
@@ -618,6 +626,6 @@ void HeaderGenerator::writeInheritedOverloads(QTextStream &s)
             args << argName;
         }
         s << args.join(QLatin1String(", ")) << ')';
-        s << "; }" << endl;
+        s << "; }\n";
     }
 }

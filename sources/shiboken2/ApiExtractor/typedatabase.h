@@ -84,6 +84,9 @@ public:
 
     IncludeList extraIncludes(const QString &className) const;
 
+    const QByteArrayList &systemIncludes() const { return m_systemIncludes; }
+    void addSystemInclude(const QString &name);
+
     PrimitiveTypeEntry *findPrimitiveType(const QString &name) const;
     ComplexTypeEntry *findComplexType(const QString &name) const;
     ObjectTypeEntry *findObjectType(const QString &name) const;
@@ -189,6 +192,7 @@ private:
     QVector<TypeRejection> m_rejections;
 
     QStringList m_dropTypeEntries;
+    QByteArrayList m_systemIncludes;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

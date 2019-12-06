@@ -461,6 +461,7 @@
     <enum-type name="SliderChange"/>
   </object-type>
   <object-type name="QActionGroup">
+    <enum-type name="ExclusionPolicy" since="5.14"/>
     <modify-function signature="addAction(QAction*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -2950,6 +2951,7 @@
   <object-type name="QCommandLinkButton"/>
   <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
     <enum-type name="Roles"/>
+    <enum-type name="Option" flags="Options" since="5.14"/>
     <modify-function signature="setIconProvider(QFileIconProvider*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

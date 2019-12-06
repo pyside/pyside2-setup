@@ -16,7 +16,7 @@
               "declarative/signals/qmltopy3/main.py",
               "declarative/signals/qmltopy4/main.py",
               "declarative/usingmodel.py",
-              "installer_test/hello.py"
+              "installer_test/hello.py",
               "macextras/macpasteboardmime.py",
               "multimedia/audiooutput.py",
               "multimedia/camera.py",

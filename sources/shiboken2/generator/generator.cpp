@@ -430,9 +430,16 @@ bool Generator::generate()
             return false;
     }
 
+    const auto smartPointers = m_d->apiextractor->smartPointers();
     for (const AbstractMetaType *type : qAsConst(m_d->instantiatedSmartPointers)) {
         AbstractMetaClass *smartPointerClass =
-                AbstractMetaClass::findClass(m_d->apiextractor->smartPointers(), type->typeEntry());
+            AbstractMetaClass::findClass(smartPointers, type->typeEntry());
+        if (!smartPointerClass) {
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgCannotFindSmartPointer(type->cppSignature(),
+                                                           smartPointers)));
+            return false;
+        }
         GeneratorContext context(smartPointerClass, type, true);
         if (!generateFileForContext(context))
             return false;
@@ -442,7 +449,8 @@ bool Generator::generate()
 
 bool Generator::shouldGenerateTypeEntry(const TypeEntry *type) const
 {
-    return type->codeGeneration() & TypeEntry::GenerateTargetLang;
+    return (type->codeGeneration() & TypeEntry::GenerateTargetLang)
+        && NamespaceTypeEntry::isVisibleScope(type);
 }
 
 bool Generator::shouldGenerate(const AbstractMetaClass *metaClass) const
@@ -522,7 +530,7 @@ QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
 
             s << indentor << line.remove(0, limit);
         }
-        s << endl;
+        s << Qt::endl;
     }
     return s;
 }
@@ -760,7 +768,7 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
             bool simple = true;
             bool suitable = true;
             for (int i = 0, size = arguments.size();
-                 suitable && i < size && !arguments.at(i)->hasDefaultValueExpression(); ++i) {
+                 suitable && i < size && !arguments.at(i)->hasOriginalDefaultValueExpression(); ++i) {
                 const AbstractMetaArgument *arg = arguments.at(i);
                 const TypeEntry *aType = arg->type()->typeEntry();
                 suitable &= aType != cType;
@@ -777,11 +785,12 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
         bool ok = true;
         for (int i =0, size = arguments.size(); ok && i < size; ++i) {
             const AbstractMetaArgument *arg = arguments.at(i);
-            if (arg->hasDefaultValueExpression()) {
-                if (arg->hasModifiedDefaultValueExpression())
-                    args << arg->defaultValueExpression(); // Spell out modified values
+            if (arg->hasModifiedDefaultValueExpression()) {
+                args << arg->defaultValueExpression(); // Spell out modified values
                 break;
             }
+            if (arg->hasOriginalDefaultValueExpression())
+                break;
             auto argValue = minimalConstructor(arg->type());
             ok &= argValue.isValid();
             args << argValue.constructorParameter();
@@ -885,8 +894,12 @@ static QString getClassTargetFullName_(const T *t, bool includePackageName)
     QString name = t->name();
     const AbstractMetaClass *context = t->enclosingClass();
     while (context) {
-        name.prepend(QLatin1Char('.'));
-        name.prepend(context->name());
+        // If the type was marked as 'visible=false' we should not use it in
+        // the type name
+        if (NamespaceTypeEntry::isVisibleScope(context->typeEntry())) {
+            name.prepend(QLatin1Char('.'));
+            name.prepend(context->name());
+        }
         context = context->enclosingClass();
     }
     if (includePackageName) {

@@ -98,6 +98,13 @@ enum class ExceptionHandling {
     On
 };
 
+enum Visibility { // For namespaces
+    Unspecified,
+    Visible,
+    Invisible,
+    Auto
+};
+
 } // namespace TypeSystem
 
 #endif // TYPESYSTEM_ENUMS_H

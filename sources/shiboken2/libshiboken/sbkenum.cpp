@@ -321,6 +321,11 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
 #ifndef Py_LIMITED_API
     Py_TRASHCAN_SAFE_END(pyObj);
 #endif
+    if (PepRuntime_38_flag) {
+        // PYSIDE-939: Handling references correctly.
+        // This was not needed before Python 3.8 (Python issue 35810)
+        Py_DECREF(Py_TYPE(pyObj));
+    }
 }
 
 PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
@@ -512,7 +517,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_nb_index, (void *)enum_int},
     {Py_tp_richcompare, (void *)enum_richcompare},
     {Py_tp_hash, (void *)enum_hash},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, nullptr}
 };
 static PyType_Spec SbkNewType_spec = {

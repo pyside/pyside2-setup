@@ -14,7 +14,9 @@ that loads the QML file. To make things easier, let's save both files in
 the same directory.
 
 Here is a simple QML file called `view.qml`:
-::
+
+.. code-block:: javascript
+
     import QtQuick 2.0
 
     Rectangle {
@@ -39,7 +41,9 @@ is the Rectangle in this case.
 
 Now, let's see how the code looks on the PySide2.
 Let's call it `main.py`:
-::
+
+.. code-block:: python
+
     from PySide2.QtWidgets import QApplication
     from PySide2.QtQuick import QQuickView
     from PySide2.QtCore import QUrl

@@ -43,8 +43,8 @@ import sys
 import fnmatch
 
 from ..config import config
-from ..options import *
-from ..utils import copydir, copyfile, rmtree, makefile
+from ..options import OPTION
+from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources, filter_match
 from ..utils import download_and_extract_7z
 
@@ -147,25 +147,9 @@ def prepare_packages_win32(self, vars):
             filter=pdbs,
             recursive=False, vars=vars)
 
-        # <install>/lib/site-packages/pyside2uic/* ->
-        #   <setup>/pyside2uic
-        copydir(
-            "{site_packages_dir}/pyside2uic",
-            "{st_build_dir}/pyside2uic",
-            force=False, vars=vars)
-        if sys.version_info[0] > 2:
-            rmtree("{st_build_dir}/pyside2uic/port_v2".format(**vars))
-        else:
-            rmtree("{st_build_dir}/pyside2uic/port_v3".format(**vars))
-
-        # <install>/bin/pyside2-uic -> {st_package_name}/scripts/uic.py
         makefile(
             "{st_build_dir}/{st_package_name}/scripts/__init__.py",
             vars=vars)
-        copyfile(
-            "{install_dir}/bin/pyside2-uic",
-            "{st_build_dir}/{st_package_name}/scripts/uic.py",
-            force=False, vars=vars)
 
         # For setting up setuptools entry points
         copyfile(
@@ -177,7 +161,7 @@ def prepare_packages_win32(self, vars):
         copydir(
             "{install_dir}/bin/",
             "{st_build_dir}/{st_package_name}",
-            filter=["pyside*.exe", "pyside*.dll"],
+            filter=["pyside*.exe", "pyside*.dll", "uic.exe", "rcc.exe", "designer.exe"],
             recursive=False, vars=vars)
 
         # <install>/lib/*.lib -> {st_package_name}/
@@ -222,7 +206,7 @@ def prepare_packages_win32(self, vars):
             filter=pdbs,
             recursive=False, vars=vars)
 
-        if not OPTION_NOEXAMPLES:
+        if not OPTION["NOEXAMPLES"]:
             def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if fnmatch.fnmatch(dir_name, "__pycache__"):
                     return False
@@ -236,19 +220,18 @@ def prepare_packages_win32(self, vars):
             if sys.version_info[0] == 3:
                 examples_path = "{st_build_dir}/{st_package_name}/examples".format(
                     **vars)
-                pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(
+                pyside_rcc_path = "{install_dir}/bin/rcc.exe".format(
                     **vars)
-                pyside_rcc_options = '-py3'
-                regenerate_qt_resources(examples_path, pyside_rcc_path,
-                    pyside_rcc_options)
+                pyside_rcc_options = ['-g', 'python']
+                regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 
         if vars['ssl_libs_dir']:
             # <ssl_libs>/* -> <setup>/{st_package_name}/openssl
             copydir("{ssl_libs_dir}", "{st_build_dir}/{st_package_name}/openssl",
-                filter=[
-                    "libeay32.dll",
-                    "ssleay32.dll"],
-                force=False, vars=vars)
+                    filter=[
+                        "libeay32.dll",
+                        "ssleay32.dll"],
+                    force=False, vars=vars)
 
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
@@ -398,19 +381,21 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         # e.g. "/home/work/qt/qtbase/bin"
         file_path_dir_name = os.path.dirname(file_full_path)
         # e.g. "Qt5Coredd"
-        maybe_debug_name = file_base_name + 'd'
+        maybe_debug_name = "{}d".format(file_base_name)
         if self.debug:
             filter = debug
-            def predicate(path): return not os.path.exists(path)
+
+            def predicate(path):
+                return not os.path.exists(path)
         else:
             filter = release
-            def predicate(path): return os.path.exists(path)
-        # e.g. "/home/work/qt/qtbase/bin/Qt5Coredd.dll"
-        other_config_path = os.path.join(file_path_dir_name,
-            maybe_debug_name + file_ext)
 
-        if (filter_match(file_name, filter) and
-                predicate(other_config_path)):
+            def predicate(path):
+                return os.path.exists(path)
+        # e.g. "/home/work/qt/qtbase/bin/Qt5Coredd.dll"
+        other_config_path = os.path.join(file_path_dir_name, maybe_debug_name + file_ext)
+
+        if (filter_match(file_name, filter) and predicate(other_config_path)):
             return True
         return False
 
@@ -427,19 +412,18 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         pdb_pattern = "*{}.pdb"
         if copy_pdbs:
             plugin_dll_patterns += [pdb_pattern]
-        plugin_dll_filter = functools.partial(qt_build_config_filter,
-            plugin_dll_patterns)
+        plugin_dll_filter = functools.partial(qt_build_config_filter, plugin_dll_patterns)
         copydir("{qt_plugins_dir}", "{st_build_dir}/{st_package_name}/plugins",
-            file_filter_function=plugin_dll_filter,
-            vars=vars)
+                file_filter_function=plugin_dll_filter,
+                vars=vars)
 
     if copy_translations:
         # <qt>/translations/* -> <setup>/{st_package_name}/translations
         copydir("{qt_translations_dir}",
-            "{st_build_dir}/{st_package_name}/translations",
-            filter=["*.qm", "*.pak"],
-            force=False,
-            vars=vars)
+                "{st_build_dir}/{st_package_name}/translations",
+                filter=["*.qm", "*.pak"],
+                force=False,
+                vars=vars)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/qml
@@ -449,43 +433,41 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
 
         # Copy all files that are not dlls and pdbs (.qml, qmldir).
         copydir("{qt_qml_dir}", "{st_build_dir}/{st_package_name}/qml",
-            ignore=qml_ignore,
-            force=False,
-            recursive=True,
-            vars=vars)
+                ignore=qml_ignore,
+                force=False,
+                recursive=True,
+                vars=vars)
 
         if copy_pdbs:
             qml_dll_patterns += [pdb_pattern]
-        qml_dll_filter = functools.partial(qt_build_config_filter,
-            qml_dll_patterns)
+        qml_dll_filter = functools.partial(qt_build_config_filter, qml_dll_patterns)
 
         # Copy all dlls (and possibly pdbs).
         copydir("{qt_qml_dir}", "{st_build_dir}/{st_package_name}/qml",
-            file_filter_function=qml_dll_filter,
-            force=False,
-            recursive=True,
-            vars=vars)
+                file_filter_function=qml_dll_filter,
+                force=False,
+                recursive=True,
+                vars=vars)
 
     if self.is_webengine_built(built_modules):
         copydir("{qt_prefix_dir}/resources",
-            "{st_build_dir}/{st_package_name}/resources",
-            filter=None,
-            recursive=False,
-            vars=vars)
+                "{st_build_dir}/{st_package_name}/resources",
+                filter=None,
+                recursive=False,
+                vars=vars)
 
         filter = 'QtWebEngineProcess{}.exe'.format(
             'd' if self.debug else '')
         copydir("{qt_bin_dir}",
-            "{st_build_dir}/{st_package_name}",
-            filter=[filter],
-            recursive=False, vars=vars)
+                "{st_build_dir}/{st_package_name}",
+                filter=[filter],
+                recursive=False, vars=vars)
 
     if copy_qt_conf:
         # Copy the qt.conf file to prefix dir.
-        copyfile(
-            "{build_dir}/pyside2/{st_package_name}/qt.conf",
-            "{st_build_dir}/{st_package_name}",
-            vars=vars)
+        copyfile("{build_dir}/pyside2/{st_package_name}/qt.conf",
+                 "{st_build_dir}/{st_package_name}",
+                 vars=vars)
 
     if copy_clang:
         self.prepare_standalone_clang(is_win=True)

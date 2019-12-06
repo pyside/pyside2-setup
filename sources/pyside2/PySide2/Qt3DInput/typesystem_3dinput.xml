@@ -73,11 +73,11 @@
         </object-type>
         <object-type name="QMouseEvent">
             <enum-type name="Buttons"/>
-            <enum-type name="Modifier" flags="Modifiers" since="5.14"/>
+            <enum-type name="Modifiers"/>
         </object-type>
         <object-type name="QWheelEvent">
             <enum-type name="Buttons"/>
-            <enum-type name="Modifier" flags="Modifiers" since="5.14"/>
+            <enum-type name="Modifiers"/>
         </object-type>
         <object-type name="QMouseHandler"/>
         <!-- On windows this raise the following error:

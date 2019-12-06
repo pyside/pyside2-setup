@@ -39,6 +39,7 @@
 
 #include "sbkpython.h"
 #include "typespec.h"
+#include "sbkstaticstrings.h"
 #include <structmember.h>
 
 #if PY_MAJOR_VERSION < 3
@@ -713,7 +714,7 @@ PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     if (PyType_Ready(type) < 0)
         goto fail;
 
-    // no ht_hached_keys in Python 2
+    // no ht_cached_keys in Python 2
     // if (type->tp_dictoffset) {
     //     res->ht_cached_keys = _PyDict_NewKeysForClass();
     // }
@@ -730,7 +731,7 @@ PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
         }
         // no PyId_ things in Python 2
         // err = _PyDict_SetItemId(type->tp_dict, &PyId___module__, modname);
-        err = PyDict_SetItemString(type->tp_dict, "__module__", modname);
+        err = PyDict_SetItem(type->tp_dict, Shiboken::PyMagicName::module(), modname);
         Py_DECREF(modname);
         if (err != 0)
             goto fail;

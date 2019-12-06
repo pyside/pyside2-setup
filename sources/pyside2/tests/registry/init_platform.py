@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -54,11 +54,20 @@ shiboken and pysidetest projects.
 
 import sys
 import os
-import re
 from contextlib import contextmanager
 from textwrap import dedent
+from util import get_refpath, get_script_dir
 
-script_dir = os.path.normpath(os.path.join(__file__, *".. .. .. .. ..".split()))
+def qt_build():
+    result = '<Unknown build of Qt>'
+    try:
+        from PySide2.QtCore import QLibraryInfo
+        result = QLibraryInfo.build()
+    except:
+        pass
+    return result
+
+script_dir = get_script_dir()
 history_dir = os.path.join(script_dir, 'build_history')
 
 # Find out if we have the build dir, already. Then use it.
@@ -118,7 +127,7 @@ sys.path[:0] = [os.path.join(shiboken_build_dir, "shibokenmodule"),
 
 import PySide2
 
-all_modules = list("PySide2." + x for x in PySide2.__all__)
+all_modules = list("PySide2." + _ for _ in PySide2.__all__)
 
 # now we should be able to do all imports:
 if not have_build_dir:
@@ -138,57 +147,10 @@ for modname in "minimal sample other smart".split():
     __import__(modname)
     all_modules.append(modname)
 
-from PySide2.QtCore import __version__
 from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator
 
-is_py3 = sys.version_info[0] == 3
-is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
-# Python2 legacy: Correct 'linux2' to 'linux', recommended way.
-if sys.platform.startswith('linux'):
-    # We have to be more specific because we had differences between
-    # RHEL 6.6 and RHEL 7.4 .
-    # Note: The platform module is deprecated. We need to switch to the
-    # distro package, ASAP! The distro has been extracted from Python,
-    # because it changes more often than the Python version.
-    try:
-        import distro
-    except ImportError:
-        import platform as distro
-    platform_name = "".join(distro.linux_distribution()[:2]).lower()
-    platform_name = re.sub('[^0-9a-z]', '', platform_name)
-else:
-    platform_name = sys.platform
-# In the linux case, we need more information.
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
-
-def qt_version():
-    return tuple(map(int, __version__.split(".")))
-
-# Format a registry file name for version.
-def _registry_filename(version):
-    name = "exists_{}_{}_{}_{}{}.py".format(platform_name,
-        version[0], version[1], version[2], "_ci" if is_ci else "")
-    return os.path.join(os.path.dirname(__file__), name)
-
-# Return the expected registry file name.
-def get_refpath():
-    return _registry_filename(qt_version())
-
-# Return the registry file name, either that of the current
-# version or fall back to a previous patch release.
-def get_effective_refpath():
-    refpath = get_refpath()
-    if os.path.exists(refpath):
-        return refpath
-    version = qt_version()
-    major, minor, patch = version[:3]
-    while patch >= 0:
-        file = _registry_filename((major, minor, patch))
-        if os.path.exists(file):
-            return file
-        patch = patch - 1
-    return refpath
 
 
 class Formatter(object):
@@ -201,39 +163,41 @@ class Formatter(object):
     """
     def __init__(self, outfile):
         self.outfile = outfile
+        self.last_level = 0
 
     def print(self, *args, **kw):
         print(*args, file=self.outfile, **kw) if self.outfile else None
 
     @contextmanager
     def module(self, mod_name):
-        self.mod_name = mod_name
         self.print("")
         self.print("# Module", mod_name)
-        self.print('if "{}" in sys.modules:'.format(mod_name))
-        self.print("    dict.update({")
+        self.print("sig_dict.update({")
         yield
-        self.print("    })")
+        self.print('    }}) if "{mod_name}" in sys.modules else None'.format(**locals()))
 
     @contextmanager
     def klass(self, class_name, class_str):
-        self.class_name = class_name
         self.print()
-        self.print("    # class {}.{}:".format(self.mod_name, class_name))
+        self.print("# class {self.mod_name}.{class_name}:".format(**locals()))
         yield
 
     @contextmanager
     def function(self, func_name, signature):
-        if self.class_name is None:
-            key = viskey = "{}".format(func_name)
+        if self.last_level > self.level:
+            self.print()
+        self.last_level = self.level
+        class_name = self.class_name
+        if class_name is None:
+            key = viskey = "{self.mod_name}.{func_name}".format(**locals())
         else:
-            key = viskey = "{}.{}".format(self.class_name, func_name)
+            key = viskey = "{self.mod_name}.{class_name}.{func_name}".format(**locals())
         if key.endswith("lY"):
             # Some classes like PySide2.QtGui.QContextMenuEvent have functions
             # globalX and the same with Y. The gerrit robot thinks that this
             # is a badly written "globally". Convince it by hiding this word.
             viskey = viskey[:-1] + '""Y'
-        self.print('        "{}": {},'.format(viskey, signature))
+        self.print('    "{viskey}": {signature},'.format(**locals()))
         yield key
 
 
@@ -255,20 +219,27 @@ def generate_all():
         lines = f.readlines()
         license_line = next((lno for lno, line in enumerate(lines)
                              if "$QT_END_LICENSE$" in line))
+        fmt.print("#recreate       # uncomment this to enforce generation")
         fmt.print("".join(lines[:license_line + 3]))
+        version = sys.version.replace('\n', ' ')
+        build = qt_build()
         fmt.print(dedent('''\
             """
             This file contains the simplified signatures for all functions in PySide
-            for module '{}'. There are no default values, no variable
-            names and no self parameter. Only types are present after simplification.
-            The functions 'next' resp. '__next__' are removed to make the output
+            for module '{module}' using
+            Python {version}
+            {build}
+
+            There are no default values, no variable names and no self
+            parameter. Only types are present after simplification. The
+            functions 'next' resp. '__next__' are removed to make the output
             identical for Python 2 and 3. '__div__' is also removed,
             since it exists in Python 2, only.
             """
-            '''.format(module)))
+            '''.format(**locals())))
         fmt.print("import sys")
         fmt.print("")
-        fmt.print("dict = {}")
+        fmt.print("sig_dict = {}")
         for mod_name in all_modules:
             enu.module(mod_name)
         fmt.print("# eof")

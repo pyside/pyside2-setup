@@ -37,8 +37,12 @@
 ##
 #############################################################################
 
-import os, sys, re, subprocess
+import os
+import sys
+import re
+import subprocess
 from distutils.spawn import find_executable
+
 
 class QtInfo(object):
     def __init__(self, qmake_command=None):
@@ -47,7 +51,7 @@ class QtInfo(object):
         if qmake_command:
             self._qmake_command = qmake_command
         else:
-            self._qmake_command = [find_executable("qmake"),]
+            self._qmake_command = [find_executable("qmake"), ]
 
         # Dict to cache qmake values.
         self._query_dict = {}
@@ -120,9 +124,9 @@ class QtInfo(object):
     def get_mkspecs_variables(self):
         return self._mkspecs_dict
 
-    def _get_qmake_output(self, args_list = []):
+    def _get_qmake_output(self, args_list=[]):
         cmd = self._qmake_command + args_list
-        proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, shell=False)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=False)
         output = proc.communicate()[0]
         proc.wait()
         if proc.returncode != 0:

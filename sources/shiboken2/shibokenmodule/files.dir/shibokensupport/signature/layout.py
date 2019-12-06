@@ -56,7 +56,7 @@ used literally as strings like "signature", "existence", etc.
 """
 
 from textwrap import dedent
-from shibokensupport.signature import inspect
+from shibokensupport.signature import inspect, typing
 from shibokensupport.signature.mapping import ellipsis
 from shibokensupport.signature.lib.tool import SimpleNamespace
 
@@ -162,6 +162,35 @@ def define_nameless_parameter():
 
 NamelessParameter = define_nameless_parameter()
 
+"""
+Note on the "Optional" feature:
+
+When an annotation has a default value that is None, then the
+type has to be wrapped into "typing.Optional".
+
+Note that only the None value creates an Optional expression,
+because the None leaves the domain of the variable.
+Defaults like integer values are ignored: They stay in the domain.
+
+That information would be lost when we use the "..." convention.
+
+Note that the typing module has the remarkable expansion
+
+    Optional[T]    is    Variant[T, NoneType]
+
+We want to avoid that when generating the .pyi file.
+This is done by a regex in generate_pyi.py .
+The following would work in Python 3, but this is a version-dependent
+hack that also won't work in Python 2 and would be _very_ complex.
+"""
+# import sys
+# if sys.version_info[0] == 3:
+#     class hugo(list):pass
+#     typing._normalize_alias["hugo"] = "Optional"
+#     Optional = typing._alias(hugo, typing.T, inst=False)
+# else:
+#     Optional = typing.Optional
+
 
 def make_signature_nameless(signature):
     """
@@ -173,6 +202,13 @@ def make_signature_nameless(signature):
     for key in signature.parameters.keys():
         signature.parameters[key].__class__ = NamelessParameter
 
+
+_POSITIONAL_ONLY         = inspect._POSITIONAL_ONLY
+_POSITIONAL_OR_KEYWORD   = inspect._POSITIONAL_OR_KEYWORD
+_VAR_POSITIONAL          = inspect._VAR_POSITIONAL
+_KEYWORD_ONLY            = inspect._KEYWORD_ONLY
+_VAR_KEYWORD             = inspect._VAR_KEYWORD
+_empty                   = inspect._empty
 
 def create_signature(props, key):
     if not props:
@@ -204,26 +240,39 @@ def create_signature(props, key):
         elif sig_kind == "classmethod":
             varnames = ("klass",) + varnames
         else:
-            raise SystemError("Methods must be function, method, staticmethod or "
-                              "classmethod")
+            raise SystemError("Methods must be function, method, staticmethod"
+                              " or classmethod")
     # calculate the modifications
     defaults = props["defaults"][:]
     if not layout.defaults:
         defaults = ()
-    if layout.ellipsis:
-        defaults = (ellipsis,) * len(defaults)
     annotations = props["annotations"].copy()
     if not layout.return_annotation and "return" in annotations:
         del annotations["return"]
 
-    # attach parameters to a fake function and build a signature
-    argstr = ", ".join(varnames)
-    fakefunc = eval("lambda {}: None".format(argstr))
-    fakefunc.__name__ = props["name"]
-    fakefunc.__defaults__ = defaults
-    fakefunc.__kwdefaults__ = props["kwdefaults"]
-    fakefunc.__annotations__ = annotations
-    sig = inspect._signature_from_function(inspect.Signature, fakefunc)
+    # Build a signature.
+    kind = inspect._POSITIONAL_OR_KEYWORD
+    params = []
+    for idx, name in enumerate(varnames):
+        if name.startswith("**"):
+            kind = _VAR_KEYWORD
+        elif name.startswith("*"):
+            kind = _VAR_POSITIONAL
+        ann = annotations.get(name, _empty)
+        name = name.lstrip("*")
+        defpos = idx - len(varnames) + len(defaults)
+        default = defaults[defpos] if defpos >= 0 else _empty
+        if default is None:
+            ann = typing.Optional[ann]
+        if default is not _empty and layout.ellipsis:
+            default = ellipsis
+        param = inspect.Parameter(name, kind, annotation=ann, default=default)
+        params.append(param)
+        if kind == _VAR_POSITIONAL:
+            kind = _KEYWORD_ONLY
+    sig = inspect.Signature(params,
+           return_annotation=annotations.get('return', _empty),
+           __validate_parameters__=False)
 
     # the special case of nameless parameters
     if not layout.parameter_names:

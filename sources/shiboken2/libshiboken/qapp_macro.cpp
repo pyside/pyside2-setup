@@ -120,6 +120,7 @@ reset_qApp_var(void)
 PyObject *
 MakeSingletonQAppWrapper(PyTypeObject *type)
 {
+    static bool app_created = false;
     if (type == nullptr)
         type = Py_NONE_TYPE;
     if (!(type == Py_NONE_TYPE || Py_TYPE(qApp_content) == Py_NONE_TYPE)) {
@@ -145,6 +146,9 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
         Py_REFCNT(qApp_var) = 1; // fuse is armed...
     }
     if (type == Py_NONE_TYPE) {
+        // PYSIDE-1093: Ignore None when no instance has ever been created.
+        if (!app_created)
+            Py_RETURN_NONE;
         // Debug mode showed that we need to do more than just remove the
         // reference. To keep everything in the right order, it is easiest
         // to do a full shutdown, using QtCore.__moduleShutdown().
@@ -158,9 +162,10 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
         Py_REFCNT(qApp_content) = Py_REFCNT(Py_None);
         if (__moduleShutdown != nullptr)
             Py_XDECREF(PyObject_CallFunction(__moduleShutdown, const_cast<char *>("()")));
+    } else {
+        PyObject_INIT(qApp_content, type);
+        app_created = true;
     }
-    else
-        (void)PyObject_INIT(qApp_content, type);
     Py_INCREF(qApp_content);
     return qApp_content;
 }

@@ -923,6 +923,16 @@ void  _NamespaceModelItem::appendNamespace(const _NamespaceModelItem &other)
 void _NamespaceModelItem::formatDebug(QDebug &d) const
 {
     _ScopeModelItem::formatDebug(d);
+    switch (m_type) {
+    case NamespaceType::Default:
+        break;
+    case NamespaceType::Anonymous:
+        d << ", anonymous";
+        break;
+    case NamespaceType::Inline:
+        d << ", inline";
+        break;
+    }
     formatScopeList(d, ", namespaces=", m_namespaces);
 }
 #endif // !QT_NO_DEBUG_STREAM

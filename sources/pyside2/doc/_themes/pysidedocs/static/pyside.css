@@ -3,8 +3,8 @@
 /* -- admonitions -- */
 
 div.admonition {
-    margin: 1em 0 1em;
-    padding: 7px;
+    margin: 1.5em 0 1.5em;
+    padding: 0;
 }
 
 div.admonition dt {
@@ -19,6 +19,23 @@ p.admonition-title {
     margin: 0px 10px 5px 0px;
     font-weight: bold;
 }
+
+div.admonition code {
+    font-family: inherit;
+}
+
+p.admonition-title + p {
+    padding-left: 1em;
+}
+
+div.admonition a:after {
+    content: ', ';
+}
+
+div.admonition a:last-child:after {
+    content: '';
+}
+
 .body {
     width: 100%
 }
@@ -35,18 +52,21 @@ div.body p.centered {
     margin-top: 25px;
 }
 
+div.warning, div.seealso, div.note {
+    padding: 6px 0px 6px 10px;
+    border: none;
+}
+
 div.warning {
     background-color: #ffe4e4;
-    border: 1px solid #f66;
 }
 
 div.seealso {
-    background-color: #ffffcc;
-    border: 1px solid #ffff66;
+    background-color: #fff2d6;
 }
 
 div.note {
-    border: 1px solid #e3e3e3;
+    background-color: #f3f3f4;
 }
 
 table.docutils {
@@ -91,7 +111,7 @@ h2 em {
 .body blockquote {
     border: none;
     padding-left: 0;
-    margin-bottom: 2em;
+    margin-bottom: 1.5em;
 }
 
 .sphinxsidebar {
@@ -146,11 +166,8 @@ h2 em {
     display: block;
     padding: 5px;
     margin: 0 10px 10px 0;
-    border: 1px solid #ddd;
-    background-color: #f4f4f4;
-    -moz-border-radius:6px;
-    -webkit-border-radius:6px;
-    -khtml-border-radius:6px;
+    border: none;
+    background-color: #e2e2e2;
 }
 
 .section .docutils.container td {
@@ -290,14 +307,23 @@ tt.descname {
 }
 
 #functions ul, #virtual-functions ul, #slots ul, #signals ul, #static-functions ul {
-    list-style: none;
-    margin: 0px;
-    padding: 10px;
+    margin: 0;
+    padding: 6px;
     border: 1px solid #ddd;
-    background-color: #f4f4f4;
-    -moz-border-radius:10px;
-    -webkit-border-radius:10px;
-    -khtml-border-radius:10px;
+    border-radius: 0;
+    background-color: #e2e2e2;
+}
+
+#functions p, #virtual-functions p, #slots p, #signals p, #static-functions p {
+    margin: 0;
+    padding: 0;
+}
+
+#functions li, #virtual-functions li, #slots li, #signals li, #static-functions li {
+    list-style: none;
+    margin: 5px;
+    padding: 0;
+    font-size: 90%;
 }
 
 #synopsis span.pre {
@@ -312,11 +338,94 @@ tt.descname {
     margin: 0px;
     margin-bottom: 10px;
     padding: 10px;
-    border: 1px solid #ddd;
-    background-color: #f4f4f4;
-    -moz-border-radius:10px;
-    -webkit-border-radius:10px;
-    -khtml-border-radius:10px;
+    font-weight: bold;
+    background-color: #e2e2e2;
+    border: none;
+    border-radius: 0;
+}
+
+#detailed-description dd > blockquote,
+#detailed-description dd > .field-list {
+    font-family: 'Droid Sans Mono';
+    font-size: small;
+    border-left: 10px solid #e2e2e2;
+    padding-left: 10px;
+    margin-bottom: 1.5em;
+}
+
+#detailed-description dd > blockquote blockquote {
+    border: none;
+    padding: 0;
+}
+
+#detailed-description .class .field-odd,
+#detailed-description .method .field-odd,
+#detailed-description .staticmethod .field-odd,
+#detailed-description .attribute .field-odd  {
+    margin: 0;
+    padding: 1px 0 0 0;
+    background-color: #ffffff;
+
+}
+
+#detailed-description .class .field-even,
+#detailed-description .method .field-even,
+#detailed-description .staticmethod .field-even,
+#detailed-description .attribute .field-even  {
+    margin: 0;
+    padding: 1px 0 0 0;
+    background-color: #ffffff;
+}
+
+#detailed-description .class .field-odd li,
+#detailed-description .method .field-odd li,
+#detailed-description .staticmethod .field-odd li,
+#detailed-description .attribute .field-odd li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+}
+
+#detailed-description .class .field-even li,
+#detailed-description .method .field-even li,
+#detailed-description .staticmethod .field-even li,
+#detailed-description .attribute .field-even li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#detailed-description .class .field-odd p,
+#detailed-description .method .field-odd p,
+#detailed-description .staticmethod .field-odd p,
+#detailed-description .attribute .field-odd  p{
+    margin: 0;
+    margin-left: 20px;
+
+}
+
+#detailed-description .class .field-even p,
+#detailed-description .method .field-even p,
+#detailed-description .staticmethod .field-even p,
+#detailed-description .attribute .field-even p{
+    margin: 0;
+    margin-left: 20px;
+}
+
+#detailed-description .class .field-odd p:last-child,
+#detailed-description .method .field-odd p:last-child,
+#detailed-description .staticmethod .field-odd p:last-child,
+#detailed-description .attribute .field-odd  p:last-child {
+    margin-bottom: 10px;
+
+}
+
+#detailed-description .class .field-even p:last-child,
+#detailed-description .method .field-even p:last-child,
+#detailed-description .staticmethod .field-even p:last-child,
+#detailed-description .attribute .field-even p:last-child{
+    margin-bottom: 10px;
 }
 
 .document dl.attribute,
@@ -331,6 +440,10 @@ tt.descname {
 .document dl.method dd,
 .document dl.staticmethod dd {
     padding-left: 1em;
+}
+
+#detailed-description .attribute td:nth-child(1) {
+    font-family: 'Droid Sans Mono';
 }
 
 /* Qt theme */
@@ -907,7 +1020,8 @@ body {
   color:#404244;
 }
 ol,ul {
-  list-style:none
+  list-style-type: square;
+  color: #17a81a;
 }
 .body ol,.body ul {
   margin-top:0.75em;
@@ -1056,9 +1170,15 @@ div.multi-column div {
 }
 .col-2 h2,.toc h3,.sidebar-content h2,
 .sidebar-content h3,.sectionlist h2,
+.sphinxsidebar {
+  position: fixed;
+  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
 .sphinxsidebar h3 {
-  font-weight:400;
-  margin-bottom:1em
+  font-weight: bold;
+  margin-bottom:1em;
 }
 .toc h3 a {
   color:#404244
@@ -1344,7 +1464,7 @@ div.pre {
   height:auto
 }
 pre, .LegaleseLeft {
-  background-color:#3a4055;
+  background-color:#222840;
   color:#fff;
   display:block;
   font-family:"Droid Sans Mono";
@@ -1425,6 +1545,13 @@ pre span.wrap {
   margin:4px;
   opacity:0.65
 }
+
+span.pre {
+    color: #09102d;
+    background-color: #e4e4e4;
+    padding: 3px;
+}
+
 span.wrap:hover {
   opacity:1
 }
@@ -1449,6 +1576,10 @@ span.wrap:active {
 }
 code,.codelike {
   font-family:"Droid Sans Mono"
+}
+#detailed-description .function dt > code,
+#detailed-description .function dt > em {
+  font-weight:bold
 }
 h3.fn code {
   font-size:0.75em;
@@ -1889,4 +2020,53 @@ a.plink, a.headerlink {
 }
 a.plink::before {
   content:'\00B6'
+}
+
+table.special {
+    border: 3px;
+    padding: 0px;
+    border-collapse: separate;
+    border-spacing: 20px;
+    line-height: 1.5em;
+}
+
+.special p {
+    text-align: center;
+    color: #3a4055;
+}
+
+.special a {
+    display: block;
+    border-bottom: 0;
+    text-decoration: none;
+}
+
+.special a:hover {
+    border-bottom: 0;
+    text-decoration: none;
+}
+
+.special strong {
+    color: #17a81a;
+    font-size: 110%;
+    font-weight: normal;
+}
+
+table.special th,
+table.special td {
+    border: 1px solid #888;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 6px;
+    padding-right: 5px;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
+}
+
+.special td:hover {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-bottom: 4px solid #41cd52;
 }

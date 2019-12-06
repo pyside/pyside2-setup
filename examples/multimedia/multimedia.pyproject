@@ -1,0 +1,3 @@
+{
+    "files": ["player.py", "audiooutput.py", "camera.py"]
+}

@@ -73,11 +73,11 @@ static void printOptions(QTextStream &s, const OptionDescriptions &options)
         if (od.second.isEmpty()) {
             s << ", ";
         } else {
-            s << endl;
+            s << Qt::endl;
             const auto lines = od.second.splitRef(QLatin1Char('\n'));
             for (const auto &line : lines)
-                s << "        " << line << endl;
-            s << endl;
+                s << "        " << line << Qt::endl;
+            s << Qt::endl;
         }
     }
 }
@@ -343,7 +343,7 @@ void printUsage()
     for (const GeneratorPtr &generator : generators) {
         const OptionDescriptions options = generator->options();
         if (!options.isEmpty()) {
-            s << endl << generator->name() << " options:\n\n";
+            s << Qt::endl << generator->name() << " options:\n\n";
             printOptions(s, generator->options());
         }
     }

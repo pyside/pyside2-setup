@@ -43,6 +43,8 @@ from __future__ import print_function, absolute_import
 tool.py
 
 Some useful stuff, see below.
+On the function with_metaclass see the answer from Martijn Pieters on
+https://stackoverflow.com/questions/18513821/python-metaclass-understanding-the-with-metaclass
 """
 
 from textwrap import dedent
@@ -131,5 +133,22 @@ def build_brace_pattern(level, separators=""):
         pattern = pattern.format(replacer = repeated if idx < level-1 else no_braces_q,
                                  indent = idx * "    ", **locals())
     return pattern.replace("C", "{").replace("D", "}")
+
+
+# Copied from the six module:
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(type):
+
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+
+        @classmethod
+        def __prepare__(cls, name, this_bases):
+            return meta.__prepare__(name, bases)
+    return type.__new__(metaclass, 'temporary_class', (), {})
 
 # eof

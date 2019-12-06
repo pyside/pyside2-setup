@@ -39,6 +39,10 @@
 
 #include "pep384impl.h"
 #include "autodecref.h"
+#include "sbkstaticstrings.h"
+#include "sbkstaticstrings_p.h"
+#include <stdlib.h>
+
 
 extern "C"
 {
@@ -85,14 +89,15 @@ static PyGetSetDef probe_getseters[] = {
 #define probe_tp_str        make_dummy(2)
 #define probe_tp_traverse   make_dummy(3)
 #define probe_tp_clear      make_dummy(4)
+#define probe_tp_iternext   make_dummy(5)
 #define probe_tp_methods    probe_methoddef
 #define probe_tp_getset     probe_getseters
-#define probe_tp_descr_get  make_dummy(7)
-#define probe_tp_init       make_dummy(8)
-#define probe_tp_alloc      make_dummy(9)
-#define probe_tp_new        make_dummy(10)
-#define probe_tp_free       make_dummy(11)
-#define probe_tp_is_gc      make_dummy(12)
+#define probe_tp_descr_get  make_dummy(8)
+#define probe_tp_init       make_dummy(9)
+#define probe_tp_alloc      make_dummy(10)
+#define probe_tp_new        make_dummy(11)
+#define probe_tp_free       make_dummy(12)
+#define probe_tp_is_gc      make_dummy(13)
 
 #define probe_tp_name       "type.probe"
 #define probe_tp_basicsize  make_dummy_int(42)
@@ -102,6 +107,7 @@ static PyType_Slot typeprobe_slots[] = {
     {Py_tp_str,         probe_tp_str},
     {Py_tp_traverse,    probe_tp_traverse},
     {Py_tp_clear,       probe_tp_clear},
+    {Py_tp_iternext,    probe_tp_iternext},
     {Py_tp_methods,     probe_tp_methods},
     {Py_tp_getset,      probe_tp_getset},
     {Py_tp_descr_get,   probe_tp_descr_get},
@@ -125,16 +131,16 @@ check_PyTypeObject_valid()
 {
     auto *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
     auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(
-        PyObject_GetAttrString(obtype, "__base__"));
-    PyObject *probe_tp_bases = PyObject_GetAttrString(obtype, "__bases__");
+        PyObject_GetAttr(obtype, Shiboken::PyMagicName::base()));
+    auto *probe_tp_bases = PyObject_GetAttr(obtype, Shiboken::PyMagicName::bases());
     auto *check = reinterpret_cast<PyTypeObject *>(
         PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
     auto *typetype = reinterpret_cast<PyTypeObject *>(obtype);
-    PyObject *w = PyObject_GetAttrString(obtype, "__weakrefoffset__");
+    PyObject *w = PyObject_GetAttr(obtype, Shiboken::PyMagicName::weakrefoffset());
     long probe_tp_weakrefoffset = PyLong_AsLong(w);
-    PyObject *d = PyObject_GetAttrString(obtype, "__dictoffset__");
+    PyObject *d = PyObject_GetAttr(obtype, Shiboken::PyMagicName::dictoffset());
     long probe_tp_dictoffset = PyLong_AsLong(d);
-    PyObject *probe_tp_mro = PyObject_GetAttrString(obtype, "__mro__");
+    PyObject *probe_tp_mro = PyObject_GetAttr(obtype, Shiboken::PyMagicName::mro());
     if (false
         || strcmp(probe_tp_name, check->tp_name) != 0
         || probe_tp_basicsize       != check->tp_basicsize
@@ -143,6 +149,7 @@ check_PyTypeObject_valid()
         || probe_tp_traverse        != check->tp_traverse
         || probe_tp_clear           != check->tp_clear
         || probe_tp_weakrefoffset   != typetype->tp_weaklistoffset
+        || probe_tp_iternext        != check->tp_iternext
         || probe_tp_methods         != check->tp_methods
         || probe_tp_getset          != check->tp_getset
         || probe_tp_base            != typetype->tp_base
@@ -156,7 +163,8 @@ check_PyTypeObject_valid()
         || probe_tp_free            != check->tp_free
         || probe_tp_is_gc           != check->tp_is_gc
         || probe_tp_bases           != typetype->tp_bases
-        || probe_tp_mro             != typetype->tp_mro)
+        || probe_tp_mro             != typetype->tp_mro
+        || Py_TPFLAGS_DEFAULT       != (check->tp_flags & Py_TPFLAGS_DEFAULT))
         Py_FatalError("The structure of type objects has changed!");
     Py_DECREF(check);
     Py_DECREF(probe_tp_base);
@@ -416,9 +424,10 @@ PepRun_GetResult(const char *command, const char *resvar)
     PyObject *d, *v, *res;
 
     d = PyDict_New();
-    if (d == NULL || PyDict_SetItemString(d, "__builtins__",
-                                          PyEval_GetBuiltins()) < 0)
-        return NULL;
+    if (d == nullptr
+        || PyDict_SetItem(d, Shiboken::PyMagicName::builtins(), PyEval_GetBuiltins()) < 0) {
+        return nullptr;
+    }
     v = PyRun_String(command, Py_file_input, d, d);
     res = v ? PyDict_GetItemString(d, resvar) : NULL;
     Py_XDECREF(v);
@@ -457,7 +466,7 @@ PyMethod_New(PyObject *func, PyObject *self)
 PyObject *
 PyMethod_Function(PyObject *im)
 {
-    PyObject *ret = PyObject_GetAttrString(im, "__func__");
+    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::func());
 
     // We have to return a borrowed reference.
     Py_DECREF(ret);
@@ -467,7 +476,7 @@ PyMethod_Function(PyObject *im)
 PyObject *
 PyMethod_Self(PyObject *im)
 {
-    PyObject *ret = PyObject_GetAttrString(im, "__self__");
+    PyObject *ret = PyObject_GetAttr(im, Shiboken::PyMagicName::self());
 
     // We have to return a borrowed reference.
     // If we don't obey that here, then we get a test error!
@@ -620,8 +629,8 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
         return name;
     }
 #endif
-    Shiboken::AutoDecRef privateobj(PyObject_GetAttrString(
-        reinterpret_cast<PyObject *>(Py_TYPE(self)), "__name__"));
+    Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
+        reinterpret_cast<PyObject *>(Py_TYPE(self)), Shiboken::PyMagicName::name()));
 #ifndef Py_LIMITED_API
     return _Py_Mangle(privateobj, name);
 #else
@@ -663,6 +672,25 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
 
 /*****************************************************************************
  *
+ * Runtime support for Python 3.8 incompatibilities
+ *
+ */
+
+int PepRuntime_38_flag = 0;
+
+static void
+init_PepRuntime()
+{
+    // We expect a string of the form "\d\.\d+\."
+    const char *version = Py_GetVersion();
+    if (version[0] < '3')
+        return;
+    if (std::atoi(version + 2) >= 8)
+        PepRuntime_38_flag = 1;
+}
+
+/*****************************************************************************
+ *
  * Module Initialization
  *
  */
@@ -671,6 +699,7 @@ void
 Pep384_Init()
 {
     check_PyTypeObject_valid();
+    init_PepRuntime();
 #ifdef Py_LIMITED_API
     Pep_GetVerboseFlag();
     PepMethod_TypePtr = getMethodType();

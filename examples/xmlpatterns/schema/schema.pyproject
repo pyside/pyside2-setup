@@ -1,0 +1,4 @@
+{
+    "files": ["schema.qrc", "schema.py", "schema.ui", "ui_schema.py",
+              "schema_rc.py"]
+}

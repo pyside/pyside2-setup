@@ -35,11 +35,14 @@
 #include "libothermacros.h"
 #include "objecttype.h"
 #include "collector.h"
+#include "samplenamespace.h"
 
-class OtherObjectType : public ObjectType
+
+class LIBOTHER_API OtherObjectType : public ObjectType
 {
 public:
-
+    static int enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum value);
+    static int enumAsIntForInvisibleNamespace(Invisible::EnumOnNamespace value);
 };
 
 

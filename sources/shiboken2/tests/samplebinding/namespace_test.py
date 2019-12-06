@@ -33,12 +33,17 @@
 
 import unittest
 from sample import *
+from helper import objectFullname
 
 
 class TestEnumUnderNamespace(unittest.TestCase):
     def testInvisibleNamespace(self):
         o1 = EnumOnNamespace.Option1
         self.assertEqual(o1, 1)
+    def testTpNames(self):
+        self.assertEqual(objectFullname(EnumOnNamespace), "sample.EnumOnNamespace")
+        self.assertEqual(str(EnumOnNamespace.Option1),
+            "sample.EnumOnNamespace.Option1")
 
 class TestClassesUnderNamespace(unittest.TestCase):
     def testIt(self):
@@ -64,6 +69,20 @@ class TestClassesUnderNamespace(unittest.TestCase):
             "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>")
         self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum),
             "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
+
+        # Test if enum inside of class is correct represented
+        self.assertEqual(objectFullname(SampleNamespace.enumInEnumOut.__signature__.parameters['in_'].annotation),
+            "sample.SampleNamespace.InValue")
+        self.assertEqual(objectFullname(SampleNamespace.enumAsInt.__signature__.parameters['value'].annotation),
+            "sample.SampleNamespace.SomeClass.PublicScopedEnum")
+        self.assertEqual(objectFullname(ObjectOnInvisibleNamespace.toInt.__signature__.parameters['e'].annotation),
+            "sample.EnumOnNamespace")
+
+        # Test if enum on namespace that was marked as not gerenated does not appear on type name
+        self.assertEqual(objectFullname(ObjectOnInvisibleNamespace),
+            "sample.ObjectOnInvisibleNamespace")
+        self.assertEqual(objectFullname(ObjectOnInvisibleNamespace.consume.__signature__.parameters['other'].annotation),
+            "sample.ObjectOnInvisibleNamespace")
 
 if __name__ == '__main__':
     unittest.main()

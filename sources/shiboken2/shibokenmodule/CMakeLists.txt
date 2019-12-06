@@ -30,7 +30,6 @@ if(WIN32)
 endif()
 target_link_libraries(shibokenmodule PUBLIC libshiboken)
 
-add_dependencies(shibokenmodule shiboken2)
 create_generator_target(shibokenmodule)
 
 install(TARGETS shibokenmodule DESTINATION ${PYTHON_SITE_PACKAGES}/shiboken2)
