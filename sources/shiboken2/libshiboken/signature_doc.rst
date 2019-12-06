@@ -265,6 +265,17 @@ we can now capture the error output of COIN and check the generated module
 in.
 
 
+Explicitly Enforcing Recreation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The former way to regenerate the registry files was to remove the files
+and check that in. This has the desired effect, but creates huge deltas.
+As a more efficient way, we have prepared a comment in the first line
+that contains the word "recreate".
+By uncommenting this line, a NameError is triggered, which has the same
+effect.
+
+
 init_platform.py
 ~~~~~~~~~~~~~~~~
 

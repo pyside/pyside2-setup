@@ -63,9 +63,10 @@ namespace Internet {
 <typesystem package='Package.Internet'>
     <load-typesystem name='%1' generate='no'/>
     <container-type name='QList' type='list'/>
-    <namespace-type name='Internet' generate='no'/>
-    <value-type name='Internet::Url'/>
-    <value-type name='Internet::Bookmarks'/>
+    <namespace-type name='Internet' generate='no'>
+        <value-type name='Url'/>
+        <value-type name='Bookmarks'/>
+    </namespace-type>
 </typesystem>)XML").arg(file.fileName());
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, qPrintable(xmlCode1), false));
@@ -97,11 +98,12 @@ namespace Namespace {
     const char xmlCode[] = R"XML(
 <typesystem package="Package">
     <container-type name='QList' type='list'/>
-    <namespace-type name='Namespace'/>
-    <enum-type name='Namespace::SomeEnum'/>
+    <namespace-type name='Namespace'>
+       <enum-type name='SomeEnum'/>
+       <object-type name='A' generate='no'/>
+       <object-type name='B'/>
+    </namespace-type>
     <object-type name='Base'/>
-    <object-type name='Namespace::A' generate='no'/>
-    <object-type name='Namespace::B'/>
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
@@ -211,8 +213,9 @@ struct List {
 
     const char xmlCode[] = R"XML(
  <typesystem package='Package'>
-     <container-type name='List' type='list'/>
-     <value-type name='List::Iterator'/>
+     <container-type name='List' type='list'>
+         <value-type name='Iterator'/>
+     </container-type>
  </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
@@ -324,11 +327,12 @@ template<SomeEnum type> struct Future {};
 
     const char xmlCode[] = R"XML(
 <typesystem package='Package'>
-    <namespace-type name='Namespace'/>
-    <enum-type name='Namespace::SomeEnum'/>
-    <value-type name='Namespace::A' generate='no'/>
-    <value-type name='Namespace::B'/>
-    <value-type name='Namespace::Future' generate='no'/>
+    <namespace-type name='Namespace'>
+        <enum-type name='SomeEnum'/>
+        <value-type name='A' generate='no'/>
+        <value-type name='B'/>
+        <value-type name='Future' generate='no'/>
+    </namespace-type>
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));

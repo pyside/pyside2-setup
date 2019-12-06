@@ -1,0 +1,4 @@
+{
+    "files": ["pingpong.py", "trafficlight.py", "twowaybutton.py",
+              "eventtrans.py", "rogue.py", "factstates.py"]
+}

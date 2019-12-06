@@ -47,11 +47,12 @@ void TestAbstractMetaClass::testClassName()
 void TestAbstractMetaClass::testClassNameUnderNamespace()
 {
     const char* cppCode ="namespace Namespace { class ClassName {}; }\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <namespace-type name=\"Namespace\"/>\n\
-        <value-type name=\"Namespace::ClassName\"/>\n\
-    </typesystem>\n";
+    const char* xmlCode = R"XML(
+    <typesystem package="Foo">
+        <namespace-type name="Namespace">
+            <value-type name="ClassName"/>
+        </namespace-type>
+    </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -201,11 +202,12 @@ void TestAbstractMetaClass::testDefaultValues()
         class B {};\n\
         void method(B b = B());\n\
     };\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <value-type name='A'/>\n\
-        <value-type name='A::B'/>\n\
-    </typesystem>\n";
+    const char* xmlCode = R"XML(
+    <typesystem package="Foo">
+        <value-type name='A'>
+            <value-type name='B'/>
+        </value-type>
+    </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -224,17 +226,17 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
         class B {};\n\
         void method(B b = B());\n\
     };\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <value-type name='A'>\n\
-        <modify-function signature='method(A::B)'>\n\
-            <modify-argument index='1'>\n\
-                <replace-default-expression with='Hello'/>\n\
-            </modify-argument>\n\
-        </modify-function>\n\
-        </value-type>\n\
-        <value-type name='A::B'/>\n\
-    </typesystem>\n";
+    const char* xmlCode = R"XML(
+    <typesystem package="Foo">
+        <value-type name='A'>
+            <modify-function signature='method(A::B)'>
+                <modify-argument index='1'>
+                    <replace-default-expression with='Hello'/>
+                </modify-argument>
+            </modify-function>
+            <value-type name='B'/>
+        </value-type>
+    </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -254,11 +256,12 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
         class B {};\n\
         virtual void method();\n\
     };\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <object-type name='A'/>\n\
-        <value-type name='A::B'/>\n\
-    </typesystem>\n";
+    const char* xmlCode = R"XML(
+    <typesystem package="Foo">
+        <object-type name='A'>
+            <value-type name='B'/>
+        </object-type>
+    </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
@@ -281,11 +284,12 @@ void TestAbstractMetaClass::testForwardDeclaredInnerClass()
     public:\n\
         void foo();\n\
     };\n";
-    const char xmlCode[] = "\
-    <typesystem package=\"Foo\">\n\
-        <value-type name='A'/>\n\
-        <value-type name='A::B'/>\n\
-    </typesystem>\n";
+    const char xmlCode[] = R"XML(
+    <typesystem package="Foo">
+        <value-type name='A'>
+            <value-type name='B'/>
+        </value-type>
+    </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();

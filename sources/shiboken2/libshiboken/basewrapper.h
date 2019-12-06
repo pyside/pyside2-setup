@@ -64,6 +64,9 @@ struct LIBSHIBOKEN_API SbkObject
 };
 
 
+/// PYSIDE-939: A general replacement for object_dealloc.
+LIBSHIBOKEN_API void Sbk_object_dealloc(PyObject *self);
+
 /// Dealloc the python object \p pyObj and the C++ object represented by it.
 LIBSHIBOKEN_API void SbkDeallocWrapper(PyObject *pyObj);
 LIBSHIBOKEN_API void SbkDeallocQAppWrapper(PyObject *pyObj);
@@ -116,7 +119,7 @@ LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, Py
  *  nullptr. But the default before conversion to heaptypes was to assign
  *  object_dealloc. This seems to be a bug in the Limited API.
  */
-LIBSHIBOKEN_API void object_dealloc(PyObject *);
+/// PYSIDE-939: Replaced by Sbk_object_dealloc.
 LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *);
 
 } // extern "C"

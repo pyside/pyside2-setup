@@ -44,8 +44,8 @@ from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
 
 from ..config import config
-from ..options import *
-from ..utils import copydir, copyfile, rmtree, makefile
+from ..options import OPTION
+from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources
 
 
@@ -118,25 +118,9 @@ def prepare_packages_posix(self, vars):
             vars=vars)
 
     if config.is_internal_pyside_build():
-        # <install>/lib/site-packages/pyside2uic/* ->
-        #   <setup>/pyside2uic
-        copydir(
-            "{site_packages_dir}/pyside2uic",
-            "{st_build_dir}/pyside2uic",
-            force=False, vars=vars)
-        if sys.version_info[0] > 2:
-            rmtree("{st_build_dir}/pyside2uic/port_v2".format(**vars))
-        else:
-            rmtree("{st_build_dir}/pyside2uic/port_v3".format(**vars))
-
-        # <install>/bin/pyside2-uic -> {st_package_name}/scripts/uic.py
         makefile(
             "{st_build_dir}/{st_package_name}/scripts/__init__.py",
             vars=vars)
-        copyfile(
-            "{install_dir}/bin/pyside2-uic",
-            "{st_build_dir}/{st_package_name}/scripts/uic.py",
-            force=False, vars=vars)
 
         # For setting up setuptools entry points
         copyfile(
@@ -150,9 +134,23 @@ def prepare_packages_posix(self, vars):
             "{st_build_dir}/{st_package_name}",
             filter=[
                 "pyside2-lupdate",
-                "pyside2-rcc",
+                "uic",
+                "rcc",
             ],
             recursive=False, vars=vars))
+
+        # Copying designer
+        if sys.platform == "darwin":
+            executables.extend(copydir(
+                "{install_dir}/bin/Designer.app",
+                "{st_build_dir}/{st_package_name}/Designer.app",
+                filter=None,
+                recursive=True, vars=vars))
+        else:
+            copyfile(
+                "{install_dir}/bin/designer",
+                "{st_build_dir}/{st_package_name}/designer",
+                force=False, vars=vars)
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
@@ -193,7 +191,7 @@ def prepare_packages_posix(self, vars):
             filter=["*.pyi"],
             vars=vars)
 
-        if not OPTION_NOEXAMPLES:
+        if not OPTION["NOEXAMPLES"]:
             def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
                 if fnmatch.fnmatch(dir_name, "__pycache__"):
                     return False
@@ -205,16 +203,13 @@ def prepare_packages_posix(self, vars):
             # Re-generate examples Qt resource files for Python 3
             # compatibility
             if sys.version_info[0] == 3:
-                examples_path = "{st_build_dir}/{st_package_name}/examples".format(
-                    **vars)
-                pyside_rcc_path = "{install_dir}/bin/pyside2-rcc".format(
-                    **vars)
-                pyside_rcc_options = '-py3'
-                regenerate_qt_resources(examples_path, pyside_rcc_path,
-                    pyside_rcc_options)
+                examples_path = "{st_build_dir}/{st_package_name}/examples".format(**vars)
+                pyside_rcc_path = "{install_dir}/bin/rcc".format(**vars)
+                pyside_rcc_options = ['-g', 'python']
+                regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 
     # Copy Qt libs to package
-    if OPTION_STANDALONE:
+    if OPTION["STANDALONE"]:
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
             vars['built_modules'] = generated_config['built_modules']
             if sys.platform == 'darwin':

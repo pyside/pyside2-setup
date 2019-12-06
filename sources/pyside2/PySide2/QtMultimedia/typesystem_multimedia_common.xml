@@ -82,10 +82,19 @@
   <object-type name="QAbstractVideoSurface">
       <enum-type name="Error"/>
   </object-type>
-  <object-type name="QAbstractVideoFilter"/>
+  <object-type name="QAbstractVideoFilter">
+      <modify-function signature="createFilterRunnable()">
+        <modify-argument index="return">
+            <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+    </modify-function>
+  </object-type>
   <value-type name="QVideoFrame">
       <enum-type name="FieldType"/>
       <enum-type name="PixelFormat"/>
+      <modify-function signature="bits()">
+        <inject-code file="../glue/qtmultimedia.cpp" snippet="qvideoframe-bits"/>
+      </modify-function>
       <modify-function signature="bits(int)" remove="all"/>
       <modify-function signature="bits(int)const" remove="all"/>
   </value-type>
@@ -193,7 +202,6 @@
   <object-type name="QCameraControl">
       <enum-type name="PropertyChangeType"/>
   </object-type>
-  <!-- Private destructor
   <object-type name="QCameraExposure">
       <enum-type name="FlashMode" flags="FlashModes"/>
       <enum-type name="ExposureMode"/>
@@ -202,7 +210,6 @@
       <modify-function signature="supportedIsoSensitivities(bool*)const" remove="all"/>
       <modify-function signature="supportedShutterSpeeds(bool*)const" remove="all"/>
   </object-type>
-  -->
   <object-type name="QCameraExposureControl">
       <enum-type name="ExposureParameter"/>
       <modify-function signature="supportedParameterRange(QCameraExposureControl::ExposureParameter,bool*)const" remove="all"/>
@@ -213,14 +220,12 @@
   <value-type name="QCameraFocusZone">
       <enum-type name="FocusZoneStatus"/>
   </value-type>
-  <!-- Private destructor
   <object-type name="QCameraFocus">
       <enum-type name="FocusMode" flags="FocusModes"/>
       <enum-type name="FocusPointMode"/>
   </object-type>
-  <object-type name="QCameraFlashControl"/> needs enums from QCameraFocus
+  <object-type name="QCameraFlashControl"/>
   <object-type name="QCameraFocusControl"/>
-  -->
   <value-type name="QCameraInfo"/>
   <object-type name="QCameraInfoControl"/>
   <object-type name="QCameraImageCapture">
@@ -230,12 +235,10 @@
       <modify-function signature="supportedResolutions(const QImageEncoderSettings &amp;,bool*)const" remove="all"/>
   </object-type>
   <object-type name="QCameraImageCaptureControl"/>
-  <!-- Private destructor
   <object-type name="QCameraImageProcessing">
       <enum-type name="WhiteBalanceMode"/>
       <enum-type name="ColorFilter"/>
   </object-type>
-  -->
   <object-type name="QCameraImageProcessingControl">
       <enum-type name="ProcessingParameter"/>
   </object-type>

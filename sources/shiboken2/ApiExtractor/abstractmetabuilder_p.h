@@ -37,12 +37,15 @@
 
 #include <QSet>
 #include <QFileInfo>
+#include <QVector>
 
 class TypeDatabase;
 
 class AbstractMetaBuilderPrivate
 {
 public:
+    using TranslateTypeFlags = AbstractMetaBuilder::TranslateTypeFlags;
+
     Q_DISABLE_COPY(AbstractMetaBuilderPrivate)
 
     AbstractMetaBuilderPrivate();
@@ -56,7 +59,7 @@ public:
     void dumpLog() const;
     AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                    const Dependencies &additionalDependencies = Dependencies()) const;
-    ScopeModelItem popScope() { return m_scopes.takeLast(); }
+    NamespaceModelItem popScope() { return m_scopes.takeLast(); }
 
     void pushScope(const NamespaceModelItem &item);
 
@@ -106,6 +109,7 @@ public:
     void checkFunctionModifications();
     void registerHashFunction(const FunctionModelItem &functionItem,
                               AbstractMetaClass *currentClass);
+    void registerToStringCapabilityIn(const NamespaceModelItem &namespaceItem);
     void registerToStringCapability(const FunctionModelItem &functionItem,
                                     AbstractMetaClass *currentClass);
 
@@ -135,12 +139,12 @@ public:
     AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo);
     AbstractMetaType *translateType(const TypeInfo &type,
                                     AbstractMetaClass *currentClass,
-                                    bool resolveType = true,
+                                    TranslateTypeFlags flags = {},
                                     QString *errorMessage = nullptr);
     static AbstractMetaType *translateTypeStatic(const TypeInfo &type,
                                                  AbstractMetaClass *current,
                                                  AbstractMetaBuilderPrivate *d = nullptr,
-                                                 bool resolveType = true,
+                                                 TranslateTypeFlags flags = {},
                                                  QString *errorMessageIn = nullptr);
 
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
@@ -184,7 +188,7 @@ public:
 
     QHash<const TypeEntry *, AbstractMetaEnum *> m_enums;
 
-    QList<NamespaceModelItem> m_scopes;
+    QVector<NamespaceModelItem> m_scopes;
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 

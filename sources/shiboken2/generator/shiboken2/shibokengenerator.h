@@ -71,11 +71,6 @@ public:
 
     const char *name() const override { return "Shiboken"; }
 
-    /**
-     * Helper function to find for argument default value
-     */
-    static QString getDefaultValue(const AbstractMetaFunction *func, const AbstractMetaArgument *arg);
-
     /// Returns a list of all ancestor classes for the given class.
     AbstractMetaClassList getAllAncestors(const AbstractMetaClass *metaClass) const;
 
@@ -211,8 +206,6 @@ protected:
 
     /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
     static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass);
-    /// Returns the enclosing class for an enum, or nullptr if it should be global.
-    const AbstractMetaClass *getProperEnclosingClassForEnum(const AbstractMetaEnum *metaEnum);
 
     QString wrapperName(const AbstractMetaClass *metaClass) const;
     QString wrapperName(const AbstractMetaType *metaType) const;

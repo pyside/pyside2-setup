@@ -324,35 +324,17 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaCl
 
 void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass)
 {
-    if (!metaClass)
-        return;
-
-    if (metaClass->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass) {
+    Q_ASSERT(metaClass);
+    // if a scope is not to be generated, collect its enums into the parent scope
+    if (!NamespaceTypeEntry::isVisibleScope(metaClass->typeEntry())) {
         const AbstractMetaEnumList &enums = metaClass->enums();
-        for (const AbstractMetaEnum *metaEnum : enums) {
-            if (metaEnum->isPrivate() || metaEnum->typeEntry()->codeGeneration() == TypeEntry::GenerateForSubclass)
-                continue;
-            if (!enumList.contains(const_cast<AbstractMetaEnum *>(metaEnum)))
-                enumList.append(const_cast<AbstractMetaEnum *>(metaEnum));
+        for (AbstractMetaEnum *metaEnum : enums) {
+            if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode()
+                && !enumList.contains(metaEnum)) {
+                enumList.append(metaEnum);
+            }
         }
-        lookForEnumsInClassesNotToBeGenerated(enumList, metaClass->enclosingClass());
     }
-}
-
-static const AbstractMetaClass *getProperEnclosingClass(const AbstractMetaClass *metaClass)
-{
-    if (!metaClass)
-        return nullptr;
-
-    if (metaClass->typeEntry()->codeGeneration() != TypeEntry::GenerateForSubclass)
-        return metaClass;
-
-    return getProperEnclosingClass(metaClass->enclosingClass());
-}
-
-const AbstractMetaClass *ShibokenGenerator::getProperEnclosingClassForEnum(const AbstractMetaEnum *metaEnum)
-{
-    return getProperEnclosingClass(metaEnum->enclosingClass());
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
@@ -378,7 +360,8 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClas
     QString fullClassName = metaClass->name();
     const AbstractMetaClass *enclosing = metaClass->enclosingClass();
     while (enclosing) {
-        fullClassName.prepend(enclosing->name() + QLatin1Char('.'));
+        if (NamespaceTypeEntry::isVisibleScope(enclosing->typeEntry()))
+            fullClassName.prepend(enclosing->name() + QLatin1Char('.'));
         enclosing = enclosing->enclosingClass();
     }
     fullClassName.prepend(packageName() + QLatin1Char('.'));
@@ -571,13 +554,13 @@ QString ShibokenGenerator::guessScopeForDefaultFlagsValue(const AbstractMetaFunc
 QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction *func,
                                                      const AbstractMetaArgument *arg) const
 {
-    QString value = getDefaultValue(func, arg);
+    QString value = arg->defaultValueExpression();
 
-    if (value.isEmpty())
-        return QString();
-
-    if (isPointer(arg->type()))
+    if (value.isEmpty()
+        || arg->hasModifiedDefaultValueExpression()
+        || isPointer(arg->type())) {
         return value;
+    }
 
     static const QRegularExpression enumValueRegEx(QStringLiteral("^([A-Za-z_]\\w*)?$"));
     Q_ASSERT(enumValueRegEx.isValid());
@@ -1255,6 +1238,11 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool gene
 QString ShibokenGenerator::guessCPythonCheckFunction(const QString &type, AbstractMetaType **metaType)
 {
     *metaType = nullptr;
+    // PYSIDE-795: We abuse PySequence for iterables.
+    // This part handles the overrides in the XML files.
+    if (type == QLatin1String("PySequence"))
+        return QLatin1String("Shiboken::String::checkIterable");
+
     if (type == QLatin1String("PyTypeObject"))
         return QLatin1String("PyType_Check");
 
@@ -1545,7 +1533,7 @@ void ShibokenGenerator::writeFunctionCall(QTextStream &s,
 
 void ShibokenGenerator::writeUnusedVariableCast(QTextStream &s, const QString &variableName)
 {
-    s << INDENT << "SBK_UNUSED(" << variableName<< ')' << endl;
+    s << INDENT << "SBK_UNUSED(" << variableName<< ")\n";
 }
 
 AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaClass *metaClass)
@@ -1728,9 +1716,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     if (code.isEmpty())
         return;
     processCodeSnip(code, context);
-    s << INDENT << "// Begin code injection" << endl;
+    s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection" << endl;
+    s << INDENT << "// End of code injection\n";
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream &s,
@@ -1955,9 +1943,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     replaceTemplateVariables(code, func);
 
     processCodeSnip(code);
-    s << INDENT << "// Begin code injection" << endl;
+    s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection" << endl;
+    s << INDENT << "// End of code injection\n";
 }
 
 // Returns true if the string is an expression,
@@ -2051,7 +2039,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                         qFatal("%s", qPrintable(msgConversionTypesDiffer(varType, conversionSignature)));
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, conversionType);
-                    c << ';' << endl;
+                    c << ";\n";
                     Indentation indent(INDENT);
                     c << INDENT;
                 }
@@ -2306,7 +2294,7 @@ AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromString(QString typ
     auto it = m_metaTypeFromStringCache.find(typeSignature);
     if (it == m_metaTypeFromStringCache.end()) {
         AbstractMetaType *metaType =
-            AbstractMetaBuilder::translateType(typeSignature, nullptr, true, errorMessage);
+              AbstractMetaBuilder::translateType(typeSignature, nullptr, {}, errorMessage);
         if (Q_UNLIKELY(!metaType)) {
             if (errorMessage)
                 errorMessage->prepend(msgCannotBuildMetaType(typeSignature));
@@ -2708,22 +2696,6 @@ bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadD
            || overloadData.hasArgumentWithDefaultValue();
 }
 
-QString  ShibokenGenerator::getDefaultValue(const AbstractMetaFunction *func, const AbstractMetaArgument *arg)
-{
-    if (!arg->defaultValueExpression().isEmpty())
-        return arg->defaultValueExpression();
-
-    //Check modifications
-    const FunctionModificationList &mods = func->modifications();
-    for (const FunctionModification &m : mods) {
-        for (const ArgumentModification &am : m.argument_mods) {
-            if (am.index == (arg->argumentIndex() + 1))
-                return am.replacedDefaultExpression;
-        }
-    }
-    return QString();
-}
-
 void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const AbstractMetaType *type, const QString &defaultCtor)
 {
     if (!defaultCtor.isEmpty()) {
@@ -2756,7 +2728,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const 
     } else {
         const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->qualifiedCppName());
         qCWarning(lcShiboken()).noquote() << message;
-        s << ";\n#error " << message << endl;
+        s << ";\n#error " << message << Qt::endl;
     }
 }
 

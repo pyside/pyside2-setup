@@ -113,7 +113,9 @@ CO_NOFREE       = 0x0040
 # We use '__builtin__' and '__name__' instead.
 def formatannotation(annotation, base_module=None):
     if getattr(annotation, '__module__', None) == 'typing':
-        return repr(annotation).replace('typing.', '')
+        # The replace must not be done on Python 2.7 because it
+        # already happens somewhere else.
+        return repr(annotation) ##.replace('typing.', '')
     if isinstance(annotation, type):
         if annotation.__module__ in ('__builtin__', base_module):
             return annotation.__name__

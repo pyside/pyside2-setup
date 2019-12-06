@@ -41,6 +41,7 @@
 #include "pysidemetafunction_p.h"
 
 #include <shiboken.h>
+#include <signature.h>
 
 #include <QtCore/QMetaMethod>
 
@@ -61,11 +62,11 @@ static PyType_Slot PySideMetaFunctionType_slots[] = {
     {Py_tp_call, (void *)functionCall},
     {Py_tp_new, (void *)PyType_GenericNew},
     {Py_tp_free, (void *)functionFree},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideMetaFunctionType_spec = {
-    "PySide.MetaFunction",
+    "PySide2.QtCore.MetaFunction",
     sizeof(PySideMetaFunction),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -101,11 +102,16 @@ PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 namespace PySide { namespace MetaFunction {
 
+static const char *MetaFunction_SignatureStrings[] = {
+    "PySide2.QtCore.MetaFunction.__call__(*args:typing.Any)->typing.Any",
+    nullptr}; // Sentinel
+
 void init(PyObject *module)
 {
-    if (PyType_Ready(PySideMetaFunctionTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySideMetaFunctionTypeF(), MetaFunction_SignatureStrings) < 0)
         return;
 
+    Py_INCREF(PySideMetaFunctionTypeF());
     PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunctionTypeF()));
 }
 

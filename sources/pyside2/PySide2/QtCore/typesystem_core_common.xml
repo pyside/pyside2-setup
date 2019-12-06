@@ -599,6 +599,7 @@
     <enum-type name="GestureState" since="4.6"/>
     <enum-type name="GestureType" since="4.6"/>
     <enum-type name="GlobalColor"/>
+    <enum-type name="HighDpiScaleFactorRoundingPolicy" since="5.14"/>
     <enum-type name="HitTestAccuracy"/>
     <enum-type name="ImageConversionFlag" flags="ImageConversionFlags"/>
     <enum-type name="InputMethodHint" flags="InputMethodHints" since="4.6"/>
@@ -630,6 +631,7 @@
     <enum-type name="SizeHint"/>
     <enum-type name="SizeMode"/>
     <enum-type name="SortOrder"/>
+    <enum-type name="SplitBehaviorFlags" flags="SplitBehavior" since="5.14"/>
     <enum-type name="TabFocusBehavior" since="5.5"/>
     <enum-type name="TextElideMode"/>
     <enum-type name="TextFlag"/>
@@ -785,6 +787,10 @@
 
   <value-type name="QBasicTimer"/>
   <value-type name="QByteArrayMatcher"/>
+  <value-type name="QCalendar" since="5.14">
+      <value-type name="YearMonthDay"/>
+      <enum-type name="System"/>
+  </value-type>
   <value-type name="QDate" hash-function="PySide::hash" >
     <inject-code class="native" position="beginning">
         <insert-template name="pydatetime_importandcheck_function">
@@ -847,6 +853,7 @@
     </modify-function>
   </value-type>
   <value-type name="QDateTime" hash-function="PySide::hash">
+    <enum-type name="YearRange" since="5.14"/>
     <inject-code class="native" position="beginning">
         <insert-template name="pydatetime_importandcheck_function">
             <replace from="$DATETIMETYPE" to="PyDateTime"/>
@@ -2296,6 +2303,7 @@
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
+  <object-type name="QRecursiveMutex" since="5.14"/>
   <object-type name="QRandomGenerator" since="5.10">
       <modify-function signature="global()" rename="global_" allow-thread="yes"/>
       <modify-function signature="operator()()" remove="all"/>
@@ -2545,12 +2553,6 @@
     <extra-includes>
       <include file-name="QtCore/QtCore" location="global"/>
     </extra-includes>
-
-    <modify-function signature="setDevice(QIODevice*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
 
     <!-- ### Replaced by write<TYPE> methods -->
     <modify-function signature="operator&gt;&gt;(qint8&amp;)" remove="all"/>
@@ -2828,9 +2830,7 @@
     <include file-name="qobjectdefs.h" location="global"/>
   </value-type>
 
-  <object-type name="QMessageLogContext">
-    <modify-function signature="copy(const QMessageLogContext &amp;)" remove="all"/>
-  </object-type>
+  <object-type name="QMessageLogContext"/>
 
   <value-type name="QMetaMethod">
     <enum-type name="Access"/>
@@ -2844,9 +2844,9 @@
     <include file-name="qobjectdefs.h" location="global"/>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="connect(const QObject*,int,const QObject*,int,int,int*)" remove="all"/>
-  </object-type>
-  <object-type name="QMetaObject::Connection">
-    <include file-name="qobjectdefs.h" location="global"/>
+      <object-type name="Connection">
+        <include file-name="qobjectdefs.h" location="global"/>
+      </object-type>
   </object-type>
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->

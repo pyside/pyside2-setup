@@ -50,6 +50,9 @@ protected:
     bool finishGeneration() override;
 
 private:
+    void writeInitFunc(QTextStream &declStr, QTextStream &callStr,
+                       const Indentor &indent, const QString &initFunctionName,
+                       const TypeEntry *enclosingEntry = nullptr);
     void writeConstructorNative(QTextStream &s, const AbstractMetaFunction *func);
     void writeDestructorNative(QTextStream &s, const AbstractMetaClass *metaClass);
 
@@ -336,7 +339,7 @@ private:
     /// Helper function for writeStdListWrapperMethods.
     void writeIndexError(QTextStream &s, const QString &errorMsg);
 
-    QString writeReprFunction(QTextStream &s, GeneratorContext &context);
+    QString writeReprFunction(QTextStream &s, GeneratorContext &context, uint indirections);
 
     const AbstractMetaFunction *boolCast(const AbstractMetaClass *metaClass) const;
     bool hasBoolCast(const AbstractMetaClass *metaClass) const

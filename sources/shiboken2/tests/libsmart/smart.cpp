@@ -28,8 +28,50 @@
 
 #include "smart.h"
 
-bool shouldPrint() {
+#include <algorithm>
+#include <iostream>
+
+static inline bool shouldPrint()
+{
     return Registry::getInstance()->shouldPrint();
+}
+
+void SharedPtrBase::logDefaultConstructor(const void *t)
+{
+    if (shouldPrint())
+        std::cout << "shared_ptr default constructor " << t << '\n';
+}
+
+void SharedPtrBase::logConstructor(const void *t, const void *pointee)
+{
+    if (shouldPrint()) {
+        std::cout << "shared_ptr constructor " << t << " with pointer "
+            << pointee << '\n';
+    }
+}
+
+void SharedPtrBase::logCopyConstructor(const void *t, const void *refData)
+{
+    if (shouldPrint()) {
+        std::cout << "shared_ptr copy constructor " << t << " with pointer "
+            << refData << '\n';
+    }
+}
+
+void SharedPtrBase::logAssignment(const void *t, const void *refData)
+{
+    if (shouldPrint()) {
+        std::cout << "shared_ptr assignment operator " << t << " with pointer "
+            << refData << "\n";
+    }
+}
+
+void SharedPtrBase::logDestructor(const void *t, int remainingRefCount)
+{
+    if (shouldPrint()) {
+        std::cout << "shared_ptr destructor " << t << " remaining refcount "
+            << remainingRefCount << '\n';
+    }
 }
 
 Obj::Obj() : m_integer(123), m_internalInteger(new Integer)
@@ -143,10 +185,9 @@ Registry *Registry::getInstance()
     return &registry;
 }
 
-Registry::Registry() : m_printStuff(false)
-{
+Registry::Registry() = default;
 
-}
+Registry::~Registry() = default;
 
 void Registry::add(Obj *p)
 {

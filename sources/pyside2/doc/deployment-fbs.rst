@@ -1,15 +1,17 @@
-===============
 |project| & fbs
-===============
+####################
 
-`fbs <https://build-system.fman.io>`_ provides a powerful environment for packaging,
+`fbs`_ provides a powerful environment for packaging,
 creating installers, and signing your application. It also lets you manage updates to
 your application. As it is based on PyInstaller, it supports Linux, macOS, and Windows.
 
-You can read the `official tutorial <https://github.com/mherrmann/fbs-tutorial>`_ for more
-details on how to use `fbs`, or check the
-`documentation <https://build-system.fman.io/manual/>`_ for a complete set of features and
-options.
+You can read the `fbs tutorial`_ for more details about how to use
+`fbs`, or check out the `fbs manual`_ for a complete set of features
+and options.
+
+.. _fbs tutorial: https://github.com/mherrmann/fbs-tutorial
+
+.. _fbs manual: https://build-system.fman.io/manual/
 
 Preparation
 ===========

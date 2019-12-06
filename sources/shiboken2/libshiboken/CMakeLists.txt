@@ -30,8 +30,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/embed/signature_bootstrap.py"
                "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap.py" @ONLY)
 
 add_custom_command(
-    OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap.inc"
-    OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature.inc"
+    OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_bootstrap_inc.h"
+    OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/embed/signature_inc.h"
     COMMAND ${PYTHON_EXECUTABLE} -E
             "${CMAKE_CURRENT_SOURCE_DIR}/embed/embedding_generator.py"
             --cmake-dir "${CMAKE_CURRENT_BINARY_DIR}/embed"
@@ -53,6 +53,7 @@ sbkconverter.cpp
 sbkenum.cpp
 sbkmodule.cpp
 sbkstring.cpp
+sbkstaticstrings.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 shibokenbuffer.cpp
@@ -62,8 +63,8 @@ pep384impl.cpp
 voidptr.cpp
 typespec.cpp
 bufferprocs_py37.cpp
-embed/signature_bootstrap.inc
-embed/signature.inc
+embed/signature_bootstrap_inc.h
+embed/signature_inc.h
 )
 
 get_numpy_location()
@@ -129,6 +130,7 @@ install(FILES
         python25compat.h
         sbkdbg.h
         sbkstring.h
+        sbkstaticstrings.h
         shiboken.h
         shibokenmacros.h
         threadstatesaver.h

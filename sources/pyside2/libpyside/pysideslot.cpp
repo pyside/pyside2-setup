@@ -45,8 +45,7 @@
 
 #include <QtCore/QMetaObject>
 #include <QtCore/QString>
-
-#define SLOT_DEC_NAME "Slot"
+#include <signature.h>
 
 struct SlotData
 {
@@ -72,11 +71,11 @@ static PyType_Slot PySideSlotType_slots[] = {
     {Py_tp_call, (void *)slotCall},
     {Py_tp_init, (void *)slotTpInit},
     {Py_tp_new, (void *)PyType_GenericNew},
-    {Py_tp_dealloc, (void *)object_dealloc},
+    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
     {0, 0}
 };
 static PyType_Spec PySideSlotType_spec = {
-    "PySide2.QtCore." SLOT_DEC_NAME,
+    "PySide2.QtCore.Slot",
     sizeof(PySideSlot),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -102,9 +101,9 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     if (emptyTuple == 0)
         emptyTuple = PyTuple_New(0);
 
-    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore." SLOT_DEC_NAME,
+    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore.Slot",
                                      const_cast<char **>(kwlist), &argName, &argResult)) {
-        return 0;
+        return -1;
     }
 
     PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
@@ -128,7 +127,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
     data->slotData->resultType = argResult
         ? PySide::Signal::getTypeName(argResult) : PySide::Signal::voidType();
 
-    return 1;
+    return 0;
 }
 
 PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
@@ -177,15 +176,20 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 
 } // extern "C"
 
-namespace PySide { namespace Slot {
+namespace PySide {
+namespace Slot {
+
+static const char *Slot_SignatureStrings[] = {
+    "PySide2.QtCore.Slot(*types:type,name:str=nullptr,result:str=nullptr)->typing.Callable[...,typing.Optional[str]]",
+    nullptr}; // Sentinel
 
 void init(PyObject *module)
 {
-    if (PyType_Ready(PySideSlotTypeF()) < 0)
+    if (SbkSpecial_Type_Ready(module, PySideSlotTypeF(), Slot_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySideSlotTypeF());
-    PyModule_AddObject(module, SLOT_DEC_NAME, reinterpret_cast<PyObject *>(PySideSlotTypeF()));
+    PyModule_AddObject(module, "Slot", reinterpret_cast<PyObject *>(PySideSlotTypeF()));
 }
 
 } // namespace Slot

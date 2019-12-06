@@ -37,7 +37,7 @@
 ##
 #############################################################################
 
-import sys, os
+import os
 import distutils.log as log
 
 
@@ -88,11 +88,10 @@ class Config(object):
             'Programming Language :: Python :: 2',
             'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.3',
-            'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
         ]
 
         self.setup_script_dir = None
@@ -135,6 +134,8 @@ class Config(object):
         setup_kwargs['zip_safe'] = False
         setup_kwargs['cmdclass'] = cmd_class_dict
         setup_kwargs['version'] = package_version
+        setup_kwargs['python_requires'] = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <3.9"
+
 
         if quiet:
             # Tells distutils / setuptools to be quiet, and only print warnings or errors.
@@ -174,6 +175,7 @@ class Config(object):
             'Environment :: Win32 (MS Windows)',
             'Intended Audience :: Developers',
             'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+            'License :: Other/Proprietary License',
             'Operating System :: MacOS :: MacOS X',
             'Operating System :: POSIX',
             'Operating System :: POSIX :: Linux',
@@ -211,8 +213,9 @@ class Config(object):
             setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
-                    'pyside2-uic = {}.scripts.uic:main'.format(self.package_name()),
-                    'pyside2-rcc = {}.scripts.pyside_tool:main'.format(self.package_name()),
+                    'pyside2-uic = {}.scripts.pyside_tool:uic'.format(self.package_name()),
+                    'pyside2-rcc = {}.scripts.pyside_tool:rcc'.format(self.package_name()),
+                    'pyside2-designer= {}.scripts.pyside_tool:designer'.format(self.package_name()),
                     'pyside2-lupdate = {}.scripts.pyside_tool:main'.format(self.package_name()),
                 ]
             }
@@ -286,9 +289,6 @@ class Config(object):
         if self.internal_build_type == self.pyside_option_name:
             return [
                 config.package_name(),
-                'pyside2uic',
-                'pyside2uic.Compiler',
-                'pyside2uic.port_v{}'.format(sys.version_info[0])
             ]
         elif self.internal_build_type == self.shiboken_module_option_name:
             return [self.package_name()]
@@ -319,7 +319,6 @@ class Config(object):
         elif self.is_internal_pyside_build():
             return {
                 self.package_name(): "sources/pyside2/PySide2",
-                "pyside2uic": "sources/pyside2-tools/pyside2uic"
             }
         else:
             return {}

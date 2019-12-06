@@ -89,7 +89,7 @@ typedef struct _typeobject {
     Py_ssize_t tp_basicsize;
     void *X03; // Py_ssize_t tp_itemsize;
     void *X04; // destructor tp_dealloc;
-    void *X05; // printfunc tp_print;
+    void *X05; // Py_ssize_t tp_vectorcall_offset;
     void *X06; // getattrfunc tp_getattr;
     void *X07; // setattrfunc tp_setattr;
     void *X08; // PyAsyncMethods *tp_as_async;
@@ -103,14 +103,14 @@ typedef struct _typeobject {
     void *X16; // getattrofunc tp_getattro;
     void *X17; // setattrofunc tp_setattro;
     void *X18; // PyBufferProcs *tp_as_buffer;
-    void *X19; // unsigned long tp_flags;
+    unsigned long tp_flags;
     void *X20; // const char *tp_doc;
     traverseproc tp_traverse;
     inquiry tp_clear;
     void *X23; // richcmpfunc tp_richcompare;
     Py_ssize_t tp_weaklistoffset;
     void *X25; // getiterfunc tp_iter;
-    void *X26; // iternextfunc tp_iternext;
+    iternextfunc tp_iternext;
     struct PyMethodDef *tp_methods;
     void *X28; // struct PyMemberDef *tp_members;
     struct PyGetSetDef *tp_getset;
@@ -128,6 +128,13 @@ typedef struct _typeobject {
     PyObject *tp_mro; /* method resolution order */
 
 } PyTypeObject;
+
+#ifndef PyObject_IS_GC
+/* Test if an object has a GC head */
+#define PyObject_IS_GC(o) \
+    (PyType_IS_GC(Py_TYPE(o)) \
+     && (Py_TYPE(o)->tp_is_gc == NULL || Py_TYPE(o)->tp_is_gc(o)))
+#endif
 
 // This was a macro error in the limited API from the beginning.
 // It was fixed in Python master, but did make it only in Python 3.8 .
@@ -292,7 +299,7 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 // But this is no problem as we check it's validity for every version.
 
 #define PYTHON_BUFFER_VERSION_COMPATIBLE    (PY_VERSION_HEX >= 0x03030000 && \
-                                             PY_VERSION_HEX <  0x0307FFFF)
+                                             PY_VERSION_HEX <  0x0308FFFF)
 #if !PYTHON_BUFFER_VERSION_COMPATIBLE
 # error Please check the buffer compatibility for this python version!
 #endif
@@ -485,6 +492,19 @@ extern LIBSHIBOKEN_API PyTypeObject *PepMethodDescr_TypePtr;
 #else
 #define PepMethodDescr_TypePtr &PyMethodDescr_Type
 #endif
+
+/*****************************************************************************
+ *
+ * Runtime support for Python 3.8 incompatibilities
+ *
+ */
+
+#ifndef Py_TPFLAGS_METHOD_DESCRIPTOR
+/* Objects behave like an unbound method */
+#define Py_TPFLAGS_METHOD_DESCRIPTOR (1UL << 17)
+#endif
+
+extern LIBSHIBOKEN_API int PepRuntime_38_flag;
 
 /*****************************************************************************
  *

@@ -210,6 +210,10 @@ ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )
 
+if (Qt5Gui_VERSION VERSION_EQUAL 5.14.0 OR Qt5Gui_VERSION VERSION_GREATER 5.14.0)
+    list(APPEND QtGui_SRC ${QtGui_GEN_DIR}/qcolorspace_wrapper.cpp)
+endif()
+
 # cf qtbase/src/gui/opengl/opengl.pri
 list(FIND QtGui_enabled_features "opengles2" _opengles2Index)
 # ### fixme: For cmake >= 3.3: if(opengles2 IN_LIST QtGui_enabled_features)

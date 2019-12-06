@@ -1,101 +1,111 @@
-===============
-Getting Started
-===============
+|project| Getting Started
+==========================
 
-To develop with |project|, you must install Python, Clang, and |project|.
+This page is focused on building |project| from source, if you just want to install |pymodname|
+with ``pip`` you need to run::
 
-Preparing for the Installation
-==============================
+    pip install pyside2
 
-Before you can install |project|, you must install the following software:
+for more details, refer to our `Quick Start`_ guide.
 
-* Python 3.5+ or 2.7
-* libclang 5.0+ (for Qt 5.11) or 6.0+ (for Qt 5.12)
-* Recommended: a virtual environment, such as `venv <https://docs.python.org/3/library/venv.html>`_ or `virtualenv <https://virtualenv.pypa.io/en/stable/installation>`_
+.. _Quick Start: quickstart.html
 
-Installing |project|
-====================
+General Requirements
+--------------------
 
-After you have installed the required software, you are ready to install the |project|
-packages using the pip wheel. Run the following command from your command
-prompt to install::
+ * **Python**: 3.5+ and 2.7
+ * **Qt:** 5.12+ is recommended
+ * **libclang:** The libclang library, recommended: version 6 for PySide2 5.12.
+   Prebuilt versions of it can be `downloaded here`_.
+ * **CMake:** 3.1+ is needed.
 
-    pip install PySide2 # For the latest version on PyPi
+.. _downloaded here: http://download.qt.io/development_releases/prebuilt/libclang/
 
-or::
+Guides per platform
+-------------------
 
-    pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.12/latest pyside2 --trusted-host download.qt.io
+You can refer to the following pages for platform specific instructions:
 
-Testing the Installation
-========================
+ * `Windows`_,
+ * `macOS`_,
+ * `Linux`_,
+ * Mobile platforms (iOS/Android) **(no support)**
+ * Embedded platforms **(no official support)**
 
-Now that you have |project| installed, you can test your setup by running the following Python
-constructs to print version information:
+   .. note:: Most Linux-based embedded OS provide PySide2 with their official
+             package manager (e.g. `Raspbian`_ and `ArchlinuxARM`_).
 
-.. include:: pysideversion.rst
-   :start-line: 5
-   :end-line: 32
+.. _Windows: gettingstarted-windows.html
+.. _macOS: gettingstarted-macOS.html
+.. _Linux: gettingstarted-linux.html
+.. _Raspbian: https://www.raspbian.org/
+.. _ArchlinuxARM: https://archlinuxarm.org/
 
-Creating a Simple Application
-=============================
+A normal building command will look like this::
 
-Your |project| setup is ready, so try exploring it further by developing a simple application
-that prints "Hello World" in several languages. The following instructions will
-guide you through the development process:
+    python setup.py install --qmake=/path/to/qmake \
+                            --ignore-git \
+                            --debug \
+                            --build-tests \
+                            --parallel=8 \
+                            --make-spec=ninja \
+                            --verbose-build \
+                            --module-subset=Core,Gui,Widgets
 
-* Create a new file named :code:`hello_world.py`, and add the following imports to it.
+Which will build and install the project with **debug** symbols, including the **tests**,
+using **ninja** (instead of make), and considering only the **module subset** of QtCore, QtGUI
+and QtWidgets.
 
-  ::
+Other important options to consider are:
+ * ``--cmake``, to specify the path to the cmake binary,
+ * ``--reuse-build``, to rebuild only the modified files,
+ * ``--openssl=/path/to/openssl/bin``, to use a different path for OpenSSL,
+ * ``--standalone``, to copy over the Qt libraries into the final package
+   to make it work on other machines.
 
-        import sys
-        import random
-        from PySide2 import QtCore, QtWidgets, QtGui
+Testing the installation
+-------------------------
 
-  The |pymodname| Python module provides access to the Qt APIs as its submodule.
-  In this case, you are importing the :code:`QtCore`, :code:`QtWidgets`, and :code:`QtGui` submodules.
+Once the installation finishes, you will be able to execute any of our examples::
 
-* Define a class named :code:`MyWidget`, which extends QWidget and includes a QPushButton and QLabel.
+    python examples/widgets/widgets/tetrix.py
 
-  ::
+Running Tests
+--------------
 
-        class MyWidget(QtWidgets.QWidget):
-            def __init__(self):
-                super().__init__()
+Using the ``--build-tests`` option will enable us to run all the auto tests inside the project::
 
-                self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
+    python testrunner.py test > testlog.txt
 
-                self.button = QtWidgets.QPushButton("Click me!")
-                self.text = QtWidgets.QLabel("Hello World")
-                self.text.setAlignment(QtCore.Qt.AlignCenter)
+.. note:: On Windows, don't forget to have qmake in your path
+   (``set PATH=E:\Path\to\Qt\5.14\msvc2017_64\bin;%PATH%``)
 
-                self.layout = QtWidgets.QVBoxLayout()
-                self.layout.addWidget(self.text)
-                self.layout.addWidget(self.button)
-                self.setLayout(self.layout)
+You can also run a specific test (for example ``qpainter_test``) by running::
 
-                self.button.clicked.connect(self.magic)
+    ctest -R qpainter_test --verbose
 
+Building the documentation
+---------------------------
 
-            def magic(self):
-                self.text.setText(random.choice(self.hello))
+The documentation is being generated using **qdoc** to get the API information, and also **sphinx**
+for the local Python related notes.
 
-  The MyWidget class has the :code:`magic` member function that
-  randomly chooses an item from the list :code:`hello`. This function
-  is called when you click the button.
+The system required ``libxml2`` and `libxslt``, also on the Python environment, ``sphinx`` and
+``graphviz`` need to be installed before running the installation process::
 
-* Now, add a main function where you instantiate :code:`MyWidget` and
-  :code:`show` it.
+    pip install graphviz sphinx
 
-  ::
+After installing ``graphviz`, the ``dot`` command needs to be in PATH, otherwise,
+the process will fail. Installing ``graphviz`` system-wide is also an option.
 
-        if __name__ == "__main__":
-            app = QtWidgets.QApplication([])
+Since the process rely on a Qt installation, you need to specify where the ``qtbase`` directory
+you will use with your ``qmake`` is located::
 
-            widget = MyWidget()
-            widget.resize(800, 600)
-            widget.show()
+    export QT_SRC_DIR=/path/to/qtbase
 
-            sys.exit(app.exec_())
+Once the build process finishes, you can go to the generated ``*_build/*_release/pyside2``
+directory, and run::
 
-Your example is ready to be run. Try clicking the button at the bottom
-and see which greeting you get.
+    make apidoc
+
+Finally, you will get a ``html`` directory containing all the generated documentation.

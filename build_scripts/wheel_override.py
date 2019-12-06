@@ -41,7 +41,8 @@
 wheel_module_exists = False
 
 try:
-    import os, sys
+    import os
+    import sys
 
     from distutils import log as logger
     from wheel import pep425tags
@@ -52,13 +53,14 @@ try:
     from email.generator import Generator
     from wheel import __version__ as wheel_version
 
-    from .options import *
+    from .options import OPTION
 
     wheel_module_exists = True
 except Exception as e:
     _bdist_wheel, wheel_version = type, ''  # dummy to make class statement happy
     print('***** Exception while trying to prepare bdist_wheel override class: {}. '
           'Skipping wheel overriding.'.format(e))
+
 
 def get_bdist_wheel_override(params):
     if wheel_module_exists:
@@ -69,6 +71,7 @@ def get_bdist_wheel_override(params):
         return PysideBuildWheelDecorated
     else:
         return None
+
 
 class PysideBuildWheel(_bdist_wheel):
     def __init__(self, *args, **kwargs):
@@ -84,9 +87,9 @@ class PysideBuildWheel(_bdist_wheel):
 
         # When limited API is requested, notify bdist_wheel to
         # create a properly named package.
-        limited_api_enabled = OPTION_LIMITED_API and sys.version_info[0] >= 3
+        limited_api_enabled = OPTION["LIMITED_API"] and sys.version_info[0] >= 3
         if limited_api_enabled:
-            self.py_limited_api = "cp35.cp36.cp37"
+            self.py_limited_api = "cp35.cp36.cp37.cp38"
 
         _bdist_wheel.finalize_options(self)
 
@@ -101,8 +104,7 @@ class PysideBuildWheel(_bdist_wheel):
         qt_version = self.params['qt_version']
         package_version = self.params['package_version']
         wheel_version = "{}-{}".format(package_version, qt_version)
-        components = (_safer_name(self.distribution.get_name()),
-            wheel_version)
+        components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
             components += (self.build_number,)
         return '-'.join(components)
@@ -135,8 +137,9 @@ class PysideBuildWheel(_bdist_wheel):
             # pypi).
             # TODO: Add actual distro detection, instead of
             # relying on limited_api option.
-            if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize > 2147483647 \
-                         and (self.py_limited_api or sys.version_info[0] == 2):
+            if (plat_name in ('linux-x86_64', 'linux_x86_64')
+                    and sys.maxsize > 2147483647
+                    and (self.py_limited_api or sys.version_info[0] == 2)):
                 plat_name = 'manylinux1_x86_64'
         plat_name = plat_name.replace('-', '_').replace('.', '_')
 
@@ -163,8 +166,7 @@ class PysideBuildWheel(_bdist_wheel):
             if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64') and sys.version_info[0] == 2):
                 return tag
             assert tag == supported_tags[0], "%s != %s" % (tag, supported_tags[0])
-            assert tag in supported_tags, (
-                          "would build wheel with unsupported tag {}".format(tag))
+            assert tag in supported_tags, ("would build wheel with unsupported tag {}".format(tag))
         return tag
 
     # Copy of get_tag from bdist_wheel.py, to write a triplet Tag
@@ -181,7 +183,7 @@ class PysideBuildWheel(_bdist_wheel):
         # Doesn't work for bdist_wininst
         impl_tag, abi_tag, plat_tag = self.get_tag()
         # To enable pypi upload we are adjusting the wheel name
-        pypi_ready = (OPTION_LIMITED_API and sys.version_info[0] >= 3) or (sys.version_info[0] == 2)
+        pypi_ready = (OPTION["LIMITED_API"] and sys.version_info[0] >= 3) or (sys.version_info[0] == 2)
 
         def writeTag(impl):
             for abi in abi_tag.split('.'):
@@ -201,4 +203,3 @@ class PysideBuildWheel(_bdist_wheel):
 
 if not wheel_module_exists:
     del PysideBuildWheel
-

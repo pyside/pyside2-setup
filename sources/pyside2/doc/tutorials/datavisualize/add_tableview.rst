@@ -59,10 +59,12 @@ In the following snippets you'll see those changes highlighted:
 .. literalinclude:: datavisualize4/main_window.py
    :language: python
    :linenos:
+   :lines: 40-
    :emphasize-lines: 8,11
 
 .. literalinclude:: datavisualize4/main.py
    :language: python
    :linenos:
+   :lines: 40-
    :emphasize-lines: 46-47
 

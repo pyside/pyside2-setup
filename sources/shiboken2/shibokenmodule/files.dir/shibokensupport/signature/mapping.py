@@ -55,6 +55,7 @@ import os
 
 from shibokensupport.signature import typing
 from shibokensupport.signature.typing import TypeVar, Generic
+from shibokensupport.signature.lib.tool import with_metaclass
 
 class ellipsis(object):
     def __repr__(self):
@@ -66,26 +67,14 @@ Variant = typing.Any
 ModelIndexList = typing.List[int]
 QImageCleanupFunction = typing.Callable
 
+# unfortunately, typing.Optional[t] expands to typing.Union[t, NoneType]
+# Until we can force it to create Optional[t] again, we use this.
+NoneType = type(None)
+
 _S = TypeVar("_S")
 
 # Building our own Char type, which is much nicer than
 # Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
-
-# Copied from the six module:
-def with_metaclass(meta, *bases):
-    """Create a base class with a metaclass."""
-    # This requires a bit of explanation: the basic idea is to make a dummy
-    # metaclass for one level of class instantiation that replaces itself with
-    # the actual metaclass.
-    class metaclass(type):
-
-        def __new__(cls, name, this_bases, d):
-            return meta(name, bases, d)
-
-        @classmethod
-        def __prepare__(cls, name, this_bases):
-            return meta.__prepare__(name, bases)
-    return type.__new__(metaclass, 'temporary_class', (), {})
 
 class _CharMeta(type):
     def __repr__(self):
@@ -208,7 +197,7 @@ class _Parameterized(object):
 class ResultVariable(_Parameterized):
     pass
 
-# Mark the primitive variables to become Sequence, Iterator or List
+# Mark the primitive variables to become Sequence, Iterable or List
 # (decided in the parser).
 class ArrayLikeVariable(_Parameterized):
     pass
@@ -275,6 +264,7 @@ type_map = {}
 namespace = globals()  # our module's __dict__
 
 type_map.update({
+    "...": ellipsis,
     "bool": bool,
     "char": Char,
     "char*": str,
@@ -337,6 +327,7 @@ type_map.update({
     "unsigned long": int,
     "unsigned short int": int, # 5.6, RHEL 6.6
     "unsigned short": int,
+    "Unspecified": None,
     "ushort": int,
     "void": int, # be more specific?
     "WId": WId,
@@ -357,6 +348,7 @@ type_map.update({
     "array GLuint*"         : ArrayLikeVariable(int),
     "array int*"            : ArrayLikeVariable(int),
     "array long long*"      : ArrayLikeVariable(int),
+    "array long*"           : ArrayLikeVariable(int),
     "array short*"          : ArrayLikeVariable(int),
     "array signed char*"    : bytes,
     "array unsigned char*"  : bytes,
@@ -420,6 +412,7 @@ def init_sample():
         "Foo.HANDLE": int,
         "HANDLE": int,
         "Null": None,
+        "nullptr": None,
         "ObjectType.Identifier": Missing("sample.ObjectType.Identifier"),
         "OddBool": bool,
         "PStr": str,

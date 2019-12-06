@@ -45,8 +45,6 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QMetaMethod>
 
-#define GLOBAL_RECEIVER_CLASS_NAME "__GlobalReceiver__"
-
 struct PySideProperty;
 namespace PySide
 {

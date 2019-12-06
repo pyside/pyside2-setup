@@ -71,8 +71,8 @@ void TestCodeInjections::testReadFile()
         <value-type name='A'>\n\
             <conversion-rule ") + attribute + QLatin1String("/>\n\
             <inject-code class='target' ") + attribute + QLatin1String("/>\n\
+            <value-type name='B'/>\n\
         </value-type>\n\
-        <value-type name='A::B'/>\n\
     </typesystem>\n");
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().constData()));
     QVERIFY(!builder.isNull());

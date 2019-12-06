@@ -227,7 +227,6 @@
             </modify-argument>
             <modify-argument index="1">
                 <replace-type modified-type="PStr"/>
-                <remove-default-expression/>
                 <replace-default-expression with="PStr()"/>
             </modify-argument>
             <inject-code class="target" position="end">
@@ -544,8 +543,9 @@
 
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
 
-    <namespace-type name="Invisible" generate="no">
+    <namespace-type name="Invisible" visible="no">
         <enum-type name="EnumOnNamespace" />
+        <value-type name="ObjectOnInvisibleNamespace" />
     </namespace-type>
 
     <namespace-type name="SampleNamespace">
@@ -956,6 +956,7 @@
 
     <object-type name="Modifications">
         <enum-type name="OverloadedModFunc"/>
+        <enum-type name="TestEnum"/>
 
         <modify-function signature="overloaded(int, bool, int, double)">
             <modify-argument index="2">
@@ -1286,6 +1287,11 @@
           %RETURN_TYPE %0 = !%CPPSELF.%FUNCTION_NAME(%1);
           %PYARG_0 = %CONVERTTOPYTHON[OddBool](%0);
           </inject-code>
+        </modify-function>
+        <modify-function signature="setEnumValue(Modifications::TestEnum)">
+          <modify-argument index="1">
+            <replace-default-expression with="cppSelf->defaultEnumValue()"/>
+          </modify-argument>
         </modify-function>
     </object-type>
 
@@ -2426,6 +2432,9 @@
     <object-type name="TemplatePtr">
         <modify-function signature="dummy(std::list&lt;std::pair&lt;BlackBox *, BlackBox *&gt; &gt; &amp;)" rename="dummy_method" />
     </object-type>
+
+    <value-type name="ToBeRenamedValue" target-lang-name="RenamedValue"/>
+    <value-type name="RenamedUser"/>
 
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />

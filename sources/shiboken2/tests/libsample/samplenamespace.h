@@ -51,6 +51,13 @@ enum EnumOnNamespace {
     Option3     = 3
 };
 
+struct ObjectOnInvisibleNamespace
+{
+    bool exists() const { return true; }
+    static int toInt(EnumOnNamespace e) { return static_cast<int>(e); }
+    static ObjectOnInvisibleNamespace consume(const ObjectOnInvisibleNamespace &other) { return other; }
+};
+
 };
 
 namespace SampleNamespace
@@ -136,6 +143,8 @@ protected:
 
     PublicScopedEnum protectedMethodReturningPublicScopedEnum() const;
 };
+
+LIBSAMPLE_API inline int enumAsInt(SomeClass::PublicScopedEnum value) { return static_cast<int>(value); }
 
 class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
 {

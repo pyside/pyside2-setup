@@ -91,7 +91,10 @@ macro(create_pyside_module)
     list(REMOVE_DUPLICATES total_type_system_files)
 
     # Contains include directories to pass to shiboken's preprocessor.
-    set(shiboken_include_dirs ${pyside2_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR})
+    # Workaround: Added ${QT_INCLUDE_DIR}/QtCore until
+    # qtdeclarative/8d560d1bf0a747bf62f73fad6b6774095442d9d2 has reached qt5.git
+    string(REPLACE ";" ${PATH_SEP} core_includes "${Qt5Core_INCLUDE_DIRS}")
+    set(shiboken_include_dirs ${pyside2_SOURCE_DIR}${PATH_SEP}${QT_INCLUDE_DIR}${PATH_SEP}${core_includes})
     set(shiboken_framework_include_dirs_option "")
     if(CMAKE_HOST_APPLE)
         set(shiboken_framework_include_dirs "${QT_FRAMEWORK_INCLUDE_DIR}")

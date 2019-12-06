@@ -57,24 +57,38 @@ bool py2kStrCheck(PyObject *obj)
 // @snippet pystring-check
 
 // @snippet qsettings-value
-QVariant out = %CPPSELF.value(%1, %2);
+// If we enter the kwds, means that we have a defaultValue or
+// at least a type.
+// This avoids that we are passing '0' as defaultValue.
+// defaultValue can also be passed as positional argument,
+// not only as keyword.
+QVariant out;
+if (kwds || numArgs > 1)
+    out = %CPPSELF.value(%1, %2);
+else
+    out = %CPPSELF.value(%1);
+
 PyTypeObject *typeObj = reinterpret_cast<PyTypeObject*>(%PYARG_3);
 
 if (typeObj) {
     if (typeObj == &PyList_Type) {
-        QByteArrayList valuesList = out.toByteArray().split(',');
-        const int valuesSize = valuesList.size();
-        if (valuesSize > 0) {
-            PyObject *list = PyList_New(valuesSize);
-            for (int i = 0; i < valuesSize; i++) {
-                PyObject *item = PyUnicode_FromString(valuesList[i].data());
-                PyList_SET_ITEM(list, i, item);
-                Py_DECREF(item);
-            }
-            %PYARG_0 = list;
+        QByteArray out_ba = out.toByteArray();
+        if (!out_ba.isEmpty()) {
+            QByteArrayList valuesList = out_ba.split(',');
+            const int valuesSize = valuesList.size();
+            if (valuesSize > 0) {
+                PyObject *list = PyList_New(valuesSize);
+                for (int i = 0; i < valuesSize; i++) {
+                    PyObject *item = PyUnicode_FromString(valuesList[i].data());
+                    PyList_SET_ITEM(list, i, item);
+                }
+                %PYARG_0 = list;
 
+            } else {
+                %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
+            }
         } else {
-            %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
+            %PYARG_0 = PyList_New(0);
         }
     } else if (typeObj == &PyBytes_Type) {
         QByteArray asByteArray = out.toByteArray();
@@ -94,14 +108,24 @@ if (typeObj) {
     } else if (typeObj == &PyFloat_Type) {
         float asFloat = out.toFloat();
         %PYARG_0 = PyFloat_FromDouble(asFloat);
+    } else if (typeObj == &PyBool_Type) {
+        if (out.toBool()) {
+            Py_INCREF(Py_True);
+            %PYARG_0 = Py_True;
+        } else {
+            Py_INCREF(Py_False);
+            %PYARG_0 = Py_False;
+        }
     }
     // TODO: PyDict_Type and PyTuple_Type
 }
 else {
-    if (out == 0)
+    if (!out.isValid()) {
+        Py_INCREF(Py_None);
         %PYARG_0 = Py_None;
-    else
+    } else {
         %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
+    }
 }
 
 // @snippet qsettings-value
@@ -308,7 +332,7 @@ PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qobject-connect
 static bool isDecorator(PyObject *method, PyObject *self)
 {
-    Shiboken::AutoDecRef methodName(PyObject_GetAttrString(method, "__name__"));
+    Shiboken::AutoDecRef methodName(PyObject_GetAttr(method, Shiboken::PyMagicName::name()));
     if (!PyObject_HasAttr(self, methodName))
         return true;
     Shiboken::AutoDecRef otherMethod(PyObject_GetAttr(self, methodName));
@@ -811,8 +835,8 @@ _findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %P
 // @snippet qobject-tr
 QString result;
 if (QCoreApplication::instance()) {
-    PyObject *klass = PyObject_GetAttrString(%PYSELF, "__class__");
-    PyObject *cname = PyObject_GetAttrString(klass, "__name__");
+    PyObject *klass = PyObject_GetAttr(%PYSELF, Shiboken::PyMagicName::class_());
+    PyObject *cname = PyObject_GetAttr(klass, Shiboken::PyMagicName::name());
     result = QString(QCoreApplication::instance()->translate(Shiboken::String::toCString(cname),
                                                         /*   %1, %2, QCoreApplication::CodecForTr, %3)); */
                                                              %1, %2, %3));

@@ -51,6 +51,18 @@
 #     fi
 # done
 # A line enclosed in [] denotes a (relative) target directory
+[pyside-examples]
+all-pyside-examples.webxml
+pyside2examples-widgets-dialogs-classwizard-classwizard-pyproject.webxml
+pyside2examples-widgets-dialogs-classwizard-classwizard-py.webxml
+pyside2examples-widgets-dialogs-classwizard-classwizard-qrc.webxml
+pyside2examples-widgets-dialogs-classwizard-classwizard-rc-py.webxml
+pyside2examples-widgets-dialogs-classwizard-example.webxml
+pyside2examples-widgets-itemviews-stardelegate-example.webxml
+pyside2examples-widgets-itemviews-stardelegate-stardelegate-pyproject.webxml
+pyside2examples-widgets-itemviews-stardelegate-stardelegate-py.webxml
+pyside2examples-widgets-itemviews-stardelegate-stareditor-py.webxml
+pyside2examples-widgets-itemviews-stardelegate-starrating-py.webxml
 
 [overviews]
 animation-overview.webxml

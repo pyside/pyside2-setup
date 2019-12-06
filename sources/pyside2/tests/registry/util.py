@@ -48,6 +48,7 @@ and eventually report them afterwards as error.
 """
 
 import sys
+import os
 import warnings
 import re
 from contextlib import contextmanager
@@ -91,10 +92,76 @@ def check_warnings():
                     return True
     return False
 
-def warn(message, category=None, stacklevel=1):
+def warn(message, category=None, stacklevel=2):
     """Issue a warning with the default 'RuntimeWarning'"""
     if category is None:
         category = UserWarning
     warnings.warn(message, category, stacklevel)
+
+
+# Python2 legacy: Correct 'linux2' to 'linux', recommended way.
+if sys.platform.startswith('linux'):
+    # We have to be more specific because we had differences between
+    # RHEL 6.6 and RHEL 7.4 .
+    # Note: The platform module is deprecated. We need to switch to the
+    # distro package, ASAP! The distro has been extracted from Python,
+    # because it changes more often than the Python version.
+    try:
+        import distro
+    except ImportError:
+        import platform as distro
+    platform_name = "".join(distro.linux_distribution()[:2]).lower()
+    # this currently happens on opensuse in 5.14:
+    if not platform_name:
+        # We intentionally crash when that last resort is also absent:
+        platform_name = os.environ["MACHTYPE"]
+    platform_name = re.sub('[^0-9a-z]', '_', platform_name)
+else:
+    platform_name = sys.platform
+# In the linux case, we need more information.
+
+is_py3 = sys.version_info[0] == 3
+is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
+
+def get_script_dir():
+    script_dir = os.path.normpath(os.path.dirname(__file__))
+    while "sources" not in os.listdir(script_dir):
+        script_dir = os.path.dirname(script_dir)
+    return script_dir
+
+def qt_version():
+    from PySide2.QtCore import __version__
+    return tuple(map(int, __version__.split(".")))
+
+# Format a registry file name for version.
+def _registry_filename(version, use_ci_module):
+    name = "exists_{}_{}_{}_{}{}.py".format(platform_name,
+        version[0], version[1], version[2], "_ci" if use_ci_module else "")
+    return os.path.join(os.path.dirname(__file__), name)
+
+# Return the expected registry file name.
+def get_refpath(use_ci_module=is_ci):
+    return _registry_filename(qt_version(), use_ci_module)
+
+# Return the registry file name, either that of the current
+# version or fall back to a previous patch release.
+def get_effective_refpath(use_ci_module=is_ci):
+    refpath = get_refpath(use_ci_module)
+    if os.path.exists(refpath):
+        return refpath
+    version = qt_version()
+    major, minor, patch = version[:3]
+    while patch >= 0:
+        file = _registry_filename((major, minor, patch), use_ci_module)
+        if os.path.exists(file):
+            return file
+        patch -= 1
+    return refpath
+
+# Import the CI version of the platform module
+def import_refmodule(use_ci_module=is_ci):
+    refpath = get_effective_refpath(use_ci_module)
+    modname = os.path.basename(os.path.splitext(refpath)[0])
+    return __import__(modname)
 
 # eof
