@@ -268,7 +268,7 @@ def find_error_like_snippets(content):
                   ('ERROR: Module load completed but symbols could '
                    'not be loaded')}
         return (re.search('error', l, re.IGNORECASE)
-                and all(e not in errors for e in errors))
+                and all(e not in l for e in errors))
 
     for i in range(1, len(lines)):
         line = lines[i]
