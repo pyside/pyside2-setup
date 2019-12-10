@@ -147,6 +147,18 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 0)
         self.assertEqual(integerCount(), 0)
 
+    def testConstIntegerSmartPointer(self):
+        # Uncomment to see more debug info about creation of objects and ref counts.
+        # Registry.getInstance().setShouldPrint(True)
+
+        # Create Obj.
+        o = Obj()
+        ptrToConstInteger = o.giveSharedPtrToConstInteger()
+        self.assertEqual(ptrToConstInteger.m_int, 456)
+        result = o.takeSharedPtrToConstInteger(ptrToConstInteger)
+        self.assertEqual(result, 456)
+        self.assertEqual(ptrToConstInteger.value(), 456)
+
     def testSmartPointersWithNamespace(self):
         # Create the main object
         o = Obj()

@@ -137,6 +137,17 @@ int Obj::takeSharedPtrToInteger(SharedPtr<Integer> pInt)
     return pInt->value();
 }
 
+SharedPtr<const Integer> Obj::giveSharedPtrToConstInteger()
+{
+    SharedPtr<const Integer> co(new Integer);
+    return co;
+}
+
+int Obj::takeSharedPtrToConstInteger(SharedPtr<const Integer> pInt)
+{
+    return pInt->m_int;
+}
+
 Integer Obj::takeInteger(Integer val)
 {
     return val;
