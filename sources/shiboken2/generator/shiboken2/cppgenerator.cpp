@@ -5270,6 +5270,7 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &conte
     const AbstractMetaClass *metaClass = context.metaClass();
     s << "static PyObject *" << cpythonGetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name)\n{\n";
+    s << INDENT << "assert(self);\n";
 
     QString getattrFunc;
     if (usePySideExtensions() && metaClass->isQObject()) {
@@ -5278,112 +5279,93 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &conte
             << cpythonWrapperCPtr(qobjectClass, QLatin1String("self"))
             << ", self, name)";
     } else {
-        getattrFunc = QLatin1String("PyObject_GenericGetAttr(") + QLatin1String("self")
-                                    + QLatin1String(", name)");
+        getattrFunc = QLatin1String("PyObject_GenericGetAttr(self, name)");
     }
 
     if (classNeedsGetattroFunction(metaClass)) {
-        s << INDENT << "if (self) {\n";
+        s << INDENT << "// Search the method in the instance dict\n";
+        s << INDENT << "if (auto ob_dict = reinterpret_cast<SbkObject *>(self)->ob_dict) {\n";
         {
             Indentation indent(INDENT);
-            s << INDENT << "// Search the method in the instance dict\n";
-            s << INDENT << "if (reinterpret_cast<SbkObject *>(self)->ob_dict) {\n";
+            s << INDENT << "if (auto meth = PyDict_GetItem(ob_dict, name)) {\n";
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyObject *meth = PyDict_GetItem(reinterpret_cast<SbkObject *>(self)->ob_dict, name);\n";
-                s << INDENT << "if (meth) {\n";
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "Py_INCREF(meth);\n";
-                    s << INDENT << "return meth;\n";
-                }
-                s << INDENT << "}\n";
+                s << INDENT << "Py_INCREF(meth);\n";
+                s << INDENT << "return meth;\n";
             }
             s << INDENT << "}\n";
-            s << INDENT << "// Search the method in the type dict\n";
-            s << INDENT << "if (Shiboken::Object::isUserType(self)) {\n";
+        }
+        s << INDENT << "}\n";
+        s << INDENT << "// Search the method in the type dict\n";
+        s << INDENT << "if (Shiboken::Object::isUserType(self)) {\n";
+        {
+            Indentation indent(INDENT);
+            // PYSIDE-772: Perform optimized name mangling.
+            s << INDENT << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(self, name));\n";
+            s << INDENT << "if (auto meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp))\n";
             {
                 Indentation indent(INDENT);
-                // PYSIDE-772: Perform optimized name mangling.
-                s << INDENT << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(self, name));\n";
-                s << INDENT << "PyObject *meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp);\n";
-                s << INDENT << "if (meth)\n";
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "return PyFunction_Check(meth) ? SBK_PyMethod_New(meth, self) : " << getattrFunc << ";\n";
-                }
-            }
-            s << INDENT << "}\n";
-
-            const AbstractMetaFunctionList &funcs = getMethodsWithBothStaticAndNonStaticMethods(metaClass);
-            for (const AbstractMetaFunction *func : funcs) {
-                QString defName = cpythonMethodDefinitionName(func);
-                s << INDENT << "static PyMethodDef non_static_" << defName << " = {\n";
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << defName << ".ml_name,\n";
-                    s << INDENT << defName << ".ml_meth,\n";
-                    s << INDENT << defName << ".ml_flags & (~METH_STATIC),\n";
-                    s << INDENT << defName << ".ml_doc,\n";
-                }
-                s << INDENT << "};\n";
-                s << INDENT << "if (Shiboken::String::compare(name, \"" << func->name() << "\") == 0)\n";
-                Indentation indent(INDENT);
-                s << INDENT << "return PyCFunction_NewEx(&non_static_" << defName << ", self, 0);\n";
+                s << INDENT << "return PyFunction_Check(meth) ? SBK_PyMethod_New(meth, self) : " << getattrFunc << ";\n";
             }
         }
         s << INDENT << "}\n";
+
+        const AbstractMetaFunctionList &funcs = getMethodsWithBothStaticAndNonStaticMethods(metaClass);
+        for (const AbstractMetaFunction *func : funcs) {
+            QString defName = cpythonMethodDefinitionName(func);
+            s << INDENT << "static PyMethodDef non_static_" << defName << " = {\n";
+            {
+                Indentation indent(INDENT);
+                s << INDENT << defName << ".ml_name,\n";
+                s << INDENT << defName << ".ml_meth,\n";
+                s << INDENT << defName << ".ml_flags & (~METH_STATIC),\n";
+                s << INDENT << defName << ".ml_doc,\n";
+            }
+            s << INDENT << "};\n";
+            s << INDENT << "if (Shiboken::String::compare(name, \"" << func->name() << "\") == 0)\n";
+            Indentation indent(INDENT);
+            s << INDENT << "return PyCFunction_NewEx(&non_static_" << defName << ", self, 0);\n";
+        }
     }
 
     if (context.forSmartPointer()) {
         s << INDENT << "PyObject *tmp = " << getattrFunc << ";\n";
-        s << INDENT << "if (tmp) {\n";
+        s << INDENT << "if (tmp)\n";
         {
             Indentation indent(INDENT);
             s << INDENT << "return tmp;\n";
         }
-        s << INDENT << "} else {\n";
+        s << INDENT << "if (!PyErr_ExceptionMatches(PyExc_AttributeError))\n";
         {
             Indentation indent(INDENT);
-            s << INDENT << "if (!PyErr_ExceptionMatches(PyExc_AttributeError)) return nullptr;\n";
-            s << INDENT << "PyErr_Clear();\n";
+            s << INDENT << "return nullptr;\n";
+        }
+        s << INDENT << "PyErr_Clear();\n";
 
-            s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for "
-                           "the corresponding C++ object held by the smart pointer.\n";
-            s << INDENT << "PyObject *rawObj = PyObject_CallMethod(self, "
-              << writeSmartPointerGetterCast() << ", 0);\n";
-            s << INDENT << "if (rawObj) {\n";
+        s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for "
+                       "the corresponding C++ object held by the smart pointer.\n";
+        s << INDENT << "if (auto rawObj = PyObject_CallMethod(self, "
+          << writeSmartPointerGetterCast() << ", 0)) {\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "if (auto attribute = PyObject_GetAttr(rawObj, name))\n";
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyObject *attribute = PyObject_GetAttr(rawObj, name);\n";
-                s << INDENT << "if (attribute) {\n";
-                {
-                    Indentation indent(INDENT);
-                    s << INDENT << "tmp = attribute;\n";
-                }
-                s << INDENT << "}\n";
-                s << INDENT << "Py_DECREF(rawObj);\n";
+                s << INDENT << "tmp = attribute;\n";
             }
-            s << INDENT << "}\n";
-            s << INDENT << "if (!tmp) {\n";
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "PyTypeObject *tp = Py_TYPE(self);\n";
-                s << INDENT << "PyErr_Format(PyExc_AttributeError,\n";
-                s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\",\n";
-                s << INDENT << "             tp->tp_name, Shiboken::String::toCString(name));\n";
-                s << INDENT << "return nullptr;\n";
-            }
-            s << INDENT << "} else {\n";
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "return tmp;\n";
-            }
-            s << INDENT << "}\n";
-
+            s << INDENT << "Py_DECREF(rawObj);\n";
         }
         s << INDENT << "}\n";
-
+        s << INDENT << "if (!tmp) {\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "PyTypeObject *tp = Py_TYPE(self);\n";
+            s << INDENT << "PyErr_Format(PyExc_AttributeError,\n";
+            s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\",\n";
+            s << INDENT << "             tp->tp_name, Shiboken::String::toCString(name));\n";
+        }
+        s << INDENT << "}\n";
+        s << INDENT << "return tmp;\n";
     } else {
         s << INDENT << "return " << getattrFunc << ";\n";
     }
