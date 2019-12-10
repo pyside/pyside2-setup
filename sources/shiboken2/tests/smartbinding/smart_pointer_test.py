@@ -116,6 +116,10 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(integer.m_int, 50)
 
         # Set and get a member value via shared pointer (like operator->).
+        ptrToInteger.setValue(150)
+        self.assertEqual(ptrToInteger.value(), 150)
+
+        # Set and get a member field via shared pointer (like operator->).
         ptrToInteger.m_int = 100
         self.assertEqual(ptrToInteger.m_int, 100)
 

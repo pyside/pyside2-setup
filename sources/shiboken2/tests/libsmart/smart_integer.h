@@ -37,8 +37,12 @@ public:
     Integer(const Integer &other);
     Integer &operator=(const Integer &other);
     ~Integer();
-    void printInteger();
-    int m_int;
+    void printInteger() const;
+
+    int value() const;
+    void setValue(int v);
+
+    int m_int; // public for testing member field access.
 };
 
 namespace Smart {
