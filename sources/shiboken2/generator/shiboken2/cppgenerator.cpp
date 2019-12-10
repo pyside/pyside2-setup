@@ -343,7 +343,7 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses) {
         GeneratorContext innerClassContext(innerClass);
-        if (shouldGenerate(innerClass)) {
+        if (shouldGenerate(innerClass) && !innerClass->typeEntry()->isSmartPointer()) {
             QString headerfile = fileNameForContext(innerClassContext);
             headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
             s << "#include \"" << headerfile << "\"\n";
