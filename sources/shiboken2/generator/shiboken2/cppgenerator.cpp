@@ -5345,6 +5345,8 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &conte
         }
         s << INDENT << "PyErr_Clear();\n";
 
+        // This generates the code which dispatches access to member functions
+        // and fields from the smart pointer to its pointee.
         s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for "
                        "the corresponding C++ object held by the smart pointer.\n";
         s << INDENT << "if (auto rawObj = PyObject_CallMethod(self, "
