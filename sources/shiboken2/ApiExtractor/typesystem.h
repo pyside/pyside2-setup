@@ -562,20 +562,14 @@ public:
         EnumValue,
         ConstantValueType,
         TemplateArgumentType,
-        ThreadType,
         BasicValueType,
-        StringType,
         ContainerType,
         InterfaceType,
         ObjectType,
         NamespaceType,
-        VariantType,
-        JObjectWrapperType,
-        CharType,
         ArrayType,
         TypeSystemType,
         CustomType,
-        TargetLangType,
         FunctionType,
         SmartPointerType,
         TypedefType
@@ -629,14 +623,6 @@ public:
     {
         return m_type == ObjectType;
     }
-    bool isString() const
-    {
-        return m_type == StringType;
-    }
-    bool isChar() const
-    {
-        return m_type == CharType;
-    }
     bool isNamespace() const
     {
         return m_type == NamespaceType;
@@ -648,14 +634,6 @@ public:
     bool isSmartPointer() const
     {
         return m_type == SmartPointerType;
-    }
-    bool isVariant() const
-    {
-        return m_type == VariantType;
-    }
-    bool isJObjectWrapper() const
-    {
-        return m_type == JObjectWrapperType;
     }
     bool isArray() const
     {
@@ -673,17 +651,9 @@ public:
     {
         return m_type == VarargsType;
     }
-    bool isThread() const
-    {
-        return m_type == ThreadType;
-    }
     bool isCustom() const
     {
         return m_type == CustomType;
-    }
-    bool isBasicValue() const
-    {
-        return m_type == BasicValueType;
     }
     bool isTypeSystem() const
     {

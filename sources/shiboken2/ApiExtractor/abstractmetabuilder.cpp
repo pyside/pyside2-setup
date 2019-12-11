@@ -550,11 +550,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         if (!entry->isPrimitive()) {
             if ((entry->isValue() || entry->isObject())
                 && !types->shouldDropTypeEntry(entry->qualifiedCppName())
-                && !entry->isString()
-                && !entry->isChar()
                 && !entry->isContainer()
                 && !entry->isCustom()
-                && !entry->isVariant()
                 && (entry->generateCode() & TypeEntry::GenerateTargetLang)
                 && !AbstractMetaClass::findClass(m_metaClasses, entry)) {
                 qCWarning(lcShiboken).noquote().nospace()
@@ -1292,33 +1289,6 @@ static bool _compareAbstractMetaTypes(const AbstractMetaType *type,
 {
     return (type != nullptr) == (other != nullptr)
         && (type == nullptr || type->compare(*other, flags));
-}
-
-static bool _compareAbstractMetaFunctions(const AbstractMetaFunction *func,
-                                          const AbstractMetaFunction *other,
-                                          AbstractMetaType::ComparisonFlags argumentFlags = {})
-{
-    if (!func && !other)
-        return true;
-    if (!func || !other)
-        return false;
-    if (func->name() != other->name())
-        return false;
-    const int argumentsCount = func->arguments().count();
-    if (argumentsCount != other->arguments().count()
-        || func->isConstant() != other->isConstant()
-        || func->isStatic() != other->isStatic()
-        || !_compareAbstractMetaTypes(func->type(), other->type())) {
-        return false;
-    }
-    for (int i = 0; i < argumentsCount; ++i) {
-        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(),
-                                       other->arguments().at(i)->type(),
-                                       argumentFlags)) {
-            return false;
-        }
-    }
-    return true;
 }
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
