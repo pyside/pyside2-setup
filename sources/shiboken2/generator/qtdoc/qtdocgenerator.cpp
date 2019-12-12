@@ -2119,6 +2119,9 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
             continue;
         if (item.startsWith(Q) && item.length() > 1)
             idx = item[1];
+        else
+            idx = item[0]; // To group classes without the 'Q' prefix
+
         item.chop(4); // Remove the .rst extension
         tocMap[idx] << item;
     }
