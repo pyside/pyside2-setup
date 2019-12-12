@@ -599,6 +599,7 @@ public:
 
     const TypeEntry *parent() const { return m_parent; }
     void setParent(const TypeEntry *p) { m_parent = p; }
+    bool isChildOf(const TypeEntry *p) const;
     const TypeSystemTypeEntry *typeSystemTypeEntry() const;
     // cf AbstractMetaClass::targetLangEnclosingClass()
     const TypeEntry *targetLangEnclosingEntry() const;
@@ -680,6 +681,8 @@ public:
 
     // The type's name in C++, fully qualified
     QString name() const { return m_name; }
+    // C++ excluding inline namespaces
+    QString shortName() const;
     // Name as specified in XML
     QString entryName() const { return m_entryName; }
 
@@ -868,7 +871,8 @@ protected:
 
 private:
     const TypeEntry *m_parent;
-    QString m_name; // fully qualified
+    QString m_name; // C++ fully qualified
+    mutable QString m_cachedShortName; // C++ excluding inline namespaces
     QString m_entryName;
     QString m_targetLangPackage;
     mutable QString m_cachedTargetLangName; // "Foo.Bar"

@@ -87,6 +87,8 @@ public:
     const QByteArrayList &systemIncludes() const { return m_systemIncludes; }
     void addSystemInclude(const QString &name);
 
+    void addInlineNamespaceLookups(const NamespaceTypeEntry *n);
+
     PrimitiveTypeEntry *findPrimitiveType(const QString &name) const;
     ComplexTypeEntry *findComplexType(const QString &name) const;
     ObjectTypeEntry *findObjectType(const QString &name) const;
@@ -174,7 +176,7 @@ private:
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
 
     bool m_suppressWarnings = true;
-    TypeEntryMultiMap m_entries;
+    TypeEntryMultiMap m_entries; // Contains duplicate entries (cf addInlineNamespaceLookups).
     TypeEntryMap m_flagsEntries;
     TypedefEntryMap m_typedefEntries;
     TemplateEntryMap m_templates;
