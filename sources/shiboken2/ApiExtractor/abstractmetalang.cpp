@@ -2167,27 +2167,23 @@ void AbstractMetaClass::fixFunctions()
 
     m_functionsFixed = true;
 
-    AbstractMetaClass *superClass = baseClass();
     AbstractMetaFunctionList funcs = functions();
 
-    if (superClass)
+    for (auto superClass : m_baseClasses) {
         superClass->fixFunctions();
-    while (superClass) {
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
         AbstractMetaFunctionList superFuncs;
-        if (superClass) {
-            // Super classes can never be final
-            if (superClass->isFinalInTargetLang()) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
-                *superClass -= AbstractMetaAttributes::FinalInTargetLang;
-            }
-            superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
-            AbstractMetaFunctionList virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
-            superFuncs += virtuals;
+        // Super classes can never be final
+        if (superClass->isFinalInTargetLang()) {
+            qCWarning(lcShiboken).noquote().nospace()
+                << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
+            *superClass -= AbstractMetaAttributes::FinalInTargetLang;
         }
+        superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
+        AbstractMetaFunctionList virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
+        superFuncs += virtuals;
 
         QSet<AbstractMetaFunction *> funcsToAdd;
         for (auto sf : qAsConst(superFuncs)) {
@@ -2316,8 +2312,6 @@ void AbstractMetaClass::fixFunctions()
             (*copy) += AddedMethod;
             funcs.append(copy);
         }
-
-        superClass = superClass->baseClass();
     }
 
     bool hasPrivateConstructors = false;
