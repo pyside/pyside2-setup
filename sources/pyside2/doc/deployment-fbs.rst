@@ -1,7 +1,7 @@
 |project| & fbs
 ####################
 
-`fbs`_ provides a powerful environment for packaging,
+``fbs`` provides a powerful environment for packaging,
 creating installers, and signing your application. It also lets you manage updates to
 your application. As it is based on PyInstaller, it supports Linux, macOS, and Windows.
 
