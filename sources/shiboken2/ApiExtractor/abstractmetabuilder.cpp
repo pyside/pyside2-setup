@@ -1465,43 +1465,21 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 
     TypeDatabase* types = TypeDatabase::instance();
 
-    int primary = -1;
-    for (int i = 0; i < baseClasses.size(); ++i) {
-
-        if (types->isClassRejected(baseClasses.at(i)))
-            continue;
-
-        TypeEntry* baseClassEntry = types->findType(baseClasses.at(i));
-        if (!baseClassEntry) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("class '%1' inherits from unknown base class '%2'")
-                                  .arg(metaClass->name(), baseClasses.at(i));
-        }
-        primary = i;
-    }
-
-    if (primary >= 0) {
-        AbstractMetaClass *baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClasses.at(primary));
-        if (!baseClass) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("unknown baseclass for '%1': '%2'")
-                                  .arg(metaClass->name(), baseClasses.at(primary));
-            return false;
-        }
-        metaClass->setBaseClass(baseClass);
-    }
-
-    for (int i = 0; i < baseClasses.size(); ++i) {
-        if (types->isClassRejected(baseClasses.at(i)))
-            continue;
-
-        if (i != primary) {
-            AbstractMetaClass *baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClasses.at(i));
-            if (!baseClass) {
+    for (const auto  &baseClassName : baseClasses) {
+        if (!types->isClassRejected(baseClassName)) {
+            if (!types->findType(baseClassName)) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClasses.at(i));
+                     << QStringLiteral("class '%1' inherits from unknown base class '%2'")
+                        .arg(metaClass->name(), baseClassName);
                 return false;
             }
+            auto baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClassName);
+            if (!baseClass) {
+                qCWarning(lcShiboken).noquote().nospace()
+                    << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClassName);
+                return false;
+            }
+            metaClass->addBaseClass(baseClass);
 
             setupInheritance(baseClass);
         }

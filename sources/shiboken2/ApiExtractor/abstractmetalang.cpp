@@ -80,7 +80,7 @@ const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
 {
     if (pred(klass))
         return klass;
-    if (auto base = klass->baseClass()) {
+    for (auto base : klass->baseClasses()) {
         if (auto r = recurseClassHierarchy(base, pred))
             return r;
     }
@@ -1554,11 +1554,19 @@ QString AbstractMetaClass::name() const
     return m_typeEntry->targetLangEntryName();
 }
 
+void AbstractMetaClass::addBaseClass(AbstractMetaClass *baseClass)
+{
+    Q_ASSERT(baseClass);
+    m_baseClasses.append(baseClass);
+    m_isPolymorphic |= baseClass->isPolymorphic();
+}
+
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
 {
-    m_baseClass = baseClass;
-    if (baseClass)
+    if (baseClass) {
+        m_baseClasses.prepend(baseClass);
         m_isPolymorphic |= baseClass->isPolymorphic();
+    }
 }
 
 QString AbstractMetaClass::package() const
@@ -1674,7 +1682,7 @@ void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList 
 bool AbstractMetaClass::deleteInMainThread() const
 {
     return typeEntry()->deleteInMainThread()
-        || (m_baseClass && m_baseClass->deleteInMainThread());
+        || (!m_baseClasses.isEmpty() && m_baseClasses.constFirst()->deleteInMainThread());
 }
 
 static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
@@ -2580,8 +2588,11 @@ void AbstractMetaClass::format(QDebug &d) const
         d << " [final]";
     if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
         d << " [deprecated]";
-    if (m_baseClass)
-        d << ", inherits \"" << m_baseClass->name() << '"';
+    if (!m_baseClasses.isEmpty()) {
+        d << ", inherits ";
+        for (auto b : m_baseClasses)
+            d << " \"" << b->name() << '"';
+    }
     if (auto templateBase = templateBaseClass()) {
         const auto instantiatedTypes = templateBaseClassInstantiations();
         d << ", instantiates \"" << templateBase->name();
