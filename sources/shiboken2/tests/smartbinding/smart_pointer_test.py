@@ -116,6 +116,10 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(integer.m_int, 50)
 
         # Set and get a member value via shared pointer (like operator->).
+        ptrToInteger.setValue(150)
+        self.assertEqual(ptrToInteger.value(), 150)
+
+        # Set and get a member field via shared pointer (like operator->).
         ptrToInteger.m_int = 100
         self.assertEqual(ptrToInteger.m_int, 100)
 
@@ -142,6 +146,18 @@ class SmartPointerTests(unittest.TestCase):
         del o
         self.assertEqual(objCount(), 0)
         self.assertEqual(integerCount(), 0)
+
+    def testConstIntegerSmartPointer(self):
+        # Uncomment to see more debug info about creation of objects and ref counts.
+        # Registry.getInstance().setShouldPrint(True)
+
+        # Create Obj.
+        o = Obj()
+        ptrToConstInteger = o.giveSharedPtrToConstInteger()
+        self.assertEqual(ptrToConstInteger.m_int, 456)
+        result = o.takeSharedPtrToConstInteger(ptrToConstInteger)
+        self.assertEqual(result, 456)
+        self.assertEqual(ptrToConstInteger.value(), 456)
 
     def testSmartPointersWithNamespace(self):
         # Create the main object

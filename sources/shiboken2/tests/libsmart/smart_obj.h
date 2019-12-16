@@ -49,11 +49,13 @@ public:
     SharedPtr<Obj> giveSharedPtrToObj();
     std::vector<SharedPtr<Obj> > giveSharedPtrToObjList(int size);
     SharedPtr<Integer> giveSharedPtrToInteger();
+    SharedPtr<const Integer> giveSharedPtrToConstInteger();
+    int takeSharedPtrToConstInteger(SharedPtr<const Integer> pInt);
     SharedPtr<Smart::Integer2> giveSharedPtrToInteger2();
     int takeSharedPtrToObj(SharedPtr<Obj> pObj);
     int takeSharedPtrToInteger(SharedPtr<Integer> pInt);
 
-    int m_integer;
+    int m_integer;  // public for testing member field access.
     Integer *m_internalInteger;
 };
 

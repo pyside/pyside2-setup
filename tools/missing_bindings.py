@@ -113,7 +113,6 @@ modules_to_test['QtDataVisualization'] = 'qtdatavisualization-module.html'
 modules_to_test['QtOpenGL'] = 'qtopengl-module.html'
 modules_to_test['QtPositioning'] = 'qtpositioning-module.html'
 modules_to_test['QtRemoteObjects'] = 'qtremoteobjects-module.html'
-modules_to_test['QtScript'] = 'qtscript-module.html'
 modules_to_test['QtScriptTools'] = 'qtscripttools-module.html'
 modules_to_test['QtSensors'] = 'qtsensors-module.html'
 types_to_ignore = set()

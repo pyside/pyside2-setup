@@ -562,20 +562,14 @@ public:
         EnumValue,
         ConstantValueType,
         TemplateArgumentType,
-        ThreadType,
         BasicValueType,
-        StringType,
         ContainerType,
         InterfaceType,
         ObjectType,
         NamespaceType,
-        VariantType,
-        JObjectWrapperType,
-        CharType,
         ArrayType,
         TypeSystemType,
         CustomType,
-        TargetLangType,
         FunctionType,
         SmartPointerType,
         TypedefType
@@ -605,6 +599,7 @@ public:
 
     const TypeEntry *parent() const { return m_parent; }
     void setParent(const TypeEntry *p) { m_parent = p; }
+    bool isChildOf(const TypeEntry *p) const;
     const TypeSystemTypeEntry *typeSystemTypeEntry() const;
     // cf AbstractMetaClass::targetLangEnclosingClass()
     const TypeEntry *targetLangEnclosingEntry() const;
@@ -629,14 +624,6 @@ public:
     {
         return m_type == ObjectType;
     }
-    bool isString() const
-    {
-        return m_type == StringType;
-    }
-    bool isChar() const
-    {
-        return m_type == CharType;
-    }
     bool isNamespace() const
     {
         return m_type == NamespaceType;
@@ -648,14 +635,6 @@ public:
     bool isSmartPointer() const
     {
         return m_type == SmartPointerType;
-    }
-    bool isVariant() const
-    {
-        return m_type == VariantType;
-    }
-    bool isJObjectWrapper() const
-    {
-        return m_type == JObjectWrapperType;
     }
     bool isArray() const
     {
@@ -673,17 +652,9 @@ public:
     {
         return m_type == VarargsType;
     }
-    bool isThread() const
-    {
-        return m_type == ThreadType;
-    }
     bool isCustom() const
     {
         return m_type == CustomType;
-    }
-    bool isBasicValue() const
-    {
-        return m_type == BasicValueType;
     }
     bool isTypeSystem() const
     {
@@ -710,6 +681,8 @@ public:
 
     // The type's name in C++, fully qualified
     QString name() const { return m_name; }
+    // C++ excluding inline namespaces
+    QString shortName() const;
     // Name as specified in XML
     QString entryName() const { return m_entryName; }
 
@@ -898,7 +871,8 @@ protected:
 
 private:
     const TypeEntry *m_parent;
-    QString m_name; // fully qualified
+    QString m_name; // C++ fully qualified
+    mutable QString m_cachedShortName; // C++ excluding inline namespaces
     QString m_entryName;
     QString m_targetLangPackage;
     mutable QString m_cachedTargetLangName; // "Foo.Bar"

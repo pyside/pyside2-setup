@@ -334,8 +334,10 @@ QString msgCannotFindSmartPointer(const QString &instantiationType,
     QString result;
     QTextStream str(&result);
     str << "Unable to find smart pointer type for " << instantiationType << " (known types:";
-    for (auto t : pointers)
-        str << ' ' << t->fullName();
+    for (auto t : pointers) {
+        auto typeEntry = t->typeEntry();
+        str << ' ' << typeEntry->targetLangName() << '/' << typeEntry->qualifiedCppName();
+    }
     str << ").";
     return result;
 }

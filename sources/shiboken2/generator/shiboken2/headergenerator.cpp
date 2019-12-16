@@ -401,9 +401,17 @@ bool HeaderGenerator::finishGeneration()
     int smartPointerCount = 0;
     const QVector<const AbstractMetaType *> &instantiatedSmartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
-        _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(metaType),
-                             smartPointerCountIndex);
+        QString indexName = getTypeIndexVariableName(metaType);
+        _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
         macrosStream << ", // " << metaType->cppSignature() << Qt::endl;
+        // Add a the same value for const pointees (shared_ptr<const Foo>).
+        const auto ptrName = metaType->typeEntry()->entryName();
+        int pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
+        if (pos >= 0) {
+            indexName.insert(pos + ptrName.size() + 1, QLatin1String("CONST"));
+            _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
+            macrosStream << ", //   (const)\n";
+        }
         ++smartPointerCountIndex;
         ++smartPointerCount;
     }

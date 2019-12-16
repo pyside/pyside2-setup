@@ -11,6 +11,8 @@
     examples/index.rst
     videos.rst
     deployment.rst
+    licenses.rst
+    modules.rst
     considerations.rst
     shiboken2/index.rst
 

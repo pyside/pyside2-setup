@@ -7,26 +7,27 @@ selected when using the online installer.
 Requirements
 ------------
 
- * Qt package from `here`_ or a custom build of Qt (preferably Qt 5.12 or greater)
- * A Python interpreter (version Python 3.5+).
-
-  * Preferably get python from the `official website`_.
-
-  .. note:: Python 2.7 interpreter is not supported.
-      The official Python 2.7 binary package which can be downloaded at
-      https://www.python.org/downloads/ is built using MSVC 2007, while
-      the Qt libraries are built using MSVC 2015/2017.
-      Note that if you build your own custom Python2.7 interpreter with
-      an MSVC version equivalent to the one that Qt was built with,
-      you can safely build and use Qt for Python against that interpreter.
-
+ * Qt package from `here`_ or a custom build of Qt (preferably Qt 5.12
+   or greater)
+ * A Python interpreter (version Python 3.5+). Preferably get it
+   from the `official website`_.
  * `MSVC2017`_ (or MSVC2019) for Python 3 on Windows,
  * `CMake`_  version 3.1 or greater
  * `Git`_ version 2 or greater
- * `libclang_` from the `precompiled Qt packages`_ is recommended.
- * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library)
+ * `libclang`_ prebuilt version from the
+   ``Qt Downloads`` page is recommended.
+ * `OpenSSL`_ (optional for SSL support, Qt must have been
+   configured using the same SSL library).
  * ``virtualenv`` is strongly recommended, but optional.
  * ``sphinx`` package for the documentation (optional).
+
+.. note:: Python 2.7 interpreter is not supported.
+    The official Python 2.7 binary package offerred on the
+    `official website`_ is built using MSVC 2007, while
+    the Qt libraries are built using MSVC 2015/2017.
+    If you intend to use Python 2.7, build the interpreter yourself
+    with MSVC 2015 or later, and build Qt for Python with it.
+
 
 .. _here: https://qt.io/download
 .. _official website: https://www.python.org/downloads/

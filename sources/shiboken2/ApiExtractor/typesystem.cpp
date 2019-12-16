@@ -684,6 +684,15 @@ TypeEntry::~TypeEntry()
     delete m_customConversion;
 }
 
+bool TypeEntry::isChildOf(const TypeEntry *p) const
+{
+    for (auto e = m_parent; e; e = e->parent()) {
+        if (e == p)
+            return true;
+    }
+    return false;
+}
+
 const TypeSystemTypeEntry *TypeEntry::typeSystemTypeEntry() const
 {
     for (auto e = this; e; e = e->parent()) {

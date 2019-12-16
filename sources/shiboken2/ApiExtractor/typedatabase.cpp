@@ -149,6 +149,20 @@ void TypeDatabase::addSystemInclude(const QString &name)
     m_systemIncludes.append(name.toUtf8());
 }
 
+// Add a lookup for the short name excluding inline namespaces
+// so that "std::shared_ptr" finds "std::__1::shared_ptr" as well.
+// Note: This inserts duplicate TypeEntry * into m_entries.
+void TypeDatabase::addInlineNamespaceLookups(const NamespaceTypeEntry *n)
+{
+    QVector<TypeEntry *> additionalEntries; // Store before modifying the hash
+    for (TypeEntry *entry : m_entries) {
+        if (entry->isChildOf(n))
+            additionalEntries.append(entry);
+    }
+    for (const auto &ae : additionalEntries)
+        m_entries.insert(ae->shortName(), ae);
+}
+
 ContainerTypeEntry* TypeDatabase::findContainerType(const QString &name) const
 {
     QString template_name = name;
@@ -701,6 +715,35 @@ static void _computeTypeIndexes()
     for (TypeEntry *e : qAsConst(list))
         e->setSbkIndex(maxTypeIndex++);
     computeTypeIndexes = false;
+}
+
+// Build the C++ name excluding any inline namespaces
+// ("std::__1::shared_ptr" -> "std::shared_ptr"
+QString TypeEntry::shortName() const
+{
+    if (m_cachedShortName.isEmpty()) {
+        QVarLengthArray<const TypeEntry *> parents;
+        bool foundInlineNamespace = false;
+        for (auto p = m_parent; p != nullptr && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
+            if (p->type() == TypeEntry::NamespaceType
+                && static_cast<const NamespaceTypeEntry *>(p)->isInlineNamespace()) {
+                foundInlineNamespace = true;
+            } else {
+                parents.append(p);
+            }
+        }
+        if (foundInlineNamespace) {
+            m_cachedShortName.reserve(m_name.size());
+            for (int i = parents.size() - 1; i >= 0; --i) {
+                m_cachedShortName.append(parents.at(i)->entryName());
+                m_cachedShortName.append(QLatin1String("::"));
+            }
+            m_cachedShortName.append(m_entryName);
+        } else {
+            m_cachedShortName = m_name;
+        }
+    }
+    return m_cachedShortName;
 }
 
 void TypeEntry::setRevision(int r)

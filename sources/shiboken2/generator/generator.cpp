@@ -159,7 +159,6 @@ struct Generator::GeneratorPrivate
     QString licenseComment;
     QString moduleName;
     QStringList instantiatedContainersNames;
-    QStringList instantiatedSmartPointerNames;
     QVector<const AbstractMetaType *> instantiatedContainers;
     QVector<const AbstractMetaType *> instantiatedSmartPointers;
 
@@ -211,6 +210,31 @@ QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType *type)
     return typeName;
 }
 
+// Strip a "const QSharedPtr<const Foo> &" or similar to "QSharedPtr<Foo>" (PYSIDE-1016/454)
+const AbstractMetaType *canonicalSmartPtrInstantiation(const AbstractMetaType *type)
+{
+    AbstractMetaTypeList instantiations = type->instantiations();
+    Q_ASSERT(instantiations.size() == 1);
+    const bool needsFix = type->isConstant() || type->referenceType() != NoReference;
+    const bool pointeeNeedsFix = instantiations.constFirst()->isConstant();
+    if (!needsFix && !pointeeNeedsFix)
+        return type;
+    auto fixedType = type->copy();
+    fixedType->setReferenceType(NoReference);
+    fixedType->setConstant(false);
+    if (pointeeNeedsFix) {
+        auto fixedPointeeType = instantiations.constFirst()->copy();
+        fixedPointeeType->setConstant(false);
+        fixedType->setInstantiations(AbstractMetaTypeList(1, fixedPointeeType));
+    }
+    return fixedType;
+}
+
+static inline const TypeEntry *pointeeTypeEntry(const AbstractMetaType *smartPtrType)
+{
+    return smartPtrType->instantiations().constFirst()->typeEntry();
+}
+
 void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType *type,
                                                           const QString &context)
 {
@@ -244,18 +268,15 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
             m_d->instantiatedContainers.append(type);
         }
     } else {
-        // Is smart pointer.
-        if (!m_d->instantiatedSmartPointerNames.contains(typeName)) {
-            m_d->instantiatedSmartPointerNames.append(typeName);
-            if (type->isConstant() || type->referenceType() != NoReference) {
-                // Strip a "const QSharedPtr<Foo> &" or similar to "QSharedPtr<Foo>" (PYSIDE-1016)
-                auto fixedType = type->copy();
-                fixedType->setReferenceType(NoReference);
-                fixedType->setConstant(false);
-                type = fixedType;
-            }
-            m_d->instantiatedSmartPointers.append(type);
-        }
+        // Is smart pointer. Check if the (const?) pointee is already known
+        auto pt = pointeeTypeEntry(type);
+        const bool present =
+            std::any_of(m_d->instantiatedSmartPointers.cbegin(), m_d->instantiatedSmartPointers.cend(),
+                        [pt] (const AbstractMetaType *t) {
+                            return pointeeTypeEntry(t) == pt;
+                        });
+        if (!present)
+            m_d->instantiatedSmartPointers.append(canonicalSmartPtrInstantiation(type));
     }
 
 }
