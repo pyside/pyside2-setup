@@ -1,0 +1,69 @@
+Qt for Python 5.14.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*        Important Source Incompatible/Behavior Changes                    *
+****************************************************************************
+
+- [PYSIDE-990] It is no longer possible to nest types in typesystem files by
+               by qualifying the namespace components with "::". The elements
+               need to be properly nested.
+
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ - [PYSIDE-487] Add bindings for Qt 5.14
+ - [PYSIDE-785] Release ownership in QAbstractVideoFilterWrapper::createFilterRunnable
+ - [PYSIDE-795] Create a framework for deprecated functions
+ - [PYSIDE-795] Make the function registry more usable in Python modules
+ - [PYSIDE-795] Improve the NumPy Support by iterables
+ - [PYSIDE-820] Fix booleans and empty list cases in QSettings
+ - [PYSIDE-849] Add inject-code for QVideoFrame::bits()
+ - [PYSIDE-939] Add support for Python 3.8
+ - [PYSIDE-939] Fix refcount issues with QSettings glue code
+ - [PYSIDE-939] Finalize the Python 3.8 refcount fix
+ - [PYSIDE-951] Support Pointer Primitive Types by Arrays or Result Tuples
+ - [PYSIDE-1007] Remove extra ref on QDataStream::setDevice
+ - [PYSIDE-1033] CMake modularization: macros creation
+ - [PYSIDE-1041] Enable multimedia classes after API fixup
+ - [PYSIDE-1047] QtWinExtras: Add QtWin namespace
+ - [PYSIDE-1051] Fix heaptype conflict with QtCore.QObject.__new__in Python 2.7
+ - [PYSIDE-1052] Add QtCore.Slot.__signature__ and much more manually
+ - [PYSIDE-1059] Documentation: update QInputDialog snippets
+ - [PYSIDE-1066] Fix Xcode sdk value embedded into PySide2 binaries
+ - [PYSIDE-1067] Update docs style
+ - [PYSIDE-1067] New documentation structure
+ - [PYSIDE-1068] Add designer to the pyside tools
+ - [PYSIDE-1073] Fix a typing bug in Python 2.7 and update
+ - [PYSIDE-1077] Fix wrong Python init return codes
+ - [PYSIDE-1079] signature: Support typing.Optional[T] and refine a bit
+ - [PYSIDE-1089] Fix formatting of the deployment documentation
+ - [PYSIDE-1093] Fix bad shutdown effect on QApplication.instance()
+ - [PYSIDE-1098] Replace pyside2-uic/pyside2-rcc by
+                 uic/rcc which now have an option to generate Python
+ - [PYSIDE-1101] Remove QGraphicsItem::scroll from QtChart
+ - [PYSIDE-1140] Add python_requires to the python setup
+ - [QTBUG-66304] Blacklist failing QtPositioning test
+
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - [PYSIDE-454] Fix crash when smartptr template class cannot be found
+ - [PYSIDE-1037] Allow for "auto" as target of type for CONVERTTOCPP in injected code
+ - [PYSIDE-1095] Fix handling of modified default expressions
