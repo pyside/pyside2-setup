@@ -53,19 +53,17 @@ extern "C"
 // variable that monitors Q*Application.instance().
 // This variable is also able to destroy the app by deleting qApp.
 //
+static const char *mod_names[3] = {"PySide2.QtCore", "PySide2.QtGui", "PySide2.QtWidgets"};
+static const char *app_names[3] = {"QCoreApplication", "QGuiApplication", "QApplication"};
+
 static int
 qApp_module_index(PyObject *module)
 {
     const char *name = PyModule_GetName(module);
-    int ret = 0;
-
-    if (strcmp(name, "PySide2.QtCore") == 0)
-        ret = 1;
-    else if (strcmp(name, "PySide2.QtGui") == 0)
-        ret = 2;
-    else if (strcmp(name, "PySide2.QtWidgets") == 0)
-        ret = 3;
-    return ret;
+    for (int idx = 0; idx < 3; idx++)
+        if (strcmp(name, mod_names[idx]) == 0)
+            return idx + 1;
+    return 0;
 }
 
 #define PYTHON_IS_PYTHON3               (PY_VERSION_HEX >= 0x03000000)
@@ -109,6 +107,8 @@ reset_qApp_var(void)
     return 0;
 }
 
+static bool app_created = false;
+
 /*
  * Note:
  * The PYSIDE-585 problem was that shutdown is called one more often
@@ -120,7 +120,6 @@ reset_qApp_var(void)
 PyObject *
 MakeSingletonQAppWrapper(PyTypeObject *type)
 {
-    static bool app_created = false;
     if (type == nullptr)
         type = Py_NONE_TYPE;
     if (!(type == Py_NONE_TYPE || Py_TYPE(qApp_content) == Py_NONE_TYPE)) {
@@ -245,20 +244,45 @@ NotifyModuleForQApp(PyObject *module, void *qApp)
      * Therefore, the implementation is very simple and just redirects the
      * qApp_contents variable and assigns the instance, instead of vice-versa.
      */
-    PyObject *coreDict = qApp_moduledicts[1];
-    if (coreDict == nullptr) {
-        // PYSIDE-1135: Make sure that at least QtCore gets imported.
-        // That problem exists when a derived instance is created in C++.
-        qApp_moduledicts[1] = Py_None; // anything != nullptr during import
-        coreDict = PyImport_ImportModule("PySide2.QtCore");
-        qApp_moduledicts[1] = coreDict;
-    }
-    if (qApp != nullptr && coreDict != nullptr && coreDict != Py_None) {
-        PyObject *coreApp = PyDict_GetItemString(coreDict, "QCoreApplication");
-        if (coreApp != nullptr) {
-            qApp_content = PyObject_CallMethod(coreApp, "instance", "");
-            reset_qApp_var();
+
+    // PYSIDE-1135: Make sure that at least QtCore gets imported.
+    // That problem exists when a derived instance is created in C++.
+    // PYSIDE-1164: Use the highest Q*Application module possible,
+    // because in embedded mode the instance() seems to be sticky.
+    static bool oneshot_active = false;
+    if (qApp == nullptr || app_created || oneshot_active)
+        return;
+
+    // qApp exists without an application created.
+    // We assume that we are embedded, and we simply try to import all three modules.
+    oneshot_active = true;
+    int mod_found = 0;
+    const char *mod_name, *app_name;
+    const char *thismod_name = PyModule_GetName(module);
+
+    // First go through all three modules, import and set qApp_moduledicts.
+    for (int idx = 0; idx < 3; idx++) {
+        // only import if it is not already the module
+        PyObject *mod = strcmp(thismod_name, mod_names[idx]) == 0 ? module
+                      : PyImport_ImportModule(mod_names[idx]);
+        if (mod != nullptr) {
+            mod_found = idx + 1;
+            qApp_moduledicts[mod_found] = PyModule_GetDict(mod);
+            mod_name = PyModule_GetName(mod);
+            app_name = app_names[idx];
+            continue;
         }
+        PyErr_Clear();
+    }
+
+    // Then take the highest module and call instance() on it.
+    if (mod_found) {
+        PyObject *mod_dict = qApp_moduledicts[mod_found];
+        PyObject *app_class = PyDict_GetItemString(mod_dict, app_name);
+        qApp_content = PyObject_CallMethod(app_class, const_cast<char *>("instance"),
+                                                      const_cast<char *>(""));
+        app_created = true;
+        reset_qApp_var();
     }
 }
 
