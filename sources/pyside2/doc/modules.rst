@@ -5,7 +5,7 @@ Qt Modules
    :hidden:
    :glob:
 
-   PySide2/Qt*/*
+   PySide2/Qt*/index
 
 .. list-table::
    :widths: 150, 150
