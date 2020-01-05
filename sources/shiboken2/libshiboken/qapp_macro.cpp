@@ -162,7 +162,7 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
         if (__moduleShutdown != nullptr)
             Py_XDECREF(PyObject_CallFunction(__moduleShutdown, const_cast<char *>("()")));
     } else {
-        PyObject_INIT(qApp_content, type);
+        PyObject_Init(qApp_content, type);
         app_created = true;
     }
     Py_INCREF(qApp_content);
