@@ -192,7 +192,7 @@ class View(QGraphicsView):
         self._coordX = QGraphicsSimpleTextItem(self._chart)
         self._coordX.setPos(
             self._chart.size().width()/2 - 50, self._chart.size().height())
-        self._coordX.setText("X: ");
+        self._coordX.setText("X: ")
         self._coordY = QGraphicsSimpleTextItem(self._chart)
         self._coordY.setPos(
             self._chart.size().width()/2 + 50, self._chart.size().height())
@@ -232,7 +232,7 @@ class View(QGraphicsView):
         QGraphicsView.mouseMoveEvent(self, event)
 
     def keepCallout(self):
-        self._callouts.append(self._tooltip);
+        self._callouts.append(self._tooltip)
         self._tooltip = Callout(self._chart)
 
     def tooltip(self, point, state):

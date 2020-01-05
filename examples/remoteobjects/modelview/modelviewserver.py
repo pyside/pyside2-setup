@@ -60,7 +60,7 @@ class TimerHandler(QObject):
                                 QColor(Qt.blue), Qt.BackgroundRole)
 
     def insert_data(self):
-        self._model.insertRows(2, 9);
+        self._model.insertRows(2, 9)
         for i in range(2, 11):
             self._model.setData(self._model.index(i, 1),
                                 QColor(Qt.green), Qt.BackgroundRole)
@@ -83,18 +83,18 @@ class TimerHandler(QObject):
 def add_child(num_children, nesting_level):
     result = []
     if nesting_level == 0:
-        return result;
+        return result
     for i in range(num_children):
         child = QStandardItem("Child num {}, nesting Level {}".format(i + 1,
                               nesting_level))
         if i == 0:
             child.appendRow(add_child(num_children, nesting_level -1))
         result.append(child)
-    return result;
+    return result
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    model_size = 100000;
+    model_size = 100000
     list = []
     source_model = QStandardItemModel()
     horizontal_header_list = ["First Column with spacing",
