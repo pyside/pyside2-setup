@@ -43,10 +43,10 @@
 
 import sys
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import (qApp, QApplication, QComboBox, QFormLayout,
+from PySide2.QtWidgets import (QApplication, QComboBox, QFormLayout,
     QHBoxLayout, QLineEdit, QMainWindow, QPushButton, QSlider, QWidget)
 
-from PySide2.QtTextToSpeech import QTextToSpeech, QVoice
+from PySide2.QtTextToSpeech import QTextToSpeech
 
 class MainWindow(QMainWindow):
     def __init__(self):

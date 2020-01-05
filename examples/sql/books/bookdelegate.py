@@ -40,9 +40,8 @@
 
 import copy
 from PySide2.QtSql import QSqlRelationalDelegate
-from PySide2.QtWidgets import (QItemDelegate, QSpinBox, QStyledItemDelegate,
-    QStyle, QStyleOptionViewItem)
-from PySide2.QtGui import QMouseEvent, QPixmap, QPalette
+from PySide2.QtWidgets import QSpinBox, QStyle
+from PySide2.QtGui import QPixmap, QPalette
 from PySide2.QtCore import QEvent, QSize, Qt
 
 

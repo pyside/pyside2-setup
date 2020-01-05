@@ -40,7 +40,7 @@
 ##
 #############################################################################
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtWidgets
 
 
 def createItem(minimum, preferred, maximum, name):

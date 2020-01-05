@@ -42,7 +42,7 @@
 
 """PySide2 port of the widgets/layouts/basiclayout example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtWidgets
 
 
 class Dialog(QtWidgets.QDialog):

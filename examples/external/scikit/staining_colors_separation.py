@@ -43,7 +43,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.figure import Figure
-from PySide2.QtCore import QSize, Qt, Slot
+from PySide2.QtCore import Qt, Slot
 from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import (QAction, QApplication, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QSizePolicy,

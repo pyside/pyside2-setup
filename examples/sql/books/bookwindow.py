@@ -40,12 +40,11 @@
 
 from __future__ import print_function, absolute_import
 
-from PySide2.QtWidgets import (QAction, QAbstractItemView, qApp, QDataWidgetMapper,
+from PySide2.QtWidgets import (QAbstractItemView, qApp, QDataWidgetMapper,
     QHeaderView, QMainWindow, QMessageBox)
 from PySide2.QtGui import QKeySequence
-from PySide2.QtSql import (QSqlRelation, QSqlRelationalTableModel, QSqlTableModel,
-    QSqlError)
-from PySide2.QtCore import QAbstractItemModel, QObject, QSize, Qt, Slot
+from PySide2.QtSql import QSqlRelation, QSqlRelationalTableModel, QSqlTableModel
+from PySide2.QtCore import Qt, Slot
 import createdb
 from ui_bookwindow import Ui_BookWindow
 from bookdelegate import BookDelegate
@@ -131,6 +130,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
         aboutQt_action = help_menu.addAction("&About Qt")
         aboutQt_action.triggered.connect(qApp.aboutQt)
 
+    @Slot()
     def about(self):
         QMessageBox.about(self, self.tr("About Books"),
             self.tr("<p>The <b>Books</b> example shows how to use Qt SQL classes "

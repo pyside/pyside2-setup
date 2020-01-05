@@ -41,11 +41,10 @@
 
 """PySide2 port of the charts/audio example from Qt v5.x"""
 
-import os
 import sys
 from PySide2.QtCharts import QtCharts
-from PySide2.QtCore import QPointF, QRect, QSize
-from PySide2.QtMultimedia import (QAudio, QAudioDeviceInfo, QAudioFormat,
+from PySide2.QtCore import QPointF
+from PySide2.QtMultimedia import (QAudioDeviceInfo, QAudioFormat,
         QAudioInput)
 from PySide2.QtWidgets import QApplication, QMainWindow, QMessageBox
 

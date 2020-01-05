@@ -45,8 +45,7 @@ import sys
 
 from PySide2.QtCore import QUrl
 from PySide2.QtWidgets import (QApplication, QTreeView)
-from PySide2.QtRemoteObjects import (QAbstractItemModelReplica,
-                                     QRemoteObjectNode)
+from PySide2.QtRemoteObjects import QRemoteObjectNode
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
