@@ -2,7 +2,7 @@
 *********
 
 **Qt for Python** offers the official Python bindings for `Qt`_ (`PySide2`_),
-enabling the use of its APIs in Python applications, and a binding generator tool (`Shiboken2`_)
+so that you can use Qt5 APIs in your Python applications, and a binding generator tool (`Shiboken2`_)
 which can be used to expose C++ projects into Python.
 
 |project| is available under the LGPLv3/GPLv3 and the Qt commercial license.
