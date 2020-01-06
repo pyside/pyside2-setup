@@ -287,6 +287,9 @@ run_test_instructions: &run_test_instructions
        property: features
        not_contains_value: LicenseCheck
      instructions:
+       - type: EnvironmentVariable
+         variableName: QTEST_ENVIRONMENT
+         variableValue: "ci"
        - type: ExecuteCommand
          command: python -u coin_test_instructions.py --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
          maxTimeInSeconds: 7200

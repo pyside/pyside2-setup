@@ -46,6 +46,9 @@ if(NOT Qt5XmlPatterns_FOUND AND NOT HAS_LIBXSLT)
             "Documentation will not be built due to missing dependency (no Qt5XmlPatterns found).")
 endif()
 
+# Export to parent scope so that generator/CMakeLists.txt gets it
+set(DISABLE_DOCSTRINGS ${DISABLE_DOCSTRINGS} PARENT_SCOPE)
+
 add_library(apiextractor STATIC ${apiextractor_SRC})
 target_include_directories(apiextractor PRIVATE ${CLANG_EXTRA_INCLUDES}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}

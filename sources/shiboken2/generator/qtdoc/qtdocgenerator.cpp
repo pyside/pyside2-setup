@@ -1621,9 +1621,9 @@ void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContex
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
 
-    s << ".. currentmodule:: " << metaClass->package() << Qt::endl;
     QString className = getClassTargetFullName(metaClass, false);
-    s << ".. _" << className << ":\n\n";
+    s << ".. _" << className << ":" << "\n\n";
+    s << ".. currentmodule:: " << metaClass->package() << "\n\n\n";
 
     s << className << Qt::endl;
     s << Pad('*', className.count()) << Qt::endl << Qt::endl;
