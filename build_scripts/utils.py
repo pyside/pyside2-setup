@@ -378,6 +378,7 @@ def run_process_output(args, initial_env=None):
     for raw_line in std_out.readlines():
         line = raw_line if sys.version_info >= (3,) else raw_line.decode('utf-8')
         result.append(line.rstrip())
+    std_out.close()
     return result
 
 
