@@ -85,24 +85,28 @@ static PyGetSetDef probe_getseters[] = {
     {nullptr}  /* Sentinel */
 };
 
-#define probe_tp_call       make_dummy(1)
-#define probe_tp_str        make_dummy(2)
-#define probe_tp_traverse   make_dummy(3)
-#define probe_tp_clear      make_dummy(4)
-#define probe_tp_iternext   make_dummy(5)
+#define probe_tp_dealloc    make_dummy(1)
+#define probe_tp_repr       make_dummy(2)
+#define probe_tp_call       make_dummy(3)
+#define probe_tp_str        make_dummy(4)
+#define probe_tp_traverse   make_dummy(5)
+#define probe_tp_clear      make_dummy(6)
+#define probe_tp_iternext   make_dummy(7)
 #define probe_tp_methods    probe_methoddef
 #define probe_tp_getset     probe_getseters
-#define probe_tp_descr_get  make_dummy(8)
-#define probe_tp_init       make_dummy(9)
-#define probe_tp_alloc      make_dummy(10)
-#define probe_tp_new        make_dummy(11)
-#define probe_tp_free       make_dummy(12)
-#define probe_tp_is_gc      make_dummy(13)
+#define probe_tp_descr_get  make_dummy(10)
+#define probe_tp_init       make_dummy(11)
+#define probe_tp_alloc      make_dummy(12)
+#define probe_tp_new        make_dummy(13)
+#define probe_tp_free       make_dummy(14)
+#define probe_tp_is_gc      make_dummy(15)
 
 #define probe_tp_name       "type.probe"
 #define probe_tp_basicsize  make_dummy_int(42)
 
 static PyType_Slot typeprobe_slots[] = {
+    {Py_tp_dealloc,     probe_tp_dealloc},
+    {Py_tp_repr,        probe_tp_repr},
     {Py_tp_call,        probe_tp_call},
     {Py_tp_str,         probe_tp_str},
     {Py_tp_traverse,    probe_tp_traverse},
@@ -144,6 +148,8 @@ check_PyTypeObject_valid()
     if (false
         || strcmp(probe_tp_name, check->tp_name) != 0
         || probe_tp_basicsize       != check->tp_basicsize
+        || probe_tp_dealloc         != check->tp_dealloc
+        || probe_tp_repr            != check->tp_repr
         || probe_tp_call            != check->tp_call
         || probe_tp_str             != check->tp_str
         || probe_tp_traverse        != check->tp_traverse

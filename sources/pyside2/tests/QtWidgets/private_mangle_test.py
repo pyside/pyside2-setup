@@ -91,7 +91,7 @@ class TestMangle(unittest.TestCase):
         QApplication()
 
     def tearDown(self):
-        del QtWidgets.qApp
+        qApp.shutdown()
 
     def testPrivateMangle(self):
         harness = Harness()

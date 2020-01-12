@@ -46,10 +46,11 @@ class QApplicationInstance(unittest.TestCase):
         app1.setObjectName("MyApp")
         self.assertEqual(app1, app2)
         self.assertEqual(app2.objectName(), app1.objectName())
-        if len(all) > 3:
-            # an import triggers qApp initialization
-            __import__("PySide2." + all[-1])
-            self.assertEqual(app1, qApp)
+        # We no longer support qApp when embedding
+        # if len(all) > 3:
+        #     # an import triggers qApp initialization
+        #     __import__("PySide2." + all[-1])
+        #     self.assertEqual(app1, qApp)
         app1.destroyed.connect(self.appDestroyed)
 
 if __name__ == '__main__':

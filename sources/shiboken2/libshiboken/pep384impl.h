@@ -88,12 +88,12 @@ typedef struct _typeobject {
     const char *tp_name;
     Py_ssize_t tp_basicsize;
     void *X03; // Py_ssize_t tp_itemsize;
-    void *X04; // destructor tp_dealloc;
+    destructor tp_dealloc;
     void *X05; // Py_ssize_t tp_vectorcall_offset;
     void *X06; // getattrfunc tp_getattr;
     void *X07; // setattrfunc tp_setattr;
     void *X08; // PyAsyncMethods *tp_as_async;
-    void *X09; // reprfunc tp_repr;
+    reprfunc tp_repr;
     void *X10; // PyNumberMethods *tp_as_number;
     void *X11; // PySequenceMethods *tp_as_sequence;
     void *X12; // PyMappingMethods *tp_as_mapping;
