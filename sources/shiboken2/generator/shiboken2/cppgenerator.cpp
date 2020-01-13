@@ -746,11 +746,14 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         return QLatin1Char('"') + func->typeReplaced(0) + QLatin1Char('"');
 
     // SbkType would return null when the type is a container.
-    if (func->type()->typeEntry()->isContainer()) {
+    auto typeEntry = func->type()->typeEntry();
+    if (typeEntry->isContainer()) {
         return QLatin1Char('"')
-               + reinterpret_cast<const ContainerTypeEntry *>(func->type()->typeEntry())->typeName()
+               + reinterpret_cast<const ContainerTypeEntry *>(typeEntry)->typeName()
                + QLatin1Char('"');
     }
+    if (typeEntry->isSmartPointer())
+        return QLatin1Char('"') + typeEntry->qualifiedCppName() + QLatin1Char('"');
 
     if (avoidProtectedHack()) {
         const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(func->type());
@@ -761,7 +764,8 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     if (func->type()->isPrimitive())
         return QLatin1Char('"') + func->type()->name() + QLatin1Char('"');
 
-    return QString::fromLatin1("reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< %1 >())->tp_name").arg(func->type()->typeEntry()->qualifiedCppName());
+    return QLatin1String("reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< ")
+        + typeEntry->qualifiedCppName() + QLatin1String(" >())->tp_name");
 }
 
 void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction *func)

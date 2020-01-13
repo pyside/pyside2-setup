@@ -692,6 +692,9 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType *type) const
     if (Generator::isPointer(type))
         return DefaultValue(DefaultValue::Pointer, QLatin1String("::") + type->typeEntry()->qualifiedCppName());
 
+    if (type->typeEntry()->isSmartPointer())
+        return minimalConstructor(type->typeEntry());
+
     if (type->typeEntry()->isComplex()) {
         auto cType = static_cast<const ComplexTypeEntry *>(type->typeEntry());
         if (cType->hasDefaultConstructor())
@@ -745,6 +748,9 @@ DefaultValue Generator::minimalConstructor(const TypeEntry *type) const
                            + type->qualifiedCppName())
             : DefaultValue(DefaultValue::Custom, ctor);
     }
+
+    if (type->isSmartPointer())
+        return DefaultValue(DefaultValue::DefaultConstructor, type->qualifiedCppName());
 
     if (type->isComplex())
         return minimalConstructor(AbstractMetaClass::findClass(classes(), type));
