@@ -827,7 +827,7 @@ bool TypeSystemParser::endElement(const QStringRef &localName)
             break;
         default:
             break; // nada
-        };
+        }
         break;
     default:
         break;
@@ -903,7 +903,7 @@ bool TypeSystemParser::characters(const String &ch)
                 break;
             default:
                 Q_ASSERT(false);
-            };
+            }
             return true;
         }
     }
@@ -2857,7 +2857,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             break;
         default:
             Q_ASSERT(false);
-        };
+        }
 
         if (element->entry) {
             if (!m_database->addType(element->entry, &m_error))

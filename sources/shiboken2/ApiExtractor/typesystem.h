@@ -228,7 +228,7 @@ struct ArgumentModification
 
 struct Modification
 {
-    enum Modifiers {
+    enum Modifiers : uint {
         InvalidModifier =       0x0000,
         Private =               0x0001,
         Protected =             0x0002,

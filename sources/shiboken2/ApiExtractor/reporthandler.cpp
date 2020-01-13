@@ -35,7 +35,7 @@
 #include <cstdarg>
 #include <cstdio>
 
-#if _WINDOWS || NOCOLOR
+#if defined(_WINDOWS) || defined(NOCOLOR)
     #define COLOR_END ""
     #define COLOR_WHITE ""
     #define COLOR_YELLOW ""

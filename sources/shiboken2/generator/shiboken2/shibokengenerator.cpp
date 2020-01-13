@@ -2349,7 +2349,7 @@ static bool isGroupable(const AbstractMetaFunction *func)
         return false;
     // weird operator overloads
     if (func->name() == QLatin1String("operator[]") || func->name() == QLatin1String("operator->"))  // FIXME: what about cast operators?
-        return false;;
+        return false;
     return true;
 }
 

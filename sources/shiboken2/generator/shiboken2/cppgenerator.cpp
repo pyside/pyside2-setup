@@ -44,8 +44,7 @@
 #include <QMetaType>
 
 #include <algorithm>
-
-#include <algorithm>
+#include <cstring>
 
 static const char CPP_ARG0[] = "cppArg0";
 
@@ -2605,9 +2604,11 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
 
         if (usePyArgs && signatureFound) {
             AbstractMetaArgumentList args = refFunc->arguments();
-            int lastArgIsVarargs = (int) (args.size() > 1 && args.constLast()->type()->isVarargs());
-            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
-            typeChecks.prepend(QString::fromLatin1("numArgs %1 %2").arg(lastArgIsVarargs ? QLatin1String(">=") : QLatin1String("==")).arg(numArgs));
+            const bool isVarargs = args.size() > 1 && args.constLast()->type()->isVarargs();
+            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc);
+            if (isVarargs)
+                --numArgs;
+            typeChecks.prepend(QString::fromLatin1("numArgs %1 %2").arg(isVarargs ? QLatin1String(">=") : QLatin1String("==")).arg(numArgs));
         } else if (sequenceArgCount > 1) {
             typeChecks.prepend(QString::fromLatin1("numArgs >= %1").arg(startArg + sequenceArgCount));
         } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
@@ -3250,7 +3251,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                 std::swap(firstArg, secondArg);
 
             QString op = func->originalName();
-            op = op.right(op.size() - (sizeof("operator")/sizeof(char)-1));
+            op.remove(0, int(std::strlen("operator")));
 
             if (func->isBinaryOperator()) {
                 if (func->isReverseOperator())
@@ -4066,7 +4067,7 @@ void CppGenerator::writeSequenceMethods(QTextStream &s,
 
         writeCppSelfDefinition(s, func, context);
 
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? 0 : func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
         writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
         s<< "}\n\n";
     }
@@ -5887,7 +5888,7 @@ void CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
         writeReturnValueHeuristics(s, func);
 }
 
-void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func, const QString &self)
+void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func)
 {
     AbstractMetaType *type = func->type();
     if (!useReturnValueHeuristic()

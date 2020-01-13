@@ -208,7 +208,7 @@ int warning(PyObject *category, int stacklevel, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-#if _WIN32
+#ifdef _WIN32
     va_list args2 = args;
 #else
     va_list args2;

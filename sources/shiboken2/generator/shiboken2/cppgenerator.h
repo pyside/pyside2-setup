@@ -306,7 +306,7 @@ private:
 
     void writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, int argIndex, bool userHeuristicPolicy);
-    void writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func, const QString &self = QLatin1String("self"));
+    void writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func);
     void writeInitQtMetaTypeFunctionBody(QTextStream &s, GeneratorContext &context) const;
 
     /**

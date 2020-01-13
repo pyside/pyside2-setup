@@ -268,7 +268,7 @@ QString AbstractMetaType::pythonSignature() const
     // PYSIDE-921: Handle container returntypes correctly.
     // This is now a clean reimplementation.
     if (m_cachedPythonSignature.isEmpty())
-        m_cachedPythonSignature = formatPythonSignature(false);
+        m_cachedPythonSignature = formatPythonSignature();
     return m_cachedPythonSignature;
 }
 
@@ -2530,7 +2530,7 @@ QString AbstractMetaType::formatSignature(bool minimal) const
     return result;
 }
 
-QString AbstractMetaType::formatPythonSignature(bool minimal) const
+QString AbstractMetaType::formatPythonSignature() const
 {
     /*
      * This is a version of the above, more suitable for Python.
@@ -2553,7 +2553,7 @@ QString AbstractMetaType::formatPythonSignature(bool minimal) const
         result += package() + QLatin1Char('.');
     if (isArray()) {
         // Build nested array dimensions a[2][3] in correct order
-        result += m_arrayElementType->formatPythonSignature(true);
+        result += m_arrayElementType->formatPythonSignature();
         const int arrayPos = result.indexOf(QLatin1Char('['));
         if (arrayPos != -1)
             result.insert(arrayPos, formatArraySize(m_arrayElementCount));
@@ -2567,7 +2567,7 @@ QString AbstractMetaType::formatPythonSignature(bool minimal) const
         for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
                 result += QLatin1String(", ");
-            result += m_instantiations.at(i)->formatPythonSignature(true);
+            result += m_instantiations.at(i)->formatPythonSignature();
         }
         result += QLatin1Char(']');
     }

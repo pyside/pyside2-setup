@@ -538,7 +538,7 @@ public:
 private:
     TypeUsagePattern determineUsagePattern() const;
     QString formatSignature(bool minimal) const;
-    QString formatPythonSignature(bool minimal) const;
+    QString formatPythonSignature() const;
 
     const TypeEntry *m_typeEntry = nullptr;
     AbstractMetaTypeList m_instantiations;

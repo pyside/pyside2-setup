@@ -106,7 +106,7 @@ struct OverloadSortData
             return;
         map[typeName] = counter;
         if (!reverseMap.contains(counter))
-            reverseMap[counter] = 0;
+            reverseMap[counter] = nullptr;
         counter++;
     }
 

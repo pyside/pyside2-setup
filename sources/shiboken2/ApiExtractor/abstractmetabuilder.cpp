@@ -270,7 +270,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
             const ArgumentModelItem &arg = arguments.at(1);
             if (AbstractMetaClass *cls = argumentToClass(arg, currentClass)) {
                 if (arg->type().indirections() < 2)
-                    cls->setToStringCapability(true, arg->type().indirections());
+                    cls->setToStringCapability(true, int(arg->type().indirections()));
             }
         }
     }
@@ -1285,14 +1285,6 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(retType);
     metaFunction->replaceType(metaType);
-}
-
-static bool _compareAbstractMetaTypes(const AbstractMetaType *type,
-                                      const AbstractMetaType *other,
-                                      AbstractMetaType::ComparisonFlags flags = {})
-{
-    return (type != nullptr) == (other != nullptr)
-        && (type == nullptr || type->compare(*other, flags));
 }
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
