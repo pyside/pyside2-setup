@@ -102,9 +102,15 @@ private:
 
     void writeTypeDiscoveryFunction(QTextStream &s, const AbstractMetaClass *metaClass);
 
-    void writeSetattroFunction(QTextStream &s, GeneratorContext &context);
-    void writeGetattroFunction(QTextStream &s, GeneratorContext &context);
+    static void writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
+    void writeSetattroDefaultReturn(QTextStream &s) const;
+    void writeSmartPointerSetattroFunction(QTextStream &s, GeneratorContext &context);
+    void writeSetattroFunction(QTextStream &s, AttroCheck attroCheck, GeneratorContext &context);
+    static void writeGetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
+    void writeSmartPointerGetattroFunction(QTextStream &s, GeneratorContext &context);
+    void writeGetattroFunction(QTextStream &s, AttroCheck attroCheck, GeneratorContext &context);
     QString writeSmartPointerGetterCast();
+    QString qObjectGetAttroFunction() const;
 
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
