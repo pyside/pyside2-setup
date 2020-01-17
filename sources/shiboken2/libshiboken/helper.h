@@ -44,6 +44,8 @@
 #include "shibokenmacros.h"
 #include "autodecref.h"
 
+#include <iosfwd>
+
 #define SBK_UNUSED(x)   (void)(x);
 
 namespace Shiboken
@@ -99,6 +101,24 @@ LIBSHIBOKEN_API ThreadId mainThreadId();
  */
 LIBSHIBOKEN_API int warning(PyObject *category, int stacklevel, const char *format, ...);
 
+struct LIBSHIBOKEN_API debugPyObject
+{
+    explicit debugPyObject(PyObject *o);
+
+    PyObject *m_object;
+};
+
+struct LIBSHIBOKEN_API debugPyTypeObject
+{
+    explicit debugPyTypeObject(const PyTypeObject *o);
+
+    const PyTypeObject *m_object;
+};
+
+LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyObject &o);
+LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o);
+
 } // namespace Shiboken
+
 
 #endif // HELPER_H
