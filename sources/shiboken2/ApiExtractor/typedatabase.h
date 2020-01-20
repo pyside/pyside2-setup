@@ -37,9 +37,9 @@
 
 #include <QtCore/QRegularExpression>
 #include <QtCore/QStringList>
+#include <QtCore/QVersionNumber>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
-QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 
 class ComplexTypeEntry;
 class ContainerTypeEntry;
@@ -59,6 +59,18 @@ int getMaxTypeIndex();
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;
 class TypeSystemTypeEntry;
+
+struct VersionRange
+{
+    bool isNull() const
+    {
+        return since.majorVersion() == 0 && since.minorVersion() == 0
+            && until.majorVersion() == 9999 && until.minorVersion() == 9999;
+    }
+
+    QVersionNumber since{0, 0};
+    QVersionNumber until{9999, 9999};
+};
 
 class TypeDatabase
 {
@@ -153,7 +165,7 @@ public:
     static bool setApiVersion(const QString &package, const QString &version);
     static void clearApiVersions();
 
-    static bool checkApiVersion(const QString &package, const QVersionNumber &version);
+    static bool checkApiVersion(const QString &package, const VersionRange &vr);
 
     bool hasDroppedTypeEntries() const { return !m_dropTypeEntries.isEmpty(); }
 

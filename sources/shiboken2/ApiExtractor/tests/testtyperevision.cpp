@@ -77,6 +77,7 @@ void TestTypeRevision::testVersion_data()
     QTest::newRow("none") << QString() << 2;
     QTest::newRow("1.0") << QString::fromLatin1("1.0") << 1;  // Bar20 excluded
     QTest::newRow("2.0") << QString::fromLatin1("2.0") << 2;
+    QTest::newRow("3.0") << QString::fromLatin1("3.0") << 1;  // Bar excluded by "until"
 }
 
 void TestTypeRevision::testVersion()
@@ -90,7 +91,7 @@ class Bar20 {};
 )CPP";
     const char xmlCode[] = R"XML(
 <typesystem package="Foo">
-    <value-type name="Bar"/>
+    <value-type name="Bar" until="2.0"/>
     <value-type name="Bar20" since="2.0"/>
 </typesystem>
 )XML";
