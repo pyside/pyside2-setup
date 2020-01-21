@@ -87,7 +87,6 @@ if __name__=='__main__':
                 'QtSvg',
                 'QtTest',
                #'QtUiTools',
-                'QtWebKit',
                 'QtXml',
                 'QtXmlPatterns' ]
 

@@ -140,8 +140,6 @@ def prepare_standalone_package_macos(self, vars):
         ignored_modules = []
         if not self.is_webengine_built(built_modules):
             ignored_modules.extend(['libQt5WebEngine*.dylib'])
-        if 'WebKit' not in built_modules:
-            ignored_modules.extend(['libQt5WebKit*.dylib'])
         accepted_modules = ['libQt5*.5.dylib']
         if constrain_modules:
             accepted_modules = ["libQt5" + module + "*.5.dylib" for module in constrain_modules]

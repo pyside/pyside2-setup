@@ -100,8 +100,6 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/opengl_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/openglfunctions_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/webkitwidgets_common.xml
-        DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/xml_common.xml
         DESTINATION share/PySide2${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h
