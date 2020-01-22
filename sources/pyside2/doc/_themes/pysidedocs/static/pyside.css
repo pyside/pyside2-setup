@@ -930,6 +930,7 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
   padding:0;
   border:0;
   font-size:100%
+  line-height: 1.4;
 }
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,caption,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video {
   vertical-align:baseline
@@ -1548,8 +1549,6 @@ pre span.wrap {
 
 span.pre {
     color: #09102d;
-    background-color: #e4e4e4;
-    padding: 3px;
 }
 
 span.wrap:hover {
