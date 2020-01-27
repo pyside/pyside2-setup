@@ -22,7 +22,7 @@ same hash.
 
 
 QString
-~~~~~~~~
+~~~~~~~
 
 Methods and functions that change the contents of a QString argument were modified to receive an
 immutable Python Unicode (or str) and return another Python Unicode/str as the modified string.
@@ -83,3 +83,53 @@ its original Python object type.
 
 When a method expects a ``QVariant::Type`` the programmer can use a string (the type name) or the
 type itself.
+
+
+qApp "macro"
+~~~~~~~~~~~~
+
+The C++ API of QtWidgets provides a macro called ``qApp`` that roughly expands to
+``QtWidgets::QApplication->instance()``.
+
+In PySide, we tried to create a macro-like experience.
+For that, the ``qApp`` variable was implemented as a normal variable
+that lives in the builtins.
+After importing ``PySide2``, you can immediately use ``qApp``.
+
+As a useful shortcut for the action "create an application if it was not created", we recommend::
+
+    qApp or QtWidgets.QApplication()
+
+or if you want to check if there is one, simply use the truth value::
+
+    if qApp:
+        # do something if an application was created
+        pass
+
+Comparing to ``None`` is also possible, but slightly over-specified.
+
+
+Testing support
++++++++++++++++
+
+For testing purposes, you can also get rid of the application by calling::
+
+    qApp.shutdown()
+
+As for 5.14.2, this is currently an experimental feature that is not fully tested.
+
+
+Embedding status
+++++++++++++++++
+
+In embedded mode, application objects that are pre-created in C++ don't have a Python wrapper.
+The ``qApp`` variable is created together with a wrapped application.
+Therefore, ``qApp`` does not exist in that embedded mode.
+Please note that you always can use ``QtWidgets.QApplication.instance()`` instead.
+
+
+Abandoned Alternative
++++++++++++++++++++++
+
+We also tried an alternative implementation with a ``qApp()`` function that was more *pythonic*
+and problem free, but many people liked the ``qApp`` macro better for its brevity, so here it is.
