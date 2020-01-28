@@ -68,9 +68,7 @@
 [QtQml::qquickitem_grabToImage]
     darwin
 [smart::smart_pointer]
-    win32
-    linux
-    darwin
+    py2
 # PYSIDE-474
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
     py2
