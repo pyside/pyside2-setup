@@ -4836,6 +4836,7 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
     s << INDENT << "{Py_nb_xor,     (void *)" << cpythonName  << "___xor__}," << endl;
     s << INDENT << "{Py_nb_or,      (void *)" << cpythonName  << "___or__}," << endl;
     s << INDENT << "{Py_nb_int,     (void *)" << cpythonName << "_long}," << endl;
+    s << INDENT << "{Py_nb_index,   (void *)" << cpythonName << "_long}," << endl;
     s << "#ifndef IS_PY3K" << endl;
     s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long}," << endl;
     s << "#endif" << endl;
