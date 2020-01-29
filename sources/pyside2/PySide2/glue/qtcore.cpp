@@ -1046,6 +1046,7 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
 
     QByteArray * cppSelf = %CONVERTTOCPP[QByteArray *](obj);
     //XXX      /|\ omitting this space crashes shiboken!
+ #ifdef Py_LIMITED_API
     view->obj = obj;
     view->buf = reinterpret_cast<void *>(cppSelf->data());
     view->len = cppSelf->size();
@@ -1053,13 +1054,20 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
     view->itemsize = 1;
     view->format = const_cast<char *>("c");
     view->ndim = 1;
-    view->shape = NULL;
+    view->shape = (flags & PyBUF_ND) == PyBUF_ND ? &(view->len) : nullptr;
     view->strides = &view->itemsize;
     view->suboffsets = NULL;
     view->internal = NULL;
 
     Py_XINCREF(obj);
     return 0;
+#else // Py_LIMITED_API
+    const int result = PyBuffer_FillInfo(view, obj, reinterpret_cast<void *>(cppSelf->data()),
+                                         cppSelf->size(), 0, flags);
+    if (result == 0)
+        Py_XINCREF(obj);
+    return result;
+#endif
 }
 
 #if PY_VERSION_HEX < 0x03000000

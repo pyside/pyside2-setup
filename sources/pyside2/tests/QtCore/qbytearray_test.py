@@ -265,6 +265,12 @@ class QByteArraySliceAssignment(unittest.TestCase):
         b[9:2:-3] = bytearray(py3k.b('XYZ'))
         self.assertEqual(b, py3k.b('012Z45Y78X'))
 
+    def testBufferProtocol(self):
+        orig_bytes = py3k.b('0123456789')
+        byte_array = QByteArray(orig_bytes)
+        actual_bytes = bytes(byte_array)
+        self.assertEqual(orig_bytes, actual_bytes)
+
 
 if __name__ == '__main__':
     unittest.main()
