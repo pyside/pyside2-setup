@@ -93,3 +93,6 @@
     win32
     linux
     darwin
+# Open GL functions failures on macOS (2/2020)
+[registry::existence_test]
+    darwin
