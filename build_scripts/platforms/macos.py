@@ -39,7 +39,7 @@
 
 import fnmatch
 import os
-from ..utils import copydir, copyfile, macos_fix_rpaths_for_library
+from ..utils import copydir, copyfile, macos_fix_rpaths_for_library, macos_add_rpath
 from ..config import config
 
 
@@ -76,6 +76,13 @@ def prepare_standalone_package_macos(self, vars):
         if file_name.endswith('_debug.dylib') and no_copy_debug:
             return False
         return True
+
+    # Patching designer to use the Qt libraries provided in the wheel
+    if config.is_internal_pyside_build():
+        designer_bundle = "{st_build_dir}/{st_package_name}/Designer.app".format(**vars)
+        designer_binary = "{}/Contents/MacOS/Designer".format(designer_bundle)
+        rpath = "@loader_path/../../../Qt/lib"
+        macos_add_rpath(rpath, designer_binary)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     if self.qt_is_framework_build():

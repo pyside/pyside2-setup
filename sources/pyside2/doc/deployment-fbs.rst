@@ -1,48 +1,43 @@
 |project| & fbs
 ####################
 
-``fbs`` provides a powerful environment for packaging,
-creating installers, and signing your application. It also lets you manage updates to
-your application. As it is based on PyInstaller, it supports Linux, macOS, and Windows.
+`fbs`_ provides a powerful environment for packaging, creating installers, and signing your
+application. It also lets you manage updates to your application. Since `fbs` is based on
+PyInstaller, it supports Linux, macOS, and Windows.
 
-You can read the `fbs tutorial`_ for more details about how to use
-`fbs`, or check out the `fbs manual`_ for a complete set of features
-and options.
+For more details, see the `fbs tutorial`_ and the `fbs manual`_.
 
+.. _fbs: https://build-system.fman.io/
 .. _fbs tutorial: https://github.com/mherrmann/fbs-tutorial
-
 .. _fbs manual: https://build-system.fman.io/manual/
 
 Preparation
 ===========
 
-Installing `fbs` (>= 0.7.6) can be done via **pip**::
+Installing `fbs`_ (>= 0.7.6) is done via **pip**::
 
     pip install fbs
 
-If you are using a virtual environment, remember to activate it before
-installing it.
+If you're using a virtual environment, remember to activate it before installing `fbs`_.
 
-After the installation, you will be able to use the `fbs` executable.
+After the installation, you can use the `fbs`_ executable.
 
 Starting a new project
 ======================
 
-`fbs` provides nice features that lets you create a base
-project structure by executing the following command::
+`fbs`_ provides useful features for you to create a base project structure with the following
+command::
 
     fbs startproject
 
-This command prompts you to answer a few questions to configure the details
-of your project, like:
+This command prompts you to answer a few questions to configure the details of your project, like:
 
  * Application name
  * Author name
  * Qt bindings (PySide2 or PyQt5)
  * Bundle indentified (for macOS)
 
-After it finishes, you will have a `src/` directory that
-contains the following structure::
+Afterwards, you have a `src/` directory that contains the following structure::
 
     └── src
         ├── build
@@ -54,11 +49,10 @@ contains the following structure::
             │   └── mac
             └── python
 
-Inside the `settings` directory, you will find a couple of `json` files
-that can be edited to include more information about your project.
+Inside the `settings` directory, there are a few JSON files that can be edited to include more
+information about your project.
 
-The `main` file will be under the `python` directory, and its content
-by default is::
+The `main` file is in the `python` directory, and its default content is::
 
     from fbs_runtime.application_context import ApplicationContext
     from PySide2.QtWidgets import QMainWindow
@@ -73,33 +67,31 @@ by default is::
         exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
         sys.exit(exit_code)
 
-This example shows an empty `QMainWindow`. You can run it using the
-following command::
+This example shows an empty `QMainWindow`. You can run it using the following command::
 
     fbs run
 
 Freezing the application
 ========================
 
-Once you verify that the application is properly working,
-you can continue with the freezing process using the following
-command::
+Once you've verified that the application is working properly, you can continue with the freezing
+process using the following command::
 
     fbs freeze
 
-After the process finishes, you will get a message stating the location
-of your executable. For example::
+After the process completes, you see a message stating the location of your executable. For
+example::
 
     Done. You can now run `target/MyApp/MyApp`. If that doesn't work, see
     https://build-system.fman.io/troubleshooting.
 
 
-You can now try running the application, which will result in the same
-window that you saw with the `fbs run` command::
+Now, you can try to run the application. The result is the same window as the one you saw with the
+`fbs run` command::
 
     cd target/MyApp/
     ./MyApp
 
-.. note:: This is the case for Linux. For other platforms like macOS,
-   you need to enter the directory: `target/MyApp.app/Contents/macOS`,
-   and for Windows find the `MyApp.exe` executable.
+.. note:: This is the case for Linux. For other platforms like macOS, you need to enter the
+   directory: `target/MyApp.app/Contents/macOS`. For Windows, you need to find the `MyApp.exe`
+   executable.

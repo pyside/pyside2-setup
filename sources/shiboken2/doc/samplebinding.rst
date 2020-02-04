@@ -1,9 +1,9 @@
 SampleBinding Example
 ***********************
 
-The example showcases how you can generate CPython-based binding code for a
-C++ library using Shiboken. The C++ library is called :code:`Universe`,
-with two classes: :code:`Icecream` and :code:`Truck`. Ice creams are
+This example showcases how you can use Shiboken to generate CPython-based
+binding code for a C++ library. The C++ library is called :code:`Universe`,
+with two classes: :code:`Icecream` and :code:`Truck`. Ice-creams are
 characterized by their flavor, and :code:`Truck` serves as a vehicle of
 :code:`Icecream` distribution for kids in a neighborhood.
 
@@ -52,7 +52,7 @@ First, let's look at the definition of the two classes:
         std::vector m_flavors;
     };
 
-Here is a summary of what the :code:`Universe` library includes:
+Here's a summary of what's included in the :code:`Universe` library:
 
 * The :code:`Icecream` polymorphic type, which is intended to be overridden.
 * The :code:`Icecream::getFlavor()` method returns the flavor depending on the
@@ -63,14 +63,14 @@ Here is a summary of what the :code:`Universe` library includes:
   modified via :code:`Truck::addIcecreamFlavor()`.
 * The :code:`Truck’s` arrival message can be customized using its
   :code:`setArrivalMessage()` method.
-* The :code:`Truck::deliver()` method tells us if the ice cream delivery was
+* The :code:`Truck::deliver()` method tells us if the ice-cream delivery was
   successful.
 
 Shiboken typesystem
 ====================
 
-Now that the library definitions are in place, Shiboken generator needs a header
-file that includes the types we are interested in:
+Now that the library definitions are in place, the Shiboken generator needs a
+header file that includes the types we are interested in:
 
 .. code-block:: cpp
    :caption: bindings.h
@@ -107,10 +107,10 @@ relationship between C++ and Python types:
         </value-type>
     </typesystem>
 
-The first important thing to notice here is that we declare :code:`"bool"` and
+One important thing to notice here is that we declare :code:`"bool"` and
 :code:`"std::string"` as primitive types. These types are used by some of the
 C++ methods as parameters or return types, so Shiboken must know about them.
-It can then generate relevant conversion code between C++ and Python, although
+Then, Shiboken can generate relevant conversion code between C++ and Python, although
 most C++ primitive types are handled by Shiboken without additional code.
 
 Next, we declare the two aforementioned classes. One of them as an
@@ -126,12 +126,12 @@ you want to modify them.
 Object ownership rules
 =======================
 
-Shiboken cannot magically know who is responsible for freeing the C++ objects
-allocated in the Python code. It can guess, but it’s not always correct. There
-can be cases where Python should release the C++ memory when the ref count
-of the Python object becomes zero. It should never delete the C++ object assuming
-that it will not be deleted by the C++ library or maybe it’s parented to another
-object (like QWidgets).
+Shiboken doesn't know if Python or C++ are responsible for freeing the C++ objects that were
+allocated in the Python code, and assuming this might lead to errors.
+There can be cases where Python should release the C++ memory when the reference count of the
+Python object becomes zero, but it should never delete the underlying C++ object just from
+assuming that it will not be deleted by underlying C++ library, or if it's maybe parented to
+another object (like QWidgets).
 
 In our case, the :code:`clone()` method is only called inside the C++ library,
 and we assume that the C++ code takes care of releasing the cloned object.
@@ -142,27 +142,26 @@ destroyed. That's why the ownership is set to “c++” in the typesystem file,
 so that the C++ objects are not deleted when the corresponding Python names
 go out of scope.
 
-Building
-=========
+Build
+=====
 
 To build the :code:`Universe` custom library and then generate bindings for it,
-use the :file:`CMakeLists.txt` file provided with the example. You can reuse the
-file for your own libraries with minor changes.
+use the :file:`CMakeLists.txt` file provided with the example. Later, you can reuse
+the file for your own libraries with minor changes.
 
-Now, run the command :command:`"cmake ."` from the prompt to configure the
-project and build with the toolchain of your choice (we recommend the
-‘(N)Makefiles’ generator though).
+Now, run the :command:`"cmake ."` command from the prompt to configure the
+project and build with the toolchain of your choice; we recommend the
+‘(N)Makefiles’ generator.
 
 As a result, you end up with two shared libraries:
 :file:`libuniverse.(so/dylib/dll)` and :file:`Universe.(so/pyd)`. The former is
-the custom C++ library, and the latter is the Python module that can be
-imported in your Python script.
+the custom C++ library, and the latter is the Python module to import in your
+Python script.
 
-Refer to the :file:`README.md` file for more details about the Windows-specific
-build instructions.
+For more details about these platforms, see the :file:`README.md` file.
 
-Using the Python module
-========================
+Use the Python module
+=====================
 
 The following script uses the :code:`Universe` module, derives a few types from
 :code:`Icecream`, implements virtual methods, instantiates objects, and much more:
@@ -234,9 +233,7 @@ types from :code:`Icecream` for different “flavors”. It then creates a
 If the delivery fails, a new :code:`truck` is created with the old flavors
 copied over, and a new *magical* flavor that will surely satisfy all customers.
 
-The script above shows how to derive from C++ types, override virtual methods,
-create and destroy objects, and more. Try running it to see if the ice creams
-are delivered.
+Try running it to see if the ice creams are delivered.
 
 .. note::
     You can find the sources for this example under

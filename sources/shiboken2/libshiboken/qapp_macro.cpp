@@ -54,7 +54,6 @@ extern "C"
 // This variable is also able to destroy the app by deleting qApp.
 //
 static const char *mod_names[3] = {"PySide2.QtCore", "PySide2.QtGui", "PySide2.QtWidgets"};
-static const char *app_names[3] = {"QCoreApplication", "QGuiApplication", "QApplication"};
 
 static int
 qApp_module_index(PyObject *module)
@@ -88,8 +87,6 @@ static SbkObject _Py_ChameleonQAppWrapper_Struct = {
 static PyObject *qApp_var = nullptr;
 static PyObject *qApp_content = reinterpret_cast<PyObject *>(&_Py_ChameleonQAppWrapper_Struct);
 static PyObject *qApp_moduledicts[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
-static int qApp_var_ref = 0;
-static int qApp_content_ref = 0;
 
 static int
 reset_qApp_var(void)
@@ -109,14 +106,6 @@ reset_qApp_var(void)
 
 static bool app_created = false;
 
-/*
- * Note:
- * The PYSIDE-585 problem was that shutdown is called one more often
- * than Q*Application is created. We could special-case that last
- * shutdown or add a refcount, initially, but actually it was easier
- * and more intuitive in that context to make the refcount of
- * qApp_content equal to the refcount of Py_None.
- */
 PyObject *
 MakeSingletonQAppWrapper(PyTypeObject *type)
 {
@@ -131,42 +120,39 @@ MakeSingletonQAppWrapper(PyTypeObject *type)
     }
     if (reset_qApp_var() < 0)
         return nullptr;
-    // always know the max of the refs
-    if (Py_REFCNT(qApp_var) > qApp_var_ref)
-        qApp_var_ref = Py_REFCNT(qApp_var);
-    if (Py_REFCNT(qApp_content) > qApp_content_ref)
-        qApp_content_ref = Py_REFCNT(qApp_content);
-
-    if (Py_TYPE(qApp_content) != Py_NONE_TYPE) {
-        // Remove the "_" variable which might hold a reference to qApp.
-        Shiboken::AutoDecRef pymain(PyImport_ImportModule("__main__"));
-        if (pymain.object() && PyObject_HasAttrString(pymain.object(), "_"))
-            PyObject_DelAttrString(pymain.object(), "_");
-        Py_REFCNT(qApp_var) = 1; // fuse is armed...
-    }
     if (type == Py_NONE_TYPE) {
         // PYSIDE-1093: Ignore None when no instance has ever been created.
         if (!app_created)
             Py_RETURN_NONE;
-        // Debug mode showed that we need to do more than just remove the
-        // reference. To keep everything in the right order, it is easiest
-        // to do a full shutdown, using QtCore.__moduleShutdown().
-        // restore the "None-state"
-        PyObject *__moduleShutdown = PyDict_GetItemString(qApp_moduledicts[1],
-                                                          "__moduleShutdown");
-        // PYSIDE-585: It was crucial to update the refcounts *before*
-        // calling the shutdown.
         Py_TYPE(qApp_content) = Py_NONE_TYPE;
-        Py_REFCNT(qApp_var) = qApp_var_ref;
-        Py_REFCNT(qApp_content) = Py_REFCNT(Py_None);
-        if (__moduleShutdown != nullptr)
-            Py_XDECREF(PyObject_CallFunction(__moduleShutdown, const_cast<char *>("()")));
     } else {
         PyObject_Init(qApp_content, type);
         app_created = true;
     }
     Py_INCREF(qApp_content);
     return qApp_content;
+}
+
+// PYSIDE-1158: Be clear that the QApp none has the type of None but is a
+// different thing.
+
+static PyObject *
+none_repr(PyObject *op)
+{
+    if (op == qApp_content)
+        return PyUnicode_FromString("noApp");
+    return PyUnicode_FromString("None");
+}
+
+static void
+none_dealloc(PyObject *ignore)
+{
+    if (ignore == qApp_content)
+        return;
+    /* This should never get called, but we also don't want to SEGV if
+     * we accidentally decref None out of existence.
+     */
+    Py_FatalError("deallocating None");
 }
 
 #if PYTHON_IS_PYTHON2
@@ -201,6 +187,8 @@ setup_qApp_var(PyObject *module)
     static int init_done = 0;
 
     if (!init_done) {
+        Py_NONE_TYPE->tp_repr = &none_repr;
+        Py_NONE_TYPE->tp_dealloc = &none_dealloc;
 #if PYTHON_IS_PYTHON2
         Py_NONE_TYPE->tp_as_number = &none_as_number;
 #endif
@@ -229,7 +217,6 @@ setup_qApp_var(PyObject *module)
 void
 NotifyModuleForQApp(PyObject *module, void *qApp)
 {
-    setup_qApp_var(module);
     /*
      * PYSIDE-571: Check if an QApplication instance exists before the import.
      * This happens in scriptableapplication and application_test.py .
@@ -249,41 +236,12 @@ NotifyModuleForQApp(PyObject *module, void *qApp)
     // That problem exists when a derived instance is created in C++.
     // PYSIDE-1164: Use the highest Q*Application module possible,
     // because in embedded mode the instance() seems to be sticky.
-    static bool oneshot_active = false;
-    if (qApp == nullptr || app_created || oneshot_active)
-        return;
 
-    // qApp exists without an application created.
-    // We assume that we are embedded, and we simply try to import all three modules.
-    oneshot_active = true;
-    int mod_found = 0;
-    const char *mod_name, *app_name;
-    const char *thismod_name = PyModule_GetName(module);
-
-    // First go through all three modules, import and set qApp_moduledicts.
-    for (int idx = 0; idx < 3; idx++) {
-        // only import if it is not already the module
-        PyObject *mod = strcmp(thismod_name, mod_names[idx]) == 0 ? module
-                      : PyImport_ImportModule(mod_names[idx]);
-        if (mod != nullptr) {
-            mod_found = idx + 1;
-            qApp_moduledicts[mod_found] = PyModule_GetDict(mod);
-            mod_name = PyModule_GetName(mod);
-            app_name = app_names[idx];
-            continue;
-        }
-        PyErr_Clear();
-    }
-
-    // Then take the highest module and call instance() on it.
-    if (mod_found) {
-        PyObject *mod_dict = qApp_moduledicts[mod_found];
-        PyObject *app_class = PyDict_GetItemString(mod_dict, app_name);
-        qApp_content = PyObject_CallMethod(app_class, const_cast<char *>("instance"),
-                                                      const_cast<char *>(""));
-        app_created = true;
-        reset_qApp_var();
-    }
+    // PYSIDE-1135 again:
+    // The problem of late initialization is not worth the effort.
+    // We simply don't create the qApp variable when we are embedded.
+    if (qApp == nullptr)
+        setup_qApp_var(module);
 }
 
 

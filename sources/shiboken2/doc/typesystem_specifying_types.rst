@@ -104,6 +104,7 @@ primitive-type
         <typesystem>
             <primitive-type name="..."
                 since="..."
+                until="..."
                 target-name="..."
                 default-constructor="..."
                 preferred-conversion="yes | no" />
@@ -114,7 +115,11 @@ primitive-type
     language. If the later two attributes are not specified their default value
     will be the same as the **name** attribute.
 
-    The *optional*  **since** value is used to specify the API version of this type.
+    The *optional*  **since** value is used to specify the API version in which
+    the type was introduced.
+
+    Similarly, the *optional*  **until** value can be used to specify the API
+    version in which the type will be obsoleted.
 
     If the *optional* **preferred-conversion** attribute is set to *no*, it
     indicates that this version of the primitive type is not the preferred C++

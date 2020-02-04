@@ -95,7 +95,7 @@ class CustomTableModel(QAbstractTableModel):
                 if rect.contains(index.column(), index.row()):
                     return QColor(color)
             # cell not mapped return white color
-            return QColor(Qt.white);
+            return QColor(Qt.white)
         return None
 
     def setData(self, index, value, role=Qt.EditRole):
@@ -159,7 +159,7 @@ class TableWidget(QWidget):
 
         # get the color of the series and use it for showing the mapped area
         seriesColorHex = "{}".format(self.series.pen().color().name())
-        self.model.add_mapping(seriesColorHex, QRect(2, 0, 2, self.model.rowCount()));
+        self.model.add_mapping(seriesColorHex, QRect(2, 0, 2, self.model.rowCount()))
 
         self.chart.createDefaultAxes()
         self.chart_view = QtCharts.QChartView(self.chart)

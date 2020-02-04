@@ -464,7 +464,8 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
             if (Signal::checkType(value)) {
                 // Register signals.
                 auto data = reinterpret_cast<PySideSignal *>(value);
-                data->data->signalName = Shiboken::String::toCString(key);
+                if (data->data->signalName.isEmpty())
+                    data->data->signalName = Shiboken::String::toCString(key);
                 for (const auto &s : data->data->signatures) {
                     const auto sig = data->data->signalName + '(' + s.signature + ')';
                     if (m_baseObject->indexOfSignal(sig) == -1) {

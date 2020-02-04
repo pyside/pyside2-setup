@@ -90,6 +90,8 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
                 break
         if not printer:
             printer = QPrinter()
+            printer.setPrinterName("Print to PDF")
+            printer.setOutputFormat(QPrinter.PdfFormat)
         # On macOS the minimum margin of a page is ~12, setting something lower than that will
         # actually fail to set all the margins.
         values = (15.0, 16.0, 17.0, 18.0, QPrinter.Point)

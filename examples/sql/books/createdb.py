@@ -38,7 +38,7 @@
 ##
 #############################################################################
 
-from PySide2.QtSql import QSqlDatabase, QSqlError, QSqlQuery
+from PySide2.QtSql import QSqlDatabase, QSqlQuery
 from datetime import date
 
 def add_book(q, title, year, authorId, genreId, rating):

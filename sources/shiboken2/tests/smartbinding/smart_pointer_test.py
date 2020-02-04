@@ -29,6 +29,10 @@
 ##
 #############################################################################
 
+from __future__ import print_function
+
+import gc
+import sys
 import unittest
 from copy import copy
 from smart import Obj, Registry, Integer
@@ -79,6 +83,9 @@ class SmartPointerTests(unittest.TestCase):
         result = ptrToObj.takeInteger(ptrToObj.m_internalInteger)
         self.assertEqual(integerCount(), 2)
         result = None
+        if integerCount() > 1:
+            gc.collect()
+            print('Running garbage collector for reference test', file=sys.stderr)
         self.assertEqual(integerCount(), 1)
 
         # Make a copy of the shared pointer, object count should not change.

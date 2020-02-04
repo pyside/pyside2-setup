@@ -45,9 +45,10 @@ from PySide2.QtWidgets import (QWidget)
 from PySide2.QtGui import (QPainter)
 from PySide2.QtCore import Signal
 
+from starrating import StarRating
 
 class StarEditor(QWidget):
-    """ The custome editor for editing StarRatings. """
+    """ The custom editor for editing StarRatings. """
 
     # A signal to tell the delegate when we've finished editing.
     editingFinished = Signal()
@@ -60,6 +61,7 @@ class StarEditor(QWidget):
 
         self.setMouseTracking(True)
         self.setAutoFillBackground(True)
+        self.starRating = StarRating()
 
     def sizeHint(self):
         """ Tell the caller how big we are. """

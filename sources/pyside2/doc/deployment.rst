@@ -1,16 +1,19 @@
 |project| Deployment
 ====================
 
-Deploying or freezing an application is a crucial part of many Python projects.
-Most large projects are not based on a single Python file, so
-the distribution of these applications becomes more difficult.
 
-Here are a few distribution options that you could use:
- 1. Sending a normal zip-file with the application's content.
- 2. Building a proper `Python package (wheel) <https://packaging.python.org/>`_.
- 3. Freezing the application into a single binary file or a directory.
+Deploying or freezing an application is an important part of a Python project,
+this means to bundle all required resources so that the application finds everything it needs to
+be able to run on a client's machine.
+However, because most large projects aren't based on a single Python file, distributing these
+applications can be a challenge.
 
-If you choose the **third** option, consider using one of these tools:
+Here are a few distribution options that you can use:
+ 1. Send a normal ZIP file with the application's content.
+ 2. Build a proper `Python package (wheel) <https://packaging.python.org/>`_.
+ 3. Freeze the application into a single binary file or directory.
+
+If you choose Option 3, consider using one of these tools:
  * `fbs`_
  * `PyInstaller`_
  * `cx_Freeze`_
@@ -23,11 +26,10 @@ If you choose the **third** option, consider using one of these tools:
 .. _py2exe: http://www.py2exe.org/
 .. _py2app: https://py2app.readthedocs.io/en/latest/
 
-|project| is a cross-platform framework,
-so we would like to focus on solutions that work on the three
-major platforms supported by Qt: Linux, macOS, and Windows.
-The following table summarizes the platform support for those packaging
-tools:
+Since |project| is a cross-platform framework, we focus on solutions for the three major
+platforms that Qt supports: Windows, Linux, and macOS.
+
+The following table summarizes the platform support for those packaging tools:
 
 .. raw:: html
 
@@ -80,28 +82,23 @@ tools:
       </tbody>
     </table>
 
-According to this table, only *fbs*, *cx_Freeze*, and *PyInstaller*
-meets our cross-platform requirement.
+Notice that only *fbs*, *cx_Freeze*, and *PyInstaller* meet our cross-platform requirement.
 
-As these are command-line tools, it could be hard to include
-resources to your application, such as images, icons, and
-meta-information. This means, you will need special hooks
-or scripts to handle them before adding to the package.
-In addition to this, these tools does not offer a mechanism
-to update your application packages.
+Since these are command-line tools, you'll need special hooks or scripts to handle resources
+such as images, icons, and meta-information, before adding them to your package. Additionally,
+these tools don't offer a mechanism to update your application packages.
 
-To create update packages, use the `PyUpdater <https://www.pyupdater.org/>`_,
-which is built around PyInstaller.
+To create update packages, use the `PyUpdater <https://www.pyupdater.org/>`_, which is a tool
+built around PyInstaller.
 
-The `fbs`_ tool offers a nice UI
-that allows the user to install the application step-by-step.
-
-Here you can find a set of tutorials on how to use the previously
-described tools.
+The `fbs <https://build-system.fman.io>`_ tool offers a nice UI for the user to install the
+application step-by-step.
 
 .. note::
 
    Deployment is supported only from Qt for Python 5.12.2 and later.
+
+Here's a set of tutorials on how to use these tools:
 
 .. toctree::
     :name: mastertoc

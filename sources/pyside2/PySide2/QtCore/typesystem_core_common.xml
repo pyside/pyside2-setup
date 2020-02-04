@@ -2486,6 +2486,13 @@
     <add-function signature="QCoreApplication()">
         <inject-code file="../glue/qtcore.cpp" snippet="qcoreapplication-2"/>
     </add-function>
+    <!-- Addition for qApp.
+         To be fixed: This function deletes a little too much ATM that is missing later
+         when creating a new qApp. -->
+    <add-function signature="shutdown()">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="moduleshutdown"/>
+    </add-function>
+
     <!-- blocking functions -->
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;,int)" allow-thread="yes"/>
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;)" allow-thread="yes"/>
@@ -2830,7 +2837,11 @@
     <include file-name="qobjectdefs.h" location="global"/>
   </value-type>
 
-  <object-type name="QMessageLogContext"/>
+  <object-type name="QMessageLogContext" since="5.14"/>
+
+  <object-type name="QMessageLogContext" since="5.9" until="5.13.2">
+    <modify-function signature="copy(const QMessageLogContext &amp;)" remove="all"/>
+  </object-type>
 
   <value-type name="QMetaMethod">
     <enum-type name="Access"/>

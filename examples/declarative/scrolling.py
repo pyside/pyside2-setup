@@ -45,7 +45,6 @@ import os
 import sys
 from PySide2.QtCore import QUrl
 from PySide2.QtGui import QGuiApplication
-import PySide2.QtQml
 from PySide2.QtQuick import QQuickView
 
 # This example uses a QML file to show a scrolling list containing

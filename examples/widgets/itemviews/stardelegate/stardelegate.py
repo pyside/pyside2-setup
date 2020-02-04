@@ -41,7 +41,7 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import (QItemDelegate, QStyledItemDelegate, QStyle)
+from PySide2.QtWidgets import QStyledItemDelegate, QStyle
 
 from starrating import StarRating
 from stareditor import StarEditor

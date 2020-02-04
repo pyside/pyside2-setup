@@ -177,12 +177,10 @@ int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    if (doc) {
+    if (doc)
         pData->doc = doc;
-        free(doc);
-    } else {
+    else
         pData->doc.clear();
-    }
 
     pData->typeName = PySide::Signal::getTypeName(type);
 

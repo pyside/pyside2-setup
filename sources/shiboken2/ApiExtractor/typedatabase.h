@@ -37,9 +37,9 @@
 
 #include <QtCore/QRegularExpression>
 #include <QtCore/QStringList>
+#include <QtCore/QVersionNumber>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
-QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 
 class ComplexTypeEntry;
 class ContainerTypeEntry;
@@ -59,6 +59,18 @@ int getMaxTypeIndex();
 class ContainerTypeEntry;
 class PrimitiveTypeEntry;
 class TypeSystemTypeEntry;
+
+struct VersionRange
+{
+    bool isNull() const
+    {
+        return since.majorVersion() == 0 && since.minorVersion() == 0
+            && until.majorVersion() == 9999 && until.minorVersion() == 9999;
+    }
+
+    QVersionNumber since{0, 0};
+    QVersionNumber until{9999, 9999};
+};
 
 class TypeDatabase
 {
@@ -101,6 +113,8 @@ public:
     QString defaultPackageName() const;
 
     TypeEntry *findType(const QString &name) const;
+    TypeEntries findTypes(const QString &name) const;
+    TypeEntries findCppTypes(const QString &name) const;
 
     const TypeEntryMultiMap &entries() const { return m_entries; }
     const TypedefEntryMap  &typedefEntries() const { return m_typedefEntries; }
@@ -158,7 +172,7 @@ public:
     static bool setApiVersion(const QString &package, const QString &version);
     static void clearApiVersions();
 
-    static bool checkApiVersion(const QString &package, const QVersionNumber &version);
+    static bool checkApiVersion(const QString &package, const VersionRange &vr);
 
     bool hasDroppedTypeEntries() const { return !m_dropTypeEntries.isEmpty(); }
 
@@ -172,7 +186,9 @@ public:
     void formatDebug(QDebug &d) const;
 #endif
 private:
-    TypeEntryMultiMapConstIteratorRange findTypes(const QString &name) const;
+    TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
+    template <class Predicate>
+    TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
 
     bool m_suppressWarnings = true;

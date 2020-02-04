@@ -98,8 +98,8 @@ class PieChart (QQuickItem):
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
 
-    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart');
-    qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice");
+    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart')
+    qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice")
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)

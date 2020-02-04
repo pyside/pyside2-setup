@@ -28,6 +28,7 @@
 
 #include "messages.h"
 #include "abstractmetalang.h"
+#include "typedatabase.h"
 #include "typesystem.h"
 #include <codemodel.h>
 
@@ -127,6 +128,28 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
     debug.nospace();
     msgFormatEnumType(debug, enumItem, className);
     debug << " is not an enum (type: " << t->type() << ')';
+    return result;
+}
+
+QString msgInterfaceTypeFound(const QString &qualifiedName)
+{
+    return QLatin1String("Interface type found for \"") + qualifiedName
+        + QLatin1String("\".");
+}
+
+QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te)
+{
+    QString result = QLatin1String("Ambiguous types of varying types found for \"") + qualifiedName
+        + QLatin1String("\": ");
+    QDebug(&result) << te;
+    return result;
+}
+
+QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te)
+{
+    QString result = QLatin1String("Ambiguous types found for \"") + qualifiedName
+        + QLatin1String("\": ");
+    QDebug(&result) << te;
     return result;
 }
 

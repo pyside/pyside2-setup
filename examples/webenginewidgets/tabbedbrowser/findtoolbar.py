@@ -39,10 +39,9 @@
 #############################################################################
 
 from PySide2 import QtCore
-from PySide2.QtCore import Qt, QUrl
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QIcon, QKeySequence
-from PySide2.QtWidgets import (QAction, QCheckBox, QDockWidget, QHBoxLayout,
-    QLabel, QLineEdit, QToolBar, QToolButton, QWidget)
+from PySide2.QtWidgets import QCheckBox, QLineEdit, QToolBar, QToolButton
 from PySide2.QtWebEngineWidgets import QWebEnginePage
 
 # A Find tool bar (bottom area)

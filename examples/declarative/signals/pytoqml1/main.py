@@ -45,7 +45,6 @@ import os
 import sys
 from PySide2.QtCore import QTimer, QUrl
 from PySide2.QtGui import QGuiApplication
-import PySide2.QtQml
 from PySide2.QtQuick import QQuickView
 
 if __name__ == '__main__':

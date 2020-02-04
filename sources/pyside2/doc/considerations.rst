@@ -70,7 +70,7 @@ QTextStream
 
 Inside this class some renames were applied to avoid clashes with native Python functions.
 They are: ``bin_()``, ``hex_()`` and ``oct_()``.
-The only modification was the addition of '_' character.
+The only modification was the addition of the '_' character.
 
 
 QVariant
@@ -79,7 +79,7 @@ QVariant
 As ``QVariant`` was removed, any function expecting it can receive any Python object (``None`` is
 an invalid ``QVariant``).
 The same rule is valid when returning something: the returned ``QVariant`` will be converted to
-the its original Python object type.
+its original Python object type.
 
 When a method expects a ``QVariant::Type`` the programmer can use a string (the type name) or the
 type itself.

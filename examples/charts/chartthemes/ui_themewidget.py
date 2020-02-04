@@ -18,59 +18,59 @@ class Ui_ThemeWidgetForm(object):
         if ThemeWidgetForm.objectName():
             ThemeWidgetForm.setObjectName(u"ThemeWidgetForm")
         ThemeWidgetForm.resize(900, 600)
-        self.gridLayout = QGridLayout(ThemeWidgetForm);
+        self.gridLayout = QGridLayout(ThemeWidgetForm)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.horizontalLayout = QHBoxLayout();
+        self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.themeLabel = QLabel(ThemeWidgetForm)
         self.themeLabel.setObjectName(u"themeLabel")
 
-        self.horizontalLayout.addWidget(self.themeLabel);
+        self.horizontalLayout.addWidget(self.themeLabel)
 
         self.themeComboBox = QComboBox(ThemeWidgetForm)
         self.themeComboBox.setObjectName(u"themeComboBox")
 
-        self.horizontalLayout.addWidget(self.themeComboBox);
+        self.horizontalLayout.addWidget(self.themeComboBox)
 
         self.animatedLabel = QLabel(ThemeWidgetForm)
         self.animatedLabel.setObjectName(u"animatedLabel")
 
-        self.horizontalLayout.addWidget(self.animatedLabel);
+        self.horizontalLayout.addWidget(self.animatedLabel)
 
         self.animatedComboBox = QComboBox(ThemeWidgetForm)
         self.animatedComboBox.setObjectName(u"animatedComboBox")
 
-        self.horizontalLayout.addWidget(self.animatedComboBox);
+        self.horizontalLayout.addWidget(self.animatedComboBox)
 
         self.legendLabel = QLabel(ThemeWidgetForm)
         self.legendLabel.setObjectName(u"legendLabel")
 
-        self.horizontalLayout.addWidget(self.legendLabel);
+        self.horizontalLayout.addWidget(self.legendLabel)
 
         self.legendComboBox = QComboBox(ThemeWidgetForm)
         self.legendComboBox.setObjectName(u"legendComboBox")
 
-        self.horizontalLayout.addWidget(self.legendComboBox);
+        self.horizontalLayout.addWidget(self.legendComboBox)
 
         self.antialiasCheckBox = QCheckBox(ThemeWidgetForm)
         self.antialiasCheckBox.setObjectName(u"antialiasCheckBox")
         self.antialiasCheckBox.setChecked(False)
 
-        self.horizontalLayout.addWidget(self.antialiasCheckBox);
+        self.horizontalLayout.addWidget(self.antialiasCheckBox)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum);
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout.addItem(self.horizontalSpacer);
+        self.horizontalLayout.addItem(self.horizontalSpacer)
 
 
-        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 3);
+        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 3)
 
 
         self.retranslateUi(ThemeWidgetForm)
-        self.themeComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI);
-        self.antialiasCheckBox.toggled.connect(ThemeWidgetForm.updateUI);
-        self.legendComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI);
-        self.animatedComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI);
+        self.themeComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI)
+        self.antialiasCheckBox.toggled.connect(ThemeWidgetForm.updateUI)
+        self.legendComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI)
+        self.animatedComboBox.currentIndexChanged.connect(ThemeWidgetForm.updateUI)
 
         QMetaObject.connectSlotsByName(ThemeWidgetForm)
     # setupUi

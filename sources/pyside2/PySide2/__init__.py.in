@@ -1,3 +1,6 @@
+from __future__ import print_function
+
+
 __all__ = list("Qt" + body for body in
     "@all_module_shortnames@"
     .split(";"))
@@ -18,7 +21,14 @@ def _setupQtDirectories():
     # the libshiboken library location. Importing the module
     # loads the libraries into the process memory beforehand, and
     # thus takes care of it for us.
-    import shiboken2
+    try:
+        import shiboken2
+    except Exception:
+        paths = ', '.join(sys.path)
+        print('PySide2/__init__.py: Unable to import shiboken2 from {}'.format(paths),
+              file=sys.stderr)
+        raise
+
     #   Trigger signature initialization.
     type.__signature__
 

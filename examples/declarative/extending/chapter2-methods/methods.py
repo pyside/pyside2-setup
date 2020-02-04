@@ -59,9 +59,9 @@ class PieChart (QQuickPaintedItem):
 
     def paint(self, painter):
         pen = QPen(self.color, 2)
-        painter.setPen(pen);
-        painter.setRenderHints(QPainter.Antialiasing, True);
-        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16);
+        painter.setPen(pen)
+        painter.setRenderHints(QPainter.Antialiasing, True)
+        painter.drawPie(self.boundingRect().adjusted(1,1,-1,-1), 90 * 16, 290 * 16)
 
     def getColor(self):
         return self._color
@@ -88,7 +88,7 @@ class PieChart (QQuickPaintedItem):
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
 
-    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart');
+    qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart')
 
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)

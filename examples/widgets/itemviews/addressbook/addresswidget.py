@@ -46,9 +46,8 @@ except ImportError:
     import pickle
 
 from PySide2.QtCore import (Qt, Signal, QRegExp, QModelIndex,
-                            QItemSelection, QItemSelectionModel, QSortFilterProxyModel)
-from PySide2.QtWidgets import (QWidget, QTabWidget, QMessageBox, QTableView,
-                               QAbstractItemView)
+                            QItemSelection, QSortFilterProxyModel)
+from PySide2.QtWidgets import QTabWidget, QMessageBox, QTableView, QAbstractItemView
 
 from tablemodel import TableModel
 from newaddresstab import NewAddressTab
