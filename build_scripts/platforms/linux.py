@@ -37,7 +37,9 @@
 ##
 #############################################################################
 
-from ..utils import copydir, copyfile, copy_icu_libs, find_files_using_glob
+from ..utils import (copydir, copyfile, copy_icu_libs, find_files_using_glob,
+                     linux_set_rpaths, linux_run_read_elf, linux_get_rpaths,
+                     rpaths_has_origin)
 from ..config import config
 
 
@@ -86,6 +88,15 @@ def prepare_standalone_package_linux(self, vars):
         # checking which QtCore library the shiboken2 executable uses.
         if not maybe_icu_libs:
             copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
+
+    # Patching designer to use the Qt libraries provided in the wheel
+    if config.is_internal_pyside_build():
+        designer_path = "{st_build_dir}/{st_package_name}/designer".format(**vars)
+        rpaths = linux_get_rpaths(designer_path)
+        if not rpaths or not rpaths_has_origin(rpaths):
+            rpaths.insert(0, '$ORIGIN/../lib')
+            new_rpaths_string = ":".join(rpaths)
+            linux_set_rpaths(self._patchelf_path, designer_path, new_rpaths_string)
 
     if self.is_webengine_built(built_modules):
         copydir("{qt_lib_execs_dir}",

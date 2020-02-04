@@ -57,20 +57,12 @@ class qAppMacroTest(unittest.TestCase):
                    QtWidgets.QApplication)
         for klass in classes:
             print("created", klass([]))
-            del __builtins__.qApp
-            print("deleted qApp")
+            qApp.shutdown()
+            print("deleted qApp", qApp)
         # creating without deletion raises:
         QtCore.QCoreApplication([])
         with self.assertRaises(RuntimeError):
             QtCore.QCoreApplication([])
-        # assigning qApp is obeyed
-        QtCore.qApp = 42
-        del __builtins__.qApp
-        self.assertEqual(QtCore.qApp, 42)
-        self.assertNotEqual(__builtins__, 42)
-        # delete it and it re-appears
-        del QtCore.qApp
-        QtCore.QCoreApplication([])
         self.assertEqual(QtCore.QCoreApplication.instance(), QtCore.qApp)
         # and they are again all the same
         self.assertTrue(qApp is QtCore.qApp is QtGui.qApp is QtWidgets.qApp)
@@ -87,7 +79,7 @@ class qAppMacroTest(unittest.TestCase):
         if app is None:
             app = QtCore.QCoreApplication([])
         self.assertTrue(QtCore.QObject.staticMetaObject is not None)
-        del __builtins__.qApp
+        qApp.shutdown()
 
 
 if __name__ == '__main__':

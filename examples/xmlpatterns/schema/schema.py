@@ -200,7 +200,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_SchemaMainWindow):
         self.validate()
 
     def instanceSelected(self, index):
-        if index is -1:
+        if index == -1:
             return
 
         index += 2 * self.schemaSelection.currentIndex()

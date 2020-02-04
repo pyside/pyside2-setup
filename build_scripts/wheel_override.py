@@ -160,8 +160,17 @@ class PysideBuildWheel(_bdist_wheel):
             else:
                 abi_tag = str(get_abi_tag()).lower()
             tag = (impl, abi_tag, plat_name)
-            supported_tags = pep425tags.get_supported(
-                supplied_platform=plat_name if self.plat_name_supplied else None)
+            try:
+                supported_tags = pep425tags.get_supported(
+                    supplied_platform=plat_name if self.plat_name_supplied else None)
+            except TypeError:
+                # This was breaking the CI, specifically the:
+                #   OpenSUSE 15 x86_64 using ICC
+                # Some versions of Python 2.7 require an argument called
+                # 'archive_root' which doesn't exist on 3, so we set it to
+                # 'None' for those version (e.g.: Python 2.7.14)
+                supported_tags = pep425tags.get_supported(None,
+                    supplied_platform=plat_name if self.plat_name_supplied else None)
             # XXX switch to this alternate implementation for non-pure:
             if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64') and sys.version_info[0] == 2):
                 return tag

@@ -45,8 +45,7 @@ import sys
 
 from PySide2.QtCore import QUrl
 from PySide2.QtWidgets import (QApplication, QTreeView)
-from PySide2.QtRemoteObjects import (QAbstractItemModelReplica,
-                                     QRemoteObjectNode)
+from PySide2.QtRemoteObjects import QRemoteObjectNode
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -54,9 +53,9 @@ if __name__ == '__main__':
     node.setHeartbeatInterval(1000)
     view = QTreeView()
     view.setWindowTitle("RemoteView")
-    view.resize(640,480);
+    view.resize(640,480)
     model = node.acquireModel("RemoteModel")
-    view.setModel(model);
-    view.show();
+    view.setModel(model)
+    view.show()
 
     sys.exit(app.exec_())

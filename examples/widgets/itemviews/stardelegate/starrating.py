@@ -68,8 +68,7 @@ class StarRating(object):
         diamondPoints = [QPointF(0.4, 0.5), QPointF(0.5, 0.4),
                          QPointF(0.6, 0.5), QPointF(0.5, 0.6),
                          QPointF(0.4, 0.5)]
-        for point in diamondPoints:
-            self.diamondPolygon.append(point)
+        self.diamondPolygon.append(diamondPoints)
 
     def sizeHint(self):
         """ Tell the caller how big we are. """

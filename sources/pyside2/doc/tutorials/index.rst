@@ -7,6 +7,8 @@ documents were ported from C++ to Python and cover a range of topics,
 from basic use of widgets to step-by-step tutorials that show how an
 application is put together.
 
+Basic tutorials
+---------------
 
 .. toctree::
     :maxdepth: 2
@@ -16,8 +18,23 @@ application is put together.
     basictutorial/clickablebutton.rst
     basictutorial/dialog.rst
     basictutorial/uifiles.rst
+
+Real use-cases applications
+---------------------------
+
+.. toctree::
+    :maxdepth: 2
+
     datavisualize/index.rst
     expenses/expenses.rst
     qmlapp/qmlapplication.rst
     qmlintegration/qmlintegration.rst
+    qmlsqlintegration/qmlsqlintegration.rst
+
+C++ and Python
+--------------
+
+.. toctree::
+    :maxdepth: 2
+
     portingguide/index.rst

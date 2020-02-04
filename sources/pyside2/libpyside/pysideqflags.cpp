@@ -86,6 +86,11 @@ extern "C" {
         return PyLong_AsLong(number);
     }
 
+    static PyObject *qflag_int(PyObject *self)
+    {
+        return PyLong_FromLong(reinterpret_cast<PySideQFlagsObject*>(self)->ob_value);
+    }
+
     PyObject *PySideQFlagsRichCompare(PyObject *self, PyObject *other, int op)
     {
         int result = 0;
@@ -146,7 +151,8 @@ namespace QFlags
         {Py_nb_and, 0},
         {Py_nb_xor, 0},
         {Py_nb_or, 0},
-        {Py_nb_int, 0},
+        {Py_nb_int, reinterpret_cast<void*>(qflag_int)},
+        {Py_nb_index, reinterpret_cast<void*>(qflag_int)},
 #ifndef IS_PY3K
         {Py_nb_long, 0},
 #endif

@@ -38,7 +38,6 @@
 ##
 #############################################################################
 
-import sys
 from PySide2.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 
 from PySide2 import QtCore

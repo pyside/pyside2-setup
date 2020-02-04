@@ -42,7 +42,7 @@
 
 """PySide2 port of the widgets/tools/codecs example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtWidgets
 
 
 def codec_name(codec):

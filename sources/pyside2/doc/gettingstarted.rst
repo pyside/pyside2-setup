@@ -6,9 +6,11 @@ with ``pip`` you need to run::
 
     pip install pyside2
 
-for more details, refer to our `Quick Start`_ guide.
+for more details, refer to our `Quick Start`_ guide. Additionally, you can
+check the `FAQ`_ related to the project.
 
 .. _Quick Start: quickstart.html
+.. _FAQ: faq.html
 
 General Requirements
 --------------------

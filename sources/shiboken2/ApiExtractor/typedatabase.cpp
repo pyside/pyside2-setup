@@ -841,14 +841,15 @@ bool TypeDatabase::setApiVersion(const QString& packageWildcardPattern, const QS
 }
 
 bool TypeDatabase::checkApiVersion(const QString &package,
-                                   const QVersionNumber &versionNumber)
+                                   const VersionRange &vr)
 {
     const ApiVersions &versions = *apiVersions();
     if (versions.isEmpty()) // Nothing specified: use latest.
         return true;
     for (int i = 0, size = versions.size(); i < size; ++i) {
         if (versions.at(i).first.match(package).hasMatch())
-            return versions.at(i).second >= versionNumber;
+            return versions.at(i).second >= vr.since
+                && versions.at(i).second <= vr.until;
     }
     return false;
 }

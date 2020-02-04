@@ -43,7 +43,7 @@
 
 import os
 import sys
-from PySide2.QtCore import QRect, QSize, QProcess
+from PySide2.QtCore import QProcess
 from PySide2.QtWidgets import QApplication, QMainWindow
 from PySide2.QtCharts import QtCharts
 
@@ -105,13 +105,13 @@ class MainWindow(QMainWindow):
 
         self.series = QtCharts.QPieSeries()
         for item in memoryUsage:
-            self.series.append(item[0], item[1]);
+            self.series.append(item[0], item[1])
 
         slice = self.series.slices()[0]
-        slice.setExploded();
-        slice.setLabelVisible();
+        slice.setExploded()
+        slice.setLabelVisible()
         self.chart = QtCharts.QChart()
-        self.chart.addSeries(self.series);
+        self.chart.addSeries(self.series)
         self.chartView = QtCharts.QChartView(self.chart)
         self.setCentralWidget(self.chartView)
 

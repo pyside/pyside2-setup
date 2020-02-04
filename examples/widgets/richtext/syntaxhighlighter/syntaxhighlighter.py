@@ -47,8 +47,8 @@ import re
 from PySide2.QtCore import (QFile, Qt, QTextStream)
 from PySide2.QtGui import (QColor, QFont, QKeySequence, QSyntaxHighlighter,
     QTextCharFormat)
-from PySide2.QtWidgets import (QAction, qApp, QApplication, QFileDialog, QMainWindow,
-    QMenu, QMenuBar, QPlainTextEdit)
+from PySide2.QtWidgets import (qApp, QApplication, QFileDialog, QMainWindow,
+    QPlainTextEdit)
 
 import syntaxhighlighter_rc
 

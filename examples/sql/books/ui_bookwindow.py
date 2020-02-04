@@ -22,63 +22,63 @@ class Ui_BookWindow(object):
         BookWindow.resize(601, 420)
         self.centralWidget = QWidget(BookWindow)
         self.centralWidget.setObjectName(u"centralWidget")
-        self.vboxLayout = QVBoxLayout(self.centralWidget);
+        self.vboxLayout = QVBoxLayout(self.centralWidget)
         self.vboxLayout.setSpacing(6)
         self.vboxLayout.setObjectName(u"vboxLayout")
-        self.vboxLayout.setContentsMargins(9, 9, 9, 9);
+        self.vboxLayout.setContentsMargins(9, 9, 9, 9)
         self.groupBox = QGroupBox(self.centralWidget)
         self.groupBox.setObjectName(u"groupBox")
-        self.vboxLayout1 = QVBoxLayout(self.groupBox);
+        self.vboxLayout1 = QVBoxLayout(self.groupBox)
         self.vboxLayout1.setSpacing(6)
         self.vboxLayout1.setObjectName(u"vboxLayout1")
-        self.vboxLayout1.setContentsMargins(9, 9, 9, 9);
+        self.vboxLayout1.setContentsMargins(9, 9, 9, 9)
         self.bookTable = QTableView(self.groupBox)
         self.bookTable.setObjectName(u"bookTable")
         self.bookTable.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        self.vboxLayout1.addWidget(self.bookTable);
+        self.vboxLayout1.addWidget(self.bookTable)
 
         self.groupBox_2 = QGroupBox(self.groupBox)
         self.groupBox_2.setObjectName(u"groupBox_2")
-        self.formLayout = QFormLayout(self.groupBox_2);
+        self.formLayout = QFormLayout(self.groupBox_2)
         self.formLayout.setObjectName(u"formLayout")
         self.label_5 = QLabel(self.groupBox_2)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label_5);
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label_5)
 
         self.titleEdit = QLineEdit(self.groupBox_2)
         self.titleEdit.setObjectName(u"titleEdit")
         self.titleEdit.setEnabled(True)
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.titleEdit);
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.titleEdit)
 
         self.label_2 = QLabel(self.groupBox_2)
         self.label_2.setObjectName(u"label_2")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2);
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
         self.authorEdit = QComboBox(self.groupBox_2)
         self.authorEdit.setObjectName(u"authorEdit")
         self.authorEdit.setEnabled(True)
 
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.authorEdit);
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.authorEdit)
 
         self.label_3 = QLabel(self.groupBox_2)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3);
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
 
         self.genreEdit = QComboBox(self.groupBox_2)
         self.genreEdit.setObjectName(u"genreEdit")
         self.genreEdit.setEnabled(True)
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.genreEdit);
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.genreEdit)
 
         self.label_4 = QLabel(self.groupBox_2)
         self.label_4.setObjectName(u"label_4")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_4);
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_4)
 
         self.yearEdit = QSpinBox(self.groupBox_2)
         self.yearEdit.setObjectName(u"yearEdit")
@@ -86,24 +86,24 @@ class Ui_BookWindow(object):
         self.yearEdit.setMinimum(-1000)
         self.yearEdit.setMaximum(2100)
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.yearEdit);
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.yearEdit)
 
         self.label = QLabel(self.groupBox_2)
         self.label.setObjectName(u"label")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label);
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label)
 
         self.ratingEdit = QSpinBox(self.groupBox_2)
         self.ratingEdit.setObjectName(u"ratingEdit")
         self.ratingEdit.setMaximum(5)
 
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.ratingEdit);
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.ratingEdit)
 
 
-        self.vboxLayout1.addWidget(self.groupBox_2);
+        self.vboxLayout1.addWidget(self.groupBox_2)
 
 
-        self.vboxLayout.addWidget(self.groupBox);
+        self.vboxLayout.addWidget(self.groupBox)
 
         BookWindow.setCentralWidget(self.centralWidget)
         QWidget.setTabOrder(self.bookTable, self.titleEdit)

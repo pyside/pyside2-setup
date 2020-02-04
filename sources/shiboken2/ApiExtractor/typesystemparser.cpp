@@ -56,6 +56,7 @@ static inline QString quoteBeforeLineAttribute() { return QStringLiteral("quote-
 static inline QString textAttribute() { return QStringLiteral("text"); }
 static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString sinceAttribute() { return QStringLiteral("since"); }
+static inline QString untilAttribute() { return QStringLiteral("until"); }
 static inline QString defaultSuperclassAttribute() { return QStringLiteral("default-superclass"); }
 static inline QString deleteInMainThreadAttribute() { return QStringLiteral("delete-in-main-thread"); }
 static inline QString deprecatedAttribute() { return QStringLiteral("deprecated"); }
@@ -2623,6 +2624,17 @@ bool TypeSystemParser::parseReplace(const QXmlStreamReader &,
     return true;
 }
 
+static bool parseVersion(const QString &versionSpec, const QString &package,
+                         QVersionNumber *result, QString *errorMessage)
+{
+    *result = QVersionNumber::fromString(versionSpec);
+    if (result->isNull()) {
+        *errorMessage = msgInvalidVersion(versionSpec, package);
+        return false;
+    }
+    return true;
+}
+
 bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
 {
     if (m_ignoreDepth) {
@@ -2633,20 +2645,25 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
     const QStringRef tagName = reader.name();
     QXmlStreamAttributes attributes = reader.attributes();
 
-    QVersionNumber since(0, 0);
-    int index = indexOfAttribute(attributes, sinceAttribute());
-    if (index != -1) {
-        const QStringRef sinceSpec = attributes.takeAt(index).value();
-        since = QVersionNumber::fromString(sinceSpec.toString());
-        if (since.isNull()) {
-            m_error = msgInvalidVersion(sinceSpec, m_defaultPackage);
-            return false;
+    VersionRange versionRange;
+    for (int i = attributes.size() - 1; i >= 0; --i) {
+        const QStringRef name = attributes.at(i).qualifiedName();
+        if (name == sinceAttribute()) {
+            if (!parseVersion(attributes.takeAt(i).value().toString(),
+                              m_defaultPackage, &versionRange.since, &m_error)) {
+                return false;
+            }
+        } else if (name == untilAttribute()) {
+            if (!parseVersion(attributes.takeAt(i).value().toString(),
+                              m_defaultPackage, &versionRange.until, &m_error)) {
+                return false;
+            }
         }
     }
 
-    if (!m_defaultPackage.isEmpty() && since > QVersionNumber(0, 0)) {
+    if (!m_defaultPackage.isEmpty() && !versionRange.isNull()) {
         TypeDatabase* td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, since)) {
+        if (!td->checkApiVersion(m_defaultPackage, versionRange)) {
             ++m_ignoreDepth;
             return true;
         }
@@ -2765,15 +2782,15 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         case StackElement::CustomTypeEntry:
             if (!checkRootElement())
                 return false;
-            element->entry = new TypeEntry(name, TypeEntry::CustomType, since, m_current->entry);
+            element->entry = new TypeEntry(name, TypeEntry::CustomType, versionRange.since, m_current->entry);
             break;
         case StackElement::PrimitiveTypeEntry:
-            element->entry = parsePrimitiveTypeEntry(reader, name, since, &attributes);
+            element->entry = parsePrimitiveTypeEntry(reader, name, versionRange.since, &attributes);
             if (Q_UNLIKELY(!element->entry))
                 return false;
             break;
         case StackElement::ContainerTypeEntry:
-            if (ContainerTypeEntry *ce = parseContainerTypeEntry(reader, name, since, &attributes)) {
+            if (ContainerTypeEntry *ce = parseContainerTypeEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, ce, &attributes);
                 element->entry = ce;
             } else {
@@ -2782,7 +2799,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             break;
 
         case StackElement::SmartPointerTypeEntry:
-            if (SmartPointerTypeEntry *se = parseSmartPointerEntry(reader, name, since, &attributes)) {
+            if (SmartPointerTypeEntry *se = parseSmartPointerEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, se, &attributes);
                 element->entry = se;
             } else {
@@ -2790,14 +2807,14 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             }
             break;
         case StackElement::EnumTypeEntry:
-            m_currentEnum = parseEnumTypeEntry(reader, name, since, &attributes);
+            m_currentEnum = parseEnumTypeEntry(reader, name, versionRange.since, &attributes);
             if (Q_UNLIKELY(!m_currentEnum))
                 return false;
             element->entry = m_currentEnum;
             break;
 
         case StackElement::InterfaceTypeEntry:
-            if (ObjectTypeEntry *oe = parseInterfaceTypeEntry(reader, name, since, &attributes)) {
+            if (ObjectTypeEntry *oe = parseInterfaceTypeEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, oe, &attributes);
                 element->entry = oe;
             } else {
@@ -2805,7 +2822,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             }
             break;
         case StackElement::ValueTypeEntry:
-           if (ValueTypeEntry *ve = parseValueTypeEntry(reader, name, since, &attributes)) {
+           if (ValueTypeEntry *ve = parseValueTypeEntry(reader, name, versionRange.since, &attributes)) {
                applyComplexTypeAttributes(reader, ve, &attributes);
                element->entry = ve;
            } else {
@@ -2813,7 +2830,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
            }
            break;
         case StackElement::NamespaceTypeEntry:
-            if (auto entry = parseNamespaceTypeEntry(reader, name, since, &attributes))
+            if (auto entry = parseNamespaceTypeEntry(reader, name, versionRange.since, &attributes))
                 element->entry = entry;
             else
                 return false;
@@ -2821,17 +2838,17 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         case StackElement::ObjectTypeEntry:
             if (!checkRootElement())
                 return false;
-            element->entry = new ObjectTypeEntry(name, since, currentParentTypeEntry());
+            element->entry = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());
             applyCommonAttributes(element->entry, &attributes);
             applyComplexTypeAttributes(reader, static_cast<ComplexTypeEntry *>(element->entry), &attributes);
             break;
         case StackElement::FunctionTypeEntry:
-            element->entry = parseFunctionTypeEntry(reader, name, since, &attributes);
+            element->entry = parseFunctionTypeEntry(reader, name, versionRange.since, &attributes);
             if (Q_UNLIKELY(!element->entry))
                 return false;
             break;
         case StackElement::TypedefTypeEntry:
-            if (TypedefEntry *te = parseTypedefEntry(reader, name, since, &attributes)) {
+            if (TypedefEntry *te = parseTypedefEntry(reader, name, versionRange.since, &attributes)) {
                 applyComplexTypeAttributes(reader, te, &attributes);
                 element->entry = te;
             } else {
@@ -2878,7 +2895,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
 
         switch (element->type) {
         case StackElement::Root:
-            element->entry = parseRootElement(reader, since, &attributes);
+            element->entry = parseRootElement(reader, versionRange.since, &attributes);
             element->type = StackElement::Root;
             break;
         case StackElement::LoadTypesystem:

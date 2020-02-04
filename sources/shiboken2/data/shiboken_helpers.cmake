@@ -232,7 +232,7 @@ macro(get_python_extension_suffix)
        try:
            from importlib import machinery
            first_suffix = machinery.EXTENSION_SUFFIXES[0]
-       except AttributeError:
+       except (AttributeError, ImportError):
            import imp
            first_suffix = imp.get_suffixes()[0][0]
        res = re.search(r'^(.+)\\.', first_suffix)

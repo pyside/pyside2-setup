@@ -43,7 +43,7 @@
 
 import os, sys
 from PySide2.QtCore import QDate, QDir, QStandardPaths, Qt, QUrl
-from PySide2.QtGui import QClipboard, QGuiApplication, QDesktopServices, QIcon
+from PySide2.QtGui import QGuiApplication, QDesktopServices, QIcon
 from PySide2.QtGui import QImage, QPixmap
 from PySide2.QtWidgets import (QAction, qApp, QApplication, QHBoxLayout, QLabel,
     QMainWindow, QPushButton, QTabWidget, QToolBar, QVBoxLayout, QWidget)

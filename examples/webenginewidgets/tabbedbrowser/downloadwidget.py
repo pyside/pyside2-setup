@@ -42,8 +42,7 @@ import sys
 from PySide2 import QtCore
 from PySide2.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
 from PySide2.QtGui import QDesktopServices
-from PySide2.QtWidgets import (QAction, QLabel, QMenu, QProgressBar,
-    QStyleFactory, QWidget)
+from PySide2.QtWidgets import QMenu, QProgressBar, QStyleFactory
 from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem
 
 # A QProgressBar with context menu for displaying downloads in a QStatusBar.

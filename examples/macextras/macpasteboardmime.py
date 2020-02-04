@@ -40,8 +40,7 @@
 ############################################################################
 
 import sys
-import math
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtWidgets
 
 try:
     from PySide2 import QtMacExtras
