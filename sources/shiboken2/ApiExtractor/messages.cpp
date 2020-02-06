@@ -131,12 +131,6 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
     return result;
 }
 
-QString msgInterfaceTypeFound(const QString &qualifiedName)
-{
-    return QLatin1String("Interface type found for \"") + qualifiedName
-        + QLatin1String("\".");
-}
-
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te)
 {
     QString result = QLatin1String("Ambiguous types of varying types found for \"") + qualifiedName

@@ -1295,7 +1295,6 @@ public:
     AbstractMetaClass();
     ~AbstractMetaClass();
 
-    AbstractMetaClass *extractInterface();
     void fixFunctions();
 
     AbstractMetaFunctionList functions() const
@@ -1436,13 +1435,6 @@ public:
     AbstractMetaEnum *findEnum(const QString &enumName);
     AbstractMetaEnumValue *findEnumValue(const QString &enumName);
 
-    AbstractMetaClassList interfaces() const
-    {
-        return m_interfaces;
-    }
-    void addInterface(AbstractMetaClass *interface);
-    void setInterfaces(const AbstractMetaClassList &interface);
-
     QString fullName() const
     {
         return package() + QLatin1Char('.') + name();
@@ -1488,8 +1480,6 @@ public:
     }
 
     QString package() const;
-
-    bool isInterface() const;
 
     bool isNamespace() const;
 
@@ -1718,8 +1708,6 @@ private:
     AbstractMetaFunctionList m_functions;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
-    AbstractMetaClassList m_interfaces;
-    AbstractMetaClass *m_extractedInterface = nullptr;
     QVector<QPropertySpec *> m_propertySpecs;
     AbstractMetaClassList m_innerClasses;
 

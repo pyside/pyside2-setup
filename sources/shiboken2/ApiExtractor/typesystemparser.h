@@ -188,9 +188,6 @@ private:
                                 const QString &name, const QVersionNumber &since,
                                 QXmlStreamAttributes *attributes);
 
-    ObjectTypeEntry *
-        parseInterfaceTypeEntry(const QXmlStreamReader &, const QString &name,
-                                const QVersionNumber &since, QXmlStreamAttributes *);
     ValueTypeEntry *
         parseValueTypeEntry(const QXmlStreamReader &, const QString &name,
                             const QVersionNumber &since, QXmlStreamAttributes *);

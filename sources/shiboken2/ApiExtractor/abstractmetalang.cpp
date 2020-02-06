@@ -84,11 +84,6 @@ const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
         if (auto r = recurseClassHierarchy(base, pred))
             return r;
     }
-    const auto interfaces = klass->interfaces();
-    for (auto i : interfaces) {
-        if (auto r = recurseClassHierarchy(i, pred))
-            return r;
-    }
     return nullptr;
 }
 
@@ -948,9 +943,6 @@ FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaC
             (implementor == implementingClass() && !mods.isEmpty())) {
                 break;
         }
-        const AbstractMetaClassList &interfaces = implementor->interfaces();
-        for (const AbstractMetaClass *interface : interfaces)
-            mods += this->modifications(interface);
         implementor = implementor->baseClass();
     }
     return mods;
@@ -1365,44 +1357,6 @@ bool AbstractMetaClass::inheritsFrom(const AbstractMetaClass *cls) const
 }
 
 /*******************************************************************************
- * Constructs an interface based on the functions and enums in this
- * class and returns it...
- */
-AbstractMetaClass *AbstractMetaClass::extractInterface()
-{
-    Q_ASSERT(typeEntry()->designatedInterface());
-
-    if (!m_extractedInterface) {
-        auto *iface = new AbstractMetaClass;
-        iface->setAttributes(attributes());
-        iface->setBaseClass(nullptr);
-
-        iface->setTypeEntry(typeEntry()->designatedInterface());
-
-        for (AbstractMetaFunction *function : qAsConst(m_functions)) {
-            if (!function->isConstructor())
-                iface->addFunction(function->copy());
-        }
-
-//         iface->setEnums(enums());
-//         setEnums(AbstractMetaEnumList());
-
-        for (const AbstractMetaField *field : qAsConst(m_fields)) {
-            if (field->isPublic()) {
-                AbstractMetaField *new_field = field->copy();
-                new_field->setEnclosingClass(iface);
-                iface->addField(new_field);
-            }
-        }
-
-        m_extractedInterface = iface;
-        addInterface(iface);
-    }
-
-    return m_extractedInterface;
-}
-
-/*******************************************************************************
  * Returns a list of all the functions with a given name
  */
 AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &name) const
@@ -1423,10 +1377,6 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &
 AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
 {
     FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemovedFromTargetLang;
-
-    // Interfaces don't implement functions
-    if (isInterface())
-        default_flags |= ClassImplements;
 
     // Only public functions in final classes
     // default_flags |= isFinal() ? WasPublic : 0;
@@ -1614,11 +1564,6 @@ void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
 QString AbstractMetaClass::package() const
 {
     return m_typeEntry->targetLangPackage();
-}
-
-bool AbstractMetaClass::isInterface() const
-{
-    return m_typeEntry->isInterface();
 }
 
 bool AbstractMetaClass::isNamespace() const
@@ -2147,57 +2092,6 @@ AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
     return queryFunctions(Signals | Visible | NotRemovedFromTargetLang);
 }
 
-/**
- * Adds the specified interface to this class by adding all the
- * functions in the interface to this class.
- */
-void AbstractMetaClass::addInterface(AbstractMetaClass *interface)
-{
-    Q_ASSERT(!m_interfaces.contains(interface));
-    m_interfaces << interface;
-
-    m_isPolymorphic |= interface->isPolymorphic();
-
-    if (m_extractedInterface && m_extractedInterface != interface)
-        m_extractedInterface->addInterface(interface);
-
-
-#if 0
-    const AbstractMetaFunctionList &funcs = interface->functions();
-    for (AbstractMetaFunction *function : funcs)
-    if (!hasFunction(function) && !function->isConstructor()) {
-        AbstractMetaFunction *cpy = function->copy();
-        cpy->setImplementingClass(this);
-
-        // Setup that this function is an interface class.
-        cpy->setInterfaceClass(interface);
-        *cpy += AbstractMetaAttributes::InterfaceFunction;
-
-        // Copy the modifications in interface into the implementing classes.
-        const FunctionModificationList &mods = function->modifications(interface);
-        for (const FunctionModification &mod : mods)
-            m_typeEntry->addFunctionModification(mod);
-
-        // It should be mostly safe to assume that when we implement an interface
-        // we don't "pass on" pure virtual functions to our sublcasses...
-//             *cpy -= AbstractMetaAttributes::Abstract;
-
-        addFunction(cpy);
-    }
-#endif
-
-}
-
-
-void AbstractMetaClass::setInterfaces(const AbstractMetaClassList &interfaces)
-{
-    m_interfaces = interfaces;
-    for (const AbstractMetaClass *interface : interfaces) {
-        if (interface)
-            m_isPolymorphic |= interface->isPolymorphic();
-    }
-}
-
 AbstractMetaField *AbstractMetaClass::findField(const QString &name) const
 {
     return AbstractMetaField::find(m_fields, name);
@@ -2207,10 +2101,6 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
 {
     if (AbstractMetaEnum *e = findByName(m_enums, enumName))
         return e;
-
-    if (typeEntry()->designatedInterface())
-        return extractInterface()->findEnum(enumName);
-
     return nullptr;
 }
 
@@ -2223,10 +2113,6 @@ AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValue
         if (AbstractMetaEnumValue *v = e->findEnumValue(enumValueName))
             return v;
     }
-
-    if (typeEntry()->designatedInterface())
-        return extractInterface()->findEnumValue(enumValueName);
-
     if (baseClass())
         return baseClass()->findEnumValue(enumValueName);
 
@@ -2278,8 +2164,7 @@ void AbstractMetaClass::fixFunctions()
 
     if (superClass)
         superClass->fixFunctions();
-    int iface_idx = 0;
-    while (superClass || iface_idx < interfaces().size()) {
+    while (superClass) {
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
@@ -2293,10 +2178,6 @@ void AbstractMetaClass::fixFunctions()
             }
             superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
             AbstractMetaFunctionList virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
-            superFuncs += virtuals;
-        } else {
-            superFuncs = interfaces().at(iface_idx)->queryFunctions(AbstractMetaClass::NormalFunctions);
-            AbstractMetaFunctionList virtuals = interfaces().at(iface_idx)->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
             superFuncs += virtuals;
         }
 
@@ -2428,10 +2309,7 @@ void AbstractMetaClass::fixFunctions()
             funcs.append(copy);
         }
 
-        if (superClass)
-            superClass = superClass->baseClass();
-        else
-            iface_idx++;
+        superClass = superClass->baseClass();
     }
 
     bool hasPrivateConstructors = false;

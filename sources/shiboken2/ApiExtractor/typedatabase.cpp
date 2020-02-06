@@ -256,7 +256,6 @@ static bool useCppType(const TypeEntry *t)
     case TypeEntry::TemplateArgumentType:
     case TypeEntry::BasicValueType:
     case TypeEntry::ContainerType:
-    case TypeEntry::InterfaceType:
     case TypeEntry::ObjectType:
     case TypeEntry::ArrayType:
     case TypeEntry::CustomType:
@@ -392,7 +391,6 @@ TypeEntry *TypeDatabase::resolveTypeDefEntry(TypedefEntry *typedefEntry,
         switch (e->type()) {
         case TypeEntry::BasicValueType:
         case TypeEntry::ContainerType:
-        case TypeEntry::InterfaceType:
         case TypeEntry::ObjectType:
         case TypeEntry::SmartPointerType:
             source = dynamic_cast<ComplexTypeEntry *>(e);

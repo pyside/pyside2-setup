@@ -1010,11 +1010,6 @@ bool ValueTypeEntry::isValue() const
     return true;
 }
 
-bool ValueTypeEntry::isNativeIdBased() const
-{
-    return true;
-}
-
 TypeEntry *ValueTypeEntry::clone() const
 {
     return new ValueTypeEntry(*this);
@@ -1162,30 +1157,6 @@ void CustomConversion::TargetToNativeConversion::setConversion(const QString& co
     m_d->conversion = conversion;
 }
 
-InterfaceTypeEntry::InterfaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                       const TypeEntry *parent) :
-    ComplexTypeEntry(entryName, InterfaceType, vr, parent)
-{
-}
-
-bool InterfaceTypeEntry::isNativeIdBased() const
-{
-    return true;
-}
-
-QString InterfaceTypeEntry::qualifiedCppName() const
-{
-    const int len = ComplexTypeEntry::qualifiedCppName().length() - interfaceName(QString()).length();
-    return ComplexTypeEntry::qualifiedCppName().left(len);
-}
-
-TypeEntry *InterfaceTypeEntry::clone() const
-{
-    return new InterfaceTypeEntry(*this);
-}
-
-InterfaceTypeEntry::InterfaceTypeEntry(const InterfaceTypeEntry &) = default;
-
 FunctionTypeEntry::FunctionTypeEntry(const QString &entryName, const QString &signature,
                                      const QVersionNumber &vr,
                                      const TypeEntry *parent) :
@@ -1205,16 +1176,6 @@ ObjectTypeEntry::ObjectTypeEntry(const QString &entryName, const QVersionNumber 
                                  const TypeEntry *parent)
     : ComplexTypeEntry(entryName, ObjectType, vr, parent)
 {
-}
-
-InterfaceTypeEntry *ObjectTypeEntry::designatedInterface() const
-{
-    return m_interface;
-}
-
-bool ObjectTypeEntry::isNativeIdBased() const
-{
-    return true;
 }
 
 TypeEntry *ObjectTypeEntry::clone() const

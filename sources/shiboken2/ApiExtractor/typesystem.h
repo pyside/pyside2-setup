@@ -499,7 +499,6 @@ QDebug operator<<(QDebug d, const AddedFunction::Argument &a);
 QDebug operator<<(QDebug d, const AddedFunction &af);
 #endif
 
-class InterfaceTypeEntry;
 class ObjectTypeEntry;
 
 class DocModification
@@ -564,7 +563,6 @@ public:
         TemplateArgumentType,
         BasicValueType,
         ContainerType,
-        InterfaceType,
         ObjectType,
         NamespaceType,
         ArrayType,
@@ -615,10 +613,6 @@ public:
     bool isFlags() const
     {
         return m_type == FlagsType;
-    }
-    bool isInterface() const
-    {
-        return m_type == InterfaceType;
     }
     bool isObject() const
     {
@@ -741,11 +735,6 @@ public:
 
     QString qualifiedTargetLangName() const;
 
-    virtual InterfaceTypeEntry *designatedInterface() const
-    {
-        return nullptr;
-    }
-
     void setCustomConstructor(const CustomFunction &func)
     {
         m_customConstructor = func;
@@ -769,11 +758,6 @@ public:
         return false;
     }
     virtual bool isComplex() const
-    {
-        return false;
-    }
-
-    virtual bool isNativeIdBased() const
     {
         return false;
     }
@@ -1553,8 +1537,6 @@ public:
 
     bool isValue() const override;
 
-    bool isNativeIdBased() const override;
-
     TypeEntry *clone() const override;
 
 protected:
@@ -1562,39 +1544,6 @@ protected:
                             const TypeEntry *parent);
     ValueTypeEntry(const ValueTypeEntry &);
 };
-
-class InterfaceTypeEntry : public ComplexTypeEntry
-{
-public:
-    explicit InterfaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                const TypeEntry *parent);
-
-    static QString interfaceName(const QString &name)
-    {
-        return name + QLatin1String("Interface");
-    }
-
-    ObjectTypeEntry *origin() const
-    {
-        return m_origin;
-    }
-    void setOrigin(ObjectTypeEntry *origin)
-    {
-        m_origin = origin;
-    }
-
-    bool isNativeIdBased() const override;
-    QString qualifiedCppName() const override;
-
-    TypeEntry *clone() const override;
-
-protected:
-    InterfaceTypeEntry(const InterfaceTypeEntry &);
-
-private:
-    ObjectTypeEntry *m_origin = nullptr;
-};
-
 
 class FunctionTypeEntry : public TypeEntry
 {
@@ -1632,21 +1581,10 @@ public:
     explicit ObjectTypeEntry(const QString &entryName, const QVersionNumber &vr,
                              const TypeEntry *parent);
 
-    InterfaceTypeEntry *designatedInterface() const override;
-    void setDesignatedInterface(InterfaceTypeEntry *entry)
-    {
-        m_interface = entry;
-    }
-
-    bool isNativeIdBased() const override;
-
     TypeEntry *clone() const override;
 
 protected:
     ObjectTypeEntry(const ObjectTypeEntry &);
-
-private:
-    InterfaceTypeEntry *m_interface = nullptr;
 };
 
 struct TypeRejection

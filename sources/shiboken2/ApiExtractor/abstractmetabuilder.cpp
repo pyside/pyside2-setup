@@ -513,7 +513,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     ReportHandler::startProgress("Fixing class inheritance...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        if (!cls->isInterface() && !cls->isNamespace()) {
+        if (!cls->isNamespace()) {
             setupInheritance(cls);
             if (!cls->hasVirtualDestructor() && cls->baseClass()
                 && cls->baseClass()->hasVirtualDestructor())
@@ -531,7 +531,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                                   .arg(cls->name());
         } else {
             const bool couldAddDefaultCtors = cls->isConstructible()
-                && !cls->isInterface() && !cls->isNamespace()
+                && !cls->isNamespace()
                 && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
             if (couldAddDefaultCtors) {
                 if (!cls->hasConstructors())
@@ -727,12 +727,6 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
         m_smartPointers << cls;
     } else {
         m_metaClasses << cls;
-        if (cls->typeEntry()->designatedInterface()) {
-            AbstractMetaClass *interface = cls->extractInterface();
-            m_metaClasses << interface;
-            if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-                qCDebug(lcShiboken) << QStringLiteral(" -> interface '%1'").arg(interface->name());
-        }
     }
 }
 
@@ -1432,8 +1426,6 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
 
 bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 {
-    Q_ASSERT(!metaClass->isInterface());
-
     if (m_setupInheritanceDone.contains(metaClass))
         return true;
 
@@ -1474,7 +1466,6 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     TypeDatabase* types = TypeDatabase::instance();
 
     int primary = -1;
-    int primaries = 0;
     for (int i = 0; i < baseClasses.size(); ++i) {
 
         if (types->isClassRejected(baseClasses.at(i)))
@@ -1485,10 +1476,8 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
             qCWarning(lcShiboken).noquote().nospace()
                 << QStringLiteral("class '%1' inherits from unknown base class '%2'")
                                   .arg(metaClass->name(), baseClasses.at(i));
-        } else if (!baseClassEntry->designatedInterface()) { // true for primary base class
-            primaries++;
-            primary = i;
         }
+        primary = i;
     }
 
     if (primary >= 0) {
@@ -1515,19 +1504,6 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
             }
 
             setupInheritance(baseClass);
-
-            QString interfaceName = baseClass->isInterface() ? InterfaceTypeEntry::interfaceName(baseClass->name()) : baseClass->name();
-            AbstractMetaClass *iface = AbstractMetaClass::findClass(m_metaClasses, interfaceName);
-            if (!iface) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("unknown interface for '%1': '%2'").arg(metaClass->name(), interfaceName);
-                return false;
-            }
-            metaClass->addInterface(iface);
-
-            const AbstractMetaClassList &interfaces = iface->interfaces();
-            for (AbstractMetaClass* iface : interfaces)
-                metaClass->addInterface(iface);
         }
     }
 
@@ -2060,6 +2036,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
         qFatal("%s", qPrintable(msg));
     }
 
+    // These are only implicit and should not appear in code...
     auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
@@ -2277,14 +2254,6 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
 
     const TypeEntry *type = types.constFirst();
     const TypeEntry::Type typeEntryType = type->type();
-
-    // These are only implicit and should not appear in code...
-    if (typeEntryType == TypeEntry::InterfaceType) {
-        if (errorMessageIn)
-            *errorMessageIn = msgInterfaceTypeFound(qualifiedName);
-
-        return nullptr;
-    }
 
     QScopedPointer<AbstractMetaType> metaType(new AbstractMetaType);
     metaType->setIndirectionsV(typeInfo.indirectionsV());
@@ -2814,7 +2783,6 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 
     subclass->setTemplateBaseClass(templateClass);
     subclass->setTemplateBaseClassInstantiations(templateTypes);
-    subclass->setInterfaces(templateClass->interfaces());
     subclass->setBaseClass(templateClass->baseClass());
 
     return true;
@@ -2892,11 +2860,9 @@ void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
         QQueue<AbstractMetaClass*> baseClasses;
         if (cls->baseClass())
             baseClasses.enqueue(cls->baseClass());
-        baseClasses << cls->interfaces().toList();
 
         while (!baseClasses.isEmpty()) {
             AbstractMetaClass* currentClass = baseClasses.dequeue();
-            baseClasses << currentClass->interfaces().toList();
             if (currentClass->baseClass())
                 baseClasses.enqueue(currentClass->baseClass());
 
@@ -3092,8 +3058,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     } else {
         for (int i : qAsConst(unmappedResult)) {
             Q_ASSERT(reverseMap.contains(i));
-            if (!reverseMap[i]->isInterface())
-                result << reverseMap[i];
+            result << reverseMap[i];
         }
     }
 

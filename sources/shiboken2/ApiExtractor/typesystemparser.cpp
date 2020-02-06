@@ -804,11 +804,6 @@ bool TypeSystemParser::endElement(const QStringRef &localName)
         centry->setFieldModifications(m_contextStack.top()->fieldMods);
         centry->setCodeSnips(m_contextStack.top()->codeSnips);
         centry->setDocModification(m_contextStack.top()->docModifications);
-
-        if (centry->designatedInterface()) {
-            centry->designatedInterface()->setCodeSnips(m_contextStack.top()->codeSnips);
-            centry->designatedInterface()->setFunctionModifications(m_contextStack.top()->functionMods);
-        }
     }
     break;
     case StackElement::AddFunction: {
@@ -1344,40 +1339,6 @@ EnumTypeEntry *
     return entry;
 }
 
-ObjectTypeEntry *
-    TypeSystemParser::parseInterfaceTypeEntry(const QXmlStreamReader &,
-                                     const QString &name, const QVersionNumber &since,
-                                     QXmlStreamAttributes *attributes)
-{
-    if (!checkRootElement())
-        return nullptr;
-    auto *otype = new ObjectTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(otype, attributes);
-    QString targetLangName = name;
-    bool generate = true;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
-        if (name == targetLangNameAttribute()) {
-            targetLangName = attributes->takeAt(i).value().toString();
-        } else if (name == generateAttribute()) {
-            generate = convertBoolean(attributes->takeAt(i).value(),
-                                      generateAttribute(), true);
-        }
-    }
-
-    auto itype = new InterfaceTypeEntry(InterfaceTypeEntry::interfaceName(targetLangName),
-                                        since, currentParentTypeEntry());
-    itype->setTargetLangName(targetLangName);
-
-    if (generate)
-        itype->setCodeGeneration(m_generate);
-    else
-        itype->setCodeGeneration(TypeEntry::GenerateForSubclass);
-
-    otype->setDesignatedInterface(itype);
-    itype->setOrigin(otype);
-    return otype;
-}
 
 NamespaceTypeEntry *
     TypeSystemParser::parseNamespaceTypeEntry(const QXmlStreamReader &reader,
@@ -1589,9 +1550,6 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
     // The generator code relies on container's package being empty.
     if (ctype->type() != TypeEntry::ContainerType)
         ctype->setTargetLangPackage(package);
-
-    if (InterfaceTypeEntry *di = ctype->designatedInterface())
-        di->setTargetLangPackage(package);
 
     if (generate)
         ctype->setCodeGeneration(m_generate);
@@ -2628,10 +2586,6 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
         m_error = QLatin1String("Only supported parent tags are primitive-type, complex types or extra-includes");
         return false;
     }
-    if (InterfaceTypeEntry *di = entry->designatedInterface()) {
-        di->setInclude(entry->include());
-        di->setExtraIncludes(entry->extraIncludes());
-    }
     return true;
 }
 
@@ -2881,14 +2835,6 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             element->entry = m_currentEnum;
             break;
 
-        case StackElement::InterfaceTypeEntry:
-            if (ObjectTypeEntry *oe = parseInterfaceTypeEntry(reader, name, versionRange.since, &attributes)) {
-                applyComplexTypeAttributes(reader, oe, &attributes);
-                element->entry = oe;
-            } else {
-                return false;
-            }
-            break;
         case StackElement::ValueTypeEntry:
            if (ValueTypeEntry *ve = parseValueTypeEntry(reader, name, versionRange.since, &attributes)) {
                applyComplexTypeAttributes(reader, ve, &attributes);
@@ -2904,6 +2850,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::ObjectTypeEntry:
+        case StackElement::InterfaceTypeEntry:
             if (!checkRootElement())
                 return false;
             element->entry = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());

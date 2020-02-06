@@ -335,30 +335,7 @@ object-type
 interface-type
 ^^^^^^^^^^^^^^
 
-    The interface-type node indicates that the given class is replaced by an
-    interface pattern when mapping from C++ to the target language. Using the
-    interface-type node implicitly makes the given type an :ref:`object-type`.
-
-    .. code-block:: xml
-
-        <typesystem>
-            <interface-type name="..."
-                since="..."
-                package ="..."
-                default-superclass ="..."
-                revision="..." />
-        </typesystem>
-
-    The **name** attribute is the fully qualified C++ class name. The *optional*
-    **package** attribute can be used to override the package of the type system.
-    If there is no C++ base class, the *optional* **default-superclass** attribute
-    can be used to specify a superclass in the generated target language API, for
-    the given class.
-
-    The *optional*  **since** value is used to specify the API version of this interface.
-
-    The **revision** attribute can be used to specify a revision for each type, easing the
-    production of ABI compatible bindings.
+    This type is deprecated and no longer has any effect. Use object-type instead.
 
 .. _container-type:
 

@@ -59,7 +59,6 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
                               const QString &className,
                               const TypeEntry *t);
 
-QString msgInterfaceTypeFound(const QString &qualifiedName);
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te);
 QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te);
 
