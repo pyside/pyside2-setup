@@ -28,10 +28,16 @@
 ##
 #############################################################################
 
+import os
+from random import random
+import sys
 import time
 import threading
 import unittest
-from random import random
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import ObjectType, Event
 

@@ -31,7 +31,13 @@
 
 '''Tests user defined primitive type from a required module.'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 from other import Number
 
 class UserDefinedPrimitiveTypeFromRequiredModuleTest(unittest.TestCase):

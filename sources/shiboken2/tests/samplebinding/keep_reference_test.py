@@ -31,8 +31,14 @@
 
 '''Test case for objects that keep references to other object without owning them (e.g. model/view relationships).'''
 
-import unittest
+import os
+import sys
 from sys import getrefcount
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import ObjectModel, ObjectView
 

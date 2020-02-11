@@ -31,8 +31,13 @@
 
 '''Test case for functions that could return a NULL pointer.'''
 
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import returnNullPrimitivePointer, returnNullValueTypePointer, returnNullObjectTypePointer
 

@@ -29,7 +29,13 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 from minimal import *
 from py3kcompat import IS_PY3K
 
