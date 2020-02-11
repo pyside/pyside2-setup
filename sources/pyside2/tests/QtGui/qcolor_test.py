@@ -37,7 +37,7 @@ init_test_paths(False)
 
 import PySide2
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QColor
+from PySide2.QtGui import QColor, QColorConstants
 
 
 class QColorGetTest(unittest.TestCase):
@@ -115,7 +115,8 @@ class QColorCopy(unittest.TestCase):
 
 class QColorRepr(unittest.TestCase):
     def testReprFunction(self):
-        c = QColor(100, 120, 200)
+        # QColorConstants are disabled for MSVC/5.15, fixme: Check Qt 6
+        c = QColorConstants.Yellow if sys.platform != 'win32' else QColor(100, 120, 200)
         c2 = eval(c.__repr__())
         self.assertEqual(c, c2)
 

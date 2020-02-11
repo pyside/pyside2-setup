@@ -219,6 +219,8 @@ ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 if (Qt${QT_MAJOR_VERSION}Gui_VERSION VERSION_EQUAL 5.14.0
     OR Qt${QT_MAJOR_VERSION}Gui_VERSION VERSION_GREATER 5.14.0)
     list(APPEND QtGui_SRC ${QtGui_GEN_DIR}/qcolorspace_wrapper.cpp)
+    list(APPEND QtGui_SRC ${QtGui_GEN_DIR}/qcolorconstants_wrapper.cpp)
+    list(APPEND QtGui_SRC ${QtGui_GEN_DIR}/qcolorconstants_svg_wrapper.cpp)
 endif()
 
 # cf qtbase/src/gui/opengl/opengl.pri
