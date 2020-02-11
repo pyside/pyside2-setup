@@ -72,6 +72,7 @@ public:
         GetattroMask           = 0x0F,
         SetattroQObject        = 0x10,
         SetattroSmartPointer   = 0x20,
+        SetattroMethodOverride = 0x40,
         SetattroMask           = 0xF0,
     };
     Q_DECLARE_FLAGS(AttroCheck, AttroCheckFlag);
@@ -193,6 +194,7 @@ protected:
     /// Returns the top-most class that has multiple inheritance in the ancestry.
     static const AbstractMetaClass *getMultipleInheritingClass(const AbstractMetaClass *metaClass);
 
+    static bool useOverrideCaching(const AbstractMetaClass *metaClass);
     AttroCheck checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const;
 
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
@@ -212,6 +214,9 @@ protected:
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const;
 
+    /// Condition to call WriteVirtualMethodNative. Was extracted because also used to count these calls.
+    bool shouldWriteVirtualMethodNative(const AbstractMetaFunction *func);
+
     /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
     static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass);
     /// Returns the enclosing class for an enum, or nullptr if it should be global.
@@ -219,6 +224,7 @@ protected:
 
     QString wrapperName(const AbstractMetaClass *metaClass) const;
     QString wrapperName(const AbstractMetaType *metaType) const;
+    QString wrapperName(const TypeEntry *type) const;
 
     QString fullPythonClassName(const AbstractMetaClass *metaClass);
     QString fullPythonFunctionName(const AbstractMetaFunction *func);

@@ -415,18 +415,17 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         }
 
         const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
+        int maxOverrides = 0;
+        writeCacheResetNative(s, metaClass);
         for (const AbstractMetaFunction *func : funcs) {
             const bool notAbstract = !func->isAbstract();
             if ((func->isPrivate() && notAbstract && !visibilityModifiedToPrivate(func))
                 || (func->isModifiedRemoved() && notAbstract))
                 continue;
-            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded()) {
+            if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded())
                 writeConstructorNative(s, func);
-            } else if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-                     && ((func->isVirtual() || func->isAbstract())
-                         && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0)) {
-                writeVirtualMethodNative(s, func);
-            }
+            else if (shouldWriteVirtualMethodNative(func))
+                writeVirtualMethodNative(s, func, maxOverrides++);
         }
 
         if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
@@ -696,6 +695,14 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     }
 }
 
+void CppGenerator::writeCacheResetNative(QTextStream &s, const AbstractMetaClass *metaClass)
+{
+    Indentation indentation(INDENT);
+    s << "void " << wrapperName(metaClass) << "::resetPyMethodCache()\n{\n";
+    s << INDENT << "std::fill_n(m_PyMethodCache, sizeof(m_PyMethodCache) / sizeof(m_PyMethodCache[0]), false);\n";
+    s << "}\n\n";
+}
+
 void CppGenerator::writeConstructorNative(QTextStream &s, const AbstractMetaFunction *func)
 {
     Indentation indentation(INDENT);
@@ -705,6 +712,7 @@ void CppGenerator::writeConstructorNative(QTextStream &s, const AbstractMetaFunc
     writeFunctionCall(s, func);
     s << "\n{\n";
     const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+    s << INDENT << "resetPyMethodCache();\n";
     writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
     s << INDENT << "// ... middle\n";
     writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
@@ -760,7 +768,9 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     return QString::fromLatin1("reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< %1 >())->tp_name").arg(func->type()->typeEntry()->qualifiedCppName());
 }
 
-void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction *func)
+void CppGenerator::writeVirtualMethodNative(QTextStream &s,
+                                            const AbstractMetaFunction *func,
+                                            int cacheIndex)
 {
     //skip metaObject function, this will be written manually ahead
     if (usePySideExtensions() && func->ownerClass() && func->ownerClass()->isQObject() &&
@@ -835,6 +845,28 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         s << endl;
     }
 
+    // PYSIDE-803: Build a boolean cache for unused overrides.
+    bool multi_line = retType == nullptr;  // set to true when using instrumentation
+    s << INDENT << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n");
+    {
+        Indentation indentation(INDENT);
+        s << INDENT;
+        if (retType)
+            s << "return ";
+        if (!func->isAbstract()) {
+            s << "this->::" << func->implementingClass()->qualifiedCppName() << "::";
+            writeFunctionCall(s, func, Generator::VirtualCall);
+        } else {
+            if (retType)
+                s << ' ' << defaultReturnExpr.returnValue();
+        }
+        if (!retType)
+            s << ";\n" << INDENT << "return";
+        s << ";\n";
+    }
+    if (multi_line)
+        s << INDENT << "}\n";
+
     s << INDENT << "Shiboken::GilState gil;\n";
 
     // Get out of virtual method call if someone already threw an error.
@@ -867,7 +899,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
                 s << ' ' << defaultReturnExpr.returnValue();
         } else {
             s << INDENT << "gil.release();\n";
-            s << INDENT;
+            if (useOverrideCaching(func->ownerClass())) {
+                s << INDENT << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
+                s << INDENT;
+            }
             if (retType)
                 s << "return ";
             s << "this->::" << func->implementingClass()->qualifiedCppName() << "::";
@@ -877,7 +912,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFu
         }
     }
     s << ";\n";
-    s << INDENT<< "}\n\n";
+    s << INDENT << "}\n\n";  //WS
 
     writeConversionRule(s, func, TypeSystem::TargetLangCode);
 
@@ -5235,6 +5270,16 @@ void CppGenerator::writeSetattroFunction(QTextStream &s, AttroCheck attroCheck,
     Q_ASSERT(!context.forSmartPointer());
     const AbstractMetaClass *metaClass = context.metaClass();
     writeSetattroDefinition(s, metaClass);
+    // PYSIDE-803: Detect duck-punching; clear cache if a method is set.
+    if (attroCheck.testFlag(AttroCheckFlag::SetattroMethodOverride)
+            && ShibokenGenerator::shouldGenerateCppWrapper(metaClass)) {
+        s << INDENT << "if (value && PyCallable_Check(value)) {\n";
+        s << INDENT << "    auto plain_inst = " << cpythonWrapperCPtr(metaClass, QLatin1String("self")) << ";\n";
+        s << INDENT << "    auto inst = dynamic_cast<" << wrapperName(metaClass) << " *>(plain_inst);\n";
+        s << INDENT << "    if (inst)\n";
+        s << INDENT << "        inst->resetPyMethodCache();\n";
+        s << INDENT << "}\n";
+    }
     if (attroCheck.testFlag(AttroCheckFlag::SetattroQObject)) {
         s << INDENT << "Shiboken::AutoDecRef pp(reinterpret_cast<PyObject *>(PySide::Property::getObject(self, name)));\n";
         s << INDENT << "if (!pp.isNull())\n";
@@ -5897,7 +5942,7 @@ void CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
         writeReturnValueHeuristics(s, func);
 }
 
-void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func, const QString &self)
+void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func)
 {
     AbstractMetaType *type = func->type();
     if (!useReturnValueHeuristic()

@@ -37,6 +37,7 @@
 **
 ****************************************************************************/
 
+#include "autodecref.h"
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
@@ -288,7 +289,7 @@ PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
         }
     }
 
-    PyObject *pyMethodName = Shiboken::String::fromCString(methodName);
+    Shiboken::AutoDecRef pyMethodName(Shiboken::String::fromCString(methodName));
     PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
     if (method && PyMethod_Check(method)
@@ -302,16 +303,13 @@ PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
             if (parent->tp_dict) {
                 defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
-                if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod) {
-                    Py_DECREF(pyMethodName);
+                if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod)
                     return method;
-                }
             }
         }
     }
 
     Py_XDECREF(method);
-    Py_DECREF(pyMethodName);
     return nullptr;
 }
 

@@ -50,11 +50,15 @@ protected:
     bool finishGeneration() override;
 
 private:
+    void writeInitFunc(QTextStream &declStr, QTextStream &callStr,
+                       const Indentor &indent, const QString &initFunctionName,
+                       const TypeEntry *enclosingEntry = nullptr);
+    void writeCacheResetNative(QTextStream &s, const AbstractMetaClass *metaClass);
     void writeConstructorNative(QTextStream &s, const AbstractMetaFunction *func);
     void writeDestructorNative(QTextStream &s, const AbstractMetaClass *metaClass);
 
     QString getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func);
-    void writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction *func);
+    void writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction *func, int cacheIndex);
 
     void writeMetaObjectMethod(QTextStream &s, const AbstractMetaClass *metaClass);
     void writeMetaCast(QTextStream &s, const AbstractMetaClass *metaClass);
@@ -309,7 +313,7 @@ private:
 
     void writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, int argIndex, bool userHeuristicPolicy);
-    void writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func, const QString &self = QLatin1String("self"));
+    void writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func);
     void writeInitQtMetaTypeFunctionBody(QTextStream &s, GeneratorContext &context) const;
 
     /**

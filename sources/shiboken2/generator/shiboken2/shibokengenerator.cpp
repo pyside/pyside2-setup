@@ -322,6 +322,15 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaCl
     return result;
 }
 
+bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunction *func)
+{
+    // PYSIDE-803: Extracted this because it is used multiple times.
+    const AbstractMetaClass *metaClass = func->ownerClass();
+    return (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+            && ((func->isVirtual() || func->isAbstract())
+            && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0);
+}
+
 void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass)
 {
     Q_ASSERT(metaClass);
@@ -369,6 +378,15 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
 QString ShibokenGenerator::wrapperName(const AbstractMetaType *metaType) const
 {
     return metaType->cppSignature();
+}
+
+QString ShibokenGenerator::wrapperName(const TypeEntry *type) const
+{
+    QString name = type->name();
+    int pos = name.lastIndexOf(QLatin1String("::"));
+    if (pos >= 0)
+        name = name.remove(0, pos + 2);
+    return name + QLatin1String("Wrapper");
 }
 
 QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClass)
@@ -2182,6 +2200,13 @@ bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction *fun
     return false;
 }
 
+bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClass *metaClass)
+{
+    return metaClass->isPolymorphic()
+        && !metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::NoOverrideCaching);
+
+}
+
 ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const
 {
     AttroCheck result;
@@ -2192,6 +2217,8 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
             result |= AttroCheckFlag::GetattroOverloads;
         if (usePySideExtensions() && metaClass->qualifiedCppName() == QLatin1String("QObject"))
             result |= AttroCheckFlag::SetattroQObject;
+        if (useOverrideCaching(metaClass))
+            result |= AttroCheckFlag::SetattroMethodOverride;
     }
     return result;
 }
