@@ -1,0 +1,4 @@
+{
+    "files": ["main.py", "core.py", "dialog.py", "websocketclientwrapper.py",
+              "websockettransport.py", "dialog.ui", "index.html"]
+}

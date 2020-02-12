@@ -99,18 +99,32 @@ def warn(message, category=None, stacklevel=2):
     warnings.warn(message, category, stacklevel)
 
 
-# Python2 legacy: Correct 'linux2' to 'linux', recommended way.
-if sys.platform.startswith('linux'):
+def linux_distribution():
+    """Returns the Linux distribution"""
     # We have to be more specific because we had differences between
     # RHEL 6.6 and RHEL 7.4 .
     # Note: The platform module is deprecated. We need to switch to the
     # distro package, ASAP! The distro has been extracted from Python,
     # because it changes more often than the Python version.
+    distribution = []
     try:
         import distro
+        distribution = distro.linux_distribution()
     except ImportError:
-        import platform as distro
-    platform_name = "".join(distro.linux_distribution()[:2]).lower()
+        # platform.linux_distribution() was removed in 3.8
+        if sys.version_info[0] < 3 or sys.version_info[1] < 8:
+            import platform
+            distribution = platform.linux_distribution()
+    if distribution:
+        return "".join(distribution[:2]).lower()
+    warnings.warn('Cannot determine Linux distribution, please install distro',
+                  UserWarning)
+    return ""
+
+
+# Python2 legacy: Correct 'linux2' to 'linux', recommended way.
+if sys.platform.startswith('linux'):
+    platform_name = linux_distribution()
     # this currently happens on opensuse in 5.14:
     if not platform_name:
         # We intentionally crash when that last resort is also absent:
