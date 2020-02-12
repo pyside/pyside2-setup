@@ -28,9 +28,16 @@
 
 # trimmed down diagramscene.py to demonstrate crash in sizeHint()
 
+import os
 import sys
-from PySide2 import QtCore, QtWidgets
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+from PySide2 import QtCore, QtWidgets
+
 
 class CustomWidget(QtWidgets.QGraphicsProxyWidget):
    def itemChange(self, eventType, value):

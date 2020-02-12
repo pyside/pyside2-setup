@@ -33,7 +33,14 @@
     are registered at type parsing time. Also test that the signal and slot
     indices do not change after signal connection or emission. '''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 from PySide2 import QtCore
 
 class Mixin(object):

@@ -26,7 +26,14 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 from PySide2.QtCore import QObject, Signal, Property, Slot
 
 '''Tests that the signal notify id of a property is correct, aka corresponds to the initially set
