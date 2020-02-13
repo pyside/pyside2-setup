@@ -101,7 +101,7 @@ bool Graph::containsEdge(int from, int to)
 
 void Graph::addEdge(int from, int to)
 {
-    Q_ASSERT(to < (int)m_d->edges.size());
+    Q_ASSERT(to < m_d->edges.size());
     m_d->edges[from].insert(to);
 }
 

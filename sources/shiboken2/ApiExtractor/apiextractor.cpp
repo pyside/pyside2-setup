@@ -166,24 +166,6 @@ ContainerTypeEntryList ApiExtractor::containerTypes() const
     return TypeDatabase::instance()->containerTypes();
 }
 
-static const AbstractMetaEnum* findEnumOnClasses(AbstractMetaClassList metaClasses, const EnumTypeEntry* typeEntry)
-{
-    const AbstractMetaEnum *result = nullptr;
-    for (const AbstractMetaClass* metaClass : qAsConst(metaClasses)) {
-        const AbstractMetaEnumList &enums = metaClass->enums();
-        for (const AbstractMetaEnum *metaEnum : enums) {
-            if (metaEnum->typeEntry() == typeEntry) {
-                result = metaEnum;
-                break;
-            }
-        }
-        if (result)
-            break;
-        result = findEnumOnClasses(metaClass->innerClasses(), typeEntry);
-    }
-    return result;
-}
-
 const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
 {
     return m_builder->findEnum(typeEntry);

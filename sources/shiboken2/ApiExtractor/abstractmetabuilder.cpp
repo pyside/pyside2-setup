@@ -270,7 +270,7 @@ void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelI
             const ArgumentModelItem &arg = arguments.at(1);
             if (AbstractMetaClass *cls = argumentToClass(arg, currentClass)) {
                 if (arg->type().indirections() < 2)
-                    cls->setToStringCapability(true, arg->type().indirections());
+                    cls->setToStringCapability(true, int(arg->type().indirections()));
             }
         }
     }
@@ -513,7 +513,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     ReportHandler::startProgress("Fixing class inheritance...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        if (!cls->isInterface() && !cls->isNamespace()) {
+        if (!cls->isNamespace()) {
             setupInheritance(cls);
             if (!cls->hasVirtualDestructor() && cls->baseClass()
                 && cls->baseClass()->hasVirtualDestructor())
@@ -531,7 +531,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                                   .arg(cls->name());
         } else {
             const bool couldAddDefaultCtors = cls->isConstructible()
-                && !cls->isInterface() && !cls->isNamespace()
+                && !cls->isNamespace()
                 && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
             if (couldAddDefaultCtors) {
                 if (!cls->hasConstructors())
@@ -727,12 +727,6 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(AbstractMetaClass *cls,
         m_smartPointers << cls;
     } else {
         m_metaClasses << cls;
-        if (cls->typeEntry()->designatedInterface()) {
-            AbstractMetaClass *interface = cls->extractInterface();
-            m_metaClasses << interface;
-            if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-                qCDebug(lcShiboken) << QStringLiteral(" -> interface '%1'").arg(interface->name());
-        }
     }
 }
 
@@ -1287,14 +1281,6 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     metaFunction->replaceType(metaType);
 }
 
-static bool _compareAbstractMetaTypes(const AbstractMetaType *type,
-                                      const AbstractMetaType *other,
-                                      AbstractMetaType::ComparisonFlags flags = {})
-{
-    return (type != nullptr) == (other != nullptr)
-        && (type == nullptr || type->compare(*other, flags));
-}
-
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
                                                                        AbstractMetaClass::Attributes *constructorAttributes,
                                                                        AbstractMetaClass *currentClass)
@@ -1440,8 +1426,6 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
 
 bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 {
-    Q_ASSERT(!metaClass->isInterface());
-
     if (m_setupInheritanceDone.contains(metaClass))
         return true;
 
@@ -1481,61 +1465,23 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 
     TypeDatabase* types = TypeDatabase::instance();
 
-    int primary = -1;
-    int primaries = 0;
-    for (int i = 0; i < baseClasses.size(); ++i) {
-
-        if (types->isClassRejected(baseClasses.at(i)))
-            continue;
-
-        TypeEntry* baseClassEntry = types->findType(baseClasses.at(i));
-        if (!baseClassEntry) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("class '%1' inherits from unknown base class '%2'")
-                                  .arg(metaClass->name(), baseClasses.at(i));
-        } else if (!baseClassEntry->designatedInterface()) { // true for primary base class
-            primaries++;
-            primary = i;
-        }
-    }
-
-    if (primary >= 0) {
-        AbstractMetaClass *baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClasses.at(primary));
-        if (!baseClass) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("unknown baseclass for '%1': '%2'")
-                                  .arg(metaClass->name(), baseClasses.at(primary));
-            return false;
-        }
-        metaClass->setBaseClass(baseClass);
-    }
-
-    for (int i = 0; i < baseClasses.size(); ++i) {
-        if (types->isClassRejected(baseClasses.at(i)))
-            continue;
-
-        if (i != primary) {
-            AbstractMetaClass *baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClasses.at(i));
+    for (const auto  &baseClassName : baseClasses) {
+        if (!types->isClassRejected(baseClassName)) {
+            if (!types->findType(baseClassName)) {
+                qCWarning(lcShiboken).noquote().nospace()
+                     << QStringLiteral("class '%1' inherits from unknown base class '%2'")
+                        .arg(metaClass->name(), baseClassName);
+                return false;
+            }
+            auto baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClassName);
             if (!baseClass) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClasses.at(i));
+                    << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClassName);
                 return false;
             }
+            metaClass->addBaseClass(baseClass);
 
             setupInheritance(baseClass);
-
-            QString interfaceName = baseClass->isInterface() ? InterfaceTypeEntry::interfaceName(baseClass->name()) : baseClass->name();
-            AbstractMetaClass *iface = AbstractMetaClass::findClass(m_metaClasses, interfaceName);
-            if (!iface) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("unknown interface for '%1': '%2'").arg(metaClass->name(), interfaceName);
-                return false;
-            }
-            metaClass->addInterface(iface);
-
-            const AbstractMetaClassList &interfaces = iface->interfaces();
-            for (AbstractMetaClass* iface : interfaces)
-                metaClass->addInterface(iface);
         }
     }
 
@@ -2068,6 +2014,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
         qFatal("%s", qPrintable(msg));
     }
 
+    // These are only implicit and should not appear in code...
     auto *metaType = new AbstractMetaType;
     metaType->setTypeEntry(type);
     metaType->setIndirections(typeInfo.indirections);
@@ -2286,33 +2233,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     const TypeEntry *type = types.constFirst();
     const TypeEntry::Type typeEntryType = type->type();
 
-    // These are only implicit and should not appear in code...
-    if (typeEntryType == TypeEntry::InterfaceType) {
-        if (errorMessageIn)
-            *errorMessageIn = msgInterfaceTypeFound(qualifiedName);
-
-        return nullptr;
-    }
-
-    if (types.size() > 1) {
-        const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
-                                          [typeEntryType](const TypeEntry *e) {
-            return e->type() == typeEntryType; });
-        if (!sameType) {
-            if (errorMessageIn)
-                *errorMessageIn = msgAmbiguousVaryingTypesFound(qualifiedName, types);
-            return nullptr;
-        }
-        // Ambiguous primitive types are possible (when including type systems).
-        if (typeEntryType != TypeEntry::PrimitiveType) {
-            if (errorMessageIn)
-                *errorMessageIn = msgAmbiguousTypesFound(qualifiedName, types);
-            return nullptr;
-        }
-    }
-
-    auto *metaType = new AbstractMetaType;
-    metaType->setTypeEntry(type);
+    QScopedPointer<AbstractMetaType> metaType(new AbstractMetaType);
     metaType->setIndirectionsV(typeInfo.indirectionsV());
     metaType->setReferenceType(typeInfo.referenceType());
     metaType->setConstant(typeInfo.isConstant());
@@ -2326,12 +2247,58 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         if (!targType) {
             if (errorMessageIn)
                 *errorMessageIn = msgCannotTranslateTemplateArgument(t, ti, errorMessage);
-            delete metaType;
             return nullptr;
         }
 
         metaType->addInstantiation(targType, true);
     }
+
+    if (types.size() > 1) {
+        const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
+                                          [typeEntryType](const TypeEntry *e) {
+            return e->type() == typeEntryType; });
+        if (!sameType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgAmbiguousVaryingTypesFound(qualifiedName, types);
+            return nullptr;
+        }
+        // Ambiguous primitive/smart pointer types are possible (when
+        // including type systems).
+        if (typeEntryType != TypeEntry::PrimitiveType
+            && typeEntryType != TypeEntry::SmartPointerType) {
+            if (errorMessageIn)
+                *errorMessageIn = msgAmbiguousTypesFound(qualifiedName, types);
+            return nullptr;
+        }
+    }
+
+    if (typeEntryType == TypeEntry::SmartPointerType) {
+        // Find a matching instantiation
+        if (metaType->instantiations().size() != 1) {
+            if (errorMessageIn)
+                *errorMessageIn = msgInvalidSmartPointerType(_typei);
+            return nullptr;
+        }
+        auto instantiationType = metaType->instantiations().constFirst()->typeEntry();
+        if (instantiationType->type() == TypeEntry::TemplateArgumentType) {
+            // Member functions of the template itself, SharedPtr(const SharedPtr &)
+            type = instantiationType;
+        } else {
+            auto it = std::find_if(types.cbegin(), types.cend(),
+                                   [instantiationType](const TypeEntry *e) {
+                auto smartPtr = static_cast<const SmartPointerTypeEntry *>(e);
+                return smartPtr->matchesInstantiation(instantiationType);
+            });
+            if (it == types.cend()) {
+                if (errorMessageIn)
+                    *errorMessageIn = msgCannotFindSmartPointerInstantion(_typei);
+                return nullptr;
+            }
+            type =*it;
+        }
+    }
+
+    metaType->setTypeEntry(type);
 
     // The usage pattern *must* be decided *after* the possible template
     // instantiations have been determined, or else the absence of
@@ -2339,7 +2306,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     // AbstractMetaType::cppSignature().
     metaType->decideUsagePattern();
 
-    return metaType;
+    return metaType.take();
 }
 
 AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei,
@@ -2794,7 +2761,6 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 
     subclass->setTemplateBaseClass(templateClass);
     subclass->setTemplateBaseClassInstantiations(templateTypes);
-    subclass->setInterfaces(templateClass->interfaces());
     subclass->setBaseClass(templateClass->baseClass());
 
     return true;
@@ -2872,11 +2838,9 @@ void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
         QQueue<AbstractMetaClass*> baseClasses;
         if (cls->baseClass())
             baseClasses.enqueue(cls->baseClass());
-        baseClasses << cls->interfaces().toList();
 
         while (!baseClasses.isEmpty()) {
             AbstractMetaClass* currentClass = baseClasses.dequeue();
-            baseClasses << currentClass->interfaces().toList();
             if (currentClass->baseClass())
                 baseClasses.enqueue(currentClass->baseClass());
 
@@ -3072,8 +3036,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     } else {
         for (int i : qAsConst(unmappedResult)) {
             Q_ASSERT(reverseMap.contains(i));
-            if (!reverseMap[i]->isInterface())
-                result << reverseMap[i];
+            result << reverseMap[i];
         }
     }
 

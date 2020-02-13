@@ -80,13 +80,8 @@ const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
 {
     if (pred(klass))
         return klass;
-    if (auto base = klass->baseClass()) {
+    for (auto base : klass->baseClasses()) {
         if (auto r = recurseClassHierarchy(base, pred))
-            return r;
-    }
-    const auto interfaces = klass->interfaces();
-    for (auto i : interfaces) {
-        if (auto r = recurseClassHierarchy(i, pred))
             return r;
     }
     return nullptr;
@@ -268,7 +263,7 @@ QString AbstractMetaType::pythonSignature() const
     // PYSIDE-921: Handle container returntypes correctly.
     // This is now a clean reimplementation.
     if (m_cachedPythonSignature.isEmpty())
-        m_cachedPythonSignature = formatPythonSignature(false);
+        m_cachedPythonSignature = formatPythonSignature();
     return m_cachedPythonSignature;
 }
 
@@ -948,9 +943,6 @@ FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaC
             (implementor == implementingClass() && !mods.isEmpty())) {
                 break;
         }
-        const AbstractMetaClassList &interfaces = implementor->interfaces();
-        for (const AbstractMetaClass *interface : interfaces)
-            mods += this->modifications(interface);
         implementor = implementor->baseClass();
     }
     return mods;
@@ -1365,44 +1357,6 @@ bool AbstractMetaClass::inheritsFrom(const AbstractMetaClass *cls) const
 }
 
 /*******************************************************************************
- * Constructs an interface based on the functions and enums in this
- * class and returns it...
- */
-AbstractMetaClass *AbstractMetaClass::extractInterface()
-{
-    Q_ASSERT(typeEntry()->designatedInterface());
-
-    if (!m_extractedInterface) {
-        auto *iface = new AbstractMetaClass;
-        iface->setAttributes(attributes());
-        iface->setBaseClass(nullptr);
-
-        iface->setTypeEntry(typeEntry()->designatedInterface());
-
-        for (AbstractMetaFunction *function : qAsConst(m_functions)) {
-            if (!function->isConstructor())
-                iface->addFunction(function->copy());
-        }
-
-//         iface->setEnums(enums());
-//         setEnums(AbstractMetaEnumList());
-
-        for (const AbstractMetaField *field : qAsConst(m_fields)) {
-            if (field->isPublic()) {
-                AbstractMetaField *new_field = field->copy();
-                new_field->setEnclosingClass(iface);
-                iface->addField(new_field);
-            }
-        }
-
-        m_extractedInterface = iface;
-        addInterface(iface);
-    }
-
-    return m_extractedInterface;
-}
-
-/*******************************************************************************
  * Returns a list of all the functions with a given name
  */
 AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &name) const
@@ -1423,10 +1377,6 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &
 AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
 {
     FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemovedFromTargetLang;
-
-    // Interfaces don't implement functions
-    if (isInterface())
-        default_flags |= ClassImplements;
 
     // Only public functions in final classes
     // default_flags |= isFinal() ? WasPublic : 0;
@@ -1604,21 +1554,24 @@ QString AbstractMetaClass::name() const
     return m_typeEntry->targetLangEntryName();
 }
 
+void AbstractMetaClass::addBaseClass(AbstractMetaClass *baseClass)
+{
+    Q_ASSERT(baseClass);
+    m_baseClasses.append(baseClass);
+    m_isPolymorphic |= baseClass->isPolymorphic();
+}
+
 void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
 {
-    m_baseClass = baseClass;
-    if (baseClass)
+    if (baseClass) {
+        m_baseClasses.prepend(baseClass);
         m_isPolymorphic |= baseClass->isPolymorphic();
+    }
 }
 
 QString AbstractMetaClass::package() const
 {
     return m_typeEntry->targetLangPackage();
-}
-
-bool AbstractMetaClass::isInterface() const
-{
-    return m_typeEntry->isInterface();
 }
 
 bool AbstractMetaClass::isNamespace() const
@@ -1729,7 +1682,7 @@ void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList 
 bool AbstractMetaClass::deleteInMainThread() const
 {
     return typeEntry()->deleteInMainThread()
-        || (m_baseClass && m_baseClass->deleteInMainThread());
+        || (!m_baseClasses.isEmpty() && m_baseClasses.constFirst()->deleteInMainThread());
 }
 
 static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
@@ -2147,57 +2100,6 @@ AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
     return queryFunctions(Signals | Visible | NotRemovedFromTargetLang);
 }
 
-/**
- * Adds the specified interface to this class by adding all the
- * functions in the interface to this class.
- */
-void AbstractMetaClass::addInterface(AbstractMetaClass *interface)
-{
-    Q_ASSERT(!m_interfaces.contains(interface));
-    m_interfaces << interface;
-
-    m_isPolymorphic |= interface->isPolymorphic();
-
-    if (m_extractedInterface && m_extractedInterface != interface)
-        m_extractedInterface->addInterface(interface);
-
-
-#if 0
-    const AbstractMetaFunctionList &funcs = interface->functions();
-    for (AbstractMetaFunction *function : funcs)
-    if (!hasFunction(function) && !function->isConstructor()) {
-        AbstractMetaFunction *cpy = function->copy();
-        cpy->setImplementingClass(this);
-
-        // Setup that this function is an interface class.
-        cpy->setInterfaceClass(interface);
-        *cpy += AbstractMetaAttributes::InterfaceFunction;
-
-        // Copy the modifications in interface into the implementing classes.
-        const FunctionModificationList &mods = function->modifications(interface);
-        for (const FunctionModification &mod : mods)
-            m_typeEntry->addFunctionModification(mod);
-
-        // It should be mostly safe to assume that when we implement an interface
-        // we don't "pass on" pure virtual functions to our sublcasses...
-//             *cpy -= AbstractMetaAttributes::Abstract;
-
-        addFunction(cpy);
-    }
-#endif
-
-}
-
-
-void AbstractMetaClass::setInterfaces(const AbstractMetaClassList &interfaces)
-{
-    m_interfaces = interfaces;
-    for (const AbstractMetaClass *interface : interfaces) {
-        if (interface)
-            m_isPolymorphic |= interface->isPolymorphic();
-    }
-}
-
 AbstractMetaField *AbstractMetaClass::findField(const QString &name) const
 {
     return AbstractMetaField::find(m_fields, name);
@@ -2207,10 +2109,6 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
 {
     if (AbstractMetaEnum *e = findByName(m_enums, enumName))
         return e;
-
-    if (typeEntry()->designatedInterface())
-        return extractInterface()->findEnum(enumName);
-
     return nullptr;
 }
 
@@ -2223,10 +2121,6 @@ AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValue
         if (AbstractMetaEnumValue *v = e->findEnumValue(enumValueName))
             return v;
     }
-
-    if (typeEntry()->designatedInterface())
-        return extractInterface()->findEnumValue(enumValueName);
-
     if (baseClass())
         return baseClass()->findEnumValue(enumValueName);
 
@@ -2273,32 +2167,23 @@ void AbstractMetaClass::fixFunctions()
 
     m_functionsFixed = true;
 
-    AbstractMetaClass *superClass = baseClass();
     AbstractMetaFunctionList funcs = functions();
 
-    if (superClass)
+    for (auto superClass : m_baseClasses) {
         superClass->fixFunctions();
-    int iface_idx = 0;
-    while (superClass || iface_idx < interfaces().size()) {
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
         AbstractMetaFunctionList superFuncs;
-        if (superClass) {
-            // Super classes can never be final
-            if (superClass->isFinalInTargetLang()) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
-                *superClass -= AbstractMetaAttributes::FinalInTargetLang;
-            }
-            superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
-            AbstractMetaFunctionList virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
-            superFuncs += virtuals;
-        } else {
-            superFuncs = interfaces().at(iface_idx)->queryFunctions(AbstractMetaClass::NormalFunctions);
-            AbstractMetaFunctionList virtuals = interfaces().at(iface_idx)->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
-            superFuncs += virtuals;
+        // Super classes can never be final
+        if (superClass->isFinalInTargetLang()) {
+            qCWarning(lcShiboken).noquote().nospace()
+                << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
+            *superClass -= AbstractMetaAttributes::FinalInTargetLang;
         }
+        superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
+        AbstractMetaFunctionList virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
+        superFuncs += virtuals;
 
         QSet<AbstractMetaFunction *> funcsToAdd;
         for (auto sf : qAsConst(superFuncs)) {
@@ -2427,11 +2312,6 @@ void AbstractMetaClass::fixFunctions()
             (*copy) += AddedMethod;
             funcs.append(copy);
         }
-
-        if (superClass)
-            superClass = superClass->baseClass();
-        else
-            iface_idx++;
     }
 
     bool hasPrivateConstructors = false;
@@ -2530,7 +2410,7 @@ QString AbstractMetaType::formatSignature(bool minimal) const
     return result;
 }
 
-QString AbstractMetaType::formatPythonSignature(bool minimal) const
+QString AbstractMetaType::formatPythonSignature() const
 {
     /*
      * This is a version of the above, more suitable for Python.
@@ -2553,7 +2433,7 @@ QString AbstractMetaType::formatPythonSignature(bool minimal) const
         result += package() + QLatin1Char('.');
     if (isArray()) {
         // Build nested array dimensions a[2][3] in correct order
-        result += m_arrayElementType->formatPythonSignature(true);
+        result += m_arrayElementType->formatPythonSignature();
         const int arrayPos = result.indexOf(QLatin1Char('['));
         if (arrayPos != -1)
             result.insert(arrayPos, formatArraySize(m_arrayElementCount));
@@ -2567,7 +2447,7 @@ QString AbstractMetaType::formatPythonSignature(bool minimal) const
         for (int i = 0, size = m_instantiations.size(); i < size; ++i) {
             if (i > 0)
                 result += QLatin1String(", ");
-            result += m_instantiations.at(i)->formatPythonSignature(true);
+            result += m_instantiations.at(i)->formatPythonSignature();
         }
         result += QLatin1Char(']');
     }
@@ -2702,8 +2582,11 @@ void AbstractMetaClass::format(QDebug &d) const
         d << " [final]";
     if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
         d << " [deprecated]";
-    if (m_baseClass)
-        d << ", inherits \"" << m_baseClass->name() << '"';
+    if (!m_baseClasses.isEmpty()) {
+        d << ", inherits ";
+        for (auto b : m_baseClasses)
+            d << " \"" << b->name() << '"';
+    }
     if (auto templateBase = templateBaseClass()) {
         const auto instantiatedTypes = templateBaseClassInstantiations();
         d << ", instantiates \"" << templateBase->name();

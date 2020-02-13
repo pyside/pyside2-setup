@@ -538,7 +538,7 @@ public:
 private:
     TypeUsagePattern determineUsagePattern() const;
     QString formatSignature(bool minimal) const;
-    QString formatPythonSignature(bool minimal) const;
+    QString formatPythonSignature() const;
 
     const TypeEntry *m_typeEntry = nullptr;
     AbstractMetaTypeList m_instantiations;
@@ -1295,7 +1295,6 @@ public:
     AbstractMetaClass();
     ~AbstractMetaClass();
 
-    AbstractMetaClass *extractInterface();
     void fixFunctions();
 
     AbstractMetaFunctionList functions() const
@@ -1436,13 +1435,6 @@ public:
     AbstractMetaEnum *findEnum(const QString &enumName);
     AbstractMetaEnumValue *findEnumValue(const QString &enumName);
 
-    AbstractMetaClassList interfaces() const
-    {
-        return m_interfaces;
-    }
-    void addInterface(AbstractMetaClass *interface);
-    void setInterfaces(const AbstractMetaClassList &interface);
-
     QString fullName() const
     {
         return package() + QLatin1Char('.') + name();
@@ -1456,14 +1448,16 @@ public:
 
     QString baseClassName() const
     {
-        return m_baseClass ? m_baseClass->name() : QString();
+        return m_baseClasses.isEmpty() ? QString() : m_baseClasses.constFirst()->name();
     }
 
     AbstractMetaClass *baseClass() const
     {
-        return m_baseClass;
+        return m_baseClasses.value(0, nullptr);
     }
+    const AbstractMetaClassList &baseClasses() const { return m_baseClasses; }
 
+    void addBaseClass(AbstractMetaClass *base_class);
     void setBaseClass(AbstractMetaClass *base_class);
 
     /**
@@ -1488,8 +1482,6 @@ public:
     }
 
     QString package() const;
-
-    bool isInterface() const;
 
     bool isNamespace() const;
 
@@ -1711,21 +1703,19 @@ private:
     uint m_hasToStringCapability : 1;
 
     const AbstractMetaClass *m_enclosingClass = nullptr;
-    AbstractMetaClass *m_baseClass = nullptr;
+    AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance
     AbstractMetaClass *m_extendedNamespace = nullptr;
 
     const AbstractMetaClass *m_templateBaseClass = nullptr;
     AbstractMetaFunctionList m_functions;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
-    AbstractMetaClassList m_interfaces;
-    AbstractMetaClass *m_extractedInterface = nullptr;
     QVector<QPropertySpec *> m_propertySpecs;
     AbstractMetaClassList m_innerClasses;
 
     AbstractMetaFunctionList m_externalConversionOperators;
 
-    QStringList m_baseClassNames;
+    QStringList m_baseClassNames;  // Base class names from C++, including rejected
     QVector<TypeEntry *> m_templateArgs;
     ComplexTypeEntry *m_typeEntry = nullptr;
 //     FunctionModelItem m_qDebugStreamFunction;

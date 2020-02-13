@@ -44,8 +44,7 @@
 #include <QMetaType>
 
 #include <algorithm>
-
-#include <algorithm>
+#include <cstring>
 
 static const char CPP_ARG0[] = "cppArg0";
 
@@ -562,21 +561,16 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     s << INDENT << '{' << NULL_PTR << ", " << NULL_PTR << "} // Sentinel\n";
     s << "};\n\n";
 
-    // Write tp_getattro function
-    if ((usePySideExtensions() && metaClass->qualifiedCppName() == QLatin1String("QObject"))) {
-        writeGetattroFunction(s, classContext);
-        s << Qt::endl;
-        writeSetattroFunction(s, classContext);
-        s << Qt::endl;
+    // Write tp_s/getattro function
+    const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
+    if (attroCheck.testFlag(AttroCheckFlag::GetattroSmartPointer)) {
+        writeSmartPointerGetattroFunction(s, classContext);
+        writeSmartPointerSetattroFunction(s, classContext);
     } else {
-        if (classNeedsGetattroFunction(metaClass)) {
-            writeGetattroFunction(s, classContext);
-            s << Qt::endl;
-        }
-        if (classNeedsSetattroFunction(metaClass)) {
-            writeSetattroFunction(s, classContext);
-            s << Qt::endl;
-        }
+        if ((attroCheck & AttroCheckFlag::GetattroMask) != 0)
+            writeGetattroFunction(s, attroCheck, classContext);
+        if ((attroCheck & AttroCheckFlag::SetattroMask) != 0)
+            writeSetattroFunction(s, attroCheck, classContext);
     }
 
     if (const AbstractMetaFunction *f = boolCast(metaClass)) {
@@ -747,11 +741,14 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         return QLatin1Char('"') + func->typeReplaced(0) + QLatin1Char('"');
 
     // SbkType would return null when the type is a container.
-    if (func->type()->typeEntry()->isContainer()) {
+    auto typeEntry = func->type()->typeEntry();
+    if (typeEntry->isContainer()) {
         return QLatin1Char('"')
-               + reinterpret_cast<const ContainerTypeEntry *>(func->type()->typeEntry())->typeName()
+               + reinterpret_cast<const ContainerTypeEntry *>(typeEntry)->typeName()
                + QLatin1Char('"');
     }
+    if (typeEntry->isSmartPointer())
+        return QLatin1Char('"') + typeEntry->qualifiedCppName() + QLatin1Char('"');
 
     if (avoidProtectedHack()) {
         const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(func->type());
@@ -762,7 +759,8 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
     if (func->type()->isPrimitive())
         return QLatin1Char('"') + func->type()->name() + QLatin1Char('"');
 
-    return QString::fromLatin1("reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< %1 >())->tp_name").arg(func->type()->typeEntry()->qualifiedCppName());
+    return QLatin1String("reinterpret_cast<PyTypeObject *>(Shiboken::SbkType< ")
+        + typeEntry->qualifiedCppName() + QLatin1String(" >())->tp_name");
 }
 
 void CppGenerator::writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction *func)
@@ -2605,9 +2603,11 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
 
         if (usePyArgs && signatureFound) {
             AbstractMetaArgumentList args = refFunc->arguments();
-            int lastArgIsVarargs = (int) (args.size() > 1 && args.constLast()->type()->isVarargs());
-            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc) - lastArgIsVarargs;
-            typeChecks.prepend(QString::fromLatin1("numArgs %1 %2").arg(lastArgIsVarargs ? QLatin1String(">=") : QLatin1String("==")).arg(numArgs));
+            const bool isVarargs = args.size() > 1 && args.constLast()->type()->isVarargs();
+            int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc);
+            if (isVarargs)
+                --numArgs;
+            typeChecks.prepend(QString::fromLatin1("numArgs %1 %2").arg(isVarargs ? QLatin1String(">=") : QLatin1String("==")).arg(numArgs));
         } else if (sequenceArgCount > 1) {
             typeChecks.prepend(QString::fromLatin1("numArgs >= %1").arg(startArg + sequenceArgCount));
         } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
@@ -3250,7 +3250,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                 std::swap(firstArg, secondArg);
 
             QString op = func->originalName();
-            op = op.right(op.size() - (sizeof("operator")/sizeof(char)-1));
+            op.remove(0, int(std::strlen("operator")));
 
             if (func->isBinaryOperator()) {
                 if (func->isReverseOperator())
@@ -3881,17 +3881,11 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
             tp_init = cpythonFunctionName(ctors.constFirst());
     }
 
-    QString tp_getattro;
-    QString tp_setattro;
-    if (usePySideExtensions() && (metaClass->qualifiedCppName() == QLatin1String("QObject"))) {
-        tp_getattro = cpythonGetattroFunctionName(metaClass);
-        tp_setattro = cpythonSetattroFunctionName(metaClass);
-    } else {
-        if (classNeedsGetattroFunction(metaClass))
-            tp_getattro = cpythonGetattroFunctionName(metaClass);
-        if (classNeedsSetattroFunction(metaClass))
-            tp_setattro = cpythonSetattroFunctionName(metaClass);
-    }
+    const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
+    const QString tp_getattro = (attroCheck & AttroCheckFlag::GetattroMask) != 0
+        ? cpythonGetattroFunctionName(metaClass) : QString();
+    const QString tp_setattro = (attroCheck & AttroCheckFlag::SetattroMask) != 0
+        ? cpythonSetattroFunctionName(metaClass) : QString();
 
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor) {
         // tp_flags = QLatin1String("Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES");
@@ -4066,7 +4060,7 @@ void CppGenerator::writeSequenceMethods(QTextStream &s,
 
         writeCppSelfDefinition(s, func, context);
 
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? 0 : func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
         writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
         s<< "}\n\n";
     }
@@ -5227,63 +5221,88 @@ QString CppGenerator::writeSmartPointerGetterCast()
            + QLatin1String(SMART_POINTER_GETTER) + QLatin1Char(')');
 }
 
-void CppGenerator::writeSetattroFunction(QTextStream &s, GeneratorContext &context)
+void CppGenerator::writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
-    s << "static int " << cpythonSetattroFunctionName(metaClass)
+    s << "static int " << ShibokenGenerator::cpythonSetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name, PyObject *value)\n{\n";
-    if (usePySideExtensions()) {
+}
+
+inline void CppGenerator::writeSetattroDefaultReturn(QTextStream &s) const
+{
+    s << INDENT << "return PyObject_GenericSetAttr(self, name, value);\n}\n\n";
+}
+
+void CppGenerator::writeSetattroFunction(QTextStream &s, AttroCheck attroCheck,
+                                         GeneratorContext &context)
+{
+    Q_ASSERT(!context.forSmartPointer());
+    const AbstractMetaClass *metaClass = context.metaClass();
+    writeSetattroDefinition(s, metaClass);
+    if (attroCheck.testFlag(AttroCheckFlag::SetattroQObject)) {
         s << INDENT << "Shiboken::AutoDecRef pp(reinterpret_cast<PyObject *>(PySide::Property::getObject(self, name)));\n";
         s << INDENT << "if (!pp.isNull())\n";
         Indentation indent(INDENT);
         s << INDENT << "return PySide::Property::setValue(reinterpret_cast<PySideProperty *>(pp.object()), self, value);\n";
     }
+    writeSetattroDefaultReturn(s);
+}
 
-    if (context.forSmartPointer()) {
-        s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for the corresponding C++ object held by the smart pointer.\n";
-        s << INDENT << "PyObject *rawObj = PyObject_CallMethod(self, "
-          << writeSmartPointerGetterCast() << ", 0);\n";
-        s << INDENT << "if (rawObj) {\n";
+void CppGenerator::writeSmartPointerSetattroFunction(QTextStream &s, GeneratorContext &context)
+{
+    Q_ASSERT(context.forSmartPointer());
+    writeSetattroDefinition(s, context.metaClass());
+    s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for the corresponding C++ object held by the smart pointer.\n";
+    s << INDENT << "PyObject *rawObj = PyObject_CallMethod(self, "
+      << writeSmartPointerGetterCast() << ", 0);\n";
+    s << INDENT << "if (rawObj) {\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "int hasAttribute = PyObject_HasAttr(rawObj, name);\n";
+        s << INDENT << "if (hasAttribute) {\n";
         {
             Indentation indent(INDENT);
-            s << INDENT << "int hasAttribute = PyObject_HasAttr(rawObj, name);\n";
-            s << INDENT << "if (hasAttribute) {\n";
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "return PyObject_GenericSetAttr(rawObj, name, value);\n";
-            }
-            s << INDENT << "}\n";
-            s << INDENT << "Py_DECREF(rawObj);\n";
+            s << INDENT << "return PyObject_GenericSetAttr(rawObj, name, value);\n";
         }
         s << INDENT << "}\n";
-
+        s << INDENT << "Py_DECREF(rawObj);\n";
     }
-
-    s << INDENT << "return PyObject_GenericSetAttr(self, name, value);\n";
-    s << "}\n";
+    s << INDENT << "}\n";
+    writeSetattroDefaultReturn(s);
 }
 
 static inline QString qObjectClassName() { return QStringLiteral("QObject"); }
 static inline QString qMetaObjectClassName() { return QStringLiteral("QMetaObject"); }
 
-void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &context)
+void CppGenerator::writeGetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
 {
-    const AbstractMetaClass *metaClass = context.metaClass();
     s << "static PyObject *" << cpythonGetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name)\n{\n";
-    s << INDENT << "assert(self);\n";
+}
 
-    QString getattrFunc;
-    if (usePySideExtensions() && metaClass->isQObject()) {
+QString CppGenerator::qObjectGetAttroFunction() const
+{
+    static QString result;
+    if (result.isEmpty()) {
         AbstractMetaClass *qobjectClass = AbstractMetaClass::findClass(classes(), qObjectClassName());
-        QTextStream(&getattrFunc) << "PySide::getMetaDataFromQObject("
-            << cpythonWrapperCPtr(qobjectClass, QLatin1String("self"))
-            << ", self, name)";
-    } else {
-        getattrFunc = QLatin1String("PyObject_GenericGetAttr(self, name)");
+        Q_ASSERT(qobjectClass);
+        result = QLatin1String("PySide::getMetaDataFromQObject(")
+                 + cpythonWrapperCPtr(qobjectClass, QLatin1String("self"))
+                 + QLatin1String(", self, name)");
     }
+    return result;
+}
 
-    if (classNeedsGetattroFunction(metaClass)) {
+void CppGenerator::writeGetattroFunction(QTextStream &s, AttroCheck attroCheck,
+                                         GeneratorContext &context)
+{
+    Q_ASSERT(!context.forSmartPointer());
+    const AbstractMetaClass *metaClass = context.metaClass();
+    writeGetattroDefinition(s, metaClass);
+
+    const QString getattrFunc = usePySideExtensions() && metaClass->isQObject()
+        ? qObjectGetAttroFunction() : QLatin1String("PyObject_GenericGetAttr(self, name)");
+
+    if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
         s << INDENT << "// Search the method in the instance dict\n";
         s << INDENT << "if (auto ob_dict = reinterpret_cast<SbkObject *>(self)->ob_dict) {\n";
         {
@@ -5329,50 +5348,53 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, GeneratorContext &conte
         }
     }
 
-    if (context.forSmartPointer()) {
-        s << INDENT << "PyObject *tmp = " << getattrFunc << ";\n";
-        s << INDENT << "if (tmp)\n";
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "return tmp;\n";
-        }
-        s << INDENT << "if (!PyErr_ExceptionMatches(PyExc_AttributeError))\n";
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "return nullptr;\n";
-        }
-        s << INDENT << "PyErr_Clear();\n";
+    s << INDENT << "return " << getattrFunc << ";\n}\n\n";
+}
 
-        // This generates the code which dispatches access to member functions
-        // and fields from the smart pointer to its pointee.
-        s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for "
-                       "the corresponding C++ object held by the smart pointer.\n";
-        s << INDENT << "if (auto rawObj = PyObject_CallMethod(self, "
-          << writeSmartPointerGetterCast() << ", 0)) {\n";
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "if (auto attribute = PyObject_GetAttr(rawObj, name))\n";
-            {
-                Indentation indent(INDENT);
-                s << INDENT << "tmp = attribute;\n";
-            }
-            s << INDENT << "Py_DECREF(rawObj);\n";
-        }
-        s << INDENT << "}\n";
-        s << INDENT << "if (!tmp) {\n";
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "PyTypeObject *tp = Py_TYPE(self);\n";
-            s << INDENT << "PyErr_Format(PyExc_AttributeError,\n";
-            s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\",\n";
-            s << INDENT << "             tp->tp_name, Shiboken::String::toCString(name));\n";
-        }
-        s << INDENT << "}\n";
+void CppGenerator::writeSmartPointerGetattroFunction(QTextStream &s, GeneratorContext &context)
+{
+    Q_ASSERT(context.forSmartPointer());
+    const AbstractMetaClass *metaClass = context.metaClass();
+    writeGetattroDefinition(s, metaClass);
+    s << INDENT << "PyObject *tmp = PyObject_GenericGetAttr(self, name);\n";
+    s << INDENT << "if (tmp)\n";
+    {
+        Indentation indent(INDENT);
         s << INDENT << "return tmp;\n";
-    } else {
-        s << INDENT << "return " << getattrFunc << ";\n";
     }
-    s << "}\n";
+    s << INDENT << "if (!PyErr_ExceptionMatches(PyExc_AttributeError))\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return nullptr;\n";
+    }
+    s << INDENT << "PyErr_Clear();\n";
+
+    // This generates the code which dispatches access to member functions
+    // and fields from the smart pointer to its pointee.
+    s << INDENT << "// Try to find the 'name' attribute, by retrieving the PyObject for "
+                   "the corresponding C++ object held by the smart pointer.\n";
+    s << INDENT << "if (auto rawObj = PyObject_CallMethod(self, "
+      << writeSmartPointerGetterCast() << ", 0)) {\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "if (auto attribute = PyObject_GetAttr(rawObj, name))\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "tmp = attribute;\n";
+        }
+        s << INDENT << "Py_DECREF(rawObj);\n";
+    }
+    s << INDENT << "}\n";
+    s << INDENT << "if (!tmp) {\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "PyTypeObject *tp = Py_TYPE(self);\n";
+        s << INDENT << "PyErr_Format(PyExc_AttributeError,\n";
+        s << INDENT << "             \"'%.50s' object has no attribute '%.400s'\",\n";
+        s << INDENT << "             tp->tp_name, Shiboken::String::toCString(name));\n";
+    }
+    s << INDENT << "}\n";
+    s << INDENT << "return tmp;\n}\n\n";
 }
 
 // Write declaration and invocation of the init function for the module init
@@ -5887,7 +5909,7 @@ void CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
         writeReturnValueHeuristics(s, func);
 }
 
-void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func, const QString &self)
+void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func)
 {
     AbstractMetaType *type = func->type();
     if (!useReturnValueHeuristic()

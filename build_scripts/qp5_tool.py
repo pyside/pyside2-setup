@@ -40,29 +40,36 @@
 from __future__ import print_function
 
 from argparse import ArgumentParser, RawTextHelpFormatter
+from enum import Enum
 import os
 import re
 import subprocess
 import sys
+import time
 import warnings
 
-desc = """
+
+DESC = """
 Utility script for working with Qt for Python.
 
 Feel free to extend!
 
-qp5_tool.py can be configured by creating a configuration file
-in the format key=value:
-    "%CONFIGFILE%"
+Typical Usage:
+Update and build a repository: python qp5_tool -p -b
 
-It is possible to use repository-specific values
-by adding a key postfixed by a dash and the repository folder base name, eg:
+qp5_tool.py uses a configuration file "%CONFIGFILE%"
+in the format key=value.
+
+It is possible to use repository-specific values by adding a key postfixed by
+a dash and the repository folder base name, eg:
 Modules-pyside-setup512=Core,Gui,Widgets,Network,Test
 
 Configuration keys:
+Acceleration     Incredibuild or unset
+BuildArguments   Arguments to setup.py
+Jobs             Number of jobs to be run simultaneously
 Modules          Comma separated list of modules to be built
                  (for --module-subset=)
-BuildArguments   Arguments to setup.py
 Python           Python executable (Use python_d for debug builds on Windows)
 
 Arbitrary keys can be defined and referenced by $(name):
@@ -73,10 +80,39 @@ Modules-pyside-setup-minimal=$(MinimalModules)
 """
 
 
+class Acceleration(Enum):
+    NONE = 0
+    INCREDIBUILD = 1
+
+
+class BuildMode(Enum):
+    NONE = 0
+    BUILD = 1
+    RECONFIGURE = 2
+    MAKE = 3
+
+
+DEFAULT_BUILD_ARGS = ['--build-tests', '--skip-docs', '--quiet']
+IS_WINDOWS = sys.platform == 'win32'
+INCREDIBUILD_CONSOLE = 'BuildConsole' if IS_WINDOWS else '/opt/incredibuild/bin/ib_console'
+# Config file keys
+ACCELERATION_KEY = 'Acceleration'
+BUILDARGUMENTS_KEY = 'BuildArguments'
+JOBS_KEY = 'Jobs'
+MODULES_KEY = 'Modules'
+PYTHON_KEY = 'Python'
+
+DEFAULT_MODULES = "Core,Gui,Widgets,Network,Test,Qml,Quick,Multimedia,MultimediaWidgets"
+DEFAULT_CONFIG_FILE = "Modules={}\n".format(DEFAULT_MODULES)
+
+build_mode = BuildMode.NONE
+opt_dry_run = False
+
+
 def which(needle):
     """Perform a path search"""
     needles = [needle]
-    if is_windows:
+    if IS_WINDOWS:
         for ext in ("exe", "bat", "cmd"):
             needles.append("{}.{}".format(needle, ext))
 
@@ -92,6 +128,8 @@ def execute(args):
     """Execute a command and print to log"""
     log_string = '[{}] {}'.format(os.path.basename(os.getcwd()), ' '.join(args))
     print(log_string)
+    if opt_dry_run:
+        return
     exit_code = subprocess.call(args)
     if exit_code != 0:
         raise RuntimeError('FAIL({}): {}'.format(exit_code, log_string))
@@ -106,7 +144,7 @@ def run_git(args):
     execute(module_args)
 
 
-def expand_reference(dict, value):
+def expand_reference(cache_dict, value):
     """Expand references to other keys in config files $(name) by value."""
     pattern = re.compile(r"\$\([^)]+\)")
     while True:
@@ -114,8 +152,31 @@ def expand_reference(dict, value):
         if not match:
             break
         key = match.group(0)[2:-1]
-        value = value[:match.start(0)] + dict[key] + value[match.end(0):]
+        value = value[:match.start(0)] + cache_dict[key] + value[match.end(0):]
     return value
+
+
+def editor():
+    editor = os.getenv('EDITOR')
+    if not editor:
+        return 'notepad' if IS_WINDOWS else 'vi'
+    editor = editor.strip()
+    if IS_WINDOWS:
+        # Windows: git requires quotes in the variable
+        if editor.startswith('"') and editor.endswith('"'):
+            editor = editor[1:-1]
+        editor = editor.replace('/', '\\')
+    return editor
+
+
+def edit_config_file():
+    exit_code = -1
+    try:
+        exit_code = subprocess.call([editor(), config_file])
+    except Exception as e:
+        reason = str(e)
+        print('Unable to launch: {}: {}'.format(editor(), reason))
+    return exit_code
 
 
 """
@@ -124,10 +185,11 @@ Config file handling, cache and read function
 config_dict = {}
 
 
-def read_config_file(fileName):
+def read_config_file(file_name):
+    """Read the config file into config_dict, expanding continuation lines"""
     global config_dict
     keyPattern = re.compile(r'^\s*([A-Za-z0-9\_\-]+)\s*=\s*(.*)$')
-    with open(config_file) as f:
+    with open(file_name) as f:
         while True:
             line = f.readline().rstrip()
             if not line:
@@ -142,7 +204,7 @@ def read_config_file(fileName):
                 config_dict[key] = expand_reference(config_dict, value)
 
 
-def read_tool_config(key):
+def read_config(key):
     """
     Read a value from the '$HOME/.qp5_tool' configuration file. When given
     a key 'key' for the repository directory '/foo/qt-5', check for the
@@ -154,47 +216,102 @@ def read_tool_config(key):
     return repo_value if repo_value else config_dict.get(key)
 
 
+def read_bool_config(key):
+    value = read_config(key)
+    return value and value in ['1', 'true', 'True']
+
+
+def read_int_config(key, default=-1):
+    value = read_config(key)
+    return int(value) if value else default
+
+
+def read_acceleration_config():
+    value = read_config(ACCELERATION_KEY)
+    if value:
+        value = value.lower()
+        if value == 'incredibuild':
+            return Acceleration.INCREDIBUILD
+    return Acceleration.NONE
+
+
 def read_config_build_arguments():
-    value = read_tool_config('BuildArguments')
+    value = read_config(BUILDARGUMENTS_KEY)
     if value:
         return re.split(r'\s+', value)
-    return default_build_args
+    return DEFAULT_BUILD_ARGS
 
 
 def read_config_modules_argument():
-    value = read_tool_config('Modules')
+    value = read_config(MODULES_KEY)
     if value and value != '' and value != 'all':
         return '--module-subset=' + value
     return None
 
 
 def read_config_python_binary():
-    binary = read_tool_config('Python')
-    return binary if binary else 'python'
+    binary = read_config(PYTHON_KEY)
+    if binary:
+        return binary
+    return 'python3' if which('python3') else 'python'
 
 
-def get_config_file():
+def get_config_file(base_name):
     home = os.getenv('HOME')
-    if is_windows:
+    if IS_WINDOWS:
         # Set a HOME variable on Windows such that scp. etc.
         # feel at home (locating .ssh).
         if not home:
             home = os.getenv('HOMEDRIVE') + os.getenv('HOMEPATH')
             os.environ['HOME'] = home
         user = os.getenv('USERNAME')
-        config_file = os.path.join(os.getenv('APPDATA'), config_file_name)
+        config_file = os.path.join(os.getenv('APPDATA'), base_name)
     else:
         user = os.getenv('USER')
         config_dir = os.path.join(home, '.config')
         if os.path.exists(config_dir):
-            config_file = os.path.join(config_dir, config_file_name)
+            config_file = os.path.join(config_dir, base_name)
         else:
-            config_file = os.path.join(home, '.' + config_file_name)
+            config_file = os.path.join(home, '.' + base_name)
     return config_file
 
 
-def get_options(desc):
+def build():
+    """Run configure and build steps"""
+    start_time = time.time()
+
+    arguments = []
+    acceleration = read_acceleration_config()
+    if not IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
+        arguments.append(INCREDIBUILD_CONSOLE)
+    arguments.extend([read_config_python_binary(), 'setup.py', 'install'])
+    arguments.extend(read_config_build_arguments())
+    jobs = read_int_config(JOBS_KEY)
+    if jobs > 1:
+        arguments.extend(['-j', str(jobs)])
+    if build_mode != BuildMode.BUILD:
+        arguments.extend(['--reuse-build', '--ignore-git'])
+        if build_mode != BuildMode.RECONFIGURE:
+            arguments.append('--skip-cmake')
+    modules = read_config_modules_argument()
+    if modules:
+        arguments.append(modules)
+    if IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
+        arg_string = ' '.join(arguments)
+        arguments = [INCREDIBUILD_CONSOLE, '/command={}'.format(arg_string)]
+
+    execute(arguments)
+
+    elapsed_time = int(time.time() - start_time)
+    print('--- Done({}s) ---'.format(elapsed_time))
+
+
+def create_argument_parser(desc):
     parser = ArgumentParser(description=desc, formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--dry-run', '-d', action='store_true',
+                        help='Dry run, print commands')
+    parser.add_argument('--edit', '-e', action='store_true',
+                        help='Edit config file')
     parser.add_argument('--reset', '-r', action='store_true',
                         help='Git reset hard to upstream state')
     parser.add_argument('--clean', '-c', action='store_true',
@@ -207,29 +324,34 @@ def get_options(desc):
     parser.add_argument('--Make', '-M', action='store_true',
                         help='cmake + Make (continue broken build)')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
-
-    return parser.parse_args()
+    return parser
 
 
 if __name__ == '__main__':
-
     git = None
     base_dir = None
-    default_build_args = ['--build-tests', '--skip-docs', '--quiet']
-    is_windows = sys.platform == 'win32'
-    config_file_name = 'qp5_tool.conf'
     config_file = None
     user = None
-    default_config_file = """
-    Modules=Core,Gui,Widgets,Network,Test,Qml,Quick,Multimedia,MultimediaWidgets
-    BuildArguments={}
-    # Python executable (python_d for debug builds)
-    Python=python
-    """
 
-    config_file = get_config_file()
-    desc = desc.replace('%CONFIGFILE%', config_file)
-    options = get_options(desc)
+    config_file = get_config_file('qp5_tool.conf')
+    argument_parser = create_argument_parser(DESC.replace('%CONFIGFILE%', config_file))
+    options = argument_parser.parse_args()
+    opt_dry_run = options.dry_run
+
+    if options.edit:
+        sys.exit(edit_config_file())
+
+    if options.build:
+        build_mode = BuildMode.BUILD
+    elif options.make:
+        build_mode = BuildMode.MAKE
+    elif options.Make:
+        build_mode = BuildMode.RECONFIGURE
+
+    if build_mode == BuildMode.NONE and not (options.clean or options.reset
+        or options.pull):
+        argument_parser.print_help()
+        sys.exit(0)
 
     git = which('git')
     if git is None:
@@ -239,11 +361,11 @@ if __name__ == '__main__':
     if not os.path.exists(config_file):
         print('Create initial config file ', config_file, " ..")
         with open(config_file, 'w') as f:
-            f.write(default_config_file.format(' '.join(default_build_args)))
+            f.write(DEFAULT_CONFIG_FILE.format(' '.join(DEFAULT_BUILD_ARGS)))
 
     while not os.path.exists('.gitmodules'):
         cwd = os.getcwd()
-        if cwd == '/' or (is_windows and len(cwd) < 4):
+        if cwd == '/' or (IS_WINDOWS and len(cwd) < 4):
             warnings.warn('Unable to find git root', RuntimeWarning)
             sys.exit(-1)
         os.chdir(os.path.dirname(cwd))
@@ -259,15 +381,7 @@ if __name__ == '__main__':
     if options.pull:
         run_git(['pull', '--rebase'])
 
-    if options.build or options.make or options.Make:
-        arguments = [read_config_python_binary(), 'setup.py', 'install']
-        arguments.extend(read_config_build_arguments())
-        if options.make or options.Make:
-            arguments.extend(['--reuse-build', '--ignore-git'])
-            if not options.Make:
-                arguments.append('--skip-cmake')
-        modules = read_config_modules_argument()
-        if modules:
-            arguments.append(modules)
-        execute(arguments)
+    if build_mode != BuildMode.NONE:
+        build()
+
     sys.exit(0)

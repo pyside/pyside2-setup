@@ -43,7 +43,8 @@
          possible to explicitly instantiate a new shared pointer in python e.g. o = SharedPtr_Foo()
          won't work.
     -->
-    <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount" />
+    <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
+                        instantiations="Integer,Smart::Integer2,Obj"/>
 
     <object-type name="Obj" />
     <value-type name="Integer" />

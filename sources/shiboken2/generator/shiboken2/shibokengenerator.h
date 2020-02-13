@@ -64,6 +64,18 @@ QT_FORWARD_DECLARE_CLASS(QTextStream)
 class ShibokenGenerator : public Generator
 {
 public:
+    enum class AttroCheckFlag
+    {
+        None                   = 0x0,
+        GetattroOverloads      = 0x01,
+        GetattroSmartPointer   = 0x02,
+        GetattroMask           = 0x0F,
+        SetattroQObject        = 0x10,
+        SetattroSmartPointer   = 0x20,
+        SetattroMask           = 0xF0,
+    };
+    Q_DECLARE_FLAGS(AttroCheck, AttroCheckFlag);
+
     using FunctionGroups = QMap<QString, AbstractMetaFunctionList>; // Sorted
 
     ShibokenGenerator();
@@ -181,11 +193,7 @@ protected:
     /// Returns the top-most class that has multiple inheritance in the ancestry.
     static const AbstractMetaClass *getMultipleInheritingClass(const AbstractMetaClass *metaClass);
 
-    /// Returns true if the class needs to have a getattro function.
-    bool classNeedsGetattroFunction(const AbstractMetaClass *metaClass);
-
-    /// Returns true if the class needs to have a setattro function.
-    bool classNeedsSetattroFunction(const AbstractMetaClass *metaClass);
+    AttroCheck checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const;
 
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
     AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass);
@@ -280,13 +288,13 @@ protected:
     QString converterObject(const AbstractMetaType *type);
     QString converterObject(const TypeEntry *type);
 
-    QString cpythonBaseName(const AbstractMetaClass *metaClass);
-    QString cpythonBaseName(const TypeEntry *type);
+    static QString cpythonBaseName(const AbstractMetaClass *metaClass);
+    static QString cpythonBaseName(const TypeEntry *type);
     QString cpythonBaseName(const AbstractMetaType *type);
     QString cpythonTypeName(const AbstractMetaClass *metaClass);
     QString cpythonTypeName(const TypeEntry *type);
-    QString cpythonTypeNameExt(const TypeEntry *type);
-    QString cpythonTypeNameExt(const AbstractMetaType *type);
+    QString cpythonTypeNameExt(const TypeEntry *type) const;
+    QString cpythonTypeNameExt(const AbstractMetaType *type) const;
     QString cpythonCheckFunction(const TypeEntry *type, bool genericNumberType = false);
     QString cpythonCheckFunction(const AbstractMetaType *metaType, bool genericNumberType = false);
     /**
@@ -313,14 +321,14 @@ protected:
     QString cpythonFunctionName(const AbstractMetaFunction *func);
     QString cpythonMethodDefinitionName(const AbstractMetaFunction *func);
     QString cpythonGettersSettersDefinitionName(const AbstractMetaClass *metaClass);
-    QString cpythonGetattroFunctionName(const AbstractMetaClass *metaClass);
-    QString cpythonSetattroFunctionName(const AbstractMetaClass *metaClass);
+    static QString cpythonGetattroFunctionName(const AbstractMetaClass *metaClass);
+    static QString cpythonSetattroFunctionName(const AbstractMetaClass *metaClass);
     QString cpythonGetterFunctionName(const AbstractMetaField *metaField);
     QString cpythonSetterFunctionName(const AbstractMetaField *metaField);
     QString cpythonWrapperCPtr(const AbstractMetaClass *metaClass,
-                               const QString &argName = QLatin1String("self"));
-    QString cpythonWrapperCPtr(const AbstractMetaType *metaType, const QString &argName);
-    QString cpythonWrapperCPtr(const TypeEntry *type, const QString &argName);
+                               const QString &argName = QLatin1String("self")) const;
+    QString cpythonWrapperCPtr(const AbstractMetaType *metaType, const QString &argName) const;
+    QString cpythonWrapperCPtr(const TypeEntry *type, const QString &argName) const;
 
     /// Guesses the scope to where belongs an argument's default value.
     QString guessScopeForDefaultValue(const AbstractMetaFunction *func,
@@ -329,13 +337,13 @@ protected:
                                            const AbstractMetaArgument *arg,
                                            const QString &value) const;
 
-    QString cpythonEnumName(const EnumTypeEntry *enumEntry);
-    QString cpythonEnumName(const AbstractMetaEnum *metaEnum);
+    static QString cpythonEnumName(const EnumTypeEntry *enumEntry);
+    static QString cpythonEnumName(const AbstractMetaEnum *metaEnum);
 
-    QString cpythonFlagsName(const FlagsTypeEntry *flagsEntry);
-    QString cpythonFlagsName(const AbstractMetaEnum *metaEnum);
+    static QString cpythonFlagsName(const FlagsTypeEntry *flagsEntry);
+    static QString cpythonFlagsName(const AbstractMetaEnum *metaEnum);
     /// Returns the special cast function name, the function used to proper cast class with multiple inheritance.
-    QString cpythonSpecialCastFunctionName(const AbstractMetaClass *metaClass);
+    static QString cpythonSpecialCastFunctionName(const AbstractMetaClass *metaClass);
 
     QString getFormatUnitString(const AbstractMetaFunction *func, bool incRef = false) const;
 
@@ -364,9 +372,9 @@ protected:
      *  made of the template class and the instantiation values, or an empty string if the class isn't
      *  derived from a template class at all.
      */
-    QString getTypeIndexVariableName(const AbstractMetaClass *metaClass, bool alternativeTemplateName = false);
-    QString getTypeIndexVariableName(const TypeEntry *type);
-    QString getTypeIndexVariableName(const AbstractMetaType *type);
+    QString getTypeIndexVariableName(const AbstractMetaClass *metaClass, bool alternativeTemplateName = false) const;
+    QString getTypeIndexVariableName(const TypeEntry *type) const;
+    QString getTypeIndexVariableName(const AbstractMetaType *type) const;
 
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     bool verboseErrorMessagesDisabled() const;
@@ -542,5 +550,7 @@ private:
     QString m_typeSystemConvName[TypeSystemConverterVariables];
     QRegularExpression m_typeSystemConvRegEx[TypeSystemConverterVariables];
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::AttroCheck);
 
 #endif // SHIBOKENGENERATOR_H

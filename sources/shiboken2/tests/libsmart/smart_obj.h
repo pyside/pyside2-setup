@@ -48,7 +48,7 @@ public:
     Integer takeInteger(Integer val);
     SharedPtr<Obj> giveSharedPtrToObj();
     std::vector<SharedPtr<Obj> > giveSharedPtrToObjList(int size);
-    SharedPtr<Integer> giveSharedPtrToInteger();
+    virtual SharedPtr<Integer> giveSharedPtrToInteger(); // virtual for PYSIDE-1188
     SharedPtr<const Integer> giveSharedPtrToConstInteger();
     int takeSharedPtrToConstInteger(SharedPtr<const Integer> pInt);
     SharedPtr<Smart::Integer2> giveSharedPtrToInteger2();

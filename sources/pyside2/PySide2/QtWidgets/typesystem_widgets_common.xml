@@ -1753,6 +1753,12 @@
     </modify-function>
   </object-type>
   <object-type name="QTreeWidget">
+    <modify-function signature="mimeData(const QList&lt;QTreeWidgetItem*&gt;&amp;)const">
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="setItemWidget(QTreeWidgetItem*,int,QWidget*)">
       <modify-argument index="3">
         <parent index="this" action="add"/>
@@ -1975,6 +1981,12 @@
 
   </object-type>
   <object-type name="QListWidget">
+    <modify-function signature="mimeData(const QList&lt;QListWidgetItem*&gt;&amp;)const">
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="setItemWidget(QListWidgetItem*,QWidget*)">
       <modify-argument index="2">
         <parent index="1" action="add"/>
@@ -2556,6 +2568,12 @@
     </modify-function>
   </object-type>
   <object-type name="QTableWidget">
+    <modify-function signature="mimeData(const QList&lt;QTableWidgetItem*&gt;&amp;)const">
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="setHorizontalHeaderItem(int,QTableWidgetItem*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>

@@ -650,6 +650,14 @@ bool TypeSystemParser::parse(QXmlStreamReader &reader)
 {
     m_error.clear();
     m_currentPath.clear();
+    m_smartPointerInstantiations.clear();
+    const bool result = parseXml(reader) && setupSmartPointerInstantiations();
+    m_smartPointerInstantiations.clear();
+    return result;
+}
+
+bool TypeSystemParser::parseXml(QXmlStreamReader &reader)
+{
     const QString fileName = readerFileName(reader);
     if (!fileName.isEmpty())
         m_currentPath = QFileInfo(fileName).absolutePath();
@@ -689,6 +697,62 @@ bool TypeSystemParser::parse(QXmlStreamReader &reader)
         case QXmlStreamReader::ProcessingInstruction:
             break;
         }
+    }
+    return true;
+}
+
+// Split a type list potentially with template types
+// "A<B,C>,D" -> ("A<B,C>", "D")
+static QStringList splitTypeList(const QString &s)
+{
+    QStringList result;
+    int templateDepth = 0;
+    int lastPos = 0;
+    const int size = s.size();
+    for (int i = 0; i < size; ++i) {
+        switch (s.at(i).toLatin1()) {
+        case '<':
+            ++templateDepth;
+            break;
+        case '>':
+            --templateDepth;
+            break;
+        case ',':
+            if (templateDepth == 0) {
+                result.append(s.mid(lastPos, i - lastPos).trimmed());
+                lastPos = i + 1;
+            }
+            break;
+        }
+    }
+    if (lastPos < size)
+        result.append(s.mid(lastPos, size - lastPos).trimmed());
+    return result;
+}
+
+bool TypeSystemParser::setupSmartPointerInstantiations()
+{
+    for (auto it = m_smartPointerInstantiations.cbegin(),
+         end = m_smartPointerInstantiations.cend(); it != end; ++it) {
+        auto smartPointerEntry = it.key();
+        const auto instantiationNames = splitTypeList(it.value());
+        SmartPointerTypeEntry::Instantiations instantiations;
+        instantiations.reserve(instantiationNames.size());
+        for (const auto &instantiationName : instantiationNames) {
+            const auto types = m_database->findCppTypes(instantiationName);
+            if (types.isEmpty()) {
+                m_error =
+                    msgCannotFindTypeEntryForSmartPointer(instantiationName,
+                                                          smartPointerEntry->name());
+                return false;
+            }
+            if (types.size() > 1) {
+                m_error = msgAmbiguousTypesFound(instantiationName, types);
+                return false;
+            }
+            instantiations.append(types.constFirst());
+        }
+        smartPointerEntry->setInstantiations(instantiations);
     }
     return true;
 }
@@ -740,11 +804,6 @@ bool TypeSystemParser::endElement(const QStringRef &localName)
         centry->setFieldModifications(m_contextStack.top()->fieldMods);
         centry->setCodeSnips(m_contextStack.top()->codeSnips);
         centry->setDocModification(m_contextStack.top()->docModifications);
-
-        if (centry->designatedInterface()) {
-            centry->designatedInterface()->setCodeSnips(m_contextStack.top()->codeSnips);
-            centry->designatedInterface()->setFunctionModifications(m_contextStack.top()->functionMods);
-        }
     }
     break;
     case StackElement::AddFunction: {
@@ -827,7 +886,7 @@ bool TypeSystemParser::endElement(const QStringRef &localName)
             break;
         default:
             break; // nada
-        };
+        }
         break;
     default:
         break;
@@ -903,7 +962,7 @@ bool TypeSystemParser::characters(const String &ch)
                 break;
             default:
                 Q_ASSERT(false);
-            };
+            }
             return true;
         }
     }
@@ -1135,6 +1194,7 @@ SmartPointerTypeEntry *
     QString smartPointerType;
     QString getter;
     QString refCountMethodName;
+    QString instantiations;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type")) {
@@ -1143,6 +1203,8 @@ SmartPointerTypeEntry *
             getter = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("ref-count-method")) {
             refCountMethodName = attributes->takeAt(i).value().toString();
+        } else if (name == QLatin1String("instantiations")) {
+            instantiations = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -1177,6 +1239,7 @@ SmartPointerTypeEntry *
     auto *type = new SmartPointerTypeEntry(name, getter, smartPointerType,
                                            refCountMethodName, since, currentParentTypeEntry());
     applyCommonAttributes(type, attributes);
+    m_smartPointerInstantiations.insert(type, instantiations);
     return type;
 }
 
@@ -1276,40 +1339,6 @@ EnumTypeEntry *
     return entry;
 }
 
-ObjectTypeEntry *
-    TypeSystemParser::parseInterfaceTypeEntry(const QXmlStreamReader &,
-                                     const QString &name, const QVersionNumber &since,
-                                     QXmlStreamAttributes *attributes)
-{
-    if (!checkRootElement())
-        return nullptr;
-    auto *otype = new ObjectTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(otype, attributes);
-    QString targetLangName = name;
-    bool generate = true;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
-        if (name == targetLangNameAttribute()) {
-            targetLangName = attributes->takeAt(i).value().toString();
-        } else if (name == generateAttribute()) {
-            generate = convertBoolean(attributes->takeAt(i).value(),
-                                      generateAttribute(), true);
-        }
-    }
-
-    auto itype = new InterfaceTypeEntry(InterfaceTypeEntry::interfaceName(targetLangName),
-                                        since, currentParentTypeEntry());
-    itype->setTargetLangName(targetLangName);
-
-    if (generate)
-        itype->setCodeGeneration(m_generate);
-    else
-        itype->setCodeGeneration(TypeEntry::GenerateForSubclass);
-
-    otype->setDesignatedInterface(itype);
-    itype->setOrigin(otype);
-    return otype;
-}
 
 NamespaceTypeEntry *
     TypeSystemParser::parseNamespaceTypeEntry(const QXmlStreamReader &reader,
@@ -1521,9 +1550,6 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
     // The generator code relies on container's package being empty.
     if (ctype->type() != TypeEntry::ContainerType)
         ctype->setTargetLangPackage(package);
-
-    if (InterfaceTypeEntry *di = ctype->designatedInterface())
-        di->setTargetLangPackage(package);
 
     if (generate)
         ctype->setCodeGeneration(m_generate);
@@ -2560,10 +2586,6 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
         m_error = QLatin1String("Only supported parent tags are primitive-type, complex types or extra-includes");
         return false;
     }
-    if (InterfaceTypeEntry *di = entry->designatedInterface()) {
-        di->setInclude(entry->include());
-        di->setExtraIncludes(entry->extraIncludes());
-    }
     return true;
 }
 
@@ -2813,14 +2835,6 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             element->entry = m_currentEnum;
             break;
 
-        case StackElement::InterfaceTypeEntry:
-            if (ObjectTypeEntry *oe = parseInterfaceTypeEntry(reader, name, versionRange.since, &attributes)) {
-                applyComplexTypeAttributes(reader, oe, &attributes);
-                element->entry = oe;
-            } else {
-                return false;
-            }
-            break;
         case StackElement::ValueTypeEntry:
            if (ValueTypeEntry *ve = parseValueTypeEntry(reader, name, versionRange.since, &attributes)) {
                applyComplexTypeAttributes(reader, ve, &attributes);
@@ -2836,6 +2850,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::ObjectTypeEntry:
+        case StackElement::InterfaceTypeEntry:
             if (!checkRootElement())
                 return false;
             element->entry = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());
@@ -2857,7 +2872,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             break;
         default:
             Q_ASSERT(false);
-        };
+        }
 
         if (element->entry) {
             if (!m_database->addType(element->entry, &m_error))

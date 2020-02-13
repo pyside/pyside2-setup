@@ -131,12 +131,6 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
     return result;
 }
 
-QString msgInterfaceTypeFound(const QString &qualifiedName)
-{
-    return QLatin1String("Interface type found for \"") + qualifiedName
-        + QLatin1String("\".");
-}
-
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te)
 {
     QString result = QLatin1String("Ambiguous types of varying types found for \"") + qualifiedName
@@ -217,6 +211,23 @@ QString msgUnableToTranslateType(const TypeInfo &typeInfo,
 QString msgCannotFindTypeEntry(const QString &t)
 {
     return QLatin1String("Cannot find type entry for \"") + t + QLatin1String("\".");
+}
+
+QString msgCannotFindTypeEntryForSmartPointer(const QString &t, const QString &smartPointerType)
+{
+    return QLatin1String("Cannot find type entry \"") + t
+        + QLatin1String("\" for instantiation of \"") + smartPointerType + QLatin1String("\".");
+}
+
+QString msgInvalidSmartPointerType(const TypeInfo &i)
+{
+    return QLatin1String("Invalid smart pointer type \"") + i.toString() + QLatin1String("\".");
+}
+
+QString msgCannotFindSmartPointerInstantion(const TypeInfo &i)
+{
+    return QLatin1String("Cannot find instantiation of smart pointer type for \"")
+        + i.toString() + QLatin1String("\".");
 }
 
 QString msgCannotTranslateTemplateArgument(int i,

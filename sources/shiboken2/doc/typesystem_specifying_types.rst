@@ -335,30 +335,7 @@ object-type
 interface-type
 ^^^^^^^^^^^^^^
 
-    The interface-type node indicates that the given class is replaced by an
-    interface pattern when mapping from C++ to the target language. Using the
-    interface-type node implicitly makes the given type an :ref:`object-type`.
-
-    .. code-block:: xml
-
-        <typesystem>
-            <interface-type name="..."
-                since="..."
-                package ="..."
-                default-superclass ="..."
-                revision="..." />
-        </typesystem>
-
-    The **name** attribute is the fully qualified C++ class name. The *optional*
-    **package** attribute can be used to override the package of the type system.
-    If there is no C++ base class, the *optional* **default-superclass** attribute
-    can be used to specify a superclass in the generated target language API, for
-    the given class.
-
-    The *optional*  **since** value is used to specify the API version of this interface.
-
-    The **revision** attribute can be used to specify a revision for each type, easing the
-    production of ABI compatible bindings.
+    This type is deprecated and no longer has any effect. Use object-type instead.
 
 .. _container-type:
 
@@ -445,6 +422,14 @@ smart-pointer-type
     to function return values.
     **ref-count-method** specifies the name of the method used to do reference counting.
 
+    The *optional* attribute **instantiations** specifies for which instantiations
+    of the smart pointer wrappers will be generated (comma-separated list).
+    By default, this will happen for all instantiations found by code parsing.
+    This might be a problem when linking different modules, since wrappers for the
+    same instantiation might be generated into different modules, which then clash.
+    Providing an instantiations list makes it possible to specify which wrappers
+    will be generated into specific modules.
+
     .. code-block:: xml
 
         <typesystem>
@@ -452,7 +437,8 @@ smart-pointer-type
                 since="..."
                 type="..."
                 getter="..."
-                ref-count-method="..."/>
+                ref-count-method="..."
+                instantiations="..."/>
             </typesystem>
 
 .. _function:

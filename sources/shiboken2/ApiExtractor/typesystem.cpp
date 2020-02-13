@@ -956,6 +956,11 @@ TypeEntry *SmartPointerTypeEntry::clone() const
 
 SmartPointerTypeEntry::SmartPointerTypeEntry(const SmartPointerTypeEntry &) = default;
 
+bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntry *e) const
+{
+    return m_instantiations.isEmpty() || m_instantiations.contains(e);
+}
+
 NamespaceTypeEntry::NamespaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                        const TypeEntry *parent) :
     ComplexTypeEntry(entryName, NamespaceType, vr, parent)
@@ -1001,11 +1006,6 @@ ValueTypeEntry::ValueTypeEntry(const QString &entryName, const QVersionNumber &v
 }
 
 bool ValueTypeEntry::isValue() const
-{
-    return true;
-}
-
-bool ValueTypeEntry::isNativeIdBased() const
 {
     return true;
 }
@@ -1157,30 +1157,6 @@ void CustomConversion::TargetToNativeConversion::setConversion(const QString& co
     m_d->conversion = conversion;
 }
 
-InterfaceTypeEntry::InterfaceTypeEntry(const QString &entryName, const QVersionNumber &vr,
-                                       const TypeEntry *parent) :
-    ComplexTypeEntry(entryName, InterfaceType, vr, parent)
-{
-}
-
-bool InterfaceTypeEntry::isNativeIdBased() const
-{
-    return true;
-}
-
-QString InterfaceTypeEntry::qualifiedCppName() const
-{
-    const int len = ComplexTypeEntry::qualifiedCppName().length() - interfaceName(QString()).length();
-    return ComplexTypeEntry::qualifiedCppName().left(len);
-}
-
-TypeEntry *InterfaceTypeEntry::clone() const
-{
-    return new InterfaceTypeEntry(*this);
-}
-
-InterfaceTypeEntry::InterfaceTypeEntry(const InterfaceTypeEntry &) = default;
-
 FunctionTypeEntry::FunctionTypeEntry(const QString &entryName, const QString &signature,
                                      const QVersionNumber &vr,
                                      const TypeEntry *parent) :
@@ -1200,16 +1176,6 @@ ObjectTypeEntry::ObjectTypeEntry(const QString &entryName, const QVersionNumber 
                                  const TypeEntry *parent)
     : ComplexTypeEntry(entryName, ObjectType, vr, parent)
 {
-}
-
-InterfaceTypeEntry *ObjectTypeEntry::designatedInterface() const
-{
-    return m_interface;
-}
-
-bool ObjectTypeEntry::isNativeIdBased() const
-{
-    return true;
 }
 
 TypeEntry *ObjectTypeEntry::clone() const

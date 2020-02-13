@@ -59,7 +59,6 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
                               const QString &className,
                               const TypeEntry *t);
 
-QString msgInterfaceTypeFound(const QString &qualifiedName);
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te);
 QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te);
 
@@ -82,6 +81,10 @@ QString msgUnableToTranslateType(const TypeInfo &typeInfo,
                                  const QString &why);
 
 QString msgCannotFindTypeEntry(const QString &t);
+
+QString msgCannotFindTypeEntryForSmartPointer(const QString &t, const QString &smartPointerType);
+QString msgInvalidSmartPointerType(const TypeInfo &i);
+QString msgCannotFindSmartPointerInstantion(const TypeInfo &i);
 
 QString msgCannotTranslateTemplateArgument(int i,
                                            const TypeInfo &typeInfo,
