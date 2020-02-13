@@ -1430,8 +1430,8 @@ if (qApp) {
         // this will keep app live after python exit (extra ref)
 }
 // PYSIDE-571: make sure that we return the singleton "None"
-if (pyApp == Py_None)
-    Py_DECREF(MakeSingletonQAppWrapper(nullptr)); // here qApp and instance() diverge
+if (Py_TYPE(pyApp) == Py_TYPE(Py_None))
+    Py_DECREF(MakeQAppWrapper(nullptr));
 %PYARG_0 = pyApp;
 Py_XINCREF(%PYARG_0);
 // @snippet qcoreapplication-instance

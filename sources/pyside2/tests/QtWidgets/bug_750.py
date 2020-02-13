@@ -36,7 +36,7 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide2.QtCore import QTimer
 from PySide2.QtGui import QPainter, QFont, QFontInfo
-from PySide2.QtWidgets import QWidget, qApp
+from PySide2.QtWidgets import QWidget
 
 class MyWidget(QWidget):
     def paintEvent(self, e):

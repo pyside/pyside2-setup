@@ -32,6 +32,8 @@ import PySide2
 # This test tests the new "macro" feature of qApp.
 # It also uses the qApp variable to finish the instance and start over.
 
+# Note: this test makes qapplication_singleton_test.py obsolete.
+
 class qAppMacroTest(unittest.TestCase):
     _test_1093_is_first = True
 
@@ -44,13 +46,8 @@ class qAppMacroTest(unittest.TestCase):
             QtWidgets = QtGui = QtCore
         # qApp is in the builtins
         self.assertEqual(bool(qApp), False)
-        # and also in certain PySide modules
-        QtCore.qApp, QtGui.qApp, QtWidgets.qApp
-        # and they are all the same
-        self.assertTrue(qApp is QtCore.qApp is QtGui.qApp is QtWidgets.qApp)
-        # and the type is NoneType, but it is not None (cannot work)
-        self.assertTrue(type(qApp) is type(None))
-        self.assertTrue(qApp is not None)
+        # and the type is None
+        self.assertTrue(qApp is None)
         # now we create an application for all cases
         classes = (QtCore.QCoreApplication,
                    QtGui.QGuiApplication,
@@ -63,9 +60,7 @@ class qAppMacroTest(unittest.TestCase):
         QtCore.QCoreApplication([])
         with self.assertRaises(RuntimeError):
             QtCore.QCoreApplication([])
-        self.assertEqual(QtCore.QCoreApplication.instance(), QtCore.qApp)
-        # and they are again all the same
-        self.assertTrue(qApp is QtCore.qApp is QtGui.qApp is QtWidgets.qApp)
+        self.assertEqual(QtCore.QCoreApplication.instance(), qApp)
 
     def test_1093(self):
         # Test that without creating a QApplication staticMetaObject still exists.

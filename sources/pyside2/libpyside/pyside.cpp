@@ -94,6 +94,7 @@ void init(PyObject *module)
     MetaFunction::init(module);
     // Init signal manager, so it will register some meta types used by QVariant.
     SignalManager::instance();
+    initQApp();
 }
 
 static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *accept)
@@ -214,7 +215,7 @@ void destroyQCoreApplication()
     delete app;
     Py_END_ALLOW_THREADS
     // PYSIDE-571: make sure to create a singleton deleted qApp.
-    MakeSingletonQAppWrapper(NULL);
+    Py_DECREF(MakeQAppWrapper(nullptr));
 }
 
 std::size_t getSizeOfQObject(SbkObjectType *type)
@@ -297,6 +298,23 @@ void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds 
         return;
     }
     initDynamicMetaObject(type, userData->mo.update(), userData->cppObjSize);
+}
+
+void initQApp()
+{
+    /*
+     * qApp will not be initialized when embedding is active.
+     * That means that qApp exists already when PySide is initialized.
+     * We could solve that by creating a qApp variable, but in embedded
+     * mode, we also have the effect that the first assignment to qApp
+     * is persistent! Therefore, we can never be sure to have created
+     * qApp late enough to get the right type for the instance.
+     *
+     * I would appreciate very much if someone could explain or even fix
+     * this issue. It exists only when a pre-existing application exists.
+     */
+    if (!qApp)
+        Py_DECREF(MakeQAppWrapper(nullptr));
 }
 
 PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)

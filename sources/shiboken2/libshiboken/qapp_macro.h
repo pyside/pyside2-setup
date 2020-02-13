@@ -45,8 +45,7 @@
 extern "C"
 {
 
-LIBSHIBOKEN_API PyObject *MakeSingletonQAppWrapper(PyTypeObject *type);
-LIBSHIBOKEN_API void NotifyModuleForQApp(PyObject *module, void *qApp);
+LIBSHIBOKEN_API PyObject *MakeQAppWrapper(PyTypeObject *type);
 
 } // extern "C"
 
