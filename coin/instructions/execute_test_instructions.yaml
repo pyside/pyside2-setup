@@ -1,0 +1,141 @@
+type: Group
+enable_if:
+  condition: property
+  property: features
+  not_contains_value: LicenseCheck
+instructions:
+  - type: EnvironmentVariable
+    variableName: QTEST_ENVIRONMENT
+    variableValue: "ci"
+  - type: ExecuteCommand
+    command: python -u coin_test_instructions.py --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+    maxTimeInSeconds: 7200
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: MacOS
+        - condition: property
+          property: features
+          not_contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute test instructions on osx
+  - type: ExecuteCommand
+    command: python -u coin_test_instructions.py --packaging --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+    maxTimeInSeconds: 7200
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: MacOS
+        - condition: property
+          property: features
+          contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute test instructions on osx
+  - type: ExecuteCommand
+    command: python -u coin_test_instructions.py --os=Linux --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: Linux
+        - condition: property
+          property: features
+          not_contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute test instructions on Linux
+  - type: ExecuteCommand
+    command: python -u coin_test_instructions.py --packaging --os=Linux --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: Linux
+        - condition: property
+          property: features
+          contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute test instructions on Linux
+  - type: ExecuteCommand
+    command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
+    maxTimeInSeconds: 7200
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: Windows
+        - condition: property
+          property: target.arch
+          equals_property: host.arch
+        - condition: property
+          property: features
+          not_contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute test instructions on 64 bit Windows
+  - type: ExecuteCommand
+    command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
+    maxTimeInSeconds: 7200
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: Windows
+        - condition: property
+          property: target.arch
+          equals_value: X86
+        - condition: property
+          property: features
+          not_contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute test instructions on 64 bit Windows
+  - type: ExecuteCommand
+    command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --packaging --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
+    maxTimeInSeconds: 7200
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: Windows
+        - condition: property
+          property: target.arch
+          equals_property: host.arch
+        - condition: property
+          property: features
+          contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute 32 bit test instructions on 64 bit Windows
+  - type: ExecuteCommand
+    command: c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --packaging --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
+    maxTimeInSeconds: 7200
+    maxTimeBetweenOutput: 120
+    enable_if:
+      condition: and
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: Windows
+        - condition: property
+          property: target.arch
+          equals_value: X86
+        - condition: property
+          property: features
+          contains_value: Packaging
+    userMessageOnFailure: >
+         Failed to execute 32 bit test instructions on 64 bit Windows

@@ -1,0 +1,117 @@
+type: Group
+instructions:
+    - type: EnvironmentVariable
+      variableName: TARGET_ARCHITECTURE
+      variableValue: amd64
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86_64
+          - condition: property
+            property: host.os
+            equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: TARGET_ARCHITECTURE
+      variableValue: amd64_x86
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86
+          - condition: property
+            property: host.os
+            equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: CI_TARGET_ARCHITECTURE
+      variableValue: X86_64
+      enable_if:
+          condition: property
+          property: target.arch
+          equals_value: X86_64
+    - type: EnvironmentVariable
+      variableName: CI_TARGET_ARCHITECTURE
+      variableValue: X86
+      enable_if:
+          condition: property
+          property: target.arch
+          equals_value: X86
+    - type: EnvironmentVariable
+      variableName: CI_PACKAGING_FEATURE
+      variableValue: "--packaging"
+      enable_if:
+          condition: property
+          property: features
+          contains_value: Packaging
+    - type: EnvironmentVariable
+      variableName: CI_OS
+      variableValue: "MacOS"
+      enable_if:
+          condition: property
+          property: host.os
+          equals_value: MacOS
+    - type: EnvironmentVariable
+      variableName: CI_OS
+      variableValue: "Linux"
+      enable_if:
+          condition: property
+          property: host.os
+          equals_value: Linux
+    - type: EnvironmentVariable
+      variableName: CI_OS
+      variableValue: "Windows"
+      enable_if:
+          condition: property
+          property: host.os
+          equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: MAKEFLAGS
+      variableValue: ""
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: AppendToEnvironmentVariable
+      variableName: PATH
+      variableValue: ;%CI_JOM_PATH%
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
+      variableValue: "\\Users\\qt\\work\\install\\bin;"
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: EnvironmentVariable
+      variableName: ICC64_18_LDLP
+      variableValue: /opt/intel/lib/intel64
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: EnvironmentVariable
+      variableName: ICC64_18_PATH # Seems a bit hard to maintain
+      variableValue: /opt/intel/compilers_and_libraries_2018.1.163/linux/bin/intel64:/opt/intel/bin
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: AppendToEnvironmentVariable
+      variableName: LD_LIBRARY_PATH
+      variableValue: :/opt/intel/lib/intel64
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
+    - type: AppendToEnvironmentVariable
+      variableName: PATH
+      variableValue: ":{{.Env.ICC64_18_PATH}}"
+      enable_if:
+         condition: property
+         property: target.compiler
+         equals_value: ICC_18
