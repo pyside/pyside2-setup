@@ -21,7 +21,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on Linux
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
+    command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
@@ -30,3 +30,27 @@ instructions:
         equals_value: Windows
     userMessageOnFailure: >
          Failed to execute build instructions on Windows
+  - type: SignPackage
+    directory: "{{.AgentWorkingDir}}\\pyside"
+    maxTimeInSeconds: 1200
+    maxTimeBetweenOutput: 1200
+    enable_if:
+      condition: property
+      property: host.os
+      equals_value: Windows
+  - type: ChangeDirectory
+    directory: "{{.AgentWorkingDir}}\\pyside\\pyside-setup"
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: Windows
+  - type: ExecuteCommand
+    command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=WHEEL"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 300
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: Windows
+    userMessageOnFailure: >
+         Failed to create wheels for Windows
