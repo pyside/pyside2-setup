@@ -26,10 +26,18 @@
 ##
 #############################################################################
 
+import os
+import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper import adjust_filename
+
 from PySide2 import QtUiTools
 from PySide2 import QtCore
 from PySide2 import QtWidgets
-from helper import adjust_filename
+
 
 app = QtWidgets.QApplication([])
 loader = QtUiTools.QUiLoader()

@@ -28,8 +28,12 @@
 
 '''Basic test cases for QGraphicsScene'''
 
-import unittest
 import gc
+import os
+import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QPointF
 from PySide2.QtGui import QPolygonF, QPixmap, QPainterPath, QTransform, QWindow

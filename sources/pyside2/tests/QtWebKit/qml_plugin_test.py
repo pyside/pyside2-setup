@@ -30,6 +30,8 @@ import os
 import sys
 import unittest
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QUrl, QTimer
 from PySide2.QtWidgets import QApplication, QLabel
 from PySide2.QtWebKit import QWebPluginFactory, QWebView, QWebSettings

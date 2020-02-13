@@ -26,7 +26,12 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from helper import adjust_filename, TimedQApplication
 from PySide2.QtQuick import QQuickView
 from PySide2.QtCore import QObject, Signal, Slot, QUrl, QTimer, Property

@@ -31,8 +31,11 @@
 '''Test cases for PySide API2 support'''
 
 
-import unittest
+import os
 import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtGui import QIntValidator, QValidator
 from PySide2.QtWidgets import QWidget, QSpinBox, QApplication

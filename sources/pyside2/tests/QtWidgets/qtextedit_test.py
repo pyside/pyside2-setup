@@ -28,8 +28,13 @@
 
 '''Test cases for QTextEdit and ownership problems.'''
 
-import unittest
+import os
+import sys
 from sys import getrefcount
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtWidgets import QTextEdit
 
 from helper import UsesQApplication

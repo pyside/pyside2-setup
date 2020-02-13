@@ -28,7 +28,11 @@
 
 '''Tests for calling methods further than the direct parent'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtWidgets import QPushButton, QWidget
 

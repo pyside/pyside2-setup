@@ -37,7 +37,11 @@
 # 2011-04-08 Thomas Perl <m@thp.io>
 # Released under the same terms as PySide itself
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import adjust_filename, TimedQApplication
 

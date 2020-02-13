@@ -28,7 +28,11 @@
 
 '''Test cases for overriding inherited protected virtual methods'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QTimerEvent
 from PySide2.QtWidgets import QApplication, QSpinBox

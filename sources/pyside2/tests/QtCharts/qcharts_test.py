@@ -30,9 +30,13 @@
 
 '''Test cases for QCharts'''
 
-from helper import UsesQApplication
+import os
+import sys
 import unittest
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper import UsesQApplication
 from PySide2.QtCore import QRect, QSize, QTimer
 from PySide2.QtGui import QGuiApplication, QScreen
 from PySide2.QtCharts import QtCharts

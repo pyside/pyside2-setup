@@ -28,9 +28,15 @@
 
 ''' unit test for BUG #1060 '''
 
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper import adjust_filename
 from PySide2.QtWidgets import QApplication
 from PySide2.QtUiTools import QUiLoader
-from helper import adjust_filename
+
 
 class MyQUiLoader(QUiLoader):
     def __init__(self):

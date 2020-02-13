@@ -30,7 +30,11 @@
 
 '''Unit tests for QGLBuffer'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QByteArray
 from PySide2.QtOpenGL import QGLBuffer, QGLWidget

@@ -28,7 +28,11 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication
 from PySide2.QtGui import QBrush, QColor

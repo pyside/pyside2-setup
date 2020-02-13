@@ -28,7 +28,12 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QObject, QState, QFinalState, SIGNAL
 from PySide2.QtCore import QTimer, QStateMachine
 from PySide2.QtCore import QParallelAnimationGroup

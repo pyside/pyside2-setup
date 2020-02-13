@@ -29,7 +29,12 @@
 '''Tests for inject codes and modifications on QFontMetrics
    and QFontMetricsF'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtGui import QFont, QFontMetrics, QFontMetricsF
 from PySide2.QtCore import QRect, QRectF, Qt, QSize, QSizeF
 from helper import UsesQApplication

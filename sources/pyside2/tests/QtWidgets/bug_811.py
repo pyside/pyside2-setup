@@ -26,9 +26,12 @@
 ##
 #############################################################################
 
-import unittest
+import os
 import sys
+import unittest
 import weakref
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import UsesQApplication
 

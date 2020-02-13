@@ -27,10 +27,14 @@
 #############################################################################
 
 import os
-import sys
-import threading
-import select
 import random
+import select
+import sys
+import tempfile
+import threading
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 
 if py3k.IS_PY3K:

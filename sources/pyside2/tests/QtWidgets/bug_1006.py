@@ -26,9 +26,12 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
 import weakref
-import sys
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QDialog, QLabel, QGridLayout, QHBoxLayout, QWidget

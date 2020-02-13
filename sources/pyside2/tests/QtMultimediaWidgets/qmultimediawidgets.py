@@ -28,7 +28,11 @@
 
 '''Test cases for QtMultimediaWidgets'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import UsesQApplication
 from PySide2.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget

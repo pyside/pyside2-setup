@@ -28,8 +28,11 @@
 
 ''' Test bug 363: http://bugs.openbossa.org/show_bug.cgi?id=363'''
 
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import UsesQApplication
 from PySide2 import QtCore, QtWidgets

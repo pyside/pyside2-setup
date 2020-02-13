@@ -30,7 +30,11 @@
 
 """Tests covering signal emission and receiving to python slots"""
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QObject, SIGNAL, Slot
 from helper import UsesQCoreApplication

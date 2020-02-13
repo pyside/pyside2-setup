@@ -33,7 +33,11 @@ archive:
 https://srinikom.github.io/pyside-bz-archive/442.html
 '''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import adjust_filename, TimedQApplication
 

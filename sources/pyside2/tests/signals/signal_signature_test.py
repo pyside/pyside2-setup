@@ -30,7 +30,12 @@
 
 '''Test case for signal signature received by QObject::connectNotify().'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import *
 from helper import UsesQCoreApplication
 

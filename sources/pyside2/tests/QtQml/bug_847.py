@@ -36,7 +36,11 @@
 
 from __future__ import print_function
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import adjust_filename, UsesQApplication
 

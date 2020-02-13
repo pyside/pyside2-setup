@@ -28,9 +28,12 @@
 
 '''Unit tests for QOpenGLBuffer'''
 
-import unittest
 import ctypes
+import os
 import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from helper import UsesQApplication
 from PySide2.QtGui import QOpenGLBuffer

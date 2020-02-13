@@ -30,7 +30,11 @@
 
 '''Test cases for multiple inheritance from 2 QObjects'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QObject
 from PySide2.QtGui import *

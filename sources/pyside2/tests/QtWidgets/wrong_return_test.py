@@ -28,12 +28,18 @@
 
 '''Test cases for Virtual functions with wrong return type'''
 
+import os
+import sys
 import unittest
+import warnings
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 from PySide2 import QtWidgets
 from helper import UsesQApplication
 
-import warnings
+
 warnings.simplefilter('error')
 
 

@@ -31,10 +31,15 @@
 
 '''Tests QByteArray implementation of Python buffer protocol'''
 
+import os
+from os.path import isdir
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 
-from os.path import isdir
 from PySide2.QtCore import QByteArray
 
 
