@@ -1,134 +1,32 @@
 type: Group
 instructions:
   - type: ExecuteCommand
-    command: python -u coin_build_instructions.py --os=MacOS --packaging --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+    command: "python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: MacOS
-        - condition: property
-          property: features
-          contains_value: Packaging
+        condition: property
+        property: host.os
+        equals_value: MacOS
     userMessageOnFailure: >
          Failed to execute build instructions on osx
   - type: ExecuteCommand
-    command: python -u coin_build_instructions.py --os=MacOS --instdir=/Users/qt/work/install  --targetOs=MacOS --hostArch=X86_64 --targetArch=X86_64
+    command: "python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: MacOS
-        - condition: property
-          property: features
-          not_contains_value: Packaging
-    userMessageOnFailure: >
-         Failed to execute build instructions on osx
-  - type: ExecuteCommand
-    command: python -u coin_build_instructions.py --os=Linux --packaging --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: Linux
-        - condition: property
-          property: features
-          contains_value: Packaging
+        condition: property
+        property: host.os
+        equals_value: Linux
     userMessageOnFailure: >
          Failed to execute build instructions on Linux
   - type: ExecuteCommand
-    command: python -u coin_build_instructions.py --os=Linux --instdir=/home/qt/work/install  --targetOs=Linux --hostArch=X86_64 --targetArch=X86_64
+    command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: Linux
-        - condition: property
-          property: features
-          not_contains_value: Packaging
+        condition: property
+        property: host.os
+        equals_value: Windows
     userMessageOnFailure: >
-         Failed to execute build instructions on Linux
-  - type: ExecuteCommand
-    command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --packaging --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: Windows
-        - condition: property
-          property: features
-          contains_value: Packaging
-        - condition: property
-          property: target.arch
-          equals_property: host.arch
-    userMessageOnFailure: >
-         Failed to execute build instructions on 64 bit Windows
-  - type: ExecuteCommand
-    command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86_64
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: Windows
-        - condition: property
-          property: features
-          not_contains_value: Packaging
-        - condition: property
-          property: target.arch
-          equals_property: host.arch
-    userMessageOnFailure: >
-         Failed to execute build instructions on 64 bit Windows
-  - type: ExecuteCommand
-    command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --packaging --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: Windows
-        - condition: property
-          property: features
-          contains_value: Packaging
-        - condition: property
-          property: target.arch
-          equals_value: X86
-    userMessageOnFailure: >
-         Failed to execute 32 bit build instructions on 64 bit Windows
-  - type: ExecuteCommand
-    command: c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os=Windows --instdir=\Users\qt\work\install  --targetOs=Windows --hostArch=X86_64 --targetArch=X86
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-      condition: and
-      conditions:
-        - condition: property
-          property: host.os
-          equals_value: Windows
-        - condition: property
-          property: features
-          not_contains_value: Packaging
-        - condition: property
-          property: target.arch
-          equals_value: X86
-    userMessageOnFailure: >
-         Failed to execute 32 bit build instructions on 64 bit Windows
+         Failed to execute build instructions on Windows
