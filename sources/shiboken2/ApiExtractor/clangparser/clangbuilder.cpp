@@ -190,7 +190,7 @@ public:
                                    TypeInfo *t) const;
     bool addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const;
 
-    void addTypeDef(const CXCursor &cursor, const TypeInfo &ti);
+    void addTypeDef(const CXCursor &cursor, const CXType &cxType);
 
     TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor) const;
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
@@ -539,11 +539,12 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
     return it.value();
 }
 
-void BuilderPrivate::addTypeDef(const CXCursor &cursor, const TypeInfo &ti)
+void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
 {
-    TypeDefModelItem item(new _TypeDefModelItem(m_model, getCursorSpelling(cursor)));
+    const QString target = getCursorSpelling(cursor);
+    TypeDefModelItem item(new _TypeDefModelItem(m_model, target));
     setFileName(cursor, item.data());
-    item->setType(ti);
+    item->setType(createTypeInfo(cxType));
     item->setScope(m_scope);
     m_scopeStack.back()->addTypeDef(item);
     m_cursorTypedefHash.insert(cursor, item);
@@ -765,6 +766,19 @@ static CodeModel::ClassType codeModelClassTypeFromCursor(CXCursorKind kind)
     return result;
 }
 
+static QString enumType(const CXCursor &cursor)
+{
+    QString name = getCursorSpelling(cursor); // "enum Foo { v1, v2 };"
+    if (name.isEmpty()) {
+        // PYSIDE-1228: For "typedef enum { v1, v2 } Foo;", type will return
+        // "Foo" as expected. Care must be taken to exclude real anonymous enums.
+        name = getTypeName(clang_getCursorType(cursor));
+        if (name.contains(QLatin1String("(anonymous")))
+            name.clear();
+    }
+    return name;
+}
+
 BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
 {
     switch (cursor.kind) {
@@ -807,7 +821,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_scope.back() += templateBrackets();
         break;
     case CXCursor_EnumDecl: {
-        QString name = getCursorSpelling(cursor);
+        QString name = enumType(cursor);
         EnumKind kind = CEnum;
         if (name.isEmpty()) {
             kind = AnonymousEnum;
@@ -953,11 +967,17 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     case CXCursor_TypeAliasTemplateDecl: { // May contain nested CXCursor_TemplateTypeParameter
         const CXType type = clang_getCanonicalType(clang_getCursorType(cursor));
         if (type.kind > CXType_Unexposed)
-            d->addTypeDef(cursor, d->createTypeInfo(type));
+            d->addTypeDef(cursor, type);
     }
         return Skip;
-    case CXCursor_TypedefDecl:
-        d->addTypeDef(cursor, d->createTypeInfo(clang_getTypedefDeclUnderlyingType(cursor)));
+    case CXCursor_TypedefDecl: {
+        auto underlyingType = clang_getTypedefDeclUnderlyingType(cursor);
+        d->addTypeDef(cursor, underlyingType);
+        // For "typedef enum/struct {} Foo;", skip the enum/struct
+        // definition nested into the typedef (PYSIDE-1228).
+        if (underlyingType.kind == CXType_Elaborated)
+            return Skip;
+    }
         break;
     case CXCursor_TypeRef:
         if (!d->m_currentFunction.isNull()) {
