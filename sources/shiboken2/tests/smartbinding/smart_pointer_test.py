@@ -183,7 +183,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 10)
 
         # clear and delete all objects in the list
-        ptrToObjList.clear()
+        del ptrToObjList[:]  # Python 2.7 lists have no clear method
         self.assertEqual(len(ptrToObjList), 0)
         self.assertEqual(objCount(), 1)
 
