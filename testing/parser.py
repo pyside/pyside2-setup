@@ -44,6 +44,15 @@ import re
 from collections import namedtuple
 from .helper import StringIO
 
+"""
+testing/parser.py
+
+Parse test output lines from ctest and build TestResult objects.
+
+TestParser.iter_blacklist adds info from the blacklist while iterating
+over the test results.
+"""
+
 _EXAMPLE = """
 Example output:
 
@@ -62,39 +71,42 @@ Note the field "mod_name". I had split this before, but it is necessary
 to use the combination as the key, because the test names are not unique.
 """
 
-# validation of our pattern:
+_TEST_PAT_PRE = r"""
+    ^                          # start
+    \s*                        # any whitespace ==: WS
+    ([0-9]+)/([0-9]+)          #                         ip1 "/" n
+    \s+                        # some WS
+    Test                       #                         "Test"
+    \s+                        # some WS
+    \#                         # sharp symbol            "#"
+    ([0-9]+)                   #                         sharp
+    :                          # colon symbol            ':'
+    """
+_TEST_PAT = _TEST_PAT_PRE + r"""
+    \s+                        # some WS
+    ([\w-]+)                   #                         mod_name
+    .*?                        # whatever (non greedy)
+    (                          #
+      (Passed)                 # either "Passed", None
+      |                        #
+      \*\*\*(\w+.*?)           # or     None, "Something"
+    )                          #                         code
+    \s+                        # some WS
+    ([0-9]+\.[0-9]+)           #                         tim
+    \s+                        # some WS
+    sec                        #                         "sec"
+    \s*                        # any WS
+    $                          # end
+    """
 
-_TEST_PAT = r"""
-              ^                          # start
-              \s*                        # any whitespace ==: WS
-              ([0-9]+)/([0-9]+)          #                         ip1 "/" n
-              \s+                        # some WS
-              Test                       #                         "Test"
-              \s+                        # some WS
-              \#                         # sharp symbol            "#"
-              ([0-9]+)                   #                         sharp
-              :                          # colon symbol            ':'
-              \s+                        # some WS
-              ([\w-]+)                   #                         mod_name
-              .*?                        # whatever (non greedy)
-              (                          #
-                (Passed)                 # either "Passed", None
-                |                        #
-                \*\*\*(\w+.*?)           # or     None, "Something"
-              )                          #                         code
-              \s+                        # some WS
-              ([0-9]+\.[0-9]+)           #                         tim
-              \s+                        # some WS
-              sec                        #                         "sec"
-              \s*                        # any WS
-              $                          # end
-              """
+# validation of our pattern:
 assert re.match(_TEST_PAT, _EXAMPLE.splitlines()[5], re.VERBOSE)
 assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[5], re.VERBOSE).groups()) == 8
 assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[7], re.VERBOSE).groups()) == 8
 
-TestResult = namedtuple("TestResult", ["idx", "mod_name", "passed",
-                                       "code", "time"])
+TestResult = namedtuple("TestResult", "idx n sharp mod_name passed "
+                                      "code time fatal rich_result".split())
+
 def _parse_tests(test_log):
     """
     Create a TestResult object for every entry.
@@ -107,6 +119,15 @@ def _parse_tests(test_log):
             lines = f.readlines()
     else:
         lines = []
+
+    # PYSIDE-1229: Fix disrupted lines like "Exit code 0xc0000409\n***Exception:"
+    pat = _TEST_PAT_PRE
+    for idx, line in enumerate(lines[:-1]):
+        match = re.match(pat, line, re.VERBOSE)
+        if match and line.split()[-1] != "sec":
+            # don't change the number of lines
+            lines[idx : idx + 2] = [line.rstrip() + lines[idx + 1], ""]
+
     pat = _TEST_PAT
     for line in lines:
         match = re.match(pat, line, re.VERBOSE)
@@ -114,29 +135,41 @@ def _parse_tests(test_log):
             idx, n, sharp, mod_name, much_stuff, code1, code2, tim = tup = match.groups()
             # either code1 or code2 is None
             code = code1 or code2
-            idx, n, code, tim = int(idx), int(n), code.lower(), float(tim)
-            res = TestResult(idx, mod_name, code == "passed", code, tim)
-            result.append(res)
+            idx, n, sharp, code, tim = int(idx), int(n), int(sharp), code.lower(), float(tim)
+            item = TestResult(idx, n, sharp, mod_name, code == "passed", code, tim, False, None)
+            result.append(item)
+
+    # PYSIDE-1229: Be sure that the numbering of the tests is consecutive
+    for idx, item in enumerate(result):
+        # testing fatal error:
+        # Use "if idx + 1 != item.idx or idx == 42:"
+        if idx + 1 != item.idx:
+            # The numbering is disrupted. Provoke an error in this line!
+            passed = False
+            code += ", but lines are disrupted!"
+            result[idx] = item._replace(passed=False,
+                                        code=item.code + ", but lines are disrupted!",
+                                        fatal=True)
+            break
     return result
 
 
 class TestParser(object):
     def __init__(self, test_log):
-        self._result = _parse_tests(test_log)
+        self._results = _parse_tests(test_log)
 
     @property
-    def result(self):
-        return self._result
+    def results(self):
+        return self._results
 
     def __len__(self):
-        return len(self._result)
+        return len(self._results)
 
     def iter_blacklist(self, blacklist):
         bl = blacklist
-        for line in self._result:
-            mod_name = line.mod_name
-            passed = line.passed
-            match = bl.find_matching_line(line)
+        for item in self.results:
+            passed = item.passed
+            match = bl.find_matching_line(item)
             if not passed:
                 if match:
                     res = "BFAIL"
@@ -147,4 +180,7 @@ class TestParser(object):
                     res = "BPASS"
                 else:
                     res = "PASS"
-            yield mod_name, res
+            if item.fatal:
+                # PYSIDE-1229: Stop the testing completely when a fatal error exists
+                res = "FATAL"
+            yield item._replace(rich_result=res)

@@ -39,6 +39,12 @@
 
 from __future__ import print_function
 
+"""
+testing/helper.py
+
+Some tools that do not fit elsewhere.
+"""
+
 import os
 import sys
 from collections import namedtuple
