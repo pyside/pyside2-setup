@@ -14,7 +14,7 @@ macro(get_numpy_location)
                   break"
       OUTPUT_VARIABLE PYTHON_NUMPY_LOCATION
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("PYTHON_NUMPY_LOCATION: " ${PYTHON_NUMPY_LOCATION})
+  message(STATUS "PYTHON_NUMPY_LOCATION: " ${PYTHON_NUMPY_LOCATION})
 endmacro()
 
 option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
