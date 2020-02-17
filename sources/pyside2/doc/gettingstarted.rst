@@ -28,9 +28,9 @@ Guides per platform
 
 You can refer to the following pages for platform specific instructions:
 
- * `Windows`_,
- * `macOS`_,
- * `Linux`_,
+ * `Windows`_
+ * `macOS`_
+ * `Linux`_
  * Mobile platforms (iOS/Android) **(no support)**
  * Embedded platforms **(no official support)**
 
@@ -92,12 +92,12 @@ Building the documentation
 The documentation is being generated using **qdoc** to get the API information, and also **sphinx**
 for the local Python related notes.
 
-The system required ``libxml2`` and `libxslt``, also on the Python environment, ``sphinx`` and
+The system required ``libxml2`` and ``libxslt``, also on the Python environment, ``sphinx`` and
 ``graphviz`` need to be installed before running the installation process::
 
     pip install graphviz sphinx
 
-After installing ``graphviz`, the ``dot`` command needs to be in PATH, otherwise,
+After installing ``graphviz``, the ``dot`` command needs to be in PATH, otherwise,
 the process will fail. Installing ``graphviz`` system-wide is also an option.
 
 Since the process rely on a Qt installation, you need to specify where the ``qtbase`` directory
@@ -111,3 +111,51 @@ directory, and run::
     make apidoc
 
 Finally, you will get a ``html`` directory containing all the generated documentation.
+
+Using the internal tools
+------------------------
+
+A set of tools can be found under the ``tools/`` directory inside the ``pyside-setup`` repository.
+
+* ``checklibs.py``: Script to analyze dynamic library dependencies of Mach-O binaries.
+  To use this utility, just run::
+
+    python checklibs.py /path/to/some.app/Contents/MacOS/Some
+
+  This script was fetched from this repository_.
+
+* ``create_changelog.py``: Script used to create the CHANGELOG that you can find in the ``dist/``
+  directory. Usage::
+
+    python create_changelog.py -r 5.14.1 -v v5.14.0..5.14 -t bug-fix
+
+* ``debug_windows.py``: This script can be used to find out why PySide2 modules
+  fail to load with various DLL errors like Missing DLL or Missing symbol in DLL.
+
+  You can think of it as a Windows version of ``ldd`` / ``LD_DEBUG``.
+
+  Underneath it uses the ``cdb.exe`` command line debugger, and the ``gflags.exe`` tool, both
+  installed with the latest Windows Kit.
+
+  The aim is to ask users to run this script when they encounter PySide2 imports not working on
+  Windows. The user should then provide the generated log file.
+
+  Incidentally it can also be used for any Windows executables, not just Python.
+  To use it just run::
+
+    python debug_windows.py
+
+* ``missing_bindings.py``: This script is used to compare the state of PySide2 and PyQt5
+  regarding available modules and classses. This content is displayed in our `wiki page`_,
+  and can be used as follows::
+
+    python missing_bindings.py --qt-version 5.14.1 -w all
+
+  Please keep in mind we rely on BeautifulSoup_ to parse the content, so you will be to install
+  it besides PySide2 and PyQt5 (Including additional modules like DataVisualiztion, QtCharts,
+  WebEngine, etc).
+
+
+.. _repository: https://github.com/liyanage/macosx-shell-scripts/
+.. _`wiki page`: https://wiki.qt.io/Qt_for_Python_Missing_Bindings
+.. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
