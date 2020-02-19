@@ -33,7 +33,7 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtWidgets import *
-from helper import TimedQApplication
+from helper.timedqapplication import TimedQApplication
 
 def makeBug643(tab):
     button = QPushButton('Foo')

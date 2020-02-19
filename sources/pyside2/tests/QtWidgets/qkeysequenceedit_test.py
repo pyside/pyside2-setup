@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtCore import QTimer
 from PySide2.QtWidgets import QKeySequenceEdit
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QKeySequenceEditTest(UsesQApplication):
     def testKeySequence(self):

@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtWidgets import QGraphicsObject, QGraphicsWidget
 from PySide2.QtCore import QRectF
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class GObjA(QGraphicsObject):
     def paint(self, *args):

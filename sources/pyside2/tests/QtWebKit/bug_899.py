@@ -34,7 +34,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtCore import Property, QObject
 from PySide2.QtWebKit import QWebView
-from helper import TimedQApplication
+from helper.timedqapplication import TimedQApplication
 
 class TestLambdaPropery(TimedQApplication):
 

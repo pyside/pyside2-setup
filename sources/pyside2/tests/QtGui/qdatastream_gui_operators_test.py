@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtCore import QDataStream, QByteArray, QIODevice, Qt
 from PySide2.QtGui import QPixmap, QColor
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QPixmapQDatastream(UsesQApplication):
     '''QDataStream <<>> QPixmap'''

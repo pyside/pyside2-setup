@@ -32,7 +32,9 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
-from helper import adjust_filename, TimedQApplication
+from helper.helper import adjust_filename
+from helper.timedqapplication import TimedQApplication
+
 from PySide2 import QtCore, QtGui, QtQuick
 
 class TestGrabToSharedPointerImage(TimedQApplication):

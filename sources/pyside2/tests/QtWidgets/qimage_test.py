@@ -37,7 +37,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 import py3kcompat as py3k
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
-from helper import UsesQApplication, adjust_filename
+from helper.helper import adjust_filename
+from helper.usesqapplication import UsesQApplication
 
 xpm = [
     "27 22 206 2",

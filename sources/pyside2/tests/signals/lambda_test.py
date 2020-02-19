@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtCore import QObject, SIGNAL, QProcess
 
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 
 class Dummy(QObject):

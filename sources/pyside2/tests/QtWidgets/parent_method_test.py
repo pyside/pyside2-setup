@@ -39,7 +39,7 @@ class Foo(QTableView):
     def __init__(self, parent=None):
         QTableView.__init__(self, parent)
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class TestParentType(UsesQApplication):
 

@@ -33,7 +33,7 @@ import weakref
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 from PySide2.QtGui import QTextBlockUserData, QTextCursor
 from PySide2.QtWidgets import QTextEdit

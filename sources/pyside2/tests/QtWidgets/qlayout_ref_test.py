@@ -39,7 +39,7 @@ from PySide2.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QWidget
 from PySide2.QtWidgets import QStackedLayout, QFormLayout
 from PySide2.QtWidgets import QApplication, QPushButton, QLabel
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class SaveReference(UsesQApplication):
     '''Test case to check if QLayout-derived classes increment the refcount

@@ -36,7 +36,7 @@ from PySide2.QtWidgets import QMenu
 from PySide2.QtGui import QKeySequence, QIcon
 from PySide2.QtCore import SLOT
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QMenuAddAction(UsesQApplication):
 

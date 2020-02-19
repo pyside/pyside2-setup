@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QLabel
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 xpm = [
     "27 22 206 2",

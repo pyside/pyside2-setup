@@ -36,7 +36,7 @@ from PySide2.QtGui import QStandardItemModel, QStandardItem
 from PySide2.QtWidgets import QWidget
 import shiboken2 as shiboken
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class QStandardItemModelTest(UsesQApplication):

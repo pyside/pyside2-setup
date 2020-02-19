@@ -32,7 +32,7 @@ from testbinding import TestObject
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeySequence
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QVariantTest(UsesQApplication):
 

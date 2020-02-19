@@ -39,7 +39,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtCore import QThread, QCoreApplication, QObject, SIGNAL, QMutex, QTimer
 from PySide2.QtCore import QEventLoop
 
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 mutex = QMutex()
 

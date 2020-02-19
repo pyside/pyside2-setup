@@ -38,7 +38,7 @@ from PySide2.QtGui import QTextCursor
 from PySide2.QtPrintSupport import QPrinter, QPrinterInfo
 from PySide2.QtWidgets import QLayout, QWidget, QGraphicsLayout, QGraphicsLayoutItem
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class Layout(QLayout):
     def __init__(self):

@@ -42,7 +42,8 @@ try:
 except ImportError:
     hasQtGui = False
 
-from helper import BasicPySlotCase, UsesQApplication
+from helper.basicpyslotcase import BasicPySlotCase
+from helper.usesqapplication import UsesQApplication
 
 class MultipleSignalConnections(unittest.TestCase):
     '''Base class for multiple signal connection testing'''

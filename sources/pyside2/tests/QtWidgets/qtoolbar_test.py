@@ -36,7 +36,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtWidgets import QToolBar, QMainWindow, QAction
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class AddActionText(UsesQApplication):
     '''Test case for calling QToolbar.addAction passing a text'''

@@ -32,7 +32,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
-from helper import TimedQApplication
+from helper.timedqapplication import TimedQApplication
 from PySide2.support import deprecated
 from PySide2.support.signature import importhandler
 from PySide2 import QtGui

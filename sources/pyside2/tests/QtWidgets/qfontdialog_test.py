@@ -36,7 +36,7 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-from helper import TimedQApplication
+from helper.timedqapplication import TimedQApplication
 
 class TestFontDialog(TimedQApplication):
 

@@ -45,7 +45,7 @@ from PySide2.QtWidgets import QGraphicsPolygonItem, QGraphicsRectItem
 from PySide2.QtWidgets import QGraphicsSimpleTextItem, QGraphicsTextItem
 from PySide2.QtWidgets import QGraphicsProxyWidget, QGraphicsView
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class Constructor(unittest.TestCase):
     '''QGraphicsScene constructor'''

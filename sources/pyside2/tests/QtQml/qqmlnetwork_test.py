@@ -41,7 +41,9 @@ from PySide2.QtQuick import QQuickView
 from PySide2.QtQml import QQmlNetworkAccessManagerFactory
 from PySide2.QtNetwork import QNetworkAccessManager
 
-from helper import adjust_filename, TimedQApplication
+from helper.helper import adjust_filename
+from helper.timedqapplication import TimedQApplication
+
 
 class CustomManager(QNetworkAccessManager):
     def createRequest(self, op, req, data = None):

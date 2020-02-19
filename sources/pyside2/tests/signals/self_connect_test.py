@@ -39,7 +39,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtCore import QObject, SIGNAL, SLOT
 from PySide2.QtWidgets import QPushButton, QWidget
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class SelfConnect(UsesQApplication):

@@ -40,7 +40,8 @@ from PySide2.QtCore import QObject, SIGNAL, QUrl
 from PySide2.QtWebKit import QWebPage, QWebView
 from PySide2.QtNetwork import QNetworkRequest
 
-from helper import adjust_filename, TimedQApplication
+from helper.helper import adjust_filename
+from helper.timedqapplication import TimedQApplication
 
 
 class testWebPage(QWebPage):

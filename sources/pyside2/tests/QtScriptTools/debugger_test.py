@@ -36,7 +36,7 @@ from PySide2.QtCore import SIGNAL, QTimer
 from PySide2.QtScript import QScriptEngine
 from PySide2.QtScriptTools import QScriptEngineDebugger
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class DebuggerTest(UsesQApplication):
 

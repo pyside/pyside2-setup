@@ -36,8 +36,8 @@ from PySide2.QtCore import QObject, SIGNAL, QUrl
 from PySide2.QtWebKit import *
 from PySide2.QtNetwork import QNetworkRequest
 
-from helper import adjust_filename, UsesQApplication
-
+from helper.helper import adjust_filename
+from helper.usesqapplication import UsesQApplication
 
 
 class TestWebFrame(UsesQApplication):

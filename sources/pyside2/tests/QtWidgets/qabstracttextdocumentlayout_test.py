@@ -37,7 +37,7 @@ import py3kcompat as py3k
 from PySide2.QtCore import QSizeF, QTimer
 from PySide2.QtGui import QTextFormat, QTextCharFormat, QPyTextObject
 from PySide2.QtWidgets import QTextEdit
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class Foo(QPyTextObject):
     called = False

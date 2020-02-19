@@ -37,7 +37,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from PySide2.QtTest import *
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class MyValidator1(QValidator):
     def fixup(self, input):

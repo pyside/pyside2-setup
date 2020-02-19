@@ -40,7 +40,7 @@ try:
 except ImportError:
     hasQtGui = False
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class Dummy(QObject):
     """Dummy class used in this test."""

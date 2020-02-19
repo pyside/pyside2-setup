@@ -38,7 +38,7 @@ from PySide2.QtCore import QObject, QState, QFinalState, SIGNAL
 from PySide2.QtCore import QTimer, QStateMachine
 from PySide2.QtCore import QParallelAnimationGroup
 
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 
 class StateMachineTest(unittest.TestCase):

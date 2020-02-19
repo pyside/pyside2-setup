@@ -35,7 +35,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtCore import QObject, SIGNAL, QProcess
 
-from helper import BasicPySlotCase, UsesQCoreApplication
+from helper.basicpyslotcase import BasicPySlotCase
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 
 class MultipleSignalConnections(unittest.TestCase):

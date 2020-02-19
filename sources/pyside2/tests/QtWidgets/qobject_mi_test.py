@@ -40,7 +40,7 @@ from PySide2.QtCore import QObject
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class WidgetValidator(QWidget, QIntValidator):
     def __init__(self, parent=None):

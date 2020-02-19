@@ -39,7 +39,7 @@ from PySide2.QtGui import QKeyEvent
 from PySide2.QtWidgets import QLineEdit
 from PySide2.QtTest import QTest
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class KeyEventFilter(QObject):

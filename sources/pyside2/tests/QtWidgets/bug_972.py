@@ -35,7 +35,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtCore import QSizeF
 from PySide2.QtWidgets import QGraphicsProxyWidget, QSizePolicy, QPushButton, QGraphicsScene, QGraphicsView
 
-from helper import TimedQApplication
+from helper.timedqapplication import TimedQApplication
 
 def createItem(minimum, preferred, maximum, name):
     w = QGraphicsProxyWidget()

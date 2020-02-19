@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtGui import QFont, QFontMetrics, QFontMetricsF
 from PySide2.QtCore import QRect, QRectF, Qt, QSize, QSizeF
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 
 class QFontMetricsTest(UsesQApplication):

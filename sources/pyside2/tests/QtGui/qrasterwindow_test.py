@@ -34,7 +34,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 from PySide2.QtCore import QEvent, QPoint, QRect, QSize, QTimer, Qt
 from PySide2.QtGui import QColor, QBackingStore, QPaintDevice, QPainter, QWindow, QPaintDeviceWindow, QRasterWindow, QRegion, QStaticText
 

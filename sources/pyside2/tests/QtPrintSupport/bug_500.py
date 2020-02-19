@@ -36,7 +36,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtCore import *
 from PySide2.QtPrintSupport import *
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class NeverDiesTest(UsesQApplication):
 

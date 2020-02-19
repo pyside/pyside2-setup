@@ -36,7 +36,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtCore import *
 from PySide2.QtXmlPatterns import QXmlSchema
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 import py3kcompat as py3k
 
 class QXmlPatternsTest(UsesQCoreApplication):

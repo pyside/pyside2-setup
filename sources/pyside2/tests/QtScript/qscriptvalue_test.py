@@ -39,7 +39,7 @@ from PySide2.QtScript import *
 # Required for eval() to work
 import PySide2.QtScript
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class TestQScriptValue (UsesQApplication):
 

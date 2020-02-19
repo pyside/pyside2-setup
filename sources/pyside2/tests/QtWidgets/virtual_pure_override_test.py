@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsView, QApplication
 from PySide2.QtGui import QBrush, QColor
 from PySide2.QtCore import QTimer
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 qgraphics_item_painted = False
 

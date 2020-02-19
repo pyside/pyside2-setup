@@ -38,7 +38,7 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QColor, QBrush
 from PySide2.QtWidgets import QApplication
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class Constructor(UsesQApplication):
     '''Test case for constructor of QBrush'''

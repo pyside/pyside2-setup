@@ -34,7 +34,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 from PySide2.QtWidgets import QFormLayout, QWidget
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QFormLayoutTest(UsesQApplication):
 

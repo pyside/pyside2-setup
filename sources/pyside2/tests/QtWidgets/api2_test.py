@@ -40,7 +40,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtGui import QIntValidator, QValidator
 from PySide2.QtWidgets import QWidget, QSpinBox, QApplication
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class WidgetValidatorQInt(QWidget, QIntValidator):
     def __init__(self, parent=None):

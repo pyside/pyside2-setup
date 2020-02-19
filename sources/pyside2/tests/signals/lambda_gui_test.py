@@ -42,7 +42,7 @@ try:
 except ImportError:
     hasQtGui = False
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 if hasQtGui:
     class Control:

@@ -39,7 +39,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 from PySide2.QtCore import QByteArray
 from PySide2.QtOpenGL import QGLBuffer, QGLWidget
 import py3kcompat as py3k
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QGLBufferTest(UsesQApplication):
     def testIt(self):
