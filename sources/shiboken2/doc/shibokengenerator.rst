@@ -1,3 +1,64 @@
+.. _gen-overview:
+
+******************
+Generator Overview
+******************
+
+The following diagram summarizes Shiboken's role in the Qt for Python
+project.
+
+.. image:: images/qtforpython-underthehood.png
+
+An XML typesystem file is used to specify the types to be exposed to Python
+and to apply modifications to properly represent and manipulate the types in
+the Python World. For example, you can remove and add methods to certain types,
+and also modify the arguments of each method. These actions are inevitable to
+properly handle the data structures or types.
+
+The final outcome of this process is a set of wrappers written in CPython,
+which can be used as a module in your Python code.
+
+In a few words, the Generator is a utility that parses a collection of header and
+typesystem files, generating other files (code, documentation, etc.) as result.
+
+Creating new bindings
+=====================
+
+.. figure:: images/bindinggen-development.png
+   :scale: 80
+   :align: center
+
+   Creating new bindings
+
+Each module of the generator system has an specific role.
+
+1. Provide enough data about the classes and functions.
+2. Generate valid code, with modifications from typesystems and injected codes.
+3. Modify the API to expose the objects in a way that fits you target language best.
+4. Insert customizations where handwritten code is needed.
+
+.. figure:: images/shibokenqtarch.png
+   :scale: 80
+   :align: center
+
+   Runtime architecture
+
+The newly created binding will run on top of Shiboken which takes
+care of interfacing Python and the underlying C++ library.
+
+Handwritten inputs
+==================
+
+Creating new bindings involves creating two pieces of "code": the typesystem and
+the inject code.
+
+:typesystem: XML files that provides the developer with a tool to customize the
+             way that the generators will see the classes and functions. For
+             example, functions can be renamed, have its signature changed and
+             many other actions.
+:inject code: allows the developer to insert handwritten code where the generated
+              code is not suitable or needs some customization.
+
 .. _command-line:
 
 Command line options
@@ -184,3 +245,71 @@ QtDocGenerator Options
 ``--additional-documentation=<file>``
    List of additional XML files to be converted to .rst files
    (for example, tutorials).
+
+.. _project-file:
+
+********************
+Binding Project File
+********************
+
+Instead of directing the Generator behavior via command line, the binding
+developer can write a text project file describing the same information, and
+avoid the hassle of a long stream of command line arguments.
+
+.. _project-file-structure:
+
+The project file structure
+==========================
+
+Here follows a comprehensive example of a generator project file.
+
+    .. code-block:: ini
+
+         [generator-project]
+         generator-set = path/to/generator/CHOICE_GENERATOR
+         header-file = DIR/global.h" />
+         typesystem-file = DIR/typesystem_for_your_binding.xml
+         output-directory location="OUTPUTDIR" />
+         include-path = path/to/library/being/wrapped/headers/1
+         include-path = path/to/library/being/wrapped/headers/2
+         typesystem-path = path/to/directory/containing/type/system/files/1
+         typesystem-path = path/to/directory/containing/type/system/files/2
+         enable-parent-ctor-heuristic
+
+
+Project file tags
+=================
+
+The generator project file tags are in direct relation to the
+:ref:`command line arguments <command-line>`. All of the current command line
+options provided by |project| were already seen on the
+:ref:`project-file-structure`, for new command line options provided by
+additional generator modules (e.g.: qtdoc, Shiboken) could also be used in the
+generator project file following simple conversion rules.
+
+For tags without options, just write as an empty tag without any attributes.
+Example:
+
+    .. code-block:: bash
+
+         --BOOLEAN-ARGUMENT
+
+becomes
+
+    .. code-block:: ini
+
+         BOOLEAN-ARGUMENT
+
+and
+
+    .. code-block:: bash
+
+         --VALUE-ARGUMENT=VALUE
+
+becomes
+
+    .. code-block:: ini
+
+         VALUE-ARGUMENT = VALUE
+
+
