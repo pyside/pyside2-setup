@@ -32,7 +32,13 @@
 '''Test cases for constructor and method signature decisor on Time class.'''
 
 import sys
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 import datetime
 
 from sample import Time, ImplicitConv, ObjectType

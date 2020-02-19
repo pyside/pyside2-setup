@@ -39,15 +39,19 @@
 
 from __future__ import absolute_import, print_function
 
+import os
 import re
 import sys
-import os
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 import shiboken2
 type.__signature__   # trigger bootstrap
 
 from shibokensupport.signature.lib.tool import build_brace_pattern
-import unittest
 
 """
 This test tests the brace pattern from signature.lib.tool

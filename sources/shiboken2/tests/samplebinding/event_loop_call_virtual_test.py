@@ -30,8 +30,14 @@
 
 '''Simple event loop dispatcher test.'''
 
+import os
+import sys
 import time
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 from random import random
 
 from sample import ObjectType, Event

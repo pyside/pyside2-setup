@@ -416,7 +416,6 @@ void TestEnum::testTypedefEnum()
     QVERIFY(!builder.isNull());
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
-    QEXPECT_FAIL("", "APIExtractor does not handle typedef enum correctly yet", Abort);
     QCOMPARE(globalEnums.count(), 1);
 
     AbstractMetaEnum* enumA = globalEnums.first();

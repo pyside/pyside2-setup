@@ -30,16 +30,22 @@
 
 '''Tests for using Shiboken-based bindings with python threads'''
 
-import unittest
-import threading
-import sample
-import time
-
 import logging
+import os
+from random import random
+import sys
+import threading
+import time
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
+
+import sample
 
 #logging.basicConfig(level=logging.DEBUG)
 
-from random import random
 
 class Producer(threading.Thread):
     '''Producer thread'''

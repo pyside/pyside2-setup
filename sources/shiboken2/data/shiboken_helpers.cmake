@@ -287,8 +287,9 @@ macro(shiboken_check_if_limited_api)
     # On other platforms, this result is not used at all.
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+            import os
             for lib in '${PYTHON_LIBRARIES}'.split(';'):
-                if '/' in lib:
+                if '/' in lib and os.path.isfile(lib):
                     prefix, py = lib.rsplit('/', 1)
                     if py.startswith('python3'):
                         print(prefix + '/python3.lib')

@@ -32,8 +32,13 @@
 from __future__ import print_function
 
 import gc
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 from copy import copy
 from smart import Obj, Registry, Integer
 
