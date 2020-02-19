@@ -1,0 +1,31 @@
+type: Group
+instructions:
+    - type: ChangeDirectory
+      directory: "{{.AgentWorkingDir}}"
+    - type: InstallSourceArchive
+      maxTimeInSeconds: 600
+      maxTimeBetweenOutput: 600
+      project: qt/qtbase
+      ref: 5.14
+      directory: qt/qtbase
+      userMessageOnFailure: >
+              Could not install source archive. Please investigate why.
+    - type: InstallSourceArchive
+      maxTimeInSeconds: 600
+      maxTimeBetweenOutput: 600
+      project: qt/qtqa
+      ref: master
+      directory: qt/qtqa-latest
+      userMessageOnFailure: >
+              Could not install source archive. Please investigate why.
+    - type: EnvironmentVariable
+      variableName: QT_MODULE_TO_TEST
+      variableValue: pyside/pyside-setup
+      userMessageOnFailure: >
+              Failed to set environment variable. This should not happen.
+    - type: ExecuteCommand
+      command: perl qt/qtqa-latest/tests/prebuild/license/tst_licenses.pl
+      maxTimeInSeconds: 7200
+      maxTimeBetweenOutput: 120
+      userMessageOnFailure: >
+           Failed to run license check script.

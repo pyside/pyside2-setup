@@ -40,6 +40,7 @@
 from __future__ import print_function
 
 from argparse import ArgumentParser, RawTextHelpFormatter
+import datetime
 from enum import Enum
 import os
 import re
@@ -124,15 +125,28 @@ def which(needle):
     return None
 
 
+def command_log_string(args, dir):
+    return '[{}] {}'.format(os.path.basename(dir), ' '.join(args))
+
+
 def execute(args):
     """Execute a command and print to log"""
-    log_string = '[{}] {}'.format(os.path.basename(os.getcwd()), ' '.join(args))
+    log_string = command_log_string(args, os.getcwd())
     print(log_string)
     if opt_dry_run:
         return
     exit_code = subprocess.call(args)
     if exit_code != 0:
         raise RuntimeError('FAIL({}): {}'.format(exit_code, log_string))
+
+
+def run_process_output(args):
+    """Run a process and return its output. Also run in dry_run mode"""
+    std_out = subprocess.Popen(args, universal_newlines=1,
+                               stdout=subprocess.PIPE).stdout
+    result = [line.rstrip() for line in std_out.readlines()]
+    std_out.close()
+    return result
 
 
 def run_git(args):
@@ -306,6 +320,19 @@ def build():
     print('--- Done({}s) ---'.format(elapsed_time))
 
 
+def run_tests():
+    """Run tests redirected into a log file with a time stamp"""
+    logfile_name = datetime.datetime.today().strftime("test_%Y%m%d_%H%M.txt")
+    binary = sys.executable
+    command = '"{}" testrunner.py test > {}'.format(binary, logfile_name)
+    print(command_log_string([command], os.getcwd()))
+    start_time = time.time()
+    result = 0 if opt_dry_run else os.system(command)
+    elapsed_time = int(time.time() - start_time)
+    print('--- Done({}s) ---'.format(elapsed_time))
+    return result
+
+
 def create_argument_parser(desc):
     parser = ArgumentParser(description=desc, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--dry-run', '-d', action='store_true',
@@ -323,6 +350,8 @@ def create_argument_parser(desc):
     parser.add_argument('--make', '-m', action='store_true', help='Make')
     parser.add_argument('--Make', '-M', action='store_true',
                         help='cmake + Make (continue broken build)')
+    parser.add_argument('--test', '-t', action='store_true',
+                        help='Run tests')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
     return parser
 
@@ -349,7 +378,7 @@ if __name__ == '__main__':
         build_mode = BuildMode.RECONFIGURE
 
     if build_mode == BuildMode.NONE and not (options.clean or options.reset
-        or options.pull):
+        or options.pull or options.test):
         argument_parser.print_help()
         sys.exit(0)
 
@@ -383,5 +412,8 @@ if __name__ == '__main__':
 
     if build_mode != BuildMode.NONE:
         build()
+
+    if options.test:
+        sys.exit(run_tests())
 
     sys.exit(0)

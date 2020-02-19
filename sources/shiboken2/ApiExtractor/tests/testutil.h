@@ -44,6 +44,7 @@ namespace TestUtil
                                       const QStringList &dropTypeEntries = QStringList())
     {
         ReportHandler::setSilent(silent);
+        ReportHandler::startTimer();
         TypeDatabase* td = TypeDatabase::instance(true);
         if (apiVersion.isEmpty())
             TypeDatabase::clearApiVersions();
