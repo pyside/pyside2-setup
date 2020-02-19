@@ -130,7 +130,7 @@ class QtInfo(object):
         output = proc.communicate()[0]
         proc.wait()
         if proc.returncode != 0:
-            return None
+            return ""
         if sys.version_info >= (3,):
             output = str(output, 'ascii').strip()
         else:
