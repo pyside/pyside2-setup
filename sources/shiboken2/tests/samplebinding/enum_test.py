@@ -35,6 +35,13 @@ import os
 import sys
 import unittest
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
+
+import shiboken2
+# This is needed after the introduction of BUILD_DIR.
+
 import sample
 from sample import SampleNamespace, ObjectType, Event
 from py3kcompat import IS_PY3K, b

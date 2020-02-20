@@ -107,10 +107,17 @@ set_property(TARGET testbinding PROPERTY OUTPUT_NAME "testbinding${SHIBOKEN_PYTH
 if(WIN32)
     set_property(TARGET testbinding PROPERTY SUFFIX ".pyd")
 endif()
+
+if(PYTHON_LIMITED_API)
+    set(TESTBINDING_PYTHON_LIBS ${PYTHON_LIMITED_LIBRARIES})
+else()
+    set(TESTBINDING_PYTHON_LIBS ${PYTHON_LIBRARIES})
+endif()
+
 target_link_libraries(testbinding
                       pysidetest
                       pyside2
-                      ${PYTHON_LIBRARIES}
+                      ${TESTBINDING_PYTHON_LIBS}
                       Shiboken2::libshiboken
                       ${Qt5Core_LIBRARIES}
                       ${Qt5Gui_LIBRARIES}

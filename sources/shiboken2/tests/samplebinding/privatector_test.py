@@ -32,8 +32,13 @@
 '''Test cases for a class with only a private constructor.'''
 
 import gc
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import PrivateCtor
 

@@ -33,7 +33,13 @@
    being that the latter defines a new conversion operator for the former, and this one
    has no implicit conversions.'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import NoImplicitConversion
 from other import ExtendsNoImplicitConversion

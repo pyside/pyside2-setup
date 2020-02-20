@@ -31,7 +31,13 @@
 
 '''Tests ObjectType class of object-type with privates copy constructor and = operator.'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 import sys
 
 from sample import ObjectType, Str

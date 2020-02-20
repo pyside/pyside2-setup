@@ -530,7 +530,13 @@ class PysideBuild(_build):
         self.py_scripts_dir = py_scripts_dir
         if py_libdir is None or not os.path.exists(py_libdir):
             if sys.platform == "win32":
-                py_libdir = os.path.join(py_prefix, "libs")
+                # For virtual environments on Windows, the py_prefix will contain a path pointing
+                # to it, instead of the system Python installation path.
+                # Since INCLUDEPY contains a path to the system location, we use the same base
+                # directory to define the py_libdir variable.
+                py_libdir = os.path.join(os.path.dirname(py_include_dir), "libs")
+                if not os.path.isdir(py_libdir):
+                    raise DistutilsSetupError("Failed to locate the 'libs' directory")
             else:
                 py_libdir = os.path.join(py_prefix, "lib")
         if py_include_dir is None or not os.path.exists(py_include_dir):

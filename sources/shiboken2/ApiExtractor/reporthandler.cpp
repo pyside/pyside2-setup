@@ -62,6 +62,11 @@ Q_LOGGING_CATEGORY(lcShiboken, "qt.shiboken")
 void ReportHandler::install()
 {
     qInstallMessageHandler(ReportHandler::messageOutput);
+    startTimer();
+}
+
+void ReportHandler::startTimer()
+{
     m_timer.start();
 }
 

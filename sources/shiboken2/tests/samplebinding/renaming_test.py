@@ -31,8 +31,14 @@
 
 '''Test cases for renaming using target-lang-name attribute.'''
 
+import os
 import re
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import RenamedValue, RenamedUser
 

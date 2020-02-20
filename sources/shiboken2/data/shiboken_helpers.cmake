@@ -206,7 +206,7 @@ endmacro()
 
 macro(set_quiet_build)
     # Don't display "up-to-date / install" messages when installing, to reduce visual clutter.
-    set(CMAKE_INSTALL_MESSAGE NEVER PARENT_SCOPE)
+    set(CMAKE_INSTALL_MESSAGE NEVER)
     # Override message not to display info messages when doing a quiet build.
     function(message)
         list(GET ARGV 0 MessageType)
@@ -287,8 +287,9 @@ macro(shiboken_check_if_limited_api)
     # On other platforms, this result is not used at all.
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+            import os
             for lib in '${PYTHON_LIBRARIES}'.split(';'):
-                if '/' in lib:
+                if '/' in lib and os.path.isfile(lib):
                     prefix, py = lib.rsplit('/', 1)
                     if py.startswith('python3'):
                         print(prefix + '/python3.lib')

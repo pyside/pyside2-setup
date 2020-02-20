@@ -32,8 +32,13 @@
 from __future__ import print_function
 
 import gc
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 from copy import copy
 from smart import Obj, Registry, Integer
 
@@ -194,7 +199,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertEqual(objCount(), 10)
 
         # clear and delete all objects in the list
-        ptrToObjList.clear()
+        del ptrToObjList[:]  # Python 2.7 lists have no clear method
         self.assertEqual(len(ptrToObjList), 0)
         self.assertEqual(objCount(), 1)
 

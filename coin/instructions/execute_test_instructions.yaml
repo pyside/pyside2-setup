@@ -1,0 +1,39 @@
+type: Group
+enable_if:
+  condition: property
+  property: features
+  not_contains_value: LicenseCheck
+instructions:
+  - type: EnvironmentVariable
+    variableName: QTEST_ENVIRONMENT
+    variableValue: "ci"
+  - type: ExecuteCommand
+    command: "python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 300
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: MacOS
+    userMessageOnFailure: >
+         Failed to execute test instructions on osx
+  - type: ExecuteCommand
+    command: "python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 300
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: Linux
+    userMessageOnFailure: >
+         Failed to execute test instructions on Linux
+  - type: ExecuteCommand
+    command: "c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 300
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: Windows
+    userMessageOnFailure: >
+         Failed to execute test instructions on 64 bit Windows

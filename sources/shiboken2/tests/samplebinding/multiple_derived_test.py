@@ -31,8 +31,13 @@
 
 '''Test cases for multiple inheritance'''
 
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shiboken_paths import init_paths
+init_paths()
 
 from sample import Base1, Base2, Base3, Base4, Base5, Base6
 from sample import MDerived1, MDerived2, MDerived3, MDerived4, MDerived5, SonOfMDerived1

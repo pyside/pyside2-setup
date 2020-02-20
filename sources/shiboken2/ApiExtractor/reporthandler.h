@@ -40,6 +40,7 @@ public:
     enum DebugLevel { NoDebug, SparseDebug, MediumDebug, FullDebug };
 
     static void install();
+    static void startTimer();
 
     static DebugLevel debugLevel();
     static void setDebugLevel(DebugLevel level);

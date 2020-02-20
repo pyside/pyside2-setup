@@ -1,0 +1,28 @@
+type: Group
+enable_if:
+  condition: property
+  property: host.os
+  equals_value: Windows
+instructions:
+  - type: EnvironmentVariable
+    variableName: VC_SCRIPT
+    variableValue: "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+    enable_if:
+      condition: property
+      property: host.compiler
+      equals_value: MSVC2017
+  - type: EnvironmentVariable
+    variableName: VC_SCRIPT
+    variableValue: "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2019\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+    enable_if:
+      condition: property
+      property: host.compiler
+      equals_value: MSVC2019
+  - type: WriteFile
+    fileContents: "call \"{{.Env.VC_SCRIPT}}\" {{.Env.TARGET_ARCHITECTURE}} \r\ncmd /c %*"
+    filename: "c:\\users\\qt\\MSVC.bat"
+    fileMode: 420
+    enable_if:
+      condition: property
+      property: host.os
+      equals_value: Windows
