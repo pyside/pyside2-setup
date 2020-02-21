@@ -30,11 +30,14 @@
 
 '''Test case for QObject.childEvent and QTimer.childEvent overloading'''
 
+import os
+import sys
 import unittest
-from time import sleep
-from PySide2.QtCore import QObject, QTimer, QCoreApplication
 
-from helper import UsesQCoreApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from PySide2.QtCore import QObject, QTimer, QCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 class ExtQObject(QObject):
     def __init__(self):

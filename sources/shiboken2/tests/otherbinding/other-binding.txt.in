@@ -8,11 +8,13 @@ typesystem-file = @other_TYPESYSTEM@
 output-directory = @CMAKE_CURRENT_BINARY_DIR@
 
 include-path = @libother_SOURCE_DIR@
+include-path = @libsmart_SOURCE_DIR@
 include-path = @libsample_SOURCE_DIR@
 include-path = @libsample_SOURCE_DIR@/..
 
 typesystem-path = @CMAKE_CURRENT_SOURCE_DIR@
 typesystem-path = @sample_SOURCE_DIR@
+typesystem-path = @smart_SOURCE_DIR@
 
 enable-parent-ctor-heuristic
 

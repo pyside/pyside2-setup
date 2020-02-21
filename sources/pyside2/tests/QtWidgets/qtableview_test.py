@@ -26,11 +26,15 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QAbstractTableModel
 from PySide2.QtWidgets import QTableWidget
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QPenTest(UsesQApplication):
 

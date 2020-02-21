@@ -26,11 +26,15 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import QMenu, QWidget, QMenuBar, QToolBar
+import os
+import sys
+import unittest
 import weakref
 
-import unittest
-from helper import UsesQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from PySide2.QtWidgets import QMenu, QWidget, QMenuBar, QToolBar
+from helper.usesqapplication import UsesQApplication
 
 
 class TestQActionLifeCycle(UsesQApplication):

@@ -27,9 +27,12 @@
 #############################################################################
 
 import os
+import sys
 import unittest
 
-from helper import TimedQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.timedqapplication import TimedQApplication
 from PySide2.QtCore import QObject, SIGNAL
 from PySide2.QtScxml import QScxmlStateMachine
 

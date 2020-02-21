@@ -39,6 +39,13 @@
 
 from __future__ import print_function
 
+"""
+testing/__init__.py
+
+- install an alternative, flushing print
+- define command.main as entry point
+"""
+
 import sys
 from . import command
 

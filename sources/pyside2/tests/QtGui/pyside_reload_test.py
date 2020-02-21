@@ -27,9 +27,12 @@
 #############################################################################
 
 import os
-import sys
 import shutil
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 
 orig_path = os.path.join(os.path.dirname(__file__))

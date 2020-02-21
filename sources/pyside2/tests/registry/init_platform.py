@@ -141,8 +141,8 @@ Shiboken.__name__ = "Shiboken"
 sys.modules["Shiboken"] = sys.modules.pop("shiboken2")
 all_modules.append("Shiboken")
 
-# 'sample' seems to be needed by 'other', so import it first.
-for modname in "minimal sample other smart".split():
+# 'sample/smart' are needed by 'other', so import them first.
+for modname in "minimal sample smart other".split():
     sys.path.insert(0, os.path.join(shiboken_build_dir, "tests", modname + "binding"))
     __import__(modname)
     all_modules.append(modname)

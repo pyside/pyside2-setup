@@ -30,11 +30,15 @@
 
 '''Test case for QObject.timerEvent overloading'''
 
+import os
+import sys
 import unittest
-from time import sleep
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QObject, QCoreApplication
 
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 class Dummy(QObject):
 

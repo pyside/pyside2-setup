@@ -33,9 +33,14 @@ archive:
 https://srinikom.github.io/pyside-bz-archive/442.html
 '''
 
+import os
+import sys
 import unittest
 
-from helper import adjust_filename, TimedQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.helper import adjust_filename
+from helper.timedqapplication import TimedQApplication
 
 from PySide2 import QtCore, QtGui, QtQuick
 

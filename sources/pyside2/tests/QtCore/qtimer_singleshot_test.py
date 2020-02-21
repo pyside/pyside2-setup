@@ -30,10 +30,14 @@
 
 '''Test cases for QTimer.singleShot'''
 
+import os
+import sys
 import unittest
 
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QObject, QTimer, QCoreApplication, Signal
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 class WatchDog(QObject):
     '''Exits the QCoreApplication main loop after sometime.'''

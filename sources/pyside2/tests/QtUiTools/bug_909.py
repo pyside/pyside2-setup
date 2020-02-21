@@ -26,15 +26,18 @@
 ##
 #############################################################################
 
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QFile
 from PySide2.QtWidgets import QTabWidget
 from PySide2.QtUiTools import QUiLoader
 
-from helper import UsesQApplication
-from helper import adjust_filename
+from helper.usesqapplication import UsesQApplication
+from helper.helper import adjust_filename
 
 class TestDestruction(UsesQApplication):
     def testBug909(self):

@@ -31,9 +31,14 @@
 
 '''Unit tests for QByteArray'''
 
-import unittest
 import ctypes
+import os
 import pickle
+import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 
 from PySide2.QtCore import QByteArray, QSettings, QObject, QDataStream, QIODevice

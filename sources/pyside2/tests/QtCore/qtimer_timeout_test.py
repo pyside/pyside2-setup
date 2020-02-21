@@ -28,12 +28,15 @@
 
 '''Test case for timeout() signals from QTimer object.'''
 
-import unittest
 import os
 import sys
-from tempfile import mkstemp
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QObject, QTimer, SIGNAL
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
+
 
 class WatchDog(QObject):
     '''Exits the QCoreApplication main loop after sometime.'''

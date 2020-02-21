@@ -27,7 +27,12 @@
 #############################################################################
 
 '''Test cases for QVariant::Type converter'''
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 from PySide2.QtSql import QSqlField
 

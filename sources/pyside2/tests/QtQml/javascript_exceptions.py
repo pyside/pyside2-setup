@@ -26,9 +26,14 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
 
-from helper import adjust_filename, UsesQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.helper import adjust_filename
+from helper.usesqapplication import UsesQApplication
 
 from PySide2.QtCore import Slot, Property, Signal, QObject, QUrl
 from PySide2.QtQml import QJSEngine, qmlRegisterType

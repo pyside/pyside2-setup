@@ -39,6 +39,14 @@
 
 from __future__ import print_function
 
+"""
+testing/buildlog.py
+
+A BuildLog holds the tests of a build.
+
+BuildLog.classifiers finds the set of classifier strings.
+"""
+
 import os
 import sys
 from collections import namedtuple

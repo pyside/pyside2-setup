@@ -39,6 +39,13 @@
 
 from __future__ import print_function, absolute_import
 
+"""
+testrunner.py
+
+Run ctest on the last build.
+See the notes in testing/command.py .
+"""
+
 import sys
 import testing
 import testing.blacklist # just to be sure it's us...
