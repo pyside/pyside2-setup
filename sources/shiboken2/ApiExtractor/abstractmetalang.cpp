@@ -819,8 +819,10 @@ bool AbstractMetaFunction::allowThread() const
     case TypeSystem::AllowThread::Allow:
         break;
     case TypeSystem::AllowThread::Auto:
-    case TypeSystem::AllowThread::Unspecified:
         result = autoDetectAllowThread();
+        break;
+    case TypeSystem::AllowThread::Unspecified:
+        result = false;
         break;
     }
     if (!result)
