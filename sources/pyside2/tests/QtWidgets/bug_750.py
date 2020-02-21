@@ -26,9 +26,13 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
 
-from helper import UsesQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.usesqapplication import UsesQApplication
 
 from PySide2.QtCore import QTimer
 from PySide2.QtGui import QPainter, QFont, QFontInfo

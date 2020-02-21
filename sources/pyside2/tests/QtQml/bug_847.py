@@ -36,9 +36,14 @@
 
 from __future__ import print_function
 
+import os
+import sys
 import unittest
 
-from helper import adjust_filename, UsesQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.helper import adjust_filename
+from helper.usesqapplication import UsesQApplication
 
 from PySide2.QtCore import Slot, Signal, QUrl, QTimer, QCoreApplication
 from PySide2.QtQuick import QQuickView

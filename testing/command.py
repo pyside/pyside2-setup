@@ -46,7 +46,7 @@ testrunner
 Provide an interface to the pyside tests.
 -----------------------------------------
 
-This program can only be run if PySide was build with tests enabled.
+This program can only be run if PySide was built with tests enabled.
 All tests are run in a single pass, and if not blacklisted, an error
 is raised at the end of the run.
 
@@ -123,20 +123,26 @@ def test_project(project, args, blacklist, runs):
             else:
                 rerun = None
             runner.run("RUN {}:".format(idx + 1), rerun, 10 * 60)
-        result = TestParser(runner.logfile)
+        results = TestParser(runner.logfile)
         r = 5 * [0]
         rerun_list = []
         print()
-        for test, res in result.iter_blacklist(blacklist):
-            print("RES {}:".format(index), end=" ")
-            print("%-6s" % res, decorate(test) + "()")
+        fatal = False
+        for item in results.iter_blacklist(blacklist):
+            res = item.rich_result
+            sharp = "#" + str(item.sharp)
+            mod_name = decorate(item.mod_name)
+            print("RES {index}: Test {sharp:>4}: {res:<6} {mod_name}()".format(**locals()))
             r[0] += 1 if res == "PASS" else 0
             r[1] += 1 if res == "FAIL!" else 0
             r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
             r[3] += 1 if res == "BFAIL" else 0
             r[4] += 1 if res == "BPASS" else 0
             if res not in ("PASS", "BPASS"):
-                rerun_list.append(test)
+                rerun_list.append(item.mod_name)
+            # PYSIDE-1229: When a fatal error happens, bail out immediately!
+            if item.fatal:
+                fatal = item
         print()
         print("Totals:", sum(r), "tests.",
               "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
@@ -145,8 +151,11 @@ def test_project(project, args, blacklist, runs):
         print("********* Finished testing of %s *********" % project)
         print()
         ret.append(r)
-
-    return ret
+        if fatal:
+            print("FATAL ERROR:", fatal)
+            print("Repetitions cancelled!")
+            break
+    return ret, fatal
 
 def main():
     # create the top-level command parser
@@ -249,8 +258,11 @@ def main():
     runs = COIN_TESTING
     fail_crit = COIN_THRESHOLD
     # now loop over the projects and accumulate
+    fatal = False
     for project in args.projects:
-        res = test_project(project, args, bl, runs)
+        res, fatal = test_project(project, args, bl, runs)
+        if fatal:
+            runs = 1
         for idx, r in enumerate(res):
             q = list(map(lambda x, y: x+y, r, q))
 
@@ -265,11 +277,11 @@ def main():
         for idx in range(runs):
             index = idx + 1
             runner = TestRunner(builds.selected, project, index)
-            result = TestParser(runner.logfile)
-            for test, res in result.iter_blacklist(bl):
-                key = project + ":" + test
+            results = TestParser(runner.logfile)
+            for item in results.iter_blacklist(bl):
+                key = project + ":" + item.mod_name
                 tot_res.setdefault(key, [])
-                tot_res[key].append(res)
+                tot_res[key].append(item.rich_result)
     tot_flaky = 0
     print("*" * 79)
     print("**")
@@ -282,17 +294,20 @@ def main():
         fail__c = res.count("FAIL!")
         bfail_c = res.count("BFAIL")
         fail2_c = fail__c + bfail_c
+        fatal_c = res.count("FATAL")
         if pass__c == len(res):
             continue
-        elif bpass_c == runs and runs > 1:
+        elif bpass_c >= runs and runs > 1:
             msg = "Remove blacklisting; test passes"
-        elif fail__c == runs:
+        elif fail__c >= runs:
             msg = "Newly detected Real test failure!"
-        elif bfail_c == runs:
+        elif bfail_c >= runs:
             msg = "Keep blacklisting ;-("
         elif fail2_c > 0 and fail2_c < len(res):
             msg = "Flaky test"
             tot_flaky += 1
+        elif fatal_c:
+            msg = "FATAL format error, repetitions aborted!"
         else:
             continue
         empty = False
@@ -326,6 +341,8 @@ def main():
     used_time = stop_time - start_time
     # Now create an error if the criterion is met:
     try:
+        if fatal:
+            raise ValueError("FATAL format error:", fatal)
         err_crit = "'FAIL! >= {}'".format(fail_crit)
         for res in tot_res.values():
             if res.count("FAIL!") >= fail_crit:

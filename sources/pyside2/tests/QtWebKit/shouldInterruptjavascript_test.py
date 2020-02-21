@@ -29,10 +29,15 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2 import QtCore, QtWebKit
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QWebPageHeadless(QtWebKit.QWebPage):
     # FIXME: This is not working, the slot is not overriden!

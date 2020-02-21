@@ -31,7 +31,11 @@
 
 '''Test cases for QByteArray concatenation with '+' operator'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import QByteArray
 import py3kcompat as py3k

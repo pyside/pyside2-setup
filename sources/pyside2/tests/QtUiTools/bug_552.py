@@ -26,7 +26,13 @@
 ##
 #############################################################################
 
-from helper import adjust_filename
+import os
+import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.helper import adjust_filename
 from PySide2 import QtWidgets, QtCore
 from PySide2.QtUiTools import QUiLoader
 

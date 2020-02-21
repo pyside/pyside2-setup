@@ -1,0 +1,5 @@
+{
+    "files": ["basicpyslotcase.py", "docmodifier.py", "helper.py",
+    "timedqapplication.py", "usesqapplication.py", "usesqcoreapplication.py",
+    "usesqguiapplication.py" ]
+}

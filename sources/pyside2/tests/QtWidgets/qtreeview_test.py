@@ -26,13 +26,17 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtGui import QStandardItemModel
 from PySide2.QtWidgets import (QWidget, QTreeView, QVBoxLayout,
     QStyledItemDelegate, QHeaderView)
 from PySide2.QtCore import Qt
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class Widget(QWidget):
     def __init__(self, parent=None):

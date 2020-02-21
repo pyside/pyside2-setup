@@ -28,13 +28,17 @@
 
 '''QtTest mouse click functionalities'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtCore import Qt, QObject
 from PySide2.QtWidgets import QPushButton, QLineEdit
 from PySide2.QtTest import QTest
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class MouseClickTest(UsesQApplication):
 

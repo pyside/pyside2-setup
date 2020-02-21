@@ -34,7 +34,7 @@ from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QLabel
 import shiboken2 as shiboken
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QLabelTest(UsesQApplication):
     '''Test case for calling QLabel.setPixmap'''

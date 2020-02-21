@@ -298,6 +298,7 @@ def build():
     acceleration = read_acceleration_config()
     if not IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
         arguments.append(INCREDIBUILD_CONSOLE)
+        arguments.append('--avoid')  # caching, v0.96.74
     arguments.extend([read_config_python_binary(), 'setup.py', 'install'])
     arguments.extend(read_config_build_arguments())
     jobs = read_int_config(JOBS_KEY)

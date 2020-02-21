@@ -29,7 +29,7 @@
 #############################################################################
 
 import unittest
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 from testbinding import TestView
 from PySide2.QtCore import Qt

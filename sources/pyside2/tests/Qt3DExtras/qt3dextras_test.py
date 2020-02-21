@@ -30,8 +30,13 @@
 
 '''Test cases for Q3DExtras'''
 
-from helper import UsesQGuiApplication
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.usesqguiapplication import UsesQGuiApplication
 
 from PySide2.QtCore import(Property, QObject, QPropertyAnimation, QTimer, Signal, Slot)
 from PySide2.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D, QWindow)

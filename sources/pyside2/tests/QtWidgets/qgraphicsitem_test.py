@@ -28,12 +28,16 @@
 
 ''' Test cases related to QGraphicsItem and subclasses'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2.QtGui import QPolygonF, QColor, QBrush
 from PySide2.QtWidgets import QGraphicsScene
 
-from helper import UsesQApplication
+from helper.usesqapplication import UsesQApplication
 
 class QColorOnSetBrush(UsesQApplication):
     '''Test case for passing a QColor directly to setBrush'''

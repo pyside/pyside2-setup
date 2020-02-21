@@ -26,14 +26,17 @@
 ##
 #############################################################################
 
-import unittest
+import os
 import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-from helper import TimedQApplication
+from helper.timedqapplication import TimedQApplication
 
 class TestFontDialog(TimedQApplication):
 

@@ -32,10 +32,15 @@
 '''Unit tests for QObject's tr static methods.'''
 
 import os
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QObject
 
-#from helper import UsesQCoreApplication
+#from helper.usesqcoreapplication import UsesQCoreApplication
 
 class QObjectTrTest(unittest.TestCase):
     '''Test case to check if QObject tr static methods could be treated as instance methods.'''

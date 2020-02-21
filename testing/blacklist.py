@@ -39,6 +39,14 @@
 
 from __future__ import print_function
 
+"""
+testing/blacklist.py
+
+Take a blacklist file and build classifiers for all tests.
+
+find_matching_line() adds info using classifiers.
+"""
+
 from .helper import decorate, StringIO
 from .buildlog import builds
 
@@ -56,7 +64,7 @@ class BlackList(object):
 
         def filtered_line(line):
             if '#' in line:
-                line = line[0:line.index('#')]
+                line = line[0 : line.index('#')]
             return line.split()
 
         # now put every bracketed line in a test
@@ -99,7 +107,6 @@ class BlackList(object):
         if line found and test passed, it is a BPASS.
         If line found and test failed, it is a BFAIL.
         """
-        passed = test.passed
         classifiers = set(builds.classifiers)
 
         if "" in self.tests:

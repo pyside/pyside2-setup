@@ -28,15 +28,20 @@
 
 '''Test cases for QWebView'''
 
-import unittest
-import py3kcompat as py3k
+import os
 import sys
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+import py3kcompat as py3k
 
 from PySide2.QtCore import QObject, SIGNAL, QUrl
 from PySide2.QtWebKit import QWebPage, QWebView
 from PySide2.QtNetwork import QNetworkRequest
 
-from helper import adjust_filename, TimedQApplication
+from helper.helper import adjust_filename
+from helper.timedqapplication import TimedQApplication
 
 
 class testWebPage(QWebPage):

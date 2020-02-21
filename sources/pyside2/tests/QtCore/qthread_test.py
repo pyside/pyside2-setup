@@ -30,11 +30,16 @@
 
 '''Test cases for QThread'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 from PySide2.QtCore import QThread, QCoreApplication, QObject, SIGNAL, QMutex, QTimer
 from PySide2.QtCore import QEventLoop
 
-from helper import UsesQCoreApplication
+from helper.usesqcoreapplication import UsesQCoreApplication
 
 mutex = QMutex()
 

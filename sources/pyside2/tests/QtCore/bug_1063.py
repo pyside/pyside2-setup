@@ -28,10 +28,14 @@
 
 ''' unit test for BUG #1063 '''
 
-import unittest
-import tempfile
-from PySide2 import QtCore
 import os
+import sys
+import tempfile
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from PySide2 import QtCore
 import py3kcompat as py3k
 
 class QTextStreamTestCase(unittest.TestCase):

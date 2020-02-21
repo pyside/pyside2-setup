@@ -30,9 +30,13 @@
 from PySide2.QtWidgets import QApplication, QLabel, QStyleFactory
 from PySide2.QtCore import QObject
 
+import os
+import sys
 import unittest
 
-from helper import UsesQApplication
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.usesqapplication import UsesQApplication
 
 class QMacStyleTest(UsesQApplication):
     def setUp(self):

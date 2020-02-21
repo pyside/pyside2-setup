@@ -26,8 +26,13 @@
 ##
 #############################################################################
 
+import os
 import sys
-from helper import adjust_filename
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
+from helper.helper import adjust_filename
 
 from PySide2.QtCore import QUrl
 from PySide2.QtGui import QGuiApplication

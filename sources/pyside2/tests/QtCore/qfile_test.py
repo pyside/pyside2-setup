@@ -26,11 +26,13 @@
 ##
 #############################################################################
 
+import os
+import sys
+import tempfile
 import unittest
 
-import os
-import tempfile
-import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+
 import py3kcompat as py3k
 
 from PySide2.QtCore import QDir, QFile, QIODevice, QSaveFile, QTemporaryDir
