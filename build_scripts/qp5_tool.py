@@ -293,7 +293,7 @@ def get_config_file(base_name):
     return config_file
 
 
-def build():
+def build(target):
     """Run configure and build steps"""
     start_time = time.time()
 
@@ -302,7 +302,7 @@ def build():
     if not IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
         arguments.append(INCREDIBUILD_CONSOLE)
         arguments.append('--avoid')  # caching, v0.96.74
-    arguments.extend([read_config_python_binary(), 'setup.py', 'install'])
+    arguments.extend([read_config_python_binary(), 'setup.py', target])
     arguments.extend(read_config_build_arguments())
     jobs = read_int_config(JOBS_KEY)
     if jobs > 1:
@@ -352,6 +352,8 @@ def create_argument_parser(desc):
     parser.add_argument('--build', '-b', action='store_true',
                         help='Build (configure + build)')
     parser.add_argument('--make', '-m', action='store_true', help='Make')
+    parser.add_argument('--no-install', '-n', action='store_true',
+                        help='Run --build only, do not install')
     parser.add_argument('--Make', '-M', action='store_true',
                         help='cmake + Make (continue broken build)')
     parser.add_argument('--test', '-t', action='store_true',
@@ -415,7 +417,8 @@ if __name__ == '__main__':
         run_git(['pull', '--rebase'])
 
     if build_mode != BuildMode.NONE:
-        build()
+        target = 'build' if options.no_install else 'install'
+        build(target)
 
     if options.test:
         sys.exit(run_tests())
