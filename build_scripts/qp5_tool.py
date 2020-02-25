@@ -126,7 +126,10 @@ def which(needle):
 
 
 def command_log_string(args, dir):
-    return '[{}] {}'.format(os.path.basename(dir), ' '.join(args))
+    result = '[{}]'.format(os.path.basename(dir))
+    for arg in args:
+        result += ' "{}"'.format(arg) if ' ' in arg else ' {}'.format(arg)
+    return result
 
 
 def execute(args):
