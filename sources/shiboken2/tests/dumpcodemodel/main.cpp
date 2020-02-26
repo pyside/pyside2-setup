@@ -33,9 +33,11 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QCommandLineOption>
 #include <QtCore/QCommandLineParser>
+#include <QtCore/QDateTime>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QXmlStreamWriter>
 
 #include <iostream>
 #include <algorithm>
@@ -48,23 +50,146 @@ static inline QString languageLevelDescription()
         + QLatin1Char(')');
 }
 
+static void formatDebugOutput(const FileModelItem &dom, bool verbose)
+{
+    QString output;
+    {
+        QDebug debug(&output);
+        if (verbose)
+            debug.setVerbosity(3);
+        debug << dom.data();
+    }
+    std::cout << qPrintable(output) << '\n';
+}
+
+static const char *primitiveTypes[] = {
+    "int", "unsigned", "short", "unsigned short", "long", "unsigned long",
+    "float", "double"
+};
+
+static inline QString nameAttribute() { return QStringLiteral("name"); }
+
+static void formatXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem &nsp);
+static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass);
+
+static void formatXmlEnum(QXmlStreamWriter &writer, const EnumModelItem &en)
+{
+    writer.writeStartElement(QStringLiteral("enum-type"));
+    writer.writeAttribute(nameAttribute(), en->name());
+    writer.writeEndElement();
+}
+
+static void formatXmlScopeMembers(QXmlStreamWriter &writer, const ScopeModelItem &nsp)
+{
+    for (const auto &klass : nsp->classes()) {
+        if (klass->classType() != CodeModel::Union && klass->templateParameters().isEmpty())
+            formatXmlClass(writer, klass);
+    }
+    for (const auto &en : nsp->enums())
+        formatXmlEnum(writer, en);
+}
+
+static bool isPublicCopyConstructor(const FunctionModelItem &f)
+{
+    return f->functionType() == CodeModel::CopyConstructor
+        && f->accessPolicy() == CodeModel::Public && !f->isDeleted();
+}
+
+static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass)
+{
+    // Heuristics for value types: check on public copy constructors.
+    const auto functions = klass->functions();
+    const bool isValueType = std::any_of(functions.cbegin(), functions.cend(),
+                                         isPublicCopyConstructor);
+    writer.writeStartElement(isValueType ? QStringLiteral("value-type")
+                                         : QStringLiteral("object-type"));
+    writer.writeAttribute(nameAttribute(), klass->name());
+    formatXmlScopeMembers(writer, klass);
+    writer.writeEndElement();
+}
+
+static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
+{
+    for (const auto &nested : nsp->namespaces())
+        formatXmlNamespace(writer, nested);
+    for (auto func : nsp->functions()) {
+        const QString signature = func->typeSystemSignature();
+        if (!signature.contains(QLatin1String("operator"))) { // Skip free operators
+            writer.writeStartElement(QStringLiteral("function"));
+            writer.writeAttribute(QStringLiteral("signature"), signature);
+            writer.writeEndElement();
+        }
+    }
+    formatXmlScopeMembers(writer, nsp);
+}
+
+static void formatXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
+{
+    writer.writeStartElement(QStringLiteral("namespace-type"));
+    writer.writeAttribute(nameAttribute(), nsp->name());
+    formatXmlNamespaceMembers(writer, nsp);
+    writer.writeEndElement();
+}
+
+static void formatXmlOutput(const FileModelItem &dom)
+{
+    QString output;
+    QXmlStreamWriter writer(&output);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+    writer.writeStartElement(QStringLiteral("typesystem"));
+    writer.writeAttribute(QStringLiteral("package"), QStringLiteral("insert_name"));
+    writer.writeComment(QStringLiteral("Auto-generated ") +
+                        QDateTime::currentDateTime().toString(Qt::ISODate));
+    for (auto p : primitiveTypes) {
+        writer.writeStartElement(QStringLiteral("primitive-type"));
+        writer.writeAttribute(nameAttribute(), QLatin1String(p));
+        writer.writeEndElement();
+    }
+    formatXmlNamespaceMembers(writer, dom);
+    writer.writeEndElement();
+    writer.writeEndDocument();
+    std::cout << qPrintable(output) << '\n';
+}
+
+static const char descriptionFormat[] = R"(
+Type system dumper
+
+Parses a C++ header and dumps out the classes found in typesystem XML syntax.
+Arguments are arguments to the compiler the last of which should be the header
+or source file.
+It is recommended to create a .hh include file including the desired headers
+and pass that along with the required include paths.
+
+Based on Qt %1 and LibClang v%2.)";
+
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
     QCommandLineParser parser;
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    parser.setApplicationDescription(QStringLiteral("Code model tester"));
+    parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
+    const QString description =
+        QString::fromLatin1(descriptionFormat).arg(QLatin1String(qVersion()),
+                                                   clang::libClangVersion().toString());
+    parser.setApplicationDescription(description);
     parser.addHelpOption();
     parser.addVersionOption();
-    QCommandLineOption verboseOption(QStringLiteral("d"),
+    QCommandLineOption verboseOption(QStringLiteral("verbose"),
                                      QStringLiteral("Display verbose output about types"));
     parser.addOption(verboseOption);
+    QCommandLineOption debugOption(QStringLiteral("debug"),
+                                     QStringLiteral("Display debug output"));
+    parser.addOption(debugOption);
+
     QCommandLineOption languageLevelOption(QStringLiteral("std"),
                                            languageLevelDescription(),
                                            QStringLiteral("level"));
     parser.addOption(languageLevelOption);
-    parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("C++ source file"));
+    parser.addPositionalArgument(QStringLiteral("argument"),
+                                 QStringLiteral("C++ compiler argument"),
+                                 QStringLiteral("argument(s)"));
 
     parser.process(app);
     const QStringList &positionalArguments = parser.positionalArguments();
@@ -93,14 +218,10 @@ int main(int argc, char **argv)
         return -2;
     }
 
-    QString output;
-    {
-        QDebug debug(&output);
-        if (parser.isSet(verboseOption))
-            debug.setVerbosity(3);
-        debug << dom.data();
-    }
-    std::cout << qPrintable(output) << '\n';
+    if (parser.isSet(debugOption))
+        formatDebugOutput(dom, parser.isSet(verboseOption));
+    else
+        formatXmlOutput(dom);
 
     return 0;
 }
