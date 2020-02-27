@@ -224,4 +224,6 @@ call returned. In this case, you should use the ``invalidate-after-use`` attribu
 
 In this example the second argument will be invalidated after this method call.
 
-.. [#] See *Object Trees and Object Ownership* http://doc.qt.io/qt-5/objecttrees.html
+See `Object Trees and Object Ownership`_.
+
+.. _`Object Trees and Object Ownership`: http://doc.qt.io/qt-5/objecttrees.html

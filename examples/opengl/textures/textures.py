@@ -204,7 +204,7 @@ class Window(QtWidgets.QWidget):
                 mainLayout.addWidget(self.glWidgets[i][j], i, j)
 
                 self.glWidgets[i][j].clicked.connect(self.setCurrentGlWidget)
-                QtWidgets.qApp.lastWindowClosed.connect(self.glWidgets[i][j].freeGLResources)
+                qApp.lastWindowClosed.connect(self.glWidgets[i][j].freeGLResources)
 
         self.setLayout(mainLayout)
 

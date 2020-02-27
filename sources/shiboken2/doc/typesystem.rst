@@ -1,5 +1,5 @@
 Type System Reference
-*********************
+=====================
 
 The typesystem is used by a binding generator or any other software using the APIExtractor library
 to map a C++ library API onto a higher level language.
@@ -15,15 +15,43 @@ Below there is a complete reference guide to the various nodes (XML tags) of the
 For usage examples, take a look at the typesystem files used to generate PySide2. These files
 can be found in the PySide2/<QT_MODULE_NAME> directory of the PySide2 package.
 
+Define types
+------------
+
 .. toctree::
+   :maxdepth: 1
 
-    typesystem_specifying_types
-    typesystem_manipulating_objects
-    typesystem_modify_function
-    typesystem_arguments
-    typesystem_solving_compilation
-    typesystem_templates
-    typesystem_conversionrule
-    typesystem_documentation
+   typesystem_specifying_types.rst
 
+Modifying types
+---------------
 
+.. toctree::
+   :maxdepth: 1
+
+   typesystem_arguments.rst
+   typesystem_codeinjection.rst
+   typesystem_converters.rst
+   typesystem_templates.rst
+   typesystem_modify_function.rst
+   typesystem_manipulating_objects.rst
+   typesystem_conversionrule.rst
+   typesystem_documentation.rst
+   typesystem_variables.rst
+
+Object ownership
+----------------
+
+.. toctree::
+   :maxdepth: 1
+
+   typesystem_ownership.rst
+
+Extra options and Python caveats
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   typesystem_solving_compilation.rst
+   typesystem_sequenceprotocol.rst

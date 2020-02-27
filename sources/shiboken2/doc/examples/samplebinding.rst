@@ -240,8 +240,7 @@ Try running it to see if the ice creams are delivered.
     :file:`<PYTHON_ENV_ROOT>/site-packages/lib/PySide2/examples/samplebinding`.
 
 Refer to the following topics for detailed information about using Shiboken:
- * :doc:`Shiboken module <shibokenmodule>`
- * :doc:`Type System Variables <typesystemvariables>`
- * :doc:`User Defined Type Conversion <typeconverters>`
- * :doc:`Object ownership <ownership>`
- * :doc:`Frequently Asked Questions <faq>`
+ * :doc:`Type System Variables <../typesystem_variables>`
+ * :doc:`User Defined Type Conversion <../typesystem_converters>`
+ * :doc:`Object ownership <../typesystem_ownership>`
+ * :doc:`Considerations and Frequently Asked Questions <../considerations>`

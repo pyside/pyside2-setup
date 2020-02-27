@@ -34,10 +34,12 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
 
-from PySide2.QtCore import QBuffer, QTimer
-from PySide2.QtWidgets import QApplication
+from PySide2.QtCore import QBuffer, Qt, QTimer
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PySide2.QtWebEngine import QtWebEngine
 from PySide2.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
-from PySide2.QtWebEngineCore import QWebEngineUrlSchemeHandler
+from PySide2.QtWebEngineCore import (QWebEngineUrlScheme,
+                                     QWebEngineUrlSchemeHandler)
 import py3kcompat as py3k
 
 class TestSchemeHandler(QWebEngineUrlSchemeHandler):
@@ -51,19 +53,44 @@ class TestSchemeHandler(QWebEngineUrlSchemeHandler):
         self.buffer.aboutToClose.connect(self.buffer.deleteLater)
         request.reply(py3k.b("text/plain;charset=utf-8"), self.buffer)
 
+
 class MainTest(unittest.TestCase):
     def test_SchemeHandlerRedirect(self):
+        self._loaded = False
+        QApplication.setAttribute(Qt.AA_ShareOpenGLContexts);
+        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+        QtWebEngine.initialize()
         app = QApplication([])
+
+        scheme_name = py3k.b("testpy")
+        scheme = QWebEngineUrlScheme(scheme_name)
+        scheme.setSyntax(QWebEngineUrlScheme.Syntax.Path)
+        QWebEngineUrlScheme.registerScheme(scheme)
         handler = TestSchemeHandler()
         profile = QWebEngineProfile.defaultProfile()
-        profile.installUrlSchemeHandler(py3k.b("testpy"), handler)
+        profile.installUrlSchemeHandler(scheme_name, handler)
+
+        top_level_widget = QWidget()
+        top_level_widget.setWindowTitle('web_engine_custom_scheme.py')
+        top_level_widget.resize(400, 400)
+        layout = QVBoxLayout(top_level_widget)
         view = QWebEngineView()
-        view.loadFinished.connect(app.quit)
+        layout.addWidget(view)
+
+        view.loadFinished.connect(self._slot_loaded)
         QTimer.singleShot(5000, app.quit)
-        view.show()
+
+        top_level_widget.show()
         view.load("testpy:hello")
         app.exec_()
+
+        self.assertTrue(self._loaded)
         self.assertEqual(view.url(), "testpy:goodbye")
+
+    def _slot_loaded(self):
+        self._loaded = True
+        QApplication.quit()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,39 +1,52 @@
-Shiboken the Binding Generator
-*******************************
+Shiboken
+********
 
-Shiboken is the CPython-based binding code generator for C or C++ libraries.
-It uses an ApiExtractor library to parse the C or C++ headers and get the
-type information, using Clang. You can also use this library to parse non-Qt
-projects. The following diagram summarizes Shiboken's role in the Qt for Python
-project.
+Shiboken is a fundamental piece on the `Qt for Python`_ project that serves two purposes:
 
-.. image:: images/qtforpython-underthehood.png
+* Generator_: Extract information from C or C++ headers and generate CPython_ code that allow
+  to bring C or C++ projects to Python. This process uses a library called ApiExtractor_ which
+  internally uses Clang_.
+* Module_: An utility Python module that exposed new Python types, functions to handle pointers,
+  among other things, that is written in CPython_ and can use independently of the generator.
 
-An XML typesystem file is used to specify the types to be exposed to Python
-and to apply modifications to properly represent and manipulate the types in
-the Python World. For example, you can remove and add methods to certain types,
-and also modify the arguments of each method. These actions are inevitable to
-properly handle the data structures or types.
+.. _`Qt for Python`: ../index.html
+.. _Generator: shibokengenerator.html
+.. _Module: shibokenmodule.html
+.. _CPython: https://github.com/python/cpython
+.. _Clang: https://clang.llvm.org/
+.. _ApiExtractor: typesystem.html
 
-The final outcome of this process is a set of wrappers written in CPython,
-which can be used as a module in your Python code.
+Documentation
+=============
 
-Table of Contents
-*****************
+.. raw:: html
+
+    <table class="special">
+        <colgroup>
+            <col style="width: 33%" />
+            <col style="width: 33%" />
+            <col style="width: 33%" />
+        </colgroup>
+        <tr>
+          <td><a href="gettingstarted.html"><p><strong>Getting Started</strong><br/>Install and build from source.</p></a></td>
+          <td><a href="shibokengenerator.html"><p><strong>Shiboken Generator</strong><br/>Binding generator executable.</p></a></td>
+          <td><a href="shibokenmodule.html"><p><strong>Shiboken Module</strong><br/>Python utility module.</p></a></td>
+        </tr>
+        <tr>
+          <td><a href="typesystem.html"><p><strong>Type System</strong><br/>Reference and functionallities.</p></a></td>
+          <td><a href="examples/index.html"><p><strong>Examples</strong><br/>Using Shiboken.</p></a></td>
+          <td><a href="considerations.html"><p><strong>Considerations</strong><br/>Known issues and FAQ.</p></a></td>
+        </tr>
+
+    </table>
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :glob:
 
-   overview.rst
-   samplebinding.rst
-   commandlineoptions.rst
-   projectfile.rst
-   typesystemvariables.rst
-   typeconverters.rst
-   codeinjectionsemantics.rst
-   sequenceprotocol.rst
-   ownership.rst
-   wordsofadvice.rst
+   gettingstarted.rst
+   shibokengenerator.rst
    shibokenmodule.rst
-   faq.rst
    typesystem.rst
+   examples/index.rst
+   considerations.rst
