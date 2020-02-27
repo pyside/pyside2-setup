@@ -426,7 +426,7 @@ void SbkDeallocQAppWrapper(PyObject *pyObj)
 {
     SbkDeallocWrapper(pyObj);
     // PYSIDE-571: make sure to create a singleton deleted qApp.
-    MakeSingletonQAppWrapper(nullptr);
+    Py_DECREF(MakeQAppWrapper(nullptr));
 }
 
 void SbkDeallocWrapperWithPrivateDtor(PyObject *self)
@@ -612,7 +612,7 @@ PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
         subtype->tp_free = PyObject_Del;
     }
 #endif
-    auto self = reinterpret_cast<SbkObject *>(MakeSingletonQAppWrapper(subtype));
+    auto self = reinterpret_cast<SbkObject *>(MakeQAppWrapper(subtype));
     return self == nullptr ? nullptr : _setupNew(self, subtype);
 }
 

@@ -60,7 +60,7 @@ class MyWidget(QtWidgets.QWidget):
         slider.setValue(0)
 
         self.connect(quit, QtCore.SIGNAL("clicked()"),
-                     QtWidgets.qApp, QtCore.SLOT("quit()"))
+                     qApp, QtCore.SLOT("quit()"))
         self.connect(slider, QtCore.SIGNAL("valueChanged(int)"),
                      lcd, QtCore.SLOT("display(int)"))
 

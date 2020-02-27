@@ -5818,10 +5818,6 @@ bool CppGenerator::finishGeneration()
     s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
         << "_SignatureStrings);\n";
 
-    if (usePySideExtensions()) {
-        // initialize the qApp module.
-        s << INDENT << "NotifyModuleForQApp(module, qApp);\n";
-    }
     s << Qt::endl;
     s << "SBK_MODULE_INIT_FUNCTION_END\n";
 

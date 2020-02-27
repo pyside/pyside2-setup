@@ -70,9 +70,9 @@ class FileListModel(QtCore.QAbstractListModel):
             batch = (index.row() // 100) % 2
 #  FIXME: QGuiApplication::palette() required
             if batch == 0:
-                return QtWidgets.qApp.palette().base()
+                return qApp.palette().base()
 
-            return QtWidgets.qApp.palette().alternateBase()
+            return qApp.palette().alternateBase()
 
         return None
 

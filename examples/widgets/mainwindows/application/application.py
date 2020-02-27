@@ -147,7 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
                 statusTip="Show the Qt library's About box",
-                triggered=QtWidgets.qApp.aboutQt)
+                triggered=qApp.aboutQt)
 
         self.cutAct.setEnabled(False)
         self.copyAct.setEnabled(False)

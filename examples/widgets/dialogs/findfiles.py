@@ -131,7 +131,7 @@ class Window(QtWidgets.QDialog):
         for i in range(len(files)):
             progressDialog.setValue(i)
             progressDialog.setLabelText("Searching file number %d of %d..." % (i, len(files)))
-            QtCore.qApp.processEvents()
+            QtCore.QCoreApplication.processEvents()
 
             if progressDialog.wasCanceled():
                 break

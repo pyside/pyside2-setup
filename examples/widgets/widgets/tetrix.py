@@ -77,7 +77,7 @@ class TetrixWindow(QtWidgets.QWidget):
 
         startButton.clicked.connect(self.board.start)
         pauseButton.clicked.connect(self.board.pause)
-        quitButton.clicked.connect(QtWidgets.qApp.quit)
+        quitButton.clicked.connect(qApp.quit)
         self.board.scoreChanged.connect(scoreLcd.display)
         self.board.levelChanged.connect(levelLcd.display)
         self.board.linesRemovedChanged.connect(linesLcd.display)

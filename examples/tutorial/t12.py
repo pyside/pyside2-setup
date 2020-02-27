@@ -259,7 +259,7 @@ class MyWidget(QtWidgets.QWidget):
         quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
 
         self.connect(quit, QtCore.SIGNAL("clicked()"),
-                     QtWidgets.qApp, QtCore.SLOT("quit()"))
+                     qApp, QtCore.SLOT("quit()"))
 
         angle = LCDRange("ANGLE")
         angle.setRange(5, 70)

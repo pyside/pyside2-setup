@@ -102,14 +102,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         fileMenu.addAction("&New...", self.newFile, "Ctrl+N")
         fileMenu.addAction("&Open...", self.openFile, "Ctrl+O")
-        fileMenu.addAction("E&xit", QtWidgets.qApp.quit, "Ctrl+Q")
+        fileMenu.addAction("E&xit", qApp.quit, "Ctrl+Q")
 
     def setupHelpMenu(self):
         helpMenu = QtWidgets.QMenu("&Help", self)
         self.menuBar().addMenu(helpMenu)
 
         helpMenu.addAction("&About", self.about)
-        helpMenu.addAction("About &Qt", QtWidgets.qApp.aboutQt)
+        helpMenu.addAction("About &Qt", qApp.aboutQt)
 
 
 class Highlighter(QtGui.QSyntaxHighlighter):

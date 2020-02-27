@@ -146,7 +146,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
 
         self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
-                triggered=QtWidgets.qApp.aboutQt)
+                triggered=qApp.aboutQt)
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&File")
