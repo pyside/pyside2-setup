@@ -1509,10 +1509,10 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
     QStringList cppSignature;
     if (!classContext.forSmartPointer()) {
         cppSignature = metaClass->qualifiedCppName().split(QLatin1String("::"),
-                                                                       QString::SkipEmptyParts);
+                                                                       Qt::SkipEmptyParts);
     } else {
         cppSignature = classContext.preciseType()->cppSignature().split(QLatin1String("::"),
-                                                                        QString::SkipEmptyParts);
+                                                                        Qt::SkipEmptyParts);
     }
     while (!cppSignature.isEmpty()) {
         QString signature = cppSignature.join(QLatin1String("::"));
@@ -1960,7 +1960,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream &s, OverloadData &overl
 
     s << INDENT << "PyObject *";
     s << PYTHON_ARGS << "[] = {"
-        << QString(maxArgs, QLatin1Char('0')).split(QLatin1String(""), QString::SkipEmptyParts).join(QLatin1String(", "))
+        << QString(maxArgs, QLatin1Char('0')).split(QLatin1String(""), Qt::SkipEmptyParts).join(QLatin1String(", "))
         << "};\n";
     s << endl;
 
@@ -5808,7 +5808,7 @@ bool CppGenerator::finishGeneration()
         if (!referencedType)
             continue;
         QString converter = converterObject(referencedType);
-        QStringList cppSignature = pte->qualifiedCppName().split(QLatin1String("::"), QString::SkipEmptyParts);
+        QStringList cppSignature = pte->qualifiedCppName().split(QLatin1String("::"), Qt::SkipEmptyParts);
         while (!cppSignature.isEmpty()) {
             QString signature = cppSignature.join(QLatin1String("::"));
             s << INDENT << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << signature << "\");\n";
