@@ -41,9 +41,9 @@ import re
 import sys
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from subprocess import check_output, Popen, PIPE
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
-content = """Qt for Python @VERSION is a @TYPE release.
+content_header = """Qt for Python @VERSION is a @TYPE release.
 
 For more details, refer to the online documentation included in this
 distribution. The documentation is also available online:
@@ -61,14 +61,11 @@ information about a particular change.
 ****************************************************************************
 *                                  PySide2                                 *
 ****************************************************************************
+"""
 
-@PYSIDE
-
-****************************************************************************
+shiboken_header = """****************************************************************************
 *                                  Shiboken2                               *
 ****************************************************************************
-
-@SHIBOKEN
 """
 
 
@@ -143,20 +140,22 @@ def get_commit_content(sha: str) -> str:
         print(err, file=sys.stderr)
     return out.decode("utf-8")
 
-
-def git_command(versions: List[str], pattern: str):
+def git_get_sha1s(versions: List[str], pattern: str):
+    """Return a list of SHA1s matching a pattern"""
     command = "git rev-list --reverse --grep '^{}'".format(pattern)
     command += " {}..{}".format(versions[0], versions[1])
     command += " | git cat-file --batch"
     command += " | grep -o -E \"^[0-9a-f]{40}\""
-    task_number_re = re.compile(r'^.*-(\d+)\s*$')
     print("{}: {}".format(git_command.__name__, command), file=sys.stderr)
     out_sha1, err = Popen(command, stdout=PIPE, shell=True).communicate()
     if err:
         print(err, file=sys.stderr)
-    sha1_list = [s.decode("utf-8") for s in out_sha1.splitlines()]
+    return [s.decode("utf-8") for s in out_sha1.splitlines()]
 
-    for sha in sha1_list:
+
+def git_command(versions: List[str], pattern: str):
+    task_number_re = re.compile(r'^.*-(\d+)\s*$')
+    for sha in git_get_sha1s(versions, pattern):
         content = get_commit_content(sha).splitlines()
         # First line is title
         title = content[0]
@@ -190,11 +189,43 @@ def create_task_log(versions: List[str]) -> None:
     git_command(versions, "Task-number: ")
 
 
+def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
+    """Extract a tuple of (component, change log lines) from a commit message
+       of the form [ChangeLog][shiboken2] description..."""
+    result = []
+    component = 'pyside'
+    within_changelog = False
+    for line in commit_message:
+        if within_changelog:
+            if line:
+                result.append('   ' + line.strip())
+            else:
+                break
+        else:
+            if line.startswith('[ChangeLog]'):
+                log_line = line[11:]
+                if log_line.startswith('['):
+                    end = log_line.find(']')
+                    if end > 0:
+                        component = log_line[1:end]
+                        log_line = log_line[end + 1:]
+                result.append(' * ' + log_line.strip())
+                within_changelog = True
+    return (component, result)
+
+
+def create_change_log(versions: List[str]) -> None:
+    for sha in git_get_sha1s(versions, r"\[ChangeLog\]"):
+        change_log = extract_change_log(get_commit_content(sha).splitlines())
+        if change_log[0].startswith('shiboken'):
+            shiboken2_changelogs.extend(change_log[1])
+        else:
+            pyside2_changelogs.extend(change_log[1])
+
+
 def gen_list(d: Dict[str, Dict[str, str]]) -> str:
-    if d:
-        return "".join(" - [{}] {}\n".format(v["task"], v["title"])
-                       for _, v in d.items())
-    return " - No changes"
+    return "".join(" - [{}] {}\n".format(v["task"], v["title"])
+                   for _, v in d.items())
 
 
 def sort_dict(d: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
@@ -206,6 +237,8 @@ if __name__ == "__main__":
     args = parse_options()
     pyside2_commits: Dict[str, Dict[str, str]] = {}
     shiboken2_commits: Dict[str, Dict[str, str]] = {}
+    pyside2_changelogs: List[str] = []
+    shiboken2_changelogs: List[str] = []
 
     # Getting commits information
     directory = args.directory if args.directory else "."
@@ -214,14 +247,21 @@ if __name__ == "__main__":
         if check_tag(versions[0]) and check_tag(versions[1]):
             create_fixes_log(versions)
             create_task_log(versions)
+            create_change_log(versions)
 
     # Sort commits
     pyside2_commits = sort_dict(pyside2_commits)
     shiboken2_commits = sort_dict(shiboken2_commits)
 
     # Generate message
-    print(content
-          .replace("@VERSION", args.release)
-          .replace("@TYPE", args.type)
-          .replace("@PYSIDE", gen_list(pyside2_commits))
-          .replace("@SHIBOKEN", gen_list(shiboken2_commits)))
+    print(content_header.replace("@VERSION", args.release).
+          replace("@TYPE", args.type))
+    print('\n'.join(pyside2_changelogs))
+    print(gen_list(pyside2_commits))
+    if not pyside2_changelogs and not pyside2_commits:
+        print(" - No changes")
+    print(shiboken_header)
+    print('\n'.join(shiboken2_changelogs))
+    print(gen_list(shiboken2_commits))
+    if not shiboken2_changelogs and not shiboken2_commits:
+        print(" - No changes")
