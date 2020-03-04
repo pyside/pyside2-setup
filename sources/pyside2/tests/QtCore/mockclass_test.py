@@ -30,7 +30,14 @@
 # http://bugs.pyside.org/show_bug.cgi?id=634
 # Marcus Lindblom <macke@yar.nu>; 2011-02-16
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 from PySide2.QtCore import QCoreApplication
 
 class Mock(object):

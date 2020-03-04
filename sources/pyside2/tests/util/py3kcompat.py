@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -27,12 +28,55 @@
 ##
 #############################################################################
 
+# Copy of ../../../shiboken2/tests/py3kcompat.py
+
 import sys
 
 IS_PY3K = sys.version_info[0] == 3
 
 if IS_PY3K:
-    from py3xfunctions import b, l, unicode_, unicode, unichr, long, unichr, buffer
-else:
-    from py2xfunctions import b, l, unicode_, unicode, unichr, long, unichr, buffer
+    def b(s):
+        if type(s) == bytes:
+            return s
+        return bytes(s, "UTF8")
 
+    def buffer_(s):
+        if s == None:
+            return None
+        elif type(s) == str:
+            return bytes(s, "UTF8")
+        elif type(s) == bytes:
+            return s
+        else:
+            memoryview(s)
+
+    def l(n):
+        return n
+
+    def unicode_(s):
+        return s
+
+    unicode = str
+    unichr = chr
+    long = int
+    unichr = chr
+    buffer = buffer_
+else:
+    def b(s):
+        return s
+
+    def l(n):
+        return long(n)
+
+    def unicode_(s):
+        if type(s) == str:
+            import codecs
+            c = codecs.lookup('utf-8')
+            s2 = c.decode(s, 'ignore')
+            return s2[0]
+        return u'%s' % s
+
+    unicode = unicode
+    unichr = unichr
+    long = long
+    buffer = buffer

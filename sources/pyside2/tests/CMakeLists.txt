@@ -5,23 +5,11 @@ else()
         set(CTEST_TESTING_TIMEOUT 60)
     endif()
 
-   # tests/QtWidgets/qstandarditemmodel_test.py needs shiboken2
-   # tests/QtWidgets/qlabel_test.py needs shiboken2
-   if(WIN32)
-        set(TEST_PYTHONPATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/tests/util;${CMAKE_BINARY_DIR}/tests/pysidetest;${SHIBOKEN_PYTHON_MODULE_DIR};$ENV{PYTHONPATH}")
-        set(TEST_LIBRARY_PATH   "${libpyside_BINARY_DIR};${pysidetest_BINARY_DIR};${SHIBOKEN_SHARED_LIBRARY_DIR};$ENV{PATH}")
-        set(LIBRARY_PATH_VAR    "PATH")
-        string(REPLACE "\\" "/" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
-        string(REPLACE "\\" "/" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")
-
-        string(REPLACE ";" "\\;" TEST_PYTHONPATH "${TEST_PYTHONPATH}")
-        string(REPLACE ";" "\\;" TEST_LIBRARY_PATH "${TEST_LIBRARY_PATH}")
-    else()
-        set(TEST_PYTHONPATH "${CMAKE_BINARY_DIR}:${CMAKE_SOURCE_DIR}/tests/util:${CMAKE_BINARY_DIR}/tests/pysidetest:${CMAKE_BINARY_DIR}/../shiboken2/shibokenmodule:$ENV{PYTHONPATH}")
-        set(TEST_LIBRARY_PATH   "${libpyside_BINARY_DIR}:${pysidetest_BINARY_DIR}:$ENV{LD_LIBRARY_PATH}")
-        set(LIBRARY_PATH_VAR    "LD_LIBRARY_PATH")
-    endif()
-
+    # BUILD_DIR and QT_DIR are used by init_paths.py for setting
+    # the path to the testbinding module
+    get_filename_component(BUILD_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
+    get_filename_component(BUILD_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
+    set(QT_DIR "${_qt5Core_install_prefix}")
 
     macro(TEST_QT_MODULE var name)
       if(NOT DISABLE_${name} AND ${var})
@@ -46,7 +34,7 @@ else()
         set_tests_properties(${TEST_NAME} PROPERTIES
                              TIMEOUT ${CTEST_TESTING_TIMEOUT}
                              WILL_FAIL ${EXPECT_TO_FAIL}
-                             ENVIRONMENT "PYTHONPATH=${TEST_PYTHONPATH};${LIBRARY_PATH_VAR}=${TEST_LIBRARY_PATH};PYSIDE_DISABLE_INTERNAL_QT_CONF=1;QT_NO_GLIB=1")
+                             ENVIRONMENT "BUILD_DIR=${BUILD_DIR};QT_DIR=${QT_DIR};PYSIDE_DISABLE_INTERNAL_QT_CONF=1;QT_NO_GLIB=1")
     endmacro()
 
     if (NOT DISABLE_QtCore AND NOT DISABLE_QtGui AND NOT DISABLE_QtWidgets)

@@ -28,7 +28,14 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(True)
+
 from testbinding import TestObject
 from PySide2.QtWidgets import QApplication
 from PySide2 import __all__ as all

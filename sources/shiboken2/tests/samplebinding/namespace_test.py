@@ -40,7 +40,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 from sample import *
-from helper import objectFullname
+from shiboken_test_helper import objectFullname
 
 
 class TestEnumUnderNamespace(unittest.TestCase):

@@ -48,11 +48,18 @@
 # <__main__.MyQGraphicsItem object at 0x7f55cf226c20>
 #
 
+import os
+import sys
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
 
 from PySide2.QtCore import QObject
 from PySide2.QtWidgets import *
 import PySide2.QtCore
-import unittest
+
 
 class MyQObject(QObject):
     def __init__(self):

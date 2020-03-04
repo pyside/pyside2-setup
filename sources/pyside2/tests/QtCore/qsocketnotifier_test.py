@@ -30,13 +30,18 @@
 
 '''Unit tests for QUuid'''
 
+import os
+import socket
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
 
 from PySide2.QtWidgets import QApplication
 from PySide2.QtCore import QSocketNotifier
-import socket
-import sys
-import os
+
 
 class QSocketNotifierTest(unittest.TestCase):
     def testClass(self):

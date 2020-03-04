@@ -40,7 +40,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 from other import OtherObjectType
-from helper import objectFullname
+from shiboken_test_helper import objectFullname
 
 class SignatureTest(unittest.TestCase):
 

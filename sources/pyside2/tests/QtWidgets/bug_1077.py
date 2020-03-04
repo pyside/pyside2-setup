@@ -28,8 +28,17 @@
 
 ''' unit test for BUG #1077 '''
 
-from PySide2 import QtCore, QtGui, QtWidgets
+import os
+import sys
 import time
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths()
+
+from PySide2 import QtCore, QtGui, QtWidgets
+
 
 class Highlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, parent, mode):

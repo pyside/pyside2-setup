@@ -58,6 +58,14 @@ For some reason, the test does not work as a unittest because it creates
 no crash. We leave it this way.
 """
 
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "util"))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths()
+
 from PySide2.QtCore import QTimer
 from PySide2 import QtWidgets
 
