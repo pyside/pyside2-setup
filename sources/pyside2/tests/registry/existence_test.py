@@ -68,8 +68,13 @@ List entry
 
 import os
 import sys
-import unittest
 from textwrap import dedent
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_all_test_paths
+init_all_test_paths()
+
 from init_platform import enum_all, generate_all
 from util import (isolate_warnings, check_warnings, suppress_warnings, warn,
                   is_ci, qt_version, get_script_dir, get_effective_refpath,

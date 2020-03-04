@@ -139,10 +139,17 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         s << "\n{\npublic:\n";
 
         const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
+        int maxOverrides = 0;
         for (AbstractMetaFunction *func : funcs) {
-            if ((func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0)
+            if ((func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0) {
                 writeFunction(s, func);
+                // PYSIDE-803: Build a boolean cache for unused overrides.
+                if (shouldWriteVirtualMethodNative(func))
+                    maxOverrides++;
+            }
         }
+        if (!maxOverrides)
+            maxOverrides = 1;
 
         if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
             const AbstractMetaFieldList &fields = metaClass->fields();
@@ -181,6 +188,10 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
 
         if (usePySideExtensions())
             s << INDENT << "static void pysideInitQtMetaTypes();\n";
+
+        s << INDENT << "void resetPyMethodCache();\n";
+        s << "private:\n";
+        s << INDENT << "mutable bool m_PyMethodCache[" << maxOverrides << "];\n";
 
         s << "};\n\n";
         if (!innerHeaderGuard.isEmpty())

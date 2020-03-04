@@ -29,9 +29,17 @@
 """ Unittest for bug #575 """
 """ http://bugs.openbossa.org/show_bug.cgi?id=575 """
 
-from PySide2.QtWidgets import QApplication, QPlainTextEdit, QTextEdit
+import sys
+import os
 import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+from PySide2.QtWidgets import QApplication, QPlainTextEdit, QTextEdit
+
 
 class Bug575(unittest.TestCase):
     def testPropertyValues(self):

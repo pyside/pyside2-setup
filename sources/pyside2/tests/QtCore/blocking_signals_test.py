@@ -28,9 +28,14 @@
 
 ''' Test case for QObject.signalsBlocked() and blockSignal()'''
 
-import unittest
 import os
+import sys
 from tempfile import mkstemp
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
 
 from PySide2.QtCore import QObject, SIGNAL, QFile, QSignalBlocker
 

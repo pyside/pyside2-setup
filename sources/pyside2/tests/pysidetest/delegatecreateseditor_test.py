@@ -28,9 +28,15 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
-from helper.usesqapplication import UsesQApplication
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(True)
+
+from helper.usesqapplication import UsesQApplication
 from testbinding import TestView
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QAbstractItemDelegate, QComboBox

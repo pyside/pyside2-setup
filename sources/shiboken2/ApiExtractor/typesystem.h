@@ -1179,7 +1179,8 @@ class ComplexTypeEntry : public TypeEntry
 {
 public:
     enum TypeFlag {
-        Deprecated         = 0x4
+        Deprecated         = 0x4,
+        NoOverrideCaching  = 0x8
     };
     Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 

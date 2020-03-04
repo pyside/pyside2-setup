@@ -30,9 +30,15 @@
 
 '''Producer-Consumer test/example with QThread'''
 
-import unittest
-from random import random
 import logging
+import os
+from random import random
+import sys
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
 
 logging.basicConfig(level=logging.WARNING)
 

@@ -42,7 +42,14 @@ This is the example from https://bugreports.qt.io/browse/PYSIDE-772
 with no interaction as a unittest.
 """
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QApplication, QWidget
 from PySide2 import QtWidgets

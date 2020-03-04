@@ -370,7 +370,7 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
     const CommandArgumentMap::iterator it = args.find(option);
     if (it != args.end()) {
         const QStringList includePathListList =
-            it.value().split(pathSplitter, QString::SkipEmptyParts);
+            it.value().split(pathSplitter, Qt::SkipEmptyParts);
         args.erase(it);
         for (const QString &s : includePathListList) {
             auto path = QFile::encodeName(QDir::cleanPath(s));
