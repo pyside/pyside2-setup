@@ -28,10 +28,17 @@
 
 ''' Test bug 635: http://bugs.openbossa.org/show_bug.cgi?id=635'''
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import QApplication, QToolBar
-import sys
+
 
 class testQToolBar(unittest.TestCase):
     def callback(self):

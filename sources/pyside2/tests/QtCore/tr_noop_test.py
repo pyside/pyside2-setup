@@ -26,9 +26,14 @@
 ##
 #############################################################################
 
+import os
+import sys
 import unittest
 
-import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 from PySide2.QtCore import QT_TR_NOOP, QT_TR_NOOP_UTF8
 from PySide2.QtCore import QT_TRANSLATE_NOOP, QT_TRANSLATE_NOOP3, QT_TRANSLATE_NOOP_UTF8
 

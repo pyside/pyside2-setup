@@ -27,9 +27,14 @@
 #############################################################################
 
 from __future__ import print_function
-import unittest
-import sys
+import os
 import gc
+import sys
+import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
 
 from PySide2 import QtGui, QtWidgets
 

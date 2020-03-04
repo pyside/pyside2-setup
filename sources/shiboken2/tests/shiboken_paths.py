@@ -31,6 +31,20 @@ import os
 import sys
 
 
+def get_dir_env_var(var_name):
+    """Return a directory set by an environment variable"""
+    result = os.environ.get(var_name)
+    if not result:
+        raise ValueError('{} is not set!'.format(var_name))
+    if not os.path.isdir(result):
+        raise ValueError('{} is not a directory!'.format(result))
+    return result
+
+
+def get_build_dir():
+    return get_dir_env_var('BUILD_DIR')
+
+
 def _prepend_path_var(var_name, paths):
     """Prepend additional paths to a path environment variable
        like PATH, LD_LIBRARY_PATH"""
@@ -41,29 +55,15 @@ def _prepend_path_var(var_name, paths):
     os.environ[var_name] = new_paths
 
 
-def init_paths():
-    """Sets the correct import paths (Python modules and C++ library
-       paths) for testing shiboken depending on a single
-       environment variable BUILD_DIR pointing to the build
-       directory."""
-    VAR_NAME = 'BUILD_DIR'
-    build_dir = os.environ.get(VAR_NAME)
-    if not build_dir:
-        raise ValueError('{} is not set!'.format(VAR_NAME))
-    if not os.path.isdir(build_dir):
-        raise ValueError('{} is not a directory!'.format(build_dir))
-    src_dir = os.path.dirname(os.path.abspath(__file__))
-    if src_dir not in sys.path:  # Might be present due to import of this file
-        sys.path.append(src_dir)  # For py3kcompat
-    shiboken_dir = os.path.join(build_dir, 'shiboken2')
-    sys.path.append(os.path.join(shiboken_dir, 'shibokenmodule'))
-    lib_dirs = [os.path.join(shiboken_dir, 'libshiboken')]
-    shiboken_test_dir = os.path.join(shiboken_dir, 'tests')
-    for module in ['minimal', 'sample', 'smart', 'other']:
-        module_dir = os.path.join(shiboken_test_dir, module + 'binding')
-        sys.path.append(module_dir)
-        lib_dir = os.path.join(shiboken_test_dir, 'lib' + module)
-        lib_dirs.append(lib_dir)
+def add_python_dirs(python_dirs):
+    """Add directories to the Python path unless present."""
+    for python_dir in python_dirs:
+        if python_dir not in sys.path:
+            sys.path.append(python_dir)
+
+
+def add_lib_dirs(lib_dirs):
+    """Add directories to the platform's library path."""
     if sys.platform == 'win32':
         if sys.version_info >= (3, 8, 0):
             for lib_dir in lib_dirs:
@@ -72,3 +72,35 @@ def init_paths():
             _prepend_path_var('PATH', lib_dirs)
     else:
         _prepend_path_var('LD_LIBRARY_PATH', lib_dirs)
+
+
+def shiboken_paths(include_shiboken_tests=False):
+    """Return a tuple of python directories/lib directories to be set for
+       using the shiboken2 module from the build directory or running the
+       shiboken tests depending on a single environment variable BUILD_DIR
+       pointing to the build directory."""
+    src_dir = os.path.dirname(os.path.abspath(__file__))
+    python_dirs = []
+    if include_shiboken_tests:
+        python_dirs.append(src_dir)  # For py3kcompat
+    shiboken_dir = os.path.join(get_build_dir(), 'shiboken2')
+    python_dirs.append(os.path.join(shiboken_dir, 'shibokenmodule'))
+    lib_dirs = [os.path.join(shiboken_dir, 'libshiboken')]
+    if include_shiboken_tests:
+        shiboken_test_dir = os.path.join(shiboken_dir, 'tests')
+        for module in ['minimal', 'sample', 'smart', 'other']:
+            module_dir = os.path.join(shiboken_test_dir, module + 'binding')
+            python_dirs.append(module_dir)
+            lib_dir = os.path.join(shiboken_test_dir, 'lib' + module)
+            lib_dirs.append(lib_dir)
+    return (python_dirs, lib_dirs)
+
+
+def init_paths():
+    """Sets the correct import paths (Python modules and C++ library
+       paths) for testing shiboken depending on a single
+       environment variable BUILD_DIR pointing to the build
+       directory."""
+    paths = shiboken_paths(True)
+    add_python_dirs(paths[0])
+    add_lib_dirs(paths[1])

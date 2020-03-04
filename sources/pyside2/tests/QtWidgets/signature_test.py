@@ -39,7 +39,14 @@
 
 from __future__ import print_function, absolute_import
 
+import os
+import sys
 import unittest
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 import PySide2.QtCore
 import PySide2.QtWidgets
 from shibokensupport.signature import inspect
