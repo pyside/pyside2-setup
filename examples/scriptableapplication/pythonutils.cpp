@@ -53,6 +53,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
+#include <QtCore/QOperatingSystemVersion>
 #include <QtCore/QStringList>
 #include <QtCore/QTemporaryFile>
 #include <QtCore/QDir>
@@ -87,15 +88,30 @@ static void cleanup()
     }
 }
 
+static const char virtualEnvVar[] = "VIRTUAL_ENV";
+
+// If there is an active python virtual environment, use that environment's
+// packages location.
+static void initVirtualEnvironment()
+{
+    QByteArray virtualEnvPath = qgetenv(virtualEnvVar);
+    // As of Python 3.8, Python is no longer able to run stand-alone in a
+    // virtualenv due to missing libraries. Add the path to the modules instead.
+    if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows
+        && (PY_MAJOR_VERSION > 3 || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 8))) {
+        qputenv("PYTHONPATH", virtualEnvPath + "\\Lib\\site-packages");
+    } else {
+        qputenv("PYTHONHOME", virtualEnvPath);
+    }
+}
+
 State init()
 {
     if (state > PythonUninitialized)
         return state;
 
-    // If there is an active python virtual environment, use that environment's packages location.
-    QByteArray virtualEnvPath = qgetenv("VIRTUAL_ENV");
-    if (!virtualEnvPath.isEmpty())
-        qputenv("PYTHONHOME", virtualEnvPath);
+    if (qEnvironmentVariableIsSet(virtualEnvVar))
+        initVirtualEnvironment();
 
     Py_Initialize();
     qAddPostRoutine(cleanup);

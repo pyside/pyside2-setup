@@ -1137,6 +1137,20 @@ void _FunctionModelItem::setInvokable(bool isInvokable)
     m_isInvokable = isInvokable;
 }
 
+QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type system files
+{
+    QString result;
+    QTextStream str(&result);
+    str << name() << '(';
+    for (int a = 0, size = m_arguments.size(); a < size; ++a) {
+        if (a)
+            str << ',';
+        str << m_arguments.at(a)->type().qualifiedName().join(QLatin1String("::"));
+    }
+    str << ')';
+    return result;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void _FunctionModelItem::formatDebug(QDebug &d) const
 {

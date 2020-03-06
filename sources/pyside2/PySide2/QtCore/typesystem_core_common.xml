@@ -682,6 +682,10 @@
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-installmessagehandler"/>
   </add-function>
 
+  <value-type name="QDeadlineTimer" since="5.8">
+    <enum-type name="ForeverConstant"/>
+  </value-type>
+
   <value-type name="QElapsedTimer" since="4.7">
     <enum-type name="ClockType" since="4.7"/>
   </value-type>

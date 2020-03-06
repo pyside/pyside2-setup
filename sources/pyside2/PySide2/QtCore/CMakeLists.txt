@@ -47,6 +47,7 @@ ${QtCore_GEN_DIR}/qcryptographichash_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
 ${QtCore_GEN_DIR}/qdate_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatetime_wrapper.cpp
+${QtCore_GEN_DIR}/qdeadlinetimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qdir_wrapper.cpp
 ${QtCore_GEN_DIR}/qdiriterator_wrapper.cpp
 ${QtCore_GEN_DIR}/qdynamicpropertychangeevent_wrapper.cpp
