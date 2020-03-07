@@ -1,0 +1,6 @@
+{
+    "files": ["qtpy2cpp.py",
+              "qtpy2cpp_lib/formatter.py", "qtpy2cpp_lib/visitor.py", "qtpy2cpp_lib/nodedump.py",
+              "qtpy2cpp_lib/astdump.py", "qtpy2cpp_lib/tokenizer.py",
+              "qtpy2cpp_lib/test_baseline/basic_test.py", "qtpy2cpp_lib/test_baseline/uic.py"]
+}

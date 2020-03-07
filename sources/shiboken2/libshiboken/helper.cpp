@@ -47,10 +47,15 @@
 #include <stdarg.h>
 
 #ifdef _WIN32
+#  ifndef NOMINMAX
+#    define NOMINMAX
+#  endif
 #  include <windows.h>
 #else
 #  include <pthread.h>
 #endif
+
+#include <algorithm>
 
 static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
 {
@@ -84,6 +89,27 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
     }
 }
 
+static void formatPyObject(PyObject *obj, std::ostream &str);
+
+static void formatPySequence(PyObject *obj, std::ostream &str)
+{
+    const Py_ssize_t size = PySequence_Size(obj);
+    const Py_ssize_t printSize = std::min(size, Py_ssize_t(5));
+    str << size << " <";
+    for (Py_ssize_t i = 0; i < printSize; ++i) {
+        if (i)
+            str << ", ";
+        str << '(';
+        PyObject *item = PySequence_GetItem(obj, i);
+        formatPyObject(item, str);
+        str << ')';
+        Py_XDECREF(item);
+    }
+    if (printSize < size)
+        str << ",...";
+    str << '>';
+}
+
 static void formatPyObject(PyObject *obj, std::ostream &str)
 {
     if (obj) {
@@ -100,6 +126,8 @@ static void formatPyObject(PyObject *obj, std::ostream &str)
         else if (PyString_Check(obj))
             str << '"' << PyString_AsString(obj) << '"';
 #endif
+        else if (PySequence_Check(obj))
+            formatPySequence(obj, str);
         else
             str << "<unknown>";
     } else {

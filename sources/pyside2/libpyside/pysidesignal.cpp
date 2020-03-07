@@ -54,6 +54,7 @@
 #include <utility>
 
 #define QT_SIGNAL_SENTINEL '2'
+#define PyEnumMeta_Check(x) (strcmp(Py_TYPE(arg)->tp_name, "EnumMeta") == 0)
 
 namespace PySide {
 namespace Signal {
@@ -241,7 +242,7 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     for (Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
         PyObject *arg = PyTuple_GET_ITEM(args, i);
-        if (PySequence_Check(arg) && !Shiboken::String::check(arg)) {
+        if (PySequence_Check(arg) && !Shiboken::String::check(arg) && !PyEnumMeta_Check(arg)) {
             tupledArgs = true;
             const auto sig = PySide::Signal::parseSignature(arg);
             PySide::Signal::appendSignature(
