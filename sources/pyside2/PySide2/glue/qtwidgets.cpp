@@ -93,18 +93,14 @@ _defaultValue = %PYARG_1;
 // @snippet qformlayout-fix-args
 int _row;
 QFormLayout::ItemRole _role;
-%BEGIN_ALLOW_THREADS
 %CPPSELF->%FUNCTION_NAME(%ARGUMENT_NAMES, &_row, &_role);
-%END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](_row));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
 // @snippet qformlayout-fix-args
 
 // @snippet qfiledialog-return
-%BEGIN_ALLOW_THREADS
 %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &%5, %6);
-%END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
@@ -389,9 +385,7 @@ Shiboken::AutoDecRef parent(%CONVERTTOPYTHON[QGraphicsItem *](parentItem));
 const auto &childItems = %1->childItems();
 for (auto *item : childItems)
     Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[QGraphicsItem *](item));
-%BEGIN_ALLOW_THREADS
 %CPPSELF.%FUNCTION_NAME(%1);
-%END_ALLOW_THREADS
 // the arg was destroyed by Qt.
 Shiboken::Object::invalidate(%PYARG_1);
 // @snippet qgraphicsscene-destroyitemgroup

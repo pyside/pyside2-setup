@@ -757,6 +757,11 @@
       <include file-name="QMatrix" location="global"/>
     </extra-includes>
 
+    <modify-function signature="load(const QString&amp;, const char*)" allow-thread="yes"/>
+    <modify-function signature="load(QIODevice*,const char*)" allow-thread="yes"/>
+    <modify-function signature="save(const QString&amp;,const char*,int)const" allow-thread="yes"/>
+    <modify-function signature="save(QIODevice*,const char*,int)const" allow-thread="yes"/>
+
     <modify-function signature="QImage(uchar*,int,int,int,QImage::Format,QImageCleanupFunction,void*)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
@@ -1214,10 +1219,13 @@
     <modify-function signature="drawInlineObject(QPainter*,QRectF,QTextInlineObject,int,QTextFormat)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
+    <modify-function signature="update(const QRectF &amp;)" allow-thread="yes"/>
   </object-type>
   <object-type name="QPyTextObject"/>
 
-  <object-type name="QDesktopServices" since="4.2"/>
+  <object-type name="QDesktopServices" since="4.2">
+    <modify-function signature="openUrl(const QUrl&amp;)" allow-thread="yes"/>
+  </object-type>
   <object-type name="QDoubleValidator">
       <enum-type name="Notation"/>
   </object-type>
@@ -1254,6 +1262,8 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="read()" allow-thread="yes"/>
+    <modify-function signature="write()" allow-thread="yes"/>
   </object-type>
   <object-type name="QPixmapCache">
     <value-type name="Key"/>
@@ -1523,6 +1533,7 @@
     <!-- ### This method does not make sense in Python.
          Update: perhaps it does, but no one is missing it. -->
     <modify-function signature="read(QImage*)" remove="all"/>
+    <modify-function signature="read()" allow-thread="yes"/>
     <modify-function signature="setDevice(QIODevice*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -1720,7 +1731,7 @@
       <include file-name="QPixmap" location="global"/>
     </extra-includes>
     <enum-type name="Mode"/>
-    <modify-function signature="setMimeData(QMimeData*,QClipboard::Mode)">
+    <modify-function signature="setMimeData(QMimeData*,QClipboard::Mode)" allow-thread="yes">
       <modify-argument index="1">
         <!-- TODO: maybe this is not the best solution -->
         <parent index="this" action="add"/>
@@ -2536,6 +2547,11 @@
       </modify-argument>
       <inject-code file="../glue/qtgui.cpp" snippet="qwindow-fromWinId"/>
     </modify-function>
+    <modify-function signature="show()" allow-thread="yes"/>
+    <modify-function signature="showFullScreen()" allow-thread="yes"/>
+    <modify-function signature="showMaximized()" allow-thread="yes"/>
+    <modify-function signature="showMinimized()" allow-thread="yes"/>
+    <modify-function signature="showNormal()" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QGuiApplication">
@@ -2555,6 +2571,7 @@
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-2"/>
     </add-function>
     <inject-code class="native" position="beginning" file="../glue/qtgui.cpp" snippet="qguiapplication-init"/>
+    <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
 
   </object-type>
 
@@ -3017,6 +3034,8 @@
       <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int)const" remove="all"/>
       <modify-function signature="advancesForGlyphIndexes(const quint32*,QPointF*,int,QFlags&lt;QRawFont::LayoutFlag&gt;)const" remove="all"/>
       <modify-function signature="glyphIndexesForChars(const QChar*,int,quint32*,int*)const" remove="all"/>
+      <modify-function signature="loadFromData(const QByteArray&amp;,qreal, QFont::HintingPreference)" allow-thread="yes"/>
+      <modify-function signature="loadFromFile(const QString&amp;,qreal, QFont::HintingPreference)" allow-thread="yes"/>
   </value-type>
   <object-type name="QRasterWindow"/>
   <object-type name="QScreen">

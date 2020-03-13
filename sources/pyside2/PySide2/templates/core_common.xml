@@ -49,17 +49,13 @@
 
     <template name="bool*_fix,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_ok_retval"/>
     </template>
 
     <template name="bool*_fix,arg,arg,arg,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3, %4, %5);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_ok_retval"/>
     </template>
 
@@ -72,113 +68,85 @@
 
     <template name="fix_bool*">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_args,bool*">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;ok_);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_args,arg,bool*">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, &amp;ok_);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,bool*,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, &amp;ok_, %3);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_bool*,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_bool*,arg,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_bool*,arg,arg,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3, %4);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_bool*,arg,arg,arg,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3, %4, %5);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, &amp;ok_, %9);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, &amp;ok_, %9, %10);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, &amp;ok_, %8);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, &amp;ok_, %7);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,bool*,arg,arg">
         bool ok_;
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &amp;ok_, %6, %7);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_char*">
         char val_{};
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;val_);
-        %END_ALLOW_THREADS
         %PYARG_0 = PyTuple_New(2);
         PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
         PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[char](val_));
@@ -194,17 +162,13 @@
 
     <template name="fix_number*,number*,number*,number*">
         $TYPE a, b, c, d;
-        %BEGIN_ALLOW_THREADS
         %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a, &amp;b, &amp;c, &amp;d);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_abcd_same_type"/>
     </template>
 
     <template name="fix_number*,number*,number*,number*,args">
         $TYPE a, b, c, d;
-        %BEGIN_ALLOW_THREADS
         %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a, &amp;b, &amp;c, &amp;d, %ARGUMENT_NAMES);
-        %END_ALLOW_THREADS
         <insert-template name="tuple_abcd_same_type"/>
     </template>
 
@@ -227,9 +191,7 @@
 
     <template name="fix_number*,number*,number*,number*,number*">
         $TYPE a, b, c, d, e;
-        %BEGIN_ALLOW_THREADS
         %CPPSELF.%FUNCTION_NAME(&amp;a, &amp;b, &amp;c, &amp;d, &amp;e);
-        %END_ALLOW_THREADS
         %PYARG_0 = PyTuple_New(5);
         PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[$TYPE](a));
         PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[$TYPE](b));
@@ -240,9 +202,7 @@
 
     <template name="fix_args,number*,number*">
         $TYPE a, b;
-        %BEGIN_ALLOW_THREADS
         %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;a, &amp;b);
-        %END_ALLOW_THREADS
         %PYARG_0 = PyTuple_New(2);
         PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[$TYPE](a));
         PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[$TYPE](b));
@@ -251,9 +211,7 @@
     <template name="fix_arg,int*,int*">
     %RETURN_TYPE _ret;
     int a, b;
-    %BEGIN_ALLOW_THREADS
     _ret = %CPPSELF.%FUNCTION_NAME(%1, &amp;a, &amp;b);
-    %END_ALLOW_THREADS
     %PYARG_0 = PyTuple_New(3);
     PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](_ret));
     PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](a));
@@ -261,9 +219,7 @@
     </template>
 
     <template name="return_tuple_QValidator_QString_int">
-        %BEGIN_ALLOW_THREADS
         %RETURN_TYPE retval_ = %RETURN_TYPE(%CPPSELF.%FUNCTION_NAME(%1, %2));
-        %END_ALLOW_THREADS
         %PYARG_0 = PyTuple_New(3);
         PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
         PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));

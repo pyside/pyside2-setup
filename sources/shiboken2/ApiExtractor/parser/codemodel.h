@@ -202,6 +202,8 @@ public:
     static TypeInfo combine(const TypeInfo &__lhs, const TypeInfo &__rhs);
     static TypeInfo resolveType(TypeInfo const &__type, const ScopeModelItem &__scope);
 
+    void formatTypeSystemSignature(QTextStream &str) const;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif

@@ -393,6 +393,33 @@ void TypeInfo::simplifyStdType()
     }
 }
 
+void TypeInfo::formatTypeSystemSignature(QTextStream &str) const
+{
+    if (m_constant)
+        str << "const ";
+    str << m_qualifiedName.join(QLatin1String("::"));
+    switch (m_referenceType) {
+    case NoReference:
+        break;
+    case LValueReference:
+        str << '&';
+        break;
+    case RValueReference:
+        str << "&&";
+        break;
+    }
+    for (auto i : m_indirections) {
+        switch (i) {
+        case Indirection::Pointer:
+            str << '*';
+            break;
+        case Indirection::ConstPointer:
+            str << "* const";
+            break;
+        }
+    }
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class It>
 void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
@@ -1145,7 +1172,7 @@ QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type
     for (int a = 0, size = m_arguments.size(); a < size; ++a) {
         if (a)
             str << ',';
-        str << m_arguments.at(a)->type().qualifiedName().join(QLatin1String("::"));
+        m_arguments.at(a)->type().formatTypeSystemSignature(str);
     }
     str << ')';
     return result;
