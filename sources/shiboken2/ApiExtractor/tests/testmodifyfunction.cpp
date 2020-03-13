@@ -256,9 +256,9 @@ struct A {
     // Nothing specified, true
     const AbstractMetaFunction *f1 = classA->findFunction(QLatin1String("f1"));
     QVERIFY(f1);
-    QVERIFY(f1->allowThread());
+    QVERIFY(!f1->allowThread());
 
-    // 'auto' specified, should be true for nontrivial function
+    // 'auto' specified, should be false for nontrivial function
     const AbstractMetaFunction *f2 = classA->findFunction(QLatin1String("f2"));
     QVERIFY(f2);
     QVERIFY(f2->allowThread());
@@ -349,7 +349,7 @@ struct A : public Base {
     <object-type name='A'/>
 </typesystem>)XML")
          << false << false << false // exception
-         << true; // allowthread
+         << false; // allowthread
 
     // Modify one function
     QTest::newRow("modify-function1")
@@ -363,7 +363,7 @@ struct A : public Base {
     </object-type>
 </typesystem>)XML")
          << false << false << true // exception
-         << true; // allowthread
+         << false; // allowthread
 
     // Flip defaults by modifying functions
     QTest::newRow("modify-function2")
@@ -378,7 +378,7 @@ struct A : public Base {
     </object-type>
 </typesystem>)XML")
          << true << false << false // exception
-         << true; // allowthread
+         << false; // allowthread
 
     // Activate on type system level
     QTest::newRow("typesystem-on")
@@ -428,7 +428,7 @@ struct A : public Base {
     </object-type>
 </typesystem>)XML")
          << true << false << false // exception
-         << true; // allowthread
+         << false; // allowthread
 }
 
 void TestModifyFunction::testScopedModifications()

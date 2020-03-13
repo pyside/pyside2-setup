@@ -550,6 +550,12 @@ bool SignalManager::registerMetaMethod(QObject *source, const char *signature, Q
 
 static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
 {
+    // PYSIDE-803: The dict in this function is the ob_dict of an SbkObject.
+    // The "metaObjectAttr" entry is only handled in this file. There is no
+    // way in this function to involve the interpreter. Therefore, we need
+    // no GIL.
+    // Note that "SignalManager::registerMetaMethodGetIndex" has write actions
+    // that might involve the interpreter, but in that context the GIL is held.
     if (!dict || !PyDict_Contains(dict, metaObjectAttr))
         return nullptr;
 
@@ -605,7 +611,14 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
 
 const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
 {
-    Shiboken::GilState gil;
+    // PYSIDE-803: Avoid the GIL in SignalManager::retrieveMetaObject
+    // This function had the GIL. We do not use the GIL unless we have to.
+    // metaBuilderFromDict accesses a Python dict, but in that context there
+    // is no way to reach the interpreter, see "metaBuilderFromDict".
+    //
+    // The update function is MetaObjectBuilderPrivate::update in
+    // dynamicmetaobject.c . That function now uses the GIL when the
+    // m_dirty flag is set.
     Q_ASSERT(self);
 
     MetaObjectBuilder *builder = metaBuilderFromDict(reinterpret_cast<SbkObject *>(self)->ob_dict);

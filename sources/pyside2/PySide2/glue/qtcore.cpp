@@ -63,10 +63,15 @@ bool py2kStrCheck(PyObject *obj)
 // defaultValue can also be passed as positional argument,
 // not only as keyword.
 QVariant out;
-if (kwds || numArgs > 1)
+if (kwds || numArgs > 1) {
+    Py_BEGIN_ALLOW_THREADS
     out = %CPPSELF.value(%1, %2);
-else
+    Py_END_ALLOW_THREADS
+} else {
+    Py_BEGIN_ALLOW_THREADS
     out = %CPPSELF.value(%1);
+    Py_END_ALLOW_THREADS
+}
 
 PyTypeObject *typeObj = reinterpret_cast<PyTypeObject*>(%PYARG_3);
 
@@ -393,9 +398,7 @@ static bool qobjectConnect(QObject *source, const char *signal, QObject *receive
     slot++;
     PySide::SignalManager::registerMetaMethod(receiver, slot, isSignal ? QMetaMethod::Signal : QMetaMethod::Slot);
     bool connection;
-    Py_BEGIN_ALLOW_THREADS
     connection = QObject::connect(source, signal - 1, receiver, slot - 1, type);
-    Py_END_ALLOW_THREADS
     return connection;
 }
 
@@ -451,9 +454,7 @@ static bool qobjectConnectCallback(QObject *source, const char *signal, PyObject
         }
     }
     bool connection;
-    Py_BEGIN_ALLOW_THREADS
     connection = QMetaObject::connect(source, signalIndex, receiver, slotIndex, type);
-    Py_END_ALLOW_THREADS
     if (connection) {
         if (usingGlobalReceiver)
             signalManager.notifyGlobalReceiver(receiver);
@@ -499,9 +500,7 @@ static bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObj
     slotMethod = metaObject->method(slotIndex);
 
     bool disconnected;
-    Py_BEGIN_ALLOW_THREADS
     disconnected = QMetaObject::disconnectOne(source, signalIndex, receiver, slotIndex);
-    Py_END_ALLOW_THREADS
 
     if (disconnected) {
         if (usingGlobalReceiver)
@@ -577,8 +576,10 @@ bool %0 = qobjectConnect(%1, %2, %3, %4, %5);
 // qFatal doesn't have a stream version, so we do a
 // qWarning call followed by a qFatal() call using a
 // literal.
+Py_BEGIN_ALLOW_THREADS
 qWarning() << %1;
 qFatal("[A qFatal() call was made from Python code]");
+Py_END_ALLOW_THREADS
 // @snippet qfatal
 
 // @snippet moduleshutdown
@@ -669,9 +670,7 @@ if (!PyDateTimeAPI)
 
 // @snippet qdate-getdate
 int year, month, day;
-%BEGIN_ALLOW_THREADS
 %CPPSELF.%FUNCTION_NAME(&year, &month, &day);
-%END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(3);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](year));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](month));
@@ -680,9 +679,7 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](day));
 
 // @snippet qdate-weeknumber
 int yearNumber;
-%BEGIN_ALLOW_THREADS
 int week = %CPPSELF.%FUNCTION_NAME(&yearNumber);
-%END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[int](week));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](yearNumber));
@@ -1439,7 +1436,10 @@ Py_XINCREF(%PYARG_0);
 // @snippet qdatastream-readrawdata
 QByteArray data;
 data.resize(%2);
-int result = %CPPSELF.%FUNCTION_NAME(data.data(), data.size());
+int result = 0;
+Py_BEGIN_ALLOW_THREADS
+result = %CPPSELF.%FUNCTION_NAME(data.data(), data.size());
+Py_END_ALLOW_THREADS
 if (result == -1) {
     Py_INCREF(Py_None);
     %PYARG_0 = Py_None;
@@ -1449,7 +1449,10 @@ if (result == -1) {
 // @snippet qdatastream-readrawdata
 
 // @snippet qdatastream-writerawdata
-int r = %CPPSELF.%FUNCTION_NAME(%1, Shiboken::String::len(%PYARG_1));
+int r = 0;
+Py_BEGIN_ALLOW_THREADS
+r = %CPPSELF.%FUNCTION_NAME(%1, Shiboken::String::len(%PYARG_1));
+Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[int](r);
 // @snippet qdatastream-writerawdata
 
@@ -1580,7 +1583,9 @@ QT_END_NAMESPACE
 // @snippet use-stream-for-format-security
 // Uses the stream version for security reasons
 // see gcc man page at -Wformat-security
+Py_BEGIN_ALLOW_THREADS
 %FUNCTION_NAME() << %1;
+Py_END_ALLOW_THREADS
 // @snippet use-stream-for-format-security
 
 // @snippet qresource-registerResource
@@ -1594,12 +1599,16 @@ QT_END_NAMESPACE
 // @snippet qstring-return
 
 // @snippet stream-write-method
+Py_BEGIN_ALLOW_THREADS
 (*%CPPSELF) << %1;
+Py_END_ALLOW_THREADS
 // @snippet stream-write-method
 
 // @snippet stream-read-method
 %RETURN_TYPE _cpp_result;
+Py_BEGIN_ALLOW_THREADS
 (*%CPPSELF) >> _cpp_result;
+Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](_cpp_result);
 // @snippet stream-read-method
 
@@ -1621,7 +1630,9 @@ if (PyBytes_Check(%PYARG_0)) {
 
 // @snippet qiodevice-readData
 QByteArray ba(1 + int(%2), char(0));
+Py_BEGIN_ALLOW_THREADS
 %CPPSELF.%FUNCTION_NAME(ba.data(), int(%2));
+Py_END_ALLOW_THREADS
 %PYARG_0 = Shiboken::String::fromCString(ba.constData());
 // @snippet qiodevice-readData
 

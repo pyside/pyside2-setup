@@ -444,7 +444,7 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setIndexWidget(const QModelIndex &amp;,QWidget*)">
+    <modify-function signature="setIndexWidget(const QModelIndex &amp;,QWidget*)" allow-thread="yes">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -559,6 +559,7 @@
         <parent index="return" action="add"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="registerField(const QString&amp;,QWidget*,const char*,const char*)" allow-thread="yes"/>
   </object-type>
   <object-type name="QFocusFrame">
     <modify-function signature="setWidget(QWidget*)">
@@ -583,7 +584,7 @@
             <insert-template name="bool*_fix,arg"/>
         </inject-code>
     </modify-function>
-    <modify-function signature="getFont(bool*,QFont,QWidget*,QString,QFlags&lt;QFontDialog::FontDialogOption&gt;)">
+    <modify-function signature="getFont(bool*,QFont,QWidget*,QString,QFlags&lt;QFontDialog::FontDialogOption&gt;)" allow-thread="yes">
         <modify-argument index="1">
             <remove-argument />
         </modify-argument>
@@ -792,15 +793,16 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="removeSubWindow(QWidget*)" allow-thread="yes"/>
   </object-type>
   <object-type name="QMdiSubWindow">
     <enum-type name="SubWindowOption" flags="SubWindowOptions"/>
-    <modify-function signature="setWidget(QWidget*)" >
+    <modify-function signature="setWidget(QWidget*)" allow-thread="yes">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setSystemMenu(QMenu*)" >
+    <modify-function signature="setSystemMenu(QMenu*)" allow-thread="yes">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -1291,16 +1293,16 @@
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
-    <modify-function signature="addWidget(QWidget*)">
+    <modify-function signature="addWidget(QWidget*)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
-    <modify-function signature="addChildWidget(QWidget*)">
+    <modify-function signature="addChildWidget(QWidget*)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
     <modify-function signature="addChildLayout(QLayout*)">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
-    <modify-function signature="setMenuBar(QWidget*)">
+    <modify-function signature="setMenuBar(QWidget*)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
@@ -1341,8 +1343,11 @@
   <object-type name="QStackedLayout">
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
     <enum-type name="StackingMode"/>
-    <modify-function signature="insertWidget(int,QWidget*)">
+    <modify-function signature="insertWidget(int,QWidget*)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
+    </modify-function>
+    <modify-function signature="addWidget(QWidget*)" allow-thread="yes">
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
   </object-type>
 
@@ -1351,7 +1356,7 @@
 
     <enum-type name="Direction"/>
 
-    <modify-function signature="addWidget(QWidget*,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
+    <modify-function signature="addWidget(QWidget*,int,QFlags&lt;Qt::AlignmentFlag&gt;)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
@@ -1359,7 +1364,7 @@
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-1"/>
     </modify-function>
 
-    <modify-function signature="insertWidget(int,QWidget*,int,QFlags&lt;Qt::AlignmentFlag&gt;)">
+    <modify-function signature="insertWidget(int,QWidget*,int,QFlags&lt;Qt::AlignmentFlag&gt;)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
     </modify-function>
     <modify-function signature="insertLayout(int,QLayout*,int)">
@@ -1759,7 +1764,7 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setItemWidget(QTreeWidgetItem*,int,QWidget*)">
+    <modify-function signature="setItemWidget(QTreeWidgetItem*,int,QWidget*)" allow-thread="yes">
       <modify-argument index="3">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -1806,6 +1811,7 @@
     <modify-function signature="clear()">
         <inject-code file="../glue/qtwidgets.cpp" snippet="qtreewidget-clear"/>
     </modify-function>
+    <modify-function signature="removeItemWidget(QTreeWidgetItem*,int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QAbstractItemDelegate">
     <enum-type name="EndEditHint"/>
@@ -1823,13 +1829,14 @@
         <define-ownership class="native" owner="c++"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)" allow-thread="yes"/>
   </object-type>
   <object-type name="QTableWidgetItem" >
     <enum-type name="ItemType"/>
-    <modify-function signature="read(QDataStream&amp;)">
+    <modify-function signature="read(QDataStream&amp;)" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="write(QDataStream&amp;)const">
+    <modify-function signature="write(QDataStream&amp;)const" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
@@ -1855,10 +1862,10 @@
         <define-ownership owner="target"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="read(QDataStream&amp;)">
+    <modify-function signature="read(QDataStream&amp;)" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="write(QDataStream&amp;)const">
+    <modify-function signature="write(QDataStream&amp;)const" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
   </object-type>
@@ -1895,10 +1902,10 @@
   <object-type name="QTreeWidgetItem" hash-function="qHash">
     <enum-type name="ChildIndicatorPolicy"/>
     <enum-type name="ItemType"/>
-    <modify-function signature="read(QDataStream&amp;)">
+    <modify-function signature="read(QDataStream&amp;)" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="write(QDataStream&amp;)const">
+    <modify-function signature="write(QDataStream&amp;)const" allow-thread="yes">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
     <modify-function signature="QTreeWidgetItem(QTreeWidget*,int)">
@@ -1987,7 +1994,7 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setItemWidget(QListWidgetItem*,QWidget*)">
+    <modify-function signature="setItemWidget(QListWidgetItem*,QWidget*)" allow-thread="yes">
       <modify-argument index="2">
         <parent index="1" action="add"/>
       </modify-argument>
@@ -2011,6 +2018,7 @@
     <modify-function signature="clear()">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlistwidget-clear"/>
     </modify-function>
+    <modify-function signature="removeItemWidget(QListWidgetItem*)" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QWidget" delete-in-main-thread="true">
@@ -2249,7 +2257,7 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="setLayout(QLayout*)">
+    <modify-function signature="setLayout(QLayout*)" allow-thread="yes">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-setlayout"/>
     </modify-function>
     <modify-function signature="raise()" rename="raise_"/>
@@ -2292,7 +2300,8 @@
     <modify-function signature="question(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,int,int)" remove="all"/>
     <modify-function signature="warning(QWidget*,const QString&amp;,const QString&amp;,int,int,int)" remove="all"/>
     <modify-function signature="warning(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,int,int)" remove="all"/>
-
+    <modify-function signature="about(QWidget*,const QString&amp;,const QString&amp;)" allow-thread="yes"/>
+    <modify-function signature="aboutQt(QWidget*,const QString&amp;)" allow-thread="yes"/>
   </object-type>
   <object-type name="QAbstractSpinBox">
     <enum-type name="ButtonSymbols"/>
@@ -2436,7 +2445,7 @@
     </modify-function>
 
     <modify-function signature="getExistingDirectory(QWidget*,const QString&amp;,const QString&amp;,QFlags&lt;QFileDialog::Option>)" allow-thread="yes"/>
-    <modify-function signature="getExistingDirectoryUrl(QWidget*,const QString&amp;,const QUrl&amp;,QFlags&lt;QFileDialog::Option>,const QStringList&amp;)"/>
+    <modify-function signature="getExistingDirectoryUrl(QWidget*,const QString&amp;,const QUrl&amp;,QFlags&lt;QFileDialog::Option>,const QStringList&amp;)" allow-thread="yes"/>
     <modify-function signature="getOpenFileName(QWidget*,const QString&amp;,const QString&amp;,const QString&amp;,QString*,QFlags&lt;QFileDialog::Option&gt;)" allow-thread="yes">
       <modify-argument index="return">
         <replace-type modified-type="(fileName, selectedFilter)"/>
@@ -2609,11 +2618,12 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setCellWidget(int,int,QWidget*)">
+    <modify-function signature="setCellWidget(int,int,QWidget*)" allow-thread="yes">
       <modify-argument index="3">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="removeCellWidget(int,int)" allow-thread="yes"/>
     <modify-function signature="setCurrentItem(QTableWidgetItem*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -2653,7 +2663,9 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QGroupBox"/>
+  <object-type name="QGroupBox">
+    <modify-function signature="clicked(bool)" allow-thread="yes"/>
+  </object-type>
   <object-type name="QStackedWidget">
     <modify-function signature="addWidget(QWidget*)">
       <modify-argument index="1">
@@ -2939,6 +2951,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="triggered(bool)" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QApplication">
@@ -2963,6 +2976,8 @@
       <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qapplication-setStyle"/>
     </modify-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
+    <modify-function signature="notify(QObject*,QEvent*)" allow-thread="yes"/>
+    <modify-function signature="alert(QWidget*,int)" allow-thread="yes"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qapplication-init"/>
   </object-type>
 
@@ -3235,7 +3250,7 @@
         <parent index="1" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="setWidget(QWidget*)">
+    <modify-function signature="setWidget(QWidget*)" allow-thread="yes">
       <inject-code file="../glue/qtwidgets.cpp" snippet="qgraphicsproxywidget-setwidget"/>
     </modify-function>
   </object-type>

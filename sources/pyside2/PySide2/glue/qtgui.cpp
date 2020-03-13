@@ -78,9 +78,7 @@ QBitmap %0 = QBitmap::fromData(%1, buffer, %3);
 // @snippet qbitmap-fromdata
 
 // @snippet qtextline-cursortox
-%BEGIN_ALLOW_THREADS
 %RETURN_TYPE %0 = %CPPSELF->::%TYPE::%FUNCTION_NAME(&%1, %2);
-%END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
@@ -444,9 +442,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 // @snippet qclipboard-text
 
 // @snippet qpainter-drawpolygon
-%BEGIN_ALLOW_THREADS
 %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size(), %2);
-%END_ALLOW_THREADS
 // @snippet qpainter-drawpolygon
 
 // @snippet qmatrix-map-point

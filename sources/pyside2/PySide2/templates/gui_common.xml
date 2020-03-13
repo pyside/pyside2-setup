@@ -66,9 +66,7 @@
         for (int line = 0; line &lt; lineCount; ++line)
             xpm[line] = Shiboken::String::toCString(PySequence_Fast_GET_ITEM(strList.object(), line));
 
-        %BEGIN_ALLOW_THREADS
         %0 = new %TYPE(xpm);
-        %END_ALLOW_THREADS
 
         free(xpm);
     </template>
@@ -164,9 +162,7 @@
     </template>
 
     <template name="qpainter_drawlist">
-        %BEGIN_ALLOW_THREADS
         %CPPSELF.%FUNCTION_NAME(%1.data(), %1.size());
-        %END_ALLOW_THREADS
     </template>
 
     <template name="inplace_add">
@@ -255,17 +251,13 @@
 
     <template name="fix_args,QRectF*">
         QRectF rect_;
-        %BEGIN_ALLOW_THREADS
         %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;rect_);
-        %END_ALLOW_THREADS
         %PYARG_0 = %CONVERTTOPYTHON[QRectF](rect_);
     </template>
 
     <template name="fix_args,QRect*">
         QRect rect_;
-        %BEGIN_ALLOW_THREADS
         %CPPSELF.%FUNCTION_NAME(%ARGUMENT_NAMES, &amp;rect_);
-        %END_ALLOW_THREADS
         %PYARG_0 = %CONVERTTOPYTHON[QRect](rect_);
     </template>
 

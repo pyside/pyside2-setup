@@ -413,6 +413,10 @@ const QMetaObject *MetaObjectBuilderPrivate::update()
     if (!m_builder)
         return m_baseObject;
     if (m_cachedMetaObjects.empty() || m_dirty) {
+        // PYSIDE-803: The dirty branch needs to be protected by the GIL.
+        // This was moved from SignalManager::retrieveMetaObject to here,
+        // which is only the update in "return builder->update()".
+        Shiboken::GilState gil;
         m_cachedMetaObjects.push_back(m_builder->toMetaObject());
         checkMethodOrder(m_cachedMetaObjects.back());
         m_dirty = false;
