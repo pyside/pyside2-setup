@@ -28,24 +28,59 @@
 
 from __future__ import print_function
 
+from functools import partial
 import os
 import sys
 import unittest
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(os.path.dirname(TEST_DIR))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide2 import QtWidgets
-from PySide2 import QtWebEngineWidgets
+from PySide2.QtCore import QCoreApplication, QSize, QUrl, Qt
+from PySide2.QtWidgets import QApplication, QVBoxLayout, QWidget
+from PySide2.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+
 
 class MainTest(unittest.TestCase):
 
     def test_WebEngineView_findText_exists(self):
-        qApp = (QtWidgets.QApplication.instance() or
-                QtWidgets.QApplication([]))
-        view = QtWebEngineWidgets.QWebEngineView()
-        view.findText("nothing")
+        QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+        app = QApplication.instance() or QApplication()
+        top_level = QWidget()
+        layout = QVBoxLayout(top_level)
+        self._view = QWebEngineView()
+        self._view.loadFinished.connect(self.loaded)
+        self._view.load(QUrl.fromLocalFile(os.path.join(TEST_DIR, "fox.html")))
+        self._view.setMinimumSize(QSize(400, 300))
+        self._callback_count = 0
+        layout.addWidget(self._view)
+        top_level.show()
+        app.exec_()
+
+    def found_callback(self, found):
+        self.assertTrue(found)
+        self._callback_count += 1
+        if self._callback_count == 2:
+            QCoreApplication.quit()
+
+    def javascript_callback(self, result):
+        self.assertEqual(result, "Title")
+        self._callback_count += 1
+        if self._callback_count == 2:
+            QCoreApplication.quit()
+
+    def loaded(self, ok):
+        self.assertTrue(ok)
+        if not ok:
+            QCoreApplication.quit()
+        self._view.page().runJavaScript("document.title", 1,
+                                        partial(self.javascript_callback))
+        self._view.findText("fox", QWebEnginePage.FindFlags(),
+                            partial(self.found_callback))
+
 
 if __name__ == '__main__':
     unittest.main()
