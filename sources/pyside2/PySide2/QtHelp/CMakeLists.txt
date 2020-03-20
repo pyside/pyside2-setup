@@ -26,7 +26,8 @@ endif()
 
 if (Qt5Help_VERSION VERSION_EQUAL 5.15.0 OR Qt5Help_VERSION VERSION_GREATER 5.15.0)
     list(APPEND QtHelp_SRC
-         ${QtHelp_GEN_DIR}/qhelpfiltersettingswidget_wrapper.cpp)
+         ${QtHelp_GEN_DIR}/qhelpfiltersettingswidget_wrapper.cpp
+         ${QtHelp_GEN_DIR}/qhelplink_wrapper.cpp)
 endif()
 
 

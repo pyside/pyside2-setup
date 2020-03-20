@@ -60,6 +60,7 @@
     <object-type name="QHelpFilterSettingsWidget" since="5.15"/>
     <object-type name="QHelpIndexModel"/>
     <object-type name="QHelpIndexWidget"/>
+    <value-type name="QHelpLink" since="5.15"/>
     <object-type name="QHelpSearchEngine"/>
     <value-type name="QHelpSearchQuery">
         <enum-type name="FieldName"/>
