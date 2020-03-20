@@ -195,6 +195,33 @@ public:
     QCOMPARE(funcC->implementingClass(), c);
 }
 
+void TestAbstractMetaClass::testVirtualBase()
+{
+    const char cppCode[] =R"CPP(
+class Base {
+public:
+    virtual ~Base() = default;
+};
+class Derived : public Base {};
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package="Foo">
+    <object-type name='Base'/>
+    <object-type name='Derived'/>
+</typesystem>
+)XML";
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    auto base = AbstractMetaClass::findClass(classes, QLatin1String("Base"));
+    QVERIFY(base);
+    QVERIFY(base->isPolymorphic());
+    auto derived = AbstractMetaClass::findClass(classes, QLatin1String("Derived"));
+    QVERIFY(derived);
+    QVERIFY(derived->isPolymorphic());
+}
+
 void TestAbstractMetaClass::testDefaultValues()
 {
     const char* cppCode ="\

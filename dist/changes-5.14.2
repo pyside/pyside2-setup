@@ -1,0 +1,52 @@
+Qt for Python 5.14.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ - [PYSIDE-239]  Python enum types can now be used as a valid signal type.
+ - [PYSIDE-571]  qApp has been turned into a normal Python variable. This
+                 implies that QtWidgets.qApp no longer works; it should be
+                 replaced by qApp.
+ - [PYSIDE-803]  GUI slowdowns caused by background threads have been fixed
+                 by reducing GIL allocation and usage of
+                 Py_(BEGIN|END)_ALLOW_THREADS.
+ - [PYSIDE-858]  Windows binaries are now signed.
+ - [PYSIDE-939]
+ - [PYSIDE-1231] Further issues introduced by Python 3.8 have been addressed:
+                 - Warnings about deprecated int conversions of enumerations
+                   and flags have been fixed.
+                 - Packages can now be built with Python 3.8.1.
+                 - Tests run with Python 3.8.1.
+ - [PYSIDE-1189] A crash caused by wrong ownership of the return value of
+                 QList/QTable/QTreeWidget.mimeData() has been fixed.
+ - [PYSIDE-1199] The webchannel standalone example has been added.
+ - [PYSIDE-1204] QByteArray now properly supports the PyBuffer interface.
+ - [PYSIDE-1214] For accessors returning non-exposed classes inheriting
+                 QObject, the most-derived wrapper is now created.
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - [PYSIDE-803]  The default of the "allow-thread" attribute has been changed
+                 to false as it was observed to cause performance issues when
+                 using threads.
+ - [PYSIDE-1112] The shiboken documentation has been re-structured.
+ - [PYSIDE-1228] Typedef'ed anonymous enums are now supported.
+ - [PYSIDE-1240] The manual test dumpcodemodel has been modified to output
+                 typesystem XML, enabling convenient generation of
+                 typesystem file skeletons for new bindings.
