@@ -184,6 +184,10 @@
         <object-type name="QRenderAspect">
             <enum-type name="RenderType"/>
         </object-type>
+        <object-type name="QRenderCapabilities" since="5.15">
+            <enum-type name="API"/>
+            <enum-type name="Profile"/>
+        </object-type>
         <object-type name="QRenderCapture"/>
         <object-type name="QRenderCaptureReply"/>
         <object-type name="QRenderPass"/>

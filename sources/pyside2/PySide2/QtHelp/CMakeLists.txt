@@ -24,6 +24,12 @@ if (Qt5Help_VERSION VERSION_EQUAL 5.13.0 OR Qt5Help_VERSION VERSION_GREATER 5.13
          ${QtHelp_GEN_DIR}/qhelpfilterengine_wrapper.cpp)
 endif()
 
+if (Qt5Help_VERSION VERSION_EQUAL 5.15.0 OR Qt5Help_VERSION VERSION_GREATER 5.15.0)
+    list(APPEND QtHelp_SRC
+         ${QtHelp_GEN_DIR}/qhelpfiltersettingswidget_wrapper.cpp)
+endif()
+
+
 set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtHelp_BINARY_DIR}
                         ${Qt5Core_INCLUDE_DIRS}

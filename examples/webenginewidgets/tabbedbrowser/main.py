@@ -50,7 +50,7 @@ from webengineview import WebEngineView
 from PySide2 import QtCore
 from PySide2.QtCore import Qt, QUrl
 from PySide2.QtGui import QKeySequence, QIcon
-from PySide2.QtWidgets import (qApp, QAction, QApplication,
+from PySide2.QtWidgets import (QAction, QApplication,
     QDockWidget, QLabel, QLineEdit, QMainWindow, QToolBar)
 from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
 

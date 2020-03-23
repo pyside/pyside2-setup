@@ -1,7 +1,6 @@
-
 #############################################################################
 ##
-## Copyright (C) 2017 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -39,44 +38,19 @@
 ##
 #############################################################################
 
-"""PySide2 Active Qt Viewer example"""
+"""PySide2 port of the widgets/gallery example from Qt v5.15"""
 
 import sys
-from PySide2.QtAxContainer import QAxSelect, QAxWidget
-from PySide2.QtWidgets import (QAction, QApplication, QDialog,
-    QMainWindow, QMessageBox, QToolBar)
 
-class MainWindow(QMainWindow):
+from PySide2.QtCore import QCoreApplication, Qt
+from PySide2.QtWidgets import QApplication
+from widgetgallery import WidgetGallery
 
-    def __init__(self):
-        super(MainWindow, self).__init__()
-
-        toolBar = QToolBar()
-        self.addToolBar(toolBar)
-        fileMenu = self.menuBar().addMenu("&File")
-        loadAction = QAction("Load...", self, shortcut="Ctrl+L", triggered=self.load)
-        fileMenu.addAction(loadAction)
-        toolBar.addAction(loadAction)
-        exitAction = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
-        fileMenu.addAction(exitAction)
-
-        aboutMenu = self.menuBar().addMenu("&About")
-        aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
-        aboutMenu.addAction(aboutQtAct)
-        self.axWidget = QAxWidget()
-        self.setCentralWidget(self.axWidget)
-
-    def load(self):
-        axSelect = QAxSelect(self)
-        if axSelect.exec_() == QDialog.Accepted:
-            clsid = axSelect.clsid()
-            if not self.axWidget.setControl(clsid):
-                QMessageBox.warning(self, "AxViewer", "Unable to load " + clsid + ".")
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    mainWin = MainWindow()
-    availableGeometry = app.desktop().availableGeometry(mainWin)
-    mainWin.resize(availableGeometry.width() / 3, availableGeometry.height() / 2)
-    mainWin.show()
+    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    app = QApplication()
+    gallery = WidgetGallery()
+    gallery.show()
     sys.exit(app.exec_())

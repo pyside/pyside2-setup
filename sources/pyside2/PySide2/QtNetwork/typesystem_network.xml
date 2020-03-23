@@ -258,6 +258,7 @@
         <enum-type name="CacheLoadControl"/>
         <enum-type name="KnownHeaders"/>
         <enum-type name="RedirectPolicy" since="5.9"/>
+        <enum-type name="TransferTimeoutConstant" since="5.15"/>
     </value-type>
 
     <value-type name="QNetworkConfiguration" since="4.7">
@@ -284,6 +285,7 @@
 
     <!-- The following entries may be present in the system or not. Keep this section organized. -->
     <value-type name="QSslCertificate">
+        <enum-type name="PatternSyntax" since="5.15"/>
         <enum-type name="SubjectInfo"/>
     </value-type>
 

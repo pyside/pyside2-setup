@@ -57,6 +57,7 @@
     <object-type name="QHelpEngineCore"/>
     <value-type name="QHelpFilterData" since="5.13"/>
     <object-type name="QHelpFilterEngine" since="5.13"/>
+    <object-type name="QHelpFilterSettingsWidget" since="5.15"/>
     <object-type name="QHelpIndexModel"/>
     <object-type name="QHelpIndexWidget"/>
     <object-type name="QHelpSearchEngine"/>

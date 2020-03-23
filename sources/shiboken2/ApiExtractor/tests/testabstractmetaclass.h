@@ -40,6 +40,7 @@ private slots:
     void testClassName();
     void testClassNameUnderNamespace();
     void testVirtualMethods();
+    void testVirtualBase();
     void testDefaultValues();
     void testModifiedDefaultValues();
     void testInnerClassOfAPolymorphicOne();
