@@ -45,7 +45,7 @@ from PySide2.QtCore import Signal, QAbstractTableModel, QModelIndex, Qt, QUrl
 
 class HistoryModel(QAbstractTableModel):
 
-    def __init__(self, history, parent = None):
+    def __init__(self, history, parent=None):
         super(HistoryModel, self).__init__(parent)
         self._history = history
 
