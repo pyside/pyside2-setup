@@ -39,7 +39,10 @@ init_test_paths(True)
 from helper.usesqapplication import UsesQApplication
 from testbinding import TestView
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QAbstractItemDelegate, QComboBox
+from PySide2.QtGui import QStandardItem, QStandardItemModel
+from PySide2.QtWidgets import (QAbstractItemDelegate, QComboBox,
+                               QSpinBox, QStyledItemDelegate,
+                               QStyleOptionViewItem, QWidget)
 
 id_text = 'This is me'
 
@@ -82,6 +85,19 @@ class EditorCreatedByDelegateTest(UsesQApplication):
         self.assertEqual(editor.count(), 1)
         self.assertEqual(editor.itemData(0, Qt.DisplayRole), id_text)
         editor.metaObject()
+
+    def testIntDelegate(self):
+        """PYSIDE-1250: When creating a QVariant, use int instead of long long
+           for anything that fits into a int. Verify by checking that a spin
+           box is created as item view editor for int."""
+        item = QStandardItem()
+        item.setData(123123, Qt.EditRole)  # <-- QVariant conversion here
+        model = QStandardItemModel()
+        model.appendRow(item)
+        style_option = QStyleOptionViewItem()
+        delegate = QStyledItemDelegate()
+        editor = delegate.createEditor(None, style_option, model.index(0, 0))
+        self.assertEqual(type(editor), QSpinBox)
 
 
 if __name__ == '__main__':
