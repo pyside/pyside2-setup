@@ -45,6 +45,13 @@ QT_FORWARD_DECLARE_CLASS(QDir)
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamReader)
 
+QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
+                                       const QString &typeName,
+                                       int pos, const QString &why);
+
+QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
+                                          const QString &typeName, const QString &why);
+
 QString msgNoFunctionForModification(const QString &signature,
                                      const QString &originalSignature,
                                      const QString &className,

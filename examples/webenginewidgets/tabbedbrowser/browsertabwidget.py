@@ -48,6 +48,7 @@ from PySide2.QtCore import Qt, QUrl
 from PySide2.QtWidgets import QMenu, QTabBar, QTabWidget
 from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
 
+
 class BrowserTabWidget(QTabWidget):
     """Enables having several tabs with QWebEngineView."""
 
@@ -60,7 +61,7 @@ class BrowserTabWidget(QTabWidget):
         self.setTabsClosable(True)
         self._window_factory_function = window_factory_function
         self._webengineviews = []
-        self._history_windows = {} # map WebengineView to HistoryWindow
+        self._history_windows = {}  # map WebengineView to HistoryWindow
         self.currentChanged.connect(self._current_changed)
         self.tabCloseRequested.connect(self.handle_tab_close_request)
         self._actions_enabled = {}
@@ -74,7 +75,8 @@ class BrowserTabWidget(QTabWidget):
 
     def add_browser_tab(self):
         factory_func = partial(BrowserTabWidget.add_browser_tab, self)
-        web_engine_view = WebEngineView(factory_func, self._window_factory_function)
+        web_engine_view = WebEngineView(factory_func,
+                                        self._window_factory_function)
         index = self.count()
         self._webengineviews.append(web_engine_view)
         title = 'Tab {}'.format(index + 1)
@@ -209,7 +211,7 @@ class BrowserTabWidget(QTabWidget):
         elif chosen_action == close_other_tabs_action:
             for t in range(tab_count - 1, -1, -1):
                 if t != index:
-                     self.handle_tab_close_request(t)
+                    self.handle_tab_close_request(t)
         elif chosen_action == close_tabs_to_the_right_action:
             for t in range(tab_count - 1, index, -1):
                 self.handle_tab_close_request(t)
