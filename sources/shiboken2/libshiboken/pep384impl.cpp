@@ -67,7 +67,7 @@ extern "C"
 #define make_dummy(x)       (reinterpret_cast<void *>(make_dummy_int(x)))
 
 #ifdef Py_LIMITED_API
-datetime_struc *PyDateTimeAPI = NULL;
+datetime_struc *PyDateTimeAPI = nullptr;
 #endif
 
 static PyObject *
@@ -207,15 +207,15 @@ _PepUnicode_AsString(PyObject *str)
 #define TOSTRING(x) STRINGIFY(x)
 #define AT __FILE__ ":" TOSTRING(__LINE__)
 
-    static PyObject *cstring_dict = NULL;
-    if (cstring_dict == NULL) {
+    static PyObject *cstring_dict = nullptr;
+    if (cstring_dict == nullptr) {
         cstring_dict = PyDict_New();
-        if (cstring_dict == NULL)
+        if (cstring_dict == nullptr)
             Py_FatalError("Error in " AT);
     }
-    PyObject *bytesStr = PyUnicode_AsEncodedString(str, "utf8", NULL);
+    PyObject *bytesStr = PyUnicode_AsEncodedString(str, "utf8", nullptr);
     PyObject *entry = PyDict_GetItem(cstring_dict, bytesStr);
-    if (entry == NULL) {
+    if (entry == nullptr) {
         int e = PyDict_SetItem(cstring_dict, bytesStr, bytesStr);
         if (e != 0)
             Py_FatalError("Error in " AT);
@@ -253,7 +253,7 @@ _PepLong_AsInt(PyObject *obj)
                         "Python int too large to convert to C int");
         return -1;
     }
-    return (int)result;
+    return int(result);
 }
 
 /*****************************************************************************
@@ -261,7 +261,7 @@ _PepLong_AsInt(PyObject *obj)
  * Support for pydebug.h
  *
  */
-static PyObject *sys_flags = NULL;
+static PyObject *sys_flags = nullptr;
 
 int
 Pep_GetFlag(const char *name)
@@ -271,13 +271,13 @@ Pep_GetFlag(const char *name)
 
     if (!initialized) {
         sys_flags = PySys_GetObject("flags");
-        // func gives no error if NULL is returned and does not incref.
+        // func gives no error if nullptr is returned and does not incref.
         Py_XINCREF(sys_flags);
         initialized = 1;
     }
-    if (sys_flags != NULL) {
+    if (sys_flags != nullptr) {
         PyObject *ob_ret = PyObject_GetAttrString(sys_flags, name);
-        if (ob_ret != NULL) {
+        if (ob_ret != nullptr) {
             long long_ret = PyLong_AsLong(ob_ret);
             Py_DECREF(ob_ret);
             ret = (int) long_ret;
@@ -314,7 +314,7 @@ PepCode_Get(PyCodeObject *co, const char *name)
     int ret = -1;
 
     ob_ret = PyObject_GetAttrString(ob, name);
-    if (ob_ret != NULL) {
+    if (ob_ret != nullptr) {
         long long_ret = PyLong_AsLong(ob_ret);
         Py_DECREF(ob_ret);
         ret = (int) long_ret;
@@ -331,11 +331,11 @@ PepCode_Get(PyCodeObject *co, const char *name)
 static PyTypeObject *dt_getCheck(const char *name)
 {
     PyObject *op = PyObject_GetAttrString(PyDateTimeAPI->module, name);
-    if (op == NULL) {
+    if (op == nullptr) {
         fprintf(stderr, "datetime.%s not found\n", name);
         Py_FatalError("aborting");
     }
-    return (PyTypeObject *)op;
+    return reinterpret_cast<PyTypeObject *>(op);
 }
 
 // init_DateTime is called earlier than our module init.
@@ -346,10 +346,10 @@ init_DateTime(void)
     static int initialized = 0;
     if (!initialized) {
         PyDateTimeAPI = (datetime_struc *)malloc(sizeof(datetime_struc));
-        if (PyDateTimeAPI == NULL)
+        if (PyDateTimeAPI == nullptr)
             Py_FatalError("PyDateTimeAPI malloc error, aborting");
         PyDateTimeAPI->module = PyImport_ImportModule("datetime");
-        if (PyDateTimeAPI->module == NULL)
+        if (PyDateTimeAPI->module == nullptr)
             Py_FatalError("datetime module not found, aborting");
         PyDateTimeAPI->DateType     = dt_getCheck("date");
         PyDateTimeAPI->DateTimeType = dt_getCheck("datetime");
@@ -368,7 +368,7 @@ PyDateTime_Get(PyObject *ob, const char *name)
     int ret = -1;
 
     ob_ret = PyObject_GetAttrString(ob, name);
-    if (ob_ret != NULL) {
+    if (ob_ret != nullptr) {
         long long_ret = PyLong_AsLong(ob_ret);
         Py_DECREF(ob_ret);
         ret = (int) long_ret;
@@ -410,9 +410,9 @@ PyObject *
 PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 {
     PyObject *code = Py_CompileString(str, "pyscript", start);
-    PyObject *ret = NULL;
+    PyObject *ret = nullptr;
 
-    if (code != NULL) {
+    if (code != nullptr) {
         ret = PyEval_EvalCode(code, globals, locals);
     }
     Py_XDECREF(code);
@@ -425,7 +425,7 @@ PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 // Used also in Python 2.
 #if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x03000000
 static PyObject *
-PepRun_GetResult(const char *command, const char *resvar)
+PepRun_GetResult(const char *command)
 {
     PyObject *d, *v, *res;
 
@@ -435,7 +435,7 @@ PepRun_GetResult(const char *command, const char *resvar)
         return nullptr;
     }
     v = PyRun_String(command, Py_file_input, d, d);
-    res = v ? PyDict_GetItemString(d, resvar) : NULL;
+    res = v ? PyDict_GetItem(d, Shiboken::PyName::result()) : nullptr;
     Py_XDECREF(v);
     Py_DECREF(d);
     return res;
@@ -450,15 +450,15 @@ PepRun_GetResult(const char *command, const char *resvar)
  *
  */
 
-PyTypeObject *PepMethod_TypePtr = NULL;
+PyTypeObject *PepMethod_TypePtr = nullptr;
 
 static PyTypeObject *getMethodType(void)
 {
     static const char prog[] =
         "class _C:\n"
         "    def _m(self): pass\n"
-        "MethodType = type(_C()._m)\n";
-    return (PyTypeObject *) PepRun_GetResult(prog, "MethodType");
+        "result = type(_C()._m)\n";
+    return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 
 // We have no access to PyMethod_New and must call types.MethodType, instead.
@@ -509,13 +509,13 @@ PepFunction_Get(PyObject *ob, const char *name)
 
 // This became necessary after Windows was activated.
 
-PyTypeObject *PepFunction_TypePtr = NULL;
+PyTypeObject *PepFunction_TypePtr = nullptr;
 
 static PyTypeObject *getFunctionType(void)
 {
     static const char prog[] =
-        "from types import FunctionType\n";
-    return (PyTypeObject *) PepRun_GetResult(prog, "FunctionType");
+        "from types import FunctionType as result\n";
+    return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 
 /*****************************************************************************
@@ -524,7 +524,7 @@ static PyTypeObject *getFunctionType(void)
  *
  */
 
-PyTypeObject *PepStaticMethod_TypePtr = NULL;
+PyTypeObject *PepStaticMethod_TypePtr = nullptr;
 
 static PyTypeObject *
 getStaticMethodType(void)
@@ -533,8 +533,8 @@ getStaticMethodType(void)
     //    "StaticMethodType = type(str.__dict__['maketrans'])\n";
     static const char prog[] =
         "from xxsubtype import spamlist\n"
-        "StaticMethod_Type = type(spamlist.__dict__['staticmeth'])\n";
-    return (PyTypeObject *) PepRun_GetResult(prog, "StaticMethod_Type");
+        "result = type(spamlist.__dict__['staticmeth'])\n";
+    return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 
 typedef struct {
@@ -548,23 +548,23 @@ PyStaticMethod_New(PyObject *callable)
 {
     staticmethod *sm = (staticmethod *)
         PyType_GenericAlloc(PepStaticMethod_TypePtr, 0);
-    if (sm != NULL) {
+    if (sm != nullptr) {
         Py_INCREF(callable);
         sm->sm_callable = callable;
     }
-    return (PyObject *)sm;
+    return reinterpret_cast<PyObject *>(sm);
 }
 #endif // Py_LIMITED_API
 
 #if PY_VERSION_HEX < 0x03000000
-PyTypeObject *PepMethodDescr_TypePtr = NULL;
+PyTypeObject *PepMethodDescr_TypePtr = nullptr;
 
 static PyTypeObject *
 getMethodDescrType(void)
 {
     static const char prog[] =
-        "MethodDescr_Type = type(str.split)\n";
-    return (PyTypeObject *) PepRun_GetResult(prog, "MethodDescr_Type");
+        "result = type(str.split)\n";
+    return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 #endif
 
@@ -609,7 +609,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
      */
 #if PY_VERSION_HEX < 0X03000000
     const char *namestr = PyString_AsString(name);
-    if (namestr == NULL || namestr[0] != '_' || namestr[1] != '_') {
+    if (namestr == nullptr || namestr[0] != '_' || namestr[1] != '_') {
         Py_INCREF(name);
         return name;
     }
@@ -655,7 +655,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     if (plen + nlen >= PY_SSIZE_T_MAX - 1) {
         PyErr_SetString(PyExc_OverflowError,
                         "private identifier too large to be mangled");
-        return NULL;
+        return nullptr;
     }
     size_t const amount = ipriv + 1 + plen + nlen;
     size_t const big_stack = 1000;
