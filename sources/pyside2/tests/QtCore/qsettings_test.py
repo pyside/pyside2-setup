@@ -75,10 +75,7 @@ class TestQSettings(unittest.TestCase):
 
         # Handling zero value
         r = settings.value('zero_value')
-        if py3k.IS_PY3K:
-            self.assertEqual(type(r), int)
-        else:
-            self.assertEqual(type(r), long)
+        self.assertEqual(type(r), int)
 
         r = settings.value('zero_value', type=int)
         self.assertEqual(type(r), int)

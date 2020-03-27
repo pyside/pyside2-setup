@@ -108,6 +108,28 @@ static void msgFormatEnumType(Stream &str,
         str << " (class: " << className << ')';
 }
 
+QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
+                                       const QString &typeName,
+                                       int pos, const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to translate type \"" << typeName  << "\" of argument "
+        << pos << " of added function \"" << addedFuncName << "\": " << why;
+    return result;
+}
+
+QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
+                                          const QString &typeName, const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to translate return type \"" <<  typeName
+        << "\" of added function \"" << addedFuncName << "\": "
+        << why;
+    return result;
+}
+
 QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
                            const QString &className)
 {

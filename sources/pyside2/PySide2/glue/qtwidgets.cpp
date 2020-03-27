@@ -413,7 +413,15 @@ for (auto *item : items) {
 // @snippet qtreewidget-clear
 QTreeWidgetItem *rootItem = %CPPSELF.invisibleRootItem();
 Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
-for (int i = 0, i_count = rootItem->childCount(); i < i_count; ++i) {
+
+// PYSIDE-1251:
+// Since some objects can be created with a parent and without
+// being saved on a local variable (refcount = 1), they will be
+// deleted when setting the parent to nullptr, so we change the loop
+// to do this from the last child to the first, to avoid the case
+// when the child(1) points to the original child(2) in case the
+// first one was removed.
+for (int i = rootItem->childCount() - 1; i >= 0; --i) {
     QTreeWidgetItem *item = rootItem->child(i);
     if (SbkObject *wrapper = bm.retrieveWrapper(item))
         Shiboken::Object::setParent(nullptr, reinterpret_cast<PyObject *>(wrapper));

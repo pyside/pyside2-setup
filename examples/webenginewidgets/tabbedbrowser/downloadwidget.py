@@ -45,6 +45,7 @@ from PySide2.QtGui import QDesktopServices
 from PySide2.QtWidgets import QMenu, QProgressBar, QStyleFactory
 from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem
 
+
 # A QProgressBar with context menu for displaying downloads in a QStatusBar.
 class DownloadWidget(QProgressBar):
     """Lets you track progress of a QWebEngineDownloadItem."""
@@ -63,7 +64,8 @@ class DownloadWidget(QProgressBar):
         description = QFileInfo(path).fileName()
         description_length = len(description)
         if description_length > 30:
-            description = '{}...{}'.format(description[0:10], description[description_length - 10:])
+            description = '{}...{}'.format(description[0:10],
+                                           description[description_length - 10:])
         self.setFormat('{} %p%'.format(description))
         self.setOrientation(Qt.Horizontal)
         self.setMinimum(0)
@@ -89,7 +91,7 @@ class DownloadWidget(QProgressBar):
     def _update_tool_tip(self):
         path = self._download_item.path()
         tool_tip = "{}\n{}".format(self._download_item.url().toString(),
-            QDir.toNativeSeparators(path))
+                                   QDir.toNativeSeparators(path))
         total_bytes = self._download_item.total_bytes()
         if total_bytes > 0:
             tool_tip += "\n{}K".format(total_bytes / 1024)
@@ -136,7 +138,8 @@ class DownloadWidget(QProgressBar):
         if chosen_action == launch_action:
             self._launch()
         elif chosen_action == show_in_folder_action:
-            DownloadWidget.open_file(QFileInfo(self._download_item.path()).absolutePath())
+            path = QFileInfo(self._download_item.path()).absolutePath()
+            DownloadWidget.open_file(path)
         elif chosen_action == cancel_action:
             self._download_item.cancel()
         elif chosen_action == remove_action:

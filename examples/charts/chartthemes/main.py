@@ -41,7 +41,7 @@
 """PySide2 port of the Chart Themes example from Qt v5.x"""
 
 import sys
-from PySide2.QtCore import qApp, QPointF, Qt
+from PySide2.QtCore import QPointF, Qt
 from PySide2.QtGui import QColor, QPainter, QPalette
 from PySide2.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
     QWidget)

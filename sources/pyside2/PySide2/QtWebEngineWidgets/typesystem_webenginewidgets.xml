@@ -73,6 +73,24 @@
     <enum-type name="FileSelectionMode"/>
     <enum-type name="JavaScriptConsoleMessageLevel"/>
     <enum-type name="RenderProcessTerminationStatus"/>
+    <add-function signature="findText(const QString &amp;,QWebEnginePage::FindFlags,PyObject*)">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
+    </add-function>
+    <add-function signature="print(QPrinter*,PyObject*)">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-print"/>
+    </add-function>
+    <add-function signature="toPlainText(PyObject*) const">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-convertto"/>
+    </add-function>
+    <add-function signature="toHtml(PyObject*) const">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-convertto"/>
+    </add-function>
+    <add-function signature="runJavaScript(const QString &amp;,quint32,PyObject*)">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-runjavascript"/>
+    </add-function>
+    <add-function signature="printToPdf(PyObject*,const QPageLayout &amp;)">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-printtopdf"/>
+    </add-function>
   </object-type>
 
   <object-type name="QWebEngineProfile">
@@ -94,7 +112,11 @@
     <enum-type name="WebAttribute"/>
   </object-type>
 
-  <object-type name="QWebEngineView"/>
+  <object-type name="QWebEngineView">
+      <add-function signature="findText(const QString &amp;,QWebEnginePage::FindFlags,PyObject*)">
+          <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
+      </add-function>
+  </object-type>
 
   <value-type name="QWebEngineContextMenuData">
     <enum-type name="EditFlag" flags="EditFlags" since="5.11"/>

@@ -43,6 +43,7 @@
 
 // @snippet include-pyside
 #include <pyside.h>
+#include <limits>
 // @snippet include-pyside
 
 // @snippet pystring-check
@@ -1716,8 +1717,11 @@ int i = %CONVERTTOCPP[int](%in);
 // @snippet conversion-pyint
 
 // @snippet conversion-qlonglong
+// PYSIDE-1250: For QVariant, if the type fits into an int; use int preferably.
 qlonglong in = %CONVERTTOCPP[qlonglong](%in);
-%out = %OUTTYPE(in);
+constexpr qlonglong intMax = qint64(std::numeric_limits<int>::max());
+constexpr qlonglong intMin = qint64(std::numeric_limits<int>::min());
+%out = in >= intMin && in <= intMax ? %OUTTYPE(int(in)) : %OUTTYPE(in);
 // @snippet conversion-qlonglong
 
 // @snippet conversion-qstring
