@@ -40,8 +40,6 @@
 #ifndef PEP384IMPL_H
 #define PEP384IMPL_H
 
-#include "sbkpython.h"
-
 extern "C"
 {
 
@@ -204,16 +202,39 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
  * RESOLVED: unicodeobject.h
  *
  */
+
+///////////////////////////////////////////////////////////////////////
+//
+// PYSIDE-813: About The Length Of Unicode Objects
+// -----------------------------------------------
+//
+// In Python 2 and before Python 3.3, the macro PyUnicode_GET_SIZE
+// worked fine and really like a macro.
+//
+// Meanwhile, the unicode objects have changed their layout very much,
+// and the former cheap macro call has become a real function call
+// that converts objects and needs PyMemory.
+// PyUnicode_GET_SIZE was retained for compatibility reasons.
+//
+// That is not only inefficient, but also requires the GIL!
+// This problem was visible by debug Python and qdatastream_test.py .
+// It was found while fixing the refcount problem of PYSIDE-813 which
+// needed a debug Python.
+//
+
+// PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength.
+// We undefine the PyUnicode_GET_SIZE macro, to be sure that it is not used
+// by accident. Only PepUnicode_GetLength should be used.
+#undef PyUnicode_GET_SIZE
+#if PY_VERSION_HEX < 0x03000000
+#define PepUnicode_GetLength(op)    PyUnicode_GetSize((PyObject *)(op))
+#else
+#define PepUnicode_GetLength(op)    PyUnicode_GetLength((PyObject *)(op))
+#endif
+
 #ifdef Py_LIMITED_API
 
 LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
-
-#if PY_VERSION_HEX < 0x03000000
-#define PyUnicode_GET_SIZE(op)      PyUnicode_GetSize((PyObject *)(op))
-#else
-// PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength
-#define PyUnicode_GET_SIZE(op)      PyUnicode_GetLength((PyObject *)(op))
-#endif
 
 #else
 #define _PepUnicode_AsString     PyUnicode_AsUTF8

@@ -37,7 +37,7 @@
 **
 ****************************************************************************/
 
-#include "pep384impl.h"
+#include "sbkpython.h"
 #include "autodecref.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
