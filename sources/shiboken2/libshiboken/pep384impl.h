@@ -214,7 +214,6 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 // Meanwhile, the unicode objects have changed their layout very much,
 // and the former cheap macro call has become a real function call
 // that converts objects and needs PyMemory.
-// PyUnicode_GET_SIZE was retained for compatibility reasons.
 //
 // That is not only inefficient, but also requires the GIL!
 // This problem was visible by debug Python and qdatastream_test.py .
@@ -223,9 +222,6 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 //
 
 // PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength.
-// We undefine the PyUnicode_GET_SIZE macro, to be sure that it is not used
-// by accident. Only PepUnicode_GetLength should be used.
-#undef PyUnicode_GET_SIZE
 #if PY_VERSION_HEX < 0x03000000
 #define PepUnicode_GetLength(op)    PyUnicode_GetSize((PyObject *)(op))
 #else
