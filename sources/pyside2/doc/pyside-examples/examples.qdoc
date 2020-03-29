@@ -28,5 +28,10 @@
 /*!
     \group all-pyside-examples
     \title All Qt for Python Examples
-    \brief A list of all the examples that are available with the Qt for Python package.
+    \brief A varied selection of examples can be found in the 'examples' directory of the
+    pyside-setup repository. This can be accessed after installing
+    PySide2 via pip, checking the 'site-packages/PySide2/examples' directory.
+
+    This page aims to document the most important use cases of the module
+    and it will be extended with each release.
 */
