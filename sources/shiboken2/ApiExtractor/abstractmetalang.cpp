@@ -1582,7 +1582,7 @@ void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
     else
         Q_ASSERT(false); //memory leak
 
-    m_hasVirtuals |= function->isVirtual() || hasVirtualDestructor();
+    m_hasVirtuals |= function->isVirtual();
     m_isPolymorphic |= m_hasVirtuals;
     m_hasNonpublic |= !function->isPublic();
 }
@@ -2017,6 +2017,13 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     f->setOriginalAttributes(f->attributes());
 
     addFunction(f);
+}
+
+void AbstractMetaClass::setHasVirtualDestructor(bool value)
+{
+    m_hasVirtualDestructor = value;
+    if (value)
+        m_hasVirtuals = m_isPolymorphic = 1;
 }
 
 bool AbstractMetaClass::hasFunction(const AbstractMetaFunction *f) const
