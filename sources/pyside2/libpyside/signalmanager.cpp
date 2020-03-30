@@ -559,7 +559,10 @@ static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     if (!dict || !PyDict_Contains(dict, metaObjectAttr))
         return nullptr;
 
-    PyObject *pyBuilder = PyDict_GetItem(dict, metaObjectAttr);
+    // PYSIDE-813: The above assumption is not true in debug mode:
+    // PyDict_GetItem would touch PyThreadState_GET and the global error state.
+    // PyDict_GetItemWithError instead can work without GIL.
+    PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr);
 #ifdef IS_PY3K
     return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
 #else

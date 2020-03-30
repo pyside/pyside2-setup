@@ -279,6 +279,17 @@ LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
 
 /*****************************************************************************
  *
+ * RESOLVED: dictobject.h
+ *
+ * PYSIDE-803, PYSIDE-813: We need PyDict_GetItemWithError in order to
+ *                         avoid the GIL.
+ */
+#if PY_VERSION_HEX < 0x03000000
+LIBSHIBOKEN_API PyObject *PyDict_GetItemWithError(PyObject *mp, PyObject *key);
+#endif
+
+/*****************************************************************************
+ *
  * RESOLVED: methodobject.h
  *
  */

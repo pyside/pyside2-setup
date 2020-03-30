@@ -106,6 +106,16 @@ listobject.h
 function calls.
 
 
+dictobject.h
+------------
+
+``PyDict_GetItem`` also exists in a ``PyDict_GetItemWithError`` version that does
+not suppress errors. This suppression has the side effect of touching global
+structures. This function exists in Python 2 only since Python 2.7.12 and has
+a different name. We simply implemented the function.
+Needed to avoid the GIL when accessing dictionaries.
+
+
 methodobject.h
 --------------
 

@@ -518,11 +518,56 @@ static PyTypeObject *getFunctionType(void)
     return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 
+#endif // Py_LIMITED_API || Python 2
+
+/*****************************************************************************
+ *
+ * Support for dictobject.h
+ *
+ */
+
+// PYSIDE-803, PYSIDE-813: We need that GIL-free version from Python 2.7.12 .
+#if PY_VERSION_HEX < 0x03000000
+
+/* Variant of PyDict_GetItem() that doesn't suppress exceptions.
+   This returns NULL *with* an exception set if an exception occurred.
+   It returns NULL *without* an exception set if the key wasn't present.
+*/
+PyObject *
+PyDict_GetItemWithError(PyObject *op, PyObject *key)
+{
+    long hash;
+    PyDictObject *mp = reinterpret_cast<PyDictObject *>(op);
+    PyDictEntry *ep;
+    if (!PyDict_Check(op)) {
+        PyErr_BadInternalCall();
+        return nullptr;
+    }
+    if (!PyString_CheckExact(key) ||
+        (hash = (reinterpret_cast<PyStringObject *>(key))->ob_shash) == -1)
+    {
+        hash = PyObject_Hash(key);
+        if (hash == -1) {
+            return nullptr;
+        }
+    }
+
+    ep = (mp->ma_lookup)(mp, key, hash);
+    if (ep == nullptr) {
+        return nullptr;
+    }
+    return ep->me_value;
+}
+
+#endif
+
 /*****************************************************************************
  *
  * Extra support for signature.cpp
  *
  */
+
+#ifdef Py_LIMITED_API
 
 PyTypeObject *PepStaticMethod_TypePtr = nullptr;
 
