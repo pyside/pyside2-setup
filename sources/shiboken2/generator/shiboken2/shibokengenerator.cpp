@@ -2202,9 +2202,7 @@ bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction *fun
 
 bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClass *metaClass)
 {
-    return metaClass->isPolymorphic()
-        && !metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::NoOverrideCaching);
-
+    return metaClass->isPolymorphic();
 }
 
 ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const

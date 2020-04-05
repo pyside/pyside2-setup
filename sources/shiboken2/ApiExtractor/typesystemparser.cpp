@@ -60,7 +60,6 @@ static inline QString untilAttribute() { return QStringLiteral("until"); }
 static inline QString defaultSuperclassAttribute() { return QStringLiteral("default-superclass"); }
 static inline QString deleteInMainThreadAttribute() { return QStringLiteral("delete-in-main-thread"); }
 static inline QString deprecatedAttribute() { return QStringLiteral("deprecated"); }
-static inline QString noOverrideCachingAttribute() { return QStringLiteral("no-override-caching"); }
 static inline QString exceptionHandlingAttribute() { return QStringLiteral("exception-handling"); }
 static inline QString extensibleAttribute() { return QStringLiteral("extensible"); }
 static inline QString flagsAttribute() { return QStringLiteral("flags"); }
@@ -1477,9 +1476,6 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
         } else if (name == deprecatedAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute(), false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);
-       } else if (name == noOverrideCachingAttribute()) {
-            if (convertBoolean(attributes->takeAt(i).value(), noOverrideCachingAttribute(), false))
-                ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::NoOverrideCaching);
         } else if (name == deleteInMainThreadAttribute()) {
             if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
                 ctype->setDeleteInMainThread(true);
