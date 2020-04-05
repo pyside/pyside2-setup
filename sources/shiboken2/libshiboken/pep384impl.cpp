@@ -50,25 +50,18 @@ extern "C"
 /*
  * The documentation is located in pep384impl_doc.rst
  */
-
-/*****************************************************************************
- *
- * Support for object.h
- *
- */
-
+#if PY_VERSION_HEX < 0x03000000
+#define IS_PY2
+#endif // PY_VERSION_HEX < 0x03000000
 /*
  * Here is the verification code for PyTypeObject.
  * We create a type object and check if its fields
  * appear at the right offsets.
  */
+#ifdef Py_LIMITED_API
 
 #define make_dummy_int(x)   (x * sizeof(void *))
 #define make_dummy(x)       (reinterpret_cast<void *>(make_dummy_int(x)))
-
-#ifdef Py_LIMITED_API
-datetime_struc *PyDateTimeAPI = nullptr;
-#endif
 
 static PyObject *
 dummy_func(PyObject * /* self */, PyObject * /* args */)
@@ -180,18 +173,18 @@ check_PyTypeObject_valid()
     Py_DECREF(probe_tp_mro);
 }
 
-
-#ifdef Py_LIMITED_API
-
 #if PY_VERSION_HEX < PY_ISSUE33738_SOLVED
 #include "pep384_issue33738.cpp"
 #endif
+
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for unicodeobject.h
  *
  */
+#ifdef Py_LIMITED_API
 
 char *
 _PepUnicode_AsString(PyObject *str)
@@ -214,7 +207,7 @@ _PepUnicode_AsString(PyObject *str)
             Py_FatalError("Error in " AT);
     }
     PyObject *bytesStr = PyUnicode_AsEncodedString(str, "utf8", nullptr);
-    PyObject *entry = PyDict_GetItem(cstring_dict, bytesStr);
+    PyObject *entry = PyDict_GetItemWithError(cstring_dict, bytesStr);
     if (entry == nullptr) {
         int e = PyDict_SetItem(cstring_dict, bytesStr, bytesStr);
         if (e != 0)
@@ -225,12 +218,14 @@ _PepUnicode_AsString(PyObject *str)
         Py_DECREF(bytesStr);
     return PyBytes_AsString(entry);
 }
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for longobject.h
  *
  */
+#ifdef Py_LIMITED_API
 
 /*
  * This is the original Python function _PyLong_AsInt() from longobject.c .
@@ -255,12 +250,15 @@ _PepLong_AsInt(PyObject *obj)
     }
     return int(result);
 }
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for pydebug.h
  *
  */
+#ifdef Py_LIMITED_API
+
 static PyObject *sys_flags = nullptr;
 
 int
@@ -299,12 +297,14 @@ Pep_GetVerboseFlag()
     }
     return verbose_flag;
 }
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for code.h
  *
  */
+#ifdef Py_LIMITED_API
 
 int
 PepCode_Get(PyCodeObject *co, const char *name)
@@ -321,12 +321,16 @@ PepCode_Get(PyCodeObject *co, const char *name)
     }
     return ret;
 }
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for datetime.h
  *
  */
+#ifdef Py_LIMITED_API
+
+datetime_struc *PyDateTimeAPI = nullptr;
 
 static PyTypeObject *dt_getCheck(const char *name)
 {
@@ -398,12 +402,14 @@ PyTime_FromTime(int hour, int min, int sec, int usec)
     return PyObject_CallFunction((PyObject *)PyDateTimeAPI->TimeType,
                                  (char *)"(iiii)", hour, min, sec, usec);
 }
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for pythonrun.h
  *
  */
+#ifdef Py_LIMITED_API
 
 // Flags are ignored in these simple helpers.
 PyObject *
@@ -423,7 +429,7 @@ PyRun_String(const char *str, int start, PyObject *globals, PyObject *locals)
 
 // This is only a simple local helper that returns a computed variable.
 // Used also in Python 2.
-#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x03000000
+#if defined(Py_LIMITED_API) || defined(IS_PY2)
 static PyObject *
 PepRun_GetResult(const char *command)
 {
@@ -440,15 +446,14 @@ PepRun_GetResult(const char *command)
     Py_DECREF(d);
     return res;
 }
-#endif // Py_LIMITED_API || Python 2
-
-#ifdef Py_LIMITED_API
+#endif // defined(Py_LIMITED_API) || defined(IS_PY2)
 
 /*****************************************************************************
  *
  * Support for classobject.h
  *
  */
+#ifdef Py_LIMITED_API
 
 PyTypeObject *PepMethod_TypePtr = nullptr;
 
@@ -489,12 +494,14 @@ PyMethod_Self(PyObject *im)
     Py_DECREF(ret);
     return ret;
 }
+#endif // Py_LIMITED_API
 
 /*****************************************************************************
  *
  * Support for funcobject.h
  *
  */
+#ifdef Py_LIMITED_API
 
 PyObject *
 PepFunction_Get(PyObject *ob, const char *name)
@@ -517,7 +524,6 @@ static PyTypeObject *getFunctionType(void)
         "from types import FunctionType as result\n";
     return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
-
 #endif // Py_LIMITED_API || Python 2
 
 /*****************************************************************************
@@ -527,7 +533,7 @@ static PyTypeObject *getFunctionType(void)
  */
 
 // PYSIDE-803, PYSIDE-813: We need that GIL-free version from Python 2.7.12 .
-#if PY_VERSION_HEX < 0x03000000
+#ifdef IS_PY2
 
 /* Variant of PyDict_GetItem() that doesn't suppress exceptions.
    This returns NULL *with* an exception set if an exception occurred.
@@ -558,15 +564,13 @@ PyDict_GetItemWithError(PyObject *op, PyObject *key)
     }
     return ep->me_value;
 }
-
-#endif
+#endif // IS_PY2
 
 /*****************************************************************************
  *
  * Extra support for signature.cpp
  *
  */
-
 #ifdef Py_LIMITED_API
 
 PyTypeObject *PepStaticMethod_TypePtr = nullptr;
@@ -601,7 +605,7 @@ PyStaticMethod_New(PyObject *callable)
 }
 #endif // Py_LIMITED_API
 
-#if PY_VERSION_HEX < 0x03000000
+#ifdef IS_PY2
 PyTypeObject *PepMethodDescr_TypePtr = nullptr;
 
 static PyTypeObject *
@@ -611,7 +615,7 @@ getMethodDescrType(void)
         "result = type(str.split)\n";
     return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
-#endif
+#endif // IS_PY2
 
 /*****************************************************************************
  *
@@ -640,9 +644,9 @@ PepType_GetNameStr(PyTypeObject *type)
 
 #ifdef Py_LIMITED_API
 // We keep these definitions local, because they don't work in Python 2.
-#define PyUnicode_GET_LENGTH(op)    PyUnicode_GetLength((PyObject *)(op))
-#define PyUnicode_READ_CHAR(u, i)   PyUnicode_ReadChar((PyObject *)(u), (i))
-#endif
+# define PyUnicode_GET_LENGTH(op)    PyUnicode_GetLength((PyObject *)(op))
+# define PyUnicode_READ_CHAR(u, i)   PyUnicode_ReadChar((PyObject *)(u), (i))
+#endif // Py_LIMITED_API
 
 PyObject *
 _Pep_PrivateMangle(PyObject *self, PyObject *name)
@@ -652,7 +656,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
      * This function is modelled after _Py_Mangle, but is optimized
      * a little for our purpose.
      */
-#if PY_VERSION_HEX < 0X03000000
+#ifdef IS_PY2
     const char *namestr = PyString_AsString(name);
     if (namestr == nullptr || namestr[0] != '_' || namestr[1] != '_') {
         Py_INCREF(name);
@@ -679,7 +683,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
         Py_INCREF(name);
         return name;
     }
-#endif
+#endif // IS_PY2
     Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
         reinterpret_cast<PyObject *>(Py_TYPE(self)), Shiboken::PyMagicName::name()));
 #ifndef Py_LIMITED_API
@@ -718,7 +722,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     if (amount > big_stack)
         free(resbuf);
     return result;
-#endif  // Py_LIMITED_API
+#endif // else Py_LIMITED_API
 }
 
 /*****************************************************************************
@@ -749,17 +753,18 @@ init_PepRuntime()
 void
 Pep384_Init()
 {
-    check_PyTypeObject_valid();
     init_PepRuntime();
 #ifdef Py_LIMITED_API
+    check_PyTypeObject_valid();
     Pep_GetVerboseFlag();
     PepMethod_TypePtr = getMethodType();
     PepFunction_TypePtr = getFunctionType();
     PepStaticMethod_TypePtr = getStaticMethodType();
-#endif
-#if PY_VERSION_HEX < 0x03000000
+#endif // Py_LIMITED_API
+
+#ifdef IS_PY2
     PepMethodDescr_TypePtr = getMethodDescrType();
-#endif
+#endif // IS_PY2
 }
 
 } // extern "C"
