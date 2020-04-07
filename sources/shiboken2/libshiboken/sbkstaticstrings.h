@@ -50,6 +50,7 @@ namespace PyName
 {
 LIBSHIBOKEN_API PyObject *dumps();
 LIBSHIBOKEN_API PyObject *loads();
+LIBSHIBOKEN_API PyObject *result();
 } // namespace PyName
 
 namespace PyMagicName

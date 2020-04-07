@@ -17,15 +17,19 @@ information about a particular change.
 *                                  PySide2                                 *
 ****************************************************************************
 
+ - [PYSIDE-135]  Add doc getter for Property
  - [PYSIDE-239]  Python enum types can now be used as a valid signal type.
+ - [PYSIDE-939]  Fix Python 3.8 warnings about deprecated int conversions of
+                 enums/flags
  - [PYSIDE-571]  qApp has been turned into a normal Python variable. This
-                 implies that QtWidgets.qApp no longer works; it should be
-                 replaced by qApp.
- - [PYSIDE-803]  GUI slowdowns caused by background threads have been fixed
-                 by reducing GIL allocation and usage of
+                 implies that QtWidgets.qApp no longer works;
+                 it should be replaced by qApp.
+ - [PYSIDE-803]  GUI slowdowns caused by background threads have been fixed by
+                 reducing GIL allocation and usage of
                  Py_(BEGIN|END)_ALLOW_THREADS.
  - [PYSIDE-858]  Windows binaries are now signed.
- - [PYSIDE-939]
+ - [PYSIDE-939]  Fix testrunner for Python 3.8/Linux
+ - [PYSIDE-946]  Add functions with callback of QWebEnginePage
  - [PYSIDE-1231] Further issues introduced by Python 3.8 have been addressed:
                  - Warnings about deprecated int conversions of enumerations
                    and flags have been fixed.
@@ -37,6 +41,12 @@ information about a particular change.
  - [PYSIDE-1204] QByteArray now properly supports the PyBuffer interface.
  - [PYSIDE-1214] For accessors returning non-exposed classes inheriting
                  QObject, the most-derived wrapper is now created.
+ - [PYSIDE-1229] testrunner: Fix disrupted lines in the error log
+ - [PYSIDE-1236] Fix running scriptableapplication in a virtualenv on Windows
+                 with Python 3.8
+ - [PYSIDE-1247] Avoid a signature warning in Python 3.6
+ - [PYSIDE-1250] PySide2: Use int for QVariant conversion when possible
+ - [PYSIDE-1251] Invert QTreeWidgetItem clear function loop
 
 ****************************************************************************
 *                                  Shiboken2                               *
@@ -48,5 +58,9 @@ information about a particular change.
  - [PYSIDE-1112] The shiboken documentation has been re-structured.
  - [PYSIDE-1228] Typedef'ed anonymous enums are now supported.
  - [PYSIDE-1240] The manual test dumpcodemodel has been modified to output
-                 typesystem XML, enabling convenient generation of
-                 typesystem file skeletons for new bindings.
+                 typesystem XML, enabling convenient generation of typesystem
+                 file skeletons for new bindings.
+ - [PYSIDE-1241] Improve error messages about invalid types of added functions
+ - [PYSIDE-1241] Enable flags types in added functions
+ - [PYSIDE-1246] Fix classes with virtual destructors not being considered
+                 polymorphic

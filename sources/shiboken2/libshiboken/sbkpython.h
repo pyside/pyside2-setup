@@ -72,6 +72,7 @@ extern "C" {
 // Now we have the usual variables from Python.h .
 #  include "python25compat.h"
 #  include "shibokenmacros.h"
+// "pep384impl.h" may nowhere be included but in this file.
 #  include "pep384impl.h"
 #  include "typespec.h"
 #  pragma pop_macro("slots")
@@ -98,6 +99,7 @@ extern "C" {
 // Now we have the usual variables from Python.h .
 #  include "python25compat.h"
 #  include "shibokenmacros.h"
+// "pep384impl.h" may nowhere be included but in this file.
 #  include "pep384impl.h"
 #  include "typespec.h"
 #endif

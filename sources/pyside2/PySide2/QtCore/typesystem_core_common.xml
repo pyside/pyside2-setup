@@ -2885,6 +2885,7 @@
       <object-type name="Connection">
         <include file-name="qobjectdefs.h" location="global"/>
       </object-type>
+    <modify-function signature="^invokeMethod\(" allow-thread="yes"/>
   </object-type>
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->
