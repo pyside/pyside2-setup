@@ -40,8 +40,6 @@
 #ifndef PEP384IMPL_H
 #define PEP384IMPL_H
 
-#include "sbkpython.h"
-
 extern "C"
 {
 
@@ -204,16 +202,35 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
  * RESOLVED: unicodeobject.h
  *
  */
+
+///////////////////////////////////////////////////////////////////////
+//
+// PYSIDE-813: About The Length Of Unicode Objects
+// -----------------------------------------------
+//
+// In Python 2 and before Python 3.3, the macro PyUnicode_GET_SIZE
+// worked fine and really like a macro.
+//
+// Meanwhile, the unicode objects have changed their layout very much,
+// and the former cheap macro call has become a real function call
+// that converts objects and needs PyMemory.
+//
+// That is not only inefficient, but also requires the GIL!
+// This problem was visible by debug Python and qdatastream_test.py .
+// It was found while fixing the refcount problem of PYSIDE-813 which
+// needed a debug Python.
+//
+
+// PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength.
+#if PY_VERSION_HEX < 0x03000000
+#define PepUnicode_GetLength(op)    PyUnicode_GetSize((PyObject *)(op))
+#else
+#define PepUnicode_GetLength(op)    PyUnicode_GetLength((PyObject *)(op))
+#endif
+
 #ifdef Py_LIMITED_API
 
 LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
-
-#if PY_VERSION_HEX < 0x03000000
-#define PyUnicode_GET_SIZE(op)      PyUnicode_GetSize((PyObject *)(op))
-#else
-// PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength
-#define PyUnicode_GET_SIZE(op)      PyUnicode_GetLength((PyObject *)(op))
-#endif
 
 #else
 #define _PepUnicode_AsString     PyUnicode_AsUTF8
@@ -258,6 +275,17 @@ LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
 #define PyList_GET_ITEM(op, i)      PyList_GetItem(op, i)
 #define PyList_SET_ITEM(op, i, v)   PyList_SetItem(op, i, v)
 #define PyList_GET_SIZE(op)         PyList_Size(op)
+#endif
+
+/*****************************************************************************
+ *
+ * RESOLVED: dictobject.h
+ *
+ * PYSIDE-803, PYSIDE-813: We need PyDict_GetItemWithError in order to
+ *                         avoid the GIL.
+ */
+#if PY_VERSION_HEX < 0x03000000
+LIBSHIBOKEN_API PyObject *PyDict_GetItemWithError(PyObject *mp, PyObject *key);
 #endif
 
 /*****************************************************************************

@@ -1685,7 +1685,7 @@ Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
 // cast as Py_UNICODE can be a different type
 %out = QString::fromUcs4((const uint *)unicode);
 # else
-%out = QString::fromUtf16((const ushort *)unicode, PyUnicode_GET_SIZE(%in));
+%out = QString::fromUtf16((const ushort *)unicode, PepUnicode_GetLength(%in));
 # endif
 #else
 wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);

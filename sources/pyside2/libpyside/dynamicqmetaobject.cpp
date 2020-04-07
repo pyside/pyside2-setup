@@ -140,7 +140,8 @@ MetaObjectBuilder::MetaObjectBuilder(PyTypeObject *type, const QMetaObject *meta
 
 MetaObjectBuilder::~MetaObjectBuilder()
 {
-    qDeleteAll(m_d->m_cachedMetaObjects);
+    for (auto *metaObject : m_d->m_cachedMetaObjects)
+        free(const_cast<QMetaObject*>(metaObject));
     delete m_d->m_builder;
     delete m_d;
 }

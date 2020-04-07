@@ -274,7 +274,7 @@ static QString findClangBuiltInIncludesDir()
         for (const QFileInfo &fi : versionDirs) {
             const QString fileName = fi.fileName();
             if (fileName.at(0).isDigit()) {
-                const QVersionNumber versionNumber = QVersionNumber::fromString(fileName.at(0));
+                const QVersionNumber versionNumber = QVersionNumber::fromString(fileName);
                 if (!versionNumber.isNull() && versionNumber > lastVersionNumber) {
                     candidate = fi.absoluteFilePath();
                     lastVersionNumber = versionNumber;

@@ -309,7 +309,6 @@ object-type
              allow-thread="..."
              exception-handling="..."
              hash-function="..."
-             no-override-caching="yes | no"
              stream="yes | no"
              revision="..." />
         </typesystem>
@@ -332,10 +331,6 @@ object-type
     The *optional* attributes **allow-thread** and **exception-handling**
     specify the default handling for the corresponding function modification
     (see :ref:`modify-function`).
-
-    The *optional* attribute **no-override-caching** can be used to turn off the
-    caching of methods overridden in Python, which can trigger obscure bugs when
-    setting attributes in Python 2.
 
 interface-type
 ^^^^^^^^^^^^^^

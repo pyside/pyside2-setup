@@ -144,8 +144,8 @@ def prepare_packages_posix(self, vars):
             executables.extend(copydir(
                 "{install_dir}/bin/Designer.app",
                 "{st_build_dir}/{st_package_name}/Designer.app",
-                filter=None,
-                recursive=True, vars=vars))
+                filter=None, recursive=True,
+                force=False, vars=vars))
         else:
             copyfile(
                 "{install_dir}/bin/designer",
