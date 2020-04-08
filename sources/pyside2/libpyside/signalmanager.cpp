@@ -114,18 +114,24 @@ namespace PySide {
 PyObjectWrapper::PyObjectWrapper()
     :m_me(Py_None)
 {
+    // PYSIDE-813: When PYSIDE-164 was solved by adding some thread allowance,
+    // this code was no longer protected. It was hard to find this connection.
+    // See the website https://bugreports.qt.io/browse/PYSIDE-813 for details.
+    Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::PyObjectWrapper(PyObject *me)
     : m_me(me)
 {
+    Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::PyObjectWrapper(const PyObjectWrapper &other)
     : m_me(other.m_me)
 {
+    Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }
 
@@ -142,6 +148,7 @@ PyObjectWrapper::~PyObjectWrapper()
 
 void PyObjectWrapper::reset(PyObject *o)
 {
+    Shiboken::GilState gil;
     Py_XINCREF(o);
     Py_XDECREF(m_me);
     m_me = o;
