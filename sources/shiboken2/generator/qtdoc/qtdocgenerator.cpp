@@ -1527,7 +1527,7 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     if (!context.forSmartPointer()) {
-        return getClassTargetFullName(metaClass, false) + fileNameSuffix();
+        return metaClass->name() + fileNameSuffix();
     }
     const AbstractMetaType *smartPointerType = context.preciseType();
     QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
@@ -1540,7 +1540,7 @@ void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc
     QString metaClassName;
 
     if (metaClass)
-        metaClassName = getClassTargetFullName(metaClass);
+        metaClassName = metaClass->fullName();
 
     if (doc.format() == Documentation::Native) {
         QtXmlToSphinx x(this, doc.value(), metaClassName);
@@ -1583,7 +1583,7 @@ static void writeInheritedByList(QTextStream& s, const AbstractMetaClass* metaCl
     s << "**Inherited by:** ";
     QStringList classes;
     for (AbstractMetaClass *c : qAsConst(res))
-        classes << QLatin1String(":ref:`") + getClassTargetFullName(c, false) + QLatin1Char('`');
+        classes << QLatin1String(":ref:`") + c->name() + QLatin1Char('`');
     s << classes.join(QLatin1String(", ")) << Qt::endl << Qt::endl;
 }
 
@@ -1621,7 +1621,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(const_cast<AbstractMetaClass*>(metaClass));
 
-    QString className = getClassTargetFullName(metaClass, false);
+    QString className = metaClass->name();
     s << ".. _" << className << ":" << "\n\n";
     s << ".. currentmodule:: " << metaClass->package() << "\n\n\n";
 
@@ -1633,8 +1633,9 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
     if (extractBrief(&documentation, &brief))
         writeFormattedText(s, brief, metaClass);
 
-    s << ".. inheritance-diagram:: " << getClassTargetFullName(metaClass, true) << Qt::endl
-      << "    :parts: 2\n\n"; // TODO: This would be a parameter in the future...
+    s << ".. inheritance-diagram:: " << metaClass->fullName() << Qt::endl
+      << "    :parts: 2" << Qt::endl << Qt::endl;
+    // TODO: This would be a parameter in the future...
 
 
     writeInheritedByList(s, metaClass, classes());
@@ -1696,9 +1697,9 @@ void QtDocGenerator::writeFunctionList(QTextStream& s, const AbstractMetaClass* 
 
         QString className;
         if (!func->isConstructor())
-            className =  getClassTargetFullName(cppClass) + QLatin1Char('.');
+            className = cppClass->fullName() + QLatin1Char('.');
         else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-            className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + QLatin1Char('.');
+            className = func->implementingClass()->enclosingClass()->fullName() + QLatin1Char('.');
         QString funcName = getFuncName(func);
 
         QString str = QLatin1String("def :meth:`");
@@ -1760,7 +1761,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
 
     const AbstractMetaEnumList &enums = cppClass->enums();
     for (AbstractMetaEnum *en : enums) {
-        s << section_title << getClassTargetFullName(cppClass) << '.' << en->name() << Qt::endl << Qt::endl;
+        s << section_title << cppClass->fullName() << '.' << en->name() << Qt::endl << Qt::endl;
         writeFormattedText(s, en->documentation(), cppClass);
         const auto version = versionOf(en->typeEntry());
         if (!version.isNull())
@@ -1775,7 +1776,7 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
 
     const AbstractMetaFieldList &fields = cppClass->fields();
     for (AbstractMetaField *field : fields) {
-        s << section_title << getClassTargetFullName(cppClass) << "." << field->name() << Qt::endl << Qt::endl;
+        s << section_title << cppClass->fullName() << "." << field->name() << Qt::endl << Qt::endl;
         //TODO: request for member ‘documentation’ is ambiguous
         writeFormattedText(s, field->AbstractMetaAttributes::documentation(), cppClass);
     }
@@ -1988,9 +1989,9 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, con
 {
     QString className;
     if (!func->isConstructor())
-        className =  getClassTargetFullName(cppClass) + QLatin1Char('.');
+        className =  cppClass->fullName() + QLatin1Char('.');
     else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-        className =  getClassTargetFullName(func->implementingClass()->enclosingClass()) + QLatin1Char('.');
+        className = func->implementingClass()->enclosingClass()->fullName() + QLatin1Char('.');
 
     QString funcName = getFuncName(func);
     if (!funcName.startsWith(className))
@@ -2104,7 +2105,7 @@ void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppC
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
 }
 
-static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4)
+static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 2)
 {
     using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
@@ -2113,12 +2114,13 @@ static void writeFancyToc(QTextStream& s, const QStringList& items, int cols = 4
     for (QString item : items) {
         if (item.isEmpty())
             continue;
-        if (item.startsWith(Q) && item.length() > 1)
-            idx = item[1];
-        else
-            idx = item[0]; // To group classes without the 'Q' prefix
-
         item.chop(4); // Remove the .rst extension
+        // skip namespace if necessary
+        const QString className = item.split(QLatin1Char('.')).last();
+        if (className.startsWith(Q) && className.length() > 1)
+            idx = className[1];
+        else
+            idx = className[0];
         tocMap[idx] << item;
     }
     QtXmlToSphinx::Table table;
