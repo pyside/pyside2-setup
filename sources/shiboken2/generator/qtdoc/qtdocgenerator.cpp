@@ -2007,20 +2007,42 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, con
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
 {
-    QString strType;
+    static const QStringList nativeTypes = {
+        QLatin1String("bool"),
+        QLatin1String("float"),
+        QLatin1String("int"),
+        QLatin1String("object"),
+        QLatin1String("str")
+    };
     const QString name = type->name();
-    if (name == QLatin1String("QString")) {
-        strType = QLatin1String("unicode");
-    } else if (name == QLatin1String("QVariant")) {
-        strType = QLatin1String("object");
-    } else if (name == QLatin1String("QStringList")) {
-        strType = QLatin1String("list of strings");
-    } else if (type->isConstant() && name == QLatin1String("char") && type->indirections() == 1) {
+    if (nativeTypes.contains(name))
+        return name;
+
+    static const QMap<QString, QString> typeMap = {
+        { QLatin1String("PyObject"), QLatin1String("object") },
+        { QLatin1String("QString"), QLatin1String("str") },
+        { QLatin1String("uchar"), QLatin1String("str") },
+        { QLatin1String("QStringList"), QLatin1String("list of strings") },
+        { QLatin1String("QVariant"), QLatin1String("object") },
+        { QLatin1String("quint32"), QLatin1String("int") },
+        { QLatin1String("uint32_t"), QLatin1String("int") },
+        { QLatin1String("quint64"), QLatin1String("int") },
+        { QLatin1String("qint64"), QLatin1String("int") },
+        { QLatin1String("size_t"), QLatin1String("int") },
+        { QLatin1String("int64_t"), QLatin1String("int") },
+        { QLatin1String("qreal"), QLatin1String("float") }
+    };
+    const auto found = typeMap.find(name);
+    if (found != typeMap.end())
+        return found.value();
+
+    QString strType;
+    if (type->isConstant() && name == QLatin1String("char") && type->indirections() == 1) {
         strType = QLatin1String("str");
     } else if (name.startsWith(QLatin1String("unsigned short"))) {
         strType = QLatin1String("int");
     } else if (name.startsWith(QLatin1String("unsigned "))) { // uint and ulong
-        strType = QLatin1String("long");
+        strType = QLatin1String("int");
     } else if (type->isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
         strType.remove(QLatin1Char('*'));
@@ -2038,12 +2060,9 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, cons
                                          .arg(types[0], types[1]);
         }
     } else {
-        QString refTag;
-        if (type->isEnum())
-            refTag = QLatin1String("attr");
-        else
-            refTag = QLatin1String("class");
-        strType = QLatin1Char(':') + refTag + QLatin1String(":`") + name + QLatin1Char('`');
+        const AbstractMetaClass *k = AbstractMetaClass::findClass(classes(), type->typeEntry());
+        strType = k ? k->fullName() : type->name();
+        strType = QStringLiteral(":any:`") + strType + QLatin1Char('`');
     }
     return strType;
 }
