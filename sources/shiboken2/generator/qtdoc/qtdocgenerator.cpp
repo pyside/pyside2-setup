@@ -1991,15 +1991,11 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
 
 QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
 {
-    QString className;
-    if (!func->isConstructor())
-        className =  cppClass->fullName() + QLatin1Char('.');
-    else if (func->implementingClass() && func->implementingClass()->enclosingClass())
-        className = func->implementingClass()->enclosingClass()->fullName() + QLatin1Char('.');
+    QString funcName;
 
-    QString funcName = getFuncName(func);
-    if (!funcName.startsWith(className))
-        funcName = className + funcName;
+    funcName = cppClass->fullName();
+    if (!func->isConstructor())
+        funcName += QLatin1Char('.') + getFuncName(func);
 
     return funcName + QLatin1Char('(') + parseArgDocStyle(cppClass, func)
         + QLatin1Char(')');
