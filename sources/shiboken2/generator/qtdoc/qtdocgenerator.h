@@ -252,7 +252,7 @@ private:
     void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
     QString functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
-                       const AbstractMetaFunction* func);
+                       const AbstractMetaFunction* func, bool indexed = true);
     void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunction* func);
     void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);

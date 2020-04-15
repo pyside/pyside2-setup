@@ -1667,6 +1667,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
         writeFields(s, metaClass);
 
 
+    QStringList uniqueFunctions;
     for (AbstractMetaFunction *func : qAsConst(functionList)) {
         if (shouldSkip(func))
             continue;
@@ -1676,7 +1677,8 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
         else
             s <<  ".. method:: ";
 
-        writeFunction(s, metaClass, func);
+        writeFunction(s, metaClass, func, !uniqueFunctions.contains(func->name()));
+        uniqueFunctions.append(func->name());
     }
 
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, nullptr);
@@ -2104,12 +2106,15 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
 }
 
 void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
-                                   const AbstractMetaFunction* func)
+                                   const AbstractMetaFunction* func, bool indexed)
 {
-    s << functionSignature(cppClass, func) << "\n\n";
+    s << functionSignature(cppClass, func);
 
     {
         Indentation indentation(INDENT);
+        if (!indexed)
+            s << QLatin1Char('\n') << INDENT << QLatin1String(":noindex:");
+        s << "\n\n";
         writeFunctionParametersType(s, cppClass, func);
         const auto version = versionOf(func->typeEntry());
         if (!version.isNull())
