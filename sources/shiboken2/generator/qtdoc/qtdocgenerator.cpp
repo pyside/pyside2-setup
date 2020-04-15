@@ -1797,25 +1797,29 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
 
     IndentorBase<1> indent1;
     indent1.indent = INDENT.total();
-    for (AbstractMetaFunction *func : qAsConst(lst)) {
-        s << indent1;
-        if (first) {
-            first = false;
-            s << sectionTitle;
-            indent1.indent += sectionTitle.size();
-        }
-        s << functionSignature(cppClass, func) << "\n\n";
+    if (lst.isEmpty()) {
+        s << sectionTitle << cppClass->fullName();
+    } else {
+        for (AbstractMetaFunction *func : qAsConst(lst)) {
+            s << indent1;
+            if (first) {
+                first = false;
+                s << sectionTitle;
+                indent1.indent += sectionTitle.size();
+            }
+            s << functionSignature(cppClass, func) << "\n\n";
 
-        const auto version = versionOf(func->typeEntry());
-        if (!version.isNull())
-            s << indent1 << rstVersionAdded(version);
-        if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated))
-            s << indent1 << rstDeprecationNote("constructor");
+            const auto version = versionOf(func->typeEntry());
+            if (!version.isNull())
+                s << indent1 << rstVersionAdded(version);
+            if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated))
+                s << indent1 << rstDeprecationNote("constructor");
 
-        const AbstractMetaArgumentList &arguments = func->arguments();
-        for (AbstractMetaArgument *arg : arguments) {
-            if (!arg_map.contains(arg->name())) {
-                arg_map.insert(arg->name(), arg);
+            const AbstractMetaArgumentList &arguments = func->arguments();
+            for (AbstractMetaArgument *arg : arguments) {
+                if (!arg_map.contains(arg->name())) {
+                    arg_map.insert(arg->name(), arg);
+                }
             }
         }
     }
