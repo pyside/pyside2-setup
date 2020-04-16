@@ -1374,10 +1374,7 @@ public:
         return m_hasVirtualDestructor;
     }
 
-    void setHasVirtualDestructor(bool value)
-    {
-        m_hasVirtualDestructor = value;
-    }
+    void setHasVirtualDestructor(bool value);
 
     bool isConstructible() const
     {

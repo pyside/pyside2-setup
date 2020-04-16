@@ -47,7 +47,7 @@
 
 #ifdef Py_LIMITED_API
 
-#include "pep384impl.h"
+#include "sbkpython.h"
 /* Buffer C-API for Python 3.0 */
 
 int

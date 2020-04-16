@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,66 +38,34 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import QApplication, QTreeView
+"""QUiLoader example, showing how to dynamically load a Qt Designer form
+   from a UI file."""
 
-from PySide2.QtCore import Signal, QAbstractTableModel, QModelIndex, Qt, QUrl
+from argparse import ArgumentParser, RawTextHelpFormatter
+import sys
 
-
-class HistoryModel(QAbstractTableModel):
-
-    def __init__(self, history, parent=None):
-        super(HistoryModel, self).__init__(parent)
-        self._history = history
-
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return 'Title' if section == 0 else 'Url'
-        return None
-
-    def rowCount(self, index=QModelIndex()):
-        return self._history.count()
-
-    def columnCount(self, index=QModelIndex()):
-        return 2
-
-    def item_at(self, model_index):
-        return self._history.itemAt(model_index.row())
-
-    def data(self, index, role=Qt.DisplayRole):
-        item = self.item_at(index)
-        column = index.column()
-        if role == Qt.DisplayRole:
-            return item.title() if column == 0 else item.url().toString()
-        return None
-
-    def refresh(self):
-        self.beginResetModel()
-        self.endResetModel()
+from PySide2.QtCore import Qt, QFile, QIODevice
+from PySide2.QtWidgets import QApplication, QWidget
+from PySide2.QtUiTools import QUiLoader
 
 
-class HistoryWindow(QTreeView):
+if __name__ == '__main__':
+    arg_parser = ArgumentParser(description="QUiLoader example",
+                                formatter_class=RawTextHelpFormatter)
+    arg_parser.add_argument('file', type=str, help='UI file')
+    args = arg_parser.parse_args()
+    ui_file_name = args.file
 
-    open_url = Signal(QUrl)
-
-    def __init__(self, history, parent):
-        super(HistoryWindow, self).__init__(parent)
-
-        self._model = HistoryModel(history, self)
-        self.setModel(self._model)
-        self.activated.connect(self._activated)
-
-        screen = QApplication.desktop().screenGeometry(parent)
-        self.resize(screen.width() / 3, screen.height() / 3)
-        self._adjustSize()
-
-    def refresh(self):
-        self._model.refresh()
-        self._adjustSize()
-
-    def _adjustSize(self):
-        if (self._model.rowCount() > 0):
-            self.resizeColumnToContents(0)
-
-    def _activated(self, index):
-        item = self._model.item_at(index)
-        self.open_url.emit(item.url())
+    app = QApplication(sys.argv)
+    ui_file = QFile(ui_file_name)
+    if not ui_file.open(QIODevice.ReadOnly):
+        print("Cannot open {}: {}".format(ui_file_name, ui_file.errorString()))
+        sys.exit(-1)
+    loader = QUiLoader()
+    widget = loader.load(ui_file, None)
+    ui_file.close()
+    if not widget:
+        print(loader.errorString())
+        sys.exit(-1)
+    widget.show()
+    sys.exit(app.exec_())

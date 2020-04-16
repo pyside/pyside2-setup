@@ -38,7 +38,9 @@
 ##
 #############################################################################
 
-import json, os, warnings
+import json
+import os
+import warnings
 
 from PySide2 import QtCore
 from PySide2.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
@@ -53,23 +55,27 @@ _default_bookmarks = [
     ['Tool Bar'],
     ['http://qt.io', 'Qt', ':/qt-project.org/qmessagebox/images/qtlogo-64.png'],
     ['https://download.qt.io/snapshots/ci/pyside/', 'Downloads'],
-    ['https://doc-snapshots.qt.io/qtforpython/', 'Documentation'],
+    ['https://doc.qt.io/qtforpython/', 'Documentation'],
     ['https://bugreports.qt.io/projects/PYSIDE/', 'Bug Reports'],
     ['https://www.python.org/', 'Python', None],
     ['https://wiki.qt.io/PySide2', 'Qt for Python', None],
     ['Other Bookmarks']
 ]
 
+
 def _config_dir():
     return '{}/QtForPythonBrowser'.format(
         QStandardPaths.writableLocation(QStandardPaths.ConfigLocation))
 
+
 _bookmark_file = 'bookmarks.json'
+
 
 def _create_folder_item(title):
     result = QStandardItem(title)
     result.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
     return result
+
 
 def _create_item(url, title, icon):
     result = QStandardItem(title)
@@ -78,6 +84,7 @@ def _create_item(url, title, icon):
     if icon is not None:
         result.setIcon(icon)
     return result
+
 
 # Create the model from an array of arrays
 def _create_model(parent, serialized_bookmarks):
@@ -93,6 +100,7 @@ def _create_model(parent, serialized_bookmarks):
             icon = QIcon(entry[2]) if len(entry) > 2 and entry[2] else None
             last_folder_item.appendRow(_create_item(url, title, icon))
     return result
+
 
 # Serialize model into an array of arrays, writing out the icons
 # into .png files under directory in the process
@@ -111,11 +119,13 @@ def _serialize_model(model, directory):
                 icon_sizes = icon.availableSizes()
                 largest_size = icon_sizes[len(icon_sizes) - 1]
                 icon_file_name = '{}/icon{:02}_{:02}_{}.png'.format(directory,
-                               f, i, largest_size.width())
+                                                                    f, i,
+                                                                    largest_size.width())
                 icon.pixmap(largest_size).save(icon_file_name, 'PNG')
                 entry.append(icon_file_name)
             result.append(entry)
     return result
+
 
 # Bookmarks as a tree view to be used in a dock widget with
 # functionality to persist and populate tool bars and menus.
@@ -187,7 +197,8 @@ class BookmarkWidget(QTreeView):
                     action.setData(url)
                     action.setVisible(True)
             else:
-                action = target_object.addAction(icon, BookmarkWidget.short_title(title))
+                short_title = BookmarkWidget.short_title(title)
+                action = target_object.addAction(icon, short_title)
                 action.setToolTip(title)
                 action.setData(url)
                 action.triggered.connect(self._action_activated)
@@ -206,7 +217,7 @@ class BookmarkWidget(QTreeView):
         index = self.currentIndex()
         if index.isValid():
             item = self._model.itemFromIndex(index)
-            if item.parent(): # exclude top level items
+            if item.parent():  # exclude top level items
                 return item
         return None
 
@@ -224,9 +235,9 @@ class BookmarkWidget(QTreeView):
             self._remove_item(current_item)
 
     def _remove_item(self, item):
-        button = QMessageBox.question(self, "Remove",
-            "Would you like to remove \"{}\"?".format(item.text()),
-            QMessageBox.Yes | QMessageBox.No)
+        message = "Would you like to remove \"{}\"?".format(item.text())
+        button = QMessageBox.question(self, "Remove", message,
+                                      QMessageBox.Yes | QMessageBox.No)
         if button == QMessageBox.Yes:
             item.parent().removeRow(item.row())
 
@@ -246,11 +257,11 @@ class BookmarkWidget(QTreeView):
         bookmark_file_name = os.path.join(native_dir_path, _bookmark_file)
         print('Writing {}...'.format(bookmark_file_name))
         with open(bookmark_file_name, 'w') as bookmark_file:
-            json.dump(serialized_model, bookmark_file, indent = 4)
+            json.dump(serialized_model, bookmark_file, indent=4)
 
     def _read_bookmarks(self):
         bookmark_file_name = os.path.join(QDir.toNativeSeparators(_config_dir()),
-                                        _bookmark_file)
+                                          _bookmark_file)
         if os.path.exists(bookmark_file_name):
             print('Reading {}...'.format(bookmark_file_name))
             return json.load(open(bookmark_file_name))

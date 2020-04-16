@@ -116,7 +116,7 @@ def build_brace_pattern(level, separators=""):
             | {so} {replacer} {sc}
             | {co} {replacer} {cc}
             | {ao} {replacer} {ac}
-          )*
+          )+
         )
         """)
     no_braces_q = "[^{all}{qu}{bs}]*".format(**locals())

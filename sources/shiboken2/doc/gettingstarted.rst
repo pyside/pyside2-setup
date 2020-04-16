@@ -28,9 +28,9 @@ If you need only Shiboken Generator, a simple build run would look like this::
                             --build-tests \
                             --parallel=8 \
                             --verbose-build \
-                            --internal-build=shiboken2-generator
+                            --internal-build-type=shiboken2-generator
 
-The same can be used for the module, changing the value of ``internal-build`` to
+The same can be used for the module, changing the value of ``internal-build-type`` to
 ``shiboken2-module``.
 
 Using the wheels

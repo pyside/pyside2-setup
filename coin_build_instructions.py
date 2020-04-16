@@ -110,7 +110,12 @@ def call_setup(python_ver, phase):
     if phase in ["BUILD"]:
         rmtree(_env, True)
         run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-        install_pip_dependencies(env_pip, ["pip", "numpy", "setuptools", "sphinx", "six", "wheel"])
+        # When the 'python_ver' variable is empty, we are using Python 2
+        # setuptools from v45+ removed the support for Python 2, so we pin an old release
+        install_pip_dependencies(env_pip, ["pip",
+                                           "numpy" if python_ver else "numpy==1.16.6",
+                                           "setuptools" if python_ver else "setuptools==44.0.0",
+                                           "sphinx", "six", "wheel"])
 
     cmd = [env_python, "-u", "setup.py"]
     if phase in ["BUILD"]:

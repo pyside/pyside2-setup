@@ -43,6 +43,7 @@
 
 // @snippet include-pyside
 #include <pyside.h>
+#include <limits>
 // @snippet include-pyside
 
 // @snippet pystring-check
@@ -1684,7 +1685,7 @@ Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
 // cast as Py_UNICODE can be a different type
 %out = QString::fromUcs4((const uint *)unicode);
 # else
-%out = QString::fromUtf16((const ushort *)unicode, PyUnicode_GET_SIZE(%in));
+%out = QString::fromUtf16((const ushort *)unicode, PepUnicode_GetLength(%in));
 # endif
 #else
 wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);
@@ -1716,8 +1717,11 @@ int i = %CONVERTTOCPP[int](%in);
 // @snippet conversion-pyint
 
 // @snippet conversion-qlonglong
+// PYSIDE-1250: For QVariant, if the type fits into an int; use int preferably.
 qlonglong in = %CONVERTTOCPP[qlonglong](%in);
-%out = %OUTTYPE(in);
+constexpr qlonglong intMax = qint64(std::numeric_limits<int>::max());
+constexpr qlonglong intMin = qint64(std::numeric_limits<int>::min());
+%out = in >= intMin && in <= intMax ? %OUTTYPE(int(in)) : %OUTTYPE(in);
 // @snippet conversion-qlonglong
 
 // @snippet conversion-qstring
