@@ -58,6 +58,7 @@ static int m_step_warning = 0;
 static QElapsedTimer m_timer;
 
 Q_LOGGING_CATEGORY(lcShiboken, "qt.shiboken")
+Q_LOGGING_CATEGORY(lcShibokenDoc, "qt.shiboken.doc")
 
 void ReportHandler::install()
 {

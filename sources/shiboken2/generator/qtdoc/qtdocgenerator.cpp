@@ -478,7 +478,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
                 << reader.errorString() << " at " << reader.lineNumber()
                 << ':' << reader.columnNumber() << '\n' << doc;
             m_output << INDENT << message;
-            qCWarning(lcShiboken).noquote().nospace() << message;
+            qCWarning(lcShibokenDoc).noquote().nospace() << message;
             break;
         }
 
@@ -541,7 +541,7 @@ QString QtXmlToSphinx::readFromLocations(const QStringList &locations, const QSt
            << locations.join(QLatin1String("\", \""));
         return QString(); // null
     }
-    qCDebug(lcShiboken).noquote().nospace() << "snippet file " << path
+    qCDebug(lcShibokenDoc).noquote().nospace() << "snippet file " << path
         << " [" << identifier << ']' << " resolved to " << resolvedPath;
     return readFromLocation(resolvedPath, identifier, errorMessage);
 }
@@ -783,7 +783,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         const QString pythonCode =
             readFromLocations(m_generator->codeSnippetDirs(), location, identifier, &errorMessage);
         if (!errorMessage.isEmpty())
-            qCWarning(lcShiboken, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
+            qCWarning(lcShibokenDoc, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
         // Fall back to C++ snippet when "path" attribute is present.
         // Also read fallback snippet when comparison is desired.
         QString fallbackCode;
@@ -792,15 +792,15 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
             const QString fallback = reader.attributes().value(fallbackPathAttribute()).toString();
             if (QFileInfo::exists(fallback)) {
                 if (pythonCode.isEmpty())
-                    qCWarning(lcShiboken, "%s", qPrintable(msgFallbackWarning(reader, m_context, m_lastTagName, location, identifier, fallback)));
+                    qCWarning(lcShibokenDoc, "%s", qPrintable(msgFallbackWarning(reader, m_context, m_lastTagName, location, identifier, fallback)));
                 fallbackCode = readFromLocation(fallback, identifier, &errorMessage);
                 if (!errorMessage.isEmpty())
-                    qCWarning(lcShiboken, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
+                    qCWarning(lcShibokenDoc, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
             }
         }
 
         if (!pythonCode.isEmpty() && !fallbackCode.isEmpty() && snippetComparison())
-            qCDebug(lcShiboken, "%s", qPrintable(msgSnippetComparison(location, identifier, pythonCode, fallbackCode)));
+            qCDebug(lcShibokenDoc, "%s", qPrintable(msgSnippetComparison(location, identifier, pythonCode, fallbackCode)));
 
         if (!consecutiveSnippet)
             m_output << INDENT << "::\n\n";
@@ -1120,7 +1120,7 @@ static bool copyImage(const QString &href, const QString &docDataDir,
             << source.errorString();
         return false;
     }
-    qCDebug(lcShiboken()).noquote().nospace() << __FUNCTION__ << " href=\""
+    qCDebug(lcShibokenDoc()).noquote().nospace() << __FUNCTION__ << " href=\""
         << href << "\", context=\"" << context << "\", docDataDir=\""
         << docDataDir << "\", outputDir=\"" << outputDir << "\", copied \""
         << source.fileName() << "\"->\"" << targetFileName << '"';
@@ -1134,7 +1134,7 @@ bool QtXmlToSphinx::copyImage(const QString &href) const
         ::copyImage(href, m_generator->docDataDir(), m_context,
                     m_generator->outputDirectory(), &errorMessage);
     if (!result)
-        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
     return result;
 }
 
@@ -1204,7 +1204,7 @@ void QtXmlToSphinx::handleUnknownTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement)
-        qCDebug(lcShiboken).noquote().nospace() << "Unknown QtDoc tag: \"" << reader.name().toString() << "\".";
+        qCDebug(lcShibokenDoc).noquote().nospace() << "Unknown QtDoc tag: \"" << reader.name().toString() << "\".";
 }
 
 void QtXmlToSphinx::handleSuperScriptTag(QXmlStreamReader& reader)
@@ -1292,7 +1292,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         QString errorMessage;
         QString code = readFromLocation(location, QString(), &errorMessage);
         if (!errorMessage.isEmpty())
-            qCWarning(lcShiboken(), "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
+            qCWarning(lcShibokenDoc, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
         m_output << INDENT << "::\n\n";
         Indentation indentation(INDENT);
         if (code.isEmpty())
@@ -1391,7 +1391,7 @@ void QtXmlToSphinx::Table::format (QTextStream& s) const
         return;
 
     if (!isNormalized()) {
-        qCDebug(lcShiboken) << "Attempt to print an unnormalized table!";
+        qCDebug(lcShibokenDoc) << "Attempt to print an unnormalized table!";
         return;
     }
 
@@ -1614,7 +1614,7 @@ static bool extractBrief(Documentation *sourceDoc, Documentation *brief)
 void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 {
     AbstractMetaClass *metaClass = classContext.metaClass();
-    qCDebug(lcShiboken).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
+    qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
     m_packages[metaClass->package()] << fileNameForContext(classContext);
 
@@ -2202,7 +2202,7 @@ void QtDocGenerator::writeModuleDocumentation()
         if (!m_extraSectionDir.isEmpty()) {
             QDir extraSectionDir(m_extraSectionDir);
             if (!extraSectionDir.exists())
-                qCWarning(lcShiboken) << m_extraSectionDir << "doesn't exist";
+                qCWarning(lcShibokenDoc) << m_extraSectionDir << "doesn't exist";
 
             QStringList fileList = extraSectionDir.entryList(QStringList() << (moduleName.mid(lastIndex + 1) + QLatin1String("?*.rst")), QDir::Files);
             QStringList::iterator it2 = fileList.begin();
@@ -2213,7 +2213,7 @@ void QtDocGenerator::writeModuleDocumentation()
                 if (QFile::exists(newFilePath))
                     QFile::remove(newFilePath);
                 if (!QFile::copy(m_extraSectionDir + QLatin1Char('/') + origFileName, newFilePath)) {
-                    qCDebug(lcShiboken).noquote().nospace() << "Error copying extra doc "
+                    qCDebug(lcShibokenDoc).noquote().nospace() << "Error copying extra doc "
                         << QDir::toNativeSeparators(m_extraSectionDir + QLatin1Char('/') + origFileName)
                         << " to " << QDir::toNativeSeparators(newFilePath);
                 }
@@ -2269,7 +2269,7 @@ void QtDocGenerator::writeAdditionalDocumentation()
 {
     QFile additionalDocumentationFile(m_additionalDocumentationList);
     if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qCWarning(lcShiboken, "%s",
+        qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgCannotOpenForReading(additionalDocumentationFile)));
         return;
     }
@@ -2295,7 +2295,7 @@ void QtDocGenerator::writeAdditionalDocumentation()
                 targetDir = outDir.absolutePath();
             } else {
                 if (!outDir.exists(dir) && !outDir.mkdir(dir)) {
-                    qCWarning(lcShiboken, "Cannot create directory %s under %s",
+                    qCWarning(lcShibokenDoc, "Cannot create directory %s under %s",
                               qPrintable(dir),
                               qPrintable(QDir::toNativeSeparators(outputDirectory())));
                     break;
@@ -2312,14 +2312,14 @@ void QtDocGenerator::writeAdditionalDocumentation()
                 if (QtXmlToSphinx::convertToRst(this, fi.absoluteFilePath(),
                                                 rstFile, context, &errorMessage)) {
                     ++successCount;
-                    qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
+                    qCDebug(lcShibokenDoc).nospace().noquote() << __FUNCTION__
                         << " converted " << fi.fileName()
                         << ' ' << rstFileName;
                 } else {
-                    qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+                    qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
                 }
             } else {
-                qCWarning(lcShiboken, "%s",
+                qCWarning(lcShibokenDoc, "%s",
                           qPrintable(msgNonExistentAdditionalDocFile(m_docDataDir, line)));
             }
             ++count;
@@ -2327,7 +2327,7 @@ void QtDocGenerator::writeAdditionalDocumentation()
     }
     additionalDocumentationFile.close();
 
-    qCInfo(lcShiboken, "Created %d/%d additional documentation files.",
+    qCInfo(lcShibokenDoc, "Created %d/%d additional documentation files.",
            successCount, count);
 }
 
@@ -2346,7 +2346,7 @@ bool QtDocGenerator::doSetup()
         m_docParser = new QtDocParser;
 
     if (m_libSourceDir.isEmpty() || m_docDataDir.isEmpty()) {
-        qCWarning(lcShiboken) << "Documentation data dir and/or Qt source dir not informed, "
+        qCWarning(lcShibokenDoc) << "Documentation data dir and/or Qt source dir not informed, "
                                  "documentation will not be extracted from Qt sources.";
         return false;
     }
@@ -2395,7 +2395,7 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
         return true;
     }
     if (key == QLatin1String("doc-parser")) {
-        qCDebug(lcShiboken).noquote().nospace() << "doc-parser: " << value;
+        qCDebug(lcShibokenDoc).noquote().nospace() << "doc-parser: " << value;
         if (value == QLatin1String("doxygen"))
             m_docParser = new DoxygenParser;
         return true;

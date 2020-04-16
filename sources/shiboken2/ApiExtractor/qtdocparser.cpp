@@ -225,7 +225,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     if (!sourceFile.exists())
         sourceFile.setFile(sourceFileRoot + QStringLiteral(".xml"));
    if (!sourceFile.exists()) {
-        qCWarning(lcShiboken).noquote().nospace()
+        qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for class " << metaClass->name() << ", tried: "
             << QDir::toNativeSeparators(sourceFile.absoluteFilePath());
         return;
@@ -235,7 +235,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(sourceFileName, &errorMessage);
     if (xquery.isNull()) {
-        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
 
@@ -258,7 +258,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
 
     Documentation doc(getDocumentation(xquery, query, classModifs));
     if (doc.isEmpty())
-         qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
+         qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(sourceFileName, "class", className, query)));
     metaClass->setDocumentation(doc);
 
     //Functions Documentation
@@ -268,7 +268,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
             queryFunctionDocumentation(sourceFileName, metaClass, classQuery,
                                        func, signedModifs, xquery, &errorMessage);
         if (!errorMessage.isEmpty())
-            qCWarning(lcShiboken(), "%s", qPrintable(errorMessage));
+            qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         func->setDocumentation(Documentation(documentation));
     }
 #if 0
@@ -291,7 +291,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
             << meta_enum->name() << "\"]/description";
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
         if (doc.isEmpty()) {
-            qCWarning(lcShiboken(), "%s",
+            qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, query)));
         }
         meta_enum->setDocumentation(doc);
@@ -321,7 +321,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     if (!QFile::exists(sourceFile))
         sourceFile = prefix + QLatin1String("-module.webxml");
     if (!QFile::exists(sourceFile)) {
-        qCWarning(lcShiboken).noquote().nospace()
+        qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
             << QDir::toNativeSeparators(sourceFile);
         return Documentation();
@@ -330,7 +330,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(sourceFile, &errorMessage);
     if (xquery.isNull()) {
-        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return {};
     }
 
@@ -339,7 +339,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
         + moduleName + QLatin1String("\"]/description");
     Documentation doc = getDocumentation(xquery, query, DocModificationList());
     if (doc.isEmpty()) {
-        qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(sourceFile, "module", name, query)));
         return doc;
     }
 

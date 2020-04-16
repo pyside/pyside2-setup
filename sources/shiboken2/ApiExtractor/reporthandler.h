@@ -33,6 +33,7 @@
 #include <QString>
 
 Q_DECLARE_LOGGING_CATEGORY(lcShiboken)
+Q_DECLARE_LOGGING_CATEGORY(lcShibokenDoc)
 
 class ReportHandler
 {
