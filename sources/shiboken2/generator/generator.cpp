@@ -418,8 +418,6 @@ bool Generator::generateFileForContext(GeneratorContext &context)
     const QString fileName = fileNameForContext(context);
     if (fileName.isEmpty())
         return true;
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-        qCDebug(lcShiboken) << "generating: " << fileName;
 
     QString filePath = outputDirectory() + QLatin1Char('/') + subDirectoryForClass(cls)
             + QLatin1Char('/') + fileName;

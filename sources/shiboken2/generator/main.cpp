@@ -633,7 +633,6 @@ int main(int argc, char *argv[])
     }
 
     const QByteArray doneMessage = ReportHandler::doneMessage();
-    qCDebug(lcShiboken, "%s", doneMessage.constData());
     std::cout << doneMessage.constData() << std::endl;
 
     return EXIT_SUCCESS;

@@ -621,15 +621,8 @@ bool TypeDatabase::parseFile(const QString &filename, const QString &currentPath
         return false;
     }
 
-    int count = m_entries.size();
     bool ok = parseFile(&file, generate);
     m_parsedTypesystemFiles[filepath] = ok;
-    int newCount = m_entries.size();
-
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
-          qCDebug(lcShiboken)
-              << QStringLiteral("Parsed: '%1', %2 new entries").arg(filename).arg(newCount - count);
-    }
     return ok;
 }
 

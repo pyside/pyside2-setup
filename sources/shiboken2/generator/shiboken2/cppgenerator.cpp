@@ -295,8 +295,6 @@ static inline bool canGenerateFieldSetter(const AbstractMetaField *field)
 void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 {
     AbstractMetaClass *metaClass = classContext.metaClass();
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-        qCDebug(lcShiboken) << "Generating wrapper implementation for " << metaClass->fullName();
 
     // write license comment
     s << licenseComment() << Qt::endl;

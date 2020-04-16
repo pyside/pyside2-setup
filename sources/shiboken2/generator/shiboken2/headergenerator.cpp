@@ -94,8 +94,6 @@ void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const Abstrac
 void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
 {
     AbstractMetaClass *metaClass = classContext.metaClass();
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-        qCDebug(lcShiboken) << "Generating header for " << metaClass->fullName();
     m_inheritedOverloads.clear();
     Indentation indent(INDENT);
 

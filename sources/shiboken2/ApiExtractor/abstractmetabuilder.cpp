@@ -775,11 +775,6 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
         m_itemToClass.insert(namespaceItem.data(), metaClass);
     }
 
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
-        qCDebug(lcShiboken)
-            << QStringLiteral("namespace '%1.%2'").arg(metaClass->package(), namespaceItem->name());
-    }
-
     traverseEnums(namespaceItem, metaClass, namespaceItem->enumsDeclarations());
 
     pushScope(namespaceItem);
@@ -908,9 +903,6 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         break;
     }
 
-    if (ReportHandler::isDebug(ReportHandler::MediumDebug))
-        qCDebug(lcShiboken) << " - traversing enum " << metaEnum->fullName();
-
     const EnumeratorList &enums = enumItem->enumerators();
     for (const EnumeratorModelItem &value : enums) {
 
@@ -921,11 +913,6 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         metaEnumValue->setStringValue(value->stringValue());
         metaEnumValue->setValue(value->value());
         metaEnum->addEnumValue(metaEnumValue);
-
-        if (ReportHandler::isDebug(ReportHandler::FullDebug)) {
-            qCDebug(lcShiboken) << "   - " << metaEnumValue->name() << " = "
-                << metaEnumValue->value() << " = " << metaEnumValue->value();
-        }
     }
 
     m_enums.insert(typeEntry, metaEnum);
@@ -1782,9 +1769,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
     metaFunction->setExceptionSpecification(functionItem->exceptionSpecification());
-
-    if (ReportHandler::isDebug(ReportHandler::MediumDebug))
-        qCDebug(lcShiboken).noquote().nospace() << " - " << functionName << "()";
 
     metaFunction->setName(functionName);
     metaFunction->setOriginalName(functionItem->name());
