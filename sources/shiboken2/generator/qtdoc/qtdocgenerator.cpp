@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -1535,7 +1535,8 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
 }
 
 void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc,
-                                        const AbstractMetaClass *metaClass)
+                                        const AbstractMetaClass *metaClass,
+                                        Documentation::Type docType)
 {
     QString metaClassName;
 
@@ -1543,10 +1544,10 @@ void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc
         metaClassName = metaClass->fullName();
 
     if (doc.format() == Documentation::Native) {
-        QtXmlToSphinx x(this, doc.value(), metaClassName);
+        QtXmlToSphinx x(this,doc.value(docType), metaClassName);
         s << x;
     } else {
-        const QString &value = doc.value();
+        const QString &value = doc.value(docType);
         const QVector<QStringRef> lines = value.splitRef(QLatin1Char('\n'));
         int typesystemIndentation = std::numeric_limits<int>::max();
         // check how many spaces must be removed from the beginning of each line
@@ -1631,7 +1632,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
     auto documentation = metaClass->documentation();
     Documentation brief;
     if (extractBrief(&documentation, &brief))
-        writeFormattedText(s, brief, metaClass);
+        writeFormattedText(s, brief.value(), metaClass);
 
     s << ".. inheritance-diagram:: " << metaClass->fullName() << Qt::endl
       << "    :parts: 2" << Qt::endl << Qt::endl;
@@ -1658,7 +1659,7 @@ void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &class
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
-        writeFormattedText(s, documentation, metaClass);
+        writeFormattedText(s, documentation.value(), metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass);
@@ -1764,7 +1765,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
     const AbstractMetaEnumList &enums = cppClass->enums();
     for (AbstractMetaEnum *en : enums) {
         s << section_title << cppClass->fullName() << '.' << en->name() << Qt::endl << Qt::endl;
-        writeFormattedText(s, en->documentation(), cppClass);
+        writeFormattedText(s, en->documentation().value(), cppClass);
         const auto version = versionOf(en->typeEntry());
         if (!version.isNull())
             s << rstVersionAdded(version);
@@ -1780,7 +1781,7 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
     for (AbstractMetaField *field : fields) {
         s << section_title << cppClass->fullName() << "." << field->name() << Qt::endl << Qt::endl;
         //TODO: request for member ‘documentation’ is ambiguous
-        writeFormattedText(s, field->AbstractMetaAttributes::documentation(), cppClass);
+        writeFormattedText(s, field->AbstractMetaAttributes::documentation().value(), cppClass);
     }
 }
 
@@ -1836,7 +1837,7 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     s << Qt::endl;
 
     for (AbstractMetaFunction *func : qAsConst(lst))
-        writeFormattedText(s, func->documentation(), cppClass);
+        writeFormattedText(s, func->documentation().value(), cppClass);
 }
 
 QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */,
@@ -1971,8 +1972,8 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
                 else
                     continue;
 
-                doc.setValue(mod.code() , fmt);
-                writeFormattedText(s, doc, cppClass);
+                doc.setValue(mod.code(), Documentation::Detailed, fmt);
+                writeFormattedText(s, doc.value(), cppClass);
                 didSomething = true;
             }
         }
@@ -2122,10 +2123,11 @@ void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppC
         if (func->attributes().testFlag(AbstractMetaAttributes::Deprecated))
             s << INDENT << rstDeprecationNote("function");
     }
-
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func))
-        writeFormattedText(s, func->documentation(), cppClass);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func)) {
+        writeFormattedText(s, func->documentation(), cppClass, Documentation::Brief);
+        writeFormattedText(s, func->documentation(), cppClass, Documentation::Detailed);
+    }
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
 }
 

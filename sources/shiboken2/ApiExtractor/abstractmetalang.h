@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -39,6 +39,7 @@
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QStringList>
+#include <QtCore/QMap>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -72,34 +73,27 @@ public:
         Native,
         Target
     };
+    enum Type {
+        Detailed,
+        Brief,
+        Last
+    };
 
     Documentation() = default;
+    Documentation(const QString& value, Type t = Documentation::Detailed,
+                  Format fmt = Documentation::Native);
 
-    Documentation(const QString& value, Format fmt = Documentation::Native)
-            : m_data(value.trimmed()), m_format(fmt) {}
+    bool isEmpty() const;
 
-    bool isEmpty() const { return m_data.isEmpty(); }
+    QString value(Type t = Documentation::Detailed) const;
+    void setValue(const QString& value, Type t = Documentation::Detailed,
+                  Format fmt = Documentation::Native);
 
-    QString value() const
-    {
-        return m_data;
-    }
-
-    void setValue(const QString& value, Format fmt = Documentation::Native)
-    {
-        m_data = value.trimmed();
-        m_format = fmt;
-    }
-
-    Documentation::Format format() const
-    {
-        return m_format;
-    }
-
-    void setFormat(Format f) { m_format = f; }
+    Documentation::Format format() const;
+    void setFormat(Format f);
 
 private:
-    QString m_data;
+    QMap<Type, QString> m_data;
     Format m_format = Documentation::Native;
 
 };
