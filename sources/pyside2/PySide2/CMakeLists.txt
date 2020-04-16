@@ -8,6 +8,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/_config.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/_config.py" @ONLY)
+# typing support for mypy
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/py.typed.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/py.typed" @ONLY)
 
 # Use absolute path instead of relative path, to avoid ninja build errors due to
 # duplicate file dependency inconsistency.

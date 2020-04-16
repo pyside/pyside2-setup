@@ -188,7 +188,7 @@ def prepare_packages_posix(self, vars):
         copydir(
             "{build_dir}/pyside2/{st_package_name}",
             "{st_build_dir}/{st_package_name}",
-            filter=["*.pyi"],
+            filter=["*.pyi", "py.typed"],
             vars=vars)
 
         if not OPTION["NOEXAMPLES"]:
