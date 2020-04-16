@@ -43,6 +43,7 @@
 #include "pysidemacros.h"
 
 #include <sbkpython.h>
+#include <shibokenmacros.h>
 
 #include <QtCore/QMetaMethod>
 

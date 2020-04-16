@@ -114,18 +114,24 @@ namespace PySide {
 PyObjectWrapper::PyObjectWrapper()
     :m_me(Py_None)
 {
+    // PYSIDE-813: When PYSIDE-164 was solved by adding some thread allowance,
+    // this code was no longer protected. It was hard to find this connection.
+    // See the website https://bugreports.qt.io/browse/PYSIDE-813 for details.
+    Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::PyObjectWrapper(PyObject *me)
     : m_me(me)
 {
+    Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }
 
 PyObjectWrapper::PyObjectWrapper(const PyObjectWrapper &other)
     : m_me(other.m_me)
 {
+    Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }
 
@@ -142,6 +148,7 @@ PyObjectWrapper::~PyObjectWrapper()
 
 void PyObjectWrapper::reset(PyObject *o)
 {
+    Shiboken::GilState gil;
     Py_XINCREF(o);
     Py_XDECREF(m_me);
     m_me = o;
@@ -559,7 +566,10 @@ static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     if (!dict || !PyDict_Contains(dict, metaObjectAttr))
         return nullptr;
 
-    PyObject *pyBuilder = PyDict_GetItem(dict, metaObjectAttr);
+    // PYSIDE-813: The above assumption is not true in debug mode:
+    // PyDict_GetItem would touch PyThreadState_GET and the global error state.
+    // PyDict_GetItemWithError instead can work without GIL.
+    PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr);
 #ifdef IS_PY3K
     return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
 #else

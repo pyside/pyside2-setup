@@ -2202,9 +2202,7 @@ bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction *fun
 
 bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClass *metaClass)
 {
-    return metaClass->isPolymorphic()
-        && !metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::NoOverrideCaching);
-
+    return metaClass->isPolymorphic();
 }
 
 ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const
@@ -2219,6 +2217,13 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
             result |= AttroCheckFlag::SetattroQObject;
         if (useOverrideCaching(metaClass))
             result |= AttroCheckFlag::SetattroMethodOverride;
+        // PYSIDE-1255: If setattro is generated for a class inheriting
+        // QObject, the property code needs to be generated, too.
+        if ((result & AttroCheckFlag::SetattroMask) != 0
+            && !result.testFlag(AttroCheckFlag::SetattroQObject)
+            && metaClass->isQObject()) {
+            result |= AttroCheckFlag::SetattroQObject;
+        }
     }
     return result;
 }
