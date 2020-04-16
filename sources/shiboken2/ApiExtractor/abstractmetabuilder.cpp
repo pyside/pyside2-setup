@@ -1053,11 +1053,11 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     if (type->stream())
         metaClass->setStream(true);
 
-    if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
+    if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
         const QString message = type->isContainer()
             ? QStringLiteral("container: '%1'").arg(fullClassName)
             : QStringLiteral("class: '%1'").arg(metaClass->fullName());
-        qCDebug(lcShiboken) << message;
+        qCInfo(lcShiboken, "%s", qPrintable(message));
     }
 
     TemplateParameterList template_parameters = classItem->templateParameters();
@@ -1745,11 +1745,14 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     const QString &signature = functionSignature(functionItem);
     const bool rejected =
         TypeDatabase::instance()->isFunctionRejected(className, signature, &rejectReason);
-    qCDebug(lcShiboken).nospace().noquote() << __FUNCTION__
-        << ": Checking rejection for signature \"" << signature << "\" for " << className
-        << ": " << rejected;
-    if (rejected)
+
+    if (rejected) {
+        if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
+            qCInfo(lcShiboken, "%s::%s was rejected by the type database (%s).",
+                   qPrintable(className), qPrintable(signature), qPrintable(rejectReason));
+        }
         return nullptr;
+    }
 
     if (functionItem->isFriend())
         return nullptr;

@@ -388,7 +388,8 @@ int main(int argc, char *argv[])
     // needed by qxmlpatterns
     QCoreApplication app(argc, argv);
     ReportHandler::install();
-    qCDebug(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(QLatin1Char(' '));
+    if (ReportHandler::isDebug(ReportHandler::SparseDebug))
+        qCInfo(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(QLatin1Char(' '));
 
     // Store command arguments in a map
     CommandArgumentMap args = getCommandLineArgs();
@@ -616,8 +617,11 @@ int main(int argc, char *argv[])
     if (!extractor.classCount())
         qCWarning(lcShiboken) << "No C++ classes found!";
 
-    qCDebug(lcShiboken) << extractor << '\n'
-        << *TypeDatabase::instance();
+    if (ReportHandler::isDebug(ReportHandler::FullDebug)
+        || qEnvironmentVariableIsSet("SHIBOKEN_DUMP_CODEMODEL")) {
+        qCInfo(lcShiboken) << "API Extractor:\n" << extractor
+            << "\n\nType datase:\n" << *TypeDatabase::instance();
+    }
 
     for (const GeneratorPtr &g : qAsConst(generators)) {
         g->setOutputDirectory(outputDirectory);

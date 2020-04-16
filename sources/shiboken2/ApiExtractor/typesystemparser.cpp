@@ -2758,8 +2758,8 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 m_currentDroppedEntry = element;
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
-                      qCDebug(lcShiboken)
-                          << QStringLiteral("Type system entry '%1' was intentionally dropped from generation.").arg(identifier);
+                    qCInfo(lcShiboken, "Type system entry '%s' was intentionally dropped from generation.",
+                           qPrintable(identifier));
                 }
                 return true;
             }

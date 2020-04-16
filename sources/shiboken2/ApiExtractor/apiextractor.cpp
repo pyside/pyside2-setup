@@ -207,8 +207,11 @@ bool ApiExtractor::run()
     for (const HeaderPath &headerPath : qAsConst(m_includePaths))
         arguments.append(HeaderPath::includeOption(headerPath));
     arguments.append(QFile::encodeName(preprocessedCppFileName));
-    qCDebug(lcShiboken) << __FUNCTION__ << arguments
-        << "level=" << int(m_languageLevel);
+    if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
+        qCInfo(lcShiboken).noquote().nospace()
+            << "clang language level: " << int(m_languageLevel)
+            << "\nclang arguments: " << arguments;
+    }
     const bool result = m_builder->build(arguments, m_languageLevel);
     if (!result)
         autoRemove = false;
@@ -250,6 +253,8 @@ QDebug operator<<(QDebug d, const ApiExtractor &ae)
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
+    if (ReportHandler::debugLevel() >= ReportHandler::FullDebug)
+        d.setVerbosity(3); // Trigger verbose output of AbstractMetaClass
     d << "ApiExtractor(typeSystem=\"" << ae.typeSystem() << "\", cppFileName=\""
       << ae.cppFileName() << ", ";
     ae.m_builder->formatDebug(d);
