@@ -39,7 +39,7 @@
 
 major_version = "5"
 minor_version = "14"
-patch_version = "2"
+patch_version = "2.1"
 
 # For example: "a", "b", "rc"
 # (which means "alpha", "beta", "release candidate").
