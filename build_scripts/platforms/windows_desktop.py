@@ -197,7 +197,7 @@ def prepare_packages_win32(self, vars):
         copydir(
             "{build_dir}/pyside2/{st_package_name}",
             "{st_build_dir}/{st_package_name}",
-            filter=["*.pyi"],
+            filter=["*.pyi", "py.typed"],
             vars=vars)
 
         copydir(
