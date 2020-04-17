@@ -1284,41 +1284,6 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     metaFunction->replaceType(metaType);
 }
 
-static bool _compareAbstractMetaTypes(const AbstractMetaType *type,
-                                      const AbstractMetaType *other,
-                                      AbstractMetaType::ComparisonFlags flags = {})
-{
-    return (type != nullptr) == (other != nullptr)
-        && (type == nullptr || type->compare(*other, flags));
-}
-
-static bool _compareAbstractMetaFunctions(const AbstractMetaFunction *func,
-                                          const AbstractMetaFunction *other,
-                                          AbstractMetaType::ComparisonFlags argumentFlags = {})
-{
-    if (!func && !other)
-        return true;
-    if (!func || !other)
-        return false;
-    if (func->name() != other->name())
-        return false;
-    const int argumentsCount = func->arguments().count();
-    if (argumentsCount != other->arguments().count()
-        || func->isConstant() != other->isConstant()
-        || func->isStatic() != other->isStatic()
-        || !_compareAbstractMetaTypes(func->type(), other->type())) {
-        return false;
-    }
-    for (int i = 0; i < argumentsCount; ++i) {
-        if (!_compareAbstractMetaTypes(func->arguments().at(i)->type(),
-                                       other->arguments().at(i)->type(),
-                                       argumentFlags)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
                                                                        AbstractMetaClass::Attributes *constructorAttributes,
                                                                        AbstractMetaClass *currentClass)
