@@ -33,6 +33,7 @@
 #include <iostream>
 #include <apiextractor.h>
 #include <fileout.h>
+#include <reporthandler.h>
 #include <typedatabase.h>
 #include <messages.h>
 #include "generator.h"
@@ -487,14 +488,11 @@ int main(int argc, char *argv[])
     } else {
         ait = args.find(QLatin1String("debug-level"));
         if (ait != args.end()) {
-            const QString level = ait.value();
+            if (!ReportHandler::setDebugLevelFromArg(ait.value())) {
+                errorPrint(QLatin1String("Invalid debug level: ") + ait.value());
+                return EXIT_FAILURE;
+            }
             args.erase(ait);
-            if (level == QLatin1String("sparse"))
-                extractor.setDebugLevel(ReportHandler::SparseDebug);
-            else if (level == QLatin1String("medium"))
-                extractor.setDebugLevel(ReportHandler::MediumDebug);
-            else if (level == QLatin1String("full"))
-                extractor.setDebugLevel(ReportHandler::FullDebug);
         }
     }
     ait = args.find(QLatin1String("no-suppress-warnings"));

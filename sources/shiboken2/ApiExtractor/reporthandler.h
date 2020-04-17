@@ -45,6 +45,7 @@ public:
 
     static DebugLevel debugLevel();
     static void setDebugLevel(DebugLevel level);
+    static bool setDebugLevelFromArg(const QString &);
 
     static int warningCount();
 
