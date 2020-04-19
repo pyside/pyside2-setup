@@ -29,7 +29,6 @@
 #ifndef APIEXTRACTOR_H
 #define APIEXTRACTOR_H
 
-#include "reporthandler.h"
 #include "dependency.h"
 #include "abstractmetalang_typedefs.h"
 #include "apiextractormacros.h"
@@ -67,7 +66,6 @@ public:
     QString typeSystem() const { return m_typeSystemFileName; }
     void setCppFileName(const QString& cppFileName);
     QString cppFileName() const { return m_cppFileName; }
-    void setDebugLevel(ReportHandler::DebugLevel debugLevel);
     void setSkipDeprecated(bool value);
     void setSuppressWarnings(bool value);
     void setSilent(bool value);

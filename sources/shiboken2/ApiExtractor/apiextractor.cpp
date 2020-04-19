@@ -92,11 +92,6 @@ void ApiExtractor::setTypeSystem(const QString& typeSystemFileName)
     m_typeSystemFileName = typeSystemFileName;
 }
 
-void ApiExtractor::setDebugLevel(ReportHandler::DebugLevel debugLevel)
-{
-    ReportHandler::setDebugLevel(debugLevel);
-}
-
 void ApiExtractor::setSkipDeprecated(bool value)
 {
     m_skipDeprecated = value;

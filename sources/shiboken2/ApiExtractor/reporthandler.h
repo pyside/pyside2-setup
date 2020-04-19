@@ -33,6 +33,7 @@
 #include <QString>
 
 Q_DECLARE_LOGGING_CATEGORY(lcShiboken)
+Q_DECLARE_LOGGING_CATEGORY(lcShibokenDoc)
 
 class ReportHandler
 {
@@ -44,6 +45,7 @@ public:
 
     static DebugLevel debugLevel();
     static void setDebugLevel(DebugLevel level);
+    static bool setDebugLevelFromArg(const QString &);
 
     static int warningCount();
 

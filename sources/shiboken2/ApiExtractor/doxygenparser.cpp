@@ -80,7 +80,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     if (doxyFilePath.isEmpty()) {
-        qCWarning(lcShiboken).noquote().nospace()
+        qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find doxygen file for class " << metaClass->name() << ", tried: "
             << QDir::toNativeSeparators(documentationDataDirectory())
             <<  "/{struct|class|namespace}"<< doxyFileSuffix;
@@ -90,7 +90,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(doxyFilePath, &errorMessage);
     if (xquery.isNull()) {
-        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
 
@@ -99,7 +99,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     QString classDoc = getDocumentation(xquery, classQuery,
                                         metaClass->typeEntry()->docModifications());
     if (classDoc.isEmpty())
-        qCWarning(lcShiboken(), "%s", qPrintable(msgCannotFindDocumentation(doxyFilePath, "class", metaClass->name(), classQuery)));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(doxyFilePath, "class", metaClass->name(), classQuery)));
     metaClass->setDocumentation(classDoc);
 
     //Functions Documentation
@@ -146,7 +146,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
         }
         QString doc = getDocumentation(xquery, query, DocModificationList());
         if (doc.isEmpty()) {
-            qCWarning(lcShiboken(), "%s",
+            qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, func, query)));
         }
         func->setDocumentation(doc);
@@ -163,7 +163,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                         + field->name() + QLatin1String("\"]/../detaileddescription");
         QString doc = getDocumentation(xquery, query, DocModificationList());
         if (doc.isEmpty()) {
-            qCWarning(lcShiboken(), "%s",
+            qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, field, query)));
         }
         field->setDocumentation(doc);
@@ -176,7 +176,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             + meta_enum->name() + QLatin1String("\"]/..");
         QString doc = getDocumentation(xquery, query, DocModificationList());
         if (doc.isEmpty()) {
-            qCWarning(lcShiboken(), "%s",
+            qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, meta_enum, query)));
         }
         meta_enum->setDocumentation(doc);
@@ -189,7 +189,7 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
     QString sourceFile = documentationDataDirectory() + QLatin1String("/indexpage.xml");
 
     if (!QFile::exists(sourceFile)) {
-        qCWarning(lcShiboken).noquote().nospace()
+        qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find doxygen XML file for module " << name << ", tried: "
             << QDir::toNativeSeparators(sourceFile);
         return Documentation();
@@ -198,7 +198,7 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(sourceFile, &errorMessage);
     if (xquery.isNull()) {
-        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return {};
     }
 

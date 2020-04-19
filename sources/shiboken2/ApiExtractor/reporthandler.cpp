@@ -58,6 +58,7 @@ static int m_step_warning = 0;
 static QElapsedTimer m_timer;
 
 Q_LOGGING_CATEGORY(lcShiboken, "qt.shiboken")
+Q_LOGGING_CATEGORY(lcShibokenDoc, "qt.shiboken.doc")
 
 void ReportHandler::install()
 {
@@ -78,6 +79,20 @@ ReportHandler::DebugLevel ReportHandler::debugLevel()
 void ReportHandler::setDebugLevel(ReportHandler::DebugLevel level)
 {
     m_debugLevel = level;
+}
+
+bool ReportHandler::setDebugLevelFromArg(const QString &level)
+{
+    bool result = true;
+    if (level == QLatin1String("sparse"))
+        ReportHandler::setDebugLevel(ReportHandler::SparseDebug);
+    else if (level == QLatin1String("medium"))
+        ReportHandler::setDebugLevel(ReportHandler::MediumDebug);
+    else if (level == QLatin1String("full"))
+        ReportHandler::setDebugLevel(ReportHandler::FullDebug);
+    else
+        result = false;
+    return result;
 }
 
 int ReportHandler::suppressedCount()

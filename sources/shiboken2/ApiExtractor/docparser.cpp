@@ -65,7 +65,7 @@ QString DocParser::execXQuery(const XQueryPtr &xquery, const QString& query) con
     QString errorMessage;
     const QString result = xquery->evaluate(query, &errorMessage);
     if (!errorMessage.isEmpty())
-        qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
     return result;
 }
 
@@ -138,12 +138,12 @@ R"(<xsl:template match="/">
     QString errorMessage;
     const QString result = xsl_transform(xml, xsl, &errorMessage);
     if (!errorMessage.isEmpty())
-        qCWarning(lcShiboken, "%s",
+        qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgXpathDocModificationError(mods, errorMessage)));
     if (result == xml) {
         const QString message = QLatin1String("Query did not result in any modifications to \"")
             + xml + QLatin1Char('"');
-        qCWarning(lcShiboken, "%s",
+        qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgXpathDocModificationError(mods, message)));
     }
     return result;

@@ -305,10 +305,6 @@ AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() con
     if (m_typeEntry->isValue())
         return indirections() == 1 ? ValuePointerPattern : ValuePattern;
 
-    if (ReportHandler::isDebug(ReportHandler::FullDebug)) {
-        qCDebug(lcShiboken)
-            << QStringLiteral("native pointer pattern for '%1'").arg(cppSignature());
-    }
     return NativePointerPattern;
 }
 

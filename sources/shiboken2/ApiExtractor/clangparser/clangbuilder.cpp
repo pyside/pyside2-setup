@@ -222,7 +222,8 @@ public:
     FunctionModelItem m_currentFunction;
     ArgumentModelItem m_currentArgument;
     VariableModelItem m_currentField;
-    QByteArrayList m_systemIncludes;
+    QByteArrayList m_systemIncludes; // files, like "memory"
+    QByteArrayList m_systemIncludePaths; // paths, like "/usr/include/Qt/"
 
     int m_anonymousEnumCount = 0;
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
@@ -696,6 +697,11 @@ static bool cStringStartsWith(const char *str, const char (&prefix)[N])
 }
 #endif
 
+static bool cStringStartsWith(const char *str, const QByteArray &prefix)
+{
+    return std::strncmp(prefix.constData(), str, int(prefix.size())) == 0;
+}
+
 bool BuilderPrivate::visitHeader(const char *cFileName) const
 {
     // Resolve OpenGL typedefs although the header is considered a system header.
@@ -728,6 +734,10 @@ bool BuilderPrivate::visitHeader(const char *cFileName) const
                 return true;
         }
     }
+    for (const auto &systemIncludePath : m_systemIncludePaths) {
+        if (cStringStartsWith(cFileName, systemIncludePath))
+            return true;
+    }
     return false;
 }
 
@@ -752,7 +762,12 @@ bool Builder::visitLocation(const CXSourceLocation &location) const
 
 void Builder::setSystemIncludes(const QByteArrayList &systemIncludes)
 {
-    d->m_systemIncludes = systemIncludes;
+    for (const auto &i : systemIncludes) {
+        if (i.endsWith('/'))
+            d->m_systemIncludePaths.append(i);
+        else
+            d->m_systemIncludes.append(i);
+    }
 }
 
 FileModelItem Builder::dom() const
