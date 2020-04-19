@@ -94,5 +94,6 @@
     linux
     darwin
 # Open GL functions failures on macOS (2/2020)
-[registry::existence_test]
-    darwin
+##[registry::existence_test]
+##    darwin
+## Enable again after recreating!
