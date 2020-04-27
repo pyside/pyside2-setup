@@ -525,10 +525,11 @@ extern LIBSHIBOKEN_API PyTypeObject *PepMethodDescr_TypePtr;
  *
  * Newly introduced convenience functions
  *
+ * This is not defined if Py_LIMITED_API is defined.
  */
-#if PY_VERSION_HEX < 0x03070000
+#if PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
 LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
-#endif // PY_VERSION_HEX < 0x03070000
+#endif // PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
 
 /*****************************************************************************
  *

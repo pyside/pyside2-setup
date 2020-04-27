@@ -641,7 +641,7 @@ PepType_GetNameStr(PyTypeObject *type)
  * Newly introduced convenience functions
  *
  */
-#if PY_VERSION_HEX < 0x03070000
+#if PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
 
 PyObject *
 PyImport_GetModule(PyObject *name)
@@ -667,7 +667,7 @@ PyImport_GetModule(PyObject *name)
     return m;
 }
 
-#endif // PY_VERSION_HEX < 0x03070000
+#endif // PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
 /*****************************************************************************
  *
  * Extra support for name mangling
