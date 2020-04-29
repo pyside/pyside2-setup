@@ -2311,14 +2311,13 @@
 
   <!-- Qt5 addition -->
   <object-type name="QBasicMutex">
-    <modify-function signature="lock()"/>
-    <modify-function signature="tryLock()"/>
+    <modify-function signature="lock()" allow-thread="yes"/>
+    <modify-function signature="tryLock()" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QMutex">
     <enum-type name="RecursionMode"/>
     <modify-function signature="lock()" allow-thread="yes"/>
-    <modify-function signature="unlock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QRecursiveMutex" since="5.14"/>
