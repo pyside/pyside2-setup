@@ -330,6 +330,9 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
     if (metaClass->generateExceptionHandling())
         s << "#include <exception>\n";
 
+    if (wrapperDiagnostics())
+        s << "#include <helper.h>\n#include <iostream>\n";
+
     s << "\n// module include\n" << "#include \"" << getModuleHeaderFileName() << "\"\n";
 
     QString headerfile = fileNameForContext(classContext);
@@ -708,6 +711,8 @@ void CppGenerator::writeConstructorNative(QTextStream &s, const AbstractMetaFunc
     s << " : ";
     writeFunctionCall(s, func);
     s << "\n{\n";
+    if (wrapperDiagnostics())
+        s << INDENT << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
     const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
     s << INDENT << "resetPyMethodCache();\n";
     writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
@@ -720,6 +725,8 @@ void CppGenerator::writeDestructorNative(QTextStream &s, const AbstractMetaClass
 {
     Indentation indentation(INDENT);
     s << wrapperName(metaClass) << "::~" << wrapperName(metaClass) << "()\n{\n";
+    if (wrapperDiagnostics())
+        s << INDENT << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
     // kill pyobject
     s << INDENT << "SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(this);\n";
     s << INDENT << "Shiboken::Object::destroy(wrapper, this);\n";
@@ -848,6 +855,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
     // PYSIDE-803: Build a boolean cache for unused overrides.
     bool multi_line = retType == nullptr;  // set to true when using instrumentation
+    if (wrapperDiagnostics()) {
+        s << INDENT << "std::cerr << ";
+#ifndef Q_CC_MSVC // g++ outputs __FUNCTION__ unqualified
+        s << '"' << prefix << R"(" << )";
+#endif
+        s  << R"(__FUNCTION__ << ' ' << this << " m_PyMethodCache[" << )"
+           << cacheIndex << R"( << "]=" << m_PyMethodCache[)" << cacheIndex
+           << R"(] << '\n';)" << '\n';
+    }
     s << INDENT << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n");
     {
         Indentation indentation(INDENT);
@@ -5254,10 +5270,14 @@ QString CppGenerator::writeSmartPointerGetterCast()
            + QLatin1String(SMART_POINTER_GETTER) + QLatin1Char(')');
 }
 
-void CppGenerator::writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     s << "static int " << ShibokenGenerator::cpythonSetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name, PyObject *value)\n{\n";
+    if (wrapperDiagnostics()) {
+        s << INDENT << R"(std::cerr << __FUNCTION__ << ' ' << Shiboken::debugPyObject(name)
+        << ' ' << Shiboken::debugPyObject(value) << '\n';)" << '\n';
+    }
 }
 
 inline void CppGenerator::writeSetattroDefaultReturn(QTextStream &s) const
