@@ -142,7 +142,6 @@ class Formatter(Writer):
         self.print("    import typing")
         self.print("except ImportError:")
         self.print("    from PySide2.support.signature import typing")
-        self.print("from PySide2.support.signature import typing")
         self.print("from PySide2.support.signature.mapping import (")
         self.print("    Virtual, Missing, Invalid, Default, Instance)")
         self.print()

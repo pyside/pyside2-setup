@@ -73,45 +73,6 @@ NoneType = type(None)
 
 _S = TypeVar("_S")
 
-# Building our own Char type, which is much nicer than
-# Char = typing.Union[str, int]     # how do I model the limitation to 1 char?
-
-class _CharMeta(type):
-    def __repr__(self):
-        return '%s.%s' % (self.__module__, self.__name__)
-
-
-class Char(with_metaclass(_CharMeta)):
-    """
-    From http://doc.qt.io/qt-5/qchar.html :
-
-    In Qt, Unicode characters are 16-bit entities without any markup or
-    structure. This class represents such an entity. It is lightweight,
-    so it can be used everywhere. Most compilers treat it like an
-    unsigned short.
-
-    Here, we provide a simple implementation just to avoid long aliases.
-    """
-    __module__ = "typing"
-
-    def __init__(self, code):
-        if isinstance(code, int):
-            self.code = code & 0xffff
-        else:
-            self.code = ord(code)
-
-    def __add__(self, other):
-        return chr(self.code) + other
-
-    def __radd__(self, other):
-        return other + chr(self.code)
-
-    def __repr__(self):
-        return "typing.Char({})".format(self.code)
-
-typing.Char = Char
-
-
 MultiMap = typing.DefaultDict[str, typing.List[str]]
 
 # ulong_max is only 32 bit on windows.
@@ -266,7 +227,7 @@ namespace = globals()  # our module's __dict__
 type_map.update({
     "...": ellipsis,
     "bool": bool,
-    "char": Char,
+    "char": int,
     "char*": str,
     "char*const": str,
     "double": float,
@@ -278,7 +239,7 @@ type_map.update({
     "PyObject": object,
     "PySequence": typing.Iterable,  # important for numpy
     "PyTypeObject": type,
-    "QChar": Char,
+    "QChar": str,
     "QHash": typing.Dict,
     "qint16": int,
     "qint32": int,
@@ -305,7 +266,7 @@ type_map.update({
     "QVector": typing.List,
     "real": float,
     "short": int,
-    "signed char": Char,
+    "signed char": int,
     "signed long": int,
     "std.list": typing.List,
     "std.map": typing.Dict,
@@ -314,12 +275,12 @@ type_map.update({
     "str": str,
     "true": True,
     "Tuple": typing.Tuple,
-    "uchar": Char,
+    "uchar": int,
     "uchar*": str,
     "uint": int,
     "ulong": int,
     "ULONG_MAX": ulong_max,
-    "unsigned char": Char, # 5.9
+    "unsigned char": int, # 5.9
     "unsigned char*": str,
     "unsigned int": int,
     "unsigned long int": int, # 5.6, RHEL 6.6
@@ -405,7 +366,7 @@ def init_minimal():
 def init_sample():
     import datetime
     type_map.update({
-        "char": Char,
+        "char": int,
         "char**": typing.List[str],
         "Complex": complex,
         "double": float,
@@ -418,7 +379,7 @@ def init_sample():
         "PStr": str,
         "PyDate": datetime.date,
         "sample.bool": bool,
-        "sample.char": Char,
+        "sample.char": int,
         "sample.double": float,
         "sample.int": int,
         "sample.ObjectType": object,
@@ -427,7 +388,7 @@ def init_sample():
         "sample.Photon.TemplateBase[Photon.IdentityType]": sample.Photon.ValueIdentity,
         "sample.Point": Point,
         "sample.PStr": str,
-        "sample.unsigned char": Char,
+        "sample.unsigned char": int,
         "std.size_t": int,
         "std.string": str,
         "ZeroIn": 0,
