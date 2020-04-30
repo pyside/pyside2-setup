@@ -2065,6 +2065,16 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     if ((query & GenerateExceptionHandling) && !f->generateExceptionHandling())
         return false;
 
+    if (query.testFlag(GetAttroFunction)
+        && f->functionType() != AbstractMetaFunction::GetAttroFunction) {
+        return false;
+    }
+
+    if (query.testFlag(SetAttroFunction)
+        && f->functionType() != AbstractMetaFunction::SetAttroFunction) {
+        return false;
+    }
+
     return true;
 }
 

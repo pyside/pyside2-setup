@@ -132,9 +132,17 @@ public:
     TestEnum enumValue() const;
     TestEnum defaultEnumValue() const;
 
+    bool wasGetAttroCalled() const;
+    void notifyGetAttroCalled();
+
+    bool wasSetAttroCalled() const;
+    void notifySetAttroCalled();
+
 private:
     ObjectType* m_object;
     TestEnum m_enumValue = TestEnumValue1;
+    bool m_getAttroCalled = false;
+    bool m_setAttroCalled = false;
 };
 
 class LIBSAMPLE_API AbstractModifications : public Modifications

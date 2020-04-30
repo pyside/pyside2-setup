@@ -763,7 +763,9 @@ public:
         SignalFunction,
         EmptyFunction,
         SlotFunction,
-        GlobalScopeFunction
+        GlobalScopeFunction,
+        GetAttroFunction,
+        SetAttroFunction
     };
     Q_ENUM(FunctionType)
 
@@ -1271,7 +1273,9 @@ public:
         VirtualInTargetLangFunctions = 0x0080000, // Only functions which are virtual in TargetLang
         NotRemovedFromTargetLang     = 0x0400000, // Only functions that have not been removed from TargetLang
         OperatorOverloads            = 0x2000000, // Only functions that are operator overloads
-        GenerateExceptionHandling    = 0x4000000
+        GenerateExceptionHandling    = 0x4000000,
+        GetAttroFunction             = 0x8000000,
+        SetAttroFunction            = 0x10000000
     };
     Q_DECLARE_FLAGS(FunctionQueryOptions, FunctionQueryOption)
     Q_FLAG(FunctionQueryOption)

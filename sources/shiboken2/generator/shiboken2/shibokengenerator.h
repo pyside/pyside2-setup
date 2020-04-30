@@ -69,10 +69,12 @@ public:
         None                   = 0x0,
         GetattroOverloads      = 0x01,
         GetattroSmartPointer   = 0x02,
+        GetattroUser           = 0x04, // Injected code
         GetattroMask           = 0x0F,
         SetattroQObject        = 0x10,
         SetattroSmartPointer   = 0x20,
         SetattroMethodOverride = 0x40,
+        SetattroUser           = 0x80, // Injected code
         SetattroMask           = 0xF0,
     };
     Q_DECLARE_FLAGS(AttroCheck, AttroCheckFlag);

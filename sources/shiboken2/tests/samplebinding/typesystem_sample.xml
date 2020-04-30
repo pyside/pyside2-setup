@@ -1293,6 +1293,16 @@
             <replace-default-expression with="cppSelf->defaultEnumValue()"/>
           </modify-argument>
         </modify-function>
+        <add-function signature="__getattro__" return-type="PyObject *">
+          <inject-code class="target" position="beginning">
+          cppSelf->notifyGetAttroCalled();
+          </inject-code>
+        </add-function>
+        <add-function signature="__setattro__" return-type="int">
+          <inject-code class="target" position="beginning">
+          cppSelf->notifySetAttroCalled();
+          </inject-code>
+        </add-function>
     </object-type>
 
     <object-type name="AbstractModifications">

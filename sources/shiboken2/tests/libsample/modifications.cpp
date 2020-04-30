@@ -165,3 +165,22 @@ Modifications::TestEnum Modifications::defaultEnumValue() const
     return TestEnumValue2;
 }
 
+bool Modifications::wasGetAttroCalled() const
+{
+    return m_getAttroCalled;
+}
+
+void Modifications::notifyGetAttroCalled()
+{
+    m_getAttroCalled = true;
+}
+
+bool Modifications::wasSetAttroCalled() const
+{
+    return m_setAttroCalled;
+}
+
+void Modifications::notifySetAttroCalled()
+{
+    m_setAttroCalled = true;
+}

@@ -5308,6 +5308,22 @@ void CppGenerator::writeSetattroFunction(QTextStream &s, AttroCheck attroCheck,
         Indentation indent(INDENT);
         s << INDENT << "return PySide::Property::setValue(reinterpret_cast<PySideProperty *>(pp.object()), self, value);\n";
     }
+
+    if (attroCheck.testFlag(AttroCheckFlag::SetattroUser)) {
+        auto func = AbstractMetaClass::queryFirstFunction(metaClass->functions(),
+                                                          AbstractMetaClass::SetAttroFunction);
+        Q_ASSERT(func);
+        s << INDENT << "{\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "auto " << CPP_SELF_VAR << " = "
+                << cpythonWrapperCPtr(metaClass, QLatin1String("self")) << ";\n";
+            writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
+                           TypeSystem::TargetLangCode, metaClass);
+        }
+        s << INDENT << "}\n";
+    }
+
     writeSetattroDefaultReturn(s);
 }
 
@@ -5410,6 +5426,21 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, AttroCheck attroCheck,
             Indentation indent(INDENT);
             s << INDENT << "return PyCFunction_NewEx(&non_static_" << defName << ", self, 0);\n";
         }
+    }
+
+    if (attroCheck.testFlag(AttroCheckFlag::GetattroUser)) {
+        auto func = AbstractMetaClass::queryFirstFunction(metaClass->functions(),
+                                                          AbstractMetaClass::GetAttroFunction);
+        Q_ASSERT(func);
+        s << INDENT << "{\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "auto " << CPP_SELF_VAR << " = "
+                << cpythonWrapperCPtr(metaClass, QLatin1String("self")) << ";\n";
+            writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
+                           TypeSystem::TargetLangCode, metaClass);
+        }
+        s << INDENT << "}\n";
     }
 
     s << INDENT << "return " << getattrFunc << ";\n}\n\n";
