@@ -122,6 +122,11 @@ def seterror_argument(args, func_name):
     # We don't raise the error here, to avoid the loader in the traceback.
     return TypeError, msg
 
+def check_string_type(s):
+    if sys.version_info[0] == 3:
+        return isinstance(s, str)
+    else:
+        return isinstance(s, (str, unicode))
 
 def make_helptext(func):
     existing_doc = func.__doc__
@@ -135,7 +140,7 @@ def make_helptext(func):
     except AttribureError:
         func_name = func.__func__.__name__
     sigtext = "\n".join(func_name + str(sig) for sig in sigs)
-    msg = sigtext + "\n\n" + existing_doc if existing_doc else sigtext
+    msg = sigtext + "\n\n" + existing_doc if check_string_type(existing_doc) else sigtext
     return msg
 
 # end of file

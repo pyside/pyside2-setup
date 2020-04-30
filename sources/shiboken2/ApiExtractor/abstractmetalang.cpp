@@ -816,8 +816,8 @@ bool AbstractMetaFunction::allowThread() const
         result = false;
         break;
     }
-    if (!result)
-        qCDebug(lcShiboken).noquote() << msgDisallowThread(this);
+    if (!result && ReportHandler::isDebug(ReportHandler::MediumDebug))
+        qCInfo(lcShiboken).noquote() << msgDisallowThread(this);
     return result;
 }
 

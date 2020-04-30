@@ -227,6 +227,8 @@ protected:
     QString fullPythonClassName(const AbstractMetaClass *metaClass);
     QString fullPythonFunctionName(const AbstractMetaFunction *func);
 
+    bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
+
     static QString protectedEnumSurrogateName(const AbstractMetaEnum *metaEnum);
     static QString protectedFieldGetterName(const AbstractMetaField *field);
     static QString protectedFieldSetterName(const AbstractMetaField *field);
@@ -548,6 +550,7 @@ private:
     bool m_verboseErrorMessagesDisabled = false;
     bool m_useIsNullAsNbNonZero = false;
     bool m_avoidProtectedHack = false;
+    bool m_wrapperDiagnostics = false;
 
     using AbstractMetaTypeCache = QHash<QString, AbstractMetaType *>;
     AbstractMetaTypeCache m_metaTypeFromStringCache;

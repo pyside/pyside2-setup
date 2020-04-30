@@ -39,6 +39,8 @@
 
 #include "sbkenum.h"
 #include "sbkstring.h"
+#include "sbkstaticstrings.h"
+#include "sbkstaticstrings_p.h"
 #include "sbkconverter.h"
 #include "basewrapper.h"
 #include "sbkdbg.h"
@@ -369,7 +371,7 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
 {
     PyObject *key, *value;
     Py_ssize_t pos = 0;
-    PyObject *values = PyDict_GetItemString(enumType->tp_dict, const_cast<char *>("values"));
+    PyObject *values = PyDict_GetItem(enumType->tp_dict, Shiboken::PyName::values());
 
     while (PyDict_Next(values, &pos, &key, &value)) {
         auto *obj = reinterpret_cast<SbkEnumObject *>(value);
@@ -386,19 +388,25 @@ static PyTypeObject *createEnum(const char *fullName, const char *cppName,
                                 PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = newTypeWithName(fullName, cppName, flagsType);
-    if (PyType_Ready(enumType) < 0)
+    if (PyType_Ready(enumType) < 0) {
+        Py_XDECREF(enumType);
         return nullptr;
+    }
     return enumType;
 }
 
 PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, name, flagsType);
-    if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0)
+    if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0) {
+        Py_DECREF(enumType);
         return nullptr;
+    }
     if (flagsType && PyModule_AddObject(module, PepType_GetNameStr(flagsType),
-            reinterpret_cast<PyObject *>(flagsType)) < 0)
+            reinterpret_cast<PyObject *>(flagsType)) < 0) {
+        Py_DECREF(enumType);
         return nullptr;
+    }
     return enumType;
 }
 
@@ -406,51 +414,48 @@ PyTypeObject *createScopedEnum(SbkObjectType *scope, const char *name, const cha
 {
     PyTypeObject *enumType = createEnum(fullName, cppName, name, flagsType);
     if (enumType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, name,
-            reinterpret_cast<PyObject *>(enumType)) < 0)
+            reinterpret_cast<PyObject *>(enumType)) < 0) {
+        Py_DECREF(enumType);
         return nullptr;
+    }
     if (flagsType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict,
             PepType_GetNameStr(flagsType),
-            reinterpret_cast<PyObject *>(flagsType)) < 0)
+            reinterpret_cast<PyObject *>(flagsType)) < 0) {
+        Py_DECREF(enumType);
         return nullptr;
+    }
     return enumType;
 }
 
 static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName, long itemValue)
 {
     PyObject *enumItem = newItem(enumType, itemValue, itemName);
-    if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0)
+    if (PyDict_SetItemString(enumType->tp_dict, itemName, enumItem) < 0) {
+        Py_DECREF(enumItem);
         return nullptr;
-    Py_DECREF(enumItem);
+    }
     return enumItem;
 }
 
 bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module, const char *itemName, long itemValue)
 {
     PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
-    if (enumItem) {
-        if (PyModule_AddObject(module, itemName, enumItem) < 0)
-            return false;
-        // @TODO This Py_DECREF causes crashes on exit with a debug Python interpreter, essentially
-        // causing a use-after-free in the GC. This is now commented out to cause a memory leak
-        // instead of a crash. Proper memory management of Enum types and items should be
-        // implemented. See PYSIDE-488. This will require proper allocation and deallocation of
-        // the underlying Enum PyHeapType, which is currently just deallocated at application exit.
-        // Py_DECREF(enumItem);
-        return true;
-    }
-    return false;
+    if (!enumItem)
+        return false;
+    int ok = PyModule_AddObject(module, itemName, enumItem);
+    Py_DECREF(enumItem);
+    return ok >= 0;
 }
 
 bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
                           const char *itemName, long itemValue)
 {
-    if (PyObject *enumItem = createEnumItem(enumType, itemName, itemValue)) {
-        if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, itemName, enumItem) < 0)
-            return false;
-        Py_DECREF(enumItem);
-        return true;
-    }
-    return false;
+    PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
+    if (!enumItem)
+        return false;
+    int ok = PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, itemName, enumItem);
+    Py_DECREF(enumItem);
+    return ok >= 0;
 }
 
 bool createScopedEnumItem(PyTypeObject *enumType, SbkObjectType *scope, const char *itemName, long itemValue)
@@ -480,11 +485,11 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
     enumObj->ob_value = itemValue;
 
     if (newValue) {
-        PyObject *values = PyDict_GetItemString(enumType->tp_dict, const_cast<char *>("values"));
+        PyObject *values = PyDict_GetItem(enumType->tp_dict, Shiboken::PyName::values());
         if (!values) {
             values = PyDict_New();
-            PyDict_SetItemString(enumType->tp_dict, const_cast<char *>("values"), values);
-            Py_DECREF(values); // ^ values still alive, because setitemstring incref it
+            PyDict_SetItem(enumType->tp_dict, Shiboken::PyName::values(), values);
+            Py_DECREF(values); // ^ values still alive, because setitem increfs it
         }
         PyDict_SetItemString(values, itemName, reinterpret_cast<PyObject *>(enumObj));
     }

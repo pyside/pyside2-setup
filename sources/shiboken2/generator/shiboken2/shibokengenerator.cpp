@@ -47,6 +47,7 @@ static const char RETURN_VALUE_HEURISTIC[] = "enable-return-value-heuristic";
 static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
 static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-messages";
 static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
+static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
 
 const char *CPP_ARG = "cppArg";
 const char *CPP_ARG_REMOVED = "removed_cppArg";
@@ -2503,7 +2504,9 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
                                    "(USE WITH CAUTION!)"))
         << qMakePair(QLatin1String(USE_ISNULL_AS_NB_NONZERO),
                      QLatin1String("If a class have an isNull() const method, it will be used to compute\n"
-                                   "the value of boolean casts"));
+                                   "the value of boolean casts"))
+        << qMakePair(QLatin1String(WRAPPER_DIAGNOSTICS),
+                     QLatin1String("Generate diagnostic code around wrappers"));
 }
 
 bool ShibokenGenerator::handleOption(const QString &key, const QString & /* value */)
@@ -2520,6 +2523,8 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString & /* valu
         return (m_useIsNullAsNbNonZero = true);
     if (key == QLatin1String(AVOID_PROTECTED_HACK))
         return (m_avoidProtectedHack = true);
+    if (key == QLatin1String(WRAPPER_DIAGNOSTICS))
+        return (m_wrapperDiagnostics = true);
     return false;
 }
 

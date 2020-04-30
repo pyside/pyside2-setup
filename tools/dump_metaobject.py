@@ -43,6 +43,10 @@ from PySide2.QtCore import (QMetaClassInfo, QMetaEnum, QMetaMethod,
                             QMetaProperty, QMetaObject, QObject)
 
 
+def _qbytearray_to_string(b):
+    return bytes(b.data()).decode('utf-8')
+
+
 def _dump_metaobject_helper(meta_obj, indent):
     print('{}class {}:'.format(indent, meta_obj.className()))
     indent += '    '
@@ -93,9 +97,9 @@ def _dump_metaobject_helper(meta_obj, indent):
                 desc += ', writable'
             if meta_property.isResettable:
                 desc += ', resettable'
-            if meta_property.hasNotifySignal() :
+            if meta_property.hasNotifySignal():
                 notify_name = meta_property.notifySignal().name()
-                desc += ', notify={}'.format(bytes(notify_name).decode('utf-8'))
+                desc += ', notify={}'.format(_qbytearray_to_string(notify_name))
             print('{}{:4d} {} {}{}'.format(indent, p, meta_property.typeName(),
                                            name, desc))
 
@@ -105,14 +109,32 @@ def _dump_metaobject_helper(meta_obj, indent):
         print('{}Methods:'.format(indent))
         for m in range(method_offset, method_count):
             method = meta_obj.method(m)
-            signature = bytes(method.methodSignature().data()).decode('utf-8')
+            signature = _qbytearray_to_string(method.methodSignature())
+            access = ''
+            if method.access() == QMetaMethod.Protected:
+                access += 'protected '
+            elif method.access() == QMetaMethod.Private:
+                access += 'private '
             type = method.methodType()
             typeString = ''
             if type == QMetaMethod.Signal:
                 typeString = ' (Signal)'
             elif type == QMetaMethod.Slot:
                 typeString = ' (Slot)'
-            print('{}{:4d} {}{}'.format(indent, m, signature, typeString))
+            elif type == QMetaMethod.Constructor:
+                typeString = ' (Ct)'
+            desc = '{}{:4d} {}{} {}{}'.format(indent, m, access,
+                                              method.typeName(), signature,
+                                              typeString)
+            parameter_names = method.parameterNames()
+            if parameter_names:
+                parameter_types = method.parameterTypes()
+                desc += ' Parameters:'
+                for p, bname in enumerate(parameter_names):
+                    name = _qbytearray_to_string(bname)
+                    type = _qbytearray_to_string(parameter_types[p])
+                    desc += ' {}: {}'.format(name if name else '<unnamed>', type)
+            print(desc)
 
 
 def dump_metaobject(meta_obj):

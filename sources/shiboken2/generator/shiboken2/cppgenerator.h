@@ -106,7 +106,7 @@ private:
 
     void writeTypeDiscoveryFunction(QTextStream &s, const AbstractMetaClass *metaClass);
 
-    static void writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
+    void writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass) const;
     void writeSetattroDefaultReturn(QTextStream &s) const;
     void writeSmartPointerSetattroFunction(QTextStream &s, GeneratorContext &context);
     void writeSetattroFunction(QTextStream &s, AttroCheck attroCheck, GeneratorContext &context);
