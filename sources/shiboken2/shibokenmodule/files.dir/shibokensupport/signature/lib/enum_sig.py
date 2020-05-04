@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -100,17 +100,19 @@ class ExactEnumerator(object):
             return ret
 
     def klass(self, class_name, klass):
+        ret = self.result_type()
+        if "<" in class_name:
+            # This is happening in QtQuick for some reason:
+            ## class QSharedPointer<QQuickItemGrabResult >:
+            # We simply skip over this class.
+            return ret
         bases_list = []
         for base in klass.__bases__:
             name = base.__name__
-            if name in ("object", "type"):
-                pass
-            else:
-                modname = base.__module__
-                name = modname + "." + base.__name__
+            if name not in ("object", "type"):
+                name = base.__module__ + "." + name
             bases_list.append(name)
         class_str = "{}({})".format(class_name, ", ".join(bases_list))
-        ret = self.result_type()
         # class_members = inspect.getmembers(klass)
         # gives us also the inherited things.
         class_members = sorted(list(klass.__dict__.items()))

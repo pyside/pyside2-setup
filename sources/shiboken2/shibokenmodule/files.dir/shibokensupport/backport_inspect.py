@@ -109,8 +109,13 @@ CO_NOFREE       = 0x0040
 ###############################################################################
 
 
+
+# PYSIDE-1286: We now use the added __qualname__ for classes.
+def _get_class_name(cls):
+    return getattr(cls, "__qualname__", cls.__name__)
+
 # This function was changed: 'builtins' and 'qualname' don't exist.
-# We use '__builtin__' and '__name__' instead.
+# We use '__builtin__' and '__(qual)?name__' instead.
 def formatannotation(annotation, base_module=None):
     if getattr(annotation, '__module__', None) == 'typing':
         # The replace must not be done on Python 2.7 because it
@@ -118,8 +123,8 @@ def formatannotation(annotation, base_module=None):
         return repr(annotation) ##.replace('typing.', '')
     if isinstance(annotation, type):
         if annotation.__module__ in ('__builtin__', base_module):
-            return annotation.__name__
-        return annotation.__module__+'.'+annotation.__name__
+            return _get_class_name(annotation)
+        return annotation.__module__ + '.' + _get_class_name(annotation)
     return repr(annotation)
 
 
@@ -393,7 +398,7 @@ class Parameter(object):
         return formatted
 
     def __repr__(self):
-        return '<{} "{}">'.format(self.__class__.__name__, self)
+        return '<{} "{}">'.format(_get_class_name(self.__class__), self)
 
     def __hash__(self):
         return hash((self.name, self.kind, self.annotation, self.default))
@@ -536,7 +541,7 @@ class BoundArguments(object):
         args = []
         for arg, value in self.arguments.items():
             args.append('{}={!r}'.format(arg, value))
-        return '<{} ({})>'.format(self.__class__.__name__, ', '.join(args))
+        return '<{} ({})>'.format(_get_class_name(self.__class__), ', '.join(args))
 
 
 class Signature(object):
@@ -842,7 +847,7 @@ class Signature(object):
         self._return_annotation = state['_return_annotation']
 
     def __repr__(self):
-        return '<{} {}>'.format(self.__class__.__name__, self)
+        return '<{} {}>'.format(_get_class_name(self.__class__), self)
 
     def __str__(self):
         result = []

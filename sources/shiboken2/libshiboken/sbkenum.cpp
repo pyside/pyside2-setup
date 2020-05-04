@@ -260,6 +260,23 @@ static PyGetSetDef SbkEnumGetSetList[] = {
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
+#if PY_VERSION_HEX < 0x03000000
+
+static PyObject *SbkEnumType_repr(PyObject *type)
+{
+    Shiboken::AutoDecRef mod(PyObject_GetAttr(type, Shiboken::PyMagicName::module()));
+    if (mod.isNull())
+        return nullptr;
+    Shiboken::AutoDecRef name(PyObject_GetAttr(type, Shiboken::PyMagicName::qualname()));
+    if (name.isNull())
+        return nullptr;
+    return PyString_FromFormat("<class '%s.%s'>",
+                               PyString_AS_STRING(mod.object()),
+                               PyString_AS_STRING(name.object()));
+}
+
+#endif // PY_VERSION_HEX < 0x03000000
+
 static void SbkEnumTypeDealloc(PyObject *pyObj);
 static PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
@@ -287,6 +304,9 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_alloc, (void *)PyType_GenericAlloc},
     {Py_tp_new, (void *)SbkEnumTypeTpNew},
     {Py_tp_free, (void *)PyObject_GC_Del},
+#if PY_VERSION_HEX < 0x03000000
+    {Py_tp_repr, (void *)SbkEnumType_repr},
+#endif
     {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
