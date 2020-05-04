@@ -361,6 +361,107 @@ PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwd
 
 } // extern "C"
 
+///////////////////////////////////////////////////////////////
+//
+// PYSIDE-15: Pickling Support for Qt Enum objects
+//            This works very well and fixes the issue.
+//
+extern "C" {
+
+static void init_enum();  // forward
+
+static PyObject *enum_unpickler = nullptr;
+
+// Pickling: reduce the Qt Enum object
+static PyObject *enum___reduce__(PyObject *obj)
+{
+    init_enum();
+    return Py_BuildValue("O(Ni)",
+                         enum_unpickler,
+                         Py_BuildValue("s", Py_TYPE(obj)->tp_name),
+                         PyInt_AS_LONG(obj));
+}
+
+} // extern "C"
+
+namespace Shiboken { namespace Enum {
+
+// Unpickling: rebuild the Qt Enum object
+PyObject *unpickleEnum(PyObject *enum_class_name, PyObject *value)
+{
+    Shiboken::AutoDecRef parts(PyObject_CallMethod(enum_class_name,
+        const_cast<char *>("split"), const_cast<char *>("s"), "."));
+    if (parts.isNull())
+        return nullptr;
+    PyObject *top_name = PyList_GetItem(parts, 0); // borrowed ref
+    if (top_name == nullptr)
+        return nullptr;
+    PyObject *module = PyImport_GetModule(top_name);
+    if (module == nullptr) {
+        PyErr_Format(PyExc_ImportError, "could not import module %.200s",
+            Shiboken::String::toCString(top_name));
+        return nullptr;
+    }
+    Shiboken::AutoDecRef cur_thing(module);
+    int len = PyList_Size(parts);
+    for (int idx = 1; idx < len; ++idx) {
+        PyObject *name = PyList_GetItem(parts, idx); // borrowed ref
+        PyObject *thing = PyObject_GetAttr(cur_thing, name);
+        if (thing == nullptr) {
+            PyErr_Format(PyExc_ImportError, "could not import Qt Enum type %.200s",
+                Shiboken::String::toCString(enum_class_name));
+            return nullptr;
+        }
+        cur_thing.reset(thing);
+    }
+    PyObject *klass = cur_thing;
+    return PyObject_CallFunctionObjArgs(klass, value, nullptr);
+}
+
+} // namespace Enum
+} // namespace Shiboken
+
+extern "C" {
+
+// Initialization
+static bool _init_enum()
+{
+    static PyObject *shiboken_name = Py_BuildValue("s", "shiboken2");
+    if (shiboken_name == nullptr)
+        return false;
+    Shiboken::AutoDecRef shibo(PyImport_GetModule(shiboken_name));
+    if (shibo.isNull())
+        return false;
+    Shiboken::AutoDecRef sub(PyObject_GetAttr(shibo, shiboken_name));
+    PyObject *mod = sub.object();
+    if (mod == nullptr) {
+        // We are in the build dir and already in shiboken.
+        PyErr_Clear();
+        mod = shibo.object();
+    }
+    enum_unpickler = PyObject_GetAttrString(mod, "_unpickle_enum");
+    if (enum_unpickler == nullptr)
+        return false;
+    return true;
+}
+
+static void init_enum()
+{
+    if (!(enum_unpickler || _init_enum()))
+        Py_FatalError("could not load enum helper functions");
+}
+
+static PyMethodDef SbkEnumObject_Methods[] = {
+    {const_cast<char *>("__reduce__"), reinterpret_cast<PyCFunction>(enum___reduce__),
+        METH_NOARGS, nullptr},
+    {nullptr, nullptr, 0, nullptr} // Sentinel
+};
+
+} // extern "C"
+
+//
+///////////////////////////////////////////////////////////////
+
 namespace Shiboken {
 
 class DeclaredEnumTypes
@@ -521,6 +622,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_tp_repr, (void *)SbkEnumObject_repr},
     {Py_tp_str, (void *)SbkEnumObject_repr},
     {Py_tp_getset, (void *)SbkEnumGetSetList},
+    {Py_tp_methods, (void *)SbkEnumObject_Methods},
     {Py_tp_new, (void *)SbkEnum_tp_new},
     {Py_nb_add, (void *)enum_add},
     {Py_nb_subtract, (void *)enum_subtract},

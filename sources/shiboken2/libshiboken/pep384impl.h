@@ -523,6 +523,15 @@ extern LIBSHIBOKEN_API PyTypeObject *PepMethodDescr_TypePtr;
 
 /*****************************************************************************
  *
+ * Newly introduced convenience functions
+ *
+ */
+#if PY_VERSION_HEX < 0x03070000
+LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
+#endif // PY_VERSION_HEX < 0x03070000
+
+/*****************************************************************************
+ *
  * Runtime support for Python 3.8 incompatibilities
  *
  */
