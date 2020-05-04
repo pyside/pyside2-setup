@@ -240,7 +240,7 @@ static PyType_Slot PropertyListType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PropertyListType_spec = {
-    "PySide2.QtQml.ListProperty",
+    "2:PySide2.QtQml.ListProperty",
     sizeof(PySideProperty),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -253,7 +253,7 @@ PyTypeObject *PropertyListTypeF(void)
     static PyTypeObject *type = nullptr;
     if (!type) {
         PyObject *bases = Py_BuildValue("(O)", PySidePropertyTypeF());
-        type = (PyTypeObject *)PyType_FromSpecWithBases(&PropertyListType_spec, bases);
+        type = (PyTypeObject *)SbkType_FromSpecWithBases(&PropertyListType_spec, bases);
         Py_XDECREF(bases);
     }
     return type;
@@ -454,7 +454,7 @@ static PyType_Slot QtQml_VolatileBoolType_slots[] = {
     {0, 0}
 };
 static PyType_Spec QtQml_VolatileBoolType_spec = {
-    "PySide2.QtQml.VolatileBool",
+    "2:PySide2.QtQml.VolatileBool",
     sizeof(QtQml_VolatileBoolObject),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -464,9 +464,8 @@ static PyType_Spec QtQml_VolatileBoolType_spec = {
 
 PyTypeObject *QtQml_VolatileBoolTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type)
-        type = (PyTypeObject *)PyType_FromSpec(&QtQml_VolatileBoolType_spec);
+    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
+        SbkType_FromSpec(&QtQml_VolatileBoolType_spec));
     return type;
 }
 

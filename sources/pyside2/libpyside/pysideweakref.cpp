@@ -57,7 +57,7 @@ static PyType_Slot PySideCallableObjectType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideCallableObjectType_spec = {
-    const_cast<char *>("PySide.Callable"),
+    "1:PySide.Callable",
     sizeof(PySideCallableObject),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -68,7 +68,7 @@ static PyType_Spec PySideCallableObjectType_spec = {
 static PyTypeObject *PySideCallableObjectTypeF()
 {
     static PyTypeObject *type =
-        (PyTypeObject *)PyType_FromSpec(&PySideCallableObjectType_spec);
+        reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&PySideCallableObjectType_spec));
     return type;
 }
 

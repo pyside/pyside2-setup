@@ -122,6 +122,10 @@ LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, Py
 /// PYSIDE-939: Replaced by Sbk_object_dealloc.
 LIBSHIBOKEN_API PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *);
 
+/// PYSIDE-1286: Generate correct __module__ and __qualname__
+LIBSHIBOKEN_API PyObject *SbkType_FromSpec(PyType_Spec *);
+LIBSHIBOKEN_API PyObject *SbkType_FromSpecWithBases(PyType_Spec *, PyObject *);
+
 } // extern "C"
 
 namespace Shiboken

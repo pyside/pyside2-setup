@@ -340,7 +340,7 @@ static PyType_Slot SbkVoidPtrType_slots[] = {
     {0, nullptr}
 };
 static PyType_Spec SbkVoidPtrType_spec = {
-    "shiboken2.libshiboken.VoidPtr",
+    "2:shiboken2.shiboken2.VoidPtr",
     sizeof(SbkVoidPtrObject),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -353,16 +353,15 @@ static PyType_Spec SbkVoidPtrType_spec = {
 PyTypeObject *SbkVoidPtrTypeF(void)
 {
     static PyTypeObject *type = nullptr;
-    if (!type)
-        type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkVoidPtrType_spec));
-
+    if (!type) {
+        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkVoidPtrType_spec));
 #if PY_VERSION_HEX < 0x03000000
-    type->tp_as_buffer = &SbkVoidPtrObjectBufferProc;
-    type->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+        type->tp_as_buffer = &SbkVoidPtrObjectBufferProc;
+        type->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #else
-    PepType_AS_BUFFER(type) = &SbkVoidPtrObjectBufferProc;
+        PepType_AS_BUFFER(type) = &SbkVoidPtrObjectBufferProc;
 #endif
-
+    }
     return type;
 }
 

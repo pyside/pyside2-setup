@@ -4037,8 +4037,10 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     }
     s << INDENT << "{0, " << NULL_PTR << "}\n";
     s << "};\n";
+
+    int packageLevel = packageName().count(QLatin1Char('.')) + 1;
     s << "static PyType_Spec " << className << "_spec = {\n";
-    s << INDENT << "\"" << computedClassTargetFullName << "\",\n";
+    s << INDENT << '"' << packageLevel << ':' << computedClassTargetFullName << "\",\n";
     s << INDENT << "sizeof(SbkObject),\n";
     s << INDENT << "0,\n";
     s << INDENT << tp_flags << ",\n";
@@ -4667,6 +4669,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
 
     QString enumVarTypeObj;
     if (!cppEnum->isAnonymous()) {
+        int packageLevel = packageName().count(QLatin1Char('.')) + 1;
         FlagsTypeEntry *flags = enumTypeEntry->flags();
         if (flags) {
             // The following could probably be made nicer:
@@ -4674,7 +4677,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             QString fullPath = getClassTargetFullName(cppEnum);
             fullPath.truncate(fullPath.lastIndexOf(QLatin1Char('.')) + 1);
             s << INDENT << cpythonTypeNameExt(flags) << " = PySide::QFlags::create(\""
-                << fullPath << flags->flagsName() << "\", "
+                << packageLevel << ':' << fullPath << flags->flagsName() << "\", "
                 << cpythonEnumName(cppEnum) << "_number_slots);\n";
         }
 
@@ -4686,7 +4689,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
         {
             Indentation indent(INDENT);
             s << INDENT << '"' << cppEnum->name() << "\",\n";
-            s << INDENT << '"' << getClassTargetFullName(cppEnum) << "\",\n";
+            s << INDENT << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n";
             s << INDENT << '"' << (cppEnum->enclosingClass() ? (cppEnum->enclosingClass()->qualifiedCppName() + QLatin1String("::")) : QString());
             s << cppEnum->name() << '"';
             if (flags)

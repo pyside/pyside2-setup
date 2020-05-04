@@ -290,7 +290,7 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
-    "Shiboken.EnumType",
+    "1:Shiboken.EnumType",
     0,    // filled in later
     sizeof(PyMemberDef),
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
@@ -304,7 +304,7 @@ PyTypeObject *SbkEnumType_TypeF(void)
     if (!type) {
         SbkEnumType_Type_spec.basicsize =
             PepHeapType_SIZE + sizeof(SbkEnumTypePrivate);
-        type = (PyTypeObject *)PyType_FromSpec(&SbkEnumType_Type_spec);
+        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkEnumType_Type_spec));
     }
     return type;
 }
@@ -594,7 +594,7 @@ newTypeWithName(const char *name,
                 const char *cppName,
                 PyTypeObject *numbers_fromFlag)
 {
-    // Careful: PyType_FromSpec does not allocate the string.
+    // Careful: SbkType_FromSpec does not allocate the string.
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
     auto *newspec = new PyType_Spec;
     newspec->name = strdup(name);
@@ -611,7 +611,7 @@ newTypeWithName(const char *name,
     if (numbers_fromFlag)
         copyNumberMethods(numbers_fromFlag, newslots, &idx);
     newspec->slots = newslots;
-    auto *type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(newspec));
+    auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(newspec));
     Py_TYPE(type) = SbkEnumType_TypeF();
     Py_INCREF(Py_TYPE(type));
 
@@ -659,7 +659,7 @@ DeclaredEnumTypes::DeclaredEnumTypes() = default;
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
         /*
-         * PYSIDE-595: This was "delete *it;" before introducing 'PyType_FromSpec'.
+         * PYSIDE-595: This was "delete *it;" before introducing 'SbkType_FromSpec'.
          * XXX what should I do now?
          * Refcounts in tests are 30 or 0 at end.
          * When I add the default tp_dealloc, we get negative refcounts!
