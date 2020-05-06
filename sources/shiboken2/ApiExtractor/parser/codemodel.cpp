@@ -40,7 +40,7 @@
 #include <QtCore/QStack>
 
 // Predicate to find an item by name in a list of QSharedPointer<Item>
-template <class T> class ModelItemNamePredicate : public std::unary_function<bool, QSharedPointer<T> >
+template <class T> class ModelItemNamePredicate
 {
 public:
     explicit ModelItemNamePredicate(const QString &name) : m_name(name) {}
@@ -196,8 +196,7 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
 
 // Handler for clang::parseTemplateArgumentList() that populates
 // TypeInfo::m_instantiations
-class TypeInfoTemplateArgumentHandler :
-    public std::binary_function<void, int, const QStringRef &>
+class TypeInfoTemplateArgumentHandler
 {
 public:
     explicit TypeInfoTemplateArgumentHandler(TypeInfo *t)
@@ -872,7 +871,7 @@ namespace {
 // Predicate to match a non-template class name against the class list.
 // "Vector" should match "Vector" as well as "Vector<T>" (as seen for methods
 // from within the class "Vector").
-class ClassNamePredicate : public std::unary_function<bool, ClassModelItem>
+class ClassNamePredicate
 {
 public:
     explicit ClassNamePredicate(const QString &name) : m_name(name) {}

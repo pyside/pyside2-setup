@@ -30,6 +30,7 @@
 #define CLANGUTILS_H
 
 #include <clang-c/Index.h>
+#include <qtcompat.h>
 #include <QtCore/QPair>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -40,10 +41,10 @@
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 bool operator==(const CXCursor &c1, const CXCursor &c2);
-uint qHash(const CXCursor &c, uint seed = 0);
+QtCompatHashFunctionType qHash(const CXCursor &c, QtCompatHashFunctionType seed = 0);
 
 bool operator==(const CXType &t1, const CXType &t2);
-uint qHash(const CXType &ct, uint seed);
+QtCompatHashFunctionType qHash(const CXType &ct, QtCompatHashFunctionType seed);
 
 namespace clang {
 
