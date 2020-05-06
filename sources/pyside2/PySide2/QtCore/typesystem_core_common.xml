@@ -2292,7 +2292,13 @@
     <enum-type name="LibraryLocation"/>
   </object-type>
   <object-type name="QMutexLocker" copyable="no">
-    <modify-function signature="QMutexLocker(QBasicMutex*)">
+    <!-- PYSIDE-1271: Creating locking capable objects inside sections that
+    contain allow-thread, require the classes to also allow having threads.
+    The lack of the option here, was generating a deadlock when running a
+    QMutexLocker inside a QThread::run.
+    The reason of having this change is due to the new way of handling the GIL
+    in the Qt calls on the whole PySide2 module, that started on 5.14.2-->
+    <modify-function signature="QMutexLocker(QBasicMutex*)" allow-thread="yes">
         <modify-argument index="1">
             <reference-count action="set" variable-name="mutex()const0"/>
         </modify-argument>
@@ -2311,14 +2317,13 @@
 
   <!-- Qt5 addition -->
   <object-type name="QBasicMutex">
-    <modify-function signature="lock()"/>
-    <modify-function signature="tryLock()"/>
+    <modify-function signature="lock()" allow-thread="yes"/>
+    <modify-function signature="tryLock()" allow-thread="yes"/>
   </object-type>
 
   <object-type name="QMutex">
     <enum-type name="RecursionMode"/>
     <modify-function signature="lock()" allow-thread="yes"/>
-    <modify-function signature="unlock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
   <object-type name="QRecursiveMutex" since="5.14"/>
