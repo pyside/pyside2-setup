@@ -8,7 +8,7 @@ set_property(TARGET dummy_generator PROPERTY PREFIX "")
 add_executable(dummygenerator main.cpp)
 set(DUMMYGENERATOR_EXECUTABLE dummygenerator${generator_SUFFIX})
 set_target_properties(dummygenerator PROPERTIES OUTPUT_NAME ${DUMMYGENERATOR_EXECUTABLE})
-target_link_libraries(dummygenerator ${Qt5Core_LIBRARIES})
+target_link_libraries(dummygenerator ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES})
 
 configure_file(dummygentestconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/dummygentestconfig.h" @ONLY)
 
@@ -50,8 +50,8 @@ macro(declare_test testname)
     target_link_libraries(${testname}
                           ${QT_QTTEST_LIBRARY}
                           ${QT_QTCORE_LIBRARY}
-                          ${Qt5Test_LIBRARIES}
-                          ${Qt5Core_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Test_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                           )
     m_add_test(${testname})
 endmacro(declare_test testname)

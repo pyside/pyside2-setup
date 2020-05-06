@@ -20,7 +20,7 @@ target_include_directories(shiboken2 PRIVATE
                     ${CMAKE_CURRENT_BINARY_DIR}
                     ${apiextractor_SOURCE_DIR}
                     )
-target_link_libraries(shiboken2 apiextractor Qt5::Core)
+target_link_libraries(shiboken2 apiextractor Qt${QT_MAJOR_VERSION}::Core)
 if (NOT DISABLE_DOCSTRINGS)
     target_sources(shiboken2 PRIVATE qtdoc/qtdocgenerator.cpp)
     target_compile_definitions(shiboken2 PUBLIC DOCSTRINGS_ENABLED)
