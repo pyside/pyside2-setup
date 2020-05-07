@@ -15,7 +15,7 @@ macro(declare_test testname)
                                                    ${CMAKE_CURRENT_BINARY_DIR}
                                                    ${apiextractor_SOURCE_DIR}
                                                    )
-    target_link_libraries(${testname} PRIVATE apiextractor Qt5::Test)
+    target_link_libraries(${testname} PRIVATE apiextractor Qt${QT_MAJOR_VERSION}::Test)
     add_test(${testname} ${testname})
     if (INSTALL_TESTS)
         install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${testname}

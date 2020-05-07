@@ -1613,7 +1613,12 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
                     metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
             }
         } else {
-            metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
+            auto type = AbstractMetaFunction::NormalFunction;
+            if (metaFunction->name() == QLatin1String("__getattro__"))
+                type = AbstractMetaFunction::GetAttroFunction;
+            else if (metaFunction->name() == QLatin1String("__setattro__"))
+                type = AbstractMetaFunction::SetAttroFunction;
+            metaFunction->setFunctionType(type);
         }
 
         metaFunction->setDeclaringClass(metaClass);

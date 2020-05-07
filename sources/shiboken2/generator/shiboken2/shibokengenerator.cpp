@@ -1555,16 +1555,34 @@ void ShibokenGenerator::writeUnusedVariableCast(QTextStream &s, const QString &v
     s << INDENT << "SBK_UNUSED(" << variableName<< ")\n";
 }
 
+static bool filterFunction(const AbstractMetaFunction *func, bool avoidProtectedHack)
+{
+    switch (func->functionType()) {
+    case AbstractMetaFunction::DestructorFunction:
+    case AbstractMetaFunction::SignalFunction:
+    case AbstractMetaFunction::GetAttroFunction:
+    case AbstractMetaFunction::SetAttroFunction:
+        return false;
+    default:
+        break;
+    }
+    if (func->usesRValueReferences())
+        return false;
+    if (func->isModifiedRemoved() && !func->isAbstract()
+        && (!avoidProtectedHack || !func->isProtected())) {
+        return false;
+    }
+    return true;
+}
+
 AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaClass *metaClass)
 {
     AbstractMetaFunctionList result;
     const AbstractMetaFunctionList &funcs = metaClass->functions();
+    result.reserve(funcs.size());
     for (AbstractMetaFunction *func : funcs) {
-        if (func->isSignal() || func->isDestructor() || func->usesRValueReferences()
-            || (func->isModifiedRemoved() && !func->isAbstract()
-                && (!avoidProtectedHack() || !func->isProtected())))
-            continue;
-        result << func;
+        if (filterFunction(func, avoidProtectedHack()))
+            result.append(func);
     }
     return result;
 }
@@ -2199,10 +2217,18 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
     } else {
         if (getGeneratorClassInfo(metaClass).needsGetattroFunction)
             result |= AttroCheckFlag::GetattroOverloads;
+        if (metaClass->queryFirstFunction(metaClass->functions(),
+                                          AbstractMetaClass::GetAttroFunction)) {
+            result |= AttroCheckFlag::GetattroUser;
+        }
         if (usePySideExtensions() && metaClass->qualifiedCppName() == QLatin1String("QObject"))
             result |= AttroCheckFlag::SetattroQObject;
         if (useOverrideCaching(metaClass))
             result |= AttroCheckFlag::SetattroMethodOverride;
+        if (metaClass->queryFirstFunction(metaClass->functions(),
+                                          AbstractMetaClass::SetAttroFunction)) {
+            result |= AttroCheckFlag::SetattroUser;
+        }
         // PYSIDE-1255: If setattro is generated for a class inheriting
         // QObject, the property code needs to be generated, too.
         if ((result & AttroCheckFlag::SetattroMask) != 0
@@ -2380,7 +2406,16 @@ static void dumpFunction(AbstractMetaFunctionList lst)
 
 static bool isGroupable(const AbstractMetaFunction *func)
 {
-    if (func->isSignal() || func->isDestructor() || (func->isModifiedRemoved() && !func->isAbstract()))
+    switch (func->functionType()) {
+    case AbstractMetaFunction::DestructorFunction:
+    case AbstractMetaFunction::SignalFunction:
+    case AbstractMetaFunction::GetAttroFunction:
+    case AbstractMetaFunction::SetAttroFunction:
+        return false;
+    default:
+        break;
+    }
+    if (func->isModifiedRemoved() && !func->isAbstract())
         return false;
     // weird operator overloads
     if (func->name() == QLatin1String("operator[]") || func->name() == QLatin1String("operator->"))  // FIXME: what about cast operators?

@@ -1,5 +1,5 @@
 if(BUILD_TESTS)
-    find_package(Qt5Test 5.12 REQUIRED)
+    find_package(Qt${QT_MAJOR_VERSION}Test 5.12 REQUIRED)
 endif()
 
 add_subdirectory(libminimal)

@@ -235,6 +235,14 @@ class ModificationsTest(unittest.TestCase):
         modifications.setEnumValue()
         self.assertEqual(modifications.enumValue(), Modifications.TestEnumValue2)
 
+    def testSetGetAttro(self):
+        modifications = Modifications()
+        self.assertFalse(modifications.wasSetAttroCalled())
+        setattr(modifications, 'Foo', 'Bar')
+        self.assertTrue(modifications.wasSetAttroCalled())
+        self.assertEqual(getattr(modifications, 'Foo'), 'Bar')
+        self.assertTrue(modifications.wasGetAttroCalled())
+
 
 if __name__ == '__main__':
     unittest.main()

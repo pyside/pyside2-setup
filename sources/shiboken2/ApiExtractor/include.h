@@ -29,6 +29,8 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
+#include <qtcompat.h>
+
 #include <QString>
 #include <QVector>
 
@@ -76,13 +78,13 @@ public:
         return m_type == other.m_type && m_name == other.m_name;
     }
 
-    friend uint qHash(const Include&);
+    friend QtCompatHashFunctionType qHash(const Include&);
     private:
         IncludeType m_type = IncludePath;
         QString m_name;
 };
 
-uint qHash(const Include& inc);
+QtCompatHashFunctionType qHash(const Include& inc);
 QTextStream& operator<<(QTextStream& out, const Include& include);
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const Include &i);

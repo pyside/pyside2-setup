@@ -18,7 +18,9 @@ option(BUILD_TESTS "Build tests." TRUE)
 option(USE_PYTHON_VERSION "Use specific python version to build shiboken2." "")
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
-find_package(Qt5 5.12 REQUIRED COMPONENTS Core)
+set (QT_MAJOR_VERSION 5)
+message(STATUS "Using Qt ${QT_MAJOR_VERSION}")
+find_package(Qt${QT_MAJOR_VERSION} 5.12 REQUIRED COMPONENTS Core)
 
 if (QUIET_BUILD)
     set_quiet_build()
@@ -208,7 +210,7 @@ add_subdirectory(libshiboken)
 add_subdirectory(doc)
 
 # deps found, compile the generator.
-if (Qt5Core_FOUND AND PYTHONINTERP_FOUND)
+if (Qt${QT_MAJOR_VERSION}Core_FOUND AND PYTHONINTERP_FOUND)
     add_subdirectory(generator)
     add_subdirectory(shibokenmodule)
 
