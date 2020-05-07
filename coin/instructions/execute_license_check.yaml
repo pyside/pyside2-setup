@@ -6,7 +6,7 @@ instructions:
       maxTimeInSeconds: 600
       maxTimeBetweenOutput: 600
       project: qt/qtbase
-      ref: 5.14
+      ref: 5.15
       directory: qt/qtbase
       userMessageOnFailure: >
               Could not install source archive. Please investigate why.
