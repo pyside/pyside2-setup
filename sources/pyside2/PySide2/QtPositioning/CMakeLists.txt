@@ -23,20 +23,21 @@ ${QtPositioning_GEN_DIR}/qnmeapositioninfosource_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qtpositioning_module_wrapper.cpp
 )
 
-if (Qt5Positioning_VERSION VERSION_EQUAL 5.10.0 OR Qt5Positioning_VERSION VERSION_GREATER 5.10.0)
+if (Qt${QT_MAJOR_VERSION}Positioning_VERSION VERSION_EQUAL 5.10.0
+    OR Qt${QT_MAJOR_VERSION}Positioning_VERSION VERSION_GREATER 5.10.0)
     list(APPEND QtPositioning_SRC
          ${QtPositioning_GEN_DIR}/qgeopolygon_wrapper.cpp)
 endif()
 
 set(QtPositioning_include_dirs ${QtPositioning_SOURCE_DIR}
                                ${QtPositioning_BINARY_DIR}
-                               ${Qt5Core_INCLUDE_DIRS}
-                               ${Qt5Positioning_INCLUDE_DIRS}
+                               ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                               ${Qt${QT_MAJOR_VERSION}Positioning_INCLUDE_DIRS}
                                ${libpyside_SOURCE_DIR}
                                ${QtCore_GEN_DIR})
 
 set(QtPositioning_libraries pyside2
-                            ${Qt5Positioning_LIBRARIES})
+                            ${Qt${QT_MAJOR_VERSION}Positioning_LIBRARIES})
 
 set(QtPositioning_deps QtCore)
 

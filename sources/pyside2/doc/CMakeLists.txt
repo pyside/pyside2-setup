@@ -22,7 +22,7 @@ file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/
 #    - Build include path for qdoc for shiboken
 
 # The last element of the include list is the mkspec directory containing qplatformdefs.h
-list(GET Qt5Core_INCLUDE_DIRS -1 mkspecInclude)
+list(GET Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS -1 mkspecInclude)
 configure_file("pyside-config.qdocconf.in" "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf" @ONLY)
 
 file(READ "${pyside2_BINARY_DIR}/pyside2_global.h" docHeaderContents)
@@ -56,8 +56,8 @@ foreach(moduleIn ${all_module_shortnames})
             # -- @TODO fix this for macOS frameworks.
             file(APPEND "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf"
                  "    -I ${QT_INCLUDE_DIR}Qt${module} \\\n"
-                 "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION} \\\n"
-                 "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt5Core_VERSION}/Qt${module} \\\n")
+                 "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION} \\\n"
+                 "    -I ${QT_INCLUDE_DIR}Qt${module}/${Qt${QT_MAJOR_VERSION}Core_VERSION}/Qt${module} \\\n")
 
             if (${moduleIn} STREQUAL "X11Extras")
                 set(globalHeader "QX11Info")

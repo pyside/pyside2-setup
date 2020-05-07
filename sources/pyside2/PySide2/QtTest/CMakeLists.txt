@@ -15,20 +15,20 @@ configure_file("${QtTest_SOURCE_DIR}/QtTest_global.post.h.in"
 
 set(QtTest_include_dirs ${QtTest_SOURCE_DIR}
                         ${QtTest_BINARY_DIR}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
-                        ${Qt5Widgets_INCLUDE_DIRS}
-                        ${Qt5Test_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Test_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtWidgets_GEN_DIR}
                         )
 set(QtTest_libraries    pyside2
-                        ${Qt5Test_LIBRARIES}
-                        ${Qt5Widgets_LIBRARIES}
-                        ${Qt5Gui_LIBRARIES}
-                        ${Qt5Core_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Test_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                         )
 set(QtTest_deps  QtWidgets)
 

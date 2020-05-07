@@ -21,7 +21,7 @@ ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_module_wrapper.cpp
 
 set(QtRemoteObjects_include_dirs ${QtRemoteObjects_SOURCE_DIR}
                                  ${QtRemoteObjects_BINARY_DIR}
-                                 ${Qt5RemoteObjects_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}RemoteObjects_INCLUDE_DIRS}
                                  ${SHIBOKEN_INCLUDE_DIR}
                                  ${libpyside_SOURCE_DIR}
                                  ${SHIBOKEN_PYTHON_INCLUDE_DIR}
@@ -30,7 +30,7 @@ set(QtRemoteObjects_include_dirs ${QtRemoteObjects_SOURCE_DIR}
 set(QtRemoteObjects_libraries    pyside2
                                  ${SHIBOKEN_PYTHON_LIBRARIES}
                                  ${SHIBOKEN_LIBRARY}
-                                 ${Qt5RemoteObjects_LIBRARIES})
+                                 ${Qt${QT_MAJOR_VERSION}RemoteObjects_LIBRARIES})
 
 set(QtRemoteObjects_deps QtCore QtNetwork)
 

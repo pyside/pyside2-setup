@@ -97,27 +97,28 @@ ${QtMultimedia_GEN_DIR}/qvideowindowcontrol_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )
 
-if (Qt5Multimedia_VERSION VERSION_EQUAL 5.11.0 OR Qt5Multimedia_VERSION VERSION_GREATER 5.11.0)
+if (Qt${QT_MAJOR_VERSION}Multimedia_VERSION VERSION_EQUAL 5.11.0
+    OR Qt${QT_MAJOR_VERSION}Multimedia_VERSION VERSION_GREATER 5.11.0)
     list(APPEND QtMultimedia_SRC
          ${QtMultimedia_GEN_DIR}/qcustomaudiorolecontrol_wrapper.cpp)
 endif()
 
 set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${QtMultimedia_BINARY_DIR}
-                                ${Qt5Core_INCLUDE_DIRS}
-                                ${Qt5Gui_INCLUDE_DIRS}
-                                ${Qt5Network_INCLUDE_DIRS}
-                                ${Qt5Multimedia_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Multimedia_INCLUDE_DIRS}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 ${QtGui_GEN_DIR}
                                 ${QtNetwork_GEN_DIR})
 
 set(QtMultimedia_libraries  pyside2
-                            ${Qt5Multimedia_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
-                            ${Qt5Gui_LIBRARIES}
-                            ${Qt5Network_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
                             )
 set(QtMultimedia_deps QtCore QtGui QtNetwork)
 

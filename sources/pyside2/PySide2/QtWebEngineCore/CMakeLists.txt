@@ -11,7 +11,8 @@ ${QtWebEngineCore_GEN_DIR}/qwebengineurlschemehandler_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qtwebenginecore_module_wrapper.cpp
 )
 
-if (Qt5WebEngineCore_VERSION VERSION_EQUAL 5.12.0 OR Qt5WebEngineCore_VERSION VERSION_GREATER 5.12.0)
+if (Qt${QT_MAJOR_VERSION}WebEngineCore_VERSION VERSION_EQUAL 5.12.0
+    OR Qt${QT_MAJOR_VERSION}WebEngineCore_VERSION VERSION_GREATER 5.12.0)
     list(APPEND QtWebEngineCore_SRC
          ${QtWebEngineCore_GEN_DIR}/qwebengineurlscheme_wrapper.cpp)
 endif()
@@ -19,13 +20,13 @@ endif()
 set(QtWebEngineCore_include_dirs
                             ${QtWebEngineCore_SOURCE_DIR}
                             ${QtWebEngineCore_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             )
 set(QtWebEngineCore_libraries pyside2
-                            ${Qt5WebEngineCore_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}WebEngineCore_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                             )
 set(QtWebEngineCore_deps QtCore)
 create_pyside_module(NAME QtWebEngineCore

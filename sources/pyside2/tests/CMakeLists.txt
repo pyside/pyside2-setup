@@ -46,7 +46,7 @@ else()
 
     foreach(shortname IN LISTS all_module_shortnames)
         message(STATUS "preparing tests for module 'Qt${shortname}'")
-        TEST_QT_MODULE(Qt5${shortname}_FOUND Qt${shortname})
+        TEST_QT_MODULE(Qt${QT_MAJOR_VERSION}${shortname}_FOUND Qt${shortname})
     endforeach()
 
     #platform specific

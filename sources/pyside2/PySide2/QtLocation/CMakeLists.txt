@@ -47,21 +47,22 @@ ${QtLocation_GEN_DIR}/qplacesupplier_wrapper.cpp
 ${QtLocation_GEN_DIR}/qtlocation_module_wrapper.cpp
 )
 
-if (Qt5Location_VERSION VERSION_EQUAL 5.11.0 OR Qt5Location_VERSION VERSION_GREATER 5.11.0)
+if (Qt${QT_MAJOR_VERSION}Location_VERSION VERSION_EQUAL 5.11.0
+    OR Qt${QT_MAJOR_VERSION}Location_VERSION VERSION_GREATER 5.11.0)
     list(APPEND QtLocation_SRC
          ${QtLocation_GEN_DIR}/qgeoserviceproviderfactoryv2_wrapper.cpp)
 endif()
 
 set(QtLocation_include_dirs ${QtLocation_SOURCE_DIR}
                             ${QtLocation_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Location_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Location_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtPositioning_GEN_DIR})
 
 set(QtLocation_libraries pyside2
-                         ${Qt5Location_LIBRARIES})
+                         ${Qt${QT_MAJOR_VERSION}Location_LIBRARIES})
 
 set(QtLocation_deps QtCore QtPositioning)
 

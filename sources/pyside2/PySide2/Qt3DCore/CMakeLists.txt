@@ -32,7 +32,7 @@ ${Qt3DCore_GEN_DIR}/qt3dcore_qtransform_wrapper.cpp
 # module is always needed
 ${Qt3DCore_GEN_DIR}/qt3dcore_module_wrapper.cpp)
 
-if (Qt53DCore_VERSION VERSION_EQUAL 5.10.0 OR Qt53DCore_VERSION VERSION_GREATER 5.10.0)
+if (Qt${QT_MAJOR_VERSION}3DCore_VERSION VERSION_EQUAL 5.10.0 OR Qt${QT_MAJOR_VERSION}3DCore_VERSION VERSION_GREATER 5.10.0)
     list(APPEND Qt3DCore_SRC
          ${Qt3DCore_GEN_DIR}/qt3dcore_qarmature_wrapper.cpp
          ${Qt3DCore_GEN_DIR}/qt3dcore_qjoint_wrapper.cpp
@@ -46,17 +46,17 @@ set(Qt3DCore_include_dirs
                      ${Qt3DCore_SOURCE_DIR}
                      ${Qt3DCore_BINARY_DIR}
                      ${pyside2_SOURCE_DIR}
-                     ${Qt5Core_INCLUDE_DIRS}
-                     ${Qt5Gui_INCLUDE_DIRS}
-                     ${Qt5Network_INCLUDE_DIRS}
-                     ${Qt53DCore_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}3DCore_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${QtNetwork_GEN_DIR})
 
 set(Qt3DCore_libraries pyside2
-                     ${Qt53DCore_LIBRARIES})
+                     ${Qt${QT_MAJOR_VERSION}3DCore_LIBRARIES})
 
 set(Qt3DCore_deps QtGui QtNetwork)
 

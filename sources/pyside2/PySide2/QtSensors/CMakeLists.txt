@@ -81,13 +81,13 @@ set(QtSensors_SRC
 
 set(QtSensors_include_dirs  ${QtSensors_SOURCE_DIR}
                             ${QtSensors_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Sensors_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Sensors_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR})
 
 set(QtSensors_libraries pyside2
-                        ${Qt5Sensors_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}Sensors_LIBRARIES})
 
 set(QtSensors_deps QtCore)
 

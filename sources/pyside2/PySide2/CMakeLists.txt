@@ -49,10 +49,10 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/deprecated.py"
 file(READ "${CMAKE_CURRENT_BINARY_DIR}/pyside2_global.h" pyside2_global_contents)
 
 foreach(shortname IN LISTS all_module_shortnames)
-    set(name "Qt5${shortname}")
+    set(name "Qt${QT_MAJOR_VERSION}${shortname}")
     set(_qt_module_name "${name}")
     if ("${shortname}" STREQUAL "OpenGLFunctions")
-        set(_qt_module_name "Qt5Gui")
+        set(_qt_module_name "Qt${QT_MAJOR_VERSION}Gui")
     endif()
     HAS_QT_MODULE(${_qt_module_name}_FOUND Qt${shortname})
 

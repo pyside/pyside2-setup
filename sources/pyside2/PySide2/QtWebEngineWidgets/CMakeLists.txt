@@ -20,12 +20,12 @@ ${QtWebEngineWidgets_GEN_DIR}/qtwebenginewidgets_module_wrapper.cpp
 set(QtWebEngineWidgets_include_dirs
                             ${QtWebEngineWidgets_SOURCE_DIR}
                             ${QtWebEngineWidgets_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Gui_INCLUDE_DIRS}
-                            ${Qt5Widgets_INCLUDE_DIRS}
-                            ${Qt5Network_INCLUDE_DIRS}
-                            ${Qt5WebChannel_INCLUDE_DIRS}
-                            ${Qt5WebEngineWidgets_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}WebChannel_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}WebEngineWidgets_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
@@ -37,13 +37,13 @@ set(QtWebEngineWidgets_include_dirs
                             ${QtPrintSupport_GEN_DIR}
                             )
 set(QtWebEngineWidgets_libraries      pyside2
-                            ${Qt5WebEngineWidgets_LIBRARIES}
-                            ${Qt5Network_LIBRARIES}
-                            ${Qt5WebChannel_LIBRARIES}
-                            ${Qt5Widgets_LIBRARIES}
-                            ${Qt5Gui_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
-                            ${Qt5PrintSupport_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}WebEngineWidgets_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}WebChannel_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES}
                             )
 set(QtWebEngineWidgets_deps QtGui QtWidgets QtNetwork QtWebChannel QtPrintSupport)
 create_pyside_module(NAME QtWebEngineWidgets

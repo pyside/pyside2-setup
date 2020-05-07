@@ -25,20 +25,20 @@ configure_file("${QtSql_SOURCE_DIR}/QtSql_global.pre.h.in"
 
 set(QtSql_include_dirs  ${QtSql_SOURCE_DIR}
                         ${QtSql_BINARY_DIR}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
-                        ${Qt5Widgets_INCLUDE_DIRS}
-                        ${Qt5Sql_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Sql_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtWidgets_GEN_DIR}
                         )
 set(QtSql_libraries     pyside2
-                        ${Qt5Core_LIBRARIES}
-                        ${Qt5Gui_LIBRARIES}
-                        ${Qt5Widgets_LIBRARIES}
-                        ${Qt5Sql_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Sql_LIBRARIES})
 set(QtSql_deps QtWidgets)
 
 create_pyside_module(NAME QtSql

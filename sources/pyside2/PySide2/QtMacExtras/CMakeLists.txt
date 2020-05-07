@@ -11,17 +11,17 @@ ${QtMacExtras_GEN_DIR}/qtmacextras_module_wrapper.cpp
 
 set(QtMacExtras_include_dirs ${QtMacExtras_SOURCE_DIR}
                         ${QtMacExtras_BINARY_DIR}
-                        ${Qt5MacExtras_INCLUDE_DIRS}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}MacExtras_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
                         ${libpyside_SOURCE_DIR})
 
 set(QtMacExtras_libraries pyside2
-                        ${Qt5MacExtras_LIBRARIES}
-                        ${Qt5Core_LIBRARIES}
-                        ${Qt5Gui_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}MacExtras_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
 
 set(QtMacExtras_deps QtCore QtGui)
 

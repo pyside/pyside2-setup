@@ -9,13 +9,13 @@ ${QtWebEngine_GEN_DIR}/qtwebengine_module_wrapper.cpp
 set(QtWebEngine_include_dirs
                             ${QtWebEngine_SOURCE_DIR}
                             ${QtWebEngine_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             )
 set(QtWebEngine_libraries pyside2
-                            ${Qt5WebEngine_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}WebEngine_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                             )
 set(QtWebEngine_deps QtCore)
 create_pyside_module(NAME QtWebEngine

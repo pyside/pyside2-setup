@@ -51,7 +51,7 @@ ${QtQuick_GEN_DIR}/qsgtransformnode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qtquick_module_wrapper.cpp
 )
 
-if (Qt5Quick_VERSION VERSION_GREATER 5.5.1)
+if (Qt${QT_MAJOR_VERSION}Quick_VERSION VERSION_GREATER 5.5.1)
     set(QtQuick_SRC ${QtQuick_SRC}
                     ${QtQuick_GEN_DIR}/qquickasyncimageprovider_wrapper.cpp
                     ${QtQuick_GEN_DIR}/qquickimageresponse_wrapper.cpp
@@ -60,11 +60,11 @@ endif()
 
 set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${QtQml_SOURCE_DIR}
-                          ${Qt5Core_INCLUDE_DIRS}
-                          ${Qt5Gui_INCLUDE_DIRS}
-                          ${Qt5Network_INCLUDE_DIRS}
-                          ${Qt5Qml_INCLUDE_DIRS}
-                          ${Qt5Quick_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Quick_INCLUDE_DIRS}
                           ${libpyside_SOURCE_DIR}
                           ${QtGui_GEN_DIR}
                           ${QtCore_GEN_DIR}
@@ -73,11 +73,11 @@ set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${QtQuick_GEN_DIR})
 
 set(QtQuick_libraries pyside2
-                      ${Qt5Core_LIBRARIES}
-                      ${Qt5Gui_LIBRARIES}
-                      ${Qt5Network_LIBRARIES}
-                      ${Qt5Qml_LIBRARIES}
-                      ${Qt5Quick_LIBRARIES})
+                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES})
 
 set(QtQuick_deps QtGui QtNetwork QtQml)
 

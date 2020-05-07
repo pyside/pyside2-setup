@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 3.1)
 
 set(QT_USE_QTCORE 1)
 # no more supported: include(${QT_USE_FILE})
-add_definitions(${Qt5Core_DEFINITIONS})
+add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
-find_package(Qt5Widgets)
+find_package(Qt${QT_MAJOR_VERSION}Widgets)
 
 set(pysidetest_SRC
 testobject.cpp
@@ -23,7 +23,11 @@ testview.h
 hiddenobject.h
 )
 
-qt5_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
+if (${QT_MAJOR_VERSION} GREATER_EQUAL 6)
+    qt6_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
+else()
+    qt5_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
+endif()
 
 set(testbinding_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp
@@ -43,9 +47,15 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 # ./qt/lib/QtCore.framework; ./qt/lib/QtCore.framework/Headers ; ./qt/mkspecs/macx-clang
 # Thus we use the second direct path, which contains the actual header files.
 
-list(GET Qt5Core_INCLUDE_DIRS 1 Qt5Core_DIRECT_INCLUDE_DIR)
-list(GET Qt5Gui_INCLUDE_DIRS 1 Qt5Gui_DIRECT_INCLUDE_DIR)
-list(GET Qt5Widgets_INCLUDE_DIRS 1 Qt5Widgets_DIRECT_INCLUDE_DIR)
+if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
+    set(Qt6Core_DIRECT_INCLUDE_DIR Qt6Core_INCLUDE_DIRS)
+    set(Qt6Gui_DIRECT_INCLUDE_DIR Qt6Gui_INCLUDE_DIRS)
+    set(Qt6Widgets_DIRECT_INCLUDE_DIR Qt6Widgets_INCLUDE_DIRS)
+else()
+    list(GET Qt5Core_INCLUDE_DIRS 1 Qt5Core_DIRECT_INCLUDE_DIR)
+    list(GET Qt5Gui_INCLUDE_DIRS 1 Qt5Gui_DIRECT_INCLUDE_DIR)
+    list(GET Qt5Widgets_INCLUDE_DIRS 1 Qt5Widgets_DIRECT_INCLUDE_DIR)
+endif()
 
 # Adjust include headers paths for frameworks.
 set(shiboken_framework_include_dirs_option "")
@@ -59,9 +69,9 @@ make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide2
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../libpyside
                                     ${QT_INCLUDE_DIR}
-                                    ${Qt5Core_DIRECT_INCLUDE_DIR}
-                                    ${Qt5Gui_DIRECT_INCLUDE_DIR}
-                                    ${Qt5Widgets_DIRECT_INCLUDE_DIR}
+                                    ${Qt${QT_MAJOR_VERSION}Core_DIRECT_INCLUDE_DIR}
+                                    ${Qt${QT_MAJOR_VERSION}Gui_DIRECT_INCLUDE_DIR}
+                                    ${Qt${QT_MAJOR_VERSION}Widgets_DIRECT_INCLUDE_DIR}
                                     )
 
 make_path(testbinding_typesystem_path ${pyside2_SOURCE_DIR}
@@ -84,9 +94,9 @@ COMMENT "Running generator for test binding..."
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    ${Qt5Core_INCLUDE_DIRS}
-                    ${Qt5Gui_INCLUDE_DIRS}
-                    ${Qt5Widgets_INCLUDE_DIRS}
+                    ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                    ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                    ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
                     ${pyside2_SOURCE_DIR}
                     ${QtCore_GEN_DIR}
                     ${QtGui_GEN_DIR}
@@ -96,9 +106,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 add_library(pysidetest SHARED ${pysidetest_SRC} ${pysidetest_MOC_SRC})
 target_link_libraries(pysidetest
                       Shiboken2::libshiboken
-                      ${Qt5Core_LIBRARIES}
-                      ${Qt5Gui_LIBRARIES}
-                      ${Qt5Widgets_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                       )
 
 add_library(testbinding MODULE ${testbinding_SRC})
@@ -119,9 +129,9 @@ target_link_libraries(testbinding
                       pyside2
                       ${TESTBINDING_PYTHON_LIBS}
                       Shiboken2::libshiboken
-                      ${Qt5Core_LIBRARIES}
-                      ${Qt5Gui_LIBRARIES}
-                      ${Qt5Widgets_LIBRARIES})
+                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
 
 add_dependencies(testbinding pyside2 QtCore QtGui QtWidgets pysidetest)
 create_generator_target(testbinding)
@@ -129,7 +139,7 @@ create_generator_target(testbinding)
 PYSIDE_TEST(constructor_properties_test.py)
 PYSIDE_TEST(decoratedslot_test.py)
 # Will always crash when built against Qt 5.6, no point in running it.
-if (Qt5Core_VERSION VERSION_GREATER 5.7.0)
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.7.0)
     PYSIDE_TEST(delegatecreateseditor_test.py)
 endif()
 PYSIDE_TEST(all_modules_load_test.py)

@@ -4,9 +4,9 @@
 # CT: maybe we can remove this.
 # For now, I just use the mapping to Qt5
 
-find_package(Qt5Multimedia)
+find_package(Qt${QT_MAJOR_VERSION}Multimedia)
 
-if (NOT Qt5Multimedia_FOUND)
+if (NOT Qt${QT_MAJOR_VERSION}Multimedia_FOUND)
     find_path(QT_QTMULTIMEDIA_INCLUDE_DIR QtMultimedia
             PATHS ${QT_HEADERS_DIR}/QtMultimedia
                 ${QT_LIBRARY_DIR}/QtMultimedia.framework/Headers

@@ -11,17 +11,17 @@ configure_file("${QtX11Extras_SOURCE_DIR}/QtX11Extras_global.post.h.in"
 
 set(QtX11Extras_include_dirs ${QtX11Extras_SOURCE_DIR}
                         ${QtX11Extras_BINARY_DIR}
-                        ${Qt5X11Extras_INCLUDE_DIRS}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}X11Extras_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
                         ${libpyside_SOURCE_DIR})
 
 set(QtX11Extras_libraries pyside2
-                        ${Qt5X11Extras_LIBRARIES}
-                        ${Qt5Core_LIBRARIES}
-                        ${Qt5Gui_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}X11Extras_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
 
 set(QtX11Extras_deps QtCore QtGui)
 

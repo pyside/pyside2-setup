@@ -31,14 +31,14 @@ set(Qt3DInput_include_dirs
                      ${Qt3DInput_SOURCE_DIR}
                      ${Qt3DInput_BINARY_DIR}
                      ${pyside2_SOURCE_DIR}
-                     ${Qt5Core_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${Qt3DCore_GEN_DIR})
 
 set(Qt3DInput_libraries pyside2
-                     ${Qt53DInput_LIBRARIES})
+                     ${Qt${QT_MAJOR_VERSION}3DInput_LIBRARIES})
 
 set(Qt3DInput_deps Qt3DCore)
 

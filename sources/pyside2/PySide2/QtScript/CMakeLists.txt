@@ -24,14 +24,14 @@ set(QtScript_glue_sources
 
 set(QtScript_include_dirs   ${QtScript_SOURCE_DIR}
                             ${QtScript_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Script_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Script_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             )
 set(QtScript_libraries      pyside2
-                            ${Qt5Core_LIBRARIES}
-                            ${Qt5Script_LIBRARIES})
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Script_LIBRARIES})
 set(QtScript_deps QtCore)
 create_pyside_module(NAME QtScript
                      INCLUDE_DIRS QtScript_include_dirs

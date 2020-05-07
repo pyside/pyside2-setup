@@ -18,20 +18,20 @@ configure_file("${QtPrintSupport_SOURCE_DIR}/typesystem_printsupport.xml.in"
 
 set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${QtPrintSupport_BINARY_DIR}
-                                ${Qt5Core_INCLUDE_DIRS}
-                                ${Qt5Gui_INCLUDE_DIRS}
-                                ${Qt5Widgets_INCLUDE_DIRS}
-                                ${Qt5PrintSupport_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}PrintSupport_INCLUDE_DIRS}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 ${QtGui_GEN_DIR}
                                 ${QtWidgets_GEN_DIR}
                                 )
 set(QtPrintSupport_libraries    pyside2
-                                ${Qt5Core_LIBRARIES}
-                                ${Qt5Gui_LIBRARIES}
-                                ${Qt5Widgets_LIBRARIES}
-                                ${Qt5PrintSupport_LIBRARIES}
+                                ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                                ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                                ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                                ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES}
                                 )
 set(QtPrintSupport_deps QtWidgets)
 create_pyside_module(NAME QtPrintSupport

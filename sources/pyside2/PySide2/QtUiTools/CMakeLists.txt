@@ -12,12 +12,12 @@ set(QtUiTools_glue_sources
 
 set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${QtUiTools_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Gui_INCLUDE_DIRS}
-                            ${Qt5Widgets_INCLUDE_DIRS}
-                            ${Qt5Xml_INCLUDE_DIRS}
-                            ${Qt5Designer_INCLUDE_DIRS}
-                            ${Qt5UiTools_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Xml_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Designer_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}UiTools_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${plugins_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
@@ -27,10 +27,10 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             )
 set(QtUiTools_libraries     pyside2
                             uiplugin
-                            ${Qt5UiTools_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
-                            ${Qt5Gui_LIBRARIES}
-                            ${Qt5Widgets_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}UiTools_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                             )
 set(QtUiTools_deps QtWidgets QtXml)
 create_pyside_module(NAME QtUiTools

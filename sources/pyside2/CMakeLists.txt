@@ -6,6 +6,8 @@ cmake_policy(VERSION 3.1)
 # Don't ignore targets that do not exist, inside add_dependencies calls.
 cmake_policy(SET CMP0046 NEW)
 
+set (QT_MAJOR_VERSION 5)
+
 project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_helpers/
@@ -77,8 +79,8 @@ if (SHIBOKEN_PYTHON_LIMITED_API)
     message(STATUS "******************************************************")
 endif()
 
-find_package(Qt5 5.12 REQUIRED COMPONENTS Core)
-add_definitions(${Qt5Core_DEFINITIONS})
+find_package(Qt${QT_MAJOR_VERSION} 5.12 REQUIRED COMPONENTS Core)
+add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
 message("result:" "${GL_H}")
@@ -108,17 +110,26 @@ endif()
 
 # Force usage of the C++11 standard, without a silent fallback
 # to C++98 if the compiler does not support C++11.
-set(CMAKE_CXX_STANDARD 11)
+if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
+    set(CMAKE_CXX_STANDARD 17)
+else()
+    set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Qt5: QT_INCLUDE_DIR does no longer exist.
-# On Windows, macOS, and Linux it can be computed from Qt5Core_INCLUDE_DIRS, which contains
-# a list of include directories. We take the first one.
-message(STATUS "*** Qt5Core_INCLUDE_DIRS = ${Qt5Core_INCLUDE_DIRS}")
-list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
+# >= Qt5: QT_INCLUDE_DIR does no longer exist. Derive from QtCore
+if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
+    get_target_property(QT_INCLUDE_DIR Qt6::Core INTERFACE_INCLUDE_DIRECTORIES)
+    get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}" DIRECTORY)
+else()
+    # On Windows, macOS, and Linux it can be computed from Qt5Core_INCLUDE_DIRS, which contains
+    # a list of include directories. We take the first one.
+    list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
+endif()
+message(STATUS "*** Qt ${QT_MAJOR_VERSION}, QT_INCLUDE_DIR= ${QT_INCLUDE_DIR}")
 
 # On macOS, check if Qt is a framework build. This affects how include paths should be handled.
-get_target_property(QtCore_is_framework Qt5::Core FRAMEWORK)
+get_target_property(QtCore_is_framework Qt${QT_MAJOR_VERSION}::Core FRAMEWORK)
 
 if (QtCore_is_framework)
     # Get the path to the framework dir.
@@ -151,9 +162,9 @@ compute_config_py_values(BINDING_API_VERSION)
 include(PySideModules)
 
 # Set default values for pyside2_global.h
-set (Qt5X11Extras_FOUND "0")
-set (Qt5Test_FOUND "0")
-set (Qt5Widgets_FOUND "0")
+set (Qt${QT_MAJOR_VERSION}X11Extras_FOUND "0")
+set (Qt${QT_MAJOR_VERSION}Test_FOUND "0")
+set (Qt${QT_MAJOR_VERSION}Widgets_FOUND "0")
 
 collect_essential_modules()
 collect_optional_modules()
@@ -175,7 +186,7 @@ foreach(m ${DISABLED_MODULES})
 endforeach()
 
 
-string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt5Core_VERSION}")
+string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt${QT_MAJOR_VERSION}Core_VERSION}")
 
 list(GET qt_version_helper 0 QT_VERSION_MAJOR)
 list(GET qt_version_helper 1 QT_VERSION_MINOR)
@@ -241,8 +252,9 @@ endif()
 #####################################################################
 
 add_subdirectory(libpyside)
-find_package(Qt5Designer)
-if(Qt5UiTools_FOUND AND Qt5Designer_FOUND)
+find_package(Qt${QT_MAJOR_VERSION}Designer)
+if(${QT_MAJOR_VERSION} LESS 6 AND Qt${QT_MAJOR_VERSION}UiTools_FOUND
+   AND Qt${QT_MAJOR_VERSION}Designer_FOUND)
     add_subdirectory(plugins)
 endif()
 
