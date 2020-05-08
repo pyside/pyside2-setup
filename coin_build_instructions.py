@@ -109,6 +109,8 @@ def call_setup(python_ver, phase):
 
     if phase in ["BUILD"]:
         rmtree(_env, True)
+        # Pinning the virtualenv before creating one
+        run_instruction(["pip", "install", "--user", "virtualenv==20.0.20"], "Failed to pin virtualenv")
         run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
         # When the 'python_ver' variable is empty, we are using Python 2
         # setuptools from v45+ removed the support for Python 2, so we pin an old release

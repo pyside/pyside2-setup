@@ -64,6 +64,8 @@ CI_RELEASE_CONF = has_option("packaging")
 def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
+    # Pinning the virtualenv before creating one
+    run_instruction(["pip", "install", "--user", "virtualenv==20.0.20"], "Failed to pin virtualenv")
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
     upgrade_pip = True if CI_HOST_OS == "Linux" else False
     install_pip_dependencies(env_pip, ["pip"], upgrade_pip)
