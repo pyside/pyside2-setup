@@ -115,6 +115,7 @@ modules_to_test['QtPositioning'] = 'qtpositioning-module.html'
 modules_to_test['QtRemoteObjects'] = 'qtremoteobjects-module.html'
 modules_to_test['QtScriptTools'] = 'qtscripttools-module.html'
 modules_to_test['QtSensors'] = 'qtsensors-module.html'
+modules_to_test['QtSerialPort'] = 'qtserialport-module.html'
 types_to_ignore = set()
 # QtCore
 types_to_ignore.add('QFlag')
