@@ -113,13 +113,8 @@ def call_setup(python_ver, phase):
         run_instruction(["pip", "install", "--user", "virtualenv==20.0.20"], "Failed to pin virtualenv")
         run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
         # When the 'python_ver' variable is empty, we are using Python 2
-        # setuptools from v45+ removed the support for Python 2, so we pin an old release
         # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
-        upgrade_pip = True if CI_HOST_OS == "Linux" else False
-        install_pip_dependencies(env_pip, ["pip"], upgrade_pip)
-        install_pip_dependencies(env_pip, ["numpy" if python_ver else "numpy==1.16.6",
-                                           "setuptools" if python_ver else "setuptools==44.0.0",
-                                           "sphinx", "six", "wheel"])
+        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
 
     cmd = [env_python, "-u", "setup.py"]
     if phase in ["BUILD"]:
