@@ -180,6 +180,7 @@ endif()
 
 # ================================= Dubious deployment section ================================
 
+set(windows_shiboken_shared_libraries)
 
 if(WIN32)
     # =========================================================================================
@@ -202,22 +203,12 @@ if(WIN32)
     set_target_properties(${bindings_library}
                            PROPERTIES LINK_FLAGS "${python_additional_link_flags}")
 
-    # Add custom target to hard-link shiboken shared libraries into the build folder, so that
+    # Compile a list of shiboken shared libraries to be installed, so that
     # the user doesn't have to set the PATH manually to point to the PySide2 package.
     foreach(library_path ${shiboken_shared_libraries})
         string(REGEX REPLACE ".lib$" ".dll" library_path ${library_path})
-        get_filename_component(base_name ${library_path} NAME)
-        file(TO_NATIVE_PATH ${library_path} source_path)
-        file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${base_name}" dest_path)
-        add_custom_command(OUTPUT "${base_name}"
-                            COMMAND mklink /H "${dest_path}" "${source_path}"
-                            DEPENDS ${library_path}
-                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                            COMMENT "Creating hardlink to shiboken shared library ${base_name}")
-
-        # Fake target that depends on the previous one, but has special ALL keyword, which means
-        # it will always be executed.
-        add_custom_target("fake_${base_name}" ALL DEPENDS ${base_name})
+        file(TO_CMAKE_PATH ${library_path} library_path)
+        list(APPEND windows_shiboken_shared_libraries "${library_path}")
     endforeach()
     # =========================================================================================
     # !!! End of dubious section.
@@ -233,7 +224,8 @@ endif()
 install(TARGETS ${bindings_library} ${sample_library}
         LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}
         RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}
-        )
+        )    
+install(FILES ${windows_shiboken_shared_libraries} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
 # =============================================================================================
 # !!! End of dubious section.
 # =============================================================================================

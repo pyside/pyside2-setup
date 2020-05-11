@@ -575,17 +575,6 @@ static inline
                                                  attribute.value());
 }
 
-static QString msgInvalidVersion(const QStringRef &version, const QString &package = QString())
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Invalid version \"" << version << '"';
-    if (!package.isEmpty())
-        str << "\" specified for package " << package;
-    str << '.';
-    return result;
-}
-
 static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attributes,
                          QString *errorMessage)
 {

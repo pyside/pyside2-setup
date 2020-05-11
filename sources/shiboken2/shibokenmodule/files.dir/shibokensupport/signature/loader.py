@@ -152,10 +152,12 @@ if sys.version_info >= (3,):
     import inspect
     inspect.formatannotation = formatannotation
 else:
-    if "typing" not in sys.modules:
+    tp_name = "typing"
+    if tp_name not in sys.modules:
         orig_typing = False
         from shibokensupport import typing27 as typing
-        sys.modules["typing"] = typing
+        sys.modules[tp_name] = typing
+        typing.__name__ = tp_name
     else:
         import typing
     import inspect

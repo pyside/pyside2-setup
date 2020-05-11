@@ -55,6 +55,7 @@ namespace PyName {
 STATIC_STRING_IMPL(dumps, "dumps")
 STATIC_STRING_IMPL(loads, "loads")
 STATIC_STRING_IMPL(result, "result")
+STATIC_STRING_IMPL(values, "values")
 
 // Internal:
 STATIC_STRING_IMPL(classmethod, "classmethod")

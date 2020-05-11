@@ -195,14 +195,6 @@ def write_data(name, text):
     with open(fn, "w") as f:
         f.write(text)
 
-def update_license(text):
-    end_license = text.index("\n\n")
-    with open(my_name) as fi:
-        my_text = fi.read()
-    my_end_license = my_text.index("\n\n")
-    text = my_text[:my_end_license] + text[end_license:]
-    return text
-
 def eval_data(force=False):
     """
     Read all found files, sort them and keep the latest version.
@@ -224,7 +216,7 @@ def eval_data(force=False):
     for fn in results:
         name = os.path.join(target_path, fn + ".py")
         with open(name, "w") as f:
-            f.write(update_license(results[fn]))
+            f.write(results[fn])
         print("+++ generated:", name)
     return len(results)
 
