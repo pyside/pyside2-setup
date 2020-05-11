@@ -5135,7 +5135,12 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     if (usePySideExtensions() && metaClass->isQObject()) {
         s << INDENT << "Shiboken::ObjectType::setSubTypeInitHook(" << pyTypeName << ", &PySide::initQObjectSubType);\n";
         s << INDENT << "PySide::initDynamicMetaObject(" << pyTypeName << ", &::" << metaClass->qualifiedCppName()
-          << "::staticMetaObject, sizeof(::" << metaClass->qualifiedCppName() << "));\n";
+          << "::staticMetaObject, sizeof(";
+        if (shouldGenerateCppWrapper(metaClass))
+            s << wrapperName(metaClass);
+        else
+            s << "::" << metaClass->qualifiedCppName();
+        s << "));\n";
     }
 
     s << "}\n";
