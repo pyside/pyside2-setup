@@ -805,32 +805,6 @@ PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMet
     return root;
 }
 
-PySideSignal *newObject(const char *name, ...)
-{
-    va_list listSignatures;
-    char *sig = nullptr;
-    PySideSignal *self = PyObject_New(PySideSignal, PySideSignalTypeF());
-    self->data = new PySideSignalData;
-    self->data->signalName = name;
-    self->homonymousMethod = 0;
-
-    va_start(listSignatures, name);
-    sig = va_arg(listSignatures, char *);
-
-    while (sig != NULL) {
-        if (strcmp(sig, "void") == 0)
-            appendSignature(self, SignalSignature(""));
-        else
-            appendSignature(self, SignalSignature(sig));
-
-        sig = va_arg(listSignatures, char *);
-    }
-
-    va_end(listSignatures);
-
-    return self;
-}
-
 template<typename T>
 static typename T::value_type join(T t, const char *sep)
 {
@@ -912,11 +886,6 @@ PyObject *buildQtCompatible(const QByteArray &signature)
 {
     const auto ba = QT_SIGNAL_SENTINEL + signature;
     return Shiboken::String::fromStringAndSize(ba, ba.size());
-}
-
-void addSignalToWrapper(SbkObjectType *wrapperType, const char *signalName, PySideSignal *signal)
-{
-    _addSignalToWrapper(wrapperType, signalName, signal);
 }
 
 PyObject *getObject(PySideSignalInstance *signal)

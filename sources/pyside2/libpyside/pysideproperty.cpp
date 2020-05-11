@@ -378,11 +378,6 @@ bool checkType(PyObject *pyObj)
     return false;
 }
 
-bool isPropertyType(PyObject *pyObj)
-{
-    return checkType(pyObj);
-}
-
 int setValue(PySideProperty *self, PyObject *source, PyObject *value)
 {
     PyObject *fset = self->d->fset;

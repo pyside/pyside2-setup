@@ -312,7 +312,6 @@ void CppGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
         s << "#include <pysidesignal.h>\n"
             << "#include <pysideproperty.h>\n"
             << "#include <pyside.h>\n"
-            << "#include <destroylistener.h>\n"
             << "#include <qapp_macro.h>\n\n"
             << "QT_WARNING_DISABLE_DEPRECATED\n\n";
      }

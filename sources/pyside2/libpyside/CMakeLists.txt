@@ -38,11 +38,8 @@ else()
     set(QML_LIBRARIES "")
 endif()
 
-qt5_wrap_cpp(DESTROYLISTENER_MOC "destroylistener.h")
-
 set(libpyside_SRC
     dynamicqmetaobject.cpp
-    destroylistener.cpp
     signalmanager.cpp
     globalreceiverv2.cpp
     pysideclassinfo.cpp
@@ -54,7 +51,6 @@ set(libpyside_SRC
     pysideweakref.cpp
     pyside.cpp
     pysidestaticstrings.cpp
-    ${DESTROYLISTENER_MOC}
 )
 
 # Add python files to project explorer in Qt Creator, when opening the CMakeLists.txt as a project,
@@ -125,7 +121,6 @@ endif()
 #
 
 set(libpyside_HEADERS
-    destroylistener.h
     dynamicqmetaobject.h
     pysideclassinfo.h
     pysidemacros.h
