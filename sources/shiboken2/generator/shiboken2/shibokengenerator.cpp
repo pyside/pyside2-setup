@@ -349,15 +349,11 @@ void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumLi
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
 {
-    if (shouldGenerateCppWrapper(metaClass)) {
-        QString result = metaClass->name();
-        if (metaClass->enclosingClass()) // is a inner class
-            result.replace(QLatin1String("::"), QLatin1String("_"));
-
-        result += QLatin1String("Wrapper");
-        return result;
-    }
-    return metaClass->qualifiedCppName();
+    Q_ASSERT(shouldGenerateCppWrapper(metaClass));
+    QString result = metaClass->name();
+    if (metaClass->enclosingClass()) // is a inner class
+        result.replace(QLatin1String("::"), QLatin1String("_"));
+    return result + QLatin1String("Wrapper");
 }
 
 QString ShibokenGenerator::wrapperName(const AbstractMetaType *metaType) const
@@ -1674,7 +1670,9 @@ void ShibokenGenerator::processCodeSnip(QString &code, const AbstractMetaClass *
         // for the class context in which the variable is used.
         code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
                      cpythonTypeName(context) + QLatin1String("->type"));
-        code.replace(QLatin1String("%TYPE"), wrapperName(context));
+        const QString className = shouldGenerateCppWrapper(context)
+            ? wrapperName(context) : context->qualifiedCppName();
+        code.replace(QLatin1String("%TYPE"), className);
         code.replace(QLatin1String("%CPPTYPE"), context->name());
     }
 
@@ -2147,7 +2145,10 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction 
     QString wrappedCtorCall;
     if (func->isConstructor()) {
         funcCall.prepend(QLatin1String("new "));
-        wrappedCtorCall = QStringLiteral("new %1(").arg(wrapperName(func->ownerClass()));
+        const auto owner = func->ownerClass();
+        const QString className = shouldGenerateCppWrapper(owner)
+            ? wrapperName(owner) : owner->qualifiedCppName();
+        wrappedCtorCall = QLatin1String("new ") + className + QLatin1Char('(');
     }
     CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
     for (const CodeSnip &snip : qAsConst(snips)) {

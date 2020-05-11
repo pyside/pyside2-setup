@@ -102,7 +102,8 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
 
     QString wrapperName;
     if (!classContext.forSmartPointer()) {
-        wrapperName = HeaderGenerator::wrapperName(metaClass);
+        wrapperName = shouldGenerateCppWrapper(metaClass)
+            ? HeaderGenerator::wrapperName(metaClass) : metaClass->qualifiedCppName();
     } else {
         wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
     }

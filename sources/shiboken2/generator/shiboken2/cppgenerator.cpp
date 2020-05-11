@@ -1364,10 +1364,12 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     code.clear();
 
     QString computedWrapperName;
-    if (!classContext.forSmartPointer())
-        computedWrapperName = wrapperName(metaClass);
-    else
+    if (!classContext.forSmartPointer()) {
+        computedWrapperName = shouldGenerateCppWrapper(metaClass)
+            ? wrapperName(metaClass) : metaClass->qualifiedCppName();
+    } else {
         computedWrapperName = wrapperName(classContext.preciseType());
+    }
 
     c << INDENT << "return Shiboken::Object::newObject(" << cpythonType
         << ", new ::" << computedWrapperName << "(*reinterpret_cast<const "
@@ -3320,13 +3322,15 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         } else if (!injectedCodeCallsCppFunction(func)) {
             if (func->isConstructor()) {
                 isCtor = true;
-                QString className = wrapperName(func->ownerClass());
+                const auto owner = func->ownerClass();
+                QString className = shouldGenerateCppWrapper(owner)
+                    ? wrapperName(owner) : owner->qualifiedCppName();
 
                 if (func->functionType() == AbstractMetaFunction::CopyConstructorFunction && maxArgs == 1) {
                     mc << "new ::" << className << "(*" << CPP_ARG0 << ')';
                 } else {
                     QString ctorCall = className + QLatin1Char('(') + userArgs.join(QLatin1String(", ")) + QLatin1Char(')');
-                    if (usePySideExtensions() && func->ownerClass()->isQObject()) {
+                    if (usePySideExtensions() && owner->isQObject()) {
                         s << INDENT << "void *addr = PySide::nextQObjectMemoryAddr();\n";
                         uva << "if (addr) {\n";
                         {
@@ -5040,8 +5044,10 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         s << INDENT;
         if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
             QString dtorClassName = metaClass->qualifiedCppName();
-            if ((avoidProtectedHack() && metaClass->hasProtectedDestructor()) || classTypeEntry->isValue())
+            if (((avoidProtectedHack() && metaClass->hasProtectedDestructor()) || classTypeEntry->isValue())
+                && shouldGenerateCppWrapper(metaClass)) {
                 dtorClassName = wrapperName(metaClass);
+            }
             if (classContext.forSmartPointer())
                 dtorClassName = wrapperName(classContext.preciseType());
 
