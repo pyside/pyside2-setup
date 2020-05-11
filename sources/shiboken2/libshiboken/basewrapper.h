@@ -86,9 +86,6 @@ typedef void *(*SpecialCastFunction)(void *, SbkObjectType *);
 typedef SbkObjectType *(*TypeDiscoveryFunc)(void *, SbkObjectType *);
 typedef void *(*TypeDiscoveryFuncV2)(void *, SbkObjectType *);
 
-typedef void *(*ExtendedToCppFunc)(PyObject *);        // DEPRECATED.
-typedef bool (*ExtendedIsConvertibleFunc)(PyObject *); // DEPRECATED.
-
 // Used in userdata dealloc function
 typedef void (*DeleteUserDataFunc)(void *);
 
@@ -139,11 +136,6 @@ void callCppDestructor(void *cptr)
 {
     delete reinterpret_cast<T *>(cptr);
 }
-
-/**
- *  Shiboken::importModule is DEPRECATED. Use Shiboken::Module::import() instead.
- */
-SBK_DEPRECATED(LIBSHIBOKEN_API bool importModule(const char *moduleName, PyTypeObject *** cppApiPtr));
 
 // setErrorAboutWrongArguments now gets overload info from the signature module.
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *funcName);
@@ -421,9 +413,6 @@ LIBSHIBOKEN_API void invalidate(PyObject *pyobj);
  * Make the object valid again
  */
 LIBSHIBOKEN_API void makeValid(SbkObject *self);
-
-/// \deprecated Use destroy(SbkObject *, void *)
-SBK_DEPRECATED(LIBSHIBOKEN_API void destroy(SbkObject *self));
 
 /**
  * Destroy any data in Shiboken structure and c++ pointer if the pyboject has the ownership

@@ -666,35 +666,6 @@ bool walkThroughClassHierarchy(PyTypeObject *currentType, HierarchyVisitor *visi
     return result;
 }
 
-bool importModule(const char *moduleName, PyTypeObject *** cppApiPtr)
-{
-    PyObject *sysModules = PyImport_GetModuleDict();
-    PyObject *module = PyDict_GetItemString(sysModules, moduleName);
-    if (!module) {
-        module = PyImport_ImportModule(moduleName);
-        if (!module)
-            return false;
-    } else {
-        Py_INCREF(module);
-    }
-
-    Shiboken::AutoDecRef cppApi(PyObject_GetAttrString(module, "_Cpp_Api"));
-    Py_DECREF(module);
-
-    if (cppApi.isNull())
-        return false;
-
-#ifdef IS_PY3K
-    if (PyCapsule_CheckExact(cppApi))
-        *cppApiPtr = reinterpret_cast<PyTypeObject **>(PyCapsule_GetPointer(cppApi, nullptr));
-#else
-    // Python 2.6 doesn't have PyCapsule API, so let's keep usign PyCObject on all Python 2.x
-    if (PyCObject_Check(cppApi))
-        *cppApiPtr = reinterpret_cast<PyTypeObject **>(PyCObject_AsVoidPtr(cppApi));
-#endif
-    return true;
-}
-
 // Wrapper metatype and base type ----------------------------------------------------------
 
 HierarchyVisitor::HierarchyVisitor() = default;
@@ -1400,11 +1371,6 @@ PyObject *newObject(SbkObjectType *instanceType,
         Py_IncRef(reinterpret_cast<PyObject *>(self));
     }
     return reinterpret_cast<PyObject *>(self);
-}
-
-void destroy(SbkObject *self)
-{
-    destroy(self, nullptr);
 }
 
 void destroy(SbkObject *self, void *cppData)

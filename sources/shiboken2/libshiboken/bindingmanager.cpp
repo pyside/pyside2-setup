@@ -318,11 +318,6 @@ void BindingManager::addClassInheritance(SbkObjectType *parent, SbkObjectType *c
     m_d->classHierarchy.addEdge(parent, child);
 }
 
-SbkObjectType *BindingManager::resolveType(void *cptr, SbkObjectType *type)
-{
-    return resolveType(&cptr, type);
-}
-
 SbkObjectType *BindingManager::resolveType(void **cptr, SbkObjectType *type)
 {
     SbkObjectType *identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
