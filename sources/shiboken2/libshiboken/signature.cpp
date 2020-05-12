@@ -865,12 +865,15 @@ get_signature(PyObject * /* self */, PyObject *args)
 ////////////////////////////////////////////////////////////////////////////
 // a stack trace for linux-like platforms
 #include <stdio.h>
-#include <execinfo.h>
+#if defined(__GLIBC__)
+#  include <execinfo.h>
+#endif
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 void handler(int sig) {
+#if defined(__GLIBC__)
     void *array[30];
     size_t size;
 
@@ -878,8 +881,11 @@ void handler(int sig) {
     size = backtrace(array, 30);
 
     // print out all the frames to stderr
+#endif
     fprintf(stderr, "Error: signal %d:\n", sig);
+#if defined(__GLIBC__)
     backtrace_symbols_fd(array, size, STDERR_FILENO);
+#endif
     exit(1);
 }
 
