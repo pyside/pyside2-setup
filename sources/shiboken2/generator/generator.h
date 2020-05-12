@@ -146,15 +146,10 @@ private:
  * In the future the second case might be generalized for all template type instantiations.
  */
 class GeneratorContext {
+    friend class ShibokenGenerator;
+    friend class Generator;
 public:
     GeneratorContext() = default;
-    GeneratorContext(const AbstractMetaClass *metaClass,
-                     const AbstractMetaType *preciseType = nullptr,
-                     bool forSmartPointer = false)
-        : m_metaClass(metaClass),
-        m_preciseClassType(preciseType),
-        m_forSmartPointer(forSmartPointer) {}
-
 
     const AbstractMetaClass *metaClass() const { return m_metaClass; }
     bool forSmartPointer() const { return m_forSmartPointer; }
@@ -293,6 +288,10 @@ protected:
 
     /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or nullptr if not found.
     const AbstractMetaEnum *findAbstractMetaEnum(const AbstractMetaType *metaType) const;
+
+    virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
+    GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
+                                            const AbstractMetaType *t) const;
 
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
     bool generateFileForContext(const GeneratorContext &context);

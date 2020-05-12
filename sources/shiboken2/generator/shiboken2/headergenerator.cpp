@@ -206,7 +206,7 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
         metaClass = metaClass->baseClass();
         if (!metaClass || !avoidProtectedHack())
             break;
-        classContext = GeneratorContext(metaClass);
+        classContext = contextForClass(metaClass);
         if (!classContext.forSmartPointer()) {
             wrapperName = HeaderGenerator::wrapperName(metaClass);
         } else {

@@ -341,7 +341,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     s << Qt::endl << "// inner classes\n";
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses) {
-        GeneratorContext innerClassContext(innerClass);
+        GeneratorContext innerClassContext = contextForClass(innerClass);
         if (shouldGenerate(innerClass) && !innerClass->typeEntry()->isSmartPointer()) {
             QString headerfile = fileNameForContext(innerClassContext);
             headerfile.replace(QLatin1String(".cpp"), QLatin1String(".h"));
@@ -5606,7 +5606,7 @@ bool CppGenerator::finishGeneration()
     // Initialize smart pointer types.
     const QVector<const AbstractMetaType *> &smartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType *metaType : smartPtrs) {
-        GeneratorContext context(nullptr, metaType, true);
+        GeneratorContext context = contextForSmartPointer(nullptr, metaType);
         writeInitFunc(s_classInitDecl, s_classPythonDefines, INDENT,
                       getInitFunctionName(context),
                       metaType->typeEntry()->targetLangEnclosingEntry());

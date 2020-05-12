@@ -440,12 +440,28 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType *smartP
     return fileName;
 }
 
+GeneratorContext Generator::contextForClass(const AbstractMetaClass *c) const
+{
+    GeneratorContext result;
+    result.m_metaClass = c;
+    return result;
+}
+
+GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
+                                                   const AbstractMetaType *t) const
+{
+    GeneratorContext result;
+    result.m_metaClass = c;
+    result.m_preciseClassType = t;
+    result.m_forSmartPointer = true;
+    return result;
+}
+
 bool Generator::generate()
 {
     const AbstractMetaClassList &classList = m_d->apiextractor->classes();
     for (AbstractMetaClass *cls : classList) {
-        GeneratorContext context(cls);
-        if (!generateFileForContext(context))
+        if (!generateFileForContext(contextForClass(cls)))
             return false;
     }
 
@@ -459,8 +475,7 @@ bool Generator::generate()
                                                            smartPointers)));
             return false;
         }
-        GeneratorContext context(smartPointerClass, type, true);
-        if (!generateFileForContext(context))
+        if (!generateFileForContext(contextForSmartPointer(smartPointerClass, type)))
             return false;
     }
     return finishGeneration();
