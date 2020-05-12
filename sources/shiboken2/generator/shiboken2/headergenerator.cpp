@@ -45,7 +45,7 @@ QString HeaderGenerator::fileNameSuffix() const
     return QLatin1String("_wrapper.h");
 }
 
-QString HeaderGenerator::fileNameForContext(GeneratorContext &context) const
+QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     if (!context.forSmartPointer()) {
@@ -91,9 +91,10 @@ void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const Abstrac
       << " { " << fieldName << " = value; }\n";
 }
 
-void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
+void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &classContextIn)
 {
-    AbstractMetaClass *metaClass = classContext.metaClass();
+    GeneratorContext classContext = classContextIn;
+    const AbstractMetaClass *metaClass = classContext.metaClass();
     m_inheritedOverloads.clear();
     Indentation indent(INDENT);
 

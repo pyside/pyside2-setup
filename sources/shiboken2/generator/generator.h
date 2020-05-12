@@ -148,7 +148,7 @@ private:
 class GeneratorContext {
 public:
     GeneratorContext() = default;
-    GeneratorContext(AbstractMetaClass *metaClass,
+    GeneratorContext(const AbstractMetaClass *metaClass,
                      const AbstractMetaType *preciseType = nullptr,
                      bool forSmartPointer = false)
         : m_metaClass(metaClass),
@@ -156,12 +156,12 @@ public:
         m_forSmartPointer(forSmartPointer) {}
 
 
-    AbstractMetaClass *metaClass() const { return m_metaClass; }
+    const AbstractMetaClass *metaClass() const { return m_metaClass; }
     bool forSmartPointer() const { return m_forSmartPointer; }
     const AbstractMetaType *preciseType() const { return m_preciseClassType; }
 
 private:
-    AbstractMetaClass *m_metaClass = nullptr;
+    const AbstractMetaClass *m_metaClass = nullptr;
     const AbstractMetaType *m_preciseClassType = nullptr;
     bool m_forSmartPointer = false;
 };
@@ -295,7 +295,7 @@ protected:
     const AbstractMetaEnum *findAbstractMetaEnum(const AbstractMetaType *metaType) const;
 
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
-    bool generateFileForContext(GeneratorContext &context);
+    bool generateFileForContext(const GeneratorContext &context);
 
     /// Returns the file base name for a smart pointer.
     QString getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,
@@ -371,7 +371,7 @@ protected:
      *   \return the file name used to write the binding code for the class
      */
     virtual QString fileNameSuffix() const = 0;
-    virtual QString fileNameForContext(GeneratorContext &context) const = 0;
+    virtual QString fileNameForContext(const GeneratorContext &context) const = 0;
 
 
     virtual bool doSetup() = 0;
@@ -382,7 +382,7 @@ protected:
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
-    virtual void generateClass(QTextStream &s, GeneratorContext &classContext) = 0;
+    virtual void generateClass(QTextStream &s, const GeneratorContext &classContext) = 0;
     virtual bool finishGeneration() = 0;
 
     /**

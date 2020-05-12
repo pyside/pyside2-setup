@@ -43,10 +43,10 @@ public:
 
 protected:
     QString fileNameSuffix() const override;
-    QString fileNameForContext(GeneratorContext &context) const override;
+    QString fileNameForContext(const GeneratorContext &context) const override;
     QVector<AbstractMetaFunctionList> filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
                                                                      uint query);
-    void generateClass(QTextStream &s, GeneratorContext &classContext) override;
+    void generateClass(QTextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:
@@ -66,29 +66,29 @@ private:
     void writeEnumConverterFunctions(QTextStream &s, const TypeEntry *enumType);
     void writeEnumConverterFunctions(QTextStream &s, const AbstractMetaEnum *metaEnum);
     void writeConverterFunctions(QTextStream &s, const AbstractMetaClass *metaClass,
-                                 GeneratorContext &classContext);
+                                 const GeneratorContext &classContext);
     void writeCustomConverterFunctions(QTextStream &s, const CustomConversion *customConversion);
     void writeConverterRegister(QTextStream &s, const AbstractMetaClass *metaClass,
-                                GeneratorContext &classContext);
+                                const GeneratorContext &classContext);
     void writeCustomConverterRegister(QTextStream &s, const CustomConversion *customConversion, const QString &converterVar);
 
     void writeContainerConverterFunctions(QTextStream &s, const AbstractMetaType *containerType);
 
     void writeMethodWrapperPreamble(QTextStream &s, OverloadData &overloadData,
-                                    GeneratorContext &context);
+                                    const GeneratorContext &context);
     void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
-                                 GeneratorContext &classContext);
+                                 const GeneratorContext &classContext);
     void writeMethodWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
-                            GeneratorContext &classContext);
+                            const GeneratorContext &classContext);
     void writeArgumentsInitializer(QTextStream &s, OverloadData &overloadData);
     void writeCppSelfConversion(QTextStream &s, const GeneratorContext &context,
                                 const QString &className, bool useWrapperClass);
     void writeCppSelfDefinition(QTextStream &s,
                                 const AbstractMetaFunction *func,
-                                GeneratorContext &context,
+                                const GeneratorContext &context,
                                 bool hasStaticOverload = false);
     void writeCppSelfDefinition(QTextStream &s,
-                                GeneratorContext &context,
+                                const GeneratorContext &context,
                                 bool hasStaticOverload = false,
                                 bool cppSelfAsReference = false);
 
@@ -107,11 +107,13 @@ private:
 
     void writeSetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass) const;
     void writeSetattroDefaultReturn(QTextStream &s) const;
-    void writeSmartPointerSetattroFunction(QTextStream &s, GeneratorContext &context);
-    void writeSetattroFunction(QTextStream &s, AttroCheck attroCheck, GeneratorContext &context);
+    void writeSmartPointerSetattroFunction(QTextStream &s, const GeneratorContext &context);
+    void writeSetattroFunction(QTextStream &s, AttroCheck attroCheck,
+                               const GeneratorContext &context);
     static void writeGetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
-    void writeSmartPointerGetattroFunction(QTextStream &s, GeneratorContext &context);
-    void writeGetattroFunction(QTextStream &s, AttroCheck attroCheck, GeneratorContext &context);
+    void writeSmartPointerGetattroFunction(QTextStream &s, const GeneratorContext &context);
+    void writeGetattroFunction(QTextStream &s, AttroCheck attroCheck,
+                               const GeneratorContext &context);
     QString writeSmartPointerGetterCast();
     QString qObjectGetAttroFunction() const;
 
@@ -182,13 +184,13 @@ private:
     /// Writes calls to all the possible method/function overloads.
     void writeFunctionCalls(QTextStream &s,
                             const OverloadData &overloadData,
-                            GeneratorContext &context);
+                            const GeneratorContext &context);
 
     /// Writes the call to a single function usually from a collection of overloads.
     void writeSingleFunctionCall(QTextStream &s,
                                  const OverloadData &overloadData,
                                  const AbstractMetaFunction *func,
-                                 GeneratorContext &context);
+                                 const GeneratorContext &context);
 
     /// Returns the name of a C++ to Python conversion function.
     static QString cppToPythonFunctionName(const QString &sourceTypeName, QString targetTypeName = QString());
@@ -241,48 +243,48 @@ private:
     /// Returns a string containing the name of an argument for the given function and argument index.
     QString argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex, const AbstractMetaClass **wrappedClass);
     void writeMethodCall(QTextStream &s, const AbstractMetaFunction *func,
-                         GeneratorContext &context, int maxArgs = 0);
+                         const GeneratorContext &context, int maxArgs = 0);
 
-    QString getInitFunctionName(GeneratorContext &context) const;
+    QString getInitFunctionName(const GeneratorContext &context) const;
     QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const;
 
     void writeClassRegister(QTextStream &s,
                             const AbstractMetaClass *metaClass,
-                            GeneratorContext &classContext,
+                            const GeneratorContext &classContext,
                             QTextStream &signatureStream);
     void writeClassDefinition(QTextStream &s,
                               const AbstractMetaClass *metaClass,
-                              GeneratorContext &classContext);
+                              const GeneratorContext &classContext);
     void writeMethodDefinitionEntry(QTextStream &s, const AbstractMetaFunctionList &overloads);
     void writeMethodDefinition(QTextStream &s, const AbstractMetaFunctionList &overloads);
     void writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads);
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(QTextStream &s,
                               const AbstractMetaClass *metaClass,
-                              GeneratorContext &context);
+                              const GeneratorContext &context);
     void writeTypeAsSequenceDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
 
     /// Writes the PyMappingMethods structure for types that supports the python mapping protocol.
     void writeTypeAsMappingDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
     void writeMappingMethods(QTextStream &s,
                              const AbstractMetaClass *metaClass,
-                             GeneratorContext &context);
+                             const GeneratorContext &context);
 
     void writeTypeAsNumberDefinition(QTextStream &s, const AbstractMetaClass *metaClass);
 
     void writeTpTraverseFunction(QTextStream &s, const AbstractMetaClass *metaClass);
     void writeTpClearFunction(QTextStream &s, const AbstractMetaClass *metaClass);
 
-    void writeCopyFunction(QTextStream &s, GeneratorContext &context);
+    void writeCopyFunction(QTextStream &s, const GeneratorContext &context);
 
     void writeGetterFunction(QTextStream &s,
                              const AbstractMetaField *metaField,
-                             GeneratorContext &context);
+                             const GeneratorContext &context);
     void writeSetterFunction(QTextStream &s,
                              const AbstractMetaField *metaField,
-                             GeneratorContext &context);
+                             const GeneratorContext &context);
 
-    void writeRichCompareFunction(QTextStream &s, GeneratorContext &context);
+    void writeRichCompareFunction(QTextStream &s, const GeneratorContext &context);
 
     void writeEnumsInitialization(QTextStream &s, AbstractMetaEnumList &enums);
     void writeEnumInitialization(QTextStream &s, const AbstractMetaEnum *metaEnum);
@@ -313,7 +315,7 @@ private:
     void writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn);
     bool writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, int argIndex, bool userHeuristicPolicy);
     void writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func);
-    void writeInitQtMetaTypeFunctionBody(QTextStream &s, GeneratorContext &context) const;
+    void writeInitQtMetaTypeFunctionBody(QTextStream &s, const GeneratorContext &context) const;
 
     /**
      *   Returns the multiple inheritance initializer function for the given class.
@@ -338,14 +340,14 @@ private:
     /// Returns true if generator should produce getters and setters for the given class.
     bool shouldGenerateGetSetList(const AbstractMetaClass *metaClass);
 
-    void writeHashFunction(QTextStream &s, GeneratorContext &context);
+    void writeHashFunction(QTextStream &s, const GeneratorContext &context);
 
     /// Write default implementations for sequence protocol
-    void writeStdListWrapperMethods(QTextStream &s, GeneratorContext &context);
+    void writeStdListWrapperMethods(QTextStream &s, const GeneratorContext &context);
     /// Helper function for writeStdListWrapperMethods.
     void writeIndexError(QTextStream &s, const QString &errorMsg);
 
-    QString writeReprFunction(QTextStream &s, GeneratorContext &context, uint indirections);
+    QString writeReprFunction(QTextStream &s, const GeneratorContext &context, uint indirections);
 
     const AbstractMetaFunction *boolCast(const AbstractMetaClass *metaClass) const;
     bool hasBoolCast(const AbstractMetaClass *metaClass) const

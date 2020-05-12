@@ -408,9 +408,9 @@ void Generator::setOutputDirectory(const QString &outDir)
     m_d->outDir = outDir;
 }
 
-bool Generator::generateFileForContext(GeneratorContext &context)
+bool Generator::generateFileForContext(const GeneratorContext &context)
 {
-    AbstractMetaClass *cls = context.metaClass();
+    const AbstractMetaClass *cls = context.metaClass();
 
     if (!shouldGenerate(cls))
         return true;
