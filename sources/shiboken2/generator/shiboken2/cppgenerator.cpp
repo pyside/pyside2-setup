@@ -3156,7 +3156,10 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         const CodeSnipList &snips = func->injectedCodeSnips();
         for (const CodeSnip &cs : snips) {
             if (cs.position == TypeSystem::CodeSnipPositionEnd) {
-                s << INDENT << "overloadId = " << func->ownerClass()->functions().indexOf(const_cast<AbstractMetaFunction *const>(func)) << ";\n";
+                auto klass = func->ownerClass();
+                s << INDENT << "overloadId = "
+                  << klass->functions().indexOf(const_cast<AbstractMetaFunction *>(func))
+                  << ";\n";
                 break;
             }
         }
