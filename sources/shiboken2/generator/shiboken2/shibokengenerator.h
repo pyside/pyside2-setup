@@ -107,6 +107,8 @@ protected:
                                 const AbstractMetaFunction *func,
                                 Options options = NoOption) const override;
 
+    GeneratorContext contextForClass(const AbstractMetaClass *c) const override;
+
     /**
      *   Returns a map with all functions grouped, the function name is used as key.
      *   Example of return value: { "foo" -> ["foo(int)", "foo(int, long)], "bar" -> "bar(double)"}
@@ -229,8 +231,6 @@ protected:
     static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass);
 
     QString wrapperName(const AbstractMetaClass *metaClass) const;
-    QString wrapperName(const AbstractMetaType *metaType) const;
-    QString wrapperName(const TypeEntry *type) const;
 
     QString fullPythonClassName(const AbstractMetaClass *metaClass);
     QString fullPythonFunctionName(const AbstractMetaFunction *func);

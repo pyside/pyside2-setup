@@ -103,10 +103,10 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
 
     QString wrapperName;
     if (!classContext.forSmartPointer()) {
-        wrapperName = shouldGenerateCppWrapper(metaClass)
-            ? HeaderGenerator::wrapperName(metaClass) : metaClass->qualifiedCppName();
+        wrapperName = classContext.useWrapper()
+            ? classContext.wrapperName() : metaClass->qualifiedCppName();
     } else {
-        wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
+        wrapperName = classContext.smartPointerWrapperName();
     }
     QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     QString innerHeaderGuard;
@@ -121,11 +121,10 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
     //Includes
     s << metaClass->typeEntry()->include() << Qt::endl;
 
-    if (shouldGenerateCppWrapper(metaClass) &&
-        usePySideExtensions() && metaClass->isQObject())
+    if (classContext.useWrapper() && usePySideExtensions() && metaClass->isQObject())
         s << "namespace PySide { class DynamicQMetaObject; }\n\n";
 
-    while (shouldGenerateCppWrapper(metaClass)) {
+    while (classContext.useWrapper()) {
         if (!innerHeaderGuard.isEmpty()) {
             s << "#  ifndef SBK_" << innerHeaderGuard << "_H\n";
             s << "#  define SBK_" << innerHeaderGuard << "_H\n\n";
@@ -208,9 +207,10 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
             break;
         classContext = contextForClass(metaClass);
         if (!classContext.forSmartPointer()) {
-            wrapperName = HeaderGenerator::wrapperName(metaClass);
+            wrapperName = classContext.useWrapper()
+                ? classContext.wrapperName() : metaClass->qualifiedCppName();
         } else {
-            wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
+            wrapperName = classContext.smartPointerWrapperName();
         }
         innerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     }

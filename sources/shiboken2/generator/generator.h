@@ -149,16 +149,29 @@ class GeneratorContext {
     friend class ShibokenGenerator;
     friend class Generator;
 public:
+    enum Type { Class, WrappedClass, SmartPointer };
+
     GeneratorContext() = default;
 
     const AbstractMetaClass *metaClass() const { return m_metaClass; }
-    bool forSmartPointer() const { return m_forSmartPointer; }
     const AbstractMetaType *preciseType() const { return m_preciseClassType; }
+
+    bool forSmartPointer() const { return m_type == SmartPointer; }
+    bool useWrapper() const { return m_type ==  WrappedClass; }
+
+    QString wrapperName() const
+    {
+        Q_ASSERT(m_type == WrappedClass);
+        return m_wrappername;
+    }
+
+    QString smartPointerWrapperName() const;
 
 private:
     const AbstractMetaClass *m_metaClass = nullptr;
     const AbstractMetaType *m_preciseClassType = nullptr;
-    bool m_forSmartPointer = false;
+    QString m_wrappername;
+    Type m_type = Class;
 };
 
 /**

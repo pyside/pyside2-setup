@@ -356,20 +356,6 @@ QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
     return result + QLatin1String("Wrapper");
 }
 
-QString ShibokenGenerator::wrapperName(const AbstractMetaType *metaType) const
-{
-    return metaType->cppSignature();
-}
-
-QString ShibokenGenerator::wrapperName(const TypeEntry *type) const
-{
-    QString name = type->name();
-    int pos = name.lastIndexOf(QLatin1String("::"));
-    if (pos >= 0)
-        name = name.remove(0, pos + 2);
-    return name + QLatin1String("Wrapper");
-}
-
 QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClass)
 {
     QString fullClassName = metaClass->name();
@@ -1468,6 +1454,16 @@ void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
     }
 }
 
+GeneratorContext ShibokenGenerator::contextForClass(const AbstractMetaClass *c) const
+{
+    GeneratorContext result = Generator::contextForClass(c);
+    if (shouldGenerateCppWrapper(c)) {
+        result.m_type = GeneratorContext::WrappedClass;
+        result.m_wrappername = wrapperName(c);
+    }
+    return result;
+}
+
 QString ShibokenGenerator::functionReturnType(const AbstractMetaFunction *func, Options options) const
 {
     QString modifiedReturnType = QString(func->typeReplaced(0));
@@ -1671,8 +1667,8 @@ void ShibokenGenerator::processClassCodeSnip(QString &code, const GeneratorConte
     // for the class context in which the variable is used.
     code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
                  cpythonTypeName(metaClass) + QLatin1String("->type"));
-    const QString className = shouldGenerateCppWrapper(metaClass)
-        ? wrapperName(metaClass) : metaClass->qualifiedCppName();
+    const QString className = context.useWrapper()
+        ? context.wrapperName() : metaClass->qualifiedCppName();
     code.replace(QLatin1String("%TYPE"), className);
     code.replace(QLatin1String("%CPPTYPE"), metaClass->name());
 
@@ -2166,8 +2162,8 @@ bool ShibokenGenerator::injectedCodeCallsCppFunction(const GeneratorContext &con
     if (func->isConstructor()) {
         funcCall.prepend(QLatin1String("new "));
         const auto owner = func->ownerClass();
-        const QString className = shouldGenerateCppWrapper(owner)
-            ? wrapperName(owner) : owner->qualifiedCppName();
+        const QString className = context.useWrapper()
+            ? context.wrapperName() : owner->qualifiedCppName();
         wrappedCtorCall = QLatin1String("new ") + className + QLatin1Char('(');
     }
     CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);

@@ -151,6 +151,12 @@ QString DefaultValue::constructorParameter() const
     return m_value + QLatin1String("()");
 }
 
+QString GeneratorContext::smartPointerWrapperName() const
+{
+    Q_ASSERT(m_type == SmartPointer);
+    return m_preciseClassType->cppSignature();
+}
+
 struct Generator::GeneratorPrivate
 {
     const ApiExtractor *apiextractor = nullptr;
@@ -453,7 +459,7 @@ GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
     GeneratorContext result;
     result.m_metaClass = c;
     result.m_preciseClassType = t;
-    result.m_forSmartPointer = true;
+    result.m_type = GeneratorContext::SmartPointer;
     return result;
 }
 
