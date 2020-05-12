@@ -182,6 +182,8 @@ OPTION = {
     # This is used automatically by distutils.command.install object, to
     # specify the final installation location.
     "FINAL_INSTALL_PREFIX": option_value("prefix", remove=False),
+    # This is used to identify the template for doc builds
+    "DOC_BUILD_ONLINE": has_option("doc-build-online"),
 }
 _deprecated_option_jobs = option_value('jobs')
 if _deprecated_option_jobs:

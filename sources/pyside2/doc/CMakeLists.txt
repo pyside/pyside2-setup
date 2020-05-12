@@ -95,15 +95,50 @@ add_custom_target(qdoc
                 COMMENT "Running qdoc against Qt source code..."
                 SOURCE "pyside.qdocconf")
 
+# conditional tag for sphinx build
+#string(JOIN "_" SPHINX_TAG ${DOC_OUTPUT_FORMAT} "format")
+# Python script to replace the virtualFolder string in the QHP
+set(py_cmd "from __future__ import print_function
+import fileinput
+import re
+try:
+\tfor line in fileinput.input('html/PySide.qhp',inplace=True,backup='.bak'):
+\t\tline_copy=line.strip()
+\t\tif not line_copy: # check for empty line
+\t\t\tcontinue
+\t\tmatch=re.match('(^.*virtualFolder.)doc(.*$)',line)
+\t\tif match:
+\t\t\trepl=''.join([match.group(1),'pyside2',match.group(2)])
+\t\t\tprint(line.replace(match.group(0),repl),end='')
+\t\telse:
+\t\t\tprint(line)
+except:
+\tpass\n")
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/py_script.py CONTENT ${py_cmd})
+
 add_custom_target(apidoc
-                  COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b html  ${CMAKE_CURRENT_BINARY_DIR}/rst html
-                  #copying shiboken2 (including ApiExtractor) doc htmls
-                  COMMENT "Copying over the Shiboken2 doc HTMLs..."
-                  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
-                  COMMAND ${CMAKE_COMMAND} -E copy_directory
-                          ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken2/doc/html
-                          ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+                  COMMAND ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT} ${CMAKE_CURRENT_BINARY_DIR}/rst html
+                  COMMENT "Generating PySide htmls..."
                  )
+
+# create a custom commands to copy the shiboken docs
+# and generate offline help based on the output format.
+if(DOC_OUTPUT_FORMAT STREQUAL "html")
+    add_custom_command(TARGET apidoc POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken2/doc/html
+                    ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+            COMMENT "Copying Shiboken docs..."
+            VERBATIM)
+else()
+    file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/html/PySide.qhp QHP_FILE)
+    add_custom_command(TARGET apidoc POST_BUILD
+            COMMAND ${PYTHON_EXECUTABLE} py_script.py
+            COMMAND qhelpgenerator ${QHP_FILE}
+            COMMENT "Generating QCH from a QHP file..."
+            VERBATIM)
+endif()
 
 # create conf.py based on conf.py.in
 configure_file("conf.py.in" "rst/conf.py" @ONLY)

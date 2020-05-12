@@ -25,7 +25,12 @@ import sys, os
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
 'sphinx.ext.coverage']
 
+output_format='@DOC_OUTPUT_FORMAT@'
+
+def setup(app):
+    app.add_config_value('output_format','qthelp','env')
 rst_epilog = """
+
 .. |project| replace:: Shiboken
 """
 
@@ -158,3 +163,6 @@ html_show_sourcelink = False
 
 # If nonempty, this is the file name suffix for HTML files (e.g. ".xhtml").
 #html_file_suffix = ''
+
+# -- Options for qthelp output --------------------------------------------------
+qthelp_theme = 'pysidedocs_qthelp'
