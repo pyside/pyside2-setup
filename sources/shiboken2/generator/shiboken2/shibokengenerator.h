@@ -124,11 +124,15 @@ protected:
     AbstractMetaFunctionList getFunctionAndInheritedOverloads(const AbstractMetaFunction *func, QSet<QString> *seen);
 
     /// Write user's custom code snippets at class or module level.
+    void writeClassCodeSnips(QTextStream &s,
+                             const QVector<CodeSnip> & codeSnips,
+                             TypeSystem::CodeSnipPosition position,
+                             TypeSystem::Language language,
+                             const GeneratorContext &context);
     void writeCodeSnips(QTextStream &s,
                         const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
-                        TypeSystem::Language language,
-                        const AbstractMetaClass *context = nullptr);
+                        TypeSystem::Language language);
     /// Write user's custom code snippets at function level.
     void writeCodeSnips(QTextStream &s,
                         const QVector<CodeSnip> & codeSnips,
@@ -138,7 +142,8 @@ protected:
                         const AbstractMetaArgument *lastArg = nullptr);
 
     /// Replaces variables for the user's custom code at global or class level.
-    void processCodeSnip(QString &code, const AbstractMetaClass *context = nullptr);
+    void processCodeSnip(QString &code);
+    void processClassCodeSnip(QString &code, const GeneratorContext &context);
 
     /**
      *   Verifies if any of the function's code injections of the "native"
@@ -155,7 +160,8 @@ protected:
      *   \param func the function to check
      *   \return true if the function's code snippets call the wrapped C++ function
      */
-    bool injectedCodeCallsCppFunction(const AbstractMetaFunction *func);
+    bool injectedCodeCallsCppFunction(const GeneratorContext &context,
+                                      const AbstractMetaFunction *func);
 
     /**
      *   Verifies if any of the function's code injections of the "native" class makes a

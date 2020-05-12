@@ -171,7 +171,9 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
             s << '~' << wrapperName << "();\n";
         }
 
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode);
+        writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
+                            TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode,
+                            classContext);
 
         if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && usePySideExtensions() && metaClass->isQObject()) {

@@ -1663,19 +1663,24 @@ QString ShibokenGenerator::getCodeSnippets(const CodeSnipList &codeSnips,
     }
     return code;
 }
-void ShibokenGenerator::processCodeSnip(QString &code, const AbstractMetaClass *context)
-{
-    if (context) {
-        // Replace template variable by the Python Type object
-        // for the class context in which the variable is used.
-        code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
-                     cpythonTypeName(context) + QLatin1String("->type"));
-        const QString className = shouldGenerateCppWrapper(context)
-            ? wrapperName(context) : context->qualifiedCppName();
-        code.replace(QLatin1String("%TYPE"), className);
-        code.replace(QLatin1String("%CPPTYPE"), context->name());
-    }
 
+void ShibokenGenerator::processClassCodeSnip(QString &code, const GeneratorContext &context)
+{
+    auto metaClass = context.metaClass();
+    // Replace template variable by the Python Type object
+    // for the class context in which the variable is used.
+    code.replace(QLatin1String("%PYTHONTYPEOBJECT"),
+                 cpythonTypeName(metaClass) + QLatin1String("->type"));
+    const QString className = shouldGenerateCppWrapper(metaClass)
+        ? wrapperName(metaClass) : metaClass->qualifiedCppName();
+    code.replace(QLatin1String("%TYPE"), className);
+    code.replace(QLatin1String("%CPPTYPE"), metaClass->name());
+
+    processCodeSnip(code);
+}
+
+void ShibokenGenerator::processCodeSnip(QString &code)
+{
     // replace "toPython" converters
     replaceConvertToPythonTypeSystemVariable(code);
 
@@ -1741,16 +1746,30 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
     return argReplacements;
 }
 
-void ShibokenGenerator::writeCodeSnips(QTextStream &s,
+void ShibokenGenerator::writeClassCodeSnips(QTextStream &s,
                                        const CodeSnipList &codeSnips,
                                        TypeSystem::CodeSnipPosition position,
                                        TypeSystem::Language language,
-                                       const AbstractMetaClass *context)
+                                       const GeneratorContext &context)
 {
     QString code = getCodeSnippets(codeSnips, position, language);
     if (code.isEmpty())
         return;
-    processCodeSnip(code, context);
+    processClassCodeSnip(code, context);
+    s << INDENT << "// Begin code injection\n";
+    s << code;
+    s << INDENT << "// End of code injection\n";
+}
+
+void ShibokenGenerator::writeCodeSnips(QTextStream &s,
+                                       const CodeSnipList &codeSnips,
+                                       TypeSystem::CodeSnipPosition position,
+                                       TypeSystem::Language language)
+{
+    QString code = getCodeSnippets(codeSnips, position, language);
+    if (code.isEmpty())
+        return;
+    processCodeSnip(code);
     s << INDENT << "// Begin code injection\n";
     s << code;
     s << INDENT << "// End of code injection\n";
@@ -2139,7 +2158,8 @@ bool ShibokenGenerator::injectedCodeUsesPySelf(const AbstractMetaFunction *func)
     return false;
 }
 
-bool ShibokenGenerator::injectedCodeCallsCppFunction(const AbstractMetaFunction *func)
+bool ShibokenGenerator::injectedCodeCallsCppFunction(const GeneratorContext &context,
+                                                     const AbstractMetaFunction *func)
 {
     QString funcCall = func->originalName() + QLatin1Char('(');
     QString wrappedCtorCall;

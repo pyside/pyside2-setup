@@ -53,15 +53,16 @@ private:
     void writeInitFunc(QTextStream &declStr, QTextStream &callStr,
                        const Indentor &indent, const QString &initFunctionName,
                        const TypeEntry *enclosingEntry = nullptr);
-    void writeCacheResetNative(QTextStream &s, const AbstractMetaClass *metaClass);
-    void writeConstructorNative(QTextStream &s, const AbstractMetaFunction *func);
-    void writeDestructorNative(QTextStream &s, const AbstractMetaClass *metaClass);
+    void writeCacheResetNative(QTextStream &s, const GeneratorContext &classContext);
+    void writeConstructorNative(QTextStream &s, const GeneratorContext &classContext,
+                                const AbstractMetaFunction *func);
+    void writeDestructorNative(QTextStream &s, const GeneratorContext &classContext);
 
     QString getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func);
     void writeVirtualMethodNative(QTextStream &s, const AbstractMetaFunction *func, int cacheIndex);
 
-    void writeMetaObjectMethod(QTextStream &s, const AbstractMetaClass *metaClass);
-    void writeMetaCast(QTextStream &s, const AbstractMetaClass *metaClass);
+    void writeMetaObjectMethod(QTextStream &s, const GeneratorContext &classContext);
+    void writeMetaCast(QTextStream &s, const GeneratorContext &classContext);
 
     void writeEnumConverterFunctions(QTextStream &s, const TypeEntry *enumType);
     void writeEnumConverterFunctions(QTextStream &s, const AbstractMetaEnum *metaEnum);
