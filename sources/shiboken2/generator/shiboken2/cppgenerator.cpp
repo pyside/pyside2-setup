@@ -6080,7 +6080,12 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream &s, const GeneratorCon
     s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = " << CPP_SELF_VAR << "->begin();\n";
     s << INDENT << "for (Py_ssize_t pos = 0; pos < _i; pos++) _item++;\n";
 
-    const AbstractMetaType *itemType = metaClass->templateBaseClassInstantiations().constFirst();
+    const AbstractMetaTypeList instantiations = metaClass->templateBaseClassInstantiations();
+    if (instantiations.isEmpty()) {
+        qFatal("shiboken: %s: Internal error, no instantiations of \"%s\" were found.",
+               __FUNCTION__, qPrintable(metaClass->qualifiedCppName()));
+    }
+    const AbstractMetaType *itemType = instantiations.constFirst();
 
     s << INDENT << "return ";
     writeToPythonConversion(s, itemType, metaClass, QLatin1String("*_item"));
