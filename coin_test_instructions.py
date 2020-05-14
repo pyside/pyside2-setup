@@ -64,10 +64,12 @@ CI_RELEASE_CONF = has_option("packaging")
 def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
+    # Pinning the virtualenv before creating one
+    run_instruction(["pip", "install", "--user", "virtualenv==20.0.20"], "Failed to pin virtualenv")
     run_instruction(["virtualenv", "-p", _pExe,  _env], "Failed to create virtualenv")
-    upgrade_pip = True if CI_HOST_OS == "Linux" else False
-    install_pip_dependencies(env_pip, ["pip"], upgrade_pip)
-    install_pip_dependencies(env_pip, ["numpy", "PyOpenGL", "setuptools", "six", "pyinstaller==3.6", "wheel"])
+    # When the 'python_ver' variable is empty, we are using Python 2
+    # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
+    run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
                   "--buildno=" + buildnro]
