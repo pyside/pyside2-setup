@@ -91,6 +91,8 @@ static CodeModelItem findRecursion(const ScopeModelItem &scope,
             return es;
         if (TypeDefModelItem tp = scope->findTypeDef(nameSegment))
             return tp;
+        if (TemplateTypeAliasModelItem tta = scope->findTemplateTypeAlias(nameSegment))
+            return tta;
         return CodeModelItem();
     }
     if (auto nestedClass = scope->findClass(nameSegment))
@@ -188,6 +190,23 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
                 << std::endl;
             return otherType;
         }
+        return resolveType(nextItem, combined, __scope);
+    }
+
+    if (TemplateTypeAliasModelItem templateTypeAlias = qSharedPointerDynamicCast<_TemplateTypeAliasModelItem>(__item)) {
+
+        TypeInfo combined = TypeInfo::combine(templateTypeAlias->type(), otherType);
+        // For the alias "template<typename T> using QList = QVector<T>" with
+        // other="QList<int>", replace the instantiations to obtain "QVector<int>".
+        auto aliasInstantiations = templateTypeAlias->type().instantiations();
+        auto concreteInstantiations = otherType.instantiations();
+        const int count = qMin(aliasInstantiations.size(), concreteInstantiations.size());
+        for (int i = 0; i < count; ++i)
+            aliasInstantiations[i] = concreteInstantiations[i];
+        combined.setInstantiations(aliasInstantiations);
+        const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
+        if (!nextItem)
+            return combined;
         return resolveType(nextItem, combined, __scope);
     }
 
@@ -639,6 +658,9 @@ void _CodeModelItem::formatKind(QDebug &d, int k)
     case Kind_TypeDef:
         d << "TypeDefModelItem";
         break;
+    case Kind_TemplateTypeAlias:
+        d << "TemplateTypeAliasModelItem";
+        break;
     default:
         d << "CodeModelItem";
         break;
@@ -802,6 +824,11 @@ void _ScopeModelItem::addTypeDef(const TypeDefModelItem &item)
     m_typeDefs.append(item);
 }
 
+void _ScopeModelItem::addTemplateTypeAlias(const TemplateTypeAliasModelItem &item)
+{
+    m_templateTypeAliases.append(item);
+}
+
 void _ScopeModelItem::addEnum(const EnumModelItem &item)
 {
     m_enums.append(item);
@@ -812,6 +839,7 @@ void _ScopeModelItem::appendScope(const _ScopeModelItem &other)
     m_classes += other.m_classes;
     m_enums += other.m_enums;
     m_typeDefs += other.m_typeDefs;
+    m_templateTypeAliases += other.m_templateTypeAliases;
     m_variables += other.m_variables;
     m_functions += other.m_functions;
     m_enumsDeclarations += other.m_enumsDeclarations;
@@ -856,6 +884,7 @@ void _ScopeModelItem::formatScopeItemsDebug(QDebug &d) const
     formatScopeList(d, ", classes=", m_classes, "\n", true);
     formatScopeList(d, ", enums=", m_enums, "\n", true);
     formatScopeList(d, ", aliases=", m_typeDefs, "\n", true);
+    formatScopeList(d, ", template type aliases=", m_templateTypeAliases, "\n", true);
     formatScopeList(d, ", functions=", m_functions, "\n", true);
     formatScopeList(d, ", variables=", m_variables);
 }
@@ -905,6 +934,11 @@ VariableModelItem _ScopeModelItem::findVariable(const QString &name) const
 TypeDefModelItem _ScopeModelItem::findTypeDef(const QString &name) const
 {
     return findModelItem(m_typeDefs, name);
+}
+
+TemplateTypeAliasModelItem _ScopeModelItem::findTemplateTypeAlias(const QString &name) const
+{
+    return findModelItem(m_templateTypeAliases, name);
 }
 
 EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
@@ -1226,6 +1260,48 @@ void _TypeDefModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
+
+_TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem(CodeModel *model, int kind)
+    : _CodeModelItem(model, kind) {}
+
+_TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem(CodeModel *model, const QString &name, int kind)
+    : _CodeModelItem(model, name, kind) {}
+
+TemplateParameterList _TemplateTypeAliasModelItem::templateParameters() const
+{
+    return m_templateParameters;
+}
+
+void _TemplateTypeAliasModelItem::addTemplateParameter(const TemplateParameterModelItem &templateParameter)
+{
+    m_templateParameters.append(templateParameter);
+}
+
+TypeInfo _TemplateTypeAliasModelItem::type() const
+{
+    return m_type;
+}
+
+void _TemplateTypeAliasModelItem::setType(const TypeInfo &type)
+{
+    m_type = type;
+}
+
+#ifndef QT_NO_DEBUG_STREAM
+void _TemplateTypeAliasModelItem::formatDebug(QDebug &d) const
+{
+    _CodeModelItem::formatDebug(d);
+    d << ", <";
+    for (int i = 0, count = m_templateParameters.size(); i < count; ++i) {
+        if (i)
+            d << ", ";
+        d << m_templateParameters.at(i)->name();
+    }
+    d << ">, type=" << m_type;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
+// ---------------------------------------------------------------------------
 CodeModel::AccessPolicy _EnumModelItem::accessPolicy() const
 {
     return m_accessPolicy;
@@ -1473,4 +1549,3 @@ void _MemberModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // kate: space-indent on; indent-width 2; replace-tabs on;
-
