@@ -50,7 +50,6 @@
 #include "pysidemetafunction_p.h"
 #include "pysidemetafunction.h"
 #include "dynamicqmetaobject.h"
-#include "destroylistener.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>
@@ -166,12 +165,10 @@ void registerCleanupFunction(CleanupFunction func)
 
 void runCleanupFunctions()
 {
-    //PySide::DestroyListener::instance()->destroy();
     while (!cleanupFunctionList.isEmpty()) {
         CleanupFunction f = cleanupFunctionList.pop();
         f();
     }
-    PySide::DestroyListener::destroy();
 }
 
 static void destructionVisitor(SbkObject *pyObj, void *data)
@@ -269,11 +266,6 @@ const QMetaObject *retrieveMetaObject(PyObject *pyObj)
     auto pyTypeObj = PyType_Check(pyObj)
         ? reinterpret_cast<PyTypeObject *>(pyObj) : Py_TYPE(pyObj);
     return retrieveMetaObject(pyTypeObj);
-}
-
-void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base)
-{
-    initDynamicMetaObject(type, base, 0);
 }
 
 void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds */)

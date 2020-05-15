@@ -88,9 +88,9 @@ static PyType_Slot PySidePropertyType_slots[] = {
     {Py_tp_getset, PySidePropertyType_getset},
     {0, 0}
 };
-// Dotted modulename is crucial for PyType_FromSpec to work. Is this name right?
+// Dotted modulename is crucial for SbkType_FromSpec to work. Is this name right?
 static PyType_Spec PySidePropertyType_spec = {
-    "PySide2.QtCore.Property",
+    "2:PySide2.QtCore.Property",
     sizeof(PySideProperty),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_BASETYPE,
@@ -100,9 +100,8 @@ static PyType_Spec PySidePropertyType_spec = {
 
 PyTypeObject *PySidePropertyTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type)
-        type = (PyTypeObject *)PyType_FromSpec(&PySidePropertyType_spec);
+    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
+        SbkType_FromSpec(&PySidePropertyType_spec));
     return type;
 }
 
@@ -376,11 +375,6 @@ bool checkType(PyObject *pyObj)
         return PyType_IsSubtype(Py_TYPE(pyObj), PySidePropertyTypeF());
     }
     return false;
-}
-
-bool isPropertyType(PyObject *pyObj)
-{
-    return checkType(pyObj);
 }
 
 int setValue(PySideProperty *self, PyObject *source, PyObject *value)

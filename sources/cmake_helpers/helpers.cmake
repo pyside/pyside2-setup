@@ -17,7 +17,7 @@ endmacro()
 macro(collect_optional_modules)
 # Collect all optional modules.
 set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia
-MultimediaWidgets OpenGL OpenGLFunctions Positioning Location Qml Quick QuickWidgets RemoteObjects Scxml Script ScriptTools Sensors TextToSpeech Charts Svg DataVisualization)
+MultimediaWidgets OpenGL OpenGLFunctions Positioning Location Qml Quick QuickWidgets RemoteObjects Scxml Script ScriptTools Sensors SerialPort TextToSpeech Charts Svg DataVisualization)
 find_package(Qt5UiTools)
 if(Qt5UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)

@@ -356,12 +356,16 @@ QByteArrayList emulatedCompilerOptions()
 
 LanguageLevel emulatedCompilerLanguageLevel()
 {
-#if defined(Q_CC_MSVC) && _MSC_VER > 1900
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return LanguageLevel::Cpp17;
+#else
+#  if defined(Q_CC_MSVC) && _MSC_VER > 1900
     // Fixes constexpr errors in MSVC2017 library headers with Clang 4.1..5.X (0.45 == Clang 6).
     if (libClangVersion() < QVersionNumber(0, 45))
         return LanguageLevel::Cpp1Z;
-#endif // Q_CC_MSVC && _MSC_VER > 1900
+#  endif // Q_CC_MSVC && _MSC_VER > 1900
     return LanguageLevel::Cpp14; // otherwise, t.h is parsed as "C"
+#endif // Qt 5
 }
 
 struct LanguageLevelMapping

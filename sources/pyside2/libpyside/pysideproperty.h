@@ -64,9 +64,6 @@ typedef void (*MetaCallHandler)(PySideProperty*,PyObject*,QMetaObject::Call, voi
 
 PYSIDE_API bool checkType(PyObject* pyObj);
 
-/// @deprecated Use checkType
-PYSIDE_DEPRECATED(PYSIDE_API bool isPropertyType(PyObject* pyObj));
-
 /**
  * This function call set property function and pass value as arg
  * This function does not check the property object type

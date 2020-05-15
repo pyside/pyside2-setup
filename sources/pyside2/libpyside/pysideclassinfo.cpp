@@ -64,7 +64,7 @@ static PyType_Slot PySideClassInfoType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideClassInfoType_spec = {
-    "PySide2.QtCore.ClassInfo",
+    "2:PySide2.QtCore.ClassInfo",
     sizeof(PySideClassInfo),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -75,7 +75,7 @@ static PyType_Spec PySideClassInfoType_spec = {
 PyTypeObject *PySideClassInfoTypeF(void)
 {
     static PyTypeObject *type =
-        reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&PySideClassInfoType_spec));
+        reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&PySideClassInfoType_spec));
     return type;
 }
 
