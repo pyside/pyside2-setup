@@ -66,7 +66,7 @@ static PyType_Slot PySideMetaFunctionType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideMetaFunctionType_spec = {
-    "PySide2.QtCore.MetaFunction",
+    "2:PySide2.QtCore.MetaFunction",
     sizeof(PySideMetaFunction),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -76,9 +76,8 @@ static PyType_Spec PySideMetaFunctionType_spec = {
 
 PyTypeObject *PySideMetaFunctionTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type)
-        type = (PyTypeObject *)PyType_FromSpec(&PySideMetaFunctionType_spec);
+    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
+        SbkType_FromSpec(&PySideMetaFunctionType_spec));
     return type;
 }
 

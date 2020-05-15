@@ -184,11 +184,8 @@ __all__ = [
 
 
 def _qualname(x):
-    if sys.version_info[:2] >= (3, 3):
-        return x.__qualname__
-    else:
-        # Fall back to just name.
-        return x.__name__
+    # PYSIDE-1286: Support __qualname__ in Python 2
+    return getattr(x, "__qualname__", x.__name__)
 
 
 def _trim_name(nm):

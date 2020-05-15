@@ -44,6 +44,7 @@
 #include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkstring.h"
+#include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 #include "gilstate.h"
@@ -114,7 +115,7 @@ static PyType_Slot SbkObjectType_Type_slots[] = {
     {0, nullptr}
 };
 static PyType_Spec SbkObjectType_Type_spec = {
-    "Shiboken.ObjectType",
+    "1:Shiboken.ObjectType",
     0,   // basicsize (inserted later)
     sizeof(PyMemberDef),
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
@@ -216,7 +217,7 @@ PyTypeObject *SbkObjectType_TypeF(void)
     if (!type) {
         SbkObjectType_Type_spec.basicsize =
             PepHeapType_SIZE + sizeof(SbkObjectTypePrivate);
-        type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkObjectType_Type_spec));
+        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkObjectType_Type_spec));
 #if PY_VERSION_HEX < 0x03000000
         if (patch_tp_new_wrapper(type) < 0)
             return nullptr;
@@ -290,7 +291,7 @@ static PyType_Slot SbkObject_Type_slots[] = {
     {0, nullptr}
 };
 static PyType_Spec SbkObject_Type_spec = {
-    "Shiboken.Object",
+    "1:Shiboken.Object",
     sizeof(SbkObject),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -302,7 +303,7 @@ SbkObjectType *SbkObject_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
-        type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(&SbkObject_Type_spec));
+        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkObject_Type_spec));
         Py_TYPE(type) = SbkObjectType_TypeF();
         Py_INCREF(Py_TYPE(type));
         type->tp_weaklistoffset = offsetof(SbkObject, weakreflist);
@@ -616,14 +617,27 @@ PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
     return self == nullptr ? nullptr : _setupNew(self, subtype);
 }
 
-PyObject *
-SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *)
+PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *)
 {
     // PYSIDE-595: Give the same error as type_call does when tp_new is NULL.
     PyErr_Format(PyExc_TypeError,
                  "cannot create '%.100s' instances ¯\\_(ツ)_/¯",
                  type->tp_name);
     return nullptr;
+}
+
+PyObject *SbkType_FromSpec(PyType_Spec *spec)
+{
+    return SbkType_FromSpecWithBases(spec, nullptr);
+}
+
+PyObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
+{
+    PyType_Spec new_spec = *spec;
+    const char *colon = strchr(spec->name, ':');
+    assert(colon);
+    new_spec.name = colon + 1;
+    return PyType_FromSpecWithBases(&new_spec, bases);
 }
 
 } //extern "C"
@@ -718,13 +732,13 @@ void init()
     Shiboken::ObjectType::initPrivateData(SbkObject_TypeF());
 
     if (PyType_Ready(SbkEnumType_TypeF()) < 0)
-        Py_FatalError("[libshiboken] Failed to initialise Shiboken.SbkEnumType metatype.");
+        Py_FatalError("[libshiboken] Failed to initialize Shiboken.SbkEnumType metatype.");
 
     if (PyType_Ready(SbkObjectType_TypeF()) < 0)
-        Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapperType metatype.");
+        Py_FatalError("[libshiboken] Failed to initialize Shiboken.BaseWrapperType metatype.");
 
     if (PyType_Ready(reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())) < 0)
-        Py_FatalError("[libshiboken] Failed to initialise Shiboken.BaseWrapper type.");
+        Py_FatalError("[libshiboken] Failed to initialize Shiboken.BaseWrapper type.");
 
     VoidPtr::init();
 
@@ -874,7 +888,7 @@ introduceWrapperType(PyObject *enclosingObject,
 {
     typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType ? baseType : SbkObject_TypeF());
 
-    PyObject *heaptype = PyType_FromSpecWithBases(typeSpec, baseTypes);
+    PyObject *heaptype = SbkType_FromSpecWithBases(typeSpec, baseTypes);
     Py_TYPE(heaptype) = SbkObjectType_TypeF();
     Py_INCREF(Py_TYPE(heaptype));
     auto *type = reinterpret_cast<SbkObjectType *>(heaptype);
