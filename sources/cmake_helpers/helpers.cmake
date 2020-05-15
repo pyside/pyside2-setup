@@ -2,7 +2,15 @@ macro(collect_essential_modules)
 # Collect all essential modules.
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets.
-set(ALL_ESSENTIAL_MODULES Core Gui Widgets PrintSupport Sql Network Test Concurrent)
+set(ALL_ESSENTIAL_MODULES
+    Core
+    Gui
+    Widgets
+    PrintSupport
+    Sql
+    Network
+    Test
+    Concurrent)
 if(UNIX AND NOT APPLE)
     list(APPEND ALL_ESSENTIAL_MODULES X11Extras)
 endif()
@@ -16,8 +24,28 @@ endmacro()
 
 macro(collect_optional_modules)
 # Collect all optional modules.
-set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia
-MultimediaWidgets OpenGL OpenGLFunctions Positioning Location Qml Quick QuickWidgets RemoteObjects Scxml Script ScriptTools Sensors SerialPort TextToSpeech Charts Svg DataVisualization)
+set(ALL_OPTIONAL_MODULES
+    Xml
+    XmlPatterns
+    Help Multimedia
+    MultimediaWidgets
+    OpenGL
+    OpenGLFunctions
+    Positioning
+    Location
+    Qml
+    Quick
+    QuickWidgets
+    RemoteObjects
+    Scxml
+    Script
+    ScriptTools
+    Sensors
+    SerialPort
+    TextToSpeech
+    Charts
+    Svg
+    DataVisualization)
 find_package(Qt5UiTools)
 if(Qt5UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)
