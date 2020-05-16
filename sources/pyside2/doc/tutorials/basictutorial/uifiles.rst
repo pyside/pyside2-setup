@@ -1,5 +1,5 @@
-Using UI Files
-***************
+Using `.ui` Files (`QUiLoader` and `pyside2-uic`)
+*************************************************
 
 This page describes the use of Qt Creator to create graphical
 interfaces for your Qt for Python project.
