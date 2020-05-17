@@ -107,14 +107,16 @@ static PyObject *SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
     if (!self)
         return nullptr;
     self->ob_value = itemValue;
-    PyObject *item = Shiboken::Enum::getEnumItemFromValue(type, itemValue);
-    if (item) {
-        self->ob_name = SbkEnumObject_name(item, nullptr);
-        Py_XDECREF(item);
-    } else {
-        self->ob_name = nullptr;
-    }
+    Shiboken::AutoDecRef item(Shiboken::Enum::getEnumItemFromValue(type, itemValue));
+    self->ob_name = item.object() ? SbkEnumObject_name(item, nullptr) : nullptr;
     return reinterpret_cast<PyObject *>(self);
+}
+
+void enum_object_dealloc(PyObject *ob)
+{
+    auto self = reinterpret_cast<SbkEnumObject *>(ob);
+    Py_XDECREF(self->ob_name);
+    Sbk_object_dealloc(ob);
 }
 
 static PyObject *enum_op(enum_func f, PyObject *a, PyObject *b) {
@@ -448,7 +450,7 @@ static bool _init_enum()
 static void init_enum()
 {
     if (!(enum_unpickler || _init_enum()))
-        Py_FatalError("could not load enum helper functions");
+        Py_FatalError("could not load enum pickling helper function");
 }
 
 static PyMethodDef SbkEnumObject_Methods[] = {
@@ -497,7 +499,7 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
     while (PyDict_Next(values, &pos, &key, &value)) {
         auto *obj = reinterpret_cast<SbkEnumObject *>(value);
         if (obj->ob_value == itemValue) {
-            Py_INCREF(obj);
+            Py_INCREF(value);
             return value;
         }
     }
@@ -644,7 +646,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_nb_index, (void *)enum_int},
     {Py_tp_richcompare, (void *)enum_richcompare},
     {Py_tp_hash, (void *)enum_hash},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
+    {Py_tp_dealloc, (void *)enum_object_dealloc},
     {0, nullptr}
 };
 static PyType_Spec SbkNewType_spec = {
@@ -735,7 +737,6 @@ newTypeWithName(const char *name,
     newspec->slots = newslots;
     auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(newspec));
     Py_TYPE(type) = SbkEnumType_TypeF();
-    Py_INCREF(Py_TYPE(type));
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     PepType_SETP(enumType)->cppName = cppName;

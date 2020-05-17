@@ -30,6 +30,7 @@
 
 '''Test cases for QEnum and QFlags'''
 
+import gc
 import os
 import sys
 import pickle
@@ -74,6 +75,22 @@ class TestEnum(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             a = k*2.0
+
+    @unittest.skipUnless(getattr(sys, "getobjects", None), "requires debug build")
+    def testEnumNew_NoLeak(self):
+        gc.collect()
+        total = sys.gettotalrefcount()
+        for idx in range(1000):
+            ret = Qt.Key(42)
+        gc.collect()
+        delta = sys.gettotalrefcount() - total
+        print("delta total refcount =", delta)
+        if abs(delta) >= 10:
+            all = sys.getobjects(0)
+            all.sort(key=lambda x: sys.getrefcount(x), reverse=True)
+            for ob in all[:10]:
+                print(sys.getrefcount(ob), ob)
+        self.assertTrue(abs(delta) < 10)
 
 
 class TestQFlags(unittest.TestCase):
