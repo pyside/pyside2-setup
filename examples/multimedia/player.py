@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         if self.player.position() <= 5000:
             self.playlist.previous()
         else:
-            player.setPosition(0)
+            self.player.setPosition(0)
 
     def updateButtons(self, state):
         mediaCount = self.playlist.mediaCount()
