@@ -267,7 +267,8 @@ public:
         Kind_File = 5 << FirstKind | Kind_Namespace,
         Kind_TemplateParameter = 7 << FirstKind,
         Kind_TypeDef = 8 << FirstKind,
-        Kind_Variable = 9 << FirstKind | Kind_Member
+        Kind_TemplateTypeAlias = 9 << FirstKind,
+        Kind_Variable = 10 << FirstKind | Kind_Member
     };
 
 public:
@@ -333,18 +334,21 @@ public:
     EnumList enums() const { return m_enums; }
     inline FunctionList functions() const { return m_functions; }
     TypeDefList typeDefs() const { return m_typeDefs; }
+    TemplateTypeAliasList templateTypeAliases() const { return m_templateTypeAliases; }
     VariableList variables() const { return m_variables; }
 
     void addClass(const ClassModelItem &item);
     void addEnum(const EnumModelItem &item);
     void addFunction(const FunctionModelItem &item);
     void addTypeDef(const TypeDefModelItem &item);
+    void addTemplateTypeAlias(const TemplateTypeAliasModelItem &item);
     void addVariable(const VariableModelItem &item);
 
     ClassModelItem findClass(const QString &name) const;
     EnumModelItem findEnum(const QString &name) const;
     FunctionList findFunctions(const QString &name) const;
     TypeDefModelItem findTypeDef(const QString &name) const;
+    TemplateTypeAliasModelItem findTemplateTypeAlias(const QString &name) const;
     VariableModelItem findVariable(const QString &name) const;
 
     void addEnumsDeclaration(const QString &enumsDeclaration);
@@ -372,6 +376,7 @@ private:
     ClassList m_classes;
     EnumList m_enums;
     TypeDefList m_typeDefs;
+    TemplateTypeAliasList m_templateTypeAliases;
     VariableList m_variables;
     FunctionList m_functions;
 
@@ -680,6 +685,30 @@ public:
 #endif
 
 private:
+    TypeInfo m_type;
+};
+
+class _TemplateTypeAliasModelItem : public _CodeModelItem
+{
+public:
+    DECLARE_MODEL_NODE(TemplateTypeAlias)
+
+    explicit _TemplateTypeAliasModelItem(CodeModel *model, int kind = __node_kind);
+    explicit _TemplateTypeAliasModelItem(CodeModel *model, const QString &name,
+                                         int kind = __node_kind);
+
+    TemplateParameterList templateParameters() const;
+    void addTemplateParameter(const TemplateParameterModelItem &templateParameter);
+
+    TypeInfo type() const;
+    void setType(const TypeInfo &type);
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
+
+private:
+    TemplateParameterList m_templateParameters;
     TypeInfo m_type;
 };
 

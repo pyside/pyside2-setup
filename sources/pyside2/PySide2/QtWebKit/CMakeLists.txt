@@ -8,10 +8,10 @@ ${QtWebKit_GEN_DIR}/qtwebkit_module_wrapper.cpp
 
 set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
                             ${QtWebKit_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Gui_INCLUDE_DIRS}
-                            ${Qt5Network_INCLUDE_DIRS}
-                            ${Qt5WebKit_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}WebKit_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
@@ -19,10 +19,10 @@ set(QtWebKit_include_dirs   ${QtWebKit_SOURCE_DIR}
                             ${QtNetwork_GEN_DIR}
                             )
 set(QtWebKit_libraries      pyside2
-                            ${Qt5WebKit_LIBRARIES}
-                            ${Qt5Network_LIBRARIES}
-                            ${Qt5Gui_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}WebKit_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                             )
 set(QtWebKit_deps QtGui QtNetwork)
 create_pyside_module(NAME QtWebKit

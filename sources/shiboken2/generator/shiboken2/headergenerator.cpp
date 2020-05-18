@@ -45,7 +45,7 @@ QString HeaderGenerator::fileNameSuffix() const
     return QLatin1String("_wrapper.h");
 }
 
-QString HeaderGenerator::fileNameForContext(GeneratorContext &context) const
+QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     if (!context.forSmartPointer()) {
@@ -91,9 +91,10 @@ void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const Abstrac
       << " { " << fieldName << " = value; }\n";
 }
 
-void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
+void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &classContextIn)
 {
-    AbstractMetaClass *metaClass = classContext.metaClass();
+    GeneratorContext classContext = classContextIn;
+    const AbstractMetaClass *metaClass = classContext.metaClass();
     m_inheritedOverloads.clear();
     Indentation indent(INDENT);
 
@@ -102,9 +103,10 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
 
     QString wrapperName;
     if (!classContext.forSmartPointer()) {
-        wrapperName = HeaderGenerator::wrapperName(metaClass);
+        wrapperName = classContext.useWrapper()
+            ? classContext.wrapperName() : metaClass->qualifiedCppName();
     } else {
-        wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
+        wrapperName = classContext.smartPointerWrapperName();
     }
     QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     QString innerHeaderGuard;
@@ -119,11 +121,10 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
     //Includes
     s << metaClass->typeEntry()->include() << Qt::endl;
 
-    if (shouldGenerateCppWrapper(metaClass) &&
-        usePySideExtensions() && metaClass->isQObject())
+    if (classContext.useWrapper() && usePySideExtensions() && metaClass->isQObject())
         s << "namespace PySide { class DynamicQMetaObject; }\n\n";
 
-    while (shouldGenerateCppWrapper(metaClass)) {
+    while (classContext.useWrapper()) {
         if (!innerHeaderGuard.isEmpty()) {
             s << "#  ifndef SBK_" << innerHeaderGuard << "_H\n";
             s << "#  define SBK_" << innerHeaderGuard << "_H\n\n";
@@ -169,7 +170,9 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
             s << '~' << wrapperName << "();\n";
         }
 
-        writeCodeSnips(s, metaClass->typeEntry()->codeSnips(), TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode);
+        writeClassCodeSnips(s, metaClass->typeEntry()->codeSnips(),
+                            TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode,
+                            classContext);
 
         if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             && usePySideExtensions() && metaClass->isQObject()) {
@@ -202,11 +205,12 @@ void HeaderGenerator::generateClass(QTextStream &s, GeneratorContext &classConte
         metaClass = metaClass->baseClass();
         if (!metaClass || !avoidProtectedHack())
             break;
-        classContext = GeneratorContext(metaClass);
+        classContext = contextForClass(metaClass);
         if (!classContext.forSmartPointer()) {
-            wrapperName = HeaderGenerator::wrapperName(metaClass);
+            wrapperName = classContext.useWrapper()
+                ? classContext.wrapperName() : metaClass->qualifiedCppName();
         } else {
-            wrapperName = HeaderGenerator::wrapperName(classContext.preciseType());
+            wrapperName = classContext.smartPointerWrapperName();
         }
         innerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
     }

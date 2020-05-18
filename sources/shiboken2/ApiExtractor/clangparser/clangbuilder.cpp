@@ -191,6 +191,8 @@ public:
     bool addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const;
 
     void addTypeDef(const CXCursor &cursor, const CXType &cxType);
+    void startTemplateTypeAlias(const CXCursor &cursor);
+    void endTemplateTypeAlias(const CXCursor &typeAliasCursor);
 
     TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor) const;
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
@@ -216,12 +218,14 @@ public:
     CursorTypedefHash m_cursorTypedefHash;
 
     mutable TypeInfoHash m_typeInfoHash; // Cache type information
+    mutable QHash<QString, TemplateTypeAliasModelItem> m_templateTypeAliases;
 
     ClassModelItem m_currentClass;
     EnumModelItem m_currentEnum;
     FunctionModelItem m_currentFunction;
     ArgumentModelItem m_currentArgument;
     VariableModelItem m_currentField;
+    TemplateTypeAliasModelItem m_currentTemplateTypeAlias;
     QByteArrayList m_systemIncludes; // files, like "memory"
     QByteArrayList m_systemIncludePaths; // paths, like "/usr/include/Qt/"
 
@@ -552,6 +556,26 @@ void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
     m_cursorTypedefHash.insert(cursor, item);
 }
 
+void BuilderPrivate::startTemplateTypeAlias(const CXCursor &cursor)
+{
+    const QString target = getCursorSpelling(cursor);
+    m_currentTemplateTypeAlias.reset(new _TemplateTypeAliasModelItem(m_model, target));
+    setFileName(cursor, m_currentTemplateTypeAlias.data());
+    m_currentTemplateTypeAlias->setScope(m_scope);
+}
+
+void BuilderPrivate::endTemplateTypeAlias(const CXCursor &typeAliasCursor)
+{
+    CXType type = clang_getTypedefDeclUnderlyingType(typeAliasCursor);
+    // Usually "<elaborated>std::list<T>" or "<unexposed>Container1<T>",
+    // as obtained with parser of PYSIDE-323
+    if (type.kind == CXType_Unexposed || type.kind == CXType_Elaborated) {
+        m_currentTemplateTypeAlias->setType(createTypeInfo(type));
+        m_scopeStack.back()->addTemplateTypeAlias(m_currentTemplateTypeAlias);
+    }
+    m_currentTemplateTypeAlias.reset();
+}
+
 // extract an expression from the cursor via source
 // CXCursor_EnumConstantDecl, ParmDecl (a = Flag1 | Flag2)
 QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor) const
@@ -597,8 +621,22 @@ long clang_EnumDecl_isScoped4(BaseVisitor *bv, const CXCursor &cursor)
 // Add a base class to the current class from CXCursor_CXXBaseSpecifier
 void BuilderPrivate::addBaseClass(const CXCursor &cursor)
 {
-    const CXType inheritedType = clang_getCursorType(cursor); // Note spelling has "struct baseClass",
-    QString baseClassName = getTypeName(inheritedType);       // use type.
+    // Note: spelling has "struct baseClass", use type
+    QString baseClassName;
+    const CXType inheritedType = clang_getCursorType(cursor);
+    if (inheritedType.kind == CXType_Unexposed) {
+        // The type is unexposed when the base class is a template type alias:
+        // "class QItemSelection : public QList<X>" where QList is aliased to QVector.
+        // Try to resolve via code model.
+        TypeInfo info = createTypeInfo(inheritedType);
+        auto parentScope = m_scopeStack.at(m_scopeStack.size() - 2); // Current is class.
+        auto resolved = TypeInfo::resolveType(info, parentScope);
+        if (resolved != info)
+            baseClassName = resolved.toString();
+    }
+    if (baseClassName.isEmpty())
+        baseClassName = getTypeName(inheritedType);
+
     const CXCursor declCursor = clang_getTypeDeclaration(inheritedType);
     const CursorClassHash::const_iterator it = m_cursorClassHash.constFind(declCursor);
     const CodeModel::AccessPolicy access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
@@ -990,6 +1028,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // Apply to function/member template?
         if (!d->m_currentFunction.isNull()) {
             d->m_currentFunction->setTemplateParameters(d->m_currentFunction->templateParameters() << tItem);
+        } else if (!d->m_currentTemplateTypeAlias.isNull()) {
+            d->m_currentTemplateTypeAlias->addTemplateParameter(tItem);
         } else if (!d->m_currentClass.isNull()) { // Apply to class
             const QString &tplParmName = tItem->name();
             if (Q_UNLIKELY(!insertTemplateParameterIntoClassName(tplParmName, d->m_currentClass)
@@ -1005,13 +1045,19 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         }
     }
         break;
-    case CXCursor_TypeAliasDecl:
-    case CXCursor_TypeAliasTemplateDecl: { // May contain nested CXCursor_TemplateTypeParameter
-        const CXType type = clang_getCanonicalType(clang_getCursorType(cursor));
-        if (type.kind > CXType_Unexposed)
-            d->addTypeDef(cursor, type);
-    }
-        return Skip;
+    case CXCursor_TypeAliasTemplateDecl:
+        d->startTemplateTypeAlias(cursor);
+        break;
+    case CXCursor_TypeAliasDecl: // May contain nested CXCursor_TemplateTypeParameter
+        if (d->m_currentTemplateTypeAlias.isNull()) {
+            const CXType type = clang_getCanonicalType(clang_getCursorType(cursor));
+            if (type.kind > CXType_Unexposed)
+                d->addTypeDef(cursor, type);
+            return Skip;
+        } else {
+            d->endTemplateTypeAlias(cursor);
+        }
+        break;
     case CXCursor_TypedefDecl: {
         auto underlyingType = clang_getTypedefDeclUnderlyingType(cursor);
         d->addTypeDef(cursor, underlyingType);
@@ -1089,6 +1135,9 @@ bool Builder::endToken(const CXCursor &cursor)
         break;
     case CXCursor_ParmDecl:
         d->m_currentArgument.clear();
+        break;
+    case CXCursor_TypeAliasTemplateDecl:
+        d->m_currentTemplateTypeAlias.reset();
         break;
     default:
         break;

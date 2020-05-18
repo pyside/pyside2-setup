@@ -22,14 +22,14 @@ ${QtXmlPatterns_GEN_DIR}/qtxmlpatterns_module_wrapper.cpp
 
 set(QtXmlPatterns_include_dirs  ${QtXmlPatterns_SOURCE_DIR}
                                 ${QtXmlPatterns_BINARY_DIR}
-                                ${Qt5Core_INCLUDE_DIRS}
-                                ${Qt5XmlPatterns_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}XmlPatterns_INCLUDE_DIRS}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 )
 set(QtXmlPatterns_libraries     pyside2
-                                ${Qt5Core_LIBRARIES}
-                                ${Qt5XmlPatterns_LIBRARIES})
+                                ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                                ${Qt${QT_MAJOR_VERSION}XmlPatterns_LIBRARIES})
 set(QtXmlPatterns_deps QtCore)
 
 create_pyside_module(NAME QtXmlPatterns

@@ -24,7 +24,8 @@ ${QtScxml_GEN_DIR}/qscxmlexecutablecontent_parameterinfo_wrapper.cpp
 ${QtScxml_GEN_DIR}/qtscxml_module_wrapper.cpp
 )
 
-if (Qt5Scxml_VERSION VERSION_EQUAL 5.12.0 OR Qt5Scxml_VERSION VERSION_GREATER 5.12.0)
+if (Qt${QT_MAJOR_VERSION}Scxml_VERSION VERSION_EQUAL 5.12.0
+    OR Qt${QT_MAJOR_VERSION}Scxml_VERSION VERSION_GREATER 5.12.0)
     list(APPEND QtScxml_SRC
          ${QtScxml_GEN_DIR}/qscxmldatamodel_wrapper.cpp
          ${QtScxml_GEN_DIR}/qscxmldatamodel_foreachloopbody_wrapper.cpp
@@ -35,13 +36,13 @@ endif()
 
 set(QtScxml_include_dirs ${QtScxml_SOURCE_DIR}
                          ${QtScxml_BINARY_DIR}
-                         ${Qt5Core_INCLUDE_DIRS}
-                         ${Qt5Scxml_INCLUDE_DIRS}
+                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                         ${Qt${QT_MAJOR_VERSION}Scxml_INCLUDE_DIRS}
                          ${libpyside_SOURCE_DIR}
                          ${QtCore_GEN_DIR})
 
 set(QtScxml_libraries pyside2
-                         ${Qt5Scxml_LIBRARIES})
+                         ${Qt${QT_MAJOR_VERSION}Scxml_LIBRARIES})
 
 set(QtScxml_deps QtCore)
 

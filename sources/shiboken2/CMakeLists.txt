@@ -114,7 +114,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_T
 
 # Force usage of the C++11 standard, without a silent fallback
 # to C++98 if the compiler does not support C++11.
-set(CMAKE_CXX_STANDARD 11)
+if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
+    set(CMAKE_CXX_STANDARD 17)
+else()
+    set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )

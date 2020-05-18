@@ -151,6 +151,12 @@ QString DefaultValue::constructorParameter() const
     return m_value + QLatin1String("()");
 }
 
+QString GeneratorContext::smartPointerWrapperName() const
+{
+    Q_ASSERT(m_type == SmartPointer);
+    return m_preciseClassType->cppSignature();
+}
+
 struct Generator::GeneratorPrivate
 {
     const ApiExtractor *apiextractor = nullptr;
@@ -408,9 +414,9 @@ void Generator::setOutputDirectory(const QString &outDir)
     m_d->outDir = outDir;
 }
 
-bool Generator::generateFileForContext(GeneratorContext &context)
+bool Generator::generateFileForContext(const GeneratorContext &context)
 {
-    AbstractMetaClass *cls = context.metaClass();
+    const AbstractMetaClass *cls = context.metaClass();
 
     if (!shouldGenerate(cls))
         return true;
@@ -440,12 +446,28 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType *smartP
     return fileName;
 }
 
+GeneratorContext Generator::contextForClass(const AbstractMetaClass *c) const
+{
+    GeneratorContext result;
+    result.m_metaClass = c;
+    return result;
+}
+
+GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
+                                                   const AbstractMetaType *t) const
+{
+    GeneratorContext result;
+    result.m_metaClass = c;
+    result.m_preciseClassType = t;
+    result.m_type = GeneratorContext::SmartPointer;
+    return result;
+}
+
 bool Generator::generate()
 {
     const AbstractMetaClassList &classList = m_d->apiextractor->classes();
     for (AbstractMetaClass *cls : classList) {
-        GeneratorContext context(cls);
-        if (!generateFileForContext(context))
+        if (!generateFileForContext(contextForClass(cls)))
             return false;
     }
 
@@ -459,8 +481,7 @@ bool Generator::generate()
                                                            smartPointers)));
             return false;
         }
-        GeneratorContext context(smartPointerClass, type, true);
-        if (!generateFileForContext(context))
+        if (!generateFileForContext(contextForSmartPointer(smartPointerClass, type)))
             return false;
     }
     return finishGeneration();

@@ -47,6 +47,7 @@ class _NamespaceModelItem;
 class _ScopeModelItem;
 class _TemplateParameterModelItem;
 class _TypeDefModelItem;
+class _TemplateTypeAliasModelItem;
 class _VariableModelItem;
 class _MemberModelItem;
 class TypeInfo;
@@ -62,6 +63,7 @@ using NamespaceModelItem = QSharedPointer<_NamespaceModelItem>;
 using ScopeModelItem = QSharedPointer<_ScopeModelItem>;
 using TemplateParameterModelItem = QSharedPointer<_TemplateParameterModelItem>;
 using TypeDefModelItem = QSharedPointer<_TypeDefModelItem>;
+using TemplateTypeAliasModelItem = QSharedPointer<_TemplateTypeAliasModelItem>;
 using VariableModelItem = QSharedPointer<_VariableModelItem>;
 using MemberModelItem = QSharedPointer<_MemberModelItem>;
 
@@ -76,6 +78,7 @@ using NamespaceList = QVector<NamespaceModelItem>;
 using ScopeList = QVector<ScopeModelItem>;
 using TemplateParameterList = QVector<TemplateParameterModelItem>;
 using TypeDefList = QVector<TypeDefModelItem>;
+using TemplateTypeAliasList = QVector<TemplateTypeAliasModelItem>;
 using VariableList = QVector<VariableModelItem>;
 using MemberList = QVector<MemberModelItem>;
 

@@ -2,7 +2,15 @@ macro(collect_essential_modules)
 # Collect all essential modules.
 # note: the order of this list is relevant for dependencies.
 # For instance: Qt5Printsupport must come before Qt5WebKitWidgets.
-set(ALL_ESSENTIAL_MODULES Core Gui Widgets PrintSupport Sql Network Test Concurrent)
+set(ALL_ESSENTIAL_MODULES
+    Core
+    Gui
+    Widgets
+    PrintSupport
+    Sql
+    Network
+    Test
+    Concurrent)
 if(UNIX AND NOT APPLE)
     list(APPEND ALL_ESSENTIAL_MODULES X11Extras)
 endif()
@@ -16,10 +24,30 @@ endmacro()
 
 macro(collect_optional_modules)
 # Collect all optional modules.
-set(ALL_OPTIONAL_MODULES Xml XmlPatterns Help Multimedia
-MultimediaWidgets OpenGL OpenGLFunctions Positioning Location Qml Quick QuickWidgets RemoteObjects Scxml Script ScriptTools Sensors SerialPort TextToSpeech Charts Svg DataVisualization)
-find_package(Qt5UiTools)
-if(Qt5UiTools_FOUND)
+set(ALL_OPTIONAL_MODULES
+    Xml
+    XmlPatterns
+    Help Multimedia
+    MultimediaWidgets
+    OpenGL
+    OpenGLFunctions
+    Positioning
+    Location
+    Qml
+    Quick
+    QuickWidgets
+    RemoteObjects
+    Scxml
+    Script
+    ScriptTools
+    Sensors
+    SerialPort
+    TextToSpeech
+    Charts
+    Svg
+    DataVisualization)
+find_package(Qt${QT_MAJOR_VERSION}UiTools)
+if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
     list(APPEND ALL_OPTIONAL_MODULES UiTools)
 else()
     set(DISABLE_QtUiTools 1)
@@ -31,7 +59,7 @@ endif()
 #   If WebKit support is needed add the following elements
 #   to the list: WebKit WebKitWidgets
 list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngine WebEngineWidgets WebSockets)
-if (Qt5Core_VERSION VERSION_GREATER 5.9.3) # Depending on fixes in Qt3D
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.9.3) # Depending on fixes in Qt3D
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
 endif()
 endmacro()
@@ -89,10 +117,10 @@ endforeach()
 endmacro()
 
 macro(COLLECT_MODULE_IF_FOUND shortname)
-    set(name "Qt5${shortname}")
+    set(name "Qt${QT_MAJOR_VERSION}${shortname}")
     set(_qt_module_name "${name}")
     if ("${shortname}" STREQUAL "OpenGLFunctions")
-        set(_qt_module_name "Qt5Gui")
+        set(_qt_module_name "Qt${QT_MAJOR_VERSION}Gui")
     endif()
     # Determine essential/optional/missing
     set(module_state "missing")
@@ -122,7 +150,7 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
     # directory, to avoid CMake looking in another path.
     # This will be saved in a global variable at the beginning of the modules
     # collection process.
-    string(FIND "${name}" "Qt5Core" qtcore_found)
+    string(FIND "${name}" "Qt${QT_MAJOR_VERSION}Core" qtcore_found)
     if(("${qtcore_found}" GREATER "0") OR ("${qtcore_found}" EQUAL "0"))
         get_filename_component(_core_abs_dir "${${_name_dir}}/../" ABSOLUTE)
         # Setting the absolute path where the Qt5Core was found
@@ -143,6 +171,16 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
         message(STATUS "${module_state} module ${name} found (${ARGN})${looked_in_message}")
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})
+        # Build Qt 5 compatibility variables
+        if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
+            get_target_property(Qt6${shortname}_INCLUDE_DIRS Qt6::${shortname}
+                                INTERFACE_INCLUDE_DIRECTORIES)
+            get_target_property(Qt6${shortname}_PRIVATE_INCLUDE_DIRS
+                                Qt6::${shortname}Private
+                                INTERFACE_INCLUDE_DIRECTORIES)
+            get_target_property(Qt6${shortname}_LIBRARIES Qt6::${shortname}
+                                INTERFACE_LINK_LIBRARIES)
+        endif()
     else()
         if("${module_state}" STREQUAL "optional")
             message(STATUS "optional module ${name} skipped${looked_in_message}")

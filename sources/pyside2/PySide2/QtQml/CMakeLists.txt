@@ -36,10 +36,10 @@ ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 )
 
 set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
-                        ${Qt5Network_INCLUDE_DIRS}
-                        ${Qt5Qml_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtCore_GEN_DIR}
@@ -47,10 +47,10 @@ set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
                         ${QtQml_GEN_DIR})
 
 set(QtQml_libraries pyside2
-                    ${Qt5Core_LIBRARIES}
-                    ${Qt5Gui_LIBRARIES}
-                    ${Qt5Network_LIBRARIES}
-                    ${Qt5Qml_LIBRARIES})
+                    ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                    ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                    ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
+                    ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES})
 
 set(QtQml_deps QtGui QtNetwork)
 

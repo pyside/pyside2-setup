@@ -12,13 +12,13 @@ set(QtSerialPort_SRC
 
 set(QtSerialPort_include_dirs ${QtSerialPort_SOURCE_DIR}
                               ${QtSerialPort_BINARY_DIR}
-                              ${Qt5Core_INCLUDE_DIRS}
-                              ${Qt5SerialPort_INCLUDE_DIRS}
+                              ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                              ${Qt${QT_MAJOR_VERSION}SerialPort_INCLUDE_DIRS}
                               ${libpyside_SOURCE_DIR}
                               ${QtCore_GEN_DIR})
 
 set(QtSerialPort_libraries pyside2
-                        ${Qt5SerialPort_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}SerialPort_LIBRARIES})
 
 set(QtSerialPort_deps QtCore)
 

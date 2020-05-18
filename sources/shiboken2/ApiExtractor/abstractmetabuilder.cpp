@@ -3003,10 +3003,6 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
 
         const AbstractMetaClassList &bases = getBaseClasses(clazz);
         for (AbstractMetaClass *baseClass : bases) {
-            // Fix polymorphic expression
-            if (clazz->baseClass() == baseClass)
-                clazz->setBaseClass(baseClass);
-
             const auto baseIt = map.constFind(baseClass);
             if (baseIt!= map.cend())
                 graph.addEdge(baseIt.value(), classIndex);

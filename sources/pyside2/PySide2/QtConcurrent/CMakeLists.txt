@@ -8,14 +8,14 @@ ${QtConcurrent_GEN_DIR}/qtconcurrent_module_wrapper.cpp
 
 set(QtConcurrent_include_dirs   ${QtConcurrent_SOURCE_DIR}
                                 ${QtConcurrent_BINARY_DIR}
-                                ${Qt5Core_INCLUDE_DIRS}
-                                ${Qt5Concurrent_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Concurrent_INCLUDE_DIRS}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 )
 set(QtConcurrent_libraries  pyside2
                             ${QtConcurrent_LIBRARIES}
-                            ${Qt5Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                             )
 set(QtConcurrent_deps QtCore)
 

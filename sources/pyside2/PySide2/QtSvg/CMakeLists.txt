@@ -11,20 +11,20 @@ ${QtSvg_GEN_DIR}/qtsvg_module_wrapper.cpp
 
 set(QtSvg_include_dirs  ${QtSvg_SOURCE_DIR}
                         ${QtSvg_BINARY_DIR}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
-                        ${Qt5Widgets_INCLUDE_DIRS}
-                        ${Qt5Svg_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Svg_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
                         ${QtWidgets_GEN_DIR}
                         )
 set(QtSvg_libraries     pyside2
-                        ${Qt5Core_LIBRARIES}
-                        ${Qt5Gui_LIBRARIES}
-                        ${Qt5Widgets_LIBRARIES}
-                        ${Qt5Svg_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Svg_LIBRARIES}
                         )
 set(QtSvg_deps QtWidgets)
 

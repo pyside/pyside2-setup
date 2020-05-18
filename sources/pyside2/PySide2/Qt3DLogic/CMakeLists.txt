@@ -11,15 +11,15 @@ set(Qt3DLogic_include_dirs
                      ${Qt3DLogic_SOURCE_DIR}
                      ${Qt3DLogic_BINARY_DIR}
                      ${pyside2_SOURCE_DIR}
-                     ${Qt5Core_INCLUDE_DIRS}
-                     ${Qt5Gui_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${Qt3DCore_GEN_DIR})
 
 set(Qt3DLogic_libraries pyside2
-                     ${Qt53DLogic_LIBRARIES})
+                     ${Qt${QT_MAJOR_VERSION}3DLogic_LIBRARIES})
 
 set(Qt3DLogic_deps Qt3DCore)
 

@@ -146,24 +146,32 @@ private:
  * In the future the second case might be generalized for all template type instantiations.
  */
 class GeneratorContext {
+    friend class ShibokenGenerator;
+    friend class Generator;
 public:
+    enum Type { Class, WrappedClass, SmartPointer };
+
     GeneratorContext() = default;
-    GeneratorContext(AbstractMetaClass *metaClass,
-                     const AbstractMetaType *preciseType = nullptr,
-                     bool forSmartPointer = false)
-        : m_metaClass(metaClass),
-        m_preciseClassType(preciseType),
-        m_forSmartPointer(forSmartPointer) {}
 
-
-    AbstractMetaClass *metaClass() const { return m_metaClass; }
-    bool forSmartPointer() const { return m_forSmartPointer; }
+    const AbstractMetaClass *metaClass() const { return m_metaClass; }
     const AbstractMetaType *preciseType() const { return m_preciseClassType; }
 
+    bool forSmartPointer() const { return m_type == SmartPointer; }
+    bool useWrapper() const { return m_type ==  WrappedClass; }
+
+    QString wrapperName() const
+    {
+        Q_ASSERT(m_type == WrappedClass);
+        return m_wrappername;
+    }
+
+    QString smartPointerWrapperName() const;
+
 private:
-    AbstractMetaClass *m_metaClass = nullptr;
+    const AbstractMetaClass *m_metaClass = nullptr;
     const AbstractMetaType *m_preciseClassType = nullptr;
-    bool m_forSmartPointer = false;
+    QString m_wrappername;
+    Type m_type = Class;
 };
 
 /**
@@ -294,8 +302,12 @@ protected:
     /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or nullptr if not found.
     const AbstractMetaEnum *findAbstractMetaEnum(const AbstractMetaType *metaType) const;
 
+    virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
+    GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
+                                            const AbstractMetaType *t) const;
+
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
-    bool generateFileForContext(GeneratorContext &context);
+    bool generateFileForContext(const GeneratorContext &context);
 
     /// Returns the file base name for a smart pointer.
     QString getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,
@@ -371,7 +383,7 @@ protected:
      *   \return the file name used to write the binding code for the class
      */
     virtual QString fileNameSuffix() const = 0;
-    virtual QString fileNameForContext(GeneratorContext &context) const = 0;
+    virtual QString fileNameForContext(const GeneratorContext &context) const = 0;
 
 
     virtual bool doSetup() = 0;
@@ -382,7 +394,7 @@ protected:
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
-    virtual void generateClass(QTextStream &s, GeneratorContext &classContext) = 0;
+    virtual void generateClass(QTextStream &s, const GeneratorContext &classContext) = 0;
     virtual bool finishGeneration() = 0;
 
     /**

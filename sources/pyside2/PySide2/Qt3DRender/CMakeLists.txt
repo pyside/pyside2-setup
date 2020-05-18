@@ -106,7 +106,8 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qviewport_wrapper.cpp
 # module is always needed
 ${Qt3DRender_GEN_DIR}/qt3drender_module_wrapper.cpp)
 
-if (Qt53DRender_VERSION VERSION_EQUAL 5.10.0 OR Qt53DRender_VERSION VERSION_GREATER 5.10.0)
+if (Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_EQUAL 5.10.0
+    OR Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_GREATER 5.10.0)
     list(APPEND Qt3DRender_SRC
          ${Qt3DRender_GEN_DIR}/qt3drender_qblitframebuffer_wrapper.cpp
          ${Qt3DRender_GEN_DIR}/qt3drender_qlinewidth_wrapper.cpp
@@ -117,7 +118,8 @@ if (Qt53DRender_VERSION VERSION_EQUAL 5.10.0 OR Qt53DRender_VERSION VERSION_GREA
 )
 endif()
 
-if (Qt53DRender_VERSION VERSION_EQUAL 5.11.0 OR Qt53DRender_VERSION VERSION_GREATER 5.11.0)
+if (Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_EQUAL 5.11.0
+    OR Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_GREATER 5.11.0)
     list(APPEND Qt3DRender_SRC
          ${Qt3DRender_GEN_DIR}/qt3drender_qabstractraycaster_wrapper.cpp
          ${Qt3DRender_GEN_DIR}/qt3drender_qraycaster_wrapper.cpp
@@ -125,20 +127,23 @@ if (Qt53DRender_VERSION VERSION_EQUAL 5.11.0 OR Qt53DRender_VERSION VERSION_GREA
          ${Qt3DRender_GEN_DIR}/qt3drender_qscreenraycaster_wrapper.cpp)
 endif()
 
-if (Qt53DRender_VERSION VERSION_EQUAL 5.13.0 OR Qt53DRender_VERSION VERSION_GREATER 5.13.0)
+if (Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_EQUAL 5.13.0
+    OR Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_GREATER 5.13.0)
     list(APPEND Qt3DRender_SRC
          ${Qt3DRender_GEN_DIR}/qt3drender_qsetfence_wrapper.cpp
          ${Qt3DRender_GEN_DIR}/qt3drender_qsharedgltexture_wrapper.cpp
          ${Qt3DRender_GEN_DIR}/qt3drender_qwaitfence_wrapper.cpp)
 endif()
 
-if (Qt53DRender_VERSION VERSION_EQUAL 5.14.0 OR Qt53DRender_VERSION VERSION_GREATER 5.14.0)
+if (Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_EQUAL 5.14.0
+    OR Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_GREATER 5.14.0)
     list(APPEND Qt3DRender_SRC
         ${Qt3DRender_GEN_DIR}/qt3drender_qnopicking_wrapper.cpp
         ${Qt3DRender_GEN_DIR}/qt3drender_qshaderimage_wrapper.cpp)
 endif()
 
-if (Qt53DRender_VERSION VERSION_EQUAL 5.15.0 OR Qt53DRender_VERSION VERSION_GREATER 5.15.0)
+if (Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_EQUAL 5.15.0
+    OR Qt${QT_MAJOR_VERSION}3DRender_VERSION VERSION_GREATER 5.15.0)
     list(APPEND Qt3DRender_SRC
         ${Qt3DRender_GEN_DIR}/qt3drender_qrendercapabilities_wrapper.cpp)
 endif()
@@ -147,15 +152,15 @@ set(Qt3DRender_include_dirs
                      ${Qt3DRender_SOURCE_DIR}
                      ${Qt3DRender_BINARY_DIR}
                      ${pyside2_SOURCE_DIR}
-                     ${Qt5Core_INCLUDE_DIRS}
-                     ${Qt5Gui_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
                      ${Qt3DCore_GEN_DIR})
 
 set(Qt3DRender_libraries pyside2
-                     ${Qt53DRender_LIBRARIES})
+                     ${Qt${QT_MAJOR_VERSION}3DRender_LIBRARIES})
 
 set(Qt3DRender_deps Qt3DCore)
 

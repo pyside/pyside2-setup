@@ -47,8 +47,10 @@ ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )
 
-get_property(QtNetwork_enabled_features  TARGET Qt5::Network PROPERTY INTERFACE_QT_ENABLED_FEATURES)
-get_property(QtNetwork_disabled_features TARGET Qt5::Network PROPERTY INTERFACE_QT_DISABLED_FEATURES)
+get_property(QtNetwork_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Network
+             PROPERTY INTERFACE_QT_ENABLED_FEATURES)
+get_property(QtNetwork_disabled_features TARGET Qt${QT_MAJOR_VERSION}::Network
+             PROPERTY INTERFACE_QT_DISABLED_FEATURES)
 
 # ### fixme: For cmake >= 3.3, use if( needle IN_LIST list)
 list(FIND QtNetwork_enabled_features  "ssl"  _sslEnabledIndex)
@@ -59,7 +61,7 @@ if(_sslEnabledIndex EQUAL -1)
     list(APPEND QtNetwork_DROPPED_ENTRIES QOcspResponse QSslCipher
          QSslConfiguration QSslDiffieHellmanParameters QSslError
          QSslKey QSslPreSharedKeyAuthenticator QSslSocket)
-    message(STATUS "Qt5Network: Dropping SSL classes")
+    message(STATUS "Qt${QT_MAJOR_VERSION}Network: Dropping SSL classes")
 else()
     # Problems with operator==(QSslEllipticCurve,QSslEllipticCurve)
     # check_qt_class(QtNetwork QSslEllipticCurve QtNetwork_OPTIONAL_SRC QtNetwork_DROPPED_ENTRIES)
@@ -71,41 +73,42 @@ else()
          ${QtNetwork_GEN_DIR}/qsslkey_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslpresharedkeyauthenticator_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslsocket_wrapper.cpp)
-     if (Qt5Network_VERSION VERSION_EQUAL 5.13.0 OR Qt5Network_VERSION VERSION_GREATER 5.13.0)
+     if (Qt${QT_MAJOR_VERSION}Network_VERSION VERSION_EQUAL 5.13.0
+         OR Qt${QT_MAJOR_VERSION}Network_VERSION VERSION_GREATER 5.13.0)
          list(APPEND QtNetwork_SRC
               ${QtNetwork_GEN_DIR}/qocspresponse_wrapper.cpp)
      endif()
-    message(STATUS "Qt5Network: Adding SSL classes")
+    message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding SSL classes")
 endif()
 
 if(_dtlsDisabledIndex GREATER -1)
     list(APPEND QtNetwork_DROPPED_ENTRIES QDtls)
-    message(STATUS "Qt5Network: Dropping DTLS classes")
+    message(STATUS "Qt${QT_MAJOR_VERSION}Network: Dropping DTLS classes")
 else()
     list(APPEND QtNetwork_SRC
          ${QtNetwork_GEN_DIR}/qdtls_wrapper.cpp)
-    message(STATUS "Qt5Network: Adding DTLS classes")
+    message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding DTLS classes")
 endif()
 
 if(_sctpDisabledIndex GREATER -1)
     list(APPEND QtNetwork_DROPPED_ENTRIES QSctpServer QSctpSocket)
-    message(STATUS "Qt5Network: Dropping SCTP classes")
+    message(STATUS "Qt${QT_MAJOR_VERSION}Network: Dropping SCTP classes")
 else()
     list(APPEND QtNetwork_SRC
          ${QtNetwork_GEN_DIR}/qsctpserver_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsctpsocket_wrapper.cpp)
-    message(STATUS "Qt5Network: Adding SCTP classes")
+    message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding SCTP classes")
 endif()
 
 set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
                             ${QtNetwork_BINARY_DIR}
-                            ${Qt5Core_INCLUDE_DIRS}
-                            ${Qt5Network_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                            ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR})
 
 set(QtNetwork_libraries pyside2
-                        ${Qt5Network_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES})
 
 set(QtNetwork_deps QtCore)
 

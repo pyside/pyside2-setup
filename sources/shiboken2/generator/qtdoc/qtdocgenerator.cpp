@@ -1523,7 +1523,7 @@ bool QtDocGenerator::shouldGenerate(const AbstractMetaClass *cls) const
         && cls->typeEntry()->type() != TypeEntry::SmartPointerType;
 }
 
-QString QtDocGenerator::fileNameForContext(GeneratorContext &context) const
+QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) const
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     if (!context.forSmartPointer()) {
@@ -1611,9 +1611,9 @@ static bool extractBrief(Documentation *sourceDoc, Documentation *brief)
     return true;
 }
 
-void QtDocGenerator::generateClass(QTextStream &s, GeneratorContext &classContext)
+void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &classContext)
 {
-    AbstractMetaClass *metaClass = classContext.metaClass();
+    const AbstractMetaClass *metaClass = classContext.metaClass();
     qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
     m_packages[metaClass->package()] << fileNameForContext(classContext);

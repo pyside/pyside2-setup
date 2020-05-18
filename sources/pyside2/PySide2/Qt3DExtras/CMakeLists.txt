@@ -36,7 +36,8 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qt3dwindow_wrapper.cpp
 # module is always needed
 ${Qt3DExtras_GEN_DIR}/qt3dextras_module_wrapper.cpp)
 
-if (Qt53DExtras_VERSION VERSION_EQUAL 5.10.0 OR Qt53DExtras_VERSION VERSION_GREATER 5.10.0)
+if (Qt${QT_MAJOR_VERSION}3DExtras_VERSION VERSION_EQUAL 5.10.0
+    OR Qt${QT_MAJOR_VERSION}3DExtras_VERSION VERSION_GREATER 5.10.0)
     list(APPEND Qt3DExtras_SRC
          ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_wrapper.cpp
          ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_inputstate_wrapper.cpp
@@ -51,11 +52,11 @@ set(Qt3DExtras_include_dirs
                      ${Qt3DExtras_SOURCE_DIR}
                      ${Qt3DExtras_BINARY_DIR}
                      ${pyside2_SOURCE_DIR}
-                     ${Qt5Core_INCLUDE_DIRS}
-                     ${Qt5Gui_INCLUDE_DIRS}
-                     ${Qt53DCore_INCLUDE_DIRS}
-                     ${Qt53DRender_INCLUDE_DIRS}
-                     ${Qt53DExtras_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}3DCore_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}3DRender_INCLUDE_DIRS}
+                     ${Qt${QT_MAJOR_VERSION}3DExtras_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
@@ -63,7 +64,7 @@ set(Qt3DExtras_include_dirs
                      ${Qt3DRender_GEN_DIR})
 
 set(Qt3DExtras_libraries pyside2
-                     ${Qt53DExtras_LIBRARIES})
+                     ${Qt${QT_MAJOR_VERSION}3DExtras_LIBRARIES})
 
 set(Qt3DExtras_deps Qt3DRender)
 

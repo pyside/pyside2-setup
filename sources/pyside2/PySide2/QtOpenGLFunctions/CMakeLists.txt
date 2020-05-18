@@ -2,7 +2,8 @@ project(QtOpenGLFunctions)
 
 set(QtOpenGLFunctions_DROPPED_ENTRIES)
 
-get_property(QtOpenGLFunctions_enabled_features TARGET Qt5::Gui PROPERTY INTERFACE_QT_ENABLED_FEATURES)
+get_property(QtOpenGLFunctions_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
+             PROPERTY INTERFACE_QT_ENABLED_FEATURES)
 
 set(QtOpenGLFunctions_SRC ${QtOpenGLFunctions_GEN_DIR}/qtopenglfunctions_module_wrapper.cpp)
 
@@ -13,7 +14,7 @@ if(_opengles2Index GREATER -1)
     list(APPEND QtOpenGLFunctions_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery)
     list(APPEND QtOpenGLFunctions_SRC
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_es2_wrapper.cpp)
-    message(STATUS "Qt5OpenGLFunctions: Dropping Desktop OpenGL classes (GLES2)")
+    message(STATUS "Qt${QT_MAJOR_VERSION}OpenGLFunctions: Dropping Desktop OpenGL classes (GLES2)")
 else()
     list(APPEND QtOpenGLFunctions_SRC
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_1_0_wrapper.cpp
@@ -42,7 +43,7 @@ else()
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_4_core_wrapper.cpp
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_compatibility_wrapper.cpp
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_4_5_core_wrapper.cpp)
-   message(STATUS "Qt5OpenGLFunctions: Adding Desktop OpenGL classes")
+   message(STATUS "Qt${QT_MAJOR_VERSION}OpenGLFunctions: Adding Desktop OpenGL classes")
 endif()
 
 configure_file("${QtOpenGLFunctions_SOURCE_DIR}/QtOpenGLFunctions_global.post.h.in"
@@ -51,14 +52,14 @@ configure_file("${QtOpenGLFunctions_SOURCE_DIR}/QtOpenGLFunctions_global.post.h.
 set(QtOpenGLFunctions_include_dirs  ${QtGOpenGLFunctions_SOURCE_DIR}
                         ${QtOpenGLFunctions_BINARY_DIR}
                         ${pyside2_SOURCE_DIR}
-                        ${Qt5Core_INCLUDE_DIRS}
-                        ${Qt5Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
                         )
 set(QtOpenGLFunctions_libraries   pyside2
-                      ${Qt5Gui_LIBRARIES})
+                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
 
 set(QtOpenGLFunctions_deps QtGui)
 

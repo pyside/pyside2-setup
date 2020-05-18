@@ -8,11 +8,11 @@ ${QtScriptTools_GEN_DIR}/qtscripttools_module_wrapper.cpp
 
 set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 ${QtScriptTools_BINARY_DIR}
-                                ${Qt5Core_INCLUDE_DIRS}
-                                ${Qt5Gui_INCLUDE_DIRS}
-                                ${Qt5Widgets_INCLUDE_DIRS}
-                                ${Qt5Script_INCLUDE_DIRS}
-                                ${Qt5ScriptTools_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}Script_INCLUDE_DIRS}
+                                ${Qt${QT_MAJOR_VERSION}ScriptTools_INCLUDE_DIRS}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 ${QtGui_GEN_DIR}
@@ -21,11 +21,11 @@ set(QtScriptTools_include_dirs  ${QtScriptTools_SOURCE_DIR}
                                 )
 
 set(QtScriptTools_libraries pyside2
-                            ${Qt5Core_LIBRARIES}
-                            ${Qt5Gui_LIBRARIES}
-                            ${Qt5Widgets_LIBRARIES}
-                            ${Qt5Script_LIBRARIES}
-                            ${Qt5ScriptTools_LIBRARIES})
+                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}Script_LIBRARIES}
+                            ${Qt${QT_MAJOR_VERSION}ScriptTools_LIBRARIES})
 
 set(QtScriptTools_deps QtCore QtScript QtGui QtWidgets)
 

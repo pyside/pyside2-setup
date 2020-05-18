@@ -8,13 +8,13 @@ ${QtQuickWidgets_GEN_DIR}/qtquickwidgets_module_wrapper.cpp
 
 set(QtQuickWidgets_include_dirs  ${QtQuickWidgets_SOURCE_DIR}
                                  ${QtQml_SOURCE_DIR}
-                                 ${Qt5Core_INCLUDE_DIRS}
-                                 ${Qt5Gui_INCLUDE_DIRS}
-                                 ${Qt5Widgets_INCLUDE_DIRS}
-                                 ${Qt5Network_INCLUDE_DIRS}
-                                 ${Qt5Quick_INCLUDE_DIRS}
-                                 ${Qt5Qml_INCLUDE_DIRS}
-                                 ${Qt5QuickWidgets_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}Quick_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
+                                 ${Qt${QT_MAJOR_VERSION}QuickWidgets_INCLUDE_DIRS}
                                  ${libpyside_SOURCE_DIR}
                                  ${QtGui_GEN_DIR}
                                  ${QtCore_GEN_DIR}
@@ -25,13 +25,13 @@ set(QtQuickWidgets_include_dirs  ${QtQuickWidgets_SOURCE_DIR}
                                  ${QtQuickWidgets_GEN_DIR})
 
 set(QtQuickWidgets_libraries pyside2
-                             ${Qt5Core_LIBRARIES}
-                             ${Qt5Gui_LIBRARIES}
-                             ${Qt5Network_LIBRARIES}
-                             ${Qt5Widgets_LIBRARIES}
-                             ${Qt5Quick_LIBRARIES}
-                             ${Qt5Qml_LIBRARIES}
-                             ${Qt5QuickWidgets_LIBRARIES})
+                             ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                             ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                             ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
+                             ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
+                             ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
+                             ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
+                             ${Qt${QT_MAJOR_VERSION}QuickWidgets_LIBRARIES})
 
 set(QtQuickWidgets_deps QtGui QtQml QtQuick QtWidgets QtNetwork)
 

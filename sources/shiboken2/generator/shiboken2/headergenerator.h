@@ -47,8 +47,8 @@ public:
 
 protected:
     QString fileNameSuffix() const override;
-    QString fileNameForContext(GeneratorContext &context) const override;
-    void generateClass(QTextStream &s, GeneratorContext &classContext) override;
+    QString fileNameForContext(const GeneratorContext &context) const override;
+    void generateClass(QTextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:

@@ -48,6 +48,7 @@ private slots:
     void testContainerTypeIncompleteArgument();
     void testTemplateTypeDefs_data();
     void testTemplateTypeDefs();
+    void testTemplateTypeAliases();
 };
 
 #endif

@@ -181,13 +181,15 @@ ${SPECIFIC_OS_FILES}
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
 
-if (Qt5Core_VERSION VERSION_EQUAL 5.13.0 OR Qt5Core_VERSION VERSION_GREATER 5.13.0)
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.13.0
+    OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.13.0)
     list(APPEND QtCore_SRC
          ${QtCore_GEN_DIR}/qconcatenatetablesproxymodel_wrapper.cpp
          ${QtCore_GEN_DIR}/qtransposeproxymodel_wrapper.cpp)
 endif()
 
-if (Qt5Core_VERSION VERSION_EQUAL 5.14.0 OR Qt5Core_VERSION VERSION_GREATER 5.14.0)
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.14.0
+    OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.14.0)
     list(APPEND QtCore_SRC
          ${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
          ${QtCore_GEN_DIR}/qcalendar_yearmonthday_wrapper.cpp
@@ -204,11 +206,11 @@ configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
 
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}
-                        ${Qt5Core_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         )
 set(QtCore_libraries  pyside2
-                      ${Qt5Core_LIBRARIES}
+                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                       )
 
 create_pyside_module(NAME QtCore

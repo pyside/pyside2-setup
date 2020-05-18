@@ -43,17 +43,17 @@ ${QtDataVisualization_GEN_DIR}/qtdatavisualization_module_wrapper.cpp
 
 set(QtDataVisualization_include_dirs ${QtDataVisualization_SOURCE_DIR}
                           ${QtDataVisualization_BINARY_DIR}
-                          ${Qt5Core_INCLUDE_DIRS}
-                          ${Qt5Gui_INCLUDE_DIRS}
-                          ${Qt5DataVisualization_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}DataVisualization_INCLUDE_DIRS}
                           ${libpyside_SOURCE_DIR}
                           ${QtCore_GEN_DIR}
                           ${QtGui_GEN_DIR})
 
 set(QtDataVisualization_libraries    pyside2
-                          ${Qt5DataVisualization_LIBRARIES}
-                          ${Qt5Core_LIBRARIES}
-                          ${Qt5Gui_LIBRARIES})
+                          ${Qt${QT_MAJOR_VERSION}DataVisualization_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
 
 set(QtDataVisualization_deps QtCore QtGui)
 

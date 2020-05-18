@@ -561,4 +561,53 @@ void TestTemplates::testTemplateTypeDefs()
     QCOMPARE(xmlValueField->type()->cppSignature(), QLatin1String("int"));
 }
 
+void TestTemplates::testTemplateTypeAliases()
+{
+    // Model Qt 6's "template<typename T> using QList = QVector<T>"
+    const char cppCode[] = R"CPP(
+template<typename T>
+class Container1 { };
+
+template<typename T>
+using Container2 = Container1<T>;
+
+class Test
+{
+public:
+    Container2<int> m_intContainer;
+};
+
+class Derived : public Container2<int>
+{
+public:
+};
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <value-type name='Container1'/>
+    <value-type name='Derived'/>
+    <object-type name='Test'/>
+</typesystem>)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    QVERIFY(!builder.isNull());
+
+    AbstractMetaClassList classes = builder->classes();
+    auto testClass = AbstractMetaClass::findClass(classes, QLatin1String("Test"));
+    QVERIFY(testClass);
+
+    auto fields = testClass->fields();
+    QCOMPARE(fields.count(), 1);
+    auto fieldType = testClass->fields().at(0)->type();
+    QCOMPARE(fieldType->name(), QLatin1String("Container1"));
+    QCOMPARE(fieldType->instantiations().size(), 1);
+
+    auto derived = AbstractMetaClass::findClass(classes, QLatin1String("Derived"));
+    QVERIFY(derived);
+    auto base = derived->templateBaseClass();
+    QCOMPARE(base->name(), QLatin1String("Container1"));
+}
+
 QTEST_APPLESS_MAIN(TestTemplates)

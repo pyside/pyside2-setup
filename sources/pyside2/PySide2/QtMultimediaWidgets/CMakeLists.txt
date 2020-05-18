@@ -11,12 +11,12 @@ ${QtMultimediaWidgets_GEN_DIR}/qtmultimediawidgets_module_wrapper.cpp
 
 set(QtMultimediaWidgets_include_dirs ${QtMultimediaWidgets_SOURCE_DIR}
                                      ${QtMultimediaWidgets_BINARY_DIR}
-                                     ${Qt5Core_INCLUDE_DIRS}
-                                     ${Qt5Gui_INCLUDE_DIRS}
-                                     ${Qt5Network_INCLUDE_DIRS}
-                                     ${Qt5Widgets_INCLUDE_DIRS}
-                                     ${Qt5Multimedia_INCLUDE_DIRS}
-                                     ${Qt5MultimediaWidgets_INCLUDE_DIRS}
+                                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                                     ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
+                                     ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                                     ${Qt${QT_MAJOR_VERSION}Multimedia_INCLUDE_DIRS}
+                                     ${Qt${QT_MAJOR_VERSION}MultimediaWidgets_INCLUDE_DIRS}
                                      ${libpyside_SOURCE_DIR}
                                      ${QtCore_GEN_DIR}
                                      ${QtGui_GEN_DIR}
@@ -25,12 +25,12 @@ set(QtMultimediaWidgets_include_dirs ${QtMultimediaWidgets_SOURCE_DIR}
                                      ${QtMultimedia_GEN_DIR})
 
 set(QtMultimediaWidgets_libraries    pyside2
-                                     ${Qt5Multimedia_LIBRARIES}
-                                     ${Qt5MultimediaWidgets_LIBRARIES}
-                                     ${Qt5Core_LIBRARIES}
-                                     ${Qt5Gui_LIBRARIES}
-                                     ${Qt5Network_LIBRARIES}
-                                     ${Qt5Widgets_LIBRARIES})
+                                     ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES}
+                                     ${Qt${QT_MAJOR_VERSION}MultimediaWidgets_LIBRARIES}
+                                     ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                                     ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                                     ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
+                                     ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
 
 set(QtMultimediaWidgets_deps QtCore QtGui QtNetwork QtWidgets QtMultimedia)
 

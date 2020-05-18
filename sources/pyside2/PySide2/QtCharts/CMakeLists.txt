@@ -60,20 +60,20 @@ ${QtCharts_GEN_DIR}/qtcharts_module_wrapper.cpp
 
 set(QtCharts_include_dirs ${QtCharts_SOURCE_DIR}
                           ${QtCharts_BINARY_DIR}
-                          ${Qt5Core_INCLUDE_DIRS}
-                          ${Qt5Gui_INCLUDE_DIRS}
-                          ${Qt5Widgets_INCLUDE_DIRS}
-                          ${Qt5Charts_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
+                          ${Qt${QT_MAJOR_VERSION}Charts_INCLUDE_DIRS}
                           ${libpyside_SOURCE_DIR}
                           ${QtCore_GEN_DIR}
                           ${QtGui_GEN_DIR}
                           ${QtWidgets_GEN_DIR})
 
 set(QtCharts_libraries    pyside2
-                          ${Qt5Charts_LIBRARIES}
-                          ${Qt5Core_LIBRARIES}
-                          ${Qt5Gui_LIBRARIES}
-                          ${Qt5Widgets_LIBRARIES})
+                          ${Qt${QT_MAJOR_VERSION}Charts_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                          ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
 
 set(QtCharts_deps QtCore QtGui QtWidgets)
 
