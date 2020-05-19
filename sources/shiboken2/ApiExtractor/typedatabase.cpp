@@ -426,6 +426,17 @@ bool TypeDatabase::addType(TypeEntry *e, QString *errorMessage)
     return true;
 }
 
+// Add a dummy value entry for non-type template parameters
+ConstantValueTypeEntry *
+    TypeDatabase::addConstantValueTypeEntry(const QString &value,
+                                            const TypeEntry *parent)
+{
+    auto result = new ConstantValueTypeEntry(value, parent);
+    result->setCodeGeneration(0);
+    addType(result);
+    return result;
+}
+
 bool TypeDatabase::isFunctionRejected(const QString& className, const QString& functionName,
                                       QString *reason) const
 {

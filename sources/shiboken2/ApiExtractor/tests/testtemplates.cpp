@@ -443,6 +443,35 @@ typedef Vector<int> IntVector;
     QCOMPARE(otherMethod->type()->cppSignature(), QLatin1String("Vector<int >"));
 }
 
+void TestTemplates::testNonTypeTemplates()
+{
+    // PYSIDe-1296, functions with non type templates parameters.
+    const char cppCode[] = R"CPP(
+template <class T, int Size>
+class Array {
+    T array[Size];
+};
+
+Array<int, 2> foo();
+
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <container-type name='Array' type='vector'/>
+    <function signature="foo()"/>
+</typesystem>)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    QVERIFY(!builder.isNull());
+    auto functions = builder->globalFunctions();
+    QCOMPARE(functions.count(), 1);
+    auto foo = functions.constFirst();
+    QCOMPARE(foo->name(), QLatin1String("foo"));
+    QCOMPARE(foo->type()->name(), QLatin1String("Array"));
+}
+
 // Perform checks on template inheritance; a typedef of a template class
 // should result in rewritten types.
 void TestTemplates::testTemplateTypeDefs_data()

@@ -137,6 +137,8 @@ public:
                               QString *reason = nullptr) const;
 
     bool addType(TypeEntry *e, QString *errorMessage = nullptr);
+    ConstantValueTypeEntry *addConstantValueTypeEntry(const QString &value,
+                                                      const TypeEntry *parent);
     void addTypeSystemType(const TypeSystemTypeEntry *e);
 
     FlagsTypeEntry *findFlagsType(const QString &name) const;
