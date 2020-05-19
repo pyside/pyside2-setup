@@ -470,6 +470,8 @@ void BuilderPrivate::addTemplateInstantiations(const CXType &type,
     // Finally, remove the list "<>" from the type name.
     const bool parsed = addTemplateInstantiationsRecursion(type, t)
         && !t->instantiations().isEmpty();
+    if (!parsed)
+        t->setInstantiations({});
     const QPair<int, int> pos = parsed
         ? parseTemplateArgumentList(*typeName, dummyTemplateArgumentHandler)
         : t->parseTemplateArgumentList(*typeName);
