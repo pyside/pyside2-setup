@@ -789,7 +789,7 @@
     </modify-function>
   </object-type>
 
-  <value-type name="QBasicTimer"/>
+  <object-type name="QBasicTimer"/>
   <value-type name="QByteArrayMatcher"/>
   <value-type name="QCalendar" since="5.14">
       <value-type name="YearMonthDay"/>
@@ -1541,7 +1541,7 @@
     <enum-type name="SelectionFlag" flags="SelectionFlags"/>
   </object-type>
 
-  <value-type name="QItemSelectionRange" hash-function="qHash">
+  <value-type name="QItemSelectionRange">
   </value-type>
   <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
     <extra-includes>
