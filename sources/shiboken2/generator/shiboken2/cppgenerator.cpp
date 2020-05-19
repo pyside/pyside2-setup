@@ -328,6 +328,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
         s << "#include <algorithm>\n#include <set>\n";
     if (metaClass->generateExceptionHandling())
         s << "#include <exception>\n";
+    s << "#include <iterator>\n"; // For containers
 
     if (wrapperDiagnostics())
         s << "#include <helper.h>\n#include <iostream>\n";
@@ -4134,7 +4135,7 @@ void CppGenerator::writeSequenceMethods(QTextStream &s,
     }
 
     if (!injectedCode)
-        writeStdListWrapperMethods(s, context);
+        writeDefaultSequenceMethods(s, context);
 }
 
 void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
@@ -6062,7 +6063,7 @@ void CppGenerator::writeHashFunction(QTextStream &s, const GeneratorContext &con
     s<< "}\n\n";
 }
 
-void CppGenerator::writeStdListWrapperMethods(QTextStream &s, const GeneratorContext &context)
+void CppGenerator::writeDefaultSequenceMethods(QTextStream &s, const GeneratorContext &context)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
     ErrorCode errorCode(0);
@@ -6080,8 +6081,10 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream &s, const GeneratorCon
     writeCppSelfDefinition(s, context);
     writeIndexError(s, QLatin1String("index out of bounds"));
 
-    s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = " << CPP_SELF_VAR << "->begin();\n";
-    s << INDENT << "for (Py_ssize_t pos = 0; pos < _i; pos++) _item++;\n";
+    QString value;
+    s << INDENT << metaClass->qualifiedCppName() << "::const_iterator _item = "
+        << CPP_SELF_VAR << "->begin();\n"
+        << INDENT << "std::advance(_item, _i);\n";
 
     const AbstractMetaTypeList instantiations = metaClass->templateBaseClassInstantiations();
     if (instantiations.isEmpty()) {
@@ -6115,9 +6118,11 @@ void CppGenerator::writeStdListWrapperMethods(QTextStream &s, const GeneratorCon
     s << INDENT << "}\n";
     writeArgumentConversion(s, itemType, QLatin1String("cppValue"), QLatin1String("pyArg"), metaClass);
 
-    s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = " << CPP_SELF_VAR << "->begin();\n";
-    s << INDENT << "for (Py_ssize_t pos = 0; pos < _i; pos++) _item++;\n";
-    s << INDENT << "*_item = cppValue;\n";
+    s << INDENT << metaClass->qualifiedCppName() << "::iterator _item = "
+        << CPP_SELF_VAR << "->begin();\n"
+        << INDENT << "std::advance(_item, _i);\n"
+        << INDENT << "*_item = cppValue;\n";
+
     s << INDENT << "return {};\n";
     s << "}\n";
 }
