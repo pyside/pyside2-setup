@@ -428,8 +428,10 @@ typedef Vector<int> IntVector;
 
     AbstractMetaClass* vector = AbstractMetaClass::findClass(classes, QLatin1String("IntVector"));
     QVERIFY(vector);
-    QVERIFY(vector->typeEntry()->baseContainerType());
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(vector->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::VectorContainer);
+    auto baseContainer = vector->typeEntry()->baseContainerType();
+    QVERIFY(baseContainer);
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
+             ContainerTypeEntry::VectorContainer);
     QCOMPARE(vector->functions().count(), 4);
 
     const AbstractMetaFunction* method = vector->findFunction(QLatin1String("method"));

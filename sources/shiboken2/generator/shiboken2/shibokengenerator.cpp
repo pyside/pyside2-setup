@@ -789,7 +789,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
         baseName = cpythonFlagsName(static_cast<const FlagsTypeEntry *>(type));
     } else if (type->isContainer()) {
         const auto *ctype = static_cast<const ContainerTypeEntry *>(type);
-        switch (ctype->type()) {
+        switch (ctype->containerKind()) {
             case ContainerTypeEntry::ListContainer:
             case ContainerTypeEntry::StringListContainer:
             case ContainerTypeEntry::LinkedListContainer:
@@ -1164,10 +1164,11 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType *metaType
             return QLatin1String("PyObject_Check");
         return cpythonCheckFunction(metaType->typeEntry(), genericNumberType);
     }
-    if (metaType->typeEntry()->isContainer()) {
+    auto typeEntry = metaType->typeEntry();
+    if (typeEntry->isContainer()) {
         QString typeCheck = QLatin1String("Shiboken::Conversions::");
-        ContainerTypeEntry::Type type =
-            static_cast<const ContainerTypeEntry *>(metaType->typeEntry())->type();
+        ContainerTypeEntry::ContainerKind type =
+            static_cast<const ContainerTypeEntry *>(typeEntry)->containerKind();
         if (type == ContainerTypeEntry::ListContainer
             || type == ContainerTypeEntry::StringListContainer
             || type == ContainerTypeEntry::LinkedListContainer
@@ -1206,7 +1207,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType *metaType
         }
         return typeCheck;
     }
-    return cpythonCheckFunction(metaType->typeEntry(), genericNumberType);
+    return cpythonCheckFunction(typeEntry, genericNumberType);
 }
 
 QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool genericNumberType)

@@ -954,7 +954,7 @@ void NamespaceTypeEntry::formatDebug(QDebug &d) const
 void ContainerTypeEntry::formatDebug(QDebug &d) const
 {
     ComplexTypeEntry::formatDebug(d);
-    d << ", type=" << m_type << ",\"" << typeName() << '"';
+    d << ", type=" << m_containerKind << ",\"" << typeName() << '"';
 }
 
 void SmartPointerTypeEntry::formatDebug(QDebug &d) const
