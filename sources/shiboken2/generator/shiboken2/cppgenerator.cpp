@@ -6052,10 +6052,13 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMeta
 void CppGenerator::writeHashFunction(QTextStream &s, const GeneratorContext &context)
 {
     const AbstractMetaClass *metaClass = context.metaClass();
-    s << "static Py_hash_t " << cpythonBaseName(metaClass) << "_HashFunc(PyObject *self) {\n";
+    const char hashType[] = "Py_hash_t";
+    s << "static " << hashType << ' ' << cpythonBaseName(metaClass)
+        << "_HashFunc(PyObject *self) {\n";
     writeCppSelfDefinition(s, context);
-    s << INDENT << "return " << metaClass->typeEntry()->hashFunction() << '(';
-    s << (isObjectType(metaClass) ? "" : "*") << CPP_SELF_VAR << ");\n";
+    s << INDENT << "return " << hashType << '('
+        << metaClass->typeEntry()->hashFunction() << '('
+        << (isObjectType(metaClass) ? "" : "*") << CPP_SELF_VAR << "));\n";
     s<< "}\n\n";
 }
 
