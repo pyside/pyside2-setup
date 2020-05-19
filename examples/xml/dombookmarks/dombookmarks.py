@@ -100,18 +100,18 @@ class MainWindow(QtWidgets.QMainWindow):
             "DOM classes to read and write XML documents.")
 
     def createActions(self):
-        self.openAct = QtWidgets.QAction("&Open...", self, shortcut="Ctrl+O",
+        self.openAct = QtGui.QAction("&Open...", self, shortcut="Ctrl+O",
                 triggered=self.open)
 
-        self.saveAsAct = QtWidgets.QAction("&Save As...", self, shortcut="Ctrl+S",
+        self.saveAsAct = QtGui.QAction("&Save As...", self, shortcut="Ctrl+S",
                 triggered=self.saveAs)
 
-        self.exitAct = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+Q",
+        self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
                 triggered=self.close)
 
-        self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
+        self.aboutAct = QtGui.QAction("&About", self, triggered=self.about)
 
-        self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
+        self.aboutQtAct = QtGui.QAction("About &Qt", self,
                 triggered=qApp.aboutQt)
 
     def createMenus(self):

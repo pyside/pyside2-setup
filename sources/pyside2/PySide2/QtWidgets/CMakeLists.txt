@@ -9,8 +9,6 @@ ${QtWidgets_GEN_DIR}/qabstractitemview_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractscrollarea_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractslider_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractspinbox_wrapper.cpp
-${QtWidgets_GEN_DIR}/qaction_wrapper.cpp
-${QtWidgets_GEN_DIR}/qactiongroup_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qapplication_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qboxlayout_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qbuttongroup_wrapper.cpp
@@ -26,11 +24,9 @@ ${QtWidgets_GEN_DIR}/qcompleter_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdatawidgetmapper_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdateedit_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdatetimeedit_wrapper.cpp
-${QtWidgets_GEN_DIR}/qdesktopwidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdial_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdialog_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdialogbuttonbox_wrapper.cpp
-${QtWidgets_GEN_DIR}/qdirmodel_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdockwidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qdoublespinbox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qerrormessage_wrapper.cpp
@@ -109,7 +105,6 @@ ${QtWidgets_GEN_DIR}/qmenu_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qmenubar_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qmessagebox_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qmouseeventtransition_wrapper.cpp
-${QtWidgets_GEN_DIR}/qopenglwidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qpangesture_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qpinchgesture_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qplaintextdocumentlayout_wrapper.cpp
@@ -124,7 +119,6 @@ ${QtWidgets_GEN_DIR}/qscrollarea_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscrollbar_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscroller_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscrollerproperties_wrapper.cpp
-${QtWidgets_GEN_DIR}/qshortcut_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qsizegrip_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qsizepolicy_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qslider_wrapper.cpp
@@ -190,9 +184,6 @@ ${QtWidgets_GEN_DIR}/qtreeview_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qtreewidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qtreewidgetitem_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qtreewidgetitemiterator_wrapper.cpp
-${QtWidgets_GEN_DIR}/qundocommand_wrapper.cpp
-${QtWidgets_GEN_DIR}/qundogroup_wrapper.cpp
-${QtWidgets_GEN_DIR}/qundostack_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qundoview_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qvboxlayout_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qwhatsthis_wrapper.cpp

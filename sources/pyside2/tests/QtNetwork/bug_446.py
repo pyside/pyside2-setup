@@ -49,7 +49,7 @@ class HttpSignalsCase(UsesQCoreApplication):
 
     def onNewConnection(self):
         self.serverConnection = self.server.nextPendingConnection()
-        self.serverConnection.error.connect(self.onError)
+        self.serverConnection.errorOccurred.connect(self.onError)
         self.serverConnection.write(HttpSignalsCase.DATA)
         self.server.close()
 

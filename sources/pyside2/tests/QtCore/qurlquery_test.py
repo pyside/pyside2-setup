@@ -45,8 +45,6 @@ class QUrlQueryTest(unittest.TestCase):
     def testConstructing(self):
         empty = QUrlQuery()
         self.assertTrue(empty.isEmpty())
-        self.assertEqual(empty.queryPairDelimiter(), QUrlQuery.defaultQueryPairDelimiter())
-        self.assertEqual(empty.queryValueDelimiter(), QUrlQuery.defaultQueryValueDelimiter())
 
         empty.clear();
         self.assertTrue(empty.isEmpty())

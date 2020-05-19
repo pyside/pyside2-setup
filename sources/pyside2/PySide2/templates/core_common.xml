@@ -242,8 +242,8 @@
     <!-- Helpers for modifying "bool nativeEventFilter(QByteArray, void*, long *result)"
          to return a tuple of bool,long -->
     <template name="return_native_eventfilter_conversion_variables">
-        long resultVar{0};
-        long *%out = &amp;resultVar;
+        qintptr resultVar{0};
+        qintptr *%out = &amp;resultVar;
     </template>
     <template name="return_native_eventfilter_conversion">
         %RETURN_TYPE %out = false;

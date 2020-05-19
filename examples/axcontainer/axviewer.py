@@ -43,7 +43,8 @@
 
 import sys
 from PySide2.QtAxContainer import QAxSelect, QAxWidget
-from PySide2.QtWidgets import (QAction, QApplication, QDialog,
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import (QApplication, QDialog,
     QMainWindow, QMessageBox, QToolBar)
 
 class MainWindow(QMainWindow):

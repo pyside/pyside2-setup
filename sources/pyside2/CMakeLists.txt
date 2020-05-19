@@ -6,7 +6,7 @@ cmake_policy(VERSION 3.1)
 # Don't ignore targets that do not exist, inside add_dependencies calls.
 cmake_policy(SET CMP0046 NEW)
 
-set (QT_MAJOR_VERSION 5)
+set (QT_MAJOR_VERSION 6)
 
 project(pysidebindings)
 

@@ -36,7 +36,6 @@ init_test_paths(False)
 
 import PySide2
 from PySide2.QtCore import QPoint
-from PySide2.QtGui import QMatrix
 from PySide2.QtGui import QMatrix2x2, QMatrix2x3, QMatrix2x4
 from PySide2.QtGui import QMatrix3x2, QMatrix3x3, QMatrix3x4
 from PySide2.QtGui import QMatrix4x2, QMatrix4x3, QMatrix4x4
@@ -52,7 +51,7 @@ class ReprCopyHelper:
 
 class QTransformReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QTransform(1, 2, 3, 4, 5, 6, 7, 8)
+        self.original = QTransform(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
 class QKeySequenceReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
@@ -73,10 +72,6 @@ class QVector3DReprCopy(ReprCopyHelper, unittest.TestCase):
 class QVector4DReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QVector4D(1, 2, 3, 4)
-
-class QMatrixReprCopy(ReprCopyHelper, unittest.TestCase):
-    def setUp(self):
-        self.original = QMatrix(1, 2, 3, 4, 5, 6)
 
 
 # Avoid these tests until get gcc fixed

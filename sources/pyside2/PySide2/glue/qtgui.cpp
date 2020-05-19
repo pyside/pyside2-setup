@@ -144,7 +144,7 @@ for (int i = 0, i_max = %CPPSELF.count(); i < i_max; ++i){
 // @snippet qpixmap
 
 // @snippet qimage-constbits
-%PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.byteCount());
+%PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(), %CPPSELF.sizeInBytes());
 // @snippet qimage-constbits
 
 // @snippet qimage-bits

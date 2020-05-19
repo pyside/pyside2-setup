@@ -39,7 +39,8 @@
 #############################################################################
 
 import sys
-from PySide2.QtWidgets import QAction, QApplication, QMainWindow
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import QApplication, QMainWindow
 
 
 class MainWindow(QMainWindow):

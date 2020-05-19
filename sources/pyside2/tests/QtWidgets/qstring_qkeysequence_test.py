@@ -42,8 +42,8 @@ init_test_paths(False)
 import py3kcompat as py3k
 from helper.usesqapplication import UsesQApplication
 
-from PySide2.QtGui import QKeySequence
-from PySide2.QtWidgets import QAction
+from PySide2.QtGui import QAction, QKeySequence
+
 
 class QStringQKeySequenceTest(UsesQApplication):
     '''Tests conversions of QString to and from QKeySequence.'''

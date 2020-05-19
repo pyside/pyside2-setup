@@ -23,11 +23,7 @@ testview.h
 hiddenobject.h
 )
 
-if (${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    qt6_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
-else()
-    qt5_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
-endif()
+qt_wrap_cpp(pysidetest_MOC_SRC ${pysidetest_MOC_HEADERS})
 
 set(testbinding_SRC
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp
@@ -48,9 +44,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 # Thus we use the second direct path, which contains the actual header files.
 
 if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    set(Qt6Core_DIRECT_INCLUDE_DIR Qt6Core_INCLUDE_DIRS)
-    set(Qt6Gui_DIRECT_INCLUDE_DIR Qt6Gui_INCLUDE_DIRS)
-    set(Qt6Widgets_DIRECT_INCLUDE_DIR Qt6Widgets_INCLUDE_DIRS)
+    set(Qt6Core_DIRECT_INCLUDE_DIR ${Qt6Core_INCLUDE_DIRS})
+    set(Qt6Gui_DIRECT_INCLUDE_DIR ${Qt6Gui_INCLUDE_DIRS})
+    set(Qt6Widgets_DIRECT_INCLUDE_DIR ${Qt6Widgets_INCLUDE_DIRS})
 else()
     list(GET Qt5Core_INCLUDE_DIRS 1 Qt5Core_DIRECT_INCLUDE_DIR)
     list(GET Qt5Gui_INCLUDE_DIRS 1 Qt5Gui_DIRECT_INCLUDE_DIR)

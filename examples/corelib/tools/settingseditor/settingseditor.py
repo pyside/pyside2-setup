@@ -111,41 +111,41 @@ class MainWindow(QtWidgets.QMainWindow):
                 "application settings using Qt.")
 
     def createActions(self):
-        self.openSettingsAct = QtWidgets.QAction("&Open Application Settings...",
+        self.openSettingsAct = QtGui.QAction("&Open Application Settings...",
                 self, shortcut="Ctrl+O", triggered=self.openSettings)
 
-        self.openIniFileAct = QtWidgets.QAction("Open I&NI File...", self,
+        self.openIniFileAct = QtGui.QAction("Open I&NI File...", self,
                 shortcut="Ctrl+N", triggered=self.openIniFile)
 
-        self.openPropertyListAct = QtWidgets.QAction("Open macOS &Property List...",
+        self.openPropertyListAct = QtGui.QAction("Open macOS &Property List...",
                 self, shortcut="Ctrl+P", triggered=self.openPropertyList)
         if sys.platform != 'darwin':
             self.openPropertyListAct.setEnabled(False)
 
-        self.openRegistryPathAct = QtWidgets.QAction(
+        self.openRegistryPathAct = QtGui.QAction(
                 "Open Windows &Registry Path...", self, shortcut="Ctrl+G",
                 triggered=self.openRegistryPath)
         if sys.platform != 'win32':
             self.openRegistryPathAct.setEnabled(False)
 
-        self.refreshAct = QtWidgets.QAction("&Refresh", self, shortcut="Ctrl+R",
+        self.refreshAct = QtGui.QAction("&Refresh", self, shortcut="Ctrl+R",
                 enabled=False, triggered=self.settingsTree.refresh)
 
-        self.exitAct = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+Q",
+        self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
                 triggered=self.close)
 
-        self.autoRefreshAct = QtWidgets.QAction("&Auto-Refresh", self,
+        self.autoRefreshAct = QtGui.QAction("&Auto-Refresh", self,
                 shortcut="Ctrl+A", checkable=True, enabled=False)
         self.autoRefreshAct.triggered[bool].connect(self.settingsTree.setAutoRefresh)
         self.autoRefreshAct.triggered[bool].connect(self.refreshAct.setDisabled)
 
-        self.fallbacksAct = QtWidgets.QAction("&Fallbacks", self,
+        self.fallbacksAct = QtGui.QAction("&Fallbacks", self,
                 shortcut="Ctrl+F", checkable=True, enabled=False)
         self.fallbacksAct.triggered[bool].connect(self.settingsTree.setFallbacksEnabled)
 
-        self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
+        self.aboutAct = QtGui.QAction("&About", self, triggered=self.about)
 
-        self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
+        self.aboutQtAct = QtGui.QAction("About &Qt", self,
                 triggered=qApp.aboutQt)
 
     def createMenus(self):

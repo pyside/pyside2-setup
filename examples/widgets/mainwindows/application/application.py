@@ -106,46 +106,46 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowModified(self.textEdit.document().isModified())
 
     def createActions(self):
-        self.newAct = QtWidgets.QAction(QtGui.QIcon(':/images/new.png'), "&New",
+        self.newAct = QtGui.QAction(QtGui.QIcon(':/images/new.png'), "&New",
                 self, shortcut=QtGui.QKeySequence.New,
                 statusTip="Create a new file", triggered=self.newFile)
 
-        self.openAct = QtWidgets.QAction(QtGui.QIcon(':/images/open.png'),
+        self.openAct = QtGui.QAction(QtGui.QIcon(':/images/open.png'),
                 "&Open...", self, shortcut=QtGui.QKeySequence.Open,
                 statusTip="Open an existing file", triggered=self.open)
 
-        self.saveAct = QtWidgets.QAction(QtGui.QIcon(':/images/save.png'),
+        self.saveAct = QtGui.QAction(QtGui.QIcon(':/images/save.png'),
                 "&Save", self, shortcut=QtGui.QKeySequence.Save,
                 statusTip="Save the document to disk", triggered=self.save)
 
-        self.saveAsAct = QtWidgets.QAction("Save &As...", self,
+        self.saveAsAct = QtGui.QAction("Save &As...", self,
                 shortcut=QtGui.QKeySequence.SaveAs,
                 statusTip="Save the document under a new name",
                 triggered=self.saveAs)
 
-        self.exitAct = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+Q",
+        self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
                 statusTip="Exit the application", triggered=self.close)
 
-        self.cutAct = QtWidgets.QAction(QtGui.QIcon(':/images/cut.png'), "Cu&t",
+        self.cutAct = QtGui.QAction(QtGui.QIcon(':/images/cut.png'), "Cu&t",
                 self, shortcut=QtGui.QKeySequence.Cut,
                 statusTip="Cut the current selection's contents to the clipboard",
                 triggered=self.textEdit.cut)
 
-        self.copyAct = QtWidgets.QAction(QtGui.QIcon(':/images/copy.png'),
+        self.copyAct = QtGui.QAction(QtGui.QIcon(':/images/copy.png'),
                 "&Copy", self, shortcut=QtGui.QKeySequence.Copy,
                 statusTip="Copy the current selection's contents to the clipboard",
                 triggered=self.textEdit.copy)
 
-        self.pasteAct = QtWidgets.QAction(QtGui.QIcon(':/images/paste.png'),
+        self.pasteAct = QtGui.QAction(QtGui.QIcon(':/images/paste.png'),
                 "&Paste", self, shortcut=QtGui.QKeySequence.Paste,
                 statusTip="Paste the clipboard's contents into the current selection",
                 triggered=self.textEdit.paste)
 
-        self.aboutAct = QtWidgets.QAction("&About", self,
+        self.aboutAct = QtGui.QAction("&About", self,
                 statusTip="Show the application's About box",
                 triggered=self.about)
 
-        self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
+        self.aboutQtAct = QtGui.QAction("About &Qt", self,
                 statusTip="Show the Qt library's About box",
                 triggered=qApp.aboutQt)
 

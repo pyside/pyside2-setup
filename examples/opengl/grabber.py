@@ -355,21 +355,21 @@ class MainWindow(QtWidgets.QMainWindow):
                 "rendering OpenGL into a Qt pixmap.")
 
     def createActions(self):
-        self.renderIntoPixmapAct = QtWidgets.QAction("&Render into Pixmap...",
+        self.renderIntoPixmapAct = QtGui.QAction("&Render into Pixmap...",
                 self, shortcut="Ctrl+R", triggered=self.renderIntoPixmap)
 
-        self.grabFrameBufferAct = QtWidgets.QAction("&Grab Frame Buffer", self,
+        self.grabFrameBufferAct = QtGui.QAction("&Grab Frame Buffer", self,
                 shortcut="Ctrl+G", triggered=self.grabFrameBuffer)
 
-        self.clearPixmapAct = QtWidgets.QAction("&Clear Pixmap", self,
+        self.clearPixmapAct = QtGui.QAction("&Clear Pixmap", self,
                 shortcut="Ctrl+L", triggered=self.clearPixmap)
 
-        self.exitAct = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+Q",
+        self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
                 triggered=self.close)
 
-        self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
+        self.aboutAct = QtGui.QAction("&About", self, triggered=self.about)
 
-        self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
+        self.aboutQtAct = QtGui.QAction("About &Qt", self,
                 triggered=qApp.aboutQt)
 
     def createMenus(self):

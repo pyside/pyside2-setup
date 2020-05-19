@@ -235,7 +235,7 @@
 
   <object-type name="QLayoutItem">
 
-    <modify-function signature="widget()">
+    <modify-function signature="widget()const">
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
@@ -461,19 +461,6 @@
     <enum-type name="SliderAction"/>
     <enum-type name="SliderChange"/>
   </object-type>
-  <object-type name="QActionGroup">
-    <enum-type name="ExclusionPolicy" since="5.14"/>
-    <modify-function signature="addAction(QAction*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="removeAction(QAction*)">
-      <modify-argument index="1">
-        <parent index="this" action="remove"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
   <object-type name="QCheckBox"/>
   <object-type name="QCommonStyle">
   </object-type>
@@ -522,14 +509,6 @@
     <modify-function signature="removeButton(QAbstractButton*)">
       <modify-argument index="1">
         <parent index="this" action="remove"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="QDirModel" polymorphic-id-expression="qobject_cast&lt;QDirModel*&gt;(%1)">
-    <enum-type name="Roles"/>
-    <modify-function signature="setIconProvider(QFileIconProvider*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
   </object-type>
@@ -638,8 +617,6 @@
   <object-type name="QItemDelegate">
     <!-- ### "doLayout(...)" is an internal method. -->
     <modify-function signature="doLayout(QStyleOptionViewItem,QRect*,QRect*,QRect*,bool)const" remove="all"/>
-    <!-- ### "selected(QPixmap,QPalette,bool)" is an internal method. -->
-    <modify-function signature="selected(QPixmap,QPalette,bool)const" remove="all"/>
     <!-- ### -->
     <modify-function signature="drawCheck(QPainter*,QStyleOptionViewItem,QRect,Qt::CheckState)const">
       <modify-argument index="1" invalidate-after-use="yes"/>
@@ -963,15 +940,6 @@
     </modify-function>
   </object-type>
 
-  <object-type name="QShortcut">
-    <add-function signature="QShortcut(QKeySequence&amp;,QWidget*,PyCallable*,Qt::ShortcutContext)">
-      <modify-argument index="4">
-        <replace-default-expression with="Qt::WindowShortcut"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qshortcut-1"/>
-      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qshortcut-2"/>
-    </add-function>
-  </object-type>
   <object-type name="QSpacerItem"/>
   <object-type name="QStatusBar">
     <modify-function signature="addWidget(QWidget*,int)">
@@ -1073,40 +1041,6 @@
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
     <modify-function signature="setHeader(QHeaderView*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="QUndoCommand">
-    <modify-function signature="mergeWith(const QUndoCommand*)">
-      <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-  </object-type>
-  <object-type name="QUndoGroup">
-    <modify-function signature="addStack(QUndoStack*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="removeStack(QUndoStack*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="QUndoStack">
-    <modify-function signature="createUndoAction(QObject*,const QString&amp;)const">
-      <modify-argument index="return">
-        <parent index="1" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="createRedoAction(QObject*,const QString&amp;)const">
-      <modify-argument index="return">
-        <parent index="1" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="push(QUndoCommand*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -1252,8 +1186,6 @@
   <object-type name="QColorDialog">
     <enum-type name="ColorDialogOption" flags="ColorDialogOptions"/>
     <modify-function signature="getColor(const QColor&amp;,QWidget*,const QString&amp;,QFlags&lt;QColorDialog::ColorDialogOption>)" allow-thread="yes"/>
-    <!-- Qt5: obsolete -->
-    <modify-function signature="getRgba(unsigned int,bool*,QWidget*)" remove="all"/>
   </object-type>
 
   <object-type name="QLayout">
@@ -1559,16 +1491,6 @@
       </modify-argument>
       <inject-code class="target" position="beginning">
         <insert-template name="fix_arg,arg,arg,arg,arg,bool*,arg"/>
-      </inject-code>
-    </modify-function>
-
-    <modify-function signature="getDouble(QWidget*,const QString&amp;,const QString&amp;,double,double,double,int,bool*,QFlags&lt;Qt::WindowType&gt;)" allow-thread="yes">
-      <modify-argument index="8">
-        <remove-default-expression/>
-        <remove-argument/>
-      </modify-argument>
-      <inject-code class="target" position="beginning">
-        <insert-template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg"/>
       </inject-code>
     </modify-function>
 
@@ -2024,7 +1946,7 @@
 
   <object-type name="QWidget" delete-in-main-thread="true">
     <!-- see QWindow::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
-    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,long*)">
+    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,qintptr*)">
       <modify-argument index="3">
         <remove-argument/>
         <conversion-rule class="native">
@@ -2225,33 +2147,6 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="getContentsMargins(int*,int*,int*,int*)const">
-        <modify-argument index="0">
-            <replace-type modified-type="PyObject"/>
-        </modify-argument>
-        <modify-argument index="1">
-            <remove-argument/>
-        </modify-argument>
-        <modify-argument index="2">
-            <remove-argument/>
-        </modify-argument>
-        <modify-argument index="3">
-            <remove-argument/>
-        </modify-argument>
-        <modify-argument index="4">
-            <remove-argument/>
-        </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int"/>
-            </insert-template>
-        </inject-code>
-        <inject-code class="native" position="end">
-            <insert-template name="fix_native_return_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
     <modify-function signature="insertAction(QAction*,QAction*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
@@ -2706,28 +2601,6 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="del()" rename="del_"/>
-    <modify-function signature="getTextMargins(int*,int*,int*,int*)const">
-        <modify-argument index="0">
-            <replace-type modified-type="PyObject*"/>
-        </modify-argument>
-        <modify-argument index="1">
-            <remove-argument/>
-        </modify-argument>
-        <modify-argument index="2">
-            <remove-argument/>
-        </modify-argument>
-        <modify-argument index="3">
-            <remove-argument/>
-        </modify-argument>
-        <modify-argument index="4">
-            <remove-argument/>
-        </modify-argument>
-        <inject-code class="target" position="beginning">
-            <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="int"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
 
     <add-function signature="addAction(QAction*)">
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlineedit-addaction"/>
@@ -2737,9 +2610,6 @@
   <object-type name="QLCDNumber">
       <enum-type name="Mode"/>
       <enum-type name="SegmentStyle"/>
-  </object-type>
-  <object-type name="QOpenGLWidget">
-      <enum-type name="UpdateBehavior"/>
   </object-type>
   <object-type name="QSplashScreen">
     <!-- Override QWidget.painter -->
@@ -2761,7 +2631,6 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QDesktopWidget"/>
   <object-type name="QFrame">
       <enum-type name="Shadow"/>
       <enum-type name="Shape"/>
@@ -2782,7 +2651,7 @@
     sys.exit(app.exec_())
           </inject-documentation>
       </modify-function>
-      <modify-function signature="valueChanged(QString)">
+      <modify-function signature="textChanged(QString)">
           <inject-documentation mode="append" format="target">
 ::
 
@@ -2943,20 +2812,8 @@
     </modify-function>
     <modify-function signature="print(QPagedPaintDevice*)const" rename="print_"/>
   </object-type>
-  <object-type name="QAction">
-    <enum-type name="ActionEvent"/>
-    <enum-type name="MenuRole"/>
-    <enum-type name="Priority" since="4.6"/>
-    <modify-function signature="setMenu(QMenu*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="triggered(bool)" allow-thread="yes"/>
-  </object-type>
 
   <object-type name="QApplication">
-    <enum-type name="ColorSpec"/>
     <extra-includes>
       <include file-name="QBasicTimer" location="global"/>
       <include file-name="QFont" location="global"/>

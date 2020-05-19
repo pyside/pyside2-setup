@@ -170,7 +170,6 @@
 
 
   <enum-type name="QtMsgType"/>
-
   <enum-type name="QCborSimpleType" since="5.12"/>
   <enum-type name="QCborKnownTags" since="5.12"/>
 
@@ -189,6 +188,8 @@
   <primitive-type name="long long"/>
   <primitive-type name="qlonglong" target-lang-api-name="PyLong"/>
   <primitive-type name="qulonglong" target-lang-api-name="PyLong"/>
+  <primitive-type name="qsizetype" target-lang-api-name="PyLong"/>
+  <primitive-type name="size_t" target-lang-api-name="PyLong"/>
   <primitive-type name="short"/>
   <primitive-type name="signed short"/>
   <primitive-type name="signed short int"/>
@@ -354,7 +355,7 @@
     <include file-name="qcborstream.h" location="global"/>
     <value-type name="StringResult" generate="no"/>
     <!-- 64bit (qsizetype = long long) -->
-    <modify-function signature="readStringChunk(char*,long long)" remove="all"/>
+    <modify-function signature="readStringChunk(char*,qsizetype)" remove="all"/>
     <!-- 32bit (qsizetype = int) -->
     <modify-function signature="readStringChunk(char*,int)" remove="all"/>
   </object-type>
@@ -405,6 +406,7 @@
     </conversion-rule>
   </container-type>
 
+  <!-- FIXME: Which one is it going to be? -->
   <container-type name="QList" type="list">
     <include file-name="QList" location="global"/>
     <conversion-rule>
@@ -417,21 +419,6 @@
             </add-conversion>
         </target-to-native>
     </conversion-rule>
-  </container-type>
-
-  <container-type name="QVector" type="vector">
-    <include file-name="QVector" location="global"/>
-    <conversion-rule>
-        <native-to-target>
-            <insert-template name="cppvector_to_pylist_conversion"/>
-        </native-to-target>
-        <target-to-native>
-            <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cppvector_conversion"/>
-            </add-conversion>
-        </target-to-native>
-    </conversion-rule>
-
   </container-type>
 
   <container-type name="QStack" type="stack">
@@ -450,20 +437,6 @@
 
   <container-type name="QQueue" type="queue">
     <include file-name="QQueue" location="global"/>
-    <conversion-rule>
-        <native-to-target>
-            <insert-template name="cpplist_to_pylist_conversion"/>
-        </native-to-target>
-        <target-to-native>
-            <add-conversion type="PySequence">
-                <insert-template name="pyseq_to_cpplist_conversion"/>
-            </add-conversion>
-        </target-to-native>
-    </conversion-rule>
-  </container-type>
-
-  <container-type name="QLinkedList" type="linked-list">
-    <include file-name="QLinkedList" location="global"/>
     <conversion-rule>
         <native-to-target>
             <insert-template name="cpplist_to_pylist_conversion"/>
@@ -634,6 +607,7 @@
     <enum-type name="PenCapStyle"/>
     <enum-type name="PenJoinStyle"/>
     <enum-type name="PenStyle"/>
+    <enum-type name="ReturnByValueConstant" since="6.0"/>
     <enum-type name="ScreenOrientation" flags="ScreenOrientations" since="5.0"/>
     <enum-type name="ScrollBarPolicy"/>
     <enum-type name="ScrollPhase" since="5.2"/>
@@ -827,7 +801,6 @@
     <extra-includes>
       <include file-name="datetime.h" location="global"/>
     </extra-includes>
-    <enum-type name="MonthNameType"/>
     <add-function signature="__repr__" return-type="PyObject">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -848,7 +821,7 @@
     <add-function signature="toPython()" return-type="PyObject">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdate-topython"/>
     </add-function>
-    <modify-function signature="getDate(int*,int*,int*)" >
+    <modify-function signature="getDate(int*,int*,int*)const" >
         <modify-argument index="1">
             <remove-argument/>
         </modify-argument>
@@ -1310,8 +1283,6 @@
             <rename to="format"/>
         </modify-argument>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions, int arg is gone -->
-    <modify-function signature="toUInt(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toUInt(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1324,8 +1295,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions, int arg is gone -->
-    <modify-function signature="toULongLong(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toULongLong(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1338,8 +1307,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions -->
-    <modify-function signature="toDouble(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toDouble(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1352,8 +1319,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions -->
-    <modify-function signature="toFloat(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toFloat(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1366,8 +1331,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions, int arg is gone -->
-    <modify-function signature="toInt(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toInt(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1379,8 +1342,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions, int arg is gone -->
-    <modify-function signature="toLongLong(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toLongLong(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1392,8 +1353,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions, int arg is gone -->
-    <modify-function signature="toShort(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toShort(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1405,8 +1364,6 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
-    <!-- Qt5: ignore the new QStringRef versions, int arg is gone -->
-    <modify-function signature="toUShort(QStringRef,bool*)const" remove="all"/>
     <modify-function signature="toUShort(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1505,7 +1462,7 @@
     <enum-type name="CheckIndexOption" flags="CheckIndexOptions" since="5.11"/>
     <enum-type name="LayoutChangeHint"/>
      <!-- This function was replaced by a added function -->
-    <modify-function signature="createIndex(int,int,void*)const" remove="all"/>
+    <modify-function signature="createIndex(int,int,const void*)const" remove="all"/>
     <!-- This function is the same as createIndex(int, int, int)const -->
     <modify-function signature="createIndex(int,int,quintptr)const">
         <modify-argument index="3">
@@ -1586,10 +1543,6 @@
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="clear()" remove="all"/>
-    <modify-function signature="filterChanged()" remove="all"/>
-    <!--### End of obsolete section -->
   </object-type>
   <object-type name="QIdentityProxyModel"/>
   <object-type name="QTransposeProxyModel" since="5.13"/>
@@ -1731,12 +1684,6 @@
             <replace-default-expression with="QString()"/>
         </modify-argument>
     </add-function>
-    <add-function signature="findChildren(PyTypeObject*,const QRegExp&amp;)" return-type="PySequence*" >
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
-        <modify-argument index="return">
-            <parent index="this" action="add"/>
-        </modify-argument>
-    </add-function>
     <add-function signature="findChildren(PyTypeObject*,const QRegularExpression&amp;)" return-type="PySequence*" >
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return">
@@ -1819,64 +1766,8 @@
         </inject-code>
     </add-function>
   </value-type>
-  <value-type name="QRegExp">
-    <enum-type name="CaretMode"/>
-    <enum-type name="PatternSyntax"/>
-    <extra-includes>
-      <include file-name="QStringList" location="global"/>
-    </extra-includes>
-    <add-function signature="__repr__" return-type="PyObject*">
-        <inject-code class="target" position="beginning">
-            <insert-template name="repr_code">
-               <replace from="%REPR_FORMAT" to="'%s', %i, %i"/>
-               <replace from="%REPR_ARGS" to="qPrintable(%CPPSELF.pattern()), (int)%CPPSELF.caseSensitivity(), (int)%CPPSELF.patternSyntax()"/>
-             </insert-template>
-        </inject-code>
-    </add-function>
-
-    <add-function signature="__reduce__" return-type="PyObject*">
-        <inject-code class="target" position="beginning">
-            <insert-template name="reduce_code">
-              <replace from="%REDUCE_FORMAT" to="sii"/>
-              <replace from="%REDUCE_ARGS" to="qPrintable(%CPPSELF.pattern()), (int)%CPPSELF.caseSensitivity(), (int)%CPPSELF.patternSyntax()"/>
-            </insert-template>
-        </inject-code>
-    </add-function>
-    <add-function signature="replace(QString,QString)" return-type="QString">
-        <modify-argument index="1">
-            <rename to="sourceString"/>
-        </modify-argument>
-        <modify-argument index="2">
-            <rename to="after"/>
-        </modify-argument>
-        <inject-documentation format="target" mode="append">
-        Replaces every occurrence of the regular expression in *sourceString* with *after*.
-        Returns a new Python string with the modified contents. For example:
-
-        ::
-
-            s = "Banana"
-            re = QRegExp("a[mn]")
-            s = re.replace(s, "ox")
-            # s == "Boxoxa"
-
-
-        For regular expressions containing capturing parentheses, occurrences of \1, \2, ..., in *after*
-        are replaced with rx.cap(1), cap(2), ...
-
-        ::
-
-            t = "A &lt;i>bon mot&lt;/i>."
-            re = QRegExp("&lt;i>([^&lt;]*)&lt;/i>")
-            t = re.replace(t, "\\emph{\\1}")
-            # t == "A \\emph{bon mot}."
-
-        </inject-documentation>
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qregexp-replace"/>
-    </add-function>
-  </value-type>
-
   <value-type name="QRegularExpression">
+    <enum-type name="WildcardConversionOption" flags="WildcardConversionOptions" since="6.0"/>
     <enum-type name="MatchOption" flags="MatchOptions"/>
     <enum-type name="MatchType"/>
     <enum-type name="PatternOption" flags="PatternOptions"/>
@@ -1918,56 +1809,41 @@
     <!-- ### These overloads must be removed accept strings with \x00 in their contents -->
     <modify-function signature="append(const char*,int)" remove="all"/>
     <modify-function signature="append(const char*)" remove="all"/>
-    <modify-function signature="append(QString)" remove="all"/>
     <modify-function signature="contains(const char*)const" remove="all"/>
     <modify-function signature="count(const char*)const" remove="all"/>
     <modify-function signature="endsWith(const char*)const" remove="all"/>
     <modify-function signature="indexOf(const char*,int)const" remove="all"/>
     <modify-function signature="indexOf(char,int)const" remove="all"/>
-    <modify-function signature="indexOf(QString,int)const" remove="all"/>
     <modify-function signature="insert(int,const char*)" remove="all"/>
     <modify-function signature="insert(int,char)" remove="all"/>
     <modify-function signature="insert(int,const char*,int)" since="4.6" remove="all"/>
-    <modify-function signature="insert(int,QString)" remove="all"/>
     <modify-function signature="lastIndexOf(const char*,int)const" remove="all"/>
-    <modify-function signature="lastIndexOf(QString,int)const" remove="all"/>
     <modify-function signature="lastIndexOf(char,int)const" remove="all"/>
     <modify-function signature="prepend(const char*)" remove="all"/>
     <modify-function signature="prepend(const char*,int)" since="4.6" remove="all"/>
     <modify-function signature="replace(QByteArray,const char*)" remove="all"/>
     <modify-function signature="replace(const char*,int,const char*,int)" remove="all"/>
-    <modify-function signature="replace(QString,const char*)" remove="all"/>
     <modify-function signature="replace(const char*,QByteArray)" remove="all"/>
     <modify-function signature="replace(const char*,const char*)" remove="all"/>
     <modify-function signature="replace(int,int,const char*)" remove="all"/>
     <modify-function signature="replace(int,int,const char*,int)" since="4.6" remove="all"/>
     <modify-function signature="replace(char,const char*)" remove="all"/>
-    <modify-function signature="replace(char,QString)" remove="all"/>
     <modify-function signature="startsWith(const char*)const" remove="all"/>
-    <modify-function signature="operator==(QString)const" remove="all"/>
     <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator==(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator>(QString)const" remove="all"/>
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator>(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator>=(QString)const" remove="all"/>
     <modify-function signature="operator>=(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator>=(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator&lt;(QString)const" remove="all"/>
     <modify-function signature="operator&lt;(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator&lt;=(QString)const" remove="all"/>
     <modify-function signature="operator&lt;=(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator&lt;=(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator!=(QString)const" remove="all"/>
     <modify-function signature="operator!=(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator!=(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator+=(QString)" remove="all"/>
     <modify-function signature="operator+=(const char*)" remove="all"/>
     <modify-function signature="operator+(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator+(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator+(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="operator+(QString,QByteArray)" remove="all"/>
-    <modify-function signature="operator+(QByteArray,QString)" remove="all"/>
     <add-function signature="operator+(PyBytes,QByteArray)">
         <inject-code file="../glue/qtcore.cpp" snippet="qbytearray-operatorplus-1"/>
     </add-function>
@@ -2053,7 +1929,6 @@
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator>=(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator[](int)const" remove="all"/>
-    <modify-function signature="operator[](uint)const" remove="all"/>
     <!-- Those types have the same representation in Python, an overload would be useless. -->
     <modify-function signature="setNum(uint,int)" remove="all"/>
     <modify-function signature="setNum(ushort,int)" remove="all"/>
@@ -2196,7 +2071,7 @@
   <!-- Qt5: had to move QAbstractEventDispatcher into os-specific files because of Windows -->
   <object-type name="QAbstractNativeEventFilter">
     <!-- see QWidget::nativeEvent(), QWindow::nativeEvent() -->
-    <modify-function signature="nativeEventFilter(const QByteArray&amp;,void*,long*)">
+    <modify-function signature="nativeEventFilter(const QByteArray&amp;,void*,qintptr*)">
       <modify-argument index="3">
         <remove-argument/>
         <conversion-rule class="native">
@@ -2310,7 +2185,7 @@
   </object-type>
   <object-type name="QCryptographicHash">
     <enum-type name="Algorithm"/>
-    <modify-function signature="addData(const char*,int)">
+    <modify-function signature="addData(const char*,qsizetype)">
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
@@ -2406,38 +2281,6 @@
       <include file-name="QUrl" location="global"/>
     </extra-includes>
   </object-type>
-  <object-type name="QTextCodec">
-    <enum-type name="ConversionFlag" flags="ConversionFlags"/>
-
-    <object-type name="ConverterState">
-      <include file-name="QTextCodec" location="global"/>
-      <modify-function signature="ConverterState(QFlags&lt;QTextCodec::ConversionFlag&gt;)">
-        <modify-argument index="1">
-          <replace-default-expression with="QTextCodec::DefaultConversion"/>
-        </modify-argument>
-      </modify-function>
-    </object-type>
-
-    <modify-function signature="setCodecForLocale(QTextCodec*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <!-- fromUnicode(QString) does the job -->
-    <modify-function signature="fromUnicode(const QChar*,int,QTextCodec::ConverterState*)const" remove="all"/>
-    <modify-function signature="convertFromUnicode(const QChar*,int,QTextCodec::ConverterState*)const" remove="all"/>
-    <!-- this causes a warning that I cannot avoid. See suppressed warning at the end. -->
-  </object-type>
-  <object-type name="QTextDecoder">
-    <!-- ### toUnicode(QByteArray) does the job -->
-    <modify-function signature="toUnicode(const char*,int)" remove="all"/>
-    <modify-function signature="toUnicode(QString*,const char*,int)" remove="all"/>
-    <!-- ### -->
-  </object-type>
-  <object-type name="QTextEncoder">
-    <!-- fromUnicode(QString) does the job -->
-    <modify-function signature="fromUnicode(const QChar*,int)" remove="all"/>
-  </object-type>
   <object-type name="QTimeLine">
     <enum-type name="CurveShape"/>
     <enum-type name="Direction"/>
@@ -2493,7 +2336,6 @@
     <modify-function signature="readAllStandardOutput()" allow-thread="yes"/>
     <modify-function signature="readAllStandardError()" allow-thread="yes"/>
     <modify-function signature="execute(QString,QStringList)" allow-thread="yes"/>
-    <modify-function signature="execute(QString)" allow-thread="yes"/>
     <modify-function signature="startDetached(QString,QStringList,QString,qint64*)">
         <modify-argument index="4">
             <remove-argument />
@@ -2508,10 +2350,6 @@
     <add-function signature="pid()" return-type="long">
         <inject-code file="../glue/qtcore.cpp" snippet="qprocess-pid"/>
     </add-function>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="setReadChannelMode(QProcess::ProcessChannelMode)" remove="all"/>
-    <modify-function signature="readChannelMode()const" remove="all"/>
-    <!-- ### -->
   </object-type>
   <object-type name="QSignalMapper"/>
 
@@ -2590,12 +2428,6 @@
     <!--### Obsolete in 4.3-->
     <modify-function signature="setSystemIniPath(const QString&amp;)" remove="all"/>
     <modify-function signature="setUserIniPath(const QString&amp;)" remove="all"/>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="iniCodec()const">
-      <modify-argument index="return">
-        <define-ownership class="target" owner="default"/>
-      </modify-argument>
-    </modify-function>
     <!-- PYSIDE-1010:
     We remove the original implementation of value() to include the optional parameter -->
     <modify-function signature="value(const QString&amp;,const QVariant&amp;)const" remove="all"/>
@@ -2882,11 +2714,6 @@
   <object-type name="QXmlStreamWriter">
     <!-- Removed because it expect QString to be mutable -->
     <modify-function signature="QXmlStreamWriter(QString*)" remove="all"/>
-    <modify-function signature="codec()const">
-      <modify-argument index="return">
-        <define-ownership class="target" owner="default"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <value-type name="QModelIndex" hash-function="qHash">
     <modify-function signature="internalPointer()const">

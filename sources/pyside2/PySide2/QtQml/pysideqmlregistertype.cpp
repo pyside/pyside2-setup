@@ -132,7 +132,6 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     Q_ASSERT(metaObject);
 
     QQmlPrivate::RegisterType type;
-    type.version = 0;
 
     // Allow registering Qt Quick items.
     bool registered = false;
@@ -153,8 +152,8 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         pyTypes[nextType] = pyObj;
 
         // FIXME: Fix this to assign new type ids each time.
-        type.typeId = qMetaTypeId<QObject *>();
-        type.listId = qMetaTypeId<QQmlListProperty<QObject> >();
+        type.typeId = QMetaType(QMetaType::QObjectStar);
+        type.listId = QMetaType::fromType<QQmlListProperty<QObject> >();
         type.attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<QObject>();
         type.attachedPropertiesMetaObject = QQmlPrivate::attachedPropertiesMetaObject<QObject>();
 
@@ -170,8 +169,7 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.objectSize = objectSize;
         type.create = createFuncs[nextType];
         type.uri = uri;
-        type.versionMajor = versionMajor;
-        type.versionMinor = versionMinor;
+        type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
         type.elementName = qmlName;
 
         type.extensionObjectCreate = 0;

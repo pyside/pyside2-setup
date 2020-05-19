@@ -40,7 +40,8 @@
 
 import sys
 from PySide2.QtCore import Slot
-from PySide2.QtWidgets import (QAction, QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import (QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
 

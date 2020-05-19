@@ -3,10 +3,12 @@ project(QtQuick)
 set(QtQuick_registerType "${QtQuick_SOURCE_DIR}/pysidequickregistertype.cpp")
 
 set(QtQuick_SRC
+${QtQuick_GEN_DIR}/qquickasyncimageprovider_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickframebufferobject_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickframebufferobject_renderer_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktexturefactory_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickimageprovider_wrapper.cpp
+${QtQuick_GEN_DIR}/qquickimageresponse_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktransform_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitem_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickitem_updatepaintnodedata_wrapper.cpp
@@ -17,11 +19,9 @@ ${QtQuick_GEN_DIR}/qquickrendercontrol_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktextdocument_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickview_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickwindow_wrapper.cpp
-${QtQuick_GEN_DIR}/qsgabstractrenderer_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgbasicgeometrynode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgclipnode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgdynamictexture_wrapper.cpp
-${QtQuick_GEN_DIR}/qsgengine_wrapper.cpp
 #${QtQuick_GEN_DIR}/qsgflatcolormaterial_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsggeometry_attribute_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsggeometry_attributeset_wrapper.cpp
@@ -50,13 +50,6 @@ ${QtQuick_GEN_DIR}/qsgtransformnode_wrapper.cpp
 # module is always needed
 ${QtQuick_GEN_DIR}/qtquick_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Quick_VERSION VERSION_GREATER 5.5.1)
-    set(QtQuick_SRC ${QtQuick_SRC}
-                    ${QtQuick_GEN_DIR}/qquickasyncimageprovider_wrapper.cpp
-                    ${QtQuick_GEN_DIR}/qquickimageresponse_wrapper.cpp
-       )
-endif()
 
 set(QtQuick_include_dirs  ${QtQuick_SOURCE_DIR}
                           ${QtQml_SOURCE_DIR}

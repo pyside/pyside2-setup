@@ -142,12 +142,12 @@ namespace QTest
 
 private:
 #ifdef QT_WIDGETS_LIB
-        PySideQTouchEventSequence(QWidget *widget, QTouchDevice *aDevice, bool autoCommit)
+        PySideQTouchEventSequence(QWidget *widget, QInputDevice *aDevice, bool autoCommit)
             : targetWidget(widget), targetWindow(0), device(aDevice), commitWhenDestroyed(autoCommit)
         {
         }
 #endif
-        PySideQTouchEventSequence(QWindow *window, QTouchDevice *aDevice, bool autoCommit)
+        PySideQTouchEventSequence(QWindow *window, QInputDevice *aDevice, bool autoCommit)
             :
 #ifdef QT_WIDGETS_LIB
               targetWidget(0),
@@ -195,18 +195,18 @@ private:
         QWidget *targetWidget;
 #endif
         QWindow *targetWindow;
-        QTouchDevice *device;
+        QInputDevice *device;
         bool commitWhenDestroyed;
 #ifdef QT_WIDGETS_LIB
-        friend PySideQTouchEventSequence *generateTouchEvent(QWidget *, QTouchDevice *, bool);
+        friend PySideQTouchEventSequence *generateTouchEvent(QWidget *, QInputDevice *, bool);
 #endif
-        friend PySideQTouchEventSequence *generateTouchEvent(QWindow *, QTouchDevice *, bool);
+        friend PySideQTouchEventSequence *generateTouchEvent(QWindow *, QInputDevice *, bool);
     };
 
 #ifdef QT_WIDGETS_LIB
     inline
     PySideQTouchEventSequence *generateTouchEvent(QWidget *widget,
-                                                  QTouchDevice *device,
+                                                  QInputDevice *device,
                                                   bool autoCommit = true)
     {
         return new PySideQTouchEventSequence(widget, device, autoCommit);
@@ -214,7 +214,7 @@ private:
 #endif
     inline
     PySideQTouchEventSequence *generateTouchEvent(QWindow *window,
-                                                  QTouchDevice *device,
+                                                  QInputDevice *device,
                                                   bool autoCommit = true)
     {
         return new PySideQTouchEventSequence(window, device, autoCommit);

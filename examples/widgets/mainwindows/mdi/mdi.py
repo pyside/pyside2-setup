@@ -44,8 +44,8 @@
 
 from PySide2.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper,
         QSaveFile, QSize, QTextStream, Qt)
-from PySide2.QtGui import QIcon, QKeySequence
-from PySide2.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow,
+from PySide2.QtGui import QAction, QIcon, QKeySequence
+from PySide2.QtWidgets import (QApplication, QFileDialog, QMainWindow,
         QMdiArea, QMessageBox, QTextEdit, QWidget)
 
 import mdi_rc

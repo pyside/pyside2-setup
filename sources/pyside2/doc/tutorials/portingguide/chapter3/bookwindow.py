@@ -40,7 +40,8 @@
 
 from __future__ import print_function, absolute_import
 
-from PySide2.QtWidgets import (QAction, QAbstractItemView, qApp, QDataWidgetMapper,
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import (QAbstractItemView, qApp, QDataWidgetMapper,
     QHeaderView, QMainWindow, QMessageBox)
 from PySide2.QtGui import QKeySequence
 from PySide2.QtSql import (QSqlRelation, QSqlRelationalTableModel, QSqlTableModel,

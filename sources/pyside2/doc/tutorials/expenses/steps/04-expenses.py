@@ -40,7 +40,8 @@
 
 import sys
 from PySide2.QtCore import Slot
-from PySide2.QtWidgets import QAction, QApplication, QMainWindow, QWidget
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import QApplication, QMainWindow, QWidget
 
 
 class Widget(QWidget):

@@ -38,7 +38,7 @@ init_test_paths(False)
 
 import py3kcompat as py3k
 
-from PySide2.QtCore import QByteArray, QTextStream, QIODevice, QTextCodec, QFile
+from PySide2.QtCore import QByteArray, QTextStream, QIODevice, QFile
 
 class QTextStreamShiftTest(unittest.TestCase):
 
@@ -61,14 +61,6 @@ class QTextStreamGetSet(unittest.TestCase):
     def setUp(self):
         self.obj = QTextStream()
 
-
-    def testCodec(self):
-        '''QTextStream set/get Codec'''
-
-        codec = QTextCodec.codecForName('ISO8859-1')
-        self.obj.setCodec(codec)
-        self.assertEqual(codec, self.obj.codec())
-
     def testDevice(self):
         '''QTextStream get/set Device'''
         device = QFile()
@@ -83,7 +75,6 @@ class QTextStreamInitialization(unittest.TestCase):
         '''QTextStream construction'''
         obj = QTextStream()
 
-        self.assertEqual(obj.codec(), QTextCodec.codecForLocale())
         self.assertEqual(obj.device(), None)
         self.assertEqual(obj.string(), None)
 

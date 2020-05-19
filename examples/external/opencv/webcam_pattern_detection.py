@@ -44,8 +44,8 @@ import time
 
 import cv2
 from PySide2.QtCore import Qt, QThread, Signal, Slot
-from PySide2.QtGui import QImage, QKeySequence, QPixmap
-from PySide2.QtWidgets import (QAction, QApplication, QComboBox, QGroupBox,
+from PySide2.QtGui import QAction, QImage, QKeySequence, QPixmap
+from PySide2.QtWidgets import (QApplication, QComboBox, QGroupBox,
                                QHBoxLayout, QLabel, QMainWindow, QPushButton,
                                QSizePolicy, QVBoxLayout, QWidget)
 

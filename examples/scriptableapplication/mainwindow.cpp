@@ -51,7 +51,7 @@
 #include "mainwindow.h"
 #include "pythonutils.h"
 
-#include <QtWidgets/QAction>
+#include <QtGui.QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>

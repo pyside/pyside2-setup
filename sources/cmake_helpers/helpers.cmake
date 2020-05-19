@@ -26,7 +26,6 @@ macro(collect_optional_modules)
 # Collect all optional modules.
 set(ALL_OPTIONAL_MODULES
     Xml
-    XmlPatterns
     Help Multimedia
     MultimediaWidgets
     OpenGL
@@ -39,8 +38,6 @@ set(ALL_OPTIONAL_MODULES
     QuickWidgets
     RemoteObjects
     Scxml
-    Script
-    ScriptTools
     Sensors
     SerialPort
     TextToSpeech
@@ -179,8 +176,7 @@ macro(COLLECT_MODULE_IF_FOUND shortname)
             get_target_property(Qt6${shortname}_PRIVATE_INCLUDE_DIRS
                                 Qt6::${shortname}Private
                                 INTERFACE_INCLUDE_DIRECTORIES)
-            get_target_property(Qt6${shortname}_LIBRARIES Qt6::${shortname}
-                                INTERFACE_LINK_LIBRARIES)
+            set(Qt6${shortname}_LIBRARIES Qt::${shortname})
         endif()
     else()
         if("${module_state}" STREQUAL "optional")

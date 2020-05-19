@@ -107,16 +107,9 @@
         <enum-type name="TextRenderType" since="5.10"/>
     </object-type>
 
-    <object-type name="QSGAbstractRenderer">
-        <enum-type name="ClearModeBit" flags="ClearMode"/>
-        <enum-type name="MatrixTransformFlag" flags="MatrixTransformFlags" since="5.14"/>
-    </object-type>
     <object-type name="QSGBasicGeometryNode"/>
     <object-type name="QSGClipNode"/>
     <object-type name="QSGDynamicTexture"/>
-    <object-type name="QSGEngine">
-        <enum-type name="CreateTextureOption" flags="CreateTextureOptions"/>
-    </object-type>
     <!-- <object-type name="QSGFlatColorMaterial"/> -->
     <object-type name="QSGGeometry">
         <enum-type name="DataPattern"/>

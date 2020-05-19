@@ -647,8 +647,10 @@ if (%PYARG_0 == Py_None)
 
 // @snippet qline-hash
 namespace PySide {
-    template<> inline Py_ssize_t hash(const QLine &v) {
-        return qHash(qMakePair(qMakePair(v.x1(), v.y1()), qMakePair(v.x2(), v.y2())));
+    template<> inline Py_ssize_t hash(const QLine &l)
+    {
+        const int v[4] = {l.x1(), l.y1(), l.x2(), l.y2()};
+        return qHashRange(v, v + 4);
     }
 };
 // @snippet qline-hash
@@ -723,8 +725,9 @@ namespace PySide {
 
 // @snippet qrect
 namespace PySide {
-    template<> inline Py_ssize_t hash(const QRect &v) {
-        return qHash(qMakePair(qMakePair(v.x(), v.y()), qMakePair(v.width(), v.height())));
+    template<> inline Py_ssize_t hash(const QRect &r) {
+        const int v[4] = {r.x(), r.y(), r.width(), r.height()};
+        return qHashRange(v, v + 4);
     }
 };
 // @snippet qrect
@@ -799,11 +802,6 @@ static QObject *_findChildHelper(const QObject *parent, const QString &name, PyT
             return obj;
     }
     return nullptr;
-}
-
-static inline bool _findChildrenComparator(const QObject *&child, const QRegExp &name)
-{
-    return name.indexIn(child->objectName()) != -1;
 }
 
 static inline bool _findChildrenComparator(const QObject *&child, const QRegularExpression &name)

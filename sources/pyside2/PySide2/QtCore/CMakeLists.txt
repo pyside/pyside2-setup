@@ -26,22 +26,26 @@ ${QtCore_GEN_DIR}/qbasicmutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qbasictimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qbitarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbuffer_wrapper.cpp
+${QtCore_GEN_DIR}/qbytearray_frombase64result_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
-${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
+${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
+${QtCore_GEN_DIR}/qcalendar_yearmonthday_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborerror_wrapper.cpp
 ${QtCore_GEN_DIR}/qcbormap_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborparsererror_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborstreamreader_wrapper.cpp
-${QtCore_GEN_DIR}/qcborstringresultstring_wrapper.cpp
-${QtCore_GEN_DIR}/qcborstringresultbytearray_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborstreamwriter_wrapper.cpp
+${QtCore_GEN_DIR}/qcborstringresultbytearray_wrapper.cpp
+${QtCore_GEN_DIR}/qcborstringresultstring_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborvalue_wrapper.cpp
+${QtCore_GEN_DIR}/qchildevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qcollator_wrapper.cpp
 ${QtCore_GEN_DIR}/qcollatorsortkey_wrapper.cpp
 ${QtCore_GEN_DIR}/qcommandlineoption_wrapper.cpp
 ${QtCore_GEN_DIR}/qcommandlineparser_wrapper.cpp
+${QtCore_GEN_DIR}/qconcatenatetablesproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qcoreapplication_wrapper.cpp
 ${QtCore_GEN_DIR}/qcryptographichash_wrapper.cpp
 ${QtCore_GEN_DIR}/qdatastream_wrapper.cpp
@@ -58,9 +62,9 @@ ${QtCore_GEN_DIR}/qeventloop_wrapper.cpp
 ${QtCore_GEN_DIR}/qeventtransition_wrapper.cpp
 ${QtCore_GEN_DIR}/qfactoryinterface_wrapper.cpp
 ${QtCore_GEN_DIR}/qfile_wrapper.cpp
-${QtCore_GEN_DIR}/qfileselector_wrapper.cpp
 ${QtCore_GEN_DIR}/qfiledevice_wrapper.cpp
 ${QtCore_GEN_DIR}/qfileinfo_wrapper.cpp
+${QtCore_GEN_DIR}/qfileselector_wrapper.cpp
 ${QtCore_GEN_DIR}/qfilesystemwatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qfinalstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericargument_wrapper.cpp
@@ -68,13 +72,13 @@ ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qhistorystate_wrapper.cpp
 ${QtCore_GEN_DIR}/qidentityproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevice_wrapper.cpp
+${QtCore_GEN_DIR}/qitemselection_wrapper.cpp
+${QtCore_GEN_DIR}/qitemselectionmodel_wrapper.cpp
+${QtCore_GEN_DIR}/qitemselectionrange_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsondocument_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonparseerror_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonvalue_wrapper.cpp
-${QtCore_GEN_DIR}/qitemselection_wrapper.cpp
-${QtCore_GEN_DIR}/qitemselectionmodel_wrapper.cpp
-${QtCore_GEN_DIR}/qitemselectionrange_wrapper.cpp
 ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
@@ -107,13 +111,13 @@ ${QtCore_GEN_DIR}/qpointf_wrapper.cpp
 ${QtCore_GEN_DIR}/qprocess_wrapper.cpp
 ${QtCore_GEN_DIR}/qprocessenvironment_wrapper.cpp
 ${QtCore_GEN_DIR}/qpropertyanimation_wrapper.cpp
-${QtCore_GEN_DIR}/qrandomgenerator_wrapper.cpp
 ${QtCore_GEN_DIR}/qrandomgenerator64_wrapper.cpp
+${QtCore_GEN_DIR}/qrandomgenerator_wrapper.cpp
 ${QtCore_GEN_DIR}/qreadlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qreadwritelock_wrapper.cpp
 ${QtCore_GEN_DIR}/qrect_wrapper.cpp
 ${QtCore_GEN_DIR}/qrectf_wrapper.cpp
-${QtCore_GEN_DIR}/qregexp_wrapper.cpp
+${QtCore_GEN_DIR}/qrecursivemutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qregularexpression_wrapper.cpp
 ${QtCore_GEN_DIR}/qregularexpressionmatch_wrapper.cpp
 ${QtCore_GEN_DIR}/qregularexpressionmatchiterator_wrapper.cpp
@@ -132,8 +136,8 @@ ${QtCore_GEN_DIR}/qsizef_wrapper.cpp
 ${QtCore_GEN_DIR}/qsocketdescriptor_wrapper.cpp
 ${QtCore_GEN_DIR}/qsocketnotifier_wrapper.cpp
 ${QtCore_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
-${QtCore_GEN_DIR}/qstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qstandardpaths_wrapper.cpp
+${QtCore_GEN_DIR}/qstate_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_signalevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrappedevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qstatemachine_wrapper.cpp
@@ -145,10 +149,6 @@ ${QtCore_GEN_DIR}/qt_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporarydir_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporaryfile_wrapper.cpp
 ${QtCore_GEN_DIR}/qtextboundaryfinder_wrapper.cpp
-${QtCore_GEN_DIR}/qtextcodec_converterstate_wrapper.cpp
-${QtCore_GEN_DIR}/qtextcodec_wrapper.cpp
-${QtCore_GEN_DIR}/qtextdecoder_wrapper.cpp
-${QtCore_GEN_DIR}/qtextencoder_wrapper.cpp
 ${QtCore_GEN_DIR}/qtextstream_wrapper.cpp
 ${QtCore_GEN_DIR}/qtextstreammanipulator_wrapper.cpp
 ${QtCore_GEN_DIR}/qthread_wrapper.cpp
@@ -157,9 +157,10 @@ ${QtCore_GEN_DIR}/qtime_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimeline_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimerevent_wrapper.cpp
-${QtCore_GEN_DIR}/qtimezone_wrapper.cpp
 ${QtCore_GEN_DIR}/qtimezone_offsetdata_wrapper.cpp
+${QtCore_GEN_DIR}/qtimezone_wrapper.cpp
 ${QtCore_GEN_DIR}/qtranslator_wrapper.cpp
+${QtCore_GEN_DIR}/qtransposeproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qurl_wrapper.cpp
 ${QtCore_GEN_DIR}/qurlquery_wrapper.cpp
 ${QtCore_GEN_DIR}/quuid_wrapper.cpp
@@ -176,32 +177,10 @@ ${QtCore_GEN_DIR}/qxmlstreamnotationdeclaration_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamreader_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamwriter_wrapper.cpp
 
-
 ${SPECIFIC_OS_FILES}
 # module is always needed
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.13.0
-    OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.13.0)
-    list(APPEND QtCore_SRC
-         ${QtCore_GEN_DIR}/qconcatenatetablesproxymodel_wrapper.cpp
-         ${QtCore_GEN_DIR}/qtransposeproxymodel_wrapper.cpp)
-endif()
-
-if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.14.0
-    OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.14.0)
-    list(APPEND QtCore_SRC
-         ${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
-         ${QtCore_GEN_DIR}/qcalendar_yearmonthday_wrapper.cpp
-         ${QtCore_GEN_DIR}/qrecursivemutex_wrapper.cpp)
-endif()
-
-if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.15.0
-    OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.15.0)
-    list(APPEND QtCore_SRC
-         ${QtCore_GEN_DIR}/qbytearray_frombase64result_wrapper.cpp)
-endif()
 
 set(QtCore_glue_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"

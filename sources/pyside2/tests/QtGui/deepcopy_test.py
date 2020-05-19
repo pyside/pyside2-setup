@@ -36,7 +36,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2.QtCore import QPoint
-from PySide2.QtGui import QMatrix
 from PySide2.QtGui import QMatrix2x2, QMatrix2x3, QMatrix2x4
 from PySide2.QtGui import QMatrix3x2, QMatrix3x3, QMatrix3x4
 from PySide2.QtGui import QMatrix4x2, QMatrix4x3, QMatrix4x4
@@ -81,7 +80,7 @@ class QColorCMYKDeepCopy(DeepCopyColorHelperF, unittest.TestCase):
 
 class QTransformDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QTransform(1, 2, 3, 4, 5, 6, 7, 8)
+        self.original = QTransform(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
 class QKeySequenceDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
@@ -106,10 +105,6 @@ class QVector4DDeepCopy(DeepCopyHelper, unittest.TestCase):
 class QPolygonDeepCopy(DeepCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QPolygon([QPoint(1, 2), QPoint(3, 4), QPoint(5, 6)])
-
-class QMatrixDeepCopy(DeepCopyHelper, unittest.TestCase):
-    def setUp(self):
-        self.original = QMatrix(1, 2, 3, 4, 5, 6)
 
 
 # Avoid these tests until get gcc fixed

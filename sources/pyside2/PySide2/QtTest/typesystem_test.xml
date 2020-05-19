@@ -89,14 +89,14 @@
       The problem that costed my days of bug hunting is the fact that shiboken gives
       misleading error messages. The messages that I could not get rid of were
 
-    signature 'generateTouchEvent(QWidget*,QTouchDevice*,bool)' for function modification in 'QTest' not found. Possible candidates:
-    signature 'generateTouchEvent(QWindow*,QTouchDevice*,bool)' for function modification in 'QTest' not found. Possible candidates:
+    signature 'generateTouchEvent(QWidget*,QInputDevice*,bool)' for function modification in 'QTest' not found. Possible candidates:
+    signature 'generateTouchEvent(QWindow*,QInputDevice*,bool)' for function modification in 'QTest' not found. Possible candidates:
 
       I always thought that for some reason the functions were not recognized, or the arguments somehow
       do not match their declaration. Only late in the project, I learnt that also
       a simply missing type name in the argument list leads to this message.
 
-  <object-type name="QTouchDevice">
+  <object-type name="QInputDevice">
     <enum-type name="CapabilityFlag" flags="Capabilities"/>
     <enum-type name="DeviceType"/>
   </object-type>
@@ -151,12 +151,12 @@
             </modify-argument>
         </modify-function>
     </object-type>
-    <modify-function signature="generateTouchEvent(QWidget*,QTouchDevice*,bool)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWidget*,QInputDevice*,bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="generateTouchEvent(QWindow*,QTouchDevice*,bool)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWindow*,QInputDevice*,bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>

@@ -40,7 +40,8 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import (QMainWindow, QAction, QFileDialog, QApplication)
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import (QMainWindow, QFileDialog, QApplication)
 
 from addresswidget import AddressWidget
 

@@ -37,7 +37,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2.QtCore import SLOT
-from PySide2.QtWidgets import QMenuBar, QAction, QPushButton
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import QMenuBar, QPushButton
 
 from helper.usesqapplication import UsesQApplication
 

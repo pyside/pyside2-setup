@@ -39,8 +39,8 @@
 #############################################################################
 
 from PySide2.QtCore import Slot
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog,
+from PySide2.QtGui import QAction, QIcon
+from PySide2.QtWidgets import (QCheckBox, QComboBox, QDialog,
                                QGridLayout, QGroupBox, QHBoxLayout, QLabel,
                                QLineEdit, QMenu, QMessageBox, QPushButton,
                                QSpinBox, QStyle, QSystemTrayIcon, QTextEdit,

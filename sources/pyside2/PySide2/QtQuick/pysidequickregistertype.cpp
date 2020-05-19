@@ -130,6 +130,7 @@ void registerTypeIfInheritsFromClass(
     bool shouldRegister = !registered && pyTypeObjectInheritsFromClass(typeToRegister, className);
     if (shouldRegister) {
         int ptrType =
+#if 0 // FIXME Qt 6
                 QMetaType::registerNormalizedType(
                     typePointerName.constData(),
                     QtMetaTypePrivate::QMetaTypeFunctionHelper<WrapperClass *>::Destruct,
@@ -143,8 +144,11 @@ void registerTypeIfInheritsFromClass(
                          typePointerName.constData());
             return;
         }
-
+#else
+                -1;
+#endif
         int lstType =
+#if 0 // FIXME Qt 6
                 QMetaType::registerNormalizedType(
                     typeListName.constData(),
                     QtMetaTypePrivate::QMetaTypeFunctionHelper<QQmlListProperty<WrapperClass> >
@@ -155,14 +159,17 @@ void registerTypeIfInheritsFromClass(
                     static_cast< ::QFlags<QMetaType::TypeFlag> >(
                         QtPrivate::QMetaTypeTypeFlags<QQmlListProperty<WrapperClass> >::Flags),
                     nullptr);
+#else
+                -1;
+#endif
         if (lstType == -1) {
             PyErr_Format(PyExc_TypeError, "Meta type registration of \"%s\" for QML usage failed.",
                          typeListName.constData());
             return;
         }
 
-        type->typeId = ptrType;
-        type->listId = lstType;
+        type->typeId = QMetaType(ptrType);
+        type->listId = QMetaType(lstType);
         type->attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<WrapperClass>();
         type->attachedPropertiesMetaObject =
                 QQmlPrivate::attachedPropertiesMetaObject<WrapperClass>();
@@ -228,10 +235,8 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
         return false;
 
     type->create = createFuncs[nextType];
-    type->version = 0;
     type->uri = uri;
-    type->versionMajor = versionMajor;
-    type->versionMinor = versionMinor;
+    type->version = QTypeRevision::fromVersion(versionMajor, versionMinor);
     type->elementName = qmlName;
     type->metaObject = metaObject;
 

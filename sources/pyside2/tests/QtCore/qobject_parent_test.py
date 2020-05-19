@@ -148,10 +148,6 @@ class ParentCase(unittest.TestCase):
         res = parent.findChildren(QObject, QRegularExpression("^fo+"))
         self.assertEqual(res, test_children)
 
-        # test findChildren with a QRegExp (deprecated)
-        res = parent.findChildren(QObject, QRegExp("^fo+"))
-        self.assertEqual(res, test_children)
-
     def testParentEquality(self):
         #QObject.parent() == parent
         parent = QObject()

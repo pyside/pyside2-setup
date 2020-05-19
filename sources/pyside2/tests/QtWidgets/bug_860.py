@@ -52,7 +52,7 @@ class MultipleSlotTest(UsesQApplication):
         box.stateChanged.connect(checkboxMapper.map)
 
         checkboxMapper.setMapping(box, box.text())
-        checkboxMapper.mapped[str].connect(self.cb_changed)
+        checkboxMapper.mappedString[str].connect(self.cb_changed)
         self._changed = False
         box.setChecked(True)
         self.assertTrue(self._changed)

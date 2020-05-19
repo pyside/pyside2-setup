@@ -1,10 +1,6 @@
 project(QtGui)
 
-if (${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    qt6_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
-else()
-    qt5_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
-endif()
+qt_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_DROPPED_ENTRIES)
 
@@ -12,7 +8,6 @@ get_property(QtGui_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
              PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
 set(QtGui_SRC
-${QtGui_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
@@ -31,13 +26,16 @@ ${QtGui_GEN_DIR}/qaccessibletextselectionevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibletextupdateevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessiblevaluechangeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessiblevalueinterface_wrapper.cpp
+${QtGui_GEN_DIR}/qaction_wrapper.cpp
 ${QtGui_GEN_DIR}/qactionevent_wrapper.cpp
+${QtGui_GEN_DIR}/qactiongroup_wrapper.cpp
 ${QtGui_GEN_DIR}/qbackingstore_wrapper.cpp
 ${QtGui_GEN_DIR}/qbitmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qbrush_wrapper.cpp
 ${QtGui_GEN_DIR}/qclipboard_wrapper.cpp
 ${QtGui_GEN_DIR}/qcloseevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolor_wrapper.cpp
+${QtGui_GEN_DIR}/qcolorspace_wrapper.cpp
 ${QtGui_GEN_DIR}/qconicalgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qcontextmenuevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcursor_wrapper.cpp
@@ -70,6 +68,7 @@ ${QtGui_GEN_DIR}/qimage_wrapper.cpp
 ${QtGui_GEN_DIR}/qimageiohandler_wrapper.cpp
 ${QtGui_GEN_DIR}/qimagereader_wrapper.cpp
 ${QtGui_GEN_DIR}/qimagewriter_wrapper.cpp
+${QtGui_GEN_DIR}/qinputdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethod_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_attribute_wrapper.cpp
@@ -79,7 +78,6 @@ ${QtGui_GEN_DIR}/qintvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeyevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeysequence_wrapper.cpp
 ${QtGui_GEN_DIR}/qlineargradient_wrapper.cpp
-${QtGui_GEN_DIR}/qmatrix_wrapper.cpp
 ${QtGui_GEN_DIR}/qmatrix2x2_wrapper.cpp
 ${QtGui_GEN_DIR}/qmatrix2x3_wrapper.cpp
 ${QtGui_GEN_DIR}/qmatrix2x4_wrapper.cpp
@@ -95,20 +93,8 @@ ${QtGui_GEN_DIR}/qmovie_wrapper.cpp
 ${QtGui_GEN_DIR}/qnativegestureevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qoffscreensurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
-${QtGui_GEN_DIR}/qopengldebuglogger_wrapper.cpp
-${QtGui_GEN_DIR}/qopengldebugmessage_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglframebufferobjectformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
-# Compile error on Windows: ${QtGui_GEN_DIR}/qopenglpaintdevice_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglpixeltransferoptions_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
-${QtGui_GEN_DIR}/qopengltexture_wrapper.cpp
-${QtGui_GEN_DIR}/qopengltextureblitter_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglversionprofile_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglvertexarrayobject_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglvertexarrayobject_binder_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_margins_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagelayout_wrapper.cpp
@@ -127,18 +113,18 @@ ${QtGui_GEN_DIR}/qpalette_wrapper.cpp
 ${QtGui_GEN_DIR}/qpdfwriter_wrapper.cpp
 ${QtGui_GEN_DIR}/qpen_wrapper.cpp
 ${QtGui_GEN_DIR}/qpicture_wrapper.cpp
-${QtGui_GEN_DIR}/qpictureio_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_key_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixmapcache_wrapper.cpp
 ${QtGui_GEN_DIR}/qpixelformat_wrapper.cpp
+${QtGui_GEN_DIR}/qpointerevent_wrapper.cpp
+${QtGui_GEN_DIR}/qpointingdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpointingdeviceuniqueid_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygon_wrapper.cpp
 ${QtGui_GEN_DIR}/qpolygonf_wrapper.cpp
 ${QtGui_GEN_DIR}/qpytextobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qquaternion_wrapper.cpp
 ${QtGui_GEN_DIR}/qradialgradient_wrapper.cpp
-${QtGui_GEN_DIR}/qregexpvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qregularexpressionvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qregion_wrapper.cpp
 ${QtGui_GEN_DIR}/qresizeevent_wrapper.cpp
@@ -148,14 +134,11 @@ ${QtGui_GEN_DIR}/qshowevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditem_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglbuffer_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_state_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qscreen_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglshader_wrapper.cpp
-#${QtGui_GEN_DIR}/qopenglshaderprogram_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglframebufferobject_wrapper.cpp
+${QtGui_GEN_DIR}/qshortcut_wrapper.cpp
 ${QtGui_GEN_DIR}/qrasterwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qrawfont_wrapper.cpp
 ${QtGui_GEN_DIR}/qscrollevent_wrapper.cpp
@@ -199,11 +182,13 @@ ${QtGui_GEN_DIR}/qtexttablecell_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttablecellformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttableformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtoolbarchangeevent_wrapper.cpp
-${QtGui_GEN_DIR}/qtouchdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_touchpoint_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtransform_wrapper.cpp
 ${QtGui_GEN_DIR}/qt_wrapper.cpp
+${QtGui_GEN_DIR}/qundocommand_wrapper.cpp
+${QtGui_GEN_DIR}/qundogroup_wrapper.cpp
+${QtGui_GEN_DIR}/qundostack_wrapper.cpp
 ${QtGui_GEN_DIR}/qvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qvector2d_wrapper.cpp
 ${QtGui_GEN_DIR}/qvector3d_wrapper.cpp
@@ -215,24 +200,6 @@ ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
 # module is always needed
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Gui_VERSION VERSION_EQUAL 5.14.0
-    OR Qt${QT_MAJOR_VERSION}Gui_VERSION VERSION_GREATER 5.14.0)
-    list(APPEND QtGui_SRC ${QtGui_GEN_DIR}/qcolorspace_wrapper.cpp)
-endif()
-
-# cf qtbase/src/gui/opengl/opengl.pri
-list(FIND QtGui_enabled_features "opengles2" _opengles2Index)
-# ### fixme: For cmake >= 3.3: if(opengles2 IN_LIST QtGui_enabled_features)
-if(_opengles2Index GREATER -1)
-    list(APPEND QtGui_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery)
-    message(STATUS "Qt${QT_MAJOR_VERSION}Gui: Dropping Desktop OpenGL classes (GLES2)")
-else()
-    list(APPEND QtGui_SRC
-         ${QtGui_GEN_DIR}/qopengltimemonitor_wrapper.cpp
-         ${QtGui_GEN_DIR}/qopengltimerquery_wrapper.cpp)
-    message(STATUS "Qt${QT_MAJOR_VERSION}Gui: Adding Desktop OpenGL classes")
-endif()
 
 configure_file("${QtGui_SOURCE_DIR}/typesystem_gui.xml.in"
                "${QtGui_BINARY_DIR}/typesystem_gui.xml" @ONLY)

@@ -11,11 +11,7 @@ set(ui_plugin_moc
 )
 include_directories(${Qt${QT_MAJOR_VERSION}Designer_INCLUDE_DIRS})
 
-if (${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    qt6_wrap_cpp(MOC_FILES ${ui_plugin_moc})
-else()
-    qt5_wrap_cpp(MOC_FILES ${ui_plugin_moc})
-endif()
+qt_wrap_cpp(MOC_FILES ${ui_plugin_moc})
 
 add_library(uiplugin STATIC ${ui_plugin_src} ${MOC_FILES})
 if(CMAKE_HOST_UNIX AND NOT CYGWIN)

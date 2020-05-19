@@ -39,8 +39,8 @@
 #############################################################################
 
 from PySide2.QtCore import Slot, qApp
-from PySide2.QtGui import QKeySequence
-from PySide2.QtWidgets import QMainWindow, QAction
+from PySide2.QtGui import QAction, QKeySequence
+from PySide2.QtWidgets import QMainWindow
 
 
 class MainWindow(QMainWindow):

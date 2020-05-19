@@ -247,6 +247,42 @@
   <object-type name="QAccessibleTextUpdateEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::TextUpdated"/>
   <object-type name="QAccessibleValueChangeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QAccessible::ValueChanged"/>
 
+  <object-type name="QAction">
+    <enum-type name="ActionEvent"/>
+    <enum-type name="MenuRole"/>
+    <enum-type name="Priority" since="4.6"/>
+    <modify-function signature="setMenu(QMenu*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="triggered(bool)" allow-thread="yes"/>
+  </object-type>
+  <object-type name="QActionGroup">
+    <enum-type name="ExclusionPolicy" since="5.14"/>
+    <modify-function signature="addAction(QAction*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeAction(QAction*)">
+      <modify-argument index="1">
+        <parent index="this" action="remove"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QShortcut">
+<!--  FIXME: Qt 6
+    <add-function signature="QShortcut(QKeySequence&amp;,QWidget*,PyCallable*,Qt::ShortcutContext)">
+      <modify-argument index="4">
+        <replace-default-expression with="Qt::WindowShortcut"/>
+      </modify-argument>
+      <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qshortcut-1"/>
+      <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qshortcut-2"/>
+    </add-function>
+-->
+  </object-type>
+
   <value-type name="QTransform">
     <enum-type name="TransformationType"/>
     <add-function signature="__repr__" return-type="PyObject*">
@@ -405,10 +441,10 @@
     <modify-function signature="operator QVariant()const" remove="all"/>
   </value-type>
   <value-type name="QPicture" >
-    <modify-function signature="load(QIODevice*,const char*)" allow-thread="yes"/>
-    <modify-function signature="load(const QString&amp;,const char*)" allow-thread="yes"/>
-    <modify-function signature="save(QIODevice*,const char*)" allow-thread="yes"/>
-    <modify-function signature="save(const QString&amp;,const char*)" allow-thread="yes"/>
+    <modify-function signature="load(QIODevice*)" allow-thread="yes"/>
+    <modify-function signature="load(const QString&amp;)" allow-thread="yes"/>
+    <modify-function signature="save(QIODevice*)" allow-thread="yes"/>
+    <modify-function signature="save(const QString&amp;)" allow-thread="yes"/>
     <!-- See bug 759 -->
     <modify-function signature="data()const">
         <modify-argument index="return">
@@ -501,7 +537,6 @@
   </value-type>
   <value-type name="QPolygon">
     <extra-includes>
-      <include file-name="QMatrix" location="global"/>
       <include file-name="QTransform" location="global"/>
     </extra-includes>
     <add-function signature="__reduce__" return-type="PyObject*">
@@ -527,7 +562,6 @@
   </value-type>
   <value-type name="QPolygonF">
     <extra-includes>
-      <include file-name="QMatrix" location="global"/>
       <include file-name="QTransform" location="global"/>
     </extra-includes>
     <!-- ### A QVector parameter, for no defined type, will generate wrong code. -->
@@ -655,70 +689,6 @@
     </modify-function>
   </value-type>
 
-  <!-- Qt5: this _should_ be obsolete, but QImage is still using it... -->
-  <value-type name="QMatrix">
-    <extra-includes>
-      <include file-name="QPainterPath" location="global"/>
-    </extra-includes>
-    <add-function signature="__repr__" return-type="PyObject*">
-        <inject-code class="target" position="beginning">
-            <insert-template name="repr_code">
-               <replace from="%REPR_FORMAT" to="%f, %f, %f, %f, %f, %f"/>
-               <replace from="%REPR_ARGS"
-                        to="%CPPSELF.m11(), %CPPSELF.m12(), %CPPSELF.m21(), %CPPSELF.m22(), %CPPSELF.dx(), %CPPSELF.dy()"/>
-             </insert-template>
-        </inject-code>
-    </add-function>
-
-    <add-function signature="__reduce__" return-type="PyObject*">
-        <inject-code class="target" position="beginning">
-            <insert-template name="reduce_code">
-              <replace from="%REDUCE_FORMAT" to="dddddd"/>
-              <replace from="%REDUCE_ARGS" to="%CPPSELF.m11(), %CPPSELF.m12(), %CPPSELF.m21(), %CPPSELF.m22(), %CPPSELF.dx(), %CPPSELF.dy()"/>
-            </insert-template>
-        </inject-code>
-    </add-function>
-    <modify-function signature="map(int,int,int*,int*)const">
-        <modify-argument index="3">
-            <remove-argument />
-        </modify-argument>
-        <modify-argument index="4">
-            <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="qmatrix_map"/>
-        </inject-code>
-    </modify-function>
-    <modify-function signature="map(qreal,qreal,qreal*,qreal*)const">
-        <modify-argument index="3">
-            <remove-argument />
-        </modify-argument>
-        <modify-argument index="4">
-            <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="qmatrix_map"/>
-        </inject-code>
-    </modify-function>
-    <modify-function signature="map(const QPoint&amp;)const">
-        <modify-argument index="return">
-          <replace-type modified-type="QPoint"/>
-        </modify-argument>
-        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-map-point" />
-    </modify-function>
-    <modify-function signature="inverted(bool*)const">
-      <modify-argument index="1">
-        <remove-argument/>
-      </modify-argument>
-      <modify-argument index="return">
-        <replace-type modified-type="PyTuple"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning">
-        <insert-template name="fix_bool*"/>
-      </inject-code>
-    </modify-function>
-  </value-type>
-
   <value-type name="QConicalGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::ConicalGradient"/>
   <value-type name="QFontInfo"/>
   <value-type name="QRadialGradient" polymorphic-id-expression="%1-&gt;type() == QGradient::RadialGradient"/>
@@ -756,7 +726,6 @@
     <enum-type name="InvertMode"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
-      <include file-name="QMatrix" location="global"/>
     </extra-includes>
 
     <modify-function signature="load(const QString&amp;, const char*)" allow-thread="yes"/>
@@ -764,7 +733,7 @@
     <modify-function signature="save(const QString&amp;,const char*,int)const" allow-thread="yes"/>
     <modify-function signature="save(QIODevice*,const char*,int)const" allow-thread="yes"/>
 
-    <modify-function signature="QImage(uchar*,int,int,int,QImage::Format,QImageCleanupFunction,void*)">
+    <modify-function signature="QImage(uchar*,int,int,qsizetype,QImage::Format,QImageCleanupFunction,void*)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
         </modify-argument>
@@ -801,7 +770,7 @@
     </add-function>
 
     <!-- The non-const versions are already used -->
-    <modify-function signature="QImage(const uchar*,int,int,int,QImage::Format,QImageCleanupFunction,void*)" remove="all"/>
+    <modify-function signature="QImage(const uchar*,int,int,qsizetype,QImage::Format,QImageCleanupFunction,void*)" remove="all"/>
     <modify-function signature="QImage(const uchar*,int,int,QImage::Format,QImageCleanupFunction,void*)" remove="all"/>
     <!-- ### -->
 
@@ -909,7 +878,7 @@
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qcolor"/>
     </add-function>
     <!-- get* methods. Inject code -->
-    <modify-function signature="getCmyk(int*,int*,int*,int*,int*)">
+    <modify-function signature="getCmyk(int*,int*,int*,int*,int*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -936,7 +905,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getCmykF(qreal*,qreal*,qreal*,qreal*,qreal*)">
+    <modify-function signature="getCmykF(qreal*,qreal*,qreal*,qreal*,qreal*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -1120,7 +1089,7 @@
      </inject-code>
     </modify-function>
 
-    <modify-function signature="width(QChar)const" rename="widthChar">
+    <modify-function signature="horizontalAdvance(QChar)const" rename="horizontalAdvanceChar">
       <modify-argument index="1">
         <replace-type modified-type="char"/>
       </modify-argument>
@@ -1156,7 +1125,7 @@
      </inject-code>
     </modify-function>
 
-    <modify-function signature="width(QChar)const" rename="widthChar">
+    <modify-function signature="horizontalAdvance(QChar)const" rename="horizontalAdvanceChar">
       <modify-argument index="1">
         <replace-type modified-type="char"/>
       </modify-argument>
@@ -1258,15 +1227,6 @@
   <object-type name="QIntValidator"/>
 
   <object-type name="QPainterPathStroker" copyable="false"/>
-  <object-type name="QPictureIO">
-    <modify-function signature="setIODevice(QIODevice*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="read()" allow-thread="yes"/>
-    <modify-function signature="write()" allow-thread="yes"/>
-  </object-type>
   <object-type name="QPixmapCache">
     <value-type name="Key"/>
     <add-function signature="find(QPixmapCache::Key&amp;)">
@@ -1274,7 +1234,6 @@
     </add-function>
   </object-type>
 
-  <object-type name="QRegExpValidator"/>
   <object-type name="QRegularExpressionValidator"/>
 
   <object-type name="QStandardItem">
@@ -1454,10 +1413,7 @@
   </object-type>
   <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
   <object-type name="QStatusTipEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::StatusTip"/>
-  <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease">
-      <enum-type name="PointerType"/>
-      <enum-type name="TabletDevice"/>
-  </object-type>
+  <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease"/>
   <object-type name="QToolBarChangeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolBarChange"/>
   <object-type name="QWhatsThisClickedEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::WhatsThisClicked"/>
   <object-type name="QWheelEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Wheel"/>
@@ -1476,6 +1432,7 @@
   <object-type name="QScrollEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Scroll">
       <enum-type name="ScrollState"/>
   </object-type>
+  <object-type name="QPointerEvent" copyable= "false" since="6.0"/>
   <object-type name="QScrollPrepareEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::ScrollPrepare"/>
 
   <object-type name="QTextFrame" >
@@ -1892,14 +1849,6 @@
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
-    <modify-function signature="drawRoundRect(int,int,int,int,int,int)">
-      <modify-argument index="5">
-        <rename to="xRound"/>
-      </modify-argument>
-      <modify-argument index="6">
-        <rename to="yRound"/>
-      </modify-argument>
-    </modify-function>
     <modify-function signature="drawTiledPixmap(const QRect&amp;,const QPixmap&amp;,const QPoint&amp;)">
       <modify-argument index="3">
         <rename to="pos"/>
@@ -1911,16 +1860,6 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="begin(QPaintDevice*)">
-      <modify-argument index="1">
-        <no-null-pointer/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setRedirected(const QPaintDevice*,QPaintDevice*,const QPoint&amp;)">
-      <modify-argument index="1">
-        <no-null-pointer/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="restoreRedirected(const QPaintDevice*)">
       <modify-argument index="1">
         <no-null-pointer/>
       </modify-argument>
@@ -2258,6 +2197,7 @@
   </value-type>
 
   <value-type name="QMatrix4x4" since="4.6">
+    <enum-type name="Flag" flags="Flags" since="6.0"/>
 
     <!-- Qt5: HAIRY TRICK ALERT ahead!
         Qt5 partially replaced 'qreal' by float.
@@ -2381,9 +2321,9 @@
       </value-type>
   </object-type>
 
-  <object-type name="QTouchDevice">
-    <enum-type name="CapabilityFlag" flags="Capabilities"/>
-    <enum-type name="DeviceType"/>
+  <object-type name="QInputDevice">
+    <enum-type name="Capability" flags="Capabilities"/>
+    <enum-type name="DeviceType" flags="DeviceTypes"/>
   </object-type>
 
   <value-type name="QVector2D" since="4.6">
@@ -2527,7 +2467,7 @@
     <enum-type name="Visibility"/>
     <modify-function signature="raise()" rename="raise_"/>
     <!-- see QWidget::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
-    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,long*)">
+    <modify-function signature="nativeEvent(const QByteArray &amp;,void*,qintptr*)">
       <modify-argument index="3">
         <remove-argument/>
         <conversion-rule class="native">
@@ -2578,29 +2518,10 @@
 
   </object-type>
 
-  <object-type name="QOpenGLBuffer" since="5.0">
-    <enum-type name="Access"/>
-    <enum-type name="RangeAccessFlag" flags="RangeAccessFlags"/>
-    <enum-type name="Type"/>
-    <enum-type name="UsagePattern"/>
-  </object-type>
   <object-type name="QOpenGLContext">
     <enum-type name="OpenGLModuleType"/>
   </object-type>
   <object-type name="QOpenGLContextGroup" since="5.0"/>
-  <object-type name="QOpenGLDebugLogger" since="5.1">
-      <enum-type name="LoggingMode"/>
-  </object-type>
-  <value-type name="QOpenGLDebugMessage" since="5.1">
-      <enum-type name="Source" flags="Sources"/>
-      <enum-type name="Type" flags="Types"/>
-      <enum-type name="Severity" flags="Severities"/>
-  </value-type>
-  <object-type name="QOpenGLFramebufferObject" since="5.0">
-    <enum-type name="Attachment"/>
-    <enum-type name="FramebufferRestorePolicy" since="5.7"/>
-  </object-type>
-  <value-type name="QOpenGLFramebufferObjectFormat"/>
   <!-- Compile error on Windows: QOpenGLPaintDevice::QOpenGLPaintDevice(const QOpenGLPaintDevice &)': attempting to reference a deleted function
   <object-type name="QOpenGLPaintDevice" since="5.0"/>
   -->
@@ -2887,7 +2808,6 @@
           <modify-argument index="2"><array/></modify-argument>
       </modify-function>
   </object-type>
-  <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
   <!-- Classes are result of a macro expansion in src/gui/opengl/qopenglversionfunctions.h
   <object-type name="QOpenGLFunctions_1_0" since="5.1"/>
   <object-type name="QOpenGLFunctions_1_1" since="5.1"/>
@@ -2917,98 +2837,6 @@
   <object-type name="QOpenGLFunctions_4_5_Core" since="5.5"/>
   <object-type name="QOpenGLFunctions_ES2" since="5.1"/>
   -->
-  <value-type  name="QOpenGLPixelTransferOptions"/>
-  <object-type name="QOpenGLShader" since="5.0">
-    <enum-type name="ShaderTypeBit" flags="ShaderType"/>
-  </object-type>
-  <object-type name="QOpenGLShaderProgram" since="5.0">
-      <modify-function signature="setAttributeArray(int,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setAttributeArray(const char*,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setAttributeArray(int,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setAttributeValue(int,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setAttributeValue(const char*,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setUniformValueArray(int,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setUniformValueArray(int,const int*,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setUniformValueArray(int,const unsigned int*,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setUniformValueArray(const char*,const float*,int,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setUniformValueArray(const char*,const int*,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <modify-function signature="setUniformValueArray(const char*,const unsigned int*,int)">
-          <modify-argument index="2"><array/></modify-argument>
-      </modify-function>
-      <!-- Add explicit signatures for the setUniformValue functions -->
-      <modify-function signature="^setUniformValue\(const char\*,(float|int|uint)\)$" remove="all"/>
-      <!-- No need for a signature for GLuint, since Qt (internally) calls the same function: glUniform1i -->
-      <add-function signature="setUniformValue1f(const char*, float)" return-type="void">
-          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
-      </add-function>
-      <add-function signature="setUniformValue1i(const char*, int)" return-type="void">
-          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
-      </add-function>
-      <add-function signature="setUniformValue1f(int, float)" return-type="void">
-          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
-      </add-function>
-      <add-function signature="setUniformValue1i(int, int)" return-type="void">
-          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
-      </add-function>
-  </object-type>
-  <object-type name="QOpenGLTexture" since="5.2">
-      <enum-type name="BindingTarget"/>
-      <enum-type name="CoordinateDirection"/>
-      <enum-type name="ComparisonFunction"/>
-      <enum-type name="ComparisonMode"/>
-      <enum-type name="CubeMapFace"/>
-      <enum-type name="DepthStencilMode"/>
-      <enum-type name="Feature" flags="Features"/>
-      <enum-type name="Filter"/>
-      <enum-type name="MipMapGeneration"/>
-      <enum-type name="PixelFormat"/>
-      <enum-type name="PixelType"/>
-      <enum-type name="SwizzleComponent"/>
-      <enum-type name="SwizzleValue"/>
-      <enum-type name="Target"/>
-      <enum-type name="TextureFormat"/>
-      <enum-type name="TextureFormatClass"/>
-      <enum-type name="TextureUnitReset"/>
-      <enum-type name="WrapMode"/>
-      <modify-function signature="borderColor(unsigned int*)const" remove="all"/>
-      <modify-function signature="borderColor(int*)const" remove="all"/>
-      <modify-function signature="borderColor(float*)const" remove="all"/>
-      <!-- Work around link error introduced by qtbase/d15b02ff291e3124d9bb8ac3b06b704c292f52ab, can be removed once
-           qtbase/1bfabe35d8178c93e66acef21c01e08980f9ed0d has landed -->
-      <modify-function signature="setData(int,int,int,int,int,int,int,QOpenGLTexture::PixelFormat,QOpenGLTexture::PixelType,const void*,QOpenGLPixelTransferOptions*const)" remove="all"/>
-  </object-type>
-  <object-type name="QOpenGLTextureBlitter">
-      <enum-type name="Origin"/>
-  </object-type>
-  <object-type name="QOpenGLTimeMonitor" since="5.1"/>
-  <object-type name="QOpenGLTimerQuery" since="5.1"/>
-  <object-type name="QOpenGLWindow" since="5.4">
-      <enum-type name="UpdateBehavior"/>
-  </object-type>
-  <value-type name="QOpenGLVersionProfile" since="5.1"/>
-  <object-type name="QOpenGLVertexArrayObject">
-      <object-type name="Binder"/>
-  </object-type>
   <value-type name="QPageLayout">
       <enum-type name="Mode"/>
       <enum-type name="Orientation"/>
@@ -3030,6 +2858,9 @@
       <enum-type name="YUVLayout"/>
   </value-type>
   <object-type name="QPdfWriter"/>
+  <object-type name="QPointingDevice" since="6.0">
+    <enum-type name="PointerType" flags="PointerTypes"/>
+  </object-type>
   <value-type name="QPointingDeviceUniqueId"/>
   <value-type name="QRawFont">
       <enum-type name="AntialiasingType"/>
@@ -3051,4 +2882,38 @@
   </object-type>
   <object-type name="QStyleHints"/>
 
+  <object-type name="QUndoCommand">
+    <modify-function signature="mergeWith(const QUndoCommand*)">
+      <modify-argument index="1" invalidate-after-use="yes"/>
+    </modify-function>
+  </object-type>
+  <object-type name="QUndoGroup">
+    <modify-function signature="addStack(QUndoStack*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="removeStack(QUndoStack*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QUndoStack">
+    <modify-function signature="createUndoAction(QObject*,const QString&amp;)const">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="createRedoAction(QObject*,const QString&amp;)const">
+      <modify-argument index="return">
+        <parent index="1" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="push(QUndoCommand*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
 </typesystem>

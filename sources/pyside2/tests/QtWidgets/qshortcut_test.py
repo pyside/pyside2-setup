@@ -38,11 +38,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import Qt, QTimer
+from PySide2.QtGui import QKeySequence, QShortcut
+from PySide2.QtWidgets import QApplication, QWidget
 
-class Foo(QtWidgets.QWidget):
+class Foo(QWidget):
     def __init__(self):
-        QtWidgets.QWidget.__init__(self)
+        QWidget.__init__(self)
         self.ok = False
         self.copy = False
 
@@ -52,9 +54,9 @@ class Foo(QtWidgets.QWidget):
     def slot_of_copy(self):
         self.copy = True
 
-class MyShortcut(QtWidgets.QShortcut):
+class MyShortcut(QShortcut):
     def __init__(self, keys, wdg, slot):
-        QtWidgets.QShortcut.__init__(self, keys, wdg, slot)
+        QShortcut.__init__(self, keys, wdg, slot)
 
     def emit_signal(self):
         self.emit(QtCore.SIGNAL("activated()"))
@@ -62,12 +64,12 @@ class MyShortcut(QtWidgets.QShortcut):
 class QAppPresence(unittest.TestCase):
 
     def testQShortcut(self):
-        self.qapp = QtWidgets.QApplication([])
+        self.qapp = QApplication([])
         f = Foo()
 
-        self.sc = MyShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Return), f, f.slot_of_foo)
-        self.scstd = MyShortcut(QtGui.QKeySequence.Copy, f, f.slot_of_copy)
-        QtCore.QTimer.singleShot(0, self.init);
+        self.sc = MyShortcut(QKeySequence(Qt.Key_Return), f, f.slot_of_foo)
+        self.scstd = MyShortcut(QKeySequence.Copy, f, f.slot_of_copy)
+        QTimer.singleShot(0, self.init);
         self.qapp.exec_()
         self.assertEqual(f.ok, True)
         self.assertEqual(f.copy, True)

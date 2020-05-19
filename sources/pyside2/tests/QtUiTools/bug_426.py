@@ -42,7 +42,7 @@ class Window(object):
         loader = QUiLoader()
         filePath = os.path.join(os.path.dirname(__file__), 'bug_426.ui')
         self.widget = loader.load(filePath)
-        self.group = QtWidgets.QActionGroup(self.widget)
+        self.group = QtGui.QActionGroup(self.widget)
         self.widget.show()
         QtCore.QTimer.singleShot(0, self.widget.close)
 

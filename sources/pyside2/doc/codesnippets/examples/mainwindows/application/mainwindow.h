@@ -48,7 +48,8 @@
 **
 ****************************************************************************/
 
-from PySide2.QtWidgets import (QAction, QApplication, QMainWindow, QMenu,
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import (QApplication, QMainWindow, QMenu,
                                QPlainTextEdit, QSessionManager)
 
 

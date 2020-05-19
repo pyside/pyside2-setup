@@ -35,7 +35,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2.QtGui import Qt
-from PySide2.QtCore import QTextCodec
 
 
 class QTextDocumentFunctions(unittest.TestCase):
@@ -45,8 +44,6 @@ class QTextDocumentFunctions(unittest.TestCase):
         self.assertTrue(Qt.mightBeRichText('<html><head/><body><p>bla</p></body></html>'))
         html = Qt.convertFromPlainText("A & B", Qt.WhiteSpaceNormal)
         self.assertEqual(html, '<p>A &amp; B</p>')
-        codec = Qt.codecForHtml(b'bla')
-        self.assertTrue(codec)
 
 
 if __name__ == '__main__':

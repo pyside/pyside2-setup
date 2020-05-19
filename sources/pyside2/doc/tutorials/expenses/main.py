@@ -40,8 +40,8 @@
 
 import sys
 from PySide2.QtCore import Qt, Slot
-from PySide2.QtGui import QPainter
-from PySide2.QtWidgets import (QAction, QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
+from PySide2.QtGui import QAction, QPainter
+from PySide2.QtWidgets import (QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
 from PySide2.QtCharts import QtCharts

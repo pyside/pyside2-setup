@@ -607,38 +607,38 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolBox.addItem(backgroundWidget, "Backgrounds")
 
     def createActions(self):
-        self.toFrontAction = QtWidgets.QAction(
+        self.toFrontAction = QtGui.QAction(
                 QtGui.QIcon(':/images/bringtofront.png'), "Bring to &Front",
                 self, shortcut="Ctrl+F", statusTip="Bring item to front",
                 triggered=self.bringToFront)
 
-        self.sendBackAction = QtWidgets.QAction(
+        self.sendBackAction = QtGui.QAction(
                 QtGui.QIcon(':/images/sendtoback.png'), "Send to &Back", self,
                 shortcut="Ctrl+B", statusTip="Send item to back",
                 triggered=self.sendToBack)
 
-        self.deleteAction = QtWidgets.QAction(QtGui.QIcon(':/images/delete.png'),
+        self.deleteAction = QtGui.QAction(QtGui.QIcon(':/images/delete.png'),
                 "&Delete", self, shortcut="Delete",
                 statusTip="Delete item from diagram",
                 triggered=self.deleteItem)
 
-        self.exitAction = QtWidgets.QAction("E&xit", self, shortcut="Ctrl+X",
+        self.exitAction = QtGui.QAction("E&xit", self, shortcut="Ctrl+X",
                 statusTip="Quit Scenediagram example", triggered=self.close)
 
-        self.boldAction = QtWidgets.QAction(QtGui.QIcon(':/images/bold.png'),
+        self.boldAction = QtGui.QAction(QtGui.QIcon(':/images/bold.png'),
                 "Bold", self, checkable=True, shortcut="Ctrl+B",
                 triggered=self.handleFontChange)
 
-        self.italicAction = QtWidgets.QAction(QtGui.QIcon(':/images/italic.png'),
+        self.italicAction = QtGui.QAction(QtGui.QIcon(':/images/italic.png'),
                 "Italic", self, checkable=True, shortcut="Ctrl+I",
                 triggered=self.handleFontChange)
 
-        self.underlineAction = QtWidgets.QAction(
+        self.underlineAction = QtGui.QAction(
                 QtGui.QIcon(':/images/underline.png'), "Underline", self,
                 checkable=True, shortcut="Ctrl+U",
                 triggered=self.handleFontChange)
 
-        self.aboutAction = QtWidgets.QAction("A&bout", self, shortcut="Ctrl+B",
+        self.aboutAction = QtGui.QAction("A&bout", self, shortcut="Ctrl+B",
                 triggered=self.about)
 
     def createMenus(self):
@@ -780,7 +780,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         colorMenu = QtWidgets.QMenu(self)
         for color, name in zip(colors, names):
-            action = QtWidgets.QAction(self.createColorIcon(color), name, self,
+            action = QtGui.QAction(self.createColorIcon(color), name, self,
                     triggered=slot)
             action.setData(QtGui.QColor(color))
             colorMenu.addAction(action)

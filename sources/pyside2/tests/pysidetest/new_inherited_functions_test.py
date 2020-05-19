@@ -57,7 +57,6 @@ new_functions = """
 """
 
 new_functions += """
-    PySide2.QtGui.QBitmap().transformed(qMatrix,transformationMode)
     PySide2.QtGui.QStandardItemModel().insertColumn(int,qModelIndex)
     PySide2.QtGui.QStandardItemModel().parent()
     # PySide2.QtGui.QTextList(qTextDocument).setFormat(qTextFormat) # Segmentation fault: 11
@@ -71,8 +70,6 @@ new_functions += """
     PySide2.QtWidgets.QApplication.setPalette(qPalette)
     PySide2.QtWidgets.QBoxLayout(direction).addWidget(qWidget)
     PySide2.QtWidgets.QColorDialog().open()
-    PySide2.QtWidgets.QDirModel().index(int,int,qModelIndex)
-    PySide2.QtWidgets.QDirModel().parent()
     PySide2.QtWidgets.QFileDialog().open()
     PySide2.QtWidgets.QFileSystemModel().index(int,int,qModelIndex)
     PySide2.QtWidgets.QFileSystemModel().parent()
@@ -145,7 +142,6 @@ class MainTest(unittest.TestCase):
         try:
             PySide2.QtGui
             #qPaintDevice = PySide2.QtGui.QPaintDevice()  # NotImplementedError
-            qMatrix = PySide2.QtGui.QMatrix()
             qTextDocument = PySide2.QtGui.QTextDocument()
             qTextFormat = PySide2.QtGui.QTextFormat()
             quintptr = long(42) if sys.version_info[0] < 3 else 42
@@ -158,7 +154,7 @@ class MainTest(unittest.TestCase):
             direction = PySide2.QtWidgets.QBoxLayout.Direction()
             qWidget = PySide2.QtWidgets.QWidget()
             qStyleOptionFrame = PySide2.QtWidgets.QStyleOptionFrame()
-            qAction = PySide2.QtWidgets.QAction(qObject)
+            qAction = PySide2.QtGui.QAction(qObject)
             renderFlags = PySide2.QtWidgets.QWidget.RenderFlags
         except AttributeError:
             pass
