@@ -344,7 +344,7 @@ private:
     void writeHashFunction(QTextStream &s, const GeneratorContext &context);
 
     /// Write default implementations for sequence protocol
-    void writeStdListWrapperMethods(QTextStream &s, const GeneratorContext &context);
+    void writeDefaultSequenceMethods(QTextStream &s, const GeneratorContext &context);
     /// Helper function for writeStdListWrapperMethods.
     void writeIndexError(QTextStream &s, const QString &errorMsg);
 

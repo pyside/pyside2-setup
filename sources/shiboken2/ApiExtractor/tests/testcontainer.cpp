@@ -57,8 +57,10 @@ void TestContainer::testContainerType()
     //search for class A
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QVERIFY(classA->typeEntry()->baseContainerType());
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(classA->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::ListContainer);
+    auto baseContainer = classA->typeEntry()->baseContainerType();
+    QVERIFY(baseContainer);
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
+             ContainerTypeEntry::ListContainer);
 }
 
 void TestContainer::testListOfValueType()

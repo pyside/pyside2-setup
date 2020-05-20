@@ -1406,7 +1406,7 @@ class ContainerTypeEntry : public ComplexTypeEntry
 {
     Q_GADGET
 public:
-    enum Type {
+    enum ContainerKind {
         NoContainer,
         ListContainer,
         StringListContainer,
@@ -1421,14 +1421,14 @@ public:
         MultiHashContainer,
         PairContainer,
     };
-    Q_ENUM(Type)
+    Q_ENUM(ContainerKind)
 
-    explicit ContainerTypeEntry(const QString &entryName, Type type, const QVersionNumber &vr,
-                                const TypeEntry *parent);
+    explicit ContainerTypeEntry(const QString &entryName, ContainerKind containerKind,
+                                const QVersionNumber &vr, const TypeEntry *parent);
 
-    Type type() const
+    ContainerKind containerKind() const
     {
-        return m_type;
+        return m_containerKind;
     }
 
     QString typeName() const;
@@ -1443,7 +1443,7 @@ protected:
     ContainerTypeEntry(const ContainerTypeEntry &);
 
 private:
-    Type m_type;
+    ContainerKind m_containerKind;
 };
 
 class SmartPointerTypeEntry : public ComplexTypeEntry

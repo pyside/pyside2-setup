@@ -2108,6 +2108,12 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typ
     return translateTypeStatic(_typei, currentClass, this, flags, errorMessage);
 }
 
+static bool isNumber(const QString &s)
+{
+    return std::all_of(s.cbegin(), s.cend(),
+                       [](QChar c) { return c.isDigit(); });
+}
+
 AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
                                                                   AbstractMetaClass *currentClass,
                                                                   AbstractMetaBuilderPrivate *d,
@@ -2255,6 +2261,15 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     for (int t = 0, size = templateArguments.size(); t < size; ++t) {
         const  TypeInfo &ti = templateArguments.at(t);
         AbstractMetaType *targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
+        // For non-type template parameters, create a dummy type entry on the fly
+        // as is done for classes.
+        if (!targType) {
+            const QString value = ti.qualifiedName().join(colonColon());
+            if (isNumber(value)) {
+                TypeDatabase::instance()->addConstantValueTypeEntry(value, type->typeSystemTypeEntry());
+                targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
+            }
+        }
         if (!targType) {
             if (errorMessageIn)
                 *errorMessageIn = msgCannotTranslateTemplateArgument(t, ti, errorMessage);
@@ -2628,14 +2643,11 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         // "template <int R, int C> Matrix<R, C>" and subclass
         // "typedef Matrix<2,3> Matrix2x3;". If so, create dummy entries of
         // EnumValueTypeEntry for the integer values encountered on the fly.
-        const bool isNumber = std::all_of(typeName.cbegin(), typeName.cend(),
-                                          [](QChar c) { return c.isDigit(); });
-        if (isNumber) {
+        if (isNumber(typeName)) {
             t = typeDb->findType(typeName);
             if (!t) {
-                t = new ConstantValueTypeEntry(typeName, subclass->typeEntry()->typeSystemTypeEntry());
-                t->setCodeGeneration(0);
-                typeDb->addType(t);
+                auto parent = subclass->typeEntry()->typeSystemTypeEntry();
+                t = TypeDatabase::instance()->addConstantValueTypeEntry(typeName, parent);
             }
         } else {
             QStringList possibleNames;

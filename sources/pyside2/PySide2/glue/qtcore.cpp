@@ -1681,11 +1681,19 @@ Py_END_ALLOW_THREADS
 // @snippet conversion-pyunicode
 #ifndef Py_LIMITED_API
 Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
-# if defined(Py_UNICODE_WIDE)
+#  if defined(Py_UNICODE_WIDE)
 // cast as Py_UNICODE can be a different type
-%out = QString::fromUcs4((const uint *)unicode);
-# else
-%out = QString::fromUtf16((const ushort *)unicode, PepUnicode_GetLength(%in));
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+%out = QString::fromUcs4(reinterpret_cast<const char32_t *>(unicode));
+#    else
+%out = QString::fromUcs4(reinterpret_cast<const uint *>(unicode));
+#    endif // Qt 6
+#  else // Py_UNICODE_WIDE
+#    if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+%out = QString::fromUtf16(reinterpret_cast<const char16_t *>(unicode), PepUnicode_GetLength(%in));
+#    else
+%out = QString::fromUtf16(reinterpret_cast<const ushort *>(unicode), PepUnicode_GetLength(%in));
+#    endif // Qt 6
 # endif
 #else
 wchar_t *temp = PyUnicode_AsWideCharString(%in, NULL);

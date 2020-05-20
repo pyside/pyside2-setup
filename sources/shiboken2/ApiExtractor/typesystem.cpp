@@ -144,7 +144,7 @@ ComplexTypeEntry::ComplexTypeEntry(const ComplexTypeEntry &) = default;
 
 QString ContainerTypeEntry::qualifiedCppName() const
 {
-    if (m_type == StringListContainer)
+    if (m_containerKind == StringListContainer)
         return QLatin1String("QStringList");
     return ComplexTypeEntry::qualifiedCppName();
 }
@@ -595,7 +595,7 @@ QString ComplexTypeEntry::targetLangApiName() const
 
 QString ContainerTypeEntry::typeName() const
 {
-    switch(m_type) {
+    switch (m_containerKind) {
         case LinkedListContainer:
             return QLatin1String("linked-list");
         case ListContainer:
@@ -928,11 +928,11 @@ TypeEntry *TypedefEntry::clone() const
 
 TypedefEntry::TypedefEntry(const TypedefEntry &) = default;
 
-ContainerTypeEntry::ContainerTypeEntry(const QString &entryName, Type type,
+ContainerTypeEntry::ContainerTypeEntry(const QString &entryName, ContainerKind containerKind,
                                        const QVersionNumber &vr,
                                        const TypeEntry *parent) :
     ComplexTypeEntry(entryName, ContainerType, vr, parent),
-    m_type(type)
+    m_containerKind(containerKind)
 {
     setCodeGeneration(GenerateForSubclass);
 }

@@ -33,6 +33,7 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 
+class ConstantValueTypeEntry;
 class ContainerTypeEntry;
 class NamespaceTypeEntry;
 class PrimitiveTypeEntry;

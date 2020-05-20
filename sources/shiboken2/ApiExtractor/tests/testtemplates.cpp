@@ -428,8 +428,10 @@ typedef Vector<int> IntVector;
 
     AbstractMetaClass* vector = AbstractMetaClass::findClass(classes, QLatin1String("IntVector"));
     QVERIFY(vector);
-    QVERIFY(vector->typeEntry()->baseContainerType());
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(vector->typeEntry()->baseContainerType())->type(), ContainerTypeEntry::VectorContainer);
+    auto baseContainer = vector->typeEntry()->baseContainerType();
+    QVERIFY(baseContainer);
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer)->containerKind(),
+             ContainerTypeEntry::VectorContainer);
     QCOMPARE(vector->functions().count(), 4);
 
     const AbstractMetaFunction* method = vector->findFunction(QLatin1String("method"));
@@ -441,6 +443,35 @@ typedef Vector<int> IntVector;
     QCOMPARE(otherMethod->signature(), QLatin1String("otherMethod()"));
     QVERIFY(otherMethod->type());
     QCOMPARE(otherMethod->type()->cppSignature(), QLatin1String("Vector<int >"));
+}
+
+void TestTemplates::testNonTypeTemplates()
+{
+    // PYSIDe-1296, functions with non type templates parameters.
+    const char cppCode[] = R"CPP(
+template <class T, int Size>
+class Array {
+    T array[Size];
+};
+
+Array<int, 2> foo();
+
+)CPP";
+
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <primitive-type name='int'/>
+    <container-type name='Array' type='vector'/>
+    <function signature="foo()"/>
+</typesystem>)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
+    QVERIFY(!builder.isNull());
+    auto functions = builder->globalFunctions();
+    QCOMPARE(functions.count(), 1);
+    auto foo = functions.constFirst();
+    QCOMPARE(foo->name(), QLatin1String("foo"));
+    QCOMPARE(foo->type()->name(), QLatin1String("Array"));
 }
 
 // Perform checks on template inheritance; a typedef of a template class

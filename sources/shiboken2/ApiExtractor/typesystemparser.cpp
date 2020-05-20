@@ -297,7 +297,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
-ENUM_LOOKUP_BEGIN(ContainerTypeEntry::Type, Qt::CaseSensitive,
+ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
                   containerTypeFromAttribute, ContainerTypeEntry::NoContainer)
     {
         {u"list", ContainerTypeEntry::ListContainer},
@@ -1278,7 +1278,7 @@ ContainerTypeEntry *
         return nullptr;
     }
     const QStringRef typeName = attributes->takeAt(typeIndex).value();
-    ContainerTypeEntry::Type containerType = containerTypeFromAttribute(typeName);
+    ContainerTypeEntry::ContainerKind containerType = containerTypeFromAttribute(typeName);
     if (containerType == ContainerTypeEntry::NoContainer) {
         m_error = QLatin1String("there is no container of type ") + typeName.toString();
         return nullptr;
