@@ -44,6 +44,7 @@ from os.path import abspath, dirname, join
 from PySide2.QtCore import QObject, Slot
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
+from PySide2.QtQuickControls2 import QQuickStyle
 
 
 class Bridge(QObject):
@@ -90,8 +91,8 @@ class Bridge(QObject):
 
 
 if __name__ == '__main__':
-    sys.argv += ['--style', 'material']
     app = QGuiApplication(sys.argv)
+    QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
 
     # Instance of the Python object
