@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the documentation of Qt for Python.
+** This file is part of the examples of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:BSD$
 ** Commercial License Usage
@@ -48,12 +48,65 @@
 **
 ****************************************************************************/
 
-//! [0]
-    QBuffer device;
-    device.setData(myQString.toUtf8());
-    device.open(QIODevice::ReadOnly);
+from PySide2.QtWidgets import (QAction, QApplication, QMainWindow, QMenu,
+                               QPlainTextEdit, QSessionManager)
 
-    QXmlQuery query;
-    query.setQuery("doc($inputDocument)/query[theDocument]");
-    query.bindVariable("inputDocument", &device);
+
+//! [0]
+class MainWindow(QMainWindow):
+    def __init__(self, parent=None):
+        self.textEdit = QPlainTextEdit()
+        self.curFile = ""
+        # ...
+
+    def loadFile(self, fileName):
+        pass
+
+    def closeEvent(self, event):
+        pass
+
+    def newFile(self):
+        pass
+
+    def open(self):
+        pass
+
+    def save(self):
+        pass
+
+    def saveAs(self):
+        pass
+
+    def about(self):
+        pass
+
+    def documentWasModified(self):
+        pass
+    # Enable this only if QT_NO_SESSIONMANAGER is not defined
+    # def commitData(self):
+    #   pass
+
+    def createActions(self):
+        pass
+
+    def createStatusBar(self):
+        pass
+
+    def readSettings(self):
+        pass
+
+    def writeSettings(self):
+        pass
+
+    def maybeSave(self):
+        pass
+
+    def saveFile(self, fileName):
+        pass
+
+    def setCurrentFile(self, fileName):
+        pass
+
+    def strippedName(self, fullFileName):
+        pass
 //! [0]

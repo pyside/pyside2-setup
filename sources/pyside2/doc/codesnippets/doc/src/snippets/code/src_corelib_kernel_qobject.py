@@ -1,52 +1,52 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the documentation of Qt for Python.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+############################################################################
+##
+## Copyright (C) 2016 The Qt Company Ltd.
+## Contact: https://www.qt.io/licensing/
+##
+## This file is part of the documentation of Qt for Python.
+##
+## $QT_BEGIN_LICENSE:BSD$
+## Commercial License Usage
+## Licensees holding valid commercial Qt licenses may use this file in
+## accordance with the commercial license agreement provided with the
+## Software or, alternatively, in accordance with the terms contained in
+## a written agreement between you and The Qt Company. For licensing terms
+## and conditions see https://www.qt.io/terms-conditions. For further
+## information use the contact form at https://www.qt.io/contact-us.
+##
+## BSD License Usage
+## Alternatively, you may use this file under the terms of the BSD license
+## as follows:
+##
+## "Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions are
+## met:
+##   * Redistributions of source code must retain the above copyright
+##     notice, this list of conditions and the following disclaimer.
+##   * Redistributions in binary form must reproduce the above copyright
+##     notice, this list of conditions and the following disclaimer in
+##     the documentation and/or other materials provided with the
+##     distribution.
+##   * Neither the name of The Qt Company Ltd nor the names of its
+##     contributors may be used to endorse or promote products derived
+##     from this software without specific prior written permission.
+##
+##
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+## LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+## A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+## OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+## SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+## LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+## DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+## THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+##
+## $QT_END_LICENSE$
+##
+############################################################################
 
 //! [0]
 lineEdit = qt_find_obj_child(myWidget, "QLineEdit", "my line edit")
@@ -96,8 +96,8 @@ layout.inherits("QLayoutItem")      # returns false
 
 
 //! [5]
-print "MyClass::setPrecision(): (%s) invalid precision %f" % \
-       (qPrintable(objectName()), newPrecision)
+print("MyClass.setPrecision(): ({}) invalid precision {}".format(qPrintable(objectName()),
+                                                                 newPrecision))
 //! [5]
 
 
@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
         if obj == textEdit:
             if event.type() == QEvent.KeyPress:
                 keyEvent = event
-                print "Ate key press", keyEvent.key()
+                print("Ate key press", keyEvent.key())
                 return true
             else:
                 return false
@@ -138,14 +138,14 @@ class MyObject(QObject):
 
 
     def timerEvent(self, event):
-        print "Timer ID:", event.timerId()
+        print("Timer ID:", event.timerId())
 
 //! [8]
 
 
 //! [9]
-list = window().queryList("QAbstractButton")
-for obj in list:
+a_list = window().queryList("QAbstractButton")
+for obj in a_list:
     obj.setEnabled(false)
 //! [9]
 
@@ -156,7 +156,7 @@ button = parentWidget.findChild(QPushButton, "button1")
 
 
 //! [11]
-list = parentWidget.findChild(QListWidget)
+a_list = parentWidget.findChild(QListWidget)
 //! [11]
 
 
@@ -179,7 +179,7 @@ monitoredObj.installEventFilter(filterObj)
 class KeyPressEater(QObject):
     def eventFilter(self, obj, event):
         if event.type() == QEvent.KeyPress:
-            print "Ate key press", event.key()
+            print("Ate key press", event.key())
             return True
         else:
             # standard event processing
@@ -234,15 +234,16 @@ if receivers(SIGNAL('valueChanged()')) > 0:
 //! [22]
 label = QLabel()
 scrollBar = QScrollBar()
-QObject.connect(scrollBar, SIGNAL('valueChanged()'),
-                label,  SLOT('setNum()'))
+QObject.connect(scrollBar, SIGNAL('valueChanged(int)'),
+                 label, SLOT('setNum(int)'));
+# or scrollBar.valueChanged.connect(label.setNum)
 //! [22]
 
 
 //! [23]
 // WRONG
-QObject.connect(scrollBar, SIGNAL('valueChanged()'),
-                 label, SLOT('setNum()'));
+QObject.connect(scrollBar, SIGNAL('valueChanged(int value)'),
+                 label, SLOT('setNum(int value)'));
 //! [23]
 
 
@@ -250,8 +251,7 @@ QObject.connect(scrollBar, SIGNAL('valueChanged()'),
 class MyWidget(QWidget):
     def __init__(self):
         myButton = QPushButton(self)
-        connect(myButton, SIGNAL('clicked()'),
-                self, SIGNAL('buttonClicked()'))
+        myButton.clicked.connect(self.buttonClicked)
 //! [24]
 
 
@@ -323,7 +323,7 @@ Q_PROPERTY(type name
            [DESIGNABLE bool]
            [SCRIPTABLE bool]
            [STORED bool]
-	   [USER bool])
+       [USER bool])
 //! [36]
 
 
@@ -333,34 +333,40 @@ Q_PROPERTY(QString title READ title WRITE setTitle USER true)
 
 
 //! [38]
-#this not apply for Python
+#this does not apply to Python
 class MyClass(QObject):
 
-    Q_OBJECT
-    Q_ENUMS(Priority)
+    #Q_OBJECT, not needed
+    #Q_ENUMS(Priority), not supported
 
-public:
-    MyClass(QObject *parent = 0);
-    ~MyClass();
+    def __init__(self, parent=None):
+        pass
 
-    enum Priority { High, Low, VeryHigh, VeryLow };
-    void setPriority(Priority priority);
-    Priority priority() const;
+    class Priority(Enum):
+        High = 1
+        Low = 2
+        VeryHigh = 3
+        VeryLow 4
+
+    def setPriority(self, priority):
+        pass
+
+    priority = Property(...)
 };
 //! [38]
 
 
 //! [39]
-#this not apply for Python
+#this does not apply to Python
 Q_FLAGS(Options Alignment)
 //! [39]
 
 
 //! [40]
-//: This name refers to a host name.
+# This name refers to a host name.
 hostNameLabel.setText(self.tr("Name:"))
 
-#: This text refers to a C++ code example. 
+# This text refers to a C++ code example.
 example = self.tr("Example")
 //! [40]
 

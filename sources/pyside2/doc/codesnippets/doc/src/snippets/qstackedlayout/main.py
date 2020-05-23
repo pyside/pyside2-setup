@@ -3,7 +3,7 @@
 ## Copyright (C) 2016 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the examples of Qt for Python.
+## This file is part of the documentation of the Qt Toolkit.
 ##
 ## $QT_BEGIN_LICENSE:BSD$
 ## Commercial License Usage
@@ -48,82 +48,40 @@
 ##
 ############################################################################
 
+from PySide2.QtWidgets import QApplication, QWidget, QStackedLayout, QComboBox
 
+class Widget(QWidget)
+    def __init__(self, parent=None):
+        QWidget.__init__(self, parent)
 //! [0]
-def find(self)
+        self.firstPageWidget = QWidget()
+        self.secondPageWidget = QWidget()
+        self.thirdPageWidget = QWidget()
 
-    if !self.findDialog:
-        self.findDialog = FindDialog(self)
-        connect(findDialog, SIGNAL("findNext()"), self, SLOT("findNext()"))
-    
+        self.stackedLayout = QStackedLayout()
+        self.stackedLayout.addWidget(self.firstPageWidget)
+        self.stackedLayout.addWidget(self.secondPageWidget)
+        self.stackedLayout.addWidget(self.thirdPageWidget)
 
-    self.findDialog.show()
-    self.findDialog.raise()
-    self.findDialog.activateWindow()
-
-//! [0]
-
-//! [1]
-def countWords(self):
-    dialog = WordCountDialog(self)
-    dialog.setWordCount(document().wordCount())
-    dialog.exec_()
-
+//! [0] //! [1]
+        self.pageComboBox = QComboBox()
+        self.pageComboBox.addItem(tr("Page 1"))
+        self.pageComboBox.addItem(tr("Page 2"))
+        self.pageComboBox.addItem(tr("Page 3"))
+        self.pageComboBox.activated.connect(self.stackedLayout.setCurrentIndex)
 //! [1]
 
 //! [2]
-        mb = QMessageBox("Application Name",
-                        "Hardware failure.\n\nDisk error detected\nDo you want to stop?",
-                       QMessageBox.Question,
-                       QMessageBox.Yes | QMessageBox.Default,
-                       QMessageBox.No | QMessageBox.Escape,
-                       QMessageBox.NoButton)
-        if mb.exec() == QMessageBox.No:
-            # try again
+        self.mainLayout = QVBoxLayout()
 //! [2]
-
+        self.mainLayout.addWidget(self.pageComboBox)
 //! [3]
-    progress = QProgressDialog("Copying files...", "Abort Copy", 0, numFiles, self)
-    progress.setWindowModality(Qt.WindowModal)
-
-    for i in rang(numFiles):
-        progress.setValue(i)
-
-        if progress.wasCanceled():
-            break
-        #... copy one file
-    
-    progress.setValue(numFiles)
+        self.mainLayout.addLayout(self.stackedLayout)
+        self.setLayout(self.mainLayout)
 //! [3]
 
-//! [4]
-# Operation constructor
-def __init__(self, parent):
-    QObject.__init__(self, parent)
-
-    pd =  QProgressDialog("Operation in progress.", "Cancel", 0, 100)
-    connect(pd, SIGNAL("canceled()"), self, SLOT("cancel()"))
-    t =  QTimer(self)
-    connect(t, SIGNAL("timeout()"), self, SLOT("perform()"))
-    t.start(0)
-
-//! [4] //! [5]
-
-def perform(self):
-
-    pd.setValue(steps)
-    #... perform one percent of the operation
-    steps++
-    if steps > pd.maximum():
-        t.stop()
-
-//! [5] //! [6]
-
-def cancel(self):
-
-    t.stop()
-    #... cleanup
-
-//! [6]
-
-
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    widget = Widget()
+    widget.show()
+    sys.exit(app.exec_())

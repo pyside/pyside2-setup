@@ -142,7 +142,7 @@ def save(self):
                              .arg(fileName)
                              .arg(file.errorString()))
         return
-    
+
 
     out = QTextStream(file)
     QApplication.setOverrideCursor(Qt::WaitCursor)
@@ -177,7 +177,7 @@ def insertCustomer(self, customer):
             for i in range(customerList.size()):
                 cursor.insertBlock()
                 cursor.insertText(customerList.at(i))
-            
+
             cursor.endEditBlock()
         else:
             oldcursor.endEditBlock()
@@ -248,8 +248,6 @@ def createDockWindows(self):
     addDockWidget(Qt.RightDockWidgetArea, dock)
     viewMenu.addAction(dock.toggleViewAction())
 
-    connect(customerList, SIGNAL("currentTextChanged(const QString &)"),
-            self, SLOT("insertCustomer(const QString &)"))
-    connect(paragraphsList, SIGNAL("currentTextChanged(const QString &)"),
-            self, SLOT("addParagraph(const QString &)"))
+    customerList.currentTextChanged[str].connect(self.insertCostumer)
+    paragraphsList.currentTextChanged[str].connect(self.addParagraph)
 //! [9]
