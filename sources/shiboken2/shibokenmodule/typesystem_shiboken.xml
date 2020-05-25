@@ -103,6 +103,12 @@
         </inject-code>
     </add-function>
 
+    <add-function signature="_unpickle_enum(PyObject*, PyObject*)" return-type="PyObject*">
+        <inject-code>
+            %PYARG_0 = Shiboken::Enum::unpickleEnum(%1, %2);
+        </inject-code>
+    </add-function>
+
     <extra-includes>
         <include file-name="sbkversion.h" location="local"/>
         <include file-name="voidptr.h" location="local"/>

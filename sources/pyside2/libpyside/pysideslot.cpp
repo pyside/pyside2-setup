@@ -75,7 +75,7 @@ static PyType_Slot PySideSlotType_slots[] = {
     {0, 0}
 };
 static PyType_Spec PySideSlotType_spec = {
-    "PySide2.QtCore.Slot",
+    "2:PySide2.QtCore.Slot",
     sizeof(PySideSlot),
     0,
     Py_TPFLAGS_DEFAULT,
@@ -85,9 +85,8 @@ static PyType_Spec PySideSlotType_spec = {
 
 static PyTypeObject *PySideSlotTypeF(void)
 {
-    static PyTypeObject *type = nullptr;
-    if (!type)
-        type = (PyTypeObject *)PyType_FromSpec(&PySideSlotType_spec);
+    static PyTypeObject *type = reinterpret_cast<PyTypeObject *>(
+        SbkType_FromSpec(&PySideSlotType_spec));
     return type;
 }
 

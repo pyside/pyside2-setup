@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -169,12 +169,6 @@ class Formatter(Writer):
         else:
             self.print("{spaces}class {class_str}: ...".format(**locals()))
         yield
-        if "<" in class_name:
-            # This is happening in QtQuick for some reason:
-            ## class QSharedPointer<QQuickItemGrabResult >:
-            # We simply skip over this class.
-            self.outfile.seek(here)
-            self.outfile.truncate()
 
     @contextmanager
     def function(self, func_name, signature, modifier=None):

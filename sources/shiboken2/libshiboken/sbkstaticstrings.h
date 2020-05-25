@@ -61,6 +61,7 @@ LIBSHIBOKEN_API PyObject *ecf();
 LIBSHIBOKEN_API PyObject *file();
 LIBSHIBOKEN_API PyObject *module();
 LIBSHIBOKEN_API PyObject *name();
+LIBSHIBOKEN_API PyObject *qualname();
 } // namespace PyMagicName
 } // namespace Shiboken
 

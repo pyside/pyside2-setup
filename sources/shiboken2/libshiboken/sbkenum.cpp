@@ -107,14 +107,16 @@ static PyObject *SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
     if (!self)
         return nullptr;
     self->ob_value = itemValue;
-    PyObject *item = Shiboken::Enum::getEnumItemFromValue(type, itemValue);
-    if (item) {
-        self->ob_name = SbkEnumObject_name(item, nullptr);
-        Py_XDECREF(item);
-    } else {
-        self->ob_name = nullptr;
-    }
+    Shiboken::AutoDecRef item(Shiboken::Enum::getEnumItemFromValue(type, itemValue));
+    self->ob_name = item.object() ? SbkEnumObject_name(item, nullptr) : nullptr;
     return reinterpret_cast<PyObject *>(self);
+}
+
+void enum_object_dealloc(PyObject *ob)
+{
+    auto self = reinterpret_cast<SbkEnumObject *>(ob);
+    Py_XDECREF(self->ob_name);
+    Sbk_object_dealloc(ob);
 }
 
 static PyObject *enum_op(enum_func f, PyObject *a, PyObject *b) {
@@ -260,6 +262,23 @@ static PyGetSetDef SbkEnumGetSetList[] = {
     {nullptr, nullptr, nullptr, nullptr, nullptr} // Sentinel
 };
 
+#if PY_VERSION_HEX < 0x03000000
+
+static PyObject *SbkEnumType_repr(PyObject *type)
+{
+    Shiboken::AutoDecRef mod(PyObject_GetAttr(type, Shiboken::PyMagicName::module()));
+    if (mod.isNull())
+        return nullptr;
+    Shiboken::AutoDecRef name(PyObject_GetAttr(type, Shiboken::PyMagicName::qualname()));
+    if (name.isNull())
+        return nullptr;
+    return PyString_FromFormat("<class '%s.%s'>",
+                               PyString_AS_STRING(mod.object()),
+                               PyString_AS_STRING(name.object()));
+}
+
+#endif // PY_VERSION_HEX < 0x03000000
+
 static void SbkEnumTypeDealloc(PyObject *pyObj);
 static PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
@@ -287,10 +306,13 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_alloc, (void *)PyType_GenericAlloc},
     {Py_tp_new, (void *)SbkEnumTypeTpNew},
     {Py_tp_free, (void *)PyObject_GC_Del},
+#if PY_VERSION_HEX < 0x03000000
+    {Py_tp_repr, (void *)SbkEnumType_repr},
+#endif
     {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
-    "Shiboken.EnumType",
+    "1:Shiboken.EnumType",
     0,    // filled in later
     sizeof(PyMemberDef),
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
@@ -304,7 +326,7 @@ PyTypeObject *SbkEnumType_TypeF(void)
     if (!type) {
         SbkEnumType_Type_spec.basicsize =
             PepHeapType_SIZE + sizeof(SbkEnumTypePrivate);
-        type = (PyTypeObject *)PyType_FromSpec(&SbkEnumType_Type_spec);
+        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkEnumType_Type_spec));
     }
     return type;
 }
@@ -341,6 +363,107 @@ PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwd
 
 } // extern "C"
 
+///////////////////////////////////////////////////////////////
+//
+// PYSIDE-15: Pickling Support for Qt Enum objects
+//            This works very well and fixes the issue.
+//
+extern "C" {
+
+static void init_enum();  // forward
+
+static PyObject *enum_unpickler = nullptr;
+
+// Pickling: reduce the Qt Enum object
+static PyObject *enum___reduce__(PyObject *obj)
+{
+    init_enum();
+    return Py_BuildValue("O(Ni)",
+                         enum_unpickler,
+                         Py_BuildValue("s", Py_TYPE(obj)->tp_name),
+                         PyInt_AS_LONG(obj));
+}
+
+} // extern "C"
+
+namespace Shiboken { namespace Enum {
+
+// Unpickling: rebuild the Qt Enum object
+PyObject *unpickleEnum(PyObject *enum_class_name, PyObject *value)
+{
+    Shiboken::AutoDecRef parts(PyObject_CallMethod(enum_class_name,
+        const_cast<char *>("split"), const_cast<char *>("s"), "."));
+    if (parts.isNull())
+        return nullptr;
+    PyObject *top_name = PyList_GetItem(parts, 0); // borrowed ref
+    if (top_name == nullptr)
+        return nullptr;
+    PyObject *module = PyImport_GetModule(top_name);
+    if (module == nullptr) {
+        PyErr_Format(PyExc_ImportError, "could not import module %.200s",
+            Shiboken::String::toCString(top_name));
+        return nullptr;
+    }
+    Shiboken::AutoDecRef cur_thing(module);
+    int len = PyList_Size(parts);
+    for (int idx = 1; idx < len; ++idx) {
+        PyObject *name = PyList_GetItem(parts, idx); // borrowed ref
+        PyObject *thing = PyObject_GetAttr(cur_thing, name);
+        if (thing == nullptr) {
+            PyErr_Format(PyExc_ImportError, "could not import Qt Enum type %.200s",
+                Shiboken::String::toCString(enum_class_name));
+            return nullptr;
+        }
+        cur_thing.reset(thing);
+    }
+    PyObject *klass = cur_thing;
+    return PyObject_CallFunctionObjArgs(klass, value, nullptr);
+}
+
+} // namespace Enum
+} // namespace Shiboken
+
+extern "C" {
+
+// Initialization
+static bool _init_enum()
+{
+    static PyObject *shiboken_name = Py_BuildValue("s", "shiboken2");
+    if (shiboken_name == nullptr)
+        return false;
+    Shiboken::AutoDecRef shibo(PyImport_GetModule(shiboken_name));
+    if (shibo.isNull())
+        return false;
+    Shiboken::AutoDecRef sub(PyObject_GetAttr(shibo, shiboken_name));
+    PyObject *mod = sub.object();
+    if (mod == nullptr) {
+        // We are in the build dir and already in shiboken.
+        PyErr_Clear();
+        mod = shibo.object();
+    }
+    enum_unpickler = PyObject_GetAttrString(mod, "_unpickle_enum");
+    if (enum_unpickler == nullptr)
+        return false;
+    return true;
+}
+
+static void init_enum()
+{
+    if (!(enum_unpickler || _init_enum()))
+        Py_FatalError("could not load enum pickling helper function");
+}
+
+static PyMethodDef SbkEnumObject_Methods[] = {
+    {const_cast<char *>("__reduce__"), reinterpret_cast<PyCFunction>(enum___reduce__),
+        METH_NOARGS, nullptr},
+    {nullptr, nullptr, 0, nullptr} // Sentinel
+};
+
+} // extern "C"
+
+//
+///////////////////////////////////////////////////////////////
+
 namespace Shiboken {
 
 class DeclaredEnumTypes
@@ -376,7 +499,7 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
     while (PyDict_Next(values, &pos, &key, &value)) {
         auto *obj = reinterpret_cast<SbkEnumObject *>(value);
         if (obj->ob_value == itemValue) {
-            Py_INCREF(obj);
+            Py_INCREF(value);
             return value;
         }
     }
@@ -501,6 +624,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_tp_repr, (void *)SbkEnumObject_repr},
     {Py_tp_str, (void *)SbkEnumObject_repr},
     {Py_tp_getset, (void *)SbkEnumGetSetList},
+    {Py_tp_methods, (void *)SbkEnumObject_Methods},
     {Py_tp_new, (void *)SbkEnum_tp_new},
     {Py_nb_add, (void *)enum_add},
     {Py_nb_subtract, (void *)enum_subtract},
@@ -522,7 +646,7 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_nb_index, (void *)enum_int},
     {Py_tp_richcompare, (void *)enum_richcompare},
     {Py_tp_hash, (void *)enum_hash},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
+    {Py_tp_dealloc, (void *)enum_object_dealloc},
     {0, nullptr}
 };
 static PyType_Spec SbkNewType_spec = {
@@ -594,7 +718,7 @@ newTypeWithName(const char *name,
                 const char *cppName,
                 PyTypeObject *numbers_fromFlag)
 {
-    // Careful: PyType_FromSpec does not allocate the string.
+    // Careful: SbkType_FromSpec does not allocate the string.
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
     auto *newspec = new PyType_Spec;
     newspec->name = strdup(name);
@@ -611,9 +735,8 @@ newTypeWithName(const char *name,
     if (numbers_fromFlag)
         copyNumberMethods(numbers_fromFlag, newslots, &idx);
     newspec->slots = newslots;
-    auto *type = reinterpret_cast<PyTypeObject *>(PyType_FromSpec(newspec));
+    auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(newspec));
     Py_TYPE(type) = SbkEnumType_TypeF();
-    Py_INCREF(Py_TYPE(type));
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     PepType_SETP(enumType)->cppName = cppName;
@@ -659,7 +782,7 @@ DeclaredEnumTypes::DeclaredEnumTypes() = default;
 DeclaredEnumTypes::~DeclaredEnumTypes()
 {
         /*
-         * PYSIDE-595: This was "delete *it;" before introducing 'PyType_FromSpec'.
+         * PYSIDE-595: This was "delete *it;" before introducing 'SbkType_FromSpec'.
          * XXX what should I do now?
          * Refcounts in tests are 30 or 0 at end.
          * When I add the default tp_dealloc, we get negative refcounts!

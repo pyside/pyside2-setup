@@ -96,8 +96,10 @@ public:
      */
     void reset(PyObject *other)
     {
-        Py_XDECREF(m_pyObj);
+        // Safely decref m_pyObj. See Py_XSETREF in object.h .
+        PyObject *_py_tmp = m_pyObj;
         m_pyObj = other;
+        Py_XDECREF(_py_tmp);
     }
 private:
     PyObject *m_pyObj;

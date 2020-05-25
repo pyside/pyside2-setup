@@ -174,7 +174,7 @@ namespace QFlags
         char qualname[200];
         // PYSIDE-747: Here we insert now the full class name.
         strcpy(qualname, name);
-        // Careful: PyType_FromSpec does not allocate the string.
+        // Careful: SbkType_FromSpec does not allocate the string.
         PyType_Spec *newspec = new PyType_Spec;
         newspec->name = strdup(qualname);
         newspec->basicsize = SbkNewQFlagsType_spec.basicsize;
@@ -186,7 +186,7 @@ namespace QFlags
             SbkNewQFlagsType_slots[idx].pfunc = numberMethods[idx].pfunc;
         }
         newspec->slots = SbkNewQFlagsType_spec.slots;
-        PyTypeObject *type = (PyTypeObject *)PyType_FromSpec(newspec);
+        PyTypeObject *type = (PyTypeObject *)SbkType_FromSpec(newspec);
         Py_TYPE(type) = &PyType_Type;
 
         PySideQFlagsType *flagsType = reinterpret_cast<PySideQFlagsType *>(type);

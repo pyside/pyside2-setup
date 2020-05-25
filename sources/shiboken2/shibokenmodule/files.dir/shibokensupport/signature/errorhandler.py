@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -55,6 +55,8 @@ enough to produce a useful ValueError.
 
 This matter will be improved in a later version.
 """
+
+import sys
 
 from shibokensupport.signature import inspect
 from shibokensupport.signature import get_signature

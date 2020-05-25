@@ -64,7 +64,7 @@ class PySideDeprecationWarningRemovedInQt6(Warning):
 
 def constData(self):
     cls = self.__class__
-    name = cls.__name__
+    name = cls.__qualname__
     warnings.warn(dedent("""
         {name}.constData is unpythonic and will be removed in Qt For Python 6.0 .
         Please use {name}.data instead."""

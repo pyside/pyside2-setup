@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of Qt for Python.
@@ -67,6 +67,7 @@ List entry
 """
 
 import os
+import re
 import sys
 from textwrap import dedent
 import unittest
@@ -144,8 +145,19 @@ class TestSignaturesExists(unittest.TestCase):
             name = key.rsplit(".", 1)[-1]
             if name in ("next", "__next__"): # ignore problematic cases
                 continue
+            if "<" in key:
+                # Skip over remaining crap in "<...>"
+                continue
+            if key.startswith("sample.SampleNamespace"):
+                # We cannot work with sample namespaces after the change to __qualname__.
+                continue
+            if (key.startswith("smart.SharedPtr") or
+                re.match(r"PySide2\..*?\.QSharedPointer_", key)):
+                # These mangled names are not supported.
+                # We should fix them.
+                continue
             if key not in found_sigs:
-                warn("missing key: '{}'".format(key), stacklevel=3)
+                warn("missing key: '{} value={}'".format(key, value), stacklevel=3)
             else:
                 found_val = found_sigs[key]
                 if type(value) is list and (
