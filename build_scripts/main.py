@@ -74,10 +74,12 @@ def get_package_version():
 
     final_version = "{}.{}.{}".format(
         d['major_version'], d['minor_version'], d['patch_version'])
-    pre_release_version_type = d['pre_release_version_type']
+    release_version_type = d['release_version_type']
     pre_release_version = d['pre_release_version']
-    if pre_release_version and pre_release_version_type:
-        final_version += pre_release_version_type + pre_release_version
+    if pre_release_version and release_version_type:
+        final_version += release_version_type + pre_release_version
+    if release_version_type.startswith("comm"):
+        final_version += "." + release_version_type
 
     # Add the current timestamp to the version number, to suggest it
     # is a development snapshot build.

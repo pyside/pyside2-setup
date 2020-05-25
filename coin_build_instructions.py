@@ -95,9 +95,9 @@ def is_snapshot_build():
         setup_script_dir, "sources", "pyside2", "pyside_version.py")
     d = get_python_dict(pyside_version_py)
 
-    pre_release_version_type = d['pre_release_version_type']
+    release_version_type = d['release_version_type']
     pre_release_version = d['pre_release_version']
-    if pre_release_version or pre_release_version_type:
+    if pre_release_version and release_version_type:
         return True
     return False
 
