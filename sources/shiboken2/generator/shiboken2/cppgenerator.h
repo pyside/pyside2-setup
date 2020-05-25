@@ -249,6 +249,9 @@ private:
     QString getInitFunctionName(const GeneratorContext &context) const;
     QString getSimpleClassInitFunctionName(const AbstractMetaClass *metaClass) const;
 
+    void writeSignatureStrings(QTextStream &s, QTextStream &signatureStream,
+                               const QString &arrayName,
+                               const char *comment) const;
     void writeClassRegister(QTextStream &s,
                             const AbstractMetaClass *metaClass,
                             const GeneratorContext &classContext,

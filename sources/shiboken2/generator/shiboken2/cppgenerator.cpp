@@ -4646,8 +4646,6 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
                 strArg += QLatin1Char('=');
                 QString e = arg->defaultValueExpression();
                 e.replace(QLatin1String("::"), QLatin1String("."));
-                // the tests insert stuff like Str("<unknown>"):
-                e.replace(QLatin1Char('"'), QLatin1String("\\\""));
                 strArg += e;
             }
             args << arg->name() + QLatin1Char(':') + strArg;
@@ -4976,6 +4974,20 @@ QString CppGenerator::getInitFunctionName(const GeneratorContext &context) const
         : getFilteredCppSignatureString(context.preciseType()->cppSignature());
 }
 
+void CppGenerator::writeSignatureStrings(QTextStream &s,
+                                         QTextStream &signatureStream,
+                                         const QString &arrayName,
+                                         const char *comment) const
+{
+    s << "// The signatures string for the " << comment << ".\n";
+    s << "// Multiple signatures have their index \"n:\" in front.\n";
+    s << "static const char *" << arrayName << "_SignatureStrings[] = {\n";
+    QString line;
+    while (signatureStream.readLineInto(&line))
+        s << INDENT << "R\"CPP(" << line << ")CPP\",\n";
+    s << INDENT << NULL_PTR << "}; // Sentinel\n\n";
+}
+
 void CppGenerator::writeClassRegister(QTextStream &s,
                                       const AbstractMetaClass *metaClass,
                                       const GeneratorContext &classContext,
@@ -4990,13 +5002,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     QString initFunctionName = getInitFunctionName(classContext);
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
-    s << "// The signatures string for the functions.\n";
-    s << "// Multiple signatures have their index \"n:\" in front.\n";
-    s << "static const char *" << initFunctionName << "_SignatureStrings[] = {\n";
-    QString line;
-    while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\",\n";
-    s << INDENT << NULL_PTR << "}; // Sentinel\n\n";
+    writeSignatureStrings(s, signatureStream, initFunctionName, "functions");
     s << "void init_" << initFunctionName;
     s << "(PyObject *" << enclosingObjectVariable << ")\n{\n";
 
@@ -5802,13 +5808,7 @@ bool CppGenerator::finishGeneration()
     s << "#endif\n\n";
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
-    s << "// The signatures string for the global functions.\n";
-    s << "// Multiple signatures have their index \"n:\" in front.\n";
-    s << "static const char *" << moduleName() << "_SignatureStrings[] = {\n";
-    QString line;
-    while (signatureStream.readLineInto(&line))
-        s << INDENT << '"' << line << "\",\n";
-    s << INDENT << NULL_PTR << "}; // Sentinel\n\n";
+    writeSignatureStrings(s, signatureStream, moduleName(), "global functions");
 
     s << "SBK_MODULE_INIT_FUNCTION_BEGIN(" << moduleName() << ")\n";
 
