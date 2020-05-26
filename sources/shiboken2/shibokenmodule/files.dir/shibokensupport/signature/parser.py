@@ -165,6 +165,11 @@ def try_to_guess(thing, valtype):
                 return ret
     return None
 
+def get_name(thing):
+    if isinstance(thing, type):
+        return getattr(thing, "__qualname__", thing.__name__)
+    else:
+        return thing.__name__
 
 def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
@@ -172,7 +177,7 @@ def _resolve_value(thing, valtype, line):
             return None
         map = type_map[valtype]
         # typing.Any: '_SpecialForm' object has no attribute '__name__'
-        name = map.__name__ if hasattr(map, "__name__") else str(map)
+        name = get_name(map) if hasattr(map, "__name__") else str(map)
         thing = "zero({})".format(name)
     if thing in type_map:
         return type_map[thing]
@@ -212,7 +217,8 @@ def to_string(thing):
         return thing
     if hasattr(thing, "__name__"):
         dot = "." in str(thing)
-        return thing.__module__ + "." + thing.__name__ if dot else thing.__name__
+        name = get_name(thing)
+        return thing.__module__ + "." + name if dot else name
     # Note: This captures things from the typing module:
     return str(thing)
 

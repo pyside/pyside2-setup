@@ -39,6 +39,7 @@
 
 #include "basewrapper.h"
 #include "autodecref.h"
+#include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
 
@@ -185,7 +186,6 @@ _get_class_of_sm(PyObject *ob_sm)
 static PyObject *
 _get_class_of_descr(PyObject *ob)
 {
-    Shiboken::AutoDecRef func_name(PyObject_GetAttr(ob, Shiboken::PyMagicName::name()));
     return PyObject_GetAttr(ob, Shiboken::PyMagicName::objclass());
 }
 
@@ -318,6 +318,20 @@ pyside_tp_get___signature__(PyObject *obtype_mod, PyObject *modifier)
 static PyObject *
 GetSignature_Cached(PyObject *props, PyObject *func_kind, PyObject *modifier);
 
+// Helper for __qualname__ which might not always exist in Python 2 (type).
+static PyObject *
+_get_qualname(PyObject *ob)
+{
+    // We support __qualname__ for types, only.
+    assert(PyType_Check(ob));
+    PyObject *name = PyObject_GetAttr(ob, Shiboken::PyMagicName::qualname());
+    if (name == nullptr) {
+        PyErr_Clear();
+        name = PyObject_GetAttr(ob, Shiboken::PyMagicName::name());
+    }
+    return name;
+}
+
 static PyObject *
 GetTypeKey(PyObject *ob)
 {
@@ -334,19 +348,20 @@ GetTypeKey(PyObject *ob)
      *
      * This is the PyCFunction behavior, as opposed to Python functions.
      */
-    Shiboken::AutoDecRef class_name(PyObject_GetAttr(ob, Shiboken::PyMagicName::name()));
+    // PYSIDE-1286: We use correct __module__ and __qualname__, now.
     Shiboken::AutoDecRef module_name(PyObject_GetAttr(ob, Shiboken::PyMagicName::module()));
-
-    if (module_name.isNull())
+    if (module_name.isNull()) {
+        // We have no module_name because this is a module ;-)
         PyErr_Clear();
-
-    // Note: if we have a module, then __module__ is null, and we get
-    // the module name through __name__ .
-    if (class_name.isNull())
+        module_name.reset(PyObject_GetAttr(ob, Shiboken::PyMagicName::name()));
+        return Py_BuildValue("O", module_name.object());
+    }
+    Shiboken::AutoDecRef class_name(_get_qualname(ob));
+    if (class_name.isNull()) {
+        Py_FatalError("Signature: missing class name in GetTypeKey");
         return nullptr;
-    if (module_name.object())
-        return Py_BuildValue("(OO)", module_name.object(), class_name.object());
-    return Py_BuildValue("O", class_name.object());
+    }
+    return Py_BuildValue("(OO)", module_name.object(), class_name.object());
 }
 
 static PyObject *empty_dict = nullptr;
@@ -402,7 +417,6 @@ GetSignature_Wrapper(PyObject *ob, PyObject *modifier)
     Shiboken::AutoDecRef func_name(PyObject_GetAttr(ob, Shiboken::PyMagicName::name()));
     Shiboken::AutoDecRef objclass(PyObject_GetAttr(ob, Shiboken::PyMagicName::objclass()));
     Shiboken::AutoDecRef class_key(GetTypeKey(objclass));
-
     if (func_name.isNull() || objclass.isNull() || class_key.isNull())
         return nullptr;
     PyObject *dict = TypeKey_to_PropsDict(class_key, objclass);
@@ -851,12 +865,15 @@ get_signature(PyObject * /* self */, PyObject *args)
 ////////////////////////////////////////////////////////////////////////////
 // a stack trace for linux-like platforms
 #include <stdio.h>
-#include <execinfo.h>
+#if defined(__GLIBC__)
+#  include <execinfo.h>
+#endif
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 void handler(int sig) {
+#if defined(__GLIBC__)
     void *array[30];
     size_t size;
 
@@ -864,8 +881,11 @@ void handler(int sig) {
     size = backtrace(array, 30);
 
     // print out all the frames to stderr
+#endif
     fprintf(stderr, "Error: signal %d:\n", sig);
+#if defined(__GLIBC__)
     backtrace_symbols_fd(array, size, STDERR_FILENO);
+#endif
     exit(1);
 }
 

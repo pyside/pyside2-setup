@@ -31,8 +31,10 @@
 
 
 def objectFullname(t):
+    # '__qualname__' for Python 2 does exist for PySide types, only.
+    name = getattr(t, "__qualname__", t.__name__)
     module = t.__module__
     if module is None or module == str.__class__.__module__:
-        return t.__name__
+        return name
     else:
-        return module + '.' + t.__name__
+        return module + '.' + name

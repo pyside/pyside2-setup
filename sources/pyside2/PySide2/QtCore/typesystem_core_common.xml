@@ -223,9 +223,9 @@
   </primitive-type>
   <primitive-type name="quintptr" target-lang-api-name="PyLong">
     <conversion-rule>
-        <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong-unsigned"/>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pylong-quintptr"/>
         <target-to-native>
-            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong-unsigned"/>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong-quintptr"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>

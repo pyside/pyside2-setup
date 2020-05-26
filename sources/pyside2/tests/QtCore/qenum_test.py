@@ -30,15 +30,18 @@
 
 '''Test cases for QEnum and QFlags'''
 
+import gc
 import os
 import sys
+import pickle
 import unittest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide2.QtCore import *
+from PySide2.QtCore import Qt, QIODevice
+
 
 class TestEnum(unittest.TestCase):
 
@@ -73,6 +76,23 @@ class TestEnum(unittest.TestCase):
         with self.assertRaises(TypeError):
             a = k*2.0
 
+    @unittest.skipUnless(getattr(sys, "getobjects", None), "requires debug build")
+    def testEnumNew_NoLeak(self):
+        gc.collect()
+        total = sys.gettotalrefcount()
+        for idx in range(1000):
+            ret = Qt.Key(42)
+        gc.collect()
+        delta = sys.gettotalrefcount() - total
+        print("delta total refcount =", delta)
+        if abs(delta) >= 10:
+            all = sys.getobjects(0)
+            all.sort(key=lambda x: sys.getrefcount(x), reverse=True)
+            for ob in all[:10]:
+                print(sys.getrefcount(ob), ob)
+        self.assertTrue(abs(delta) < 10)
+
+
 class TestQFlags(unittest.TestCase):
     def testToItn(self):
         om = QIODevice.NotOpen
@@ -93,6 +113,34 @@ class TestQFlags(unittest.TestCase):
             self.assertFail()
         except:
             pass
+
+
+# PYSIDE-15: Pickling of enums
+class TestEnumPickling(unittest.TestCase):
+    def testPickleEnum(self):
+
+        # Pickling of enums with different depth works.
+        ret = pickle.loads(pickle.dumps(QIODevice.Append))
+        self.assertEqual(ret, QIODevice.Append)
+
+        ret = pickle.loads(pickle.dumps(Qt.Key.Key_Asterisk))
+        self.assertEqual(ret, Qt.Key.Key_Asterisk)
+        self.assertEqual(ret, Qt.Key(42))
+
+        # We can also pickle the whole enum class (built in):
+        ret = pickle.loads(pickle.dumps(QIODevice))
+
+        # This works also with nested classes for Python 3, after we
+        # introduced the correct __qualname__ attribute.
+
+        # Note: For Python 2, we would need quite strange patches.
+        func = lambda: pickle.loads(pickle.dumps(Qt.Key))
+        if sys.version_info[0] < 3:
+            with self.assertRaises(pickle.PicklingError):
+                func()
+        else:
+            func()
+
 
 if __name__ == '__main__':
     unittest.main()

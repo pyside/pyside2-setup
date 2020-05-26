@@ -30,7 +30,7 @@ configure_file(shibokenconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/shibokenconfig.h
 
 install(TARGETS shiboken2
         EXPORT Shiboken2Targets
-        DESTINATION bin)
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
 set(shiboken_generator_package_name "shiboken2_generator")
 
