@@ -49,25 +49,11 @@
 ****************************************************************************/
 
 //! [0]
-        QDesignerPropertyEditorInterface *propertyEditor = 0;
-        propertyEditor = formEditor->propertyEditor();
+    device = QBuffer()
+    device.setData(myQString.toUtf8())
+    device.open(QIODevice.ReadOnly)
 
-        connect(propertyEditor, SIGNAL(propertyChanged(QString, QVariant)),
-                this, SLOT(checkProperty(QString, QVariant)));
+    query = QXmlQuery()
+    query.setQuery("doc($inputDocument)/query[theDocument]")
+    query.bindVariable("inputDocument", device)
 //! [0]
-
-
-//! [1]
-        void checkProperty(QString property, QVariant value) {
-            QDesignerPropertyEditorInterface *propertyEditor = 0;
-            propertyEditor = formEditor->propertyEditor();
-
-            QObject *object = propertyeditor->object();
-            MyCustomWidget *widget = qobject_cast<MyCustomWidget>(object);
-
-            if (widget && property == aProperty && value != expectedValue)
-                {...}
-        }
-//! [1]
-
-

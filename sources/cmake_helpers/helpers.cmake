@@ -35,6 +35,7 @@ set(ALL_OPTIONAL_MODULES
     Location
     Qml
     Quick
+    QuickControls2
     QuickWidgets
     RemoteObjects
     Scxml

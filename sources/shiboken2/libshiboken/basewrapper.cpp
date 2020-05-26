@@ -104,6 +104,23 @@ static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
     {nullptr}  // Sentinel
 };
 
+#if PY_VERSION_HEX < 0x03000000
+
+static PyObject *SbkObjectType_repr(PyObject *type)
+{
+    Shiboken::AutoDecRef mod(PyObject_GetAttr(type, Shiboken::PyMagicName::module()));
+    if (mod.isNull())
+        return nullptr;
+    Shiboken::AutoDecRef name(PyObject_GetAttr(type, Shiboken::PyMagicName::qualname()));
+    if (name.isNull())
+        return nullptr;
+    return PyString_FromFormat("<class '%s.%s'>",
+                               PyString_AS_STRING(mod.object()),
+                               PyString_AS_STRING(name.object()));
+}
+
+#endif // PY_VERSION_HEX < 0x03000000
+
 static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectTypeDealloc)},
     {Py_tp_setattro, reinterpret_cast<void *>(PyObject_GenericSetAttr)},
@@ -112,6 +129,9 @@ static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_new, reinterpret_cast<void *>(SbkObjectTypeTpNew)},
     {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
     {Py_tp_getset, reinterpret_cast<void *>(SbkObjectType_Type_getsetlist)},
+#if PY_VERSION_HEX < 0x03000000
+    {Py_tp_repr, reinterpret_cast<void *>(SbkObjectType_repr)},
+#endif
     {0, nullptr}
 };
 static PyType_Spec SbkObjectType_Type_spec = {
@@ -633,11 +653,42 @@ PyObject *SbkType_FromSpec(PyType_Spec *spec)
 
 PyObject *SbkType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
 {
+    // PYSIDE-1286: Generate correct __module__ and __qualname__
+    // The name field can now be extended by an "n:" prefix which is
+    // the number of modules in the name. The default is 1.
+    //
+    // Example:
+    //    "2:mainmod.submod.mainclass.subclass"
+    // results in
+    //    __module__   : "mainmod.submod"
+    //    __qualname__ : "mainclass.subclass"
+    //    __name__     : "subclass"
+
     PyType_Spec new_spec = *spec;
     const char *colon = strchr(spec->name, ':');
     assert(colon);
-    new_spec.name = colon + 1;
-    return PyType_FromSpecWithBases(&new_spec, bases);
+    int package_level = atoi(spec->name);
+    const char *mod = new_spec.name = colon + 1;
+
+    PyObject *type = PyType_FromSpecWithBases(&new_spec, bases);
+    if (type == nullptr)
+        return nullptr;
+
+    const char *qual = mod;
+    for (int idx = package_level; idx > 0; --idx) {
+        const char *dot = strchr(qual, '.');
+        if (!dot)
+            break;
+        qual = dot + 1;
+    }
+    int mlen = qual - mod - 1;
+    Shiboken::AutoDecRef module(Shiboken::String::fromCString(mod, mlen));
+    Shiboken::AutoDecRef qualname(Shiboken::String::fromCString(qual));
+    if (PyObject_SetAttr(type, Shiboken::PyMagicName::module(), module) < 0)
+        return nullptr;
+    if (PyObject_SetAttr(type, Shiboken::PyMagicName::qualname(), qualname) < 0)
+        return nullptr;
+    return type;
 }
 
 } //extern "C"

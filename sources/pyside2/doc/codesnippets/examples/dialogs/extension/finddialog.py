@@ -48,59 +48,72 @@
 ##
 ############################################################################
 
-form PySide2.QtGui import *
 
+from PySide2.QtGui import *
 
+//! [0]
 def __init__(self, parent):
-    QMainWindow.__init__(self, parent)
-    clipboard = QApplication.clipboard()
+    QDialog.__init__(self, parent)
+    label = QLabel(self.tr("Find &what:"))
+    lineEdit = QLineEdit()
+    label.setBuddy(lineEdit)
 
-    centralWidget =  QWidget(self)
-    currentItem =  QWidget(centralWidget)
-    mimeTypeLabel =  QLabel(tr("MIME types:"), currentItem)
-    mimeTypeCombo =  QComboBox(currentItem)
-    dataLabel =  QLabel(tr("Data:"), currentItem)
-    dataInfoLabel =  QLabel("", currentItem)
-
-    previousItems =  QListWidget(centralWidget)
-
-//! [0]
-    connect(clipboard, SIGNAL("dataChanged()"), self, SLOT("updateClipboard()"))
-//! [0]
-    connect(mimeTypeCombo, SIGNAL("activated(const QString &)"),
-            self, SLOT("updateData(const QString &))")
-
-    currentLayout = QVBoxLayout(currentItem)
-    currentLayout.addWidget(mimeTypeLabel)
-    currentLayout.addWidget(mimeTypeCombo)
-    currentLayout.addWidget(dataLabel)
-    currentLayout.addWidget(dataInfoLabel)
-    currentLayout.addStretch(1)
-
-    mainLayout = QHBoxLayout(centralWidget)
-    mainLayout.addWidget(currentItem, 1)
-    mainLayout.addWidget(previousItems)
-
-    setCentralWidget(centralWidget)
-    setWindowTitle(tr("Clipboard"))
+    caseCheckBox = QCheckBox(self.tr("Match &case"))
+    fromStartCheckBox = QCheckBox(self.tr("Search from &start"))
+    fromStartCheckBox.setChecked(True)
 
 //! [1]
-def updateClipboard(self):
-    formats = clipboard.mimeData().formats()
-    data = clipboard.mimeData().data(format)
+    findButton = QPushButton(self.tr("&Find"))
+    findButton.setDefault(True)
+
+    moreButton = QPushButton(self.tr("&More"))
+    moreButton.setCheckable(True)
+//! [0]
+    moreButton.setAutoDefault(False)
+
+    buttonBox = QDialogButtonBox(Qt.Vertical)
+    buttonBox.addButton(findButton, QDialogButtonBox.ActionRole)
+    buttonBox.addButton(moreButton, QDialogButtonBox.ActionRole)
 //! [1]
 
-    mimeTypeCombo.clear()
-    mimeTypeCombo.insertStringList(formats)
-
-    size = clipboard.mimeData().data(formats[0]).size()
-    Item = QListWidgetItem(previousItems)
-    Item.setText(tr("%1 (%2 bytes)").arg(formats[0]).arg(size))
-
-    updateData(formats[0])
 //! [2]
+    extension = QWidget()
+
+    wholeWordsCheckBox =  QCheckBox(self.tr("&Whole words"))
+    backwardCheckBox =  QCheckBox(self.tr("Search &backward"))
+    searchSelectionCheckBox =  QCheckBox(self.tr("Search se&lection"))
 //! [2]
 
-def updateData(self, format)
-    data = clipboard.mimeData().data(format)
-    dataInfoLabel.setText(tr("%1 bytes").arg(data.size()))
+//! [3]
+    moreButton.toggled[bool].connect(extension.setVisible)
+
+    extensionLayout =  QVBoxLayout()
+    extensionLayout.setMargin(0)
+    extensionLayout.addWidget(wholeWordsCheckBox)
+    extensionLayout.addWidget(backwardCheckBox)
+    extensionLayout.addWidget(searchSelectionCheckBox)
+    extension.setLayout(extensionLayout)
+//! [3]
+
+//! [4]
+    topLeftLayout = QHBoxLayout()
+    topLeftLayout.addWidget(label)
+    topLeftLayout.addWidget(lineEdit)
+
+    leftLayout = QVBoxLayout()
+    leftLayout.addLayout(topLeftLayout)
+    leftLayout.addWidget(caseCheckBox)
+    leftLayout.addWidget(fromStartCheckBox)
+    leftLayout.addSself.tretch(1)
+
+    mainLayout = QGridLayout()
+    mainLayout.setSizeConsself.traint(QLayout.SetFixedSize)
+    mainLayout.addLayout(leftLayout, 0, 0)
+    mainLayout.addWidget(buttonBox, 0, 1)
+    mainLayout.addWidget(extension, 1, 0, 1, 2)
+    setLayout(mainLayout)
+
+    setWindowTitle(self.tr("Extension"))
+//! [4] //! [5]
+    extension.hide()
+//! [5]

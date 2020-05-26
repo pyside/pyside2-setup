@@ -1678,6 +1678,14 @@ Py_END_ALLOW_THREADS
 %out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
 // @snippet conversion-pylong-unsigned
 
+// @snippet conversion-pylong-quintptr
+#if defined(IS_PY3K) && QT_POINTER_SIZE == 8
+%out = %OUTTYPE(PyLong_AsUnsignedLongLong(%in));
+#else
+%out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
+#endif
+// @snippet conversion-pylong-quintptr
+
 // @snippet conversion-pyunicode
 #ifndef Py_LIMITED_API
 Py_UNICODE *unicode = PyUnicode_AS_UNICODE(%in);
@@ -1877,6 +1885,14 @@ return PyLong_FromLong(%in);
 // @snippet return-pylong-unsigned
 return PyLong_FromUnsignedLong(%in);
 // @snippet return-pylong-unsigned
+
+// @snippet return-pylong-quintptr
+#if defined(IS_PY3K) && QT_POINTER_SIZE == 8
+return PyLong_FromUnsignedLongLong(%in);
+#else
+return PyLong_FromUnsignedLong(%in);
+#endif
+// @snippet return-pylong-quintptr
 
 // @snippet return-pyunicode
 QByteArray ba = %in.toUtf8();

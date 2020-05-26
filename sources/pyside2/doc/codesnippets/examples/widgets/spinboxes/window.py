@@ -147,8 +147,7 @@ def createDateTimeEdits(self):
     formatComboBox.addItem("hh:mm ap")
 //! [9] //! [10]
 
-    connect(formatComboBox, SIGNAL("activated(const QString &)"),
-            self, SLOT("setFormatString(const QString &)"))
+    formatComboBox.activated[str].connect(setFormatString)
 //! [10]
 
     setFormatString(formatComboBox.currentText())
@@ -174,12 +173,12 @@ def setFormatString(self, formatString):
         meetingEdit.setDateRange(QDate(2004, 11, 1), QDate(2005, 11, 30))
         meetingLabel.setText(tr("Meeting date (between %0 and %1):")
             .arg(meetingEdit.minimumDate().toString(Qt.ISODate))
-	    .arg(meetingEdit.maximumDate().toString(Qt.ISODate)))
+        .arg(meetingEdit.maximumDate().toString(Qt.ISODate)))
     else:
         meetingEdit.setTimeRange(QTime(0, 7, 20, 0), QTime(21, 0, 0, 0))
         meetingLabel.setText(tr("Meeting time (between %0 and %1):")
             .arg(meetingEdit.minimumTime().toString(Qt.ISODate))
-	    .arg(meetingEdit.maximumTime().toString(Qt.ISODate)))
+        .arg(meetingEdit.maximumTime().toString(Qt.ISODate)))
 //! [13]
 
 //! [14]
@@ -222,9 +221,8 @@ def createDoubleSpinBoxes():
     priceSpinBox.setPrefix("$")
     priceSpinBox.setValue(99.99)
 
-    connect(precisionSpinBox, SIGNAL("valueChanged(int)"),
+    precisionSpinBox.valueChanged[int].connect(changePrecision)
 //! [17]
-            self, SLOT("changePrecision(int))")
 
 //! [18]
     spinBoxLayout =  QVBoxLayout()

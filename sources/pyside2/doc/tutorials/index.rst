@@ -18,6 +18,7 @@ Basic tutorials
     basictutorial/clickablebutton.rst
     basictutorial/dialog.rst
     basictutorial/uifiles.rst
+    basictutorial/qrcfiles.rst
 
 Real use-cases applications
 ---------------------------

@@ -49,28 +49,30 @@
 ############################################################################
 
 //! [0]
-from PySide2.QtGui import *
+from PySide2.QtCore import Qt, QFile, QFileInfo, QSettings, QTextStream
+from PySide2.QtGui import QIcon
+from PySide2.Widgets import (QAction, QApplication, QFileDialog, QMainWindow,
+                             QPlainTextEdit, QFileDialog, QMessageBox, )
 //! [0]
 
 //! [1]
-def __init__(self):
+def __init__(self, parent=None):
     QMainWindow.__init__(self)
 //! [1] //! [2]
-    textEdit =  QPlainTextEdit()
-    setCentralWidget(textEdit)
+    self.textEdit =  QPlainTextEdit()
+    self.setCentralWidget(textEdit)
 
-    createActions()
-    createMenus()
-    createToolBars()
-    createStatusBar()
+    self.createActions()
+    self.createMenus()
+    self.createToolBars()
+    self.createStatusBar()
 
-    readSettings()
+    self.readSettings()
 
-    connect(textEdit.document(), SIGNAL("contentsChanged()"),
-            self, SLOT("documentWasModified()"))
+    self.textEdit.document().contentsChanged.connect(self.documentWasModified)
 
-    setCurrentFile("")
-    setUnifiedTitleAndToolBarOnMac(True)
+    self.setCurrentFile("")
+    self.setUnifiedTitleAndToolBarOnMac(True)
 
 //! [2]
 
@@ -97,7 +99,7 @@ def open(self):
 //! [7] //! [8]
     if maybeSave():
         fileName = QFileDialog.getOpenFileName(self)
-        if !fileName.isEmpty():
+        if not fileName.isEmpty():
             loadFile(fileName)
 //! [8]
 
@@ -142,70 +144,68 @@ def MainWindow.createActions(self):
     Act = QAction(QIcon(":/images/new.png"), tr("&New"), self)
     Act.setShortcuts(QKeySequence.New)
     Act.setStatusTip(tr("Create a new file"))
-    connect(Act, SIGNAL("triggered()"), self, SLOT("newFile()"))
+    Act.triggered.connect(newFile)
 
 //! [19]
-    openAct =  QAction(QIcon(":/images/open.png"), tr("&Open..."), self)
+    openAct = QAction(QIcon(":/images/open.png"), tr("&Open..."), self)
     openAct.setShortcuts(QKeySequence.Open)
     openAct.setStatusTip(tr("Open an existing file"))
-    connect(openAct, SIGNAL("triggered()"), self, SLOT("open()"))
+    openAct.triggered.connect(open)
 //! [18] //! [19]
 
-    saveAct =  QAction(QIcon(":/images/save.png"), tr("&Save"), self)
+    saveAct = QAction(QIcon(":/images/save.png"), tr("&Save"), self)
     saveAct.setShortcuts(QKeySequence.Save)
     saveAct.setStatusTip(tr("Save the document to disk"))
-    connect(saveAct, SIGNAL("triggered()"), self, SLOT("save()"))
+    saveAct.triggered.connect(save)
 
-    saveAsAct =  QAction(tr("Save &As..."), self)
+    saveAsAct = QAction(tr("Save &As..."), self)
     saveAsAct.setShortcuts(QKeySequence.SaveAs)
     saveAsAct.setStatusTip(tr("Save the document under a  name"))
-    connect(saveAsAct, SIGNAL("triggered()"), self, SLOT("saveAs()"))
+    saveAsAct.triggered.connect(saveAs)
 
 //! [20]
-    exitAct =  QAction(tr("E&xit"), self)
+    exitAct = QAction(tr("E&xit"), self)
     exitAct.setShortcut(tr("Ctrl+Q"))
 //! [20]
     exitAct.setStatusTip(tr("Exit the application"))
-    connect(exitAct, SIGNAL("triggered()"), self, SLOT("close()"))
+    exitAct.triggered.connect(close)
 
 //! [21]
-    cutAct =  QAction(QIcon(":/images/cut.png"), tr("Cu&t"), self)
+    cutAct = QAction(QIcon(":/images/cut.png"), tr("Cu&t"), self)
 //! [21]
     cutAct.setShortcuts(QKeySequence.Cut)
     cutAct.setStatusTip(tr("Cut the current selection's contents to the "
                             "clipboard"))
-    connect(cutAct, SIGNAL("triggered()"), textEdit, SLOT("cut()"))
+    cutAct.triggered.connect(cut)
 
-    copyAct =  QAction(QIcon(":/images/copy.png"), tr("&Copy"), self)
+    copyAct = QAction(QIcon(":/images/copy.png"), tr("&Copy"), self)
     copyAct.setShortcuts(QKeySequence.Copy)
     copyAct.setStatusTip(tr("Copy the current selection's contents to the "
                              "clipboard"))
-    connect(copyAct, SIGNAL("triggered()"), textEdit, SLOT("copy()"))
+    copyAct.triggered.connect(copy)
 
-    pasteAct =  QAction(QIcon(":/images/paste.png"), tr("&Paste"), self)
+    pasteAct = QAction(QIcon(":/images/paste.png"), tr("&Paste"), self)
     pasteAct.setShortcuts(QKeySequence.Paste)
     pasteAct.setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"))
-    connect(pasteAct, SIGNAL("triggered()"), textEdit, SLOT("paste()"))
+    pasteAct.triggered.connect(textEdit.paste)
 
-    aboutAct =  QAction(tr("&About"), self)
+    aboutAct = QAction(tr("&About"), self)
     aboutAct.setStatusTip(tr("Show the application's About box"))
-    connect(aboutAct, SIGNAL("triggered()"), self, SLOT("about()"))
+    aboutAct.triggered.connect(about)
 
 //! [22]
     aboutQtAct =  QAction(tr("About &Qt"), self)
     aboutQtAct.setStatusTip(tr("Show the Qt library's About box"))
-    connect(aboutQtAct, SIGNAL("triggered()"), qApp, SLOT("aboutQt()"))
+    aboutQtAct.triggered.connect(qApp.aboutQt)
 //! [22]
 
 //! [23]
     cutAct.setEnabled(False)
 //! [23] //! [24]
     copyAct.setEnabled(False)
-    connect(textEdit, SIGNAL("copyAvailable(bool)"),
-            cutAct, SLOT("setEnabled(bool)"))
-    connect(textEdit, SIGNAL("copyAvailable(bool)"),
-            copyAct, SLOT("setEnabled(bool)"))
+    textEdit.copyAvailable[bool].connect(cutAct.setEnabled)
+    textEdit.copyAvailable[bool].connect(copyAct.setEnabled)
 }
 //! [24]
 
@@ -298,10 +298,8 @@ def loadFile(self, fileName):
 //! [42] //! [43]
     file = QFile(fileName)
     if !file.open(QFile.ReadOnly | QFile.Text):
-        QMessageBox.warning(self, tr("Application"),
-                             tr("Cannot read file %1:\n%2.")
-                             .arg(fileName)
-                             .arg(file.errorString()))
+        QMessageBox.warning(self, tr("Application"), tr("Cannot read file "
+            "{}:\n{}.".format(fileName, file.errorString())))
         return
 
     in = QTextStream(file)
@@ -309,8 +307,8 @@ def loadFile(self, fileName):
     textEdit.setPlainText(in.readAll())
     QApplication.restoreOverrideCursor()
 
-    setCurrentFile(fileName)
-    statusBar().showMessage(tr("File loaded"), 2000)
+    self.setCurrentFile(fileName)
+    self.statusBar().showMessage(tr("File loaded"), 2000)
 
 //! [43]
 

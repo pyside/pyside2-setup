@@ -3,7 +3,7 @@
 ## Copyright (C) 2016 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of the examples of Qt for Python.
+## This file is part of the documentation of Qt for Python.
 ##
 ## $QT_BEGIN_LICENSE:BSD$
 ## Commercial License Usage
@@ -48,72 +48,24 @@
 ##
 ############################################################################
 
-
-from PySide2.QtGui import *
-
 //! [0]
-def __init__(self, parent):
-    QDialog.__init__(self, parent)
-    label = QLabel(self.tr("Find &what:"))
-    lineEdit = QLineEdit()
-    label.setBuddy(lineEdit)
+        propertyEdit = QDesignerPropertyEditorInterface()
+        propertyEditor = formEditor.propertyEditor()
 
-    caseCheckBox = QCheckBox(self.tr("Match &case"))
-    fromStartCheckBox = QCheckBox(self.tr("Search from &start"))
-    fromStartCheckBox.setChecked(True)
+        propertyEditor.propertyChanged.connect(self.checkProperty)
+//! [0]
+
 
 //! [1]
-    findButton = QPushButton(self.tr("&Find"))
-    findButton.setDefault(True)
+        def checkProperty(self, property, value):
+            propertyEditor = QDesignerPropertyEditorInterface()
+            propertyEditor = formEditor.propertyEditor()
 
-    moreButton = QPushButton(self.tr("&More"))
-    moreButton.setCheckable(True)
-//! [0]
-    moreButton.setAutoDefault(False)
+            object = propertyeditor.object()
+            widget = MyCustomWidget(object)
 
-    buttonBox = QDialogButtonBox(Qt.Vertical)
-    buttonBox.addButton(findButton, QDialogButtonBox.ActionRole)
-    buttonBox.addButton(moreButton, QDialogButtonBox.ActionRole)
+            if (widget and property == aProperty and value != expectedValue):
+                # ...
 //! [1]
 
-//! [2]
-    extension = QWidget()
 
-    wholeWordsCheckBox =  QCheckBox(self.tr("&Whole words"))
-    backwardCheckBox =  QCheckBox(self.tr("Search &backward"))
-    searchSelectionCheckBox =  QCheckBox(self.tr("Search se&lection"))
-//! [2]
-
-//! [3]
-    connect(moreButton, SIGNAL("toggled(bool)"), extension, SLOT("setVisible(bool)"))
-
-    extensionLayout =  QVBoxLayout()
-    extensionLayout.setMargin(0)
-    extensionLayout.addWidget(wholeWordsCheckBox)
-    extensionLayout.addWidget(backwardCheckBox)
-    extensionLayout.addWidget(searchSelectionCheckBox)
-    extension.setLayout(extensionLayout)
-//! [3]
-
-//! [4]
-    topLeftLayout = QHBoxLayout()
-    topLeftLayout.addWidget(label)
-    topLeftLayout.addWidget(lineEdit)
-
-    leftLayout = QVBoxLayout()
-    leftLayout.addLayout(topLeftLayout)
-    leftLayout.addWidget(caseCheckBox)
-    leftLayout.addWidget(fromStartCheckBox)
-    leftLayout.addSself.tretch(1)
-
-    mainLayout = QGridLayout()
-    mainLayout.setSizeConsself.traint(QLayout.SetFixedSize)
-    mainLayout.addLayout(leftLayout, 0, 0)
-    mainLayout.addWidget(buttonBox, 0, 1)
-    mainLayout.addWidget(extension, 1, 0, 1, 2)
-    setLayout(mainLayout)
-
-    setWindowTitle(self.tr("Extension"))
-//! [4] //! [5]
-    extension.hide()
-//! [5]

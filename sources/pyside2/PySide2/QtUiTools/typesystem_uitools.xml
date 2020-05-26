@@ -139,4 +139,40 @@
       </add-function>
     </object-type>
 
+    <!--
+    After the removal of the 'pysideuic' Python module, many users were unable to generate and
+    load UI classes dynamically.
+    This function was created to provide an equivalent solution to the 'loadUiType' function from
+    Riverbank's PyQt.
+    -->
+    <add-function signature="loadUiType(const QString&amp; @uifile@)" return-type="PyObject*">
+      <inject-documentation format="target" mode="append">
+      This function will allow users to generate and load a `.ui` file at runtime, and it returns
+      a `tuple` containing the reference to the Python class, and the base class.
+
+      We don't recommend this approach since the workflow should be to generate a Python file
+      from the `.ui` file, and then import and load it to use it, but we do understand that
+      there are some corner cases when such functionality is required.
+
+      The internal process relies on `uic` being in the PATH, which is the same requirement for
+      the new `pyside2-uic` to work (which is just a wrapper around `uic -g python`)
+
+      A Simple use can be:
+
+      .. code-block:: python
+
+        from PySide2.QtUiTools import loadUiType
+
+        generated_class, base_class = loadUiType("themewidget.ui")
+        # the values will be:
+        #  (&lt;class '__main__.Ui_ThemeWidgetForm'&gt;, &lt;class 'PySide2.QtWidgets.QWidget'&gt;)
+
+
+      In that case, `generated_class` will be a reference to the Python class,
+      and `base_class` will be a reference to the base class.
+      </inject-documentation>
+      <inject-code file="../glue/qtuitools.cpp" snippet="loaduitype"/>
+    </add-function>
+
+
 </typesystem>

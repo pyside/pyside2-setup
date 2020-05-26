@@ -142,8 +142,7 @@ class ClassInfoPage(QWizardPage):
 
         defaultCtorRadioButton.setChecked(True)
 
-        self.connect(defaultCtorRadioButton, SIGNAL("toggled(bool)"),
-                copyCtorCheckBox, SLOT("setEnabled(bool)"))
+        defaultCtorRadioButton.toggled[bool].connect(copyCtorCheckBox.setEnabled)
 
 //! [11] //! [12]
         registerField("className*", classNameLineEdit)
@@ -201,14 +200,10 @@ class CodeStylePage(QWizardPage):
         baseIncludeLineEdit = QLineEdit()
         baseIncludeLabel.setBuddy(baseIncludeLineEdit)
 
-        self.connect(protectCheckBox, SIGNAL("toggled(bool)"),
-                    macroNameLabel, SLOT("setEnabled(bool)"))
-        self.connect(protectCheckBox, SIGNAL("toggled(bool)"),
-                    macroNameLineEdit, SLOT("setEnabled(bool)"))
-        self.connect(includeBaseCheckBox, SIGNAL("toggled(bool)"),
-                    baseIncludeLabel, SLOT("setEnabled(bool)"))
-        self.connect(includeBaseCheckBox, SIGNAL(toggled(bool)),
-                    baseIncludeLineEdit, SLOT("setEnabled(bool)"))
+        protectCheckBox.toggled[bool].connect(macroNameLabel.setEnabled)
+        protectCheckBox.toggled[bool].connect(macroNameLineEdit.setEnabled)
+        includeBaseCheckBox.toggled[bool].connect(baseIncludeLabel.setEnabled)
+        includeBaseCheckBox.toggled[bool].connect(baseIncludeLineEdit.setEnabled)
 
         self.registerField("comment", commentCheckBox)
         self.registerField("protect", protectCheckBox)

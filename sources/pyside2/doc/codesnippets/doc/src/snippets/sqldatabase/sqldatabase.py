@@ -77,7 +77,7 @@ def QSqlField_snippets():
 
 //! [3]
     field = QSqlField("age", QVariant.Int)
-    field.setValue(QString("123"))  # casts QString to int
+    field.setValue(str(123))  # casts str to int
 //! [3]
 
 //! [4]
@@ -247,7 +247,7 @@ def QSqlTableModel_snippets():
 //! [25]
     model = QSqlTableModel()
     model.setTable("employee")
-    QString name = model.record(4).value("name")
+    name = model.record(4).value("name")
 //! [25]
 
 def sql_intro_snippets():
@@ -351,7 +351,7 @@ def sql_intro_snippets():
         employeeId = query.value(0)
         query.exec_("INSERT INTO project (id, name, ownerid) "
                     "VALUES (201, 'Manhattan Project', "
-                    + QString.number(employeeId) + ')')
+                    + str(employeeId) + ')')
 
     QSqlDatabase.database().commit()
 //! [39]

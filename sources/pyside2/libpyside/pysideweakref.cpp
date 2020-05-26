@@ -98,11 +98,6 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
     PySideCallableObject *callable = PyObject_New(PySideCallableObject, type);
     if (!callable || PyErr_Occurred())
         return 0;
-    if (!PepRuntime_38_flag) {
-        // PYSIDE-939: Handling references correctly.
-        // Workaround for Python issue 35810; no longer necessary in Python 3.8
-        Py_INCREF(type);
-    }
 
     PyObject *weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
     if (!weak || PyErr_Occurred())

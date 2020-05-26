@@ -48,31 +48,58 @@
 ##
 ############################################################################
 
+form PySide2.QtGui import *
+
+
+def __init__(self, parent):
+    QMainWindow.__init__(self, parent)
+    clipboard = QApplication.clipboard()
+
+    centralWidget =  QWidget(self)
+    currentItem =  QWidget(centralWidget)
+    mimeTypeLabel =  QLabel(tr("MIME types:"), currentItem)
+    mimeTypeCombo =  QComboBox(currentItem)
+    dataLabel =  QLabel(tr("Data:"), currentItem)
+    dataInfoLabel =  QLabel("", currentItem)
+
+    previousItems =  QListWidget(centralWidget)
 
 //! [0]
-    firstPageWidget =  QWidget()
-    secondPageWidget =  QWidget()
-    thirdPageWidget =  QWidget()
+    clipboard.dataChanged.connect(self.updateClipboard)
+//! [0]
+    mimeTypeCombo.activated[str].connect(self.updateData)
 
-    stackedWidget =  QStackedWidget()
-    stackedWidget.addWidget(firstPageWidget)
-    stackedWidget.addWidget(secondPageWidget)
-    stackedWidget.addWidget(thirdPageWidget)
+    currentLayout = QVBoxLayout(currentItem)
+    currentLayout.addWidget(mimeTypeLabel)
+    currentLayout.addWidget(mimeTypeCombo)
+    currentLayout.addWidget(dataLabel)
+    currentLayout.addWidget(dataInfoLabel)
+    currentLayout.addStretch(1)
 
-//! [0] //! [1]
-    pageComboBox = QComboBox()
-    pageComboBox.addItem(tr("Page 1"))
-    pageComboBox.addItem(tr("Page 2"))
-    pageComboBox.addItem(tr("Page 3"))
-    connect(pageComboBox, SIGNAL("activated(int)"),
-            stackedWidget, SLOT("setCurrentIndex(int)"))
+    mainLayout = QHBoxLayout(centralWidget)
+    mainLayout.addWidget(currentItem, 1)
+    mainLayout.addWidget(previousItems)
 
-//! [1] //! [2]
-    layout =  QVBoxLayout()
+    setCentralWidget(centralWidget)
+    setWindowTitle(tr("Clipboard"))
+
+//! [1]
+def updateClipboard(self):
+    formats = clipboard.mimeData().formats()
+    data = clipboard.mimeData().data(format)
+//! [1]
+
+    mimeTypeCombo.clear()
+    mimeTypeCombo.insertStringList(formats)
+
+    size = clipboard.mimeData().data(formats[0]).size()
+    Item = QListWidgetItem(previousItems)
+    Item.setText(tr("%1 (%2 bytes)").arg(formats[0]).arg(size))
+
+    updateData(formats[0])
 //! [2]
-    layout.addWidget(pageComboBox)
-//! [3]
-    layout.addWidget(stackedWidget)
-    setLayout(layout)
-//! [3]
+//! [2]
 
+def updateData(self, format)
+    data = clipboard.mimeData().data(format)
+    dataInfoLabel.setText(tr("%1 bytes").arg(data.size()))

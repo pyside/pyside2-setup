@@ -109,3 +109,141 @@ registerCustomWidget(%PYARG_1);
 // Avoid calling the original function: %CPPSELF.%FUNCTION_NAME()
 %PYARG_0 = QUiLoaderLoadUiFromFileName(%CPPSELF, %1, %2);
 // @snippet quiloader-load-2
+
+// @snippet loaduitype
+/*
+Arguments:
+    %PYARG_1 (uifile)
+*/
+// 1. Generate the Python code from the UI file
+#ifdef IS_PY3K
+PyObject *strObj = PyUnicode_AsUTF8String(%PYARG_1);
+char *arg1 = PyBytes_AsString(strObj);
+QByteArray uiFileName(arg1);
+Py_DECREF(strObj);
+#else
+QByteArray uiFileName(PyBytes_AsString(%PYARG_1));
+#endif
+
+QFile uiFile(uiFileName);
+
+if (!uiFile.exists()) {
+    qCritical().noquote() << "File" << uiFileName << "does not exists";
+    Py_RETURN_NONE;
+}
+
+if (uiFileName.isEmpty()) {
+    qCritical() << "Error converting the UI filename to QByteArray";
+    Py_RETURN_NONE;
+}
+
+QString uicBin("uic");
+QStringList uicArgs = {"-g", "python", QString::fromUtf8(uiFileName)};
+
+QProcess uicProcess;
+uicProcess.start(uicBin, uicArgs);
+if (!uicProcess.waitForFinished()) {
+    qCritical() << "Cannot run 'uic': " << uicProcess.errorString() << " - "
+                << "Exit status " << uicProcess.exitStatus()
+                << " (" << uicProcess.exitCode() << ")\n"
+                << "Check if 'uic' is in PATH";
+    Py_RETURN_NONE;
+}
+QByteArray uiFileContent = uicProcess.readAllStandardOutput();
+QByteArray errorOutput = uicProcess.readAllStandardError();
+
+if (!errorOutput.isEmpty()) {
+    qCritical().noquote() << errorOutput;
+    Py_RETURN_NONE;
+}
+
+// 2. Obtain the 'classname' and the Qt base class.
+QByteArray className;
+QByteArray baseClassName;
+
+// Problem
+// The generated Python file doesn't have the Qt Base class information.
+
+// Solution
+// Use the XML file
+if (!uiFile.open(QIODevice::ReadOnly))
+    Py_RETURN_NONE;
+
+// This will look for the first <widget> tag, e.g.:
+//      <widget class="QWidget" name="ThemeWidgetForm">
+// and then extract the information from "class", and "name",
+// to get the baseClassName and className respectively
+QXmlStreamReader reader(&uiFile);
+while (!reader.atEnd() && baseClassName.isEmpty() && className.isEmpty()) {
+    auto token = reader.readNext();
+    if (token == QXmlStreamReader::StartElement && reader.name() == "widget") {
+        baseClassName = reader.attributes().value(QLatin1String("class")).toUtf8();
+        className = reader.attributes().value(QLatin1String("name")).toUtf8();
+    }
+}
+
+uiFile.close();
+
+if (className.isEmpty() || baseClassName.isEmpty() || reader.hasError()) {
+    qCritical() << "An error occurred when parsing the UI file while looking for the class info "
+                << reader.errorString();
+    Py_RETURN_NONE;
+}
+
+QByteArray pyClassName("Ui_"+className);
+
+PyObject *module = PyImport_ImportModule("__main__");
+PyObject *loc = PyModule_GetDict(module);
+
+// 3. exec() the code so the class exists in the context: exec(uiFileContent)
+// The context of PyRun_SimpleString is __main__.
+// 'Py_file_input' is the equivalent to using exec(), since it will execute
+// the code, without returning anything.
+Shiboken::AutoDecRef codeUi(Py_CompileString(uiFileContent.constData(), "<stdin>", Py_file_input));
+if (codeUi.isNull()) {
+    qCritical() << "Error while compiling the generated Python file";
+    Py_RETURN_NONE;
+}
+PyObject *uiObj = nullptr;
+#ifdef IS_PY3K
+uiObj = PyEval_EvalCode(codeUi, loc, loc);
+#else
+uiObj = PyEval_EvalCode(reinterpret_cast<PyCodeObject *>(codeUi.object()), loc, loc);
+#endif
+
+if (uiObj == nullptr) {
+    qCritical() << "Error while running exec() on the generated code";
+    Py_RETURN_NONE;
+}
+
+// 4. eval() the name of the class on a variable to return
+// 'Py_eval_input' is the equivalent to using eval(), since it will just
+// evaluate an expression.
+Shiboken::AutoDecRef codeClass(Py_CompileString(pyClassName.constData(),"<stdin>", Py_eval_input));
+if (codeClass.isNull()) {
+    qCritical() << "Error while compiling the Python class";
+    Py_RETURN_NONE;
+}
+
+Shiboken::AutoDecRef codeBaseClass(Py_CompileString(baseClassName.constData(), "<stdin>", Py_eval_input));
+if (codeBaseClass.isNull()) {
+    qCritical() << "Error while compiling the base class";
+    Py_RETURN_NONE;
+}
+
+#ifdef IS_PY3K
+PyObject *classObj = PyEval_EvalCode(codeClass, loc, loc);
+PyObject *baseClassObj = PyEval_EvalCode(codeBaseClass, loc, loc);
+#else
+PyObject *classObj = PyEval_EvalCode(reinterpret_cast<PyCodeObject *>(codeClass.object()), loc, loc);
+PyObject *baseClassObj = PyEval_EvalCode(reinterpret_cast<PyCodeObject *>(codeBaseClass.object()), loc, loc);
+#endif
+
+%PYARG_0  = PyTuple_New(2);
+if (%PYARG_0 == nullptr) {
+    qCritical() << "Error while creating the return Tuple";
+    Py_RETURN_NONE;
+}
+PyTuple_SET_ITEM(%PYARG_0, 0, classObj);
+PyTuple_SET_ITEM(%PYARG_0, 1, baseClassObj);
+// @snippet loaduitype

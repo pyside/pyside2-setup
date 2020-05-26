@@ -196,63 +196,63 @@ def createActions(self):
     Act = new QAction(tr("&New"), self)
     Act.setShortcuts(QKeySequence.New)
     Act.setStatusTip(tr("Create a new file"))
-    connect(Act, SIGNAL("triggered()"), self, SLOT("newFile()"))
+    Act.triggered.connect(newFile)
 //! [4]
 
     openAct =  QAction(tr("&Open..."), self)
     openAct.setShortcuts(QKeySequence.Open)
     openAct.setStatusTip(tr("Open an existing file"))
-    connect(openAct, SIGNAL("triggered()"), self, SLOT("open()"))
+    openAct.triggered.connect(open)
 //! [5]
 
     saveAct =  QAction(tr("&Save"), self)
     saveAct.setShortcuts(QKeySequence.Save)
     saveAct.setStatusTip(tr("Save the document to disk"))
-    connect(saveAct, SIGNAL("triggered()"), self, SLOT("save()"))
+    saveAct.triggered.connect(save)
 
     printAct =  QAction(tr("&Print..."), self)
     printAct.setShortcuts(QKeySequence.Print)
     printAct.setStatusTip(tr("Print the document"))
-    connect(printAct, SIGNAL("triggered()"), self, SLOT("print_()"))
+    printAct.triggered.connect(print_)
 
     exitAct =  QAction(tr("E&xit"), self)
     exitAct.setShortcut(tr("Ctrl+Q"))
     exitAct.setStatusTip(tr("Exit the application"))
-    connect(exitAct, SIGNAL("triggered()"), self, SLOT("close()"))
+    exitAct.triggered.connect(close)
 
     undoAct =  QAction(tr("&Undo"), self)
     undoAct.setShortcuts(QKeySequence.Undo)
     undoAct.setStatusTip(tr("Undo the last operation"))
-    connect(undoAct, SIGNAL("triggered()"), self, SLOT("undo()"))
+    undoAct.triggered.connect(undo)
 
     redoAct =  QAction(tr("&Redo"), self)
     redoAct.setShortcuts(QKeySequence.Redo)
     redoAct.setStatusTip(tr("Redo the last operation"))
-    connect(redoAct, SIGNAL("triggered()"), self, SLOT("redo()"))
+    redoAct.triggered.connect(redo)
 
     cutAct =  QAction(tr("Cu&t"), self)
     cutAct.setShortcuts(QKeySequence.Cut)
     cutAct.setStatusTip(tr("Cut the current selection's contents to the "
                             "clipboard"))
-    connect(cutAct, SIGNAL("triggered()"), self, SLOT("cut()"))
+    cutAct.triggered.connect(cut)
 
     copyAct =  QAction(tr("&Copy"), self)
     copyAct.setShortcut(tr("Ctrl+C"))
     copyAct.setStatusTip(tr("Copy the current selection's contents to the "
                              "clipboard"))
-    connect(copyAct, SIGNAL("triggered()"), self, SLOT("copy()"))
+    copyAct.triggered.connect(copy)
 
     pasteAct =  QAction(tr("&Paste"), self)
     pasteAct.setShortcuts(QKeySequence.Paste)
     pasteAct.setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"))
-    connect(pasteAct, SIGNAL("triggered()"), self, SLOT("paste()"))
+    pasteAct.triggered.connect(paste)
 
     boldAct =  QAction(tr("&Bold"), self)
     boldAct.setCheckable(True)
     boldAct.setShortcut(tr("Ctrl+B"))
     boldAct.setStatusTip(tr("Make the text bold"))
-    connect(boldAct, SIGNAL("triggered()"), self, SLOT("bold()"))
+    boldAct.triggered.connect(bold)
 
     QFont boldFont = boldAct.font()
     boldFont.setBold(True)
@@ -262,7 +262,7 @@ def createActions(self):
     italicAct.setCheckable(True)
     italicAct.setShortcut(tr("Ctrl+I"))
     italicAct.setStatusTip(tr("Make the text italic"))
-    connect(italicAct, SIGNAL("triggered()"), self, SLOT("italic()"))
+    italicAct.triggered.connect(italic)
 
     QFont italicFont = italicAct.font()
     italicFont.setItalic(True)
@@ -271,45 +271,44 @@ def createActions(self):
     setLineSpacingAct =  QAction(tr("Set &Line Spacing..."), self)
     setLineSpacingAct.setStatusTip(tr("Change the gap between the lines of a "
                                        "paragraph"))
-    connect(setLineSpacingAct, SIGNAL("triggered()"), self, SLOT("setLineSpacing()"))
+    setLineSpacingAct.triggered.connect(setLineSpacing)
 
     setParagraphSpacingAct =  QAction(tr("Set &Paragraph Spacing..."), self)
     setLineSpacingAct.setStatusTip(tr("Change the gap between paragraphs"))
-    connect(setParagraphSpacingAct, SIGNAL("triggered()"),
-            self, SLOT("setParagraphSpacing()"))
+    setParagraphSpacingAct.triggered.connect(setParagraphSpacing)
 
     aboutAct =  QAction(tr("&About"), self)
     aboutAct.setStatusTip(tr("Show the application's About box"))
-    connect(aboutAct, SIGNAL("triggered()"), self, SLOT("about()"))
+    aboutAct.triggered.connect(about)
 
     aboutQtAct =  QAction(tr("About &Qt"), self)
     aboutQtAct.setStatusTip(tr("Show the Qt library's About box"))
-    connect(aboutQtAct, SIGNAL("triggered()"), qApp, SLOT("aboutQt()"))
-    connect(aboutQtAct, SIGNAL("triggered()"), self, SLOT("aboutQt()"))
+    aboutQtAct.triggered.connect(qApp.aboutQt)
+    aboutQtAct.triggered.connect(aboutQt)
 
     leftAlignAct =  QAction(tr("&Left Align"), self)
     leftAlignAct.setCheckable(True)
     leftAlignAct.setShortcut(tr("Ctrl+L"))
     leftAlignAct.setStatusTip(tr("Left align the selected text"))
-    connect(leftAlignAct, SIGNAL("triggered()"), self, SLOT("leftAlign()"))
+    leftAlignAct.triggered.connect(leftAlign)
 
     rightAlignAct =  QAction(tr("&Right Align"), self)
     rightAlignAct.setCheckable(True)
     rightAlignAct.setShortcut(tr("Ctrl+R"))
     rightAlignAct.setStatusTip(tr("Right align the selected text"))
-    connect(rightAlignAct, SIGNAL("triggered()"), self, SLOT("rightAlign()"))
+    rightAlignAct.triggered.connect(rightAlign)
 
     justifyAct =  QAction(tr("&Justify"), self)
     justifyAct.setCheckable(True)
     justifyAct.setShortcut(tr("Ctrl+J"))
     justifyAct.setStatusTip(tr("Justify the selected text"))
-    connect(justifyAct, SIGNAL("triggered()"), self, SLOT("justify()"))
+    justifyAct.triggered.connect(justify)
 
     centerAct =  QAction(tr("&Center"), self)
     centerAct.setCheckable(True)
     centerAct.setShortcut(tr("Ctrl+E"))
     centerAct.setStatusTip(tr("Center the selected text"))
-    connect(centerAct, SIGNAL("triggered()"), self, SLOT("center()"))
+    centerAct.triggered.connect(center)
 
 //! [6] //! [7]
     alignmentGroup =  QActionGroup(self)

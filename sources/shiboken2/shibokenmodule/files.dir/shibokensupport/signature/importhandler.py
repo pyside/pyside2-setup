@@ -70,7 +70,7 @@ def finish_import(module):
             if func:
                 func(module)
         except Exception as e:
-            name = e.__class__.__name__
+            name = e.__class__.__qualname__
             print(72 * "*")
             print("Error in deprecated.py, ignored:")
             print("    {name}: {e}".format(**locals()))
