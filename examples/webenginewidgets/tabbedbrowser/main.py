@@ -359,9 +359,9 @@ class MainWindow(QMainWindow):
                 del old_download
 
         item.accept()
-        download_widget = download_widget(item)
-        download_widget.removeRequested.connect(self._remove_download_requested,
-                                                Qt.QueuedConnection)
+        download_widget = DownloadWidget(item)
+        download_widget.remove_requested.connect(self._remove_download_requested,
+                                                 Qt.QueuedConnection)
         self.statusBar().addWidget(download_widget)
 
     def _remove_download_requested(self):
