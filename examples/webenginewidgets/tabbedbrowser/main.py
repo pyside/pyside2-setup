@@ -353,7 +353,7 @@ class MainWindow(QMainWindow):
     def _download_requested(self, item):
         # Remove old downloads before opening a new one
         for old_download in self.statusBar().children():
-            if (type(old_download).__name__ == 'download_widget' and
+            if (type(old_download).__name__ == 'DownloadWidget' and
                 old_download.state() != QWebEngineDownloadItem.DownloadInProgress):
                 self.statusBar().removeWidget(old_download)
                 del old_download
