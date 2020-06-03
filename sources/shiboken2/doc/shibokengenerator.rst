@@ -69,7 +69,7 @@ Usage
 
 ::
 
-   shiboken [options] header-file typesystem-file
+   shiboken [options] header-file(s) typesystem-file
 
 
 Options

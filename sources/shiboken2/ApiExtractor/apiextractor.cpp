@@ -82,9 +82,9 @@ void ApiExtractor::setLogDirectory(const QString& logDir)
     m_logDirectory = logDir;
 }
 
-void ApiExtractor::setCppFileName(const QString& cppFileName)
+void ApiExtractor::setCppFileNames(const QFileInfoList &cppFileName)
 {
-    m_cppFileName = cppFileName;
+    m_cppFileNames = cppFileName;
 }
 
 void ApiExtractor::setTypeSystem(const QString& typeSystemFileName)
@@ -182,8 +182,9 @@ bool ApiExtractor::run()
         return false;
     }
 
-    const QString pattern = QDir::tempPath() + QLatin1Char('/') +
-        QFileInfo(m_cppFileName).baseName() + QStringLiteral("_XXXXXX.hpp");
+    const QString pattern = QDir::tempPath() + QLatin1Char('/')
+        + m_cppFileNames.constFirst().baseName()
+        + QStringLiteral("_XXXXXX.hpp");
     QTemporaryFile ppFile(pattern);
     bool autoRemove = !qEnvironmentVariableIsSet("KEEP_TEMP_FILES");
     // make sure that a tempfile can be written
@@ -192,14 +193,16 @@ bool ApiExtractor::run()
             << ": " << qPrintable(ppFile.errorString()) << '\n';
         return false;
     }
-    ppFile.write("#include \"");
-    ppFile.write(m_cppFileName.toLocal8Bit());
-    ppFile.write("\"\n");
+    for (const auto &cppFileName : qAsConst(m_cppFileNames)) {
+        ppFile.write("#include \"");
+        ppFile.write(cppFileName.absoluteFilePath().toLocal8Bit());
+        ppFile.write("\"\n");
+    }
     const QString preprocessedCppFileName = ppFile.fileName();
     ppFile.close();
     m_builder = new AbstractMetaBuilder;
     m_builder->setLogDirectory(m_logDirectory);
-    m_builder->setGlobalHeader(m_cppFileName);
+    m_builder->setGlobalHeaders(m_cppFileNames);
     m_builder->setSkipDeprecated(m_skipDeprecated);
     m_builder->setHeaderPaths(m_includePaths);
     QByteArrayList arguments;
@@ -255,8 +258,8 @@ QDebug operator<<(QDebug d, const ApiExtractor &ae)
     d.nospace();
     if (ReportHandler::debugLevel() >= ReportHandler::FullDebug)
         d.setVerbosity(3); // Trigger verbose output of AbstractMetaClass
-    d << "ApiExtractor(typeSystem=\"" << ae.typeSystem() << "\", cppFileName=\""
-      << ae.cppFileName() << ", ";
+    d << "ApiExtractor(typeSystem=\"" << ae.typeSystem() << "\", cppFileNames=\""
+      << ae.cppFileNames() << ", ";
     ae.m_builder->formatDebug(d);
     d << ')';
     return d;
