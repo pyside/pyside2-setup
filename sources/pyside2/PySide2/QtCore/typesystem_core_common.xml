@@ -2342,6 +2342,9 @@
   </object-type>
   <object-type name="QSemaphoreReleaser" since="5.10"/>
 
+  <value-type name="QSocketDescriptor" since="5.15">
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qsocketdescriptor"/>
+  </value-type>
   <object-type name="QSocketNotifier">
     <enum-type name="Type"/>
     <add-function signature="QSocketNotifier(PyObject*, QSocketNotifier::Type, QObject*)">

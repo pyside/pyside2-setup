@@ -1288,6 +1288,14 @@ QByteArray ba(1 + int(%2), char(0));
 %CPPSELF.%FUNCTION_NAME(Shiboken::String::toCString(%PYARG_1), Shiboken::String::len(%PYARG_1));
 // @snippet qcryptographichash-adddata
 
+// @snippet qsocketdescriptor
+#ifdef WIN32
+using DescriptorType = Qt::HANDLE;
+#else
+using DescriptorType = int;
+#endif
+// @snippet qsocketdescriptor
+
 // @snippet qsocketnotifier
 PyObject *socket = %PYARG_1;
 if (socket != nullptr) {
