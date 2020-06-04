@@ -126,14 +126,14 @@ The offline documentation (QCH) can be viewed using the Qt Creator IDE or Qt Ass
 a standalone application for viewing QCH files.
 
 To view the QCH using Qt Creator, following the instructions outlined in
-`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html`_. If you chose to
+`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html>`_. If you chose to
 use Qt Assistant instead, use the following command to register the QCH file before launching
 Qt Assistant:
 
     assistant -register PySide.qch
 
 .. note:: Qt Assistant renders the QCH content using the QTextBrowser backend, which supports
-   a subset of the CSS sytles only, However, Qt Creator offers an alternative litehtml-based
+   a subset of the CSS styles, However, Qt Creator offers an alternative litehtml-based
    backend, which offers better browsing experience. At the moment, this is not the default
    backend, so you have to select the litehtml backend
    explicitly under the ``General`` tab in ``Qt Creator >> Tools >> Options >> Help``.
