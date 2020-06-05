@@ -1273,6 +1273,7 @@
   </object-type>
 
   <object-type name="QRegExpValidator"/>
+  <object-type name="QRegularExpressionValidator"/>
 
   <object-type name="QStandardItem">
     <enum-type name="ItemType"/>
