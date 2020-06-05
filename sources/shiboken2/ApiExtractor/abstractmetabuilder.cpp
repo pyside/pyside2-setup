@@ -3106,9 +3106,9 @@ AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractM
     return ret;
 }
 
-void AbstractMetaBuilder::setGlobalHeader(const QString& globalHeader)
+void AbstractMetaBuilder::setGlobalHeaders(const QFileInfoList &globalHeaders)
 {
-    d->m_globalHeader = QFileInfo(globalHeader);
+    d->m_globalHeaders = globalHeaders;
 }
 
 void AbstractMetaBuilder::setHeaderPaths(const HeaderPaths &hp)
@@ -3146,23 +3146,26 @@ static bool matchHeader(const QString &headerPath, const QString &fileName)
         && fileName.startsWith(headerPath, caseSensitivity);
 }
 
-void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &fileName) const
+void AbstractMetaBuilderPrivate::setInclude(TypeEntry *te, const QString &path) const
 {
-    auto it = m_resolveIncludeHash.find(fileName);
+    auto it = m_resolveIncludeHash.find(path);
     if (it == m_resolveIncludeHash.end()) {
-        QFileInfo info(fileName);
-        if (m_globalHeader.fileName() == info.fileName())
+        QFileInfo info(path);
+        const QString fileName = info.fileName();
+        if (std::any_of(m_globalHeaders.cbegin(), m_globalHeaders.cend(),
+                        [fileName] (const QFileInfo &fi) {
+                            return fi.fileName() == fileName; })) {
             return;
+        }
 
         int bestMatchLength = 0;
         for (const auto &headerPath : m_headerPaths) {
-            if (headerPath.size() > bestMatchLength && matchHeader(headerPath, fileName))
+            if (headerPath.size() > bestMatchLength && matchHeader(headerPath, path))
                 bestMatchLength = headerPath.size();
         }
         const QString include = bestMatchLength > 0
-            ? fileName.right(fileName.size() - bestMatchLength - 1)
-            : info.fileName();
-        it = m_resolveIncludeHash.insert(fileName, {Include::IncludePath, include});
+            ? path.right(path.size() - bestMatchLength - 1) : fileName;
+        it = m_resolveIncludeHash.insert(path, {Include::IncludePath, include});
     }
     te->setInclude(it.value());
 }
@@ -3187,7 +3190,7 @@ static void debugFormatSequence(QDebug &d, const char *key, const Container& c,
 
 void AbstractMetaBuilder::formatDebug(QDebug &debug) const
 {
-    debug << "m_globalHeader=" << d->m_globalHeader.absoluteFilePath();
+    debug << "m_globalHeader=" << d->m_globalHeaders;
     debugFormatSequence(debug, "globalEnums", d->m_globalEnums, "\n");
     debugFormatSequence(debug, "globalFunctions", d->m_globalFunctions, "\n");
     if (const int scopeCount = d->m_scopes.size()) {

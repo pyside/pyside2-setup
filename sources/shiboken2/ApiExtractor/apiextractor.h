@@ -36,6 +36,7 @@
 #include "typedatabase_typedefs.h"
 #include "typesystem_typedefs.h"
 #include "clangparser/compilersupport.h"
+#include <QFileInfoList>
 #include <QStringList>
 
 class AbstractMetaBuilder;
@@ -64,8 +65,8 @@ public:
 
     void setTypeSystem(const QString& typeSystemFileName);
     QString typeSystem() const { return m_typeSystemFileName; }
-    void setCppFileName(const QString& cppFileName);
-    QString cppFileName() const { return m_cppFileName; }
+    void setCppFileNames(const QFileInfoList &cppFileNames);
+    QFileInfoList cppFileNames() const { return m_cppFileNames; }
     void setSkipDeprecated(bool value);
     void setSuppressWarnings(bool value);
     void setSilent(bool value);
@@ -95,7 +96,7 @@ public:
     bool run();
 private:
     QString m_typeSystemFileName;
-    QString m_cppFileName;
+    QFileInfoList m_cppFileNames;
     HeaderPaths m_includePaths;
     AbstractMetaBuilder* m_builder = nullptr;
     QString m_logDirectory;

@@ -92,7 +92,7 @@ class DownloadWidget(QProgressBar):
         path = self._download_item.path()
         tool_tip = "{}\n{}".format(self._download_item.url().toString(),
                                    QDir.toNativeSeparators(path))
-        total_bytes = self._download_item.total_bytes()
+        total_bytes = self._download_item.totalBytes()
         if total_bytes > 0:
             tool_tip += "\n{}K".format(total_bytes / 1024)
         state = self.state()
@@ -118,11 +118,11 @@ class DownloadWidget(QProgressBar):
     def _launch(self):
         DownloadWidget.open_file(self._download_item.path())
 
-    def mouse_double_click_event(self, event):
+    def mouseDoubleClickEvent(self, event):
         if self.state() == QWebEngineDownloadItem.DownloadCompleted:
             self._launch()
 
-    def context_menu_event(self, event):
+    def contextMenuEvent(self, event):
         state = self.state()
         context_menu = QMenu()
         launch_action = context_menu.addAction("Launch")

@@ -170,7 +170,7 @@ public:
 
     void sortLists();
     AbstractMetaArgumentList reverseList(const AbstractMetaArgumentList &list);
-    void setInclude(TypeEntry *te, const QString &fileName) const;
+    void setInclude(TypeEntry *te, const QString &path) const;
     void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
 
     void fillAddedFunctions(AbstractMetaClass *metaClass);
@@ -197,7 +197,7 @@ public:
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 
     QString m_logDirectory;
-    QFileInfo m_globalHeader;
+    QFileInfoList m_globalHeaders;
     QStringList m_headerPaths;
     mutable QHash<QString, Include> m_resolveIncludeHash;
     bool m_skipDeprecated = false;

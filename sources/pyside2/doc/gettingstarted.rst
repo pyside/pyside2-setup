@@ -63,7 +63,8 @@ Other important options to consider are:
  * ``--reuse-build``, to rebuild only the modified files,
  * ``--openssl=/path/to/openssl/bin``, to use a different path for OpenSSL,
  * ``--standalone``, to copy over the Qt libraries into the final package
-   to make it work on other machines.
+   to make it work on other machines,
+ * ``--doc-build-online``, to build documentation using the online template.
 
 Testing the installation
 -------------------------
@@ -110,7 +111,32 @@ directory, and run::
 
     make apidoc
 
-Finally, you will get a ``html`` directory containing all the generated documentation.
+.. note:: The ``apidoc`` make target builds offline documenation in QCH (Qt Creator Help) format
+   by default. You can switch to building for the online use with the ``--doc-build-online``
+   configure option.
+
+Finally, you will get a ``html`` directory containing all the generated documentation. The offline
+help files, ``PySide.qch`` and ``Shiboken.qch``, can be moved to any directory of your choice. You
+can find ``Shiboken.qch`` in the build directory, ``*_build\*_release\shiboken2\doc\html``.
+
+Viewing offline documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The offline documentation (QCH) can be viewed using the Qt Creator IDE or Qt Assistant, which is
+a standalone application for viewing QCH files.
+
+To view the QCH using Qt Creator, following the instructions outlined in
+`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html>`_. If you chose to
+use Qt Assistant instead, use the following command to register the QCH file before launching
+Qt Assistant:
+
+    assistant -register PySide.qch
+
+.. note:: Qt Assistant renders the QCH content using the QTextBrowser backend, which supports
+   a subset of the CSS styles, However, Qt Creator offers an alternative litehtml-based
+   backend, which offers better browsing experience. At the moment, this is not the default
+   backend, so you have to select the litehtml backend
+   explicitly under the ``General`` tab in ``Qt Creator >> Tools >> Options >> Help``.
 
 Using the internal tools
 ------------------------

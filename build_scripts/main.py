@@ -1059,6 +1059,13 @@ class PysideBuild(_build):
             cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
+        if OPTION["DOC_BUILD_ONLINE"]:
+            log.info("Output format will be HTML")
+            cmake_cmd.append("-DDOC_OUTPUT_FORMAT=html")
+        else:
+            log.info("Output format will be qthelp")
+            cmake_cmd.append("-DDOC_OUTPUT_FORMAT=qthelp")
+
         if not OPTION["SKIP_CMAKE"]:
             log.info("Configuring module {} ({})...".format(extension, module_src_dir))
             if run_process(cmake_cmd) != 0:

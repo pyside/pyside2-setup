@@ -1,7 +1,14 @@
 Shiboken
 ********
 
-Shiboken is a fundamental piece on the `Qt for Python`_ project that serves two purposes:
+.. ifconfig:: output_format == 'html'
+
+   Shiboken is a fundamental piece on the `Qt for Python <../index.html>`_ project that serves two purposes:
+
+.. ifconfig:: output_format == 'qthelp'
+
+   Shiboken is a fundamental piece on the `Qt for Python <../pyside2/index.html>`_ project that serves two purposes:
+
 
 * Generator_: Extract information from C or C++ headers and generate CPython_ code that allow
   to bring C or C++ projects to Python. This process uses a library called ApiExtractor_ which
@@ -9,7 +16,6 @@ Shiboken is a fundamental piece on the `Qt for Python`_ project that serves two 
 * Module_: An utility Python module that exposed new Python types, functions to handle pointers,
   among other things, that is written in CPython_ and can use independently of the generator.
 
-.. _`Qt for Python`: ../index.html
 .. _Generator: shibokengenerator.html
 .. _Module: shibokenmodule.html
 .. _CPython: https://github.com/python/cpython

@@ -3,12 +3,12 @@ Expenses Tool Tutorial
 ######################
 
 In this tutorial you will learn the following concepts:
-* creating user interfaces programatically,
-* layouts and widgets,
-* overloading Qt classes,
-* connecting signal and slots,
-* interacting with QWidgets,
-* and building your own application.
+ * creating user interfaces programatically,
+ * layouts and widgets,
+ * overloading Qt classes,
+ * connecting signal and slots,
+ * interacting with QWidgets,
+ * and building your own application.
 
 The requirements:
  * A simple window for the application

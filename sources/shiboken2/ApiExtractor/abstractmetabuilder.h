@@ -35,6 +35,8 @@
 
 #include "clangparser/compilersupport.h"
 
+#include <QFileInfoList>
+
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class AbstractMetaBuilderPrivate;
@@ -85,7 +87,7 @@ public:
     *   so any class declared under this header wont have the include file
     *   filled.
     */
-    void setGlobalHeader(const QString& globalHeader);
+    void setGlobalHeaders(const QFileInfoList& globalHeaders);
     void setHeaderPaths(const HeaderPaths &h);
 
     void setSkipDeprecated(bool value);
