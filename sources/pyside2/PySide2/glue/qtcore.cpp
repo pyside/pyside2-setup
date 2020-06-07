@@ -587,6 +587,14 @@ Py_END_ALLOW_THREADS
 PySide::runCleanupFunctions();
 // @snippet moduleshutdown
 
+// @snippet qt-qenum
+%PYARG_0 = PySide::QEnum::QEnumMacro(%1, false);
+// @snippet qt-qenum
+
+// @snippet qt-qflag
+%PYARG_0 = PySide::QEnum::QEnumMacro(%1, true);
+// @snippet qt-qflag
+
 // @snippet qt-pysideinit
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "unicode");
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");

@@ -43,6 +43,7 @@ set(libpyside_SRC
     signalmanager.cpp
     globalreceiverv2.cpp
     pysideclassinfo.cpp
+    pysideqenum.cpp
     pysidemetafunction.cpp
     pysidesignal.cpp
     pysideslot.cpp
@@ -125,6 +126,7 @@ endif()
 set(libpyside_HEADERS
     dynamicqmetaobject.h
     pysideclassinfo.h
+    pysideqenum.h
     pysidemacros.h
     signalmanager.h
     pyside.h

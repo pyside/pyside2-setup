@@ -486,7 +486,7 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
     }
 }
 
-PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
+static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
     // Check if all bases are new style before calling type.tp_new
     // Was causing gc assert errors in test_bug704.py when
@@ -513,7 +513,8 @@ PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *k
 #ifndef IS_PY3K
         if (PyClass_Check(baseType)) {
             PyErr_Format(PyExc_TypeError, "Invalid base class used in type %s. "
-                "PySide only support multiple inheritance from python new style class.", metatype->tp_name);
+                "PySide only supports multiple inheritance from Python new style classes.",
+                metatype->tp_name);
             return 0;
         }
 #endif
@@ -579,7 +580,6 @@ PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *k
         if (PepType_SOTP(base)->subtype_init)
             PepType_SOTP(base)->subtype_init(newType, args, kwds);
     }
-
     return reinterpret_cast<PyObject *>(newType);
 }
 

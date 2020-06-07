@@ -668,6 +668,22 @@ PyImport_GetModule(PyObject *name)
 }
 
 #endif // PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
+
+/*****************************************************************************
+ *
+ * Python 2 incompatibilities
+ *
+ * This is incompatibly implemented as macro in Python 2.
+ */
+#if PY_VERSION_HEX < 0x03000000
+
+PyObject *PepMapping_Items(PyObject *o)
+{
+    return PyObject_CallMethod(o, const_cast<char *>("items"), NULL);
+}
+
+#endif
+
 /*****************************************************************************
  *
  * Extra support for name mangling

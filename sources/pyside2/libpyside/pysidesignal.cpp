@@ -54,7 +54,6 @@
 #include <utility>
 
 #define QT_SIGNAL_SENTINEL '2'
-#define PyEnumMeta_Check(x) (strcmp(Py_TYPE(arg)->tp_name, "EnumMeta") == 0)
 
 namespace PySide {
 namespace Signal {

@@ -41,6 +41,7 @@
 #define SBKPYTHON_H
 
 #include "sbkversion.h"
+#define PyEnumMeta_Check(x) (strcmp(Py_TYPE(x)->tp_name, "EnumMeta") == 0)
 
 // Qt's "slots" macro collides with the "slots" member variables
 // used in some Python structs. For compilers that support push_macro,
