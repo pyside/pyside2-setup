@@ -227,7 +227,8 @@ qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5.11/'
 qt_documentation_website_prefixes['5.11'] = 'http://doc.qt.io/qt-5.11/'
 qt_documentation_website_prefixes['5.12'] = 'http://doc.qt.io/qt-5.12/'
 qt_documentation_website_prefixes['5.13'] = 'http://doc.qt.io/qt-5.13/'
-qt_documentation_website_prefixes['5.14'] = 'http://doc.qt.io/qt-5/'
+qt_documentation_website_prefixes['5.14'] = 'http://doc.qt.io/qt-5.14/'
+qt_documentation_website_prefixes['5.15'] = 'http://doc.qt.io/qt-5/'
 qt_documentation_website_prefixes['dev'] = 'http://doc-snapshots.qt.io/qt5-dev/'
 
 
@@ -250,8 +251,8 @@ parser.add_argument("module",
                     help="the Qt module for which to get the missing types")
 parser.add_argument("--qt-version",
                     "-v",
-                    default='5.12',
-                    choices=['5.6', '5.9', '5.11', '5.12', '5.13', '5.14', 'dev'],
+                    default='5.15',
+                    choices=['5.6', '5.9', '5.11', '5.12', '5.13', '5.14', '5.15', 'dev'],
                     type=str,
                     dest='version',
                     help="the Qt version to use to check for types")
