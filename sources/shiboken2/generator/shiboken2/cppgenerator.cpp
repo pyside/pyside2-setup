@@ -745,18 +745,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     if (metaClass->isPolymorphic() && metaClass->baseClass())
         writeTypeDiscoveryFunction(s, metaClass);
 
-
-    for (AbstractMetaEnum *cppEnum : qAsConst(classEnums)) {
-        if (cppEnum->isAnonymous() || cppEnum->isPrivate())
-            continue;
-
-        bool hasFlags = cppEnum->typeEntry()->flags();
-        if (hasFlags) {
-            writeFlagsMethods(s, cppEnum);
-            writeFlagsNumberMethodsDefinition(s, cppEnum);
-            s << Qt::endl;
-        }
-    }
+    writeFlagsNumberMethodsDefinitions(s, classEnums);
     s << Qt::endl;
 
     writeConverterFunctions(s, metaClass, classContext);
@@ -5082,6 +5071,17 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
     s << "};\n\n";
 }
 
+void CppGenerator::writeFlagsNumberMethodsDefinitions(QTextStream &s, const AbstractMetaEnumList &enums)
+{
+    for (AbstractMetaEnum *e : enums) {
+        if (!e->isAnonymous() && !e->isPrivate() && e->typeEntry()->flags()) {
+            writeFlagsMethods(s, e);
+            writeFlagsNumberMethodsDefinition(s, e);
+            s << '\n';
+        }
+    }
+}
+
 void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
                                             const QString &pyOpName, const QString &cppOpName)
 {
@@ -5922,6 +5922,9 @@ bool CppGenerator::finishGeneration()
             s << converterImpl << Qt::endl;
             s << "} // namespace Shiboken\n\n";
         }
+
+        writeFlagsNumberMethodsDefinitions(s, globalEnums);
+        s << '\n';
     }
 
     const QStringList &requiredModules = typeDb->requiredTargetImports();

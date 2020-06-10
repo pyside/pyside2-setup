@@ -60,6 +60,12 @@
             </modify-argument>
         </modify-function>
     </object-type>
+
+    <namespace-type name="FlagsNamespace" visible="no">
+        <enum-type name="Option" flags="Options"/>
+        <object-type name="ClassForEnum" />
+    </namespace-type>
+
     <suppress-warning text="type 'QPyTextObject' is specified in typesystem, but not defined. This could potentially lead to compilation errors." />
     <!-- Qt5: I never really understood this warning. Probably it is because there
         is no way to instantiate the class. Anyway, why must this class emit this warning?

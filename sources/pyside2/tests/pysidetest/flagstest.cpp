@@ -26,13 +26,11 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDETEST_GLOBAL_H
-#define PYSIDETEST_GLOBAL_H
-
-// PySide global.h file
-#include "testobject.h"
-#include "testview.h"
 #include "flagstest.h"
-#include "hiddenobject.h"
 
-#endif // PYSIDETEST_GLOBAL_H
+namespace FlagsNamespace
+{
+    ClassForEnum::ClassForEnum(FlagsNamespace::Options) {}
+
+    ClassForEnum::~ClassForEnum() = default;
+}
