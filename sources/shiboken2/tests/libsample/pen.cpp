@@ -65,3 +65,7 @@ int Pen::ctorType()
 {
     return m_ctor;
 }
+
+void Pen::drawLine(int x1, int y1, int x2, int y2, RenderHints renderHints)
+{
+}
