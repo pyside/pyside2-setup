@@ -49,10 +49,15 @@ class LIBSAMPLE_API Pen
 public:
     enum { EmptyCtor, EnumCtor, ColorCtor, CopyCtor };
 
+    enum  RenderHints { None = 0, Antialiasing = 0x1, TextAntialiasing = 0x2 };
+
     Pen();
     Pen(SampleNamespace::Option option);
     Pen(const Color& color);
     Pen(const Pen& pen);
+
+    // PYSIDE-1325, default initializer
+    void drawLine(int x1, int y1, int x2, int y2, RenderHints renderHints = {});
 
     int ctorType();
 private:
