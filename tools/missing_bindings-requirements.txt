@@ -1,0 +1,7 @@
+pyside2
+pyqt5
+beautifulsoup4
+pyqt3d
+pyqtchart
+pyqtdatavisualization
+pyqtwebengine

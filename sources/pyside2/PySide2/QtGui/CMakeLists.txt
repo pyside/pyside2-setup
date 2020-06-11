@@ -138,6 +138,7 @@ ${QtGui_GEN_DIR}/qpytextobject_wrapper.cpp
 ${QtGui_GEN_DIR}/qquaternion_wrapper.cpp
 ${QtGui_GEN_DIR}/qradialgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qregexpvalidator_wrapper.cpp
+${QtGui_GEN_DIR}/qregularexpressionvalidator_wrapper.cpp
 ${QtGui_GEN_DIR}/qregion_wrapper.cpp
 ${QtGui_GEN_DIR}/qresizeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qsessionmanager_wrapper.cpp

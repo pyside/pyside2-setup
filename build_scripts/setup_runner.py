@@ -41,6 +41,8 @@ import sys
 import os
 import textwrap
 
+import distutils.log as log
+
 from build_scripts.config import config
 from build_scripts.main import get_package_version, get_setuptools_extension_modules
 from build_scripts.main import cmd_class_dict
@@ -49,6 +51,8 @@ from build_scripts.utils import run_process
 
 from setuptools import setup
 
+if OPTION["VERBOSE_BUILD"]:
+    log.set_verbosity(1)
 
 class SetupRunner(object):
     def __init__(self, orig_argv):
@@ -148,7 +152,7 @@ class SetupRunner(object):
 
         for cmd in self.invocations_list:
             cmd_as_string = " ".join(cmd)
-            print("\nRunning process: {}\n".format(cmd_as_string))
+            log.info("\nRunning setup:  {}\n".format(cmd_as_string))
             exit_code = run_process(cmd)
             if exit_code != 0:
                 msg = textwrap.dedent("""

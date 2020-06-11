@@ -158,7 +158,7 @@ The complete code of this example looks like this:
     import sys
     from PySide2.QtUiTools import QUiLoader
     from PySide2.QtWidgets import QApplication
-    from PySide2.QtCore import QFile
+    from PySide2.QtCore import QFile, QIODevice
 
     if __name__ == "__main__":
         app = QApplication(sys.argv)

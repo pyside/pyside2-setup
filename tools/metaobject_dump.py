@@ -60,8 +60,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     type_name = sys.argv[1]
-    class_instance = eval(type_name + '()')
-    if not class_instance:
-        print('Unable to instantiate {}'.format(type_name))
+    type_instance = eval(type_name)
+    if not type_instance:
+        print('Invalid type {}'.format(type_name))
         sys.exit(1)
-    dump_metaobject(class_instance.metaObject())
+    dump_metaobject(type_instance.staticMetaObject)

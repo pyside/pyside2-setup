@@ -244,7 +244,7 @@ macro(get_python_extension_suffix)
        "
     OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
+  message(STATUS "PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
 endmacro()
 
 macro(get_llvm_config)
@@ -260,7 +260,7 @@ macro(get_llvm_config)
        "
     OUTPUT_VARIABLE LLVM_CONFIG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("LLVM_CONFIG:             " ${LLVM_CONFIG})
+  message(STATUS "LLVM_CONFIG:             " ${LLVM_CONFIG})
 endmacro()
 
 macro(get_python_arch)
@@ -271,7 +271,7 @@ macro(get_python_arch)
        "
     OUTPUT_VARIABLE PYTHON_ARCH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("PYTHON_ARCH:             " ${PYTHON_ARCH})
+  message(STATUS "PYTHON_ARCH:             " ${PYTHON_ARCH})
 endmacro()
 
 macro(shiboken_parse_all_arguments prefix type flags options multiopts)

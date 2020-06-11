@@ -129,6 +129,7 @@ ${QtCore_GEN_DIR}/qsignalmapper_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignaltransition_wrapper.cpp
 ${QtCore_GEN_DIR}/qsize_wrapper.cpp
 ${QtCore_GEN_DIR}/qsizef_wrapper.cpp
+${QtCore_GEN_DIR}/qsocketdescriptor_wrapper.cpp
 ${QtCore_GEN_DIR}/qsocketnotifier_wrapper.cpp
 ${QtCore_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qstate_wrapper.cpp

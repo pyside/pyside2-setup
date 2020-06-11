@@ -83,7 +83,7 @@ find_package(Qt${QT_MAJOR_VERSION} 5.12 REQUIRED COMPONENTS Core)
 add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
-message("result:" "${GL_H}")
+message(STATUS "GL Headers path:" "${GL_H}")
 include(FindQt5Extra)
 
 set(XVFB_EXEC "")

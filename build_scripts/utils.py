@@ -388,7 +388,7 @@ def run_process(args, initial_env=None):
     No output is captured.
     """
     command = " ".join([(" " in x and '"{}"'.format(x) or x) for x in args])
-    log.info("Running process in directory {}: command {}".format(os.getcwd(), command))
+    log.info("In directory {}:\n\tRunning command:  {}".format(os.getcwd(), command))
 
     if initial_env is None:
         initial_env = os.environ

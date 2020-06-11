@@ -12,6 +12,9 @@ __version_info__ = (@BINDING_API_MAJOR_VERSION@, @BINDING_API_MINOR_VERSION@, @B
 def _additional_dll_directories(package_dir):
     # Find shiboken2 relative to the package directory.
     root = os.path.dirname(package_dir)
+    # Check for a flat .zip as deployed by cx_free(PYSIDE-1257)
+    if root.endswith('.zip'):
+        return []
     shiboken2 = os.path.join(root, 'shiboken2')
     if os.path.isdir(shiboken2): # Standard case, only shiboken2 is needed
         return [shiboken2]

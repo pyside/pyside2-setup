@@ -43,6 +43,8 @@
 #include <algorithm>
 #include <iterator>
 
+static bool optJoinNamespaces = false;
+
 static inline QString languageLevelDescription()
 {
     return QLatin1String("C++ Language level (c++11..c++17, default=")
@@ -69,7 +71,6 @@ static const char *primitiveTypes[] = {
 
 static inline QString nameAttribute() { return QStringLiteral("name"); }
 
-static void formatXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem &nsp);
 static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass);
 
 static void formatXmlEnum(QXmlStreamWriter &writer, const EnumModelItem &en)
@@ -79,10 +80,16 @@ static void formatXmlEnum(QXmlStreamWriter &writer, const EnumModelItem &en)
     writer.writeEndElement();
 }
 
+static bool useClass(const ClassModelItem &c)
+{
+    return c->classType() != CodeModel::Union && c->templateParameters().isEmpty()
+        && !c->name().isEmpty(); // No anonymous structs
+}
+
 static void formatXmlScopeMembers(QXmlStreamWriter &writer, const ScopeModelItem &nsp)
 {
     for (const auto &klass : nsp->classes()) {
-        if (klass->classType() != CodeModel::Union && klass->templateParameters().isEmpty())
+        if (useClass(klass))
             formatXmlClass(writer, klass);
     }
     for (const auto &en : nsp->enums())
@@ -95,12 +102,20 @@ static bool isPublicCopyConstructor(const FunctionModelItem &f)
         && f->accessPolicy() == CodeModel::Public && !f->isDeleted();
 }
 
+static void formatXmlLocationComment(QXmlStreamWriter &writer, const CodeModelItem &i)
+{
+    QString comment;
+    QTextStream(&comment) << ' ' << i->fileName() << ':' << i->startLine() << ' ';
+    writer.writeComment(comment);
+}
+
 static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass)
 {
     // Heuristics for value types: check on public copy constructors.
     const auto functions = klass->functions();
     const bool isValueType = std::any_of(functions.cbegin(), functions.cend(),
                                          isPublicCopyConstructor);
+    formatXmlLocationComment(writer, klass);
     writer.writeStartElement(isValueType ? QStringLiteral("value-type")
                                          : QStringLiteral("object-type"));
     writer.writeAttribute(nameAttribute(), klass->name());
@@ -108,10 +123,51 @@ static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass
     writer.writeEndElement();
 }
 
+// Check whether a namespace is relevant for type system
+// output, that is, has non template classes, functions or enumerations.
+static bool hasMembers(const NamespaceModelItem &nsp)
+{
+    if (!nsp->namespaces().isEmpty() || !nsp->enums().isEmpty()
+        || !nsp->functions().isEmpty()) {
+        return true;
+    }
+    const auto classes = nsp->classes();
+    return std::any_of(classes.cbegin(), classes.cend(), useClass);
+}
+
+static void startXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
+{
+    formatXmlLocationComment(writer, nsp);
+    writer.writeStartElement(QStringLiteral("namespace-type"));
+    writer.writeAttribute(nameAttribute(), nsp->name());
+}
+
 static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
 {
-    for (const auto &nested : nsp->namespaces())
-        formatXmlNamespace(writer, nested);
+    auto nestedNamespaces = nsp->namespaces();
+    for (int i = nestedNamespaces.size() - 1; i >= 0; --i) {
+        if (!hasMembers(nestedNamespaces.at(i)))
+            nestedNamespaces.removeAt(i);
+    }
+    while (!nestedNamespaces.isEmpty()) {
+        auto current = nestedNamespaces.takeFirst();
+        startXmlNamespace(writer, current);
+        formatXmlNamespaceMembers(writer, current);
+        if (optJoinNamespaces) {
+            // Write out members of identical namespaces and remove
+            const QString name = current->name();
+            for (int i = 0; i < nestedNamespaces.size(); ) {
+                if (nestedNamespaces.at(i)->name() == name) {
+                    formatXmlNamespaceMembers(writer, nestedNamespaces.at(i));
+                    nestedNamespaces.removeAt(i);
+                } else {
+                    ++i;
+                }
+            }
+        }
+        writer.writeEndElement();
+    }
+
     for (auto func : nsp->functions()) {
         const QString signature = func->typeSystemSignature();
         if (!signature.contains(QLatin1String("operator"))) { // Skip free operators
@@ -121,14 +177,6 @@ static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceM
         }
     }
     formatXmlScopeMembers(writer, nsp);
-}
-
-static void formatXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
-{
-    writer.writeStartElement(QStringLiteral("namespace-type"));
-    writer.writeAttribute(nameAttribute(), nsp->name());
-    formatXmlNamespaceMembers(writer, nsp);
-    writer.writeEndElement();
 }
 
 static void formatXmlOutput(const FileModelItem &dom)
@@ -183,6 +231,10 @@ int main(int argc, char **argv)
                                      QStringLiteral("Display debug output"));
     parser.addOption(debugOption);
 
+    QCommandLineOption joinNamespacesOption({QStringLiteral("j"), QStringLiteral("join-namespaces")},
+                                            QStringLiteral("Join namespaces"));
+    parser.addOption(joinNamespacesOption);
+
     QCommandLineOption languageLevelOption(QStringLiteral("std"),
                                            languageLevelDescription(),
                                            QStringLiteral("level"));
@@ -210,6 +262,8 @@ int main(int argc, char **argv)
             return -2;
         }
     }
+
+    optJoinNamespaces = parser.isSet(joinNamespacesOption);
 
     const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, level, 0);
     if (dom.isNull()) {

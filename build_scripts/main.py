@@ -356,7 +356,7 @@ class PysideInstall(_install):
 
     def run(self):
         _install.run(self)
-        print('*** Install completed ({}s)'.format(elapsed()))
+        print('--- Install completed ({}s)'.format(elapsed()))
 
 
 class PysideDevelop(_develop):
@@ -737,7 +737,7 @@ class PysideBuild(_build):
             _build.run(self)
         else:
             log.info("Skipped preparing and building packages.")
-        print('*** Build completed ({}s)'.format(elapsed()))
+        print('--- Build completed ({}s)'.format(elapsed()))
 
     def log_pre_build_info(self):
         if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():
@@ -748,16 +748,16 @@ class PysideBuild(_build):
             setuptools_install_prefix = OPTION["FINAL_INSTALL_PREFIX"]
         log.info("=" * 30)
         log.info("Package version: {}".format(get_package_version()))
-        log.info("Build type: {}".format(self.build_type))
+        log.info("Build type:  {}".format(self.build_type))
         log.info("Build tests: {}".format(self.build_tests))
         log.info("-" * 3)
-        log.info("Make path: {}".format(self.make_path))
+        log.info("Make path:      {}".format(self.make_path))
         log.info("Make generator: {}".format(self.make_generator))
-        log.info("Make jobs: {}".format(OPTION["JOBS"]))
+        log.info("Make jobs:      {}".format(OPTION["JOBS"]))
         log.info("-" * 3)
-        log.info("setup.py directory: {}".format(self.script_dir))
+        log.info("setup.py directory:      {}".format(self.script_dir))
         log.info("Build scripts directory: {}".format(build_scripts_dir))
-        log.info("Sources directory: {}".format(self.sources_dir))
+        log.info("Sources directory:       {}".format(self.sources_dir))
         log.info(dedent("""
         Building {st_package_name} will create and touch directories
           in the following order:
@@ -767,9 +767,9 @@ class PysideBuild(_build):
             setuptools install directory
               (usually path-installed-python/lib/python*/site-packages/*)
          """).format(st_package_name=config.package_name()))
-        log.info("make build directory: {}".format(self.build_dir))
+        log.info("make build directory:   {}".format(self.build_dir))
         log.info("make install directory: {}".format(self.install_dir))
-        log.info("setuptools build directory: {}".format(self.st_build_dir))
+        log.info("setuptools build directory:   {}".format(self.st_build_dir))
         log.info("setuptools install directory: {}".format(setuptools_install_prefix))
         log.info(dedent("""
         make-installed site-packages directory: {}
@@ -779,15 +779,15 @@ class PysideBuild(_build):
             self.site_packages_dir))
         log.info("-" * 3)
         log.info("Python executable: {}".format(self.py_executable))
-        log.info("Python includes: {}".format(self.py_include_dir))
-        log.info("Python library: {}".format(self.py_library))
-        log.info("Python prefix: {}".format(self.py_prefix))
-        log.info("Python scripts: {}".format(self.py_scripts_dir))
+        log.info("Python includes:   {}".format(self.py_include_dir))
+        log.info("Python library:    {}".format(self.py_library))
+        log.info("Python prefix:     {}".format(self.py_prefix))
+        log.info("Python scripts:    {}".format(self.py_scripts_dir))
         log.info("-" * 3)
-        log.info("Qt qmake: {}".format(self.qtinfo.qmake_command))
+        log.info("Qt qmake:   {}".format(self.qtinfo.qmake_command))
         log.info("Qt version: {}".format(self.qtinfo.version))
-        log.info("Qt bins: {}".format(self.qtinfo.bins_dir))
-        log.info("Qt docs: {}".format(self.qtinfo.docs_dir))
+        log.info("Qt bins:    {}".format(self.qtinfo.bins_dir))
+        log.info("Qt docs:    {}".format(self.qtinfo.docs_dir))
         log.info("Qt plugins: {}".format(self.qtinfo.plugins_dir))
         log.info("-" * 3)
         if sys.platform == 'win32':
@@ -1074,7 +1074,7 @@ class PysideBuild(_build):
             log.info("Reusing old configuration for module {} ({})...".format(
                 extension, module_src_dir))
 
-        log.info("Compiling module {}...".format(extension))
+        log.info("-- Compiling module {}...".format(extension))
         cmd_make = [self.make_path]
         if OPTION["JOBS"]:
             cmd_make.append(OPTION["JOBS"])

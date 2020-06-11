@@ -2321,6 +2321,7 @@
     <value-type name="Color" />
     <value-type name="Pen">
         <enum-type identified-by-value="EnumCtor"/>
+        <enum-type name="RenderHints"/>
     </value-type>
 
     <value-type name="CtorConvRule">

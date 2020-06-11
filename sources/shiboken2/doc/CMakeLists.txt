@@ -1,7 +1,9 @@
+cmake_minimum_required(VERSION 3.1)
+
 find_program(SPHINX sphinx-build DOC "Path to sphinx-build binary.")
 
 if (SPHINX)
-    message("-- sphinx-build - found")
+    message(STATUS "sphinx-build - found")
     configure_file(conf.py.in conf.py @ONLY)
     # conditional tag for sphinx build
     #string(JOIN "_" SPHINX_TAG ${DOC_OUTPUT_FORMAT} "format")
@@ -39,7 +41,7 @@ except:
             VERBATIM)
     endif()
 else()
-    message("-- sphinx-build - not found! doc target disabled")
+    message(WARNING "sphinx-build - not found! doc target disabled")
     if (WIN32)
         # if jom is used and we have no sphinx, then jom will crash.
         # so for windows, we always create a doc target (until jom gets fixed...)

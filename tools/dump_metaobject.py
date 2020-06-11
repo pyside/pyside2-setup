@@ -68,12 +68,18 @@ def _dump_metaobject_helper(meta_obj, indent):
             meta_enum = meta_obj.enumerator(e)
             name = meta_enum.name()
             value_str = ''
+            descr = ''
+            if meta_enum.isFlag():
+                descr += ' flag'
+            if meta_enum.isScoped():
+                descr += ' scoped'
             for k in range(0, meta_enum.keyCount()):
                 if k > 0:
                     value_str += ', '
                 value_str += '{} = {}'.format(meta_enum.key(k),
                                               meta_enum.value(k))
-            print('{}{:4d} {} ({})'.format(indent, e, name, value_str))
+            print('{}{:4d} {}{} ({})'.format(indent, e, name, descr,
+                                             value_str))
 
     property_offset = meta_obj.propertyOffset()
     property_count = meta_obj.propertyCount()
