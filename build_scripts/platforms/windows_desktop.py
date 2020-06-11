@@ -251,7 +251,8 @@ def copy_msvc_redist_files(vars, redist_target_path):
         "vcamp140.dll",
         "vccorlib140.dll",
         "vcomp140.dll",
-        "vcruntime140.dll"
+        "vcruntime140.dll",
+        "vcruntime140_1.dll"
     ]
 
     # Make a directory where the files should be extracted.
