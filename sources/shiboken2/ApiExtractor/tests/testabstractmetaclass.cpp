@@ -588,4 +588,34 @@ void TestAbstractMetaClass::testIsPolymorphic()
     QVERIFY(!a->isPolymorphic());
 }
 
+void TestAbstractMetaClass::testClassTypedefedBaseClass()
+{
+    const char cppCode[] =R"CPP(
+class Base {
+};
+
+using BaseAlias1 = Base;
+using BaseAlias2 = BaseAlias1;
+
+class Derived : public BaseAlias2 {
+};
+)CPP";
+    const char xmlCode[] = R"XML(
+<typesystem package='Foo'>
+    <object-type name='Base'/>
+    <object-type name='Derived'/>
+</typesystem>
+)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
+    QVERIFY(!builder.isNull());
+    AbstractMetaClassList classes = builder->classes();
+    QCOMPARE(classes.count(), 2);
+    auto base = AbstractMetaClass::findClass(classes, QLatin1String("Base"));
+    QVERIFY(base);
+    auto derived = AbstractMetaClass::findClass(classes, QLatin1String("Derived"));
+    QVERIFY(derived);
+    QCOMPARE(derived->baseClasses().value(0), base);
+}
+
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)

@@ -620,27 +620,52 @@ long clang_EnumDecl_isScoped4(BaseVisitor *bv, const CXCursor &cursor)
 }
 #endif // CLANG_NO_ENUMDECL_ISSCOPED
 
+// Resolve declaration and type of a base class
+
+struct TypeDeclaration
+{
+    CXType type;
+    CXCursor declaration;
+};
+
+static TypeDeclaration resolveBaseSpecifier(const CXCursor &cursor)
+{
+    Q_ASSERT(clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier);
+    CXType inheritedType = clang_getCursorType(cursor);
+    CXCursor decl = clang_getTypeDeclaration(inheritedType);
+    if (inheritedType.kind != CXType_Unexposed) {
+        while (true) {
+            auto kind = clang_getCursorKind(decl);
+            if (kind != CXCursor_TypeAliasDecl && kind != CXCursor_TypedefDecl)
+                break;
+            inheritedType = clang_getTypedefDeclUnderlyingType(decl);
+            decl = clang_getTypeDeclaration(inheritedType);
+        }
+    }
+    return {inheritedType, decl};
+}
+
 // Add a base class to the current class from CXCursor_CXXBaseSpecifier
 void BuilderPrivate::addBaseClass(const CXCursor &cursor)
 {
+    Q_ASSERT(clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier);
     // Note: spelling has "struct baseClass", use type
     QString baseClassName;
-    const CXType inheritedType = clang_getCursorType(cursor);
-    if (inheritedType.kind == CXType_Unexposed) {
+    const auto decl = resolveBaseSpecifier(cursor);
+    if (decl.type.kind == CXType_Unexposed) {
         // The type is unexposed when the base class is a template type alias:
         // "class QItemSelection : public QList<X>" where QList is aliased to QVector.
         // Try to resolve via code model.
-        TypeInfo info = createTypeInfo(inheritedType);
+        TypeInfo info = createTypeInfo(decl.type);
         auto parentScope = m_scopeStack.at(m_scopeStack.size() - 2); // Current is class.
         auto resolved = TypeInfo::resolveType(info, parentScope);
         if (resolved != info)
             baseClassName = resolved.toString();
     }
     if (baseClassName.isEmpty())
-        baseClassName = getTypeName(inheritedType);
+        baseClassName = getTypeName(decl.type);
 
-    const CXCursor declCursor = clang_getTypeDeclaration(inheritedType);
-    const CursorClassHash::const_iterator it = m_cursorClassHash.constFind(declCursor);
+    auto it = m_cursorClassHash.constFind(decl.declaration);
     const CodeModel::AccessPolicy access = accessPolicy(clang_getCXXAccessSpecifier(cursor));
     if (it == m_cursorClassHash.constEnd()) {
         // Set unqualified name. This happens in cases like "class X : public std::list<...>"
