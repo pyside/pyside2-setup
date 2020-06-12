@@ -4983,8 +4983,13 @@ void CppGenerator::writeSignatureStrings(QTextStream &s,
     s << "// Multiple signatures have their index \"n:\" in front.\n";
     s << "static const char *" << arrayName << "_SignatureStrings[] = {\n";
     QString line;
-    while (signatureStream.readLineInto(&line))
-        s << INDENT << "R\"CPP(" << line << ")CPP\",\n";
+    while (signatureStream.readLineInto(&line)) {
+        // must anything be escaped?
+        if (line.contains(QLatin1Char('"')) || line.contains(QLatin1Char('\\')))
+            s << INDENT << "R\"CPP(" << line << ")CPP\",\n";
+        else
+            s << INDENT << '"' << line << "\",\n";
+    }
     s << INDENT << NULL_PTR << "}; // Sentinel\n\n";
 }
 
