@@ -95,12 +95,31 @@ void Sbk_object_dealloc(PyObject *self)
 static void SbkObjectTypeDealloc(PyObject *pyObj);
 static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
+static SelectableFeatureHook SelectFeatureSet = nullptr;
+
+void initSelectableFeature(SelectableFeatureHook func)
+{
+    SelectFeatureSet = func;
+}
+
+// PYSIDE-1019: Switch type's tp_dict to the currently active namespace.
+static PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context)
+{
+    auto dict = type->tp_dict;
+    if (dict == NULL)
+        Py_RETURN_NONE;
+    if (SelectFeatureSet != nullptr)
+        dict = SelectFeatureSet(type);
+    return PyDictProxy_New(dict);
+}
+
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
 // explicitly pass __doc__. For __signature__ it _did_ actually work, because
 // it was not existing before. We add them both for clarity.
 static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
     {const_cast<char *>("__signature__"), (getter)Sbk_TypeGet___signature__},
     {const_cast<char *>("__doc__"),       (getter)Sbk_TypeGet___doc__},
+    {const_cast<char *>("__dict__"),      (getter)Sbk_TypeGet___dict__},
     {nullptr}  // Sentinel
 };
 
@@ -121,8 +140,25 @@ static PyObject *SbkObjectType_repr(PyObject *type)
 
 #endif // PY_VERSION_HEX < 0x03000000
 
+// PYSIDE-1019: Switch type's tp_dict to the currently active namespace.
+static PyObject *(*type_getattro)(PyObject *type, PyObject *name);
+
+static PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
+{
+    /*
+     * Note: This `type_getattro` version is only the default that comes
+     * from `PyType_Type.tp_getattro`. This does *not* interfere in any way
+     * with the complex `tp_getattro` of `QObject` and other instances.
+     * What we change here is the meta class of `QObject`.
+     */
+    if (SelectFeatureSet != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+    return type_getattro(reinterpret_cast<PyObject *>(type), name);
+}
+
 static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectTypeDealloc)},
+    {Py_tp_getattro, reinterpret_cast<void *>(mangled_type_getattro)},
     {Py_tp_setattro, reinterpret_cast<void *>(PyObject_GenericSetAttr)},
     {Py_tp_base, static_cast<void *>(&PyType_Type)},
     {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
@@ -235,6 +271,9 @@ PyTypeObject *SbkObjectType_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
+        // PYSIDE-1019: Insert the default tp_getattro explicitly here
+        //              so we can overwrite it a bit.
+        type_getattro = PyType_Type.tp_getattro;
         SbkObjectType_Type_spec.basicsize =
             PepHeapType_SIZE + sizeof(SbkObjectTypePrivate);
         type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkObjectType_Type_spec));

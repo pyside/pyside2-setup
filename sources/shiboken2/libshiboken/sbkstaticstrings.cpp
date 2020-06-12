@@ -52,9 +52,11 @@ namespace Shiboken
 {
 namespace PyName {
 // exported:
+STATIC_STRING_IMPL(dict_ring, "dict_ring")
 STATIC_STRING_IMPL(dumps, "dumps")
 STATIC_STRING_IMPL(loads, "loads")
 STATIC_STRING_IMPL(result, "result")
+STATIC_STRING_IMPL(select_id, "select_id")
 STATIC_STRING_IMPL(value, "value")
 STATIC_STRING_IMPL(values, "values")
 
@@ -75,6 +77,7 @@ STATIC_STRING_IMPL(staticmethod, "staticmethod")
 namespace PyMagicName {
 // exported:
 STATIC_STRING_IMPL(class_, "__class__")
+STATIC_STRING_IMPL(dict, "__dict__")
 STATIC_STRING_IMPL(ecf, "__ecf__")
 STATIC_STRING_IMPL(file, "__file__")
 STATIC_STRING_IMPL(members, "__members__")

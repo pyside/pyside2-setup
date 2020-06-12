@@ -98,7 +98,7 @@ typedef struct _typeobject {
     void *X13; // hashfunc tp_hash;
     ternaryfunc tp_call;
     reprfunc tp_str;
-    void *X16; // getattrofunc tp_getattro;
+    getattrofunc tp_getattro;
     void *X17; // setattrofunc tp_setattro;
     void *X18; // PyBufferProcs *tp_as_buffer;
     unsigned long tp_flags;
@@ -110,7 +110,7 @@ typedef struct _typeobject {
     void *X25; // getiterfunc tp_iter;
     iternextfunc tp_iternext;
     struct PyMethodDef *tp_methods;
-    void *X28; // struct PyMemberDef *tp_members;
+    struct PyMemberDef *tp_members;
     struct PyGetSetDef *tp_getset;
     struct _typeobject *tp_base;
     PyObject *tp_dict;
@@ -530,6 +530,9 @@ extern LIBSHIBOKEN_API PyTypeObject *PepMethodDescr_TypePtr;
 #if PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
 LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
 #endif // PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
+
+// Evaluate a script and return the variable `result`
+LIBSHIBOKEN_API PyObject *PepRun_GetResult(const char *command);
 
 /*****************************************************************************
  *
