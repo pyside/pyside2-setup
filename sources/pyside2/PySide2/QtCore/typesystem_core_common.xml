@@ -1467,6 +1467,7 @@
     <modify-function signature="msleep(unsigned long)" allow-thread="yes"/>
     <modify-function signature="sleep(unsigned long)" allow-thread="yes"/>
     <modify-function signature="usleep(unsigned long)" allow-thread="yes"/>
+    <modify-function signature="wait(QDeadlineTimer)" allow-thread="yes"/>
     <modify-function signature="wait(unsigned long)" allow-thread="yes"/>
     <modify-function signature="yieldCurrentThread()" allow-thread="yes"/>
     <modify-function signature="start(QThread::Priority)" allow-thread="yes">
@@ -2420,7 +2421,9 @@
     </modify-function>
   </object-type>
   <object-type name="QWaitCondition">
+    <modify-function signature="wait(QMutex*,QDeadlineTimer)" allow-thread="yes"/>
     <modify-function signature="wait(QMutex*,unsigned long)" allow-thread="yes"/>
+    <modify-function signature="wait(QReadWriteLock*,QDeadlineTimer)" allow-thread="yes"/>
     <modify-function signature="wait(QReadWriteLock*,unsigned long)" allow-thread="yes"/>
   </object-type>
   <object-type name="QFileSystemWatcher">
