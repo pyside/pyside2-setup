@@ -240,6 +240,7 @@ def prepare_packages_win32(self, vars):
 
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
         copy_qt_artifacts(self, copy_pdbs, vars)
+        copy_msvc_redist_files(vars, "{build_dir}/msvc_redist".format(**vars))
 
 
 def copy_msvc_redist_files(vars, redist_target_path):
@@ -252,7 +253,10 @@ def copy_msvc_redist_files(vars, redist_target_path):
         "vccorlib140.dll",
         "vcomp140.dll",
         "vcruntime140.dll",
-        "vcruntime140_1.dll"
+        "vcruntime140_1.dll",
+        "msvcp140_1.dll",
+        "msvcp140_2.dll",
+        "msvcp140_codecvt_ids.dll"
     ]
 
     # Make a directory where the files should be extracted.
