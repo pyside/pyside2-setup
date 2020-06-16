@@ -1704,10 +1704,10 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
     }
 
     if (usesNamedArguments && !rfunc->isCallOperator())
-        s << INDENT << "int numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);\n";
+        s << INDENT << "const Py_ssize_t numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);\n";
 
     if (initPythonArguments) {
-        s << INDENT << "int numArgs = ";
+        s << INDENT << "const Py_ssize_t numArgs = ";
         if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor() && !pythonFunctionWrapperUsesListOfArguments(overloadData))
             s << "(" << PYTHON_ARG << " == 0 ? 0 : 1);\n";
         else
