@@ -19,6 +19,7 @@ Basic tutorials
     basictutorial/dialog.rst
     basictutorial/uifiles.rst
     basictutorial/qrcfiles.rst
+    basictutorial/widgetstyling.rst
 
 Real use-cases applications
 ---------------------------
