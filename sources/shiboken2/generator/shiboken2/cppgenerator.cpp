@@ -785,6 +785,47 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         + typeEntry->qualifiedCppName() + QLatin1String(" >())->tp_name");
 }
 
+// When writing an overridden method of a wrapper class, write the part
+// calling the C++ function in case no overload in Python exists.
+void CppGenerator::writeVirtualMethodCppCall(QTextStream &s,
+                                             const AbstractMetaFunction *func,
+                                             const QString &funcName,
+                                             const CodeSnipList &snips,
+                                             const AbstractMetaArgument *lastArg,
+                                             const TypeEntry *retType,
+                                             const DefaultValue &defaultReturnExpr)
+{
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
+                       TypeSystem::ShellCode, func, lastArg);
+    }
+
+    if (func->isAbstract()) {
+        s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '"
+            << func->ownerClass()->name() << '.' << funcName
+            << "()' not implemented.\");\n";
+        s << INDENT << "return";
+        if (retType)
+            s << ' ' << defaultReturnExpr.returnValue();
+        s << ";\n";
+        return;
+    }
+
+    s << INDENT;
+    if (retType)
+        s << "return ";
+    s << "this->::" << func->implementingClass()->qualifiedCppName() << "::";
+    writeFunctionCall(s, func, Generator::VirtualCall);
+    s << ";\n";
+    if (retType)
+        return;
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd,
+                       TypeSystem::ShellCode, func, lastArg);
+    }
+    s << INDENT << "return;\n";
+}
+
 void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                                             const AbstractMetaFunction *func,
                                             int cacheIndex)
@@ -803,10 +844,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
     Indentation indentation(INDENT);
 
+    const FunctionModificationList &functionModifications = func->modifications();
     DefaultValue defaultReturnExpr;
     if (retType) {
-        const FunctionModificationList &mods = func->modifications();
-        for (const FunctionModification &mod : mods) {
+        for (const FunctionModification &mod : functionModifications) {
             for (const ArgumentModification &argMod : mod.argument_mods) {
                 if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
                     static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
@@ -854,15 +895,16 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         return;
     }
 
+    const CodeSnipList snips = func->hasInjectedCode()
+        ? func->injectedCodeSnips() : CodeSnipList();
+    const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
+        ?  nullptr : func->arguments().constLast();
+
     //Write declaration/native injected code
-    if (func->hasInjectedCode()) {
-        CodeSnipList snips = func->injectedCodeSnips();
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+    if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode, func, lastArg);
     }
 
-    // PYSIDE-803: Build a boolean cache for unused overrides.
-    bool multi_line = retType == nullptr;  // set to true when using instrumentation
     if (wrapperDiagnostics()) {
         s << INDENT << "std::cerr << ";
 #ifndef Q_CC_MSVC // g++ outputs __FUNCTION__ unqualified
@@ -872,22 +914,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
            << cacheIndex << R"( << "]=" << m_PyMethodCache[)" << cacheIndex
            << R"(] << '\n';)" << '\n';
     }
+    // PYSIDE-803: Build a boolean cache for unused overrides.
+    const bool multi_line = retType == nullptr || !snips.isEmpty() || func->isAbstract();
     s << INDENT << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n");
     {
         Indentation indentation(INDENT);
-        s << INDENT;
-        if (retType)
-            s << "return ";
-        if (!func->isAbstract()) {
-            s << "this->::" << func->implementingClass()->qualifiedCppName() << "::";
-            writeFunctionCall(s, func, Generator::VirtualCall);
-        } else {
-            if (retType)
-                s << ' ' << defaultReturnExpr.returnValue();
-        }
-        if (!retType)
-            s << ";\n" << INDENT << "return";
-        s << ";\n";
+        writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
+                                  defaultReturnExpr);
     }
     if (multi_line)
         s << INDENT << "}\n";
@@ -907,35 +940,12 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     s << INDENT << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n";
     {
         Indentation indentation(INDENT);
-        CodeSnipList snips;
-        if (func->hasInjectedCode()) {
-            snips = func->injectedCodeSnips();
-            const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
-            writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::ShellCode, func, lastArg);
-        }
-
-        if (func->isAbstract()) {
-            s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '";
-            s << func->ownerClass()->name() << '.' << funcName;
-            s << "()' not implemented.\");\n";
-            s << INDENT << "return";
-            if (retType)
-                s << ' ' << defaultReturnExpr.returnValue();
-        } else {
-            s << INDENT << "gil.release();\n";
-            if (useOverrideCaching(func->ownerClass())) {
-                s << INDENT << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
-                s << INDENT;
-            }
-            if (retType)
-                s << "return ";
-            s << "this->::" << func->implementingClass()->qualifiedCppName() << "::";
-            writeFunctionCall(s, func, Generator::VirtualCall);
-            if (!retType)
-                s << ";\n" << INDENT << "return";
-        }
+        s << INDENT << "gil.release();\n";
+        if (useOverrideCaching(func->ownerClass()))
+            s << INDENT << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
+        writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
+                                  defaultReturnExpr);
     }
-    s << ";\n";
     s << INDENT << "}\n\n";  //WS
 
     writeConversionRule(s, func, TypeSystem::TargetLangCode);
@@ -992,8 +1002,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
     bool invalidateReturn = false;
     QSet<int> invalidateArgs;
-    const FunctionModificationList &mods = func->modifications();
-    for (const FunctionModification &funcMod : mods) {
+    for (const FunctionModification &funcMod : functionModifications) {
         for (const ArgumentModification &argMod : funcMod.argument_mods) {
             if (argMod.resetAfterUse && !invalidateArgs.contains(argMod.index)) {
                 invalidateArgs.insert(argMod.index);
@@ -1006,10 +1015,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     }
     s << Qt::endl;
 
-    CodeSnipList snips;
-    if (func->hasInjectedCode()) {
-        snips = func->injectedCodeSnips();
-
+    if (!snips.isEmpty()) {
         if (injectedCodeUsesPySelf(func))
             s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
 
@@ -1100,8 +1106,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     }
 
 
-    const FunctionModificationList &funcMods = func->modifications();
-    for (const FunctionModification &funcMod : funcMods) {
+    for (const FunctionModification &funcMod : functionModifications) {
         for (const ArgumentModification &argMod : funcMod.argument_mods) {
             if (argMod.ownerships.contains(TypeSystem::NativeCode)
                 && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
