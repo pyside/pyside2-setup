@@ -57,6 +57,7 @@ public:
     GilState();
     ~GilState();
     void release();
+    void abandon();
 private:
     PyGILState_STATE m_gstate;
     bool m_locked = false;
