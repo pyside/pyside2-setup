@@ -36,21 +36,9 @@ enum Language {
     TargetLangCode      = 0x0001,
     NativeCode          = 0x0002,
     ShellCode           = 0x0004,
-    ShellDeclaration    = 0x0008,
-    PackageInitializer  = 0x0010,
-    DestructorFunction  = 0x0020,
-    Constructors        = 0x0040,
-    Interface           = 0x0080,
 
     // masks
-    All                 = TargetLangCode
-    | NativeCode
-    | ShellCode
-    | ShellDeclaration
-    | PackageInitializer
-    | Constructors
-    | Interface
-    | DestructorFunction,
+    All                 = TargetLangCode | NativeCode | ShellCode,
 
     TargetLangAndNativeCode   = TargetLangCode | NativeCode
 };
@@ -72,12 +60,7 @@ enum Ownership {
 enum CodeSnipPosition {
     CodeSnipPositionBeginning,
     CodeSnipPositionEnd,
-    CodeSnipPositionAfterThis,
-    // QtScript
     CodeSnipPositionDeclaration,
-    CodeSnipPositionPrototypeInitialization,
-    CodeSnipPositionConstructorInitialization,
-    CodeSnipPositionConstructor,
     CodeSnipPositionAny,
     CodeSnipPositionInvalid
 };

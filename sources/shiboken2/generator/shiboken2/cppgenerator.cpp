@@ -902,7 +902,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
     //Write declaration/native injected code
     if (!snips.isEmpty()) {
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode, func, lastArg);
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration,
+                       TypeSystem::ShellCode, func, lastArg);
     }
 
     if (wrapperDiagnostics()) {
