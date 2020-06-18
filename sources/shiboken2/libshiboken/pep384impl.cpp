@@ -319,9 +319,9 @@ Pep_GetVerboseFlag()
 #ifdef Py_LIMITED_API
 
 int
-PepCode_Get(PyCodeObject *co, const char *name)
+PepCode_Get(PepCodeObject *co, const char *name)
 {
-    PyObject *ob = (PyObject *)co;
+    PyObject *ob = reinterpret_cast<PyObject *>(co);
     PyObject *ob_ret;
     int ret = -1;
 

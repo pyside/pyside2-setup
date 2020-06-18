@@ -70,10 +70,7 @@ class PointerPrimitiveTypeTest(unittest.TestCase):
         self.assertTrue(found)
         ann = sig.parameters["data"].annotation
         self.assertEqual(ann.__args__, (int,))
-        # un-specify this class (forget "int") by setting the _special
-        # flag, so we can check using issubclass (undocumented feature).
-        ann._special = True
-        self.assertTrue(issubclass(ann, typing.Iterable))
+        self.assertTrue(issubclass(ann.__origin__, typing.Iterable))
 
     def testReturnVarSignature(self):
         # signature="getMargins(int*,int*,int*,int*)const">

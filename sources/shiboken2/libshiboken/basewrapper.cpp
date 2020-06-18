@@ -881,7 +881,9 @@ void init()
 
     Conversions::init();
 
+#if PY_VERSION_HEX < 0x03070000
     PyEval_InitThreads();
+#endif
 
     //Init private data
     Pep384_Init();
