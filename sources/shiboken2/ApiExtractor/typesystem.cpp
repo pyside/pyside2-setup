@@ -289,6 +289,20 @@ QString CodeSnipAbstract::fixSpaces(QString code)
     return code;
 }
 
+// Prepend a line to the code, observing indentation
+void CodeSnipAbstract::prependCode(QString *code, QString firstLine)
+{
+    while (!code->isEmpty() && code->front() == QLatin1Char('\n'))
+        code->remove(0, 1);
+    if (!code->isEmpty() && code->front().isSpace()) {
+        const int indent = firstNonBlank(*code);
+        firstLine.prepend(QString(indent, QLatin1Char(' ')));
+    }
+    if (!firstLine.endsWith(QLatin1Char('\n')))
+        firstLine += QLatin1Char('\n');
+    code->prepend(firstLine);
+}
+
 QString CodeSnipFragment::code() const
 {
     return m_instance ? m_instance->expandCode() : m_code;

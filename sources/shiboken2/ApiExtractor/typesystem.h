@@ -127,6 +127,7 @@ public:
 
     static QString fixSpaces(QString code);
     static QString dedent(const QString &code);
+    static void prependCode(QString *code, QString firstLine);
 };
 
 class CustomFunction : public CodeSnipAbstract

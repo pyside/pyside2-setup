@@ -2857,8 +2857,9 @@ void CppGenerator::writeCppToPythonFunction(QTextStream &s, const QString &code,
 
 static void replaceCppToPythonVariables(QString &code, const QString &typeName)
 {
-    code.prepend(QLatin1String("auto &cppInRef = *reinterpret_cast<")
-                 + typeName + QLatin1String(" *>(const_cast<void *>(cppIn));\n"));
+    const QString line = QLatin1String("auto &cppInRef = *reinterpret_cast<")
+        + typeName + QLatin1String(" *>(const_cast<void *>(cppIn));");
+    CodeSnipAbstract::prependCode(&code, line);
     code.replace(QLatin1String("%INTYPE"), typeName);
     code.replace(QLatin1String("%OUTTYPE"), QLatin1String("PyObject *"));
     code.replace(QLatin1String("%in"), QLatin1String("cppInRef"));
@@ -3032,11 +3033,10 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s, const Abs
     }
     // Python to C++ conversion function.
     QString cppTypeName = getFullTypeNameWithoutModifiers(containerType);
-    QString code;
-    QTextStream c(&code);
-    c << INDENT << "auto &cppOutRef = *reinterpret_cast<"
-        << cppTypeName << " *>(cppOut);\n";
-    code.append(toCppConversions.constFirst()->conversion());
+    QString code = toCppConversions.constFirst()->conversion();
+    const QString line = QLatin1String("auto &cppOutRef = *reinterpret_cast<")
+        + cppTypeName + QLatin1String(" *>(cppOut);");
+    CodeSnipAbstract::prependCode(&code, line);
     for (int i = 0; i < containerType->instantiations().count(); ++i) {
         const AbstractMetaType *type = containerType->instantiations().at(i);
         QString typeName = getFullTypeName(type);
