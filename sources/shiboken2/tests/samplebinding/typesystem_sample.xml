@@ -44,15 +44,15 @@
 
     <inject-code class="native" position="beginning">
     static bool Check2TupleOfNumbers(PyObject* pyIn) {
-	if (!PySequence_Check(pyIn) || !(PySequence_Size(pyIn) == 2))
-	    return false;
-	Shiboken::AutoDecRef pyReal(PySequence_GetItem(pyIn, 0));
-	if (!SbkNumber_Check(pyReal))
-	    return false;
-	Shiboken::AutoDecRef pyImag(PySequence_GetItem(pyIn, 1));
-	if (!SbkNumber_Check(pyImag))
-	    return false;
-	return true;
+        if (!PySequence_Check(pyIn) || !(PySequence_Size(pyIn) == 2))
+            return false;
+        Shiboken::AutoDecRef pyReal(PySequence_GetItem(pyIn, 0));
+        if (!SbkNumber_Check(pyReal))
+            return false;
+        Shiboken::AutoDecRef pyImag(PySequence_GetItem(pyIn, 1));
+        if (!SbkNumber_Check(pyImag))
+            return false;
+        return true;
     }
     </inject-code>
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
@@ -70,8 +70,8 @@
                 %out = %OUTTYPE(real, imag);
                 </add-conversion>
                 <add-conversion type="PySequence" check="Check2TupleOfNumbers(%in)">
-		Shiboken::AutoDecRef pyReal(PySequence_GetItem(%in, 0));
-		Shiboken::AutoDecRef pyImag(PySequence_GetItem(%in, 1));
+                Shiboken::AutoDecRef pyReal(PySequence_GetItem(%in, 0));
+                Shiboken::AutoDecRef pyImag(PySequence_GetItem(%in, 1));
                 double real = %CONVERTTOCPP[double](pyReal);
                 double imag  = %CONVERTTOCPP[double](pyImag);
                 %out = %OUTTYPE(real, imag);
