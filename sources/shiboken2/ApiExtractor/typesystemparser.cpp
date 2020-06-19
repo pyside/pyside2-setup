@@ -149,7 +149,7 @@ static QString extractSnippet(const QString &code, const QString &snippetLabel)
         } else if (useLine)
             result += line.toString() + QLatin1Char('\n');
     }
-    return result;
+    return CodeSnipAbstract::fixSpaces(result);
 }
 
 template <class EnumType, Qt::CaseSensitivity cs = Qt::CaseInsensitive>
@@ -2475,7 +2475,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
            "// START of custom code block [file: "
         << source << "]\n"
         << extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel)
-        << "\n// END of custom code block [file: " << source
+        << "// END of custom code block [file: " << source
         << "]\n// ========================================================================\n";
     snip->addCode(content);
     return true;

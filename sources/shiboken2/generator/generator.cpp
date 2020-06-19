@@ -558,7 +558,9 @@ QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
     Q_ASSERT(emptyLine.isValid());
 
     for (QString line : lst) {
-        if (!line.isEmpty() && !emptyLine.match(line).hasMatch()) {
+        if (line.startsWith(QLatin1Char('#'))) {
+            s << line; // Do not indent preprocessor lines
+        } else if (!line.isEmpty() && !emptyLine.match(line).hasMatch()) {
             while (line.constEnd()->isSpace())
                 line.chop(1);
             int limit = 0;

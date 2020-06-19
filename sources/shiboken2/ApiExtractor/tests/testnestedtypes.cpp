@@ -69,7 +69,7 @@ void TestNestedTypes::testNestedTypesModifications()
     QCOMPARE(ins->functions().count(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().count(), 1);
     CodeSnip snip = ins->typeEntry()->codeSnips().first();
-    QCOMPARE(snip.code(), QLatin1String("custom_code1();"));
+    QCOMPARE(snip.code().trimmed(), QLatin1String("custom_code1();"));
 
     AbstractMetaFunction* addedFunc = ins->functions().first();
     QVERIFY(addedFunc->isUserAdded());
@@ -80,7 +80,7 @@ void TestNestedTypes::testNestedTypesModifications()
     QCOMPARE(addedFunc->modifications().size(), 1);
     QVERIFY(addedFunc->modifications().first().isCodeInjection());
     snip = addedFunc->modifications().first().snips.first();
-    QCOMPARE(snip.code(), QLatin1String("custom_code2();"));
+    QCOMPARE(snip.code().trimmed(), QLatin1String("custom_code2();"));
 
     const AbstractMetaClass *sc = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
     QVERIFY(ins);

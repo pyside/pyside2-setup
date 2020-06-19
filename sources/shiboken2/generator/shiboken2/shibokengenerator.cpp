@@ -1755,7 +1755,7 @@ void ShibokenGenerator::writeClassCodeSnips(QTextStream &s,
     processClassCodeSnip(code, context);
     s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection\n";
+    s << INDENT << "// End of code injection\n\n";
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream &s,
@@ -1769,7 +1769,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     processCodeSnip(code);
     s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection\n";
+    s << INDENT << "// End of code injection\n\n";
 }
 
 void ShibokenGenerator::writeCodeSnips(QTextStream &s,
@@ -1996,7 +1996,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     processCodeSnip(code);
     s << INDENT << "// Begin code injection\n";
     s << code;
-    s << INDENT << "// End of code injection\n";
+    s << INDENT << "// End of code injection\n\n";
 }
 
 // Returns true if the string is an expression,

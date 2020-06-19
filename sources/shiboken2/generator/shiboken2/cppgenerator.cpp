@@ -859,7 +859,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         CodeSnipList snips = func->injectedCodeSnips();
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode, func, lastArg);
-        s << Qt::endl;
     }
 
     // PYSIDE-803: Build a boolean cache for unused overrides.
@@ -913,7 +912,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
             snips = func->injectedCodeSnips();
             const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
             writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::ShellCode, func, lastArg);
-            s << Qt::endl;
         }
 
         if (func->isAbstract()) {
@@ -1017,7 +1015,6 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
-        s << Qt::endl;
     }
 
     if (!injectedCodeCallsPythonOverride(func)) {
@@ -1349,7 +1346,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
             << INDENT << "if (sbkType && Shiboken::ObjectType::hasSpecialCastFunction(sbkType)) {\n"
             << INDENT << "    typeName = typeNameOf(tCppIn);\n"
             << INDENT << "    changedTypeName = true;\n"
-            << INDENT << " }\n"
+            << INDENT << "}\n"
             << INDENT << "PyObject *result = Shiboken::Object::newObject(" << cpythonType
             <<           ", const_cast<void *>(cppIn), false, /* exactType */ changedTypeName, typeName);\n"
             << INDENT << "if (changedTypeName)\n"
@@ -3233,7 +3230,6 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         }
 
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func, lastArg);
-        s << Qt::endl;
     }
 
     writeConversionRule(s, func, TypeSystem::NativeCode);
@@ -3524,10 +3520,8 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         }
     }
 
-    if (func->hasInjectedCode() && !func->isConstructor()) {
-        s << Qt::endl;
+    if (func->hasInjectedCode() && !func->isConstructor())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func, lastArg);
-    }
 
     bool hasReturnPolicy = false;
 
@@ -5687,10 +5681,8 @@ bool CppGenerator::finishGeneration()
     const CodeSnipList snips = moduleEntry->codeSnips();
 
     // module inject-code native/beginning
-    if (!snips.isEmpty()) {
+    if (!snips.isEmpty())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode);
-        s << Qt::endl;
-    }
 
     // cleanup staticMetaObject attribute
     if (usePySideExtensions()) {
@@ -5821,10 +5813,8 @@ bool CppGenerator::finishGeneration()
 
     ErrorCode errorCode(QLatin1String("SBK_MODULE_INIT_ERROR"));
     // module inject-code target/beginning
-    if (!snips.isEmpty()) {
+    if (!snips.isEmpty())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode);
-        s << Qt::endl;
-    }
 
     for (const QString &requiredModule : requiredModules) {
         s << INDENT << "{\n";
@@ -5926,16 +5916,12 @@ bool CppGenerator::finishGeneration()
     s << INDENT << "}\n";
 
     // module inject-code target/end
-    if (!snips.isEmpty()) {
+    if (!snips.isEmpty())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode);
-        s << Qt::endl;
-    }
 
     // module inject-code native/end
-    if (!snips.isEmpty()) {
+    if (!snips.isEmpty())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
-        s << Qt::endl;
-    }
 
     if (usePySideExtensions()) {
         for (AbstractMetaEnum *metaEnum : qAsConst(globalEnums))

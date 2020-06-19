@@ -115,7 +115,7 @@ class CodeSnipAbstract
 public:
     QString code() const;
 
-    void addCode(const QString &code) { codeList.append(CodeSnipFragment(code)); }
+    void addCode(const QString &code);
     void addCode(const QStringRef &code) { addCode(code.toString()); }
 
     void addTemplateInstance(TemplateInstance *ti)
@@ -124,6 +124,9 @@ public:
     }
 
     QVector<CodeSnipFragment> codeList;
+
+    static QString fixSpaces(QString code);
+    static QString dedent(const QString &code);
 };
 
 class CustomFunction : public CodeSnipAbstract
@@ -510,8 +513,8 @@ public:
     explicit DocModification(TypeSystem::DocModificationMode mode, const QString& signature) :
         m_signature(signature), m_mode(mode) {}
 
-    void setCode(const QString& code) { m_code = code; }
-    void setCode(const QStringRef& code) { m_code = code.toString(); }
+    void setCode(const QString& code);
+    void setCode(const QStringRef& code) { setCode(code.toString()); }
 
     QString code() const
     {

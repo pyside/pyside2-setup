@@ -34,6 +34,7 @@
 #include <QtCore/QSet>
 
 #include <algorithm>
+#include <limits>
 
 static QString strings_Object = QLatin1String("Object");
 static QString strings_String = QLatin1String("String");
@@ -212,7 +213,7 @@ QString TemplateInstance::expandCode() const
     if (!code.startsWith(QLatin1Char('\n')))
         result += QLatin1Char('\n');
     result += code;
-    result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END");
+    result += QLatin1String("\n// TEMPLATE - ") + m_name + QLatin1String(" - END\n");
     return result;
 }
 
@@ -224,6 +225,68 @@ QString CodeSnipAbstract::code() const
         res.append(codeFrag.code());
 
     return res;
+}
+
+void CodeSnipAbstract::addCode(const QString &code)
+{
+    codeList.append(CodeSnipFragment(fixSpaces(code)));
+}
+
+template <class String> // QString, QStringRef
+static inline int firstNonBlank(const String &s)
+{
+    const auto it = std::find_if(s.cbegin(), s.cend(),
+                                 [] (QChar c) { return !c.isSpace(); });
+    return int(it - s.cbegin());
+}
+
+template <class String> // QString, QStringRef
+static inline bool isEmpty(const String &s)
+{
+    return s.isEmpty()
+        || std::all_of(s.cbegin(), s.cend(),
+                       [] (QChar c) { return c.isSpace(); });
+}
+
+QString CodeSnipAbstract::dedent(const QString &code)
+{
+    if (code.isEmpty())
+        return code;
+    // Right trim if indent=0, or trim if single line
+    if (!code.at(0).isSpace() || !code.contains(QLatin1Char('\n')))
+        return code.trimmed();
+    const auto lines = code.splitRef(QLatin1Char('\n'));
+    int spacesToRemove = std::numeric_limits<int>::max();
+    for (const auto &line : lines) {
+        if (!isEmpty(line)) {
+            const int nonSpacePos = firstNonBlank(line);
+            if (nonSpacePos < spacesToRemove)
+                spacesToRemove = nonSpacePos;
+            if (spacesToRemove == 0)
+                return code;
+        }
+    }
+    QString result;
+    for (const auto &line : lines) {
+        if (!isEmpty(line) && spacesToRemove < line.size())
+            result += line.mid(spacesToRemove).toString();
+        result += QLatin1Char('\n');
+    }
+    return result;
+}
+
+QString CodeSnipAbstract::fixSpaces(QString code)
+{
+    code.remove(QLatin1Char('\r'));
+    // Check for XML <tag>\n<space>bla...
+    if (code.startsWith(QLatin1String("\n ")))
+        code.remove(0, 1);
+    while (!code.isEmpty() && code.back().isSpace())
+        code.chop(1);
+    code = dedent(code);
+    if (!code.isEmpty() && !code.endsWith(QLatin1Char('\n')))
+        code.append(QLatin1Char('\n'));
+    return code;
 }
 
 QString CodeSnipFragment::code() const
@@ -1184,3 +1247,8 @@ TypeEntry *ObjectTypeEntry::clone() const
 }
 
 ObjectTypeEntry::ObjectTypeEntry(const ObjectTypeEntry &) = default;
+
+void DocModification::setCode(const QString &code)
+{
+    m_code = CodeSnipAbstract::fixSpaces(code);
+}
