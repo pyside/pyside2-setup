@@ -540,39 +540,12 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
 
 QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
 {
-    // detect number of spaces before the first character
-    const QStringList lst(code.split(QLatin1Char('\n')));
-    static const QRegularExpression nonSpaceRegex(QStringLiteral("[^\\s]"));
-    Q_ASSERT(nonSpaceRegex.isValid());
-    int spacesToRemove = 0;
-    for (const QString &line : lst) {
-        if (!line.trimmed().isEmpty()) {
-            spacesToRemove = line.indexOf(nonSpaceRegex);
-            if (spacesToRemove == -1)
-                spacesToRemove = 0;
-            break;
-        }
-    }
-
-    static const QRegularExpression emptyLine(QStringLiteral("^\\s*[\\r]?[\\n]?\\s*$"));
-    Q_ASSERT(emptyLine.isValid());
-
-    for (QString line : lst) {
-        if (line.startsWith(QLatin1Char('#'))) {
-            s << line; // Do not indent preprocessor lines
-        } else if (!line.isEmpty() && !emptyLine.match(line).hasMatch()) {
-            while (line.constEnd()->isSpace())
-                line.chop(1);
-            int limit = 0;
-            for(int i = 0; i < spacesToRemove; ++i) {
-                if (!line[i].isSpace())
-                    break;
-                limit++;
-            }
-
-            s << indentor << line.remove(0, limit);
-        }
-        s << Qt::endl;
+    const auto lines= code.splitRef(QLatin1Char('\n'));
+    for (const auto &line : lines) {
+        // Do not indent preprocessor lines
+        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#')))
+            s << indentor;
+        s << line << '\n';
     }
     return s;
 }
