@@ -608,11 +608,16 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
     enumObj->ob_value = itemValue;
 
     if (newValue) {
-        PyObject *values = PyDict_GetItem(enumType->tp_dict, Shiboken::PyName::values());
-        if (!values) {
-            values = PyDict_New();
-            PyDict_SetItem(enumType->tp_dict, Shiboken::PyName::values(), values);
-            Py_DECREF(values); // ^ values still alive, because setitem increfs it
+        auto dict = enumType->tp_dict;  // Note: 'values' is borrowed
+        PyObject *values = PyDict_GetItemWithError(dict, Shiboken::PyName::values());
+        if (values == nullptr) {
+            if (PyErr_Occurred())
+                return nullptr;
+            Shiboken::AutoDecRef new_values(values = PyDict_New());
+            if (values == nullptr)
+                return nullptr;
+            if (PyDict_SetItem(dict, Shiboken::PyName::values(), values) < 0)
+                return nullptr;
         }
         PyDict_SetItemString(values, itemName, reinterpret_cast<PyObject *>(enumObj));
     }

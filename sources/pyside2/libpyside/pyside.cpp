@@ -223,8 +223,7 @@ std::size_t getSizeOfQObject(SbkObjectType *type)
 void initDynamicMetaObject(SbkObjectType *type, const QMetaObject *base, std::size_t cppObjSize)
 {
     //create DynamicMetaObject based on python type
-    auto userData =
-        new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
+    auto userData = new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
     userData->mo.update();
     Shiboken::ObjectType::setTypeUserData(type, userData, Shiboken::callCppDestructor<TypeUserData>);
 

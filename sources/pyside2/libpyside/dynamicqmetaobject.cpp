@@ -44,6 +44,7 @@
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
 #include "pysideslot_p.h"
+#include "pysideqenum.h"
 
 #include <shiboken.h>
 
@@ -91,6 +92,10 @@ public:
     int addProperty(const QByteArray &property, PyObject *data);
     void addInfo(const QByteArray &key, const  QByteArray &value);
     void addInfo(const QMap<QByteArray, QByteArray> &info);
+    void addEnumerator(const char *name,
+                       bool flag,
+                       bool scoped,
+                       const QVector<QPair<QByteArray, int> > &entries);
     void removeProperty(int index);
     const QMetaObject *update();
 
@@ -357,6 +362,28 @@ void MetaObjectBuilder::addInfo(const QMap<QByteArray, QByteArray> &info)
     m_d->addInfo(info);
 }
 
+void MetaObjectBuilder::addEnumerator(const char *name, bool flag, bool scoped,
+                                      const QVector<QPair<QByteArray, int> > &entries)
+{
+    m_d->addEnumerator(name, flag, scoped, entries);
+}
+
+void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool scoped,
+                                             const QVector<QPair<QByteArray, int> > &entries)
+{
+    auto builder = ensureBuilder();
+    int have_already = builder->indexOfEnumerator(name);
+    if (have_already >= 0)
+        builder->removeEnumerator(have_already);
+    auto enumbuilder = builder->addEnumerator(name);
+    enumbuilder.setIsFlag(flag);
+    enumbuilder.setIsScoped(scoped);
+
+    for (auto item : entries)
+        enumbuilder.addKey(item.first, item.second);
+    m_dirty = true;
+}
+
 void MetaObjectBuilderPrivate::removeProperty(int index)
 {
     index -= m_baseObject->propertyCount();
@@ -430,6 +457,8 @@ const QMetaObject *MetaObjectBuilder::update()
     return m_d->update();
 }
 
+using namespace Shiboken;
+
 void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
 {
     // Get all non-QObject-derived base types in method resolution order, filtering out the types
@@ -439,7 +468,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // existing connections.
     const PyObject *mro = type->tp_mro;
     const Py_ssize_t basesCount = PyTuple_GET_SIZE(mro);
-    PyTypeObject *qObjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    PyTypeObject *qObjectType = Conversions::getPythonTypeObject("QObject*");
 
     std::vector<PyTypeObject *> basesToCheck;
     // Prepend the actual type that we are parsing.
@@ -470,7 +499,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 // Register signals.
                 auto data = reinterpret_cast<PySideSignal *>(value);
                 if (data->data->signalName.isEmpty())
-                    data->data->signalName = Shiboken::String::toCString(key);
+                    data->data->signalName = String::toCString(key);
                 for (const auto &s : data->data->signatures) {
                     const auto sig = data->data->signalName + '(' + s.signature + ')';
                     if (m_baseObject->indexOfSignal(sig) == -1) {
@@ -489,7 +518,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         }
     }
 
-    Shiboken::AutoDecRef slotAttrName(Shiboken::String::fromCString(PYSIDE_SLOT_LIST_ATTR));
+    AutoDecRef slotAttrName(String::fromCString(PYSIDE_SLOT_LIST_ATTR));
     // PYSIDE-315: Now take care of the rest.
     // Signals and slots should be separated, unless the types are modified, later.
     // We check for this using "is_sorted()". Sorting no longer happens at all.
@@ -501,16 +530,16 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
 
         while (PyDict_Next(attrs, &pos, &key, &value)) {
             if (Property::checkType(value)) {
-                const int index = m_baseObject->indexOfProperty(Shiboken::String::toCString(key));
+                const int index = m_baseObject->indexOfProperty(String::toCString(key));
                 if (index == -1)
-                    addProperty(Shiboken::String::toCString(key), value);
+                    addProperty(String::toCString(key), value);
             } else if (PyFunction_Check(value)) {
                 // Register slots.
                 if (PyObject_HasAttr(value, slotAttrName)) {
                     PyObject *signatureList = PyObject_GetAttr(value, slotAttrName);
                     for (Py_ssize_t i = 0, i_max = PyList_Size(signatureList); i < i_max; ++i) {
                         PyObject *pySignature = PyList_GET_ITEM(signatureList, i);
-                        QByteArray signature(Shiboken::String::toCString(pySignature));
+                        QByteArray signature(String::toCString(pySignature));
                         // Split the slot type and its signature.
                         QByteArray type;
                         const int spacePos = signature.indexOf(' ');
@@ -529,5 +558,30 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 }
             }
         }
+    }
+    // PYSIDE-957: Collect the delayed QEnums
+    auto collectedEnums = PySide::QEnum::resolveDelayedQEnums(type);
+    for (PyObject *obEnumType : collectedEnums) {
+        bool isFlag = PySide::QEnum::isFlag(obEnumType);
+        AutoDecRef obName(PyObject_GetAttr(obEnumType, PyMagicName::name()));
+        // Everything has been checked already in resolveDelayedQEnums.
+        // Therefore, we don't need to error-check here again.
+        auto name = String::toCString(obName);
+        AutoDecRef members(PyObject_GetAttr(obEnumType, PyMagicName::members()));
+        AutoDecRef items(PepMapping_Items(members));
+        Py_ssize_t nr_items = PySequence_Length(items);
+
+        QVector<QPair<QByteArray, int> > entries;
+        for (Py_ssize_t idx = 0; idx < nr_items; ++idx) {
+            AutoDecRef item(PySequence_GetItem(items, idx));
+            AutoDecRef key(PySequence_GetItem(item, 0));
+            AutoDecRef member(PySequence_GetItem(item, 1));
+            AutoDecRef value(PyObject_GetAttr(member, Shiboken::PyName::value()));
+            auto ckey = String::toCString(key);
+            auto ivalue = PyInt_AsSsize_t(value);   // int/long cheating
+            auto thing = QPair<QByteArray, int>(ckey, int(ivalue));
+            entries.push_back(thing);
+        }
+        addEnumerator(name, isFlag, true, entries);
     }
 }

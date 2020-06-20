@@ -55,11 +55,15 @@ namespace PyName {
 STATIC_STRING_IMPL(dumps, "dumps")
 STATIC_STRING_IMPL(loads, "loads")
 STATIC_STRING_IMPL(result, "result")
+STATIC_STRING_IMPL(value, "value")
 STATIC_STRING_IMPL(values, "values")
 
 // Internal:
 STATIC_STRING_IMPL(classmethod, "classmethod")
+STATIC_STRING_IMPL(co_name, "co_name")
 STATIC_STRING_IMPL(compile, "compile");
+STATIC_STRING_IMPL(f_code, "f_code")
+STATIC_STRING_IMPL(f_lineno, "f_lineno")
 STATIC_STRING_IMPL(function, "function")
 STATIC_STRING_IMPL(marshal, "marshal")
 STATIC_STRING_IMPL(method, "method")
@@ -73,6 +77,7 @@ namespace PyMagicName {
 STATIC_STRING_IMPL(class_, "__class__")
 STATIC_STRING_IMPL(ecf, "__ecf__")
 STATIC_STRING_IMPL(file, "__file__")
+STATIC_STRING_IMPL(members, "__members__")
 STATIC_STRING_IMPL(module, "__module__")
 STATIC_STRING_IMPL(name, "__name__")
 STATIC_STRING_IMPL(qualname, "__qualname__")

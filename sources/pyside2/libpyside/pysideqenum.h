@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,37 +37,21 @@
 **
 ****************************************************************************/
 
-#ifndef SBKSTATICSTRINGS_H
-#define SBKSTATICSTRINGS_H
+#ifndef PYSIDE_QENUM_H
+#define PYSIDE_QENUM_H
 
-#include "sbkpython.h"
-#include "shibokenmacros.h"
+#include <pysidemacros.h>
+#include <vector>
 
-namespace Shiboken
-{
-// Some often-used strings
-namespace PyName
-{
-LIBSHIBOKEN_API PyObject *co_name();
-LIBSHIBOKEN_API PyObject *dumps();
-LIBSHIBOKEN_API PyObject *f_code();
-LIBSHIBOKEN_API PyObject *f_lineno();
-LIBSHIBOKEN_API PyObject *loads();
-LIBSHIBOKEN_API PyObject *result();
-LIBSHIBOKEN_API PyObject *value();
-LIBSHIBOKEN_API PyObject *values();
-} // namespace PyName
+namespace PySide { namespace QEnum {
 
-namespace PyMagicName
-{
-LIBSHIBOKEN_API PyObject *class_();
-LIBSHIBOKEN_API PyObject *ecf();
-LIBSHIBOKEN_API PyObject *file();
-LIBSHIBOKEN_API PyObject *members();
-LIBSHIBOKEN_API PyObject *module();
-LIBSHIBOKEN_API PyObject *name();
-LIBSHIBOKEN_API PyObject *qualname();
-} // namespace PyMagicName
-} // namespace Shiboken
+// PYSIDE-957: Support the QEnum macro
+PYSIDE_API PyObject *QEnumMacro(PyObject *, bool);
+PYSIDE_API int isFlag(PyObject *);
+PYSIDE_API std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *);
+PYSIDE_API void init();
 
-#endif // SBKSTATICSTRINGS_H
+} // namespace QEnum
+} // namespace PySide
+
+#endif

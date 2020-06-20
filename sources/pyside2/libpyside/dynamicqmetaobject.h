@@ -68,7 +68,10 @@ public:
     int addProperty(const char *property, PyObject *data);
     void addInfo(const char *key, const char *value);
     void addInfo(const QMap<QByteArray, QByteArray> &info);
-
+    void addEnumerator(const char *name,
+                       bool flag,
+                       bool scoped,
+                       const QVector<QPair<QByteArray, int> > &entries);
     void removeProperty(int index);
 
     const QMetaObject *update();

@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -40,7 +40,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide2.QtCore import Qt, QIODevice
+from PySide2.QtCore import Qt, QIODevice, QObject, QEnum, QFlag
 
 
 class TestEnum(unittest.TestCase):
@@ -68,28 +68,30 @@ class TestEnum(unittest.TestCase):
 
         # Floats
         with self.assertRaises(TypeError):
-            a = k+2.0
+            a = k + 2.0
 
         with self.assertRaises(TypeError):
-            a = k-2.0
+            a = k - 2.0
 
         with self.assertRaises(TypeError):
-            a = k*2.0
+            a = k * 2.0
 
-    @unittest.skipUnless(getattr(sys, "getobjects", None), "requires debug build")
+    @unittest.skipUnless(getattr(sys, "getobjects", None), "requires --with-trace-refs")
+    @unittest.skipUnless(getattr(sys, "gettotalrefcount", None), "requires --with-pydebug")
     def testEnumNew_NoLeak(self):
         gc.collect()
         total = sys.gettotalrefcount()
         for idx in range(1000):
             ret = Qt.Key(42)
+
         gc.collect()
         delta = sys.gettotalrefcount() - total
         print("delta total refcount =", delta)
         if abs(delta) >= 10:
-            all = sys.getobjects(0)
-            all.sort(key=lambda x: sys.getrefcount(x), reverse=True)
+            all = [(sys.getrefcount(x), x) for x in sys.getobjects(0)]
+            all.sort(key=lambda x: x[0], reverse=True)
             for ob in all[:10]:
-                print(sys.getrefcount(ob), ob)
+                print(ob)
         self.assertTrue(abs(delta) < 10)
 
 
@@ -140,6 +142,105 @@ class TestEnumPickling(unittest.TestCase):
                 func()
         else:
             func()
+
+# PYSIDE-957: The QEnum macro
+
+try:
+    import enum
+    HAVE_ENUM = True
+except ImportError:
+    HAVE_ENUM = False
+    QEnum = QFlag = lambda x: x
+    import types
+    class Enum: pass
+    enum = types.ModuleType("enum")
+    enum.Enum = enum.Flag = enum.IntEnum = enum.IntFlag = Enum
+    Enum.__module__ = "enum"
+    Enum.__members__ = {}
+    del Enum
+    enum.auto = lambda: 42
+
+HAVE_FLAG = hasattr(enum, "Flag")
+
+@QEnum
+class OuterEnum(enum.Enum):
+    A = 1
+    B = 2
+
+class SomeClass(QObject):
+
+    @QEnum
+    class SomeEnum(enum.Enum):
+        A = 1
+        B = 2
+        C = 3
+
+    @QEnum
+    class OtherEnum(enum.IntEnum):
+        A = 1
+        B = 2
+        C = 3
+
+    class InnerClass(QObject):
+
+        @QEnum
+        class InnerEnum(enum.Enum):
+            X = 42
+
+    class SomeEnum(enum.Enum):
+        A = 4
+        B = 5
+        C = 6
+
+    QEnum(SomeEnum)     # works even without the decorator assignment
+
+
+@unittest.skipUnless(HAVE_ENUM, "requires 'enum' module (use 'pip install enum34' for Python 2)")
+class TestQEnumMacro(unittest.TestCase):
+    def testTopLevel(self):
+        self.assertEqual(type(OuterEnum).__module__, "enum")
+        self.assertEqual(type(OuterEnum).__name__, "EnumMeta")
+        self.assertEqual(len(OuterEnum.__members__), 2)
+
+    def testSomeClass(self):
+        self.assertEqual(type(SomeClass.SomeEnum).__module__, "enum")
+        self.assertEqual(type(SomeClass.SomeEnum).__name__, "EnumMeta")
+        self.assertEqual(len(SomeClass.SomeEnum.__members__), 3)
+        with self.assertRaises(TypeError):
+            int(SomeClass.SomeEnum.C) == 6
+        self.assertEqual(SomeClass.OtherEnum.C, 3)
+
+    @unittest.skipIf(sys.version_info[0] < 3, "we cannot support nested classes in Python 2")
+    def testInnerClass(self):
+        self.assertEqual(SomeClass.InnerClass.InnerEnum.__qualname__,
+            "SomeClass.InnerClass.InnerEnum")
+        with self.assertRaises(TypeError):
+            int(SomeClass.InnerClass.InnerEnum.X) == 42
+
+    @unittest.skipUnless(HAVE_FLAG, "some older Python versions have no 'Flag'")
+    def testEnumFlag(self):
+        with self.assertRaises(TypeError):
+            class WrongFlagForEnum(QObject):
+                @QEnum
+                class Bad(enum.Flag):
+                    pass
+        with self.assertRaises(TypeError):
+            class WrongEnuForFlag(QObject):
+                @QFlag
+                class Bad(enum.Enum):
+                    pass
+
+    def testIsRegistered(self):
+        mo = SomeClass.staticMetaObject
+        self.assertEqual(mo.enumeratorCount(), 2)
+        self.assertEqual(mo.enumerator(0).name(), "OtherEnum")
+        self.assertEqual(mo.enumerator(0).scope(), "SomeClass")
+        self.assertEqual(mo.enumerator(1).name(), "SomeEnum")
+        moi = SomeClass.InnerClass.staticMetaObject
+        self.assertEqual(moi.enumerator(0).name(), "InnerEnum")
+        ## Question: Should that scope not better be  "SomeClass.InnerClass"?
+        ## But we have __qualname__ already:
+        self.assertEqual(moi.enumerator(0).scope(), "InnerClass")
 
 
 if __name__ == '__main__':

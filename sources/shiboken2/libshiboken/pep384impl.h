@@ -533,6 +533,18 @@ LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
 
 /*****************************************************************************
  *
+ * Python 2 incompatibilities
+ *
+ * This is incompatibly implemented as macro in Python 2.
+ */
+#if PY_VERSION_HEX < 0x03000000
+extern LIBSHIBOKEN_API PyObject *PepMapping_Items(PyObject *o);
+#else
+#define PepMapping_Items PyMapping_Items
+#endif
+
+/*****************************************************************************
+ *
  * Runtime support for Python 3.8 incompatibilities
  *
  */

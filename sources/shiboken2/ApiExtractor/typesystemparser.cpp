@@ -149,7 +149,7 @@ static QString extractSnippet(const QString &code, const QString &snippetLabel)
         } else if (useLine)
             result += line.toString() + QLatin1Char('\n');
     }
-    return result;
+    return CodeSnipAbstract::fixSpaces(result);
 }
 
 template <class EnumType, Qt::CaseSensitivity cs = Qt::CaseInsensitive>
@@ -207,13 +207,8 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
                   languageFromAttribute, TypeSystem::NoLanguage)
     {
         {u"all", TypeSystem::All}, // sorted!
-        {u"constructors", TypeSystem::Constructors},
-        {u"destructor-function", TypeSystem::DestructorFunction},
-        {u"interface", TypeSystem::Interface},
-        {u"library-initializer", TypeSystem::PackageInitializer},
         {u"native", TypeSystem::NativeCode}, // em algum lugar do cpp
         {u"shell", TypeSystem::ShellCode}, // coloca no header, mas antes da declaracao da classe
-        {u"shell-declaration", TypeSystem::ShellDeclaration},
         {u"target", TypeSystem::TargetLangCode}  // em algum lugar do cpp
     };
 ENUM_LOOKUP_BINARY_SEARCH()
@@ -272,10 +267,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
     {
         {u"beginning", TypeSystem::CodeSnipPositionBeginning},
         {u"end", TypeSystem::CodeSnipPositionEnd},
-        {u"declaration", TypeSystem::CodeSnipPositionDeclaration},
-        {u"prototype-initialization", TypeSystem::CodeSnipPositionPrototypeInitialization},
-        {u"constructor-initialization", TypeSystem::CodeSnipPositionConstructorInitialization},
-        {u"constructor", TypeSystem::CodeSnipPositionConstructor}
+        {u"declaration", TypeSystem::CodeSnipPositionDeclaration}
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
@@ -2475,7 +2467,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
            "// START of custom code block [file: "
         << source << "]\n"
         << extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel)
-        << "\n// END of custom code block [file: " << source
+        << "// END of custom code block [file: " << source
         << "]\n// ========================================================================\n";
     snip->addCode(content);
     return true;
@@ -2520,19 +2512,8 @@ bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
     snip.position = position;
     snip.language = lang;
 
-    if (snip.language == TypeSystem::Interface
-        && topElement.type != StackElement::InterfaceTypeEntry) {
-        m_error = QLatin1String("Interface code injections must be direct child of an interface type entry");
-        return false;
-    }
-
     if (topElement.type == StackElement::ModifyFunction
         || topElement.type == StackElement::AddFunction) {
-        if (snip.language == TypeSystem::ShellDeclaration) {
-            m_error = QLatin1String("no function implementation in shell declaration in which to inject code");
-            return false;
-        }
-
         FunctionModification &mod = m_contextStack.top()->functionMods.last();
         mod.snips << snip;
         if (!snip.code().isEmpty())

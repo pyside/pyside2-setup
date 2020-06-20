@@ -42,7 +42,7 @@
 #include "headergenerator.h"
 #include "qtdocgenerator.h"
 
-#ifdef _WINDOWS
+#ifdef Q_OS_WIN
 static const QChar pathSplitter = QLatin1Char(';');
 #else
 static const QChar pathSplitter = QLatin1Char(':');
