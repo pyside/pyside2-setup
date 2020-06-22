@@ -899,20 +899,22 @@ const char *getSignature(PySideSignalInstance *signal)
 
 QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit)
 {
-    const QString qsignature = QLatin1String(signature);
+    QString qsignature = QString::fromLatin1(signature).trimmed();
     QStringList result;
-    QRegExp splitRegex(QLatin1String("\\s*,\\s*"));
 
     if (isShortCircuit)
         *isShortCircuit = !qsignature.contains(QLatin1Char('('));
     if (qsignature.contains(QLatin1String("()")) || qsignature.contains(QLatin1String("(void)")))
         return result;
-    if (qsignature.contains(QLatin1Char('('))) {
-        static QRegExp regex(QLatin1String(".+\\((.*)\\)"));
-        //get args types
-        QString types = qsignature;
-        types.replace(regex, QLatin1String("\\1"));
-        result = types.split(splitRegex);
+    if (qsignature.endsWith(QLatin1Char(')'))) {
+        const int paren = qsignature.indexOf(QLatin1Char('('));
+        if (paren >= 0) {
+            qsignature.chop(1);
+            qsignature.remove(0, paren + 1);
+            result = qsignature.split(QLatin1Char(','));
+            for (QString &type : result)
+                type = type.trimmed();
+        }
     }
     return result;
 }
