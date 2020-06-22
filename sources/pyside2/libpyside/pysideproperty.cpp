@@ -139,12 +139,17 @@ static void qpropertyMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::C
             break;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        case QMetaObject::RegisterQPropertyObserver:
+        case QMetaObject::SetQPropertyBinding:
+#else
         case QMetaObject::QueryPropertyDesignable:
         case QMetaObject::QueryPropertyScriptable:
         case QMetaObject::QueryPropertyStored:
         case QMetaObject::QueryPropertyEditable:
         case QMetaObject::QueryPropertyUser:
         // just to avoid gcc warnings
+#endif
         case QMetaObject::InvokeMetaMethod:
         case QMetaObject::CreateInstance:
         case QMetaObject::IndexOfMethod:

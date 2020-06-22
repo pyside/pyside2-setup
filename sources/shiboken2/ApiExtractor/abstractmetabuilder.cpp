@@ -42,7 +42,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QRegularExpression>
-#include <QTextCodec>
 #include <QTextStream>
 #include <QVariant>
 #include <QTime>
