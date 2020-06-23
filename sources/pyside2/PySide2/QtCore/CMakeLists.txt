@@ -197,6 +197,12 @@ if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.14.0
          ${QtCore_GEN_DIR}/qrecursivemutex_wrapper.cpp)
 endif()
 
+if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 5.15.0
+    OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.15.0)
+    list(APPEND QtCore_SRC
+         ${QtCore_GEN_DIR}/qbytearray_frombase64result_wrapper.cpp)
+endif()
+
 set(QtCore_glue_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"

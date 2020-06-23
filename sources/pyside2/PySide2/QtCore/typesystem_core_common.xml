@@ -1888,6 +1888,8 @@
   </value-type>
   <value-type name="QByteArray" hash-function="qHash">
     <enum-type name="Base64Option" flags="Base64Options" since="5.2"/>
+    <enum-type name="Base64DecodingStatus" since="5.15"/>
+    <value-type name="FromBase64Result" since="5.15"/>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
