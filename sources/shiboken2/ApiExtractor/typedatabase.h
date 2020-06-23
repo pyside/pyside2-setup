@@ -163,6 +163,7 @@ public:
     bool addSuppressedWarning(const QString &warning, QString *errorMessage);
 
     bool isSuppressedWarning(const QString &s) const;
+    bool isSuppressedWarning(const QStringRef &s) const;
 
     static QString globalNamespaceClassName(const TypeEntry *te);
 
@@ -192,6 +193,8 @@ private:
     template <class Predicate>
     TypeEntries findTypesHelper(const QString &name, Predicate pred) const;
     TypeEntry *resolveTypeDefEntry(TypedefEntry *typedefEntry, QString *errorMessage);
+    template <class String>
+    bool isSuppressedWarningHelper(const String &s) const;
 
     bool m_suppressWarnings = true;
     TypeEntryMultiMap m_entries; // Contains duplicate entries (cf addInlineNamespaceLookups).

@@ -13,6 +13,7 @@ fileout.cpp
 graph.cpp
 messages.cpp
 reporthandler.cpp
+sourcelocation.cpp
 typeparser.cpp
 typesystem.cpp
 typesystemparser.cpp

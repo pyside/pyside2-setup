@@ -28,6 +28,7 @@
 
 #include "messages.h"
 #include "abstractmetalang.h"
+#include "sourcelocation.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 #include <codemodel.h>
@@ -43,19 +44,20 @@ static inline QString colonColon() { return QStringLiteral("::"); }
 
 // abstractmetabuilder.cpp
 
-QString msgNoFunctionForModification(const QString &signature,
+QString msgNoFunctionForModification(const AbstractMetaClass *klass,
+                                     const QString &signature,
                                      const QString &originalSignature,
-                                     const QString &className,
                                      const QStringList &possibleSignatures,
                                      const AbstractMetaFunctionList &allFunctions)
 {
     QString result;
     QTextStream str(&result);
-    str << "signature '" << signature << '\'';
+    str << klass->typeEntry()->sourceLocation() << "signature '"
+        << signature << '\'';
     if (!originalSignature.isEmpty() && originalSignature != signature)
         str << " (specified as '" << originalSignature << "')";
     str << " for function modification in '"
-        << className << "' not found.";
+        << klass->qualifiedCppName() << "' not found.";
     if (!possibleSignatures.isEmpty()) {
         str << "\n  Possible candidates:\n";
         for (const auto &s : possibleSignatures)
@@ -135,6 +137,7 @@ QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
 {
     QString result;
     QTextStream str(&result);
+    str << enumItem->sourceLocation();
     msgFormatEnumType(str, enumItem, className);
     str << " does not have a type entry";
     return result;
@@ -148,8 +151,19 @@ QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
     QDebug debug(&result); // Use the debug operator for TypeEntry::Type
     debug.noquote();
     debug.nospace();
+    debug << enumItem->sourceLocation().toString();
     msgFormatEnumType(debug, enumItem, className);
     debug << " is not an enum (type: " << t->type() << ')';
+    return result;
+}
+
+QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
+                                const QString &fullName)
+{
+    QString result;
+    QTextStream str(&result);
+    str << item->sourceLocation() << "namespace '" << fullName
+        << "' does not have a type entry";
     return result;
 }
 
@@ -195,7 +209,7 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
 {
     QString result;
     QTextStream str(&result);
-    str << "skipping ";
+    str << functionItem->sourceLocation() << "skipping ";
     if (functionItem->isAbstract())
         str << "abstract ";
     str << "function '" << signature << "', " << why;
@@ -203,6 +217,80 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
         str << "\nThis will lead to compilation errors due to not "
                "being able to instantiate the wrapper.";
     }
+    return result;
+}
+
+QString msgSkippingField(const VariableModelItem &field, const QString &className,
+                         const QString &type)
+{
+    QString result;
+    QTextStream str(&result);
+    str << field->sourceLocation() << "skipping field '" << className
+        << "::" << field->name() << "' with unmatched type '" << type << '\'';
+    return result;
+}
+
+static const char msgCompilationError[] =
+    "This could potentially lead to compilation errors.";
+
+QString msgTypeNotDefined(const TypeEntry *entry)
+{
+    QString result;
+    QTextStream str(&result);
+    str << entry->sourceLocation() << "type '" <<entry->qualifiedCppName()
+        << "' is specified in typesystem, but not defined. " << msgCompilationError;
+    return result;
+}
+
+QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
+                                    const QString &signature)
+{
+    QString result;
+    QTextStream str(&result);
+    str << fte->sourceLocation() << "Global function '" << signature
+        << "' is specified in typesystem, but not defined. " << msgCompilationError;
+    return result;
+}
+
+QString msgStrippingArgument(const FunctionModelItem &f, int i,
+                             const QString &originalSignature,
+                             const ArgumentModelItem &arg)
+{
+    QString result;
+    QTextStream str(&result);
+    str << f->sourceLocation() << "Stripping argument #" << (i + 1) << " of "
+        << originalSignature << " due to unmatched type \""
+        << arg->type().toString() << "\" with default expression \""
+        << arg->defaultValueExpression() << "\".";
+    return result;
+}
+
+QString msgEnumNotDefined(const EnumTypeEntry *t)
+{
+    QString result;
+    QTextStream str(&result);
+    str << t->sourceLocation() << "enum '" << t->qualifiedCppName()
+        << "' is specified in typesystem, but not declared.";
+    return result;
+}
+
+QString msgUnknownBase(const AbstractMetaClass *metaClass, const QString &baseClassName)
+{
+    QString result;
+    QTextStream str(&result);
+    str << metaClass->sourceLocation() << "class '" << metaClass->name()
+        << "' inherits from unknown base class '" << baseClassName << "'";
+    return result;
+}
+
+QString msgArrayModificationFailed(const FunctionModelItem &functionItem,
+                                   const QString &className,
+                                   const QString &errorMessage)
+{
+    QString result;
+    QTextStream str(&result);
+    str << functionItem->sourceLocation() << "While traversing " << className
+        << ": " << errorMessage;
     return result;
 }
 

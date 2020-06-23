@@ -212,9 +212,8 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
 
             if (!found) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << msgNoFunctionForModification(signature,
+                    << msgNoFunctionForModification(clazz, signature,
                                                     modification.originalSignature(),
-                                                    clazz->qualifiedCppName(),
                                                     possibleSignatures, functions);
             }
         }
@@ -553,9 +552,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 && !entry->isCustom()
                 && (entry->generateCode() & TypeEntry::GenerateTargetLang)
                 && !AbstractMetaClass::findClass(m_metaClasses, entry)) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("type '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
-                                      .arg(entry->qualifiedCppName());
+                qCWarning(lcShiboken, "%s", qPrintable(msgTypeNotDefined(entry)));
             } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
                 auto fte = static_cast<const FunctionTypeEntry *>(entry);
                 const QStringList &signatures = fte->signatures();
@@ -568,13 +565,13 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                         }
                     }
                     if (!ok) {
-                        qCWarning(lcShiboken).noquote().nospace()
-                            << QStringLiteral("Global function '%1' is specified in typesystem, but not defined. This could potentially lead to compilation errors.")
-                                              .arg(signature);
+                        qCWarning(lcShiboken, "%s",
+                                  qPrintable(msgGlobalFunctionNotDefined(fte, signature)));
                     }
                 }
             } else if (entry->isEnum() && (entry->generateCode() & TypeEntry::GenerateTargetLang)) {
-                const QString name = static_cast<const EnumTypeEntry *>(entry)->targetLangQualifier();
+                auto enumEntry = static_cast<const EnumTypeEntry *>(entry);
+                const QString name = enumEntry->targetLangQualifier();
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
                 const bool enumFound = cls
@@ -583,9 +580,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
                 if (!enumFound) {
                     entry->setCodeGeneration(TypeEntry::GenerateNothing);
-                    qCWarning(lcShiboken).noquote().nospace()
-                        << QStringLiteral("enum '%1' is specified in typesystem, but not declared")
-                                          .arg(entry->qualifiedCppName());
+                    qCWarning(lcShiboken, "%s",
+                              qPrintable(msgEnumNotDefined(enumEntry)));
                 }
 
             }
@@ -744,8 +740,8 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
 
     auto type = TypeDatabase::instance()->findNamespaceType(namespaceName, namespaceItem->fileName());
     if (!type) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("namespace '%1' does not have a type entry").arg(namespaceName);
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgNamespaceNoTypeEntry(namespaceItem, namespaceName)));
         return nullptr;
     }
 
@@ -1035,6 +1031,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     }
 
     auto *metaClass = new AbstractMetaClass;
+    metaClass->setSourceLocation(classItem->sourceLocation());
     metaClass->setTypeEntry(type);
 
     if (classItem->isFinal())
@@ -1188,9 +1185,8 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
     if (!metaType) {
         const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(colonColon());
         if (cls->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang) {
-            qCWarning(lcShiboken).noquote().nospace()
-                 << QStringLiteral("skipping field '%1::%2' with unmatched type '%3'")
-                                   .arg(cls->name(), fieldName, type);
+             qCWarning(lcShiboken, "%s",
+                       qPrintable(msgSkippingField(field, cls->name(), type)));
         }
         delete metaField;
         return nullptr;
@@ -1454,9 +1450,8 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
     for (const auto  &baseClassName : baseClasses) {
         if (!types->isClassRejected(baseClassName)) {
             if (!types->findType(baseClassName)) {
-                qCWarning(lcShiboken).noquote().nospace()
-                     << QStringLiteral("class '%1' inherits from unknown base class '%2'")
-                        .arg(metaClass->name(), baseClassName);
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgUnknownBase(metaClass, baseClassName)));
                 return false;
             }
             auto baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClassName);
@@ -1769,6 +1764,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     }
 
     auto *metaFunction = new AbstractMetaFunction;
+    metaFunction->setSourceLocation(functionItem->sourceLocation());
     if (deprecated)
         *metaFunction += AbstractMetaAttributes::Deprecated;
 
@@ -1871,12 +1867,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
                 if (!currentClass
                     || (currentClass->typeEntry()->codeGeneration()
                         & TypeEntry::GenerateTargetLang)) {
-                    qCWarning(lcShiboken).noquote().nospace()
-                    << "Stripping argument #" << (i + 1) << " of "
-                    << originalQualifiedSignatureWithReturn
-                    << " due to unmatched type \"" << arg->type().toString()
-                    << "\" with default expression \""
-                    << arg->defaultValueExpression() << "\".";
+                    qCWarning(lcShiboken, "%s",
+                              qPrintable(msgStrippingArgument(functionItem, i, originalQualifiedSignatureWithReturn, arg)));
                 }
                 break;
             }
@@ -1940,8 +1932,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         fixArgumentNames(metaFunction, functionMods);
         QString errorMessage;
         if (!applyArrayArgumentModifications(functionMods, metaFunction, &errorMessage)) {
-            qCWarning(lcShiboken, "While traversing %s: %s",
-                      qPrintable(className), qPrintable(errorMessage));
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgArrayModificationFailed(functionItem, className, errorMessage)));
         }
     }
 

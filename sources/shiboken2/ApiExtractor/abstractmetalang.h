@@ -30,6 +30,7 @@
 #define ABSTRACTMETALANG_H
 
 #include "abstractmetalang_typedefs.h"
+#include "sourcelocation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
@@ -1093,6 +1094,9 @@ public:
     void formatDebugVerbose(QDebug &d) const;
 #endif
 
+    SourceLocation sourceLocation() const;
+    void setSourceLocation(const SourceLocation &sourceLocation);
+
 private:
     bool autoDetectAllowThread() const;
 
@@ -1111,6 +1115,7 @@ private:
     QPropertySpec *m_propertySpec = nullptr;
     AbstractMetaArgumentList m_arguments;
     AddedFunctionPtr m_addedFunction;
+    SourceLocation m_sourceLocation;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
     uint m_explicit                 : 1;
@@ -1682,6 +1687,9 @@ public:
     static AbstractMetaEnum *findEnum(const AbstractMetaClassList &classes,
                                       const EnumTypeEntry *entry);
 
+    SourceLocation sourceLocation() const;
+    void setSourceLocation(const SourceLocation &sourceLocation);
+
 private:
 #ifndef QT_NO_DEBUG_STREAM
     void format(QDebug &d) const;
@@ -1719,6 +1727,7 @@ private:
     QStringList m_baseClassNames;  // Base class names from C++, including rejected
     QVector<TypeEntry *> m_templateArgs;
     ComplexTypeEntry *m_typeEntry = nullptr;
+    SourceLocation m_sourceLocation;
 //     FunctionModelItem m_qDebugStreamFunction;
 
     bool m_stream = false;

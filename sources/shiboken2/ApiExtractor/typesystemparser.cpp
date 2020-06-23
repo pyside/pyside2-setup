@@ -519,14 +519,14 @@ static QString msgReaderMessage(const QXmlStreamReader &reader,
 {
     QString message;
     QTextStream str(&message);
-    str << type << ": ";
     const QString fileName = readerFileName(reader);
     if (fileName.isEmpty())
         str << "<stdin>:";
     else
         str << QDir::toNativeSeparators(fileName) << ':';
+    // Use a tab separator like SourceLocation for suppression detection
     str << reader.lineNumber() << ':' << reader.columnNumber()
-        << ": " << what;
+        << ":\t" << type << ": " << what;
     return message;
 }
 
@@ -631,6 +631,7 @@ bool TypeSystemParser::parse(QXmlStreamReader &reader)
 {
     m_error.clear();
     m_currentPath.clear();
+    m_currentFile.clear();
     m_smartPointerInstantiations.clear();
     const bool result = parseXml(reader) && setupSmartPointerInstantiations();
     m_smartPointerInstantiations.clear();
@@ -640,8 +641,11 @@ bool TypeSystemParser::parse(QXmlStreamReader &reader)
 bool TypeSystemParser::parseXml(QXmlStreamReader &reader)
 {
     const QString fileName = readerFileName(reader);
-    if (!fileName.isEmpty())
-        m_currentPath = QFileInfo(fileName).absolutePath();
+    if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        m_currentPath = fi.absolutePath();
+        m_currentFile = fi.absoluteFilePath();
+    }
     m_entityResolver.reset(new TypeSystemEntityResolver(m_currentPath));
     reader.setEntityResolver(m_entityResolver.data());
 
@@ -1109,8 +1113,11 @@ bool TypeSystemParser::checkRootElement()
     return ok;
 }
 
-void TypeSystemParser::applyCommonAttributes(TypeEntry *type, QXmlStreamAttributes *attributes) const
+void TypeSystemParser::applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
+                                             QXmlStreamAttributes *attributes) const
 {
+    type->setSourceLocation(SourceLocation(m_currentFile,
+                                           reader.lineNumber()));
     type->setCodeGeneration(m_generate);
     const int revisionIndex =
         indexOfAttribute(*attributes, u"revision");
@@ -1119,7 +1126,7 @@ void TypeSystemParser::applyCommonAttributes(TypeEntry *type, QXmlStreamAttribut
 }
 
 FlagsTypeEntry *
-    TypeSystemParser::parseFlagsEntry(const QXmlStreamReader &,
+    TypeSystemParser::parseFlagsEntry(const QXmlStreamReader &reader,
                              EnumTypeEntry *enumEntry, QString flagName,
                              const QVersionNumber &since,
                              QXmlStreamAttributes *attributes)
@@ -1140,7 +1147,7 @@ FlagsTypeEntry *
     }
 
     ftype->setOriginalName(flagName);
-    applyCommonAttributes(ftype, attributes);
+    applyCommonAttributes(reader, ftype, attributes);
 
     QStringList lst = flagName.split(colonColon());
     const QString targetLangFlagName = QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1Char('.'));
@@ -1166,7 +1173,7 @@ FlagsTypeEntry *
 }
 
 SmartPointerTypeEntry *
-    TypeSystemParser::parseSmartPointerEntry(const QXmlStreamReader &,
+    TypeSystemParser::parseSmartPointerEntry(const QXmlStreamReader &reader,
                                     const QString &name, const QVersionNumber &since,
                                     QXmlStreamAttributes *attributes)
 {
@@ -1219,7 +1226,7 @@ SmartPointerTypeEntry *
 
     auto *type = new SmartPointerTypeEntry(name, getter, smartPointerType,
                                            refCountMethodName, since, currentParentTypeEntry());
-    applyCommonAttributes(type, attributes);
+    applyCommonAttributes(reader, type, attributes);
     m_smartPointerInstantiations.insert(type, instantiations);
     return type;
 }
@@ -1232,7 +1239,7 @@ PrimitiveTypeEntry *
     if (!checkRootElement())
         return nullptr;
     auto *type = new PrimitiveTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(type, attributes);
+    applyCommonAttributes(reader, type, attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == targetLangNameAttribute()) {
@@ -1258,7 +1265,7 @@ PrimitiveTypeEntry *
 }
 
 ContainerTypeEntry *
-    TypeSystemParser::parseContainerTypeEntry(const QXmlStreamReader &,
+    TypeSystemParser::parseContainerTypeEntry(const QXmlStreamReader &reader,
                                      const QString &name, const QVersionNumber &since,
                                      QXmlStreamAttributes *attributes)
 {
@@ -1276,7 +1283,7 @@ ContainerTypeEntry *
         return nullptr;
     }
     auto *type = new ContainerTypeEntry(name, containerType, since, currentParentTypeEntry());
-    applyCommonAttributes(type, attributes);
+    applyCommonAttributes(reader, type, attributes);
     return type;
 }
 
@@ -1288,7 +1295,7 @@ EnumTypeEntry *
     if (!checkRootElement())
         return nullptr;
     auto *entry = new EnumTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(entry, attributes);
+    applyCommonAttributes(reader, entry, attributes);
     entry->setTargetLangPackage(m_defaultPackage);
 
     QString flagNames;
@@ -1330,7 +1337,7 @@ NamespaceTypeEntry *
         return nullptr;
     QScopedPointer<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
     auto visibility = TypeSystem::Visibility::Unspecified;
-    applyCommonAttributes(result.data(), attributes);
+    applyCommonAttributes(reader, result.data(), attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef attributeName = attributes->at(i).qualifiedName();
         if (attributeName == QLatin1String("files")) {
@@ -1380,14 +1387,14 @@ NamespaceTypeEntry *
 }
 
 ValueTypeEntry *
-    TypeSystemParser::parseValueTypeEntry(const QXmlStreamReader &,
+    TypeSystemParser::parseValueTypeEntry(const QXmlStreamReader &reader,
                                  const QString &name, const QVersionNumber &since,
                                  QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
     auto *typeEntry = new ValueTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(typeEntry, attributes);
+    applyCommonAttributes(reader, typeEntry, attributes);
     const int defaultCtIndex =
         indexOfAttribute(*attributes, u"default-constructor");
     if (defaultCtIndex != -1)
@@ -1396,7 +1403,7 @@ ValueTypeEntry *
 }
 
 FunctionTypeEntry *
-    TypeSystemParser::parseFunctionTypeEntry(const QXmlStreamReader &,
+    TypeSystemParser::parseFunctionTypeEntry(const QXmlStreamReader &reader,
                                     const QString &name, const QVersionNumber &since,
                                     QXmlStreamAttributes *attributes)
 {
@@ -1414,7 +1421,7 @@ FunctionTypeEntry *
 
     if (!existingType) {
         auto *result = new FunctionTypeEntry(name, signature, since, currentParentTypeEntry());
-        applyCommonAttributes(result, attributes);
+        applyCommonAttributes(reader, result, attributes);
         return result;
     }
 
@@ -1430,9 +1437,10 @@ FunctionTypeEntry *
 }
 
 TypedefEntry *
- TypeSystemParser::parseTypedefEntry(const QXmlStreamReader &, const QString &name,
-                            const QVersionNumber &since,
-                            QXmlStreamAttributes *attributes)
+ TypeSystemParser::parseTypedefEntry(const QXmlStreamReader &reader,
+                                     const QString &name,
+                                     const QVersionNumber &since,
+                                     QXmlStreamAttributes *attributes)
 {
     if (!checkRootElement())
         return nullptr;
@@ -1448,7 +1456,7 @@ TypedefEntry *
     }
     const QString sourceType = attributes->takeAt(sourceIndex).value().toString();
     auto result = new TypedefEntry(name, sourceType, since, currentParentTypeEntry());
-    applyCommonAttributes(result, attributes);
+    applyCommonAttributes(reader, result, attributes);
     return result;
 }
 
@@ -2824,7 +2832,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             if (!checkRootElement())
                 return false;
             element->entry = new ObjectTypeEntry(name, versionRange.since, currentParentTypeEntry());
-            applyCommonAttributes(element->entry, &attributes);
+            applyCommonAttributes(reader, element->entry, &attributes);
             applyComplexTypeAttributes(reader, static_cast<ComplexTypeEntry *>(element->entry), &attributes);
             break;
         case StackElement::FunctionTypeEntry:

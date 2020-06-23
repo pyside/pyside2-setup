@@ -37,6 +37,8 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 
+class EnumTypeEntry;
+class FunctionTypeEntry;
 class TypeEntry;
 class TypeInfo;
 struct TypeRejection;
@@ -52,9 +54,9 @@ QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
 QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
                                           const QString &typeName, const QString &why);
 
-QString msgNoFunctionForModification(const QString &signature,
+QString msgNoFunctionForModification(const AbstractMetaClass *klass,
+                                     const QString &signature,
                                      const QString &originalSignature,
-                                     const QString &className,
                                      const QStringList &possibleSignatures,
                                      const AbstractMetaFunctionList &allFunctions);
 
@@ -65,6 +67,9 @@ QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
 QString msgNoEnumTypeConflict(const EnumModelItem &enumItem,
                               const QString &className,
                               const TypeEntry *t);
+
+QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
+                                const QString &fullName);
 
 QString msgAmbiguousVaryingTypesFound(const QString &qualifiedName, const TypeEntries &te);
 QString msgAmbiguousTypesFound(const QString &qualifiedName, const TypeEntries &te);
@@ -77,6 +82,27 @@ QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
 
 QString msgSkippingFunction(const FunctionModelItem &functionItem,
                             const QString &signature, const QString &why);
+
+QString msgSkippingField(const VariableModelItem &field, const QString &className,
+                         const QString &type);
+
+QString msgTypeNotDefined(const TypeEntry *entry);
+
+QString msgGlobalFunctionNotDefined(const FunctionTypeEntry *fte,
+                                    const QString &signature);
+
+QString msgStrippingArgument(const FunctionModelItem &f, int i,
+                             const QString &originalSignature,
+                             const ArgumentModelItem &arg);
+
+QString msgEnumNotDefined(const EnumTypeEntry *t);
+
+QString msgUnknownBase(const AbstractMetaClass *metaClass,
+                       const QString &baseClassName);
+
+QString msgArrayModificationFailed(const FunctionModelItem &functionItem,
+                                   const QString &className,
+                                   const QString &errorMessage);
 
 QString msgCannotResolveEntity(const QString &name, const QString &reason);
 

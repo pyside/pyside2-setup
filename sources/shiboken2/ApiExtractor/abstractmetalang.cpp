@@ -783,6 +783,16 @@ bool AbstractMetaFunction::autoDetectAllowThread() const
     return !maybeGetter;
 }
 
+SourceLocation AbstractMetaFunction::sourceLocation() const
+{
+    return m_sourceLocation;
+}
+
+void AbstractMetaFunction::setSourceLocation(const SourceLocation &sourceLocation)
+{
+    m_sourceLocation = sourceLocation;
+}
+
 static inline TypeSystem::AllowThread allowThreadMod(const AbstractMetaClass *klass)
 {
     return klass->typeEntry()->allowThread();
@@ -2634,6 +2644,16 @@ void AbstractMetaClass::formatMembers(QDebug &d) const
         }
         d << ')';
     }
+}
+
+SourceLocation AbstractMetaClass::sourceLocation() const
+{
+    return m_sourceLocation;
+}
+
+void AbstractMetaClass::setSourceLocation(const SourceLocation &sourceLocation)
+{
+    m_sourceLocation = sourceLocation;
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaClass *ac)

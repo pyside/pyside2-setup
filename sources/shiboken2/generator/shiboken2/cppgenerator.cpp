@@ -2265,7 +2265,8 @@ static void checkTypeViability(const AbstractMetaFunction *func, const AbstractM
         return;
     QString message;
     QTextStream str(&message);
-    str << "There's no user provided way (conversion rule, argument"
+    str << func->sourceLocation()
+        << "There's no user provided way (conversion rule, argument"
            " removal, custom code, etc) to handle the primitive ";
     if (argIdx == 0)
         str << "return type '" << type->cppSignature() << '\'';
