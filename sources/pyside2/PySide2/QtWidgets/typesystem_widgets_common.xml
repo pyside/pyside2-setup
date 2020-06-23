@@ -67,6 +67,7 @@
   -->
   <rejection class="*" enum-name="enum_1"/>
 
+  <rejection class="QMdi"/>
 
   <!--
     Event classes have a lot of non-documented protected fields, those fields

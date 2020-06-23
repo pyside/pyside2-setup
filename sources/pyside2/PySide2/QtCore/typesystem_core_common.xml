@@ -104,6 +104,16 @@
     <rejection class="QMetaObject" function-name="changeGuard"/>
     <rejection class="QMetaObject" function-name="removeGuard"/>
 
+    <rejection class="QAlgorithmsPrivate"/>
+    <rejection class="QJsonPrivate"/>
+    <rejection class="QTextStreamFunctions"/>
+    <rejection class="QtGlobalStatic"/>
+    <rejection class="QtMetaTypePrivate"/>
+    <rejection class="QtPrivate"/>
+    <rejection class="QtSharedPointer"/>
+    <rejection class="QtStringBuilder"/>
+    <rejection class="std"/>
+
   <rejection class="QByteArray" field-name="MaxSize"/>
   <rejection class="QChildEvent" field-name="c"/>
   <rejection class="QTimerEvent" field-name="id"/>
