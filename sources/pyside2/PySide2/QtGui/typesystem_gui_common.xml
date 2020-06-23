@@ -105,6 +105,8 @@
   <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
 
+  <rejection class="QDrawBorderPixmap"/>
+
   <!--
     Event classes have a lot of non-documented protected fields, those fields
     are removed from PySide because they are Qt implementation details,

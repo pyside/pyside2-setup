@@ -47,6 +47,8 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 #define DECLARE_MODEL_NODE(k) \
     enum { __node_kind = Kind_##k };
 
+class SourceLocation;
+
 class CodeModel
 {
 public:
@@ -295,6 +297,8 @@ public:
 
     void getEndPosition(int *line, int *column);
     void setEndPosition(int line, int column);
+
+    SourceLocation sourceLocation() const;
 
     inline CodeModel *model() const { return m_model; }
 

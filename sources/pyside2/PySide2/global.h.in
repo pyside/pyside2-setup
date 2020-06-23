@@ -37,6 +37,9 @@
 **
 ****************************************************************************/
 
+// Make "signals:", "slots:" visible as access specifiers
+#define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
+
 #include <QtCore/qnamespace.h>
 
 #if @ENABLE_X11@
@@ -50,8 +53,5 @@
 // There are symbols in Qt that exist in Debug but
 // not in release
 #define QT_NO_DEBUG
-
-// Make "signals:", "slots:" visible as access specifiers
-#define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
 
 // Here are now all configured modules appended:

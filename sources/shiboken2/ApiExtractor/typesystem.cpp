@@ -811,6 +811,16 @@ QString TypeEntry::buildTargetLangName() const
     return result;
 }
 
+SourceLocation TypeEntry::sourceLocation() const
+{
+    return m_sourceLocation;
+}
+
+void TypeEntry::setSourceLocation(const SourceLocation &sourceLocation)
+{
+    m_sourceLocation = sourceLocation;
+}
+
 QString TypeEntry::targetLangEntryName() const
 {
     if (m_cachedTargetLangEntryName.isEmpty()) {

@@ -411,11 +411,13 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
         case QMetaObject::ReadProperty:
         case QMetaObject::WriteProperty:
         case QMetaObject::ResetProperty:
+#  if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         case QMetaObject::QueryPropertyDesignable:
         case QMetaObject::QueryPropertyScriptable:
         case QMetaObject::QueryPropertyStored:
         case QMetaObject::QueryPropertyEditable:
         case QMetaObject::QueryPropertyUser:
+#  endif // < Qt 6
             pp->d->metaCallHandler(pp, pySelf, call, args);
             break;
 #endif

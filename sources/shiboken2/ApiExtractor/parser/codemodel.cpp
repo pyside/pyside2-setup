@@ -30,6 +30,7 @@
 
 #include "codemodel.h"
 
+#include <sourcelocation.h>
 #include <clangparser/clangutils.h>
 
 #include <algorithm>
@@ -606,6 +607,11 @@ void _CodeModelItem::setEndPosition(int line, int column)
 {
     m_endLine = line;
     m_endColumn = column;
+}
+
+SourceLocation _CodeModelItem::sourceLocation() const
+{
+    return SourceLocation(m_fileName, m_startLine);
 }
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -857,7 +857,11 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                         const QRegularExpressionMatch match = regex.match(expr, offset);
                         if (!match.hasMatch())
                             break;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                        const int argId = match.capturedView(1).toInt() - 1;
+#else
                         const int argId = match.capturedRef(1).toInt() - 1;
+#endif
                         if (argId < 0 || argId > func->arguments().count()) {
                             qCWarning(lcShiboken) << "The expression used in return value contains an invalid index.";
                             break;
@@ -2261,7 +2265,8 @@ static void checkTypeViability(const AbstractMetaFunction *func, const AbstractM
         return;
     QString message;
     QTextStream str(&message);
-    str << "There's no user provided way (conversion rule, argument"
+    str << func->sourceLocation()
+        << "There's no user provided way (conversion rule, argument"
            " removal, custom code, etc) to handle the primitive ";
     if (argIdx == 0)
         str << "return type '" << type->cppSignature() << '\'';

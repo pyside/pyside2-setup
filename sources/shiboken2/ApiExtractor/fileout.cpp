@@ -30,7 +30,9 @@
 #include "messages.h"
 #include "reporthandler.h"
 
-#include <QtCore/QTextCodec>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#  include <QtCore/QTextCodec>
+#endif
 #include <QtCore/QFileInfo>
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
@@ -219,8 +221,10 @@ FileOut::State FileOut::done(QString *errorMessage)
             *errorMessage = msgCannotOpenForWriting(fileWrite);
             return Failure;
         }
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         QTextCodec *codec = QTextCodec::codecForName("UTF-8");
         stream.setCodec(codec);
+#endif
         stream.setDevice(&fileWrite);
         stream << tmp;
     }

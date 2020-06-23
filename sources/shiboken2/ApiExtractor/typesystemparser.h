@@ -168,7 +168,8 @@ private:
 
     const TypeEntry *currentParentTypeEntry() const;
     bool checkRootElement();
-    void applyCommonAttributes(TypeEntry *type, QXmlStreamAttributes *attributes) const;
+    void applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
+                               QXmlStreamAttributes *attributes) const;
     PrimitiveTypeEntry *
         parsePrimitiveTypeEntry(const QXmlStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);
@@ -272,6 +273,7 @@ private:
 
     QString m_currentSignature;
     QString m_currentPath;
+    QString m_currentFile;
     QScopedPointer<TypeSystemEntityResolver> m_entityResolver;
     QHash<SmartPointerTypeEntry *, QString> m_smartPointerInstantiations;
 };

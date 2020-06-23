@@ -568,17 +568,25 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
     return true;
 }
 
-bool TypeDatabase::isSuppressedWarning(const QString& s) const
+template <class String> //  QString,  QStringRef
+bool TypeDatabase::isSuppressedWarningHelper(const String &s) const
 {
     if (!m_suppressWarnings)
         return false;
+    return std::any_of(m_suppressedWarnings.cbegin(), m_suppressedWarnings.end(),
+                       [&s] (const QRegularExpression &e) {
+                           return e.match(s).hasMatch();
+                       });
+}
 
-    for (const QRegularExpression &warning : m_suppressedWarnings) {
-        if (warning.match(s).hasMatch())
-             return true;
-    }
+bool TypeDatabase::isSuppressedWarning(const QString &s) const
+{
+    return isSuppressedWarningHelper(s);
+}
 
-    return false;
+bool TypeDatabase::isSuppressedWarning(const QStringRef &s) const
+{
+    return isSuppressedWarningHelper(s);
 }
 
 QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, const QString &currentPath) const

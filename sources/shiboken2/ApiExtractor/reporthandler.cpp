@@ -122,13 +122,19 @@ void ReportHandler::setPrefix(const QString &p)
 
 void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &text)
 {
+    // Check for file location separator added by SourceLocation
+    int fileLocationPos = text.indexOf(QLatin1String(":\t"));
     if (type == QtWarningMsg) {
         if (m_silent || m_reportedWarnings.contains(text))
             return;
-        const TypeDatabase *db = TypeDatabase::instance();
-        if (db && db->isSuppressedWarning(text)) {
-            ++m_suppressedCount;
-            return;
+        if (auto db = TypeDatabase::instance()) {
+            const bool suppressed = fileLocationPos >= 0
+                ? db->isSuppressedWarning(text.midRef(fileLocationPos + 2))
+                : db->isSuppressedWarning(text);
+            if (suppressed) {
+                ++m_suppressedCount;
+                return;
+            }
         }
         ++m_warningCount;
         ++m_step_warning;
@@ -137,7 +143,11 @@ void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &cont
     QString message = m_prefix;
     if (!message.isEmpty())
         message.append(QLatin1Char(' '));
+    const int prefixLength = message.size();
     message.append(text);
+    // Replace file location tab by space
+    if (fileLocationPos >= 0)
+        message[prefixLength + fileLocationPos + 1] = QLatin1Char(' ');
     fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, message)));
 }
 

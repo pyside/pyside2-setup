@@ -65,6 +65,7 @@
     </namespace-type>
 
     <rejection class="QIPv6Address" field-name="c"/>
+    <rejection class="dtlsopenssl"/>
 
     <object-type name="QAbstractSocket">
         <enum-type name="BindFlag" flags="BindMode"/>
