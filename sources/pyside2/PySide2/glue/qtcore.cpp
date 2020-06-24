@@ -806,6 +806,11 @@ static inline bool _findChildrenComparator(const QObject *&child, const QRegExp 
     return name.indexIn(child->objectName()) != -1;
 }
 
+static inline bool _findChildrenComparator(const QObject *&child, const QRegularExpression &name)
+{
+    return name.match(child->objectName()).hasMatch();
+}
+
 static inline bool _findChildrenComparator(const QObject *&child, const QString &name)
 {
     return name.isNull() || name == child->objectName();
@@ -828,15 +833,10 @@ QObject *child = _findChildHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>
 %PYARG_0 = %CONVERTTOPYTHON[QObject *](child);
 // @snippet qobject-findchild-2
 
-// @snippet qobject-findchildren-1
+// @snippet qobject-findchildren
 %PYARG_0 = PyList_New(0);
 _findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %PYARG_0);
-// @snippet qobject-findchildren-1
-
-// @snippet qobject-findchildren-2
-%PYARG_0 = PyList_New(0);
-_findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %PYARG_0);
-// @snippet qobject-findchildren-2
+// @snippet qobject-findchildren
 
 // @snippet qobject-tr
 QString result;

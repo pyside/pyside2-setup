@@ -1723,7 +1723,7 @@
         <inject-documentation format="target" mode="append">
         Like the method *findChild*, the first parameter should be the child's type.
         </inject-documentation>
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren-1"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return">
             <parent index="this" action="add"/>
         </modify-argument>
@@ -1732,7 +1732,13 @@
         </modify-argument>
     </add-function>
     <add-function signature="findChildren(PyTypeObject*,const QRegExp&amp;)" return-type="PySequence*" >
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren-2"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
+        <modify-argument index="return">
+            <parent index="this" action="add"/>
+        </modify-argument>
+    </add-function>
+    <add-function signature="findChildren(PyTypeObject*,const QRegularExpression&amp;)" return-type="PySequence*" >
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return">
             <parent index="this" action="add"/>
         </modify-argument>
