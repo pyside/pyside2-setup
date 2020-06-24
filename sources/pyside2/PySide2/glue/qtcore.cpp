@@ -647,7 +647,7 @@ if (%PYARG_0 == Py_None)
 
 // @snippet qline-hash
 namespace PySide {
-    template<> inline uint hash(const QLine &v) {
+    template<> inline Py_ssize_t hash(const QLine &v) {
         return qHash(qMakePair(qMakePair(v.x1(), v.y1()), qMakePair(v.x2(), v.y2())));
     }
 };
@@ -715,7 +715,7 @@ if (!PyDateTimeAPI) PySideDateTime_IMPORT;
 
 // @snippet qpoint
 namespace PySide {
-    template<> inline uint hash(const QPoint &v) {
+    template<> inline Py_ssize_t hash(const QPoint &v) {
         return qHash(qMakePair(v.x(), v.y()));
     }
 };
@@ -723,7 +723,7 @@ namespace PySide {
 
 // @snippet qrect
 namespace PySide {
-    template<> inline uint hash(const QRect &v) {
+    template<> inline Py_ssize_t hash(const QRect &v) {
         return qHash(qMakePair(qMakePair(v.x(), v.y()), qMakePair(v.width(), v.height())));
     }
 };
@@ -731,7 +731,7 @@ namespace PySide {
 
 // @snippet qsize
 namespace PySide {
-    template<> inline uint hash(const QSize &v) {
+    template<> inline Py_ssize_t hash(const QSize &v) {
         return qHash(qMakePair(v.width(), v.height()));
     }
 };

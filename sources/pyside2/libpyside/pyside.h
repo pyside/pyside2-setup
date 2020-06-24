@@ -62,7 +62,7 @@ PYSIDE_API void init(PyObject *module);
  * Hash function used to enable hash on objects not supported on native Qt library which has toString function.
  */
 template<class T>
-inline uint hash(const T& value)
+inline Py_ssize_t hash(const T& value)
 {
     return qHash(value.toString());
 }
