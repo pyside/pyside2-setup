@@ -204,7 +204,7 @@ def prepare_packages_posix(self, vars):
             # compatibility
             if sys.version_info[0] == 3:
                 examples_path = "{st_build_dir}/{st_package_name}/examples".format(**vars)
-                pyside_rcc_path = "{install_dir}/bin/rcc".format(**vars)
+                pyside_rcc_path = "rcc"
                 pyside_rcc_options = ['-g', 'python']
                 regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 

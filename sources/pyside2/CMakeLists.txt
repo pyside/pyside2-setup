@@ -84,7 +84,6 @@ add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
 find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
 message(STATUS "GL Headers path:" "${GL_H}")
-include(FindQt5Extra)
 
 set(XVFB_EXEC "")
 option(USE_XVFB "Uses xvfb-run with the unit tests to avoid QtGui tests popping windows on the screen." FALSE)

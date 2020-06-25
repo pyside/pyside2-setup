@@ -220,8 +220,7 @@ def prepare_packages_win32(self, vars):
             if sys.version_info[0] == 3:
                 examples_path = "{st_build_dir}/{st_package_name}/examples".format(
                     **vars)
-                pyside_rcc_path = "{install_dir}/bin/rcc.exe".format(
-                    **vars)
+                pyside_rcc_path = "rcc.exe"
                 pyside_rcc_options = ['-g', 'python']
                 regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 

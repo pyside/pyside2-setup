@@ -20,4 +20,3 @@ add_subdirectory(sources/pyside2)
 
 # Semi-hack to include exported pyside2 variables.
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/pyside2/libpyside")
-add_subdirectory(sources/pyside2-tools)
