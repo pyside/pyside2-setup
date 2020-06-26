@@ -30,7 +30,7 @@ instructions:
   - type: ExecuteCommand
     command: "c:\\users\\qt\\MSVC.bat python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
     maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
+    maxTimeBetweenOutput: 500
     enable_if:
         condition: property
         property: host.os
