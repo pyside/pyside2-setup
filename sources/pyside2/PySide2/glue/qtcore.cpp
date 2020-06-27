@@ -647,7 +647,7 @@ if (%PYARG_0 == Py_None)
 
 // @snippet qline-hash
 namespace PySide {
-    template<> inline uint hash(const QLine &v) {
+    template<> inline Py_ssize_t hash(const QLine &v) {
         return qHash(qMakePair(qMakePair(v.x1(), v.y1()), qMakePair(v.x2(), v.y2())));
     }
 };
@@ -715,7 +715,7 @@ if (!PyDateTimeAPI) PySideDateTime_IMPORT;
 
 // @snippet qpoint
 namespace PySide {
-    template<> inline uint hash(const QPoint &v) {
+    template<> inline Py_ssize_t hash(const QPoint &v) {
         return qHash(qMakePair(v.x(), v.y()));
     }
 };
@@ -723,7 +723,7 @@ namespace PySide {
 
 // @snippet qrect
 namespace PySide {
-    template<> inline uint hash(const QRect &v) {
+    template<> inline Py_ssize_t hash(const QRect &v) {
         return qHash(qMakePair(qMakePair(v.x(), v.y()), qMakePair(v.width(), v.height())));
     }
 };
@@ -731,7 +731,7 @@ namespace PySide {
 
 // @snippet qsize
 namespace PySide {
-    template<> inline uint hash(const QSize &v) {
+    template<> inline Py_ssize_t hash(const QSize &v) {
         return qHash(qMakePair(v.width(), v.height()));
     }
 };
@@ -806,6 +806,11 @@ static inline bool _findChildrenComparator(const QObject *&child, const QRegExp 
     return name.indexIn(child->objectName()) != -1;
 }
 
+static inline bool _findChildrenComparator(const QObject *&child, const QRegularExpression &name)
+{
+    return name.match(child->objectName()).hasMatch();
+}
+
 static inline bool _findChildrenComparator(const QObject *&child, const QString &name)
 {
     return name.isNull() || name == child->objectName();
@@ -828,15 +833,10 @@ QObject *child = _findChildHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>
 %PYARG_0 = %CONVERTTOPYTHON[QObject *](child);
 // @snippet qobject-findchild-2
 
-// @snippet qobject-findchildren-1
+// @snippet qobject-findchildren
 %PYARG_0 = PyList_New(0);
 _findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %PYARG_0);
-// @snippet qobject-findchildren-1
-
-// @snippet qobject-findchildren-2
-%PYARG_0 = PyList_New(0);
-_findChildrenHelper(%CPPSELF, %2, reinterpret_cast<PyTypeObject *>(%PYARG_1), %PYARG_0);
-// @snippet qobject-findchildren-2
+// @snippet qobject-findchildren
 
 // @snippet qobject-tr
 QString result;
@@ -1984,3 +1984,31 @@ PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
 PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
 return %out;
 // @snippet return-qpair
+
+// @snippet qthread_pthread_cleanup
+#ifdef Q_OS_UNIX
+#  include <stdio.h>
+#  include <pthread.h>
+static void qthread_pthread_cleanup(void *arg)
+{
+    // PYSIDE 1282: When terminating a thread using QThread::terminate()
+    // (pthread_cancel()), QThread::run() is aborted and the lock is released,
+    // but ~GilState() is still executed for some reason. Prevent it from
+    // releasing.
+    auto gil = reinterpret_cast<Shiboken::GilState *>(arg);
+    gil->abandon();
+}
+#endif // Q_OS_UNIX
+// @snippet qthread_pthread_cleanup
+
+// @snippet qthread_pthread_cleanup_install
+#ifdef Q_OS_UNIX
+pthread_cleanup_push(qthread_pthread_cleanup, &gil);
+#endif
+// @snippet qthread_pthread_cleanup_install
+
+// @snippet qthread_pthread_cleanup_uninstall
+#ifdef Q_OS_UNIX
+pthread_cleanup_pop(0);
+#endif
+// @snippet qthread_pthread_cleanup_uninstall

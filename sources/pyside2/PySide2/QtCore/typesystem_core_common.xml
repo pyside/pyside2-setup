@@ -1477,9 +1477,15 @@
     <enum-type name="IteratorFlag" flags="IteratorFlags"/>
   </object-type>
   <object-type name="QThread">
+    <inject-code file="../glue/qtcore.cpp" class="native" position="beginning" snippet="qthread_pthread_cleanup"/>
     <enum-type name="Priority"/>
     <modify-function signature="currentThreadId()" remove="all"/>
-    <modify-function signature="run()" allow-thread="yes"/>
+    <modify-function signature="run()" allow-thread="yes">
+        <inject-code file="../glue/qtcore.cpp" class="native" position="beginning"
+                     snippet="qthread_pthread_cleanup_install"/>
+        <inject-code file="../glue/qtcore.cpp" class="native" position="end"
+                     snippet="qthread_pthread_cleanup_uninstall"/>
+    </modify-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <modify-function signature="msleep(unsigned long)" allow-thread="yes"/>
     <modify-function signature="sleep(unsigned long)" allow-thread="yes"/>
@@ -1717,7 +1723,7 @@
         <inject-documentation format="target" mode="append">
         Like the method *findChild*, the first parameter should be the child's type.
         </inject-documentation>
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren-1"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return">
             <parent index="this" action="add"/>
         </modify-argument>
@@ -1726,7 +1732,13 @@
         </modify-argument>
     </add-function>
     <add-function signature="findChildren(PyTypeObject*,const QRegExp&amp;)" return-type="PySequence*" >
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren-2"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
+        <modify-argument index="return">
+            <parent index="this" action="add"/>
+        </modify-argument>
+    </add-function>
+    <add-function signature="findChildren(PyTypeObject*,const QRegularExpression&amp;)" return-type="PySequence*" >
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return">
             <parent index="this" action="add"/>
         </modify-argument>

@@ -63,5 +63,12 @@ void GilState::release()
     }
 }
 
+// Abandon the lock: Only for special situations, like termination of a
+// POSIX thread (PYSIDE 1282).
+void GilState::abandon()
+{
+    m_locked = false;
+}
+
 } // namespace Shiboken
 

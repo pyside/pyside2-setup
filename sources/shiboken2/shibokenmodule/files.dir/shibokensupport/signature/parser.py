@@ -111,17 +111,21 @@ def _parse_line(line):
     arglist = _parse_arglist(argstr)
     args = []
     for arg in arglist:
-        name, ann = arg.split(":")
-        if name in keyword.kwlist:
-            if LIST_KEYWORDS:
-                print("KEYWORD", ret)
-            name = name + "_"
-        if "=" in ann:
-            ann, default = ann.split("=", 1)
-            tup = name, ann, default
+        tokens = arg.split(":")
+        if len(tokens) < 2:
+            warnings.warn('Invalid argument "{}" in "{}".'.format(arg, line))
         else:
-            tup = name, ann
-        args.append(tup)
+            name, ann = tokens
+            if name in keyword.kwlist:
+                if LIST_KEYWORDS:
+                    print("KEYWORD", ret)
+                name = name + "_"
+            if "=" in ann:
+                ann, default = ann.split("=", 1)
+                tup = name, ann, default
+            else:
+                tup = name, ann
+            args.append(tup)
     ret.arglist = args
     multi = ret.multi
     if multi is not None:
