@@ -1863,7 +1863,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         AbstractMetaType *metaType = translateType(arg->type(), currentClass, {}, &errorMessage);
         if (!metaType) {
             // If an invalid argument has a default value, simply remove it
-            if (arg->defaultValue()) {
+            // unless the function is virtual (since the override in the
+            // wrapper can then not correctly be generated).
+            if (arg->defaultValue() && !functionItem->isVirtual()) {
                 if (!currentClass
                     || (currentClass->typeEntry()->codeGeneration()
                         & TypeEntry::GenerateTargetLang)) {
