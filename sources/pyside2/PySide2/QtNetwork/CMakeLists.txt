@@ -48,9 +48,9 @@ ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )
 
 get_property(QtNetwork_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Network
-             PROPERTY INTERFACE_QT_ENABLED_FEATURES)
+             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 get_property(QtNetwork_disabled_features TARGET Qt${QT_MAJOR_VERSION}::Network
-             PROPERTY INTERFACE_QT_DISABLED_FEATURES)
+             PROPERTY QT_DISABLED_PUBLIC_FEATURES)
 
 # ### fixme: For cmake >= 3.3, use if( needle IN_LIST list)
 list(FIND QtNetwork_enabled_features  "ssl"  _sslEnabledIndex)

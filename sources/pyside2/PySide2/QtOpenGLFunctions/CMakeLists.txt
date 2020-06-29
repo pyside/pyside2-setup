@@ -3,7 +3,7 @@ project(QtOpenGLFunctions)
 set(QtOpenGLFunctions_DROPPED_ENTRIES)
 
 get_property(QtOpenGLFunctions_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
-             PROPERTY INTERFACE_QT_ENABLED_FEATURES)
+             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
 set(QtOpenGLFunctions_SRC ${QtOpenGLFunctions_GEN_DIR}/qtopenglfunctions_module_wrapper.cpp)
 
