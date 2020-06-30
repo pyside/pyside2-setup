@@ -1070,19 +1070,23 @@ static bool convertRemovalAttribute(QStringView remove, Modification& mod, QStri
     return false;
 }
 
-static void getNamePrefixRecursive(StackElement* element, QStringList& names)
+// Check whether an entry should be dropped, allowing for dropping the module
+// name (match 'Class' and 'Module.Class').
+static bool shouldDropTypeEntry(const TypeDatabase *db,
+                                const StackElement *element,
+                                QString name)
 {
-    if (!element->parent || !element->parent->entry)
-        return;
-    getNamePrefixRecursive(element->parent, names);
-    names << element->parent->entry->name();
-}
-
-static QString getNamePrefix(StackElement* element)
-{
-    QStringList names;
-    getNamePrefixRecursive(element, names);
-    return names.join(QLatin1Char('.'));
+    for (auto e = element->parent; e ; e = e->parent) {
+        if (e->entry) {
+            if (e->entry->type() == TypeEntry::TypeSystemType) {
+                if (db->shouldDropTypeEntry(name)) // Unqualified
+                    return true;
+            }
+            name.prepend(QLatin1Char('.'));
+            name.prepend(e->entry->name());
+        }
+    }
+    return db->shouldDropTypeEntry(name);
 }
 
 // Returns empty string if there's no error.
@@ -2728,11 +2732,9 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         }
 
         if (m_database->hasDroppedTypeEntries()) {
-            QString identifier = getNamePrefix(element) + QLatin1Char('.');
-            identifier += element->type == StackElement::FunctionTypeEntry
-                ? attributes.value(signatureAttribute()).toString()
-                : name;
-            if (m_database->shouldDropTypeEntry(identifier)) {
+            const QString identifier = element->type == StackElement::FunctionTypeEntry
+                ? attributes.value(signatureAttribute()).toString() : name;
+            if (shouldDropTypeEntry(m_database, element, identifier)) {
                 m_currentDroppedEntry = element;
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {

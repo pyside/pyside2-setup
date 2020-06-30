@@ -2322,6 +2322,9 @@
   </value-type>
   <object-type name="QLibraryInfo">
     <enum-type name="LibraryLocation"/>
+    <modify-function signature="build()">
+        <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qlibraryinfo_build"/>
+    </modify-function>
   </object-type>
   <object-type name="QMutexLocker" copyable="no">
     <!-- PYSIDE-1271: Creating locking capable objects inside sections that

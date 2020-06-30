@@ -8,7 +8,8 @@ endif()
 
 set(QtGui_DROPPED_ENTRIES)
 
-get_property(QtGui_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui PROPERTY INTERFACE_QT_ENABLED_FEATURES)
+get_property(QtGui_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
+             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
 set(QtGui_SRC
 ${QtGui_GEN_DIR}/qabstractopenglfunctions_wrapper.cpp

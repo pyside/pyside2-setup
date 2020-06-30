@@ -2012,3 +2012,13 @@ pthread_cleanup_push(qthread_pthread_cleanup, &gil);
 pthread_cleanup_pop(0);
 #endif
 // @snippet qthread_pthread_cleanup_uninstall
+
+// @snippet qlibraryinfo_build
+#if defined(IS_PY3K) && defined(Py_LIMITED_API)
+auto suffix = PyUnicode_FromString(" [limited API]");
+auto oldResult = pyResult;
+pyResult = PyUnicode_Concat(pyResult, suffix);
+Py_DECREF(oldResult);
+Py_DECREF(suffix);
+#endif
+// @snippet qlibraryinfo_build

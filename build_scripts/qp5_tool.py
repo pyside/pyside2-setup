@@ -68,6 +68,8 @@ Modules-pyside-setup512=Core,Gui,Widgets,Network,Test
 Configuration keys:
 Acceleration     Incredibuild or unset
 BuildArguments   Arguments to setup.py
+Generator        Generator to be used for CMake. Currently, only Ninja is
+                 supported.
 Jobs             Number of jobs to be run simultaneously
 Modules          Comma separated list of modules to be built
                  (for --module-subset=)
@@ -99,6 +101,7 @@ INCREDIBUILD_CONSOLE = 'BuildConsole' if IS_WINDOWS else '/opt/incredibuild/bin/
 # Config file keys
 ACCELERATION_KEY = 'Acceleration'
 BUILDARGUMENTS_KEY = 'BuildArguments'
+GENERATOR_KEY = 'Generator'
 JOBS_KEY = 'Jobs'
 MODULES_KEY = 'Modules'
 PYTHON_KEY = 'Python'
@@ -304,6 +307,9 @@ def build(target):
         arguments.append('--avoid')  # caching, v0.96.74
     arguments.extend([read_config_python_binary(), 'setup.py', target])
     arguments.extend(read_config_build_arguments())
+    generator = read_config(GENERATOR_KEY)
+    if generator == 'Ninja':
+        arguments.extend(['--make-spec', 'ninja'])
     jobs = read_int_config(JOBS_KEY)
     if jobs > 1:
         arguments.extend(['-j', str(jobs)])
