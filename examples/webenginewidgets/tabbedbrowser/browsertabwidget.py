@@ -241,4 +241,4 @@ class BrowserTabWidget(QTabWidget):
         return -1
 
     def _download_requested(self, item):
-        self.downloadRequested.emit(item)
+        self.download_requested.emit(item)

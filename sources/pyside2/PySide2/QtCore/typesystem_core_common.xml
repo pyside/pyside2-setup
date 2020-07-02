@@ -1460,9 +1460,15 @@
     <enum-type name="IteratorFlag" flags="IteratorFlags"/>
   </object-type>
   <object-type name="QThread">
+    <inject-code file="../glue/qtcore.cpp" class="native" position="beginning" snippet="qthread_pthread_cleanup"/>
     <enum-type name="Priority"/>
     <modify-function signature="currentThreadId()" remove="all"/>
-    <modify-function signature="run()" allow-thread="yes"/>
+    <modify-function signature="run()" allow-thread="yes">
+        <inject-code file="../glue/qtcore.cpp" class="native" position="beginning"
+                     snippet="qthread_pthread_cleanup_install"/>
+        <inject-code file="../glue/qtcore.cpp" class="native" position="end"
+                     snippet="qthread_pthread_cleanup_uninstall"/>
+    </modify-function>
     <modify-function signature="exec()" rename="exec_" allow-thread="yes"/>
     <modify-function signature="msleep(unsigned long)" allow-thread="yes"/>
     <modify-function signature="sleep(unsigned long)" allow-thread="yes"/>

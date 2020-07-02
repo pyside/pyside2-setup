@@ -589,7 +589,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
 {
     QString value = arg->defaultValueExpression();
 
-    if (value.isEmpty()
+    if (value.isEmpty() || value == QLatin1String("{}")
         || arg->hasModifiedDefaultValueExpression()
         || isPointer(arg->type())) {
         return value;

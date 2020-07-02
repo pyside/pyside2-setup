@@ -1960,3 +1960,31 @@ PyTuple_SET_ITEM(%out, 0, %CONVERTTOPYTHON[%INTYPE_0](%in.first));
 PyTuple_SET_ITEM(%out, 1, %CONVERTTOPYTHON[%INTYPE_1](%in.second));
 return %out;
 // @snippet return-qpair
+
+// @snippet qthread_pthread_cleanup
+#ifdef Q_OS_UNIX
+#  include <stdio.h>
+#  include <pthread.h>
+static void qthread_pthread_cleanup(void *arg)
+{
+    // PYSIDE 1282: When terminating a thread using QThread::terminate()
+    // (pthread_cancel()), QThread::run() is aborted and the lock is released,
+    // but ~GilState() is still executed for some reason. Prevent it from
+    // releasing.
+    auto gil = reinterpret_cast<Shiboken::GilState *>(arg);
+    gil->abandon();
+}
+#endif // Q_OS_UNIX
+// @snippet qthread_pthread_cleanup
+
+// @snippet qthread_pthread_cleanup_install
+#ifdef Q_OS_UNIX
+pthread_cleanup_push(qthread_pthread_cleanup, &gil);
+#endif
+// @snippet qthread_pthread_cleanup_install
+
+// @snippet qthread_pthread_cleanup_uninstall
+#ifdef Q_OS_UNIX
+pthread_cleanup_pop(0);
+#endif
+// @snippet qthread_pthread_cleanup_uninstall

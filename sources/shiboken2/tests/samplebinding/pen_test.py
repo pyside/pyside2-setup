@@ -63,6 +63,8 @@ class TestPen(unittest.TestCase):
     def testPenWithIntConvertedToColor(self):
         pen = Pen(1)
         self.assertEqual(pen.ctorType(), Pen.ColorCtor)
+        pen.drawLine(0, 0, 5, 5)
+
 
 if __name__ == '__main__':
     unittest.main()

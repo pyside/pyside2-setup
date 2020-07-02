@@ -328,7 +328,6 @@ PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *nam
         Py_DECREF(attr);
         if (!value)
             return 0;
-        Py_INCREF(value);
         attr = value;
     }
 
