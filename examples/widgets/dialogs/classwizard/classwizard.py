@@ -325,7 +325,7 @@ class CodeStylePage(QtWidgets.QWizardPage):
 
         if not is_baseClass:
             self.baseIncludeLineEdit.clear()
-        elif QtCore.QRegExp('Q[A-Z].*').exactMatch(baseClass):
+        elif QtCore.QRegularExpression('^Q[A-Z].*$').match(baseClass).hasMatch():
             self.baseIncludeLineEdit.setText('<' + baseClass + '>')
         else:
             self.baseIncludeLineEdit.setText('"' + baseClass.lower() + '.h"')

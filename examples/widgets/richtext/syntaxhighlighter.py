@@ -130,65 +130,73 @@ class Highlighter(QtGui.QSyntaxHighlighter):
                 "\\bunion\\b", "\\bunsigned\\b", "\\bvirtual\\b", "\\bvoid\\b",
                 "\\bvolatile\\b"]
 
-        self.highlightingRules = [(QtCore.QRegExp(pattern), keywordFormat)
+        self.highlightingRules = [(QtCore.QRegularExpression(pattern), keywordFormat)
                 for pattern in keywordPatterns]
 
         classFormat = QtGui.QTextCharFormat()
         classFormat.setFontWeight(QtGui.QFont.Bold)
         classFormat.setForeground(QtCore.Qt.darkMagenta)
-        self.highlightingRules.append((QtCore.QRegExp("\\bQ[A-Za-z]+\\b"),
-                classFormat))
+        pattern = QtCore.QRegularExpression(r'\bQ[A-Za-z]+\b')
+        assert pattern.isValid()
+        self.highlightingRules.append((pattern, classFormat))
 
         singleLineCommentFormat = QtGui.QTextCharFormat()
         singleLineCommentFormat.setForeground(QtCore.Qt.red)
-        self.highlightingRules.append((QtCore.QRegExp("//[^\n]*"),
-                singleLineCommentFormat))
+        pattern = QtCore.QRegularExpression('//[^\n]*')
+        assert pattern.isValid()
+        self.highlightingRules.append((pattern, singleLineCommentFormat))
 
         self.multiLineCommentFormat = QtGui.QTextCharFormat()
         self.multiLineCommentFormat.setForeground(QtCore.Qt.red)
 
         quotationFormat = QtGui.QTextCharFormat()
         quotationFormat.setForeground(QtCore.Qt.darkGreen)
-        self.highlightingRules.append((QtCore.QRegExp("\".*\""),
-                quotationFormat))
+        pattern = QtCore.QRegularExpression('".*"')
+        assert pattern.isValid()
+        self.highlightingRules.append((pattern, quotationFormat))
 
         functionFormat = QtGui.QTextCharFormat()
         functionFormat.setFontItalic(True)
         functionFormat.setForeground(QtCore.Qt.blue)
-        self.highlightingRules.append((QtCore.QRegExp("\\b[A-Za-z0-9_]+(?=\\()"),
-                functionFormat))
+        pattern = QtCore.QRegularExpression(r'\b[A-Za-z0-9_]+(?=\()')
+        assert pattern.isValid()
+        self.highlightingRules.append((pattern, functionFormat))
 
-        self.commentStartExpression = QtCore.QRegExp("/\\*")
-        self.commentEndExpression = QtCore.QRegExp("\\*/")
+        self.commentStartExpression = QtCore.QRegularExpression(r'/\*')
+        assert self.commentStartExpression.isValid()
+        self.commentEndExpression = QtCore.QRegularExpression(r'\*/')
+        assert self.commentEndExpression.isValid()
 
     def highlightBlock(self, text):
         for pattern, format in self.highlightingRules:
-            expression = QtCore.QRegExp(pattern)
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
+            match = pattern.match(text)
+            while match.hasMatch():
+                index = match.capturedStart(0)
+                length = match.capturedLength(0)
                 self.setFormat(index, length, format)
-                index = expression.indexIn(text, index + length)
+                match = pattern.match(text, index + length)
 
         self.setCurrentBlockState(0)
 
         startIndex = 0
         if self.previousBlockState() != 1:
-            startIndex = self.commentStartExpression.indexIn(text)
+            match = self.commentStartExpression.match(text)
+            startIndex = match.capturedStart(0) if match.hasMatch() else -1
 
         while startIndex >= 0:
-            endIndex = self.commentEndExpression.indexIn(text, startIndex)
-
-            if endIndex == -1:
+            match = self.commentEndExpression.match(text, startIndex)
+            if match.hasMatch():
+                endIndex = match.capturedStart(0)
+                length = match.capturedLength(0)
+                commentLength = endIndex - startIndex + length
+            else:
                 self.setCurrentBlockState(1)
                 commentLength = len(text) - startIndex
-            else:
-                commentLength = endIndex - startIndex + self.commentEndExpression.matchedLength()
 
             self.setFormat(startIndex, commentLength,
                     self.multiLineCommentFormat)
-            startIndex = self.commentStartExpression.indexIn(text,
-                    startIndex + commentLength)
+            match = self.commentStartExpression.match(text, startIndex + commentLength)
+            startIndex = match.capturedStart(0) if match.hasMatch() else -1
 
 
 if __name__ == '__main__':

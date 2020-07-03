@@ -123,7 +123,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def findCodecs(self):
         codecMap = []
-        iso8859RegExp = QtCore.QRegExp('ISO[- ]8859-([0-9]+).*')
+        iso8859RegExp = QtCore.QRegularExpression('^ISO[- ]8859-([0-9]+).*$')
+        assert iso8859RegExp.isValid()
 
         for mib in QtCore.QTextCodec.availableMibs():
             codec = QtCore.QTextCodec.codecForMib(mib)
@@ -134,13 +135,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 rank = 1
             elif sortKey.startswith('UTF-16'):
                 rank = 2
-            elif iso8859RegExp.exactMatch(sortKey):
-                if len(iso8859RegExp.cap(1)) == 1:
-                    rank = 3
-                else:
-                    rank = 4
             else:
-                rank = 5
+                match = iso8859RegExp.match(sortKey)
+                if match.hasMatch():
+                    if len(match.captured(1)) == 1:
+                        rank = 3
+                    else:
+                        rank = 4
+                else:
+                    rank = 5
 
             codecMap.append((str(rank) + sortKey, codec))
 

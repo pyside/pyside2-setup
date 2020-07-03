@@ -45,7 +45,7 @@ try:
 except ImportError:
     import pickle
 
-from PySide2.QtCore import (Qt, Signal, QRegExp, QModelIndex,
+from PySide2.QtCore import (Qt, Signal, QRegularExpression, QModelIndex,
                             QItemSelection, QSortFilterProxyModel)
 from PySide2.QtWidgets import QTabWidget, QMessageBox, QTableView, QAbstractItemView
 
@@ -193,9 +193,10 @@ class AddressWidget(QTabWidget):
             # tab. The regex will end up looking like "^[ABC].*", only
             # allowing this tab to display items where the name starts with
             # "A", "B", or "C". Notice that we set it to be case-insensitive.
-            reFilter = "^[%s].*" % group
-
-            proxyModel.setFilterRegExp(QRegExp(reFilter, Qt.CaseInsensitive))
+            re = QRegularExpression("^[{}].*".format(group))
+            assert re.isValid()
+            re.setPatternOptions(QRegularExpression.CaseInsensitiveOption)
+            proxyModel.setFilterRegularExpression(re)
             proxyModel.setFilterKeyColumn(0) # Filter on the "name" column
             proxyModel.sort(0, Qt.AscendingOrder)
 
