@@ -31,6 +31,7 @@
 #include "clangutils.h"
 
 #include <codemodel.h>
+#include <reporthandler.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
@@ -168,8 +169,10 @@ public:
 
     bool addClass(const CXCursor &cursor, CodeModel::ClassType t);
     FunctionModelItem createFunction(const CXCursor &cursor,
-                                     CodeModel::FunctionType t = CodeModel::Normal);
-    FunctionModelItem createMemberFunction(const CXCursor &cursor);
+                                     CodeModel::FunctionType t = CodeModel::Normal,
+                                     bool isTemplateCode = false);
+    FunctionModelItem createMemberFunction(const CXCursor &cursor,
+                                           bool isTemplateCode = false);
     void qualifyConstructor(const CXCursor &cursor);
     TypeInfo createTypeInfoHelper(const CXType &type) const; // uncashed
     TypeInfo createTypeInfo(const CXType &type) const;
@@ -257,12 +260,54 @@ bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
     return true;
 }
 
-static inline ExceptionSpecification exceptionSpecificationFromClang(int ce)
+static QString msgCannotDetermineException(const std::string_view &snippetV)
 {
+    const auto newLine = snippetV.find('\n'); // Multiline noexcept specifications have been found in Qt
+    const bool truncate = newLine != std::string::npos;
+    const qsizetype length = qsizetype(truncate ? newLine : snippetV.size());
+    QString snippet = QString::fromUtf8(snippetV.cbegin(), length);
+    if (truncate)
+        snippet += QStringLiteral("...");
+
+    return QLatin1String("Cannot determine exception specification: \"")
+        + snippet + QLatin1Char('"');
+}
+
+// Return whether noexcept(<value>) throws. noexcept() takes a constexpr value.
+// Try to determine the simple cases (true|false) via code snippet.
+static ExceptionSpecification computedExceptionSpecificationFromClang(BaseVisitor *bv,
+                                                                      const CXCursor &cursor,
+                                                                      bool isTemplateCode)
+{
+    const std::string_view snippet = bv->getCodeSnippet(cursor);
+    if (snippet.empty())
+        return ExceptionSpecification::Unknown; // Macro expansion, cannot tell
+    if (snippet.find("noexcept(false)") != std::string::npos)
+        return ExceptionSpecification::Throws;
+    if (snippet.find("noexcept(true)") != std::string::npos)
+        return ExceptionSpecification::NoExcept;
+    // Warn about it unless it is some form of template code where it is common
+    // to have complicated code, which is of no concern to shiboken, like:
+    // "QList::emplace(T) noexcept(is_pod<T>)".
+    if (!isTemplateCode && ReportHandler::isDebug(ReportHandler::FullDebug)) {
+        const Diagnostic d(msgCannotDetermineException(snippet), cursor, CXDiagnostic_Warning);
+        qWarning() << d;
+        bv->appendDiagnostic(d);
+    }
+    return ExceptionSpecification::Unknown;
+}
+
+static ExceptionSpecification exceptionSpecificationFromClang(BaseVisitor *bv,
+                                                              const CXCursor &cursor,
+                                                              bool isTemplateCode)
+{
+    const auto ce = clang_getCursorExceptionSpecificationType(cursor);
     switch (ce) {
-    case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
     case CXCursor_ExceptionSpecificationKind_ComputedNoexcept:
+        return computedExceptionSpecificationFromClang(bv, cursor, isTemplateCode);
+    case CXCursor_ExceptionSpecificationKind_BasicNoexcept:
     case CXCursor_ExceptionSpecificationKind_DynamicNone: // throw()
+    case CXCursor_ExceptionSpecificationKind_NoThrow:
         return ExceptionSpecification::NoExcept;
     case CXCursor_ExceptionSpecificationKind_Dynamic: // throw(t1..)
     case CXCursor_ExceptionSpecificationKind_MSAny: // throw(...)
@@ -277,7 +322,8 @@ static inline ExceptionSpecification exceptionSpecificationFromClang(int ce)
 }
 
 FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
-                                                 CodeModel::FunctionType t)
+                                                 CodeModel::FunctionType t,
+                                                 bool isTemplateCode)
 {
     QString name = getCursorSpelling(cursor);
     // Apply type fixes to "operator X &" -> "operator X&"
@@ -289,7 +335,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
-    result->setExceptionSpecification(exceptionSpecificationFromClang(clang_getCursorExceptionSpecificationType(cursor)));
+    result->setExceptionSpecification(exceptionSpecificationFromClang(m_baseVisitor, cursor, isTemplateCode));
     switch (clang_getCursorAvailability(cursor)) {
     case CXAvailability_Available:
         break;
@@ -326,13 +372,15 @@ static inline CodeModel::FunctionType functionTypeFromCursor(const CXCursor &cur
     return result;
 }
 
-FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor)
+FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
+                                                       bool isTemplateCode)
 {
     const CodeModel::FunctionType functionType =
         m_currentFunctionType == CodeModel::Signal || m_currentFunctionType == CodeModel::Slot
         ? m_currentFunctionType // by annotation
         : functionTypeFromCursor(cursor);
-    FunctionModelItem result = createFunction(cursor, functionType);
+    isTemplateCode |= m_currentClass->name().endsWith(QLatin1Char('>'));
+    auto result = createFunction(cursor, functionType, isTemplateCode);
     result->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     result->setConstant(clang_CXXMethod_isConst(cursor) != 0);
     result->setStatic(clang_CXXMethod_isStatic(cursor) != 0);
@@ -959,7 +1007,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // Skip inline member functions outside class, only go by declarations inside class
         if (!withinClassDeclaration(cursor))
             return Skip;
-        d->m_currentFunction = d->createMemberFunction(cursor);
+        d->m_currentFunction = d->createMemberFunction(cursor, false);
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     // Not fully supported, currently, seen as normal function
@@ -968,16 +1016,18 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         const CXCursor semParent = clang_getCursorSemanticParent(cursor);
         if (isClassCursor(semParent)) {
             if (semParent == clang_getCursorLexicalParent(cursor)) {
-                d->m_currentFunction = d->createMemberFunction(cursor);
+                d->m_currentFunction = d->createMemberFunction(cursor, true);
                 d->m_scopeStack.back()->addFunction(d->m_currentFunction);
                 break;
             }
             return Skip; // inline member functions outside class
         }
     }
-        Q_FALLTHROUGH(); // fall through to free template function.
+        d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, true);
+        d->m_scopeStack.back()->addFunction(d->m_currentFunction);
+        break;
     case CXCursor_FunctionDecl:
-        d->m_currentFunction = d->createFunction(cursor);
+        d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, false);
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     case CXCursor_Namespace: {

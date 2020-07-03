@@ -335,7 +335,11 @@ struct Base {
 struct A : public Base {
     void unspecified();
     void nonThrowing() noexcept;
+# if __cplusplus >= 201703L // C++ 17
+    void throwing() noexcept(false);
+#else
     void throwing() throw(int);
+#endif
 };
 )CPP";
 
@@ -374,7 +378,7 @@ struct A : public Base {
     <object-type name='Base'/>
     <object-type name='A'>
         <modify-function signature='unspecified()' exception-handling='auto-on'/>
-        <modify-function signature='throwing()' exception-handling='off'/>
+        <modify-function signature='throwing()' exception-handling='no'/>
     </object-type>
 </typesystem>)XML")
          << true << false << false // exception
