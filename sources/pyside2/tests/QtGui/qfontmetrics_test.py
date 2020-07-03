@@ -226,7 +226,7 @@ class QCharTest(QFontMetricsFTest):
         self.assertEqual(type(retCh), QRectF)
 
     def testWith(self):
-        retCh = self.metrics.widthChar('a')
+        retCh = self.metrics.horizontalAdvance('a')
         self.assertTrue(retCh > 0)
 
 if __name__ == '__main__':
