@@ -75,6 +75,14 @@ class QByteArrayTestToNumber(unittest.TestCase):
         b.setNum(-0.5)
         self.assertEqual(b, "-0.5")
 
+    def testNumber(self):
+        b = QByteArray.number(py3k.long(-124124))
+        self.assertEqual(b, "-124124")
+        b = QByteArray.number(-124124)
+        self.assertEqual(b, "-124124")
+        b = QByteArray.number(-0.5)
+        self.assertEqual(b, "-0.5")
+
     def testAppend(self):
         b = QByteArray()
         b.append(py3k.b("A"))

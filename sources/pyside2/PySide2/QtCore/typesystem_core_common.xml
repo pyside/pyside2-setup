@@ -1929,12 +1929,19 @@
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator>=(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator[](int)const" remove="all"/>
-    <!-- Those types have the same representation in Python, an overload would be useless. -->
+    <modify-function signature="operator[](uint)const" remove="all"/>
+    <!-- Those types have the same representation in Python, an overload
+         would be useless and cause overflow errors. -->
     <modify-function signature="setNum(uint,int)" remove="all"/>
     <modify-function signature="setNum(ushort,int)" remove="all"/>
     <modify-function signature="setNum(float,char,int)" remove="all"/>
     <modify-function signature="setNum(short,int)" remove="all"/>
     <modify-function signature="setNum(qulonglong,int)" remove="all"/>
+    <modify-function signature="number(uint,int)" remove="all"/>
+    <modify-function signature="number(ushort,int)" remove="all"/>
+    <modify-function signature="number(float,char,int)" remove="all"/>
+    <modify-function signature="number(short,int)" remove="all"/>
+    <modify-function signature="number(qulonglong,int)" remove="all"/>
 
     <!--### -->
 

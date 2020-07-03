@@ -3,7 +3,7 @@ instructions:
   - type: ExecuteCommand
     command: "python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
+    maxTimeBetweenOutput: 1200
     enable_if:
         condition: property
         property: host.os
@@ -13,7 +13,7 @@ instructions:
   - type: ExecuteCommand
     command: "python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
+    maxTimeBetweenOutput: 600
     enable_if:
         condition: property
         property: host.os
@@ -23,7 +23,7 @@ instructions:
   - type: ExecuteCommand
     command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
     maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
+    maxTimeBetweenOutput: 600
     enable_if:
         condition: property
         property: host.os

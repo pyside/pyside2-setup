@@ -410,6 +410,11 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         }
     }
 
+    PyObject *error_type, *error_value, *error_traceback;
+
+    /* Save the current exception, if any. */
+    PyErr_Fetch(&error_type, &error_value, &error_traceback);
+
     if (canDelete) {
         if (sotp->is_multicpp) {
             Shiboken::DtorAccumulatorVisitor visitor(sbkObj);
@@ -428,6 +433,9 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     } else {
         Shiboken::Object::deallocData(sbkObj, true);
     }
+
+    /* Restore the saved exception. */
+    PyErr_Restore(error_type, error_value, error_traceback);
 
     if (needTypeDecref)
         Py_DECREF(pyType);
