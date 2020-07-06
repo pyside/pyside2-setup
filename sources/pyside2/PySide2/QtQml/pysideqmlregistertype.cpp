@@ -365,18 +365,23 @@ QtQml_VolatileBoolObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     QtQml_VolatileBoolObject *self
             = reinterpret_cast<QtQml_VolatileBoolObject *>(type->tp_alloc(type, 0));
 
-    if (self != Q_NULLPTR)
-        self->flag = ok;
+    if (self != nullptr)
+        self->flag = new AtomicBool(ok);
 
     return reinterpret_cast<PyObject *>(self);
+}
+
+static void QtQml_VolatileBoolObject_dealloc(PyObject *self)
+{
+    auto volatileBool = reinterpret_cast<QtQml_VolatileBoolObject *>(self);
+    delete volatileBool->flag;
+    Sbk_object_dealloc(self);
 }
 
 static PyObject *
 QtQml_VolatileBoolObject_get(QtQml_VolatileBoolObject *self)
 {
-    if (self->flag)
-        return Py_True;
-    return Py_False;
+    return *self->flag ? Py_True : Py_False;
 }
 
 static PyObject *
@@ -395,10 +400,7 @@ QtQml_VolatileBoolObject_set(QtQml_VolatileBoolObject *self, PyObject *args)
         return Q_NULLPTR;
     }
 
-    if (ok > 0)
-        self->flag = true;
-    else
-        self->flag = false;
+    *self->flag = ok > 0;
 
     Py_RETURN_NONE;
 }
@@ -418,7 +420,7 @@ QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
 {
     PyObject *s;
 
-    if (self->flag)
+    if (*self->flag)
         s = PyBytes_FromFormat("%s(True)",
                                 Py_TYPE(self)->tp_name);
     else
@@ -433,12 +435,12 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
 {
     PyObject *s;
 
-    if (self->flag)
+    if (*self->flag)
         s = PyBytes_FromFormat("%s(True) -> %p",
-                                Py_TYPE(self)->tp_name, &(self->flag));
+                                Py_TYPE(self)->tp_name, self->flag);
     else
         s = PyBytes_FromFormat("%s(False) -> %p",
-                                Py_TYPE(self)->tp_name, &(self->flag));
+                                Py_TYPE(self)->tp_name, self->flag);
     Py_XINCREF(s);
     return s;
 }
@@ -448,7 +450,7 @@ static PyType_Slot QtQml_VolatileBoolType_slots[] = {
     {Py_tp_str, (void *)reinterpret_cast<reprfunc>(QtQml_VolatileBoolObject_str)},
     {Py_tp_methods, (void *)QtQml_VolatileBoolObject_methods},
     {Py_tp_new, (void *)QtQml_VolatileBoolObject_new},
-    {Py_tp_dealloc, (void *)Sbk_object_dealloc},
+    {Py_tp_dealloc, (void *)QtQml_VolatileBoolObject_dealloc},
     {0, 0}
 };
 static PyType_Spec QtQml_VolatileBoolType_spec = {

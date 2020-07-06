@@ -59,12 +59,11 @@
     <!-- For qmlEngine(const QObject*), qmlContext(const QObject*) in qqml.h -->
     <namespace-type name="QtQml"/>
 
-    <!-- FIXME Qt 6: expose QQmlIncubationController::incubateWhile()
-         (see QtQml_VolatileBoolTypeF in pysideqmlregistertype.h)
+    <!-- expose QQmlIncubationController::incubateWhile() (see
+         QtQml_VolatileBoolTypeF/pysideqmlregistertype.h) -->
     <namespace-type name="std" generate="no">
         <value-type name="atomic" generate="no"/>
     </namespace-type>
-    -->
 
     <add-function signature="qmlRegisterType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
         <inject-documentation format="target" mode="append">
@@ -162,19 +161,17 @@
         <enum-type name="Status"/>
     </object-type>
     <object-type name="QQmlIncubationController">
-        <!-- FIXME Qt 6
         <modify-function signature="incubateWhile(std::atomic&lt;bool&gt;*,int)" allow-thread="yes">
             <modify-argument index="1">
                      The replace type is needed to use the VolatileBool_Check macro instead of
                      a template conversion function with "volatile bool" as argument.
                 <replace-type modified-type="VolatileBool"/>
                 <conversion-rule class="native">
-                    volatile bool * %out =
-                      &amp;((reinterpret_cast&lt;QtQml_VolatileBoolObject *&gt;(%PYARG_1))->flag);
+                    auto volatileBool = reinterpret_cast&lt;QtQml_VolatileBoolObject *&gt;(%PYARG_1);
+                    std::atomic&lt;bool&gt; *%out = volatileBool->flag;
                 </conversion-rule>
             </modify-argument>
         </modify-function>
-        -->
     </object-type>
 
     <!-- TODO: QQmlListProperty is a template class, and thus should probably be treated like a

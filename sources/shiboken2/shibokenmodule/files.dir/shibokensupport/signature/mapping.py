@@ -329,6 +329,7 @@ type_map.update({
 
 type_map.update({
     # Handling variables that are returned, eventually as Tuples:
+    "PySide2.QtQml.atomic[bool]": ResultVariable(bool),  # QmlIncubationController::incubateWhile()
     "bool*"         : ResultVariable(bool),
     "float*"        : ResultVariable(float),
     "int*"          : ResultVariable(int),

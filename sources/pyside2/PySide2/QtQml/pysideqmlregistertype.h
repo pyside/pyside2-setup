@@ -42,6 +42,8 @@
 
 #include <sbkpython.h>
 
+#include <atomic>
+
 struct SbkObjectType;
 
 namespace PySide
@@ -71,11 +73,13 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
                     const char *qmlName);
 }
 
-// Volatile Bool Ptr type definition.
+// Volatile Bool Ptr type definition for QQmlIncubationController::incubateWhile(std::atomic<bool> *, int)
+
+using AtomicBool = std::atomic<bool>;
 
 typedef struct {
     PyObject_HEAD
-    volatile bool flag;
+    AtomicBool *flag;
 } QtQml_VolatileBoolObject;
 
 PyAPI_FUNC(PyTypeObject *) QtQml_VolatileBoolTypeF(void);
