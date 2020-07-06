@@ -2062,9 +2062,6 @@
     <modify-function signature="setNum(short,int)" remove="all"/>
     <modify-function signature="setNum(qulonglong,int)" remove="all"/>
     <modify-function signature="number(uint,int)" remove="all"/>
-    <modify-function signature="number(ushort,int)" remove="all"/>
-    <modify-function signature="number(float,char,int)" remove="all"/>
-    <modify-function signature="number(short,int)" remove="all"/>
     <modify-function signature="number(qulonglong,int)" remove="all"/>
 
     <!--### -->
