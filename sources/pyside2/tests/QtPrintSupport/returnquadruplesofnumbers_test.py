@@ -71,12 +71,6 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
         obj = GraphicsLayoutItem()
         self.assertTrue(self.compareTuples(obj.getContentsMargins(), (0.0, 0.0, 0.0, 0.0)))
 
-    def testQWidgetGetContentsMargins(self):
-        obj = QWidget()
-        values = (10, 20, 30, 40)
-        obj.setContentsMargins(*values)
-        self.assertTrue(self.compareTuples(obj.getContentsMargins(), values))
-
     def testQLayoutGetContentsMargins(self):
         obj = Layout()
         values = (10, 20, 30, 40)

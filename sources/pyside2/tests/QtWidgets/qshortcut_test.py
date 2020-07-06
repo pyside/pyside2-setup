@@ -59,7 +59,7 @@ class MyShortcut(QShortcut):
         QShortcut.__init__(self, keys, wdg, slot)
 
     def emit_signal(self):
-        self.emit(QtCore.SIGNAL("activated()"))
+        self.activated.emit()
 
 class QAppPresence(unittest.TestCase):
 

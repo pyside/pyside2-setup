@@ -272,15 +272,13 @@
     </modify-function>
   </object-type>
   <object-type name="QShortcut">
-<!--  FIXME: Qt 6
-    <add-function signature="QShortcut(QKeySequence&amp;,QWidget*,PyCallable*,Qt::ShortcutContext)">
+    <add-function signature="QShortcut(QKeySequence&amp;,QObject*,PyCallable*,Qt::ShortcutContext)">
       <modify-argument index="4">
         <replace-default-expression with="Qt::WindowShortcut"/>
       </modify-argument>
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="qshortcut-1"/>
       <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qshortcut-2"/>
     </add-function>
--->
   </object-type>
 
   <value-type name="QTransform">

@@ -67,7 +67,7 @@ class QDomDocumentTest(unittest.TestCase):
         '''Sets invalid xml as the QDomDocument contents.'''
         ok, errorStr, errorLine, errorColumn = self.dom.setContent(self.badXmlData, True)
         self.assertFalse(ok)
-        self.assertEqual(errorStr, 'tag mismatch')
+        self.assertEqual(errorStr, 'Opening and ending tag mismatch.')
         self.assertEqual(errorLine, 4)
         self.assertEqual(errorColumn, 21)
 
