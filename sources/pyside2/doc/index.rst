@@ -80,10 +80,6 @@ Documentation
             </tr>
         </table>
 
-We have also a `wiki page`_ where you can find how to report bugs, contribute or contact the community.
-
-.. _`wiki page`: https://wiki.qt.io/Qt_for_Python
-
 .. toctree::
    :hidden:
    :glob:
