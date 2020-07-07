@@ -439,6 +439,7 @@ def init_PySide2_QtCore():
         "4294967295UL": 4294967295, # 5.6, RHEL 6.6
         "CheckIndexOption.NoOption": Instance(
             "PySide2.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
+        "DescriptorType(-1)": int,  # Native handle of QSocketDescriptor
         "false": False,
         "list of QAbstractAnimation": typing.List[PySide2.QtCore.QAbstractAnimation],
         "list of QAbstractState": typing.List[PySide2.QtCore.QAbstractState],
@@ -447,6 +448,7 @@ def init_PySide2_QtCore():
         "nullptr": None, # 5.9
         "PyByteArray": bytearray,
         "PyBytes": bytes,
+        "QDeadlineTimer(QDeadlineTimer.Forever)": Instance("PySide2.QtCore.QDeadlineTimer"),
         "PySide2.QtCore.QCborStreamReader.StringResult[PySide2.QtCore.QByteArray]":
             PySide2.QtCore.QCborStringResultByteArray,
         "PySide2.QtCore.QCborStreamReader.StringResult[QString]":
@@ -541,10 +543,15 @@ def init_PySide2_QtSql():
 
 
 def init_PySide2_QtNetwork():
+    from PySide2.QtNetwork import QNetworkRequest
     best_structure = typing.OrderedDict if getattr(typing, "OrderedDict", None) else typing.Dict
     type_map.update({
         "QMultiMap[PySide2.QtNetwork.QSsl.AlternativeNameEntryType, QString]":
             best_structure[PySide2.QtNetwork.QSsl.AlternativeNameEntryType, typing.List[str]],
+        "DefaultTransferTimeoutConstant":
+            QNetworkRequest.TransferTimeoutConstant,
+        "QNetworkRequest.DefaultTransferTimeoutConstant":
+            QNetworkRequest.TransferTimeoutConstant,
     })
     del best_structure
     return locals()

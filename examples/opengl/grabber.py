@@ -414,11 +414,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if not ok:
             return QtCore.QSize()
 
-        regExp = QtCore.QRegExp("([0-9]+) *x *([0-9]+)")
+        regExp = QtCore.QRegularExpression("([0-9]+) *x *([0-9]+)")
+        assert regExp.isValid()
 
-        if regExp.exactMatch(text):
-            width = int(regExp.cap(1))
-            height = int(regExp.cap(2))
+        match = regExp.match(text)
+        if match.hasMatch():
+            width = int(match.captured(1))
+            height = int(match.captured(2))
             if width > 0 and width < 2048 and height > 0 and height < 2048:
                 return QtCore.QSize(width, height)
 

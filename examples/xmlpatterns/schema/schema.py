@@ -77,19 +77,22 @@ class XmlSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         format = QtGui.QTextCharFormat()
         format.setForeground(QtCore.Qt.darkBlue)
         format.setFontWeight(QtGui.QFont.Bold)
-        pattern = QtCore.QRegExp("(<[a-zA-Z:]+\\b|<\\?[a-zA-Z:]+\\b|\\?>|>|/>|</[a-zA-Z:]+>)")
+        pattern = QtCore.QRegularExpression(r'(<[a-zA-Z:]+\b|<\?[a-zA-Z:]+\b|\?>|>|/>|</[a-zA-Z:]+>)')
+        assert pattern.isValid()
         self.highlightingRules.append((pattern, format))
 
         # Attribute format.
         format = QtGui.QTextCharFormat()
         format.setForeground(QtCore.Qt.darkGreen)
-        pattern = QtCore.QRegExp("[a-zA-Z:]+=")
+        pattern = QtCore.QRegularExpression('[a-zA-Z:]+=')
+        assert pattern.isValid()
         self.highlightingRules.append((pattern, format))
 
         # Attribute content format.
         format = QtGui.QTextCharFormat()
         format.setForeground(QtCore.Qt.red)
-        pattern = QtCore.QRegExp("(\"[^\"]*\"|'[^']*')")
+        pattern = QtCore.QRegularExpression("(\"[^\"]*\"|'[^']*')")
+        assert pattern.isValid()
         self.highlightingRules.append((pattern, format))
 
         # Comment format.
@@ -97,35 +100,41 @@ class XmlSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.commentFormat.setForeground(QtCore.Qt.lightGray)
         self.commentFormat.setFontItalic(True)
 
-        self.commentStartExpression = QtCore.QRegExp("<!--")
-        self.commentEndExpression = QtCore.QRegExp("-->")
+        self.commentStartExpression = QtCore.QRegularExpression("<!--")
+        assert self.commentStartExpression.isValid()
+        self.commentEndExpression = QtCore.QRegularExpression("-->")
+        assert self.commentEndExpression.isValid()
 
     def highlightBlock(self, text):
         for pattern, format in self.highlightingRules:
-            expression = QtCore.QRegExp(pattern)
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
+            match = pattern.match(text)
+            while match.hasMatch():
+                index = match.capturedStart()
+                length = match.capturedLength(0)
                 self.setFormat(index, length, format)
-                index = expression.indexIn(text, index + length)
+                match = pattern.match(text, index + length)
 
         self.setCurrentBlockState(0)
 
         startIndex = 0
         if self.previousBlockState() != 1:
-            startIndex = self.commentStartExpression.indexIn(text)
+            match = self.commentStartExpression.match(text)
+            startIndex = match.capturedStart(0) if match.hasMatch() else -1
 
         while startIndex >= 0:
-            endIndex = self.commentEndExpression.indexIn(text, startIndex)
-            if endIndex == -1:
+            match = self.commentEndExpression.match(text, startIndex)
+            endIndex = match.capturedStart(0) if match.hasMatch() else -1
+            if match.hasMatch():
+                endIndex = match.capturedStart(0)
+                length = match.capturedLength(0)
+                commentLength = endIndex - startIndex + length
+            else:
                 self.setCurrentBlockState(1)
                 commentLength = text.length() - startIndex
-            else:
-                commentLength = endIndex - startIndex + self.commentEndExpression.matchedLength()
 
             self.setFormat(startIndex, commentLength, self.commentFormat)
-            startIndex = self.commentStartExpression.indexIn(text,
-                    startIndex + commentLength)
+            match = self.commentStartExpression.match(text, startIndex + commentLength)
+            startIndex = match.capturedStart(0) if match.hasMatch() else -1
 
 
 class MessageHandler(QtXmlPatterns.QAbstractMessageHandler):
