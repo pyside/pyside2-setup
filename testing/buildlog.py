@@ -154,7 +154,7 @@ class BuildLog(object):
             raise ValueError('+++ No build with the configuration found!')
         # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
         platform = 'linux' if sys.platform.startswith('linux') else sys.platform
-        res = [platform]
+        res = [platform, 'qt6']
         if self.selected.build_classifiers:
             # Use classifier string encoded into build_dir.txt file.
             res.extend(self.selected.build_classifiers.split('-'))

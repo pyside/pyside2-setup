@@ -96,3 +96,8 @@
 # Open GL functions failures on macOS (2/2020)
 [registry::existence_test]
     darwin
+# QItemSelection::operator+() degenerates to list<QItemSelectionRange> for which added operator==() does not work
+[QtWidgets::bug_785]
+    qt6
+[QtQml::registertype]
+    qt6
