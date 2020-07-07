@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -48,10 +48,10 @@ QString SourceFileCache::getFileName(CXFile file)
     return it.value();
 }
 
-SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor,
-                                                         QString *errorMessage)
+std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
+                                                 QString *errorMessage)
 {
-    Snippet result(nullptr, nullptr);
+    static const char empty[] = "";
 
     if (errorMessage)
         errorMessage->clear();
@@ -60,12 +60,12 @@ SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor,
     // Quick check for equal locations: Frequently happens if the code is
     // the result of a macro expansion
     if (range.first == range.second)
-         return result;
+         return std::string_view(empty, 0);
 
     if (range.first.file != range.second.file) {
         if (errorMessage)
             *errorMessage = QStringLiteral("Range spans several files");
-        return result;
+        return std::string_view(empty, 0);
     }
 
     auto it = m_fileBufferCache.find(range.first.file);
@@ -74,7 +74,7 @@ SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor,
         if (fileName.isEmpty()) {
             if (errorMessage)
                  *errorMessage = QStringLiteral("Range has no file");
-            return result;
+            return std::string_view(empty, 0);
         }
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
@@ -83,7 +83,7 @@ SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor,
                 str << "Cannot open \"" << QDir::toNativeSeparators(fileName)
                     << "\": " << file.errorString();
             }
-            return result;
+            return std::string_view(empty, 0);
         }
         it = m_fileBufferCache.insert(range.first.file, file.readAll());
     }
@@ -99,11 +99,10 @@ SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor,
                 << QDir::toNativeSeparators(getFileName(range.first.file))
                 << "\" (" << contents.size() << ')';
         }
-        return result;
+        return std::string_view(empty, 0);
     }
-    result.first = contents.constData() + pos;
-    result.second = contents.constData() + end;
-    return result;
+
+    return std::string_view(contents.constData() + pos, end - pos);
 }
 
 BaseVisitor::BaseVisitor() = default;
@@ -135,11 +134,11 @@ bool BaseVisitor::cbHandleEndToken(const CXCursor &cursor, StartTokenResult star
     return result;
 }
 
-BaseVisitor::CodeSnippet BaseVisitor::getCodeSnippet(const CXCursor &cursor)
+std::string_view BaseVisitor::getCodeSnippet(const CXCursor &cursor)
 {
     QString errorMessage;
-    CodeSnippet result = m_fileCache.getCodeSnippet(cursor, &errorMessage);
-    if (result.first == nullptr && !errorMessage.isEmpty()) {
+    const std::string_view result = m_fileCache.getCodeSnippet(cursor, &errorMessage);
+    if (result.empty() && !errorMessage.isEmpty()) {
         QString message;
         QTextStream str(&message);
         str << "Unable to retrieve code snippet \"" << getCursorSpelling(cursor)
@@ -151,10 +150,10 @@ BaseVisitor::CodeSnippet BaseVisitor::getCodeSnippet(const CXCursor &cursor)
 
 QString BaseVisitor::getCodeSnippetString(const CXCursor &cursor)
 {
-    CodeSnippet result = getCodeSnippet(cursor);
-    return result.first != nullptr
-        ? QString::fromUtf8(result.first, int(result.second - result.first))
-        : QString();
+    const std::string_view result = getCodeSnippet(cursor);
+    return result.empty()
+        ? QString()
+        : QString::fromUtf8(result.cbegin(), result.size());
 }
 
 static CXChildVisitResult

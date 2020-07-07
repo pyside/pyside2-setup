@@ -37,15 +37,15 @@
 #include <QtCore/QString>
 #include <QtCore/QVector>
 
+#include <string_view>
+
 namespace clang {
 
 struct Diagnostic;
 
 class SourceFileCache {
 public:
-    using Snippet = QPair<const char *, const char *>;
-
-    Snippet getCodeSnippet(const CXCursor &cursor, QString *errorMessage = nullptr);
+    std::string_view getCodeSnippet(const CXCursor &cursor, QString *errorMessage = nullptr);
     QString getFileName(CXFile file);
 
 private:
@@ -60,7 +60,6 @@ class BaseVisitor {
     Q_DISABLE_COPY(BaseVisitor)
 public:
     using Diagnostics = QVector<Diagnostic>;
-    using CodeSnippet = SourceFileCache::Snippet;
 
     enum StartTokenResult { Error, Skip, Recurse };
 
@@ -78,8 +77,7 @@ public:
     bool cbHandleEndToken(const CXCursor &cursor, StartTokenResult startResult);
 
     QString getFileName(CXFile file) { return m_fileCache.getFileName(file); }
-
-    CodeSnippet getCodeSnippet(const CXCursor &cursor);
+    std::string_view getCodeSnippet(const CXCursor &cursor);
     QString getCodeSnippetString(const CXCursor &cursor);
 
     Diagnostics diagnostics() const;

@@ -147,4 +147,16 @@ QDebug operator<<(QDebug s, const CXSourceLocation &location)
     return s;
 }
 
+QDebug operator<<(QDebug s, const std::string_view &v)
+{
+    QDebugStateSaver saver(s);
+    s.nospace();
+    s.noquote();
+    s << '"';
+    for (auto c : v)
+        s << c;
+    s << '"';
+    return s;
+}
+
 #endif // !QT_NO_DEBUG_STREAM
