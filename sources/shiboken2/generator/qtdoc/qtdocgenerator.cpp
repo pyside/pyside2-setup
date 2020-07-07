@@ -1367,7 +1367,7 @@ void QtXmlToSphinx::Table::normalize()
                     newCell.rowSpan = -1;
                     int targetRow = row + 1;
                     const int targetEndRow =
-                        std::min(targetRow + cell.rowSpan - 1, m_rows.count());
+                        std::min(targetRow + cell.rowSpan - 1, int(m_rows.count()));
                     cell.rowSpan = 0;
                     for ( ; targetRow < targetEndRow; ++targetRow)
                         m_rows[targetRow].insert(col, newCell);
@@ -1405,7 +1405,7 @@ void QtXmlToSphinx::Table::format (QTextStream& s) const
             const QVector<QStringRef> rowLines = row[j].data.splitRef(QLatin1Char('\n')); // cache this would be a good idea
             for (const QStringRef &str : rowLines)
                 colWidths[j] = std::max(colWidths[j], str.count());
-            rowHeights[i] = std::max(rowHeights[i], row[j].data.count(QLatin1Char('\n')) + 1);
+            rowHeights[i] = std::max(rowHeights[i], int(row[j].data.count(QLatin1Char('\n')) + 1));
         }
     }
 
@@ -1441,7 +1441,7 @@ void QtXmlToSphinx::Table::format (QTextStream& s) const
         // Print the table cells
         for (int rowLine = 0; rowLine < rowHeights[i]; ++rowLine) { // for each line in a row
             int j = 0;
-            for (int maxJ = std::min(row.count(), headerColumnCount); j < maxJ; ++j) { // for each column
+            for (int maxJ = std::min(int(row.count()), headerColumnCount); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
                 const QVector<QStringRef> rowLines = cell.data.splitRef(QLatin1Char('\n')); // FIXME: Cache this!!!
                 if (!j) // First column, so we need print the identation
