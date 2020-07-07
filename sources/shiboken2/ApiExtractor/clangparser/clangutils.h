@@ -62,15 +62,23 @@ inline bool isCursorValid(const CXCursor &c)
     return c.kind < CXCursor_FirstInvalid || c.kind >  CXCursor_LastInvalid;
 }
 
+QString getFileName(CXFile file); // Uncached,see BaseVisitor for a cached version
+
 struct SourceLocation
 {
-    int compare(const SourceLocation &rhs) const;
+    bool equals(const SourceLocation &rhs) const;
 
-    QString file;
+    CXFile file;
     unsigned line = 0;
     unsigned column = 0;
     unsigned offset = 0;
 };
+
+inline bool operator==(const SourceLocation &l1, const SourceLocation &l2)
+{ return l1.equals(l2); }
+
+inline bool operator!=(const SourceLocation &l1, const SourceLocation &l2)
+{ return !l1.equals(l2); }
 
 SourceLocation getExpansionLocation(const CXSourceLocation &location);
 

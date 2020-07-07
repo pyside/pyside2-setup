@@ -60,15 +60,25 @@ QtCompatHashFunctionType qHash(const CXType &ct, QtCompatHashFunctionType seed)
 
 namespace clang {
 
+bool SourceLocation::equals(const SourceLocation &rhs) const
+{
+    return file == rhs.file && offset == rhs.offset;
+}
+
 SourceLocation getExpansionLocation(const CXSourceLocation &location)
 {
     SourceLocation result;
-    CXFile file; // void *
-    clang_getExpansionLocation(location, &file, &result.line, &result.column, &result.offset);
+    clang_getExpansionLocation(location, &result.file, &result.line, &result.column, &result.offset);
+    return result;
+}
+
+QString getFileName(CXFile file)
+{
+    QString result;
     const CXString cxFileName = clang_getFileName(file);
     // Has been observed to be 0 for invalid locations
     if (const char *cFileName = clang_getCString(cxFileName))
-        result.file = QString::fromUtf8(cFileName);
+        result = QString::fromUtf8(cFileName);
     clang_disposeString(cxFileName);
     return result;
 }
@@ -226,7 +236,7 @@ QDebug operator<<(QDebug s, const SourceLocation &l)
     QDebugStateSaver saver(s);
     s.nospace();
     s.noquote();
-    s << QDir::toNativeSeparators(l.file) << ':' << l.line;
+    s << QDir::toNativeSeparators(clang::getFileName(l.file)) << ':' << l.line;
     if (l.column)
         s << ':' << l.column;
     return s;

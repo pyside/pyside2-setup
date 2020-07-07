@@ -40,19 +40,49 @@
 
 namespace clang {
 
-SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor)
+QString SourceFileCache::getFileName(CXFile file)
+{
+    auto it = m_fileNameCache.find(file);
+    if (it == m_fileNameCache.end())
+        it = m_fileNameCache.insert(file, clang::getFileName(file));
+    return it.value();
+}
+
+SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor,
+                                                         QString *errorMessage)
 {
     Snippet result(nullptr, nullptr);
+
+    if (errorMessage)
+        errorMessage->clear();
+
     const SourceRange range = getCursorRange(cursor);
-    if (range.first.file.isEmpty() || range.second.file != range.first.file)
+    // Quick check for equal locations: Frequently happens if the code is
+    // the result of a macro expansion
+    if (range.first == range.second)
+         return result;
+
+    if (range.first.file != range.second.file) {
+        if (errorMessage)
+            *errorMessage = QStringLiteral("Range spans several files");
         return result;
-    FileBufferCache::Iterator it = m_fileBufferCache.find(range.first.file);
+    }
+
+    auto it = m_fileBufferCache.find(range.first.file);
     if (it == m_fileBufferCache.end()) {
-        QFile file(range.first.file);
+        const QString fileName = getFileName(range.first.file);
+        if (fileName.isEmpty()) {
+            if (errorMessage)
+                 *errorMessage = QStringLiteral("Range has no file");
+            return result;
+        }
+        QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
-            qWarning().noquote().nospace()
-                << "Can't open " << QDir::toNativeSeparators(range.first.file)
-                << ": " << file.errorString();
+            if (errorMessage) {
+                QTextStream str(errorMessage);
+                str << "Cannot open \"" << QDir::toNativeSeparators(fileName)
+                    << "\": " << file.errorString();
+            }
             return result;
         }
         it = m_fileBufferCache.insert(range.first.file, file.readAll());
@@ -60,10 +90,15 @@ SourceFileCache::Snippet SourceFileCache::getCodeSnippet(const CXCursor &cursor)
 
     const unsigned pos = range.first.offset;
     const unsigned end = range.second.offset;
+    Q_ASSERT(end > pos);
     const QByteArray &contents = it.value();
     if (end >= unsigned(contents.size())) {
-        qWarning().noquote().nospace() << "Range end " << end << " is above size of "
-            << range.first.file << " (" << contents.size() << ')';
+        if (errorMessage) {
+            QTextStream str(errorMessage);
+            str << "Range end " << end << " is above size of \""
+                << QDir::toNativeSeparators(getFileName(range.first.file))
+                << "\" (" << contents.size() << ')';
+        }
         return result;
     }
     result.first = contents.constData() + pos;
@@ -102,15 +137,21 @@ bool BaseVisitor::cbHandleEndToken(const CXCursor &cursor, StartTokenResult star
 
 BaseVisitor::CodeSnippet BaseVisitor::getCodeSnippet(const CXCursor &cursor)
 {
-    CodeSnippet result = m_fileCache.getCodeSnippet(cursor);
-    if (result.first == nullptr)
-        appendDiagnostic(Diagnostic(QStringLiteral("Unable to retrieve code snippet."), cursor, CXDiagnostic_Error));
+    QString errorMessage;
+    CodeSnippet result = m_fileCache.getCodeSnippet(cursor, &errorMessage);
+    if (result.first == nullptr && !errorMessage.isEmpty()) {
+        QString message;
+        QTextStream str(&message);
+        str << "Unable to retrieve code snippet \"" << getCursorSpelling(cursor)
+            << "\": " << errorMessage;
+        appendDiagnostic(Diagnostic(message, cursor, CXDiagnostic_Error));
+    }
     return result;
 }
 
 QString BaseVisitor::getCodeSnippetString(const CXCursor &cursor)
 {
-    CodeSnippet result = m_fileCache.getCodeSnippet(cursor);
+    CodeSnippet result = getCodeSnippet(cursor);
     return result.first != nullptr
         ? QString::fromUtf8(result.first, int(result.second - result.first))
         : QString();
