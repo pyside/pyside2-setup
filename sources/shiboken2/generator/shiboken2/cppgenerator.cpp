@@ -939,9 +939,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         s << INDENT << returnStatement(defaultReturnExpr.returnValue()) << Qt::endl;
     }
 
-    s << INDENT << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR << "(Shiboken::BindingManager::instance().getOverride(this, \"";
-    s << funcName << "\"));\n";
-
+    s << INDENT << "static PyObject *pyFuncName = Shiboken::String::createStaticString(\""
+                << funcName << "\");\n";
+    s << INDENT << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
+                << "(Shiboken::BindingManager::instance().getOverride(this, pyFuncName));\n";
     s << INDENT << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n";
     {
         Indentation indentation(INDENT);

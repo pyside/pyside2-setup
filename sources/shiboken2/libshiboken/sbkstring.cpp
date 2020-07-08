@@ -41,7 +41,7 @@
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
-#include <vector>
+#include <set>
 
 namespace Shiboken
 {
@@ -236,7 +236,7 @@ Py_ssize_t len(PyObject *str)
 // But this is a global fault in shiboken. We are missing a true
 // finalization like in all other modules.
 
-using StaticStrings = std::vector<PyObject *>;
+using StaticStrings = std::set<PyObject *>;
 
 static StaticStrings &staticStrings()
 {
@@ -256,7 +256,7 @@ PyObject *createStaticString(const char *str)
         PyErr_Print();
         Py_FatalError("unexpected error in createStaticString()");
     }
-    staticStrings().push_back(result);
+    staticStrings().insert(result);
     return result;
 }
 
