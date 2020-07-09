@@ -2619,6 +2619,15 @@ void AbstractMetaClass::format(QDebug &d) const
             d << (i ? ',' : '<') << instantiatedTypes.at(i)->name();
         d << ">\"";
     }
+    if (const int count = m_propertySpecs.size()) {
+        d << ", properties (" << count << "): [";
+        for (int i = 0; i < count; ++i) {
+            if (i)
+                d << ", ";
+            m_propertySpecs.at(i)->formatDebug(d);
+        }
+        d << ']';
+    }
 }
 
 void AbstractMetaClass::formatMembers(QDebug &d) const
@@ -2725,3 +2734,28 @@ QString AbstractMetaEnum::package() const
 {
     return m_typeEntry->targetLangPackage();
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+void QPropertySpec::formatDebug(QDebug &d) const
+{
+    d << '#' << m_index << " \"" << m_name << "\" (" << m_type->qualifiedCppName()
+        << "), read=" << m_read;
+    if (!m_write.isEmpty())
+        d << ", write=" << m_write;
+    if (!m_reset.isEmpty())
+          d << ", reset=" << m_reset;
+    if (!m_designable.isEmpty())
+          d << ", esignable=" << m_designable;
+}
+
+QDebug operator<<(QDebug d, const QPropertySpec &p)
+{
+    QDebugStateSaver s(d);
+    d.noquote();
+    d.nospace();
+    d << "QPropertySpec(";
+    p.formatDebug(d);
+    d << ')';
+    return d;
+}
+#endif // QT_NO_DEBUG_STREAM

@@ -789,6 +789,8 @@ void _ClassModelItem::formatDebug(QDebug &d) const
     }
     formatModelItemList(d, ", templateParameters=", m_templateParameters);
     formatScopeItemsDebug(d);
+    if (!m_propertyDeclarations.isEmpty())
+        d << ", Properties=" << m_propertyDeclarations;
 }
 #endif // !QT_NO_DEBUG_STREAM
 
