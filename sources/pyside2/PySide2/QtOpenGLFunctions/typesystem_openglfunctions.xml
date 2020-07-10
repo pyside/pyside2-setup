@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,7 +40,7 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtOpenGLFunctions">
-  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="QtOpenGL/typesystem_opengl.xml" generate="no"/>
   <load-typesystem name="templates/openglfunctions_common.xml" generate="no"/>
 
   <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>

@@ -1,17 +1,15 @@
 project(QtOpenGLFunctions)
 
-set(QtOpenGLFunctions_DROPPED_ENTRIES)
-
 get_property(QtOpenGLFunctions_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
              PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
 set(QtOpenGLFunctions_SRC ${QtOpenGLFunctions_GEN_DIR}/qtopenglfunctions_module_wrapper.cpp)
 
-# cf qtbase/src/gui/opengl/opengl.pri
-list(FIND QtOpenGLFunctions_enabled_features "opengles2" _opengles2Index)
-# ### fixme: For cmake >= 3.3: if(opengles2 IN_LIST QtOpenGLFunctions_enabled_features)
-if(_opengles2Index GREATER -1)
-    list(APPEND QtOpenGLFunctions_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery)
+get_property(QtGui_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Gui
+             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
+
+cmake_policy(SET CMP0057 NEW)
+if("opengles2" IN_LIST QtGui_enabled_features)
     list(APPEND QtOpenGLFunctions_SRC
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_es2_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}OpenGLFunctions: Dropping Desktop OpenGL classes (GLES2)")
@@ -49,19 +47,23 @@ endif()
 configure_file("${QtOpenGLFunctions_SOURCE_DIR}/QtOpenGLFunctions_global.post.h.in"
                "${QtOpenGLFunctions_BINARY_DIR}/QtOpenGLFunctions_global.post.h" @ONLY)
 
-set(QtOpenGLFunctions_include_dirs  ${QtGOpenGLFunctions_SOURCE_DIR}
-                        ${QtOpenGLFunctions_BINARY_DIR}
-                        ${pyside2_SOURCE_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                        ${libpyside_SOURCE_DIR}
-                        ${QtCore_GEN_DIR}
-                        ${QtGui_GEN_DIR}
-                        )
-set(QtOpenGLFunctions_libraries   pyside2
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
+set(QtOpenGLFunctions_include_dirs ${QtOpenGLFunctions_SOURCE_DIR}
+                                   ${QtOpenGLFunctions_BINARY_DIR}
+                                   ${pyside2_SOURCE_DIR}
+                                   ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                                   ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                                   ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
+                                   ${libpyside_SOURCE_DIR}
+                                   ${QtCore_GEN_DIR}
+                                   ${QtGui_GEN_DIR}
+                                   ${QtOpenGL_GEN_DIR}
+                                   )
 
-set(QtOpenGLFunctions_deps QtGui)
+set(QtOpenGLFunctions_libraries pyside2
+                                ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                                ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES})
+
+set(QtOpenGLFunctions_deps QtGui QtOpenGL)
 
 create_pyside_module(NAME QtOpenGLFunctions
                      INCLUDE_DIRS QtOpenGLFunctions_include_dirs
