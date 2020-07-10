@@ -114,16 +114,6 @@ static inline CodeModel::AccessPolicy accessPolicy(CX_CXXAccessSpecifier access)
     return result;
 }
 
-static void setFileName(const CXCursor &cursor, _CodeModelItem *item)
-{
-    const SourceRange range = getCursorRange(cursor);
-    if (!range.first.file.isEmpty()) { // Has been observed to be 0 for invalid locations
-        item->setFileName(QDir::cleanPath(range.first.file));
-        item->setStartPosition(int(range.first.line), int(range.first.column));
-        item->setEndPosition(int(range.second.line), int(range.second.column));
-    }
-}
-
 static bool isSigned(CXTypeKind kind)
 {
     switch (kind) {
@@ -178,8 +168,8 @@ public:
 
     bool addClass(const CXCursor &cursor, CodeModel::ClassType t);
     FunctionModelItem createFunction(const CXCursor &cursor,
-                                     CodeModel::FunctionType t = CodeModel::Normal) const;
-    FunctionModelItem createMemberFunction(const CXCursor &cursor) const;
+                                     CodeModel::FunctionType t = CodeModel::Normal);
+    FunctionModelItem createMemberFunction(const CXCursor &cursor);
     void qualifyConstructor(const CXCursor &cursor);
     TypeInfo createTypeInfoHelper(const CXType &type) const; // uncashed
     TypeInfo createTypeInfo(const CXType &type) const;
@@ -205,6 +195,8 @@ public:
     void qualifyTypeDef(const CXCursor &typeRefCursor, const QSharedPointer<Item> &item) const;
 
     bool visitHeader(const char *cFileName) const;
+
+    void setFileName(const CXCursor &cursor, _CodeModelItem *item);
 
     BaseVisitor *m_baseVisitor;
     CodeModel *m_model;
@@ -285,7 +277,7 @@ static inline ExceptionSpecification exceptionSpecificationFromClang(int ce)
 }
 
 FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
-                                                 CodeModel::FunctionType t) const
+                                                 CodeModel::FunctionType t)
 {
     QString name = getCursorSpelling(cursor);
     // Apply type fixes to "operator X &" -> "operator X&"
@@ -334,7 +326,7 @@ static inline CodeModel::FunctionType functionTypeFromCursor(const CXCursor &cur
     return result;
 }
 
-FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor) const
+FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor)
 {
     const CodeModel::FunctionType functionType =
         m_currentFunctionType == CodeModel::Signal || m_currentFunctionType == CodeModel::Slot
@@ -725,6 +717,17 @@ void BuilderPrivate::qualifyTypeDef(const CXCursor &typeRefCursor, const QShared
     }
 }
 
+void BuilderPrivate::setFileName(const CXCursor &cursor, _CodeModelItem *item)
+{
+    const SourceRange range = getCursorRange(cursor);
+    QString file = m_baseVisitor->getFileName(range.first.file);
+    if (!file.isEmpty()) { // Has been observed to be 0 for invalid locations
+        item->setFileName(QDir::cleanPath(file));
+        item->setStartPosition(int(range.first.line), int(range.first.column));
+        item->setEndPosition(int(range.second.line), int(range.second.column));
+    }
+}
+
 Builder::Builder()
 {
     d = new BuilderPrivate(this);
@@ -937,7 +940,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             kind = EnumClass;
         }
         d->m_currentEnum.reset(new _EnumModelItem(d->m_model, name));
-        setFileName(cursor, d->m_currentEnum.data());
+        d->setFileName(cursor, d->m_currentEnum.data());
         d->m_currentEnum->setScope(d->m_scope);
         d->m_currentEnum->setEnumKind(kind);
         d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
@@ -1024,7 +1027,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // in subsequent modules.
         NamespaceModelItem namespaceItem = parentNamespaceItem->findNamespace(name);
         namespaceItem.reset(new _NamespaceModelItem(d->m_model, name));
-        setFileName(cursor, namespaceItem.data());
+        d->setFileName(cursor, namespaceItem.data());
         namespaceItem->setScope(d->m_scope);
         namespaceItem->setType(type);
         parentNamespaceItem->addNamespace(namespaceItem);

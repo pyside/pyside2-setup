@@ -45,12 +45,15 @@ class SourceFileCache {
 public:
     using Snippet = QPair<const char *, const char *>;
 
-    Snippet getCodeSnippet(const CXCursor &cursor);
+    Snippet getCodeSnippet(const CXCursor &cursor, QString *errorMessage = nullptr);
+    QString getFileName(CXFile file);
 
 private:
-    using FileBufferCache = QHash<QString, QByteArray>;
+    using FileBufferCache = QHash<CXFile, QByteArray>;
+    using FileNameCache = QHash<CXFile, QString>;
 
     FileBufferCache m_fileBufferCache;
+    FileNameCache m_fileNameCache;
 };
 
 class BaseVisitor {
@@ -73,6 +76,8 @@ public:
 
     StartTokenResult cbHandleStartToken(const CXCursor &cursor);
     bool cbHandleEndToken(const CXCursor &cursor, StartTokenResult startResult);
+
+    QString getFileName(CXFile file) { return m_fileCache.getFileName(file); }
 
     CodeSnippet getCodeSnippet(const CXCursor &cursor);
     QString getCodeSnippetString(const CXCursor &cursor);

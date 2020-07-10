@@ -273,7 +273,7 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr)
     return iter->second;
 }
 
-PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
+PyObject *BindingManager::getOverride(const void *cptr, PyObject *methodName)
 {
     SbkObject *wrapper = retrieveWrapper(cptr);
     // The refcount can be 0 if the object is dieing and someone called
@@ -282,15 +282,14 @@ PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
         return nullptr;
 
     if (wrapper->ob_dict) {
-        PyObject *method = PyDict_GetItemString(wrapper->ob_dict, methodName);
+        PyObject *method = PyDict_GetItem(wrapper->ob_dict, methodName);
         if (method) {
             Py_INCREF(reinterpret_cast<PyObject *>(method));
             return method;
         }
     }
 
-    Shiboken::AutoDecRef pyMethodName(Shiboken::String::fromCString(methodName));
-    PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
+    PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), methodName);
 
     if (method && PyMethod_Check(method)
         && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
@@ -302,7 +301,7 @@ PyObject *BindingManager::getOverride(const void *cptr, const char *methodName)
         for (int i = 1; i < PyTuple_GET_SIZE(mro) - 1; i++) {
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
             if (parent->tp_dict) {
-                defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
+                defaultMethod = PyDict_GetItem(parent->tp_dict, methodName);
                 if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod)
                     return method;
             }
