@@ -51,56 +51,19 @@
 #include "pyside2_qtquick_python.h"
 #include "pyside2_qtqml_python.h"
 
-#ifndef PYSIDE_MAX_QUICK_TYPES
-// Maximum number of different Qt Quick types the user can export to QML using
-// qmlRegisterType. This limit exists because the QML engine instantiates objects
-// by calling a function with one argument (a void* pointer where the object should
-// be created), and thus does not allow us to choose which object to create. Thus
-// we create a C++ factory function for each new registered type at compile time.
-#  define PYSIDE_MAX_QUICK_TYPES 50
-#endif // !PYSIDE_MAX_QUICK_TYPES
-
-// All registered python types and their creation functions.
-static PyObject *pyTypes[PYSIDE_MAX_QUICK_TYPES];
-static void (*createFuncs[PYSIDE_MAX_QUICK_TYPES])(void *);
-
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
 
-// Python object factory functions.
-template<int N>
-struct ElementFactoryBase
+static void createQuickItem(void *memory, void *type)
 {
-    static void createQuickItem(void *memory)
-    {
-        QMutexLocker locker(&nextQmlElementMutex);
-        PySide::setNextQObjectMemoryAddr(memory);
-        Shiboken::GilState state;
-        PyObject *obj = PyObject_CallObject(pyTypes[N], 0);
-        if (!obj || PyErr_Occurred())
-            PyErr_Print();
-        PySide::setNextQObjectMemoryAddr(0);
-    }
-};
-
-template<int N>
-struct ElementFactory : ElementFactoryBase<N>
-{
-    static void init()
-    {
-        createFuncs[N] = &ElementFactoryBase<N>::createQuickItem;
-        ElementFactory<N-1>::init();
-    }
-};
-
-template<>
-struct  ElementFactory<0> : ElementFactoryBase<0>
-{
-    static void init()
-    {
-        createFuncs[0] = &ElementFactoryBase<0>::createQuickItem;
-    }
-};
+    QMutexLocker locker(&nextQmlElementMutex);
+    PySide::setNextQObjectMemoryAddr(memory);
+    Shiboken::GilState state;
+    PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), 0);
+    if (!obj || PyErr_Occurred())
+        PyErr_Print();
+    PySide::setNextQObjectMemoryAddr(0);
+}
 
 #define PY_REGISTER_IF_INHERITS_FROM(className, typeToRegister,typePointerName, \
                                      typeListName, typeMetaObject, type, registered) \
@@ -185,13 +148,6 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
                                const char *qmlName, QQmlPrivate::RegisterType *type)
 {
     using namespace Shiboken;
-    static int nextType = 0;
-
-    if (nextType >= PYSIDE_MAX_QUICK_TYPES) {
-        PyErr_Format(PyExc_TypeError,
-                     "You can only export %d Qt Quick types to QML.", PYSIDE_MAX_QUICK_TYPES);
-        return false;
-    }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     PyTypeObject *qQuickItemPyType =
@@ -212,8 +168,6 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
     // there's no way to unregister a QML type.
     Py_INCREF(pyObj);
 
-    pyTypes[nextType] = pyObj;
-
     // Used in macro registration.
     QByteArray pointerName(qmlName);
     pointerName.append('*');
@@ -231,7 +185,9 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
     if (!registered)
         return false;
 
-    type->create = createFuncs[nextType];
+    type->structVersion = 0;
+    type->create = createQuickItem;
+    type->userdata = pyObj;
     type->uri = uri;
     type->version = QTypeRevision::fromVersion(versionMajor, versionMinor);
     type->elementName = qmlName;
@@ -241,14 +197,12 @@ bool quickRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int v
     type->extensionMetaObject = 0;
     type->customParser = 0;
 
-    ++nextType;
     return true;
 }
 
 void PySide::initQuickSupport(PyObject *module)
 {
     Q_UNUSED(module);
-    ElementFactory<PYSIDE_MAX_QUICK_TYPES - 1>::init();
 #ifdef PYSIDE_QML_SUPPORT
     setQuickRegisterItemFunction(quickRegisterType);
 #endif

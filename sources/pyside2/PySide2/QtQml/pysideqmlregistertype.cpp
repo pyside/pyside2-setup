@@ -52,59 +52,23 @@
 #include "pyside2_qtcore_python.h"
 #include "pyside2_qtqml_python.h"
 
-#ifndef PYSIDE_MAX_QML_TYPES
-// Maximum number of different Qt QML types the user can export to QML using
-// qmlRegisterType. This limit exists because the QML engine instantiates objects
-// by calling a function with one argument (a void *pointer where the object should
-// be created), and thus does not allow us to choose which object to create. Thus
-// we create a C++ factory function for each new registered type at compile time.
-#define PYSIDE_MAX_QML_TYPES 50
-#endif
-
 // Forward declarations.
 static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call,
                              void **args);
 
-// All registered python types and their creation functions.
-static PyObject *pyTypes[PYSIDE_MAX_QML_TYPES];
-static void (*createFuncs[PYSIDE_MAX_QML_TYPES])(void *);
-
 // Mutex used to avoid race condition on PySide::nextQObjectMemoryAddr.
 static QMutex nextQmlElementMutex;
 
-template<int N>
-struct ElementFactoryBase
+static void createInto(void *memory, void *type)
 {
-    static void createInto(void *memory)
-    {
-        QMutexLocker locker(&nextQmlElementMutex);
-        PySide::setNextQObjectMemoryAddr(memory);
-        Shiboken::GilState state;
-        PyObject *obj = PyObject_CallObject(pyTypes[N], 0);
-        if (!obj || PyErr_Occurred())
-            PyErr_Print();
-        PySide::setNextQObjectMemoryAddr(0);
-    }
-};
-
-template<int N>
-struct ElementFactory : ElementFactoryBase<N>
-{
-    static void init()
-    {
-        createFuncs[N] = &ElementFactoryBase<N>::createInto;
-        ElementFactory<N-1>::init();
-    }
-};
-
-template<>
-struct  ElementFactory<0> : ElementFactoryBase<0>
-{
-    static void init()
-    {
-        createFuncs[0] = &ElementFactoryBase<0>::createInto;
-    }
-};
+    QMutexLocker locker(&nextQmlElementMutex);
+    PySide::setNextQObjectMemoryAddr(memory);
+    Shiboken::GilState state;
+    PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), 0);
+    if (!obj || PyErr_Occurred())
+        PyErr_Print();
+    PySide::setNextQObjectMemoryAddr(0);
+}
 
 int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
                             int versionMinor, const char *qmlName)
@@ -113,13 +77,6 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
 
     static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
     assert(qobjectType);
-    static int nextType = 0;
-
-    if (nextType >= PYSIDE_MAX_QML_TYPES) {
-        PyErr_Format(PyExc_TypeError, "You can only export %d custom QML types to QML.",
-                     PYSIDE_MAX_QML_TYPES);
-        return -1;
-    }
 
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
@@ -149,7 +106,7 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         // there's no way to unregister a QML type.
         Py_INCREF(pyObj);
 
-        pyTypes[nextType] = pyObj;
+        type.structVersion = 0;
 
         // FIXME: Fix this to assign new type ids each time.
         type.typeId = QMetaType(QMetaType::QObjectStar);
@@ -167,7 +124,8 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         int objectSize = static_cast<int>(PySide::getSizeOfQObject(
                                               reinterpret_cast<SbkObjectType *>(pyObj)));
         type.objectSize = objectSize;
-        type.create = createFuncs[nextType];
+        type.create = createInto;
+        type.userdata = pyObj;
         type.uri = uri;
         type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
         type.elementName = qmlName;
@@ -175,7 +133,6 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.extensionObjectCreate = 0;
         type.extensionMetaObject = 0;
         type.customParser = 0;
-        ++nextType;
     }
     type.metaObject = metaObject; // Snapshot may have changed.
 
@@ -481,8 +438,6 @@ static const char *VolatileBool_SignatureStrings[] = {
 
 void PySide::initQmlSupport(PyObject *module)
 {
-    ElementFactory<PYSIDE_MAX_QML_TYPES - 1>::init();
-
     // Export QmlListProperty type
     if (SbkSpecial_Type_Ready(module, PropertyListTypeF(), PropertyList_SignatureStrings) < 0) {
         PyErr_Print();
