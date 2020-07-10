@@ -117,6 +117,39 @@ bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, QByteArray className
     return isDerived;
 }
 
+template <typename T>
+struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
+{
+    const QByteArray name;
+
+    QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObject = nullptr)
+        : QMetaTypeInterface {
+            /*.revision=*/ 0,
+            /*.size=*/ sizeof(T),
+            /*.alignment=*/ alignof(T),
+            /*.flags=*/ QtPrivate::QMetaTypeTypeFlags<T>::Flags,
+            /*.metaObject=*/ metaObject,
+            /*.name=*/ name.constData(),
+            /*.typeId=*/ 0,
+            /*.ref=*/ { Q_BASIC_ATOMIC_INITIALIZER(0) },
+            /*.deleteSelf=*/ [](QMetaTypeInterface *self) {
+                delete static_cast<QPysideQmlMetaTypeInterface *>(self);
+            },
+            /*.defaultCtr=*/ [](const QMetaTypeInterface *, void *addr) { new (addr) T(); },
+            /*.copyCtr=*/ [](const QMetaTypeInterface *, void *addr, const void *other) {
+                new (addr) T(*reinterpret_cast<const T *>(other));
+            },
+            /*.moveCtr=*/ [](const QMetaTypeInterface *, void *addr, void *other) {
+                new (addr) T(std::move(*reinterpret_cast<T *>(other)));
+            },
+            /*.dtor=*/ [](const QMetaTypeInterface *, void *addr) {
+                reinterpret_cast<T *>(addr)->~T();
+            },
+            /*.legacyRegisterOp=*/ nullptr
+        }
+        , name(name) {}
+};
+
 template <class WrapperClass>
 void registerTypeIfInheritsFromClass(
         QByteArray className,
@@ -129,47 +162,11 @@ void registerTypeIfInheritsFromClass(
 {
     bool shouldRegister = !registered && pyTypeObjectInheritsFromClass(typeToRegister, className);
     if (shouldRegister) {
-        int ptrType =
-#if 0 // FIXME Qt 6
-                QMetaType::registerNormalizedType(
-                    typePointerName.constData(),
-                    QtMetaTypePrivate::QMetaTypeFunctionHelper<WrapperClass *>::Destruct,
-                    QtMetaTypePrivate::QMetaTypeFunctionHelper<WrapperClass *>::Construct,
-                    sizeof(WrapperClass *),
-                    static_cast< ::QFlags<QMetaType::TypeFlag> >(QtPrivate::QMetaTypeTypeFlags<
-                                                                 WrapperClass *>::Flags),
-                    typeMetaObject);
-        if (ptrType == -1) {
-            PyErr_Format(PyExc_TypeError, "Meta type registration of \"%s\" for QML usage failed.",
-                         typePointerName.constData());
-            return;
-        }
-#else
-                -1;
-#endif
-        int lstType =
-#if 0 // FIXME Qt 6
-                QMetaType::registerNormalizedType(
-                    typeListName.constData(),
-                    QtMetaTypePrivate::QMetaTypeFunctionHelper<QQmlListProperty<WrapperClass> >
-                      ::Destruct,
-                    QtMetaTypePrivate::QMetaTypeFunctionHelper<QQmlListProperty<WrapperClass> >
-                      ::Construct,
-                    sizeof(QQmlListProperty<WrapperClass>),
-                    static_cast< ::QFlags<QMetaType::TypeFlag> >(
-                        QtPrivate::QMetaTypeTypeFlags<QQmlListProperty<WrapperClass> >::Flags),
-                    nullptr);
-#else
-                -1;
-#endif
-        if (lstType == -1) {
-            PyErr_Format(PyExc_TypeError, "Meta type registration of \"%s\" for QML usage failed.",
-                         typeListName.constData());
-            return;
-        }
+        QMetaType ptrType(new QPysideQmlMetaTypeInterface<WrapperClass *>(typePointerName, typeMetaObject));
+        QMetaType lstType(new QPysideQmlMetaTypeInterface<QQmlListProperty<WrapperClass>>(typeListName));
 
-        type->typeId = QMetaType(ptrType);
-        type->listId = QMetaType(lstType);
+        type->typeId = std::move(ptrType);
+        type->listId = std::move(lstType);
         type->attachedPropertiesFunction = QQmlPrivate::attachedPropertiesFunc<WrapperClass>();
         type->attachedPropertiesMetaObject =
                 QQmlPrivate::attachedPropertiesMetaObject<WrapperClass>();
