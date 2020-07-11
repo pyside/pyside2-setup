@@ -49,6 +49,7 @@ BuildLog.classifiers finds the set of classifier strings.
 
 import os
 import sys
+import shutil
 from collections import namedtuple
 from textwrap import dedent
 
@@ -74,7 +75,6 @@ class BuildLog(object):
                 continue
             fpath = os.path.join(log_dir, 'build_dir.txt')
             if not os.path.exists(fpath):
-                print("Warning: %s not found, skipped" % fpath)
                 continue
             with open(fpath) as f:
                 f_contents = f.read().strip()
@@ -109,6 +109,31 @@ class BuildLog(object):
         build_history.sort()
         self.history = build_history
         self._buildno = None
+        self.prune_old_entries(history_dir)
+
+    def prune_old_entries(self, history_dir):
+        lst = []
+        for timestamp in os.listdir(history_dir):
+            log_dir = os.path.join(history_dir, timestamp)
+            if not os.path.isdir(log_dir):
+                continue
+            lst.append(log_dir)
+        if lst:
+            def warn_problem(func, path, exc_info):
+                cls, ins, tb = exc_info
+                print("rmtree({}) warning: problem with {}:\n   {}: {}".format(
+                    func.__name__, path,
+                    cls.__name__, ins.args))
+
+            lst.sort()
+            log_dir = lst[-1]
+            fname = os.path.basename(log_dir)
+            ref_date_str = fname[:10]
+            for log_dir in lst:
+                fname = os.path.basename(log_dir)
+                date_str = fname[:10]
+                if date_str != ref_date_str:
+                    shutil.rmtree(log_dir, onerror=warn_problem)
 
     def set_buildno(self, buildno):
         self.history[buildno] # test
