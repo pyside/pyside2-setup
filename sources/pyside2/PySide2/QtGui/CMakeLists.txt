@@ -47,6 +47,7 @@ ${QtGui_GEN_DIR}/qdragleaveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdragmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qdropevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qenterevent_wrapper.cpp
+${QtGui_GEN_DIR}/qeventpoint_wrapper.cpp
 ${QtGui_GEN_DIR}/qexposeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfileopenevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfocusevent_wrapper.cpp
@@ -131,6 +132,7 @@ ${QtGui_GEN_DIR}/qresizeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qsessionmanager_wrapper.cpp
 ${QtGui_GEN_DIR}/qshortcutevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qshowevent_wrapper.cpp
+${QtGui_GEN_DIR}/qsinglepointevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditem_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
@@ -182,7 +184,6 @@ ${QtGui_GEN_DIR}/qtexttablecell_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttablecellformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtexttableformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtoolbarchangeevent_wrapper.cpp
-${QtGui_GEN_DIR}/qtouchevent_touchpoint_wrapper.cpp
 ${QtGui_GEN_DIR}/qtouchevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtransform_wrapper.cpp
 ${QtGui_GEN_DIR}/qt_wrapper.cpp

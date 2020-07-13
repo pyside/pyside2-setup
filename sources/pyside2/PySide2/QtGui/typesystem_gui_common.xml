@@ -1375,6 +1375,9 @@
       <enum-type name="Reason"/>
   </object-type>
 
+  <value-type name="QEventPoint" since="6.0">
+      <enum-type name="State"/>
+  </value-type>
   <object-type name="QDragEnterEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragEnter"/>
   <object-type name="QDragLeaveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragLeave"/>
   <object-type name="QDragMoveEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DragMove"/>
@@ -1410,6 +1413,7 @@
   <object-type name="QShortcutEvent" copyable = "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Shortcut">
   </object-type>
   <object-type name="QShowEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::Show"/>
+  <object-type name="QSinglePointEvent" copyable="false" since="6.0"/>
   <object-type name="QStatusTipEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::StatusTip"/>
   <object-type name="QTabletEvent" copyable= "false" polymorphic-id-expression="%1-&gt;type() == QEvent::TabletMove || %1-&gt;type() == QEvent::TabletPress || %1-&gt;type() == QEvent::TabletRelease"/>
   <object-type name="QToolBarChangeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ToolBarChange"/>
@@ -2313,11 +2317,7 @@
     <modify-function signature="getEulerAngles(float*,float*,float*)const" since="5.5" remove="all"/>
   </value-type>
 
-  <object-type name="QTouchEvent" since="4.6">
-      <value-type name="TouchPoint" since="4.6">
-        <enum-type name="InfoFlag" flags="InfoFlags"/>
-      </value-type>
-  </object-type>
+  <object-type name="QTouchEvent" since="4.6"/>
 
   <object-type name="QInputDevice">
     <enum-type name="Capability" flags="Capabilities"/>
