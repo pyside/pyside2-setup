@@ -1138,6 +1138,19 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         if (!d->m_currentFunction.isNull())
             d->m_currentFunction->setOverride(true);
         break;
+    case CXCursor_StaticAssert:
+        // Check for Q_PROPERTY() (see PySide2/global.h.in for an explanation
+        // how it is defined, and qdoc).
+        if (clang_isDeclaration(cursor.kind) && !d->m_currentClass.isNull()) {
+            auto snippet = getCodeSnippet(cursor);
+            const auto length = snippet.size();
+            if (length > 12 && *snippet.rbegin() == ')'
+                && snippet.compare(0, 11, "Q_PROPERTY(") == 0) {
+                const QString qProperty = QString::fromUtf8(snippet.data() + 11, length - 12);
+                d->m_currentClass->addPropertyDeclaration(qProperty);
+            }
+        }
+        break;
     default:
         break;
     }

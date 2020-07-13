@@ -114,8 +114,10 @@ def finish_import(module):
 
 
 import signature_bootstrap
-from shibokensupport import signature
+from shibokensupport import signature, __feature__
 signature.get_signature = signature_bootstrap.get_signature
+# PYSIDE-1019: Publish the __feature__ dictionary.
+__feature__.pyside_feature_dict = signature_bootstrap.pyside_feature_dict
 del signature_bootstrap
 
 def _get_modname(mod):
@@ -194,6 +196,7 @@ def move_into_pyside_package():
         import PySide2.support
     except ModuleNotFoundError:
         PySide2.support = types.ModuleType("PySide2.support")
+    put_into_package(PySide2.support, __feature__)
     put_into_package(PySide2.support, signature)
     put_into_package(PySide2.support.signature, mapping)
     put_into_package(PySide2.support.signature, errorhandler)
@@ -217,5 +220,16 @@ from shibokensupport.signature.lib import enum_sig
 if "PySide2" in sys.modules:
     # We publish everything under "PySide2.support.signature", again.
     move_into_pyside_package()
+    # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
+    # __feature__ is already in sys.modules, so this is actually no import
+    try:
+        import PySide2.support.__feature__
+        sys.modules["__feature__"] = PySide2.support.__feature__
+        PySide2.support.__feature__.original_import = __builtins__["__import__"]
+        __builtins__["__import__"] = PySide2.support.__feature__._import
+        # Maybe we should optimize that and change `__import__` from C, instead?
+    except ModuleNotFoundError:
+        print("__feature__ could not be imported. "
+              "This is an unsolved PyInstaller problem.", file=sys.stderr)
 
 # end of file

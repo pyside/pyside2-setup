@@ -1807,6 +1807,10 @@ public:
         m_index = index;
     }
 
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const;
+#endif
+
 private:
     QString m_name;
     QString m_read;
@@ -1816,5 +1820,9 @@ private:
     const TypeEntry *m_type;
     int m_index = -1;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const QPropertySpec &p);
+#endif
 
 #endif // ABSTRACTMETALANG_H

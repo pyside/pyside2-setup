@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,21 +37,17 @@
 **
 ****************************************************************************/
 
-#ifndef SIGNATURE_H
-#define SIGNATURE_H
+#ifndef FEATURE_SELECT_H
+#define FEATURE_SELECT_H
 
-#include "sbkpython.h"
+#include "pysidemacros.h"
 
-extern "C"
-{
+namespace PySide {
+namespace FeatureSelector {
 
-LIBSHIBOKEN_API int SbkSpecial_Type_Ready(PyObject *, PyTypeObject *, const char *[]);
-LIBSHIBOKEN_API void FinishSignatureInitialization(PyObject *, const char *[]);
-LIBSHIBOKEN_API void SetError_Argument(PyObject *, const char *);
-LIBSHIBOKEN_API PyObject *Sbk_TypeGet___signature__(PyObject *, PyObject *);
-LIBSHIBOKEN_API PyObject *Sbk_TypeGet___doc__(PyObject *);
-LIBSHIBOKEN_API PyObject *GetFeatureDict();
+PYSIDE_API void init();
 
-} // extern "C"
+} // namespace PySide
+} // namespace FeatureSelector
 
-#endif // SIGNATURE_H
+#endif // FEATURE_SELECT_H

@@ -74,7 +74,8 @@ typedef struct safe_globals_struc {
     PyObject *helper_module;
     PyObject *arg_dict;
     PyObject *map_dict;
-    PyObject *value_dict;  // for writing signatures
+    PyObject *value_dict;       // for writing signatures
+    PyObject *feature_dict;     // registry for PySide.support.__feature__
     // init part 2: run module
     PyObject *pyside_type_init_func;
     PyObject *create_signature_func;
@@ -570,6 +571,12 @@ init_phase_1(void)
         // build a dict for assigned signature values
         p->value_dict = PyDict_New();
         if (p->value_dict == nullptr)
+            goto error;
+
+        // PYSIDE-1019: build a __feature__ dict
+        p->feature_dict = PyDict_New();
+        if (p->feature_dict == nullptr
+            || PyObject_SetAttrString(p->helper_module, "pyside_feature_dict", p->feature_dict) < 0)
             goto error;
 
         // This function will be disabled until phase 2 is done.
@@ -1257,6 +1264,12 @@ Sbk_TypeGet___signature__(PyObject *ob, PyObject *modifier)
 PyObject *Sbk_TypeGet___doc__(PyObject *ob)
 {
     return pyside_tp_get___doc__(ob);
+}
+
+PyObject *GetFeatureDict()
+{
+    init_module_1();
+    return pyside_globals->feature_dict;
 }
 
 } //extern "C"

@@ -93,6 +93,9 @@ typedef void (*ObjectDestructor)(void *);
 
 typedef void (*SubTypeInitHook)(SbkObjectType *, PyObject *, PyObject *);
 
+typedef PyObject *(*SelectableFeatureHook)(PyTypeObject *);
+LIBSHIBOKEN_API void initSelectableFeature(SelectableFeatureHook func);
+
 extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
 extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);
 

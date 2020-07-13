@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -44,69 +45,191 @@
 
 import sys
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import (QByteArray, QDate, QDateTime, QDir, QEvent, QPoint,
+    QRect, QRegularExpression, QSettings, QSize, QTime, QTimer, Qt)
+from PySide2.QtGui import (QAction, QColor, QIcon, QIntValidator,
+    QDoubleValidator, QRegularExpressionValidator, QValidator)
+from PySide2.QtWidgets import (QAbstractItemView, QApplication,
+    QCheckBox, QComboBox, QFileDialog, QDialog, QDialogButtonBox, QGridLayout,
+    QGroupBox, QHeaderView, QInputDialog, QItemDelegate, QLabel, QLineEdit,
+    QMainWindow, QMessageBox, QStyle, QSpinBox, QStyleOptionViewItem,
+    QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem, QVBoxLayout)
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class TypeChecker:
+    def __init__(self, parent=None):
+        self.bool_exp = QRegularExpression('^(true)|(false)$')
+        assert self.bool_exp.isValid()
+        self.bool_exp.setPatternOptions(QRegularExpression.CaseInsensitiveOption)
+
+        self.byteArray_exp = QRegularExpression(r'^[\x00-\xff]*$')
+        assert self.byteArray_exp.isValid()
+
+        self.char_exp = QRegularExpression('^.$')
+        assert self.char_exp.isValid()
+
+        pattern = r'^[+-]?\d+$'
+        self.int_exp = QRegularExpression(pattern)
+        assert self.int_exp.isValid()
+
+        pattern = r'^\(([0-9]*),([0-9]*),([0-9]*),([0-9]*)\)$'
+        self.color_exp = QRegularExpression(pattern)
+        assert self.color_exp.isValid()
+
+        pattern = r'^\((-?[0-9]*),(-?[0-9]*)\)$'
+        self.point_exp = QRegularExpression(pattern)
+        assert self.point_exp.isValid()
+
+        pattern = r'^\((-?[0-9]*),(-?[0-9]*),(-?[0-9]*),(-?[0-9]*)\)$'
+        self.rect_exp = QRegularExpression(pattern)
+        assert self.rect_exp.isValid()
+
+        self.size_exp = QRegularExpression(self.point_exp)
+
+        date_pattern = '([0-9]{,4})-([0-9]{,2})-([0-9]{,2})'
+        self.date_exp = QRegularExpression('^{}$'.format(date_pattern))
+        assert self.date_exp.isValid()
+
+        time_pattern = '([0-9]{,2}):([0-9]{,2}):([0-9]{,2})'
+        self.time_exp = QRegularExpression('^{}$'.format(time_pattern))
+        assert self.time_exp.isValid()
+
+        pattern = '^{}T{}$'.format(date_pattern, time_pattern)
+        self.dateTime_exp = QRegularExpression(pattern)
+        assert self.dateTime_exp.isValid()
+
+    def type_from_text(self, text):
+        if self.bool_exp.match(text).hasMatch():
+            return bool
+        if self.int_exp.match(text).hasMatch():
+            return int
+        return None
+
+    def create_validator(self, value, parent):
+        if isinstance(value, bool):
+            return QRegularExpressionValidator(self.bool_exp, parent)
+        if isinstance(value, float):
+            return QDoubleValidator(parent)
+        if isinstance(value, int):
+            return QIntValidator(parent)
+        if isinstance(value, QByteArray):
+            return QRegularExpressionValidator(self.byteArray_exp, parent)
+        if isinstance(value, QColor):
+            return QRegularExpressionValidator(self.color_exp, parent)
+        if isinstance(value, QDate):
+            return QRegularExpressionValidator(self.date_exp, parent)
+        if isinstance(value, QDateTime):
+            return QRegularExpressionValidator(self.dateTime_exp, parent)
+        if isinstance(value, QTime):
+            return QRegularExpressionValidator(self.time_exp, parent)
+        if isinstance(value, QPoint):
+            return QRegularExpressionValidator(self.point_exp, parent)
+        if isinstance(value, QRect):
+            return QRegularExpressionValidator(self.rect_exp, parent)
+        if isinstance(value, QSize):
+            return QRegularExpressionValidator(self.size_exp, parent)
+        return None
+
+    def from_string(self, text, original_value):
+        if isinstance(original_value, QColor):
+            match = self.color_exp.match(text)
+            return QColor(min(int(match.captured(1)), 255),
+                          min(int(match.captured(2)), 255),
+                          min(int(match.captured(3)), 255),
+                          min(int(match.captured(4)), 255))
+        if isinstance(original_value, QDate):
+            value = QDate.fromString(text, Qt.ISODate)
+            return value if value.isValid() else None
+        if isinstance(original_value, QDateTime):
+            value = QDateTime.fromString(text, Qt.ISODate)
+            return value if value.isValid() else None
+        if isinstance(original_value, QTime):
+            value = QTime.fromString(text, Qt.ISODate)
+            return value if value.isValid() else None
+        if isinstance(original_value, QPoint):
+            match = self.point_exp.match(text)
+            return QPoint(int(match.captured(1)),
+                          int(match.captured(2)))
+        if isinstance(original_value, QRect):
+            match = self.rect_exp.match(text)
+            return QRect(int(match.captured(1)),
+                         int(match.captured(2)),
+                         int(match.captured(3)),
+                         int(match.captured(4)))
+        if isinstance(original_value, QSize):
+            match = self.size_exp.match(text)
+            return QSize(int(match.captured(1)),
+                         int(match.captured(2)))
+        if isinstance(original_value, list):
+            return text.split(',')
+        return type(original_value)(text)
+
+
+class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self.settingsTree = SettingsTree()
-        self.setCentralWidget(self.settingsTree)
+        self.settings_tree = SettingsTree()
+        self.setCentralWidget(self.settings_tree)
 
-        self.locationDialog = None
+        self.location_dialog = None
 
-        self.createActions()
-        self.createMenus()
+        self.create_actions()
+        self.create_menus()
 
-        self.autoRefreshAct.setChecked(True)
-        self.fallbacksAct.setChecked(True)
+        self.auto_refresh_action.setChecked(True)
+        self.fallbacks_action.setChecked(True)
 
         self.setWindowTitle("Settings Editor")
         self.resize(500, 600)
 
-    def openSettings(self):
-        if self.locationDialog is None:
-            self.locationDialog = LocationDialog(self)
+    def open_settings(self):
+        if self.location_dialog is None:
+            self.location_dialog = LocationDialog(self)
 
-        if self.locationDialog.exec_():
-            settings = QtCore.QSettings(self.locationDialog.format(),
-                                        self.locationDialog.scope(),
-                                        self.locationDialog.organization(),
-                                        self.locationDialog.application())
-            self.setSettingsObject(settings)
-            self.fallbacksAct.setEnabled(True)
+        if self.location_dialog.exec_():
+            settings = QSettings(self.location_dialog.format(),
+                                 self.location_dialog.scope(),
+                                 self.location_dialog.organization(),
+                                 self.location_dialog.application())
+            self.set_settings_object(settings)
+            self.fallbacks_action.setEnabled(True)
 
-    def openIniFile(self):
-        fileName, _  = QtWidgets.QFileDialog.getOpenFileName(self, "Open INI File",
+    def open_inifile(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open INI File",
                 '', "INI Files (*.ini *.conf)")
 
-        if fileName:
-            settings = QtCore.QSettings(fileName, QtCore.QSettings.IniFormat)
-            self.setSettingsObject(settings)
-            self.fallbacksAct.setEnabled(False)
+        if file_name:
+            self.load_ini_file(file_name)
 
-    def openPropertyList(self):
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+    def load_ini_file(self, file_name):
+        settings = QSettings(file_name, QSettings.IniFormat)
+        if settings.status() != QSettings.NoError:
+            return
+        self.set_settings_object(settings)
+        self.fallbacks_action.setEnabled(False)
+
+    def open_property_list(self):
+        file_name, _ = QFileDialog.getOpenFileName(self,
                 "Open Property List", '', "Property List Files (*.plist)")
 
-        if fileName:
-            settings = QtCore.QSettings(fileName, QtCore.QSettings.NativeFormat)
-            self.setSettingsObject(settings)
-            self.fallbacksAct.setEnabled(False)
+        if file_name:
+            settings = QSettings(file_name, QSettings.NativeFormat)
+            self.set_settings_object(settings)
+            self.fallbacks_action.setEnabled(False)
 
-    def openRegistryPath(self):
-        path, ok = QtWidgets.QInputDialog.getText(self, "Open Registry Path",
+    def open_registry_path(self):
+        path, ok = QInputDialog.getText(self, "Open Registry Path",
                 "Enter the path in the Windows registry:",
-                QtWidgets.QLineEdit.Normal, 'HKEY_CURRENT_USER\\')
+                QLineEdit.Normal, 'HKEY_CURRENT_USER\\')
 
         if ok and path != '':
-            settings = QtCore.QSettings(path, QtCore.QSettings.NativeFormat)
-            self.setSettingsObject(settings)
-            self.fallbacksAct.setEnabled(False)
+            settings = QSettings(path, QSettings.NativeFormat)
+            self.set_settings_object(settings)
+            self.fallbacks_action.setEnabled(False)
 
     def about(self):
-        QtWidgets.QMessageBox.about(self, "About Settings Editor",
+        QMessageBox.about(self, "About Settings Editor",
                 "The <b>Settings Editor</b> example shows how to access "
                 "application settings using Qt.")
 
@@ -119,185 +242,192 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.openPropertyListAct = QtGui.QAction("Open macOS &Property List...",
                 self, shortcut="Ctrl+P", triggered=self.openPropertyList)
+
+    def create_actions(self):
+        self.open_settings_action = QAction("&Open Application Settings...",
+                self, shortcut="Ctrl+O", triggered=self.open_settings)
+
+        self.open_ini_file_action = QAction("Open I&NI File...", self,
+                shortcut="Ctrl+N", triggered=self.open_inifile)
+
+        self.open_property_list_action = QAction("Open macOS &Property List...",
+                self, shortcut="Ctrl+P", triggered=self.open_property_list)
         if sys.platform != 'darwin':
-            self.openPropertyListAct.setEnabled(False)
+            self.open_property_list_action.setEnabled(False)
 
-        self.openRegistryPathAct = QtGui.QAction(
+        self.open_registry_path_action = QAction(
                 "Open Windows &Registry Path...", self, shortcut="Ctrl+G",
-                triggered=self.openRegistryPath)
+                triggered=self.open_registry_path)
         if sys.platform != 'win32':
-            self.openRegistryPathAct.setEnabled(False)
+            self.open_registry_path_action.setEnabled(False)
 
-        self.refreshAct = QtGui.QAction("&Refresh", self, shortcut="Ctrl+R",
-                enabled=False, triggered=self.settingsTree.refresh)
+        self.refresh_action = QAction("&Refresh", self, shortcut="Ctrl+R",
+                enabled=False, triggered=self.settings_tree.refresh)
 
-        self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
+        self.exit_action = QAction("E&xit", self, shortcut="Ctrl+Q",
                 triggered=self.close)
 
-        self.autoRefreshAct = QtGui.QAction("&Auto-Refresh", self,
+        self.auto_refresh_action = QAction("&Auto-Refresh", self,
                 shortcut="Ctrl+A", checkable=True, enabled=False)
-        self.autoRefreshAct.triggered[bool].connect(self.settingsTree.setAutoRefresh)
-        self.autoRefreshAct.triggered[bool].connect(self.refreshAct.setDisabled)
+        self.auto_refresh_action.triggered[bool].connect(self.settings_tree.set_auto_refresh)
+        self.auto_refresh_action.triggered[bool].connect(self.refresh_action.setDisabled)
 
-        self.fallbacksAct = QtGui.QAction("&Fallbacks", self,
+        self.fallbacks_action = QAction("&Fallbacks", self,
                 shortcut="Ctrl+F", checkable=True, enabled=False)
-        self.fallbacksAct.triggered[bool].connect(self.settingsTree.setFallbacksEnabled)
+        self.fallbacks_action.triggered[bool].connect(self.settings_tree.set_fallbacks_enabled)
 
-        self.aboutAct = QtGui.QAction("&About", self, triggered=self.about)
+        self.about_action = QAction("&About", self, triggered=self.about)
 
-        self.aboutQtAct = QtGui.QAction("About &Qt", self,
-                triggered=qApp.aboutQt)
+        self.about_Qt_action = QAction("About &Qt", self,
+                                       triggered=qApp.aboutQt)
 
-    def createMenus(self):
-        self.fileMenu = self.menuBar().addMenu("&File")
-        self.fileMenu.addAction(self.openSettingsAct)
-        self.fileMenu.addAction(self.openIniFileAct)
-        self.fileMenu.addAction(self.openPropertyListAct)
-        self.fileMenu.addAction(self.openRegistryPathAct)
-        self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.refreshAct)
-        self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.exitAct)
+    def create_menus(self):
+        self.file_menu = self.menuBar().addMenu("&File")
+        self.file_menu.addAction(self.open_settings_action)
+        self.file_menu.addAction(self.open_ini_file_action)
+        self.file_menu.addAction(self.open_property_list_action)
+        self.file_menu.addAction(self.open_registry_path_action)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self.refresh_action)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self.exit_action)
 
-        self.optionsMenu = self.menuBar().addMenu("&Options")
-        self.optionsMenu.addAction(self.autoRefreshAct)
-        self.optionsMenu.addAction(self.fallbacksAct)
+        self.options_menu = self.menuBar().addMenu("&Options")
+        self.options_menu.addAction(self.auto_refresh_action)
+        self.options_menu.addAction(self.fallbacks_action)
 
         self.menuBar().addSeparator()
 
-        self.helpMenu = self.menuBar().addMenu("&Help")
-        self.helpMenu.addAction(self.aboutAct)
-        self.helpMenu.addAction(self.aboutQtAct)
+        self.help_menu = self.menuBar().addMenu("&Help")
+        self.help_menu.addAction(self.about_action)
+        self.help_menu.addAction(self.about_Qt_action)
 
-    def setSettingsObject(self, settings):
-        settings.setFallbacksEnabled(self.fallbacksAct.isChecked())
-        self.settingsTree.setSettingsObject(settings)
+    def set_settings_object(self, settings):
+        settings.setFallbacksEnabled(self.fallbacks_action.isChecked())
+        self.settings_tree.set_settings_object(settings)
 
-        self.refreshAct.setEnabled(True)
-        self.autoRefreshAct.setEnabled(True)
+        self.refresh_action.setEnabled(True)
+        self.auto_refresh_action.setEnabled(True)
 
-        niceName = settings.fileName()
-        niceName.replace('\\', '/')
-        niceName = niceName.split('/')[-1]
+        nice_name = QDir.fromNativeSeparators(settings.fileName())
+        nice_name = nice_name.split('/')[-1]
 
         if not settings.isWritable():
-            niceName += " (read only)"
+            nice_name += " (read only)"
 
-        self.setWindowTitle("%s - Settings Editor" % niceName)
+        self.setWindowTitle("{} - Settings Editor".format(nice_name))
 
 
-class LocationDialog(QtWidgets.QDialog):
+class LocationDialog(QDialog):
     def __init__(self, parent=None):
         super(LocationDialog, self).__init__(parent)
 
-        self.formatComboBox = QtWidgets.QComboBox()
-        self.formatComboBox.addItem("Native")
-        self.formatComboBox.addItem("INI")
+        self.format_combo = QComboBox()
+        self.format_combo.addItem("Native")
+        self.format_combo.addItem("INI")
 
-        self.scopeComboBox = QtWidgets.QComboBox()
-        self.scopeComboBox.addItem("User")
-        self.scopeComboBox.addItem("System")
+        self.scope_cCombo = QComboBox()
+        self.scope_cCombo.addItem("User")
+        self.scope_cCombo.addItem("System")
 
-        self.organizationComboBox = QtWidgets.QComboBox()
-        self.organizationComboBox.addItem("Trolltech")
-        self.organizationComboBox.setEditable(True)
+        self.organization_combo = QComboBox()
+        self.organization_combo.addItem("Trolltech")
+        self.organization_combo.setEditable(True)
 
-        self.applicationComboBox = QtWidgets.QComboBox()
-        self.applicationComboBox.addItem("Any")
-        self.applicationComboBox.addItem("Application Example")
-        self.applicationComboBox.addItem("Assistant")
-        self.applicationComboBox.addItem("Designer")
-        self.applicationComboBox.addItem("Linguist")
-        self.applicationComboBox.setEditable(True)
-        self.applicationComboBox.setCurrentIndex(3)
+        self.application_combo = QComboBox()
+        self.application_combo.addItem("Any")
+        self.application_combo.addItem("Application Example")
+        self.application_combo.addItem("Assistant")
+        self.application_combo.addItem("Designer")
+        self.application_combo.addItem("Linguist")
+        self.application_combo.setEditable(True)
+        self.application_combo.setCurrentIndex(3)
 
-        formatLabel = QtWidgets.QLabel("&Format:")
-        formatLabel.setBuddy(self.formatComboBox)
+        format_label = QLabel("&Format:")
+        format_label.setBuddy(self.format_combo)
 
-        scopeLabel = QtWidgets.QLabel("&Scope:")
-        scopeLabel.setBuddy(self.scopeComboBox)
+        scope_label = QLabel("&Scope:")
+        scope_label.setBuddy(self.scope_cCombo)
 
-        organizationLabel = QtWidgets.QLabel("&Organization:")
-        organizationLabel.setBuddy(self.organizationComboBox)
+        organization_label = QLabel("&Organization:")
+        organization_label.setBuddy(self.organization_combo)
 
-        applicationLabel = QtWidgets.QLabel("&Application:")
-        applicationLabel.setBuddy(self.applicationComboBox)
+        application_label = QLabel("&Application:")
+        application_label.setBuddy(self.application_combo)
 
-        self.locationsGroupBox = QtWidgets.QGroupBox("Setting Locations")
+        self.locations_groupbox = QGroupBox("Setting Locations")
 
-        self.locationsTable = QtWidgets.QTableWidget()
-        self.locationsTable.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.locationsTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.locationsTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.locationsTable.setColumnCount(2)
-        self.locationsTable.setHorizontalHeaderLabels(("Location", "Access"))
-        self.locationsTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        self.locationsTable.horizontalHeader().resizeSection(1, 180)
+        self.locations_table = QTableWidget()
+        self.locations_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.locations_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.locations_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.locations_table.setColumnCount(2)
+        self.locations_table.setHorizontalHeaderLabels(("Location", "Access"))
+        self.locations_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.locations_table.horizontalHeader().resizeSection(1, 180)
 
-        self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
-        self.formatComboBox.activated.connect(self.updateLocationsTable)
-        self.scopeComboBox.activated.connect(self.updateLocationsTable)
-        self.organizationComboBox.lineEdit().editingFinished.connect(self.updateLocationsTable)
-        self.applicationComboBox.lineEdit().editingFinished.connect(self.updateLocationsTable)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
+        self.format_combo.activated.connect(self.update_locations)
+        self.scope_cCombo.activated.connect(self.update_locations)
+        self.organization_combo.lineEdit().editingFinished.connect(self.update_locations)
+        self.application_combo.lineEdit().editingFinished.connect(self.update_locations)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
 
-        locationsLayout = QtWidgets.QVBoxLayout()
-        locationsLayout.addWidget(self.locationsTable)
-        self.locationsGroupBox.setLayout(locationsLayout)
+        locations_layout = QVBoxLayout(self.locations_groupbox)
+        locations_layout.addWidget(self.locations_table)
 
-        mainLayout = QtWidgets.QGridLayout()
-        mainLayout.addWidget(formatLabel, 0, 0)
-        mainLayout.addWidget(self.formatComboBox, 0, 1)
-        mainLayout.addWidget(scopeLabel, 1, 0)
-        mainLayout.addWidget(self.scopeComboBox, 1, 1)
-        mainLayout.addWidget(organizationLabel, 2, 0)
-        mainLayout.addWidget(self.organizationComboBox, 2, 1)
-        mainLayout.addWidget(applicationLabel, 3, 0)
-        mainLayout.addWidget(self.applicationComboBox, 3, 1)
-        mainLayout.addWidget(self.locationsGroupBox, 4, 0, 1, 2)
-        mainLayout.addWidget(self.buttonBox, 5, 0, 1, 2)
-        self.setLayout(mainLayout)
+        mainLayout = QGridLayout(self)
+        mainLayout.addWidget(format_label, 0, 0)
+        mainLayout.addWidget(self.format_combo, 0, 1)
+        mainLayout.addWidget(scope_label, 1, 0)
+        mainLayout.addWidget(self.scope_cCombo, 1, 1)
+        mainLayout.addWidget(organization_label, 2, 0)
+        mainLayout.addWidget(self.organization_combo, 2, 1)
+        mainLayout.addWidget(application_label, 3, 0)
+        mainLayout.addWidget(self.application_combo, 3, 1)
+        mainLayout.addWidget(self.locations_groupbox, 4, 0, 1, 2)
+        mainLayout.addWidget(self.button_box, 5, 0, 1, 2)
 
-        self.updateLocationsTable()
+        self.update_locations()
 
         self.setWindowTitle("Open Application Settings")
         self.resize(650, 400)
 
     def format(self):
-        if self.formatComboBox.currentIndex() == 0:
-            return QtCore.QSettings.NativeFormat
+        if self.format_combo.currentIndex() == 0:
+            return QSettings.NativeFormat
         else:
-            return QtCore.QSettings.IniFormat
+            return QSettings.IniFormat
 
     def scope(self):
-        if self.scopeComboBox.currentIndex() == 0:
-            return QtCore.QSettings.UserScope
+        if self.scope_cCombo.currentIndex() == 0:
+            return QSettings.UserScope
         else:
-            return QtCore.QSettings.SystemScope
+            return QSettings.SystemScope
 
     def organization(self):
-        return self.organizationComboBox.currentText()
+        return self.organization_combo.currentText()
 
     def application(self):
-        if self.applicationComboBox.currentText() == "Any":
+        if self.application_combo.currentText() == "Any":
             return ''
 
-        return self.applicationComboBox.currentText()
+        return self.application_combo.currentText()
 
-    def updateLocationsTable(self):
-        self.locationsTable.setUpdatesEnabled(False)
-        self.locationsTable.setRowCount(0)
+    def update_locations(self):
+        self.locations_table.setUpdatesEnabled(False)
+        self.locations_table.setRowCount(0)
 
         for i in range(2):
             if i == 0:
-                if self.scope() == QtCore.QSettings.SystemScope:
+                if self.scope() == QSettings.SystemScope:
                     continue
 
-                actualScope = QtCore.QSettings.UserScope
+                actualScope = QSettings.UserScope
             else:
-                actualScope = QtCore.QSettings.SystemScope
+                actualScope = QSettings.SystemScope
 
             for j in range(2):
                 if j == 0:
@@ -308,16 +438,16 @@ class LocationDialog(QtWidgets.QDialog):
                 else:
                     actualApplication = ''
 
-                settings = QtCore.QSettings(self.format(), actualScope,
-                        self.organization(), actualApplication)
+                settings = QSettings(self.format(), actualScope,
+                                     self.organization(), actualApplication)
 
-                row = self.locationsTable.rowCount()
-                self.locationsTable.setRowCount(row + 1)
+                row = self.locations_table.rowCount()
+                self.locations_table.setRowCount(row + 1)
 
-                item0 = QtWidgets.QTableWidgetItem()
+                item0 = QTableWidgetItem()
                 item0.setText(settings.fileName())
 
-                item1 = QtWidgets.QTableWidgetItem()
+                item1 = QTableWidgetItem()
                 disable = not (settings.childKeys() or settings.childGroups())
 
                 if row == 0:
@@ -326,77 +456,79 @@ class LocationDialog(QtWidgets.QDialog):
                         disable = False
                     else:
                         item1.setText("Read-only")
-                    self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setDisabled(disable)
+                    self.button_box.button(QDialogButtonBox.Ok).setDisabled(disable)
                 else:
                     item1.setText("Read-only fallback")
 
                 if disable:
-                    item0.setFlags(item0.flags() & ~QtCore.Qt.ItemIsEnabled)
-                    item1.setFlags(item1.flags() & ~QtCore.Qt.ItemIsEnabled)
+                    item0.setFlags(item0.flags() & ~Qt.ItemIsEnabled)
+                    item1.setFlags(item1.flags() & ~Qt.ItemIsEnabled)
 
-                self.locationsTable.setItem(row, 0, item0)
-                self.locationsTable.setItem(row, 1, item1)
+                self.locations_table.setItem(row, 0, item0)
+                self.locations_table.setItem(row, 1, item1)
 
-        self.locationsTable.setUpdatesEnabled(True)
+        self.locations_table.setUpdatesEnabled(True)
 
 
-class SettingsTree(QtWidgets.QTreeWidget):
+class SettingsTree(QTreeWidget):
     def __init__(self, parent=None):
         super(SettingsTree, self).__init__(parent)
 
-        self.setItemDelegate(VariantDelegate(self))
+        self._type_checker = TypeChecker()
+        self.setItemDelegate(VariantDelegate(self._type_checker, self))
 
         self.setHeaderLabels(("Setting", "Type", "Value"))
-        self.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        self.header().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.header().setSectionResizeMode(2, QHeaderView.Stretch)
 
         self.settings = None
-        self.refreshTimer = QtCore.QTimer()
-        self.refreshTimer.setInterval(2000)
-        self.autoRefresh = False
+        self.refresh_timer = QTimer()
+        self.refresh_timer.setInterval(2000)
+        self.auto_refresh = False
 
-        self.groupIcon = QtGui.QIcon()
-        self.groupIcon.addPixmap(self.style().standardPixmap(QtWidgets.QStyle.SP_DirClosedIcon),
-                QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.groupIcon.addPixmap(self.style().standardPixmap(QtWidgets.QStyle.SP_DirOpenIcon),
-                QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.keyIcon = QtGui.QIcon()
-        self.keyIcon.addPixmap(self.style().standardPixmap(QtWidgets.QStyle.SP_FileIcon))
+        self.group_icon = QIcon()
+        style = self.style()
+        self.group_icon.addPixmap(style.standardPixmap(QStyle.SP_DirClosedIcon),
+                                  QIcon.Normal, QIcon.Off)
+        self.group_icon.addPixmap(style.standardPixmap(QStyle.SP_DirOpenIcon),
+                                  QIcon.Normal, QIcon.On)
+        self.key_icon = QIcon()
+        self.key_icon.addPixmap(style.standardPixmap(QStyle.SP_FileIcon))
 
-        self.refreshTimer.timeout.connect(self.maybeRefresh)
+        self.refresh_timer.timeout.connect(self.maybe_refresh)
 
-    def setSettingsObject(self, settings):
+    def set_settings_object(self, settings):
         self.settings = settings
         self.clear()
 
         if self.settings is not None:
             self.settings.setParent(self)
             self.refresh()
-            if self.autoRefresh:
-                self.refreshTimer.start()
+            if self.auto_refresh:
+                self.refresh_timer.start()
         else:
-            self.refreshTimer.stop()
+            self.refresh_timer.stop()
 
     def sizeHint(self):
-        return QtCore.QSize(800, 600)
+        return QSize(800, 600)
 
-    def setAutoRefresh(self, autoRefresh):
-        self.autoRefresh = autoRefresh
+    def set_auto_refresh(self, autoRefresh):
+        self.auto_refresh = autoRefresh
 
         if self.settings is not None:
-            if self.autoRefresh:
-                self.maybeRefresh()
-                self.refreshTimer.start()
+            if self.auto_refresh:
+                self.maybe_refresh()
+                self.refresh_timer.start()
             else:
-                self.refreshTimer.stop()
+                self.refresh_timer.stop()
 
-    def setFallbacksEnabled(self, enabled):
+    def set_fallbacks_enabled(self, enabled):
         if self.settings is not None:
             self.settings.setFallbacksEnabled(enabled)
             self.refresh()
 
-    def maybeRefresh(self):
-        if self.state() != QtWidgets.QAbstractItemView.EditingState:
+    def maybe_refresh(self):
+        if self.state() != QAbstractItemView.EditingState:
             self.refresh()
 
     def refresh(self):
@@ -405,23 +537,23 @@ class SettingsTree(QtWidgets.QTreeWidget):
 
         # The signal might not be connected.
         try:
-            self.itemChanged.disconnect(self.updateSetting)
+            self.itemChanged.disconnect(self.update_setting)
         except:
             pass
 
         self.settings.sync()
-        self.updateChildItems(None)
+        self.update_child_items(None)
 
-        self.itemChanged.connect(self.updateSetting)
+        self.itemChanged.connect(self.update_setting)
 
     def event(self, event):
-        if event.type() == QtCore.QEvent.WindowActivate:
-            if self.isActiveWindow() and self.autoRefresh:
-                self.maybeRefresh()
+        if event.type() == QEvent.WindowActivate:
+            if self.isActiveWindow() and self.auto_refresh:
+                self.maybe_refresh()
 
         return super(SettingsTree, self).event(event)
 
-    def updateSetting(self, item):
+    def update_setting(self, item):
         key = item.text(0)
         ancestor = item.parent()
 
@@ -429,154 +561,121 @@ class SettingsTree(QtWidgets.QTreeWidget):
             key = ancestor.text(0) + '/' + key
             ancestor = ancestor.parent()
 
-        d = item.data(2, QtCore.Qt.UserRole)
-        self.settings.setValue(key, item.data(2, QtCore.Qt.UserRole))
+        d = item.data(2, Qt.UserRole)
+        self.settings.setValue(key, item.data(2, Qt.UserRole))
 
-        if self.autoRefresh:
+        if self.auto_refresh:
             self.refresh()
 
-    def updateChildItems(self, parent):
-        dividerIndex = 0
+    def update_child_items(self, parent):
+        divider_index = 0
 
         for group in self.settings.childGroups():
-            childIndex = self.findChild(parent, group, dividerIndex)
-            if childIndex != -1:
-                child = self.childAt(parent, childIndex)
+            child_index = self.find_child(parent, group, divider_index)
+            if child_index != -1:
+                child = self.child_at(parent, child_index)
                 child.setText(1, '')
                 child.setText(2, '')
-                child.setData(2, QtCore.Qt.UserRole, None)
-                self.moveItemForward(parent, childIndex, dividerIndex)
+                child.setData(2, Qt.UserRole, None)
+                self.move_item_forward(parent, child_index, divider_index)
             else:
-                child = self.createItem(group, parent, dividerIndex)
+                child = self.create_item(group, parent, divider_index)
 
-            child.setIcon(0, self.groupIcon)
-            dividerIndex += 1
+            child.setIcon(0, self.group_icon)
+            divider_index += 1
 
             self.settings.beginGroup(group)
-            self.updateChildItems(child)
+            self.update_child_items(child)
             self.settings.endGroup()
 
         for key in self.settings.childKeys():
-            childIndex = self.findChild(parent, key, 0)
-            if childIndex == -1 or childIndex >= dividerIndex:
-                if childIndex != -1:
-                    child = self.childAt(parent, childIndex)
+            child_index = self.find_child(parent, key, 0)
+            if child_index == -1 or child_index >= divider_index:
+                if child_index != -1:
+                    child = self.child_at(parent, child_index)
                     for i in range(child.childCount()):
-                        self.deleteItem(child, i)
-                    self.moveItemForward(parent, childIndex, dividerIndex)
+                        self.delete_item(child, i)
+                    self.move_item_forward(parent, child_index, divider_index)
                 else:
-                    child = self.createItem(key, parent, dividerIndex)
-                child.setIcon(0, self.keyIcon)
-                dividerIndex += 1
+                    child = self.create_item(key, parent, divider_index)
+                child.setIcon(0, self.key_icon)
+                divider_index += 1
             else:
-                child = self.childAt(parent, childIndex)
+                child = self.child_at(parent, child_index)
 
             value = self.settings.value(key)
             if value is None:
                 child.setText(1, 'Invalid')
             else:
+                # Try to convert to type unless a QByteArray is received
+                if isinstance(value, str):
+                    value_type = self._type_checker.type_from_text(value)
+                    if value_type:
+                        value = self.settings.value(key, type=value_type)
                 child.setText(1, value.__class__.__name__)
             child.setText(2, VariantDelegate.displayText(value))
-            child.setData(2, QtCore.Qt.UserRole, value)
+            child.setData(2, Qt.UserRole, value)
 
-        while dividerIndex < self.childCount(parent):
-            self.deleteItem(parent, dividerIndex)
+        while divider_index < self.child_count(parent):
+            self.delete_item(parent, divider_index)
 
-    def createItem(self, text, parent, index):
+    def create_item(self, text, parent, index):
         after = None
 
         if index != 0:
-            after = self.childAt(parent, index - 1)
+            after = self.child_at(parent, index - 1)
 
         if parent is not None:
-            item = QtWidgets.QTreeWidgetItem(parent, after)
+            item = QTreeWidgetItem(parent, after)
         else:
-            item = QtWidgets.QTreeWidgetItem(self, after)
+            item = QTreeWidgetItem(self, after)
 
         item.setText(0, text)
-        item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
         return item
 
-    def deleteItem(self, parent, index):
+    def delete_item(self, parent, index):
         if parent is not None:
             item = parent.takeChild(index)
         else:
             item = self.takeTopLevelItem(index)
         del item
 
-    def childAt(self, parent, index):
+    def child_at(self, parent, index):
         if parent is not None:
             return parent.child(index)
         else:
             return self.topLevelItem(index)
 
-    def childCount(self, parent):
+    def child_count(self, parent):
         if parent is not None:
             return parent.childCount()
         else:
             return self.topLevelItemCount()
 
-    def findChild(self, parent, text, startIndex):
-        for i in range(self.childCount(parent)):
-            if self.childAt(parent, i).text(0) == text:
+    def find_child(self, parent, text, startIndex):
+        for i in range(self.child_count(parent)):
+            if self.child_at(parent, i).text(0) == text:
                 return i
         return -1
 
-    def moveItemForward(self, parent, oldIndex, newIndex):
+    def move_item_forward(self, parent, oldIndex, newIndex):
         for int in range(oldIndex - newIndex):
-            self.deleteItem(parent, newIndex)
+            self.delete_item(parent, newIndex)
 
 
-class VariantDelegate(QtWidgets.QItemDelegate):
-    def __init__(self, parent=None):
+class VariantDelegate(QItemDelegate):
+    def __init__(self, type_checker, parent=None):
         super(VariantDelegate, self).__init__(parent)
-
-        self.boolExp = QtCore.QRegExp()
-        self.boolExp.setPattern('true|false')
-        self.boolExp.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-
-        self.byteArrayExp = QtCore.QRegExp()
-        self.byteArrayExp.setPattern('[\\x00-\\xff]*')
-
-        self.charExp = QtCore.QRegExp()
-        self.charExp.setPattern('.')
-
-        self.colorExp = QtCore.QRegExp()
-        self.colorExp.setPattern('\\(([0-9]*),([0-9]*),([0-9]*),([0-9]*)\\)')
-
-        self.doubleExp = QtCore.QRegExp()
-        self.doubleExp.setPattern('')
-
-        self.pointExp = QtCore.QRegExp()
-        self.pointExp.setPattern('\\((-?[0-9]*),(-?[0-9]*)\\)')
-
-        self.rectExp = QtCore.QRegExp()
-        self.rectExp.setPattern('\\((-?[0-9]*),(-?[0-9]*),(-?[0-9]*),(-?[0-9]*)\\)')
-
-        self.signedIntegerExp = QtCore.QRegExp()
-        self.signedIntegerExp.setPattern('-?[0-9]*')
-
-        self.sizeExp = QtCore.QRegExp(self.pointExp)
-
-        self.unsignedIntegerExp = QtCore.QRegExp()
-        self.unsignedIntegerExp.setPattern('[0-9]*')
-
-        self.dateExp = QtCore.QRegExp()
-        self.dateExp.setPattern('([0-9]{,4})-([0-9]{,2})-([0-9]{,2})')
-
-        self.timeExp = QtCore.QRegExp()
-        self.timeExp.setPattern('([0-9]{,2}):([0-9]{,2}):([0-9]{,2})')
-
-        self.dateTimeExp = QtCore.QRegExp()
-        self.dateTimeExp.setPattern(self.dateExp.pattern() + 'T' + self.timeExp.pattern())
+        self._type_checker = type_checker
 
     def paint(self, painter, option, index):
         if index.column() == 2:
-            value = index.model().data(index, QtCore.Qt.UserRole)
-            if not self.isSupportedType(value):
-                myOption = QtWidgets.QStyleOptionViewItem(option)
-                myOption.state &= ~QtWidgets.QStyle.State_Enabled
-                super(VariantDelegate, self).paint(painter, myOption, index)
+            value = index.model().data(index, Qt.UserRole)
+            if not self.is_supported_type(value):
+                my_option = QStyleOptionViewItem(option)
+                my_option.state &= ~QStyle.State_Enabled
+                super(VariantDelegate, self).paint(painter, my_option, index)
                 return
 
         super(VariantDelegate, self).paint(painter, option, index)
@@ -585,137 +684,97 @@ class VariantDelegate(QtWidgets.QItemDelegate):
         if index.column() != 2:
             return None
 
-        originalValue = index.model().data(index, QtCore.Qt.UserRole)
-        if not self.isSupportedType(originalValue):
+        original_value = index.model().data(index, Qt.UserRole)
+        if not self.is_supported_type(original_value):
             return None
 
-        lineEdit = QtWidgets.QLineEdit(parent)
-        lineEdit.setFrame(False)
-
-        if isinstance(originalValue, bool):
-            regExp = self.boolExp
-        elif isinstance(originalValue, float):
-            regExp = self.doubleExp
-        elif isinstance(originalValue, int):
-            regExp = self.signedIntegerExp
-        elif isinstance(originalValue, QtCore.QByteArray):
-            regExp = self.byteArrayExp
-        elif isinstance(originalValue, QtGui.QColor):
-            regExp = self.colorExp
-        elif isinstance(originalValue, QtCore.QDate):
-            regExp = self.dateExp
-        elif isinstance(originalValue, QtCore.QDateTime):
-            regExp = self.dateTimeExp
-        elif isinstance(originalValue, QtCore.QTime):
-            regExp = self.timeExp
-        elif isinstance(originalValue, QtCore.QPoint):
-            regExp = self.pointExp
-        elif isinstance(originalValue, QtCore.QRect):
-            regExp = self.rectExp
-        elif isinstance(originalValue, QtCore.QSize):
-            regExp = self.sizeExp
+        editor = None
+        if isinstance(original_value, bool):
+            editor = QCheckBox(parent)
+        if isinstance(original_value, int):
+            editor = QSpinBox(parent)
+            editor.setRange(-32767, 32767)
         else:
-            regExp = QtCore.QRegExp()
-
-        if not regExp.isEmpty():
-            validator = QtGui.QRegExpValidator(regExp, lineEdit)
-            lineEdit.setValidator(validator)
-
-        return lineEdit
+            editor = QLineEdit(parent)
+            editor.setFrame(False)
+            validator = self._type_checker.create_validator(original_value, editor)
+            if validator:
+                editor.setValidator(validator)
+        return editor
 
     def setEditorData(self, editor, index):
-        value = index.model().data(index, QtCore.Qt.UserRole)
-        if editor is not None:
+        if not editor:
+            return
+        value = index.model().data(index, Qt.UserRole)
+        if isinstance(editor, QCheckBox):
+            editor.setCheckState(Qt.Checked if value else Qt.Unchecked)
+        elif isinstance(editor, QSpinBox):
+            editor.setValue(value)
+        else:
             editor.setText(self.displayText(value))
 
-    def setModelData(self, editor, model, index):
-        if not editor.isModified():
-            return
-
-        text = editor.text()
-        validator = editor.validator()
+    def value_from_lineedit(self, lineedit, model, index):
+        if not lineedit.isModified():
+            return None
+        text = lineedit.text()
+        validator = lineedit.validator()
         if validator is not None:
             state, text, _ = validator.validate(text, 0)
-            if state != QtGui.QValidator.Acceptable:
-                return
+            if state != QValidator.Acceptable:
+                return None
+        original_value = index.model().data(index, Qt.UserRole)
+        return self._type_checker.from_string(text, original_value)
 
-        originalValue = index.model().data(index, QtCore.Qt.UserRole)
-
-        if isinstance(originalValue, QtGui.QColor):
-            self.colorExp.exactMatch(text)
-            value = QtGui.QColor(min(int(self.colorExp.cap(1)), 255),
-                                 min(int(self.colorExp.cap(2)), 255),
-                                 min(int(self.colorExp.cap(3)), 255),
-                                 min(int(self.colorExp.cap(4)), 255))
-        elif isinstance(originalValue, QtCore.QDate):
-            value = QtCore.QDate.fromString(text, QtCore.Qt.ISODate)
-            if not value.isValid():
-                return
-        elif isinstance(originalValue, QtCore.QDateTime):
-            value = QtCore.QDateTime.fromString(text, QtCore.Qt.ISODate)
-            if not value.isValid():
-                return
-        elif isinstance(originalValue, QtCore.QTime):
-            value = QtCore.QTime.fromString(text, QtCore.Qt.ISODate)
-            if not value.isValid():
-                return
-        elif isinstance(originalValue, QtCore.QPoint):
-            self.pointExp.exactMatch(text)
-            value = QtCore.QPoint(int(self.pointExp.cap(1)),
-                                  int(self.pointExp.cap(2)))
-        elif isinstance(originalValue, QtCore.QRect):
-            self.rectExp.exactMatch(text)
-            value = QtCore.QRect(int(self.rectExp.cap(1)),
-                                 int(self.rectExp.cap(2)),
-                                 int(self.rectExp.cap(3)),
-                                 int(self.rectExp.cap(4)))
-        elif isinstance(originalValue, QtCore.QSize):
-            self.sizeExp.exactMatch(text)
-            value = QtCore.QSize(int(self.sizeExp.cap(1)),
-                                 int(self.sizeExp.cap(2)))
-        elif isinstance(originalValue, list):
-            value = text.split(',')
+    def setModelData(self, editor, model, index):
+        value = None
+        if isinstance(editor, QCheckBox):
+            value = editor.checkState() == Qt.Checked
+        elif isinstance(editor, QSpinBox):
+            value = editor.value()
         else:
-            value = type(originalValue)(text)
-
-        model.setData(index, self.displayText(value), QtCore.Qt.DisplayRole)
-        model.setData(index, value, QtCore.Qt.UserRole)
+            value = self.value_from_lineedit(editor, model, index)
+        if not value is None:
+            model.setData(index, value, Qt.UserRole)
+            model.setData(index, self.displayText(value), Qt.DisplayRole)
 
     @staticmethod
-    def isSupportedType(value):
-        return isinstance(value, (bool, float, int, QtCore.QByteArray,
-                str, QtGui.QColor, QtCore.QDate, QtCore.QDateTime,
-                QtCore.QTime, QtCore.QPoint, QtCore.QRect, QtCore.QSize,
-                list))
+    def is_supported_type(value):
+        return isinstance(value, (bool, float, int, QByteArray, str, QColor,
+                                  QDate, QDateTime, QTime, QPoint, QRect,
+                                  QSize, list))
 
     @staticmethod
     def displayText(value):
-        if isinstance(value, (bool, int, QtCore.QByteArray)):
-            return str(value)
         if isinstance(value, str):
             return value
-        elif isinstance(value, float):
-            return '%g' % value
-        elif isinstance(value, QtGui.QColor):
-            return '(%u,%u,%u,%u)' % (value.red(), value.green(), value.blue(), value.alpha())
-        elif isinstance(value, (QtCore.QDate, QtCore.QDateTime, QtCore.QTime)):
-            return value.toString(QtCore.Qt.ISODate)
-        elif isinstance(value, QtCore.QPoint):
-            return '(%d,%d)' % (value.x(), value.y())
-        elif isinstance(value, QtCore.QRect):
-            return '(%d,%d,%d,%d)' % (value.x(), value.y(), value.width(), value.height())
-        elif isinstance(value, QtCore.QSize):
-            return '(%d,%d)' % (value.width(), value.height())
-        elif isinstance(value, list):
+        if isinstance(value, bool):
+            return '✓' if value else '☐'
+        if isinstance(value, (int, float, QByteArray)):
+            return str(value)
+        if isinstance(value, QColor):
+            return '({},{},{},{})'.format(value.red(), value.green(),
+                                          value.blue(), value.alpha())
+        if isinstance(value, (QDate, QDateTime, QTime)):
+            return value.toString(Qt.ISODate)
+        if isinstance(value, QPoint):
+            return '({},{})'.format(value.x(), value.y())
+        if isinstance(value, QRect):
+            return '({},{},{},{})'.format(value.x(), value.y(), value.width(),
+                                          value.height())
+        if isinstance(value, QSize):
+            return '({},{})'.format(value.width(), value.height())
+        if isinstance(value, list):
             return ','.join(value)
-        elif value is None:
+        if value is None:
             return '<Invalid>'
 
-        return '<%s>' % value
+        return '<{}>'.format(value)
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    mainWin = MainWindow()
-    mainWin.show()
+    app = QApplication(sys.argv)
+    main_win = MainWindow()
+    if len(sys.argv) > 1:
+        main_win.load_ini_file(sys.argv[1])
+    main_win.show()
     sys.exit(app.exec_())

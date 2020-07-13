@@ -40,6 +40,7 @@ endif()
 
 set(libpyside_SRC
     dynamicqmetaobject.cpp
+    feature_select.cpp
     signalmanager.cpp
     globalreceiverv2.cpp
     pysideclassinfo.cpp
@@ -125,6 +126,7 @@ endif()
 
 set(libpyside_HEADERS
     dynamicqmetaobject.h
+    feature_select.h
     pysideclassinfo.h
     pysideqenum.h
     pysidemacros.h

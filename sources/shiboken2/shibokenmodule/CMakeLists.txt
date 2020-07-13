@@ -42,6 +42,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/__feature__.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/__feature__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/__init__.py"
                "${CMAKE_CURRENT_BINARY_DIR}/files.dir/shibokensupport/__init__.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/files.dir/shibokensupport/signature/__init__.py"
