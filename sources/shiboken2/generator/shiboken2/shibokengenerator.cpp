@@ -1145,6 +1145,12 @@ bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction *
     return false;
 }
 
+bool ShibokenGenerator::isNullPtr(const QString &value)
+{
+    return value == QLatin1String("0") || value == QLatin1String("nullptr")
+        || value == QLatin1String("NULLPTR") || value == QLatin1String("{}");
+}
+
 QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType *metaType, bool genericNumberType)
 {
     QString customCheck;

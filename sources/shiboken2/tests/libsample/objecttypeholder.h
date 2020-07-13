@@ -37,15 +37,16 @@ class LIBSAMPLE_API ObjectTypeHolder
 {
 public:
     explicit ObjectTypeHolder(const char* objectName);
+    explicit ObjectTypeHolder(const ObjectType *object = ObjectType::defaultInstance());
     virtual ~ObjectTypeHolder();
 
-    ObjectType* getObjecType() { return m_objectType; }
+    const ObjectType* getObjecType() { return m_objectType; }
 
     virtual Str passObjectTypeAsReference(const ObjectType& objectType);
     Str callPassObjectTypeAsReference();
 
 private:
-    ObjectType* m_objectType;
+   const ObjectType *m_objectType;
 };
 
 #endif

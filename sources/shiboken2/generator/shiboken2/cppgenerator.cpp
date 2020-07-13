@@ -2424,8 +2424,17 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
         s << ' ' << cppOut;
     } else if (treatAsPointer || isPointerOrObjectType) {
         s << " *" << cppOut;
-        if (!defaultValue.isEmpty())
-            s << " = " << defaultValue;
+        if (!defaultValue.isEmpty()) {
+            const bool needsConstCast = !isNullPtr(defaultValue)
+                && type->indirections() == 1 && type->isConstant()
+                && type->referenceType() == NoReference;
+            s << " = ";
+            if (needsConstCast)
+                s << "const_cast<" << typeName << " *>(";
+            s << defaultValue;
+            if (needsConstCast)
+                s << ')';
+        }
     } else if (type->referenceType() == LValueReference && !typeEntry->isPrimitive() && isNotContainerEnumOrFlags) {
         s << " *" << cppOut << " = &" << cppOutAux;
     } else {

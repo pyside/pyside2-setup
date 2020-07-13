@@ -301,6 +301,8 @@ protected:
 
     static bool visibilityModifiedToPrivate(const AbstractMetaFunction *func);
 
+    static bool isNullPtr(const QString &value);
+
     QString converterObject(const AbstractMetaType *type);
     QString converterObject(const TypeEntry *type);
 
