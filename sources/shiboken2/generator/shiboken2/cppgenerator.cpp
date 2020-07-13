@@ -869,6 +869,11 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
         qCWarning(lcShiboken).noquote().nospace() << errorMsg;
         s << Qt::endl << INDENT << "#error " << errorMsg << Qt::endl;
     }
+    if (returnType->referenceType() == LValueReference) {
+        s << INDENT << "static " << returnType->typeEntry()->qualifiedCppName()
+            << " result;\n";
+        return QLatin1String("return result;");
+    }
     return QLatin1String("return ") + defaultReturnExpr.returnValue()
            + QLatin1Char(';');
 }

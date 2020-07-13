@@ -106,6 +106,8 @@ public:
     virtual int recursionOnModifiedVirtual(Str arg) const { return 0; }
     int callRecursionOnModifiedVirtual(Str arg) const { return recursionOnModifiedVirtual(arg); }
 
+    virtual const Str & returnConstRef() const;
+
 private:
     Str m_name;
     int m_left;
