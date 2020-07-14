@@ -307,7 +307,8 @@ QByteArrayList emulatedCompilerOptions()
     QByteArrayList result;
 #if defined(Q_CC_MSVC)
     HeaderPaths headerPaths;
-    result.append(QByteArrayLiteral("-fms-compatibility-version=19"));
+    result.append(QByteArrayLiteral("-fms-compatibility-version=19.26.28806"));
+    result.append(QByteArrayLiteral("-fdelayed-template-parsing"));
     result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
     // Fix yvals_core.h:  STL1000: Unexpected compiler version, expected Clang 7 or newer (MSVC2017 update)
     result.append(QByteArrayLiteral("-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH"));
