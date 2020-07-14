@@ -265,7 +265,7 @@ static QString msgCannotDetermineException(const std::string_view &snippetV)
     const auto newLine = snippetV.find('\n'); // Multiline noexcept specifications have been found in Qt
     const bool truncate = newLine != std::string::npos;
     const qsizetype length = qsizetype(truncate ? newLine : snippetV.size());
-    QString snippet = QString::fromUtf8(snippetV.cbegin(), length);
+    QString snippet = QString::fromUtf8(snippetV.data(), length);
     if (truncate)
         snippet += QStringLiteral("...");
 
@@ -627,8 +627,8 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
     if (equalSign == std::string::npos)
         return QString();
     ++equalSign;
-    return QString::fromLocal8Bit(snippet.cbegin() + equalSign,
-                                  int(snippet.size() - equalSign)).trimmed();
+    return QString::fromLocal8Bit(snippet.data() + equalSign,
+                                  qsizetype(snippet.size() - equalSign)).trimmed();
 }
 
 // Resolve declaration and type of a base class

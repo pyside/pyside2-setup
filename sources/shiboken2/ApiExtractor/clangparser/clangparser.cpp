@@ -153,7 +153,7 @@ QString BaseVisitor::getCodeSnippetString(const CXCursor &cursor)
     const std::string_view result = getCodeSnippet(cursor);
     return result.empty()
         ? QString()
-        : QString::fromUtf8(result.cbegin(), result.size());
+        : QString::fromUtf8(result.data(), qsizetype(result.size()));
 }
 
 static CXChildVisitResult
