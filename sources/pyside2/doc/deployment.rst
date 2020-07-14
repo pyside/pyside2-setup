@@ -12,6 +12,7 @@ Here are a few distribution options that you can use:
  1. Send a normal ZIP file with the application's content.
  2. Build a proper `Python package (wheel) <https://packaging.python.org/>`_.
  3. Freeze the application into a single binary file or directory.
+ 4. Provide native installer (msi, dmg)
 
 If you choose Option 3, consider using one of these tools:
  * `fbs`_
@@ -19,12 +20,14 @@ If you choose Option 3, consider using one of these tools:
  * `cx_Freeze`_
  * `py2exe`_
  * `py2app`_
+ * `briefcase`_
 
 .. _fbs: https://build-system.fman.io/
 .. _PyInstaller: https://www.pyinstaller.org/
 .. _cx_Freeze: https://anthony-tuininga.github.io/cx_Freeze/
 .. _py2exe: http://www.py2exe.org/
 .. _py2app: https://py2app.readthedocs.io/en/latest/
+.. _briefcase: https://briefcase.readthedocs.io
 
 Since |project| is a cross-platform framework, we focus on solutions for the three major
 platforms that Qt supports: Windows, Linux, and macOS.
@@ -79,10 +82,17 @@ The following table summarizes the platform support for those packaging tools:
           <td><p style="color: green;">yes</p></td>
           <td><p style="color: red;">no</p></td>
         </tr>
+        <tr>
+          <td><p>briefcase</p></td>
+          <td><p>BSD3</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+          <td><p style="color: green;">yes</p></td>
+        </tr>
       </tbody>
     </table>
 
-Notice that only *fbs*, *cx_Freeze*, and *PyInstaller* meet our cross-platform requirement.
+Notice that only *fbs*, *cx_Freeze*, *briefcase*, and *PyInstaller* meet our cross-platform requirement.
 
 Since these are command-line tools, you'll need special hooks or scripts to handle resources
 such as images, icons, and meta-information, before adding them to your package. Additionally,
@@ -107,3 +117,4 @@ Here's a set of tutorials on how to use these tools:
     deployment-fbs.rst
     deployment-pyinstaller.rst
     deployment-cxfreeze.rst
+    deployment-briefcase.rst

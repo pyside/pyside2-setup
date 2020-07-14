@@ -2735,6 +2735,11 @@ QString AbstractMetaEnum::package() const
     return m_typeEntry->targetLangPackage();
 }
 
+bool QPropertySpec::isValid() const
+{
+    return m_type != nullptr && !m_name.isEmpty() && !m_read.isEmpty();
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void QPropertySpec::formatDebug(QDebug &d) const
 {

@@ -30,8 +30,14 @@
 
 ObjectTypeHolder::ObjectTypeHolder(const char* objectName)
 {
-    m_objectType = new ObjectType();
-    m_objectType->setObjectName(objectName);
+    auto object = new ObjectType();
+    object->setObjectName(objectName);
+    m_objectType = object;
+}
+
+ObjectTypeHolder::ObjectTypeHolder(const ObjectType *object) :
+    m_objectType(object)
+{
 }
 
 ObjectTypeHolder::~ObjectTypeHolder()

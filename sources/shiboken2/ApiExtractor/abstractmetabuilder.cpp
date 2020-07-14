@@ -1069,7 +1069,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     }
     metaClass->setTemplateArguments(template_args);
 
-    parseQ_Property(metaClass, classItem->propertyDeclarations());
+    parseQ_Properties(metaClass, classItem->propertyDeclarations());
 
     traverseEnums(classItem, metaClass, classItem->enumsDeclarations());
 
@@ -2782,51 +2782,77 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
     return true;
 }
 
-void AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
-                                                 const QStringList &declarations)
+void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
+                                                   const QStringList &declarations)
 {
     const QStringList scopes = currentScope()->qualifiedName();
-
+    QString errorMessage;
     for (int i = 0; i < declarations.size(); ++i) {
-        const auto propertyTokens = declarations.at(i).splitRef(QLatin1Char(' '));
-
-        AbstractMetaType *type = nullptr;
-        for (int j = scopes.size(); j >= 0; --j) {
-            QStringList qualifiedName = scopes.mid(0, j);
-            qualifiedName.append(propertyTokens.at(0).toString());
-            TypeInfo info;
-            info.setQualifiedName(qualifiedName);
-
-            type = translateType(info, metaClass);
-            if (type)
-                break;
+        if (auto spec = parseQ_Property(metaClass, declarations.at(i), scopes, &errorMessage)) {
+            spec->setIndex(i);
+            metaClass->addPropertySpec(spec);
+        } else {
+            QString message;
+            QTextStream str(&message);
+            str << metaClass->sourceLocation() << errorMessage;
+            qCWarning(lcShiboken, "%s", qPrintable(message));
         }
-
-        if (!type) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("Unable to decide type of property: '%1' in class '%2'")
-                                  .arg(propertyTokens.at(0).toString(), metaClass->name());
-            continue;
-        }
-
-        auto *spec = new QPropertySpec(type->typeEntry());
-        spec->setName(propertyTokens.at(1).toString());
-        spec->setIndex(i);
-
-        for (int pos = 2; pos + 1 < propertyTokens.size(); pos += 2) {
-            if (propertyTokens.at(pos) == QLatin1String("READ"))
-                spec->setRead(propertyTokens.at(pos + 1).toString());
-            else if (propertyTokens.at(pos) == QLatin1String("WRITE"))
-                spec->setWrite(propertyTokens.at(pos + 1).toString());
-            else if (propertyTokens.at(pos) == QLatin1String("DESIGNABLE"))
-                spec->setDesignable(propertyTokens.at(pos + 1).toString());
-            else if (propertyTokens.at(pos) == QLatin1String("RESET"))
-                spec->setReset(propertyTokens.at(pos + 1).toString());
-        }
-
-        metaClass->addPropertySpec(spec);
-        delete type;
     }
+}
+
+QPropertySpec *AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
+                                                           const QString &declaration,
+                                                           const QStringList &scopes,
+                                                           QString *errorMessage)
+{
+    errorMessage->clear();
+
+    // Q_PROPERTY(QString objectName READ objectName WRITE setObjectName NOTIFY objectNameChanged)
+
+    auto propertyTokens = declaration.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
+    if (propertyTokens.size()  < 4) {
+        *errorMessage = QLatin1String("Insufficient number of tokens");
+        return nullptr;
+    }
+
+    const QString typeName = propertyTokens.takeFirst().toString();
+    const QString name = propertyTokens.takeFirst().toString();
+
+    QScopedPointer<AbstractMetaType> type;
+    for (int j = scopes.size(); j >= 0 && type.isNull(); --j) {
+        QStringList qualifiedName = scopes.mid(0, j);
+        qualifiedName.append(typeName);
+        TypeInfo info;
+        info.setQualifiedName(qualifiedName);
+        type.reset(translateType(info, metaClass));
+    }
+
+    if (!type) {
+        QTextStream str(errorMessage);
+        str << "Unable to decide type of property: \"" << name << "\" ("
+            <<  typeName << ')';
+        return nullptr;
+    }
+
+    QScopedPointer<QPropertySpec> spec(new QPropertySpec(type->typeEntry()));
+    spec->setName(name);
+
+    for (int pos = 0; pos + 1 < propertyTokens.size(); pos += 2) {
+        if (propertyTokens.at(pos) == QLatin1String("READ"))
+            spec->setRead(propertyTokens.at(pos + 1).toString());
+        else if (propertyTokens.at(pos) == QLatin1String("WRITE"))
+            spec->setWrite(propertyTokens.at(pos + 1).toString());
+        else if (propertyTokens.at(pos) == QLatin1String("DESIGNABLE"))
+            spec->setDesignable(propertyTokens.at(pos + 1).toString());
+        else if (propertyTokens.at(pos) == QLatin1String("RESET"))
+            spec->setReset(propertyTokens.at(pos + 1).toString());
+    }
+
+    if (!spec->isValid()) {
+        *errorMessage = QLatin1String("Incomplete specification");
+        return nullptr;
+    }
+    return spec.take();
 }
 
 static AbstractMetaFunction* findCopyCtor(AbstractMetaClass* cls)

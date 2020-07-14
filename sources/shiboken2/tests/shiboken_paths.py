@@ -42,7 +42,27 @@ def get_dir_env_var(var_name):
 
 
 def get_build_dir():
-    return get_dir_env_var('BUILD_DIR')
+    """
+    Return the env var `BUILD_DIR`.
+    If not set (interactive mode), take the last build history entry.
+    """
+    try:
+        return get_dir_env_var('BUILD_DIR')
+    except ValueError:
+        look_for = "testing"
+        here = os.path.dirname(__file__)
+        while look_for not in os.listdir(here):
+            here = os.path.dirname(here)
+            if len(here) <= 3:
+                raise SystemError(look_for + " not found!")
+        try:
+            sys.path.insert(0, here)
+            from testing.buildlog import builds
+            if not builds.history:
+                raise
+            return builds.history[-1].build_dir
+        finally:
+            del sys.path[0]
 
 
 def _prepend_path_var(var_name, paths):

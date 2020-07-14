@@ -793,7 +793,7 @@ void CppGenerator::writeVirtualMethodCppCall(QTextStream &s,
                                              const CodeSnipList &snips,
                                              const AbstractMetaArgument *lastArg,
                                              const TypeEntry *retType,
-                                             const DefaultValue &defaultReturnExpr)
+                                             const QString &returnStatement)
 {
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
@@ -803,11 +803,8 @@ void CppGenerator::writeVirtualMethodCppCall(QTextStream &s,
     if (func->isAbstract()) {
         s << INDENT << "PyErr_SetString(PyExc_NotImplementedError, \"pure virtual method '"
             << func->ownerClass()->name() << '.' << funcName
-            << "()' not implemented.\");\n";
-        s << INDENT << "return";
-        if (retType)
-            s << ' ' << defaultReturnExpr.returnValue();
-        s << ";\n";
+            << "()' not implemented.\");\n"
+            << INDENT << returnStatement << '\n';
         return;
     }
 
@@ -824,6 +821,61 @@ void CppGenerator::writeVirtualMethodCppCall(QTextStream &s,
                        TypeSystem::ShellCode, func, lastArg);
     }
     s << INDENT << "return;\n";
+}
+
+// Determine the return statement (void or a result value).
+QString CppGenerator::virtualMethodReturn(QTextStream &s,
+                                          const AbstractMetaFunction *func,
+                                          const FunctionModificationList &functionModifications)
+{
+    const AbstractMetaType *returnType = func->type();
+    if (!returnType)
+        return QLatin1String("return;");
+    for (const FunctionModification &mod : functionModifications) {
+        for (const ArgumentModification &argMod : mod.argument_mods) {
+            if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
+                static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
+                Q_ASSERT(regex.isValid());
+                QString expr = argMod.replacedDefaultExpression;
+                for (int offset = 0; ; ) {
+                    const QRegularExpressionMatch match = regex.match(expr, offset);
+                    if (!match.hasMatch())
+                        break;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                    const int argId = match.capturedView(1).toInt() - 1;
+#else
+                    const int argId = match.capturedRef(1).toInt() - 1;
+#endif
+                    if (argId < 0 || argId > func->arguments().count()) {
+                        qCWarning(lcShiboken, "The expression used in return value contains an invalid index.");
+                        break;
+                    }
+                    expr.replace(match.captured(0), func->arguments().at(argId)->name());
+                    offset = match.capturedStart(1);
+                }
+                DefaultValue defaultReturnExpr(DefaultValue::Custom, expr);
+                return QLatin1String("return ") + defaultReturnExpr.returnValue()
+                       + QLatin1Char(';');
+            }
+        }
+    }
+    const DefaultValue defaultReturnExpr = minimalConstructor(returnType);
+    if (!defaultReturnExpr.isValid()) {
+        QString errorMsg = QLatin1String(__FUNCTION__) + QLatin1String(": ");
+        if (const AbstractMetaClass *c = func->implementingClass())
+            errorMsg += c->qualifiedCppName() + QLatin1String("::");
+        errorMsg += func->signature();
+        errorMsg = msgCouldNotFindMinimalConstructor(errorMsg, func->type()->cppSignature());
+        qCWarning(lcShiboken).noquote().nospace() << errorMsg;
+        s << Qt::endl << INDENT << "#error " << errorMsg << Qt::endl;
+    }
+    if (returnType->referenceType() == LValueReference) {
+        s << INDENT << "static " << returnType->typeEntry()->qualifiedCppName()
+            << " result;\n";
+        return QLatin1String("return result;");
+    }
+    return QLatin1String("return ") + defaultReturnExpr.returnValue()
+           + QLatin1Char(';');
 }
 
 void CppGenerator::writeVirtualMethodNative(QTextStream &s,
@@ -845,57 +897,15 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     Indentation indentation(INDENT);
 
     const FunctionModificationList &functionModifications = func->modifications();
-    DefaultValue defaultReturnExpr;
-    if (retType) {
-        for (const FunctionModification &mod : functionModifications) {
-            for (const ArgumentModification &argMod : mod.argument_mods) {
-                if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
-                    static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
-                    Q_ASSERT(regex.isValid());
-                    QString expr = argMod.replacedDefaultExpression;
-                    for (int offset = 0; ; ) {
-                        const QRegularExpressionMatch match = regex.match(expr, offset);
-                        if (!match.hasMatch())
-                            break;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-                        const int argId = match.capturedView(1).toInt() - 1;
-#else
-                        const int argId = match.capturedRef(1).toInt() - 1;
-#endif
-                        if (argId < 0 || argId > func->arguments().count()) {
-                            qCWarning(lcShiboken) << "The expression used in return value contains an invalid index.";
-                            break;
-                        }
-                        expr.replace(match.captured(0), func->arguments().at(argId)->name());
-                        offset = match.capturedStart(1);
-                    }
-                    defaultReturnExpr.setType(DefaultValue::Custom);
-                    defaultReturnExpr.setValue(expr);
-                }
-            }
-        }
-        if (!defaultReturnExpr.isValid())
-            defaultReturnExpr = minimalConstructor(func->type());
-        if (!defaultReturnExpr.isValid()) {
-            QString errorMsg = QLatin1String(__FUNCTION__) + QLatin1String(": ");
-            if (const AbstractMetaClass *c = func->implementingClass())
-                errorMsg += c->qualifiedCppName() + QLatin1String("::");
-            errorMsg += func->signature();
-            errorMsg = msgCouldNotFindMinimalConstructor(errorMsg, func->type()->cppSignature());
-            qCWarning(lcShiboken).noquote().nospace() << errorMsg;
-            s << Qt::endl << INDENT << "#error " << errorMsg << Qt::endl;
-        }
-    } else {
-        defaultReturnExpr.setType(DefaultValue::Void);
-    }
+
+    const QString returnStatement = virtualMethodReturn(s, func, functionModifications);
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
         qCWarning(lcShiboken).noquote().nospace()
             << QString::fromLatin1("Pure virtual method '%1::%2' must be implement but was "\
                                    "completely removed on type system.")
                                    .arg(func->ownerClass()->name(), func->minimalSignature());
-        s << INDENT << returnStatement(defaultReturnExpr.returnValue()) << Qt::endl;
-        s << "}\n\n";
+        s << INDENT << returnStatement << "\n}\n\n";
         return;
     }
 
@@ -925,7 +935,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     {
         Indentation indentation(INDENT);
         writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                                  defaultReturnExpr);
+                                  returnStatement);
     }
     if (multi_line)
         s << INDENT << "}\n";
@@ -936,7 +946,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     s << INDENT << "if (PyErr_Occurred())\n";
     {
         Indentation indentation(INDENT);
-        s << INDENT << returnStatement(defaultReturnExpr.returnValue()) << Qt::endl;
+        s << INDENT << returnStatement << '\n';
     }
 
     s << INDENT << "static PyObject *pyFuncName = Shiboken::String::createStaticString(\""
@@ -950,7 +960,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         if (useOverrideCaching(func->ownerClass()))
             s << INDENT << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
         writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                                  defaultReturnExpr);
+                                  returnStatement);
     }
     s << INDENT << "}\n\n";  //WS
 
@@ -1040,7 +1050,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         {
             Indentation indent(INDENT);
             s << INDENT << "PyErr_Print();\n";
-            s << INDENT << returnStatement(defaultReturnExpr.returnValue()) << Qt::endl;
+            s << INDENT << returnStatement << '\n';
         }
         s << INDENT << "}\n";
 
@@ -1062,7 +1072,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                                        "\"Invalid return value in function %s, expected %s, got %s.\", \"";
                         s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
                         s << ", Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n";
-                        s << INDENT << returnStatement(defaultReturnExpr.returnValue()) << Qt::endl;
+                        s << INDENT << returnStatement << '\n';
                     }
                     s << INDENT << "}\n";
 
@@ -1083,7 +1093,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                                        "\"Invalid return value in function %s, expected %s, got %s.\", \"";
                         s << func->ownerClass()->name() << '.' << funcName << "\", " << getVirtualFunctionReturnTypeName(func);
                         s << ", Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n";
-                        s << INDENT << returnStatement(defaultReturnExpr.returnValue()) << Qt::endl;
+                        s << INDENT << returnStatement << '\n';
                     }
                     s << INDENT << "}\n";
 
@@ -2419,8 +2429,17 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
         s << ' ' << cppOut;
     } else if (treatAsPointer || isPointerOrObjectType) {
         s << " *" << cppOut;
-        if (!defaultValue.isEmpty())
-            s << " = " << defaultValue;
+        if (!defaultValue.isEmpty()) {
+            const bool needsConstCast = !isNullPtr(defaultValue)
+                && type->indirections() == 1 && type->isConstant()
+                && type->referenceType() == NoReference;
+            s << " = ";
+            if (needsConstCast)
+                s << "const_cast<" << typeName << " *>(";
+            s << defaultValue;
+            if (needsConstCast)
+                s << ')';
+        }
     } else if (type->referenceType() == LValueReference && !typeEntry->isPrimitive() && isNotContainerEnumOrFlags) {
         s << " *" << cppOut << " = &" << cppOutAux;
     } else {

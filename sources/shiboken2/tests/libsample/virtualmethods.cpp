@@ -57,6 +57,12 @@ VirtualMethods::getMargins(int* left, int* top, int* right, int* bottom) const
     *bottom = m_bottom;
 }
 
+const Str & VirtualMethods::returnConstRef() const
+{
+    static const Str result;
+    return result;
+}
+
 double VirtualDaughter2::virtualMethod0(Point pt, int val, Complex cpx, bool b)
 {
     return 42 + VirtualMethods::virtualMethod0(pt, val, cpx, b);
