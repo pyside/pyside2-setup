@@ -40,7 +40,9 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide2.QtCore import QSize, QTimer, Qt
 from PySide2.QtGui import (QColor, QGuiApplication, QImage, QOpenGLContext,
-    QOpenGLTexture, QSurfaceFormat, QOpenGLWindow)
+    QSurfaceFormat)
+from PySide2.QtOpenGL import (QOpenGLTexture, QOpenGLWindow)
+
 
 try:
     from OpenGL import GL

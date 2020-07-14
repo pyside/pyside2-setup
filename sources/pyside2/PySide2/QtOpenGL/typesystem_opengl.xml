@@ -2,7 +2,7 @@
 <!--
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,677 +40,134 @@
 ****************************************************************************/
 -->
 <typesystem package="PySide2.QtOpenGL">
-  <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no" />
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
   <load-typesystem name="templates/opengl_common.xml" generate="no" />
 
-  <primitive-type name="GLbitfield"/>
-  <primitive-type name="GLboolean"/>
-  <primitive-type name="GLbyte"/>
-  <primitive-type name="GLclampd"/>
-  <primitive-type name="GLclampf"/>
-  <primitive-type name="GLdouble"/>
-  <primitive-type name="GLenum"/>
-  <primitive-type name="GLfloat"/>
-  <primitive-type name="GLint"/>
-  <primitive-type name="GLshort"/>
-  <primitive-type name="GLsizei"/>
-  <primitive-type name="GLubyte"/>
-  <primitive-type name="GLuint"/>
-  <primitive-type name="GLushort"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^char\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?char ?\*\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?QMatrix.x. ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
 
-  <rejection class="QGLColormap::QGLColormapData"/>
-  <rejection class="QGLContext" field-name="currentCtx"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLchar ?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLchar ?\*const"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLenum ?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLfloat ?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLfloat ?\[.*$"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLdouble ?\*$"/>
-  <rejection class="^QGL.*$" argument-type="GLintptr"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLint64 ?\*$"/>
-  <rejection class="^QGL.*$" argument-type="^(const )?GLsizei ?\*$"/>
-
-  <namespace-type name="QGL">
-    <enum-type name="FormatOption" flags="FormatOptions"/>
-    <extra-includes>
-        <include file-name="qgl.h" location="global"/>
-    </extra-includes>
-  </namespace-type>
-
-  <value-type name="QGLColormap">
-    <modify-function signature="setEntries(int,const unsigned int*,int)">
-        <access modifier="private"/>
-    </modify-function>
-  </value-type>
-
-  <value-type name="QGLFormat">
-    <enum-type name="OpenGLContextProfile" since="4.7"/>
-    <enum-type name="OpenGLVersionFlag" flags="OpenGLVersionFlags"/>
-  </value-type>
-
-  <rejection class="QGLContext" field-name="currentCtx"/>
-  <object-type name="QGLContext">
-    <enum-type name="BindOption" flags="BindOptions" since="4.6"/>
-    <modify-function signature="chooseContext(const QGLContext*)">
-        <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-    <modify-function signature="create(const QGLContext*)">
-        <modify-argument index="1" invalidate-after-use="yes"/>
-    </modify-function>
-
-    <!-- ### Obsolete functions and ctors -->
-    <modify-function signature="QGLContext(const QGLFormat&amp;,QPaintDevice*)" remove="all"/>
-    <!-- ### -->
+  <object-type name="QOpenGLBuffer" since="5.0">
+    <enum-type name="Access"/>
+    <enum-type name="RangeAccessFlag" flags="RangeAccessFlags"/>
+    <enum-type name="Type"/>
+    <enum-type name="UsagePattern"/>
   </object-type>
-  <object-type name="QGLFramebufferObject">
+  <object-type name="QOpenGLDebugLogger" since="5.1">
+      <enum-type name="LoggingMode"/>
+  </object-type>
+  <value-type name="QOpenGLDebugMessage" since="5.1">
+      <enum-type name="Source" flags="Sources"/>
+      <enum-type name="Type" flags="Types"/>
+      <enum-type name="Severity" flags="Severities"/>
+  </value-type>
+  <object-type name="QOpenGLFramebufferObject" since="5.0">
     <enum-type name="Attachment"/>
+    <enum-type name="FramebufferRestorePolicy" since="5.7"/>
   </object-type>
-  <object-type name="QGLPixelBuffer">
-    <extra-includes>
-        <include file-name="QImage" location="global"/>
-    </extra-includes>
-  </object-type>
-  <object-type name="QGLWidget">
-    <extra-includes>
-        <include file-name="QImage" location="global"/>
-        <include file-name="QPixmap" location="global"/>
-    </extra-includes>
-    <modify-function signature="QGLWidget(QGLContext*,QWidget*,const QGLWidget*,QFlags&lt;Qt::WindowType&gt;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-      <modify-argument index="this">
-        <parent index="2" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <!-- ### Not part of Qt public API -->
-    <modify-function signature="setContext(QGLContext*,const QGLContext*,bool)" remove="all"/>
-    <!-- ### -->
-    <!--- ### Obsolete functions -->
-    <modify-function signature="setFormat(QGLFormat)" remove="all"/>
-    <!-- ### -->
-  </object-type>
-
-  <value-type name="QGLFramebufferObjectFormat" since="4.6"/>
-  <object-type name="QGLShader" since="4.6">
+  <value-type name="QOpenGLFramebufferObjectFormat"/>
+  <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
+  <value-type  name="QOpenGLPixelTransferOptions"/>
+  <object-type name="QOpenGLShader" since="5.0">
     <enum-type name="ShaderTypeBit" flags="ShaderType"/>
   </object-type>
-
-  <object-type name="QGLShaderProgram" since="4.6">
-    <!-- setAttributeArray -->
-    <modify-function signature="setAttributeArray(int,const QVector2D*,int)" rename="setAttributeArray2D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="%3"/>
-                <replace from="$ARG1" to="%3"/>
-                <replace from="$ATTR_TYPE" to="QVector2D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setAttributeArray(int,const QVector3D*,int)" rename="setAttributeArray3D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="%3"/>
-                <replace from="$ARG1" to="%3"/>
-                <replace from="$ATTR_TYPE" to="QVector3D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setAttributeArray(int,const QVector4D*,int)" rename="setAttributeArray4D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="%3"/>
-                <replace from="$ARG1" to="%3"/>
-                <replace from="$ATTR_TYPE" to="QVector4D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setAttributeArray(const char*,const QVector2D*,int)" rename="setAttributeArray2D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="%3"/>
-                <replace from="$ARG1" to="%3"/>
-                <replace from="$ATTR_TYPE" to="QVector2D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setAttributeArray(const char*,const QVector3D*,int)" rename="setAttributeArray3D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="%3"/>
-                <replace from="$ARG1" to="%3"/>
-                <replace from="$ATTR_TYPE" to="QVector3D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setAttributeArray(const char*,const QVector4D*,int)" rename="setAttributeArray4D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="%3"/>
-                <replace from="$ARG1" to="%3"/>
-                <replace from="$ATTR_TYPE" to="QVector4D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <!-- setUniformValueArray -->
-    <modify-function signature="setUniformValueArray(int,const GLint*,int)" rename="setUniformValueArrayInt">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-            <array/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="GLint"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const GLuint*,int)" rename="setUniformValueArrayUint">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-            <array/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="GLuint"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QVector2D*,int)" rename="setUniformValueArray2D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QVector2D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QVector3D*,int)" rename="setUniformValueArray3D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QVector3D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QVector4D*,int)" rename="setUniformValueArray4D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QVector4D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix2x2*,int)" rename="setUniformValueArray2x2">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix2x2"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix2x3*,int)" rename="setUniformValueArray2x3">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix2x3"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix2x4*,int)" rename="setUniformValueArray2x4">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix2x4"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix3x2*,int)" rename="setUniformValueArray3x2">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix3x2"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix3x3*,int)" rename="setUniformValueArray3x3">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix3x3"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix3x4*,int)" rename="setUniformValueArray3x4">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix3x4"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix4x2*,int)" rename="setUniformValueArray4x2">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix4x2"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix4x3*,int)" rename="setUniformValueArray4x3">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix4x3"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(int,const QMatrix4x4*,int)" rename="setUniformValueArray4x4">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix4x4"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const GLint*,int)" rename="setUniformValueArrayInt">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-            <array/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="GLint"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const GLuint*,int)" rename="setUniformValueArrayUint">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-            <array/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="GLuint"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QVector2D*,int)" rename="setUniformValueArray2D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QVector2D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QVector3D*,int)" rename="setUniformValueArray3D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QVector3D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QVector4D*,int)" rename="setUniformValueArray4D">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QVector4D"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix2x2*,int)" rename="setUniformValueArray2x2">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix2x2"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix2x3*,int)" rename="setUniformValueArray2x3">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix2x3"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix2x4*,int)" rename="setUniformValueArray2x4">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix2x4"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix3x2*,int)" rename="setUniformValueArray3x2">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix3x2"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix3x3*,int)" rename="setUniformValueArray3x3">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix3x3"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix3x4*,int)" rename="setUniformValueArray3x4">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix3x4"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix4x2*,int)" rename="setUniformValueArray4x2">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix4x2"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix4x3*,int)" rename="setUniformValueArray4x3">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix4x3"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <modify-function signature="setUniformValueArray(const char*,const QMatrix4x4*,int)" rename="setUniformValueArray4x4">
-        <modify-argument index="2" >
-            <replace-type modified-type="PySequence"/>
-        </modify-argument>
-        <modify-argument index="3">
-             <remove-argument />
-        </modify-argument>
-        <inject-code>
-            <insert-template name="callArrayFunction">
-                <replace from="$ARG0" to="_size"/>
-                <replace from="$ARG1" to="0"/>
-                <replace from="$ATTR_TYPE" to="QMatrix4x4"/>
-            </insert-template>
-        </inject-code>
-    </modify-function>
-
-    <!-- ### Use QMatrixZxY overloads -->
-    <modify-function signature="setAttributeArray(int,GLenum,const void*,int,int)" remove="all" since="4.7"/>
-    <modify-function signature="setAttributeArray(const char*,GLenum,const void*,int,int)" remove="all" since="4.7"/>
-    <!-- ### -->
+  <object-type name="QOpenGLShaderProgram" since="5.0">
+      <modify-function signature="setAttributeArray(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeArray(const char*,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeArray(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeValue(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeValue(const char*,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(int,const int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(int,const unsigned int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(const char*,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(const char*,const int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(const char*,const unsigned int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <!-- Add explicit signatures for the setUniformValue functions -->
+      <modify-function signature="^setUniformValue\(const char\*,(float|int|uint)\)$" remove="all"/>
+      <!-- No need for a signature for GLuint, since Qt (internally) calls the same function: glUniform1i -->
+      <add-function signature="setUniformValue1f(const char*, float)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
+      </add-function>
+      <add-function signature="setUniformValue1i(const char*, int)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
+      </add-function>
+      <add-function signature="setUniformValue1f(int, float)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
+      </add-function>
+      <add-function signature="setUniformValue1i(int, int)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
+      </add-function>
   </object-type>
-
-  <!-- Qt 4.7 -->
-  <object-type name="QGLBuffer" since="4.7">
-    <enum-type name="Access" since="4.7"/>
-    <enum-type name="Type" since="4.7"/>
-    <enum-type name="UsagePattern" since="4.7"/>
-    <modify-function signature="allocate(const void*,int)">
-      <modify-argument index="1">
-        <replace-type modified-type="QByteArray&amp;"/>
-      </modify-argument>
-      <modify-argument index="2">
-        <replace-default-expression with="-1"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtopengl.cpp" snippet="qglbuffer-allocate"/>
-    </modify-function>
-    <modify-function signature="map(QGLBuffer::Access)">
-      <inject-code file="../glue/qtopengl.cpp" snippet="qglbuffer-map"/>
-    </modify-function>
-    <modify-function signature="read(int,void*,int)">
-      <modify-argument index="2">
-        <remove-argument/>
-      </modify-argument>
-      <modify-argument index="return">
-        <replace-type modified-type="(retval, data)"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtopengl.cpp" snippet="qglbuffer-read"/>
-    </modify-function>
-    <modify-function signature="write(int,const void*,int)">
-      <modify-argument index="2">
-        <replace-type modified-type="QByteArray&amp;"/>
-      </modify-argument>
-      <modify-argument index="3">
-        <replace-default-expression with="-1"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtopengl.cpp" snippet="qglbuffer-write"/>
-    </modify-function>
+  <object-type name="QOpenGLTexture" since="5.2">
+      <enum-type name="BindingTarget"/>
+      <enum-type name="CoordinateDirection"/>
+      <enum-type name="ComparisonFunction"/>
+      <enum-type name="ComparisonMode"/>
+      <enum-type name="CubeMapFace"/>
+      <enum-type name="DepthStencilMode"/>
+      <enum-type name="Feature" flags="Features"/>
+      <enum-type name="Filter"/>
+      <enum-type name="MipMapGeneration"/>
+      <enum-type name="PixelFormat"/>
+      <enum-type name="PixelType"/>
+      <enum-type name="SwizzleComponent"/>
+      <enum-type name="SwizzleValue"/>
+      <enum-type name="Target"/>
+      <enum-type name="TextureFormat"/>
+      <enum-type name="TextureFormatClass"/>
+      <enum-type name="TextureUnitReset"/>
+      <enum-type name="WrapMode"/>
+      <modify-function signature="borderColor(unsigned int*)const" remove="all"/>
+      <modify-function signature="borderColor(int*)const" remove="all"/>
+      <modify-function signature="borderColor(float*)const" remove="all"/>
+  </object-type>
+  <object-type name="QOpenGLTextureBlitter">
+      <enum-type name="Origin"/>
+  </object-type>
+  <object-type name="QOpenGLTimeMonitor" since="5.1"/>
+  <object-type name="QOpenGLTimerQuery" since="5.1"/>
+  <object-type name="QOpenGLWindow" since="5.4">
+      <enum-type name="UpdateBehavior"/>
+  </object-type>
+  <value-type name="QOpenGLVersionProfile" since="5.1"/>
+  <object-type name="QOpenGLVertexArrayObject">
+      <object-type name="Binder"/>
   </object-type>
 
 </typesystem>
