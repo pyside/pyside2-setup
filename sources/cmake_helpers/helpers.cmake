@@ -30,6 +30,7 @@ set(ALL_OPTIONAL_MODULES
     MultimediaWidgets
     OpenGL
     OpenGLFunctions
+    OpenGLWidgets
     Positioning
     Location
     Qml

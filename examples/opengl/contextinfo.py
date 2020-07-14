@@ -48,8 +48,9 @@ from textwrap import dedent
 
 
 from PySide2.QtCore import QCoreApplication, QLibraryInfo, QSize, QTimer, Qt
-from PySide2.QtGui import (QMatrix4x4, QOpenGLBuffer, QOpenGLContext, QOpenGLShader,
-    QOpenGLShaderProgram, QOpenGLVertexArrayObject, QSurfaceFormat, QWindow)
+from PySide2.QtGui import (QMatrix4x4, QOpenGLContext, QSurfaceFormat, QWindow)
+from PySide2.QtOpenGL import (QOpenGLBuffer, QOpenGLShader,
+                              QOpenGLShaderProgram, QOpenGLVertexArrayObject)
 from PySide2.QtWidgets import (QApplication, QHBoxLayout, QMessageBox, QPlainTextEdit,
     QWidget)
 from PySide2.support import VoidPtr

@@ -47,10 +47,14 @@ import math
 import numpy
 import ctypes
 from PySide2.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPoint
-from PySide2.QtGui import (QVector3D, QOpenGLFunctions, QOpenGLVertexArrayObject, QOpenGLBuffer,
-    QOpenGLShaderProgram, QMatrix4x4, QOpenGLShader, QOpenGLContext, QSurfaceFormat)
-from PySide2.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout, QSlider,
-    QOpenGLWidget)
+from PySide2.QtGui import (QVector3D, QOpenGLFunctions,
+    QMatrix4x4, QOpenGLContext, QSurfaceFormat)
+from PySide2.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,
+    QOpenGLShaderProgram, QOpenGLShader)
+from PySide2.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout,
+    QSlider)
+from PySide2.QtOpenGLWidgets import QOpenGLWidget
+
 from shiboken2 import VoidPtr
 
 try:
