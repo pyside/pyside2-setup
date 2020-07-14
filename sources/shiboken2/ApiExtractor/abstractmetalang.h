@@ -1742,6 +1742,8 @@ class QPropertySpec
 public:
     explicit QPropertySpec(const TypeEntry *type) : m_type(type) {}
 
+    bool isValid() const;
+
     const TypeEntry *type() const
     {
         return m_type;
