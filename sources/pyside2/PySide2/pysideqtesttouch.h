@@ -68,145 +68,133 @@ namespace QTest
         }
         PySideQTouchEventSequence *press(int touchId, const QPoint &pt, QWindow *window = nullptr)
         {
-            QTouchEvent::TouchPoint &p = point(touchId);
-            p.setScreenPos(mapToScreen(window, pt));
-            p.setState(Qt::TouchPointPressed);
+            auto it = m_points.find(touchId);
+            if (it == m_points.end()) {
+                QEventPoint point(touchId, QEventPoint::Pressed, pt, mapToScreen(window, pt));
+                m_points.insert(touchId, point);
+            }
             return this;
         }
         PySideQTouchEventSequence *move(int touchId, const QPoint &pt, QWindow *window = nullptr)
         {
-            QTouchEvent::TouchPoint &p = point(touchId);
-            p.setScreenPos(mapToScreen(window, pt));
-            p.setState(Qt::TouchPointMoved);
+            QEventPoint point(touchId, QEventPoint::Updated, pt, mapToScreen(window, pt));
+            m_points[touchId] = point;
             return this;
         }
         PySideQTouchEventSequence *release(int touchId, const QPoint &pt, QWindow *window = nullptr)
         {
-            QTouchEvent::TouchPoint &p = point(touchId);
-            p.setScreenPos(mapToScreen(window, pt));
-            p.setState(Qt::TouchPointReleased);
+            auto it = m_points.find(touchId);
+            if (it == m_points.end()) {
+                QEventPoint point(touchId, QEventPoint::Released, pt, mapToScreen(window, pt));
+                m_points.insert(touchId, point);
+            }
             return this;
         }
         PySideQTouchEventSequence *stationary(int touchId)
         {
-            QTouchEvent::TouchPoint &p = pointOrPreviousPoint(touchId);
-            p.setState(Qt::TouchPointStationary);
+            auto it = m_points.find(touchId);
+            if (it == m_points.end()) {
+                auto previous_it = m_previousPoints.find(touchId);
+                const QEventPoint point = previous_it != m_previousPoints.end()
+                    ? previous_it.value()
+                    : QEventPoint(touchId, QEventPoint::Stationary, QPointF(), QPointF());
+                m_points.insert(touchId, point);
+            }
             return this;
         }
 
 #ifdef QT_WIDGETS_LIB
         PySideQTouchEventSequence *press(int touchId, const QPoint &pt, QWidget *widget = nullptr)
         {
-            QTouchEvent::TouchPoint &p = point(touchId);
-            p.setScreenPos(mapToScreen(widget, pt));
-            p.setState(Qt::TouchPointPressed);
+            auto it = m_points.find(touchId);
+            if (it == m_points.end()) {
+                QEventPoint point(touchId, QEventPoint::Pressed, pt, mapToScreen(widget, pt));
+                m_points.insert(touchId, point);
+            }
             return this;
         }
 
         PySideQTouchEventSequence *move(int touchId, const QPoint &pt, QWidget *widget = nullptr)
         {
-            QTouchEvent::TouchPoint &p = point(touchId);
-            p.setScreenPos(mapToScreen(widget, pt));
-            p.setState(Qt::TouchPointMoved);
+            QEventPoint point(touchId, QEventPoint::Updated, pt, mapToScreen(widget, pt));
+            m_points[touchId] = point;
             return this;
         }
 
         PySideQTouchEventSequence *release(int touchId, const QPoint &pt, QWidget *widget = nullptr)
         {
-            QTouchEvent::TouchPoint &p = point(touchId);
-            p.setScreenPos(mapToScreen(widget, pt));
-            p.setState(Qt::TouchPointReleased);
+            auto it = m_points.find(touchId);
+            if (it == m_points.end()) {
+                QEventPoint point(touchId, QEventPoint::Released, pt, mapToScreen(widget, pt));
+                m_points.insert(touchId, point);
+            }
             return this;
         }
 #endif
 
         void commit(bool processEvents = true)
         {
-            if (!points.isEmpty()) {
-                if (targetWindow)
-                {
-                    qt_handleTouchEvent(targetWindow, device, points.values());
+            if (!m_points.isEmpty()) {
+                if (targetWindow) {
+                    qt_handleTouchEvent(targetWindow, device, m_points.values());
                 }
 #ifdef QT_WIDGETS_LIB
-                else if (targetWidget)
-                {
-                    qt_handleTouchEvent(targetWidget->windowHandle(), device, points.values());
+                else if (targetWidget) {
+                    qt_handleTouchEvent(targetWidget->windowHandle(), device, m_points.values());
                 }
 #endif
             }
             if (processEvents)
                 QCoreApplication::processEvents();
-            previousPoints = points;
-            points.clear();
+            m_previousPoints = m_points;
+            m_points.clear();
         }
 
 private:
 #ifdef QT_WIDGETS_LIB
-        PySideQTouchEventSequence(QWidget *widget, QInputDevice *aDevice, bool autoCommit)
-            : targetWidget(widget), targetWindow(0), device(aDevice), commitWhenDestroyed(autoCommit)
+        PySideQTouchEventSequence(QWidget *widget, QPointingDevice *aDevice, bool autoCommit)
+            : targetWidget(widget), device(aDevice), commitWhenDestroyed(autoCommit)
         {
         }
 #endif
-        PySideQTouchEventSequence(QWindow *window, QInputDevice *aDevice, bool autoCommit)
-            :
-#ifdef QT_WIDGETS_LIB
-              targetWidget(0),
-#endif
-              targetWindow(window), device(aDevice), commitWhenDestroyed(autoCommit)
+        PySideQTouchEventSequence(QWindow *window, QPointingDevice *aDevice, bool autoCommit)
+            : targetWindow(window), device(aDevice), commitWhenDestroyed(autoCommit)
         {
-        }
-
-        QTouchEvent::TouchPoint &point(int touchId)
-        {
-            if (!points.contains(touchId))
-                points[touchId] = QTouchEvent::TouchPoint(touchId);
-            return points[touchId];
-        }
-
-        QTouchEvent::TouchPoint &pointOrPreviousPoint(int touchId)
-        {
-            if (!points.contains(touchId)) {
-                if (previousPoints.contains(touchId))
-                    points[touchId] = previousPoints.value(touchId);
-                else
-                    points[touchId] = QTouchEvent::TouchPoint(touchId);
-            }
-            return points[touchId];
         }
 
 #ifdef QT_WIDGETS_LIB
-        QPoint mapToScreen(QWidget *widget, const QPoint &pt)
+        QPointF mapToScreen(const QWidget *widget, const QPointF &pt)
         {
             if (widget)
                 return widget->mapToGlobal(pt);
             return targetWidget ? targetWidget->mapToGlobal(pt) : pt;
         }
 #endif
-        QPoint mapToScreen(QWindow *window, const QPoint &pt)
+        QPointF mapToScreen(const QWindow *window, const QPointF &pt)
         {
             if(window)
                 return window->mapToGlobal(pt);
             return targetWindow ? targetWindow->mapToGlobal(pt) : pt;
         }
 
-        QMap<int, QTouchEvent::TouchPoint> previousPoints;
-        QMap<int, QTouchEvent::TouchPoint> points;
+        QMap<int, QEventPoint> m_previousPoints;
+        QMap<int, QEventPoint> m_points;
 #ifdef QT_WIDGETS_LIB
-        QWidget *targetWidget;
+        QWidget *targetWidget = nullptr;
 #endif
-        QWindow *targetWindow;
-        QInputDevice *device;
-        bool commitWhenDestroyed;
+        QWindow *targetWindow = nullptr;
+        QPointingDevice *device = nullptr;
+        bool commitWhenDestroyed = false;
 #ifdef QT_WIDGETS_LIB
-        friend PySideQTouchEventSequence *generateTouchEvent(QWidget *, QInputDevice *, bool);
+        friend PySideQTouchEventSequence *generateTouchEvent(QWidget *, QPointingDevice *, bool);
 #endif
-        friend PySideQTouchEventSequence *generateTouchEvent(QWindow *, QInputDevice *, bool);
+        friend PySideQTouchEventSequence *generateTouchEvent(QWindow *, QPointingDevice *, bool);
     };
 
 #ifdef QT_WIDGETS_LIB
     inline
     PySideQTouchEventSequence *generateTouchEvent(QWidget *widget,
-                                                  QInputDevice *device,
+                                                  QPointingDevice *device,
                                                   bool autoCommit = true)
     {
         return new PySideQTouchEventSequence(widget, device, autoCommit);
@@ -214,7 +202,7 @@ private:
 #endif
     inline
     PySideQTouchEventSequence *generateTouchEvent(QWindow *window,
-                                                  QInputDevice *device,
+                                                  QPointingDevice *device,
                                                   bool autoCommit = true)
     {
         return new PySideQTouchEventSequence(window, device, autoCommit);

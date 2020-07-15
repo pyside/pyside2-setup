@@ -151,12 +151,12 @@
             </modify-argument>
         </modify-function>
     </object-type>
-    <modify-function signature="generateTouchEvent(QWidget*,QInputDevice*,bool)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWidget*,QPointingDevice*,bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="generateTouchEvent(QWindow*,QInputDevice*,bool)" rename="touchEvent" since="4.6">
+    <modify-function signature="generateTouchEvent(QWindow*,QPointingDevice*,bool)" rename="touchEvent" since="4.6">
         <modify-argument index="return">
             <define-ownership class="target" owner="target"/>
         </modify-argument>
