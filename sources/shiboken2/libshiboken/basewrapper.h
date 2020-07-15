@@ -93,8 +93,13 @@ typedef void (*ObjectDestructor)(void *);
 
 typedef void (*SubTypeInitHook)(SbkObjectType *, PyObject *, PyObject *);
 
+// PYSIDE-1019: Set the function to select the current feature.
 typedef PyObject *(*SelectableFeatureHook)(PyTypeObject *);
 LIBSHIBOKEN_API void initSelectableFeature(SelectableFeatureHook func);
+
+// PYSIDE-1019: Publish the start of setattro.
+LIBSHIBOKEN_API void SbkObject_NotifySetAttr(PyObject *obj, PyObject *name, PyObject *value);
+
 
 extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
 extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);

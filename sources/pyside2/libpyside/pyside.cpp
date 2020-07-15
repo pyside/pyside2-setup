@@ -94,7 +94,7 @@ void init(PyObject *module)
     MetaFunction::init(module);
     // Init signal manager, so it will register some meta types used by QVariant.
     SignalManager::instance();
-    FeatureSelector::init();
+    Feature::init();
     initQApp();
 }
 

@@ -61,6 +61,7 @@ namespace String
     LIBSHIBOKEN_API int compare(PyObject *val1, const char *val2);
     LIBSHIBOKEN_API Py_ssize_t len(PyObject *str);
     LIBSHIBOKEN_API PyObject *createStaticString(const char *str);
+    LIBSHIBOKEN_API PyObject *getSnakeCaseName(const char *name, bool lower);
 
 } // namespace String
 } // namespace Shiboken

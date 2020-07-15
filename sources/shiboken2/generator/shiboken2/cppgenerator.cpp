@@ -313,6 +313,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
             << "#include <pysideproperty.h>\n"
             << "#include <pyside.h>\n"
             << "#include <pysideqenum.h>\n"
+            << "#include <feature_select.h>\n"
             << "#include <qapp_macro.h>\n\n"
             << "QT_WARNING_DISABLE_DEPRECATED\n\n";
      }
@@ -949,10 +950,10 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         s << INDENT << returnStatement << '\n';
     }
 
-    s << INDENT << "static PyObject *pyFuncName = Shiboken::String::createStaticString(\""
-                << funcName << "\");\n";
+    s << INDENT << "static PyObject *nameCache[2] = {};\n";
+    s << INDENT << "static const char *funcName = \"" << funcName << "\";\n";
     s << INDENT << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
-                << "(Shiboken::BindingManager::instance().getOverride(this, pyFuncName));\n";
+                << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n";
     s << INDENT << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n";
     {
         Indentation indentation(INDENT);
@@ -5371,6 +5372,11 @@ void CppGenerator::writeSetattroFunction(QTextStream &s, AttroCheck attroCheck,
     Q_ASSERT(!context.forSmartPointer());
     const AbstractMetaClass *metaClass = context.metaClass();
     writeSetattroDefinition(s, metaClass);
+
+    // PYSIDE-1019: Switch tp_dict before doing tp_setattro.
+    if (usePySideExtensions())
+        s << INDENT << "PySide::Feature::Select(self);\n";
+
     // PYSIDE-803: Detect duck-punching; clear cache if a method is set.
     if (attroCheck.testFlag(AttroCheckFlag::SetattroMethodOverride)
             && context.useWrapper()) {
@@ -5457,6 +5463,10 @@ void CppGenerator::writeGetattroFunction(QTextStream &s, AttroCheck attroCheck,
     Q_ASSERT(!context.forSmartPointer());
     const AbstractMetaClass *metaClass = context.metaClass();
     writeGetattroDefinition(s, metaClass);
+
+    // PYSIDE-1019: Switch tp_dict before doing tp_getattro.
+    if (usePySideExtensions())
+        s << INDENT << "PySide::Feature::Select(self);\n";
 
     const QString getattrFunc = usePySideExtensions() && metaClass->isQObject()
         ? qObjectGetAttroFunction() : QLatin1String("PyObject_GenericGetAttr(self, name)");

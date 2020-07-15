@@ -73,7 +73,7 @@ public:
     void addToDeletionInMainThread(const DestructorEntry &);
 
     SbkObject *retrieveWrapper(const void *cptr);
-    PyObject *getOverride(const void *cptr, PyObject *methodName);
+    PyObject *getOverride(const void *cptr, PyObject *methodNameCache[2], const char *methodName);
 
     void addClassInheritance(SbkObjectType *parent, SbkObjectType *child);
     /**

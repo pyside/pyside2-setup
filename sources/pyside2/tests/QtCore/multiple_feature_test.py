@@ -37,6 +37,8 @@
 ##
 #############################################################################
 
+from __future__ import print_function, absolute_import
+
 import os
 import sys
 import unittest
@@ -50,12 +52,13 @@ from PySide2.support.__feature__ import _really_all_feature_names
 from textwrap import dedent
 
 """
-feature_test.py
---------------
+multiple_feature_test.py
+------------------------
 
 This tests the selectable features in PySide.
 
-There are no real features implemented. They will be added, later.
+The first feature is `snake_case` instead of `camelCase`.
+There is much more to come.
 """
 
 class FeaturesTest(unittest.TestCase):
@@ -66,9 +69,27 @@ class FeaturesTest(unittest.TestCase):
         """
         global __name__
 
-        for bit in range(8):
+        def tst_bit0(flag, self):
+            if flag == 0:
+                QtCore.QCborArray.isEmpty
+                QtCore.QCborArray.__dict__["isEmpty"]
+                with self.assertRaises(AttributeError):
+                    QtCore.QCborArray.is_empty
+                with self.assertRaises(KeyError):
+                    QtCore.QCborArray.__dict__["is_empty"]
+            else:
+                QtCore.QCborArray.is_empty
+                QtCore.QCborArray.__dict__["is_empty"]
+                with self.assertRaises(AttributeError):
+                    QtCore.QCborArray.isEmpty
+                with self.assertRaises(KeyError):
+                    QtCore.QCborArray.__dict__["isEmpty"]
+
+        edict = {}
+        for bit in range(1, 8):
             # We are cheating here, since the functions are in the globals.
-            exec(dedent("""
+
+            eval(compile(dedent("""
 
         def tst_bit{0}(flag, self):
             if flag == 0:
@@ -80,7 +101,8 @@ class FeaturesTest(unittest.TestCase):
                 QtCore.QCborArray.fake_feature_{1:02x}
                 QtCore.QCborArray.__dict__["fake_feature_{1:02x}"]
 
-                        """.format(bit, 1 << bit)), globals(), globals())
+                        """).format(bit, 1 << bit), "<string>", "exec"), globals(), edict)
+        globals().update(edict)
         feature_list = _really_all_feature_names
         func_list = [tst_bit0, tst_bit1, tst_bit2, tst_bit3,
                      tst_bit4, tst_bit5, tst_bit6, tst_bit7]
@@ -95,7 +117,7 @@ class FeaturesTest(unittest.TestCase):
                     feature = feature_list[bit]
                     text = "from __feature__ import {}".format(feature)
                     print(text)
-                    exec(text)
+                    eval(compile(text, "<string>", "exec"), globals(), edict)
             for bit in range(8):
                 value = idx & 1 << bit
                 func_list[bit](value, self=self)

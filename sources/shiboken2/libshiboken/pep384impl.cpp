@@ -86,6 +86,7 @@ static PyMemberDef probe_members[] = {
 #define probe_tp_repr       make_dummy(2)
 #define probe_tp_call       make_dummy(3)
 #define probe_tp_getattro   make_dummy(16)
+#define probe_tp_setattro   make_dummy(17)
 #define probe_tp_str        make_dummy(4)
 #define probe_tp_traverse   make_dummy(5)
 #define probe_tp_clear      make_dummy(6)
@@ -108,6 +109,7 @@ static PyType_Slot typeprobe_slots[] = {
     {Py_tp_repr,        probe_tp_repr},
     {Py_tp_call,        probe_tp_call},
     {Py_tp_getattro,    probe_tp_getattro},
+    {Py_tp_setattro,    probe_tp_setattro},
     {Py_tp_str,         probe_tp_str},
     {Py_tp_traverse,    probe_tp_traverse},
     {Py_tp_clear,       probe_tp_clear},
@@ -153,6 +155,7 @@ check_PyTypeObject_valid()
         || probe_tp_repr            != check->tp_repr
         || probe_tp_call            != check->tp_call
         || probe_tp_getattro        != check->tp_getattro
+        || probe_tp_setattro        != check->tp_setattro
         || probe_tp_str             != check->tp_str
         || probe_tp_traverse        != check->tp_traverse
         || probe_tp_clear           != check->tp_clear

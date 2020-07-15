@@ -49,7 +49,7 @@ similarity to Python's `__future__` file, but also some distinction.
 import sys
 
 all_feature_names = [
-    "_dummy_feature_01",
+    "snake_case",
     "_dummy_feature_02",
     "_dummy_feature_04",
     "_dummy_feature_08",
@@ -61,7 +61,7 @@ all_feature_names = [
 
 __all__ = ["all_feature_names"] + all_feature_names
 
-_dummy_feature_01 = 0x01
+snake_case = 1
 _dummy_feature_02 = 0x02
 _dummy_feature_04 = 0x04
 _dummy_feature_08 = 0x08
@@ -107,5 +107,8 @@ def _import(name, *args, **kwargs):
         if isinstance(existing, int):
             flag |= existing & 255
         pyside_feature_dict[importing_module] = flag
+        if importing_module == "__main__":
+            # We need to add all modules here which should see __feature__.
+            pyside_feature_dict["rlcompleter"] = flag
         return sys.modules["__feature__"]
     return original_import(name, *args, **kwargs)
