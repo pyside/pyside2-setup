@@ -52,6 +52,8 @@
 #include "pyside2_qtcore_python.h"
 #include "pyside2_qtqml_python.h"
 
+#include <QtQml/QJSValue>
+
 // Forward declarations.
 static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call,
                              void **args);
@@ -142,6 +144,126 @@ int PySide::qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
                      qmlName);
     }
     return qmlTypeId;
+}
+
+int PySide::qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
+                                     int versionMinor, const char *qmlName, PyObject *callback,
+                                     bool isQObject, bool hasCallback)
+{
+    using namespace Shiboken;
+
+    if (hasCallback) {
+        if (!PyCallable_Check(callback)) {
+            PyErr_Format(PyExc_TypeError, "Invalid callback specified.");
+            return -1;
+        }
+
+        AutoDecRef funcCode(PyObject_GetAttrString(callback, "__code__"));
+        AutoDecRef argCount(PyObject_GetAttrString(funcCode, "co_argcount"));
+
+        int count = PyInt_AsLong(argCount);
+
+        if (count != 1) {
+            PyErr_Format(PyExc_TypeError, "Callback has a bad parameter count.");
+            return -1;
+        }
+
+        // Make sure the callback never gets deallocated
+        Py_INCREF(callback);
+    }
+
+    const QMetaObject *metaObject = nullptr;
+
+    if (isQObject) {
+        static PyTypeObject *qobjectType = Conversions::getPythonTypeObject("QObject*");
+        assert(qobjectType);
+
+        PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+        if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+            PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
+                         qobjectType->tp_name, pyObjType->tp_name);
+            return -1;
+        }
+
+        // If we don't have a callback we'll need the pyObj to stay allocated indefinitely
+        if (!hasCallback)
+            Py_INCREF(pyObj);
+
+        metaObject = PySide::retrieveMetaObject(pyObjType);
+        Q_ASSERT(metaObject);
+    }
+
+    QQmlPrivate::RegisterSingletonType type;
+    type.structVersion = 0;
+
+    type.uri = uri;
+    type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
+    type.typeName = qmlName;
+    type.instanceMetaObject = metaObject;
+
+    if (isQObject) {
+        // FIXME: Fix this to assign new type ids each time.
+        type.typeId = QMetaType(QMetaType::QObjectStar);
+
+        type.qObjectApi =
+            [callback, pyObj, hasCallback](QQmlEngine *engine, QJSEngine *) -> QObject * {
+                AutoDecRef args(PyTuple_New(hasCallback ? 1 : 0));
+
+                if (hasCallback) {
+                    PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
+                                         (SbkObjectType *)SbkPySide2_QtQmlTypes[SBK_QQMLENGINE_IDX],
+                                         engine));
+                }
+
+                AutoDecRef retVal(PyObject_CallObject(hasCallback ? callback : pyObj, args));
+
+                SbkObjectType *qobjectType = (SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX];
+
+                // Make sure the callback returns something we can convert, else the entire application will crash.
+                if (retVal.isNull() ||
+                    Conversions::isPythonToCppPointerConvertible(qobjectType, retVal) == nullptr) {
+                    PyErr_Format(PyExc_TypeError, "Callback returns invalid value.");
+                    return nullptr;
+                }
+
+                QObject *obj = nullptr;
+                Conversions::pythonToCppPointer(qobjectType, retVal, &obj);
+
+                if (obj != nullptr)
+                    Py_INCREF(retVal);
+
+                return obj;
+            };
+    } else {
+        type.scriptApi =
+            [callback](QQmlEngine *engine, QJSEngine *) -> QJSValue {
+                AutoDecRef args(PyTuple_New(1));
+
+                PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
+                                     (SbkObjectType *)SbkPySide2_QtQmlTypes[SBK_QQMLENGINE_IDX],
+                                     engine));
+
+                AutoDecRef retVal(PyObject_CallObject(callback, args));
+
+                SbkObjectType *qjsvalueType = (SbkObjectType *)SbkPySide2_QtQmlTypes[SBK_QJSVALUE_IDX];
+
+                // Make sure the callback returns something we can convert, else the entire application will crash.
+                if (retVal.isNull() ||
+                    Conversions::isPythonToCppPointerConvertible(qjsvalueType, retVal) == nullptr) {
+                    PyErr_Format(PyExc_TypeError, "Callback returns invalid value.");
+                    return QJSValue(QJSValue::UndefinedValue);
+                }
+
+                QJSValue *val = nullptr;
+                Conversions::pythonToCppPointer(qjsvalueType, retVal, &val);
+
+                Py_INCREF(retVal);
+
+                return *val;
+            };
+    }
+
+    return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
 
 extern "C"

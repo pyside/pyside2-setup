@@ -71,6 +71,21 @@ void initQmlSupport(PyObject *module);
  */
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
                     const char *qmlName);
+
+/**
+ * PySide implementation of qmlRegisterType<T> function.
+ *
+ * \param pyObj Python type to be registered.
+ * \param uri QML element uri.
+ * \param versionMajor QML component major version.
+ * \param versionMinor QML component minor version.
+ * \param qmlName QML element name
+ * \param callback Registration callback
+ * \return the metatype id of the registered type.
+ */
+int qmlRegisterSingletonType(PyObject *pyObj,const char *uri, int versionMajor, int versionMinor, const char *qmlName,
+                             PyObject *callback, bool isQObject, bool hasCallback);
+
 }
 
 // Volatile Bool Ptr type definition for QQmlIncubationController::incubateWhile(std::atomic<bool> *, int)

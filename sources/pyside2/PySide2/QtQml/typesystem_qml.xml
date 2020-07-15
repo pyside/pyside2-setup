@@ -90,6 +90,27 @@
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistertype"/>
     </add-function>
 
+    <add-function signature="qmlRegisterSingletonType(PyTypeObject,const char*,int,int,const char*,PyObject*)" return-type="int">
+      <inject-documentation format="target" mode="append">
+        This function registers a Python type as a singleton in the QML system using the provided callback (which gets a QQmlEngine as a parameter) to generate the singleton.
+      </inject-documentation>
+      <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_callback"/>
+    </add-function>
+
+    <add-function signature="qmlRegisterSingletonType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
+      <inject-documentation format="target" mode="append">
+        This function registers a Python type as a singleton in the QML system.
+      </inject-documentation>
+      <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_nocallback"/>
+    </add-function>
+
+    <add-function signature="qmlRegisterSingletonType(const char*,int,int,const char*,PyObject*)" return-type="int">
+      <inject-documentation format="target" mode="append">
+        This function registers a QJSValue as a singleton in the QML system using the provided callback (which gets a QQmlEngine as a parameter) to generate the singleton.
+      </inject-documentation>
+      <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qjsvalue"/>
+    </add-function>
+
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
             <include file-name="QtQml" location="global"/>

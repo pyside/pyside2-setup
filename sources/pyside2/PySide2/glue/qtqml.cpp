@@ -42,6 +42,21 @@ int %0 = PySide::qmlRegisterType(%ARGUMENT_NAMES);
 %PYARG_0 = %CONVERTTOPYTHON[int](%0);
 // @snippet qmlregistertype
 
+// @snippet qmlregistersingletontype_qobject_callback
+int %0 = PySide::qmlRegisterSingletonType(%ARGUMENT_NAMES, true, true);
+%PYARG_0 = %CONVERTTOPYTHON[int](%0);
+// @snippet qmlregistersingletontype_qobject_callback
+
+// @snippet qmlregistersingletontype_qobject_nocallback
+int %0 = PySide::qmlRegisterSingletonType(%ARGUMENT_NAMES, nullptr, true, false);
+%PYARG_0 = %CONVERTTOPYTHON[int](%0);
+// @snippet qmlregistersingletontype_qobject_nocallback
+
+// @snippet qmlregistersingletontype_qjsvalue
+int %0 = PySide::qmlRegisterSingletonType(nullptr, %ARGUMENT_NAMES, false, true);
+%PYARG_0 = %CONVERTTOPYTHON[int](%0);
+// @snippet qmlregistersingletontype_qjsvalue
+
 // @snippet init
 PySide::initQmlSupport(module);
 // @snippet init
