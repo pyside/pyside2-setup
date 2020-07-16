@@ -115,45 +115,29 @@
 
   <rejection class="^QAccessible.*Event$" field-name="^m_.*$"/>
 
-  <rejection class="QEnterEvent" field-name="l"/>
-  <rejection class="QEnterEvent" field-name="w"/>
-  <rejection class="QEnterEvent" field-name="s"/>
+  <rejection class="QEventPoint" field-name="^m_.*$"/>
 
+  <rejection class="QInputEvent" field-name="m_dev"/>
   <rejection class="QInputEvent" field-name="modState"/>
-  <rejection class="QInputEvent" field-name="modState"/>
+  <rejection class="QInputEvent" field-name="ts"/>
+  <rejection class="QInputEvent" field-name="m_extra"/>
 
-  <rejection class="QMouseEvent" field-name="p"/>
-  <rejection class="QMouseEvent" field-name="g"/>
-  <rejection class="QMouseEvent" field-name="b"/>
-  <rejection class="QMouseEvent" field-name="mouseState"/>
   <rejection class="QNativeGestureEvent" field-name="^m.*$"/>
 
-  <rejection class="QHoverEvent" field-name="p"/>
+  <rejection class="QHoverEvent" field-name="mReserved"/>
   <rejection class="QHoverEvent" field-name="op"/>
 
-  <rejection class="QWheelEvent" field-name="p"/>
-  <rejection class="QWheelEvent" field-name="g"/>
-  <rejection class="QWheelEvent" field-name="mouseState"/>
-  <rejection class="QWheelEvent" field-name="o"/>
+  <rejection class="QWheelEvent" field-name="^m_.*$"/>
 
-  <rejection class="QTabletEvent" field-name="mPos"/>
-  <rejection class="QTabletEvent" field-name="mGPos"/>
-  <rejection class="QTabletEvent" field-name="mHiResGlobalPos"/>
-  <rejection class="QTabletEvent" field-name="mDev"/>
-  <rejection class="QTabletEvent" field-name="mPointerType"/>
-  <rejection class="QTabletEvent" field-name="mXT"/>
-  <rejection class="QTabletEvent" field-name="mYT"/>
-  <rejection class="QTabletEvent" field-name="mZ"/>
-  <rejection class="QTabletEvent" field-name="mPress"/>
-  <rejection class="QTabletEvent" field-name="mTangential"/>
-  <rejection class="QTabletEvent" field-name="mRot"/>
-  <rejection class="QTabletEvent" field-name="mUnique"/>
-  <rejection class="QTabletEvent" field-name="mExtra"/>
+  <rejection class="QTabletEvent" field-name="^m[A-Z].*$"/>
 
   <rejection class="QKeyEvent" field-name="txt"/>
   <rejection class="QKeyEvent" field-name="k"/>
+  <rejection class="QKeyEvent" field-name="nScanCode"/>
+  <rejection class="QKeyEvent" field-name="nVirtualKey"/>
+  <rejection class="QKeyEvent" field-name="nModifiers"/>
   <rejection class="QKeyEvent" field-name="c"/>
-  <rejection class="QKeyEvent" field-name="auto"/>
+  <rejection class="QKeyEvent" field-name="autor"/>
 
   <rejection class="QPaintEvent" field-name="m_rect"/>
   <rejection class="QPaintEvent" field-name="m_region"/>
@@ -176,20 +160,26 @@
   <rejection class="QDropEvent" field-name="drop_action"/>
   <rejection class="QDropEvent" field-name="default_action"/>
   <rejection class="QDropEvent" field-name="mdata"/>
-  <rejection class="QDropEvent" field-name="fmts"/>
 
   <rejection class="QDragMoveEvent" field-name="rect"/>
+
+  <rejection class="QShowEvent" field-name="p"/>
+  <rejection class="QShowEvent" field-name="gp"/>
+  <rejection class="QShowEvent" field-name="reas"/>
 
   <rejection class="QShortcutEvent" field-name="sequence"/>
   <rejection class="QShortcutEvent" field-name="ambig"/>
   <rejection class="QShortcutEvent" field-name="sid"/>
 
-  <rejection class="QTouchEvent" field-name="_device"/>
-  <rejection class="QTouchEvent" field-name="_widget"/>
-  <rejection class="QTouchEvent" field-name="_window"/>
-  <rejection class="QTouchEvent" field-name="_deviceType"/>
-  <rejection class="QTouchEvent" field-name="_touchPointStates"/>
-  <rejection class="QTouchEvent" field-name="_touchPoints"/>
+  <rejection class="QSinglePointEvent" field-name="m_point"/>
+  <rejection class="QSinglePointEvent" field-name="m_button"/>
+  <rejection class="QSinglePointEvent" field-name="m_source"/>
+  <rejection class="QSinglePointEvent" field-name="m_doubleClick"/>
+  <rejection class="QSinglePointEvent" field-name="m_doubleClick"/>
+
+  <rejection class="QTouchEvent" field-name="m_target"/>
+  <rejection class="QTouchEvent" field-name="m_touchPointStates"/>
+  <rejection class="QTouchEvent" field-name="m_touchPoints"/>
 
   <rejection class="QAbstractTextDocumentLayout::PaintContext" field-name="selections"/>
   <rejection class="QBrush" function-name="cleanUp"/>
