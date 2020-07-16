@@ -41,7 +41,7 @@
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
-#include <set>
+#include <vector>
 
 namespace Shiboken
 {
@@ -231,12 +231,10 @@ Py_ssize_t len(PyObject *str)
 //
 //     PyObject *attr = PyObject_GetAttr(obj, name());
 //
-// Missing:
-// There is no finalization for the string structures, yet.
-// But this is a global fault in shiboken. We are missing a true
-// finalization like in all other modules.
 
-using StaticStrings = std::set<PyObject *>;
+using StaticStrings = std::vector<PyObject *>;
+
+static void finalizeStaticStrings();    // forward
 
 static StaticStrings &staticStrings()
 {
@@ -244,8 +242,21 @@ static StaticStrings &staticStrings()
     return result;
 }
 
+static void finalizeStaticStrings()
+{
+    auto &list = staticStrings();
+    for (PyObject *ob : list)
+        Py_DECREF(ob);
+    list.clear();
+}
+
 PyObject *createStaticString(const char *str)
 {
+    static bool initialized = false;
+    if (!initialized) {
+        Py_AtExit(finalizeStaticStrings);
+        initialized = true;
+    }
 #if PY_VERSION_HEX >= 0x03000000
     PyObject *result = PyUnicode_InternFromString(str);
 #else
@@ -256,16 +267,8 @@ PyObject *createStaticString(const char *str)
         PyErr_Print();
         Py_FatalError("unexpected error in createStaticString()");
     }
-    staticStrings().insert(result);
+    staticStrings().push_back(result);
     return result;
-}
-
-void finalizeStaticStrings() // Currently unused
-{
-    auto &list = staticStrings();
-    for (auto s : list)
-        Py_DECREF(s);
-    list.clear();
 }
 
 } // namespace String
