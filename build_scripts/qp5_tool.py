@@ -395,8 +395,8 @@ if __name__ == '__main__':
         argument_parser.print_help()
         sys.exit(0)
 
-    git = which('git')
-    if git is None:
+    git = 'git'
+    if which(git) is None:
         warnings.warn('Unable to find git', RuntimeWarning)
         sys.exit(-1)
 
