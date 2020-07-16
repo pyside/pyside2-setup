@@ -211,9 +211,10 @@ def read_config_file(file_name):
     keyPattern = re.compile(r'^\s*([A-Za-z0-9\_\-]+)\s*=\s*(.*)$')
     with open(file_name) as f:
         while True:
-            line = f.readline().rstrip()
+            line = f.readline()
             if not line:
                 break
+            line = line.rstrip()
             match = keyPattern.match(line)
             if match:
                 key = match.group(1)
