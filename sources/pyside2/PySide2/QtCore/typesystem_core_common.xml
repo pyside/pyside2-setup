@@ -1809,15 +1809,10 @@
     <!-- ### These overloads must be removed accept strings with \x00 in their contents -->
     <modify-function signature="append(const char*,int)" remove="all"/>
     <modify-function signature="append(const char*)" remove="all"/>
-    <modify-function signature="contains(const char*)const" remove="all"/>
-    <modify-function signature="count(const char*)const" remove="all"/>
-    <modify-function signature="endsWith(const char*)const" remove="all"/>
-    <modify-function signature="indexOf(const char*,int)const" remove="all"/>
     <modify-function signature="indexOf(char,int)const" remove="all"/>
     <modify-function signature="insert(int,const char*)" remove="all"/>
     <modify-function signature="insert(int,char)" remove="all"/>
     <modify-function signature="insert(int,const char*,int)" since="4.6" remove="all"/>
-    <modify-function signature="lastIndexOf(const char*,int)const" remove="all"/>
     <modify-function signature="lastIndexOf(char,int)const" remove="all"/>
     <modify-function signature="prepend(const char*)" remove="all"/>
     <modify-function signature="prepend(const char*,int)" since="4.6" remove="all"/>
@@ -1828,7 +1823,6 @@
     <modify-function signature="replace(int,int,const char*)" remove="all"/>
     <modify-function signature="replace(int,int,const char*,int)" since="4.6" remove="all"/>
     <modify-function signature="replace(char,const char*)" remove="all"/>
-    <modify-function signature="startsWith(const char*)const" remove="all"/>
     <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator==(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
