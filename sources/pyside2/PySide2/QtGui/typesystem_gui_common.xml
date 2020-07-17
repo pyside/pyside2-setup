@@ -113,73 +113,8 @@
     besides the fact they are accessible by ordinary event methods.
     -->
 
-  <rejection class="^QAccessible.*Event$" field-name="^m_.*$"/>
-
+  <rejection class="^Q.*Event$" field-name="^m_.*$"/>
   <rejection class="QEventPoint" field-name="^m_.*$"/>
-
-  <rejection class="QInputEvent" field-name="m_dev"/>
-  <rejection class="QInputEvent" field-name="modState"/>
-  <rejection class="QInputEvent" field-name="ts"/>
-  <rejection class="QInputEvent" field-name="m_extra"/>
-
-  <rejection class="QNativeGestureEvent" field-name="^m.*$"/>
-
-  <rejection class="QHoverEvent" field-name="mReserved"/>
-  <rejection class="QHoverEvent" field-name="op"/>
-
-  <rejection class="QWheelEvent" field-name="^m_.*$"/>
-
-  <rejection class="QTabletEvent" field-name="^m[A-Z].*$"/>
-
-  <rejection class="QKeyEvent" field-name="txt"/>
-  <rejection class="QKeyEvent" field-name="k"/>
-  <rejection class="QKeyEvent" field-name="nScanCode"/>
-  <rejection class="QKeyEvent" field-name="nVirtualKey"/>
-  <rejection class="QKeyEvent" field-name="nModifiers"/>
-  <rejection class="QKeyEvent" field-name="c"/>
-  <rejection class="QKeyEvent" field-name="autor"/>
-
-  <rejection class="QPaintEvent" field-name="m_rect"/>
-  <rejection class="QPaintEvent" field-name="m_region"/>
-  <rejection class="QPaintEvent" field-name="m_erased"/>
-
-  <rejection class="QMoveEvent" field-name="p"/>
-  <rejection class="QMoveEvent" field-name="oldp"/>
-
-  <rejection class="QResizeEvent" field-name="s"/>
-  <rejection class="QResizeEvent" field-name="olds"/>
-
-  <rejection class="QContextMenuEvent" field-name="p"/>
-  <rejection class="QContextMenuEvent" field-name="gp"/>
-  <rejection class="QContextMenuEvent" field-name="reas"/>
-
-  <rejection class="QDropEvent" field-name="p"/>
-  <rejection class="QDropEvent" field-name="mouseState"/>
-  <rejection class="QDropEvent" field-name="modState"/>
-  <rejection class="QDropEvent" field-name="act"/>
-  <rejection class="QDropEvent" field-name="drop_action"/>
-  <rejection class="QDropEvent" field-name="default_action"/>
-  <rejection class="QDropEvent" field-name="mdata"/>
-
-  <rejection class="QDragMoveEvent" field-name="rect"/>
-
-  <rejection class="QShowEvent" field-name="p"/>
-  <rejection class="QShowEvent" field-name="gp"/>
-  <rejection class="QShowEvent" field-name="reas"/>
-
-  <rejection class="QShortcutEvent" field-name="sequence"/>
-  <rejection class="QShortcutEvent" field-name="ambig"/>
-  <rejection class="QShortcutEvent" field-name="sid"/>
-
-  <rejection class="QSinglePointEvent" field-name="m_point"/>
-  <rejection class="QSinglePointEvent" field-name="m_button"/>
-  <rejection class="QSinglePointEvent" field-name="m_source"/>
-  <rejection class="QSinglePointEvent" field-name="m_doubleClick"/>
-  <rejection class="QSinglePointEvent" field-name="m_doubleClick"/>
-
-  <rejection class="QTouchEvent" field-name="m_target"/>
-  <rejection class="QTouchEvent" field-name="m_touchPointStates"/>
-  <rejection class="QTouchEvent" field-name="m_touchPoints"/>
 
   <rejection class="QAbstractTextDocumentLayout::PaintContext" field-name="selections"/>
   <rejection class="QBrush" function-name="cleanUp"/>
