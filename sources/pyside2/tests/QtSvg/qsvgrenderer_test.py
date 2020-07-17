@@ -2,7 +2,7 @@
 
 #############################################################################
 ##
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
 ## This file is part of the test suite of Qt for Python.
@@ -36,15 +36,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
-from PySide2.QtSvg import *
+from PySide2.QtCore import QFile
+from PySide2.QtGui import QGuiApplication
+from PySide2.QtSvg import QSvgRenderer
 
 class QSvgRendererTest(unittest.TestCase):
 
     def testLoad(self):
         tigerPath = os.path.join(os.path.dirname(__file__), 'tiger.svg')
-        app = QApplication([])
+        app = QGuiApplication([])
 
         fromFile = QSvgRenderer(tigerPath)
         self.assertTrue(fromFile.isValid())

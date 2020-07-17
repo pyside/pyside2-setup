@@ -44,6 +44,7 @@ set(ALL_OPTIONAL_MODULES
     TextToSpeech
     Charts
     Svg
+    SvgWidgets
     DataVisualization)
 find_package(Qt${QT_MAJOR_VERSION}UiTools)
 if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
