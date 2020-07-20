@@ -5,7 +5,10 @@ cmake_minimum_required(VERSION 3.1)
 
 set(QT_USE_QTCORE 1)
 # no more supported: include(${QT_USE_FILE})
-add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
+
+# removed after qtbase/054b66a65748c9ebfafeca88bf31669a24994237, is this required?
+# add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
+
 add_definitions(-DQT_SHARED)
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
 
