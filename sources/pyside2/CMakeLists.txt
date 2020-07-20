@@ -252,8 +252,7 @@ endif()
 
 add_subdirectory(libpyside)
 find_package(Qt${QT_MAJOR_VERSION}Designer)
-if(${QT_MAJOR_VERSION} LESS 6 AND Qt${QT_MAJOR_VERSION}UiTools_FOUND
-   AND Qt${QT_MAJOR_VERSION}Designer_FOUND)
+if(Qt${QT_MAJOR_VERSION}UiTools_FOUND AND Qt${QT_MAJOR_VERSION}Designer_FOUND)
     add_subdirectory(plugins)
 endif()
 

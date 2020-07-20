@@ -1,15 +1,18 @@
 project(plugins)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 COMPONENTS Gui)
+find_package(Qt6 COMPONENTS Widgets)
+find_package(Qt6 COMPONENTS UiPlugin)
+
 set(ui_plugin_src
     customwidgets.cpp
     customwidget.cpp
 )
-
-set(ui_plugin_moc
-    customwidget.h
-    customwidgets.h
-)
-include_directories(${Qt${QT_MAJOR_VERSION}Designer_INCLUDE_DIRS})
 
 qt_wrap_cpp(MOC_FILES ${ui_plugin_moc})
 
@@ -26,7 +29,10 @@ else()
 endif()
 
 target_link_libraries(uiplugin
-                      ${Qt${QT_MAJOR_VERSION}UiTools_LIBRARY}
+                      Qt::Core
+                      Qt::Gui
+                      Qt::UiPlugin
+                      Qt::Widgets
                       Shiboken2::libshiboken)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_DEBUG_POSTFIX})
