@@ -162,6 +162,7 @@ public:
 
     void popScope()
     {
+        m_scopeStack.back()->purgeClassDeclarations();
         m_scopeStack.pop();
         updateScope();
     }
@@ -841,7 +842,9 @@ void Builder::setSystemIncludes(const QByteArrayList &systemIncludes)
 FileModelItem Builder::dom() const
 {
     Q_ASSERT(!d->m_scopeStack.isEmpty());
-    return qSharedPointerDynamicCast<_FileModelItem>(d->m_scopeStack.constFirst());
+    auto rootScope = d->m_scopeStack.constFirst();
+    rootScope->purgeClassDeclarations();
+    return qSharedPointerDynamicCast<_FileModelItem>(rootScope);
 }
 
 static QString msgOutOfOrder(const CXCursor &cursor, const char *expectedScope)
