@@ -170,26 +170,22 @@ static void ensureNewDictType()
 static inline PyObject *nextInCircle(PyObject *dict)
 {
     // returns a borrowed ref
-    assert(Py_TYPE(dict) != old_dict_type);
     AutoDecRef next_dict(PyObject_GetAttr(dict, PyName::dict_ring()));
     return next_dict;
 }
 
 static inline void setNextDict(PyObject *dict, PyObject *next_dict)
 {
-    assert(Py_TYPE(dict) != old_dict_type);
     PyObject_SetAttr(dict, PyName::dict_ring(), next_dict);
 }
 
 static inline void setSelectId(PyObject *dict, PyObject *select_id)
 {
-    assert(Py_TYPE(dict) != old_dict_type);
     PyObject_SetAttr(dict, PyName::select_id(), select_id);
 }
 
 static inline PyObject *getSelectId(PyObject *dict)
 {
-    assert(Py_TYPE(dict) != old_dict_type);
     auto select_id = PyObject_GetAttr(dict, PyName::select_id());
     return select_id;
 }
@@ -318,7 +314,7 @@ static PyObject *SelectFeatureSet(PyTypeObject *type)
      *  It just makes no sense to make the function public, because
      *  Shiboken will assign it via a public hook of `basewrapper.cpp`.
      */
-    if (Py_TYPE(type->tp_dict) == old_dict_type) {
+    if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
         // PYSIDE-1019: On first touch, we initialize the dynamic naming.
         // The dict type will be replaced after the first call.
         if (!replaceClassDict(type))

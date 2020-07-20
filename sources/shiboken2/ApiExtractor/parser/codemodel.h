@@ -360,6 +360,9 @@ public:
 
     FunctionModelItem declaredFunction(const FunctionModelItem &item);
 
+    bool isEmpty() const;
+    void purgeClassDeclarations();
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -422,6 +425,9 @@ public:
 
     bool isFinal() const { return m_final; }
     void setFinal(bool f) { m_final = f; }
+
+    bool isEmpty() const;
+    bool isTemplate() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

@@ -757,6 +757,16 @@ void _ClassModelItem::addPropertyDeclaration(const QString &propertyDeclaration)
     m_propertyDeclarations << propertyDeclaration;
 }
 
+bool _ClassModelItem::isEmpty() const
+{
+    return _ScopeModelItem::isEmpty() && m_propertyDeclarations.isEmpty();
+}
+
+bool _ClassModelItem::isTemplate() const
+{
+    return !m_templateParameters.isEmpty();
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 template <class List>
 static void formatModelItemList(QDebug &d, const char *prefix, const List &l,
@@ -851,6 +861,49 @@ void _ScopeModelItem::appendScope(const _ScopeModelItem &other)
     m_variables += other.m_variables;
     m_functions += other.m_functions;
     m_enumsDeclarations += other.m_enumsDeclarations;
+}
+
+bool _ScopeModelItem::isEmpty() const
+{
+    return m_classes.isEmpty() && m_enums.isEmpty()
+        && m_typeDefs.isEmpty() && m_templateTypeAliases.isEmpty()
+        && m_variables.isEmpty() && m_functions.isEmpty()
+        && m_enumsDeclarations.isEmpty();
+}
+
+/* This function removes MSVC export declarations of non-type template
+ * specializations (see below code from photon.h) for which
+ * clang_isCursorDefinition() returns true, causing them to be added as
+ * definitions of empty classes shadowing the template definition depending
+ *  on QHash seed values.
+
+template <int N> class Tpl
+{
+public:
+...
+};
+
+#ifdef WIN32
+template class LIBSAMPLE_EXPORT Tpl<54>;
+*/
+void _ScopeModelItem::purgeClassDeclarations()
+{
+    for (int i = m_classes.size() - 1; i >= 0; --i) {
+        auto klass = m_classes.at(i);
+        // For an empty class, check if there is a matching template
+        // definition, and remove it if this is the case.
+        if (!klass->isTemplate() && klass->isEmpty()) {
+            const QString definitionPrefix = klass->name() + QLatin1Char('<');
+            const bool definitionFound =
+                std::any_of(m_classes.cbegin(), m_classes.cend(),
+                            [definitionPrefix] (const ClassModelItem &c) {
+                    return c->isTemplate() && !c->isEmpty()
+                        && c->name().startsWith(definitionPrefix);
+            });
+            if (definitionFound)
+                m_classes.removeAt(i);
+        }
+    }
 }
 
 #ifndef QT_NO_DEBUG_STREAM

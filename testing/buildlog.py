@@ -56,6 +56,7 @@ from textwrap import dedent
 from .helper import script_dir
 
 LogEntry = namedtuple("LogEntry", ["log_dir", "build_dir", "build_classifiers"])
+is_ci = os.environ.get("QTEST_ENVIRONMENT", "") == "ci"
 
 
 class BuildLog(object):
@@ -109,7 +110,9 @@ class BuildLog(object):
         build_history.sort()
         self.history = build_history
         self._buildno = None
-        self.prune_old_entries(history_dir)
+        if not is_ci:
+            # there seems to be a timing problem in RHel 7.6, so we better don't touch it
+            self.prune_old_entries(history_dir)
 
     def prune_old_entries(self, history_dir):
         lst = []

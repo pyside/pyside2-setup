@@ -211,9 +211,10 @@ def read_config_file(file_name):
     keyPattern = re.compile(r'^\s*([A-Za-z0-9\_\-]+)\s*=\s*(.*)$')
     with open(file_name) as f:
         while True:
-            line = f.readline().rstrip()
+            line = f.readline()
             if not line:
                 break
+            line = line.rstrip()
             match = keyPattern.match(line)
             if match:
                 key = match.group(1)
@@ -394,8 +395,8 @@ if __name__ == '__main__':
         argument_parser.print_help()
         sys.exit(0)
 
-    git = which('git')
-    if git is None:
+    git = 'git'
+    if which(git) is None:
         warnings.warn('Unable to find git', RuntimeWarning)
         sys.exit(-1)
 
