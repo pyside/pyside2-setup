@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -42,15 +42,9 @@
 
 #include <shiboken.h>
 
-#include <QtCore/QtGlobal>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
- #include <QtDesigner/QDesignerCustomWidgetInterface>
-#else
- #include <QtUiPlugin/QDesignerCustomWidgetInterface>
-#endif
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
 
-
-struct PyCustomWidgetPrivate;
+#include <QtCore/qglobal.h>
 
 class PyCustomWidget: public QObject, public QDesignerCustomWidgetInterface
 {
@@ -58,24 +52,24 @@ class PyCustomWidget: public QObject, public QDesignerCustomWidgetInterface
      Q_INTERFACES(QDesignerCustomWidgetInterface)
 
 public:
-    PyCustomWidget(PyObject* objectType);
-    ~PyCustomWidget();
+    explicit PyCustomWidget(PyObject *objectType);
 
-    bool isContainer() const;
-    bool isInitialized() const;
-    QIcon icon() const;
-    QString domXml() const;
-    QString group() const;
-    QString includeFile() const;
-    QString name() const;
-    QString toolTip() const;
-    QString whatsThis() const;
-    QWidget *createWidget(QWidget *parent);
-    void initialize(QDesignerFormEditorInterface *core);
+    bool isContainer() const override;
+    bool isInitialized() const override;
+    QIcon icon() const override;
+    QString domXml() const override;
+    QString group() const override;
+    QString includeFile() const override;
+    QString name() const override;
+    QString toolTip() const override;
+    QString whatsThis() const override;
+    QWidget *createWidget(QWidget *parent) override;
+    void initialize(QDesignerFormEditorInterface *core) override;
 
 private:
-    PyCustomWidgetPrivate* m_data;
-    QString m_name;
+    PyObject *m_pyObject = nullptr;
+    const QString m_name;
+    bool m_initialized = false;
 };
 
-#endif
+#endif // _PY_CUSTOM_WIDGET_H_
