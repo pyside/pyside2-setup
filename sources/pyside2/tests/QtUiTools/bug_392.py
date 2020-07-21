@@ -36,29 +36,31 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide2 import QtWidgets
+from PySide2.QtGui import QAction
+from PySide2.QtWidgets import QComboBox, QWidget
 from PySide2.QtUiTools import QUiLoader
 
-class MyWidget(QtWidgets.QComboBox):
+class MyWidget(QComboBox):
     def __init__(self, parent=None):
-        QtWidgets.QComboBox.__init__(self, parent)
+        QComboBox.__init__(self, parent)
 
     def isPython(self):
         return True
 
 class BugTest(UsesQApplication):
     def testCase(self):
-        w = QtWidgets.QWidget()
+        w = QWidget()
         loader = QUiLoader()
 
         filePath = os.path.join(os.path.dirname(__file__), 'action.ui')
         result = loader.load(filePath, w)
-        self.assertTrue(isinstance(result.actionFoo, QtGui.QAction))
+        self.assertTrue(isinstance(result.actionFoo, QAction))
 
     def testPythonCustomWidgets(self):
-        w = QtWidgets.QWidget()
+        w = QWidget()
         loader = QUiLoader()
         loader.registerCustomWidget(MyWidget)
+        self.assertTrue('MyWidget' in loader.availableWidgets())
 
         filePath = os.path.join(os.path.dirname(__file__), 'pycustomwidget.ui')
         result = loader.load(filePath, w)
@@ -66,9 +68,10 @@ class BugTest(UsesQApplication):
         self.assertTrue(result.custom.isPython())
 
     def testPythonCustomWidgetsTwice(self):
-        w = QtWidgets.QWidget()
+        w = QWidget()
         loader = QUiLoader()
         loader.registerCustomWidget(MyWidget)
+        self.assertTrue('MyWidget' in loader.availableWidgets())
 
         filePath = os.path.join(os.path.dirname(__file__), 'pycustomwidget2.ui')
         result = loader.load(filePath, w)

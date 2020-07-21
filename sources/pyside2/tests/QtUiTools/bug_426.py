@@ -34,19 +34,22 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide2 import QtCore, QtWidgets
+from PySide2.QtCore import QTimer
+from PySide2.QtGui import QAction, QActionGroup
+from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtUiTools import QUiLoader
+
 
 class Window(object):
     def __init__(self):
         loader = QUiLoader()
         filePath = os.path.join(os.path.dirname(__file__), 'bug_426.ui')
         self.widget = loader.load(filePath)
-        self.group = QtGui.QActionGroup(self.widget)
+        self.group = QActionGroup(self.widget)
         self.widget.show()
-        QtCore.QTimer.singleShot(0, self.widget.close)
+        QTimer.singleShot(0, self.widget.close)
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     win = Window()
     sys.exit(app.exec_())
