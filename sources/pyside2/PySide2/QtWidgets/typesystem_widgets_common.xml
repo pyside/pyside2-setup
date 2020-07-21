@@ -2305,13 +2305,8 @@
       </modify-argument>
     </modify-function>
 
-    <modify-function signature="pixmap()const">
-      <modify-argument index="return">
-        <!-- Defining ownership as "default" avoids the object to be automatically
-             set as parent of the returned pointer. -->
-        <define-ownership class="target" owner="default"/>
-      </modify-argument>
-    </modify-function>
+    <modify-function signature="pixmap(Qt::ReturnByValueConstant)const" remove="all"/>
+    <modify-function signature="picture(Qt::ReturnByValueConstant)const" remove="all"/>
     <modify-function signature="setMovie(QMovie *)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

@@ -1155,6 +1155,9 @@
     <add-function signature="find(QPixmapCache::Key&amp;)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpixmapcache-find"/>
     </add-function>
+    <add-function signature="find(const QString&amp;)">
+        <inject-code file="../glue/qtgui.cpp" snippet="qpixmapcache-find"/>
+    </add-function>
   </object-type>
 
   <object-type name="QRegularExpressionValidator"/>
