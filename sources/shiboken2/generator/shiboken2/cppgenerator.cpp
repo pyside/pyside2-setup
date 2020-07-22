@@ -4557,10 +4557,17 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
                                             QString(), func->isUserAdded());
 
                     // If the function is user added, use the inject code
+                    bool generateOperatorCode = true;
                     if (func->isUserAdded()) {
                         CodeSnipList snips = func->injectedCodeSnips();
-                        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, func->arguments().constLast());
-                    } else {
+                        if (!snips.isEmpty()) {
+                            writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny,
+                                           TypeSystem::TargetLangCode, func,
+                                           func->arguments().constLast());
+                            generateOperatorCode = false;
+                        }
+                    }
+                    if (generateOperatorCode) {
                         s << INDENT;
                         if (func->type())
                             s << func->type()->cppSignature() << " " << CPP_RETURN_VAR << " = ";

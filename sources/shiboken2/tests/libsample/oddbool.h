@@ -31,6 +31,8 @@
 
 #include "libsamplemacros.h"
 
+#include <type_traits>
+
 class OddBool
 {
 
@@ -80,4 +82,27 @@ private:
     OddBool m_oddbool;
 };
 
-#endif
+class LIBSAMPLE_API ComparisonTester
+{
+public:
+    explicit ComparisonTester(int v);
+    ComparisonTester &operator=(int v);
+
+    int compare(const ComparisonTester &rhs) const;
+
+private:
+    int m_value;
+};
+
+// Hide the comparison operators from the clang parser (see typesystem_sample.xml:184,
+// oddbool_test.py)
+
+inline std::enable_if<std::is_assignable<ComparisonTester, int>::value, bool>::type
+    operator==(const ComparisonTester &c1, const ComparisonTester &c2)
+{ return c1.compare(c2) == 0; }
+
+inline std::enable_if<std::is_assignable<ComparisonTester, int>::value, bool>::type
+    operator!=(const ComparisonTester &c1, const ComparisonTester &c2)
+{ return c1.compare(c2) != 0; }
+
+#endif // ODDBOOL_H
