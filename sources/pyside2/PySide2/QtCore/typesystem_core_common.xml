@@ -1513,6 +1513,10 @@
   </object-type>
   <value-type name="QItemSelection">
     <include file-name="QList" location="global"/>
+    <!-- Expose operator==, != inherited from QList, which the parser does
+         not see due to the TMP expression of the return type. -->
+    <add-function signature="operator==(const QItemSelection&amp;)" return-type="bool"/>
+    <add-function signature="operator!=(const QItemSelection&amp;)" return-type="bool"/>
   </value-type>
 
   <object-type name="QItemSelectionModel">
@@ -2703,6 +2707,10 @@
     <modify-function signature="toList()const" remove="all"/>
     <modify-function signature="fromList(const QList&lt;QXmlStreamAttribute&gt; &amp;)" remove="all"/>
     <modify-function signature="operator+=(QVector&lt;QXmlStreamAttribute&gt;)" remove="all"/>
+    <!-- Expose operator==, != inherited from QList, which the parser does
+         not see due to the TMP expression of the return type. -->
+    <add-function signature="operator==(const QXmlStreamAttributes&amp;)" return-type="bool"/>
+    <add-function signature="operator!=(const QXmlStreamAttributes&amp;)" return-type="bool"/>
   </value-type>
   <value-type name="QXmlStreamNamespaceDeclaration"/>
   <value-type name="QXmlStreamNotationDeclaration"/>

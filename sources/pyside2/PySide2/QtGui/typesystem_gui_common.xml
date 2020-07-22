@@ -462,6 +462,10 @@
     <extra-includes>
       <include file-name="QTransform" location="global"/>
     </extra-includes>
+    <!-- Expose operator==, != inherited from QList, which the parser does
+         not see due to the TMP expression of the return type. -->
+    <add-function signature="operator==(const QPolygon&amp;)" return-type="bool"/>
+    <add-function signature="operator!=(const QPolygon&amp;)" return-type="bool"/>
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qpolygon-reduce">
             <insert-template name="reduce_code">
