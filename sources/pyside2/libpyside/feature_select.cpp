@@ -51,7 +51,7 @@
 // This functionality is no longer implemented in the signature module, since
 // the PyCFunction getsets do not have to be modified any longer.
 // Instead, we simply exchange the complete class dicts. This is done in the
-// basewrapper.cpp file.
+// basewrapper.cpp file and in every generated `tp_(get|set)attro`.
 //
 // This is the general framework of the switchable extensions.
 // A maximum of eight features is planned so far. This seems to be enough.
@@ -65,10 +65,10 @@
     -------------------------------------
 
 The basic idea is to replace the `tp_dict` of a QObject derived type.
-This way, we can replace the methods of the dict in no time.
+This way, we can replace the methods of the class in no time.
 
 The crucial point to understand is how the `tp_dict` is actually accessed:
-When you type "QObject.__dict__", the descriptor of SbkObjectType_Type
+When you type "QObject.__dict__", the descriptor of `SbkObjectType_Type`
 is called. This descriptor is per default unassigned, so the base class
 PyType_Type provides the tp_getset method `type_dict`:
 
@@ -111,9 +111,9 @@ looks into the `__name__` attribute of the active module and decides which
 version of `tp_dict` is needed. Then the right dict is searched in the ring
 and created if not already there.
 
-Furthermore, we need to overwrite every `tp_getattro` and `tp_setattro`
-with a version that switches dicts before looking up methods.
-The dict changing must follow the `tp_mro` in order to change all names.
+Furthermore, we need to overwrite every `tp_(get|set)attro`  with a version
+that switches dicts right before looking up methods.
+The dict changing must walk the whole `tp_mro` in order to change all names.
 
 This is everything that the following code does.
 
@@ -124,7 +124,7 @@ namespace PySide { namespace Feature {
 
 using namespace Shiboken;
 
-static PyObject *getFeatureSelectID()
+static inline PyObject *getFeatureSelectID()
 {
     static PyObject *zero = PyInt_FromLong(0);
     static PyObject *feature_dict = GetFeatureDict();
@@ -312,8 +312,12 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
 
 static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
 {
+    /*
+     * This is the selector for one sublass. We need to call this for
+     * every subclass until no more subclasses or reaching the wanted id.
+     */
     if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
-        // PYSIDE-1019: On first touch, we initialize the dynamic naming.
+        // On first touch, we initialize the dynamic naming.
         // The dict type will be replaced after the first call.
         if (!replaceClassDict(type)) {
             Py_FatalError("failed to replace class dict!");
@@ -329,16 +333,18 @@ static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static PyObject *SelectFeatureSet(PyTypeObject *type)
+static inline PyObject *SelectFeatureSet(PyTypeObject *type)
 {
     /*
-     *  This is the main function of the module.
-     *  Generated functions call this directly.
-     *  Shiboken will assign it via a public hook of `basewrapper.cpp`.
+     * This is the main function of the module.
+     * The purpose of this function is to switch the dict of a class right
+     * before a (get|set)attro call is performed.
+     *
+     * Generated functions call this directly.
+     * Shiboken will assign it via a public hook of `basewrapper.cpp`.
      */
     if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
-        // PYSIDE-1019: On first touch, we initialize the dynamic naming.
-        // The dict type will be replaced after the first call.
+        // We initialize the dynamic features by using our own dict type.
         if (!replaceClassDict(type))
             return nullptr;
     }
@@ -404,7 +410,7 @@ void init()
 // basewrapper.cpp file.
 //
 
-static PyObject *methodWithLowerName(PyTypeObject *type,
+static PyObject *methodWithNewName(PyTypeObject *type,
                                      PyMethodDef *meth,
                                      const char *new_name)
 {
@@ -456,7 +462,7 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict)
     PyMethodDef *meth = type->tp_methods;
     for (; meth != nullptr && meth->ml_name != nullptr; ++meth) {
         const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
-        AutoDecRef new_method(methodWithLowerName(type, meth, name));
+        AutoDecRef new_method(methodWithNewName(type, meth, name));
         if (new_method.isNull())
             return false;
         if (PyDict_SetItemString(lower_dict, name, new_method) < 0)
