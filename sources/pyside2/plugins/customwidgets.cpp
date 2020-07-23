@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,47 +37,25 @@
 **
 ****************************************************************************/
 
-#include "customwidget.h"
 #include "customwidgets.h"
-
-
-struct PyCustomWidgetPrivate
-{
-    PyObject *pyObject;
-    bool initialized;
-};
-
-struct PyCustomWidgetsPrivate
-{
-    QList<QDesignerCustomWidgetInterface *> widgets;
-    ~PyCustomWidgetsPrivate();
-};
-
-
-PyCustomWidgetsPrivate::~PyCustomWidgetsPrivate()
-{
-    qDeleteAll(widgets);
-    widgets.clear();
-}
+#include "customwidget.h"
 
 PyCustomWidgets::PyCustomWidgets(QObject *parent)
-    : QObject(parent), m_data(new PyCustomWidgetsPrivate)
+    : QObject(parent)
 {
 }
 
 PyCustomWidgets::~PyCustomWidgets()
 {
-    delete m_data;
+    qDeleteAll(m_widgets);
 }
 
 void PyCustomWidgets::registerWidgetType(PyObject *widget)
 {
-    m_data->widgets.append(new PyCustomWidget(widget));
+    m_widgets.append(new PyCustomWidget(widget));
 }
 
 QList<QDesignerCustomWidgetInterface *> PyCustomWidgets::customWidgets() const
 {
-    return m_data->widgets;
+    return m_widgets;
 }
-
-

@@ -16,24 +16,24 @@ function:
 .. code-block::
    :linenos:
 
-from PySide2.QtCore import QObject, Property
+    from PySide2.QtCore import QObject, Property
 
-class MyObject(QObject):
-    def __init__(self,startval=42):
-        QObject.__init__(self)
-        self.ppval = startval
+    class MyObject(QObject):
+        def __init__(self,startval=42):
+            QObject.__init__(self)
+            self.ppval = startval
 
-    def readPP(self):
-        return self.ppval
+        def readPP(self):
+            return self.ppval
 
-    def setPP(self,val):
-        self.ppval = val
+        def setPP(self,val):
+            self.ppval = val
 
-    pp = Property(int, readPP, setPP)
+        pp = Property(int, readPP, setPP)
 
-obj = MyObject()
-obj.pp = 47
-print(obj.pp)
+    obj = MyObject()
+    obj.pp = 47
+    print(obj.pp)
 
 Properties in QML expressions
 -----------------------------
@@ -45,18 +45,18 @@ example illustrating how to do this:
 .. code-block::
    :linenos:
 
-from PySide2.QtCore import QObject, Signal, Property
+    from PySide2.QtCore import QObject, Signal, Property
 
-class Person(QObject):
-    def __init__(self, name):
-        QObject.__init__(self)
-        self._person_name = name
+    class Person(QObject):
+        def __init__(self, name):
+            QObject.__init__(self)
+            self._person_name = name
 
-    def _name(self):
-        return self._person_name
+        def _name(self):
+            return self._person_name
 
-    @Signal
-    def name_changed(self):
-        pass
+        @Signal
+        def name_changed(self):
+            pass
 
-    name = Property(str, _name, notify=name_changed)
+        name = Property(str, _name, notify=name_changed)

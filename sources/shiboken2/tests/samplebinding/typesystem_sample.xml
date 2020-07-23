@@ -181,6 +181,21 @@
         </conversion-rule>
     </primitive-type>
 
+    <!-- As of Qt 6, there is a trend of hiding bool returns of comparison
+         operators of container classes behind some template expression using
+         SFINAE depending on their value's traits, like:
+          template <typename U = T>
+          friend QTypeTraits::compare_eq_result<U> operator==(const QList &l, const QList &r)
+         which the clang parser cannot identify. Rich comparison of classes
+         inheriting QList (QPolygon, QItemSelection) will then not be generated.
+         To work around, the operators should be added manually without
+         injecting code. The code should just use the standard implementation. -->
+    <value-type name="ComparisonTester">
+        <include file-name="oddbool.h" location="global"/>
+        <add-function signature="operator==(const ComparisonTester&amp;)" return-type="bool"/>
+        <add-function signature="operator!=(const ComparisonTester&amp;)" return-type="bool"/>
+    </value-type>
+
     <primitive-type name="PStr">
         <include file-name="str.h" location="global"/>
         <conversion-rule>
@@ -2459,6 +2474,8 @@
     <suppress-warning text="hiding of function 'takeChild' in class 'ObjectView'" />
     <suppress-warning text="visibility of function 'publicMethod' modified in class 'MDerived3'" />
     <suppress-warning text="skipping function 'InjectCode::toStr', unmatched parameter type 'T const&amp;'" />
+
+    <suppress-warning text="^skipping function 'std::enable_if.*ComparisonTester::operator[!=]=.*ComparisonTester.*$"/>
 
     <!-- Do not fix this warning, the generator should be able to handle this situation for Object Types. -->
     <suppress-warning text="Argument in position 1 of added function 'SampleNamespace::passReferenceToObjectType(ObjectType * arg__1)', has a type that is not a reference, while the argument in the corresponding position in C++ function 'SampleNamespace::passReferenceToObjectType(const ObjectType &amp; obj, int multiplier)' is a reference." />

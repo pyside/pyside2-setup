@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,26 +40,28 @@
 #ifndef _PLUGIN_H_
 #define _PLUGIN_H_
 
-#include <QPluginLoader>
 #include "customwidgets.h"
 
-inline void registerCustomWidget(PyObject *obj)
+#include <QtCore/qpluginloader.h>
+
+static inline PyCustomWidgets *findPlugin()
 {
-    static PyCustomWidgets *plugin = nullptr;
-
-    if (plugin == 0) {
-        const auto &instances = QPluginLoader::staticInstances();
-        for (QObject *o : instances) {
-            plugin = qobject_cast<PyCustomWidgets *>(o);
-            if (plugin)
-                break;
-        }
+    const auto &instances = QPluginLoader::staticInstances();
+    for (QObject *o : instances) {
+        if (auto plugin = qobject_cast<PyCustomWidgets *>(o))
+            return plugin;
     }
+    return nullptr;
+}
 
-    if (!plugin)
-        qDebug() << "Failed to load uiloader plugin.";
-    else
+static void registerCustomWidget(PyObject *obj)
+{
+    static PyCustomWidgets *const plugin = findPlugin();
+
+    if (plugin)
         plugin->registerWidgetType(obj);
+    else
+        qWarning("Qt for Python: Failed to find the static QUiLoader plugin.");
 }
 
 #endif

@@ -20,6 +20,7 @@ modifications.cpp
 mapuser.cpp
 modified_constructor.cpp
 multiple_derived.cpp
+oddbool.cpp
 objectmodel.cpp
 objecttype.cpp
 objecttypeholder.cpp

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -42,16 +42,11 @@
 
 #include <shiboken.h>
 
-#include <QtCore/QtGlobal>
-#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
- #include <QtDesigner/QDesignerCustomWidgetInterface>
-#else
- #include <QtUiPlugin/QDesignerCustomWidgetInterface>
-#endif
+#include <QtUiPlugin/QDesignerCustomWidgetInterface>
 
+#include <QtCore/qlist.h>
 
-struct PyCustomWidgetsPrivate;
-
+// A static plugin linked to the QtUiLoader Python module
 class PyCustomWidgets: public QObject, public QDesignerCustomWidgetCollectionInterface
 {
     Q_OBJECT
@@ -59,13 +54,16 @@ class PyCustomWidgets: public QObject, public QDesignerCustomWidgetCollectionInt
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.PySide.PyCustomWidgetsInterface")
 
 public:
-    PyCustomWidgets(QObject *parent = 0);
+    explicit PyCustomWidgets(QObject *parent = nullptr);
     ~PyCustomWidgets();
-    virtual QList<QDesignerCustomWidgetInterface*> customWidgets() const;
+
+    QList<QDesignerCustomWidgetInterface*> customWidgets() const override;
+
+    // Called from added function QUiLoader::registerCustomWidget()
     void registerWidgetType(PyObject* widget);
 
 private:
-    PyCustomWidgetsPrivate* m_data;
+    QList<QDesignerCustomWidgetInterface *> m_widgets;
 };
 
 #endif

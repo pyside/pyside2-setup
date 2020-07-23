@@ -78,8 +78,6 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     struct B {};\n\
     B operator+(const A&, const B&);\n\
     B operator+(const B&, const A&);\n\
-    int operator-(int, const A*);\n\
-    int operator/(const A*, int);\n\
     ";
     const char xmlCode[] = "\n\
     <typesystem package=\"Foo\">\n\
@@ -89,12 +87,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     </typesystem>";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QEXPECT_FAIL("", "Clang: Does not compile", Abort);
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    QCOMPARE(classA->functions().count(), 6);
+    QCOMPARE(classA->functions().count(), 4);
 
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
@@ -118,19 +115,6 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().count(), 1);
     QCOMPARE(reverseOp->minimalSignature(), QLatin1String("operator+(A,B)"));
-
-    reverseOp = classA->findFunction(QLatin1String("operator-"));
-    QVERIFY(reverseOp);
-    QCOMPARE(reverseOp->arguments().count(), 1);
-    QVERIFY(reverseOp->isPointerOperator());
-    QVERIFY(reverseOp->isReverseOperator());
-
-    normalOp = classA->findFunction(QLatin1String("operator/"));
-    QVERIFY(normalOp);
-    QCOMPARE(normalOp->arguments().count(), 1);
-    QVERIFY(normalOp->isPointerOperator());
-    QVERIFY(!normalOp->isReverseOperator());
-
 }
 
 
