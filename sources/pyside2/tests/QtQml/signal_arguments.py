@@ -68,6 +68,7 @@ class TestConnectionWithQml(TimedQApplication):
         root = view.rootObject()
         self.assertTrue(root)
         button = root.findChild(QObject, "button")
+        self.assertTrue(button)
         view.show()
         button.clicked.emit()
         self.assertEqual(obj.value, 42)
