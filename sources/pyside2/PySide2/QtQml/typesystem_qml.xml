@@ -66,48 +66,18 @@
     </namespace-type>
 
     <add-function signature="qmlRegisterType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
-        <inject-documentation format="target" mode="append">
-            This function registers the Python type in the QML system with the name qmlName, in the library imported from uri having the version number composed from versionMajor and versionMinor.
-            Returns the QML type id.
-
-            For example, this registers a Python class MySliderItem as a QML type named Slider for version 1.0 of a module called "com.mycompany.qmlcomponents":
-
-            ::
-
-                qmlRegisterType(MySliderItem, "com.mycompany.qmlcomponents", 1, 0, "Slider")
-
-            Once this is registered, the type can be used in QML by importing the specified module name and version number:
-
-            ::
-
-                import com.mycompany.qmlcomponents 1.0
-
-                Slider { ... }
-
-            Note that it's perfectly reasonable for a library to register types to older versions than the actual version of the library. Indeed, it is normal for the new library to allow QML written to previous versions to continue to work, even if more advanced versions of some of its types are available.
-        </inject-documentation>
-
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistertype"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonType(PyTypeObject,const char*,int,int,const char*,PyObject*)" return-type="int">
-      <inject-documentation format="target" mode="append">
-        This function registers a Python type as a singleton in the QML system using the provided callback (which gets a QQmlEngine as a parameter) to generate the singleton.
-      </inject-documentation>
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_callback"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
-      <inject-documentation format="target" mode="append">
-        This function registers a Python type as a singleton in the QML system.
-      </inject-documentation>
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_nocallback"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonType(const char*,int,int,const char*,PyObject*)" return-type="int">
-      <inject-documentation format="target" mode="append">
-        This function registers a QJSValue as a singleton in the QML system using the provided callback (which gets a QQmlEngine as a parameter) to generate the singleton.
-      </inject-documentation>
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qjsvalue"/>
     </add-function>
 
