@@ -574,6 +574,17 @@ static int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *val
     return PyObject_GenericSetAttr(obj, name, value);
 }
 
+// Caching the select Id.
+int SbkObjectType_GetReserved(PyTypeObject *type)
+{
+    return PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->pyside_reserved_bits;
+}
+
+void SbkObjectType_SetReserved(PyTypeObject *type, int value)
+{
+    PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->pyside_reserved_bits = value;
+}
+
 //
 //////////////////////////////////////////////////////////////////////////////
 

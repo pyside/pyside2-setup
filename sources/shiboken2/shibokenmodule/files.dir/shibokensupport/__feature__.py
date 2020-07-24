@@ -94,6 +94,8 @@ Note: This are two imports.
 # XXX build an improved C version
 def _import(name, *args, **kwargs):
     if name == "__feature__" and args[2]:
+        # Initialize feature (multiple times allowed) and clear cache.
+        sys.modules["PySide2.QtCore"].__init_feature__()
         # This is an `import from` statement that corresponds to `IMPORT_NAME`.
         # The following `IMPORT_FROM` will handle errors. (Confusing, ofc.)
         flag = 0

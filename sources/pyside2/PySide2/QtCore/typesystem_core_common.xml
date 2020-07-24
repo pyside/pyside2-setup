@@ -673,6 +673,10 @@
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-qflag"/>
   </add-function>
 
+  <add-function signature="__init_feature__()">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-init-feature"/>
+  </add-function>
+
   <add-function signature="qAbs(double)" return-type="double">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-qabs"/>
   </add-function>

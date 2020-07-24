@@ -5690,6 +5690,7 @@ bool CppGenerator::finishGeneration()
         s << includeQDebug;
         s << "#include <pyside.h>\n";
         s << "#include <pysideqenum.h>\n";
+        s << "#include <feature_select.h>\n";
         s << "#include <qapp_macro.h>\n";
     }
 

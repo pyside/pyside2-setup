@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "feature_select.h"
+#include "pyside.h"
 
 #include <shiboken.h>
 #include <sbkstaticstrings.h>
@@ -124,21 +125,35 @@ namespace PySide { namespace Feature {
 
 using namespace Shiboken;
 
-static inline PyObject *getFeatureSelectID()
+typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict);
+
+static FeatureProc *featurePointer = nullptr;
+
+static PyObject *cached_globals = nullptr;
+static PyObject *last_select_id = nullptr;
+
+static PyObject *fast_id_array[256] = {};
+
+static inline PyObject *getFeatureSelectId()
 {
-    static PyObject *zero = PyInt_FromLong(0);
+    static PyObject *zero = fast_id_array[0];
     static PyObject *feature_dict = GetFeatureDict();
     // these things are all borrowed
     PyObject *globals = PyEval_GetGlobals();
     if (globals == nullptr)
         return zero;
+    if (globals == cached_globals)
+        return last_select_id;
+
     PyObject *modname = PyDict_GetItem(globals, PyMagicName::name());
     if (modname == nullptr)
         return zero;
-    PyObject *flag = PyDict_GetItem(feature_dict, modname);
-    if (flag == nullptr || !PyInt_Check(flag))  // int/long cheating
+    PyObject *select_id = PyDict_GetItem(feature_dict, modname);
+    if (select_id == nullptr || !PyInt_Check(select_id))  // int/long cheating
         return zero;
-    return flag;
+    cached_globals = globals;
+    last_select_id = select_id;
+    return select_id;
 }
 
 // Create a derived dict class
@@ -191,6 +206,21 @@ static inline PyObject *getSelectId(PyObject *dict)
 {
     auto select_id = PyObject_GetAttr(dict, PyName::select_id());
     return select_id;
+}
+
+static inline void setCurrentSelectId(PyTypeObject *type, PyObject *select_id)
+{
+    SbkObjectType_SetReserved(type, PyInt_AsSsize_t(select_id));    // int/long cheating
+}
+
+static inline void setCurrentSelectId(PyTypeObject *type, int id)
+{
+    SbkObjectType_SetReserved(type, id);
+}
+
+static inline PyObject *getCurrentSelectId(PyTypeObject *type)
+{
+    return fast_id_array[SbkObjectType_GetReserved(type)];
 }
 
 static bool replaceClassDict(PyTypeObject *type)
@@ -251,16 +281,13 @@ static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
         // This works because small numbers are singleton objects.
         if (current_id == select_id) {
             type->tp_dict = dict;
+            setCurrentSelectId(type, select_id);
             return true;
         }
     } while (dict != initial_dict);
     type->tp_dict = initial_dict;
     return false;
 }
-
-typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict);
-
-static FeatureProc *featurePointer = nullptr;
 
 static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
 {
@@ -279,18 +306,19 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     // make sure that small integers are cached
     assert(small_1 != nullptr && small_1 == small_2);
 
-    static auto zero = PyInt_FromLong(0);
+    static auto zero = fast_id_array[0];
     bool ok = moveToFeatureSet(type, zero);
     Q_UNUSED(ok);
     assert(ok);
 
     AutoDecRef prev_dict(type->tp_dict);
-    Py_INCREF(prev_dict);
+    Py_INCREF(prev_dict);   // keep the first ref unchanged
     if (!addNewDict(type, select_id))
         return false;
-    auto id = PyInt_AsSsize_t(select_id);
+    auto id = PyInt_AsSsize_t(select_id);   // int/long cheating
     if (id == -1)
         return false;
+    setCurrentSelectId(type, id);
     FeatureProc *proc = featurePointer;
     for (int idx = id; *proc != nullptr; ++proc, idx >>= 1) {
         if (idx & 1) {
@@ -348,8 +376,8 @@ static inline PyObject *SelectFeatureSet(PyTypeObject *type)
         if (!replaceClassDict(type))
             return nullptr;
     }
-    PyObject *select_id = getFeatureSelectID();     // borrowed
-    AutoDecRef current_id(getSelectId(type->tp_dict));
+    PyObject *select_id = getFeatureSelectId();         // borrowed
+    PyObject *current_id = getCurrentSelectId(type);    // borrowed
     if (select_id != current_id) {
         PyObject *mro = type->tp_mro;
         Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
@@ -367,6 +395,8 @@ static inline PyObject *SelectFeatureSet(PyTypeObject *type)
 // For cppgenerator:
 void Select(PyObject *obj)
 {
+    if (featurePointer == nullptr)
+        return;
     auto type = Py_TYPE(obj);
     type->tp_dict = SelectFeatureSet(type);
 }
@@ -392,10 +422,26 @@ static FeatureProc featureProcArray[] = {
     nullptr
 };
 
+void finalize()
+{
+    for (int idx = 0; idx < 256; ++idx)
+        Py_DECREF(fast_id_array[idx]);
+}
+
 void init()
 {
-    featurePointer = featureProcArray;
-    initSelectableFeature(SelectFeatureSet);
+    // This function can be called multiple times.
+    static bool is_initialized = false;
+    if (!is_initialized) {
+        for (int idx = 0; idx < 256; ++idx)
+            fast_id_array[idx] = PyInt_FromLong(idx);
+        featurePointer = featureProcArray;
+        initSelectableFeature(SelectFeatureSet);
+        registerCleanupFunction(finalize);
+        is_initialized = true;
+    }
+    // Reset the cache. This is called at any "from __feature__ import".
+    cached_globals = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////

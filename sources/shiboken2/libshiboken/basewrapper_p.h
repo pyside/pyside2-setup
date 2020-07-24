@@ -138,6 +138,8 @@ struct SbkObjectTypePrivate
     // TODO-CONVERTERS: to be deprecated/removed
     int type_behaviour : 2;
     int delete_in_main_thread : 1;
+    /// PYSIDE-1019: Caching the current select Id
+    int pyside_reserved_bits : 9;   // MSVC needs the sign bit! Buglet?
     /// C++ name
     char *original_name;
     /// Type user data
