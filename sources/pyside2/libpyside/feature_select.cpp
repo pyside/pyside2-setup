@@ -111,12 +111,16 @@ looks into the `__name__` attribute of the active module and decides which
 version of `tp_dict` is needed. Then the right dict is searched in the ring
 and created if not already there.
 
+Furthermore, we need to overwrite every `tp_getattro` and `tp_setattro`
+with a version that switches dicts before looking up methods.
+The dict changing must follow the `tp_mro` in order to change all names.
+
 This is everything that the following code does.
 
 *****************************************************************************/
 
 
-namespace PySide { namespace FeatureSelector {
+namespace PySide { namespace Feature {
 
 using namespace Shiboken;
 
@@ -155,7 +159,6 @@ createDerivedDictType()
     return reinterpret_cast<PyTypeObject *>(ChameleonDict);
 }
 
-static PyTypeObject *old_dict_type = Py_TYPE(PyType_Type.tp_dict);
 static PyTypeObject *new_dict_type = nullptr;
 
 static void ensureNewDictType()
@@ -285,7 +288,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     Py_INCREF(prev_dict);
     if (!addNewDict(type, select_id))
         return false;
-    int id = PyInt_AsSsize_t(select_id);
+    auto id = PyInt_AsSsize_t(select_id);
     if (id == -1)
         return false;
     FeatureProc *proc = featurePointer;
@@ -307,11 +310,30 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
+static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
+{
+    if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
+        // PYSIDE-1019: On first touch, we initialize the dynamic naming.
+        // The dict type will be replaced after the first call.
+        if (!replaceClassDict(type)) {
+            Py_FatalError("failed to replace class dict!");
+            return false;
+        }
+    }
+    if (!moveToFeatureSet(type, select_id)) {
+        if (!createNewFeatureSet(type, select_id)) {
+            Py_FatalError("failed to create a new feature set!");
+            return false;
+        }
+    }
+    return true;
+}
+
 static PyObject *SelectFeatureSet(PyTypeObject *type)
 {
     /*
      *  This is the main function of the module.
-     *  It just makes no sense to make the function public, because
+     *  Generated functions call this directly.
      *  Shiboken will assign it via a public hook of `basewrapper.cpp`.
      */
     if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
@@ -323,16 +345,27 @@ static PyObject *SelectFeatureSet(PyTypeObject *type)
     PyObject *select_id = getFeatureSelectID();     // borrowed
     AutoDecRef current_id(getSelectId(type->tp_dict));
     if (select_id != current_id) {
-        if (!moveToFeatureSet(type, select_id))
-            if (!createNewFeatureSet(type, select_id)) {
-                Py_FatalError("failed to create a new feature set!");
-                return nullptr;
-            }
+        PyObject *mro = type->tp_mro;
+        Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+        // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
+        for (idx = 0; idx < n - 2; idx++) {
+            auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+            // When any subtype is already resolved (false), we can stop.
+            if (!SelectFeatureSetSubtype(sub_type, select_id))
+                break;
+        }
     }
     return type->tp_dict;
 }
 
-static bool feature_01_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
+// For cppgenerator:
+void Select(PyObject *obj)
+{
+    auto type = Py_TYPE(obj);
+    type->tp_dict = SelectFeatureSet(type);
+}
+
+static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict);
 static bool feature_02_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
 static bool feature_04_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
 static bool feature_08_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
@@ -342,7 +375,7 @@ static bool feature_40_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
 static bool feature_80_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
 
 static FeatureProc featureProcArray[] = {
-    feature_01_addDummyNames,
+    feature_01_addLowerNames,
     feature_02_addDummyNames,
     feature_04_addDummyNames,
     feature_08_addDummyNames,
@@ -363,7 +396,80 @@ void init()
 //
 // PYSIDE-1019: Support switchable extensions
 //
-//     Feature 0x01..0x80: A fake switchable option for testing
+//     Feature 0x01: Allow snake_case instead of camelCase
+//
+// This functionality is no longer implemented in the signature module, since
+// the PyCFunction getsets do not have to be modified any longer.
+// Instead, we simply exchange the complete class dicts. This is done in the
+// basewrapper.cpp file.
+//
+
+static PyObject *methodWithLowerName(PyTypeObject *type,
+                                     PyMethodDef *meth,
+                                     const char *new_name)
+{
+    /*
+     * Create a method with a lower case name.
+     */
+    auto obtype = reinterpret_cast<PyObject *>(type);
+    int len = strlen(new_name);
+    auto name = new char[len + 1];
+    strcpy(name, new_name);
+    auto new_meth = new PyMethodDef;
+    new_meth->ml_name = name;
+    new_meth->ml_meth = meth->ml_meth;
+    new_meth->ml_flags = meth->ml_flags;
+    new_meth->ml_doc = meth->ml_doc;
+    PyObject *descr = nullptr;
+    if (new_meth->ml_flags & METH_STATIC) {
+        AutoDecRef cfunc(PyCFunction_NewEx(new_meth, obtype, nullptr));
+        if (cfunc.isNull())
+            return nullptr;
+        descr = PyStaticMethod_New(cfunc);
+    }
+    else {
+        descr = PyDescr_NewMethod(type, new_meth);
+    }
+    return descr;
+}
+
+static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict)
+{
+    /*
+     * Add objects with lower names to `type->tp_dict` from 'prev_dict`.
+     */
+    PyObject *lower_dict = type->tp_dict;
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
+
+    // We first copy the things over which will not be changed:
+    while (PyDict_Next(prev_dict, &pos, &key, &value)) {
+        if (   Py_TYPE(value) != PepMethodDescr_TypePtr
+            && Py_TYPE(value) != PepStaticMethod_TypePtr) {
+            if (PyDict_SetItem(lower_dict, key, value))
+                return false;
+            continue;
+        }
+    }
+    // Then we walk over the tp_methods to get all methods and insert
+    // them with changed names.
+    PyMethodDef *meth = type->tp_methods;
+    for (; meth != nullptr && meth->ml_name != nullptr; ++meth) {
+        const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
+        AutoDecRef new_method(methodWithLowerName(type, meth, name));
+        if (new_method.isNull())
+            return false;
+        if (PyDict_SetItemString(lower_dict, name, new_method) < 0)
+            return false;
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// PYSIDE-1019: Support switchable extensions
+//
+//     Feature 0x02..0x80: A fake switchable option for testing
 //
 
 #define SIMILAR_FEATURE(xx)  \
@@ -378,7 +484,6 @@ static bool feature_##xx##_addDummyNames(PyTypeObject *type, PyObject *prev_dict
     return true; \
 }
 
-SIMILAR_FEATURE(01)
 SIMILAR_FEATURE(02)
 SIMILAR_FEATURE(04)
 SIMILAR_FEATURE(08)
@@ -388,4 +493,4 @@ SIMILAR_FEATURE(40)
 SIMILAR_FEATURE(80)
 
 } // namespace PySide
-} // namespace FeatureSelector
+} // namespace Feature

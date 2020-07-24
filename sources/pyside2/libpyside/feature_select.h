@@ -41,13 +41,15 @@
 #define FEATURE_SELECT_H
 
 #include "pysidemacros.h"
+#include <sbkpython.h>
 
 namespace PySide {
-namespace FeatureSelector {
+namespace Feature {
 
 PYSIDE_API void init();
+PYSIDE_API void Select(PyObject *obj);
 
+} // namespace Feature
 } // namespace PySide
-} // namespace FeatureSelector
 
 #endif // FEATURE_SELECT_H

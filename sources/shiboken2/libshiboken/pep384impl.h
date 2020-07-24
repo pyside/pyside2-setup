@@ -99,7 +99,7 @@ typedef struct _typeobject {
     ternaryfunc tp_call;
     reprfunc tp_str;
     getattrofunc tp_getattro;
-    void *X17; // setattrofunc tp_setattro;
+    setattrofunc tp_setattro;
     void *X18; // PyBufferProcs *tp_as_buffer;
     unsigned long tp_flags;
     void *X20; // const char *tp_doc;

@@ -97,21 +97,7 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
 
 static SelectableFeatureHook SelectFeatureSet = nullptr;
 
-void initSelectableFeature(SelectableFeatureHook func)
-{
-    SelectFeatureSet = func;
-}
-
-// PYSIDE-1019: Switch type's tp_dict to the currently active namespace.
-static PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context)
-{
-    auto dict = type->tp_dict;
-    if (dict == NULL)
-        Py_RETURN_NONE;
-    if (SelectFeatureSet != nullptr)
-        dict = SelectFeatureSet(type);
-    return PyDictProxy_New(dict);
-}
+static PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context);   // forward
 
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
 // explicitly pass __doc__. For __signature__ it _did_ actually work, because
@@ -140,26 +126,12 @@ static PyObject *SbkObjectType_repr(PyObject *type)
 
 #endif // PY_VERSION_HEX < 0x03000000
 
-// PYSIDE-1019: Switch type's tp_dict to the currently active namespace.
-static PyObject *(*type_getattro)(PyObject *type, PyObject *name);
-
-static PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
-{
-    /*
-     * Note: This `type_getattro` version is only the default that comes
-     * from `PyType_Type.tp_getattro`. This does *not* interfere in any way
-     * with the complex `tp_getattro` of `QObject` and other instances.
-     * What we change here is the meta class of `QObject`.
-     */
-    if (SelectFeatureSet != nullptr)
-        type->tp_dict = SelectFeatureSet(type);
-    return type_getattro(reinterpret_cast<PyObject *>(type), name);
-}
+static PyObject *(*type_getattro)(PyObject *type, PyObject *name);          // forward
+static PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name); // forward
 
 static PyType_Slot SbkObjectType_Type_slots[] = {
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectTypeDealloc)},
     {Py_tp_getattro, reinterpret_cast<void *>(mangled_type_getattro)},
-    {Py_tp_setattro, reinterpret_cast<void *>(PyObject_GenericSetAttr)},
     {Py_tp_base, static_cast<void *>(&PyType_Type)},
     {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
     {Py_tp_new, reinterpret_cast<void *>(SbkObjectTypeTpNew)},
@@ -340,7 +312,12 @@ static int SbkObject_clear(PyObject *self)
     return 0;
 }
 
+static PyObject *SbkObject_GenericGetAttr(PyObject *obj, PyObject *name);
+static int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *value);
+
 static PyType_Slot SbkObject_Type_slots[] = {
+    {Py_tp_getattro, reinterpret_cast<void *>(SbkObject_GenericGetAttr)},
+    {Py_tp_setattro, reinterpret_cast<void *>(SbkObject_GenericSetAttr)},
     {Py_tp_dealloc, reinterpret_cast<void *>(SbkDeallocWrapperWithPrivateDtor)},
     {Py_tp_traverse, reinterpret_cast<void *>(SbkObject_traverse)},
     {Py_tp_clear, reinterpret_cast<void *>(SbkObject_clear)},
@@ -532,6 +509,71 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
         Py_DECREF(Py_TYPE(pyObj));
     }
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// PYSIDE-1019: Support switchable extensions
+//
+// We simply exchange the complete class dicts.
+// This is done in
+// - mangled_type_getattro              which replaces
+// - Sbk_TypeGet___dict__
+// - SbkObjectType_replace_getattro
+// - SbkObjectType_replace_setattro
+//
+
+void initSelectableFeature(SelectableFeatureHook func)
+{
+    SelectFeatureSet = func;
+}
+
+static PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
+{
+    /*
+     * Note: This `type_getattro` version is only the default that comes
+     * from `PyType_Type.tp_getattro`. This does *not* interfere in any way
+     * with the complex `tp_getattro` of `QObject` and other instances.
+     * What we change here is the meta class of `QObject`.
+     */
+    if (SelectFeatureSet != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+    return type_getattro(reinterpret_cast<PyObject *>(type), name);
+}
+
+static PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context)
+{
+    /*
+     * This is the override for getting a dict.
+     */
+    auto dict = type->tp_dict;
+    if (dict == NULL)
+        Py_RETURN_NONE;
+    if (SelectFeatureSet != nullptr)
+        dict = SelectFeatureSet(type);
+    return PyDictProxy_New(dict);
+}
+
+// These functions replace the standard PyObject_Generic(Get|Set)Attr functions.
+// They provide the default that "object" inherits.
+// Everything else is directly handled by an insertion PyObject_GenericGetAttr
+static PyObject *SbkObject_GenericGetAttr(PyObject *obj, PyObject *name)
+{
+    auto type = Py_TYPE(obj);
+    if (SelectFeatureSet != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+    return PyObject_GenericGetAttr(obj, name);
+}
+
+static int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *value)
+{
+    auto type = Py_TYPE(obj);
+    if (SelectFeatureSet != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+    return PyObject_GenericSetAttr(obj, name, value);
+}
+
+//
+//////////////////////////////////////////////////////////////////////////////
 
 static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {

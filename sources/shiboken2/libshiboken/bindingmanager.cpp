@@ -44,6 +44,7 @@
 #include "sbkdbg.h"
 #include "gilstate.h"
 #include "sbkstring.h"
+#include "sbkstaticstrings.h"
 #include "debugfreehook.h"
 
 #include <cstddef>
@@ -273,7 +274,19 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr)
     return iter->second;
 }
 
-PyObject *BindingManager::getOverride(const void *cptr, PyObject *methodName)
+static bool mangleNameFlag(PyTypeObject *type)
+{
+    // PYSIDE-1019: See if a dict is set with a snake_case bit.
+    static PyTypeObject *old_dict_type = Py_TYPE(PyType_Type.tp_dict);
+    auto dict = type->tp_dict;
+    if (Py_TYPE(dict) == old_dict_type)
+        return false;
+    Shiboken::AutoDecRef select_id(PyObject_GetAttr(dict, Shiboken::PyName::select_id()));
+    auto id = PyInt_AsSsize_t(select_id);
+    return (id & 1) != 0;
+}
+
+PyObject *BindingManager::getOverride(const void *cptr, PyObject *methodNameCache[2], const char *methodName)
 {
     SbkObject *wrapper = retrieveWrapper(cptr);
     // The refcount can be 0 if the object is dieing and someone called
@@ -281,15 +294,22 @@ PyObject *BindingManager::getOverride(const void *cptr, PyObject *methodName)
     if (!wrapper || reinterpret_cast<const PyObject *>(wrapper)->ob_refcnt == 0)
         return nullptr;
 
+    bool flag = mangleNameFlag(Py_TYPE(wrapper));
+    PyObject *pyMethodName = methodNameCache[flag];     // borrowed
+    if (pyMethodName == nullptr) {
+        pyMethodName = Shiboken::String::getSnakeCaseName(methodName, flag);
+        methodNameCache[flag] = pyMethodName;
+    }
+
     if (wrapper->ob_dict) {
-        PyObject *method = PyDict_GetItem(wrapper->ob_dict, methodName);
+        PyObject *method = PyDict_GetItem(wrapper->ob_dict, pyMethodName);
         if (method) {
             Py_INCREF(reinterpret_cast<PyObject *>(method));
             return method;
         }
     }
 
-    PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), methodName);
+    PyObject *method = PyObject_GetAttr(reinterpret_cast<PyObject *>(wrapper), pyMethodName);
 
     if (method && PyMethod_Check(method)
         && PyMethod_GET_SELF(method) == reinterpret_cast<PyObject *>(wrapper)) {
@@ -301,7 +321,7 @@ PyObject *BindingManager::getOverride(const void *cptr, PyObject *methodName)
         for (int i = 1; i < PyTuple_GET_SIZE(mro) - 1; i++) {
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
             if (parent->tp_dict) {
-                defaultMethod = PyDict_GetItem(parent->tp_dict, methodName);
+                defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
                 if (defaultMethod && PyMethod_GET_FUNCTION(method) != defaultMethod)
                     return method;
             }
