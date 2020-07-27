@@ -44,7 +44,7 @@
 
 from PySide2.QtCore import QDate, QFile, Qt, QTextStream
 from PySide2.QtGui import (QAction, QFont, QIcon, QKeySequence,
-        QTextCharFormat, QTextTableFormat)
+        QTextCharFormat, QTextCursor, QTextTableFormat)
 from PySide2.QtPrintSupport import QPrintDialog, QPrinter
 from PySide2.QtWidgets import (QApplication, QDialog, QDockWidget,
         QFileDialog, QListWidget, QMainWindow, QMessageBox, QTextEdit)

@@ -550,7 +550,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def createToolBox(self):
         self.buttonGroup = QtWidgets.QButtonGroup()
         self.buttonGroup.setExclusive(False)
-        self.buttonGroup.buttonClicked[int].connect(self.buttonGroupClicked)
+        self.buttonGroup.idClicked.connect(self.buttonGroupClicked)
 
         layout = QtWidgets.QGridLayout()
         layout.addWidget(self.createCellWidget("Conditional", DiagramItem.Conditional),
@@ -726,12 +726,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pointerTypeGroup.addButton(pointerButton, DiagramScene.MoveItem)
         self.pointerTypeGroup.addButton(linePointerButton,
                 DiagramScene.InsertLine)
-        self.pointerTypeGroup.buttonClicked[int].connect(self.pointerGroupClicked)
+        self.pointerTypeGroup.idClicked.connect(self.pointerGroupClicked)
 
         self.sceneScaleCombo = QtWidgets.QComboBox()
         self.sceneScaleCombo.addItems(["50%", "75%", "100%", "125%", "150%"])
         self.sceneScaleCombo.setCurrentIndex(2)
-        self.sceneScaleCombo.currentIndexChanged[str].connect(self.sceneScaleChanged)
+        self.sceneScaleCombo.currentTextChanged.connect(self.sceneScaleChanged)
 
         self.pointerToolbar = self.addToolBar("Pointer type")
         self.pointerToolbar.addWidget(pointerButton)

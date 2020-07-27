@@ -74,7 +74,7 @@ class CodeEditor(QPlainTextEdit):
             max_num *= 0.1
             digits += 1
 
-        space = 3 + self.fontMetrics().width('9') * digits
+        space = 3 + self.fontMetrics().horizontalAdvance('9') * digits
         return space
 
     def resizeEvent(self, e):

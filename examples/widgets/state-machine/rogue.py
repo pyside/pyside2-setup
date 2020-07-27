@@ -146,12 +146,13 @@ class MainWindow(QMainWindow):
 
     def sizeHint(self):
         metrics = QFontMetrics(self.font())
-        return QSize(metrics.width('X') * self.width, metrics.height() * (self.height + 1))
+        return QSize(metrics.horizontalAdvance('X') * self.width,
+                     metrics.height() * (self.height + 1))
     def paintEvent(self, event):
         metrics = QFontMetrics(self.font())
         painter = QPainter(self)
         fontHeight = metrics.height()
-        fontWidth = metrics.width('X')
+        fontWidth = metrics.horizontalAdvance('X')
 
         painter.fillRect(self.rect(), Qt.black)
         painter.setPen(Qt.white)

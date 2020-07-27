@@ -251,7 +251,7 @@ class MandelbrotWidget(QWidget):
             painter.save()
             painter.translate(newX, newY)
             painter.scale(scaleFactor, scaleFactor)
-            exposed, _ = painter.matrix().inverted()
+            exposed, _ = painter.transform().inverted()
             exposed = exposed.mapRect(self.rect()).adjusted(-1, -1, 1, 1)
             painter.drawPixmap(exposed, self.pixmap, exposed)
             painter.restore()
@@ -259,7 +259,7 @@ class MandelbrotWidget(QWidget):
         text = "Use mouse wheel or the '+' and '-' keys to zoom. Press and " \
                 "hold left mouse button to scroll."
         metrics = painter.fontMetrics()
-        textWidth = metrics.width(text)
+        textWidth = metrics.horizontalAdvance(text)
 
         painter.setPen(Qt.NoPen)
         painter.setBrush(QColor(0, 0, 0, 127))

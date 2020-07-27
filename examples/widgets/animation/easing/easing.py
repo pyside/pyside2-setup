@@ -121,7 +121,7 @@ class Window(QtWidgets.QWidget):
         m_ui.overshootSpinBox.setValue(dummy.overshoot())
 
         m_ui.easingCurvePicker.currentRowChanged.connect(self.curveChanged)
-        m_ui.buttonGroup.buttonClicked[int].connect(self.pathChanged)
+        m_ui.buttonGroup.idClicked.connect(self.pathChanged)
         m_ui.periodSpinBox.valueChanged.connect(self.periodChanged)
         m_ui.amplitudeSpinBox.valueChanged.connect(self.amplitudeChanged)
         m_ui.overshootSpinBox.valueChanged.connect(self.overshootChanged)

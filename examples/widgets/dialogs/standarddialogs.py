@@ -119,7 +119,7 @@ class Dialog(QtWidgets.QDialog):
 
         self.errorLabel = QtWidgets.QLabel()
         self.errorLabel.setFrameStyle(frameStyle)
-        self.errorButton = QtWidgets.QPushButton("QErrorMessage.show&M&essage()")
+        self.errorButton = QtWidgets.QPushButton("QErrorMessage.showM&essage()")
 
         self.integerButton.clicked.connect(self.setInteger)
         self.doubleButton.clicked.connect(self.setDouble)

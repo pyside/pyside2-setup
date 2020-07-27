@@ -83,7 +83,7 @@ class Client(QtWidgets.QDialog):
         self.getFortuneButton.clicked.connect(self.requestNewFortune)
         quitButton.clicked.connect(self.close)
         self.tcpSocket.readyRead.connect(self.readFortune)
-        self.tcpSocket.error.connect(self.displayError)
+        self.tcpSocket.errorOccurred.connect(self.displayError)
 
         mainLayout = QtWidgets.QGridLayout()
         mainLayout.addWidget(hostLabel, 0, 0)
