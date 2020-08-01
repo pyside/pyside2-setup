@@ -175,9 +175,9 @@ def info(mod_name=None):
 def _current_selection(flag):
     names = []
     if flag >= 0:
-      for idx, name in enumerate(_really_all_feature_names):
-          if (1 << idx) & flag:
-              names.append(name)
+        for idx, name in enumerate(_really_all_feature_names):
+            if (1 << idx) & flag:
+                names.append(name)
     return names
 
 #eof

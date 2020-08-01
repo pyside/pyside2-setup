@@ -62,7 +62,7 @@ namespace PySide { namespace Property {
 
 typedef void (*MetaCallHandler)(PySideProperty*,PyObject*,QMetaObject::Call, void**);
 
-PYSIDE_API bool checkType(PyObject* pyObj);
+PYSIDE_API bool checkType(PyObject *pyObj);
 
 /**
  * This function call set property function and pass value as arg
@@ -73,7 +73,7 @@ PYSIDE_API bool checkType(PyObject* pyObj);
  * @param   value The value to set in property
  * @return  Return 0 if ok or -1 if this function fail
  **/
-PYSIDE_API int setValue(PySideProperty* self, PyObject* source, PyObject* value);
+PYSIDE_API int setValue(PySideProperty *self, PyObject *source, PyObject *value);
 
 /**
  * This function call get property function
@@ -83,7 +83,7 @@ PYSIDE_API int setValue(PySideProperty* self, PyObject* source, PyObject* value)
  * @param   source The QObject witch has the property
  * @return  Return the result of property get function or 0 if this fail
  **/
-PYSIDE_API PyObject* getValue(PySideProperty* self, PyObject* source);
+PYSIDE_API PyObject *getValue(PySideProperty *self, PyObject *source);
 
 /**
  * This function return the notify name used on this property
@@ -91,7 +91,7 @@ PYSIDE_API PyObject* getValue(PySideProperty* self, PyObject* source);
  * @param   self The property object
  * @return  Return a const char with the notify name used
  **/
-PYSIDE_API const char* getNotifyName(PySideProperty* self);
+PYSIDE_API const char *getNotifyName(PySideProperty *self);
 
 
 /**
@@ -101,14 +101,14 @@ PYSIDE_API const char* getNotifyName(PySideProperty* self);
  * @param   name The property name
  * @return  Return a new reference to property object
  **/
-PYSIDE_API PySideProperty* getObject(PyObject* source, PyObject* name);
+PYSIDE_API PySideProperty *getObject(PyObject *source, PyObject *name);
 
-PYSIDE_API void setMetaCallHandler(PySideProperty* self, MetaCallHandler handler);
+PYSIDE_API void setMetaCallHandler(PySideProperty *self, MetaCallHandler handler);
 
-PYSIDE_API void setTypeName(PySideProperty* self, const char* typeName);
+PYSIDE_API void setTypeName(PySideProperty *self, const char *typeName);
 
-PYSIDE_API void setUserData(PySideProperty* self, void* data);
-PYSIDE_API void* userData(PySideProperty* self);
+PYSIDE_API void setUserData(PySideProperty *self, void *data);
+PYSIDE_API void* userData(PySideProperty *self);
 
 } //namespace Property
 } //namespace PySide

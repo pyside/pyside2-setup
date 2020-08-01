@@ -73,7 +73,7 @@ static PyMethodDef PySidePropertyMethods[] = {
 };
 
 static PyGetSetDef PySidePropertyType_getset[] = {
-    {"__doc__", qPropertyDocGet, nullptr, nullptr, nullptr},
+    {const_cast<char *>("__doc__"), qPropertyDocGet, nullptr, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
@@ -167,7 +167,7 @@ static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
     return reinterpret_cast<PyObject *>(me);
 }
 
-int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
+static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *type = nullptr;
     auto data = reinterpret_cast<PySideProperty *>(self);
@@ -218,7 +218,7 @@ int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     return -1;
 }
 
-void qpropertyDeAlloc(PyObject *self)
+static void qpropertyDeAlloc(PyObject *self)
 {
     qpropertyClear(self);
     if (PepRuntime_38_flag) {
@@ -229,7 +229,7 @@ void qpropertyDeAlloc(PyObject *self)
     Py_TYPE(self)->tp_free(self);
 }
 
-PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
+static PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
     PyObject *callback = PyTuple_GetItem(args, 0);
     if (PyFunction_Check(callback)) {
@@ -246,7 +246,7 @@ PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
     return nullptr;
 }
 
-PyObject *qPropertySetter(PyObject *self, PyObject *callback)
+static PyObject *qPropertySetter(PyObject *self, PyObject *callback)
 {
     if (PyFunction_Check(callback)) {
         PySideProperty *prop = reinterpret_cast<PySideProperty *>(self);
@@ -262,7 +262,7 @@ PyObject *qPropertySetter(PyObject *self, PyObject *callback)
     return nullptr;
 }
 
-PyObject *qPropertyGetter(PyObject *self, PyObject *callback)
+static PyObject *qPropertyGetter(PyObject *self, PyObject *callback)
 {
     if (PyFunction_Check(callback)) {
         PySideProperty *prop = reinterpret_cast<PySideProperty *>(self);
@@ -291,8 +291,7 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
         return PyString_FromString(doc);
 #endif
     }
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 
@@ -432,11 +431,6 @@ const char *getTypeName(const PySideProperty *self)
 PySideProperty *getObject(PyObject *source, PyObject *name)
 {
     PyObject *attr = nullptr;
-
-    if (Shiboken::Object::isUserType(source)) {
-        if (auto dict = reinterpret_cast<SbkObject *>(source)->ob_dict)
-            attr = PyDict_GetItem(dict, name);
-    }
 
     attr = getFromType(Py_TYPE(source), name);
     if (attr && checkType(attr)) {

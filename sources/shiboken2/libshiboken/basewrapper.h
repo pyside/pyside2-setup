@@ -97,9 +97,6 @@ typedef void (*SubTypeInitHook)(SbkObjectType *, PyObject *, PyObject *);
 typedef PyObject *(*SelectableFeatureHook)(PyTypeObject *);
 LIBSHIBOKEN_API void initSelectableFeature(SelectableFeatureHook func);
 
-// PYSIDE-1019: Publish the start of setattro.
-LIBSHIBOKEN_API void SbkObject_NotifySetAttr(PyObject *obj, PyObject *name, PyObject *value);
-
 // PYSIDE-1019: Get access to PySide reserved bits.
 LIBSHIBOKEN_API int SbkObjectType_GetReserved(PyTypeObject *type);
 LIBSHIBOKEN_API void SbkObjectType_SetReserved(PyTypeObject *type, int value);
