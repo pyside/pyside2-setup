@@ -288,6 +288,34 @@ static inline bool canGenerateFieldSetter(const AbstractMetaField *field)
     return !type->isConstant() || isPointerToConst(type);
 }
 
+static bool isStdSetterName(QString setterName, QString propertyName)
+{
+   return setterName.size() == propertyName.size() + 3
+          && setterName.startsWith(QLatin1String("set"))
+          && setterName.endsWith(propertyName.rightRef(propertyName.size() - 1))
+          && setterName.at(3) == propertyName.at(0).toUpper();
+}
+
+static QString buildPropertyString(QPropertySpec *spec)
+{
+    QString text;
+    text += QLatin1Char('"');
+    text += spec->name();
+    text += QLatin1Char(':');
+
+    if (spec->read() != spec->name())
+        text += spec->read();
+
+    if (!spec->write().isEmpty()) {
+        text += QLatin1Char(':');
+        if (!isStdSetterName(spec->write(), spec->name()))
+            text += spec->write();
+    }
+
+    text += QLatin1Char('"');
+    return text;
+}
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -555,6 +583,22 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
 
     // Write single method definitions
     s << singleMethodDefinitions;
+
+    if (usePySideExtensions()) {
+        // PYSIDE-1019: Write a compressed list of all properties `name:getter[:setter]`.
+        //              Default values are suppressed.
+        QStringList sorter;
+        for (const auto spec : metaClass->propertySpecs())
+            sorter.append(buildPropertyString(spec));
+        sorter.sort();
+
+        s << '\n';
+        s << "static const char *" << className << "_properties[] = {\n";
+        for (const auto &entry : qAsConst(sorter))
+            s << INDENT << entry << ",\n";
+        s << INDENT << NULL_PTR << " // Sentinel\n";
+        s << "};\n\n";
+    }
 
     // Write methods definition
     s << "static PyMethodDef " << className << "_methods[] = {\n";
@@ -951,8 +995,22 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         s << INDENT << returnStatement << '\n';
     }
 
+    //PYSIDE-1019: Add info about properties.
+    int propFlag = 0;
+    if (func->isPropertyReader())
+        propFlag |= 1;
+    if (func->isPropertyWriter())
+        propFlag |= 2;
+    if (propFlag && func->isStatic())
+        propFlag |= 4;
+    QString propStr;
+    if (propFlag)
+        propStr = QString::number(propFlag) + QLatin1Char(':');
+
     s << INDENT << "static PyObject *nameCache[2] = {};\n";
-    s << INDENT << "static const char *funcName = \"" << funcName << "\";\n";
+    if (propFlag)
+        s << INDENT << "// This method belongs to a property.\n";
+    s << INDENT << "static const char *funcName = \"" << propStr << funcName << "\";\n";
     s << INDENT << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
                 << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n";
     s << INDENT << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n";
@@ -5158,6 +5216,12 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
     s << INDENT << ");\n";
     s << INDENT << Qt::endl;
+
+    if (usePySideExtensions()) {
+        QString className = metaClass->qualifiedCppName();
+        s << INDENT << "SbkObjectType_SetPropertyStrings(reinterpret_cast<PyTypeObject *>(" << typePtr << "), "
+        << chopType(pyTypeName) << "_properties);\n";
+    }
 
     if (!classContext.forSmartPointer())
         s << INDENT << cpythonTypeNameExt(classTypeEntry) << Qt::endl;

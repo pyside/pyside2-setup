@@ -55,5 +55,9 @@ STATIC_STRING_IMPL(qtStaticMetaObject, "staticMetaObject")
 STATIC_STRING_IMPL(qtConnect, "connect")
 STATIC_STRING_IMPL(qtDisconnect, "disconnect")
 STATIC_STRING_IMPL(qtEmit, "emit")
+STATIC_STRING_IMPL(dict_ring, "dict_ring")
+STATIC_STRING_IMPL(name, "name")
+STATIC_STRING_IMPL(property, "property")
+STATIC_STRING_IMPL(select_id, "select_id")
 } // namespace PyName
 } // namespace PySide

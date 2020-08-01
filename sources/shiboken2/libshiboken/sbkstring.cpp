@@ -315,5 +315,13 @@ PyObject *getSnakeCaseName(const char *name, bool lower)
     return createStaticString(new_name);
 }
 
+PyObject *getSnakeCaseName(PyObject *name, bool lower)
+{
+    // This is all static strings, not refcounted.
+    if (lower)
+        return getSnakeCaseName(toCString(name), lower);
+    return name;
+}
+
 } // namespace String
 } // namespace Shiboken

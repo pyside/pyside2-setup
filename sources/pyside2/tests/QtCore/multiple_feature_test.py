@@ -48,8 +48,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2 import QtCore
-from PySide2.support.__feature__ import (
-    _really_all_feature_names, pyside_feature_dict)
+from PySide2.support import __feature__
 from textwrap import dedent
 
 """
@@ -62,6 +61,8 @@ The first feature is `snake_case` instead of `camelCase`.
 There is much more to come.
 """
 
+MethodDescriptorType = type(str.split)
+
 class FeaturesTest(unittest.TestCase):
 
     def testAllFeatureCombinations(self):
@@ -69,7 +70,7 @@ class FeaturesTest(unittest.TestCase):
         Test for all 256 possible combinations of `__feature__` imports.
         """
 
-        def tst_bit0(flag, self):
+        def tst_bit0(flag, self, bits):
             if flag == 0:
                 QtCore.QCborArray.isEmpty
                 QtCore.QCborArray.__dict__["isEmpty"]
@@ -85,13 +86,25 @@ class FeaturesTest(unittest.TestCase):
                 with self.assertRaises(KeyError):
                     QtCore.QCborArray.__dict__["isEmpty"]
 
+        def tst_bit1(flag, self, bits):
+            getter_name = "object_name" if bits & 1 else "objectName"
+            setter_name = "set_object_name" if bits & 1 else "setObjectName"
+            thing = getattr(QtCore.QObject, getter_name)
+            if flag:
+                self.assertEqual(type(thing), property)
+                with self.assertRaises(AttributeError):
+                    getattr(QtCore.QObject, setter_name)
+            else:
+                self.assertEqual(type(thing), MethodDescriptorType)
+                getattr(QtCore.QObject, setter_name)
+
         edict = {}
-        for bit in range(1, 8):
+        for bit in range(2, 8):
             # We are cheating here, since the functions are in the globals.
 
             eval(compile(dedent("""
 
-        def tst_bit{0}(flag, self):
+        def tst_bit{0}(flag, self, bits):
             if flag == 0:
                 with self.assertRaises(AttributeError):
                     QtCore.QCborArray.fake_feature_{1:02x}
@@ -103,12 +116,12 @@ class FeaturesTest(unittest.TestCase):
 
                         """).format(bit, 1 << bit), "<string>", "exec"), globals(), edict)
         globals().update(edict)
-        feature_list = _really_all_feature_names
+        feature_list = __feature__._really_all_feature_names
         func_list = [tst_bit0, tst_bit1, tst_bit2, tst_bit3,
                      tst_bit4, tst_bit5, tst_bit6, tst_bit7]
 
         for idx in range(0x100):
-            pyside_feature_dict.clear()
+            __feature__.set_selection(0)
             config = "feature_{:02x}".format(idx)
             print()
             print("--- Feature Test Config `{}` ---".format(config))
@@ -121,7 +134,7 @@ class FeaturesTest(unittest.TestCase):
                     eval(compile(text, "<string>", "exec"), globals(), edict)
             for bit in range(8):
                 value = idx & 1 << bit
-                func_list[bit](value, self=self)
+                func_list[bit](value, self=self, bits=idx)
 
 
 if __name__ == '__main__':

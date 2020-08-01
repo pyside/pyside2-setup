@@ -50,6 +50,10 @@ PyObject *qtStaticMetaObject();
 PyObject *qtConnect();
 PyObject *qtDisconnect();
 PyObject *qtEmit();
+PyObject *dict_ring();
+PyObject *name();
+PyObject *property();
+PyObject *select_id();
 } // namespace PyName
 } // namespace PySide
 

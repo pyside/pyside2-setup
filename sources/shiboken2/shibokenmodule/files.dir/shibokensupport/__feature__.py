@@ -60,7 +60,7 @@ import sys
 
 all_feature_names = [
     "snake_case",
-    "_feature_02",
+    "true_property",
     "_feature_04",
     "_feature_08",
     "_feature_10",
@@ -71,8 +71,8 @@ all_feature_names = [
 
 __all__ = ["all_feature_names", "set_selection", "info"] + all_feature_names
 
-snake_case = 1
-_feature_02 = 0x02
+snake_case = 0x01
+true_property = 0x02
 _feature_04 = 0x04
 _feature_08 = 0x08
 _feature_10 = 0x10
@@ -108,13 +108,7 @@ def _import(name, *args, **kwargs):
     existing = pyside_feature_dict.get(importing_module, 0)
 
     if name == "__feature__" and args[2]:
-        global _is_initialized
-        if not _is_initialized:
-            # use _one_ recursive import...
-            import PySide2.QtCore
-            # Initialize all prior imported modules
-            for name in sys.modules:
-                pyside_feature_dict.setdefault(name, -1)
+        __init__()
 
         # This is an `import from` statement that corresponds to `IMPORT_NAME`.
         # The following `IMPORT_FROM` will handle errors. (Confusing, ofc.)
@@ -147,6 +141,15 @@ def _import(name, *args, **kwargs):
 
 _is_initialized = False
 
+def __init__():
+    global _is_initialized
+    if not _is_initialized:
+        # use _one_ recursive import...
+        import PySide2.QtCore
+        # Initialize all prior imported modules
+        for name in sys.modules:
+            pyside_feature_dict.setdefault(name, -1)
+
 
 def set_selection(select_id, mod_name=None):
     """
@@ -154,11 +157,12 @@ def set_selection(select_id, mod_name=None):
     Id == -1: ignore this module in switching.
     """
     mod_name = mod_name or sys._getframe(1).f_globals['__name__']
+    __init__()
     # Reset the features to the given id
     flag = 0
     if isinstance(select_id, int):
         flag = select_id & 255
-    pyside_feature_dict[importing_module] = flag
+    pyside_feature_dict[mod_name] = flag
     sys.modules["PySide2.QtCore"].__init_feature__()
     return _current_selection(flag)
 

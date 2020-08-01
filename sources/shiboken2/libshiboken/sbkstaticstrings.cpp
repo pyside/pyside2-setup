@@ -52,11 +52,11 @@ namespace Shiboken
 {
 namespace PyName {
 // exported:
-STATIC_STRING_IMPL(dict_ring, "dict_ring")
 STATIC_STRING_IMPL(dumps, "dumps")
+STATIC_STRING_IMPL(fget, "fget")
+STATIC_STRING_IMPL(fset, "fset")
 STATIC_STRING_IMPL(loads, "loads")
 STATIC_STRING_IMPL(result, "result")
-STATIC_STRING_IMPL(select_id, "select_id")
 STATIC_STRING_IMPL(value, "value")
 STATIC_STRING_IMPL(values, "values")
 

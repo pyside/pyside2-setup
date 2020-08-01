@@ -49,13 +49,13 @@ namespace Shiboken
 namespace PyName
 {
 LIBSHIBOKEN_API PyObject *co_name();
-LIBSHIBOKEN_API PyObject *dict_ring();
 LIBSHIBOKEN_API PyObject *dumps();
+LIBSHIBOKEN_API PyObject *fget();
+LIBSHIBOKEN_API PyObject *fset();
 LIBSHIBOKEN_API PyObject *f_code();
 LIBSHIBOKEN_API PyObject *f_lineno();
 LIBSHIBOKEN_API PyObject *loads();
 LIBSHIBOKEN_API PyObject *result();
-LIBSHIBOKEN_API PyObject *select_id();
 LIBSHIBOKEN_API PyObject *value();
 LIBSHIBOKEN_API PyObject *values();
 } // namespace PyName
