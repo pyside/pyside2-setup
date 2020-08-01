@@ -274,16 +274,10 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr)
     return iter->second;
 }
 
-static bool mangleNameFlag(PyTypeObject *type)
+static inline bool mangleNameFlag(PyTypeObject *type)
 {
     // PYSIDE-1019: See if a dict is set with a snake_case bit.
-    static PyTypeObject *old_dict_type = Py_TYPE(PyType_Type.tp_dict);
-    auto dict = type->tp_dict;
-    if (Py_TYPE(dict) == old_dict_type)
-        return false;
-    Shiboken::AutoDecRef select_id(PyObject_GetAttr(dict, Shiboken::PyName::select_id()));
-    auto id = PyInt_AsSsize_t(select_id);
-    return (id & 1) != 0;
+    return (SbkObjectType_GetReserved(type) & 1) != 0;
 }
 
 PyObject *BindingManager::getOverride(const void *cptr, PyObject *methodNameCache[2], const char *methodName)

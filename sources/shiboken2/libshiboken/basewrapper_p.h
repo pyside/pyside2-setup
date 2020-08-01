@@ -130,16 +130,16 @@ struct SbkObjectTypePrivate
     TypeDiscoveryFuncV2 type_discovery;
     /// Pointer to a function responsible for deletion of the C++ instance calling the proper destructor.
     ObjectDestructor cpp_dtor;
+    /// PYSIDE-1019: Caching the current select Id
+    unsigned int pyside_reserved_bits : 8;   // MSVC has bug with the sign bit!
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
-    int is_multicpp : 1;
+    unsigned int is_multicpp : 1;
     /// True if this type was defined by the user.
-    int is_user_type : 1;
+    unsigned int is_user_type : 1;
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_ *constants.
     // TODO-CONVERTERS: to be deprecated/removed
-    int type_behaviour : 2;
-    int delete_in_main_thread : 1;
-    /// PYSIDE-1019: Caching the current select Id
-    int pyside_reserved_bits : 9;   // MSVC needs the sign bit! Buglet?
+    unsigned int type_behaviour : 2;
+    unsigned int delete_in_main_thread : 1;
     /// C++ name
     char *original_name;
     /// Type user data
