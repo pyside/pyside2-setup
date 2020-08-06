@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 import sys
+from textwrap import dedent
 
 __all__ = list("Qt" + body for body in
     "@all_module_shortnames@"
@@ -62,7 +63,20 @@ def _setupQtDirectories():
         raise
 
     #   Trigger signature initialization.
-    type.__signature__
+    try:
+        type.__signature__
+    except AttributeError:
+        print(dedent('''\
+            {stars}
+            PySide2/__init__.py: The `signature` module was not initialized.
+            This libshiboken module was loaded from
+
+            "{shiboken2.__file__}".
+
+            Please make sure that this is the real shiboken2 binary and not just a folder.
+            {stars}
+            ''').format(stars=79*"*", **locals()), file=sys.stderr)
+        raise
 
     if sys.platform == 'win32':
         # PATH has to contain the package directory, otherwise plugins
