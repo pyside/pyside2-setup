@@ -18,6 +18,7 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_qgoochmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qmetalroughmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qmorphphongmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qnormaldiffusemapmaterial_wrapper.cpp
+${Qt3DExtras_GEN_DIR}/qt3dextras_qnormaldiffusemapalphamaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qnormaldiffusespecularmapmaterial_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qorbitcameracontroller_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qpervertexcolormaterial_wrapper.cpp

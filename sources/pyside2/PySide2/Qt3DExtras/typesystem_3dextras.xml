@@ -63,6 +63,7 @@
         <object-type name="QGoochMaterial"/>
         <object-type name="QMetalRoughMaterial"/>
         <object-type name="QMorphPhongMaterial"/>
+        <object-type name="QNormalDiffuseMapAlphaMaterial"/>
         <object-type name="QNormalDiffuseMapMaterial"/>
         <object-type name="QNormalDiffuseSpecularMapMaterial"/>
         <object-type name="QOrbitCameraController"/>
