@@ -577,7 +577,11 @@ static int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *val
 // Caching the select Id.
 int SbkObjectType_GetReserved(PyTypeObject *type)
 {
-    return PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->pyside_reserved_bits;
+    auto ptr = PepType_SOTP(reinterpret_cast<SbkObjectType *>(type));
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (ptr == nullptr)
+        return -1;
+    return ptr->pyside_reserved_bits;
 }
 
 void SbkObjectType_SetReserved(PyTypeObject *type, int value)

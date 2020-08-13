@@ -132,27 +132,33 @@ static FeatureProc *featurePointer = nullptr;
 static PyObject *cached_globals = nullptr;
 static PyObject *last_select_id = nullptr;
 
-static PyObject *fast_id_array[256] = {};
+static PyObject *_fast_id_array[1 + 256] = {};
+// this will point to element 1 to allow indexing from -1
+static PyObject **fast_id_array;
 
 static inline PyObject *getFeatureSelectId()
 {
-    static PyObject *zero = fast_id_array[0];
+    static PyObject *undef = fast_id_array[-1];
     static PyObject *feature_dict = GetFeatureDict();
     // these things are all borrowed
     PyObject *globals = PyEval_GetGlobals();
-    if (globals == nullptr)
-        return zero;
-    if (globals == cached_globals)
+    if (   globals == nullptr
+        || globals == cached_globals)
         return last_select_id;
 
     PyObject *modname = PyDict_GetItem(globals, PyMagicName::name());
     if (modname == nullptr)
-        return zero;
+        return last_select_id;
+
     PyObject *select_id = PyDict_GetItem(feature_dict, modname);
-    if (select_id == nullptr || !PyInt_Check(select_id))  // int/long cheating
-        return zero;
+    if (   select_id == nullptr
+        || !PyInt_Check(select_id)  // int/long cheating
+        || select_id == undef)
+        return last_select_id;
+
     cached_globals = globals;
     last_select_id = select_id;
+    assert(PyInt_AsSsize_t(select_id) >= 0);
     return select_id;
 }
 
@@ -378,6 +384,12 @@ static inline PyObject *SelectFeatureSet(PyTypeObject *type)
     }
     PyObject *select_id = getFeatureSelectId();         // borrowed
     PyObject *current_id = getCurrentSelectId(type);    // borrowed
+    static PyObject *undef = fast_id_array[-1];
+
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (current_id == undef)
+        current_id = select_id = fast_id_array[0];
+
     if (select_id != current_id) {
         PyObject *mro = type->tp_mro;
         Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
@@ -424,7 +436,7 @@ static FeatureProc featureProcArray[] = {
 
 void finalize()
 {
-    for (int idx = 0; idx < 256; ++idx)
+    for (int idx = -1; idx < 256; ++idx)
         Py_DECREF(fast_id_array[idx]);
 }
 
@@ -433,8 +445,10 @@ void init()
     // This function can be called multiple times.
     static bool is_initialized = false;
     if (!is_initialized) {
-        for (int idx = 0; idx < 256; ++idx)
+        fast_id_array = &_fast_id_array[1];
+        for (int idx = -1; idx < 256; ++idx)
             fast_id_array[idx] = PyInt_FromLong(idx);
+        last_select_id = fast_id_array[0];
         featurePointer = featureProcArray;
         initSelectableFeature(SelectFeatureSet);
         registerCleanupFunction(finalize);
