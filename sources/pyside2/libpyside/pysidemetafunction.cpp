@@ -183,7 +183,7 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
                                                   "registered on meta type: %s", typeName.data());
                     break;
                 }
-                methValues[i] = QVariant(typeId, static_cast<const void *>(0));
+                methValues[i] = QVariant(static_cast<QVariant::Type>(typeId));
             }
             methArgs[i] = methValues[i].data();
             if (i == 0) // Don't do this for return type

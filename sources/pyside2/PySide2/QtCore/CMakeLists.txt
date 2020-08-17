@@ -72,6 +72,7 @@ ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qhistorystate_wrapper.cpp
 ${QtCore_GEN_DIR}/qidentityproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevice_wrapper.cpp
+${QtCore_GEN_DIR}/qiodevicebase_wrapper.cpp
 ${QtCore_GEN_DIR}/qitemselection_wrapper.cpp
 ${QtCore_GEN_DIR}/qitemselectionmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qitemselectionrange_wrapper.cpp

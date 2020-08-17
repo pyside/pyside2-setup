@@ -194,7 +194,7 @@ static QVariant QVariant_convertToValueList(PyObject *list)
         if (typeId > 0) {
             Shiboken::Conversions::SpecificConverter converter(listTypeName);
             if (converter) {
-                QVariant var(typeId, nullptr);
+                QVariant var(static_cast<QVariant::Type>(typeId));
                 converter.toCpp(list, &var);
                 return var;
             }
@@ -1782,7 +1782,7 @@ if (!typeCode || !typeName) {
     %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
 }
 else {
-    QVariant var(typeCode, nullptr);
+    QVariant var(static_cast<QVariant::Type>(typeCode));
     Shiboken::Conversions::SpecificConverter converter(typeName);
     converter.toCpp(pyIn, var.data());
     %out = var;

@@ -748,7 +748,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <modify-function signature="intersect(QLineF,QPointF*)const">
+    <modify-function signature="intersect(const QLineF &amp;,QPointF*)const">
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
@@ -2129,8 +2129,8 @@
     <modify-function signature="flush()" allow-thread="yes"/>
   </object-type>
   <object-type name="QFile">
-    <modify-function signature="open(QFlags&lt;QIODevice::OpenModeFlag&gt;)" allow-thread="yes"/>
-    <modify-function signature="open(int,QFlags&lt;QIODevice::OpenModeFlag&gt;,QFlags&lt;QFileDevice::FileHandleFlag&gt;)" allow-thread="yes"/>
+    <modify-function signature="open(QFlags&lt;QIODeviceBase::OpenModeFlag&gt;)" allow-thread="yes"/>
+    <modify-function signature="open(int,QFlags&lt;QIODeviceBase::OpenModeFlag&gt;,QFlags&lt;QFileDevice::FileHandleFlag&gt;)" allow-thread="yes"/>
     <modify-function signature="copy(const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="copy(const QString&amp;,const QString&amp;)" allow-thread="yes"/>
     <modify-function signature="link(const QString&amp;)" allow-thread="yes"/>
@@ -2144,8 +2144,7 @@
   <object-type name="QFileSelector"/>
 
   <object-type name="QIODevice">
-    <enum-type name="OpenModeFlag" flags="OpenMode"/>
-    <modify-function signature="open(QFlags&lt;QIODevice::OpenModeFlag>)" allow-thread="yes"/>
+    <modify-function signature="open(QFlags&lt;QIODeviceBase::OpenModeFlag>)" allow-thread="yes"/>
     <modify-function signature="close()" allow-thread="yes"/>
     <modify-function signature="seek(qint64)" allow-thread="yes"/>
     <modify-function signature="readAll()" allow-thread="yes"/>
@@ -2192,6 +2191,9 @@
         <inject-code class="native" position="end" file="../glue/qtcore.cpp" snippet="return-readData"/>
     </modify-function>
   </object-type>
+  <value-type name="QIODeviceBase" since="6.0">
+      <enum-type name="OpenModeFlag" flags="OpenMode"/>
+  </value-type>
   <object-type name="QCryptographicHash">
     <enum-type name="Algorithm"/>
     <modify-function signature="addData(const char*,qsizetype)">
@@ -2434,9 +2436,6 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="setSystemIniPath(const QString&amp;)" remove="all"/>
-    <modify-function signature="setUserIniPath(const QString&amp;)" remove="all"/>
     <!-- PYSIDE-1010:
     We remove the original implementation of value() to include the optional parameter -->
     <modify-function signature="value(const QString&amp;,const QVariant&amp;)const" remove="all"/>
@@ -2625,14 +2624,14 @@
     <enum-type name="RealNumberNotation"/>
     <enum-type name="Status"/>
     <!-- Removed because it expect QString to be mutable -->
-    <modify-function signature="QTextStream(QString*,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
+    <modify-function signature="QTextStream(QString*,QFlags&lt;QIODeviceBase::OpenModeFlag&gt;)" remove="all"/>
     <!-- Qt5.5: Removed because it expect QString to be mutable -->
     <modify-function signature="readLineInto(QString*,qint64)" since="5.5" remove="all"/>
     <!-- Removed because we use the non-const version -->
-    <modify-function signature="QTextStream(const QByteArray&amp;,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
+    <modify-function signature="QTextStream(const QByteArray&amp;,QFlags&lt;QIODeviceBase::OpenModeFlag&gt;)" remove="all"/>
 
     <!-- Removed because it expect QString to be mutable -->
-    <modify-function signature="setString(QString*,QFlags&lt;QIODevice::OpenModeFlag&gt;)" remove="all"/>
+    <modify-function signature="setString(QString*,QFlags&lt;QIODeviceBase::OpenModeFlag&gt;)" remove="all"/>
 
     <modify-function signature="operator&lt;&lt;(const void*)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(float)" remove="all"/>
