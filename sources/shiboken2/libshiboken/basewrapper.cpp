@@ -515,11 +515,13 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
 // PYSIDE-1019: Support switchable extensions
 //
 // We simply exchange the complete class dicts.
-// This is done in
-// - mangled_type_getattro              which replaces
-// - Sbk_TypeGet___dict__
-// - SbkObjectType_replace_getattro
-// - SbkObjectType_replace_setattro
+//
+//   This is done in                which replaces
+//   ---------------                --------------
+//   mangled_type_getattro          type_getattro
+//   Sbk_TypeGet___dict__           type_dict
+//   SbkObject_GenericGetAttr       PyObject_GenericGetAttr
+//   SbkObject_GenericSetAttr       PyObject_GenericSetAttr
 //
 
 void initSelectableFeature(SelectableFeatureHook func)
@@ -555,7 +557,7 @@ static PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context)
 
 // These functions replace the standard PyObject_Generic(Get|Set)Attr functions.
 // They provide the default that "object" inherits.
-// Everything else is directly handled by an insertion PyObject_GenericGetAttr
+// Everything else is directly handled by cppgenerator that calls `Feature::Select`.
 static PyObject *SbkObject_GenericGetAttr(PyObject *obj, PyObject *name)
 {
     auto type = Py_TYPE(obj);
@@ -570,6 +572,21 @@ static int SbkObject_GenericSetAttr(PyObject *obj, PyObject *name, PyObject *val
     if (SelectFeatureSet != nullptr)
         type->tp_dict = SelectFeatureSet(type);
     return PyObject_GenericSetAttr(obj, name, value);
+}
+
+// Caching the select Id.
+int SbkObjectType_GetReserved(PyTypeObject *type)
+{
+    auto ptr = PepType_SOTP(reinterpret_cast<SbkObjectType *>(type));
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (ptr == nullptr)
+        return -1;
+    return ptr->pyside_reserved_bits;
+}
+
+void SbkObjectType_SetReserved(PyTypeObject *type, int value)
+{
+    PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->pyside_reserved_bits = value;
 }
 
 //

@@ -38,6 +38,7 @@
 ****************************************************************************/
 
 #include "feature_select.h"
+#include "pyside.h"
 
 #include <shiboken.h>
 #include <sbkstaticstrings.h>
@@ -51,7 +52,7 @@
 // This functionality is no longer implemented in the signature module, since
 // the PyCFunction getsets do not have to be modified any longer.
 // Instead, we simply exchange the complete class dicts. This is done in the
-// basewrapper.cpp file.
+// basewrapper.cpp file and in every generated `tp_(get|set)attro`.
 //
 // This is the general framework of the switchable extensions.
 // A maximum of eight features is planned so far. This seems to be enough.
@@ -65,10 +66,10 @@
     -------------------------------------
 
 The basic idea is to replace the `tp_dict` of a QObject derived type.
-This way, we can replace the methods of the dict in no time.
+This way, we can replace the methods of the class in no time.
 
 The crucial point to understand is how the `tp_dict` is actually accessed:
-When you type "QObject.__dict__", the descriptor of SbkObjectType_Type
+When you type "QObject.__dict__", the descriptor of `SbkObjectType_Type`
 is called. This descriptor is per default unassigned, so the base class
 PyType_Type provides the tp_getset method `type_dict`:
 
@@ -111,9 +112,9 @@ looks into the `__name__` attribute of the active module and decides which
 version of `tp_dict` is needed. Then the right dict is searched in the ring
 and created if not already there.
 
-Furthermore, we need to overwrite every `tp_getattro` and `tp_setattro`
-with a version that switches dicts before looking up methods.
-The dict changing must follow the `tp_mro` in order to change all names.
+Furthermore, we need to overwrite every `tp_(get|set)attro`  with a version
+that switches dicts right before looking up methods.
+The dict changing must walk the whole `tp_mro` in order to change all names.
 
 This is everything that the following code does.
 
@@ -124,21 +125,41 @@ namespace PySide { namespace Feature {
 
 using namespace Shiboken;
 
-static PyObject *getFeatureSelectID()
+typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict);
+
+static FeatureProc *featurePointer = nullptr;
+
+static PyObject *cached_globals = nullptr;
+static PyObject *last_select_id = nullptr;
+
+static PyObject *_fast_id_array[1 + 256] = {};
+// this will point to element 1 to allow indexing from -1
+static PyObject **fast_id_array;
+
+static inline PyObject *getFeatureSelectId()
 {
-    static PyObject *zero = PyInt_FromLong(0);
+    static PyObject *undef = fast_id_array[-1];
     static PyObject *feature_dict = GetFeatureDict();
     // these things are all borrowed
     PyObject *globals = PyEval_GetGlobals();
-    if (globals == nullptr)
-        return zero;
+    if (   globals == nullptr
+        || globals == cached_globals)
+        return last_select_id;
+
     PyObject *modname = PyDict_GetItem(globals, PyMagicName::name());
     if (modname == nullptr)
-        return zero;
-    PyObject *flag = PyDict_GetItem(feature_dict, modname);
-    if (flag == nullptr || !PyInt_Check(flag))  // int/long cheating
-        return zero;
-    return flag;
+        return last_select_id;
+
+    PyObject *select_id = PyDict_GetItem(feature_dict, modname);
+    if (   select_id == nullptr
+        || !PyInt_Check(select_id)  // int/long cheating
+        || select_id == undef)
+        return last_select_id;
+
+    cached_globals = globals;
+    last_select_id = select_id;
+    assert(PyInt_AsSsize_t(select_id) >= 0);
+    return select_id;
 }
 
 // Create a derived dict class
@@ -191,6 +212,21 @@ static inline PyObject *getSelectId(PyObject *dict)
 {
     auto select_id = PyObject_GetAttr(dict, PyName::select_id());
     return select_id;
+}
+
+static inline void setCurrentSelectId(PyTypeObject *type, PyObject *select_id)
+{
+    SbkObjectType_SetReserved(type, PyInt_AsSsize_t(select_id));    // int/long cheating
+}
+
+static inline void setCurrentSelectId(PyTypeObject *type, int id)
+{
+    SbkObjectType_SetReserved(type, id);
+}
+
+static inline PyObject *getCurrentSelectId(PyTypeObject *type)
+{
+    return fast_id_array[SbkObjectType_GetReserved(type)];
 }
 
 static bool replaceClassDict(PyTypeObject *type)
@@ -251,16 +287,13 @@ static bool moveToFeatureSet(PyTypeObject *type, PyObject *select_id)
         // This works because small numbers are singleton objects.
         if (current_id == select_id) {
             type->tp_dict = dict;
+            setCurrentSelectId(type, select_id);
             return true;
         }
     } while (dict != initial_dict);
     type->tp_dict = initial_dict;
     return false;
 }
-
-typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict);
-
-static FeatureProc *featurePointer = nullptr;
 
 static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
 {
@@ -279,18 +312,19 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
     // make sure that small integers are cached
     assert(small_1 != nullptr && small_1 == small_2);
 
-    static auto zero = PyInt_FromLong(0);
+    static auto zero = fast_id_array[0];
     bool ok = moveToFeatureSet(type, zero);
     Q_UNUSED(ok);
     assert(ok);
 
     AutoDecRef prev_dict(type->tp_dict);
-    Py_INCREF(prev_dict);
+    Py_INCREF(prev_dict);   // keep the first ref unchanged
     if (!addNewDict(type, select_id))
         return false;
-    auto id = PyInt_AsSsize_t(select_id);
+    auto id = PyInt_AsSsize_t(select_id);   // int/long cheating
     if (id == -1)
         return false;
+    setCurrentSelectId(type, id);
     FeatureProc *proc = featurePointer;
     for (int idx = id; *proc != nullptr; ++proc, idx >>= 1) {
         if (idx & 1) {
@@ -312,8 +346,12 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
 
 static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
 {
+    /*
+     * This is the selector for one sublass. We need to call this for
+     * every subclass until no more subclasses or reaching the wanted id.
+     */
     if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
-        // PYSIDE-1019: On first touch, we initialize the dynamic naming.
+        // On first touch, we initialize the dynamic naming.
         // The dict type will be replaced after the first call.
         if (!replaceClassDict(type)) {
             Py_FatalError("failed to replace class dict!");
@@ -329,21 +367,29 @@ static bool SelectFeatureSetSubtype(PyTypeObject *type, PyObject *select_id)
     return true;
 }
 
-static PyObject *SelectFeatureSet(PyTypeObject *type)
+static inline PyObject *SelectFeatureSet(PyTypeObject *type)
 {
     /*
-     *  This is the main function of the module.
-     *  Generated functions call this directly.
-     *  Shiboken will assign it via a public hook of `basewrapper.cpp`.
+     * This is the main function of the module.
+     * The purpose of this function is to switch the dict of a class right
+     * before a (get|set)attro call is performed.
+     *
+     * Generated functions call this directly.
+     * Shiboken will assign it via a public hook of `basewrapper.cpp`.
      */
     if (Py_TYPE(type->tp_dict) == Py_TYPE(PyType_Type.tp_dict)) {
-        // PYSIDE-1019: On first touch, we initialize the dynamic naming.
-        // The dict type will be replaced after the first call.
+        // We initialize the dynamic features by using our own dict type.
         if (!replaceClassDict(type))
             return nullptr;
     }
-    PyObject *select_id = getFeatureSelectID();     // borrowed
-    AutoDecRef current_id(getSelectId(type->tp_dict));
+    PyObject *select_id = getFeatureSelectId();         // borrowed
+    PyObject *current_id = getCurrentSelectId(type);    // borrowed
+    static PyObject *undef = fast_id_array[-1];
+
+    // PYSIDE-1019: During import PepType_SOTP is still zero.
+    if (current_id == undef)
+        current_id = select_id = fast_id_array[0];
+
     if (select_id != current_id) {
         PyObject *mro = type->tp_mro;
         Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
@@ -361,6 +407,8 @@ static PyObject *SelectFeatureSet(PyTypeObject *type)
 // For cppgenerator:
 void Select(PyObject *obj)
 {
+    if (featurePointer == nullptr)
+        return;
     auto type = Py_TYPE(obj);
     type->tp_dict = SelectFeatureSet(type);
 }
@@ -386,10 +434,28 @@ static FeatureProc featureProcArray[] = {
     nullptr
 };
 
+void finalize()
+{
+    for (int idx = -1; idx < 256; ++idx)
+        Py_DECREF(fast_id_array[idx]);
+}
+
 void init()
 {
-    featurePointer = featureProcArray;
-    initSelectableFeature(SelectFeatureSet);
+    // This function can be called multiple times.
+    static bool is_initialized = false;
+    if (!is_initialized) {
+        fast_id_array = &_fast_id_array[1];
+        for (int idx = -1; idx < 256; ++idx)
+            fast_id_array[idx] = PyInt_FromLong(idx);
+        last_select_id = fast_id_array[0];
+        featurePointer = featureProcArray;
+        initSelectableFeature(SelectFeatureSet);
+        registerCleanupFunction(finalize);
+        is_initialized = true;
+    }
+    // Reset the cache. This is called at any "from __feature__ import".
+    cached_globals = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -404,7 +470,7 @@ void init()
 // basewrapper.cpp file.
 //
 
-static PyObject *methodWithLowerName(PyTypeObject *type,
+static PyObject *methodWithNewName(PyTypeObject *type,
                                      PyMethodDef *meth,
                                      const char *new_name)
 {
@@ -456,7 +522,7 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict)
     PyMethodDef *meth = type->tp_methods;
     for (; meth != nullptr && meth->ml_name != nullptr; ++meth) {
         const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
-        AutoDecRef new_method(methodWithLowerName(type, meth, name));
+        AutoDecRef new_method(methodWithNewName(type, meth, name));
         if (new_method.isNull())
             return false;
         if (PyDict_SetItemString(lower_dict, name, new_method) < 0)

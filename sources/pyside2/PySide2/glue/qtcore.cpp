@@ -595,6 +595,10 @@ PySide::runCleanupFunctions();
 %PYARG_0 = PySide::QEnum::QEnumMacro(%1, true);
 // @snippet qt-qflag
 
+// @snippet qt-init-feature
+PySide::Feature::init();
+// @snippet qt-init-feature
+
 // @snippet qt-pysideinit
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "unicode");
 Shiboken::Conversions::registerConverterName(SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");

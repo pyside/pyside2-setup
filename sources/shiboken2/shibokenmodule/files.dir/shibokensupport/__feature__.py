@@ -44,31 +44,41 @@ __feature__.py
 
 This is the feature file for the Qt for Python project. There is some
 similarity to Python's `__future__` file, but also some distinction.
+
+The normal usage is like
+
+    from __feature__ import <feature_name> [, ...]
+    ...
+
+Alternatively, there is the `set_selection` function which uses select_id's
+and takes an optional `mod_name` parameter.
+
+The select id `-1` has the spectial meaning "ignore this module".
 """
 
 import sys
 
 all_feature_names = [
     "snake_case",
-    "_dummy_feature_02",
-    "_dummy_feature_04",
-    "_dummy_feature_08",
-    "_dummy_feature_10",
-    "_dummy_feature_20",
-    "_dummy_feature_40",
-    "_dummy_feature_80",
+    "_feature_02",
+    "_feature_04",
+    "_feature_08",
+    "_feature_10",
+    "_feature_20",
+    "_feature_40",
+    "_feature_80",
 ]
 
-__all__ = ["all_feature_names"] + all_feature_names
+__all__ = ["all_feature_names", "set_selection", "info"] + all_feature_names
 
 snake_case = 1
-_dummy_feature_02 = 0x02
-_dummy_feature_04 = 0x04
-_dummy_feature_08 = 0x08
-_dummy_feature_10 = 0x10
-_dummy_feature_20 = 0x20
-_dummy_feature_40 = 0x40
-_dummy_feature_80 = 0x80
+_feature_02 = 0x02
+_feature_04 = 0x04
+_feature_08 = 0x08
+_feature_10 = 0x10
+_feature_20 = 0x20
+_feature_40 = 0x40
+_feature_80 = 0x80
 
 # let's remove the dummies for the normal user
 _really_all_feature_names = all_feature_names[:]
@@ -91,9 +101,20 @@ Note: This are two imports.
              12 LOAD_CONST               0 (None)
              14 RETURN_VALUE
 """
-# XXX build an improved C version
+# XXX build an improved C version? I guess not.
 def _import(name, *args, **kwargs):
+    importing_module = sys._getframe(1).f_globals['__name__']
+    existing = pyside_feature_dict.get(importing_module, 0)
+
     if name == "__feature__" and args[2]:
+        global _is_initialized
+        if not _is_initialized:
+            # use _one_ recursive import...
+            import PySide2.QtCore
+            # Initialize all prior imported modules
+            for name in sys.modules:
+                pyside_feature_dict.setdefault(name, -1)
+
         # This is an `import from` statement that corresponds to `IMPORT_NAME`.
         # The following `IMPORT_FROM` will handle errors. (Confusing, ofc.)
         flag = 0
@@ -102,13 +123,60 @@ def _import(name, *args, **kwargs):
                 flag |= globals()[feature]
             else:
                 raise SyntaxError("PySide feature {} is not defined".format(feature))
-        importing_module = sys._getframe(1).f_globals['__name__']
-        existing = pyside_feature_dict.get(importing_module, 0)
-        if isinstance(existing, int):
-            flag |= existing & 255
+
+        flag |= existing & 255 if isinstance(existing, int) and existing >= 0 else 0
         pyside_feature_dict[importing_module] = flag
+
         if importing_module == "__main__":
             # We need to add all modules here which should see __feature__.
             pyside_feature_dict["rlcompleter"] = flag
+
+        # Initialize feature (multiple times allowed) and clear cache.
+        sys.modules["PySide2.QtCore"].__init_feature__()
         return sys.modules["__feature__"]
+
+    if name.split(".")[0] == "PySide2":
+        # This is a module that imports PySide2.
+        flag = existing if isinstance(existing, int) else 0
+    else:
+        # This is some other module. Ignore it in switching.
+        flag = -1
+    pyside_feature_dict[importing_module] = flag
     return original_import(name, *args, **kwargs)
+
+_is_initialized = False
+
+
+def set_selection(select_id, mod_name=None):
+    """
+    Internal use: Set the feature directly by Id.
+    Id == -1: ignore this module in switching.
+    """
+    mod_name = mod_name or sys._getframe(1).f_globals['__name__']
+    # Reset the features to the given id
+    flag = 0
+    if isinstance(select_id, int):
+        flag = select_id & 255
+    pyside_feature_dict[importing_module] = flag
+    sys.modules["PySide2.QtCore"].__init_feature__()
+    return _current_selection(flag)
+
+
+def info(mod_name=None):
+    """
+    Internal use: Return the current selection
+    """
+    mod_name = mod_name or sys._getframe(1).f_globals['__name__']
+    flag = pyside_feature_dict.get(mod_name, 0)
+    return _current_selection(flag)
+
+
+def _current_selection(flag):
+    names = []
+    if flag >= 0:
+      for idx, name in enumerate(_really_all_feature_names):
+          if (1 << idx) & flag:
+              names.append(name)
+    return names
+
+#eof

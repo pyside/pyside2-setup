@@ -48,7 +48,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2 import QtCore
-from PySide2.support.__feature__ import _really_all_feature_names
+from PySide2.support.__feature__ import (
+    _really_all_feature_names, pyside_feature_dict)
 from textwrap import dedent
 
 """
@@ -67,7 +68,6 @@ class FeaturesTest(unittest.TestCase):
         """
         Test for all 256 possible combinations of `__feature__` imports.
         """
-        global __name__
 
         def tst_bit0(flag, self):
             if flag == 0:
@@ -108,9 +108,10 @@ class FeaturesTest(unittest.TestCase):
                      tst_bit4, tst_bit5, tst_bit6, tst_bit7]
 
         for idx in range(0x100):
-            __name__ = "feature_{:02x}".format(idx)
+            pyside_feature_dict.clear()
+            config = "feature_{:02x}".format(idx)
             print()
-            print("--- Feature Test Module `{}` ---".format(__name__))
+            print("--- Feature Test Config `{}` ---".format(config))
             print("Imports:")
             for bit in range(8):
                 if idx & 1 << bit:
