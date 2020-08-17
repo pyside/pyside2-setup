@@ -748,7 +748,7 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <modify-function signature="intersect(const QLineF &amp;,QPointF*)const">
+    <modify-function signature="intersects(const QLineF &amp;,QPointF*)const">
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
