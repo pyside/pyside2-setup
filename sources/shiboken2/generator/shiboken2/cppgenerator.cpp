@@ -1932,6 +1932,9 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
                                        && !rfunc->isInplaceOperator()
                                        && !rfunc->isCallOperator()
                                        && rfunc->isOperatorOverload();
+
+    QScopedPointer<Indentation> reverseIndent;
+
     if (callExtendedReverseOperator) {
         QString revOpName = ShibokenGenerator::pythonOperatorFunctionName(rfunc).insert(2, QLatin1Char('r'));
         // For custom classes, operations like __radd__ and __rmul__
@@ -1966,11 +1969,12 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
                 }
                 s << INDENT << "}\n";
                 s << INDENT << "Py_XDECREF(revOpMethod);\n\n";
-            }
-            s << INDENT << "}\n";
-        }
-        s << INDENT << "// Do not enter here if other object has implemented a reverse operator.\n";
-        s << INDENT << "if (!" << PYTHON_RETURN_VAR << ") {\n\n";
+            } //
+            s << INDENT << "}\n\n";
+            s << INDENT << "// Do not enter here if other object has implemented a reverse operator.\n";
+            s << INDENT << "if (!" << PYTHON_RETURN_VAR << ") {\n";
+            reverseIndent.reset(new Indentation(INDENT));
+        } // binary shift operator
     }
 
     if (maxArgs > 0)
@@ -1978,8 +1982,10 @@ void CppGenerator::writeMethodWrapper(QTextStream &s, const AbstractMetaFunction
 
     writeFunctionCalls(s, overloadData, classContext);
 
-    if (callExtendedReverseOperator)
+    if (!reverseIndent.isNull()) { // binary shift operator
+        reverseIndent.reset();
         s << Qt::endl << INDENT << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"\n";
+    }
 
     s << Qt::endl;
 
