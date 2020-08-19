@@ -137,7 +137,7 @@ class TestQmlSupport(unittest.TestCase):
         self.assertTrue(paintCalled)
 
         # Check that the uncreatable item produces the correct error
-        view.setSource(QUrl.fromLocalFile(helper.adjust_filename('registeruncreatable.qml', __file__)))
+        view.setSource(QUrl.fromLocalFile(adjust_filename('registeruncreatable.qml', __file__)))
         self.assertEqual(view.status(), QQuickView.Error)
         errorFound = False
         for e in view.errors():
