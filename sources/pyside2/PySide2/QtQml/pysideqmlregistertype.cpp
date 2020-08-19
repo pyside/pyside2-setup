@@ -570,6 +570,9 @@ void PySide::initQmlSupport(PyObject *module)
         return;
     }
 
+    // Register QQmlListProperty metatype for use in QML
+    qRegisterMetaType<QQmlListProperty<QObject>>();
+
     Py_INCREF(reinterpret_cast<PyObject *>(PropertyListTypeF()));
     PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
                        reinterpret_cast<PyObject *>(PropertyListTypeF()));
