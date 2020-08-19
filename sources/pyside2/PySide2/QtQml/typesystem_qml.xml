@@ -113,6 +113,12 @@
     <object-type name="QQmlComponent">
         <enum-type name="CompilationMode"/>
         <enum-type name="Status"/>
+        <modify-function signature="QQmlComponent(QObject*)" allow-thread="yes"/>
+        <modify-function signature="QQmlComponent(QQmlEngine*,QObject*)" allow-thread="yes"/>
+        <modify-function signature="QQmlComponent(QQmlEngine*,QString,QObject*)" allow-thread="yes"/>
+        <modify-function signature="QQmlComponent(QQmlEngine*,QString,QQmlComponent::CompilationMode,QObject*)" allow-thread="yes"/>
+        <modify-function signature="QQmlComponent(QQmlEngine*,QUrl,QObject*)" allow-thread="yes"/>
+        <modify-function signature="QQmlComponent(QQmlEngine*,QUrl,QQmlComponent::CompilationMode,QObject*)" allow-thread="yes"/>
     </object-type>
     <object-type name="QQmlContext"/>
     <value-type name="QQmlError"/>
