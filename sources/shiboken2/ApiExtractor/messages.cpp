@@ -422,7 +422,7 @@ QString msgXpathDocModificationError(const DocModificationList& mods,
             str << '"' << mod.xpath() << "\" -> \"";
             const QString simplified = mod.code().simplified();
             if (simplified.size() > 20)
-                str << simplified.leftRef(20) << "...";
+                str << QStringView{simplified}.left(20) << "...";
             else
                 str << simplified;
             str << '"';
@@ -604,7 +604,7 @@ QString msgRejectReason(const TypeRejection &r, const QString &needle)
 // typesystem.cpp
 
 QString msgCannotFindNamespaceToExtend(const QString &name,
-                                       const QStringRef &extendsPackage)
+                                       const QString &extendsPackage)
 {
     return QLatin1String("Cannot find namespace ") + name
         + QLatin1String(" in package ") + extendsPackage;
@@ -640,7 +640,7 @@ QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
     QString result;
     QTextStream str(&result);
     str << "While handling <";
-    const QStringRef currentTag = reader.name();
+    const auto currentTag = reader.name();
     if (currentTag.isEmpty())
         str << tag;
     else

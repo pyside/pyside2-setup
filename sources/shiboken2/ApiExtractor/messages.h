@@ -165,7 +165,7 @@ QString msgLeftOverArguments(const QMap<QString, QString> &remainingArgs);
 QString msgInvalidVersion(const QString &package, const QString &version);
 
 QString msgCannotFindNamespaceToExtend(const QString &name,
-                                       const QStringRef &extendsPackage);
+                                       const QString &extendsPackage);
 
 QString msgExtendingNamespaceRequiresPattern(const QString &name);
 

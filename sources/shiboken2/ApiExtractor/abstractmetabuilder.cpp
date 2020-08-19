@@ -2809,7 +2809,8 @@ QPropertySpec *AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *me
 
     // Q_PROPERTY(QString objectName READ objectName WRITE setObjectName NOTIFY objectNameChanged)
 
-    auto propertyTokens = declaration.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
+    auto propertyTokens = QStringView{declaration}.split(QLatin1Char(' '),
+                                                         Qt::SkipEmptyParts);
     if (propertyTokens.size()  < 4) {
         *errorMessage = QLatin1String("Insufficient number of tokens");
         return nullptr;

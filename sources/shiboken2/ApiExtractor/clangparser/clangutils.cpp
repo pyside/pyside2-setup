@@ -196,7 +196,7 @@ QPair<int, int> parseTemplateArgumentList(const QString &l,
         switch (c) {
         case ',':
         case '>':
-            handler(level, l.midRef(startPos, p - startPos).trimmed());
+            handler(level, QStringView{l}.mid(startPos, p - startPos).trimmed());
             ++p;
             if (c == '>') {
                 if (--level == 0)
@@ -207,7 +207,7 @@ QPair<int, int> parseTemplateArgumentList(const QString &l,
             startPos = p;
             break;
         case '<':
-            handler(level, l.midRef(startPos, p - startPos).trimmed());
+            handler(level, QStringView{l}.mid(startPos, p - startPos).trimmed());
             ++level;
             startPos = ++p;
             break;

@@ -2766,7 +2766,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(const TypeEntry *type) const
     if (type->isNamespace()) {
         QString package = type->targetLangPackage();
         const int dot = package.lastIndexOf(QLatin1Char('.'));
-        result += package.rightRef(package.size() - (dot + 1));
+        result += QStringView{package}.right(package.size() - (dot + 1));
     }
     result += _fixedCppTypeName(type->qualifiedCppName()).toUpper();
     appendIndexSuffix(&result);

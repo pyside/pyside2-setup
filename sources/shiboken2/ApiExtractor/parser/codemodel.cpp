@@ -224,7 +224,7 @@ public:
         m_parseStack.append(t);
     }
 
-    void operator()(int level, const QStringRef &name)
+    void operator()(int level, QStringView name)
     {
         if (level > m_parseStack.size()) {
             Q_ASSERT(!top()->m_instantiations.isEmpty());
@@ -240,12 +240,12 @@ public:
 private:
     TypeInfo *top() const { return m_parseStack.back(); }
 
-    static QStringList qualifiedName(const QStringRef &name)
+    static QStringList qualifiedName(QStringView name)
     {
         QStringList result;
-        const QVector<QStringRef> nameParts = name.split(QLatin1String("::"));
+        const auto nameParts = name.split(u"::");
         result.reserve(nameParts.size());
-        for (const QStringRef &p : nameParts)
+        for (const auto &p : nameParts)
             result.append(p.toString());
         return result;
     }

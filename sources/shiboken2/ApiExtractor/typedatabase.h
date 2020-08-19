@@ -162,8 +162,7 @@ public:
 
     bool addSuppressedWarning(const QString &warning, QString *errorMessage);
 
-    bool isSuppressedWarning(const QString &s) const;
-    bool isSuppressedWarning(const QStringRef &s) const;
+    bool isSuppressedWarning(QStringView s) const;
 
     static QString globalNamespaceClassName(const TypeEntry *te);
 

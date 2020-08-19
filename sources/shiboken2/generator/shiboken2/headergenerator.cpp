@@ -366,7 +366,7 @@ static void formatTypeDefEntries(QTextStream &s)
     for (const auto e : entries) {
         const QString name = e->qualifiedCppName();
         // Fixme: simplify by using nested namespaces in C++ 17.
-        const auto components = name.splitRef(QLatin1String("::"));
+        const auto components = QStringView{name}.split(u"::");
         const int nameSpaceCount = components.size() -  1;
         for (int n = 0; n < nameSpaceCount; ++n)
             s << "namespace " << components.at(n) << " {\n";

@@ -129,7 +129,7 @@ void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &cont
             return;
         if (auto db = TypeDatabase::instance()) {
             const bool suppressed = fileLocationPos >= 0
-                ? db->isSuppressedWarning(text.midRef(fileLocationPos + 2))
+                ? db->isSuppressedWarning(QStringView{text}.mid(fileLocationPos + 2))
                 : db->isSuppressedWarning(text);
             if (suppressed) {
                 ++m_suppressedCount;

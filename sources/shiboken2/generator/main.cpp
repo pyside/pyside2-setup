@@ -79,7 +79,7 @@ static void printOptions(QTextStream &s, const OptionDescriptions &options)
             s << ", ";
         } else {
             s << Qt::endl;
-            const auto lines = od.second.splitRef(QLatin1Char('\n'));
+            const auto lines = QStringView{od.second}.split(QLatin1Char('\n'));
             for (const auto &line : lines)
                 s << "        " << line << Qt::endl;
             s << Qt::endl;

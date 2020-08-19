@@ -430,14 +430,6 @@ void BuilderPrivate::addField(const CXCursor &cursor)
     m_scopeStack.back()->addVariable(field);
 }
 
-// Array helpers: Parse "a[2][4]" into a list of dimensions
-
-struct ArrayDimensionResult
-{
-    QVector<QStringRef> dimensions;
-    int position;
-};
-
 // Create qualified name "std::list<std::string>" -> ("std", "list<std::string>")
 static QStringList qualifiedName(const QString &t)
 {
@@ -494,7 +486,7 @@ bool BuilderPrivate::addTemplateInstantiationsRecursion(const CXType &type, Type
     return true;
 }
 
-static void dummyTemplateArgumentHandler(int, const QStringRef &) {}
+static void dummyTemplateArgumentHandler(int, QStringView) {}
 
 void BuilderPrivate::addTemplateInstantiations(const CXType &type,
                                                QString *typeName,

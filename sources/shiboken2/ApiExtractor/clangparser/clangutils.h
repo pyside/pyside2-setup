@@ -109,7 +109,7 @@ CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds);
 
 // Parse a template argument list "a<b<c,d>,e>" and invoke a handler
 // with each match (level and string). Return begin and end of the list.
-using TemplateArgumentHandler = std::function<void (int, const QStringRef &)>;
+using TemplateArgumentHandler = std::function<void (int, QStringView)>;
 
 QPair<int, int> parseTemplateArgumentList(const QString &l,
                                           const TemplateArgumentHandler &handler,

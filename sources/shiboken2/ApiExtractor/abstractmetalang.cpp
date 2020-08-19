@@ -2530,11 +2530,11 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &class
 AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
                                                         const QString &name)
 {
-    const QVector<QStringRef> lst = name.splitRef(QLatin1String("::"));
+    const auto lst = QStringView{name}.split(u"::");
 
     if (lst.size() > 1) {
-        const QStringRef &prefixName = lst.at(0);
-        const QStringRef &enumName = lst.at(1);
+        const auto &prefixName = lst.at(0);
+        const auto &enumName = lst.at(1);
         if (AbstractMetaClass *cl = findClass(classes, prefixName.toString()))
             return cl->findEnumValue(enumName.toString());
     }
@@ -2715,8 +2715,8 @@ AbstractMetaEnumValue *AbstractMetaEnum::findEnumValue(const QString &value) con
     const int sepPos = value.indexOf(QLatin1String("::"));
     if (sepPos == -1)
         return findMatchingEnumValue(m_enumValues, value);
-    return name() == value.leftRef(sepPos)
-        ? findMatchingEnumValue(m_enumValues, value.rightRef(value.size() - sepPos - 2))
+    return name() == QStringView{value}.left(sepPos)
+        ? findMatchingEnumValue(m_enumValues, QStringView{value}.right(value.size() - sepPos - 2))
         : nullptr;
 }
 

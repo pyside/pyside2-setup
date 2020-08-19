@@ -232,16 +232,14 @@ void CodeSnipAbstract::addCode(const QString &code)
     codeList.append(CodeSnipFragment(fixSpaces(code)));
 }
 
-template <class String> // QString, QStringRef
-static inline int firstNonBlank(const String &s)
+static inline int firstNonBlank(QStringView s)
 {
     const auto it = std::find_if(s.cbegin(), s.cend(),
                                  [] (QChar c) { return !c.isSpace(); });
     return int(it - s.cbegin());
 }
 
-template <class String> // QString, QStringRef
-static inline bool isEmpty(const String &s)
+static inline bool isEmpty(QStringView s)
 {
     return s.isEmpty()
         || std::all_of(s.cbegin(), s.cend(),
@@ -255,7 +253,7 @@ QString CodeSnipAbstract::dedent(const QString &code)
     // Right trim if indent=0, or trim if single line
     if (!code.at(0).isSpace() || !code.contains(QLatin1Char('\n')))
         return code.trimmed();
-    const auto lines = code.splitRef(QLatin1Char('\n'));
+    const auto lines = QStringView{code}.split(QLatin1Char('\n'));
     int spacesToRemove = std::numeric_limits<int>::max();
     for (const auto &line : lines) {
         if (!isEmpty(line)) {
@@ -369,7 +367,7 @@ static AddedFunction::TypeInfo parseType(const QString& signature,
     int length = signature.length();
     int start = signature.indexOf(regex, startPos);
     if (start == -1) {
-        if (signature.midRef(startPos + 1, 3) == QLatin1String("...")) { // varargs
+        if (QStringView{signature}.mid(startPos + 1, 3) == QLatin1String("...")) { // varargs
             if (endPos)
                 *endPos = startPos + 4;
             result.name = QLatin1String("...");
@@ -468,7 +466,7 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
                 break;
         }
         // is const?
-        m_isConst = signature.rightRef(signatureLength - endPos).contains(QLatin1String("const"));
+        m_isConst = QStringView{signature}.right(signatureLength - endPos).contains(QLatin1String("const"));
     }
 }
 
@@ -490,7 +488,7 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
     d << "CodeSnip(language=" << s.language << ", position=" << s.position << ", \"";
     for (const auto &f : s.codeList) {
         const QString &code = f.code();
-        const auto lines = code.splitRef(QLatin1Char('\n'));
+        const auto lines = QStringView{code}.split(QLatin1Char('\n'));
         for (int i = 0, size = lines.size(); i < size; ++i) {
             if (i)
                 d << "\\n";

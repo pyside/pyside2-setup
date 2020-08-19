@@ -540,7 +540,7 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
 
 QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
 {
-    const auto lines= code.splitRef(QLatin1Char('\n'));
+    const auto lines= QStringView{code}.split(QLatin1Char('\n'));
     for (const auto &line : lines) {
         // Do not indent preprocessor lines
         if (!line.isEmpty() && !line.startsWith(QLatin1Char('#')))

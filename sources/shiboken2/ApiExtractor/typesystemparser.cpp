@@ -140,8 +140,8 @@ static QString extractSnippet(const QString &code, const QString &snippetLabel)
 
     bool useLine = false;
     QString result;
-    const auto lines = code.splitRef(QLatin1Char('\n'));
-    for (const QStringRef &line : lines) {
+    const auto lines = QStringView{code}.split(QLatin1Char('\n'));
+    for (const auto &line : lines) {
         if (snippetRe.match(line).hasMatch()) {
             useLine = !useLine;
             if (!useLine)
@@ -596,7 +596,7 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
         return false;
 
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         const TypeRejection::MatchType type = typeRejectionFromAttribute(name);
         switch (type) {
         case TypeRejection::Function:
@@ -975,11 +975,11 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
         }
     }
 
-    const QStringRef quoteFrom = atts.value(quoteAfterLineAttribute());
+    const auto quoteFrom = atts.value(quoteAfterLineAttribute());
     bool foundFromOk = quoteFrom.isEmpty();
     bool from = quoteFrom.isEmpty();
 
-    const QStringRef quoteTo = atts.value(quoteBeforeLineAttribute());
+    const auto quoteTo = atts.value(quoteBeforeLineAttribute());
     bool foundToOk = quoteTo.isEmpty();
     bool to = true;
 
@@ -1188,7 +1188,7 @@ SmartPointerTypeEntry *
     QString refCountMethodName;
     QString instantiations;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type")) {
              smartPointerType = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("getter")) {
@@ -1245,7 +1245,7 @@ PrimitiveTypeEntry *
     auto *type = new PrimitiveTypeEntry(name, since, currentParentTypeEntry());
     applyCommonAttributes(reader, type, attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == targetLangNameAttribute()) {
             type->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == QLatin1String("target-lang-api-name")) {
@@ -1280,7 +1280,7 @@ ContainerTypeEntry *
         m_error = QLatin1String("no 'type' attribute specified");
         return nullptr;
     }
-    const QStringRef typeName = attributes->takeAt(typeIndex).value();
+    const auto typeName = attributes->takeAt(typeIndex).value();
     ContainerTypeEntry::ContainerKind containerType = containerTypeFromAttribute(typeName);
     if (containerType == ContainerTypeEntry::NoContainer) {
         m_error = QLatin1String("there is no container of type ") + typeName.toString();
@@ -1304,7 +1304,7 @@ EnumTypeEntry *
 
     QString flagNames;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("upper-bound")) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -1343,7 +1343,7 @@ NamespaceTypeEntry *
     auto visibility = TypeSystem::Visibility::Unspecified;
     applyCommonAttributes(reader, result.data(), attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef attributeName = attributes->at(i).qualifiedName();
+        const auto attributeName = attributes->at(i).qualifiedName();
         if (attributeName == QLatin1String("files")) {
             const QString pattern = attributes->takeAt(i).value().toString();
             QRegularExpression re(pattern);
@@ -1360,7 +1360,7 @@ NamespaceTypeEntry *
                                               return e->targetLangPackage() == extendsPackageName;
                                           });
             if (extendsIt == allEntries.cend()) {
-                m_error = msgCannotFindNamespaceToExtend(name, extendsPackageName);
+                m_error = msgCannotFindNamespaceToExtend(name, extendsPackageName.toString());
                 return nullptr;
             }
             result->setExtends(*extendsIt);
@@ -1475,7 +1475,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
 
     QString package = m_defaultPackage;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == streamAttribute()) {
             ctype->setStream(convertBoolean(attributes->takeAt(i).value(), streamAttribute(), false));
         } else if (name == generateAttribute()) {
@@ -1556,7 +1556,7 @@ bool TypeSystemParser::parseRenameFunction(const QXmlStreamReader &,
     QString signature;
     QString rename;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == signatureAttribute()) {
             // Do not remove as it is needed for the type entry later on
             signature = attributes->at(i).value().toString();
@@ -1611,16 +1611,16 @@ bool TypeSystemParser::parseInjectDocumentation(const QXmlStreamReader &,
     TypeSystem::DocModificationMode mode = TypeSystem::DocModificationReplace;
     TypeSystem::Language lang = TypeSystem::NativeCode;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("mode")) {
-            const QStringRef modeName = attributes->takeAt(i).value();
+            const auto modeName = attributes->takeAt(i).value();
             mode = docModificationFromAttribute(modeName);
             if (mode == TypeSystem::DocModificationInvalid) {
                 m_error = QLatin1String("Unknown documentation injection mode: ") + modeName;
                 return false;
             }
         } else if (name == formatAttribute()) {
-            const QStringRef format = attributes->takeAt(i).value();
+            const auto format = attributes->takeAt(i).value();
             lang = languageFromAttribute(format);
             if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
                 m_error = QStringLiteral("unsupported class attribute: '%1'").arg(format);
@@ -1668,7 +1668,7 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &
                                                QXmlStreamAttributes *attributes)
 {
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == packageAttribute()) {
             m_defaultPackage = attributes->takeAt(i).value().toString();
         } else if (name == defaultSuperclassAttribute()) {
@@ -1718,7 +1718,7 @@ bool TypeSystemParser::loadTypesystem(const QXmlStreamReader &,
     QString typeSystemName;
     bool generateChild = true;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute())
             typeSystemName = attributes->takeAt(i).value().toString();
         else if (name == generateAttribute())
@@ -1787,9 +1787,9 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
     QString snippetLabel;
     TypeSystem::Language lang = TypeSystem::NativeCode;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const QStringRef languageAttribute = attributes->takeAt(i).value();
+            const auto languageAttribute = attributes->takeAt(i).value();
             lang = languageFromAttribute(languageAttribute);
             if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
                 m_error = QStringLiteral("unsupported class attribute: '%1'").arg(languageAttribute);
@@ -1872,7 +1872,7 @@ bool TypeSystemParser::parseAddConversion(const QXmlStreamReader &,
     if (!readFileSnippet(attributes, &snip))
         return false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("type"))
              sourceTypeName = attributes->takeAt(i).value().toString();
         else if (name == QLatin1String("check"))
@@ -1924,7 +1924,7 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
     QString replaceValue;
     bool resetAfterUse = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
              index = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("replace-value")) {
@@ -1989,9 +1989,9 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
     QString ownership;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const QStringRef className = attributes->takeAt(i).value();
+            const auto className = attributes->takeAt(i).value();
             lang = languageFromAttribute(className);
             if (lang != TypeSystem::TargetLangCode && lang != TypeSystem::NativeCode) {
                 m_error = QStringLiteral("unsupported class attribute: '%1'").arg(className);
@@ -2022,7 +2022,7 @@ bool TypeSystemParser::parseArgumentMap(const QXmlStreamReader &,
     int pos = 1;
     QString metaName;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
             if (!parseIndex(attributes->takeAt(i).value().toString(), &pos, &m_error))
                 return false;
@@ -2059,7 +2059,7 @@ bool TypeSystemParser::parseRemoval(const QXmlStreamReader &,
     TypeSystem::Language lang = TypeSystem::All;
     const int classIndex = indexOfAttribute(*attributes, classAttribute());
     if (classIndex != -1) {
-        const QStringRef value = attributes->takeAt(classIndex).value();
+        const auto value = attributes->takeAt(classIndex).value();
         lang = languageFromAttribute(value);
         if (lang == TypeSystem::TargetLangCode) // "target" means TargetLangAndNativeCode here
             lang = TypeSystem::TargetLangAndNativeCode;
@@ -2110,7 +2110,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
             m_error = msgMissingAttribute(modifierAttribute());
             return false;
         }
-        const QStringRef modifier = attributes->takeAt(modifierIndex).value();
+        const auto modifier = attributes->takeAt(modifierIndex).value();
         modifierFlag = modifierFromAttribute(modifier);
         if (modifierFlag == Modification::InvalidModifier) {
             m_error = QStringLiteral("Unknown access modifier: '%1'").arg(modifier);
@@ -2133,7 +2133,7 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
     FieldModification fm;
     fm.modifiers = FieldModification::Readable | FieldModification::Writable;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
             fm.name = attributes->takeAt(i).value().toString();
         } else if (name == removeAttribute()) {
@@ -2173,7 +2173,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     bool staticFunction = false;
     QString access;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("signature")) {
             originalSignature = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("return-type")) {
@@ -2245,7 +2245,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("signature")) {
             originalSignature = attributes->takeAt(i).value().toString();
         } else if (name == accessAttribute()) {
@@ -2369,7 +2369,7 @@ CustomFunction *
            ? QLatin1String("_create") : QLatin1String("_delete"));
     QString paramName = QLatin1String("copy");
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute())
             functionName = attributes->takeAt(i).value().toString();
         else if (name == QLatin1String("param-name"))
@@ -2391,7 +2391,7 @@ bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
 
     ReferenceCount rc;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == actionAttribute()) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
             rc.action = referenceCountFromAttribute(attribute.value());
@@ -2427,13 +2427,13 @@ bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
     }
     ArgumentOwner ao;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
             const QString index = attributes->takeAt(i).value().toString();
             if (!parseArgumentIndex(index, &ao.index, &m_error))
                 return false;
         } else if (name == actionAttribute()) {
-            const QStringRef action = attributes->takeAt(i).value();
+            const auto action = attributes->takeAt(i).value();
             ao.action = argumentOwnerActionFromAttribute(action);
             if (ao.action == ArgumentOwner::Invalid) {
                 m_error = QLatin1String("Invalid parent actionr '") + action + QLatin1String("'.");
@@ -2450,7 +2450,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
     QString fileName;
     QString snippetLabel;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("file")) {
             fileName = attributes->takeAt(i).value().toString();
         } else if (name == snippetAttribute()) {
@@ -2503,16 +2503,16 @@ bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
     if (!readFileSnippet(attributes, &snip))
         return false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == classAttribute()) {
-            const QStringRef className = attributes->takeAt(i).value();
+            const auto className = attributes->takeAt(i).value();
             lang = languageFromAttribute(className);
             if (lang == TypeSystem::NoLanguage) {
                 m_error = QStringLiteral("Invalid class specifier: '%1'").arg(className);
                 return false;
             }
         } else if (name == positionAttribute()) {
-            const QStringRef value = attributes->takeAt(i).value();
+            const auto value = attributes->takeAt(i).value();
             position = codeSnipPositionFromAttribute(value);
             if (position == TypeSystem::CodeSnipPositionInvalid) {
                 m_error = QStringLiteral("Invalid position: '%1'").arg(value);
@@ -2546,7 +2546,7 @@ bool TypeSystemParser::parseInclude(const QXmlStreamReader &,
     QString fileName;
     QString location;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == fileNameAttribute())
             fileName = attributes->takeAt(i).value().toString();
         else if (name == locationAttribute())
@@ -2618,7 +2618,7 @@ bool TypeSystemParser::parseReplace(const QXmlStreamReader &,
     QString from;
     QString to;
     for (int i = attributes->size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes->at(i).qualifiedName();
+        const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("from"))
             from = attributes->takeAt(i).value().toString();
         else if (name == toAttribute())
@@ -2646,12 +2646,12 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
         return true;
     }
 
-    const QStringRef tagName = reader.name();
+    const auto tagName = reader.name();
     QXmlStreamAttributes attributes = reader.attributes();
 
     VersionRange versionRange;
     for (int i = attributes.size() - 1; i >= 0; --i) {
-        const QStringRef name = attributes.at(i).qualifiedName();
+        const auto name = attributes.at(i).qualifiedName();
         if (name == sinceAttribute()) {
             if (!parseVersion(attributes.takeAt(i).value().toString(),
                               m_defaultPackage, &versionRange.since, &m_error)) {
