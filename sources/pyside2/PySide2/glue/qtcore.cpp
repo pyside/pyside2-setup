@@ -1917,15 +1917,6 @@ QByteArray ba = %in.toUtf8();
 return PyUnicode_FromStringAndSize(ba.constData(), ba.size());
 // @snippet return-pyunicode
 
-// @snippet return-pyunicode-qstringref
- const int N = %in.length();
- wchar_t *str = new wchar_t[N];
- %in.toString().toWCharArray(str);
- PyObject *%out = PyUnicode_FromWideChar(str, N);
- delete[] str;
- return %out;
-// @snippet return-pyunicode-qstringref
-
 // @snippet return-pyunicode-qchar
 wchar_t c = (wchar_t)%in.unicode();
 return PyUnicode_FromWideChar(&c, 1);

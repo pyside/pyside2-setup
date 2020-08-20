@@ -263,11 +263,6 @@
     </conversion-rule>
   </primitive-type>
 
-  <primitive-type name="QStringRef">
-    <conversion-rule>
-        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-qstringref"/>
-    </conversion-rule>
-  </primitive-type>
   <primitive-type name="QChar">
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-qchar"/>
@@ -2708,6 +2703,9 @@
     <modify-function signature="push_front(QXmlStreamAttribute)" remove="all"/>
     <modify-function signature="pop_front()" remove="all"/>
     <modify-function signature="toList()const" remove="all"/>
+    <!-- Remove methods from QList -->
+    <modify-function signature="value(qsizetype,const QXmlStreamAttribute&amp;) const" remove="all"/>
+    <modify-function signature="value(qsizetype) const" remove="all"/>
     <modify-function signature="fromList(const QList&lt;QXmlStreamAttribute&gt; &amp;)" remove="all"/>
     <modify-function signature="operator+=(QVector&lt;QXmlStreamAttribute&gt;)" remove="all"/>
     <!-- Expose operator==, != inherited from QList, which the parser does

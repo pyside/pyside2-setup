@@ -425,7 +425,7 @@ static QString msgInvalidAttributeValue(const QXmlStreamAttribute &attribute)
     return result;
 }
 
-static QString msgUnusedAttributes(const QStringRef &tag, const QXmlStreamAttributes &attributes)
+static QString msgUnusedAttributes(QStringView tag, const QXmlStreamAttributes &attributes)
 {
     QString result;
     QTextStream str(&result);
@@ -541,18 +541,20 @@ static QString msgReaderError(const QXmlStreamReader &reader, const QString &wha
 }
 
 static QString msgUnimplementedElementWarning(const QXmlStreamReader &reader,
-                                              const QStringRef &name)
+                                              QStringView name)
 {
-    const QString message = QLatin1String("The element \"") +
-        name + QLatin1String("\" is not implemented.");
+    QString message;
+    QTextStream(&message) << "The element \"" << name
+        << "\" is not implemented.";
     return msgReaderMessage(reader, "Warning", message);
 }
 
 static QString msgUnimplementedAttributeWarning(const QXmlStreamReader &reader,
-                                                const QStringRef &name)
+                                                QStringView name)
 {
-    const QString message = QLatin1String("The attribute \"") +
-        name + QLatin1String("\" is not implemented.");
+    QString message;
+    QTextStream(&message) <<  "The attribute \"" << name
+        << "\" is not implemented.";
     return msgReaderMessage(reader, "Warning", message);
 }
 
@@ -742,7 +744,7 @@ bool TypeSystemParser::setupSmartPointerInstantiations()
     return true;
 }
 
-bool TypeSystemParser::endElement(const QStringRef &localName)
+bool TypeSystemParser::endElement(QStringView localName)
 {
     if (m_ignoreDepth) {
         --m_ignoreDepth;
@@ -1616,7 +1618,8 @@ bool TypeSystemParser::parseInjectDocumentation(const QXmlStreamReader &,
             const auto modeName = attributes->takeAt(i).value();
             mode = docModificationFromAttribute(modeName);
             if (mode == TypeSystem::DocModificationInvalid) {
-                m_error = QLatin1String("Unknown documentation injection mode: ") + modeName;
+                m_error = QLatin1String("Unknown documentation injection mode: ");
+                m_error += modeName;
                 return false;
             }
         } else if (name == formatAttribute()) {
@@ -2397,8 +2400,9 @@ bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
             rc.action = referenceCountFromAttribute(attribute.value());
             switch (rc.action) {
             case ReferenceCount::Invalid:
-                m_error = QLatin1String("unrecognized value '") + attribute.value()
-                          + QLatin1String("' for action attribute.");
+                m_error = QLatin1String("unrecognized value '");
+                m_error += attribute.value();
+                m_error += QLatin1String("' for action attribute.");
                 return false;
             case ReferenceCount::AddAll:
             case ReferenceCount::Ignore:
@@ -2436,7 +2440,9 @@ bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
             const auto action = attributes->takeAt(i).value();
             ao.action = argumentOwnerActionFromAttribute(action);
             if (ao.action == ArgumentOwner::Invalid) {
-                m_error = QLatin1String("Invalid parent actionr '") + action + QLatin1String("'.");
+                m_error = QLatin1String("Invalid parent action '");
+                m_error += action;
+                m_error += QLatin1String("'.");
                 return false;
             }
         }

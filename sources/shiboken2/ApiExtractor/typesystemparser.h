@@ -160,7 +160,7 @@ private:
                                                   const QString &name,
                                                   const QVersionNumber &since,
                                                   QXmlStreamAttributes *attributes);
-    bool endElement(const QStringRef& localName);
+    bool endElement(QStringView localName);
     template <class String> // QString/QStringRef
     bool characters(const String &ch);
 

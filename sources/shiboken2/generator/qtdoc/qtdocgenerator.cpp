@@ -147,12 +147,12 @@ static int writeEscapedRstText(QTextStream &str, const String &s)
 class escape
 {
 public:
-    explicit escape(const QStringRef &s) : m_string(s) {}
+    explicit escape(QStringView s) : m_string(s) {}
 
     void write(QTextStream &str) const { writeEscapedRstText(str, m_string); }
 
 private:
-    const QStringRef m_string;
+    const QStringView m_string;
 };
 
 inline QTextStream &operator<<(QTextStream &str, const escape &e)
@@ -675,7 +675,7 @@ void QtXmlToSphinx::handleArgumentTag(QXmlStreamReader& reader)
 static inline QString functionLinkType() { return QStringLiteral("function"); }
 static inline QString classLinkType() { return QStringLiteral("class"); }
 
-static inline QString fixLinkType(const QStringRef &type)
+static inline QString fixLinkType(QStringView type)
 {
     // TODO: create a flag PROPERTY-AS-FUNCTION to ask if the properties
     // are recognized as such or not in the binding
@@ -902,7 +902,7 @@ void QtXmlToSphinx::handleRowTag(QXmlStreamReader& reader)
 
 enum ListType { BulletList, OrderedList, EnumeratedList };
 
-static inline ListType webXmlListType(const QStringRef &t)
+static inline ListType webXmlListType(QStringView t)
 {
     if (t == QLatin1String("enum"))
         return EnumeratedList;

@@ -117,7 +117,7 @@ public:
     QString code() const;
 
     void addCode(const QString &code);
-    void addCode(const QStringRef &code) { addCode(code.toString()); }
+    void addCode(QStringView code) { addCode(code.toString()); }
 
     void addTemplateInstance(TemplateInstance *ti)
     {
@@ -516,7 +516,7 @@ public:
         m_signature(signature), m_mode(mode) {}
 
     void setCode(const QString& code);
-    void setCode(const QStringRef& code) { setCode(code.toString()); }
+    void setCode(QStringView code) { setCode(code.toString()); }
 
     QString code() const
     {
