@@ -154,14 +154,11 @@ class ExactEnumerator(object):
                 self.fmt.class_name = class_name
             ret.update(self.function("__init__", klass))
             for func_name, func in functions:
-                func_kind = get_signature(func, "__func_kind__")
-                modifier = func_kind if func_kind in (
-                    "staticmethod", "classmethod") else None
-                ret.update(self.function(func_name, func, modifier))
+                ret.update(self.function(func_name, func))
             self.fmt.level -= 1
         return ret
 
-    def function(self, func_name, func, modifier=None):
+    def function(self, func_name, func):
         self.fmt.level += 1
         ret = self.result_type()
         signature = func.__signature__
@@ -192,7 +189,7 @@ class SimplifyingEnumerator(ExactEnumerator):
     is desired.
     """
 
-    def function(self, func_name, func, modifier=None):
+    def function(self, func_name, func):
         ret = self.result_type()
         signature = get_signature(func, 'existence')
         sig = stringify(signature) if signature is not None else None
@@ -209,11 +206,11 @@ class HintingEnumerator(ExactEnumerator):
     hinting stubs. Only default values are replaced by "...".
     """
 
-    def function(self, func_name, func, modifier=None):
+    def function(self, func_name, func):
         ret = self.result_type()
         signature = get_signature(func, 'hintingstub')
         if signature is not None:
-            with self.fmt.function(func_name, signature, modifier) as key:
+            with self.fmt.function(func_name, signature) as key:
                 ret[key] = signature
         return ret
 

@@ -345,6 +345,11 @@ type_map.update({
     "QStringList*"  : ResultVariable(StringList),
     })
 
+# PYSIDE-1328: We need to handle "self" explicitly.
+type_map.update({
+    "self"  : "self",
+    })
+
 
 # The Shiboken Part
 def init_Shiboken():

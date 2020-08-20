@@ -231,17 +231,14 @@ def create_signature(props, key):
     # this is the basic layout of a signature
     varnames = props["varnames"]
     if layout.definition:
-        if sig_kind == "function":
-            pass
-        elif sig_kind == "method":
-            varnames = ("self",) + varnames
-        elif sig_kind == "staticmethod":
-            pass
-        elif sig_kind == "classmethod":
-            varnames = ("klass",) + varnames
-        else:
-            raise SystemError("Methods must be function, method, staticmethod"
-                              " or classmethod")
+        # PYSIDE-1328: We no longer use info from the sig_kind which is
+        # more complex for multiple signatures. We now get `self` from the
+        # parser.
+        pass
+    else:
+        if "self" in varnames[:1]:
+            varnames = varnames[1:]
+
     # calculate the modifications
     defaults = props["defaults"][:]
     if not layout.defaults:
@@ -259,6 +256,8 @@ def create_signature(props, key):
         elif name.startswith("*"):
             kind = _VAR_POSITIONAL
         ann = annotations.get(name, _empty)
+        if ann == "self":
+            ann = _empty
         name = name.lstrip("*")
         defpos = idx - len(varnames) + len(defaults)
         default = defaults[defpos] if defpos >= 0 else _empty

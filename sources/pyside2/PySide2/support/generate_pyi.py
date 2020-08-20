@@ -171,7 +171,7 @@ class Formatter(Writer):
         yield
 
     @contextmanager
-    def function(self, func_name, signature, modifier=None):
+    def function(self, func_name, signature):
         if self.after_enum() or func_name == "__init__":
             self.print()
         key = func_name
@@ -179,16 +179,16 @@ class Formatter(Writer):
         if type(signature) == type([]):
             for sig in signature:
                 self.print('{spaces}@typing.overload'.format(**locals()))
-                self._function(func_name, sig, modifier, spaces)
+                self._function(func_name, sig, spaces)
         else:
-            self._function(func_name, signature, modifier, spaces)
+            self._function(func_name, signature, spaces)
         if func_name == "__init__":
             self.print()
         yield key
 
-    def _function(self, func_name, signature, modifier, spaces):
-        if modifier:
-            self.print('{spaces}@{modifier}'.format(**locals()))
+    def _function(self, func_name, signature, spaces):
+        if "self" not in tuple(signature.parameters.keys()):
+            self.print('{spaces}@staticmethod'.format(**locals()))
         signature = self.optional_replacer(signature)
         self.print('{spaces}def {func_name}{signature}: ...'.format(**locals()))
 
