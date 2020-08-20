@@ -38,23 +38,8 @@ from helper.helper import adjust_filename
 
 from PySide2.QtCore import Property, QObject, QTimer, QUrl
 from PySide2.QtGui import QGuiApplication, QPen, QColor, QPainter
-from PySide2.QtQml import qmlRegisterType, qmlRegisterUncreatableType, ListProperty
+from PySide2.QtQml import qmlRegisterType, ListProperty
 from PySide2.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
-
-noCreationReason = 'Cannot create an item of type: Uncreatable (expected)';
-
-class Uncreatable(QObject):
-    def __init__(self, parent = None):
-        QObject.__init__(self, parent)
-        self._name = 'uncreatable'
-
-    def getName(self):
-        return self._name
-
-    def setName(self, value):
-        self._name = value
-
-    name = Property(str, getName, setName)
 
 class PieSlice (QQuickPaintedItem):
     def __init__(self, parent = None):
@@ -123,10 +108,8 @@ class TestQmlSupport(unittest.TestCase):
     def testIt(self):
         app = QGuiApplication([])
 
-        qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart')
-        self.assertTrue(qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice") > 0);
-        self.assertTrue(qmlRegisterUncreatableType(Uncreatable, 'Charts', 1, 0,
-                                                   'Uncreatable', noCreationReason) > 0);
+        self.assertTrue(qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart') != -1)
+        self.assertTrue(qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice") != -1)
 
         view = QQuickView()
         view.setSource(QUrl.fromLocalFile(adjust_filename('registertype.qml', __file__)))
@@ -135,17 +118,6 @@ class TestQmlSupport(unittest.TestCase):
         app.exec_()
         self.assertTrue(appendCalled)
         self.assertTrue(paintCalled)
-
-        # Check that the uncreatable item produces the correct error
-        view.setSource(QUrl.fromLocalFile(adjust_filename('registeruncreatable.qml', __file__)))
-        self.assertEqual(view.status(), QQuickView.Error)
-        errorFound = False
-        for e in view.errors():
-            if noCreationReason in e.toString():
-                errorFound = True
-                break
-        self.assertTrue(errorFound)
-
 
 if __name__ == '__main__':
     unittest.main()

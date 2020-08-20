@@ -35,9 +35,4 @@ Item {
     Uncreatable {
         name : 'uncreatable'
     }
-
-    PieChart {
-        anchors.centerIn: parent
-        width: 100; height: 100
-    }
 }
