@@ -277,27 +277,51 @@ struct QmlListProperty
 {
     PyTypeObject *type;
     PyObject *append;
+    PyObject *count;
     PyObject *at;
     PyObject *clear;
-    PyObject *count;
+    PyObject *replace;
+    PyObject *removeLast;
 };
 
 static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    static const char *kwlist[] = {"type", "append", "at", "clear", "count", 0};
+    static const char *kwlist[] = {"type", "append", "count", "at", "clear", "replace", "removeLast", 0};
     PySideProperty *pySelf = reinterpret_cast<PySideProperty *>(self);
     QmlListProperty *data = new QmlListProperty;
     memset(data, 0, sizeof(QmlListProperty));
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "OO|OOO:QtQml.ListProperty", (char **) kwlist,
+                                     "O|OOOOOO:QtQml.ListProperty", (char **) kwlist,
                                      &data->type,
                                      &data->append,
+                                     &data->count,
                                      &data->at,
                                      &data->clear,
-                                     &data->count)) {
+                                     &data->replace,
+                                     &data->removeLast)) {
         return -1;
     }
+
+    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    assert(qobjectType);
+
+    if (!PySequence_Contains(data->type->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
+                     qobjectType->tp_name, data->type->tp_name);
+        return -1;
+    }
+
+    if ((data->append && data->append != Py_None && !PyCallable_Check(data->append)) ||
+        (data->count && data->count != Py_None && !PyCallable_Check(data->count)) ||
+        (data->at && data->at != Py_None && !PyCallable_Check(data->at)) ||
+        (data->clear && data->clear != Py_None && !PyCallable_Check(data->clear)) ||
+        (data->replace && data->replace != Py_None && !PyCallable_Check(data->replace)) ||
+        (data->removeLast && data->removeLast != Py_None && !PyCallable_Check(data->removeLast))) {
+        PyErr_Format(PyExc_TypeError, "Non-callable parameter given");
+        return -1;
+    }
+
     PySide::Property::setMetaCallHandler(pySelf, &propListMetaCall);
     PySide::Property::setTypeName(pySelf, "QQmlListProperty<QObject>");
     PySide::Property::setUserData(pySelf, data);
@@ -413,6 +437,38 @@ void propListClear(QQmlListProperty<QObject> * propList)
         PyErr_Print();
 }
 
+// Implementation of QQmlListProperty<T>::ReplaceFunction callback
+void propListReplace(QQmlListProperty<QObject> *propList, int index, QObject *value)
+{
+    Shiboken::GilState state;
+
+    Shiboken::AutoDecRef args(PyTuple_New(3));
+    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+    PyTuple_SET_ITEM(args, 1, Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<int>(), &index));
+    PyTuple_SET_ITEM(args, 2, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], value));
+
+    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
+    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->replace, args));
+
+    if (PyErr_Occurred())
+        PyErr_Print();
+}
+
+// Implementation of QQmlListProperty<T>::RemoveLastFunction callback
+void propListRemoveLast(QQmlListProperty<QObject> *propList)
+{
+    Shiboken::GilState state;
+
+    Shiboken::AutoDecRef args(PyTuple_New(1));
+    PyTuple_SET_ITEM(args, 0, Shiboken::Conversions::pointerToPython((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], propList->object));
+
+    auto data = reinterpret_cast<QmlListProperty *>(propList->data);
+    Shiboken::AutoDecRef retVal(PyObject_CallObject(data->removeLast, args));
+
+    if (PyErr_Occurred())
+        PyErr_Print();
+}
+
 // qt_metacall specialization for ListProperties
 static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Call call, void **args)
 {
@@ -422,7 +478,13 @@ static void propListMetaCall(PySideProperty *pp, PyObject *self, QMetaObject::Ca
     auto data = reinterpret_cast<QmlListProperty *>(PySide::Property::userData(pp));
     QObject *qobj;
     Shiboken::Conversions::pythonToCppPointer((SbkObjectType *)SbkPySide2_QtCoreTypes[SBK_QOBJECT_IDX], self, &qobj);
-    QQmlListProperty<QObject> declProp(qobj, data, &propListAppender, &propListCount, &propListAt, &propListClear);
+    QQmlListProperty<QObject> declProp(qobj, data,
+                                       data->append && data->append != Py_None ? &propListAppender : nullptr,
+                                       data->count && data->count != Py_None ? &propListCount : nullptr,
+                                       data->at && data->at != Py_None ? &propListAt : nullptr,
+                                       data->clear && data->clear != Py_None ? &propListClear : nullptr,
+                                       data->replace && data->replace != Py_None ? &propListReplace : nullptr,
+                                       data->removeLast && data->removeLast != Py_None ? &propListRemoveLast : nullptr);
 
     // Copy the data to the memory location requested by the meta call
     void *v = args[0];
