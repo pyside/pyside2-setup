@@ -84,6 +84,13 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
 int qmlRegisterSingletonType(PyObject *pyObj,const char *uri, int versionMajor, int versionMinor, const char *qmlName,
                              PyObject *callback, bool isQObject, bool hasCallback);
 
+
+/**
+ * PySide implementation of the QML_ELEMENT macro
+ *
+ * \param pyObj Python type to be registered
+ */
+PyObject *qmlElementMacro(PyObject *pyObj);
 }
 
 PyAPI_FUNC(PyTypeObject *) QtQml_VolatileBoolTypeF(void);

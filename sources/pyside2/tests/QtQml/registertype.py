@@ -38,9 +38,13 @@ from helper.helper import adjust_filename
 
 from PySide2.QtCore import Property, QObject, QTimer, QUrl
 from PySide2.QtGui import QGuiApplication, QPen, QColor, QPainter
-from PySide2.QtQml import qmlRegisterType, ListProperty
+from PySide2.QtQml import qmlRegisterType, ListProperty, QmlElement
 from PySide2.QtQuick import QQuickView, QQuickItem, QQuickPaintedItem
 
+QML_IMPORT_NAME = "Charts"
+QML_IMPORT_MAJOR_VERSION = 1
+
+@QmlElement
 class PieSlice (QQuickPaintedItem):
     def __init__(self, parent = None):
         QQuickPaintedItem.__init__(self, parent)
@@ -78,6 +82,7 @@ class PieSlice (QQuickPaintedItem):
         painter.drawPie(self.boundingRect(), self._fromAngle * 16, self._angleSpan * 16);
         paintCalled = True
 
+@QmlElement
 class PieChart (QQuickItem):
     def __init__(self, parent = None):
         QQuickItem.__init__(self, parent)
@@ -107,9 +112,6 @@ class TestQmlSupport(unittest.TestCase):
 
     def testIt(self):
         app = QGuiApplication([])
-
-        self.assertTrue(qmlRegisterType(PieChart, 'Charts', 1, 0, 'PieChart') != -1)
-        self.assertTrue(qmlRegisterType(PieSlice, "Charts", 1, 0, "PieSlice") != -1)
 
         view = QQuickView()
         view.setSource(QUrl.fromLocalFile(adjust_filename('registertype.qml', __file__)))

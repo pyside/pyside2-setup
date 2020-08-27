@@ -70,3 +70,7 @@ PySide::initQmlSupport(module);
 %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(%1);
 return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qjsengine-toscriptvalue
+
+// @snippet qmlelement
+%PYARG_0 = PySide::qmlElementMacro(%ARGUMENT_NAMES);
+// @snippet qmlelement

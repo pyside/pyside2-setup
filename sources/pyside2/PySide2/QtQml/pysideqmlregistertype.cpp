@@ -39,6 +39,8 @@
 
 #include "pysideqmlregistertype.h"
 
+#include <limits>
+
 // shiboken
 #include <shiboken.h>
 #include <signature.h>
@@ -648,4 +650,83 @@ void PySide::initQmlSupport(PyObject *module)
     Py_INCREF(QtQml_VolatileBoolTypeF());
     PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBoolTypeF()),
                        reinterpret_cast<PyObject *>(QtQml_VolatileBoolTypeF()));
+}
+
+static std::string getGlobalString(const char *name)
+{
+    using Shiboken::AutoDecRef;
+
+    PyObject *globals = PyEval_GetGlobals();
+
+    AutoDecRef pyName(Py_BuildValue("s", name));
+
+    PyObject *globalVar = PyDict_GetItem(globals, pyName);
+
+    if (globalVar == nullptr || !PyUnicode_Check(globalVar))
+        return "";
+
+    const char *stringValue = PyUnicode_AsUTF8(globalVar);
+    return stringValue != nullptr ? stringValue : "";
+}
+
+static int getGlobalInt(const char *name)
+{
+    using Shiboken::AutoDecRef;
+
+    PyObject *globals = PyEval_GetGlobals();
+
+    AutoDecRef pyName(Py_BuildValue("s", name));
+
+    PyObject *globalVar = PyDict_GetItem(globals, pyName);
+
+    if (globalVar == nullptr || !PyLong_Check(globalVar))
+        return -1;
+
+    long value = PyLong_AsLong(globalVar);
+
+    if (value > std::numeric_limits<int>::max() || value < std::numeric_limits<int>::min())
+        return -1;
+
+    return value;
+}
+
+PyObject *PySide::qmlElementMacro(PyObject *pyObj)
+{
+    if (!PyType_Check(pyObj)) {
+        PyErr_Format(PyExc_TypeError, "This decorator can only be used on classes.");
+        return nullptr;
+    }
+
+    static PyTypeObject *qobjectType = Shiboken::Conversions::getPythonTypeObject("QObject*");
+    assert(qobjectType);
+
+    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
+        PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.", pyObjType->tp_name);
+        return nullptr;
+    }
+
+    std::string importName = getGlobalString("QML_IMPORT_NAME");
+    int majorVersion = getGlobalInt("QML_IMPORT_MAJOR_VERSION");
+    int minorVersion = getGlobalInt("QML_IMPORT_MINOR_VERSION");
+
+    if (importName.empty()) {
+        PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_NAME in order to use QmlElement.");
+        return nullptr;
+    }
+
+    if (majorVersion == -1) {
+       PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_MAJOR_VERSION in order to use QmlElement.");
+       return nullptr;
+    }
+
+    // Specifying a minor version is optional
+    if (minorVersion == -1)
+        minorVersion = 0;
+
+    if (qmlRegisterType(pyObj, importName.c_str(), majorVersion, minorVersion, pyObjType->tp_name) == -1) {
+       PyErr_Format(PyExc_TypeError, "Failed to register type %s.", pyObjType->tp_name);
+    }
+
+    return pyObj;
 }

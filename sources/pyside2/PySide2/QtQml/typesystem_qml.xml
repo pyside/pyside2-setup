@@ -100,6 +100,10 @@
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregisteruncreatabletype"/>
     </add-function>
 
+    <add-function signature="QmlElement(PyObject*)" return-type="PyObject*">
+        <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlelement"/>
+    </add-function>
+
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
             <include file-name="QtQml" location="global"/>
