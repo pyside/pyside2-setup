@@ -99,12 +99,38 @@ static SelectableFeatureHook SelectFeatureSet = nullptr;
 
 static PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void *context);   // forward
 
+static int
+check_set_special_type_attr(PyTypeObject *type, PyObject *value, const char *name)
+{
+    if (!(type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+        PyErr_Format(PyExc_TypeError,
+                     "can't set %s.%s", type->tp_name, name);
+        return 0;
+    }
+    if (!value) {
+        PyErr_Format(PyExc_TypeError,
+                     "can't delete %s.%s", type->tp_name, name);
+        return 0;
+    }
+    return 1;
+}
+
+// PYSIDE-1177: Add a setter to allow setting type doc.
+static int
+type_set_doc(PyTypeObject *type, PyObject *value, void *context)
+{
+    if (!check_set_special_type_attr(type, value, "__doc__"))
+        return -1;
+    PyType_Modified(type);
+    return PyDict_SetItem(type->tp_dict, Shiboken::PyMagicName::doc(), value);
+}
+
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to
 // explicitly pass __doc__. For __signature__ it _did_ actually work, because
 // it was not existing before. We add them both for clarity.
 static PyGetSetDef SbkObjectType_Type_getsetlist[] = {
     {const_cast<char *>("__signature__"), (getter)Sbk_TypeGet___signature__},
-    {const_cast<char *>("__doc__"),       (getter)Sbk_TypeGet___doc__},
+    {const_cast<char *>("__doc__"),       (getter)Sbk_TypeGet___doc__, (setter)type_set_doc},
     {const_cast<char *>("__dict__"),      (getter)Sbk_TypeGet___dict__},
     {nullptr}  // Sentinel
 };

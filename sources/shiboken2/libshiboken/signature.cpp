@@ -731,8 +731,9 @@ handle_doc(PyObject *ob, PyObject *old_descr)
         name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
     if (handle_doc_in_progress || name == nullptr
         || strncmp(name, "PySide2.", 8) != 0)
-        return PyObject_CallMethod(old_descr, const_cast<char *>("__get__"),
-            const_cast<char *>("(O)"), ob);
+        return PyObject_CallMethodObjArgs(old_descr,
+                                          Shiboken::PyMagicName::get(),
+                                          ob, nullptr);
     handle_doc_in_progress++;
     PyObject *res = PyObject_CallFunction(
                         pyside_globals->make_helptext_func,

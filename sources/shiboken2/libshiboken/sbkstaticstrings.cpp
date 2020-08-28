@@ -78,8 +78,10 @@ namespace PyMagicName {
 // exported:
 STATIC_STRING_IMPL(class_, "__class__")
 STATIC_STRING_IMPL(dict, "__dict__")
+STATIC_STRING_IMPL(doc, "__doc__")
 STATIC_STRING_IMPL(ecf, "__ecf__")
 STATIC_STRING_IMPL(file, "__file__")
+STATIC_STRING_IMPL(get, "__get__")
 STATIC_STRING_IMPL(members, "__members__")
 STATIC_STRING_IMPL(module, "__module__")
 STATIC_STRING_IMPL(name, "__name__")

@@ -64,8 +64,10 @@ namespace PyMagicName
 {
 LIBSHIBOKEN_API PyObject *class_();
 LIBSHIBOKEN_API PyObject *dict();
+LIBSHIBOKEN_API PyObject *doc();
 LIBSHIBOKEN_API PyObject *ecf();
 LIBSHIBOKEN_API PyObject *file();
+LIBSHIBOKEN_API PyObject *get();
 LIBSHIBOKEN_API PyObject *members();
 LIBSHIBOKEN_API PyObject *module();
 LIBSHIBOKEN_API PyObject *name();
