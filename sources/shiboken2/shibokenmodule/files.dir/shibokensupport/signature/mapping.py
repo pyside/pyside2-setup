@@ -450,7 +450,6 @@ def init_PySide2_QtCore():
         "DescriptorType(-1)": int,  # Native handle of QSocketDescriptor
         "false": False,
         "list of QAbstractAnimation": typing.List[PySide2.QtCore.QAbstractAnimation],
-        "list of QAbstractState": typing.List[PySide2.QtCore.QAbstractState],
         "long long": int,
         "NULL": None, # 5.6, MSVC
         "nullptr": None, # 5.9

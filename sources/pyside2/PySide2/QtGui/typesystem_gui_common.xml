@@ -143,6 +143,11 @@
     </conversion-rule>
   </primitive-type>
 
+  <object-type name="QAbstractFileIconProvider" since="6.0">
+      <enum-type name="IconType"/>
+      <enum-type name="Option" flags="Options"/>
+  </object-type>
+
   <value-type name="QAccessible">
       <value-type name="State"/>
       <enum-type name="Event"/>

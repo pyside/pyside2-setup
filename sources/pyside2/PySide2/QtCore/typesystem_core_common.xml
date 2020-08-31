@@ -51,7 +51,6 @@
     <custom-type name="PyTypeObject"/>
     <custom-type name="PyUnicode"/>
     <custom-type name="list of QAbstractAnimation"/>
-    <custom-type name="list of QAbstractState"/>
 
     <function signature="qAcos(qreal)"/>
     <function signature="qAsin(qreal)" since="4.6"/>
@@ -72,11 +71,9 @@
     <function signature="qTan(qreal)" since="4.6"/>
     <function signature="qtTrId(const char*,int)" since="4.6"/>
     <function signature="qVersion()"/>
-    <function signature="qrand()"/>
-    <function signature="qsrand(uint)"/>
-    <function signature="qCompress(const uchar*,int,int)"/>
+    <function signature="qCompress(const uchar*,qsizetype,int)"/>
     <function signature="qCompress(const QByteArray&amp;,int)"/>
-    <function signature="qUncompress(const uchar*,int)"/>
+    <function signature="qUncompress(const uchar*,qsizetype)"/>
     <function signature="qUncompress(const QByteArray&amp;)"/>
 
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="include-pyside"/>
@@ -716,7 +713,7 @@
     </add-function>
   </value-type>
   <value-type name="QLineF">
-    <enum-type name="IntersectType"/>
+    <enum-type name="IntersectionType"/>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -1810,21 +1807,11 @@
     </extra-includes>
 
     <!-- ### These overloads must be removed accept strings with \x00 in their contents -->
-    <modify-function signature="append(const char*,int)" remove="all"/>
     <modify-function signature="append(const char*)" remove="all"/>
-    <modify-function signature="indexOf(char,int)const" remove="all"/>
-    <modify-function signature="insert(int,const char*)" remove="all"/>
-    <modify-function signature="insert(int,char)" remove="all"/>
-    <modify-function signature="insert(int,const char*,int)" since="4.6" remove="all"/>
-    <modify-function signature="lastIndexOf(char,int)const" remove="all"/>
     <modify-function signature="prepend(const char*)" remove="all"/>
-    <modify-function signature="prepend(const char*,int)" since="4.6" remove="all"/>
     <modify-function signature="replace(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="replace(const char*,int,const char*,int)" remove="all"/>
     <modify-function signature="replace(const char*,QByteArray)" remove="all"/>
     <modify-function signature="replace(const char*,const char*)" remove="all"/>
-    <modify-function signature="replace(int,int,const char*)" remove="all"/>
-    <modify-function signature="replace(int,int,const char*,int)" since="4.6" remove="all"/>
     <modify-function signature="replace(char,const char*)" remove="all"/>
     <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator==(QByteArray,const char*)" remove="all"/>
@@ -1885,10 +1872,6 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <modify-function signature="QByteArray(const char*,int)">
-        <!-- Keep \x00 bytes passed in python strings -->
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-1"/>
-    </modify-function>
     <add-function signature="QByteArray(PyByteArray)">
          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-2"/>
     </add-function>
@@ -1925,7 +1908,6 @@
     <modify-function signature="operator&lt;=(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator>=(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="operator[](int)const" remove="all"/>
     <!-- Those types have the same representation in Python, an overload
          would be useless and cause overflow errors. -->
     <modify-function signature="setNum(uint,int)" remove="all"/>
@@ -2019,16 +2001,6 @@
       </inject-code>
     </modify-function>
     <!-- QByteArray(const char *) do the job of this constructor -->
-    <modify-function signature="QByteArray(const char*,int)" remove="all"/>
-    <modify-function signature="fromRawData(const char*,int)">
-        <modify-argument index="1">
-            <replace-type modified-type="PyBytes"/>
-        </modify-argument>
-        <modify-argument index="2">
-            <remove-argument />
-        </modify-argument>
-        <inject-code class="target" file="../glue/qtcore.cpp" snippet="qbytearray-fromrawdata"/>
-    </modify-function>
     <modify-function signature="toDouble(bool*)const">
       <modify-argument index="1">
         <remove-argument/>
@@ -2288,7 +2260,6 @@
     </extra-includes>
   </object-type>
   <object-type name="QTimeLine">
-    <enum-type name="CurveShape"/>
     <enum-type name="Direction"/>
     <enum-type name="State"/>
   </object-type>
@@ -2405,7 +2376,6 @@
     <!-- blocking functions -->
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;,int)" allow-thread="yes"/>
     <modify-function signature="processEvents(QFlags&lt;QEventLoop::ProcessEventsFlag&gt;)" allow-thread="yes"/>
-    <modify-function signature="flush()" allow-thread="yes"/>
     <modify-function signature="sendEvent(QObject*,QEvent*)" allow-thread="yes"/>
     <modify-function signature="sendPostedEvents(QObject*,int)" allow-thread="yes"/>
     <modify-function signature="instance()">
@@ -2812,61 +2782,6 @@
     <enum-type name="State"/>
   </object-type>
 
-  <object-type name="QAbstractState" since="4.6">
-    <modify-function signature="machine()const">
-        <modify-argument index="this">
-            <parent index="return" action="add"/>
-        </modify-argument>
-    </modify-function>
-  </object-type>
-
-  <object-type name="QAbstractTransition" since="4.6">
-    <enum-type name="TransitionType" since="5.5"/>
-
-    <modify-function signature="QAbstractTransition(QState*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="addAnimation(QAbstractAnimation*)">
-      <modify-argument index="1">
-        <reference-count action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="removeAnimation(QAbstractAnimation*)">
-      <modify-argument index="1">
-        <reference-count action="remove"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="setTargetState(QAbstractState*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="targetState()const">
-      <modify-argument index="return">
-        <reference-count action="set" variable-name="setTargetState(QAbstractState*)1"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="targetStates()const">
-      <modify-argument index="return">
-        <reference-count action="set" variable-name="setTargetState(QAbstractState*)1"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="setTargetStates(QList&lt;QAbstractState*&gt;)">
-      <modify-argument index="1">
-        <reference-count action="set" variable-name="setTargetState(QAbstractState*)1"/>
-      </modify-argument>
-    </modify-function>
-
-  </object-type>
-
   <object-type name="QAnimationGroup" since="4.6">
     <modify-function signature="addAnimation(QAbstractAnimation*)">
       <modify-argument index="1">
@@ -2941,48 +2856,6 @@
     </extra-includes>
   </value-type>
 
-  <object-type name="QEventTransition" since="4.6">
-    <modify-function signature="QEventTransition(QState*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="QEventTransition(QObject*,QEvent::Type,QState*)">
-      <modify-argument index="3">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-  </object-type>
-
-  <object-type name="QFinalState" since="4.6"/>
-
-  <object-type name="QHistoryState" since="4.6">
-    <enum-type name="HistoryType"/>
-    <modify-documentation xpath='description/code'>
-        &lt;code>machine = QStateMachine()
-
-s1 = QState()
-s11 = QState(s1)
-s12 = QState(s1)
-
-s1h = QHistoryState(s1)
-s1h.setDefaultState(s11)
-
-machine.addState(s1)
-
-s2 = QState()
-machine.addState(s2)
-
-button = QPushButton()
-# Clicking the button will cause the state machine to enter the child state
-# that s1 was in the last time s1 was exited, or the history state's default
-# state if s1 has never been entered.
-s1.addTransition(button.clicked, s1h)&lt;/code>
-    </modify-documentation>
-  </object-type>
-
   <value-type name="QMargins" since="4.6"/>
   <value-type name="QMarginsF" since="5.3"/>
 
@@ -2995,82 +2868,6 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   <object-type name="QPropertyAnimation" since="4.6"/>
 
   <object-type name="QSequentialAnimationGroup" since="4.6"/>
-
-  <object-type name="QSignalTransition" since="4.6">
-    <add-function signature="QSignalTransition(PyObject*,QState*)" return-type="QSignalTransition*">
-        <modify-argument index="2">
-            <replace-default-expression with="0"/>
-        </modify-argument>
-        <inject-code file="../glue/qtcore.cpp" snippet="qsignaltransition"/>
-    </add-function>
-  </object-type>
-
-  <object-type name="QState" since="4.6">
-    <enum-type name="ChildMode"/>
-    <enum-type name="RestorePolicy"/>
-    <modify-function signature="addTransition(QAbstractTransition*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <modify-function signature="addTransition(const QObject*,const char*,QAbstractState*)">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstate-addtransition-1"/>
-    </modify-function>
-    <modify-function signature="addTransition(QAbstractState*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <!-- FIXME: the proper signature for this added function would be something like
-         addTransition(PySide2.QtCore.Signal, QAbstractState*)
-         but that depends on bug #362. -->
-    <add-function signature="addTransition(PyObject*,QAbstractState*)" return-type="QSignalTransition*">
-      <modify-argument index="return">
-        <parent index="this" action="add"/>
-      </modify-argument>
-      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstate-addtransition-2"/>
-    </add-function>
-
-    <modify-function signature="removeTransition(QAbstractTransition*)">
-      <modify-argument index="1">
-        <parent index="this" action="remove"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-
-  <object-type name="QStateMachine" since="4.6">
-    <enum-type name="Error"/>
-    <enum-type name="EventPriority"/>
-
-    <value-type name="SignalEvent" since="4.6"/>
-    <value-type name="WrappedEvent" since="4.6"/>
-
-    <modify-function signature="addState(QAbstractState*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="removeState(QAbstractState*)">
-      <modify-argument index="1">
-        <parent index="this" action="remove"/>
-      </modify-argument>
-    </modify-function>
-
-    <add-function signature="configuration()" return-type="list of QAbstractState" >
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstatemachine-configuration"/>
-    </add-function>
-
-    <!-- Replaced by a added function -->
-    <modify-function signature="defaultAnimations()const" remove="all"/>
-    <add-function signature="defaultAnimations()" return-type="list of QAbstractAnimation" >
-        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qstatemachine-defaultanimations"/>
-    </add-function>
-  </object-type>
 
   <object-type name="QVariantAnimation" since="4.6"/>
 

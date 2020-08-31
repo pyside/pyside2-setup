@@ -176,7 +176,7 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
 
         Shiboken::Conversions::SpecificConverter converter(typeName);
         if (converter) {
-            int typeId = QMetaType::type(typeName);
+            int typeId = QMetaType::fromName(typeName).id();
             if (!Shiboken::Conversions::pythonTypeIsObjectType(converter)) {
                 if (!typeId) {
                     PyErr_Format(PyExc_TypeError, "Value types used on meta functions (including signals) need to be "

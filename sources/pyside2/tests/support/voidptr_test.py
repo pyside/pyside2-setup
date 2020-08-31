@@ -53,7 +53,7 @@ class PySide2Support(unittest.TestCase):
         self.assertIsInstance(vp, shiboken.VoidPtr)
 
         # Create QByteArray from voidptr byte interpretation
-        nba = QByteArray.fromRawData(vp.toBytes())
+        nba = QByteArray(vp.toBytes())
         # Compare original bytes to toBytes()
         self.assertTrue(b, vp.toBytes())
         # Compare original with new QByteArray data

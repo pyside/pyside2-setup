@@ -148,7 +148,7 @@ static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
         // Do not convert user type of value
         if (valueType && Shiboken::ObjectType::isUserType(type))
             return nullptr;
-        int obTypeId = QMetaType::type(typeName);
+        int obTypeId = QMetaType::fromName(typeName).id();
         if (obTypeId) {
             *typeId = obTypeId;
             return typeName;
@@ -190,7 +190,7 @@ static QVariant QVariant_convertToValueList(PyObject *list)
         QByteArray listTypeName("QList<");
         listTypeName += typeName;
         listTypeName += '>';
-        typeId = QMetaType::type(listTypeName);
+        typeId = QMetaType::fromName(listTypeName).id();
         if (typeId > 0) {
             Shiboken::Conversions::SpecificConverter converter(listTypeName);
             if (converter) {
@@ -1820,15 +1820,18 @@ else if (Py_TYPE(%in) == SbkObjectType_TypeF())
     typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType *)%in);
 else
     typeName = reinterpret_cast<PyTypeObject *>(%in)->tp_name;
-%out = QVariant::nameToType(typeName);
+const int id = QMetaType::fromName(typeName).id();
+%out = QVariant::Type(id);
 // @snippet conversion-qvariant-pytypeobject
 
 // @snippet conversion-qvariant-pystring
-%out = QVariant::nameToType(Shiboken::String::toCString(%in));
+const int id = QMetaType::fromName(Shiboken::String::toCString(%in)).id();
+%out = QVariant::Type(id);
 // @snippet conversion-qvariant-pystring
 
 // @snippet conversion-qvariant-pydict
-%out = QVariant::nameToType("QVariantMap");
+const int id = QMetaType::fromName("QVariantMap").id();
+%out = QVariant::Type(id);
 // @snippet conversion-qvariant-pydict
 
 // @snippet conversion-qvariant-pysequence
@@ -1951,7 +1954,7 @@ return 0;
 // @snippet return-qvariant
 
 // @snippet return-qvariant-type
-const char *typeName = QVariant::typeToName(%in);
+const char *typeName = QMetaType(%in).name();
 PyObject *%out;
 PyTypeObject *pyType = nullptr;
 if (typeName)

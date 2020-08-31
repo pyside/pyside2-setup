@@ -165,12 +165,6 @@ class TestBug567(unittest.TestCase):
         self.assertEqual(ba[::-2], '08642')
         self.assertEqual(ba[2:8:3], '36')
 
-class QByteArrayBug514(unittest.TestCase):
-    def testIt(self):
-        data = py3k.b("foobar")
-        a = QByteArray.fromRawData(data)
-        self.assertEqual(type(a), QByteArray)
-        self.assertEqual(a.data(), data)
 
 class TestPickler(unittest.TestCase):
     def testIt(self):

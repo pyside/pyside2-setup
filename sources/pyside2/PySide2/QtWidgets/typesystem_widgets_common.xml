@@ -426,11 +426,6 @@
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="viewOptions()const">
-      <modify-argument index="return">
-        <replace-default-expression with="QStyleOptionViewItem()"/>
-      </modify-argument>
-    </modify-function>
     <modify-function signature="model()const">
       <modify-argument index="return">
         <!-- Defining ownership as "default" avoids the object to be automatically
@@ -512,10 +507,7 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QFileIconProvider">
-      <enum-type name="IconType"/>
-      <enum-type name="Option" flags="Options"/>
-  </object-type>
+  <object-type name="QFileIconProvider"/>
   <object-type name="QWizard">
     <enum-type name="WizardButton"/>
     <enum-type name="WizardOption" flags="WizardOptions"/>
@@ -2324,7 +2316,7 @@
       <include file-name="QUrl" location="global"/>
       <include file-name="QAbstractProxyModel" location="global"/>
     </extra-includes>
-    <modify-function signature="setIconProvider(QFileIconProvider*)">
+    <modify-function signature="setIconProvider(QAbstractFileIconProvider*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -2838,7 +2830,7 @@
   <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
     <enum-type name="Roles"/>
     <enum-type name="Option" flags="Options" since="5.14"/>
-    <modify-function signature="setIconProvider(QFileIconProvider*)">
+    <modify-function signature="setIconProvider(QAbstractFileIconProvider*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -3269,8 +3261,6 @@
   <object-type name="QGraphicsRotation" since="4.6"/>
   <object-type name="QGraphicsScale" since="4.6"/>
   <object-type name="QGraphicsTransform" since="4.6"/>
-  <object-type name="QKeyEventTransition" since="4.6"/>
-  <object-type name="QMouseEventTransition" since="4.6"/>
   <object-type name="QPanGesture" since="4.6"/>
   <object-type name="QPinchGesture" since="4.6">
       <enum-type name="ChangeFlag" flags="ChangeFlags"/>
