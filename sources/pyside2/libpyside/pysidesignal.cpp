@@ -360,7 +360,7 @@ PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 
         if (isMethod || isFunction) {
             PyObject *function = isMethod ? PyMethod_GET_FUNCTION(slot) : slot;
-            PyCodeObject *objCode = reinterpret_cast<PyCodeObject *>(PyFunction_GET_CODE(function));
+            auto *objCode = reinterpret_cast<PepCodeObject *>(PyFunction_GET_CODE(function));
             useSelf = isMethod;
             slotArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);
             if (useSelf)
@@ -567,7 +567,11 @@ PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(signal->homonymousMethod, 0, 0));
     if (PyCFunction_Check(homonymousMethod)
             && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC)) {
+#if PY_VERSION_HEX >=  0x03090000
+        return PyObject_Call(homonymousMethod, args, kw);
+#else
         return PyCFunction_Call(homonymousMethod, args, kw);
+#endif
     }
 
     // Assumes homonymousMethod is not a static method.
@@ -585,7 +589,11 @@ PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw)
 
     descrgetfunc getDescriptor = Py_TYPE(PySideSignal->d->homonymousMethod)->tp_descr_get;
     Shiboken::AutoDecRef homonymousMethod(getDescriptor(PySideSignal->d->homonymousMethod, PySideSignal->d->source, 0));
+#if PY_VERSION_HEX >=  0x03090000
+        return PyObject_Call(homonymousMethod, args, kw);
+#else
     return PyCFunction_Call(homonymousMethod, args, kw);
+#endif
 }
 
 static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *arg)
@@ -929,7 +937,7 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
 
     if (isMethod || isFunction) {
         PyObject *function = isMethod ? PyMethod_GET_FUNCTION(callback) : callback;
-        auto objCode = reinterpret_cast<PyCodeObject *>(PyFunction_GET_CODE(function));
+        auto objCode = reinterpret_cast<PepCodeObject *>(PyFunction_GET_CODE(function));
         functionName = Shiboken::String::toCString(PepFunction_GetName(function));
         useSelf = isMethod;
         numArgs = PepCode_GET_FLAGS(objCode) & CO_VARARGS ? -1 : PepCode_GET_ARGCOUNT(objCode);

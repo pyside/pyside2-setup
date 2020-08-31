@@ -4683,6 +4683,10 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
 
     for (const AbstractMetaFunction *f : overloads) {
         QStringList args;
+        // PYSIDE-1328: `self`-ness cannot be computed in Python because there are mixed cases.
+        // Toplevel functions like `PySide2.QtCore.QEnum` are always self-less.
+        if (!(f->isStatic()) && f->ownerClass())
+            args << QLatin1String("self");
         const AbstractMetaArgumentList &arguments = f->arguments();
         for (const AbstractMetaArgument *arg : arguments)  {
             QString strArg = arg->type()->pythonSignature();

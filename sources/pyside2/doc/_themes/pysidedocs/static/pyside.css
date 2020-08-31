@@ -552,6 +552,9 @@ tt.descname {
   .container {
     padding:0 2%
   }
+  .sphinxsidebar {
+    top: 16px !important;
+  }
 }
 #navbar .navbar-oneQt {
   display:inline;
@@ -1172,7 +1175,9 @@ div.multi-column div {
 .col-2 h2,.toc h3,.sidebar-content h2,
 .sidebar-content h3,.sectionlist h2,
 .sphinxsidebar {
-  position: fixed;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 64px;
   overflow: scroll;
   overflow-x: hidden;
   overflow-y: hidden;

@@ -327,7 +327,7 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 // But this is no problem as we check it's validity for every version.
 
 #define PYTHON_BUFFER_VERSION_COMPATIBLE    (PY_VERSION_HEX >= 0x03030000 && \
-                                             PY_VERSION_HEX <  0x0308FFFF)
+                                             PY_VERSION_HEX <  0x0309FFFF)
 #if !PYTHON_BUFFER_VERSION_COMPATIBLE
 # error Please check the buffer compatibility for this python version!
 #endif
@@ -411,23 +411,27 @@ LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 /* Bytecode object */
 
 // we have to grab the code object from python
-typedef struct _code PyCodeObject;
+typedef struct _code PepCodeObject;
 
-LIBSHIBOKEN_API int PepCode_Get(PyCodeObject *co, const char *name);
+LIBSHIBOKEN_API int PepCode_Get(PepCodeObject *co, const char *name);
 
-#define PepCode_GET_FLAGS(o)         PepCode_Get(o, "co_flags")
-#define PepCode_GET_ARGCOUNT(o)      PepCode_Get(o, "co_argcount")
+#  define PepCode_GET_FLAGS(o)         PepCode_Get(o, "co_flags")
+#  define PepCode_GET_ARGCOUNT(o)      PepCode_Get(o, "co_argcount")
 
 /* Masks for co_flags above */
-#define CO_OPTIMIZED    0x0001
-#define CO_NEWLOCALS    0x0002
-#define CO_VARARGS      0x0004
-#define CO_VARKEYWORDS  0x0008
-#define CO_NESTED       0x0010
-#define CO_GENERATOR    0x0020
+#  define CO_OPTIMIZED    0x0001
+#  define CO_NEWLOCALS    0x0002
+#  define CO_VARARGS      0x0004
+#  define CO_VARKEYWORDS  0x0008
+#  define CO_NESTED       0x0010
+#  define CO_GENERATOR    0x0020
+
 #else
-#define PepCode_GET_FLAGS(o)         ((o)->co_flags)
-#define PepCode_GET_ARGCOUNT(o)      ((o)->co_argcount)
+
+#  define PepCodeObject                PyCodeObject
+#  define PepCode_GET_FLAGS(o)         ((o)->co_flags)
+#  define PepCode_GET_ARGCOUNT(o)      ((o)->co_argcount)
+
 #endif
 
 /*****************************************************************************

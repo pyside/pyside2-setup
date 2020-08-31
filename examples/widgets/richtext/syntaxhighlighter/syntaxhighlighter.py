@@ -2,7 +2,7 @@
 ############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -57,97 +57,98 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
 
-        self.highlighter = Highlighter()
+        self._highlighter = Highlighter()
 
-        self.setupFileMenu()
-        self.setupEditor()
+        self.setup_file_menu()
+        self.setup_editor()
 
-        self.setCentralWidget(self.editor)
+        self.setCentralWidget(self._editor)
         self.setWindowTitle(self.tr("Syntax Highlighter"))
 
-    def newFile(self):
-        self.editor.clear()
+    def new_file(self):
+        self._editor.clear()
 
-    def openFile(self, path = ""):
-        fileName = path
+    def open_file(self, path=""):
+        file_name = path
 
-        if not fileName:
-            fileName, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), "",
-                                                      "qmake Files (*.pro *.prf *.pri)")
+        if not file_name:
+            file_name, _ = QFileDialog.getOpenFileName(self, self.tr("Open File"), "",
+                                                       "qmake Files (*.pro *.prf *.pri)")
 
-        if fileName:
-            inFile = QFile(fileName)
+        if file_name:
+            inFile = QFile(file_name)
             if inFile.open(QFile.ReadOnly | QFile.Text):
                 stream = QTextStream(inFile)
-                self.editor.setPlainText(stream.readAll())
+                self._editor.setPlainText(stream.readAll())
 
-    def setupEditor(self):
-        variableFormat = QTextCharFormat()
-        variableFormat.setFontWeight(QFont.Bold)
-        variableFormat.setForeground(Qt.blue)
-        self.highlighter.addMapping("\\b[A-Z_]+\\b", variableFormat)
+    def setup_editor(self):
+        variable_format = QTextCharFormat()
+        variable_format.setFontWeight(QFont.Bold)
+        variable_format.setForeground(Qt.blue)
+        self._highlighter.add_mapping("\\b[A-Z_]+\\b", variable_format)
 
-        singleLineCommentFormat = QTextCharFormat()
-        singleLineCommentFormat.setBackground(QColor("#77ff77"))
-        self.highlighter.addMapping("#[^\n]*", singleLineCommentFormat)
+        single_line_comment_format = QTextCharFormat()
+        single_line_comment_format.setBackground(QColor("#77ff77"))
+        self._highlighter.add_mapping("#[^\n]*", single_line_comment_format)
 
-        quotationFormat = QTextCharFormat()
-        quotationFormat.setBackground(Qt.cyan)
-        quotationFormat.setForeground(Qt.blue)
-        self.highlighter.addMapping("\".*\"", quotationFormat)
+        quotation_format = QTextCharFormat()
+        quotation_format.setBackground(Qt.cyan)
+        quotation_format.setForeground(Qt.blue)
+        self._highlighter.add_mapping("\".*\"", quotation_format)
 
-        functionFormat = QTextCharFormat()
-        functionFormat.setFontItalic(True)
-        functionFormat.setForeground(Qt.blue)
-        self.highlighter.addMapping("\\b[a-z0-9_]+\\(.*\\)", functionFormat)
+        function_format = QTextCharFormat()
+        function_format.setFontItalic(True)
+        function_format.setForeground(Qt.blue)
+        self._highlighter.add_mapping("\\b[a-z0-9_]+\\(.*\\)", function_format)
 
         font = QFont()
         font.setFamily("Courier")
         font.setFixedPitch(True)
         font.setPointSize(10)
 
-        self.editor = QPlainTextEdit()
-        self.editor.setFont(font)
-        self.highlighter.setDocument(self.editor.document())
+        self._editor = QPlainTextEdit()
+        self._editor.setFont(font)
+        self._highlighter.setDocument(self._editor.document())
 
-    def setupFileMenu(self):
-        fileMenu = self.menuBar().addMenu(self.tr("&File"))
+    def setup_file_menu(self):
+        file_menu = self.menuBar().addMenu(self.tr("&File"))
 
-        newFileAct = fileMenu.addAction(self.tr("&New..."))
-        newFileAct.setShortcut(QKeySequence(QKeySequence.New))
-        newFileAct.triggered.connect(self.newFile)
+        new_file_act = file_menu.addAction(self.tr("&New..."))
+        new_file_act.setShortcut(QKeySequence(QKeySequence.New))
+        new_file_act.triggered.connect(self.new_file)
 
-        openFileAct = fileMenu.addAction(self.tr("&Open..."))
-        openFileAct.setShortcut(QKeySequence(QKeySequence.Open))
-        openFileAct.triggered.connect(self.openFile)
+        open_file_act = file_menu.addAction(self.tr("&Open..."))
+        open_file_act.setShortcut(QKeySequence(QKeySequence.Open))
+        open_file_act.triggered.connect(self.open_file)
 
-        quitAct = fileMenu.addAction(self.tr("E&xit"))
-        quitAct.setShortcut(QKeySequence(QKeySequence.Quit))
-        quitAct.triggered.connect(self.close)
+        quit_act = file_menu.addAction(self.tr("E&xit"))
+        quit_act.setShortcut(QKeySequence(QKeySequence.Quit))
+        quit_act.triggered.connect(self.close)
 
-        helpMenu = self.menuBar().addMenu("&Help")
-        helpMenu.addAction("About &Qt", qApp.aboutQt)
+        help_menu = self.menuBar().addMenu("&Help")
+        help_menu.addAction("About &Qt", qApp.aboutQt)
 
 
 class Highlighter(QSyntaxHighlighter):
     def __init__(self, parent=None):
         QSyntaxHighlighter.__init__(self, parent)
 
-        self.mappings = {}
+        self._mappings = {}
 
-    def addMapping(self, pattern, format):
-        self.mappings[pattern] = format
+    def add_mapping(self, pattern, format):
+        self._mappings[pattern] = format
 
     def highlightBlock(self, text):
-        for pattern in self.mappings:
-            for m in re.finditer(pattern,text):
-                s,e = m.span()
-                self.setFormat(s, e - s, self.mappings[pattern])
+        for pattern, format in self._mappings.items():
+            for match in re.finditer(pattern, text):
+                start, end = match.span()
+                self.setFormat(start, end - start, format)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.resize(640, 512)
     window.show()
-    window.openFile(":/examples/example")
+    window.open_file(":/examples/example")
     sys.exit(app.exec_())
