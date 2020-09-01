@@ -51,12 +51,12 @@ endif()
 set(DISABLE_DOCSTRINGS ${DISABLE_DOCSTRINGS} PARENT_SCOPE)
 
 add_library(apiextractor STATIC ${apiextractor_SRC})
-target_include_directories(apiextractor PRIVATE ${CLANG_EXTRA_INCLUDES}
+target_include_directories(apiextractor PRIVATE ${CLANG_INCLUDE_DIRS}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}
                                                 ${CMAKE_CURRENT_BINARY_DIR}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}/parser)
 target_link_libraries(apiextractor PUBLIC Qt${QT_MAJOR_VERSION}::Core)
-target_link_libraries(apiextractor PRIVATE ${CLANG_EXTRA_LIBRARIES})
+target_link_libraries(apiextractor PRIVATE libclang)
 
 if (HAS_LIBXSLT)
     target_compile_definitions(apiextractor PUBLIC HAVE_LIBXSLT)
