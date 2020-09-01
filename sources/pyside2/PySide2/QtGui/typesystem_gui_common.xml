@@ -1102,7 +1102,6 @@
       <enum-type name="PaintDeviceMetric"/>
   </object-type>
   <object-type name="QPagedPaintDevice">
-    <value-type name="Margins"/>
     <enum-type name="PageSize"/>
     <enum-type name="PdfVersion" since="5.10"/>
   </object-type>

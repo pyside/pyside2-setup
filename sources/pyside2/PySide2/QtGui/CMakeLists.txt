@@ -97,7 +97,6 @@ ${QtGui_GEN_DIR}/qoffscreensurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
-${QtGui_GEN_DIR}/qpagedpaintdevice_margins_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagelayout_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagesize_wrapper.cpp
