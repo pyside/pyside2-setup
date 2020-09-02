@@ -79,8 +79,8 @@
         <enum-type name="SocketOption" since="4.6"/>
         <enum-type name="SocketState"/>
         <enum-type name="SocketType"/>
-        <modify-function signature="connectToHost(const QString&amp;,quint16,QFlags&lt;QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes"/>
-        <modify-function signature="connectToHost(const QHostAddress&amp;,quint16,QFlags&lt;QIODevice::OpenModeFlag>)" allow-thread="yes"/>
+        <modify-function signature="connectToHost(const QString&amp;,quint16,QFlags&lt;QIODeviceBase::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes"/>
+        <modify-function signature="connectToHost(const QHostAddress&amp;,quint16,QFlags&lt;QIODeviceBase::OpenModeFlag>)" allow-thread="yes"/>
         <modify-function signature="disconnectFromHost()" allow-thread="yes"/>
         <modify-function signature="waitForConnected(int)" allow-thread="yes"/>
         <modify-function signature="waitForDisconnected(int)" allow-thread="yes"/>
@@ -205,10 +205,8 @@
         <enum-type name="ConversionModeFlag" flags="ConversionMode" since="5.8"/>
         <enum-type name="SpecialAddress"/>
         <!-- ### QHostAddress(QIPv6Address) does this -->
-        <modify-function signature="QHostAddress(quint8*)" remove="all"/>
         <modify-function signature="QHostAddress(const quint8*)" remove="all"/>
        <!-- ### -->
-        <modify-function signature="setAddress(quint8*)" remove="all"/>
         <modify-function signature="setAddress(const quint8*)" remove="all"/>
     </value-type>
 
@@ -302,7 +300,7 @@
     <object-type name="QSslSocket">
         <enum-type name="SslMode"/>
         <enum-type name="PeerVerifyMode"/>
-        <modify-function signature="connectToHostEncrypted(const QString&amp;,quint16,QFlags&lt;QIODevice::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes"/>
+        <modify-function signature="connectToHostEncrypted(const QString&amp;,quint16,QFlags&lt;QIODeviceBase::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes"/>
         <modify-function signature="waitForEncrypted(int)" allow-thread="yes"/>
     </object-type>
 
