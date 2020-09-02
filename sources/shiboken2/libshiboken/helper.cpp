@@ -119,13 +119,8 @@ static void formatPyObject(PyObject *obj, std::ostream &str)
             str << PyLong_AsLong(obj);
         else if (PyFloat_Check(obj))
             str << PyFloat_AsDouble(obj);
-#ifdef IS_PY3K
         else if (PyUnicode_Check(obj))
             str << '"' << _PepUnicode_AsString(obj) << '"';
-#else
-        else if (PyString_Check(obj))
-            str << '"' << PyString_AsString(obj) << '"';
-#endif
         else if (PySequence_Check(obj))
             formatPySequence(obj, str);
         else

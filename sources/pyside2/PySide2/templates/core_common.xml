@@ -377,15 +377,10 @@
     </template>
 
     <template name="pydatetime_importandcheck_function">
-        #ifdef IS_PY3K
-        #define PySideDateTime_IMPORT PyDateTime_IMPORT
-        #else
-        #define PySideDateTime_IMPORT \
-                    (PyDateTimeAPI = (PyDateTime_CAPI*) PyCObject_Import((char*)"datetime", \
-                                                                     (char*)"datetime_CAPI"))
-        #endif
-        static bool PyDateTime_ImportAndCheck(PyObject *pyIn) {
-            if (!PyDateTimeAPI) PySideDateTime_IMPORT;
+        static bool PyDateTime_ImportAndCheck(PyObject *pyIn)
+        {
+            if (!PyDateTimeAPI)
+                PyDateTime_IMPORT;
             return $DATETIMETYPE_Check(pyIn);
         }
     </template>

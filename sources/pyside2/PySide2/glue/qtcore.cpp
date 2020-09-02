@@ -46,17 +46,6 @@
 #include <limits>
 // @snippet include-pyside
 
-// @snippet pystring-check
-bool py2kStrCheck(PyObject *obj)
-{
-#ifdef IS_PY3K
-    return false;
-#else
-    return PyString_Check(obj);
-#endif
-}
-// @snippet pystring-check
-
 // @snippet qsettings-value
 // If we enter the kwds, means that we have a defaultValue or
 // at least a type.
@@ -102,15 +91,9 @@ if (typeObj) {
     } else if (typeObj == &PyUnicode_Type) {
         QByteArray asByteArray = out.toByteArray();
         %PYARG_0 = PyUnicode_FromString(asByteArray.data());
-#ifdef IS_PY3K
     } else if (typeObj == &PyLong_Type) {
         float asFloat = out.toFloat();
         pyResult = PyLong_FromDouble(asFloat);
-#else
-    } else if (typeObj == &PyInt_Type) {
-        float asFloat = out.toFloat();
-        pyResult = PyInt_FromLong(long(asFloat));
-#endif
     } else if (typeObj == &PyFloat_Type) {
         float asFloat = out.toFloat();
         %PYARG_0 = PyFloat_FromDouble(asFloat);
@@ -679,7 +662,7 @@ if (d) {
 
 // @snippet qdate-topython
 if (!PyDateTimeAPI)
-    PySideDateTime_IMPORT;
+    PyDateTime_IMPORT;
 %PYARG_0 = PyDate_FromDate(%CPPSELF.year(), %CPPSELF.month(), %CPPSELF.day());
 // @snippet qdate-topython
 
@@ -715,7 +698,8 @@ QTime time(%4, %5, %6);
 // @snippet qdatetime-topython
 QDate date = %CPPSELF.date();
 QTime time = %CPPSELF.time();
-if (!PyDateTimeAPI) PySideDateTime_IMPORT;
+if (!PyDateTimeAPI)
+    PyDateTime_IMPORT;
 %PYARG_0 = PyDateTime_FromDateAndTime(date.year(), date.month(), date.day(), time.hour(), time.minute(), time.second(), time.msec()*1000);
 // @snippet qdatetime-topython
 
@@ -746,7 +730,7 @@ namespace PySide {
 
 // @snippet qtime-topython
 if (!PyDateTimeAPI)
-    PySideDateTime_IMPORT;
+    PyDateTime_IMPORT;
 %PYARG_0 = PyTime_FromTime(%CPPSELF.hour(), %CPPSELF.minute(), %CPPSELF.second(), %CPPSELF.msec()*1000);
 // @snippet qtime-topython
 
@@ -886,13 +870,7 @@ if (PyIndex_Check(_key)) {
     }
 } else if (PySlice_Check(_key)) {
     Py_ssize_t start, stop, step, slicelength, cur;
-
-#ifdef IS_PY3K
-    PyObject *key = _key;
-#else
-    PySliceObject *key = reinterpret_cast<PySliceObject *>(_key);
-#endif
-    if (PySlice_GetIndicesEx(key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
+    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
         return nullptr;
     }
 
@@ -937,15 +915,9 @@ if (PyIndex_Check(_key)) {
     }
 
     // Provide more specific error message for bytes/str, bytearray, QByteArray respectively
-#ifdef IS_PY3K
     if (PyBytes_Check(_value)) {
         if (Py_SIZE(_value) != 1) {
             PyErr_SetString(PyExc_ValueError, "bytes must be of size 1");
-#else
-    if (PyString_CheckExact(_value)) {
-        if (Py_SIZE(_value) != 1) {
-            PyErr_SetString(PyExc_ValueError, "str must be of size 1");
-#endif
             return -1;
         }
     } else if (PyByteArray_Check(_value)) {
@@ -959,11 +931,7 @@ if (PyIndex_Check(_key)) {
             return -1;
         }
     } else {
-#ifdef IS_PY3K
         PyErr_SetString(PyExc_ValueError, "a bytes, bytearray, QByteArray of size 1 is required");
-#else
-        PyErr_SetString(PyExc_ValueError, "a str, bytearray, QByteArray of size 1 is required");
-#endif
         return -1;
     }
 
@@ -976,13 +944,7 @@ if (PyIndex_Check(_key)) {
     return !result ? -1 : 0;
 } else if (PySlice_Check(_key)) {
     Py_ssize_t start, stop, step, slicelength, value_length;
-
-#ifdef IS_PY3K
-    PyObject *key = _key;
-#else
-    PySliceObject *key = reinterpret_cast<PySliceObject *>(_key);
-#endif
-    if (PySlice_GetIndicesEx(key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
+    if (PySlice_GetIndicesEx(_key, %CPPSELF.count(), &start, &stop, &step, &slicelength) < 0) {
         return -1;
     }
     // The parameter candidates are: bytes/str, bytearray, QByteArray itself.
@@ -1013,11 +975,7 @@ if (PyIndex_Check(_key)) {
         for (int j = 0; j < slicelength; j++) {
             PyObject *item = PyObject_GetItem(_value, PyLong_FromLong(j));
             QByteArray temp;
-#ifdef IS_PY3K
             if (PyLong_Check(item)) {
-#else
-            if (PyLong_Check(item) || PyInt_Check(item)) {
-#endif
                 int overflow;
                 long ival = PyLong_AsLongAndOverflow(item, &overflow);
                 // Not suppose to bigger than 255 because only bytes, bytearray, QByteArray were accept
@@ -1194,15 +1152,7 @@ if (aux == nullptr) {
     return nullptr;
 }
 QByteArray b(Py_TYPE(%PYSELF)->tp_name);
-#ifdef IS_PY3K
-    %PYARG_0 = PyUnicode_FromFormat("%s(%R)", b.constData(), aux);
-#else
-    aux = PyObject_Repr(aux);
-    b += '(';
-    b += QByteArray(PyBytes_AS_STRING(aux), PyBytes_GET_SIZE(aux));
-    b += ')';
-    %PYARG_0 = Shiboken::String::fromStringAndSize(b.constData(), b.size());
-#endif
+%PYARG_0 = PyUnicode_FromFormat("%s(%R)", b.constData(), aux);
 Py_DECREF(aux);
 // @snippet qbytearray-repr
 
@@ -1245,12 +1195,8 @@ PyObject *aux = PyBytes_FromStringAndSize(%CPPSELF.constData(), %CPPSELF.size())
 if (aux == nullptr) {
     return nullptr;
 }
-#ifdef IS_PY3K
-    %PYARG_0 = PyObject_Repr(aux);
-    Py_DECREF(aux);
-#else
-    %PYARG_0 = aux;
-#endif
+%PYARG_0 = PyObject_Repr(aux);
+Py_DECREF(aux);
 // @snippet qbytearray-str
 
 // @snippet qbytearray-len
@@ -1697,7 +1643,7 @@ Py_END_ALLOW_THREADS
 // @snippet conversion-pylong-unsigned
 
 // @snippet conversion-pylong-quintptr
-#if defined(IS_PY3K) && QT_POINTER_SIZE == 8
+#if QT_POINTER_SIZE == 8
 %out = %OUTTYPE(PyLong_AsUnsignedLongLong(%in));
 #else
 %out = %OUTTYPE(PyLong_AsUnsignedLong(%in));
@@ -1876,11 +1822,7 @@ int usec = PyDateTime_TIME_GET_MICROSECOND(%in);
 // @snippet conversion-qtime-pytime
 
 // @snippet conversion-qbytearray-pybytes
-#ifdef IS_PY3K
 %out = %OUTTYPE(PyBytes_AS_STRING(%in), PyBytes_GET_SIZE(%in));
-#else
-%out = %OUTTYPE(Shiboken::String::toCString(%in), Shiboken::String::len(%in));
-#endif
 // @snippet conversion-qbytearray-pybytes
 
 // @snippet conversion-qbytearray-pybytearray
@@ -1908,7 +1850,7 @@ return PyLong_FromUnsignedLong(%in);
 // @snippet return-pylong-unsigned
 
 // @snippet return-pylong-quintptr
-#if defined(IS_PY3K) && QT_POINTER_SIZE == 8
+#if QT_POINTER_SIZE == 8
 return PyLong_FromUnsignedLongLong(%in);
 #else
 return PyLong_FromUnsignedLong(%in);
@@ -2010,7 +1952,7 @@ pthread_cleanup_pop(0);
 // @snippet qthread_pthread_cleanup_uninstall
 
 // @snippet qlibraryinfo_build
-#if defined(IS_PY3K) && defined(Py_LIMITED_API)
+#if defined(Py_LIMITED_API)
 auto suffix = PyUnicode_FromString(" [limited API]");
 auto oldResult = pyResult;
 pyResult = PyUnicode_Concat(pyResult, suffix);

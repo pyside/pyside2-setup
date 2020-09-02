@@ -85,20 +85,12 @@ bool isConvertible(PyObject *obj)
 
 PyObject *fromCString(const char *value)
 {
-#ifdef IS_PY3K
     return PyUnicode_FromString(value);
-#else
-    return PyBytes_FromString(value);
-#endif
 }
 
 PyObject *fromCString(const char *value, int len)
 {
-#ifdef IS_PY3K
     return PyUnicode_FromStringAndSize(value, len);
-#else
-    return PyBytes_FromStringAndSize(value, len);
-#endif
 }
 
 const char *toCString(PyObject *str, Py_ssize_t *len)
@@ -111,17 +103,9 @@ const char *toCString(PyObject *str, Py_ssize_t *len)
             Shiboken::AutoDecRef uniStr(PyUnicode_AsUTF8String(str));
             *len = PyBytes_GET_SIZE(uniStr.object());
         }
-#ifdef IS_PY3K
         // Return unicode from str instead of uniStr, because the lifetime of the returned pointer
         // depends on the lifetime of str.
         return _PepUnicode_AsString(str);
-#else
-        str = PyUnicode_AsUTF8String(str);
-        if (str == NULL) {
-            return NULL;
-        }
-        return PyString_AsString(str);
-#endif
     }
     if (PyBytes_Check(str)) {
         if (len)
@@ -159,39 +143,20 @@ PyObject *fromFormat(const char *format, ...)
     va_list argp;
     va_start(argp, format);
     PyObject *result = nullptr;
-#ifdef IS_PY3K
     result = PyUnicode_FromFormatV(format, argp);
-#else
-    result = PyString_FromFormatV(format, argp);
-#endif
     va_end(argp);
     return result;
 }
 
 PyObject *fromStringAndSize(const char *str, Py_ssize_t size)
 {
-#ifdef IS_PY3K
     return PyUnicode_FromStringAndSize(str, size);
-#else
-    return PyString_FromStringAndSize(str, size);
-#endif
 }
 
 int compare(PyObject *val1, const char *val2)
 {
     if (PyUnicode_Check(val1))
-#ifdef IS_PY3K
        return PyUnicode_CompareWithASCIIString(val1, val2);
-#else
-    {
-        PyObject *uVal2 = PyUnicode_FromString(val2);
-        bool result = PyUnicode_Compare(val1, uVal2);
-        Py_XDECREF(uVal2);
-        return result;
-    }
-    if (PyString_Check(val1))
-        return strcmp(PyString_AS_STRING(val1), val2);
-#endif
     return 0;
 
 }

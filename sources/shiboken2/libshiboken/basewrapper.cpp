@@ -642,14 +642,6 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
 
     for (int i=0, i_max=PyTuple_GET_SIZE(pyBases); i < i_max; i++) {
         PyObject *baseType = PyTuple_GET_ITEM(pyBases, i);
-#ifndef IS_PY3K
-        if (PyClass_Check(baseType)) {
-            PyErr_Format(PyExc_TypeError, "Invalid base class used in type %s. "
-                "PySide only supports multiple inheritance from Python new style classes.",
-                metatype->tp_name);
-            return 0;
-        }
-#endif
         if (reinterpret_cast<PyTypeObject *>(baseType)->tp_new == SbkDummyNew) {
             // PYSIDE-595: A base class does not allow inheritance.
             return SbkDummyNew(metatype, args, kwds);
@@ -759,12 +751,6 @@ PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
     // PYSIDE-560:
     // We avoid to use this in Python 3, because we have a hard time to get
     // write access to these flags
-#ifndef IS_PY3K
-    if (PyType_HasFeature(subtype, Py_TPFLAGS_HAVE_GC)) {
-        subtype->tp_flags &= ~Py_TPFLAGS_HAVE_GC;
-        subtype->tp_free = PyObject_Del;
-    }
-#endif
     auto self = reinterpret_cast<SbkObject *>(MakeQAppWrapper(subtype));
     return self == nullptr ? nullptr : _setupNew(self, subtype);
 }

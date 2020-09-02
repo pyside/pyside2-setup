@@ -116,14 +116,10 @@ Arguments:
     %PYARG_1 (uifile)
 */
 // 1. Generate the Python code from the UI file
-#ifdef IS_PY3K
 PyObject *strObj = PyUnicode_AsUTF8String(%PYARG_1);
 char *arg1 = PyBytes_AsString(strObj);
 QByteArray uiFileName(arg1);
 Py_DECREF(strObj);
-#else
-QByteArray uiFileName(PyBytes_AsString(%PYARG_1));
-#endif
 
 QFile uiFile(uiFileName);
 
@@ -207,12 +203,7 @@ if (codeUi.isNull()) {
     qCritical() << "Error while compiling the generated Python file";
     Py_RETURN_NONE;
 }
-PyObject *uiObj = nullptr;
-#ifdef IS_PY3K
-uiObj = PyEval_EvalCode(codeUi, loc, loc);
-#else
-uiObj = PyEval_EvalCode(reinterpret_cast<PyCodeObject *>(codeUi.object()), loc, loc);
-#endif
+PyObject *uiObj = PyEval_EvalCode(codeUi, loc, loc);
 
 if (uiObj == nullptr) {
     qCritical() << "Error while running exec() on the generated code";
@@ -234,13 +225,8 @@ if (codeBaseClass.isNull()) {
     Py_RETURN_NONE;
 }
 
-#ifdef IS_PY3K
 PyObject *classObj = PyEval_EvalCode(codeClass, loc, loc);
 PyObject *baseClassObj = PyEval_EvalCode(codeBaseClass, loc, loc);
-#else
-PyObject *classObj = PyEval_EvalCode(reinterpret_cast<PyCodeObject *>(codeClass.object()), loc, loc);
-PyObject *baseClassObj = PyEval_EvalCode(reinterpret_cast<PyCodeObject *>(codeBaseClass.object()), loc, loc);
-#endif
 
 %PYARG_0  = PyTuple_New(2);
 if (%PYARG_0 == nullptr) {

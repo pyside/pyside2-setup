@@ -141,21 +141,13 @@ namespace PySide
 namespace QFlags
 {
     static PyType_Slot SbkNewQFlagsType_slots[] = {
-#ifdef IS_PY3K
         {Py_nb_bool, 0},
-#else
-        {Py_nb_nonzero, 0},
-        {Py_nb_long, 0},
-#endif
         {Py_nb_invert, 0},
         {Py_nb_and, 0},
         {Py_nb_xor, 0},
         {Py_nb_or, 0},
         {Py_nb_int, reinterpret_cast<void*>(qflag_int)},
         {Py_nb_index, reinterpret_cast<void*>(qflag_int)},
-#ifndef IS_PY3K
-        {Py_nb_long, 0},
-#endif
         {Py_tp_new, (void *)PySideQFlagsNew},
         {Py_tp_richcompare, (void *)PySideQFlagsRichCompare},
         {Py_tp_dealloc, (void *)Sbk_object_dealloc},

@@ -85,7 +85,6 @@ namespace {
     static PyObject *parseArguments(const QList< QByteArray >& paramTypes, void **args);
     static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
 
-#ifdef IS_PY3K
     static void destroyMetaObject(PyObject *obj)
     {
         void *ptr = PyCapsule_GetPointer(obj, 0);
@@ -95,17 +94,6 @@ namespace {
             Shiboken::BindingManager::instance().releaseWrapper(wrapper);
         delete meta;
     }
-
-#else
-    static void destroyMetaObject(void *obj)
-    {
-        auto meta = reinterpret_cast<PySide::MetaObjectBuilder *>(obj);
-        SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
-        if (wrapper)
-            Shiboken::BindingManager::instance().releaseWrapper(wrapper);
-        delete meta;
-    }
-#endif
 }
 
 namespace PySide {
@@ -569,11 +557,7 @@ static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     // PyDict_GetItem would touch PyThreadState_GET and the global error state.
     // PyDict_GetItemWithError instead can work without GIL.
     PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr);
-#ifdef IS_PY3K
     return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
-#else
-    return reinterpret_cast<MetaObjectBuilder *>(PyCObject_AsVoidPtr(pyBuilder));
-#endif
 }
 
 int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signature, QMetaMethod::MethodType type)
@@ -599,12 +583,7 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
             // Create a instance meta object
             if (!dmo) {
                 dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
-#ifdef IS_PY3K
                 PyObject *pyDmo = PyCapsule_New(dmo, 0, destroyMetaObject);
-#else
-                PyObject *pyDmo = PyCObject_FromVoidPtr(dmo, destroyMetaObject);
-#endif
-
                 PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
                 Py_DECREF(pyDmo);
             }

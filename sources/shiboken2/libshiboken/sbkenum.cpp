@@ -204,13 +204,6 @@ static PyObject *enum_multiply(PyObject *self, PyObject *v)
 return enum_op(PyNumber_Multiply, self, v);
 }
 
-#ifndef IS_PY3K
-static PyObject *enum_divide(PyObject *self, PyObject *v)
-{
-    return enum_op(PyNumber_Divide, self, v);
-}
-#endif
-
 static PyObject *enum_richcompare(PyObject *self, PyObject *other, int op)
 {
     PyObject *valA = self;
@@ -287,16 +280,8 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_nb_add, (void *)enum_add},
     {Py_nb_subtract, (void *)enum_subtract},
     {Py_nb_multiply, (void *)enum_multiply},
-#ifndef IS_PY3K
-    {Py_nb_divide, (void *)enum_divide},
-#endif
     {Py_nb_positive, (void *)enum_int},
-#ifdef IS_PY3K
     {Py_nb_bool, (void *)enum_bool},
-#else
-    {Py_nb_nonzero, (void *)enum_bool},
-    {Py_nb_long, (void *)enum_int},
-#endif
     {Py_nb_and, (void *)enum_and},
     {Py_nb_xor, (void *)enum_xor},
     {Py_nb_or, (void *)enum_or},
@@ -634,16 +619,8 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_nb_add, (void *)enum_add},
     {Py_nb_subtract, (void *)enum_subtract},
     {Py_nb_multiply, (void *)enum_multiply},
-#ifndef IS_PY3K
-    {Py_nb_divide, (void *)enum_divide},
-#endif
     {Py_nb_positive, (void *)enum_int},
-#ifdef IS_PY3K
     {Py_nb_bool, (void *)enum_bool},
-#else
-    {Py_nb_nonzero, (void *)enum_bool},
-    {Py_nb_long, (void *)enum_int},
-#endif
     {Py_nb_and, (void *)enum_and},
     {Py_nb_xor, (void *)enum_xor},
     {Py_nb_or, (void *)enum_or},
@@ -676,11 +653,7 @@ copyNumberMethods(PyTypeObject *flagsType,
     PUT_SLOT(Py_nb_absolute);
     PUT_SLOT(Py_nb_add);
     PUT_SLOT(Py_nb_and);
-#ifdef IS_PY3K
     PUT_SLOT(Py_nb_bool);
-#else
-    PUT_SLOT(Py_nb_nonzero);
-#endif
     PUT_SLOT(Py_nb_divmod);
     PUT_SLOT(Py_nb_float);
     PUT_SLOT(Py_nb_floor_divide);
@@ -710,10 +683,6 @@ copyNumberMethods(PyTypeObject *flagsType,
     PUT_SLOT(Py_nb_subtract);
     PUT_SLOT(Py_nb_true_divide);
     PUT_SLOT(Py_nb_xor);
-#ifndef IS_PY3K
-    PUT_SLOT(Py_nb_long);
-    PUT_SLOT(Py_nb_divide);
-#endif
 #undef PUT_SLOT
     *pidx = idx;
 }

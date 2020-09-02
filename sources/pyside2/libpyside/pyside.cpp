@@ -473,13 +473,11 @@ QString pyStringToQString(PyObject *str) {
     if (str == Py_None)
         return QString();
 
-#ifdef IS_PY3K
     if (PyUnicode_Check(str)) {
         const char *unicodeBuffer = _PepUnicode_AsString(str);
         if (unicodeBuffer)
             return QString::fromUtf8(unicodeBuffer);
     }
-#endif
     if (PyBytes_Check(str)) {
         const char *asciiBuffer = PyBytes_AS_STRING(str);
         if (asciiBuffer)

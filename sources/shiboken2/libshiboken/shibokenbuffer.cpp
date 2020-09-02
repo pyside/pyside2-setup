@@ -43,42 +43,25 @@
 
 bool Shiboken::Buffer::checkType(PyObject *pyObj)
 {
-#ifdef IS_PY3K
     return PyObject_CheckBuffer(pyObj) != 0;
-#else
-    return PyObject_CheckReadBuffer(pyObj) != 0;
-#endif
 }
 
 void *Shiboken::Buffer::getPointer(PyObject *pyObj, Py_ssize_t *size)
 {
-    const void *buffer = nullptr;
-#ifdef IS_PY3K
     Py_buffer view;
     if (PyObject_GetBuffer(pyObj, &view, PyBUF_ND) == 0) {
         if (size)
             *size = view.len;
-        buffer = view.buf;
         PyBuffer_Release(&view);
         return view.buf;
     }
     return nullptr;
-#else
-    Py_ssize_t bufferSize = 0;
-
-    PyObject_AsReadBuffer(pyObj, &buffer, &bufferSize);
-
-    if (size)
-        *size = bufferSize;
-#endif
-    return const_cast<void *>(buffer);
 }
 
 PyObject *Shiboken::Buffer::newObject(void *memory, Py_ssize_t size, Type type)
 {
     if (size == 0)
         Py_RETURN_NONE;
-#ifdef IS_PY3K
     Py_buffer view;
     memset(&view, 0, sizeof(Py_buffer));
     view.buf = memory;
@@ -92,9 +75,6 @@ PyObject *Shiboken::Buffer::newObject(void *memory, Py_ssize_t size, Type type)
     //return PyMemoryView_FromBuffer(&view);
     return PyMemoryView_FromMemory(reinterpret_cast<char *>(view.buf),
                                    size, type == ReadOnly ? PyBUF_READ : PyBUF_WRITE);
-#else
-    return type == ReadOnly ? PyBuffer_FromMemory(memory, size) : PyBuffer_FromReadWriteMemory(memory, size);
-#endif
 }
 
 PyObject *Shiboken::Buffer::newObject(const void *memory, Py_ssize_t size)

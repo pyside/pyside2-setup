@@ -226,13 +226,9 @@ int signalTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         Py_ssize_t argument_size = PySequence_Size(argArguments);
         for (Py_ssize_t i = 0; i < argument_size; ++i) {
             PyObject *item = PySequence_GetItem(argArguments, i);
-#ifdef IS_PY3K
             PyObject *strObj = PyUnicode_AsUTF8String(item);
             char *s = PyBytes_AsString(strObj);
             Py_DECREF(strObj);
-#else
-            char *s = PyBytes_AsString(item);
-#endif
             Py_DECREF(item);
             if (s != nullptr)
                 data->data->signalArguments->append(QByteArray(s));

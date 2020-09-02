@@ -93,11 +93,9 @@ inline std::ostream &operator<<(std::ostream &out, PyObject *obj)
 {
     PyObject *repr = Shiboken::Object::isValid(obj, false) ? PyObject_Repr(obj) : 0;
     if (repr) {
-#ifdef IS_PY3K
         PyObject *str = PyUnicode_AsUTF8String(repr);
         Py_DECREF(repr);
         repr = str;
-#endif
         out << PyBytes_AS_STRING(repr);
         Py_DECREF(repr);
     } else {

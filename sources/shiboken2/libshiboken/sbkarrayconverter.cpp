@@ -104,11 +104,7 @@ SbkArrayConverter *unimplementedArrayConverter()
 
 static inline bool intCheck(PyObject *pyIn)
 {
-#ifdef IS_PY3K
     return PyLong_Check(pyIn);
-#else
-    return PyInt_Check(pyIn);
-#endif
 }
 
 static short toShort(PyObject *pyIn) { return short(PyLong_AsLong(pyIn)); }

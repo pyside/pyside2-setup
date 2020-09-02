@@ -4200,11 +4200,7 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractM
         const QString &sqName = it.key();
         if (funcs[sqName].isEmpty())
             continue;
-        if (it.value() == QLatin1String("sq_slice"))
-            s << "#ifndef IS_PY3K\n";
         s << INDENT <<  "{Py_" << it.value() << ", (void *)" << funcs[sqName] << "},\n";
-        if (it.value() == QLatin1String("sq_slice"))
-            s << "#endif\n";
     }
 }
 
@@ -4285,26 +4281,17 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream &s, const AbstractMet
         if (nb[nbName].isEmpty())
             continue;
 
-        // bool is special because the field name differs on Python 2 and 3 (nb_nonzero vs nb_bool)
-        // so a shiboken macro is used.
         if (nbName == QLatin1String("bool")) {
-            s << "#ifdef IS_PY3K\n";
             s << INDENT <<  "{Py_nb_bool, (void *)" << nb[nbName] << "},\n";
-            s << "#else\n";
-            s << INDENT <<  "{Py_nb_nonzero, (void *)" << nb[nbName] << "},\n";
-            s << "#endif\n";
         } else {
             bool excludeFromPy3K = nbName == QLatin1String("__div__") || nbName == QLatin1String("__idiv__");
             if (!excludeFromPy3K)
                 s << INDENT <<  "{Py_" << it.value() << ", (void *)" << nb[nbName] << "},\n";
         }
     }
-    if (!nb[QLatin1String("__div__")].isEmpty()) {
+    if (!nb[QLatin1String("__div__")].isEmpty())
         s << INDENT << "{Py_nb_true_divide, (void *)" << nb[QLatin1String("__div__")] << "},\n";
-        s << "#ifndef IS_PY3K\n";
-        s << INDENT << "{Py_nb_divide, (void *)" << nb[QLatin1String("__div__")] << "},\n";
-        s << "#endif\n";
-    }
+
     if (!nb[QLatin1String("__idiv__")].isEmpty()) {
         s << INDENT << "// This function is unused in Python 3. We reference it here.\n";
         s << INDENT << "{0, (void *)" << nb[QLatin1String("__idiv__")] << "},\n";
@@ -4928,21 +4915,13 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
     QString cpythonName = cpythonEnumName(cppEnum);
 
     s << "static PyType_Slot " << cpythonName << "_number_slots[] = {\n";
-    s << "#ifdef IS_PY3K\n";
     s << INDENT << "{Py_nb_bool,    (void *)" << cpythonName << "__nonzero},\n";
-    s << "#else\n";
-    s << INDENT << "{Py_nb_nonzero, (void *)" << cpythonName << "__nonzero},\n";
-    s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long},\n";
-    s << "#endif\n";
     s << INDENT << "{Py_nb_invert,  (void *)" << cpythonName << "___invert__},\n";
     s << INDENT << "{Py_nb_and,     (void *)" << cpythonName  << "___and__},\n";
     s << INDENT << "{Py_nb_xor,     (void *)" << cpythonName  << "___xor__},\n";
     s << INDENT << "{Py_nb_or,      (void *)" << cpythonName  << "___or__},\n";
     s << INDENT << "{Py_nb_int,     (void *)" << cpythonName << "_long},\n";
     s << INDENT << "{Py_nb_index,   (void *)" << cpythonName << "_long},\n";
-    s << "#ifndef IS_PY3K\n";
-    s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long},\n";
-    s << "#endif\n";
     s << INDENT << "{0, " << NULL_PTR << "} // sentinel\n";
     s << "};\n\n";
 }
@@ -4958,17 +4937,10 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
 
     AbstractMetaType *flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
     s << INDENT << "::" << flagsEntry->originalName() << " cppResult, " << CPP_SELF_VAR << ", cppArg;\n";
-    s << "#ifdef IS_PY3K\n";
     s << INDENT << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
         << ">(int(PyLong_AsLong(self)));\n";
     s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName() << ">(int(PyLong_AsLong("
-        << PYTHON_ARG << ")));\n";
-    s << "#else\n";
-    s << INDENT << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
-        << ">(int(PyInt_AsLong(self)));\n";
-    s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName()
-        << ">(int(PyInt_AsLong(" << PYTHON_ARG << ")));\n";
-    s << "#endif\n\n";
+        << PYTHON_ARG << ")));\n\n";
     s << INDENT << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;\n";
     s << INDENT << "return ";
     writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));
@@ -5855,7 +5827,6 @@ bool CppGenerator::finishGeneration()
     s << "    #define SBK_EXPORT_MODULE\n";
     s << "#endif\n\n";
 
-    s << "#ifdef IS_PY3K\n";
     s << "static struct PyModuleDef moduledef = {\n";
     s << "    /* m_base     */ PyModuleDef_HEAD_INIT,\n";
     s << "    /* m_name     */ \"" << moduleName() << "\",\n";
@@ -5867,7 +5838,6 @@ bool CppGenerator::finishGeneration()
     s << "    /* m_clear    */ nullptr,\n";
     s << "    /* m_free     */ nullptr\n";
     s << "};\n\n";
-    s << "#endif\n\n";
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatureStream, moduleName(), "global functions");
@@ -5906,12 +5876,7 @@ bool CppGenerator::finishGeneration()
     s << INDENT << "static SbkConverter *sbkConverters[SBK_" << moduleName() << "_CONVERTERS_IDX_COUNT" << "];\n";
     s << INDENT << convertersVariableName() << " = sbkConverters;\n\n";
 
-    s << "#ifdef IS_PY3K\n";
-    s << INDENT << "PyObject *module = Shiboken::Module::create(\""  << moduleName() << "\", &moduledef);\n";
-    s << "#else\n";
-    s << INDENT << "PyObject *module = Shiboken::Module::create(\""  << moduleName() << "\", ";
-    s << moduleName() << "_methods);\n";
-    s << "#endif\n\n";
+    s << INDENT << "PyObject *module = Shiboken::Module::create(\""  << moduleName() << "\", &moduledef);\n\n";
 
     s << INDENT << "// Make module available from global scope\n";
     s << INDENT << pythonModuleObjectName() << " = module;\n\n";

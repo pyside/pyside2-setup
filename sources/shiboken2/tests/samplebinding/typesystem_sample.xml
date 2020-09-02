@@ -101,23 +101,14 @@
             <native-to-target>
                 if (!%in)
                     Py_RETURN_NONE;
-                #ifdef IS_PY3K
-                    return PyCapsule_New(%in, 0, 0);
-                #else
-                    return PyCObject_FromVoidPtr(%in, 0);
-                #endif
+                return PyCapsule_New(%in, nullptr, nullptr);
             </native-to-target>
             <target-to-native>
                 <add-conversion type="PyNone">
                     %out = 0;
                 </add-conversion>
                 <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
-                void* ptr;
-                #ifdef IS_PY3K
-                    ptr = PyCapsule_GetPointer(%in, 0);
-                #else
-                    ptr = PyCObject_AsVoidPtr(%in);
-                #endif
+                void *ptr = PyCapsule_GetPointer(%in, nullptr);
                 %out = (%OUTTYPE)ptr;
                 </add-conversion>
             </target-to-native>
@@ -127,11 +118,7 @@
     <inject-code class="native" position="beginning">
         static bool checkPyCapsuleOrPyCObject(PyObject* pyObj)
         {
-        #ifdef IS_PY3K
             return PyCapsule_CheckExact(pyObj);
-        #else
-            return PyCObject_Check(pyObj);
-        #endif
         }
     </inject-code>
 
@@ -139,20 +126,11 @@
         <include file-name="handle.h" location="local"/>
         <conversion-rule>
             <native-to-target>
-                #ifdef IS_PY3K
-                    return PyCapsule_New(&amp;%in, 0, 0);
-                #else
-                    return PyCObject_FromVoidPtr(&amp;%in, 0);
-                #endif
+                return PyCapsule_New(&amp;%in, nullptr, nullptr);
             </native-to-target>
             <target-to-native>
                 <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
-                void* ptr;
-                #ifdef IS_PY3K
-                    ptr = PyCapsule_GetPointer(%in, 0);
-                #else
-                    ptr = PyCObject_AsVoidPtr(%in);
-                #endif
+                void *ptr = PyCapsule_GetPointer(%in, nullptr);
                 %out = *((%OUTTYPE*)ptr);
                 </add-conversion>
             </target-to-native>

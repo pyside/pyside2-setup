@@ -49,11 +49,7 @@ extern "C"
 
 /*
  * The documentation is located in pep384impl_doc.rst
- */
-#if PY_VERSION_HEX < 0x03000000
-#define IS_PY2
-#endif // PY_VERSION_HEX < 0x03000000
-/*
+
  * Here is the verification code for PyTypeObject.
  * We create a type object and check if its fields
  * appear at the right offsets.
@@ -523,40 +519,6 @@ static PyTypeObject *getFunctionType(void)
  *
  */
 
-// PYSIDE-803, PYSIDE-813: We need that GIL-free version from Python 2.7.12 .
-#ifdef IS_PY2
-
-/* Variant of PyDict_GetItem() that doesn't suppress exceptions.
-   This returns NULL *with* an exception set if an exception occurred.
-   It returns NULL *without* an exception set if the key wasn't present.
-*/
-PyObject *
-PyDict_GetItemWithError(PyObject *op, PyObject *key)
-{
-    long hash;
-    PyDictObject *mp = reinterpret_cast<PyDictObject *>(op);
-    PyDictEntry *ep;
-    if (!PyDict_Check(op)) {
-        PyErr_BadInternalCall();
-        return nullptr;
-    }
-    if (!PyString_CheckExact(key) ||
-        (hash = (reinterpret_cast<PyStringObject *>(key))->ob_shash) == -1)
-    {
-        hash = PyObject_Hash(key);
-        if (hash == -1) {
-            return nullptr;
-        }
-    }
-
-    ep = (mp->ma_lookup)(mp, key, hash);
-    if (ep == nullptr) {
-        return nullptr;
-    }
-    return ep->me_value;
-}
-#endif // IS_PY2
-
 /*****************************************************************************
  *
  * Extra support for signature.cpp
@@ -595,18 +557,6 @@ PyStaticMethod_New(PyObject *callable)
     return reinterpret_cast<PyObject *>(sm);
 }
 #endif // Py_LIMITED_API
-
-#ifdef IS_PY2
-PyTypeObject *PepMethodDescr_TypePtr = nullptr;
-
-static PyTypeObject *
-getMethodDescrType(void)
-{
-    static const char prog[] =
-        "result = type(str.split)\n";
-    return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
-}
-#endif // IS_PY2
 
 /*****************************************************************************
  *
@@ -718,20 +668,6 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
      * This function is modelled after _Py_Mangle, but is optimized
      * a little for our purpose.
      */
-#ifdef IS_PY2
-    const char *namestr = PyString_AsString(name);
-    if (namestr == nullptr || namestr[0] != '_' || namestr[1] != '_') {
-        Py_INCREF(name);
-        return name;
-    }
-    size_t nlen = strlen(namestr);
-    /* Don't mangle __id__ or names with dots. */
-    if ((namestr[nlen-1] == '_' && namestr[nlen-2] == '_')
-        || strchr(namestr, '.')) {
-        Py_INCREF(name);
-        return name;
-    }
-#else
     if (PyUnicode_READ_CHAR(name, 0) != '_' ||
         PyUnicode_READ_CHAR(name, 1) != '_') {
         Py_INCREF(name);
@@ -745,7 +681,6 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
         Py_INCREF(name);
         return name;
     }
-#endif // IS_PY2
     Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
         reinterpret_cast<PyObject *>(Py_TYPE(self)), Shiboken::PyMagicName::name()));
 #ifndef Py_LIMITED_API
@@ -823,10 +758,6 @@ Pep384_Init()
     PepFunction_TypePtr = getFunctionType();
     PepStaticMethod_TypePtr = getStaticMethodType();
 #endif // Py_LIMITED_API
-
-#ifdef IS_PY2
-    PepMethodDescr_TypePtr = getMethodDescrType();
-#endif // IS_PY2
 }
 
 } // extern "C"
