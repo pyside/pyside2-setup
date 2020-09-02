@@ -103,7 +103,8 @@ Note: This are two imports.
 """
 # XXX build an improved C version? I guess not.
 def _import(name, *args, **kwargs):
-    importing_module = sys._getframe(1).f_globals['__name__']
+    # PYSIDE-1368: The `__name__` attribute does not need to exist in all modules.
+    importing_module = sys._getframe(1).f_globals.get("__name__", "__main__")
     existing = pyside_feature_dict.get(importing_module, 0)
 
     if name == "__feature__" and args[2]:
