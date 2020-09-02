@@ -108,6 +108,7 @@ primitive-type
                 target-name="..."
                 default-constructor="..."
                 preferred-conversion="yes | no" />
+                view-on="..."
         </typesystem>
 
     The **name** attribute is the name of the primitive in C++, the optional,
@@ -139,6 +140,13 @@ primitive-type
     used only for classes declared as primitive types and not for primitive C++
     types, but that depends on the application using *ApiExtractor*.
 
+    The *optional* **view-on** attribute specifies that the type is a view
+    class like std::string_view or QStringView which has a constructor
+    accepting another type like std::string or QString. Since typically
+    no values can be assigned to view classes, no target-to-native conversion
+    can be generated for them. Instead, an instance of the viewed class should
+    be instantiated and passed to functions using the view class
+    for argument types.
 
 .. _namespace:
 

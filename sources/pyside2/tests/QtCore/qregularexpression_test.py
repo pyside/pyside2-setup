@@ -48,6 +48,7 @@ class QRegularExpressionTest(unittest.TestCase):
         match = re.match('word1 word2  word3')
         self.assertTrue(match.isValid())
         self.assertEqual(match.captured(1), 'word2')
+        self.assertEqual(match.capturedView(1), 'word2')
 
     def testMatchIterator(self):
         re = QRegularExpression('(\w+)')

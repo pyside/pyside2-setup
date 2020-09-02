@@ -169,8 +169,8 @@ private:
 
     const TypeEntry *currentParentTypeEntry() const;
     bool checkRootElement();
-    void applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
-                               QXmlStreamAttributes *attributes) const;
+    bool applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
+                               QXmlStreamAttributes *attributes);
     PrimitiveTypeEntry *
         parsePrimitiveTypeEntry(const QXmlStreamReader &, const QString &name,
                                 const QVersionNumber &since, QXmlStreamAttributes *);

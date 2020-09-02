@@ -43,7 +43,8 @@ from PySide2.QtCore import QUuid
 class QUuidTest(unittest.TestCase):
     def testFromString(self):
         uuidString = '{fc69b59e-cc34-4436-a43c-ee95d128b8c5}'
-        uuid = QUuid(uuidString)
+#       testing overload QUUid::fromString(QStringView)
+        uuid = QUuid.fromString(uuidString)
         self.assertTrue(not uuid.isNull())
         self.assertEqual(uuid.toString(), uuidString)
 

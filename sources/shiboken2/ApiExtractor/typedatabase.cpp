@@ -894,6 +894,8 @@ void TypeEntry::formatDebug(QDebug &d) const
     FORMAT_BOOL("stream", m_stream)
     FORMAT_LIST_SIZE("codeSnips", m_codeSnips)
     FORMAT_NONEMPTY_STRING("conversionRule", m_conversionRule)
+    if (m_viewOn)
+       d << ", views=" << m_viewOn->name();
     if (!m_version.isNull() && m_version > QVersionNumber(0, 0))
         d << ", version=" << m_version;
     if (m_revision)

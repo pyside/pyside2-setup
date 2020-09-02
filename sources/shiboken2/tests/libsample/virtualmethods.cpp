@@ -63,6 +63,11 @@ const Str & VirtualMethods::returnConstRef() const
     return result;
 }
 
+int VirtualMethods::stringViewLength(std::string_view in) const
+{
+    return int(in.size());
+}
+
 double VirtualDaughter2::virtualMethod0(Point pt, int val, Complex cpx, bool b)
 {
     return 42 + VirtualMethods::virtualMethod0(pt, val, cpx, b);

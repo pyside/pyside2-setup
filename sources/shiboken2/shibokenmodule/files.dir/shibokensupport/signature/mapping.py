@@ -255,6 +255,7 @@ type_map.update({
     "qreal": float,
     "QSet": typing.Set,
     "QString": str,
+    "QStringView": str,
     "QStringList": StringList,
     "quint16": int,
     "quint32": int,

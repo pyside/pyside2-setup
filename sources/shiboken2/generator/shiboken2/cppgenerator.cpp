@@ -2389,6 +2389,8 @@ void CppGenerator::writeTypeCheck(QTextStream &s, const OverloadData *overloadDa
     // This condition trusts that the OverloadData object will arrange for
     // PyInt type to come after the more precise numeric types (e.g. float and bool)
     const AbstractMetaType *argType = overloadData->argType();
+    if (auto viewOn = argType->viewOn())
+        argType = viewOn;
     bool numberType = numericTypes.count() == 1 || ShibokenGenerator::isPyInt(argType);
     QString customType = (overloadData->hasArgumentTypeReplace() ? overloadData->argumentTypeReplaced() : QString());
     bool rejectNull = shouldRejectNullPointerArgument(overloadData->referenceFunction(), overloadData->argPos());
@@ -2419,12 +2421,15 @@ const AbstractMetaType *CppGenerator::getArgumentType(const AbstractMetaFunction
         return nullptr;
     }
 
-    const AbstractMetaType *argType = nullptr;
     QString typeReplaced = func->typeReplaced(argPos);
-    if (typeReplaced.isEmpty())
-        argType = (argPos == 0) ? func->type() : func->arguments().at(argPos-1)->type();
-    else
-        argType = buildAbstractMetaTypeFromString(typeReplaced);
+    if (typeReplaced.isEmpty()) {
+        if (argPos == 0)
+            return func->type();
+        auto argType = func->arguments().at(argPos - 1)->type();
+        return argType->viewOn() ? argType->viewOn() : argType;
+    }
+
+    auto argType = buildAbstractMetaTypeFromString(typeReplaced);
     if (!argType && !m_knownPythonTypes.contains(typeReplaced)) {
         qCWarning(lcShiboken).noquote().nospace()
             << QString::fromLatin1("Unknown type '%1' used as argument type replacement "\
@@ -4804,7 +4809,10 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
             args << QLatin1String("self");
         const AbstractMetaArgumentList &arguments = f->arguments();
         for (const AbstractMetaArgument *arg : arguments)  {
-            QString strArg = arg->type()->pythonSignature();
+            const auto *metaType = arg->type();
+            if (auto viewOn = metaType->viewOn())
+                metaType = viewOn;
+            QString strArg = metaType->pythonSignature();
             if (!arg->defaultValueExpression().isEmpty()) {
                 strArg += QLatin1Char('=');
                 QString e = arg->defaultValueExpression();

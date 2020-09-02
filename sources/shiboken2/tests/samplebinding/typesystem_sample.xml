@@ -25,6 +25,7 @@
     <primitive-type name="long long"/>
     <primitive-type name="unsigned long long"/>
     <primitive-type name="std::string"/>
+    <primitive-type name="std::string_view" view-on="std::string"/>
     <primitive-type name="ObjectType::Identifier"/>
 
     <primitive-type name="Foo::HANDLE" target-lang-api-name="PyLong"/>

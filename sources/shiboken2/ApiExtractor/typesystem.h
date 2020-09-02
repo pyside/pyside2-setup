@@ -863,6 +863,12 @@ public:
     void setCustomConversion(CustomConversion* customConversion);
     CustomConversion* customConversion() const;
 
+    // View on: Type to use for function argument conversion, fex
+    // std::string_view -> std::string for foo(std::string_view).
+    // cf AbstractMetaType::viewOn()
+    TypeEntry *viewOn() const { return m_viewOn; }
+    void setViewOn(TypeEntry *v) { m_viewOn = v; }
+
     virtual TypeEntry *clone() const;
 
     void useAsTypedef(const TypeEntry *source);
@@ -898,6 +904,7 @@ private:
     CustomConversion *m_customConversion = nullptr;
     SourceLocation m_sourceLocation; // XML file
     uint m_codeGeneration = GenerateAll;
+    TypeEntry *m_viewOn = nullptr;
     int m_revision = 0;
     int m_sbkIndex = 0;
     Type m_type;

@@ -303,6 +303,7 @@ public:
     Q_DECLARE_FLAGS(ComparisonFlags, ComparisonFlag);
 
     AbstractMetaType();
+    AbstractMetaType(const AbstractMetaType &);
     ~AbstractMetaType();
 
     QString package() const;
@@ -530,6 +531,12 @@ public:
 
     bool compare(const AbstractMetaType &rhs, ComparisonFlags = {}) const;
 
+    // View on: Type to use for function argument conversion, fex
+    // std::string_view -> std::string for foo(std::string_view);
+    // cf TypeEntry::viewOn()
+    const AbstractMetaType *viewOn() const { return m_viewOn; }
+    void setViewOn(const AbstractMetaType *v) { m_viewOn = v; }
+
 private:
     TypeUsagePattern determineUsagePattern() const;
     QString formatSignature(bool minimal) const;
@@ -545,6 +552,7 @@ private:
     int m_arrayElementCount = -1;
     const AbstractMetaType *m_arrayElementType = nullptr;
     const AbstractMetaType *m_originalTemplateType = nullptr;
+    const AbstractMetaType *m_viewOn = nullptr;
     Indirections m_indirections;
 
     TypeUsagePattern m_pattern = InvalidPattern;
@@ -555,8 +563,6 @@ private:
 
     ReferenceType m_referenceType = NoReference;
     AbstractMetaTypeList m_children;
-
-    Q_DISABLE_COPY(AbstractMetaType)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaType::ComparisonFlags);

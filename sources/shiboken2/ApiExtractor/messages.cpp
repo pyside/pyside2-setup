@@ -649,6 +649,12 @@ QString msgIncorrectlyNestedName(const QString &name)
            + name + QLatin1String(").");
 }
 
+QString msgCannotFindView(const QString &viewedName, const QString &name)
+{
+    return QLatin1String("Unable to find viewed type ") + viewedName
+        + QLatin1String(" for ") + name;
+}
+
 // qtdocgenerator.cpp
 
 QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,

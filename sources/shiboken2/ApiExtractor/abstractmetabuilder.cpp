@@ -1884,6 +1884,17 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
+        // Add view substitution for simple view types of function arguments
+        // std::string_view -> std::string for foo(std::string_view)
+        auto viewOnTypeEntry = metaType->typeEntry()->viewOn();
+        if (viewOnTypeEntry != nullptr && metaType->indirections() == 0
+            && metaType->arrayElementType() == nullptr
+            && !metaType->hasInstantiations()) {
+            auto viewOn = new AbstractMetaType(*metaType);
+            viewOn->setTypeEntry(viewOnTypeEntry);
+            metaType->setViewOn(viewOn);
+        }
+
         auto *metaArgument = new AbstractMetaArgument;
 
         metaArgument->setType(metaType);

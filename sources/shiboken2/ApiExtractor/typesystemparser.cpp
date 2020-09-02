@@ -1112,16 +1112,44 @@ bool TypeSystemParser::checkRootElement()
     return ok;
 }
 
-void TypeSystemParser::applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
-                                             QXmlStreamAttributes *attributes) const
+static TypeEntry *findViewedType(const QString &name)
+{
+    const auto range = TypeDatabase::instance()->entries().equal_range(name);
+    for (auto i = range.first; i != range.second; ++i) {
+        switch (i.value()->type()) {
+        case TypeEntry::BasicValueType:
+        case TypeEntry::PrimitiveType:
+        case TypeEntry::ContainerType:
+        case TypeEntry::ObjectType:
+            return i.value();
+        default:
+            break;
+        }
+    }
+    return nullptr;
+}
+
+bool TypeSystemParser::applyCommonAttributes(const QXmlStreamReader &reader, TypeEntry *type,
+                                             QXmlStreamAttributes *attributes)
 {
     type->setSourceLocation(SourceLocation(m_currentFile,
                                            reader.lineNumber()));
     type->setCodeGeneration(m_generate);
-    const int revisionIndex =
-        indexOfAttribute(*attributes, u"revision");
-    if (revisionIndex != -1)
-        type->setRevision(attributes->takeAt(revisionIndex).value().toInt());
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name ==  u"revision") {
+            type->setRevision(attributes->takeAt(i).value().toInt());
+        } else if (name == u"view-on") {
+            const QString name = attributes->takeAt(i).value().toString();
+            TypeEntry *views = findViewedType(name);
+            if (views == nullptr) {
+                m_error = msgCannotFindView(name, type->name());
+                return false;
+            }
+            type->setViewOn(views);
+        }
+    }
+    return true;
 }
 
 FlagsTypeEntry *
@@ -1146,7 +1174,8 @@ FlagsTypeEntry *
     }
 
     ftype->setOriginalName(flagName);
-    applyCommonAttributes(reader, ftype, attributes);
+    if (!applyCommonAttributes(reader, ftype, attributes))
+        return nullptr;
 
     QStringList lst = flagName.split(colonColon());
     const QString targetLangFlagName = QStringList(lst.mid(0, lst.size() - 1)).join(QLatin1Char('.'));
@@ -1225,7 +1254,8 @@ SmartPointerTypeEntry *
 
     auto *type = new SmartPointerTypeEntry(name, getter, smartPointerType,
                                            refCountMethodName, since, currentParentTypeEntry());
-    applyCommonAttributes(reader, type, attributes);
+    if (!applyCommonAttributes(reader, type, attributes))
+        return nullptr;
     m_smartPointerInstantiations.insert(type, instantiations);
     return type;
 }
@@ -1238,7 +1268,8 @@ PrimitiveTypeEntry *
     if (!checkRootElement())
         return nullptr;
     auto *type = new PrimitiveTypeEntry(name, since, currentParentTypeEntry());
-    applyCommonAttributes(reader, type, attributes);
+    if (!applyCommonAttributes(reader, type, attributes))
+        return nullptr;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == targetLangNameAttribute()) {
@@ -1282,7 +1313,8 @@ ContainerTypeEntry *
         return nullptr;
     }
     auto *type = new ContainerTypeEntry(name, containerType, since, currentParentTypeEntry());
-    applyCommonAttributes(reader, type, attributes);
+    if (!applyCommonAttributes(reader, type, attributes))
+        return nullptr;
     return type;
 }
 

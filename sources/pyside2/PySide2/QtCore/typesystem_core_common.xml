@@ -253,6 +253,13 @@
     </conversion-rule>
   </primitive-type>
 
+  <primitive-type name="QStringView" target-lang-api-name="PyUnicode" view-on="QString">
+    <include file-name="QStringView" location="global"/>
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode"/>
+    </conversion-rule>
+  </primitive-type>
+
   <primitive-type name="QChar">
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-qchar"/>
@@ -2022,6 +2029,12 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-msetitem"/>
     </add-function>
   </value-type>
+  <primitive-type name="QByteArrayView" view-on="QByteArray" since="6.0">
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pybytes"/>
+    </conversion-rule>
+  </primitive-type>
+
   <value-type name="QTextBoundaryFinder">
     <enum-type name="BoundaryReason" flags="BoundaryReasons"/>
     <enum-type name="BoundaryType"/>

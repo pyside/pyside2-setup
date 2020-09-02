@@ -194,10 +194,13 @@ AbstractMetaType::AbstractMetaType() :
 {
 }
 
+AbstractMetaType::AbstractMetaType(const AbstractMetaType &rhs) = default;
+
 AbstractMetaType::~AbstractMetaType()
 {
     qDeleteAll(m_children);
     m_instantiations.clear();
+    delete m_viewOn;
 }
 
 QString AbstractMetaType::package() const
@@ -449,6 +452,8 @@ QDebug operator<<(QDebug d, const AbstractMetaType *at)
                 }
             }
             d << '>';
+            if (at->viewOn())
+                d << ", views " << at->viewOn()->name();
         }
     } else {
         d << '0';

@@ -179,6 +179,8 @@ QString msgNoRootTypeSystemEntry();
 
 QString msgIncorrectlyNestedName(const QString &name);
 
+QString msgCannotFindView(const QString &viewedName, const QString &name);
+
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const QVector<const AbstractMetaFunction *> &involvedConversions);
 

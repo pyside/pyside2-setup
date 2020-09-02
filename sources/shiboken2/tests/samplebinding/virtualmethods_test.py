@@ -133,6 +133,11 @@ class VirtualMethodsTest(unittest.TestCase):
         self.assertTrue(eevd.grand_grand_daughter_name_called)
         self.assertEqual(eevd.name().prepend(self.prefix_from_codeinjection), name)
 
+    def testStringView(self):
+        virtual_methods = VirtualMethods()
+        self.assertEqual(virtual_methods.stringViewLength('bla'), 3)
+
+
 class PrettyErrorMessageTest(unittest.TestCase):
     def testIt(self):
         obj = ExtendedVirtualMethods()

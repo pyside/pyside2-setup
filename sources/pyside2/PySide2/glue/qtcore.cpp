@@ -1839,6 +1839,10 @@ int usec = PyDateTime_TIME_GET_MICROSECOND(%in);
 return PyBool_FromLong((bool)%in);
 // @snippet return-pybool
 
+// @snippet return-pybytes
+return PyBytes_FromStringAndSize(%in.constData(), %in.size());
+// @snippet return-pybytes
+
 // @snippet return-pylong
 return PyLong_FromLong(%in);
 // @snippet return-pylong
