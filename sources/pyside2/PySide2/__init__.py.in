@@ -65,7 +65,8 @@ def _setupQtDirectories():
     #   Trigger signature initialization.
     try:
         # PYSIDE-829: Avoid non-existent attributes in compiled code (Nuitka).
-        eval("type.__signature__")
+        # We now use an explicit function instead of touching a signature.
+        _init_pyside_extension()
     except AttributeError:
         print(dedent('''\
             {stars}

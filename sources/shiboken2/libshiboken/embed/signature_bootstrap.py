@@ -73,7 +73,7 @@ def bootstrap():
     if recursion_trap:
         # we are probably called from outside, already
         print("Recursion occurred in Bootstrap. Did you start by hand? Then it's ok.")
-        print("""But you should trigger start by 'eval("type.__signature__")', only!""")
+        print("But you should trigger start by '_init_pyside_extension()', only!")
     recursion_trap += 1
 
     @contextmanager

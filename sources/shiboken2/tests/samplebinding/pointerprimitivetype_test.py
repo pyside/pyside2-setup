@@ -54,7 +54,7 @@ init_paths()
 from sample import IntArray2, VirtualMethods
 
 import shiboken2
-eval("type.__signature__")   # trigger init, which does not happen in tests
+_init_pyside_extension()   # trigger init, which does not happen in tests
 from shibokensupport.signature import typing
 
 
