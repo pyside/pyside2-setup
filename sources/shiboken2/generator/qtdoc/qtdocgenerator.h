@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -33,6 +33,7 @@
 #include <QtCore/QScopedPointer>
 #include <QtCore/QTextStream>
 #include <QXmlStreamReader>
+#include "abstractmetalang.h"
 #include "generator.h"
 #include "docparser.h"
 #include "typesystem_enums.h"
@@ -252,7 +253,7 @@ private:
     void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
     QString functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
-                       const AbstractMetaFunction* func);
+                       const AbstractMetaFunction* func, bool indexed = true);
     void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunction* func);
     void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);
@@ -261,7 +262,8 @@ private:
 
     void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass);
     void writeFormattedText(QTextStream &s, const Documentation &doc,
-                            const AbstractMetaClass *metaclass = nullptr);
+                            const AbstractMetaClass *metaclass = nullptr,
+                            Documentation::Type docType = Documentation::Detailed);
     bool writeInjectDocumentation(QTextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 

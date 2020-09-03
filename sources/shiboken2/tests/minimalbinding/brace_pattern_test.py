@@ -49,7 +49,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 import shiboken2
-type.__signature__   # trigger bootstrap
+eval("type.__signature__")   # trigger bootstrap
 
 from shibokensupport.signature.lib.tool import build_brace_pattern
 

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -94,12 +94,24 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
         return;
     }
 
+    static const QList<QPair<Documentation::Type, QString>> docTags = {
+        { Documentation::Brief,  QLatin1String("briefdescription") },
+        { Documentation::Detailed,  QLatin1String("detaileddescription") }
+    };
     // Get class documentation
-    const QString classQuery = QLatin1String("/doxygen/compounddef/detaileddescription");
-    QString classDoc = getDocumentation(xquery, classQuery,
-                                        metaClass->typeEntry()->docModifications());
-    if (classDoc.isEmpty())
-        qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotFindDocumentation(doxyFilePath, "class", metaClass->name(), classQuery)));
+    Documentation classDoc;
+
+    for (const auto &tag : docTags) {
+        const QString classQuery = QLatin1String("/doxygen/compounddef/") + tag.second;
+        QString doc = getDocumentation(xquery, classQuery,
+                                            metaClass->typeEntry()->docModifications());
+        if (doc.isEmpty())
+            qCWarning(lcShibokenDoc, "%s",
+                      qPrintable(msgCannotFindDocumentation(doxyFilePath, "class", metaClass->name(),
+                                                            classQuery)));
+        else
+            classDoc.setValue(doc, tag.first);
+    }
     metaClass->setDocumentation(classDoc);
 
     //Functions Documentation
@@ -128,28 +140,38 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                     if (!arg->type()->isPrimitive()) {
                         query += QLatin1String("/../param[") + QString::number(i)
                                  + QLatin1String("]/type/ref[text()=\"")
-                                 + arg->type()->name() + QLatin1String("\"]/../..");
+                                 + arg->type()->cppSignature().toHtmlEscaped()
+                                 + QLatin1String("\"]/../..");
                     } else {
                         query += QLatin1String("/../param[") + QString::number(i)
-                                 + QLatin1String("]/type[text()=\"")
-                                 + arg->type()->name() + QLatin1String("\"]/..");
+                                 + QLatin1String("]/type[text(), \"")
+                                 + arg->type()->cppSignature().toHtmlEscaped()
+                                 + QLatin1String("\"]/..");
                     }
                     ++i;
                 }
             }
         }
-        if (!isProperty) {
-            query += QLatin1String("/../detaileddescription");
-        } else {
-            query = QLatin1Char('(') + query;
-            query += QLatin1String("/../detaileddescription)[1]");
+        Documentation funcDoc;
+        for (const auto &tag : docTags) {
+            QString funcQuery(query);
+            if (!isProperty) {
+                funcQuery += QLatin1String("/../") + tag.second;
+            } else {
+                funcQuery = QLatin1Char('(') + funcQuery;
+                funcQuery += QLatin1String("/../%1)[1]").arg(tag.second);
+            }
+
+            QString doc = getDocumentation(xquery, funcQuery, DocModificationList());
+            if (doc.isEmpty()) {
+                qCWarning(lcShibokenDoc, "%s",
+                          qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, func,
+                                                                funcQuery)));
+            } else {
+                funcDoc.setValue(doc, tag.first);
+            }
         }
-        QString doc = getDocumentation(xquery, query, DocModificationList());
-        if (doc.isEmpty()) {
-            qCWarning(lcShibokenDoc, "%s",
-                      qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, func, query)));
-        }
-        func->setDocumentation(doc);
+        func->setDocumentation(funcDoc);
         isProperty = false;
     }
 
@@ -159,14 +181,20 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
         if (field->isPrivate())
             return;
 
-        QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef/name[text()=\"")
-                        + field->name() + QLatin1String("\"]/../detaileddescription");
-        QString doc = getDocumentation(xquery, query, DocModificationList());
-        if (doc.isEmpty()) {
-            qCWarning(lcShibokenDoc, "%s",
-                      qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, field, query)));
+        Documentation fieldDoc;
+        for (const auto &tag : docTags) {
+            QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef/name[text()=\"")
+                            + field->name() + QLatin1String("\"]/../") + tag.second;
+            QString doc = getDocumentation(xquery, query, DocModificationList());
+            if (doc.isEmpty()) {
+                qCWarning(lcShibokenDoc, "%s",
+                          qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, field,
+                                                                query)));
+            } else {
+                fieldDoc.setValue(doc, tag.first);
+            }
         }
-        field->setDocumentation(doc);
+        field->setDocumentation(fieldDoc);
     }
 
     //Enums
