@@ -2074,7 +2074,7 @@
   <object-type name="QFileDevice" since="5.0">
     <enum-type name="FileError"/>
     <enum-type name="FileTime" since="5.10"/>
-    <enum-type name="MemoryMapFlags"/>
+    <enum-type name="MemoryMapFlag" flags="MemoryMapFlags"/>
     <enum-type name="Permission" flags="Permissions"/>
     <enum-type name="FileHandleFlag" flags="FileHandleFlags"/>
     <extra-includes>
@@ -2086,7 +2086,7 @@
         </modify-argument>
         <inject-code file="../glue/qtcore.cpp" snippet="qfiledevice-unmap"/>
     </modify-function>
-    <modify-function signature="map(qint64,qint64,QFileDevice::MemoryMapFlags)">
+    <modify-function signature="map(qint64,qint64,QFlags&lt;QFileDevice::MemoryMapFlag&gt;)">
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
         </modify-argument>
