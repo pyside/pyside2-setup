@@ -38,15 +38,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import *
 
 class TestQProcess (unittest.TestCase):
     def testStartDetached(self):
         value, pid = QProcess.startDetached("dir", [], os.getcwd())
         self.assertTrue(isinstance(value, bool))
-        self.assertTrue(isinstance(pid, py3k.long))
+        self.assertTrue(isinstance(pid, int))
 
     def testPid(self):
         p = QProcess()

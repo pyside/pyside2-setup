@@ -39,7 +39,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from PySide2.QtCore import QObject
 
 class QStringConstructor(unittest.TestCase):
@@ -48,11 +47,11 @@ class QStringConstructor(unittest.TestCase):
     def testQStringDefault(self):
         obj = QObject()
         obj.setObjectName('foo')
-        self.assertEqual(obj.objectName(), py3k.unicode_('foo'))
-        obj.setObjectName(py3k.unicode_('áâãà'))
-        self.assertEqual(obj.objectName(), py3k.unicode_('áâãà'))
+        self.assertEqual(obj.objectName(), 'foo')
+        obj.setObjectName('áâãà')
+        self.assertEqual(obj.objectName(), 'áâãà')
         obj.setObjectName(None)
-        self.assertEqual(obj.objectName(), py3k.unicode_(''))
+        self.assertEqual(obj.objectName(), '')
 
 if __name__ == '__main__':
     unittest.main()

@@ -42,7 +42,6 @@ from PySide2.QtWebEngine import QtWebEngine
 from PySide2.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile
 from PySide2.QtWebEngineCore import (QWebEngineUrlScheme,
                                      QWebEngineUrlSchemeHandler)
-import py3kcompat as py3k
 
 class TestSchemeHandler(QWebEngineUrlSchemeHandler):
     def requestStarted(self, request):
@@ -51,9 +50,9 @@ class TestSchemeHandler(QWebEngineUrlSchemeHandler):
             return
 
         self.buffer = QBuffer()
-        self.buffer.setData(py3k.b("Really nice goodbye text."))
+        self.buffer.setData(bytes("Really nice goodbye text.", "UTF-8"))
         self.buffer.aboutToClose.connect(self.buffer.deleteLater)
-        request.reply(py3k.b("text/plain;charset=utf-8"), self.buffer)
+        request.reply(bytes("text/plain;charset=utf-8", "UTF-8"), self.buffer)
 
 
 class MainTest(unittest.TestCase):
@@ -64,7 +63,7 @@ class MainTest(unittest.TestCase):
         QtWebEngine.initialize()
         app = QApplication([])
 
-        scheme_name = py3k.b("testpy")
+        scheme_name = bytes("testpy", "UTF-8")
         scheme = QWebEngineUrlScheme(scheme_name)
         scheme.setSyntax(QWebEngineUrlScheme.Syntax.Path)
         QWebEngineUrlScheme.registerScheme(scheme)

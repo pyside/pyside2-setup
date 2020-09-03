@@ -38,7 +38,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2 import QtCore
-import py3kcompat as py3k
+
 
 class QTextStreamTestCase(unittest.TestCase):
     def setUp(self):
@@ -46,7 +46,7 @@ class QTextStreamTestCase(unittest.TestCase):
         self.temp_file.close()
         self.f = QtCore.QFile(self.temp_file.name)
         self.f.open(QtCore.QIODevice.WriteOnly)
-        self.strings = (py3k.unicode_('foo'), py3k.unicode_('bar'))
+        self.strings = ('foo', 'bar')
         self.stream = QtCore.QTextStream(self.f)
 
     def testIt(self):

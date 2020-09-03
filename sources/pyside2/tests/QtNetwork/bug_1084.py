@@ -37,7 +37,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2 import QtNetwork
-import py3kcompat as py3k
+
 
 class QTcpSocketTestCase(unittest.TestCase):
     def setUp(self):
@@ -45,7 +45,7 @@ class QTcpSocketTestCase(unittest.TestCase):
         self.sock.connectToHost('127.0.0.1', 25)
 
     def testIt(self):
-        self.sock.write(py3k.b('quit'))
+        self.sock.write(bytes('quit', "UTF-8"))
 
 if __name__ == "__main__":
     unittest.main()

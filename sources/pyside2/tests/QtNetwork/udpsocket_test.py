@@ -38,7 +38,7 @@ init_test_paths(False)
 
 from PySide2.QtCore import QUrl, QObject, SIGNAL, QCoreApplication, QTimer
 from PySide2.QtNetwork import QUdpSocket, QHostAddress
-import py3kcompat as py3k
+
 
 class HttpSignalsCase(unittest.TestCase):
     '''Test case for bug #124 - readDatagram signature
@@ -64,7 +64,7 @@ class HttpSignalsCase(unittest.TestCase):
 
     def sendPackage(self):
         addr = QHostAddress(QHostAddress.LocalHost)
-        self.socket.writeDatagram(py3k.b('datagram'), addr, 45454)
+        self.socket.writeDatagram(bytes('datagram', "UTF-8"), addr, 45454)
 
     def callback(self):
         while self.server.hasPendingDatagrams():

@@ -36,7 +36,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(True)
 
-import py3kcompat as py3k
 from testbinding import TestView
 from PySide2.QtCore import QAbstractListModel, QObject, QModelIndex
 
@@ -98,7 +97,7 @@ class ModelViewTest(unittest.TestCase):
         model = ListModelThatReturnsString()
         view = TestView(model)
         obj = view.getData()
-        self.assertEqual(type(obj), py3k.unicode)
+        self.assertEqual(type(obj), str)
         self.assertEqual(obj, 'string')
 
 if __name__ == '__main__':

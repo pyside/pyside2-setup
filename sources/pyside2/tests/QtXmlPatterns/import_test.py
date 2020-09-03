@@ -39,7 +39,7 @@ init_test_paths(False)
 from PySide2.QtCore import *
 from PySide2.QtXmlPatterns import QXmlSchema
 from helper.usesqcoreapplication import UsesQCoreApplication
-import py3kcompat as py3k
+
 
 class QXmlPatternsTest(UsesQCoreApplication):
 

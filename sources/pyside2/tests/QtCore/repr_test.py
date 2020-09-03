@@ -37,7 +37,6 @@ init_test_paths(False)
 import PySide2
 from PySide2.QtCore import QByteArray, QDate, QDateTime, QTime, QLine, QLineF
 from PySide2.QtCore import Qt, QSize, QSizeF, QRect, QRectF, QPoint, QPointF
-import py3kcompat as py3k
 try:
     from PySide2.QtCore import QUuid
     HAVE_Q = True
@@ -52,7 +51,7 @@ class ReprCopyHelper:
 
 class QByteArrayReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
-        self.original = QByteArray(py3k.b('the quick brown fox jumps over the lazy dog'))
+        self.original = QByteArray(bytes('the quick brown fox jumps over the lazy dog', "UTF-8"))
 
 
 class QDateReprCopy(ReprCopyHelper, unittest.TestCase):

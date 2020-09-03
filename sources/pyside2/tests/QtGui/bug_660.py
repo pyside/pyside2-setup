@@ -34,7 +34,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from PySide2.QtGui import QStandardItemModel, QStandardItem
 
 class MyItemModel(QStandardItemModel):
@@ -44,12 +43,12 @@ class MyItemModel(QStandardItemModel):
 
     def mimeTypes(self):
         mtypes = super(MyItemModel,self).mimeTypes()
-        mtypes.append(py3k.unicode_('application/my-form'))
+        mtypes.append('application/my-form')
         return mtypes
 
     def mimeData(self,indexes):
         self.__mimedata = super(MyItemModel,self).mimeData(indexes)
-        self.__mimedata.setData(py3k.unicode_('application/my-form'), py3k.b('hi'))
+        self.__mimedata.setData('application/my-form',bytes('hi', "UTF-8"))
         return self.__mimedata
 
 class TestBug660(unittest.TestCase):

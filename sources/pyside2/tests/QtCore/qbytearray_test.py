@@ -41,32 +41,31 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 
 from PySide2.QtCore import QByteArray, QSettings, QObject, QDataStream, QIODevice
 
 class QByteArrayTestToNumber(unittest.TestCase):
     def testToNumberInt(self):
-        obj = QByteArray(py3k.b('37'))
+        obj = QByteArray(bytes('37', "UTF8"))
         self.assertEqual((37, True), obj.toInt())
 
     def testToNumberUShort(self):
-        obj = QByteArray(py3k.b('37'))
+        obj = QByteArray(bytes('37', "UTF8"))
         self.assertEqual((37, True), obj.toUShort())
 
     def testToNumberFloat(self):
-        obj = QByteArray(py3k.b('37.109'))
+        obj = QByteArray(bytes('37.109', "UTF8"))
         self.assertEqual((ctypes.c_float(37.109).value, True),
                          obj.toFloat())
 
     def testToNumberDouble(self):
-        obj = QByteArray(py3k.b('37.109'))
+        obj = QByteArray(bytes('37.109', "UTF8"))
         self.assertEqual((ctypes.c_double(37.109).value, True),
                          obj.toDouble())
 
     def testSetNum(self):
         b = QByteArray()
-        b.setNum(py3k.long(-124124))
+        b.setNum(int(-124124))
         self.assertEqual(b, "-124124")
         b = QByteArray()
         b.setNum(-124124)
@@ -76,7 +75,7 @@ class QByteArrayTestToNumber(unittest.TestCase):
         self.assertEqual(b, "-0.5")
 
     def testNumber(self):
-        b = QByteArray.number(py3k.long(-124124))
+        b = QByteArray.number(int(-124124))
         self.assertEqual(b, "-124124")
         b = QByteArray.number(-124124)
         self.assertEqual(b, "-124124")
@@ -85,9 +84,9 @@ class QByteArrayTestToNumber(unittest.TestCase):
 
     def testAppend(self):
         b = QByteArray()
-        b.append(py3k.b("A"))
+        b.append(bytes("A", "UTF8"))
         self.assertEqual(b.size(), 1)
-        b.append(py3k.b("AB"))
+        b.append(bytes("AB", "UTF8"))
         self.assertEqual(b.size(), 3)
 
 
@@ -96,7 +95,7 @@ class QByteArraySplit(unittest.TestCase):
 
     def testPathSeparator(self):
         #QByteArray.split('/')
-        obj = QByteArray(py3k.b(unittest.__file__))
+        obj = QByteArray(bytes(unittest.__file__, "UTF8"))
         self.assertEqual(obj.split('/'), unittest.__file__.split('/'))
 
 class QByteArrayData(unittest.TestCase):
@@ -104,14 +103,14 @@ class QByteArrayData(unittest.TestCase):
     '''Test case for QByteArray.data'''
 
     def testData(self):
-        url = QByteArray(py3k.b("http://pyside.org"))
-        self.assertEqual(url.data(), py3k.b("http://pyside.org"))
+        url = QByteArray(bytes("http://pyside.org", "UTF8"))
+        self.assertEqual(url.data(), bytes("http://pyside.org", "UTF8"))
 
     def testDataWithZeros(self):
-        s1 = py3k.b("123\000321")
+        s1 = bytes("123\000321", "UTF8")
         ba = QByteArray(s1)
         s2 = ba.data()
-        self.assertEqual(py3k.b(s1), s2)
+        self.assertEqual(s1, s2)
         self.assertEqual(s1, ba)
 
 class QByteArrayOperatorAtSetter(unittest.TestCase):
@@ -119,9 +118,9 @@ class QByteArrayOperatorAtSetter(unittest.TestCase):
 
     def testSetterString(self):
         '''QByteArray[x] = pythonstring'''
-        obj = QByteArray(py3k.b('123456'))
-        obj[1] = py3k.b('0')
-        self.assertEqual(obj, QByteArray(py3k.b('103456')))
+        obj = QByteArray(bytes('123456', "UTF8"))
+        obj[1] = bytes('0', "UTF8")
+        self.assertEqual(obj, QByteArray(bytes('103456', "UTF8")))
 
 class QByteArrayOnQDataStream(unittest.TestCase):
     '''
@@ -139,11 +138,9 @@ class TestBug664(unittest.TestCase):
     QByteArray.data() should return correct data
     '''
     def testIt(self):
-        a = QByteArray(py3k.unicode_('hi 猫').encode('utf-8'))
-        if py3k.IS_PY3K:
-            self.assertEqual(repr(a), "PySide2.QtCore.QByteArray(b'hi \\xe7\\x8c\\xab')")
-        else:
-            self.assertEqual(repr(a), "PySide2.QtCore.QByteArray('hi \\xe7\\x8c\\xab')")
+        a = QByteArray(bytes('hi 猫', "UTF-8"))
+        self.assertEqual(repr(a), "PySide2.QtCore.QByteArray(b'hi \\xe7\\x8c\\xab')")
+
 
 class QByteArrayOnQVariant(unittest.TestCase):
     def testQByteArrayOnQVariant(self):
@@ -155,7 +152,7 @@ class TestBug567(unittest.TestCase):
     QByteArray should support slices
     '''
     def testIt(self):
-        ba = QByteArray(py3k.b('1234567890'))
+        ba = QByteArray(bytes('1234567890', "UTF8"))
         self.assertEqual(ba[2:4], '34')
         self.assertEqual(ba[:4], '1234')
         self.assertEqual(ba[4:], '567890')
@@ -168,114 +165,111 @@ class TestBug567(unittest.TestCase):
 
 class TestPickler(unittest.TestCase):
     def testIt(self):
-        ba = QByteArray(py3k.b("321\x00123"))
+        ba = QByteArray(bytes("321\x00123", "UTF8"))
         output = pickle.dumps(str(ba))
         ba2 = pickle.loads(output)
         self.assertEqual(str(ba), str(ba2))
 
 class QByteArrayBug720(unittest.TestCase):
     def testIt(self):
-        ba = QByteArray(py3k.b("32\"1\x00123"))
-        self.assertEqual(str(ba), str(py3k.b("32\"1\x00123")))
-        if py3k.IS_PY3K:
-            self.assertEqual(repr(ba), "PySide2.QtCore.QByteArray(b'32\"1\\x00123')")
-        else:
-            self.assertEqual(repr(ba), "PySide2.QtCore.QByteArray('32\"1\\x00123')")
+        ba = QByteArray(bytes("32\"1\x00123", "UTF8"))
+        self.assertEqual(str(ba), str(bytes("32\"1\x00123", "UTF-8")))
+        self.assertEqual(repr(ba), "PySide2.QtCore.QByteArray(b'32\"1\\x00123')")
 
 class QByteArrayImplicitConvert(unittest.TestCase):
     def testString(self):
         # No implicit conversions from QByteArray to python string
-        ba = QByteArray(py3k.b("object name"))
+        ba = QByteArray(bytes("object name", "UTF8"))
         obj = QObject()
         self.assertRaises(TypeError, obj.setObjectName, ba)
 
 
 class QByteArraySliceAssignment(unittest.TestCase):
     def testIndexAssignment(self):
-        a = QByteArray(py3k.b('abc'))
-        a[0] = py3k.b('x')
-        self.assertEqual(a[0], py3k.b('x'))
+        a = QByteArray(bytes('abc', "UTF8"))
+        a[0] = bytes('x', "UTF8")
+        self.assertEqual(a[0], bytes('x', "UTF8"))
 
         def test_1():
-            a[0] = py3k.b('xy')
+            a[0] = bytes('xy', "UTF8")
         self.assertRaises(ValueError, test_1)
 
     def testSliceAssignmentBytes(self):
-        b = QByteArray(py3k.b('0123456789'))
-        b[2:8] = py3k.b('abcdef')
-        self.assertEqual(b[2:8], py3k.b('abcdef'))
+        b = QByteArray(bytes('0123456789', "UTF8"))
+        b[2:8] = bytes('abcdef', "UTF8")
+        self.assertEqual(b[2:8], bytes('abcdef', "UTF8"))
         # Delete behavior
         b[2:8] = None
-        self.assertEqual(b, py3k.b('0189'))
+        self.assertEqual(b, bytes('0189', "UTF8"))
 
         # number of slots and number of values doesn't match
         def test_2():
-            b[2:8:2] = py3k.b('')
+            b[2:8:2] = bytes('', "UTF8")
         self.assertRaises(ValueError, test_2)
-        b = QByteArray(py3k.b('0123456789'))
+        b = QByteArray(bytes('0123456789', "UTF8"))
         # reverse slice
-        b[5:2:-1] = py3k.b('ABC')
-        self.assertEqual(b, py3k.b('012CBA6789'))
+        b[5:2:-1] = bytes('ABC', "UTF8")
+        self.assertEqual(b, bytes('012CBA6789', "UTF8"))
         # step is not 1
-        b[2:9:3] = py3k.b('XYZ')
-        self.assertEqual(b, py3k.b('01XCBY67Z9'))
-        b = QByteArray(py3k.b('0123456789'))
-        b[9:2:-3] = py3k.b('XYZ')
-        self.assertEqual(b, py3k.b('012Z45Y78X'))
+        b[2:9:3] = bytes('XYZ', "UTF8")
+        self.assertEqual(b, bytes('01XCBY67Z9', "UTF8"))
+        b = QByteArray(bytes('0123456789', "UTF8"))
+        b[9:2:-3] = bytes('XYZ', "UTF8")
+        self.assertEqual(b, bytes('012Z45Y78X', "UTF8"))
 
     def testSliceAssignmentQByteArray(self):
-        b = QByteArray(py3k.b('0123456789'))
-        b[2:8] = QByteArray(py3k.b('abcdef'))
-        self.assertEqual(b[2:8], py3k.b('abcdef'))
+        b = QByteArray(bytes('0123456789', "UTF8"))
+        b[2:8] = QByteArray(bytes('abcdef', "UTF8"))
+        self.assertEqual(b[2:8], bytes('abcdef', "UTF8"))
         # shrink
-        b[2:8] = QByteArray(py3k.b('aaa'))
-        self.assertEqual(b, py3k.b('01aaa89'))
+        b[2:8] = QByteArray(bytes('aaa', "UTF8"))
+        self.assertEqual(b, bytes('01aaa89', "UTF8"))
         # expanse
-        b[2:5] = QByteArray(py3k.b('uvwxyz'))
-        self.assertEqual(b, py3k.b('01uvwxyz89'))
+        b[2:5] = QByteArray(bytes('uvwxyz', "UTF8"))
+        self.assertEqual(b, bytes('01uvwxyz89', "UTF8"))
         # Delete behavior
         b[2:8] = QByteArray()
-        self.assertEqual(b, py3k.b('0189'))
+        self.assertEqual(b, bytes('0189', "UTF8"))
 
-        b = QByteArray(py3k.b('0123456789'))
+        b = QByteArray(bytes('0123456789', "UTF8"))
         # reverse assginment
-        b[5:2:-1] = QByteArray(py3k.b('ABC'))
-        self.assertEqual(b, py3k.b('012CBA6789'))
+        b[5:2:-1] = QByteArray(bytes('ABC', "UTF8"))
+        self.assertEqual(b, bytes('012CBA6789', "UTF8"))
         # step is not 1
-        b[2:9:3] = QByteArray(py3k.b('XYZ'))
-        self.assertEqual(b, py3k.b('01XCBY67Z9'))
-        b = QByteArray(py3k.b('0123456789'))
-        b[9:2:-3] = QByteArray(py3k.b('XYZ'))
-        self.assertEqual(b, py3k.b('012Z45Y78X'))
+        b[2:9:3] = QByteArray(bytes('XYZ', "UTF8"))
+        self.assertEqual(b, bytes('01XCBY67Z9', "UTF8"))
+        b = QByteArray(bytes('0123456789', "UTF8"))
+        b[9:2:-3] = QByteArray(bytes('XYZ', "UTF8"))
+        self.assertEqual(b, bytes('012Z45Y78X', "UTF8"))
 
     def testSliceAssignmentByteArray(self):
-        b = QByteArray(py3k.b('0123456789'))
+        b = QByteArray(bytes('0123456789', "UTF8"))
         # replace
-        b[2:8] = bytearray(py3k.b('abcdef'))
-        self.assertEqual(b[2:8], py3k.b('abcdef'))
+        b[2:8] = bytearray(bytes('abcdef', "UTF8"))
+        self.assertEqual(b[2:8], bytes('abcdef', "UTF8"))
         # shrink
-        b[2:8] = bytearray(py3k.b('aaa'))
-        self.assertEqual(b, py3k.b('01aaa89'))
+        b[2:8] = bytearray(bytes('aaa', "UTF8"))
+        self.assertEqual(b, bytes('01aaa89', "UTF8"))
         # expanse
-        b[2:5] = bytearray(py3k.b('uvwxyz'))
-        self.assertEqual(b, py3k.b('01uvwxyz89'))
+        b[2:5] = bytearray(bytes('uvwxyz', "UTF8"))
+        self.assertEqual(b, bytes('01uvwxyz89', "UTF8"))
         # Delete behavior
-        b[2:8] = bytearray(py3k.b(''))
-        self.assertEqual(b, py3k.b('0189'))
+        b[2:8] = bytearray(bytes('', "UTF8"))
+        self.assertEqual(b, bytes('0189', "UTF8"))
 
-        b = QByteArray(py3k.b('0123456789'))
+        b = QByteArray(bytes('0123456789', "UTF8"))
         # reverse assginment
-        b[5:2:-1] = bytearray(py3k.b('ABC'))
-        self.assertEqual(b, py3k.b('012CBA6789'))
+        b[5:2:-1] = bytearray(bytes('ABC', "UTF8"))
+        self.assertEqual(b, bytes('012CBA6789', "UTF8"))
         # step is not 1
-        b[2:9:3] = bytearray(py3k.b('XYZ'))
-        self.assertEqual(b, py3k.b('01XCBY67Z9'))
-        b = QByteArray(py3k.b('0123456789'))
-        b[9:2:-3] = bytearray(py3k.b('XYZ'))
-        self.assertEqual(b, py3k.b('012Z45Y78X'))
+        b[2:9:3] = bytearray(bytes('XYZ', "UTF8"))
+        self.assertEqual(b, bytes('01XCBY67Z9', "UTF8"))
+        b = QByteArray(bytes('0123456789', "UTF8"))
+        b[9:2:-3] = bytearray(bytes('XYZ', "UTF8"))
+        self.assertEqual(b, bytes('012Z45Y78X', "UTF8"))
 
     def testBufferProtocol(self):
-        orig_bytes = py3k.b('0123456789')
+        orig_bytes = bytes('0123456789', "UTF8")
         byte_array = QByteArray(orig_bytes)
         actual_bytes = bytes(byte_array)
         self.assertEqual(orig_bytes, actual_bytes)

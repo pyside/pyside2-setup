@@ -37,7 +37,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.helper import adjust_filename
-import py3kcompat as py3k
 from PySide2.QtCore import QSettings
 
 class TestQSettings(unittest.TestCase):
@@ -49,10 +48,7 @@ class TestQSettings(unittest.TestCase):
         self.assertEqual(type(r), list)
 
         r = settings.value('var2')
-        if py3k.IS_PY3K:
-            self.assertEqual(type(r), str)
-        else:
-            self.assertEqual(type(r), unicode)
+        self.assertEqual(type(r), str)
 
         r = settings.value('var2', type=list)
         self.assertEqual(type(r), list)

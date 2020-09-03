@@ -34,14 +34,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from helper.usesqapplication import UsesQApplication
 from PySide2.QtCore import QSize
 from PySide2.QtGui import QBitmap, QImage
 
 class TestQBitmap(UsesQApplication):
     def testFromDataMethod(self):
-        dataBits = py3k.b('\x38\x28\x38\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\xfe\xfe\x7c\x7c\x38\x38\x10\x10')
+        dataBits = bytes('\x38\x28\x38\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\xfe\xfe\x7c\x7c\x38\x38\x10\x10', "UTF-8")
         bim = QBitmap.fromData(QSize(8, 48), dataBits, QImage.Format_Mono) # missing function
 
 if __name__ == '__main__':

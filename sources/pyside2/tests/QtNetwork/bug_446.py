@@ -38,11 +38,11 @@ from PySide2.QtCore import *
 from PySide2.QtNetwork import *
 
 from helper.usesqcoreapplication import UsesQCoreApplication
-import py3kcompat as py3k
+
 
 class HttpSignalsCase(UsesQCoreApplication):
     '''Test case for launching QHttp signals'''
-    DATA = py3k.b("PySide rocks")
+    DATA = bytes("PySide rocks", "UTF-8")
 
     def onError(self):
         self.assertTrue(False)

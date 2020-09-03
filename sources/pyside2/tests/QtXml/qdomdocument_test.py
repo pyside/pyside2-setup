@@ -38,25 +38,25 @@ init_test_paths(False)
 
 from PySide2.QtCore import QByteArray
 from PySide2.QtXml import QDomDocument, QDomElement
-import py3kcompat as py3k
+
 
 class QDomDocumentTest(unittest.TestCase):
 
     def setUp(self):
         self.dom = QDomDocument()
 
-        self.goodXmlData = QByteArray(py3k.b('''
+        self.goodXmlData = QByteArray(bytes('''
         <typesystem package="PySide2.QtXml">
             <value-type name="QDomDocument"/>
             <value-type name="QDomElement"/>
         </typesystem>
-        '''))
+        ''', "UTF-8"))
 
-        self.badXmlData = QByteArray(py3k.b('''
+        self.badXmlData = QByteArray(bytes('''
         <typesystem package="PySide2.QtXml">
             <value-type name="QDomDocument">
         </typesystem>
-        '''))
+        ''', "UTF-8"))
 
     def tearDown(self):
         del self.dom

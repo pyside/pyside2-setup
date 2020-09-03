@@ -38,8 +38,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QBitArray, QByteArray, QIODevice, QDataStream, QDate, QTime, QDateTime
 
 def create_bitarray(string):
@@ -115,32 +113,32 @@ class QDataStreamShift(unittest.TestCase):
         self.stream.writeQChar(42)
 
         res = self.read_stream.readQChar()
-        self.assertEqual(res, py3k.unichr(42))
+        self.assertEqual(res, chr(42))
 
     def testQCharNull(self):
         '''QDataStream <<>> QChar - null'''
         self.stream.writeQChar(None)
 
         res = self.read_stream.readQChar()
-        self.assertEqual(res, py3k.unicode_('\x00'))
+        self.assertEqual(res, '\x00')
 
     def testQByteArrayValid(self):
         '''QDataStream <<>> QByteArray - valid'''
-        self.stream << QByteArray(py3k.b("hello"))
+        self.stream << QByteArray(bytes("hello", "UTF-8"))
 
         res = QByteArray()
 
         self.read_stream >> res
-        self.assertEqual(res, QByteArray(py3k.b("hello")))
+        self.assertEqual(res, QByteArray(bytes("hello", "UTF-8")))
 
     def testQByteArrayEmpty(self):
         '''QDataStream <<>> QByteArray - empty'''
-        self.stream << QByteArray(py3k.b(""))
+        self.stream << QByteArray(bytes("", "UTF-8"))
 
         res = QByteArray()
 
         self.read_stream >> res
-        self.assertEqual(res, QByteArray(py3k.b("")))
+        self.assertEqual(res, QByteArray(bytes("", "UTF-8")))
         self.assertTrue(res.isEmpty())
         self.assertFalse(res.isNull())
 
@@ -160,21 +158,21 @@ class QDataStreamShift(unittest.TestCase):
         self.stream.writeQString('Ka-boom')
 
         res = self.read_stream.readQString()
-        self.assertEqual(res, py3k.unicode_('Ka-boom'))
+        self.assertEqual(res, 'Ka-boom')
 
     def testQStringEmpty(self):
         '''QDataStream <<>> QString - empty'''
         self.stream.writeQString('')
 
         res = self.read_stream.readQString()
-        self.assertEqual(res, py3k.unicode_(''))
+        self.assertEqual(res, '')
 
     def testQStringNull(self):
         '''QDataStream <<>> QString - null'''
         self.stream.writeQString(None)
 
         res = self.read_stream.readQString()
-        self.assertEqual(res, py3k.unicode_(''))
+        self.assertEqual(res, '')
 
     def testQBitArrayNull(self):
         '''QDataStream <<>> QBitArray - null'''
@@ -284,29 +282,29 @@ class QDataStreamShiftBitArray(unittest.TestCase):
         '''QDataStream with valid QBitArray'''
         data = []
 
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x00')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x00', "UTF-8")), QDataStream.Ok,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x01\x00')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x01\x00', "UTF-8")), QDataStream.Ok,
                      create_bitarray('0')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x01\x01')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x01\x01', "UTF-8")), QDataStream.Ok,
                      create_bitarray('1')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x02\x03')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x02\x03', "UTF-8")), QDataStream.Ok,
                      create_bitarray('11')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x03\x07')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x03\x07', "UTF-8")), QDataStream.Ok,
                      create_bitarray('111')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x04\x0f')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x04\x0f', "UTF-8")), QDataStream.Ok,
                      create_bitarray('1111')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x05\x1f')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x05\x1f', "UTF-8")), QDataStream.Ok,
                      create_bitarray('11111')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x06\x3f')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x06\x3f', "UTF-8")), QDataStream.Ok,
                      create_bitarray('111111')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x07\x7f')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x07\x7f', "UTF-8")), QDataStream.Ok,
                      create_bitarray('1111111')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x07\x7e')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x07\x7e', "UTF-8")), QDataStream.Ok,
                      create_bitarray('0111111')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x07\x00')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x07\x00', "UTF-8")), QDataStream.Ok,
                      create_bitarray('0000000')))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x07\x39')), QDataStream.Ok,
+        data.append((QByteArray(bytes('\x00\x00\x00\x07\x39', "UTF-8")), QDataStream.Ok,
                      create_bitarray('1001110')))
 
         self._check_bitarray(data)
@@ -317,19 +315,19 @@ class QDataStreamShiftBitArray(unittest.TestCase):
 
         data.append((QByteArray(), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00\x00', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00\x00')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00\x00\x00', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x01')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00\x00\x00\x01', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x02')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00\x00\x00\x02', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x03')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00\x00\x00\x03', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x04')), QDataStream.ReadPastEnd,
+        data.append((QByteArray(bytes('\x00\x00\x00\x04', "UTF-8")), QDataStream.ReadPastEnd,
                      QBitArray()))
 
         self._check_bitarray(data)
@@ -338,7 +336,7 @@ class QDataStreamShiftBitArray(unittest.TestCase):
         '''QDataStream reading corrupt data'''
         data = []
 
-        data.append((QByteArray(py3k.b('\x00\x00\x00\x01\x02')),
+        data.append((QByteArray(bytes('\x00\x00\x00\x01\x02', "UTF-8")),
                      QDataStream.ReadCorruptData,
                      QBitArray()))
 
@@ -352,10 +350,10 @@ class QDataStreamRawData(unittest.TestCase):
         ba = QByteArray()
         data = QDataStream(ba, QIODevice.WriteOnly)
         data.writeRawData('AB\x00C')
-        self.assertEqual(ba.data(), py3k.b('AB\x00C'))
+        self.assertEqual(ba.data(), bytes('AB\x00C', "UTF-8"))
 
         data = QDataStream(ba)
-        self.assertEqual(data.readRawData(4), py3k.b('AB\x00C'))
+        self.assertEqual(data.readRawData(4), bytes('AB\x00C', "UTF-8"))
 
 if __name__ == '__main__':
     unittest.main()

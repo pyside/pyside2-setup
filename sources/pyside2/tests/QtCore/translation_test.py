@@ -39,7 +39,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from PySide2.QtCore import QObject, QTranslator, QCoreApplication
 
 from helper.usesqcoreapplication import UsesQCoreApplication
@@ -59,7 +58,7 @@ class TranslationTest(UsesQCoreApplication):
 
         obj = QObject()
         obj.setObjectName(obj.tr('Hello World!'))
-        self.assertEqual(obj.objectName(), py3k.unicode_('Orbis, te saluto!'))
+        self.assertEqual(obj.objectName(), 'Orbis, te saluto!')
 
     def testRussian(self):
         #Set string value to Russian
@@ -69,7 +68,7 @@ class TranslationTest(UsesQCoreApplication):
 
         obj = QObject()
         obj.setObjectName(obj.tr('Hello World!'))
-        self.assertEqual(obj.objectName(), py3k.unicode_('привет мир!'))
+        self.assertEqual(obj.objectName(), 'привет мир!')
 
     def testUtf8(self):
         translator = QTranslator()
@@ -78,12 +77,12 @@ class TranslationTest(UsesQCoreApplication):
 
         obj = QObject()
         obj.setObjectName(obj.tr('Hello World!'))
-        self.assertEqual(obj.objectName(), py3k.unicode_('привет мир!'))
+        self.assertEqual(obj.objectName(), 'привет мир!')
 
     def testTranslateWithNoneDisambiguation(self):
         value = 'String here'
         obj = QCoreApplication.translate('context', value, None)
-        self.assertTrue(isinstance(obj, py3k.unicode))
+        self.assertTrue(isinstance(obj, str))
         self.assertEqual(obj, value)
 
 if __name__ == '__main__':

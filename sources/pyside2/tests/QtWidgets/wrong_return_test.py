@@ -37,7 +37,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from PySide2 import QtWidgets
 from helper.usesqapplication import UsesQApplication
 
@@ -56,10 +55,7 @@ class testCase(UsesQApplication):
 
     def testVirtualReturn(self):
         w = MyWidget()
-        if py3k.IS_PY3K:
-            self.assertWarns(RuntimeWarning, w.show)
-        else:
-            self.assertRaises(RuntimeWarning, w.show)
+        self.assertWarns(RuntimeWarning, w.show)
 
 
 if __name__ == '__main__':

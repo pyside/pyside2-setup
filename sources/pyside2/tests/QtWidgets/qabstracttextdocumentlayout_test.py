@@ -34,8 +34,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QSizeF, QTimer
 from PySide2.QtGui import QTextFormat, QTextCharFormat, QPyTextObject
 from PySide2.QtWidgets import QTextEdit
@@ -60,7 +58,7 @@ class QAbstractTextDocumentLayoutTest(UsesQApplication):
         fmt.setObjectType(QAbstractTextDocumentLayoutTest.objectType)
 
         cursor = self.textEdit.textCursor()
-        cursor.insertText(py3k.unichr(0xfffc), fmt)
+        cursor.insertText(chr(0xfffc), fmt)
         self.textEdit.setTextCursor(cursor)
         self.textEdit.close()
 

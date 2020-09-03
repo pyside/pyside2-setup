@@ -35,11 +35,10 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2.QtCore import QTimeZone
-import py3kcompat as py3k
 
 class TestQTimeZone (unittest.TestCase):
     def testTimeZone(self):
-        id = py3k.b('Europe/Berlin')
+        id = bytes('Europe/Berlin', "UTF-8")
         timeZone = QTimeZone(id)
         self.assertTrue(timeZone.isValid())
         self.assertEqual(timeZone.id(), id)

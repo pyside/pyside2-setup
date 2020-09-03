@@ -39,11 +39,10 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2.QtCore import QCryptographicHash, QMessageAuthenticationCode
-import py3kcompat as py3k
 
 class TestQMessageAuthenticationCode (unittest.TestCase):
     def test(self):
-        code = QMessageAuthenticationCode(QCryptographicHash.Sha1, py3k.b('bla'))
+        code = QMessageAuthenticationCode(QCryptographicHash.Sha1, bytes('bla', "UTF-8"))
         result = code.result()
         self.assertTrue(result.size() > 0)
         print(result.toHex())

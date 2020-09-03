@@ -36,7 +36,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from helper.helper import adjust_filename
@@ -292,17 +291,11 @@ class QImageTest(UsesQApplication):
         data2 = img1.scanLine(0)
         self.assertEqual(data1, data2)
 
-        # PySide python 3.x does not support slice yet
-        if not py3k.IS_PY3K:
-            buff = py3k.buffer(img0.bits()[:img0.bytesPerLine()])
-            self.assertEqual(data1, buff)
-            self.assertEqual(data2, buff)
-
     def testEmptyBuffer(self):
-        img = QImage(py3k.buffer(''), 100, 100, QImage.Format_ARGB32)
+        img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format_ARGB32)
 
     def testEmptyStringAsBuffer(self):
-        img = QImage(py3k.b(''), 100, 100, QImage.Format_ARGB32)
+        img = QImage(bytes('', "UTF-8"), 100, 100, QImage.Format_ARGB32)
 
     def testXpmConstructor(self):
         label = QLabel()

@@ -37,7 +37,6 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2 import QtCore
-import py3kcompat as py3k
 
 
 class MyQObject(QtCore.QObject):
@@ -51,11 +50,9 @@ async def demo_coroutine():
 """
 
 
-if py3k.IS_PY3K:
-    exec(demo_coroutine_definition_code)
+exec(demo_coroutine_definition_code)
 
 
-@unittest.skipIf(not py3k.IS_PY3K, "Requires Python 3 due to use of async def")
 class CoroutineRaisesStopIterationTestCase(unittest.TestCase):
     def setUp(self):
         self.coroutine = demo_coroutine()

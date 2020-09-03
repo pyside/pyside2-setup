@@ -34,16 +34,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 from PySide2.QtCore import QIODevice, QTextStream
 
 
 class MyIODevice (QIODevice):
     def readData(self, amount):
-        return py3k.b("\0a" * int(amount/2))
+        return bytes("\0a" * int(amount/2), "UTF-8")
 
     def readLineData(self, maxSize):
-        return py3k.b("\0b" * 4)
+        return bytes("\0b" * 4, "UTF-8")
 
     def atEnd(self):
         return False

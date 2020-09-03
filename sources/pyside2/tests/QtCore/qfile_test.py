@@ -35,8 +35,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QDir, QFile, QIODevice, QSaveFile, QTemporaryDir
 
 class GetCharTest(unittest.TestCase):
@@ -45,7 +43,7 @@ class GetCharTest(unittest.TestCase):
     def setUp(self):
         '''Acquire resources'''
         handle, self.filename = tempfile.mkstemp()
-        os.write(handle, py3k.b('a'))
+        os.write(handle, bytes('a', "UTF-8"))
         os.close(handle)
 
     def tearDown(self):
@@ -71,7 +69,7 @@ class GetCharTest(unittest.TestCase):
             if sys.version_info[0] >= 3:
                 self.assertEqual(memory[0], ord('a'))
             else:
-                self.assertEqual(memory[0], py3k.b('a'))
+                self.assertEqual(memory[0], bytes('a', "UTF-8"))
             # now memory points to wild bytes... :-)
             # uncommenting this must cause a segfault.
             # self.assertEqual(memory[0], 'a')
@@ -84,7 +82,7 @@ class GetCharTest(unittest.TestCase):
         self.assertTrue(dir.isValid())
         saveFile = QSaveFile(dir.path() + "/test.dat")
         self.assertTrue(saveFile.open(QIODevice.WriteOnly))
-        saveFile.write(py3k.b("Test"))
+        saveFile.write(bytes("Test", "UTF-8"))
         self.assertTrue(saveFile.commit())
         self.assertTrue(os.path.exists(QDir.toNativeSeparators(saveFile.fileName())))
 

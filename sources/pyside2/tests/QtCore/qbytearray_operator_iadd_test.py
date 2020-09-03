@@ -36,7 +36,7 @@ init_test_paths(False)
 
 from PySide2.QtCore import QByteArray
 from helper.docmodifier import DocModifier
-import py3kcompat as py3k
+
 
 class BaseQByteArrayOperatorIAdd(object):
     '''Base class for QByteArray += operator tests.
@@ -49,21 +49,21 @@ class BaseQByteArrayOperatorIAdd(object):
 
     def testSingleString(self):
         '''QByteArray += bytes of size 1'''
-        s = py3k.b('0')
+        s = bytes('0', "UTF-8")
         self.obj += s
         self.assertEqual(self.obj, self.orig_obj + s)
         self.assertEqual(self.obj.size(), self.orig_obj.size() + len(s))
 
     def testString(self):
         '''QByteArray += bytes of size > 1'''
-        s = bytearray(py3k.b('dummy'))
+        s = bytearray(bytes('dummy', "UTF-8"))
         self.obj += s # XXx iadd support abytearray
         self.assertEqual(self.obj, self.orig_obj + s)
         self.assertEqual(self.obj.size(), self.orig_obj.size() + len(s))
 
     def testQByteArray(self):
         '''QByteArray += QByteArray'''
-        s = QByteArray(py3k.b('array'))
+        s = QByteArray(bytes('array', "UTF-8"))
         self.obj += s
         self.assertEqual(self.obj, self.orig_obj + s)
 
@@ -86,8 +86,8 @@ class ValidQByteArrayOperatorIAdd(unittest.TestCase, BaseQByteArrayOperatorIAdd)
     doc_filter = lambda x: x.startswith('test')
 
     def setUp(self):
-        self.obj = QByteArray(py3k.b('some byte array'))
-        self.orig_obj = QByteArray(py3k.b('some byte array'))
+        self.obj = QByteArray(bytes('some byte array', "UTF-8"))
+        self.orig_obj = QByteArray(bytes('some byte array', "UTF-8"))
 
 if __name__ == '__main__':
     unittest.main()

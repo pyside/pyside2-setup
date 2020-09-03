@@ -39,8 +39,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QObject, Signal, Qt
 
 class Obj(QObject):
@@ -73,7 +71,7 @@ class ObjectNameCase(unittest.TestCase):
         self.assertEqual('', obj.objectName())
 
     def testUnicode(self):
-        name = py3k.unicode_('não')
+        name = 'não'
         #FIXME Strange error on upstream when using equal(name, obj)
         obj = QObject()
         obj.setObjectName(name)

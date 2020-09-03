@@ -39,8 +39,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QByteArray
 
 class QByteArrayOperatorEqual(unittest.TestCase):
@@ -54,12 +52,12 @@ class QByteArrayOperatorEqual(unittest.TestCase):
 
     def testSimple(self):
         #QByteArray(some_string) == QByteArray(some_string)
-        string = py3k.b('egg snakes')
+        string = bytes('egg snakes', "UTF-8")
         self.assertEqual(QByteArray(string), QByteArray(string))
 
     def testPyString(self):
         #QByteArray(string) == string
-        string = py3k.b('my test string')
+        string = bytes('my test string', "UTF-8")
         self.assertEqual(QByteArray(string), string)
 
 class QByteArrayOperatorAt(unittest.TestCase):
@@ -68,30 +66,30 @@ class QByteArrayOperatorAt(unittest.TestCase):
     def testInRange(self):
         #QByteArray[x] where x is a valid index
         string = 'abcdefgh'
-        obj = QByteArray(py3k.b(string))
+        obj = QByteArray(bytes(string, "UTF-8"))
 
         for i in range(len(string)):
-            self.assertEqual(obj[i], py3k.b(string[i]))
+            self.assertEqual(obj[i], bytes(string[i], "UTF-8"))
 
     def testInRangeReverse(self):
         #QByteArray[x] where x is a valid index (reverse order)
         string = 'abcdefgh'
-        obj = QByteArray(py3k.b(string))
+        obj = QByteArray(bytes(string, "UTF-8"))
 
         for i in range(len(string)-1, 0, -1):
-            self.assertEqual(obj[i], py3k.b(string[i]))
+            self.assertEqual(obj[i], bytes(string[i], "UTF-8"))
 
 
     def testOutOfRange(self):
         #QByteArray[x] where x is out of index
-        string = py3k.b('1234567')
+        string = bytes('1234567', "UTF-8")
         obj = QByteArray(string)
         self.assertRaises(IndexError, lambda :obj[len(string)])
 
     def testNullStrings(self):
-        ba = QByteArray(py3k.b('\x00'))
+        ba = QByteArray(bytes('\x00', "UTF-8"))
         self.assertEqual(ba.at(0), '\x00')
-        self.assertEqual(ba[0], py3k.b('\x00'))
+        self.assertEqual(ba[0], bytes('\x00', "UTF-8"))
 
 class QByteArrayOperatorLen(unittest.TestCase):
     '''Test case for __len__ operator of QByteArray'''
@@ -99,9 +97,9 @@ class QByteArrayOperatorLen(unittest.TestCase):
     def testBasic(self):
         '''QByteArray __len__'''
         self.assertEqual(len(QByteArray()), 0)
-        self.assertEqual(len(QByteArray(py3k.b(''))), 0)
-        self.assertEqual(len(QByteArray(py3k.b(' '))), 1)
-        self.assertEqual(len(QByteArray(py3k.b('yabadaba'))), 8)
+        self.assertEqual(len(QByteArray(bytes('', "UTF-8"))), 0)
+        self.assertEqual(len(QByteArray(bytes(' ', "UTF-8"))), 1)
+        self.assertEqual(len(QByteArray(bytes('yabadaba', "UTF-8"))), 8)
 
 
 class QByteArrayOperatorStr(unittest.TestCase):
@@ -110,8 +108,8 @@ class QByteArrayOperatorStr(unittest.TestCase):
     def testBasic(self):
         '''QByteArray __str__'''
         self.assertEqual(QByteArray().__str__(), str(b''))
-        self.assertEqual(QByteArray(py3k.b('')).__str__(), str(b''))
-        self.assertEqual(QByteArray(py3k.b('aaa')).__str__(), str(b'aaa'))
+        self.assertEqual(QByteArray(bytes('', "UTF-8")).__str__(), str(b''))
+        self.assertEqual(QByteArray(bytes('aaa', "UTF-8")).__str__(), str(b'aaa'))
 
 
 if __name__ == '__main__':

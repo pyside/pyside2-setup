@@ -26,6 +26,8 @@
 ##
 #############################################################################
 
+import importlib
+import importlib.util
 import os
 import shutil
 import sys
@@ -35,7 +37,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
 
 orig_path = os.path.join(os.path.dirname(__file__))
 workdir = os.getcwd()
@@ -45,11 +46,8 @@ shutil.copyfile(src, dst)
 sys.path.append(workdir)
 
 def reload_module(moduleName):
-    if py3k.IS_PY3K:
-        import importlib
-        importlib.reload(moduleName)
-    else:
-        reload(moduleName)
+    importlib.reload(moduleName)
+
 
 def increment_module_value():
     modfile = open(dst, 'a')
@@ -57,11 +55,8 @@ def increment_module_value():
     modfile.flush()
     modfile.close()
     if not sys.dont_write_bytecode:
-        if py3k.IS_PY3K:
-            import importlib.util
-            cacheFile = importlib.util.cache_from_source(dst)
-        else:
-            cacheFile = dst + 'c'
+        import importlib.util
+        cacheFile = importlib.util.cache_from_source(dst)
         os.remove(cacheFile)
 
 class TestModuleReloading(unittest.TestCase):

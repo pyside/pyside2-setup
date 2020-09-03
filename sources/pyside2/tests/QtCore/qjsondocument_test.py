@@ -39,24 +39,18 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2.QtCore import QJsonDocument
-import py3kcompat as py3k
+
 
 class QJsonDocumentTest(unittest.TestCase):
 
     def testToVariant(self):
         a = QJsonDocument.fromJson(b'{"test": null}')
         self.assertIsInstance(a, QJsonDocument)
-        if py3k.IS_PY3K:
-            self.assertEqual(str(a.toVariant()), "{'test': None}")
-        else:
-            self.assertEqual(str(a.toVariant()), "{u'test': None}")
+        self.assertEqual(str(a.toVariant()), "{'test': None}")
 
         b = QJsonDocument.fromJson(b'{"test": [null]}')
         self.assertIsInstance(b, QJsonDocument)
-        if py3k.IS_PY3K:
-            self.assertEqual(str(b.toVariant()), "{'test': [None]}")
-        else:
-            self.assertEqual(str(b.toVariant()), "{u'test': [None]}")
+        self.assertEqual(str(b.toVariant()), "{'test': [None]}")
 
 
 if __name__ == '__main__':

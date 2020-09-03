@@ -36,8 +36,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QByteArray, QTextStream, QIODevice, QFile
 
 class QTextStreamShiftTest(unittest.TestCase):
@@ -53,7 +51,7 @@ class QTextStreamShiftTest(unittest.TestCase):
         self.write << '4'
         self.write.flush()
         res = self.read.readLine()
-        self.assertTrue(isinstance(res, py3k.unicode))
+        self.assertTrue(isinstance(res, str))
         self.assertEqual(res, '4')
 
 class QTextStreamGetSet(unittest.TestCase):
@@ -100,12 +98,12 @@ class QTextStreamReadLinesFromDevice(unittest.TestCase):
         data = []
 
         data.append((QByteArray(), []))
-        data.append((QByteArray(py3k.b('\n')), ['']))
-        data.append((QByteArray(py3k.b('\r\n')), ['']))
-        data.append((QByteArray(py3k.b('ole')), ['ole']))
-        data.append((QByteArray(py3k.b('ole\n')), ['ole']))
-        data.append((QByteArray(py3k.b('ole\r\n')), ['ole']))
-        data.append((QByteArray(py3k.b('ole\r\ndole\r\ndoffen')), ['ole', 'dole', 'doffen']))
+        data.append((QByteArray(bytes('\n', "UTF-8")), ['']))
+        data.append((QByteArray(bytes('\r\n', "UTF-8")), ['']))
+        data.append((QByteArray(bytes('ole', "UTF-8")), ['ole']))
+        data.append((QByteArray(bytes('ole\n', "UTF-8")), ['ole']))
+        data.append((QByteArray(bytes('ole\r\n', "UTF-8")), ['ole']))
+        data.append((QByteArray(bytes('ole\r\ndole\r\ndoffen', "UTF-8")), ['ole', 'dole', 'doffen']))
 
         self._check_data(data)
 

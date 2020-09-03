@@ -39,8 +39,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-import py3kcompat as py3k
-
 from PySide2.QtCore import QObject
 from PySide2.QtCore import QByteArray
 
@@ -57,13 +55,13 @@ class UnicodeConversion(unittest.TestCase):
         #Set regular Python string retrieve unicode
         obj = QObject()
         obj.setObjectName('test')
-        self.assertEqual(obj.objectName(), py3k.unicode_('test'))
+        self.assertEqual(obj.objectName(), 'test')
 
     def testSetUnicodeRetrieveUnicode(self):
         #Set Python unicode string and retrieve unicode
         obj = QObject()
-        obj.setObjectName(py3k.unicode_('ümlaut'))
-        self.assertEqual(obj.objectName(), py3k.unicode_('ümlaut'))
+        obj.setObjectName('ümlaut')
+        self.assertEqual(obj.objectName(), 'ümlaut')
 
 if __name__ == '__main__':
     unittest.main()
