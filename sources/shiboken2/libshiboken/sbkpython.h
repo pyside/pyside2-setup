@@ -75,7 +75,6 @@ extern "C" {
 #  include "shibokenmacros.h"
 // "pep384impl.h" may nowhere be included but in this file.
 #  include "pep384impl.h"
-#  include "typespec.h"
 #  pragma pop_macro("slots")
 
 #else
@@ -102,7 +101,6 @@ extern "C" {
 #  include "shibokenmacros.h"
 // "pep384impl.h" may nowhere be included but in this file.
 #  include "pep384impl.h"
-#  include "typespec.h"
 #endif
 
 #define PyInt_Type PyLong_Type

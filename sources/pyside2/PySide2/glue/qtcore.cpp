@@ -1674,14 +1674,6 @@ PyMem_Free(temp);
 #endif
 // @snippet conversion-pyunicode
 
-// @snippet conversion-pystring
-#ifndef IS_PY3K
-const char * str = %CONVERTTOCPP[const char *](%in);
-//XXX      /|\ omitting this space crashes shiboken!
-%out = %OUTTYPE(str);
-#endif
-// @snippet conversion-pystring
-
 // @snippet conversion-pynone
 %out = %OUTTYPE();
 // @snippet conversion-pynone

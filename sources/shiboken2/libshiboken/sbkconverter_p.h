@@ -335,7 +335,6 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
-#if PY_MAJOR_VERSION >= 3
         if (PyLong_Check(pyIn)) {
             unsigned PY_LONG_LONG result = PyLong_AsUnsignedLongLong(pyIn);
             if (OverFlowChecker<unsigned PY_LONG_LONG, unsigned PY_LONG_LONG>::check(result, pyIn))
@@ -345,22 +344,6 @@ struct Primitive<unsigned PY_LONG_LONG> : OnePrimitive<unsigned PY_LONG_LONG>
         else {
             PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
         }
-#else
-        if (PyInt_Check(pyIn)) {
-            long result = PyInt_AsLong(pyIn);
-            if (OverFlowChecker<unsigned PY_LONG_LONG>::check(result, pyIn))
-                PyErr_SetObject(PyExc_OverflowError, 0);
-            *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) =
-                static_cast<unsigned PY_LONG_LONG>(result);
-        } else if (PyLong_Check(pyIn)) {
-            unsigned PY_LONG_LONG result = PyLong_AsUnsignedLongLong(pyIn);
-            if (OverFlowChecker<unsigned PY_LONG_LONG, unsigned PY_LONG_LONG>::check(result, pyIn))
-                PyErr_SetObject(PyExc_OverflowError, 0);
-            *reinterpret_cast<unsigned PY_LONG_LONG * >(cppOut) = result;
-        } else {
-            PyErr_SetString(PyExc_TypeError, "Invalid type for unsigned long long conversion");
-        }
-#endif // Python 2
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {

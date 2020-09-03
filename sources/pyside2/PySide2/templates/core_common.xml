@@ -343,11 +343,7 @@
     <template name="checkPyCapsuleOrPyCObject_func">
     static bool checkPyCapsuleOrPyCObject(PyObject* pyObj)
     {
-        #ifdef IS_PY3K
         return PyCapsule_CheckExact(pyObj);
-        #else
-        return PyCObject_Check(pyObj);
-        #endif
     }
     </template>
 

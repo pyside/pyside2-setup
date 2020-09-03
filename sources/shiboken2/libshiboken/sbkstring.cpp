@@ -57,20 +57,12 @@ bool checkIterable(PyObject *obj)
 
 bool checkType(PyTypeObject *type)
 {
-    return type == &PyUnicode_Type
-#if PY_MAJOR_VERSION < 3
-            || type == &PyString_Type
-#endif
-    ;
+    return type == &PyUnicode_Type;
 }
 
 bool check(PyObject *obj)
 {
-    return obj == Py_None ||
-#if PY_MAJOR_VERSION < 3
-        PyString_Check(obj) ||
-#endif
-        PyUnicode_Check(obj);
+    return obj == Py_None || PyUnicode_Check(obj);
 }
 
 bool checkChar(PyObject *pyobj)
@@ -129,12 +121,6 @@ bool concat(PyObject **val1, PyObject *val2)
         return true;
     }
 
-#if PY_MAJOR_VERSION < 3
-    if (PyString_Check(*val1) && PyString_Check(val2)) {
-        PyString_Concat(val1, val2);
-        return true;
-    }
-#endif
     return false;
 }
 

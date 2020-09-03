@@ -49,22 +49,14 @@
       <include file-name="wtypes.h" location="global"/>
       <conversion-rule>
         <native-to-target>
-        #ifdef IS_PY3K
-        return PyCapsule_New(%in, 0, 0);
-        #else
-        return PyCObject_FromVoidPtr(%in, 0);
-        #endif
+        return PyCapsule_New(%in, nullptr, nullptr);
         </native-to-target>
         <target-to-native>
             <add-conversion type="PyNone">
             %out = 0;
             </add-conversion>
             <add-conversion check="checkPyCapsuleOrPyCObject(%in)" type="PyObject">
-            #ifdef IS_PY3K
-            %out = (%OUTTYPE)PyCapsule_GetPointer(%in, 0);
-            #else
-            %out = (%OUTTYPE)PyCObject_AsVoidPtr(%in);
-            #endif
+            %out = (%OUTTYPE)PyCapsule_GetPointer(%in, nullptr);
             </add-conversion>
         </target-to-native>
       </conversion-rule>

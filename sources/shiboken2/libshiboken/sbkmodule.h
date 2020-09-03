@@ -43,21 +43,12 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
-#if PY_MAJOR_VERSION >= 3
-    #define SBK_MODULE_INIT_ERROR 0
-    #define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
-        extern "C" SBK_EXPORT_MODULE PyObject *PyInit_##ModuleName() {
+#define SBK_MODULE_INIT_ERROR 0
+#define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
+    extern "C" SBK_EXPORT_MODULE PyObject *PyInit_##ModuleName() {
 
-    #define SBK_MODULE_INIT_FUNCTION_END \
-        return module; }
-#else
-    #define SBK_MODULE_INIT_ERROR
-    #define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
-        extern "C" SBK_EXPORT_MODULE void init##ModuleName() {
-
-    #define SBK_MODULE_INIT_FUNCTION_END \
-        }
-#endif
+#define SBK_MODULE_INIT_FUNCTION_END \
+    return module; }
 
 extern "C"
 {
