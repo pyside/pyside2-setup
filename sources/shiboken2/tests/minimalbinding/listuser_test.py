@@ -29,6 +29,7 @@
 ##
 #############################################################################
 
+from functools import reduce
 import os
 import sys
 import unittest
@@ -38,11 +39,6 @@ from shiboken_paths import init_paths
 init_paths()
 
 from minimal import ListUser, Val, Obj
-from py3kcompat import IS_PY3K
-
-if IS_PY3K:
-    import functools
-    reduce = functools.reduce
 
 
 class ExtListUser(ListUser):

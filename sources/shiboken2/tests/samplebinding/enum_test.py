@@ -44,7 +44,6 @@ import shiboken2
 
 import sample
 from sample import SampleNamespace, ObjectType, Event
-from py3kcompat import IS_PY3K, b
 
 def createTempFile():
     if sys.version_info >= (2, 6):
@@ -133,13 +132,7 @@ class EnumTest(unittest.TestCase):
     def testEnumTpPrintImplementation(self):
         '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
         tmpfile = createTempFile()
-        if IS_PY3K:
-            from py3k import printToFile
-            printToFile(tmpfile, Event.ANY_EVENT)
-        else:
-            sys.stdout = tmpfile
-            print(Event.ANY_EVENT)
-            sys.stdout = sys.__stdout__
+        print(Event.ANY_EVENT, file=tmpfile)
         tmpfile.seek(0)
         text = tmpfile.read().strip()
         tmpfile.close()

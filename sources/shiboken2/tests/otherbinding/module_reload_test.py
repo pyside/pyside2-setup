@@ -29,6 +29,7 @@
 ##
 #############################################################################
 
+from importlib import reload
 import os
 import shutil
 import sys
@@ -38,10 +39,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shiboken_paths import init_paths
 init_paths()
 
-from py3kcompat import IS_PY3K
-
-if IS_PY3K:
-    from imp import reload
 
 orig_path = os.path.join(os.path.dirname(__file__))
 workdir = os.getcwd()

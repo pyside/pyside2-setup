@@ -36,7 +36,6 @@ import unittest
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shiboken_paths import init_paths
 init_paths()
-from py3kcompat import IS_PY3K
 
 from sample import ObjectType
 
@@ -45,17 +44,11 @@ class NewStyle(object):
     def name(self):
         return "NewStyle"
 
-class OldStyle:
-    def name(self):
-        return "OldStyle"
 
 def defineNewStyle():
     class MyObjectNew(ObjectType, NewStyle):
         pass
 
-def defineOldStyle():
-    class MyObjectOld(ObjectType, OldStyle):
-        pass
 
 class ObjectTypeTest(unittest.TestCase):
     '''Test cases to avoid declaring Shiboken classes with multiple inheritance from old style classes.'''
@@ -63,10 +56,6 @@ class ObjectTypeTest(unittest.TestCase):
     def testObjectTypeNewStype(self):
         defineNewStyle()
 
-    def testObjectTypeOldStype(self):
-        # Py 3k doesn't have old style classes
-        if not IS_PY3K:
-            self.assertRaises(TypeError, defineOldStyle)
 
 
 if __name__ == '__main__':

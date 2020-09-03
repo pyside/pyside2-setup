@@ -40,7 +40,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 from sample import *
-from py3kcompat import IS_PY3K, long
+
 
 class OverflowTest(unittest.TestCase):
     '''Test case for overflowing C++ numeric types.'''
@@ -56,7 +56,7 @@ class OverflowTest(unittest.TestCase):
         '''C++ function receives an long long argument and raise OverflowError if the value is negative.'''
         val = 100
         self.assertEqual(doubleLongLong(val), 2 * val)
-        val = long(100)
+        val = int(100)
         self.assertEqual(doubleLongLong(val), 2 * val)
         val = (2 << 64) + 1
         self.assertRaises(OverflowError, doubleLongLong, val)
@@ -65,11 +65,11 @@ class OverflowTest(unittest.TestCase):
         '''C++ function receives an unsigned long long argument and raise OverflowError if the value is negative.'''
         val = 100
         self.assertEqual(doubleUnsignedLongLong(val), 2 * val)
-        val = long(100)
+        val = int(100)
         self.assertEqual(doubleUnsignedLongLong(val), 2 * val)
         val = -100
         self.assertRaises(OverflowError, doubleUnsignedLongLong, val)
-        val = long(-200)
+        val = int(-200)
         self.assertRaises(OverflowError, doubleUnsignedLongLong, val)
 
     def testOverflow(self):

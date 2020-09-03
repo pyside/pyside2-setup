@@ -39,15 +39,12 @@ import unittest
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shiboken_paths import init_paths
 init_paths()
-from py3kcompat import IS_PY3K
 
 from sample import VirtualMethods, SimpleFile, Point
 
 def MethodTypeCompat(func, instance):
-    if IS_PY3K:
-        return types.MethodType(func, instance)
-    else:
-        return types.MethodType(func, instance, type(instance))
+    return types.MethodType(func, instance)
+
 
 class Duck(VirtualMethods):
     def __init__(self):

@@ -40,7 +40,6 @@ from shiboken_paths import init_paths
 init_paths()
 import sys
 import sample
-from py3kcompat import IS_PY3K, l, long
 
 # Hardcode the limits of the underlying C-types depending on architecture and memory
 # model (taking MSVC using LLP64 into account).
@@ -48,7 +47,7 @@ cIntMin = -2147483648
 cIntMax = 2147483647
 cLongMin = cIntMin
 cLongMax = cIntMax
-maxRepresentableInt = sys.maxsize if IS_PY3K else sys.maxint
+maxRepresentableInt = sys.maxsize
 is64bitArchitecture = maxRepresentableInt > 2**32
 if is64bitArchitecture and sys.platform != 'win32':
     cLongMin = -9223372036854775808
@@ -81,13 +80,13 @@ class FloatImplicitConvert(NumericTester):
 
     def testFloatAsUInt(self):
         '''Float as unsigned Int'''
-        self.check_value(3.14, 3, sample.acceptUInt, long)
+        self.check_value(3.14, 3, sample.acceptUInt, int)
         self.assertRaises(OverflowError, sample.acceptUInt, -3.14)
 
     def testFloatAsULong(self):
         '''Float as unsigned Long'''
         #FIXME Breaking with SystemError "bad argument to internal function"
-        self.check_value(3.14, 3, sample.acceptULong, long)
+        self.check_value(3.14, 3, sample.acceptULong, int)
         self.assertRaises(OverflowError, sample.acceptULong, -3.14)
 
     def testFloatAsDouble(self):
@@ -112,12 +111,12 @@ class IntImplicitConvert(NumericTester):
 
     def testIntAsUInt(self):
         '''Int as unsigned Int'''
-        self.check_value(3, 3, sample.acceptUInt, long)
+        self.check_value(3, 3, sample.acceptUInt, int)
         self.assertRaises(OverflowError, sample.acceptUInt, -3)
 
     def testIntAsULong(self):
         '''Int as unsigned Long'''
-        self.check_value(3, 3, sample.acceptULong, long)
+        self.check_value(3, 3, sample.acceptULong, int)
         self.assertRaises(OverflowError, sample.acceptULong, -3)
 
     def testFloatAsDouble(self):
@@ -130,27 +129,27 @@ class LongImplicitConvert(NumericTester):
 
     def testLongAsInt(self):
         '''Long as Int'''
-        self.check_value(l(24224), 24224, sample.acceptInt, int)
+        self.check_value(24224, 24224, sample.acceptInt, int)
         self.assertRaises(OverflowError, sample.acceptInt, cIntMax + 20)
 
     def testLongAsLong(self):
         '''Long as Long'''
-        self.check_value(l(2405), 2405, sample.acceptLong, int)
+        self.check_value(2405, 2405, sample.acceptLong, int)
         self.assertRaises(OverflowError, sample.acceptLong, cLongMax + 20)
 
     def testLongAsUInt(self):
         '''Long as unsigned Int'''
-        self.check_value(l(260), 260, sample.acceptUInt, long)
+        self.check_value(260, 260, sample.acceptUInt, int)
         self.assertRaises(OverflowError, sample.acceptUInt, -42)
 
     def testLongAsULong(self):
         '''Long as unsigned Long'''
-        self.check_value(l(128), 128, sample.acceptULong, long)
-        self.assertRaises(OverflowError, sample.acceptULong, l(-334))
+        self.check_value(128, 128, sample.acceptULong, int)
+        self.assertRaises(OverflowError, sample.acceptULong, -334)
 
     def testLongAsDouble(self):
         '''Float as double'''
-        self.check_value(l(42), 42, sample.acceptDouble, float)
+        self.check_value(42, 42, sample.acceptDouble, float)
 
 
 if __name__ == '__main__':

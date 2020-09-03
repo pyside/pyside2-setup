@@ -42,10 +42,6 @@ from shiboken_paths import init_paths
 init_paths()
 
 from sample import ObjectType
-from py3kcompat import IS_PY3K
-
-if IS_PY3K:
-    string.letters = string.ascii_letters
 
 
 class DeleteChildInPython(unittest.TestCase):
@@ -55,7 +51,7 @@ class DeleteChildInPython(unittest.TestCase):
         '''Delete child in python should not invalidate child'''
         parent = ObjectType()
         child = ObjectType(parent)
-        name = ''.join(random.sample(string.letters, 5))
+        name = ''.join(random.sample(string.ascii_letters, 5))
         child.setObjectName(name)
 
         del child

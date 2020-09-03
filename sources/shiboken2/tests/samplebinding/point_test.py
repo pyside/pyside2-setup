@@ -40,7 +40,6 @@ from shiboken_paths import init_paths
 init_paths()
 
 from sample import Point
-from py3kcompat import unicode
 
 class PointTest(unittest.TestCase):
     '''Test case for Point class, including operator overloads.'''
@@ -97,12 +96,12 @@ class PointTest(unittest.TestCase):
 
     def testAddedOperator(self):
         p = Point(0.0, 0.0)
-        r = p - unicode('Hi')
-        self.assertEqual(r, unicode('Hi'))
+        r = p - 'Hi'
+        self.assertEqual(r, 'Hi')
 
         # now the reverse op.
-        r = unicode('Hi') - p
-        self.assertEqual(r, unicode('Hi'))
+        r = 'Hi' - p
+        self.assertEqual(r, 'Hi')
 
     def testModifiedMethod(self):
         pt1 = Point(0.0, 0.0)

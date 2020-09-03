@@ -38,7 +38,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 from sample import Overload, Str
-from py3kcompat import b
+
 
 class OverloadTest(unittest.TestCase):
 
@@ -59,11 +59,11 @@ class OverloadTest(unittest.TestCase):
 
     def testStringArgumentAsBuffer(self):
         overload = Overload()
-        self.assertEqual(overload.strBufferOverloads(b'', 0), Overload.Function1)
+        self.assertEqual(overload.strBufferOverloads(bytes('', "UTF-8"), 0), Overload.Function1)
 
     def testBufferArgument(self):
         overload = Overload()
-        self.assertEqual(overload.strBufferOverloads(b(''), 0), Overload.Function1)
+        self.assertEqual(overload.strBufferOverloads(bytes('', "UTF-8"), 0), Overload.Function1)
 
 if __name__ == '__main__':
     unittest.main()

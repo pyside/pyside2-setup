@@ -102,7 +102,7 @@ def shiboken_paths(include_shiboken_tests=False):
     src_dir = os.path.dirname(os.path.abspath(__file__))
     python_dirs = []
     if include_shiboken_tests:
-        python_dirs.append(src_dir)  # For py3kcompat
+        python_dirs.append(src_dir)  # For shiboken_test_helper
     shiboken_dir = os.path.join(get_build_dir(), 'shiboken2')
     python_dirs.append(os.path.join(shiboken_dir, 'shibokenmodule'))
     lib_dirs = [os.path.join(shiboken_dir, 'libshiboken')]

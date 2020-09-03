@@ -38,7 +38,6 @@ from shiboken_paths import init_paths
 init_paths()
 from os.path import isdir
 from sample import ByteArray
-from py3kcompat import b
 
 
 class ByteArrayBufferProtocolTest(unittest.TestCase):
@@ -102,14 +101,14 @@ class ByteArrayOperatorAt(unittest.TestCase):
         string = 'abcdefgh'
         obj = ByteArray(string)
         for i in range(len(string)):
-            self.assertEqual(obj[i], b(string[i]))
+            self.assertEqual(obj[i], bytes(string[i], "UTF8"))
 
     def testInRangeReverse(self):
         # ByteArray[x] where x is a valid index (reverse order).
         string = 'abcdefgh'
         obj = ByteArray(string)
         for i in range(len(string)-1, 0, -1):
-            self.assertEqual(obj[i], b(string[i]))
+            self.assertEqual(obj[i], bytes(string[i], "UTF8"))
 
     def testOutOfRange(self):
         # ByteArray[x] where x is out of index.
@@ -120,7 +119,7 @@ class ByteArrayOperatorAt(unittest.TestCase):
     def testNullStrings(self):
         ba = ByteArray('\x00')
         self.assertEqual(ba.at(0), '\x00')
-        self.assertEqual(ba[0], b('\x00'))
+        self.assertEqual(ba[0], bytes('\x00', "UTF8"))
 
 
 class ByteArrayOperatorLen(unittest.TestCase):
@@ -144,7 +143,7 @@ class ByteArrayAndPythonStr(unittest.TestCase):
         self.assertEqual(ByteArray('aaa').__str__(), 'aaa')
 
     def testPythonStrAndNull(self):
-        s1 = b('123\000321')
+        s1 = bytes('123\000321', "UTF8")
         ba = ByteArray(s1)
         s2 = ba.data()
         self.assertEqual(s1, s2)
