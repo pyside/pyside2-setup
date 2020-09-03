@@ -66,9 +66,6 @@
     #include <private/qv4engine_p.h>
     #include <private/qv4context_p.h>
     #include <private/qqmldata_p.h>
-#if QT_VERSION < 0x050700
-        #include <private/qqmlcontextwrapper_p.h>
-#endif
 #endif
 
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
@@ -396,13 +393,6 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
         case QMetaObject::ReadProperty:
         case QMetaObject::WriteProperty:
         case QMetaObject::ResetProperty:
-#  if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        case QMetaObject::QueryPropertyDesignable:
-        case QMetaObject::QueryPropertyScriptable:
-        case QMetaObject::QueryPropertyStored:
-        case QMetaObject::QueryPropertyEditable:
-        case QMetaObject::QueryPropertyUser:
-#  endif // < Qt 6
             pp->d->metaCallHandler(pp, pySelf, call, args);
             break;
 #endif
@@ -441,15 +431,7 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
 
             if (data && !data->jsWrapper.isNullOrUndefined()) {
                 QV4::ExecutionEngine *engine = data->jsWrapper.engine();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
                 if (engine->currentStackFrame != nullptr) {
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-                if (engine->currentContext->d() != engine->rootContext()->d()) {
-#else
-                QV4::ExecutionContext *ctx = engine->currentContext();
-                if (ctx->type == QV4::Heap::ExecutionContext::Type_CallContext ||
-                    ctx->type == QV4::Heap::ExecutionContext::Type_SimpleCallContext) {
-#endif
                     PyObject *errType, *errValue, *errTraceback;
                     PyErr_Fetch(&errType, &errValue, &errTraceback);
                     // PYSIDE-464: The error is only valid before PyErr_Restore,
@@ -462,7 +444,6 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
 
                     PyErr_Print();    // Note: PyErr_Print clears the error.
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
                     if (isSyntaxError) {
                         return engine->throwSyntaxError(errString);
                     } else if (isTypeError) {
@@ -470,18 +451,9 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
                     } else {
                         return engine->throwError(errString);
                     }
-#else
-                    if (isSyntaxError) {
-                        return ctx->throwSyntaxError(errString);
-                    } else if (isTypeError) {
-                        return ctx->throwTypeError(errString);
-                    } else {
-                        return ctx->throwError(errString);
-                    }
-#endif
                 }
             }
-#endif
+#endif // PYSIDE_QML_PRIVATE_API_SUPPORT
 
             int reclimit = Py_GetRecursionLimit();
             // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.

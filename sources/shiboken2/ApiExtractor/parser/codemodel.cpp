@@ -494,11 +494,7 @@ void TypeInfo::formatDebug(QDebug &d) const
 QDebug operator<<(QDebug d, const TypeInfo &t)
 {
     QDebugStateSaver s(d);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     const int verbosity = d.verbosity();
-#else
-    const int verbosity = 0;
-#endif
     d.noquote();
     d.nospace();
     d << "TypeInfo(";

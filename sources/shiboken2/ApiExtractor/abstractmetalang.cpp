@@ -1340,16 +1340,12 @@ QDebug operator<<(QDebug d, const AbstractMetaFunction *af)
     d.nospace();
     d << "AbstractMetaFunction(";
     if (af) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         if (d.verbosity() > 2) {
             af->formatDebugVerbose(d);
         } else {
-#endif
             d << "signature=";
             formatMetaFunctionBrief(d, af);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         }
-#endif
     } else {
         d << '0';
     }

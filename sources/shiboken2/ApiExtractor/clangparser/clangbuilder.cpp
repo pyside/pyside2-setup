@@ -44,10 +44,6 @@
 #include <cstring>
 #include <ctype.h>
 
-#if QT_VERSION < 0x050800
-#  define Q_FALLTHROUGH()  (void)0
-#endif
-
 namespace clang {
 
 static inline QString colonColon() { return QStringLiteral("::"); }
