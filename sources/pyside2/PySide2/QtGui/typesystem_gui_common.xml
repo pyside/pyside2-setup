@@ -1267,10 +1267,7 @@
   <object-type name="QTextItem">
       <enum-type name="RenderFlag" flags="RenderFlags"/>
   </object-type>
-  <object-type name="QTextList" >
-    <!--### Obsolete in 4.3-->
-    <modify-function signature="isEmpty()const" remove="all"/>
-  </object-type>
+  <object-type name="QTextList"/>
   <object-type name="QTextObject"/>
   <object-type name="QTextObjectInterface" >
     <modify-function signature="drawObject(QPainter*,QRectF,QTextDocument*,int,QTextFormat)">

@@ -1805,9 +1805,6 @@
     <modify-function signature="append(const char*)" remove="all"/>
     <modify-function signature="prepend(const char*)" remove="all"/>
     <modify-function signature="replace(QByteArray,const char*)" remove="all"/>
-    <modify-function signature="replace(const char*,QByteArray)" remove="all"/>
-    <modify-function signature="replace(const char*,const char*)" remove="all"/>
-    <modify-function signature="replace(char,const char*)" remove="all"/>
     <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator==(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
@@ -2035,7 +2032,7 @@
     <enum-type name="BoundaryReason" flags="BoundaryReasons"/>
     <enum-type name="BoundaryType"/>
     <!-- There's no QChar in PySide -->
-    <modify-function signature="QTextBoundaryFinder(QTextBoundaryFinder::BoundaryType,const QChar*,int,unsigned char*,int)" remove="all"/>
+    <modify-function signature="QTextBoundaryFinder(QTextBoundaryFinder::BoundaryType,const QChar*,qsizetype,unsigned char*,qsizetype)" remove="all"/>
   </value-type>
   <object-type name="QXmlStreamEntityResolver"/>
 

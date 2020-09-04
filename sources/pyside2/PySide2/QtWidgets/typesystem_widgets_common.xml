@@ -2026,7 +2026,7 @@
             <rename to="event"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="enterEvent(QEvent*)">
+    <modify-function signature="enterEvent(QEnterEvent*)">
         <modify-argument index="1" invalidate-after-use="yes">
             <rename to="event"/>
         </modify-argument>
