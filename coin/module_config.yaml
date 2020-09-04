@@ -21,7 +21,7 @@ accept_configuration:
             not_in_values: [OPENSUSE_13_01, QEMU, WebAssembly, Ubuntu_18_04, SLES_12, SLES_15]
           - condition: property  # MibnGW and msvc2015 are not supported
             property: target.compiler
-            not_in_values: [Mingw73, MSVC2015]
+            not_in_values: [Mingw, MSVC2015]
       - condition: and
         conditions:
           - condition: property

@@ -26,5 +26,5 @@ if sys.version_info[0] == 3:
 
 from .shiboken2 import *
 
-# Trigger signature initialization.
-eval("type.__signature__")
+# Trigger signature initialization via __builtins__.
+_init_pyside_extension()

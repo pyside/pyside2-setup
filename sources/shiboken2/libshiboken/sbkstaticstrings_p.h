@@ -67,7 +67,6 @@ PyObject *module();
 PyObject *mro();
 PyObject *new_();
 PyObject *objclass();
-PyObject *self();
 PyObject *signature();
 PyObject *weakrefoffset();
 } // namespace PyMagicName

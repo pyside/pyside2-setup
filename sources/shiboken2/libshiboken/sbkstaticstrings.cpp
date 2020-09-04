@@ -86,6 +86,7 @@ STATIC_STRING_IMPL(members, "__members__")
 STATIC_STRING_IMPL(module, "__module__")
 STATIC_STRING_IMPL(name, "__name__")
 STATIC_STRING_IMPL(qualname, "__qualname__")
+STATIC_STRING_IMPL(self, "__self__")
 
 // Internal:
 STATIC_STRING_IMPL(base, "__base__")
@@ -99,7 +100,6 @@ STATIC_STRING_IMPL(iter, "__iter__")
 STATIC_STRING_IMPL(mro, "__mro__")
 STATIC_STRING_IMPL(new_, "__new__")
 STATIC_STRING_IMPL(objclass, "__objclass__")
-STATIC_STRING_IMPL(self, "__self__")
 STATIC_STRING_IMPL(signature, "__signature__")
 STATIC_STRING_IMPL(weakrefoffset, "__weakrefoffset__")
 } // namespace PyMagicName

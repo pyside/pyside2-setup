@@ -98,6 +98,7 @@ static PyObject *PySide_BuildSignatureProps(PyObject *class_mod);
 
 static void init_module_1(void);
 static void init_module_2(void);
+static PyObject *_init_pyside_extension(PyObject * /* self */, PyObject * /* args */);
 
 static PyObject *
 CreateSignature(PyObject *props, PyObject *key)
@@ -486,8 +487,14 @@ static const unsigned char PySide_SignatureLoader[] = {
 #include "embed/signature_bootstrap_inc.h"
     };
 
+// This function will be inserted into __builtins__.
+static PyMethodDef init_methods[] = {
+    {"_init_pyside_extension", (PyCFunction)_init_pyside_extension, METH_NOARGS},
+    {nullptr, nullptr}
+};
+
 static safe_globals_struc *
-init_phase_1(void)
+init_phase_1(PyMethodDef *init_meth)
 {
     {
         auto *p = reinterpret_cast<safe_globals_struc *>
@@ -581,6 +588,12 @@ init_phase_1(void)
 
         // This function will be disabled until phase 2 is done.
         p->finish_import_func = nullptr;
+
+        // Initialize the explicit init function.
+        Shiboken::AutoDecRef init(PyCFunction_NewEx(init_meth, nullptr, nullptr));
+        if (init.isNull()
+            || PyDict_SetItemString(PyEval_GetBuiltins(), init_meth->ml_name, init) != 0)
+            goto error;
 
         return p;
     }
@@ -870,6 +883,14 @@ get_signature(PyObject * /* self */, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+_init_pyside_extension(PyObject * /* self */, PyObject * /* args */)
+{
+    init_module_1();
+    init_module_2();
+    Py_RETURN_NONE;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 //
 // This special Type_Ready does certain initializations earlier with
@@ -955,7 +976,7 @@ init_module_1(void)
     static int init_done = 0;
 
     if (!init_done) {
-        pyside_globals = init_phase_1();
+        pyside_globals = init_phase_1(init_methods);
         if (pyside_globals != nullptr)
             init_done = 1;
     }

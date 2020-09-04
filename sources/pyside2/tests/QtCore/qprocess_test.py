@@ -48,13 +48,14 @@ class TestQProcess (unittest.TestCase):
 
     def testPid(self):
         p = QProcess()
-        p.start("dir")
+        p.start("dir", [])
         p.waitForStarted()
         pid = p.pid()
         # We can't test the pid method result because it returns 0 when the
         # process isn't running
         if p.state() == QProcess.Running:
             self.assertNotEqual(pid, 0)
+            p.waitForFinished()
         else:
             print("PROCESS ALREADY DEAD :-/")
 
