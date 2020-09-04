@@ -1,15 +1,5 @@
 include(CMakeParseArguments)
 
-macro(set_python_shared_library_suffix)
-  set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
-
-  # Append a "v" to disambiguate the python version and the shiboken version in the
-  # shared library file name.
-  if (APPLE AND PYTHON_VERSION_MAJOR EQUAL 2)
-      set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_SHARED_LIBRARY_SUFFIX}v")
-  endif()
-endmacro()
-
 macro(set_limited_api)
     if (WIN32 AND NOT EXISTS "${PYTHON_LIMITED_LIBRARIES}")
         message(FATAL_ERROR "The Limited API was enabled, but ${PYTHON_LIMITED_LIBRARIES} was not found!")
@@ -103,23 +93,16 @@ macro(set_python_site_packages)
 endmacro()
 
 macro(set_python_config_suffix)
-  if (PYTHON_VERSION_MAJOR EQUAL 2)
-      set(PYTHON_CONFIG_SUFFIX "-python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
-      if (PYTHON_EXTENSION_SUFFIX)
-          set(PYTHON_CONFIG_SUFFIX "${PYTHON_CONFIG_SUFFIX}${PYTHON_EXTENSION_SUFFIX}")
-      endif()
-  elseif (PYTHON_VERSION_MAJOR EQUAL 3)
-      if (PYTHON_LIMITED_API)
-          if(WIN32)
-              set(PYTHON_EXTENSION_SUFFIX "")
-          else()
-              set(PYTHON_EXTENSION_SUFFIX ".abi3")
-          endif()
-          set(PYTHON_CONFIG_SUFFIX ".abi3")
-      else()
-          set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
-      endif()
-  endif()
+    if (PYTHON_LIMITED_API)
+        if(WIN32)
+            set(PYTHON_EXTENSION_SUFFIX "")
+        else()
+            set(PYTHON_EXTENSION_SUFFIX ".abi3")
+        endif()
+        set(PYTHON_CONFIG_SUFFIX ".abi3")
+    else()
+        set(PYTHON_CONFIG_SUFFIX "${PYTHON_EXTENSION_SUFFIX}")
+    endif()
 endmacro()
 
 macro(setup_clang)
@@ -182,22 +165,6 @@ macro(get_python_extension_suffix)
     OUTPUT_VARIABLE PYTHON_EXTENSION_SUFFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   message(STATUS "PYTHON_EXTENSION_SUFFIX: " ${PYTHON_EXTENSION_SUFFIX})
-endmacro()
-
-macro(get_llvm_config)
-  execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-       import os
-       import sys
-       sys.path.append(os.path.realpath(os.path.join('${CMAKE_CURRENT_LIST_DIR}', '..', '..')))
-       from build_scripts.utils import find_llvm_config
-       llvmConfig = find_llvm_config()
-       if llvmConfig:
-           print(llvmConfig)
-       "
-    OUTPUT_VARIABLE LLVM_CONFIG
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message(STATUS "LLVM_CONFIG:             " ${LLVM_CONFIG})
 endmacro()
 
 macro(get_python_arch)
@@ -268,10 +235,9 @@ macro(shiboken_find_required_python)
 endmacro()
 
 macro(shiboken_validate_python_version)
-    if((PYTHON_VERSION_MAJOR EQUAL "2" AND PYTHON_VERSION_MINOR LESS "7") OR
-       (PYTHON_VERSION_MAJOR EQUAL "3" AND PYTHON_VERSION_MINOR LESS "5"))
+    if(PYTHON_VERSION_MAJOR EQUAL "3" AND PYTHON_VERSION_MINOR LESS "5")
             message(FATAL_ERROR
-                   "Shiboken requires Python 2.7+ or Python 3.5+.")
+                   "Shiboken requires Python 3.5+.")
     endif()
 endmacro()
 
@@ -304,7 +270,7 @@ endmacro()
 
 # Given a list of the following form:
 #     optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
-# choose the correpsonding library to use, based on the current configuration type.
+# choose the corresponding library to use, based on the current configuration type.
 function(shiboken_get_library_for_current_config library_list current_config out_var)
     list(FIND library_list "optimized" optimized_found)
     list(FIND library_list "general" general_found)

@@ -91,9 +91,7 @@ if (NOT PYTHON_CONFIG_SUFFIX)
     set_python_config_suffix()
 endif()
 
-if (NOT PYTHON_SHARED_LIBRARY_SUFFIX)
-    set_python_shared_library_suffix()
-endif()
+set(PYTHON_SHARED_LIBRARY_SUFFIX "${PYTHON_CONFIG_SUFFIX}")
 
 if (NOT PYTHON_CONFIG_SUFFIX)
     message(FATAL_ERROR
@@ -112,13 +110,8 @@ endif()
 set_cmake_cxx_flags()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
 
-# Force usage of the C++11 standard, without a silent fallback
-# to C++98 if the compiler does not support C++11.
-if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    set(CMAKE_CXX_STANDARD 17)
-else()
-    set(CMAKE_CXX_STANDARD 11)
-endif()
+# Force usage of the C++17 standard
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )

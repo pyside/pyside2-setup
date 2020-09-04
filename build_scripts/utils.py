@@ -669,28 +669,6 @@ def find_glob_in_path(pattern):
     return result
 
 
-# Locate the most recent version of llvm_config in the path.
-def find_llvm_config():
-    version_re = re.compile(r'(\d+)\.(\d+)\.(\d+)')
-    result = None
-    last_version_string = '000000'
-    for llvm_config in find_glob_in_path('llvm-config*'):
-        try:
-            output = run_process_output([llvm_config, '--version'])
-            if output:
-                match = version_re.match(output[0])
-                if match:
-                    version_string = "{:02d}{:02d}{:02d}".format(int(match.group(1)),
-                                                                 int(match.group(2)),
-                                                                 int(match.group(3)))
-                    if (version_string > last_version_string):
-                        result = llvm_config
-                        last_version_string = version_string
-        except OSError:
-            pass
-    return result
-
-
 # Add Clang to path for Windows for the shiboken ApiExtractor tests.
 # Revisit once Clang is bundled with Qt.
 def detect_clang():

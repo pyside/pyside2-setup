@@ -82,19 +82,6 @@ endif()
 find_package(Qt${QT_MAJOR_VERSION} 5.12 REQUIRED COMPONENTS Core)
 add_definitions(${Qt${QT_MAJOR_VERSION}Core_DEFINITIONS})
 
-find_file(GL_H "gl.h" PATH_SUFFIXES "GL")
-message(STATUS "GL Headers path:" "${GL_H}")
-
-set(XVFB_EXEC "")
-option(USE_XVFB "Uses xvfb-run with the unit tests to avoid QtGui tests popping windows on the screen." FALSE)
-if(USE_XVFB)
-    find_program(XVFB_RUN NAMES xvfb-run)
-    if (NOT ${XVFB_RUN} MATCHES "XVFB_RUN-NOTFOUND")
-        set(XVFB_EXEC ${XVFB_RUN} -a)
-        message(STATUS "Using xvfb-run to perform QtGui tests.")
-    endif()
-endif()
-
 option(BUILD_TESTS "Build tests." TRUE)
 option(ENABLE_VERSION_SUFFIX "Used to use current version in suffix to generated files. This is used to allow multiples versions installed simultaneous." FALSE)
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
@@ -107,24 +94,13 @@ if(CMAKE_HOST_APPLE)
     endif()
 endif()
 
-# Force usage of the C++11 standard, without a silent fallback
-# to C++98 if the compiler does not support C++11.
-if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    set(CMAKE_CXX_STANDARD 17)
-else()
-    set(CMAKE_CXX_STANDARD 11)
-endif()
+# Force usage of the C++17 standard
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # >= Qt5: QT_INCLUDE_DIR does no longer exist. Derive from QtCore
-if(${QT_MAJOR_VERSION} GREATER_EQUAL 6)
-    get_target_property(QT_INCLUDE_DIR Qt6::Core INTERFACE_INCLUDE_DIRECTORIES)
-    get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}" DIRECTORY)
-else()
-    # On Windows, macOS, and Linux it can be computed from Qt5Core_INCLUDE_DIRS, which contains
-    # a list of include directories. We take the first one.
-    list(GET Qt5Core_INCLUDE_DIRS 0 QT_INCLUDE_DIR)
-endif()
+get_target_property(QT_INCLUDE_DIR Qt6::Core INTERFACE_INCLUDE_DIRECTORIES)
+get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}" DIRECTORY)
 message(STATUS "*** Qt ${QT_MAJOR_VERSION}, QT_INCLUDE_DIR= ${QT_INCLUDE_DIR}")
 
 # On macOS, check if Qt is a framework build. This affects how include paths should be handled.
