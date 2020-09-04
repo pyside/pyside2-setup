@@ -31,7 +31,6 @@ parser/enumvalue.cpp
 xmlutils.cpp
 )
 
-find_package(Qt${QT_MAJOR_VERSION}XmlPatterns 5.12)
 find_package(Qt${QT_MAJOR_VERSION}Xml 5.12)
 find_package(LibXml2 2.6.32)
 find_package(LibXslt 1.1.19)
@@ -41,7 +40,7 @@ if (LIBXSLT_FOUND AND LIBXML2_FOUND)
     set(HAS_LIBXSLT 1)
 endif()
 
-if(NOT Qt${QT_MAJOR_VERSION}XmlPatterns_FOUND AND NOT HAS_LIBXSLT)
+if(NOT HAS_LIBXSLT)
     set(DISABLE_DOCSTRINGS TRUE)
     message(WARNING
             "Documentation will not be built due to missing dependency (no Qt5XmlPatterns found).")
@@ -67,20 +66,10 @@ if (HAS_LIBXSLT)
                           PRIVATE ${LIBXSLT_LIBRARIES} ${LIBXML2_LIBRARIES})
 endif()
 
-if (Qt${QT_MAJOR_VERSION}XmlPatterns_FOUND)
-    target_compile_definitions(apiextractor PUBLIC HAVE_QTXMLPATTERNS)
-    target_sources(apiextractor PRIVATE xmlutils_qt.cpp)
-    target_link_libraries(apiextractor PUBLIC Qt${QT_MAJOR_VERSION}::Xml Qt${QT_MAJOR_VERSION}::XmlPatterns)
-endif()
-
 if (NOT DISABLE_DOCSTRINGS)
     target_sources(apiextractor PRIVATE docparser.cpp
                                         doxygenparser.cpp
                                         qtdocparser.cpp)
-    if (NOT HAS_LIBXSLT)
-        message(WARNING
-                "libxslt and/or libxml not found, falling back to QtXmlPatterns (QTBUG-66925)")
-    endif()
 endif()
 
 target_compile_definitions(apiextractor PRIVATE CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}")

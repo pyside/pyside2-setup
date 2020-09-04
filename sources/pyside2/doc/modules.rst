@@ -78,10 +78,6 @@ Qt Modules
         Provides information about the X display configuration.
      - :mod:`Qt Xml <PySide2.QtXml>`
         Provides C++ implementations of SAX and DOM.
-   * - :mod:`Qt XmlPatterns <PySide2.QtXmlPatterns>`
-        Provides support for XPath, XQuery, XSLTi, and XML Schema validation.
-     - :mod:`Qt 3D Core <PySide2.Qt3DCore>`
-        Contains functionality to support near-realtime simulation systems.
    * - :mod:`Qt 3D Extras <PySide2.Qt3DExtras>`
         Provides a set of prebuilt elements to help you get started with Qt 3D.
      - :mod:`Qt 3D Input <PySide2.Qt3DInput>`

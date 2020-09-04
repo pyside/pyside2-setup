@@ -28,7 +28,6 @@
 
 #include "xmlutils.h"
 
-#include "xmlutils_qt.h"
 #include "xmlutils_libxslt.h"
 
 XQuery::XQuery() = default;
@@ -47,8 +46,6 @@ QSharedPointer<XQuery> XQuery::create(const QString &focus, QString *errorMessag
 {
 #if defined(HAVE_LIBXSLT)
     return libXml_createXQuery(focus, errorMessage);
-#elif defined(HAVE_QTXMLPATTERNS)
-    return qt_createXQuery(focus, errorMessage);
 #else
     *errorMessage = QLatin1String(__FUNCTION__) + QLatin1String(" is not implemented.");
     return QSharedPointer<XQuery>();
@@ -59,8 +56,6 @@ QString xsl_transform(const QString &xml, const QString &xsl, QString *errorMess
 {
 #if defined(HAVE_LIBXSLT)
     return libXslt_transform(xml, xsl, errorMessage);
-#elif defined(HAVE_QTXMLPATTERNS)
-    return qt_xsl_transform(xml, xsl, errorMessage);
 #else
     *errorMessage = QLatin1String(__FUNCTION__) + QLatin1String(" is not implemented.");
     return xml;

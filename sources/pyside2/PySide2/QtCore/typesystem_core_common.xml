@@ -514,15 +514,11 @@
   <rejection class="" enum-name="enum_1"/>
   <rejection class="" enum-name="enum_2"/>
   <rejection class="" enum-name="QtValidLicenseForXmlModule"/>
-  <rejection class="" enum-name="QtValidLicenseForXmlPatternsModule"/>
   <rejection class="" enum-name="QtValidLicenseForActiveQtModule"/>
   <rejection class="" enum-name="QtValidLicenseForCoreModule"/>
-  <rejection class="" enum-name="QtValidLicenseForQt3SupportLightModule"/>
-  <rejection class="" enum-name="QtValidLicenseForQt3SupportModule"/>
   <rejection class="" enum-name="QtValidLicenseForNetworkModule"/>
   <rejection class="" enum-name="QtValidLicenseForSvgModule"/>
   <rejection class="" enum-name="QtValidLicenseForGuiModule"/>
-  <rejection class="" enum-name="QtValidLicenseForScriptModule"/>
   <rejection class="" enum-name="QtValidLicenseForHelpModule"/>
   <!-- Internal -->
   <rejection class="QAbstractFileEngine"/> <!--
