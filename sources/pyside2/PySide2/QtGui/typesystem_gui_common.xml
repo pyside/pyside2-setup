@@ -336,6 +336,7 @@
   <object-type name="QInputMethod">
       <enum-type name="Action"/>
   </object-type>
+  <value-type name="QKeyCombination"/>
   <value-type name="QKeySequence">
     <enum-type name="SequenceFormat"/>
     <enum-type name="SequenceMatch"/>
@@ -343,11 +344,7 @@
 
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
-            <insert-template name="repr_code">
-               <replace from="%REPR_FORMAT" to="%i, %i, %i, %i"/>
-               <replace from="%REPR_ARGS"
-                        to="(*%CPPSELF)[0], (*%CPPSELF)[1], (*%CPPSELF)[2], (*%CPPSELF)[3]"/>
-             </insert-template>
+            <insert-template name="qkeysequence_repr"/>
         </inject-code>
     </add-function>
 

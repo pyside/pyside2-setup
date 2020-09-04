@@ -125,6 +125,15 @@
        }
     </template>
 
+    <template name="qkeysequence_repr">
+    QString result;
+    QDebug debug(&amp;result);
+    debug.noquote();
+    debug.nospace();
+    debug &lt;&lt; (*%CPPSELF);
+    %PYARG_0 = Shiboken::String::fromCString(result.toUtf8().constData());
+    </template>
+
     <template name="validator_conversionrule">
           QValidator::State %out;
 
