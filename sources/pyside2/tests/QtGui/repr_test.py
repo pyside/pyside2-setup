@@ -53,10 +53,6 @@ class QTransformReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QTransform(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
-class QKeySequenceReprCopy(ReprCopyHelper, unittest.TestCase):
-    def setUp(self):
-        self.original = QKeySequence("Ctrl+P")
-
 class QQuaternionReprCopy(ReprCopyHelper, unittest.TestCase):
     def setUp(self):
         self.original = QQuaternion(1, 2, 3, 4)
