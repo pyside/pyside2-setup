@@ -25,7 +25,6 @@ ${QtOpenGL_GEN_DIR}/qtopengl_module_wrapper.cpp
 get_property(QtGui_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Gui
              PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
-cmake_policy(SET CMP0057 NEW)
 if("opengles2" IN_LIST QtGui_enabled_features)
     list(APPEND QtOpenGL_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery)
     message(STATUS "Qt${QT_MAJOR_VERSION}Gui: Dropping Desktop OpenGL classes (GLES2)")

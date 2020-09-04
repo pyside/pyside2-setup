@@ -8,7 +8,6 @@ set(QtOpenGLFunctions_SRC ${QtOpenGLFunctions_GEN_DIR}/qtopenglfunctions_module_
 get_property(QtGui_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Gui
              PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
-cmake_policy(SET CMP0057 NEW)
 if("opengles2" IN_LIST QtGui_enabled_features)
     list(APPEND QtOpenGLFunctions_SRC
          ${QtOpenGLFunctions_GEN_DIR}/qopenglfunctions_es2_wrapper.cpp)

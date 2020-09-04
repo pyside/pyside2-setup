@@ -4,9 +4,6 @@ qt_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside2_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_DROPPED_ENTRIES)
 
-get_property(QtGui_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
-             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
-
 set(QtGui_SRC
 ${QtGui_GEN_DIR}/qabstractfileiconprovider_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
-cmake_policy(VERSION 3.1)
+cmake_minimum_required(VERSION 3.16)
+cmake_policy(VERSION 3.16)
 
 project(doc)
 

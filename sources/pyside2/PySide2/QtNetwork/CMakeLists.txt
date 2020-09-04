@@ -44,17 +44,10 @@ ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtnetwork_module_wrapper.cpp
 )
 
-get_property(QtNetwork_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Network
-             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 get_property(QtNetwork_disabled_features TARGET Qt${QT_MAJOR_VERSION}::Network
              PROPERTY QT_DISABLED_PUBLIC_FEATURES)
 
-# ### fixme: For cmake >= 3.3, use if( needle IN_LIST list)
-list(FIND QtNetwork_enabled_features  "ssl"  _sslEnabledIndex)
-list(FIND QtNetwork_disabled_features "dtls" _dtlsDisabledIndex)
-list(FIND QtNetwork_disabled_features "sctp" _sctpDisabledIndex)
-
-if(_sslEnabledIndex EQUAL -1)
+if("ssl" IN_LIST QtNetwork_disabled_features)
     list(APPEND QtNetwork_DROPPED_ENTRIES QOcspResponse QSslCipher
          QSslConfiguration QSslDiffieHellmanParameters QSslError
          QSslKey QSslPreSharedKeyAuthenticator QSslSocket)
@@ -69,16 +62,12 @@ else()
          ${QtNetwork_GEN_DIR}/qsslerror_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslkey_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslpresharedkeyauthenticator_wrapper.cpp
-         ${QtNetwork_GEN_DIR}/qsslsocket_wrapper.cpp)
-     if (Qt${QT_MAJOR_VERSION}Network_VERSION VERSION_EQUAL 5.13.0
-         OR Qt${QT_MAJOR_VERSION}Network_VERSION VERSION_GREATER 5.13.0)
-         list(APPEND QtNetwork_SRC
-              ${QtNetwork_GEN_DIR}/qocspresponse_wrapper.cpp)
-     endif()
+         ${QtNetwork_GEN_DIR}/qsslsocket_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qocspresponse_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding SSL classes")
 endif()
 
-if(_dtlsDisabledIndex GREATER -1)
+if("dtls" IN_LIST QtNetwork_disabled_features)
     list(APPEND QtNetwork_DROPPED_ENTRIES QDtls)
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Dropping DTLS classes")
 else()
@@ -87,7 +76,7 @@ else()
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding DTLS classes")
 endif()
 
-if(_sctpDisabledIndex GREATER -1)
+if("sctp" IN_LIST QtNetwork_disabled_features)
     list(APPEND QtNetwork_DROPPED_ENTRIES QSctpServer QSctpSocket)
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Dropping SCTP classes")
 else()
