@@ -101,9 +101,6 @@ def get_setuptools_extension_modules():
     return extension_modules
 
 
-# Git submodules: ["submodule_name", "location_relative_to_sources_folder"]
-submodules = [["pyside2-tools"]]
-
 try:
     import setuptools
 except ImportError:
@@ -249,43 +246,6 @@ def prefix():
     return name
 
 
-# Initialize, pull and checkout submodules
-def prepare_sub_modules():
-    print("Initializing submodules for PySide2 version: {}".format(
-        get_package_version()))
-    submodules_dir = os.path.join(setup_script_dir, "sources")
-
-    # Create list of [name, desired branch, absolute path, desired
-    # branch] and determine whether all submodules are present
-    need_init_sub_modules = False
-
-    for m in submodules:
-        module_name = m[0]
-        module_dir = m[1] if len(m) > 1 else ''
-        module_dir = os.path.join(submodules_dir, module_dir, module_name)
-        # Check for non-empty directory (repository checked out)
-        if not os.listdir(module_dir):
-            need_init_sub_modules = True
-            break
-
-    if need_init_sub_modules:
-        git_update_cmd = ["git", "submodule", "update", "--init"]
-        if run_process(git_update_cmd) != 0:
-            m = "Failed to initialize the git submodules: update --init failed"
-            raise DistutilsSetupError(m)
-        git_pull_cmd = ["git", "submodule", "foreach", "git", "fetch", "--all"]
-        if run_process(git_pull_cmd) != 0:
-            m = "Failed to initialize the git submodules: git fetch --all failed"
-            raise DistutilsSetupError(m)
-    else:
-        print("All submodules present.")
-
-    git_update_cmd = ["git", "submodule", "update"]
-    if run_process(git_update_cmd) != 0:
-        m = "Failed to checkout the correct git submodules SHA1s."
-        raise DistutilsSetupError(m)
-
-
 # Single global instance of QtInfo to be used later in multiple code
 # paths.
 qtinfo = QtInfo(QMAKE_COMMAND)
@@ -307,9 +267,6 @@ def get_qt_version():
 
 
 def prepare_build():
-    if (os.path.isdir(".git") and not OPTION["IGNOREGIT"] and not OPTION["ONLYPACKAGE"]
-            and not OPTION["REUSE_BUILD"]):
-        prepare_sub_modules()
     # Clean up temp build folder.
     for n in ["build"]:
         d = os.path.join(setup_script_dir, n)

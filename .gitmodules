@@ -1,3 +1,0 @@
-[submodule "sources/pyside2-tools"]
-	path = sources/pyside2-tools
-	url = ../pyside-tools.git

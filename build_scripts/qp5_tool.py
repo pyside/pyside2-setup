@@ -405,7 +405,7 @@ if __name__ == '__main__':
         with open(config_file, 'w') as f:
             f.write(DEFAULT_CONFIG_FILE.format(' '.join(DEFAULT_BUILD_ARGS)))
 
-    while not os.path.exists('.gitmodules'):
+    while not os.path.exists('.git'):
         cwd = os.getcwd()
         if cwd == '/' or (IS_WINDOWS and len(cwd) < 4):
             warnings.warn('Unable to find git root', RuntimeWarning)
