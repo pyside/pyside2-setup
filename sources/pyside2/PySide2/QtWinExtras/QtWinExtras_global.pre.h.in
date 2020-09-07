@@ -1,0 +1,5 @@
+// QT_WIDGETS_LIB must be defined for the widget functions to become visible.
+
+#if @Qt5Widgets_FOUND@
+#  define QT_WIDGETS_LIB
+#endif

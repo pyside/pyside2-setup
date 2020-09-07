@@ -18,21 +18,27 @@ ${QtWinExtras_GEN_DIR}/qwinthumbnailtoolbutton_wrapper.cpp
 ${QtWinExtras_GEN_DIR}/qtwinextras_module_wrapper.cpp
 )
 
+configure_file("${QtWinExtras_SOURCE_DIR}/QtWinExtras_global.pre.h.in"
+               "${QtWinExtras_BINARY_DIR}/QtWinExtras_global.pre.h" @ONLY)
+
 set(QtWinExtras_include_dirs ${QtWinExtras_SOURCE_DIR}
                         ${QtWinExtras_BINARY_DIR}
                         ${Qt${QT_MAJOR_VERSION}WinExtras_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
+                        ${QtWidgets_GEN_DIR}
                         ${libpyside_SOURCE_DIR})
 
 set(QtWinExtras_libraries pyside2
                         ${Qt${QT_MAJOR_VERSION}WinExtras_LIBRARIES}
                         ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
+                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
 
-set(QtWinExtras_deps QtCore QtGui)
+set(QtWinExtras_deps QtCore QtGui QtWidgets)
 
 create_pyside_module(NAME QtWinExtras
                      INCLUDE_DIRS QtWinExtras_include_dirs
