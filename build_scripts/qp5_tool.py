@@ -159,9 +159,6 @@ def run_git(args):
     """Run git in the current directory and its submodules"""
     args.insert(0, git)  # run in repo
     execute(args)  # run for submodules
-    module_args = [git, "submodule", "foreach"]
-    module_args.extend(args)
-    execute(module_args)
 
 
 def expand_reference(cache_dict, value):
