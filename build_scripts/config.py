@@ -332,7 +332,7 @@ class Config(object):
         if self.is_internal_shiboken_module_build() or self.is_internal_shiboken_generator_build():
             return ['shiboken2']
         elif self.is_internal_pyside_build():
-            return ['pyside2']
+            return ['pyside2', 'pyside-tools']
         return None
 
     def set_is_top_level_invocation(self):

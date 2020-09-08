@@ -18,5 +18,7 @@ add_subdirectory(sources/shiboken2)
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/shiboken2/data")
 add_subdirectory(sources/pyside2)
 
+add_subdirectory(sources/pyside-tools)
+
 # Semi-hack to include exported pyside2 variables.
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/sources/pyside2/libpyside")
