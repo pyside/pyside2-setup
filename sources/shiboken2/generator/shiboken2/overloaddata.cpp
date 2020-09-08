@@ -30,6 +30,7 @@
 #include <reporthandler.h>
 #include <graph.h>
 #include "overloaddata.h"
+#include "ctypenames.h"
 #include "indentor.h"
 #include "shibokengenerator.h"
 
@@ -200,14 +201,10 @@ void OverloadData::sortNextOverloads()
 
     // Primitive types that are not int, long, short,
     // char and their respective unsigned counterparts.
-    QStringList nonIntegerPrimitives;
-    nonIntegerPrimitives << QLatin1String("float") << QLatin1String("double")
-        << QLatin1String("bool");
+    static const QStringList nonIntegerPrimitives{floatT(), doubleT(), boolT()};
 
     // Signed integer primitive types.
-    QStringList signedIntegerPrimitives;
-    signedIntegerPrimitives << QLatin1String("int") << QLatin1String("short")
-       << QLatin1String("long");
+    static const QStringList signedIntegerPrimitives{intT(), shortT(), longT(), longLongT()};
 
     // sort the children overloads
     for (OverloadData *ov : qAsConst(m_nextOverloadData))
@@ -233,10 +230,10 @@ void OverloadData::sortNextOverloads()
         } else if (!checkPyBuffer && typeName == QLatin1String("PyBuffer")) {
             checkPyBuffer = true;
             pyBufferIndex = sortData.lastProcessedItemId();
-        } else if (!checkQVariant && typeName == QLatin1String("QVariant")) {
+        } else if (!checkQVariant && typeName == qVariantT()) {
             checkQVariant = true;
             qvariantIndex = sortData.lastProcessedItemId();
-        } else if (!checkQString && typeName == QLatin1String("QString")) {
+        } else if (!checkQString && typeName == qStringT()) {
             checkQString = true;
             qstringIndex = sortData.lastProcessedItemId();
         }
@@ -267,23 +264,16 @@ void OverloadData::sortNextOverloads()
     // Create the graph of type dependencies based on implicit conversions.
     Graph graph(sortData.reverseMap.count());
     // All C++ primitive types, add any forgotten type AT THE END OF THIS LIST!
-    const char *primitiveTypes[] = {"int",
-                                    "unsigned int",
-                                    "long",
-                                    "unsigned long",
-                                    "short",
-                                    "unsigned short",
-                                    "bool",
-                                    "unsigned char",
-                                    "char",
-                                    "float",
-                                    "double",
-                                    "const char*"
-                                    };
-    const int numPrimitives = sizeof(primitiveTypes)/sizeof(const char *);
-    bool hasPrimitive[numPrimitives];
-    for (int i = 0; i < numPrimitives; ++i)
-        hasPrimitive[i] = sortData.map.contains(QLatin1String(primitiveTypes[i]));
+    static const QStringList primitiveTypes{intT(), unsignedIntT(), longT(), unsignedLongT(),
+        shortT(), unsignedShortT(), boolT(), unsignedCharT(), charT(), floatT(),
+        doubleT(), constCharPtrT()};
+
+    QList<int> foundPrimitiveTypeIds;
+    for (const auto &p : primitiveTypes) {
+        const auto it = sortData.map.constFind(p);
+        if (it != sortData.map.cend())
+            foundPrimitiveTypeIds.append(it.value());
+    }
 
     if (checkPySequence && checkPyObject)
         graph.addEdge(pySeqIndex, pyobjectIndex);
@@ -306,7 +296,7 @@ void OverloadData::sortNextOverloads()
             else
                 convertibleType = getTypeName(function->arguments().constFirst()->type());
 
-            if (convertibleType == QLatin1String("int") || convertibleType == QLatin1String("unsigned int"))
+            if (convertibleType == intT() || convertibleType == unsignedIntT())
                 classesWithIntegerImplicitConversion << targetTypeEntryName;
 
             if (!sortData.map.contains(convertibleType))
@@ -379,12 +369,12 @@ void OverloadData::sortNextOverloads()
                 // Add dependency on PyObject, so its check is the last one (too generic).
                 graph.addEdge(targetTypeId, pyobjectIndex);
             }
-        } else if (checkQVariant && targetTypeEntryName != QLatin1String("QVariant")) {
+        } else if (checkQVariant && targetTypeEntryName != qVariantT()) {
             if (!graph.containsEdge(qvariantIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qvariantIndex);
         } else if (checkQString && ShibokenGenerator::isPointer(ov->argType())
-            && targetTypeEntryName != QLatin1String("QString")
-            && targetTypeEntryName != QLatin1String("QByteArray")
+            && targetTypeEntryName != qStringT()
+            && targetTypeEntryName != qByteArrayT()
             && (!checkPyObject || targetTypeId != pyobjectIndex)) {
             if (!graph.containsEdge(qstringIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qstringIndex);
@@ -392,16 +382,14 @@ void OverloadData::sortNextOverloads()
 
         if (targetType->isEnum()) {
             // Enum values must precede primitive types.
-            for (int i = 0; i < numPrimitives; ++i) {
-                if (hasPrimitive[i])
-                    graph.addEdge(targetTypeId, sortData.map[QLatin1String(primitiveTypes[i])]);
-            }
+            for (auto id : foundPrimitiveTypeIds)
+                    graph.addEdge(targetTypeId, id);
         }
     }
 
     // QByteArray args need to be checked after QString args
-    if (sortData.map.contains(QLatin1String("QString")) && sortData.map.contains(QLatin1String("QByteArray")))
-        graph.addEdge(sortData.map[QLatin1String("QString")], sortData.map[QLatin1String("QByteArray")]);
+    if (sortData.map.contains(qStringT()) && sortData.map.contains(qByteArrayT()))
+        graph.addEdge(sortData.map.value(qStringT()), sortData.map.value(qByteArrayT()));
 
     for (OverloadData *ov : qAsConst(m_nextOverloadData)) {
         const AbstractMetaType *targetType = ov->argType();

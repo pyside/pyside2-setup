@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "qtdocgenerator.h"
+#include "ctypenames.h"
 #include <abstractmetalang.h>
 #include <messages.h>
 #include <reporthandler.h>
@@ -2006,10 +2007,7 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, con
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
 {
-    static const QStringList nativeTypes = {
-        QLatin1String("bool"),
-        QLatin1String("float"),
-        QLatin1String("int"),
+    static const QStringList nativeTypes = {boolT(), floatT(), intT(),
         QLatin1String("object"),
         QLatin1String("str")
     };
@@ -2022,14 +2020,14 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, cons
         { QLatin1String("QString"), QLatin1String("str") },
         { QLatin1String("uchar"), QLatin1String("str") },
         { QLatin1String("QStringList"), QLatin1String("list of strings") },
-        { QLatin1String("QVariant"), QLatin1String("object") },
-        { QLatin1String("quint32"), QLatin1String("int") },
-        { QLatin1String("uint32_t"), QLatin1String("int") },
-        { QLatin1String("quint64"), QLatin1String("int") },
-        { QLatin1String("qint64"), QLatin1String("int") },
-        { QLatin1String("size_t"), QLatin1String("int") },
-        { QLatin1String("int64_t"), QLatin1String("int") },
-        { QLatin1String("qreal"), QLatin1String("float") }
+        { qVariantT(), QLatin1String("object") },
+        { QLatin1String("quint32"), intT() },
+        { QLatin1String("uint32_t"), intT() },
+        { QLatin1String("quint64"), intT() },
+        { QLatin1String("qint64"), intT() },
+        { QLatin1String("size_t"), intT() },
+        { QLatin1String("int64_t"), intT() },
+        { QLatin1String("qreal"), floatT() }
     };
     const auto found = typeMap.find(name);
     if (found != typeMap.end())
@@ -2038,10 +2036,10 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, cons
     QString strType;
     if (type->isConstant() && name == QLatin1String("char") && type->indirections() == 1) {
         strType = QLatin1String("str");
-    } else if (name.startsWith(QLatin1String("unsigned short"))) {
-        strType = QLatin1String("int");
-    } else if (name.startsWith(QLatin1String("unsigned "))) { // uint and ulong
-        strType = QLatin1String("int");
+    } else if (name.startsWith(unsignedShortT())) {
+        strType = intT();
+    } else if (name.startsWith(unsignedT())) { // uint and ulong
+        strType = intT();
     } else if (type->isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
         strType.remove(QLatin1Char('*'));

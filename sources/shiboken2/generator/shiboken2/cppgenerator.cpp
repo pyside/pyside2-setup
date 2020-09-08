@@ -29,6 +29,7 @@
 #include <memory>
 
 #include "cppgenerator.h"
+#include "ctypenames.h"
 #include "fileout.h"
 #include "overloaddata.h"
 #include <abstractmetalang.h>
@@ -150,16 +151,16 @@ CppGenerator::CppGenerator()
                                QLatin1String("PyObject*")});
     m_sequenceProtocol.insert(QLatin1String("__setitem__"),
                               {QLatin1String("PyObject *self, Py_ssize_t _i, PyObject *_value"),
-                               QLatin1String("int")});
+                               intT()});
     m_sequenceProtocol.insert(QLatin1String("__getslice__"),
                               {QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2"),
                                QLatin1String("PyObject*")});
     m_sequenceProtocol.insert(QLatin1String("__setslice__"),
                               {QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject *_value"),
-                               QLatin1String("int")});
+                               intT()});
     m_sequenceProtocol.insert(QLatin1String("__contains__"),
                               {QLatin1String("PyObject *self, PyObject *_value"),
-                               QLatin1String("int")});
+                               intT()});
     m_sequenceProtocol.insert(QLatin1String("__concat__"),
                               {QLatin1String("PyObject *self, PyObject *_other"),
                                QLatin1String("PyObject*")});
@@ -182,7 +183,7 @@ CppGenerator::CppGenerator()
                               QLatin1String("PyObject*")});
     m_mappingProtocol.insert(QLatin1String("__msetitem__"),
                              {QLatin1String("PyObject *self, PyObject *_key, PyObject *_value"),
-                              QLatin1String("int")});
+                              intT()});
 
     // Sequence protocol structure members names
     m_mpFuncs.insert(QLatin1String("__mlen__"), QLatin1String("mp_length"));
@@ -5447,9 +5448,6 @@ void CppGenerator::writeSmartPointerSetattroFunction(QTextStream &s, const Gener
     writeSetattroDefaultReturn(s);
 }
 
-static inline QString qObjectClassName() { return QStringLiteral("QObject"); }
-static inline QString qMetaObjectClassName() { return QStringLiteral("QMetaObject"); }
-
 void CppGenerator::writeGetattroDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
 {
     s << "static PyObject *" << cpythonGetattroFunctionName(metaClass)
@@ -5460,7 +5458,7 @@ QString CppGenerator::qObjectGetAttroFunction() const
 {
     static QString result;
     if (result.isEmpty()) {
-        AbstractMetaClass *qobjectClass = AbstractMetaClass::findClass(classes(), qObjectClassName());
+        AbstractMetaClass *qobjectClass = AbstractMetaClass::findClass(classes(), qObjectT());
         Q_ASSERT(qobjectClass);
         result = QLatin1String("PySide::getMetaDataFromQObject(")
                  + cpythonWrapperCPtr(qobjectClass, QLatin1String("self"))
@@ -5655,8 +5653,8 @@ bool CppGenerator::finishGeneration()
     //We need move QMetaObject register before QObject
     Dependencies additionalDependencies;
     const AbstractMetaClassList &allClasses = classes();
-    if (auto qObjectClass = AbstractMetaClass::findClass(allClasses, qObjectClassName())) {
-        if (auto qMetaObjectClass = AbstractMetaClass::findClass(allClasses, qMetaObjectClassName())) {
+    if (auto qObjectClass = AbstractMetaClass::findClass(allClasses, qObjectT())) {
+        if (auto qMetaObjectClass = AbstractMetaClass::findClass(allClasses, qMetaObjectT())) {
             Dependency dependency;
             dependency.parent = qMetaObjectClass;
             dependency.child = qObjectClass;
