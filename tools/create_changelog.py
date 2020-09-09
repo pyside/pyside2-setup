@@ -145,7 +145,8 @@ def git_get_sha1s(versions: List[str], pattern: str):
     command = "git rev-list --reverse --grep '^{}'".format(pattern)
     command += " {}..{}".format(versions[0], versions[1])
     command += " | git cat-file --batch"
-    command += " | grep -o -E \"^[0-9a-f]{40}\""
+    command += " | grep -o -E \"^[0-9a-f]{40} commit\""
+    command += " | awk '{print $1}'"
     print("{}: {}".format(git_command.__name__, command), file=sys.stderr)
     out_sha1, err = Popen(command, stdout=PIPE, shell=True).communicate()
     if err:
@@ -224,7 +225,9 @@ def create_change_log(versions: List[str]) -> None:
 
 
 def gen_list(d: Dict[str, Dict[str, str]]) -> str:
-    return "".join(" - [{}] {}\n".format(v["task"], v["title"])
+    def clean_task(s):
+        return s.replace("Fixes: ", "").replace("Task-number: ", "")
+    return "".join(" - [{}] {}\n".format(clean_task(v["task"]), v["title"])
                    for _, v in d.items())
 
 
