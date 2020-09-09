@@ -88,6 +88,8 @@ enum Visibility { // For namespaces
     Auto
 };
 
+enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
+
 } // namespace TypeSystem
 
 #endif // TYPESYSTEM_ENUMS_H

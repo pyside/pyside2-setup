@@ -1084,6 +1084,8 @@ public:
     void setExceptionHandlingModification(TypeSystem::ExceptionHandling em)
     { m_exceptionHandlingModification = em;  }
 
+     int overloadNumber() const;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebugVerbose(QDebug &d) const;
 #endif
@@ -1115,6 +1117,7 @@ private:
     uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
+    mutable int m_cachedOverloadNumber = TypeSystem::OverloadNumberUnset;
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
     TypeSystem::AllowThread m_allowThreadModification = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;

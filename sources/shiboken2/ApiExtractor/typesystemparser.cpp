@@ -76,6 +76,7 @@ static inline QString invalidateAfterUseAttribute() { return QStringLiteral("inv
 static inline QString locationAttribute() { return QStringLiteral("location"); }
 static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
 static inline QString modifierAttribute() { return QStringLiteral("modifier"); }
+static inline QString overloadNumberAttribute() { return QStringLiteral("overload-number"); }
 static inline QString ownershipAttribute() { return QStringLiteral("owner"); }
 static inline QString packageAttribute() { return QStringLiteral("package"); }
 static inline QString positionAttribute() { return QStringLiteral("position"); }
@@ -2151,6 +2152,18 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
     return true;
 }
 
+static bool parseOverloadNumber(const QXmlStreamAttribute &attribute, int *overloadNumber,
+                                QString *errorMessage)
+{
+    bool ok;
+    *overloadNumber = attribute.value().toInt(&ok);
+    if (!ok || *overloadNumber < 0) {
+        *errorMessage = msgInvalidAttributeValue(attribute);
+        return false;
+    }
+    return true;
+}
+
 bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
                                const StackElement &topElement,
                                QXmlStreamAttributes *attributes)
@@ -2164,6 +2177,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     QString returnType = QLatin1String("void");
     bool staticFunction = false;
     QString access;
+    int overloadNumber = TypeSystem::OverloadNumberUnset;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const QStringRef name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("signature")) {
@@ -2175,6 +2189,9 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
                                             staticAttribute(), false);
         } else if (name == accessAttribute()) {
             access = attributes->takeAt(i).value().toString();
+        } else if (name == overloadNumberAttribute()) {
+            if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
+                return false;
         }
     }
 
@@ -2210,6 +2227,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
         m_contextStack.top()->functionMods.size();
 
     FunctionModification mod;
+    mod.setOverloadNumber(overloadNumber);
     if (!mod.setSignature(m_currentSignature, &m_error))
         return false;
     mod.setOriginalSignature(originalSignature);
@@ -2234,6 +2252,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     QString association;
     bool deprecated = false;
     bool isThread = false;
+    int overloadNumber = TypeSystem::OverloadNumberUnset;
     TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
     for (int i = attributes->size() - 1; i >= 0; --i) {
@@ -2270,6 +2289,9 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
+        } else if (name == overloadNumberAttribute()) {
+            if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
+                return false;
         } else if (name == virtualSlotAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -2293,6 +2315,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
         return false;
     mod.setOriginalSignature(originalSignature);
     mod.setExceptionHandling(exceptionHandling);
+    mod.setOverloadNumber(overloadNumber);
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {

@@ -103,6 +103,7 @@ modify-function
                               access="public | private | protected"
                               allow-thread="true | auto | false"
                               exception-handling="off | auto-off | auto-on | on"
+                              overload-number="number"
                               rename="..." />
          </object-type>
 
@@ -131,6 +132,47 @@ modify-function
            * auto-on: Generate exception handling code unless function
              declares ``noexcept``
            * yes, true: Always generate exception handling code
+
+    The optional ``overload-number`` attribute specifies the position of the
+    overload when checking arguments. Typically, when a number of overloads
+    exists, as for in example in Qt:
+
+    .. code-block:: c++
+
+        void QPainter::drawLine(QPointF, QPointF);
+        void QPainter::drawLine(QPoint, QPoint);
+
+    they will be reordered such that the check for matching arguments for the
+    one taking a ``QPoint`` is done first. This is to avoid a potentially
+    costly implicit conversion from ``QPoint`` to ``QPointF`` when using the
+    2nd overload. There are cases though in which this is not desired;
+    most prominently when a class inherits from a container and overloads exist
+    for both types as is the case for the ``QPolygon`` class:
+
+    .. code-block:: c++
+
+        class QPolygon : public QList<QPoint> {};
+
+        void QPainter::drawPolygon(QPolygon);
+        void QPainter::drawPolygon(QList<QPoint>);
+
+    By default, the overload taking a ``QList`` will be checked first, trying
+    to avoid constructing a ``QPolygon`` from ``QList``. The type check for a
+    list of points will succeed for a parameter of type ``QPolygon``, too,
+    since it inherits ``QList``. This presents a problem since the sequence
+    type check is costly due to it checking that each container element is a
+    ``QPoint``. It is thus preferable to check for the ``QPolygon`` overload
+    first. This is achieved by specifying numbers as follows:
+
+    .. code-block:: xml
+
+        <object-type name="QPainter">
+            <modify-function signature="drawPolygon(QPolygon)" overload-number="0"/>
+            <modify-function signature="drawPolygon(QList&lt;QPoint&gt;)" overload-number="1"/>
+        </object-type>
+
+    Numbers should be given for all overloads; otherwise, the order will be in
+    declaration order.
 
     The ``remove``, ``access`` and ``rename`` attributes are *optional* attributes
     for added convenience; they serve the same purpose as the deprecated tags :ref:`remove`, :ref:`access` and :ref:`rename`.

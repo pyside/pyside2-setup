@@ -84,5 +84,12 @@ public:
 
 };
 
+class LIBSAMPLE_API CustomOverloadSequence
+{
+public:
+    int overload(short v) const;
+    int overload(int v) const;
+};
+
 #endif // OVERLOADSORT_H
 

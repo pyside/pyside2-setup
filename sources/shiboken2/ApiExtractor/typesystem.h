@@ -356,6 +356,9 @@ struct FunctionModification: public Modification
     TypeSystem::ExceptionHandling exceptionHandling() const { return m_exceptionHandling; }
     void setExceptionHandling(TypeSystem::ExceptionHandling e) { m_exceptionHandling = e; }
 
+    int overloadNumber() const { return m_overloadNumber; }
+    void setOverloadNumber(int overloadNumber) { m_overloadNumber = overloadNumber; }
+
     QString toString() const;
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -371,6 +374,7 @@ private:
     QString m_signature;
     QString m_originalSignature;
     QRegularExpression m_signaturePattern;
+    int m_overloadNumber = TypeSystem::OverloadNumberUnset;
     bool m_thread = false;
     AllowThread m_allowThread = AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;

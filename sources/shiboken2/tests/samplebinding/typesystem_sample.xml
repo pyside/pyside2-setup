@@ -1806,6 +1806,11 @@
     </value-type>
     <value-type name="ImplicitTarget"/>
 
+    <object-type name="CustomOverloadSequence">
+        <modify-function signature="overload(int) const" overload-number="0"/>
+        <modify-function signature="overload(short) const" overload-number="1"/>
+    </object-type>
+
     <value-type name="Point">
         <add-function signature="__str__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
