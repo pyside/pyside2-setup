@@ -2797,7 +2797,7 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
 }
 
 QPropertySpec *AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
-                                                           const QString &declaration,
+                                                           const QString &declarationIn,
                                                            const QStringList &scopes,
                                                            QString *errorMessage)
 {
@@ -2805,6 +2805,7 @@ QPropertySpec *AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *me
 
     // Q_PROPERTY(QString objectName READ objectName WRITE setObjectName NOTIFY objectNameChanged)
 
+    const QString declaration = declarationIn.simplified();
     auto propertyTokens = QStringView{declaration}.split(QLatin1Char(' '),
                                                          Qt::SkipEmptyParts);
     if (propertyTokens.size()  < 4) {
@@ -2812,27 +2813,40 @@ QPropertySpec *AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *me
         return nullptr;
     }
 
-    const QString typeName = propertyTokens.takeFirst().toString();
-    const QString name = propertyTokens.takeFirst().toString();
+    QString fullTypeName = propertyTokens.takeFirst().toString();
+    QString name = propertyTokens.takeFirst().toString();
+    // Fix errors like "Q_PROPERTY(QXYSeries *series .." to be of type "QXYSeries*"
+    while (name.startsWith(QLatin1Char('*'))) {
+        fullTypeName += name.at(0);
+        name.remove(0, 1);
+    }
+
+    int indirections = 0;
+    QString typeName = fullTypeName;
+    for (; typeName.endsWith(QLatin1Char('*')); ++indirections)
+        typeName.chop(1);
 
     QScopedPointer<AbstractMetaType> type;
+    QString typeError;
     for (int j = scopes.size(); j >= 0 && type.isNull(); --j) {
         QStringList qualifiedName = scopes.mid(0, j);
         qualifiedName.append(typeName);
         TypeInfo info;
+        info.setIndirections(indirections);
         info.setQualifiedName(qualifiedName);
-        type.reset(translateType(info, metaClass));
+        type.reset(translateType(info, metaClass, {}, &typeError));
     }
 
     if (!type) {
         QTextStream str(errorMessage);
         str << "Unable to decide type of property: \"" << name << "\" ("
-            <<  typeName << ')';
+            <<  typeName << "): " << typeError;
         return nullptr;
     }
 
     QScopedPointer<QPropertySpec> spec(new QPropertySpec(type->typeEntry()));
     spec->setName(name);
+    spec->setIndirections(indirections);
 
     for (int pos = 0; pos + 1 < propertyTokens.size(); pos += 2) {
         if (propertyTokens.at(pos) == QLatin1String("READ"))

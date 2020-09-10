@@ -42,6 +42,7 @@
 <typesystem package="PySide2.QtWinExtras">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
     <namespace-type name="QtWin">
         <enum-type name="HBitmapFormat"/>

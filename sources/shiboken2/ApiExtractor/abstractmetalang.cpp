@@ -2782,14 +2782,16 @@ bool QPropertySpec::isValid() const
 #ifndef QT_NO_DEBUG_STREAM
 void QPropertySpec::formatDebug(QDebug &d) const
 {
-    d << '#' << m_index << " \"" << m_name << "\" (" << m_type->qualifiedCppName()
-        << "), read=" << m_read;
+    d << '#' << m_index << " \"" << m_name << "\" (" << m_type->qualifiedCppName();
+    for (int i = 0; i < m_indirections; ++i)
+        d << '*';
+    d << "), read=" << m_read;
     if (!m_write.isEmpty())
         d << ", write=" << m_write;
     if (!m_reset.isEmpty())
           d << ", reset=" << m_reset;
     if (!m_designable.isEmpty())
-          d << ", esignable=" << m_designable;
+          d << ", designable=" << m_designable;
 }
 
 QDebug operator<<(QDebug d, const QPropertySpec &p)

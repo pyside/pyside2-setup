@@ -4596,6 +4596,8 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
         s << INDENT << "default:\n";
         {
             Indentation indent(INDENT);
+            s << INDENT << "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
+            s << INDENT << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n";
             s << INDENT << "goto " << baseName << "_RichComparison_TypeError;\n";
         }
     }

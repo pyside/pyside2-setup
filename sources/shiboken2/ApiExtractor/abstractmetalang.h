@@ -1743,6 +1743,9 @@ public:
         return m_type;
     }
 
+    int indirections() const { return m_indirections; }
+    void setIndirections(int indirections) { m_indirections = indirections; }
+
     QString name() const
     {
         return m_name;
@@ -1814,6 +1817,7 @@ private:
     QString m_designable;
     QString m_reset;
     const TypeEntry *m_type;
+    int m_indirections = 0;
     int m_index = -1;
 };
 

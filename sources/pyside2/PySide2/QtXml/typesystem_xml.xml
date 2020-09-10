@@ -231,7 +231,20 @@
 
     <object-type name="QXmlNamespaceSupport"/>
 
-    <value-type name="QDomElement"/>
+    <value-type name="QDomElement">
+        <!-- PYSIDE-1372
+            We will leave only one for int, and one for float since Python
+            doesn't have other variations on the primitive types.
+            Only 'qlonglong' and 'double' will be available from the Qt API.
+            TODO: This will require a better review of the shiboken primitive
+                  types converters, since this situation might happen on
+                  different signatures.
+        -->
+        <modify-function signature="setAttribute(const QString&amp;, uint)" remove="all"/>
+        <modify-function signature="setAttribute(const QString&amp;, float)" remove="all"/>
+        <modify-function signature="setAttribute(const QString&amp;, int)" remove="all"/>
+        <modify-function signature="setAttribute(const QString&amp;, qulonglong)" remove="all"/>
+    </value-type>
 
     <object-type name="QXmlContentHandler">
         <modify-function signature="setDocumentLocator(QXmlLocator*)">

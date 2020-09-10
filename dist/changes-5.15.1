@@ -1,0 +1,67 @@
+Qt for Python 5.15.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+
+ - [PYSIDE-74] Implement default __ne__ and __eq__ for all PySide types
+ - [PYSIDE-198] Add compatibility with Nuitka
+ - [PYSIDE-829] signature: Avoid non-existent attributes in compiled code (Nuitka)
+ - [PYSIDE-841] doc: Add widget styling tutorial
+ - [PYSIDE-841] add quick painteditem example
+ - [PYSIDE-904] Add QObject.findChildren(QRegularExpression)
+ - [PYSIDE-904] qp5_tool.py: Add an configuration key for the CMake generator
+ - [PYSIDE-904] Port some examples from QRegExp to QRegularExpression
+ - [PYSIDE-904] Fix libsample/photon test for Qt 6 / Windows
+ - [PYSIDE-904] Enable adding  operators ==, != as functions without code injection
+ - [PYSIDE-957] Implement the QEnum/QFlag decorator, V2
+ - [PYSIDE-981] Return QVariantList when using list as Signal argument
+ - [PYSIDE-1019] feature-select: Implement a selectable feature framework
+ - [PYSIDE-1019] feature-select: allow snake_case instead of camelCase for methods
+ - [PYSIDE-1019] feature-select: delay the feature switching
+ - [PYSIDE-1223] Use pyside2-uic instead of uic for the loadUiType
+ - [PYSIDE-1257] Potential fix for deploying with cx_freeze using zip_include_packages
+ - [PYSIDE-1282] pthreads: Try to abandon the GIL in case a thread was terminated
+ - [PYSIDE-1292] Doc: Enable doc builds using the offline template
+ - [PYSIDE-1313] basewrapper.cpp: add PyErr_Fetch/Restore in SbkDeallocWrapperCommon()
+ - [PYSIDE-1317] Add QSocketDescriptor class
+ - [PYSIDE-1321] Fix leaking reference in PySide2 property getter
+ - [PYSIDE-1321] Fix some leaks in enumeration creation
+ - [PYSIDE-1323] Add missing Win runtime dll into win wheels
+ - [PYSIDE-1323] Update vcredist binaries for MSVC 2019
+ - [PYSIDE-1332] Fix crashes in QThread::wait(), QWaitCondition::wait()
+ - [PYSIDE-1349] QQmlComponent: allow thread in constructors
+ - [PYSIDE-1353] doc: fix Property indentation
+ - [PYSIDE-1355] Add Qt3DExtras.QNormalDiffuseMapAlphaMaterial
+ - [PYSIDE-1368] __feature__: ignore if `__name__` does not exist in a module
+ - [PYSIDE-1372] QDomElement: remove unnecesary setAttribute overloads
+ - [PYSIDE-1374] Add the QWidget *-based overloads of the QtWinExtras functions
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ * shiboken now accepts multiple headers on the command line.
+ * A number of error and warning messages have been prefixed by file name
+   and line for better tooling.
+ - [PYSIDE-841] Add custom widget shiboken example
+ - [PYSIDE-904] shiboken2: Handle virtual methods returning a reference
+ - [PYSIDE-1019] shiboken2: Re-add support for parsing Q_PROPERTY
+ - [PYSIDE-1177] shiboken: Fix __doc__ setter for derived types
+ - [PYSIDE-1325] shiboken: Fix default-initialized function arguments
+ - [PYSIDE-1327] shiboken: Resolve typedef'ed base classes
+
