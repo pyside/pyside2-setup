@@ -834,7 +834,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getCmykF(qreal*,qreal*,qreal*,qreal*,qreal*)const">
+    <modify-function signature="getCmykF(float*,float*,float*,float*,float*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -857,7 +857,7 @@
 
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal"/>
+                <replace from="$TYPE" to="float"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -884,7 +884,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getHslF(qreal*,qreal*,qreal*,qreal*)const" since="4.6">
+    <modify-function signature="getHslF(float*,float*,float*,float*)const" since="4.6">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -903,7 +903,7 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal"/>
+                <replace from="$TYPE" to="float"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -930,7 +930,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getHsvF(qreal*,qreal*,qreal*,qreal*)const">
+    <modify-function signature="getHsvF(float*,float*,float*,float*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -949,7 +949,7 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal"/>
+                <replace from="$TYPE" to="float"/>
             </insert-template>
         </inject-code>
     </modify-function>
@@ -976,7 +976,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getRgbF(qreal*,qreal*,qreal*,qreal*)const">
+    <modify-function signature="getRgbF(float*,float*,float*,float*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -995,7 +995,7 @@
         </modify-argument>
         <inject-code class="target" position="beginning">
             <insert-template name="fix_number*,number*,number*,number*">
-                <replace from="$TYPE" to="qreal"/>
+                <replace from="$TYPE" to="float"/>
             </insert-template>
         </inject-code>
     </modify-function>

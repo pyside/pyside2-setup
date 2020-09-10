@@ -51,14 +51,9 @@
     <custom-type name="PyTypeObject"/>
     <custom-type name="PyUnicode"/>
     <custom-type name="list of QAbstractAnimation"/>
-
-    <function signature="qAcos(qreal)"/>
-    <function signature="qAsin(qreal)" since="4.6"/>
-    <function signature="qAtan(qreal)" since="4.6"/>
-    <function signature="qAtan2(qreal,qreal)" since="4.6"/>
-    <function signature="qChecksum(const char*,uint)"/>
-    <function signature="qExp(qreal)" since="4.6"/>
-    <function signature="qFabs(qreal)" since="4.6"/>
+<!--
+    <function signature="qChecksum(QByteArrayView data, Qt::ChecksumType)"/>
+-->
     <function signature="qFastCos(qreal)" since="4.6"/>
     <function signature="qFastSin(qreal)" since="4.6"/>
     <function signature="qFuzzyCompare(double,double)"/>
@@ -68,7 +63,6 @@
     <function signature="qIsNaN(double)"/>
     <function signature="qIsNull(double)"/>
     <!-- Qt5: gone <function signature="qRound(qreal)"/> -->
-    <function signature="qTan(qreal)" since="4.6"/>
     <function signature="qtTrId(const char*,int)" since="4.6"/>
     <function signature="qVersion()"/>
     <function signature="qCompress(const uchar*,qsizetype,int)"/>
@@ -2166,7 +2160,7 @@
       <enum-type name="OSType"/>
   </value-type>
   <object-type name="QLibraryInfo">
-    <enum-type name="LibraryLocation"/>
+    <enum-type name="LibraryPath"/>
     <modify-function signature="build()">
         <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qlibraryinfo_build"/>
     </modify-function>

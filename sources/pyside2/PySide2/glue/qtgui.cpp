@@ -170,34 +170,34 @@ PyObject *args = PyTuple_GET_ITEM(%1, 1);
 switch (%CPPSELF.spec()) {
     case QColor::Rgb:
     {
-        qreal r, g, b, a;
+        float r, g, b, a;
         %CPPSELF.getRgbF(&r, &g, &b, &a);
         %PYARG_0 = Py_BuildValue("(ON(s(ffff)))", Py_TYPE(%PYSELF), PyTuple_New(0),
-                                 "setRgbF", float(r), float(g), float(b), float(a));
+                                 "setRgbF", r, g, b, a);
         break;
     }
     case QColor::Hsv:
     {
-        qreal h, s, v, a;
+        float h, s, v, a;
         %CPPSELF.getHsvF(&h, &s, &v, &a);
         %PYARG_0 = Py_BuildValue("(ON(s(ffff)))", Py_TYPE(%PYSELF), PyTuple_New(0),
-                                 "setHsvF", float(h), float(s), float(v), float(a));
+                                 "setHsvF", h, s, v, a);
         break;
     }
     case QColor::Cmyk:
     {
-        qreal c, m, y, k, a;
+        float c, m, y, k, a;
         %CPPSELF.getCmykF(&c, &m, &y, &k, &a);
         %PYARG_0 = Py_BuildValue("(ON(s(fffff)))", Py_TYPE(%PYSELF), PyTuple_New(0),
-                                 "setCmykF", float(c), float(m), float(y), float(k), float(a));
+                                 "setCmykF", c, m, y, k, a);
         break;
     }
     case QColor::Hsl:
     {
-        qreal h, s, l, a;
+        float h, s, l, a;
         %CPPSELF.getHslF(&h, &s, &l, &a);
         %PYARG_0 = Py_BuildValue("(ON(s(ffff)))", Py_TYPE(%PYSELF), PyTuple_New(0),
-                                 "setHslF", float(h), float(s), float(l), float(a));
+                                 "setHslF", h, s, l, a);
         break;
     }
     default:
