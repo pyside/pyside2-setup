@@ -53,11 +53,15 @@
     <object-type name="QAxScript">
         <enum-type name="FunctionFlags"/>
     </object-type>
-    <object-type name="QAxScriptEngine"/>
+    <object-type name="QAxScriptEngine">
+        <enum-type name="State"/>
+    </object-type>
     <object-type name="QAxScriptManager">
         <!-- Ax Servers only -->
         <modify-function signature="addObject(QObject*)" remove="all"/>
     </object-type>
-    <object-type name="QAxSelect"/>
+    <object-type name="QAxSelect">
+        <enum-type name="SandboxingLevel"/>
+    </object-type>
     <object-type name="QAxWidget"/>
 </typesystem>
