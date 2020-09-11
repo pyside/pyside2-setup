@@ -2,7 +2,10 @@ project(QtAxContainer)
 
 set(QtAxContainer_SRC
 ${QtAxContainer_GEN_DIR}/qaxbase_wrapper.cpp
+${QtAxContainer_GEN_DIR}/qaxbaseobject_wrapper.cpp
+${QtAxContainer_GEN_DIR}/qaxbasewidget_wrapper.cpp
 ${QtAxContainer_GEN_DIR}/qaxobject_wrapper.cpp
+${QtAxContainer_GEN_DIR}/qaxobjectinterface_wrapper.cpp
 ${QtAxContainer_GEN_DIR}/qaxscript_wrapper.cpp
 ${QtAxContainer_GEN_DIR}/qaxscriptengine_wrapper.cpp
 ${QtAxContainer_GEN_DIR}/qaxscriptmanager_wrapper.cpp

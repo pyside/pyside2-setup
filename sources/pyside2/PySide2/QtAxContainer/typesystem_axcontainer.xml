@@ -46,10 +46,11 @@
     <rejection class="*" function-name="queryInterface"/>
     <rejection class="*" function-name="qt_metacall"/>
     <rejection class="*" function-name="qt_static_metacall"/>
-    <rejection class="*" field-name="qt_meta_stringdata_QAxBase"/>
-    <rejection class="*" field-name="qt_meta_data_QAxBase"/>
+
     <object-type name="QAxBase"/>
+    <object-type name="QAxBaseObject"/>
     <object-type name="QAxObject"/>
+    <object-type name="QAxObjectInterface"/>
     <object-type name="QAxScript">
         <enum-type name="FunctionFlags"/>
     </object-type>
@@ -59,5 +60,6 @@
         <modify-function signature="addObject(QObject*)" remove="all"/>
     </object-type>
     <object-type name="QAxSelect"/>
+    <object-type name="QAxBaseWidget"/>
     <object-type name="QAxWidget"/>
 </typesystem>

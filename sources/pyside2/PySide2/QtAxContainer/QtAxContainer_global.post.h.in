@@ -1,5 +1,1 @@
-#include <ActiveQt/QAxSelect>
-#include <ActiveQt/QAxScript>
-#include <ActiveQt/QAxScriptEngine>
-#include <ActiveQt/QAxScriptManager>
-#include <ActiveQt/QAxWidget>
+#include <QtAxContainer/QtAxContainer>
