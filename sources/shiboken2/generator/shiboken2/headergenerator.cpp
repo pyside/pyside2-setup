@@ -391,6 +391,12 @@ bool HeaderGenerator::finishGeneration()
     QString protectedEnumSurrogates;
     QTextStream protEnumsSurrogates(&protectedEnumSurrogates);
 
+    const auto snips = TypeDatabase::instance()->defaultTypeSystemType()->codeSnips();
+    if (!snips.isEmpty()) {
+        writeCodeSnips(macrosStream, snips, TypeSystem::CodeSnipPositionDeclaration,
+                       TypeSystem::TargetLangCode);
+    }
+
     Indentation indent(INDENT);
 
     macrosStream << "// Type indices\nenum : int {\n";

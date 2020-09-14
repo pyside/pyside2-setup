@@ -44,10 +44,22 @@
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
 
+    <inject-code class="target" position="declaration">
+    // Volatile Bool Ptr type definition.
+
+    typedef struct {
+        PyObject_HEAD
+        volatile bool flag;
+    } QtQml_VolatileBoolObject;
+    </inject-code>
+
+    <inject-code class="native" position="beginning">
+    #include "pysideqmlregistertype.h"
+    </inject-code>
+
     <!-- This is to inform the generator that the VolatileBool python type exists -->
     <custom-type name="VolatileBool"/>
     <primitive-type name="bool volatile" target-lang-api-name="VolatileBool">
-        <include file-name="pysideqmlregistertype.h" location="local"/>
         <!-- No conversion rules are specified here, because the generator does not handle
              pointer to primitive types without function adjustment.
              See commit ff0b861b59b41387e771d9cd565e13de8b2750d1 or search for changePStr
@@ -85,7 +97,6 @@
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
             <include file-name="QtQml" location="global"/>
-            <include file-name="pysideqmlregistertype.h" location="local"/>
         </extra-includes>
     </enum-type>
 
@@ -159,6 +170,9 @@
         <enum-type name="Status"/>
     </object-type>
     <object-type name="QQmlIncubationController">
+        <extra-includes>
+            <include file-name="pysideqmlregistertype.h" location="local"/>
+        </extra-includes>
         <modify-function signature="incubateWhile(volatile bool*,int)" allow-thread="yes">
             <modify-argument index="1">
                 <!-- The replace type is needed to use the VolatileBool_Check macro instead of

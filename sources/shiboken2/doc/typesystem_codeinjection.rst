@@ -114,6 +114,8 @@ The following table describes the semantics of ``inject-code`` tag as used on
     |               |      |end        |Insert code at the end of the module initialization function  |
     |               |      |           |(``initMODULENAME()``), but before the checking that emits a  |
     |               |      |           |fatal error in case of problems importing the module.         |
+    |               |      +-----------+--------------------------------------------------------------+
+    |               |      |declaration|Insert code into module header.                               |
     +---------------+------+-----------+--------------------------------------------------------------+
 
 
@@ -400,3 +402,6 @@ to prevent bad custom code to pass unnoticed.
         (...)
 
         // Start of ``MODULENAME_module_wrapper.cpp``
+
+In addition, code can be injected into the module header by specifying ``target``
+and ``declaration``. This is useful for type definitions.
