@@ -340,8 +340,9 @@ def calculate_props(line):
             _defaults.append(default)
     defaults = tuple(_defaults)
     returntype = parsed.returntype
-    if returntype is not None:
-        annotations["return"] = _resolve_type(returntype, line, 0, handle_retvar)
+    # PYSIDE-1383: We need to handle `None` explicitly.
+    annotations["return"] = (_resolve_type(returntype, line, 0, handle_retvar)
+                             if returntype is not None else None)
     props = SimpleNamespace()
     props.defaults = defaults
     props.kwdefaults = {}
