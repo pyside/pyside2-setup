@@ -18,20 +18,6 @@ ${QtXml_GEN_DIR}/qdomnodelist_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomnotation_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomprocessinginstruction_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomtext_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlattributes_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlcontenthandler_wrapper.cpp
-${QtXml_GEN_DIR}/qxmldeclhandler_wrapper.cpp
-${QtXml_GEN_DIR}/qxmldefaulthandler_wrapper.cpp
-${QtXml_GEN_DIR}/qxmldtdhandler_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlentityresolver_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlerrorhandler_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlinputsource_wrapper.cpp
-${QtXml_GEN_DIR}/qxmllexicalhandler_wrapper.cpp
-${QtXml_GEN_DIR}/qxmllocator_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlnamespacesupport_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlparseexception_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlreader_wrapper.cpp
-${QtXml_GEN_DIR}/qxmlsimplereader_wrapper.cpp
 # module is always needed
 ${QtXml_GEN_DIR}/qtxml_module_wrapper.cpp
 )

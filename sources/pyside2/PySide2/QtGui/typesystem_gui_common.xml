@@ -1129,7 +1129,7 @@
       <enum-type name="Notation"/>
   </object-type>
   <object-type name="QIconEngine">
-    <object-type name="AvailableSizesArgument"/>
+    <object-type name="ScaledPixmapArgument"/>
     <enum-type name="IconEngineHook"/>
     <modify-function signature="paint(QPainter*,QRect,QIcon::Mode,QIcon::State)">
       <modify-argument index="1" invalidate-after-use="yes"/>

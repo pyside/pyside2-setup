@@ -61,7 +61,7 @@ ${QtGui_GEN_DIR}/qhideevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qhoverevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qicon_wrapper.cpp
 ${QtGui_GEN_DIR}/qicondragevent_wrapper.cpp
-${QtGui_GEN_DIR}/qiconengine_availablesizesargument_wrapper.cpp
+${QtGui_GEN_DIR}/qiconengine_scaledpixmapargument_wrapper.cpp
 ${QtGui_GEN_DIR}/qiconengine_wrapper.cpp
 ${QtGui_GEN_DIR}/qimage_wrapper.cpp
 ${QtGui_GEN_DIR}/qimageiohandler_wrapper.cpp

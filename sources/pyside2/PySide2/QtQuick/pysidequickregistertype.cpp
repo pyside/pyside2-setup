@@ -88,16 +88,12 @@ struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
     QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObject = nullptr)
         : QMetaTypeInterface {
             /*.revision=*/ 0,
-            /*.size=*/ sizeof(T),
             /*.alignment=*/ alignof(T),
+            /*.size=*/ sizeof(T),
             /*.flags=*/ QtPrivate::QMetaTypeTypeFlags<T>::Flags,
+            /*.typeId=*/ 0,
             /*.metaObject=*/ metaObject,
             /*.name=*/ name.constData(),
-            /*.typeId=*/ 0,
-            /*.ref=*/ { Q_BASIC_ATOMIC_INITIALIZER(0) },
-            /*.deleteSelf=*/ [](QMetaTypeInterface *self) {
-                delete static_cast<QPysideQmlMetaTypeInterface *>(self);
-            },
             /*.defaultCtr=*/ [](const QMetaTypeInterface *, void *addr) { new (addr) T(); },
             /*.copyCtr=*/ [](const QMetaTypeInterface *, void *addr, const void *other) {
                 new (addr) T(*reinterpret_cast<const T *>(other));
@@ -108,6 +104,11 @@ struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
             /*.dtor=*/ [](const QMetaTypeInterface *, void *addr) {
                 reinterpret_cast<T *>(addr)->~T();
             },
+            /*.equals=*/ nullptr,
+            /*.lessThan=*/ nullptr,
+            /*.debugStream=*/ nullptr,
+            /*.dataStreamOut=*/ nullptr,
+            /*.dataStreamIn=*/ nullptr,
             /*.legacyRegisterOp=*/ nullptr
         }
         , name(name) {}
