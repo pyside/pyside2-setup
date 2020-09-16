@@ -264,6 +264,7 @@ type_map.update({
     "qulonglong": int,
     "QVariant": Variant,
     "QVector": typing.List,
+    "QSharedPointer": typing.Tuple,
     "real": float,
     "short": int,
     "signed char": int,

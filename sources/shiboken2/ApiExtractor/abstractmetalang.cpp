@@ -2489,6 +2489,7 @@ QString AbstractMetaType::formatPythonSignature() const
      * When we have a primitive with an indirection, we use that '*'
      * character for later postprocessing, since those indirections
      * need to be modified into a result tuple.
+     * Smart pointer instantiations: Drop the package
      */
     QString result;
     if (m_pattern == AbstractMetaType::NativePointerAsArrayPattern)
@@ -2497,7 +2498,7 @@ QString AbstractMetaType::formatPythonSignature() const
     // NativePointerAsArrayPattern indicates when we have <array> in XML.
     // if (m_typeEntry->isPrimitive() && isConstant())
     //     result += QLatin1String("const ");
-    if (!m_typeEntry->isPrimitive() && !package().isEmpty())
+    if (!m_typeEntry->isPrimitive() && !m_typeEntry->isSmartPointer() && !package().isEmpty())
         result += package() + QLatin1Char('.');
     if (isArray()) {
         // Build nested array dimensions a[2][3] in correct order
