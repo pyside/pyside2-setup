@@ -79,13 +79,13 @@ MainWindow::MainWindow()
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     const QIcon runIcon = QIcon::fromTheme(QStringLiteral("system-run"));
     QAction *runAction = fileMenu->addAction(runIcon, tr("&Run..."), this, &MainWindow::slotRunScript);
-    runAction->setShortcut(Qt::CTRL + Qt::Key_R);
+    runAction->setShortcut(Qt::CTRL | Qt::Key_R);
     QAction *diagnosticAction = fileMenu->addAction(tr("&Print Diagnostics"), this, &MainWindow::slotPrintDiagnostics);
-    diagnosticAction->setShortcut(Qt::CTRL + Qt::Key_D);
+    diagnosticAction->setShortcut(Qt::CTRL | Qt::Key_D);
     fileMenu->addAction(tr("&Invoke testFunction1()"), this, &MainWindow::testFunction1);
     const QIcon quitIcon = QIcon::fromTheme(QStringLiteral("application-exit"));
     QAction *quitAction = fileMenu->addAction(quitIcon, tr("&Quit"), qApp, &QCoreApplication::quit);
-    quitAction->setShortcut(Qt::CTRL + Qt::Key_Q);
+    quitAction->setShortcut(Qt::CTRL | Qt::Key_Q);
 
     QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
     const QIcon clearIcon = QIcon::fromTheme(QStringLiteral("edit-clear"));
