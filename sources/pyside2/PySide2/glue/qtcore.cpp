@@ -374,9 +374,15 @@ static bool getReceiver(QObject *source, const char *signal, PyObject *callback,
             usingGlobalReceiver = true;
     }
 
+    const auto receiverThread = *receiver ? (*receiver)->thread() : nullptr;
+
     if (usingGlobalReceiver) {
         PySide::SignalManager &signalManager = PySide::SignalManager::instance();
         *receiver = signalManager.globalReceiver(source, callback);
+        // PYSIDE-1354: Move the global receiver to the original receivers's thread
+        // so that autoconnections work correctly.
+        if (receiverThread && receiverThread != (*receiver)->thread())
+            (*receiver)->moveToThread(receiverThread);
         *callbackSig = PySide::Signal::getCallbackSignature(signal, *receiver, callback, usingGlobalReceiver).toLatin1();
     }
 
