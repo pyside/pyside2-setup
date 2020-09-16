@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "shibokengenerator.h"
+#include "ctypenames.h"
 #include <abstractmetalang.h>
 #include <messages.h>
 #include "overloaddata.h"
@@ -195,8 +196,8 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
         m_pythonPrimitiveTypeName.insert(QLatin1String(intType), QStringLiteral("PyInt"));
 
     // PyFloat
-    m_pythonPrimitiveTypeName.insert(QLatin1String("double"), QLatin1String("PyFloat"));
-    m_pythonPrimitiveTypeName.insert(QLatin1String("float"), QLatin1String("PyFloat"));
+    m_pythonPrimitiveTypeName.insert(doubleT(), QLatin1String("PyFloat"));
+    m_pythonPrimitiveTypeName.insert(floatT(), QLatin1String("PyFloat"));
 
     // PyLong
     const char *longTypes[] = {
@@ -256,18 +257,18 @@ void ShibokenGenerator::initPrimitiveTypesCorrespondences()
     m_formatUnits.clear();
     m_formatUnits.insert(QLatin1String("char"), QLatin1String("b"));
     m_formatUnits.insert(QLatin1String("unsigned char"), QLatin1String("B"));
-    m_formatUnits.insert(QLatin1String("int"), QLatin1String("i"));
+    m_formatUnits.insert(intT(), QLatin1String("i"));
     m_formatUnits.insert(QLatin1String("unsigned int"), QLatin1String("I"));
-    m_formatUnits.insert(QLatin1String("short"), QLatin1String("h"));
-    m_formatUnits.insert(QLatin1String("unsigned short"), QLatin1String("H"));
-    m_formatUnits.insert(QLatin1String("long"), QLatin1String("l"));
-    m_formatUnits.insert(QLatin1String("unsigned long"), QLatin1String("k"));
-    m_formatUnits.insert(QLatin1String("long long"), QLatin1String("L"));
+    m_formatUnits.insert(shortT(), QLatin1String("h"));
+    m_formatUnits.insert(unsignedShortT(), QLatin1String("H"));
+    m_formatUnits.insert(longT(), QLatin1String("l"));
+    m_formatUnits.insert(unsignedLongLongT(), QLatin1String("k"));
+    m_formatUnits.insert(longLongT(), QLatin1String("L"));
     m_formatUnits.insert(QLatin1String("__int64"), QLatin1String("L"));
-    m_formatUnits.insert(QLatin1String("unsigned long long"), QLatin1String("K"));
+    m_formatUnits.insert(unsignedLongLongT(), QLatin1String("K"));
     m_formatUnits.insert(QLatin1String("unsigned __int64"), QLatin1String("K"));
-    m_formatUnits.insert(QLatin1String("double"), QLatin1String("d"));
-    m_formatUnits.insert(QLatin1String("float"), QLatin1String("f"));
+    m_formatUnits.insert(doubleT(), QLatin1String("d"));
+    m_formatUnits.insert(floatT(), QLatin1String("f"));
 }
 
 void ShibokenGenerator::initKnownPythonTypes()
@@ -581,7 +582,7 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
         const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), arg->type()->typeEntry());
         if (enumValueRegEx.match(value).hasMatch() && value != QLatin1String("NULL"))
             prefix = resolveScopePrefix(metaClass, value);
-    } else if (arg->type()->isPrimitive() && arg->type()->name() == QLatin1String("int")) {
+    } else if (arg->type()->isPrimitive() && arg->type()->name() == intT()) {
         if (enumValueRegEx.match(value).hasMatch() && func->implementingClass())
             prefix = resolveScopePrefix(func->implementingClass(), value);
     } else if(arg->type()->isPrimitive()) {
@@ -2245,7 +2246,7 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
                                           AbstractMetaClass::GetAttroFunction)) {
             result |= AttroCheckFlag::GetattroUser;
         }
-        if (usePySideExtensions() && metaClass->qualifiedCppName() == QLatin1String("QObject"))
+        if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT())
             result |= AttroCheckFlag::SetattroQObject;
         if (useOverrideCaching(metaClass))
             result |= AttroCheckFlag::SetattroMethodOverride;

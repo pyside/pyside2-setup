@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "generator.h"
+#include "ctypenames.h"
 #include "abstractmetalang.h"
 #include "parser/codemodel.h"
 #include "messages.h"
@@ -860,7 +861,7 @@ QString Generator::translateType(const AbstractMetaType *cType,
     } else if (cType->isArray()) {
         s = translateType(cType->arrayElementType(), context, options) + QLatin1String("[]");
     } else if ((options & Generator::EnumAsInts) && useEnumAsIntForProtectedHack(cType)) {
-        s = QLatin1String("int");
+        s = intT();
     } else {
         if (options & Generator::OriginalName) {
             s = cType->originalTypeDescription().trimmed();

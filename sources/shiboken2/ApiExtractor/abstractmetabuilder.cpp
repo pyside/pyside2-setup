@@ -1292,7 +1292,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
         classFunctionList(scopeItem, &constructorAttributes, metaClass);
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
-    for (AbstractMetaFunction *metaFunction : functions){
+    for (AbstractMetaFunction *metaFunction : functions) {
         metaFunction->setOriginalAttributes(metaFunction->attributes());
         if (metaClass->isNamespace())
             *metaFunction += AbstractMetaAttributes::Static;
@@ -1307,7 +1307,8 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             }
         } else if (QPropertySpec *write = metaClass->propertySpecForWrite(metaFunction->name())) {
             // Property setter must be in the form "void name(<type>)"
-            // make sure the function was created with all aguments, some argument can be missing during the pareser because of errors on typesystem
+            // Make sure the function was created with all arguments; some argument can be
+            // missing during the parsing because of errors in the typesystem.
             if ((!metaFunction->type()) && (metaFunction->arguments().size() == 1) && (write->type() == metaFunction->arguments().at(0)->type()->typeEntry())) {
                 *metaFunction += AbstractMetaAttributes::PropertyWriter;
                 metaFunction->setPropertySpec(write);
