@@ -452,6 +452,7 @@ def init_PySide2_QtCore():
         "false": False,
         "list of QAbstractAnimation": typing.List[PySide2.QtCore.QAbstractAnimation],
         "long long": int,
+        "size_t": int,
         "NULL": None, # 5.6, MSVC
         "nullptr": None, # 5.9
         "PyByteArray": bytearray,
