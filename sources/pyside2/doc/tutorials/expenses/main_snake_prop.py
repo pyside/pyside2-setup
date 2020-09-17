@@ -39,14 +39,14 @@
 #############################################################################
 
 import sys
-from PySide2.QtCore import Qt, Slot
+from PySide2.QtCore import Qt, Slot, QSize
 from PySide2.QtGui import QPainter
 from PySide2.QtWidgets import (QAction, QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
 from PySide2.QtCharts import QtCharts
 
-from __feature__ import snake_case
+from __feature__ import snake_case, true_property
 
 
 class Widget(QWidget):
@@ -61,13 +61,13 @@ class Widget(QWidget):
 
         # Left
         self.table = QTableWidget()
-        self.table.set_column_count(2)
-        self.table.set_horizontal_header_labels(["Description", "Price"])
-        self.table.horizontal_header().set_section_resize_mode(QHeaderView.Stretch)
+        self.table.column_count = 2
+        self.table.horizontal_header_labels = ["Description", "Price"]
+        self.table.horizontal_header().section_resize_mode = QHeaderView.Stretch
 
         # Chart
         self.chart_view = QtCharts.QChartView()
-        self.chart_view.set_render_hint(QPainter.Antialiasing)
+        self.chart_view.render_hint = QPainter.Antialiasing
 
         # Right
         self.description = QLineEdit()
@@ -78,10 +78,10 @@ class Widget(QWidget):
         self.plot = QPushButton("Plot")
 
         # Disabling 'Add' button
-        self.add.setEnabled(False)
+        self.add.enabled = False
 
         self.right = QVBoxLayout()
-        self.right.set_margin(10)
+        self.right.margin = 10
         self.right.add_widget(QLabel("Description"))
         self.right.add_widget(self.description)
         self.right.add_widget(QLabel("Price"))
@@ -115,41 +115,41 @@ class Widget(QWidget):
 
     @Slot()
     def add_element(self):
-        des = self.description.text()
-        price = self.price.text()
+        des = self.description.text
+        price = self.price.text
 
         self.table.insert_row(self.items)
         description_item = QTableWidgetItem(des)
         price_item = QTableWidgetItem("{:.2f}".format(float(price)))
-        price_item.set_text_alignment(Qt.AlignRight)
+        price_item.text_alignment = Qt.AlignRight
 
         self.table.set_item(self.items, 0, description_item)
         self.table.set_item(self.items, 1, price_item)
 
-        self.description.set_text("")
-        self.price.set_text("")
+        self.description.text = ""
+        self.price.text = ""
 
         self.items += 1
 
     @Slot()
     def check_disable(self, s):
-        if not self.description.text() or not self.price.text():
-            self.add.set_enabled(False)
+        if not self.description.text or not self.price.text:
+            self.add.enabled = False
         else:
-            self.add.set_enabled(True)
+            self.add.enabled = True
 
     @Slot()
     def plot_data(self):
         # Get table information
         series = QtCharts.QPieSeries()
-        for i in range(self.table.row_count()):
+        for i in range(self.table.row_count):
             text = self.table.item(i, 0).text()
             number = float(self.table.item(i, 1).text())
             series.append(text, number)
 
         chart = QtCharts.QChart()
         chart.add_series(series)
-        chart.legend().set_alignment(Qt.AlignLeft)
+        chart.legend().alignment = Qt.AlignLeft
         self.chart_view.set_chart(chart)
 
     @Slot()
@@ -161,7 +161,7 @@ class Widget(QWidget):
         for desc, price in data.items():
             description_item = QTableWidgetItem(desc)
             price_item = QTableWidgetItem("{:.2f}".format(price))
-            price_item.set_text_alignment(Qt.AlignRight)
+            price_item.text_alignment = Qt.AlignRight
             self.table.insert_row(self.items)
             self.table.set_item(self.items, 0, description_item)
             self.table.set_item(self.items, 1, price_item)
@@ -169,14 +169,14 @@ class Widget(QWidget):
 
     @Slot()
     def clear_table(self):
-        self.table.set_row_count(0)
+        self.table.row_count = 0
         self.items = 0
 
 
 class MainWindow(QMainWindow):
     def __init__(self, widget):
         QMainWindow.__init__(self)
-        self.setWindowTitle("Tutorial")
+        self.window_title = "Tutorial"
 
         # Menu
         self.menu = self.menu_bar()
@@ -184,7 +184,7 @@ class MainWindow(QMainWindow):
 
         # Exit QAction
         exit_action = QAction("Exit", self)
-        exit_action.set_shortcut("Ctrl+Q")
+        exit_action.shortcut = "Ctrl+Q"
         exit_action.triggered.connect(self.exit_app)
 
         self.file_menu.add_action(exit_action)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     widget = Widget()
     # QMainWindow using QWidget as central widget
     window = MainWindow(widget)
-    window.resize(800, 600)
+    window.size = QSize(800, 600)
     window.show()
 
     # Execute application

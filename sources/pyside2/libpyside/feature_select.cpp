@@ -39,6 +39,7 @@
 
 #include "feature_select.h"
 #include "pyside.h"
+#include "pysidestaticstrings.h"
 
 #include <shiboken.h>
 #include <sbkstaticstrings.h>
@@ -125,7 +126,7 @@ namespace PySide { namespace Feature {
 
 using namespace Shiboken;
 
-typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict);
+typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict, int id);
 
 static FeatureProc *featurePointer = nullptr;
 
@@ -226,7 +227,11 @@ static inline void setCurrentSelectId(PyTypeObject *type, int id)
 
 static inline PyObject *getCurrentSelectId(PyTypeObject *type)
 {
-    return fast_id_array[SbkObjectType_GetReserved(type)];
+    int id = SbkObjectType_GetReserved(type);
+    // This can be too early.
+    if (id < 0)
+        id = 0;
+    return fast_id_array[id];
 }
 
 static bool replaceClassDict(PyTypeObject *type)
@@ -331,7 +336,7 @@ static bool createNewFeatureSet(PyTypeObject *type, PyObject *select_id)
             // clear the tp_dict that will get new content
             PyDict_Clear(type->tp_dict);
             // let the proc re-fill the tp_dict
-            if (!(*proc)(type, prev_dict))
+            if (!(*proc)(type, prev_dict, id))
                 return false;
             // if there is still a step, prepare `prev_dict`
             if (idx >> 1) {
@@ -413,18 +418,18 @@ void Select(PyObject *obj)
     type->tp_dict = SelectFeatureSet(type);
 }
 
-static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_02_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_04_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_08_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_10_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_20_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_40_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
-static bool feature_80_addDummyNames(PyTypeObject *type, PyObject *prev_dict);
+static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_04_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_08_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_10_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_20_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_40_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
+static bool feature_80_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
 
 static FeatureProc featureProcArray[] = {
     feature_01_addLowerNames,
-    feature_02_addDummyNames,
+    feature_02_true_property,
     feature_04_addDummyNames,
     feature_08_addDummyNames,
     feature_10_addDummyNames,
@@ -471,8 +476,8 @@ void init()
 //
 
 static PyObject *methodWithNewName(PyTypeObject *type,
-                                     PyMethodDef *meth,
-                                     const char *new_name)
+                                   PyMethodDef *meth,
+                                   const char *new_name)
 {
     /*
      * Create a method with a lower case name.
@@ -499,7 +504,7 @@ static PyObject *methodWithNewName(PyTypeObject *type,
     return descr;
 }
 
-static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict)
+static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id)
 {
     /*
      * Add objects with lower names to `type->tp_dict` from 'prev_dict`.
@@ -520,6 +525,9 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict)
     // Then we walk over the tp_methods to get all methods and insert
     // them with changed names.
     PyMethodDef *meth = type->tp_methods;
+    if (!meth)
+        return true;
+
     for (; meth != nullptr && meth->ml_name != nullptr; ++meth) {
         const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
         AutoDecRef new_method(methodWithNewName(type, meth, name));
@@ -535,22 +543,140 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict)
 //
 // PYSIDE-1019: Support switchable extensions
 //
-//     Feature 0x02..0x80: A fake switchable option for testing
+//     Feature 0x02: Use true properties instead of getters and setters
+//
+
+static PyObject *createProperty(PyObject *getter, PyObject *setter, PyObject *doc)
+{
+    assert(getter != nullptr);
+    if (setter == nullptr)
+        setter = Py_None;
+    PyObject *deleter = Py_None;
+    PyObject *prop = PyObject_CallObject(reinterpret_cast<PyObject *>(&PyProperty_Type), nullptr);
+    AutoDecRef args(Py_BuildValue("OOOO", getter, setter, deleter, doc));
+    PyProperty_Type.tp_init(prop, args, nullptr);
+    return prop;
+}
+
+static PyObject *calcPropDocString(PyTypeObject *type, PyObject *getterName, PyObject *setterName)
+{
+    // To calculate the docstring, we need the __doc__ attribute of the original
+    // getter and setter. We temporatily switch back to no features. This
+    // might change when we have full signature support for features.
+    auto hold = type->tp_dict;
+    moveToFeatureSet(type, fast_id_array[0]);
+    auto dict = type->tp_dict;
+    auto getter = PyDict_GetItem(dict, getterName);
+    auto setter = setterName ? PyDict_GetItem(dict, setterName) : nullptr;
+    PyObject *buf = PyObject_GetAttr(getter, PyMagicName::doc());
+    type->tp_dict = hold;
+
+    if (setter == nullptr)
+        return buf;
+    AutoDecRef nl(Py_BuildValue("s", "\n"));
+    AutoDecRef wdoc(PyObject_GetAttr(setter, PyMagicName::doc()));
+    String::concat(&buf, nl);
+    String::concat(&buf, wdoc);
+    return buf;
+}
+
+static QStringList parseFields(const char *propstr)
+{
+    /*
+     * Break the string into subfields at ':' and add defaults.
+     */
+    QString s = QString(QLatin1String(propstr));
+    auto list = s.split(QLatin1Char(':'));
+    assert(list.size() == 2 || list.size() == 3);
+    auto name = list[0];
+    auto read = list[1];
+    if (read.size() == 0)
+        list[1] = name;
+    if (list.size() == 2)
+        return list;
+    auto write = list[2];
+    if (write.size() == 0) {
+        list[2] = QLatin1String("set") + name;
+        list[2][3] = list[2][3].toUpper();
+    }
+    return list;
+}
+
+static PyObject *make_snake_case(QString s, bool lower)
+{
+    if (s.isNull())
+        return nullptr;
+    return String::getSnakeCaseName(s.toLatin1().data(), lower);
+}
+
+static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, int id)
+{
+    /*
+     * Use the property info to create true Python property objects.
+     */
+
+    // The empty `tp_dict` gets populated by the previous dict.
+    PyObject *prop_dict = type->tp_dict;
+    if (PyDict_Update(prop_dict, prev_dict) < 0)
+        return false;
+
+    // We then replace methods by properties.
+    bool lower = (id & 0x01) != 0;
+    auto props = SbkObjectType_GetPropertyStrings(type);
+    if (props == nullptr || *props == nullptr)
+        return true;
+    for (; *props != nullptr; ++props) {
+        auto propstr = *props;
+        auto fields = parseFields(propstr);
+        bool haveWrite = fields.size() == 3;
+        PyObject *name = make_snake_case(fields[0], lower);
+        PyObject *read = make_snake_case(fields[1], lower);
+        PyObject *write = haveWrite ? make_snake_case(fields[2], lower) : nullptr;
+        PyObject *getter = PyDict_GetItem(prev_dict, read);
+        if (getter == nullptr || Py_TYPE(getter) != PepMethodDescr_TypePtr)
+            continue;
+        PyObject *setter = haveWrite ? PyDict_GetItem(prev_dict, write) : nullptr;
+        if (setter != nullptr && Py_TYPE(setter) != PepMethodDescr_TypePtr)
+            continue;
+
+        PyObject *doc_read = make_snake_case(fields[1], false);
+        PyObject *doc_write(haveWrite ? make_snake_case(fields[2], false) : nullptr);
+        AutoDecRef doc(calcPropDocString(type, doc_read, doc_write));
+        AutoDecRef PyProperty(createProperty(getter, setter, doc));
+        if (PyProperty.isNull())
+            return false;
+        if (PyDict_SetItem(prop_dict, name, PyProperty) < 0)
+            return false;
+        if (fields[0] != fields[1] && PyDict_GetItem(prop_dict, read))
+            if (PyDict_DelItem(prop_dict, read) < 0)
+                return false;
+        // Theoretically, we need to check for multiple signatures to be exact.
+        // But we don't do so intentionally because it would be confusing.
+        if (haveWrite && PyDict_GetItem(prop_dict, write))
+            if (PyDict_DelItem(prop_dict, write) < 0)
+                return false;
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// PYSIDE-1019: Support switchable extensions
+//
+//     Feature 0x04..0x40: A fake switchable option for testing
 //
 
 #define SIMILAR_FEATURE(xx)  \
-static bool feature_##xx##_addDummyNames(PyTypeObject *type, PyObject *prev_dict) \
+static bool feature_##xx##_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id) \
 { \
     PyObject *dict = type->tp_dict; \
     if (PyDict_Update(dict, prev_dict) < 0) \
         return false; \
-    Py_INCREF(Py_None); \
     if (PyDict_SetItemString(dict, "fake_feature_" #xx, Py_None) < 0) \
         return false; \
     return true; \
 }
 
-SIMILAR_FEATURE(02)
 SIMILAR_FEATURE(04)
 SIMILAR_FEATURE(08)
 SIMILAR_FEATURE(10)

@@ -46,41 +46,61 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide2 import QtWidgets
+from PySide2.support import __feature__
 
 """
-snake_case_feature_test.py
+snake_prop_feature_test.py
 --------------------------
 
-Test the snake_case feature.
+Test the snake_case and true_property feature.
 
 This works now. More tests needed!
 """
 
-class RenamingTest(unittest.TestCase):
+class Window(QtWidgets.QWidget):
+    def __init__(self):
+        super(Window, self).__init__()
+
+
+class FeatureTest(unittest.TestCase):
     def setUp(self):
         qApp or QtWidgets.QApplication()
+        __feature__.set_selection(0)
 
     def tearDown(self):
         qApp.shutdown()
 
     def testRenamedFunctions(self):
-
-        class Window(QtWidgets.QWidget):
-            def __init__(self):
-                super(Window, self).__init__()
-
         window = Window()
         window.setWindowTitle('camelCase')
 
         # and now the same with snake_case enabled
         from __feature__ import snake_case
 
-        class Window(QtWidgets.QWidget):
-            def __init__(self):
-                super(Window, self).__init__()
-
-        window = Window()
+        # Works with the same window! window = Window()
         window.set_window_title('snake_case')
+
+    def testPropertyAppearVanish(self):
+        window = Window()
+
+        self.assertTrue(callable(window.isModal))
+        with self.assertRaises(AttributeError):
+            window.modal
+
+        from __feature__ import snake_case, true_property
+
+        self.assertTrue(isinstance(QtWidgets.QWidget.modal, property))
+        self.assertTrue(isinstance(window.modal, bool))
+        with self.assertRaises(AttributeError):
+            window.isModal
+
+        # switching back
+        __feature__.set_selection(0)
+
+        self.assertTrue(callable(window.isModal))
+        with self.assertRaises(AttributeError):
+            window.modal
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -42,8 +42,6 @@
 
 #include <sbkpython.h>
 
-#include <atomic>
-
 struct SbkObjectType;
 
 namespace PySide
@@ -87,15 +85,6 @@ int qmlRegisterSingletonType(PyObject *pyObj,const char *uri, int versionMajor, 
                              PyObject *callback, bool isQObject, bool hasCallback);
 
 }
-
-// Volatile Bool Ptr type definition for QQmlIncubationController::incubateWhile(std::atomic<bool> *, int)
-
-using AtomicBool = std::atomic<bool>;
-
-typedef struct {
-    PyObject_HEAD
-    AtomicBool *flag;
-} QtQml_VolatileBoolObject;
 
 PyAPI_FUNC(PyTypeObject *) QtQml_VolatileBoolTypeF(void);
 

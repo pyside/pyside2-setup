@@ -615,6 +615,16 @@ void SbkObjectType_SetReserved(PyTypeObject *type, int value)
     PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->pyside_reserved_bits = value;
 }
 
+const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type)
+{
+    return PepType_SOTP(type)->propertyStrings;
+}
+
+void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings)
+{
+    PepType_SOTP(reinterpret_cast<SbkObjectType *>(type))->propertyStrings = strings;
+}
+
 //
 //////////////////////////////////////////////////////////////////////////////
 

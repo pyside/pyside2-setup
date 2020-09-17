@@ -101,6 +101,10 @@ LIBSHIBOKEN_API void initSelectableFeature(SelectableFeatureHook func);
 LIBSHIBOKEN_API int SbkObjectType_GetReserved(PyTypeObject *type);
 LIBSHIBOKEN_API void SbkObjectType_SetReserved(PyTypeObject *type, int value);
 
+// PYSIDE-1019: Get access to PySide property strings.
+LIBSHIBOKEN_API const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type);
+LIBSHIBOKEN_API void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings);
+
 
 extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
 extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);
