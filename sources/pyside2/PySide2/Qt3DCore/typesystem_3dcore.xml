@@ -45,6 +45,10 @@
     <namespace-type name="Qt3DCore">
         <enum-type name="ChangeFlag" flags="ChangeFlags"/>
         <object-type name="QAbstractAspect"/>
+        <object-type name="QAbstractFrontEndNodeManager" since="6.0">
+             <enum-type name="DirtyNodeFlag" flags="DirtyNodeSet"/>
+        </object-type>
+        <object-type name="QAbstractFunctor" since="6.0"/>
         <object-type name="QAbstractSkeleton" since="5.10"/>
         <object-type name="QArmature" since="5.10"/>
         <object-type name="QAspectEngine">
@@ -59,19 +63,29 @@
         <object-type name="QBackendNode">
             <enum-type name="Mode"/>
         </object-type>
+        <object-type name="QAttribute">
+            <enum-type name="AttributeType"/>
+            <enum-type name="VertexBaseType"/>
+        </object-type>
         <!-- TODO: Solve issues related to windows and a unresolved
             external symbol
         <object-type name="QBackendNodeMapper"/>-->
+        <object-type name="QBoundingVolume" since="6.0"/>
+        <object-type name="QBuffer" since="6.0">
+            <enum-type name="AccessType"/>
+            <enum-type name="UsageType"/>
+        </object-type>
         <object-type name="QComponent"/>
-        <object-type name="QComponentAddedChange"/>
-        <object-type name="QComponentRemovedChange"/>
-        <object-type name="QDynamicPropertyUpdatedChange"/>
         <object-type name="QEntity">
           <modify-function signature="addComponent(Qt3DCore::QComponent*)">
             <modify-argument index="this">
               <parent index="1" action="add"/>
             </modify-argument>
           </modify-function>
+        </object-type>
+        <object-type name="QGeometry" since="6.0"/>
+        <object-type name="QGeometryView" since="6.0">
+            <enum-type name="PrimitiveType"/>
         </object-type>
         <object-type name="QJoint" since="5.10">
           <modify-function signature="addChildJoint(Qt3DCore::QJoint*)">
@@ -80,32 +94,13 @@
             </modify-argument>
           </modify-function>
         </object-type>
-        <object-type name="QNode">
-            <enum-type name="PropertyTrackingMode"/>
-        </object-type>
-        <object-type name="QNodeCommand" since="5.10"/>
-        <object-type name="QNodeCreatedChangeBase"/>
-        <object-type name="QNodeDestroyedChange"/>
+        <object-type name="QNode"/>
         <value-type name="QNodeId"/>
         <value-type name="QNodeIdTypePair"/>
-        <object-type name="QPropertyNodeAddedChange"/>
-        <object-type name="QPropertyNodeRemovedChange"/>
-        <object-type name="QPropertyUpdatedChange"/>
-        <object-type name="QPropertyUpdatedChangeBase"/>
-        <object-type name="QPropertyValueAddedChange"/>
-        <object-type name="QPropertyValueAddedChangeBase"/>
-        <object-type name="QPropertyValueRemovedChange"/>
-        <object-type name="QPropertyValueRemovedChangeBase"/>
-        <object-type name="QSceneChange">
-            <enum-type name="DeliveryFlag" flags="DeliveryFlags"/>
-        </object-type>
         <object-type name="QSkeleton" since="5.10"/>
         <object-type name="QSkeletonLoader" since="5.10">
             <enum-type name="Status"/>
         </object-type>
-        <object-type name="QStaticPropertyUpdatedChangeBase"/>
-        <object-type name="QStaticPropertyValueAddedChangeBase"/>
-        <object-type name="QStaticPropertyValueRemovedChangeBase"/>
         <object-type name="QTransform">
             <!-- Disambiguate from QtGui/qtransform.h -->
             <include file-name="Qt3DCore/qtransform.h" location="global"/>

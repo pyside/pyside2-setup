@@ -43,8 +43,8 @@
 <typesystem package="PySide2.Qt3DRender">
     <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
     <namespace-type name="Qt3DRender">
+        <enum-type name="API"/>
         <object-type name="PropertyReaderInterface"/>
-        <object-type name="QAbstractFunctor"/>
         <object-type name="QAbstractLight">
             <enum-type name="Type"/>
         </object-type>
@@ -69,10 +69,6 @@
         <object-type name="QAlphaTest">
             <enum-type name="AlphaFunction"/>
         </object-type>
-        <object-type name="QAttribute">
-            <enum-type name="AttributeType"/>
-            <enum-type name="VertexBaseType"/>
-        </object-type>
         <object-type name="QBlendEquation">
             <enum-type name="BlendFunction"/>
         </object-type>
@@ -82,15 +78,7 @@
         <object-type name="QBlitFramebuffer" since="5.10">
             <enum-type name="InterpolationMethod"/>
         </object-type>
-        <object-type name="QBuffer">
-            <enum-type name="AccessType"/>
-            <enum-type name="BufferType"/>
-            <enum-type name="UsageType"/>
-        </object-type>
         <object-type name="QBufferCapture"/>
-        <object-type name="QBufferDataGenerator">
-            <modify-function signature="operator()()" remove="all"/>
-        </object-type>
         <object-type name="QCamera">
             <enum-type name="CameraTranslationOption"/>
         </object-type>
@@ -119,15 +107,10 @@
         <object-type name="QEnvironmentLight"/>
         <object-type name="QFilterKey"/>
         <object-type name="QFrameGraphNode"/>
-        <object-type name="QFrameGraphNodeCreatedChangeBase"/>
         <object-type name="QFrontFace">
             <enum-type name="WindingDirection"/>
         </object-type>
         <object-type name="QFrustumCulling"/>
-        <object-type name="QGeometry"/>
-        <object-type name="QGeometryFactory">
-            <modify-function signature="operator()()" remove="all"/>
-        </object-type>
         <object-type name="QGeometryRenderer">
             <enum-type name="PrimitiveType"/>
         </object-type>
@@ -182,7 +165,7 @@
             <enum-type name="HitType"/>
         </value-type>
         <object-type name="QRenderAspect">
-            <enum-type name="RenderType"/>
+            <enum-type name="SubmissionType"/>
         </object-type>
         <object-type name="QRenderCapabilities" since="5.15">
             <enum-type name="API"/>
@@ -215,6 +198,7 @@
         </object-type>
         <object-type name="QShaderData"/>
         <object-type name="QShaderProgram">
+            <enum-type name="Format" since="6.0"/>
             <enum-type name="ShaderType"/>
             <enum-type name="Status"/>
         </object-type>
@@ -252,9 +236,6 @@
         <object-type name="QTextureCubeMap"/>
         <object-type name="QTextureCubeMapArray"/>
         <object-type name="QTextureData"/>
-        <object-type name="QTextureGenerator">
-            <modify-function signature="QTextureGenerator()" remove="all"/>
-        </object-type>
         <object-type name="QTextureImage">
             <enum-type name="Status"/>
         </object-type>
