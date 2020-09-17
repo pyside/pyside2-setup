@@ -40,6 +40,15 @@ from PySide2.QtWidgets import QWidget
 from PySide2.QtUiTools import QUiLoader
 
 
+class OverridingLoader(QUiLoader):
+    def createWidget(self, class_name, parent=None, name=''):
+        if class_name == 'QWidget':
+            w = QWidget(parent)
+            w.setObjectName(name)
+            return w
+        return QUiLoader.createWidget(self, class_name, parent, name)
+
+
 class QUiLoaderTester(UsesQApplication):
     def setUp(self):
         UsesQApplication.setUp(self)
@@ -56,6 +65,13 @@ class QUiLoaderTester(UsesQApplication):
         child = w.findChild(QWidget, "child_object")
         self.assertNotEqual(child, None)
         self.assertEqual(w.findChild(QWidget, "grandson_object"), child.findChild(QWidget, "grandson_object"))
+
+
+    def testLoadFileOverride(self):
+        # PYSIDE-1070, override QUiLoader::createWidget() with parent=None crashes
+        loader = OverridingLoader()
+        w = loader.load(self._filePath)
+        self.assertNotEqual(w, None)
 
 
 if __name__ == '__main__':
