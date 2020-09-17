@@ -100,6 +100,8 @@ static void initVirtualEnvironment()
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows
         && (PY_MAJOR_VERSION > 3 || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 8))) {
         qputenv("PYTHONPATH", virtualEnvPath + "\\Lib\\site-packages");
+    } else {
+        qputenv("PYTHONHOME", virtualEnvPath);
     }
 }
 
