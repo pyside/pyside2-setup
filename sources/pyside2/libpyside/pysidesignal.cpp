@@ -88,6 +88,7 @@ static void signalFree(void *);
 static void signalInstanceFree(void *);
 static PyObject *signalGetItem(PyObject *self, PyObject *key);
 static PyObject *signalToString(PyObject *self);
+static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject *type);
 
 // Signal Instance methods
 static PyObject *signalInstanceConnect(PyObject *, PyObject *, PyObject *);
@@ -137,6 +138,7 @@ static PyTypeObject *PySideMetaSignalTypeF(void)
 
 static PyType_Slot PySideSignalType_slots[] = {
     {Py_mp_subscript,   reinterpret_cast<void *>(signalGetItem)},
+    {Py_tp_descr_get,   reinterpret_cast<void *>(signalDescrGet)},
     {Py_tp_call,        reinterpret_cast<void *>(signalCall)},
     {Py_tp_str,         reinterpret_cast<void *>(signalToString)},
     {Py_tp_init,        reinterpret_cast<void *>(signalTpInit)},
@@ -546,6 +548,19 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     return 0;
 }
 
+// PYSIDE-68: Supply the missing __get__ function
+static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject * /*type*/)
+{
+    auto signal = reinterpret_cast<PySideSignal *>(self);
+    // Return the unbound signal if there is nothing to bind it to.
+    if (obj == nullptr || obj == Py_None) {
+        Py_INCREF(self);
+        return self;
+    }
+    Shiboken::AutoDecRef name(Py_BuildValue("s", signal->data->signalName.data()));
+    return reinterpret_cast<PyObject *>(PySide::Signal::initialize(signal, name, obj));
+}
+
 static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
 {
     auto signal = reinterpret_cast<PySideSignal *>(self);
@@ -759,11 +774,12 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySid
 
 PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *object)
 {
-    PySideSignalInstance *instance = PyObject_New(PySideSignalInstance, PySideSignalInstanceTypeF());
+    PySideSignalInstance *instance = PyObject_New(PySideSignalInstance,
+                                                  PySideSignalInstanceTypeF());
+    instanceInitialize(instance, name, self, object, 0);
     auto sbkObj = reinterpret_cast<SbkObject *>(object);
     if (!Shiboken::Object::wasCreatedByPython(sbkObj))
         Py_INCREF(object); // PYSIDE-79: this flag was crucial for a wrapper call.
-    instanceInitialize(instance, name, self, object, 0);
     return instance;
 }
 
