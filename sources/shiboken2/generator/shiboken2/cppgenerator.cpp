@@ -404,8 +404,9 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     {
         const AbstractMetaClass *context = metaClass->enclosingClass();
         while (context) {
-            if (context->isNamespace() && !context->enclosingClass()) {
-                s << "using namespace " << context->qualifiedCppName() << ";\n";
+            if (context->isNamespace() && !context->enclosingClass()
+                && static_cast<const NamespaceTypeEntry *>(context->typeEntry())->generateUsing()) {
+                s << "\nusing namespace " << context->qualifiedCppName() << ";\n";
                 break;
             }
             context = context->enclosingClass();

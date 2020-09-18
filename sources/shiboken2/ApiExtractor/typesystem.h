@@ -1527,6 +1527,9 @@ public:
     void formatDebug(QDebug &d) const override;
 #endif
 
+    bool generateUsing() const { return m_generateUsing; }
+    void setGenerateUsing(bool generateUsing) { m_generateUsing = generateUsing; }
+
 protected:
     NamespaceTypeEntry(const NamespaceTypeEntry &);
 
@@ -1536,6 +1539,7 @@ private:
     TypeSystem::Visibility m_visibility = TypeSystem::Visibility::Auto;
     bool m_hasPattern = false;
     bool m_inlineNamespace = false;
+    bool m_generateUsing = true; // Whether to generate "using namespace" into wrapper
 };
 
 class ValueTypeEntry : public ComplexTypeEntry

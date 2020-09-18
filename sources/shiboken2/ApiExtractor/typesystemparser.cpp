@@ -67,6 +67,7 @@ static inline QString flagsAttribute() { return QStringLiteral("flags"); }
 static inline QString forceAbstractAttribute() { return QStringLiteral("force-abstract"); }
 static inline QString forceIntegerAttribute() { return QStringLiteral("force-integer"); }
 static inline QString formatAttribute() { return QStringLiteral("format"); }
+static inline QString generateUsingAttribute() { return QStringLiteral("generate-using"); }
 static inline QString classAttribute() { return QStringLiteral("class"); }
 static inline QString generateAttribute() { return QStringLiteral("generate"); }
 static inline QString genericClassAttribute() { return QStringLiteral("generic-class"); }
@@ -1374,6 +1375,8 @@ NamespaceTypeEntry *
         } else if (attributeName == generateAttribute()) {
             if (!convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true))
                 visibility = TypeSystem::Visibility::Invisible;
+        } else if (attributeName == generateUsingAttribute()) {
+            result->setGenerateUsing(convertBoolean(attributes->takeAt(i).value(), generateUsingAttribute(), true));
         }
     }
 
