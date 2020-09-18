@@ -1,3 +1,5 @@
+.. _objectownership:
+
 ****************
 Object ownership
 ****************
@@ -153,6 +155,9 @@ Not saving unowned objects references
 
 Ownership Management in  the Typesystem
 =======================================
+
+For the possible values of the ``class`` attribute, see
+:ref:`codegenerationterminology`.
 
 Ownership transfer from C++ to target
 -------------------------------------

@@ -36,7 +36,8 @@ inject-code
 
 
     The ``class`` attribute specifies which module of the generated code that
-    will be affected by the code injection. The ``class`` attribute accepts the
+    will be affected by the code injection
+    (see :ref:`codegenerationterminology`). The ``class`` attribute accepts the
     following values:
 
         * native: The c++ code
@@ -61,6 +62,8 @@ inject-code
         // @snippet label
 
     will be extracted.
+
+    For a detailed description, see :ref:`codeinjectionsemantics`.
 
 modify-field
 ^^^^^^^^^^^^
