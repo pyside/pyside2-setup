@@ -53,7 +53,7 @@ try:
     from email.generator import Generator
     from wheel import __version__ as wheel_version
 
-    from .options import OPTION
+    from .options import DistUtilsCommandMixin, OPTION
     from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
     wheel_module_exists = True
@@ -67,12 +67,17 @@ def get_bdist_wheel_override():
     return PysideBuildWheel if wheel_module_exists else None
 
 
-class PysideBuildWheel(_bdist_wheel):
+class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
+
+    user_options = _bdist_wheel.user_options + DistUtilsCommandMixin.mixin_user_options
+
     def __init__(self, *args, **kwargs):
         self._package_version = None
         _bdist_wheel.__init__(self, *args, **kwargs)
+        DistUtilsCommandMixin.__init__(self)
 
     def finalize_options(self):
+        DistUtilsCommandMixin.mixin_finalize_options(self)
         if sys.platform == 'darwin':
             # Override the platform name to contain the correct
             # minimum deployment target.

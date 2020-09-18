@@ -48,7 +48,7 @@ from textwrap import dedent
 import time
 from .config import config
 from .utils import get_python_dict
-from .options import OPTION
+from .options import DistUtilsCommandMixin, OPTION
 from .wheel_utils import (get_package_version, get_qt_version,
                           get_package_timestamp, macos_plat_name,
                           macos_pyside_min_deployment_target)
@@ -287,57 +287,6 @@ def check_allowed_python_version():
 
 qt_src_dir = ''
 
-if OPTION["QT_VERSION"] is None:
-    OPTION["QT_VERSION"] = "5"
-if OPTION["QMAKE"] is None:
-    OPTION["QMAKE"] = find_executable("qmake-qt5")
-if OPTION["QMAKE"] is None:
-    OPTION["QMAKE"] = find_executable("qmake")
-
-# make qtinfo.py independent of relative paths.
-if OPTION["QMAKE"] is not None and os.path.exists(OPTION["QMAKE"]):
-    OPTION["QMAKE"] = os.path.abspath(OPTION["QMAKE"])
-if OPTION["CMAKE"] is not None and os.path.exists(OPTION["CMAKE"]):
-    OPTION["CMAKE"] = os.path.abspath(OPTION["CMAKE"])
-
-if len(OPTION["QMAKE"]) == 0:
-    print("qmake could not be found.")
-    sys.exit(1)
-if not os.path.exists(OPTION["QMAKE"]):
-    print("'{}' does not exist.".format(OPTION["QMAKE"]))
-    sys.exit(1)
-
-if OPTION["CMAKE"] is None:
-    OPTION["CMAKE"] = find_executable("cmake")
-
-if OPTION["CMAKE"] is None:
-    print("cmake could not be found.")
-    sys.exit(1)
-if not os.path.exists(OPTION["CMAKE"]):
-    print("'{}' does not exist.".format(OPTION["CMAKE"]))
-    sys.exit(1)
-
-# First element is default
-available_mkspecs = ["msvc", "mingw", "ninja"] if sys.platform == "win32" else ["make", "ninja"]
-
-if OPTION["MAKESPEC"] is None:
-    OPTION["MAKESPEC"] = available_mkspecs[0]
-
-if OPTION["MAKESPEC"] not in available_mkspecs:
-    print('Invalid option --make-spec "{}". Available values are {}'.format(OPTION["MAKESPEC"],
-                                                                            available_mkspecs))
-    sys.exit(1)
-
-if OPTION["JOBS"]:
-    if sys.platform == 'win32' and OPTION["NO_JOM"]:
-        print("Option --jobs can only be used with jom on Windows.")
-        sys.exit(1)
-    else:
-        if not OPTION["JOBS"].startswith('-j'):
-            OPTION["JOBS"] = '-j' + OPTION["JOBS"]
-else:
-    OPTION["JOBS"] = ''
-
 
 def is_debug_python():
     return getattr(sys, "gettotalrefcount", None) is not None
@@ -397,12 +346,6 @@ def prepare_sub_modules():
         raise DistutilsSetupError(m)
 
 
-# Single global instance of QtInfo to be used later in multiple code
-# paths.
-qtinfo = QtInfo()
-qtinfo.setup(OPTION["QMAKE"], OPTION["QT_VERSION"])
-
-
 def prepare_build():
     if (os.path.isdir(".git") and not OPTION["IGNOREGIT"] and not OPTION["ONLYPACKAGE"]
             and not OPTION["REUSE_BUILD"]):
@@ -420,7 +363,7 @@ def prepare_build():
 
     # locate Qt sources for the documentation
     if OPTION["QT_SRC"] is None:
-        install_prefix = qtinfo.prefix_dir
+        install_prefix = QtInfo().prefix_dir
         if install_prefix:
             global qt_src_dir
             # In-source, developer build
@@ -430,9 +373,13 @@ def prepare_build():
                 qt_src_dir = os.path.join(os.path.dirname(install_prefix), 'Src', 'qtbase')
 
 
-class PysideInstall(_install):
+class PysideInstall(_install, DistUtilsCommandMixin):
+
+    user_options = _install.user_options + DistUtilsCommandMixin.mixin_user_options
+
     def __init__(self, *args, **kwargs):
         _install.__init__(self, *args, **kwargs)
+        DistUtilsCommandMixin.__init__(self)
 
     def initialize_options(self):
         _install.initialize_options(self)
@@ -450,6 +397,10 @@ class PysideInstall(_install):
             # was created for bdist_* derived classes to override, for
             # similar cases.
             self.warn_dir = False
+
+    def finalize_options(self):
+        DistUtilsCommandMixin.mixin_finalize_options(self)
+        _install.finalize_options(self)
 
     def run(self):
         _install.run(self)
@@ -514,13 +465,17 @@ class PysideInstallLib(_install_lib):
         return outfiles
 
 
-class PysideBuild(_build):
+class PysideBuild(_build, DistUtilsCommandMixin):
+
+    user_options = _build.user_options + DistUtilsCommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
         _build.__init__(self, *args, **kwargs)
+        DistUtilsCommandMixin.__init__(self)
 
     def finalize_options(self):
         os_name_backup = os.name
+        DistUtilsCommandMixin.mixin_finalize_options(self)
         if sys.platform == 'darwin':
             self.plat_name = macos_plat_name()
             # This is a hack to circumvent the dubious check in
@@ -541,7 +496,6 @@ class PysideBuild(_build):
         _build.initialize_options(self)
         self.make_path = None
         self.make_generator = None
-        self.debug = False
         self.script_dir = None
         self.sources_dir = None
         self.build_dir = None
@@ -586,7 +540,7 @@ class PysideBuild(_build):
             py_scripts_dir = os.path.join(py_prefix, "bin")
         self.py_scripts_dir = py_scripts_dir
 
-        self.qtinfo = qtinfo
+        self.qtinfo = QtInfo()
         qt_dir = os.path.dirname(OPTION["QMAKE"])
         qt_version = get_qt_version()
 
@@ -626,7 +580,6 @@ class PysideBuild(_build):
 
         self.make_path = make_path
         self.make_generator = make_generator
-        self.debug = OPTION["DEBUG"]
         self.script_dir = script_dir
         self.st_build_dir = os.path.join(self.script_dir, self.build_lib)
         self.sources_dir = sources_dir

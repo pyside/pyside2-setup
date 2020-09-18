@@ -38,9 +38,26 @@
 #############################################################################
 
 from __future__ import print_function
+import distutils.log as log
+from distutils.spawn import find_executable
 import sys
 import os
 import warnings
+
+from .qtinfo import QtInfo
+
+
+_AVAILABLE_MKSPECS = ["msvc", "mingw", "ninja"] if sys.platform == "win32" else ["make", "ninja"]
+
+
+# Global options not which are not part of the commands
+ADDITIONAL_OPTIONS = """
+Additional options:
+  --limited-api                        Use Limited API [yes/no]
+  ---macos-use-libc++                  Use libc++ on macOS
+  --snapshot-build                     Snapshot build
+  --package-timestamp                  Package Timestamp
+"""
 
 
 def _warn_multiple_option(option):
@@ -132,60 +149,192 @@ def option_value(*args, **kwargs):
     return options.option_value(*args, **kwargs)
 
 
-# Declare options
+def _jobs_option_value():
+    """Option value for parallel builds."""
+    value = option_value('parallel', short_option_name='j')
+    if value:
+        return '-j' + value if not value.startswith('-j') else value
+    return ''
+
+
+# Declare options which need to be known when instantiating the DistUtils
+# commands.
 OPTION = {
     "BUILD_TYPE": option_value("build-type"),
     "INTERNAL_BUILD_TYPE": option_value("internal-build-type"),
-    "DEBUG": has_option("debug"),
-    "RELWITHDEBINFO": has_option('relwithdebinfo'),
-    "QMAKE": option_value("qmake"),
-    "QT_VERSION": option_value("qt"),
-    "CMAKE": option_value("cmake"),
-    "OPENSSL": option_value("openssl"),
-    "SHIBOKEN_CONFIG_DIR": option_value("shiboken-config-dir"),
-    "ONLYPACKAGE": has_option("only-package"),
-    "STANDALONE": has_option("standalone"),
-    "MAKESPEC": option_value("make-spec"),
-    "IGNOREGIT": has_option("ignore-git"),
-    # don't generate documentation
-    "SKIP_DOCS": has_option("skip-docs"),
-    # don't include pyside2-examples
-    "NOEXAMPLES": has_option("no-examples"),
     # number of parallel build jobs
-    "JOBS": option_value('parallel', short_option_name='j'),
+    "JOBS": _jobs_option_value(),
     # Legacy, not used any more.
     "JOM": has_option('jom'),
-    # Do not use jom instead of nmake with msvc
-    "NO_JOM": has_option('no-jom'),
-    "BUILDTESTS": has_option("build-tests"),
-    "MACOS_ARCH": option_value("macos-arch"),
     "MACOS_USE_LIBCPP": has_option("macos-use-libc++"),
-    "MACOS_SYSROOT": option_value("macos-sysroot"),
-    "MACOS_DEPLOYMENT_TARGET": option_value("macos-deployment-target"),
-    "XVFB": has_option("use-xvfb"),
-    "REUSE_BUILD": has_option("reuse-build"),
-    "SKIP_CMAKE": has_option("skip-cmake"),
-    "SKIP_MAKE_INSTALL": has_option("skip-make-install"),
-    "SKIP_PACKAGING": has_option("skip-packaging"),
-    "SKIP_MODULES": option_value("skip-modules"),
-    "MODULE_SUBSET": option_value("module-subset"),
-    "RPATH_VALUES": option_value("rpath"),
-    "QT_CONF_PREFIX": option_value("qt-conf-prefix"),
-    "QT_SRC": option_value("qt-src-dir"),
     "QUIET": has_option('quiet', remove=False),
-    "VERBOSE_BUILD": has_option("verbose-build"),
-    "SANITIZE_ADDRESS": has_option("sanitize-address"),
     "SNAPSHOT_BUILD": has_option("snapshot-build"),
     "LIMITED_API": option_value("limited-api"),
     "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
-    "SHORTER_PATHS": has_option("shorter-paths"),
     # This is used automatically by distutils.command.install object, to
     # specify the final installation location.
-    "FINAL_INSTALL_PREFIX": option_value("prefix", remove=False),
+    "FINAL_INSTALL_PREFIX": option_value("prefix", remove=False)
     # This is used to identify the template for doc builds
-    "DOC_BUILD_ONLINE": has_option("doc-build-online"),
 }
 _deprecated_option_jobs = option_value('jobs')
 if _deprecated_option_jobs:
     _warn_deprecated_option('jobs', 'parallel')
     OPTION["JOBS"] = _deprecated_option_jobs
+
+
+class DistUtilsCommandMixin(object):
+    """Mixin for the DistUtils build/install commands handling the options."""
+
+    _finalized = False
+
+    mixin_user_options = [
+        ('debug', None, 'Build with debug information'),
+        ('relwithdebinfo', None, 'Build in release mode with debug information'),
+        ('only-package', None, 'Package only'),
+        ('standalone', None, 'Standalone build'),
+        ('ignore-git', None, 'Do update subrepositories'),
+        ('skip-docs', None, 'Skip documentation build'),
+        ('no-examples', None, 'Do not build examples'),
+        ('no-jom', None, 'Do not use jom (MSVC)'),
+        ('build-tests', None, 'Build tests'),
+        ('use-xvfb', None, 'Use Xvfb for testing'),
+        ('reuse-build', None, 'Reuse existing build'),
+        ('skip-cmake', None, 'Skip CMake step'),
+        ('skip-make-install', None, 'Skip install step'),
+        ('skip-packaging', None, 'Skip packaging step'),
+        ('verbose-build', None, 'Verbose build'),
+        ('sanitize-address', None, 'Build with address sanitizer'),
+        ('shorter-paths', None, 'Use shorter paths'),
+        ('doc-build-online', None, 'Build online documentation'),
+        ('qmake=', None, 'Path to qmake'),
+        ('qt=', None, 'Qt version'),
+        ('cmake=', None, 'Path to CMake'),
+        ('openssl=', None, 'Path to OpenSSL libraries'),
+        ('shiboken-config-dir=', None, 'shiboken configuration directory'),
+        ('make-spec=', None, 'Qt make-spec'),
+        ('macos-arch=', None, 'macOS architecture'),
+        ('macos-sysroot=', None, 'macOS sysroot'),
+        ('macos-deployment-target=', None, 'macOS deployment target'),
+        ('skip-modules=', None, 'Qt modules to be skipped'),
+        ('module-subset=', None, 'Qt modules to be built'),
+        ('rpath=', None, 'RPATH'),
+        ('qt-conf-prefix=', None, 'Qt configuration prefix'),
+        ('qt-src-dir=', None, 'Qt source directory')]
+
+    def __init__(self):
+        self.debug = False
+        self.relwithdebinfo = False
+        self.only_package = False
+        self.standalone = False
+        self.ignore_git = False
+        self.skip_docs = False
+        self.no_examples = False
+        self.no_jom = False
+        self.build_tests = False
+        self.use_xvfb = False
+        self.reuse_build = False
+        self.skip_cmake = False
+        self.skip_make_install = False
+        self.skip_packaging = False
+        self.verbose_build = False
+        self.sanitize_address = False
+        self.snapshot_build = False
+        self.shorter_paths = False
+        self.doc_build_online = False
+        self.qmake = None
+        self.qt = '5'
+        self.cmake = None
+        self.openssl = None
+        self.shiboken_config_dir = None
+        self.make_spec = None
+        self.macos_arch = None
+        self.macos_sysroot = None
+        self.macos_deployment_target = None
+        self.skip_modules = None
+        self.module_subset = None
+        self.rpath = None
+        self.qt_conf_prefix = None
+        self.qt_src_dir = None
+
+    def mixin_finalize_options(self):
+        # Bail out on 2nd call to mixin_finalize_options() since that is the
+        # build command following the install command when invoking
+        # setup.py install
+        if not DistUtilsCommandMixin._finalized:
+            DistUtilsCommandMixin._finalized = True
+            self._do_finalize()
+
+    def _do_finalize(self):
+        if not self._determine_defaults_and_check():
+            sys.exit(-1)
+        OPTION['DEBUG'] = self.debug
+        OPTION['RELWITHDEBINFO'] = self.relwithdebinfo
+        OPTION['ONLYPACKAGE'] = self.only_package
+        OPTION['STANDALONE'] = self.standalone
+        OPTION['IGNOREGIT'] = self.ignore_git
+        OPTION['SKIP_DOCS'] = self.skip_docs
+        OPTION['NOEXAMPLES'] = self.no_examples
+        OPTION['BUILDTESTS'] = self.build_tests
+        OPTION['NO_JOM'] = self.no_jom
+        OPTION['XVFB'] = self.use_xvfb
+        OPTION['REUSE_BUILD'] = self.reuse_build
+        OPTION['SKIP_CMAKE'] = self.skip_cmake
+        OPTION['SKIP_MAKE_INSTALL'] = self.skip_make_install
+        OPTION['SKIP_PACKAGING'] = self.skip_packaging
+        OPTION['VERBOSE_BUILD'] = self.verbose_build
+        if self.verbose_build:
+            log.set_verbosity(1)
+        OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
+        OPTION['SHORTER_PATHS'] = self.shorter_paths
+        OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
+        # make qtinfo.py independent of relative paths.
+        qmake_abs_path = os.path.abspath(self.qmake)
+        OPTION['QMAKE'] = qmake_abs_path
+        OPTION['QT_VERSION'] = self.qt
+        QtInfo().setup(qmake_abs_path, self.qt)
+        OPTION['CMAKE'] = os.path.abspath(self.cmake)
+        OPTION['OPENSSL'] = self.openssl
+        OPTION['SHIBOKEN_CONFIG_DIR'] = self.shiboken_config_dir
+        OPTION['MAKESPEC'] = self.make_spec
+        OPTION['MACOS_ARCH'] = self.macos_arch
+        OPTION['MACOS_SYSROOT'] = self.macos_sysroot
+        OPTION['MACOS_DEPLOYMENT_TARGET'] = self.macos_deployment_target
+        OPTION['SKIP_MODULES'] = self.skip_modules
+        OPTION['MODULE_SUBSET'] = self.module_subset
+        OPTION['RPATH_VALUES'] = self.rpath
+        OPTION['QT_CONF_PREFIX'] = self.qt_conf_prefix
+        OPTION['QT_SRC'] = self.qt_src_dir
+
+    def _determine_defaults_and_check(self):
+        if not self.cmake:
+            self.cmake = find_executable("cmake")
+        if not self.cmake:
+            print("cmake could not be found.")
+            return False
+        if not os.path.exists(self.cmake):
+            print("'{}' does not exist.".format(self.cmake))
+            return False
+
+        if not self.qmake:
+            self.qmake = find_executable("qmake")
+            if not self.qmake:
+                self.qmake = find_executable("qmake-qt5")
+        if not self.qmake:
+            print("qmake could not be found.")
+            return False
+        if not os.path.exists(self.qmake):
+            print("'{}' does not exist.".format(self.qmake))
+            return False
+
+        if not self.make_spec:
+            self.make_spec = _AVAILABLE_MKSPECS[0]
+        if self.make_spec not in _AVAILABLE_MKSPECS:
+            print('Invalid option --make-spec "{}". Available values are {}'.format(OPTION["MAKESPEC"],
+                                                                                    _AVAILABLE_MKSPECS))
+            return False
+
+        if OPTION["JOBS"] and sys.platform == 'win32' and self.no_jom:
+            print("Option --jobs can only be used with jom on Windows.")
+            return False
+
+        return True
