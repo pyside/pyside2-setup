@@ -1019,7 +1019,6 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
 
 static bool convertBoolean(QStringView value, const QString &attributeName, bool defaultValue)
 {
-#ifdef QTBUG_69389_FIXED
     if (value.compare(trueAttributeValue(), Qt::CaseInsensitive) == 0
         || value.compare(yesAttributeValue(), Qt::CaseInsensitive) == 0) {
         return true;
@@ -1028,16 +1027,6 @@ static bool convertBoolean(QStringView value, const QString &attributeName, bool
         || value.compare(noAttributeValue(), Qt::CaseInsensitive) == 0) {
         return false;
     }
-#else
-    if (QtPrivate::compareStrings(value, trueAttributeValue(), Qt::CaseInsensitive) == 0
-        || QtPrivate::compareStrings(value, yesAttributeValue(), Qt::CaseInsensitive) == 0) {
-        return true;
-    }
-    if (QtPrivate::compareStrings(value, falseAttributeValue(), Qt::CaseInsensitive) == 0
-        || QtPrivate::compareStrings(value, noAttributeValue(), Qt::CaseInsensitive) == 0) {
-        return false;
-    }
-#endif
     const QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
                                       .arg(value)
                                       .arg(attributeName,
