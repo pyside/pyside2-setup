@@ -43,6 +43,11 @@ from sample import *
 from shiboken_test_helper import objectFullname
 
 
+class TestVariablesUnderNamespace(unittest.TestCase):
+    def testIt(self):
+         self.assertEqual(SampleNamespace.variableInNamespace, 42)
+
+
 class TestEnumUnderNamespace(unittest.TestCase):
     def testInvisibleNamespace(self):
         o1 = EnumOnNamespace.Option1

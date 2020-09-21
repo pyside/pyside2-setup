@@ -132,4 +132,6 @@ passReferenceToObjectType(const ObjectType& obj, int multiplier)
     return obj.objectName().size() * multiplier;
 }
 
+int variableInNamespace = 42;
+
 } // namespace SampleNamespace
