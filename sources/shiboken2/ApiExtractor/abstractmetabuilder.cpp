@@ -3010,6 +3010,19 @@ static ClassIndexHash::ConstIterator findByTypeEntry(const ClassIndexHash &map,
     return it;
 }
 
+// Add a dependency of the class associated with typeEntry on clazz
+static void addClassDependency(const TypeEntry *typeEntry,
+                               const AbstractMetaClass *clazz,
+                               int classIndex, const  ClassIndexHash &map,
+                               Graph *graph)
+{
+    if (typeEntry->isComplex() && typeEntry != clazz->typeEntry()) {
+        const auto it = findByTypeEntry(map, typeEntry);
+        if (it != map.cend() && it.key()->enclosingClass() != clazz)
+            graph->addEdge(it.value(), classIndex);
+    }
+}
+
 AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                                            const Dependencies &additionalDependencies) const
 {
@@ -3062,14 +3075,16 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
                 // ("QString s = QString()"), add a dependency.
                 if (!arg->originalDefaultValueExpression().isEmpty()
                     && arg->type()->isValue()) {
-                    auto typeEntry = arg->type()->typeEntry();
-                    if (typeEntry->isComplex() && typeEntry != clazz->typeEntry()) {
-                        auto ait = findByTypeEntry(map, typeEntry);
-                            if (ait != map.cend() && ait.key()->enclosingClass() != clazz)
-                                graph.addEdge(ait.value(), classIndex);
-                    }
+                    addClassDependency(arg->type()->typeEntry(), clazz, classIndex,
+                                       map, &graph);
                 }
             }
+        }
+        // Member fields need to be initialized
+        const AbstractMetaFieldList &fields = clazz->fields();
+        for (AbstractMetaField *field : fields) {
+            addClassDependency(field->type()->typeEntry(), clazz, classIndex,
+                               map, &graph);
         }
     }
 
