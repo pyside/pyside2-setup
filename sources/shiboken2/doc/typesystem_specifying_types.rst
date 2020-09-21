@@ -155,6 +155,7 @@ namespace-type
             <namespace-type name="..."
                 visible="true | auto | false"
                 generate="yes | no"
+                generate-using="yes | no"
                 package="..."
                 since="..."
                 revision="..." />
@@ -172,6 +173,13 @@ namespace-type
 
     The *optional* **generate** is a legacy attribute. Specifying
     **no** is equivalent to **visible="false"**.
+
+    The *optional* **generate-using** attribute specifies whether
+    ``using namespace`` is generated into the wrapper code for classes within
+    the namespace (default: **yes**). This ensures for example that not fully
+    qualified enumeration values of default argument values compile.
+    However, in rare cases, it might cause ambiguities and can then be turned
+    off.
 
     The **package** attribute can be used to override the package of the type system.
 

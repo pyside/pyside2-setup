@@ -39,18 +39,25 @@ from helper.usesqapplication import UsesQApplication
 from PySide2.QtWidgets import QWidget
 from PySide2.QtUiTools import QUiLoader
 
-def get_file_path():
-    for path in file_path:
-        if os.path.exists(path):
-            return path
-    return ""
 
-class QUioaderTeste(UsesQApplication):
+class OverridingLoader(QUiLoader):
+    def createWidget(self, class_name, parent=None, name=''):
+        if class_name == 'QWidget':
+            w = QWidget(parent)
+            w.setObjectName(name)
+            return w
+        return QUiLoader.createWidget(self, class_name, parent, name)
+
+
+class QUiLoaderTester(UsesQApplication):
+    def setUp(self):
+        UsesQApplication.setUp(self)
+        self._filePath = os.path.join(os.path.dirname(__file__), 'test.ui')
+
     def testLoadFile(self):
-        filePath = os.path.join(os.path.dirname(__file__), 'test.ui')
         loader = QUiLoader()
         parent = QWidget()
-        w = loader.load(filePath, parent)
+        w = loader.load(self._filePath, parent)
         self.assertNotEqual(w, None)
 
         self.assertEqual(len(parent.children()), 1)
@@ -59,18 +66,13 @@ class QUioaderTeste(UsesQApplication):
         self.assertNotEqual(child, None)
         self.assertEqual(w.findChild(QWidget, "grandson_object"), child.findChild(QWidget, "grandson_object"))
 
-    def testLoadFileUnicodeFilePath(self):
-        filePath = str(os.path.join(os.path.dirname(__file__), 'test.ui'))
-        loader = QUiLoader()
-        parent = QWidget()
-        w = loader.load(filePath, parent)
+
+    def testLoadFileOverride(self):
+        # PYSIDE-1070, override QUiLoader::createWidget() with parent=None crashes
+        loader = OverridingLoader()
+        w = loader.load(self._filePath)
         self.assertNotEqual(w, None)
 
-        self.assertEqual(len(parent.children()), 1)
-
-        child = w.findChild(QWidget, "child_object")
-        self.assertNotEqual(child, None)
-        self.assertEqual(w.findChild(QWidget, "grandson_object"), child.findChild(QWidget, "grandson_object"))
 
 if __name__ == '__main__':
     unittest.main()

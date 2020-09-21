@@ -67,6 +67,7 @@ static inline QString flagsAttribute() { return QStringLiteral("flags"); }
 static inline QString forceAbstractAttribute() { return QStringLiteral("force-abstract"); }
 static inline QString forceIntegerAttribute() { return QStringLiteral("force-integer"); }
 static inline QString formatAttribute() { return QStringLiteral("format"); }
+static inline QString generateUsingAttribute() { return QStringLiteral("generate-using"); }
 static inline QString classAttribute() { return QStringLiteral("class"); }
 static inline QString generateAttribute() { return QStringLiteral("generate"); }
 static inline QString genericClassAttribute() { return QStringLiteral("generic-class"); }
@@ -1020,7 +1021,6 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
 
 static bool convertBoolean(QStringView value, const QString &attributeName, bool defaultValue)
 {
-#ifdef QTBUG_69389_FIXED
     if (value.compare(trueAttributeValue(), Qt::CaseInsensitive) == 0
         || value.compare(yesAttributeValue(), Qt::CaseInsensitive) == 0) {
         return true;
@@ -1029,16 +1029,6 @@ static bool convertBoolean(QStringView value, const QString &attributeName, bool
         || value.compare(noAttributeValue(), Qt::CaseInsensitive) == 0) {
         return false;
     }
-#else
-    if (QtPrivate::compareStrings(value, trueAttributeValue(), Qt::CaseInsensitive) == 0
-        || QtPrivate::compareStrings(value, yesAttributeValue(), Qt::CaseInsensitive) == 0) {
-        return true;
-    }
-    if (QtPrivate::compareStrings(value, falseAttributeValue(), Qt::CaseInsensitive) == 0
-        || QtPrivate::compareStrings(value, noAttributeValue(), Qt::CaseInsensitive) == 0) {
-        return false;
-    }
-#endif
     const QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
                                       .arg(value)
                                       .arg(attributeName,
@@ -1376,6 +1366,8 @@ NamespaceTypeEntry *
         } else if (attributeName == generateAttribute()) {
             if (!convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true))
                 visibility = TypeSystem::Visibility::Invisible;
+        } else if (attributeName == generateUsingAttribute()) {
+            result->setGenerateUsing(convertBoolean(attributes->takeAt(i).value(), generateUsingAttribute(), true));
         }
     }
 
