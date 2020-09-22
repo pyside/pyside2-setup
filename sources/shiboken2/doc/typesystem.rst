@@ -23,6 +23,14 @@ Define types
 
    typesystem_specifying_types.rst
 
+Code generation
+---------------
+
+.. toctree::
+   :maxdepth: 1
+
+   typesystem_codegeneration.rst
+
 Modifying types
 ---------------
 

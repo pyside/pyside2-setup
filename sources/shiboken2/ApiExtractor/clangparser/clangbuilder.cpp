@@ -56,6 +56,11 @@ static inline bool isClassCursor(const CXCursor &c)
         || c.kind == CXCursor_ClassTemplatePartialSpecialization;
 }
 
+static inline bool isClassOrNamespaceCursor(const CXCursor &c)
+{
+    return c.kind == CXCursor_Namespace || isClassCursor(c);
+}
+
 static inline bool withinClassDeclaration(const CXCursor &cursor)
 {
     return isClassCursor(clang_getCursorLexicalParent(cursor));
@@ -979,7 +984,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_VarDecl:
         // static class members are seen as CXCursor_VarDecl
-        if (!d->m_currentClass.isNull() && isClassCursor(clang_getCursorSemanticParent(cursor))) {
+        if (isClassOrNamespaceCursor(clang_getCursorSemanticParent(cursor))) {
              d->addField(cursor);
              d->m_currentField->setStatic(true);
         }

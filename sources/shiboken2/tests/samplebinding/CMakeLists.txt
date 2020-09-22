@@ -22,6 +22,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/collector_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/comparisontester_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/color_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/ctorconvrule_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/customoverloadsequence_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/cvlistuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/cvvaluetype_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/sbkdate_wrapper.cpp

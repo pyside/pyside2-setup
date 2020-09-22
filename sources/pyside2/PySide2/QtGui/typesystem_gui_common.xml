@@ -1775,7 +1775,11 @@
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
+    <!-- PYSIDE-1366: Preferably use the QPolygon overloads first to avoid
+         a costly sequence type check on QPolygon. -->
     <modify-function signature="drawPolyline(const QPointF*,int)" remove="all"/>
+    <modify-function signature="drawPolyline(const QPolygon&amp;)" overload-number="0"/>
+    <modify-function signature="drawPolyline(const QPolygonF&amp;)" overload-number="1"/>
     <add-function signature="drawPolyline(QVector&lt;QPointF>)">
         <inject-code>
             <insert-template name="qpainter_drawlist"/>

@@ -19,33 +19,16 @@ This is the ``inject-code`` tag options that matters to |project|.
          </inject-code>
 
 
-Conventions
-===========
-
-**C++ Wrapper**
-  This term refers to a generated C++ class that extends a class from the
-  wrapped library. It is used only when a wrapped C++ class is polymorphic,
-  i.e. it has or inherits any virtual methods.
-
-**Python Wrapper**
-  The code that exports the C++ wrapped class to Python. **Python wrapper**
-  refers to all the code needed to export a C++ class to Python, and
-  **Python method/function wrapper** means the specific function that calls
-  the C++ method/function on behalf of Python.
-
-**Native**
-  This is a possible value for the ``class`` attribute of the ``inject-code``
-  tag, it means things more akin to the C++ side.
-
-**Target**
- Another ``class`` attribute value, it indicates things more close to the
- Python side.
-
 inject-code tag
 ===============
 
 The following table describes the semantics of ``inject-code`` tag as used on
-|project|.
+|project|. The ``class`` attribute specifies whether to code is injected
+into the **C++ Wrapper** or the **Python Wrapper** (see
+:ref:`codegenerationterminology`).
+The ``position`` attribute specifies the location of the custom code in the
+function.
+
 
     +---------------+------+-----------+--------------------------------------------------------------+
     |Parent Tag     |Class |Position   |Meaning                                                       |

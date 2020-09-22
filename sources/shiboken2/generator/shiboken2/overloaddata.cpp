@@ -38,6 +38,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QTemporaryFile>
 
+#include <algorithm>
+
 static const TypeEntry *getReferencedTypeEntry(const TypeEntry *typeEntry)
 {
     if (typeEntry->isPrimitive()) {
@@ -175,6 +177,24 @@ static QString msgCyclicDependency(const QString &funcName, const QString &graph
     return result;
 }
 
+static inline int overloadNumber(const OverloadData *o)
+{
+    return o->referenceFunction()->overloadNumber();
+}
+
+bool OverloadData::sortByOverloadNumberModification()
+{
+    if (std::all_of(m_nextOverloadData.cbegin(), m_nextOverloadData.cend(),
+                    [](const OverloadData *o) { return overloadNumber(o) == TypeSystem::OverloadNumberDefault; })) {
+        return false;
+    }
+    std::stable_sort(m_nextOverloadData.begin(), m_nextOverloadData.end(),
+                     [] (const OverloadData *o1, const OverloadData *o2) {
+                         return overloadNumber(o1) < overloadNumber(o2);
+                     });
+    return true;
+}
+
 /**
  * Topologically sort the overloads by implicit convertion order
  *
@@ -210,7 +230,7 @@ void OverloadData::sortNextOverloads()
     for (OverloadData *ov : qAsConst(m_nextOverloadData))
         ov->sortNextOverloads();
 
-    if (m_nextOverloadData.size() <= 1)
+    if (m_nextOverloadData.size() <= 1 || sortByOverloadNumberModification())
         return;
 
     // Populates the OverloadSortData object containing map and reverseMap, to map type names to ids,

@@ -139,6 +139,7 @@ private:
     OverloadData *addOverloadData(const AbstractMetaFunction *func, const AbstractMetaArgument *arg);
 
     void sortNextOverloads();
+    bool sortByOverloadNumberModification();
 
     int functionNumber(const AbstractMetaFunction *func) const;
     OverloadDataList overloadDataOnPosition(OverloadData *overloadData, int argPos) const;

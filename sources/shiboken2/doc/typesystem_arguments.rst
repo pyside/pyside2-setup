@@ -119,7 +119,8 @@ define-ownership
 
     The define-ownership tag indicates that the function changes the ownership
     rules of the argument object. The ``class`` attribute specifies the class of
-    function where to inject the ownership altering code. The ``owner`` attribute
+    function where to inject the ownership altering code
+    (see :ref:`codegenerationterminology`). The ``owner`` attribute
     specifies the new ownership of the object. It accepts the following values:
 
         * target: the target language will assume full ownership of the object.

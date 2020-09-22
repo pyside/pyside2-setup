@@ -97,7 +97,12 @@ def matched_type(args, sigs):
 
 def seterror_argument(args, func_name):
     update_mapping()
-    func = eval(func_name, namespace)
+    func = None
+    try:
+        func = eval(func_name, namespace)
+    except Exception as e:
+        msg = "Internal error evaluating " + func_name + " :"  + str(e)
+        return TypeError, msg
     sigs = get_signature(func, "typeerror")
     if type(sigs) != list:
         sigs = [sigs]

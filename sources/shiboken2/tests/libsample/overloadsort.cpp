@@ -28,3 +28,12 @@
 
 #include "overloadsort.h"
 
+int CustomOverloadSequence::overload(short v) const
+{
+    return v + int(sizeof(v));
+}
+
+int CustomOverloadSequence::overload(int v) const
+{
+    return v + 4;
+}

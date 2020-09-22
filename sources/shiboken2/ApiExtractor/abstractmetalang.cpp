@@ -1283,6 +1283,21 @@ AbstractMetaFunction::find(const AbstractMetaFunctionList &haystack,
     return findByName(haystack, needle);
 }
 
+int AbstractMetaFunction::overloadNumber() const
+{
+    if (m_cachedOverloadNumber == TypeSystem::OverloadNumberUnset) {
+        m_cachedOverloadNumber = TypeSystem::OverloadNumberDefault;
+        const FunctionModificationList &mods = modifications(implementingClass());
+        for (const FunctionModification &mod : mods) {
+            if (mod.overloadNumber() != TypeSystem::OverloadNumberUnset) {
+                m_cachedOverloadNumber = mod.overloadNumber();
+                break;
+            }
+        }
+    }
+    return m_cachedOverloadNumber;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 static inline void formatMetaFunctionBrief(QDebug &d, const AbstractMetaFunction *af)
 {

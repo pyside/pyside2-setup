@@ -2787,6 +2787,12 @@
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
     </extra-includes>
+    <modify-function signature="createMimeDataFromSelection() const">
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="setDocument(QTextDocument*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -3205,6 +3211,12 @@
   <object-type name="QPlainTextDocumentLayout"/>
   <object-type name="QPlainTextEdit">
     <enum-type name="LineWrapMode"/>
+    <modify-function signature="createMimeDataFromSelection() const">
+      <modify-argument index="return">
+        <define-ownership class="native" owner="c++"/>
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="setDocument(QTextDocument*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

@@ -94,5 +94,14 @@ class EnumOverIntSorting(unittest.TestCase):
         ic = ImplicitConv(ImplicitConv.CtorTwo)
         self.assertEqual(ic.ctorEnum(), ImplicitConv.CtorTwo)
 
+
+class TestCustomOverloadSequence(unittest.TestCase):
+    '''Ensure the int-overload (returning v + sizeof(v)) is first as specified via
+       overload-number in XML.'''
+    def testCustomOverloadSequence(self):
+        s = CustomOverloadSequence()
+        self.assertEqual(s.overload(42), 46)
+
+
 if __name__ == '__main__':
     unittest.main()
