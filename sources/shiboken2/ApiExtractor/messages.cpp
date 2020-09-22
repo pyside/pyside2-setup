@@ -368,6 +368,16 @@ QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QSt
         + packageName + QLatin1Char('.');
 }
 
+QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeName,
+                                     const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to decide type of property: \"" << name << "\" (" << typeName
+        << "): " << why;
+    return result;
+}
+
 // docparser.cpp
 
 QString msgCannotFindDocumentation(const QString &fileName,

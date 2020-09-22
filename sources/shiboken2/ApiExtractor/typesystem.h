@@ -553,6 +553,18 @@ private:
 class CustomConversion;
 class TypeSystemTypeEntry;
 
+struct TypeSystemProperty
+{
+    bool isValid() const { return !name.isEmpty() && !read.isEmpty() && !type.isEmpty(); }
+
+    QString type;
+    QString name;
+    QString read;
+    QString write;
+    QString reset;
+    QString designable;
+};
+
 class TypeEntry
 {
     Q_GADGET

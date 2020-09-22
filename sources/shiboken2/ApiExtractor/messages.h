@@ -127,6 +127,9 @@ QString msgDisallowThread(const AbstractMetaFunction *f);
 
 QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QString &packageName);
 
+QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeName,
+                                     const QString &why);
+
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
                                    const QString &query);

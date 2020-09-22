@@ -33,7 +33,10 @@
 
 class AbstractMetaClass;
 class AbstractMetaBuilderPrivate;
+class AbstractMetaType;
 class TypeEntry;
+
+struct TypeSystemProperty;
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -42,7 +45,18 @@ class QPropertySpec
 public:
     Q_DISABLE_COPY_MOVE(QPropertySpec)
 
-    explicit QPropertySpec(const TypeEntry *type) : m_type(type) {}
+    explicit QPropertySpec(const TypeSystemProperty &ts,
+                           const AbstractMetaType *type);
+    ~QPropertySpec();
+
+    static TypeSystemProperty typeSystemPropertyFromQ_Property(const QString &declarationIn,
+                                                               QString *errorMessage);
+
+    static QPropertySpec *fromTypeSystemProperty(AbstractMetaBuilderPrivate *b,
+                                                 AbstractMetaClass *metaClass,
+                                                 const TypeSystemProperty &ts,
+                                                 const QStringList &scopes,
+                                                 QString *errorMessage);
 
     static QPropertySpec *parseQ_Property(AbstractMetaBuilderPrivate *b,
                                           AbstractMetaClass *metaClass,
@@ -52,10 +66,10 @@ public:
 
     bool isValid() const;
 
-    const TypeEntry *type() const { return m_type; }
+    const AbstractMetaType *type() const { return m_type; }
+    void setType(AbstractMetaType *t) { m_type = t; }
 
-    int indirections() const { return m_indirections; }
-    void setIndirections(int indirections) { m_indirections = indirections; }
+    const TypeEntry *typeEntry() const;
 
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
@@ -85,8 +99,7 @@ private:
     QString m_write;
     QString m_designable;
     QString m_reset;
-    const TypeEntry *m_type;
-    int m_indirections = 0;
+    const AbstractMetaType *m_type = nullptr;
     int m_index = -1;
 };
 

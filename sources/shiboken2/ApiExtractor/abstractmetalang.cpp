@@ -1401,6 +1401,7 @@ AbstractMetaClass::~AbstractMetaClass()
     qDeleteAll(m_functions);
     qDeleteAll(m_fields);
     qDeleteAll(m_enums);
+    qDeleteAll(m_propertySpecs);
     if (hasTemplateBaseClassInstantiations())
         qDeleteAll(templateBaseClassInstantiations());
 }
