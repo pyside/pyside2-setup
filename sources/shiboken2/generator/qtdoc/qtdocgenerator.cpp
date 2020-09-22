@@ -30,6 +30,7 @@
 #include "ctypenames.h"
 #include <abstractmetalang.h>
 #include <messages.h>
+#include <propertyspec.h>
 #include <reporthandler.h>
 #include <typesystem.h>
 #include <qtdocparser.h>

@@ -126,8 +126,6 @@ public:
     void fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction);
 
     void parseQ_Properties(AbstractMetaClass *metaClass, const QStringList &declarations);
-    QPropertySpec *parseQ_Property(AbstractMetaClass *metaClass, const QString &declaration,
-                                   const QStringList &scopes, QString *errorMessage);
     void setupEquals(AbstractMetaClass *metaClass);
     void setupComparable(AbstractMetaClass *metaClass);
     void setupClonable(AbstractMetaClass *cls);

@@ -34,6 +34,7 @@
 #include "overloaddata.h"
 #include <abstractmetalang.h>
 #include <messages.h>
+#include <propertyspec.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
 

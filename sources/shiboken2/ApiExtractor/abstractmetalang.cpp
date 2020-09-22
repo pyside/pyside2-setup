@@ -28,6 +28,7 @@
 
 #include "abstractmetalang.h"
 #include "messages.h"
+#include "propertyspec.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
 #include "typesystem.h"
@@ -2794,34 +2795,3 @@ QString AbstractMetaEnum::package() const
     return m_typeEntry->targetLangPackage();
 }
 
-bool QPropertySpec::isValid() const
-{
-    return m_type != nullptr && !m_name.isEmpty() && !m_read.isEmpty();
-}
-
-#ifndef QT_NO_DEBUG_STREAM
-void QPropertySpec::formatDebug(QDebug &d) const
-{
-    d << '#' << m_index << " \"" << m_name << "\" (" << m_type->qualifiedCppName();
-    for (int i = 0; i < m_indirections; ++i)
-        d << '*';
-    d << "), read=" << m_read;
-    if (!m_write.isEmpty())
-        d << ", write=" << m_write;
-    if (!m_reset.isEmpty())
-          d << ", reset=" << m_reset;
-    if (!m_designable.isEmpty())
-          d << ", designable=" << m_designable;
-}
-
-QDebug operator<<(QDebug d, const QPropertySpec &p)
-{
-    QDebugStateSaver s(d);
-    d.noquote();
-    d.nospace();
-    d << "QPropertySpec(";
-    p.formatDebug(d);
-    d << ')';
-    return d;
-}
-#endif // QT_NO_DEBUG_STREAM

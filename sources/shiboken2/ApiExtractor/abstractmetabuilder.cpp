@@ -28,6 +28,7 @@
 
 #include "abstractmetabuilder_p.h"
 #include "messages.h"
+#include "propertyspec.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
 
@@ -2789,7 +2790,7 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
     const QStringList scopes = currentScope()->qualifiedName();
     QString errorMessage;
     for (int i = 0; i < declarations.size(); ++i) {
-        if (auto spec = parseQ_Property(metaClass, declarations.at(i), scopes, &errorMessage)) {
+        if (auto spec = QPropertySpec::parseQ_Property(this, metaClass, declarations.at(i), scopes, &errorMessage)) {
             spec->setIndex(i);
             metaClass->addPropertySpec(spec);
         } else {
@@ -2799,75 +2800,6 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
             qCWarning(lcShiboken, "%s", qPrintable(message));
         }
     }
-}
-
-QPropertySpec *AbstractMetaBuilderPrivate::parseQ_Property(AbstractMetaClass *metaClass,
-                                                           const QString &declarationIn,
-                                                           const QStringList &scopes,
-                                                           QString *errorMessage)
-{
-    errorMessage->clear();
-
-    // Q_PROPERTY(QString objectName READ objectName WRITE setObjectName NOTIFY objectNameChanged)
-
-    const QString declaration = declarationIn.simplified();
-    auto propertyTokens = declaration.splitRef(QLatin1Char(' '), Qt::SkipEmptyParts);
-    if (propertyTokens.size()  < 4) {
-        *errorMessage = QLatin1String("Insufficient number of tokens");
-        return nullptr;
-    }
-
-    QString fullTypeName = propertyTokens.takeFirst().toString();
-    QString name = propertyTokens.takeFirst().toString();
-    // Fix errors like "Q_PROPERTY(QXYSeries *series .." to be of type "QXYSeries*"
-    while (name.startsWith(QLatin1Char('*'))) {
-        fullTypeName += name.at(0);
-        name.remove(0, 1);
-    }
-
-    int indirections = 0;
-    QString typeName = fullTypeName;
-    for (; typeName.endsWith(QLatin1Char('*')); ++indirections)
-        typeName.chop(1);
-
-    QScopedPointer<AbstractMetaType> type;
-    QString typeError;
-    for (int j = scopes.size(); j >= 0 && type.isNull(); --j) {
-        QStringList qualifiedName = scopes.mid(0, j);
-        qualifiedName.append(typeName);
-        TypeInfo info;
-        info.setIndirections(indirections);
-        info.setQualifiedName(qualifiedName);
-        type.reset(translateType(info, metaClass, {}, &typeError));
-    }
-
-    if (!type) {
-        QTextStream str(errorMessage);
-        str << "Unable to decide type of property: \"" << name << "\" ("
-            <<  typeName << "): " << typeError;
-        return nullptr;
-    }
-
-    QScopedPointer<QPropertySpec> spec(new QPropertySpec(type->typeEntry()));
-    spec->setName(name);
-    spec->setIndirections(indirections);
-
-    for (int pos = 0; pos + 1 < propertyTokens.size(); pos += 2) {
-        if (propertyTokens.at(pos) == QLatin1String("READ"))
-            spec->setRead(propertyTokens.at(pos + 1).toString());
-        else if (propertyTokens.at(pos) == QLatin1String("WRITE"))
-            spec->setWrite(propertyTokens.at(pos + 1).toString());
-        else if (propertyTokens.at(pos) == QLatin1String("DESIGNABLE"))
-            spec->setDesignable(propertyTokens.at(pos + 1).toString());
-        else if (propertyTokens.at(pos) == QLatin1String("RESET"))
-            spec->setReset(propertyTokens.at(pos + 1).toString());
-    }
-
-    if (!spec->isValid()) {
-        *errorMessage = QLatin1String("Incomplete specification");
-        return nullptr;
-    }
-    return spec.take();
 }
 
 static AbstractMetaFunction* findCopyCtor(AbstractMetaClass* cls)

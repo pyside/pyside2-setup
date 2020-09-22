@@ -12,6 +12,7 @@ abstractmetalang.cpp
 fileout.cpp
 graph.cpp
 messages.cpp
+propertyspec.cpp
 reporthandler.cpp
 sourcelocation.cpp
 typeparser.cpp
