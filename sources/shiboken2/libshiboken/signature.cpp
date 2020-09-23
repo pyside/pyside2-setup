@@ -1182,11 +1182,8 @@ static int _build_func_to_type(PyObject *obtype)
     return 0;
 }
 
-int SbkSpecial_Type_Ready(PyObject * /* module */, PyTypeObject *type,
-                      const char *signatures[])
+int InitSignatureStrings(PyTypeObject *type, const char *signatures[])
 {
-    if (PyType_Ready(type) < 0)
-        return -1;
     auto *ob_type = reinterpret_cast<PyObject *>(type);
     int ret = PySide_BuildSignatureArgs(ob_type, signatures);
     if (ret < 0) {

@@ -188,7 +188,7 @@ static const char *Slot_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (SbkSpecial_Type_Ready(module, PySideSlotTypeF(), Slot_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideSlotTypeF(), Slot_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySideSlotTypeF());

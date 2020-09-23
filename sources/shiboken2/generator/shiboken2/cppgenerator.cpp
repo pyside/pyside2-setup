@@ -595,7 +595,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
         sorter.sort();
 
         s << '\n';
-        s << "static const char *" << className << "_properties[] = {\n";
+        s << "static const char *" << className << "_PropertyStrings[] = {\n";
         for (const auto &entry : qAsConst(sorter))
             s << INDENT << entry << ",\n";
         s << INDENT << NULL_PTR << " // Sentinel\n";
@@ -5171,10 +5171,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         // 4:typeSpec
         s << INDENT << '&' << chopType(pyTypeName) << "_spec,\n";
 
-        // 5:signatureStrings
-        s << INDENT << initFunctionName << "_SignatureStrings,\n";
-
-        // 6:cppObjDtor
+        // 5:cppObjDtor
         s << INDENT;
         if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
             QString dtorClassName = metaClass->qualifiedCppName();
@@ -5190,7 +5187,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << "0,\n";
         }
 
-        // 7:baseType
+        // 6:baseType
         const auto base = metaClass->isNamespace()
             ? metaClass->extendedNamespace() : metaClass->baseClass();
         if (base) {
@@ -5200,13 +5197,13 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << INDENT << "0,\n";
         }
 
-        // 8:baseTypes
+        // 7:baseTypes
         if (metaClass->baseClassNames().size() > 1)
             s << INDENT << pyTypeBasesVariable << ',' << Qt::endl;
         else
             s << INDENT << "0,\n";
 
-        // 9:wrapperflags
+        // 8:wrapperflags
         QByteArrayList wrapperFlags;
         if (enc)
             wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::InnerClass"));
@@ -5220,11 +5217,12 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     s << INDENT << ");\n";
     s << INDENT << Qt::endl;
 
-    if (usePySideExtensions()) {
-        QString className = metaClass->qualifiedCppName();
+    s << INDENT << "auto pyType = reinterpret_cast<PyTypeObject *>(" << typePtr << ");\n";
+    s << INDENT << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n";
+
+    if (usePySideExtensions())
         s << INDENT << "SbkObjectType_SetPropertyStrings(reinterpret_cast<PyTypeObject *>(" << typePtr << "), "
-        << chopType(pyTypeName) << "_properties);\n";
-    }
+                    << chopType(pyTypeName) << "_PropertyStrings);\n";
 
     if (!classContext.forSmartPointer())
         s << INDENT << cpythonTypeNameExt(classTypeEntry) << Qt::endl;

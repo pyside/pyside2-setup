@@ -639,17 +639,17 @@ static const char *SignalInstance_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (SbkSpecial_Type_Ready(module, PySideMetaSignalTypeF(), MetaSignal_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideMetaSignalTypeF(), MetaSignal_SignatureStrings) < 0)
         return;
     Py_INCREF(PySideMetaSignalTypeF());
     PyModule_AddObject(module, "MetaSignal", reinterpret_cast<PyObject *>(PySideMetaSignalTypeF()));
 
-    if (SbkSpecial_Type_Ready(module, PySideSignalTypeF(), Signal_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideSignalTypeF(), Signal_SignatureStrings) < 0)
         return;
     Py_INCREF(PySideSignalTypeF());
     PyModule_AddObject(module, "Signal", reinterpret_cast<PyObject *>(PySideSignalTypeF()));
 
-    if (SbkSpecial_Type_Ready(module, PySideSignalInstanceTypeF(), SignalInstance_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideSignalInstanceTypeF(), SignalInstance_SignatureStrings) < 0)
         return;
     Py_INCREF(PySideSignalInstanceTypeF());
     PyModule_AddObject(module, "SignalInstance", reinterpret_cast<PyObject *>(PySideSignalInstanceTypeF()));

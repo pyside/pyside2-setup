@@ -1102,7 +1102,6 @@ introduceWrapperType(PyObject *enclosingObject,
                      const char *typeName,
                      const char *originalName,
                      PyType_Spec *typeSpec,
-                     const char *signatureStrings[],
                      ObjectDestructor cppObjDtor,
                      SbkObjectType *baseType,
                      PyObject *baseTypes,
@@ -1127,12 +1126,8 @@ introduceWrapperType(PyObject *enclosingObject,
             BindingManager::instance().addClassInheritance(baseType, type);
         }
     }
-    // PYSIDE-510: Here is the single change to support signatures.
-    if (SbkSpecial_Type_Ready(enclosingObject, reinterpret_cast<PyTypeObject *>(type), signatureStrings) < 0) {
-        std::cerr << "Warning: " << __FUNCTION__ << " returns nullptr for "
-            << typeName << '/' << originalName << " due to SbkSpecial_Type_Ready() failing\n";
+    if (PyType_Ready(reinterpret_cast<PyTypeObject *>(type)) < 0)
         return nullptr;
-    }
 
     initPrivateData(type);
     auto sotp = PepType_SOTP(type);
