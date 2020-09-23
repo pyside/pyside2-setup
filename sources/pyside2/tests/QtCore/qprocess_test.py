@@ -50,7 +50,7 @@ class TestQProcess (unittest.TestCase):
         p = QProcess()
         p.start("dir", [])
         p.waitForStarted()
-        pid = p.pid()
+        pid = p.processId()
         # We can't test the pid method result because it returns 0 when the
         # process isn't running
         if p.state() == QProcess.Running:

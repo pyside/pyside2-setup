@@ -64,7 +64,6 @@
   <object-type name="QPrinter" >
     <enum-type name="ColorMode"/>
     <enum-type name="DuplexMode"/>
-    <enum-type name="Orientation"/>
     <enum-type name="OutputFormat"/>
     <enum-type name="PageOrder"/>
     <enum-type name="PaperSource"/>

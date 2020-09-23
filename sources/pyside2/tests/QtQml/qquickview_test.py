@@ -40,7 +40,7 @@ from helper.helper import adjust_filename
 from helper.timedqapplication import TimedQApplication
 
 from PySide2.QtCore import QUrl, QObject, Property, Slot
-from PySide2.QtQml import QtQml
+from PySide2.QtQml import QtQml, QQmlEngine
 from PySide2.QtQuick import QQuickView
 
 class MyObject(QObject):
@@ -76,8 +76,9 @@ class TestQQuickView(TimedQApplication):
         self.assertEqual(view.status(), QQuickView.Ready)
         rootObject = view.rootObject()
         self.assertTrue(rootObject)
-        self.assertTrue(QtQml.qmlEngine(rootObject))
-        self.assertTrue(QtQml.qmlContext(rootObject))
+        context = QQmlEngine.contextForObject(rootObject)
+        self.assertTrue(context)
+        self.assertTrue(context.engine())
 
     def testModelExport(self):
         view = QQuickView()

@@ -1352,17 +1352,6 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[qint64](pid));
 // @snippet qprocess-startdetached
 
-// @snippet qprocess-pid
-long result;
-#ifdef WIN32
-    _PROCESS_INFORMATION *procInfo = %CPPSELF.%FUNCTION_NAME();
-    result = procInfo ? procInfo->dwProcessId : 0;
-#else
-    result = %CPPSELF.%FUNCTION_NAME();
-#endif
-%PYARG_0 = %CONVERTTOPYTHON[long](result);
-// @snippet qprocess-pid
-
 // @snippet qcoreapplication-init
 static void QCoreApplicationConstructor(PyObject *self, PyObject *pyargv, QCoreApplicationWrapper **cptr)
 {

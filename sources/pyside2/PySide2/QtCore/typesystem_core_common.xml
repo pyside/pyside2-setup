@@ -1805,7 +1805,6 @@
     <!-- ### These overloads must be removed accept strings with \x00 in their contents -->
     <modify-function signature="append(const char*)" remove="all"/>
     <modify-function signature="prepend(const char*)" remove="all"/>
-    <modify-function signature="replace(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator==(const char*,QByteArray)" remove="all"/>
     <modify-function signature="operator==(QByteArray,const char*)" remove="all"/>
     <modify-function signature="operator>(const char*,QByteArray)" remove="all"/>
@@ -2321,11 +2320,6 @@
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qprocess-startdetached"/>
     </modify-function>
-    <!-- Function removed because on windows it returns a win32 specific structure -->
-    <modify-function signature="pid()const" remove="all"/>
-    <add-function signature="pid()" return-type="long">
-        <inject-code file="../glue/qtcore.cpp" snippet="qprocess-pid"/>
-    </add-function>
   </object-type>
   <object-type name="QSignalMapper"/>
 
@@ -2674,7 +2668,6 @@
     <modify-function signature="toList()const" remove="all"/>
     <!-- Remove methods from QList -->
     <modify-function signature="value(qsizetype,const QXmlStreamAttribute&amp;) const" remove="all"/>
-    <modify-function signature="value(qsizetype) const" remove="all"/>
     <modify-function signature="fromList(const QList&lt;QXmlStreamAttribute&gt; &amp;)" remove="all"/>
     <modify-function signature="operator+=(QVector&lt;QXmlStreamAttribute&gt;)" remove="all"/>
     <!-- Expose operator==, != inherited from QList, which the parser does
