@@ -40,8 +40,6 @@
 #ifndef SIGNATURE_H
 #define SIGNATURE_H
 
-#include "sbkpython.h"
-
 extern "C"
 {
 
