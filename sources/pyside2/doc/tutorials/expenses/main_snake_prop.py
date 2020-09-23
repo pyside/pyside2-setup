@@ -39,7 +39,7 @@
 #############################################################################
 
 import sys
-from PySide2.QtCore import Qt, Slot, QSize
+from PySide2.QtCore import QMargins, Qt, Slot, QSize
 from PySide2.QtGui import QPainter
 from PySide2.QtWidgets import (QAction, QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
                                QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
@@ -81,7 +81,8 @@ class Widget(QWidget):
         self.add.enabled = False
 
         self.right = QVBoxLayout()
-        self.right.margin = 10
+
+        self.right.contents_margins = QMargins(10, 10, 10, 10)
         self.right.add_widget(QLabel("Description"))
         self.right.add_widget(self.description)
         self.right.add_widget(QLabel("Price"))
