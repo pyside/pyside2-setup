@@ -1607,6 +1607,7 @@ public:
         return m_propertySpecs;
     }
 
+    QPropertySpec *propertySpecByName(const QString &name) const;
     QPropertySpec *propertySpecForRead(const QString &name) const;
     QPropertySpec *propertySpecForWrite(const QString &name) const;
     QPropertySpec *propertySpecForReset(const QString &name) const;

@@ -1268,6 +1268,9 @@ public:
         return m_fieldMods;
     }
 
+    const QList<TypeSystemProperty> &properties() const { return m_properties; }
+    void addProperty(const TypeSystemProperty &p) { m_properties.append(p); }
+
     QString defaultSuperclass() const
     {
         return m_defaultSuperclass;
@@ -1374,6 +1377,7 @@ private:
     AddedFunctionList m_addedFunctions;
     FunctionModificationList m_functionMods;
     FieldModificationList m_fieldMods;
+    QList<TypeSystemProperty> m_properties;
     QString m_defaultConstructor;
     QString m_defaultSuperclass;
     QString m_qualifiedCppName;

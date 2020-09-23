@@ -2790,7 +2790,8 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
 {
     const QStringList scopes = currentScope()->qualifiedName();
     QString errorMessage;
-    for (int i = 0; i < declarations.size(); ++i) {
+    int i = 0;
+    for (; i < declarations.size(); ++i) {
         if (auto spec = QPropertySpec::parseQ_Property(this, metaClass, declarations.at(i), scopes, &errorMessage)) {
             spec->setIndex(i);
             metaClass->addPropertySpec(spec);
@@ -2798,6 +2799,26 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
             QString message;
             QTextStream str(&message);
             str << metaClass->sourceLocation() << errorMessage;
+            qCWarning(lcShiboken, "%s", qPrintable(message));
+        }
+    }
+
+    // User-added properties
+    auto typeEntry = metaClass->typeEntry();
+    for (const TypeSystemProperty &tp : typeEntry->properties()) {
+        QPropertySpec *spec = nullptr;
+        if (metaClass->propertySpecByName(tp.name))
+            errorMessage = msgPropertyExists(metaClass->name(), tp.name);
+        else
+            spec = QPropertySpec::fromTypeSystemProperty(this, metaClass, tp, scopes, &errorMessage);
+
+        if (spec) {
+            spec->setIndex(i++);
+            metaClass->addPropertySpec(spec);
+        } else {
+            QString message;
+            QTextStream str(&message);
+            str << typeEntry->sourceLocation() << errorMessage;
             qCWarning(lcShiboken, "%s", qPrintable(message));
         }
     }

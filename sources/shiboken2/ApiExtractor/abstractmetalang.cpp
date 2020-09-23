@@ -1695,6 +1695,15 @@ bool AbstractMetaClass::hasProtectedMembers() const
     return hasProtectedFields() || hasProtectedFunctions();
 }
 
+QPropertySpec *AbstractMetaClass::propertySpecByName(const QString &name) const
+{
+    for (auto propertySpec : m_propertySpecs) {
+        if (name == propertySpec->name())
+            return propertySpec;
+    }
+    return nullptr;
+}
+
 QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
 {
     for (const auto &propertySpec : m_propertySpecs) {

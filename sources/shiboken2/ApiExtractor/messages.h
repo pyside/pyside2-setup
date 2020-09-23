@@ -129,6 +129,7 @@ QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QSt
 
 QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeName,
                                      const QString &why);
+QString msgPropertyExists(const QString &className, const QString &name);
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
