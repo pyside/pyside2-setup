@@ -1626,20 +1626,39 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
 
     s << Qt::endl;
 
-    QStringList cppSignature;
-    if (!classContext.forSmartPointer()) {
-        cppSignature = metaClass->qualifiedCppName().split(QLatin1String("::"),
-                                                                       Qt::SkipEmptyParts);
-    } else {
-        cppSignature = classContext.preciseType()->cppSignature().split(QLatin1String("::"),
-                                                                        Qt::SkipEmptyParts);
-    }
-    while (!cppSignature.isEmpty()) {
-        QString signature = cppSignature.join(QLatin1String("::"));
+    auto writeConversions = [&s, this](const QString &signature)
+    {
         s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "\");\n";
         s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "*\");\n";
         s << INDENT << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "&\");\n";
-        cppSignature.removeFirst();
+    };
+
+    auto writeConversionsForType = [writeConversions](const QString &fullTypeName)
+    {
+        QStringList lst = fullTypeName.split(QLatin1String("::"),
+                                               Qt::SkipEmptyParts);
+        while (!lst.isEmpty()) {
+            QString signature = lst.join(QLatin1String("::"));
+            writeConversions(signature);
+            lst.removeFirst();
+        }
+    };
+
+    if (!classContext.forSmartPointer()) {
+        writeConversionsForType(metaClass->qualifiedCppName());
+    } else {
+        const QString &smartPointerType = classContext.preciseType()->instantiations().at(0)->cppSignature();
+        const QString &smartPointerName = classContext.preciseType()->typeEntry()->name();
+
+        QStringList lst = smartPointerType.split(QLatin1String("::"),
+                                               Qt::SkipEmptyParts);
+        while (!lst.isEmpty()) {
+            QString signature = lst.join(QLatin1String("::"));
+            writeConversions(QStringLiteral("%1<%2>").arg(smartPointerName, signature));
+            lst.removeFirst();
+        }
+
+        writeConversionsForType(smartPointerType);
     }
 
     s << INDENT << "Shiboken::Conversions::registerConverterName(converter, typeid(::";
