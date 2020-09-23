@@ -3536,12 +3536,13 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                     if (!avoidProtectedHack() || !func->isProtected()) {
                         QString virtualCall(methodCall);
                         QString normalCall(methodCall);
-                        virtualCall = virtualCall.replace(QLatin1String("%CLASS_NAME"),
-                                                          methodCallClassName);
+                        virtualCall.replace(QLatin1String("%CLASS_NAME"),
+                                            methodCallClassName);
                         normalCall.remove(QLatin1String("::%CLASS_NAME::"));
                         methodCall.clear();
-                        mc << "Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(self)) ? ";
-                        mc << virtualCall << " : " <<  normalCall;
+                        mc << "Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(self))\n"
+                            << INDENT << "    ? " << virtualCall << '\n'
+                            << INDENT << "    : " <<  normalCall;
                     }
                 }
             }
