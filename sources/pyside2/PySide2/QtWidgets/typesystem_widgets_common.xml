@@ -1287,6 +1287,7 @@
     <modify-function signature="takeAt(int)">
       <modify-argument index="return">
         <parent index="this" action="remove"/>
+        <define-ownership class="native" owner="c++"/>
       </modify-argument>
     </modify-function>
 
