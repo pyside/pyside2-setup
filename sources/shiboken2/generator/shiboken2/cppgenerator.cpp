@@ -2188,7 +2188,8 @@ void CppGenerator::writeCppSelfDefinition(QTextStream &s,
     Q_ASSERT(!(cppSelfAsReference && hasStaticOverload));
 
     const AbstractMetaClass *metaClass = context.metaClass();
-    bool useWrapperClass = avoidProtectedHack() && metaClass->hasProtectedMembers();
+    bool useWrapperClass = avoidProtectedHack() && metaClass->hasProtectedMembers()
+        && !metaClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass);
     Q_ASSERT(!useWrapperClass || context.useWrapper());
     QString className;
     if (!context.forSmartPointer()) {
@@ -3488,14 +3489,16 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                                   + QLatin1String(" *>(") + QLatin1String(CPP_SELF_VAR) + QLatin1Char(')');
                             if (func->isConstant()) {
                                 if (avoidProtectedHack()) {
+                                    auto ownerClass = func->ownerClass();
                                     mc << "const_cast<const ::";
-                                    if (func->ownerClass()->hasProtectedMembers()) {
+                                    if (ownerClass->hasProtectedMembers()
+                                        && !ownerClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass)) {
                                         // PYSIDE-500: Need a special wrapper cast when inherited
-                                        const QString selfWrapCast = func->ownerClass() == func->implementingClass()
+                                        const QString selfWrapCast = ownerClass == func->implementingClass()
                                             ? QLatin1String(CPP_SELF_VAR)
-                                            : QLatin1String("reinterpret_cast<") + wrapperName(func->ownerClass())
+                                            : QLatin1String("reinterpret_cast<") + wrapperName(ownerClass)
                                               + QLatin1String(" *>(") + QLatin1String(CPP_SELF_VAR) + QLatin1Char(')');
-                                        mc << wrapperName(func->ownerClass());
+                                        mc << wrapperName(ownerClass);
                                         mc << " *>(" << selfWrapCast << ")->";
                                     }
                                     else {
