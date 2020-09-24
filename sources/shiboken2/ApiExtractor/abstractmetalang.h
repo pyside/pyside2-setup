@@ -1592,10 +1592,7 @@ public:
         m_propertySpecs << spec;
     }
 
-    QVector<QPropertySpec *> propertySpecs() const
-    {
-        return m_propertySpecs;
-    }
+    const QVector<QPropertySpec *> &propertySpecs() const { return m_propertySpecs; }
 
     QPropertySpec *propertySpecByName(const QString &name) const;
     QPropertySpec *propertySpecForRead(const QString &name) const;

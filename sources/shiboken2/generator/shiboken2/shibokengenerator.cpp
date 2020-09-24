@@ -31,6 +31,7 @@
 #include <abstractmetalang.h>
 #include <messages.h>
 #include "overloaddata.h"
+#include "propertyspec.h"
 #include <reporthandler.h>
 #include <typedatabase.h>
 #include <abstractmetabuilder.h>
@@ -452,14 +453,38 @@ QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClass *
     return cpythonBaseName(metaClass) + QLatin1String("_getattro");
 }
 
+QString ShibokenGenerator::cpythonGetterFunctionName(const QString &name,
+                                                     const AbstractMetaClass *enclosingClass)
+{
+    return cpythonBaseName(enclosingClass) + QStringLiteral("_get_") + name;
+}
+
+QString ShibokenGenerator::cpythonSetterFunctionName(const QString &name,
+                                                     const AbstractMetaClass *enclosingClass)
+{
+    return cpythonBaseName(enclosingClass) + QStringLiteral("_set_") + name;
+}
+
 QString ShibokenGenerator::cpythonGetterFunctionName(const AbstractMetaField *metaField)
 {
-    return QStringLiteral("%1_get_%2").arg(cpythonBaseName(metaField->enclosingClass()), metaField->name());
+    return cpythonGetterFunctionName(metaField->name(), metaField->enclosingClass());
 }
 
 QString ShibokenGenerator::cpythonSetterFunctionName(const AbstractMetaField *metaField)
 {
-    return QStringLiteral("%1_set_%2").arg(cpythonBaseName(metaField->enclosingClass()), metaField->name());
+    return cpythonSetterFunctionName(metaField->name(), metaField->enclosingClass());
+}
+
+QString ShibokenGenerator::cpythonGetterFunctionName(const QPropertySpec *property,
+                                                     const AbstractMetaClass *metaClass)
+{
+    return cpythonGetterFunctionName(property->name(), metaClass);
+}
+
+QString ShibokenGenerator::cpythonSetterFunctionName(const QPropertySpec *property,
+                                                     const AbstractMetaClass *metaClass)
+{
+    return cpythonSetterFunctionName(property->name(), metaClass);
 }
 
 static QString cpythonEnumFlagsName(const QString &moduleName,

@@ -70,6 +70,7 @@ static inline QString formatAttribute() { return QStringLiteral("format"); }
 static inline QString generateUsingAttribute() { return QStringLiteral("generate-using"); }
 static inline QString classAttribute() { return QStringLiteral("class"); }
 static inline QString generateAttribute() { return QStringLiteral("generate"); }
+static inline QString generateGetSetDefAttribute() { return QStringLiteral("generate-getsetdef"); }
 static inline QString genericClassAttribute() { return QStringLiteral("generic-class"); }
 static inline QString indexAttribute() { return QStringLiteral("index"); }
 static inline QString invalidateAfterUseAttribute() { return QStringLiteral("invalidate-after-use"); }
@@ -2256,6 +2257,10 @@ bool TypeSystemParser::parseProperty(const QXmlStreamReader &, const StackElemen
             property.type = attributes->takeAt(i).value().toString();
         } else if (name == QLatin1String("set")) {
             property.write = attributes->takeAt(i).value().toString();
+        } else if (name == generateGetSetDefAttribute()) {
+            property.generateGetSetDef =
+                convertBoolean(attributes->takeAt(i).value(),
+                               generateGetSetDefAttribute(), false);
         }
     }
     if (!property.isValid()) {

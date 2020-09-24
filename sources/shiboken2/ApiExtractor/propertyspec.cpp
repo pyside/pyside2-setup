@@ -48,7 +48,8 @@ QPropertySpec::QPropertySpec(const TypeSystemProperty &ts,
     m_write(ts.write),
     m_designable(ts.designable),
     m_reset(ts.reset),
-    m_type(type)
+    m_type(type),
+    m_generateGetSetDef(ts.generateGetSetDef)
 {
 }
 

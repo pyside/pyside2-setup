@@ -2342,6 +2342,7 @@
     <value-type name="Pen">
         <enum-type identified-by-value="EnumCtor"/>
         <enum-type name="RenderHints"/>
+        <property type="RenderHints" name="renderHints" get="getRenderHints" set="setRenderHints"/>
     </value-type>
 
     <value-type name="CtorConvRule">

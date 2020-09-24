@@ -79,6 +79,7 @@ public:
 
     QString write() const { return m_write; }
     void setWrite(const QString &write) { m_write = write; }
+    bool hasWrite() const { return !m_write.isEmpty(); }
 
     QString designable() const { return m_designable; }
     void setDesignable(const QString &designable) { m_designable = designable; }
@@ -88,6 +89,9 @@ public:
 
     int index() const { return m_index; }
     void setIndex(int index) {m_index = index; }
+
+    bool generateGetSetDef() const { return m_generateGetSetDef; }
+    void setGenerateGetSetDef(bool generateGetSetDef) { m_generateGetSetDef = generateGetSetDef; }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
@@ -101,6 +105,8 @@ private:
     QString m_reset;
     const AbstractMetaType *m_type = nullptr;
     int m_index = -1;
+    // Indicates whether actual code is generated instead of relying on libpyside.
+    bool m_generateGetSetDef = false;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

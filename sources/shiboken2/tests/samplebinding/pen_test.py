@@ -65,7 +65,19 @@ class TestPen(unittest.TestCase):
         self.assertEqual(pen.ctorType(), Pen.ColorCtor)
         pen.drawLine(0, 0, 5, 5)
 
+    def testPenRenderHintsProperty(self):
+        """Exercise the generated property setter and getters, checking
+           against the C++ getter/setter functions."""
+        pen = Pen(1)
+        self.assertEqual(pen.getRenderHints(), Pen.RenderHints.None_)
+        self.assertEqual(pen.renderHints, Pen.RenderHints.None_)
+        pen.renderHints = Pen.RenderHints.TextAntialiasing
+        self.assertEqual(pen.getRenderHints(), Pen.RenderHints.TextAntialiasing)
+        self.assertEqual(pen.renderHints, Pen.RenderHints.TextAntialiasing)
+        pen.setRenderHints(Pen.RenderHints.Antialiasing)
+        self.assertEqual(pen.getRenderHints(), Pen.RenderHints.Antialiasing)
+        self.assertEqual(pen.renderHints, Pen.RenderHints.Antialiasing)
+
 
 if __name__ == '__main__':
     unittest.main()
-
