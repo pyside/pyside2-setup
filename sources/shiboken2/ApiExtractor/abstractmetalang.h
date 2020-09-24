@@ -717,10 +717,6 @@ class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttrib
 {
 public:
     AbstractMetaField();
-    ~AbstractMetaField();
-
-    const AbstractMetaFunction *getter() const;
-    const AbstractMetaFunction *setter() const;
 
     FieldModificationList modifications() const;
 
@@ -733,10 +729,6 @@ public:
 
     static AbstractMetaField *
         find(const AbstractMetaFieldList &haystack, const QString &needle);
-
-private:
-    mutable AbstractMetaFunction *m_getter = nullptr;
-    mutable AbstractMetaFunction *m_setter = nullptr;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -1537,8 +1529,6 @@ public:
     {
         m_templateArgs = args;
     }
-
-    bool hasFieldAccessors() const;
 
     // only valid during metabuilder's run
     QStringList baseClassNames() const
