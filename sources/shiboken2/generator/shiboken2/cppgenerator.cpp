@@ -4470,11 +4470,16 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
                         << "reinterpret_cast<SbkObject *>(self), reinterpret_cast<SbkObjectType *>("
                         << cpythonTypeNameExt(fieldType)
                         << ")));\n";
-            s << INDENT << "if (pyOut) {Py_IncRef(pyOut); return pyOut;}\n";
+            s << INDENT << "if (pyOut) {\n";
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "Py_IncRef(pyOut);\n"
+                   << INDENT << "return pyOut;\n";
+            }
+            s << INDENT << "}\n";
         }
-        s << INDENT << "}\n";
         // Check if field wrapper has already been created.
-        s << INDENT << "else if (Shiboken::BindingManager::instance().hasWrapper(" << cppField << ")) {" << "\n";
+        s << INDENT << "} else if (Shiboken::BindingManager::instance().hasWrapper(" << cppField << ")) {" << "\n";
         {
             Indentation indent(INDENT);
             s << INDENT << "pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper("
