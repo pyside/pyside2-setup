@@ -1182,7 +1182,8 @@
 
   <object-type name="QLayout">
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
-
+    <!-- Becomes a real Q_OPROPERTY in Qt 6 -->
+    <property name="contentsMargins" type="QMargins" get="contentsMargins" set="setContentsMargins"/>
     <enum-type name="SizeConstraint"/>
 
     <modify-function signature="itemAt(int)const">
@@ -1211,6 +1212,7 @@
     <modify-function signature="takeAt(int)">
       <modify-argument index="return">
         <parent index="this" action="remove"/>
+        <define-ownership class="native" owner="c++"/>
       </modify-argument>
     </modify-function>
 

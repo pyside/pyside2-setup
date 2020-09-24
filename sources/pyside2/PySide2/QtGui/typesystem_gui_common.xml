@@ -1001,6 +1001,17 @@
     </modify-function>
   </value-type>
 
+  <namespace-type name="QColorConstants" since="5.14">
+    <extra-includes>
+        <include file-name="QColor" location="global"/>
+    </extra-includes>
+    <namespace-type name="Svg" since="5.14">
+        <extra-includes>
+            <include file-name="QColor" location="global"/>
+        </extra-includes>
+    </namespace-type>
+  </namespace-type>
+
   <value-type name="QColorSpace" since="5.14">
       <enum-type name="NamedColorSpace"/>
       <enum-type name="Primaries"/>

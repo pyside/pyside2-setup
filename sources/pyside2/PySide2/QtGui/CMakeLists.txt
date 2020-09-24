@@ -34,6 +34,8 @@ ${QtGui_GEN_DIR}/qclipboard_wrapper.cpp
 ${QtGui_GEN_DIR}/qcloseevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolor_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolorspace_wrapper.cpp
+${QtGui_GEN_DIR}/qcolorconstants_wrapper.cpp
+${QtGui_GEN_DIR}/qcolorconstants_svg_wrapper.cpp
 ${QtGui_GEN_DIR}/qconicalgradient_wrapper.cpp
 ${QtGui_GEN_DIR}/qcontextmenuevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcursor_wrapper.cpp

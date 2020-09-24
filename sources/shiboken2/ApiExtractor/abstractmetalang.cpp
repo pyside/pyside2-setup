@@ -28,6 +28,7 @@
 
 #include "abstractmetalang.h"
 #include "messages.h"
+#include "propertyspec.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
 #include "typesystem.h"
@@ -1396,6 +1397,7 @@ AbstractMetaClass::~AbstractMetaClass()
     qDeleteAll(m_functions);
     qDeleteAll(m_fields);
     qDeleteAll(m_enums);
+    qDeleteAll(m_propertySpecs);
     if (hasTemplateBaseClassInstantiations())
         qDeleteAll(templateBaseClassInstantiations());
 }
@@ -1687,6 +1689,15 @@ bool AbstractMetaClass::hasProtectedFields() const
 bool AbstractMetaClass::hasProtectedMembers() const
 {
     return hasProtectedFields() || hasProtectedFunctions();
+}
+
+QPropertySpec *AbstractMetaClass::propertySpecByName(const QString &name) const
+{
+    for (auto propertySpec : m_propertySpecs) {
+        if (name == propertySpec->name())
+            return propertySpec;
+    }
+    return nullptr;
 }
 
 QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
@@ -2790,34 +2801,3 @@ QString AbstractMetaEnum::package() const
     return m_typeEntry->targetLangPackage();
 }
 
-bool QPropertySpec::isValid() const
-{
-    return m_type != nullptr && !m_name.isEmpty() && !m_read.isEmpty();
-}
-
-#ifndef QT_NO_DEBUG_STREAM
-void QPropertySpec::formatDebug(QDebug &d) const
-{
-    d << '#' << m_index << " \"" << m_name << "\" (" << m_type->qualifiedCppName();
-    for (int i = 0; i < m_indirections; ++i)
-        d << '*';
-    d << "), read=" << m_read;
-    if (!m_write.isEmpty())
-        d << ", write=" << m_write;
-    if (!m_reset.isEmpty())
-          d << ", reset=" << m_reset;
-    if (!m_designable.isEmpty())
-          d << ", designable=" << m_designable;
-}
-
-QDebug operator<<(QDebug d, const QPropertySpec &p)
-{
-    QDebugStateSaver s(d);
-    d.noquote();
-    d.nospace();
-    d << "QPropertySpec(";
-    p.formatDebug(d);
-    d << ')';
-    return d;
-}
-#endif // QT_NO_DEBUG_STREAM

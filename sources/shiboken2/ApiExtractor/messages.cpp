@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -366,6 +366,23 @@ QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QSt
     return QLatin1String("The namespace '") + namespaceName
         + QLatin1String("' to be extended cannot be found in package ")
         + packageName + QLatin1Char('.');
+}
+
+QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeName,
+                                     const QString &why)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "Unable to decide type of property: \"" << name << "\" (" << typeName
+        << "): " << why;
+    return result;
+}
+
+QString msgPropertyExists(const QString &className, const QString &name)
+{
+    return QLatin1String("class ") + className
+        + QLatin1String(" already has a property \"") + name
+        + QLatin1String("\" (defined by Q_PROPERTY).");
 }
 
 // docparser.cpp

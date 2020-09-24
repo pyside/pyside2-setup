@@ -366,6 +366,7 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"object-type", StackElement::ObjectTypeEntry},
         {u"parent", StackElement::ParentOwner},
         {u"primitive-type", StackElement::PrimitiveTypeEntry},
+        {u"property", StackElement::Property},
         {u"reference-count", StackElement::ReferenceCount},
         {u"reject-enum-value", StackElement::RejectEnumValue},
         {u"rejection", StackElement::Rejection},
@@ -2238,6 +2239,36 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
     return true;
 }
 
+bool TypeSystemParser::parseProperty(const QXmlStreamReader &, const StackElement &topElement,
+                                     QXmlStreamAttributes *attributes)
+{
+    if ((topElement.type & StackElement::ComplexTypeEntryMask) == 0) {
+        m_error = QString::fromLatin1("Add property requires a complex type as parent"
+                                      ", was=%1").arg(topElement.type, 0, 16);
+        return false;
+    }
+
+    TypeSystemProperty property;
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == nameAttribute()) {
+            property.name = attributes->takeAt(i).value().toString();
+        } else if (name == QLatin1String("get")) {
+            property.read = attributes->takeAt(i).value().toString();
+        } else if (name == QLatin1String("type")) {
+            property.type = attributes->takeAt(i).value().toString();
+        } else if (name == QLatin1String("set")) {
+            property.write = attributes->takeAt(i).value().toString();
+        }
+    }
+    if (!property.isValid()) {
+        m_error = QLatin1String("<property> element is missing required attibutes (name/type/get).");
+        return false;
+    }
+    static_cast<ComplexTypeEntry *>(topElement.entry)->addProperty(property);
+    return true;
+}
+
 bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
                                   const StackElement &topElement,
                                   QXmlStreamAttributes *attributes)
@@ -3004,6 +3035,10 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             break;
         case StackElement::AddFunction:
             if (!parseAddFunction(reader, topElement, &attributes))
+                return false;
+            break;
+        case StackElement::Property:
+            if (!parseProperty(reader, topElement, &attributes))
                 return false;
             break;
         case StackElement::ModifyFunction:

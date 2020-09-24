@@ -233,3 +233,35 @@ conversion-rule
     .. note:: You can also use the conversion-rule node to specify :ref:`how the conversion of a single function argument should be done in a function <conversion-rule>`.
 
     The ``file`` and ``snippet`` attributes are also supported (see :ref:`inject-code` nodes).
+
+
+property
+^^^^^^^^
+
+    The ``property`` element allows you to add properties complementing the
+    properties obtained from the ``Q_PROPERTY`` macro in Qt-based code when using
+    the PySide2 extension. It may appear as a child of a complex type such as
+    ``object-type`` or  ``value-type``.
+
+    .. code-block:: xml
+
+        <property name="..." type="..." get="..." set="..." since="..."/>
+
+    The ``name`` attribute specifies the name of the property, the ``type``
+    attribute specifies the C++ type and the ``get`` attribute specifies the
+    name of the accessor function.
+
+    The optional ``set`` attribute specifies name of the setter function.
+
+    The optional ``since`` attribute specifies the API version when this
+    property appears.
+
+    For example:
+
+    .. code-block:: xml
+
+        <object-type name="QMainWindow">
+            <property name="centralWidget" type="QWidget *" get="centralWidget" set="setCentralWidget"/>
+
+    specifies ``centralWidget`` to be a Python property in addition to the normal properties
+    of ``QMainWindow`` defined for Qt Designer usage.

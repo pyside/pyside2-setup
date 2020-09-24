@@ -29,6 +29,7 @@
 #include "doxygenparser.h"
 #include "abstractmetalang.h"
 #include "messages.h"
+#include "propertyspec.h"
 #include "reporthandler.h"
 #include "typesystem.h"
 #include "xmlutils.h"
