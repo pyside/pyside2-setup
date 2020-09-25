@@ -1015,11 +1015,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     s << INDENT << "Shiboken::GilState gil;\n";
 
     // Get out of virtual method call if someone already threw an error.
-    s << INDENT << "if (PyErr_Occurred())\n";
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << returnStatement << '\n';
-    }
+    s << INDENT << "if (PyErr_Occurred())\n" << indent(INDENT)
+        << INDENT << returnStatement << '\n' << outdent(INDENT);
 
     //PYSIDE-1019: Add info about properties.
     int propFlag = 0;
@@ -1039,16 +1036,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     s << INDENT << "static const char *funcName = \"" << propStr << funcName << "\";\n";
     s << INDENT << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
                 << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n";
-    s << INDENT << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n";
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << "gil.release();\n";
-        if (useOverrideCaching(func->ownerClass()))
-            s << INDENT << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
-        writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                                  returnStatement);
-    }
-    s << INDENT << "}\n\n";  //WS
+    s << INDENT << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n"
+       << indent(INDENT) << INDENT << "gil.release();\n";
+    if (useOverrideCaching(func->ownerClass()))
+        s << INDENT << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
+    writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
+                              returnStatement);
+    s << outdent(INDENT) << INDENT << "}\n\n";  //WS
 
     writeConversionRule(s, func, TypeSystem::TargetLangCode);
 
@@ -1197,15 +1191,14 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     }
 
     if (invalidateReturn) {
-        s << INDENT << "if (invalidateArg0)\n";
-        Indentation indentation(INDENT);
-        s << INDENT << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR  << ".object());\n";
+        s << INDENT << "if (invalidateArg0)\n" << indent(INDENT)
+            << INDENT << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR
+            << ".object());\n" << outdent(INDENT);
     }
     for (int argIndex : qAsConst(invalidateArgs)) {
-        s << INDENT << "if (invalidateArg" << argIndex << ")\n";
-        Indentation indentation(INDENT);
-        s << INDENT << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS << ", ";
-        s << (argIndex - 1) << "));\n";
+        s << INDENT << "if (invalidateArg" << argIndex << ")\n" << indent(INDENT)
+            << INDENT << "Shiboken::Object::invalidate(PyTuple_GET_ITEM(" << PYTHON_ARGS
+            << ", " << (argIndex - 1) << "));\n" << outdent(INDENT);
     }
 
 
@@ -1865,30 +1858,20 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     }
 
     if (metaClass->isAbstract()) {
-        s << INDENT << "if (type == myType) {\n";
-        {
-            Indentation indent(INDENT);
-            s << INDENT << "PyErr_SetString(PyExc_NotImplementedError,\n";
-            {
-                Indentation indentation(INDENT);
-                s << INDENT << "\"'" << metaClass->qualifiedCppName();
-            }
-            s << "' represents a C++ abstract class and cannot be instantiated\");\n";
-            s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
-        }
-        s << INDENT<< "}\n\n";
+        s << INDENT << "if (type == myType) {\n" << indent(INDENT)
+            << INDENT << "PyErr_SetString(PyExc_NotImplementedError,\n" << indent(INDENT)
+            << INDENT << "\"'" << metaClass->qualifiedCppName()
+            << "' represents a C++ abstract class and cannot be instantiated\");\n" << outdent(INDENT)
+            << INDENT << returnStatement(m_currentErrorCode) << '\n' << outdent(INDENT)
+            << INDENT<< "}\n\n";
     }
 
     if (metaClass->baseClassNames().size() > 1) {
-        if (!metaClass->isAbstract()) {
-            s << INDENT << "if (type != myType) {\n";
-        }
-        {
-            Indentation indentation(INDENT);
-            s << INDENT << "Shiboken::ObjectType::copyMultipleInheritance(type, myType);\n";
-        }
         if (!metaClass->isAbstract())
-            s << INDENT<< "}\n\n";
+            s << INDENT << "if (type != myType)\n" << indent(INDENT);
+        s << INDENT << "Shiboken::ObjectType::copyMultipleInheritance(type, myType);\n";
+        if (!metaClass->isAbstract())
+            s << outdent(INDENT) << '\n';
     }
 
     writeMethodWrapperPreamble(s, overloadData, classContext);
@@ -1935,11 +1918,9 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
         s << Qt::endl << INDENT << "// QObject setup\n";
         s << INDENT << "PySide::Signal::updateSourceObject(self);\n";
         s << INDENT << "metaObject = cptr->metaObject(); // <- init python qt properties\n";
-        s << INDENT << "if (kwds && !PySide::fillQtProperties(self, metaObject, kwds, argNames, " << argNamesSet.count() << "))\n";
-        {
-            Indentation indentation(INDENT);
-            s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
-        }
+        s << INDENT << "if (kwds && !PySide::fillQtProperties(self, metaObject, kwds, argNames, "
+            << argNamesSet.count() << "))\n" << indent(INDENT)
+            << INDENT << returnStatement(m_currentErrorCode) << '\n' << outdent(INDENT);
     }
 
     // Constructor code injections, position=end
@@ -2923,14 +2904,11 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
 
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
 
-    s << INDENT << "if (!PyErr_Occurred()) {\n";
-    {
-        Indentation indentation(INDENT);
-        writeMethodCall(s, func, context, func->arguments().size() - numRemovedArgs);
-        if (!func->isConstructor())
-            writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
-    }
-    s << INDENT << "}\n";
+    s << INDENT << "if (!PyErr_Occurred()) {\n" << indent(INDENT);
+    writeMethodCall(s, func, context, func->arguments().size() - numRemovedArgs);
+    if (!func->isConstructor())
+        writeNoneReturn(s, func, overloadData.hasNonVoidReturnType());
+    s << outdent(INDENT) << INDENT << "}\n";
 }
 
 QString CppGenerator::cppToPythonFunctionName(const QString &sourceTypeName, QString targetTypeName)
@@ -4572,26 +4550,20 @@ void CppGenerator::writeSetterFunctionPreamble(QTextStream &s, const QString &na
 
     writeCppSelfDefinition(s, context);
 
-    s << INDENT << "if (pyIn == " << NULL_PTR << ") {\n";
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'";
-        s << name << "' may not be deleted\");\n";
-        s << INDENT << "return -1;\n";
-    }
-    s << INDENT << "}\n";
+    s << INDENT << "if (pyIn == " << NULL_PTR << ") {\n" << indent(INDENT)
+        << INDENT << "PyErr_SetString(PyExc_TypeError, \"'"
+        << name << "' may not be deleted\");\n"
+        << INDENT << "return -1;\n"
+        << outdent(INDENT) << INDENT << "}\n";
 
     s << INDENT << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << "{nullptr};\n";
     s << INDENT << "if (!";
     writeTypeCheck(s, type, QLatin1String("pyIn"), isNumber(type->typeEntry()));
-    s << ") {\n";
-    {
-        Indentation indent(INDENT);
-        s << INDENT << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '";
-        s << name << "', '" << type->name() << "' or convertible type expected\");\n";
-        s << INDENT << "return -1;\n";
-    }
-    s << INDENT<< "}\n\n";
+    s << ") {\n" << indent(INDENT)
+        << INDENT << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '"
+        << name << "', '" << type->name() << "' or convertible type expected\");\n"
+        << INDENT << "return -1;\n"
+        << outdent(INDENT) << INDENT<< "}\n\n";
 }
 
 void CppGenerator::writeSetterFunction(QTextStream &s,
@@ -5783,7 +5755,7 @@ bool CppGenerator::finishGeneration()
     QString signaturesString;
     QTextStream signatureStream(&signaturesString);
 
-    Indentation indent(INDENT);
+    Indentation indentation(INDENT);
 
     const auto functionGroups = getGlobalFunctionGroups();
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
@@ -5908,19 +5880,13 @@ bool CppGenerator::finishGeneration()
         s << "void cleanTypesAttributes(void) {\n";
         s << INDENT << "if (PY_VERSION_HEX >= 0x03000000 && PY_VERSION_HEX < 0x03060000)\n";
         s << INDENT << "    return; // PYSIDE-953: testbinding crashes in Python 3.5 when hasattr touches types!\n";
-        s << INDENT << "for (int i = 0, imax = SBK_" << moduleName() << "_IDX_COUNT; i < imax; i++) {\n";
-        {
-            Indentation indentation(INDENT);
-            s << INDENT << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);\n";
-            s << INDENT << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"staticMetaObject\"));\n";
-            s << INDENT << "if (pyType && PyObject_HasAttr(pyType, attrName))\n";
-            {
-                Indentation indentation(INDENT);
-                s << INDENT << "PyObject_SetAttr(pyType, attrName, Py_None);\n";
-            }
-        }
-        s << INDENT << "}\n";
-        s << "}\n";
+        s << INDENT << "for (int i = 0, imax = SBK_" << moduleName()
+            << "_IDX_COUNT; i < imax; i++) {\n" << indent(INDENT)
+            << INDENT << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);\n"
+            << INDENT << "Shiboken::AutoDecRef attrName(Py_BuildValue(\"s\", \"staticMetaObject\"));\n"
+            << INDENT << "if (pyType && PyObject_HasAttr(pyType, attrName))\n" << indent(INDENT)
+            << INDENT << "PyObject_SetAttr(pyType, attrName, Py_None);\n" << outdent(INDENT)
+            << outdent(INDENT) << INDENT << "}\n" << "}\n";
     }
 
     s << "// Global functions ";
@@ -6036,19 +6002,15 @@ bool CppGenerator::finishGeneration()
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode);
 
     for (const QString &requiredModule : requiredModules) {
-        s << INDENT << "{\n";
-        {
-            Indentation indentation(INDENT);
-            s << INDENT << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n";
-            s << INDENT << "if (requiredModule.isNull())\n";
-            {
-                Indentation indentation(INDENT);
-                s << INDENT << "return SBK_MODULE_INIT_ERROR;\n";
-            }
-            s << INDENT << cppApiVariableName(requiredModule) << " = Shiboken::Module::getTypes(requiredModule);\n";
-            s << INDENT << convertersVariableName(requiredModule) << " = Shiboken::Module::getTypeConverters(requiredModule);\n";
-        }
-        s << INDENT << "}\n\n";
+        s << INDENT << "{\n" << indent(INDENT)
+             << INDENT << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n"
+             << INDENT << "if (requiredModule.isNull())\n" << indent(INDENT)
+             << INDENT << "return SBK_MODULE_INIT_ERROR;\n" << outdent(INDENT)
+             << INDENT << cppApiVariableName(requiredModule)
+             << " = Shiboken::Module::getTypes(requiredModule);\n"
+             << INDENT << convertersVariableName(requiredModule)
+             << " = Shiboken::Module::getTypeConverters(requiredModule);\n" << outdent(INDENT)
+             << INDENT << "}\n\n";
     }
 
     int maxTypeIndex = getMaxTypeIndex() + instantiatedSmartPointers().size();
@@ -6126,13 +6088,10 @@ bool CppGenerator::finishGeneration()
         s << INDENT << "Shiboken::Module::registerTypes(module, " << cppApiVariableName() << ");\n";
     s << INDENT << "Shiboken::Module::registerTypeConverters(module, " << convertersVariableName() << ");\n";
 
-    s << Qt::endl << INDENT << "if (PyErr_Occurred()) {\n";
-    {
-        Indentation indentation(INDENT);
-        s << INDENT << "PyErr_Print();\n";
-        s << INDENT << "Py_FatalError(\"can't initialize module " << moduleName() << "\");\n";
-    }
-    s << INDENT << "}\n";
+    s << '\n' << INDENT << "if (PyErr_Occurred()) {\n" << indent(INDENT)
+        << INDENT << "PyErr_Print();\n"
+        << INDENT << "Py_FatalError(\"can't initialize module " << moduleName() << "\");\n"
+        << outdent(INDENT) << INDENT << "}\n";
 
     // module inject-code target/end
     if (!snips.isEmpty())

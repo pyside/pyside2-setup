@@ -82,4 +82,18 @@ inline QTextStream &operator <<(QTextStream &s, const IndentorBase<tabWidth> &in
     return s;
 }
 
+template <int tabWidth>
+const char *indent(IndentorBase<tabWidth> &indentor)
+{
+    ++indentor.indent;
+    return "";
+}
+
+template <int tabWidth>
+const char *outdent(IndentorBase<tabWidth> &indentor)
+{
+    --indentor.indent;
+    return "";
+}
+
 #endif // GENERATOR_H

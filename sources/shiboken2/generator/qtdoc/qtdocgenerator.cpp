@@ -2247,18 +2247,13 @@ void QtDocGenerator::writeModuleDocumentation()
 
         writeFancyToc(s, it.value());
 
-        s << INDENT << ".. container:: hide\n\n";
-        {
-            Indentation indentation(INDENT);
-            s << INDENT << ".. toctree::\n";
-            Indentation deeperIndentation(INDENT);
-            s << INDENT << ":maxdepth: 1\n\n";
-            for (const QString &className : qAsConst(it.value()))
-                s << INDENT << className << Qt::endl;
-            s << Qt::endl << Qt::endl;
-        }
-
-        s << "Detailed Description\n--------------------\n\n";
+        s << INDENT << ".. container:: hide\n\n" << indent(INDENT)
+            << INDENT << ".. toctree::\n" << indent(INDENT)
+            << INDENT << ":maxdepth: 1\n\n";
+        for (const QString &className : qAsConst(it.value()))
+            s << INDENT << className << Qt::endl;
+        s << "\n\n" << outdent(INDENT) << outdent(INDENT)
+            << "Detailed Description\n--------------------\n\n";
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
         QFile moduleDoc(m_extraSectionDir + QLatin1Char('/') + moduleName.mid(lastIndex + 1) + QLatin1String(".rst"));
