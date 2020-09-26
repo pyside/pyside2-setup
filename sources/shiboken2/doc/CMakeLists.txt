@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 
+if(FULLDOCSBUILD EQUAL 0)
+    project(shiboken2_doc)
+endif()
 find_program(SPHINX sphinx-build DOC "Path to sphinx-build binary.")
 
 if (SPHINX)
