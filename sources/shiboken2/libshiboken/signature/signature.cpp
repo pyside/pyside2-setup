@@ -343,6 +343,9 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
             empty_dict = PyDict_New();
         return empty_dict;
     }
+    // PYSIDE-1019: Build snake case versions of the functions.
+    if (insert_snake_case_variants(dict) < 0)
+        return nullptr;
     // We replace the arguments by the result dict.
     if (PyDict_SetItem(pyside_globals->arg_dict, type_key, dict) < 0)
         return nullptr;

@@ -349,7 +349,6 @@ def calculate_props(line):
     props.annotations = annotations
     props.varnames = varnames = tuple(tup[0] for tup in arglist)
     funcname = parsed.funcname
-    props.fullname = funcname
     shortname = funcname[funcname.rindex(".")+1:]
     props.name = shortname
     props.multi = parsed.multi
@@ -366,7 +365,6 @@ def fix_variables(props, line):
     if retvar and isinstance(retvar, (ResultVariable, ArrayLikeVariable)):
         # Special case: a ResultVariable which is the result will always be an array!
         annos["return"] = retvar = typing.List[retvar.type]
-    fullname = props.fullname
     varnames = list(props.varnames)
     defaults = list(props.defaults)
     diff = len(varnames) - len(defaults)
@@ -456,8 +454,7 @@ def pyside_type_init(type_key, sig_strings):
             multi_props.append(props)
             if multi > 0:
                 continue
-            fullname = props.pop("fullname")
-            multi_props = {"multi": multi_props, "fullname": fullname}
+            multi_props = {"multi": multi_props}
             ret[shortname] = multi_props
             dprint(multi_props)
             multi_props = []
