@@ -160,7 +160,7 @@ It creates a subdirectory each for the different platforms.
 This step takes longer as it adds the packages listed in `requires` sections in the `pyproject.toml` file.
 
 Build the application
----------------
+---------------------
 ::
 
     briefcase build
@@ -175,7 +175,7 @@ You'll get::
 
 
 Run the application
------------
+-------------------
 ::
 
     briefcase run
