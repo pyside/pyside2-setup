@@ -206,7 +206,7 @@ add-function
     Within the signature, names for the function parameters can be specified by
     enclosing them within the delimiter *@*:
 
-    .. code-block:: c++
+    .. code-block::
 
         void foo(int @parameter1@,float)
 

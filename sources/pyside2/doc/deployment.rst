@@ -101,7 +101,7 @@ these tools don't offer a mechanism to update your application packages.
 To create update packages, use the `PyUpdater <https://www.pyupdater.org/>`_, which is a tool
 built around PyInstaller.
 
-The `fbs <https://build-system.fman.io>`_ tool offers a nice UI for the user to install the
+The `fbs`_ tool offers a nice UI for the user to install the
 application step-by-step.
 
 .. note::
