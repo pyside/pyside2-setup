@@ -623,16 +623,16 @@
         </add-function>
     </namespace-type>
 
-    <namespace-type name="RemovedNamespace1" generate='no'>
+    <namespace-type name="RemovedNamespace1" visible='false'>
         <enum-type name="RemovedNamespace1_Enum" />
-        <namespace-type name="RemovedNamespace2" generate='no'>
+        <namespace-type name="RemovedNamespace2" visible='false'>
             <enum-type name="RemovedNamespace2_Enum" />
         </namespace-type>
         <enum-type identified-by-value="RemovedNamespace1_AnonymousEnum_Value0" />
     </namespace-type>
 
     <namespace-type name="UnremovedNamespace">
-        <namespace-type name="RemovedNamespace3" generate='no'>
+        <namespace-type name="RemovedNamespace3" visible='false'>
             <enum-type name="RemovedNamespace3_Enum" />
             <enum-type identified-by-value="RemovedNamespace3_AnonymousEnum_Value0" />
         </namespace-type>
