@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -47,6 +47,8 @@
 #include <shiboken.h>
 #include <signature.h>
 
+using namespace Shiboken;
+
 extern "C"
 {
 
@@ -55,25 +57,41 @@ static int qpropertyTpInit(PyObject *, PyObject *, PyObject *);
 static void qpropertyDeAlloc(PyObject *self);
 
 //methods
-static PyObject *qPropertyCall(PyObject *, PyObject *, PyObject *);
-static PyObject *qPropertySetter(PyObject *, PyObject *);
 static PyObject *qPropertyGetter(PyObject *, PyObject *);
+static PyObject *qPropertySetter(PyObject *, PyObject *);
+static PyObject *qPropertyResetter(PyObject *, PyObject *);
+static PyObject *qPropertyDeleter(PyObject *, PyObject *);
+static PyObject *qPropertyCall(PyObject *, PyObject *, PyObject *);
 static int qpropertyTraverse(PyObject *self, visitproc visit, void *arg);
 static int qpropertyClear(PyObject *self);
 
 // Attributes
 static PyObject *qPropertyDocGet(PyObject *, void *);
+static int qPropertyDocSet(PyObject *, PyObject *, void *);
+static PyObject *qProperty_fget(PyObject *, void *);
+static PyObject *qProperty_fset(PyObject *, void *);
+static PyObject *qProperty_freset(PyObject *, void *);
+static PyObject *qProperty_fdel(PyObject *, void *);
 
 static PyMethodDef PySidePropertyMethods[] = {
-    {"setter", (PyCFunction)qPropertySetter, METH_O, 0},
-    {"write", (PyCFunction)qPropertySetter, METH_O, 0},
     {"getter", (PyCFunction)qPropertyGetter, METH_O, 0},
+    {"setter", (PyCFunction)qPropertySetter, METH_O, 0},
+    {"resetter", (PyCFunction)qPropertyResetter, METH_O, 0},
+    {"deleter", (PyCFunction)qPropertyDeleter, METH_O, 0},
+    // Synonyms from Qt
     {"read", (PyCFunction)qPropertyGetter, METH_O, 0},
+    {"write", (PyCFunction)qPropertySetter, METH_O, 0},
     {0, 0, 0, 0}
 };
 
 static PyGetSetDef PySidePropertyType_getset[] = {
-    {const_cast<char *>("__doc__"), qPropertyDocGet, nullptr, nullptr, nullptr},
+    // Note: we could not use `PyMemberDef` like Python's properties,
+    // because of the indirection of PySidePropertyPrivate.
+    {const_cast<char *>("fget"), qProperty_fget, nullptr, nullptr, nullptr},
+    {const_cast<char *>("fset"), qProperty_fset, nullptr, nullptr, nullptr},
+    {const_cast<char *>("freset"), qProperty_freset, nullptr, nullptr, nullptr},
+    {const_cast<char *>("fdel"), qProperty_fdel, nullptr, nullptr, nullptr},
+    {const_cast<char *>("__doc__"), qPropertyDocGet, qPropertyDocSet, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
@@ -175,21 +193,26 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     pData->metaCallHandler = &qpropertyMetaCall;
 
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
-                                   "designable", "scriptable", "stored", "user",
-                                   "constant", "final", 0};
+                                   "designable", "scriptable", "stored",
+                                   "user", "constant", "final", 0};
     char *doc{};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOsObbbbbb:QtCore.QProperty",
+                                     "O|OOOOsObbbbbb:QtCore.Property",
                                      const_cast<char **>(kwlist),
                                      /*OO*/     &type, &(pData->fget),
                                      /*OOO*/    &(pData->fset), &(pData->freset), &(pData->fdel),
                                      /*s*/      &doc,
                                      /*O*/      &(pData->notify),
-                                     /*bbbbbb*/ &(pData->designable), &(pData->scriptable), &(pData->stored), &(pData->user), &(pData->constant), &(pData->final))) {
+                                     /*bbb*/    &(pData->designable), &(pData->scriptable), &(pData->stored),
+                                     /*bbb*/    &(pData->user), &(pData->constant), &(pData->final))) {
         return -1;
     }
 
+    // PYSIDE-1019: Fetching the default `__doc__` from fget would fail for inherited functions
+    // because we don't initialize the mro with signatures (and we will not!).
+    // But it is efficient and in-time to do that on demand in qPropertyDocGet.
+    pData->getter_doc = false;
     if (doc)
         pData->doc = doc;
     else
@@ -229,53 +252,107 @@ static void qpropertyDeAlloc(PyObject *self)
     Py_TYPE(self)->tp_free(self);
 }
 
+static PyObject *
+_property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyObject *del)
+{
+    PySideProperty *pold = reinterpret_cast<PySideProperty *>(old);
+    PySidePropertyPrivate *pData = pold->d;
+
+    AutoDecRef type(PyObject_Type(old));
+    QByteArray doc{};
+    if (type.isNull())
+        return nullptr;
+
+    if (get == nullptr || get == Py_None) {
+        Py_XDECREF(get);
+        get = pData->fget ? pData->fget : Py_None;
+    }
+    if (set == nullptr || set == Py_None) {
+        Py_XDECREF(set);
+        set = pData->fset ? pData->fset : Py_None;
+    }
+    if (reset == nullptr || reset == Py_None) {
+        Py_XDECREF(reset);
+        reset = pData->freset ? pData->freset : Py_None;
+    }
+    if (del == nullptr || del == Py_None) {
+        Py_XDECREF(del);
+        del = pData->fdel ? pData->fdel : Py_None;
+    }
+    if (pData->getter_doc && get != Py_None) {
+        /* make _init use __doc__ from getter */
+        doc = "";
+    }
+    else {
+        doc = !pData->doc.isEmpty() ? pData->doc : "";
+    }
+    auto notify = pData->notify ? pData->notify : Py_None;
+
+    PyObject *typeName = String::fromCString(pData->typeName);
+    PyObject *obNew = PyObject_CallFunction(type, const_cast<char *>("OOOOOsO" "bbb" "bbb"),
+        typeName, get, set, reset, del, doc.data(), notify,
+        pData->designable, pData->scriptable, pData->stored,
+        pData->user, pData->constant, pData->final);
+
+    return obNew;
+}
+
+static PyObject *qPropertyGetter(PyObject *self, PyObject *getter)
+{
+    return _property_copy(self, getter, nullptr, nullptr, nullptr);
+}
+
+static PyObject *qPropertySetter(PyObject *self, PyObject *setter)
+{
+    return _property_copy(self, nullptr, setter, nullptr, nullptr);
+}
+
+static PyObject *qPropertyResetter(PyObject *self, PyObject *resetter)
+{
+    return _property_copy(self, nullptr, nullptr, resetter, nullptr);
+}
+
+static PyObject *qPropertyDeleter(PyObject *self, PyObject *deleter)
+{
+    return _property_copy(self, nullptr, nullptr, nullptr, deleter);
+}
+
 static PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    PyObject *callback = PyTuple_GetItem(args, 0);
-    if (PyFunction_Check(callback)) {
-        auto prop = reinterpret_cast<PySideProperty *>(self);
-        PySidePropertyPrivate *pData = prop->d;
-
-        Py_INCREF(callback);
-        pData->fget = callback;
-
-        Py_INCREF(self);
-        return self;
-    }
-    PyErr_SetString(PyExc_TypeError, "Invalid property usage.");
-    return nullptr;
+    PyObject *getter = PyTuple_GetItem(args, 0);
+    return _property_copy(self, getter, nullptr, nullptr, nullptr);
 }
 
-static PyObject *qPropertySetter(PyObject *self, PyObject *callback)
+// PYSIDE-1019: Provide the same getters as Pythons `PyProperty`.
+static PyObject *_property_func(PyObject *self, ssize_t offset)
 {
-    if (PyFunction_Check(callback)) {
-        PySideProperty *prop = reinterpret_cast<PySideProperty *>(self);
-        PySidePropertyPrivate *pData = prop->d;
-
-        Py_INCREF(callback);
-        pData->fset = callback;
-
-        Py_INCREF(callback);
-        return callback;
-    }
-    PyErr_SetString(PyExc_TypeError, "Invalid property setter agument.");
-    return nullptr;
+    auto data = reinterpret_cast<PySideProperty *>(self);
+    PySidePropertyPrivate *pData = data->d;
+    auto funcptr = reinterpret_cast<char *>(pData) + offset;
+    auto func = *reinterpret_cast<PyObject **>(funcptr);
+    auto ret = func != nullptr ? func : Py_None;
+    Py_INCREF(ret);
+    return ret;
 }
 
-static PyObject *qPropertyGetter(PyObject *self, PyObject *callback)
+static PyObject *qProperty_fget(PyObject *self, void *)
 {
-    if (PyFunction_Check(callback)) {
-        PySideProperty *prop = reinterpret_cast<PySideProperty *>(self);
-        PySidePropertyPrivate *pData = prop->d;
+    return _property_func(self, offsetof(PySidePropertyPrivate, fget));
+}
 
-        Py_INCREF(callback);
-        pData->fget = callback;
+static PyObject *qProperty_fset(PyObject *self, void *)
+{
+    return _property_func(self, offsetof(PySidePropertyPrivate, fset));
+}
 
-        Py_INCREF(callback);
-        return callback;
-    }
-    PyErr_SetString(PyExc_TypeError, "Invalid property getter agument.");
-    return nullptr;
+static PyObject *qProperty_freset(PyObject *self, void *)
+{
+    return _property_func(self, offsetof(PySidePropertyPrivate, freset));
+}
+
+static PyObject *qProperty_fdel(PyObject *self, void *)
+{
+    return _property_func(self, offsetof(PySidePropertyPrivate, fdel));
 }
 
 static PyObject *qPropertyDocGet(PyObject *self, void *)
@@ -291,9 +368,40 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
         return PyString_FromString(doc);
 #endif
     }
+    if (pData->fget != nullptr) {
+        // PYSIDE-1019: Fetch the default `__doc__` from fget. We do it late.
+        AutoDecRef get_doc(PyObject_GetAttr(pData->fget, PyMagicName::doc()));
+        if (!get_doc.isNull()) {
+            pData->doc = String::toCString(get_doc);
+            pData->getter_doc = true;
+            if (Py_TYPE(self) == PySidePropertyTypeF())
+                return qPropertyDocGet(self, nullptr);
+            /*
+             * If this is a property subclass, put __doc__ in dict of the
+             * subclass instance instead, otherwise it gets shadowed by
+             * __doc__ in the class's dict.
+             */
+            auto get_doc_obj = get_doc.object();
+            int err = PyObject_SetAttr(self, PyMagicName::doc(), get_doc);
+            return err < 0 ? nullptr : (Py_INCREF(get_doc_obj), get_doc_obj);
+        }
+        PyErr_Clear();
+    }
     Py_RETURN_NONE;
 }
 
+static int qPropertyDocSet(PyObject *self, PyObject *value, void *)
+{
+    auto data = reinterpret_cast<PySideProperty *>(self);
+    PySidePropertyPrivate *pData = data->d;
+
+    if (String::check(value)) {
+        pData->doc = String::toCString(value);
+        return 0;
+    }
+    PyErr_SetString(PyExc_TypeError, "String argument expected.");
+    return -1;
+}
 
 static int qpropertyTraverse(PyObject *self, visitproc visit, void *arg)
 {
@@ -354,14 +462,20 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
 namespace PySide { namespace Property {
 
 static const char *Property_SignatureStrings[] = {
-    "PySide2.QtCore.Property(type:type,fget:typing.Callable=None,fset:typing.Callable=None,"
+    "PySide2.QtCore.Property(self,type:type,fget:typing.Callable=None,fset:typing.Callable=None,"
         "freset:typing.Callable=None,fdel:typing.Callable=None,doc:str=None,"
         "notify:typing.Callable=None,designable:bool=True,scriptable:bool=True,"
-        "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)",
-    "PySide2.QtCore.Property.getter(func:typing.Callable)",
-    "PySide2.QtCore.Property.read(func:typing.Callable)",
-    "PySide2.QtCore.Property.setter(func:typing.Callable)",
-    "PySide2.QtCore.Property.write(func:typing.Callable)",
+        "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)"
+        "->PySide2.QtCore.Property",
+    "PySide2.QtCore.Property.deleter(self,func:typing.Callable)",
+    "PySide2.QtCore.Property.fdel(self)->typing.Callable",
+    "PySide2.QtCore.Property.fget(self)->typing.Callable",
+    "PySide2.QtCore.Property.freset(self)->typing.Callable",
+    "PySide2.QtCore.Property.fset(self)->typing.Callable",
+    "PySide2.QtCore.Property.getter(self,func:typing.Callable)",
+    "PySide2.QtCore.Property.read(self,func:typing.Callable)",
+    "PySide2.QtCore.Property.setter(self,func:typing.Callable)",
+    "PySide2.QtCore.Property.write(self,func:typing.Callable)",
     nullptr}; // Sentinel
 
 void init(PyObject *module)
@@ -384,7 +498,7 @@ bool checkType(PyObject *pyObj)
 int setValue(PySideProperty *self, PyObject *source, PyObject *value)
 {
     PyObject *fset = self->d->fset;
-    if (fset) {
+    if (fset && value) {
         Shiboken::AutoDecRef args(PyTuple_New(2));
         PyTuple_SET_ITEM(args, 0, source);
         PyTuple_SET_ITEM(args, 1, value);
@@ -392,9 +506,16 @@ int setValue(PySideProperty *self, PyObject *source, PyObject *value)
         Py_INCREF(value);
         Shiboken::AutoDecRef result(PyObject_CallObject(fset, args));
         return (result.isNull() ? -1 : 0);
-    } else {
-        PyErr_SetString(PyExc_AttributeError, "Attibute read only");
     }
+    PyObject *fdel = self->d->fdel;
+    if (fdel) {
+        Shiboken::AutoDecRef args(PyTuple_New(1));
+        PyTuple_SET_ITEM(args, 0, source);
+        Py_INCREF(source);
+        Shiboken::AutoDecRef result(PyObject_CallObject(fdel, args));
+        return (result.isNull() ? -1 : 0);
+    }
+    PyErr_SetString(PyExc_AttributeError, "Attibute read only");
     return -1;
 }
 

@@ -56,6 +56,7 @@ struct PySidePropertyPrivate
     PyObject *freset = nullptr;
     PyObject *fdel = nullptr;
     PyObject *notify = nullptr;
+    bool getter_doc = false;
     QByteArray notifySignature;
     QByteArray doc;
     bool designable = true;

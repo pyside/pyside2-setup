@@ -47,7 +47,9 @@ class MyObject(QObject):
         return self._value
 
     @value.setter
-    def valueSet(self, value):
+    # Note: The name of property and setter must be the same, because the
+    # object changes its identity all the time. `valueSet` no longer works.
+    def value(self, value):
         self._value = value
 
 
