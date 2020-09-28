@@ -313,11 +313,9 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 
 void Generator::collectInstantiatedContainersAndSmartPointers()
 {
-    const AbstractMetaFunctionList &funcs = globalFunctions();
-    for (const AbstractMetaFunction *func : funcs)
+    for (const AbstractMetaFunction *func : globalFunctions())
         collectInstantiatedContainersAndSmartPointers(func);
-    const AbstractMetaClassList &classList = classes();
-    for (const AbstractMetaClass *metaClass : classList)
+    for (const AbstractMetaClass *metaClass : classes())
         collectInstantiatedContainersAndSmartPointers(metaClass);
 }
 
@@ -341,7 +339,7 @@ bool Generator::handleOption(const QString & /* key */, const QString & /* value
     return false;
 }
 
-AbstractMetaClassList Generator::classes() const
+const AbstractMetaClassList &Generator::classes() const
 {
     return m_d->apiextractor->classes();
 }
@@ -351,12 +349,12 @@ AbstractMetaClassList Generator::classesTopologicalSorted(const Dependencies &ad
     return m_d->apiextractor->classesTopologicalSorted(additionalDependencies);
 }
 
-AbstractMetaFunctionList Generator::globalFunctions() const
+const AbstractMetaFunctionList &Generator::globalFunctions() const
 {
     return m_d->apiextractor->globalFunctions();
 }
 
-AbstractMetaEnumList Generator::globalEnums() const
+const AbstractMetaEnumList &Generator::globalEnums() const
 {
     return m_d->apiextractor->globalEnums();
 }

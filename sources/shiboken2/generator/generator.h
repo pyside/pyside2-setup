@@ -216,7 +216,7 @@ public:
     virtual bool handleOption(const QString &key, const QString &value);
 
     /// Returns the classes used to generate the binding code.
-    AbstractMetaClassList classes() const;
+    const AbstractMetaClassList &classes() const;
 
     /// Returns the output directory
     QString outputDirectory() const;
@@ -285,10 +285,10 @@ protected:
     AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
 
     /// Returns all global functions found by APIExtractor
-    AbstractMetaFunctionList globalFunctions() const;
+    const AbstractMetaFunctionList &globalFunctions() const;
 
     /// Returns all global enums found by APIExtractor
-    AbstractMetaEnumList globalEnums() const;
+    const AbstractMetaEnumList &globalEnums() const;
 
     /// Returns all primitive types found by APIExtractor
     PrimitiveTypeEntryList primitiveTypes() const;

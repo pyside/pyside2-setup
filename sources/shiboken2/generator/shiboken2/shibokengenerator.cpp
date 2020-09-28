@@ -1615,8 +1615,7 @@ AbstractMetaFunctionList ShibokenGenerator::filterFunctions(const AbstractMetaCl
 ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverters() const
 {
     ExtendedConverterData extConvs;
-    const AbstractMetaClassList &classList = classes();
-    for (const AbstractMetaClass *metaClass : classList) {
+    for (const AbstractMetaClass *metaClass : classes()) {
         // Use only the classes for the current module.
         if (!shouldGenerate(metaClass))
             continue;
@@ -2647,8 +2646,7 @@ bool ShibokenGenerator::doSetup()
     const ContainerTypeEntryList &containerTypeList = containerTypes();
     for (const ContainerTypeEntry *type : containerTypeList)
         getCode(snips, type);
-    const AbstractMetaClassList &classList = classes();
-    for (const AbstractMetaClass *metaClass : classList)
+    for (const AbstractMetaClass *metaClass : classes())
         getCode(snips, metaClass->typeEntry());
 
     const TypeSystemTypeEntry *moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();

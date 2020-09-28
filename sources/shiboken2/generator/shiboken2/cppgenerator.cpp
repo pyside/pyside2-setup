@@ -5869,8 +5869,7 @@ bool CppGenerator::finishGeneration()
 
     // Global enums
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    const AbstractMetaClassList &classList = classes();
-    for (const AbstractMetaClass *metaClass : classList) {
+    for (const AbstractMetaClass *metaClass : classes()) {
         const AbstractMetaClass *encClass = metaClass->enclosingClass();
         if (!encClass || !NamespaceTypeEntry::isVisibleScope(encClass->typeEntry()))
             lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
