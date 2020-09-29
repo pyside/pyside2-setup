@@ -71,7 +71,9 @@ public:
     void leave() const;
 
     void setLeaveOnDestruction(bool value);
+
     void setArrivalMessage(const std::string &message);
+    std::string getArrivalMessage() const;
 
 private:
     void clearFlavors();

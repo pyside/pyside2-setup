@@ -92,7 +92,7 @@ if __name__ == '__main__':
         del truck
 
         print("")
-        special_truck.setArrivalMessage("A new SPECIAL icecream truck has arrived!\n")
+        special_truck.arrivalMessage = "A new SPECIAL icecream truck has arrived!\n"
         special_truck.arrive()
         special_truck.addIcecreamFlavor(Icecream("SPECIAL *magical* icecream"))
         special_truck.printAvailableFlavors()

@@ -62,6 +62,19 @@ and the `clone()` and `addIcecreamFlavor(Icecream*)` need additional
 info about who owns the parameter objects when passing them across
 language boundaries (in this case C++ will delete the objects).
 
+The `Truck` has getters and setters for the string `arrivalMessage`.
+In the type system file, we declare this to be a property in Python:
+
+```
+<property type="std::string" name="arrivalMessage" get="getArrivalMessage" set="setArrivalMessage"/>
+```
+
+It can then be used in a more pythonic way:
+
+```
+special_truck.arrivalMessage = "A new SPECIAL icecream truck has arrived!\n"
+```
+
 After shiboken generates the C++ code and CMake makes an extension
 module from the code, the types can be accessed in Python simply by
 importing them using the original C++ names.
