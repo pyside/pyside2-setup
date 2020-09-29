@@ -339,8 +339,7 @@ void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumLi
     Q_ASSERT(metaClass);
     // if a scope is not to be generated, collect its enums into the parent scope
     if (!NamespaceTypeEntry::isVisibleScope(metaClass->typeEntry())) {
-        const AbstractMetaEnumList &enums = metaClass->enums();
-        for (AbstractMetaEnum *metaEnum : enums) {
+        for (AbstractMetaEnum *metaEnum : metaClass->enums()) {
             if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode()
                 && !enumList.contains(metaEnum)) {
                 enumList.append(metaEnum);

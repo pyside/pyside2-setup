@@ -5462,8 +5462,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream &s, const Generat
         }
     }
 
-    const AbstractMetaEnumList &enums = metaClass->enums();
-    for (AbstractMetaEnum *metaEnum : enums) {
+    for (AbstractMetaEnum *metaEnum : metaClass->enums()) {
         if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
             for (const QString &name : qAsConst(nameVariants))
                 s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << name << "::" << metaEnum->name() << "\");\n";

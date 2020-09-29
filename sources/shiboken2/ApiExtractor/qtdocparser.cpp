@@ -285,8 +285,7 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 #endif
     // Enums
-    const AbstractMetaEnumList &enums = metaClass->enums();
-    for (AbstractMetaEnum *meta_enum : enums) {
+    for (AbstractMetaEnum *meta_enum : metaClass->enums()) {
         query.clear();
         QTextStream(&query) << classQuery << "/enum[@name=\""
             << meta_enum->name() << "\"]/description";

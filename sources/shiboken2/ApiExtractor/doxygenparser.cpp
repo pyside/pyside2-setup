@@ -199,8 +199,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     //Enums
-    const AbstractMetaEnumList &enums = metaClass->enums();
-    for (AbstractMetaEnum *meta_enum : enums) {
+    for (AbstractMetaEnum *meta_enum : metaClass->enums()) {
         QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef[@kind=\"enum\"]/name[text()=\"")
             + meta_enum->name() + QLatin1String("\"]/..");
         QString doc = getDocumentation(xquery, query, DocModificationList());

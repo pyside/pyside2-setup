@@ -1762,8 +1762,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
 {
     static const QString section_title = QLatin1String(".. attribute:: ");
 
-    const AbstractMetaEnumList &enums = cppClass->enums();
-    for (AbstractMetaEnum *en : enums) {
+    for (AbstractMetaEnum *en : cppClass->enums()) {
         s << section_title << cppClass->fullName() << '.' << en->name() << Qt::endl << Qt::endl;
         writeFormattedText(s, en->documentation().value(), cppClass);
         const auto version = versionOf(en->typeEntry());

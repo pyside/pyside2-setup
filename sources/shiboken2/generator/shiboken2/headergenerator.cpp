@@ -343,8 +343,7 @@ void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMet
     if (!typeEntry->generateCode() || !NamespaceTypeEntry::isVisibleScope(typeEntry))
         return;
     writeTypeIndexValueLine(s, metaClass->typeEntry());
-    const AbstractMetaEnumList &enums = metaClass->enums();
-    for (const AbstractMetaEnum *metaEnum : enums) {
+    for (const AbstractMetaEnum *metaEnum : metaClass->enums()) {
         if (metaEnum->isPrivate())
             continue;
         writeTypeIndexValueLine(s, metaEnum->typeEntry());
@@ -503,8 +502,7 @@ bool HeaderGenerator::finishGeneration()
         const TypeEntry *classType = metaClass->typeEntry();
         includes << classType->include();
 
-        const AbstractMetaEnumList &enums = metaClass->enums();
-        for (const AbstractMetaEnum *cppEnum : enums) {
+        for (const AbstractMetaEnum *cppEnum : metaClass->enums()) {
             if (cppEnum->isAnonymous() || cppEnum->isPrivate())
                 continue;
             EnumTypeEntry *enumType = cppEnum->typeEntry();
