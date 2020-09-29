@@ -65,6 +65,9 @@ class TestEnumFromRemovedNamespace(unittest.TestCase):
         self.assertEqual(objectFullname(signature.parameters['other'].annotation),
                          "sample.ObjectOnInvisibleNamespace")
 
+    def testGlobalFunctionFromRemovedNamespace(self):
+        self.assertEqual(sample.mathSum(1, 2), 3)
+
     def testEnumPromotedToUpperNamespace(self):
         sample.UnremovedNamespace
         sample.UnremovedNamespace.RemovedNamespace3_Enum

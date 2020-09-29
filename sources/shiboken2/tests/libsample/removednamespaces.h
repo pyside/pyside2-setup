@@ -39,6 +39,8 @@ enum RemovedNamespace1_Enum { RemovedNamespace1_Enum_Value0 = 0,
 
 enum { RemovedNamespace1_AnonymousEnum_Value0 };
 
+inline int mathSum(int x, int y) { return x + y; }
+
 struct ObjectOnInvisibleNamespace
 {
     bool exists() const { return true; }

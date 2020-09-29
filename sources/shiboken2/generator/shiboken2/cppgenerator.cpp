@@ -1739,7 +1739,7 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
                                               const GeneratorContext &context)
 {
     const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
-    const AbstractMetaClass *ownerClass = rfunc->ownerClass();
+    const AbstractMetaClass *ownerClass = rfunc->targetLangOwner();
     Q_ASSERT(ownerClass == context.metaClass());
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
@@ -4779,8 +4779,14 @@ void CppGenerator::writeMethodDefinitionEntry(QTextStream &s, const AbstractMeta
         if (overloadData.hasArgumentWithDefaultValue())
             s << "|METH_KEYWORDS";
     }
-    if (func->ownerClass() && overloadData.hasStaticFunction())
+    // METH_STATIC causes a crash when used for global functions (also from
+    // invisible namespaces).
+    auto ownerClass = func->ownerClass();
+    if (ownerClass
+        && !invisibleTopNamespaces().contains(const_cast<AbstractMetaClass *>(ownerClass))
+        && overloadData.hasStaticFunction()) {
         s << "|METH_STATIC";
+    }
 }
 
 void CppGenerator::writeMethodDefinition(QTextStream &s, const AbstractMetaFunctionList &overloads)

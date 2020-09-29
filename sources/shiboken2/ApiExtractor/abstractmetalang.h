@@ -907,6 +907,9 @@ public:
         m_class = cls;
     }
 
+    // Owner excluding invisible namespaces
+    const AbstractMetaClass *targetLangOwner() const;
+
     // The first class in a hierarchy that declares the function
     const AbstractMetaClass *declaringClass() const
     {

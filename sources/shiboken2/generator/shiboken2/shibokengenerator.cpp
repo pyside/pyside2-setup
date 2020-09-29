@@ -2457,14 +2457,21 @@ static bool isGroupable(const AbstractMetaFunction *func)
     return true;
 }
 
-ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() const
+static void insertIntoFunctionGroups(const AbstractMetaFunctionList &lst,
+                                     ShibokenGenerator::FunctionGroups *results)
 {
-    const AbstractMetaFunctionList &lst = globalFunctions();
-    FunctionGroups results;
     for (AbstractMetaFunction *func : lst) {
         if (isGroupable(func))
-            results[func->name()].append(func);
+            (*results)[func->name()].append(func);
     }
+}
+
+ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() const
+{
+    FunctionGroups results;
+    insertIntoFunctionGroups(globalFunctions(), &results);
+    for (auto nsp : invisibleTopNamespaces())
+        insertIntoFunctionGroups(nsp->functions(), &results);
     return results;
 }
 

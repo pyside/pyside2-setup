@@ -803,6 +803,12 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
     return false;
 }
 
+const AbstractMetaClass *AbstractMetaFunction::targetLangOwner() const
+{
+    return m_class && m_class->isInvisibleNamespace()
+        ?  m_class->targetLangEnclosingClass() : m_class;
+}
+
 bool AbstractMetaFunction::isDeprecated() const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
