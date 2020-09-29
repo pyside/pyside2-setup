@@ -334,20 +334,6 @@ bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctio
             && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0);
 }
 
-void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass)
-{
-    Q_ASSERT(metaClass);
-    // if a scope is not to be generated, collect its enums into the parent scope
-    if (!NamespaceTypeEntry::isVisibleScope(metaClass->typeEntry())) {
-        for (AbstractMetaEnum *metaEnum : metaClass->enums()) {
-            if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode()
-                && !enumList.contains(metaEnum)) {
-                enumList.append(metaEnum);
-            }
-        }
-    }
-}
-
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
 {
     Q_ASSERT(shouldGenerateCppWrapper(metaClass));

@@ -390,8 +390,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+    metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     //Extra includes
     s << "\n// Extra includes\n";
@@ -1390,9 +1389,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     s << "// Type conversion functions.\n\n";
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+    metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
     if (!classEnums.isEmpty())
         s << "// Python to C++ enum conversion.\n";
     for (const AbstractMetaEnum *metaEnum : qAsConst(classEnums))
@@ -5334,9 +5331,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+    metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     ErrorCode errorCode(QString::fromLatin1(""));
     writeEnumsInitialization(s, classEnums);
@@ -5843,11 +5838,8 @@ bool CppGenerator::finishGeneration()
 
     // Global enums
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    for (const AbstractMetaClass *metaClass : classes()) {
-        const AbstractMetaClass *encClass = metaClass->enclosingClass();
-        if (!encClass || !NamespaceTypeEntry::isVisibleScope(encClass->typeEntry()))
-            lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
-    }
+    for (const AbstractMetaClass *nsp : invisibleTopNamespaces())
+        nsp->getEnumsToBeGenerated(&globalEnums);
 
     TypeDatabase *typeDb = TypeDatabase::instance();
     const TypeSystemTypeEntry *moduleEntry = typeDb->defaultTypeSystemType();
