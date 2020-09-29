@@ -120,7 +120,7 @@ endif()
 set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken2${shiboken2_SUFFIX}${PYTHON_SHARED_LIBRARY_SUFFIX}"
                                              VERSION ${libshiboken_VERSION}
                                              SOVERSION ${libshiboken_SOVERSION}
-                                             DEFINE_SYMBOL LIBSHIBOKEN_EXPORTS)
+                                             DEFINE_SYMBOL BUILD_LIBSHIBOKEN)
 
 install(FILES
         autodecref.h

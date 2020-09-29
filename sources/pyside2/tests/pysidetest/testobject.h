@@ -29,15 +29,15 @@
 #ifndef TESTOBJECT_H
 #define TESTOBJECT_H
 
-#include <QObject>
-#include <QApplication>
-#include <QMetaType>
-#include <QVariant>
-#include <QDebug>
-#ifdef pysidetest_EXPORTS
-#define PYSIDE_EXPORTS 1
-#endif
-#include "pysidemacros.h"
+#include "pysidetest_macros.h"
+
+#include <QtWidgets/QApplication>
+
+#include <QtCore/QObject>
+#include <QtCore/QMetaType>
+#include <QtCore/QVariant>
+
+QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class IntValue
 {
@@ -50,7 +50,7 @@ public:
 
 typedef IntValue TypedefValue;
 
-class PYSIDE_API TestObject : public QObject
+class PYSIDETEST_API TestObject : public QObject
 {
     Q_OBJECT
 public:
@@ -82,15 +82,15 @@ private:
     int m_idValue;
     QList<QObject*> m_children;
 };
-PYSIDE_API QDebug operator<<(QDebug dbg, TestObject &testObject);
 
+PYSIDETEST_API QDebug operator<<(QDebug dbg, TestObject &testObject);
 
 typedef int PySideInt;
 
 
 namespace PySideCPP {
 
-class PYSIDE_API TestObjectWithNamespace :  public QObject
+class PYSIDETEST_API TestObjectWithNamespace :  public QObject
 {
     Q_OBJECT
 public:
@@ -106,17 +106,18 @@ signals:
     void emitSignalWithNamespace(PySideCPP::TestObjectWithNamespace* obj);
     void emitSignalWithTypedef(PySideInt val);
 };
-PYSIDE_API QDebug operator<<(QDebug dbg, TestObjectWithNamespace &testObject);
 
-class PYSIDE_API TestObject2WithNamespace :  public QObject
+PYSIDETEST_API QDebug operator<<(QDebug dbg, TestObjectWithNamespace &testObject);
+
+class PYSIDETEST_API TestObject2WithNamespace :  public QObject
 {
     Q_OBJECT
 public:
     TestObject2WithNamespace(QObject* parent) : QObject(parent) {}
     QString name() { return "TestObject2WithNamespace"; }
 };
-PYSIDE_API QDebug operator<<(QDebug dbg, TestObject2WithNamespace& testObject);
 
+PYSIDETEST_API QDebug operator<<(QDebug dbg, TestObject2WithNamespace& testObject);
 
 } // Namespace PySideCPP
 
@@ -127,7 +128,7 @@ enum Enum1 { Option1 = 1, Option2 = 2 };
 
 typedef long PySideLong;
 
-class PYSIDE_API TestObjectWithoutNamespace :  public QObject
+class PYSIDETEST_API TestObjectWithoutNamespace :  public QObject
 {
     Q_OBJECT
 public:

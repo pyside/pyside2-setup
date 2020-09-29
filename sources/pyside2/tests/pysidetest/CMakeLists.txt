@@ -66,6 +66,7 @@ endif()
 
 make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken2/libshiboken
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide2
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../libpyside
                                     ${QT_INCLUDE_DIR}
@@ -104,6 +105,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${libpyside_SOURCE_DIR})
 
 add_library(pysidetest SHARED ${pysidetest_SRC} ${pysidetest_MOC_SRC})
+set_target_properties(pysidetest PROPERTIES
+                      DEFINE_SYMBOL BUILD_PYSIDETEST)
+
 target_link_libraries(pysidetest
                       Shiboken2::libshiboken
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
