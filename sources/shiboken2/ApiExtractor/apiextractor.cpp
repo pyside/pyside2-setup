@@ -121,25 +121,25 @@ void ApiExtractor::setDropTypeEntries(QString dropEntries)
     TypeDatabase::instance()->setDropTypeEntries(entries);
 }
 
-AbstractMetaEnumList ApiExtractor::globalEnums() const
+const AbstractMetaEnumList &ApiExtractor::globalEnums() const
 {
     Q_ASSERT(m_builder);
     return m_builder->globalEnums();
 }
 
-AbstractMetaFunctionList ApiExtractor::globalFunctions() const
+const AbstractMetaFunctionList &ApiExtractor::globalFunctions() const
 {
     Q_ASSERT(m_builder);
     return m_builder->globalFunctions();
 }
 
-AbstractMetaClassList ApiExtractor::classes() const
+const AbstractMetaClassList &ApiExtractor::classes() const
 {
     Q_ASSERT(m_builder);
     return m_builder->classes();
 }
 
-AbstractMetaClassList ApiExtractor::smartPointers() const
+const AbstractMetaClassList &ApiExtractor::smartPointers() const
 {
     Q_ASSERT(m_builder);
     return m_builder->smartPointers();

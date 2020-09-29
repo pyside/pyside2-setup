@@ -40,12 +40,10 @@
 #ifndef SIGNATURE_H
 #define SIGNATURE_H
 
-#include "sbkpython.h"
-
 extern "C"
 {
 
-LIBSHIBOKEN_API int SbkSpecial_Type_Ready(PyObject *, PyTypeObject *, const char *[]);
+LIBSHIBOKEN_API int InitSignatureStrings(PyTypeObject *, const char *[]);
 LIBSHIBOKEN_API void FinishSignatureInitialization(PyObject *, const char *[]);
 LIBSHIBOKEN_API void SetError_Argument(PyObject *, const char *);
 LIBSHIBOKEN_API PyObject *Sbk_TypeGet___signature__(PyObject *, PyObject *);

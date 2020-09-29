@@ -73,7 +73,7 @@ It calls ``GetSignature_Function`` which returns the signature if it is found.
 Why this Code is Fast
 ---------------------
 
-It costs a little time (maybe 6 seconds) to run througs every single signature
+It costs a little time (maybe 6 seconds) to run through every single signature
 object, since these are more than 25000 Python objects. But all the signature
 objects will be rarely accessed but in special applications.
 The normal case are only a few accesses, and these are working pretty fast.

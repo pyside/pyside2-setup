@@ -1080,13 +1080,23 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
         _pExe = "python.exe"
         # With windows we are creating building 32-bit target in 64-bit host
         if hostArch == "X86_64" and targetArch == "X86":
-            if python_ver == "3":
-                _pExe = os.path.join(os.getenv("PYTHON3_32_PATH"), "python.exe")
+            if python_ver.startswith("3"):
+                print("Try to find python from {} env variable".format("PYTHON"+python_ver+"-32_PATH"))
+                _path = os.getenv("PYTHON"+python_ver+"-32_PATH", "")
+                _pExe = os.path.join(_path, "python.exe")
+                if not os.path.isfile(_pExe):
+                    print("Can't find python.exe from {}, using default python3".format(_pExe))
+                    _pExe = os.path.join(os.getenv("PYTHON3_32_PATH"), "python.exe")
             else:
-                _pExe = os.path.join(os.getenv("PYTHON2_32_PATH"), "python.exe")
+                _pExe = os.path.join(os.getenv("PYTHON2_32_PATH"),  "python.exe")
         else:
-            if python_ver == "3":
-                _pExe = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+             if python_ver.startswith("3"):
+                print("Try to find python from {} env variable".format("PYTHON"+python_ver+"-64_PATH"))
+                _path = os.getenv("PYTHON"+python_ver+"-64_PATH", "")
+                _pExe = os.path.join(_path, "python.exe")
+                if not os.path.isfile(_pExe):
+                    print("Can't find python.exe from {}, using default python3".format(_pExe))
+                    _pExe = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
         env_python = _env + "\\Scripts\\python.exe"
         env_pip = _env + "\\Scripts\\pip.exe"
     else:

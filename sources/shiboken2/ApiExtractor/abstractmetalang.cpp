@@ -1564,16 +1564,6 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
     }
 }
 
-bool AbstractMetaClass::hasFieldAccessors() const
-{
-    for (const AbstractMetaField *field : m_fields) {
-        if (field->getter() || field->setter())
-            return true;
-    }
-
-    return false;
-}
-
 bool AbstractMetaClass::hasDefaultToStringFunction() const
 {
     const AbstractMetaFunctionList &funcs = queryFunctionsByName(QLatin1String("toString"));
@@ -1769,12 +1759,6 @@ static bool functions_contains(const AbstractMetaFunctionList &l, const Abstract
 
 AbstractMetaField::AbstractMetaField() = default;
 
-AbstractMetaField::~AbstractMetaField()
-{
-    delete m_setter;
-    delete m_getter;
-}
-
 AbstractMetaField *AbstractMetaField::copy() const
 {
     auto *returned = new AbstractMetaField;
@@ -1806,55 +1790,6 @@ bool AbstractMetaField::isModifiedRemoved(int types) const
     return false;
 }
 
-static QString upCaseFirst(const QString &str)
-{
-    Q_ASSERT(!str.isEmpty());
-    QString s = str;
-    s[0] = s.at(0).toUpper();
-    return s;
-}
-
-static AbstractMetaFunction *createXetter(const AbstractMetaField *g, const QString &name,
-                                          AbstractMetaAttributes::Attributes type)
-{
-    auto *f = new AbstractMetaFunction;
-
-    f->setName(name);
-    f->setOriginalName(name);
-    f->setOwnerClass(g->enclosingClass());
-    f->setImplementingClass(g->enclosingClass());
-    f->setDeclaringClass(g->enclosingClass());
-
-    AbstractMetaAttributes::Attributes attr = AbstractMetaAttributes::FinalInTargetLang | type;
-    if (g->isStatic())
-        attr |= AbstractMetaAttributes::Static;
-    if (g->isPublic())
-        attr |= AbstractMetaAttributes::Public;
-    else if (g->isProtected())
-        attr |= AbstractMetaAttributes::Protected;
-    else
-        attr |= AbstractMetaAttributes::Private;
-    f->setAttributes(attr);
-    f->setOriginalAttributes(attr);
-
-    const FieldModificationList &mods = g->modifications();
-    for (const FieldModification &mod : mods) {
-        if (mod.isRenameModifier())
-            f->setName(mod.renamedTo());
-        if (mod.isAccessModifier()) {
-            if (mod.isPrivate())
-                f->setVisibility(AbstractMetaAttributes::Private);
-            else if (mod.isProtected())
-                f->setVisibility(AbstractMetaAttributes::Protected);
-            else if (mod.isPublic())
-                f->setVisibility(AbstractMetaAttributes::Public);
-            else if (mod.isFriendly())
-                f->setVisibility(AbstractMetaAttributes::Friendly);
-        }
-    }
-    return f;
-}
-
 FieldModificationList AbstractMetaField::modifications() const
 {
     const FieldModificationList &mods = enclosingClass()->typeEntry()->fieldModifications();
@@ -1868,40 +1803,12 @@ FieldModificationList AbstractMetaField::modifications() const
     return returned;
 }
 
-const AbstractMetaFunction *AbstractMetaField::setter() const
-{
-    if (!m_setter) {
-        m_setter = createXetter(this,
-                                QLatin1String("set") + upCaseFirst(name()),
-                                AbstractMetaAttributes::SetterFunction);
-        AbstractMetaArgumentList arguments;
-        auto *argument = new AbstractMetaArgument;
-        argument->setType(type()->copy());
-        argument->setName(name());
-        arguments.append(argument);
-        m_setter->setArguments(arguments);
-    }
-    return m_setter;
-}
-
 const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
 {
     auto result = m_enclosingClass;
     while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
         result = result->enclosingClass();
     return result;
-}
-
-const AbstractMetaFunction *AbstractMetaField::getter() const
-{
-    if (!m_getter) {
-        m_getter = createXetter(this,
-                                name(),
-                                AbstractMetaAttributes::GetterFunction);
-        m_getter->setType(type());
-    }
-
-    return m_getter;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

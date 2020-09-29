@@ -57,13 +57,18 @@ sbkstaticstrings.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 shibokenbuffer.cpp
-signature.cpp
 qapp_macro.cpp
 pep384impl.cpp
 voidptr.cpp
 bufferprocs_py37.cpp
+
 embed/signature_bootstrap_inc.h
 embed/signature_inc.h
+
+signature/signature.cpp
+signature/signature_globals.cpp
+signature/signature_extend.cpp
+signature/signature_helper.cpp
 )
 
 get_numpy_location()
@@ -136,11 +141,14 @@ install(FILES
         shibokenbuffer.h
         sbkpython.h
         pep384impl.h
-        signature.h
         qapp_macro.h
         voidptr.h
         bufferprocs_py37.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"
+
+        signature.h
+        signature/signature_p.h
+
         DESTINATION include/shiboken2${shiboken2_SUFFIX})
 install(TARGETS libshiboken EXPORT Shiboken2Targets
                             LIBRARY DESTINATION "${LIB_INSTALL_DIR}"

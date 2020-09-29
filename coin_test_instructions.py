@@ -110,7 +110,12 @@ def run_test_instructions():
         testRun =+ 1
     # We know that second build was with python3
     if CI_RELEASE_CONF:
-        call_testrunner("3", str(testRun))
+        # In win machines, there are additional python versions to test with
+        if CI_HOST_OS == "Windows":
+            call_testrunner("3.6.1", str(testRun))
+            call_testrunner("3.8.1", str(testRun))
+        else:
+            call_testrunner("3", str(testRun))
 
 if __name__ == "__main__":
     run_test_instructions()

@@ -34,7 +34,7 @@ C++ version
 .. literalinclude:: bookwindow.cpp
    :language: c++
    :linenos:
-   :lines: 47-115
+   :lines: 57-140
 
 Python version
 ---------------

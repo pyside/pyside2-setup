@@ -563,6 +563,8 @@ struct TypeSystemProperty
     QString write;
     QString reset;
     QString designable;
+    // Indicates whether actual code is generated instead of relying on libpyside.
+    bool generateGetSetDef = false;
 };
 
 class TypeEntry

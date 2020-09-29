@@ -184,7 +184,7 @@ static const char *ClassInfo_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (SbkSpecial_Type_Ready(module, PySideClassInfoTypeF(), ClassInfo_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySideClassInfoTypeF(), ClassInfo_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySideClassInfoTypeF());

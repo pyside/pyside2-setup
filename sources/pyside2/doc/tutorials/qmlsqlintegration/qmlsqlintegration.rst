@@ -99,9 +99,10 @@ There are three properties that are almost always set when using ApplicationWind
 Once we've set these, we have a properly sized, empty window ready to be filled with content.
 
 There are two ways of laying out items in QML: `Item Positioners`_ and `Qt Quick Layouts`_.
-* Item positioners (`Row`_, `Column`_, and so on) are useful for situations where the size of items
+
+- Item positioners (`Row`_, `Column`_, and so on) are useful for situations where the size of items
   is known or fixed, and all that is required is to neatly position them in a certain formation.
-* The layouts in Qt Quick Layouts can both position and resize items, making them well suited for
+- The layouts in Qt Quick Layouts can both position and resize items, making them well suited for
   resizable user interfaces.
   Below, we use `ColumnLayout`_ to vertically lay out a `ListView`_ and a `Pane`_.
 
@@ -205,14 +206,15 @@ if it doesn't already exist.
 
 
 A few interesting things happen in the ``main`` function:
-* Declaring a :ref:`QGuiApplication`.
+
+- Declaring a :ref:`QGuiApplication`.
   You should use a :ref:`QGuiApplication` instead of :ref:`QApplication` because we're not
   using the **QtWidgets** module.
-* Connecting to the database,
-* Declaring a :ref:`QQmlApplicationEngine`.
+- Connecting to the database,
+- Declaring a :ref:`QQmlApplicationEngine`.
   This allows you to access the QML context property to connect Python
   and QML from the conversation model we built on ``sqlDialog.py``.
-* Loading the ``.qml`` file that defines the UI.
+- Loading the ``.qml`` file that defines the UI.
 
 Finally, the Qt application runs, and your program starts.
 

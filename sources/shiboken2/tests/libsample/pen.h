@@ -60,8 +60,13 @@ public:
     void drawLine(int x1, int y1, int x2, int y2, RenderHints renderHints = {});
 
     int ctorType();
+
+    RenderHints getRenderHints() const;
+    void setRenderHints(RenderHints h);
+
 private:
     int m_ctor;
+    RenderHints m_renderHints = None;
 };
 
 #endif

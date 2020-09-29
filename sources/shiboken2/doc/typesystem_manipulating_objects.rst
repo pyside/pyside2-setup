@@ -206,7 +206,7 @@ add-function
     Within the signature, names for the function parameters can be specified by
     enclosing them within the delimiter *@*:
 
-    .. code-block:: c++
+    .. code-block::
 
         void foo(int @parameter1@,float)
 
@@ -238,14 +238,23 @@ conversion-rule
 property
 ^^^^^^^^
 
-    The ``property`` element allows you to add properties complementing the
-    properties obtained from the ``Q_PROPERTY`` macro in Qt-based code when using
-    the PySide2 extension. It may appear as a child of a complex type such as
-    ``object-type`` or  ``value-type``.
+    The ``property`` element allows you to specify properties consisting of
+    a type and getter and setter functions.
+
+    It may appear as a child of a complex type such as ``object-type`` or
+    ``value-type``.
+
+    If the PySide2 extension is not present, code will be generated using the
+    ``PyGetSetDef`` struct, similar to what is generated for fields.
+
+    If the PySide2 extension is present, those properties complement the
+    properties obtained from the ``Q_PROPERTY`` macro in Qt-based code.
+    The properties will be handled in ``libpyside`` unless code generation
+    is forced.
 
     .. code-block:: xml
 
-        <property name="..." type="..." get="..." set="..." since="..."/>
+        <property name="..." type="..." get="..." set="..." " generate-getsetdef="yes | no" since="..."/>
 
     The ``name`` attribute specifies the name of the property, the ``type``
     attribute specifies the C++ type and the ``get`` attribute specifies the
@@ -253,15 +262,49 @@ property
 
     The optional ``set`` attribute specifies name of the setter function.
 
+    The optional ``generate-getsetdef`` attribute specifies whether to generate
+    code for if the PySide2 extension is present (indicating this property is not
+    handled by libpyside). It defaults to *no*.
+
     The optional ``since`` attribute specifies the API version when this
     property appears.
 
-    For example:
+    For a typical C++ class, like:
+
+    .. code-block:: c++
+
+        class Test {
+        public:
+            int getValue() const;
+            void setValue();
+        };
+
+    ``value`` can then be specified to be a property:
+
+    .. code-block:: xml
+
+        <value-type name="Test">
+            <property name="value" type="int" get="getValue" set="setValue"/>
+
+    With that, a more pythonic style can be used:
+
+    .. code-block:: python
+
+        test = Test()
+        test.value = 42
+
+    For Qt classes (with the PySide2 extension present), additional setters
+    and getters that do not appear as ``Q_PROPERTY``, can be specified to
+    be properties:
 
     .. code-block:: xml
 
         <object-type name="QMainWindow">
             <property name="centralWidget" type="QWidget *" get="centralWidget" set="setCentralWidget"/>
 
-    specifies ``centralWidget`` to be a Python property in addition to the normal properties
-    of ``QMainWindow`` defined for Qt Designer usage.
+    in addition to the normal properties of ``QMainWindow`` defined for
+    Qt Designer usage.
+
+    .. note:: In the *Qt* coding style, the property name typically conflicts
+        with the getter name. It is recommended to exclude the getter from the
+        wrapper generation using the ``remove`` function modification.

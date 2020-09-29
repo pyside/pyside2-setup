@@ -22,7 +22,7 @@ function with parameters and return type defined by the table above.
 
 The function needs to follow the same semantics of the *CPython equivalent*
 function, the only way to do it is using the
-:doc:`inject-code <codeinjectionsemantics>` tag.
+:ref:`inject-code <codeinjectionsemantics>` tag.
 
 A concrete example how to add sequence protocol support to a class can be found
 on shiboken tests, more precisely in the definition of the Str class in

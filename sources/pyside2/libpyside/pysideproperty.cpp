@@ -357,7 +357,7 @@ static const char *Property_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (SbkSpecial_Type_Ready(module, PySidePropertyTypeF(), Property_SignatureStrings) < 0)
+    if (InitSignatureStrings(PySidePropertyTypeF(), Property_SignatureStrings) < 0)
         return;
 
     Py_INCREF(PySidePropertyTypeF());

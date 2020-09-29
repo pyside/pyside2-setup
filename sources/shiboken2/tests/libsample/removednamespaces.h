@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -34,35 +34,29 @@
 namespace RemovedNamespace1
 {
 
-enum RemovedNamespace1_Enum {
-    RemovedNamespace1_Enum_Value0
-};
+enum RemovedNamespace1_Enum { RemovedNamespace1_Enum_Value0 };
 
-enum {
-    RemovedNamespace1_AnonymousEnum_Value0
-};
+enum { RemovedNamespace1_AnonymousEnum_Value0 };
 
-namespace RemovedNamespace2 {
-    enum RemovedNamespace2_Enum {
-        RemovedNamespace2_Enum_Value0
-    };
-}
+namespace RemovedNamespace2
+{
 
-}
+enum RemovedNamespace2_Enum { RemovedNamespace2_Enum_Value0 };
+
+} // namespace RemovedNamespace2
+} // namespace RemovedNamespace1
 
 namespace UnremovedNamespace
 {
+
 namespace RemovedNamespace3
 {
-    enum RemovedNamespace3_Enum {
-        RemovedNamespace3_Enum_Value0
-    };
+    enum RemovedNamespace3_Enum { RemovedNamespace3_Enum_Value0 };
 
-    enum {
-        RemovedNamespace3_AnonymousEnum_Value0
-    };
-}
-}
+    enum { RemovedNamespace3_AnonymousEnum_Value0 };
+
+} // namespace RemovedNamespace3
+} // namespace UnremovedNamespace
 
 #endif // REMOVEDNAMESPACE_H
 

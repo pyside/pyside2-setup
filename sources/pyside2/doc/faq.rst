@@ -1,3 +1,7 @@
+.. _faq:
+
+:orphan:
+
 Frequently Asked Questions
 ==========================
 

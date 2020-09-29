@@ -317,6 +317,13 @@ static QString buildPropertyString(QPropertySpec *spec)
     return text;
 }
 
+static void writePyGetSetDefEntry(QTextStream &s, const QString &name,
+                                  const QString &getFunc, const QString &setFunc)
+{
+    s << "{const_cast<char *>(\"" << name << "\"), " << getFunc << ", "
+        << (setFunc.isEmpty() ? QLatin1String(NULL_PTR) : setFunc) << "},\n";
+}
+
 /*!
     Function used to write the class generated binding code on the buffer
     \param s the output buffer
@@ -590,12 +597,14 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
         // PYSIDE-1019: Write a compressed list of all properties `name:getter[:setter]`.
         //              Default values are suppressed.
         QStringList sorter;
-        for (const auto spec : metaClass->propertySpecs())
-            sorter.append(buildPropertyString(spec));
+        for (const auto spec : metaClass->propertySpecs()) {
+            if (!spec->generateGetSetDef())
+                sorter.append(buildPropertyString(spec));
+        }
         sorter.sort();
 
         s << '\n';
-        s << "static const char *" << className << "_properties[] = {\n";
+        s << "static const char *" << className << "_PropertyStrings[] = {\n";
         for (const auto &entry : qAsConst(sorter))
             s << INDENT << entry << ",\n";
         s << INDENT << NULL_PTR << " // Sentinel\n";
@@ -689,19 +698,34 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
             s << Qt::endl;
         }
 
+        for (const QPropertySpec *property : metaClass->propertySpecs()) {
+            if (property->generateGetSetDef() || !usePySideExtensions()) {
+                writeGetterFunction(s, property, classContext);
+                if (property->hasWrite())
+                    writeSetterFunction(s, property, classContext);
+            }
+        }
+
         s << "// Getters and Setters for " << metaClass->name() << Qt::endl;
         s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass) << "[] = {\n";
         for (const AbstractMetaField *metaField : fields) {
-            if (metaField->isStatic())
-                continue;
+            if (!metaField->isStatic()) {
+                s << INDENT;
+                const QString setter = canGenerateFieldSetter(metaField)
+                    ? cpythonSetterFunctionName(metaField) : QString();
+                writePyGetSetDefEntry(s, metaField->name(),
+                                      cpythonGetterFunctionName(metaField), setter);
+            }
+        }
 
-            s << INDENT << "{const_cast<char *>(\"" << metaField->name() << "\"), ";
-            s << cpythonGetterFunctionName(metaField) << ", ";
-            if (canGenerateFieldSetter(metaField))
-                s << cpythonSetterFunctionName(metaField);
-            else
-                s << NULL_PTR;
-            s << "},\n";
+        for (const QPropertySpec *property : metaClass->propertySpecs()) {
+            if (property->generateGetSetDef() || !usePySideExtensions()) {
+                s << INDENT;
+                const QString setter = property->hasWrite()
+                    ? cpythonSetterFunctionName(property, metaClass) : QString();
+                writePyGetSetDefEntry(s, property->name(),
+                                      cpythonGetterFunctionName(property, metaClass), setter);
+            }
         }
         s << INDENT << '{' << NULL_PTR << "} // Sentinel\n";
         s << "};\n\n";
@@ -3972,6 +3996,13 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass *metaClass)
         if (!f->isStatic())
             return true;
     }
+    // Generate all user-added properties unless Pyside extensions are used,
+    // in which only the explicitly specified ones are generated (rest is handled
+    // in libpyside).
+    return usePySideExtensions()
+        ? std::any_of(metaClass->propertySpecs().cbegin(), metaClass->propertySpecs().cend(),
+                      [] (const QPropertySpec *s) { return s->generateGetSetDef(); })
+        : !metaClass->propertySpecs().isEmpty();
     return false;
 }
 
@@ -4399,13 +4430,18 @@ void CppGenerator::writeCopyFunction(QTextStream &s, const GeneratorContext &con
     s << Qt::endl;
 }
 
+static inline void writeGetterFunctionStart(QTextStream &s, const QString &funcName)
+{
+    s << "static PyObject *" << funcName << "(PyObject *self, void *)\n";
+    s << "{\n";
+}
+
 void CppGenerator::writeGetterFunction(QTextStream &s,
                                        const AbstractMetaField *metaField,
                                        const GeneratorContext &context)
 {
     ErrorCode errorCode(QString::fromLatin1(NULL_PTR));
-    s << "static PyObject *" << cpythonGetterFunctionName(metaField) << "(PyObject *self, void *)\n";
-    s << "{\n";
+    writeGetterFunctionStart(s, cpythonGetterFunctionName(metaField));
 
     writeCppSelfDefinition(s, context);
 
@@ -4453,11 +4489,16 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
                         << "reinterpret_cast<SbkObject *>(self), reinterpret_cast<SbkObjectType *>("
                         << cpythonTypeNameExt(fieldType)
                         << ")));\n";
-            s << INDENT << "if (pyOut) {Py_IncRef(pyOut); return pyOut;}\n";
+            s << INDENT << "if (pyOut) {\n";
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "Py_IncRef(pyOut);\n"
+                   << INDENT << "return pyOut;\n";
+            }
+            s << INDENT << "}\n";
         }
-        s << INDENT << "}\n";
         // Check if field wrapper has already been created.
-        s << INDENT << "else if (Shiboken::BindingManager::instance().hasWrapper(" << cppField << ")) {" << "\n";
+        s << INDENT << "} else if (Shiboken::BindingManager::instance().hasWrapper(" << cppField << ")) {" << "\n";
         {
             Indentation indent(INDENT);
             s << INDENT << "pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper("
@@ -4481,12 +4522,35 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
     s << "}\n";
 }
 
-void CppGenerator::writeSetterFunction(QTextStream &s,
-                                       const AbstractMetaField *metaField,
+// Write a getter for QPropertySpec
+void CppGenerator::writeGetterFunction(QTextStream &s, const QPropertySpec *property,
                                        const GeneratorContext &context)
 {
     ErrorCode errorCode(0);
-    s << "static int " << cpythonSetterFunctionName(metaField) << "(PyObject *self, PyObject *pyIn, void *)\n";
+    writeGetterFunctionStart(s, cpythonGetterFunctionName(property, context.metaClass()));
+    writeCppSelfDefinition(s, context);
+    const QString value = QStringLiteral("value");
+    s << INDENT << "auto " << value << " = " << CPP_SELF_VAR << "->" << property->read() << "();\n"
+        << INDENT << "auto pyResult = ";
+    writeToPythonConversion(s, property->type(), context.metaClass(), value);
+    s << ";\n"
+        << INDENT << "if (PyErr_Occurred() || !pyResult) {\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "Py_XDECREF(pyResult);\n"
+            << INDENT << " return {};\n";
+    }
+    s << INDENT << "}\n"
+        << INDENT << "return pyResult;\n}\n\n";
+}
+
+// Write setter function preamble (type checks on "pyIn")
+void CppGenerator::writeSetterFunctionPreamble(QTextStream &s, const QString &name,
+                                               const QString &funcName,
+                                               const AbstractMetaType *type,
+                                               const GeneratorContext &context)
+{
+    s << "static int " << funcName << "(PyObject *self, PyObject *pyIn, void *)\n";
     s << "{\n";
 
     writeCppSelfDefinition(s, context);
@@ -4495,24 +4559,33 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_TypeError, \"'";
-        s << metaField->name() << "' may not be deleted\");\n";
+        s << name << "' may not be deleted\");\n";
         s << INDENT << "return -1;\n";
     }
     s << INDENT << "}\n";
 
-    AbstractMetaType *fieldType = metaField->type();
-
     s << INDENT << "PythonToCppFunc " << PYTHON_TO_CPP_VAR << "{nullptr};\n";
     s << INDENT << "if (!";
-    writeTypeCheck(s, fieldType, QLatin1String("pyIn"), isNumber(fieldType->typeEntry()));
+    writeTypeCheck(s, type, QLatin1String("pyIn"), isNumber(type->typeEntry()));
     s << ") {\n";
     {
         Indentation indent(INDENT);
         s << INDENT << "PyErr_SetString(PyExc_TypeError, \"wrong type attributed to '";
-        s << metaField->name() << "', '" << fieldType->name() << "' or convertible type expected\");\n";
+        s << name << "', '" << type->name() << "' or convertible type expected\");\n";
         s << INDENT << "return -1;\n";
     }
     s << INDENT<< "}\n\n";
+}
+
+void CppGenerator::writeSetterFunction(QTextStream &s,
+                                       const AbstractMetaField *metaField,
+                                       const GeneratorContext &context)
+{
+    ErrorCode errorCode(0);
+
+    AbstractMetaType *fieldType = metaField->type();
+    writeSetterFunctionPreamble(s, metaField->name(), cpythonSetterFunctionName(metaField),
+                                fieldType, context);
 
     QString cppField = QString::fromLatin1("%1->%2").arg(QLatin1String(CPP_SELF_VAR), metaField->name());
     s << INDENT;
@@ -4544,6 +4617,26 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
 
     s << INDENT << "return 0;\n";
     s << "}\n";
+}
+
+// Write a setter for QPropertySpec
+void CppGenerator::writeSetterFunction(QTextStream &s, const QPropertySpec *property,
+                                       const GeneratorContext &context)
+{
+    ErrorCode errorCode(0);
+    writeSetterFunctionPreamble(s, property->name(),
+                                cpythonSetterFunctionName(property, context.metaClass()),
+                                property->type(), context);
+
+    s << INDENT << "auto cppOut = " << CPP_SELF_VAR << "->" << property->read() << "();\n"
+        << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);\n"
+        << INDENT << "if (PyErr_Occurred())\n";
+    {
+        Indentation indent(INDENT);
+        s << INDENT << "return -1;\n";
+    }
+    s << INDENT << CPP_SELF_VAR << "->" << property->write() << "(cppOut);\n"
+        << INDENT << "return 0;\n}\n\n";
 }
 
 void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorContext &context)
@@ -5139,10 +5232,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         // 4:typeSpec
         s << INDENT << '&' << chopType(pyTypeName) << "_spec,\n";
 
-        // 5:signatureStrings
-        s << INDENT << initFunctionName << "_SignatureStrings,\n";
-
-        // 6:cppObjDtor
+        // 5:cppObjDtor
         s << INDENT;
         if (!metaClass->isNamespace() && !metaClass->hasPrivateDestructor()) {
             QString dtorClassName = metaClass->qualifiedCppName();
@@ -5158,7 +5248,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << "0,\n";
         }
 
-        // 7:baseType
+        // 6:baseType
         const auto base = metaClass->isNamespace()
             ? metaClass->extendedNamespace() : metaClass->baseClass();
         if (base) {
@@ -5168,13 +5258,13 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << INDENT << "0,\n";
         }
 
-        // 8:baseTypes
+        // 7:baseTypes
         if (metaClass->baseClassNames().size() > 1)
             s << INDENT << pyTypeBasesVariable << ',' << Qt::endl;
         else
             s << INDENT << "0,\n";
 
-        // 9:wrapperflags
+        // 8:wrapperflags
         QByteArrayList wrapperFlags;
         if (enc)
             wrapperFlags.append(QByteArrayLiteral("Shiboken::ObjectType::WrapperFlags::InnerClass"));
@@ -5188,11 +5278,12 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     s << INDENT << ");\n";
     s << INDENT << Qt::endl;
 
-    if (usePySideExtensions()) {
-        QString className = metaClass->qualifiedCppName();
+    s << INDENT << "auto pyType = reinterpret_cast<PyTypeObject *>(" << typePtr << ");\n";
+    s << INDENT << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n";
+
+    if (usePySideExtensions())
         s << INDENT << "SbkObjectType_SetPropertyStrings(reinterpret_cast<PyTypeObject *>(" << typePtr << "), "
-        << chopType(pyTypeName) << "_properties);\n";
-    }
+                    << chopType(pyTypeName) << "_PropertyStrings);\n";
 
     if (!classContext.forSmartPointer())
         s << INDENT << cpythonTypeNameExt(classTypeEntry) << Qt::endl;
@@ -5746,8 +5837,7 @@ bool CppGenerator::finishGeneration()
 
     // Global enums
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    const AbstractMetaClassList &classList = classes();
-    for (const AbstractMetaClass *metaClass : classList) {
+    for (const AbstractMetaClass *metaClass : classes()) {
         const AbstractMetaClass *encClass = metaClass->enclosingClass();
         if (!encClass || !NamespaceTypeEntry::isVisibleScope(encClass->typeEntry()))
             lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);

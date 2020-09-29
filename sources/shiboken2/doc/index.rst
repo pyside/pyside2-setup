@@ -3,11 +3,11 @@ Shiboken
 
 .. ifconfig:: output_format == 'html'
 
-   Shiboken is a fundamental piece on the `Qt for Python <../index.html>`_ project that serves two purposes:
+   Shiboken is a fundamental piece on the `Qt for Python <../index.html>`__ project that serves two purposes:
 
 .. ifconfig:: output_format == 'qthelp'
 
-   Shiboken is a fundamental piece on the `Qt for Python <../pyside2/index.html>`_ project that serves two purposes:
+   Shiboken is a fundamental piece on the `Qt for Python <../pyside2/index.html>`__ project that serves two purposes:
 
 
 * Generator_: Extract information from C or C++ headers and generate CPython_ code that allow

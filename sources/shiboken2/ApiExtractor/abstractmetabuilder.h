@@ -63,11 +63,11 @@ public:
     AbstractMetaBuilder();
     virtual ~AbstractMetaBuilder();
 
-    AbstractMetaClassList classes() const;
-    AbstractMetaClassList templates() const;
-    AbstractMetaClassList smartPointers() const;
-    AbstractMetaFunctionList globalFunctions() const;
-    AbstractMetaEnumList globalEnums() const;
+    const AbstractMetaClassList &classes() const;
+    const AbstractMetaClassList &templates() const;
+    const AbstractMetaClassList &smartPointers() const;
+    const AbstractMetaFunctionList &globalFunctions() const;
+    const AbstractMetaEnumList &globalEnums() const;
     AbstractMetaEnum *findEnum(const TypeEntry *typeEntry) const;
 
     /**

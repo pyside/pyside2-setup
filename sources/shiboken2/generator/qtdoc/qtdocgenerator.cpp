@@ -411,8 +411,7 @@ QString QtXmlToSphinx::expandFunction(const QString& function) const
     const AbstractMetaClass *metaClass = nullptr;
     if (firstDot != -1) {
         const auto className = QStringView{function}.left(firstDot);
-        const AbstractMetaClassList &classes = m_generator->classes();
-        for (const AbstractMetaClass *cls : classes) {
+        for (const AbstractMetaClass *cls : m_generator->classes()) {
             if (cls->name() == className) {
                 metaClass = cls;
                 break;
@@ -431,8 +430,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
     const auto currentClass = QStringView{m_context}.split(QLatin1Char('.')).constLast();
 
     const AbstractMetaClass *metaClass = nullptr;
-    const AbstractMetaClassList &classes = m_generator->classes();
-    for (const AbstractMetaClass *cls : classes) {
+    for (const AbstractMetaClass *cls : m_generator->classes()) {
         if (cls->name() == currentClass) {
             metaClass = cls;
             break;

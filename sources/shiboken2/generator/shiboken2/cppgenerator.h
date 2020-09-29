@@ -290,8 +290,19 @@ private:
     void writeGetterFunction(QTextStream &s,
                              const AbstractMetaField *metaField,
                              const GeneratorContext &context);
+    void writeGetterFunction(QTextStream &s,
+                             const QPropertySpec *property,
+                             const GeneratorContext &context);
+    void writeSetterFunctionPreamble(QTextStream &s,
+                                     const QString &name,
+                                     const QString &funcName,
+                                     const AbstractMetaType *type,
+                                     const GeneratorContext &context);
     void writeSetterFunction(QTextStream &s,
                              const AbstractMetaField *metaField,
+                             const GeneratorContext &context);
+    void writeSetterFunction(QTextStream &s,
+                             const QPropertySpec *property,
                              const GeneratorContext &context);
 
     void writeRichCompareFunction(QTextStream &s, const GeneratorContext &context);

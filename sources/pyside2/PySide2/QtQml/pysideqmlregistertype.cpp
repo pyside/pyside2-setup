@@ -626,7 +626,7 @@ static const char *VolatileBool_SignatureStrings[] = {
 void PySide::initQmlSupport(PyObject *module)
 {
     // Export QmlListProperty type
-    if (SbkSpecial_Type_Ready(module, PropertyListTypeF(), PropertyList_SignatureStrings) < 0) {
+    if (InitSignatureStrings(PropertyListTypeF(), PropertyList_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing PropertyList type.";
         return;
@@ -639,7 +639,7 @@ void PySide::initQmlSupport(PyObject *module)
     PyModule_AddObject(module, PepType_GetNameStr(PropertyListTypeF()),
                        reinterpret_cast<PyObject *>(PropertyListTypeF()));
 
-    if (SbkSpecial_Type_Ready(module, QtQml_VolatileBoolTypeF(), VolatileBool_SignatureStrings) < 0) {
+    if (InitSignatureStrings(QtQml_VolatileBoolTypeF(), VolatileBool_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing VolatileBool type.";
         return;

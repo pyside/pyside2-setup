@@ -135,27 +135,27 @@ AbstractMetaBuilder::~AbstractMetaBuilder()
     delete d;
 }
 
-AbstractMetaClassList AbstractMetaBuilder::classes() const
+const AbstractMetaClassList &AbstractMetaBuilder::classes() const
 {
     return d->m_metaClasses;
 }
 
-AbstractMetaClassList AbstractMetaBuilder::templates() const
+const AbstractMetaClassList &AbstractMetaBuilder::templates() const
 {
     return d->m_templates;
 }
 
-AbstractMetaClassList AbstractMetaBuilder::smartPointers() const
+const AbstractMetaClassList &AbstractMetaBuilder::smartPointers() const
 {
     return d->m_smartPointers;
 }
 
-AbstractMetaFunctionList AbstractMetaBuilder::globalFunctions() const
+const AbstractMetaFunctionList &AbstractMetaBuilder::globalFunctions() const
 {
     return d->m_globalFunctions;
 }
 
-AbstractMetaEnumList AbstractMetaBuilder::globalEnums() const
+const AbstractMetaEnumList &AbstractMetaBuilder::globalEnums() const
 {
     return d->m_globalEnums;
 }
