@@ -41,25 +41,6 @@ enum {
     AnonymousGlobalEnum_Value1
 };
 
-// Invisible namespace
-namespace Invisible
-{
-
-enum EnumOnNamespace {
-    Option1     = 1,
-    Option2     = 2,
-    Option3     = 3
-};
-
-struct ObjectOnInvisibleNamespace
-{
-    bool exists() const { return true; }
-    static int toInt(EnumOnNamespace e) { return static_cast<int>(e); }
-    static ObjectOnInvisibleNamespace consume(const ObjectOnInvisibleNamespace &other) { return other; }
-};
-
-};
-
 namespace SampleNamespace
 {
 

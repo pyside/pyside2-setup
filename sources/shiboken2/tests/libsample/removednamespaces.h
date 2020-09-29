@@ -34,9 +34,17 @@
 namespace RemovedNamespace1
 {
 
-enum RemovedNamespace1_Enum { RemovedNamespace1_Enum_Value0 };
+enum RemovedNamespace1_Enum { RemovedNamespace1_Enum_Value0 = 0,
+                              RemovedNamespace1_Enum_Value1 = 1 };
 
 enum { RemovedNamespace1_AnonymousEnum_Value0 };
+
+struct ObjectOnInvisibleNamespace
+{
+    bool exists() const { return true; }
+    static int toInt(RemovedNamespace1_Enum e) { return static_cast<int>(e); }
+    static ObjectOnInvisibleNamespace consume(const ObjectOnInvisibleNamespace &other) { return other; }
+};
 
 namespace RemovedNamespace2
 {
