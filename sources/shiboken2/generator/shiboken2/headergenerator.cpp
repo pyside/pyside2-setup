@@ -340,14 +340,15 @@ void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *t
 void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass)
 {
     auto typeEntry = metaClass->typeEntry();
-    if (!typeEntry->generateCode() || !NamespaceTypeEntry::isVisibleScope(typeEntry))
+    if (!typeEntry->generateCode())
         return;
-    writeTypeIndexValueLine(s, metaClass->typeEntry());
+    // enum indices are required for invisible namespaces as well.
     for (const AbstractMetaEnum *metaEnum : metaClass->enums()) {
-        if (metaEnum->isPrivate())
-            continue;
-        writeTypeIndexValueLine(s, metaEnum->typeEntry());
+        if (!metaEnum->isPrivate())
+            writeTypeIndexValueLine(s, metaEnum->typeEntry());
     }
+    if (NamespaceTypeEntry::isVisibleScope(typeEntry))
+        writeTypeIndexValueLine(s, metaClass->typeEntry());
 }
 
 // Format the typedefs for the typedef entries to be generated
@@ -399,19 +400,16 @@ bool HeaderGenerator::finishGeneration()
     Indentation indent(INDENT);
 
     macrosStream << "// Type indices\nenum : int {\n";
-    AbstractMetaEnumList globalEnums = this->globalEnums();
     AbstractMetaClassList classList = classes();
 
     std::sort(classList.begin(), classList.end(), [](AbstractMetaClass *a, AbstractMetaClass *b) {
         return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
     });
 
-    for (const AbstractMetaClass *metaClass : classList) {
+    for (const AbstractMetaClass *metaClass : classList)
         writeTypeIndexValueLines(macrosStream, metaClass);
-        lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
-    }
 
-    for (const AbstractMetaEnum *metaEnum : qAsConst(globalEnums))
+    for (const AbstractMetaEnum *metaEnum : globalEnums())
         writeTypeIndexValueLine(macrosStream, metaEnum->typeEntry());
 
     // Write the smart pointer define indexes.
@@ -486,12 +484,11 @@ bool HeaderGenerator::finishGeneration()
         typeFunctions << "QT_WARNING_PUSH\n";
         typeFunctions << "QT_WARNING_DISABLE_DEPRECATED\n";
     }
-    for (const AbstractMetaEnum *cppEnum : qAsConst(globalEnums)) {
-        if (cppEnum->isAnonymous() || cppEnum->isPrivate())
-            continue;
-        includes << cppEnum->typeEntry()->include();
-        writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
-        writeSbkTypeFunction(typeFunctions, cppEnum);
+    for (const AbstractMetaEnum *cppEnum : globalEnums()) {
+        if (!cppEnum->isAnonymous()) {
+            includes << cppEnum->typeEntry()->include();
+            writeSbkTypeFunction(typeFunctions, cppEnum);
+        }
     }
 
     for (AbstractMetaClass *metaClass : classList) {
