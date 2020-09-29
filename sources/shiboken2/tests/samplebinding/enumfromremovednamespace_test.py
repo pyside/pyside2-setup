@@ -74,6 +74,9 @@ class TestEnumFromRemovedNamespace(unittest.TestCase):
         sample.UnremovedNamespace.RemovedNamespace3_Enum_Value0
         sample.UnremovedNamespace.RemovedNamespace3_AnonymousEnum_Value0
 
+    def testNestedFunctionFromRemovedNamespace(self):
+            self.assertEqual(sample.UnremovedNamespace.nestedMathSum(1, 2), 3)
+
 
 if __name__ == '__main__':
     unittest.main()

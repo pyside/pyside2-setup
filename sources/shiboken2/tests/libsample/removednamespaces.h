@@ -65,6 +65,8 @@ namespace RemovedNamespace3
 
     enum { RemovedNamespace3_AnonymousEnum_Value0 };
 
+    inline int nestedMathSum(int x, int y) { return x + y; }
+
 } // namespace RemovedNamespace3
 } // namespace UnremovedNamespace
 

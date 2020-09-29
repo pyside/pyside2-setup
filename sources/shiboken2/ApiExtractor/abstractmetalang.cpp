@@ -2159,6 +2159,15 @@ void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMet
     }
 }
 
+void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const
+{
+    if (isNamespace()) {
+        invisibleNamespaceRecursion([funcList](AbstractMetaClass *c) {
+            funcList->append(c->functions());
+        });
+    }
+}
+
 static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractMetaType *type)
 {
     if (!type)

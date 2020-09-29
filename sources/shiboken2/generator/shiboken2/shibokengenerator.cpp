@@ -2495,7 +2495,8 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroups(const Abs
 
 ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClass *scope)
 {
-    const AbstractMetaFunctionList &lst = scope->functions();
+    AbstractMetaFunctionList lst = scope->functions();
+    scope->getFunctionsFromInvisibleNamespacesToBeGenerated(&lst);
 
     FunctionGroups results;
     for (AbstractMetaFunction *func : lst) {
