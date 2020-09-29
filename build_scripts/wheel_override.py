@@ -49,11 +49,11 @@ from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
 try:
 
-    from wheel import pep425tags
+    from distutils import log as logger
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
     from wheel.bdist_wheel import safer_name as _safer_name
-    from wheel.pep425tags import get_abbr_impl, get_impl_ver, get_abi_tag
-    from wheel.pep425tags import get_platform as wheel_get_platform
+    from wheel.bdist_wheel import get_abi_tag, get_platform
+    from packaging import tags
     from wheel import __version__ as wheel_version
 
     wheel_module_exists = True
@@ -124,7 +124,18 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         elif self.root_is_pure:
             plat_name = 'any'
         else:
-            plat_name = self.plat_name or wheel_get_platform()
+            # macosx contains system version in platform name so need special handle
+            if self.plat_name and not self.plat_name.startswith("macosx"):
+                plat_name = self.plat_name
+            else:
+                # on macosx always limit the platform name to comply with any
+                # c-extension modules in bdist_dir, since the user can specify
+                # a higher MACOSX_DEPLOYMENT_TARGET via tools like CMake
+
+                # on other platforms, and on macosx if there are no c-extension
+                # modules, use the default platform name.
+                plat_name = get_platform(self.bdist_dir)
+
             if plat_name in ('linux-x86_64', 'linux_x86_64') and sys.maxsize == 2147483647:
                 plat_name = 'linux_i686'
 
@@ -151,8 +162,8 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
                 impl = self.python_tag
             tag = (impl, 'none', plat_name)
         else:
-            impl_name = get_abbr_impl()
-            impl_ver = get_impl_ver()
+            impl_name = tags.interpreter_name()
+            impl_ver = tags.interpreter_version()
             impl = impl_name + impl_ver
             # We don't work on CPython 3.1, 3.0.
             if self.py_limited_api and (impl_name + impl_ver).startswith('cp3'):
@@ -161,21 +172,11 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             else:
                 abi_tag = str(get_abi_tag()).lower()
             tag = (impl, abi_tag, plat_name)
-            try:
-                supported_tags = pep425tags.get_supported(
-                    supplied_platform=plat_name if self.plat_name_supplied else None)
-            except TypeError:
-                # This was breaking the CI, specifically the:
-                #   OpenSUSE 15 x86_64 using ICC
-                # Some versions of Python 2.7 require an argument called
-                # 'archive_root' which doesn't exist on 3, so we set it to
-                # 'None' for those version (e.g.: Python 2.7.14)
-                supported_tags = pep425tags.get_supported(None,
-                    supplied_platform=plat_name if self.plat_name_supplied else None)
+            supported_tags = [(t.interpreter, t.abi, t.platform)
+                              for t in tags.sys_tags()]
             # XXX switch to this alternate implementation for non-pure:
             if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64') and sys.version_info[0] == 2):
                 return tag
-            assert tag == supported_tags[0], "%s != %s" % (tag, supported_tags[0])
             assert tag in supported_tags, ("would build wheel with unsupported tag {}".format(tag))
         return tag
 

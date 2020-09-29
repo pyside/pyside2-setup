@@ -5,6 +5,6 @@ setuptools==44.0.0; python_version < '3'
 setuptools; python_version >= '3'
 sphinx
 six
-wheel
+wheel>=0.35
 PyOpenGL
 pyinstaller==3.6
