@@ -5064,19 +5064,19 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
 
     s << "static PyType_Slot " << cpythonName << "_number_slots[] = {\n";
     s << "#ifdef IS_PY3K\n";
-    s << INDENT << "{Py_nb_bool,    (void *)" << cpythonName << "__nonzero},\n";
+    s << INDENT << "{Py_nb_bool,    reinterpret_cast<void *>(" << cpythonName << "__nonzero)},\n";
     s << "#else\n";
-    s << INDENT << "{Py_nb_nonzero, (void *)" << cpythonName << "__nonzero},\n";
-    s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long},\n";
+    s << INDENT << "{Py_nb_nonzero, reinterpret_cast<void *>(" << cpythonName << "__nonzero)},\n";
+    s << INDENT << "{Py_nb_long,    reinterpret_cast<void *>(" << cpythonName << "_long)},\n";
     s << "#endif\n";
-    s << INDENT << "{Py_nb_invert,  (void *)" << cpythonName << "___invert__},\n";
-    s << INDENT << "{Py_nb_and,     (void *)" << cpythonName  << "___and__},\n";
-    s << INDENT << "{Py_nb_xor,     (void *)" << cpythonName  << "___xor__},\n";
-    s << INDENT << "{Py_nb_or,      (void *)" << cpythonName  << "___or__},\n";
-    s << INDENT << "{Py_nb_int,     (void *)" << cpythonName << "_long},\n";
-    s << INDENT << "{Py_nb_index,   (void *)" << cpythonName << "_long},\n";
+    s << INDENT << "{Py_nb_invert,  reinterpret_cast<void *>(" << cpythonName << "___invert__)},\n";
+    s << INDENT << "{Py_nb_and,     reinterpret_cast<void *>(" << cpythonName  << "___and__)},\n";
+    s << INDENT << "{Py_nb_xor,     reinterpret_cast<void *>(" << cpythonName  << "___xor__)},\n";
+    s << INDENT << "{Py_nb_or,      reinterpret_cast<void *>(" << cpythonName  << "___or__)},\n";
+    s << INDENT << "{Py_nb_int,     reinterpret_cast<void *>(" << cpythonName << "_long)},\n";
+    s << INDENT << "{Py_nb_index,   reinterpret_cast<void *>(" << cpythonName << "_long)},\n";
     s << "#ifndef IS_PY3K\n";
-    s << INDENT << "{Py_nb_long,    (void *)" << cpythonName << "_long},\n";
+    s << INDENT << "{Py_nb_long,    reinterpret_cast<void *>(" << cpythonName << "_long)},\n";
     s << "#endif\n";
     s << INDENT << "{0, " << NULL_PTR << "} // sentinel\n";
     s << "};\n\n";
@@ -5088,7 +5088,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
     FlagsTypeEntry *flagsEntry = cppEnum->typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
-    s << "PyObject * " << cpythonEnumName(cppEnum) << "___" << pyOpName
+    s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
         << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n";
 
     AbstractMetaType *flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
