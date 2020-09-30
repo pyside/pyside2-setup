@@ -114,6 +114,11 @@ void Truck::setArrivalMessage(const std::string &message)
     m_arrivalMessage = message;
 }
 
+std::string Truck::getArrivalMessage() const
+{
+    return m_arrivalMessage;
+}
+
 bool Truck::deliver() const
 {
     std::random_device rd;

@@ -38,14 +38,32 @@ from shiboken_paths import init_paths
 init_paths()
 
 import sample
+from shiboken_test_helper import objectFullname
+
 
 class TestEnumFromRemovedNamespace(unittest.TestCase):
     def testEnumPromotedToGlobal(self):
         sample.RemovedNamespace1_Enum
-        sample.RemovedNamespace1_Enum_Value0
+        self.assertEqual(sample.RemovedNamespace1_Enum_Value0, 0)
+        self.assertEqual(sample.RemovedNamespace1_Enum_Value1, 1)
         sample.RemovedNamespace1_AnonymousEnum_Value0
         sample.RemovedNamespace2_Enum
         sample.RemovedNamespace2_Enum_Value0
+
+    def testNames(self):
+        # Test if invisible namespace does not appear on type name
+        self.assertEqual(objectFullname(sample.RemovedNamespace1_Enum),
+                         "sample.RemovedNamespace1_Enum")
+        self.assertEqual(objectFullname(sample.ObjectOnInvisibleNamespace),
+                         "sample.ObjectOnInvisibleNamespace")
+
+        # Function arguments
+        signature = sample.ObjectOnInvisibleNamespace.toInt.__signature__
+        self.assertEqual(objectFullname(signature.parameters['e'].annotation),
+                         "sample.RemovedNamespace1_Enum")
+        signature = sample.ObjectOnInvisibleNamespace.consume.__signature__
+        self.assertEqual(objectFullname(signature.parameters['other'].annotation),
+                         "sample.ObjectOnInvisibleNamespace")
 
     def testEnumPromotedToUpperNamespace(self):
         sample.UnremovedNamespace

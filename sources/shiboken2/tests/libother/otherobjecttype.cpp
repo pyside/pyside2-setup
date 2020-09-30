@@ -40,7 +40,7 @@ int OtherObjectType::enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum valu
     return static_cast<int>(value);
 }
 
-int OtherObjectType::enumAsIntForInvisibleNamespace(Invisible::EnumOnNamespace value)
+int OtherObjectType::enumAsIntForInvisibleNamespace(RemovedNamespace1::RemovedNamespace1_Enum value)
 {
     return static_cast<int>(value);
 }

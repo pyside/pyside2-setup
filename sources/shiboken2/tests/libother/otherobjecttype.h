@@ -36,13 +36,14 @@
 #include "objecttype.h"
 #include "collector.h"
 #include "samplenamespace.h"
+#include "removednamespaces.h"
 
 
 class LIBOTHER_API OtherObjectType : public ObjectType
 {
 public:
     static int enumAsInt(SampleNamespace::SomeClass::PublicScopedEnum value);
-    static int enumAsIntForInvisibleNamespace(Invisible::EnumOnNamespace value);
+    static int enumAsIntForInvisibleNamespace(RemovedNamespace1::RemovedNamespace1_Enum value);
 };
 
 

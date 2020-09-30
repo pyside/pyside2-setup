@@ -119,6 +119,7 @@ from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 from distutils.command.build_ext import build_ext as _build_ext
 from distutils.util import get_platform
+from distutils.cmd import Command
 
 from setuptools import Extension
 from setuptools.command.install import install as _install
@@ -1023,6 +1024,9 @@ class PysideBuild(_build):
             log.info("Output format will be qthelp")
             cmake_cmd.append("-DDOC_OUTPUT_FORMAT=qthelp")
 
+        # Build the whole documentation (rst + API) by default
+        cmake_cmd.append("-DFULLDOCSBUILD=1")
+
         if not OPTION["SKIP_CMAKE"]:
             log.info("Configuring module {} ({})...".format(extension, module_src_dir))
             if run_process(cmake_cmd) != 0:
@@ -1273,6 +1277,83 @@ class PysideBuild(_build):
             log.info("Patched rpath to '$ORIGIN/' (Linux) or "
                      "updated rpath (OS/X) in {}.".format(srcpath))
 
+class PysideRstDocs(Command):
+    description = "Build .rst documentation only"
+    user_options = []
+    def initialize_options(self):
+        log.info("-- This build process will not include the API documentation."
+                 "API documentation requires a full build of pyside/shiboken.")
+        self.skip = False
+        if config.is_internal_shiboken_generator_build():
+            self.skip = True
+        if not self.skip:
+            self.name = config.package_name().lower()
+            self.doc_dir = os.path.join(config.setup_script_dir, "sources")
+            self.doc_dir = os.path.join(self.doc_dir, self.name)
+            self.doc_dir = os.path.join(self.doc_dir, "doc")
+            try:
+                # Check if sphinx is installed to proceed.
+                import sphinx
+                if self.name == "shiboken2":
+                    log.info("-- Generating Shiboken documentation")
+                    log.info("-- Documentation directory: 'html/pyside2/shiboken2/'")
+                elif self.name == "pyside2":
+                    log.info("-- Generating PySide documentation")
+                    log.info("-- Documentation directory: 'html/pyside2/'")
+            except ImportError:
+                raise DistutilsSetupError("Sphinx not found - aborting")
+            self.html_dir = "html"
+
+            # creating directories html/pyside2/shiboken2
+            try:
+                if not os.path.isdir(self.html_dir):
+                    os.mkdir(self.html_dir)
+                if self.name == "shiboken2":
+                    out_pyside = os.path.join(self.html_dir, "pyside2")
+                    if not os.path.isdir(out_pyside):
+                        os.mkdir(out_pyside)
+                    out_shiboken = os.path.join(out_pyside, "shiboken2")
+                    if not os.path.isdir(out_shiboken):
+                        os.mkdir(out_shiboken)
+                    self.out_dir = out_shiboken
+                # We know that on the shiboken step, we already created the
+                # 'pyside2' directory
+                elif self.name == "pyside2":
+                    self.out_dir = os.path.join(self.html_dir, "pyside2")
+            except:
+                raise DistutilsSetupError("Error while creating directories for {}".format(self.doc_dir))
+
+    def run(self):
+        if not self.skip:
+            cmake_cmd = [OPTION["CMAKE"]]
+            cmake_cmd += [
+                "-S", self.doc_dir,
+                "-B", self.out_dir,
+                "-DDOC_OUTPUT_FORMAT=html",
+                "-DFULLDOCSBUILD=0",
+            ]
+            if run_process(cmake_cmd) != 0:
+                raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))
+
+            if self.name == "pyside2":
+                self.sphinx_src = os.path.join(self.out_dir, "rst")
+            elif self.name == "shiboken2":
+                self.sphinx_src = self.out_dir
+
+            sphinx_cmd = ["sphinx-build",
+                "-b", "html",
+                "-c", self.sphinx_src,
+                self.doc_dir,
+                self.out_dir
+            ]
+            if run_process(sphinx_cmd) != 0:
+                raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))
+        # Last message
+        if not self.skip and self.name == "pyside2":
+            log.info("-- The documentation was built. Check html/pyside2/index.html")
+
+    def finalize_options(self):
+        pass
 
 cmd_class_dict = {
     'build': PysideBuild,
@@ -1281,7 +1362,8 @@ cmd_class_dict = {
     'bdist_egg': PysideBdistEgg,
     'develop': PysideDevelop,
     'install': PysideInstall,
-    'install_lib': PysideInstallLib
+    'install_lib': PysideInstallLib,
+    'build_rst_docs': PysideRstDocs,
 }
 if wheel_module_exists:
     params = {}

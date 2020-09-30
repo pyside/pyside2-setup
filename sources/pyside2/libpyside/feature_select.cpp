@@ -546,38 +546,15 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
 //     Feature 0x02: Use true properties instead of getters and setters
 //
 
-static PyObject *createProperty(PyObject *getter, PyObject *setter, PyObject *doc)
+static PyObject *createProperty(PyObject *getter, PyObject *setter)
 {
     assert(getter != nullptr);
     if (setter == nullptr)
         setter = Py_None;
-    PyObject *deleter = Py_None;
     PyObject *prop = PyObject_CallObject(reinterpret_cast<PyObject *>(&PyProperty_Type), nullptr);
-    AutoDecRef args(Py_BuildValue("OOOO", getter, setter, deleter, doc));
+    AutoDecRef args(Py_BuildValue("OO", getter, setter));
     PyProperty_Type.tp_init(prop, args, nullptr);
     return prop;
-}
-
-static PyObject *calcPropDocString(PyTypeObject *type, PyObject *getterName, PyObject *setterName)
-{
-    // To calculate the docstring, we need the __doc__ attribute of the original
-    // getter and setter. We temporatily switch back to no features. This
-    // might change when we have full signature support for features.
-    auto hold = type->tp_dict;
-    moveToFeatureSet(type, fast_id_array[0]);
-    auto dict = type->tp_dict;
-    auto getter = PyDict_GetItem(dict, getterName);
-    auto setter = setterName ? PyDict_GetItem(dict, setterName) : nullptr;
-    PyObject *buf = PyObject_GetAttr(getter, PyMagicName::doc());
-    type->tp_dict = hold;
-
-    if (setter == nullptr)
-        return buf;
-    AutoDecRef nl(Py_BuildValue("s", "\n"));
-    AutoDecRef wdoc(PyObject_GetAttr(setter, PyMagicName::doc()));
-    String::concat(&buf, nl);
-    String::concat(&buf, wdoc);
-    return buf;
 }
 
 static QStringList parseFields(const char *propstr)
@@ -639,10 +616,7 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
         if (setter != nullptr && Py_TYPE(setter) != PepMethodDescr_TypePtr)
             continue;
 
-        PyObject *doc_read = make_snake_case(fields[1], false);
-        PyObject *doc_write(haveWrite ? make_snake_case(fields[2], false) : nullptr);
-        AutoDecRef doc(calcPropDocString(type, doc_read, doc_write));
-        AutoDecRef PyProperty(createProperty(getter, setter, doc));
+        AutoDecRef PyProperty(createProperty(getter, setter));
         if (PyProperty.isNull())
             return false;
         if (PyDict_SetItem(prop_dict, name, PyProperty) < 0)

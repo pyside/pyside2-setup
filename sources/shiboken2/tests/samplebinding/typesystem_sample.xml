@@ -536,11 +536,6 @@
 
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
 
-    <namespace-type name="Invisible" visible="no">
-        <enum-type name="EnumOnNamespace" />
-        <value-type name="ObjectOnInvisibleNamespace" />
-    </namespace-type>
-
     <namespace-type name="SampleNamespace">
         <enum-type name="Option"/>
         <enum-type name="InValue"/>
@@ -603,6 +598,7 @@
 
     <namespace-type name="RemovedNamespace1" visible='false'>
         <enum-type name="RemovedNamespace1_Enum" />
+        <value-type name="ObjectOnInvisibleNamespace" />
         <namespace-type name="RemovedNamespace2" visible='false'>
             <enum-type name="RemovedNamespace2_Enum" />
         </namespace-type>

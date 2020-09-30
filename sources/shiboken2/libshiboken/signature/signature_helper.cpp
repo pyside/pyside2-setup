@@ -150,6 +150,28 @@ static PyObject *compute_name_key(PyObject *ob)
     return Py_BuildValue("(OO)", type_key.object(), func_name.object());
 }
 
+static PyObject *_func_with_new_name(PyTypeObject *type,
+                                     PyMethodDef *meth,
+                                     const char *new_name)
+{
+    /*
+     * Create a function with a lower case name.
+     * Note: This is similar to feature_select's methodWithNewName,
+     * but does not create a descriptor.
+     * XXX Maybe we can get rid of this, completely?
+     */
+    auto obtype = reinterpret_cast<PyObject *>(type);
+    int len = strlen(new_name);
+    auto name = new char[len + 1];
+    strcpy(name, new_name);
+    auto new_meth = new PyMethodDef;
+    new_meth->ml_name = name;
+    new_meth->ml_meth = meth->ml_meth;
+    new_meth->ml_flags = meth->ml_flags;
+    new_meth->ml_doc = meth->ml_doc;
+    return PyCFunction_NewEx(new_meth, obtype, nullptr);
+}
+
 static int build_name_key_to_func(PyObject *obtype)
 {
     auto *type = reinterpret_cast<PyTypeObject *>(obtype);
@@ -161,6 +183,17 @@ static int build_name_key_to_func(PyObject *obtype)
     AutoDecRef type_key(GetTypeKey(obtype));
     for (; meth->ml_name != nullptr; meth++) {
         AutoDecRef func(PyCFunction_NewEx(meth, obtype, nullptr));
+        AutoDecRef func_name(get_funcname(func));
+        AutoDecRef name_key(Py_BuildValue("(OO)", type_key.object(), func_name.object()));
+        if (func.isNull() || name_key.isNull()
+            || PyDict_SetItem(pyside_globals->map_dict, name_key, func) < 0)
+            return -1;
+    }
+    // PYSIDE-1019: Now we repeat the same for snake case names.
+    meth = type->tp_methods;
+    for (; meth->ml_name != nullptr; meth++) {
+        const char *name = String::toCString(String::getSnakeCaseName(meth->ml_name, true));
+        AutoDecRef func(_func_with_new_name(type, meth, name));
         AutoDecRef func_name(get_funcname(func));
         AutoDecRef name_key(Py_BuildValue("(OO)", type_key.object(), func_name.object()));
         if (func.isNull() || name_key.isNull()
@@ -196,6 +229,46 @@ PyObject *name_key_to_func(PyObject *ob)
     }
     Py_XINCREF(ret);
     return ret;
+}
+
+static PyObject *_build_new_entry(PyObject *new_name, PyObject *value)
+{
+    PyObject *new_value = PyDict_Copy(value);
+    PyObject *multi = PyDict_GetItem(value, PyName::multi());
+    if (multi != nullptr && Py_TYPE(multi) == &PyList_Type) {
+        ssize_t len = PyList_Size(multi);
+        AutoDecRef list(PyList_New(len));
+        if (list.isNull())
+            return nullptr;
+        for (int idx = 0; idx < len; ++idx) {
+            auto multi_entry = PyList_GetItem(multi, idx);
+            auto dup = PyDict_Copy(multi_entry);
+            if (PyDict_SetItem(dup, PyName::name(), new_name) < 0)
+                return nullptr;
+            if (PyList_SetItem(list, idx, dup) < 0)
+                return nullptr;
+        }
+        if (PyDict_SetItem(new_value, PyName::multi(), list) < 0)
+            return nullptr;
+    } else {
+        if (PyDict_SetItem(new_value, PyName::name(), new_name) < 0)
+            return nullptr;
+    }
+    return new_value;
+}
+
+int insert_snake_case_variants(PyObject *dict)
+{
+    AutoDecRef snake_dict(PyDict_New());
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
+    while (PyDict_Next(dict, &pos, &key, &value)) {
+        AutoDecRef name(String::getSnakeCaseName(key, true));
+        AutoDecRef new_value(_build_new_entry(name, value));
+        if (PyDict_SetItem(snake_dict, name, new_value) < 0)
+            return -1;
+    }
+    return PyDict_Merge(dict, snake_dict, 0);
 }
 
 PyObject *_get_class_of_cf(PyObject *ob_cf)

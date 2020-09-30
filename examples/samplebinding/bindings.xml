@@ -70,6 +70,7 @@
 
     <value-type name="Truck">
         <!-- Same ownership caveat applies here. -->
+        <property type="std::string" name="arrivalMessage" get="getArrivalMessage" set="setArrivalMessage"/>
         <modify-function signature="addIcecreamFlavor(Icecream*)">
             <modify-argument index="1">
                 <define-ownership owner="c++"/>

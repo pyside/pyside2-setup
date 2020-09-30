@@ -108,6 +108,10 @@ public:
 
     virtual const Str & returnConstRef() const;
 
+protected:
+    // PYSIDE-1388: Protected hack with final classes (see VirtualFinalDaughter).
+    void protectedMethod() {}
+
 private:
     Str m_name;
     int m_left;

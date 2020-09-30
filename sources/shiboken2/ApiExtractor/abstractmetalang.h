@@ -1413,10 +1413,7 @@ public:
 
     AbstractMetaField *findField(const QString &name) const;
 
-    AbstractMetaEnumList enums() const
-    {
-        return m_enums;
-    }
+    const AbstractMetaEnumList &enums() const { return m_enums; }
     void setEnums(const AbstractMetaEnumList &enums)
     {
         m_enums = enums;

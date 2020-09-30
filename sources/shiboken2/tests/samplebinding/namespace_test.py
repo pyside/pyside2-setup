@@ -43,19 +43,14 @@ from sample import *
 from shiboken_test_helper import objectFullname
 
 
+# For tests of invisible namespaces, see
+# enumfromremovednamespace_test.py / removednamespaces.h
+
+
 class TestVariablesUnderNamespace(unittest.TestCase):
     def testIt(self):
          self.assertEqual(SampleNamespace.variableInNamespace, 42)
 
-
-class TestEnumUnderNamespace(unittest.TestCase):
-    def testInvisibleNamespace(self):
-        o1 = EnumOnNamespace.Option1
-        self.assertEqual(o1, 1)
-    def testTpNames(self):
-        self.assertEqual(objectFullname(EnumOnNamespace), "sample.EnumOnNamespace")
-        self.assertEqual(str(EnumOnNamespace.Option1),
-            "sample.EnumOnNamespace.Option1")
 
 class TestClassesUnderNamespace(unittest.TestCase):
     def testIt(self):
@@ -87,14 +82,7 @@ class TestClassesUnderNamespace(unittest.TestCase):
             "sample.SampleNamespace.InValue")
         self.assertEqual(objectFullname(SampleNamespace.enumAsInt.__signature__.parameters['value'].annotation),
             "sample.SampleNamespace.SomeClass.PublicScopedEnum")
-        self.assertEqual(objectFullname(ObjectOnInvisibleNamespace.toInt.__signature__.parameters['e'].annotation),
-            "sample.EnumOnNamespace")
 
-        # Test if enum on namespace that was marked as not gerenated does not appear on type name
-        self.assertEqual(objectFullname(ObjectOnInvisibleNamespace),
-            "sample.ObjectOnInvisibleNamespace")
-        self.assertEqual(objectFullname(ObjectOnInvisibleNamespace.consume.__signature__.parameters['other'].annotation),
-            "sample.ObjectOnInvisibleNamespace")
 
 if __name__ == '__main__':
     unittest.main()
