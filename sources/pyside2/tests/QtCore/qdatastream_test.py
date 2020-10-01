@@ -46,6 +46,14 @@ def create_bitarray(string):
         array.setBit(i, char != '0')
     return array
 
+
+def serialize_bitarray(bit_array):
+    buffer = QByteArray()
+    stream = QDataStream(buffer, QIODevice.WriteOnly)
+    stream << bit_array
+    return buffer
+
+
 class QDataStreamWrite(unittest.TestCase):
     '''Test case for QDatastream write* functions'''
 
@@ -280,67 +288,23 @@ class QDataStreamShiftBitArray(unittest.TestCase):
 
     def testOk(self):
         '''QDataStream with valid QBitArray'''
+        test_set = [QBitArray()]
+        for i in range(1, 7):
+            test_set.append(create_bitarray(i * '1'))
+        for s in ['0111111', '0000000', '1001110']:
+            test_set.append(create_bitarray(s))
+
         data = []
-
-        data.append((QByteArray(bytes('\x00\x00\x00\x00', "UTF-8")), QDataStream.Ok,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00\x00\x01\x00', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('0')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x01\x01', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('1')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x02\x03', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('11')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x03\x07', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('111')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x04\x0f', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('1111')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x05\x1f', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('11111')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x06\x3f', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('111111')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x07\x7f', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('1111111')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x07\x7e', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('0111111')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x07\x00', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('0000000')))
-        data.append((QByteArray(bytes('\x00\x00\x00\x07\x39', "UTF-8")), QDataStream.Ok,
-                     create_bitarray('1001110')))
-
+        for expected in test_set:
+            data.append((serialize_bitarray(expected), QDataStream.Ok, expected))
         self._check_bitarray(data)
 
     def testPastEnd(self):
         '''QDataStream >> QBitArray reading past the end of the data'''
-        data = []
+        serialized = serialize_bitarray(create_bitarray('1001110'))
+        serialized.resize(serialized.size() - 2)
+        self._check_bitarray([(serialized, QDataStream.ReadPastEnd, QBitArray())])
 
-        data.append((QByteArray(), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00\x00', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00\x00\x01', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00\x00\x02', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00\x00\x03', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-        data.append((QByteArray(bytes('\x00\x00\x00\x04', "UTF-8")), QDataStream.ReadPastEnd,
-                     QBitArray()))
-
-        self._check_bitarray(data)
-
-    def testCorruptData(self):
-        '''QDataStream reading corrupt data'''
-        data = []
-
-        data.append((QByteArray(bytes('\x00\x00\x00\x01\x02', "UTF-8")),
-                     QDataStream.ReadCorruptData,
-                     QBitArray()))
-
-        self._check_bitarray(data)
 
 class QDataStreamRawData(unittest.TestCase):
     def testRawData(self):
