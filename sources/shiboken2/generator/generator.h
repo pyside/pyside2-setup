@@ -218,6 +218,9 @@ public:
     /// Returns the classes used to generate the binding code.
     const AbstractMetaClassList &classes() const;
 
+    /// Returns the top namespace made invisible
+    const AbstractMetaClassList &invisibleTopNamespaces() const;
+
     /// Returns the output directory
     QString outputDirectory() const;
 

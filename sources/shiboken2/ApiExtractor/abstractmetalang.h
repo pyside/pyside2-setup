@@ -913,6 +913,9 @@ public:
         m_class = cls;
     }
 
+    // Owner excluding invisible namespaces
+    const AbstractMetaClass *targetLangOwner() const;
+
     // The first class in a hierarchy that declares the function
     const AbstractMetaClass *declaringClass() const
     {
@@ -1432,6 +1435,10 @@ public:
 
     AbstractMetaEnum *findEnum(const QString &enumName);
     AbstractMetaEnumValue *findEnumValue(const QString &enumName);
+    void getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const;
+    void getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const;
+
+    void getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const;
 
     QString fullName() const
     {
@@ -1482,6 +1489,7 @@ public:
     QString package() const;
 
     bool isNamespace() const;
+    bool isInvisibleNamespace() const;
 
     bool isQObject() const;
 
@@ -1678,6 +1686,9 @@ public:
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
 
+    template <class Function>
+    void invisibleNamespaceRecursion(Function f) const;
+
 private:
 #ifndef QT_NO_DEBUG_STREAM
     void format(QDebug &d) const;
@@ -1724,5 +1735,16 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::OperatorQueryOptions)
+
+template <class Function>
+void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
+{
+    for (auto ic : m_innerClasses) {
+        if (ic->isInvisibleNamespace()) {
+            f(ic);
+            ic->invisibleNamespaceRecursion(f);
+        }
+    }
+}
 
 #endif // ABSTRACTMETALANG_H

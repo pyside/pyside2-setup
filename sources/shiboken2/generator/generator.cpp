@@ -168,7 +168,7 @@ struct Generator::GeneratorPrivate
     QStringList instantiatedContainersNames;
     QVector<const AbstractMetaType *> instantiatedContainers;
     QVector<const AbstractMetaType *> instantiatedSmartPointers;
-
+    AbstractMetaClassList m_invisibleTopNamespaces;
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
@@ -190,6 +190,15 @@ bool Generator::setup(const ApiExtractor &extractor)
     }
 
     collectInstantiatedContainersAndSmartPointers();
+
+    for (auto c : classes()) {
+        if (c->enclosingClass() == nullptr && c->isInvisibleNamespace()) {
+            m_d->m_invisibleTopNamespaces.append(c);
+            c->invisibleNamespaceRecursion([&](AbstractMetaClass *ic) {
+                m_d->m_invisibleTopNamespaces.append(ic);
+            });
+        }
+    }
 
     return doSetup();
 }
@@ -342,6 +351,11 @@ bool Generator::handleOption(const QString & /* key */, const QString & /* value
 const AbstractMetaClassList &Generator::classes() const
 {
     return m_d->apiextractor->classes();
+}
+
+const AbstractMetaClassList &Generator::invisibleTopNamespaces() const
+{
+    return m_d->m_invisibleTopNamespaces;
 }
 
 AbstractMetaClassList Generator::classesTopologicalSorted(const Dependencies &additionalDependencies) const

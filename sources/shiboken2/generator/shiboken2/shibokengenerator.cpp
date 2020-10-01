@@ -334,20 +334,6 @@ bool ShibokenGenerator::shouldWriteVirtualMethodNative(const AbstractMetaFunctio
             && (func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0);
 }
 
-void ShibokenGenerator::lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass)
-{
-    Q_ASSERT(metaClass);
-    // if a scope is not to be generated, collect its enums into the parent scope
-    if (!NamespaceTypeEntry::isVisibleScope(metaClass->typeEntry())) {
-        for (AbstractMetaEnum *metaEnum : metaClass->enums()) {
-            if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode()
-                && !enumList.contains(metaEnum)) {
-                enumList.append(metaEnum);
-            }
-        }
-    }
-}
-
 QString ShibokenGenerator::wrapperName(const AbstractMetaClass *metaClass) const
 {
     Q_ASSERT(shouldGenerateCppWrapper(metaClass));
@@ -2471,14 +2457,21 @@ static bool isGroupable(const AbstractMetaFunction *func)
     return true;
 }
 
-ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() const
+static void insertIntoFunctionGroups(const AbstractMetaFunctionList &lst,
+                                     ShibokenGenerator::FunctionGroups *results)
 {
-    const AbstractMetaFunctionList &lst = globalFunctions();
-    FunctionGroups results;
     for (AbstractMetaFunction *func : lst) {
         if (isGroupable(func))
-            results[func->name()].append(func);
+            (*results)[func->name()].append(func);
     }
+}
+
+ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() const
+{
+    FunctionGroups results;
+    insertIntoFunctionGroups(globalFunctions(), &results);
+    for (auto nsp : invisibleTopNamespaces())
+        insertIntoFunctionGroups(nsp->functions(), &results);
     return results;
 }
 
@@ -2502,7 +2495,8 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroups(const Abs
 
 ShibokenGenerator::FunctionGroups ShibokenGenerator::getFunctionGroupsImpl(const AbstractMetaClass *scope)
 {
-    const AbstractMetaFunctionList &lst = scope->functions();
+    AbstractMetaFunctionList lst = scope->functions();
+    scope->getFunctionsFromInvisibleNamespacesToBeGenerated(&lst);
 
     FunctionGroups results;
     for (AbstractMetaFunction *func : lst) {

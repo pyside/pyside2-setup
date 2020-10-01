@@ -228,9 +228,6 @@ protected:
     /// Condition to call WriteVirtualMethodNative. Was extracted because also used to count these calls.
     bool shouldWriteVirtualMethodNative(const AbstractMetaFunction *func);
 
-    /// Adds enums eligible for generation from classes/namespaces marked not to be generated.
-    static void lookForEnumsInClassesNotToBeGenerated(AbstractMetaEnumList &enumList, const AbstractMetaClass *metaClass);
-
     QString wrapperName(const AbstractMetaClass *metaClass) const;
 
     QString fullPythonClassName(const AbstractMetaClass *metaClass);

@@ -390,8 +390,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+    metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     //Extra includes
     s << "\n// Extra includes\n";
@@ -1386,9 +1385,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     s << "// Type conversion functions.\n\n";
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+    metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
     if (!classEnums.isEmpty())
         s << "// Python to C++ enum conversion.\n";
     for (const AbstractMetaEnum *metaEnum : qAsConst(classEnums))
@@ -1738,7 +1735,7 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
                                               const GeneratorContext &context)
 {
     const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
-    const AbstractMetaClass *ownerClass = rfunc->ownerClass();
+    const AbstractMetaClass *ownerClass = rfunc->targetLangOwner();
     Q_ASSERT(ownerClass == context.metaClass());
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
@@ -4770,8 +4767,14 @@ void CppGenerator::writeMethodDefinitionEntry(QTextStream &s, const AbstractMeta
         if (overloadData.hasArgumentWithDefaultValue())
             s << "|METH_KEYWORDS";
     }
-    if (func->ownerClass() && overloadData.hasStaticFunction())
+    // METH_STATIC causes a crash when used for global functions (also from
+    // invisible namespaces).
+    auto ownerClass = func->ownerClass();
+    if (ownerClass
+        && !invisibleTopNamespaces().contains(const_cast<AbstractMetaClass *>(ownerClass))
+        && overloadData.hasStaticFunction()) {
         s << "|METH_STATIC";
+    }
 }
 
 void CppGenerator::writeMethodDefinition(QTextStream &s, const AbstractMetaFunctionList &overloads)
@@ -5051,13 +5054,13 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
     QString cpythonName = cpythonEnumName(cppEnum);
 
     s << "static PyType_Slot " << cpythonName << "_number_slots[] = {\n";
-    s << INDENT << "{Py_nb_bool,    (void *)" << cpythonName << "__nonzero},\n";
-    s << INDENT << "{Py_nb_invert,  (void *)" << cpythonName << "___invert__},\n";
-    s << INDENT << "{Py_nb_and,     (void *)" << cpythonName  << "___and__},\n";
-    s << INDENT << "{Py_nb_xor,     (void *)" << cpythonName  << "___xor__},\n";
-    s << INDENT << "{Py_nb_or,      (void *)" << cpythonName  << "___or__},\n";
-    s << INDENT << "{Py_nb_int,     (void *)" << cpythonName << "_long},\n";
-    s << INDENT << "{Py_nb_index,   (void *)" << cpythonName << "_long},\n";
+    s << INDENT << "{Py_nb_bool,    reinterpret_cast<void *>(" << cpythonName << "__nonzero)},\n";
+    s << INDENT << "{Py_nb_invert,  reinterpret_cast<void *>(" << cpythonName << "___invert__)},\n";
+    s << INDENT << "{Py_nb_and,     reinterpret_cast<void *>(" << cpythonName  << "___and__)},\n";
+    s << INDENT << "{Py_nb_xor,     reinterpret_cast<void *>(" << cpythonName  << "___xor__)},\n";
+    s << INDENT << "{Py_nb_or,      reinterpret_cast<void *>(" << cpythonName  << "___or__)},\n";
+    s << INDENT << "{Py_nb_int,     reinterpret_cast<void *>(" << cpythonName << "_long)},\n";
+    s << INDENT << "{Py_nb_index,   reinterpret_cast<void *>(" << cpythonName << "_long)},\n";
     s << INDENT << "{0, " << NULL_PTR << "} // sentinel\n";
     s << "};\n\n";
 }
@@ -5068,7 +5071,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
     FlagsTypeEntry *flagsEntry = cppEnum->typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
-    s << "PyObject * " << cpythonEnumName(cppEnum) << "___" << pyOpName
+    s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
         << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n";
 
     AbstractMetaType *flagsType = buildAbstractMetaTypeFromTypeEntry(flagsEntry);
@@ -5310,9 +5313,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
-    const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
-    for (AbstractMetaClass *innerClass : innerClasses)
-        lookForEnumsInClassesNotToBeGenerated(classEnums, innerClass);
+    metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     ErrorCode errorCode(QString::fromLatin1(""));
     writeEnumsInitialization(s, classEnums);
@@ -5819,11 +5820,8 @@ bool CppGenerator::finishGeneration()
 
     // Global enums
     AbstractMetaEnumList globalEnums = this->globalEnums();
-    for (const AbstractMetaClass *metaClass : classes()) {
-        const AbstractMetaClass *encClass = metaClass->enclosingClass();
-        if (!encClass || !NamespaceTypeEntry::isVisibleScope(encClass->typeEntry()))
-            lookForEnumsInClassesNotToBeGenerated(globalEnums, metaClass);
-    }
+    for (const AbstractMetaClass *nsp : invisibleTopNamespaces())
+        nsp->getEnumsToBeGenerated(&globalEnums);
 
     TypeDatabase *typeDb = TypeDatabase::instance();
     const TypeSystemTypeEntry *moduleEntry = typeDb->defaultTypeSystemType();

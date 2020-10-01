@@ -599,6 +599,7 @@
 
     <namespace-type name="RemovedNamespace1" visible='false'>
         <enum-type name="RemovedNamespace1_Enum" />
+        <function signature="mathSum(int,int)"/>
         <value-type name="ObjectOnInvisibleNamespace" />
         <namespace-type name="RemovedNamespace2" visible='false'>
             <enum-type name="RemovedNamespace2_Enum" />

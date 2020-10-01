@@ -808,6 +808,12 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
     return false;
 }
 
+const AbstractMetaClass *AbstractMetaFunction::targetLangOwner() const
+{
+    return m_class && m_class->isInvisibleNamespace()
+        ?  m_class->targetLangEnclosingClass() : m_class;
+}
+
 bool AbstractMetaFunction::isDeprecated() const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
@@ -1638,6 +1644,14 @@ bool AbstractMetaClass::isNamespace() const
     return m_typeEntry->isNamespace();
 }
 
+// Is an invisible namespaces whose functions/enums
+// should be mapped to the global space.
+bool AbstractMetaClass::isInvisibleNamespace() const
+{
+    return m_typeEntry->isNamespace() && m_typeEntry->generateCode()
+        && !NamespaceTypeEntry::isVisibleScope(m_typeEntry);
+}
+
 static bool qObjectPredicate(const AbstractMetaClass *c)
 {
     return c->qualifiedCppName() == QLatin1String("QObject");
@@ -2129,6 +2143,31 @@ AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValue
     return nullptr;
 }
 
+void AbstractMetaClass::getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const
+{
+    for (AbstractMetaEnum *metaEnum : m_enums) {
+        if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode())
+            enumList->append(metaEnum);
+    }
+}
+
+void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const
+{
+    if (isNamespace()) {
+        invisibleNamespaceRecursion([enumList](AbstractMetaClass *c) {
+            c->getEnumsToBeGenerated(enumList);
+        });
+    }
+}
+
+void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const
+{
+    if (isNamespace()) {
+        invisibleNamespaceRecursion([funcList](AbstractMetaClass *c) {
+            funcList->append(c->functions());
+        });
+    }
+}
 
 static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractMetaType *type)
 {
