@@ -93,7 +93,7 @@ public:
 
     int classCount() const;
 
-    bool run();
+    bool run(bool usePySideExtensions);
 private:
     QString m_typeSystemFileName;
     QFileInfoList m_cppFileNames;

@@ -30,7 +30,6 @@
 #define PYSIDETEST_GLOBAL_H
 
 // PySide global.h file
-#include "pyside2_global.h"
 #include "testobject.h"
 #include "testview.h"
 #include "hiddenobject.h"

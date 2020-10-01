@@ -90,6 +90,9 @@ public:
     /// Returns a list of all ancestor classes for the given class.
     AbstractMetaClassList getAllAncestors(const AbstractMetaClass *metaClass) const;
 
+    /// Returns true if the user enabled PySide extensions.
+    bool usePySideExtensions() const;
+
 protected:
     bool doSetup() override;
 
@@ -377,8 +380,6 @@ protected:
     bool useCtorHeuristic() const;
     /// Returns true if the user enabled the so called "return value heuristic".
     bool useReturnValueHeuristic() const;
-    /// Returns true if the user enabled PySide extensions.
-    bool usePySideExtensions() const;
     /// Returns true if the generator should use the result of isNull()const to compute boolean casts.
     bool useIsNullAsNbNonZero() const;
     /// Returns true if the generated code should use the "#define protected public" hack.
