@@ -180,23 +180,13 @@ if OPTION["QMAKE"] is not None and os.path.exists(OPTION["QMAKE"]):
 if OPTION["CMAKE"] is not None and os.path.exists(OPTION["CMAKE"]):
     OPTION["CMAKE"] = os.path.abspath(OPTION["CMAKE"])
 
-QMAKE_COMMAND = None
-# Checking whether qmake executable exists
-if OPTION["QMAKE"] is not None and os.path.exists(OPTION["QMAKE"]):
-    # Looking whether qmake path is a link and whether the link exists
-    if os.path.islink(OPTION["QMAKE"]) and os.path.lexists(OPTION["QMAKE"]):
-        # Set -qt=X here.
-        if "qtchooser" in os.readlink(OPTION["QMAKE"]):
-            QMAKE_COMMAND = [OPTION["QMAKE"], "-qt={}".format(OPTION["QT_VERSION"])]
-if not QMAKE_COMMAND:
-    QMAKE_COMMAND = [OPTION["QMAKE"]]
-
-if len(QMAKE_COMMAND) == 0 or QMAKE_COMMAND[0] is None:
+if len(OPTION["QMAKE"]) == 0:
     print("qmake could not be found.")
     sys.exit(1)
-if not os.path.exists(QMAKE_COMMAND[0]):
-    print("'{}' does not exist.".format(QMAKE_COMMAND[0]))
+if not os.path.exists(OPTION["QMAKE"]):
+    print("'{}' does not exist.".format(OPTION["QMAKE"]))
     sys.exit(1)
+
 if OPTION["CMAKE"] is None:
     OPTION["CMAKE"] = find_executable("cmake")
 
@@ -289,7 +279,8 @@ def prepare_sub_modules():
 
 # Single global instance of QtInfo to be used later in multiple code
 # paths.
-qtinfo = QtInfo(QMAKE_COMMAND)
+qtinfo = QtInfo()
+qtinfo.setup(OPTION["QMAKE"], OPTION["QT_VERSION"])
 
 
 def get_qt_version():
