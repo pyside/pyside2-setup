@@ -95,7 +95,7 @@ def get_setuptools_extension_modules():
     # future.
     extension_args = ('QtCore', [])
     extension_kwargs = {}
-    if OPTION["LIMITED_API"]:
+    if OPTION["LIMITED_API"] == 'yes':
         extension_kwargs['py_limited_api'] = True
     extension_modules = [Extension(*extension_args, **extension_kwargs)]
     return extension_modules
