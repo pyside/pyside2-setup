@@ -43,8 +43,11 @@ from distutils.version import LooseVersion
 import os
 import time
 from .config import config
-from .utils import memoize, get_python_dict
+from .utils import get_python_dict
 from .options import OPTION
+from .wheel_utils import (get_package_version, get_qt_version,
+                          get_package_timestamp, macos_plat_name,
+                          macos_pyside_min_deployment_target)
 
 setup_script_dir = os.getcwd()
 build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
@@ -55,37 +58,6 @@ start_time = int(time.time())
 
 def elapsed():
     return int(time.time()) - start_time
-
-
-@memoize
-def get_package_timestamp():
-    """ In a Coin CI build the returned timestamp will be the
-        Coin integration id timestamp. For regular builds it's
-        just the current timestamp or a user provided one."""
-    return OPTION["PACKAGE_TIMESTAMP"] if OPTION["PACKAGE_TIMESTAMP"] else start_time
-
-
-@memoize
-def get_package_version():
-    """ Returns the version string for the PySide2 package. """
-    pyside_version_py = os.path.join(
-        setup_script_dir, "sources", "pyside2", "pyside_version.py")
-    d = get_python_dict(pyside_version_py)
-
-    final_version = "{}.{}.{}".format(
-        d['major_version'], d['minor_version'], d['patch_version'])
-    release_version_type = d['release_version_type']
-    pre_release_version = d['pre_release_version']
-    if pre_release_version and release_version_type:
-        final_version += release_version_type + pre_release_version
-    if release_version_type.startswith("comm"):
-        final_version += "." + release_version_type
-
-    # Add the current timestamp to the version number, to suggest it
-    # is a development snapshot build.
-    if OPTION["SNAPSHOT_BUILD"]:
-        final_version += ".dev{}".format(get_package_timestamp())
-    return final_version
 
 
 def get_setuptools_extension_modules():
@@ -283,21 +255,6 @@ qtinfo = QtInfo()
 qtinfo.setup(OPTION["QMAKE"], OPTION["QT_VERSION"])
 
 
-def get_qt_version():
-    qt_version = qtinfo.version
-
-    if not qt_version:
-        log.error("Failed to query the Qt version with qmake {0}".format(qtinfo.qmake_command))
-        sys.exit(1)
-
-    if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
-        log.error("Incompatible Qt version detected: {}. A Qt version >= 5.7 is "
-                  "required.".format(qt_version))
-        sys.exit(1)
-
-    return qt_version
-
-
 def prepare_build():
     if (os.path.isdir(".git") and not OPTION["IGNOREGIT"] and not OPTION["ONLYPACKAGE"]
             and not OPTION["REUSE_BUILD"]):
@@ -417,7 +374,7 @@ class PysideBuild(_build):
     def finalize_options(self):
         os_name_backup = os.name
         if sys.platform == 'darwin':
-            self.plat_name = PysideBuild.macos_plat_name()
+            self.plat_name = macos_plat_name()
             # This is a hack to circumvent the dubious check in
             # distutils.commands.build -> finalize_options, which only
             # allows setting the plat_name for windows NT.
@@ -786,73 +743,11 @@ class PysideBuild(_build):
             log.info("OpenSSL dll directory: {}".format(OPTION["OPENSSL"]))
         if sys.platform == 'darwin':
             pyside_macos_deployment_target = (
-                PysideBuild.macos_pyside_min_deployment_target()
+                macos_pyside_min_deployment_target()
             )
             log.info("MACOSX_DEPLOYMENT_TARGET set to: {}".format(
                 pyside_macos_deployment_target))
         log.info("=" * 30)
-
-    @staticmethod
-    def macos_qt_min_deployment_target():
-        target = qtinfo.macos_min_deployment_target
-
-        if not target:
-            raise DistutilsSetupError("Failed to query for Qt's QMAKE_MACOSX_DEPLOYMENT_TARGET.")
-        return target
-
-    @staticmethod
-    @memoize
-    def macos_pyside_min_deployment_target():
-        """
-        Compute and validate PySide2 MACOSX_DEPLOYMENT_TARGET value.
-        Candidate sources that are considered:
-            - setup.py provided value
-            - maximum value between minimum deployment target of the
-              Python interpreter and the minimum deployment target of
-              the Qt libraries.
-        If setup.py value is provided, that takes precedence.
-        Otherwise use the maximum of the above mentioned two values.
-        """
-        python_target = get_config_var('MACOSX_DEPLOYMENT_TARGET') or None
-        qt_target = PysideBuild.macos_qt_min_deployment_target()
-        setup_target = OPTION["MACOS_DEPLOYMENT_TARGET"]
-
-        qt_target_split = [int(x) for x in qt_target.split('.')]
-        if python_target:
-            python_target_split = [int(x) for x in python_target.split('.')]
-        if setup_target:
-            setup_target_split = [int(x) for x in setup_target.split('.')]
-
-        message = ("Can't set MACOSX_DEPLOYMENT_TARGET value to {} because "
-                   "{} was built with minimum deployment target set to {}.")
-        # setup.py provided OPTION["MACOS_DEPLOYMENT_TARGET"] value takes
-        # precedence.
-        if setup_target:
-            if python_target and setup_target_split < python_target_split:
-                raise DistutilsSetupError(message.format(setup_target, "Python",
-                                                         python_target))
-            if setup_target_split < qt_target_split:
-                raise DistutilsSetupError(message.format(setup_target, "Qt",
-                                                         qt_target))
-            # All checks clear, use setup.py provided value.
-            return setup_target
-
-        # Setup.py value not provided,
-        # use same value as provided by Qt.
-        if python_target:
-            maximum_target = '.'.join([str(e) for e in max(python_target_split, qt_target_split)])
-        else:
-            maximum_target = qt_target
-        return maximum_target
-
-    @staticmethod
-    @memoize
-    def macos_plat_name():
-        deployment_target = PysideBuild.macos_pyside_min_deployment_target()
-        # Example triple "macosx-10.12-x86_64".
-        plat = get_platform().split("-")
-        plat_name = "{}-{}-{}".format(plat[0], deployment_target, plat[2])
-        return plat_name
 
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
@@ -1047,7 +942,7 @@ class PysideBuild(_build):
             # interpreter sysconfig value.
             # Doing so could break the detected clang include paths
             # for example.
-            deployment_target = PysideBuild.macos_pyside_min_deployment_target()
+            deployment_target = macos_pyside_min_deployment_target()
             cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
@@ -1400,11 +1295,6 @@ cmd_class_dict = {
     'build_rst_docs': PysideRstDocs,
 }
 if wheel_module_exists:
-    params = {}
-    params['qt_version'] = get_qt_version()
-    params['package_version'] = get_package_version()
-    if sys.platform == 'darwin':
-        params['macos_plat_name'] = PysideBuild.macos_plat_name()
-    pyside_bdist_wheel = get_bdist_wheel_override(params)
+    pyside_bdist_wheel = get_bdist_wheel_override()
     if pyside_bdist_wheel:
         cmd_class_dict['bdist_wheel'] = pyside_bdist_wheel
