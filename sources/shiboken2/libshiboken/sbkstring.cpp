@@ -42,6 +42,7 @@
 #include "autodecref.h"
 
 #include <vector>
+#include <unordered_set>
 
 namespace Shiboken
 {
@@ -232,7 +233,7 @@ Py_ssize_t len(PyObject *str)
 //     PyObject *attr = PyObject_GetAttr(obj, name());
 //
 
-using StaticStrings = std::vector<PyObject *>;
+using StaticStrings = std::unordered_set<PyObject *>;
 
 static void finalizeStaticStrings();    // forward
 
@@ -244,10 +245,12 @@ static StaticStrings &staticStrings()
 
 static void finalizeStaticStrings()
 {
-    auto &list = staticStrings();
-    for (PyObject *ob : list)
+    auto &set = staticStrings();
+    for (PyObject *ob : set) {
+        Py_REFCNT(ob) = 1;
         Py_DECREF(ob);
-    list.clear();
+    }
+    set.clear();
 }
 
 PyObject *createStaticString(const char *str)
@@ -267,7 +270,11 @@ PyObject *createStaticString(const char *str)
         PyErr_Print();
         Py_FatalError("unexpected error in createStaticString()");
     }
-    staticStrings().push_back(result);
+    auto it = staticStrings().find(result);
+    if (it != staticStrings().end())
+        Py_INCREF(result);
+    else
+        staticStrings().insert(result);
     return result;
 }
 
