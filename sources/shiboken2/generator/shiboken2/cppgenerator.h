@@ -81,6 +81,8 @@ private:
 
     void writeContainerConverterFunctions(QTextStream &s, const AbstractMetaType *containerType);
 
+    void writeSmartPointerConverterFunctions(QTextStream &s, const AbstractMetaType *smartPointerType);
+
     void writeMethodWrapperPreamble(QTextStream &s, OverloadData &overloadData,
                                     const GeneratorContext &context);
     void writeConstructorWrapper(QTextStream &s, const AbstractMetaFunctionList &overloads,
@@ -332,6 +334,7 @@ private:
     void writeEnumConverterInitialization(QTextStream &s, const TypeEntry *enumType);
     void writeEnumConverterInitialization(QTextStream &s, const AbstractMetaEnum *metaEnum);
     void writeContainerConverterInitialization(QTextStream &s, const AbstractMetaType *type);
+    void writeSmartPointerConverterInitialization(QTextStream &s, const AbstractMetaType *type);
     void writeExtendedConverterInitialization(QTextStream &s, const TypeEntry *externalType, const QVector<const AbstractMetaClass *>& conversions);
 
     void writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn);
@@ -374,6 +377,8 @@ private:
     const AbstractMetaFunction *boolCast(const AbstractMetaClass *metaClass) const;
     bool hasBoolCast(const AbstractMetaClass *metaClass) const
     { return boolCast(metaClass) != nullptr; }
+
+    const AbstractMetaType *findSmartPointerInstantiation(const TypeEntry *entry) const;
 
     // Number protocol structure members names.
     static QHash<QString, QString> m_nbFuncs;

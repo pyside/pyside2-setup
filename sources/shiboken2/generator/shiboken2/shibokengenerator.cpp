@@ -860,7 +860,7 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType *type)
             + QLatin1String(">(") + QString::number(nestedArrayTypes.size())
             + QLatin1Char(')');
     }
-    if (type->typeEntry()->isContainer()) {
+    if (type->typeEntry()->isContainer() || type->typeEntry()->isSmartPointer()) {
         return convertersVariableName(type->typeEntry()->targetLangPackage())
                + QLatin1Char('[') + getTypeIndexVariableName(type) + QLatin1Char(']');
     }
