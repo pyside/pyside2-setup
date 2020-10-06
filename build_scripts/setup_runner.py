@@ -131,7 +131,11 @@ class SetupRunner(object):
                                .format(config.build_type))
 
         # Build everything: shiboken2, shiboken2-generator and PySide2.
-        if config.is_top_level_build_all():
+        help_requested = '--help' in self.sub_argv or '-h' in self.sub_argv
+        if help_requested:
+            self.add_setup_internal_invocation(config.pyside_option_name)
+
+        elif config.is_top_level_build_all():
             self.add_setup_internal_invocation(config.shiboken_module_option_name)
 
             # Reuse the shiboken build for the generator package instead

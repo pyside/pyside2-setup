@@ -45,8 +45,7 @@
 
 #define SBK_MODULE_INIT_ERROR 0
 #define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
-    extern "C" SBK_EXPORT_MODULE PyObject *PyInit_##ModuleName() {
-
+    extern "C" LIBSHIBOKEN_EXPORT PyObject *PyInit_##ModuleName() {
 #define SBK_MODULE_INIT_FUNCTION_END \
     return module; }
 

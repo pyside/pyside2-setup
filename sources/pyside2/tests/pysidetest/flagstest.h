@@ -26,13 +26,30 @@
 **
 ****************************************************************************/
 
-#ifndef PYSIDETEST_GLOBAL_H
-#define PYSIDETEST_GLOBAL_H
+#pragma once
 
-// PySide global.h file
-#include "testobject.h"
-#include "testview.h"
-#include "flagstest.h"
-#include "hiddenobject.h"
+#include "pysidetest_macros.h"
 
-#endif // PYSIDETEST_GLOBAL_H
+#include <QtCore/QObject>
+
+namespace FlagsNamespace
+{
+
+enum Option {
+    NoOptions = 0x0,
+    ShowTabs = 0x1,
+    ShowAll = 0x2,
+    SqueezeBlank = 0x4
+};
+Q_DECLARE_FLAGS(Options, Option)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Options)
+
+class PYSIDETEST_API ClassForEnum : public QObject
+{
+    Q_OBJECT
+public:
+    ClassForEnum(FlagsNamespace::Options opt = FlagsNamespace::Option::NoOptions);
+    virtual ~ClassForEnum();
+};
+
+} // namespace FlagsNamespace

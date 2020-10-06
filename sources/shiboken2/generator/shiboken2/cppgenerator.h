@@ -316,6 +316,7 @@ private:
     void writeFlagsToLong(QTextStream &s, const AbstractMetaEnum *cppEnum);
     void writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum *cppEnum);
     void writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum *cppEnum);
+    void writeFlagsNumberMethodsDefinitions(QTextStream &s, const AbstractMetaEnumList &enums);
     void writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
                                   const QString &pyOpName, const QString &cppOpName);
     void writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
