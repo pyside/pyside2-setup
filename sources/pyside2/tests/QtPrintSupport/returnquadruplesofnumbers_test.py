@@ -81,25 +81,6 @@ class ReturnsQuadruplesOfNumbers(UsesQApplication):
         obj = QTextCursor()
         self.assertEqual(obj.selectedTableCells(), (-1, -1, -1, -1))
 
-    def testQPrinterGetPageMargins(self):
-        # Bug #742. Find a printer like PDF/XPS on which arbitrary margins can be set.
-        printer = None
-        for printerInfo in QPrinterInfo.availablePrinters():
-            name = printerInfo.printerName().lower()
-            if "xps" in name or "pdf" in name:
-                printer = QPrinter(printerInfo)
-                break
-        if not printer:
-            printer = QPrinter()
-            printer.setPrinterName("Print to PDF")
-            printer.setOutputFormat(QPrinter.PdfFormat)
-        # On macOS the minimum margin of a page is ~12, setting something lower than that will
-        # actually fail to set all the margins.
-        values = (15.0, 16.0, 17.0, 18.0, QPrinter.Point)
-        printer.setPageMargins(*values)
-        actual = printer.getPageMargins(QPrinter.Point)
-        print(printer.printerName(), actual, values[:-1])
-        self.assertTrue(self.compareTuples(actual, values[:-1]))
 
 if __name__ == "__main__":
    unittest.main()
