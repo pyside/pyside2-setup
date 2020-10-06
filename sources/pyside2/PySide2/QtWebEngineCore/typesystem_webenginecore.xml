@@ -41,6 +41,7 @@
 -->
 <typesystem package="PySide2.QtWebEngineCore">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
 
   <object-type name="QWebEngineCookieStore"/>
 

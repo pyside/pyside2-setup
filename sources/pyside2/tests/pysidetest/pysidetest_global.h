@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,9 +26,12 @@
 **
 ****************************************************************************/
 
+#ifndef PYSIDETEST_GLOBAL_H
+#define PYSIDETEST_GLOBAL_H
+
 // PySide global.h file
-#include "pyside2_global.h"
 #include "testobject.h"
 #include "testview.h"
-#define PYSIDE_API
 #include "hiddenobject.h"
+
+#endif // PYSIDETEST_GLOBAL_H

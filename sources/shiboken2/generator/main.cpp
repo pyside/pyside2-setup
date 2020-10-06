@@ -612,7 +612,10 @@ int main(int argc, char *argv[])
     extractor.setCppFileNames(cppFileNames);
     extractor.setTypeSystem(typeSystemFileName);
 
-    if (!extractor.run()) {
+    auto shibokenGenerator = dynamic_cast<const ShibokenGenerator *>(generators.constFirst().data());
+    const bool usePySideExtensions = shibokenGenerator && shibokenGenerator->usePySideExtensions();
+
+    if (!extractor.run(usePySideExtensions)) {
         errorPrint(QLatin1String("Error running ApiExtractor."));
         return EXIT_FAILURE;
     }

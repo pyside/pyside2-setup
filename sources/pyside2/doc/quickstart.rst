@@ -9,7 +9,7 @@ Before you can install |project|, first you must install the following software:
  * Python 2.7 or 3.5+,
  * We recommend using a virtual environment, such as
    `venv <https://docs.python.org/3/library/venv.html>`_ or
-   `virtualenv <https://virtualenv.pypa.io/en/stable/installation>`_
+   `virtualenv <https://virtualenv.pypa.io/en/latest>`_
 
 Installation
 ------------

@@ -29,11 +29,9 @@
 #ifndef TESTVIEW_H
 #define TESTVIEW_H
 
-#include <QObject>
-#ifdef pysidetest_EXPORTS
-#define PYSIDE_EXPORTS 1
-#endif
-#include "pysidemacros.h"
+#include "pysidetest_macros.h"
+
+#include <QtCore/QObject>
 
 QT_BEGIN_NAMESPACE
 class QWidget;
@@ -41,7 +39,7 @@ class QAbstractListModel;
 class QAbstractItemDelegate;
 QT_END_NAMESPACE
 
-class PYSIDE_API TestView : public QObject
+class PYSIDETEST_API TestView : public QObject
 {
     Q_OBJECT
 public:

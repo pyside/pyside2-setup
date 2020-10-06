@@ -29,11 +29,9 @@
 #ifndef HIDDENOBJECT_H
 #define HIDDENOBJECT_H
 
-#ifdef pysidetest_EXPORTS
-#define PYSIDE_EXPORTS 1
-#endif
-#include "pysidemacros.h"
-#include <QObject>
+#include "pysidetest_macros.h"
+
+#include <QtCore/QObject>
 
 // This class shouldn't be exported!
 class HiddenObject : public QObject
@@ -49,7 +47,6 @@ private:
 };
 
 // Return a instance of HiddenObject
-PYSIDE_API QObject* getHiddenObject();
-
+PYSIDETEST_API QObject* getHiddenObject();
 
 #endif

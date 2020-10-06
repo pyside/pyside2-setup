@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,53 +26,18 @@
 **
 ****************************************************************************/
 
-#include "testobject.h"
+#ifndef PYSIDETEST_MACROS_H
+#define PYSIDETEST_MACROS_H
 
-#include <QtCore/QDebug>
+#include <pysidemacros.h>
 
-void TestObject::emitIdValueSignal()
-{
-    emit idValue(m_idValue);
-}
+#define PYSIDETEST_EXPORT PYSIDE_EXPORT
+#define PYSIDETEST_IMPORT PYSIDE_IMPORT
 
-void TestObject::emitStaticMethodDoubleSignal()
-{
-    emit staticMethodDouble();
-}
+#ifdef BUILD_PYSIDETEST
+#  define PYSIDETEST_API PYSIDETEST_EXPORT
+#else
+#  define PYSIDETEST_API PYSIDETEST_IMPORT
+#endif
 
-void TestObject::emitSignalWithDefaultValue_void()
-{
-    emit signalWithDefaultValue();
-}
-
-void TestObject::emitSignalWithDefaultValue_bool()
-{
-    emit signalWithDefaultValue(true);
-}
-
-void TestObject::emitSignalWithTypedefValue(int value)
-{
-    emit signalWithTypedefValue(TypedefValue(value));
-}
-
-QDebug operator<<(QDebug dbg, TestObject& testObject)
-{
-    QDebugStateSaver saver(dbg);
-    dbg.nospace() << "TestObject(id=" << testObject.idValue() << ") ";
-    return dbg;
-}
-
-namespace PySideCPP {
-    QDebug operator<<(QDebug dbg, TestObjectWithNamespace& testObject)
-    {
-        QDebugStateSaver saver(dbg);
-        dbg.nospace() << "TestObjectWithNamespace(" << testObject.name() << ") ";
-        return dbg;
-    }
-    QDebug operator<<(QDebug dbg, TestObject2WithNamespace& testObject)
-    {
-        QDebugStateSaver saver(dbg);
-        dbg.nospace() << "TestObject2WithNamespace(" << testObject.name() << ") ";
-        return dbg;
-    }
-}
+#endif // PYSIDETEST_MACROS_H

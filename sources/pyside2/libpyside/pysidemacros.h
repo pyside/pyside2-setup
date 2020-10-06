@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -40,25 +40,16 @@
 #ifndef PYSIDEMACROS_H
 #define PYSIDEMACROS_H
 
-#if defined _WIN32
-    #if PYSIDE_EXPORTS
-        #define PYSIDE_API __declspec(dllexport)
-    #else
-        #if defined __MINGW32__
-            #define PYSIDE_API
-        #else
-            #define PYSIDE_API __declspec(dllimport)
-        #endif
-    #endif
-    #define PYSIDE_DEPRECATED(func) __declspec(deprecated) func
+#include <shibokenmacros.h>
+
+#define PYSIDE_EXPORT LIBSHIBOKEN_EXPORT
+#define PYSIDE_IMPORT LIBSHIBOKEN_IMPORT
+#define PYSIDE_DEPRECATED(func) SBK_DEPRECATED(func)
+
+#ifdef BUILD_LIBPYSIDE
+#  define PYSIDE_API PYSIDE_EXPORT
 #else
-    #if __GNUC__ >= 4
-        #define PYSIDE_API __attribute__ ((visibility("default")))
-        #define PYSIDE_DEPRECATED(func) func __attribute__ ((deprecated))
-    #else
-        #define PYSIDE_API
-        #define PYSIDE_DEPRECATED(func) func
-    #endif
+#  define PYSIDE_API PYSIDE_IMPORT
 #endif
 
-#endif
+#endif // PYSIDEMACROS_H

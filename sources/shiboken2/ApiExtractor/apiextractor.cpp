@@ -172,7 +172,20 @@ int ApiExtractor::classCount() const
     return m_builder->classes().count();
 }
 
-bool ApiExtractor::run()
+// Add defines required for parsing Qt code headers
+static void addPySideExtensions(QByteArrayList *a)
+{
+    // Make "signals:", "slots:" visible as access specifiers
+    a->append(QByteArrayLiteral("-DQT_ANNOTATE_ACCESS_SPECIFIER(a)=__attribute__((annotate(#a)))"));
+
+    // Q_PROPERTY is defined as class annotation which does not work since a
+    // sequence of properties will to expand to a sequence of annotations
+    // annotating nothing, causing clang to complain. Instead, define it away in a
+    // static assert with the stringified argument in a ','-operator (cf qdoc).
+    a->append(QByteArrayLiteral("-DQT_ANNOTATE_CLASS(type,...)=static_assert(sizeof(#__VA_ARGS__),#type);"));
+}
+
+bool ApiExtractor::run(bool usePySideExtensions)
 {
     if (m_builder)
         return false;
@@ -215,6 +228,10 @@ bool ApiExtractor::run()
             << "clang language level: " << int(m_languageLevel)
             << "\nclang arguments: " << arguments;
     }
+
+    if (usePySideExtensions)
+        addPySideExtensions(&arguments);
+
     const bool result = m_builder->build(arguments, m_languageLevel);
     if (!result)
         autoRemove = false;
