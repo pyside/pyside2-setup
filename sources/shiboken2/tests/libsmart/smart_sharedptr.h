@@ -29,19 +29,9 @@
 #ifndef SMART_SHARED_PTR_H
 #define SMART_SHARED_PTR_H
 
-#include "libsmartmacros.h"
+#include <memory>
 
-template <class T>
-class RefData {
-public:
-    RefData(T *ptr) :  m_refCount(1), m_heldPtr(ptr) {}
-    ~RefData() { delete m_heldPtr; }
-    int inc() { return ++m_refCount; }
-    int dec() { return --m_refCount; }
-    int useCount() { return m_refCount; }
-    int m_refCount;
-    T *m_heldPtr;
-};
+#include "libsmartmacros.h"
 
 struct SharedPtrBase
 {
@@ -57,84 +47,70 @@ class SharedPtr : public SharedPtrBase {
 public:
     SharedPtr() { logDefaultConstructor(this); }
 
-    SharedPtr(T *v)
+    SharedPtr(T *v) : mPtr(v)
     {
         logConstructor(this, v);
-        if (v)
-            m_refData = new RefData<T>(v);
     }
 
-    SharedPtr(const SharedPtr<T> &other) : m_refData(other.m_refData)
+    SharedPtr(const SharedPtr<T> &other) : mPtr(other.mPtr)
     {
-        logCopyConstructor(this, other.m_refData);
-        if (m_refData)
-            m_refData->inc();
+        logCopyConstructor(this, data());
     }
 
-    SharedPtr<T> &operator=(const SharedPtr<T>& other)
+    template<class X>
+    SharedPtr(const SharedPtr<X> &other) : mPtr(other.mPtr)
     {
-        if (this != &other) {
-            logAssignment(this, other.m_refData);
-            if (m_refData && m_refData->dec() == 0)
-               delete m_refData;
-            m_refData = other.m_refData;
-            if (m_refData)
-                m_refData->inc();
-        }
+        logCopyConstructor(this, data());
+    }
+
+    SharedPtr& operator=(const SharedPtr& other)
+    {
+        mPtr = other.mPtr;
         return *this;
     }
 
     T *data() const
     {
-        return m_refData ? m_refData->m_heldPtr : nullptr;
+        return mPtr.get();
     }
 
     int useCount() const
     {
-        return m_refData ? m_refData->useCount() : 0;
+        return mPtr.use_count();
     }
 
     void dummyMethod1()
     {
+    }
 
+    bool isNull() const
+    {
+        return mPtr.get() == nullptr;
     }
 
     T& operator*() const
     {
         // Crashes if smart pointer is empty (just like std::shared_ptr).
-        return *(m_refData->m_heldPtr);
+        return *mPtr;
     }
 
     T *operator->() const
     {
-        return m_refData ? m_refData->m_heldPtr : nullptr;
+        return mPtr.get();
     }
 
     bool operator!() const
     {
-        return !m_refData || !m_refData->m_heldPtr;
-    }
-
-    bool isNull() const
-    {
-        return !m_refData || !m_refData->m_heldPtr;
-    }
-
-    operator bool() const
-    {
-        return m_refData && m_refData->m_heldPtr;
+        return !mPtr;
     }
 
     ~SharedPtr()
     {
-        if (m_refData)
-            logDestructor(this, m_refData->useCount() - 1);
-        if (m_refData && m_refData->dec() == 0)
-           delete m_refData;
+        if (mPtr.use_count() >= 1)
+            logDestructor(this, mPtr.use_count() - 1);
     }
 
-private:
-    RefData<T> *m_refData = nullptr;
+    std::shared_ptr<T> mPtr;
 };
 
 #endif // SMART_SHARED_PTR_H

@@ -34,6 +34,7 @@
         </conversion-rule>
     </container-type>
 
+    <custom-type name="std::shared_ptr" />
 
     <!-- Used in tests to check what C++ objects are allocated. -->
     <object-type name="Registry" />
