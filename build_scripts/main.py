@@ -41,6 +41,10 @@ from __future__ import print_function
 from distutils.version import LooseVersion
 
 import os
+import platform
+import re
+import sys
+from textwrap import dedent
 import time
 from .config import config
 from .utils import get_python_dict
@@ -82,10 +86,6 @@ except ImportError:
     from ez_setup import use_setuptools
     use_setuptools()
 
-import sys
-import platform
-import re
-
 import distutils.log as log
 from distutils.errors import DistutilsSetupError
 from distutils.sysconfig import get_config_var
@@ -111,8 +111,6 @@ from .utils import linux_fix_rpaths_for_library
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .wheel_override import wheel_module_exists, get_bdist_wheel_override
-
-from textwrap import dedent
 
 
 def check_allowed_python_version():
@@ -1206,9 +1204,11 @@ class PysideBuild(_build):
             log.info("Patched rpath to '$ORIGIN/' (Linux) or "
                      "updated rpath (OS/X) in {}.".format(srcpath))
 
+
 class PysideRstDocs(Command):
     description = "Build .rst documentation only"
     user_options = []
+
     def initialize_options(self):
         log.info("-- This build process will not include the API documentation."
                  "API documentation requires a full build of pyside/shiboken.")
@@ -1269,12 +1269,8 @@ class PysideRstDocs(Command):
             elif self.name == "shiboken2":
                 self.sphinx_src = self.out_dir
 
-            sphinx_cmd = ["sphinx-build",
-                "-b", "html",
-                "-c", self.sphinx_src,
-                self.doc_dir,
-                self.out_dir
-            ]
+            sphinx_cmd = ["sphinx-build", "-b", "html", "-c", self.sphinx_src,
+                          self.doc_dir, self.out_dir]
             if run_process(sphinx_cmd) != 0:
                 raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))
         # Last message
@@ -1283,6 +1279,7 @@ class PysideRstDocs(Command):
 
     def finalize_options(self):
         pass
+
 
 cmd_class_dict = {
     'build': PysideBuild,
