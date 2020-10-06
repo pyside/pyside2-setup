@@ -271,10 +271,15 @@ PyObject *createStaticString(const char *str)
         Py_FatalError("unexpected error in createStaticString()");
     }
     auto it = staticStrings().find(result);
-    if (it != staticStrings().end())
-        Py_INCREF(result);
-    else
+    if (it == staticStrings().end())
         staticStrings().insert(result);
+    /*
+     * Note: We always add one reference even if we have a new string.
+     *       This makes the strings immortal, and we are safe if someone
+     *       uses AutoDecRef, although the set cannot cope with deletions.
+     *       The exit handler cleans that up, anyway.
+     */
+    Py_INCREF(result);
     return result;
 }
 
