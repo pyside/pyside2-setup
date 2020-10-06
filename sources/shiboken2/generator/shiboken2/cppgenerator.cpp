@@ -5973,14 +5973,6 @@ bool CppGenerator::finishGeneration()
         s << Qt::endl;
     }
 
-    s << "#if defined _WIN32 || defined __CYGWIN__\n";
-    s << "    #define SBK_EXPORT_MODULE __declspec(dllexport)\n";
-    s << "#elif __GNUC__ >= 4\n";
-    s << "    #define SBK_EXPORT_MODULE __attribute__ ((visibility(\"default\")))\n";
-    s << "#else\n";
-    s << "    #define SBK_EXPORT_MODULE\n";
-    s << "#endif\n\n";
-
     s << "#ifdef IS_PY3K\n";
     s << "static struct PyModuleDef moduledef = {\n";
     s << "    /* m_base     */ PyModuleDef_HEAD_INIT,\n";
