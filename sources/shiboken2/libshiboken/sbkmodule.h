@@ -43,12 +43,6 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
-#define SBK_MODULE_INIT_ERROR 0
-#define SBK_MODULE_INIT_FUNCTION_BEGIN(ModuleName) \
-    extern "C" LIBSHIBOKEN_EXPORT PyObject *PyInit_##ModuleName() {
-#define SBK_MODULE_INIT_FUNCTION_END \
-    return module; }
-
 extern "C"
 {
 struct SbkConverter;

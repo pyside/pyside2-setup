@@ -5964,9 +5964,10 @@ bool CppGenerator::finishGeneration()
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatureStream, moduleName(), "global functions");
 
-    s << "SBK_MODULE_INIT_FUNCTION_BEGIN(" << moduleName() << ")\n";
+    s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
+        << moduleName() << "()\n{\n";
 
-    ErrorCode errorCode(QLatin1String("SBK_MODULE_INIT_ERROR"));
+    ErrorCode errorCode(QLatin1String("nullptr"));
     // module inject-code target/beginning
     if (!snips.isEmpty())
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode);
@@ -5975,7 +5976,7 @@ bool CppGenerator::finishGeneration()
         s << INDENT << "{\n" << indent(INDENT)
              << INDENT << "Shiboken::AutoDecRef requiredModule(Shiboken::Module::import(\"" << requiredModule << "\"));\n"
              << INDENT << "if (requiredModule.isNull())\n" << indent(INDENT)
-             << INDENT << "return SBK_MODULE_INIT_ERROR;\n" << outdent(INDENT)
+             << INDENT << "return nullptr;\n" << outdent(INDENT)
              << INDENT << cppApiVariableName(requiredModule)
              << " = Shiboken::Module::getTypes(requiredModule);\n"
              << INDENT << convertersVariableName(requiredModule)
@@ -6078,10 +6079,8 @@ bool CppGenerator::finishGeneration()
 
     // finish the rest of __signature__ initialization.
     s << INDENT << "FinishSignatureInitialization(module, " << moduleName()
-        << "_SignatureStrings);\n";
-
-    s << Qt::endl;
-    s << "SBK_MODULE_INIT_FUNCTION_END\n";
+        << "_SignatureStrings);\n"
+        << INDENT << "\nreturn module;\n}\n";
 
     return file.done() != FileOut::Failure;
 }
