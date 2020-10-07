@@ -804,7 +804,7 @@ public:
         return m_docModifications;
     }
 
-    IncludeList extraIncludes() const
+    const IncludeList &extraIncludes() const
     {
         return m_extraIncludes;
     }

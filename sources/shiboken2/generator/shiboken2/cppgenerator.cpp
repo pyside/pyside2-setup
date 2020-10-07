@@ -393,14 +393,18 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     //Extra includes
-    s << "\n// Extra includes\n";
-    QVector<Include> includes = metaClass->typeEntry()->extraIncludes();
+    QVector<Include> includes;
+    if (!classContext.useWrapper())
+        includes += metaClass->typeEntry()->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(classEnums))
         includes.append(cppEnum->typeEntry()->extraIncludes());
-    std::sort(includes.begin(), includes.end());
-    for (const Include &inc : qAsConst(includes))
-        s << inc.toString() << Qt::endl;
-    s << Qt::endl;
+    if (!includes.isEmpty()) {
+        s << "\n// Extra includes\n";
+        std::sort(includes.begin(), includes.end());
+        for (const Include &inc : qAsConst(includes))
+            s << inc.toString() << Qt::endl;
+        s << '\n';
+    }
 
     s << "\n#include <cctype>\n#include <cstring>\n";
 

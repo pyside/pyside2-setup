@@ -119,7 +119,13 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
         s << "#define protected public\n\n";
 
     //Includes
-    s << metaClass->typeEntry()->include() << Qt::endl;
+    auto typeEntry = metaClass->typeEntry();
+    s << typeEntry->include() << '\n';
+    if (classContext.useWrapper() && !typeEntry->extraIncludes().isEmpty()) {
+        s << "\n// Extra includes\n";
+        for (const Include &inc : typeEntry->extraIncludes())
+            s << inc.toString() << '\n';
+    }
 
     if (classContext.useWrapper() && usePySideExtensions() && metaClass->isQObject())
         s << "namespace PySide { class DynamicQMetaObject; }\n\n";
