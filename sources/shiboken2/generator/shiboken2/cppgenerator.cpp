@@ -5262,9 +5262,16 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << "0,\n";
         }
 
-        // 6:baseType
-        const auto base = metaClass->isNamespace()
+        // 6:baseType: Find a type that is not disabled.
+        auto base = metaClass->isNamespace()
             ? metaClass->extendedNamespace() : metaClass->baseClass();
+        if (!metaClass->isNamespace()) {
+            for (; base != nullptr; base = base->baseClass()) {
+                const auto ct = base->typeEntry()->codeGeneration();
+                if (ct == TypeEntry::GenerateCode || ct == TypeEntry::GenerateForSubclass)
+                    break;
+            }
+        }
         if (base) {
             s << INDENT << "reinterpret_cast<SbkObjectType *>("
                 << cpythonTypeNameExt(base->typeEntry()) << "),\n";
