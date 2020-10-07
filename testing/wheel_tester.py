@@ -65,8 +65,6 @@ this_dir = os.path.dirname(this_file)
 setup_script_dir = os.path.abspath(os.path.join(this_dir, '..'))
 sys.path.append(setup_script_dir)
 
-from build_scripts.options import OPTION
-
 from build_scripts.utils import find_files_using_glob
 from build_scripts.utils import find_glob_in_path
 from build_scripts.utils import run_process, run_process_output
@@ -75,14 +73,6 @@ import distutils.log as log
 import platform
 
 log.set_verbosity(1)
-
-
-def find_executable_qmake():
-    return find_executable('qmake', OPTION["QMAKE"])
-
-
-def find_executable_cmake():
-    return find_executable('cmake', OPTION["CMAKE"])
 
 
 def find_executable(executable, command_line_value):
@@ -108,8 +98,8 @@ def find_executable(executable, command_line_value):
     return value
 
 
-QMAKE_PATH = find_executable_qmake()
-CMAKE_PATH = find_executable_cmake()
+QMAKE_PATH = None
+CMAKE_PATH = None
 
 
 def get_wheels_dir():
@@ -351,5 +341,12 @@ if __name__ == "__main__":
     parser.add_argument('--no-install-wheels', '-n', action='store_true',
                         help='Do not install wheels'
                              ' (for developer builds with virtualenv)')
+    parser.add_argument("--qmake", type=str,
+                        help="Path to qmake")
+    parser.add_argument("--cmake", type=str,
+                        help="Path to cmake")
     options = parser.parse_args()
+    QMAKE_PATH = find_executable('qmake', options.qmake)
+    CMAKE_PATH = find_executable('cmake', options.cmake)
+
     run_wheel_tests(not options.no_install_wheels)
