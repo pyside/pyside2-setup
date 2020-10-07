@@ -432,7 +432,7 @@ ConstantValueTypeEntry *
                                             const TypeEntry *parent)
 {
     auto result = new ConstantValueTypeEntry(value, parent);
-    result->setCodeGeneration(0);
+    result->setCodeGeneration(TypeEntry::GenerateNothing);
     addType(result);
     return result;
 }

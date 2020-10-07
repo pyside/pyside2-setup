@@ -929,7 +929,7 @@ QString ShibokenGenerator::fixedCppTypeName(const TypeEntry *type, QString typeN
 {
     if (typeName.isEmpty())
         typeName = type->qualifiedCppName();
-    if (!(type->codeGeneration() & TypeEntry::GenerateTargetLang)) {
+    if (!type->generateCode()) {
         typeName.prepend(QLatin1Char('_'));
         typeName.prepend(type->targetLangPackage());
     }
@@ -1609,8 +1609,7 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
             // Get only the conversion operators that return a type from another module,
             // that are value-types and were not removed in the type system.
             const TypeEntry *convType = convOp->type()->typeEntry();
-            if ((convType->codeGeneration() & TypeEntry::GenerateTargetLang)
-                || !convType->isValue()
+            if (convType->generateCode() || !convType->isValue()
                 || convOp->isModifiedRemoved())
                 continue;
             extConvs[convType].append(convOp->ownerClass());
