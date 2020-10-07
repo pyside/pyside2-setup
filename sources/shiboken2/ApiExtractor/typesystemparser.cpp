@@ -788,13 +788,26 @@ bool TypeSystemParser::endElement(const QStringRef &localName)
     case StackElement::InterfaceTypeEntry:
     case StackElement::NamespaceTypeEntry: {
         auto *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
-        centry->setAddedFunctions(m_contextStack.top()->addedFunctions);
-        centry->setFunctionModifications(m_contextStack.top()->functionMods);
-        centry->setFieldModifications(m_contextStack.top()->fieldMods);
-        centry->setCodeSnips(m_contextStack.top()->codeSnips);
-        centry->setDocModification(m_contextStack.top()->docModifications);
+        auto top = m_contextStack.top();
+        centry->setAddedFunctions(top->addedFunctions);
+        centry->setFunctionModifications(top->functionMods);
+        centry->setFieldModifications(top->fieldMods);
+        centry->setCodeSnips(top->codeSnips);
+        centry->setDocModification(top->docModifications);
     }
     break;
+
+    case StackElement::TypedefTypeEntry: {
+        auto *centry = static_cast<TypedefEntry *>(m_current->entry)->target();
+        auto top = m_contextStack.top();
+        centry->setAddedFunctions(centry->addedFunctions() + top->addedFunctions);
+        centry->setFunctionModifications(centry->functionModifications() + top->functionMods);
+        centry->setFieldModifications(centry->fieldModifications() + top->fieldMods);
+        centry->setCodeSnips(centry->codeSnips() + top->codeSnips);
+        centry->setDocModification(centry->docModifications() + top->docModifications);
+    }
+    break;
+
     case StackElement::AddFunction: {
         // Leaving add-function: Assign all modifications to the added function
         StackElementContext *top = m_contextStack.top();
