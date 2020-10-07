@@ -2,6 +2,10 @@ project(QtConcurrent)
 
 set(QtConcurrent_SRC
 ${QtConcurrent_GEN_DIR}/qtconcurrent_wrapper.cpp
+${QtConcurrent_GEN_DIR}/qfuturevoid_wrapper.cpp
+${QtConcurrent_GEN_DIR}/qfutureqstring_wrapper.cpp
+${QtConcurrent_GEN_DIR}/qfuturewatchervoid_wrapper.cpp
+${QtConcurrent_GEN_DIR}/qfuturewatcherqstring_wrapper.cpp
 # module is always needed
 ${QtConcurrent_GEN_DIR}/qtconcurrent_module_wrapper.cpp
 )

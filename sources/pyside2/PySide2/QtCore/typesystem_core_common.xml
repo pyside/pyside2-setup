@@ -2908,6 +2908,21 @@
     </modify-function>
   </value-type>
 
+  <object-type name="QFutureInterfaceBase">
+      <enum-type name="State"/>
+  </object-type>
+  <value-type name="QFuture" generate="no">
+      <include file-name="QtCore/qfuture.h" location="global"/>
+      <modify-function signature="waitForFinished()" allow-thread="yes"/>
+  </value-type>
+  <object-type name="QFutureWatcherBase" generate="no">
+      <modify-function signature="futureInterface()" remove="all"/>
+      <modify-function signature="futureInterface() const" remove="all"/>
+  </object-type>
+  <object-type name="QFutureWatcher" generate="no">
+      <include file-name="QtCore/qfuturewatcher.h" location="global"/>
+  </object-type>
+
   <value-type name="QGenericArgument">
     <include file-name="qobjectdefs.h" location="global"/>
   </value-type>

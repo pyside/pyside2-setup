@@ -63,6 +63,7 @@ ${QtCore_GEN_DIR}/qfiledevice_wrapper.cpp
 ${QtCore_GEN_DIR}/qfileinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qfilesystemwatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qfinalstate_wrapper.cpp
+${QtCore_GEN_DIR}/qfutureinterfacebase_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qhistorystate_wrapper.cpp

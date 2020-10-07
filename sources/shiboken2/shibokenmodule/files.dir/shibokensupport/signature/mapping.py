@@ -494,6 +494,16 @@ def init_PySide2_QtCore():
     return locals()
 
 
+def init_PySide2_QtConcurrent():
+    type_map.update({
+        "PySide2.QtCore.QFuture[QString]":
+        PySide2.QtConcurrent.QFutureQString,
+        "PySide2.QtCore.QFuture[void]":
+        PySide2.QtConcurrent.QFutureVoid,
+    })
+    return locals()
+
+
 def init_PySide2_QtGui():
     from PySide2.QtGui import QPageLayout, QPageSize # 5.12 macOS
     type_map.update({
