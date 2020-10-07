@@ -115,7 +115,7 @@ typedef struct _typeobject {
     struct _typeobject *tp_base;
     PyObject *tp_dict;
     descrgetfunc tp_descr_get;
-    void *X33; // descrsetfunc tp_descr_set;
+    descrsetfunc tp_descr_set;
     Py_ssize_t tp_dictoffset;
     initproc tp_init;
     allocfunc tp_alloc;

@@ -95,6 +95,7 @@ static PyMemberDef probe_members[] = {
 #define probe_tp_members    probe_members
 #define probe_tp_getset     probe_getseters
 #define probe_tp_descr_get  make_dummy(10)
+#define probe_tp_descr_set  make_dummy(18)
 #define probe_tp_init       make_dummy(11)
 #define probe_tp_alloc      make_dummy(12)
 #define probe_tp_new        make_dummy(13)
@@ -118,6 +119,7 @@ static PyType_Slot typeprobe_slots[] = {
     {Py_tp_members,     probe_tp_members},
     {Py_tp_getset,      probe_tp_getset},
     {Py_tp_descr_get,   probe_tp_descr_get},
+    {Py_tp_descr_set,   probe_tp_descr_set},
     {Py_tp_init,        probe_tp_init},
     {Py_tp_alloc,       probe_tp_alloc},
     {Py_tp_new,         probe_tp_new},
@@ -167,6 +169,7 @@ check_PyTypeObject_valid()
         || !PyDict_Check(check->tp_dict)
         || !PyDict_GetItemString(check->tp_dict, "dummy")
         || probe_tp_descr_get       != check->tp_descr_get
+        || probe_tp_descr_set       != check->tp_descr_set
         || probe_tp_dictoffset      != typetype->tp_dictoffset
         || probe_tp_init            != check->tp_init
         || probe_tp_alloc           != check->tp_alloc

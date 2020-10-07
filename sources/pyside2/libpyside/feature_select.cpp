@@ -445,6 +445,8 @@ void finalize()
         Py_DECREF(fast_id_array[idx]);
 }
 
+static bool patch_property_impl();
+
 void init()
 {
     // This function can be called multiple times.
@@ -457,6 +459,7 @@ void init()
         featurePointer = featureProcArray;
         initSelectableFeature(SelectFeatureSet);
         registerCleanupFunction(finalize);
+        patch_property_impl();
         is_initialized = true;
     }
     // Reset the cache. This is called at any "from __feature__ import".
@@ -551,9 +554,8 @@ static PyObject *createProperty(PyObject *getter, PyObject *setter)
     assert(getter != nullptr);
     if (setter == nullptr)
         setter = Py_None;
-    PyObject *prop = PyObject_CallObject(reinterpret_cast<PyObject *>(&PyProperty_Type), nullptr);
-    AutoDecRef args(Py_BuildValue("OO", getter, setter));
-    PyProperty_Type.tp_init(prop, args, nullptr);
+    auto obtype = reinterpret_cast<PyObject *>(&PyProperty_Type);
+    PyObject *prop = PyObject_CallFunctionObjArgs(obtype, getter, setter, nullptr);
     return prop;
 }
 
@@ -630,6 +632,77 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
             if (PyDict_DelItem(prop_dict, write) < 0)
                 return false;
     }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// These are a number of patches to make Python's property object better
+// suitable for us.
+// We turn `__doc__` into a lazy attribute saving signature initialization.
+//
+// Currently, there is no static extension planned, because _PyType_Lookup
+// and Limited_API are hard to use at the same time.
+//
+
+typedef struct {
+    PyObject_HEAD
+    PyObject *prop_get;
+    PyObject *prop_set;
+    PyObject *prop_del;
+    PyObject *prop_doc;
+    int getter_doc;
+} propertyobject;
+
+static PyObject *property_doc_get(PyObject *self, void *)
+{
+    auto po = reinterpret_cast<propertyobject *>(self);
+
+    if (po->prop_doc != nullptr && po->prop_doc != Py_None) {
+        Py_INCREF(po->prop_doc);
+        return po->prop_doc;
+    }
+    if (po->prop_get) {
+        // PYSIDE-1019: Fetch the default `__doc__` from fget. We do it late.
+        auto txt = PyObject_GetAttr(po->prop_get, PyMagicName::doc());
+        if (txt != nullptr) {
+            Py_INCREF(txt);
+            po->prop_doc = txt;
+            Py_INCREF(txt);
+            return txt;
+        }
+        PyErr_Clear();
+    }
+    Py_RETURN_NONE;
+}
+
+static int property_doc_set(PyObject *self, PyObject *value, void *)
+{
+    auto po = reinterpret_cast<propertyobject *>(self);
+
+    Py_INCREF(value);
+    po->prop_doc = value;
+    return 0;
+}
+
+static PyGetSetDef property_getset[] = {
+    // This gets added to the existing getsets
+    {const_cast<char *>("__doc__"), property_doc_get, property_doc_set, nullptr, nullptr},
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+
+static bool patch_property_impl()
+{
+    // Turn `__doc__` into a computed attribute without changing writability.
+    auto gsp = property_getset;
+    auto type = &PyProperty_Type;
+    auto dict = type->tp_dict;
+    AutoDecRef descr(PyDescr_NewGetSet(type, gsp));
+    if (descr.isNull())
+        return false;
+    if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
+        return false;
+    // Replace property_descr_get/set by slightly changed versions
     return true;
 }
 
