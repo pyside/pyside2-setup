@@ -45,14 +45,17 @@ from PySide2 import QtCore, QtGui, QtWidgets
 import dragdroprobot_rc
 
 
+def random(boundary):
+    return QtCore.QRandomGenerator.global_().bounded(boundary)
+
+
 class ColorItem(QtWidgets.QGraphicsItem):
     n = 0
 
     def __init__(self):
         super(ColorItem, self).__init__()
 
-        self.color = QtGui.QColor(QtCore.qrand() % 256, QtCore.qrand() % 256,
-                QtCore.qrand() % 256)
+        self.color = QtGui.QColor(random(256), random(256), random(256))
 
         self.setToolTip(
             "QColor(%d, %d, %d)\nClick and drag this color onto the robot!" %
@@ -87,7 +90,7 @@ class ColorItem(QtWidgets.QGraphicsItem):
         drag.setMimeData(mime)
 
         ColorItem.n += 1
-        if ColorItem.n > 2 and QtCore.qrand() % 3 == 0:
+        if ColorItem.n > 2 and random(3) == 0:
             image = QtGui.QImage(':/images/head.png')
             mime.setImageData(image)
             drag.setPixmap(QtGui.QPixmap.fromImage(image).scaled(30,40))
@@ -260,8 +263,6 @@ if __name__== '__main__':
     import math
 
     app = QtWidgets.QApplication(sys.argv)
-
-    QtCore.qsrand(QtCore.QTime(0, 0, 0).secsTo(QtCore.QTime.currentTime()))
 
     scene = QtWidgets.QGraphicsScene(-200, -200, 400, 400)
 

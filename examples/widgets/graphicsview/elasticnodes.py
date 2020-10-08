@@ -46,6 +46,10 @@ import math
 from PySide2 import QtCore, QtGui, QtWidgets
 
 
+def random(boundary):
+    return QtCore.QRandomGenerator.global_().bounded(boundary)
+
+
 class Edge(QtWidgets.QGraphicsItem):
     Pi = math.pi
     TwoPi = 2.0 * Pi
@@ -338,7 +342,7 @@ class GraphWidget(QtWidgets.QGraphicsView):
         elif key == QtCore.Qt.Key_Space or key == QtCore.Qt.Key_Enter:
             for item in self.scene().items():
                 if isinstance(item, Node):
-                    item.setPos(-150 + QtCore.qrand() % 300, -150 + QtCore.qrand() % 300)
+                    item.setPos(-150 + random(300), -150 + random(300))
         else:
             QtWidgets.QGraphicsView.keyPressEvent(self, event)
 
@@ -405,7 +409,6 @@ class GraphWidget(QtWidgets.QGraphicsView):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    QtCore.qsrand(QtCore.QTime(0,0,0).secsTo(QtCore.QTime.currentTime()))
 
     widget = GraphWidget()
     widget.show()
