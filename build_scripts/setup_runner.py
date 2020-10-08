@@ -54,6 +54,7 @@ from setuptools import setup
 if OPTION["VERBOSE_BUILD"]:
     log.set_verbosity(1)
 
+
 class SetupRunner(object):
     def __init__(self, orig_argv):
         self.invocations_list = []

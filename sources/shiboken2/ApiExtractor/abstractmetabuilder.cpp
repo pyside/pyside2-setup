@@ -175,12 +175,12 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
         const TypeEntry *entry = it.value();
         if (!entry)
             continue;
-        if (!entry->isComplex() || entry->codeGeneration() == TypeEntry::GenerateNothing)
+        if (!entry->isComplex() || !entry->generateCode())
             continue;
 
         auto centry = static_cast<const ComplexTypeEntry *>(entry);
 
-        if (!(centry->codeGeneration() & TypeEntry::GenerateTargetLang))
+        if (!centry->generateCode())
             continue;
 
         FunctionModificationList modifications = centry->functionModifications();
@@ -290,7 +290,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     if (arguments.size() == 1) {
         unaryOperator = true;
     } else if (!baseoperandClass
-               || !(baseoperandClass->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang)) {
+               || !baseoperandClass->typeEntry()->generateCode()) {
         baseoperandClass = argumentToClass(arguments.at(1), currentClass);
         firstArgumentIsSelf = false;
     } else {
@@ -551,7 +551,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 && !types->shouldDropTypeEntry(entry->qualifiedCppName())
                 && !entry->isContainer()
                 && !entry->isCustom()
-                && (entry->generateCode() & TypeEntry::GenerateTargetLang)
+                && entry->generateCode()
                 && !AbstractMetaClass::findClass(m_metaClasses, entry)) {
                 qCWarning(lcShiboken, "%s", qPrintable(msgTypeNotDefined(entry)));
             } else if (entry->generateCode() && entry->type() == TypeEntry::FunctionType) {
@@ -570,7 +570,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                                   qPrintable(msgGlobalFunctionNotDefined(fte, signature)));
                     }
                 }
-            } else if (entry->isEnum() && (entry->generateCode() & TypeEntry::GenerateTargetLang)) {
+            } else if (entry->isEnum() && entry->generateCode()) {
                 auto enumEntry = static_cast<const EnumTypeEntry *>(entry);
                 const QString name = enumEntry->targetLangQualifier();
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
@@ -855,8 +855,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         return nullptr;
     }
 
-    const bool rejectionWarning = !enclosing
-        || (enclosing->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang);
+    const bool rejectionWarning = !enclosing || enclosing->typeEntry()->generateCode();
 
     if (!typeEntry) {
         if (rejectionWarning)
@@ -1185,7 +1184,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
 
     if (!metaType) {
         const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(colonColon());
-        if (cls->typeEntry()->codeGeneration() & TypeEntry::GenerateTargetLang) {
+        if (cls->typeEntry()->generateCode()) {
              qCWarning(lcShiboken, "%s",
                        qPrintable(msgSkippingField(field, cls->name(), type)));
         }
@@ -1865,9 +1864,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             // unless the function is virtual (since the override in the
             // wrapper can then not correctly be generated).
             if (arg->defaultValue() && !functionItem->isVirtual()) {
-                if (!currentClass
-                    || (currentClass->typeEntry()->codeGeneration()
-                        & TypeEntry::GenerateTargetLang)) {
+                if (!currentClass || currentClass->typeEntry()->generateCode()) {
                     qCWarning(lcShiboken, "%s",
                               qPrintable(msgStrippingArgument(functionItem, i, originalQualifiedSignatureWithReturn, arg)));
                 }

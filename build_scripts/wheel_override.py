@@ -54,6 +54,7 @@ try:
     from wheel import __version__ as wheel_version
 
     from .options import OPTION
+    from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
     wheel_module_exists = True
 except Exception as e:
@@ -62,20 +63,13 @@ except Exception as e:
           'Skipping wheel overriding.'.format(e))
 
 
-def get_bdist_wheel_override(params):
-    if wheel_module_exists:
-        class PysideBuildWheelDecorated(PysideBuildWheel):
-            def __init__(self, *args, **kwargs):
-                self.params = params
-                PysideBuildWheel.__init__(self, *args, **kwargs)
-        return PysideBuildWheelDecorated
-    else:
-        return None
+def get_bdist_wheel_override():
+    return PysideBuildWheel if wheel_module_exists else None
 
 
 class PysideBuildWheel(_bdist_wheel):
     def __init__(self, *args, **kwargs):
-        self.pyside_params = None
+        self._package_version = None
         _bdist_wheel.__init__(self, *args, **kwargs)
 
     def finalize_options(self):
@@ -83,7 +77,7 @@ class PysideBuildWheel(_bdist_wheel):
             # Override the platform name to contain the correct
             # minimum deployment target.
             # This is used in the final wheel name.
-            self.plat_name = self.params['macos_plat_name']
+            self.plat_name = macos_plat_name()
 
         # When limited API is requested, notify bdist_wheel to
         # create a properly named package.
@@ -91,6 +85,8 @@ class PysideBuildWheel(_bdist_wheel):
                                and sys.version_info[0] >= 3)
         if limited_api_enabled:
             self.py_limited_api = "cp35.cp36.cp37.cp38.cp39"
+
+        self._package_version = get_package_version()
 
         _bdist_wheel.finalize_options(self)
 
@@ -102,9 +98,7 @@ class PysideBuildWheel(_bdist_wheel):
         #   PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
         # The PySide2 version is "5.6".
         # The Qt version built against is "5.6.4".
-        qt_version = self.params['qt_version']
-        package_version = self.params['package_version']
-        wheel_version = "{}-{}".format(package_version, qt_version)
+        wheel_version = "{}-{}".format(self._package_version, get_qt_version())
         components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
             components += (self.build_number,)

@@ -390,7 +390,7 @@ if __name__ == '__main__':
         build_mode = BuildMode.RECONFIGURE
 
     if build_mode == BuildMode.NONE and not (options.clean or options.reset
-        or options.pull or options.test):
+                                             or options.pull or options.test):
         argument_parser.print_help()
         sys.exit(0)
 

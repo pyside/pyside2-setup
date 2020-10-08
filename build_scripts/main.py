@@ -41,10 +41,17 @@ from __future__ import print_function
 from distutils.version import LooseVersion
 
 import os
+import platform
+import re
+import sys
+from textwrap import dedent
 import time
 from .config import config
-from .utils import memoize, get_python_dict
+from .utils import get_python_dict
 from .options import OPTION
+from .wheel_utils import (get_package_version, get_qt_version,
+                          get_package_timestamp, macos_plat_name,
+                          macos_pyside_min_deployment_target)
 
 setup_script_dir = os.getcwd()
 build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
@@ -55,37 +62,6 @@ start_time = int(time.time())
 
 def elapsed():
     return int(time.time()) - start_time
-
-
-@memoize
-def get_package_timestamp():
-    """ In a Coin CI build the returned timestamp will be the
-        Coin integration id timestamp. For regular builds it's
-        just the current timestamp or a user provided one."""
-    return OPTION["PACKAGE_TIMESTAMP"] if OPTION["PACKAGE_TIMESTAMP"] else start_time
-
-
-@memoize
-def get_package_version():
-    """ Returns the version string for the PySide2 package. """
-    pyside_version_py = os.path.join(
-        setup_script_dir, "sources", "pyside2", "pyside_version.py")
-    d = get_python_dict(pyside_version_py)
-
-    final_version = "{}.{}.{}".format(
-        d['major_version'], d['minor_version'], d['patch_version'])
-    release_version_type = d['release_version_type']
-    pre_release_version = d['pre_release_version']
-    if pre_release_version and release_version_type:
-        final_version += release_version_type + pre_release_version
-    if release_version_type.startswith("comm"):
-        final_version += "." + release_version_type
-
-    # Add the current timestamp to the version number, to suggest it
-    # is a development snapshot build.
-    if OPTION["SNAPSHOT_BUILD"]:
-        final_version += ".dev{}".format(get_package_timestamp())
-    return final_version
 
 
 def get_setuptools_extension_modules():
@@ -101,15 +77,161 @@ def get_setuptools_extension_modules():
     return extension_modules
 
 
+def _get_make(platform_arch, build_type):
+    """Helper for retrieving the make command and CMake generator name"""
+    makespec = OPTION["MAKESPEC"]
+    if makespec == "make":
+        return ("make", "Unix Makefiles")
+    if makespec == "msvc":
+        nmake_path = find_executable("nmake")
+        if nmake_path is None or not os.path.exists(nmake_path):
+            log.info("nmake not found. Trying to initialize the MSVC env...")
+            init_msvc_env(platform_arch, build_type)
+            nmake_path = find_executable("nmake")
+            if not nmake_path or not os.path.exists(nmake_path):
+                raise DistutilsSetupError('"nmake" could not be found.')
+        if not OPTION["NO_JOM"]:
+            jom_path = find_executable("jom")
+            if jom_path:
+                log.info("jom was found in {}".format(jom_path))
+                return (jom_path, "NMake Makefiles JOM")
+        log.info("nmake was found in {}".format(nmake_path))
+        if OPTION["JOBS"]:
+            msg = "Option --jobs can only be used with 'jom' on Windows."
+            raise DistutilsSetupError(msg)
+        return (nmake_path, "NMake Makefiles")
+    if makespec == "mingw":
+        return ("mingw32-make", "mingw32-make")
+    if makespec == "ninja":
+        return ("ninja", "Ninja")
+    m = 'Invalid option --make-spec "{}".'.format(makespec)
+    raise DistutilsSetupError(m)
+
+
+def get_make(platform_arch, build_type):
+    """Retrieve the make command and CMake generator name"""
+    (make_path, make_generator) = _get_make(platform_arch, build_type)
+    if not os.path.isabs(make_path):
+        make_path = find_executable(make_path)
+        if not make_path or not os.path.exists(make_path):
+            raise DistutilsSetupError("You need the program '{}' on your system path to "
+                                      "compile PySide2.".format(make_path))
+    return (make_path, make_generator)
+
+
+def _get_py_library_win(build_type, py_version, py_prefix, py_libdir,
+                        py_include_dir):
+    """Helper for finding the Python library on Windows"""
+    if py_include_dir is None or not os.path.exists(py_include_dir):
+        py_include_dir = os.path.join(py_prefix, "include")
+    if py_libdir is None or not os.path.exists(py_libdir):
+        # For virtual environments on Windows, the py_prefix will contain a
+        # path pointing to it, instead of the system Python installation path.
+        # Since INCLUDEPY contains a path to the system location, we use the
+        # same base directory to define the py_libdir variable.
+        py_libdir = os.path.join(os.path.dirname(py_include_dir), "libs")
+        if not os.path.isdir(py_libdir):
+            raise DistutilsSetupError("Failed to locate the 'libs' directory")
+    dbg_postfix = "_d" if build_type == "Debug" else ""
+    if OPTION["MAKESPEC"] == "mingw":
+        static_lib_name = "libpython{}{}.a".format(
+            py_version.replace(".", ""), dbg_postfix)
+        return os.path.join(py_libdir, static_lib_name)
+    v = py_version.replace(".", "")
+    python_lib_name = "python{}{}.lib".format(v, dbg_postfix)
+    return os.path.join(py_libdir, python_lib_name)
+
+
+def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
+                         py_include_dir):
+    """Helper for finding the Python library on UNIX"""
+    if py_libdir is None or not os.path.exists(py_libdir):
+        py_libdir = os.path.join(py_prefix, "lib")
+    if py_include_dir is None or not os.path.exists(py_include_dir):
+        dir = "include/python{}".format(py_version)
+        py_include_dir = os.path.join(py_prefix, dir)
+    dbg_postfix = "_d" if build_type == "Debug" else ""
+    lib_exts = ['.so']
+    if sys.platform == 'darwin':
+        lib_exts.append('.dylib')
+    if sys.version_info[0] > 2:
+        lib_suff = getattr(sys, 'abiflags', None)
+    else:  # Python 2
+        lib_suff = ''
+    lib_exts.append('.so.1')
+    # Suffix for OpenSuSE 13.01
+    lib_exts.append('.so.1.0')
+    # static library as last gasp
+    lib_exts.append('.a')
+
+    if sys.version_info[0] == 2 and dbg_postfix:
+        # For Python2 add a duplicate set of extensions combined with the
+        # dbg_postfix, so we test for both the debug version of the lib
+        # and the normal one. This allows a debug PySide2 to be built with a
+        # non-debug Python.
+        lib_exts = [dbg_postfix + e for e in lib_exts] + lib_exts
+
+    libs_tried = []
+    for lib_ext in lib_exts:
+        lib_name = "libpython{}{}{}".format(py_version, lib_suff, lib_ext)
+        py_library = os.path.join(py_libdir, lib_name)
+        if os.path.exists(py_library):
+            return py_library
+        libs_tried.append(py_library)
+    # At least on macOS 10.11, the system Python 2.6 does not include a
+    # symlink to the framework file disguised as a .dylib file, thus finding
+    # the library would fail. Manually check if a framework file "Python"
+    # exists in the Python framework bundle.
+    if sys.platform == 'darwin' and sys.version_info[:2] == (2, 6):
+        # These manipulations essentially transform
+        # /System/Library/Frameworks/Python.framework/Versions/2.6/lib
+        # to
+        # /System/Library/Frameworks/Python.framework/Versions/2.6/Python
+        possible_framework_path = os.path.realpath(os.path.join(py_libdir, '..'))
+        possible_framework_version = os.path.basename(possible_framework_path)
+        possible_framework_library = os.path.join(possible_framework_path, 'Python')
+
+        if (possible_framework_version == '2.6'
+                and os.path.exists(possible_framework_library)):
+            return possible_framework_library
+        libs_tried.append(possible_framework_library)
+
+    # Try to find shared libraries which have a multi arch
+    # suffix.
+    py_multiarch = get_config_var("MULTIARCH")
+    if py_multiarch:
+        try_py_libdir = os.path.join(py_libdir, py_multiarch)
+        libs_tried = []
+        for lib_ext in lib_exts:
+            lib_name = "libpython{}{}{}".format(py_version, lib_suff, lib_ext)
+            py_library = os.path.join(try_py_libdir, lib_name)
+            if os.path.exists(py_library):
+                return py_library
+            libs_tried.append(py_library)
+
+    m = "Failed to locate the Python library with {}".format(", ".join(libs_tried))
+    raise DistutilsSetupError(m)
+
+
+def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir):
+    """Find the Python library"""
+    if sys.platform == "win32":
+        py_library = _get_py_library_win(build_type, py_version, py_prefix,
+                                         py_libdir, py_include_dir)
+    else:
+        py_library = _get_py_library_unix(build_type, py_version, py_prefix,
+                                          py_libdir, py_include_dir)
+    if py_library.endswith('.a'):
+        # Python was compiled as a static library
+        log.error("Failed to locate a dynamic Python library, using {}".format(py_library))
+    return py_library
+
+
 try:
     import setuptools
 except ImportError:
     from ez_setup import use_setuptools
     use_setuptools()
-
-import sys
-import platform
-import re
 
 import distutils.log as log
 from distutils.errors import DistutilsSetupError
@@ -136,8 +258,6 @@ from .utils import linux_fix_rpaths_for_library
 from .platforms.unix import prepare_packages_posix
 from .platforms.windows_desktop import prepare_packages_win32
 from .wheel_override import wheel_module_exists, get_bdist_wheel_override
-
-from textwrap import dedent
 
 
 def check_allowed_python_version():
@@ -241,21 +361,6 @@ def prefix():
 # paths.
 qtinfo = QtInfo()
 qtinfo.setup(OPTION["QMAKE"], OPTION["QT_VERSION"])
-
-
-def get_qt_version():
-    qt_version = qtinfo.version
-
-    if not qt_version:
-        log.error("Failed to query the Qt version with qmake {0}".format(qtinfo.qmake_command))
-        sys.exit(1)
-
-    if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
-        log.error("Incompatible Qt version detected: {}. A Qt version >= 5.7 is "
-                  "required.".format(qt_version))
-        sys.exit(1)
-
-    return qt_version
 
 
 def prepare_build():
@@ -374,7 +479,7 @@ class PysideBuild(_build):
     def finalize_options(self):
         os_name_backup = os.name
         if sys.platform == 'darwin':
-            self.plat_name = PysideBuild.macos_plat_name()
+            self.plat_name = macos_plat_name()
             # This is a hack to circumvent the dubious check in
             # distutils.commands.build -> finalize_options, which only
             # allows setting the plat_name for windows NT.
@@ -421,49 +526,7 @@ class PysideBuild(_build):
         make_path = None
         make_generator = None
         if not OPTION["ONLYPACKAGE"]:
-            if OPTION["MAKESPEC"] == "make":
-                make_name = "make"
-                make_generator = "Unix Makefiles"
-            elif OPTION["MAKESPEC"] == "msvc":
-                nmake_path = find_executable("nmake")
-                if nmake_path is None or not os.path.exists(nmake_path):
-                    log.info("nmake not found. Trying to initialize the MSVC env...")
-                    init_msvc_env(platform_arch, build_type)
-                    nmake_path = find_executable("nmake")
-                    assert(nmake_path is not None and os.path.exists(nmake_path))
-                jom_path = None if OPTION["NO_JOM"] else find_executable("jom")
-                if jom_path is not None and os.path.exists(jom_path):
-                    log.info("jom was found in {}".format(jom_path))
-                    make_name = "jom"
-                    make_generator = "NMake Makefiles JOM"
-                else:
-                    log.info("nmake was found in {}".format(nmake_path))
-                    make_name = "nmake"
-                    make_generator = "NMake Makefiles"
-                    if OPTION["JOBS"]:
-                        msg = "Option --jobs can only be used with 'jom' on Windows."
-                        raise DistutilsSetupError(msg)
-            elif OPTION["MAKESPEC"] == "mingw":
-                make_name = "mingw32-make"
-                make_generator = "MinGW Makefiles"
-            elif OPTION["MAKESPEC"] == "ninja":
-                make_name = "ninja"
-                make_generator = "Ninja"
-            else:
-                raise DistutilsSetupError("Invalid option --make-spec.")
-            make_path = find_executable(make_name)
-            if make_path is None or not os.path.exists(make_path):
-                raise DistutilsSetupError("You need the program '{}' on your system path to "
-                                          "compile PySide2.".format(make_name))
-
-            if OPTION["CMAKE"] is None or not os.path.exists(OPTION["CMAKE"]):
-                raise DistutilsSetupError("Failed to find cmake."
-                                          " Please specify the path to cmake with "
-                                          "--cmake parameter.")
-
-        if OPTION["QMAKE"] is None or not os.path.exists(OPTION["QMAKE"]):
-            raise DistutilsSetupError("Failed to find qmake. "
-                                      "Please specify the path to qmake with --qmake parameter.")
+            (make_path, make_generator) = get_make(platform_arch, build_type)
 
         # Prepare parameters
         py_executable = sys.executable
@@ -479,111 +542,6 @@ class PysideBuild(_build):
         else:
             py_scripts_dir = os.path.join(py_prefix, "bin")
         self.py_scripts_dir = py_scripts_dir
-        if py_libdir is None or not os.path.exists(py_libdir):
-            if sys.platform == "win32":
-                # For virtual environments on Windows, the py_prefix will contain a path pointing
-                # to it, instead of the system Python installation path.
-                # Since INCLUDEPY contains a path to the system location, we use the same base
-                # directory to define the py_libdir variable.
-                py_libdir = os.path.join(os.path.dirname(py_include_dir), "libs")
-                if not os.path.isdir(py_libdir):
-                    raise DistutilsSetupError("Failed to locate the 'libs' directory")
-            else:
-                py_libdir = os.path.join(py_prefix, "lib")
-        if py_include_dir is None or not os.path.exists(py_include_dir):
-            if sys.platform == "win32":
-                py_include_dir = os.path.join(py_prefix, "include")
-            else:
-                py_include_dir = os.path.join(py_prefix, "include/python{}".format(py_version))
-        dbg_postfix = ""
-        if build_type == "Debug":
-            dbg_postfix = "_d"
-        if sys.platform == "win32":
-            if OPTION["MAKESPEC"] == "mingw":
-                static_lib_name = "libpython{}{}.a".format(
-                    py_version.replace(".", ""), dbg_postfix)
-                py_library = os.path.join(py_libdir, static_lib_name)
-            else:
-                python_lib_name = "python{}{}.lib".format(
-                    py_version.replace(".", ""), dbg_postfix)
-                py_library = os.path.join(py_libdir, python_lib_name)
-        else:
-            lib_exts = ['.so']
-            if sys.platform == 'darwin':
-                lib_exts.append('.dylib')
-            if sys.version_info[0] > 2:
-                lib_suff = getattr(sys, 'abiflags', None)
-            else:  # Python 2
-                lib_suff = ''
-            lib_exts.append('.so.1')
-            # Suffix for OpenSuSE 13.01
-            lib_exts.append('.so.1.0')
-            # static library as last gasp
-            lib_exts.append('.a')
-
-            if sys.version_info[0] == 2 and dbg_postfix:
-                # For Python2 add a duplicate set of extensions
-                # combined with the dbg_postfix, so we test for both the
-                # debug version of the lib and the normal one.
-                # This allows a debug PySide2 to be built with a
-                # non-debug Python.
-                lib_exts = [dbg_postfix + e for e in lib_exts] + lib_exts
-
-            python_library_found = False
-            libs_tried = []
-            for lib_ext in lib_exts:
-                lib_name = "libpython{}{}{}".format(py_version, lib_suff, lib_ext)
-                py_library = os.path.join(py_libdir, lib_name)
-                if os.path.exists(py_library):
-                    python_library_found = True
-                    break
-                libs_tried.append(py_library)
-            else:
-                # At least on macOS 10.11, the system Python 2.6 does
-                # not include a symlink to the framework file disguised
-                # as a .dylib file, thus finding the library would
-                # fail.
-                # Manually check if a framework file "Python" exists in
-                # the Python framework bundle.
-                if sys.platform == 'darwin' and sys.version_info[:2] == (2, 6):
-                    # These manipulations essentially transform
-                    # /System/Library/Frameworks/Python.framework/Versions/2.6/lib
-                    # to
-                    # /System/Library/Frameworks/Python.framework/Versions/2.6/Python
-                    possible_framework_path = os.path.realpath(os.path.join(py_libdir, '..'))
-                    possible_framework_version = os.path.basename(possible_framework_path)
-                    possible_framework_library = os.path.join(possible_framework_path, 'Python')
-
-                    if (possible_framework_version == '2.6'
-                            and os.path.exists(possible_framework_library)):
-                        py_library = possible_framework_library
-                        python_library_found = True
-                    else:
-                        libs_tried.append(possible_framework_library)
-
-                # Try to find shared libraries which have a multi arch
-                # suffix.
-                if not python_library_found:
-                    py_multiarch = get_config_var("MULTIARCH")
-                    if py_multiarch and not python_library_found:
-                        try_py_libdir = os.path.join(py_libdir, py_multiarch)
-                        libs_tried = []
-                        for lib_ext in lib_exts:
-                            lib_name = "libpython{}{}{}".format(py_version, lib_suff, lib_ext)
-                            py_library = os.path.join(try_py_libdir, lib_name)
-                            if os.path.exists(py_library):
-                                py_libdir = try_py_libdir
-                                python_library_found = True
-                                break
-                            libs_tried.append(py_library)
-
-            if not python_library_found:
-                raise DistutilsSetupError(
-                    "Failed to locate the Python library with {}".format(", ".join(libs_tried)))
-
-            if py_library.endswith('.a'):
-                # Python was compiled as a static library
-                log.error("Failed to locate a dynamic Python library, using {}".format(py_library))
 
         self.qtinfo = qtinfo
         qt_dir = os.path.dirname(OPTION["QMAKE"])
@@ -633,7 +591,8 @@ class PysideBuild(_build):
         self.install_dir = install_dir
         self.py_executable = py_executable
         self.py_include_dir = py_include_dir
-        self.py_library = py_library
+        self.py_library = get_py_library(build_type, py_version, py_prefix,
+                                         py_libdir, py_include_dir)
         self.py_version = py_version
         self.build_type = build_type
         self.site_packages_dir = get_python_lib(1, 0, prefix=install_dir)
@@ -743,73 +702,11 @@ class PysideBuild(_build):
             log.info("OpenSSL dll directory: {}".format(OPTION["OPENSSL"]))
         if sys.platform == 'darwin':
             pyside_macos_deployment_target = (
-                PysideBuild.macos_pyside_min_deployment_target()
+                macos_pyside_min_deployment_target()
             )
             log.info("MACOSX_DEPLOYMENT_TARGET set to: {}".format(
                 pyside_macos_deployment_target))
         log.info("=" * 30)
-
-    @staticmethod
-    def macos_qt_min_deployment_target():
-        target = qtinfo.macos_min_deployment_target
-
-        if not target:
-            raise DistutilsSetupError("Failed to query for Qt's QMAKE_MACOSX_DEPLOYMENT_TARGET.")
-        return target
-
-    @staticmethod
-    @memoize
-    def macos_pyside_min_deployment_target():
-        """
-        Compute and validate PySide2 MACOSX_DEPLOYMENT_TARGET value.
-        Candidate sources that are considered:
-            - setup.py provided value
-            - maximum value between minimum deployment target of the
-              Python interpreter and the minimum deployment target of
-              the Qt libraries.
-        If setup.py value is provided, that takes precedence.
-        Otherwise use the maximum of the above mentioned two values.
-        """
-        python_target = get_config_var('MACOSX_DEPLOYMENT_TARGET') or None
-        qt_target = PysideBuild.macos_qt_min_deployment_target()
-        setup_target = OPTION["MACOS_DEPLOYMENT_TARGET"]
-
-        qt_target_split = [int(x) for x in qt_target.split('.')]
-        if python_target:
-            python_target_split = [int(x) for x in python_target.split('.')]
-        if setup_target:
-            setup_target_split = [int(x) for x in setup_target.split('.')]
-
-        message = ("Can't set MACOSX_DEPLOYMENT_TARGET value to {} because "
-                   "{} was built with minimum deployment target set to {}.")
-        # setup.py provided OPTION["MACOS_DEPLOYMENT_TARGET"] value takes
-        # precedence.
-        if setup_target:
-            if python_target and setup_target_split < python_target_split:
-                raise DistutilsSetupError(message.format(setup_target, "Python",
-                                                         python_target))
-            if setup_target_split < qt_target_split:
-                raise DistutilsSetupError(message.format(setup_target, "Qt",
-                                                         qt_target))
-            # All checks clear, use setup.py provided value.
-            return setup_target
-
-        # Setup.py value not provided,
-        # use same value as provided by Qt.
-        if python_target:
-            maximum_target = '.'.join([str(e) for e in max(python_target_split, qt_target_split)])
-        else:
-            maximum_target = qt_target
-        return maximum_target
-
-    @staticmethod
-    @memoize
-    def macos_plat_name():
-        deployment_target = PysideBuild.macos_pyside_min_deployment_target()
-        # Example triple "macosx-10.12-x86_64".
-        plat = get_platform().split("-")
-        plat_name = "{}-{}-{}".format(plat[0], deployment_target, plat[2])
-        return plat_name
 
     def build_patchelf(self):
         if not sys.platform.startswith('linux'):
@@ -1004,7 +901,7 @@ class PysideBuild(_build):
             # interpreter sysconfig value.
             # Doing so could break the detected clang include paths
             # for example.
-            deployment_target = PysideBuild.macos_pyside_min_deployment_target()
+            deployment_target = macos_pyside_min_deployment_target()
             cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
@@ -1268,9 +1165,11 @@ class PysideBuild(_build):
             log.info("Patched rpath to '$ORIGIN/' (Linux) or "
                      "updated rpath (OS/X) in {}.".format(srcpath))
 
+
 class PysideRstDocs(Command):
     description = "Build .rst documentation only"
     user_options = []
+
     def initialize_options(self):
         log.info("-- This build process will not include the API documentation."
                  "API documentation requires a full build of pyside/shiboken.")
@@ -1331,12 +1230,8 @@ class PysideRstDocs(Command):
             elif self.name == "shiboken2":
                 self.sphinx_src = self.out_dir
 
-            sphinx_cmd = ["sphinx-build",
-                "-b", "html",
-                "-c", self.sphinx_src,
-                self.doc_dir,
-                self.out_dir
-            ]
+            sphinx_cmd = ["sphinx-build", "-b", "html", "-c", self.sphinx_src,
+                          self.doc_dir, self.out_dir]
             if run_process(sphinx_cmd) != 0:
                 raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))
         # Last message
@@ -1345,6 +1240,7 @@ class PysideRstDocs(Command):
 
     def finalize_options(self):
         pass
+
 
 cmd_class_dict = {
     'build': PysideBuild,
@@ -1357,11 +1253,6 @@ cmd_class_dict = {
     'build_rst_docs': PysideRstDocs,
 }
 if wheel_module_exists:
-    params = {}
-    params['qt_version'] = get_qt_version()
-    params['package_version'] = get_package_version()
-    if sys.platform == 'darwin':
-        params['macos_plat_name'] = PysideBuild.macos_plat_name()
-    pyside_bdist_wheel = get_bdist_wheel_override(params)
+    pyside_bdist_wheel = get_bdist_wheel_override()
     if pyside_bdist_wheel:
         cmd_class_dict['bdist_wheel'] = pyside_bdist_wheel

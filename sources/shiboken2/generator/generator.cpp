@@ -502,8 +502,7 @@ bool Generator::generate()
 
 bool Generator::shouldGenerateTypeEntry(const TypeEntry *type) const
 {
-    return (type->codeGeneration() & TypeEntry::GenerateTargetLang)
-        && NamespaceTypeEntry::isVisibleScope(type);
+    return type->generateCode() && NamespaceTypeEntry::isVisibleScope(type);
 }
 
 bool Generator::shouldGenerate(const AbstractMetaClass *metaClass) const

@@ -598,13 +598,10 @@ public:
     Q_ENUM(Type)
 
     enum CodeGeneration {
-        GenerateTargetLang      = 0x0001,
-        GenerateCpp             = 0x0002,
-        GenerateForSubclass     = 0x0004,
-
-        GenerateNothing         = 0,
-        GenerateAll             = 0xffff,
-        GenerateCode            = GenerateTargetLang | GenerateCpp
+        GenerateNothing,     // Rejection, private type, ConstantValueTypeEntry or similar
+        GenerationDisabled,  // generate='no' in type system
+        GenerateCode,        // Generate code
+        GenerateForSubclass, // Inherited from a loaded dependent type system.
     };
     Q_ENUM(CodeGeneration)
 
@@ -703,11 +700,11 @@ public:
     // Name as specified in XML
     QString entryName() const { return m_entryName; }
 
-    uint codeGeneration() const
+    CodeGeneration codeGeneration() const
     {
         return m_codeGeneration;
     }
-    void setCodeGeneration(uint cg)
+    void setCodeGeneration(CodeGeneration cg)
     {
         m_codeGeneration = cg;
     }
@@ -719,8 +716,7 @@ public:
     //       on 'load-typesystem' tag
     inline bool generateCode() const
     {
-        return m_codeGeneration != TypeEntry::GenerateForSubclass
-               && m_codeGeneration != TypeEntry::GenerateNothing;
+        return m_codeGeneration == GenerateCode;
     }
 
     int revision() const { return m_revision; }
@@ -804,7 +800,7 @@ public:
         return m_docModifications;
     }
 
-    IncludeList extraIncludes() const
+    const IncludeList &extraIncludes() const
     {
         return m_extraIncludes;
     }
@@ -903,7 +899,7 @@ private:
     QVersionNumber m_version;
     CustomConversion *m_customConversion = nullptr;
     SourceLocation m_sourceLocation; // XML file
-    uint m_codeGeneration = GenerateAll;
+    CodeGeneration m_codeGeneration = GenerateCode;
     TypeEntry *m_viewOn = nullptr;
     int m_revision = 0;
     int m_sbkIndex = 0;

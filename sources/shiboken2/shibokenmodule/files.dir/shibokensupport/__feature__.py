@@ -104,7 +104,9 @@ Note: This are two imports.
 # XXX build an improved C version? I guess not.
 def _import(name, *args, **kwargs):
     # PYSIDE-1368: The `__name__` attribute does not need to exist in all modules.
-    importing_module = sys._getframe(1).f_globals.get("__name__", "__main__")
+    # PYSIDE-1398: sys._getframe(1) may not exist when embedding.
+    calling_frame = _cf = sys._getframe().f_back
+    importing_module = _cf.f_globals.get("__name__", "__main__") if _cf else "__main__"
     existing = pyside_feature_dict.get(importing_module, 0)
 
     if name == "__feature__" and args[2]:

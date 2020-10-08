@@ -393,14 +393,18 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     //Extra includes
-    s << "\n// Extra includes\n";
-    QVector<Include> includes = metaClass->typeEntry()->extraIncludes();
+    QVector<Include> includes;
+    if (!classContext.useWrapper())
+        includes += metaClass->typeEntry()->extraIncludes();
     for (AbstractMetaEnum *cppEnum : qAsConst(classEnums))
         includes.append(cppEnum->typeEntry()->extraIncludes());
-    std::sort(includes.begin(), includes.end());
-    for (const Include &inc : qAsConst(includes))
-        s << inc.toString() << Qt::endl;
-    s << Qt::endl;
+    if (!includes.isEmpty()) {
+        s << "\n// Extra includes\n";
+        std::sort(includes.begin(), includes.end());
+        for (const Include &inc : qAsConst(includes))
+            s << inc.toString() << Qt::endl;
+        s << '\n';
+    }
 
     s << "\n#include <cctype>\n#include <cstring>\n";
 
@@ -5234,9 +5238,16 @@ void CppGenerator::writeClassRegister(QTextStream &s,
             s << "0,\n";
         }
 
-        // 6:baseType
-        const auto base = metaClass->isNamespace()
+        // 6:baseType: Find a type that is not disabled.
+        auto base = metaClass->isNamespace()
             ? metaClass->extendedNamespace() : metaClass->baseClass();
+        if (!metaClass->isNamespace()) {
+            for (; base != nullptr; base = base->baseClass()) {
+                const auto ct = base->typeEntry()->codeGeneration();
+                if (ct == TypeEntry::GenerateCode || ct == TypeEntry::GenerateForSubclass)
+                    break;
+            }
+        }
         if (base) {
             s << INDENT << "reinterpret_cast<SbkObjectType *>("
                 << cpythonTypeNameExt(base->typeEntry()) << "),\n";

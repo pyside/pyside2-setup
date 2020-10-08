@@ -125,7 +125,7 @@ class QtInfo(object):
             return self.get_property("QT_INSTALL_PREFIX/src")
 
         def get_property(self, prop_name):
-            if not  self._query_dict:
+            if not self._query_dict:
                 self._get_query_properties()
                 self._get_other_properties()
             if prop_name not in self._query_dict:

@@ -505,7 +505,7 @@ QString TypeSystemEntityResolver::resolveUndeclaredEntity(const QString &name)
 
 TypeSystemParser::TypeSystemParser(TypeDatabase *database, bool generate) :
     m_database(database),
-    m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
+    m_generate(generate ? TypeEntry::GenerateCode : TypeEntry::GenerateForSubclass)
 {
 }
 
@@ -775,7 +775,7 @@ bool TypeSystemParser::endElement(QStringView localName)
 
     switch (m_current->type) {
     case StackElement::Root:
-        if (m_generate == TypeEntry::GenerateAll) {
+        if (m_generate == TypeEntry::GenerateCode) {
             TypeDatabase::instance()->addGlobalUserFunctions(m_contextStack.top()->addedFunctions);
             TypeDatabase::instance()->addGlobalUserFunctionModifications(m_contextStack.top()->functionMods);
             for (CustomConversion *customConversion : qAsConst(customConversionsForReview)) {
@@ -790,13 +790,26 @@ bool TypeSystemParser::endElement(QStringView localName)
     case StackElement::InterfaceTypeEntry:
     case StackElement::NamespaceTypeEntry: {
         auto *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
-        centry->setAddedFunctions(m_contextStack.top()->addedFunctions);
-        centry->setFunctionModifications(m_contextStack.top()->functionMods);
-        centry->setFieldModifications(m_contextStack.top()->fieldMods);
-        centry->setCodeSnips(m_contextStack.top()->codeSnips);
-        centry->setDocModification(m_contextStack.top()->docModifications);
+        auto top = m_contextStack.top();
+        centry->setAddedFunctions(top->addedFunctions);
+        centry->setFunctionModifications(top->functionMods);
+        centry->setFieldModifications(top->fieldMods);
+        centry->setCodeSnips(top->codeSnips);
+        centry->setDocModification(top->docModifications);
     }
     break;
+
+    case StackElement::TypedefTypeEntry: {
+        auto *centry = static_cast<TypedefEntry *>(m_current->entry)->target();
+        auto top = m_contextStack.top();
+        centry->setAddedFunctions(centry->addedFunctions() + top->addedFunctions);
+        centry->setFunctionModifications(centry->functionModifications() + top->functionMods);
+        centry->setFieldModifications(centry->fieldModifications() + top->fieldMods);
+        centry->setCodeSnips(centry->codeSnips() + top->codeSnips);
+        centry->setDocModification(centry->docModifications() + top->docModifications);
+    }
+    break;
+
     case StackElement::AddFunction: {
         // Leaving add-function: Assign all modifications to the added function
         StackElementContext *top = m_contextStack.top();
@@ -1576,7 +1589,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
     if (generate)
         ctype->setCodeGeneration(m_generate);
     else
-        ctype->setCodeGeneration(TypeEntry::GenerateForSubclass);
+        ctype->setCodeGeneration(TypeEntry::GenerationDisabled);
 }
 
 bool TypeSystemParser::parseRenameFunction(const QXmlStreamReader &,
@@ -1760,7 +1773,7 @@ bool TypeSystemParser::loadTypesystem(const QXmlStreamReader &,
     }
     const bool result =
         m_database->parseFile(typeSystemName, m_currentPath, generateChild
-                              && m_generate == TypeEntry::GenerateAll);
+                              && m_generate == TypeEntry::GenerateCode);
     if (!result)
         m_error = QStringLiteral("Failed to parse: '%1'").arg(typeSystemName);
     return result;
@@ -2779,7 +2792,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
     auto *element = new StackElement(m_current);
     element->type = elementType;
 
-    if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateAll)
+    if (element->type == StackElement::Root && m_generate == TypeEntry::GenerateCode)
         customConversionsForReview.clear();
 
     if (element->type == StackElement::CustomMetaConstructor
