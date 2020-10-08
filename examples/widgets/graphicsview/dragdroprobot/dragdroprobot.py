@@ -242,7 +242,8 @@ class Robot(RobotPart):
         self.animations[0].setScaleAt(1, 1.1, 1.1)
 
         self.timeline.setUpdateInterval(1000 / 25)
-        self.timeline.setCurveShape(QtCore.QTimeLine.SineCurve)
+        curve = QtCore.QEasingCurve(QtCore.QEasingCurve.SineCurve)
+        self.timeline.setEasingCurve(curve)
         self.timeline.setLoopCount(0)
         self.timeline.setDuration(2000)
         self.timeline.start()
