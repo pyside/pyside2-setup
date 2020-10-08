@@ -201,7 +201,6 @@
       &openglfunctions_modifications2_1;
       &openglfunctions_modifications3_0;
       &openglfunctions_modifications3_3;
-      &openglfunctions_modifications3_3a;
   </object-type>
   <object-type name="QOpenGLFunctions_4_0_Compatibility" since="5.1">
       &openglfunctions_modifications1_0;
@@ -228,7 +227,6 @@
       &openglfunctions_modifications2_1;
       &openglfunctions_modifications3_0;
       &openglfunctions_modifications3_3;
-      &openglfunctions_modifications3_3a;
       &openglfunctions_modifications4_0;
  </object-type>
   <object-type name="QOpenGLFunctions_4_1_Compatibility" since="5.1">
@@ -257,7 +255,6 @@
       &openglfunctions_modifications2_1;
       &openglfunctions_modifications3_0;
       &openglfunctions_modifications3_3;
-      &openglfunctions_modifications3_3a;
       &openglfunctions_modifications4_0;
       &openglfunctions_modifications4_1;
       &openglfunctions_modifications_va;
@@ -288,7 +285,6 @@
       &openglfunctions_modifications2_1;
       &openglfunctions_modifications3_0;
       &openglfunctions_modifications3_3;
-      &openglfunctions_modifications3_3a;
       &openglfunctions_modifications4_0;
       &openglfunctions_modifications4_1;
       &openglfunctions_modifications_va;
@@ -320,7 +316,6 @@
       &openglfunctions_modifications2_1;
       &openglfunctions_modifications3_0;
       &openglfunctions_modifications3_3;
-      &openglfunctions_modifications3_3a;
       &openglfunctions_modifications4_0;
       &openglfunctions_modifications4_3;
       &openglfunctions_modifications4_1;
