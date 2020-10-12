@@ -145,7 +145,7 @@ void TestAddFunction::testAddFunctionConstructor()
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(addedFunc->arguments().size(), 1);
     QVERIFY(addedFunc->isUserAdded());
-    QVERIFY(!addedFunc->type());
+    QVERIFY(addedFunc->isVoid());
 }
 
 void TestAddFunction::testAddFunctionTagDefaultValues()
@@ -167,7 +167,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QVERIFY(addedFunc->isUserAdded());
-    QVERIFY(!addedFunc->type());
+    QVERIFY(addedFunc->isVoid());
 }
 
 void TestAddFunction::testAddFunctionCodeSnippets()

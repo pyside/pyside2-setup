@@ -579,10 +579,8 @@ QStringList OverloadData::returnTypes() const
     for (const AbstractMetaFunction *func : m_overloads) {
         if (!func->typeReplaced(0).isEmpty())
             retTypes << func->typeReplaced(0);
-        else if (func->type() && !func->argumentRemoved(0))
+        else if (!func->argumentRemoved(0))
             retTypes << func->type()->cppSignature();
-        else
-            retTypes << QLatin1String("void");
     }
     return retTypes.values();
 }
@@ -878,12 +876,9 @@ QString OverloadData::dumpGraph() const
         // Shows all function signatures
         s << "legend [fontsize=9 fontname=freemono shape=rect label=\"";
         for (const AbstractMetaFunction *func : m_overloads) {
-            s << "f" << functionNumber(func) << " : ";
-            if (func->type())
-                s << toHtml(func->type()->cppSignature());
-            else
-                s << "void";
-            s << ' ' << toHtml(func->minimalSignature()) << "\\l";
+            s << "f" << functionNumber(func) << " : "
+                << toHtml(func->type()->cppSignature())
+                << ' ' << toHtml(func->minimalSignature()) << "\\l";
         }
         s << "\"];\n";
 
@@ -903,12 +898,9 @@ QString OverloadData::dumpGraph() const
         s << "</td></tr>";
 
         // Function return type
-        s << "<tr><td bgcolor=\"gray\" align=\"right\">original type</td><td bgcolor=\"gray\" align=\"left\">";
-        if (rfunc->type())
-            s << toHtml(rfunc->type()->cppSignature());
-        else
-            s << "void";
-        s << "</td></tr>";
+        s << "<tr><td bgcolor=\"gray\" align=\"right\">original type</td><td bgcolor=\"gray\" align=\"left\">"
+            << toHtml(rfunc->type()->cppSignature())
+            << "</td></tr>";
 
         // Shows type changes for all function signatures
         for (const AbstractMetaFunction *func : m_overloads) {

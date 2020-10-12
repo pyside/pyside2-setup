@@ -293,7 +293,8 @@ public:
         ContainerPattern,
         SmartPointerPattern,
         VarargsPattern,
-        ArrayPattern
+        ArrayPattern,
+        VoidPattern // Plain "void", no "void *" or similar.
     };
     Q_ENUM(TypeUsagePattern)
 
@@ -416,6 +417,8 @@ public:
         return m_pattern == FlagsPattern;
     }
 
+    bool isVoid() const { return m_pattern == VoidPattern; }
+
     bool isConstant() const
     {
         return m_constant;
@@ -529,6 +532,8 @@ public:
     bool hasTemplateChildren() const;
 
     bool compare(const AbstractMetaType &rhs, ComparisonFlags = {}) const;
+
+    static AbstractMetaType *createVoid();
 
 private:
     TypeUsagePattern determineUsagePattern() const;
@@ -881,6 +886,7 @@ public:
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
 
+    bool isVoid() const { return m_type->isVoid(); }
     AbstractMetaType *type() const
     {
         return m_type;

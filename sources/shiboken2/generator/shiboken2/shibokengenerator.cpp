@@ -1862,7 +1862,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     if (func->isConstructor()) {
         code.replace(QLatin1String("%0."), QLatin1String("cptr->"));
         code.replace(QLatin1String("%0"), QLatin1String("cptr"));
-    } else if (func->type()) {
+    } else if (!func->isVoid()) {
         QString returnValueOp = isPointerToWrapperType(func->type())
             ? QLatin1String("%1->") : QLatin1String("%1.");
         if (ShibokenGenerator::isWrapperType(func->type()))
