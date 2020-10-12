@@ -898,9 +898,8 @@ void TypeEntry::formatDebug(QDebug &d) const
     d << '"' << m_name << '"';
     if (m_name != cppName)
         d << "\", cppName=\"" << cppName << '"';
-    d << ", type=" << m_type << ", codeGeneration=0x"
-        << Qt::hex << m_codeGeneration << Qt::dec
-        << ", target=\"" << targetLangName() << '"';
+    d << ", type=" << m_type << ", codeGeneration="
+        << m_codeGeneration << ", target=\"" << targetLangName() << '"';
     FORMAT_NONEMPTY_STRING("package", m_targetLangPackage)
     FORMAT_BOOL("stream", m_stream)
     FORMAT_LIST_SIZE("codeSnips", m_codeSnips)
@@ -1011,6 +1010,16 @@ void TypeDatabase::formatDebug(QDebug &d) const
       << "entries[" << m_entries.size() << "]=";
     for (auto it = m_entries.cbegin(), end = m_entries.cend(); it != end; ++it)
         d << "  " << it.value() << '\n';
+    if (!m_typedefEntries.isEmpty()) {
+        d << "typedefs[" << m_typedefEntries.size() << "]=(";
+        const auto begin = m_typedefEntries.cbegin();
+        for (auto it = begin, end = m_typedefEntries.cend(); it != end; ++it) {
+            if (it != begin)
+                d << ", ";
+            d << "  " << it.value() << '\n';
+        }
+        d << ")\n";
+    }
     if (!m_templates.isEmpty()) {
         d << "templates[" << m_templates.size() << "]=(";
         const auto begin = m_templates.cbegin();
