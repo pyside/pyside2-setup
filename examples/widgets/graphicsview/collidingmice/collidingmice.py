@@ -47,6 +47,10 @@ from PySide2 import QtCore, QtGui, QtWidgets
 import mice_rc
 
 
+def random(boundary):
+    return QtCore.QRandomGenerator.global_().bounded(boundary)
+
+
 class Mouse(QtWidgets.QGraphicsItem):
     Pi = math.pi
     TwoPi = 2.0 * Pi
@@ -62,10 +66,9 @@ class Mouse(QtWidgets.QGraphicsItem):
         self.angle = 0.0
         self.speed = 0.0
         self.mouseEyeDirection = 0.0
-        self.color = QtGui.QColor(QtCore.qrand() % 256, QtCore.qrand() % 256,
-                QtCore.qrand() % 256)
+        self.color = QtGui.QColor(random(256), random(256), random(256))
 
-        self.setTransform(QtGui.QTransform().rotate(QtCore.qrand() % (360 * 16)))
+        self.setTransform(QtGui.QTransform().rotate(random(360 * 16)))
 
         # In the C++ version of this example, this class is also derived from
         # QObject in order to receive timer events. PySide2 does not support
@@ -171,11 +174,11 @@ class Mouse(QtWidgets.QGraphicsItem):
         # Add some random movement.
         if len(dangerMice) > 1 and (QtCore.qrand() % 10) == 0:
             if QtCore.qrand() % 1:
-                self.angle += (QtCore.qrand() % 100) / 500.0
+                self.angle += random(100) / 500.0
             else:
-                self.angle -= (QtCore.qrand() % 100) / 500.0
+                self.angle -= random(100) / 500.0
 
-        self.speed += (-50 + QtCore.qrand() % 100) / 100.0
+        self.speed += (-50 + random(100)) / 100.0
 
         dx = math.sin(self.angle) * 10
         self.mouseEyeDirection = [dx / 5, 0.0][QtCore.qAbs(dx / 5) < 1]
@@ -191,7 +194,6 @@ if __name__ == '__main__':
     MouseCount = 7
 
     app = QtWidgets.QApplication(sys.argv)
-    QtCore.qsrand(QtCore.QTime(0,0,0).secsTo(QtCore.QTime.currentTime()))
 
     scene = QtWidgets.QGraphicsScene()
     scene.setSceneRect(-300, -300, 600, 600)

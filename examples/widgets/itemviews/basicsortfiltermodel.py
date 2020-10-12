@@ -2,7 +2,7 @@
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
-## Copyright (C) 2016 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -40,51 +40,63 @@
 ##
 #############################################################################
 
-from PySide2 import QtCore, QtGui, QtWidgets
+import sys
+from PySide2.QtCore import (QDate, QDateTime, QRegularExpression,
+                            QSortFilterProxyModel, QTime, Qt)
+from PySide2.QtGui import QStandardItemModel
+from PySide2.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
+                               QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+                               QTreeView, QVBoxLayout, QWidget)
 
 
-class Window(QtWidgets.QWidget):
+REGULAR_EXPRESSION = 0
+WILDCARD = 1
+FIXED_STRING = 2
+
+
+class Window(QWidget):
     def __init__(self):
         super(Window, self).__init__()
 
-        self.proxyModel = QtCore.QSortFilterProxyModel()
+        self.proxyModel = QSortFilterProxyModel()
         self.proxyModel.setDynamicSortFilter(True)
 
-        self.sourceGroupBox = QtWidgets.QGroupBox("Original Model")
-        self.proxyGroupBox = QtWidgets.QGroupBox("Sorted/Filtered Model")
+        self.sourceGroupBox = QGroupBox("Original Model")
+        self.proxyGroupBox = QGroupBox("Sorted/Filtered Model")
 
-        self.sourceView = QtWidgets.QTreeView()
+        self.sourceView = QTreeView()
         self.sourceView.setRootIsDecorated(False)
         self.sourceView.setAlternatingRowColors(True)
 
-        self.proxyView = QtWidgets.QTreeView()
+        self.proxyView = QTreeView()
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.proxyModel)
         self.proxyView.setSortingEnabled(True)
 
-        self.sortCaseSensitivityCheckBox = QtWidgets.QCheckBox("Case sensitive sorting")
-        self.filterCaseSensitivityCheckBox = QtWidgets.QCheckBox("Case sensitive filter")
+        self.sortCaseSensitivityCheckBox = QCheckBox("Case sensitive sorting")
+        self.filterCaseSensitivityCheckBox = QCheckBox("Case sensitive filter")
 
-        self.filterPatternLineEdit = QtWidgets.QLineEdit()
-        self.filterPatternLabel = QtWidgets.QLabel("&Filter pattern:")
+        self.filterPatternLineEdit = QLineEdit()
+        self.filterPatternLineEdit.setClearButtonEnabled(True)
+        self.filterPatternLabel = QLabel("&Filter pattern:")
         self.filterPatternLabel.setBuddy(self.filterPatternLineEdit)
 
-        self.filterSyntaxComboBox = QtWidgets.QComboBox()
+        self.filterSyntaxComboBox = QComboBox()
         self.filterSyntaxComboBox.addItem("Regular expression",
-                QtCore.QRegExp.RegExp)
+                                          REGULAR_EXPRESSION)
         self.filterSyntaxComboBox.addItem("Wildcard",
-                QtCore.QRegExp.Wildcard)
+                                          WILDCARD)
         self.filterSyntaxComboBox.addItem("Fixed string",
-                QtCore.QRegExp.FixedString)
-        self.filterSyntaxLabel = QtWidgets.QLabel("Filter &syntax:")
+                                          FIXED_STRING)
+        self.filterSyntaxLabel = QLabel("Filter &syntax:")
         self.filterSyntaxLabel.setBuddy(self.filterSyntaxComboBox)
 
-        self.filterColumnComboBox = QtWidgets.QComboBox()
+        self.filterColumnComboBox = QComboBox()
         self.filterColumnComboBox.addItem("Subject")
         self.filterColumnComboBox.addItem("Sender")
         self.filterColumnComboBox.addItem("Date")
-        self.filterColumnLabel = QtWidgets.QLabel("Filter &column:")
+        self.filterColumnLabel = QLabel("Filter &column:")
         self.filterColumnLabel.setBuddy(self.filterColumnComboBox)
 
         self.filterPatternLineEdit.textChanged.connect(self.filterRegExpChanged)
@@ -93,11 +105,11 @@ class Window(QtWidgets.QWidget):
         self.filterCaseSensitivityCheckBox.toggled.connect(self.filterRegExpChanged)
         self.sortCaseSensitivityCheckBox.toggled.connect(self.sortChanged)
 
-        sourceLayout = QtWidgets.QHBoxLayout()
+        sourceLayout = QHBoxLayout()
         sourceLayout.addWidget(self.sourceView)
         self.sourceGroupBox.setLayout(sourceLayout)
 
-        proxyLayout = QtWidgets.QGridLayout()
+        proxyLayout = QGridLayout()
         proxyLayout.addWidget(self.proxyView, 0, 0, 1, 3)
         proxyLayout.addWidget(self.filterPatternLabel, 1, 0)
         proxyLayout.addWidget(self.filterPatternLineEdit, 1, 1, 1, 2)
@@ -109,7 +121,7 @@ class Window(QtWidgets.QWidget):
         proxyLayout.addWidget(self.sortCaseSensitivityCheckBox, 4, 2)
         self.proxyGroupBox.setLayout(proxyLayout)
 
-        mainLayout = QtWidgets.QVBoxLayout()
+        mainLayout = QVBoxLayout()
         mainLayout.addWidget(self.sourceGroupBox)
         mainLayout.addWidget(self.proxyGroupBox)
         self.setLayout(mainLayout)
@@ -117,7 +129,7 @@ class Window(QtWidgets.QWidget):
         self.setWindowTitle("Basic Sort/Filter Model")
         self.resize(500, 450)
 
-        self.proxyView.sortByColumn(1, QtCore.Qt.AscendingOrder)
+        self.proxyView.sortByColumn(1, Qt.AscendingOrder)
         self.filterColumnComboBox.setCurrentIndex(1)
 
         self.filterPatternLineEdit.setText("Andy|Grace")
@@ -129,26 +141,28 @@ class Window(QtWidgets.QWidget):
         self.sourceView.setModel(model)
 
     def filterRegExpChanged(self):
-        syntax_nr = self.filterSyntaxComboBox.itemData(self.filterSyntaxComboBox.currentIndex())
-        syntax = QtCore.QRegExp.PatternSyntax(syntax_nr)
+        syntax_nr = self.filterSyntaxComboBox.currentData()
+        pattern = self.filterPatternLineEdit.text()
+        if syntax_nr == WILDCARD:
+            pattern = QRegularExpression.wildcardToRegularExpression(pattern)
+        elif syntax_nr == FIXED_STRING:
+            pattern = QRegularExpression.escape(pattern)
 
-        if self.filterCaseSensitivityCheckBox.isChecked():
-            caseSensitivity = QtCore.Qt.CaseSensitive
-        else:
-            caseSensitivity = QtCore.Qt.CaseInsensitive
-
-        regExp = QtCore.QRegExp(self.filterPatternLineEdit.text(),
-                caseSensitivity, syntax)
-        self.proxyModel.setFilterRegExp(regExp)
+        regExp = QRegularExpression(pattern)
+        if not self.filterCaseSensitivityCheckBox.isChecked():
+            options = regExp.patternOptions()
+            options |= QRegularExpression.CaseInsensitiveOption
+            regExp.setPatternOptions(options)
+        self.proxyModel.setFilterRegularExpression(regExp)
 
     def filterColumnChanged(self):
         self.proxyModel.setFilterKeyColumn(self.filterColumnComboBox.currentIndex())
 
     def sortChanged(self):
         if self.sortCaseSensitivityCheckBox.isChecked():
-            caseSensitivity = QtCore.Qt.CaseSensitive
+            caseSensitivity = Qt.CaseSensitive
         else:
-            caseSensitivity = QtCore.Qt.CaseInsensitive
+            caseSensitivity = Qt.CaseInsensitive
 
         self.proxyModel.setSortCaseSensitivity(caseSensitivity)
 
@@ -161,41 +175,38 @@ def addMail(model, subject, sender, date):
 
 
 def createMailModel(parent):
-    model = QtGui.QStandardItemModel(0, 3, parent)
+    model = QStandardItemModel(0, 3, parent)
 
-    model.setHeaderData(0, QtCore.Qt.Horizontal, "Subject")
-    model.setHeaderData(1, QtCore.Qt.Horizontal, "Sender")
-    model.setHeaderData(2, QtCore.Qt.Horizontal, "Date")
+    model.setHeaderData(0, Qt.Horizontal, "Subject")
+    model.setHeaderData(1, Qt.Horizontal, "Sender")
+    model.setHeaderData(2, Qt.Horizontal, "Date")
 
     addMail(model, "Happy New Year!", "Grace K. <grace@software-inc.com>",
-            QtCore.QDateTime(QtCore.QDate(2006, 12, 31), QtCore.QTime(17, 3)))
+            QDateTime(QDate(2006, 12, 31), QTime(17, 3)))
     addMail(model, "Radically new concept", "Grace K. <grace@software-inc.com>",
-            QtCore.QDateTime(QtCore.QDate(2006, 12, 22), QtCore.QTime(9, 44)))
+            QDateTime(QDate(2006, 12, 22), QTime(9, 44)))
     addMail(model, "Accounts", "pascale@nospam.com",
-            QtCore.QDateTime(QtCore.QDate(2006, 12, 31), QtCore.QTime(12, 50)))
+            QDateTime(QDate(2006, 12, 31), QTime(12, 50)))
     addMail(model, "Expenses", "Joe Bloggs <joe@bloggs.com>",
-            QtCore.QDateTime(QtCore.QDate(2006, 12, 25), QtCore.QTime(11, 39)))
+            QDateTime(QDate(2006, 12, 25), QTime(11, 39)))
     addMail(model, "Re: Expenses", "Andy <andy@nospam.com>",
-            QtCore.QDateTime(QtCore.QDate(2007, 1, 2), QtCore.QTime(16, 5)))
+            QDateTime(QDate(2007, 1, 2), QTime(16, 5)))
     addMail(model, "Re: Accounts", "Joe Bloggs <joe@bloggs.com>",
-            QtCore.QDateTime(QtCore.QDate(2007, 1, 3), QtCore.QTime(14, 18)))
+            QDateTime(QDate(2007, 1, 3), QTime(14, 18)))
     addMail(model, "Re: Accounts", "Andy <andy@nospam.com>",
-            QtCore.QDateTime(QtCore.QDate(2007, 1, 3), QtCore.QTime(14, 26)))
+            QDateTime(QDate(2007, 1, 3), QTime(14, 26)))
     addMail(model, "Sports", "Linda Smith <linda.smith@nospam.com>",
-            QtCore.QDateTime(QtCore.QDate(2007, 1, 5), QtCore.QTime(11, 33)))
+            QDateTime(QDate(2007, 1, 5), QTime(11, 33)))
     addMail(model, "AW: Sports", "Rolf Newschweinstein <rolfn@nospam.com>",
-            QtCore.QDateTime(QtCore.QDate(2007, 1, 5), QtCore.QTime(12, 0)))
+            QDateTime(QDate(2007, 1, 5), QTime(12, 0)))
     addMail(model, "RE: Sports", "Petra Schmidt <petras@nospam.com>",
-            QtCore.QDateTime(QtCore.QDate(2007, 1, 5), QtCore.QTime(12, 1)))
+            QDateTime(QDate(2007, 1, 5), QTime(12, 1)))
 
     return model
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = Window()
     window.setSourceModel(createMailModel(window))
     window.show()
