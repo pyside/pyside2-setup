@@ -1976,13 +1976,21 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
     bool isTemplate = false;
     QStringList templateArgs;
     if (!type && typeInfo.name.contains(QLatin1Char('<'))) {
-        const QStringList& parsedType = parseTemplateType(typeInfo.name);
+        QStringList parsedType = parseTemplateType(typeInfo.name);
         if (parsedType.isEmpty()) {
             *errorMessage = QStringLiteral("Template type parsing failed for '%1'").arg(typeInfo.name);
             return nullptr;
         }
-        templateArgs = parsedType.mid(1);
-        isTemplate = (type = typeDb->findContainerType(parsedType[0]));
+        const QString name = parsedType.takeFirst();
+        templateArgs = parsedType;
+        type = typeDb->findContainerType(name);
+        if (!type) { // A template typedef?
+            if (auto candidate = typeDb->findType(name)) {
+                if (candidate->type() == TypeEntry::ObjectType || candidate->type() == TypeEntry::BasicValueType)
+                    type = candidate;
+            }
+        }
+        isTemplate = type != nullptr;
     }
 
     if (!type) {
