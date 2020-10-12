@@ -1537,7 +1537,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgAddedFunctionInvalidReturnType(addedFunc->name(),
                                                                addedFunc->returnType().name,
-                                                               errorMessage)));
+                                                               errorMessage,
+                                                               metaClass)));
         return nullptr;
     }
 
@@ -1553,7 +1554,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgAddedFunctionInvalidArgType(addedFunc->name(),
                                                                 typeInfo.name, i + 1,
-                                                                errorMessage)));
+                                                                errorMessage,
+                                                                metaClass)));
             delete metaFunction;
             return nullptr;
         }
