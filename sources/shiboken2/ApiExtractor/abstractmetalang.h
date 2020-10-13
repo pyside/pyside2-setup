@@ -303,7 +303,7 @@ public:
     };
     Q_DECLARE_FLAGS(ComparisonFlags, ComparisonFlag);
 
-    AbstractMetaType();
+    explicit AbstractMetaType(const TypeEntry *t = nullptr);
     ~AbstractMetaType();
 
     QString package() const;
@@ -341,7 +341,7 @@ public:
         }
     }
 
-    AbstractMetaTypeList instantiations() const
+    const AbstractMetaTypeList &instantiations() const
     {
         return m_instantiations;
     }
@@ -512,7 +512,7 @@ public:
     AbstractMetaType *getSmartPointerInnerType() const
     {
         Q_ASSERT(isSmartPointer());
-        AbstractMetaTypeList instantiations = this->instantiations();
+        const AbstractMetaTypeList &instantiations = this->instantiations();
         Q_ASSERT(!instantiations.isEmpty());
         AbstractMetaType *innerType = instantiations.at(0);
         return innerType;
@@ -540,7 +540,7 @@ private:
     QString formatSignature(bool minimal) const;
     QString formatPythonSignature() const;
 
-    const TypeEntry *m_typeEntry = nullptr;
+    const TypeEntry *m_typeEntry;
     AbstractMetaTypeList m_instantiations;
     QString m_package;
     mutable QString m_cachedCppSignature;
@@ -1640,8 +1640,8 @@ public:
     }
 
     bool hasTemplateBaseClassInstantiations() const;
-    AbstractMetaTypeList templateBaseClassInstantiations() const;
-    void setTemplateBaseClassInstantiations(AbstractMetaTypeList& instantiations);
+    const AbstractMetaTypeList &templateBaseClassInstantiations() const;
+    void setTemplateBaseClassInstantiations(const AbstractMetaTypeList& instantiations);
 
     void setTypeDef(bool typeDef) { m_isTypeDef = typeDef; }
     bool isTypeDef() const { return m_isTypeDef; }
@@ -1712,6 +1712,7 @@ private:
 
     const AbstractMetaClass *m_enclosingClass = nullptr;
     AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance
+    AbstractMetaTypeList m_baseTemplateInstantiations;
     AbstractMetaClass *m_extendedNamespace = nullptr;
 
     const AbstractMetaClass *m_templateBaseClass = nullptr;

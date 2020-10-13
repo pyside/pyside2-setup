@@ -1258,9 +1258,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     if (!retType)
         return;
 
-    auto *metaType = new AbstractMetaType;
-    metaType->setTypeEntry(retType);
-    metaFunction->replaceType(metaType);
+    metaFunction->replaceType(new AbstractMetaType(retType));
 }
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
@@ -2010,8 +2008,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
     }
 
     // These are only implicit and should not appear in code...
-    auto *metaType = new AbstractMetaType;
-    metaType->setTypeEntry(type);
+    auto *metaType = new AbstractMetaType(type);
     metaType->setIndirections(typeInfo.indirections);
     if (typeInfo.isReference)
         metaType->setReferenceType(LValueReference);
@@ -2611,7 +2608,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                                                  const TypeInfo &info)
 {
     QVector<TypeInfo> targs = info.instantiations();
-    QVector<AbstractMetaType *> templateTypes;
+    AbstractMetaTypeList  templateTypes;
     QString errorMessage;
 
     if (subclass->isTypeDef()) {
@@ -2654,8 +2651,7 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         }
 
         if (t) {
-            auto *temporaryType = new AbstractMetaType;
-            temporaryType->setTypeEntry(t);
+            auto *temporaryType = new AbstractMetaType(t);
             temporaryType->setConstant(i.isConstant());
             temporaryType->setReferenceType(i.referenceType());
             temporaryType->setIndirectionsV(i.indirectionsV());

@@ -2406,8 +2406,7 @@ AbstractMetaType *ShibokenGenerator::buildAbstractMetaTypeFromTypeEntry(const Ty
         typeName.remove(0, 2);
     if (m_metaTypeFromStringCache.contains(typeName))
         return m_metaTypeFromStringCache.value(typeName);
-    auto *metaType = new AbstractMetaType;
-    metaType->setTypeEntry(typeEntry);
+    auto *metaType = new AbstractMetaType(typeEntry);
     metaType->clearIndirections();
     metaType->setReferenceType(NoReference);
     metaType->setConstant(false);
@@ -2737,8 +2736,7 @@ QString ShibokenGenerator::convertersVariableName(const QString &moduleName) con
 static QString processInstantiationsVariableName(const AbstractMetaType *type)
 {
     QString res = QLatin1Char('_') + _fixedCppTypeName(type->typeEntry()->qualifiedCppName()).toUpper();
-    const AbstractMetaTypeList &instantiations = type->instantiations();
-    for (const AbstractMetaType  *instantiation : instantiations) {
+    for (const auto *instantiation : type->instantiations()) {
         res += instantiation->isContainer()
                ? processInstantiationsVariableName(instantiation)
                : QLatin1Char('_') + _fixedCppTypeName(instantiation->cppSignature()).toUpper();
@@ -2762,8 +2760,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaClass *met
             return QString();
         QString result = QLatin1String("SBK_")
             + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
-        const AbstractMetaTypeList &templateBaseClassInstantiations = metaClass->templateBaseClassInstantiations();
-        for (const AbstractMetaType *instantiation : templateBaseClassInstantiations)
+        for (const auto *instantiation : metaClass->templateBaseClassInstantiations())
             result += processInstantiationsVariableName(instantiation);
         appendIndexSuffix(&result);
         return result;

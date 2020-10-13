@@ -229,7 +229,7 @@ QString Generator::getSimplifiedContainerTypeName(const AbstractMetaType *type)
 // Strip a "const QSharedPtr<const Foo> &" or similar to "QSharedPtr<Foo>" (PYSIDE-1016/454)
 const AbstractMetaType *canonicalSmartPtrInstantiation(const AbstractMetaType *type)
 {
-    AbstractMetaTypeList instantiations = type->instantiations();
+    const AbstractMetaTypeList &instantiations = type->instantiations();
     Q_ASSERT(instantiations.size() == 1);
     const bool needsFix = type->isConstant() || type->referenceType() != NoReference;
     const bool pointeeNeedsFix = instantiations.constFirst()->isConstant();
@@ -256,8 +256,7 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
 {
     if (!type)
         return;
-    const AbstractMetaTypeList &instantiations = type->instantiations();
-    for (const AbstractMetaType *t : instantiations)
+    for (const auto *t : type->instantiations())
         addInstantiatedContainersAndSmartPointers(t, context);
     const auto typeEntry = type->typeEntry();
     const bool isContainer = typeEntry->isContainer();

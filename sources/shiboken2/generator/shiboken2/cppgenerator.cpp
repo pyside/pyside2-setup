@@ -85,10 +85,9 @@ static const char *typeNameOf(const T &t)
 inline AbstractMetaType *getTypeWithoutContainer(AbstractMetaType *arg)
 {
     if (arg && arg->typeEntry()->isContainer()) {
-        AbstractMetaTypeList lst = arg->instantiations();
         // only support containers with 1 type
-        if (lst.size() == 1)
-            return lst[0];
+        if (arg->instantiations().size() == 1)
+            return arg->instantiations().constFirst();
     }
     return arg;
 }
@@ -6265,7 +6264,7 @@ void CppGenerator::writeDefaultSequenceMethods(QTextStream &s, const GeneratorCo
         << CPP_SELF_VAR << "->begin();\n"
         << INDENT << "std::advance(_item, _i);\n";
 
-    const AbstractMetaTypeList instantiations = metaClass->templateBaseClassInstantiations();
+    const AbstractMetaTypeList &instantiations = metaClass->templateBaseClassInstantiations();
     if (instantiations.isEmpty()) {
         qFatal("shiboken: %s: Internal error, no instantiations of \"%s\" were found.",
                __FUNCTION__, qPrintable(metaClass->qualifiedCppName()));

@@ -186,7 +186,8 @@ void AbstractMetaAttributes::assignMetaAttributes(const AbstractMetaAttributes &
  * AbstractMetaType
  */
 
-AbstractMetaType::AbstractMetaType() :
+AbstractMetaType::AbstractMetaType(const TypeEntry *t) :
+    m_typeEntry(t),
     m_constant(false),
     m_volatile(false),
     m_cppInstantiation(true),
@@ -217,7 +218,7 @@ QString AbstractMetaType::fullName() const
 
 AbstractMetaType *AbstractMetaType::copy() const
 {
-    auto *cpy = new AbstractMetaType;
+    auto *cpy = new AbstractMetaType(typeEntry());
 
     cpy->setTypeUsagePattern(typeUsagePattern());
     cpy->setConstant(isConstant());
@@ -230,8 +231,6 @@ AbstractMetaType *AbstractMetaType::copy() const
     cpy->setOriginalTemplateType(originalTemplateType() ? originalTemplateType()->copy() : nullptr);
 
     cpy->setArrayElementType(arrayElementType() ? arrayElementType()->copy() : nullptr);
-
-    cpy->setTypeEntry(typeEntry());
 
     return cpy;
 }
@@ -417,8 +416,7 @@ AbstractMetaType *AbstractMetaType::createVoid()
 {
     static const TypeEntry *voidTypeEntry = TypeDatabase::instance()->findType(QLatin1String("void"));
     Q_ASSERT(voidTypeEntry);
-    auto *metaType = new AbstractMetaType;
-    metaType->setTypeEntry(voidTypeEntry);
+    auto *metaType = new AbstractMetaType(voidTypeEntry);
     metaType->decideUsagePattern();
     return metaType;
 }
@@ -1418,8 +1416,7 @@ AbstractMetaClass::~AbstractMetaClass()
     qDeleteAll(m_fields);
     qDeleteAll(m_enums);
     qDeleteAll(m_propertySpecs);
-    if (hasTemplateBaseClassInstantiations())
-        qDeleteAll(templateBaseClassInstantiations());
+    qDeleteAll(m_baseTemplateInstantiations);
 }
 
 /*******************************************************************************
@@ -1745,28 +1742,20 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
     return nullptr;
 }
 
-using AbstractMetaClassBaseTemplateInstantiationsMap = QHash<const AbstractMetaClass *, AbstractMetaTypeList>;
-Q_GLOBAL_STATIC(AbstractMetaClassBaseTemplateInstantiationsMap, metaClassBaseTemplateInstantiations);
-
 bool AbstractMetaClass::hasTemplateBaseClassInstantiations() const
 {
-    if (!templateBaseClass())
-        return false;
-    return metaClassBaseTemplateInstantiations()->contains(this);
+    return m_templateBaseClass != nullptr && !m_baseTemplateInstantiations.isEmpty();
 }
 
-AbstractMetaTypeList AbstractMetaClass::templateBaseClassInstantiations() const
+const AbstractMetaTypeList &AbstractMetaClass::templateBaseClassInstantiations() const
 {
-    if (!templateBaseClass())
-        return AbstractMetaTypeList();
-    return metaClassBaseTemplateInstantiations()->value(this);
+    return m_baseTemplateInstantiations;
 }
 
-void AbstractMetaClass::setTemplateBaseClassInstantiations(AbstractMetaTypeList &instantiations)
+void AbstractMetaClass::setTemplateBaseClassInstantiations(const AbstractMetaTypeList &instantiations)
 {
-    if (!templateBaseClass())
-        return;
-    metaClassBaseTemplateInstantiations()->insert(this, instantiations);
+    Q_ASSERT(m_templateBaseClass != nullptr);
+    m_baseTemplateInstantiations = instantiations;
 }
 
 // Does any of the base classes require deletion in the main thread?
@@ -1965,8 +1954,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     f->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
     f->setDeclaringClass(this);
 
-    auto argType = new AbstractMetaType;
-    argType->setTypeEntry(typeEntry());
+    auto argType = new AbstractMetaType(typeEntry());
     argType->setReferenceType(LValueReference);
     argType->setConstant(true);
     argType->setTypeUsagePattern(AbstractMetaType::ValuePattern);
@@ -2195,8 +2183,7 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
     }
 
     if (type->hasInstantiations()) {
-        const AbstractMetaTypeList &instantiations = type->instantiations();
-        for (const AbstractMetaType *instantiation : instantiations)
+        for (const AbstractMetaType *instantiation : type->instantiations())
             addExtraIncludeForType(metaClass, instantiation);
     }
 }
@@ -2641,7 +2628,7 @@ void AbstractMetaClass::format(QDebug &d) const
             d << " \"" << b->name() << '"';
     }
     if (auto templateBase = templateBaseClass()) {
-        const auto instantiatedTypes = templateBaseClassInstantiations();
+        const auto &instantiatedTypes = templateBaseClassInstantiations();
         d << ", instantiates \"" << templateBase->name();
         for (int i = 0, count = instantiatedTypes.size(); i < count; ++i)
             d << (i ? ',' : '<') << instantiatedTypes.at(i)->name();
