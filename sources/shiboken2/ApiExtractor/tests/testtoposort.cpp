@@ -38,8 +38,10 @@ void TestTopoSort::testTopoSort()
         g.addEdge(1, 2);
         g.addEdge(0, 1);
         const auto result = g.topologicalSort();
-        QCOMPARE(result.size(), 3);
-        auto it = result.begin();
+        QVERIFY(result.isValid());
+        QVERIFY(result.cyclic.isEmpty());
+        QCOMPARE(result.result.size(), 3);
+        auto it = result.result.begin();
         QCOMPARE(*it, 0);
         QCOMPARE(*(++it), 1);
         QCOMPARE(*(++it), 2);
@@ -47,21 +49,25 @@ void TestTopoSort::testTopoSort()
     {
         Graph g(2);
         const auto result = g.topologicalSort();
-        QCOMPARE(result.size(), 2);
-        auto it = result.begin();
+        QVERIFY(result.isValid());
+        QVERIFY(result.cyclic.isEmpty());
+        QCOMPARE(result.result.size(), 2);
+        auto it = result.result.begin();
         QCOMPARE(*it, 1);
         QCOMPARE(*(++it), 0);
     }
 }
 
-void TestTopoSort::testCiclicGraph()
+void TestTopoSort::testCyclicGraph()
 {
     Graph g(3);
     g.addEdge(0, 1);
     g.addEdge(1, 2);
     g.addEdge(2, 0);
     const auto result = g.topologicalSort();
-    QVERIFY(result.isEmpty());
+    QVERIFY(!result.isValid());
+    QVERIFY(result.result.isEmpty());
+    QVERIFY(!result.cyclic.isEmpty());
 }
 
 QTEST_APPLESS_MAIN(TestTopoSort)

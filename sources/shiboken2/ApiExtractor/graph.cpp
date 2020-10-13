@@ -74,23 +74,28 @@ int Graph::nodeCount() const
     return m_d->edges.size();
 }
 
-Graph::Indexes Graph::topologicalSort() const
+Graph::SortResult Graph::topologicalSort() const
 {
     const int nodeCount = Graph::nodeCount();
-    Indexes result;
-    result.reserve(nodeCount);
+    SortResult result;
+    result.result.reserve(nodeCount);
 
     QVector<GraphPrivate::Color> colors(nodeCount, GraphPrivate::WHITE);
 
     for (int i = 0; i < nodeCount; ++i) {
         if (colors[i] == GraphPrivate::WHITE)
-            m_d->dfsVisit(i, result, colors);
+            m_d->dfsVisit(i, result.result, colors);
     }
 
-    if (result.size() == nodeCount)
-        std::reverse(result.begin(), result.end());
-    else
-        result.clear(); // Not a DAG!
+    if (result.result.size() == nodeCount) {
+        std::reverse(result.result.begin(), result.result.end());
+    } else {
+        for (int i = 0; i < nodeCount; ++i) {
+            if (!result.result.contains(i))
+                result.cyclic.append(i);
+        }
+        result.result.clear(); // Not a DAG!
+    }
     return result;
 }
 

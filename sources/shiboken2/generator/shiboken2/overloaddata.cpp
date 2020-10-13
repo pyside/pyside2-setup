@@ -155,13 +155,16 @@ static QString getImplicitConversionTypeName(const AbstractMetaType &containerTy
 
 // overloaddata.cpp
 static QString msgCyclicDependency(const QString &funcName, const QString &graphName,
+                                   const AbstractMetaFunctionCList &cyclic,
                                    const OverloadData::MetaFunctionList &involvedConversions)
 {
     QString result;
     QTextStream str(&result);
     str << "Cyclic dependency found on overloaddata for \"" << funcName
          << "\" method! The graph boy saved the graph at \"" << QDir::toNativeSeparators(graphName)
-         << "\".";
+         << "\". Cyclic functions:";
+    for (auto c : cyclic)
+        str << ' ' << c->signature();
     if (const int count = involvedConversions.size()) {
         str << " Implicit conversions (" << count << "): ";
         for (int i = 0; i < count; ++i) {
@@ -431,7 +434,7 @@ void OverloadData::sortNextOverloads()
 
     // sort the overloads topologically based on the dependency graph.
     const auto unmappedResult = graph.topologicalSort();
-    if (unmappedResult.isEmpty()) {
+    if (!unmappedResult.isValid()) {
         QString funcName = referenceFunction()->name();
         if (referenceFunction()->ownerClass())
             funcName.prepend(referenceFunction()->ownerClass()->name() + QLatin1Char('.'));
@@ -442,11 +445,14 @@ void OverloadData::sortNextOverloads()
         for (auto it = sortData.map.cbegin(), end = sortData.map.cend(); it != end; ++it)
             nodeNames.insert(it.value(), it.key());
         graph.dumpDot(nodeNames, graphName);
-        qCWarning(lcShiboken).noquote() << qPrintable(msgCyclicDependency(funcName, graphName, involvedConversions));
+        AbstractMetaFunctionCList cyclic;
+        for (int c : unmappedResult.cyclic)
+            cyclic.append(sortData.reverseMap.value(c)->referenceFunction());
+        qCWarning(lcShiboken, "%s", qPrintable(msgCyclicDependency(funcName, graphName, cyclic, involvedConversions)));
     }
 
     m_nextOverloadData.clear();
-    for (int i : unmappedResult) {
+    for (int i : unmappedResult.result) {
         if (!sortData.reverseMap[i])
             continue;
         m_nextOverloadData << sortData.reverseMap[i];

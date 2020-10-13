@@ -36,7 +36,7 @@ class TestTopoSort : public QObject
 Q_OBJECT
 private slots:
     void testTopoSort();
-    void testCiclicGraph();
+    void testCyclicGraph();
 };
 
 #endif

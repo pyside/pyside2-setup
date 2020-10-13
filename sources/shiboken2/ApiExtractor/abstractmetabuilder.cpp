@@ -3099,7 +3099,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
 
     AbstractMetaClassList result;
     const auto unmappedResult = graph.topologicalSort();
-    if (unmappedResult.isEmpty() && graph.nodeCount()) {
+    if (!unmappedResult.isValid() && graph.nodeCount()) {
         QTemporaryFile tempFile(QDir::tempPath() + QLatin1String("/cyclic_depXXXXXX.dot"));
         tempFile.setAutoRemove(false);
         tempFile.open();
@@ -3107,11 +3107,16 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
         for (auto it = map.cbegin(), end = map.cend(); it != end; ++it)
             hash.insert(it.value(), it.key()->qualifiedCppName());
         graph.dumpDot(hash, tempFile.fileName());
-        qCWarning(lcShiboken).noquote().nospace()
-            << "Cyclic dependency found! Graph can be found at "
-            << QDir::toNativeSeparators(tempFile.fileName());
+
+        QString message;
+        QTextStream str(&message);
+        str << "Cyclic dependency of classes found:";
+        for (int c : unmappedResult.cyclic)
+            str << ' ' <<  reverseMap.value(c)->name();
+        str << ". Graph can be found at \"" << QDir::toNativeSeparators(tempFile.fileName()) << '"';
+        qCWarning(lcShiboken, "%s", qPrintable(message));
     } else {
-        for (int i : qAsConst(unmappedResult)) {
+        for (int i : qAsConst(unmappedResult.result)) {
             Q_ASSERT(reverseMap.contains(i));
             result << reverseMap[i];
         }

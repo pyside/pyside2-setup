@@ -41,6 +41,13 @@ public:
 
     using Indexes = QVector<int>;
 
+    struct SortResult
+    {
+        bool isValid() const { return !result.isEmpty() && cyclic.isEmpty(); }
+        Indexes result;
+        Indexes cyclic;
+    };
+
     /// Create a new graph with \p numNodes nodes.
     Graph(int numNodes);
     ~Graph();
@@ -67,7 +74,7 @@ public:
     *   \return A collection with all nodes topologically sorted or an empty collection if a cyclic
     *   dependency was found.
     */
-    Indexes topologicalSort() const;
+    SortResult topologicalSort() const;
 private:
 
     struct GraphPrivate;
