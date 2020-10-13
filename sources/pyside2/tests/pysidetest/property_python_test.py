@@ -58,7 +58,7 @@ try:
     if sys.version_info[0] >= 3:  # This test has no support in Python 2
         from test import support
         has_test = True
-except:
+except ImportError:
     pass
 
 class PropertyBase(Exception):
