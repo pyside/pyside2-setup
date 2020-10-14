@@ -48,6 +48,7 @@ str.cpp
 strlist.cpp
 templateptr.cpp
 transform.cpp
+typesystypedef.cpp
 virtualmethods.cpp
 expression.cpp
 filter.cpp

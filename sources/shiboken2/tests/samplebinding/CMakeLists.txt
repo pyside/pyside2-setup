@@ -117,6 +117,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/sample/strlist_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/time_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/templateptr_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/unremovednamespace_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/valuewithunitdoubleinch_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/valuewithunitdoublemillimeter_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/sample/valuewithunituser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdaughter_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualdaughter2_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/sample/virtualfinaldaughter_wrapper.cpp
