@@ -40,21 +40,21 @@
 
 wheel_module_exists = False
 
-try:
-    import os
-    import sys
+import os
+import sys
+from .options import DistUtilsCommandMixin, OPTION
+from distutils import log as logger
+from email.generator import Generator
+from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
-    from distutils import log as logger
+try:
+
     from wheel import pep425tags
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
     from wheel.bdist_wheel import safer_name as _safer_name
     from wheel.pep425tags import get_abbr_impl, get_impl_ver, get_abi_tag
     from wheel.pep425tags import get_platform as wheel_get_platform
-    from email.generator import Generator
     from wheel import __version__ as wheel_version
-
-    from .options import DistUtilsCommandMixin, OPTION
-    from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
     wheel_module_exists = True
 except Exception as e:
@@ -69,7 +69,8 @@ def get_bdist_wheel_override():
 
 class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
 
-    user_options = _bdist_wheel.user_options + DistUtilsCommandMixin.mixin_user_options
+    user_options = (_bdist_wheel.user_options + DistUtilsCommandMixin.mixin_user_options
+                    if wheel_module_exists else None)
 
     def __init__(self, *args, **kwargs):
         self._package_version = None
