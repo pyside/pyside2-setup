@@ -514,6 +514,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
         if (!cls->isNamespace()) {
             setupInheritance(cls);
+            if (cls->templateBaseClass())
+                inheritTemplateFunctions(cls);
             if (!cls->hasVirtualDestructor() && cls->baseClass()
                 && cls->baseClass()->hasVirtualDestructor())
                 cls->setHasVirtualDestructor(true);
@@ -2617,17 +2619,6 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
 {
     QVector<TypeInfo> targs = info.instantiations();
     AbstractMetaTypeList  templateTypes;
-    QString errorMessage;
-
-    if (subclass->isTypeDef()) {
-        subclass->setHasCloneOperator(templateClass->hasCloneOperator());
-        subclass->setHasEqualsOperator(templateClass->hasEqualsOperator());
-        subclass->setHasHashFunction(templateClass->hasHashFunction());
-        subclass->setHasNonPrivateConstructor(templateClass->hasNonPrivateConstructor());
-        subclass->setHasPrivateDestructor(templateClass->hasPrivateDestructor());
-        subclass->setHasProtectedDestructor(templateClass->hasProtectedDestructor());
-        subclass->setHasVirtualDestructor(templateClass->hasVirtualDestructor());
-    }
 
     for (const TypeInfo &i : qAsConst(targs)) {
         QString typeName = i.qualifiedName().join(colonColon());
@@ -2672,6 +2663,28 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         }
     }
 
+    subclass->setTemplateBaseClass(templateClass);
+    subclass->setTemplateBaseClassInstantiations(templateTypes);
+    subclass->setBaseClass(templateClass->baseClass());
+    return true;
+}
+
+void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *subclass)
+{
+    QString errorMessage;
+    auto templateClass = subclass->templateBaseClass();
+
+    if (subclass->isTypeDef()) {
+        subclass->setHasCloneOperator(templateClass->hasCloneOperator());
+        subclass->setHasEqualsOperator(templateClass->hasEqualsOperator());
+        subclass->setHasHashFunction(templateClass->hasHashFunction());
+        subclass->setHasNonPrivateConstructor(templateClass->hasNonPrivateConstructor());
+        subclass->setHasPrivateDestructor(templateClass->hasPrivateDestructor());
+        subclass->setHasProtectedDestructor(templateClass->hasProtectedDestructor());
+        subclass->setHasVirtualDestructor(templateClass->hasVirtualDestructor());
+    }
+
+    const auto &templateTypes = subclass->templateBaseClassInstantiations();
     const AbstractMetaFunctionList &subclassFuncs = subclass->functions();
     const AbstractMetaFunctionList &templateClassFunctions = templateClass->functions();
     for (const AbstractMetaFunction *function : templateClassFunctions) {
@@ -2774,12 +2787,6 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
         f->replaceType(fieldType);
         subclass->addField(f.take());
     }
-
-    subclass->setTemplateBaseClass(templateClass);
-    subclass->setTemplateBaseClassInstantiations(templateTypes);
-    subclass->setBaseClass(templateClass->baseClass());
-
-    return true;
 }
 
 void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
