@@ -54,7 +54,7 @@ snake_prop_feature_test.py
 
 Test the snake_case and true_property feature.
 
-This works now. More tests needed!
+This works now, including class properties.
 """
 
 class Window(QtWidgets.QWidget):
@@ -68,6 +68,7 @@ class FeatureTest(unittest.TestCase):
         __feature__.set_selection(0)
 
     def tearDown(self):
+        __feature__.set_selection(0)
         qApp.shutdown()
 
     def testRenamedFunctions(self):
@@ -100,6 +101,22 @@ class FeatureTest(unittest.TestCase):
         self.assertTrue(callable(window.isModal))
         with self.assertRaises(AttributeError):
             window.modal
+
+    def testClassProperty(self):
+        from __feature__ import snake_case, true_property
+        # We check the class...
+        self.assertEqual(type(QtWidgets.QApplication.quit_on_last_window_closed), bool)
+        x = QtWidgets.QApplication.quit_on_last_window_closed
+        QtWidgets.QApplication.quit_on_last_window_closed = not x
+        self.assertEqual(QtWidgets.QApplication.quit_on_last_window_closed, not x)
+        # ... and now the instance.
+        self.assertEqual(type(qApp.quit_on_last_window_closed), bool)
+        x = qApp.quit_on_last_window_closed
+        qApp.quit_on_last_window_closed = not x
+        self.assertEqual(qApp.quit_on_last_window_closed, not x)
+        # make sure values are equal
+        self.assertEqual(qApp.quit_on_last_window_closed,
+                         QtWidgets.QApplication.quit_on_last_window_closed)
 
 
 if __name__ == '__main__':

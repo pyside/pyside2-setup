@@ -142,6 +142,12 @@ typedef struct _typeobject {
 LIBSHIBOKEN_API int PyIndex_Check(PyObject *obj);
 #endif
 
+LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
+
+#else // Py_LIMITED_API
+
+#define _PepType_Lookup(type, name)       _PyType_Lookup(type, name)
+
 #endif // Py_LIMITED_API
 
 struct SbkObjectTypePrivate;

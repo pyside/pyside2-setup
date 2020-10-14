@@ -60,7 +60,6 @@ PyObject *bases();
 PyObject *builtins();
 PyObject *code();
 PyObject *dictoffset();
-PyObject *func();
 PyObject *func_kind();
 PyObject *iter();
 PyObject *module();

@@ -39,6 +39,7 @@ else()
 endif()
 
 set(libpyside_SRC
+    class_property.cpp
     dynamicqmetaobject.cpp
     feature_select.cpp
     signalmanager.cpp
@@ -125,6 +126,7 @@ endif()
 #
 
 set(libpyside_HEADERS
+    class_property.h
     dynamicqmetaobject.h
     feature_select.h
     pysideclassinfo.h

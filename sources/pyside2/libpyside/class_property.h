@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2019 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -37,46 +37,33 @@
 **
 ****************************************************************************/
 
-#ifndef SBKSTATICSTRINGS_H
-#define SBKSTATICSTRINGS_H
+#ifndef CLASS_PROPERTY_H
+#define CLASS_PROPERTY_H
 
-#include "sbkpython.h"
-#include "shibokenmacros.h"
+#include "pysidemacros.h"
+#include <sbkpython.h>
 
-namespace Shiboken
-{
-// Some often-used strings
-namespace PyName
-{
-LIBSHIBOKEN_API PyObject *co_name();
-LIBSHIBOKEN_API PyObject *dumps();
-LIBSHIBOKEN_API PyObject *fget();
-LIBSHIBOKEN_API PyObject *fset();
-LIBSHIBOKEN_API PyObject *f_code();
-LIBSHIBOKEN_API PyObject *f_lineno();
-LIBSHIBOKEN_API PyObject *loads();
-LIBSHIBOKEN_API PyObject *multi();
-LIBSHIBOKEN_API PyObject *name();
-LIBSHIBOKEN_API PyObject *result();
-LIBSHIBOKEN_API PyObject *value();
-LIBSHIBOKEN_API PyObject *values();
-} // namespace PyName
+extern "C" {
 
-namespace PyMagicName
-{
-LIBSHIBOKEN_API PyObject *class_();
-LIBSHIBOKEN_API PyObject *dict();
-LIBSHIBOKEN_API PyObject *doc();
-LIBSHIBOKEN_API PyObject *ecf();
-LIBSHIBOKEN_API PyObject *file();
-LIBSHIBOKEN_API PyObject *func();
-LIBSHIBOKEN_API PyObject *get();
-LIBSHIBOKEN_API PyObject *members();
-LIBSHIBOKEN_API PyObject *module();
-LIBSHIBOKEN_API PyObject *name();
-LIBSHIBOKEN_API PyObject *qualname();
-LIBSHIBOKEN_API PyObject *self();
-} // namespace PyMagicName
-} // namespace Shiboken
+typedef struct {
+    PyObject_HEAD
+    PyObject *prop_get;
+    PyObject *prop_set;
+    PyObject *prop_del;
+    PyObject *prop_doc;
+    int getter_doc;
+} propertyobject;
 
-#endif // SBKSTATICSTRINGS_H
+PYSIDE_API PyTypeObject *PyClassPropertyTypeF();
+
+} // extern "C"
+
+namespace PySide {
+namespace ClassProperty {
+
+PYSIDE_API void init();
+
+} // namespace ClassProperty
+} // namespace PySide
+
+#endif // CLASS_PROPERTY_H

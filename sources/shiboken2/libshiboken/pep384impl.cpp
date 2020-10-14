@@ -192,6 +192,87 @@ check_PyTypeObject_valid()
 
 /*****************************************************************************
  *
+ * Additional for object.h / class properties
+ *
+ */
+#ifdef Py_LIMITED_API
+/*
+ * This implementation of `_PyType_Lookup` works for lookup in our classes.
+ * The implementation ignores all caching and versioning and is also
+ * less optimized. This is reduced from the Python implementation.
+ */
+
+/* Internal API to look for a name through the MRO, bypassing the method cache.
+   This returns a borrowed reference, and might set an exception.
+   'error' is set to: -1: error with exception; 1: error without exception; 0: ok */
+static PyObject *
+find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
+{
+    Py_ssize_t i, n;
+    PyObject *mro, *res, *base, *dict;
+
+    /* Look in tp_dict of types in MRO */
+    mro = type->tp_mro;
+
+    res = nullptr;
+    /* Keep a strong reference to mro because type->tp_mro can be replaced
+       during dict lookup, e.g. when comparing to non-string keys. */
+    Py_INCREF(mro);
+    assert(PyTuple_Check(mro));
+    n = PyTuple_GET_SIZE(mro);
+    for (i = 0; i < n; i++) {
+        base = PyTuple_GET_ITEM(mro, i);
+        assert(PyType_Check(base));
+        dict = ((PyTypeObject *)base)->tp_dict;
+        assert(dict && PyDict_Check(dict));
+        res = PyDict_GetItem(dict, name);
+        if (res != nullptr)
+            break;
+        if (PyErr_Occurred()) {
+            *error = -1;
+            goto done;
+        }
+    }
+    *error = 0;
+done:
+    Py_DECREF(mro);
+    return res;
+}
+
+/* Internal API to look for a name through the MRO.
+   This returns a borrowed reference, and doesn't set an exception! */
+PyObject *
+_PepType_Lookup(PyTypeObject *type, PyObject *name)
+{
+    PyObject *res;
+    int error;
+
+    /* We may end up clearing live exceptions below, so make sure it's ours. */
+    assert(!PyErr_Occurred());
+
+    res = find_name_in_mro(type, name, &error);
+    /* Only put NULL results into cache if there was no error. */
+    if (error) {
+        /* It's not ideal to clear the error condition,
+           but this function is documented as not setting
+           an exception, and I don't want to change that.
+           E.g., when PyType_Ready() can't proceed, it won't
+           set the "ready" flag, so future attempts to ready
+           the same type will call it again -- hopefully
+           in a context that propagates the exception out.
+        */
+        if (error == -1) {
+            PyErr_Clear();
+        }
+        return nullptr;
+    }
+    return res;
+}
+
+#endif // Py_LIMITED_API
+
+/*****************************************************************************
+ *
  * Support for unicodeobject.h
  *
  */

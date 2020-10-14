@@ -40,11 +40,10 @@
 #include "feature_select.h"
 #include "pyside.h"
 #include "pysidestaticstrings.h"
+#include "class_property.h"
 
 #include <shiboken.h>
 #include <sbkstaticstrings.h>
-
-#include <QtCore/QtGlobal>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -418,6 +417,13 @@ void Select(PyObject *obj)
     type->tp_dict = SelectFeatureSet(type);
 }
 
+PyObject *Select(PyTypeObject *type)
+{
+    if (featurePointer != nullptr)
+        type->tp_dict = SelectFeatureSet(type);
+    return type->tp_dict;
+}
+
 static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int id);
 static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, int id);
 static bool feature_04_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int id);
@@ -460,6 +466,7 @@ void init()
         initSelectableFeature(SelectFeatureSet);
         registerCleanupFunction(finalize);
         patch_property_impl();
+        PySide::ClassProperty::init();
         is_initialized = true;
     }
     // Reset the cache. This is called at any "from __feature__ import".
@@ -549,12 +556,47 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
 //     Feature 0x02: Use true properties instead of getters and setters
 //
 
-static PyObject *createProperty(PyObject *getter, PyObject *setter)
+// This is the Python 2 version for inspection of m_ml, only.
+// The actual Python 3 version is larget.
+
+typedef struct {
+    PyObject_HEAD
+    PyMethodDef *m_ml; /* Description of the C function to call */
+    PyObject    *m_self; /* Passed as 'self' arg to the C func, can be NULL */
+    PyObject    *m_module; /* The __module__ attribute, can be anything */
+} PyCFunctionObject;
+
+static PyObject *modifyStaticToClassMethod(PyTypeObject *type, PyObject *sm)
 {
+    AutoDecRef func_ob(PyObject_GetAttr(sm, PyMagicName::func()));
+    if (func_ob.isNull())
+        return nullptr;
+    auto func = reinterpret_cast<PyCFunctionObject *>(func_ob.object());
+    auto new_func = new PyMethodDef;
+    new_func->ml_name = func->m_ml->ml_name;
+    new_func->ml_meth = func->m_ml->ml_meth;
+    new_func->ml_flags = (func->m_ml->ml_flags & ~METH_STATIC) | METH_CLASS;
+    new_func->ml_doc = func->m_ml->ml_doc;
+    auto cfunc = PyCFunction_NewEx(new_func, nullptr, nullptr);
+    cfunc = PyDescr_NewClassMethod(type, new_func);
+    return cfunc;
+}
+
+static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *setter)
+{
+    bool chassprop = false;
     assert(getter != nullptr);
     if (setter == nullptr)
         setter = Py_None;
-    auto obtype = reinterpret_cast<PyObject *>(&PyProperty_Type);
+    auto ptype = &PyProperty_Type;
+    if (Py_TYPE(getter) == PepStaticMethod_TypePtr) {
+        ptype = PyClassPropertyTypeF();
+        chassprop = true;
+        getter = modifyStaticToClassMethod(type, getter);
+        if (setter != Py_None)
+            setter = modifyStaticToClassMethod(type, setter);
+    }
+    auto obtype = reinterpret_cast<PyObject *>(ptype);
     PyObject *prop = PyObject_CallFunctionObjArgs(obtype, getter, setter, nullptr);
     return prop;
 }
@@ -612,13 +654,12 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
         PyObject *read = make_snake_case(fields[1], lower);
         PyObject *write = haveWrite ? make_snake_case(fields[2], lower) : nullptr;
         PyObject *getter = PyDict_GetItem(prev_dict, read);
-        if (getter == nullptr || Py_TYPE(getter) != PepMethodDescr_TypePtr)
+        if (getter == nullptr || !(Py_TYPE(getter) == PepMethodDescr_TypePtr ||
+                                   Py_TYPE(getter) == PepStaticMethod_TypePtr))
             continue;
         PyObject *setter = haveWrite ? PyDict_GetItem(prev_dict, write) : nullptr;
-        if (setter != nullptr && Py_TYPE(setter) != PepMethodDescr_TypePtr)
-            continue;
 
-        AutoDecRef PyProperty(createProperty(getter, setter));
+        AutoDecRef PyProperty(createProperty(type, getter, setter));
         if (PyProperty.isNull())
             return false;
         if (PyDict_SetItem(prop_dict, name, PyProperty) < 0)
@@ -641,18 +682,9 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
 // suitable for us.
 // We turn `__doc__` into a lazy attribute saving signature initialization.
 //
-// Currently, there is no static extension planned, because _PyType_Lookup
-// and Limited_API are hard to use at the same time.
+// There is now also a class property implementation which inherits
+// from this one.
 //
-
-typedef struct {
-    PyObject_HEAD
-    PyObject *prop_get;
-    PyObject *prop_set;
-    PyObject *prop_del;
-    PyObject *prop_doc;
-    int getter_doc;
-} propertyobject;
 
 static PyObject *property_doc_get(PyObject *self, void *)
 {
@@ -702,7 +734,6 @@ static bool patch_property_impl()
         return false;
     if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
         return false;
-    // Replace property_descr_get/set by slightly changed versions
     return true;
 }
 
