@@ -10,9 +10,12 @@ ${CMAKE_CURRENT_BINARY_DIR}/other/number_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/otherderived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/othermultiplederived_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/otherobjecttype_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/other/othervaluewithunituser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/sharedptr_str_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/smartptrtester_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/other/other_module_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/other/valuewithunitintinch_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/other/valuewithunitintmillimeter_wrapper.cpp
 )
 
 

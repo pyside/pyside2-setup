@@ -673,6 +673,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     }
 
     m_itemToClass.clear();
+    m_typeSystemTypeDefs.clear();
 
     ReportHandler::endProgress();
 }
@@ -993,6 +994,23 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
         *metaClass += AbstractMetaAttributes::Public;
         fillAddedFunctions(metaClass);
         addAbstractMetaClass(metaClass, nullptr);
+        // Ensure base classes are set up when traversing functions for the
+        // type to be resolved.
+        if (setupInheritance(metaClass)) {
+            // Create an entry to look up up types obtained from parsing
+            // functions in reverse. As opposed to container specializations,
+            // which are generated into every instantiating module (indicated
+            // by ContainerTypeEntry::targetLangPackage() being empty), the
+            // correct index array of the module needs to be found by reverse
+            // mapping the instantiations to the typedef entry.
+            // Synthesize a AbstractMetaType which would be found by an
+            // instantiation.
+            auto sourceType = new AbstractMetaType;
+            sourceType->setTypeEntry(metaClass->templateBaseClass()->typeEntry());
+            sourceType->setInstantiations(metaClass->templateBaseClassInstantiations());
+            sourceType->decideUsagePattern();
+            m_typeSystemTypeDefs.append({AbstractMetaTypeCPtr(sourceType), metaClass});
+        }
     }
 }
 
@@ -2093,6 +2111,20 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualified
     return {};
 }
 
+// Reverse lookup of AbstractMetaType representing a template specialization
+// found during traversing function arguments to its type system typedef'ed
+// class.
+const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(const AbstractMetaType *t) const
+{
+    if (t->hasInstantiations()) {
+        auto pred = [t](const TypeClassEntry &e) { return e.type->compare(*t); };
+        auto it = std::find_if(m_typeSystemTypeDefs.cbegin(), m_typeSystemTypeDefs.cend(), pred);
+        if (it != m_typeSystemTypeDefs.cend())
+            return it->klass;
+    }
+    return nullptr;
+}
+
 AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
                                                             AbstractMetaClass *currentClass,
                                                             TranslateTypeFlags flags,
@@ -2327,6 +2359,15 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
     // such instantiations will break the caching scheme of
     // AbstractMetaType::cppSignature().
     metaType->decideUsagePattern();
+
+    if (d) {
+        // Reverse lookup of type system typedefs. Replace by class.
+        if (auto klass = d->resolveTypeSystemTypeDef(metaType.data())) {
+            metaType.reset(new AbstractMetaType);
+            metaType->setTypeEntry(klass->typeEntry());
+            metaType->decideUsagePattern();
+        }
+    }
 
     return metaType.take();
 }

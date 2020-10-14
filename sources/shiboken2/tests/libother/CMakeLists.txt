@@ -6,6 +6,7 @@ otherderived.cpp
 otherobjecttype.cpp
 othermultiplederived.cpp
 smartptrtester.cpp
+othertypesystypedef.cpp
 )
 
 add_library(libother SHARED ${libother_SRC})

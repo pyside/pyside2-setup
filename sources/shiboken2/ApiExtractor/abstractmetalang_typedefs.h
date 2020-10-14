@@ -29,6 +29,7 @@
 #ifndef ABSTRACTMETALANG_TYPEDEFS_H
 #define ABSTRACTMETALANG_TYPEDEFS_H
 
+#include <QtCore/QSharedPointer>
 #include <QtCore/QVector>
 
 class AbstractMetaClass;
@@ -45,6 +46,7 @@ using AbstractMetaEnumList = QVector<AbstractMetaEnum *>;
 using AbstractMetaEnumValueList = QVector<AbstractMetaEnumValue *>;
 using AbstractMetaFieldList = QVector<AbstractMetaField *>;
 using AbstractMetaFunctionList = QVector<AbstractMetaFunction *>;
+using AbstractMetaTypeCPtr = QSharedPointer<const AbstractMetaType>;
 using AbstractMetaTypeList = QVector<AbstractMetaType *>;
 using AbstractMetaTypeCList = QVector<const AbstractMetaType *>;
 
