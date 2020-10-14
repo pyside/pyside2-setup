@@ -275,6 +275,7 @@ value-type
             <value-type  name="..." since="..."
              copyable="yes | no"
              allow-thread="..."
+             disable-wrapper="yes | no"
              exception-handling="..."
              hash-function="..."
              stream="yes | no"
@@ -300,6 +301,8 @@ value-type
     on its constructor signatures, thus **default-constructor** is used only in
     very odd cases.
 
+    For the *optional* **disable-wrapper** attribute, see  :ref:`object-type`.
+
     The **revision** attribute can be used to specify a revision for each type, easing the
     production of ABI compatible bindings.
 
@@ -323,6 +326,7 @@ object-type
              since="..."
              copyable="yes | no"
              allow-thread="..."
+             disable-wrapper="yes | no"
              exception-handling="..."
              hash-function="..."
              stream="yes | no"
@@ -334,6 +338,14 @@ object-type
     superclass for the given type, in the generated target language API. The
     **copyable** and **hash-function** attributes are the same as described for
     :ref:`value-type`.
+
+    The *optional* **disable-wrapper** attribute disables the generation of a
+    **C++ Wrapper** (see :ref:`codegenerationterminology`). This will
+    effectively disable overriding virtuals methods in Python for the class.
+    It can be used when the class cannot be instantiated from Python and
+    its virtual methods pose some problem for the code generator (by returning
+    references, or using a default value that cannot be generated for a
+    parameter, or similar).
 
     The *optional* attribute **stream** specifies whether this type will be able to
     use externally defined operators, like QDataStream << and >>. If equals to **yes**,

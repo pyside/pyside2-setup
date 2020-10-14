@@ -300,8 +300,11 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType 
 
 bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const
 {
-    if (metaClass->isNamespace() || (metaClass->attributes() & AbstractMetaAttributes::FinalCppClass))
+    if (metaClass->isNamespace()
+        || metaClass->attributes().testFlag(AbstractMetaAttributes::FinalCppClass)
+        || metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
         return false;
+    }
     bool result = metaClass->isPolymorphic() || metaClass->hasVirtualDestructor();
     if (avoidProtectedHack()) {
         result = result || metaClass->hasProtectedFields() || metaClass->hasProtectedDestructor();

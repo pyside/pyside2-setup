@@ -1209,6 +1209,7 @@ class ComplexTypeEntry : public TypeEntry
 {
 public:
     enum TypeFlag {
+        DisableWrapper     = 0x1,
         Deprecated         = 0x4
     };
     Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
