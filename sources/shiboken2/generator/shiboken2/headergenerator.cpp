@@ -239,7 +239,8 @@ void HeaderGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction *
         s << INDENT << "inline " << (func->isStatic() ? "static " : "");
         s << functionSignature(func, QString(), QLatin1String("_protected"), Generator::EnumAsInts|Generator::OriginalTypeDescription)
             << " { ";
-        s << (func->type() ? "return " : "");
+        if (!func->isVoid())
+            s << "return ";
         if (!func->isAbstract())
             s << func->ownerClass()->qualifiedCppName() << "::";
         s << func->originalName() << '(';
@@ -637,8 +638,10 @@ void HeaderGenerator::writeInheritedOverloads(QTextStream &s)
 {
     for (const AbstractMetaFunction *func : qAsConst(m_inheritedOverloads)) {
         s << INDENT << "inline ";
-        s << functionSignature(func, QString(), QString(), Generator::EnumAsInts|Generator::OriginalTypeDescription) << " { ";
-        s << (func->type() ? "return " : "");
+        s << functionSignature(func, QString(), QString(), Generator::EnumAsInts|Generator::OriginalTypeDescription)
+            << " { ";
+        if (!func->isVoid())
+            s << "return ";
         s << func->ownerClass()->qualifiedCppName() << "::" << func->originalName() << '(';
         QStringList args;
         const AbstractMetaArgumentList &arguments = func->arguments();

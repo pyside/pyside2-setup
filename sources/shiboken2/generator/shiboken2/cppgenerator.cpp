@@ -85,10 +85,9 @@ static const char *typeNameOf(const T &t)
 inline AbstractMetaType *getTypeWithoutContainer(AbstractMetaType *arg)
 {
     if (arg && arg->typeEntry()->isContainer()) {
-        AbstractMetaTypeList lst = arg->instantiations();
         // only support containers with 1 type
-        if (lst.size() == 1)
-            return lst[0];
+        if (arg->instantiations().size() == 1)
+            return arg->instantiations().constFirst();
     }
     return arg;
 }
@@ -247,7 +246,7 @@ const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass *meta
         return nullptr;
     // TODO: This could be configurable someday
     const AbstractMetaFunction *func = metaClass->findFunction(QLatin1String("isNull"));
-    if (!func || !func->type() || !func->type()->typeEntry()->isPrimitive() || !func->isPublic())
+    if (!func || func->isVoid() || !func->type()->typeEntry()->isPrimitive() || !func->isPublic())
         return nullptr;
     auto pte = static_cast<const PrimitiveTypeEntry *>(func->type()->typeEntry());
     while (pte->referencedTypeEntry())
@@ -892,9 +891,9 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
                                           const AbstractMetaFunction *func,
                                           const FunctionModificationList &functionModifications)
 {
-    const AbstractMetaType *returnType = func->type();
-    if (!returnType)
+    if (func->isVoid())
         return QLatin1String("return;");
+    const AbstractMetaType *returnType = func->type();
     for (const FunctionModification &mod : functionModifications) {
         for (const ArgumentModification &argMod : mod.argument_mods) {
             if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
@@ -947,7 +946,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         ((func->name() == QLatin1String("metaObject")) || (func->name() == QLatin1String("qt_metacall"))))
         return;
 
-    const TypeEntry *retType = func->type() ? func->type()->typeEntry() : nullptr;
+    const TypeEntry *retType = func->type()->typeEntry();
     const QString funcName = func->isOperatorOverload() ? pythonOperatorFunctionName(func) : func->name();
 
     QString prefix = wrapperName(func->ownerClass()) + QLatin1String("::");
@@ -990,7 +989,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
            << R"(] << '\n';)" << '\n';
     }
     // PYSIDE-803: Build a boolean cache for unused overrides.
-    const bool multi_line = retType == nullptr || !snips.isEmpty() || func->isAbstract();
+    const bool multi_line = func->isVoid() || !snips.isEmpty() || func->isAbstract();
     s << INDENT << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n");
     {
         Indentation indentation(INDENT);
@@ -1122,7 +1121,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         }
         s << INDENT << "}\n";
 
-        if (retType) {
+        if (!func->isVoid()) {
             if (invalidateReturn)
                 s << INDENT << "bool invalidateArg0 = " << PYTHON_RETURN_VAR << "->ob_refcnt == 1;\n";
 
@@ -1207,7 +1206,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
     }
 
-    if (retType) {
+    if (!func->isVoid()) {
         s << INDENT << "return ";
         if (avoidProtectedHack() && retType->isEnum()) {
             const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(retType);
@@ -2325,6 +2324,7 @@ void CppGenerator::writeTypeCheck(QTextStream &s, const AbstractMetaType *argTyp
 static void checkTypeViability(const AbstractMetaFunction *func, const AbstractMetaType *type, int argIdx)
 {
     if (!type
+        || type->isVoid()
         || !type->typeEntry()->isPrimitive()
         || type->indirections() == 0
         || (type->indirections() == 1 && type->typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
@@ -2597,7 +2597,7 @@ void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunctio
 
 void CppGenerator::writeNoneReturn(QTextStream &s, const AbstractMetaFunction *func, bool thereIsReturnValue)
 {
-    if (thereIsReturnValue && (!func->type() || func->argumentRemoved(0)) && !injectedCodeHasReturnValueAttribution(func)) {
+    if (thereIsReturnValue && (func->isVoid() || func->argumentRemoved(0)) && !injectedCodeHasReturnValueAttribution(func)) {
         s << INDENT << PYTHON_RETURN_VAR << " = Py_None;\n";
         s << INDENT << "Py_INCREF(Py_None);\n";
     }
@@ -3238,7 +3238,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
     } else if (argIndex == 0) {
         AbstractMetaType *funcType = func->type();
         AbstractMetaType *returnType = getTypeWithoutContainer(funcType);
-        if (returnType) {
+        if (!returnType->isVoid()) {
             pyArgName = QLatin1String(PYTHON_RETURN_VAR);
             *wrappedClass = AbstractMetaClass::findClass(classes(), returnType->typeEntry());
         } else {
@@ -3561,7 +3561,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             if (isCtor) {
                 s << (useVAddr.isEmpty() ?
                       QString::fromLatin1("cptr = %1;").arg(methodCall) : useVAddr) << Qt::endl;
-            } else if (func->type() && !func->isInplaceOperator()) {
+            } else if (!func->isVoid() && !func->isInplaceOperator()) {
                 bool writeReturnType = true;
                 if (avoidProtectedHack()) {
                     const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(func->type());
@@ -3599,7 +3599,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             // Convert result
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
                 writeConversionRule(s, func, TypeSystem::TargetLangCode, QLatin1String(PYTHON_RETURN_VAR));
-            } else if (!isCtor && !func->isInplaceOperator() && func->type()
+            } else if (!isCtor && !func->isInplaceOperator() && !func->isVoid()
                 && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {
                 s << INDENT << PYTHON_RETURN_VAR << " = ";
                 if (isObjectTypeUsedAsValueType(func->type())) {
@@ -4684,7 +4684,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
                     }
                     if (generateOperatorCode) {
                         s << INDENT;
-                        if (func->type())
+                        if (!func->isVoid())
                             s << func->type()->cppSignature() << " " << CPP_RETURN_VAR << " = ";
                         // expression
                         if (func->isPointerOperator())
@@ -4694,7 +4694,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
                             s << '*';
                         s << CPP_ARG0 << ");\n";
                         s << INDENT << PYTHON_RETURN_VAR << " = ";
-                        if (func->type())
+                        if (!func->isVoid())
                             writeToPythonConversion(s, func->type(), metaClass, QLatin1String(CPP_RETURN_VAR));
                         else
                             s << "Py_None;\n" << INDENT << "Py_INCREF(Py_None)";
@@ -4821,7 +4821,7 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         if (multiple)
             s << idx-- << ':';
         s << funcName << '(' << args.join(QLatin1Char(',')) << ')';
-        if (f->type())
+        if (!f->isVoid())
             s << "->" << f->type()->pythonSignature();
         s << Qt::endl;
     }
@@ -6182,7 +6182,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMeta
     AbstractMetaType *type = func->type();
     if (!useReturnValueHeuristic()
         || !func->ownerClass()
-        || !type
+        || type->isVoid()
         || func->isStatic()
         || func->isConstructor()
         || !func->typeReplaced(0).isEmpty()) {
@@ -6232,7 +6232,7 @@ void CppGenerator::writeDefaultSequenceMethods(QTextStream &s, const GeneratorCo
         << CPP_SELF_VAR << "->begin();\n"
         << INDENT << "std::advance(_item, _i);\n";
 
-    const AbstractMetaTypeList instantiations = metaClass->templateBaseClassInstantiations();
+    const AbstractMetaTypeList &instantiations = metaClass->templateBaseClassInstantiations();
     if (instantiations.isEmpty()) {
         qFatal("shiboken: %s: Internal error, no instantiations of \"%s\" were found.",
                __FUNCTION__, qPrintable(metaClass->qualifiedCppName()));

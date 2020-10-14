@@ -57,8 +57,7 @@ static QString getTypeName(const AbstractMetaType *type)
     QString typeName = typeEntry->name();
     if (typeEntry->isContainer()) {
         QStringList types;
-        const AbstractMetaTypeList &instantiations = type->instantiations();
-        for (const AbstractMetaType *cType : instantiations) {
+        for (const auto *cType : type->instantiations()) {
             const TypeEntry *typeEntry = getReferencedTypeEntry(cType->typeEntry());
             types << typeEntry->name();
         }
@@ -147,8 +146,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType *containerTy
         impConv = getTypeName(function->arguments().constFirst()->type());
 
     QStringList types;
-    const AbstractMetaTypeList &instantiations = containerType->instantiations();
-    for (const AbstractMetaType *otherType : instantiations)
+    for (const auto *otherType : containerType->instantiations())
         types << (otherType == instantiation ? impConv : getTypeName(otherType));
 
     return containerType->typeEntry()->qualifiedCppName() + QLatin1Char('<')
@@ -258,8 +256,7 @@ void OverloadData::sortNextOverloads()
             qstringIndex = sortData.lastProcessedItemId();
         }
 
-        const AbstractMetaTypeList &instantiations = ov->argType()->instantiations();
-        for (const AbstractMetaType *instantiation : instantiations) {
+        for (const auto *instantiation : ov->argType()->instantiations()) {
             // Add dependencies for type instantiation of container.
             QString typeName = getTypeName(instantiation);
             sortData.mapType(typeName);
@@ -346,8 +343,7 @@ void OverloadData::sortNextOverloads()
         }
 
         // Process template instantiations
-        const AbstractMetaTypeList &instantiations = targetType->instantiations();
-        for (const AbstractMetaType *instantiation : instantiations) {
+        for (const auto *instantiation : targetType->instantiations()) {
             if (sortData.map.contains(getTypeName(instantiation))) {
                 int convertible = sortData.map[getTypeName(instantiation)];
 
@@ -579,10 +575,8 @@ QStringList OverloadData::returnTypes() const
     for (const AbstractMetaFunction *func : m_overloads) {
         if (!func->typeReplaced(0).isEmpty())
             retTypes << func->typeReplaced(0);
-        else if (func->type() && !func->argumentRemoved(0))
+        else if (!func->argumentRemoved(0))
             retTypes << func->type()->cppSignature();
-        else
-            retTypes << QLatin1String("void");
     }
     return retTypes.values();
 }
@@ -878,12 +872,9 @@ QString OverloadData::dumpGraph() const
         // Shows all function signatures
         s << "legend [fontsize=9 fontname=freemono shape=rect label=\"";
         for (const AbstractMetaFunction *func : m_overloads) {
-            s << "f" << functionNumber(func) << " : ";
-            if (func->type())
-                s << toHtml(func->type()->cppSignature());
-            else
-                s << "void";
-            s << ' ' << toHtml(func->minimalSignature()) << "\\l";
+            s << "f" << functionNumber(func) << " : "
+                << toHtml(func->type()->cppSignature())
+                << ' ' << toHtml(func->minimalSignature()) << "\\l";
         }
         s << "\"];\n";
 
@@ -903,12 +894,9 @@ QString OverloadData::dumpGraph() const
         s << "</td></tr>";
 
         // Function return type
-        s << "<tr><td bgcolor=\"gray\" align=\"right\">original type</td><td bgcolor=\"gray\" align=\"left\">";
-        if (rfunc->type())
-            s << toHtml(rfunc->type()->cppSignature());
-        else
-            s << "void";
-        s << "</td></tr>";
+        s << "<tr><td bgcolor=\"gray\" align=\"right\">original type</td><td bgcolor=\"gray\" align=\"left\">"
+            << toHtml(rfunc->type()->cppSignature())
+            << "</td></tr>";
 
         // Shows type changes for all function signatures
         for (const AbstractMetaFunction *func : m_overloads) {

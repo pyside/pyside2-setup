@@ -2081,7 +2081,7 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
         writeParameterType(s, cppClass, arg);
     }
 
-    if (!func->isConstructor() && func->type()) {
+    if (!func->isConstructor() && !func->isVoid()) {
 
         QString retType;
         // check if the return type was modified
