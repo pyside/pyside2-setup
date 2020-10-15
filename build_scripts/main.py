@@ -1162,11 +1162,12 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                      "updated rpath (OS/X) in {}.".format(srcpath))
 
 
-class PysideRstDocs(Command):
+class PysideRstDocs(Command, DistUtilsCommandMixin):
     description = "Build .rst documentation only"
-    user_options = []
+    user_options = DistUtilsCommandMixin.mixin_user_options
 
     def initialize_options(self):
+        DistUtilsCommandMixin.__init__(self)
         log.info("-- This build process will not include the API documentation."
                  "API documentation requires a full build of pyside/shiboken.")
         self.skip = False
@@ -1235,7 +1236,7 @@ class PysideRstDocs(Command):
             log.info("-- The documentation was built. Check html/pyside2/index.html")
 
     def finalize_options(self):
-        pass
+        DistUtilsCommandMixin.mixin_finalize_options(self)
 
 
 cmd_class_dict = {
