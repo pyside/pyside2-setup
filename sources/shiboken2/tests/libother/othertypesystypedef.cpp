@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,11 +26,19 @@
 **
 ****************************************************************************/
 
-#include "../samplebinding/global.h"
-#include "extendsnoimplicitconversion.h"
-#include "number.h"
-#include "otherderived.h"
-#include "otherobjecttype.h"
-#include "othermultiplederived.h"
 #include "othertypesystypedef.h"
-#include "smartptrtester.h"
+
+OtherValueWithUnitUser::OtherValueWithUnitUser() = default;
+
+
+ValueWithUnit<double, LengthUnit::Inch>
+    OtherValueWithUnitUser::doubleMillimeterToInch(ValueWithUnit<double, LengthUnit::Millimeter> v)
+{
+    return ValueWithUnit<double, LengthUnit::Inch>(v.value() / 254);
+}
+
+ValueWithUnit<int, LengthUnit::Inch>
+    OtherValueWithUnitUser::intMillimeterToInch(ValueWithUnit<int, LengthUnit::Millimeter> v)
+{
+    return ValueWithUnit<int, LengthUnit::Inch>(v.value() / 254);
+}

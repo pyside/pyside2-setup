@@ -459,14 +459,6 @@ def init_PySide2_QtCore():
         "PyByteArray": bytearray,
         "PyBytes": bytes,
         "QDeadlineTimer(QDeadlineTimer.Forever)": Instance("PySide2.QtCore.QDeadlineTimer"),
-        "PySide2.QtCore.QCborStreamReader.StringResult[PySide2.QtCore.QByteArray]":
-            PySide2.QtCore.QCborStringResultByteArray,
-        "PySide2.QtCore.QCborStreamReader.StringResult[QString]":
-            PySide2.QtCore.QCborStringResultString,
-        "PySide2.QtCore.QCborStreamReader.QCborStringResultByteArray":
-            PySide2.QtCore.QCborStringResultByteArray,  # 5.14, why?
-        "PySide2.QtCore.QCborStreamReader.QCborStringResultString":
-            PySide2.QtCore.QCborStringResultString,  # 5.14, why?
         "PySide2.QtCore.QUrl.ComponentFormattingOptions":
             PySide2.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
         "PyUnicode": typing.Text,

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,11 +26,21 @@
 **
 ****************************************************************************/
 
-#include "../samplebinding/global.h"
-#include "extendsnoimplicitconversion.h"
-#include "number.h"
-#include "otherderived.h"
-#include "otherobjecttype.h"
-#include "othermultiplederived.h"
-#include "othertypesystypedef.h"
-#include "smartptrtester.h"
+#ifndef OTHERTYPESYSTYPEDEF_H
+#define OTHERTYPESYSTYPEDEF_H
+
+#include "libothermacros.h"
+
+#include <typesystypedef.h>
+
+class LIBOTHER_API OtherValueWithUnitUser
+{
+public:
+    OtherValueWithUnitUser();
+
+    static ValueWithUnit<double, LengthUnit::Inch> doubleMillimeterToInch(ValueWithUnit<double, LengthUnit::Millimeter>);
+
+    static ValueWithUnit<int, LengthUnit::Inch> intMillimeterToInch(ValueWithUnit<int, LengthUnit::Millimeter>);
+};
+
+#endif // OTHERTYPESYSTYPEDEF_H

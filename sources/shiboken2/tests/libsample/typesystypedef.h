@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,11 +26,32 @@
 **
 ****************************************************************************/
 
-#include "../samplebinding/global.h"
-#include "extendsnoimplicitconversion.h"
-#include "number.h"
-#include "otherderived.h"
-#include "otherobjecttype.h"
-#include "othermultiplederived.h"
-#include "othertypesystypedef.h"
-#include "smartptrtester.h"
+#ifndef TYPESYSTYPEDEF_H
+#define TYPESYSTYPEDEF_H
+
+#include "libsamplemacros.h"
+
+enum class LengthUnit { Millimeter, Inch };
+
+template <class T, LengthUnit Unit>
+class ValueWithUnit
+{
+    public:
+    explicit ValueWithUnit(T value = {}) : m_value(value) {}
+
+    T value() const { return m_value; }
+    void setValue(const T &value) { m_value = value; }
+
+private:
+    T m_value;
+};
+
+class LIBSAMPLE_API ValueWithUnitUser
+{
+public:
+    ValueWithUnitUser();
+
+    static ValueWithUnit<double, LengthUnit::Millimeter> doubleInchToMillimeter(ValueWithUnit<double, LengthUnit::Inch>);
+};
+
+#endif // TYPESYSTYPEDEF_H

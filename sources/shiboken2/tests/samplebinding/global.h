@@ -86,6 +86,7 @@
 #include "sometime.h"
 #include "templateptr.h"
 #include "transform.h"
+#include "typesystypedef.h"
 #include "virtualmethods.h"
 #include "voidholder.h"
 #include "valueandvirtual.h"

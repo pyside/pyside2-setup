@@ -14,6 +14,10 @@
                         instantiations="Str"/>
     <value-type name="SmartPtrTester"/>
 
+    <typedef-type name="ValueWithUnitIntInch" source="ValueWithUnit&lt;int,LengthUnit::Inch&gt;"/>
+    <typedef-type name="ValueWithUnitIntMillimeter" source="ValueWithUnit&lt;int,LengthUnit::Millimeter&gt;"/>
+    <value-type name="OtherValueWithUnitUser"/>
+
     <suppress-warning text="signature 'operator!=(ByteArray,const char*)' for function modification in 'ByteArray' not found." />
     <suppress-warning text="signature 'operator+(ByteArray,const char*)' for function modification in 'ByteArray' not found." />
     <suppress-warning text="signature 'operator==(ByteArray,const char*)' for function modification in 'ByteArray' not found." />

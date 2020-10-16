@@ -2444,6 +2444,12 @@
     <value-type name="ToBeRenamedValue" target-lang-name="RenamedValue"/>
     <value-type name="RenamedUser"/>
 
+    <enum-type name="LengthUnit"/>
+    <value-type name="ValueWithUnit" generate="no"/>
+    <typedef-type name="ValueWithUnitDoubleInch" source="ValueWithUnit&lt;double,LengthUnit::Inch&gt;"/>
+    <typedef-type name="ValueWithUnitDoubleMillimeter" source="ValueWithUnit&lt;double,LengthUnit::Millimeter&gt;"/>
+    <value-type name="ValueWithUnitUser"/>
+
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
     <suppress-warning text="Pure virtual method &quot;Abstract::hideFunction(HideType*)&quot; must be implement but was completely removed on typesystem." />
