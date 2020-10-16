@@ -57,7 +57,7 @@ private:
     void writeFunction(QTextStream &s, const AbstractMetaFunction *func);
     void writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum *cppEnum);
     void writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass);
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType *metaType);
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType);
     void writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry);
     void writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass);
     void writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum *cppEnum);

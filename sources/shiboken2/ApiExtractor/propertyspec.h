@@ -29,6 +29,8 @@
 #ifndef PROPERTYSPEC_H
 #define PROPERTYSPEC_H
 
+#include "abstractmetatype.h"
+
 #include <QtCore/QStringList>
 
 class AbstractMetaClass;
@@ -46,7 +48,7 @@ public:
     Q_DISABLE_COPY_MOVE(QPropertySpec)
 
     explicit QPropertySpec(const TypeSystemProperty &ts,
-                           const AbstractMetaType *type);
+                           const AbstractMetaType &type);
     ~QPropertySpec();
 
     static TypeSystemProperty typeSystemPropertyFromQ_Property(const QString &declarationIn,
@@ -66,8 +68,8 @@ public:
 
     bool isValid() const;
 
-    const AbstractMetaType *type() const { return m_type; }
-    void setType(AbstractMetaType *t) { m_type = t; }
+    const AbstractMetaType &type() const { return m_type; }
+    void setType(const AbstractMetaType &t) { m_type = t; }
 
     const TypeEntry *typeEntry() const;
 
@@ -103,7 +105,7 @@ private:
     QString m_write;
     QString m_designable;
     QString m_reset;
-    const AbstractMetaType *m_type = nullptr;
+    AbstractMetaType m_type;
     int m_index = -1;
     // Indicates whether actual code is generated instead of relying on libpyside.
     bool m_generateGetSetDef = false;

@@ -8,6 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(apiextractor_SRC
 apiextractor.cpp
 abstractmetabuilder.cpp
+abstractmetatype.cpp
 abstractmetalang.cpp
 fileout.cpp
 graph.cpp

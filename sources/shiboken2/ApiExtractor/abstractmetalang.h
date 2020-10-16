@@ -30,6 +30,7 @@
 #define ABSTRACTMETALANG_H
 
 #include "abstractmetalang_typedefs.h"
+#include "abstractmetatype.h"
 #include "sourcelocation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
@@ -39,6 +40,7 @@
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QStringList>
+#include <QtCore/QSharedDataPointer>
 #include <QtCore/QMap>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
@@ -47,7 +49,6 @@ class AbstractMeta;
 class AbstractMetaClass;
 class AbstractMetaField;
 class AbstractMetaFunction;
-class AbstractMetaType;
 class AbstractMetaVariable;
 class AbstractMetaArgument;
 class AbstractMetaEnumValue;
@@ -274,315 +275,6 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaAttributes::Attributes)
 QDebug operator<<(QDebug d, const AbstractMetaAttributes *aa);
 #endif
 
-class AbstractMetaType
-{
-    Q_GADGET
-public:
-    using Indirections = QVector<Indirection>;
-
-    enum TypeUsagePattern {
-        InvalidPattern,
-        PrimitivePattern,
-        FlagsPattern,
-        EnumPattern,
-        ValuePattern,
-        ObjectPattern,
-        ValuePointerPattern,
-        NativePointerPattern,
-        NativePointerAsArrayPattern, // "int*" as "int[]"
-        ContainerPattern,
-        SmartPointerPattern,
-        VarargsPattern,
-        ArrayPattern,
-        VoidPattern,            // Plain "void", no "void *" or similar.
-        TemplateArgument,       // 'T' in std::array<T,2>
-        NonTypeTemplateArgument // '2' in in std::array<T,2>
-    };
-    Q_ENUM(TypeUsagePattern)
-
-    enum ComparisonFlag {
-        ConstRefMatchesValue = 0x1
-    };
-    Q_DECLARE_FLAGS(ComparisonFlags, ComparisonFlag);
-
-    explicit AbstractMetaType(const TypeEntry *t = nullptr);
-    AbstractMetaType(const AbstractMetaType &);
-    ~AbstractMetaType();
-
-    QString package() const;
-    QString name() const;
-    QString fullName() const;
-
-    void setTypeUsagePattern(TypeUsagePattern pattern)
-    {
-        m_pattern = pattern;
-    }
-    TypeUsagePattern typeUsagePattern() const
-    {
-        return m_pattern;
-    }
-
-    // true when use pattern is container
-    bool hasInstantiations() const
-    {
-        return !m_instantiations.isEmpty();
-    }
-
-    void addInstantiation(AbstractMetaType* inst, bool owner = false)
-    {
-        if (owner)
-            m_children << inst;
-        m_instantiations << inst;
-    }
-
-    void setInstantiations(const AbstractMetaTypeList  &insts, bool owner = false)
-    {
-        m_instantiations = insts;
-        if (owner) {
-            m_children.clear();
-            m_children = insts;
-        }
-    }
-
-    const AbstractMetaTypeList &instantiations() const
-    {
-        return m_instantiations;
-    }
-
-    void setInstantiationInCpp(bool incpp)
-    {
-        m_cppInstantiation = incpp;
-    }
-
-    QString minimalSignature() const { return formatSignature(true); }
-
-    // returns true if the typs is used as a non complex primitive, no & or *'s
-    bool isPrimitive() const
-    {
-        return m_pattern == PrimitivePattern;
-    }
-
-    bool isCppPrimitive() const;
-
-    // returns true if the type is used as an enum
-    bool isEnum() const
-    {
-        return m_pattern == EnumPattern;
-    }
-
-    // returns true if the type is used as an object, e.g. Xxx *
-    bool isObject() const
-    {
-        return m_pattern == ObjectPattern;
-    }
-
-    // returns true if the type is used as an array, e.g. Xxx[42]
-    bool isArray() const
-    {
-        return m_pattern == ArrayPattern;
-    }
-
-    // returns true if the type is used as a value type (X or const X &)
-    bool isValue() const
-    {
-        return m_pattern == ValuePattern;
-    }
-
-    bool isValuePointer() const
-    {
-        return m_pattern == ValuePointerPattern;
-    }
-
-    // returns true for more complex types...
-    bool isNativePointer() const
-    {
-        return m_pattern == NativePointerPattern;
-    }
-
-    // return true if the type was originally a varargs
-    bool isVarargs() const
-    {
-        return m_pattern == VarargsPattern;
-    }
-
-    // returns true if the type was used as a container
-    bool isContainer() const
-    {
-        return m_pattern == ContainerPattern;
-    }
-
-    // returns true if the type was used as a smart pointer
-    bool isSmartPointer() const { return m_pattern == SmartPointerPattern; }
-
-    // returns true if the type was used as a flag
-    bool isFlags() const
-    {
-        return m_pattern == FlagsPattern;
-    }
-
-    bool isVoid() const { return m_pattern == VoidPattern; }
-
-    bool isConstant() const
-    {
-        return m_constant;
-    }
-    void setConstant(bool constant)
-    {
-        m_constant = constant;
-    }
-
-    bool isVolatile() const { return m_volatile; }
-    void setVolatile(bool v) { m_volatile = v; }
-
-    bool passByConstRef() const;
-    bool passByValue() const;
-
-    ReferenceType referenceType() const { return m_referenceType; }
-    void setReferenceType(ReferenceType ref) { m_referenceType = ref; }
-
-    int actualIndirections() const
-    {
-        return m_indirections.size() + (m_referenceType == LValueReference ? 1 : 0);
-    }
-
-    Indirections indirectionsV() const { return m_indirections; }
-    void setIndirectionsV(const Indirections &i) { m_indirections = i; }
-    void clearIndirections() { m_indirections.clear(); }
-
-    // "Legacy"?
-    int indirections() const { return m_indirections.size(); }
-    void setIndirections(int indirections)
-    {
-        m_indirections = Indirections(indirections, Indirection::Pointer);
-    }
-    void addIndirection(Indirection i = Indirection::Pointer)
-        { m_indirections.append(i); }
-
-    void setArrayElementCount(int n)
-    {
-        m_arrayElementCount = n;
-    }
-    int arrayElementCount() const
-    {
-        return m_arrayElementCount;
-    }
-
-    const AbstractMetaType *arrayElementType() const
-    {
-        return m_arrayElementType;
-    }
-    void setArrayElementType(const AbstractMetaType *t)
-    {
-        m_arrayElementType = t;
-    }
-
-    AbstractMetaTypeCList nestedArrayTypes() const;
-
-    QString cppSignature() const;
-
-    QString pythonSignature() const;
-
-    AbstractMetaType *copy() const;
-    bool applyArrayModification(QString *errorMessage);
-
-    const TypeEntry *typeEntry() const
-    {
-        return m_typeEntry;
-    }
-    void setTypeEntry(const TypeEntry *type)
-    {
-        m_typeEntry = type;
-    }
-
-    void setOriginalTypeDescription(const QString &otd)
-    {
-        m_originalTypeDescription = otd;
-    }
-    QString originalTypeDescription() const
-    {
-        return m_originalTypeDescription;
-    }
-
-    void setOriginalTemplateType(const AbstractMetaType *type)
-    {
-        m_originalTemplateType = type;
-    }
-    const AbstractMetaType *originalTemplateType() const
-    {
-        return m_originalTemplateType;
-    }
-
-    AbstractMetaType *getSmartPointerInnerType() const
-    {
-        Q_ASSERT(isSmartPointer());
-        const AbstractMetaTypeList &instantiations = this->instantiations();
-        Q_ASSERT(!instantiations.isEmpty());
-        AbstractMetaType *innerType = instantiations.at(0);
-        return innerType;
-    }
-
-    QString getSmartPointerInnerTypeName() const
-    {
-        Q_ASSERT(isSmartPointer());
-        AbstractMetaType *innerType = getSmartPointerInnerType();
-        Q_ASSERT(innerType);
-        return innerType->name();
-    }
-
-    /// Decides and sets the proper usage patter for the current meta type.
-    void decideUsagePattern();
-
-    bool hasTemplateChildren() const;
-
-    bool compare(const AbstractMetaType &rhs, ComparisonFlags = {}) const;
-
-    // View on: Type to use for function argument conversion, fex
-    // std::string_view -> std::string for foo(std::string_view);
-    // cf TypeEntry::viewOn()
-    const AbstractMetaType *viewOn() const { return m_viewOn; }
-    void setViewOn(const AbstractMetaType *v) { m_viewOn = v; }
-
-    static AbstractMetaType *createVoid();
-
-private:
-    TypeUsagePattern determineUsagePattern() const;
-    QString formatSignature(bool minimal) const;
-    QString formatPythonSignature() const;
-
-    const TypeEntry *m_typeEntry;
-    AbstractMetaTypeList m_instantiations;
-    QString m_package;
-    mutable QString m_cachedCppSignature;
-    mutable QString m_cachedPythonSignature;
-    QString m_originalTypeDescription;
-
-    int m_arrayElementCount = -1;
-    const AbstractMetaType *m_arrayElementType = nullptr;
-    const AbstractMetaType *m_originalTemplateType = nullptr;
-    const AbstractMetaType *m_viewOn = nullptr;
-    Indirections m_indirections;
-
-    TypeUsagePattern m_pattern = InvalidPattern;
-    uint m_constant : 1;
-    uint m_volatile : 1;
-    uint m_cppInstantiation : 1;
-    uint m_reserved : 29; // unused
-
-    ReferenceType m_referenceType = NoReference;
-    AbstractMetaTypeList m_children;
-};
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaType::ComparisonFlags);
-
-inline bool operator==(const AbstractMetaType &t1, const AbstractMetaType &t2)
-{ return t1.compare(t2); }
-inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
-{ return !t1.compare(t2); }
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AbstractMetaType *at);
-#endif
-
 class AbstractMetaVariable
 {
     Q_DISABLE_COPY(AbstractMetaVariable)
@@ -591,18 +283,12 @@ public:
 
     virtual ~AbstractMetaVariable();
 
-    AbstractMetaType *type() const
+    const AbstractMetaType &type() const
     {
         return m_type;
     }
-    void setType(AbstractMetaType *type)
+    void setType(const AbstractMetaType &type)
     {
-        Q_ASSERT(m_type == nullptr);
-        m_type = type;
-    }
-    void replaceType(AbstractMetaType *type)
-    {
-        delete m_type;
         m_type = type;
     }
 
@@ -642,7 +328,7 @@ protected:
 private:
     QString m_originalName;
     QString m_name;
-    AbstractMetaType *m_type = nullptr;
+    AbstractMetaType m_type;
     bool m_hasName = false;
 
     Documentation m_doc;
@@ -686,7 +372,7 @@ public:
 
     QString toString() const
     {
-        return type()->name() + QLatin1Char(' ') + AbstractMetaVariable::name() +
+        return type().name() + QLatin1Char(' ') + AbstractMetaVariable::name() +
                (m_expression.isEmpty() ? QString() :  QLatin1String(" = ") + m_expression);
     }
 
@@ -894,20 +580,13 @@ public:
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
 
-    bool isVoid() const { return m_type->isVoid(); }
-    AbstractMetaType *type() const
+    bool isVoid() const { return m_type.isVoid(); }
+    const AbstractMetaType &type() const
     {
         return m_type;
     }
-    void setType(AbstractMetaType *type)
+    void setType(const AbstractMetaType &type)
     {
-        Q_ASSERT(m_type == nullptr);
-        m_type = type;
-    }
-
-    void replaceType(AbstractMetaType *type)
-    {
-        delete m_type;
         m_type = type;
     }
 
@@ -1113,7 +792,7 @@ private:
 
     FunctionTypeEntry* m_typeEntry = nullptr;
     FunctionType m_functionType = NormalFunction;
-    AbstractMetaType *m_type = nullptr;
+    AbstractMetaType m_type;
     const AbstractMetaClass *m_class = nullptr;
     const AbstractMetaClass *m_implementingClass = nullptr;
     const AbstractMetaClass *m_declaringClass = nullptr;

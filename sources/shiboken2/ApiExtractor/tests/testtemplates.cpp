@@ -76,9 +76,9 @@ namespace Internet {
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("Bookmarks"));
     QVERIFY(classB);
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("list"));
-    AbstractMetaType* funcType = func->type();
+    AbstractMetaType funcType = func->type();
     QVERIFY(funcType);
-    QCOMPARE(funcType->cppSignature(), QLatin1String("QList<Internet::Url >"));
+    QCOMPARE(funcType.cppSignature(), QLatin1String("QList<Internet::Url >"));
 }
 
 void TestTemplates::testTemplateOnContainers()
@@ -115,17 +115,17 @@ namespace Namespace {
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("foo"));
-    AbstractMetaType* argType = func->arguments().constFirst()->type();
-    QCOMPARE(argType->instantiations().count(), 1);
-    QCOMPARE(argType->typeEntry()->qualifiedCppName(), QLatin1String("QList"));
+    AbstractMetaType argType = func->arguments().constFirst()->type();
+    QCOMPARE(argType.instantiations().count(), 1);
+    QCOMPARE(argType.typeEntry()->qualifiedCppName(), QLatin1String("QList"));
 
-    const AbstractMetaType* instance1 = argType->instantiations().constFirst();
-    QCOMPARE(instance1->instantiations().count(), 1);
-    QCOMPARE(instance1->typeEntry()->qualifiedCppName(), QLatin1String("Namespace::A"));
+    const AbstractMetaType &instance1 = argType.instantiations().constFirst();
+    QCOMPARE(instance1.instantiations().count(), 1);
+    QCOMPARE(instance1.typeEntry()->qualifiedCppName(), QLatin1String("Namespace::A"));
 
-    const AbstractMetaType* instance2 = instance1->instantiations().constFirst();
-    QCOMPARE(instance2->instantiations().count(), 0);
-    QCOMPARE(instance2->typeEntry()->qualifiedCppName(), QLatin1String("Namespace::E1"));
+    const AbstractMetaType &instance2 = instance1.instantiations().constFirst();
+    QCOMPARE(instance2.instantiations().count(), 0);
+    QCOMPARE(instance2.typeEntry()->qualifiedCppName(), QLatin1String("Namespace::E1"));
 }
 
 void TestTemplates::testTemplateValueAsArgument()
@@ -149,7 +149,7 @@ void func(List<int> arg) {}
 
     AbstractMetaFunction *func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>)"));
-    QCOMPARE(func->arguments().constFirst()->type()->cppSignature(),
+    QCOMPARE(func->arguments().constFirst()->type().cppSignature(),
              QLatin1String("List<int >"));
 }
 
@@ -174,7 +174,7 @@ void func(List<int>* arg) {}
 
     AbstractMetaFunction* func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>*)"));
-    QCOMPARE(func->arguments().constFirst()->type()->cppSignature(),
+    QCOMPARE(func->arguments().constFirst()->type().cppSignature(),
              QLatin1String("List<int > *"));
 }
 
@@ -199,7 +199,7 @@ void func(List<int>& arg) {}
 
     AbstractMetaFunction* func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>&)"));
-    QCOMPARE(func->arguments().constFirst()->type()->cppSignature(),
+    QCOMPARE(func->arguments().constFirst()->type().cppSignature(),
              QLatin1String("List<int > &"));
 }
 
@@ -231,13 +231,13 @@ struct List {
     const AbstractMetaFunction *append = list->findFunction(QStringLiteral("append"));
     QVERIFY(append);
     QCOMPARE(append->arguments().size(), 1);
-    QCOMPARE(append->arguments().at(0)->type()->cppSignature(), QLatin1String("List<T >"));
+    QCOMPARE(append->arguments().at(0)->type().cppSignature(), QLatin1String("List<T >"));
     // Verify that the parameter of "void erase(Iterator)" is not modified
     const AbstractMetaFunction *erase = list->findFunction(QStringLiteral("erase"));
     QVERIFY(erase);
     QCOMPARE(erase->arguments().size(), 1);
     QEXPECT_FAIL("", "Clang: Some other code changes the parameter type", Abort);
-    QCOMPARE(erase->arguments().at(0)->type()->cppSignature(), QLatin1String("List::Iterator"));
+    QCOMPARE(erase->arguments().at(0)->type().cppSignature(), QLatin1String("List::Iterator"));
 }
 
 void TestTemplates::testInheritanceFromContainterTemplate()
@@ -394,12 +394,12 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     QVERIFY(one->hasTemplateBaseClassInstantiations());
     AbstractMetaTypeList instantiations = one->templateBaseClassInstantiations();
     QCOMPARE(instantiations.count(), 1);
-    const AbstractMetaType *inst = instantiations.constFirst();
+    const AbstractMetaType &inst = instantiations.constFirst();
     QVERIFY(inst);
-    QVERIFY(!inst->isEnum());
-    QVERIFY(!inst->typeEntry()->isEnum());
-    QVERIFY(inst->typeEntry()->isEnumValue());
-    QCOMPARE(inst->cppSignature(), QLatin1String("NSpace::TypeOne"));
+    QVERIFY(!inst.isEnum());
+    QVERIFY(!inst.typeEntry()->isEnum());
+    QVERIFY(inst.typeEntry()->isEnumValue());
+    QCOMPARE(inst.cppSignature(), QLatin1String("NSpace::TypeOne"));
 }
 
 void TestTemplates::testContainerTypeIncompleteArgument()
@@ -445,7 +445,7 @@ typedef Vector<int> IntVector;
     QVERIFY(otherMethod);
     QCOMPARE(otherMethod->signature(), QLatin1String("otherMethod()"));
     QVERIFY(otherMethod->type());
-    QCOMPARE(otherMethod->type()->cppSignature(), QLatin1String("Vector<int >"));
+    QCOMPARE(otherMethod->type().cppSignature(), QLatin1String("Vector<int >"));
 }
 
 void TestTemplates::testNonTypeTemplates()
@@ -474,7 +474,7 @@ Array<int, 2> foo();
     QCOMPARE(functions.count(), 1);
     auto foo = functions.constFirst();
     QCOMPARE(foo->name(), QLatin1String("foo"));
-    QCOMPARE(foo->type()->name(), QLatin1String("Array"));
+    QCOMPARE(foo->type().name(), QLatin1String("Array"));
 }
 
 // Perform checks on template inheritance; a typedef of a template class
@@ -574,25 +574,25 @@ void TestTemplates::testTemplateTypeDefs()
     const AbstractMetaFunction *valueMethod =
         optionalInt->findFunction(QLatin1String("value"));
     QVERIFY(valueMethod);
-    QCOMPARE(valueMethod->type()->cppSignature(), QLatin1String("int"));
+    QCOMPARE(valueMethod->type().cppSignature(), QLatin1String("int"));
 
     // ditto for typesystem XML
     const AbstractMetaFunction *xmlValueMethod =
         xmlOptionalInt->findFunction(QLatin1String("value"));
     QVERIFY(xmlValueMethod);
-    QCOMPARE(xmlValueMethod->type()->cppSignature(), QLatin1String("int"));
+    QCOMPARE(xmlValueMethod->type().cppSignature(), QLatin1String("int"));
 
     // Check whether the m_value field is of type 'int'
     const AbstractMetaField *valueField =
         optionalInt->findField(QLatin1String("m_value"));
     QVERIFY(valueField);
-    QCOMPARE(valueField->type()->cppSignature(), QLatin1String("int"));
+    QCOMPARE(valueField->type().cppSignature(), QLatin1String("int"));
 
     // ditto for typesystem XML
     const AbstractMetaField *xmlValueField =
         xmlOptionalInt->findField(QLatin1String("m_value"));
     QVERIFY(xmlValueField);
-    QCOMPARE(xmlValueField->type()->cppSignature(), QLatin1String("int"));
+    QCOMPARE(xmlValueField->type().cppSignature(), QLatin1String("int"));
 }
 
 void TestTemplates::testTemplateTypeAliases()
@@ -635,8 +635,8 @@ public:
     auto fields = testClass->fields();
     QCOMPARE(fields.count(), 1);
     auto fieldType = testClass->fields().at(0)->type();
-    QCOMPARE(fieldType->name(), QLatin1String("Container1"));
-    QCOMPARE(fieldType->instantiations().size(), 1);
+    QCOMPARE(fieldType.name(), QLatin1String("Container1"));
+    QCOMPARE(fieldType.instantiations().size(), 1);
 
     auto derived = AbstractMetaClass::findClass(classes, QLatin1String("Derived"));
     QVERIFY(derived);

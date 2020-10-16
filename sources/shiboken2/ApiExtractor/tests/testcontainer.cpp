@@ -91,17 +91,17 @@ void TestContainer::testListOfValueType()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->templateBaseClassInstantiations().count(), 1);
-    const AbstractMetaType *templateInstanceType =
+    const AbstractMetaType templateInstanceType =
         classA->templateBaseClassInstantiations().constFirst();
     QVERIFY(templateInstanceType);
 
-    QCOMPARE(templateInstanceType->indirections(), 0);
-    QVERIFY(!templateInstanceType->typeEntry()->isObject());
-    QVERIFY(templateInstanceType->typeEntry()->isValue());
-    QCOMPARE(templateInstanceType->referenceType(), NoReference);
-    QVERIFY(!templateInstanceType->isObject());
-    QVERIFY(!templateInstanceType->isValuePointer());
-    QVERIFY(templateInstanceType->isValue());
+    QCOMPARE(templateInstanceType.indirections(), 0);
+    QVERIFY(!templateInstanceType.typeEntry()->isObject());
+    QVERIFY(templateInstanceType.typeEntry()->isValue());
+    QCOMPARE(templateInstanceType.referenceType(), NoReference);
+    QVERIFY(!templateInstanceType.isObject());
+    QVERIFY(!templateInstanceType.isValuePointer());
+    QVERIFY(templateInstanceType.isValue());
 }
 
 QTEST_APPLESS_MAIN(TestContainer)

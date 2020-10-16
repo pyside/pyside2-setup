@@ -75,7 +75,8 @@ void TestNestedTypes::testNestedTypesModifications()
     QVERIFY(addedFunc->isUserAdded());
     QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
-    QCOMPARE(addedFunc->type()->minimalSignature(), QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
+    QCOMPARE(addedFunc->type().minimalSignature(),
+             QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
 
     QCOMPARE(addedFunc->modifications().size(), 1);
     QVERIFY(addedFunc->modifications().constFirst().isCodeInjection());

@@ -271,7 +271,7 @@ private:
     void writeAdditionalDocumentation();
 
     QString parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
-    QString translateToPythonType(const AbstractMetaType *type, const AbstractMetaClass *cppClass);
+    QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass);
 
     QString m_docDataDir;
     QString m_libSourceDir;

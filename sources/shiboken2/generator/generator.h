@@ -30,7 +30,7 @@
 #define GENERATOR_H
 
 #include "indentor.h"
-#include <abstractmetalang_typedefs.h>
+#include <abstractmetatype.h>
 #include <typedatabase_typedefs.h>
 #include <dependency.h>
 #include <QtCore/QObject>
@@ -61,7 +61,7 @@ void verifyDirectoryFor(const QString &file);
 
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaEnum *metaEnum, bool includePackageName = true);
-QString getClassTargetFullName(const AbstractMetaType *metaType, bool includePackageName = true);
+QString getClassTargetFullName(const AbstractMetaType &metaType, bool includePackageName = true);
 QString getFilteredCppSignatureString(QString signature);
 
 /**
@@ -154,7 +154,7 @@ public:
     GeneratorContext() = default;
 
     const AbstractMetaClass *metaClass() const { return m_metaClass; }
-    const AbstractMetaType *preciseType() const { return m_preciseClassType; }
+    const AbstractMetaType &preciseType() const { return m_preciseClassType; }
 
     bool forSmartPointer() const { return m_type == SmartPointer; }
     bool useWrapper() const { return m_type ==  WrappedClass; }
@@ -169,7 +169,7 @@ public:
 
 private:
     const AbstractMetaClass *m_metaClass = nullptr;
-    const AbstractMetaType *m_preciseClassType = nullptr;
+    AbstractMetaType m_preciseClassType;
     QString m_wrappername;
     Type m_type = Class;
 };
@@ -264,21 +264,21 @@ public:
     AbstractMetaFunctionList implicitConversions(const TypeEntry *type) const;
 
     /// Convenience function for implicitConversions(const TypeEntry *type).
-    AbstractMetaFunctionList implicitConversions(const AbstractMetaType *metaType) const;
+    AbstractMetaFunctionList implicitConversions(const AbstractMetaType &metaType) const;
 
     /// Check if type is a pointer.
-    static bool isPointer(const AbstractMetaType *type);
+    static bool isPointer(const AbstractMetaType &type);
 
     /// Tells if the type or class is an Object (or QObject) Type.
     static bool isObjectType(const TypeEntry *type);
     static bool isObjectType(const ComplexTypeEntry *type);
-    static bool isObjectType(const AbstractMetaType *metaType);
+    static bool isObjectType(const AbstractMetaType &metaType);
     static bool isObjectType(const AbstractMetaClass *metaClass);
 
     /// Returns true if the type is a C string (const char *).
-    static bool isCString(const AbstractMetaType *type);
+    static bool isCString(const AbstractMetaType &type);
     /// Returns true if the type is a void pointer.
-    static bool isVoidPointer(const AbstractMetaType *type);
+    static bool isVoidPointer(const AbstractMetaType &type);
 
 protected:
     /// Returns the classes, topologically ordered, used to generate the binding code.
@@ -303,17 +303,17 @@ protected:
     const AbstractMetaEnum *findAbstractMetaEnum(const TypeEntry *typeEntry) const;
 
     /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or nullptr if not found.
-    const AbstractMetaEnum *findAbstractMetaEnum(const AbstractMetaType *metaType) const;
+    const AbstractMetaEnum *findAbstractMetaEnum(const AbstractMetaType &metaType) const;
 
     virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
     GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
-                                            const AbstractMetaType *t) const;
+                                            const AbstractMetaType &t) const;
 
     /// Generates a file for given AbstractMetaClass or AbstractMetaType (smart pointer case).
     bool generateFileForContext(const GeneratorContext &context);
 
     /// Returns the file base name for a smart pointer.
-    QString getFileNameBaseForSmartPointer(const AbstractMetaType *smartPointerType,
+    QString getFileNameBaseForSmartPointer(const AbstractMetaType &smartPointerType,
                                            const AbstractMetaClass *smartPointerClass) const;
 
     /// Returns true if the generator should generate any code for the TypeEntry.
@@ -332,7 +332,7 @@ protected:
     *   \param option some extra options
     *   \return the metatype translated to binding source format
     */
-    QString translateType(const AbstractMetaType *metatype,
+    QString translateType(AbstractMetaType metatype,
                           const AbstractMetaClass *context,
                           Options options = NoOption) const;
 
@@ -360,7 +360,7 @@ protected:
 
     // Returns the full name of the type.
     QString getFullTypeName(const TypeEntry *type) const;
-    QString getFullTypeName(const AbstractMetaType *type) const;
+    QString getFullTypeName(const AbstractMetaType &type) const;
     QString getFullTypeName(const AbstractMetaClass *metaClass) const;
 
     /**
@@ -368,7 +368,7 @@ protected:
      *  as 'const', '&', and '*' (except if the class is not derived from a template).
      *  This is useful for instantiated templates.
      */
-    QString getFullTypeNameWithoutModifiers(const AbstractMetaType *type) const;
+    QString getFullTypeNameWithoutModifiers(const AbstractMetaType &type) const;
 
     /**
      *   Tries to build a minimal constructor for the type.
@@ -376,7 +376,7 @@ protected:
      *   Returns a null string if it fails.
      */
     DefaultValue minimalConstructor(const TypeEntry *type) const;
-    DefaultValue minimalConstructor(const AbstractMetaType *type) const;
+    DefaultValue minimalConstructor(const AbstractMetaType &type) const;
     DefaultValue minimalConstructor(const AbstractMetaClass *metaClass) const;
 
     /**
@@ -411,15 +411,15 @@ protected:
     */
     virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
-    QVector<const AbstractMetaType *> instantiatedContainers() const;
-    QVector<const AbstractMetaType *> instantiatedSmartPointers() const;
+    QVector<AbstractMetaType> instantiatedContainers() const;
+    QVector<AbstractMetaType> instantiatedSmartPointers() const;
 
-    static QString getSimplifiedContainerTypeName(const AbstractMetaType *type);
-    void addInstantiatedContainersAndSmartPointers(const AbstractMetaType *type,
+    static QString getSimplifiedContainerTypeName(const AbstractMetaType &type);
+    void addInstantiatedContainersAndSmartPointers(const AbstractMetaType &type,
                                                    const QString &context);
 
 private:
-    bool useEnumAsIntForProtectedHack(const AbstractMetaType *cType) const;
+    bool useEnumAsIntForProtectedHack(const AbstractMetaType &cType) const;
 
     struct GeneratorPrivate;
     GeneratorPrivate *m_d;

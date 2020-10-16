@@ -48,49 +48,49 @@ Documentation QtDocParser::retrieveModuleDocumentation()
 
 static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgument *arg)
 {
-    const AbstractMetaType *metaType = arg->type();
-    if (metaType->isConstant())
+    const AbstractMetaType &metaType = arg->type();
+    if (metaType.isConstant())
         str << "const " ;
-    switch (metaType->typeUsagePattern()) {
+    switch (metaType.typeUsagePattern()) {
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
         // to "Qt::Alignment" as seen by qdoc.
-        const auto *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType->typeEntry());
+        const auto *flagsEntry = static_cast<const FlagsTypeEntry *>(metaType.typeEntry());
         QString name = flagsEntry->qualifiedCppName();
         if (name.endsWith(QLatin1Char('>')) && name.startsWith(QLatin1String("QFlags<"))) {
             const int lastColon = name.lastIndexOf(QLatin1Char(':'));
             if (lastColon != -1) {
-                name.replace(lastColon + 1, name.size() - lastColon - 1, metaType->name());
+                name.replace(lastColon + 1, name.size() - lastColon - 1, metaType.name());
                 name.remove(0, 7);
             } else {
-                name = metaType->name(); // QFlags<> of enum in global namespace
+                name = metaType.name(); // QFlags<> of enum in global namespace
             }
         }
         str << name;
     }
         break;
     case AbstractMetaType::ContainerPattern: { // QVector<int>
-        str << metaType->typeEntry()->qualifiedCppName() << '<';
-        const auto instantiations = metaType->instantiations();
+        str << metaType.typeEntry()->qualifiedCppName() << '<';
+        const auto instantiations = metaType.instantiations();
         for (int i = 0, size = instantiations.size(); i < size; ++i) {
             if (i)
                 str << ", ";
-            str << instantiations.at(i)->typeEntry()->qualifiedCppName();
+            str << instantiations.at(i).typeEntry()->qualifiedCppName();
         }
         str << '>';
     }
         break;
     default: // Fully qualify enums (Qt::AlignmentFlag), nested classes, etc.
-        str << metaType->typeEntry()->qualifiedCppName();
+        str << metaType.typeEntry()->qualifiedCppName();
         break;
     }
 
-    if (metaType->referenceType() == LValueReference)
+    if (metaType.referenceType() == LValueReference)
         str << " &";
-    else if (metaType->referenceType() == RValueReference)
+    else if (metaType.referenceType() == RValueReference)
         str << " &&";
-    else if (metaType->indirections())
-        str << ' ' << QByteArray(metaType->indirections(), '*');
+    else if (metaType.indirections())
+        str << ' ' << QByteArray(metaType.indirections(), '*');
 }
 
 enum FunctionMatchFlags

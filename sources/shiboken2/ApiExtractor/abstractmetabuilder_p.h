@@ -46,7 +46,7 @@ class AbstractMetaBuilderPrivate
 public:
     struct TypeClassEntry
     {
-        AbstractMetaTypeCPtr type;
+        AbstractMetaType type;
         const AbstractMetaClass *klass;
     };
 
@@ -139,20 +139,20 @@ public:
     void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                AbstractMetaClass *metaClass);
 
-    QString fixDefaultValue(const ArgumentModelItem &item, AbstractMetaType *type,
+    QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type,
                             AbstractMetaFunction *fnc, AbstractMetaClass *,
                             int argumentIndex);
-    AbstractMetaType *translateType(const AddedFunction::TypeInfo &typeInfo,
-                                    QString *errorMessage);
-    AbstractMetaType *translateType(const TypeInfo &type,
-                                    AbstractMetaClass *currentClass,
-                                    TranslateTypeFlags flags = {},
-                                    QString *errorMessage = nullptr);
-    static AbstractMetaType *translateTypeStatic(const TypeInfo &type,
-                                                 AbstractMetaClass *current,
-                                                 AbstractMetaBuilderPrivate *d = nullptr,
-                                                 TranslateTypeFlags flags = {},
-                                                 QString *errorMessageIn = nullptr);
+    AbstractMetaType translateType(const AddedFunction::TypeInfo &typeInfo,
+                                   QString *errorMessage);
+    AbstractMetaType translateType(const TypeInfo &type,
+                                   AbstractMetaClass *currentClass,
+                                   TranslateTypeFlags flags = {},
+                                   QString *errorMessage = nullptr);
+    static AbstractMetaType translateTypeStatic(const TypeInfo &type,
+                                                AbstractMetaClass *current,
+                                                AbstractMetaBuilderPrivate *d = nullptr,
+                                                TranslateTypeFlags flags = {},
+                                                QString *errorMessageIn = nullptr);
     static TypeEntries findTypeEntries(const QString &qualifiedName, const QString &name,
                                        AbstractMetaClass *currentClass = nullptr,
                                        AbstractMetaBuilderPrivate *d = nullptr);
@@ -169,8 +169,8 @@ public:
                          const AbstractMetaClass *templateClass,
                          const TypeInfo &info);
     void inheritTemplateFunctions(AbstractMetaClass *subclass);
-    AbstractMetaType *inheritTemplateType(const AbstractMetaTypeList &templateTypes,
-                                          const AbstractMetaType *metaType);
+    AbstractMetaType inheritTemplateType(const AbstractMetaTypeList &templateTypes,
+                                         const AbstractMetaType &metaType);
 
     bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
     bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);
@@ -181,7 +181,7 @@ public:
     void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
 
     void fillAddedFunctions(AbstractMetaClass *metaClass);
-    const AbstractMetaClass *resolveTypeSystemTypeDef(const AbstractMetaType *t) const;
+    const AbstractMetaClass *resolveTypeSystemTypeDef(const AbstractMetaType &t) const;
 
     AbstractMetaBuilder *q;
     AbstractMetaClassList m_metaClasses;

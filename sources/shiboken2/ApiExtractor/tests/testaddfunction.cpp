@@ -112,13 +112,13 @@ struct A {
     QVERIFY(!addedFunc->isSlot());
     QVERIFY(!addedFunc->isStatic());
 
-    AbstractMetaType* returnType = addedFunc->type();
-    QCOMPARE(returnType->typeEntry(), typeDb->findPrimitiveType(QLatin1String("int")));
+    AbstractMetaType returnType = addedFunc->type();
+    QCOMPARE(returnType.typeEntry(), typeDb->findPrimitiveType(QLatin1String("int")));
     AbstractMetaArgumentList args = addedFunc->arguments();
     QCOMPARE(args.count(), 3);
-    QCOMPARE(args[0]->type()->typeEntry(), returnType->typeEntry());
+    QCOMPARE(args[0]->type().typeEntry(), returnType.typeEntry());
     QCOMPARE(args[1]->defaultValueExpression(), QLatin1String("4.6"));
-    QCOMPARE(args[2]->type()->typeEntry(), typeDb->findType(QLatin1String("B")));
+    QCOMPARE(args[2]->type().typeEntry(), typeDb->findType(QLatin1String("B")));
 
     auto addedCallOperator = classA->findFunction(QLatin1String("operator()"));
     QVERIFY(addedCallOperator);
@@ -313,8 +313,8 @@ void TestAddFunction::testAddFunctionWithVarargs()
     const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("func"));
     QVERIFY(addedFunc);
     const AbstractMetaArgument *arg = addedFunc->arguments().constLast();
-    QVERIFY(arg->type()->isVarargs());
-    QVERIFY(arg->type()->typeEntry()->isVarargs());
+    QVERIFY(arg->type().isVarargs());
+    QVERIFY(arg->type().typeEntry()->isVarargs());
 }
 
 void TestAddFunction::testAddStaticFunction()
@@ -460,7 +460,7 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
     QCOMPARE(builder->globalFunctions().size(), 1);
     AbstractMetaFunction *func = builder->globalFunctions().constFirst();
     AbstractMetaArgument *arg = func->arguments().constFirst();
-    QCOMPARE(arg->type()->instantiations().count(), 1);
+    QCOMPARE(arg->type().instantiations().count(), 1);
 }
 
 QTEST_APPLESS_MAIN(TestAddFunction)

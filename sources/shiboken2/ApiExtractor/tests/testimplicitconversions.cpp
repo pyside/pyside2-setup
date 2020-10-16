@@ -59,7 +59,7 @@ void TestImplicitConversions::testWithPrivateCtors()
     const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 1);
-    QCOMPARE(implicitConvs.constFirst()->arguments().constFirst()->type()->typeEntry(),
+    QCOMPARE(implicitConvs.constFirst()->arguments().constFirst()->type().typeEntry(),
              classC->typeEntry());
 }
 
@@ -89,7 +89,7 @@ void TestImplicitConversions::testWithModifiedVisibility()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 1);
-    QCOMPARE(implicitConvs.constFirst()->arguments().constFirst()->type()->typeEntry(),
+    QCOMPARE(implicitConvs.constFirst()->arguments().constFirst()->type().typeEntry(),
              classB->typeEntry());
 }
 

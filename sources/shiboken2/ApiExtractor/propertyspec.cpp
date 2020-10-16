@@ -42,7 +42,7 @@
 #include <algorithm>
 
 QPropertySpec::QPropertySpec(const TypeSystemProperty &ts,
-                             const AbstractMetaType *type) :
+                             const AbstractMetaType &type) :
     m_name(ts.name),
     m_read(ts.read),
     m_write(ts.write),
@@ -53,19 +53,16 @@ QPropertySpec::QPropertySpec(const TypeSystemProperty &ts,
 {
 }
 
-QPropertySpec::~QPropertySpec()
-{
-    delete m_type;
-}
+QPropertySpec::~QPropertySpec() = default;
 
 bool QPropertySpec::isValid() const
 {
-    return m_type != nullptr && !m_name.isEmpty() && !m_read.isEmpty();
+    return m_type.isValid() && !m_name.isEmpty() && !m_read.isEmpty();
 }
 
 const TypeEntry *QPropertySpec::typeEntry() const
 {
-    return m_type->typeEntry();
+    return m_type.typeEntry();
 }
 
 // Parse a Q_PROPERTY macro
@@ -161,10 +158,10 @@ QPropertySpec *QPropertySpec::fromTypeSystemProperty(AbstractMetaBuilderPrivate 
          return nullptr;
      }
 
-     AbstractMetaType *type = b->translateType(info, metaClass, {}, &typeError);
+     AbstractMetaType type = b->translateType(info, metaClass, {}, &typeError);
      if (!type) {
          const QStringList qualifiedName = info.qualifiedName();
-         for (int j = scopes.size(); j >= 0 && type == nullptr; --j) {
+         for (int j = scopes.size(); j >= 0 && !type; --j) {
              info.setQualifiedName(scopes.mid(0, j) + qualifiedName);
              type = b->translateType(info, metaClass, {}, &typeError);
          }
@@ -195,7 +192,7 @@ QPropertySpec *QPropertySpec::parseQ_Property(AbstractMetaBuilderPrivate *b,
 #ifndef QT_NO_DEBUG_STREAM
 void QPropertySpec::formatDebug(QDebug &d) const
 {
-    d << '#' << m_index << " \"" << m_name << "\" (" << m_type->cppSignature();
+    d << '#' << m_index << " \"" << m_name << "\" (" << m_type.cppSignature();
     d << "), read=" << m_read;
     if (!m_write.isEmpty())
         d << ", write=" << m_write;

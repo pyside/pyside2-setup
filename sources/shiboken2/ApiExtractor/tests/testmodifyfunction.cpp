@@ -312,7 +312,7 @@ void TestModifyFunction::testGlobalFunctionModification()
     QVERIFY(func);
     QCOMPARE(func->arguments().count(), 1);
     const AbstractMetaArgument *arg = func->arguments().constFirst();
-    QCOMPARE(arg->type()->cppSignature(), QLatin1String("A *"));
+    QCOMPARE(arg->type().cppSignature(), QLatin1String("A *"));
     QCOMPARE(arg->originalDefaultValueExpression(), QLatin1String("0"));
     QCOMPARE(arg->defaultValueExpression(), QLatin1String("A()"));
 }

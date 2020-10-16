@@ -79,9 +79,9 @@ private:
                                 const GeneratorContext &classContext);
     void writeCustomConverterRegister(QTextStream &s, const CustomConversion *customConversion, const QString &converterVar);
 
-    void writeContainerConverterFunctions(QTextStream &s, const AbstractMetaType *containerType);
+    void writeContainerConverterFunctions(QTextStream &s, const AbstractMetaType &containerType);
 
-    void writeSmartPointerConverterFunctions(QTextStream &s, const AbstractMetaType *smartPointerType);
+    void writeSmartPointerConverterFunctions(QTextStream &s, const AbstractMetaType &smartPointerType);
 
     void writeMethodWrapperPreamble(QTextStream &s, OverloadData &overloadData,
                                     const GeneratorContext &context);
@@ -107,7 +107,7 @@ private:
     /// Writes the check section for the validity of wrapped C++ objects.
     void writeInvalidPyObjectCheck(QTextStream &s, const QString &pyObj);
 
-    void writeTypeCheck(QTextStream &s, const AbstractMetaType *argType, const QString &argumentName,
+    void writeTypeCheck(QTextStream &s, AbstractMetaType argType, const QString &argumentName,
                         bool isNumber = false, const QString &customType = QString(),
                         bool rejectNull = false);
     void writeTypeCheck(QTextStream& s, const OverloadData *overloadData, QString argumentName);
@@ -138,7 +138,7 @@ private:
      *   \param defaultValue         an optional default value to be used instead of the conversion result
      *   \param castArgumentAsUnused if true the converted argument is cast as unused to avoid compiler warnings
      */
-    void writeArgumentConversion(QTextStream &s, const AbstractMetaType *argType,
+    void writeArgumentConversion(QTextStream &s, const AbstractMetaType &argType,
                                  const QString &argName, const QString &pyArgName,
                                  const AbstractMetaClass *context = nullptr,
                                  const QString &defaultValue = QString(),
@@ -155,10 +155,10 @@ private:
      *  \param  newType It is set to true if the type returned is a new object that must be deallocated.
      *  \return The type of the argument indicated by \p argPos.
      */
-    const AbstractMetaType *getArgumentType(const AbstractMetaFunction *func, int argPos);
+    const AbstractMetaType getArgumentType(const AbstractMetaFunction *func, int argPos);
 
     void writePythonToCppTypeConversion(QTextStream &s,
-                                        const AbstractMetaType *type,
+                                        const AbstractMetaType &type,
                                         const QString &pyIn,
                                         const QString &cppOut,
                                         const AbstractMetaClass *context = nullptr,
@@ -206,18 +206,18 @@ private:
 
     /// Returns the name of a Python to C++ conversion function.
     static QString pythonToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName);
-    static QString pythonToCppFunctionName(const AbstractMetaType *sourceType, const AbstractMetaType *targetType);
+    static QString pythonToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType);
     static QString pythonToCppFunctionName(const CustomConversion::TargetToNativeConversion *toNative, const TypeEntry *targetType);
 
     /// Returns the name of a Python to C++ convertible check function.
     static QString convertibleToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName);
-    static QString convertibleToCppFunctionName(const AbstractMetaType *sourceType, const AbstractMetaType *targetType);
+    static QString convertibleToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType);
     static QString convertibleToCppFunctionName(const CustomConversion::TargetToNativeConversion *toNative, const TypeEntry *targetType);
 
     /// Writes a C++ to Python conversion function.
     void writeCppToPythonFunction(QTextStream &s, const QString &code, const QString &sourceTypeName, QString targetTypeName = QString());
     void writeCppToPythonFunction(QTextStream &s, const CustomConversion *customConversion);
-    void writeCppToPythonFunction(QTextStream &s, const AbstractMetaType *containerType);
+    void writeCppToPythonFunction(QTextStream &s, const AbstractMetaType &containerType);
 
     /// Writes a Python to C++ conversion function.
     void writePythonToCppFunction(QTextStream &s, const QString &code, const QString &sourceTypeName, const QString &targetTypeName);
@@ -232,8 +232,8 @@ private:
 
     /// Writes a pair of Python to C++ conversion and check functions.
     void writePythonToCppConversionFunctions(QTextStream &s,
-                                             const AbstractMetaType *sourceType,
-                                             const AbstractMetaType *targetType,
+                                             const AbstractMetaType &sourceType,
+                                             const AbstractMetaType &targetType,
                                              QString typeCheck = QString(),
                                              QString conversion = QString(),
                                              const QString &preConversion = QString());
@@ -243,7 +243,7 @@ private:
                                              const TypeEntry *targetType);
 
     /// Writes a pair of Python to C++ conversion and check functions for instantiated container types.
-    void writePythonToCppConversionFunctions(QTextStream &s, const AbstractMetaType *containerType);
+    void writePythonToCppConversionFunctions(QTextStream &s, const AbstractMetaType &containerType);
 
     void writeAddPythonToCppConversion(QTextStream &s, const QString &converterVar, const QString &pythonToCppFunc, const QString &isConvertibleFunc);
 
@@ -298,7 +298,7 @@ private:
     void writeSetterFunctionPreamble(QTextStream &s,
                                      const QString &name,
                                      const QString &funcName,
-                                     const AbstractMetaType *type,
+                                     const AbstractMetaType &type,
                                      const GeneratorContext &context);
     void writeSetterFunction(QTextStream &s,
                              const AbstractMetaField *metaField,
@@ -333,8 +333,8 @@ private:
     void writePrimitiveConverterInitialization(QTextStream &s, const CustomConversion *customConversion);
     void writeEnumConverterInitialization(QTextStream &s, const TypeEntry *enumType);
     void writeEnumConverterInitialization(QTextStream &s, const AbstractMetaEnum *metaEnum);
-    void writeContainerConverterInitialization(QTextStream &s, const AbstractMetaType *type);
-    void writeSmartPointerConverterInitialization(QTextStream &s, const AbstractMetaType *type);
+    void writeContainerConverterInitialization(QTextStream &s, const AbstractMetaType &type);
+    void writeSmartPointerConverterInitialization(QTextStream &s, const AbstractMetaType &ype);
     void writeExtendedConverterInitialization(QTextStream &s, const TypeEntry *externalType, const QVector<const AbstractMetaClass *>& conversions);
 
     void writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn);
@@ -378,7 +378,7 @@ private:
     bool hasBoolCast(const AbstractMetaClass *metaClass) const
     { return boolCast(metaClass) != nullptr; }
 
-    const AbstractMetaType *findSmartPointerInstantiation(const TypeEntry *entry) const;
+    AbstractMetaType findSmartPointerInstantiation(const TypeEntry *entry) const;
 
     // Number protocol structure members names.
     static QHash<QString, QString> m_nbFuncs;

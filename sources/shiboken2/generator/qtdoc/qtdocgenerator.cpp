@@ -88,7 +88,7 @@ static bool shouldSkip(const AbstractMetaFunction* func)
 
             const AbstractMetaArgumentList fargs = f->arguments();
             for (int i = 0, max = funcArgs.count(); i < max; ++i) {
-                if (funcArgs.at(i)->type()->typeEntry() != fargs.at(i)->type()->typeEntry()) {
+                if (funcArgs.at(i)->type().typeEntry() != fargs.at(i)->type().typeEntry()) {
                     cloneFound = false;
                     break;
                 }
@@ -1529,7 +1529,7 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
     if (!context.forSmartPointer()) {
         return metaClass->name() + fileNameSuffix();
     }
-    const AbstractMetaType *smartPointerType = context.preciseType();
+    const AbstractMetaType &smartPointerType = context.preciseType();
     QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
     return fileNameBase + fileNameSuffix();
 }
@@ -1876,7 +1876,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
                 defValue.replace(QLatin1String("::"), QLatin1String("."));
                 if (defValue == QLatin1String("nullptr"))
                     defValue = none();
-                else if (defValue == QLatin1String("0") && arg->type()->isObject())
+                else if (defValue == QLatin1String("0") && arg->type().isObject())
                     defValue = none();
             }
             ret += QLatin1Char('=') + defValue;
@@ -2003,13 +2003,14 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, con
         + QLatin1Char(')');
 }
 
-QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, const AbstractMetaClass* cppClass)
+QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
+                                              const AbstractMetaClass* cppClass)
 {
     static const QStringList nativeTypes = {boolT(), floatT(), intT(),
         QLatin1String("object"),
         QLatin1String("str")
     };
-    const QString name = type->name();
+    const QString name = type.name();
     if (nativeTypes.contains(name))
         return name;
 
@@ -2032,13 +2033,13 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, cons
         return found.value();
 
     QString strType;
-    if (type->isConstant() && name == QLatin1String("char") && type->indirections() == 1) {
+    if (type.isConstant() && name == QLatin1String("char") && type.indirections() == 1) {
         strType = QLatin1String("str");
     } else if (name.startsWith(unsignedShortT())) {
         strType = intT();
     } else if (name.startsWith(unsignedT())) { // uint and ulong
         strType = intT();
-    } else if (type->isContainer()) {
+    } else if (type.isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
         strType.remove(QLatin1Char('*'));
         strType.remove(QLatin1Char('>'));
@@ -2055,8 +2056,8 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType* type, cons
                                          .arg(types[0], types[1]);
         }
     } else {
-        const AbstractMetaClass *k = AbstractMetaClass::findClass(classes(), type->typeEntry());
-        strType = k ? k->fullName() : type->name();
+        const AbstractMetaClass *k = AbstractMetaClass::findClass(classes(), type.typeEntry());
+        strType = k ? k->fullName() : type.name();
         strType = QStringLiteral(":any:`") + strType + QLatin1Char('`');
     }
     return strType;

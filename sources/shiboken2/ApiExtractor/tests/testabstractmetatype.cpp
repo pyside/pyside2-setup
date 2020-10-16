@@ -74,20 +74,20 @@ void TestAbstractMetaType::testConstCharPtrType()
     QVERIFY(!builder.isNull());
     QCOMPARE(builder->globalFunctions().size(), 1);
     AbstractMetaFunction *func = builder->globalFunctions().constFirst();
-    AbstractMetaType* rtype = func->type();
+    AbstractMetaType rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
-    QCOMPARE(rtype->package(), QLatin1String("Foo"));
-    QCOMPARE(rtype->name(), QLatin1String("char"));
-    QVERIFY(rtype->isConstant());
-    QVERIFY(!rtype->isArray());
-    QVERIFY(!rtype->isContainer());
-    QVERIFY(!rtype->isObject());
-    QVERIFY(!rtype->isPrimitive()); // const char* differs from char, so it's not considered a primitive type by apiextractor
-    QVERIFY(rtype->isNativePointer());
-    QCOMPARE(rtype->referenceType(), NoReference);
-    QVERIFY(!rtype->isValue());
-    QVERIFY(!rtype->isValuePointer());
+    QCOMPARE(rtype.package(), QLatin1String("Foo"));
+    QCOMPARE(rtype.name(), QLatin1String("char"));
+    QVERIFY(rtype.isConstant());
+    QVERIFY(!rtype.isArray());
+    QVERIFY(!rtype.isContainer());
+    QVERIFY(!rtype.isObject());
+    QVERIFY(!rtype.isPrimitive()); // const char* differs from char, so it's not considered a primitive type by apiextractor
+    QVERIFY(rtype.isNativePointer());
+    QCOMPARE(rtype.referenceType(), NoReference);
+    QVERIFY(!rtype.isValue());
+    QVERIFY(!rtype.isValuePointer());
 }
 
 void TestAbstractMetaType::testApiVersionSupported()
@@ -147,20 +147,20 @@ void TestAbstractMetaType::testCharType()
     AbstractMetaFunctionList functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
     AbstractMetaFunction *func = functions.constFirst();
-    AbstractMetaType* rtype = func->type();
+    AbstractMetaType rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
-    QCOMPARE(rtype->package(), QLatin1String("Foo"));
-    QCOMPARE(rtype->name(), QLatin1String("char"));
-    QVERIFY(!rtype->isConstant());
-    QVERIFY(!rtype->isArray());
-    QVERIFY(!rtype->isContainer());
-    QVERIFY(!rtype->isObject());
-    QVERIFY(rtype->isPrimitive());
-    QVERIFY(!rtype->isNativePointer());
-    QCOMPARE(rtype->referenceType(), NoReference);
-    QVERIFY(!rtype->isValue());
-    QVERIFY(!rtype->isValuePointer());
+    QCOMPARE(rtype.package(), QLatin1String("Foo"));
+    QCOMPARE(rtype.name(), QLatin1String("char"));
+    QVERIFY(!rtype.isConstant());
+    QVERIFY(!rtype.isArray());
+    QVERIFY(!rtype.isContainer());
+    QVERIFY(!rtype.isObject());
+    QVERIFY(rtype.isPrimitive());
+    QVERIFY(!rtype.isNativePointer());
+    QCOMPARE(rtype.referenceType(), NoReference);
+    QVERIFY(!rtype.isValue());
+    QVERIFY(!rtype.isValuePointer());
 }
 
 void TestAbstractMetaType::testTypedef()
@@ -210,8 +210,8 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     AbstractMetaArgumentList args = function->arguments();
     QCOMPARE(args.count(), 1);
     AbstractMetaArgument *arg = args.constFirst();
-    AbstractMetaType* metaType = arg->type();
-    QCOMPARE(metaType->cppSignature(), QLatin1String("A<B >"));
+    AbstractMetaType metaType = arg->type();
+    QCOMPARE(metaType.cppSignature(), QLatin1String("A<B >"));
 }
 
 
@@ -238,10 +238,10 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     AbstractMetaArgumentList args = method->arguments();
     QCOMPARE(args.count(), 1);
     AbstractMetaArgument* arg = args.constFirst();
-    AbstractMetaType* metaType = arg->type();
-    QCOMPARE(metaType->cppSignature(), QLatin1String("A"));
-    QVERIFY(metaType->isValue());
-    QVERIFY(metaType->typeEntry()->isObject());
+    AbstractMetaType metaType = arg->type();
+    QCOMPARE(metaType.cppSignature(), QLatin1String("A"));
+    QVERIFY(metaType.isValue());
+    QVERIFY(metaType.typeEntry()->isObject());
 }
 
 QTEST_APPLESS_MAIN(TestAbstractMetaType)

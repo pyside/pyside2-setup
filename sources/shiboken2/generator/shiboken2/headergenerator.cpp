@@ -53,8 +53,7 @@ QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) con
         fileNameBase.replace(QLatin1String("::"), QLatin1String("_"));
         return fileNameBase + fileNameSuffix();
     }
-    const AbstractMetaType *smartPointerType = context.preciseType();
-    QString fileNameBase = getFileNameBaseForSmartPointer(smartPointerType, metaClass);
+    QString fileNameBase = getFileNameBaseForSmartPointer(context.preciseType(), metaClass);
     return fileNameBase + fileNameSuffix();
 }
 
@@ -68,15 +67,15 @@ void HeaderGenerator::writeCopyCtor(QTextStream &s, const AbstractMetaClass *met
 
 void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField *field) const
 {
-    AbstractMetaType *metaType = field->type();
-    QString fieldType = metaType->cppSignature();
+    const AbstractMetaType &metaType = field->type();
+    QString fieldType = metaType.cppSignature();
     QString fieldName = field->enclosingClass()->qualifiedCppName() + QLatin1String("::") + field->name();
 
     // Force use of pointer to return internal variable memory
-    bool useReference = (!metaType->isConstant() &&
-                         !metaType->isEnum() &&
-                         !metaType->isPrimitive() &&
-                         metaType->indirections() == 0);
+    bool useReference = (!metaType.isConstant() &&
+                         !metaType.isEnum() &&
+                         !metaType.isPrimitive() &&
+                         metaType.indirections() == 0);
 
 
     // Get function
@@ -249,12 +248,12 @@ void HeaderGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction *
         for (const AbstractMetaArgument *arg : arguments) {
             QString argName = arg->name();
             const TypeEntry *enumTypeEntry = nullptr;
-            if (arg->type()->isFlags())
-                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg->type()->typeEntry())->originator();
-            else if (arg->type()->isEnum())
-                enumTypeEntry = arg->type()->typeEntry();
+            if (arg->type().isFlags())
+                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg->type().typeEntry())->originator();
+            else if (arg->type().isEnum())
+                enumTypeEntry = arg->type().typeEntry();
             if (enumTypeEntry)
-                argName = QString::fromLatin1("%1(%2)").arg(arg->type()->cppSignature(), argName);
+                argName = QString::fromLatin1("%1(%2)").arg(arg->type().cppSignature(), argName);
             args << argName;
         }
         s << args.join(QLatin1String(", ")) << ')';
@@ -422,13 +421,13 @@ bool HeaderGenerator::finishGeneration()
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
     int smartPointerCount = 0;
-    const QVector<const AbstractMetaType *> &instantiatedSmartPtrs = instantiatedSmartPointers();
-    for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
+    const QVector<AbstractMetaType> &instantiatedSmartPtrs = instantiatedSmartPointers();
+    for (const AbstractMetaType &metaType : instantiatedSmartPtrs) {
         QString indexName = getTypeIndexVariableName(metaType);
         _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
-        macrosStream << ", // " << metaType->cppSignature() << Qt::endl;
+        macrosStream << ", // " << metaType.cppSignature() << Qt::endl;
         // Add a the same value for const pointees (shared_ptr<const Foo>).
-        const auto ptrName = metaType->typeEntry()->entryName();
+        const auto ptrName = metaType.typeEntry()->entryName();
         int pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
         if (pos >= 0) {
             indexName.insert(pos + ptrName.size() + 1, QLatin1String("CONST"));
@@ -467,10 +466,10 @@ bool HeaderGenerator::finishGeneration()
         _writeTypeIndexValueLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
-    const QVector<const AbstractMetaType *> &containers = instantiatedContainers();
-    for (const AbstractMetaType *container : containers) {
+    const QVector<AbstractMetaType> &containers = instantiatedContainers();
+    for (const AbstractMetaType &container : containers) {
         _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(container), pCount);
-        macrosStream << ", // " << container->cppSignature() << Qt::endl;
+        macrosStream << ", // " << container.cppSignature() << Qt::endl;
         pCount++;
     }
 
@@ -519,8 +518,8 @@ bool HeaderGenerator::finishGeneration()
             writeSbkTypeFunction(typeFunctions, metaClass);
     }
 
-    for (const AbstractMetaType *metaType : instantiatedSmartPtrs) {
-        const TypeEntry *classType = metaType->typeEntry();
+    for (const AbstractMetaType &metaType : instantiatedSmartPtrs) {
+        const TypeEntry *classType = metaType.typeEntry();
         includes << classType->include();
         writeSbkTypeFunction(typeFunctions, metaType);
     }
@@ -628,9 +627,9 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaCla
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
 }
 
-void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaType *metaType)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType)
 {
-    s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType->cppSignature() << " >() "
+    s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(metaType) << "); }\n";
 }
 
@@ -648,12 +647,12 @@ void HeaderGenerator::writeInheritedOverloads(QTextStream &s)
         for (const AbstractMetaArgument *arg : arguments) {
             QString argName = arg->name();
             const TypeEntry *enumTypeEntry = nullptr;
-            if (arg->type()->isFlags())
-                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg->type()->typeEntry())->originator();
-            else if (arg->type()->isEnum())
-                enumTypeEntry = arg->type()->typeEntry();
+            if (arg->type().isFlags())
+                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg->type().typeEntry())->originator();
+            else if (arg->type().isEnum())
+                enumTypeEntry = arg->type().typeEntry();
             if (enumTypeEntry)
-                argName = arg->type()->cppSignature() + QLatin1Char('(') + argName + QLatin1Char(')');
+                argName = arg->type().cppSignature() + QLatin1Char('(') + argName + QLatin1Char(')');
             args << argName;
         }
         s << args.join(QLatin1String(", ")) << ')';

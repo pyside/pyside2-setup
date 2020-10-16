@@ -52,7 +52,7 @@ public:
     int maxArgs() const { return m_headOverloadData->m_maxArgs; }
     int argPos() const { return m_argPos; }
 
-    const AbstractMetaType *argType() const { return m_argType; }
+    const AbstractMetaType &argType() const { return m_argType; }
 
     /// Returns a string list containing all the possible return types (including void) for the current OverloadData.
     QStringList returnTypes() const;
@@ -133,7 +133,7 @@ public:
 
 private:
     OverloadData(OverloadData *headOverloadData, const AbstractMetaFunction *func,
-                 const AbstractMetaType *argType, int argPos);
+                 const AbstractMetaType &argType, int argPos);
 
     void addOverload(const AbstractMetaFunction *func);
     OverloadData *addOverloadData(const AbstractMetaFunction *func, const AbstractMetaArgument *arg);
@@ -147,7 +147,7 @@ private:
     int m_minArgs;
     int m_maxArgs;
     int m_argPos;
-    const AbstractMetaType *m_argType;
+    AbstractMetaType m_argType;
     QString m_argTypeReplaced;
     MetaFunctionList m_overloads;
 

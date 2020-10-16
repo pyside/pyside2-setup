@@ -138,15 +138,15 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                 int i = 1;
                 const AbstractMetaArgumentList &arguments = func->arguments();
                 for (AbstractMetaArgument *arg : arguments) {
-                    if (!arg->type()->isPrimitive()) {
+                    if (!arg->type().isPrimitive()) {
                         query += QLatin1String("/../param[") + QString::number(i)
                                  + QLatin1String("]/type/ref[text()=\"")
-                                 + arg->type()->cppSignature().toHtmlEscaped()
+                                 + arg->type().cppSignature().toHtmlEscaped()
                                  + QLatin1String("\"]/../..");
                     } else {
                         query += QLatin1String("/../param[") + QString::number(i)
                                  + QLatin1String("]/type[text(), \"")
-                                 + arg->type()->cppSignature().toHtmlEscaped()
+                                 + arg->type().cppSignature().toHtmlEscaped()
                                  + QLatin1String("\"]/..");
                     }
                     ++i;

@@ -46,8 +46,6 @@ using AbstractMetaEnumList = QVector<AbstractMetaEnum *>;
 using AbstractMetaEnumValueList = QVector<AbstractMetaEnumValue *>;
 using AbstractMetaFieldList = QVector<AbstractMetaField *>;
 using AbstractMetaFunctionList = QVector<AbstractMetaFunction *>;
-using AbstractMetaTypeCPtr = QSharedPointer<const AbstractMetaType>;
-using AbstractMetaTypeList = QVector<AbstractMetaType *>;
-using AbstractMetaTypeCList = QVector<const AbstractMetaType *>;
+using AbstractMetaTypeList = QVector<AbstractMetaType>;
 
 #endif // ABSTRACTMETALANG_TYPEDEFS_H
