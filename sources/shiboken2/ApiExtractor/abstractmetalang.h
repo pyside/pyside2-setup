@@ -294,7 +294,9 @@ public:
         SmartPointerPattern,
         VarargsPattern,
         ArrayPattern,
-        VoidPattern // Plain "void", no "void *" or similar.
+        VoidPattern,            // Plain "void", no "void *" or similar.
+        TemplateArgument,       // 'T' in std::array<T,2>
+        NonTypeTemplateArgument // '2' in in std::array<T,2>
     };
     Q_ENUM(TypeUsagePattern)
 
