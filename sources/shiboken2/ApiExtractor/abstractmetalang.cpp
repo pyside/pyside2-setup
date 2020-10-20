@@ -312,9 +312,6 @@ QString AbstractMetaType::pythonSignature() const
 
 AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() const
 {
-    if (m_referenceType == RValueReference)
-        return InvalidPattern;
-
     if (m_typeEntry->isTemplateArgument())
         return TemplateArgument;
 
