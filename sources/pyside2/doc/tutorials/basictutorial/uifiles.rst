@@ -1,5 +1,5 @@
-Using `.ui` Files (`QUiLoader` and `pyside2-uic`)
-*************************************************
+Using `.ui` files from Designer or QtCreator with `QUiLoader` and `pyside2-uic`
+*******************************************************************************
 
 This page describes the use of Qt Creator to create graphical
 interfaces for your Qt for Python project.
@@ -13,8 +13,9 @@ At Qt Creator, create a new Qt Design Form, choose "Main Window" for template.
 And save as `mainwindow.ui`.
 Add a `QPushButton` to the center of the centralwidget.
 
-Your file (mainwindow.ui) should look something like this:
-::
+Your file ``mainwindow.ui`` should look something like this:
+
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
     <ui version="4.0">
@@ -73,8 +74,8 @@ Your file (mainwindow.ui) should look something like this:
 
 Now we are ready to decide how to use the **UI file** from Python.
 
-Generating a Python class
-=========================
+Option A: Generating a Python class
+===================================
 
 Another option to interact with a **UI file** is to generate a Python
 class from it. This is possible thanks to the `pyside2-uic` tool.
@@ -128,8 +129,8 @@ file:
   You must run `pyside2-uic` again every time you make changes
   to the **UI file**.
 
-Loading it directly
-====================
+Option B: Loading it directly
+=============================
 
 To load the UI file directly, we will need a class from the **QtUiTools**
 module:

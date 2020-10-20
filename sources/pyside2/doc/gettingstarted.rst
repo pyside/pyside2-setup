@@ -16,7 +16,7 @@ General Requirements
 
  * **Python**: 3.5+ and 2.7
  * **Qt:** 5.12+ is recommended
- * **libclang:** The libclang library, recommended: version 6 for PySide2 5.12.
+ * **libclang:** The libclang library, recommended: version 10 for PySide2 5.15.
    Prebuilt versions of it can be `downloaded here`_.
  * **CMake:** 3.1+ is needed.
 
@@ -66,28 +66,60 @@ Other important options to consider are:
  * ``--doc-build-online``, to build documentation using the online template.
 
 Testing the installation
--------------------------
+------------------------
 
 Once the installation finishes, you will be able to execute any of our examples::
 
     python examples/widgets/widgets/tetrix.py
 
 Running Tests
---------------
+-------------
 
 Using the ``--build-tests`` option will enable us to run all the auto tests inside the project::
 
     python testrunner.py test > testlog.txt
 
 .. note:: On Windows, don't forget to have qmake in your path
-   (``set PATH=E:\Path\to\Qt\5.14\msvc2017_64\bin;%PATH%``)
+   (``set PATH=E:\Path\to\Qt\5.15\msvc2017_64\bin;%PATH%``)
 
 You can also run a specific test (for example ``qpainter_test``) by running::
 
     ctest -R qpainter_test --verbose
 
 Building the documentation
----------------------------
+--------------------------
+
+Starting from 5.15, there are two options to build the documentation:
+
+1. Building rst-only documentation (no API)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The process of parsing Qt headers to generate the PySide API documentation can take several
+minutes, this means that modifying a specific section of the rst files we currently have, might
+become a hard task.
+
+For this, you can install ``sphinx`` on a virtual environment, and execute the following command::
+
+    python setup.py build_rst_docs
+
+which will generate a ``html/`` directory with the following structure::
+
+    html
+    └── pyside2
+        ├── index.html
+        ├── ...
+        └── shiboken2
+            ├── index.html
+            └── ...
+
+so you can open the main page ``html/pyside2/index.html`` on your browser to check the generated
+files.
+
+This is useful when updating the general sections of the documentation, adding tutorials,
+modifying the build instructions, and more.
+
+2. Building the documentation (rst + API)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The documentation is being generated using **qdoc** to get the API information, and also **sphinx**
 for the local Python related notes.
@@ -152,7 +184,7 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 * ``create_changelog.py``: Script used to create the CHANGELOG that you can find in the ``dist/``
   directory. Usage::
 
-    python create_changelog.py -r 5.14.1 -v v5.14.0..5.14 -t bug-fix
+    python create_changelog.py -r 5.15.1 -v v5.15.0..5.15 -t bug-fix
 
 * ``debug_windows.py``: This script can be used to find out why PySide2 modules
   fail to load with various DLL errors like Missing DLL or Missing symbol in DLL.
@@ -174,7 +206,7 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
   regarding available modules and classses. This content is displayed in our `wiki page`_,
   and can be used as follows::
 
-    python missing_bindings.py --qt-version 5.14.1 -w all
+    python missing_bindings.py --qt-version 5.15.1 -w all
 
   Please keep in mind we rely on BeautifulSoup_ to parse the content, so you will be to install
   it besides PySide2 and PyQt5 (Including additional modules like DataVisualiztion, QtCharts,
