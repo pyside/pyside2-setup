@@ -52,7 +52,7 @@ void TestRemoveField::testRemoveField()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->fields().size(), 1);
-    const AbstractMetaField* fieldA = classA->fields().first();
+    const AbstractMetaField *fieldA = classA->fields().constFirst();
     QVERIFY(fieldA);
     QCOMPARE(fieldA->name(), QLatin1String("fieldA"));
 }

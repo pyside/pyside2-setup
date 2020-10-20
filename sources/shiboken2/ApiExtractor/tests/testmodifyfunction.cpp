@@ -303,15 +303,15 @@ void TestModifyFunction::testGlobalFunctionModification()
 
     FunctionModificationList mods = TypeDatabase::instance()->functionModifications(QLatin1String("function(A*)"));
     QCOMPARE(mods.count(), 1);
-    QVector<ArgumentModification> argMods = mods.first().argument_mods;
+    QVector<ArgumentModification> argMods = mods.constFirst().argument_mods;
     QCOMPARE(argMods.count(), 1);
-    ArgumentModification argMod = argMods.first();
+    ArgumentModification argMod = argMods.constFirst();
     QCOMPARE(argMod.replacedDefaultExpression, QLatin1String("A()"));
 
-    const AbstractMetaFunction* func = builder->globalFunctions().first();
+    const AbstractMetaFunction *func = builder->globalFunctions().constFirst();
     QVERIFY(func);
     QCOMPARE(func->arguments().count(), 1);
-    const AbstractMetaArgument* arg = func->arguments().first();
+    const AbstractMetaArgument *arg = func->arguments().constFirst();
     QCOMPARE(arg->type()->cppSignature(), QLatin1String("A *"));
     QCOMPARE(arg->originalDefaultValueExpression(), QLatin1String("0"));
     QCOMPARE(arg->defaultValueExpression(), QLatin1String("A()"));

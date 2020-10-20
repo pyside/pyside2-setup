@@ -73,7 +73,7 @@ void TestAbstractMetaType::testConstCharPtrType()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     QCOMPARE(builder->globalFunctions().size(), 1);
-    AbstractMetaFunction* func = builder->globalFunctions().first();
+    AbstractMetaFunction *func = builder->globalFunctions().constFirst();
     AbstractMetaType* rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
@@ -142,11 +142,11 @@ void TestAbstractMetaType::testCharType()
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    QCOMPARE(classes.first()->package(), QLatin1String("Foo"));
+    QCOMPARE(classes.constFirst()->package(), QLatin1String("Foo"));
 
     AbstractMetaFunctionList functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
-    AbstractMetaFunction* func = functions.first();
+    AbstractMetaFunction *func = functions.constFirst();
     AbstractMetaType* rtype = func->type();
     // Test properties of const char*
     QVERIFY(rtype);
@@ -206,10 +206,10 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     QCOMPARE(classes.size(), 1);
     AbstractMetaFunctionList functions = builder->globalFunctions();
     QCOMPARE(functions.count(), 1);
-    AbstractMetaFunction* function = functions.first();
+    AbstractMetaFunction *function = functions.constFirst();
     AbstractMetaArgumentList args = function->arguments();
     QCOMPARE(args.count(), 1);
-    AbstractMetaArgument* arg = args.first();
+    AbstractMetaArgument *arg = args.constFirst();
     AbstractMetaType* metaType = arg->type();
     QCOMPARE(metaType->cppSignature(), QLatin1String("A<B >"));
 }
@@ -233,11 +233,11 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     QVERIFY(classA);
     AbstractMetaFunctionList overloads = classA->queryFunctionsByName(QLatin1String("method"));
     QCOMPARE(overloads.count(), 1);
-    AbstractMetaFunction* method = overloads.first();
+    AbstractMetaFunction* method = overloads.constFirst();
     QVERIFY(method);
     AbstractMetaArgumentList args = method->arguments();
     QCOMPARE(args.count(), 1);
-    AbstractMetaArgument* arg = args.first();
+    AbstractMetaArgument* arg = args.constFirst();
     AbstractMetaType* metaType = arg->type();
     QCOMPARE(metaType->cppSignature(), QLatin1String("A"));
     QVERIFY(metaType->isValue());

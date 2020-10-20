@@ -81,12 +81,13 @@ void TestFunctionTag::testRenameGlobalFunction()
     QVERIFY(func);
 
     QCOMPARE(builder->globalFunctions().size(), 1);
-    const AbstractMetaFunction* metaFunc = builder->globalFunctions().first();
+    const AbstractMetaFunction *metaFunc = builder->globalFunctions().constFirst();
 
     QVERIFY(metaFunc);
     QCOMPARE(metaFunc->modifications().size(), 1);
-    QVERIFY(metaFunc->modifications().first().isRenameModifier());
-    QCOMPARE(metaFunc->modifications().first().renamedTo(), QLatin1String("smooth"));
+    QVERIFY(metaFunc->modifications().constFirst().isRenameModifier());
+    QCOMPARE(metaFunc->modifications().constFirst().renamedTo(),
+             QLatin1String("smooth"));
 
     QCOMPARE(metaFunc->name(), QLatin1String("smooth"));
     QCOMPARE(metaFunc->originalName(), QLatin1String("global_function_with_ugly_name"));

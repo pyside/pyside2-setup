@@ -63,7 +63,8 @@ void TestRemoveImplConv::testRemoveImplConv()
     QVERIFY(classC);
     AbstractMetaFunctionList implConv = classC->implicitConversions();
     QCOMPARE(implConv.count(), 1);
-    QCOMPARE(implConv.first()->arguments().first()->type()->typeEntry(), classB->typeEntry());
+    QCOMPARE(implConv.constFirst()->arguments().constFirst()->type()->typeEntry(),
+             classB->typeEntry());
 }
 
 QTEST_APPLESS_MAIN(TestRemoveImplConv)
