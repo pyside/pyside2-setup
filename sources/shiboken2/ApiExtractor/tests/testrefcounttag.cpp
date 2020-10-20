@@ -56,7 +56,7 @@ void TestRefCountTag::testReferenceCountTag()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("keepObject"));
     QVERIFY(func);
-    ReferenceCount refCount = func->modifications().first().argument_mods.first().referenceCounts.first();
+    ReferenceCount refCount = func->modifications().constFirst().argument_mods.constFirst().referenceCounts.constFirst();
     QCOMPARE(refCount.action, ReferenceCount::Add);
 }
 
@@ -89,7 +89,7 @@ void TestRefCountTag::testWithApiVersion()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("keepObject"));
     QVERIFY(func);
-    ReferenceCount refCount = func->modifications().first().argument_mods.first().referenceCounts.first();
+    ReferenceCount refCount = func->modifications().constFirst().argument_mods.constFirst().referenceCounts.constFirst();
     QCOMPARE(refCount.action, ReferenceCount::Add);
 
     QCOMPARE(func->modifications().size(), 1);

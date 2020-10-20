@@ -1988,14 +1988,13 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
 {
     Q_ASSERT(!typeInfo.name.isEmpty());
     TypeDatabase* typeDb = TypeDatabase::instance();
-    TypeEntry* type;
 
     QString typeName = typeInfo.name;
 
     if (typeName == QLatin1String("void"))
         return AbstractMetaType::createVoid();
 
-    type = typeDb->findType(typeName);
+    TypeEntry *type = typeDb->findType(typeName);
     if (!type)
         type = typeDb->findFlagsType(typeName);
 
@@ -2056,6 +2055,8 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateType(const AddedFunction:
             metaType->addInstantiation(metaArgType);
         }
         metaType->setTypeUsagePattern(AbstractMetaType::ContainerPattern);
+    } else {
+        metaType->decideUsagePattern();
     }
 
     return metaType;
@@ -2376,6 +2377,7 @@ AbstractMetaType *AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo
         }
     }
 
+    Q_ASSERT(metaType->typeUsagePattern() != AbstractMetaType::InvalidPattern);
     return metaType.take();
 }
 

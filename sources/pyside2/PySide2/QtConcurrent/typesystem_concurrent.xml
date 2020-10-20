@@ -54,4 +54,18 @@
     </extra-includes>
   </namespace-type>
 
+  <typedef-type name="QFutureVoid" source="QFuture&lt;void&gt;" disable-wrapper="yes">
+      <include file-name="QtCore/qfuture.h" location="global"/>
+      <modify-function signature="isResultReadyAt(int) const" remove="all"/>
+  </typedef-type>
+  <typedef-type name="QFutureQString" source="QFuture&lt;QString&gt;" disable-wrapper="yes">
+      <include file-name="QtCore/qfuture.h" location="global"/>
+  </typedef-type>
+  <typedef-type name="QFutureWatcherVoid" source="QFutureWatcher&lt;void&gt;">
+      <include file-name="QtCore/qfuturewatcher.h" location="global"/>
+  </typedef-type>
+  <typedef-type name="QFutureWatcherQString" source="QFutureWatcher&lt;QString&gt;">
+      <include file-name="QtCore/qfuturewatcher.h" location="global"/>
+  </typedef-type>
+
 </typesystem>

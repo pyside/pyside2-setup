@@ -52,7 +52,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
+    const AbstractMetaArgument *arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg->type()->isArray());
     QCOMPARE(arg->type()->arrayElementCount(), 3);
     QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
@@ -131,7 +131,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     AbstractMetaEnumValue *nvalues = classA->findEnumValue(QLatin1String("NValues"));
     QVERIFY(nvalues);
 
-    const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
+    const AbstractMetaArgument *arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg->type()->isArray());
     QCOMPARE(arg->type()->arrayElementCount(), nvalues->value().value());
     QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));
@@ -157,12 +157,12 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    AbstractMetaEnum* someEnum = builder->globalEnums().first();
+    AbstractMetaEnum *someEnum = builder->globalEnums().constFirst();
     QVERIFY(someEnum);
     const AbstractMetaEnumValue *nvalues = someEnum->findEnumValue(QLatin1String("NValues"));
     QVERIFY(nvalues);
 
-    const AbstractMetaArgument* arg = classA->functions().last()->arguments().first();
+    const AbstractMetaArgument *arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg->type()->isArray());
     QCOMPARE(arg->type()->arrayElementCount(), nvalues->value().value());
     QCOMPARE(arg->type()->arrayElementType()->name(), QLatin1String("double"));

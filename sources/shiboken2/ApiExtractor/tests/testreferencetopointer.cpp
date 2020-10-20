@@ -51,7 +51,7 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
     QVERIFY(classB);
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("dummy"));
     QVERIFY(func);
-    QCOMPARE(func->arguments().first()->type()->minimalSignature(), QLatin1String("A*&"));
+    QCOMPARE(func->arguments().constFirst()->type()->minimalSignature(), QLatin1String("A*&"));
 }
 
 QTEST_APPLESS_MAIN(TestReferenceToPointer)

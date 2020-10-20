@@ -148,11 +148,15 @@ void TestConversionOperator::testConversionOperatorReturningReference()
     QCOMPARE(classA->functions().count(), 2);
     QCOMPARE(classB->functions().count(), 3);
     QCOMPARE(classA->externalConversionOperators().count(), 1);
-    QCOMPARE(classA->externalConversionOperators().first()->type()->cppSignature(), QLatin1String("A"));
-    QCOMPARE(classA->externalConversionOperators().first()->ownerClass()->name(), QLatin1String("B"));
+    QCOMPARE(classA->externalConversionOperators().constFirst()->type()->cppSignature(),
+             QLatin1String("A"));
+    QCOMPARE(classA->externalConversionOperators().constFirst()->ownerClass()->name(),
+             QLatin1String("B"));
     QCOMPARE(classA->implicitConversions().count(), 1);
-    QCOMPARE(classA->implicitConversions().first()->type()->cppSignature(), QLatin1String("A"));
-    QCOMPARE(classA->implicitConversions().first()->ownerClass()->name(), QLatin1String("B"));
+    QCOMPARE(classA->implicitConversions().constFirst()->type()->cppSignature(),
+             QLatin1String("A"));
+    QCOMPARE(classA->implicitConversions().constFirst()->ownerClass()->name(),
+             QLatin1String("B"));
 }
 
 void TestConversionOperator::testConversionOperatorReturningConstReference()
@@ -178,11 +182,15 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
     QCOMPARE(classA->functions().count(), 2);
     QCOMPARE(classB->functions().count(), 3);
     QCOMPARE(classA->externalConversionOperators().count(), 1);
-    QCOMPARE(classA->externalConversionOperators().first()->type()->cppSignature(), QLatin1String("A"));
-    QCOMPARE(classA->externalConversionOperators().first()->ownerClass()->name(), QLatin1String("B"));
+    QCOMPARE(classA->externalConversionOperators().constFirst()->type()->cppSignature(),
+             QLatin1String("A"));
+    QCOMPARE(classA->externalConversionOperators().constFirst()->ownerClass()->name(),
+             QLatin1String("B"));
     QCOMPARE(classA->implicitConversions().count(), 1);
-    QCOMPARE(classA->implicitConversions().first()->type()->cppSignature(), QLatin1String("A"));
-    QCOMPARE(classA->implicitConversions().first()->ownerClass()->name(), QLatin1String("B"));
+    QCOMPARE(classA->implicitConversions().constFirst()->type()->cppSignature(),
+             QLatin1String("A"));
+    QCOMPARE(classA->implicitConversions().constFirst()->ownerClass()->name(),
+             QLatin1String("B"));
 }
 
 QTEST_APPLESS_MAIN(TestConversionOperator)

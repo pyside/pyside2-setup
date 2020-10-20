@@ -115,15 +115,15 @@ namespace Namespace {
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("foo"));
-    AbstractMetaType* argType = func->arguments().first()->type();
+    AbstractMetaType* argType = func->arguments().constFirst()->type();
     QCOMPARE(argType->instantiations().count(), 1);
     QCOMPARE(argType->typeEntry()->qualifiedCppName(), QLatin1String("QList"));
 
-    const AbstractMetaType* instance1 = argType->instantiations().first();
+    const AbstractMetaType* instance1 = argType->instantiations().constFirst();
     QCOMPARE(instance1->instantiations().count(), 1);
     QCOMPARE(instance1->typeEntry()->qualifiedCppName(), QLatin1String("Namespace::A"));
 
-    const AbstractMetaType* instance2 = instance1->instantiations().first();
+    const AbstractMetaType* instance2 = instance1->instantiations().constFirst();
     QCOMPARE(instance2->instantiations().count(), 0);
     QCOMPARE(instance2->typeEntry()->qualifiedCppName(), QLatin1String("Namespace::E1"));
 }
@@ -147,9 +147,10 @@ void func(List<int> arg) {}
     AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
-    AbstractMetaFunction* func = globalFuncs.first();
+    AbstractMetaFunction *func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>)"));
-    QCOMPARE(func->arguments().first()->type()->cppSignature(), QLatin1String("List<int >"));
+    QCOMPARE(func->arguments().constFirst()->type()->cppSignature(),
+             QLatin1String("List<int >"));
 }
 
 void TestTemplates::testTemplatePointerAsArgument()
@@ -171,9 +172,10 @@ void func(List<int>* arg) {}
     AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
-    AbstractMetaFunction* func = globalFuncs.first();
+    AbstractMetaFunction* func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>*)"));
-    QCOMPARE(func->arguments().first()->type()->cppSignature(), QLatin1String("List<int > *"));
+    QCOMPARE(func->arguments().constFirst()->type()->cppSignature(),
+             QLatin1String("List<int > *"));
 }
 
 void TestTemplates::testTemplateReferenceAsArgument()
@@ -195,9 +197,10 @@ void func(List<int>& arg) {}
     AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
-    AbstractMetaFunction* func = globalFuncs.first();
+    AbstractMetaFunction* func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>&)"));
-    QCOMPARE(func->arguments().first()->type()->cppSignature(), QLatin1String("List<int > &"));
+    QCOMPARE(func->arguments().constFirst()->type()->cppSignature(),
+             QLatin1String("List<int > &"));
 }
 
 void TestTemplates::testTemplateParameterFixup()
@@ -223,7 +226,7 @@ struct List {
     const AbstractMetaClassList templates = builder->templates();
 
     QCOMPARE(templates.count(), 1);
-    const AbstractMetaClass *list = templates.first();
+    const AbstractMetaClass *list = templates.constFirst();
     // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
     const AbstractMetaFunction *append = list->findFunction(QStringLiteral("append"));
     QVERIFY(append);
@@ -269,7 +272,7 @@ struct FooBars : public ListContainer<FooBar> {};
     const AbstractMetaClass* foobars = AbstractMetaClass::findClass(classes, QLatin1String("FooBars"));
     QCOMPARE(foobars->functions().count(), 4);
 
-    const AbstractMetaClass* lc = templates.first();
+    const AbstractMetaClass *lc = templates.constFirst();
     QCOMPARE(lc->functions().count(), 2);
 }
 
@@ -391,7 +394,7 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     QVERIFY(one->hasTemplateBaseClassInstantiations());
     AbstractMetaTypeList instantiations = one->templateBaseClassInstantiations();
     QCOMPARE(instantiations.count(), 1);
-    const AbstractMetaType* inst = instantiations.first();
+    const AbstractMetaType *inst = instantiations.constFirst();
     QVERIFY(inst);
     QVERIFY(!inst->isEnum());
     QVERIFY(!inst->typeEntry()->isEnum());

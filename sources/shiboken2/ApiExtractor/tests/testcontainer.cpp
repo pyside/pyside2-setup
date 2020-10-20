@@ -91,7 +91,8 @@ void TestContainer::testListOfValueType()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->templateBaseClassInstantiations().count(), 1);
-    const AbstractMetaType* templateInstanceType = classA->templateBaseClassInstantiations().first();
+    const AbstractMetaType *templateInstanceType =
+        classA->templateBaseClassInstantiations().constFirst();
     QVERIFY(templateInstanceType);
 
     QCOMPARE(templateInstanceType->indirections(), 0);

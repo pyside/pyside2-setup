@@ -79,7 +79,7 @@ void TestCodeInjections::testReadFile()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
-    QString code = classA->typeEntry()->codeSnips().first().code();
+    QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.indexOf(expected) != -1);
     code = classA->typeEntry()->conversionRule();
     QVERIFY(code.indexOf(expected) != -1);

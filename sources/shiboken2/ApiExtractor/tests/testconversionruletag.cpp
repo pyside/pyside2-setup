@@ -179,7 +179,8 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
 
-    CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().first();
+    CustomConversion::TargetToNativeConversion *toNative =
+        conversion->targetToNativeConversions().constFirst();
     QVERIFY(toNative);
     QCOMPARE(toNative->sourceTypeName(), QLatin1String("TargetDate"));
     QVERIFY(toNative->isCustomType());
@@ -241,7 +242,7 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     QVERIFY(conversion->hasTargetToNativeConversions());
     QCOMPARE(conversion->targetToNativeConversions().size(), 1);
 
-    CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().first();
+    CustomConversion::TargetToNativeConversion* toNative = conversion->targetToNativeConversions().constFirst();
     QVERIFY(toNative);
     QCOMPARE(toNative->conversion().trimmed(),
              QLatin1String(targetToNativeExpected));

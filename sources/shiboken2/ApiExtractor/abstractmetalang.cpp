@@ -315,8 +315,11 @@ QString AbstractMetaType::pythonSignature() const
 
 AbstractMetaType::TypeUsagePattern AbstractMetaType::determineUsagePattern() const
 {
-    if (m_typeEntry->isTemplateArgument() || m_referenceType == RValueReference)
-        return InvalidPattern;
+    if (m_typeEntry->isTemplateArgument())
+        return TemplateArgument;
+
+    if (m_typeEntry->type() == TypeEntry::ConstantValueType)
+        return NonTypeTemplateArgument;
 
     if (m_typeEntry->isPrimitive() && (actualIndirections() == 0 || passByConstRef()))
         return PrimitivePattern;

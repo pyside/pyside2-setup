@@ -68,24 +68,24 @@ void TestNestedTypes::testNestedTypesModifications()
     QVERIFY(ins);
     QCOMPARE(ins->functions().count(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().count(), 1);
-    CodeSnip snip = ins->typeEntry()->codeSnips().first();
+    CodeSnip snip = ins->typeEntry()->codeSnips().constFirst();
     QCOMPARE(snip.code().trimmed(), QLatin1String("custom_code1();"));
 
-    AbstractMetaFunction* addedFunc = ins->functions().first();
+    AbstractMetaFunction *addedFunc = ins->functions().constFirst();
     QVERIFY(addedFunc->isUserAdded());
     QCOMPARE(addedFunc->visibility(), AbstractMetaFunction::Public);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
     QCOMPARE(addedFunc->type()->minimalSignature(), QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
 
     QCOMPARE(addedFunc->modifications().size(), 1);
-    QVERIFY(addedFunc->modifications().first().isCodeInjection());
-    snip = addedFunc->modifications().first().snips.first();
+    QVERIFY(addedFunc->modifications().constFirst().isCodeInjection());
+    snip = addedFunc->modifications().constFirst().snips.constFirst();
     QCOMPARE(snip.code().trimmed(), QLatin1String("custom_code2();"));
 
     const AbstractMetaClass *sc = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));
     QVERIFY(ins);
     QCOMPARE(sc->functions().count(), 2); // default constructor and removed method
-    AbstractMetaFunction* removedFunc = sc->functions().last();
+    AbstractMetaFunction *removedFunc = sc->functions().constLast();
     QVERIFY(removedFunc->isModifiedRemoved());
 }
 

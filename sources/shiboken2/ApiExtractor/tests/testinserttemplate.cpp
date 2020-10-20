@@ -53,7 +53,7 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 1);
-    QString code = classA->typeEntry()->codeSnips().first().code();
+    QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.contains(QLatin1String("code template content")));
 }
 
@@ -79,7 +79,7 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
     QCOMPARE(module->name(), QLatin1String("Foo"));
     QVERIFY(module);
     QCOMPARE(module->codeSnips().count(), 1);
-    QString code = module->codeSnips().first().code().trimmed();
+    QString code = module->codeSnips().constFirst().code().trimmed();
     QVERIFY(code.contains(QLatin1String("code template content")));
 }
 
