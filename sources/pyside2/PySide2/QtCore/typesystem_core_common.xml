@@ -2177,29 +2177,41 @@
         <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qlibraryinfo_build"/>
     </modify-function>
   </object-type>
-  <object-type name="QMutexLocker" copyable="no">
-    <!-- PYSIDE-1271: Creating locking capable objects inside sections that
-    contain allow-thread, require the classes to also allow having threads.
-    The lack of the option here, was generating a deadlock when running a
-    QMutexLocker inside a QThread::run.
-    The reason of having this change is due to the new way of handling the GIL
-    in the Qt calls on the whole PySide2 module, that started on 5.14.2-->
-    <modify-function signature="QMutexLocker(QBasicMutex*)" allow-thread="yes">
+  <namespace-type name="QtCoreHelper" visible="no">
+    <object-type name="QMutexLocker" copyable="no">
+      <!-- PYSIDE-1271: Creating locking capable objects inside sections that
+      contain allow-thread, require the classes to also allow having threads.
+      The lack of the option here, was generating a deadlock when running a
+      QMutexLocker inside a QThread::run.
+      The reason of having this change is due to the new way of handling the GIL
+      in the Qt calls on the whole PySide2 module, that started on 5.14.2-->
+      <modify-function signature="QMutexLocker(QMutex*)" allow-thread="yes">
         <modify-argument index="1">
-            <reference-count action="set" variable-name="mutex()const0"/>
+          <reference-count action="set" variable-name="mutex()const0"/>
         </modify-argument>
-    </modify-function>
-    <modify-function signature="relock()" allow-thread="yes"/>
-    <modify-function signature="mutex()const">
-      <modify-argument index="return">
-        <reference-count action="set"/>
-      </modify-argument>
-    </modify-function>
-    <add-function signature="__enter__()"/>
-    <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
-        <inject-code file="../glue/qtcore.cpp" snippet="unlock"/>
-    </add-function>
-  </object-type>
+      </modify-function>
+      <modify-function signature="QMutexLocker(QRecursiveMutex*)" allow-thread="yes">
+        <modify-argument index="1">
+          <reference-count action="set" variable-name="recursiveMutex()const0"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="relock()" allow-thread="yes"/>
+      <modify-function signature="mutex()const">
+        <modify-argument index="return">
+          <reference-count action="set"/>
+        </modify-argument>
+      </modify-function>
+      <modify-function signature="recursiveMutex()const">
+        <modify-argument index="return">
+          <reference-count action="set"/>
+        </modify-argument>
+      </modify-function>
+      <add-function signature="__enter__()"/>
+      <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
+          <inject-code file="../glue/qtcore.cpp" snippet="unlock"/>
+      </add-function>
+    </object-type>
+  </namespace-type>
 
   <!-- Qt5 addition -->
   <object-type name="QBasicMutex">
@@ -2208,11 +2220,13 @@
   </object-type>
 
   <object-type name="QMutex">
-    <enum-type name="RecursionMode"/>
     <modify-function signature="lock()" allow-thread="yes"/>
     <modify-function signature="tryLock(int)" allow-thread="yes"/>
   </object-type>
-  <object-type name="QRecursiveMutex" since="5.14"/>
+  <object-type name="QRecursiveMutex" since="5.14">
+    <modify-function signature="lock()" allow-thread="yes"/>
+    <modify-function signature="tryLock(int)" allow-thread="yes"/>
+  </object-type>
   <object-type name="QRandomGenerator" since="5.10">
       <modify-function signature="global()" rename="global_"/>
       <modify-function signature="operator()()" remove="all"/>

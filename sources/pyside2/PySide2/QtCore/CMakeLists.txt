@@ -95,7 +95,6 @@ ${QtCore_GEN_DIR}/qmimedatabase_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimetype_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelindex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
-${QtCore_GEN_DIR}/qmutexlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qobject_wrapper.cpp
 ${QtCore_GEN_DIR}/qoperatingsystemversion_wrapper.cpp
 ${QtCore_GEN_DIR}/qparallelanimationgroup_wrapper.cpp
@@ -137,6 +136,7 @@ ${QtCore_GEN_DIR}/qstringlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qt_wrapper.cpp
+${QtCore_GEN_DIR}/qtcorehelper_qmutexlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporarydir_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporaryfile_wrapper.cpp
 ${QtCore_GEN_DIR}/qtextboundaryfinder_wrapper.cpp
@@ -173,6 +173,9 @@ ${SPECIFIC_OS_FILES}
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
 
+configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"
+               "${QtCore_BINARY_DIR}/QtCore_global.post.h" @ONLY)
+
 set(QtCore_glue_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"
@@ -184,6 +187,7 @@ configure_file("${QtCore_SOURCE_DIR}/typesystem_core.xml.in"
 set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         ${QtCore_BINARY_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
+                        ${pyside2_SOURCE_DIR}
                         ${libpyside_SOURCE_DIR}
                         )
 set(QtCore_libraries  pyside2
@@ -200,3 +204,4 @@ create_pyside_module(NAME QtCore
                      GLUE_SOURCES QtCore_glue_sources
                      )
 
+install(FILES ${pyside2_SOURCE_DIR}/qtcorehelper.h DESTINATION include/PySide2/QtCore/)
