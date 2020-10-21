@@ -14,6 +14,7 @@ ${QtRemoteObjects_GEN_DIR}/qremoteobjectregistryhost_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjectreplica_wrapper.cpp
 # ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjectsettingsstore_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qremoteobjectsourcelocationinfo_wrapper.cpp
 
 # module is always needed
 ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_module_wrapper.cpp

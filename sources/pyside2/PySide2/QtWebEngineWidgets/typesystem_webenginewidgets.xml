@@ -64,6 +64,7 @@
   <value-type name="QWebEngineHistoryItem"/>
 
   <object-type name="QWebEnginePage">
+    <enum-type name="LifecycleState"/>
     <enum-type name="WebAction"/>
     <enum-type name="FindFlag" flags="FindFlags"/>
     <enum-type name="WebWindowType"/>

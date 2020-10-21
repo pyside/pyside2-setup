@@ -43,6 +43,7 @@
 <typesystem package="PySide2.Qt3DRender">
     <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
     <namespace-type name="Qt3DRender">
+        <enum-type name="API"/>
         <object-type name="PropertyReaderInterface"/>
         <object-type name="QAbstractFunctor"/>
         <object-type name="QAbstractLight">
@@ -215,6 +216,7 @@
         </object-type>
         <object-type name="QShaderData"/>
         <object-type name="QShaderProgram">
+            <enum-type name="Format"/>
             <enum-type name="ShaderType"/>
             <enum-type name="Status"/>
         </object-type>
