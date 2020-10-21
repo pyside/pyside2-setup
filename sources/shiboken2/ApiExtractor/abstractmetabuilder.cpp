@@ -1278,7 +1278,9 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     if (!retType)
         return;
 
-    metaFunction->replaceType(new AbstractMetaType(retType));
+    auto metaType = new AbstractMetaType(retType);
+    metaType->decideUsagePattern();
+    metaFunction->replaceType(metaType);
 }
 
 AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
