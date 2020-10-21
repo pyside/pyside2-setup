@@ -198,7 +198,7 @@
         </object-type>
         <object-type name="QShaderData"/>
         <object-type name="QShaderProgram">
-            <enum-type name="Format" since="6.0"/>
+            <enum-type name="Format"/>
             <enum-type name="ShaderType"/>
             <enum-type name="Status"/>
         </object-type>

@@ -257,7 +257,9 @@
       </object-type>
       <object-type name="QSplineSeries" since="5.7"/>
       <object-type name="QStackedBarSeries" since="5.7"/>
-      <object-type name="QValueAxis" since="5.7"/>
+      <object-type name="QValueAxis" since="5.7">
+          <enum-type name="TickType"/>
+      </object-type>
       <object-type name="QVBarModelMapper" since="5.7"/>
       <object-type name="QVBoxPlotModelMapper" since="5.7"/>
       <object-type name="QVCandlestickModelMapper" since="5.7"/>

@@ -71,4 +71,5 @@
         <!-- protected: <enum-type name="ConstructorType"/>  -->
     </object-type>
     <object-type name="QRemoteObjectSettingsStore"/>
+    <value-type name="QRemoteObjectSourceLocationInfo"/>
 </typesystem>

@@ -6,10 +6,21 @@ Requirements
 
 Before you can install |project|, first you must install the following software:
 
- * Python 2.7 or 3.5+,
+ * Python 2.7 or 3.5+ (we recommend 3.5+),
  * We recommend using a virtual environment, such as
    `venv <https://docs.python.org/3/library/venv.html>`_ or
    `virtualenv <https://virtualenv.pypa.io/en/latest>`_
+
+Creating and activating an environment
+--------------------------------------
+
+You can do this by running the following on a terminal::
+
+  $ python -m venv env/       # Your binary is maybe called 'python3'
+  $ source env/bin/activate   # for Linux and macOS
+  $ env\Scripts\activate.bat  # for Windows
+
+
 
 Installation
 ------------
@@ -17,11 +28,15 @@ Installation
 Now you are ready to install the |project| packages using ``pip``.
 From the terminal, run the following command::
 
-    pip install PySide2 # For the latest version on PyPi
+    # For the latest version on PyPi
+    pip install PySide2
+
+    # For a specific version
+    pip install PySide2==5.15.0
 
 or::
 
-    pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.14/latest pyside2 --trusted-host download.qt.io
+    pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.15/latest pyside2 --trusted-host download.qt.io
 
 Test your Installation
 ----------------------
@@ -32,20 +47,16 @@ constructs to print version information::
     import PySide2.QtCore
 
     # Prints PySide2 version
-    # e.g. 5.11.1a1
     print(PySide2.__version__)
 
-    # Gets a tuple with each version component
-    # e.g. (5, 11, 1, 'a', 1)
-    print(PySide2.__version_info__)
-
     # Prints the Qt version used to compile PySide2
-    # e.g. "5.11.2"
     print(PySide2.QtCore.__version__)
 
-    # Gets a tuple with each version components of Qt used to compile PySide2
-    # e.g. (5, 11, 2)
-    print(PySide2.QtCore.__version_info__)
+.. note::
+
+    As it happened in 5.14.2, PySide had a couple of new releases to fix
+    issues in 5.14.2, adding yet another version level. In that case, you
+    will have different versions being shown for Qt and PySide.
 
 Create a Simple Application
 ---------------------------
@@ -73,8 +84,8 @@ guide you through the development process:
                 self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
 
                 self.button = QtWidgets.QPushButton("Click me!")
-                self.text = QtWidgets.QLabel("Hello World")
-                self.text.setAlignment(QtCore.Qt.AlignCenter)
+                self.text = QtWidgets.QLabel("Hello World",
+                                             alignment=QtCore.Qt.AlignCenter)
 
                 self.layout = QtWidgets.QVBoxLayout()
                 self.layout.addWidget(self.text)
@@ -83,7 +94,7 @@ guide you through the development process:
 
                 self.button.clicked.connect(self.magic)
 
-
+            @QtCore.Slot()
             def magic(self):
                 self.text.setText(random.choice(self.hello))
 

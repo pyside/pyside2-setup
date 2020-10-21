@@ -12,8 +12,8 @@ General Requirements
 ^^^^^^^^^^^^^^^^^^^^
 
  * **Python**: 3.5+ and 2.7
- * **Qt:** 5.12+ is recommended
- * **libclang:** The libclang library, recommended: version 6 for Shiboken2 5.12.
+ * **Qt:** 5.12+ (5.15 is recommended)
+ * **libclang:** The libclang library, recommended: version 10 for Shiboken2 5.15.
    Prebuilt versions of it can be `downloaded here`_.
  * **CMake:** 3.1+ is needed.
 
@@ -24,14 +24,25 @@ Simple build
 
 If you need only Shiboken Generator, a simple build run would look like this::
 
+    # For the required libraries (this will also build the shiboken2 python module)
     python setup.py install --qmake=/path/to/qmake \
                             --build-tests \
-                            --parallel=8 \
+                            --verbose-build \
+                            --internal-build-type=shiboken2
+
+    # For the executable
+    python setup.py install --qmake=/path/to/qmake \
+                            --build-tests \
                             --verbose-build \
                             --internal-build-type=shiboken2-generator
 
 The same can be used for the module, changing the value of ``internal-build-type`` to
 ``shiboken2-module``.
+
+.. warning:: If you are planning to use PySide too, for examples like
+    'scriptableapplication' you need to have build it as well.  The main issue is
+    that your PySide and Shiboken needs to be build using the same dependencies
+    from Qt and libclang.
 
 Using the wheels
 ----------------
