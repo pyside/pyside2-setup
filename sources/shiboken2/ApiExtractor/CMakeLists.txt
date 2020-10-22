@@ -10,6 +10,7 @@ apiextractor.cpp
 abstractmetabuilder.cpp
 abstractmetatype.cpp
 abstractmetalang.cpp
+documentation.cpp
 fileout.cpp
 graph.cpp
 messages.cpp

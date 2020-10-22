@@ -31,6 +31,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetatype.h"
+#include "documentation.h"
 #include "sourcelocation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
@@ -41,7 +42,6 @@
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QStringList>
 #include <QtCore/QSharedDataPointer>
-#include <QtCore/QMap>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -66,38 +66,6 @@ struct ArgumentOwner;
 struct FieldModification;
 struct FunctionModification;
 struct ReferenceCount;
-
-class Documentation
-{
-public:
-    enum Format {
-        Native,
-        Target
-    };
-    enum Type {
-        Detailed,
-        Brief,
-        Last
-    };
-
-    Documentation() = default;
-    Documentation(const QString& value, Type t = Documentation::Detailed,
-                  Format fmt = Documentation::Native);
-
-    bool isEmpty() const;
-
-    QString value(Type t = Documentation::Detailed) const;
-    void setValue(const QString& value, Type t = Documentation::Detailed,
-                  Format fmt = Documentation::Native);
-
-    Documentation::Format format() const;
-    void setFormat(Format f);
-
-private:
-    QMap<Type, QString> m_data;
-    Format m_format = Documentation::Native;
-
-};
 
 class AbstractMetaAttributes
 {

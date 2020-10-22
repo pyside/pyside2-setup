@@ -90,49 +90,6 @@ const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
 }
 
 /*******************************************************************************
- * Documentation
- */
-
-Documentation::Documentation(const QString &value, Documentation::Type t, Documentation::Format fmt)
-{
-    setValue(value, t, fmt);
-}
-
-bool Documentation::isEmpty() const
-{
-    for (int i = 0; i < Type::Last; i++) {
-        if (!m_data.value(static_cast<Type>(i)).isEmpty())
-            return false;
-    }
-    return true;
-}
-
-QString Documentation::value(Documentation::Type t) const
-{
-    return m_data.value(t);
-}
-
-void Documentation::setValue(const QString &value, Documentation::Type t, Documentation::Format fmt)
-{
-    const QString v = value.trimmed();
-    if (v.isEmpty())
-        m_data.remove(t);
-    else
-        m_data[t] = value.trimmed();
-    m_format = fmt;
-}
-
-Documentation::Format Documentation::format() const
-{
-    return m_format;
-}
-
-void Documentation::setFormat(Documentation::Format f)
-{
-    m_format = f;
-}
-
-/*******************************************************************************
  * AbstractMetaVariable
  */
 
