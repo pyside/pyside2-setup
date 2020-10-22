@@ -499,17 +499,17 @@ static QString searchForEnumScope(const AbstractMetaClass *metaClass, const QStr
 
 // Handle QFlags<> for guessScopeForDefaultValue()
 QString ShibokenGenerator::guessScopeForDefaultFlagsValue(const AbstractMetaFunction *func,
-                                                          const AbstractMetaArgument *arg,
+                                                          const AbstractMetaArgument &arg,
                                                           const QString &value) const
 {
     // Numeric values -> "Options(42)"
     static const QRegularExpression numberRegEx(QStringLiteral("^\\d+$")); // Numbers to flags
     Q_ASSERT(numberRegEx.isValid());
     if (numberRegEx.match(value).hasMatch()) {
-        QString typeName = translateTypeForWrapperMethod(arg->type(), func->implementingClass());
-        if (arg->type().isConstant())
+        QString typeName = translateTypeForWrapperMethod(arg.type(), func->implementingClass());
+        if (arg.type().isConstant())
             typeName.remove(0, sizeof("const ") / sizeof(char) - 1);
-        switch (arg->type().referenceType()) {
+        switch (arg.type().referenceType()) {
         case NoReference:
             break;
         case LValueReference:
@@ -564,13 +564,13 @@ QString ShibokenGenerator::guessScopeForDefaultFlagsValue(const AbstractMetaFunc
  * this method should be updated, do it with care.
  */
 QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction *func,
-                                                     const AbstractMetaArgument *arg) const
+                                                     const AbstractMetaArgument &arg) const
 {
-    QString value = arg->defaultValueExpression();
+    QString value = arg.defaultValueExpression();
 
     if (value.isEmpty() || value == QLatin1String("{}")
-        || arg->hasModifiedDefaultValueExpression()
-        || isPointer(arg->type())) {
+        || arg.hasModifiedDefaultValueExpression()
+        || isPointer(arg.type())) {
         return value;
     }
 
@@ -579,23 +579,24 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
     // Do not qualify macros by class name, eg QSGGeometry(..., int t = GL_UNSIGNED_SHORT);
     static const QRegularExpression macroRegEx(QStringLiteral("^[A-Z_][A-Z0-9_]*$"));
     Q_ASSERT(macroRegEx.isValid());
-    if (arg->type().isPrimitive() && macroRegEx.match(value).hasMatch())
+    if (arg.type().isPrimitive() && macroRegEx.match(value).hasMatch())
         return value;
 
     QString prefix;
-    if (arg->type().isEnum()) {
-        if (const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(arg->type()))
+    if (arg.type().isEnum()) {
+        if (const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(arg.type()))
             prefix = resolveScopePrefix(metaEnum, value);
-    } else if (arg->type().isFlags()) {
+    } else if (arg.type().isFlags()) {
         value = guessScopeForDefaultFlagsValue(func, arg, value);
-    } else if (arg->type().typeEntry()->isValue()) {
-        const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), arg->type().typeEntry());
+    } else if (arg.type().typeEntry()->isValue()) {
+        const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(),
+                                                                          arg.type().typeEntry());
         if (enumValueRegEx.match(value).hasMatch() && value != QLatin1String("NULL"))
             prefix = resolveScopePrefix(metaClass, value);
-    } else if (arg->type().isPrimitive() && arg->type().name() == intT()) {
+    } else if (arg.type().isPrimitive() && arg.type().name() == intT()) {
         if (enumValueRegEx.match(value).hasMatch() && func->implementingClass())
             prefix = resolveScopePrefix(func->implementingClass(), value);
-    } else if (arg->type().isPrimitive()) {
+    } else if (arg.type().isPrimitive()) {
         static const QRegularExpression unknowArgumentRegEx(QStringLiteral("^(?:[A-Za-z_][\\w:]*\\()?([A-Za-z_]\\w*)(?:\\))?$")); // [PrimitiveType(] DESIREDNAME [)]
         Q_ASSERT(unknowArgumentRegEx.isValid());
         const QRegularExpressionMatch match = unknowArgumentRegEx.match(value);
@@ -705,13 +706,13 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
     if (argIndex < 0 || argIndex >= func->arguments().count())
         return false;
 
-    const AbstractMetaArgument *arg = func->arguments().at(argIndex);
-    if (isValueTypeWithCopyConstructorOnly(arg->type()))
+    const AbstractMetaArgument &arg = func->arguments().at(argIndex);
+    if (isValueTypeWithCopyConstructorOnly(arg.type()))
         return true;
 
     // Argument type is not a pointer, a None rejection should not be
     // necessary because the type checking would handle that already.
-    if (!isPointer(arg->type()))
+    if (!isPointer(arg.type()))
         return false;
     if (func->argumentRemoved(argIndex + 1))
         return false;
@@ -730,38 +731,39 @@ QString ShibokenGenerator::getFormatUnitString(const AbstractMetaFunction *func,
     QString result;
     const char objType = (incRef ? 'O' : 'N');
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument *arg : arguments) {
-        if (func->argumentRemoved(arg->argumentIndex() + 1))
+    for (const AbstractMetaArgument &arg : arguments) {
+        if (func->argumentRemoved(arg.argumentIndex() + 1))
             continue;
 
-        if (!func->typeReplaced(arg->argumentIndex() + 1).isEmpty()) {
+        const auto &type = arg.type();
+        if (!func->typeReplaced(arg.argumentIndex() + 1).isEmpty()) {
             result += QLatin1Char(objType);
-        } else if (arg->type().isObject()
-            || arg->type().isValue()
-            || arg->type().isValuePointer()
-            || arg->type().isNativePointer()
-            || arg->type().isEnum()
-            || arg->type().isFlags()
-            || arg->type().isContainer()
-            || arg->type().isSmartPointer()
-            || arg->type().referenceType() == LValueReference) {
+        } else if (arg.type().isObject()
+            || type.isValue()
+            || type.isValuePointer()
+            || type.isNativePointer()
+            || type.isEnum()
+            || type.isFlags()
+            || type.isContainer()
+            || type.isSmartPointer()
+            || type.referenceType() == LValueReference) {
             result += QLatin1Char(objType);
-        } else if (arg->type().isPrimitive()) {
+        } else if (type.isPrimitive()) {
             const auto *ptype =
-                static_cast<const PrimitiveTypeEntry *>(arg->type().typeEntry());
+                static_cast<const PrimitiveTypeEntry *>(type.typeEntry());
             if (ptype->basicReferencedTypeEntry())
                 ptype = ptype->basicReferencedTypeEntry();
             if (m_formatUnits.contains(ptype->name()))
                 result += m_formatUnits[ptype->name()];
             else
                 result += QLatin1Char(objType);
-        } else if (isCString(arg->type())) {
+        } else if (isCString(type)) {
             result += QLatin1Char('z');
         } else {
             qCWarning(lcShiboken).noquote().nospace()
                 << "Method: " << func->ownerClass()->qualifiedCppName()
                 << "::" << func->signature() << " => Arg:"
-                << arg->name() << "index: " << arg->argumentIndex()
+                << arg.name() << "index: " << arg.argumentIndex()
                 << " - cannot be handled properly. Use an inject-code to fix it!";
             result += QLatin1Char('?');
         }
@@ -1137,9 +1139,9 @@ bool ShibokenGenerator::isCppPrimitive(const AbstractMetaType &type)
     return isCppPrimitive(type.typeEntry());
 }
 
-bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument *arg)
+bool ShibokenGenerator::shouldDereferenceArgumentPointer(const AbstractMetaArgument &arg)
 {
-    return shouldDereferenceAbstractMetaTypePointer(arg->type());
+    return shouldDereferenceAbstractMetaTypePointer(arg.type());
 }
 
 bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType &metaType)
@@ -1336,9 +1338,9 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
     return result;
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument *metaArg, bool genericNumberType)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg, bool genericNumberType)
 {
-    return cpythonIsConvertibleFunction(metaArg->type(), genericNumberType);
+    return cpythonIsConvertibleFunction(metaArg.type(), genericNumberType);
 }
 
 QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClass *metaClass)
@@ -1404,16 +1406,16 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const TypeEntry *ty
 }
 
 QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
-                                          const AbstractMetaArgument *argument,
+                                          const AbstractMetaArgument &argument,
                                           Options options) const
 {
     QString modified_type;
     if (!(options & OriginalTypeDescription))
-        modified_type = func->typeReplaced(argument->argumentIndex() + 1);
+        modified_type = func->typeReplaced(argument.argumentIndex() + 1);
     QString arg;
 
     if (modified_type.isEmpty())
-        arg = translateType(argument->type(), func->implementingClass(), options);
+        arg = translateType(argument.type(), func->implementingClass(), options);
     else
         arg = modified_type.replace(QLatin1Char('$'), QLatin1Char('.'));
 
@@ -1421,15 +1423,15 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
         // "int a", "int a[]"
         const int arrayPos = arg.indexOf(QLatin1Char('['));
         if (arrayPos != -1)
-            arg.insert(arrayPos, QLatin1Char(' ') + argument->name());
+            arg.insert(arrayPos, QLatin1Char(' ') + argument.name());
         else
-            arg.append(QLatin1Char(' ') + argument->name());
+            arg.append(QLatin1Char(' ') + argument.name());
     }
 
     if ((options & Generator::SkipDefaultValues) != Generator::SkipDefaultValues &&
-        !argument->originalDefaultValueExpression().isEmpty())
+        !argument.originalDefaultValueExpression().isEmpty())
     {
-        QString default_value = argument->originalDefaultValueExpression();
+        QString default_value = argument.originalDefaultValueExpression();
         if (default_value == QLatin1String("NULL"))
             default_value = QLatin1String(NULL_PTR);
 
@@ -1445,7 +1447,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
 
 void ShibokenGenerator::writeArgument(QTextStream &s,
                                       const AbstractMetaFunction *func,
-                                      const AbstractMetaArgument *argument,
+                                      const AbstractMetaArgument &argument,
                                       Options options) const
 {
     s << argumentString(func, argument, options);
@@ -1535,11 +1537,11 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
     const AbstractMetaArgumentList arguments = func->arguments();
     int argCount = 0;
     for (auto argument : arguments) {
-        const int index = argument->argumentIndex() + 1;
+        const int index = argument.argumentIndex() + 1;
         if ((options & Generator::SkipRemovedArguments) && (func->argumentRemoved(index)))
             continue;
 
-        s << ((argCount > 0) ? ", " : "") << argument->name();
+        s << ((argCount > 0) ? ", " : "") << argument.name();
 
         if (((options & Generator::VirtualCall) == 0)
             && (!func->conversionRule(TypeSystem::NativeCode, index).isEmpty()
@@ -1718,7 +1720,7 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                                     ? TypeSystem::NativeCode : TypeSystem::TargetLangCode;
     int removed = 0;
     for (int i = 0; i < func->arguments().size(); ++i) {
-        const AbstractMetaArgument *arg = func->arguments().at(i);
+        const AbstractMetaArgument &arg = func->arguments().at(i);
         QString argValue;
         if (language == TypeSystem::TargetLangCode) {
             bool hasConversionRule = !func->conversionRule(convLang, i+1).isEmpty();
@@ -1726,13 +1728,13 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
             if (argRemoved)
                 ++removed;
             if (argRemoved && hasConversionRule)
-                argValue = arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
-            else if (argRemoved || (lastArg && arg->argumentIndex() > lastArg->argumentIndex()))
+                argValue = arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
+            else if (argRemoved || (lastArg && arg.argumentIndex() > lastArg->argumentIndex()))
                 argValue = QLatin1String(CPP_ARG_REMOVED) + QString::number(i);
             if (!argRemoved && argValue.isEmpty()) {
                 int argPos = i - removed;
-                AbstractMetaType type = arg->type();
-                QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
+                AbstractMetaType type = arg.type();
+                QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
                 if (!typeReplaced.isEmpty()) {
                     AbstractMetaType builtType = buildAbstractMetaTypeFromString(typeReplaced);
                     if (builtType)
@@ -1743,7 +1745,7 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                                ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
                 } else {
                     argValue = hasConversionRule
-                               ? arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
+                               ? arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX)
                                : QLatin1String(CPP_ARG) + QString::number(argPos);
                     if (isWrapperType(type)) {
                         if (type.referenceType() == LValueReference && !isPointer(type))
@@ -1752,7 +1754,7 @@ ShibokenGenerator::ArgumentVarReplacementList ShibokenGenerator::getArgumentRepl
                 }
             }
         } else {
-            argValue = arg->name();
+            argValue = arg.name();
         }
         if (!argValue.isEmpty())
             argReplacements << ArgumentVarReplacementPair(arg, argValue);
@@ -1846,9 +1848,9 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
 
     // Replace %ARG#_TYPE variables.
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument *arg : arguments) {
-        QString argTypeVar = QStringLiteral("%ARG%1_TYPE").arg(arg->argumentIndex() + 1);
-        QString argTypeVal = arg->type().cppSignature();
+    for (const AbstractMetaArgument &arg : arguments) {
+        QString argTypeVar = QStringLiteral("%ARG%1_TYPE").arg(arg.argumentIndex() + 1);
+        QString argTypeVal = arg.type().cppSignature();
         code.replace(argTypeVar, argTypeVal);
     }
 
@@ -1951,10 +1953,10 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     code.replace(QLatin1String("%ARGUMENT_NAMES"), args.join(QLatin1String(", ")));
 
     for (const ArgumentVarReplacementPair &pair : argReplacements) {
-        const AbstractMetaArgument *arg = pair.first;
-        int idx = arg->argumentIndex() + 1;
-        AbstractMetaType type = arg->type();
-        QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
+        const AbstractMetaArgument &arg = pair.first;
+        int idx = arg.argumentIndex() + 1;
+        AbstractMetaType type = arg.type();
+        QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
         if (!typeReplaced.isEmpty()) {
             AbstractMetaType builtType = buildAbstractMetaTypeFromString(typeReplaced);
             if (builtType)

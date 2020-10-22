@@ -46,9 +46,9 @@ Documentation QtDocParser::retrieveModuleDocumentation()
     return retrieveModuleDocumentation(packageName());
 }
 
-static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgument *arg)
+static void formatFunctionArgTypeQuery(QTextStream &str, const AbstractMetaArgument &arg)
 {
-    const AbstractMetaType &metaType = arg->type();
+    const AbstractMetaType &metaType = arg.type();
     if (metaType.isConstant())
         str << "const " ;
     switch (metaType.typeUsagePattern()) {

@@ -297,7 +297,7 @@ protected:
     static bool isCppIntegralPrimitive(const AbstractMetaType &type);
 
     /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
-    static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument *arg);
+    static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument &arg);
     /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
     static bool shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType &metaType);
 
@@ -330,7 +330,7 @@ protected:
     QString guessCPythonCheckFunction(const QString &type, AbstractMetaType *metaType);
     QString cpythonIsConvertibleFunction(const TypeEntry *type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonIsConvertibleFunction(AbstractMetaType metaType, bool genericNumberType = false);
-    QString cpythonIsConvertibleFunction(const AbstractMetaArgument *metaArg, bool genericNumberType = false);
+    QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg, bool genericNumberType = false);
 
     QString cpythonToCppConversionFunction(const AbstractMetaClass *metaClass);
     QString cpythonToCppConversionFunction(const AbstractMetaType &type, const AbstractMetaClass *context = nullptr);
@@ -356,9 +356,9 @@ protected:
 
     /// Guesses the scope to where belongs an argument's default value.
     QString guessScopeForDefaultValue(const AbstractMetaFunction *func,
-                                      const AbstractMetaArgument *arg) const;
+                                      const AbstractMetaArgument &arg) const;
     QString guessScopeForDefaultFlagsValue(const AbstractMetaFunction *func,
-                                           const AbstractMetaArgument *arg,
+                                           const AbstractMetaArgument &arg,
                                            const QString &value) const;
 
     static QString cpythonEnumName(const EnumTypeEntry *enumEntry);
@@ -505,7 +505,7 @@ private:
      */
     void writeArgument(QTextStream &s,
                        const AbstractMetaFunction *func,
-                       const AbstractMetaArgument *argument,
+                       const AbstractMetaArgument &argument,
                        Options options = NoOption) const;
     /**
      *   Create a QString in the C++ format to an function argument.
@@ -514,13 +514,13 @@ private:
      *   \param options some extra options.
      */
     QString argumentString(const AbstractMetaFunction *func,
-                           const AbstractMetaArgument *argument,
+                           const AbstractMetaArgument &argument,
                            Options options = NoOption) const;
 
     QString functionReturnType(const AbstractMetaFunction *func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
-    using ArgumentVarReplacementPair = QPair<const AbstractMetaArgument *, QString>;
+    using ArgumentVarReplacementPair = QPair<AbstractMetaArgument, QString>;
     using ArgumentVarReplacementList = QVector<ArgumentVarReplacementPair>;
     ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
                                                       bool usePyArgs, TypeSystem::Language language,

@@ -40,7 +40,7 @@ class AbstractMetaEnumValue;
 class AbstractMetaFunction;
 class AbstractMetaType;
 
-using AbstractMetaArgumentList = QVector<AbstractMetaArgument *>;
+using AbstractMetaArgumentList = QVector<AbstractMetaArgument>;
 using AbstractMetaClassList = QVector<AbstractMetaClass *>;
 using AbstractMetaEnumList = QVector<AbstractMetaEnum *>;
 using AbstractMetaEnumValueList = QVector<AbstractMetaEnumValue *>;

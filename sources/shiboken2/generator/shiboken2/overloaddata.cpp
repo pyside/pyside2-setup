@@ -143,7 +143,7 @@ static QString getImplicitConversionTypeName(const AbstractMetaType &containerTy
     else if (function->isConversionOperator())
         impConv = function->ownerClass()->typeEntry()->name();
     else
-        impConv = getTypeName(function->arguments().constFirst()->type());
+        impConv = getTypeName(function->arguments().constFirst().type());
 
     QStringList types;
     for (const auto &otherType : containerType.instantiations())
@@ -314,7 +314,7 @@ void OverloadData::sortNextOverloads()
             if (function->isConversionOperator())
                 convertibleType = function->ownerClass()->typeEntry()->name();
             else
-                convertibleType = getTypeName(function->arguments().constFirst()->type());
+                convertibleType = getTypeName(function->arguments().constFirst().type());
 
             if (convertibleType == intT() || convertibleType == unsignedIntT())
                 classesWithIntegerImplicitConversion << targetTypeEntryName;
@@ -489,8 +489,8 @@ OverloadData::OverloadData(const AbstractMetaFunctionList &overloads, const Shib
             m_maxArgs = argSize;
         OverloadData *currentOverloadData = this;
         const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument *arg : arguments) {
-            if (func->argumentRemoved(arg->argumentIndex() + 1))
+        for (const AbstractMetaArgument &arg : arguments) {
+            if (func->argumentRemoved(arg.argumentIndex() + 1))
                 continue;
             currentOverloadData = currentOverloadData->addOverloadData(func, arg);
         }
@@ -530,7 +530,7 @@ void OverloadData::addOverload(const AbstractMetaFunction *func)
     for (int i = 0; m_headOverloadData->m_minArgs > 0 && i < origNumArgs; i++) {
         if (func->argumentRemoved(i + 1))
             continue;
-        if (func->arguments().at(i)->hasDefaultValueExpression()) {
+        if (func->arguments().at(i).hasDefaultValueExpression()) {
             int fixedArgIndex = i - removed;
             if (fixedArgIndex < m_headOverloadData->m_minArgs)
                 m_headOverloadData->m_minArgs = fixedArgIndex;
@@ -541,9 +541,9 @@ void OverloadData::addOverload(const AbstractMetaFunction *func)
 }
 
 OverloadData *OverloadData::addOverloadData(const AbstractMetaFunction *func,
-                                            const AbstractMetaArgument *arg)
+                                            const AbstractMetaArgument &arg)
 {
-    const AbstractMetaType &argType = arg->type();
+    const AbstractMetaType &argType = arg.type();
     OverloadData *overloadData = nullptr;
     if (!func->isOperatorOverload()) {
         for (OverloadData *tmp : qAsConst(m_nextOverloadData)) {
@@ -565,7 +565,7 @@ OverloadData *OverloadData::addOverloadData(const AbstractMetaFunction *func,
         overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
         overloadData->m_previousOverloadData = this;
         overloadData->m_generator = this->m_generator;
-        QString typeReplaced = func->typeReplaced(arg->argumentIndex() + 1);
+        QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
 
         if (!typeReplaced.isEmpty())
             overloadData->m_argTypeReplaced = typeReplaced;
@@ -597,7 +597,7 @@ bool OverloadData::hasVarargs() const
 {
     for (const AbstractMetaFunction *func : m_overloads) {
         AbstractMetaArgumentList args = func->arguments();
-        if (args.size() > 1 && args.constLast()->type().isVarargs())
+        if (args.size() > 1 && args.constLast().type().isVarargs())
             return true;
     }
     return false;
@@ -677,7 +677,7 @@ const AbstractMetaArgument *OverloadData::argument(const AbstractMetaFunction *f
             argPos++;
     }
 
-    return func->arguments().at(m_argPos + removed);
+    return &func->arguments().at(m_argPos + removed);
 }
 
 OverloadDataList OverloadData::overloadDataOnPosition(OverloadData *overloadData, int argPos) const
@@ -762,7 +762,7 @@ const AbstractMetaFunction *OverloadData::getFunctionWithDefaultValue() const
             if (func->argumentRemoved(i + 1))
                 removedArgs++;
         }
-        if (func->arguments().at(m_argPos + removedArgs)->hasDefaultValueExpression())
+        if (func->arguments().at(m_argPos + removedArgs).hasDefaultValueExpression())
             return func;
     }
     return nullptr;
@@ -779,7 +779,7 @@ QVector<int> OverloadData::invalidArgumentLengths() const
             if (func->argumentRemoved(i+1)) {
                 offset++;
             } else {
-                if (args.at(i)->hasDefaultValueExpression())
+                if (args.at(i).hasDefaultValueExpression())
                     validArgLengths << i-offset;
             }
         }
@@ -828,7 +828,7 @@ QPair<int, int> OverloadData::getMinMaxArguments(const AbstractMetaFunctionList 
             if (func->argumentRemoved(j + 1))
                 continue;
             int fixedArgIndex = j - removed;
-            if (fixedArgIndex < minArgs && func->arguments().at(j)->hasDefaultValueExpression())
+            if (fixedArgIndex < minArgs && func->arguments().at(j).hasDefaultValueExpression())
                 minArgs = fixedArgIndex;
         }
     }
@@ -1037,10 +1037,10 @@ bool OverloadData::hasArgumentWithDefaultValue() const
 bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunction *func)
 {
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument *arg : arguments) {
-        if (func->argumentRemoved(arg->argumentIndex() + 1))
+    for (const AbstractMetaArgument &arg : arguments) {
+        if (func->argumentRemoved(arg.argumentIndex() + 1))
             continue;
-        if (arg->hasDefaultValueExpression())
+        if (arg.hasDefaultValueExpression())
             return true;
     }
     return false;
@@ -1050,9 +1050,9 @@ AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const Abstr
 {
     AbstractMetaArgumentList args;
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (AbstractMetaArgument *arg : arguments) {
-        if (!arg->hasDefaultValueExpression()
-            || func->argumentRemoved(arg->argumentIndex() + 1))
+    for (const AbstractMetaArgument &arg : arguments) {
+        if (!arg.hasDefaultValueExpression()
+            || func->argumentRemoved(arg.argumentIndex() + 1))
             continue;
         args << arg;
     }

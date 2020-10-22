@@ -136,7 +136,7 @@ private:
                  const AbstractMetaType &argType, int argPos);
 
     void addOverload(const AbstractMetaFunction *func);
-    OverloadData *addOverloadData(const AbstractMetaFunction *func, const AbstractMetaArgument *arg);
+    OverloadData *addOverloadData(const AbstractMetaFunction *func, const AbstractMetaArgument &arg);
 
     void sortNextOverloads();
     bool sortByOverloadNumberModification();

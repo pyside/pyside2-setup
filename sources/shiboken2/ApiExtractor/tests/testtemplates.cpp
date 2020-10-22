@@ -115,7 +115,7 @@ namespace Namespace {
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("foo"));
-    AbstractMetaType argType = func->arguments().constFirst()->type();
+    AbstractMetaType argType = func->arguments().constFirst().type();
     QCOMPARE(argType.instantiations().count(), 1);
     QCOMPARE(argType.typeEntry()->qualifiedCppName(), QLatin1String("QList"));
 
@@ -149,7 +149,7 @@ void func(List<int> arg) {}
 
     AbstractMetaFunction *func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>)"));
-    QCOMPARE(func->arguments().constFirst()->type().cppSignature(),
+    QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              QLatin1String("List<int >"));
 }
 
@@ -174,7 +174,7 @@ void func(List<int>* arg) {}
 
     AbstractMetaFunction* func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>*)"));
-    QCOMPARE(func->arguments().constFirst()->type().cppSignature(),
+    QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              QLatin1String("List<int > *"));
 }
 
@@ -199,7 +199,7 @@ void func(List<int>& arg) {}
 
     AbstractMetaFunction* func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>&)"));
-    QCOMPARE(func->arguments().constFirst()->type().cppSignature(),
+    QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              QLatin1String("List<int > &"));
 }
 
@@ -231,13 +231,13 @@ struct List {
     const AbstractMetaFunction *append = list->findFunction(QStringLiteral("append"));
     QVERIFY(append);
     QCOMPARE(append->arguments().size(), 1);
-    QCOMPARE(append->arguments().at(0)->type().cppSignature(), QLatin1String("List<T >"));
+    QCOMPARE(append->arguments().at(0).type().cppSignature(), QLatin1String("List<T >"));
     // Verify that the parameter of "void erase(Iterator)" is not modified
     const AbstractMetaFunction *erase = list->findFunction(QStringLiteral("erase"));
     QVERIFY(erase);
     QCOMPARE(erase->arguments().size(), 1);
     QEXPECT_FAIL("", "Clang: Some other code changes the parameter type", Abort);
-    QCOMPARE(erase->arguments().at(0)->type().cppSignature(), QLatin1String("List::Iterator"));
+    QCOMPARE(erase->arguments().at(0).type().cppSignature(), QLatin1String("List::Iterator"));
 }
 
 void TestTemplates::testInheritanceFromContainterTemplate()

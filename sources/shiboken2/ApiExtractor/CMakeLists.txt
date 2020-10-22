@@ -7,6 +7,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(apiextractor_SRC
 apiextractor.cpp
+abstractmetaargument.cpp
 abstractmetabuilder.cpp
 abstractmetatype.cpp
 abstractmetalang.cpp

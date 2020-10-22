@@ -114,11 +114,11 @@ struct A {
 
     AbstractMetaType returnType = addedFunc->type();
     QCOMPARE(returnType.typeEntry(), typeDb->findPrimitiveType(QLatin1String("int")));
-    AbstractMetaArgumentList args = addedFunc->arguments();
+    const AbstractMetaArgumentList &args = addedFunc->arguments();
     QCOMPARE(args.count(), 3);
-    QCOMPARE(args[0]->type().typeEntry(), returnType.typeEntry());
-    QCOMPARE(args[1]->defaultValueExpression(), QLatin1String("4.6"));
-    QCOMPARE(args[2]->type().typeEntry(), typeDb->findType(QLatin1String("B")));
+    QCOMPARE(args.at(0).type().typeEntry(), returnType.typeEntry());
+    QCOMPARE(args.at(1).defaultValueExpression(), QLatin1String("4.6"));
+    QCOMPARE(args.at(2).type().typeEntry(), typeDb->findType(QLatin1String("B")));
 
     auto addedCallOperator = classA->findFunction(QLatin1String("operator()"));
     QVERIFY(addedCallOperator);
@@ -250,8 +250,8 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
     QVERIFY(classA);
     const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("func"));
     QVERIFY(addedFunc);
-    AbstractMetaArgument *arg = addedFunc->arguments()[1];
-    QCOMPARE(arg->defaultValueExpression(), QLatin1String("2"));
+    const AbstractMetaArgument &arg = addedFunc->arguments().at(1);
+    QCOMPARE(arg.defaultValueExpression(), QLatin1String("2"));
 }
 
 void TestAddFunction::testAddFunctionAtModuleLevel()
@@ -312,9 +312,9 @@ void TestAddFunction::testAddFunctionWithVarargs()
     QVERIFY(classA);
     const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("func"));
     QVERIFY(addedFunc);
-    const AbstractMetaArgument *arg = addedFunc->arguments().constLast();
-    QVERIFY(arg->type().isVarargs());
-    QVERIFY(arg->type().typeEntry()->isVarargs());
+    const AbstractMetaArgument &arg = addedFunc->arguments().constLast();
+    QVERIFY(arg.type().isVarargs());
+    QVERIFY(arg.type().typeEntry()->isVarargs());
 }
 
 void TestAddFunction::testAddStaticFunction()
@@ -409,9 +409,9 @@ void TestAddFunction::testModifyAddedFunction()
     AbstractMetaClass* foo = AbstractMetaClass::findClass(classes, QLatin1String("Foo"));
     const AbstractMetaFunction* method = foo->findFunction(QLatin1String("method"));
     QCOMPARE(method->arguments().size(), 2);
-    AbstractMetaArgument* arg = method->arguments().at(1);
-    QCOMPARE(arg->defaultValueExpression(), QLatin1String("0"));
-    QCOMPARE(arg->name(), QLatin1String("varName"));
+    const AbstractMetaArgument &arg = method->arguments().at(1);
+    QCOMPARE(arg.defaultValueExpression(), QLatin1String("0"));
+    QCOMPARE(arg.name(), QLatin1String("varName"));
     QCOMPARE(method->argumentName(2), QLatin1String("varName"));
 }
 
@@ -459,8 +459,8 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
     QVERIFY(!builder.isNull());
     QCOMPARE(builder->globalFunctions().size(), 1);
     AbstractMetaFunction *func = builder->globalFunctions().constFirst();
-    AbstractMetaArgument *arg = func->arguments().constFirst();
-    QCOMPARE(arg->type().instantiations().count(), 1);
+    const AbstractMetaArgument &arg = func->arguments().constFirst();
+    QCOMPARE(arg.type().instantiations().count(), 1);
 }
 
 QTEST_APPLESS_MAIN(TestAddFunction)

@@ -793,7 +793,7 @@ void CppGenerator::writeConstructorNative(QTextStream &s, const GeneratorContext
     s << "\n{\n";
     if (wrapperDiagnostics())
         s << INDENT << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
-    const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+    const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
     s << INDENT << "resetPyMethodCache();\n";
     writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
     s << INDENT << "// ... middle\n";
@@ -819,8 +819,8 @@ static bool allArgumentsRemoved(const AbstractMetaFunction *func)
     if (func->arguments().isEmpty())
         return false;
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument *arg : arguments) {
-        if (!func->argumentRemoved(arg->argumentIndex() + 1))
+    for (const AbstractMetaArgument &arg : arguments) {
+        if (!func->argumentRemoved(arg.argumentIndex() + 1))
             return false;
     }
     return true;
@@ -918,7 +918,7 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
                         qCWarning(lcShiboken, "The expression used in return value contains an invalid index.");
                         break;
                     }
-                    expr.replace(match.captured(0), func->arguments().at(argId)->name());
+                    expr.replace(match.captured(0), func->arguments().at(argId).name());
                     offset = match.capturedStart(1);
                 }
                 DefaultValue defaultReturnExpr(DefaultValue::Custom, expr);
@@ -980,7 +980,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     const CodeSnipList snips = func->hasInjectedCode()
         ? func->injectedCodeSnips() : CodeSnipList();
     const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
-        ?  nullptr : func->arguments().constLast();
+        ?  nullptr : &func->arguments().constLast();
 
     //Write declaration/native injected code
     if (!snips.isEmpty()) {
@@ -1049,13 +1049,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     } else {
         QStringList argConversions;
         const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument *arg : arguments) {
-            if (func->argumentRemoved(arg->argumentIndex() + 1))
+        for (const AbstractMetaArgument &arg : arguments) {
+            if (func->argumentRemoved(arg.argumentIndex() + 1))
                 continue;
 
             QString argConv;
             QTextStream ac(&argConv);
-            const auto &argType = arg->type();
+            const auto &argType = arg.type();
             auto argTypeEntry = static_cast<const PrimitiveTypeEntry *>(argType.typeEntry());
             bool convert = argTypeEntry->isObject()
                             || argTypeEntry->isValue()
@@ -1075,13 +1075,13 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
             Indentor nested;
             Indentation indentation(nested);
             ac << nested;
-            if (!func->conversionRule(TypeSystem::TargetLangCode, arg->argumentIndex() + 1).isEmpty()) {
+            if (!func->conversionRule(TypeSystem::TargetLangCode, arg.argumentIndex() + 1).isEmpty()) {
                 // Has conversion rule.
-                ac << arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
+                ac << arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
             } else {
-                QString argName = arg->name();
+                QString argName = arg.name();
                 if (convert)
-                    writeToPythonConversion(ac, arg->type(), func->ownerClass(), argName);
+                    writeToPythonConversion(ac, arg.type(), func->ownerClass(), argName);
                 else
                     ac << argName;
             }
@@ -1113,7 +1113,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
         if (injectedCodeUsesPySelf(func))
             s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
 
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
     }
 
@@ -1212,7 +1212,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
     if (func->hasInjectedCode()) {
         s << Qt::endl;
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode, func, lastArg);
     }
 
@@ -1542,7 +1542,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
             // Constructor that does implicit conversion.
             if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
                 continue;
-            const AbstractMetaType sourceType = conv->arguments().constFirst()->type();
+            const AbstractMetaType sourceType = conv->arguments().constFirst().type();
             typeCheck = cpythonCheckFunction(sourceType);
             bool isUserPrimitiveWithoutTargetLangName = isUserPrimitive(sourceType)
                                                         && sourceType.typeEntry()->targetLangApiName() == sourceType.typeEntry()->name();
@@ -1586,7 +1586,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
         }
         const AbstractMetaType sourceType = conv->isConversionOperator()
                                             ? buildAbstractMetaTypeFromAbstractMetaClass(conv->ownerClass())
-                                            : conv->arguments().constFirst()->type();
+                                            : conv->arguments().constFirst().type();
         writePythonToCppConversionFunctions(s, sourceType, targetType, typeCheck, toCppConv, toCppPreConv);
     }
 
@@ -1722,7 +1722,7 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
             // Constructor that does implicit conversion.
             if (!conv->typeReplaced(1).isEmpty() || conv->isModifiedToArray(1))
                 continue;
-            sourceType = conv->arguments().constFirst()->type();
+            sourceType = conv->arguments().constFirst().type();
         }
         QString toCpp = pythonToCppFunctionName(sourceType, targetType);
         QString isConv = convertibleToCppFunctionName(sourceType, targetType);
@@ -1872,10 +1872,10 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
         const OverloadData::MetaFunctionList &overloads = overloadData.overloads();
         for (const AbstractMetaFunction *func : overloads) {
             const AbstractMetaArgumentList &arguments = func->arguments();
-            for (const AbstractMetaArgument *arg : arguments) {
-                if (arg->defaultValueExpression().isEmpty() || func->argumentRemoved(arg->argumentIndex() + 1))
+            for (const AbstractMetaArgument &arg : arguments) {
+                if (arg.defaultValueExpression().isEmpty() || func->argumentRemoved(arg.argumentIndex() + 1))
                     continue;
-                argNamesSet << arg->name();
+                argNamesSet << arg.name();
             }
         }
         QStringList argNamesList = argNamesSet.values();
@@ -2410,7 +2410,7 @@ static void checkTypeViability(const AbstractMetaFunction *func)
         return;
     checkTypeViability(func, func->type(), 0);
     for (int i = 0; i < func->arguments().count(); ++i)
-        checkTypeViability(func, func->arguments().at(i)->type(), i + 1);
+        checkTypeViability(func, func->arguments().at(i).type(), i + 1);
 }
 
 void CppGenerator::writeTypeCheck(QTextStream &s, const OverloadData *overloadData, QString argumentName)
@@ -2468,7 +2468,7 @@ const AbstractMetaType CppGenerator::getArgumentType(const AbstractMetaFunction 
     if (typeReplaced.isEmpty()) {
         if (argPos == 0)
             return func->type();
-        auto argType = func->arguments().at(argPos - 1)->type();
+        auto argType = func->arguments().at(argPos - 1).type();
         return argType.viewOn() ? *argType.viewOn() : argType;
     }
 
@@ -2632,10 +2632,10 @@ void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunctio
 {
     CodeSnipList snippets;
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (AbstractMetaArgument *arg : arguments) {
-        QString rule = func->conversionRule(language, arg->argumentIndex() + 1);
+    for (const AbstractMetaArgument &arg : arguments) {
+        QString rule = func->conversionRule(language, arg.argumentIndex() + 1);
         addConversionRuleCodeSnippet(snippets, rule, language, TypeSystem::TargetLangCode,
-                                     arg->name(), arg->name());
+                                     arg.name(), arg.name());
     }
     writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func);
 }
@@ -2792,7 +2792,8 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
                 if (func->isConstructor() && func->arguments().count() == 1) {
                     const AbstractMetaClass *ownerClass = func->ownerClass();
                     const ComplexTypeEntry *baseContainerType = ownerClass->typeEntry()->baseContainerType();
-                    if (baseContainerType && baseContainerType == func->arguments().constFirst()->type().typeEntry() && isCopyable(ownerClass)) {
+                    if (baseContainerType && baseContainerType == func->arguments().constFirst().type().typeEntry()
+                        && isCopyable(ownerClass)) {
                         tck << '!' << cpythonCheckFunction(ownerClass->typeEntry()) << pyArgName << ")\n";
                         Indentation indent(INDENT);
                         tck << INDENT << "&& ";
@@ -2817,7 +2818,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
 
         if (usePyArgs && signatureFound) {
             AbstractMetaArgumentList args = refFunc->arguments();
-            const bool isVarargs = args.size() > 1 && args.constLast()->type().isVarargs();
+            const bool isVarargs = args.size() > 1 && args.constLast().type().isVarargs();
             int numArgs = args.size() - OverloadData::numberOfRemovedArguments(refFunc);
             if (isVarargs)
                 --numArgs;
@@ -2916,12 +2917,12 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
     int removedArgs = 0;
     for (int argIdx = 0; argIdx < func->arguments().count(); ++argIdx) {
         bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, argIdx + 1).isEmpty();
-        const AbstractMetaArgument *arg = func->arguments().at(argIdx);
+        const AbstractMetaArgument &arg = func->arguments().at(argIdx);
         if (func->argumentRemoved(argIdx + 1)) {
-            if (!arg->defaultValueExpression().isEmpty()) {
+            if (!arg.defaultValueExpression().isEmpty()) {
                 const QString cppArgRemoved = QLatin1String(CPP_ARG_REMOVED)
                     + QString::number(argIdx);
-                s << INDENT << getFullTypeName(arg->type()) << ' ' << cppArgRemoved;
+                s << INDENT << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
                 s << " = " << guessScopeForDefaultValue(func, arg) << ";\n";
                 writeUnusedVariableCast(s, cppArgRemoved);
             } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
@@ -3248,10 +3249,11 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
         Indentation indent(INDENT);
         s << INDENT << "PyObject *keyName = nullptr;\n";
         s << INDENT << "PyObject *value = nullptr;\n";
-        for (const AbstractMetaArgument *arg : args) {
-            int pyArgIndex = arg->argumentIndex() - OverloadData::numberOfRemovedArguments(func, arg->argumentIndex());
+        for (const AbstractMetaArgument &arg : args) {
+            const int pyArgIndex = arg.argumentIndex()
+                - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
             QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
-            s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg->name() << "\");\n";
+            s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg.name() << "\");\n";
             s << INDENT << "if (PyDict_Contains(kwds, keyName)) {\n";
             {
                 Indentation indent(INDENT);
@@ -3259,7 +3261,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
                 s << INDENT << "if (value && " << pyArgName << ") {\n";
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << pyErrString.arg(arg->name()) << Qt::endl;
+                    s << INDENT << pyErrString.arg(arg.name()) << Qt::endl;
                     s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
                 }
                 s << INDENT << "}\n";
@@ -3268,7 +3270,8 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
                     Indentation indent(INDENT);
                     s << INDENT << pyArgName << " = value;\n";
                     s << INDENT << "if (!";
-                    writeTypeCheck(s, arg->type(), pyArgName, isNumber(arg->type().typeEntry()), func->typeReplaced(arg->argumentIndex() + 1));
+                    writeTypeCheck(s, arg.type(), pyArgName, isNumber(arg.type().typeEntry()),
+                                   func->typeReplaced(arg.argumentIndex() + 1));
                     s << ")\n";
                     {
                         Indentation indent(INDENT);
@@ -3306,7 +3309,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
         }
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
-        AbstractMetaType argType = getTypeWithoutContainer(func->arguments().at(realIndex)->type());
+        AbstractMetaType argType = getTypeWithoutContainer(func->arguments().at(realIndex).type());
 
         if (argType) {
             *wrappedClass = AbstractMetaClass::findClass(classes(), argType.typeEntry());
@@ -3373,12 +3376,12 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         if (maxArgs > 0 && maxArgs < func->arguments().size() - OverloadData::numberOfRemovedArguments(func)) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
-                lastArg = func->arguments().at(i);
+                lastArg = &func->arguments().at(i);
                 if (func->argumentRemoved(i + 1))
                     removedArgs++;
             }
         } else if (maxArgs != 0 && !func->arguments().isEmpty()) {
-            lastArg = func->arguments().constLast();
+            lastArg = &func->arguments().constLast();
         }
 
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func, lastArg);
@@ -3391,8 +3394,9 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         if (func->functionType() != AbstractMetaFunction::CopyConstructorFunction) {
             int removedArgs = 0;
             for (int i = 0; i < maxArgs + removedArgs; i++) {
-                const AbstractMetaArgument *arg = func->arguments().at(i);
-                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
+                const AbstractMetaArgument &arg = func->arguments().at(i);
+                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode,
+                                                               arg.argumentIndex() + 1).isEmpty();
                 if (func->argumentRemoved(i + 1)) {
                     // If some argument with default value is removed from a
                     // method signature, the said value must be explicitly
@@ -3401,16 +3405,17 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
 
                     // If have conversion rules I will use this for removed args
                     if (hasConversionRule)
-                        userArgs << arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
-                    else if (!arg->defaultValueExpression().isEmpty())
+                        userArgs << arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX);
+                    else if (!arg.defaultValueExpression().isEmpty())
                         userArgs.append(QLatin1String(CPP_ARG_REMOVED) + QString::number(i));
                 } else {
-                    int idx = arg->argumentIndex() - removedArgs;
-                    bool deRef = isValueTypeWithCopyConstructorOnly(arg->type())
-                                 || isObjectTypeUsedAsValueType(arg->type())
-                                 || (arg->type().referenceType() == LValueReference && isWrapperType(arg->type()) && !isPointer(arg->type()));
+                    int idx = arg.argumentIndex() - removedArgs;
+                    bool deRef = isValueTypeWithCopyConstructorOnly(arg.type())
+                                 || isObjectTypeUsedAsValueType(arg.type())
+                                 || (arg.type().referenceType() == LValueReference
+                                     && isWrapperType(arg.type()) && !isPointer(arg.type()));
                     if (hasConversionRule) {
-                        userArgs.append(arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
+                        userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
                         QString argName;
                         if (deRef)
@@ -3429,15 +3434,16 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             bool otherArgsModified = false;
             bool argsClear = true;
             for (int i = func->arguments().size() - 1; i >= maxArgs + removedArgs; i--) {
-                const AbstractMetaArgument *arg = func->arguments().at(i);
-                const bool defValModified = arg->hasModifiedDefaultValueExpression();
-                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode, arg->argumentIndex() + 1).isEmpty();
+                const AbstractMetaArgument &arg = func->arguments().at(i);
+                const bool defValModified = arg.hasModifiedDefaultValueExpression();
+                bool hasConversionRule = !func->conversionRule(TypeSystem::NativeCode,
+                                                               arg.argumentIndex() + 1).isEmpty();
                 if (argsClear && !defValModified && !hasConversionRule)
                     continue;
                 argsClear = false;
                 otherArgsModified |= defValModified || hasConversionRule || func->argumentRemoved(i + 1);
                 if (hasConversionRule)
-                    otherArgs.prepend(arg->name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
+                    otherArgs.prepend(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                 else
                     otherArgs.prepend(QLatin1String(CPP_ARG_REMOVED) + QString::number(i));
             }
@@ -4297,7 +4303,8 @@ void CppGenerator::writeMappingMethods(QTextStream &s,
 
         writeCppSelfDefinition(s, func, context);
 
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
+            ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
         s<< "}\n\n";
     }
@@ -4324,7 +4331,7 @@ void CppGenerator::writeSequenceMethods(QTextStream &s,
 
         writeCppSelfDefinition(s, func, context);
 
-        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : func->arguments().constLast();
+        const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips,TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode, func, lastArg);
         s<< "}\n\n";
     }
@@ -4734,7 +4741,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
             int alternativeNumericTypes = 0;
             for (const AbstractMetaFunction *func : overloads) {
                 if (!func->isStatic() &&
-                    ShibokenGenerator::isNumber(func->arguments().at(0)->type().typeEntry()))
+                    ShibokenGenerator::isNumber(func->arguments().at(0).type().typeEntry()))
                     alternativeNumericTypes++;
             }
 
@@ -4771,7 +4778,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
                         if (!snips.isEmpty()) {
                             writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionAny,
                                            TypeSystem::TargetLangCode, func,
-                                           func->arguments().constLast());
+                                           &func->arguments().constLast());
                             generateOperatorCode = false;
                         }
                     }
@@ -4897,18 +4904,18 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
         if (!(f->isStatic()) && f->ownerClass())
             args << QLatin1String("self");
         const AbstractMetaArgumentList &arguments = f->arguments();
-        for (const AbstractMetaArgument *arg : arguments)  {
-            auto metaType = arg->type();
+        for (const AbstractMetaArgument &arg : arguments)  {
+            auto metaType = arg.type();
             if (auto viewOn = metaType.viewOn())
                 metaType = *viewOn;
             QString strArg = metaType.pythonSignature();
-            if (!arg->defaultValueExpression().isEmpty()) {
+            if (!arg.defaultValueExpression().isEmpty()) {
                 strArg += QLatin1Char('=');
-                QString e = arg->defaultValueExpression();
+                QString e = arg.defaultValueExpression();
                 e.replace(QLatin1String("::"), QLatin1String("."));
                 strArg += e;
             }
-            args << arg->name() + QLatin1Char(':') + strArg;
+            args << arg.name() + QLatin1Char(':') + strArg;
         }
         // mark the multiple signatures as such, to make it easier to generate different code
         if (multiple)
@@ -5075,8 +5082,8 @@ void CppGenerator::writeSignalInitialization(QTextStream &s, const AbstractMetaC
         if (cppSignal->declaringClass() != metaClass)
             continue;
         const AbstractMetaArgumentList &arguments = cppSignal->arguments();
-        for (AbstractMetaArgument *arg : arguments) {
-            AbstractMetaType metaType = arg->type();
+        for (const AbstractMetaArgument &arg : arguments) {
+            AbstractMetaType metaType = arg.type();
             const QByteArray origType =
                 QMetaObject::normalizedType(qPrintable(metaType.originalTypeDescription()));
             const QByteArray cppSig =
@@ -6231,8 +6238,8 @@ bool CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
     int parentIndex = argOwner.index;
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
-        AbstractMetaArgument *arg = func->arguments().at(argIndex-1);
-        if (arg->name() == QLatin1String("parent") && isObjectType(arg->type())) {
+        const AbstractMetaArgument &arg = func->arguments().at(argIndex-1);
+        if (arg.name() == QLatin1String("parent") && isObjectType(arg.type())) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;

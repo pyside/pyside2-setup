@@ -30,6 +30,7 @@
 #define ABSTRACTMETALANG_H
 
 #include "abstractmetalang_typedefs.h"
+#include "abstractmetaargument.h"
 #include "abstractmetatype.h"
 #include "documentation.h"
 #include "sourcelocation.h"
@@ -306,66 +307,6 @@ private:
 QDebug operator<<(QDebug d, const AbstractMetaVariable *av);
 #endif
 
-class AbstractMetaArgument : public AbstractMetaVariable
-{
-public:
-    AbstractMetaArgument();
-
-    QString defaultValueExpression() const
-    {
-        return m_expression;
-    }
-    void setDefaultValueExpression(const QString &expr)
-    {
-        m_expression = expr;
-    }
-
-    QString originalDefaultValueExpression() const
-    {
-        return m_originalExpression;
-    }
-    void setOriginalDefaultValueExpression(const QString &expr)
-    {
-        m_originalExpression = expr;
-    }
-
-    bool hasDefaultValueExpression() const
-    { return !m_expression.isEmpty(); }
-    bool hasOriginalDefaultValueExpression() const
-    { return !m_originalExpression.isEmpty(); }
-    bool hasUnmodifiedDefaultValueExpression() const
-    { return !m_originalExpression.isEmpty() && m_originalExpression == m_expression; }
-    bool hasModifiedDefaultValueExpression() const
-    { return !m_expression.isEmpty() && m_originalExpression != m_expression; }
-
-    QString toString() const
-    {
-        return type().name() + QLatin1Char(' ') + AbstractMetaVariable::name() +
-               (m_expression.isEmpty() ? QString() :  QLatin1String(" = ") + m_expression);
-    }
-
-    int argumentIndex() const
-    {
-        return m_argumentIndex;
-    }
-    void setArgumentIndex(int argIndex)
-    {
-        m_argumentIndex = argIndex;
-    }
-
-    AbstractMetaArgument *copy() const;
-
-protected:
-    void assignMetaArgument(const AbstractMetaArgument &other);
-
-private:
-    QString m_expression;
-    QString m_originalExpression;
-    int m_argumentIndex = 0;
-
-    friend class AbstractMetaClass;
-};
-
 class EnclosingClassMixin {
 public:
     const AbstractMetaClass *enclosingClass() const { return m_enclosingClass; }
@@ -375,10 +316,6 @@ public:
 private:
      const AbstractMetaClass *m_enclosingClass = nullptr;
 };
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AbstractMetaArgument *aa);
-#endif
 
 class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes, public EnclosingClassMixin
 {
@@ -591,7 +528,11 @@ public:
         m_implementingClass = cls;
     }
 
-    AbstractMetaArgumentList arguments() const
+    const AbstractMetaArgumentList &arguments() const
+    {
+        return m_arguments;
+    }
+    AbstractMetaArgumentList &arguments()
     {
         return m_arguments;
     }
@@ -599,7 +540,7 @@ public:
     {
         m_arguments = arguments;
     }
-    void addArgument(AbstractMetaArgument *argument)
+    void addArgument(const AbstractMetaArgument &argument)
     {
         m_arguments << argument;
     }

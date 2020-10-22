@@ -311,10 +311,10 @@ void TestModifyFunction::testGlobalFunctionModification()
     const AbstractMetaFunction *func = builder->globalFunctions().constFirst();
     QVERIFY(func);
     QCOMPARE(func->arguments().count(), 1);
-    const AbstractMetaArgument *arg = func->arguments().constFirst();
-    QCOMPARE(arg->type().cppSignature(), QLatin1String("A *"));
-    QCOMPARE(arg->originalDefaultValueExpression(), QLatin1String("0"));
-    QCOMPARE(arg->defaultValueExpression(), QLatin1String("A()"));
+    const AbstractMetaArgument &arg = func->arguments().constFirst();
+    QCOMPARE(arg.type().cppSignature(), QLatin1String("A *"));
+    QCOMPARE(arg.originalDefaultValueExpression(), QLatin1String("0"));
+    QCOMPARE(arg.defaultValueExpression(), QLatin1String("A()"));
 }
 
 // Tests modifications of exception handling and allow-thread

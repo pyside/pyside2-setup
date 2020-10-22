@@ -245,15 +245,15 @@ void HeaderGenerator::writeFunction(QTextStream &s, const AbstractMetaFunction *
         s << func->originalName() << '(';
         QStringList args;
         const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument *arg : arguments) {
-            QString argName = arg->name();
+        for (const AbstractMetaArgument &arg : arguments) {
+            QString argName = arg.name();
             const TypeEntry *enumTypeEntry = nullptr;
-            if (arg->type().isFlags())
-                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg->type().typeEntry())->originator();
-            else if (arg->type().isEnum())
-                enumTypeEntry = arg->type().typeEntry();
+            if (arg.type().isFlags())
+                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg.type().typeEntry())->originator();
+            else if (arg.type().isEnum())
+                enumTypeEntry = arg.type().typeEntry();
             if (enumTypeEntry)
-                argName = QString::fromLatin1("%1(%2)").arg(arg->type().cppSignature(), argName);
+                argName = QString::fromLatin1("%1(%2)").arg(arg.type().cppSignature(), argName);
             args << argName;
         }
         s << args.join(QLatin1String(", ")) << ')';
@@ -644,15 +644,15 @@ void HeaderGenerator::writeInheritedOverloads(QTextStream &s)
         s << func->ownerClass()->qualifiedCppName() << "::" << func->originalName() << '(';
         QStringList args;
         const AbstractMetaArgumentList &arguments = func->arguments();
-        for (const AbstractMetaArgument *arg : arguments) {
-            QString argName = arg->name();
+        for (const AbstractMetaArgument &arg : arguments) {
+            QString argName = arg.name();
             const TypeEntry *enumTypeEntry = nullptr;
-            if (arg->type().isFlags())
-                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg->type().typeEntry())->originator();
-            else if (arg->type().isEnum())
-                enumTypeEntry = arg->type().typeEntry();
+            if (arg.type().isFlags())
+                enumTypeEntry = static_cast<const FlagsTypeEntry *>(arg.type().typeEntry())->originator();
+            else if (arg.type().isEnum())
+                enumTypeEntry = arg.type().typeEntry();
             if (enumTypeEntry)
-                argName = arg->type().cppSignature() + QLatin1Char('(') + argName + QLatin1Char(')');
+                argName = arg.type().cppSignature() + QLatin1Char('(') + argName + QLatin1Char(')');
             args << argName;
         }
         s << args.join(QLatin1String(", ")) << ')';

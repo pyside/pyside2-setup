@@ -52,10 +52,10 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    const AbstractMetaArgument *arg = classA->functions().constLast()->arguments().constFirst();
-    QVERIFY(arg->type().isArray());
-    QCOMPARE(arg->type().arrayElementCount(), 3);
-    QCOMPARE(arg->type().arrayElementType()->name(), QLatin1String("double"));
+    const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
+    QVERIFY(arg.type().isArray());
+    QCOMPARE(arg.type().arrayElementCount(), 3);
+    QCOMPARE(arg.type().arrayElementType()->name(), QLatin1String("double"));
 }
 
 static QString functionMinimalSignature(const AbstractMetaClass *c, const QString &name)
@@ -131,10 +131,10 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     AbstractMetaEnumValue *nvalues = classA->findEnumValue(QLatin1String("NValues"));
     QVERIFY(nvalues);
 
-    const AbstractMetaArgument *arg = classA->functions().constLast()->arguments().constFirst();
-    QVERIFY(arg->type().isArray());
-    QCOMPARE(arg->type().arrayElementCount(), nvalues->value().value());
-    QCOMPARE(arg->type().arrayElementType()->name(), QLatin1String("double"));
+    const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
+    QVERIFY(arg.type().isArray());
+    QCOMPARE(arg.type().arrayElementCount(), nvalues->value().value());
+    QCOMPARE(arg.type().arrayElementType()->name(), QLatin1String("double"));
 };
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnum()
@@ -162,10 +162,10 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     const AbstractMetaEnumValue *nvalues = someEnum->findEnumValue(QLatin1String("NValues"));
     QVERIFY(nvalues);
 
-    const AbstractMetaArgument *arg = classA->functions().constLast()->arguments().constFirst();
-    QVERIFY(arg->type().isArray());
-    QCOMPARE(arg->type().arrayElementCount(), nvalues->value().value());
-    QCOMPARE(arg->type().arrayElementType()->name(), QLatin1String("double"));
+    const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
+    QVERIFY(arg.type().isArray());
+    QCOMPARE(arg.type().arrayElementCount(), nvalues->value().value());
+    QCOMPARE(arg.type().arrayElementType()->name(), QLatin1String("double"));
 };
 
 QTEST_APPLESS_MAIN(TestArrayArgument)

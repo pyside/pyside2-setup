@@ -138,43 +138,6 @@ void AbstractMetaAttributes::assignMetaAttributes(const AbstractMetaAttributes &
 }
 
 /*******************************************************************************
- * AbstractMetaArgument
- */
-
-AbstractMetaArgument::AbstractMetaArgument() = default;
-
-void AbstractMetaArgument::assignMetaArgument(const AbstractMetaArgument &other)
-{
-    assignMetaVariable(other);
-    m_expression = other.m_expression;
-    m_originalExpression = other.m_originalExpression;
-    m_argumentIndex = other.m_argumentIndex;
-}
-
-AbstractMetaArgument *AbstractMetaArgument::copy() const
-{
-    auto *copy = new AbstractMetaArgument;
-    copy->assignMetaArgument(*this);
-    return copy;
-}
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AbstractMetaArgument *aa)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "AbstractMetaArgument(";
-    if (aa)
-        d << aa->toString();
-    else
-        d << '0';
-    d << ')';
-    return d;
-}
-#endif // !QT_NO_DEBUG_STREAM
-
-/*******************************************************************************
  * AbstractMetaFunction
  */
 
@@ -210,10 +173,7 @@ AbstractMetaFunction::AbstractMetaFunction()
 {
 }
 
-AbstractMetaFunction::~AbstractMetaFunction()
-{
-    qDeleteAll(m_arguments);
-}
+AbstractMetaFunction::~AbstractMetaFunction() = default;
 
 /*******************************************************************************
  * Indicates that this function has a modification that removes it
@@ -287,15 +247,15 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
     bool same = true;
     for (int i = 0; i < maxCount; ++i) {
         if (i < minCount) {
-            const AbstractMetaArgument *min_arg = minArguments.at(i);
-            const AbstractMetaArgument *max_arg = maxArguments.at(i);
-            if (min_arg->type().name() != max_arg->type().name()
-                && (min_arg->defaultValueExpression().isEmpty() || max_arg->defaultValueExpression().isEmpty())) {
+            const AbstractMetaArgument &min_arg = minArguments.at(i);
+            const AbstractMetaArgument &max_arg = maxArguments.at(i);
+            if (min_arg.type().name() != max_arg.type().name()
+                && (min_arg.defaultValueExpression().isEmpty() || max_arg.defaultValueExpression().isEmpty())) {
                 same = false;
                 break;
             }
         } else {
-            if (maxArguments.at(i)->defaultValueExpression().isEmpty()) {
+            if (maxArguments.at(i).defaultValueExpression().isEmpty()) {
                 same = false;
                 break;
             }
@@ -324,9 +284,8 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     cpy->setAllowThreadModification(m_allowThreadModification);
     cpy->setExceptionHandlingModification(m_exceptionHandlingModification);
     cpy->m_addedFunction = m_addedFunction;
+    cpy->m_arguments = m_arguments;
 
-    for (AbstractMetaArgument *arg : m_arguments)
-    cpy->addArgument(arg->copy());
     return cpy;
 }
 
@@ -336,8 +295,8 @@ bool AbstractMetaFunction::usesRValueReferences() const
         return true;
     if (m_type.referenceType() == RValueReference)
         return true;
-    for (const AbstractMetaArgument *a : m_arguments) {
-        if (a->type().referenceType() == RValueReference)
+    for (const AbstractMetaArgument &a : m_arguments) {
+        if (a.type().referenceType() == RValueReference)
             return true;
     }
     return false;
@@ -352,8 +311,8 @@ QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStrin
     }
     QStringList returned;
 
-    AbstractMetaArgument *argument = arguments.at(resolvedArguments.size());
-    QStringList minimalTypeSignature = argument->type().minimalSignature().split(QLatin1String("::"));
+    const AbstractMetaArgument &argument = arguments.at(resolvedArguments.size());
+    QStringList minimalTypeSignature = argument.type().minimalSignature().split(QLatin1String("::"));
     for (int i = 0; i < minimalTypeSignature.size(); ++i) {
         returned += introspectionCompatibleSignatures(QStringList(resolvedArguments)
                                                       << QStringList(minimalTypeSignature.mid(minimalTypeSignature.size() - i - 1)).join(QLatin1String("::")));
@@ -370,20 +329,20 @@ QString AbstractMetaFunction::signature() const
         m_cachedSignature += QLatin1Char('(');
 
         for (int i = 0; i < m_arguments.count(); ++i) {
-            AbstractMetaArgument *a = m_arguments.at(i);
-            const AbstractMetaType &t = a->type();
+            const AbstractMetaArgument &a = m_arguments.at(i);
+            const AbstractMetaType &t = a.type();
             if (!t.isVoid()) {
                 if (i > 0)
                     m_cachedSignature += QLatin1String(", ");
                 m_cachedSignature += t.cppSignature();
                 // We need to have the argument names in the qdoc files
                 m_cachedSignature += QLatin1Char(' ');
-                m_cachedSignature += a->name();
+                m_cachedSignature += a.name();
             } else {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QString::fromLatin1("No abstract meta type found for argument '%1' while"
                                            "constructing signature for function '%2'.")
-                                           .arg(a->name(), name());
+                                           .arg(a.name(), name());
             }
         }
         m_cachedSignature += QLatin1Char(')');
@@ -402,7 +361,7 @@ int AbstractMetaFunction::actualMinimumArgumentCount() const
     for (int i = 0; i < arguments.size(); ++i && ++count) {
         if (argumentRemoved(i + 1))
             --count;
-        else if (!arguments.at(i)->defaultValueExpression().isEmpty())
+        else if (!arguments.at(i).defaultValueExpression().isEmpty())
             break;
     }
 
@@ -617,7 +576,7 @@ QString AbstractMetaFunction::minimalSignature() const
     AbstractMetaArgumentList arguments = this->arguments();
 
     for (int i = 0; i < arguments.count(); ++i) {
-        const AbstractMetaType &t = arguments.at(i)->type();
+        const AbstractMetaType &t = arguments.at(i).type();
         if (!t.isVoid()) {
             if (i > 0)
                 minimalSignature += QLatin1Char(',');
@@ -626,7 +585,7 @@ QString AbstractMetaFunction::minimalSignature() const
             qCWarning(lcShiboken).noquote().nospace()
                 << QString::fromLatin1("No abstract meta type found for argument '%1' while constructing"
                                        " minimal signature for function '%2'.")
-                                       .arg(arguments.at(i)->name(), name());
+                                       .arg(arguments.at(i).name(), name());
         }
     }
     minimalSignature += QLatin1Char(')');
@@ -680,7 +639,7 @@ QString AbstractMetaFunction::argumentName(int index,
                                            bool /* create */,
                                            const AbstractMetaClass * /* implementor */) const
 {
-    return m_arguments[--index]->name();
+    return m_arguments[--index].name();
 }
 
 bool AbstractMetaFunction::isCallOperator() const
@@ -1616,9 +1575,9 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     argType.setConstant(true);
     argType.setTypeUsagePattern(AbstractMetaType::ValuePattern);
 
-    auto arg = new AbstractMetaArgument;
-    arg->setType(argType);
-    arg->setName(name());
+    AbstractMetaArgument arg;
+    arg.setType(argType);
+    arg.setName(name());
     f->addArgument(arg);
 
     AbstractMetaAttributes::Attributes attr = FinalInTargetLang | AddedMethod;
@@ -1850,8 +1809,8 @@ static void addExtraIncludesForFunction(AbstractMetaClass *metaClass, const Abst
     addExtraIncludeForType(metaClass, meta_function->type());
 
     const AbstractMetaArgumentList &arguments = meta_function->arguments();
-    for (AbstractMetaArgument *argument : arguments)
-        addExtraIncludeForType(metaClass, argument->type());
+    for (const AbstractMetaArgument &argument : arguments)
+        addExtraIncludeForType(metaClass, argument.type());
 }
 
 void AbstractMetaClass::fixFunctions()

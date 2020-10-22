@@ -242,8 +242,8 @@ void TestAbstractMetaClass::testDefaultValues()
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QCOMPARE(classA->queryFunctionsByName(QLatin1String("method")).count(), 1);
     AbstractMetaFunction* method = classA->queryFunctionsByName(QLatin1String("method")).constFirst();
-    AbstractMetaArgument* arg = method->arguments().constFirst();
-    QCOMPARE(arg->defaultValueExpression(), arg->originalDefaultValueExpression());
+    const AbstractMetaArgument &arg = method->arguments().constFirst();
+    QCOMPARE(arg.defaultValueExpression(), arg.originalDefaultValueExpression());
 }
 
 void TestAbstractMetaClass::testModifiedDefaultValues()
@@ -271,9 +271,9 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QCOMPARE(classA->queryFunctionsByName(QLatin1String("method")).count(), 1);
     AbstractMetaFunction *method = classA->queryFunctionsByName(QLatin1String("method")).constFirst();
-    AbstractMetaArgument *arg = method->arguments().constFirst();
-    QCOMPARE(arg->defaultValueExpression(), QLatin1String("Hello"));
-    QCOMPARE(arg->originalDefaultValueExpression(), QLatin1String("A::B()"));
+    const AbstractMetaArgument &arg = method->arguments().constFirst();
+    QCOMPARE(arg.defaultValueExpression(), QLatin1String("Hello"));
+    QCOMPARE(arg.originalDefaultValueExpression(), QLatin1String("A::B()"));
 }
 
 void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()

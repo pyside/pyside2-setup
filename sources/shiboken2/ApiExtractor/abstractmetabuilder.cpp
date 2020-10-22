@@ -311,10 +311,9 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
             // Strip away first argument, since that is the containing object
             AbstractMetaArgumentList arguments = metaFunction->arguments();
             if (firstArgumentIsSelf || unaryOperator) {
-                AbstractMetaArgument *first = arguments.takeFirst();
-                if (!unaryOperator && first->type().indirections())
+                AbstractMetaArgument first = arguments.takeFirst();
+                if (!unaryOperator && first.type().indirections())
                     metaFunction->setPointerOperator(true);
-                delete first;
                 metaFunction->setArguments(arguments);
             } else {
                 // If the operator method is not unary and the first operator is
@@ -322,10 +321,9 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
                 // must be an reverse operator (e.g. CLASS::operator(TYPE, CLASS)).
                 // All operator overloads that operate over a class are already
                 // being added as member functions of that class by the API Extractor.
-                AbstractMetaArgument *last = arguments.takeLast();
-                if (last->type().indirections())
+                AbstractMetaArgument last = arguments.takeLast();
+                if (last.type().indirections())
                     metaFunction->setPointerOperator(true);
-                delete last;
 
                 metaFunction->setArguments(arguments);
                 metaFunction->setReverseOperator(true);
@@ -358,9 +356,9 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
                 // Strip first argument, since that is the containing object
                 AbstractMetaArgumentList arguments = streamFunction->arguments();
                 if (!streamClass->typeEntry()->generateCode())
-                    delete arguments.takeLast();
+                    arguments.takeLast();
                 else
-                    delete arguments.takeFirst();
+                    arguments.takeFirst();
 
                 streamFunction->setArguments(arguments);
 
@@ -1328,7 +1326,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             // Make sure the function was created with all arguments; some argument can be
             // missing during the parsing because of errors in the typesystem.
             if (metaFunction->isVoid() && metaFunction->arguments().size() == 1
-                && (write->typeEntry() == metaFunction->arguments().at(0)->type().typeEntry())) {
+                && (write->typeEntry() == metaFunction->arguments().at(0).type().typeEntry())) {
                 *metaFunction += AbstractMetaAttributes::PropertyWriter;
                 metaFunction->setPropertySpec(write);
             }
@@ -1547,11 +1545,9 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     metaFunction->setType(returnType);
 
     const auto &args = addedFunc->arguments();
-    AbstractMetaArgumentList metaArguments;
 
     for (int i = 0; i < args.count(); ++i) {
         const AddedFunction::TypeInfo& typeInfo = args.at(i).typeInfo;
-        auto *metaArg = new AbstractMetaArgument;
         AbstractMetaType type = translateType(typeInfo, &errorMessage);
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken, "%s",
@@ -1562,22 +1558,25 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             return nullptr;
         }
         type.decideUsagePattern();
+
+        AbstractMetaArgument metaArg;
         if (!args.at(i).name.isEmpty())
-            metaArg->setName(args.at(i).name);
-        metaArg->setType(type);
-        metaArg->setArgumentIndex(i);
-        metaArg->setDefaultValueExpression(typeInfo.defaultValue);
-        metaArg->setOriginalDefaultValueExpression(typeInfo.defaultValue);
-        metaArguments.append(metaArg);
+            metaArg.setName(args.at(i).name);
+        metaArg.setType(type);
+        metaArg.setArgumentIndex(i);
+        metaArg.setDefaultValueExpression(typeInfo.defaultValue);
+        metaArg.setOriginalDefaultValueExpression(typeInfo.defaultValue);
+        metaFunction->addArgument(metaArg);
     }
 
-    metaFunction->setArguments(metaArguments);
+    AbstractMetaArgumentList &metaArguments = metaFunction->arguments();
+
     if (metaFunction->isOperatorOverload() && !metaFunction->isCallOperator()) {
         if (metaArguments.size() > 2) {
             qCWarning(lcShiboken) << "An operator overload need to have 0, 1 or 2 arguments if it's reverse.";
         } else if (metaArguments.size() == 2) {
             // Check if it's a reverse operator
-            if (metaArguments[1]->type().typeEntry() == metaClass->typeEntry()) {
+            if (metaArguments[1].type().typeEntry() == metaClass->typeEntry()) {
                 metaFunction->setReverseOperator(true);
                 // we need to call these two function to cache the old signature (with two args)
                 // we do this buggy behaviour to comply with the original apiextractor buggy behaviour.
@@ -1595,11 +1594,11 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     // Find the correct default values
     const FunctionModificationList functionMods = metaFunction->modifications(metaClass);
     for (int i = 0; i < metaArguments.size(); ++i) {
-        AbstractMetaArgument* metaArg = metaArguments.at(i);
+        AbstractMetaArgument &metaArg = metaArguments[i];
 
         // use replace-default-expression for set default value
-        applyDefaultExpressionModifications(functionMods, i, metaArg);
-        metaArg->setOriginalDefaultValueExpression(metaArg->defaultValueExpression()); // appear unmodified
+        applyDefaultExpressionModifications(functionMods, i, &metaArg);
+        metaArg.setOriginalDefaultValueExpression(metaArg.defaultValueExpression()); // appear unmodified
     }
 
     metaFunction->setOriginalAttributes(metaFunction->attributes());
@@ -1613,7 +1612,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
         if (metaFunction->name() == metaClass->name()) {
             metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
             if (fargs.size() == 1) {
-                const TypeEntry *te = fargs.constFirst()->type().typeEntry();
+                const TypeEntry *te = fargs.constFirst().type().typeEntry();
                 if (te->isCustom())
                     metaFunction->setExplicit(true);
                 if (te->name() == metaFunction->name())
@@ -1639,20 +1638,18 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
 void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods)
 {
+    AbstractMetaArgumentList &arguments = func->arguments();
+
     for (const FunctionModification &mod : mods) {
         for (const ArgumentModification &argMod : mod.argument_mods) {
-            if (!argMod.renamed_to.isEmpty()) {
-                AbstractMetaArgument* arg = func->arguments().at(argMod.index - 1);
-                arg->setOriginalName(arg->name());
-                arg->setName(argMod.renamed_to, false);
-            }
+            if (!argMod.renamed_to.isEmpty())
+                arguments[argMod.index - 1].setName(argMod.renamed_to, false);
         }
     }
 
-    AbstractMetaArgumentList arguments = func->arguments();
     for (int i = 0, size = arguments.size(); i < size; ++i) {
-        if (arguments.at(i)->name().isEmpty())
-            arguments[i]->setName(QLatin1String("arg__") + QString::number(i + 1), false);
+        if (arguments.at(i).name().isEmpty())
+            arguments[i].setName(QLatin1String("arg__") + QString::number(i + 1), false);
     }
 }
 
@@ -1716,12 +1713,12 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
                                                            QLatin1String("Index out of range."));
                     return false;
                 }
-                auto t = func->arguments().at(i)->type();
+                auto t = func->arguments().at(i).type();
                 if (!t.applyArrayModification(errorMessage)) {
                     *errorMessage = msgCannotSetArrayUsage(func->minimalSignature(), i, *errorMessage);
                     return false;
                 }
-                func->arguments()[i]->setType(t);
+                func->arguments()[i].setType(t);
             }
         }
     }
@@ -1863,8 +1860,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             arguments.pop_front();
     }
 
-    AbstractMetaArgumentList metaArguments;
-
     for (int i = 0; i < arguments.size(); ++i) {
         const ArgumentModelItem &arg = arguments.at(i);
 
@@ -1908,15 +1903,14 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             metaType.setViewOn(viewOn);
         }
 
-        auto *metaArgument = new AbstractMetaArgument;
-
-        metaArgument->setType(metaType);
-        metaArgument->setName(arg->name());
-        metaArgument->setArgumentIndex(i);
-        metaArguments << metaArgument;
+        AbstractMetaArgument metaArgument;
+        metaArgument.setType(metaType);
+        metaArgument.setName(arg->name());
+        metaArgument.setArgumentIndex(i);
+        metaFunction->addArgument(metaArgument);
     }
 
-    metaFunction->setArguments(metaArguments);
+    AbstractMetaArgumentList &metaArguments = metaFunction->arguments();
 
     const FunctionModificationList functionMods = metaFunction->modifications(currentClass);
 
@@ -1930,19 +1924,19 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     // Find the correct default values
     for (int i = 0, size = metaArguments.size(); i < size; ++i) {
         const ArgumentModelItem &arg = arguments.at(i);
-        AbstractMetaArgument* metaArg = metaArguments.at(i);
+        AbstractMetaArgument &metaArg = metaArguments[i];
 
         const QString originalDefaultExpression =
-            fixDefaultValue(arg, metaArg->type(), metaFunction, currentClass, i);
+            fixDefaultValue(arg, metaArg.type(), metaFunction, currentClass, i);
 
-        metaArg->setOriginalDefaultValueExpression(originalDefaultExpression);
-        metaArg->setDefaultValueExpression(originalDefaultExpression);
+        metaArg.setOriginalDefaultValueExpression(originalDefaultExpression);
+        metaArg.setDefaultValueExpression(originalDefaultExpression);
 
-        applyDefaultExpressionModifications(functionMods, i, metaArg);
+        applyDefaultExpressionModifications(functionMods, i, &metaArg);
 
         //Check for missing argument name
-        if (!metaArg->defaultValueExpression().isEmpty()
-            && !metaArg->hasName()
+        if (!metaArg.defaultValueExpression().isEmpty()
+            && !metaArg.hasName()
             && !metaFunction->isOperatorOverload()
             && !metaFunction->isSignal()
             && metaFunction->argumentName(i + 1, false, currentClass).isEmpty()) {
@@ -1964,7 +1958,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     // Determine class special functions
     if (currentClass && metaFunction->arguments().size() == 1) {
-        const AbstractMetaType &argType = metaFunction->arguments().constFirst()->type();
+        const AbstractMetaType &argType = metaFunction->arguments().constFirst().type();
         if (argType.typeEntry() == currentClass->typeEntry() && argType.indirections() == 0) {
             if (metaFunction->name() == QLatin1String("operator=")) {
                 switch (argType.referenceType()) {
@@ -2757,12 +2751,12 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         }
 
         const AbstractMetaArgumentList &arguments = function->arguments();
-        for (AbstractMetaArgument *argument : arguments) {
-            AbstractMetaType argType = inheritTemplateType(templateTypes, argument->type());
+        for (const AbstractMetaArgument &argument : arguments) {
+            AbstractMetaType argType = inheritTemplateType(templateTypes, argument.type());
             if (!argType)
                 break;
-            AbstractMetaArgument *arg = argument->copy();
-            arg->setType(argType);
+            AbstractMetaArgument arg = argument;
+            arg.setType(argType);
             f->addArgument(arg);
         }
 
@@ -3079,12 +3073,12 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
         const AbstractMetaFunctionList &functions = clazz->functions();
         for (AbstractMetaFunction *func : functions) {
             const AbstractMetaArgumentList &arguments = func->arguments();
-            for (AbstractMetaArgument *arg : arguments) {
+            for (const AbstractMetaArgument &arg : arguments) {
                 // Check methods with default args: If a class is instantiated by value,
                 // ("QString s = QString()"), add a dependency.
-                if (!arg->originalDefaultValueExpression().isEmpty()
-                    && arg->type().isValue()) {
-                    addClassDependency(arg->type().typeEntry(), clazz, classIndex,
+                if (!arg.originalDefaultValueExpression().isEmpty()
+                    && arg.type().isValue()) {
+                    addClassDependency(arg.type().typeEntry(), clazz, classIndex,
                                        map, &graph);
                 }
             }
@@ -3160,8 +3154,9 @@ AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractM
     AbstractMetaArgumentList ret;
 
     int index = list.size();
-    for (AbstractMetaArgument *arg : list) {
-        arg->setArgumentIndex(index);
+    for (const AbstractMetaArgument &a : list) {
+        AbstractMetaArgument arg = a;
+        arg.setArgumentIndex(index);
         ret.prepend(arg);
         index--;
     }

@@ -209,8 +209,8 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     AbstractMetaFunction *function = functions.constFirst();
     AbstractMetaArgumentList args = function->arguments();
     QCOMPARE(args.count(), 1);
-    AbstractMetaArgument *arg = args.constFirst();
-    AbstractMetaType metaType = arg->type();
+    const AbstractMetaArgument &arg = args.constFirst();
+    AbstractMetaType metaType = arg.type();
     QCOMPARE(metaType.cppSignature(), QLatin1String("A<B >"));
 }
 
@@ -237,8 +237,8 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     QVERIFY(method);
     AbstractMetaArgumentList args = method->arguments();
     QCOMPARE(args.count(), 1);
-    AbstractMetaArgument* arg = args.constFirst();
-    AbstractMetaType metaType = arg->type();
+    const AbstractMetaArgument &arg = args.constFirst();
+    AbstractMetaType metaType = arg.type();
     QCOMPARE(metaType.cppSignature(), QLatin1String("A"));
     QVERIFY(metaType.isValue());
     QVERIFY(metaType.typeEntry()->isObject());

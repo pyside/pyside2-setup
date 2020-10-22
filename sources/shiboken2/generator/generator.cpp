@@ -298,8 +298,8 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 {
     addInstantiatedContainersAndSmartPointers(func->type(), func->signature());
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument *arg : arguments)
-        addInstantiatedContainersAndSmartPointers(arg->type(), func->signature());
+    for (const AbstractMetaArgument &arg : arguments)
+        addInstantiatedContainersAndSmartPointers(arg.type(), func->signature());
 }
 
 void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaClass *metaClass)
@@ -525,8 +525,8 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
         code.replace(QLatin1String("%TYPE"), cpp_class->name());
 
     const AbstractMetaArgumentList &argument = func->arguments();
-    for (AbstractMetaArgument *arg : argument)
-        code.replace(QLatin1Char('%') + QString::number(arg->argumentIndex() + 1), arg->name());
+    for (const AbstractMetaArgument &arg : argument)
+        code.replace(QLatin1Char('%') + QString::number(arg.argumentIndex() + 1), arg.name());
 
     //template values
     code.replace(QLatin1String("%RETURN_TYPE"), translateType(func->type(), cpp_class));
@@ -790,7 +790,7 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
                                     QLatin1String("::") + qualifiedCppName);
             }
             // First argument has unmodified default: Default constructible with values
-            if (arguments.constFirst()->hasUnmodifiedDefaultValueExpression()) {
+            if (arguments.constFirst().hasUnmodifiedDefaultValueExpression()) {
                 return DefaultValue(DefaultValue::DefaultConstructorWithDefaultValues,
                                     QLatin1String("::") + qualifiedCppName);
             }
@@ -798,11 +798,11 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
             bool simple = true;
             bool suitable = true;
             for (int i = 0, size = arguments.size();
-                 suitable && i < size && !arguments.at(i)->hasOriginalDefaultValueExpression(); ++i) {
-                const AbstractMetaArgument *arg = arguments.at(i);
-                const TypeEntry *aType = arg->type().typeEntry();
+                 suitable && i < size && !arguments.at(i).hasOriginalDefaultValueExpression(); ++i) {
+                const AbstractMetaArgument &arg = arguments.at(i);
+                const TypeEntry *aType = arg.type().typeEntry();
                 suitable &= aType != cType;
-                simple &= aType->isCppPrimitive() || aType->isEnum() || isPointer(arg->type());
+                simple &= aType->isCppPrimitive() || aType->isEnum() || isPointer(arg.type());
             }
             if (suitable)
                 candidates.insert(arguments.size() + (simple ? 0 : 100), ctor);
@@ -814,14 +814,14 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) c
         QStringList args;
         bool ok = true;
         for (int i =0, size = arguments.size(); ok && i < size; ++i) {
-            const AbstractMetaArgument *arg = arguments.at(i);
-            if (arg->hasModifiedDefaultValueExpression()) {
-                args << arg->defaultValueExpression(); // Spell out modified values
+            const AbstractMetaArgument &arg = arguments.at(i);
+            if (arg.hasModifiedDefaultValueExpression()) {
+                args << arg.defaultValueExpression(); // Spell out modified values
                 break;
             }
-            if (arg->hasOriginalDefaultValueExpression())
+            if (arg.hasOriginalDefaultValueExpression())
                 break;
-            auto argValue = minimalConstructor(arg->type());
+            auto argValue = minimalConstructor(arg.type());
             ok &= argValue.isValid();
             args << argValue.constructorParameter();
         }

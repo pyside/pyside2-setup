@@ -88,7 +88,7 @@ static bool shouldSkip(const AbstractMetaFunction* func)
 
             const AbstractMetaArgumentList fargs = f->arguments();
             for (int i = 0, max = funcArgs.count(); i < max; ++i) {
-                if (funcArgs.at(i)->type().typeEntry() != fargs.at(i)->type().typeEntry()) {
+                if (funcArgs.at(i).type().typeEntry() != fargs.at(i).type().typeEntry()) {
                     cloneFound = false;
                     break;
                 }
@@ -1795,7 +1795,7 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     }
 
     bool first = true;
-    QHash<QString, AbstractMetaArgument*> arg_map;
+    QHash<QString, AbstractMetaArgument> arg_map;
 
     IndentorBase<1> indent1;
     indent1.indent = INDENT.total();
@@ -1818,9 +1818,9 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
                 s << indent1 << rstDeprecationNote("constructor");
 
             const AbstractMetaArgumentList &arguments = func->arguments();
-            for (AbstractMetaArgument *arg : arguments) {
-                if (!arg_map.contains(arg->name())) {
-                    arg_map.insert(arg->name(), arg);
+            for (const AbstractMetaArgument &arg : arguments) {
+                if (!arg_map.contains(arg.name())) {
+                    arg_map.insert(arg.name(), arg);
                 }
             }
         }
@@ -1828,7 +1828,7 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
 
     s << Qt::endl;
 
-    for (QHash<QString, AbstractMetaArgument*>::const_iterator it = arg_map.cbegin(), end = arg_map.cend(); it != end; ++it) {
+    for (auto it = arg_map.cbegin(), end = arg_map.cend(); it != end; ++it) {
         Indentation indentation(INDENT, 2);
         writeParameterType(s, cppClass, it.value());
     }
@@ -1846,24 +1846,24 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
     int optArgs = 0;
 
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (AbstractMetaArgument *arg : arguments) {
+    for (const AbstractMetaArgument &arg : arguments) {
 
-        if (func->argumentRemoved(arg->argumentIndex() + 1))
+        if (func->argumentRemoved(arg.argumentIndex() + 1))
             continue;
 
-        bool thisIsoptional = !arg->defaultValueExpression().isEmpty();
+        bool thisIsoptional = !arg.defaultValueExpression().isEmpty();
         if (optArgs || thisIsoptional) {
             ret += QLatin1Char('[');
             optArgs++;
         }
 
-        if (arg->argumentIndex() > 0)
+        if (arg.argumentIndex() > 0)
             ret += QLatin1String(", ");
 
-        ret += arg->name();
+        ret += arg.name();
 
         if (thisIsoptional) {
-            QString defValue = arg->defaultValueExpression();
+            QString defValue = arg.defaultValueExpression();
             if (defValue == QLatin1String("QString()")) {
                 defValue = QLatin1String("\"\"");
             } else if (defValue == QLatin1String("QStringList()")
@@ -1876,7 +1876,7 @@ QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */
                 defValue.replace(QLatin1String("::"), QLatin1String("."));
                 if (defValue == QLatin1String("nullptr"))
                     defValue = none();
-                else if (defValue == QLatin1String("0") && arg->type().isObject())
+                else if (defValue == QLatin1String("0") && arg.type().isObject())
                     defValue = none();
             }
             ret += QLatin1Char('=') + defValue;
@@ -2063,10 +2063,11 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
     return strType;
 }
 
-void QtDocGenerator::writeParameterType(QTextStream& s, const AbstractMetaClass* cppClass, const AbstractMetaArgument* arg)
+void QtDocGenerator::writeParameterType(QTextStream& s, const AbstractMetaClass* cppClass,
+                                        const AbstractMetaArgument &arg)
 {
-    s << INDENT << ":param " << arg->name() << ": "
-      << translateToPythonType(arg->type(), cppClass) << Qt::endl;
+    s << INDENT << ":param " << arg.name() << ": "
+      << translateToPythonType(arg.type(), cppClass) << Qt::endl;
 }
 
 void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
@@ -2074,9 +2075,9 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
 {
     s << Qt::endl;
     const AbstractMetaArgumentList &funcArgs = func->arguments();
-    for (AbstractMetaArgument *arg : funcArgs) {
+    for (const AbstractMetaArgument &arg : funcArgs) {
 
-        if (func->argumentRemoved(arg->argumentIndex() + 1))
+        if (func->argumentRemoved(arg.argumentIndex() + 1))
             continue;
 
         writeParameterType(s, cppClass, arg);
