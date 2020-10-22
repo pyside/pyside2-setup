@@ -214,6 +214,19 @@ class SmartPointerTests(unittest.TestCase):
         except AttributeError as error:
             self.assertEqual(error.args[0], "'smart.SharedPtr_Obj' object has no attribute 'typo'")
 
+    def testSmartPointerConversions(self):
+        # Create Obj.
+        o = Obj()
+        self.assertEqual(objCount(), 1)
+        self.assertEqual(integerCount(), 1)
+
+        # Create a shared pointer to an Integer2
+        integer2 = o.giveSharedPtrToInteger2()
+        self.assertEqual(integer2.value(), 456)
+
+        # pass Smart<Integer2> to a function that accepts Smart<Integer>
+        r = o.takeSharedPtrToInteger(integer2)
+        self.assertEqual(r, integer2.value())
 
 if __name__ == '__main__':
     unittest.main()

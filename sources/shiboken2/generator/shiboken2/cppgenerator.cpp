@@ -255,6 +255,15 @@ const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass *meta
         && func->arguments().isEmpty() ? func : nullptr;
 }
 
+const AbstractMetaType *CppGenerator::findSmartPointerInstantiation(const TypeEntry *entry) const
+{
+    for (auto i : instantiatedSmartPointers()) {
+        if (i->instantiations().at(0)->typeEntry() == entry)
+            return i;
+    }
+    return nullptr;
+}
+
 using FunctionGroupMap = QMap<QString, AbstractMetaFunctionList>;
 
 // Prevent ELF symbol qt_version_tag from being generated into the source
@@ -1640,6 +1649,7 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
         }
     };
 
+
     if (!classContext.forSmartPointer()) {
         writeConversionsForType(metaClass->qualifiedCppName());
     } else {
@@ -1650,7 +1660,7 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
                                                Qt::SkipEmptyParts);
         while (!lst.isEmpty()) {
             QString signature = lst.join(QLatin1String("::"));
-            writeConversions(QStringLiteral("%1<%2>").arg(smartPointerName, signature));
+            writeConversions(QStringLiteral("%1<%2 >").arg(smartPointerName, signature));
             lst.removeFirst();
         }
 
@@ -1740,6 +1750,30 @@ void CppGenerator::writeContainerConverterFunctions(QTextStream &s, const Abstra
 {
     writeCppToPythonFunction(s, containerType);
     writePythonToCppConversionFunctions(s, containerType);
+}
+
+void CppGenerator::writeSmartPointerConverterFunctions(QTextStream &s, const AbstractMetaType *smartPointerType)
+{
+    const AbstractMetaClass *targetClass = AbstractMetaClass::findClass(classes(), smartPointerType->instantiations().at(0)->typeEntry());
+
+    if (targetClass) {
+        const auto *smartPointerTypeEntry =
+                static_cast<const SmartPointerTypeEntry *>(
+                    smartPointerType->typeEntry());
+
+        // TODO: Missing conversion to smart pointer pointer type:
+
+        s << "// Register smartpointer conversion for all derived classes\n";
+        const auto classes = getBaseClasses(targetClass);
+        for (auto k : classes) {
+            if (smartPointerTypeEntry->matchesInstantiation(k->typeEntry())) {
+                if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry())) {
+                    s << INDENT << "// SmartPointer derived class: " << smartTargetType->cppSignature() << "\n";
+                    writePythonToCppConversionFunctions(s, smartPointerType, smartTargetType, {}, {}, {});
+                }
+            }
+        }
+    }
 }
 
 void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &overloadData,
@@ -3063,10 +3097,10 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s,
     QTextStream c(&code);
     Indentor nested;
     if (conversion.isEmpty())
-        conversion = QLatin1Char('*') + cpythonWrapperCPtr(sourceType->typeEntry(), QLatin1String("pyIn"));
+        conversion = QLatin1Char('*') + cpythonWrapperCPtr(sourceType, QLatin1String("pyIn"));
     if (!preConversion.isEmpty())
         c << nested << preConversion << Qt::endl;
-    const QString fullTypeName = getFullTypeName(targetType->typeEntry());
+    const QString fullTypeName = targetType->isSmartPointer() ? targetType->cppSignature() : getFullTypeName(targetType->typeEntry());
     c << nested << "*reinterpret_cast<" << fullTypeName << " *>(cppOut) = "
         << fullTypeName << '(' << conversion << ");";
     QString sourceTypeName = fixedCppTypeName(sourceType);
@@ -3932,6 +3966,44 @@ void CppGenerator::writeContainerConverterInitialization(QTextStream &s, const A
         s << INDENT << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << cppSignature << "\");\n";
     }
     writeAddPythonToCppConversion(s, converterObject(type), toCpp, isConv);
+}
+
+void CppGenerator::writeSmartPointerConverterInitialization(QTextStream &s, const AbstractMetaType *type)
+{
+    const QByteArray cppSignature = type->cppSignature().toUtf8();
+    auto writeConversionRegister = [this, &s](const AbstractMetaType *sourceType, const QString &targetTypeName, const QString &targetConverter)
+    {
+        const QString sourceTypeName = fixedCppTypeName(sourceType);
+        const QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
+        const QString isConv = convertibleToCppFunctionName(sourceTypeName, targetTypeName);
+
+        writeAddPythonToCppConversion(s, targetConverter, toCpp, isConv);
+    };
+
+    auto klass = AbstractMetaClass::findClass(classes(), type->instantiations().at(0)->typeEntry());
+    if (!klass)
+        return;
+
+    const auto classes = getBaseClasses(klass);
+    if (classes.isEmpty())
+        return;
+
+    s << INDENT << "// Register SmartPointer converter for type '" << cppSignature << "'." << Qt::endl;
+    s << INDENT << "///////////////////////////////////////////////////////////////////////////////////////"<< Qt::endl;
+    s << Qt::endl;
+
+    for (auto k : classes) {
+        if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry()))
+        {
+            s << INDENT << "// Convert to SmartPointer derived class: [" << smartTargetType->cppSignature() << "]" << Qt::endl;
+            const QString converter = QLatin1String("Shiboken::Conversions::getConverter(\"%1\")").arg(smartTargetType->cppSignature());
+            writeConversionRegister(type, fixedCppTypeName(smartTargetType), converter);
+        } else {
+            s << INDENT << "// Class not found:" << type->instantiations().at(0)->cppSignature();
+        }
+    }
+
+    s << INDENT << "///////////////////////////////////////////////////////////////////////////////////////"<< Qt::endl << Qt::endl;
 }
 
 void CppGenerator::writeExtendedConverterInitialization(QTextStream &s, const TypeEntry *externalType,
@@ -5979,6 +6051,17 @@ bool CppGenerator::finishGeneration()
         s << Qt::endl;
     }
 
+    // Implicit smart pointers conversions
+    const auto smartPointersList = instantiatedSmartPointers();
+    if (!smartPointersList.isEmpty()) {
+        s << "// SmartPointers converters.\n\n";
+        for (const AbstractMetaType *smartPointer : smartPointersList) {
+            s << "// C++ to Python conversion for type '" << smartPointer->cppSignature() << "'.\n";
+            writeSmartPointerConverterFunctions(s, smartPointer);
+        }
+        s << Qt::endl;
+    }
+
     s << "static struct PyModuleDef moduledef = {\n";
     s << "    /* m_base     */ PyModuleDef_HEAD_INIT,\n";
     s << "    /* m_name     */ \"" << moduleName() << "\",\n";
@@ -6048,6 +6131,14 @@ bool CppGenerator::finishGeneration()
         s << Qt::endl;
         for (const AbstractMetaType *container : containers) {
             writeContainerConverterInitialization(s, container);
+            s << Qt::endl;
+        }
+    }
+
+    if (!smartPointersList.isEmpty()) {
+        s << Qt::endl;
+        for (const AbstractMetaType *smartPointer : smartPointersList) {
+            writeSmartPointerConverterInitialization(s, smartPointer);
             s << Qt::endl;
         }
     }
