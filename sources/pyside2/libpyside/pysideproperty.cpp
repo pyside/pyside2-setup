@@ -315,35 +315,37 @@ static PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw 
 }
 
 // PYSIDE-1019: Provide the same getters as Pythons `PyProperty`.
-static PyObject *_property_func(PyObject *self, ssize_t offset)
+
+static PyObject *qProperty_fget(PyObject *self, void *)
 {
-    auto data = reinterpret_cast<PySideProperty *>(self);
-    PySidePropertyPrivate *pData = data->d;
-    auto funcptr = reinterpret_cast<char *>(pData) + offset;
-    auto func = *reinterpret_cast<PyObject **>(funcptr);
+    auto func = reinterpret_cast<PySideProperty *>(self)->d->fget;
     auto ret = func != nullptr ? func : Py_None;
     Py_INCREF(ret);
     return ret;
 }
 
-static PyObject *qProperty_fget(PyObject *self, void *)
-{
-    return _property_func(self, offsetof(PySidePropertyPrivate, fget));
-}
-
 static PyObject *qProperty_fset(PyObject *self, void *)
 {
-    return _property_func(self, offsetof(PySidePropertyPrivate, fset));
+    auto func = reinterpret_cast<PySideProperty *>(self)->d->fset;
+    auto ret = func != nullptr ? func : Py_None;
+    Py_INCREF(ret);
+    return ret;
 }
 
 static PyObject *qProperty_freset(PyObject *self, void *)
 {
-    return _property_func(self, offsetof(PySidePropertyPrivate, freset));
+    auto func = reinterpret_cast<PySideProperty *>(self)->d->freset;
+    auto ret = func != nullptr ? func : Py_None;
+    Py_INCREF(ret);
+    return ret;
 }
 
 static PyObject *qProperty_fdel(PyObject *self, void *)
 {
-    return _property_func(self, offsetof(PySidePropertyPrivate, fdel));
+    auto func = reinterpret_cast<PySideProperty *>(self)->d->fdel;
+    auto ret = func != nullptr ? func : Py_None;
+    Py_INCREF(ret);
+    return ret;
 }
 
 static PyObject *qPropertyDocGet(PyObject *self, void *)
