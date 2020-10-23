@@ -232,8 +232,7 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
                                                unsigned flags = 0)
 {
     // courtesy qdoc
-    const unsigned defaultFlags = CXTranslationUnit_SkipFunctionBodies
-        | CXTranslationUnit_Incomplete;
+    const unsigned defaultFlags = CXTranslationUnit_Incomplete;
 
     static const QByteArrayList defaultArgs = {
 #ifndef Q_OS_WIN

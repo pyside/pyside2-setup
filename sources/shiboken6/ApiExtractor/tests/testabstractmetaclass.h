@@ -52,6 +52,8 @@ private slots:
     void testObjectTypesMustNotHaveCopyConstructors();
     void testIsPolymorphic();
     void testClassTypedefedBaseClass();
+    void testFreeOperators_data();
+    void testFreeOperators();
 };
 
 #endif // TESTABSTRACTMETACLASS_H

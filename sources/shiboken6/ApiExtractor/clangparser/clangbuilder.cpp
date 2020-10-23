@@ -230,6 +230,7 @@ public:
 
     int m_anonymousEnumCount = 0;
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
+    bool m_withinFriendDecl = false;
 };
 
 bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
@@ -964,14 +965,14 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     case CXCursor_ClassDecl:
     case CXCursor_UnionDecl:
     case CXCursor_StructDecl:
-        if (clang_isCursorDefinition(cursor) == 0)
+        if (d->m_withinFriendDecl || clang_isCursorDefinition(cursor) == 0)
             return Skip;
         if (!d->addClass(cursor, codeModelClassTypeFromCursor(cursor.kind)))
             return Error;
         break;
     case CXCursor_ClassTemplate:
     case CXCursor_ClassTemplatePartialSpecialization:
-        if (clang_isCursorDefinition(cursor) == 0)
+        if (d->m_withinFriendDecl || clang_isCursorDefinition(cursor) == 0)
             return Skip;
         d->addClass(cursor, CodeModel::Class);
         d->m_currentClass->setName(d->m_currentClass->name() + templateBrackets());
@@ -1028,16 +1029,18 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     case CXCursor_FieldDecl:
         d->addField(cursor);
         break;
-#if CINDEX_VERSION_MAJOR > 0 || CINDEX_VERSION_MINOR >= 37 // Clang 4.0
     case CXCursor_FriendDecl:
+        d->m_withinFriendDecl = true;
+        break;
+    case CXCursor_CompoundStmt: // Function bodies
         return Skip;
-#endif
     case CXCursor_Constructor:
     case CXCursor_Destructor: // Note: Also use clang_CXXConstructor_is..Constructor?
     case CXCursor_CXXMethod:
     case CXCursor_ConversionFunction:
+        // Member functions of other classes can be declared to be friends.
         // Skip inline member functions outside class, only go by declarations inside class
-        if (!withinClassDeclaration(cursor))
+        if (d->m_withinFriendDecl || !withinClassDeclaration(cursor))
             return Skip;
         d->m_currentFunction = d->createMemberFunction(cursor, false);
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
@@ -1059,8 +1062,19 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     case CXCursor_FunctionDecl:
-        d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, false);
-        d->m_scopeStack.back()->addFunction(d->m_currentFunction);
+        // Free functions or functions completely defined within "friend" (class
+        // operators). Note: CXTranslationUnit_SkipFunctionBodies must be off for
+        // clang_isCursorDefinition() to work here.
+        if (!d->m_withinFriendDecl || clang_isCursorDefinition(cursor) != 0) {
+            int scope = d->m_scopeStack.size() - 1; // enclosing class
+            if (d->m_withinFriendDecl) {
+                // Friend declaration: go back to namespace or file scope.
+                for (--scope;  d->m_scopeStack.at(scope)->kind() == _CodeModelItem::Kind_Class; --scope) {
+                }
+            }
+            d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, false);
+            d->m_scopeStack.at(scope)->addFunction(d->m_currentFunction);
+        }
         break;
     case CXCursor_Namespace: {
         const auto type = namespaceType(cursor);
@@ -1211,6 +1225,9 @@ bool Builder::endToken(const CXCursor &cursor)
         if (!d->m_currentEnum.isNull() && d->m_currentEnum->hasValues())
             d->m_scopeStack.back()->addEnum(d->m_currentEnum);
         d->m_currentEnum.clear();
+        break;
+    case CXCursor_FriendDecl:
+        d->m_withinFriendDecl = false;
         break;
     case CXCursor_VarDecl:
     case CXCursor_FieldDecl:

@@ -619,4 +619,53 @@ class Derived : public BaseAlias2 {
     QCOMPARE(derived->baseClasses().value(0), base);
 }
 
+void TestAbstractMetaClass::testFreeOperators_data()
+{
+    QTest::addColumn<QByteArray>("code");
+
+    const QByteArray classHeader(R"CPP(
+class Value
+{
+public:
+    Value(int v) : m_value(v) {}
+    int value() const { return m_value; }
+)CPP");
+
+    const QByteArray classFooter(R"CPP(
+private:
+    int m_value;
+};
+)CPP");
+
+    const QByteArray multOperatorSignature("Value operator*(const Value &v1, const Value &v2)");
+    const QByteArray multOperatorBody("{ return Value(v1.value() * v2.value()); }");
+    const QByteArray multOperator =  multOperatorSignature + '\n' + multOperatorBody;
+
+    QTest::newRow("free")
+        << (classHeader + classFooter + "\ninline " + multOperator);
+    QTest::newRow("free-friend-declared")
+        << (classHeader + "\n    friend " + multOperatorSignature + ";\n" + classFooter
+            + "\ninline " + multOperator);
+    QTest::newRow("hidden friend")
+        << (classHeader + "    friend inline " + multOperator + classFooter);
+};
+
+void TestAbstractMetaClass::testFreeOperators()
+{
+    QFETCH(QByteArray, code);
+    const char  xmlCode[] = R"XML(
+    <typesystem package="Foo">
+        <primitive-type name="int"/>
+        <value-type name="Value"/>
+    </typesystem>)XML";
+
+    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(code.constData(), xmlCode));
+    QVERIFY(!builder.isNull());
+    const auto classes = builder->classes();
+    QCOMPARE(classes.size(), 1);
+    QVERIFY(classes.constFirst()->hasArithmeticOperatorOverload());
+    AbstractMetaClass::FunctionQueryOptions opts(AbstractMetaClass::OperatorOverloads);
+    QCOMPARE(classes.constFirst()->queryFunctions(opts).size(), 1);
+}
+
 QTEST_APPLESS_MAIN(TestAbstractMetaClass)
