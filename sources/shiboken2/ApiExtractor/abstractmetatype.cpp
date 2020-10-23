@@ -685,6 +685,10 @@ AbstractMetaType AbstractMetaType::createVoid()
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {
+    if (!isValid()) {
+        debug << "Invalid";
+        return;
+    }
     debug << '"' << name() << '"';
     if (debug.verbosity() > 2) {
         auto te = typeEntry();
