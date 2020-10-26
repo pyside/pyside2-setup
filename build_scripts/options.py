@@ -47,7 +47,7 @@ import warnings
 from .qtinfo import QtInfo
 
 
-_AVAILABLE_MKSPECS = ["msvc", "mingw", "ninja"] if sys.platform == "win32" else ["make", "ninja"]
+_AVAILABLE_MKSPECS = ["ninja", "msvc", "mingw"] if sys.platform == "win32" else ["ninja", "make"]
 
 
 # Global options not which are not part of the commands
@@ -329,7 +329,7 @@ class DistUtilsCommandMixin(object):
         if not self.make_spec:
             self.make_spec = _AVAILABLE_MKSPECS[0]
         if self.make_spec not in _AVAILABLE_MKSPECS:
-            print('Invalid option --make-spec "{}". Available values are {}'.format(OPTION["MAKESPEC"],
+            print('Invalid option --make-spec "{}". Available values are {}'.format(self.make_spec,
                                                                                     _AVAILABLE_MKSPECS))
             return False
 
