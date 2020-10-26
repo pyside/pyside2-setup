@@ -176,7 +176,8 @@ public:
     FunctionModelItem createMemberFunction(const CXCursor &cursor,
                                            bool isTemplateCode = false);
     void qualifyConstructor(const CXCursor &cursor);
-    TypeInfo createTypeInfoHelper(const CXType &type) const; // uncashed
+    TypeInfo createTypeInfoUncached(const CXType &type,
+                                    bool *cacheable = nullptr) const;
     TypeInfo createTypeInfo(const CXType &type) const;
     TypeInfo createTypeInfo(const CXCursor &cursor) const
     { return createTypeInfo(clang_getCursorType(cursor)); }
@@ -186,6 +187,7 @@ public:
     bool addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const;
 
     void addTypeDef(const CXCursor &cursor, const CXType &cxType);
+    ClassModelItem currentTemplateClass() const;
     void startTemplateTypeAlias(const CXCursor &cursor);
     void endTemplateTypeAlias(const CXCursor &typeAliasCursor);
 
@@ -333,7 +335,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
         name = fixTypeName(name);
     FunctionModelItem result(new _FunctionModelItem(m_model, name));
     setFileName(cursor, result.data());
-    result->setType(createTypeInfoHelper(clang_getCursorResultType(cursor)));
+    result->setType(createTypeInfo(clang_getCursorResultType(cursor)));
     result->setFunctionType(t);
     result->setScope(m_scope);
     result->setStatic(clang_Cursor_getStorageClass(cursor) == CX_SC_Static);
@@ -415,7 +417,7 @@ TemplateParameterModelItem BuilderPrivate::createTemplateParameter(const CXCurso
 TemplateParameterModelItem BuilderPrivate::createNonTypeTemplateParameter(const CXCursor &cursor) const
 {
     TemplateParameterModelItem result = createTemplateParameter(cursor);
-    result->setType(createTypeInfoHelper(clang_getCursorType(cursor)));
+    result->setType(createTypeInfo(clang_getCursorType(cursor)));
     return result;
 }
 
@@ -477,7 +479,7 @@ bool BuilderPrivate::addTemplateInstantiationsRecursion(const CXType &type, Type
                 // of a non-type template (template <int v>).
                 if (argType.kind == CXType_Invalid)
                     return false;
-                t->addInstantiation(createTypeInfoHelper(argType));
+                t->addInstantiation(createTypeInfoUncached(argType));
             }
         }
         break;
@@ -513,16 +515,19 @@ void BuilderPrivate::addTemplateInstantiations(const CXType &type,
         typeName->remove(pos.first, pos.second - pos.first);
 }
 
-TypeInfo BuilderPrivate::createTypeInfoHelper(const CXType &type) const
+TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
+                                                bool *cacheable) const
 {
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
         const CXType pointeeType = clang_getPointeeType(type);
         const int argCount = clang_getNumArgTypes(pointeeType);
         if (argCount >= 0) {
-            TypeInfo result = createTypeInfoHelper(clang_getResultType(pointeeType));
+            TypeInfo result = createTypeInfoUncached(clang_getResultType(pointeeType),
+                                                     cacheable);
             result.setFunctionPointer(true);
             for (int a = 0; a < argCount; ++a)
-                result.addArgument(createTypeInfoHelper(clang_getArgType(pointeeType, unsigned(a))));
+                result.addArgument(createTypeInfoUncached(clang_getArgType(pointeeType, unsigned(a)),
+                                                          cacheable));
             return result;
         }
     }
@@ -562,6 +567,23 @@ TypeInfo BuilderPrivate::createTypeInfoHelper(const CXType &type) const
            || TypeInfo::stripLeadingVolatile(&typeName)) {
     }
 
+    // For typedefs within templates or nested classes within templates (iterators):
+    // "template <class T> class QList { using Value=T; .."
+    // the typedef source is named "type-parameter-0-0". Convert it back to the
+    // template parameter name. The CXTypes are the same for all templates and
+    // must not be cached.
+    if (!m_currentClass.isNull() && typeName.startsWith(QLatin1String("type-parameter-0-"))) {
+        if (cacheable != nullptr)
+            *cacheable = false;
+        bool ok;
+        const int n = QStringView{typeName}.mid(17).toInt(&ok);
+        if (ok) {
+            auto currentTemplate = currentTemplateClass();
+            if (!currentTemplate.isNull() && n < currentTemplate->templateParameters().size())
+                typeName = currentTemplate->templateParameters().at(n)->name();
+        }
+    }
+
     // Obtain template instantiations if the name has '<' (thus excluding
     // typedefs like "std::string".
     if (typeName.contains(QLatin1Char('<')))
@@ -575,10 +597,14 @@ TypeInfo BuilderPrivate::createTypeInfoHelper(const CXType &type) const
 
 TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
 {
-    TypeInfoHash::iterator it = m_typeInfoHash.find(type);
-    if (it == m_typeInfoHash.end())
-        it = m_typeInfoHash.insert(type, createTypeInfoHelper(type));
-    return it.value();
+    const auto it = m_typeInfoHash.constFind(type);
+    if (it != m_typeInfoHash.constEnd())
+        return it.value();
+    bool cacheable = true;
+    TypeInfo result = createTypeInfoUncached(type, &cacheable);
+    if (cacheable)
+        m_typeInfoHash.insert(type, result);
+    return result;
 }
 
 void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
@@ -590,6 +616,16 @@ void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
     item->setScope(m_scope);
     m_scopeStack.back()->addTypeDef(item);
     m_cursorTypedefHash.insert(cursor, item);
+}
+
+ClassModelItem BuilderPrivate::currentTemplateClass() const
+{
+    for (int i = m_scopeStack.size() - 1; i >= 0; --i) {
+        auto klass = qSharedPointerDynamicCast<_ClassModelItem>(m_scopeStack.at(i));
+        if (!klass.isNull() && klass->isTemplate())
+            return klass;
+    }
+    return {};
 }
 
 void BuilderPrivate::startTemplateTypeAlias(const CXCursor &cursor)
