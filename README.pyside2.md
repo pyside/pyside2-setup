@@ -17,7 +17,9 @@ Since the release of the [Technical Preview](https://blog.qt.io/blog/2018/06/13/
 it is possible to install via `pip`, both from Qt's servers
 and [PyPi](https://pypi.org/project/PySide2/):
 
-    pip install PySide2
+```
+pip install PySide2
+```
 
 #### Dependencies
 
@@ -29,13 +31,17 @@ higher is required for building. Prebuilt versions of it can be downloaded from
 After unpacking the archive, set the environment variable *LLVM_INSTALL_DIR* to
 point to the folder containing the *include* and *lib* directories of Clang:
 
-    7z x .../libclang-release_60-linux-Rhel7.2-gcc5.3-x86_64-clazy.7z
-    export LLVM_INSTALL_DIR=$PWD/libclang
+```
+7z x .../libclang-release_100-linux-Rhel7.2-gcc5.3-x86_64-clazy.7z
+export LLVM_INSTALL_DIR=$PWD/libclang
+```
 
 On Windows:
 
-    7z x .../libclang-release_60-windows-vs2015_64-clazy.7z
-    SET LLVM_INSTALL_DIR=%CD%\libclang
+```
+7z x .../libclang-release_100-windows-vs2015_64-clazy.7z
+SET LLVM_INSTALL_DIR=%CD%\libclang
+```
 
 ### Building from source
 
@@ -43,18 +49,22 @@ For building PySide2 from scratch, please read about
 [getting started](https://wiki.qt.io/Qt_for_Python/GettingStarted).
 This process will include getting the code:
 
-    git clone https://code.qt.io/pyside/pyside-setup
-    cd pyside-setup
-    git branch --track 5.12 origin/5.12
-    git checkout 5.12
+```
+git clone https://code.qt.io/pyside/pyside-setup
+cd pyside-setup
+git branch --track 5.14 origin/5.15
+git checkout 5.15
+```
 
 then install the dependencies, and following the instructions per platform.
 A common build command will look like:
 
-    python setup.py install --qmake=<path/to/qmake/> --parallel=8 --build-tests
+```
+python setup.py install --qmake=path/to/qmake/ --parallel=8 --build-tests
+```
 
-You can obtain more information about the options to build PySide
-and Shiboken in [our wiki](https://wiki.qt.io/Qt_for_Python/).
+You can obtain more information about the options to build PySide and Shiboken
+in [our wiki](https://wiki.qt.io/Qt_for_Python/).
 
 ### Documentation and Bugs
 
@@ -67,11 +77,12 @@ our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
 
 ### Community
 
-Check *#qt-pyside*, our official IRC channel on FreeNode,
-or contact us via our [mailing list](http://lists.qt-project.org/mailman/listinfo/pyside).
+Check *#qt-pyside*, our official IRC channel on FreeNode, or contact us via our
+[mailing list](http://lists.qt-project.org/mailman/listinfo/pyside).
 
 ### Licensing
 
-PySide2 is available under both Open Source (LGPLv3/GPLv2) and commercial license.
-Using PyPi is the recommended installation source, because the content of the wheels is valid for both cases.
-For more information, refer to the [Qt Licensing page](https://www.qt.io/licensing/).
+PySide2 is available under both Open Source (LGPLv3/GPLv2) and commercial
+license.  Using PyPi is the recommended installation source, because the
+content of the wheels is valid for both cases.  For more information, refer to
+the [Qt Licensing page](https://www.qt.io/licensing/).
