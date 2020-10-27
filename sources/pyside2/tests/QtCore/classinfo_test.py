@@ -108,9 +108,4 @@ class TestClassInfo(unittest.TestCase):
         ClassInfo()(SubclassOfPythonQObjectSubclass)
 
 if __name__ == '__main__':
-    if sys.version_info[0] < 2:
-        sys.exit(0)
-    elif (sys.version_info[0] == 2) and (sys.version_info[1] <= 5):
-        sys.exit(0)
-    else:
-        unittest.main()
+    unittest.main()

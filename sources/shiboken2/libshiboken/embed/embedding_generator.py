@@ -89,7 +89,7 @@ def create_zipfile(limited_api):
     """
     zip_name = "signature.zip"
     inc_name = "signature_inc.h"
-    flag = '-b' if sys.version_info >= (3,) else ''
+    flag = '-b'
     os.chdir(work_dir)
 
     # Remove all left-over py[co] and other files first, in case we use '--reuse-build'.
@@ -105,10 +105,7 @@ def create_zipfile(limited_api):
                 os.remove(fpath)
     # We copy every Python file into this dir, but only for the right version.
     # For testing in the source dir, we need to filter.
-    if sys.version_info[0] == 3:
-        ignore = "backport_inspect.py typing27.py".split()
-    else:
-        ignore = "".split()
+    ignore = []
     utils.copydir(os.path.join(source_dir, "shiboken2", "shibokenmodule", "files.dir", "shibokensupport"),
                   os.path.join(work_dir, "shibokensupport"),
                   ignore=ignore, file_filter_function=lambda name, n2: name.endswith(".py"))

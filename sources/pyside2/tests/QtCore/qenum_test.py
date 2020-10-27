@@ -137,11 +137,7 @@ class TestEnumPickling(unittest.TestCase):
 
         # Note: For Python 2, we would need quite strange patches.
         func = lambda: pickle.loads(pickle.dumps(Qt.Key))
-        if sys.version_info[0] < 3:
-            with self.assertRaises(pickle.PicklingError):
-                func()
-        else:
-            func()
+        func()
 
 # PYSIDE-957: The QEnum macro
 

@@ -130,10 +130,7 @@ def seterror_argument(args, func_name):
     return TypeError, msg
 
 def check_string_type(s):
-    if sys.version_info[0] == 3:
-        return isinstance(s, str)
-    else:
-        return isinstance(s, (str, unicode))
+    return isinstance(s, str)
 
 def make_helptext(func):
     existing_doc = func.__doc__

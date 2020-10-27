@@ -144,7 +144,7 @@ class MainTest(unittest.TestCase):
             #qPaintDevice = PySide2.QtGui.QPaintDevice()  # NotImplementedError
             qTextDocument = PySide2.QtGui.QTextDocument()
             qTextFormat = PySide2.QtGui.QTextFormat()
-            quintptr = long(42) if sys.version_info[0] < 3 else 42
+            quintptr = 42
             qFont = PySide2.QtGui.QFont()
             qPalette = PySide2.QtGui.QPalette()
         except AttributeError:

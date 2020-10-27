@@ -66,10 +66,7 @@ class GetCharTest(unittest.TestCase):
         try:
             memory = obj.map(0, 1)
             self.assertEqual(len(memory), 1)
-            if sys.version_info[0] >= 3:
-                self.assertEqual(memory[0], ord('a'))
-            else:
-                self.assertEqual(memory[0], bytes('a', "UTF-8"))
+            self.assertEqual(memory[0], ord('a'))
             # now memory points to wild bytes... :-)
             # uncommenting this must cause a segfault.
             # self.assertEqual(memory[0], 'a')

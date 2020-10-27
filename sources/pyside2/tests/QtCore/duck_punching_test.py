@@ -43,10 +43,7 @@ from PySide2.QtCore import QObject
 from helper.usesqcoreapplication import UsesQCoreApplication
 
 def MethodType(func, instance, instanceType):
-    if sys.version_info[0] == 3:
-        return types.MethodType(func, instance)
-    else:
-        return types.MethodType(func, instance, instanceType)
+    return types.MethodType(func, instance)
 
 class Duck(QObject):
     def __init__(self):

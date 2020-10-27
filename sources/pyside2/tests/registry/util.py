@@ -112,7 +112,7 @@ def linux_distribution():
         distribution = distro.linux_distribution()
     except ImportError:
         # platform.linux_distribution() was removed in 3.8
-        if sys.version_info[0] < 3 or sys.version_info[1] < 8:
+        if sys.version_info[:2] < (3, 8):
             import platform
             distribution = platform.linux_distribution()
     if distribution:

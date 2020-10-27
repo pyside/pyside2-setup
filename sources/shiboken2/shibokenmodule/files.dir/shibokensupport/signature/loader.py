@@ -153,27 +153,9 @@ def list_modules(message):
 
 
 orig_typing = True
-if sys.version_info >= (3,):
-    import typing
-    import inspect
-    inspect.formatannotation = formatannotation
-else:
-    tp_name = "typing"
-    if tp_name not in sys.modules:
-        orig_typing = False
-        from shibokensupport import typing27 as typing
-        sys.modules[tp_name] = typing
-        typing.__name__ = tp_name
-    else:
-        import typing
-    import inspect
-    namespace = inspect.__dict__
-    from shibokensupport import backport_inspect as inspect
-    _doc = inspect.__doc__
-    inspect.__dict__.update(namespace)
-    inspect.__doc__ += _doc
-    # force inspect to find all attributes. See "heuristic" in pydoc.py!
-    inspect.__all__ = list(x for x in dir(inspect) if not x.startswith("_"))
+import typing
+import inspect
+inspect.formatannotation = formatannotation
 
 # Fix the module names in typing if possible. This is important since
 # the typing names should be I/O compatible, so that typing.Dict

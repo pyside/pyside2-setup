@@ -46,11 +46,8 @@ import sample
 from sample import SampleNamespace, ObjectType, Event
 
 def createTempFile():
-    if sys.version_info >= (2, 6):
-        import tempfile
-        return tempfile.SpooledTemporaryFile(mode='rw')
-    else:
-        return os.tmpfile()
+    import tempfile
+    return tempfile.SpooledTemporaryFile(mode='rw')
 
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''

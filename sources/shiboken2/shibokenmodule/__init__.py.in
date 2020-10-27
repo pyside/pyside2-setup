@@ -20,9 +20,7 @@ import re
 import tempfile
 import keyword
 import functools
-if sys.version_info[0] == 3:
-    # PyInstaller seems to sometimes fail:
-    import typing
+import typing
 
 from .shiboken2 import *
 

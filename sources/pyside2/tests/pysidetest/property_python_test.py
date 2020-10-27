@@ -55,9 +55,8 @@ import sys
 import unittest
 has_test = False
 try:
-    if sys.version_info[0] >= 3:  # This test has no support in Python 2
-        from test import support
-        has_test = True
+    from test import support
+    has_test = True
 except ImportError:
     pass
 
