@@ -2,10 +2,10 @@ project(shibokengenerator)
 
 set(shiboken2_SRC
 generator.cpp
-shiboken2/cppgenerator.cpp
-shiboken2/headergenerator.cpp
-shiboken2/overloaddata.cpp
-shiboken2/shibokengenerator.cpp
+shiboken/cppgenerator.cpp
+shiboken/headergenerator.cpp
+shiboken/overloaddata.cpp
+shiboken/shibokengenerator.cpp
 main.cpp
 )
 
@@ -14,7 +14,7 @@ add_executable(Shiboken2::shiboken2 ALIAS shiboken2)
 add_dependencies(shiboken2 apiextractor)
 set_target_properties(shiboken2 PROPERTIES OUTPUT_NAME shiboken2${shiboken2_SUFFIX})
 target_include_directories(shiboken2 PRIVATE
-                    ${CMAKE_CURRENT_SOURCE_DIR}/shiboken2
+                    ${CMAKE_CURRENT_SOURCE_DIR}/shiboken
                     ${CMAKE_CURRENT_SOURCE_DIR}/qtdoc
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
