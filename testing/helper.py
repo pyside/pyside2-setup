@@ -37,8 +37,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 """
 testing/helper.py
 
@@ -49,17 +47,9 @@ import os
 import sys
 from collections import namedtuple
 
-PY3 = sys.version_info[0] == 3  # from the six module
 from subprocess import PIPE
-if PY3:
-    from subprocess import TimeoutExpired
-    from io import StringIO
-else:
-    class SubprocessError(Exception): pass
-    # this is a fake, just to keep the source compatible.
-    # timeout support is in python 3.3 and above.
-    class TimeoutExpired(SubprocessError): pass
-    from StringIO import StringIO
+from subprocess import TimeoutExpired
+from io import StringIO
 
 
 script_dir = os.path.dirname(os.path.dirname(__file__))

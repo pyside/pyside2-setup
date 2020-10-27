@@ -51,7 +51,6 @@ looked up in your PATH.
 Make sure that some generated wheels already exist in the dist/
 directory (e.g. setup.py bdist_wheel was already executed).
 """
-from __future__ import print_function, absolute_import
 
 from argparse import ArgumentParser, RawTextHelpFormatter
 import os, sys
@@ -274,7 +273,7 @@ def execute_script(script_path):
 def prepare_build_folder(src_path, build_folder_name):
     build_path = os.path.join(src_path, build_folder_name)
 
-    # The script can be called for both Python 2 and Python 3 wheels, so
+    # The script can be called for Python 3 wheels, so
     # preparing a build folder should clean any previous existing build.
     if os.path.exists(build_path):
         log.info("Removing {}".format(build_path))

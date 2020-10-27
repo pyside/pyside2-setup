@@ -37,8 +37,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 import os
 import sys
 import re
@@ -49,7 +47,7 @@ from collections import namedtuple
 from textwrap import dedent
 
 from .buildlog import builds
-from .helper import decorate, PY3, TimeoutExpired
+from .helper import decorate, TimeoutExpired
 
 # Get the dir path to the utils module
 try:
@@ -211,7 +209,7 @@ class TestRunner(object):
                                        stdin=ctest_process.stdout)
         try:
             comm = tee_process.communicate
-            output = (comm(timeout=timeout) if PY3 else comm())[0]
+            output = (comm(timeout=timeout)
         except (TimeoutExpired, KeyboardInterrupt):
             print()
             print("aborted, partial result")
