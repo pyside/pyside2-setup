@@ -533,17 +533,7 @@ bool registerInternalQtConf()
     // This will disable the internal qt.conf which points to the PySide2 subdirectory (due to the
     // subdirectory not existing anymore).
     QString executablePath =
-#if PY_MAJOR_VERSION >= 3
-            QString::fromWCharArray(Py_GetProgramFullPath());
-#else
-            // Python 2 unfortunately returns a char * array instead of a wchar *, which means that on
-            // Windows if the executable path contains unicode characters, the returned path will be
-            // invalid. We can't use QCoreApplication::applicationFilePath because it requires an
-            // existing QCoreApplication instance despite being a static method.
-            // This means that a qt.conf near an executable won't be picked up correctly on
-            // Windows + Python 2.
-            QString::fromLocal8Bit(Py_GetProgramFullPath());
-#endif
+    QString::fromWCharArray(Py_GetProgramFullPath());
     QString appDirPath = QFileInfo(executablePath).absolutePath();
     QString maybeQtConfPath = QDir(appDirPath).filePath(QStringLiteral("qt.conf"));
     bool executableQtConfAvailable = QFileInfo::exists(maybeQtConfPath);

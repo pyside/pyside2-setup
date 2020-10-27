@@ -228,11 +228,7 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 //
 
 // PyUnicode_GetSize is deprecated in favor of PyUnicode_GetLength.
-#if PY_VERSION_HEX < 0x03000000
-#define PepUnicode_GetLength(op)    PyUnicode_GetSize((PyObject *)(op))
-#else
 #define PepUnicode_GetLength(op)    PyUnicode_GetLength((PyObject *)(op))
-#endif
 
 #ifdef Py_LIMITED_API
 
@@ -281,17 +277,6 @@ LIBSHIBOKEN_API char *_PepUnicode_AsString(PyObject *);
 #define PyList_GET_ITEM(op, i)      PyList_GetItem(op, i)
 #define PyList_SET_ITEM(op, i, v)   PyList_SetItem(op, i, v)
 #define PyList_GET_SIZE(op)         PyList_Size(op)
-#endif
-
-/*****************************************************************************
- *
- * RESOLVED: dictobject.h
- *
- * PYSIDE-803, PYSIDE-813: We need PyDict_GetItemWithError in order to
- *                         avoid the GIL.
- */
-#if PY_VERSION_HEX < 0x03000000
-LIBSHIBOKEN_API PyObject *PyDict_GetItemWithError(PyObject *mp, PyObject *key);
 #endif
 
 /*****************************************************************************
@@ -524,12 +509,9 @@ LIBSHIBOKEN_API PyObject *PyStaticMethod_New(PyObject *callable);
 #else
 #define PepStaticMethod_TypePtr &PyStaticMethod_Type
 #endif
+
 // Although not PEP specific, we resolve this similar issue, here:
-#if PY_VERSION_HEX < 0x03000000
-extern LIBSHIBOKEN_API PyTypeObject *PepMethodDescr_TypePtr;
-#else
 #define PepMethodDescr_TypePtr &PyMethodDescr_Type
-#endif
 
 /*****************************************************************************
  *
@@ -543,18 +525,6 @@ LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
 
 // Evaluate a script and return the variable `result`
 LIBSHIBOKEN_API PyObject *PepRun_GetResult(const char *command);
-
-/*****************************************************************************
- *
- * Python 2 incompatibilities
- *
- * This is incompatibly implemented as macro in Python 2.
- */
-#if PY_VERSION_HEX < 0x03000000
-extern LIBSHIBOKEN_API PyObject *PepMapping_Items(PyObject *o);
-#else
-#define PepMapping_Items PyMapping_Items
-#endif
 
 /*****************************************************************************
  *

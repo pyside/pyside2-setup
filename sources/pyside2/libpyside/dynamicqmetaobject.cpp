@@ -569,7 +569,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         // Therefore, we don't need to error-check here again.
         auto name = String::toCString(obName);
         AutoDecRef members(PyObject_GetAttr(obEnumType, PyMagicName::members()));
-        AutoDecRef items(PepMapping_Items(members));
+        AutoDecRef items(PyMapping_Items(members));
         Py_ssize_t nr_items = PySequence_Length(items);
 
         QVector<QPair<QByteArray, int> > entries;

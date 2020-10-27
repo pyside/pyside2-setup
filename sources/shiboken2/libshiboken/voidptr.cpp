@@ -280,43 +280,10 @@ static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
     return 0;
 }
 
-#if PY_VERSION_HEX < 0x03000000
-
-static Py_ssize_t SbkVoidPtrObject_readbufferproc(PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-    if (segment || !Shiboken::Object::isValid(self))
-        return -1;
-
-    SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
-    *ptrptr = reinterpret_cast<void *>(sbkObject->cptr);
-    return sbkObject->size;
-}
-
-static Py_ssize_t SbkVoidPtrObject_segcountproc(PyObject *self, Py_ssize_t *lenp)
-{
-    if (lenp) {
-        SbkVoidPtrObject *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
-        *lenp = sbkObject->size;
-    }
-    return 1;
-}
-
-PyBufferProcs SbkVoidPtrObjectBufferProc = {
-    &SbkVoidPtrObject_readbufferproc,                    // bf_getreadbuffer
-    (writebufferproc)&SbkVoidPtrObject_readbufferproc,   // bf_getwritebuffer
-    &SbkVoidPtrObject_segcountproc,                      // bf_getsegcount
-    (charbufferproc)&SbkVoidPtrObject_readbufferproc,    // bf_getcharbuffer
-    (getbufferproc)SbkVoidPtrObject_getbuffer,           // bf_getbuffer
-};
-
-#else
-
 static PyBufferProcs SbkVoidPtrObjectBufferProc = {
     (getbufferproc)SbkVoidPtrObject_getbuffer,   // bf_getbuffer
     (releasebufferproc)nullptr                         // bf_releasebuffer
 };
-
-#endif
 
 // Void pointer type definition.
 static PyType_Slot SbkVoidPtrType_slots[] = {
@@ -347,12 +314,7 @@ PyTypeObject *SbkVoidPtrTypeF(void)
     static PyTypeObject *type = nullptr;
     if (!type) {
         type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkVoidPtrType_spec));
-#if PY_VERSION_HEX < 0x03000000
-        type->tp_as_buffer = &SbkVoidPtrObjectBufferProc;
-        type->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#else
         PepType_AS_BUFFER(type) = &SbkVoidPtrObjectBufferProc;
-#endif
     }
     return type;
 }

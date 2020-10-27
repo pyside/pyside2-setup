@@ -1038,40 +1038,11 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
 #endif
 }
 
-#if PY_VERSION_HEX < 0x03000000
-static Py_ssize_t SbkQByteArray_segcountproc(PyObject *self, Py_ssize_t *lenp)
-{
-    if (lenp)
-        *lenp = Py_TYPE(self)->tp_as_sequence->sq_length(self);
-    return 1;
-}
-
-static Py_ssize_t SbkQByteArray_readbufferproc(PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-    if (segment || !Shiboken::Object::isValid(self))
-        return -1;
-
-    QByteArray * cppSelf = %CONVERTTOCPP[QByteArray *](self);
-    //XXX      /|\ omitting this space crashes shiboken!
-    *ptrptr = reinterpret_cast<void *>(cppSelf->data());
-    return cppSelf->size();
-}
-
-PyBufferProcs SbkQByteArrayBufferProc = {
-    /*bf_getreadbuffer*/  &SbkQByteArray_readbufferproc,
-    /*bf_getwritebuffer*/ (writebufferproc) &SbkQByteArray_readbufferproc,
-    /*bf_getsegcount*/    &SbkQByteArray_segcountproc,
-    /*bf_getcharbuffer*/  (charbufferproc) &SbkQByteArray_readbufferproc,
-    /*bf_getbuffer*/  (getbufferproc)SbkQByteArray_getbufferproc,
-};
-#else
-
 static PyBufferProcs SbkQByteArrayBufferProc = {
     /*bf_getbuffer*/  (getbufferproc)SbkQByteArray_getbufferproc,
     /*bf_releasebuffer*/ (releasebufferproc)0,
 };
 
-#endif
 }
 // @snippet qbytearray-bufferprotocol
 
@@ -1175,12 +1146,7 @@ if (PyBytes_Check(%PYARG_1)) {
 // @snippet qbytearray-3
 
 // @snippet qbytearray-py3
-#if PY_VERSION_HEX < 0x03000000
-Shiboken::SbkType<QByteArray>()->tp_as_buffer = &SbkQByteArrayBufferProc;
-Shiboken::SbkType<QByteArray>()->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#else
 PepType_AS_BUFFER(Shiboken::SbkType<QByteArray>()) = &SbkQByteArrayBufferProc;
-#endif
 // @snippet qbytearray-py3
 
 // @snippet qbytearray-data

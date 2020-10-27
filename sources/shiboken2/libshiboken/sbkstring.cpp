@@ -211,11 +211,7 @@ PyObject *createStaticString(const char *str)
         Py_AtExit(finalizeStaticStrings);
         initialized = true;
     }
-#if PY_VERSION_HEX >= 0x03000000
     PyObject *result = PyUnicode_InternFromString(str);
-#else
-    PyObject *result = PyString_InternFromString(str);
-#endif
     if (result == nullptr) {
         // This error is never checked, but also very unlikely. Report and exit.
         PyErr_Print();

@@ -51,11 +51,7 @@ ThreadStateSaver::~ThreadStateSaver()
 
 void ThreadStateSaver::save()
 {
-#if PY_VERSION_HEX >=  0x0309000
     if (Py_IsInitialized())
-#else
-    if (PyEval_ThreadsInitialized())
-#endif
         m_threadState = PyEval_SaveThread();
 }
 

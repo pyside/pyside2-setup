@@ -131,7 +131,6 @@ install(FILES
         sbkconverter.h
         sbkenum.h
         sbkmodule.h
-        python25compat.h
         sbkdbg.h
         sbkstring.h
         sbkstaticstrings.h

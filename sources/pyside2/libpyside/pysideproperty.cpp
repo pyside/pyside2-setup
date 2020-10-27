@@ -354,13 +354,8 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
     PySidePropertyPrivate *pData = data->d;
 
     QByteArray doc(pData->doc);
-    if (!doc.isEmpty()) {
-#if PY_MAJOR_VERSION >= 3
+    if (!doc.isEmpty())
         return PyUnicode_FromString(doc);
-#else
-        return PyString_FromString(doc);
-#endif
-    }
     if (pData->fget != nullptr) {
         // PYSIDE-1019: Fetch the default `__doc__` from fget. We do it late.
         AutoDecRef get_doc(PyObject_GetAttr(pData->fget, PyMagicName::doc()));

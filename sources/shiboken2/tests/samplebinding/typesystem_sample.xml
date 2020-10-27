@@ -2141,12 +2141,7 @@
         </modify-function>
 
         <!-- buffer protocol -->
-        <inject-code class="native" position="beginning" file="bytearray_bufferprotocol.cpp" />
         <inject-code class="target" position="end">
-        #if PY_VERSION_HEX &lt; 0x03000000
-            Shiboken::SbkType&lt;ByteArray&gt;()->tp_as_buffer = &amp;SbkByteArrayBufferProc;
-            Shiboken::SbkType&lt;ByteArray&gt;()->tp_flags |= Py_TPFLAGS_HAVE_GETCHARBUFFER;
-        #endif
         </inject-code>
 
         <modify-function signature="data() const">

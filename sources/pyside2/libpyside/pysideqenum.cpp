@@ -66,7 +66,7 @@ static PyObject *analyzePyEnum(PyObject *pyenum, PyObject *container = nullptr)
     AutoDecRef members(PyObject_GetAttr(pyenum, Shiboken::PyMagicName::members()));
     if (members.isNull())
         return nullptr;
-    AutoDecRef items(PepMapping_Items(members));
+    AutoDecRef items(PyMapping_Items(members));
     if (items.isNull())
         return nullptr;
     int iflag = PySide::QEnum::isFlag(pyenum);

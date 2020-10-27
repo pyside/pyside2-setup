@@ -140,11 +140,7 @@ static PyObject *_GetSignature_Cached(PyObject *props, PyObject *func_kind, PyOb
 {
     // Special case: We want to know the func_kind.
     if (modifier) {
-#if PY_VERSION_HEX >= 0x03000000
         PyUnicode_InternInPlace(&modifier);
-#else
-        PyString_InternInPlace(&modifier);
-#endif
         if (modifier == PyMagicName::func_kind())
             return Py_BuildValue("O", func_kind);
     }

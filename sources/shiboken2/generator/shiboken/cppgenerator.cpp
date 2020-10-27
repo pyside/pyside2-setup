@@ -5966,8 +5966,6 @@ bool CppGenerator::finishGeneration()
     // cleanup staticMetaObject attribute
     if (usePySideExtensions()) {
         s << "void cleanTypesAttributes(void) {\n";
-        s << INDENT << "if (PY_VERSION_HEX >= 0x03000000 && PY_VERSION_HEX < 0x03060000)\n";
-        s << INDENT << "    return; // PYSIDE-953: testbinding crashes in Python 3.5 when hasattr touches types!\n";
         s << INDENT << "for (int i = 0, imax = SBK_" << moduleName()
             << "_IDX_COUNT; i < imax; i++) {\n" << indent(INDENT)
             << INDENT << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);\n"
