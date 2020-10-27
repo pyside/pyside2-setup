@@ -178,7 +178,7 @@ if(WIN32)
     # Circumvent some "#pragma comment(lib)"s in "include/pyconfig.h" which might force to link
     # against a wrong python shared library.
 
-    set(PYTHON_VERSIONS_LIST 3 32 33 34 35 36 37 38)
+    set(PYTHON_VERSIONS_LIST 3 36 37 38 39)
     set(PYTHON_ADDITIONAL_LINK_FLAGS "")
     foreach(VER ${PYTHON_VERSIONS_LIST})
         set(PYTHON_ADDITIONAL_LINK_FLAGS

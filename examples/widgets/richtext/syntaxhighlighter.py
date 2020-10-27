@@ -75,14 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
             inFile = QtCore.QFile(path[0])
             if inFile.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text):
                 text = inFile.readAll()
-
-                try:
-                    # Python v3.
-                    text = str(text, encoding='ascii')
-                except TypeError:
-                    # Python v2.
-                    text = str(text)
-
+                text = str(text, encoding='ascii')
                 self.editor.setPlainText(text)
 
     def setupEditor(self):

@@ -1,4 +1,3 @@
-# This Python file uses the following encoding: utf-8
 # It has been edited by fix-complaints.py .
 
 #############################################################################
@@ -52,7 +51,6 @@ test PyInstaller. See testing/wheel_tester.py .
 When used with PyInstaller, it automatically stops its execution after
 2 seconds.
 """
-from __future__ import print_function
 
 import sys
 import random

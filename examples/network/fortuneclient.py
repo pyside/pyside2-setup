@@ -118,13 +118,7 @@ class Client(QtWidgets.QDialog):
             return
 
         nextFortune = instr.readString()
-
-        try:
-            # Python v3.
-            nextFortune = str(nextFortune, encoding='ascii')
-        except TypeError:
-            # Python v2.
-            pass
+        nextFortune = str(nextFortune, encoding='ascii')
 
         if nextFortune == self.currentFortune:
             QtCore.QTimer.singleShot(0, self.requestNewFortune)

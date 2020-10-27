@@ -148,15 +148,8 @@ def shared_library_suffix():
 
 
 def import_suffixes():
-    if (sys.version_info >= (3, 4)):
-        import importlib.machinery
-        return importlib.machinery.EXTENSION_SUFFIXES
-    else:
-        import imp
-        result = []
-        for t in imp.get_suffixes():
-            result.append(t[0])
-        return result
+    import importlib.machinery
+    return importlib.machinery.EXTENSION_SUFFIXES
 
 
 def is_debug():
@@ -228,7 +221,7 @@ def find_package_path(dir_name):
     return None
 
 
-# Return version as "3.5"
+# Return version as "3.6"
 def python_version():
     return str(sys.version_info[0]) + '.' + str(sys.version_info[1])
 
@@ -283,11 +276,7 @@ def python_link_data():
 
     # Linux and anything else
     else:
-        if sys.version_info[0] < 3:
-            suffix = '_d' if is_debug() else ''
-            flags['lib'] = 'python{}{}'.format(version, suffix)
-        else:
-            flags['lib'] = 'python{}{}'.format(version, sys.abiflags)
+        flags['lib'] = 'python{}{}'.format(version, sys.abiflags)
 
     return flags
 

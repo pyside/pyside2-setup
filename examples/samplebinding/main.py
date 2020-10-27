@@ -39,8 +39,6 @@
 ##
 ############################################################################
 
-from __future__ import print_function
-
 """An example showcasing how to use bindings for a custom non-Qt C++ library"""
 
 from Universe import Icecream, Truck

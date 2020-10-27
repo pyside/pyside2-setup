@@ -39,8 +39,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 """PySide2 port of the qml/tutorials/extending-qml/chapter4-customPropertyTypes example from Qt v5.x"""
 
 import sys, os

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #############################################################################
 ##
 ## Copyright (C) 2013 Riverbank Computing Limited.
@@ -40,7 +39,6 @@
 ##
 #############################################################################
 
-from __future__ import unicode_literals
 from PySide2 import QtCore, QtGui, QtWidgets
 
 import classwizard_rc

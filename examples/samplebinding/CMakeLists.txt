@@ -191,7 +191,7 @@ if(WIN32)
     # Circumvent some "#pragma comment(lib)"s in "include/pyconfig.h" which might force to link
     # against a wrong python shared library.
 
-    set(python_versions_list 3 32 33 34 35 36 37 38)
+    set(python_versions_list 3 36 37 38 39)
     set(python_additional_link_flags "")
     foreach(ver ${python_versions_list})
         set(python_additional_link_flags
@@ -224,7 +224,7 @@ endif()
 install(TARGETS ${bindings_library} ${sample_library}
         LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}
         RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}
-        )    
+        )
 install(FILES ${windows_shiboken_shared_libraries} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
 # =============================================================================================
 # !!! End of dubious section.
