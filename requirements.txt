@@ -1,8 +1,5 @@
-numpy==1.16.6; python_version < '3'
-numpy; python_version >= '3'
-# setuptools from v45+ removed the support for Python 2, so we pin an old release
-setuptools==44.0.0; python_version < '3'
-setuptools; python_version >= '3'
+numpy
+setuptools
 sphinx
 six
 wheel>=0.35

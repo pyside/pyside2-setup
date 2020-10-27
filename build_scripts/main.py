@@ -228,11 +228,7 @@ def get_py_library(build_type, py_version, py_prefix, py_libdir, py_include_dir)
     return py_library
 
 
-try:
-    import setuptools
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
+import setuptools
 
 import distutils.log as log
 from distutils.errors import DistutilsSetupError
