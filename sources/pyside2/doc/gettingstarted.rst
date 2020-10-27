@@ -14,7 +14,7 @@ check the :ref:`FAQ <faq>` related to the project.
 General Requirements
 --------------------
 
- * **Python**: 3.5+ and 2.7
+ * **Python**: 3.6+
  * **Qt:** 5.12+ is recommended
  * **libclang:** The libclang library, recommended: version 10 for PySide2 5.15.
    Prebuilt versions of it can be `downloaded here`_.

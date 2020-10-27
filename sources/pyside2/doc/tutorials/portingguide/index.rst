@@ -144,11 +144,9 @@ Here are a few important ones that you must be aware of:
     functions.
 
 * **QByteArray**: A QByteArray is treated as a list of
-  bytes without encoding. The equivalent type in Python
-  varies; Python 2 uses "str" type, whereas Python 3 uses
-  "bytes". To avoid confusion, a QString is represented as
-  an encoded human readable string, which means it is
-  a "unicode" object in Python 2, and a "str" in Python 3.
+  bytes without encoding. Python 3 uses
+  "bytes". QString is represented as an encoded human readable string,
+  which means it is a "str".
 
 Here is the improved version of the Hello World example,
 demonstrating some of these differences:

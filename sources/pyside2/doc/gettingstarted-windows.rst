@@ -8,7 +8,7 @@ Requirements
 ------------
 
  * Qt package from `here`_ or a custom build of Qt 5.12+ (preferably Qt 5.15)
- * A Python interpreter (version Python 3.5+). Preferably get it from the `official website`_.
+ * A Python interpreter (version Python 3.6+). Preferably get it from the `official website`_.
  * `MSVC2017`_ (or MSVC2019) for Python 3 on Windows,
  * `CMake`_  version 3.1 or greater
  * `Git`_ version 2 or greater
@@ -17,13 +17,6 @@ Requirements
  * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
  * ``venv`` or ``virtualenv`` is strongly recommended, but optional.
  * ``sphinx`` package for the documentation (optional).
-
-.. note:: Python 2.7 interpreter is not supported.
-    The official Python 2.7 binary package offerred on the
-    `official website`_ is built using MSVC 2007, while
-    the Qt libraries are built using MSVC 2015/2017.
-    If you intend to use Python 2.7, build the interpreter yourself
-    with MSVC 2015 or later, and build Qt for Python with it.
 
 .. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
     to use it for a Windows build.

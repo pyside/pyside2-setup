@@ -126,19 +126,6 @@ If you're working with different versions, this can result in frustrating debugg
 when you think you are testing the latest version, but `PyInstaller` is working with an older
 version.
 
-Issue with numpy in Python 2.7.16
----------------------------------
-
-A recent issue with PyInstaller is the appearance of Python 2.7.16. This Python version creates
-an issue that is known from Python 3 as a `Tcl/Tk` problem. This rarely shows up in Python 3
-because `Tcl/Tk` is seldom used with `PyInstaller`.
-
-On Python 2.7.16, this problem is common, as many developers use numpy. For some reason,
-installing `numpy` creates a dependency to `Tcl/Tk`, which can be circumvented only by explicitly
-excluding `Tcl/Tk` by adding this line to spec-file's analysis section::
-
-    excludes=['FixTk', 'tcl', 'tk', '_tkinter', 'tkinter', 'Tkinter'],
-
 
 Safety Instructions
 -------------------

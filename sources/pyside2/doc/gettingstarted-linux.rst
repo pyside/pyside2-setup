@@ -5,7 +5,7 @@ Requirements
 ------------
 
  * Qt package from `here`_ or a custom build of Qt 5.12+ (preferably 5.15)
- * A Python interpreter (version Python 3.5+ or Python 2.7).
+ * A Python interpreter (version Python 3.6+).
    You can either use the one provided by your OS, or get it
    from the `official website`_.
  * GCC

@@ -5,7 +5,7 @@ Requirements
 ------------
 
  * Qt package from `here`_ or a custom build of Qt 5.12+ (preferably 5.15)
- * A Python interpreter (version Python 3.5+ or Python 2.7).
+ * A Python interpreter (version Python 3.6+).
    You can use the one provided by HomeBrew, or you can get
    python from the `official website`_.
  * `XCode`_ 8.2 (macOS 10.11), 8.3.3 (macOS 10.12), 9 (macOS 10.13), 10.1 (macOS 10.14)
