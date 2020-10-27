@@ -176,19 +176,19 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
 
         Shiboken::Conversions::SpecificConverter converter(typeName);
         if (converter) {
-            int typeId = QMetaType::fromName(typeName).id();
+            QMetaType metaType = QMetaType::fromName(typeName);
             if (!Shiboken::Conversions::pythonTypeIsObjectType(converter)) {
-                if (!typeId) {
+                if (!metaType.isValid()) {
                     PyErr_Format(PyExc_TypeError, "Value types used on meta functions (including signals) need to be "
                                                   "registered on meta type: %s", typeName.data());
                     break;
                 }
-                methValues[i] = QVariant(static_cast<QVariant::Type>(typeId));
+                methValues[i] = QVariant(metaType);
             }
             methArgs[i] = methValues[i].data();
             if (i == 0) // Don't do this for return type
                 continue;
-            if (typeId == QVariant::String) {
+            if (metaType.id() == QMetaType::QString) {
                 QString tmp;
                 converter.toCpp(PySequence_Fast_GET_ITEM(sequence.object(), i - 1), &tmp);
                 methValues[i] = tmp;

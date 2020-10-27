@@ -55,7 +55,7 @@ class PYSIDETEST_API TestObject : public QObject
     Q_OBJECT
 public:
     static void createApp() { int argc=0; new QApplication(argc, 0); };
-    static int checkType(const QVariant& var) { return (int)var.type(); }
+    static int checkType(const QVariant& var) { return var.metaType().id(); }
 
     TestObject(int idValue, QObject* parent = 0) : QObject(parent), m_idValue(idValue) {}
     int idValue() const { return m_idValue; }
