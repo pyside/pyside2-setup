@@ -217,12 +217,11 @@ def prepare_packages_win32(self, vars):
                     force=False, vars=vars, dir_filter_function=pycache_dir_filter)
             # Re-generate examples Qt resource files for Python 3
             # compatibility
-            if sys.version_info[0] == 3:
-                examples_path = "{st_build_dir}/{st_package_name}/examples".format(
-                    **vars)
-                pyside_rcc_path = "rcc.exe"
-                pyside_rcc_options = ['-g', 'python']
-                regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
+            examples_path = "{st_build_dir}/{st_package_name}/examples".format(
+                **vars)
+            pyside_rcc_path = "rcc.exe"
+            pyside_rcc_options = ['-g', 'python']
+            regenerate_qt_resources(examples_path, pyside_rcc_path, pyside_rcc_options)
 
         if vars['ssl_libs_dir']:
             # <ssl_libs>/* -> <setup>/{st_package_name}/openssl

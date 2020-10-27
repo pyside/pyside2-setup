@@ -87,10 +87,9 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
 
         # When limited API is requested, notify bdist_wheel to
         # create a properly named package.
-        limited_api_enabled = (OPTION["LIMITED_API"] == 'yes'
-                               and sys.version_info[0] >= 3)
+        limited_api_enabled = OPTION["LIMITED_API"] == 'yes'
         if limited_api_enabled:
-            self.py_limited_api = "cp35.cp36.cp37.cp38.cp39"
+            self.py_limited_api = "cp36.cp37.cp38.cp39"
 
         self._package_version = get_package_version()
 
@@ -151,7 +150,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             # relying on limited_api option.
             if (plat_name in ('linux-x86_64', 'linux_x86_64')
                     and sys.maxsize > 2147483647
-                    and (self.py_limited_api or sys.version_info[0] == 2)):
+                    and (self.py_limited_api)):
                 plat_name = 'manylinux1_x86_64'
         plat_name = plat_name.replace('-', '_').replace('.', '_')
 
@@ -175,7 +174,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             supported_tags = [(t.interpreter, t.abi, t.platform)
                               for t in tags.sys_tags()]
             # XXX switch to this alternate implementation for non-pure:
-            if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64') and sys.version_info[0] == 2):
+            if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64')):
                 return tag
             assert tag in supported_tags, ("would build wheel with unsupported tag {}".format(tag))
         return tag
@@ -194,7 +193,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         # Doesn't work for bdist_wininst
         impl_tag, abi_tag, plat_tag = self.get_tag()
         # To enable pypi upload we are adjusting the wheel name
-        pypi_ready = (OPTION["LIMITED_API"] and sys.version_info[0] >= 3) or (sys.version_info[0] == 2)
+        pypi_ready = True if OPTION["LIMITED_API"] else False
 
         def writeTag(impl):
             for abi in abi_tag.split('.'):

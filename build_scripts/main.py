@@ -155,22 +155,12 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     lib_exts = ['.so']
     if sys.platform == 'darwin':
         lib_exts.append('.dylib')
-    if sys.version_info[0] > 2:
-        lib_suff = getattr(sys, 'abiflags', None)
-    else:  # Python 2
-        lib_suff = ''
+    lib_suff = getattr(sys, 'abiflags', None)
     lib_exts.append('.so.1')
     # Suffix for OpenSuSE 13.01
     lib_exts.append('.so.1.0')
     # static library as last gasp
     lib_exts.append('.a')
-
-    if sys.version_info[0] == 2 and dbg_postfix:
-        # For Python2 add a duplicate set of extensions combined with the
-        # dbg_postfix, so we test for both the debug version of the lib
-        # and the normal one. This allows a debug PySide2 to be built with a
-        # non-debug Python.
-        lib_exts = [dbg_postfix + e for e in lib_exts] + lib_exts
 
     libs_tried = []
     for lib_ext in lib_exts:
@@ -179,23 +169,6 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
         if os.path.exists(py_library):
             return py_library
         libs_tried.append(py_library)
-    # At least on macOS 10.11, the system Python 2.6 does not include a
-    # symlink to the framework file disguised as a .dylib file, thus finding
-    # the library would fail. Manually check if a framework file "Python"
-    # exists in the Python framework bundle.
-    if sys.platform == 'darwin' and sys.version_info[:2] == (2, 6):
-        # These manipulations essentially transform
-        # /System/Library/Frameworks/Python.framework/Versions/2.6/lib
-        # to
-        # /System/Library/Frameworks/Python.framework/Versions/2.6/Python
-        possible_framework_path = os.path.realpath(os.path.join(py_libdir, '..'))
-        possible_framework_version = os.path.basename(possible_framework_path)
-        possible_framework_library = os.path.join(possible_framework_path, 'Python')
-
-        if (possible_framework_version == '2.6'
-                and os.path.exists(possible_framework_library)):
-            return possible_framework_library
-        libs_tried.append(possible_framework_library)
 
     # Try to find shared libraries which have a multi arch
     # suffix.
@@ -298,7 +271,7 @@ def prefix():
         name += "d"
     if is_debug_python():
         name += "p"
-    if OPTION["LIMITED_API"] == "yes" and sys.version_info[0] == 3:
+    if OPTION["LIMITED_API"] == "yes":
         name += "a"
     return name
 
@@ -810,7 +783,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             pass
         else:
             raise DistutilsSetupError("option limited-api must be 'yes' or 'no' "
-                                      "(default yes if applicable, i.e. python version >= 3.5)")
+                                      "(default yes if applicable, i.e. python version >= 3.6)")
 
         if OPTION["VERBOSE_BUILD"]:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
@@ -850,8 +823,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         if extension.lower() in ["shiboken2"]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
-            if sys.version_info[0] > 2:
-                cmake_cmd.append("-DUSE_PYTHON_VERSION=3.3")
+            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.6")
 
         if sys.platform == 'darwin':
             if OPTION["MACOS_ARCH"]:

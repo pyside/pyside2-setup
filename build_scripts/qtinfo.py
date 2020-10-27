@@ -143,10 +143,7 @@ class QtInfo(object):
             proc.wait()
             if proc.returncode != 0:
                 return ""
-            if sys.version_info >= (3,):
-                output = str(output, 'ascii').strip()
-            else:
-                output = output.strip()
+            output = str(output, 'ascii').strip()
             return output
 
         def _parse_query_properties(self, process_output):

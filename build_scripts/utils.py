@@ -48,11 +48,7 @@ import fnmatch
 import itertools
 import glob
 
-# There is no urllib.request in Python2
-try:
-    import urllib.request as urllib
-except ImportError:
-    import urllib
+import urllib.request as urllib
 
 import distutils.log as log
 from distutils.errors import DistutilsSetupError
@@ -376,7 +372,7 @@ def run_process_output(args, initial_env=None):
                                stdout=subprocess.PIPE).stdout
     result = []
     for raw_line in std_out.readlines():
-        line = raw_line if sys.version_info >= (3,) else raw_line.decode('utf-8')
+        line = raw_line
         result.append(line.rstrip())
     std_out.close()
     return result
@@ -439,9 +435,8 @@ def get_environment_from_batch_command(env_cmd, initial=None):
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=initial)
     # parse the output sent to stdout
     lines = proc.stdout
-    if sys.version_info[0] > 2:
-        # make sure the lines are strings
-        lines = map(lambda s: s.decode(), lines)
+    # make sure the lines are strings
+    lines = map(lambda s: s.decode(), lines)
     # consume whatever output occurs until the tag is reached
     consume(itertools.takewhile(lambda l: tag not in l, lines))
     # define a way to handle each KEY=VALUE line
@@ -475,8 +470,6 @@ def back_tick(cmd, ret_err=False):
     """
     Run command `cmd`, return stdout, or stdout, stderr,
     return_code if `ret_err` is True.
-
-    Roughly equivalent to ``check_output`` in Python 2.7
 
     Parameters
     ----------
