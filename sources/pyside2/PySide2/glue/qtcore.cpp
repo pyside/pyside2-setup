@@ -120,43 +120,39 @@ else {
 // @snippet qsettings-value
 
 // @snippet qvariant-conversion
-static const char *QVariant_resolveMetaType(PyTypeObject *type, int *typeId)
+static QMetaType QVariant_resolveMetaType(PyTypeObject *type)
 {
     if (PyObject_TypeCheck(type, SbkObjectType_TypeF())) {
         auto sbkType = reinterpret_cast<SbkObjectType *>(type);
         const char *typeName = Shiboken::ObjectType::getOriginalName(sbkType);
         if (!typeName)
-            return nullptr;
+            return {};
         const bool valueType = '*' != typeName[qstrlen(typeName) - 1];
         // Do not convert user type of value
         if (valueType && Shiboken::ObjectType::isUserType(type))
-            return nullptr;
-        int obTypeId = QMetaType::fromName(typeName).id();
-        if (obTypeId) {
-            *typeId = obTypeId;
-            return typeName;
-        }
+            return {};
+        QMetaType metaType = QMetaType::fromName(typeName);
+        if (metaType.isValid())
+            return metaType;
         // Do not resolve types to value type
         if (valueType)
-            return nullptr;
+            return {};
         // Find in base types. First check tp_bases, and only after check tp_base, because
         // tp_base does not always point to the first base class, but rather to the first
         // that has added any python fields or slots to its object layout.
         // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
         if (type->tp_bases) {
             for (int i = 0, size = PyTuple_GET_SIZE(type->tp_bases); i < size; ++i) {
-                const char *derivedName = QVariant_resolveMetaType(reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(
-                                          type->tp_bases, i)), typeId);
-                if (derivedName)
-                    return derivedName;
+                auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(type->tp_bases, i));
+                const QMetaType derived = QVariant_resolveMetaType(baseType);
+                if (derived.isValid())
+                    return derived;
             }
-        }
-        else if (type->tp_base) {
-            return QVariant_resolveMetaType(type->tp_base, typeId);
+        } else if (type->tp_base) {
+            return QVariant_resolveMetaType(type->tp_base);
         }
     }
-    *typeId = 0;
-    return nullptr;
+    return {};
 }
 static QVariant QVariant_convertToValueList(PyObject *list)
 {
@@ -167,17 +163,17 @@ static QVariant QVariant_convertToValueList(PyObject *list)
     }
 
     Shiboken::AutoDecRef element(PySequence_GetItem(list, 0));
-    int typeId;
-    const char *typeName = QVariant_resolveMetaType(element.cast<PyTypeObject *>(), &typeId);
-    if (typeName) {
+
+    const QMetaType metaType = QVariant_resolveMetaType(element.cast<PyTypeObject *>());
+    if (metaType.isValid()) {
         QByteArray listTypeName("QList<");
-        listTypeName += typeName;
+        listTypeName += metaType.name();
         listTypeName += '>';
-        typeId = QMetaType::fromName(listTypeName).id();
-        if (typeId > 0) {
+        QMetaType metaType = QMetaType::fromName(listTypeName);
+        if (metaType.isValid()) {
             Shiboken::Conversions::SpecificConverter converter(listTypeName);
             if (converter) {
-                QVariant var(static_cast<QVariant::Type>(typeId));
+                QVariant var(metaType);
                 converter.toCpp(list, &var);
                 return var;
             }
@@ -1708,17 +1704,15 @@ double in = %CONVERTTOCPP[double](%in);
 
 // @snippet conversion-sbkobject
 // a class supported by QVariant?
-int typeCode;
-const char *typeName = QVariant_resolveMetaType(Py_TYPE(%in), &typeCode);
-if (!typeCode || !typeName) {
-    // If the type was not encountered, return a default PyObjectWrapper
-    %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
-}
-else {
-    QVariant var(static_cast<QVariant::Type>(typeCode));
-    Shiboken::Conversions::SpecificConverter converter(typeName);
+const QMetaType metaType = QVariant_resolveMetaType(Py_TYPE(%in));
+if (metaType.isValid()) {
+    QVariant var(metaType);
+    Shiboken::Conversions::SpecificConverter converter(metaType.name());
     converter.toCpp(pyIn, var.data());
     %out = var;
+} else {
+    // If the type was not encountered, return a default PyObjectWrapper
+    %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
 }
 // @snippet conversion-sbkobject
 
