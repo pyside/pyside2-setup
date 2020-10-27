@@ -292,19 +292,6 @@
     </conversion-rule>
   </primitive-type>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qvariant-conversion"/>
-  <primitive-type name="QVariant::Type" default-constructor="QVariant::Invalid">
-    <conversion-rule>
-        <native-to-target file="../glue/qtcore.cpp" snippet="return-qvariant-type"/>
-        <target-to-native>
-            <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-qvariant-invalid"/>
-            <add-conversion type="PyTypeObject" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pytypeobject"/>
-            <add-conversion type="PyString" check="Shiboken::String::check(%in)" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pystring"/>
-            <add-conversion type="PyDict" check="PyDict_Check(%in) &amp;&amp; QVariantType_checkAllStringKeys(%in)" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pydict"/>
-            <add-conversion type="PySequence" file="../glue/qtcore.cpp" snippet="conversion-qvariant-pysequence"/>
-        </target-to-native>
-    </conversion-rule>
-  </primitive-type>
-
   <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qvariantmap-check"/>
   <primitive-type name="QStringList">
     <include file-name="QStringList" location="global"/>

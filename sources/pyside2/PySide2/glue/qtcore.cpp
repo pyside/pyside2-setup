@@ -1731,40 +1731,6 @@ QVariant ret = QVariant_convertToVariantList(%in);
 %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
 // @snippet conversion-pyobject
 
-// @snippet conversion-qvariant-invalid
-%out = QVariant::Invalid;
-// @snippet conversion-qvariant-invalid
-
-// @snippet conversion-qvariant-pytypeobject
-const char *typeName;
-if (Shiboken::String::checkType(reinterpret_cast<PyTypeObject *>(%in)))
-    typeName = "QString";
-else if (%in == reinterpret_cast<PyObject *>(&PyFloat_Type))
-    typeName = "double"; // float is a UserType in QVariant.
-else if (%in == reinterpret_cast<PyObject *>(&PyLong_Type))
-    typeName = "int";    // long is a UserType in QVariant.
-else if (Py_TYPE(%in) == SbkObjectType_TypeF())
-    typeName = Shiboken::ObjectType::getOriginalName((SbkObjectType *)%in);
-else
-    typeName = reinterpret_cast<PyTypeObject *>(%in)->tp_name;
-const int id = QMetaType::fromName(typeName).id();
-%out = QVariant::Type(id);
-// @snippet conversion-qvariant-pytypeobject
-
-// @snippet conversion-qvariant-pystring
-const int id = QMetaType::fromName(Shiboken::String::toCString(%in)).id();
-%out = QVariant::Type(id);
-// @snippet conversion-qvariant-pystring
-
-// @snippet conversion-qvariant-pydict
-const int id = QMetaType::fromName("QVariantMap").id();
-%out = QVariant::Type(id);
-// @snippet conversion-qvariant-pydict
-
-// @snippet conversion-qvariant-pysequence
-%out = QVariantType_isStringList(%in) ? QVariant::StringList : QVariant::List;
-// @snippet conversion-qvariant-pysequence
-
 // @snippet conversion-qjsonobject-pydict
 QVariant dict = QVariant_convertToVariantMap(%in);
 QJsonValue val = QJsonValue::fromVariant(dict);
