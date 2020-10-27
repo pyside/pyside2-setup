@@ -112,10 +112,11 @@ def get_make(platform_arch, build_type):
     """Retrieve the make command and CMake generator name"""
     (make_path, make_generator) = _get_make(platform_arch, build_type)
     if not os.path.isabs(make_path):
-        make_path = find_executable(make_path)
-        if not make_path or not os.path.exists(make_path):
+        found_path = find_executable(make_path)
+        if not found_path or not os.path.exists(found_path):
             raise DistutilsSetupError("You need the program '{}' on your system path to "
                                       "compile PySide2.".format(make_path))
+        make_path = found_path
     return (make_path, make_generator)
 
 
