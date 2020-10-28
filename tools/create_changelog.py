@@ -175,8 +175,8 @@ def git_command(versions: List[str], pattern: str):
             task_number = int(task_number_match.group(1))
         entry = {"title": title, "task": task, "task-number": task_number}
         if "shiboken" in title:
-            if sha not in shiboken2_commits:
-                shiboken2_commits[sha] = entry
+            if sha not in shiboken6_commits:
+                shiboken6_commits[sha] = entry
         else:
             if sha not in pyside2_commits:
                 pyside2_commits[sha] = entry
@@ -192,7 +192,7 @@ def create_task_log(versions: List[str]) -> None:
 
 def extract_change_log(commit_message: List[str]) -> Tuple[str, List[str]]:
     """Extract a tuple of (component, change log lines) from a commit message
-       of the form [ChangeLog][shiboken2] description..."""
+       of the form [ChangeLog][shiboken6] description..."""
     result = []
     component = 'pyside'
     within_changelog = False
@@ -219,7 +219,7 @@ def create_change_log(versions: List[str]) -> None:
     for sha in git_get_sha1s(versions, r"\[ChangeLog\]"):
         change_log = extract_change_log(get_commit_content(sha).splitlines())
         if change_log[0].startswith('shiboken'):
-            shiboken2_changelogs.extend(change_log[1])
+            shiboken6_changelogs.extend(change_log[1])
         else:
             pyside2_changelogs.extend(change_log[1])
 
@@ -239,9 +239,9 @@ if __name__ == "__main__":
 
     args = parse_options()
     pyside2_commits: Dict[str, Dict[str, str]] = {}
-    shiboken2_commits: Dict[str, Dict[str, str]] = {}
+    shiboken6_commits: Dict[str, Dict[str, str]] = {}
     pyside2_changelogs: List[str] = []
-    shiboken2_changelogs: List[str] = []
+    shiboken6_changelogs: List[str] = []
 
     # Getting commits information
     directory = args.directory if args.directory else "."
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 
     # Sort commits
     pyside2_commits = sort_dict(pyside2_commits)
-    shiboken2_commits = sort_dict(shiboken2_commits)
+    shiboken6_commits = sort_dict(shiboken6_commits)
 
     # Generate message
     print(content_header.replace("@VERSION", args.release).
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     if not pyside2_changelogs and not pyside2_commits:
         print(" - No changes")
     print(shiboken_header)
-    print('\n'.join(shiboken2_changelogs))
-    print(gen_list(shiboken2_commits))
-    if not shiboken2_changelogs and not shiboken2_commits:
+    print('\n'.join(shiboken6_changelogs))
+    print(gen_list(shiboken6_commits))
+    if not shiboken6_changelogs and not shiboken6_commits:
         print(" - No changes")

@@ -38,7 +38,7 @@ init_test_paths(True)
 
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QLabel
-import shiboken2 as shiboken
+import shiboken6 as shiboken
 
 from helper.usesqapplication import UsesQApplication
 

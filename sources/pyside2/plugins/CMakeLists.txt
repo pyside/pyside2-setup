@@ -33,7 +33,7 @@ target_link_libraries(uiplugin
                       Qt::Gui
                       Qt::UiPlugin
                       Qt::Widgets
-                      Shiboken2::libshiboken)
+                      Shiboken6::libshiboken)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_DEBUG_POSTFIX})
 else()

@@ -124,7 +124,7 @@ macro(create_pyside_module)
 
     add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
                         BYPRODUCTS ${${module_SOURCES}}
-                        COMMAND Shiboken2::shiboken2 ${GENERATOR_EXTRA_FLAGS}
+                        COMMAND Shiboken6::shiboken6 ${GENERATOR_EXTRA_FLAGS}
                         "${pyside2_BINARY_DIR}/${module_NAME}_global.h"
                         --include-paths=${shiboken_include_dirs}
                         ${shiboken_framework_include_dirs_option}
@@ -154,7 +154,7 @@ macro(create_pyside_module)
     endif()
 
     target_link_libraries(${module_NAME} ${${module_LIBRARIES}})
-    target_link_libraries(${module_NAME} Shiboken2::libshiboken)
+    target_link_libraries(${module_NAME} Shiboken6::libshiboken)
     if(${module_DEPS})
         add_dependencies(${module_NAME} ${${module_DEPS}})
     endif()

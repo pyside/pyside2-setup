@@ -147,7 +147,7 @@ class Formatter(Writer):
         self.print()
         self.print("class Object(object): pass")
         self.print()
-        self.print("import shiboken2 as Shiboken")
+        self.print("import shiboken6 as Shiboken")
         self.print("Shiboken.Object = Object")
         self.print()
         # This line will be replaced by the missing imports postprocess.

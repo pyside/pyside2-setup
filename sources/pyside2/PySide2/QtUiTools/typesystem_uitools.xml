@@ -62,7 +62,7 @@
          of the `.ui` file.
 
          (Remember that `duck punching virtual methods is an invitation for your own demise!
-         &lt;https://doc.qt.io/qtforpython/shiboken2/wordsofadvice.html#duck-punching-and-virtual-methods>`_)
+         &lt;https://doc.qt.io/qtforpython/shiboken6/wordsofadvice.html#duck-punching-and-virtual-methods>`_)
 
          Let's see an obvious example. If you want to create a new widget it's probable you'll end up
          overriding :class:`~PySide2.QtGui.QWidget`'s :meth:`~PySide2.QtGui.QWidget.paintEvent` method.

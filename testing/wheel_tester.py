@@ -111,9 +111,9 @@ def get_examples_dir():
 
 
 def package_prefix_names():
-    # Note: shiboken2_generator is not needed for compile_using_pyinstaller,
+    # Note: shiboken6_generator is not needed for compile_using_pyinstaller,
     # but building modules with cmake needs it.
-    return ["shiboken2", "shiboken2_generator", "PySide2"]
+    return ["shiboken6", "shiboken6_generator", "PySide2"]
 
 
 def clean_egg_info():

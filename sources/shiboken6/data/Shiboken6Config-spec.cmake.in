@@ -1,0 +1,41 @@
+#  SHIBOKEN_BUILD_TYPE         - Tells if Shiboken was compiled in Release or Debug mode.
+#  SHIBOKEN_PYTHON_INTERPRETER - Python interpreter (regular or debug) to be used with the bindings.
+
+@PACKAGE_INIT@
+
+# This is the version of Python against which Shiboken was built. Not necessarily the version
+# against which a downstream project is built (e.g. PySide2).
+set(SHIBOKEN_PYTHON_VERSION_MAJOR "@PYTHON_VERSION_MAJOR@")
+set(SHIBOKEN_PYTHON_VERSION_MINOR "@PYTHON_VERSION_MINOR@")
+set(SHIBOKEN_PYTHON_VERSION_PATCH "@PYTHON_VERSION_PATCH@")
+set(SHIBOKEN_PYTHON_LIMITED_API "@PYTHON_LIMITED_API@")
+
+# Import targets and call variable set up functions  only when using an installed shiboken config
+# file (so not during a regular shiboken build, or during a super project build).
+if (NOT TARGET Shiboken6::shiboken6)
+    include("${CMAKE_CURRENT_LIST_DIR}/Shiboken6Targets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/shiboken_helpers.cmake")
+
+    # Compute the python include and libraries path if needed (aka not part of super project build).
+    shiboken_find_required_python(@PYTHON_VERSION_MAJOR@)
+    shiboken_check_if_built_and_target_python_are_compatible()
+    shiboken_check_if_limited_api()
+    shiboken_compute_python_includes(IS_CALLED_FROM_EXPORT)
+    shiboken_compute_python_libraries(IS_CALLED_FROM_EXPORT)
+endif()
+
+# Get the "python interpreter" dynamic global property as a variable instead. It brings it into
+# scope for super project builds.
+get_property(SHIBOKEN_PYTHON_INTERPRETER GLOBAL PROPERTY SHIBOKEN_PYTHON_INTERPRETER)
+
+# Set static variables.
+set(SHIBOKEN_PYTHON_EXTENSION_SUFFIX "@PYTHON_EXTENSION_SUFFIX@")
+set(SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX "@PYTHON_SHARED_LIBRARY_SUFFIX@")
+set(SHIBOKEN_PYTHON_CONFIG_SUFFIX "@PYTHON_CONFIG_SUFFIX@")
+set(SHIBOKEN_SO_VERSION "@shiboken6_library_so_version@")
+set(SHIBOKEN_BUILD_TYPE "@SHIBOKEN_BUILD_TYPE@")
+
+set_and_check(SHIBOKEN_PYTHON_MODULE_DIR "@PACKAGE_SHIBOKEN_PYTHON_MODULE_DIR@")
+set_and_check(SHIBOKEN_SHARED_LIBRARY_DIR "@PACKAGE_SHIBOKEN_SHARED_LIBRARY_DIR@")
+
+message(STATUS "libshiboken built for @SHIBOKEN_BUILD_TYPE@")

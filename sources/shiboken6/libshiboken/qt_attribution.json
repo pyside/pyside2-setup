@@ -1,0 +1,12 @@
+{
+    "Id": "python",
+    "Name": "Python",
+    "QDocModule": "QtForPython",
+    "QtUsage": "Used for Qt for Python in the signature extension.",
+    "Description": "Qt for Python is an add-on for Python. The libshiboken packages of PySide uses certain parts of the source files (bufferprocs_py37.cpp, bufferprocs_py37.h). See the folder sources/shiboken6/libshiboken .",
+    "Homepage": "http://www.python.org/",
+    "Version": "3.7.0",
+    "License": "PSF LICENSE AGREEMENT FOR PYTHON 3.7.0",
+    "LicenseFile": "bufferprocs_py37.h",
+    "Copyright": "© Copyright 2001-2018, Python Software Foundation."
+}

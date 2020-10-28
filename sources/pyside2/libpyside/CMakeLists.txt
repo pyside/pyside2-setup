@@ -93,7 +93,7 @@ target_include_directories(pyside2 PUBLIC
 )
 
 target_link_libraries(pyside2
-                      PRIVATE Shiboken2::libshiboken
+                      PRIVATE Shiboken6::libshiboken
                       PRIVATE ${QML_LIBRARIES}
                       PRIVATE ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES})
 

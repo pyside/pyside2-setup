@@ -66,11 +66,11 @@ def prepare_packages_win32(self, vars):
         vars=vars)
 
     if config.is_internal_shiboken_module_build():
-        # <build>/shiboken2/doc/html/* ->
-        #   <setup>/{st_package_name}/docs/shiboken2
+        # <build>/shiboken6/doc/html/* ->
+        #   <setup>/{st_package_name}/docs/shiboken6
         copydir(
-            "{build_dir}/shiboken2/doc/html",
-            "{st_build_dir}/{st_package_name}/docs/shiboken2",
+            "{build_dir}/shiboken6/doc/html",
+            "{st_build_dir}/{st_package_name}/docs/shiboken6",
             force=False, vars=vars)
 
         # <install>/bin/*.dll -> {st_package_name}/
@@ -91,14 +91,14 @@ def prepare_packages_win32(self, vars):
         # {shibokengenerator}.pdb file.
         # Task-number: PYSIDE-615
         copydir(
-            "{build_dir}/shiboken2/shibokenmodule",
+            "{build_dir}/shiboken6/shibokenmodule",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
 
         # pdb files for libshiboken and libpyside
         copydir(
-            "{build_dir}/shiboken2/libshiboken",
+            "{build_dir}/shiboken6/libshiboken",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
@@ -126,7 +126,7 @@ def prepare_packages_win32(self, vars):
         # {shibokenmodule}.pdb file.
         # Task-number: PYSIDE-615
         copydir(
-            "{build_dir}/shiboken2/generator",
+            "{build_dir}/shiboken6/generator",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)

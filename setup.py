@@ -42,7 +42,7 @@ from __future__ import print_function
 """
 This is a distutils setup-script for the Qt for Python project
 
-To build both shiboken2 and PySide2 simply execute:
+To build both shiboken6 and PySide2 simply execute:
 
     python setup.py build
 
@@ -54,8 +54,8 @@ to build and install into your current Python installation.
 
 The same setup.py script is used to build all the components of the
 project:
-  - shiboken2 (the supporting Python module)
-  - shiboken2-generator (the bindings generation executable)
+  - shiboken6 (the supporting Python module)
+  - shiboken6-generator (the bindings generation executable)
   - PySide2
   - pyside2-tools
 
@@ -75,8 +75,8 @@ By default, all of the above is built when no special options are
 passed to the script. You can use the --build-type parameter to specify
 which things should be built:
 
-  --build-type=shiboken2 - build / package only the python module
-  --build-type=shiboken2-generator - build / package the generator
+  --build-type=shiboken6 - build / package only the python module
+  --build-type=shiboken6-generator - build / package the generator
                                      executable
   --build-type=pyside2 - build / package the PySide2 bindings and
                         and pyside2-tools
@@ -84,11 +84,11 @@ which things should be built:
 
 
 When building PySide2, optionally, one can specify the location of the
-shiboken2 cmake config path if it is not on the current PATH with:
+shiboken6 cmake config path if it is not on the current PATH with:
 
      --shiboken-config-dir=/path/to/shiboken/cmake/config/dir
 
-This is useful if you did a cmake installation of shiboken2 into
+This is useful if you did a cmake installation of shiboken6 into
 a custom location.
 
 For Windows, if OpenSSL support is required, it's necessary to specify

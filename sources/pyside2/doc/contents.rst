@@ -14,7 +14,7 @@
     licenses.rst
     modules.rst
     considerations.rst
-    shiboken2/index.rst
+    shiboken6/index.rst
 
 Module Index
 ============

@@ -72,11 +72,11 @@ def prepare_packages_posix(self, vars):
         return name + postfix
 
     if config.is_internal_shiboken_module_build():
-        # <build>/shiboken2/doc/html/* ->
-        #   <setup>/{st_package_name}/docs/shiboken2
+        # <build>/shiboken6/doc/html/* ->
+        #   <setup>/{st_package_name}/docs/shiboken6
         copydir(
-            "{build_dir}/shiboken2/doc/html",
-            "{st_build_dir}/{st_package_name}/docs/shiboken2",
+            "{build_dir}/shiboken6/doc/html",
+            "{st_build_dir}/{st_package_name}/docs/shiboken6",
             force=False, vars=vars)
 
         # <install>/lib/lib* -> {st_package_name}/
@@ -95,7 +95,7 @@ def prepare_packages_posix(self, vars):
             "{install_dir}/bin/",
             "{st_build_dir}/{st_package_name}",
             filter=[
-                "shiboken2",
+                "shiboken6",
             ],
             recursive=False, vars=vars))
 

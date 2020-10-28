@@ -36,7 +36,7 @@ init_test_paths(False)
 
 from PySide2.QtGui import QStandardItemModel, QStandardItem
 from PySide2.QtWidgets import QWidget
-import shiboken2 as shiboken
+import shiboken6 as shiboken
 
 from helper.usesqapplication import UsesQApplication
 

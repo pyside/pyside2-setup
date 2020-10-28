@@ -85,7 +85,7 @@ def prepare_standalone_package_linux(self, vars):
         # which ICU libs are used by QtCore (if used at all) using a
         # custom written ldd, and copy the ICU libs to the Pyside Qt
         # dir if necessary. We choose the QtCore lib to inspect, by
-        # checking which QtCore library the shiboken2 executable uses.
+        # checking which QtCore library the shiboken6 executable uses.
         if not maybe_icu_libs:
             copy_icu_libs(self._patchelf_path, resolved_destination_lib_dir)
 

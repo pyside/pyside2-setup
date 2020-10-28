@@ -108,7 +108,7 @@ which will generate a ``html/`` directory with the following structure::
     └── pyside2
         ├── index.html
         ├── ...
-        └── shiboken2
+        └── shiboken6
             ├── index.html
             └── ...
 
@@ -148,7 +148,7 @@ directory, and run::
 
 Finally, you will get a ``html`` directory containing all the generated documentation. The offline
 help files, ``PySide.qch`` and ``Shiboken.qch``, can be moved to any directory of your choice. You
-can find ``Shiboken.qch`` in the build directory, ``*_build\*_release\shiboken2\doc\html``.
+can find ``Shiboken.qch`` in the build directory, ``*_build\*_release\shiboken6\doc\html``.
 
 Viewing offline documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

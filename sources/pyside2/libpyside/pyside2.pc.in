@@ -11,5 +11,5 @@ Description: Support library for Python bindings of Qt5-based libraries.
 Version: @BINDING_API_VERSION_FULL@
 Libs: -L${libdir} -lpyside2@pyside2_SUFFIX@@SHIBOKEN_PYTHON_CONFIG_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@
 Cflags: -I${includedir}
-Requires: shiboken2
+Requires: shiboken6
 

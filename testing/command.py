@@ -160,8 +160,8 @@ def test_project(project, args, blacklist, runs):
 def main():
     # create the top-level command parser
     start_time = timer()
-    all_projects = "shiboken2 pyside2 pyside2-tools".split()
-    tested_projects = "shiboken2 pyside2".split()
+    all_projects = "shiboken6 pyside2 pyside2-tools".split()
+    tested_projects = "shiboken6 pyside2".split()
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent("""\

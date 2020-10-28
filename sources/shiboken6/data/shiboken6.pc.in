@@ -1,0 +1,13 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@LIB_INSTALL_DIR@
+includedir=@CMAKE_INSTALL_PREFIX@/include/shiboken6
+generator_location=@CMAKE_INSTALL_PREFIX@/bin/@SHIBOKEN_GENERATOR@
+python_interpreter=@PYTHON_EXECUTABLE@
+python_include_dir=@PYTHON_INCLUDE_DIRS@
+
+Name: shiboken6
+Description: Support library for Python bindings created with the Shiboken6 generator.
+Version: @shiboken6_VERSION@
+Libs: @SHIBOKEN_PYTHON_LIBRARIES@ -L${libdir} -lshiboken6@shiboken6_SUFFIX@@PYTHON_SHARED_LIBRARY_SUFFIX@@LIBRARY_OUTPUT_SUFFIX@
+Cflags: -I@PYTHON_INCLUDE_DIRS@ -I${includedir}/@shiboken6_SUFFIX@@SBK_PKG_CONFIG_PY_DEBUG_DEFINITION@

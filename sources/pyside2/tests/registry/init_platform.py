@@ -104,7 +104,7 @@ if not os.path.exists(os.path.join(all_build_dir, look_for)):
     sys.exit(1)
 
 pyside_build_dir = os.path.join(all_build_dir, "pyside2")
-shiboken_build_dir = os.path.join(all_build_dir, "shiboken2")
+shiboken_build_dir = os.path.join(all_build_dir, "shiboken6")
 
 # now we compute all paths:
 def set_ospaths(build_dir):
@@ -113,11 +113,11 @@ def set_ospaths(build_dir):
     old_val = os.environ.get(ospath_var, "")
     lib_path = [os.path.join(build_dir, "pyside2", "libpyside"),
                 os.path.join(build_dir, "pyside2", "tests", "pysidetest"),
-                os.path.join(build_dir, "shiboken2", "tests", "libminimal"),
-                os.path.join(build_dir, "shiboken2", "tests", "libsample"),
-                os.path.join(build_dir, "shiboken2", "tests", "libother"),
-                os.path.join(build_dir, "shiboken2", "tests", "libsmart"),
-                os.path.join(build_dir, "shiboken2", "libshiboken")]
+                os.path.join(build_dir, "shiboken6", "tests", "libminimal"),
+                os.path.join(build_dir, "shiboken6", "tests", "libsample"),
+                os.path.join(build_dir, "shiboken6", "tests", "libother"),
+                os.path.join(build_dir, "shiboken6", "tests", "libsmart"),
+                os.path.join(build_dir, "shiboken6", "libshiboken")]
     ospath = ps.join(lib_path + old_val.split(ps))
     os.environ[ospath_var] = ospath
 
@@ -136,9 +136,9 @@ import testbinding
 all_modules.append("testbinding")
 
 # Note: This is not the shiboken dir as usual, but the binary.
-import shiboken2 as Shiboken
+import shiboken6 as Shiboken
 Shiboken.__name__ = "Shiboken"
-sys.modules["Shiboken"] = sys.modules.pop("shiboken2")
+sys.modules["Shiboken"] = sys.modules.pop("shiboken6")
 all_modules.append("Shiboken")
 
 # 'sample/smart' are needed by 'other', so import them first.

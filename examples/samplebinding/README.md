@@ -139,7 +139,7 @@ For Windows you will also need:
   or all Debug).
 
 The build uses the `pyside2_config.py` file to configure the project
-using the current PySide2/Shiboken2 installation.
+using the current PySide2/Shiboken6 installation.
 
 ### Using CMake
 
@@ -232,5 +232,5 @@ In practice this means the only supported configurations are:
 This is necessary because all the shared libraries in question have to
 link to the same C++ runtime library (`msvcrt.dll` or `msvcrtd.dll`).
 To make the example as self-contained as possible, the shared libraries
-in use (`pyside2.dll`, `shiboken2.dll`) are hard-linked into the build
+in use (`pyside2.dll`, `shiboken6.dll`) are hard-linked into the build
 folder of the application.

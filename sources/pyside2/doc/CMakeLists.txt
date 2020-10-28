@@ -16,12 +16,12 @@ set(TS_ROOT "${ROOT}/PySide2")
 
 file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf.in)
 
-set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside2/shiboken2/objects.inv")
+set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside2/shiboken6/objects.inv")
 set(HAS_WEBENGINE_WIDGETS 0)
 set(SKIP_SPHINX_WARNINGS 1)
 if (FULLDOCSBUILD)
     set(SKIP_SPHINX_WARNINGS 0)
-    set(SHIBOKEN_INTERSPHINX_FILE "${CMAKE_BINARY_DIR}/doc/html/shiboken2/doc/html/objects.inv")
+    set(SHIBOKEN_INTERSPHINX_FILE "${CMAKE_BINARY_DIR}/doc/html/shiboken6/doc/html/objects.inv")
     # For Qt modules that are part of the documentation build:
     #    - Configure the module docconf file
     #    - Write shiboken header consisting of pyside2_global.h and module includes
@@ -131,10 +131,10 @@ add_custom_target(apidoc
 # and generate offline help based on the output format.
 if(DOC_OUTPUT_FORMAT STREQUAL "html")
     add_custom_command(TARGET apidoc POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken6
             COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken2/doc/html
-                    ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken2
+                    ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken6/doc/html
+                    ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken6
             COMMENT "Copying Shiboken docs..."
             VERBATIM)
 else()
@@ -151,7 +151,7 @@ configure_file("conf.py.in" "rst/conf.py" @ONLY)
 
 add_custom_target("docrsts"
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
-    COMMAND Shiboken2::shiboken2 --generator-set=qtdoc ${docHeader}
+    COMMAND Shiboken6::shiboken6 --generator-set=qtdoc ${docHeader}
             --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside2_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
             --api-version=${SUPPORTED_QT_VERSION}
             --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"

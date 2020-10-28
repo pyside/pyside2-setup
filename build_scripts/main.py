@@ -560,7 +560,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         # Save the shiboken build dir path for clang deployment
         # purposes.
-        self.shiboken_build_dir = os.path.join(self.build_dir, "shiboken2")
+        self.shiboken_build_dir = os.path.join(self.build_dir, "shiboken6")
 
         self.log_pre_build_info()
 
@@ -741,11 +741,11 @@ class PysideBuild(_build, DistUtilsCommandMixin):
         # If a custom shiboken cmake config directory path was provided, pass it to CMake.
         if OPTION["SHIBOKEN_CONFIG_DIR"] and config.is_internal_pyside_build():
             if os.path.exists(OPTION["SHIBOKEN_CONFIG_DIR"]):
-                log.info("Using custom provided shiboken2 installation: {}"
+                log.info("Using custom provided shiboken6 installation: {}"
                          .format(OPTION["SHIBOKEN_CONFIG_DIR"]))
-                cmake_cmd.append("-DShiboken2_DIR={}".format(OPTION["SHIBOKEN_CONFIG_DIR"]))
+                cmake_cmd.append("-DShiboken6_DIR={}".format(OPTION["SHIBOKEN_CONFIG_DIR"]))
             else:
-                log.info("Custom provided shiboken2 installation not found. Path given: {}"
+                log.info("Custom provided shiboken6 installation not found. Path given: {}"
                          .format(OPTION["SHIBOKEN_CONFIG_DIR"]))
 
         if OPTION["MODULE_SUBSET"]:
@@ -821,7 +821,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             timestamp = get_package_timestamp()
         cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(timestamp))
 
-        if extension.lower() in ["shiboken2"]:
+        if extension.lower() in ["shiboken6"]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             cmake_cmd.append("-DUSE_PYTHON_VERSION=3.6")
 
@@ -890,7 +890,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             raise DistutilsSetupError("Error compiling {}".format(extension))
 
         if not OPTION["SKIP_DOCS"]:
-            if extension.lower() == "shiboken2":
+            if extension.lower() == "shiboken6":
                 try:
                     # Check if sphinx is installed to proceed.
                     import sphinx
@@ -994,7 +994,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
     def prepare_standalone_clang(self, is_win=False):
         """
-        Copies the libclang library to the shiboken2-generator
+        Copies the libclang library to the shiboken6-generator
         package so that the shiboken executable works.
         """
         log.info('Finding path to the libclang shared library.')
@@ -1028,7 +1028,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
                                     'bin/libclang.dll',
                                     clang_lib_path)
         else:
-            # shiboken2 links against libclang.so.6 or a similarly
+            # shiboken6 links against libclang.so.6 or a similarly
             # named library.
             # If the linked against library is a symlink, resolve
             # the symlink once (but not all the way to the real
@@ -1144,9 +1144,9 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             try:
                 # Check if sphinx is installed to proceed.
                 import sphinx
-                if self.name == "shiboken2":
+                if self.name == "shiboken6":
                     log.info("-- Generating Shiboken documentation")
-                    log.info("-- Documentation directory: 'html/pyside2/shiboken2/'")
+                    log.info("-- Documentation directory: 'html/pyside2/shiboken6/'")
                 elif self.name == "pyside2":
                     log.info("-- Generating PySide documentation")
                     log.info("-- Documentation directory: 'html/pyside2/'")
@@ -1154,15 +1154,15 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
                 raise DistutilsSetupError("Sphinx not found - aborting")
             self.html_dir = "html"
 
-            # creating directories html/pyside2/shiboken2
+            # creating directories html/pyside2/shiboken6
             try:
                 if not os.path.isdir(self.html_dir):
                     os.mkdir(self.html_dir)
-                if self.name == "shiboken2":
+                if self.name == "shiboken6":
                     out_pyside = os.path.join(self.html_dir, "pyside2")
                     if not os.path.isdir(out_pyside):
                         os.mkdir(out_pyside)
-                    out_shiboken = os.path.join(out_pyside, "shiboken2")
+                    out_shiboken = os.path.join(out_pyside, "shiboken6")
                     if not os.path.isdir(out_shiboken):
                         os.mkdir(out_shiboken)
                     self.out_dir = out_shiboken
@@ -1187,7 +1187,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
 
             if self.name == "pyside2":
                 self.sphinx_src = os.path.join(self.out_dir, "rst")
-            elif self.name == "shiboken2":
+            elif self.name == "shiboken6":
                 self.sphinx_src = self.out_dir
 
             sphinx_cmd = ["sphinx-build", "-b", "html", "-c", self.sphinx_src,

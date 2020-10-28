@@ -33,7 +33,7 @@ import sys
 
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(SRC_DIR)),
-                             'shiboken2', 'tests'))
+                             'shiboken6', 'tests'))
 from shiboken_paths import (get_dir_env_var, get_build_dir, add_python_dirs,
                             add_lib_dirs, shiboken_paths)
 
@@ -68,7 +68,7 @@ def _get_qt_lib_dir():
 
 def _init_test_paths(shiboken_tests=False, testbindings_module=False):
     """Sets the correct import paths (Python modules and C++ library paths)
-       for PySide tests and shiboken2 tests using depending on the environment
+       for PySide tests and shiboken6 tests using depending on the environment
        variables BUILD_DIR and QT_DIR pointing to the build directory and
        Qt directory, respectively."""
     src_dir = os.path.dirname(os.path.abspath(__file__))
@@ -99,6 +99,6 @@ def init_test_paths(testbindings_module=False):
 
 
 def init_all_test_paths():
-    """Sets the correct import paths for PySide2 and shiboken2 tests
+    """Sets the correct import paths for PySide2 and shiboken6 tests
        (for registry checking only)."""
     _init_test_paths(True, True)

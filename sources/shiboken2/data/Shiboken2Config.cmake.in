@@ -1,5 +1,0 @@
-if (NOT PYTHON_CONFIG_SUFFIX)
-    message(STATUS "Shiboken2Config: Using default python: @PYTHON_CONFIG_SUFFIX@")
-    SET(PYTHON_CONFIG_SUFFIX @PYTHON_CONFIG_SUFFIX@)
-endif()
-include("${CMAKE_CURRENT_LIST_DIR}/Shiboken2Config${PYTHON_CONFIG_SUFFIX}.cmake")

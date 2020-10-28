@@ -20,7 +20,7 @@ After installation, the `pyinstaller` binary is located in your virtual environm
 directory, or where your Python executable is located. If that directory isn't in your `PATH`,
 include the whole path when you run `pyinstaller`.
 
-.. warning:: If you already have a PySide2 or Shiboken2 version installed in your
+.. warning:: If you already have a PySide2 or Shiboken6 version installed in your
    system path, PyInstaller uses them instead of your virtual environment version.
 
 Freeze an application
@@ -119,7 +119,7 @@ PyInstaller Issue
 -----------------
 
 As mentioned before, if available, `PyInstaller` picks a system installation of PySide2 or
-Shiboken2 instead of your `virtualenv` version without notice. This is negligible if those
+Shiboken6 instead of your `virtualenv` version without notice. This is negligible if those
 two versions are the same.
 
 If you're working with different versions, this can result in frustrating debugging sessions
@@ -144,13 +144,13 @@ Safety Instructions
 -------------------
 
 - When using `PyInstaller` with `virtualenv`, make sure that there is no system
-  installation of PySide2 or shiboken2.
+  installation of PySide2 or shiboken6.
 
-- Before compiling, use `pip -uninstall pyside2 shiboken2 -y` multiple times, until
+- Before compiling, use `pip -uninstall pyside2 shiboken6 -y` multiple times, until
   none of the programs are found anymore.
 
 - Pip is usually a good tool. But to be 100 % sure, you should directly remove
-  the PySide2 and shiboken2 folders from site-packages.
+  the PySide2 and shiboken6 folders from site-packages.
 
 - Be sure to use the right version of pip. The safest way to really run the right
   pip, is to use the Python that you mean: Instead of the pip command, better use::

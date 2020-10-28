@@ -173,9 +173,9 @@ html_show_sourcelink = False
 # Output file base name for HTML help builder.
 #htmlhelp_basename = 'PySideDoc'
 
-# Link to the shiboken2 sphinx project to enable linking
+# Link to the shiboken6 sphinx project to enable linking
 # between the two projects.
-intersphinx_mapping = {'shiboken2': ('shiboken2','@SHIBOKEN_INTERSPHINX_FILE@')}
+intersphinx_mapping = {'shiboken6': ('shiboken6','@SHIBOKEN_INTERSPHINX_FILE@')}
 
 add_module_names = False
 

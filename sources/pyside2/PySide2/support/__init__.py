@@ -37,6 +37,6 @@
 ##
 #############################################################################
 
-from shiboken2 import VoidPtr
+from shiboken6 import VoidPtr
 
 #eof

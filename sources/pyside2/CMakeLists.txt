@@ -11,7 +11,7 @@ set (QT_MAJOR_VERSION 6)
 project(pysidebindings)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_helpers/
-                      ${CMAKE_CURRENT_SOURCE_DIR}/../shiboken2/data/
+                      ${CMAKE_CURRENT_SOURCE_DIR}/../shiboken6/data/
                       ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros/
                       ${CMAKE_MODULE_PATH})
 include(shiboken_helpers)
@@ -63,7 +63,7 @@ else()
     set(PATH_SEP ":")
 endif()
 
-find_package(Shiboken2 2.0.0 REQUIRED)
+find_package(Shiboken6 2.0.0 REQUIRED)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "${SHIBOKEN_BUILD_TYPE}" CACHE STRING "Build Type")

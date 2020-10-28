@@ -7,7 +7,7 @@
     has two main components:
 
     * `PySide2`_, so that you can use Qt5 APIs in your Python applications, and
-    * `Shiboken2 <shiboken2/index.html>`__, a binding generator tool, which can
+    * `Shiboken6 <shiboken6/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
 
@@ -17,7 +17,7 @@
     has two main components:
 
     * `PySide2`_, so that you can use Qt5 APIs in your Python applications, and
-    * `Shiboken2 <../shiboken2/index.html>`__, a binding generator tool, which can
+    * `Shiboken6 <../shiboken6/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
 
@@ -57,7 +57,7 @@ Documentation
             <tr>
                 <td><a href="deployment.html" style="display: block;"><p><strong>Deployment</strong><br/>Learn to deploy your apps.</p></a></td>
                 <td><a href="considerations.html" style="display: block;"><p><strong>Considerations</strong><br/>API differences and known issues.</p></a></td>
-                <td><a href="shiboken2/index.html" style="display: block;"><p><strong>Shiboken</strong><br/>Generate C++ to Python binding.</p></a></td>
+                <td><a href="shiboken6/index.html" style="display: block;"><p><strong>Shiboken</strong><br/>Generate C++ to Python binding.</p></a></td>
             </tr>
         </table>
 
@@ -86,7 +86,7 @@ Documentation
             <tr>
                 <td><a href="deployment.html" style="display: block;"><p><strong>Deployment</strong><br/>Learn to deploy your apps.</p></a></td>
                 <td><a href="considerations.html" style="display: block;"><p><strong>Considerations</strong><br/>API differences and known issues.</p></a></td>
-                <td><a href="../shiboken2/index.html" style="display: block;"><p><strong>Shiboken</strong><br/>Generate C++ to Python binding.</p></a></td>
+                <td><a href="../shiboken6/index.html" style="display: block;"><p><strong>Shiboken</strong><br/>Generate C++ to Python binding.</p></a></td>
             </tr>
         </table>
 

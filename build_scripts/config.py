@@ -57,10 +57,10 @@ class Config(object):
         self.invocation_type = None
 
         # The type of the top-level build.
-        # all - build shiboken2 module, shiboken2-generator and PySide2
+        # all - build shiboken6 module, shiboken6-generator and PySide2
         #       modules
-        # shiboken2 - build only shiboken2 module
-        # shiboken2-generator - build only the shiboken2-generator
+        # shiboken6 - build only shiboken6 module
+        # shiboken6-generator - build only the shiboken6-generator
         # pyside2 - build only PySide2 modules
         self.build_type = None
 
@@ -70,15 +70,15 @@ class Config(object):
 
         # Options that can be given to --build-type and
         # --internal-build-type
-        self.shiboken_module_option_name = "shiboken2"
-        self.shiboken_generator_option_name = "shiboken2-generator"
+        self.shiboken_module_option_name = "shiboken6"
+        self.shiboken_generator_option_name = "shiboken6-generator"
         self.pyside_option_name = "pyside2"
 
         # Names to be passed to setuptools.setup() name key,
         # so not package name, but rather project name as it appears
         # in the wheel name and on PyPi.
-        self.shiboken_module_st_name = "shiboken2"
-        self.shiboken_generator_st_name = "shiboken2-generator"
+        self.shiboken_module_st_name = "shiboken6"
+        self.shiboken_generator_st_name = "shiboken6-generator"
         self.pyside_st_name = "PySide2"
 
         # Used by check_allowed_python_version to validate the
@@ -200,7 +200,7 @@ class Config(object):
             setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
-                    'shiboken2 = {}.scripts.shiboken_tool:main'.format(self.package_name()),
+                    'shiboken6 = {}.scripts.shiboken_tool:main'.format(self.package_name()),
                 ]
             }
 
@@ -223,9 +223,9 @@ class Config(object):
         changes_filename = 'CHANGES.rst'
 
         if self.is_internal_shiboken_module_build():
-            readme_filename = 'README.shiboken2.md'
+            readme_filename = 'README.shiboken6.md'
         elif self.is_internal_shiboken_generator_build():
-            readme_filename = 'README.shiboken2-generator.md'
+            readme_filename = 'README.shiboken6-generator.md'
         elif self.is_internal_pyside_build():
             readme_filename = 'README.pyside2.md'
 
@@ -264,9 +264,9 @@ class Config(object):
         dashes.
         """
         if self.is_internal_shiboken_module_build():
-            return "shiboken2"
+            return "shiboken6"
         elif self.is_internal_shiboken_generator_build():
-            return "shiboken2_generator"
+            return "shiboken6_generator"
         elif self.is_internal_pyside_build():
             return "PySide2"
         else:
@@ -298,8 +298,8 @@ class Config(object):
         the actual module packages are located.
 
         For example when building the shiboken module, setuptools will
-        expect to find the "shiboken2" module sources under
-        "sources/shiboken2/shibokenmodule".
+        expect to find the "shiboken6" module sources under
+        "sources/shiboken6/shibokenmodule".
 
         This is really just to satisfy some checks in setuptools
         build_py command, and if we ever properly implement the develop
@@ -307,7 +307,7 @@ class Config(object):
         """
         if self.is_internal_shiboken_module_build():
             return {
-                self.package_name(): "sources/shiboken2/shibokenmodule"
+                self.package_name(): "sources/shiboken6/shibokenmodule"
             }
         elif self.is_internal_shiboken_generator_build():
             # This is left empty on purpose, because the shiboken
@@ -326,7 +326,7 @@ class Config(object):
         :return: A list of directory names under the sources directory.
         """
         if self.is_internal_shiboken_module_build() or self.is_internal_shiboken_generator_build():
-            return ['shiboken2']
+            return ['shiboken6']
         elif self.is_internal_pyside_build():
             return ['pyside2', 'pyside-tools']
         return None
@@ -371,7 +371,7 @@ class Config(object):
         """
         Used to skip certain build rules and output, when we know that
         the CMake build of shiboken was already done as part of the
-        top-level "all" build when shiboken2-module was built.
+        top-level "all" build when shiboken6-module was built.
         """
         return self.is_internal_shiboken_generator_build() and self.is_top_level_build_all()
 

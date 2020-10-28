@@ -55,7 +55,7 @@ from PySide2.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout,
     QSlider)
 from PySide2.QtOpenGLWidgets import QOpenGLWidget
 
-from shiboken2 import VoidPtr
+from shiboken6 import VoidPtr
 
 try:
     from OpenGL import GL

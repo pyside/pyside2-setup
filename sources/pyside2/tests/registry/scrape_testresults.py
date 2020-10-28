@@ -344,7 +344,7 @@ if __name__ == "__main__":
             Enforces evaluation when a scan did not complete yet.
 
             For more information, see the file
-                sources/shiboken2/libshiboken/signature_doc.rst
+                sources/shiboken6/libshiboken/signature_doc.rst
             """))
     subparsers = parser.add_subparsers(dest="command", metavar="", title="required argument")
     # create the parser for the "scan" command

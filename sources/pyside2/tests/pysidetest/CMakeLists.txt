@@ -68,7 +68,7 @@ endif()
 
 make_path(testbinding_include_dirs  ${pyside2_BINARY_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken2/libshiboken
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken6/libshiboken
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide2
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../libpyside
                                     ${QT_INCLUDE_DIR}
@@ -83,7 +83,7 @@ make_path(testbinding_typesystem_path ${pyside2_SOURCE_DIR}
 add_custom_command(
 OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
         BYPRODUCTS ${testbinding_SRC}
-        COMMAND Shiboken2::shiboken2 ${GENERATOR_EXTRA_FLAGS}
+        COMMAND Shiboken6::shiboken6 ${GENERATOR_EXTRA_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/pysidetest_global.h
         --include-paths=${testbinding_include_dirs}
         ${shiboken_framework_include_dirs_option}
@@ -111,7 +111,7 @@ set_target_properties(pysidetest PROPERTIES
                       DEFINE_SYMBOL BUILD_PYSIDETEST)
 
 target_link_libraries(pysidetest
-                      Shiboken2::libshiboken
+                      Shiboken6::libshiboken
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
@@ -134,7 +134,7 @@ target_link_libraries(testbinding
                       pysidetest
                       pyside2
                       ${TESTBINDING_PYTHON_LIBS}
-                      Shiboken2::libshiboken
+                      Shiboken6::libshiboken
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})

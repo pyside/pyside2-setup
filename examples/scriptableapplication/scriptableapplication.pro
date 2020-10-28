@@ -23,7 +23,7 @@ SHIBOKEN_OPTIONS = --generator-set=shiboken --enable-parent-ctor-heuristic \
 win32:SHIBOKEN_OPTIONS += --avoid-protected-hack
 
 # Prepare the shiboken tool
-QT_TOOL.shiboken.binary = $$system_path($$SHIBOKEN2_GENERATOR/shiboken2)
+QT_TOOL.shiboken.binary = $$system_path($$SHIBOKEN6_GENERATOR/shiboken6)
 qtPrepareTool(SHIBOKEN, shiboken)
 
 # Shiboken run that adds the module wrapper to GENERATED_SOURCES
@@ -61,7 +61,7 @@ win32 {
     hard_link_libraries.CONFIG = no_link target_predeps explicit_dependencies
     hard_link_libraries.output = $$out_dir/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}
     hard_link_libraries.commands = mklink /H $$shell_path($$out_dir/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}) $$shell_path(${QMAKE_FILE_IN})
-    hard_link_libraries.input = PYSIDE2_SHARED_LIBRARIES SHIBOKEN2_SHARED_LIBRARIES
+    hard_link_libraries.input = PYSIDE2_SHARED_LIBRARIES SHIBOKEN6_SHARED_LIBRARIES
 }
 
 QMAKE_EXTRA_COMPILERS += shiboken module_wrapper_dummy_command
