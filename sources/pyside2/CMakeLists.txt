@@ -98,10 +98,18 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# >= Qt5: QT_INCLUDE_DIR does no longer exist. Derive from QtCore
-get_target_property(QT_INCLUDE_DIR Qt6::Core INTERFACE_INCLUDE_DIRECTORIES)
-get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}" DIRECTORY)
-message(STATUS "*** Qt ${QT_MAJOR_VERSION}, QT_INCLUDE_DIR= ${QT_INCLUDE_DIR}")
+# Obtain QT_INCLUDE_DIR from INTERFACE_INCLUDE_DIRECTORIES which returns a list
+# ../install-qt-6/include/QtCore;../install-qt-6/include
+set(QT_INCLUDE_DIR "")
+get_target_property(QT_INCLUDE_DIR_LIST Qt6::Core INTERFACE_INCLUDE_DIRECTORIES)
+foreach(_Q ${QT_INCLUDE_DIR_LIST})
+    if(NOT "${_Q}" MATCHES "QtCore$")
+        set(QT_INCLUDE_DIR "${_Q}")
+    endif()
+endforeach()
+if (QT_INCLUDE_DIR STREQUAL "")
+    message(FATAL_ERROR "Unable to obtain the Qt include directory")
+endif()
 
 # On macOS, check if Qt is a framework build. This affects how include paths should be handled.
 get_target_property(QtCore_is_framework Qt${QT_MAJOR_VERSION}::Core FRAMEWORK)
