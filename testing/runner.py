@@ -209,7 +209,7 @@ class TestRunner(object):
                                        stdin=ctest_process.stdout)
         try:
             comm = tee_process.communicate
-            output = (comm(timeout=timeout)
+            output = comm(timeout=timeout)[0]
         except (TimeoutExpired, KeyboardInterrupt):
             print()
             print("aborted, partial result")
