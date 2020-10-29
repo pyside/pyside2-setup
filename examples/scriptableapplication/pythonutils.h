@@ -51,9 +51,9 @@
 #ifndef PYTHONUTILS_H
 #define PYTHONUTILS_H
 
+#include <QtCore/QStringList>
+
 class QObject;
-class QString;
-class QStringList;
 
 namespace PythonUtils {
 

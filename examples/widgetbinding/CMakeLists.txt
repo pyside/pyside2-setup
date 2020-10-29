@@ -15,7 +15,10 @@ endif()
 project(wiggly LANGUAGES CXX)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-find_package(Qt5 5.12 REQUIRED COMPONENTS Core Gui Widgets)
+
+find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 COMPONENTS Gui)
+find_package(Qt6 COMPONENTS Widgets)
 
 # ================================ General configuration ======================================
 
@@ -114,9 +117,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 
 # Get all relevant Qt include dirs, to pass them on to shiboken.
-get_property(QT_CORE_INCLUDE_DIRS TARGET Qt5::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-get_property(QT_GUI_INCLUDE_DIRS TARGET Qt5::Gui PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-get_property(QT_WIDGETS_INCLUDE_DIRS TARGET Qt5::Widgets PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+get_property(QT_CORE_INCLUDE_DIRS TARGET Qt6::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+get_property(QT_GUI_INCLUDE_DIRS TARGET Qt6::Gui PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+get_property(QT_WIDGETS_INCLUDE_DIRS TARGET Qt6::Widgets PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 set(QT_INCLUDE_DIRS ${QT_CORE_INCLUDE_DIRS} ${QT_GUI_INCLUDE_DIRS} ${QT_WIDGETS_INCLUDE_DIRS})
 set(INCLUDES "")
 foreach(INCLUDE_DIR ${QT_INCLUDE_DIRS})
@@ -124,7 +127,7 @@ foreach(INCLUDE_DIR ${QT_INCLUDE_DIRS})
 endforeach()
 
 # On macOS, check if Qt is a framework build. This affects how include paths should be handled.
-get_target_property(QtCore_is_framework Qt5::Core FRAMEWORK)
+get_target_property(QtCore_is_framework Qt6::Core FRAMEWORK)
 if (QtCore_is_framework)
     get_target_property(qt_core_library_location Qt5::Core LOCATION)
     get_filename_component(qt_core_library_location_dir "${qt_core_library_location}" DIRECTORY)
@@ -193,8 +196,8 @@ target_include_directories(${bindings_library} PRIVATE ${pyside2_include_dir})
 target_include_directories(${bindings_library} PRIVATE ${python_include_dir})
 target_include_directories(${bindings_library} PRIVATE ${shiboken_include_dir})
 
-target_link_libraries(${wiggly_library} PRIVATE Qt5::Widgets)
-target_link_libraries(${bindings_library} PRIVATE Qt5::Widgets)
+target_link_libraries(${wiggly_library} PRIVATE Qt6::Widgets)
+target_link_libraries(${bindings_library} PRIVATE Qt6::Widgets)
 target_link_libraries(${bindings_library} PRIVATE ${wiggly_library})
 target_link_libraries(${bindings_library} PRIVATE ${pyside2_shared_libraries})
 target_link_libraries(${bindings_library} PRIVATE ${shiboken_shared_libraries})
