@@ -34,6 +34,6 @@
     This example demonstrates the itemview architecture, which
     is unique to Qt.
 
-    \image pyside2example-stardelegate.png
+    \image pysideexample-stardelegate.png
 */
 

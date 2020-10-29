@@ -34,6 +34,6 @@
     This example demonstrates the use a custom QDialog in a wizard,
     which generates necessary C++ class template code.
 
-    \image pyside2example-classwizard.png
+    \image pysideexample-classwizard.png
 
 */

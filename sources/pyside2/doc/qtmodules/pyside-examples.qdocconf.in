@@ -1,6 +1,6 @@
 include(@QT_SRC_DIR@/doc/global/qt-module-defaults.qdocconf)
 
-project = Pyside2Examples
+project = PysideExamples
 description = Qt for Python Examples
 version = $QT_VERSION
 

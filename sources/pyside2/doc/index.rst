@@ -100,5 +100,5 @@ We have also a `wiki page`_ where you can find how to report bugs, contribute or
 
    contents.rst
    gettingstarted*
-   pyside-examples/pyside2examples*
+   pyside-examples/pysideexamples*
    overviews/*
