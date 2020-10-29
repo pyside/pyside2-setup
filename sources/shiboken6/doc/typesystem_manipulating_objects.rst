@@ -210,6 +210,41 @@ add-function
 
         void foo(int @parameter1@,float)
 
+.. _declare-function:
+
+declare-function
+^^^^^^^^^^^^^^^^
+
+    The declare-function node allows you to declare a function present in the
+    type.
+
+    .. code-block:: xml
+
+         <container-type>
+             <declare-function signature="..." return-type="..." since="..."/>
+         </container-type>
+
+    The ``return-type`` attribute defaults to *void*.
+
+    The ``since`` attribute specifies the API version when this function was
+    added.
+
+    This is useful to make functions known to shiboken which its code parser
+    does not detect. For example, in Qt 6, the ``append()`` function of the
+    ``QList<T>`` container takes an argument of ``parameter_type`` which is
+    specialized to ``T`` for simple types and ``const T &`` for complex types
+    by some template expression which the code parser cannot resolve.
+    In that case, the function can be declared with a simple signature:
+
+    .. code-block:: xml
+
+         <container-type name="QList">
+             <declare-function signature="append(T)"/>
+         </container-type>
+
+    This tells shiboken a public function of that signature exists and
+    bindings will be created in specializations of ``QList``.
+
 .. _conversion-rule-on-types:
 
 conversion-rule

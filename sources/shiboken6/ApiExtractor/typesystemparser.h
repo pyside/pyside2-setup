@@ -84,11 +84,12 @@ class StackElement
             TemplateInstanceEnum        = 0x0e00,
             Replace                     = 0x0f00,
             AddFunction                 = 0x1000,
-            NativeToTarget              = 0x1100,
-            TargetToNative              = 0x1200,
-            AddConversion               = 0x1300,
-            SystemInclude               = 0x1400,
-            Property                    = 0x1500,
+            DeclareFunction             = 0x1100,
+            NativeToTarget              = 0x1200,
+            TargetToNative              = 0x1300,
+            AddConversion               = 0x1400,
+            SystemInclude               = 0x1500,
+            Property                    = 0x1600,
             SimpleMask                  = 0x3f00,
 
             // Code snip tags (0x1000, 0x2000, ... , 0xf000)
@@ -232,7 +233,7 @@ private:
                      const StackElement &topElement, QXmlStreamAttributes *);
     bool parseModifyField(const QXmlStreamReader &, QXmlStreamAttributes *);
     bool parseAddFunction(const QXmlStreamReader &, const StackElement &topElement,
-                          QXmlStreamAttributes *);
+                          StackElement::ElementType t, QXmlStreamAttributes *);
     bool parseProperty(const QXmlStreamReader &, const StackElement &topElement,
                        QXmlStreamAttributes *);
     bool parseModifyFunction(const QXmlStreamReader &, const StackElement &topElement,

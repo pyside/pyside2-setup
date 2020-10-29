@@ -353,6 +353,11 @@ QString AbstractMetaFunction::signature() const
     return m_cachedSignature;
 }
 
+bool AbstractMetaFunction::isUserAdded() const
+{
+    return !m_addedFunction.isNull() && !m_addedFunction->isDeclaration();
+}
+
 int AbstractMetaFunction::actualMinimumArgumentCount() const
 {
     AbstractMetaArgumentList arguments = this->arguments();

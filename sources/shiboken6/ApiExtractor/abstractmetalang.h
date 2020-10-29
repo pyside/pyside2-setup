@@ -599,7 +599,7 @@ public:
     }
 
     /// Returns true if the AbstractMetaFunction was added by the user via the type system description.
-    bool isUserAdded() const { return !m_addedFunction.isNull(); }
+    bool isUserAdded() const;
 
     QString toString() const
     {

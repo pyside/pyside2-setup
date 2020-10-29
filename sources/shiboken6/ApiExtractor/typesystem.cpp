@@ -632,6 +632,8 @@ QDebug operator<<(QDebug d, const AddedFunction &af)
     d << af.returnType() << ' ' << af.name() << '(' << af.arguments() << ')';
     if (af.isConstant())
         d << " const";
+    if (af.isDeclaration())
+        d << " [declaration]";
     return d;
 }
 #endif // !QT_NO_DEBUG_STREAM

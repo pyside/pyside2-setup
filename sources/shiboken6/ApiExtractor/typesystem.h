@@ -491,6 +491,9 @@ struct AddedFunction
         return m_isStatic;
     }
 
+    bool isDeclaration() const { return m_isDeclaration; } // <declare-function>
+    void setDeclaration(bool value) { m_isDeclaration = value; }
+
     FunctionModificationList modifications;
 
 private:
@@ -500,6 +503,7 @@ private:
     Access m_access = Protected;
     bool m_isConst = false;
     bool m_isStatic = false;
+    bool m_isDeclaration = false;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -348,6 +348,7 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"custom-constructor", StackElement::CustomMetaConstructor},
         {u"custom-destructor", StackElement::CustomMetaDestructor},
         {u"custom-type", StackElement::CustomTypeEntry},
+        {u"declare-function", StackElement::DeclareFunction},
         {u"define-ownership", StackElement::DefineOwnership},
         {u"enum-type", StackElement::EnumTypeEntry},
         {u"extra-includes", StackElement::ExtraIncludes},
@@ -2219,11 +2220,12 @@ static bool parseOverloadNumber(const QXmlStreamAttribute &attribute, int *overl
 }
 
 bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
-                               const StackElement &topElement,
-                               QXmlStreamAttributes *attributes)
+                                        const StackElement &topElement,
+                                        StackElement::ElementType t,
+                                        QXmlStreamAttributes *attributes)
 {
     if (!(topElement.type & (StackElement::ComplexTypeEntryMask | StackElement::Root))) {
-        m_error = QString::fromLatin1("Add function requires a complex type or a root tag as parent"
+        m_error = QString::fromLatin1("Add/Declare function requires a complex/container type or a root tag as parent"
                                       ", was=%1").arg(topElement.type, 0, 16);
         return false;
     }
@@ -2275,6 +2277,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
         }
         func->setAccess(a);
     }
+    func->setDeclaration(t == StackElement::DeclareFunction);
 
     m_contextStack.top()->addedFunctions << func;
     m_contextStack.top()->addedFunctionModificationIndex =
@@ -3087,8 +3090,9 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             if (!parseModifyField(reader, &attributes))
                 return false;
             break;
+        case StackElement::DeclareFunction:
         case StackElement::AddFunction:
-            if (!parseAddFunction(reader, topElement, &attributes))
+            if (!parseAddFunction(reader, topElement, element->type, &attributes))
                 return false;
             break;
         case StackElement::Property:
