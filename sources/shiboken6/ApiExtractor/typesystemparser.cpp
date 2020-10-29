@@ -790,6 +790,7 @@ bool TypeSystemParser::endElement(QStringView localName)
     case StackElement::ObjectTypeEntry:
     case StackElement::ValueTypeEntry:
     case StackElement::InterfaceTypeEntry:
+    case StackElement::ContainerTypeEntry:
     case StackElement::NamespaceTypeEntry: {
         auto *centry = static_cast<ComplexTypeEntry *>(m_current->entry);
         auto top = m_contextStack.top();
@@ -906,6 +907,7 @@ bool TypeSystemParser::endElement(QStringView localName)
     case StackElement::ValueTypeEntry:
     case StackElement::PrimitiveTypeEntry:
     case StackElement::TypedefTypeEntry:
+    case StackElement::ContainerTypeEntry:
         delete m_contextStack.pop();
         break;
     default:
@@ -2224,7 +2226,8 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
                                         StackElement::ElementType t,
                                         QXmlStreamAttributes *attributes)
 {
-    if (!(topElement.type & (StackElement::ComplexTypeEntryMask | StackElement::Root))) {
+    if (!(topElement.type
+          & (StackElement::ComplexTypeEntryMask | StackElement::Root | StackElement::ContainerTypeEntry))) {
         m_error = QString::fromLatin1("Add/Declare function requires a complex/container type or a root tag as parent"
                                       ", was=%1").arg(topElement.type, 0, 16);
         return false;
@@ -2816,6 +2819,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
     case StackElement::ValueTypeEntry:
     case StackElement::PrimitiveTypeEntry:
     case StackElement::TypedefTypeEntry:
+    case StackElement::ContainerTypeEntry:
         m_contextStack.push(new StackElementContext());
         break;
     default:
