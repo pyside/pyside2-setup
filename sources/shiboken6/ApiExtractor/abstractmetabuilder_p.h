@@ -143,6 +143,7 @@ public:
                             AbstractMetaFunction *fnc, AbstractMetaClass *,
                             int argumentIndex);
     AbstractMetaType translateType(const AddedFunction::TypeInfo &typeInfo,
+                                   AbstractMetaClass *currentClass,
                                    QString *errorMessage);
     AbstractMetaType translateType(const TypeInfo &type,
                                    AbstractMetaClass *currentClass,
@@ -153,9 +154,13 @@ public:
                                                 AbstractMetaBuilderPrivate *d = nullptr,
                                                 TranslateTypeFlags flags = {},
                                                 QString *errorMessageIn = nullptr);
+    static TypeEntries findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
+                                             AbstractMetaClass *currentClass = nullptr,
+                                             AbstractMetaBuilderPrivate *d = nullptr);
     static TypeEntries findTypeEntries(const QString &qualifiedName, const QString &name,
                                        AbstractMetaClass *currentClass = nullptr,
-                                       AbstractMetaBuilderPrivate *d = nullptr);
+                                       AbstractMetaBuilderPrivate *d = nullptr,
+                                       QString *errorMessage = nullptr);
 
     qint64 findOutValueFromString(const QString &stringValue, bool &ok);
 

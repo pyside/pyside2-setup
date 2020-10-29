@@ -1532,7 +1532,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 {
     QString errorMessage;
 
-    AbstractMetaType returnType = translateType(addedFunc->returnType(), &errorMessage);
+    AbstractMetaType returnType = translateType(addedFunc->returnType(), metaClass, &errorMessage);
     if (!returnType) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgAddedFunctionInvalidReturnType(addedFunc->name(),
@@ -1549,7 +1549,7 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
     for (int i = 0; i < args.count(); ++i) {
         const AddedFunction::TypeInfo& typeInfo = args.at(i).typeInfo;
-        AbstractMetaType type = translateType(typeInfo, &errorMessage);
+        AbstractMetaType type = translateType(typeInfo, metaClass, &errorMessage);
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgAddedFunctionInvalidArgType(addedFunc->name(),
@@ -1982,7 +1982,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 }
 
 AbstractMetaType AbstractMetaBuilderPrivate::translateType(const AddedFunction::TypeInfo &typeInfo,
-                                                            QString *errorMessage)
+                                                           AbstractMetaClass *currentClass,
+                                                           QString *errorMessage)
 {
     Q_ASSERT(!typeInfo.name.isEmpty());
     TypeDatabase* typeDb = TypeDatabase::instance();
@@ -1992,14 +1993,11 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateType(const AddedFunction::
     if (typeName == QLatin1String("void"))
         return AbstractMetaType::createVoid();
 
-    TypeEntry *type = typeDb->findType(typeName);
-    if (!type)
-        type = typeDb->findFlagsType(typeName);
-
+    const TypeEntry *type = nullptr;
     // test if the type is a template, like a container
-    bool isTemplate = false;
     QStringList templateArgs;
-    if (!type && typeInfo.name.contains(QLatin1Char('<'))) {
+    if (!typeInfo.name.startsWith(QLatin1String("QFlags<"))
+        && typeInfo.name.contains(QLatin1Char('<'))) {
         QStringList parsedType = parseTemplateType(typeInfo.name);
         if (parsedType.isEmpty()) {
             *errorMessage = QStringLiteral("Template type parsing failed for '%1'").arg(typeInfo.name);
@@ -2014,29 +2012,17 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateType(const AddedFunction::
                     type = candidate;
             }
         }
-        isTemplate = type != nullptr;
     }
 
-    if (!type) {
-        QStringList candidates;
-        const auto &entries = typeDb->entries();
-        for (auto it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-            // Let's try to find the type in different scopes.
-            if (it.key().endsWith(colonColon() + typeName))
-                candidates.append(it.key());
-        }
-        QTextStream str(errorMessage);
-        str << "Type '" << typeName << "' wasn't found in the type database.\n";
-
-        if (candidates.isEmpty()) {
-            str << "Declare it in the type system using the proper <*-type> tag.";
-        } else {
-            str << "Remember to inform the full qualified name for the type you want to use.\nCandidates are:\n";
-            candidates.sort();
-            for (const QString& candidate : qAsConst(candidates))
-                str << "    " << candidate << '\n';
-        }
-        return {};
+    if (type == nullptr)  {
+        QString unqualifiedName = typeName;
+        const int last = unqualifiedName.lastIndexOf(colonColon());
+        if (last != -1)
+            unqualifiedName.remove(0, last + 2);
+        auto types = findTypeEntries(typeName, unqualifiedName, currentClass, this, errorMessage);
+        if (types.isEmpty())
+            return {};
+        type = types.constFirst();
     }
 
     // These are only implicit and should not appear in code...
@@ -2045,9 +2031,10 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateType(const AddedFunction::
     if (typeInfo.isReference)
         metaType.setReferenceType(LValueReference);
     metaType.setConstant(typeInfo.isConstant);
-    if (isTemplate) {
+    if (!templateArgs.isEmpty()) {
         for (const QString& templateArg : qAsConst(templateArgs)) {
-            AbstractMetaType metaArgType = translateType(AddedFunction::TypeInfo::fromSignature(templateArg), errorMessage);
+            AbstractMetaType metaArgType = translateType(AddedFunction::TypeInfo::fromSignature(templateArg),
+                                                         currentClass, errorMessage);
             if (!metaArgType)
                 return {};
             metaType.addInstantiation(metaArgType);
@@ -2071,11 +2058,11 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
     return type;
 }
 
-// Helper for translateTypeStatic()
-TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
-                                                        const QString &name,
-                                                        AbstractMetaClass *currentClass,
-                                                        AbstractMetaBuilderPrivate *d)
+// Helper for findTypeEntries/translateTypeStatic()
+TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qualifiedName,
+                                                              const QString &name,
+                                                              AbstractMetaClass *currentClass,
+                                                              AbstractMetaBuilderPrivate *d)
 {
     // 5.1 - Try first using the current scope
     if (currentClass) {
@@ -2115,6 +2102,46 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualified
         }
     }
     return {};
+}
+
+// Helper for translateTypeStatic() that calls findTypeEntriesHelper()
+// and does some error checking.
+TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
+                                                        const QString &name,
+                                                        AbstractMetaClass *currentClass,
+                                                        AbstractMetaBuilderPrivate *d,
+                                                        QString *errorMessage)
+{
+    const TypeEntries types = findTypeEntriesHelper(qualifiedName, name, currentClass, d);
+    if (types.isEmpty()) {
+        if (errorMessage != nullptr)
+            *errorMessage = msgCannotFindTypeEntry(qualifiedName);
+        return {};
+    }
+
+    if (types.size() == 1)
+        return types;
+
+    const auto typeEntryType = types.constFirst()->type();
+    const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
+                                      [typeEntryType](const TypeEntry *e) {
+                                          return e->type() == typeEntryType;
+                                      });
+
+    if (!sameType) {
+        if (errorMessage != nullptr)
+            *errorMessage = msgAmbiguousVaryingTypesFound(qualifiedName, types);
+        return {};
+    }
+    // Ambiguous primitive/smart pointer types are possible (when
+    // including type systems).
+    if (typeEntryType != TypeEntry::PrimitiveType
+        && typeEntryType != TypeEntry::SmartPointerType) {
+        if (errorMessage != nullptr)
+            *errorMessage = msgAmbiguousTypesFound(qualifiedName, types);
+        return {};
+    }
+    return types;
 }
 
 // Reverse lookup of AbstractMetaType representing a template specialization
@@ -2272,12 +2299,10 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
         typeInfo.clearInstantiations();
     }
 
-    const TypeEntries types = findTypeEntries(qualifiedName, name, currentClass, d);
+    const TypeEntries types = findTypeEntries(qualifiedName, name, currentClass, d, errorMessageIn);
     if (types.isEmpty()) {
-        if (errorMessageIn) {
-            *errorMessageIn =
-                msgUnableToTranslateType(_typei, msgCannotFindTypeEntry(qualifiedName));
-        }
+        if (errorMessageIn != nullptr)
+            *errorMessageIn = msgUnableToTranslateType(_typei, *errorMessageIn);
         return {};
     }
 
@@ -2311,25 +2336,6 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
         }
 
         metaType.addInstantiation(targType);
-    }
-
-    if (types.size() > 1) {
-        const bool sameType = std::all_of(types.cbegin() + 1, types.cend(),
-                                          [typeEntryType](const TypeEntry *e) {
-            return e->type() == typeEntryType; });
-        if (!sameType) {
-            if (errorMessageIn)
-                *errorMessageIn = msgAmbiguousVaryingTypesFound(qualifiedName, types);
-            return {};
-        }
-        // Ambiguous primitive/smart pointer types are possible (when
-        // including type systems).
-        if (typeEntryType != TypeEntry::PrimitiveType
-            && typeEntryType != TypeEntry::SmartPointerType) {
-            if (errorMessageIn)
-                *errorMessageIn = msgAmbiguousTypesFound(qualifiedName, types);
-            return {};
-        }
     }
 
     if (typeEntryType == TypeEntry::SmartPointerType) {
