@@ -468,6 +468,7 @@
          not see due to the TMP expression of the return type. -->
     <add-function signature="operator==(const QPolygon&amp;)" return-type="bool"/>
     <add-function signature="operator!=(const QPolygon&amp;)" return-type="bool"/>
+
     <add-function signature="__reduce__" return-type="PyObject*">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qpolygon-reduce">
             <insert-template name="reduce_code">
@@ -481,12 +482,12 @@
     <modify-function signature="QPolygon(int,const int*)" remove="all"/>
     <!-- ### A QVector parameter, for no defined type, will generate wrong code. -->
     <modify-function signature="operator+=(QVector&lt;QPoint&gt;)" remove="all"/>
-    <modify-function signature="operator&lt;&lt;(QPoint)">
+    <add-function signature="operator&lt;&lt;(QPoint)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpolygon-operatorlowerlower"/>
-    </modify-function>
-    <modify-function signature="operator&lt;&lt;(QVector&lt;QPoint&gt;)">
+    </add-function>
+    <add-function signature="operator&lt;&lt;(QVector&lt;QPoint&gt;)">
         <inject-code file="../glue/qtgui.cpp" snippet="qpolygon-operatorlowerlower"/>
-    </modify-function>
+    </add-function>
     <!-- ### -->
   </value-type>
   <value-type name="QPolygonF">

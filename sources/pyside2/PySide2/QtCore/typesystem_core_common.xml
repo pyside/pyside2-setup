@@ -388,6 +388,14 @@
   <!-- FIXME: Which one is it going to be? -->
   <container-type name="QList" type="list">
     <include file-name="QList" location="global"/>
+    <declare-function signature="append(T)" return-type="void"/>
+    <declare-function signature="insert(qsizetype,T)" return-type="void"/>
+    <declare-function signature="prepend(T)" return-type="void"/>
+    <declare-function signature="push_back(T)" return-type="void"/>
+    <declare-function signature="push_front(T)" return-type="void"/>
+    <declare-function signature="removeAll(T)" return-type="void"/>
+    <declare-function signature="removeOne(T)" return-type="void"/>
+    <!-- operator << needs to be declared in inheriting class -->
     <conversion-rule>
         <native-to-target>
             <insert-template name="cpplist_to_pylist_conversion"/>
