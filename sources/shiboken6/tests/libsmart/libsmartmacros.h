@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -29,18 +29,15 @@
 #ifndef LIB_SMART_MACROS_H
 #define LIB_SMART_MACROS_H
 
-#if defined _WIN32 || defined __CYGWIN__
-    #if LIBSMART_BUILD
-        #define LIB_SMART_API __declspec(dllexport)
-    #else
-        #define LIB_SMART_API __declspec(dllimport)
-    #endif
+#include "../libminimal/libminimalmacros.h"
+
+#define LIB_SMART_EXPORT LIBMINIMAL_EXPORT
+#define LIB_SMART_IMPORT LIBMINIMAL_IMPORT
+
+#ifdef LIBSMART_BUILD
+#  define LIB_SMART_API LIB_SMART_EXPORT
 #else
-#if __GNUC__ >= 4
-    #define LIB_SMART_API __attribute__ ((visibility("default")))
-#else
-    #define LIB_SMART_API
-#endif
+#  define LIB_SMART_API LIB_SMART_IMPORT
 #endif
 
-#endif
+#endif // LIB_SMART_MACROS_H

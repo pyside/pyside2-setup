@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -29,18 +29,15 @@
 #ifndef LIBOTHERMACROS_H
 #define LIBOTHERMACROS_H
 
-#if defined _WIN32 || defined __CYGWIN__
-    #if LIBOTHER_BUILD
-        #define LIBOTHER_API __declspec(dllexport)
-    #else
-        #define LIBOTHER_API __declspec(dllimport)
-    #endif
+#include "../libminimal/libminimalmacros.h"
+
+#define LIBOTHER_EXPORT LIBMINIMAL_EXPORT
+#define LIBOTHER_IMPORT LIBMINIMAL_IMPORT
+
+#ifdef LIBOTHER_BUILD
+#  define LIBOTHER_API LIBOTHER_EXPORT
 #else
-#if __GNUC__ >= 4
-    #define LIBOTHER_API __attribute__ ((visibility("default")))
-#else
-    #define LIBOTHER_API
-#endif
+#  define LIBOTHER_API LIBOTHER_IMPORT
 #endif
 
-#endif
+#endif // LIBOTHERMACROS_H

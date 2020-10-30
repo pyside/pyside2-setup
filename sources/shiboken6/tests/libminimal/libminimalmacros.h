@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -29,18 +29,22 @@
 #ifndef LIBMINIMALMACROS_H
 #define LIBMINIMALMACROS_H
 
-#if defined _WIN32 || defined __CYGWIN__
-    #if LIBMINIMAL_BUILD
-        #define LIBMINIMAL_API __declspec(dllexport)
-    #else
-        #define LIBMINIMAL_API __declspec(dllimport)
-    #endif
+#if defined _WIN32
+#  define LIBMINIMAL_EXPORT __declspec(dllexport)
+#  ifdef _MSC_VER
+#    define LIBMINIMAL_IMPORT __declspec(dllimport)
+#  else
+#    define LIBMINIMAL_IMPORT
+#  endif
 #else
-#if __GNUC__ >= 4
-    #define LIBMINIMAL_API __attribute__ ((visibility("default")))
-#else
-    #define LIBMINIMAL_API
-#endif
+#  define LIBMINIMAL_EXPORT __attribute__ ((visibility("default")))
+#  define LIBMINIMAL_IMPORT
 #endif
 
+#ifdef LIBMINIMAL_BUILD
+#  define LIBMINIMAL_API LIBMINIMAL_EXPORT
+#else
+#  define LIBMINIMAL_API LIBMINIMAL_IMPORT
 #endif
+
+#endif // LIBMINIMALMACROS_H
