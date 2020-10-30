@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -36,16 +36,6 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-// Make "signals:", "slots:" visible as access specifiers
-#define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
-
-// Q_PROPERTY is defined as class annotation which does not work since a
-// sequence of properties will to expand to a sequence of annotations
-// annotating nothing, causing clang to complain. Instead, define it away in a
-// static assert with the stringified argument in a ','-operator (cf qdoc).
-
-#define QT_ANNOTATE_CLASS(type,...) static_assert(sizeof(#__VA_ARGS__),#type);
 
 #include <QtCore/qnamespace.h>
 
