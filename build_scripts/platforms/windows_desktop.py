@@ -47,6 +47,7 @@ from ..options import OPTION
 from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources, filter_match
 from ..utils import download_and_extract_7z
+from ..versions import PYSIDE, SHIBOKEN
 
 
 def prepare_packages_win32(self, vars):
@@ -69,8 +70,8 @@ def prepare_packages_win32(self, vars):
         # <build>/shiboken6/doc/html/* ->
         #   <setup>/{st_package_name}/docs/shiboken6
         copydir(
-            "{build_dir}/shiboken6/doc/html",
-            "{st_build_dir}/{st_package_name}/docs/shiboken6",
+            f"{{build_dir}}/{SHIBOKEN}/doc/html",
+            f"{{st_build_dir}}/{{st_package_name}}/docs/{SHIBOKEN}",
             force=False, vars=vars)
 
         # <install>/bin/*.dll -> {st_package_name}/
@@ -91,14 +92,14 @@ def prepare_packages_win32(self, vars):
         # {shibokengenerator}.pdb file.
         # Task-number: PYSIDE-615
         copydir(
-            "{build_dir}/shiboken6/shibokenmodule",
+            f"{{build_dir}}/{SHIBOKEN}/shibokenmodule",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
 
         # pdb files for libshiboken and libpyside
         copydir(
-            "{build_dir}/shiboken6/libshiboken",
+            f"{{build_dir}}/{SHIBOKEN}/libshiboken",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
@@ -126,7 +127,7 @@ def prepare_packages_win32(self, vars):
         # {shibokenmodule}.pdb file.
         # Task-number: PYSIDE-615
         copydir(
-            "{build_dir}/shiboken6/generator",
+            f"{{build_dir}}/{SHIBOKEN}/generator",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
@@ -142,7 +143,7 @@ def prepare_packages_win32(self, vars):
         # <build>/pyside2/{st_package_name}/*.pdb ->
         # <setup>/{st_package_name}
         copydir(
-            "{build_dir}/pyside2/{st_package_name}",
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
@@ -188,20 +189,20 @@ def prepare_packages_win32(self, vars):
         # <source>/pyside2/{st_package_name}/support/* ->
         #   <setup>/{st_package_name}/support/*
         copydir(
-            "{build_dir}/pyside2/{st_package_name}/support",
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/support",
             "{st_build_dir}/{st_package_name}/support",
             vars=vars)
 
         # <source>/pyside2/{st_package_name}/*.pyi ->
         #   <setup>/{st_package_name}/*.pyi
         copydir(
-            "{build_dir}/pyside2/{st_package_name}",
+            "{build_dir}/{PYSIDE}/{st_package_name}",
             "{st_build_dir}/{st_package_name}",
             filter=["*.pyi", "py.typed"],
             vars=vars)
 
         copydir(
-            "{build_dir}/pyside2/libpyside",
+            f"{{build_dir}}/{PYSIDE}/libpyside",
             "{st_build_dir}/{st_package_name}",
             filter=pdbs,
             recursive=False, vars=vars)
@@ -468,7 +469,7 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
 
     if copy_qt_conf:
         # Copy the qt.conf file to prefix dir.
-        copyfile("{build_dir}/pyside2/{st_package_name}/qt.conf",
+        copyfile(f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
                  "{st_build_dir}/{st_package_name}",
                  vars=vars)
 

@@ -49,9 +49,11 @@ import time
 from .config import config
 from .utils import get_python_dict
 from .options import DistUtilsCommandMixin, OPTION
+from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 from .wheel_utils import (get_package_version, get_qt_version,
                           get_package_timestamp, macos_plat_name,
                           macos_pyside_min_deployment_target)
+
 
 setup_script_dir = os.getcwd()
 build_scripts_dir = os.path.join(setup_script_dir, 'build_scripts')
@@ -114,8 +116,8 @@ def get_make(platform_arch, build_type):
     if not os.path.isabs(make_path):
         found_path = find_executable(make_path)
         if not found_path or not os.path.exists(found_path):
-            raise DistutilsSetupError("You need the program '{}' on your system path to "
-                                      "compile PySide2.".format(make_path))
+            m = f"You need the program '{make_path}' on your system path to compile {PYSIDE_MODULE}."
+            raise DistutilsSetupError(m)
         make_path = found_path
     return (make_path, make_generator)
 
@@ -278,8 +280,8 @@ def prefix():
 
 # Initialize, pull and checkout submodules
 def prepare_sub_modules():
-    print("Initializing submodules for PySide2 version: {}".format(
-        get_package_version()))
+    v = get_package_version()
+    print(f"Initializing submodules for {PYSIDE_MODULE} version: {v}")
     submodules_dir = os.path.join(setup_script_dir, "sources")
 
     # Create list of [name, desired branch, absolute path, desired
@@ -560,7 +562,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         # Save the shiboken build dir path for clang deployment
         # purposes.
-        self.shiboken_build_dir = os.path.join(self.build_dir, "shiboken6")
+        self.shiboken_build_dir = os.path.join(self.build_dir, SHIBOKEN)
 
         self.log_pre_build_info()
 
@@ -740,13 +742,13 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         # If a custom shiboken cmake config directory path was provided, pass it to CMake.
         if OPTION["SHIBOKEN_CONFIG_DIR"] and config.is_internal_pyside_build():
-            if os.path.exists(OPTION["SHIBOKEN_CONFIG_DIR"]):
-                log.info("Using custom provided shiboken6 installation: {}"
-                         .format(OPTION["SHIBOKEN_CONFIG_DIR"]))
-                cmake_cmd.append("-DShiboken6_DIR={}".format(OPTION["SHIBOKEN_CONFIG_DIR"]))
+            config_dir = OPTION["SHIBOKEN_CONFIG_DIR"]
+            if os.path.exists(config_dir):
+                log.info(f"Using custom provided {SHIBOKEN} installation: {config_dir}")
+                cmake_cmd.append(f"-DShiboken6_DIR={config_dir}")
             else:
-                log.info("Custom provided shiboken6 installation not found. Path given: {}"
-                         .format(OPTION["SHIBOKEN_CONFIG_DIR"]))
+
+                log.info(f"Custom provided {SHIBOKEN} installation not found. Path given: {config_dir}")
 
         if OPTION["MODULE_SUBSET"]:
             module_sub_set = ''
@@ -796,7 +798,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             else:
                 raise DistutilsSetupError("Address sanitizer can only be used on Linux and macOS.")
 
-        if extension.lower() == "pyside2":
+        if extension.lower() == PYSIDE:
             pyside_qt_conf_prefix = ''
             if OPTION["QT_CONF_PREFIX"]:
                 pyside_qt_conf_prefix = OPTION["QT_CONF_PREFIX"]
@@ -821,7 +823,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             timestamp = get_package_timestamp()
         cmake_cmd.append("-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={}".format(timestamp))
 
-        if extension.lower() in ["shiboken6"]:
+        if extension.lower() in [SHIBOKEN]:
             cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             cmake_cmd.append("-DUSE_PYTHON_VERSION=3.6")
 
@@ -890,7 +892,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             raise DistutilsSetupError("Error compiling {}".format(extension))
 
         if not OPTION["SKIP_DOCS"]:
-            if extension.lower() == "shiboken6":
+            if extension.lower() == SHIBOKEN:
                 try:
                     # Check if sphinx is installed to proceed.
                     import sphinx
@@ -1144,12 +1146,12 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             try:
                 # Check if sphinx is installed to proceed.
                 import sphinx
-                if self.name == "shiboken6":
+                if self.name == SHIBOKEN:
                     log.info("-- Generating Shiboken documentation")
-                    log.info("-- Documentation directory: 'html/pyside2/shiboken6/'")
-                elif self.name == "pyside2":
+                    log.info(f"-- Documentation directory: 'html/{PYSIDE}/{SHIBOKEN}/'")
+                elif self.name == PYSIDE:
                     log.info("-- Generating PySide documentation")
-                    log.info("-- Documentation directory: 'html/pyside2/'")
+                    log.info(f"-- Documentation directory: 'html/{PYSIDE}/'")
             except ImportError:
                 raise DistutilsSetupError("Sphinx not found - aborting")
             self.html_dir = "html"
@@ -1158,18 +1160,18 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             try:
                 if not os.path.isdir(self.html_dir):
                     os.mkdir(self.html_dir)
-                if self.name == "shiboken6":
-                    out_pyside = os.path.join(self.html_dir, "pyside2")
+                if self.name == SHIBOKEN:
+                    out_pyside = os.path.join(self.html_dir, PYSIDE)
                     if not os.path.isdir(out_pyside):
                         os.mkdir(out_pyside)
-                    out_shiboken = os.path.join(out_pyside, "shiboken6")
+                    out_shiboken = os.path.join(out_pyside, SHIBOKEN)
                     if not os.path.isdir(out_shiboken):
                         os.mkdir(out_shiboken)
                     self.out_dir = out_shiboken
                 # We know that on the shiboken step, we already created the
                 # 'pyside2' directory
-                elif self.name == "pyside2":
-                    self.out_dir = os.path.join(self.html_dir, "pyside2")
+                elif self.name == PYSIDE:
+                    self.out_dir = os.path.join(self.html_dir, PYSIDE)
             except:
                 raise DistutilsSetupError("Error while creating directories for {}".format(self.doc_dir))
 
@@ -1185,9 +1187,9 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             if run_process(cmake_cmd) != 0:
                 raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))
 
-            if self.name == "pyside2":
+            if self.name == PYSIDE:
                 self.sphinx_src = os.path.join(self.out_dir, "rst")
-            elif self.name == "shiboken6":
+            elif self.name == SHIBOKEN:
                 self.sphinx_src = self.out_dir
 
             sphinx_cmd = ["sphinx-build", "-b", "html", "-c", self.sphinx_src,
@@ -1195,8 +1197,8 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             if run_process(sphinx_cmd) != 0:
                 raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))
         # Last message
-        if not self.skip and self.name == "pyside2":
-            log.info("-- The documentation was built. Check html/pyside2/index.html")
+        if not self.skip and self.name == PYSIDE:
+            log.info(f"-- The documentation was built. Check html/{PYSIDE}/index.html")
 
     def finalize_options(self):
         DistUtilsCommandMixin.mixin_finalize_options(self)

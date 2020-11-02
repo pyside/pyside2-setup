@@ -47,6 +47,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import copydir, copyfile, makefile
 from ..utils import regenerate_qt_resources
+from ..versions import PYSIDE, SHIBOKEN
 
 
 def prepare_packages_posix(self, vars):
@@ -75,8 +76,8 @@ def prepare_packages_posix(self, vars):
         # <build>/shiboken6/doc/html/* ->
         #   <setup>/{st_package_name}/docs/shiboken6
         copydir(
-            "{build_dir}/shiboken6/doc/html",
-            "{st_build_dir}/{st_package_name}/docs/shiboken6",
+            f"{{build_dir}}/{SHIBOKEN}/doc/html",
+            f"{{st_build_dir}}/{{st_package_name}}/docs/{SHIBOKEN}",
             force=False, vars=vars)
 
         # <install>/lib/lib* -> {st_package_name}/
@@ -94,9 +95,7 @@ def prepare_packages_posix(self, vars):
         executables.extend(copydir(
             "{install_dir}/bin/",
             "{st_build_dir}/{st_package_name}",
-            filter=[
-                "shiboken6",
-            ],
+            filter=[SHIBOKEN],
             recursive=False, vars=vars))
 
         # Used to create scripts directory.
@@ -133,7 +132,7 @@ def prepare_packages_posix(self, vars):
             "{install_dir}/bin/",
             "{st_build_dir}/{st_package_name}",
             filter=[
-                "pyside2-lupdate",
+                f"{PYSIDE}-lupdate",
                 "uic",
                 "rcc",
             ],
@@ -179,14 +178,14 @@ def prepare_packages_posix(self, vars):
         # <source>/pyside2/{st_package_name}/support/* ->
         #   <setup>/{st_package_name}/support/*
         copydir(
-            "{build_dir}/pyside2/{st_package_name}/support",
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/support",
             "{st_build_dir}/{st_package_name}/support",
             vars=vars)
 
         # <source>/pyside2/{st_package_name}/*.pyi ->
         #   <setup>/{st_package_name}/*.pyi
         copydir(
-            "{build_dir}/pyside2/{st_package_name}",
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}",
             "{st_build_dir}/{st_package_name}",
             filter=["*.pyi", "py.typed"],
             vars=vars)

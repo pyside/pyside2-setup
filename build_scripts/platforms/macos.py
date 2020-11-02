@@ -41,6 +41,7 @@ import fnmatch
 import os
 from ..utils import copydir, copyfile, macos_fix_rpaths_for_library, macos_add_rpath
 from ..config import config
+from ..versions import PYSIDE, SHIBOKEN
 
 
 def prepare_standalone_package_macos(self, vars):
@@ -174,7 +175,7 @@ def prepare_standalone_package_macos(self, vars):
             if copy_qt_conf:
                 # Copy the qt.conf file to libexec.
                 copyfile(
-                    "{build_dir}/pyside2/{st_package_name}/qt.conf",
+                    f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
                     "{st_build_dir}/{st_package_name}/Qt/libexec",
                     vars=vars)
 

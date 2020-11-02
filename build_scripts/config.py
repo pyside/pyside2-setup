@@ -39,6 +39,7 @@
 
 import os
 import distutils.log as log
+from .versions import PYSIDE, PYSIDE_MODULE, SHIBOKEN
 
 
 class Config(object):
@@ -70,16 +71,16 @@ class Config(object):
 
         # Options that can be given to --build-type and
         # --internal-build-type
-        self.shiboken_module_option_name = "shiboken6"
-        self.shiboken_generator_option_name = "shiboken6-generator"
-        self.pyside_option_name = "pyside2"
+        self.shiboken_module_option_name = SHIBOKEN
+        self.shiboken_generator_option_name = f"{SHIBOKEN}-generator"
+        self.pyside_option_name = PYSIDE
 
         # Names to be passed to setuptools.setup() name key,
         # so not package name, but rather project name as it appears
         # in the wheel name and on PyPi.
-        self.shiboken_module_st_name = "shiboken6"
-        self.shiboken_generator_st_name = "shiboken6-generator"
-        self.pyside_st_name = "PySide2"
+        self.shiboken_module_st_name = SHIBOKEN
+        self.shiboken_generator_st_name = f"{SHIBOKEN}-generator"
+        self.pyside_st_name = PYSIDE_MODULE
 
         # Used by check_allowed_python_version to validate the
         # interpreter version.
@@ -189,6 +190,8 @@ class Config(object):
             'Topic :: Software Development :: Widget Sets'])
         setup_kwargs['classifiers'] = common_classifiers
 
+        package_name = self.package_name()
+
         if self.internal_build_type == self.shiboken_module_option_name:
             setup_kwargs['name'] = self.shiboken_module_st_name
             setup_kwargs['description'] = "Python / C++ bindings helper module"
@@ -200,7 +203,7 @@ class Config(object):
             setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
-                    'shiboken6 = {}.scripts.shiboken_tool:main'.format(self.package_name()),
+                    f'{SHIBOKEN} = {package_name}.scripts.shiboken_tool:main'
                 ]
             }
 
@@ -210,10 +213,10 @@ class Config(object):
             setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
-                    'pyside2-uic = {}.scripts.pyside_tool:uic'.format(self.package_name()),
-                    'pyside2-rcc = {}.scripts.pyside_tool:rcc'.format(self.package_name()),
-                    'pyside2-designer= {}.scripts.pyside_tool:designer'.format(self.package_name()),
-                    'pyside2-lupdate = {}.scripts.pyside_tool:main'.format(self.package_name()),
+                    f'{PYSIDE}-uic = {package_name}.scripts.pyside_tool:uic',
+                    f'{PYSIDE}-rcc = {package_name}.scripts.pyside_tool:rcc',
+                    f'{PYSIDE}-designer= {package_name}.scripts.pyside_tool:designer',
+                    f'{PYSIDE}-lupdate = {package_name}.scripts.pyside_tool:main',
                 ]
             }
         self.setup_kwargs = setup_kwargs
@@ -223,11 +226,11 @@ class Config(object):
         changes_filename = 'CHANGES.rst'
 
         if self.is_internal_shiboken_module_build():
-            readme_filename = 'README.shiboken6.md'
+            readme_filename = f'README.{SHIBOKEN}.md'
         elif self.is_internal_shiboken_generator_build():
-            readme_filename = 'README.shiboken6-generator.md'
+            readme_filename = f'README.{SHIBOKEN}-generator.md'
         elif self.is_internal_pyside_build():
-            readme_filename = 'README.pyside2.md'
+            readme_filename = f'README.{PYSIDE}.md'
 
         content = ''
         changes = ''
@@ -264,11 +267,11 @@ class Config(object):
         dashes.
         """
         if self.is_internal_shiboken_module_build():
-            return "shiboken6"
+            return SHIBOKEN
         elif self.is_internal_shiboken_generator_build():
-            return "shiboken6_generator"
+            return f"{SHIBOKEN}_generator"
         elif self.is_internal_pyside_build():
-            return "PySide2"
+            return PYSIDE_MODULE
         else:
             return None
 
@@ -299,7 +302,7 @@ class Config(object):
 
         For example when building the shiboken module, setuptools will
         expect to find the "shiboken6" module sources under
-        "sources/shiboken6/shibokenmodule".
+        "sources/{SHIBOKEN}/shibokenmodule".
 
         This is really just to satisfy some checks in setuptools
         build_py command, and if we ever properly implement the develop
@@ -307,7 +310,7 @@ class Config(object):
         """
         if self.is_internal_shiboken_module_build():
             return {
-                self.package_name(): "sources/shiboken6/shibokenmodule"
+                self.package_name(): f"sources/{SHIBOKEN}/shibokenmodule"
             }
         elif self.is_internal_shiboken_generator_build():
             # This is left empty on purpose, because the shiboken
@@ -315,7 +318,7 @@ class Config(object):
             return {}
         elif self.is_internal_pyside_build():
             return {
-                self.package_name(): "sources/pyside2/PySide2",
+                self.package_name(): f"sources/{PYSIDE}/{PYSIDE_MODULE}",
             }
         else:
             return {}
@@ -326,9 +329,9 @@ class Config(object):
         :return: A list of directory names under the sources directory.
         """
         if self.is_internal_shiboken_module_build() or self.is_internal_shiboken_generator_build():
-            return ['shiboken6']
+            return [SHIBOKEN]
         elif self.is_internal_pyside_build():
-            return ['pyside2', 'pyside-tools']
+            return [PYSIDE, 'pyside-tools']
         return None
 
     def set_is_top_level_invocation(self):

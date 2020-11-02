@@ -141,6 +141,6 @@ def prepare_standalone_package_linux(self, vars):
     if copy_qt_conf:
         # Copy the qt.conf file to libexec.
         copyfile(
-            "{build_dir}/pyside2/{st_package_name}/qt.conf",
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/qt.conf",
             "{st_build_dir}/{st_package_name}/Qt/libexec",
             vars=vars)

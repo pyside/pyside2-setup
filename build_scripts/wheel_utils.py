@@ -50,6 +50,7 @@ from distutils.version import LooseVersion
 from .options import OPTION
 from .qtinfo import QtInfo
 from .utils import memoize, get_python_dict
+from .versions import PYSIDE, SHIBOKEN
 
 
 @memoize
@@ -81,7 +82,7 @@ def get_package_version():
     """ Returns the version string for the PySide2 package. """
     setup_script_dir = os.getcwd()
     pyside_version_py = os.path.join(
-        setup_script_dir, "sources", "pyside2", "pyside_version.py")
+        setup_script_dir, "sources", PYSIDE, "pyside_version.py")
     d = get_python_dict(pyside_version_py)
 
     final_version = "{}.{}.{}".format(
