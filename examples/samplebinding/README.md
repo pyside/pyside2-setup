@@ -127,7 +127,7 @@ rules for those interested in the build process.
 This example can only be built using **CMake**.
 The following requirements need to be met:
 
-* A PySide2 package is installed into the current active Python
+* A PySide package is installed into the current active Python
   environment (system or virtualenv)
 * A new enough version of CMake (**3.1+**).
 
@@ -138,8 +138,8 @@ For Windows you will also need:
   configuration is the same (all Release, which is more likely,
   or all Debug).
 
-The build uses the `pyside2_config.py` file to configure the project
-using the current PySide2/Shiboken6 installation.
+The build uses the `pyside_config.py` file to configure the project
+using the current PySide/Shiboken installation.
 
 ### Using CMake
 
@@ -215,18 +215,18 @@ no clean solution to include symbolic links in a wheel package
 ## Windows Notes
 
 The build config of the bindings (Debug or Release) should match
-the PySide2 build config, otherwise the application will not properly
+the PySide build config, otherwise the application will not properly
 work.
 
 In practice this means the only supported configurations are:
 
 1. release config build of the bindings +
-   PySide2 `setup.py` without `--debug` flag + `python.exe` for the
-   PySide2 build process + `python36.dll` for the linked in shared
+   PySide `setup.py` without `--debug` flag + `python.exe` for the
+   PySide build process + `python36.dll` for the linked in shared
    library.
 2. debug config build of the application +
-   PySide2 `setup.py` **with** `--debug` flag + `python_d.exe` for the
-   PySide2 build process + `python36_d.dll` for the linked in shared
+   PySide `setup.py` **with** `--debug` flag + `python_d.exe` for the
+   PySide build process + `python36_d.dll` for the linked in shared
    library.
 
 This is necessary because all the shared libraries in question have to

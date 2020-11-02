@@ -3,7 +3,7 @@ CONFIG += no_keywords # avoid clash with slots in Python.h
 CONFIG += console force_debug_info
 QT += widgets
 
-include(pyside2.pri)
+include(pyside.pri)
 
 WRAPPED_HEADER = wrappedclasses.h
 WRAPPER_DIR = $$OUT_PWD/AppLib
@@ -17,13 +17,13 @@ qtConfig(framework): QT_INCLUDEPATHS += --framework-include-paths=$$[QT_INSTALL_
 
 SHIBOKEN_OPTIONS = --generator-set=shiboken --enable-parent-ctor-heuristic \
     --enable-pyside-extensions --enable-return-value-heuristic --use-isnull-as-nb_nonzero \
-    $$QT_INCLUDEPATHS -I$$PWD -T$$PWD -T$$PYSIDE2/typesystems --output-directory=$$OUT_PWD
+    $$QT_INCLUDEPATHS -I$$PWD -T$$PWD -T$$PYSIDE/typesystems --output-directory=$$OUT_PWD
 
 # MSVC does not honor #define protected public...
 win32:SHIBOKEN_OPTIONS += --avoid-protected-hack
 
 # Prepare the shiboken tool
-QT_TOOL.shiboken.binary = $$system_path($$SHIBOKEN6_GENERATOR/shiboken6)
+QT_TOOL.shiboken.binary = $$system_path($$SHIBOKEN_GENERATOR/shiboken6)
 qtPrepareTool(SHIBOKEN, shiboken)
 
 # Shiboken run that adds the module wrapper to GENERATED_SOURCES
@@ -51,7 +51,7 @@ defineReplace(getOutDir) {
   return($$out_dir)
 }
 
-# Create hardlinks to the PySide2 shared libraries, so the example can be executed without manually
+# Create hardlinks to the PySide shared libraries, so the example can be executed without manually
 # setting the PATH.
 win32 {
     out_dir = $$getOutDir()
@@ -61,7 +61,7 @@ win32 {
     hard_link_libraries.CONFIG = no_link target_predeps explicit_dependencies
     hard_link_libraries.output = $$out_dir/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}
     hard_link_libraries.commands = mklink /H $$shell_path($$out_dir/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}) $$shell_path(${QMAKE_FILE_IN})
-    hard_link_libraries.input = PYSIDE2_SHARED_LIBRARIES SHIBOKEN6_SHARED_LIBRARIES
+    hard_link_libraries.input = PYSIDE_SHARED_LIBRARIES SHIBOKEN6_SHARED_LIBRARIES
 }
 
 QMAKE_EXTRA_COMPILERS += shiboken module_wrapper_dummy_command
@@ -69,7 +69,7 @@ win32:QMAKE_EXTRA_COMPILERS += hard_link_libraries
 
 INCLUDEPATH += $$WRAPPER_DIR
 
-for(i, PYSIDE2_INCLUDE) {
+for(i, PYSIDE_INCLUDE) {
     INCLUDEPATH += $$i/QtWidgets $$i/QtGui $$i/QtCore
 }
 
@@ -82,4 +82,4 @@ HEADERS += \
     mainwindow.h \
     pythonutils.h
 
-OTHER_FILES += $$TYPESYSTEM_FILE $$WRAPPED_HEADER pyside2_config.py README.md
+OTHER_FILES += $$TYPESYSTEM_FILE $$WRAPPED_HEADER pyside_config.py README.md

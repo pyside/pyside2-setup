@@ -38,44 +38,60 @@
 ##
 #############################################################################
 
-import os, glob, re, sys
 from distutils import sysconfig
+from enum import Enum
+import glob
+import os
+import re
+import sys
 
-generic_error = (' Did you forget to activate your virtualenv? Or perhaps'
-                 ' you forgot to build / install PySide2 into your currently active Python'
+
+PYSIDE = 'pyside2'
+PYSIDE_MODULE = 'PySide2'
+SHIBOKEN = 'shiboken6'
+
+
+class Package(Enum):
+    SHIBOKEN_MODULE = 1
+    SHIBOKEN_GENERATOR = 2
+    PYSIDE_MODULE = 3
+
+
+generic_error = ('Did you forget to activate your virtualenv? Or perhaps'
+                 f' you forgot to build / install {PYSIDE_MODULE} into your currently active Python'
                  ' environment?')
-pyside2_error = 'Unable to locate PySide2.' + generic_error
-shiboken6_module_error = 'Unable to locate shiboken6-module.' + generic_error
-shiboken6_generator_error = 'Unable to locate shiboken6-generator.' + generic_error
-pyside2_libs_error = 'Unable to locate the PySide2 shared libraries.' + generic_error
+pyside_error = f'Unable to locate {PYSIDE_MODULE}. {generic_error}'
+shiboken_module_error = f'Unable to locate {SHIBOKEN}-module. {generic_error}'
+shiboken_generator_error = f'Unable to locate shiboken-generator. {generic_error}'
+pyside_libs_error = f'Unable to locate the PySide shared libraries.  {generic_error}'
 python_link_error = 'Unable to locate the Python library for linking.'
 python_include_error = 'Unable to locate the Python include headers directory.'
 
 options = []
 
 # option, function, error, description
-options.append(("--shiboken6-module-path",
-                lambda: find_shiboken6_module(),
-                shiboken6_module_error,
-                "Print shiboken6 module location"))
-options.append(("--shiboken6-generator-path",
-                lambda: find_shiboken6_generator(),
-                shiboken6_generator_error,
-                "Print shiboken6 generator location"))
-options.append(("--pyside2-path", lambda: find_pyside2(), pyside2_error,
-                "Print PySide2 location"))
+options.append(("--shiboken-module-path",
+                lambda: find_shiboken_module(),
+                shiboken_module_error,
+                "Print shiboken module location"))
+options.append(("--shiboken-generator-path",
+                lambda: find_shiboken_generator(),
+                shiboken_generator_error,
+                "Print shiboken generator location"))
+options.append(("--pyside-path", lambda: find_pyside(), pyside_error,
+                f"Print {PYSIDE_MODULE} location"))
 
 options.append(("--python-include-path",
                 lambda: get_python_include_path(),
                 python_include_error,
                 "Print Python include path"))
-options.append(("--shiboken6-generator-include-path",
-                lambda: get_package_include_path(Package.shiboken6_generator),
-                pyside2_error,
-                "Print shiboken6 generator include paths"))
-options.append(("--pyside2-include-path",
-                lambda: get_package_include_path(Package.pyside2),
-                pyside2_error,
+options.append(("--shiboken-generator-include-path",
+                lambda: get_package_include_path(Package.SHIBOKEN_GENERATOR),
+                pyside_error,
+                "Print shiboken generator include paths"))
+options.append(("--pyside-include-path",
+                lambda: get_package_include_path(Package.PYSIDE_MODULE),
+                pyside_error,
                 "Print PySide2 include paths"))
 
 options.append(("--python-link-flags-qmake", lambda: python_link_flags_qmake(), python_link_error,
@@ -83,26 +99,26 @@ options.append(("--python-link-flags-qmake", lambda: python_link_flags_qmake(), 
 options.append(("--python-link-flags-cmake", lambda: python_link_flags_cmake(), python_link_error,
                 "Print python link flags for cmake"))
 
-options.append(("--shiboken6-module-qmake-lflags",
-                lambda: get_package_qmake_lflags(Package.shiboken6_module), pyside2_error,
+options.append(("--shiboken-module-qmake-lflags",
+                lambda: get_package_qmake_lflags(Package.SHIBOKEN_MODULE), pyside_error,
                 "Print shiboken6 shared library link flags for qmake"))
-options.append(("--pyside2-qmake-lflags",
-                lambda: get_package_qmake_lflags(Package.pyside2), pyside2_error,
+options.append(("--pyside-qmake-lflags",
+                lambda: get_package_qmake_lflags(Package.PYSIDE_MODULE), pyside_error,
                 "Print PySide2 shared library link flags for qmake"))
 
-options.append(("--shiboken6-module-shared-libraries-qmake",
-                lambda: get_shared_libraries_qmake(Package.shiboken6_module), pyside2_libs_error,
-                "Print paths of shiboken6 shared libraries (.so's, .dylib's, .dll's) for qmake"))
-options.append(("--shiboken6-module-shared-libraries-cmake",
-                lambda: get_shared_libraries_cmake(Package.shiboken6_module), pyside2_libs_error,
-                "Print paths of shiboken6 shared libraries (.so's, .dylib's, .dll's) for cmake"))
+options.append(("--shiboken-module-shared-libraries-qmake",
+                lambda: get_shared_libraries_qmake(Package.SHIBOKEN_MODULE), pyside_libs_error,
+                "Print paths of shiboken shared libraries (.so's, .dylib's, .dll's) for qmake"))
+options.append(("--shiboken-module-shared-libraries-cmake",
+                lambda: get_shared_libraries_cmake(Package.SHIBOKEN_MODULE), pyside_libs_error,
+                "Print paths of shiboken shared libraries (.so's, .dylib's, .dll's) for cmake"))
 
-options.append(("--pyside2-shared-libraries-qmake",
-                lambda: get_shared_libraries_qmake(Package.pyside2), pyside2_libs_error,
-                "Print paths of PySide2 shared libraries (.so's, .dylib's, .dll's) for qmake"))
-options.append(("--pyside2-shared-libraries-cmake",
-                lambda: get_shared_libraries_cmake(Package.pyside2), pyside2_libs_error,
-                "Print paths of PySide2 shared libraries (.so's, .dylib's, .dll's) for cmake"))
+options.append(("--pyside-shared-libraries-qmake",
+                lambda: get_shared_libraries_qmake(Package.PYSIDE_MODULE), pyside_libs_error,
+                "Print paths of f{PYSIDE_MODULE} shared libraries (.so's, .dylib's, .dll's) for qmake"))
+options.append(("--pyside-shared-libraries-cmake",
+                lambda: get_shared_libraries_cmake(Package.PYSIDE_MODULE), pyside_libs_error,
+                f"Print paths of {PYSIDE_MODULE} shared libraries (.so's, .dylib's, .dll's) for cmake"))
 
 options_usage = ''
 for i, (flag, _, _, description) in enumerate(options):
@@ -111,10 +127,10 @@ for i, (flag, _, _, description) in enumerate(options):
         options_usage += '\n'
 
 usage = """
-Utility to determine include/link options of shiboken6/PySide2 and Python for qmake/CMake projects
-that would like to embed or build custom shiboken6/PySide2 bindings.
+Utility to determine include/link options of shiboken/PySide and Python for qmake/CMake projects
+that would like to embed or build custom shiboken/PySide bindings.
 
-Usage: pyside2_config.py [option]
+Usage: pyside_config.py [option]
 Options:
 {}
     -a                                            Print all options and their values
@@ -125,12 +141,6 @@ option = sys.argv[1] if len(sys.argv) == 2 else '-a'
 if option == '-h' or option == '--help':
     print(usage)
     sys.exit(0)
-
-
-class Package(object):
-    shiboken6_module = 1
-    shiboken6_generator = 2
-    pyside2 = 3
 
 
 def clean_path(path):
@@ -190,25 +200,25 @@ def link_option(lib):
 
 
 # Locate PySide2 via sys.path package path.
-def find_pyside2():
-    return find_package_path("PySide2")
+def find_pyside():
+    return find_package_path(PYSIDE_MODULE)
 
 
-def find_shiboken6_module():
-    return find_package_path("shiboken6")
+def find_shiboken_module():
+    return find_package_path(SHIBOKEN)
 
 
-def find_shiboken6_generator():
-    return find_package_path("shiboken6_generator")
+def find_shiboken_generator():
+    return find_package_path(f"{SHIBOKEN}_generator")
 
 
 def find_package(which_package):
-    if which_package == Package.shiboken6_module:
-        return find_shiboken6_module()
-    if which_package == Package.shiboken6_generator:
-        return find_shiboken6_generator()
-    if which_package == Package.pyside2:
-        return find_pyside2()
+    if which_package == Package.SHIBOKEN_MODULE:
+        return find_shiboken_module()
+    if which_package == Package.SHIBOKEN_GENERATOR:
+        return find_shiboken_generator()
+    if which_package == Package.PYSIDE_MODULE:
+        return find_pyside()
     return None
 
 

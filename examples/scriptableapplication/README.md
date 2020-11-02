@@ -26,31 +26,30 @@ This example can be built using *CMake* or *QMake*,
 but there are common requirements that you need to take into
 consideration:
 
-* Make sure that a --standalone PySide2 package (bundled with Qt libraries)
+* Make sure that a --standalone PySide package (bundled with Qt libraries)
   is installed into the current active Python environment
   (system or virtualenv)
 * qmake has to be in your PATH:
-  * so that CMake find_package(Qt5) works (used for include headers),
+  * so that CMake find_package(Qt6 COMPONENTS Core) works (used for include
+    headers),
   * used for building the application with qmake instead of CMake
 * use the same Qt version for building the example application, as was used
-  for building PySide2, this is to ensure binary compatibility between the
-  newly generated bindings libraries, the PySide2 libraries and the
+  for building PySide, this is to ensure binary compatibility between the
+  newly generated bindings libraries, the PySide libraries and the
   Qt libraries.
 
 For Windows you will also need:
 * a Visual Studio environment to be active in your terminal
 * Correct visual studio architecture chosen (32 vs 64 bit)
-* Make sure that your Qt + Python + PySide2 package + app build configuration
+* Make sure that your Qt + Python + PySide package + app build configuration
   is the same (all Release, which is more likely, or all Debug).
-* Make sure that your Qt + Python + PySide2 package + app are built with the
+* Make sure that your Qt + Python + PySide package + app are built with the
   same version of MSVC, to avoid mixing of C++ runtime libraries.
   In principle this means that if you use the python.org provided Python
-  interpreters, you need to use MSVC2015 for Python 3 projects, and MSVC2008
-  for Python 2 projects. Which also means that you can't use official Qt
-  packages, because none of the supported ones are built with MSVC2008.
+  interpreters, you need to use MSVC2015 for Python 3 projects.
 
-Both build options will use the `pyside2_config.py` file to configure the project
-using the current PySide2/Shiboken6 installation (for qmake via pyside2.pri,
+Both build options will use the `pyside_config.py` file to configure the project
+using the current PySide/Shiboken installation (for qmake via pyside.pri,
 and for CMake via the project CMakeLists.txt).
 
 
@@ -136,7 +135,7 @@ virtual environment, that environment's packages will be used for the
 python module import process.
 In this case, make sure that the application was built while the
 `virtualenv` was active, so that the build system picks up the correct
-python shared library and PySide2 package.
+python shared library and PySide package.
 
 ## Linux Shared Libraries Notes
 
@@ -155,12 +154,12 @@ work.
 In practice this means the only supported configurations are:
 
 1. release config build of the application +
-   PySide2 `setup.py` without `--debug` flag + `python.exe` for the
-   PySide2 build process + `python36.dll` for the linked in shared
+   PySide `setup.py` without `--debug` flag + `python.exe` for the
+   PySide build process + `python36.dll` for the linked in shared
    library + release build of Qt.
 2. debug config build of the application +
-   PySide2 `setup.py` **with** `--debug` flag + `python_d.exe` for the
-   PySide2 build process + `python36_d.dll` for the linked in shared
+   PySide `setup.py` **with** `--debug` flag + `python_d.exe` for the
+   PySide build process + `python36_d.dll` for the linked in shared
    library + debug build of Qt.
 
 This is necessary because all the shared libraries in question have to

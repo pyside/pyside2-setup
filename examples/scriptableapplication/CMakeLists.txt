@@ -23,7 +23,7 @@ endif()
 message(STATUS "Using python interpreter: ${python_interpreter}")
 
 # Macro to get various pyside / python include / link flags.
-macro(pyside2_config option output_var)
+macro(pyside_config option output_var)
     if(${ARGC} GREATER 2)
         set(is_list ${ARGV2})
     else()
@@ -31,13 +31,13 @@ macro(pyside2_config option output_var)
     endif()
 
     execute_process(
-      COMMAND ${python_interpreter} "${CMAKE_SOURCE_DIR}/../utils/pyside2_config.py"
+      COMMAND ${python_interpreter} "${CMAKE_SOURCE_DIR}/../utils/pyside_config.py"
               ${option}
       OUTPUT_VARIABLE ${output_var}
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if ("${${output_var}}" STREQUAL "")
-        message(FATAL_ERROR "Error: Calling pyside2_config.py ${option} returned no output.")
+        message(FATAL_ERROR "Error: Calling pyside_config.py ${option} returned no output.")
     endif()
     if(is_list)
         string (REPLACE " " ";" ${output_var} "${${output_var}}")
@@ -45,19 +45,19 @@ macro(pyside2_config option output_var)
 endmacro()
 
 # Query for the shiboken6-generator path, PySide2 path, Python path, include paths and linker flags.
-pyside2_config(--shiboken6-module-path SHIBOKEN6_MODULE_PATH)
-pyside2_config(--shiboken6-generator-path SHIBOKEN6_GENERATOR_PATH)
-pyside2_config(--pyside2-path PYSIDE2_PATH)
+pyside_config(--shiboken-module-path SHIBOKEN_MODULE_PATH)
+pyside_config(--shiboken-generator-path SHIBOKEN_GENERATOR_PATH)
+pyside_config(--pyside-path PYSIDE_PATH)
 
-pyside2_config(--python-include-path PYTHON_INCLUDE_DIR)
-pyside2_config(--shiboken6-generator-include-path SHIBOKEN6_GENERATOR_INCLUDE_DIR 1)
-pyside2_config(--pyside2-include-path PYSIDE2_INCLUDE_DIR 1)
+pyside_config(--python-include-path PYTHON_INCLUDE_DIR)
+pyside_config(--shiboken-generator-include-path SHIBOKEN_GENERATOR_INCLUDE_DIR 1)
+pyside_config(--pyside-include-path PYSIDE_INCLUDE_DIR 1)
 
-pyside2_config(--python-link-flags-cmake PYTHON_LINKING_DATA 0)
-pyside2_config(--shiboken6-module-shared-libraries-cmake SHIBOKEN6_MODULE_SHARED_LIBRARIES 0)
-pyside2_config(--pyside2-shared-libraries-cmake PYSIDE2_SHARED_LIBRARIES 0)
+pyside_config(--python-link-flags-cmake PYTHON_LINKING_DATA 0)
+pyside_config(--shiboken-module-shared-libraries-cmake SHIBOKEN_MODULE_SHARED_LIBRARIES 0)
+pyside_config(--pyside-shared-libraries-cmake PYSIDE_SHARED_LIBRARIES 0)
 
-set(SHIBOKEN_PATH "${SHIBOKEN6_GENERATOR_PATH}/shiboken6${CMAKE_EXECUTABLE_SUFFIX}")
+set(SHIBOKEN_PATH "${SHIBOKEN_GENERATOR_PATH}/shiboken6${CMAKE_EXECUTABLE_SUFFIX}")
 
 if(NOT EXISTS ${SHIBOKEN_PATH})
     message(FATAL_ERROR "Shiboken executable not found at path: ${SHIBOKEN_PATH}")
@@ -93,7 +93,7 @@ set(SHIBOKEN_OPTIONS --generator-set=shiboken --enable-parent-ctor-heuristic
     ${INCLUDES}
     -I${CMAKE_SOURCE_DIR}
     -T${CMAKE_SOURCE_DIR}
-    -T${PYSIDE2_PATH}/typesystems
+    -T${PYSIDE_PATH}/typesystems
     --output-directory=${CMAKE_CURRENT_BINARY_DIR}
     )
 
@@ -123,11 +123,11 @@ set(SOURCES
     )
 
 # We need to include the headers for the module bindings that we use.
-set(PYSIDE2_ADDITIONAL_INCLUDES "")
-foreach(INCLUDE_DIR ${PYSIDE2_INCLUDE_DIR})
-    list(APPEND PYSIDE2_ADDITIONAL_INCLUDES "${INCLUDE_DIR}/QtCore")
-    list(APPEND PYSIDE2_ADDITIONAL_INCLUDES "${INCLUDE_DIR}/QtGui")
-    list(APPEND PYSIDE2_ADDITIONAL_INCLUDES "${INCLUDE_DIR}/QtWidgets")
+set(PYSIDE_ADDITIONAL_INCLUDES "")
+foreach(INCLUDE_DIR ${PYSIDE_INCLUDE_DIR})
+    list(APPEND PYSIDE_ADDITIONAL_INCLUDES "${INCLUDE_DIR}/QtCore")
+    list(APPEND PYSIDE_ADDITIONAL_INCLUDES "${INCLUDE_DIR}/QtGui")
+    list(APPEND PYSIDE_ADDITIONAL_INCLUDES "${INCLUDE_DIR}/QtWidgets")
 endforeach()
 
 # =============================================================================================
@@ -137,7 +137,7 @@ endforeach()
 # Enable rpaths so that the example can be executed from the build dir.
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${PYSIDE2_PATH} ${SHIBOKEN6_MODULE_PATH})
+set(CMAKE_INSTALL_RPATH ${PYSIDE_PATH} ${SHIBOKEN_MODULE_PATH})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # =============================================================================================
 # !!! End of dubious section.
@@ -154,14 +154,14 @@ target_sources(${PROJECT_NAME} PUBLIC ${SOURCES})
 
 # Apply relevant include and link flags.
 target_include_directories(${PROJECT_NAME} PRIVATE ${PYTHON_INCLUDE_DIR})
-target_include_directories(${PROJECT_NAME} PRIVATE ${SHIBOKEN6_GENERATOR_INCLUDE_DIR})
-target_include_directories(${PROJECT_NAME} PRIVATE ${PYSIDE2_INCLUDE_DIR})
-target_include_directories(${PROJECT_NAME} PRIVATE ${PYSIDE2_ADDITIONAL_INCLUDES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${SHIBOKEN_GENERATOR_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PYSIDE_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PYSIDE_ADDITIONAL_INCLUDES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${SHIBOKEN6_MODULE_SHARED_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PYSIDE2_SHARED_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${SHIBOKEN_MODULE_SHARED_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PYSIDE_SHARED_LIBRARIES})
 
 # Find and link to the python library.
 list(GET PYTHON_LINKING_DATA 0 PYTHON_LIBDIR)
@@ -193,7 +193,7 @@ if(WIN32)
 
     # Add custom target to hard link PySide2 shared libraries (just like in qmake example), so you
     # don't have to set PATH manually to point to the PySide2 package.
-    set(shared_libraries ${SHIBOKEN6_MODULE_SHARED_LIBRARIES} ${PYSIDE2_SHARED_LIBRARIES})
+    set(shared_libraries ${SHIBOKEN_MODULE_SHARED_LIBRARIES} ${PYSIDE_SHARED_LIBRARIES})
     foreach(LIBRARY_PATH ${shared_libraries})
         string(REGEX REPLACE ".lib$" ".dll" LIBRARY_PATH ${LIBRARY_PATH})
         get_filename_component(BASE_NAME ${LIBRARY_PATH} NAME)
