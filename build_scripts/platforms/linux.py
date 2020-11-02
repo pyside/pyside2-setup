@@ -64,9 +64,9 @@ def prepare_standalone_package_linux(self, vars):
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     destination_lib_dir = "{st_build_dir}/{st_package_name}/Qt/lib"
 
-    accepted_modules = ['libQt5*.so.?']
+    accepted_modules = ['libQt6*.so.?']
     if constrain_modules:
-        accepted_modules = ["libQt5" + module + "*.so.?" for module in constrain_modules]
+        accepted_modules = ["libQt6" + module + "*.so.?" for module in constrain_modules]
     accepted_modules.append("libicu*.so.??")
 
     copydir("{qt_lib_dir}", destination_lib_dir,

@@ -345,13 +345,13 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
     # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
     # File filter to copy only debug or only release files.
     if constrain_modules:
-        qt_dll_patterns = ["Qt5" + x + "{}.dll" for x in constrain_modules]
+        qt_dll_patterns = ["Qt6" + x + "{}.dll" for x in constrain_modules]
         if copy_pdbs:
-            qt_dll_patterns += ["Qt5" + x + "{}.pdb" for x in constrain_modules]
+            qt_dll_patterns += ["Qt6" + x + "{}.pdb" for x in constrain_modules]
     else:
-        qt_dll_patterns = ["Qt5*{}.dll", "lib*{}.dll"]
+        qt_dll_patterns = ["Qt6*{}.dll", "lib*{}.dll"]
         if copy_pdbs:
-            qt_dll_patterns += ["Qt5*{}.pdb", "lib*{}.pdb"]
+            qt_dll_patterns += ["Qt6*{}.pdb", "lib*{}.pdb"]
 
     def qt_build_config_filter(patterns, file_name, file_full_path):
         release = [a.format('') for a in patterns]
@@ -371,20 +371,20 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         # debug mode, we want to copy only Qt debug libraries
         # (ending with "d.dll"). Or vice versa. The problem is that
         # some libraries have "d" as the last character of the
-        # actual library name (for example Qt5Gamepad.dll and
-        # Qt5Gamepadd.dll). So we can't just match a pattern ending
+        # actual library name (for example Qt6Gamepad.dll and
+        # Qt6Gamepadd.dll). So we can't just match a pattern ending
         # in "d". Instead we check if there exists a file with the
         # same name plus an additional "d" at the end, and using
         # that information we can judge if the currently processed
         # file is a debug or release file.
 
-        # e.g. ["Qt5Cored", ".dll"]
+        # e.g. ["Qt6Cored", ".dll"]
         file_split = os.path.splitext(file_name)
         file_base_name = file_split[0]
         file_ext = file_split[1]
         # e.g. "/home/work/qt/qtbase/bin"
         file_path_dir_name = os.path.dirname(file_full_path)
-        # e.g. "Qt5Coredd"
+        # e.g. "Qt6Coredd"
         maybe_debug_name = "{}d".format(file_base_name)
         if self.debug:
             filter = debug
@@ -396,7 +396,7 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
 
             def predicate(path):
                 return os.path.exists(path)
-        # e.g. "/home/work/qt/qtbase/bin/Qt5Coredd.dll"
+        # e.g. "/home/work/qt/qtbase/bin/Qt6Coredd.dll"
         other_config_path = os.path.join(file_path_dir_name, maybe_debug_name + file_ext)
 
         if (filter_match(file_name, filter) and predicate(other_config_path)):

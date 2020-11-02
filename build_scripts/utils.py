@@ -843,7 +843,7 @@ def find_files_using_glob(path, pattern):
 
 def find_qt_core_library_glob(lib_dir):
     """ Returns path to the QtCore library found in `lib_dir`. """
-    maybe_file = find_files_using_glob(lib_dir, "libQt5Core.so.?")
+    maybe_file = find_files_using_glob(lib_dir, "libQt6Core.so.?")
     if len(maybe_file) == 1:
         return maybe_file[0]
     return None
