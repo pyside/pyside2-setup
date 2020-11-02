@@ -116,11 +116,11 @@ def create_zipfile(limited_api):
         pass   # We cannot compile, unless we have folders per Python version
     else:
         files = ' '.join(fn for fn in os.listdir('.'))
-        runpy('-m compileall -q {flag} {files}'.format(**locals()))
+        runpy(f'-m compileall -q {flag} {files}')
     files = ' '.join(fn for fn in os.listdir('.') if not fn == zip_name)
-    runpy('-m zipfile -c {zip_name} {files}'.format(**locals()))
+    runpy(f'-m zipfile -c {zip_name} {files}')
     tmp = tempfile.TemporaryFile(mode="w+")
-    runpy('-m base64 {zip_name}'.format(**locals()), stdout=tmp)
+    runpy(f'-m base64 {zip_name}', stdout=tmp)
     # now generate the include file
     tmp.seek(0)
     with open(inc_name, "w") as inc:
@@ -158,9 +158,9 @@ def _embed_file(fin, fout):
             comma = "," if block else ""
             block += 1
             print(file=fout)
-            print('/* Block {block} of {blocks} */{comma}'.format(**locals()), file=fout)
-        print('\"{}\"'.format(line.strip()), file=fout)
-    print('/* Sentinel */, \"\"', file=fout)
+            print(f'/* Block {block} of {blocks} */{comma}', file=fout)
+        print(f'\"{line.strip()}\"', file=fout)
+    print(f'/* Sentinel */, \"\"', file=fout)
 
 
 def _embed_bytefile(fin, fout, is_text):
@@ -171,13 +171,13 @@ def _embed_bytefile(fin, fout, is_text):
     fname = fin.name
     remark = ("No .pyc file because '--LIMITED-API=yes'" if is_text else
               "The .pyc header is stripped away")
-    print(textwrap.dedent("""
+    print(textwrap.dedent(f"""
         /*
          * This is the file "{fname}" as a simple byte array.
          * It can be directly embedded without any further processing.
          * {remark}.
          */
-         """).format(**locals()).strip(), file=fout)
+         """), file=fout)
     headsize = ( 0 if is_text else
                 16 if sys.version_info >= (3, 7) else 12 if sys.version_info >= (3, 3) else 8)
     binstr = fin.read()[headsize:]
@@ -187,13 +187,13 @@ def _embed_bytefile(fin, fout, is_text):
         except SyntaxError as e:
             print(e)
             traceback.print_exc(file=sys.stdout)
-            print(textwrap.dedent("""
+            print(textwrap.dedent(f"""
                 *************************************************************************
                 ***
                 *** Could not compile the boot loader '{fname}'!
                 ***
                 *************************************************************************
-                """).format(version=sys.version_info[:3], **locals()))
+                """))
             raise SystemError
     else:
         try:
@@ -201,14 +201,15 @@ def _embed_bytefile(fin, fout, is_text):
         except ValueError as e:
             print(e)
             traceback.print_exc(file=sys.stdout)
-            print(textwrap.dedent("""
+            version = sys.version_info[:3]
+            print(textwrap.dedent(f"""
                 *************************************************************************
                 ***
                 *** This Python version {version} seems to have a new .pyc header size.
                 *** Please correct the 'headsize' constant ({headsize}).
                 ***
                 *************************************************************************
-                """).format(version=sys.version_info[:3], **locals()))
+                """))
             raise SystemError
 
     print(file=fout)

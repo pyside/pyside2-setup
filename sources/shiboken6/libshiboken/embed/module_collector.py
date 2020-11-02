@@ -69,7 +69,7 @@ def source_archive(module, modname):
     # Do not use: Some modules rename themselves!
     version = ".".join(map(str, sys.version_info[:3]))
     shortname = os.path.basename(fname)
-    preamble = dedent(r"""
+    preamble = dedent(fr"""
         # BEGIN SOURCE ARCHIVE    Python {version}  module {modname}
 
         sources = {{}} if "sources" not in globals() else sources
@@ -77,7 +77,7 @@ def source_archive(module, modname):
         {encoded}'''.replace("(triple_single)", "'''")
 
         # END   SOURCE ARCHIVE    Python {version}  module {modname}
-        """).format(**locals())
+        """)
     return preamble
 
 def read_all(modules):
@@ -100,6 +100,6 @@ if __name__ == "__main__":
     ret = license_header() + read_all(args.modules)
     ma_mi = "_".join(map(str, sys.version_info[:2]))
     outpath = os.path.join(os.path.dirname(__file__), "..", "..", "shibokenmodule",
-        "files.dir", "shibokensupport", "python_minilib_{ma_mi}.py".format(**locals()))
+        "files.dir", "shibokensupport", f"python_minilib_{ma_mi}.py")
     with open(outpath, "w") as f:
         f.write(ret)

@@ -102,18 +102,18 @@ class SignatureLayout(SimpleNamespace):
     def _attributeerror(self, err_keys):
         err_keys = ", ".join(err_keys)
         allowed_keys = ", ".join(self.allowed_keys.__dict__.keys())
-        raise AttributeError(dedent("""\
+        raise AttributeError(dedent(f"""\
             Not allowed: '{err_keys}'.
             The only allowed keywords are '{allowed_keys}'.
-            """.format(**locals())))
+            """))
 
     def _valueerror(self, err_values):
         err_values = ", ".join(map(str, err_values))
         allowed_values = ", ".join(map(str, self.allowed_values))
-        raise ValueError(dedent("""\
+        raise ValueError(dedent(f"""\
             Not allowed: '{err_values}'.
             The only allowed values are '{allowed_values}'.
-            """.format(**locals())))
+            """))
 
 # The following names are used literally in this module.
 # This way, we avoid the dict hashing problem.

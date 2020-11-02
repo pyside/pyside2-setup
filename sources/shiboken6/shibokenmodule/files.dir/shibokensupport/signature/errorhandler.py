@@ -111,21 +111,21 @@ def seterror_argument(args, func_name):
     # temp!
     found = matched_type(args, sigs)
     if found:
-        msg = dedent("""
+        msg = dedent(f"""
             '{func_name}' called with wrong argument values:
               {func_name}{args}
             Found signature:
               {func_name}{found}
-            """.format(**locals())).strip()
+            """).strip()
         return ValueError, msg
     type_str = ", ".join(type(arg).__name__ for arg in args)
-    msg = dedent("""
+    msg = dedent(f"""
         '{func_name}' called with wrong argument types:
           {func_name}({type_str})
         Supported signatures:
-        """.format(**locals())).strip()
+        """).strip()
     for sig in sigs:
-        msg += "\n  {func_name}{sig}".format(**locals())
+        msg += f"\n  {func_name}{sig}"
     # We don't raise the error here, to avoid the loader in the traceback.
     return TypeError, msg
 

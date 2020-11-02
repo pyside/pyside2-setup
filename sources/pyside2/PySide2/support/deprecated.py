@@ -65,14 +65,14 @@ class PySideDeprecationWarningRemovedInQt6(Warning):
 def constData(self):
     cls = self.__class__
     name = cls.__qualname__
-    warnings.warn(dedent("""
+    warnings.warn(dedent(f"""
         {name}.constData is unpythonic and will be removed in Qt For Python 6.0 .
-        Please use {name}.data instead."""
-        .format(**locals())), PySideDeprecationWarningRemovedInQt6, stacklevel=2)
+        Please use {name}.data instead."""), PySideDeprecationWarningRemovedInQt6, stacklevel=2)
     return cls.data(self)
 
 
-def fix_for_QtGui(QtGui):
+# No longer needed but kept for reference.
+def _unused_fix_for_QtGui(QtGui):
     for name, cls in QtGui.__dict__.items():
         if name.startswith("QMatrix") and "data" in cls.__dict__:
             cls.constData = constData

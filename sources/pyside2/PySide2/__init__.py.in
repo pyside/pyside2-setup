@@ -68,7 +68,8 @@ def _setupQtDirectories():
         # We now use an explicit function instead of touching a signature.
         _init_pyside_extension()
     except AttributeError:
-        print(dedent('''\
+        stars = 79 * "*"
+        print(dedent(f'''\
             {stars}
             PySide2/__init__.py: The `signature` module was not initialized.
             This libshiboken module was loaded from
@@ -77,7 +78,7 @@ def _setupQtDirectories():
 
             Please make sure that this is the real shiboken6 binary and not just a folder.
             {stars}
-            ''').format(stars=79*"*", **locals()), file=sys.stderr)
+            '''), file=sys.stderr)
         raise
 
     if sys.platform == 'win32':

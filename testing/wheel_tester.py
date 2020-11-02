@@ -150,18 +150,17 @@ def try_install_wheels(wheels_dir, py_version):
     log.info("")
 
     for p in package_prefix_names():
-        log.info("Trying to install {p}:".format(**locals()))
+        log.info(f"Trying to install {p}:")
         pattern = "{}-*cp{}*.whl".format(p, int(float(py_version)))
         files = find_files_using_glob(wheels_dir, pattern)
         if files and len(files) == 1:
             wheel_path = files[0]
             install_wheel(wheel_path)
         elif len(files) > 1:
-            raise RuntimeError("More than one wheel found for specific {p} version."
-                               .format(**locals()))
+            raise RuntimeError(f"More than one wheel found for specific {p} version.")
         else:
-            raise RuntimeError("No {p} wheels compatible with Python {py_version} found "
-                               "for testing.".format(**locals()))
+            raise RuntimeError(f"No {p} wheels compatible with Python {py_version} found "
+                               f"for testing.")
 
 
 def is_unix():
@@ -200,13 +199,13 @@ def generate_build_qmake():
 
 def raise_error_pyinstaller(msg):
     print()
-    print("PYINST: {msg}".format(**locals()))
-    print("PYINST:   sys.version         = {}".format(sys.version.splitlines()[0]))
-    print("PYINST:   platform.platform() = {}".format(platform.platform()))
-    print("PYINST: See the error message above.")
+    print(f"PYINST: {msg}")
+    print(f"PYINST:   sys.version         = {sys.version.splitlines()[0]}")
+    print(f"PYINST:   platform.platform() = {platform.platform()}")
+    print(f"PYINST: See the error message above.")
     print()
     for line in run_process_output([sys.executable, "-m", "pip", "list"]):
-        print("PyInstaller pip list:  ", line)
+        print(f"PyInstaller pip list:   {line}")
     print()
     raise(RuntimeError(msg))
 

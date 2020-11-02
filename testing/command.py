@@ -130,7 +130,7 @@ def test_project(project, args, blacklist, runs):
             res = item.rich_result
             sharp = "#" + str(item.sharp)
             mod_name = decorate(item.mod_name)
-            print("RES {index}: Test {sharp:>4}: {res:<6} {mod_name}()".format(**locals()))
+            print(f"RES {index}: Test {sharp:>4}: {res:<6} {mod_name}()")
             r[0] += 1 if res == "PASS" else 0
             r[1] += 1 if res == "FAIL!" else 0
             r[2] += 1 if res == "SKIPPED" else 0 # not yet supported
@@ -146,7 +146,7 @@ def test_project(project, args, blacklist, runs):
               "{} passed, {} failed, {} skipped, {} blacklisted, {} bpassed."
               .format(*r))
         print()
-        print("********* Finished testing of %s *********" % project)
+        print(f"********* Finished testing of {project} *********")
         print()
         ret.append(r)
         if fatal:
@@ -202,7 +202,7 @@ def main():
         try:
             builds.set_buildno(args.buildno)
         except IndexError:
-            print("history out of range. Try '%s list'" % __file__)
+            print(f"history out of range. Try '{__file__} list'")
             sys.exit(1)
 
     if args.subparser_name == "getcwd":

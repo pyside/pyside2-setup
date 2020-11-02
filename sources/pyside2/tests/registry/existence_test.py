@@ -115,8 +115,7 @@ except NameError as e:
     have_refmodule = False
 dict_name = "sig_dict"
 if have_refmodule and not hasattr(sig_exists, dict_name):
-    print("*** wrong module without '{dict_name}', removed:"
-          .format(**locals()), shortpath)
+    print(f"*** wrong module without '{dict_name}', removed: {shortpath}")
     os.unlink(effectiveRefPath)
     have_refmodule = False
 
@@ -137,9 +136,8 @@ class TestSignaturesExists(unittest.TestCase):
         def multi_signature_msg(key, actual, expect):
             len_act = len(actual) if type(actual) is list else 1
             len_exp = len(expect) if type(expect) is list else 1
-            return ("multi-signature count mismatch for '{key}'. "
-                    "Actual {len_act} {actual} vs. expected {len_exp} {expect}')"
-                    .format(**locals()))
+            return (f"multi-signature count mismatch for '{key}'. "
+                    f"Actual {len_act} {actual} vs. expected {len_exp} {expect}")
 
         for key, value in sig_exists.sig_dict.items():
             name = key.rsplit(".", 1)[-1]

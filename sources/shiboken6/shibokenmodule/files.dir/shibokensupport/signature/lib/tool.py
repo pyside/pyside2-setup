@@ -106,8 +106,8 @@ def build_brace_pattern(level, separators=""):
     ro, rc, so, sc, co, cc, ao, ac, separators, qu, bs, all = map(
         escape, (ro, rc, so, sc, co, cc, ao, ac, separators, qu, bs, all))
 
-    no_brace_sep_q = r"[^{all}{separators}{qu}{bs}]".format(**locals())
-    no_quote = r"(?: [^{qu}{bs}] | {bs}. )*".format(**locals())
+    no_brace_sep_q = fr"[^{all}{separators}{qu}{bs}]"
+    no_quote = fr"(?: [^{qu}{bs}] | {bs}. )*"
     pattern = dedent(r"""
         (
           (?: {__} {no_brace_sep_q}
@@ -119,7 +119,7 @@ def build_brace_pattern(level, separators=""):
           )+
         )
         """)
-    no_braces_q = "[^{all}{qu}{bs}]*".format(**locals())
+    no_braces_q = f"[^{all}{qu}{bs}]*"
     repeated = dedent(r"""
         {indent}  (?: {__} {no_braces_q}
         {indent}    | {qu} {no_quote} {qu}

@@ -143,7 +143,7 @@ def bootstrap():
                 os.remove(support_path)
             except OSError as e:
                 print(e)
-                print("Error deleting {support_path}, ignored".format(**locals()))
+                print(f"Error deleting {support_path}, ignored")
         return loader
 
 # New functionality: Loading from a zip archive.

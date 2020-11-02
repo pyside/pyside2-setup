@@ -170,16 +170,16 @@ class Formatter(object):
 
     @contextmanager
     def module(self, mod_name):
-        self.print("")
-        self.print("# Module", mod_name)
-        self.print("sig_dict.update({")
+        self.print(f"")
+        self.print(f"# Module {mod_name}")
+        self.print(f"sig_dict.update({{")
         yield
-        self.print('    }}) if "{mod_name}" in sys.modules else None'.format(**locals()))
+        self.print(f'    }}) if "{mod_name}" in sys.modules else None')
 
     @contextmanager
     def klass(self, class_name, class_str):
         self.print()
-        self.print("# class {self.mod_name}.{class_name}:".format(**locals()))
+        self.print(f"# class {self.mod_name}.{class_name}:")
         yield
 
     @contextmanager
@@ -189,15 +189,15 @@ class Formatter(object):
         self.last_level = self.level
         class_name = self.class_name
         if class_name is None:
-            key = viskey = "{self.mod_name}.{func_name}".format(**locals())
+            key = viskey = f"{self.mod_name}.{func_name}"
         else:
-            key = viskey = "{self.mod_name}.{class_name}.{func_name}".format(**locals())
+            key = viskey = f"{self.mod_name}.{class_name}.{func_name}"
         if key.endswith("lY"):
             # Some classes like PySide2.QtGui.QContextMenuEvent have functions
             # globalX and the same with Y. The gerrit robot thinks that this
             # is a badly written "globally". Convince it by hiding this word.
             viskey = viskey[:-1] + '""Y'
-        self.print('    "{viskey}": {signature},'.format(**locals()))
+        self.print(f'    "{viskey}": {signature},')
         yield key
 
 
@@ -223,7 +223,7 @@ def generate_all():
         fmt.print("".join(lines[:license_line + 3]))
         version = sys.version.replace('\n', ' ')
         build = qt_build()
-        fmt.print(dedent('''\
+        fmt.print(dedent(f'''\
             """
             This file contains the simplified signatures for all functions in PySide
             for module '{module}' using
@@ -236,7 +236,7 @@ def generate_all():
             identical for Python 2 and 3. '__div__' is also removed,
             since it exists in Python 2, only.
             """
-            '''.format(**locals())))
+            '''))
         fmt.print("import sys")
         fmt.print("")
         fmt.print("sig_dict = {}")

@@ -235,7 +235,7 @@ matrix_pattern = "PySide2.QtGui.QGenericMatrix"
 def handle_matrix(arg):
     n, m, typstr = tuple(map(lambda x:x.strip(), arg.split(",")))
     assert typstr == "float"
-    result = "PySide2.QtGui.QMatrix{n}x{m}".format(**locals())
+    result = f"PySide2.QtGui.QMatrix{n}x{m}"
     return eval(result, namespace)
 
 
@@ -245,7 +245,7 @@ from inspect import currentframe
 def lno(level):
     lineno = currentframe().f_back.f_lineno
     spaces = level * "  "
-    return "{lineno}{spaces}".format(**locals())
+    return f"{lineno}{spaces}"
 """
 
 
@@ -276,7 +276,7 @@ def _resolve_type(thing, line, level, var_handler):
                 part = repr(part)
             pieces.append(to_string(part))
         thing = ", ".join(pieces)
-        result = "{contr}[{thing}]".format(**locals())
+        result = f"{contr}[{thing}]"
         return eval(result, namespace)
     return _resolve_value(thing, None, line)
 

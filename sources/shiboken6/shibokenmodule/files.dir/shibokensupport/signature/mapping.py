@@ -217,8 +217,7 @@ def check_module(mod):
     # without enforcing an '__init__.py'.
     if not Reloader.module_valid(mod):
         mod_name = mod.__name__
-        raise ImportError("Module '{mod_name}' is not a binary module!"
-                          .format(**locals()))
+        raise ImportError(f"Module '{mod_name}' is not a binary module!")
 
 update_mapping = Reloader().update
 type_map = {}

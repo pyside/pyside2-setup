@@ -147,8 +147,7 @@ class ExactEnumerator(object):
                 if klass == subclass:
                     # this is a side effect of the typing module for Python 2.7
                     # via the "._gorg" property, which we can safely ignore.
-                    print("Warning: {class_name} points to itself via {subclass_name}, skipped!"
-                          .format(**locals()))
+                    print(f"Warning: {class_name} points to itself via {subclass_name}, skipped!")
                     continue
                 ret.update(self.klass(subclass_name, subclass))
                 self.fmt.class_name = class_name

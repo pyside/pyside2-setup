@@ -122,8 +122,7 @@ class Formatter(Writer):
         # this became _way_ too much.
         # See also the comment in layout.py .
         brace_pat = build_brace_pattern(3)
-        pattern = (r"\b Union \s* \[ \s* {brace_pat} \s*, \s* NoneType \s* \]"
-                   .format(**locals()))
+        pattern = fr"\b Union \s* \[ \s* {brace_pat} \s*, \s* NoneType \s* \]"
         replace = r"Optional[\1]"
         optional_searcher = re.compile(pattern, flags=re.VERBOSE)
         def optional_replacer(source):
@@ -165,9 +164,9 @@ class Formatter(Writer):
             self.print()
         here = self.outfile.tell()
         if self.have_body:
-            self.print("{spaces}class {class_str}:".format(**locals()))
+            self.print(f"{spaces}class {class_str}:")
         else:
-            self.print("{spaces}class {class_str}: ...".format(**locals()))
+            self.print(f"{spaces}class {class_str}: ...")
         yield
 
     @contextmanager
@@ -178,7 +177,7 @@ class Formatter(Writer):
         spaces = indent * self.level
         if type(signature) == type([]):
             for sig in signature:
-                self.print('{spaces}@typing.overload'.format(**locals()))
+                self.print(f'{spaces}@typing.overload')
                 self._function(func_name, sig, spaces)
         else:
             self._function(func_name, signature, spaces)
@@ -188,15 +187,15 @@ class Formatter(Writer):
 
     def _function(self, func_name, signature, spaces):
         if "self" not in tuple(signature.parameters.keys()):
-            self.print('{spaces}@staticmethod'.format(**locals()))
+            self.print(f'{spaces}@staticmethod')
         signature = self.optional_replacer(signature)
-        self.print('{spaces}def {func_name}{signature}: ...'.format(**locals()))
+        self.print(f'{spaces}def {func_name}{signature}: ...')
 
     @contextmanager
     def enum(self, class_name, enum_name, value):
         spaces = indent * self.level
         hexval = hex(value)
-        self.print("{spaces}{enum_name:25}: {class_name} = ... # {hexval}".format(**locals()))
+        self.print(f"{spaces}{enum_name:25}: {class_name} = ... # {hexval}")
         yield
 
 
@@ -221,8 +220,7 @@ def generate_pyi(import_name, outpath, options):
     top = __import__(import_name)
     obj = getattr(top, plainname)
     if not getattr(obj, "__file__", None) or os.path.isdir(obj.__file__):
-        raise ModuleNotFoundError("We do not accept a namespace as module "
-                                  "{plainname}".format(**locals()))
+        raise ModuleNotFoundError(f"We do not accept a namespace as module {plainname}")
     module = sys.modules[import_name]
 
     outfile = io.StringIO()
@@ -232,12 +230,12 @@ def generate_pyi(import_name, outpath, options):
     if USE_PEP563:
         fmt.print("from __future__ import annotations")
         fmt.print()
-    fmt.print(dedent('''\
+    fmt.print(dedent(f'''\
         """
         This file contains the exact signatures for all functions in module
         {import_name}, except for defaults which are replaced by "...".
         """
-        '''.format(**locals())))
+        '''))
     HintingEnumerator(fmt).module(import_name)
     fmt.print()
     fmt.print("# eof")
@@ -262,7 +260,7 @@ def generate_pyi(import_name, outpath, options):
                 wr.print()
             else:
                 wr.print(line)
-    logger.info("Generated: {outfilepath}".format(**locals()))
+    logger.info(f"Generated: {outfilepath}")
     if is_py3 and (options.check or is_ci):
         # Python 3: We can check the file directly if the syntax is ok.
         subprocess.check_output([sys.executable, outfilepath])
@@ -292,11 +290,10 @@ def generate_all_pyi(outpath, options):
     name_list = PySide2.__all__ if options.modules == ["all"] else options.modules
     errors = ", ".join(set(name_list) - set(PySide2.__all__))
     if errors:
-        raise ImportError("The module(s) '{errors}' do not exist".format(**locals()))
+        raise ImportError(f"The module(s) '{errors}' do not exist")
     quirk1, quirk2 = "QtMultimedia", "QtMultimediaWidgets"
     if name_list == [quirk1]:
-        logger.debug("Note: We must defer building of {quirk1}.pyi until {quirk2} "
-                     "is available".format(**locals()))
+        logger.debug(f"Note: We must defer building of {quirk1}.pyi until {quirk2} is available")
         name_list = []
     elif name_list == [quirk2]:
         name_list = [quirk1, quirk2]
@@ -322,6 +319,6 @@ if __name__ == "__main__":
     outpath = options.outpath
     if outpath and not os.path.exists(outpath):
         os.makedirs(outpath)
-        logger.info("+++ Created path {outpath}".format(**locals()))
+        logger.info(f"+++ Created path {outpath}")
     generate_all_pyi(outpath, options=options)
 # eof
