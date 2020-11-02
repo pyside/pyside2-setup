@@ -38,9 +38,9 @@
 ##
 #############################################################################
 
-from PySide2.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+from PySide6.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 _web_actions = [QWebEnginePage.Back, QWebEnginePage.Forward,
                 QWebEnginePage.Reload,

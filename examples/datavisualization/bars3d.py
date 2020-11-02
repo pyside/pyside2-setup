@@ -39,13 +39,13 @@
 ##
 #############################################################################
 
-"""PySide2 QtDataVisualization example"""
+"""PySide6 QtDataVisualization example"""
 
 import sys
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtWidgets import QApplication, QSizePolicy, QMainWindow, QWidget
-from PySide2.QtDataVisualization import QtDataVisualization
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QApplication, QSizePolicy, QMainWindow, QWidget
+from PySide6.QtDataVisualization import QtDataVisualization
 
 def dataToBarDataRow(data):
     return list(QtDataVisualization.QBarDataItem(d) for d in data)

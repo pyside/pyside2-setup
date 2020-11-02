@@ -40,8 +40,8 @@
 ##
 #############################################################################
 
-from PySide2.QtGui import QAction
-from PySide2.QtWidgets import (QMainWindow, QFileDialog, QApplication)
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import (QMainWindow, QFileDialog, QApplication)
 
 from addresswidget import AddressWidget
 
@@ -93,10 +93,10 @@ class MainWindow(QMainWindow):
     # Quick  gotcha:
     #
     # QFiledialog.getOpenFilename and QFileDialog.get.SaveFileName don't
-    # behave in PySide2 as they do in Qt, where they return a QString
+    # behave in PySide6 as they do in Qt, where they return a QString
     # containing the filename.
     #
-    # In PySide2, these functions return a tuple: (filename, filter)
+    # In PySide6, these functions return a tuple: (filename, filter)
 
     def openFile(self):
         filename, _ = QFileDialog.getOpenFileName(self)

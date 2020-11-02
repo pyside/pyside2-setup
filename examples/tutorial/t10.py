@@ -39,11 +39,11 @@
 ##
 #############################################################################
 
-# PySide2 tutorial 10
+# PySide6 tutorial 10
 
 
 import sys
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class LCDRange(QtWidgets.QWidget):

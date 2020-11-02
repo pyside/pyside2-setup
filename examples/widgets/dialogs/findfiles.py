@@ -40,9 +40,9 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/dialogs/findfiles example from Qt v5.x"""
+"""PySide6 port of the widgets/dialogs/findfiles example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class Window(QtWidgets.QDialog):

@@ -3,7 +3,7 @@
 ## Copyright (C) 2019 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of PySide2.
+## This file is part of PySide6.
 ##
 ## $QT_BEGIN_LICENSE:LGPL$
 ## Commercial License Usage

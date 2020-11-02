@@ -100,8 +100,8 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         # Slightly modified version of wheel's wheel_dist_name
         # method, to add the Qt version as well.
         # Example:
-        #   PySide2-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
-        # The PySide2 version is "5.6".
+        #   PySide6-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
+        # The PySide6 version is "5.6".
         # The Qt version built against is "5.6.4".
         wheel_version = "{}-{}".format(self._package_version, get_qt_version())
         components = (_safer_name(self.distribution.get_name()), wheel_version)

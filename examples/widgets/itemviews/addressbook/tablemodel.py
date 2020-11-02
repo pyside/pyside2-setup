@@ -40,7 +40,7 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import (Qt, QAbstractTableModel, QModelIndex)
+from PySide6.QtCore import (Qt, QAbstractTableModel, QModelIndex)
 
 class TableModel(QAbstractTableModel):
 

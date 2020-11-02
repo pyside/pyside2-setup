@@ -40,15 +40,15 @@
 ##
 #############################################################################
 
-"""PySide2 port of the network/threadedfortuneserver example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the network/threadedfortuneserver example from Qt v5.x, originating from PyQt"""
 
 import random
 
-from PySide2.QtCore import (Signal, QByteArray, QDataStream, QIODevice,
+from PySide6.QtCore import (Signal, QByteArray, QDataStream, QIODevice,
         QThread, Qt)
-from PySide2.QtWidgets import (QApplication, QDialog, QHBoxLayout, QLabel,
+from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QLabel,
         QMessageBox, QPushButton, QVBoxLayout)
-from PySide2.QtNetwork import (QHostAddress, QNetworkInterface, QTcpServer,
+from PySide6.QtNetwork import (QHostAddress, QNetworkInterface, QTcpServer,
         QTcpSocket)
 
 

@@ -44,9 +44,9 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import axes3d
-from PySide2.QtCore import Qt, Slot
-from PySide2.QtGui import QAction, QKeySequence
-from PySide2.QtWidgets import (QApplication, QComboBox, QHBoxLayout,
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout,
                                QHeaderView, QLabel, QMainWindow, QSlider,
                                QTableWidget, QTableWidgetItem, QVBoxLayout,
                                QWidget)

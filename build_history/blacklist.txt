@@ -58,7 +58,7 @@
     linux
     darwin
     win32
-# AttributeError: 'PySide2.QtQuick.QQuickItem' object has no attribute 'simpleFunction'
+# AttributeError: 'PySide6.QtQuick.QQuickItem' object has no attribute 'simpleFunction'
 [QtQml::bug_451]
     py2
     py3

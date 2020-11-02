@@ -58,11 +58,11 @@ class Config(object):
         self.invocation_type = None
 
         # The type of the top-level build.
-        # all - build shiboken6 module, shiboken6-generator and PySide2
+        # all - build shiboken6 module, shiboken6-generator and PySide6
         #       modules
         # shiboken6 - build only shiboken6 module
         # shiboken6-generator - build only the shiboken6-generator
-        # pyside2 - build only PySide2 modules
+        # pyside6 - build only PySide6 modules
         self.build_type = None
 
         # The internal build type, used for internal invocations of

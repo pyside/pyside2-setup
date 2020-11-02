@@ -40,9 +40,9 @@
 ##
 #############################################################################
 
-"""PySide2 port of the xml/dombookmarks example from Qt v5.x"""
+"""PySide6 port of the xml/dombookmarks example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets, QtXml
+from PySide6 import QtCore, QtGui, QtWidgets, QtXml
 
 
 class MainWindow(QtWidgets.QMainWindow):

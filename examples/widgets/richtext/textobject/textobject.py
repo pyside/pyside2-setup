@@ -40,9 +40,9 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/richtext/textobject example from Qt v5.x"""
+"""PySide6 port of the widgets/richtext/textobject example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets, QtSvg
+from PySide6 import QtCore, QtGui, QtWidgets, QtSvg
 
 
 class SvgTextObject(QtCore.QObject, QtGui.QTextObjectInterface):

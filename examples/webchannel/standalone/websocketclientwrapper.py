@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import QObject, Signal, Slot
+from PySide6.QtCore import QObject, Signal, Slot
 
 from websockettransport import WebSocketTransport
 

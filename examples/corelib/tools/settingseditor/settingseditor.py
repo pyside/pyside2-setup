@@ -41,15 +41,15 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/tools/settingseditor example from Qt v5.x"""
+"""PySide6 port of the widgets/tools/settingseditor example from Qt v5.x"""
 
 import sys
 
-from PySide2.QtCore import (QByteArray, QDate, QDateTime, QDir, QEvent, QPoint,
+from PySide6.QtCore import (QByteArray, QDate, QDateTime, QDir, QEvent, QPoint,
     QRect, QRegularExpression, QSettings, QSize, QTime, QTimer, Qt)
-from PySide2.QtGui import (QAction, QColor, QIcon, QIntValidator,
+from PySide6.QtGui import (QAction, QColor, QIcon, QIntValidator,
     QDoubleValidator, QRegularExpressionValidator, QValidator)
-from PySide2.QtWidgets import (QAbstractItemView, QApplication,
+from PySide6.QtWidgets import (QAbstractItemView, QApplication,
     QCheckBox, QComboBox, QFileDialog, QDialog, QDialogButtonBox, QGridLayout,
     QGroupBox, QHeaderView, QInputDialog, QItemDelegate, QLabel, QLineEdit,
     QMainWindow, QMessageBox, QStyle, QSpinBox, QStyleOptionViewItem,

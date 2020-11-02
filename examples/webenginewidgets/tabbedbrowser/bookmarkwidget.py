@@ -42,10 +42,10 @@ import json
 import os
 import warnings
 
-from PySide2 import QtCore
-from PySide2.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
-from PySide2.QtGui import QIcon, QStandardItem, QStandardItemModel
-from PySide2.QtWidgets import QMenu, QMessageBox, QTreeView
+from PySide6 import QtCore
+from PySide6.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
+from PySide6.QtGui import QIcon, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import QMenu, QMessageBox, QTreeView
 
 _url_role = Qt.UserRole + 1
 
@@ -58,7 +58,7 @@ _default_bookmarks = [
     ['https://doc.qt.io/qtforpython/', 'Documentation'],
     ['https://bugreports.qt.io/projects/PYSIDE/', 'Bug Reports'],
     ['https://www.python.org/', 'Python', None],
-    ['https://wiki.qt.io/PySide2', 'Qt for Python', None],
+    ['https://wiki.qt.io/PySide6', 'Qt for Python', None],
     ['Other Bookmarks']
 ]
 

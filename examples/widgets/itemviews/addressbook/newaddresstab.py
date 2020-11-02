@@ -40,8 +40,8 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import (Qt, Signal)
-from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout)
+from PySide6.QtCore import (Qt, Signal)
+from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout)
 
 from adddialogwidget import AddDialogWidget
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         print("Address:" + address)
 
     import sys
-    from PySide2.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     newAddressTab = NewAddressTab()

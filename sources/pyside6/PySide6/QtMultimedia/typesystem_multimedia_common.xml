@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtMultimedia">
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+  <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+
+  <namespace-type name="QAudio">
+      <enum-type name="Error"/>
+      <enum-type name="Mode"/>
+      <enum-type name="Role" since="5.6"/>
+      <enum-type name="State"/>
+      <enum-type name="VolumeScale" since="5.8"/>
+  </namespace-type>
+
+  <value-type name="QVideoSurfaceFormat">
+      <enum-type name="Direction"/>
+      <enum-type name="YCbCrColorSpace"/>
+  </value-type>
+  <object-type name="QAbstractVideoBuffer">
+      <enum-type name="HandleType"/>
+      <enum-type name="MapMode"/>
+      <modify-function signature="map(QAbstractVideoBuffer::MapMode,int*,int*)" remove="all"/>
+      <!-- TODO: discuss a way to have this working with the virtual method.
+      <modify-function signature="map(QAbstractVideoBuffer::MapMode,int*,int*)">
+          <modify-argument index="0">
+              <replace-type modified-type="PyObject"/>
+          </modify-argument>
+          <modify-argument index="2">
+              <remove-argument/>
+          </modify-argument>
+          <modify-argument index="3">
+              <remove-argument/>
+          </modify-argument>
+          <inject-code class="target" position="beginning">
+              <insert-template name="fix_arg,int*,int*"/>
+          </inject-code>
+      </modify-function>
+      -->
+      <!-- TODO: PYSIDE-354, arrays are not supported -->
+      <modify-function signature="mapPlanes(QAbstractVideoBuffer::MapMode,int*,int[4],uchar*[4])" remove="all"/>
+  </object-type>
+  <object-type name="QAbstractVideoSurface">
+      <enum-type name="Error"/>
+  </object-type>
+  <object-type name="QAbstractVideoFilter">
+      <modify-function signature="createFilterRunnable()">
+        <modify-argument index="return">
+            <define-ownership class="native" owner="c++"/>
+        </modify-argument>
+    </modify-function>
+  </object-type>
+  <value-type name="QVideoFrame">
+      <enum-type name="FieldType"/>
+      <enum-type name="PixelFormat"/>
+      <modify-function signature="bits()">
+        <inject-code file="../glue/qtmultimedia.cpp" snippet="qvideoframe-bits"/>
+      </modify-function>
+      <modify-function signature="bits(int)" remove="all"/>
+      <modify-function signature="bits(int)const" remove="all"/>
+  </value-type>
+
+  <value-type name="QAudioBuffer"/>
+  <object-type name="QAudioDecoder">
+      <enum-type name="Error"/>
+      <enum-type name="State"/>
+  </object-type>
+  <value-type name="QAudioFormat">
+      <enum-type name="Endian"/>
+      <enum-type name="SampleType"/>
+  </value-type>
+  <value-type name="QAudioDeviceInfo"/>
+  <object-type name="QAbstractAudioDeviceInfo"/>
+
+  <object-type name="QAbstractAudioOutput">
+    <modify-function signature="start()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="start(QIODevice*)">
+      <modify-argument index="1">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QAbstractAudioInput">
+    <modify-function signature="start()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="start(QIODevice*)">
+      <modify-argument index="1">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="QAudioDecoderControl"/>
+  <object-type name="QAudioProbe"/>
+  <value-type name="QAudioEncoderSettings"/>
+  <object-type name="QAudioEncoderSettingsControl">
+      <modify-function signature="supportedSampleRates(const QAudioEncoderSettings &amp;,bool*)const" remove="all"/>
+  </object-type>
+
+  <object-type name="QAudioInput">
+    <modify-function signature="start()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="start(QIODevice*)">
+      <modify-argument index="1">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QAudioInputSelectorControl"/>
+
+  <object-type name="QAudioOutput">
+    <modify-function signature="start()">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="start(QIODevice*)">
+      <modify-argument index="1">
+        <define-ownership class="target" owner="c++"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QAudioOutputSelectorControl"/>
+  <object-type name="QAudioRecorder"/>
+  <object-type name="QAudioRoleControl"/>
+
+  <object-type name="QCamera">
+      <value-type name="FrameRateRange"/>
+      <enum-type name="CaptureMode" flags="CaptureModes"/>
+      <enum-type name="Error"/>
+      <enum-type name="LockChangeReason"/>
+      <enum-type name="LockStatus"/>
+      <enum-type name="LockType" flags="LockTypes"/>
+      <enum-type name="Position"/>
+      <enum-type name="State"/>
+      <enum-type name="Status"/>
+      <modify-function signature="setViewfinder(QVideoWidget*)">
+        <modify-argument index="1">
+            <replace-type modified-type="QObject*"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
+      </modify-function>
+      <modify-function signature="setViewfinder(QGraphicsVideoItem*)">
+        <modify-argument index="1">
+            <replace-type modified-type="QObject*"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
+      </modify-function>
+  </object-type>
+  <object-type name="QCameraCaptureBufferFormatControl"/>
+  <object-type name="QCameraCaptureDestinationControl"/>
+  <object-type name="QCameraControl">
+      <enum-type name="PropertyChangeType"/>
+  </object-type>
+  <object-type name="QCameraExposure">
+      <enum-type name="FlashMode" flags="FlashModes"/>
+      <enum-type name="ExposureMode"/>
+      <enum-type name="MeteringMode"/>
+      <modify-function signature="supportedApertures(bool*)const" remove="all"/>
+      <modify-function signature="supportedIsoSensitivities(bool*)const" remove="all"/>
+      <modify-function signature="supportedShutterSpeeds(bool*)const" remove="all"/>
+  </object-type>
+  <object-type name="QCameraExposureControl">
+      <enum-type name="ExposureParameter"/>
+      <modify-function signature="supportedParameterRange(QCameraExposureControl::ExposureParameter,bool*)const" remove="all"/>
+  </object-type>
+  <object-type name="QCameraFeedbackControl">
+      <enum-type name="EventType"/>
+  </object-type>
+  <value-type name="QCameraFocusZone">
+      <enum-type name="FocusZoneStatus"/>
+  </value-type>
+  <object-type name="QCameraFocus">
+      <enum-type name="FocusMode" flags="FocusModes"/>
+      <enum-type name="FocusPointMode"/>
+  </object-type>
+  <object-type name="QCameraFlashControl"/>
+  <object-type name="QCameraFocusControl"/>
+  <value-type name="QCameraInfo"/>
+  <object-type name="QCameraInfoControl"/>
+  <object-type name="QCameraImageCapture">
+      <enum-type name="CaptureDestination" flags="CaptureDestinations"/>
+      <enum-type name="DriveMode"/>
+      <enum-type name="Error"/>
+      <modify-function signature="supportedResolutions(const QImageEncoderSettings &amp;,bool*)const" remove="all"/>
+  </object-type>
+  <object-type name="QCameraImageCaptureControl"/>
+  <object-type name="QCameraImageProcessing">
+      <enum-type name="WhiteBalanceMode"/>
+      <enum-type name="ColorFilter"/>
+  </object-type>
+  <object-type name="QCameraImageProcessingControl">
+      <enum-type name="ProcessingParameter"/>
+  </object-type>
+  <object-type name="QCameraLocksControl"/>
+  <value-type name="QCameraViewfinderSettings"/>
+  <object-type name="QCameraViewfinderSettingsControl">
+      <enum-type name="ViewfinderParameter"/>
+  </object-type>
+  <object-type name="QCameraViewfinderSettingsControl2"/>
+  <object-type name="QCameraZoomControl"/>
+
+  <value-type name="QImageEncoderSettings"/>
+  <object-type name="QImageEncoderControl">
+      <modify-function signature="supportedResolutions(const QImageEncoderSettings &amp;,bool*)const" remove="all"/>
+  </object-type>
+
+  <object-type name="QMediaAudioProbeControl"/>
+  <object-type name="QMediaAvailabilityControl"/>
+  <object-type name="QMediaBindableInterface"/>
+  <object-type name="QMediaContainerControl"/>
+  <value-type name="QMediaContent"/>
+  <object-type name="QMediaGaplessPlaybackControl"/>
+  <object-type name="QMediaControl"/>
+  <object-type name="QCustomAudioRoleControl" since="5.11"/>
+  <object-type name="QMediaNetworkAccessControl"/>
+  <!-- Causes compile errors
+  <namespace-type name="QMediaMetaData"/>
+  -->
+  <object-type name="QMediaObject"/>
+  <object-type name="QMediaPlayer">
+      <enum-type name="State"/>
+      <enum-type name="MediaStatus"/>
+      <enum-type name="Flag" flags="Flags"/>
+      <enum-type name="Error"/>
+      <modify-function signature="setVideoOutput(QVideoWidget*)">
+        <modify-argument index="1">
+            <replace-type modified-type="QObject*"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
+      </modify-function>
+      <modify-function signature="setVideoOutput(QGraphicsVideoItem*)">
+        <modify-argument index="1">
+            <replace-type modified-type="QObject*"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtmultimedia.cpp" snippet="upcast"/>
+      </modify-function>
+  </object-type>
+  <object-type name="QMediaPlayerControl"/>
+  <object-type name="QMediaPlaylist">
+      <enum-type name="PlaybackMode"/>
+      <enum-type name="Error"/>
+  </object-type>
+  <object-type name="QMediaRecorder">
+      <enum-type name="Error"/>
+      <enum-type name="State"/>
+      <enum-type name="Status"/>
+      <modify-function signature="supportedAudioSampleRates(const QAudioEncoderSettings &amp;,bool*)const" remove="all"/>
+      <modify-function signature="supportedFrameRates(const QVideoEncoderSettings &amp;,bool*)const" remove="all"/>
+      <modify-function signature="supportedResolutions(const QVideoEncoderSettings &amp;,bool*)const" remove="all"/>
+  </object-type>
+  <object-type name="QMediaRecorderControl"/>
+  <value-type name="QMediaResource"/>
+  <object-type name="QMediaService"/>
+  <interface-type name="QMediaServiceCameraInfoInterface"/>
+  <interface-type name="QMediaServiceDefaultDeviceInterface"/>
+  <interface-type name="QMediaServiceFeaturesInterface"/>
+  <value-type name="QMediaServiceProviderHint">
+      <enum-type name="Type"/>
+      <enum-type name="Feature" flags="Features"/>
+  </value-type>
+  <interface-type name="QMediaServiceSupportedDevicesInterface"/>
+  <interface-type name="QMediaServiceSupportedFormatsInterface"/>
+  <object-type name="QMediaStreamsControl">
+      <enum-type name="StreamType"/>
+  </object-type>
+  <value-type name="QMediaTimeInterval"/>
+  <value-type name="QMediaTimeRange"/>
+  <object-type name="QMediaVideoProbeControl"/>
+
+  <object-type name="QMetaDataReaderControl"/>
+  <object-type name="QMetaDataWriterControl"/>
+
+  <namespace-type name="QMultimedia">
+      <enum-type name="SupportEstimate"/>
+      <enum-type name="EncodingQuality"/>
+      <enum-type name="EncodingMode"/>
+      <enum-type name="AvailabilityStatus"/>
+  </namespace-type>
+
+  <object-type name="QRadioData">
+      <enum-type name="Error"/>
+      <enum-type name="ProgramType"/>
+  </object-type>
+  <object-type name="QRadioDataControl"/>
+  <object-type name="QRadioTuner">
+      <enum-type name="Band"/>
+      <enum-type name="Error"/>
+      <enum-type name="SearchMode"/>
+      <enum-type name="State"/>
+      <enum-type name="StereoMode"/>
+  </object-type>
+  <object-type name="QRadioTunerControl"/>
+  <object-type name="QSound">
+      <enum-type name="Loop"/>
+  </object-type>
+  <object-type name="QSoundEffect">
+      <enum-type name="Loop"/>
+      <enum-type name="Status"/>
+  </object-type>
+
+  <object-type name="QVideoDeviceSelectorControl"/>
+  <value-type name="QVideoEncoderSettings"/>
+  <object-type name="QVideoEncoderSettingsControl">
+      <modify-function signature="supportedFrameRates(const QVideoEncoderSettings &amp;,bool*)const" remove="all"/>
+      <modify-function signature="supportedResolutions(const QVideoEncoderSettings &amp;,bool*)const" remove="all"/>
+  </object-type>
+  <object-type name="QVideoFilterRunnable">
+      <enum-type name="RunFlag" flags="RunFlags"/>
+  </object-type>
+  <object-type name="QVideoProbe"/>
+  <object-type name="QVideoRendererControl"/>
+  <object-type name="QVideoWindowControl"/>
+
+  <suppress-warning text="Final class 'QMediaObject' set to non-final, as it is extended by other classes"/>
+  <suppress-warning text="Pure virtual method 'QAbstractVideoBuffer::map(QAbstractVideoBuffer::MapMode,int*,int*)' must be implement but was completely removed on type system."/>
+  <suppress-warning text="Pure virtual method 'QImageEncoderControl::supportedResolutions(QImageEncoderSettings,bool*)const' must be implement but was completely removed on type system."/>
+  <suppress-warning text="Pure virtual method 'QCameraExposureControl::supportedParameterRange(QCameraExposureControl::ExposureParameter,bool*)const' must be implement but was completely removed on type system."/>
+  <suppress-warning text="Pure virtual method 'QVideoEncoderSettingsControl::supportedFrameRates(QVideoEncoderSettings,bool*)const' must be implement but was completely removed on type system."/>
+  <suppress-warning text="Pure virtual method 'QVideoEncoderSettingsControl::supportedResolutions(QVideoEncoderSettings,bool*)const' must be implement but was completely removed on type system."/>
+  <suppress-warning text="Pure virtual method 'QAudioEncoderSettingsControl::supportedSampleRates(QAudioEncoderSettings,bool*)const' must be implement but was completely removed on type system."/>
+</typesystem>

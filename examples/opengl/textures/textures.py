@@ -40,10 +40,10 @@
 ##
 ############################################################################
 
-"""PySide2 port of the opengl/textures example from Qt v5.x"""
+"""PySide6 port of the opengl/textures example from Qt v5.x"""
 
 import sys
-from PySide2 import QtCore, QtGui, QtWidgets, QtOpenGL
+from PySide6 import QtCore, QtGui, QtWidgets, QtOpenGL
 
 try:
     from OpenGL.GL import *

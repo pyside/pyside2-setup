@@ -38,14 +38,14 @@
 ##
 #############################################################################
 
-"""PySide2 port of the Donut Chart Breakdown example from Qt v5.x"""
+"""PySide6 port of the Donut Chart Breakdown example from Qt v5.x"""
 
 
 import sys
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QColor, QFont, QPainter
-from PySide2.QtWidgets import QApplication, QMainWindow
-from PySide2.QtCharts import QtCharts
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QFont, QPainter
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCharts import QtCharts
 
 class MainSlice(QtCharts.QPieSlice):
     def __init__(self, breakdown_series, parent=None):

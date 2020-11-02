@@ -39,11 +39,11 @@
 ##
 #############################################################################
 
-# PySide2 tutorial 5
+# PySide6 tutorial 5
 
 
 import sys
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class MyWidget(QtWidgets.QWidget):

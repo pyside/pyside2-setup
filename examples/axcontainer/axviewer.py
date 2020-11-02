@@ -39,12 +39,12 @@
 ##
 #############################################################################
 
-"""PySide2 Active Qt Viewer example"""
+"""PySide6 Active Qt Viewer example"""
 
 import sys
-from PySide2.QtAxContainer import QAxSelect, QAxWidget
-from PySide2.QtGui import QAction
-from PySide2.QtWidgets import (QApplication, QDialog,
+from PySide6.QtAxContainer import QAxSelect, QAxWidget
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import (QApplication, QDialog,
     QMainWindow, QMessageBox, QToolBar)
 
 class MainWindow(QMainWindow):

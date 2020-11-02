@@ -42,7 +42,7 @@
 
 import math
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import mice_rc
 
@@ -71,7 +71,7 @@ class Mouse(QtWidgets.QGraphicsItem):
         self.setTransform(QtGui.QTransform().rotate(random(360 * 16)))
 
         # In the C++ version of this example, this class is also derived from
-        # QObject in order to receive timer events. PySide2 does not support
+        # QObject in order to receive timer events. PySide6 does not support
         # deriving from more than one wrapped class so we just create an
         # explicit timer instead.
         self.timer = QtCore.QTimer()

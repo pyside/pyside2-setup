@@ -40,11 +40,11 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/widgets/tetrix example from Qt v5.x"""
+"""PySide6 port of the widgets/widgets/tetrix example from Qt v5.x"""
 
 import random
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 NoShape, ZShape, SShape, LineShape, TShape, SquareShape, LShape, MirroredLShape = range(8)

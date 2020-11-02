@@ -148,7 +148,7 @@ no clean solution to include symbolic links in the package
 ## Windows Notes
 
 The build config of the application (Debug or Release) should match
-the PySide2 build config, otherwise the application will not properly
+the PySide6 build config, otherwise the application will not properly
 work.
 
 In practice this means the only supported configurations are:
@@ -165,5 +165,5 @@ In practice this means the only supported configurations are:
 This is necessary because all the shared libraries in question have to
 link to the same C++ runtime library (`msvcrt.dll` or `msvcrtd.dll`).
 To make the example as self-contained as possible, the shared libraries
-in use (`pyside2.dll`, `shiboken6.dll`) are hard-linked into the build
+in use (`pyside6.dll`, `shiboken6.dll`) are hard-linked into the build
 folder of the application.

@@ -81,7 +81,7 @@ The normal case are only a few accesses, and these are working pretty fast.
 The key to make this signature module fast is to avoid computation as much as
 possible. When no signature objects are used, then almost no time is lost in
 initialization. Only the above mentioned strings and some support modules are
-additionally loaded on ``import PySide2``.
+additionally loaded on ``import PySide6``.
 When it comes to signature usage, then late initialization is used and cached.
 This technique is also known as *full laziness* in haskell.
 
@@ -98,7 +98,7 @@ There are actually two locations where late initialization occurs:
 The initialization that is always done is just two dictionary writes
 per class, and we have about 1000 classes.
 To measure the additional overhead, we have simulated what happens
-when ``from PySide2 import *`` is performed.
+when ``from PySide6 import *`` is performed.
 It turned out that the overhead is below 0.5 ms.
 
 
@@ -172,7 +172,7 @@ classes and functions. In order to centralize this enumeration, the process has
 been factored out as a context manager. The user has only to supply functions
 that do the actual formatting.
 
-See for example the .pyi generator ``pyside2/PySide2/support/generate_pyi.py``.
+See for example the .pyi generator ``pyside6/PySide6/support/generate_pyi.py``.
 
 
 layout.py
@@ -221,7 +221,7 @@ future:
 existence_test.py
 -----------------
 
-The file ``pyside2/tests/registry/existence_test.py`` was written using the
+The file ``pyside6/tests/registry/existence_test.py`` was written using the
 signatures from the signatures module. The idea is that there are some 15000
 functions with a certain signature.
 
@@ -280,7 +280,7 @@ init_platform.py
 ~~~~~~~~~~~~~~~~
 
 For generating the ``exists_{platf}_{version}`` modules, the module
-``pyside2/tests/registry/init_platform.py`` was written. It can be used
+``pyside6/tests/registry/init_platform.py`` was written. It can be used
 standalone from the commandline, to check the compatibility of some
 changes, directly.
 
@@ -289,7 +289,7 @@ scrape_testresults.py
 ---------------------
 
 To simplify and automate the process of extracting the ``exists_{platf}_{version}_ci.py``
-files, the script ``pyside2/tests/registry/scrape_testresults.py`` has been written.
+files, the script ``pyside6/tests/registry/scrape_testresults.py`` has been written.
 
 This script scans the whole testresults website for PySide, that is::
 
@@ -297,24 +297,24 @@ This script scans the whole testresults website for PySide, that is::
 
 On the first scan, the script runs less than 30 minutes. After that, a cache
 is generated and the scan works *much* faster. The test results are placed
-into the folder ``pyside2/tests/registry/testresults/embedded/`` with a
+into the folder ``pyside6/tests/registry/testresults/embedded/`` with a
 unique name that allows for easy sorting. Example::
 
     testresults/embedded/2018_09_10_10_40_34-test_1536891759-exists_linux_5_11_2_ci.py
 
 These files are created only once. If they already exist, they are not touched, again.
-The file `pyside2/tests/registry/known_urls.json`` holds all scanned URLs after
+The file `pyside6/tests/registry/known_urls.json`` holds all scanned URLs after
 a successful scan. The ``testresults/embedded`` folder can be kept for reference
 or can be removed. Important is only the json file.
 
-The result of a scan is then directly placed into the ``pyside2/tests/registry/``
+The result of a scan is then directly placed into the ``pyside6/tests/registry/``
 folder. It should be reviewed and then eventually checked in.
 
 
 generate_pyi.py
 ---------------
 
-``pyside2/PySide2/support/generate_pyi.py`` is still under development.
+``pyside6/PySide6/support/generate_pyi.py`` is still under development.
 This module generates so-called hinting stubs for integration of PySide
 with diverse *Python IDEs*.
 

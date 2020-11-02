@@ -39,15 +39,15 @@
 ##
 #############################################################################
 
-"""PySide2 port of the qml/tutorials/extending-qml/chapter5-listproperties example from Qt v5.x"""
+"""PySide6 port of the qml/tutorials/extending-qml/chapter5-listproperties example from Qt v5.x"""
 
 import os
 import sys
 
-from PySide2.QtCore import Property, QUrl
-from PySide2.QtGui import QGuiApplication, QPen, QPainter, QColor
-from PySide2.QtQml import qmlRegisterType, ListProperty
-from PySide2.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
+from PySide6.QtCore import Property, QUrl
+from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
+from PySide6.QtQml import qmlRegisterType, ListProperty
+from PySide6.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
 
 class PieSlice (QQuickPaintedItem):
     def __init__(self, parent = None):

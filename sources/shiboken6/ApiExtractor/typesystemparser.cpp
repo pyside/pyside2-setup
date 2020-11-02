@@ -467,7 +467,7 @@ QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *e
     if (!fileName.contains(QLatin1Char('.')))
         fileName += QLatin1String(".xml");
     QString path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
-    if (!QFileInfo::exists(path)) // PySide2-specific hack
+    if (!QFileInfo::exists(path)) // PySide6-specific hack
         fileName.prepend(QLatin1String("typesystem_"));
     path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFileInfo::exists(path)) {

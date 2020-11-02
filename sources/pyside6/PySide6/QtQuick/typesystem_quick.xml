@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtQuick">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
+
+    <smart-pointer-type name="QSharedPointer" type="shared" getter="data"/>
+
+    <extra-includes>
+        <include file-name="pysidequickregistertype.h" location="local"/>
+    </extra-includes>
+
+    <inject-code class="target" position="end" file="../glue/qtquick.cpp" snippet="qtquick"/>
+
+    <object-type name="QQuickAsyncImageProvider" since="5.6"/>
+
+    <object-type name="QQuickFramebufferObject">
+        <object-type name="Renderer"/>
+    </object-type>
+
+    <object-type name="QQuickTextureFactory"/>
+    <object-type name="QQuickImageProvider"/>
+    <object-type name="QQuickImageResponse" since="5.6"/>
+
+    <object-type name="QQuickTransform"/>
+    <object-type name="QQuickItem" delete-in-main-thread="true">
+        <value-type name="UpdatePaintNodeData"/>
+        <enum-type name="Flag" flags="Flags"/>
+        <enum-type name="ItemChange"/>
+        <enum-type name="TransformOrigin"/>
+        <modify-function signature="itemTransform(QQuickItem*,bool*)const" allow-thread="yes">
+            <modify-argument index="2">
+                <remove-argument />
+            </modify-argument>
+            <modify-argument index="return">
+                <replace-type modified-type="PyTuple"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+                <insert-template name="fix_args,bool*"/>
+            </inject-code>
+        </modify-function>
+        <!-- TODO: Find a way to wrap `union ItemChangeData {}` -->
+    </object-type>
+
+    <object-type name="QQuickItemGrabResult"/>
+
+    <object-type name="QQuickPaintedItem">
+        <enum-type name="RenderTarget"/>
+        <enum-type name="PerformanceHint" flags="PerformanceHints"/>
+    </object-type>
+
+    <object-type name="QQuickRenderControl"/>
+
+    <object-type name="QQuickTextDocument"/>
+
+    <object-type name="QQuickView">
+        <enum-type name="ResizeMode"/>
+        <enum-type name="Status"/>
+    </object-type>
+
+    <object-type name="QQuickWindow">
+        <enum-type name="CreateTextureOption" flags="CreateTextureOptions"/>
+        <enum-type name="NativeObjectType" since="5.14"/>
+        <enum-type name="RenderStage"/>
+        <enum-type name="SceneGraphError"/>
+        <enum-type name="TextRenderType" since="5.10"/>
+    </object-type>
+
+    <object-type name="QSGBasicGeometryNode"/>
+    <object-type name="QSGClipNode"/>
+    <object-type name="QSGDynamicTexture"/>
+    <!-- <object-type name="QSGFlatColorMaterial"/> -->
+    <object-type name="QSGGeometry">
+        <enum-type name="DataPattern"/>
+        <enum-type name="AttributeType" since="5.8"/>
+        <enum-type name="DrawingMode" since="5.8"/>
+        <enum-type name="Type" since="5.8"/>
+        <value-type name="Attribute"/>
+        <value-type name="AttributeSet"/>
+        <value-type name="ColoredPoint2D"/>
+        <value-type name="Point2D"/>
+        <value-type name="TexturedPoint2D"/>
+    </object-type>
+    <object-type name="QSGGeometryNode"/>
+
+    <!-- QSGMaterialShader doesn't compile because of const char * char * types not being recognized
+         by the C++ parser, nor the generator.
+    <object-type name="QSGMaterial">
+        <enum-type name="Flag" flags="Flags"/>
+    </object-type>
+    <object-type name="QSGMaterialShader"/>
+    <value-type name="QSGMaterialShader::RenderState">
+        <enum-type name="DirtyState" flags="DirtyStates"/>
+    </value-type>
+    -->
+    <object-type name="QSGMaterialType"/>
+    <object-type name="QSGNode">
+        <enum-type name="DirtyStateBit" flags="DirtyState"/>
+        <enum-type name="Flag" flags="Flags"/>
+        <enum-type name="NodeType"/>
+    </object-type>
+    <object-type name="QSGOpacityNode"/>
+    <!-- <object-type name="QSGOpaqueTextureMaterial"/> -->
+    <object-type name="QSGSimpleRectNode"/>
+    <object-type name="QSGSimpleTextureNode">
+        <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode"/>
+    </object-type>
+    <object-type name="QSGTexture">
+        <enum-type name="AnisotropyLevel" since="5.9"/>
+        <enum-type name="Filtering"/>
+        <enum-type name="WrapMode"/>
+    </object-type>
+    <!-- <object-type name="QSGTextureMaterial"/> -->
+    <object-type name="QSGTextureProvider"/>
+    <object-type name="QSGTransformNode"/>
+    <!-- <object-type name="QSGVertexColorMaterial"/> -->
+
+    <!-- These currently don't work because they are template classes, and the generator chokes on
+         them. Making these work properly would require fixing the parsing of template classes,
+         allowing creation of State structures and passing them to the template classes, as well as
+         implementing some mechanism of registration of the custom template classes, kind of how
+         it's done for qt quick items.
+    <object-type name="QSGSimpleMaterial"/>
+    <object-type name="QSGSimpleMaterialShader"/>
+    -->
+
+</typesystem>

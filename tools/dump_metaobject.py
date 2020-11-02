@@ -39,7 +39,7 @@
 
 """Helper functions for formatting information on QMetaObject"""
 
-from PySide2.QtCore import (QMetaClassInfo, QMetaEnum, QMetaMethod,
+from PySide6.QtCore import (QMetaClassInfo, QMetaEnum, QMetaMethod,
                             QMetaProperty, QMetaObject, QObject)
 
 

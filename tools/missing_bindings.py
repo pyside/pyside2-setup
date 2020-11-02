@@ -38,14 +38,14 @@
 #############################################################################
 
 # This script is used to generate a summary of missing types / classes
-# which are present in C++ Qt5, but are missing in PySide2.
+# which are present in C++ Qt5, but are missing in PySide6.
 #
 # Required packages: bs4
 # Installed via: pip install bs4
 #
 # The script uses beautiful soup 4 to parse out the class names from
 # the online Qt documentation. It then tries to import the types from
-# PySide2.
+# PySide6.
 #
 # Example invocation of script:
 # python missing_bindings.py --qt-version 5.9 -w all
@@ -272,7 +272,7 @@ if hasattr(args, "module") and args.module != 'all':
     modules_to_test.clear()
     modules_to_test[args.module] = saved_value
 
-pyside_package_name = "PySide2"
+pyside_package_name = "PySide6"
 pyqt_package_name = "PyQt5"
 
 total_missing_types_count = 0
@@ -315,13 +315,13 @@ def log(*pargs, **kw):
 
     print(computed_str, file=wiki_file)
 
-log('PySide2 bindings for Qt {}'.format(args.version), style='heading1')
+log('PySide6 bindings for Qt {}'.format(args.version), style='heading1')
 
 log("""Using Qt version {} documentation to find public API Qt types and test
-if the types are present in the PySide2 package.""".format(args.version))
+if the types are present in the PySide6 package.""".format(args.version))
 
 log("""Results are usually stored at
-https://wiki.qt.io/PySide2_Missing_Bindings
+https://wiki.qt.io/PySide6_Missing_Bindings
 so consider taking the contents of the generated
 missing_bindings_for_wiki_qt_io.txt file and updating the linked wiki page.""",
 style='end')

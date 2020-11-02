@@ -43,8 +43,8 @@
 
 from math import (cos, sin, pi)
 
-from PySide2.QtGui import (QPainter, QPolygonF)
-from PySide2.QtCore import (QPointF, QSize, Qt)
+from PySide6.QtGui import (QPainter, QPolygonF)
+from PySide6.QtCore import (QPointF, QSize, Qt)
 
 PAINTING_SCALE_FACTOR = 20
 

@@ -40,9 +40,9 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/dialogs/trivialwizard example from Qt v5.x"""
+"""PySide6 port of the widgets/dialogs/trivialwizard example from Qt v5.x"""
 
-from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
 
 def createIntroPage():

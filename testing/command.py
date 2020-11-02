@@ -55,7 +55,7 @@ Building the project with something like
     python setup.py build --build-tests --qmake=<qmakepath> --ignore-git --debug
 
 is sufficient. The tests are run by changing into the latest build dir and there
-into pyside2, then 'make test'.
+into pyside6, then 'make test'.
 
 
 New testing policy:
@@ -158,8 +158,8 @@ def test_project(project, args, blacklist, runs):
 def main():
     # create the top-level command parser
     start_time = timer()
-    all_projects = "shiboken6 pyside2".split()
-    tested_projects = "shiboken6 pyside2".split()
+    all_projects = "shiboken6 pyside6".split()
+    tested_projects = "shiboken6 pyside6".split()
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent("""\

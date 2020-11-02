@@ -45,9 +45,9 @@ try:
 except ImportError:
     import pickle
 
-from PySide2.QtCore import (Qt, Signal, QRegularExpression, QModelIndex,
+from PySide6.QtCore import (Qt, Signal, QRegularExpression, QModelIndex,
                             QItemSelection, QSortFilterProxyModel)
-from PySide2.QtWidgets import QTabWidget, QMessageBox, QTableView, QAbstractItemView
+from PySide6.QtWidgets import QTabWidget, QMessageBox, QTableView, QAbstractItemView
 
 from tablemodel import TableModel
 from newaddresstab import NewAddressTab
@@ -240,7 +240,7 @@ class AddressWidget(QTabWidget):
 
 if __name__ == "__main__":
     import sys
-    from PySide2.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     addressWidget = AddressWidget()

@@ -1,0 +1,19 @@
+buildversion              = @PYSIDE_QT_VERSION@
+navigation.homepage       = Qt for Python
+
+macro.nullptr           = "\\c{None}"
+
+outputdir                 = @DOC_DATA_DIR@
+outputformats             = WebXML
+WebXML.quotinginformation = true
+WebXML.nosubdirs          = true
+WebXML.outputsubdir       = webxml
+
+spurious                 += "Hostile character .*"
+
+#excludes qdoc statements that are not relevant for PySide6
+defines                  += qtforpython
+
+includepaths += \
+    -I @QT_INCLUDE_DIR@ \
+    -I @mkspecInclude@ \

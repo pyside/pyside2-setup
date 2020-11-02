@@ -895,7 +895,7 @@ object code form only (“Redistributables”) under this Agreement:
 - The Licensed Software's QML (“Qt Quick”) launcher tool (“qmlscene” or
 “qmlviewer”)
 - The Licensed Software's installer framework
-- Qt for Python (PySide2)
+- Qt for Python (PySide6)
 
 2. Parts of the Licensed Software that are not permitted for distribution
 include, but are not limited to:

@@ -86,7 +86,7 @@ macro(use_protected_as_public_hack)
 # Clang does produce linker errors when we disable the hack.
 # But the ugly workaround in Python is replaced by a shiboken change.
 if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
-    message(STATUS "PySide2 will be generated avoiding the protected hack!")
+    message(STATUS "PySide6 will be generated avoiding the protected hack!")
     set(GENERATOR_EXTRA_FLAGS ${GENERATOR_EXTRA_FLAGS} --avoid-protected-hack)
     add_definitions(-DAVOID_PROTECTED_HACK)
 else()

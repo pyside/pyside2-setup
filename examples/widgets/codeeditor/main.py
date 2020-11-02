@@ -39,10 +39,10 @@
 #############################################################################
 
 import sys
-from PySide2.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 from codeeditor import CodeEditor
 
-"""PySide2 port of the widgets/codeeditor example from Qt5"""
+"""PySide6 port of the widgets/codeeditor example from Qt5"""
 
 if __name__ == "__main__":
     app = QApplication([])

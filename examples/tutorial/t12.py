@@ -39,13 +39,13 @@
 ##
 #############################################################################
 
-# PySide2 tutorial 12
+# PySide6 tutorial 12
 
 
 import sys
 import math
 import random
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class LCDRange(QtWidgets.QWidget):

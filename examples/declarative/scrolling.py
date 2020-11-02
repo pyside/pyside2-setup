@@ -41,9 +41,9 @@
 
 import os
 import sys
-from PySide2.QtCore import QUrl
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQuick import QQuickView
+from PySide6.QtCore import QUrl
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQuick import QQuickView
 
 # This example uses a QML file to show a scrolling list containing
 # all the items listed in dataList.

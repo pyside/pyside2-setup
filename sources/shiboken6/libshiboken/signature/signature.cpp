@@ -384,7 +384,7 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
     // was not yet run. But that is ok, because the first import is always for
     // the shiboken module (or a test module).
     if (pyside_globals->finish_import_func == nullptr) {
-        assert(strncmp(name, "PySide2.", 8) != 0);
+        assert(strncmp(name, "PySide6.", 8) != 0);
         return 0;
     }
     AutoDecRef ret(PyObject_CallFunction(

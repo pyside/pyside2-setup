@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtScxml">
+    <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <object-type name="QScxmlCompiler">
+        <object-type name="Loader"/>
+    </object-type>
+    <object-type name="QScxmlCppDataModel" since="5.12"/>
+    <object-type name="QScxmlEvent">
+        <enum-type name="EventType"/>
+    </object-type>
+    <object-type name="QScxmlDynamicScxmlServiceFactory"/>
+    <object-type name="QScxmlInvokableService"/>
+    <object-type name="QScxmlInvokableServiceFactory"/>
+    <object-type name="QScxmlStaticScxmlServiceFactory"/>
+    <object-type name="QScxmlStateMachine">
+        <modify-function signature="submitEvent(QScxmlEvent*)">
+            <modify-argument index="1">
+                <define-ownership owner="c++"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
+    <object-type name="QScxmlTableData"/>
+    <object-type name="QScxmlDataModel" since="5.12">
+        <!-- Needs to have exports fixed -->
+        <interface-type name="ForeachLoopBody" since="5.12"/>
+        <modify-function signature="^evaluateTo(String|Bool|Variant)\(.*bool ?\*.*$">
+            <modify-argument index="2">
+              <remove-default-expression/>
+              <remove-argument/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+              <insert-template name="fix_args,arg,bool*"/>
+            </inject-code>
+        </modify-function>
+    </object-type>
+    <object-type name="QScxmlEcmaScriptDataModel" since="5.12"/>
+    <value-type name="QScxmlError"/>
+    <namespace-type name="QScxmlExecutableContent">
+        <value-type name="AssignmentInfo"/>
+        <value-type name="EvaluatorInfo"/>
+        <value-type name="ForeachInfo"/>
+        <value-type name="InvokeInfo"/>
+        <value-type name="ParameterInfo"/>
+    </namespace-type>
+    <object-type name="QScxmlNullDataModel" since="5.12"/>
+</typesystem>

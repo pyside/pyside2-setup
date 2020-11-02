@@ -40,11 +40,11 @@
 ##
 #############################################################################
 
-"""PySide2 port of the network/fortuneserver example from Qt v5.x"""
+"""PySide6 port of the network/fortuneserver example from Qt v5.x"""
 
 import random
 
-from PySide2 import QtCore, QtWidgets, QtNetwork
+from PySide6 import QtCore, QtWidgets, QtNetwork
 
 
 class Server(QtWidgets.QDialog):

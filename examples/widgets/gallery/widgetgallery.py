@@ -40,11 +40,11 @@
 
 import sys
 
-from PySide2.QtWidgets import *
-from PySide2.QtGui import (QCursor, QDesktopServices, QGuiApplication, QIcon,
+from PySide6.QtWidgets import *
+from PySide6.QtGui import (QCursor, QDesktopServices, QGuiApplication, QIcon,
                            QKeySequence, QShortcut, QStandardItem,
                            QStandardItemModel, QScreen, QWindow)
-from PySide2.QtCore import (QDateTime, QDir, QLibraryInfo, QMetaObject,
+from PySide6.QtCore import (QDateTime, QDir, QLibraryInfo, QMetaObject,
                             QSysInfo, QTextStream, QTimer, Qt, qVersion)
 
 

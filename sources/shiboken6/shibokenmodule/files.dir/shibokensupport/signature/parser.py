@@ -180,7 +180,7 @@ def get_name(thing):
 
 def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
-        if valtype.startswith("PySide2.") or valtype.startswith("typing."):
+        if valtype.startswith("PySide6.") or valtype.startswith("typing."):
             return None
         map = type_map[valtype]
         # typing.Any: '_SpecialForm' object has no attribute '__name__'
@@ -230,12 +230,12 @@ def to_string(thing):
     return str(thing)
 
 
-matrix_pattern = "PySide2.QtGui.QGenericMatrix"
+matrix_pattern = "PySide6.QtGui.QGenericMatrix"
 
 def handle_matrix(arg):
     n, m, typstr = tuple(map(lambda x:x.strip(), arg.split(",")))
     assert typstr == "float"
-    result = f"PySide2.QtGui.QMatrix{n}x{m}"
+    result = f"PySide6.QtGui.QMatrix{n}x{m}"
     return eval(result, namespace)
 
 
@@ -251,7 +251,7 @@ def lno(level):
 
 def _resolve_type(thing, line, level, var_handler):
     # Capture total replacements, first. Happens in
-    # "PySide2.QtCore.QCborStreamReader.StringResult[PySide2.QtCore.QByteArray]"
+    # "PySide6.QtCore.QCborStreamReader.StringResult[PySide6.QtCore.QByteArray]"
     if thing in type_map:
         return type_map[thing]
     # Now the nested structures are handled.

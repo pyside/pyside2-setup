@@ -1,12 +1,12 @@
 # Qt For Python
 
-Qt For Python is the [Python Qt bindings project](http://wiki.qt.io/PySide2),
+Qt For Python is the [Python Qt bindings project](http://wiki.qt.io/PySide6),
 providing access to the complete Qt framework as well as to generator tools for
 rapidly generating bindings for any C++ libraries.
 
 Shiboken is the generator used to build the bindings.
 
-See README.pyside2.md and README.shiboken6.md for details.
+See README.pyside6.md and README.shiboken6.md for details.
 
 ## Building
 
@@ -21,7 +21,7 @@ The same setup.py script is used to build all the components of the project:
 
  * shiboken6 (the supporting Python module)
  * shiboken6-generator (the bindings generation executable)
- * PySide2
+ * PySide6
 
 Preferably, a Qt (build) environment should be used to automatically pick up
 the associated `qmake`, but optionally one can specify the location of `qmake`
@@ -38,10 +38,10 @@ be built:
 
  * `--build-type=shiboken6`, build/package only the python module
  * `--build-type=shiboken6-generator`, build/package the generator executable
- * `--build-type=pyside2`, build/package the PySide2 bindings.
+ * `--build-type=pyside6`, build/package the PySide6 bindings.
  * `--build-type=all`, the implicit default to build all of the above
 
-When building PySide2, optionally, one can specify the location of the
+When building PySide6, optionally, one can specify the location of the
 shiboken6 cmake config path if it is not on the current PATH with:
 
  * `--shiboken-config-dir=/path/to/shiboken/cmake/config/dir`
@@ -55,18 +55,18 @@ directory path that contains the OpenSSL shared libraries `libeay32.dll` and
 
 * `--openssl=C:\OpenSSL-Win64\bin`
 
-This will make sure that the libraries are copied into the PySide2 package and
+This will make sure that the libraries are copied into the PySide6 package and
 are found by the QtNetwork module.
 
 ## Building Additional Options
 
 On Linux and macOS you can use the option `--standalone` to embed Qt libraries
-into the PySide2 package.  The option does not affect Windows, because it is
-used implicitly, i.e. all relevant DLLs have to be copied into the PySide2
+into the PySide6 package.  The option does not affect Windows, because it is
+used implicitly, i.e. all relevant DLLs have to be copied into the PySide6
 package anyway, because there is no proper rpath support on the platform.
 
 You can use the option `--rpath=/path/to/lib/path` to specify which rpath
-values should be embedded into the PySide2 modules and shared libraries.  This
+values should be embedded into the PySide6 modules and shared libraries.  This
 overrides the automatically generated values when the option is not specified.
 
 You can use the option `--only-package` if you want to create more binary
@@ -75,13 +75,13 @@ every time:
 
 e.g.:
 
-* First, we create a bdist_wheel from a full PySide2 build:
+* First, we create a bdist_wheel from a full PySide6 build:
   ```
   python setup.py bdist_wheel --qmake=c:\Qt\5.12\bin\qmake.exe
         --cmake=c:\tools\cmake\bin\cmake.exe
         --openssl=c:\libs\OpenSSL32bit\bin
   ```
-* Then, we create a bdist_egg reusing the PySide2 build with option
+* Then, we create a bdist_egg reusing the PySide6 build with option
   `--only-package`:
   ```
   python setup.py bdist_egg --only-package
@@ -91,7 +91,7 @@ e.g.:
   ```
 
 You can use the option `--qt-conf-prefix` to pass a path relative to the
-PySide2 installed package, which will be embedded into an auto-generated
+PySide6 installed package, which will be embedded into an auto-generated
 `qt.conf` registered in the Qt resource system.  This path will serve as the
 PrefixPath for QLibraryInfo, thus allowing to choose where Qt plugins should be
 loaded from.  This option overrides the usual prefix chosen by `--standalone`
@@ -172,7 +172,7 @@ OpenSSL.
 On Linux, official Qt builds will try to pick up the system OpenSSL library.
 
 > **Note**: this means that Qt packages that directly link to the OpenSSL
-> shared libraries, are not currently compatible with standalone PySide2
+> shared libraries, are not currently compatible with standalone PySide6
 > packages.
 
 #### macOS SDK:

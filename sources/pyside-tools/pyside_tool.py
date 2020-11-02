@@ -43,11 +43,11 @@ import os
 import subprocess
 
 from subprocess import Popen, PIPE
-import PySide2 as ref_mod
+import PySide6 as ref_mod
 
 
 def main():
-    # This will take care of "pyside2-lupdate" listed as an entrypoint
+    # This will take care of "pyside6-lupdate" listed as an entrypoint
     # in setup.py are copied to 'scripts/..'
     cmd = os.path.join("..", os.path.basename(sys.argv[0]))
     command = [os.path.join(os.path.dirname(os.path.realpath(__file__)), cmd)]
@@ -56,7 +56,7 @@ def main():
 
 
 def qt_tool_wrapper(qt_tool, args):
-    # Taking care of pyside2-uic, pyside2-rcc, and pyside2-designer
+    # Taking care of pyside6-uic, pyside6-rcc, and pyside6-designer
     # listed as an entrypoint in setup.py
     pyside_dir = os.path.dirname(ref_mod.__file__)
     exe = os.path.join(pyside_dir, qt_tool)

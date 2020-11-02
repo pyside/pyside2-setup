@@ -47,7 +47,7 @@ The same can be used for the module, changing the value of ``internal-build-type
 Using the wheels
 ----------------
 
-Installing ``pyside2`` or ``shiboken6`` from pip **does not** install ``shiboken6_generator``,
+Installing ``pyside6`` or ``shiboken6`` from pip **does not** install ``shiboken6_generator``,
 because the wheels are not on PyPi.
 
 You can get the ``shiboken6_generator`` wheels from Qt servers, and you can still install it
@@ -56,7 +56,7 @@ via ``pip``::
     pip install \
         --index-url=http://download.qt.io/official_releases/QtForPython/ \
         --trusted-host download.qt.io \
-        shiboken6 pyside2 shiboken6_generator
+        shiboken6 pyside6 shiboken6_generator
 
 
 The ``whl`` package cannot automatically discover in your system the location for:

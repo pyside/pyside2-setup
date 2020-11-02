@@ -41,10 +41,10 @@
 #############################################################################
 
 import sys
-from PySide2.QtCore import (QDate, QDateTime, QRegularExpression,
+from PySide6.QtCore import (QDate, QDateTime, QRegularExpression,
                             QSortFilterProxyModel, QTime, Qt)
-from PySide2.QtGui import QStandardItemModel
-from PySide2.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
+from PySide6.QtGui import QStandardItemModel
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
                                QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QTreeView, QVBoxLayout, QWidget)
 

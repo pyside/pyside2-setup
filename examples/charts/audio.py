@@ -39,14 +39,14 @@
 ##
 #############################################################################
 
-"""PySide2 port of the charts/audio example from Qt v5.x"""
+"""PySide6 port of the charts/audio example from Qt v5.x"""
 
 import sys
-from PySide2.QtCharts import QtCharts
-from PySide2.QtCore import QPointF
-from PySide2.QtMultimedia import (QAudioDeviceInfo, QAudioFormat,
+from PySide6.QtCharts import QtCharts
+from PySide6.QtCore import QPointF
+from PySide6.QtMultimedia import (QAudioDeviceInfo, QAudioFormat,
         QAudioInput)
-from PySide2.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 sampleCount = 2000
 resolution = 4

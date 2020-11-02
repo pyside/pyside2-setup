@@ -580,7 +580,7 @@ QString AbstractMetaTypeData::formatPythonSignature() const
         for (Indirection i : m_indirections)
             result += TypeInfo::indirectionKeyword(i);
     // If it is a flags type, we replace it with the full name:
-    // "PySide2.QtCore.Qt.ItemFlags" instead of "PySide2.QtCore.QFlags<Qt.ItemFlag>"
+    // "PySide6.QtCore.Qt.ItemFlags" instead of "PySide6.QtCore.QFlags<Qt.ItemFlag>"
     if (m_typeEntry->isFlags())
         result = m_typeEntry->qualifiedTargetLangName();
     result.replace(QLatin1String("::"), QLatin1String("."));

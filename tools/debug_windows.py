@@ -39,15 +39,15 @@
 
 """
 This is a troubleshooting script that assists finding out which DLLs or
-which symbols in a DLL are missing when executing a PySide2 python
+which symbols in a DLL are missing when executing a PySide6 python
 script.
 It can also be used with any other non Python executable.
 
 Usage: python debug_windows.py
        When no arguments are given the script will try to import
-       PySide2.QtCore.
+       PySide6.QtCore.
 
-Usage: python debug_windows.py python -c "import PySide2.QtWebEngine"
+Usage: python debug_windows.py python -c "import PySide6.QtWebEngine"
        python debug_windows.py my_executable.exe arg1 arg2 --arg3=4
        Any arguments given after the script name will be considered
        as the target executable and the arguments passed to that
@@ -338,8 +338,8 @@ def test_run_import_qt_core_under_cdb_with_gflags():
     # The 2+2 is just ensure that Python itself works.
     python_code = """
 print(">>>>>>>>>>>>>>>>>>>>>>> Test computation of 2+2 is: {}".format(2+2))
-import PySide2.QtCore
-print(">>>>>>>>>>>>>>>>>>>>>>> QtCore object instance: {}".format(PySide2.QtCore))
+import PySide6.QtCore
+print(">>>>>>>>>>>>>>>>>>>>>>> QtCore object instance: {}".format(PySide6.QtCore))
 """
     call_command_under_cdb_with_gflags(sys.executable, ["-c", python_code])
 

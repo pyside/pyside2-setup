@@ -40,20 +40,20 @@
 ##
 ############################################################################
 
-"""PySide2 port of the opengl/hellogl2 example from Qt v5.x"""
+"""PySide6 port of the opengl/hellogl2 example from Qt v5.x"""
 
 import sys
 import math
 import numpy
 import ctypes
-from PySide2.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPoint
-from PySide2.QtGui import (QVector3D, QOpenGLFunctions,
+from PySide6.QtCore import QCoreApplication, Signal, SIGNAL, SLOT, Qt, QSize, QPoint
+from PySide6.QtGui import (QVector3D, QOpenGLFunctions,
     QMatrix4x4, QOpenGLContext, QSurfaceFormat)
-from PySide2.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,
+from PySide6.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,
     QOpenGLShaderProgram, QOpenGLShader)
-from PySide2.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout,
+from PySide6.QtWidgets import (QApplication, QWidget, QMessageBox, QHBoxLayout,
     QSlider)
-from PySide2.QtOpenGLWidgets import QOpenGLWidget
+from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from shiboken6 import VoidPtr
 

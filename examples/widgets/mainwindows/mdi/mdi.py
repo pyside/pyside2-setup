@@ -40,12 +40,12 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/draganddrop/draggabletext example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/draganddrop/draggabletext example from Qt v5.x, originating from PyQt"""
 
-from PySide2.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper,
+from PySide6.QtCore import (QFile, QFileInfo, QPoint, QSettings, QSignalMapper,
         QSaveFile, QSize, QTextStream, Qt)
-from PySide2.QtGui import QAction, QIcon, QKeySequence
-from PySide2.QtWidgets import (QApplication, QFileDialog, QMainWindow,
+from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
         QMdiArea, QMessageBox, QTextEdit, QWidget)
 
 import mdi_rc

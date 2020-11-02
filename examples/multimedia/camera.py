@@ -39,16 +39,16 @@
 ##
 #############################################################################
 
-"""PySide2 Multimedia Camera Example"""
+"""PySide6 Multimedia Camera Example"""
 
 import os, sys
-from PySide2.QtCore import QDate, QDir, QStandardPaths, Qt, QUrl
-from PySide2.QtGui import QAction, QGuiApplication, QDesktopServices, QIcon
-from PySide2.QtGui import QImage, QPixmap
-from PySide2.QtWidgets import (QApplication, QHBoxLayout, QLabel,
+from PySide6.QtCore import QDate, QDir, QStandardPaths, Qt, QUrl
+from PySide6.QtGui import QAction, QGuiApplication, QDesktopServices, QIcon
+from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel,
     QMainWindow, QPushButton, QTabWidget, QToolBar, QVBoxLayout, QWidget)
-from PySide2.QtMultimedia import QCamera, QCameraImageCapture, QCameraInfo
-from PySide2.QtMultimediaWidgets import QCameraViewfinder
+from PySide6.QtMultimedia import QCamera, QCameraImageCapture, QCameraInfo
+from PySide6.QtMultimediaWidgets import QCameraViewfinder
 
 class ImageView(QWidget):
     def __init__(self, previewImage, fileName):
@@ -125,18 +125,18 @@ class MainWindow(QMainWindow):
 
         if self.camera.status() != QCamera.UnavailableStatus:
             name = self.cameraInfo.description()
-            self.setWindowTitle("PySide2 Camera Example (" + name + ")")
+            self.setWindowTitle("PySide6 Camera Example (" + name + ")")
             self.statusBar().showMessage("Starting: '" + name + "'", 5000)
             self.camera.start()
         else:
-            self.setWindowTitle("PySide2 Camera Example")
+            self.setWindowTitle("PySide6 Camera Example")
             self.takePictureAction.setEnabled(False)
             self.statusBar().showMessage("Camera unavailable", 5000)
 
     def nextImageFileName(self):
         picturesLocation = QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
         dateString = QDate.currentDate().toString("yyyyMMdd")
-        pattern = picturesLocation + "/pyside2_camera_" + dateString + "_{:03d}.jpg"
+        pattern = picturesLocation + "/pyside6_camera_" + dateString + "_{:03d}.jpg"
         n = 1
         while True:
             result = pattern.format(n)

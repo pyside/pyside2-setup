@@ -50,7 +50,7 @@ if (EXISTS ${DESIGNER_PATH})
     endif()
 endif()
 
-# pyside2-rcc, pyside2-uic, pyside2-designer, shiboken and pyside2-lupdate entrypoints
+# pyside6-rcc, pyside6-uic, pyside6-designer, shiboken and pyside6-lupdate entrypoints
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pyside_tool.py
         DESTINATION bin
         PERMISSIONS

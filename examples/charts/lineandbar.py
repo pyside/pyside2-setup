@@ -39,13 +39,13 @@
 ##
 #############################################################################
 
-"""PySide2 port of the line/bar example from Qt v5.x"""
+"""PySide6 port of the line/bar example from Qt v5.x"""
 
 import sys
-from PySide2.QtCore import QPoint, Qt
-from PySide2.QtGui import QPainter
-from PySide2.QtWidgets import QMainWindow, QApplication
-from PySide2.QtCharts import QtCharts
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QPainter
+from PySide6.QtWidgets import QMainWindow, QApplication
+from PySide6.QtCharts import QtCharts
 
 
 class TestChart(QMainWindow):

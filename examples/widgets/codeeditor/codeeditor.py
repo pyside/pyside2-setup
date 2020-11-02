@@ -38,9 +38,9 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import Slot, Qt, QRect, QSize
-from PySide2.QtGui import QColor, QPainter, QTextFormat
-from PySide2.QtWidgets import QPlainTextEdit, QWidget, QTextEdit
+from PySide6.QtCore import Slot, Qt, QRect, QSize
+from PySide6.QtGui import QColor, QPainter, QTextFormat
+from PySide6.QtWidgets import QPlainTextEdit, QWidget, QTextEdit
 
 
 class LineNumberArea(QWidget):

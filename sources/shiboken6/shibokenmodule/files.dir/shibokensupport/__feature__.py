@@ -129,11 +129,11 @@ def _import(name, *args, **kwargs):
             pyside_feature_dict["rlcompleter"] = flag
 
         # Initialize feature (multiple times allowed) and clear cache.
-        sys.modules["PySide2.QtCore"].__init_feature__()
+        sys.modules["PySide6.QtCore"].__init_feature__()
         return sys.modules["__feature__"]
 
-    if name.split(".")[0] == "PySide2":
-        # This is a module that imports PySide2.
+    if name.split(".")[0] == "PySide6":
+        # This is a module that imports PySide6.
         flag = existing if isinstance(existing, int) else 0
     else:
         # This is some other module. Ignore it in switching.
@@ -147,7 +147,7 @@ def __init__():
     global _is_initialized
     if not _is_initialized:
         # use _one_ recursive import...
-        import PySide2.QtCore
+        import PySide6.QtCore
         # Initialize all prior imported modules
         for name in sys.modules:
             pyside_feature_dict.setdefault(name, -1)
@@ -165,7 +165,7 @@ def set_selection(select_id, mod_name=None):
     if isinstance(select_id, int):
         flag = select_id & 255
     pyside_feature_dict[mod_name] = flag
-    sys.modules["PySide2.QtCore"].__init_feature__()
+    sys.modules["PySide6.QtCore"].__init_feature__()
     return _current_selection(flag)
 
 

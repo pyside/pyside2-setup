@@ -39,21 +39,21 @@
 ##
 #############################################################################
 
-"""PySide2 WebEngineWidgets Example"""
+"""PySide6 WebEngineWidgets Example"""
 
 import sys
-from PySide2.QtCore import QUrl
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import (QApplication, QLineEdit,
+from PySide6.QtCore import QUrl
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (QApplication, QLineEdit,
     QMainWindow, QPushButton, QToolBar)
-from PySide2.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+from PySide6.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.setWindowTitle('PySide2 WebEngineWidgets Example')
+        self.setWindowTitle('PySide6 WebEngineWidgets Example')
 
         self.toolBar = QToolBar()
         self.addToolBar(self.toolBar)

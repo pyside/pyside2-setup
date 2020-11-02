@@ -43,10 +43,10 @@ from functools import partial
 from bookmarkwidget import BookmarkWidget
 from webengineview import WebEngineView
 from historywindow import HistoryWindow
-from PySide2 import QtCore
-from PySide2.QtCore import Qt, QUrl
-from PySide2.QtWidgets import QMenu, QTabBar, QTabWidget
-from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
+from PySide6 import QtCore
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtWidgets import QMenu, QTabBar, QTabWidget
+from PySide6.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
 
 
 class BrowserTabWidget(QTabWidget):

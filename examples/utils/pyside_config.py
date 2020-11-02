@@ -46,8 +46,8 @@ import re
 import sys
 
 
-PYSIDE = 'pyside2'
-PYSIDE_MODULE = 'PySide2'
+PYSIDE = 'pyside6'
+PYSIDE_MODULE = 'PySide6'
 SHIBOKEN = 'shiboken6'
 
 
@@ -92,7 +92,7 @@ options.append(("--shiboken-generator-include-path",
 options.append(("--pyside-include-path",
                 lambda: get_package_include_path(Package.PYSIDE_MODULE),
                 pyside_error,
-                "Print PySide2 include paths"))
+                "Print PySide6 include paths"))
 
 options.append(("--python-link-flags-qmake", lambda: python_link_flags_qmake(), python_link_error,
                 "Print python link flags for qmake"))
@@ -104,7 +104,7 @@ options.append(("--shiboken-module-qmake-lflags",
                 "Print shiboken6 shared library link flags for qmake"))
 options.append(("--pyside-qmake-lflags",
                 lambda: get_package_qmake_lflags(Package.PYSIDE_MODULE), pyside_error,
-                "Print PySide2 shared library link flags for qmake"))
+                "Print PySide6 shared library link flags for qmake"))
 
 options.append(("--shiboken-module-shared-libraries-qmake",
                 lambda: get_shared_libraries_qmake(Package.SHIBOKEN_MODULE), pyside_libs_error,
@@ -175,7 +175,7 @@ def shared_library_glob_pattern():
 def filter_shared_libraries(libs_list):
     def predicate(lib_name):
         basename = os.path.basename(lib_name)
-        if 'shiboken' in basename or 'pyside2' in basename:
+        if 'shiboken' in basename or 'pyside6' in basename:
             return True
         return False
     result = [lib for lib in libs_list if predicate(lib)]
@@ -199,7 +199,7 @@ def link_option(lib):
     return link
 
 
-# Locate PySide2 via sys.path package path.
+# Locate PySide6 via sys.path package path.
 def find_pyside():
     return find_package_path(PYSIDE_MODULE)
 

@@ -162,7 +162,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     else
         name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
     if (handle_doc_in_progress || name == nullptr
-        || strncmp(name, "PySide2.", 8) != 0)
+        || strncmp(name, "PySide6.", 8) != 0)
         return PyObject_CallMethodObjArgs(old_descr,
                                           PyMagicName::get(),
                                           ob, nullptr);

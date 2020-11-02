@@ -38,11 +38,11 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import (QAbstractItemView, QDataWidgetMapper,
+from PySide6.QtWidgets import (QAbstractItemView, QDataWidgetMapper,
     QHeaderView, QMainWindow, QMessageBox)
-from PySide2.QtGui import QKeySequence
-from PySide2.QtSql import QSqlRelation, QSqlRelationalTableModel, QSqlTableModel
-from PySide2.QtCore import Qt, Slot
+from PySide6.QtGui import QKeySequence
+from PySide6.QtSql import QSqlRelation, QSqlRelationalTableModel, QSqlTableModel
+from PySide6.QtCore import Qt, Slot
 import createdb
 from ui_bookwindow import Ui_BookWindow
 from bookdelegate import BookDelegate

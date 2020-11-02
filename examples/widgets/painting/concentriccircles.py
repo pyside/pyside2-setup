@@ -40,11 +40,11 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/painting/concentriccircles example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/painting/concentriccircles example from Qt v5.x, originating from PyQt"""
 
-from PySide2.QtCore import QRect, QRectF, QSize, Qt, QTimer
-from PySide2.QtGui import QColor, QPainter, QPalette, QPen
-from PySide2.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
+from PySide6.QtCore import QRect, QRectF, QSize, Qt, QTimer
+from PySide6.QtGui import QColor, QPainter, QPalette, QPen
+from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
         QSizePolicy, QWidget)
 
 

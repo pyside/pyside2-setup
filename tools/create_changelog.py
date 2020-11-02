@@ -59,7 +59,7 @@ Each of these identifiers can be entered in the bug tracker to obtain more
 information about a particular change.
 
 ****************************************************************************
-*                                  PySide2                                 *
+*                                  PySide6                                 *
 ****************************************************************************
 """
 
@@ -75,7 +75,7 @@ def parse_options() -> Namespace:
                "      v5.12.0..v5.12.1\n"
                "      cebc32a5..5.12")
 
-    options = ArgumentParser(description="PySide2 changelog tool",
+    options = ArgumentParser(description="PySide6 changelog tool",
                              formatter_class=RawTextHelpFormatter)
     options.add_argument("-d",
                          "--directory",
@@ -178,8 +178,8 @@ def git_command(versions: List[str], pattern: str):
             if sha not in shiboken6_commits:
                 shiboken6_commits[sha] = entry
         else:
-            if sha not in pyside2_commits:
-                pyside2_commits[sha] = entry
+            if sha not in pyside6_commits:
+                pyside6_commits[sha] = entry
 
 
 def create_fixes_log(versions: List[str]) -> None:
@@ -221,7 +221,7 @@ def create_change_log(versions: List[str]) -> None:
         if change_log[0].startswith('shiboken'):
             shiboken6_changelogs.extend(change_log[1])
         else:
-            pyside2_changelogs.extend(change_log[1])
+            pyside6_changelogs.extend(change_log[1])
 
 
 def gen_list(d: Dict[str, Dict[str, str]]) -> str:
@@ -238,9 +238,9 @@ def sort_dict(d: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
 if __name__ == "__main__":
 
     args = parse_options()
-    pyside2_commits: Dict[str, Dict[str, str]] = {}
+    pyside6_commits: Dict[str, Dict[str, str]] = {}
     shiboken6_commits: Dict[str, Dict[str, str]] = {}
-    pyside2_changelogs: List[str] = []
+    pyside6_changelogs: List[str] = []
     shiboken6_changelogs: List[str] = []
 
     # Getting commits information
@@ -253,15 +253,15 @@ if __name__ == "__main__":
             create_change_log(versions)
 
     # Sort commits
-    pyside2_commits = sort_dict(pyside2_commits)
+    pyside6_commits = sort_dict(pyside6_commits)
     shiboken6_commits = sort_dict(shiboken6_commits)
 
     # Generate message
     print(content_header.replace("@VERSION", args.release).
           replace("@TYPE", args.type))
-    print('\n'.join(pyside2_changelogs))
-    print(gen_list(pyside2_commits))
-    if not pyside2_changelogs and not pyside2_commits:
+    print('\n'.join(pyside6_changelogs))
+    print(gen_list(pyside6_commits))
+    if not pyside6_changelogs and not pyside6_commits:
         print(" - No changes")
     print(shiboken_header)
     print('\n'.join(shiboken6_changelogs))

@@ -40,10 +40,10 @@
 ############################################################################
 
 import sys
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 try:
-    from PySide2 import QtMacExtras
+    from PySide6 import QtMacExtras
 except ImportError:
     app = QtWidgets.QApplication(sys.argv)
     messageBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical, "QtMacExtras macpasteboardmime",

@@ -44,9 +44,9 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 import sys
 
-from PySide2.QtCore import Qt, QFile, QIODevice
-from PySide2.QtWidgets import QApplication, QWidget
-from PySide2.QtUiTools import QUiLoader
+from PySide6.QtCore import Qt, QFile, QIODevice
+from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtUiTools import QUiLoader
 
 
 if __name__ == '__main__':

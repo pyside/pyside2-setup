@@ -43,12 +43,12 @@
 import os
 import sys
 
-from PySide2.QtWidgets import QApplication
-from PySide2.QtGui import QDesktopServices
-from PySide2.QtNetwork import QHostAddress, QSslSocket
-from PySide2.QtCore import (QFile, QFileInfo, QUrl)
-from PySide2.QtWebChannel import QWebChannel
-from PySide2.QtWebSockets import QWebSocketServer
+from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtNetwork import QHostAddress, QSslSocket
+from PySide6.QtCore import (QFile, QFileInfo, QUrl)
+from PySide6.QtWebChannel import QWebChannel
+from PySide6.QtWebSockets import QWebSocketServer
 
 from dialog import Dialog
 from core import Core

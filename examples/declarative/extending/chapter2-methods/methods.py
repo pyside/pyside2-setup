@@ -39,15 +39,15 @@
 ##
 #############################################################################
 
-"""PySide2 port of the qml/tutorials/extending-qml/chapter2-methods example from Qt v5.x"""
+"""PySide6 port of the qml/tutorials/extending-qml/chapter2-methods example from Qt v5.x"""
 
 import os
 import sys
 
-from PySide2.QtCore import Property, Signal, Slot, QUrl, Qt
-from PySide2.QtGui import QGuiApplication, QPen, QPainter, QColor
-from PySide2.QtQml import qmlRegisterType
-from PySide2.QtQuick import QQuickPaintedItem, QQuickView
+from PySide6.QtCore import Property, Signal, Slot, QUrl, Qt
+from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
+from PySide6.QtQml import qmlRegisterType
+from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
 class PieChart (QQuickPaintedItem):
     def __init__(self, parent = None):

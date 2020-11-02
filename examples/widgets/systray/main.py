@@ -40,7 +40,7 @@
 
 import sys
 
-from PySide2.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
 from window import Window
 

@@ -40,8 +40,8 @@
 ##
 #############################################################################
 
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import (QDialog, QLabel, QTextEdit, QLineEdit,
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QDialog, QLabel, QTextEdit, QLineEdit,
                                QDialogButtonBox, QGridLayout, QVBoxLayout)
 
 class AddDialogWidget(QDialog):
@@ -90,7 +90,7 @@ class AddDialogWidget(QDialog):
 
 if __name__ == "__main__":
     import sys
-    from PySide2.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
 

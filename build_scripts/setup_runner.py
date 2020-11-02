@@ -129,7 +129,7 @@ class SetupRunner(object):
             raise RuntimeError("Invalid '{}' option given to --build-type. "
                                .format(config.build_type))
 
-        # Build everything: shiboken6, shiboken6-generator and PySide2.
+        # Build everything: shiboken6, shiboken6-generator and PySide6.
         help_requested = '--help' in self.sub_argv or '-h' in self.sub_argv
         if help_requested:
             self.add_setup_internal_invocation(config.pyside_option_name)

@@ -41,7 +41,7 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import QStyledItemDelegate, QStyle
+from PySide6.QtWidgets import QStyledItemDelegate, QStyle
 
 from starrating import StarRating
 from stareditor import StarEditor
@@ -139,7 +139,7 @@ class StarDelegate(QStyledItemDelegate):
 
 if __name__ == "__main__":
     """ Run the application. """
-    from PySide2.QtWidgets import (QApplication, QTableWidget, QTableWidgetItem,
+    from PySide6.QtWidgets import (QApplication, QTableWidget, QTableWidgetItem,
                                    QAbstractItemView)
     import sys
 

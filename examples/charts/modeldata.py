@@ -39,16 +39,16 @@
 ##
 #############################################################################
 
-"""PySide2 port of the Model Data example from Qt v5.x"""
+"""PySide6 port of the Model Data example from Qt v5.x"""
 
 import sys
 from random import randrange
 
-from PySide2.QtCore import QAbstractTableModel, QModelIndex, QRect, Qt
-from PySide2.QtGui import QColor, QPainter
-from PySide2.QtWidgets import (QApplication, QGridLayout, QHeaderView,
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, QRect, Qt
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView,
     QTableView, QWidget)
-from PySide2.QtCharts import QtCharts
+from PySide6.QtCharts import QtCharts
 
 class CustomTableModel(QAbstractTableModel):
     def __init__(self):

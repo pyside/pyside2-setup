@@ -40,14 +40,14 @@
 ##
 #############################################################################
 
-"""PySide2 port of the network/blockingfortunclient example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the network/blockingfortunclient example from Qt v5.x, originating from PyQt"""
 
-from PySide2.QtCore import (Signal, QDataStream, QMutex, QMutexLocker,
+from PySide6.QtCore import (Signal, QDataStream, QMutex, QMutexLocker,
         QThread, QWaitCondition)
-from PySide2.QtGui import QIntValidator
-from PySide2.QtWidgets import (QApplication, QDialogButtonBox, QGridLayout,
+from PySide6.QtGui import QIntValidator
+from PySide6.QtWidgets import (QApplication, QDialogButtonBox, QGridLayout,
         QLabel, QLineEdit, QMessageBox, QPushButton, QWidget)
-from PySide2.QtNetwork import (QAbstractSocket, QHostAddress, QNetworkInterface,
+from PySide6.QtNetwork import (QAbstractSocket, QHostAddress, QNetworkInterface,
         QTcpSocket)
 
 

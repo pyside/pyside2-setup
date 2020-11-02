@@ -44,7 +44,7 @@ macro(pyside_config option output_var)
     endif()
 endmacro()
 
-# Query for the shiboken6-generator path, PySide2 path, Python path, include paths and linker flags.
+# Query for the shiboken6-generator path, PySide6 path, Python path, include paths and linker flags.
 pyside_config(--shiboken-module-path SHIBOKEN_MODULE_PATH)
 pyside_config(--shiboken-generator-path SHIBOKEN_GENERATOR_PATH)
 pyside_config(--pyside-path PYSIDE_PATH)
@@ -191,8 +191,8 @@ if(WIN32)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PYTHON_ADDITIONAL_LINK_FLAGS}")
 
-    # Add custom target to hard link PySide2 shared libraries (just like in qmake example), so you
-    # don't have to set PATH manually to point to the PySide2 package.
+    # Add custom target to hard link PySide6 shared libraries (just like in qmake example), so you
+    # don't have to set PATH manually to point to the PySide6 package.
     set(shared_libraries ${SHIBOKEN_MODULE_SHARED_LIBRARIES} ${PYSIDE_SHARED_LIBRARIES})
     foreach(LIBRARY_PATH ${shared_libraries})
         string(REGEX REPLACE ".lib$" ".dll" LIBRARY_PATH ${LIBRARY_PATH})
@@ -203,7 +203,7 @@ if(WIN32)
                             COMMAND mklink /H "${DEST_PATH}" "${SOURCE_PATH}"
                             DEPENDS ${LIBRARY_PATH}
                             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                            COMMENT "Creating hardlink to PySide2 shared library ${BASE_NAME}")
+                            COMMENT "Creating hardlink to PySide6 shared library ${BASE_NAME}")
 
         # Fake target that depends on the previous one, but has special ALL keyword, which means
         # it will always be executed.

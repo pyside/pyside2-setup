@@ -38,13 +38,13 @@
 ##
 #############################################################################
 
-"""PySide2 WebEngine QtQuick 2 Example"""
+"""PySide6 WebEngine QtQuick 2 Example"""
 
 import os
-from PySide2.QtCore import QUrl
-from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtWidgets import QApplication
-from PySide2.QtWebEngine import QtWebEngine
+from PySide6.QtCore import QUrl
+from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtWidgets import QApplication
+from PySide6.QtWebEngine import QtWebEngine
 
 def main():
     app = QApplication([])

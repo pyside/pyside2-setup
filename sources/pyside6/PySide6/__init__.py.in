@@ -1,0 +1,108 @@
+from __future__ import print_function
+import os
+import sys
+from textwrap import dedent
+
+__all__ = list("Qt" + body for body in
+    "@all_module_shortnames@"
+    .split(";"))
+__version__ = "@FINAL_PACKAGE_VERSION@"
+__version_info__ = (@BINDING_API_MAJOR_VERSION@, @BINDING_API_MINOR_VERSION@, @BINDING_API_MICRO_VERSION@, "@BINDING_API_PRE_RELEASE_VERSION_TYPE@", "@BINDING_API_PRE_RELEASE_VERSION@")
+
+
+def _additional_dll_directories(package_dir):
+    # Find shiboken6 relative to the package directory.
+    root = os.path.dirname(package_dir)
+    # Check for a flat .zip as deployed by cx_free(PYSIDE-1257)
+    if root.endswith('.zip'):
+        return []
+    shiboken6 = os.path.join(root, 'shiboken6')
+    if os.path.isdir(shiboken6): # Standard case, only shiboken6 is needed
+        return [shiboken6]
+    # The below code is for the build process when generate_pyi.py
+    # is executed in the build directory. We need libpyside and Qt in addition.
+    shiboken6 = os.path.join(os.path.dirname(root), 'shiboken6', 'libshiboken')
+    if not os.path.isdir(shiboken6):
+        raise ImportError(shiboken6 + ' does not exist')
+    result = [shiboken6, os.path.join(root, 'libpyside')]
+    for path in os.environ.get('PATH').split(';'):
+        if path:
+             if os.path.exists(os.path.join(path, 'qmake.exe')):
+                 result.append(path)
+                 break
+    return result
+
+
+def _setupQtDirectories():
+    # On Windows we need to explicitly import the shiboken6 module so
+    # that the libshiboken.dll dependency is loaded by the time a
+    # Qt module is imported. Otherwise due to PATH not containing
+    # the shiboken6 module path, the Qt module import would fail
+    # due to the missing libshiboken dll.
+    # In addition, as of Python 3.8, the shiboken package directory
+    # must be added to the DLL search paths so that shiboken6.dll
+    # is found.
+    # We need to do the same on Linux and macOS, because we do not
+    # embed rpaths into the PySide6 libraries that would point to
+    # the libshiboken library location. Importing the module
+    # loads the libraries into the process memory beforehand, and
+    # thus takes care of it for us.
+
+    pyside_package_dir = os.path.abspath(os.path.dirname(__file__))
+
+    if sys.platform == 'win32' and sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+        for dir in _additional_dll_directories(pyside_package_dir):
+            os.add_dll_directory(dir)
+
+    try:
+        import shiboken6
+    except Exception:
+        paths = ', '.join(sys.path)
+        print('PySide6/__init__.py: Unable to import shiboken6 from {}'.format(paths),
+              file=sys.stderr)
+        raise
+
+    #   Trigger signature initialization.
+    try:
+        # PYSIDE-829: Avoid non-existent attributes in compiled code (Nuitka).
+        # We now use an explicit function instead of touching a signature.
+        _init_pyside_extension()
+    except AttributeError:
+        stars = 79 * "*"
+        print(dedent(f'''\
+            {stars}
+            PySide6/__init__.py: The `signature` module was not initialized.
+            This libshiboken module was loaded from
+
+            "{shiboken6.__file__}".
+
+            Please make sure that this is the real shiboken6 binary and not just a folder.
+            {stars}
+            '''), file=sys.stderr)
+        raise
+
+    if sys.platform == 'win32':
+        # PATH has to contain the package directory, otherwise plugins
+        # won't be able to find their required Qt libraries (e.g. the
+        # svg image plugin won't find Qt5Svg.dll).
+        os.environ['PATH'] = pyside_package_dir + os.pathsep + os.environ['PATH']
+
+        # On Windows, add the PySide6\openssl folder (created by setup.py's
+        # --openssl option) to the PATH so that the SSL DLLs can be found
+        # when Qt tries to dynamically load them. Tell Qt to load them and
+        # then reset the PATH.
+        openssl_dir = os.path.join(pyside_package_dir, 'openssl')
+        if os.path.exists(openssl_dir):
+            path = os.environ['PATH']
+            try:
+                os.environ['PATH'] = openssl_dir + os.pathsep + path
+                try:
+                    from . import QtNetwork
+                except ImportError:
+                    pass
+                else:
+                    QtNetwork.QSslSocket.supportsSsl()
+            finally:
+                os.environ['PATH'] = path
+
+_setupQtDirectories()

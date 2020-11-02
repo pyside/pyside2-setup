@@ -51,11 +51,11 @@ because the implementation of deprecated functions should be visible
 to the users (in the hope they don't use it any longer <wink>).
 
 As a first approach, the function finish_import redirects to
-PySide2/support/deprecated.py . There can come other extensions as well.
+PySide6/support/deprecated.py . There can come other extensions as well.
 """
 
 try:
-    from PySide2.support import deprecated
+    from PySide6.support import deprecated
     have_deprecated = True
 except ImportError:
     have_deprecated = False
@@ -63,7 +63,7 @@ except ImportError:
 
 # called by loader.py from signature.cpp
 def finish_import(module):
-    if have_deprecated and module.__name__.startswith("PySide2."):
+    if have_deprecated and module.__name__.startswith("PySide6."):
         try:
             name = "fix_for_" + module.__name__.split(".")[1]
             func = getattr(deprecated, name, None)
@@ -89,7 +89,7 @@ was much less appealing.
 Reason:
 If someone executes as the first PySide statement
 
-    from PySide2 import QtGui
+    from PySide6 import QtGui
 
 then this import is already running. We can see the other imports like the
 diverse initializations and QtCore, because it is triggered by import of

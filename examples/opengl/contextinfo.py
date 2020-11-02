@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-"""PySide2 port of the opengl/contextinfo example from Qt v5.x"""
+"""PySide6 port of the opengl/contextinfo example from Qt v5.x"""
 
 from argparse import ArgumentParser, RawTextHelpFormatter
 import numpy
@@ -47,13 +47,13 @@ import sys
 from textwrap import dedent
 
 
-from PySide2.QtCore import QCoreApplication, QLibraryInfo, QSize, QTimer, Qt
-from PySide2.QtGui import (QMatrix4x4, QOpenGLContext, QSurfaceFormat, QWindow)
-from PySide2.QtOpenGL import (QOpenGLBuffer, QOpenGLShader,
+from PySide6.QtCore import QCoreApplication, QLibraryInfo, QSize, QTimer, Qt
+from PySide6.QtGui import (QMatrix4x4, QOpenGLContext, QSurfaceFormat, QWindow)
+from PySide6.QtOpenGL import (QOpenGLBuffer, QOpenGLShader,
                               QOpenGLShaderProgram, QOpenGLVertexArrayObject)
-from PySide2.QtWidgets import (QApplication, QHBoxLayout, QMessageBox, QPlainTextEdit,
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMessageBox, QPlainTextEdit,
     QWidget)
-from PySide2.support import VoidPtr
+from PySide6.support import VoidPtr
 try:
     from OpenGL import GL
 except ImportError:

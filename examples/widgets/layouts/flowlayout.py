@@ -40,11 +40,11 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/layouts/flowlayout example from Qt v5.x"""
+"""PySide6 port of the widgets/layouts/flowlayout example from Qt v5.x"""
 
 import sys
-from PySide2.QtCore import Qt, QMargins, QPoint, QRect, QSize
-from PySide2.QtWidgets import (QApplication, QLayout, QPushButton,
+from PySide6.QtCore import Qt, QMargins, QPoint, QRect, QSize
+from PySide6.QtWidgets import (QApplication, QLayout, QPushButton,
                                QSizePolicy, QWidget)
 
 

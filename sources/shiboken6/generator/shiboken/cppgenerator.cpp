@@ -4161,7 +4161,7 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
         // privacy the same way. This worked before the heap types were used,
         // because inheritance is not really checked for static types.
         // Instead, we check this at runtime, see SbkObjectTypeTpNew.
-        if (metaClass->fullName().startsWith(QLatin1String("PySide2.Qt"))) {
+        if (metaClass->fullName().startsWith(QLatin1String("PySide6.Qt"))) {
             // PYSIDE-595: No idea how to do non-inheritance correctly.
             // Since that is only relevant in shiboken, I used a shortcut for
             // PySide.
@@ -4900,7 +4900,7 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
     for (const AbstractMetaFunction *f : overloads) {
         QStringList args;
         // PYSIDE-1328: `self`-ness cannot be computed in Python because there are mixed cases.
-        // Toplevel functions like `PySide2.QtCore.QEnum` are always self-less.
+        // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
         if (!(f->isStatic()) && f->ownerClass())
             args << QLatin1String("self");
         const AbstractMetaArgumentList &arguments = f->arguments();

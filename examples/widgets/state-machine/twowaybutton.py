@@ -40,8 +40,8 @@
 ##
 #############################################################################
 
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
+from PySide6.QtWidgets import *
+from PySide6.QtCore import *
 
 if __name__ == '__main__':
     import sys

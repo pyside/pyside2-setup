@@ -41,9 +41,9 @@
 
 import os
 import sys
-from PySide2.QtCore import QTimer, QUrl
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQuick import QQuickView
+from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQuick import QQuickView
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

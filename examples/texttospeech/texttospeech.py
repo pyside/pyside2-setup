@@ -39,14 +39,14 @@
 ##
 #############################################################################
 
-"""PySide2 QTextToSpeech example"""
+"""PySide6 QTextToSpeech example"""
 
 import sys
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import (QApplication, QComboBox, QFormLayout,
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QApplication, QComboBox, QFormLayout,
     QHBoxLayout, QLineEdit, QMainWindow, QPushButton, QSlider, QWidget)
 
-from PySide2.QtTextToSpeech import QTextToSpeech
+from PySide6.QtTextToSpeech import QTextToSpeech
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         layout = QFormLayout(centralWidget)
 
         textLayout = QHBoxLayout()
-        self.text = QLineEdit('Hello, PySide2')
+        self.text = QLineEdit('Hello, PySide6')
         self.text.setClearButtonEnabled(True)
         textLayout.addWidget(self.text)
         self.sayButton = QPushButton('Say')

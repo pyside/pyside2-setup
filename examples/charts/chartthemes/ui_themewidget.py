@@ -8,10 +8,10 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
     QRect, QSize, QUrl, Qt)
-from PySide2.QtGui import (QColor, QFont, QIcon, QPixmap)
-from PySide2.QtWidgets import *
+from PySide6.QtGui import (QColor, QFont, QIcon, QPixmap)
+from PySide6.QtWidgets import *
 
 class Ui_ThemeWidgetForm(object):
     def setupUi(self, ThemeWidgetForm):

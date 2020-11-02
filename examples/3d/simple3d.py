@@ -39,13 +39,13 @@
 ##
 #############################################################################
 
-"""PySide2 port of the qt3d/simple-cpp example from Qt v5.x"""
+"""PySide6 port of the qt3d/simple-cpp example from Qt v5.x"""
 
 import sys
-from PySide2.QtCore import(Property, QObject, QPropertyAnimation, Signal)
-from PySide2.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D)
-from PySide2.Qt3DCore import (Qt3DCore)
-from PySide2.Qt3DExtras import (Qt3DExtras)
+from PySide6.QtCore import(Property, QObject, QPropertyAnimation, Signal)
+from PySide6.QtGui import (QGuiApplication, QMatrix4x4, QQuaternion, QVector3D)
+from PySide6.Qt3DCore import (Qt3DCore)
+from PySide6.Qt3DExtras import (Qt3DExtras)
 
 class OrbitTransformController(QObject):
     def __init__(self, parent):

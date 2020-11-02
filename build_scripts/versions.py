@@ -38,6 +38,6 @@
 #############################################################################
 
 
-PYSIDE = 'pyside2'
-PYSIDE_MODULE = 'PySide2'
+PYSIDE = 'pyside6'
+PYSIDE_MODULE = 'PySide6'
 SHIBOKEN = 'shiboken6'

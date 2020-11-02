@@ -38,14 +38,14 @@
 ##
 #############################################################################
 
-"""PySide2 port of the Chart Themes example from Qt v5.x"""
+"""PySide6 port of the Chart Themes example from Qt v5.x"""
 
 import sys
-from PySide2.QtCore import QPointF, Qt
-from PySide2.QtGui import QColor, QPainter, QPalette
-from PySide2.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
+from PySide6.QtCore import QPointF, Qt
+from PySide6.QtGui import QColor, QPainter, QPalette
+from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
     QWidget)
-from PySide2.QtCharts import QtCharts
+from PySide6.QtCharts import QtCharts
 
 from ui_themewidget import Ui_ThemeWidgetForm as ui
 

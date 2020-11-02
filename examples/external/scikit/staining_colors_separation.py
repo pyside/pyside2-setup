@@ -44,9 +44,9 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.figure import Figure
-from PySide2.QtCore import Qt, Slot
-from PySide2.QtGui import QAction, QKeySequence
-from PySide2.QtWidgets import (QApplication, QHBoxLayout, QLabel,
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QSizePolicy,
                                QVBoxLayout, QWidget)
 from skimage import data

@@ -39,15 +39,15 @@
 ##
 #############################################################################
 
-"""PySide2 Multimedia player example"""
+"""PySide6 Multimedia player example"""
 
 import sys
-from PySide2.QtCore import QStandardPaths, Qt
-from PySide2.QtGui import QAction, QIcon, QKeySequence
-from PySide2.QtWidgets import (QApplication, QDialog, QFileDialog,
+from PySide6.QtCore import QStandardPaths, Qt
+from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
     QMainWindow, QSlider, QStyle, QToolBar)
-from PySide2.QtMultimedia import QMediaPlayer, QMediaPlaylist
-from PySide2.QtMultimediaWidgets import QVideoWidget
+from PySide6.QtMultimedia import QMediaPlayer, QMediaPlaylist
+from PySide6.QtMultimediaWidgets import QVideoWidget
 
 class MainWindow(QMainWindow):
 

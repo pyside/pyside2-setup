@@ -38,13 +38,13 @@
 ##
 #############################################################################
 
-"""PySide2 port of the QML Polar Chart Example from Qt v5.x"""
+"""PySide6 port of the QML Polar Chart Example from Qt v5.x"""
 
 import sys
 import os
-from PySide2.QtQuick import QQuickView
-from PySide2.QtCore import Qt, QUrl
-from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide6.QtQuick import QQuickView
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtWidgets import QApplication, QMainWindow
 
 
 if __name__ == '__main__':

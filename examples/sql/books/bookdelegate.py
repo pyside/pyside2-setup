@@ -39,10 +39,10 @@
 #############################################################################
 
 import copy
-from PySide2.QtSql import QSqlRelationalDelegate
-from PySide2.QtWidgets import QSpinBox, QStyle
-from PySide2.QtGui import QPixmap, QPalette
-from PySide2.QtCore import QEvent, QSize, Qt
+from PySide6.QtSql import QSqlRelationalDelegate
+from PySide6.QtWidgets import QSpinBox, QStyle
+from PySide6.QtGui import QPixmap, QPalette
+from PySide6.QtCore import QEvent, QSize, Qt
 
 
 class BookDelegate(QSqlRelationalDelegate):

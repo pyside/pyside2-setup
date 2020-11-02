@@ -39,11 +39,11 @@
 #############################################################################
 
 import sys
-from PySide2 import QtCore
-from PySide2.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
-from PySide2.QtGui import QDesktopServices
-from PySide2.QtWidgets import QMenu, QProgressBar, QStyleFactory
-from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem
+from PySide6 import QtCore
+from PySide6.QtCore import QDir, QFileInfo, QStandardPaths, Qt, QUrl
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtWidgets import QMenu, QProgressBar, QStyleFactory
+from PySide6.QtWebEngineWidgets import QWebEngineDownloadItem
 
 
 # A QProgressBar with context menu for displaying downloads in a QStatusBar.
@@ -60,7 +60,7 @@ class DownloadWidget(QProgressBar):
         download_item.stateChanged.connect(self._update_tool_tip())
         path = download_item.path()
         self.setMaximumWidth(300)
-        # Shorten 'PySide2-5.11.0a1-5.11.0-cp36-cp36m-linux_x86_64.whl'...
+        # Shorten 'PySide6-5.11.0a1-5.11.0-cp36-cp36m-linux_x86_64.whl'...
         description = QFileInfo(path).fileName()
         description_length = len(description)
         if description_length > 30:

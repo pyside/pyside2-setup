@@ -94,7 +94,7 @@ def is_snapshot_build():
     """
     setup_script_dir = get_current_script_path()
     pyside_version_py = os.path.join(
-        setup_script_dir, "sources", "pyside2", "pyside_version.py")
+        setup_script_dir, "sources", "pyside6", "pyside_version.py")
     d = get_python_dict(pyside_version_py)
 
     release_version_type = d['release_version_type']

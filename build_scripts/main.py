@@ -419,7 +419,7 @@ class PysideInstallLib(_install_lib):
     def install(self):
         """
         Installs files from build/xxx directory into final
-        site-packages/PySide2 directory.
+        site-packages/PySide6 directory.
         """
 
         if os.path.isdir(self.build_dir):
@@ -1115,7 +1115,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
 
         pyside_libs.extend(executables)
 
-        # Update rpath in PySide2 libs
+        # Update rpath in PySide6 libs
         for srcname in pyside_libs:
             srcpath = os.path.join(package_path, srcname)
             if os.path.isdir(srcpath) or os.path.islink(srcpath):
@@ -1156,7 +1156,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
                 raise DistutilsSetupError("Sphinx not found - aborting")
             self.html_dir = "html"
 
-            # creating directories html/pyside2/shiboken6
+            # creating directories html/pyside6/shiboken6
             try:
                 if not os.path.isdir(self.html_dir):
                     os.mkdir(self.html_dir)
@@ -1169,7 +1169,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
                         os.mkdir(out_shiboken)
                     self.out_dir = out_shiboken
                 # We know that on the shiboken step, we already created the
-                # 'pyside2' directory
+                # 'pyside6' directory
                 elif self.name == PYSIDE:
                     self.out_dir = os.path.join(self.html_dir, PYSIDE)
             except:

@@ -38,12 +38,12 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/gallery example from Qt v5.15"""
+"""PySide6 port of the widgets/gallery example from Qt v5.15"""
 
 import sys
 
-from PySide2.QtCore import QCoreApplication, Qt
-from PySide2.QtWidgets import QApplication
+from PySide6.QtCore import QCoreApplication, Qt
+from PySide6.QtWidgets import QApplication
 from widgetgallery import WidgetGallery
 
 

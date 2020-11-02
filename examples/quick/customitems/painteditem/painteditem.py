@@ -40,11 +40,11 @@
 
 import sys
 
-from PySide2.QtGui import QPainter, QBrush, QColor
-from PySide2.QtWidgets import QApplication
-from PySide2.QtQml import qmlRegisterType
-from PySide2.QtCore import QUrl, Property, Signal, Qt, QPointF
-from PySide2.QtQuick import QQuickPaintedItem, QQuickView
+from PySide6.QtGui import QPainter, QBrush, QColor
+from PySide6.QtWidgets import QApplication
+from PySide6.QtQml import qmlRegisterType
+from PySide6.QtCore import QUrl, Property, Signal, Qt, QPointF
+from PySide6.QtQuick import QQuickPaintedItem, QQuickView
 
 
 class TextBalloon(QQuickPaintedItem):

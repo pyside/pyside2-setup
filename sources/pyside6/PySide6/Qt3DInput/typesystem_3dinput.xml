@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+
+<typesystem package="PySide6.Qt3DInput">
+    <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
+    <namespace-type name="Qt3DInput">
+        <object-type name="QAbstractActionInput"/>
+        <object-type name="QAbstractAxisInput"/>
+        <object-type name="QAbstractPhysicalDevice"/>
+        <object-type name="QAction"/>
+        <object-type name="QActionInput"/>
+        <object-type name="QAnalogAxisInput"/>
+        <object-type name="QAxis"/>
+        <object-type name="QAxisAccumulator">
+            <enum-type name="SourceAxisType"/>
+        </object-type>
+        <object-type name="QAxisSetting"/>
+        <object-type name="QButtonAxisInput"/>
+        <object-type name="QInputAspect"/>
+        <object-type name="QInputChord"/>
+        <!-- On windows this raises the following error:
+        type 'Qt3DInput::QInputDeviceIntegration' is specified in typesystem, but not defined.
+        This could potentially lead to compilation errors.
+        <object-type name="QInputDeviceIntegration"/>
+        -->
+        <object-type name="QInputSequence"/>
+        <object-type name="QInputSettings"/>
+        <object-type name="QKeyboardDevice"/>
+        <object-type name="QKeyboardHandler"/>
+        <object-type name="QKeyEvent"/>
+        <object-type name="QLogicalDevice"/>
+        <object-type name="QMouseDevice">
+            <enum-type name="Axis"/>
+        </object-type>
+        <object-type name="QMouseEvent">
+            <enum-type name="Buttons"/>
+            <enum-type name="Modifiers"/>
+        </object-type>
+        <object-type name="QWheelEvent">
+            <enum-type name="Buttons"/>
+            <enum-type name="Modifiers"/>
+        </object-type>
+        <object-type name="QMouseHandler"/>
+        <!-- On windows this raise the following error:
+        qt3dinput_module_wrapper.cpp.obj : error LNK2019:
+        unresolved external symbol "void __cdecl init_Qt3DInput_QPhysicalDeviceCreatedChangeBase(struct _object *)"
+        (?init_Qt3DInput_QPhysicalDeviceCreatedChangeBase@@YAXPAU_object@@@Z) referenced in function _PyInit_Qt3DInput
+        <object-type name="QPhysicalDeviceCreatedChangeBase"/>
+        -->
+    </namespace-type>
+</typesystem>

@@ -4,7 +4,7 @@
 @PACKAGE_INIT@
 
 # This is the version of Python against which Shiboken was built. Not necessarily the version
-# against which a downstream project is built (e.g. PySide2).
+# against which a downstream project is built (e.g. PySide6).
 set(SHIBOKEN_PYTHON_VERSION_MAJOR "@PYTHON_VERSION_MAJOR@")
 set(SHIBOKEN_PYTHON_VERSION_MINOR "@PYTHON_VERSION_MINOR@")
 set(SHIBOKEN_PYTHON_VERSION_PATCH "@PYTHON_VERSION_PATCH@")

@@ -48,7 +48,7 @@
 ##
 ############################################################################
 
-from PySide2.QtWidgets import QDialog, QLineEdit, QVBoxLayout
+from PySide6.QtWidgets import QDialog, QLineEdit, QVBoxLayout
 
 # Python binding from the C++ widget
 from wiggly import WigglyWidget as WigglyWidgetCPP

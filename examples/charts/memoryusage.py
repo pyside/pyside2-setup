@@ -39,13 +39,13 @@
 ##
 #############################################################################
 
-"""PySide2 Charts example: Simple memory usage viewer"""
+"""PySide6 Charts example: Simple memory usage viewer"""
 
 import os
 import sys
-from PySide2.QtCore import QProcess
-from PySide2.QtWidgets import QApplication, QMainWindow
-from PySide2.QtCharts import QtCharts
+from PySide6.QtCore import QProcess
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCharts import QtCharts
 
 def runProcess(command, arguments):
     process = QProcess()

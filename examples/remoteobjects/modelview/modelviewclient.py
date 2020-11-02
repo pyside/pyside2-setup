@@ -39,13 +39,13 @@
 ##
 #############################################################################
 
-"""PySide2 port of the remoteobjects/modelviewclient example from Qt v5.x"""
+"""PySide6 port of the remoteobjects/modelviewclient example from Qt v5.x"""
 
 import sys
 
-from PySide2.QtCore import QUrl
-from PySide2.QtWidgets import (QApplication, QTreeView)
-from PySide2.QtRemoteObjects import QRemoteObjectNode
+from PySide6.QtCore import QUrl
+from PySide6.QtWidgets import (QApplication, QTreeView)
+from PySide6.QtRemoteObjects import QRemoteObjectNode
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -40,7 +40,7 @@
 ##
 #############################################################################
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import easing_rc
 from ui_form import Ui_Form
@@ -83,7 +83,7 @@ class Animation(QtCore.QPropertyAnimation):
         else:
             super(Animation, self).updateCurrentTime(currentTime)
 
-# PySide2 doesn't support deriving from more than one wrapped class so we use
+# PySide6 doesn't support deriving from more than one wrapped class so we use
 # composition and delegate the property.
 class Pixmap(QtCore.QObject):
     def __init__(self, pix):

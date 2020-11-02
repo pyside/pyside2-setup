@@ -204,7 +204,7 @@ if(WIN32)
                            PROPERTIES LINK_FLAGS "${python_additional_link_flags}")
 
     # Compile a list of shiboken shared libraries to be installed, so that
-    # the user doesn't have to set the PATH manually to point to the PySide2 package.
+    # the user doesn't have to set the PATH manually to point to the PySide6 package.
     foreach(library_path ${shiboken_shared_libraries})
         string(REGEX REPLACE ".lib$" ".dll" library_path ${library_path})
         file(TO_CMAKE_PATH ${library_path} library_path)

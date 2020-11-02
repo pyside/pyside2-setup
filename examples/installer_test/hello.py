@@ -57,9 +57,9 @@ import random
 import platform
 import time
 
-from PySide2.QtWidgets import (QApplication, QLabel, QPushButton,
+from PySide6.QtWidgets import (QApplication, QLabel, QPushButton,
                                QVBoxLayout, QWidget)
-from PySide2.QtCore import Slot, Qt, QTimer
+from PySide6.QtCore import Slot, Qt, QTimer
 
 class MyWidget(QWidget):
     def __init__(self):

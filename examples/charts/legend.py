@@ -38,14 +38,14 @@
 ##
 #############################################################################
 
-"""PySide2 port of the Legend example from Qt v5.x"""
+"""PySide6 port of the Legend example from Qt v5.x"""
 
 import sys
-from PySide2.QtCore import Qt, QRectF
-from PySide2.QtGui import QBrush, QColor, QPainter, QPen
-from PySide2.QtWidgets import (QApplication, QDoubleSpinBox,
+from PySide6.QtCore import Qt, QRectF
+from PySide6.QtGui import QBrush, QColor, QPainter, QPen
+from PySide6.QtWidgets import (QApplication, QDoubleSpinBox,
     QFormLayout, QGridLayout, QGroupBox, QPushButton, QWidget)
-from PySide2.QtCharts import QtCharts
+from PySide6.QtCharts import QtCharts
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):

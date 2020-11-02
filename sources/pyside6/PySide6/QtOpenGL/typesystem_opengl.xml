@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/****************************************************************************
+**
+** Copyright (C) 2020 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt for Python.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+-->
+<typesystem package="PySide6.QtOpenGL">
+  <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
+  <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
+  <load-typesystem name="templates/opengl_common.xml" generate="no" />
+
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLboolean ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^char\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?char ?\*\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="GLsync"/>
+  <rejection class="^QOpenGL.*$" argument-type="^GLubyte( const)?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?QMatrix.x. ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLintptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="qopengl_GLsizeiptr"/>
+  <rejection class="^QOpenGL.*$" argument-type="QOpenGLTextureHelper*"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
+  <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
+
+  <object-type name="QOpenGLBuffer" since="5.0">
+    <enum-type name="Access"/>
+    <enum-type name="RangeAccessFlag" flags="RangeAccessFlags"/>
+    <enum-type name="Type"/>
+    <enum-type name="UsagePattern"/>
+  </object-type>
+  <object-type name="QOpenGLDebugLogger" since="5.1">
+      <enum-type name="LoggingMode"/>
+  </object-type>
+  <value-type name="QOpenGLDebugMessage" since="5.1">
+      <enum-type name="Source" flags="Sources"/>
+      <enum-type name="Type" flags="Types"/>
+      <enum-type name="Severity" flags="Severities"/>
+  </value-type>
+  <object-type name="QOpenGLFramebufferObject" since="5.0">
+    <enum-type name="Attachment"/>
+    <enum-type name="FramebufferRestorePolicy" since="5.7"/>
+  </object-type>
+  <value-type name="QOpenGLFramebufferObjectFormat"/>
+  <object-type name="QAbstractOpenGLFunctions" since="5.1"/>
+  <value-type  name="QOpenGLPixelTransferOptions"/>
+  <object-type name="QOpenGLShader" since="5.0">
+    <enum-type name="ShaderTypeBit" flags="ShaderType"/>
+  </object-type>
+  <object-type name="QOpenGLShaderProgram" since="5.0">
+      <modify-function signature="setAttributeArray(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeArray(const char*,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeArray(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeValue(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setAttributeValue(const char*,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(int,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(int,const int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(int,const unsigned int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(const char*,const float*,int,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(const char*,const int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <modify-function signature="setUniformValueArray(const char*,const unsigned int*,int)">
+          <modify-argument index="2"><array/></modify-argument>
+      </modify-function>
+      <!-- Add explicit signatures for the setUniformValue functions -->
+      <modify-function signature="^setUniformValue\(const char\*,(float|int|uint)\)$" remove="all"/>
+      <!-- No need for a signature for GLuint, since Qt (internally) calls the same function: glUniform1i -->
+      <add-function signature="setUniformValue1f(const char*, float)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
+      </add-function>
+      <add-function signature="setUniformValue1i(const char*, int)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
+      </add-function>
+      <add-function signature="setUniformValue1f(int, float)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_float"/>
+      </add-function>
+      <add-function signature="setUniformValue1i(int, int)" return-type="void">
+          <inject-code file="../glue/qtgui.cpp" snippet="qopenglshaderprogram_setuniformvalue_int"/>
+      </add-function>
+  </object-type>
+  <object-type name="QOpenGLTexture" since="5.2">
+      <enum-type name="BindingTarget"/>
+      <enum-type name="CoordinateDirection"/>
+      <enum-type name="ComparisonFunction"/>
+      <enum-type name="ComparisonMode"/>
+      <enum-type name="CubeMapFace"/>
+      <enum-type name="DepthStencilMode"/>
+      <enum-type name="Feature" flags="Features"/>
+      <enum-type name="Filter"/>
+      <enum-type name="MipMapGeneration"/>
+      <enum-type name="PixelFormat"/>
+      <enum-type name="PixelType"/>
+      <enum-type name="SwizzleComponent"/>
+      <enum-type name="SwizzleValue"/>
+      <enum-type name="Target"/>
+      <enum-type name="TextureFormat"/>
+      <enum-type name="TextureFormatClass"/>
+      <enum-type name="TextureUnitReset"/>
+      <enum-type name="WrapMode"/>
+      <modify-function signature="borderColor(unsigned int*)const" remove="all"/>
+      <modify-function signature="borderColor(int*)const" remove="all"/>
+      <modify-function signature="borderColor(float*)const" remove="all"/>
+  </object-type>
+  <object-type name="QOpenGLTextureBlitter">
+      <enum-type name="Origin"/>
+  </object-type>
+  <object-type name="QOpenGLTimeMonitor" since="5.1"/>
+  <object-type name="QOpenGLTimerQuery" since="5.1"/>
+  <object-type name="QOpenGLWindow" since="5.4">
+      <enum-type name="UpdateBehavior"/>
+  </object-type>
+  <value-type name="QOpenGLVersionProfile" since="5.1"/>
+  <object-type name="QOpenGLVertexArrayObject">
+      <object-type name="Binder"/>
+  </object-type>
+
+</typesystem>

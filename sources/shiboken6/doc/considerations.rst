@@ -84,7 +84,7 @@ Example with old style class:
 
     .. code-block:: python
 
-        from PySide2 import QtCore
+        from PySide6 import QtCore
 
         class MyOldStyleObject:
             pass
@@ -99,7 +99,7 @@ this you will need use the new style class:
 
     .. code-block:: python
 
-        from PySide2 import QtCore
+        from PySide6 import QtCore
 
         class MyOldStyleObject(object):
             pass

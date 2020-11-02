@@ -79,7 +79,7 @@ def get_qt_version():
 
 @memoize
 def get_package_version():
-    """ Returns the version string for the PySide2 package. """
+    """ Returns the version string for the PySide6 package. """
     setup_script_dir = os.getcwd()
     pyside_version_py = os.path.join(
         setup_script_dir, "sources", PYSIDE, "pyside_version.py")
@@ -112,7 +112,7 @@ def macos_qt_min_deployment_target():
 @memoize
 def macos_pyside_min_deployment_target():
     """
-    Compute and validate PySide2 MACOSX_DEPLOYMENT_TARGET value.
+    Compute and validate PySide6 MACOSX_DEPLOYMENT_TARGET value.
     Candidate sources that are considered:
         - setup.py provided value
         - maximum value between minimum deployment target of the

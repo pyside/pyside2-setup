@@ -40,12 +40,12 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/painting/basicdrawing example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/painting/basicdrawing example from Qt v5.x, originating from PyQt"""
 
-from PySide2.QtCore import QPoint, QRect, QSize, Qt, qVersion
-from PySide2.QtGui import (QBrush, QConicalGradient, QLinearGradient, QPainter,
+from PySide6.QtCore import QPoint, QRect, QSize, Qt, qVersion
+from PySide6.QtGui import (QBrush, QConicalGradient, QLinearGradient, QPainter,
         QPainterPath, QPalette, QPen, QPixmap, QPolygon, QRadialGradient)
-from PySide2.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
         QLabel, QSpinBox, QWidget)
 
 import basicdrawing_rc

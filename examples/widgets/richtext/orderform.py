@@ -40,9 +40,9 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/richtext/orderform example from Qt v5.x"""
+"""PySide6 port of the widgets/richtext/orderform example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets, QtPrintSupport
+from PySide6 import QtCore, QtGui, QtWidgets, QtPrintSupport
 
 
 class MainWindow(QtWidgets.QMainWindow):

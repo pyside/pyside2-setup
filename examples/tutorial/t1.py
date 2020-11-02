@@ -39,11 +39,11 @@
 ##
 #############################################################################
 
-# PySide2 tutorial 1
+# PySide6 tutorial 1
 
 
 import sys
-from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
 
 app = QtWidgets.QApplication(sys.argv)

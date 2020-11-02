@@ -184,8 +184,8 @@ def write_import(file, i_node):
 
 def write_import_from(file, i_node):
     """Print an import from Qt classes as #include sequence"""
-    # "from PySide2.QtGui import QGuiApplication" or
-    # "from PySide2 import QtGui"
+    # "from PySide6.QtGui import QGuiApplication" or
+    # "from PySide6 import QtGui"
     mod = i_node.module
     if not mod.startswith('PySide') and not mod.startswith('PyQt'):
         return

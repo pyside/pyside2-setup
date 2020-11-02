@@ -40,13 +40,13 @@
 ##
 #############################################################################
 
-"""PySide2 port of the widgets/mainwindows/dockwidgets example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/mainwindows/dockwidgets example from Qt v5.x, originating from PyQt"""
 
-from PySide2.QtCore import QDate, QFile, Qt, QTextStream
-from PySide2.QtGui import (QAction, QFont, QIcon, QKeySequence,
+from PySide6.QtCore import QDate, QFile, Qt, QTextStream
+from PySide6.QtGui import (QAction, QFont, QIcon, QKeySequence,
         QTextCharFormat, QTextCursor, QTextTableFormat)
-from PySide2.QtPrintSupport import QPrintDialog, QPrinter
-from PySide2.QtWidgets import (QApplication, QDialog, QDockWidget,
+from PySide6.QtPrintSupport import QPrintDialog, QPrinter
+from PySide6.QtWidgets import (QApplication, QDialog, QDockWidget,
         QFileDialog, QListWidget, QMainWindow, QMessageBox, QTextEdit)
 
 import dockwidgets_rc

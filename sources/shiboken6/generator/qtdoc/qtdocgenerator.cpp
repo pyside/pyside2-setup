@@ -1074,7 +1074,7 @@ void QtXmlToSphinx::handleLinkEnd(LinkContext *linkContext)
 }
 
 // Copy images that are placed in a subdirectory "images" under the webxml files
-// by qdoc to a matching subdirectory under the "rst/PySide2/<module>" directory
+// by qdoc to a matching subdirectory under the "rst/PySide6/<module>" directory
 static bool copyImage(const QString &href, const QString &docDataDir,
                       const QString &context, const QString &outputDir,
                       QString *errorMessage)

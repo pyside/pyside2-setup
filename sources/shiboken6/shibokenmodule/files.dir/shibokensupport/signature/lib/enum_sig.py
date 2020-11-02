@@ -67,7 +67,7 @@ class ExactEnumerator(object):
         global EnumType
         try:
             # Lazy import
-            from PySide2.QtCore import Qt
+            from PySide6.QtCore import Qt
             EnumType = type(Qt.Key)
         except ImportError:
             EnumType = None

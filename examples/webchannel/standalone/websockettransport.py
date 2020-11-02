@@ -39,8 +39,8 @@
 ##
 #############################################################################
 
-from PySide2.QtWebChannel import QWebChannelAbstractTransport
-from PySide2.QtCore import QByteArray, QJsonDocument, Slot
+from PySide6.QtWebChannel import QWebChannelAbstractTransport
+from PySide6.QtCore import QByteArray, QJsonDocument, Slot
 
 
 class WebSocketTransport(QWebChannelAbstractTransport):

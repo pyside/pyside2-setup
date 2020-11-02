@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-"""PySide2 WebEngineWidgets Example"""
+"""PySide6 WebEngineWidgets Example"""
 
 import sys
 from bookmarkwidget import BookmarkWidget
@@ -47,12 +47,12 @@ from browsertabwidget import BrowserTabWidget
 from downloadwidget import DownloadWidget
 from findtoolbar import FindToolBar
 from webengineview import WebEngineView
-from PySide2 import QtCore
-from PySide2.QtCore import Qt, QUrl
-from PySide2.QtGui import QAction, QKeySequence, QIcon
-from PySide2.QtWidgets import (QApplication, QDockWidget, QLabel,
+from PySide6 import QtCore
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QAction, QKeySequence, QIcon
+from PySide6.QtWidgets import (QApplication, QDockWidget, QLabel,
                                QLineEdit, QMainWindow, QToolBar)
-from PySide2.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
+from PySide6.QtWebEngineWidgets import QWebEngineDownloadItem, QWebEnginePage
 
 main_windows = []
 
@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.setWindowTitle('PySide2 tabbed browser Example')
+        self.setWindowTitle('PySide6 tabbed browser Example')
 
         self._tab_widget = BrowserTabWidget(create_main_window_with_browser)
         self._tab_widget.enabled_changed.connect(self._enabled_changed)

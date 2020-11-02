@@ -357,10 +357,10 @@ static int _build_func_to_type(PyObject *obtype)
          * It is possible that a method is overwritten by another
          * attribute with the same name. This case was obviously provoked
          * explicitly in "testbinding.TestObject.staticMethodDouble",
-         * where instead of the method a "PySide2.QtCore.Signal" object
+         * where instead of the method a "PySide6.QtCore.Signal" object
          * was in the dict.
          * This overlap is also found in regular PySide under
-         * "PySide2.QtCore.QProcess.error" where again a signal object is
+         * "PySide6.QtCore.QProcess.error" where again a signal object is
          * returned. These hidden methods will be opened for the
          * signature module by adding them under the name
          * "{name}.overload".

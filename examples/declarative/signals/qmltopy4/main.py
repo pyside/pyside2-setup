@@ -41,9 +41,9 @@
 
 import os
 import sys
-from PySide2.QtCore import QObject, QUrl
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQuick import QQuickView
+from PySide6.QtCore import QObject, QUrl
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQuick import QQuickView
 
 def sayThis(s):
     print(s)

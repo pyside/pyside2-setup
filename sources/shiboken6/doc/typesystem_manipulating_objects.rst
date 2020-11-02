@@ -279,10 +279,10 @@ property
     It may appear as a child of a complex type such as ``object-type`` or
     ``value-type``.
 
-    If the PySide2 extension is not present, code will be generated using the
+    If the PySide6 extension is not present, code will be generated using the
     ``PyGetSetDef`` struct, similar to what is generated for fields.
 
-    If the PySide2 extension is present, those properties complement the
+    If the PySide6 extension is present, those properties complement the
     properties obtained from the ``Q_PROPERTY`` macro in Qt-based code.
     The properties will be handled in ``libpyside`` unless code generation
     is forced.
@@ -298,7 +298,7 @@ property
     The optional ``set`` attribute specifies name of the setter function.
 
     The optional ``generate-getsetdef`` attribute specifies whether to generate
-    code for if the PySide2 extension is present (indicating this property is not
+    code for if the PySide6 extension is present (indicating this property is not
     handled by libpyside). It defaults to *no*.
 
     The optional ``since`` attribute specifies the API version when this
@@ -328,7 +328,7 @@ property
         test = Test()
         test.value = 42
 
-    For Qt classes (with the PySide2 extension present), additional setters
+    For Qt classes (with the PySide6 extension present), additional setters
     and getters that do not appear as ``Q_PROPERTY``, can be specified to
     be properties:
 

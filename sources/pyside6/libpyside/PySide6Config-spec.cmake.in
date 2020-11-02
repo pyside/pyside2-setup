@@ -1,0 +1,16 @@
+#  PYSIDE_PYTHONPATH    - Path to where the PySide6 Python module files could be found
+#  PYSIDE_TYPESYSTEMS   - Type system files that should be used by other bindings extending PySide6
+#  PYSIDE_GLUE          - Path to module glue files.
+
+@PACKAGE_INIT@
+
+# Import targets only when using an installed PySide6 config file (so not during a regular
+# PySide6 build, or during a super project build).
+if (NOT TARGET PySide6::pyside6)
+    include("${CMAKE_CURRENT_LIST_DIR}/PySide6Targets.cmake")
+endif()
+
+# Set relocatable variables.
+set_and_check(PYSIDE_PYTHONPATH "@PACKAGE_PYSIDE_PYTHONPATH@")
+set_and_check(PYSIDE_TYPESYSTEMS "@PACKAGE_PYSIDE_TYPESYSTEMS@")
+set_and_check(PYSIDE_GLUE "@PACKAGE_PYSIDE_GLUE@")

@@ -237,7 +237,7 @@ Try running it to see if the ice creams are delivered.
 
 .. note::
     You can find the sources for this example under
-    :file:`<PYTHON_ENV_ROOT>/site-packages/lib/PySide2/examples/samplebinding`.
+    :file:`<PYTHON_ENV_ROOT>/site-packages/lib/PySide6/examples/samplebinding`.
 
 Refer to the following topics for detailed information about using Shiboken:
  * :doc:`Type System Variables <../typesystem_variables>`

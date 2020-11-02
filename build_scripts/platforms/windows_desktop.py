@@ -140,7 +140,7 @@ def prepare_packages_win32(self, vars):
             vars=vars)
 
     if config.is_internal_pyside_build():
-        # <build>/pyside2/{st_package_name}/*.pdb ->
+        # <build>/pyside6/{st_package_name}/*.pdb ->
         # <setup>/{st_package_name}
         copydir(
             f"{{build_dir}}/{PYSIDE}/{{st_package_name}}",
@@ -186,14 +186,14 @@ def prepare_packages_win32(self, vars):
             "{st_build_dir}/{st_package_name}/glue",
             vars=vars)
 
-        # <source>/pyside2/{st_package_name}/support/* ->
+        # <source>/pyside6/{st_package_name}/support/* ->
         #   <setup>/{st_package_name}/support/*
         copydir(
             f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/support",
             "{st_build_dir}/{st_package_name}/support",
             vars=vars)
 
-        # <source>/pyside2/{st_package_name}/*.pyi ->
+        # <source>/pyside6/{st_package_name}/*.pyi ->
         #   <setup>/{st_package_name}/*.pyi
         copydir(
             "{build_dir}/{PYSIDE}/{st_package_name}",
@@ -367,7 +367,7 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
 
         # In debug_and_release case, choosing which files to copy
         # is more difficult. We want to copy only the files that
-        # match the PySide2 build type. So if PySide2 is built in
+        # match the PySide6 build type. So if PySide6 is built in
         # debug mode, we want to copy only Qt debug libraries
         # (ending with "d.dll"). Or vice versa. The problem is that
         # some libraries have "d" as the last character of the

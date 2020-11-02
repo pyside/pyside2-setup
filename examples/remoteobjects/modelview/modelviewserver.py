@@ -39,14 +39,14 @@
 ##
 #############################################################################
 
-"""PySide2 port of the remoteobjects/modelviewserver example from Qt v5.x"""
+"""PySide6 port of the remoteobjects/modelviewserver example from Qt v5.x"""
 
 import sys
 
-from PySide2.QtCore import (Qt, QByteArray, QModelIndex, QObject, QTimer, QUrl)
-from PySide2.QtGui import (QColor, QStandardItemModel, QStandardItem)
-from PySide2.QtWidgets import (QApplication, QTreeView)
-from PySide2.QtRemoteObjects import QRemoteObjectHost, QRemoteObjectRegistryHost
+from PySide6.QtCore import (Qt, QByteArray, QModelIndex, QObject, QTimer, QUrl)
+from PySide6.QtGui import (QColor, QStandardItemModel, QStandardItem)
+from PySide6.QtWidgets import (QApplication, QTreeView)
+from PySide6.QtRemoteObjects import QRemoteObjectHost, QRemoteObjectRegistryHost
 
 class TimerHandler(QObject):
     def __init__(self, model):

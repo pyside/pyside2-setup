@@ -40,9 +40,9 @@
 ##
 #############################################################################
 
-"""PySide2 port of the network/fortuneclient example from Qt v5.x"""
+"""PySide6 port of the network/fortuneclient example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets, QtNetwork
+from PySide6 import QtCore, QtGui, QtWidgets, QtNetwork
 
 
 class Client(QtWidgets.QDialog):
