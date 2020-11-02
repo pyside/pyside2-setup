@@ -41,9 +41,8 @@
 
 """PySide2 port of the qml/tutorials/extending-qml/chapter5-listproperties example from Qt v5.x"""
 
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'utils'))
-from utils import text_type
+import os
+import sys
 
 from PySide2.QtCore import Property, QUrl
 from PySide2.QtGui import QGuiApplication, QPen, QPainter, QColor
@@ -97,7 +96,7 @@ class PieChart (QQuickItem):
     def setName(self, value):
         self._name = value
 
-    name = Property(text_type, getName, setName)
+    name = Property(str, getName, setName)
 
     def appendSlice(self, _slice):
         _slice.setParentItem(self)

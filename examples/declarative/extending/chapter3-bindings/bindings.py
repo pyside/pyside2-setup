@@ -41,9 +41,8 @@
 
 """PySide2 port of the qml/tutorials/extending-qml/chapter3-bindings example from Qt v5.x"""
 
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'utils'))
-from utils import text_type
+import os
+import sys
 
 from PySide2.QtCore import Property, Signal, Slot, QUrl, Qt
 from PySide2.QtGui import QGuiApplication, QPen, QPainter, QColor
@@ -79,7 +78,7 @@ class PieChart (QQuickPaintedItem):
 
     colorChanged = Signal()
     color = Property(QColor, getColor, setColor, notify=colorChanged)
-    name = Property(text_type, getName, setName)
+    name = Property(str, getName, setName)
     chartCleared = Signal()
 
     @Slot() # This should be something like @Invokable
