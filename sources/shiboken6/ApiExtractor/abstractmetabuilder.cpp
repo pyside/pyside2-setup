@@ -2670,10 +2670,9 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(AbstractMetaClass *subclass,
                                                  const AbstractMetaClass *templateClass,
                                                  const TypeInfo &info)
 {
-    QVector<TypeInfo> targs = info.instantiations();
     AbstractMetaTypeList  templateTypes;
 
-    for (const TypeInfo &i : qAsConst(targs)) {
+    for (const TypeInfo &i : info.instantiations()) {
         QString typeName = i.qualifiedName().join(colonColon());
         TypeDatabase *typeDb = TypeDatabase::instance();
         TypeEntry *t = nullptr;

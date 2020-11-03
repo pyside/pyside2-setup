@@ -30,6 +30,7 @@ clangparser/clangbuilder.cpp
 clangparser/clangdebugutils.cpp
 clangparser/clangutils.cpp
 # Old parser
+parser/typeinfo.cpp
 parser/codemodel.cpp
 parser/enumvalue.cpp
 xmlutils.cpp

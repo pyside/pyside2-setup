@@ -27,7 +27,7 @@
 ****************************************************************************/
 
 #include "typeparser.h"
-#include <codemodel.h>
+#include <typeinfo.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QStack>

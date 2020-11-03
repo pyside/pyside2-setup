@@ -32,7 +32,6 @@
 #include "parser/codemodel_enums.h"
 
 #include <QtCore/QString>
-#include <QtCore/QVector>
 
 class TypeInfo;
 
