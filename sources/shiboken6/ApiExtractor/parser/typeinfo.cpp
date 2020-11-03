@@ -39,6 +39,71 @@
 
 #include <iostream>
 
+class TypeInfoData : public QSharedData
+{
+
+public:
+    TypeInfoData();
+
+    bool isVoid() const;
+    bool equals(const TypeInfoData &other) const;
+    bool isStdType() const;
+    void simplifyStdType();
+
+    QStringList m_qualifiedName;
+    QStringList m_arrayElements;
+    TypeInfo::TypeInfoList m_arguments;
+    TypeInfo::TypeInfoList m_instantiations;
+    TypeInfo::Indirections m_indirections;
+
+    union {
+        uint flags;
+
+        struct {
+            uint m_constant: 1;
+            uint m_volatile: 1;
+            uint m_functionPointer: 1;
+            uint m_padding: 29;
+        };
+    };
+
+    ReferenceType m_referenceType;
+};
+
+TypeInfoData::TypeInfoData() : flags(0), m_referenceType(NoReference)
+{
+}
+
+TypeInfo::TypeInfo() : d(new TypeInfoData)
+{
+}
+
+TypeInfo::~TypeInfo() = default;
+TypeInfo::TypeInfo(const TypeInfo &) = default;
+TypeInfo& TypeInfo::operator=(const TypeInfo &) = default;
+TypeInfo::TypeInfo(TypeInfo &&) = default;
+TypeInfo& TypeInfo::operator=(TypeInfo &&) = default;
+
+
+static inline TypeInfo createType(const QString &name)
+{
+    TypeInfo result;
+    result.addName(name);
+    return result;
+}
+
+TypeInfo TypeInfo::voidType()
+{
+    static const TypeInfo result = createType(QLatin1String("void"));
+    return result;
+}
+
+TypeInfo TypeInfo::varArgsType()
+{
+    static const TypeInfo result = createType(QLatin1String("..."));
+    return result;
+}
+
 TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
 {
     TypeInfo __result = __lhs;
@@ -47,20 +112,179 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
     __result.setVolatile(__result.isVolatile() || __rhs.isVolatile());
     if (__rhs.referenceType() > __result.referenceType())
         __result.setReferenceType(__rhs.referenceType());
-    __result.m_indirections.append(__rhs.m_indirections);
+
+    const auto indirections = __rhs.indirectionsV();
+    for (auto i : indirections)
+        __result.addIndirection(i);
+
     __result.setArrayElements(__result.arrayElements() + __rhs.arrayElements());
-    __result.m_instantiations.append(__rhs.m_instantiations);
+
+    const auto instantiations = __rhs.instantiations();
+    for (const auto &i : instantiations)
+        __result.addInstantiation(i);
 
     return __result;
 }
 
-bool TypeInfo::isVoid() const
+QStringList TypeInfo::qualifiedName() const
+{
+    return d->m_qualifiedName;
+}
+
+void TypeInfo::setQualifiedName(const QStringList &qualified_name)
+{
+    if (d->m_qualifiedName != qualified_name)
+        d->m_qualifiedName = qualified_name;
+}
+
+void  TypeInfo::addName(const QString &n)
+{
+    d->m_qualifiedName.append(n);
+}
+
+bool TypeInfoData::isVoid() const
 {
     return m_indirections.isEmpty() && m_referenceType == NoReference
         && m_arguments.isEmpty() && m_arrayElements.isEmpty()
         && m_instantiations.isEmpty()
         && m_qualifiedName.size() == 1
         && m_qualifiedName.constFirst() == QLatin1String("void");
+}
+
+bool TypeInfo::isVoid() const
+{
+    return d->isVoid();
+}
+
+bool TypeInfo::isConstant() const
+{
+    return d->m_constant;
+}
+
+void TypeInfo::setConstant(bool is)
+{
+    if (d->m_constant != is)
+        d->m_constant = is;
+}
+
+bool TypeInfo::isVolatile() const
+{
+    return d->m_volatile;
+}
+
+void TypeInfo::setVolatile(bool is)
+{
+    if (d->m_volatile != is)
+        d->m_volatile = is;
+}
+
+ReferenceType TypeInfo::referenceType() const
+{
+    return d->m_referenceType;
+}
+
+void TypeInfo::setReferenceType(ReferenceType r)
+{
+    if (d->m_referenceType != r)
+        d->m_referenceType = r;
+}
+
+const TypeInfo::Indirections &TypeInfo::indirectionsV() const
+{
+    return d->m_indirections;
+}
+
+void TypeInfo::setIndirectionsV(const TypeInfo::Indirections &i)
+{
+    if (d->m_indirections != i)
+        d->m_indirections = i;
+}
+
+int TypeInfo::indirections() const
+{
+    return d->m_indirections.size();
+}
+
+void TypeInfo::setIndirections(int indirections)
+{
+    const Indirections newValue(indirections, Indirection::Pointer);
+    if (d->m_indirections != newValue)
+        d->m_indirections = newValue;
+}
+
+void TypeInfo::addIndirection(Indirection i)
+{
+    d->m_indirections.append(i);
+}
+
+bool TypeInfo::isFunctionPointer() const
+{
+    return d->m_functionPointer;
+}
+
+void TypeInfo::setFunctionPointer(bool is)
+{
+    if (d->m_functionPointer != is)
+        d->m_functionPointer = is;
+}
+
+const QStringList &TypeInfo::arrayElements() const
+{
+    return d->m_arrayElements;
+}
+
+void TypeInfo::setArrayElements(const QStringList &arrayElements)
+{
+    if (d->m_arrayElements != arrayElements)
+        d->m_arrayElements = arrayElements;
+}
+
+void TypeInfo::addArrayElement(const QString &a)
+{
+    d->m_arrayElements.append(a);
+}
+
+const QList<TypeInfo> &TypeInfo::arguments() const
+{
+    return d->m_arguments;
+}
+
+void TypeInfo::setArguments(const QList<TypeInfo> &arguments)
+{
+    if (d->m_arguments != arguments)
+        d->m_arguments = arguments;
+}
+
+void TypeInfo::addArgument(const TypeInfo &arg)
+{
+    d->m_arguments.append(arg);
+}
+
+const TypeInfo::TypeInfoList &TypeInfo::instantiations() const
+{
+    return d->m_instantiations;
+}
+
+TypeInfo::TypeInfoList &TypeInfo::instantiations()
+{
+    return d->m_instantiations;
+}
+
+void TypeInfo::setInstantiations(const TypeInfoList &i)
+{
+    if (d->m_instantiations != i)
+        d->m_instantiations = i;
+}
+
+void TypeInfo::addInstantiation(const TypeInfo &i)
+{
+    d->m_instantiations.append(i);
+}
+
+void TypeInfo::clearInstantiations()
+{
+    if (!d->m_instantiations.isEmpty())
+        d->m_instantiations.clear();
 }
 
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, const ScopeModelItem &__scope)
@@ -132,8 +356,8 @@ public:
     void operator()(int level, QStringView name)
     {
         if (level > m_parseStack.size()) {
-            Q_ASSERT(!top()->m_instantiations.isEmpty());
-            m_parseStack.push(&top()->m_instantiations.back());
+            Q_ASSERT(!top()->instantiations().isEmpty());
+            m_parseStack.push(&top()->instantiations().back());
         }
         while (level < m_parseStack.size())
             m_parseStack.pop();
@@ -172,21 +396,21 @@ QString TypeInfo::toString() const
     if (isVolatile())
         tmp += QLatin1String("volatile ");
 
-    tmp += m_qualifiedName.join(QLatin1String("::"));
+    tmp += d->m_qualifiedName.join(QLatin1String("::"));
 
-    if (const int instantiationCount = m_instantiations.size()) {
+    if (const int instantiationCount = d->m_instantiations.size()) {
         tmp += QLatin1Char('<');
         for (int i = 0; i < instantiationCount; ++i) {
             if (i)
                 tmp += QLatin1String(", ");
-            tmp += m_instantiations.at(i).toString();
+            tmp += d->m_instantiations.at(i).toString();
         }
         if (tmp.endsWith(QLatin1Char('>')))
             tmp += QLatin1Char(' ');
         tmp += QLatin1Char('>');
     }
 
-    for (Indirection i : m_indirections)
+    for (Indirection i : d->m_indirections)
         tmp.append(indirectionKeyword(i));
 
     switch (referenceType()) {
@@ -202,16 +426,16 @@ QString TypeInfo::toString() const
 
     if (isFunctionPointer()) {
         tmp += QLatin1String(" (*)(");
-        for (int i = 0; i < m_arguments.count(); ++i) {
+        for (int i = 0; i < d->m_arguments.count(); ++i) {
             if (i != 0)
                 tmp += QLatin1String(", ");
 
-            tmp += m_arguments.at(i).toString();
+            tmp += d->m_arguments.at(i).toString();
         }
         tmp += QLatin1Char(')');
     }
 
-    for (const QString &elt : m_arrayElements) {
+    for (const QString &elt : d->m_arrayElements) {
         tmp += QLatin1Char('[');
         tmp += elt;
         tmp += QLatin1Char(']');
@@ -220,9 +444,9 @@ QString TypeInfo::toString() const
     return tmp;
 }
 
-bool TypeInfo::equals(const TypeInfo &other) const
+bool TypeInfoData::equals(const TypeInfoData &other) const
 {
-    if (arrayElements().count() != other.arrayElements().count())
+    if (m_arrayElements.count() != other.m_arrayElements.count())
         return false;
 
 #if defined (RXX_CHECK_ARRAY_ELEMENTS) // ### it'll break
@@ -239,6 +463,11 @@ bool TypeInfo::equals(const TypeInfo &other) const
            && m_qualifiedName == other.m_qualifiedName
            && (!m_functionPointer || m_arguments == other.m_arguments)
            && m_instantiations == other.m_instantiations;
+}
+
+bool TypeInfo::equals(const TypeInfo &other) const
+{
+    return d.data() == other.d.data() || d->equals(*other.d);
 }
 
 QString TypeInfo::indirectionKeyword(Indirection i)
@@ -290,10 +519,15 @@ void TypeInfo::stripQualifiers(QString *s)
 // "std::__cxx11::list<int, std::allocator<int> >" or
 // "std::__1::list<int, std::allocator<int> >" -> "std::list<int>".
 
-bool TypeInfo::isStdType() const
+bool TypeInfoData::isStdType() const
 {
     return m_qualifiedName.size() > 1
         && m_qualifiedName.constFirst() == QLatin1String("std");
+}
+
+bool TypeInfo::isStdType() const
+{
+    return d->isStdType();
 }
 
 static inline bool discardStdType(const QString &name)
@@ -301,28 +535,33 @@ static inline bool discardStdType(const QString &name)
     return name == QLatin1String("allocator") || name == QLatin1String("less");
 }
 
-void TypeInfo::simplifyStdType()
+void TypeInfoData::simplifyStdType()
 {
-    if (isStdType()) {
-        if (m_qualifiedName.at(1).startsWith(QLatin1String("__")))
-            m_qualifiedName.removeAt(1);
-        for (int t = m_instantiations.size() - 1; t >= 0; --t) {
-            if (m_instantiations.at(t).isStdType()) {
-                if (discardStdType(m_instantiations.at(t).m_qualifiedName.constLast()))
-                    m_instantiations.removeAt(t);
-                else
-                    m_instantiations[t].simplifyStdType();
-            }
+    Q_ASSERT(isStdType());
+    if (m_qualifiedName.at(1).startsWith(QLatin1String("__")))
+        m_qualifiedName.removeAt(1);
+    for (int t = m_instantiations.size() - 1; t >= 0; --t) {
+        if (m_instantiations.at(t).isStdType()) {
+            if (discardStdType(m_instantiations.at(t).qualifiedName().constLast()))
+                m_instantiations.removeAt(t);
+            else
+                m_instantiations[t].simplifyStdType();
         }
     }
 }
 
+void TypeInfo::simplifyStdType()
+{
+    if (isStdType())
+        d->simplifyStdType();
+}
+
 void TypeInfo::formatTypeSystemSignature(QTextStream &str) const
 {
-    if (m_constant)
+    if (d->m_constant)
         str << "const ";
-    str << m_qualifiedName.join(QLatin1String("::"));
-    switch (m_referenceType) {
+    str << d->m_qualifiedName.join(QLatin1String("::"));
+    switch (d->m_referenceType) {
     case NoReference:
         break;
     case LValueReference:
@@ -332,7 +571,7 @@ void TypeInfo::formatTypeSystemSignature(QTextStream &str) const
         str << "&&";
         break;
     }
-    for (auto i : m_indirections) {
+    for (auto i : d->m_indirections) {
         switch (i) {
         case Indirection::Pointer:
             str << '*';
@@ -355,44 +594,44 @@ void formatSequence(QDebug &d, It i1, It i2, const char *separator=", ")
     }
 }
 
-void TypeInfo::formatDebug(QDebug &d) const
+void TypeInfo::formatDebug(QDebug &debug) const
 {
-    d << '"';
-    formatSequence(d, m_qualifiedName.begin(), m_qualifiedName.end(), "\", \"");
-    d << '"';
-    if (m_constant)
-        d << ", [const]";
-    if (m_volatile)
-        d << ", [volatile]";
-    if (!m_indirections.isEmpty()) {
-        d << ", indirections=";
-        for (auto i : m_indirections)
-            d << ' ' << TypeInfo::indirectionKeyword(i);
+    debug << '"';
+    formatSequence(debug, d->m_qualifiedName.begin(), d->m_qualifiedName.end(), "\", \"");
+    debug << '"';
+    if (d->m_constant)
+        debug << ", [const]";
+    if (d->m_volatile)
+        debug << ", [volatile]";
+    if (!d->m_indirections.isEmpty()) {
+        debug << ", indirections=";
+        for (auto i : d->m_indirections)
+            debug << ' ' << TypeInfo::indirectionKeyword(i);
     }
-    switch (m_referenceType) {
+    switch (d->m_referenceType) {
     case NoReference:
         break;
     case LValueReference:
-        d << ", [ref]";
+        debug << ", [ref]";
         break;
     case RValueReference:
-        d << ", [rvalref]";
+        debug << ", [rvalref]";
         break;
     }
-    if (!m_instantiations.isEmpty()) {
-        d << ", template<";
-        formatSequence(d, m_instantiations.begin(), m_instantiations.end());
-        d << '>';
+    if (!d->m_instantiations.isEmpty()) {
+        debug << ", template<";
+        formatSequence(debug, d->m_instantiations.begin(), d->m_instantiations.end());
+        debug << '>';
     }
-    if (m_functionPointer) {
-        d << ", function ptr(";
-        formatSequence(d, m_arguments.begin(), m_arguments.end());
-        d << ')';
+    if (d->m_functionPointer) {
+        debug << ", function ptr(";
+        formatSequence(debug, d->m_arguments.begin(), d->m_arguments.end());
+        debug << ')';
     }
-    if (!m_arrayElements.isEmpty()) {
-        d << ", array[" << m_arrayElements.size() << "][";
-        formatSequence(d, m_arrayElements.begin(), m_arrayElements.end());
-        d << ']';
+    if (!d->m_arrayElements.isEmpty()) {
+        debug << ", array[" << d->m_arrayElements.size() << "][";
+        formatSequence(debug, d->m_arrayElements.begin(), d->m_arrayElements.end());
+        debug << ']';
     }
 }
 

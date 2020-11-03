@@ -178,9 +178,8 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
 {
     Scanner scanner(str);
 
-    TypeInfo info;
-    QStack<TypeInfo *> stack;
-    stack.push(&info);
+    QStack<TypeInfo> stack;
+    stack.push(TypeInfo());
 
     bool colon_prefix = false;
     bool in_array = false;
@@ -211,16 +210,16 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
 
         case Scanner::StarToken:
             seenStar = true;
-            stack.top()->addIndirection(Indirection::Pointer);
+            stack.top().addIndirection(Indirection::Pointer);
             break;
 
         case Scanner::AmpersandToken:
-            switch (stack.top()->referenceType()) {
+            switch (stack.top().referenceType()) {
             case NoReference:
-                stack.top()->setReferenceType(LValueReference);
+                stack.top().setReferenceType(LValueReference);
                 break;
             case LValueReference:
-                stack.top()->setReferenceType(RValueReference);
+                stack.top().setReferenceType(RValueReference);
                 break;
             case RValueReference:
                 const QString message = scanner.msgParseError(QStringLiteral("Too many '&' qualifiers"));
@@ -232,18 +231,21 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
             }
             break;
         case Scanner::LessThanToken:
-            stack.top()->m_instantiations << TypeInfo();
-            stack.push(&stack.top()->m_instantiations.last());
+            stack.push(TypeInfo());
             break;
 
         case Scanner::CommaToken:
-            stack.pop();
-            stack.top()->m_instantiations << TypeInfo();
-            stack.push(&stack.top()->m_instantiations.last());
+        {
+            auto i = stack.pop();
+            stack.top().addInstantiation(i); // Add after populating to prevent detach
+            stack.push(TypeInfo());
+        }
             break;
 
-        case Scanner::GreaterThanToken:
-            stack.pop();
+        case Scanner::GreaterThanToken: {
+            auto i = stack.pop();
+            stack.top().addInstantiation(i); // Add after populating to prevent detach
+        }
             break;
 
         case Scanner::ColonToken:
@@ -252,15 +254,17 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
 
         case Scanner::ConstToken:
             if (seenStar) { // "int *const": Last indirection is const.
-                Q_ASSERT(!stack.top()->m_indirections.isEmpty());
-                *stack.top()->m_indirections.rbegin() = Indirection::ConstPointer;
+                auto indirections = stack.top().indirectionsV();
+                Q_ASSERT(!indirections.isEmpty());
+                indirections[0] = Indirection::ConstPointer;
+                stack.top().setIndirectionsV(indirections);
             } else {
-                stack.top()->m_constant = true;
+                stack.top().setConstant(true);
             }
             break;
 
         case Scanner::VolatileToken:
-            stack.top()->m_volatile  = true;
+            stack.top().setVolatile(true);
             break;
 
         case Scanner::OpenParenToken: // function pointers not supported
@@ -276,11 +280,13 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
         case Scanner::Identifier:
             if (in_array) {
                 array = scanner.identifier();
-            } else if (colon_prefix || stack.top()->m_qualifiedName.isEmpty()) {
-                stack.top()->m_qualifiedName << scanner.identifier();
+            } else if (colon_prefix || stack.top().qualifiedName().isEmpty()) {
+                stack.top().addName(scanner.identifier());
                 colon_prefix = false;
             } else {
-                stack.top()->m_qualifiedName.last().append(QLatin1Char(' ') + scanner.identifier());
+                QStringList qualifiedName = stack.top().qualifiedName();
+                qualifiedName.last().append(QLatin1Char(' ') + scanner.identifier());
+                stack.top().setQualifiedName(qualifiedName);
             }
             break;
 
@@ -290,7 +296,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
 
         case Scanner::SquareEnd:
             in_array = false;
-            stack.top()->m_arrayElements += array;
+            stack.top().addArrayElement(array);
             break;
 
 
@@ -301,5 +307,6 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
         tok = scanner.nextToken();
     }
 
-    return info;
+    Q_ASSERT(!stack.isEmpty());
+    return stack.constFirst();
 }

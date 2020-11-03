@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2020 The Qt Company Ltd.
 ** Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
@@ -34,10 +34,13 @@
 #include "codemodel_fwd.h"
 
 #include <QtCore/QString>
+#include <QtCore/QSharedDataPointer>
 #include <QtCore/QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QTextStream)
+
+class TypeInfoData;
 
 class TypeInfo
 {
@@ -46,61 +49,58 @@ public:
     using Indirections = QList<Indirection>;
     using TypeInfoList = QList<TypeInfo>;
 
-    TypeInfo() : flags(0), m_referenceType(NoReference) {}
+    TypeInfo();
+    ~TypeInfo();
+    TypeInfo(const TypeInfo &);
+    TypeInfo& operator=(const TypeInfo &);
+    TypeInfo(TypeInfo &&);
+    TypeInfo& operator=(TypeInfo &&);
 
-    QStringList qualifiedName() const { return m_qualifiedName; }
-    void setQualifiedName(const QStringList &qualified_name)
-    {
-        m_qualifiedName = qualified_name;
-    }
+    static TypeInfo voidType();
+    static TypeInfo varArgsType();
+
+    QStringList qualifiedName() const;
+    void setQualifiedName(const QStringList &qualified_name);
+    void addName(const QString &);
 
     bool isVoid() const;
 
-    bool isConstant() const { return m_constant; }
-    void setConstant(bool is) { m_constant = is; }
+    bool isConstant() const;
+    void setConstant(bool is);
 
-    bool isVolatile() const { return m_volatile; }
+    bool isVolatile() const;
 
-    void setVolatile(bool is) { m_volatile = is;    }
+    void setVolatile(bool is);
 
-    ReferenceType referenceType() const { return m_referenceType; }
-    void setReferenceType(ReferenceType r) { m_referenceType = r; }
+    ReferenceType referenceType() const;
+    void setReferenceType(ReferenceType r);
 
-    const Indirections &indirectionsV() const { return m_indirections; }
-    void setIndirectionsV(const Indirections &i) { m_indirections = i; }
-    void addIndirection(Indirection i) { m_indirections.append(i); }
+    const Indirections &indirectionsV() const;
+    void setIndirectionsV(const Indirections &i);
+    void addIndirection(Indirection i);
 
     // "Legacy", rename?
-    int indirections() const { return m_indirections.size(); }
+    int indirections() const;
 
-    void setIndirections(int indirections)
-    {
-        m_indirections = Indirections(indirections, Indirection::Pointer);
-    }
+    void setIndirections(int indirections);
 
-    bool isFunctionPointer() const { return m_functionPointer; }
-    void setFunctionPointer(bool is) { m_functionPointer = is; }
+    bool isFunctionPointer() const;
+    void setFunctionPointer(bool is);
 
-    const QStringList &arrayElements() const { return m_arrayElements; }
-    void setArrayElements(const QStringList &arrayElements)
-    {
-        m_arrayElements = arrayElements;
-    }
+    const QStringList &arrayElements() const;
+    void setArrayElements(const QStringList &arrayElements);
 
-    void addArrayElement(const QString &a) { m_arrayElements.append(a); }
+    void addArrayElement(const QString &a);
 
-    const TypeInfoList &arguments() const { return m_arguments; }
+    const TypeInfoList &arguments() const;
     void setArguments(const TypeInfoList &arguments);
+    void addArgument(const TypeInfo &arg);
 
-    void addArgument(const TypeInfo &arg)
-    {
-        m_arguments.append(arg);
-    }
-
-    const TypeInfoList &instantiations() const { return m_instantiations; }
-    void setInstantiations(const TypeInfoList &i) { m_instantiations = i; }
-    void addInstantiation(const TypeInfo &i) { m_instantiations.append(i); }
-    void clearInstantiations() { m_instantiations.clear(); }
+    const TypeInfoList &instantiations() const;
+    TypeInfoList &instantiations(); // for parsing only
+    void setInstantiations(const TypeInfoList &i);
+    void addInstantiation(const TypeInfo &i);
+    void clearInstantiations();
 
     bool isStdType() const;
 
@@ -131,28 +131,11 @@ public:
     void simplifyStdType();
 
 private:
+    QSharedDataPointer<TypeInfoData> d;
+
     friend class TypeInfoTemplateArgumentHandler;
 
     static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, const ScopeModelItem &__scope);
-
-    QStringList m_qualifiedName;
-    QStringList m_arrayElements;
-    QList<TypeInfo> m_arguments;
-    QList<TypeInfo> m_instantiations;
-    Indirections m_indirections;
-
-    union {
-        uint flags;
-
-        struct {
-            uint m_constant: 1;
-            uint m_volatile: 1;
-            uint m_functionPointer: 1;
-            uint m_padding: 29;
-        };
-    };
-
-    ReferenceType m_referenceType;
 };
 
 inline bool operator==(const TypeInfo &t1, const TypeInfo &t2)
