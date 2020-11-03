@@ -236,6 +236,13 @@ except ImportError:
     from ez_setup import use_setuptools
     use_setuptools()
 
+from setuptools import Extension
+from setuptools.command.install import install as _install
+from setuptools.command.install_lib import install_lib as _install_lib
+from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
+from setuptools.command.develop import develop as _develop
+from setuptools.command.build_py import build_py as _build_py
+
 import distutils.log as log
 from distutils.errors import DistutilsSetupError
 from distutils.sysconfig import get_config_var
@@ -245,13 +252,6 @@ from distutils.command.build import build as _build
 from distutils.command.build_ext import build_ext as _build_ext
 from distutils.util import get_platform
 from distutils.cmd import Command
-
-from setuptools import Extension
-from setuptools.command.install import install as _install
-from setuptools.command.install_lib import install_lib as _install_lib
-from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
-from setuptools.command.develop import develop as _develop
-from setuptools.command.build_py import build_py as _build_py
 
 from .qtinfo import QtInfo
 from .utils import rmtree, detect_clang, copyfile, copydir, run_process_output, run_process
