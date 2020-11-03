@@ -47,7 +47,13 @@
     <rejection class="*" function-name="qt_metacall"/>
     <rejection class="*" function-name="qt_static_metacall"/>
 
-    <object-type name="QAxBase"/>
+    <object-type name="QAxBase">
+        <!--  PYSIDE-1410, Check for QVariantList first since it also is a QVariant -->
+        <modify-function signature="dynamicCall(const char*,QList&lt;QVariant&gt;&amp;)" overload-number="0"/>
+        <modify-function signature="dynamicCall(const char*,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;,const QVariant&amp;)" overload-number="1"/>
+        <!-- Remove protected, internal function -->
+        <modify-function signature="dynamicCall(const char*,QList&lt;QVariant&gt;&amp;,unsigned)" remove="all"/>
+    </object-type>
     <object-type name="QAxBaseObject"/>
     <object-type name="QAxObject"/>
     <object-type name="QAxObjectInterface"/>
