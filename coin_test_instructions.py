@@ -83,6 +83,11 @@ def call_testrunner(python_ver, buildnro):
     # When the 'python_ver' variable is empty, we are using Python 2
     # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
     run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+    if sys.platform == "win32":
+        run_instruction([env_pip, "install", "numpy==1.19.3"], "Failed to install numpy 1.19.3")
+    else:
+        run_instruction([env_pip, "install", "numpy"], "Failed to install numpy")
+
     cmd = [env_python, "testrunner.py", "test",
                   "--blacklist", "build_history/blacklist.txt",
                   "--buildno=" + buildnro]
