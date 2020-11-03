@@ -55,12 +55,12 @@ class QCollatorTest(unittest.TestCase):
         c.setLocale(QLocale.French)
         c.setNumericMode(True)
         c.setIgnorePunctuation(True)
-        c.setLocale(QLocale.Norwegian)
+        c.setLocale(QLocale.NorwegianBokmal)
 
         self.assertEqual(c.caseSensitivity(), Qt.CaseInsensitive)
         self.assertEqual(c.numericMode(), True)
         self.assertEqual(c.ignorePunctuation(), True)
-        self.assertEqual(c.locale(), QLocale(QLocale.Norwegian))
+        self.assertEqual(c.locale(), QLocale(QLocale.NorwegianBokmal))
 
 if __name__ == '__main__':
     unittest.main()
