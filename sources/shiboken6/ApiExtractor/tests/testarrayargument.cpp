@@ -29,6 +29,8 @@
 #include "testarrayargument.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetaenum.h>
+#include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 

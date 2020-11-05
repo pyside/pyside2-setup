@@ -27,6 +27,9 @@
 ****************************************************************************/
 
 #include "headergenerator.h"
+#include <abstractmetaenum.h>
+#include <abstractmetafield.h>
+#include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typedatabase.h>
 #include <reporthandler.h>

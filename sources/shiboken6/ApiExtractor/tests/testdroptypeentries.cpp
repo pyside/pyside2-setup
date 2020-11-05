@@ -29,6 +29,7 @@
 #include "testdroptypeentries.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetaenum.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 

@@ -26,6 +26,7 @@
 **
 ****************************************************************************/
 
+#include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <reporthandler.h>
 #include <graph.h>

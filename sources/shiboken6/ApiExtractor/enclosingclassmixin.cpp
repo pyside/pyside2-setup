@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the test suite of Qt for Python.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -26,38 +26,14 @@
 **
 ****************************************************************************/
 
-#include "testremovefield.h"
-#include <QtTest/QTest>
-#include "testutil.h"
-#include <abstractmetafield.h>
-#include <abstractmetalang.h>
-#include <typesystem.h>
+#include "enclosingclassmixin.h"
+#include "abstractmetalang.h"
+#include "typesystem.h"
 
-void TestRemoveField::testRemoveField()
+const AbstractMetaClass *EnclosingClassMixin::targetLangEnclosingClass() const
 {
-    const char* cppCode ="\
-    struct A {\n\
-        int fieldA;\n\
-        int fieldB;\n\
-    };\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <primitive-type name='int'/>\n\
-        <value-type name='A'>\n\
-            <modify-field name='fieldB' remove='all'/>\n\
-        </value-type>\n\
-    </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
-    AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    QVERIFY(classA);
-    QCOMPARE(classA->fields().size(), 1);
-    const AbstractMetaField *fieldA = classA->fields().constFirst();
-    QVERIFY(fieldA);
-    QCOMPARE(fieldA->name(), QLatin1String("fieldA"));
+    auto result = m_enclosingClass;
+    while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
+        result = result->enclosingClass();
+    return result;
 }
-
-QTEST_APPLESS_MAIN(TestRemoveField)
-
-

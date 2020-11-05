@@ -28,6 +28,9 @@
 
 #include "generator.h"
 #include "ctypenames.h"
+#include "abstractmetaenum.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "parser/codemodel.h"
 #include "messages.h"

@@ -27,6 +27,9 @@
 ****************************************************************************/
 
 #include "qtdocparser.h"
+#include "abstractmetaenum.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "messages.h"
 #include "propertyspec.h"

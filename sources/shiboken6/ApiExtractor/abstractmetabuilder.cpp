@@ -27,6 +27,9 @@
 ****************************************************************************/
 
 #include "abstractmetabuilder_p.h"
+#include "abstractmetaenum.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
 #include "messages.h"
 #include "propertyspec.h"
 #include "reporthandler.h"

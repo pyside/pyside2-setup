@@ -27,6 +27,9 @@
 ****************************************************************************/
 
 #include "messages.h"
+#include "abstractmetaenum.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "sourcelocation.h"
 #include "typedatabase.h"

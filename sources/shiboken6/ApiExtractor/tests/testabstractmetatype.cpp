@@ -29,6 +29,7 @@
 #include "testabstractmetatype.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 #include <parser/codemodel.h>

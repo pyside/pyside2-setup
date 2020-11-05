@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the test suite of Qt for Python.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -26,38 +26,32 @@
 **
 ****************************************************************************/
 
-#include "testremovefield.h"
-#include <QtTest/QTest>
-#include "testutil.h"
-#include <abstractmetafield.h>
-#include <abstractmetalang.h>
-#include <typesystem.h>
+#ifndef ABSTRACTMETALANG_HELPERS_H
+#define ABSTRACTMETALANG_HELPERS_H
 
-void TestRemoveField::testRemoveField()
+template <class MetaClass>
+MetaClass *findByName(QVector<MetaClass *> haystack, QStringView needle)
 {
-    const char* cppCode ="\
-    struct A {\n\
-        int fieldA;\n\
-        int fieldB;\n\
-    };\n";
-    const char* xmlCode = "\
-    <typesystem package=\"Foo\">\n\
-        <primitive-type name='int'/>\n\
-        <value-type name='A'>\n\
-            <modify-field name='fieldB' remove='all'/>\n\
-        </value-type>\n\
-    </typesystem>\n";
-    QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
-    AbstractMetaClassList classes = builder->classes();
-    const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    QVERIFY(classA);
-    QCOMPARE(classA->fields().size(), 1);
-    const AbstractMetaField *fieldA = classA->fields().constFirst();
-    QVERIFY(fieldA);
-    QCOMPARE(fieldA->name(), QLatin1String("fieldA"));
+    for (MetaClass *c : haystack) {
+        if (c->name() == needle)
+            return c;
+    }
+    return nullptr;
 }
 
-QTEST_APPLESS_MAIN(TestRemoveField)
+// Helper for recursing the base classes of an AbstractMetaClass.
+// Returns the class for which the predicate is true.
+template <class Predicate>
+const AbstractMetaClass *recurseClassHierarchy(const AbstractMetaClass *klass,
+                                               Predicate pred)
+{
+    if (pred(klass))
+        return klass;
+    for (auto base : klass->baseClasses()) {
+        if (auto r = recurseClassHierarchy(base, pred))
+            return r;
+    }
+    return nullptr;
+}
 
-
+#endif // ABSTRACTMETALANG_HELPERS_H

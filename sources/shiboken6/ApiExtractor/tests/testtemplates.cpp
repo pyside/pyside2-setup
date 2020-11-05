@@ -31,6 +31,8 @@
 #include <QtCore/QTextStream>
 #include <QTemporaryFile>
 #include "testutil.h"
+#include <abstractmetafield.h>
+#include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 

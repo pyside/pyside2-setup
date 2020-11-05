@@ -7,11 +7,16 @@ set(CMAKE_AUTOMOC ON)
 
 set(apiextractor_SRC
 apiextractor.cpp
+abstractmetaattributes.cpp
 abstractmetaargument.cpp
 abstractmetabuilder.cpp
+abstractmetaenum.cpp
+abstractmetafield.cpp
+abstractmetafunction.cpp
 abstractmetatype.cpp
 abstractmetalang.cpp
 documentation.cpp
+enclosingclassmixin.cpp
 fileout.cpp
 graph.cpp
 messages.cpp

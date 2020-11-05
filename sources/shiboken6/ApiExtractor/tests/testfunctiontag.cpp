@@ -29,7 +29,7 @@
 #include "testfunctiontag.h"
 #include <QtTest/QTest>
 #include "testutil.h"
-#include <abstractmetalang.h>
+#include <abstractmetafunction.h>
 #include <typesystem.h>
 
 void TestFunctionTag::testFunctionTagForSpecificSignature()

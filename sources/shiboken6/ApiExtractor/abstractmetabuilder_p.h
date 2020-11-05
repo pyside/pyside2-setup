@@ -32,6 +32,7 @@
 #include "abstractmetabuilder.h"
 #include "parser/codemodel_fwd.h"
 #include "abstractmetalang.h"
+#include "abstractmetatype.h"
 #include "typesystem.h"
 #include "typeparser.h"
 

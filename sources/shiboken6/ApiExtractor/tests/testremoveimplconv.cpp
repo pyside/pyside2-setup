@@ -29,6 +29,7 @@
 #include "testremoveimplconv.h"
 #include "testutil.h"
 #include <QtTest/QTest>
+#include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
 

@@ -26,6 +26,9 @@
 **
 ****************************************************************************/
 #include "docparser.h"
+#include "abstractmetaenum.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "messages.h"
 #include "reporthandler.h"

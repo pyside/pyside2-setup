@@ -28,6 +28,9 @@
 
 #include "doxygenparser.h"
 #include "abstractmetalang.h"
+#include "abstractmetafield.h"
+#include "abstractmetafunction.h"
+#include "abstractmetaenum.h"
 #include "messages.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
