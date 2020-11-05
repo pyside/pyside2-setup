@@ -15,6 +15,7 @@ documentation.cpp
 fileout.cpp
 graph.cpp
 messages.cpp
+modifications.cpp
 propertyspec.cpp
 reporthandler.cpp
 sourcelocation.cpp
