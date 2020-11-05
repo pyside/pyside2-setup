@@ -1548,12 +1548,12 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     const auto &args = addedFunc->arguments();
 
     for (int i = 0; i < args.count(); ++i) {
-        const AddedFunction::TypeInfo& typeInfo = args.at(i).typeInfo;
-        AbstractMetaType type = translateType(typeInfo, metaClass, &errorMessage);
+        const AddedFunction::Argument &arg = args.at(i);
+        AbstractMetaType type = translateType(arg.typeInfo, metaClass, &errorMessage);
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgAddedFunctionInvalidArgType(addedFunc->name(),
-                                                                typeInfo.name, i + 1,
+                                                                arg.typeInfo.name, i + 1,
                                                                 errorMessage,
                                                                 metaClass)));
             delete metaFunction;
@@ -1566,8 +1566,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             metaArg.setName(args.at(i).name);
         metaArg.setType(type);
         metaArg.setArgumentIndex(i);
-        metaArg.setDefaultValueExpression(typeInfo.defaultValue);
-        metaArg.setOriginalDefaultValueExpression(typeInfo.defaultValue);
+        metaArg.setDefaultValueExpression(arg.defaultValue);
+        metaArg.setOriginalDefaultValueExpression(arg.defaultValue);
         metaFunction->addArgument(metaArg);
     }
 

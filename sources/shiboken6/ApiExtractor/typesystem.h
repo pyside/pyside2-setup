@@ -427,7 +427,6 @@ struct AddedFunction
         static TypeInfo fromSignature(const QString& signature);
 
         QString name;
-        QString defaultValue;
         int indirections = 0;
         bool isConstant = false;
         bool isReference = false;
@@ -435,8 +434,9 @@ struct AddedFunction
 
     struct Argument
     {
-        QString name;
         TypeInfo typeInfo;
+        QString name;
+        QString defaultValue;
     };
 
     /// Creates a new AddedFunction with a signature and a return type.

@@ -359,7 +359,8 @@ QString FunctionModification::toString() const
 
 static AddedFunction::TypeInfo parseType(const QString& signature,
                                          int startPos = 0, int *endPos = nullptr,
-                                         QString *argumentName = nullptr)
+                                         QString *argumentName = nullptr,
+                                         QString *defaultValue = nullptr)
 {
     AddedFunction::TypeInfo result;
     static const QRegularExpression regex(QLatin1String("\\w"));
@@ -401,7 +402,8 @@ static AddedFunction::TypeInfo parseType(const QString& signature,
     if (paramString.contains(QLatin1Char('='))) {
         QStringList lst = paramString.split(QLatin1Char('='));
         paramString = lst[0].trimmed();
-        result.defaultValue = lst[1].trimmed();
+        if (defaultValue != nullptr)
+            *defaultValue = lst[1].trimmed();
     }
 
     // check constness
@@ -458,9 +460,10 @@ AddedFunction::AddedFunction(QString signature, const QString &returnType) :
         int signatureLength = signature.length();
         while (endPos < signatureLength) {
             QString argumentName;
-            TypeInfo arg = parseType(signature, endPos, &endPos, &argumentName);
+            QString defaultValue;
+            TypeInfo arg = parseType(signature, endPos, &endPos, &argumentName, &defaultValue);
             if (!arg.name.isEmpty())
-                m_arguments.append({argumentName, arg});
+                m_arguments.append({arg, argumentName, defaultValue});
             // end of parameters...
             if (endPos >= signatureLength || signature[endPos] == QLatin1Char(')'))
                 break;
@@ -600,8 +603,6 @@ QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti)
     if (ti.isReference)
         d << " &";
     d << ti.name;
-    if (!ti.defaultValue.isEmpty())
-        d << " = " << ti.defaultValue;
     d << ')';
     return d;
 }
@@ -615,6 +616,8 @@ QDebug operator<<(QDebug d, const AddedFunction::Argument &a)
     d << a.typeInfo;
     if (!a.name.isEmpty())
         d << ' ' << a.name;
+    if (!a.defaultValue.isEmpty())
+        d << " = " << a.defaultValue;
     d << ')';
     return d;
 }
