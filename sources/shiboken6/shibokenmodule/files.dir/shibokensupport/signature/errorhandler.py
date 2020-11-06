@@ -63,6 +63,11 @@ from shibokensupport.signature import get_signature
 from shibokensupport.signature.mapping import update_mapping, namespace
 from textwrap import dedent
 
+try:
+    import PySide6
+except ImportError:
+    pass
+
 
 def qt_isinstance(inst, the_type):
     if the_type == float:
@@ -101,9 +106,12 @@ def seterror_argument(args, func_name):
     try:
         func = eval(func_name, namespace)
     except Exception as e:
-        msg = "Internal error evaluating " + func_name + " :"  + str(e)
+        msg = f"Internal error evaluating {func_name}: {e}"
         return TypeError, msg
     sigs = get_signature(func, "typeerror")
+    if not sigs:
+        msg = f"Missing signature: {func_name}({args})"
+        return TypeError, msg
     if type(sigs) != list:
         sigs = [sigs]
     if type(args) != tuple:
@@ -129,8 +137,10 @@ def seterror_argument(args, func_name):
     # We don't raise the error here, to avoid the loader in the traceback.
     return TypeError, msg
 
+
 def check_string_type(s):
     return isinstance(s, str)
+
 
 def make_helptext(func):
     existing_doc = func.__doc__
@@ -144,7 +154,7 @@ def make_helptext(func):
     except AttribureError:
         func_name = func.__func__.__name__
     sigtext = "\n".join(func_name + str(sig) for sig in sigs)
-    msg = sigtext + "\n\n" + existing_doc if check_string_type(existing_doc) else sigtext
+    msg = f"{sigtext}\n\n{existing_doc}" if check_string_type(existing_doc) else sigtext
     return msg
 
 # end of file
