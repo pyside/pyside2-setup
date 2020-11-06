@@ -31,6 +31,7 @@
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <modifications_p.h>
 #include <typesystem.h>
 
 void TestAddFunction::testParsingFuncNameAndConstness()
@@ -464,5 +465,44 @@ void TestAddFunction::testAddFunctionWithTemplateArg()
     QCOMPARE(arg.type().instantiations().count(), 1);
 }
 
-QTEST_APPLESS_MAIN(TestAddFunction)
+// Test splitting of <add-function> parameter lists.
 
+Q_DECLARE_METATYPE(AddedFunctionParser::Argument)
+
+using Arguments = AddedFunctionParser::Arguments;
+
+void TestAddFunction::testAddFunctionTypeParser_data()
+{
+    QTest::addColumn<QString>("parameterList");
+    QTest::addColumn<Arguments>("expected");
+
+    QTest::newRow("empty")
+        << QString() << Arguments{};
+
+    QTest::newRow("1-arg")
+       << QString::fromLatin1("int @a@=42")
+       << Arguments{{QLatin1String("int"), QLatin1String("a"), QLatin1String("42")}};
+
+    QTest::newRow("2-args")
+       << QString::fromLatin1("double @d@, int @a@=42")
+       << Arguments{{QLatin1String("double"), QLatin1String("d"), {}},
+                    {QLatin1String("int"), QLatin1String("a"), QLatin1String("42")}};
+
+    QTest::newRow("template-var_args")
+       << QString::fromLatin1("const QList<X,Y> &@list@ = QList<X,Y>{1,2}, int @b@=5, ...")
+       << Arguments{{QLatin1String("const QList<X,Y> &"), QLatin1String("list"), QLatin1String("QList<X,Y>{1,2}")},
+                    {QLatin1String("int"), QLatin1String("b"), QLatin1String("5")},
+                    {QLatin1String("..."), {}, {}}};
+}
+
+void TestAddFunction::testAddFunctionTypeParser()
+{
+
+    QFETCH(QString, parameterList);
+    QFETCH(Arguments, expected);
+
+    const auto actual = AddedFunctionParser::splitParameters(parameterList);
+    QCOMPARE(actual, expected);
+}
+
+QTEST_APPLESS_MAIN(TestAddFunction)

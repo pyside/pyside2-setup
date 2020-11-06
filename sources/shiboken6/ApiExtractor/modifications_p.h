@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the test suite of Qt for Python.
+** This file is part of Qt for Python.
 **
 ** $QT_BEGIN_LICENSE:GPL-EXCEPT$
 ** Commercial License Usage
@@ -26,31 +26,42 @@
 **
 ****************************************************************************/
 
-#ifndef TESTADDFUNCTION_H
-#define TESTADDFUNCTION_H
-#include <QObject>
+#ifndef MODIFICATIONS_P_H
+#define MODIFICATIONS_P_H
 
-class TestAddFunction : public QObject
+#include <QtCore/QList>
+#include <QtCore/QString>
+#include <QtCore/QStringView>
+
+QT_BEGIN_NAMESPACE
+class QDebug;
+QT_END_NAMESPACE
+
+// Helpers to split a parameter list of <add-function>, <declare-function>
+// in a separate header for testing purposes
+
+namespace AddedFunctionParser {
+
+struct Argument
 {
-    Q_OBJECT
-private slots:
-    void testParsingFuncNameAndConstness();
-    void testAddFunction();
-    void testAddFunctionConstructor();
-    void testAddFunctionTagDefaultValues();
-    void testAddFunctionCodeSnippets();
-    void testAddFunctionWithoutParenteses();
-    void testAddFunctionWithDefaultArgs();
-    void testAddFunctionAtModuleLevel();
-    void testAddFunctionWithVarargs();
-    void testAddStaticFunction();
-    void testAddGlobalFunction();
-    void testAddFunctionWithApiVersion();
-    void testModifyAddedFunction();
-    void testAddFunctionOnTypedef();
-    void testAddFunctionWithTemplateArg();
-    void testAddFunctionTypeParser_data();
-    void testAddFunctionTypeParser();
+    bool equals(const Argument &rhs) const;
+
+    QString type;
+    QString name;
+    QString defaultValue;
 };
 
+using Arguments = QList<Argument>;
+
+inline bool operator==(const Argument &a1, const Argument &a2) { return a1.equals(a2); }
+inline bool operator!=(const Argument &a1, const Argument &a2) { return !a1.equals(a2); }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const Argument &a);
 #endif
+
+Arguments splitParameters(QStringView paramString, QString *errorMessage = nullptr);
+
+} // namespace AddedFunctionParser
+
+#endif // MODIFICATIONS_P_H

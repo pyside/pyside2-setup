@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "modifications.h"
+#include "modifications_p.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 
@@ -173,6 +174,115 @@ bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
     }
     return true;
 }
+
+// Helpers to split a parameter list of <add-function>, <declare-function>
+// (@ denoting names), like
+// "void foo(QList<X,Y> &@list@ = QList<X,Y>{1,2}, int @b@=5, ...)"
+namespace AddedFunctionParser {
+
+bool Argument::equals(const Argument &rhs) const
+{
+    return type == rhs.type && name == rhs.name && defaultValue == rhs.defaultValue;
+}
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const Argument &a)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "Argument(type=\"" << a.type << '"';
+    if (!a.name.isEmpty())
+        d << ", name=\"" << a.name << '"';
+    if (!a.defaultValue.isEmpty())
+        d << ", defaultValue=\"" << a.defaultValue << '"';
+    d << ')';
+    return d;
+}
+#endif // QT_NO_DEBUG_STREAM
+
+// Helper for finding the end of a function parameter, observing
+// nested template parameters or lists.
+static int parameterTokenEnd(int startPos, QStringView paramString)
+{
+    const int end = paramString.size();
+    int nestingLevel = 0;
+    for (int p = startPos; p < end; ++p) {
+        switch (paramString.at(p).toLatin1()) {
+        case ',':
+            if (nestingLevel == 0)
+                return p;
+            break;
+        case '<': // templates
+        case '{': // initializer lists of default values
+        case '(': // initialization, function pointers
+        case '[': // array dimensions
+            ++nestingLevel;
+            break;
+        case '>':
+        case '}':
+        case ')':
+        case ']':
+            --nestingLevel;
+            break;
+        }
+    }
+    return end;
+}
+
+// Split a function parameter list into string tokens containing one
+// parameters (including default value, etc).
+static QList<QStringView> splitParameterTokens(QStringView paramString)
+{
+    QList<QStringView> result;
+    int startPos = 0;
+    for ( ; startPos < paramString.size(); ) {
+        int end = parameterTokenEnd(startPos, paramString);
+        result.append(paramString.mid(startPos, end - startPos).trimmed());
+        startPos = end + 1;
+    }
+    return result;
+}
+
+// Split a function parameter list
+Arguments splitParameters(QStringView paramString, QString *errorMessage)
+{
+    Arguments result;
+    const QList<QStringView> tokens = splitParameterTokens(paramString);
+
+    for (const auto &t : tokens) {
+        Argument argument;
+        // Check defaultValue, "int @b@=5"
+        const int equalPos = t.lastIndexOf(QLatin1Char('='));
+        if (equalPos != -1) {
+            const int defaultValuePos = equalPos + 1;
+            argument.defaultValue =
+                t.mid(defaultValuePos, t.size() - defaultValuePos).trimmed().toString();
+        }
+        QString typeString = (equalPos != -1 ? t.left(equalPos) : t).trimmed().toString();
+        // Check @name@
+        const int atPos = typeString.indexOf(QLatin1Char('@'));
+        if (atPos != -1) {
+            const int namePos = atPos + 1;
+            const int nameEndPos = typeString.indexOf(QLatin1Char('@'), namePos);
+            if (nameEndPos == -1) {
+                if (errorMessage != nullptr) {
+                    *errorMessage = QLatin1String("Mismatched @ in \"")
+                                    + paramString.toString() + QLatin1Char('"');
+                }
+                return {};
+            }
+            argument.name = typeString.mid(namePos, nameEndPos - namePos).trimmed();
+            typeString.remove(atPos, nameEndPos - atPos + 1);
+        }
+        argument.type = typeString.trimmed();
+        result.append(argument);
+    }
+
+    return result;
+}
+
+} // namespace AddedFunctionParser
 
 // ---------------------- AddedFunction
 
