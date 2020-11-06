@@ -220,6 +220,9 @@ public:
 
     /// Returns true if the AbstractMetaFunction was added by the user via the type system description.
     bool isUserAdded() const;
+    /// Returns true if the AbstractMetaFunction was declared by the user via
+    /// the type system description.
+    bool isUserDeclared() const;
 
     QString toString() const { return m_name; }
 

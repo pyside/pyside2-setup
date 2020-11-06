@@ -254,6 +254,11 @@ bool AbstractMetaFunction::isUserAdded() const
     return !m_addedFunction.isNull() && !m_addedFunction->isDeclaration();
 }
 
+bool AbstractMetaFunction::isUserDeclared() const
+{
+    return !m_addedFunction.isNull() && m_addedFunction->isDeclaration();
+}
+
 int AbstractMetaFunction::actualMinimumArgumentCount() const
 {
     AbstractMetaArgumentList arguments = this->arguments();
@@ -862,6 +867,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
         d << " [reverse]";
     if (isUserAdded())
         d << " [userAdded]";
+    if (isUserDeclared())
+        d << " [userDeclared]";
     if (m_explicit)
         d << " [explicit]";
     if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
