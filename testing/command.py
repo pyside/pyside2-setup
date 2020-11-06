@@ -342,11 +342,15 @@ def main():
         if fatal:
             raise ValueError("FATAL format error:", fatal)
         err_crit = "'FAIL! >= {}'".format(fail_crit)
+        fail_count = 0
         for res in tot_res.values():
             if res.count("FAIL!") >= fail_crit:
-                raise ValueError("At least one failure was not blacklisted "
-                                 "and met the criterion {}"
-                                 .format(err_crit))
+                fail_count += 1
+        if fail_count == 1:
+            raise ValueError(f"A test was not blacklisted and met the criterion {err_crit}")
+        elif fail_count > 1:
+            raise ValueError(f"{fail_count} failures were not blacklisted "
+                             f"and met the criterion {err_crit}")
         print("No test met the error criterion {}".format(err_crit))
     finally:
         print()
