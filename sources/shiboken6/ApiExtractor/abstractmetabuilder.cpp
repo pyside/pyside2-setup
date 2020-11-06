@@ -2740,13 +2740,14 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     }
 
     const auto &templateTypes = subclass->templateBaseClassInstantiations();
-    const AbstractMetaFunctionList &subclassFuncs = subclass->functions();
+    const AbstractMetaFunctionList existingSubclassFuncs =
+        subclass->functions(); // Take copy
     const AbstractMetaFunctionList &templateClassFunctions = templateClass->functions();
     for (const AbstractMetaFunction *function : templateClassFunctions) {
         // If the function is modified or the instantiation has an equally named
         // function we have shadowing, so we need to skip it.
         if (function->isModifiedRemoved(TypeSystem::All)
-            || AbstractMetaFunction::find(subclassFuncs, function->name()) != nullptr) {
+            || AbstractMetaFunction::find(existingSubclassFuncs, function->name()) != nullptr) {
             continue;
         }
 
