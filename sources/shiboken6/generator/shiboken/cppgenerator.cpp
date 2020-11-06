@@ -2301,7 +2301,7 @@ void CppGenerator::writeErrorSection(QTextStream &s, OverloadData &overloadData)
     const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
     s << Qt::endl << INDENT << cpythonFunctionName(rfunc) << "_TypeError:\n";
     Indentation indentation(INDENT);
-    QString funcName = fullPythonFunctionName(rfunc);
+    QString funcName = fullPythonFunctionName(rfunc, true);
 
     QString argsVar = pythonFunctionWrapperUsesListOfArguments(overloadData)
         ? QLatin1String("args") : QLatin1String(PYTHON_ARG);

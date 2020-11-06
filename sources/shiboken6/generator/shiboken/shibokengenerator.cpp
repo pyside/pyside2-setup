@@ -363,7 +363,7 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClass *metaClas
     return fullClassName;
 }
 
-QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *func)
+QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *func, bool forceFunc)
 {
     QString funcName;
     if (func->isOperatorOverload())
@@ -372,10 +372,14 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *fu
        funcName = func->name();
     if (func->ownerClass()) {
         QString fullClassName = fullPythonClassName(func->ownerClass());
-        if (func->isConstructor())
+        if (func->isConstructor()) {
             funcName = fullClassName;
-        else
+            if (forceFunc)
+                funcName.append(QLatin1String(".__init__"));
+        }
+        else {
             funcName.prepend(fullClassName + QLatin1Char('.'));
+        }
     }
     else {
         funcName = packageName() + QLatin1Char('.') + func->name();
