@@ -55,6 +55,13 @@ PyObject *name();
 PyObject *property();
 PyObject *select_id();
 } // namespace PyName
+namespace PyMagicName
+{
+PyObject *doc();
+PyObject *func();
+PyObject *name();
+PyObject *property_methods();
+} // namespace PyMagicName
 } // namespace PySide
 
 #endif // PYSIDESTRINGS_H

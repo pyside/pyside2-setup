@@ -59,6 +59,7 @@ STATIC_STRING_IMPL(loads, "loads")
 STATIC_STRING_IMPL(multi, "multi")
 STATIC_STRING_IMPL(name, "name")
 STATIC_STRING_IMPL(result, "result")
+STATIC_STRING_IMPL(select_id, "select_id")
 STATIC_STRING_IMPL(value, "value")
 STATIC_STRING_IMPL(values, "values")
 
@@ -87,8 +88,10 @@ STATIC_STRING_IMPL(get, "__get__")
 STATIC_STRING_IMPL(members, "__members__")
 STATIC_STRING_IMPL(module, "__module__")
 STATIC_STRING_IMPL(name, "__name__")
+STATIC_STRING_IMPL(property_methods, "__property_methods__")
 STATIC_STRING_IMPL(qualname, "__qualname__")
 STATIC_STRING_IMPL(self, "__self__")
+STATIC_STRING_IMPL(select_i, "__self__")
 
 // Internal:
 STATIC_STRING_IMPL(base, "__base__")

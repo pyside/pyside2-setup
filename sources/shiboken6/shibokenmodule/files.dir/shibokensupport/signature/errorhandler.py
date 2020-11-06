@@ -61,11 +61,6 @@ from shibokensupport.signature import get_signature
 from shibokensupport.signature.mapping import update_mapping, namespace
 from textwrap import dedent
 
-try:
-    import PySide6
-except ImportError:
-    pass
-
 
 def qt_isinstance(inst, the_type):
     if the_type == float:
@@ -99,16 +94,15 @@ def matched_type(args, sigs):
 
 
 def seterror_argument(args, func_name):
-    update_mapping()
     func = None
     try:
         func = eval(func_name, namespace)
     except Exception as e:
-        msg = f"Internal error evaluating {func_name}: {e}"
+        msg = f"Internal error evaluating {func_name}: " + str(e)
         return TypeError, msg
     sigs = get_signature(func, "typeerror")
     if not sigs:
-        msg = f"Missing signature: {func_name}({args})"
+        msg = f"{func_name}({args} is wrong (missing signature)"
         return TypeError, msg
     if type(sigs) != list:
         sigs = [sigs]
@@ -118,7 +112,7 @@ def seterror_argument(args, func_name):
     found = matched_type(args, sigs)
     if found:
         msg = dedent(f"""
-            '{func_name}' called with wrong argument values:
+            {func_name!r} called with wrong argument values:
               {func_name}{args}
             Found signature:
               {func_name}{found}
@@ -126,7 +120,7 @@ def seterror_argument(args, func_name):
         return ValueError, msg
     type_str = ", ".join(type(arg).__name__ for arg in args)
     msg = dedent(f"""
-        '{func_name}' called with wrong argument types:
+        {func_name!r} called with wrong argument types:
           {func_name}({type_str})
         Supported signatures:
         """).strip()

@@ -43,7 +43,6 @@
 #include "class_property.h"
 
 #include <shiboken.h>
-#include <sbkstaticstrings.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -142,7 +141,7 @@ static inline PyObject *getFeatureSelectId()
     static PyObject *feature_dict = GetFeatureDict();
     // these things are all borrowed
     PyObject *globals = PyEval_GetGlobals();
-    if (   globals == nullptr
+    if (globals == nullptr
         || globals == cached_globals)
         return last_select_id;
 
@@ -151,7 +150,7 @@ static inline PyObject *getFeatureSelectId()
         return last_select_id;
 
     PyObject *select_id = PyDict_GetItem(feature_dict, modname);
-    if (   select_id == nullptr
+    if (select_id == nullptr
         || !PyInt_Check(select_id)  // int/long cheating
         || select_id == undef)
         return last_select_id;
@@ -525,7 +524,7 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
 
     // We first copy the things over which will not be changed:
     while (PyDict_Next(prev_dict, &pos, &key, &value)) {
-        if (   Py_TYPE(value) != PepMethodDescr_TypePtr
+        if (Py_TYPE(value) != PepMethodDescr_TypePtr
             && Py_TYPE(value) != PepStaticMethod_TypePtr) {
             if (PyDict_SetItem(lower_dict, key, value))
                 return false;
@@ -641,6 +640,15 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
     if (PyDict_Update(prop_dict, prev_dict) < 0)
         return false;
 
+    // For speed, we establish a helper dict that maps the removed property
+    // method names to property name.
+    PyObject *prop_methods = PyDict_GetItem(prop_dict, PyMagicName::property_methods());
+    if (prop_methods == nullptr) {
+        prop_methods = PyDict_New();
+        if (prop_methods == nullptr
+            || PyDict_SetItem(prop_dict, PyMagicName::property_methods(), prop_methods))
+            return false;
+    }
     // We then replace methods by properties.
     bool lower = (id & 0x01) != 0;
     auto props = SbkObjectType_GetPropertyStrings(type);
@@ -662,7 +670,9 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
         AutoDecRef PyProperty(createProperty(type, getter, setter));
         if (PyProperty.isNull())
             return false;
-        if (PyDict_SetItem(prop_dict, name, PyProperty) < 0)
+        if (PyDict_SetItem(prop_dict, name, PyProperty) < 0
+            || PyDict_SetItem(prop_methods, read, name) < 0
+            || (setter != nullptr && PyDict_SetItem(prop_methods, write, name) < 0))
             return false;
         if (fields[0] != fields[1] && PyDict_GetItem(prop_dict, read))
             if (PyDict_DelItem(prop_dict, read) < 0)
