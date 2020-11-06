@@ -65,55 +65,6 @@ static QString stripTemplateArgs(const QString &name)
     return pos < 0 ? name : name.left(pos);
 }
 
-static QStringList parseTemplateType(const QString &name) {
-    int n = name.indexOf(QLatin1Char('<'));
-    if (n <= 0) {
-        // If name starts with '<' or contains an unmatched (i.e. any) '>', we
-        // reject it
-        if (n == 0 || name.count(QLatin1Char('>')))
-            return QStringList();
-        // Doesn't look like a template instantiation; just return the name
-        return QStringList() << name;
-    }
-
-    // Split the type name into the template name and template arguments; the
-    // part before the opening '<' is the template name
-    //
-    // Example:
-    //   "foo<A, bar<B, C>, D>" -> ( "foo", "A", "bar<B, C>", "D" )
-    QStringList result;
-    result << name.left(n).trimmed();
-
-    // Extract template arguments
-    int i, depth = 1;
-    const int l = name.length();
-    for (i = n + 1; i < l; ++i) {
-        // Consume balanced '<'/'>' within a single argument so that we won't
-        // split on ',' as part of a single argument which is itself a
-        // multi-argument template type
-        if (name[i] == QLatin1Char('<')) {
-            ++depth;
-        } else if (name[i] == QLatin1Char('>')) {
-            if (--depth == 0)
-                break;
-        } else if (name[i] == QLatin1Char(',') && depth == 1) {
-            // Encountered ',' in template argument list that is not within
-            // another template name; add current argument to result and start
-            // working on the next argument
-            result << name.mid(n + 1, i - n - 1).trimmed();
-            n = i;
-        }
-    }
-    if (i >= l) // arg list not closed
-        return QStringList();
-    if (i + 1 < l) // arg list closed before end of name
-        return QStringList();
-
-    // Add final argument and return result
-    result << name.mid(n + 1, i - n - 1).trimmed();
-    return result;
-}
-
 AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
     m_logDirectory(QLatin1String(".") + QDir::separator())
 {
@@ -1535,11 +1486,11 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 {
     QString errorMessage;
 
-    AbstractMetaType returnType = translateType(addedFunc->returnType(), metaClass, &errorMessage);
+    AbstractMetaType returnType = translateType(addedFunc->returnType(), metaClass, {}, &errorMessage);
     if (!returnType) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgAddedFunctionInvalidReturnType(addedFunc->name(),
-                                                               addedFunc->returnType().name,
+                                                               addedFunc->returnType().qualifiedName(),
                                                                errorMessage,
                                                                metaClass)));
         return nullptr;
@@ -1552,11 +1503,11 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 
     for (int i = 0; i < args.count(); ++i) {
         const AddedFunction::Argument &arg = args.at(i);
-        AbstractMetaType type = translateType(arg.typeInfo, metaClass, &errorMessage);
+        AbstractMetaType type = translateType(arg.typeInfo, metaClass, {}, &errorMessage);
         if (Q_UNLIKELY(!type)) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgAddedFunctionInvalidArgType(addedFunc->name(),
-                                                                arg.typeInfo.name, i + 1,
+                                                                arg.typeInfo.qualifiedName(), i + 1,
                                                                 errorMessage,
                                                                 metaClass)));
             delete metaFunction;
@@ -1982,72 +1933,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         }
     }
     return metaFunction;
-}
-
-AbstractMetaType AbstractMetaBuilderPrivate::translateType(const AddedFunction::TypeInfo &typeInfo,
-                                                           AbstractMetaClass *currentClass,
-                                                           QString *errorMessage)
-{
-    Q_ASSERT(!typeInfo.name.isEmpty());
-    TypeDatabase* typeDb = TypeDatabase::instance();
-
-    QString typeName = typeInfo.name;
-
-    if (typeName == QLatin1String("void"))
-        return AbstractMetaType::createVoid();
-
-    const TypeEntry *type = nullptr;
-    // test if the type is a template, like a container
-    QStringList templateArgs;
-    if (!typeInfo.name.startsWith(QLatin1String("QFlags<"))
-        && typeInfo.name.contains(QLatin1Char('<'))) {
-        QStringList parsedType = parseTemplateType(typeInfo.name);
-        if (parsedType.isEmpty()) {
-            *errorMessage = QStringLiteral("Template type parsing failed for '%1'").arg(typeInfo.name);
-            return {};
-        }
-        const QString name = parsedType.takeFirst();
-        templateArgs = parsedType;
-        type = typeDb->findContainerType(name);
-        if (!type) { // A template typedef?
-            if (auto candidate = typeDb->findType(name)) {
-                if (candidate->type() == TypeEntry::ObjectType || candidate->type() == TypeEntry::BasicValueType)
-                    type = candidate;
-            }
-        }
-    }
-
-    if (type == nullptr)  {
-        QString unqualifiedName = typeName;
-        const int last = unqualifiedName.lastIndexOf(colonColon());
-        if (last != -1)
-            unqualifiedName.remove(0, last + 2);
-        auto types = findTypeEntries(typeName, unqualifiedName, currentClass, this, errorMessage);
-        if (types.isEmpty())
-            return {};
-        type = types.constFirst();
-    }
-
-    // These are only implicit and should not appear in code...
-    AbstractMetaType metaType(type);
-    metaType.setIndirections(typeInfo.indirections);
-    if (typeInfo.isReference)
-        metaType.setReferenceType(LValueReference);
-    metaType.setConstant(typeInfo.isConstant);
-    if (!templateArgs.isEmpty()) {
-        for (const QString& templateArg : qAsConst(templateArgs)) {
-            AbstractMetaType metaArgType = translateType(AddedFunction::TypeInfo::fromSignature(templateArg),
-                                                         currentClass, errorMessage);
-            if (!metaArgType)
-                return {};
-            metaType.addInstantiation(metaArgType);
-        }
-        metaType.setTypeUsagePattern(AbstractMetaType::ContainerPattern);
-    } else {
-        metaType.decideUsagePattern();
-    }
-
-    return metaType;
 }
 
 static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaClass, const QString& qualifiedName)

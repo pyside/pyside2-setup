@@ -114,7 +114,7 @@ static void msgFormatEnumType(Stream &str,
 }
 
 QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
-                                       const QString &typeName,
+                                       const QStringList &typeName,
                                        int pos, const QString &why,
                                        const AbstractMetaClass *context)
 {
@@ -122,20 +122,21 @@ QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
     QTextStream str(&result);
     if (context)
         str << context->typeEntry()->sourceLocation();
-    str << "Unable to translate type \"" << typeName  << "\" of argument "
-        << pos << " of added function \"" << addedFuncName << "\": " << why;
+    str << "Unable to translate type \"" << typeName.join(colonColon())
+        << "\" of argument " << pos << " of added function \""
+        << addedFuncName << "\": " << why;
     return result;
 }
 
 QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
-                                          const QString &typeName, const QString &why,
+                                          const QStringList &typeName, const QString &why,
                                           const AbstractMetaClass *context)
 {
     QString result;
     QTextStream str(&result);
     if (context)
         str << context->typeEntry()->sourceLocation();
-    str << "Unable to translate return type \"" <<  typeName
+    str << "Unable to translate return type \"" << typeName.join(colonColon())
         << "\" of added function \"" << addedFuncName << "\": "
         << why;
     return result;

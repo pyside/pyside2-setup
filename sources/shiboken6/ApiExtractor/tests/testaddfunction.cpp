@@ -38,41 +38,64 @@ void TestAddFunction::testParsingFuncNameAndConstness()
 {
     // generic test...
     const char sig1[] = "func(type1, const type2, const type3* const)";
-    AddedFunction f1(QLatin1String(sig1), QLatin1String("void"));
-    QCOMPARE(f1.name(), QLatin1String("func"));
-    QCOMPARE(f1.arguments().count(), 3);
-    AddedFunction::TypeInfo retval = f1.returnType();
-    QCOMPARE(retval.name, QLatin1String("void"));
-    QCOMPARE(retval.indirections, 0);
-    QCOMPARE(retval.isConstant, false);
-    QCOMPARE(retval.isReference, false);
+    QString errorMessage;
+    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+                                                 &errorMessage);
+    QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f1->name(), QLatin1String("func"));
+    QCOMPARE(f1->arguments().count(), 3);
+    TypeInfo retval = f1->returnType();
+    QCOMPARE(retval.qualifiedName(), QStringList{QLatin1String("void")});
+    QCOMPARE(retval.indirections(), 0);
+    QCOMPARE(retval.isConstant(), false);
+    QCOMPARE(retval.referenceType(), NoReference);
 
     // test with a ugly template as argument and other ugly stuff
     const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *@my_name@, const type3* const    )   const ";
-    AddedFunction f2(QLatin1String(sig2), QLatin1String("const Abc<int& , C<char*> *   >  * *"));
-    QCOMPARE(f2.name(), QLatin1String("_fu__nc_"));
-    const auto &args = f2.arguments();
+    auto f2 = AddedFunction::createAddedFunction(QLatin1String(sig2),
+                                                 QLatin1String("const Abc<int& , C<char*> *   >  * *"),
+                                                 &errorMessage);
+    QVERIFY2(!f2.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f2->name(), QLatin1String("_fu__nc_"));
+    const auto &args = f2->arguments();
     QCOMPARE(args.count(), 4);
-    retval = f2.returnType();
-    QCOMPARE(retval.name, QLatin1String("Abc<int& , C<char*> *   >"));
-    QCOMPARE(retval.indirections, 2);
-    QCOMPARE(retval.isConstant, true);
-    QCOMPARE(retval.isReference, false);
-    retval = args.at(2).typeInfo;
+    retval = f2->returnType();
+    QCOMPARE(retval.qualifiedName(), QStringList{QLatin1String("Abc")});
+    QCOMPARE(retval.instantiations().size(), 2);
+    QCOMPARE(retval.toString(), QLatin1String("const Abc<int&, C<char*>*>**"));
+    QCOMPARE(retval.indirections(), 2);
+    QCOMPARE(retval.isConstant(), true);
+    QCOMPARE(retval.referenceType(), NoReference);
     QVERIFY(args.at(0).name.isEmpty());
     QVERIFY(args.at(1).name.isEmpty());
+
     QCOMPARE(args.at(2).name, QLatin1String("my_name"));
+    auto arg2Type = args.at(2).typeInfo;
+    QCOMPARE(arg2Type.qualifiedName(), QStringList{QLatin1String("Abc")});
+    QCOMPARE(arg2Type.instantiations().size(), 2);
+    QCOMPARE(arg2Type.toString(), QLatin1String("const Abc<int&, C<char*>*>**"));
+    QCOMPARE(arg2Type.indirections(), 2);
+    QCOMPARE(arg2Type.isConstant(), true);
+    QCOMPARE(arg2Type.referenceType(), NoReference);
+
     QVERIFY(args.at(3).name.isEmpty());
-    QCOMPARE(retval.name, QLatin1String("Abc<int& , C<char*> *   >"));
-    QCOMPARE(retval.indirections, 2);
-    QCOMPARE(retval.isConstant, true);
-    QCOMPARE(retval.isReference, false);
 
     // function with no args.
     const char sig3[] = "func()";
-    AddedFunction f3(QLatin1String(sig3), QLatin1String("void"));
-    QCOMPARE(f3.name(), QLatin1String("func"));
-    QCOMPARE(f3.arguments().count(), 0);
+    auto f3 = AddedFunction::createAddedFunction(QLatin1String(sig3), QLatin1String("void"),
+                                                 &errorMessage);
+    QVERIFY2(!f3.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f3->name(), QLatin1String("func"));
+    QCOMPARE(f3->arguments().count(), 0);
+
+    // const call operator
+    const char sig4[] = "operator()(int)const";
+    auto f4 = AddedFunction::createAddedFunction(QLatin1String(sig4), QLatin1String("int"),
+                                                 &errorMessage);
+    QVERIFY2(!f4.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f4->name(), QLatin1String("operator()"));
+    QCOMPARE(f4->arguments().count(), 1);
+    QVERIFY(f4->isConstant());
 }
 
 void TestAddFunction::testAddFunction()
@@ -196,11 +219,13 @@ void TestAddFunction::testAddFunctionCodeSnippets()
 void TestAddFunction::testAddFunctionWithoutParenteses()
 {
     const char sig1[] = "func";
-    AddedFunction f1(QLatin1String(sig1), QLatin1String("void"));
-
-    QCOMPARE(f1.name(), QLatin1String("func"));
-    QCOMPARE(f1.arguments().count(), 0);
-    QCOMPARE(f1.isConstant(), false);
+    QString errorMessage;
+    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+                                                 &errorMessage);
+    QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f1->name(), QLatin1String("func"));
+    QCOMPARE(f1->arguments().count(), 0);
+    QCOMPARE(f1->isConstant(), false);
 
     const char cppCode[] = "struct A {};\n";
     const char xmlCode[] = "\
@@ -226,11 +251,13 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
 void TestAddFunction::testAddFunctionWithDefaultArgs()
 {
     const char sig1[] = "func";
-    AddedFunction f1(QLatin1String(sig1), QLatin1String("void"));
-
-    QCOMPARE(f1.name(), QLatin1String("func"));
-    QCOMPARE(f1.arguments().count(), 0);
-    QCOMPARE(f1.isConstant(), false);
+    QString errorMessage;
+    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+                                                 &errorMessage);
+    QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f1->name(), QLatin1String("func"));
+    QCOMPARE(f1->arguments().count(), 0);
+    QCOMPARE(f1->isConstant(), false);
 
     const char cppCode[] = "struct A { };\n";
     const char xmlCode[] = "\
@@ -291,11 +318,13 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 void TestAddFunction::testAddFunctionWithVarargs()
 {
     const char sig1[] = "func(int,char,...)";
-    AddedFunction f1( QLatin1String(sig1), QLatin1String("void"));
-
-    QCOMPARE(f1.name(), QLatin1String("func"));
-    QCOMPARE(f1.arguments().count(), 3);
-    QVERIFY(!f1.isConstant());
+    QString errorMessage;
+    auto f1 = AddedFunction::createAddedFunction(QLatin1String(sig1), QLatin1String("void"),
+                                                 &errorMessage);
+    QVERIFY2(!f1.isNull(), qPrintable(errorMessage));
+    QCOMPARE(f1->name(), QLatin1String("func"));
+    QCOMPARE(f1->arguments().count(), 3);
+    QVERIFY(!f1->isConstant());
 
     const char cppCode[] = "struct A {};\n";
     const char xmlCode[] = "\

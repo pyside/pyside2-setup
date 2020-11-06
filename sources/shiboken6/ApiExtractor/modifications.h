@@ -31,10 +31,12 @@
 
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
+#include "parser/typeinfo.h"
 
 #include <QtCore/QList>
 #include <QtCore/QMap>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QSharedPointer>
 #include <QtCore/QString>
 
 QT_BEGIN_NAMESPACE
@@ -393,27 +395,13 @@ struct FieldModification: public Modification
 */
 struct AddedFunction
 {
+    using AddedFunctionPtr = QSharedPointer<AddedFunction>;
+
     /// Function access types.
     enum Access {
         InvalidAccess = 0,
         Protected = 0x1,
         Public =    0x2
-    };
-
-    /**
-    *   \internal
-    *   Internal struct used to store information about arguments and return type of the
-    *   functions added by the type system. This information is later used to create
-    *   AbstractMetaType and AbstractMetaArgument for the AbstractMetaFunctions.
-    */
-    struct TypeInfo {
-        TypeInfo() = default;
-        static TypeInfo fromSignature(const QString& signature);
-
-        QString name;
-        int indirections = 0;
-        bool isConstant = false;
-        bool isReference = false;
     };
 
     struct Argument
@@ -424,7 +412,13 @@ struct AddedFunction
     };
 
     /// Creates a new AddedFunction with a signature and a return type.
-    explicit AddedFunction(QString signature, const QString &returnType);
+    explicit AddedFunction(const QString &name, const QList<Argument> &arguments,
+                           const TypeInfo &returnType);
+
+    static AddedFunctionPtr createAddedFunction(const QString &signatureIn,
+                                                const QString &returnTypeIn,
+                                                QString *errorMessage);
+
     AddedFunction() = default;
 
     /// Returns the function name.
@@ -462,6 +456,7 @@ struct AddedFunction
     {
         return m_isConst;
     }
+    void setConstant(bool c) { m_isConst = c; };
 
     /// Set this method static.
     void setStatic(bool value)
@@ -484,14 +479,13 @@ private:
     QString m_name;
     QList<Argument> m_arguments;
     TypeInfo m_returnType;
-    Access m_access = Protected;
+    Access m_access = Public;
     bool m_isConst = false;
     bool m_isStatic = false;
     bool m_isDeclaration = false;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti);
 QDebug operator<<(QDebug d, const AddedFunction::Argument &a);
 QDebug operator<<(QDebug d, const AddedFunction &af);
 #endif

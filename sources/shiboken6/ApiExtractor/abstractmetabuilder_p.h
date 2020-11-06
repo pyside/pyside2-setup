@@ -143,9 +143,6 @@ public:
     QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type,
                             AbstractMetaFunction *fnc, AbstractMetaClass *,
                             int argumentIndex);
-    AbstractMetaType translateType(const AddedFunction::TypeInfo &typeInfo,
-                                   AbstractMetaClass *currentClass,
-                                   QString *errorMessage);
     AbstractMetaType translateType(const TypeInfo &type,
                                    AbstractMetaClass *currentClass,
                                    TranslateTypeFlags flags = {},

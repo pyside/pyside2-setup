@@ -29,6 +29,7 @@
 #include "modifications.h"
 #include "modifications_p.h"
 #include "typedatabase.h"
+#include "typeparser.h"
 #include "typesystem.h"
 
 #include <QtCore/QDebug>
@@ -284,127 +285,70 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
 
 } // namespace AddedFunctionParser
 
-// ---------------------- AddedFunction
-
-static AddedFunction::TypeInfo parseType(const QString& signature,
-                                         int startPos = 0, int *endPos = nullptr,
-                                         QString *argumentName = nullptr,
-                                         QString *defaultValue = nullptr)
+AddedFunction::AddedFunction(const QString &name, const QList<Argument> &arguments,
+                             const TypeInfo &returnType) :
+    m_name(name),
+    m_arguments(arguments),
+    m_returnType(returnType)
 {
-    AddedFunction::TypeInfo result;
-    static const QRegularExpression regex(QLatin1String("\\w"));
-    Q_ASSERT(regex.isValid());
-    int length = signature.length();
-    int start = signature.indexOf(regex, startPos);
-    if (start == -1) {
-        if (QStringView{signature}.mid(startPos + 1, 3) == QLatin1String("...")) { // varargs
-            if (endPos)
-                *endPos = startPos + 4;
-            result.name = QLatin1String("...");
-        } else { // error
-            if (endPos)
-                *endPos = length;
-        }
-        return result;
-    }
-
-    int cantStop = 0;
-    QString paramString;
-    QChar c;
-    int i = start;
-    for (; i < length; ++i) {
-        c = signature[i];
-        if (c == QLatin1Char('<'))
-            cantStop++;
-        if (c == QLatin1Char('>'))
-            cantStop--;
-        if (cantStop < 0)
-            break; // FIXME: report error?
-        if ((c == QLatin1Char(')') || c == QLatin1Char(',')) && !cantStop)
-            break;
-        paramString += signature[i];
-    }
-    if (endPos)
-        *endPos = i;
-
-    // Check default value
-    if (paramString.contains(QLatin1Char('='))) {
-        QStringList lst = paramString.split(QLatin1Char('='));
-        paramString = lst[0].trimmed();
-        if (defaultValue != nullptr)
-            *defaultValue = lst[1].trimmed();
-    }
-
-    // check constness
-    if (paramString.startsWith(QLatin1String("const "))) {
-        result.isConstant = true;
-        paramString.remove(0, sizeof("const")/sizeof(char));
-        paramString = paramString.trimmed();
-    }
-
-    // Extract argument name from "T<bla,blub>* @foo@"
-    const int nameStartPos = paramString.indexOf(QLatin1Char('@'));
-    if (nameStartPos != -1) {
-        const int nameEndPos = paramString.indexOf(QLatin1Char('@'), nameStartPos + 1);
-        if (nameEndPos > nameStartPos) {
-            if (argumentName)
-                *argumentName = paramString.mid(nameStartPos + 1, nameEndPos - nameStartPos - 1);
-            paramString.remove(nameStartPos, nameEndPos - nameStartPos + 1);
-            paramString = paramString.trimmed();
-        }
-    }
-
-    // check reference
-    if (paramString.endsWith(QLatin1Char('&'))) {
-        result.isReference = true;
-        paramString.chop(1);
-        paramString = paramString.trimmed();
-    }
-    // check Indirections
-    while (paramString.endsWith(QLatin1Char('*'))) {
-        result.indirections++;
-        paramString.chop(1);
-        paramString = paramString.trimmed();
-    }
-    result.name = paramString;
-
-    return result;
 }
 
-AddedFunction::AddedFunction(QString signature, const QString &returnType) :
-    m_access(Public)
+AddedFunction::AddedFunctionPtr
+    AddedFunction::createAddedFunction(const QString &signatureIn, const QString &returnTypeIn,
+                                       QString *errorMessage)
+
 {
-    Q_ASSERT(!returnType.isEmpty());
-    m_returnType = parseType(returnType);
-    signature = signature.trimmed();
+    errorMessage->clear();
+
+    QList<Argument> arguments;
+    const TypeInfo returnType = returnTypeIn.isEmpty()
+                                ? TypeInfo::voidType()
+                                : TypeParser::parse(returnTypeIn, errorMessage);
+    if (!errorMessage->isEmpty())
+        return {};
+
+    QStringView signature = QStringView{signatureIn}.trimmed();
+
     // Skip past "operator()(...)"
-    const int parenStartPos = signature.startsWith(callOperator())
+    const int parenSearchStartPos = signature.startsWith(callOperator())
         ? callOperator().size() : 0;
-    int endPos = signature.indexOf(QLatin1Char('('), parenStartPos);
-    if (endPos < 0) {
-        m_isConst = false;
-        m_name = signature;
-    } else {
-        m_name = signature.left(endPos).trimmed();
-        int signatureLength = signature.length();
-        while (endPos < signatureLength) {
-            QString argumentName;
-            QString defaultValue;
-            TypeInfo arg = parseType(signature, endPos, &endPos, &argumentName, &defaultValue);
-            if (!arg.name.isEmpty())
-                m_arguments.append({arg, argumentName, defaultValue});
-            // end of parameters...
-            if (endPos >= signatureLength || signature[endPos] == QLatin1Char(')'))
-                break;
-        }
-        // is const?
-        m_isConst = QStringView{signature}.right(signatureLength - endPos).contains(QLatin1String("const"));
+    const int openParenPos = signature.indexOf(QLatin1Char('('), parenSearchStartPos);
+    if (openParenPos < 0) {
+        return AddedFunctionPtr(new AddedFunction(signature.toString(),
+                                                  arguments, returnType));
     }
-}
 
-AddedFunction::TypeInfo AddedFunction::TypeInfo::fromSignature(const QString& signature)
-{
-    return parseType(signature);
+    const QString name = signature.left(openParenPos).trimmed().toString();
+    const int closingParenPos = signature.lastIndexOf(QLatin1Char(')'));
+    if (closingParenPos < 0) {
+        *errorMessage = QLatin1String("Missing closing parenthesis");
+        return {};
+    }
+
+    // Check for "foo() const"
+    bool isConst = false;
+    const int signatureLength = signature.length();
+    const int qualifierLength = signatureLength - closingParenPos - 1;
+    if (qualifierLength >= 5
+        && signature.right(qualifierLength).contains(QLatin1String("const"))) {
+        isConst = true;
+    }
+
+    const auto paramString = signature.mid(openParenPos + 1, closingParenPos - openParenPos - 1);
+    const auto params = AddedFunctionParser::splitParameters(paramString, errorMessage);
+    if (params.isEmpty() && !errorMessage->isEmpty())
+        return {};
+    for (const auto &p : params) {
+        TypeInfo type = p.type == QLatin1String("...")
+            ? TypeInfo::varArgsType() : TypeParser::parse(p.type, errorMessage);
+        if (!errorMessage->isEmpty())
+            return {};
+        arguments.append({type, p.name, p.defaultValue});
+    }
+
+    AddedFunctionPtr result(new AddedFunction(name, arguments, returnType));
+    result->setConstant(isConst);
+    return result;
 }
 
 void DocModification::setCode(const QString &code)
@@ -525,23 +469,6 @@ QDebug operator<<(QDebug d, const FunctionModification &fm)
     d.nospace();
     d << "FunctionModification(";
     fm.formatDebug(d);
-    d << ')';
-    return d;
-}
-
-QDebug operator<<(QDebug d, const AddedFunction::TypeInfo &ti)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "TypeInfo(";
-    if (ti.isConstant)
-        d << "const";
-    if (ti.indirections)
-        d << QByteArray(ti.indirections, '*');
-    if (ti.isReference)
-        d << " &";
-    d << ti.name;
     d << ')';
     return d;
 }

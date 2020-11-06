@@ -2233,7 +2233,7 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
         return false;
     }
     QString originalSignature;
-    QString returnType = QLatin1String("void");
+    QString returnType;
     bool staticFunction = false;
     QString access;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
@@ -2266,7 +2266,12 @@ bool TypeSystemParser::parseAddFunction(const QXmlStreamReader &,
         return false;
     }
 
-    AddedFunctionPtr func(new AddedFunction(signature, returnType));
+    AddedFunctionPtr func = AddedFunction::createAddedFunction(signature, returnType, &errorString);
+    if (func.isNull()) {
+        m_error = errorString;
+        return false;
+    }
+
     func->setStatic(staticFunction);
     if (!signature.contains(QLatin1Char('(')))
         signature += QLatin1String("()");

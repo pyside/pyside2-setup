@@ -48,12 +48,12 @@ QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamReader)
 
 QString msgAddedFunctionInvalidArgType(const QString &addedFuncName,
-                                       const QString &typeName,
+                                       const QStringList &typeName,
                                        int pos, const QString &why,
                                        const AbstractMetaClass *context = nullptr);
 
 QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
-                                          const QString &typeName, const QString &why,
+                                          const QStringList &typeName, const QString &why,
                                           const AbstractMetaClass *context = nullptr);
 
 QString msgNoFunctionForModification(const AbstractMetaClass *klass,
