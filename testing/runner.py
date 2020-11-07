@@ -198,7 +198,6 @@ class TestRunner(object):
                     labelled = True
 
         tee_src = dedent("""\
-            from __future__ import print_function
             import sys
             {}
             py_tee(sys.stdin, sys.stdout, '{label}')

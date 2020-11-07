@@ -38,8 +38,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
-
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QAbstractItemView, QDataWidgetMapper,
     QHeaderView, QMainWindow, QMessageBox)

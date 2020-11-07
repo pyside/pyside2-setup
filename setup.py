@@ -37,8 +37,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 """
 This is a distutils setup-script for the Qt for Python project.
 For more information see README.md

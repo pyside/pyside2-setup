@@ -28,7 +28,6 @@
 ##
 #############################################################################
 
-
 # This is a small script printing out Qt binding class hierarchies
 # for comparison purposes.
 #
@@ -38,8 +37,6 @@
 # ./list-class-hierarchy.py PyQt5 > pyqt5.list
 #
 # meld pyside.list pyqt5.list
-
-from __future__ import print_function
 
 import sys
 import pdb

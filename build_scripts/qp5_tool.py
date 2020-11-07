@@ -37,8 +37,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 from argparse import ArgumentParser, RawTextHelpFormatter
 import datetime
 from enum import Enum

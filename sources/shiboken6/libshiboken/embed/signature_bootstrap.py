@@ -54,8 +54,6 @@ functions.
 It is embedded into 'signature.cpp' as "embed/signature_bootstrap.inc".
 """
 
-from __future__ import print_function, absolute_import
-
 recursion_trap = 0
 
 # We avoid real imports in phase 1 that could fail (simply removed all).

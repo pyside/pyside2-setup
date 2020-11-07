@@ -61,8 +61,6 @@ https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk
 
 """
 
-from __future__ import print_function
-
 import sys
 import re
 import subprocess

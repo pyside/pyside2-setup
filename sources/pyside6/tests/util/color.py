@@ -26,8 +26,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 '''Function to print a colored line to terminal'''
 
 RED='\033[0;31m%s\033[m'

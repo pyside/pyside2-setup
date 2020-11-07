@@ -31,8 +31,6 @@
 ''' PYSIDE-315: https://bugreports.qt.io/browse/PYSIDE-315
     Test that creating a signal in the wrong order triggers a warning. '''
 
-from __future__ import print_function
-
 import os
 import sys
 import unittest

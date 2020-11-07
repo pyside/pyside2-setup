@@ -43,8 +43,6 @@ Updated:    17 Sep '20 17:02
 This fix was over 8 years late. :)
 """
 
-from __future__ import print_function
-
 import os
 import sys
 import unittest

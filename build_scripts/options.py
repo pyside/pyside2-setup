@@ -37,7 +37,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
 import distutils.log as log
 from distutils.spawn import find_executable
 import sys

@@ -26,8 +26,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 '''Script to show the difference between PyQt5 and ours'''
 
 import sys

@@ -53,8 +53,6 @@
 # -w           - if PyQt5 is an installed package, check if the tested
 # class also exists there.
 
-from __future__ import print_function
-
 try:
     import urllib.request as urllib2
 except ImportError:

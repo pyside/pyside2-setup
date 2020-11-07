@@ -37,6 +37,4 @@
 ##
 #############################################################################
 
-from __future__ import print_function, absolute_import
-
 __all__ = "get_signature layout mapping lib".split()

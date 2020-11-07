@@ -104,7 +104,7 @@ endif()
 # conditional tag for sphinx build
 #string(JOIN "_" SPHINX_TAG ${DOC_OUTPUT_FORMAT} "format")
 # Python script to replace the virtualFolder string in the QHP
-set(py_cmd "from __future__ import print_function
+set(py_cmd "
 import fileinput
 import re
 try:

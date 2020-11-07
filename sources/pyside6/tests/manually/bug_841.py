@@ -26,8 +26,6 @@
 ##
 #############################################################################
 
-from __future__ import print_function
-
 import sys
 
 from PySide6.QtGui import QStandardItem, QStandardItemModel

@@ -52,8 +52,6 @@ But a similar solution is possible that allows for normal imports.
 See signature_bootstrap.py for details.
 """
 
-from __future__ import print_function, absolute_import
-
 import sys
 import os
 import subprocess

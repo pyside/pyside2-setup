@@ -15,7 +15,7 @@ if (SPHINX)
         COMMENT "Generating HTMLs..."
         VERBATIM)
     # Python script that will be called to update the QHP
-    set(py_cmd "from  __future__ import print_function
+    set(py_cmd "
 import fileinput
 import re
 try:
