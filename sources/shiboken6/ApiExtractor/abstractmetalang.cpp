@@ -31,6 +31,7 @@
 #include "abstractmetaenum.h"
 #include "abstractmetafunction.h"
 #include "abstractmetafield.h"
+#include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
 #include "typedatabase.h"

@@ -30,6 +30,7 @@
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
 #include "messages.h"
+#include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
 #include "typedatabase.h"

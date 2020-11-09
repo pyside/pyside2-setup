@@ -31,6 +31,7 @@
 #include "testutil.h"
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <modifications.h>
 #include <typesystem.h>
 
 void TestNestedTypes::testNestedTypesModifications()

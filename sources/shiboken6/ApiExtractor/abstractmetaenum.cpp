@@ -29,6 +29,8 @@
 #include "abstractmetaenum.h"
 #include "typesystem.h"
 
+#include <QtCore/QDebug>
+
 AbstractMetaEnum::AbstractMetaEnum() :
     m_hasQenumsDeclaration(false), m_signed(true)
 {

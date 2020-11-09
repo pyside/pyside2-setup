@@ -34,6 +34,7 @@
 #include "propertyspec.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
+#include "typesystem.h"
 
 #include <clangparser/clangbuilder.h>
 #include <clangparser/clangutils.h>

@@ -32,6 +32,7 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
+#include <modifications.h>
 #include <typesystem.h>
 
 void TestCodeInjections::testReadFile_data()

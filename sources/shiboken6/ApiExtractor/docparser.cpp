@@ -31,6 +31,7 @@
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "messages.h"
+#include "modifications.h"
 #include "reporthandler.h"
 #include "typesystem.h"
 #include "xmlutils.h"

@@ -37,6 +37,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamWriter>
 
 #include <iostream>

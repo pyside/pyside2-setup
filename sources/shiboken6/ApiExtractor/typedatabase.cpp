@@ -763,48 +763,17 @@ static void _computeTypeIndexes()
     computeTypeIndexes = false;
 }
 
-// Build the C++ name excluding any inline namespaces
-// ("std::__1::shared_ptr" -> "std::shared_ptr"
-QString TypeEntry::shortName() const
-{
-    if (m_cachedShortName.isEmpty()) {
-        QVarLengthArray<const TypeEntry *> parents;
-        bool foundInlineNamespace = false;
-        for (auto p = m_parent; p != nullptr && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
-            if (p->type() == TypeEntry::NamespaceType
-                && static_cast<const NamespaceTypeEntry *>(p)->isInlineNamespace()) {
-                foundInlineNamespace = true;
-            } else {
-                parents.append(p);
-            }
-        }
-        if (foundInlineNamespace) {
-            m_cachedShortName.reserve(m_name.size());
-            for (int i = parents.size() - 1; i >= 0; --i) {
-                m_cachedShortName.append(parents.at(i)->entryName());
-                m_cachedShortName.append(QLatin1String("::"));
-            }
-            m_cachedShortName.append(m_entryName);
-        } else {
-            m_cachedShortName = m_name;
-        }
-    }
-    return m_cachedShortName;
-}
-
 void TypeEntry::setRevision(int r)
 {
-    if (m_revision != r) {
-        m_revision = r;
+    if (setRevisionHelper(r))
         computeTypeIndexes = true;
-    }
 }
 
 int TypeEntry::sbkIndex() const
 {
     if (computeTypeIndexes)
         _computeTypeIndexes();
-    return m_sbkIndex;
+    return sbkIndexHelper();
 }
 
 int getMaxTypeIndex()
@@ -855,18 +824,6 @@ bool TypeDatabase::checkApiVersion(const QString &package,
 
 #ifndef QT_NO_DEBUG_STREAM
 
-#define FORMAT_BOOL(name, var) \
-    if (var) \
-         d << ", [" << name << ']';
-
-#define FORMAT_NONEMPTY_STRING(name, var) \
-    if (!var.isEmpty()) \
-         d << ", " << name << "=\"" << var << '"';
-
-#define FORMAT_LIST_SIZE(name, var) \
-    if (!var.isEmpty()) \
-         d << ", " << var.size() << ' '  << name;
-
 template <class Container, class Separator>
 static void formatList(QDebug &d, const char *name, const Container &c, Separator sep)
 {
@@ -879,120 +836,6 @@ static void formatList(QDebug &d, const char *name, const Container &c, Separato
         }
         d << ')';
     }
-}
-
-void TypeEntry::formatDebug(QDebug &d) const
-{
-    const QString cppName = qualifiedCppName();
-    d << '"' << m_name << '"';
-    if (m_name != cppName)
-        d << "\", cppName=\"" << cppName << '"';
-    d << ", type=" << m_type << ", codeGeneration="
-        << m_codeGeneration << ", target=\"" << targetLangName() << '"';
-    FORMAT_NONEMPTY_STRING("package", m_targetLangPackage)
-    FORMAT_BOOL("stream", m_stream)
-    FORMAT_LIST_SIZE("codeSnips", m_codeSnips)
-    FORMAT_NONEMPTY_STRING("conversionRule", m_conversionRule)
-    if (m_viewOn)
-       d << ", views=" << m_viewOn->name();
-    if (!m_version.isNull() && m_version > QVersionNumber(0, 0))
-        d << ", version=" << m_version;
-    if (m_revision)
-        d << ", revision=" << m_revision;
-    if (m_sbkIndex)
-        d << ", sbkIndex=" << m_sbkIndex;
-    if (m_include.isValid())
-        d << ", include=" << m_include;
-    formatList(d, "extraIncludes", m_extraIncludes, ", ");
-}
-
-void ComplexTypeEntry::formatDebug(QDebug &d) const
-{
-    TypeEntry::formatDebug(d);
-    FORMAT_BOOL("polymorphicBase", m_polymorphicBase)
-    FORMAT_BOOL("genericClass", m_genericClass)
-    FORMAT_BOOL("deleteInMainThread", m_deleteInMainThread)
-    if (m_typeFlags != 0)
-        d << ", typeFlags=" << m_typeFlags;
-    d << ", copyableFlag=" << m_copyableFlag
-        << ", except=" << int(m_exceptionHandling);
-    FORMAT_NONEMPTY_STRING("defaultSuperclass", m_defaultSuperclass)
-    FORMAT_NONEMPTY_STRING("polymorphicIdValue", m_polymorphicIdValue)
-    FORMAT_NONEMPTY_STRING("targetType", m_targetType)
-    FORMAT_NONEMPTY_STRING("hash", m_hashFunction)
-    FORMAT_LIST_SIZE("addedFunctions", m_addedFunctions)
-    formatList(d, "functionMods", m_functionMods, ", ");
-    FORMAT_LIST_SIZE("fieldMods", m_fieldMods)
-}
-
-void TypedefEntry::formatDebug(QDebug &d) const
-{
-    ComplexTypeEntry::formatDebug(d);
-    d << ", sourceType=\"" << m_sourceType << '"'
-        << ", source=" << m_source << ", target=" << m_target;
-}
-
-void EnumTypeEntry::formatDebug(QDebug &d) const
-{
-    TypeEntry::formatDebug(d);
-    if (m_flags)
-        d << ", flags=(" << m_flags << ')';
-}
-
-void NamespaceTypeEntry::formatDebug(QDebug &d) const
-{
-    ComplexTypeEntry::formatDebug(d);
-    auto pattern = m_filePattern.pattern();
-    FORMAT_NONEMPTY_STRING("pattern", pattern)
-    d << ",visibility=" << m_visibility;
-    if (m_inlineNamespace)
-        d << "[inline]";
-}
-
-void ContainerTypeEntry::formatDebug(QDebug &d) const
-{
-    ComplexTypeEntry::formatDebug(d);
-    d << ", type=" << m_containerKind << ",\"" << typeName() << '"';
-}
-
-void SmartPointerTypeEntry::formatDebug(QDebug &d) const
-{
-    ComplexTypeEntry::formatDebug(d);
-    if (!m_instantiations.isEmpty()) {
-        d << ", instantiations[" << m_instantiations.size() << "]=(";
-        for (auto i : m_instantiations)
-            d << i->name() << ',';
-        d << ')';
-    }
-}
-
-QDebug operator<<(QDebug d, const TypeEntry *te)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "TypeEntry(";
-    if (te)
-        te->formatDebug(d);
-    else
-        d << '0';
-    d << ')';
-    return d;
-}
-
-QDebug operator<<(QDebug d, const TemplateEntry *te)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "TemplateEntry(";
-    if (te) {
-        d << '"' << te->name() << '"';
-    } else {
-        d << '0';
-    }
-    d << ')';
-    return d;
 }
 
 void TypeDatabase::formatDebug(QDebug &d) const

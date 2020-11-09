@@ -29,11 +29,13 @@
 #define TYPESYSTEMPARSER_H
 
 #include "typesystem.h"
+#include "modifications.h"
 
 #include <QtCore/QStack>
 #include <QtCore/QHash>
 #include <QtCore/QScopedPointer>
 
+QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamReader)
 

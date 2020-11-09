@@ -33,7 +33,8 @@
 #include "parser/codemodel_fwd.h"
 #include "abstractmetalang.h"
 #include "abstractmetatype.h"
-#include "typesystem.h"
+#include "include.h"
+#include "modifications.h"
 #include "typeparser.h"
 
 #include <QSet>

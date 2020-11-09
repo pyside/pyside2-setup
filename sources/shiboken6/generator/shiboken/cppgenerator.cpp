@@ -37,6 +37,7 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <messages.h>
+#include <modifications.h>
 #include <propertyspec.h>
 #include <reporthandler.h>
 #include <typedatabase.h>

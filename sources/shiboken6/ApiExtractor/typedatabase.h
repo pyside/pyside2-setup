@@ -72,6 +72,28 @@ struct VersionRange
     QVersionNumber until{9999, 9999};
 };
 
+struct TypeRejection
+{
+    enum MatchType
+    {
+        ExcludeClass,                // Match className only
+        Function,                    // Match className and function name
+        Field,                       // Match className and field name
+        Enum,                        // Match className and enum name
+        ArgumentType,                // Match className and argument type
+        ReturnType,                  // Match className and return type
+        Invalid
+    };
+
+    QRegularExpression className;
+    QRegularExpression pattern;
+    MatchType matchType = Invalid;
+};
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const TypeRejection &r);
+#endif
+
 class TypeDatabase
 {
     TypeDatabase();

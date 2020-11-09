@@ -31,6 +31,7 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include <modifications.h>
 #include <typedatabase.h>
 #include <reporthandler.h>
 #include <fileout.h>

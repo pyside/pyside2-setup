@@ -30,6 +30,8 @@
 #include "typedatabase.h"
 #include "messages.h"
 #include "reporthandler.h"
+#include "sourcelocation.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
@@ -37,6 +39,7 @@
 #include <QtCore/QSet>
 #include <QtCore/QStringView>
 #include <QtCore/QStringAlgorithms>
+#include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamAttributes>
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QXmlStreamEntityResolver>
