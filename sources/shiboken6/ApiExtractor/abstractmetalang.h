@@ -32,6 +32,7 @@
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaattributes.h"
 #include "enclosingclassmixin.h"
+#include "documentation.h"
 #include "sourcelocation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
@@ -187,6 +188,9 @@ public:
      *   /return the class name without scope information
      */
     QString name() const;
+
+    const Documentation &documentation() const { return m_doc; }
+    void setDocumentation(const Documentation& doc) { m_doc = doc; }
 
     QString baseClassName() const
     {
@@ -363,6 +367,8 @@ private:
     uint m_hasCloneOperator : 1;
     uint m_isTypeDef : 1;
     uint m_hasToStringCapability : 1;
+
+    Documentation m_doc;
 
     const AbstractMetaClass *m_enclosingClass = nullptr;
     AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance

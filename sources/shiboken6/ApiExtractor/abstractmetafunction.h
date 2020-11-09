@@ -33,6 +33,7 @@
 #include "abstractmetaargument.h"
 #include "abstractmetaattributes.h"
 #include "abstractmetatype.h"
+#include "documentation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 #include "sourcelocation.h"
@@ -99,6 +100,9 @@ public:
     }
 
     void setOriginalName(const QString &name) { m_originalName = name; }
+
+    const Documentation &documentation() const { return m_doc; }
+    void setDocumentation(const Documentation& doc) { m_doc = doc; }
 
     bool isReverseOperator() const { return m_reverse; }
     void setReverseOperator(bool reverse) { m_reverse = reverse; }
@@ -303,6 +307,7 @@ private:
 
     QString m_name;
     QString m_originalName;
+    Documentation m_doc;
     mutable QString m_cachedMinimalSignature;
     mutable QString m_cachedSignature;
     mutable QString m_cachedModifiedName;

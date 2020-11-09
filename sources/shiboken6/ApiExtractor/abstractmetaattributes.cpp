@@ -41,7 +41,6 @@ void AbstractMetaAttributes::assignMetaAttributes(const AbstractMetaAttributes &
 {
     m_attributes = other.m_attributes;
     m_originalAttributes = other.m_originalAttributes;
-    m_doc = other.m_doc;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

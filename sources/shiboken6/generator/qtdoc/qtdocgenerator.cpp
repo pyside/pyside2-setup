@@ -1782,8 +1782,7 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
     const AbstractMetaFieldList &fields = cppClass->fields();
     for (AbstractMetaField *field : fields) {
         s << section_title << cppClass->fullName() << "." << field->name() << Qt::endl << Qt::endl;
-        //TODO: request for member ‘documentation’ is ambiguous
-        writeFormattedText(s, field->AbstractMetaAttributes::documentation().value(), cppClass);
+        writeFormattedText(s, field->documentation().value(), cppClass);
     }
 }
 

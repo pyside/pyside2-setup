@@ -31,6 +31,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaattributes.h"
+#include "documentation.h"
 #include "enclosingclassmixin.h"
 #include "parser/codemodel_enums.h"
 #include "parser/enumvalue.h"
@@ -84,6 +85,9 @@ public:
 
     QString name() const;
 
+    const Documentation &documentation() const { return m_doc; }
+    void setDocumentation(const Documentation& doc) { m_doc = doc; }
+
     QString qualifier() const;
 
     QString package() const;
@@ -112,6 +116,7 @@ public:
 private:
     AbstractMetaEnumValueList m_enumValues;
     EnumTypeEntry *m_typeEntry = nullptr;
+    Documentation m_doc;
 
     EnumKind m_enumKind = CEnum;
     uint m_hasQenumsDeclaration : 1;

@@ -29,9 +29,9 @@
 #ifndef ABSTRACTMETAATTRIBUTES_H
 #define ABSTRACTMETAATTRIBUTES_H
 
-#include "documentation.h"
-
 #include <QtCore/qobjectdefs.h>
+
+QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class AbstractMetaAttributes
 {
@@ -169,16 +169,6 @@ public:
         return m_originalAttributes.testFlag(Public);
     }
 
-    void setDocumentation(const Documentation& doc)
-    {
-        m_doc = doc;
-    }
-
-    Documentation documentation() const
-    {
-        return m_doc;
-    }
-
 #ifndef QT_NO_DEBUG_STREAM
     static void formatMetaAttributes(QDebug &d, AbstractMetaAttributes::Attributes value);
 #endif
@@ -189,7 +179,6 @@ protected:
 private:
     Attributes m_attributes;
     Attributes m_originalAttributes;
-    Documentation m_doc;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaAttributes::Attributes)

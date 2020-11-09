@@ -30,6 +30,7 @@
 #define ABSTRACTMETAFIELD_H
 
 #include "abstractmetalang_typedefs.h"
+#include "documentation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 #include "abstractmetaattributes.h"
@@ -88,9 +89,6 @@ public:
     FieldModificationList modifications() const;
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
-
-    using AbstractMetaVariable::setDocumentation;
-    using AbstractMetaVariable::documentation;
 
     AbstractMetaField *copy() const;
 
