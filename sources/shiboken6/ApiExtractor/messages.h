@@ -144,7 +144,7 @@ QString msgCannotFindDocumentation(const QString &fileName,
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,
-                                   const AbstractMetaEnum *e,
+                                   const AbstractMetaEnum &e,
                                    const QString &query);
 
 QString msgCannotFindDocumentation(const QString &fileName,

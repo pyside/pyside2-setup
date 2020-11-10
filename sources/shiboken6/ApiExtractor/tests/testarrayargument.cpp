@@ -33,6 +33,7 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+#include <parser/enumvalue.h>
 
 void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 {
@@ -128,10 +129,10 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    AbstractMetaEnum* someEnum = classA->findEnum(QLatin1String("SomeEnum"));
-    QVERIFY(someEnum);
-    AbstractMetaEnumValue *nvalues = classA->findEnumValue(QLatin1String("NValues"));
-    QVERIFY(nvalues);
+    auto someEnum = classA->findEnum(QLatin1String("SomeEnum"));
+    QVERIFY(someEnum.has_value());
+    auto nvalues = classA->findEnumValue(QLatin1String("NValues"));
+    QVERIFY(nvalues.has_value());
 
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());
@@ -159,10 +160,9 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    AbstractMetaEnum *someEnum = builder->globalEnums().constFirst();
-    QVERIFY(someEnum);
-    const AbstractMetaEnumValue *nvalues = someEnum->findEnumValue(QLatin1String("NValues"));
-    QVERIFY(nvalues);
+    AbstractMetaEnum someEnum = builder->globalEnums().constFirst();
+    auto nvalues = someEnum.findEnumValue(u"NValues");
+    QVERIFY(nvalues.has_value());
 
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());

@@ -41,6 +41,7 @@
 #include <propertyspec.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
+#include <parser/enumvalue.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QMetaObject>
@@ -408,8 +409,8 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
     QVector<Include> includes;
     if (!classContext.useWrapper())
         includes += metaClass->typeEntry()->extraIncludes();
-    for (AbstractMetaEnum *cppEnum : qAsConst(classEnums))
-        includes.append(cppEnum->typeEntry()->extraIncludes());
+    for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
+        includes.append(cppEnum.typeEntry()->extraIncludes());
     if (!includes.isEmpty()) {
         s << "\n// Extra includes\n";
         std::sort(includes.begin(), includes.end());
@@ -849,9 +850,11 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         return QLatin1Char('"') + typeEntry->qualifiedCppName() + QLatin1Char('"');
 
     if (avoidProtectedHack()) {
-        const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(func->type());
-        if (metaEnum && metaEnum->isProtected())
-            return QLatin1Char('"') + protectedEnumSurrogateName(metaEnum) + QLatin1Char('"');
+        auto metaEnum = findAbstractMetaEnum(func->type());
+        if (metaEnum.has_value() && metaEnum->isProtected()) {
+            return QLatin1Char('"') + protectedEnumSurrogateName(metaEnum.value())
+                    + QLatin1Char('"');
+        }
     }
 
     if (func->type().isPrimitive())
@@ -1223,8 +1226,8 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     if (!func->isVoid()) {
         s << INDENT << "return ";
         if (avoidProtectedHack() && retType->isEnum()) {
-            const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(retType);
-            bool isProtectedEnum = metaEnum && metaEnum->isProtected();
+            auto metaEnum = findAbstractMetaEnum(retType);
+            bool isProtectedEnum = metaEnum.has_value() && metaEnum->isProtected();
             if (isProtectedEnum) {
                 QString typeCast;
                 if (metaEnum->enclosingClass())
@@ -1296,11 +1299,11 @@ void CppGenerator::writeMetaCast(QTextStream &s, const GeneratorContext &classCo
     s << "}\n\n";
 }
 
-void CppGenerator::writeEnumConverterFunctions(QTextStream &s, const AbstractMetaEnum *metaEnum)
+void CppGenerator::writeEnumConverterFunctions(QTextStream &s, const AbstractMetaEnum &metaEnum)
 {
-    if (metaEnum->isPrivate() || metaEnum->isAnonymous())
+    if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    writeEnumConverterFunctions(s, metaEnum->typeEntry());
+    writeEnumConverterFunctions(s, metaEnum.typeEntry());
 }
 
 void CppGenerator::writeEnumConverterFunctions(QTextStream &s, const TypeEntry *enumType)
@@ -1311,9 +1314,9 @@ void CppGenerator::writeEnumConverterFunctions(QTextStream &s, const TypeEntry *
     QString enumPythonType = cpythonTypeNameExt(enumType);
     QString cppTypeName = getFullTypeName(enumType).trimmed();
     if (avoidProtectedHack()) {
-        const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(enumType);
-        if (metaEnum && metaEnum->isProtected())
-            cppTypeName = protectedEnumSurrogateName(metaEnum);
+        auto metaEnum = findAbstractMetaEnum(enumType);
+        if (metaEnum.has_value() && metaEnum->isProtected())
+            cppTypeName = protectedEnumSurrogateName(metaEnum.value());
     }
     QString code;
     QTextStream c(&code);
@@ -1394,7 +1397,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
     if (!classEnums.isEmpty())
         s << "// Python to C++ enum conversion.\n";
-    for (const AbstractMetaEnum *metaEnum : qAsConst(classEnums))
+    for (const AbstractMetaEnum &metaEnum : qAsConst(classEnums))
         writeEnumConverterFunctions(s, metaEnum);
 
     if (metaClass->isNamespace())
@@ -2539,8 +2542,8 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
         writeMinimalConstructorExpression(s, type, defaultValue);
         s << ";\n";
     } else if (avoidProtectedHack() && type.typeEntry()->isEnum()) {
-        const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(type);
-        if (metaEnum && metaEnum->isProtected()) {
+        auto metaEnum = findAbstractMetaEnum(type);
+        if (metaEnum.has_value() && metaEnum->isProtected()) {
             typeName = QLatin1String("long");
             isProtectedEnum = true;
         }
@@ -3629,11 +3632,11 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             } else if (!func->isVoid() && !func->isInplaceOperator()) {
                 bool writeReturnType = true;
                 if (avoidProtectedHack()) {
-                    const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(func->type());
-                    if (metaEnum) {
+                    auto metaEnum = findAbstractMetaEnum(func->type());
+                    if (metaEnum.has_value()) {
                         QString enumName;
                         if (metaEnum->isProtected())
-                            enumName = protectedEnumSurrogateName(metaEnum);
+                            enumName = protectedEnumSurrogateName(metaEnum.value());
                         else
                             enumName = func->type().cppSignature();
                         methodCall.prepend(enumName + QLatin1Char('('));
@@ -3875,11 +3878,11 @@ void CppGenerator::writePrimitiveConverterInitialization(QTextStream &s, const C
     writeCustomConverterRegister(s, customConversion, converter);
 }
 
-void CppGenerator::writeEnumConverterInitialization(QTextStream &s, const AbstractMetaEnum *metaEnum)
+void CppGenerator::writeEnumConverterInitialization(QTextStream &s, const AbstractMetaEnum &metaEnum)
 {
-    if (metaEnum->isPrivate() || metaEnum->isAnonymous())
+    if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    writeEnumConverterInitialization(s, metaEnum->typeEntry());
+    writeEnumConverterInitialization(s, metaEnum.typeEntry());
 }
 
 void CppGenerator::writeEnumConverterInitialization(QTextStream &s, const TypeEntry *enumType)
@@ -4935,8 +4938,8 @@ void CppGenerator::writeEnumsInitialization(QTextStream &s, AbstractMetaEnumList
     if (enums.isEmpty())
         return;
     s << INDENT << "// Initialization of enums.\n\n";
-    for (const AbstractMetaEnum *cppEnum : qAsConst(enums)) {
-        if (cppEnum->isPrivate())
+    for (const AbstractMetaEnum &cppEnum : qAsConst(enums)) {
+        if (cppEnum.isPrivate())
             continue;
         writeEnumInitialization(s, cppEnum);
     }
@@ -4951,11 +4954,11 @@ static QString mangleName(QString name)
     return name;
 }
 
-void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    const AbstractMetaClass *enclosingClass = cppEnum->targetLangEnclosingClass();
+    const AbstractMetaClass *enclosingClass = cppEnum.targetLangEnclosingClass();
     bool hasUpperEnclosingClass = enclosingClass && enclosingClass->targetLangEnclosingClass() != nullptr;
-    const EnumTypeEntry *enumTypeEntry = cppEnum->typeEntry();
+    const EnumTypeEntry *enumTypeEntry = cppEnum.typeEntry();
     QString enclosingObjectVariable;
     if (enclosingClass)
         enclosingObjectVariable = cpythonTypeName(enclosingClass);
@@ -4965,11 +4968,11 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
         enclosingObjectVariable = QLatin1String("module");
 
     s << INDENT << "// Initialization of ";
-    s << (cppEnum->isAnonymous() ? "anonymous enum identified by enum value" : "enum");
-    s << " '" << cppEnum->name() << "'.\n";
+    s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
+    s << " '" << cppEnum.name() << "'.\n";
 
     QString enumVarTypeObj;
-    if (!cppEnum->isAnonymous()) {
+    if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(QLatin1Char('.')) + 1;
         FlagsTypeEntry *flags = enumTypeEntry->flags();
         if (flags) {
@@ -4989,40 +4992,39 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
         s << '(' << enclosingObjectVariable << ',' << Qt::endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << '"' << cppEnum->name() << "\",\n";
+            s << INDENT << '"' << cppEnum.name() << "\",\n";
             s << INDENT << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n";
-            s << INDENT << '"' << (cppEnum->enclosingClass() ? (cppEnum->enclosingClass()->qualifiedCppName() + QLatin1String("::")) : QString());
-            s << cppEnum->name() << '"';
+            s << INDENT << '"' << cppEnum.qualifiedCppName() << '"';
             if (flags)
                 s << ',' << Qt::endl << INDENT << cpythonTypeNameExt(flags);
             s << ");\n";
         }
-        s << INDENT << "if (!" << cpythonTypeNameExt(cppEnum->typeEntry()) << ")\n";
+        s << INDENT << "if (!" << cpythonTypeNameExt(cppEnum.typeEntry()) << ")\n";
         {
             Indentation indent(INDENT);
             s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl << Qt::endl;
         }
     }
 
-    const AbstractMetaEnumValueList &enumValues = cppEnum->values();
-    for (const AbstractMetaEnumValue *enumValue : enumValues) {
-        if (enumTypeEntry->isEnumValueRejected(enumValue->name()))
+    for (const AbstractMetaEnumValue &enumValue : cppEnum.values()) {
+        if (enumTypeEntry->isEnumValueRejected(enumValue.name()))
             continue;
 
         QString enumValueText;
-        if (!avoidProtectedHack() || !cppEnum->isProtected()) {
+        if (!avoidProtectedHack() || !cppEnum.isProtected()) {
             enumValueText = QLatin1String("(long) ");
-            if (cppEnum->enclosingClass())
-                enumValueText += cppEnum->enclosingClass()->qualifiedCppName() + QLatin1String("::");
+            if (cppEnum.enclosingClass())
+                enumValueText += cppEnum.enclosingClass()->qualifiedCppName() + QLatin1String("::");
             // Fully qualify the value which is required for C++ 11 enum classes.
-            if (!cppEnum->isAnonymous())
-                enumValueText += cppEnum->name() + QLatin1String("::");
-            enumValueText += enumValue->name();
+            if (!cppEnum.isAnonymous())
+                enumValueText += cppEnum.name() + QLatin1String("::");
+            enumValueText += enumValue.name();
         } else {
-            enumValueText += enumValue->value().toString();
+            enumValueText += enumValue.value().toString();
         }
 
-        switch (cppEnum->enumKind()) {
+        const QString mangledName = mangleName(enumValue.name());
+        switch (cppEnum.enumKind()) {
         case AnonymousEnum:
             if (enclosingClass || hasUpperEnclosingClass) {
                 s << INDENT << "{\n";
@@ -5030,7 +5032,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
                     Indentation indent(INDENT);
                     s << INDENT << "PyObject *anonEnumItem = PyInt_FromLong(" << enumValueText << ");\n";
                     s << INDENT << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(reinterpret_cast<SbkObjectType *>(" << enclosingObjectVariable
-                        << "))->tp_dict, \"" << mangleName(enumValue->name()) << "\", anonEnumItem) < 0)\n";
+                        << "))->tp_dict, \"" << mangledName << "\", anonEnumItem) < 0)\n";
                     {
                         Indentation indent(INDENT);
                         s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
@@ -5039,7 +5041,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
                 }
                 s << INDENT << "}\n";
             } else {
-                s << INDENT << "if (PyModule_AddIntConstant(module, \"" << mangleName(enumValue->name()) << "\", ";
+                s << INDENT << "if (PyModule_AddIntConstant(module, \"" << mangledName << "\", ";
                 s << enumValueText << ") < 0)\n";
                 {
                     Indentation indent(INDENT);
@@ -5052,7 +5054,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem" : "createGlobalEnumItem");
             s << '(' << enumVarTypeObj << ',' << Qt::endl;
             Indentation indent(INDENT);
-            s << INDENT << enclosingObjectVariable << ", \"" << mangleName(enumValue->name()) << "\", ";
+            s << INDENT << enclosingObjectVariable << ", \"" << mangledName << "\", ";
             s << enumValueText << "))\n";
             s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
         }
@@ -5061,7 +5063,7 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
             s << INDENT << "if (!Shiboken::Enum::createScopedEnumItem("
                 << enumVarTypeObj << ',' << Qt::endl;
             Indentation indent(INDENT);
-            s << INDENT << enumVarTypeObj<< ", \"" << mangleName(enumValue->name()) << "\", "
+            s << INDENT << enumVarTypeObj<< ", \"" << mangledName << "\", "
                << enumValueText << "))\n"
                << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
         }
@@ -5071,8 +5073,8 @@ void CppGenerator::writeEnumInitialization(QTextStream &s, const AbstractMetaEnu
 
     writeEnumConverterInitialization(s, cppEnum);
 
-    s << INDENT << "// End of '" << cppEnum->name() << "' enum";
-    if (cppEnum->typeEntry()->flags())
+    s << INDENT << "// End of '" << cppEnum.name() << "' enum";
+    if (cppEnum.typeEntry()->flags())
         s << "/flags";
     s << '.' << Qt::endl << Qt::endl;
 }
@@ -5103,9 +5105,9 @@ void CppGenerator::writeSignalInitialization(QTextStream &s, const AbstractMetaC
                 << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
 }
 
-void CppGenerator::writeFlagsToLong(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void CppGenerator::writeFlagsToLong(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum->typeEntry()->flags();
+    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
         return;
     s << "static PyObject *" << cpythonEnumName(cppEnum) << "_long(PyObject *self)\n";
@@ -5117,9 +5119,9 @@ void CppGenerator::writeFlagsToLong(QTextStream &s, const AbstractMetaEnum *cppE
     s << "}\n";
 }
 
-void CppGenerator::writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void CppGenerator::writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum->typeEntry()->flags();
+    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
         return;
     s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject *self)\n";
@@ -5132,7 +5134,7 @@ void CppGenerator::writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum *cpp
     s << "}\n";
 }
 
-void CppGenerator::writeFlagsMethods(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void CppGenerator::writeFlagsMethods(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
     writeFlagsBinaryOperator(s, cppEnum, QLatin1String("and"), QLatin1String("&"));
     writeFlagsBinaryOperator(s, cppEnum, QLatin1String("or"), QLatin1String("|"));
@@ -5145,7 +5147,7 @@ void CppGenerator::writeFlagsMethods(QTextStream &s, const AbstractMetaEnum *cpp
     s << Qt::endl;
 }
 
-void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
     QString cpythonName = cpythonEnumName(cppEnum);
 
@@ -5163,8 +5165,8 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
 
 void CppGenerator::writeFlagsNumberMethodsDefinitions(QTextStream &s, const AbstractMetaEnumList &enums)
 {
-    for (AbstractMetaEnum *e : enums) {
-        if (!e->isAnonymous() && !e->isPrivate() && e->typeEntry()->flags()) {
+    for (const AbstractMetaEnum &e : enums) {
+        if (!e.isAnonymous() && !e.isPrivate() && e.typeEntry()->flags()) {
             writeFlagsMethods(s, e);
             writeFlagsNumberMethodsDefinition(s, e);
             s << '\n';
@@ -5172,10 +5174,10 @@ void CppGenerator::writeFlagsNumberMethodsDefinitions(QTextStream &s, const Abst
     }
 }
 
-void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
+void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum &cppEnum,
                                             const QString &pyOpName, const QString &cppOpName)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum->typeEntry()->flags();
+    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
@@ -5194,11 +5196,11 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
     s<< "}\n\n";
 }
 
-void CppGenerator::writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
+void CppGenerator::writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnum &cppEnum,
                                            const QString &pyOpName,
                                            const QString &cppOpName, bool boolResult)
 {
-    FlagsTypeEntry *flagsEntry = cppEnum->typeEntry()->flags();
+    FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
 
     s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
@@ -5528,13 +5530,15 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream &s, const Generat
         }
     }
 
-    for (AbstractMetaEnum *metaEnum : metaClass->enums()) {
-        if (!metaEnum->isPrivate() && !metaEnum->isAnonymous()) {
-            for (const QString &name : qAsConst(nameVariants))
-                s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << name << "::" << metaEnum->name() << "\");\n";
-
-            if (metaEnum->typeEntry()->flags()) {
-                QString n = metaEnum->typeEntry()->flags()->originalName();
+    for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
+        if (!metaEnum.isPrivate() && !metaEnum.isAnonymous()) {
+            for (const QString &name : qAsConst(nameVariants)) {
+                s << INDENT << "qRegisterMetaType< ::"
+                    << metaEnum.typeEntry()->qualifiedCppName() << " >(\""
+                    << name << "::" << metaEnum.name() << "\");\n";
+            }
+            if (metaEnum.typeEntry()->flags()) {
+                QString n = metaEnum.typeEntry()->flags()->originalName();
                 s << INDENT << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");\n";
             }
         }
@@ -5944,8 +5948,8 @@ bool CppGenerator::finishGeneration()
     //Extra includes
     s << Qt::endl << "// Extra includes\n";
     QVector<Include> extraIncludes = moduleEntry->extraIncludes();
-    for (AbstractMetaEnum *cppEnum : qAsConst(globalEnums))
-        extraIncludes.append(cppEnum->typeEntry()->extraIncludes());
+    for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums))
+        extraIncludes.append(cppEnum.typeEntry()->extraIncludes());
     std::sort(extraIncludes.begin(), extraIncludes.end());
     for (const Include &inc : qAsConst(extraIncludes))
         s << inc;
@@ -5996,8 +6000,8 @@ bool CppGenerator::finishGeneration()
 
         s << "// Enum definitions ";
         s << "------------------------------------------------------------\n";
-        for (const AbstractMetaEnum *cppEnum : qAsConst(globalEnums)) {
-            if (cppEnum->isAnonymous() || cppEnum->isPrivate())
+        for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums)) {
+            if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
             writeEnumConverterFunctions(s, cppEnum);
             s << Qt::endl;
@@ -6199,9 +6203,10 @@ bool CppGenerator::finishGeneration()
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
 
     if (usePySideExtensions()) {
-        for (AbstractMetaEnum *metaEnum : qAsConst(globalEnums))
-            if (!metaEnum->isAnonymous()) {
-                s << INDENT << "qRegisterMetaType< ::" << metaEnum->typeEntry()->qualifiedCppName() << " >(\"" << metaEnum->name() << "\");\n";
+        for (const AbstractMetaEnum &metaEnum : qAsConst(globalEnums))
+            if (!metaEnum.isAnonymous()) {
+                s << INDENT << "qRegisterMetaType< ::" << metaEnum.typeEntry()->qualifiedCppName()
+                  << " >(\"" << metaEnum.name() << "\");\n";
             }
 
         // cleanup staticMetaObject attribute

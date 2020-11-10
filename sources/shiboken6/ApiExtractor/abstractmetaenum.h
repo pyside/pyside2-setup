@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -31,100 +31,98 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaattributes.h"
-#include "documentation.h"
 #include "enclosingclassmixin.h"
 #include "parser/codemodel_enums.h"
-#include "parser/enumvalue.h"
 
+#include <QtCore/QSharedDataPointer>
 #include <QtCore/QString>
+
+#include <optional>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
+class AbstractMetaEnumData;
+class AbstractMetaEnumValueData;
+class Documentation;
+class EnumValue;
 class EnumTypeEntry;
 
 class AbstractMetaEnumValue
 {
 public:
-    AbstractMetaEnumValue() = default;
+    AbstractMetaEnumValue();
+    AbstractMetaEnumValue(const AbstractMetaEnumValue &);
+    AbstractMetaEnumValue &operator=(const AbstractMetaEnumValue &);
+    AbstractMetaEnumValue(AbstractMetaEnumValue &&);
+    AbstractMetaEnumValue &operator=(AbstractMetaEnumValue &&);
+    ~AbstractMetaEnumValue();
 
-    EnumValue value() const { return m_value; }
-    void setValue(EnumValue value) { m_value = value; }
+    EnumValue value() const;
+    void setValue(EnumValue value);
 
-    QString stringValue() const { return m_stringValue; }
-    void setStringValue(const QString &v) { m_stringValue = v; }
+    QString stringValue() const;
+    void setStringValue(const QString &v);
 
-    QString name() const { return m_name; }
-    void setName(const QString &name) { m_name = name; }
+    QString name() const;
+    void setName(const QString &name);
 
-    Documentation documentation() const { return m_doc; }
-    void setDocumentation(const Documentation& doc) { m_doc = doc; }
+    Documentation documentation() const;
+    void setDocumentation(const Documentation& doc);
 
 private:
-    QString m_name;
-    QString m_stringValue;
-
-    EnumValue m_value;
-
-    Documentation m_doc;
+    QSharedDataPointer<AbstractMetaEnumValueData> d;
 };
 
 class AbstractMetaEnum : public AbstractMetaAttributes, public EnclosingClassMixin
 {
 public:
     AbstractMetaEnum();
+    AbstractMetaEnum(const AbstractMetaEnum &);
+    AbstractMetaEnum &operator=(const AbstractMetaEnum &);
+    AbstractMetaEnum(AbstractMetaEnum &&);
+    AbstractMetaEnum &operator=(AbstractMetaEnum &&);
     ~AbstractMetaEnum();
 
-    const AbstractMetaEnumValueList &values() const { return m_enumValues; }
+    const AbstractMetaEnumValueList &values() const;
+    void addEnumValue(const AbstractMetaEnumValue &enumValue);
 
-    void addEnumValue(AbstractMetaEnumValue *enumValue)
-    {
-        m_enumValues << enumValue;
-    }
-
-    AbstractMetaEnumValue *findEnumValue(const QString &value) const;
+    std::optional<AbstractMetaEnumValue> findEnumValue(QStringView value) const;
 
     QString name() const;
+    QString qualifiedCppName() const;
 
-    const Documentation &documentation() const { return m_doc; }
-    void setDocumentation(const Documentation& doc) { m_doc = doc; }
+    const Documentation &documentation() const;
+    void setDocumentation(const Documentation& doc);
 
     QString qualifier() const;
 
     QString package() const;
 
-    QString fullName() const
-    {
-        return package() + QLatin1Char('.') + qualifier()  + QLatin1Char('.') + name();
-    }
+    QString fullName() const;
 
-    EnumKind enumKind() const { return m_enumKind; }
-    void setEnumKind(EnumKind kind) { m_enumKind = kind; }
+    EnumKind enumKind() const;
+    void setEnumKind(EnumKind kind);
 
-    bool isAnonymous() const { return m_enumKind == AnonymousEnum; }
+    bool isAnonymous() const;
 
     // Has the enum been declared inside a Q_ENUMS() macro in its enclosing class?
-    bool hasQEnumsDeclaration() const { return m_hasQenumsDeclaration; }
-    void setHasQEnumsDeclaration(bool on) { m_hasQenumsDeclaration = on; }
+    bool hasQEnumsDeclaration() const;
+    void setHasQEnumsDeclaration(bool on);
 
-    EnumTypeEntry *typeEntry() const { return m_typeEntry; }
+    EnumTypeEntry *typeEntry() const;
+    void setTypeEntry(EnumTypeEntry *entry);
 
-    void setTypeEntry(EnumTypeEntry *entry) { m_typeEntry = entry; }
-
-    bool isSigned() const { return m_signed; }
-    void setSigned(bool s) { m_signed = s; }
+    bool isSigned() const;
+    void setSigned(bool s);
 
 private:
-    AbstractMetaEnumValueList m_enumValues;
-    EnumTypeEntry *m_typeEntry = nullptr;
-    Documentation m_doc;
-
-    EnumKind m_enumKind = CEnum;
-    uint m_hasQenumsDeclaration : 1;
-    uint m_signed : 1;
+    QSharedDataPointer<AbstractMetaEnumData> d;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug d, const AbstractMetaEnumValue &ae);
 QDebug operator<<(QDebug d, const AbstractMetaEnum *ae);
+QDebug operator<<(QDebug d, const AbstractMetaEnum &ae);
 #endif
 
 #endif // ABSTRACTMETAENUM_H

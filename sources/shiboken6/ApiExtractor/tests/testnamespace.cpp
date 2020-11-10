@@ -54,8 +54,8 @@ void NamespaceTest::testNamespaceMembers()
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass *ns = AbstractMetaClass::findClass(classes, QLatin1String("Namespace"));
     QVERIFY(ns);
-    const AbstractMetaEnum* metaEnum = ns->findEnum(QLatin1String("Option"));
-    QVERIFY(metaEnum);
+    auto metaEnum = ns->findEnum(QLatin1String("Option"));
+    QVERIFY(metaEnum.has_value());
     const AbstractMetaFunction* func = ns->findFunction(QLatin1String("foo"));
     QVERIFY(func);
 }

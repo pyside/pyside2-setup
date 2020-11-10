@@ -352,9 +352,9 @@ void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMet
     if (!typeEntry->generateCode())
         return;
     // enum indices are required for invisible namespaces as well.
-    for (const AbstractMetaEnum *metaEnum : metaClass->enums()) {
-        if (!metaEnum->isPrivate())
-            writeTypeIndexValueLine(s, metaEnum->typeEntry());
+    for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
+        if (!metaEnum.isPrivate())
+            writeTypeIndexValueLine(s, metaEnum.typeEntry());
     }
     if (NamespaceTypeEntry::isVisibleScope(typeEntry))
         writeTypeIndexValueLine(s, metaClass->typeEntry());
@@ -418,8 +418,8 @@ bool HeaderGenerator::finishGeneration()
     for (const AbstractMetaClass *metaClass : classList)
         writeTypeIndexValueLines(macrosStream, metaClass);
 
-    for (const AbstractMetaEnum *metaEnum : globalEnums())
-        writeTypeIndexValueLine(macrosStream, metaEnum->typeEntry());
+    for (const AbstractMetaEnum &metaEnum : globalEnums())
+        writeTypeIndexValueLine(macrosStream, metaEnum.typeEntry());
 
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
@@ -493,9 +493,9 @@ bool HeaderGenerator::finishGeneration()
         typeFunctions << "QT_WARNING_PUSH\n";
         typeFunctions << "QT_WARNING_DISABLE_DEPRECATED\n";
     }
-    for (const AbstractMetaEnum *cppEnum : globalEnums()) {
-        if (!cppEnum->isAnonymous()) {
-            includes << cppEnum->typeEntry()->include();
+    for (const AbstractMetaEnum &cppEnum : globalEnums()) {
+        if (!cppEnum.isAnonymous()) {
+            includes << cppEnum.typeEntry()->include();
             writeSbkTypeFunction(typeFunctions, cppEnum);
         }
     }
@@ -508,10 +508,10 @@ bool HeaderGenerator::finishGeneration()
         const TypeEntry *classType = metaClass->typeEntry();
         includes << classType->include();
 
-        for (const AbstractMetaEnum *cppEnum : metaClass->enums()) {
-            if (cppEnum->isAnonymous() || cppEnum->isPrivate())
+        for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
+            if (cppEnum.isAnonymous() || cppEnum.isPrivate())
                 continue;
-            EnumTypeEntry *enumType = cppEnum->typeEntry();
+            EnumTypeEntry *enumType = cppEnum.typeEntry();
             includes << enumType->include();
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);
             writeSbkTypeFunction(typeFunctions, cppEnum);
@@ -597,27 +597,22 @@ bool HeaderGenerator::finishGeneration()
     return file.done() != FileOut::Failure;
 }
 
-void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    if (avoidProtectedHack() && cppEnum->isProtected())
+    if (avoidProtectedHack() && cppEnum.isProtected())
         s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};\n";
 }
 
-void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum *cppEnum)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    QString enumName;
-    if (avoidProtectedHack() && cppEnum->isProtected()) {
-        enumName = protectedEnumSurrogateName(cppEnum);
-    } else {
-        enumName = cppEnum->name();
-        if (cppEnum->enclosingClass())
-            enumName = cppEnum->enclosingClass()->qualifiedCppName() + QLatin1String("::") + enumName;
-    }
+     const QString enumName = avoidProtectedHack() && cppEnum.isProtected()
+        ? protectedEnumSurrogateName(cppEnum)
+        : cppEnum.qualifiedCppName();
 
     s << "template<> inline PyTypeObject *SbkType< ::" << enumName << " >() ";
-    s << "{ return " << cpythonTypeNameExt(cppEnum->typeEntry()) << "; }\n";
+    s << "{ return " << cpythonTypeNameExt(cppEnum.typeEntry()) << "; }\n";
 
-    FlagsTypeEntry *flag = cppEnum->typeEntry()->flags();
+    FlagsTypeEntry *flag = cppEnum.typeEntry()->flags();
     if (flag) {
         s <<  "template<> inline PyTypeObject *SbkType< ::" << flag->name() << " >() "
           << "{ return " << cpythonTypeNameExt(flag) << "; }\n";

@@ -421,11 +421,11 @@ QString msgCannotFindDocumentation(const QString &fileName,
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,
-                                   const AbstractMetaEnum *e,
+                                   const AbstractMetaEnum &e,
                                    const QString &query)
 {
     return msgCannotFindDocumentation(fileName, "enum",
-                                      metaClass->name() + QLatin1String("::") + e->name(),
+                                      metaClass->name() + QLatin1String("::") + e.name(),
                                       query);
 }
 

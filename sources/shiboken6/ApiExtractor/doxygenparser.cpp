@@ -202,15 +202,15 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     //Enums
-    for (AbstractMetaEnum *meta_enum : metaClass->enums()) {
+    for (AbstractMetaEnum &meta_enum : metaClass->enums()) {
         QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef[@kind=\"enum\"]/name[text()=\"")
-            + meta_enum->name() + QLatin1String("\"]/..");
+            + meta_enum.name() + QLatin1String("\"]/..");
         QString doc = getDocumentation(xquery, query, DocModificationList());
         if (doc.isEmpty()) {
             qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, meta_enum, query)));
         }
-        meta_enum->setDocumentation(doc);
+        meta_enum.setDocumentation(doc);
     }
 
 }

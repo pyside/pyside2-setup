@@ -28,7 +28,6 @@
 
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
-#include "abstractmetaenum.h"
 #include "abstractmetafunction.h"
 #include "abstractmetafield.h"
 #include "modifications.h"
@@ -65,7 +64,6 @@ AbstractMetaClass::AbstractMetaClass()
 AbstractMetaClass::~AbstractMetaClass()
 {
     qDeleteAll(m_functions);
-    qDeleteAll(m_enums);
     qDeleteAll(m_propertySpecs);
 }
 
@@ -640,32 +638,37 @@ std::optional<AbstractMetaField>
     return AbstractMetaField::find(m_fields, name);
 }
 
-AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
+std::optional<AbstractMetaEnum>
+    AbstractMetaClass::findEnum(const QString &enumName) const
 {
-    if (AbstractMetaEnum *e = findByName(m_enums, enumName))
-        return e;
-    return nullptr;
+    for (const auto &e : m_enums) {
+        if (e.name() == enumName)
+            return e;
+    }
+    return {};
 }
 
 /*!  Recursively searches for the enum value named \a enumValueName in
   this class and its superclasses and interfaces.
 */
-AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const QString &enumValueName)
+std::optional<AbstractMetaEnumValue>
+    AbstractMetaClass::findEnumValue(const QString &enumValueName) const
 {
-    for (AbstractMetaEnum *e : qAsConst(m_enums)) {
-        if (AbstractMetaEnumValue *v = e->findEnumValue(enumValueName))
+    for (const AbstractMetaEnum &e : qAsConst(m_enums)) {
+        auto v = e.findEnumValue(enumValueName);
+        if (v.has_value())
             return v;
     }
     if (baseClass())
         return baseClass()->findEnumValue(enumValueName);
 
-    return nullptr;
+    return {};
 }
 
 void AbstractMetaClass::getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const
 {
-    for (AbstractMetaEnum *metaEnum : m_enums) {
-        if (!metaEnum->isPrivate() && metaEnum->typeEntry()->generateCode())
+    for (const AbstractMetaEnum &metaEnum : m_enums) {
+        if (!metaEnum.isPrivate() && metaEnum.typeEntry()->generateCode())
             enumList->append(metaEnum);
     }
 }
@@ -915,8 +918,9 @@ void AbstractMetaClass::fixFunctions()
  */
 
 
-AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &classes,
-                                              const EnumTypeEntry *entry)
+std::optional<AbstractMetaEnum>
+    AbstractMetaClass::findEnum(const AbstractMetaClassList &classes,
+                                const EnumTypeEntry *entry)
 {
     Q_ASSERT(entry->isEnum());
 
@@ -939,14 +943,15 @@ AbstractMetaEnum *AbstractMetaClass::findEnum(const AbstractMetaClassList &class
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
                               .arg(className, entry->qualifiedCppName());
-        return nullptr;
+        return {};
     }
 
     return metaClass->findEnum(enumName);
 }
 
-AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
-                                                        const QString &name)
+std::optional<AbstractMetaEnumValue>
+    AbstractMetaClass::findEnumValue(const AbstractMetaClassList &classes,
+                                     const QString &name)
 {
     const auto lst = QStringView{name}.split(u"::");
 
@@ -958,13 +963,14 @@ AbstractMetaEnumValue *AbstractMetaClass::findEnumValue(const AbstractMetaClassL
     }
 
     for (AbstractMetaClass *metaClass : classes) {
-        if (AbstractMetaEnumValue *enumValue = metaClass->findEnumValue(name))
+        auto enumValue = metaClass->findEnumValue(name);
+        if (enumValue.has_value())
             return enumValue;
     }
 
     qCWarning(lcShiboken).noquote().nospace()
         << QStringLiteral("no matching enum '%1'").arg(name);
-    return nullptr;
+    return {};
 }
 
 /*!

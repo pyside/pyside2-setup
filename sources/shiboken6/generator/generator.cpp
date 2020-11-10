@@ -382,12 +382,14 @@ ContainerTypeEntryList Generator::containerTypes() const
     return m_d->apiextractor->containerTypes();
 }
 
-const AbstractMetaEnum *Generator::findAbstractMetaEnum(const TypeEntry *typeEntry) const
+std::optional<AbstractMetaEnum>
+    Generator::findAbstractMetaEnum(const TypeEntry *typeEntry) const
 {
     return m_d->apiextractor->findAbstractMetaEnum(typeEntry);
 }
 
-const AbstractMetaEnum *Generator::findAbstractMetaEnum(const AbstractMetaType &metaType) const
+std::optional<AbstractMetaEnum>
+    Generator::findAbstractMetaEnum(const AbstractMetaType &metaType) const
 {
     return m_d->apiextractor->findAbstractMetaEnum(metaType.typeEntry());
 }
@@ -841,8 +843,8 @@ bool Generator::useEnumAsIntForProtectedHack(const AbstractMetaType &metaType) c
         return true;
     if (!metaType.isEnum())
         return false;
-    const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(metaType);
-    if (!metaEnum)
+    auto metaEnum = findAbstractMetaEnum(metaType);
+    if (!metaEnum.has_value())
         return true;
     if (metaEnum->attributes() & AbstractMetaAttributes::Public) // No reason, type is public
         return false;
@@ -945,9 +947,9 @@ QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includeP
     return getClassTargetFullName_(metaClass, includePackageName);
 }
 
-QString getClassTargetFullName(const AbstractMetaEnum *metaEnum, bool includePackageName)
+QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName)
 {
-    return getClassTargetFullName_(metaEnum, includePackageName);
+    return getClassTargetFullName_(&metaEnum, includePackageName);
 }
 
 QString getClassTargetFullName(const AbstractMetaType &metaType, bool includePackageName)

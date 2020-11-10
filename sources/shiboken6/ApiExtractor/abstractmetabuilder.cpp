@@ -73,7 +73,6 @@ AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
 
 AbstractMetaBuilderPrivate::~AbstractMetaBuilderPrivate()
 {
-    qDeleteAll(m_globalEnums);
     qDeleteAll(m_globalFunctions);
     qDeleteAll(m_templates);
     qDeleteAll(m_smartPointers);
@@ -115,11 +114,15 @@ const AbstractMetaEnumList &AbstractMetaBuilder::globalEnums() const
     return d->m_globalEnums;
 }
 
-AbstractMetaEnum *AbstractMetaBuilder::findEnum(const TypeEntry *typeEntry) const
+std::optional<AbstractMetaEnum>
+    AbstractMetaBuilder::findEnum(const TypeEntry *typeEntry) const
 {
     if (typeEntry && typeEntry->isFlags())
         typeEntry = static_cast<const FlagsTypeEntry *>(typeEntry)->originator();
-    return d->m_enums.value(typeEntry);
+    const auto it = d->m_enums.constFind(typeEntry);
+    if (it == d->m_enums.constEnd())
+        return {};
+    return it.value();
 }
 
 void AbstractMetaBuilderPrivate::checkFunctionModifications()
@@ -401,10 +404,10 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     ReportHandler::startProgress("Generating enum model ("
                                  + QByteArray::number(enums.size()) + ")...");
     for (const EnumModelItem &item : enums) {
-        AbstractMetaEnum *metaEnum = traverseEnum(item, nullptr, QSet<QString>());
-        if (metaEnum) {
+        auto metaEnum = traverseEnum(item, nullptr, QSet<QString>());
+        if (metaEnum.has_value()) {
             if (metaEnum->typeEntry()->generateCode())
-                m_globalEnums << metaEnum;
+                m_globalEnums << metaEnum.value();
         }
     }
 
@@ -529,7 +532,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
 
                 const bool enumFound = cls
-                    ? cls->findEnum(entry->targetLangEntryName()) != nullptr
+                    ? cls->findEnum(entry->targetLangEntryName()).has_value()
                     : m_enums.contains(entry);
 
                 if (!enumFound) {
@@ -629,8 +632,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     ReportHandler::endProgress();
 }
 
-static bool metaEnumLessThan(const AbstractMetaEnum *e1, const AbstractMetaEnum *e2)
-{ return e1->fullName() < e2->fullName(); }
+static bool metaEnumLessThan(const AbstractMetaEnum &e1, const AbstractMetaEnum &e2)
+{ return e1.fullName() < e2.fullName(); }
 
 static bool metaClassLessThan(const AbstractMetaClass *c1, const AbstractMetaClass *c2)
 { return c1->fullName() < c2->fullName(); }
@@ -768,9 +771,10 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseNamespace(const FileModel
     return metaClass;
 }
 
-AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
-                                                           AbstractMetaClass *enclosing,
-                                                           const QSet<QString> &enumsDeclarations)
+std::optional<AbstractMetaEnum>
+    AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
+                                             AbstractMetaClass *enclosing,
+                                             const QSet<QString> &enumsDeclarations)
 {
     QString qualifiedName = enumItem->qualifiedName().join(colonColon());
 
@@ -806,7 +810,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         if (typeEntry)
             typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
         m_rejectedEnums.insert(qualifiedName + rejectReason, AbstractMetaBuilder::GenerationDisabled);
-        return nullptr;
+        return {};
     }
 
     const bool rejectionWarning = !enclosing || enclosing->typeEntry()->generateCode();
@@ -815,7 +819,7 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         if (rejectionWarning)
             qCWarning(lcShiboken, "%s", qPrintable(msgNoEnumTypeEntry(enumItem, className)));
         m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::NotInTypeSystem);
-        return nullptr;
+        return {};
     }
 
     if (!typeEntry->isEnum()) {
@@ -824,28 +828,28 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
                       qPrintable(msgNoEnumTypeConflict(enumItem, className, typeEntry)));
         }
         m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::NotInTypeSystem);
-        return nullptr;
+        return {};
     }
 
-    auto *metaEnum = new AbstractMetaEnum;
-    metaEnum->setEnumKind(enumItem->enumKind());
-    metaEnum->setSigned(enumItem->isSigned());
+    AbstractMetaEnum metaEnum;
+    metaEnum.setEnumKind(enumItem->enumKind());
+    metaEnum.setSigned(enumItem->isSigned());
     if (enumsDeclarations.contains(qualifiedName)
         || enumsDeclarations.contains(enumName)) {
-        metaEnum->setHasQEnumsDeclaration(true);
+        metaEnum.setHasQEnumsDeclaration(true);
     }
 
     auto *enumTypeEntry = static_cast<EnumTypeEntry *>(typeEntry);
-    metaEnum->setTypeEntry(enumTypeEntry);
+    metaEnum.setTypeEntry(enumTypeEntry);
     switch (enumItem->accessPolicy()) {
     case CodeModel::Public:
-        *metaEnum += AbstractMetaAttributes::Public;
+        metaEnum += AbstractMetaAttributes::Public;
         break;
     case CodeModel::Protected:
-        *metaEnum += AbstractMetaAttributes::Protected;
+        metaEnum += AbstractMetaAttributes::Protected;
         break;
     case CodeModel::Private:
-        *metaEnum += AbstractMetaAttributes::Private;
+        metaEnum += AbstractMetaAttributes::Private;
         typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
         break;
     default:
@@ -855,21 +859,19 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
     const EnumeratorList &enums = enumItem->enumerators();
     for (const EnumeratorModelItem &value : enums) {
 
-        auto *metaEnumValue = new AbstractMetaEnumValue;
-        metaEnumValue->setName(value->name());
+        AbstractMetaEnumValue metaEnumValue;
+        metaEnumValue.setName(value->name());
         // Deciding the enum value...
 
-        metaEnumValue->setStringValue(value->stringValue());
-        metaEnumValue->setValue(value->value());
-        metaEnum->addEnumValue(metaEnumValue);
+        metaEnumValue.setStringValue(value->stringValue());
+        metaEnumValue.setValue(value->value());
+        metaEnum.addEnumValue(metaEnumValue);
     }
 
-    m_enums.insert(typeEntry, metaEnum);
+    if (!metaEnum.typeEntry()->include().isValid())
+        setInclude(metaEnum.typeEntry(), enumItem->fileName());
 
-    if (!metaEnum->typeEntry()->include().isValid())
-        setInclude(metaEnum->typeEntry(), enumItem->fileName());
-
-    metaEnum->setOriginalAttributes(metaEnum->attributes());
+    metaEnum.setOriginalAttributes(metaEnum.attributes());
 
     // Register all enum values on Type database
     const bool isScopedEnum = enumItem->enumKind() == EnumClass;
@@ -883,6 +885,9 @@ AbstractMetaEnum *AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &
         if (e->value().isNullValue())
             enumTypeEntry->setNullValue(enumValue);
     }
+
+    metaEnum.setEnclosingClass(enclosing);
+    m_enums.insert(typeEntry, metaEnum);
 
     return metaEnum;
 }
@@ -1448,10 +1453,9 @@ void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
     const EnumList &enums = scopeItem->enums();
     const QSet<QString> enumsDeclarationSet(enumsDeclarations.cbegin(), enumsDeclarations.cend());
     for (const EnumModelItem &enumItem : enums) {
-        AbstractMetaEnum* metaEnum = traverseEnum(enumItem, metaClass, enumsDeclarationSet);
-        if (metaEnum) {
-            metaClass->addEnum(metaEnum);
-            metaEnum->setEnclosingClass(metaClass);
+        auto metaEnum = traverseEnum(enumItem, metaClass, enumsDeclarationSet);
+        if (metaEnum.has_value()) {
+            metaClass->addEnum(metaEnum.value());
         }
     }
 }
@@ -2321,14 +2325,15 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
         return 0;
     }
 
-    AbstractMetaEnumValue *enumValue = AbstractMetaClass::findEnumValue(m_metaClasses, stringValue);
-    if (enumValue) {
+    auto enumValue = AbstractMetaClass::findEnumValue(m_metaClasses, stringValue);
+    if (enumValue.has_value()) {
         ok = true;
         return enumValue->value().value();
     }
 
-    for (AbstractMetaEnum *metaEnum : qAsConst(m_globalEnums)) {
-        if (const AbstractMetaEnumValue *ev = metaEnum->findEnumValue(stringValue)) {
+    for (const AbstractMetaEnum &metaEnum : qAsConst(m_globalEnums)) {
+        auto ev = metaEnum.findEnumValue(stringValue);
+        if (ev.has_value()) {
             ok = true;
             return ev->value().value();
         }

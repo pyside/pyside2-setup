@@ -113,15 +113,15 @@ static QString resolveScopePrefix(const AbstractMetaClass *scope, const QString 
         : QString();
 }
 
-static QString resolveScopePrefix(const AbstractMetaEnum *metaEnum,
+static QString resolveScopePrefix(const AbstractMetaEnum &metaEnum,
                                   const QString &value)
 {
     QStringList parts;
-    if (const AbstractMetaClass *scope = metaEnum->enclosingClass())
+    if (const AbstractMetaClass *scope = metaEnum.enclosingClass())
         parts.append(splitClassScope(scope));
     // Fully qualify the value which is required for C++ 11 enum classes.
-    if (!metaEnum->isAnonymous())
-        parts.append(metaEnum->name());
+    if (!metaEnum.isAnonymous())
+        parts.append(metaEnum.name());
     return resolveScopePrefix(parts, value);
 }
 
@@ -294,9 +294,9 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType 
         return translateTypeForWrapperMethod(*cType.arrayElementType(), context, options) + QLatin1String("[]");
 
     if (avoidProtectedHack() && cType.isEnum()) {
-        const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(cType);
+        auto metaEnum = findAbstractMetaEnum(cType);
         if (metaEnum && metaEnum->isProtected())
-            return protectedEnumSurrogateName(metaEnum);
+            return protectedEnumSurrogateName(metaEnum.value());
     }
 
     return translateType(cType, context, options);
@@ -387,9 +387,12 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunction *fu
     return funcName;
 }
 
-QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum *metaEnum)
+QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum &metaEnum)
 {
-    return metaEnum->fullName().replace(QLatin1Char('.'), QLatin1Char('_')).replace(QLatin1String("::"), QLatin1String("_")) + QLatin1String("_Surrogate");
+    QString result = metaEnum.fullName();
+    result.replace(QLatin1Char('.'), QLatin1Char('_'));
+    result.replace(QLatin1String("::"), QLatin1String("_"));
+    return result + QLatin1String("_Surrogate");
 }
 
 QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField &field)
@@ -496,9 +499,9 @@ static QString searchForEnumScope(const AbstractMetaClass *metaClass, const QStr
 {
     if (!metaClass)
         return QString();
-    const AbstractMetaEnumList &enums = metaClass->enums();
-    for (const AbstractMetaEnum *metaEnum : enums) {
-        if (metaEnum->findEnumValue(value))
+    for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
+        auto v = metaEnum.findEnumValue(value);
+        if (v.has_value())
             return resolveScopePrefix(metaEnum, value);
     }
     // PYSIDE-331: We need to also search the base classes.
@@ -595,8 +598,9 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
 
     QString prefix;
     if (arg.type().isEnum()) {
-        if (const AbstractMetaEnum *metaEnum = findAbstractMetaEnum(arg.type()))
-            prefix = resolveScopePrefix(metaEnum, value);
+        auto metaEnum = findAbstractMetaEnum(arg.type());
+        if (metaEnum.has_value())
+            prefix = resolveScopePrefix(metaEnum.value(), value);
     } else if (arg.type().isFlags()) {
         value = guessScopeForDefaultFlagsValue(func, arg, value);
     } else if (arg.type().typeEntry()->isValue()) {
@@ -641,9 +645,9 @@ QString ShibokenGenerator::cpythonEnumName(const EnumTypeEntry *enumEntry)
     return cpythonEnumFlagsName(p, enumEntry->qualifiedCppName());
 }
 
-QString ShibokenGenerator::cpythonEnumName(const AbstractMetaEnum *metaEnum)
+QString ShibokenGenerator::cpythonEnumName(const AbstractMetaEnum &metaEnum)
 {
-    return cpythonEnumName(metaEnum->typeEntry());
+    return cpythonEnumName(metaEnum.typeEntry());
 }
 
 QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntry *flagsEntry)

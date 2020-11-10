@@ -289,16 +289,16 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 #endif
     // Enums
-    for (AbstractMetaEnum *meta_enum : metaClass->enums()) {
+    for (AbstractMetaEnum &meta_enum : metaClass->enums()) {
         query.clear();
         QTextStream(&query) << classQuery << "/enum[@name=\""
-            << meta_enum->name() << "\"]/description";
+            << meta_enum.name() << "\"]/description";
         doc.setValue(getDocumentation(xquery, query, DocModificationList()));
         if (doc.isEmpty()) {
             qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, query)));
         }
-        meta_enum->setDocumentation(doc);
+        meta_enum.setDocumentation(doc);
     }
 }
 

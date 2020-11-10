@@ -71,7 +71,7 @@ private:
     void writeMetaCast(QTextStream &s, const GeneratorContext &classContext);
 
     void writeEnumConverterFunctions(QTextStream &s, const TypeEntry *enumType);
-    void writeEnumConverterFunctions(QTextStream &s, const AbstractMetaEnum *metaEnum);
+    void writeEnumConverterFunctions(QTextStream &s, const AbstractMetaEnum &metaEnum);
     void writeConverterFunctions(QTextStream &s, const AbstractMetaClass *metaClass,
                                  const GeneratorContext &classContext);
     void writeCustomConverterFunctions(QTextStream &s, const CustomConversion *customConversion);
@@ -310,18 +310,18 @@ private:
     void writeRichCompareFunction(QTextStream &s, const GeneratorContext &context);
 
     void writeEnumsInitialization(QTextStream &s, AbstractMetaEnumList &enums);
-    void writeEnumInitialization(QTextStream &s, const AbstractMetaEnum *metaEnum);
+    void writeEnumInitialization(QTextStream &s, const AbstractMetaEnum &metaEnum);
 
     void writeSignalInitialization(QTextStream &s, const AbstractMetaClass *metaClass);
 
-    void writeFlagsMethods(QTextStream &s, const AbstractMetaEnum *cppEnum);
-    void writeFlagsToLong(QTextStream &s, const AbstractMetaEnum *cppEnum);
-    void writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum *cppEnum);
-    void writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum *cppEnum);
+    void writeFlagsMethods(QTextStream &s, const AbstractMetaEnum &cppEnum);
+    void writeFlagsToLong(QTextStream &s, const AbstractMetaEnum &cppEnum);
+    void writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum &cppEnum);
+    void writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum &cppEnum);
     void writeFlagsNumberMethodsDefinitions(QTextStream &s, const AbstractMetaEnumList &enums);
-    void writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
+    void writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum &cppEnum,
                                   const QString &pyOpName, const QString &cppOpName);
-    void writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnum *cppEnum,
+    void writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnum &cppEnum,
                                  const QString &pyOpName, const QString &cppOpName,
                                  bool boolResult = false);
 
@@ -332,7 +332,7 @@ private:
 
     void writePrimitiveConverterInitialization(QTextStream &s, const CustomConversion *customConversion);
     void writeEnumConverterInitialization(QTextStream &s, const TypeEntry *enumType);
-    void writeEnumConverterInitialization(QTextStream &s, const AbstractMetaEnum *metaEnum);
+    void writeEnumConverterInitialization(QTextStream &s, const AbstractMetaEnum &metaEnum);
     void writeContainerConverterInitialization(QTextStream &s, const AbstractMetaType &type);
     void writeSmartPointerConverterInitialization(QTextStream &s, const AbstractMetaType &ype);
     void writeExtendedConverterInitialization(QTextStream &s, const TypeEntry *externalType, const QVector<const AbstractMetaClass *>& conversions);

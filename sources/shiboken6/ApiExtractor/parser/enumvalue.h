@@ -54,6 +54,8 @@ public:
     void setValue(qint64 v);
     void setUnsignedValue(quint64 v);
 
+    bool equals(const EnumValue &rhs) const;
+
 private:
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug, const EnumValue &);
@@ -67,5 +69,10 @@ private:
     };
     Type m_type = Signed;
 };
+
+inline bool operator==(const EnumValue &e1, const EnumValue &e2)
+{ return e1.equals(e2); }
+inline bool operator!=(const EnumValue &e1, const EnumValue &e2)
+{ return !e1.equals(e2); }
 
 #endif // ENUMVALUE_H

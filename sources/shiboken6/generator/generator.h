@@ -38,6 +38,8 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QVector>
 
+#include <optional>
+
 class ApiExtractor;
 class AbstractMetaBuilder;
 class AbstractMetaFunction;
@@ -60,7 +62,7 @@ QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
 void verifyDirectoryFor(const QString &file);
 
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
-QString getClassTargetFullName(const AbstractMetaEnum *metaEnum, bool includePackageName = true);
+QString getClassTargetFullName(const AbstractMetaEnum &metaEnum, bool includePackageName = true);
 QString getClassTargetFullName(const AbstractMetaType &metaType, bool includePackageName = true);
 QString getFilteredCppSignatureString(QString signature);
 
@@ -300,10 +302,10 @@ protected:
     ContainerTypeEntryList containerTypes() const;
 
     /// Returns an AbstractMetaEnum for a given TypeEntry that is an EnumTypeEntry, or nullptr if not found.
-    const AbstractMetaEnum *findAbstractMetaEnum(const TypeEntry *typeEntry) const;
+    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry *typeEntry) const;
 
     /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or nullptr if not found.
-    const AbstractMetaEnum *findAbstractMetaEnum(const AbstractMetaType &metaType) const;
+    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const AbstractMetaType &metaType) const;
 
     virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
     GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,

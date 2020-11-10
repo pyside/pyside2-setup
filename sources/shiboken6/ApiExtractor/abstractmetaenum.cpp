@@ -27,80 +27,261 @@
 ****************************************************************************/
 
 #include "abstractmetaenum.h"
+#include "abstractmetalang.h"
+#include "documentation.h"
 #include "typesystem.h"
+#include "parser/enumvalue.h"
 
 #include <QtCore/QDebug>
 
-AbstractMetaEnum::AbstractMetaEnum() :
-    m_hasQenumsDeclaration(false), m_signed(true)
+class AbstractMetaEnumValueData : public QSharedData
+{
+public:
+    QString m_name;
+    QString m_stringValue;
+    EnumValue m_value;
+    Documentation m_doc;
+};
+
+AbstractMetaEnumValue::AbstractMetaEnumValue() :
+    d(new AbstractMetaEnumValueData)
 {
 }
 
-AbstractMetaEnum::~AbstractMetaEnum()
+AbstractMetaEnumValue::AbstractMetaEnumValue(const AbstractMetaEnumValue &) = default;
+AbstractMetaEnumValue &AbstractMetaEnumValue::operator=(const AbstractMetaEnumValue &) = default;
+AbstractMetaEnumValue::AbstractMetaEnumValue(AbstractMetaEnumValue &&) = default;
+AbstractMetaEnumValue &AbstractMetaEnumValue::operator=(AbstractMetaEnumValue &&) = default;
+AbstractMetaEnumValue::~AbstractMetaEnumValue() = default;
+
+EnumValue AbstractMetaEnumValue::value() const
 {
-    qDeleteAll(m_enumValues);
+    return d->m_value;
 }
 
-template <class String>
-AbstractMetaEnumValue *findMatchingEnumValue(const AbstractMetaEnumValueList &list, const String &value)
+void AbstractMetaEnumValue::setValue(EnumValue value)
 {
-    for (AbstractMetaEnumValue *enumValue : list) {
-        if (enumValue->name() == value)
+    if (d->m_value != value)
+        d->m_value = value;
+}
+
+QString AbstractMetaEnumValue::stringValue() const
+{
+    return d->m_stringValue;
+}
+
+void AbstractMetaEnumValue::setStringValue(const QString &v)
+{
+    if (d->m_stringValue != v)
+        d->m_stringValue = v;
+}
+
+QString AbstractMetaEnumValue::name() const
+{
+    return d->m_name;
+}
+
+void AbstractMetaEnumValue::setName(const QString &name)
+{
+    if (d->m_name != name)
+        d->m_name = name;
+}
+
+Documentation AbstractMetaEnumValue::documentation() const
+{
+    return d->m_doc;
+}
+
+void AbstractMetaEnumValue::setDocumentation(const Documentation &doc)
+{
+    if (d->m_doc != doc)
+        d->m_doc = doc;
+}
+
+// --------------------- AbstractMetaEnum
+
+class AbstractMetaEnumData : public QSharedData
+{
+public:
+    AbstractMetaEnumData()  : m_hasQenumsDeclaration(false), m_signed(true)
+    {
+    }
+
+    AbstractMetaEnumValueList m_enumValues;
+
+    EnumTypeEntry *m_typeEntry = nullptr;
+    Documentation m_doc;
+
+    EnumKind m_enumKind = CEnum;
+    uint m_hasQenumsDeclaration : 1;
+    uint m_signed : 1;
+};
+
+AbstractMetaEnum::AbstractMetaEnum() : d(new AbstractMetaEnumData)
+{
+}
+
+AbstractMetaEnum::AbstractMetaEnum(const AbstractMetaEnum &) = default;
+AbstractMetaEnum &AbstractMetaEnum::operator=(const AbstractMetaEnum&) = default;
+AbstractMetaEnum::AbstractMetaEnum(AbstractMetaEnum &&) = default;
+AbstractMetaEnum &AbstractMetaEnum::operator=(AbstractMetaEnum &&) = default;
+AbstractMetaEnum::~AbstractMetaEnum() = default;
+
+const AbstractMetaEnumValueList &AbstractMetaEnum::values() const
+{
+    return d->m_enumValues;
+}
+
+void AbstractMetaEnum::addEnumValue(const AbstractMetaEnumValue &enumValue)
+{
+    d->m_enumValues << enumValue;
+}
+
+std::optional<AbstractMetaEnumValue>
+    findMatchingEnumValue(const AbstractMetaEnumValueList &list, QStringView value)
+{
+    for (const AbstractMetaEnumValue &enumValue : list) {
+        if (enumValue.name() == value)
             return enumValue;
     }
-    return nullptr;
+    return {};
 }
 
 // Find enum values for "enum Enum { e1 }" either for "e1" or "Enum::e1"
-AbstractMetaEnumValue *AbstractMetaEnum::findEnumValue(const QString &value) const
+std::optional<AbstractMetaEnumValue>
+    AbstractMetaEnum::findEnumValue(QStringView value) const
 {
     if (isAnonymous())
-        return findMatchingEnumValue(m_enumValues, value);
+        return findMatchingEnumValue(d->m_enumValues, value);
     const int sepPos = value.indexOf(QLatin1String("::"));
     if (sepPos == -1)
-        return findMatchingEnumValue(m_enumValues, value);
-    return name() == QStringView{value}.left(sepPos)
-        ? findMatchingEnumValue(m_enumValues, QStringView{value}.right(value.size() - sepPos - 2))
-        : nullptr;
+        return findMatchingEnumValue(d->m_enumValues, value);
+    if (name() == value.left(sepPos))
+        return findMatchingEnumValue(d->m_enumValues, value.right(value.size() - sepPos - 2));
+    return {};
 }
 
 QString AbstractMetaEnum::name() const
 {
-    return m_typeEntry->targetLangEntryName();
+    return d->m_typeEntry->targetLangEntryName();
+}
+
+QString AbstractMetaEnum::qualifiedCppName() const
+{
+    return enclosingClass()
+        ? enclosingClass()->qualifiedCppName() + QLatin1String("::") + name()
+        : name();
+}
+
+const Documentation &AbstractMetaEnum::documentation() const
+{
+    return d->m_doc;
+}
+
+void AbstractMetaEnum::setDocumentation(const Documentation &doc)
+{
+    if (d->m_doc != doc)
+        d->m_doc = doc;
 }
 
 QString AbstractMetaEnum::qualifier() const
 {
-    return m_typeEntry->targetLangQualifier();
+    return d->m_typeEntry->targetLangQualifier();
 }
 
 QString AbstractMetaEnum::package() const
 {
-    return m_typeEntry->targetLangPackage();
+    return d->m_typeEntry->targetLangPackage();
+}
+
+QString AbstractMetaEnum::fullName() const
+{
+    return package() + QLatin1Char('.') + qualifier()  + QLatin1Char('.') + name();
+}
+
+EnumKind AbstractMetaEnum::enumKind() const
+{
+    return d->m_enumKind;
+}
+
+void AbstractMetaEnum::setEnumKind(EnumKind kind)
+{
+    if (d->m_enumKind != kind)
+        d->m_enumKind = kind;
+}
+
+bool AbstractMetaEnum::isAnonymous() const
+{
+    return d->m_enumKind == AnonymousEnum;
+}
+
+bool AbstractMetaEnum::hasQEnumsDeclaration() const
+{
+    return d->m_hasQenumsDeclaration;
+}
+
+void AbstractMetaEnum::setHasQEnumsDeclaration(bool on)
+{
+    if (d->m_hasQenumsDeclaration != on)
+        d->m_hasQenumsDeclaration = on;
+}
+
+EnumTypeEntry *AbstractMetaEnum::typeEntry() const
+{
+    return d->m_typeEntry;
+}
+
+void AbstractMetaEnum::setTypeEntry(EnumTypeEntry *entry)
+{
+    if (d->m_typeEntry != entry)
+        d->m_typeEntry = entry;
+}
+
+bool AbstractMetaEnum::isSigned() const
+{
+    return d->m_signed;
+}
+
+void AbstractMetaEnum::setSigned(bool s)
+{
+    if (d->m_signed != s)
+        d->m_signed = s;
 }
 
 #ifndef QT_NO_DEBUG_STREAM
 
-static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue *v)
+static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v)
 {
-    const QString &name = v->stringValue();
+    const QString &name = v.stringValue();
     if (!name.isEmpty())
         d << name << '=';
-    d << v->value();
+    d << v.value();
 }
 
-QDebug operator<<(QDebug d, const AbstractMetaEnumValue *v)
+QDebug operator<<(QDebug d, const AbstractMetaEnumValue &v)
 {
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
     d << "AbstractMetaEnumValue(";
-    if (v)
-        formatMetaEnumValue(d, v);
-    else
-        d << '0';
+    formatMetaEnumValue(d, v);
     d << ')';
     return d;
+}
+
+static void formatMetaEnum(QDebug &d, const AbstractMetaEnum &e)
+{
+    d << e.fullName();
+    if (!e.isSigned())
+        d << " (unsigned) ";
+    d << '[';
+    const AbstractMetaEnumValueList &values = e.values();
+    for (int i = 0, count = values.size(); i < count; ++i) {
+        if (i)
+            d << ' ';
+        formatMetaEnumValue(d, values.at(i));
+    }
+    d << ']';
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaEnum *ae)
@@ -109,21 +290,21 @@ QDebug operator<<(QDebug d, const AbstractMetaEnum *ae)
     d.noquote();
     d.nospace();
     d << "AbstractMetaEnum(";
-    if (ae) {
-        d << ae->fullName();
-        if (!ae->isSigned())
-            d << " (unsigned) ";
-        d << '[';
-        const AbstractMetaEnumValueList &values = ae->values();
-        for (int i = 0, count = values.size(); i < count; ++i) {
-            if (i)
-                d << ' ';
-            formatMetaEnumValue(d, values.at(i));
-        }
-        d << ']';
-    } else {
+    if (ae)
+         formatMetaEnum(d, *ae);
+    else
         d << '0';
-    }
+    d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaEnum &ae)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaEnum(";
+    formatMetaEnum(d, ae);
     d << ')';
     return d;
 }

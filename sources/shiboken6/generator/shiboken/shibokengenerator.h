@@ -239,7 +239,7 @@ protected:
 
     bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
 
-    static QString protectedEnumSurrogateName(const AbstractMetaEnum *metaEnum);
+    static QString protectedEnumSurrogateName(const AbstractMetaEnum &metaEnum);
     static QString protectedFieldGetterName(const AbstractMetaField &field);
     static QString protectedFieldSetterName(const AbstractMetaField &field);
 
@@ -362,7 +362,7 @@ protected:
                                            const QString &value) const;
 
     static QString cpythonEnumName(const EnumTypeEntry *enumEntry);
-    static QString cpythonEnumName(const AbstractMetaEnum *metaEnum);
+    static QString cpythonEnumName(const AbstractMetaEnum &metaEnum);
 
     static QString cpythonFlagsName(const FlagsTypeEntry *flagsEntry);
     static QString cpythonFlagsName(const AbstractMetaEnum *metaEnum);

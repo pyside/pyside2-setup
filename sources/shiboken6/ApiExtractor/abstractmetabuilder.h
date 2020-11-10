@@ -37,6 +37,8 @@
 
 #include <QFileInfoList>
 
+#include <optional>
+
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 class AbstractMetaBuilderPrivate;
@@ -68,7 +70,7 @@ public:
     const AbstractMetaClassList &smartPointers() const;
     const AbstractMetaFunctionList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
-    AbstractMetaEnum *findEnum(const TypeEntry *typeEntry) const;
+    std::optional<AbstractMetaEnum> findEnum(const TypeEntry *typeEntry) const;
 
     /**
     *   Sorts a list of classes topologically.

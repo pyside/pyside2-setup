@@ -38,6 +38,8 @@
 #include <QFileInfoList>
 #include <QStringList>
 
+#include <optional>
+
 class AbstractMetaBuilder;
 class AbstractMetaClass;
 class AbstractMetaEnum;
@@ -88,7 +90,7 @@ public:
     PrimitiveTypeEntryList primitiveTypes() const;
     ContainerTypeEntryList containerTypes() const;
 
-    const AbstractMetaEnum* findAbstractMetaEnum(const TypeEntry* typeEntry) const;
+    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
 
     int classCount() const;
 

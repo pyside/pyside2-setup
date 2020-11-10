@@ -59,11 +59,13 @@ void TestTypeRevision::testRevisionAttr()
     AbstractMetaClass *rev2 = AbstractMetaClass::findClass(classes, QLatin1String("Rev_2"));
     QCOMPARE(rev2->typeEntry()->revision(), 2);
 
-    AbstractMetaEnum* rev3 = rev2->findEnum(QLatin1String("Rev_3"));
+    auto rev3 = rev2->findEnum(QLatin1String("Rev_3"));
+    QVERIFY(rev3.has_value());
     QCOMPARE(rev3->typeEntry()->revision(), 3);
     FlagsTypeEntry* rev4 = rev3->typeEntry()->flags();
     QCOMPARE(rev4->revision(), 4);
-    AbstractMetaEnum* rev5 = rev2->findEnum(QLatin1String("Rev_5"));
+    auto rev5 = rev2->findEnum(QLatin1String("Rev_5"));
+    QVERIFY(rev5.has_value());
     const EnumTypeEntry *revEnumTypeEntry = rev5->typeEntry();
     QCOMPARE(revEnumTypeEntry->revision(), 5);
     QCOMPARE(revEnumTypeEntry->flags()->revision(), 5);

@@ -31,6 +31,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaattributes.h"
+#include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "enclosingclassmixin.h"
 #include "documentation.h"
@@ -170,11 +171,12 @@ public:
     std::optional<AbstractMetaField> findField(const QString &name) const;
 
     const AbstractMetaEnumList &enums() const { return m_enums; }
+    AbstractMetaEnumList &enums() { return m_enums; }
     void setEnums(const AbstractMetaEnumList &enums) { m_enums = enums; }
-    void addEnum(AbstractMetaEnum *e) { m_enums << e; }
+    void addEnum(const AbstractMetaEnum &e) { m_enums << e; }
 
-    AbstractMetaEnum *findEnum(const QString &enumName);
-    AbstractMetaEnumValue *findEnumValue(const QString &enumName);
+    std::optional<AbstractMetaEnum> findEnum(const QString &enumName) const;
+    std::optional<AbstractMetaEnumValue> findEnumValue(const QString &enumName) const;
     void getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const;
     void getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const;
 
@@ -338,10 +340,10 @@ public:
                                         const QString &name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const TypeEntry* typeEntry);
-    static AbstractMetaEnumValue *findEnumValue(const AbstractMetaClassList &classes,
-                                                const QString &string);
-    static AbstractMetaEnum *findEnum(const AbstractMetaClassList &classes,
-                                      const EnumTypeEntry *entry);
+    static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,
+                                                              const QString &string);
+    static  std::optional<AbstractMetaEnum> findEnum(const AbstractMetaClassList &classes,
+                                                     const EnumTypeEntry *entry);
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);

@@ -33,6 +33,7 @@
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+#include <parser/enumvalue.h>
 
 void TestEnum::testEnumCppSignature()
 {
@@ -60,7 +61,7 @@ void TestEnum::testEnumCppSignature()
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.count(), 1);
-    QCOMPARE(globalEnums.constFirst()->name(), QLatin1String("GlobalEnum"));
+    QCOMPARE(globalEnums.constFirst().name(), QLatin1String("GlobalEnum"));
 
     // enum as parameter of a function
     AbstractMetaFunctionList functions = builder->globalFunctions();
@@ -85,11 +86,12 @@ void TestEnum::testEnumCppSignature()
     QCOMPARE(arg.type().cppSignature(), QLatin1String("A::ClassEnum"));
 
     AbstractMetaEnumList classEnums = classA->enums();
-    QCOMPARE(classEnums.constFirst()->name(), QLatin1String("ClassEnum"));
-    AbstractMetaEnumValue *e = AbstractMetaClass::findEnumValue(classes, QLatin1String("CA"));
-    QVERIFY(e);
+    QVERIFY(!classEnums.isEmpty());
+    QCOMPARE(classEnums.constFirst().name(), QLatin1String("ClassEnum"));
+    auto e = AbstractMetaClass::findEnumValue(classes, QLatin1String("CA"));
+    QVERIFY(e.has_value());
     e = AbstractMetaClass::findEnumValue(classes, QLatin1String("ClassEnum::CA"));
-    QVERIFY(e);
+    QVERIFY(e.has_value());
 }
 
 void TestEnum::testEnumWithApiVersion()
@@ -139,43 +141,43 @@ void TestEnum::testAnonymousEnum()
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.count(), 1);
-    QCOMPARE(globalEnums.constFirst()->typeEntry()->qualifiedCppName(),
+    QCOMPARE(globalEnums.constFirst().typeEntry()->qualifiedCppName(),
              QLatin1String("Global0"));
-    QVERIFY(globalEnums.constFirst()->isAnonymous());
+    QVERIFY(globalEnums.constFirst().isAnonymous());
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.count(), 1);
     QCOMPARE(classes[0]->enums().count(), 2);
 
-    AbstractMetaEnum* anonEnumA1 = classes[0]->findEnum(QLatin1String("A1"));
-    QVERIFY(anonEnumA1);
+    auto anonEnumA1 = classes[0]->findEnum(QLatin1String("A1"));
+    QVERIFY(anonEnumA1.has_value());
     QVERIFY(anonEnumA1->isAnonymous());
     QCOMPARE(anonEnumA1->typeEntry()->qualifiedCppName(), QLatin1String("A::A1"));
 
-    AbstractMetaEnumValue* enumValueA0 = anonEnumA1->values().constFirst();
-    QCOMPARE(enumValueA0->name(), QLatin1String("A0"));
-    QCOMPARE(enumValueA0->value().value(), 0);
-    QCOMPARE(enumValueA0->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA0 = anonEnumA1->values().constFirst();
+    QCOMPARE(enumValueA0.name(), QLatin1String("A0"));
+    QCOMPARE(enumValueA0.value().value(), 0);
+    QCOMPARE(enumValueA0.stringValue(), QString());
 
-    AbstractMetaEnumValue *enumValueA1 = anonEnumA1->values().constLast();
-    QCOMPARE(enumValueA1->name(), QLatin1String("A1"));
-    QCOMPARE(enumValueA1->value().value(), 1);
-    QCOMPARE(enumValueA1->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA1 = anonEnumA1->values().constLast();
+    QCOMPARE(enumValueA1.name(), QLatin1String("A1"));
+    QCOMPARE(enumValueA1.value().value(), 1);
+    QCOMPARE(enumValueA1.stringValue(), QString());
 
-    AbstractMetaEnum* anonEnumIsThis = classes[0]->findEnum(QLatin1String("isThis"));
-    QVERIFY(anonEnumIsThis);
+    auto anonEnumIsThis = classes[0]->findEnum(QLatin1String("isThis"));
+    QVERIFY(anonEnumIsThis.has_value());
     QVERIFY(anonEnumIsThis->isAnonymous());
     QCOMPARE(anonEnumIsThis->typeEntry()->qualifiedCppName(), QLatin1String("A::isThis"));
 
-    AbstractMetaEnumValue* enumValueIsThis = anonEnumIsThis->values().constFirst();
-    QCOMPARE(enumValueIsThis->name(), QLatin1String("isThis"));
-    QCOMPARE(enumValueIsThis->value().value(), static_cast<int>(true));
-    QCOMPARE(enumValueIsThis->stringValue(), QLatin1String("true"));
+    AbstractMetaEnumValue enumValueIsThis = anonEnumIsThis->values().constFirst();
+    QCOMPARE(enumValueIsThis.name(), QLatin1String("isThis"));
+    QCOMPARE(enumValueIsThis.value().value(), static_cast<int>(true));
+    QCOMPARE(enumValueIsThis.stringValue(), QLatin1String("true"));
 
-    AbstractMetaEnumValue *enumValueIsThat = anonEnumIsThis->values().constLast();
-    QCOMPARE(enumValueIsThat->name(), QLatin1String("isThat"));
-    QCOMPARE(enumValueIsThat->value().value(), static_cast<int>(false));
-    QCOMPARE(enumValueIsThat->stringValue(), QLatin1String("false"));
+    AbstractMetaEnumValue enumValueIsThat = anonEnumIsThis->values().constLast();
+    QCOMPARE(enumValueIsThat.name(), QLatin1String("isThat"));
+    QCOMPARE(enumValueIsThat.value().value(), static_cast<int>(false));
+    QCOMPARE(enumValueIsThat.stringValue(), QLatin1String("false"));
 }
 
 void TestEnum::testGlobalEnums()
@@ -195,31 +197,31 @@ void TestEnum::testGlobalEnums()
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.count(), 2);
 
-    AbstractMetaEnum *enumA = globalEnums.constFirst();
-    QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QLatin1String("EnumA"));
+    AbstractMetaEnum enumA = globalEnums.constFirst();
+    QCOMPARE(enumA.typeEntry()->qualifiedCppName(), QLatin1String("EnumA"));
 
-    AbstractMetaEnumValue *enumValueA0 = enumA->values().constFirst();
-    QCOMPARE(enumValueA0->name(), QLatin1String("A0"));
-    QCOMPARE(enumValueA0->value().value(), 0);
-    QCOMPARE(enumValueA0->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA0 = enumA.values().constFirst();
+    QCOMPARE(enumValueA0.name(), QLatin1String("A0"));
+    QCOMPARE(enumValueA0.value().value(), 0);
+    QCOMPARE(enumValueA0.stringValue(), QString());
 
-    AbstractMetaEnumValue *enumValueA1 = enumA->values().constLast();
-    QCOMPARE(enumValueA1->name(), QLatin1String("A1"));
-    QCOMPARE(enumValueA1->value().value(), 1);
-    QCOMPARE(enumValueA1->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA1 = enumA.values().constLast();
+    QCOMPARE(enumValueA1.name(), QLatin1String("A1"));
+    QCOMPARE(enumValueA1.value().value(), 1);
+    QCOMPARE(enumValueA1.stringValue(), QString());
 
-    AbstractMetaEnum *enumB = globalEnums.constLast();
-    QCOMPARE(enumB->typeEntry()->qualifiedCppName(), QLatin1String("EnumB"));
+    AbstractMetaEnum enumB = globalEnums.constLast();
+    QCOMPARE(enumB.typeEntry()->qualifiedCppName(), QLatin1String("EnumB"));
 
-    AbstractMetaEnumValue* enumValueB0 = enumB->values().constFirst();
-    QCOMPARE(enumValueB0->name(), QLatin1String("B0"));
-    QCOMPARE(enumValueB0->value().value(), 2);
-    QCOMPARE(enumValueB0->stringValue(), QLatin1String("2"));
+    AbstractMetaEnumValue enumValueB0 = enumB.values().constFirst();
+    QCOMPARE(enumValueB0.name(), QLatin1String("B0"));
+    QCOMPARE(enumValueB0.value().value(), 2);
+    QCOMPARE(enumValueB0.stringValue(), QLatin1String("2"));
 
-    AbstractMetaEnumValue *enumValueB1 = enumB->values().constLast();
-    QCOMPARE(enumValueB1->name(), QLatin1String("B1"));
-    QCOMPARE(enumValueB1->value().value(), 4);
-    QCOMPARE(enumValueB1->stringValue(), QLatin1String("0x4"));
+    AbstractMetaEnumValue enumValueB1 = enumB.values().constLast();
+    QCOMPARE(enumValueB1.name(), QLatin1String("B1"));
+    QCOMPARE(enumValueB1.value().value(), 4);
+    QCOMPARE(enumValueB1.stringValue(), QLatin1String("0x4"));
 }
 
 void TestEnum::testEnumValueFromNeighbourEnum()
@@ -244,33 +246,33 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     QCOMPARE(classes.count(), 1);
     QCOMPARE(classes[0]->enums().count(), 2);
 
-    AbstractMetaEnum* enumA = classes[0]->findEnum(QLatin1String("EnumA"));
-    QVERIFY(enumA);
+    auto enumA = classes[0]->findEnum(QLatin1String("EnumA"));
+    QVERIFY(enumA.has_value());
     QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QLatin1String("A::EnumA"));
 
-    AbstractMetaEnumValue* enumValueA0 = enumA->values().constFirst();
-    QCOMPARE(enumValueA0->name(), QLatin1String("ValueA0"));
-    QCOMPARE(enumValueA0->value().value(), 0);
-    QCOMPARE(enumValueA0->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA0 = enumA->values().constFirst();
+    QCOMPARE(enumValueA0.name(), QLatin1String("ValueA0"));
+    QCOMPARE(enumValueA0.value().value(), 0);
+    QCOMPARE(enumValueA0.stringValue(), QString());
 
-    AbstractMetaEnumValue* enumValueA1 = enumA->values().constLast();
-    QCOMPARE(enumValueA1->name(), QLatin1String("ValueA1"));
-    QCOMPARE(enumValueA1->value().value(), 1);
-    QCOMPARE(enumValueA1->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA1 = enumA->values().constLast();
+    QCOMPARE(enumValueA1.name(), QLatin1String("ValueA1"));
+    QCOMPARE(enumValueA1.value().value(), 1);
+    QCOMPARE(enumValueA1.stringValue(), QString());
 
-    AbstractMetaEnum* enumB = classes[0]->findEnum(QLatin1String("EnumB"));
-    QVERIFY(enumB);
+    auto enumB = classes[0]->findEnum(QLatin1String("EnumB"));
+    QVERIFY(enumB.has_value());
     QCOMPARE(enumB->typeEntry()->qualifiedCppName(), QLatin1String("A::EnumB"));
 
-    AbstractMetaEnumValue *enumValueB0 = enumB->values().constFirst();
-    QCOMPARE(enumValueB0->name(), QLatin1String("ValueB0"));
-    QCOMPARE(enumValueB0->value().value(), 1);
-    QCOMPARE(enumValueB0->stringValue(), QLatin1String("A::ValueA1"));
+    AbstractMetaEnumValue enumValueB0 = enumB->values().constFirst();
+    QCOMPARE(enumValueB0.name(), QLatin1String("ValueB0"));
+    QCOMPARE(enumValueB0.value().value(), 1);
+    QCOMPARE(enumValueB0.stringValue(), QLatin1String("A::ValueA1"));
 
-    AbstractMetaEnumValue *enumValueB1 = enumB->values().constLast();
-    QCOMPARE(enumValueB1->name(), QLatin1String("ValueB1"));
-    QCOMPARE(enumValueB1->value().value(), 0);
-    QCOMPARE(enumValueB1->stringValue(), QLatin1String("ValueA0"));
+    AbstractMetaEnumValue enumValueB1 = enumB->values().constLast();
+    QCOMPARE(enumValueB1.name(), QLatin1String("ValueB1"));
+    QCOMPARE(enumValueB1.value().value(), 0);
+    QCOMPARE(enumValueB1.stringValue(), QLatin1String("ValueA0"));
 }
 
 void TestEnum::testEnumValueFromExpression()
@@ -305,60 +307,60 @@ void TestEnum::testEnumValueFromExpression()
     AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    AbstractMetaEnum* enumA = classA->findEnum(QLatin1String("EnumA"));
-    QVERIFY(enumA);
+    auto enumA = classA->findEnum(QLatin1String("EnumA"));
+    QVERIFY(enumA.has_value());
     QVERIFY(!enumA->isSigned());
     QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QLatin1String("A::EnumA"));
 
-    AbstractMetaEnumValue* valueA0 = enumA->values().at(0);
-    QCOMPARE(valueA0->name(), QLatin1String("ValueA0"));
-    QCOMPARE(valueA0->stringValue(), QLatin1String("3u"));
-    QCOMPARE(valueA0->value().unsignedValue(), 3u);
+    AbstractMetaEnumValue valueA0 = enumA->values().at(0);
+    QCOMPARE(valueA0.name(), QLatin1String("ValueA0"));
+    QCOMPARE(valueA0.stringValue(), QLatin1String("3u"));
+    QCOMPARE(valueA0.value().unsignedValue(), 3u);
 
-    AbstractMetaEnumValue* valueA1 = enumA->values().at(1);
-    QCOMPARE(valueA1->name(), QLatin1String("ValueA1"));
-    QCOMPARE(valueA1->stringValue(), QLatin1String("~3u"));
-    QCOMPARE(valueA1->value().unsignedValue(), ~3u);
+    AbstractMetaEnumValue valueA1 = enumA->values().at(1);
+    QCOMPARE(valueA1.name(), QLatin1String("ValueA1"));
+    QCOMPARE(valueA1.stringValue(), QLatin1String("~3u"));
+    QCOMPARE(valueA1.value().unsignedValue(), ~3u);
 
-    AbstractMetaEnumValue* valueA2 = enumA->values().at(2);
-    QCOMPARE(valueA2->name(), QLatin1String("ValueA2"));
-    QCOMPARE(valueA2->stringValue(), QLatin1String("0xffffffff"));
-    QCOMPARE(valueA2->value().unsignedValue(), 0xffffffffu);
+    AbstractMetaEnumValue valueA2 = enumA->values().at(2);
+    QCOMPARE(valueA2.name(), QLatin1String("ValueA2"));
+    QCOMPARE(valueA2.stringValue(), QLatin1String("0xffffffff"));
+    QCOMPARE(valueA2.value().unsignedValue(), 0xffffffffu);
 
-    AbstractMetaEnumValue* valueA3 = enumA->values().at(3);
-    QCOMPARE(valueA3->name(), QLatin1String("ValueA3"));
-    QCOMPARE(valueA3->stringValue(), QLatin1String("0xf0"));
-    QCOMPARE(valueA3->value().unsignedValue(), 0xf0u);
+    AbstractMetaEnumValue valueA3 = enumA->values().at(3);
+    QCOMPARE(valueA3.name(), QLatin1String("ValueA3"));
+    QCOMPARE(valueA3.stringValue(), QLatin1String("0xf0"));
+    QCOMPARE(valueA3.value().unsignedValue(), 0xf0u);
 
-    AbstractMetaEnumValue* valueA4 = enumA->values().at(4);
-    QCOMPARE(valueA4->name(), QLatin1String("ValueA4"));
-    QCOMPARE(valueA4->stringValue(), QLatin1String("8 |ValueA3"));
-    QCOMPARE(valueA4->value().unsignedValue(), 8|0xf0u);
+    AbstractMetaEnumValue valueA4 = enumA->values().at(4);
+    QCOMPARE(valueA4.name(), QLatin1String("ValueA4"));
+    QCOMPARE(valueA4.stringValue(), QLatin1String("8 |ValueA3"));
+    QCOMPARE(valueA4.value().unsignedValue(), 8|0xf0u);
 
-    AbstractMetaEnumValue* valueA5 = enumA->values().at(5);
-    QCOMPARE(valueA5->name(), QLatin1String("ValueA5"));
-    QCOMPARE(valueA5->stringValue(), QLatin1String("ValueA3|32"));
-    QCOMPARE(valueA5->value().unsignedValue(), 0xf0u|32);
+    AbstractMetaEnumValue valueA5 = enumA->values().at(5);
+    QCOMPARE(valueA5.name(), QLatin1String("ValueA5"));
+    QCOMPARE(valueA5.stringValue(), QLatin1String("ValueA3|32"));
+    QCOMPARE(valueA5.value().unsignedValue(), 0xf0u|32);
 
-    AbstractMetaEnumValue* valueA6 = enumA->values().at(6);
-    QCOMPARE(valueA6->name(), QLatin1String("ValueA6"));
-    QCOMPARE(valueA6->stringValue(), QLatin1String("ValueA3 >> 1"));
-    QCOMPARE(valueA6->value().unsignedValue(), 0xf0u >> 1);
+    AbstractMetaEnumValue valueA6 = enumA->values().at(6);
+    QCOMPARE(valueA6.name(), QLatin1String("ValueA6"));
+    QCOMPARE(valueA6.stringValue(), QLatin1String("ValueA3 >> 1"));
+    QCOMPARE(valueA6.value().unsignedValue(), 0xf0u >> 1);
 
-    AbstractMetaEnumValue* valueA7 = enumA->values().at(7);
-    QCOMPARE(valueA7->name(), QLatin1String("ValueA7"));
-    QCOMPARE(valueA7->stringValue(), QLatin1String("ValueA3 << 1"));
-    QCOMPARE(valueA7->value().unsignedValue(), 0xf0u << 1);
+    AbstractMetaEnumValue valueA7 = enumA->values().at(7);
+    QCOMPARE(valueA7.name(), QLatin1String("ValueA7"));
+    QCOMPARE(valueA7.stringValue(), QLatin1String("ValueA3 << 1"));
+    QCOMPARE(valueA7.value().unsignedValue(), 0xf0u << 1);
 
-   const AbstractMetaEnum *enumB = classA->findEnum(QLatin1String("EnumB"));
-   QVERIFY(enumB);
+   const auto enumB = classA->findEnum(QLatin1String("EnumB"));
+   QVERIFY(enumB.has_value());
    QVERIFY(enumB->isSigned());
    QCOMPARE(enumB->typeEntry()->qualifiedCppName(), QLatin1String("A::EnumB"));
    QCOMPARE(enumB->values().size(), 1);
-   const AbstractMetaEnumValue *valueB0 = enumB->values().at(0);
-   QCOMPARE(valueB0->name(), QLatin1String("ValueB0"));
-   QCOMPARE(valueB0->stringValue(), QLatin1String("~3"));
-   QCOMPARE(valueB0->value().value(), ~3);
+   const AbstractMetaEnumValue valueB0 = enumB->values().at(0);
+   QCOMPARE(valueB0.name(), QLatin1String("ValueB0"));
+   QCOMPARE(valueB0.stringValue(), QLatin1String("~3"));
+   QCOMPARE(valueB0.value().value(), ~3);
 }
 
 void TestEnum::testPrivateEnum()
@@ -384,24 +386,24 @@ void TestEnum::testPrivateEnum()
     QVERIFY(classA);
     QCOMPARE(classA->enums().count(), 2);
 
-    AbstractMetaEnum* privateEnum = classA->findEnum(QLatin1String("PrivateEnum"));
-    QVERIFY(privateEnum);
+    auto privateEnum = classA->findEnum(QLatin1String("PrivateEnum"));
+    QVERIFY(privateEnum.has_value());
     QVERIFY(privateEnum->isPrivate());
     QCOMPARE(privateEnum->typeEntry()->qualifiedCppName(), QLatin1String("A::PrivateEnum"));
 
-    AbstractMetaEnum* publicEnum = classA->findEnum(QLatin1String("PublicEnum"));
-    QVERIFY(publicEnum);
+    auto publicEnum = classA->findEnum(QLatin1String("PublicEnum"));
+    QVERIFY(publicEnum.has_value());
     QCOMPARE(publicEnum->typeEntry()->qualifiedCppName(), QLatin1String("A::PublicEnum"));
 
-    AbstractMetaEnumValue *pub0 = publicEnum->values().constFirst();
-    QCOMPARE(pub0->name(), QLatin1String("Pub0"));
-    QCOMPARE(pub0->value().value(), 0x0f);
-    QCOMPARE(pub0->stringValue(), QLatin1String("Priv0"));
+    AbstractMetaEnumValue pub0 = publicEnum->values().constFirst();
+    QCOMPARE(pub0.name(), QLatin1String("Pub0"));
+    QCOMPARE(pub0.value().value(), 0x0f);
+    QCOMPARE(pub0.stringValue(), QLatin1String("Priv0"));
 
-    AbstractMetaEnumValue *pub1 = publicEnum->values().constLast();
-    QCOMPARE(pub1->name(), QLatin1String("Pub1"));
-    QCOMPARE(pub1->value().value(), 0xf0);
-    QCOMPARE(pub1->stringValue(), QLatin1String("A::Priv1"));
+    AbstractMetaEnumValue pub1 = publicEnum->values().constLast();
+    QCOMPARE(pub1.name(), QLatin1String("Pub1"));
+    QCOMPARE(pub1.value().value(), 0xf0);
+    QCOMPARE(pub1.stringValue(), QLatin1String("A::Priv1"));
 }
 
 void TestEnum::testTypedefEnum()
@@ -422,18 +424,18 @@ void TestEnum::testTypedefEnum()
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.count(), 1);
 
-    AbstractMetaEnum *enumA = globalEnums.constFirst();
-    QCOMPARE(enumA->typeEntry()->qualifiedCppName(), QLatin1String("EnumA"));
+    AbstractMetaEnum enumA = globalEnums.constFirst();
+    QCOMPARE(enumA.typeEntry()->qualifiedCppName(), QLatin1String("EnumA"));
 
-    AbstractMetaEnumValue *enumValueA0 = enumA->values().constFirst();
-    QCOMPARE(enumValueA0->name(), QLatin1String("A0"));
-    QCOMPARE(enumValueA0->value().value(), 0);
-    QCOMPARE(enumValueA0->stringValue(), QLatin1String(""));
+    AbstractMetaEnumValue enumValueA0 = enumA.values().constFirst();
+    QCOMPARE(enumValueA0.name(), QLatin1String("A0"));
+    QCOMPARE(enumValueA0.value().value(), 0);
+    QCOMPARE(enumValueA0.stringValue(), QLatin1String(""));
 
-    AbstractMetaEnumValue *enumValueA1 = enumA->values().constLast();
-    QCOMPARE(enumValueA1->name(), QLatin1String("A1"));
-    QCOMPARE(enumValueA1->value().value(), 1);
-    QCOMPARE(enumValueA1->stringValue(), QString());
+    AbstractMetaEnumValue enumValueA1 = enumA.values().constLast();
+    QCOMPARE(enumValueA1.name(), QLatin1String("A1"));
+    QCOMPARE(enumValueA1.value().value(), 1);
+    QCOMPARE(enumValueA1.stringValue(), QString());
 }
 
 QTEST_APPLESS_MAIN(TestEnum)

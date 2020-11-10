@@ -50,6 +50,13 @@ void EnumValue::setUnsignedValue(quint64 v)
     m_type = Unsigned;
 }
 
+bool EnumValue::equals(const EnumValue &rhs) const
+{
+    if (m_type != rhs.m_type)
+        return false;
+    return m_type == Signed ? m_value == rhs.m_value : m_unsignedValue == rhs.m_unsignedValue;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d,const EnumValue &v)
 {

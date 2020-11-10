@@ -92,8 +92,9 @@ public:
     bool setupInheritance(AbstractMetaClass *metaClass);
     AbstractMetaClass *traverseNamespace(const FileModelItem &dom,
                                          const NamespaceModelItem &item);
-    AbstractMetaEnum *traverseEnum(const EnumModelItem &item, AbstractMetaClass *enclosing,
-                                   const QSet<QString> &enumsDeclarations);
+    std::optional<AbstractMetaEnum> traverseEnum(const EnumModelItem &item,
+                                                 AbstractMetaClass *enclosing,
+                                                 const QSet<QString> &enumsDeclarations);
     void traverseEnums(const ScopeModelItem &item, AbstractMetaClass *parent,
                        const QStringList &enumsDeclarations);
     AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem,
@@ -204,7 +205,7 @@ public:
     RejectMap m_rejectedFunctions;
     RejectMap m_rejectedFields;
 
-    QHash<const TypeEntry *, AbstractMetaEnum *> m_enums;
+    QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
 
     QVector<NamespaceModelItem> m_scopes;
 

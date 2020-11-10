@@ -161,7 +161,8 @@ ContainerTypeEntryList ApiExtractor::containerTypes() const
     return TypeDatabase::instance()->containerTypes();
 }
 
-const AbstractMetaEnum* ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
+std::optional<AbstractMetaEnum>
+    ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
 {
     return m_builder->findEnum(typeEntry);
 }
