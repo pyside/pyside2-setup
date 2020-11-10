@@ -68,7 +68,6 @@ public:
     ~AbstractMetaClassPrivate()
     {
         qDeleteAll(m_functions);
-        qDeleteAll(m_propertySpecs);
     }
 
     uint m_hasVirtuals : 1;
@@ -97,7 +96,7 @@ public:
     AbstractMetaFunctionList m_functions;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
-    QVector<QPropertySpec *> m_propertySpecs;
+    QList<QPropertySpec> m_propertySpecs;
     AbstractMetaClassList m_innerClasses;
 
     AbstractMetaFunctionList m_externalConversionOperators;
@@ -349,12 +348,12 @@ void AbstractMetaClass::setHasCloneOperator(bool on)
     d->m_hasCloneOperator = on;
 }
 
-const QVector<QPropertySpec *> &AbstractMetaClass::propertySpecs() const
+const QList<QPropertySpec> &AbstractMetaClass::propertySpecs() const
 {
     return d->m_propertySpecs;
 }
 
-void AbstractMetaClass::addPropertySpec(QPropertySpec *spec)
+void AbstractMetaClass::addPropertySpec(const QPropertySpec &spec)
 {
     d->m_propertySpecs << spec;
 }
@@ -574,40 +573,30 @@ bool AbstractMetaClass::hasHashFunction() const
     return d->m_hasHashFunction;
 }
 
-QPropertySpec *AbstractMetaClass::propertySpecByName(const QString &name) const
+// Search whether a functions is a property setter/getter/reset
+AbstractMetaClass::PropertyFunctionSearchResult
+    AbstractMetaClass::searchPropertyFunction(const QString &name) const
 {
-    for (auto propertySpec : d->m_propertySpecs) {
-        if (name == propertySpec->name())
-            return propertySpec;
+    for (int i = 0, size = d->m_propertySpecs.size(); i < size; ++i) {
+        const auto &propertySpec = d->m_propertySpecs.at(i);
+        if (name == propertySpec.read())
+            return PropertyFunctionSearchResult{i, PropertyFunction::Read};
+        if (name == propertySpec.write())
+            return PropertyFunctionSearchResult{i, PropertyFunction::Write};
+        if (name == propertySpec.reset())
+            return PropertyFunctionSearchResult{i, PropertyFunction::Reset};
     }
-    return nullptr;
+    return PropertyFunctionSearchResult{-1, PropertyFunction::Read};
 }
 
-QPropertySpec *AbstractMetaClass::propertySpecForRead(const QString &name) const
+std::optional<QPropertySpec>
+    AbstractMetaClass::propertySpecByName(const QString &name) const
 {
     for (const auto &propertySpec : d->m_propertySpecs) {
-        if (name == propertySpec->read())
+        if (name == propertySpec.name())
             return propertySpec;
     }
-    return nullptr;
-}
-
-QPropertySpec *AbstractMetaClass::propertySpecForWrite(const QString &name) const
-{
-    for (const auto &propertySpec : d->m_propertySpecs) {
-        if (name == propertySpec->write())
-            return propertySpec;
-    }
-    return nullptr;
-}
-
-QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) const
-{
-    for (const auto &propertySpec : d->m_propertySpecs) {
-        if (name == propertySpec->reset())
-            return propertySpec;
-    }
-    return nullptr;
+    return {};
 }
 
 AbstractMetaFunctionList AbstractMetaClass::externalConversionOperators() const
@@ -1400,7 +1389,7 @@ void AbstractMetaClass::format(QDebug &debug) const
         for (int i = 0; i < count; ++i) {
             if (i)
                 debug << ", ";
-            d->m_propertySpecs.at(i)->formatDebug(debug);
+            d->m_propertySpecs.at(i).formatDebug(debug);
         }
         debug << ']';
     }

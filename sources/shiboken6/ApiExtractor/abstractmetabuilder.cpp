@@ -1272,28 +1272,37 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
         if (metaClass->isNamespace())
             *metaFunction += AbstractMetaAttributes::Static;
 
-        QPropertySpec *read = nullptr;
-        if (!metaFunction->isSignal() && (read = metaClass->propertySpecForRead(metaFunction->name()))) {
-            // Property reader must be in the form "<type> name()"
-            if (read->typeEntry() == metaFunction->type().typeEntry()
-                && metaFunction->arguments().isEmpty()) {
-                *metaFunction += AbstractMetaAttributes::PropertyReader;
-                metaFunction->setPropertySpec(read);
-            }
-        } else if (QPropertySpec *write = metaClass->propertySpecForWrite(metaFunction->name())) {
-            // Property setter must be in the form "void name(<type>)"
-            // Make sure the function was created with all arguments; some argument can be
-            // missing during the parsing because of errors in the typesystem.
-            if (metaFunction->isVoid() && metaFunction->arguments().size() == 1
-                && (write->typeEntry() == metaFunction->arguments().at(0).type().typeEntry())) {
-                *metaFunction += AbstractMetaAttributes::PropertyWriter;
-                metaFunction->setPropertySpec(write);
-            }
-        } else if (QPropertySpec *reset = metaClass->propertySpecForReset(metaFunction->name())) {
-            // Property resetter must be in the form "void name()"
-            if (metaFunction->isVoid() && metaFunction->arguments().isEmpty()) {
-                *metaFunction += AbstractMetaAttributes::PropertyResetter;
-                metaFunction->setPropertySpec(reset);
+        const auto propertyFunction = metaClass->searchPropertyFunction(metaFunction->name());
+        if (propertyFunction.index >= 0) {
+           QPropertySpec prop = metaClass->propertySpecs().at(propertyFunction.index);
+            switch (propertyFunction.function) {
+            case AbstractMetaClass::PropertyFunction::Read:
+                // Property reader must be in the form "<type> name()"
+                if (!metaFunction->isSignal()
+                    && prop.typeEntry() == metaFunction->type().typeEntry()
+                    && metaFunction->arguments().isEmpty()) {
+                    *metaFunction += AbstractMetaAttributes::PropertyReader;
+                    metaFunction->setPropertySpecIndex(propertyFunction.index);
+                }
+                break;
+            case AbstractMetaClass::PropertyFunction::Write:
+                // Property setter must be in the form "void name(<type>)"
+                // Make sure the function was created with all arguments; some
+                // argument can be missing during the parsing because of errors
+                // in the typesystem.
+                if (metaFunction->isVoid() && metaFunction->arguments().size() == 1
+                    && (prop.typeEntry() == metaFunction->arguments().at(0).type().typeEntry())) {
+                    *metaFunction += AbstractMetaAttributes::PropertyWriter;
+                    metaFunction->setPropertySpecIndex(propertyFunction.index);
+                }
+                break;
+            case AbstractMetaClass::PropertyFunction::Reset:
+                // Property resetter must be in the form "void name()"
+                if (metaFunction->isVoid() && metaFunction->arguments().isEmpty()) {
+                    *metaFunction += AbstractMetaAttributes::PropertyResetter;
+                    metaFunction->setPropertySpecIndex(propertyFunction.index);
+                }
+                break;
             }
         }
 
@@ -2743,9 +2752,10 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
     QString errorMessage;
     int i = 0;
     for (; i < declarations.size(); ++i) {
-        if (auto spec = QPropertySpec::parseQ_Property(this, metaClass, declarations.at(i), scopes, &errorMessage)) {
+        auto spec = QPropertySpec::parseQ_Property(this, metaClass, declarations.at(i), scopes, &errorMessage);
+        if (spec.has_value()) {
             spec->setIndex(i);
-            metaClass->addPropertySpec(spec);
+            metaClass->addPropertySpec(spec.value());
         } else {
             QString message;
             QTextStream str(&message);
@@ -2757,15 +2767,15 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
     // User-added properties
     auto typeEntry = metaClass->typeEntry();
     for (const TypeSystemProperty &tp : typeEntry->properties()) {
-        QPropertySpec *spec = nullptr;
+        std::optional<QPropertySpec> spec;
         if (metaClass->propertySpecByName(tp.name))
             errorMessage = msgPropertyExists(metaClass->name(), tp.name);
         else
             spec = QPropertySpec::fromTypeSystemProperty(this, metaClass, tp, scopes, &errorMessage);
 
-        if (spec) {
+        if (spec.has_value()) {
             spec->setIndex(i++);
-            metaClass->addPropertySpec(spec);
+            metaClass->addPropertySpec(spec.value());
         } else {
             QString message;
             QTextStream str(&message);

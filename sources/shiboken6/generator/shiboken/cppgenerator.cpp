@@ -310,20 +310,20 @@ static bool isStdSetterName(QString setterName, QString propertyName)
           && setterName.at(3) == propertyName.at(0).toUpper();
 }
 
-static QString buildPropertyString(QPropertySpec *spec)
+static QString buildPropertyString(const QPropertySpec &spec)
 {
     QString text;
     text += QLatin1Char('"');
-    text += spec->name();
+    text += spec.name();
     text += QLatin1Char(':');
 
-    if (spec->read() != spec->name())
-        text += spec->read();
+    if (spec.read() != spec.name())
+        text += spec.read();
 
-    if (!spec->write().isEmpty()) {
+    if (!spec.write().isEmpty()) {
         text += QLatin1Char(':');
-        if (!isStdSetterName(spec->write(), spec->name()))
-            text += spec->write();
+        if (!isStdSetterName(spec.write(), spec.name()))
+            text += spec.write();
     }
 
     text += QLatin1Char('"');
@@ -613,8 +613,8 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
         // PYSIDE-1019: Write a compressed list of all properties `name:getter[:setter]`.
         //              Default values are suppressed.
         QStringList sorter;
-        for (const auto spec : metaClass->propertySpecs()) {
-            if (!spec->generateGetSetDef())
+        for (const auto &spec : metaClass->propertySpecs()) {
+            if (!spec.generateGetSetDef())
                 sorter.append(buildPropertyString(spec));
         }
         sorter.sort();
@@ -714,10 +714,10 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
             s << Qt::endl;
         }
 
-        for (const QPropertySpec *property : metaClass->propertySpecs()) {
-            if (property->generateGetSetDef() || !usePySideExtensions()) {
+        for (const QPropertySpec &property : metaClass->propertySpecs()) {
+            if (property.generateGetSetDef() || !usePySideExtensions()) {
                 writeGetterFunction(s, property, classContext);
-                if (property->hasWrite())
+                if (property.hasWrite())
                     writeSetterFunction(s, property, classContext);
             }
         }
@@ -734,12 +734,12 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
             }
         }
 
-        for (const QPropertySpec *property : metaClass->propertySpecs()) {
-            if (property->generateGetSetDef() || !usePySideExtensions()) {
+        for (const QPropertySpec &property : metaClass->propertySpecs()) {
+            if (property.generateGetSetDef() || !usePySideExtensions()) {
                 s << INDENT;
-                const QString setter = property->hasWrite()
+                const QString setter = property.hasWrite()
                     ? cpythonSetterFunctionName(property, metaClass) : QString();
-                writePyGetSetDefEntry(s, property->name(),
+                writePyGetSetDefEntry(s, property.name(),
                                       cpythonGetterFunctionName(property, metaClass), setter);
             }
         }
@@ -4082,7 +4082,7 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass *metaClass)
     // in libpyside).
     return usePySideExtensions()
         ? std::any_of(metaClass->propertySpecs().cbegin(), metaClass->propertySpecs().cend(),
-                      [] (const QPropertySpec *s) { return s->generateGetSetDef(); })
+                      [] (const QPropertySpec &s) { return s.generateGetSetDef(); })
         : !metaClass->propertySpecs().isEmpty();
     return false;
 }
@@ -4605,16 +4605,16 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
 }
 
 // Write a getter for QPropertySpec
-void CppGenerator::writeGetterFunction(QTextStream &s, const QPropertySpec *property,
+void CppGenerator::writeGetterFunction(QTextStream &s, const QPropertySpec &property,
                                        const GeneratorContext &context)
 {
     ErrorCode errorCode(0);
     writeGetterFunctionStart(s, cpythonGetterFunctionName(property, context.metaClass()));
     writeCppSelfDefinition(s, context);
     const QString value = QStringLiteral("value");
-    s << INDENT << "auto " << value << " = " << CPP_SELF_VAR << "->" << property->read() << "();\n"
+    s << INDENT << "auto " << value << " = " << CPP_SELF_VAR << "->" << property.read() << "();\n"
         << INDENT << "auto pyResult = ";
-    writeToPythonConversion(s, property->type(), context.metaClass(), value);
+    writeToPythonConversion(s, property.type(), context.metaClass(), value);
     s << ";\n"
         << INDENT << "if (PyErr_Occurred() || !pyResult) {\n";
     {
@@ -4696,22 +4696,22 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
 }
 
 // Write a setter for QPropertySpec
-void CppGenerator::writeSetterFunction(QTextStream &s, const QPropertySpec *property,
+void CppGenerator::writeSetterFunction(QTextStream &s, const QPropertySpec &property,
                                        const GeneratorContext &context)
 {
     ErrorCode errorCode(0);
-    writeSetterFunctionPreamble(s, property->name(),
+    writeSetterFunctionPreamble(s, property.name(),
                                 cpythonSetterFunctionName(property, context.metaClass()),
-                                property->type(), context);
+                                property.type(), context);
 
-    s << INDENT << "auto cppOut = " << CPP_SELF_VAR << "->" << property->read() << "();\n"
+    s << INDENT << "auto cppOut = " << CPP_SELF_VAR << "->" << property.read() << "();\n"
         << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);\n"
         << INDENT << "if (PyErr_Occurred())\n";
     {
         Indentation indent(INDENT);
         s << INDENT << "return -1;\n";
     }
-    s << INDENT << CPP_SELF_VAR << "->" << property->write() << "(cppOut);\n"
+    s << INDENT << CPP_SELF_VAR << "->" << property.write() << "(cppOut);\n"
         << INDENT << "return 0;\n}\n\n";
 }
 

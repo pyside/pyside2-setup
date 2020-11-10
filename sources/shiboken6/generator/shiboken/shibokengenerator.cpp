@@ -474,16 +474,16 @@ QString ShibokenGenerator::cpythonSetterFunctionName(const AbstractMetaField &me
     return cpythonSetterFunctionName(metaField.name(), metaField.enclosingClass());
 }
 
-QString ShibokenGenerator::cpythonGetterFunctionName(const QPropertySpec *property,
+QString ShibokenGenerator::cpythonGetterFunctionName(const QPropertySpec &property,
                                                      const AbstractMetaClass *metaClass)
 {
-    return cpythonGetterFunctionName(property->name(), metaClass);
+    return cpythonGetterFunctionName(property.name(), metaClass);
 }
 
-QString ShibokenGenerator::cpythonSetterFunctionName(const QPropertySpec *property,
+QString ShibokenGenerator::cpythonSetterFunctionName(const QPropertySpec &property,
                                                      const AbstractMetaClass *metaClass)
 {
-    return cpythonSetterFunctionName(property->name(), metaClass);
+    return cpythonSetterFunctionName(property.name(), metaClass);
 }
 
 static QString cpythonEnumFlagsName(const QString &moduleName,

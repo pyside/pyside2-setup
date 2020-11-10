@@ -126,8 +126,9 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
         // properties
         if (func->isPropertyReader() || func->isPropertyWriter()
             || func->isPropertyResetter()) {
+            const auto prop = metaClass->propertySpecs().at(func->propertySpecIndex());
             query += QLatin1String("[@kind=\"property\"]/memberdef/name[text()=\"")
-                     + func->propertySpec()->name() + QLatin1String("\"]");
+                     + prop.name() + QLatin1String("\"]");
             isProperty = true;
         } else { // normal methods
             QString kind = getSectionKindAttr(func);

@@ -345,9 +345,9 @@ protected:
     static QString cpythonSetattroFunctionName(const AbstractMetaClass *metaClass);
     static QString cpythonGetterFunctionName(const AbstractMetaField &metaField);
     static QString cpythonSetterFunctionName(const AbstractMetaField &metaField);
-    static QString cpythonGetterFunctionName(const QPropertySpec *property,
+    static QString cpythonGetterFunctionName(const QPropertySpec &property,
                                              const AbstractMetaClass *metaClass);
-    static QString cpythonSetterFunctionName(const QPropertySpec *property,
+    static QString cpythonSetterFunctionName(const QPropertySpec &property,
                                              const AbstractMetaClass *metaClass);
     QString cpythonWrapperCPtr(const AbstractMetaClass *metaClass,
                                const QString &argName = QLatin1String("self")) const;

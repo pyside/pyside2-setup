@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -29,9 +29,12 @@
 #ifndef PROPERTYSPEC_H
 #define PROPERTYSPEC_H
 
-#include "abstractmetatype.h"
+class AbstractMetaType;
 
 #include <QtCore/QStringList>
+#include <QtCore/QSharedDataPointer>
+
+#include <optional>
 
 class AbstractMetaClass;
 class AbstractMetaBuilderPrivate;
@@ -40,75 +43,73 @@ class TypeEntry;
 
 struct TypeSystemProperty;
 
+class QPropertySpecData;
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class QPropertySpec
 {
 public:
-    Q_DISABLE_COPY_MOVE(QPropertySpec)
-
     explicit QPropertySpec(const TypeSystemProperty &ts,
                            const AbstractMetaType &type);
+    QPropertySpec(const QPropertySpec &);
+    QPropertySpec &operator=(const QPropertySpec &);
+    QPropertySpec(QPropertySpec &&);
+    QPropertySpec &operator=(QPropertySpec &&);
     ~QPropertySpec();
 
     static TypeSystemProperty typeSystemPropertyFromQ_Property(const QString &declarationIn,
                                                                QString *errorMessage);
 
-    static QPropertySpec *fromTypeSystemProperty(AbstractMetaBuilderPrivate *b,
-                                                 AbstractMetaClass *metaClass,
-                                                 const TypeSystemProperty &ts,
-                                                 const QStringList &scopes,
-                                                 QString *errorMessage);
 
-    static QPropertySpec *parseQ_Property(AbstractMetaBuilderPrivate *b,
-                                          AbstractMetaClass *metaClass,
-                                          const QString &declarationIn,
-                                          const QStringList &scopes,
-                                          QString *errorMessage);
+    static std::optional<QPropertySpec>
+        fromTypeSystemProperty(AbstractMetaBuilderPrivate *b,
+                               AbstractMetaClass *metaClass,
+                               const TypeSystemProperty &ts,
+                               const QStringList &scopes,
+                               QString *errorMessage);
 
-    bool isValid() const;
+    static std::optional<QPropertySpec>
+        parseQ_Property(AbstractMetaBuilderPrivate *b,
+                        AbstractMetaClass *metaClass,
+                        const QString &declarationIn,
+                        const QStringList &scopes,
+                        QString *errorMessage);
 
-    const AbstractMetaType &type() const { return m_type; }
-    void setType(const AbstractMetaType &t) { m_type = t; }
+    const AbstractMetaType &type() const;
+    void setType(const AbstractMetaType &t);
 
     const TypeEntry *typeEntry() const;
 
-    QString name() const { return m_name; }
-    void setName(const QString &name) { m_name = name; }
+    QString name() const;
+    void setName(const QString &name);
 
-    QString read() const { return m_read; }
-    void setRead(const QString &read) { m_read = read; }
+    QString read() const;
+    void setRead(const QString &read);
 
-    QString write() const { return m_write; }
-    void setWrite(const QString &write) { m_write = write; }
-    bool hasWrite() const { return !m_write.isEmpty(); }
+    QString write() const;
+    void setWrite(const QString &write);
+    bool hasWrite() const;
 
-    QString designable() const { return m_designable; }
-    void setDesignable(const QString &designable) { m_designable = designable; }
+    QString designable() const;
+    void setDesignable(const QString &designable);
 
-    QString reset() const { return m_reset; }
-    void setReset(const QString &reset) { m_reset = reset; }
+    QString reset() const;
+    void setReset(const QString &reset);
 
-    int index() const { return m_index; }
-    void setIndex(int index) {m_index = index; }
+    int index() const;
+    void setIndex(int index);
 
-    bool generateGetSetDef() const { return m_generateGetSetDef; }
-    void setGenerateGetSetDef(bool generateGetSetDef) { m_generateGetSetDef = generateGetSetDef; }
+    // Indicates whether actual code is generated instead of relying on libpyside.
+    bool generateGetSetDef() const;
+    void setGenerateGetSetDef(bool generateGetSetDef);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
 
 private:
-    QString m_name;
-    QString m_read;
-    QString m_write;
-    QString m_designable;
-    QString m_reset;
-    AbstractMetaType m_type;
-    int m_index = -1;
-    // Indicates whether actual code is generated instead of relying on libpyside.
-    bool m_generateGetSetDef = false;
+    QSharedDataPointer<QPropertySpecData> d;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

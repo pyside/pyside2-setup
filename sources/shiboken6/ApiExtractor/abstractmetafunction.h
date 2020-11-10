@@ -41,7 +41,6 @@
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class FunctionTypeEntry;
-class QPropertySpec;
 
 struct ArgumentOwner;
 struct FieldModification;
@@ -274,8 +273,8 @@ public:
      */
     QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = nullptr) const;
 
-    QPropertySpec *propertySpec() const { return m_propertySpec; }
-    void setPropertySpec(QPropertySpec *spec) { m_propertySpec = spec; }
+    int propertySpecIndex() const { return m_propertySpecIndex; }
+    void setPropertySpecIndex(int i) { m_propertySpecIndex = i; }
 
     FunctionTypeEntry* typeEntry() const { return m_typeEntry; }
 
@@ -318,7 +317,7 @@ private:
     const AbstractMetaClass *m_class = nullptr;
     const AbstractMetaClass *m_implementingClass = nullptr;
     const AbstractMetaClass *m_declaringClass = nullptr;
-    QPropertySpec *m_propertySpec = nullptr;
+    int m_propertySpecIndex = -1;
     AbstractMetaArgumentList m_arguments;
     AddedFunctionPtr m_addedFunction;
     SourceLocation m_sourceLocation;

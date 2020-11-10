@@ -177,8 +177,9 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
 
     // Properties
     if (func->isPropertyReader() || func->isPropertyWriter() || func->isPropertyResetter()) {
+        const auto prop = metaClass->propertySpecs().at(func->propertySpecIndex());
         const QString propertyQuery = classQuery + QLatin1String("/property[@name=\"")
-            + func->propertySpec()->name() + QLatin1String("\"]/description");
+            + prop.name() + QLatin1String("\"]/description");
         const QString properyDocumentation = getDocumentation(xquery, propertyQuery, funcModifs);
         if (properyDocumentation.isEmpty())
             *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func, propertyQuery);

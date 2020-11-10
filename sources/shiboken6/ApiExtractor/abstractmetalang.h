@@ -271,13 +271,25 @@ public:
     bool hasCloneOperator() const;
     void setHasCloneOperator(bool on);
 
-    const QVector<QPropertySpec *> &propertySpecs() const;
-    void addPropertySpec(QPropertySpec *spec);
+    const QList<QPropertySpec> &propertySpecs() const;
+    void addPropertySpec(const QPropertySpec &spec);
 
-    QPropertySpec *propertySpecByName(const QString &name) const;
-    QPropertySpec *propertySpecForRead(const QString &name) const;
-    QPropertySpec *propertySpecForWrite(const QString &name) const;
-    QPropertySpec *propertySpecForReset(const QString &name) const;
+    // Helpers to search whether a functions is a property setter/getter/reset
+    enum class PropertyFunction
+    {
+        Read,
+        Write,
+        Reset
+    };
+    struct PropertyFunctionSearchResult
+    {
+        int index;
+        PropertyFunction function;
+    };
+
+    PropertyFunctionSearchResult searchPropertyFunction(const QString &name) const;
+
+    std::optional<QPropertySpec> propertySpecByName(const QString &name) const;
 
     /// Returns a list of conversion operators for this class. The conversion
     /// operators are defined in other classes of the same module.

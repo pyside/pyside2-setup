@@ -293,7 +293,7 @@ private:
                              const AbstractMetaField &metaField,
                              const GeneratorContext &context);
     void writeGetterFunction(QTextStream &s,
-                             const QPropertySpec *property,
+                             const QPropertySpec &property,
                              const GeneratorContext &context);
     void writeSetterFunctionPreamble(QTextStream &s,
                                      const QString &name,
@@ -304,7 +304,7 @@ private:
                              const AbstractMetaField &metaField,
                              const GeneratorContext &context);
     void writeSetterFunction(QTextStream &s,
-                             const QPropertySpec *property,
+                             const QPropertySpec &property,
                              const GeneratorContext &context);
 
     void writeRichCompareFunction(QTextStream &s, const GeneratorContext &context);
