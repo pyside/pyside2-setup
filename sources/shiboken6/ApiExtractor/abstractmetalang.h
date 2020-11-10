@@ -31,6 +31,7 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaattributes.h"
+#include "abstractmetafield.h"
 #include "enclosingclassmixin.h"
 #include "documentation.h"
 #include "sourcelocation.h"
@@ -162,10 +163,11 @@ public:
     bool hasLogicalOperatorOverload() const;
 
     const AbstractMetaFieldList &fields() const { return m_fields; }
+    AbstractMetaFieldList &fields() { return m_fields; }
     void setFields(const AbstractMetaFieldList &fields) { m_fields = fields; }
-    void addField(AbstractMetaField *field) { m_fields << field; }
+    void addField(const AbstractMetaField &field) { m_fields << field; }
 
-    AbstractMetaField *findField(const QString &name) const;
+    std::optional<AbstractMetaField> findField(const QString &name) const;
 
     const AbstractMetaEnumList &enums() const { return m_enums; }
     void setEnums(const AbstractMetaEnumList &enums) { m_enums = enums; }

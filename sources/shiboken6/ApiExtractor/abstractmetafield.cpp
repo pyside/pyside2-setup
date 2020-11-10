@@ -28,40 +28,44 @@
 
 #include "abstractmetafield.h"
 #include "abstractmetalang.h"
-#include "abstractmetalang_helpers.h"
+#include "abstractmetatype.h"
+#include "documentation.h"
 #include "modifications.h"
 #include "typesystem.h"
 
 #include <QtCore/QDebug>
 
-AbstractMetaVariable::AbstractMetaVariable() = default;
-
-AbstractMetaVariable::~AbstractMetaVariable() = default;
-
-void AbstractMetaVariable::assignMetaVariable(const AbstractMetaVariable &other)
+class AbstractMetaFieldData : public QSharedData
 {
-    m_originalName = other.m_originalName;
-    m_name = other.m_name;
-    m_type = other.m_type;
-    m_hasName = other.m_hasName;
-    m_doc = other.m_doc;
+public:
+    QString m_originalName;
+    QString m_name;
+    AbstractMetaType m_type;
+    bool m_hasName = false;
+    Documentation m_doc;
+};
+
+AbstractMetaField::AbstractMetaField() : d(new AbstractMetaFieldData)
+{
 }
 
-AbstractMetaField::AbstractMetaField() = default;
+AbstractMetaField::AbstractMetaField(const AbstractMetaField &) = default;
+AbstractMetaField &AbstractMetaField::operator=(const AbstractMetaField &) = default;
+AbstractMetaField::AbstractMetaField(AbstractMetaField &&) = default;
+AbstractMetaField &AbstractMetaField::operator=(AbstractMetaField &&) = default;
+AbstractMetaField::~AbstractMetaField() = default;
 
-AbstractMetaField *AbstractMetaField::copy() const
-{
-    auto *returned = new AbstractMetaField;
-    returned->assignMetaVariable(*this);
-    returned->assignMetaAttributes(*this);
-    returned->setEnclosingClass(nullptr);
-    return returned;
-}
+//    returned->setEnclosingClass(nullptr);
 
-AbstractMetaField *AbstractMetaField::find(const AbstractMetaFieldList &haystack,
-                                           const QString &needle)
+std::optional<AbstractMetaField>
+    AbstractMetaField::find(const AbstractMetaFieldList &haystack,
+                            const QString &needle)
 {
-    return findByName(haystack, needle);
+    for (const auto &f : haystack) {
+        if (f.name() == needle)
+            return f;
+    }
+    return {};
 }
 
 /*******************************************************************************
@@ -81,6 +85,62 @@ bool AbstractMetaField::isModifiedRemoved(int types) const
     return false;
 }
 
+const AbstractMetaType &AbstractMetaField::type() const
+{
+    return d->m_type;
+}
+
+void AbstractMetaField::setType(const AbstractMetaType &type)
+{
+    if (d->m_type != type)
+        d->m_type = type;
+}
+
+QString AbstractMetaField::name() const
+{
+    return d->m_name;
+}
+
+void AbstractMetaField::setName(const QString &name, bool realName)
+{
+    if (d->m_name != name || d->m_hasName != realName) {
+        d->m_name = name;
+        d->m_hasName = realName;
+    }
+}
+
+bool AbstractMetaField::hasName() const
+{
+    return d->m_hasName;
+}
+
+QString AbstractMetaField::qualifiedCppName() const
+{
+    return enclosingClass()->qualifiedCppName() + QLatin1String("::") + d->m_name;
+}
+
+QString AbstractMetaField::originalName() const
+{
+    return d->m_originalName;
+}
+
+void AbstractMetaField::setOriginalName(const QString &name)
+{
+    if (d->m_originalName != name)
+        d->m_originalName = name;
+}
+
+const Documentation &AbstractMetaField::documentation() const
+{
+    return d->m_doc;
+}
+
+void AbstractMetaField::setDocumentation(const Documentation &doc)
+{
+    if (d->m_doc != doc)
+        d->m_doc = doc;
+}
+
 FieldModificationList AbstractMetaField::modifications() const
 {
     const FieldModificationList &mods = enclosingClass()->typeEntry()->fieldModifications();
@@ -95,21 +155,6 @@ FieldModificationList AbstractMetaField::modifications() const
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AbstractMetaVariable *av)
-{
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "AbstractMetaVariable(";
-    if (av) {
-        d << av->type().name() << ' ' << av->name();
-    } else {
-        d << '0';
-      }
-    d << ')';
-    return d;
-}
-
 void AbstractMetaField::formatDebug(QDebug &d) const
 {
     AbstractMetaAttributes::formatMetaAttributes(d, attributes());
@@ -126,6 +171,17 @@ QDebug operator<<(QDebug d, const AbstractMetaField *af)
         af->formatDebug(d);
     else
         d << '0';
+    d << ')';
+    return d;
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaField &af)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "AbstractMetaField(";
+    af.formatDebug(d);
     d << ')';
     return d;
 }

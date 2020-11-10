@@ -312,9 +312,8 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
     const AbstractMetaFunctionList &funcs = metaClass->functions();
     for (const AbstractMetaFunction *func : funcs)
         collectInstantiatedContainersAndSmartPointers(func);
-    const AbstractMetaFieldList &fields = metaClass->fields();
-    for (const AbstractMetaField *field : fields)
-        addInstantiatedContainersAndSmartPointers(field->type(), field->name());
+    for (const AbstractMetaField &field : metaClass->fields())
+        addInstantiatedContainersAndSmartPointers(field.type(), field.name());
     const AbstractMetaClassList &innerClasses = metaClass->innerClasses();
     for (AbstractMetaClass *innerClass : innerClasses)
         collectInstantiatedContainersAndSmartPointers(innerClass);

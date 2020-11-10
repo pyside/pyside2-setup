@@ -290,7 +290,7 @@ private:
     void writeCopyFunction(QTextStream &s, const GeneratorContext &context);
 
     void writeGetterFunction(QTextStream &s,
-                             const AbstractMetaField *metaField,
+                             const AbstractMetaField &metaField,
                              const GeneratorContext &context);
     void writeGetterFunction(QTextStream &s,
                              const QPropertySpec *property,
@@ -301,7 +301,7 @@ private:
                                      const AbstractMetaType &type,
                                      const GeneratorContext &context);
     void writeSetterFunction(QTextStream &s,
-                             const AbstractMetaField *metaField,
+                             const AbstractMetaField &metaField,
                              const GeneratorContext &context);
     void writeSetterFunction(QTextStream &s,
                              const QPropertySpec *property,

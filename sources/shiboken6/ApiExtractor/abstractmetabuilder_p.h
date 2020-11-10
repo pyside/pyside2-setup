@@ -41,6 +41,8 @@
 #include <QFileInfo>
 #include <QVector>
 
+#include <optional>
+
 class TypeDatabase;
 
 class AbstractMetaBuilderPrivate
@@ -112,8 +114,8 @@ public:
                                            AbstractMetaClass *metaClass);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
                                            AbstractMetaClass *currentClass);
-    AbstractMetaField *traverseField(const VariableModelItem &field,
-                                     AbstractMetaClass *cls);
+    std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
+                                                   AbstractMetaClass *cls);
     void checkFunctionModifications();
     void registerHashFunction(const FunctionModelItem &functionItem,
                               AbstractMetaClass *currentClass);

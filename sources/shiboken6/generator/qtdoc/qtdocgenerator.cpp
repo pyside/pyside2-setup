@@ -1780,10 +1780,9 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
 {
     static const QString section_title = QLatin1String(".. attribute:: ");
 
-    const AbstractMetaFieldList &fields = cppClass->fields();
-    for (AbstractMetaField *field : fields) {
-        s << section_title << cppClass->fullName() << "." << field->name() << Qt::endl << Qt::endl;
-        writeFormattedText(s, field->documentation().value(), cppClass);
+    for (const AbstractMetaField &field : cppClass->fields()) {
+        s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
+        writeFormattedText(s, field.documentation().value(), cppClass);
     }
 }
 

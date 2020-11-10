@@ -181,15 +181,14 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     }
 
     //Fields
-    const AbstractMetaFieldList &fields = metaClass->fields();
-    for (AbstractMetaField *field : fields) {
-        if (field->isPrivate())
+    for (AbstractMetaField &field : metaClass->fields()) {
+        if (field.isPrivate())
             return;
 
         Documentation fieldDoc;
         for (const auto &tag : docTags) {
             QString query = QLatin1String("/doxygen/compounddef/sectiondef/memberdef/name[text()=\"")
-                            + field->name() + QLatin1String("\"]/../") + tag.second;
+                            + field.name() + QLatin1String("\"]/../") + tag.second;
             QString doc = getDocumentation(xquery, query, DocModificationList());
             if (doc.isEmpty()) {
                 qCWarning(lcShibokenDoc, "%s",
@@ -199,7 +198,7 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
                 fieldDoc.setValue(doc, tag.first);
             }
         }
-        field->setDocumentation(fieldDoc);
+        field.setDocumentation(fieldDoc);
     }
 
     //Enums

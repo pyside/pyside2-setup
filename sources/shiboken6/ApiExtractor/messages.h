@@ -149,7 +149,7 @@ QString msgCannotFindDocumentation(const QString &fileName,
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,
-                                   const AbstractMetaField *f,
+                                   const AbstractMetaField &f,
                                    const QString &query);
 
 QString msgXpathDocModificationError(const DocModificationList& mods,

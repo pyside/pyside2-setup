@@ -295,9 +295,9 @@ static bool isPointerToConst(const AbstractMetaType &t)
         && indirections.constLast() != Indirection::ConstPointer;
 }
 
-static inline bool canGenerateFieldSetter(const AbstractMetaField *field)
+static inline bool canGenerateFieldSetter(const AbstractMetaField &field)
 {
-    const AbstractMetaType &type = field->type();
+    const AbstractMetaType &type = field.type();
     return !type.isConstant() || isPointerToConst(type);
 }
 
@@ -704,8 +704,8 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
 
     if (shouldGenerateGetSetList(metaClass) && !classContext.forSmartPointer()) {
         const AbstractMetaFieldList &fields = metaClass->fields();
-        for (const AbstractMetaField *metaField : fields) {
-            if (metaField->isStatic())
+        for (const AbstractMetaField &metaField : fields) {
+            if (metaField.isStatic())
                 continue;
             writeGetterFunction(s, metaField, classContext);
             if (canGenerateFieldSetter(metaField))
@@ -723,12 +723,12 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
 
         s << "// Getters and Setters for " << metaClass->name() << Qt::endl;
         s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass) << "[] = {\n";
-        for (const AbstractMetaField *metaField : fields) {
-            if (!metaField->isStatic()) {
+        for (const AbstractMetaField &metaField : fields) {
+            if (!metaField.isStatic()) {
                 s << INDENT;
                 const QString setter = canGenerateFieldSetter(metaField)
                     ? cpythonSetterFunctionName(metaField) : QString();
-                writePyGetSetDefEntry(s, metaField->name(),
+                writePyGetSetDefEntry(s, metaField.name(),
                                       cpythonGetterFunctionName(metaField), setter);
             }
         }
@@ -4070,9 +4070,8 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
 
 bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass *metaClass)
 {
-    const AbstractMetaFieldList &fields = metaClass->fields();
-    for (const AbstractMetaField *f : fields) {
-        if (!f->isStatic())
+    for (const AbstractMetaField &f : metaClass->fields()) {
+        if (!f.isStatic())
             return true;
     }
     // Generate all user-added properties unless Pyside extensions are used,
@@ -4517,7 +4516,7 @@ static inline void writeGetterFunctionStart(QTextStream &s, const QString &funcN
 }
 
 void CppGenerator::writeGetterFunction(QTextStream &s,
-                                       const AbstractMetaField *metaField,
+                                       const AbstractMetaField &metaField,
                                        const GeneratorContext &context)
 {
     ErrorCode errorCode(QString::fromLatin1(NULL_PTR));
@@ -4525,17 +4524,17 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
 
     writeCppSelfDefinition(s, context);
 
-    AbstractMetaType fieldType = metaField->type();
+    AbstractMetaType fieldType = metaField.type();
     // Force use of pointer to return internal variable memory
     bool newWrapperSameObject = !fieldType.isConstant() && isWrapperType(fieldType) && !isPointer(fieldType);
 
     QString cppField;
-    if (avoidProtectedHack() && metaField->isProtected()) {
+    if (avoidProtectedHack() && metaField.isProtected()) {
         QTextStream(&cppField) << "static_cast<"
             << context.wrapperName() << " *>("
             << CPP_SELF_VAR << ")->" << protectedFieldGetterName(metaField) << "()";
     } else {
-        cppField = QLatin1String(CPP_SELF_VAR) + QLatin1String("->") + metaField->name();
+        cppField = QLatin1String(CPP_SELF_VAR) + QLatin1String("->") + metaField.name();
         if (newWrapperSameObject) {
             cppField.prepend(QLatin1String("&("));
             cppField.append(QLatin1Char(')'));
@@ -4544,7 +4543,7 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
     if (isCppIntegralPrimitive(fieldType) || fieldType.isEnum()) {
         s << INDENT << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ";\n";
         cppField = QLatin1String("cppOut_local");
-    } else if (avoidProtectedHack() && metaField->isProtected()) {
+    } else if (avoidProtectedHack() && metaField.isProtected()) {
         s << INDENT << getFullTypeNameWithoutModifiers(fieldType);
         if (fieldType.isContainer() || fieldType.isFlags() || fieldType.isSmartPointer()) {
             s << " &";
@@ -4594,7 +4593,7 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
         s << INDENT << "Shiboken::Object::setParent(self, pyOut)";
     } else {
         s << INDENT << "pyOut = ";
-        writeToPythonConversion(s, fieldType, metaField->enclosingClass(), cppField);
+        writeToPythonConversion(s, fieldType, metaField.enclosingClass(), cppField);
     }
     s << ";\n";
 
@@ -4652,18 +4651,18 @@ void CppGenerator::writeSetterFunctionPreamble(QTextStream &s, const QString &na
 }
 
 void CppGenerator::writeSetterFunction(QTextStream &s,
-                                       const AbstractMetaField *metaField,
+                                       const AbstractMetaField &metaField,
                                        const GeneratorContext &context)
 {
     ErrorCode errorCode(0);
 
-    const AbstractMetaType &fieldType = metaField->type();
-    writeSetterFunctionPreamble(s, metaField->name(), cpythonSetterFunctionName(metaField),
+    const AbstractMetaType &fieldType = metaField.type();
+    writeSetterFunctionPreamble(s, metaField.name(), cpythonSetterFunctionName(metaField),
                                 fieldType, context);
 
-    QString cppField = QString::fromLatin1("%1->%2").arg(QLatin1String(CPP_SELF_VAR), metaField->name());
+    QString cppField = QLatin1String(CPP_SELF_VAR) + QLatin1String("->") + metaField.name();
     s << INDENT;
-    if (avoidProtectedHack() && metaField->isProtected()) {
+    if (avoidProtectedHack() && metaField.isProtected()) {
         s << getFullTypeNameWithoutModifiers(fieldType);
         s << (fieldType.indirections() == 1 ? " *" : "") << " cppOut;\n";
         s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);\n";
@@ -4686,7 +4685,7 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
 
     if (isPointerToWrapperType(fieldType)) {
         s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(self), \"";
-        s << metaField->name() << "\", pyIn);\n";
+        s << metaField.name() << "\", pyIn);\n";
     }
 
     s << INDENT << "return 0;\n";
@@ -5438,12 +5437,12 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 
     // Write static fields
     const AbstractMetaFieldList &fields = metaClass->fields();
-    for (const AbstractMetaField *field : fields) {
-        if (!field->isStatic())
+    for (const AbstractMetaField &field : fields) {
+        if (!field.isStatic())
             continue;
         s << INDENT << QLatin1String("PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(") + cpythonTypeName(metaClass) + QLatin1String(")->tp_dict, \"");
-        s << field->name() << "\", ";
-        writeToPythonConversion(s, field->type(), metaClass, metaClass->qualifiedCppName() + QLatin1String("::") + field->name());
+        s << field.name() << "\", ";
+        writeToPythonConversion(s, field.type(), metaClass, field.qualifiedCppName());
         s << ");\n";
     }
     s << Qt::endl;

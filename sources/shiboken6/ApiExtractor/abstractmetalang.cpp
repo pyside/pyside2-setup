@@ -65,7 +65,6 @@ AbstractMetaClass::AbstractMetaClass()
 AbstractMetaClass::~AbstractMetaClass()
 {
     qDeleteAll(m_functions);
-    qDeleteAll(m_fields);
     qDeleteAll(m_enums);
     qDeleteAll(m_propertySpecs);
 }
@@ -345,8 +344,8 @@ bool AbstractMetaClass::hasProtectedFunctions() const
 
 bool AbstractMetaClass::hasProtectedFields() const
 {
-    for (const AbstractMetaField *field : m_fields) {
-        if (field->isProtected())
+    for (const AbstractMetaField &field : m_fields) {
+        if (field.isProtected())
             return true;
     }
     return false;
@@ -635,7 +634,8 @@ AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
     return queryFunctions(Signals | Visible | NotRemovedFromTargetLang);
 }
 
-AbstractMetaField *AbstractMetaClass::findField(const QString &name) const
+std::optional<AbstractMetaField>
+    AbstractMetaClass::findField(const QString &name) const
 {
     return AbstractMetaField::find(m_fields, name);
 }
@@ -1067,7 +1067,7 @@ void AbstractMetaClass::formatMembers(QDebug &d) const
         for (int i = 0; i < count; ++i) {
             if (i)
                 d << ", ";
-            m_fields.at(i)->formatDebug(d);
+            m_fields.at(i).formatDebug(d);
         }
         d << ')';
     }

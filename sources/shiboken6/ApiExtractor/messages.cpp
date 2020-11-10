@@ -431,11 +431,11 @@ QString msgCannotFindDocumentation(const QString &fileName,
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaClass *metaClass,
-                                   const AbstractMetaField *f,
+                                   const AbstractMetaField &f,
                                    const QString &query)
 {
     return msgCannotFindDocumentation(fileName, "field",
-                                      metaClass->name() + QLatin1String("::") + f->name(),
+                                      metaClass->name() + QLatin1String("::") + f.name(),
                                       query);
 }
 

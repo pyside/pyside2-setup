@@ -240,8 +240,8 @@ protected:
     bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
 
     static QString protectedEnumSurrogateName(const AbstractMetaEnum *metaEnum);
-    static QString protectedFieldGetterName(const AbstractMetaField *field);
-    static QString protectedFieldSetterName(const AbstractMetaField *field);
+    static QString protectedFieldGetterName(const AbstractMetaField &field);
+    static QString protectedFieldSetterName(const AbstractMetaField &field);
 
     static QString pythonPrimitiveTypeName(const QString &cppTypeName);
     static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry *type);
@@ -343,8 +343,8 @@ protected:
     QString cpythonGettersSettersDefinitionName(const AbstractMetaClass *metaClass);
     static QString cpythonGetattroFunctionName(const AbstractMetaClass *metaClass);
     static QString cpythonSetattroFunctionName(const AbstractMetaClass *metaClass);
-    static QString cpythonGetterFunctionName(const AbstractMetaField *metaField);
-    static QString cpythonSetterFunctionName(const AbstractMetaField *metaField);
+    static QString cpythonGetterFunctionName(const AbstractMetaField &metaField);
+    static QString cpythonSetterFunctionName(const AbstractMetaField &metaField);
     static QString cpythonGetterFunctionName(const QPropertySpec *property,
                                              const AbstractMetaClass *metaClass);
     static QString cpythonSetterFunctionName(const QPropertySpec *property,

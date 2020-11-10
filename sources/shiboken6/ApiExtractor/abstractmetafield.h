@@ -30,78 +30,61 @@
 #define ABSTRACTMETAFIELD_H
 
 #include "abstractmetalang_typedefs.h"
-#include "documentation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 #include "abstractmetaattributes.h"
 #include "enclosingclassmixin.h"
-#include "abstractmetatype.h"
-#include "documentation.h"
+
+#include <QtCore/QSharedDataPointer>
+
+#include <optional>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
-class AbstractMetaVariable
-{
-    Q_DISABLE_COPY(AbstractMetaVariable)
-public:
-    AbstractMetaVariable();
+class Documentation;
+class AbstractMetaFieldData;
 
-    virtual ~AbstractMetaVariable();
-
-    const AbstractMetaType &type() const { return m_type; }
-    void setType(const AbstractMetaType &type) { m_type = type; }
-
-    QString name() const { return m_name; }
-    void setName(const QString &name, bool realName = true)
-    {
-        m_name = name;
-        m_hasName = realName;
-    }
-    bool hasName() const { return m_hasName; }
-
-    QString originalName() const { return m_originalName; }
-    void setOriginalName(const QString& name) { m_originalName = name; }
-
-    Documentation documentation() const { return m_doc; }
-    void setDocumentation(const Documentation& doc) { m_doc = doc; }
-
-protected:
-    void assignMetaVariable(const AbstractMetaVariable &other);
-
-private:
-    QString m_originalName;
-    QString m_name;
-    AbstractMetaType m_type;
-    bool m_hasName = false;
-
-    Documentation m_doc;
-};
-
-#ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AbstractMetaVariable *av);
-#endif
-
-class AbstractMetaField : public AbstractMetaVariable, public AbstractMetaAttributes, public EnclosingClassMixin
+class AbstractMetaField : public AbstractMetaAttributes, public EnclosingClassMixin
 {
 public:
     AbstractMetaField();
+    AbstractMetaField(const AbstractMetaField &);
+    AbstractMetaField &operator=(const AbstractMetaField &);
+    AbstractMetaField(AbstractMetaField &&);
+    AbstractMetaField &operator=(AbstractMetaField &&);
+    ~AbstractMetaField();
 
     FieldModificationList modifications() const;
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
 
-    AbstractMetaField *copy() const;
+    const AbstractMetaType &type() const;
+    void setType(const AbstractMetaType &type);
 
-    static AbstractMetaField *
+    QString name() const;
+    void setName(const QString &name, bool realName = true);
+    bool hasName() const;
+    QString qualifiedCppName() const;
+
+    QString originalName() const;
+    void setOriginalName(const QString& name);
+
+    const Documentation &documentation() const;
+    void setDocumentation(const Documentation& doc);
+
+    static std::optional<AbstractMetaField>
         find(const AbstractMetaFieldList &haystack, const QString &needle);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
+private:
+    QSharedDataPointer<AbstractMetaFieldData> d;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaField *af);
+QDebug operator<<(QDebug d, const AbstractMetaField &af);
 #endif
 
 #endif // ABSTRACTMETAFIELD_H

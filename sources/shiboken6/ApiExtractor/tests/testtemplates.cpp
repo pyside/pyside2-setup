@@ -585,15 +585,14 @@ void TestTemplates::testTemplateTypeDefs()
     QCOMPARE(xmlValueMethod->type().cppSignature(), QLatin1String("int"));
 
     // Check whether the m_value field is of type 'int'
-    const AbstractMetaField *valueField =
-        optionalInt->findField(QLatin1String("m_value"));
-    QVERIFY(valueField);
+    const auto valueField = optionalInt->findField(QLatin1String("m_value"));
+    QVERIFY(valueField.has_value());
     QCOMPARE(valueField->type().cppSignature(), QLatin1String("int"));
 
     // ditto for typesystem XML
-    const AbstractMetaField *xmlValueField =
+    const auto xmlValueField =
         xmlOptionalInt->findField(QLatin1String("m_value"));
-    QVERIFY(xmlValueField);
+    QVERIFY(xmlValueField.has_value());
     QCOMPARE(xmlValueField->type().cppSignature(), QLatin1String("int"));
 }
 
@@ -636,7 +635,7 @@ public:
 
     auto fields = testClass->fields();
     QCOMPARE(fields.count(), 1);
-    auto fieldType = testClass->fields().at(0)->type();
+    auto fieldType = testClass->fields().at(0).type();
     QCOMPARE(fieldType.name(), QLatin1String("Container1"));
     QCOMPARE(fieldType.instantiations().size(), 1);
 

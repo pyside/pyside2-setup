@@ -53,7 +53,7 @@ protected:
 
 private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass *metaClass) const;
-    void writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField *field) const;
+    void writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField &field) const;
     void writeFunction(QTextStream &s, const AbstractMetaFunction *func);
     void writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum *cppEnum);
     void writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass);

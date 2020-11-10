@@ -1125,30 +1125,31 @@ static inline QString qualifiedFieldSignatureWithType(const QString &className,
     return className + colonColon() + fieldSignatureWithType(field);
 }
 
-AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModelItem &field,
-                                                             AbstractMetaClass *cls)
+std::optional<AbstractMetaField>
+    AbstractMetaBuilderPrivate::traverseField(const VariableModelItem &field,
+                                              AbstractMetaClass *cls)
 {
     QString fieldName = field->name();
     QString className = cls->typeEntry()->qualifiedCppName();
 
     // Ignore friend decl.
     if (field->isFriend())
-        return nullptr;
+        return {};
 
     if (field->accessPolicy() == CodeModel::Private)
-        return nullptr;
+        return {};
 
     QString rejectReason;
     if (TypeDatabase::instance()->isFieldRejected(className, fieldName, &rejectReason)) {
         m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field) + rejectReason,
                                 AbstractMetaBuilder::GenerationDisabled);
-        return nullptr;
+        return {};
     }
 
 
-    auto *metaField = new AbstractMetaField;
-    metaField->setName(fieldName);
-    metaField->setEnclosingClass(cls);
+    AbstractMetaField metaField;
+    metaField.setName(fieldName);
+    metaField.setEnclosingClass(cls);
 
     TypeInfo fieldType = field->type();
     AbstractMetaType metaType = translateType(fieldType, cls);
@@ -1159,11 +1160,10 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
              qCWarning(lcShiboken, "%s",
                        qPrintable(msgSkippingField(field, cls->name(), type)));
         }
-        delete metaField;
-        return nullptr;
+        return {};
     }
 
-    metaField->setType(metaType);
+    metaField.setType(metaType);
 
     AbstractMetaAttributes::Attributes attr;
     if (field->isStatic())
@@ -1176,7 +1176,7 @@ AbstractMetaField *AbstractMetaBuilderPrivate::traverseField(const VariableModel
         attr |= AbstractMetaAttributes::Protected;
     else
         attr |= AbstractMetaAttributes::Private;
-    metaField->setAttributes(attr);
+    metaField.setAttributes(attr);
 
     return metaField;
 }
@@ -1186,11 +1186,10 @@ void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item
 {
     const VariableList &variables = scope_item->variables();
     for (const VariableModelItem &field : variables) {
-        AbstractMetaField *metaField = traverseField(field, metaClass);
-
-        if (metaField && !metaField->isModifiedRemoved()) {
+        auto metaField = traverseField(field, metaClass);
+        if (metaField.has_value() && !metaField->isModifiedRemoved()) {
             metaField->setOriginalAttributes(metaField->attributes());
-            metaClass->addField(metaField);
+            metaClass->addField(*metaField);
         }
     }
 }
@@ -2412,8 +2411,8 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
             // Fix scope if the parameter is a field of the current class
             if (implementingClass) {
                 const AbstractMetaFieldList &fields = implementingClass->fields();
-                for (const AbstractMetaField *field : fields) {
-                    if (defaultMatch.hasMatch() && defaultMatch.captured(2) == field->name()) {
+                for (const AbstractMetaField &field : fields) {
+                    if (defaultMatch.hasMatch() && defaultMatch.captured(2) == field.name()) {
                         expr = defaultMatch.captured(1) + implementingClass->name()
                                + colonColon() + defaultMatch.captured(2) + defaultMatch.captured(3);
                         break;
@@ -2713,22 +2712,22 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
      // Take copy
     const AbstractMetaFieldList existingSubclassFields = subclass->fields();
     const AbstractMetaFieldList &templateClassFields = templateClass->fields();
-    for (const AbstractMetaField *field : templateClassFields) {
+    for (const AbstractMetaField &field : templateClassFields) {
         // If the field is modified or the instantiation has a field named
         // the same as an existing field we have shadowing, so we need to skip it.
-        if (field->isModifiedRemoved(TypeSystem::All)
-            || field->attributes().testFlag(AbstractMetaAttributes::Static)
-            || AbstractMetaField::find(existingSubclassFields, field->name()) != nullptr) {
+        if (field.isModifiedRemoved(TypeSystem::All)
+            || field.attributes().testFlag(AbstractMetaAttributes::Static)
+            || AbstractMetaField::find(existingSubclassFields, field.name()).has_value()) {
             continue;
         }
 
-        QScopedPointer<AbstractMetaField> f(field->copy());
-        f->setEnclosingClass(subclass);
-        AbstractMetaType fieldType = inheritTemplateType(templateTypes, field->type());
+        AbstractMetaField f = field;
+        f.setEnclosingClass(subclass);
+        AbstractMetaType fieldType = inheritTemplateType(templateTypes, field.type());
         if (!fieldType)
             continue;
-        f->setType(fieldType);
-        subclass->addField(f.take());
+        f.setType(fieldType);
+        subclass->addField(f);
     }
 }
 
@@ -2982,9 +2981,8 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
             }
         }
         // Member fields need to be initialized
-        const AbstractMetaFieldList &fields = clazz->fields();
-        for (AbstractMetaField *field : fields) {
-            addClassDependency(field->type().typeEntry(), clazz, classIndex,
+        for (const AbstractMetaField &field : clazz->fields()) {
+            addClassDependency(field.type().typeEntry(), clazz, classIndex,
                                map, &graph);
         }
     }

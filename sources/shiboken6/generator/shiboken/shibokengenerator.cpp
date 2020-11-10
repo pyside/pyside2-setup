@@ -388,14 +388,14 @@ QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum *me
     return metaEnum->fullName().replace(QLatin1Char('.'), QLatin1Char('_')).replace(QLatin1String("::"), QLatin1String("_")) + QLatin1String("_Surrogate");
 }
 
-QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField *field)
+QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField &field)
 {
-    return QStringLiteral("protected_%1_getter").arg(field->name());
+    return QStringLiteral("protected_%1_getter").arg(field.name());
 }
 
-QString ShibokenGenerator::protectedFieldSetterName(const AbstractMetaField *field)
+QString ShibokenGenerator::protectedFieldSetterName(const AbstractMetaField &field)
 {
-    return QStringLiteral("protected_%1_setter").arg(field->name());
+    return QStringLiteral("protected_%1_setter").arg(field.name());
 }
 
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction *func)
@@ -457,14 +457,14 @@ QString ShibokenGenerator::cpythonSetterFunctionName(const QString &name,
     return cpythonBaseName(enclosingClass) + QStringLiteral("_set_") + name;
 }
 
-QString ShibokenGenerator::cpythonGetterFunctionName(const AbstractMetaField *metaField)
+QString ShibokenGenerator::cpythonGetterFunctionName(const AbstractMetaField &metaField)
 {
-    return cpythonGetterFunctionName(metaField->name(), metaField->enclosingClass());
+    return cpythonGetterFunctionName(metaField.name(), metaField.enclosingClass());
 }
 
-QString ShibokenGenerator::cpythonSetterFunctionName(const AbstractMetaField *metaField)
+QString ShibokenGenerator::cpythonSetterFunctionName(const AbstractMetaField &metaField)
 {
-    return cpythonSetterFunctionName(metaField->name(), metaField->enclosingClass());
+    return cpythonSetterFunctionName(metaField.name(), metaField.enclosingClass());
 }
 
 QString ShibokenGenerator::cpythonGetterFunctionName(const QPropertySpec *property,
@@ -608,11 +608,10 @@ QString ShibokenGenerator::guessScopeForDefaultValue(const AbstractMetaFunction 
         Q_ASSERT(unknowArgumentRegEx.isValid());
         const QRegularExpressionMatch match = unknowArgumentRegEx.match(value);
         if (match.hasMatch() && func->implementingClass()) {
-            const AbstractMetaFieldList &fields = func->implementingClass()->fields();
-            for (const AbstractMetaField *field : fields) {
-                if (match.captured(1).trimmed() == field->name()) {
-                    QString fieldName = field->name();
-                    if (field->isStatic()) {
+            for (const AbstractMetaField &field : func->implementingClass()->fields()) {
+                if (match.captured(1).trimmed() == field.name()) {
+                    QString fieldName = field.name();
+                    if (field.isStatic()) {
                         prefix = resolveScopePrefix(func->implementingClass(), value);
                         fieldName.prepend(prefix);
                         prefix.clear();

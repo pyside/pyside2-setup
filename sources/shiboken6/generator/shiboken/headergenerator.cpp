@@ -69,11 +69,11 @@ void HeaderGenerator::writeCopyCtor(QTextStream &s, const AbstractMetaClass *met
     s << INDENT << "}\n\n";
 }
 
-void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField *field) const
+void HeaderGenerator::writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField &field) const
 {
-    const AbstractMetaType &metaType = field->type();
+    const AbstractMetaType &metaType = field.type();
     QString fieldType = metaType.cppSignature();
-    QString fieldName = field->enclosingClass()->qualifiedCppName() + QLatin1String("::") + field->name();
+    const QString fieldName = field.qualifiedCppName();
 
     // Force use of pointer to return internal variable memory
     bool useReference = (!metaType.isConstant() &&
@@ -160,9 +160,8 @@ void HeaderGenerator::generateClass(QTextStream &s, const GeneratorContext &clas
             maxOverrides = 1;
 
         if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
-            const AbstractMetaFieldList &fields = metaClass->fields();
-            for (AbstractMetaField *field : fields) {
-                if (!field->isProtected())
+            for (const AbstractMetaField &field : metaClass->fields()) {
+                if (!field.isProtected())
                     continue;
                 writeProtectedFieldAccessors(s, field);
             }

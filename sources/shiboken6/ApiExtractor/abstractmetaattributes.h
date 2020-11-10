@@ -37,8 +37,6 @@ class AbstractMetaAttributes
 {
     Q_GADGET
 public:
-    Q_DISABLE_COPY(AbstractMetaAttributes)
-
     AbstractMetaAttributes();
     virtual ~AbstractMetaAttributes();
 
