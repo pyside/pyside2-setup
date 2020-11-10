@@ -33,6 +33,7 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
+#include <documentation.h>
 #include <modifications.h>
 #include <typesystem.h>
 #include <qtdocparser.h>

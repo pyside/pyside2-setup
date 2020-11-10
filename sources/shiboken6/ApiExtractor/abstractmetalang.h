@@ -31,27 +31,29 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaattributes.h"
-#include "abstractmetaenum.h"
-#include "abstractmetafield.h"
 #include "enclosingclassmixin.h"
-#include "documentation.h"
-#include "sourcelocation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
+#include <QtCore/QScopedPointer>
 #include <QtCore/QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
-class QPropertySpec;
+class AbstractMetaClassPrivate;
 class ComplexTypeEntry;
+class Documentation;
 class EnumTypeEntry;
+class QPropertySpec;
+class SourceLocation;
 
 class AbstractMetaClass : public AbstractMetaAttributes, public EnclosingClassMixin
 {
     Q_GADGET
 public:
+    Q_DISABLE_COPY_MOVE(AbstractMetaClass)
+
     enum FunctionQueryOption {
         Constructors                 = 0x0000001, // Only constructors
         //Destructors                  = 0x0000002, // Only destructors. Not included in class.
@@ -97,8 +99,7 @@ public:
 
     void fixFunctions();
 
-    const AbstractMetaFunctionList &functions() const { return m_functions; }
-
+    const AbstractMetaFunctionList &functions() const;
     void setFunctions(const AbstractMetaFunctionList &functions);
     void addFunction(AbstractMetaFunction *function);
     bool hasFunction(const AbstractMetaFunction *f) const;
@@ -108,31 +109,28 @@ public:
 
     bool hasConstructors() const;
     const AbstractMetaFunction *copyConstructor() const;
-    bool hasCopyConstructor() const { return copyConstructor() != nullptr; }
+    bool hasCopyConstructor() const;
     bool hasPrivateCopyConstructor() const;
 
     void addDefaultConstructor();
     void addDefaultCopyConstructor(bool isPrivate = false);
 
-    bool hasNonPrivateConstructor() const { return m_hasNonPrivateConstructor; }
-    void setHasNonPrivateConstructor(bool value) { m_hasNonPrivateConstructor = value; }
+    bool hasNonPrivateConstructor() const;
+    void setHasNonPrivateConstructor(bool value);
 
-    bool hasPrivateConstructor() const { return m_hasPrivateConstructor; }
-    void setHasPrivateConstructor(bool value) { m_hasPrivateConstructor = value; }
+    bool hasPrivateConstructor() const;
+    void setHasPrivateConstructor(bool value);
 
-    bool hasPrivateDestructor() const { return m_hasPrivateDestructor; }
-    void setHasPrivateDestructor(bool value) { m_hasPrivateDestructor = value; }
+    bool hasPrivateDestructor() const;
+    void setHasPrivateDestructor(bool value);
 
-    bool hasProtectedDestructor() const { return m_hasProtectedDestructor; }
-    void setHasProtectedDestructor(bool value) { m_hasProtectedDestructor = value; }
+    bool hasProtectedDestructor() const;
+    void setHasProtectedDestructor(bool value);
 
-    bool hasVirtualDestructor() const { return m_hasVirtualDestructor; }
+    bool hasVirtualDestructor() const;
     void setHasVirtualDestructor(bool value);
 
-    bool isConstructible() const
-    {
-        return (hasNonPrivateConstructor() || !hasPrivateConstructor()) && !hasPrivateDestructor();
-    }
+    bool isConstructible() const;
 
     bool generateExceptionHandling() const;
 
@@ -163,17 +161,17 @@ public:
     bool hasComparisonOperatorOverload() const;
     bool hasLogicalOperatorOverload() const;
 
-    const AbstractMetaFieldList &fields() const { return m_fields; }
-    AbstractMetaFieldList &fields() { return m_fields; }
-    void setFields(const AbstractMetaFieldList &fields) { m_fields = fields; }
-    void addField(const AbstractMetaField &field) { m_fields << field; }
+    const AbstractMetaFieldList &fields() const;
+    AbstractMetaFieldList &fields();
+    void setFields(const AbstractMetaFieldList &fields);
+    void addField(const AbstractMetaField &field);
 
     std::optional<AbstractMetaField> findField(const QString &name) const;
 
-    const AbstractMetaEnumList &enums() const { return m_enums; }
-    AbstractMetaEnumList &enums() { return m_enums; }
-    void setEnums(const AbstractMetaEnumList &enums) { m_enums = enums; }
-    void addEnum(const AbstractMetaEnum &e) { m_enums << e; }
+    const AbstractMetaEnumList &enums() const;
+    AbstractMetaEnumList &enums();
+    void setEnums(const AbstractMetaEnumList &enums);
+    void addEnum(const AbstractMetaEnum &e);
 
     std::optional<AbstractMetaEnum> findEnum(const QString &enumName) const;
     std::optional<AbstractMetaEnumValue> findEnumValue(const QString &enumName) const;
@@ -182,10 +180,7 @@ public:
 
     void getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const;
 
-    QString fullName() const
-    {
-        return package() + QLatin1Char('.') + name();
-    }
+    QString fullName() const;
 
     /**
      *   Retrieves the class name without any namespace/scope information.
@@ -193,19 +188,13 @@ public:
      */
     QString name() const;
 
-    const Documentation &documentation() const { return m_doc; }
-    void setDocumentation(const Documentation& doc) { m_doc = doc; }
+    const Documentation &documentation() const;
+    void setDocumentation(const Documentation& doc);
 
-    QString baseClassName() const
-    {
-        return m_baseClasses.isEmpty() ? QString() : m_baseClasses.constFirst()->name();
-    }
+    QString baseClassName() const;
 
-    AbstractMetaClass *baseClass() const
-    {
-        return m_baseClasses.value(0, nullptr);
-    }
-    const AbstractMetaClassList &baseClasses() const { return m_baseClasses; }
+    AbstractMetaClass *baseClass() const;
+    const AbstractMetaClassList &baseClasses() const;
 
     void addBaseClass(AbstractMetaClass *base_class);
     void setBaseClass(AbstractMetaClass *base_class);
@@ -213,12 +202,12 @@ public:
     /**
      *   \return the namespace from another package which this namespace extends.
      */
-    AbstractMetaClass *extendedNamespace() const { return m_extendedNamespace; }
-    void setExtendedNamespace(AbstractMetaClass *e) { m_extendedNamespace = e; }
+    AbstractMetaClass *extendedNamespace() const;
+    void setExtendedNamespace(AbstractMetaClass *e);
 
-    const AbstractMetaClassList& innerClasses() const { return m_innerClasses; }
-    void addInnerClass(AbstractMetaClass* cl) { m_innerClasses << cl; }
-    void setInnerClasses(const AbstractMetaClassList &innerClasses) { m_innerClasses = innerClasses; }
+    const AbstractMetaClassList &innerClasses() const;
+    void addInnerClass(AbstractMetaClass* cl);
+    void setInnerClasses(const AbstractMetaClassList &innerClasses);
 
     QString package() const;
 
@@ -227,10 +216,7 @@ public:
 
     bool isQObject() const;
 
-    bool isQtNamespace() const
-    {
-        return isNamespace() && name() == QLatin1String("Qt");
-    }
+    bool isQtNamespace() const;
 
     QString qualifiedCppName() const;
 
@@ -241,7 +227,7 @@ public:
     *   Says if the class that declares or inherits a virtual function.
     *   \return true if the class implements or inherits any virtual methods
     */
-    bool isPolymorphic() const { return m_isPolymorphic; }
+    bool isPolymorphic() const;
 
     /**
      * Tells if this class has one or more functions that are protected.
@@ -262,77 +248,64 @@ public:
     bool hasProtectedMembers() const;
 
 
-    const QVector<TypeEntry *> &templateArguments() const { return m_templateArgs; }
-    void setTemplateArguments(const QVector<TypeEntry *> &args) { m_templateArgs = args; }
+    const QVector<TypeEntry *> &templateArguments() const;
+    void setTemplateArguments(const QVector<TypeEntry *> &args);
 
     // only valid during metabuilder's run
-    const QStringList &baseClassNames() const { return m_baseClassNames; }
-    void setBaseClassNames(const QStringList &names) { m_baseClassNames = names; }
+    const QStringList &baseClassNames() const;
+    void setBaseClassNames(const QStringList &names);
 
-    const ComplexTypeEntry *typeEntry() const { return m_typeEntry; }
-    ComplexTypeEntry *typeEntry() { return m_typeEntry; }
-    void setTypeEntry(ComplexTypeEntry *type) { m_typeEntry = type; }
+    const ComplexTypeEntry *typeEntry() const;
+    ComplexTypeEntry *typeEntry();
+    void setTypeEntry(ComplexTypeEntry *type);
 
-    void setHasHashFunction(bool on) { m_hasHashFunction = on; }
+    void setHasHashFunction(bool on);
 
-    bool hasHashFunction() const { return m_hasHashFunction; }
+    bool hasHashFunction() const;
 
     bool hasDefaultToStringFunction() const;
 
-    bool hasEqualsOperator() const { return m_hasEqualsOperator; }
-    void setHasEqualsOperator(bool on) { m_hasEqualsOperator = on; }
+    bool hasEqualsOperator() const;
+    void setHasEqualsOperator(bool on);
 
-    bool hasCloneOperator() const { return m_hasCloneOperator; }
-    void setHasCloneOperator(bool on) { m_hasCloneOperator = on; }
+    bool hasCloneOperator() const;
+    void setHasCloneOperator(bool on);
 
-    const QVector<QPropertySpec *> &propertySpecs() const { return m_propertySpecs; }
-    void addPropertySpec(QPropertySpec *spec) { m_propertySpecs << spec; }
+    const QVector<QPropertySpec *> &propertySpecs() const;
+    void addPropertySpec(QPropertySpec *spec);
 
     QPropertySpec *propertySpecByName(const QString &name) const;
     QPropertySpec *propertySpecForRead(const QString &name) const;
     QPropertySpec *propertySpecForWrite(const QString &name) const;
     QPropertySpec *propertySpecForReset(const QString &name) const;
 
-    /// Returns a list of conversion operators for this class. The conversion operators are defined in other classes of the same module.
-    AbstractMetaFunctionList externalConversionOperators() const
-    {
-        return m_externalConversionOperators;
-    }
+    /// Returns a list of conversion operators for this class. The conversion
+    /// operators are defined in other classes of the same module.
+    AbstractMetaFunctionList externalConversionOperators() const;
     /// Adds a converter operator for this class.
-    void addExternalConversionOperator(AbstractMetaFunction* conversionOp)
-    {
-        if (!m_externalConversionOperators.contains(conversionOp))
-            m_externalConversionOperators.append(conversionOp);
-    }
+    void addExternalConversionOperator(AbstractMetaFunction* conversionOp);
     /// Returns true if this class has any converter operators defined elsewhere.
-    bool hasExternalConversionOperators() const
-    {
-        return !m_externalConversionOperators.isEmpty();
-    }
+    bool hasExternalConversionOperators() const;
 
     void sortFunctions();
 
-    const AbstractMetaClass *templateBaseClass() const { return m_templateBaseClass; }
-    void setTemplateBaseClass(const AbstractMetaClass *cls) { m_templateBaseClass = cls; }
+    const AbstractMetaClass *templateBaseClass() const;
+    void setTemplateBaseClass(const AbstractMetaClass *cls);
 
     bool hasTemplateBaseClassInstantiations() const;
     const AbstractMetaTypeList &templateBaseClassInstantiations() const;
     void setTemplateBaseClassInstantiations(const AbstractMetaTypeList& instantiations);
 
-    void setTypeDef(bool typeDef) { m_isTypeDef = typeDef; }
-    bool isTypeDef() const { return m_isTypeDef; }
+    void setTypeDef(bool typeDef);
+    bool isTypeDef() const;
 
-    bool isStream() const { return m_stream; }
-    void setStream(bool stream) { m_stream = stream; }
+    bool isStream() const;
+    void setStream(bool stream);
 
-    bool hasToStringCapability() const { return m_hasToStringCapability; }
-    void setToStringCapability(bool value, uint indirections = 0)
-    {
-        m_hasToStringCapability = value;
-        m_toStringCapabilityIndirections = indirections;
-    }
+    bool hasToStringCapability() const;
+    void setToStringCapability(bool value, uint indirections = 0);
 
-    uint toStringCapabilityIndirections() const { return m_toStringCapabilityIndirections; }
+    uint toStringCapabilityIndirections() const;
 
     bool deleteInMainThread() const;
 
@@ -357,45 +330,8 @@ private:
     void formatMembers(QDebug &d) const;
     friend QDebug operator<<(QDebug d, const AbstractMetaClass *ac);
 #endif
-    uint m_hasVirtuals : 1;
-    uint m_isPolymorphic : 1;
-    uint m_hasNonpublic : 1;
-    uint m_hasNonPrivateConstructor : 1;
-    uint m_hasPrivateConstructor : 1;
-    uint m_functionsFixed : 1;
-    uint m_hasPrivateDestructor : 1;
-    uint m_hasProtectedDestructor : 1;
-    uint m_hasVirtualDestructor : 1;
-    uint m_hasHashFunction : 1;
-    uint m_hasEqualsOperator : 1;
-    uint m_hasCloneOperator : 1;
-    uint m_isTypeDef : 1;
-    uint m_hasToStringCapability : 1;
 
-    Documentation m_doc;
-
-    const AbstractMetaClass *m_enclosingClass = nullptr;
-    AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance
-    AbstractMetaTypeList m_baseTemplateInstantiations;
-    AbstractMetaClass *m_extendedNamespace = nullptr;
-
-    const AbstractMetaClass *m_templateBaseClass = nullptr;
-    AbstractMetaFunctionList m_functions;
-    AbstractMetaFieldList m_fields;
-    AbstractMetaEnumList m_enums;
-    QVector<QPropertySpec *> m_propertySpecs;
-    AbstractMetaClassList m_innerClasses;
-
-    AbstractMetaFunctionList m_externalConversionOperators;
-
-    QStringList m_baseClassNames;  // Base class names from C++, including rejected
-    QVector<TypeEntry *> m_templateArgs;
-    ComplexTypeEntry *m_typeEntry = nullptr;
-    SourceLocation m_sourceLocation;
-//     FunctionModelItem m_qDebugStreamFunction;
-
-    bool m_stream = false;
-    uint m_toStringCapabilityIndirections = 0;
+    QScopedPointer<AbstractMetaClassPrivate> d;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::FunctionQueryOptions)
@@ -404,7 +340,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::OperatorQueryOptions)
 template <class Function>
 void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
 {
-    for (auto ic : m_innerClasses) {
+    for (auto ic : innerClasses()) {
         if (ic->isInvisibleNamespace()) {
             f(ic);
             ic->invisibleNamespaceRecursion(f);

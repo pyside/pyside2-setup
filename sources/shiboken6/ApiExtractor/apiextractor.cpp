@@ -40,6 +40,7 @@
 #include "typesystem.h"
 #include "fileout.h"
 #include "abstractmetabuilder.h"
+#include "abstractmetaenum.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 

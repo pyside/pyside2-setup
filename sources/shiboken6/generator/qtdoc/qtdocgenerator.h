@@ -33,7 +33,7 @@
 #include <QtCore/QScopedPointer>
 #include <QtCore/QTextStream>
 #include <QXmlStreamReader>
-#include "abstractmetalang.h"
+#include "documentation.h"
 #include "generator.h"
 #include "docparser.h"
 #include "typesystem_enums.h"

@@ -30,6 +30,7 @@
 #include <QtTest/QTest>
 #include "testutil.h"
 #include <abstractmetalang.h>
+#include <abstractmetaenum.h>
 #include <typesystem.h>
 
 void NamespaceTest::testNamespaceMembers()
