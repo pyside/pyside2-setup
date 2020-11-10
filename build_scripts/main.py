@@ -900,6 +900,10 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             deployment_target = macos_pyside_min_deployment_target()
             cmake_cmd.append("-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(deployment_target))
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
+        elif sys.platform == 'win32':
+            # Prevent cmake from auto-detecting clang if it is in path.
+            cmake_cmd.append("-DCMAKE_C_COMPILER=cl.exe")
+            cmake_cmd.append("-DCMAKE_CXX_COMPILER=cl.exe")
 
         if OPTION["DOC_BUILD_ONLINE"]:
             log.info("Output format will be HTML")
