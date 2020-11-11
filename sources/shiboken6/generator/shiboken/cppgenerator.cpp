@@ -912,7 +912,7 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
         return QLatin1String("return;");
     const AbstractMetaType &returnType = func->type();
     for (const FunctionModification &mod : functionModifications) {
-        for (const ArgumentModification &argMod : mod.argument_mods) {
+        for (const ArgumentModification &argMod : mod.argument_mods()) {
             if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
                 static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
                 Q_ASSERT(regex.isValid());
@@ -1108,7 +1108,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     bool invalidateReturn = false;
     QSet<int> invalidateArgs;
     for (const FunctionModification &funcMod : functionModifications) {
-        for (const ArgumentModification &argMod : funcMod.argument_mods) {
+        for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             if (argMod.resetAfterUse && !invalidateArgs.contains(argMod.index)) {
                 invalidateArgs.insert(argMod.index);
                 s << INDENT << "bool invalidateArg" << argMod.index;
@@ -1211,7 +1211,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
 
 
     for (const FunctionModification &funcMod : functionModifications) {
-        for (const ArgumentModification &argMod : funcMod.argument_mods) {
+        for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             if (argMod.ownerships.contains(TypeSystem::NativeCode)
                 && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
                 s << INDENT << "if (Shiboken::Object::checkType(" << PYTHON_RETURN_VAR << "))\n";
@@ -3713,7 +3713,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
     QVector<ArgumentModification> refcount_mods;
     const FunctionModificationList &funcMods = func->modifications();
     for (const FunctionModification &func_mod : funcMods) {
-        for (const ArgumentModification &arg_mod : func_mod.argument_mods) {
+        for (const ArgumentModification &arg_mod : func_mod.argument_mods()) {
             if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
                 ownership_mods.append(arg_mod);
             else if (!arg_mod.referenceCounts.isEmpty())

@@ -185,7 +185,7 @@ bool AbstractMetaFunction::isModifiedRemoved(int types) const
         if (!mod.isRemoveModifier())
             continue;
 
-        if ((mod.removal & types) == types)
+        if ((mod.removal() & types) == types)
             return true;
     }
 
@@ -425,7 +425,7 @@ QVector<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMeta
 
     const FunctionModificationList &mods = this->modifications(cls);
     for (const FunctionModification &mod : mods) {
-        for (const ArgumentModification &argumentMod : mod.argument_mods) {
+        for (const ArgumentModification &argumentMod : mod.argument_mods()) {
             if (argumentMod.index != idx && idx != -2)
                 continue;
             returned += argumentMod.referenceCounts;
@@ -439,7 +439,7 @@ ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClass *cls, 
 {
     const FunctionModificationList &mods = this->modifications(cls);
     for (const FunctionModification &mod : mods) {
-        for (const ArgumentModification &argumentMod : mod.argument_mods) {
+        for (const ArgumentModification &argumentMod : mod.argument_mods()) {
             if (argumentMod.index != idx)
                 continue;
             return argumentMod.owner;
@@ -452,7 +452,7 @@ QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int 
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
     for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index != key)
                 continue;
 
@@ -471,7 +471,7 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
     for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == key) {
                 if (argumentModification.removed)
                     return true;
@@ -624,7 +624,7 @@ TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *c
 {
     const FunctionModificationList &modifications = this->modifications(cls);
     for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == key)
                 return argumentModification.ownerships.value(language, TypeSystem::InvalidOwnership);
         }
@@ -642,7 +642,7 @@ bool AbstractMetaFunction::isRemovedFrom(const AbstractMetaClass *cls, TypeSyste
 {
     const FunctionModificationList &modifications = this->modifications(cls);
     for (const FunctionModification &modification : modifications) {
-        if ((modification.removal & language) == language)
+        if ((modification.removal() & language) == language)
             return true;
     }
 
@@ -653,7 +653,7 @@ QString AbstractMetaFunction::typeReplaced(int key) const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
     for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == key
                 && !argumentModification.modified_type.isEmpty()) {
                 return argumentModification.modified_type;
@@ -668,7 +668,7 @@ bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
 {
     const FunctionModificationList &modifications = this->modifications(declaringClass());
     for (const FunctionModification &modification : modifications) {
-        for (const ArgumentModification &argumentModification : modification.argument_mods) {
+        for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == argumentIndex && argumentModification.array != 0)
                 return true;
         }
@@ -795,7 +795,7 @@ CodeSnipList AbstractMetaFunction::injectedCodeSnips(TypeSystem::CodeSnipPositio
     const FunctionModificationList &mods = modifications(ownerClass());
     for (const FunctionModification &mod : mods) {
         if (mod.isCodeInjection()) {
-            for (const CodeSnip &snip : mod.snips) {
+            for (const CodeSnip &snip : mod.snips()) {
                 if ((snip.language & language) && (snip.position == position || position == TypeSystem::CodeSnipPositionAny))
                     result << snip;
             }
@@ -810,7 +810,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
     for (const FunctionModification &mod : mods) {
         if (mod.isRenameModifier())
             return true;
-        for (const ArgumentModification &argmod : mod.argument_mods) {
+        for (const ArgumentModification &argmod : mod.argument_mods()) {
             // since zero represents the return type and we're
             // interested only in checking the function arguments,
             // it will be ignored.
@@ -1039,7 +1039,7 @@ QString AbstractMetaFunctionPrivate::modifiedName(const AbstractMetaFunction *q)
         const FunctionModificationList &mods = q->modifications(q->implementingClass());
         for (const FunctionModification &mod : mods) {
             if (mod.isRenameModifier()) {
-                m_cachedModifiedName = mod.renamedToName;
+                m_cachedModifiedName = mod.renamedToName();
                 break;
             }
         }

@@ -237,7 +237,7 @@ ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 
-ENUM_LOOKUP_BEGIN(Modification::Modifiers, Qt::CaseSensitive,
+ENUM_LOOKUP_BEGIN(Modification::ModifierFlag, Qt::CaseSensitive,
                   modifierFromAttribute, Modification::InvalidModifier)
     {
         {u"private", Modification::Private},
@@ -888,10 +888,10 @@ bool TypeSystemParser::endElement(QStringView localName)
             m_current->parent->value.customFunction->addTemplateInstance(m_current->value.templateInstance);
             break;
         case StackElement::ConversionRule:
-            m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().argument_mods().last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
             break;
         case StackElement::InjectCodeInFunction:
-            m_contextStack.top()->functionMods.last().snips.last().addTemplateInstance(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(m_current->value.templateInstance);
             break;
         default:
             break; // nada
@@ -941,7 +941,7 @@ bool TypeSystemParser::characters(const String &ch)
 
     if (m_current->type == StackElement::ConversionRule
         && m_current->parent->type == StackElement::ModifyArgument) {
-        m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.last().addCode(ch);
+        m_contextStack.top()->functionMods.last().argument_mods().last().conversion_rules.last().addCode(ch);
         return true;
     }
 
@@ -961,8 +961,8 @@ bool TypeSystemParser::characters(const String &ch)
                 break;
             case StackElement::ModifyFunction:
             case StackElement::AddFunction:
-                m_contextStack.top()->functionMods.last().snips.last().addCode(ch);
-                m_contextStack.top()->functionMods.last().modifiers |= FunctionModification::CodeInjection;
+                m_contextStack.top()->functionMods.last().snips().last().addCode(ch);
+                m_contextStack.top()->functionMods.last().setModifierFlag(FunctionModification::CodeInjection);
                 break;
             case StackElement::NamespaceTypeEntry:
             case StackElement::ObjectTypeEntry:
@@ -1069,7 +1069,7 @@ static bool convertRemovalAttribute(QStringView remove, Modification& mod, QStri
 #else
     if (QtPrivate::compareStrings(remove, u"all", Qt::CaseInsensitive) == 0) {
 #endif
-        mod.removal = TypeSystem::All;
+        mod.setRemoval(TypeSystem::All);
         return true;
     }
 #ifdef QTBUG_69389_FIXED
@@ -1077,7 +1077,7 @@ static bool convertRemovalAttribute(QStringView remove, Modification& mod, QStri
 #else
     if (QtPrivate::compareStrings(remove, u"target", Qt::CaseInsensitive) == 0) {
 #endif
-        mod.removal = TypeSystem::TargetLangAndNativeCode;
+        mod.setRemoval(TypeSystem::TargetLangAndNativeCode);
         return true;
     }
     errorMsg = QString::fromLatin1("Bad removal type '%1'").arg(remove);
@@ -1640,8 +1640,8 @@ bool TypeSystemParser::parseRenameFunction(const QXmlStreamReader &,
         FunctionModification mod;
         if (!mod.setSignature(signature, &m_error))
             return false;
-        mod.renamedToName = rename;
-        mod.modifiers |= Modification::Rename;
+        mod.setRenamedToName(rename);
+        mod.setModifierFlag(Modification::Rename);
         m_contextStack.top()->functionMods << mod;
     }
     return true;
@@ -1817,7 +1817,7 @@ bool TypeSystemParser::parseReplaceArgumentType(const QXmlStreamReader &,
         m_error = QLatin1String("Type replacement requires 'modified-type' attribute");
         return false;
     }
-    m_contextStack.top()->functionMods.last().argument_mods.last().modified_type =
+    m_contextStack.top()->functionMods.last().argument_mods().last().modified_type =
         attributes->takeAt(modifiedTypeIndex).value().toString();
     return true;
 }
@@ -1857,7 +1857,7 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
     if (topElement.type == StackElement::ModifyArgument) {
         CodeSnip snip;
         snip.language = lang;
-        m_contextStack.top()->functionMods.last().argument_mods.last().conversion_rules.append(snip);
+        m_contextStack.top()->functionMods.last().argument_mods().last().conversion_rules.append(snip);
         return true;
     }
 
@@ -2004,7 +2004,7 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
     ArgumentModification argumentModification = ArgumentModification(idx);
     argumentModification.replace_value = replaceValue;
     argumentModification.resetAfterUse = resetAfterUse;
-    m_contextStack.top()->functionMods.last().argument_mods.append(argumentModification);
+    m_contextStack.top()->functionMods.last().argument_mods().append(argumentModification);
     return true;
 }
 
@@ -2016,7 +2016,7 @@ bool TypeSystemParser::parseNoNullPointer(const QXmlStreamReader &reader,
         return false;
     }
 
-    ArgumentModification &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods.last();
+    ArgumentModification &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
     lastArgMod.noNullPointers = true;
 
     const int defaultValueIndex =
@@ -2058,7 +2058,7 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
         m_error = QStringLiteral("unsupported owner attribute: '%1'").arg(ownership);
         return false;
     }
-    m_contextStack.top()->functionMods.last().argument_mods.last().ownerships[lang] = owner;
+    m_contextStack.top()->functionMods.last().argument_mods().last().ownerships[lang] = owner;
     return true;
 }
 
@@ -2083,7 +2083,7 @@ bool TypeSystemParser::parseRemoval(const QXmlStreamReader &,
             return false;
         }
     }
-    m_contextStack.top()->functionMods.last().removal = lang;
+    m_contextStack.top()->functionMods.last().setRemoval(lang);
     return true;
 }
 
@@ -2105,7 +2105,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
     else if (topElement.type == StackElement::ModifyField)
         mod = &m_contextStack.top()->fieldMods.last();
 
-    Modification::Modifiers modifierFlag = Modification::Rename;
+    Modification::ModifierFlag modifierFlag = Modification::Rename;
     if (type == StackElement::Rename) {
         const int toIndex = indexOfAttribute(*attributes, toAttribute());
         if (toIndex == -1) {
@@ -2114,11 +2114,11 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
         }
         const QString renamed_to = attributes->takeAt(toIndex).value().toString();
         if (topElement.type == StackElement::ModifyFunction)
-            mod->setRenamedTo(renamed_to);
+            mod->setRenamedToName(renamed_to);
         else if (topElement.type == StackElement::ModifyField)
-            mod->setRenamedTo(renamed_to);
+            mod->setRenamedToName(renamed_to);
         else
-            m_contextStack.top()->functionMods.last().argument_mods.last().renamed_to = renamed_to;
+            m_contextStack.top()->functionMods.last().argument_mods().last().renamed_to = renamed_to;
     } else {
         const int modifierIndex = indexOfAttribute(*attributes, modifierAttribute());
         if (modifierIndex == -1) {
@@ -2138,7 +2138,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
     }
 
     if (mod)
-        mod->modifiers |= modifierFlag;
+        mod->setModifierFlag(modifierFlag);
     return true;
 }
 
@@ -2146,7 +2146,7 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
                                QXmlStreamAttributes *attributes)
 {
     FieldModification fm;
-    fm.modifiers = FieldModification::Readable | FieldModification::Writable;
+    fm.setModifiers(FieldModification::Readable | FieldModification::Writable);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
@@ -2158,12 +2158,12 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (!convertBoolean(attributes->takeAt(i).value(), readAttribute(), true))
-                fm.modifiers &= ~FieldModification::Readable;
+                fm.clearModifierFlag(FieldModification::Readable);
         } else if (name == writeAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (!convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true))
-                fm.modifiers &= ~FieldModification::Writable;
+                fm.clearModifierFlag(FieldModification::Writable);
         }
     }
     if (fm.name.isEmpty()) {
@@ -2378,7 +2378,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
-        const Modification::Modifiers m = modifierFromAttribute(access);
+        const Modification::ModifierFlag m = modifierFromAttribute(access);
         if ((m & (Modification::AccessModifierMask | Modification::FinalMask)) == 0) {
             m_error = QString::fromLatin1("Bad access type '%1'").arg(access);
             return false;
@@ -2388,18 +2388,18 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
                       qPrintable(msgUnimplementedAttributeValueWarning(reader,
                       accessAttribute(), access)));
         }
-        mod.modifiers |= m;
+        mod.setModifierFlag(m);
     }
 
     if (deprecated)
-        mod.modifiers |= Modification::Deprecated;
+        mod.setModifierFlag(Modification::Deprecated);
 
     if (!removal.isEmpty() && !convertRemovalAttribute(removal, mod, m_error))
         return false;
 
     if (!rename.isEmpty()) {
-        mod.renamedToName = rename;
-        mod.modifiers |= Modification::Rename;
+        mod.setRenamedToName(rename);
+        mod.setModifierFlag(Modification::Rename);
     }
 
     mod.setIsThread(isThread);
@@ -2424,7 +2424,7 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const QXmlStreamReader &,
         return false;
     }
 
-    m_contextStack.top()->functionMods.last().argument_mods.last().replacedDefaultExpression =
+    m_contextStack.top()->functionMods.last().argument_mods().last().replacedDefaultExpression =
         attributes->takeAt(withIndex).value().toString();
     return true;
 }
@@ -2485,7 +2485,7 @@ bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
         }
     }
 
-    m_contextStack.top()->functionMods.last().argument_mods.last().referenceCounts.append(rc);
+    m_contextStack.top()->functionMods.last().argument_mods().last().referenceCounts.append(rc);
     return true;
 }
 
@@ -2515,7 +2515,7 @@ bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
             }
         }
     }
-    m_contextStack.top()->functionMods.last().argument_mods.last().owner = ao;
+    m_contextStack.top()->functionMods.last().argument_mods().last().owner = ao;
     return true;
 }
 
@@ -2601,9 +2601,9 @@ bool TypeSystemParser::parseInjectCode(const QXmlStreamReader &,
     if (topElement.type == StackElement::ModifyFunction
         || topElement.type == StackElement::AddFunction) {
         FunctionModification &mod = m_contextStack.top()->functionMods.last();
-        mod.snips << snip;
+        mod.appendSnip(snip);
         if (!snip.code().isEmpty())
-            mod.modifiers |= FunctionModification::CodeInjection;
+            mod.setModifierFlag(FunctionModification::CodeInjection);
         element->type = StackElement::InjectCodeInFunction;
     } else if (topElement.type == StackElement::Root) {
         element->entry->addCodeSnip(snip);
@@ -3043,7 +3043,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             }
 
-            m_contextStack.top()->functionMods.last().argument_mods.last().removed = true;
+            m_contextStack.top()->functionMods.last().argument_mods().last().removed = true;
             break;
 
         case StackElement::ModifyField:
@@ -3068,7 +3068,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::RemoveDefaultExpression:
-            m_contextStack.top()->functionMods.last().argument_mods.last().removedDefaultExpression = true;
+            m_contextStack.top()->functionMods.last().argument_mods().last().removedDefaultExpression = true;
             break;
         case StackElement::CustomMetaConstructor:
         case StackElement::CustomMetaDestructor:
@@ -3088,7 +3088,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 m_error = QLatin1String("array must be child of modify-argument");
                 return false;
             }
-            m_contextStack.top()->functionMods.last().argument_mods.last().array = true;
+            m_contextStack.top()->functionMods.last().argument_mods().last().array = true;
             break;
         case StackElement::InjectCode:
             if (!parseInjectCode(reader, topElement, element, &attributes))

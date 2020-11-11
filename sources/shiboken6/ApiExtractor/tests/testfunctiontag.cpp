@@ -87,7 +87,7 @@ void TestFunctionTag::testRenameGlobalFunction()
     QVERIFY(metaFunc);
     QCOMPARE(metaFunc->modifications().size(), 1);
     QVERIFY(metaFunc->modifications().constFirst().isRenameModifier());
-    QCOMPARE(metaFunc->modifications().constFirst().renamedTo(),
+    QCOMPARE(metaFunc->modifications().constFirst().renamedToName(),
              QLatin1String("smooth"));
 
     QCOMPARE(metaFunc->name(), QLatin1String("smooth"));

@@ -78,7 +78,7 @@ bool AbstractMetaField::isModifiedRemoved(int types) const
         if (!mod.isRemoveModifier())
             continue;
 
-        if ((mod.removal & types) == types)
+        if ((mod.removal() & types) == types)
             return true;
     }
 

@@ -312,7 +312,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 
     QCOMPARE(mods.size(), 1);
     QVERIFY(mods.constFirst().isCodeInjection());
-    CodeSnip snip = mods.constFirst().snips.constFirst();
+    CodeSnip snip = mods.constFirst().snips().constFirst();
     QCOMPARE(snip.code().trimmed(), QLatin1String("custom_code();"));
 }
 

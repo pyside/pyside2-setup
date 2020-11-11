@@ -82,7 +82,7 @@ void TestNestedTypes::testNestedTypesModifications()
 
     QCOMPARE(addedFunc->modifications().size(), 1);
     QVERIFY(addedFunc->modifications().constFirst().isCodeInjection());
-    snip = addedFunc->modifications().constFirst().snips.constFirst();
+    snip = addedFunc->modifications().constFirst().snips().constFirst();
     QCOMPARE(snip.code().trimmed(), QLatin1String("custom_code2();"));
 
     const AbstractMetaClass *sc = AbstractMetaClass::findClass(classes, QLatin1String("OuterNamespace::InnerNamespace::SomeClass"));

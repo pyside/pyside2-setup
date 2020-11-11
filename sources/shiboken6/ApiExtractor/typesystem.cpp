@@ -1195,7 +1195,7 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
     }
     FieldModification mod;
     mod.name = name;
-    mod.modifiers = FieldModification::Readable | FieldModification::Writable;
+    mod.setModifiers(FieldModification::Readable | FieldModification::Writable);
     return mod;
 }
 

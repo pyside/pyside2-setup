@@ -35,8 +35,12 @@
 
 #include <QtCore/QList>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QSharedDataPointer>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QString>
+
+class FunctionModificationData;
+class ModificationData;
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -211,8 +215,10 @@ struct ArgumentModification
     uint array : 1; // consider "int*" to be "int[]"
 };
 
-struct Modification
+class Modification
 {
+public:
+
     enum ModifierFlag {
         InvalidModifier =       0x0000,
         Private =               0x0001,
@@ -236,13 +242,30 @@ struct Modification
 
     Q_DECLARE_FLAGS(Modifiers, ModifierFlag);
 
+    Modification();
+    Modification(const Modification &);
+    Modification &operator=(const Modification &);
+    Modification(Modification &&);
+    Modification &operator=(Modification &&);
+    ~Modification();
+
+    QString renamedToName() const;
+    void setRenamedToName(const QString &value);
+
+    Modifiers modifiers() const;
+    void setModifiers(Modifiers m);
+    void setModifierFlag(ModifierFlag f);
+    void clearModifierFlag(ModifierFlag f);
+    TypeSystem::Language removal() const;
+    void setRemoval(TypeSystem::Language r);
+
     bool isAccessModifier() const
     {
-        return (modifiers & AccessModifierMask) != 0;
+        return (modifiers() & AccessModifierMask) != 0;
     }
     Modifiers accessModifier() const
     {
-        return modifiers & AccessModifierMask;
+        return modifiers() & AccessModifierMask;
     }
     bool isPrivate() const
     {
@@ -262,103 +285,90 @@ struct Modification
     }
     bool isFinal() const
     {
-        return modifiers.testFlag(Final);
+        return modifiers().testFlag(Final);
     }
     bool isNonFinal() const
     {
-        return modifiers.testFlag(NonFinal);
+        return modifiers().testFlag(NonFinal);
     }
     QString accessModifierString() const;
 
     bool isDeprecated() const
     {
-        return modifiers.testFlag(Deprecated);
+        return modifiers().testFlag(Deprecated);
     }
 
-    void setRenamedTo(const QString &name)
-    {
-        renamedToName = name;
-    }
-    QString renamedTo() const
-    {
-        return renamedToName;
-    }
     bool isRenameModifier() const
     {
-        return modifiers.testFlag(Rename);
+        return modifiers().testFlag(Rename);
     }
 
     bool isRemoveModifier() const
     {
-        return removal != TypeSystem::NoLanguage;
+        return removal() != TypeSystem::NoLanguage;
     }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
 
-    QString renamedToName;
-    Modifiers modifiers;
-    TypeSystem::Language removal = TypeSystem::NoLanguage;
+private:
+    QSharedDataPointer<ModificationData> md;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Modification::Modifiers)
 
-struct FunctionModification: public Modification
+class FunctionModification: public Modification
 {
+public:
     using AllowThread = TypeSystem::AllowThread;
+
+    FunctionModification();
+    FunctionModification(const FunctionModification &);
+    FunctionModification &operator=(const FunctionModification &);
+    FunctionModification(FunctionModification &&);
+    FunctionModification &operator=(FunctionModification &&);
+    ~FunctionModification();
 
     bool isCodeInjection() const
     {
-        return modifiers.testFlag(CodeInjection);
+        return modifiers().testFlag(CodeInjection);
     }
-    void setIsThread(bool flag)
-    {
-        m_thread = flag;
-    }
-    bool isThread() const
-    {
-        return m_thread;
-    }
+    void setIsThread(bool flag);
+    bool isThread() const;
 
-    AllowThread allowThread() const { return m_allowThread; }
-    void setAllowThread(AllowThread allow) { m_allowThread = allow; }
+    AllowThread allowThread() const;
+    void setAllowThread(AllowThread allow);
 
-    bool matches(const QString &functionSignature) const
-    {
-        return m_signature.isEmpty()
-            ? m_signaturePattern.match(functionSignature).hasMatch()
-            : m_signature == functionSignature;
-    }
+    bool matches(const QString &functionSignature) const;
 
     bool setSignature(const QString &s, QString *errorMessage =  nullptr);
-    QString signature() const { return m_signature.isEmpty() ? m_signaturePattern.pattern() : m_signature; }
+    QString signature() const;
 
-    void setOriginalSignature(const QString &s) { m_originalSignature = s; }
-    QString originalSignature() const { return m_originalSignature; }
+    void setOriginalSignature(const QString &s);
+    QString originalSignature() const;
 
-    TypeSystem::ExceptionHandling exceptionHandling() const { return m_exceptionHandling; }
-    void setExceptionHandling(TypeSystem::ExceptionHandling e) { m_exceptionHandling = e; }
+    TypeSystem::ExceptionHandling exceptionHandling() const;
+    void setExceptionHandling(TypeSystem::ExceptionHandling e);
 
-    int overloadNumber() const { return m_overloadNumber; }
-    void setOverloadNumber(int overloadNumber) { m_overloadNumber = overloadNumber; }
+    int overloadNumber() const;
+    void setOverloadNumber(int overloadNumber);
+
+    const CodeSnipList &snips() const;
+    CodeSnipList &snips();
+    void appendSnip(const CodeSnip &snip);
+    void setSnips(const CodeSnipList &snips);
+
+    const QList<ArgumentModification> &argument_mods() const;
+    QList<ArgumentModification> &argument_mods();
+    void setArgument_mods(const QList<ArgumentModification> &argument_mods);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
 
-    CodeSnipList snips;
-
-    QList<ArgumentModification> argument_mods;
-
 private:
-    QString m_signature;
-    QString m_originalSignature;
-    QRegularExpression m_signaturePattern;
-    int m_overloadNumber = TypeSystem::OverloadNumberUnset;
-    bool m_thread = false;
-    AllowThread m_allowThread = AllowThread::Unspecified;
-    TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
+    QSharedDataPointer<FunctionModificationData> d;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -372,11 +382,11 @@ struct FieldModification: public Modification
 {
     bool isReadable() const
     {
-        return modifiers.testFlag(Readable);
+        return modifiers().testFlag(Readable);
     }
     bool isWritable() const
     {
-        return modifiers.testFlag(Writable);
+        return modifiers().testFlag(Writable);
     }
 
     QString name;

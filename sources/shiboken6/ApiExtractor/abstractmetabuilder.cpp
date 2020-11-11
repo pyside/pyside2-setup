@@ -1369,7 +1369,7 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
     for (const FunctionModification &mod : mods) {
         if (mod.isRenameModifier()) {
             func->setOriginalName(func->name());
-            func->setName(mod.renamedTo());
+            func->setName(mod.renamedToName());
         } else if (mod.isAccessModifier()) {
             funcRef -= AbstractMetaAttributes::Public;
             funcRef -= AbstractMetaAttributes::Protected;
@@ -1475,7 +1475,7 @@ static void applyDefaultExpressionModifications(const FunctionModificationList &
 {
     // use replace/remove-default-expression for set default value
     for (const auto &modification : functionMods) {
-        for (const auto &argumentModification : modification.argument_mods) {
+        for (const auto &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == i + 1) {
                 if (argumentModification.removedDefaultExpression) {
                     metaArg->setDefaultValueExpression(QString());
@@ -1611,7 +1611,7 @@ void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, co
     AbstractMetaArgumentList &arguments = func->arguments();
 
     for (const FunctionModification &mod : mods) {
-        for (const ArgumentModification &argMod : mod.argument_mods) {
+        for (const ArgumentModification &argMod : mod.argument_mods()) {
             if (!argMod.renamed_to.isEmpty())
                 arguments[argMod.index - 1].setName(argMod.renamed_to, false);
         }
@@ -1675,7 +1675,7 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
                                             QString *errorMessage)
 {
     for (const FunctionModification &mod : functionMods) {
-        for (const ArgumentModification &argMod : mod.argument_mods) {
+        for (const ArgumentModification &argMod : mod.argument_mods()) {
             if (argMod.array) {
                 const int i = argMod.index - 1;
                 if (i < 0 || i >= func->arguments().size()) {

@@ -158,24 +158,6 @@ QString Modification::accessModifierString() const
     return QString();
 }
 
-// ---------------------- FunctionModification
-bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
-{
-    if (s.startsWith(QLatin1Char('^'))) {
-        m_signaturePattern.setPattern(s);
-        if (!m_signaturePattern.isValid()) {
-            if (errorMessage) {
-                *errorMessage = QLatin1String("Invalid signature pattern: \"")
-                    + s + QLatin1String("\": ") + m_signaturePattern.errorString();
-            }
-            return false;
-        }
-    } else {
-        m_signature = s;
-    }
-    return true;
-}
-
 // Helpers to split a parameter list of <add-function>, <declare-function>
 // (@ denoting names), like
 // "void foo(QList<X,Y> &@list@ = QList<X,Y>{1,2}, int @b@=5, ...)"
@@ -385,33 +367,241 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
     return d;
 }
 
-void Modification::formatDebug(QDebug &d) const
+class ModificationData : public QSharedData
 {
-    d << "modifiers=" << modifiers;
-    if (removal)
-      d << ", removal";
-    if (!renamedToName.isEmpty())
-        d << ", renamedToName=\"" << renamedToName << '"';
+public:
+    QString renamedToName;
+    Modification::Modifiers modifiers;
+    TypeSystem::Language removal = TypeSystem::NoLanguage;
+};
+
+Modification::Modification() : md(new ModificationData)
+{
 }
 
-void FunctionModification::formatDebug(QDebug &d) const
+Modification::Modification(const Modification &) = default;
+Modification &Modification::operator=(const Modification &) = default;
+Modification::Modification(Modification &&) = default;
+Modification &Modification::operator=(Modification &&) = default;
+Modification::~Modification() = default;
+
+void Modification::formatDebug(QDebug &debug) const
 {
-    if (m_signature.isEmpty())
-        d << "pattern=\"" << m_signaturePattern.pattern();
+    debug << "modifiers=" << md->modifiers;
+    if (md->removal)
+      debug << ", removal";
+    if (!md->renamedToName.isEmpty())
+        debug << ", renamedToName=\"" << md->renamedToName << '"';
+}
+
+QString Modification::renamedToName() const
+{
+    return md->renamedToName;
+}
+
+void Modification::setRenamedToName(const QString &value)
+{
+    if (md->renamedToName != value)
+        md->renamedToName = value;
+}
+
+Modification::Modifiers Modification::modifiers() const
+{
+    return md->modifiers;
+}
+
+void Modification::setModifiers(Modifiers m)
+{
+    if (md->modifiers != m)
+        md->modifiers = m;
+}
+
+void Modification::setModifierFlag(Modification::ModifierFlag f)
+{
+    auto newMods = md->modifiers | f;
+    if (md->modifiers != newMods)
+        md->modifiers = newMods;
+}
+
+void Modification::clearModifierFlag(ModifierFlag f)
+{
+    auto newMods = md->modifiers & ~f;
+    if (md->modifiers != newMods)
+        md->modifiers = newMods;
+}
+
+TypeSystem::Language Modification::removal() const
+{
+    return md->removal;
+}
+
+void Modification::setRemoval(TypeSystem::Language r)
+{
+    if (md->removal != r)
+        md->removal = r;
+}
+
+class FunctionModificationData : public QSharedData
+{
+public:
+    CodeSnipList m_snips;
+    QList<ArgumentModification> m_argument_mods;
+    QString m_signature;
+    QString m_originalSignature;
+    QRegularExpression m_signaturePattern;
+    int m_overloadNumber = TypeSystem::OverloadNumberUnset;
+    bool m_thread = false;
+    TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
+    TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
+};
+
+FunctionModification::FunctionModification() : d(new FunctionModificationData)
+{
+}
+
+FunctionModification::FunctionModification(const FunctionModification &) = default;
+FunctionModification &FunctionModification::operator=(const FunctionModification &) = default;
+FunctionModification::FunctionModification(FunctionModification &&) = default;
+FunctionModification &FunctionModification::operator=(FunctionModification &&) = default;
+FunctionModification::~FunctionModification() = default;
+
+void FunctionModification::formatDebug(QDebug &debug) const
+{
+    if (d->m_signature.isEmpty())
+        debug << "pattern=\"" << d->m_signaturePattern.pattern();
     else
-        d << "signature=\"" << m_signature;
-    d << "\", ";
-    Modification::formatDebug(d);
-    if (m_allowThread != TypeSystem::AllowThread::Unspecified)
-        d << ", allowThread=" << int(m_allowThread);
-    if (m_thread)
-        d << ", thread";
-    if (m_exceptionHandling != TypeSystem::ExceptionHandling::Unspecified)
-        d << ", exceptionHandling=" << int(m_exceptionHandling);
-    if (!snips.isEmpty())
-        d << ", snips=(" << snips << ')';
-    if (!argument_mods.isEmpty())
-        d << ", argument_mods=(" << argument_mods << ')';
+        debug << "signature=\"" << d->m_signature;
+    debug << "\", ";
+    Modification::formatDebug(debug);
+    if (d->m_allowThread != TypeSystem::AllowThread::Unspecified)
+        debug << ", allowThread=" << int(d->m_allowThread);
+    if (d->m_thread)
+        debug << ", thread";
+    if (d->m_exceptionHandling != TypeSystem::ExceptionHandling::Unspecified)
+        debug << ", exceptionHandling=" << int(d->m_exceptionHandling);
+    if (!d->m_snips.isEmpty())
+        debug << ", snips=(" << d->m_snips << ')';
+    if (!d->m_argument_mods.isEmpty())
+        debug << ", argument_mods=(" << d->m_argument_mods << ')';
+}
+
+const QList<ArgumentModification> &FunctionModification::argument_mods() const
+{
+    return d->m_argument_mods;
+}
+
+QList<ArgumentModification> &FunctionModification::argument_mods()
+{
+    return d->m_argument_mods;
+}
+
+void FunctionModification::setArgument_mods(const QList<ArgumentModification> &argument_mods)
+{
+    d->m_argument_mods = argument_mods;
+}
+
+const CodeSnipList &FunctionModification::snips() const
+{
+    return d->m_snips;
+}
+
+CodeSnipList &FunctionModification::snips()
+{
+    return d->m_snips;
+}
+
+void FunctionModification::appendSnip(const CodeSnip &snip)
+{
+    d->m_snips.append(snip);
+}
+
+void FunctionModification::setSnips(const CodeSnipList &snips)
+{
+    d->m_snips = snips;
+}
+
+// ---------------------- FunctionModification
+void FunctionModification::setIsThread(bool flag)
+{
+    if (d->m_thread != flag)
+        d->m_thread = flag;
+}
+
+bool FunctionModification::isThread() const
+{
+    return d->m_thread;
+}
+
+FunctionModification::AllowThread FunctionModification::allowThread() const
+{
+    return d->m_allowThread;
+}
+
+void FunctionModification::setAllowThread(FunctionModification::AllowThread allow)
+{
+    if (d->m_allowThread != allow)
+        d->m_allowThread = allow;
+}
+
+bool FunctionModification::matches(const QString &functionSignature) const
+{
+    return d->m_signature.isEmpty()
+            ? d->m_signaturePattern.match(functionSignature).hasMatch()
+            : d->m_signature == functionSignature;
+}
+
+bool FunctionModification::setSignature(const QString &s, QString *errorMessage)
+{
+    if (s.startsWith(QLatin1Char('^'))) {
+        d->m_signaturePattern.setPattern(s);
+        if (!d->m_signaturePattern.isValid()) {
+            if (errorMessage) {
+                *errorMessage = QLatin1String("Invalid signature pattern: \"")
+                    + s + QLatin1String("\": ") + d->m_signaturePattern.errorString();
+            }
+            return false;
+        }
+    } else {
+        d->m_signature = s;
+    }
+    return true;
+}
+
+QString FunctionModification::signature() const
+{
+    return d->m_signature.isEmpty() ? d->m_signaturePattern.pattern() : d->m_signature;
+}
+
+void FunctionModification::setOriginalSignature(const QString &s)
+{
+    if (d->m_originalSignature != s)
+        d->m_originalSignature = s;
+}
+
+QString FunctionModification::originalSignature() const
+{
+    return d->m_originalSignature;
+}
+
+TypeSystem::ExceptionHandling FunctionModification::exceptionHandling() const
+{
+    return d->m_exceptionHandling;
+}
+
+void FunctionModification::setExceptionHandling(TypeSystem::ExceptionHandling e)
+{
+    if (d->m_exceptionHandling != e)
+        d->m_exceptionHandling = e;
+}
+
+int FunctionModification::overloadNumber() const
+{
+    return d->m_overloadNumber;
+}
+
+void FunctionModification::setOverloadNumber(int overloadNumber)
+{
+    d->m_overloadNumber = overloadNumber;
 }
 
 QDebug operator<<(QDebug d, const ArgumentOwner &a)

@@ -1223,7 +1223,7 @@ void AbstractMetaClass::fixFunctions()
         const FunctionModificationList &mods = func->modifications(this);
         for (const FunctionModification &mod : mods) {
             if (mod.isRenameModifier()) {
-                func->setName(mod.renamedTo());
+                func->setName(mod.renamedToName());
             }
         }
 

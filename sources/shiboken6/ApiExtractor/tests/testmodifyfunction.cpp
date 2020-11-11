@@ -145,46 +145,46 @@ void TestModifyFunction::invalidateAfterUse()
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 
     const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
     QVERIFY(classC);
     func = classC->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 
     func = classC->findFunction(QLatin1String("call2"));
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 
     const AbstractMetaClass *classD =  AbstractMetaClass::findClass(classes, QLatin1String("D"));
     QVERIFY(classD);
     func = classD->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 
     func = classD->findFunction(QLatin1String("call2"));
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 
     const AbstractMetaClass *classE = AbstractMetaClass::findClass(classes, QLatin1String("E"));
     QVERIFY(classE);
     func = classE->findFunction(QLatin1String("call"));
     QVERIFY(func);
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 
     func = classE->findFunction(QLatin1String("call2"));
     QVERIFY(func);
     QCOMPARE(func->modifications().size(), 1);
-    QCOMPARE(func->modifications().at(0).argument_mods.size(), 1);
-    QVERIFY(func->modifications().at(0).argument_mods.at(0).resetAfterUse);
+    QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
+    QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
 }
 
 void TestModifyFunction::testWithApiVersion()
@@ -305,7 +305,7 @@ void TestModifyFunction::testGlobalFunctionModification()
 
     FunctionModificationList mods = TypeDatabase::instance()->functionModifications(QLatin1String("function(A*)"));
     QCOMPARE(mods.count(), 1);
-    QVector<ArgumentModification> argMods = mods.constFirst().argument_mods;
+    const QVector<ArgumentModification> &argMods = mods.constFirst().argument_mods();
     QCOMPARE(argMods.count(), 1);
     ArgumentModification argMod = argMods.constFirst();
     QCOMPARE(argMod.replacedDefaultExpression, QLatin1String("A()"));
