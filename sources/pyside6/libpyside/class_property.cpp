@@ -122,6 +122,7 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
     // Use `_PepType_Lookup()` instead of `PyObject_GetAttr()` in order to get the raw
     // descriptor (`property`) instead of calling `tp_descr_get` (`property.__get__()`).
     auto type = reinterpret_cast<PyTypeObject *>(obj);
+    PySide::Feature::Select(type);
     PyObject *descr = _PepType_Lookup(type, name);
 
     // The following assignment combinations are possible:
