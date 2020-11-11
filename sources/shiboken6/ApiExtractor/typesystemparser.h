@@ -77,7 +77,6 @@ class StackElement
             Root                        = 0x0500,
             CustomMetaConstructor       = 0x0600,
             CustomMetaDestructor        = 0x0700,
-            ArgumentMap                 = 0x0800,
             SuppressedWarning           = 0x0900,
             Rejection                   = 0x0a00,
             LoadTypesystem              = 0x0b00,
@@ -227,8 +226,6 @@ private:
                             QXmlStreamAttributes *attributes);
     bool parseDefineOwnership(const QXmlStreamReader &, const StackElement &topElement,
                               QXmlStreamAttributes *);
-    bool parseArgumentMap(const QXmlStreamReader &, const StackElement &topElement,
-                          QXmlStreamAttributes *);
     bool parseRemoval(const QXmlStreamReader &, const StackElement &topElement,
                       QXmlStreamAttributes *);
     bool parseRename(const QXmlStreamReader &, StackElement::ElementType type,

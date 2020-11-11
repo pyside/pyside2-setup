@@ -381,14 +381,7 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
             d << lines.at(i).trimmed();
         }
     }
-    d << '"';
-    if (!s.argumentMap.isEmpty()) {
-        d << ", argumentMap{";
-        for (auto it = s.argumentMap.cbegin(), end = s.argumentMap.cend(); it != end; ++it)
-            d << it.key() << "->\"" << it.value() << '"';
-        d << '}';
-    }
-    d << ')';
+    d << "\")";
     return d;
 }
 
@@ -409,8 +402,6 @@ void FunctionModification::formatDebug(QDebug &d) const
         d << "signature=\"" << m_signature;
     d << "\", ";
     Modification::formatDebug(d);
-    if (!association.isEmpty())
-        d << ", association=\"" << association << '"';
     if (m_allowThread != TypeSystem::AllowThread::Unspecified)
         d << ", allowThread=" << int(m_allowThread);
     if (m_thread)

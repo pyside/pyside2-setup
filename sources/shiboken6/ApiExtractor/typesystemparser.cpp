@@ -344,7 +344,6 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"access", StackElement::Access}, // sorted!
         {u"add-conversion", StackElement::AddConversion},
         {u"add-function", StackElement::AddFunction},
-        {u"argument-map", StackElement::ArgumentMap},
         {u"array", StackElement::Array},
         {u"container-type", StackElement::ContainerTypeEntry},
         {u"conversion-rule", StackElement::ConversionRule},
@@ -2063,43 +2062,6 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseArgumentMap(const QXmlStreamReader &,
-                               const StackElement &topElement,
-                               QXmlStreamAttributes *attributes)
-{
-    if (!(topElement.type & StackElement::CodeSnipMask)) {
-        m_error = QLatin1String("Argument maps requires code injection as parent");
-        return false;
-    }
-
-    int pos = 1;
-    QString metaName;
-    for (int i = attributes->size() - 1; i >= 0; --i) {
-        const auto name = attributes->at(i).qualifiedName();
-        if (name == indexAttribute()) {
-            if (!parseIndex(attributes->takeAt(i).value().toString(), &pos, &m_error))
-                return false;
-            if (pos <= 0) {
-                m_error = QStringLiteral("Argument position %1 must be a positive number").arg(pos);
-                return false;
-            }
-        } else if (name == QLatin1String("meta-name")) {
-            metaName = attributes->takeAt(i).value().toString();
-        }
-    }
-
-    if (metaName.isEmpty())
-        qCWarning(lcShiboken) << "Empty meta name in argument map";
-
-    if (topElement.type == StackElement::InjectCodeInFunction) {
-        m_contextStack.top()->functionMods.last().snips.last().argumentMap[pos] = metaName;
-    } else {
-        qCWarning(lcShiboken) << "Argument maps are only useful for injection of code "
-                                 "into functions.";
-    }
-    return true;
-}
-
 bool TypeSystemParser::parseRemoval(const QXmlStreamReader &,
                            const StackElement &topElement,
                            QXmlStreamAttributes *attributes)
@@ -2351,7 +2313,6 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     QString access;
     QString removal;
     QString rename;
-    QString association;
     bool deprecated = false;
     bool isThread = false;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
@@ -2365,10 +2326,6 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
             access = attributes->takeAt(i).value().toString();
         } else if (name == renameAttribute()) {
             rename = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("associated-to")) {
-            association = attributes->takeAt(i).value().toString();
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
         } else if (name == removeAttribute()) {
             removal = attributes->takeAt(i).value().toString();
         } else if (name == deprecatedAttribute()) {
@@ -2444,9 +2401,6 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
         mod.renamedToName = rename;
         mod.modifiers |= Modification::Rename;
     }
-
-    if (!association.isEmpty())
-        mod.association = association;
 
     mod.setIsThread(isThread);
     if (allowThread != TypeSystem::AllowThread::Unspecified)
@@ -3073,12 +3027,6 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                     return false;
             }
         }
-            break;
-        case StackElement::ArgumentMap:
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedElementWarning(reader, tagName)));
-            if (!parseArgumentMap(reader, topElement, &attributes))
-                return false;
             break;
         case StackElement::Removal:
             if (!parseRemoval(reader, topElement, &attributes))

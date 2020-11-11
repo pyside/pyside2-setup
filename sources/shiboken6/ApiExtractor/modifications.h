@@ -34,7 +34,6 @@
 #include "parser/typeinfo.h"
 
 #include <QtCore/QList>
-#include <QtCore/QMap>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QString>
@@ -42,8 +41,6 @@
 QT_BEGIN_NAMESPACE
 class QDebug;
 QT_END_NAMESPACE
-
-using ArgumentMap = QMap<int, QString>;
 
 class TemplateInstance
 {
@@ -169,7 +166,6 @@ public:
 
     TypeSystem::Language language = TypeSystem::TargetLangCode;
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
-    ArgumentMap argumentMap;
 };
 
 struct ArgumentModification
@@ -351,7 +347,6 @@ struct FunctionModification: public Modification
     void formatDebug(QDebug &d) const;
 #endif
 
-    QString association;
     CodeSnipList snips;
 
     QList<ArgumentModification> argument_mods;
