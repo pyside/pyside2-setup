@@ -29,7 +29,6 @@
 #ifndef TYPEDATABASE_H
 #define TYPEDATABASE_H
 
-#include "apiextractormacros.h"
 #include "include.h"
 #include "typedatabase_typedefs.h"
 #include "typesystem_enums.h"
