@@ -274,8 +274,8 @@ public:
     int overloadNumber() const;
 
 #ifndef QT_NO_DEBUG_STREAM
-    void formatDebugBrief(QDebug &d) const;
-    void formatDebugVerbose(QDebug &d) const;
+    void formatDebugBrief(QDebug &debug) const;
+    void formatDebugVerbose(QDebug &debug) const;
 #endif
 
     SourceLocation sourceLocation() const;
@@ -290,7 +290,7 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug d, const AbstractMetaFunction *af);
+QDebug operator<<(QDebug debug, const AbstractMetaFunction *af);
 #endif
 
 #endif // ABSTRACTMETAFUNCTION_H

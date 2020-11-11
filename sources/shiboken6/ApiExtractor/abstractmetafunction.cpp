@@ -1092,9 +1092,9 @@ int AbstractMetaFunction::overloadNumber() const
 }
 
 #ifndef QT_NO_DEBUG_STREAM
-void AbstractMetaFunction::formatDebugBrief(QDebug &d) const
+void AbstractMetaFunction::formatDebugBrief(QDebug &debug) const
 {
-    d << '"' << debugSignature() << '"';
+    debug << '"' << debugSignature() << '"';
 }
 
 void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
@@ -1143,23 +1143,23 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
         debug << " declaring class: " << d->m_declaringClass->name();
 }
 
-QDebug operator<<(QDebug d, const AbstractMetaFunction *af)
+QDebug operator<<(QDebug debug, const AbstractMetaFunction *af)
 {
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "AbstractMetaFunction(";
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "AbstractMetaFunction(";
     if (af) {
-        if (d.verbosity() > 2) {
-            af->formatDebugVerbose(d);
+        if (debug.verbosity() > 2) {
+            af->formatDebugVerbose(debug);
         } else {
-            d << "signature=";
-            af->formatDebugBrief(d);
+            debug << "signature=";
+            af->formatDebugBrief(debug);
         }
     } else {
-        d << '0';
+        debug << '0';
     }
-    d << ')';
-    return d;
+    debug << ')';
+    return debug;
 }
 #endif // !QT_NO_DEBUG_STREAM
