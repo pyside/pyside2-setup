@@ -458,7 +458,7 @@ static PyObject *adjustFuncName(const char *func_name)
     // This is a very cheap call into `mapping.py`.
     PyObject *update_mapping = PyDict_GetItemString(ns, "update_mapping");
     AutoDecRef res(PyObject_CallFunctionObjArgs(update_mapping, nullptr));
-    if (res == nullptr)
+    if (res.isNull())
         return nullptr;
 
     // Run `eval` on the type string to get the object.
