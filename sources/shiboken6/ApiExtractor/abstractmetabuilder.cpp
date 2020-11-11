@@ -33,6 +33,7 @@
 #include "messages.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
+#include "sourcelocation.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 

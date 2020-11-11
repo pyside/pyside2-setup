@@ -31,6 +31,7 @@
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
 #include "abstractmetaenum.h"
+#include "documentation.h"
 #include "messages.h"
 #include "modifications.h"
 #include "propertyspec.h"

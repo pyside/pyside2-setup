@@ -29,19 +29,67 @@
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
+#include "abstractmetatype.h"
+#include "documentation.h"
 #include "messages.h"
 #include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
+#include "sourcelocation.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 
 #include <QtCore/QDebug>
 
+class AbstractMetaFunctionPrivate
+{
+public:
+    AbstractMetaFunctionPrivate()
+        : m_constant(false),
+          m_reverse(false),
+          m_explicit(false),
+          m_pointerOperator(false),
+          m_isCallOperator(false)
+    {
+    }
+
+    QString signature() const;
+    QString minimalSignature() const;
+    QString modifiedName(const AbstractMetaFunction *q) const;
+    int overloadNumber(const AbstractMetaFunction *q) const;
+
+    QString m_name;
+    QString m_originalName;
+    Documentation m_doc;
+    mutable QString m_cachedMinimalSignature;
+    mutable QString m_cachedSignature;
+    mutable QString m_cachedModifiedName;
+
+    FunctionTypeEntry* m_typeEntry = nullptr;
+    AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
+    AbstractMetaType m_type;
+    const AbstractMetaClass *m_class = nullptr;
+    const AbstractMetaClass *m_implementingClass = nullptr;
+    const AbstractMetaClass *m_declaringClass = nullptr;
+    int m_propertySpecIndex = -1;
+    AbstractMetaArgumentList m_arguments;
+    AddedFunctionPtr m_addedFunction;
+    SourceLocation m_sourceLocation;
+    uint m_constant                 : 1;
+    uint m_reverse                  : 1;
+    uint m_explicit                 : 1;
+    uint m_pointerOperator          : 1;
+    uint m_isCallOperator           : 1;
+    mutable int m_cachedOverloadNumber = TypeSystem::OverloadNumberUnset;
+    ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
+    TypeSystem::AllowThread m_allowThreadModification = TypeSystem::AllowThread::Unspecified;
+    TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
+};
+
 AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
     AbstractMetaFunction()
 {
-    m_addedFunction = addedFunc;
+    d->m_addedFunction = addedFunc;
     setConstant(addedFunc->isConstant());
     setName(addedFunc->name());
     setOriginalName(addedFunc->name());
@@ -61,12 +109,67 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
     setAttributes(atts);
 }
 
-AbstractMetaFunction::AbstractMetaFunction()
-    : m_constant(false),
-      m_reverse(false),
-      m_explicit(false),
-      m_pointerOperator(false),
-      m_isCallOperator(false)
+QString AbstractMetaFunction::name() const
+{
+    return d->m_name;
+}
+
+void AbstractMetaFunction::setName(const QString &name)
+{
+    d->m_name = name;
+}
+
+QString AbstractMetaFunction::originalName() const
+{
+    return d->m_originalName.isEmpty() ? name() : d->m_originalName;
+}
+
+void AbstractMetaFunction::setOriginalName(const QString &name)
+{
+    d->m_originalName = name;
+}
+
+const Documentation &AbstractMetaFunction::documentation() const
+{
+    return d->m_doc;
+}
+
+void AbstractMetaFunction::setDocumentation(const Documentation &doc)
+{
+    d->m_doc = doc;
+}
+
+bool AbstractMetaFunction::isReverseOperator() const
+{
+    return d->m_reverse;
+}
+
+void AbstractMetaFunction::setReverseOperator(bool reverse)
+{
+    d->m_reverse = reverse;
+}
+
+bool AbstractMetaFunction::isPointerOperator() const
+{
+    return d->m_pointerOperator;
+}
+
+void AbstractMetaFunction::setPointerOperator(bool value)
+{
+    d->m_pointerOperator = value;
+}
+
+bool AbstractMetaFunction::isExplicit() const
+{
+    return d->m_explicit;
+}
+
+void AbstractMetaFunction::setExplicit(bool isExplicit)
+{
+    d->m_explicit = isExplicit;
+}
+
+AbstractMetaFunction::AbstractMetaFunction() : d(new AbstractMetaFunctionPrivate)
 {
 }
 
@@ -87,6 +190,31 @@ bool AbstractMetaFunction::isModifiedRemoved(int types) const
     }
 
     return false;
+}
+
+bool AbstractMetaFunction::isVoid() const
+{
+    return d->m_type.isVoid();
+}
+
+const AbstractMetaType &AbstractMetaFunction::type() const
+{
+    return d->m_type;
+}
+
+void AbstractMetaFunction::setType(const AbstractMetaType &type)
+{
+    d->m_type = type;
+}
+
+const AbstractMetaClass *AbstractMetaFunction::ownerClass() const
+{
+    return d->m_class;
+}
+
+void AbstractMetaFunction::setOwnerClass(const AbstractMetaClass *cls)
+{
+    d->m_class = cls;
 }
 
 bool AbstractMetaFunction::operator<(const AbstractMetaFunction &other) const
@@ -177,22 +305,22 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     cpy->setDeclaringClass(declaringClass());
     cpy->setType(type());
     cpy->setConstant(isConstant());
-    cpy->setExceptionSpecification(m_exceptionSpecification);
-    cpy->setAllowThreadModification(m_allowThreadModification);
-    cpy->setExceptionHandlingModification(m_exceptionHandlingModification);
-    cpy->m_addedFunction = m_addedFunction;
-    cpy->m_arguments = m_arguments;
+    cpy->setExceptionSpecification(d->m_exceptionSpecification);
+    cpy->setAllowThreadModification(d->m_allowThreadModification);
+    cpy->setExceptionHandlingModification(d->m_exceptionHandlingModification);
+    cpy->d->m_addedFunction = d->m_addedFunction;
+    cpy->d->m_arguments = d->m_arguments;
 
     return cpy;
 }
 
 bool AbstractMetaFunction::usesRValueReferences() const
 {
-    if (m_functionType == MoveConstructorFunction || m_functionType == MoveAssignmentOperatorFunction)
+    if (d->m_functionType == MoveConstructorFunction || d->m_functionType == MoveAssignmentOperatorFunction)
         return true;
-    if (m_type.referenceType() == RValueReference)
+    if (d->m_type.referenceType() == RValueReference)
         return true;
-    for (const AbstractMetaArgument &a : m_arguments) {
+    for (const AbstractMetaArgument &a : d->m_arguments) {
         if (a.type().referenceType() == RValueReference)
             return true;
     }
@@ -218,7 +346,7 @@ QStringList AbstractMetaFunction::introspectionCompatibleSignatures(const QStrin
     return returned;
 }
 
-QString AbstractMetaFunction::signature() const
+QString AbstractMetaFunctionPrivate::signature() const
 {
     if (m_cachedSignature.isEmpty()) {
         m_cachedSignature = m_originalName;
@@ -239,25 +367,40 @@ QString AbstractMetaFunction::signature() const
                 qCWarning(lcShiboken).noquote().nospace()
                     << QString::fromLatin1("No abstract meta type found for argument '%1' while"
                                            "constructing signature for function '%2'.")
-                                           .arg(a.name(), name());
+                                           .arg(a.name(), m_name);
             }
         }
         m_cachedSignature += QLatin1Char(')');
 
-        if (isConstant())
+        if (m_constant)
             m_cachedSignature += QLatin1String(" const");
     }
     return m_cachedSignature;
 }
 
+QString AbstractMetaFunction::signature() const
+{
+    return d->signature();
+}
+
+bool AbstractMetaFunction::isConstant() const
+{
+    return d->m_constant;
+}
+
+void AbstractMetaFunction::setConstant(bool constant)
+{
+    d->m_constant = constant;
+}
+
 bool AbstractMetaFunction::isUserAdded() const
 {
-    return !m_addedFunction.isNull() && !m_addedFunction->isDeclaration();
+    return !d->m_addedFunction.isNull() && !d->m_addedFunction->isDeclaration();
 }
 
 bool AbstractMetaFunction::isUserDeclared() const
 {
-    return !m_addedFunction.isNull() && m_addedFunction->isDeclaration();
+    return !d->m_addedFunction.isNull() && d->m_addedFunction->isDeclaration();
 }
 
 int AbstractMetaFunction::actualMinimumArgumentCount() const
@@ -341,8 +484,48 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
 
 const AbstractMetaClass *AbstractMetaFunction::targetLangOwner() const
 {
-    return m_class && m_class->isInvisibleNamespace()
-        ?  m_class->targetLangEnclosingClass() : m_class;
+    return d->m_class && d->m_class->isInvisibleNamespace()
+        ?  d->m_class->targetLangEnclosingClass() : d->m_class;
+}
+
+const AbstractMetaClass *AbstractMetaFunction::declaringClass() const
+{
+    return d->m_declaringClass;
+}
+
+void AbstractMetaFunction::setDeclaringClass(const AbstractMetaClass *cls)
+{
+    d->m_declaringClass = cls;
+}
+
+const AbstractMetaClass *AbstractMetaFunction::implementingClass() const
+{
+    return d->m_implementingClass;
+}
+
+void AbstractMetaFunction::setImplementingClass(const AbstractMetaClass *cls)
+{
+    d->m_implementingClass = cls;
+}
+
+const AbstractMetaArgumentList &AbstractMetaFunction::arguments() const
+{
+    return d->m_arguments;
+}
+
+AbstractMetaArgumentList &AbstractMetaFunction::arguments()
+{
+    return d->m_arguments;
+}
+
+void AbstractMetaFunction::setArguments(const AbstractMetaArgumentList &arguments)
+{
+    d->m_arguments = arguments;
+}
+
+void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
+{
+    d->m_arguments << argument;
 }
 
 bool AbstractMetaFunction::isDeprecated() const
@@ -355,6 +538,27 @@ bool AbstractMetaFunction::isDeprecated() const
     return false;
 }
 
+bool AbstractMetaFunction::isConstructor() const
+{
+    return d->m_functionType == ConstructorFunction || d->m_functionType == CopyConstructorFunction
+            || d->m_functionType == MoveConstructorFunction;
+}
+
+bool AbstractMetaFunction::isNormal() const
+{
+    return functionType() == NormalFunction || isSlot() || isInGlobalScope();
+}
+
+AbstractMetaFunction::FunctionType AbstractMetaFunction::functionType() const
+{
+    return d->m_functionType;
+}
+
+void AbstractMetaFunction::setFunctionType(AbstractMetaFunction::FunctionType type)
+{
+    d->m_functionType = type;
+}
+
 // Auto-detect whether a function should be wrapped into
 // Py_BEGIN_ALLOW_THREADS/Py_END_ALLOW_THREADS, that is, temporarily release
 // the GIL (global interpreter lock). Doing so is required for any thread-wait
@@ -364,18 +568,18 @@ bool AbstractMetaFunction::isDeprecated() const
 bool AbstractMetaFunction::autoDetectAllowThread() const
 {
     // Disallow for simple getter functions.
-    const bool maybeGetter = m_constant != 0 && !isVoid() && m_arguments.isEmpty();
+    const bool maybeGetter = d->m_constant != 0 && !isVoid() && d->m_arguments.isEmpty();
     return !maybeGetter;
 }
 
 SourceLocation AbstractMetaFunction::sourceLocation() const
 {
-    return m_sourceLocation;
+    return d->m_sourceLocation;
 }
 
 void AbstractMetaFunction::setSourceLocation(const SourceLocation &sourceLocation)
 {
-    m_sourceLocation = sourceLocation;
+    d->m_sourceLocation = sourceLocation;
 }
 
 static inline TypeSystem::AllowThread allowThreadMod(const AbstractMetaClass *klass)
@@ -390,10 +594,10 @@ static inline bool hasAllowThreadMod(const AbstractMetaClass *klass)
 
 bool AbstractMetaFunction::allowThread() const
 {
-    auto allowThreadModification = m_allowThreadModification;
+    auto allowThreadModification = d->m_allowThreadModification;
     // If there is no modification on the function, check for a base class.
-    if (m_class && allowThreadModification == TypeSystem::AllowThread::Unspecified) {
-        if (auto base = recurseClassHierarchy(m_class, hasAllowThreadMod))
+    if (d->m_class && allowThreadModification == TypeSystem::AllowThread::Unspecified) {
+        if (auto base = recurseClassHierarchy(d->m_class, hasAllowThreadMod))
             allowThreadModification = allowThreadMod(base);
     }
 
@@ -472,16 +676,14 @@ bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
     return false;
 }
 
-QString AbstractMetaFunction::minimalSignature() const
+QString AbstractMetaFunctionPrivate::minimalSignature() const
 {
     if (!m_cachedMinimalSignature.isEmpty())
         return m_cachedMinimalSignature;
 
-    QString minimalSignature = originalName() + QLatin1Char('(');
-    AbstractMetaArgumentList arguments = this->arguments();
-
-    for (int i = 0; i < arguments.count(); ++i) {
-        const AbstractMetaType &t = arguments.at(i).type();
+    QString minimalSignature = m_originalName + QLatin1Char('(');
+    for (int i = 0; i < m_arguments.count(); ++i) {
+        const AbstractMetaType &t = m_arguments.at(i).type();
         if (!t.isVoid()) {
             if (i > 0)
                 minimalSignature += QLatin1Char(',');
@@ -490,17 +692,22 @@ QString AbstractMetaFunction::minimalSignature() const
             qCWarning(lcShiboken).noquote().nospace()
                 << QString::fromLatin1("No abstract meta type found for argument '%1' while constructing"
                                        " minimal signature for function '%2'.")
-                                       .arg(arguments.at(i).name(), name());
+                                       .arg(m_arguments.at(i).name(), m_name);
         }
     }
     minimalSignature += QLatin1Char(')');
-    if (isConstant())
+    if (m_constant)
         minimalSignature += QLatin1String("const");
 
     minimalSignature = TypeDatabase::normalizedSignature(minimalSignature);
     m_cachedMinimalSignature = minimalSignature;
 
     return minimalSignature;
+}
+
+QString AbstractMetaFunction::minimalSignature() const
+{
+    return d->minimalSignature();
 }
 
 QString AbstractMetaFunction::debugSignature() const
@@ -520,8 +727,8 @@ QString AbstractMetaFunction::debugSignature() const
 
 FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass *implementor) const
 {
-    if (!m_addedFunction.isNull())
-        return m_addedFunction->modifications;
+    if (!d->m_addedFunction.isNull())
+        return d->m_addedFunction->modifications;
     if (!implementor)
         implementor = ownerClass();
 
@@ -544,12 +751,32 @@ QString AbstractMetaFunction::argumentName(int index,
                                            bool /* create */,
                                            const AbstractMetaClass * /* implementor */) const
 {
-    return m_arguments[--index].name();
+    return d->m_arguments[--index].name();
+}
+
+int AbstractMetaFunction::propertySpecIndex() const
+{
+    return d->m_propertySpecIndex;
+}
+
+void AbstractMetaFunction::setPropertySpecIndex(int i)
+{
+    d->m_propertySpecIndex = i;
+}
+
+FunctionTypeEntry *AbstractMetaFunction::typeEntry() const
+{
+    return d->m_typeEntry;
+}
+
+void AbstractMetaFunction::setTypeEntry(FunctionTypeEntry *typeEntry)
+{
+    d->m_typeEntry = typeEntry;
 }
 
 bool AbstractMetaFunction::isCallOperator() const
 {
-    return m_name == QLatin1String("operator()");
+    return d->m_name == QLatin1String("operator()");
 }
 
 bool AbstractMetaFunction::hasInjectedCode() const
@@ -603,12 +830,12 @@ bool AbstractMetaFunction::isConversionOperator(const QString &funcName)
 
 ExceptionSpecification AbstractMetaFunction::exceptionSpecification() const
 {
-    return m_exceptionSpecification;
+    return d->m_exceptionSpecification;
 }
 
 void AbstractMetaFunction::setExceptionSpecification(ExceptionSpecification e)
 {
-    m_exceptionSpecification = e;
+    d->m_exceptionSpecification = e;
 }
 
 static inline TypeSystem::ExceptionHandling exceptionMod(const AbstractMetaClass *klass)
@@ -623,7 +850,7 @@ static inline bool hasExceptionMod(const AbstractMetaClass *klass)
 
 bool AbstractMetaFunction::generateExceptionHandling() const
 {
-    switch (m_functionType) {
+    switch (d->m_functionType) {
     case AbstractMetaFunction::CopyConstructorFunction:
     case AbstractMetaFunction::MoveConstructorFunction:
     case AbstractMetaFunction::AssignmentOperatorFunction:
@@ -634,10 +861,10 @@ bool AbstractMetaFunction::generateExceptionHandling() const
         break;
     }
 
-    auto exceptionHandlingModification = m_exceptionHandlingModification;
+    auto exceptionHandlingModification = d->m_exceptionHandlingModification;
     // If there is no modification on the function, check for a base class.
-    if (m_class && exceptionHandlingModification == TypeSystem::ExceptionHandling::Unspecified) {
-        if (auto base = recurseClassHierarchy(m_class, hasExceptionMod))
+    if (d->m_class && exceptionHandlingModification == TypeSystem::ExceptionHandling::Unspecified) {
+        if (auto base = recurseClassHierarchy(d->m_class, hasExceptionMod))
             exceptionHandlingModification = exceptionMod(base);
     }
 
@@ -647,16 +874,21 @@ bool AbstractMetaFunction::generateExceptionHandling() const
         result = true;
         break;
     case TypeSystem::ExceptionHandling::AutoDefaultToOn:
-        result = m_exceptionSpecification != ExceptionSpecification::NoExcept;
+        result = d->m_exceptionSpecification != ExceptionSpecification::NoExcept;
         break;
     case TypeSystem::ExceptionHandling::AutoDefaultToOff:
-        result = m_exceptionSpecification == ExceptionSpecification::Throws;
+        result = d->m_exceptionSpecification == ExceptionSpecification::Throws;
         break;
     case TypeSystem::ExceptionHandling::Unspecified:
     case TypeSystem::ExceptionHandling::Off:
         break;
     }
     return result;
+}
+
+bool AbstractMetaFunction::isConversionOperator() const
+{
+    return isConversionOperator(originalName());
 }
 
 bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
@@ -673,6 +905,11 @@ bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
     return opRegEx.match(funcName).hasMatch();
 }
 
+bool AbstractMetaFunction::isOperatorOverload() const
+{
+    return isOperatorOverload(originalName());
+}
+
 bool AbstractMetaFunction::isCastOperator() const
 {
     return originalName().startsWith(QLatin1String("operator "));
@@ -686,7 +923,7 @@ bool AbstractMetaFunction::isArithmeticOperator() const
     QString name = originalName();
 
     // It's a dereference operator!
-    if (name == QLatin1String("operator*") && m_arguments.isEmpty())
+    if (name == QLatin1String("operator*") && d->m_arguments.isEmpty())
         return false;
 
     return name == QLatin1String("operator+") || name == QLatin1String("operator+=")
@@ -743,8 +980,8 @@ bool AbstractMetaFunction::isSubscriptOperator() const
 
 bool AbstractMetaFunction::isAssignmentOperator() const
 {
-    return m_functionType == AssignmentOperatorFunction
-        || m_functionType == MoveAssignmentOperatorFunction;
+    return d->m_functionType == AssignmentOperatorFunction
+        || d->m_functionType == MoveAssignmentOperatorFunction;
 }
 
 bool AbstractMetaFunction::isOtherOperator() const
@@ -766,7 +1003,7 @@ int AbstractMetaFunction::arityOfOperator() const
     if (!isOperatorOverload() || isCallOperator())
         return -1;
 
-    int arity = m_arguments.size();
+    int arity = d->m_arguments.size();
 
     // Operator overloads that are class members
     // implicitly includes the instance and have
@@ -796,10 +1033,10 @@ bool AbstractMetaFunction::isVirtual() const
     return attributes() & AbstractMetaAttributes::VirtualCppMethod;
 }
 
-QString AbstractMetaFunction::modifiedName() const
+QString AbstractMetaFunctionPrivate::modifiedName(const AbstractMetaFunction *q) const
 {
     if (m_cachedModifiedName.isEmpty()) {
-        const FunctionModificationList &mods = modifications(implementingClass());
+        const FunctionModificationList &mods = q->modifications(q->implementingClass());
         for (const FunctionModification &mod : mods) {
             if (mod.isRenameModifier()) {
                 m_cachedModifiedName = mod.renamedToName;
@@ -807,9 +1044,14 @@ QString AbstractMetaFunction::modifiedName() const
             }
         }
         if (m_cachedModifiedName.isEmpty())
-            m_cachedModifiedName = name();
+            m_cachedModifiedName = m_name;
     }
     return m_cachedModifiedName;
+}
+
+QString AbstractMetaFunction::modifiedName() const
+{
+    return d->modifiedName(this);
 }
 
 AbstractMetaFunction *
@@ -819,11 +1061,21 @@ AbstractMetaFunction::find(const AbstractMetaFunctionList &haystack,
     return findByName(haystack, needle);
 }
 
-int AbstractMetaFunction::overloadNumber() const
+void AbstractMetaFunction::setAllowThreadModification(TypeSystem::AllowThread am)
+{
+    d->m_allowThreadModification = am;
+}
+
+void AbstractMetaFunction::setExceptionHandlingModification(TypeSystem::ExceptionHandling em)
+{
+    d->m_exceptionHandlingModification = em;
+}
+
+int AbstractMetaFunctionPrivate::overloadNumber(const AbstractMetaFunction *q) const
 {
     if (m_cachedOverloadNumber == TypeSystem::OverloadNumberUnset) {
         m_cachedOverloadNumber = TypeSystem::OverloadNumberDefault;
-        const FunctionModificationList &mods = modifications(implementingClass());
+        const FunctionModificationList &mods = q->modifications(q->implementingClass());
         for (const FunctionModification &mod : mods) {
             if (mod.overloadNumber() != TypeSystem::OverloadNumberUnset) {
                 m_cachedOverloadNumber = mod.overloadNumber();
@@ -834,56 +1086,61 @@ int AbstractMetaFunction::overloadNumber() const
     return m_cachedOverloadNumber;
 }
 
+int AbstractMetaFunction::overloadNumber() const
+{
+    return d->overloadNumber(this);
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaFunction::formatDebugBrief(QDebug &d) const
 {
     d << '"' << debugSignature() << '"';
 }
 
-void AbstractMetaFunction::formatDebugVerbose(QDebug &d) const
+void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
 {
-    d << m_functionType << ' ' << m_type << ' ' << m_name;
-    switch (m_exceptionSpecification) {
+    debug << d->m_functionType << ' ' << d->m_type << ' ' << d->m_name;
+    switch (d->m_exceptionSpecification) {
     case ExceptionSpecification::Unknown:
         break;
     case ExceptionSpecification::NoExcept:
-        d << " noexcept";
+        debug << " noexcept";
         break;
     case ExceptionSpecification::Throws:
-        d << " throw(...)";
+        debug << " throw(...)";
         break;
     }
-    if (m_exceptionHandlingModification != TypeSystem::ExceptionHandling::Unspecified)
-        d << " exeption-mod " << int(m_exceptionHandlingModification);
-    d << '(';
-    for (int i = 0, count = m_arguments.size(); i < count; ++i) {
+    if (d->m_exceptionHandlingModification != TypeSystem::ExceptionHandling::Unspecified)
+        debug << " exeption-mod " << int(d->m_exceptionHandlingModification);
+    debug << '(';
+    for (int i = 0, count = d->m_arguments.size(); i < count; ++i) {
         if (i)
-            d << ", ";
-        d <<  m_arguments.at(i);
+            debug << ", ";
+        debug <<  d->m_arguments.at(i);
     }
-    d << "), signature=\"" << minimalSignature() << '"';
-    if (m_constant)
-        d << " [const]";
-    if (m_reverse)
-        d << " [reverse]";
+    debug << "), signature=\"" << minimalSignature() << '"';
+    if (d->m_constant)
+        debug << " [const]";
+    if (d->m_reverse)
+        debug << " [reverse]";
     if (isUserAdded())
-        d << " [userAdded]";
+        debug << " [userAdded]";
     if (isUserDeclared())
-        d << " [userDeclared]";
-    if (m_explicit)
-        d << " [explicit]";
+        debug << " [userDeclared]";
+    if (d->m_explicit)
+        debug << " [explicit]";
     if (attributes().testFlag(AbstractMetaAttributes::Deprecated))
-        d << " [deprecated]";
-    if (m_pointerOperator)
-        d << " [operator->]";
-    if (m_isCallOperator)
-        d << " [operator()]";
-    if (m_class)
-        d << " class: " << m_class->name();
-    if (m_implementingClass)
-        d << " implementing class: " << m_implementingClass->name();
-    if (m_declaringClass)
-        d << " declaring class: " << m_declaringClass->name();
+        debug << " [deprecated]";
+    if (d->m_pointerOperator)
+        debug << " [operator->]";
+    if (d->m_isCallOperator)
+        debug << " [operator()]";
+    if (d->m_class)
+        debug << " class: " << d->m_class->name();
+    if (d->m_implementingClass)
+        debug << " implementing class: " << d->m_implementingClass->name();
+    if (d->m_declaringClass)
+        debug << " declaring class: " << d->m_declaringClass->name();
 }
 
 QDebug operator<<(QDebug d, const AbstractMetaFunction *af)

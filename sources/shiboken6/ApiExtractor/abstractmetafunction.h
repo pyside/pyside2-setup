@@ -32,15 +32,18 @@
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaargument.h"
 #include "abstractmetaattributes.h"
-#include "abstractmetatype.h"
-#include "documentation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
-#include "sourcelocation.h"
+
+#include <QtCore/QScopedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
+class AbstractMetaFunctionPrivate;
+class AbstractMetaType;
 class FunctionTypeEntry;
+class Documentation;
+class SourceLocation;
 
 struct ArgumentOwner;
 struct FieldModification;
@@ -90,36 +93,33 @@ public:
     explicit AbstractMetaFunction(const AddedFunctionPtr &addedFunc);
     ~AbstractMetaFunction();
 
-    QString name() const { return m_name; }
-    void setName(const QString &name) { m_name = name; }
+    QString name() const;
+    void setName(const QString &name);
 
-    QString originalName() const
-    {
-        return m_originalName.isEmpty() ? name() : m_originalName;
-    }
+    QString originalName() const;
 
-    void setOriginalName(const QString &name) { m_originalName = name; }
+    void setOriginalName(const QString &name);
 
-    const Documentation &documentation() const { return m_doc; }
-    void setDocumentation(const Documentation& doc) { m_doc = doc; }
+    const Documentation &documentation() const;
+    void setDocumentation(const Documentation& doc);
 
-    bool isReverseOperator() const { return m_reverse; }
-    void setReverseOperator(bool reverse) { m_reverse = reverse; }
+    bool isReverseOperator() const;
+    void setReverseOperator(bool reverse);
 
     /**
      *  Returns true if this is a operator and the "self" operand is a pointer.
      *  e.g. class Foo {}; operator+(SomeEnum, Foo*);
      */
-    bool isPointerOperator() const { return m_pointerOperator; }
-    void setPointerOperator(bool value) { m_pointerOperator = value; }
+    bool isPointerOperator() const;
+    void setPointerOperator(bool value);
 
 
     /**
     *   Says if the function (a constructor) was declared as explicit in C++.
     *   \return true if the function was declared as explicit in C++
     */
-    bool isExplicit() const { return m_explicit; }
-    void setExplicit(bool isExplicit) { m_explicit = isExplicit; }
+    bool isExplicit() const;
+    void setExplicit(bool isExplicit);
 
     static bool isConversionOperator(const QString& funcName);
 
@@ -128,16 +128,10 @@ public:
 
     bool generateExceptionHandling() const;
 
-    bool isConversionOperator() const
-    {
-        return isConversionOperator(originalName());
-    }
+    bool isConversionOperator() const;
 
     static bool isOperatorOverload(const QString& funcName);
-    bool isOperatorOverload() const
-    {
-        return isOperatorOverload(originalName());
-    }
+    bool isOperatorOverload() const;
     bool isCastOperator() const;
 
     bool isArithmeticOperator() const;
@@ -167,67 +161,55 @@ public:
 
     bool isModifiedRemoved(int types = TypeSystem::All) const;
 
-    bool isVoid() const { return m_type.isVoid(); }
+    bool isVoid() const;
 
-    const AbstractMetaType &type() const { return m_type; }
-    void setType(const AbstractMetaType &type) { m_type = type; }
+    const AbstractMetaType &type() const;
+    void setType(const AbstractMetaType &type);
 
     // The class that has this function as a member.
-    const AbstractMetaClass *ownerClass() const { return m_class; }
-    void setOwnerClass(const AbstractMetaClass *cls) { m_class = cls; }
+    const AbstractMetaClass *ownerClass() const;
+    void setOwnerClass(const AbstractMetaClass *cls);
 
     // Owner excluding invisible namespaces
     const AbstractMetaClass *targetLangOwner() const;
 
     // The first class in a hierarchy that declares the function
-    const AbstractMetaClass *declaringClass() const { return m_declaringClass; }
-    void setDeclaringClass(const AbstractMetaClass *cls) { m_declaringClass = cls; }
+    const AbstractMetaClass *declaringClass() const;
+    void setDeclaringClass(const AbstractMetaClass *cls);
 
     // The class that actually implements this function
-    const AbstractMetaClass *implementingClass() const { return m_implementingClass; }
-    void setImplementingClass(const AbstractMetaClass *cls) { m_implementingClass = cls; }
+    const AbstractMetaClass *implementingClass() const;
+    void setImplementingClass(const AbstractMetaClass *cls);
 
-    const AbstractMetaArgumentList &arguments() const { return m_arguments; }
-    AbstractMetaArgumentList &arguments() { return m_arguments; }
-    void setArguments(const AbstractMetaArgumentList &arguments) { m_arguments = arguments; }
-    void addArgument(const AbstractMetaArgument &argument)
-    {
-        m_arguments << argument;
-    }
+    const AbstractMetaArgumentList &arguments() const;
+    AbstractMetaArgumentList &arguments();
+    void setArguments(const AbstractMetaArgumentList &arguments);
+    void addArgument(const AbstractMetaArgument &argument);
     int actualMinimumArgumentCount() const;
 
     bool isDeprecated() const;
     bool isDestructor() const { return functionType() == DestructorFunction; }
-    bool isConstructor() const
-    {
-        return m_functionType == ConstructorFunction || m_functionType == CopyConstructorFunction
-            || m_functionType == MoveConstructorFunction;
-    }
-    bool isNormal() const
-    {
-        return functionType() == NormalFunction || isSlot() || isInGlobalScope();
-    }
+    bool isConstructor() const;
+    bool isNormal() const;
     bool isInGlobalScope() const { return functionType() == GlobalScopeFunction; }
     bool isSignal() const { return functionType() == SignalFunction; }
     bool isSlot() const { return functionType() == SlotFunction; }
     bool isEmptyFunction() const { return functionType() == EmptyFunction; }
-    FunctionType functionType() const { return m_functionType; }
-    void setFunctionType(FunctionType type) { m_functionType = type; }
+    FunctionType functionType() const;
+    void setFunctionType(FunctionType type);
 
     bool usesRValueReferences() const;
     QStringList introspectionCompatibleSignatures(const QStringList &resolvedArguments = QStringList()) const;
     QString signature() const;
 
-    bool isConstant() const { return m_constant; }
-    void setConstant(bool constant) { m_constant = constant; }
+    bool isConstant() const;
+    void setConstant(bool constant);
 
     /// Returns true if the AbstractMetaFunction was added by the user via the type system description.
     bool isUserAdded() const;
     /// Returns true if the AbstractMetaFunction was declared by the user via
     /// the type system description.
     bool isUserDeclared() const;
-
-    QString toString() const { return m_name; }
 
     CompareResult compareTo(const AbstractMetaFunction *other) const;
 
@@ -273,12 +255,12 @@ public:
      */
     QString argumentName(int index, bool create = true, const AbstractMetaClass *cl = nullptr) const;
 
-    int propertySpecIndex() const { return m_propertySpecIndex; }
-    void setPropertySpecIndex(int i) { m_propertySpecIndex = i; }
+    int propertySpecIndex() const;
+    void setPropertySpecIndex(int i);
 
-    FunctionTypeEntry* typeEntry() const { return m_typeEntry; }
+    FunctionTypeEntry* typeEntry() const;
 
-    void setTypeEntry(FunctionTypeEntry* typeEntry) { m_typeEntry = typeEntry; }
+    void setTypeEntry(FunctionTypeEntry* typeEntry);
 
     bool isCallOperator() const;
 
@@ -286,10 +268,8 @@ public:
         find(const AbstractMetaFunctionList &haystack, const QString &needle);
 
     // for the meta builder only
-    void setAllowThreadModification(TypeSystem::AllowThread am)
-    { m_allowThreadModification = am; }
-    void setExceptionHandlingModification(TypeSystem::ExceptionHandling em)
-    { m_exceptionHandlingModification = em;  }
+    void setAllowThreadModification(TypeSystem::AllowThread am);
+    void setExceptionHandlingModification(TypeSystem::ExceptionHandling em);
 
     int overloadNumber() const;
 
@@ -304,32 +284,7 @@ public:
 private:
     bool autoDetectAllowThread() const;
 
-    QString m_name;
-    QString m_originalName;
-    Documentation m_doc;
-    mutable QString m_cachedMinimalSignature;
-    mutable QString m_cachedSignature;
-    mutable QString m_cachedModifiedName;
-
-    FunctionTypeEntry* m_typeEntry = nullptr;
-    FunctionType m_functionType = NormalFunction;
-    AbstractMetaType m_type;
-    const AbstractMetaClass *m_class = nullptr;
-    const AbstractMetaClass *m_implementingClass = nullptr;
-    const AbstractMetaClass *m_declaringClass = nullptr;
-    int m_propertySpecIndex = -1;
-    AbstractMetaArgumentList m_arguments;
-    AddedFunctionPtr m_addedFunction;
-    SourceLocation m_sourceLocation;
-    uint m_constant                 : 1;
-    uint m_reverse                  : 1;
-    uint m_explicit                 : 1;
-    uint m_pointerOperator          : 1;
-    uint m_isCallOperator           : 1;
-    mutable int m_cachedOverloadNumber = TypeSystem::OverloadNumberUnset;
-    ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
-    TypeSystem::AllowThread m_allowThreadModification = TypeSystem::AllowThread::Unspecified;
-    TypeSystem::ExceptionHandling m_exceptionHandlingModification = TypeSystem::ExceptionHandling::Unspecified;
+    QScopedPointer<AbstractMetaFunctionPrivate> d;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)

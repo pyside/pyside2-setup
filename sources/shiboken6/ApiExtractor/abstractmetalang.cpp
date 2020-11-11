@@ -31,9 +31,11 @@
 #include "abstractmetaenum.h"
 #include "abstractmetafunction.h"
 #include "abstractmetafield.h"
+#include "documentation.h"
 #include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
+#include "sourcelocation.h"
 #include "typedatabase.h"
 #include "typesystem.h"
 
