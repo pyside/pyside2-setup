@@ -249,25 +249,6 @@ static QVariant QVariant_convertToVariantList(PyObject *list)
 }
 // @snippet qvariant-conversion
 
-// @snippet qvariantmap-check
-static bool QVariantType_isStringList(PyObject *list)
-{
-    Shiboken::AutoDecRef fast(PySequence_Fast(list, "Failed to convert QVariantList"));
-    const Py_ssize_t size = PySequence_Fast_GET_SIZE(fast.object());
-    for (Py_ssize_t i=0; i < size; i++) {
-        PyObject *item = PySequence_Fast_GET_ITEM(fast.object(), i);
-        if (!%CHECKTYPE[QString](item))
-            return false;
-    }
-    return true;
-}
-static bool QVariantType_checkAllStringKeys(PyObject *dict)
-{
-    Shiboken::AutoDecRef keys(PyDict_Keys(dict));
-    return QVariantType_isStringList(keys);
-}
-// @snippet qvariantmap-check
-
 // @snippet qt-qabs
 double _abs = qAbs(%1);
 %PYARG_0 = %CONVERTTOPYTHON[double](_abs);

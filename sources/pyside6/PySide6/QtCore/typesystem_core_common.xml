@@ -292,7 +292,6 @@
     </conversion-rule>
   </primitive-type>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qvariant-conversion"/>
-  <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qvariantmap-check"/>
   <primitive-type name="QStringList">
     <include file-name="QStringList" location="global"/>
     <conversion-rule>

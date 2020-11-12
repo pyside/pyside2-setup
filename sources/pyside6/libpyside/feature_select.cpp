@@ -583,14 +583,12 @@ static PyObject *modifyStaticToClassMethod(PyTypeObject *type, PyObject *sm)
 
 static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *setter)
 {
-    bool chassprop = false;
     assert(getter != nullptr);
     if (setter == nullptr)
         setter = Py_None;
     auto ptype = &PyProperty_Type;
     if (Py_TYPE(getter) == PepStaticMethod_TypePtr) {
         ptype = PyClassPropertyTypeF();
-        chassprop = true;
         getter = modifyStaticToClassMethod(type, getter);
         if (setter != Py_None)
             setter = modifyStaticToClassMethod(type, setter);
