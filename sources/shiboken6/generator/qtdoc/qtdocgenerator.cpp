@@ -2089,8 +2089,7 @@ void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractM
 
         QString retType;
         // check if the return type was modified
-        const FunctionModificationList &mods = func->modifications();
-        for (const FunctionModification &mod : mods) {
+        for (const auto &mod : func->modifications()) {
             for (const ArgumentModification &argMod : mod.argument_mods()) {
                 if (argMod.index == 0) {
                     retType = argMod.modified_type;

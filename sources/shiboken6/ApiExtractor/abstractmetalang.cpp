@@ -1106,6 +1106,15 @@ void AbstractMetaClass::fixFunctions()
     d->m_functionsFixed = true;
 
     AbstractMetaFunctionList funcs = functions();
+    AbstractMetaFunctionList nonRemovedFuncs;
+    nonRemovedFuncs.reserve(funcs.size());
+    for (auto f : qAsConst(funcs)) {
+        // Fishy: Setting up of implementing/declaring/base classes changes
+        // the applicable modifications; clear cached ones.
+        f->clearModificationsCache();
+        if (!f->isRemovedFromAllLanguages(f->implementingClass()))
+            nonRemovedFuncs.append(f);
+    }
 
     for (auto superClass : d->m_baseClasses) {
         superClass->fixFunctions();
@@ -1135,11 +1144,7 @@ void AbstractMetaClass::fixFunctions()
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
             bool add = (sf->isNormal() || sf->isSignal() || sf->isEmptyFunction());
-            for (AbstractMetaFunction *f : funcs) {
-                if (f->isRemovedFromAllLanguages(f->implementingClass()))
-                    continue;
-
-
+            for (AbstractMetaFunction *f : qAsConst(nonRemovedFuncs)) {
                 const AbstractMetaFunction::CompareResult cmp = f->compareTo(sf);
 
                 if (cmp & AbstractMetaFunction::EqualModifiedName) {
@@ -1255,11 +1260,9 @@ void AbstractMetaClass::fixFunctions()
     bool hasPrivateConstructors = false;
     bool hasPublicConstructors = false;
     for (AbstractMetaFunction *func : qAsConst(funcs)) {
-        const FunctionModificationList &mods = func->modifications(this);
-        for (const FunctionModification &mod : mods) {
-            if (mod.isRenameModifier()) {
+        for (const auto &mod : func->modifications(this)) {
+            if (mod.isRenameModifier())
                 func->setName(mod.renamedToName());
-            }
         }
 
         // Make sure class is abstract if one of the functions is

@@ -3714,8 +3714,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
     QVector<ArgumentModification> ownership_mods;
     // Python object reference management.
     QVector<ArgumentModification> refcount_mods;
-    const FunctionModificationList &funcMods = func->modifications();
-    for (const FunctionModification &func_mod : funcMods) {
+    for (const auto &func_mod : func->modifications()) {
         for (const ArgumentModification &arg_mod : func_mod.argument_mods()) {
             if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
                 ownership_mods.append(arg_mod);

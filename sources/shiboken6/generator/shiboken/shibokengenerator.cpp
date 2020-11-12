@@ -730,8 +730,7 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
         return false;
     if (func->argumentRemoved(argIndex + 1))
         return false;
-    const FunctionModificationList &mods = func->modifications();
-    for (const FunctionModification &funcMod : mods) {
+    for (const auto &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
             if (argMod.index == argIndex + 1 && argMod.noNullPointers)
                 return true;
@@ -1166,8 +1165,7 @@ bool ShibokenGenerator::shouldDereferenceAbstractMetaTypePointer(const AbstractM
 
 bool ShibokenGenerator::visibilityModifiedToPrivate(const AbstractMetaFunction *func)
 {
-    const FunctionModificationList &mods = func->modifications();
-    for (const FunctionModification &mod : mods) {
+    for (const auto &mod : func->modifications()) {
         if (mod.modifiers().testFlag(Modification::Private))
             return true;
     }

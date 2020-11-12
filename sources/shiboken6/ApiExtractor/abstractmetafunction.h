@@ -248,7 +248,13 @@ public:
     *   \return true if there is some modification to function signature
     */
     bool hasSignatureModifications() const;
-    FunctionModificationList modifications(const AbstractMetaClass* implementor = nullptr) const;
+
+    const FunctionModificationList &modifications(const AbstractMetaClass *implementor = nullptr) const;
+    void clearModificationsCache();
+
+    static FunctionModificationList findClassModifications(const AbstractMetaFunction *f,
+                                                           const AbstractMetaClass *implementor);
+    static FunctionModificationList findGlobalModifications(const AbstractMetaFunction *f);
 
     /**
      * Return the argument name if there is a modification the renamed value will be returned

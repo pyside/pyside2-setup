@@ -41,6 +41,16 @@
 
 #include <QtCore/QDebug>
 
+// Cache FunctionModificationList in a flat list per class (0 for global
+// functions, or typically owner/implementing/declaring class.
+struct ModificationCacheEntry
+{
+     const AbstractMetaClass *klass;
+     FunctionModificationList modifications;
+};
+
+using ModificationCache = QList<ModificationCacheEntry>;
+
 class AbstractMetaFunctionPrivate
 {
 public:
@@ -58,6 +68,9 @@ public:
     QString modifiedName(const AbstractMetaFunction *q) const;
     int overloadNumber(const AbstractMetaFunction *q) const;
 
+    const FunctionModificationList &modifications(const AbstractMetaFunction *q,
+                                                  const AbstractMetaClass *implementor) const;
+
     QString m_name;
     QString m_originalName;
     Documentation m_doc;
@@ -71,6 +84,7 @@ public:
     const AbstractMetaClass *m_class = nullptr;
     const AbstractMetaClass *m_implementingClass = nullptr;
     const AbstractMetaClass *m_declaringClass = nullptr;
+    mutable ModificationCache m_modificationCache;
     int m_propertySpecIndex = -1;
     AbstractMetaArgumentList m_arguments;
     AddedFunctionPtr m_addedFunction;
@@ -180,8 +194,7 @@ AbstractMetaFunction::~AbstractMetaFunction() = default;
  */
 bool AbstractMetaFunction::isModifiedRemoved(int types) const
 {
-    const FunctionModificationList &mods = modifications(implementingClass());
-    for (const FunctionModification &mod : mods) {
+    for (const auto &mod : modifications(implementingClass())) {
         if (!mod.isRemoveModifier())
             continue;
 
@@ -423,8 +436,7 @@ QVector<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMeta
 {
     QVector<ReferenceCount> returned;
 
-    const FunctionModificationList &mods = this->modifications(cls);
-    for (const FunctionModification &mod : mods) {
+    for (const auto &mod : modifications(cls)) {
         for (const ArgumentModification &argumentMod : mod.argument_mods()) {
             if (argumentMod.index != idx && idx != -2)
                 continue;
@@ -437,8 +449,7 @@ QVector<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMeta
 
 ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClass *cls, int idx) const
 {
-    const FunctionModificationList &mods = this->modifications(cls);
-    for (const FunctionModification &mod : mods) {
+    for (const auto &mod : modifications(cls)) {
         for (const ArgumentModification &argumentMod : mod.argument_mods()) {
             if (argumentMod.index != idx)
                 continue;
@@ -450,8 +461,7 @@ ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClass *cls, 
 
 QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int key) const
 {
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index != key)
                 continue;
@@ -469,8 +479,7 @@ QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int 
 // FIXME If we remove a arg. in the method at the base class, it will not reflect here.
 bool AbstractMetaFunction::argumentRemoved(int key) const
 {
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == key) {
                 if (argumentModification.removed)
@@ -530,8 +539,7 @@ void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
 
 bool AbstractMetaFunction::isDeprecated() const
 {
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(declaringClass())) {
         if (modification.isDeprecated())
             return true;
     }
@@ -622,8 +630,7 @@ bool AbstractMetaFunction::allowThread() const
 
 TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *cls, TypeSystem::Language language, int key) const
 {
-    const FunctionModificationList &modifications = this->modifications(cls);
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(cls)) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == key)
                 return argumentModification.ownerships.value(language, TypeSystem::InvalidOwnership);
@@ -640,8 +647,7 @@ bool AbstractMetaFunction::isRemovedFromAllLanguages(const AbstractMetaClass *cl
 
 bool AbstractMetaFunction::isRemovedFrom(const AbstractMetaClass *cls, TypeSystem::Language language) const
 {
-    const FunctionModificationList &modifications = this->modifications(cls);
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(cls)) {
         if ((modification.removal() & language) == language)
             return true;
     }
@@ -651,8 +657,7 @@ bool AbstractMetaFunction::isRemovedFrom(const AbstractMetaClass *cls, TypeSyste
 
 QString AbstractMetaFunction::typeReplaced(int key) const
 {
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == key
                 && !argumentModification.modified_type.isEmpty()) {
@@ -666,8 +671,7 @@ QString AbstractMetaFunction::typeReplaced(int key) const
 
 bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
 {
-    const FunctionModificationList &modifications = this->modifications(declaringClass());
-    for (const FunctionModification &modification : modifications) {
+    for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
             if (argumentModification.index == argumentIndex && argumentModification.array != 0)
                 return true;
@@ -725,26 +729,56 @@ QString AbstractMetaFunction::debugSignature() const
     return result;
 }
 
-FunctionModificationList AbstractMetaFunction::modifications(const AbstractMetaClass *implementor) const
+FunctionModificationList AbstractMetaFunction::findClassModifications(const AbstractMetaFunction *f,
+                                                                      const AbstractMetaClass *implementor)
 {
-    if (!d->m_addedFunction.isNull())
-        return d->m_addedFunction->modifications;
-    if (!implementor)
-        implementor = ownerClass();
-
-    if (!implementor)
-        return TypeDatabase::instance()->functionModifications(minimalSignature());
-
+    const QString signature = f->minimalSignature();
     FunctionModificationList mods;
     while (implementor) {
-        mods += implementor->typeEntry()->functionModifications(minimalSignature());
+        mods += implementor->typeEntry()->functionModifications(signature);
         if ((implementor == implementor->baseClass()) ||
-            (implementor == implementingClass() && !mods.isEmpty())) {
+            (implementor == f->implementingClass() && !mods.isEmpty())) {
                 break;
         }
         implementor = implementor->baseClass();
     }
     return mods;
+}
+
+FunctionModificationList AbstractMetaFunction::findGlobalModifications(const AbstractMetaFunction *f)
+{
+    return TypeDatabase::instance()->functionModifications(f->minimalSignature());
+}
+
+const FunctionModificationList &
+    AbstractMetaFunctionPrivate::modifications(const AbstractMetaFunction *q,
+                                               const AbstractMetaClass *implementor) const
+{
+    if (!m_addedFunction.isNull())
+        return m_addedFunction->modifications;
+    for (const auto &ce : m_modificationCache) {
+        if (ce.klass == implementor)
+            return ce.modifications;
+    }
+    auto modifications = m_class == nullptr
+        ? AbstractMetaFunction::findGlobalModifications(q)
+        : AbstractMetaFunction::findClassModifications(q, implementor);
+
+    m_modificationCache.append({implementor, modifications});
+    return m_modificationCache.constLast().modifications;
+}
+
+const FunctionModificationList &
+    AbstractMetaFunction::modifications(const AbstractMetaClass *implementor) const
+{
+    if (implementor == nullptr)
+        implementor = d->m_class;
+    return d->modifications(this, implementor);
+}
+
+void AbstractMetaFunction::clearModificationsCache()
+{
+    d->m_modificationCache.clear();
 }
 
 QString AbstractMetaFunction::argumentName(int index,
@@ -1036,8 +1070,7 @@ bool AbstractMetaFunction::isVirtual() const
 QString AbstractMetaFunctionPrivate::modifiedName(const AbstractMetaFunction *q) const
 {
     if (m_cachedModifiedName.isEmpty()) {
-        const FunctionModificationList &mods = q->modifications(q->implementingClass());
-        for (const FunctionModification &mod : mods) {
+        for (const auto &mod : q->modifications(q->implementingClass())) {
             if (mod.isRenameModifier()) {
                 m_cachedModifiedName = mod.renamedToName();
                 break;
@@ -1075,8 +1108,7 @@ int AbstractMetaFunctionPrivate::overloadNumber(const AbstractMetaFunction *q) c
 {
     if (m_cachedOverloadNumber == TypeSystem::OverloadNumberUnset) {
         m_cachedOverloadNumber = TypeSystem::OverloadNumberDefault;
-        const FunctionModificationList &mods = q->modifications(q->implementingClass());
-        for (const FunctionModification &mod : mods) {
+        for (const auto &mod : q->modifications(q->implementingClass())) {
             if (mod.overloadNumber() != TypeSystem::OverloadNumberUnset) {
                 m_cachedOverloadNumber = mod.overloadNumber();
                 break;

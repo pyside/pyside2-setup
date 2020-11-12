@@ -1365,9 +1365,8 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
 
 void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction *func)
 {
-    const FunctionModificationList &mods = func->modifications(func->implementingClass());
     AbstractMetaFunction& funcRef = *func;
-    for (const FunctionModification &mod : mods) {
+    for (const FunctionModification &mod : func->modifications(func->implementingClass())) {
         if (mod.isRenameModifier()) {
             func->setOriginalName(func->name());
             func->setName(mod.renamedToName());
@@ -1898,7 +1897,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     AbstractMetaArgumentList &metaArguments = metaFunction->arguments();
 
-    const FunctionModificationList functionMods = metaFunction->modifications(currentClass);
+    const FunctionModificationList functionMods = currentClass
+        ? AbstractMetaFunction::findClassModifications(metaFunction, currentClass)
+        : AbstractMetaFunction::findGlobalModifications(metaFunction);
 
     for (const FunctionModification &mod : functionMods) {
         if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified)
