@@ -33,6 +33,10 @@ set(QtUiTools_libraries     pyside6
                             ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                             )
 set(QtUiTools_deps QtWidgets QtXml)
+
+configure_file("${QtUiTools_SOURCE_DIR}/QtUiTools_global.pre.h.in"
+               "${QtUiTools_BINARY_DIR}/QtUiTools_global.pre.h" @ONLY)
+
 create_pyside_module(NAME QtUiTools
                      INCLUDE_DIRS QtUiTools_include_dirs
                      LIBRARIES QtUiTools_libraries

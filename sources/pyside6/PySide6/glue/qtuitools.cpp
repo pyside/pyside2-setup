@@ -175,7 +175,7 @@ if (!uiFile.open(QIODevice::ReadOnly))
 QXmlStreamReader reader(&uiFile);
 while (!reader.atEnd() && baseClassName.isEmpty() && className.isEmpty()) {
     auto token = reader.readNext();
-    if (token == QXmlStreamReader::StartElement && reader.name() == "widget") {
+    if (token == QXmlStreamReader::StartElement && reader.name() == u"widget") {
         baseClassName = reader.attributes().value(QLatin1String("class")).toUtf8();
         className = reader.attributes().value(QLatin1String("name")).toUtf8();
     }

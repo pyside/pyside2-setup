@@ -1,0 +1,7 @@
+// Those classes are only forward-declared in QtUiLoader
+
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QWidget>
+#include <QtGui/QAction>
+#include <QtGui/QActionGroup>
+#include <QtCore/QDir>
