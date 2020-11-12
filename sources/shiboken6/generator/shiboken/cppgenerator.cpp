@@ -3314,7 +3314,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
         if (!returnType.isVoid()) {
             pyArgName = QLatin1String(PYTHON_RETURN_VAR);
             *wrappedClass = AbstractMetaClass::findClass(classes(), returnType.typeEntry());
-            if (errorMessage != nullptr)
+            if (*wrappedClass == nullptr && errorMessage != nullptr)
                 *errorMessage = msgClassNotFound(returnType.typeEntry());
         } else {
             if (errorMessage != nullptr) {
@@ -3332,7 +3332,7 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
 
         if (argType) {
             *wrappedClass = AbstractMetaClass::findClass(classes(), argType.typeEntry());
-            if (errorMessage != nullptr)
+            if (*wrappedClass == nullptr && errorMessage != nullptr)
                 *errorMessage = msgClassNotFound(argType.typeEntry());
             if (argIndex == 1
                 && !func->isConstructor()
