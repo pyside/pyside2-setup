@@ -22,6 +22,9 @@ ${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 )
 
+configure_file("${QtHelp_SOURCE_DIR}/QtHelp_global.pre.h.in"
+               "${QtHelp_BINARY_DIR}/QtHelp_global.pre.h" @ONLY)
+
 set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtHelp_BINARY_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}

@@ -1,0 +1,3 @@
+// QVersionNumber is only forward-declared in QtHelp
+
+#include <QtCore/QVersionNumber>
