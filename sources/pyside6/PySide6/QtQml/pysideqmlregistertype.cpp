@@ -665,7 +665,7 @@ static std::string getGlobalString(const char *name)
     if (globalVar == nullptr || !PyUnicode_Check(globalVar))
         return "";
 
-    const char *stringValue = PyUnicode_AsUTF8(globalVar);
+    const char *stringValue = _PepUnicode_AsString(globalVar);
     return stringValue != nullptr ? stringValue : "";
 }
 
