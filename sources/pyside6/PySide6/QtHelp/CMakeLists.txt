@@ -1,37 +1,26 @@
 project(QtHelp)
 
 set(QtHelp_SRC
+${QtHelp_GEN_DIR}/qcompressedhelpinfo_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentitem_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentmodel_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentwidget_wrapper.cpp
-${QtHelp_GEN_DIR}/qhelpenginecore_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpengine_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpenginecore_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpfilterdata_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpfilterengine_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpfiltersettingswidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpindexmodel_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpindexwidget_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelplink_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchengine_wrapper.cpp
-${QtHelp_GEN_DIR}/qhelpsearchquerywidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchquery_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchquerywidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchresult_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 # module is always needed
 ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Help_VERSION VERSION_EQUAL 5.13.0
-    OR Qt${QT_MAJOR_VERSION}Help_VERSION VERSION_GREATER 5.13.0)
-    list(APPEND QtHelp_SRC
-         ${QtHelp_GEN_DIR}/qcompressedhelpinfo_wrapper.cpp
-         ${QtHelp_GEN_DIR}/qhelpfilterdata_wrapper.cpp
-         ${QtHelp_GEN_DIR}/qhelpfilterengine_wrapper.cpp)
-endif()
-
-if (Qt${QT_MAJOR_VERSION}Help_VERSION VERSION_EQUAL 5.15.0
-    OR Qt${QT_MAJOR_VERSION}Help_VERSION VERSION_GREATER 5.15.0)
-    list(APPEND QtHelp_SRC
-         ${QtHelp_GEN_DIR}/qhelpfiltersettingswidget_wrapper.cpp
-         ${QtHelp_GEN_DIR}/qhelplink_wrapper.cpp)
-endif()
-
 
 set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtHelp_BINARY_DIR}
