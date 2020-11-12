@@ -53,6 +53,7 @@ class FlagsTypeEntry;
 
 QT_BEGIN_NAMESPACE
 class QFile;
+class QDebug;
 QT_END_NAMESPACE
 
 class PrimitiveTypeEntry;
@@ -132,6 +133,10 @@ private:
     Type m_type;
     QString m_value;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug debug, const DefaultValue &v);
+#endif
 
 /**
  * A GeneratorContext object contains a pointer to an AbstractMetaClass and/or a specialized

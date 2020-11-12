@@ -155,6 +155,22 @@ QString DefaultValue::constructorParameter() const
     return m_value + QLatin1String("()");
 }
 
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug debug, const DefaultValue &v)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "DefaultValue(";
+    if (v.isValid())
+        debug << v.type() << ", \"" << v.value() << '"';
+    else
+        debug << "invalid";
+    debug << ')';
+    return debug;
+}
+#endif // !QT_NO_DEBUG_STREAM
+
 QString GeneratorContext::smartPointerWrapperName() const
 {
     Q_ASSERT(m_type == SmartPointer);
@@ -706,7 +722,9 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType &type) const
         auto cType = static_cast<const ComplexTypeEntry *>(type.typeEntry());
         if (cType->hasDefaultConstructor())
             return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
-        auto ctor = minimalConstructor(AbstractMetaClass::findClass(classes(), cType));
+        auto kl = AbstractMetaClass::findClass(classes(), cType);
+        auto ctor = minimalConstructor(kl);
+        qDebug() << __FUNCTION__ << kl << ctor<< cType;
         if (ctor.isValid() && type.hasInstantiations()) {
             QString v = ctor.value();
             v.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
