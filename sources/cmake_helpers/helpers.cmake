@@ -11,15 +11,6 @@ set(ALL_ESSENTIAL_MODULES
     Network
     Test
     Concurrent)
-if(UNIX AND NOT APPLE)
-    list(APPEND ALL_ESSENTIAL_MODULES X11Extras)
-endif()
-if(WIN32)
-    list(APPEND ALL_ESSENTIAL_MODULES WinExtras)
-endif()
-if(APPLE)
-    list(APPEND ALL_ESSENTIAL_MODULES MacExtras)
-endif()
 endmacro()
 
 macro(collect_optional_modules)
@@ -58,6 +49,9 @@ endif()
 list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngine WebEngineWidgets WebSockets)
 if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 5.9.3) # Depending on fixes in Qt3D
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
+endif()
+if(WIN32)
+    list(APPEND ALL_OPTIONAL_MODULES WinExtras)
 endif()
 endmacro()
 
