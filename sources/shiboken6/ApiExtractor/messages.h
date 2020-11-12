@@ -186,6 +186,8 @@ QString msgCannotFindView(const QString &viewedName, const QString &name);
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const QVector<const AbstractMetaFunction *> &involvedConversions);
 
+QString msgClassNotFound(const TypeEntry *t);
+
 QString msgUnknownOperator(const AbstractMetaFunction* func);
 
 QString msgWrongIndex(const char *varName, const QString &capture,
@@ -196,7 +198,8 @@ QString msgCannotFindType(const QString &type, const QString &variable,
 
 QString msgCannotBuildMetaType(const QString &s);
 
-QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type);
+QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type,
+                                          const QString &why = QString());
 
 QString msgRejectReason(const TypeRejection &r, const QString &needle = QString());
 

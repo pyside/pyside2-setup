@@ -2843,11 +2843,14 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s,
     }
     if (isCppPrimitive(type) || type.isSmartPointer())
         return;
-    const auto ctor = minimalConstructor(type);
+    QString errorMessage;
+    const auto ctor = minimalConstructor(type, &errorMessage);
     if (ctor.isValid()) {
         s << ctor.initialization();
     } else {
-        const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type.cppSignature());
+        const QString message =
+            msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__),
+                                              type.cppSignature(), errorMessage);
         qCWarning(lcShiboken()).noquote() << message;
         s << ";\n#error " << message << '\n';
     }

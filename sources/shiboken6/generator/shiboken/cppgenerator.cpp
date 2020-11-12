@@ -935,13 +935,16 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
             }
         }
     }
-    const DefaultValue defaultReturnExpr = minimalConstructor(returnType);
+    QString errorMessage;
+    const DefaultValue defaultReturnExpr = minimalConstructor(returnType, &errorMessage);
     if (!defaultReturnExpr.isValid()) {
         QString errorMsg = QLatin1String(__FUNCTION__) + QLatin1String(": ");
         if (const AbstractMetaClass *c = func->implementingClass())
             errorMsg += c->qualifiedCppName() + QLatin1String("::");
         errorMsg += func->signature();
-        errorMsg = msgCouldNotFindMinimalConstructor(errorMsg, func->type().cppSignature());
+        errorMsg = msgCouldNotFindMinimalConstructor(errorMsg,
+                                                     func->type().cppSignature(),
+                                                     errorMessage);
         qCWarning(lcShiboken).noquote().nospace() << errorMsg;
         s << Qt::endl << INDENT << "#error " << errorMsg << Qt::endl;
     }
@@ -3294,8 +3297,12 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
     s << INDENT << "}\n";
 }
 
-QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex, const AbstractMetaClass **wrappedClass)
+QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex,
+                                            const AbstractMetaClass **wrappedClass,
+                                            QString *errorMessage)
 {
+    if (errorMessage != nullptr)
+        errorMessage->clear();
     *wrappedClass = nullptr;
     QString pyArgName;
     if (argIndex == -1) {
@@ -3307,13 +3314,17 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
         if (!returnType.isVoid()) {
             pyArgName = QLatin1String(PYTHON_RETURN_VAR);
             *wrappedClass = AbstractMetaClass::findClass(classes(), returnType.typeEntry());
+            if (errorMessage != nullptr)
+                *errorMessage = msgClassNotFound(returnType.typeEntry());
         } else {
-            QString message = QLatin1String("Invalid Argument index (0, return value) on function modification: ")
-                + funcType.name() + QLatin1Char(' ');
-            if (const AbstractMetaClass *declaringClass = func->declaringClass())
-                message += declaringClass->name() + QLatin1String("::");
-            message += func->name() + QLatin1String("()");
-            qCWarning(lcShiboken).noquote().nospace() << message;
+            if (errorMessage != nullptr) {
+                QTextStream str(errorMessage);
+                str << "Invalid Argument index (0, return value) on function modification: "
+                    <<  funcType.name() << ' ';
+                if (const AbstractMetaClass *declaringClass = func->declaringClass())
+                   str << declaringClass->name() << "::";
+                 str << func->name() << "()";
+            }
         }
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
@@ -3321,6 +3332,8 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
 
         if (argType) {
             *wrappedClass = AbstractMetaClass::findClass(classes(), argType.typeEntry());
+            if (errorMessage != nullptr)
+                *errorMessage = msgClassNotFound(argType.typeEntry());
             if (argIndex == 1
                 && !func->isConstructor()
                 && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
@@ -3716,9 +3729,18 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
         s << Qt::endl << INDENT << "// Ownership transferences.\n";
         for (const ArgumentModification &arg_mod : qAsConst(ownership_mods)) {
             const AbstractMetaClass *wrappedClass = nullptr;
-            QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
+            QString errorMessage;
+            QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass, &errorMessage);
             if (!wrappedClass) {
-                s << "#error Invalid ownership modification for argument " << arg_mod.index << '(' << pyArgName << ")\n" << Qt::endl;
+                QString message;
+                QTextStream str(&message);
+                str << "Invalid ownership modification for argument " << arg_mod.index
+                    << " (" << pyArgName << ") of ";
+                if (const AbstractMetaClass *declaringClass = func->declaringClass())
+                    str << declaringClass->name() << "::";
+                str << func->name() << "(): " << errorMessage;
+                qCWarning(lcShiboken, "%s", qPrintable(message));
+                s << "#error " << message << '\n';
                 break;
             }
 
@@ -3759,9 +3781,18 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             if (refCount.action == ReferenceCount::Remove) {
                 pyArgName = QLatin1String("Py_None");
             } else {
-                pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass);
+                QString errorMessage;
+                pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass, &errorMessage);
                 if (pyArgName.isEmpty()) {
-                    s << "#error Invalid reference count modification for argument " << arg_mod.index << Qt::endl << Qt::endl;
+                    QString message;
+                    QTextStream str(&message);
+                    str << "Invalid reference count modification for argument "
+                        << arg_mod.index << " of ";
+                    if (const AbstractMetaClass *declaringClass = func->declaringClass())
+                        str << declaringClass->name() << "::";
+                    str << func->name() << "(): " << errorMessage;
+                    qCWarning(lcShiboken, "%s", qPrintable(message));
+                    s << "#error " << message << "\n\n";
                     break;
                 }
             }

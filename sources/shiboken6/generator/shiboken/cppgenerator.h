@@ -250,7 +250,9 @@ private:
     void writeNamedArgumentResolution(QTextStream &s, const AbstractMetaFunction *func, bool usePyArgs);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
-    QString argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex, const AbstractMetaClass **wrappedClass);
+    QString argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex,
+                                  const AbstractMetaClass **wrappedClass,
+                                  QString *errorMessage = nullptr);
     void writeMethodCall(QTextStream &s, const AbstractMetaFunction *func,
                          const GeneratorContext &context, int maxArgs = 0);
 

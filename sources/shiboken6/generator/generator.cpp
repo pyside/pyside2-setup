@@ -690,7 +690,8 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
     return QLatin1String("::") + typeName;
 }
 
-DefaultValue Generator::minimalConstructor(const AbstractMetaType &type) const
+DefaultValue Generator::minimalConstructor(const AbstractMetaType &type,
+                                           QString *errorString) const
 {
     if (type.referenceType() == LValueReference && Generator::isObjectType(type))
         return DefaultValue(DefaultValue::Error);
@@ -722,9 +723,13 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType &type) const
         auto cType = static_cast<const ComplexTypeEntry *>(type.typeEntry());
         if (cType->hasDefaultConstructor())
             return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
-        auto kl = AbstractMetaClass::findClass(classes(), cType);
-        auto ctor = minimalConstructor(kl);
-        qDebug() << __FUNCTION__ << kl << ctor<< cType;
+        auto klass = AbstractMetaClass::findClass(classes(), cType);
+        if (!klass) {
+            if (errorString != nullptr)
+                *errorString = msgClassNotFound(cType);
+            return DefaultValue(DefaultValue::Error);
+        }
+        auto ctor = minimalConstructor(klass);
         if (ctor.isValid() && type.hasInstantiations()) {
             QString v = ctor.value();
             v.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
@@ -733,10 +738,11 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType &type) const
         return ctor;
     }
 
-    return minimalConstructor(type.typeEntry());
+    return minimalConstructor(type.typeEntry(), errorString);
 }
 
-DefaultValue Generator::minimalConstructor(const TypeEntry *type) const
+DefaultValue Generator::minimalConstructor(const TypeEntry *type,
+                                           QString *errorString) const
 {
     if (!type)
         return DefaultValue(DefaultValue::Error);
@@ -777,9 +783,18 @@ DefaultValue Generator::minimalConstructor(const TypeEntry *type) const
     if (type->isSmartPointer())
         return DefaultValue(DefaultValue::DefaultConstructor, type->qualifiedCppName());
 
-    if (type->isComplex())
-        return minimalConstructor(AbstractMetaClass::findClass(classes(), type));
+    if (type->isComplex()) {
+        auto klass = AbstractMetaClass::findClass(classes(), type);
+        if (!klass) {
+            if (errorString != nullptr)
+                *errorString = msgClassNotFound(type);
+            return DefaultValue(DefaultValue::Error);
+        }
+        return minimalConstructor(klass);
+    }
 
+    if (errorString != nullptr)
+        *errorString = QLatin1String("No default value could be determined.");
     return DefaultValue(DefaultValue::Error);
 }
 
@@ -789,7 +804,8 @@ static QString constructorCall(const QString &qualifiedCppName, const QStringLis
         + args.join(QLatin1String(", ")) + QLatin1Char(')');
 }
 
-DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass) const
+DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass,
+                                           QString *errorString) const
 {
     if (!metaClass)
         return DefaultValue(DefaultValue::Error);

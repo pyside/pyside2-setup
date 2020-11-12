@@ -382,9 +382,12 @@ protected:
      *   It will check first for a user defined default constructor.
      *   Returns a null string if it fails.
      */
-    DefaultValue minimalConstructor(const TypeEntry *type) const;
-    DefaultValue minimalConstructor(const AbstractMetaType &type) const;
-    DefaultValue minimalConstructor(const AbstractMetaClass *metaClass) const;
+    DefaultValue minimalConstructor(const TypeEntry *type,
+                                    QString *errorString = nullptr) const;
+    DefaultValue minimalConstructor(const AbstractMetaType &type,
+                                    QString *errorString = nullptr) const;
+    DefaultValue minimalConstructor(const AbstractMetaClass *metaClass,
+                                    QString *errorString = nullptr) const;
 
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass/Type.

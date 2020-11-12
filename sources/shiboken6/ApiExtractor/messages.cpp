@@ -559,6 +559,13 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
 
 // shibokengenerator.cpp
 
+QString msgClassNotFound(const TypeEntry *t)
+{
+    return QLatin1String("Could not find class \"")
+           + t->qualifiedCppName()
+           + QLatin1String("\" in the code model. Maybe it is forward declared?");
+}
+
 QString msgUnknownOperator(const AbstractMetaFunction* func)
 {
     QString result = QLatin1String("Unknown operator: \"") + func->originalName()
@@ -596,10 +603,17 @@ QString msgCannotBuildMetaType(const QString &s)
         + s + QLatin1String("\": ");
 }
 
-QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type)
+QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &type, const QString &why)
 {
-    return where + QLatin1String(": Could not find a minimal constructor for type '")
-       + type + QLatin1String("'. This will result in a compilation error.");
+    QString result;
+    QTextStream str(&result);
+    str << where << ": Could not find a minimal constructor for type '" << type << '\'';
+    if (why.isEmpty())
+        str << '.';
+    else
+        str << ": " << why << ' ';
+    str << "This will result in a compilation error.";
+    return result;
 }
 
 // typedatabase.cpp
