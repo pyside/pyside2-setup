@@ -76,8 +76,6 @@ DefaultValue::DefaultValue(QString customValue) :
 QString DefaultValue::returnValue() const
 {
     switch (m_type) {
-    case DefaultValue::Error:
-        return QLatin1String("#error");
     case DefaultValue::Boolean:
         return QLatin1String("false");
     case DefaultValue::CppScalar:
@@ -100,8 +98,6 @@ QString DefaultValue::returnValue() const
 QString DefaultValue::initialization() const
 {
     switch (m_type) {
-    case DefaultValue::Error:
-        return QLatin1String("#error");
     case DefaultValue::Boolean:
         return QLatin1String("{false}");
     case DefaultValue::CppScalar:
@@ -125,8 +121,6 @@ QString DefaultValue::initialization() const
 QString DefaultValue::constructorParameter() const
 {
     switch (m_type) {
-    case DefaultValue::Error:
-        return QLatin1String("#error");
     case DefaultValue::Boolean:
         return QLatin1String("false");
     case DefaultValue::CppScalar: {
@@ -161,12 +155,7 @@ QDebug operator<<(QDebug debug, const DefaultValue &v)
     QDebugStateSaver saver(debug);
     debug.noquote();
     debug.nospace();
-    debug << "DefaultValue(";
-    if (v.isValid())
-        debug << v.type() << ", \"" << v.value() << '"';
-    else
-        debug << "invalid";
-    debug << ')';
+    debug << "DefaultValue(" <<  v.type() << ", \"" << v.value() << "\")";
     return debug;
 }
 #endif // !QT_NO_DEBUG_STREAM
@@ -690,11 +679,12 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
     return QLatin1String("::") + typeName;
 }
 
-DefaultValue Generator::minimalConstructor(const AbstractMetaType &type,
-                                           QString *errorString) const
+std::optional<DefaultValue>
+    Generator::minimalConstructor(const AbstractMetaType &type,
+                                  QString *errorString) const
 {
     if (type.referenceType() == LValueReference && Generator::isObjectType(type))
-        return DefaultValue(DefaultValue::Error);
+        return {};
 
     if (type.isContainer()) {
         QString ctor = type.cppSignature();
@@ -727,25 +717,28 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaType &type,
         if (!klass) {
             if (errorString != nullptr)
                 *errorString = msgClassNotFound(cType);
-            return DefaultValue(DefaultValue::Error);
+            return {};
         }
-        auto ctor = minimalConstructor(klass);
-        if (ctor.isValid() && type.hasInstantiations()) {
+        auto ctorO = minimalConstructor(klass);
+        if (ctorO.has_value() && type.hasInstantiations()) {
+            auto ctor = ctorO.value();
             QString v = ctor.value();
             v.replace(getFullTypeName(cType), getFullTypeNameWithoutModifiers(type));
             ctor.setValue(v);
+            return ctor;
         }
-        return ctor;
+        return ctorO;
     }
 
     return minimalConstructor(type.typeEntry(), errorString);
 }
 
-DefaultValue Generator::minimalConstructor(const TypeEntry *type,
-                                           QString *errorString) const
+std::optional<DefaultValue>
+   Generator::minimalConstructor(const TypeEntry *type,
+                                 QString *errorString) const
 {
     if (!type)
-        return DefaultValue(DefaultValue::Error);
+        return {};
 
     if (type->isCppPrimitive()) {
         const QString &name = type->qualifiedCppName();
@@ -788,14 +781,14 @@ DefaultValue Generator::minimalConstructor(const TypeEntry *type,
         if (!klass) {
             if (errorString != nullptr)
                 *errorString = msgClassNotFound(type);
-            return DefaultValue(DefaultValue::Error);
+            return {};
         }
-        return minimalConstructor(klass);
+        return minimalConstructor(klass, errorString);
     }
 
     if (errorString != nullptr)
         *errorString = QLatin1String("No default value could be determined.");
-    return DefaultValue(DefaultValue::Error);
+    return {};
 }
 
 static QString constructorCall(const QString &qualifiedCppName, const QStringList &args)
@@ -804,11 +797,12 @@ static QString constructorCall(const QString &qualifiedCppName, const QStringLis
         + args.join(QLatin1String(", ")) + QLatin1Char(')');
 }
 
-DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass,
-                                           QString *errorString) const
+std::optional<DefaultValue>
+    Generator::minimalConstructor(const AbstractMetaClass *metaClass,
+                                  QString *errorString) const
 {
     if (!metaClass)
-        return DefaultValue(DefaultValue::Error);
+        return {};
 
     auto cType = static_cast<const ComplexTypeEntry *>(metaClass->typeEntry());
     if (cType->hasDefaultConstructor())
@@ -850,8 +844,7 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass,
     for (auto it = candidates.cbegin(), end = candidates.cend(); it != end; ++it) {
         const AbstractMetaArgumentList &arguments = it.value()->arguments();
         QStringList args;
-        bool ok = true;
-        for (int i =0, size = arguments.size(); ok && i < size; ++i) {
+        for (int i = 0, size = arguments.size(); i < size; ++i) {
             const AbstractMetaArgument &arg = arguments.at(i);
             if (arg.hasModifiedDefaultValueExpression()) {
                 args << arg.defaultValueExpression(); // Spell out modified values
@@ -859,15 +852,15 @@ DefaultValue Generator::minimalConstructor(const AbstractMetaClass *metaClass,
             }
             if (arg.hasOriginalDefaultValueExpression())
                 break;
-            auto argValue = minimalConstructor(arg.type());
-            ok &= argValue.isValid();
-            args << argValue.constructorParameter();
+            auto argValue = minimalConstructor(arg.type(), errorString);
+            if (!argValue.has_value())
+                return {};
+            args << argValue->constructorParameter();
         }
-        if (ok)
-            return DefaultValue(DefaultValue::Custom, constructorCall(qualifiedCppName, args));
+        return DefaultValue(DefaultValue::Custom, constructorCall(qualifiedCppName, args));
     }
 
-    return DefaultValue(DefaultValue::Error);
+    return {};
 }
 
 // Should int be used for a (protected) enum when generating the public wrapper?

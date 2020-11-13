@@ -2845,8 +2845,8 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s,
         return;
     QString errorMessage;
     const auto ctor = minimalConstructor(type, &errorMessage);
-    if (ctor.isValid()) {
-        s << ctor.initialization();
+    if (ctor.has_value()) {
+        s << ctor->initialization();
     } else {
         const QString message =
             msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__),
@@ -2865,8 +2865,8 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const 
     if (isCppPrimitive(type))
         return;
     const auto ctor = minimalConstructor(type);
-    if (ctor.isValid()) {
-        s << ctor.initialization();
+    if (ctor.has_value()) {
+        s << ctor->initialization();
     } else {
         const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->qualifiedCppName());
         qCWarning(lcShiboken()).noquote() << message;

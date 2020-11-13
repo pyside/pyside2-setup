@@ -936,8 +936,8 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
         }
     }
     QString errorMessage;
-    const DefaultValue defaultReturnExpr = minimalConstructor(returnType, &errorMessage);
-    if (!defaultReturnExpr.isValid()) {
+    const auto defaultReturnExpr = minimalConstructor(returnType, &errorMessage);
+    if (!defaultReturnExpr.has_value()) {
         QString errorMsg = QLatin1String(__FUNCTION__) + QLatin1String(": ");
         if (const AbstractMetaClass *c = func->implementingClass())
             errorMsg += c->qualifiedCppName() + QLatin1String("::");
@@ -953,7 +953,7 @@ QString CppGenerator::virtualMethodReturn(QTextStream &s,
             << " result;\n";
         return QLatin1String("return result;");
     }
-    return QLatin1String("return ") + defaultReturnExpr.returnValue()
+    return QLatin1String("return ") + defaultReturnExpr->returnValue()
            + QLatin1Char(';');
 }
 

@@ -103,7 +103,6 @@ class DefaultValue
 public:
     enum Type
     {
-        Error,
         Boolean,
         CppScalar, // A C++ scalar type (int,..) specified by value()
         Custom, // A custom constructor/expression, uses value() as is
@@ -114,10 +113,8 @@ public:
         Void  // "", for return values only
     };
 
-    explicit DefaultValue(Type t = Error, QString value = QString());
+    explicit DefaultValue(Type t, QString value = QString());
     explicit DefaultValue(QString customValue);
-
-    bool isValid() const { return m_type != Error; }
 
     QString returnValue() const;
     QString initialization() const;
@@ -382,12 +379,12 @@ protected:
      *   It will check first for a user defined default constructor.
      *   Returns a null string if it fails.
      */
-    DefaultValue minimalConstructor(const TypeEntry *type,
-                                    QString *errorString = nullptr) const;
-    DefaultValue minimalConstructor(const AbstractMetaType &type,
-                                    QString *errorString = nullptr) const;
-    DefaultValue minimalConstructor(const AbstractMetaClass *metaClass,
-                                    QString *errorString = nullptr) const;
+    std::optional<DefaultValue> minimalConstructor(const TypeEntry *type,
+                                                   QString *errorString = nullptr) const;
+    std::optional<DefaultValue> minimalConstructor(const AbstractMetaType &type,
+                                                   QString *errorString = nullptr) const;
+    std::optional<DefaultValue> minimalConstructor(const AbstractMetaClass *metaClass,
+                                                   QString *errorString = nullptr) const;
 
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass/Type.
