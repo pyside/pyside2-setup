@@ -155,7 +155,8 @@ private:
      *  \param  newType It is set to true if the type returned is a new object that must be deallocated.
      *  \return The type of the argument indicated by \p argPos.
      */
-    const AbstractMetaType getArgumentType(const AbstractMetaFunction *func, int argPos);
+    std::optional<AbstractMetaType>
+        getArgumentType(const AbstractMetaFunction *func, int argPos);
 
     void writePythonToCppTypeConversion(QTextStream &s,
                                         const AbstractMetaType &type,
@@ -380,7 +381,8 @@ private:
     bool hasBoolCast(const AbstractMetaClass *metaClass) const
     { return boolCast(metaClass) != nullptr; }
 
-    AbstractMetaType findSmartPointerInstantiation(const TypeEntry *entry) const;
+    std::optional<AbstractMetaType>
+        findSmartPointerInstantiation(const TypeEntry *entry) const;
 
     // Number protocol structure members names.
     static QHash<QString, QString> m_nbFuncs;

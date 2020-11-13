@@ -144,18 +144,15 @@ public:
     void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                AbstractMetaClass *metaClass);
 
-    QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type,
-                            AbstractMetaFunction *fnc, AbstractMetaClass *,
+    QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type, AbstractMetaClass *,
                             int argumentIndex);
-    AbstractMetaType translateType(const TypeInfo &type,
-                                   AbstractMetaClass *currentClass,
-                                   TranslateTypeFlags flags = {},
-                                   QString *errorMessage = nullptr);
-    static AbstractMetaType translateTypeStatic(const TypeInfo &type,
-                                                AbstractMetaClass *current,
-                                                AbstractMetaBuilderPrivate *d = nullptr,
-                                                TranslateTypeFlags flags = {},
-                                                QString *errorMessageIn = nullptr);
+    std::optional<AbstractMetaType>
+        translateType(const TypeInfo &type, AbstractMetaClass *currentClass,
+                      TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
+    static std::optional<AbstractMetaType>
+        translateTypeStatic(const TypeInfo &type, AbstractMetaClass *current,
+                            AbstractMetaBuilderPrivate *d = nullptr, TranslateTypeFlags flags = {},
+                            QString *errorMessageIn = nullptr);
     static TypeEntries findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
                                              AbstractMetaClass *currentClass = nullptr,
                                              AbstractMetaBuilderPrivate *d = nullptr);
@@ -176,8 +173,9 @@ public:
                          const AbstractMetaClass *templateClass,
                          const TypeInfo &info);
     void inheritTemplateFunctions(AbstractMetaClass *subclass);
-    AbstractMetaType inheritTemplateType(const AbstractMetaTypeList &templateTypes,
-                                         const AbstractMetaType &metaType);
+    std::optional<AbstractMetaType>
+        inheritTemplateType(const AbstractMetaTypeList &templateTypes,
+                            const AbstractMetaType &metaType);
 
     bool isQObject(const FileModelItem &dom, const QString &qualifiedName);
     bool isEnum(const FileModelItem &dom, const QStringList &qualifiedName);

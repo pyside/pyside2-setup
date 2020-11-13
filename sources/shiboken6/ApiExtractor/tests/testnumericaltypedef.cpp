@@ -62,13 +62,11 @@ void TestNumericalTypedef::testNumericalTypedef()
     QCOMPARE(funcReal->minimalSignature(), QLatin1String("funcReal(real)"));
 
     const AbstractMetaType doubleType = funcDouble->arguments().constFirst().type();
-    QVERIFY(doubleType);
     QCOMPARE(doubleType.cppSignature(), QLatin1String("double"));
     QVERIFY(doubleType.isPrimitive());
     QVERIFY(doubleType.typeEntry()->isCppPrimitive());
 
     const AbstractMetaType realType = funcReal->arguments().constFirst().type();
-    QVERIFY(realType);
     QCOMPARE(realType.cppSignature(), QLatin1String("real"));
     QVERIFY(realType.isPrimitive());
     QVERIFY(realType.typeEntry()->isCppPrimitive());
@@ -104,13 +102,11 @@ void TestNumericalTypedef::testUnsignedNumericalTypedef()
     QCOMPARE(funcUShort->minimalSignature(), QLatin1String("funcUShort(custom_ushort)"));
 
     const AbstractMetaType unsignedShortType = funcUnsignedShort->arguments().constFirst().type();
-    QVERIFY(unsignedShortType);
     QCOMPARE(unsignedShortType.cppSignature(), QLatin1String("unsigned short"));
     QVERIFY(unsignedShortType.isPrimitive());
     QVERIFY(unsignedShortType.typeEntry()->isCppPrimitive());
 
     const AbstractMetaType ushortType = funcUShort->arguments().constFirst().type();
-    QVERIFY(ushortType);
     QCOMPARE(ushortType.cppSignature(), QLatin1String("custom_ushort"));
     QVERIFY(ushortType.isPrimitive());
     QVERIFY(ushortType.typeEntry()->isCppPrimitive());

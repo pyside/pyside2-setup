@@ -79,7 +79,7 @@ namespace Internet {
     QVERIFY(classB);
     const AbstractMetaFunction* func = classB->findFunction(QLatin1String("list"));
     AbstractMetaType funcType = func->type();
-    QVERIFY(funcType);
+    QVERIFY(!funcType.isVoid());
     QCOMPARE(funcType.cppSignature(), QLatin1String("QList<Internet::Url >"));
 }
 
@@ -397,7 +397,6 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     AbstractMetaTypeList instantiations = one->templateBaseClassInstantiations();
     QCOMPARE(instantiations.count(), 1);
     const AbstractMetaType &inst = instantiations.constFirst();
-    QVERIFY(inst);
     QVERIFY(!inst.isEnum());
     QVERIFY(!inst.typeEntry()->isEnum());
     QVERIFY(inst.typeEntry()->isEnumValue());
@@ -446,7 +445,7 @@ typedef Vector<int> IntVector;
     const AbstractMetaFunction* otherMethod = vector->findFunction(QLatin1String("otherMethod"));
     QVERIFY(otherMethod);
     QCOMPARE(otherMethod->signature(), QLatin1String("otherMethod()"));
-    QVERIFY(otherMethod->type());
+    QVERIFY(!otherMethod->type().isVoid());
     QCOMPARE(otherMethod->type().cppSignature(), QLatin1String("Vector<int >"));
 }
 

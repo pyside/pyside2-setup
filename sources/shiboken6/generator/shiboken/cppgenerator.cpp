@@ -90,7 +90,7 @@ static const char *typeNameOf(const T &t)
 // utility functions
 inline AbstractMetaType getTypeWithoutContainer(const AbstractMetaType &arg)
 {
-    if (arg && arg.typeEntry()->isContainer()) {
+    if (arg.typeEntry()->isContainer()) {
         // only support containers with 1 type
         if (arg.instantiations().size() == 1)
             return arg.instantiations().constFirst();
@@ -261,7 +261,8 @@ const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass *meta
         && func->arguments().isEmpty() ? func : nullptr;
 }
 
-AbstractMetaType CppGenerator::findSmartPointerInstantiation(const TypeEntry *entry) const
+std::optional<AbstractMetaType>
+    CppGenerator::findSmartPointerInstantiation(const TypeEntry *entry) const
 {
     for (const auto &i : instantiatedSmartPointers()) {
         if (i.instantiations().at(0).typeEntry() == entry)
@@ -574,11 +575,11 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
                     // @TODO: This possibly leaks, but there are a bunch of other places where this
                     // is done, so this will be fixed in bulk with all the other cases, because the
                     // ownership of the pointers is not clear at the moment.
-                    AbstractMetaType pointerToInnerType =
+                    auto pointerToInnerType =
                             buildAbstractMetaTypeFromString(pointerToInnerTypeName);
-
+                    Q_ASSERT(pointerToInnerType.has_value());
                     AbstractMetaFunction *mutableRfunc = overloads.constFirst();
-                    mutableRfunc->setType(pointerToInnerType);
+                    mutableRfunc->setType(pointerToInnerType.value());
                 } else if (smartPointerTypeEntry->refCountMethodName().isEmpty()
                            || smartPointerTypeEntry->refCountMethodName() != rfunc->name()) {
                     // Skip all public methods of the smart pointer except for the raw getter and
@@ -834,7 +835,7 @@ static bool allArgumentsRemoved(const AbstractMetaFunction *func)
 
 QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func)
 {
-    if (!func->type())
+    if (func->type().isVoid())
         return QLatin1String("\"\"");
 
     if (!func->typeReplaced(0).isEmpty())
@@ -1780,8 +1781,9 @@ void CppGenerator::writeSmartPointerConverterFunctions(QTextStream &s, const Abs
         for (auto k : classes) {
             if (smartPointerTypeEntry->matchesInstantiation(k->typeEntry())) {
                 if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry())) {
-                    s << INDENT << "// SmartPointer derived class: " << smartTargetType.cppSignature() << "\n";
-                    writePythonToCppConversionFunctions(s, smartPointerType, smartTargetType, {}, {}, {});
+                    s << INDENT << "// SmartPointer derived class: "
+                        << smartTargetType->cppSignature() << "\n";
+                    writePythonToCppConversionFunctions(s, smartPointerType, smartTargetType.value(), {}, {}, {});
                 }
             }
         }
@@ -2359,9 +2361,10 @@ void CppGenerator::writeTypeCheck(QTextStream &s, AbstractMetaType argType,
         AbstractMetaType metaType;
         // PYSIDE-795: Note: XML-Overrides are handled in this shibokengenerator function!
         // This enables iterables for QMatrix4x4 for instance.
-        customCheck = guessCPythonCheckFunction(customType, &metaType);
-        if (metaType)
-            argType = metaType;
+        auto customCheckResult = guessCPythonCheckFunction(customType);
+        customCheck = customCheckResult.checkFunction;
+        if (customCheckResult.type.has_value())
+            argType = customCheckResult.type.value();
     }
 
     // TODO-CONVERTER: merge this with the code below.
@@ -2388,8 +2391,7 @@ void CppGenerator::writeTypeCheck(QTextStream &s, AbstractMetaType argType,
 
 static void checkTypeViability(const AbstractMetaFunction *func, const AbstractMetaType &type, int argIdx)
 {
-    if (!type
-        || type.isVoid()
+    if (type.isVoid()
         || !type.typeEntry()->isPrimitive()
         || type.indirections() == 0
         || (type.indirections() == 1 && type.typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
@@ -2467,7 +2469,8 @@ void CppGenerator::writeArgumentConversion(QTextStream &s,
         writeUnusedVariableCast(s, argName);
 }
 
-const AbstractMetaType CppGenerator::getArgumentType(const AbstractMetaFunction *func, int argPos)
+std::optional<AbstractMetaType>
+    CppGenerator::getArgumentType(const AbstractMetaFunction *func, int argPos)
 {
     if (argPos < 0 || argPos > func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()
@@ -2484,7 +2487,7 @@ const AbstractMetaType CppGenerator::getArgumentType(const AbstractMetaFunction 
     }
 
     auto argType = buildAbstractMetaTypeFromString(typeReplaced);
-    if (!argType && !m_knownPythonTypes.contains(typeReplaced)) {
+    if (!argType.has_value() && !m_knownPythonTypes.contains(typeReplaced)) {
         qCWarning(lcShiboken).noquote().nospace()
             << QString::fromLatin1("Unknown type '%1' used as argument type replacement "\
                                    "in function '%2', the generated code may be broken.")
@@ -2947,14 +2950,16 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
         }
         if (hasConversionRule)
             continue;
-        const AbstractMetaType argType = getArgumentType(func, argIdx + 1);
-        if (!argType || (mayHaveUnunsedArguments && !injectedCodeUsesArgument(func, argIdx)))
+        auto argType = getArgumentType(func, argIdx + 1);
+        if (!argType.has_value() || (mayHaveUnunsedArguments && !injectedCodeUsesArgument(func, argIdx)))
             continue;
         int argPos = argIdx - removedArgs;
         QString argName = QLatin1String(CPP_ARG) + QString::number(argPos);
         QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : QLatin1String(PYTHON_ARG);
         QString defaultValue = guessScopeForDefaultValue(func, arg);
-        writeArgumentConversion(s, argType, argName, pyArgName, func->implementingClass(), defaultValue, func->isUserAdded());
+        writeArgumentConversion(s, argType.value(), argName, pyArgName,
+                                func->implementingClass(), defaultValue,
+                                func->isUserAdded());
     }
 
     s << Qt::endl;
@@ -3329,18 +3334,15 @@ QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, in
     } else {
         int realIndex = argIndex - 1 - OverloadData::numberOfRemovedArguments(func, argIndex - 1);
         AbstractMetaType argType = getTypeWithoutContainer(func->arguments().at(realIndex).type());
-
-        if (argType) {
-            *wrappedClass = AbstractMetaClass::findClass(classes(), argType.typeEntry());
-            if (*wrappedClass == nullptr && errorMessage != nullptr)
-                *errorMessage = msgClassNotFound(argType.typeEntry());
-            if (argIndex == 1
-                && !func->isConstructor()
-                && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
-                pyArgName = QLatin1String(PYTHON_ARG);
-            else
-                pyArgName = pythonArgsAt(argIndex - 1);
-        }
+        *wrappedClass = AbstractMetaClass::findClass(classes(), argType.typeEntry());
+        if (*wrappedClass == nullptr && errorMessage != nullptr)
+            *errorMessage = msgClassNotFound(argType.typeEntry());
+        if (argIndex == 1
+            && !func->isConstructor()
+            && OverloadData::isSingleArgument(getFunctionGroups(func->implementingClass())[func->name()]))
+            pyArgName = QLatin1String(PYTHON_ARG);
+        else
+            pyArgName = pythonArgsAt(argIndex - 1);
     }
     return pyArgName;
 }
@@ -4040,11 +4042,13 @@ void CppGenerator::writeSmartPointerConverterInitialization(QTextStream &s, cons
     s << Qt::endl;
 
     for (auto k : classes) {
-        if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry()))
-        {
-            s << INDENT << "// Convert to SmartPointer derived class: [" << smartTargetType.cppSignature() << "]\n";
-            const QString converter = QLatin1String("Shiboken::Conversions::getConverter(\"%1\")").arg(smartTargetType.cppSignature());
-            writeConversionRegister(type, fixedCppTypeName(smartTargetType), converter);
+        auto smartTargetType = findSmartPointerInstantiation(k->typeEntry());
+        if (smartTargetType.has_value()) {
+            s << INDENT << "// Convert to SmartPointer derived class: ["
+                << smartTargetType->cppSignature() << "]\n";
+            const QString converter =
+                QLatin1String("Shiboken::Conversions::getConverter(\"%1\")").arg(smartTargetType->cppSignature());
+            writeConversionRegister(type, fixedCppTypeName(smartTargetType.value()), converter);
         } else {
             s << INDENT << "// Class not found:" << type.instantiations().at(0).cppSignature();
         }
@@ -4790,9 +4794,10 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
                 const AbstractMetaFunction *func = od->referenceFunction();
                 if (func->isStatic())
                     continue;
-                const AbstractMetaType argType = getArgumentType(func, 1);
-                if (!argType)
+                auto argTypeO = getArgumentType(func, 1);
+                if (!argTypeO.has_value())
                     continue;
+                auto argType = argTypeO.value();
                 if (!first) {
                     s << " else ";
                 } else {

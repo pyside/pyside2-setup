@@ -67,7 +67,7 @@ public:
     AbstractMetaTypeCPtr m_viewOn;
     AbstractMetaType::Indirections m_indirections;
 
-    AbstractMetaType::TypeUsagePattern m_pattern = AbstractMetaType::InvalidPattern;
+    AbstractMetaType::TypeUsagePattern m_pattern = AbstractMetaType::VoidPattern;
     uint m_constant : 1;
     uint m_volatile : 1;
     uint m_signaturesDirty : 1;
@@ -103,11 +103,6 @@ AbstractMetaType::AbstractMetaType(AbstractMetaType &&) = default;
 AbstractMetaType &AbstractMetaType::operator=(AbstractMetaType &&) = default;
 
 AbstractMetaType::~AbstractMetaType() = default;
-
-bool AbstractMetaType::isValid() const
-{
-    return d->m_pattern != AbstractMetaType::InvalidPattern;
-}
 
 QString AbstractMetaType::package() const
 {
@@ -685,10 +680,6 @@ AbstractMetaType AbstractMetaType::createVoid()
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {
-    if (!isValid()) {
-        debug << "Invalid";
-        return;
-    }
     debug << '"' << name() << '"';
     if (debug.verbosity() > 2) {
         auto te = typeEntry();

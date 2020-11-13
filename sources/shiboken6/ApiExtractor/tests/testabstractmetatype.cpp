@@ -77,7 +77,7 @@ void TestAbstractMetaType::testConstCharPtrType()
     AbstractMetaFunction *func = builder->globalFunctions().constFirst();
     AbstractMetaType rtype = func->type();
     // Test properties of const char*
-    QVERIFY(rtype);
+    QVERIFY(!rtype.isVoid());
     QCOMPARE(rtype.package(), QLatin1String("Foo"));
     QCOMPARE(rtype.name(), QLatin1String("char"));
     QVERIFY(rtype.isConstant());
@@ -150,7 +150,7 @@ void TestAbstractMetaType::testCharType()
     AbstractMetaFunction *func = functions.constFirst();
     AbstractMetaType rtype = func->type();
     // Test properties of const char*
-    QVERIFY(rtype);
+    QVERIFY(!rtype.isVoid());
     QCOMPARE(rtype.package(), QLatin1String("Foo"));
     QCOMPARE(rtype.name(), QLatin1String("char"));
     QVERIFY(!rtype.isConstant());

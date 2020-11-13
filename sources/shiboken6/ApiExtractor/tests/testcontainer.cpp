@@ -94,7 +94,6 @@ void TestContainer::testListOfValueType()
     QCOMPARE(classA->templateBaseClassInstantiations().count(), 1);
     const AbstractMetaType templateInstanceType =
         classA->templateBaseClassInstantiations().constFirst();
-    QVERIFY(templateInstanceType);
 
     QCOMPARE(templateInstanceType.indirections(), 0);
     QVERIFY(!templateInstanceType.typeEntry()->isObject());

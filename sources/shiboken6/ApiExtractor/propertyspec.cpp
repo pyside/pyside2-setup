@@ -272,8 +272,8 @@ std::optional<QPropertySpec>
          return {};
      }
 
-     AbstractMetaType type = b->translateType(info, metaClass, {}, &typeError);
-     if (!type) {
+     auto type = b->translateType(info, metaClass, {}, &typeError);
+     if (!type.has_value()) {
          const QStringList qualifiedName = info.qualifiedName();
          for (int j = scopes.size(); j >= 0 && !type; --j) {
              info.setQualifiedName(scopes.mid(0, j) + qualifiedName);
@@ -281,11 +281,11 @@ std::optional<QPropertySpec>
          }
      }
 
-     if (!type) {
+     if (!type.has_value()) {
          *errorMessage = msgPropertyTypeParsingFailed(ts.name, ts.type, typeError);
          return {};
      }
-     return QPropertySpec(ts, type);
+     return QPropertySpec(ts, type.value());
  }
 
 // Convenience to create a QPropertySpec from a Q_PROPERTY macro

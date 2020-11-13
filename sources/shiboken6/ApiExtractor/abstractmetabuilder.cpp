@@ -184,11 +184,12 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentMod
                                                                AbstractMetaClass *currentClass)
 {
     AbstractMetaClass *returned = nullptr;
-    AbstractMetaType type = translateType(argument->type(), currentClass);
-    if (type && type.typeEntry() && type.typeEntry()->isComplex()) {
-        const TypeEntry *entry = type.typeEntry();
+    auto type = translateType(argument->type(), currentClass);
+    if (!type.has_value())
+        return returned;
+    const TypeEntry *entry = type->typeEntry();
+    if (entry && entry->isComplex())
         returned = AbstractMetaClass::findClass(m_metaClasses, entry);
-    }
     return returned;
 }
 
@@ -252,8 +253,8 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
         baseoperandClass = argumentToClass(arguments.at(1), currentClass);
         firstArgumentIsSelf = false;
     } else {
-        AbstractMetaType type = translateType(item->type(), currentClass);
-        const TypeEntry *retType = type ? type.typeEntry() : nullptr;
+        auto type = translateType(item->type(), currentClass);
+        const TypeEntry *retType = type.has_value() ? type->typeEntry() : nullptr;
         AbstractMetaClass *otherArgClass = argumentToClass(arguments.at(1), currentClass);
         if (otherArgClass && retType
             && (retType->isValue() || retType->isObject())
@@ -1158,9 +1159,9 @@ std::optional<AbstractMetaField>
     metaField.setEnclosingClass(cls);
 
     TypeInfo fieldType = field->type();
-    AbstractMetaType metaType = translateType(fieldType, cls);
+    auto metaType = translateType(fieldType, cls);
 
-    if (!metaType) {
+    if (!metaType.has_value()) {
         const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(colonColon());
         if (cls->typeEntry()->generateCode()) {
              qCWarning(lcShiboken, "%s",
@@ -1169,7 +1170,7 @@ std::optional<AbstractMetaField>
         return {};
     }
 
-    metaField.setType(metaType);
+    metaField.setType(metaType.value());
 
     AbstractMetaAttributes::Attributes attr;
     if (field->isStatic())
@@ -1500,8 +1501,8 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
 {
     QString errorMessage;
 
-    AbstractMetaType returnType = translateType(addedFunc->returnType(), metaClass, {}, &errorMessage);
-    if (!returnType) {
+    auto returnType = translateType(addedFunc->returnType(), metaClass, {}, &errorMessage);
+    if (!returnType.has_value()) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgAddedFunctionInvalidReturnType(addedFunc->name(),
                                                                addedFunc->returnType().qualifiedName(),
@@ -1511,14 +1512,14 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     }
 
     auto metaFunction = new AbstractMetaFunction(addedFunc);
-    metaFunction->setType(returnType);
+    metaFunction->setType(returnType.value());
 
     const auto &args = addedFunc->arguments();
 
     for (int i = 0; i < args.count(); ++i) {
         const AddedFunction::Argument &arg = args.at(i);
-        AbstractMetaType type = translateType(arg.typeInfo, metaClass, {}, &errorMessage);
-        if (Q_UNLIKELY(!type)) {
+        auto type = translateType(arg.typeInfo, metaClass, {}, &errorMessage);
+        if (Q_UNLIKELY(!type.has_value())) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgAddedFunctionInvalidArgType(addedFunc->name(),
                                                                 arg.typeInfo.qualifiedName(), i + 1,
@@ -1527,12 +1528,12 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
             delete metaFunction;
             return nullptr;
         }
-        type.decideUsagePattern();
+        type->decideUsagePattern();
 
         AbstractMetaArgument metaArg;
         if (!args.at(i).name.isEmpty())
             metaArg.setName(args.at(i).name);
-        metaArg.setType(type);
+        metaArg.setType(type.value());
         metaArg.setArgumentIndex(i);
         metaArg.setDefaultValueExpression(arg.defaultValue);
         metaArg.setOriginalDefaultValueExpression(arg.defaultValue);
@@ -1806,8 +1807,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        AbstractMetaType type = translateType(returnType, currentClass, {}, &errorMessage);
-        if (!type) {
+        auto type = translateType(returnType, currentClass, {}, &errorMessage);
+        if (!type.has_value()) {
             const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
@@ -1816,7 +1817,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        metaFunction->setType(type);
+        metaFunction->setType(type.value());
     }
         break;
     }
@@ -1839,8 +1840,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        AbstractMetaType metaType = translateType(arg->type(), currentClass, {}, &errorMessage);
-        if (!metaType) {
+        auto metaTypeO = translateType(arg->type(), currentClass, {}, &errorMessage);
+        if (!metaTypeO.has_value()) {
             // If an invalid argument has a default value, simply remove it
             // unless the function is virtual (since the override in the
             // wrapper can then not correctly be generated).
@@ -1851,7 +1852,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
                 }
                 break;
             }
-            Q_ASSERT(!metaType);
             const QString reason = msgUnmatchedParameterType(arg, i, errorMessage);
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
@@ -1862,6 +1862,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
+        auto metaType = metaTypeO.value();
         // Add view substitution for simple view types of function arguments
         // std::string_view -> std::string for foo(std::string_view)
         auto viewOnTypeEntry = metaType.typeEntry()->viewOn();
@@ -1897,7 +1898,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         AbstractMetaArgument &metaArg = metaArguments[i];
 
         const QString originalDefaultExpression =
-            fixDefaultValue(arg, metaArg.type(), metaFunction, currentClass, i);
+            fixDefaultValue(arg, metaArg.type(), currentClass, i);
 
         metaArg.setOriginalDefaultValueExpression(originalDefaultExpression);
         metaArg.setDefaultValueExpression(originalDefaultExpression);
@@ -2060,10 +2061,11 @@ const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(co
     return nullptr;
 }
 
-AbstractMetaType AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
-                                                            AbstractMetaClass *currentClass,
-                                                            TranslateTypeFlags flags,
-                                                            QString *errorMessage)
+std::optional<AbstractMetaType>
+    AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
+                                              AbstractMetaClass *currentClass,
+                                              TranslateTypeFlags flags,
+                                              QString *errorMessage)
 {
     return translateTypeStatic(_typei, currentClass, this, flags, errorMessage);
 }
@@ -2074,11 +2076,12 @@ static bool isNumber(const QString &s)
                        [](QChar c) { return c.isDigit(); });
 }
 
-AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
-                                                                  AbstractMetaClass *currentClass,
-                                                                  AbstractMetaBuilderPrivate *d,
-                                                                  TranslateTypeFlags flags,
-                                                                  QString *errorMessageIn)
+std::optional<AbstractMetaType>
+    AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
+                                                    AbstractMetaClass *currentClass,
+                                                    AbstractMetaBuilderPrivate *d,
+                                                    TranslateTypeFlags flags,
+                                                    QString *errorMessageIn)
 {
     if (_typei.isVoid())
         return AbstractMetaType::createVoid();
@@ -2087,11 +2090,11 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
     //    type system
     const bool resolveType = !flags.testFlag(AbstractMetaBuilder::DontResolveType);
     if (resolveType) {
-        AbstractMetaType resolved =
+        auto resolved =
             translateTypeStatic(_typei, currentClass, d,
                                 flags | AbstractMetaBuilder::DontResolveType,
                                 errorMessageIn);
-        if (resolved)
+        if (resolved.has_value())
             return resolved;
     }
 
@@ -2150,8 +2153,8 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
         newInfo.setReferenceType(typeInfo.referenceType());
         newInfo.setVolatile(typeInfo.isVolatile());
 
-        AbstractMetaType elementType = translateTypeStatic(newInfo, currentClass, d, flags, &errorMessage);
-        if (!elementType) {
+        auto elementType = translateTypeStatic(newInfo, currentClass, d, flags, &errorMessage);
+        if (!elementType.has_value()) {
             if (errorMessageIn) {
                 errorMessage.prepend(QLatin1String("Unable to translate array element: "));
                 *errorMessageIn = msgUnableToTranslateType(_typei, errorMessage);
@@ -2161,7 +2164,7 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
 
         for (int i = typeInfo.arrayElements().size() - 1; i >= 0; --i) {
             AbstractMetaType arrayType;
-            arrayType.setArrayElementType(elementType);
+            arrayType.setArrayElementType(elementType.value());
             const QString &arrayElement = typeInfo.arrayElements().at(i);
             if (!arrayElement.isEmpty()) {
                 bool _ok;
@@ -2171,7 +2174,7 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
                 if (_ok)
                     arrayType.setArrayElementCount(int(elems));
             }
-            auto elementTypeEntry = elementType.typeEntry();
+            auto elementTypeEntry = elementType->typeEntry();
             arrayType.setTypeEntry(new ArrayTypeEntry(elementTypeEntry, elementTypeEntry->version(),
                                                       elementTypeEntry->parent()));
             arrayType.decideUsagePattern();
@@ -2221,10 +2224,10 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
     const auto &templateArguments = typeInfo.instantiations();
     for (int t = 0, size = templateArguments.size(); t < size; ++t) {
         const  TypeInfo &ti = templateArguments.at(t);
-        AbstractMetaType targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
+        auto targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
         // For non-type template parameters, create a dummy type entry on the fly
         // as is done for classes.
-        if (!targType) {
+        if (!targType.has_value()) {
             const QString value = ti.qualifiedName().join(colonColon());
             if (isNumber(value)) {
                 TypeDatabase::instance()->addConstantValueTypeEntry(value, type->typeSystemTypeEntry());
@@ -2237,7 +2240,7 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
             return {};
         }
 
-        metaType.addInstantiation(targType);
+        metaType.addInstantiation(targType.value());
     }
 
     if (typeEntryType == TypeEntry::SmartPointerType) {
@@ -2283,24 +2286,25 @@ AbstractMetaType AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo 
         }
     }
 
-    Q_ASSERT(metaType.typeUsagePattern() != AbstractMetaType::InvalidPattern);
     return metaType;
 }
 
-AbstractMetaType AbstractMetaBuilder::translateType(const TypeInfo &_typei,
-                                                    AbstractMetaClass *currentClass,
-                                                    TranslateTypeFlags flags,
-                                                    QString *errorMessage)
+std::optional<AbstractMetaType>
+    AbstractMetaBuilder::translateType(const TypeInfo &_typei,
+                                       AbstractMetaClass *currentClass,
+                                       TranslateTypeFlags flags,
+                                       QString *errorMessage)
 {
     return AbstractMetaBuilderPrivate::translateTypeStatic(_typei, currentClass,
                                                            nullptr, flags,
                                                            errorMessage);
 }
 
-AbstractMetaType AbstractMetaBuilder::translateType(const QString &t,
-                                                    AbstractMetaClass *currentClass,
-                                                    TranslateTypeFlags flags,
-                                                    QString *errorMessageIn)
+std::optional<AbstractMetaType>
+    AbstractMetaBuilder::translateType(const QString &t,
+                                      AbstractMetaClass *currentClass,
+                                      TranslateTypeFlags flags,
+                                      QString *errorMessageIn)
 {
     QString errorMessage;
     TypeInfo typeInfo = TypeParser::parse(t, &errorMessage);
@@ -2355,7 +2359,6 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
 
 QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &item,
                                                     const AbstractMetaType &type,
-                                                    AbstractMetaFunction *fnc,
                                                     AbstractMetaClass *implementingClass,
                                                     int /* argumentIndex */)
 {
@@ -2363,85 +2366,76 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
     if (expr.isEmpty())
         return expr;
 
-    if (type) {
-        if (type.isPrimitive()) {
-            if (type.name() == QLatin1String("boolean")) {
-                if (expr != QLatin1String("false") && expr != QLatin1String("true")) {
-                    bool ok = false;
-                    int number = expr.toInt(&ok);
-                    if (ok && number)
-                        expr = QLatin1String("true");
-                    else
-                        expr = QLatin1String("false");
-                }
-            } else {
-                // This can be an enum or flag so I need to delay the
-                // translation untill all namespaces are completly
-                // processed. This is done in figureOutEnumValues()
+    if (type.isPrimitive()) {
+        if (type.name() == QLatin1String("boolean")) {
+            if (expr != QLatin1String("false") && expr != QLatin1String("true")) {
+                bool ok = false;
+                int number = expr.toInt(&ok);
+                if (ok && number)
+                    expr = QLatin1String("true");
+                else
+                    expr = QLatin1String("false");
             }
-        } else if (type.isFlags() || type.isEnum()) {
-            bool isNumber;
-            expr.toInt(&isNumber);
-            if (!isNumber && expr.indexOf(colonColon()) < 0) {
-                // Add the enum/flag scope to default value, making it usable
-                // from other contexts beside its owner class hierarchy
-                static const QRegularExpression typeRegEx(QStringLiteral("[^<]*[<]([^:]*::).*"));
-                Q_ASSERT(typeRegEx.isValid());
-                const QRegularExpressionMatch match = typeRegEx.match(type.minimalSignature());
-                if (match.hasMatch())
-                    expr.prepend(match.captured(1));
-            }
-        } else if (type.isContainer() && expr.contains(QLatin1Char('<'))) {
-            static const QRegularExpression typeRegEx(QStringLiteral("[^<]*<(.*)>"));
-            Q_ASSERT(typeRegEx.isValid());
-            const QRegularExpressionMatch typeMatch = typeRegEx.match(type.minimalSignature());
-            static const QRegularExpression defaultRegEx(QLatin1String("([^<]*<).*(>[^>]*)"));
-            Q_ASSERT(defaultRegEx.isValid());
-            const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
-            if (typeMatch.hasMatch() && defaultMatch.hasMatch())
-                expr = defaultMatch.captured(1) + typeMatch.captured(1) + defaultMatch.captured(2);
         } else {
-            // Here the default value is supposed to be a constructor,
-            // a class field, or a constructor receiving a class field
-            static const QRegularExpression defaultRegEx(QStringLiteral("([^\\(]*\\(|)([^\\)]*)(\\)|)"));
-            Q_ASSERT(defaultRegEx.isValid());
-            const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
-            QString defaultValueCtorName = defaultMatch.hasMatch() ? defaultMatch.captured(1) : QString();
-            if (defaultValueCtorName.endsWith(QLatin1Char('(')))
-                defaultValueCtorName.chop(1);
-
-            // Fix the scope for constructor using the already
-            // resolved argument type as a reference.
-            // The following regular expression extracts any
-            // use of namespaces/scopes from the type string.
-            static const QRegularExpression typeRegEx(QLatin1String("^(?:const[\\s]+|)([\\w:]*::|)([A-Za-z_]\\w*)\\s*[&\\*]?$"));
+            // This can be an enum or flag so I need to delay the
+            // translation until all namespaces are completely
+            // processed. This is done in figureOutEnumValues()
+        }
+    } else if (type.isFlags() || type.isEnum()) {
+        bool isNumber;
+        expr.toInt(&isNumber);
+        if (!isNumber && expr.indexOf(colonColon()) < 0) {
+            // Add the enum/flag scope to default value, making it usable
+            // from other contexts beside its owner class hierarchy
+            static const QRegularExpression typeRegEx(QStringLiteral("[^<]*[<]([^:]*::).*"));
             Q_ASSERT(typeRegEx.isValid());
-            const QRegularExpressionMatch typeMatch = typeRegEx.match(type.minimalSignature());
+            const QRegularExpressionMatch match = typeRegEx.match(type.minimalSignature());
+            if (match.hasMatch())
+                expr.prepend(match.captured(1));
+        }
+    } else if (type.isContainer() && expr.contains(QLatin1Char('<'))) {
+        static const QRegularExpression typeRegEx(QStringLiteral("[^<]*<(.*)>"));
+        Q_ASSERT(typeRegEx.isValid());
+        const QRegularExpressionMatch typeMatch = typeRegEx.match(type.minimalSignature());
+        static const QRegularExpression defaultRegEx(QLatin1String("([^<]*<).*(>[^>]*)"));
+        Q_ASSERT(defaultRegEx.isValid());
+        const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
+        if (typeMatch.hasMatch() && defaultMatch.hasMatch())
+            expr = defaultMatch.captured(1) + typeMatch.captured(1) + defaultMatch.captured(2);
+    } else {
+        // Here the default value is supposed to be a constructor,
+        // a class field, or a constructor receiving a class field
+        static const QRegularExpression defaultRegEx(QStringLiteral("([^\\(]*\\(|)([^\\)]*)(\\)|)"));
+        Q_ASSERT(defaultRegEx.isValid());
+        const QRegularExpressionMatch defaultMatch = defaultRegEx.match(expr);
+        QString defaultValueCtorName = defaultMatch.hasMatch() ? defaultMatch.captured(1) : QString();
+        if (defaultValueCtorName.endsWith(QLatin1Char('(')))
+            defaultValueCtorName.chop(1);
 
-            QString typeNamespace = typeMatch.hasMatch() ? typeMatch.captured(1) : QString();
-            QString typeCtorName  = typeMatch.hasMatch() ? typeMatch.captured(2) : QString();
-            if (!typeNamespace.isEmpty() && defaultValueCtorName == typeCtorName)
-                expr.prepend(typeNamespace);
+        // Fix the scope for constructor using the already resolved argument
+        // type as a reference. The following regular expression extracts any
+        // use of namespaces/scopes from the type string.
+        static const QRegularExpression
+            typeRegEx(QLatin1String(R"(^(?:const[\s]+|)([\w:]*::|)([A-Za-z_]\w*)\s*[&\*]?$)"));
+        Q_ASSERT(typeRegEx.isValid());
+        const QRegularExpressionMatch typeMatch = typeRegEx.match(type.minimalSignature());
 
-            // Fix scope if the parameter is a field of the current class
-            if (implementingClass) {
-                const AbstractMetaFieldList &fields = implementingClass->fields();
-                for (const AbstractMetaField &field : fields) {
-                    if (defaultMatch.hasMatch() && defaultMatch.captured(2) == field.name()) {
-                        expr = defaultMatch.captured(1) + implementingClass->name()
-                               + colonColon() + defaultMatch.captured(2) + defaultMatch.captured(3);
-                        break;
-                    }
+        QString typeNamespace = typeMatch.hasMatch() ? typeMatch.captured(1) : QString();
+        QString typeCtorName  = typeMatch.hasMatch() ? typeMatch.captured(2) : QString();
+        if (!typeNamespace.isEmpty() && defaultValueCtorName == typeCtorName)
+            expr.prepend(typeNamespace);
+
+        // Fix scope if the parameter is a field of the current class
+        if (implementingClass) {
+            const AbstractMetaFieldList &fields = implementingClass->fields();
+            for (const AbstractMetaField &field : fields) {
+                if (defaultMatch.hasMatch() && defaultMatch.captured(2) == field.name()) {
+                    expr = defaultMatch.captured(1) + implementingClass->name()
+                           + colonColon() + defaultMatch.captured(2) + defaultMatch.captured(3);
+                    break;
                 }
             }
         }
-    } else {
-        const QString className = implementingClass ? implementingClass->qualifiedCppName() : QString();
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("undefined type for default value '%3' of argument in function '%1', class '%2'")
-                              .arg(fnc->name(), className, item->defaultValueExpression());
-
-        expr.clear();
     }
 
     return expr;
@@ -2526,11 +2520,10 @@ bool AbstractMetaBuilderPrivate::ancestorHasPrivateCopyConstructor(const Abstrac
     return false;
 }
 
-AbstractMetaType AbstractMetaBuilderPrivate::inheritTemplateType(const AbstractMetaTypeList &templateTypes,
-                                                                 const AbstractMetaType &metaType)
+std::optional<AbstractMetaType>
+    AbstractMetaBuilderPrivate::inheritTemplateType(const AbstractMetaTypeList &templateTypes,
+                                                    const AbstractMetaType &metaType)
 {
-    Q_ASSERT(metaType);
-
     auto returned = metaType;
 
     if (!metaType.typeEntry()->isTemplateArgument() && !metaType.hasInstantiations())
@@ -2544,7 +2537,7 @@ AbstractMetaType AbstractMetaBuilderPrivate::inheritTemplateType(const AbstractM
         // If the template is intantiated with void we special case this as rejecting the functions that use this
         // parameter from the instantiation.
         const AbstractMetaType &templateType = templateTypes.value(tae->ordinal());
-        if (!templateType || templateType.typeEntry()->isVoid())
+        if (templateType.typeEntry()->isVoid())
             return {};
 
         AbstractMetaType t = returned;
@@ -2558,10 +2551,10 @@ AbstractMetaType AbstractMetaBuilderPrivate::inheritTemplateType(const AbstractM
     if (returned.hasInstantiations()) {
         AbstractMetaTypeList instantiations = returned.instantiations();
         for (int i = 0; i < instantiations.count(); ++i) {
-            instantiations[i] =
-                inheritTemplateType(templateTypes, instantiations.at(i));
-            if (!instantiations.at(i))
+            auto ins = inheritTemplateType(templateTypes, instantiations.at(i));
+            if (!ins.has_value())
                 return {};
+            instantiations[i] = ins.value();
         }
         returned.setInstantiations(instantiations);
     }
@@ -2655,19 +2648,19 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         f->setArguments(AbstractMetaArgumentList());
 
         if (!function->isVoid()) {
-            AbstractMetaType returnType = inheritTemplateType(templateTypes, function->type());
-            if (!returnType)
+            auto returnType = inheritTemplateType(templateTypes, function->type());
+            if (!returnType.has_value())
                 continue;
-            f->setType(returnType);
+            f->setType(returnType.value());
         }
 
         const AbstractMetaArgumentList &arguments = function->arguments();
         for (const AbstractMetaArgument &argument : arguments) {
-            AbstractMetaType argType = inheritTemplateType(templateTypes, argument.type());
-            if (!argType)
+            auto argType = inheritTemplateType(templateTypes, argument.type());
+            if (!argType.has_value())
                 break;
             AbstractMetaArgument arg = argument;
-            arg.setType(argType);
+            arg.setType(argType.value());
             f->addArgument(arg);
         }
 
@@ -2738,10 +2731,10 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
 
         AbstractMetaField f = field;
         f.setEnclosingClass(subclass);
-        AbstractMetaType fieldType = inheritTemplateType(templateTypes, field.type());
-        if (!fieldType)
+        auto fieldType = inheritTemplateType(templateTypes, field.type());
+        if (!fieldType.has_value())
             continue;
-        f.setType(fieldType);
+        f.setType(fieldType.value());
         subclass->addField(f);
     }
 }

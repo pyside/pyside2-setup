@@ -48,7 +48,6 @@ public:
     using Indirections = QVector<Indirection>;
 
     enum TypeUsagePattern {
-        InvalidPattern,
         PrimitivePattern,
         FlagsPattern,
         EnumPattern,
@@ -74,9 +73,6 @@ public:
     AbstractMetaType(AbstractMetaType &&);
     AbstractMetaType &operator=(AbstractMetaType &&);
     ~AbstractMetaType();
-
-    bool isValid() const;
-    operator bool() const { return isValid(); }
 
     QString package() const;
     QString name() const;

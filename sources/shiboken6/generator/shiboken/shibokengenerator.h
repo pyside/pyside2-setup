@@ -327,7 +327,12 @@ protected:
      *  \return A custom check if \p type is a custom type, or an empty string if \p metaType
      *          receives an existing type object.
      */
-    QString guessCPythonCheckFunction(const QString &type, AbstractMetaType *metaType);
+    struct CPythonCheckFunctionResult
+    {
+        QString checkFunction;
+        std::optional<AbstractMetaType> type;
+    };
+    CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type);
     QString cpythonIsConvertibleFunction(const TypeEntry *type, bool genericNumberType = false, bool checkExact = false);
     QString cpythonIsConvertibleFunction(AbstractMetaType metaType, bool genericNumberType = false);
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg, bool genericNumberType = false);
@@ -408,8 +413,9 @@ protected:
      *   \return A new AbstractMetaType object that must be deleted by the caller,
      *           or a nullptr pointer in case of failure.
      */
-    AbstractMetaType buildAbstractMetaTypeFromString(QString typeSignature,
-                                                     QString *errorMessage = nullptr);
+    std::optional<AbstractMetaType>
+        buildAbstractMetaTypeFromString(QString typeSignature,
+                                        QString *errorMessage = nullptr);
 
     /// Creates an AbstractMetaType object from a TypeEntry.
     AbstractMetaType buildAbstractMetaTypeFromTypeEntry(const TypeEntry *typeEntry);

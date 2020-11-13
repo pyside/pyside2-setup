@@ -99,15 +99,12 @@ public:
     };
     Q_DECLARE_FLAGS(TranslateTypeFlags, TranslateTypeFlag);
 
-    static AbstractMetaType translateType(const TypeInfo &_typei,
-                                          AbstractMetaClass *currentClass = nullptr,
-                                          TranslateTypeFlags flags = {},
-                                          QString *errorMessage = nullptr);
-    static AbstractMetaType translateType(const QString &t,
-                                          AbstractMetaClass *currentClass = nullptr,
-                                          TranslateTypeFlags flags = {},
-                                          QString *errorMessage = nullptr);
-
+    static std::optional<AbstractMetaType>
+        translateType(const TypeInfo &_typei, AbstractMetaClass *currentClass = nullptr,
+                      TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
+    static std::optional<AbstractMetaType>
+        translateType(const QString &t, AbstractMetaClass *currentClass = nullptr,
+                      TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
