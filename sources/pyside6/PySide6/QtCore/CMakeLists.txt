@@ -91,6 +91,7 @@ ${QtCore_GEN_DIR}/qmetamethod_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaobject_connection_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaobject_wrapper.cpp
 ${QtCore_GEN_DIR}/qmetaproperty_wrapper.cpp
+${QtCore_GEN_DIR}/qmetatype_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimedata_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimedatabase_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimetype_wrapper.cpp

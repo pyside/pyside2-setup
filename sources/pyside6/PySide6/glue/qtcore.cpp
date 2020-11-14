@@ -119,6 +119,26 @@ else {
 
 // @snippet qsettings-value
 
+// @snippet conversion-pytypeobject-qmetatype
+if (Shiboken::String::checkType(reinterpret_cast<PyTypeObject *>(%in)))
+    %out = QMetaType(QMetaType::QString);
+else if (%in == reinterpret_cast<PyObject *>(&PyFloat_Type))
+    %out = QMetaType(QMetaType::Double);
+else if (%in == reinterpret_cast<PyObject *>(&PyLong_Type))
+    %out = QMetaType(QMetaType::Int);
+else if (Py_TYPE(%in) == SbkObjectType_TypeF())
+    %out = QMetaType::fromName(Shiboken::ObjectType::getOriginalName((SbkObjectType *)%in));
+else
+    %out = QMetaType::fromName(reinterpret_cast<PyTypeObject *>(%in)->tp_name);
+// @snippet conversion-pytypeobject-qmetatype
+
+// @snippet conversion-qmetatype-pytypeobject
+auto pyType = Shiboken::Conversions::getPythonTypeObject(%in.name());
+%out = pyType ? (reinterpret_cast<PyObject *>(pyType)) : Py_None;
+Py_INCREF(%out);
+return %out;
+// @snippet conversion-qmetatype-pytypeobject
+
 // @snippet qvariant-conversion
 static QMetaType QVariant_resolveMetaType(PyTypeObject *type)
 {

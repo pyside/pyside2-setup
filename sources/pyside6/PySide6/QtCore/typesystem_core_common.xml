@@ -352,6 +352,17 @@
     </conversion-rule>
   </primitive-type>
 
+  <value-type name="QMetaType">
+      <enum-type name="Type"/>
+      <enum-type name="TypeFlag" flags="TypeFlags"/>
+      <conversion-rule>
+          <native-to-target file="../glue/qtcore.cpp" snippet="conversion-qmetatype-pytypeobject"/>
+          <target-to-native>
+              <add-conversion type="PyTypeObject" file="../glue/qtcore.cpp" snippet="conversion-pytypeobject-qmetatype"/>
+          </target-to-native>
+      </conversion-rule>
+  </value-type>
+
   <primitive-type name="QModelIndexList">
     <include file-name="qabstractitemmodel.h" location="global"/>
     <conversion-rule>

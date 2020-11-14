@@ -35,27 +35,26 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from init_paths import init_test_paths
 init_test_paths(False)
 
+from PySide6.QtCore import QMetaType
 from PySide6.QtSql import QSqlField
 
 class QVariantTypeTest(unittest.TestCase):
     def testQVariantType(self):
-        f = QSqlField("name", str)
-        self.assertEqual(f.type(), str)
+        f = QSqlField("name", QMetaType(QMetaType.QString))
+        self.assertEqual(f.metaType().id(), QMetaType.QString)
 
-        f = QSqlField("name", "QString")
-        self.assertEqual(f.type(),  str)
+        f = QSqlField("name", QMetaType.fromName(b"QString"))
+        self.assertEqual(f.metaType().id(), QMetaType.QString)
 
-        f = QSqlField("name", "double")
-        self.assertEqual(f.type(), float)
+        f = QSqlField("name", QMetaType.fromName(b"double"))
+        self.assertEqual(f.metaType(), float)
 
         f = QSqlField("name", float)
-        self.assertEqual(f.type(), float)
+        self.assertEqual(f.metaType(), float)
 
         f = QSqlField("name", int)
-        self.assertEqual(f.type(), int)
+        self.assertEqual(f.metaType(), int)
 
-        f = QSqlField("name", None)
-        self.assertEqual(f.type(), None)
 
 if __name__ == '__main__':
     unittest.main()
