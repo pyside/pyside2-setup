@@ -677,6 +677,32 @@ AbstractMetaType AbstractMetaType::createVoid()
     return *metaType.data();
 }
 
+// Query functions for generators
+bool AbstractMetaType::isObjectType() const
+{
+    return d->m_typeEntry->isObject();
+}
+
+bool AbstractMetaType::isPointer() const
+{
+    return !d->m_indirections.isEmpty()
+        || isNativePointer() || isValuePointer();
+}
+
+bool AbstractMetaType::isCString() const
+{
+    return isNativePointer()
+        && d->m_indirections.size() == 1
+        && name() == QLatin1String("char");
+}
+
+bool AbstractMetaType::isVoidPointer() const
+{
+    return isNativePointer()
+        && d->m_indirections.size() == 1
+        && name() == QLatin1String("void");
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {

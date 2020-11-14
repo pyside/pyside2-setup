@@ -1355,6 +1355,21 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
     return nullptr;
 }
 
+// Query functions for generators
+bool AbstractMetaClass::isObjectType() const
+{
+    return d->m_typeEntry->isObject();
+}
+
+bool AbstractMetaClass::isCopyable() const
+{
+    if (isNamespace() || d->m_typeEntry->isObject())
+        return false;
+    auto copyable = d->m_typeEntry->copyable();
+    return copyable == ComplexTypeEntry::CopyableSet
+        || (copyable == ComplexTypeEntry::Unknown && hasCloneOperator());
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 
 void AbstractMetaClass::format(QDebug &debug) const

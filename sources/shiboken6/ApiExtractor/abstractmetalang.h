@@ -321,6 +321,10 @@ public:
 
     bool deleteInMainThread() const;
 
+    // Query functions for generators
+    bool isObjectType() const;
+    bool isCopyable() const;
+
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const QString &name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,

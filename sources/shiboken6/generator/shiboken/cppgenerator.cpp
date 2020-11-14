@@ -1241,7 +1241,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                 s << '(' << typeCast << ')';
             }
         }
-        if (func->type().referenceType() == LValueReference && !isPointer(func->type()))
+        if (func->type().referenceType() == LValueReference && !func->type().isPointer())
             s << " *";
         s << CPP_RETURN_VAR << ";\n";
     }
@@ -2395,7 +2395,7 @@ static void checkTypeViability(const AbstractMetaFunction *func, const AbstractM
         || !type.typeEntry()->isPrimitive()
         || type.indirections() == 0
         || (type.indirections() == 1 && type.typeUsagePattern() == AbstractMetaType::NativePointerAsArrayPattern)
-        || ShibokenGenerator::isCString(type)
+        || type.isCString()
         || func->argumentRemoved(argIdx)
         || !func->typeReplaced(argIdx).isEmpty()
         || !func->conversionRule(TypeSystem::All, argIdx).isEmpty()
@@ -2527,7 +2527,8 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
     QString cppOutAux = cppOut + QLatin1String("_local");
 
     bool treatAsPointer = isValueTypeWithCopyConstructorOnly(type);
-    bool isPointerOrObjectType = (isObjectType(type) || isPointer(type)) && !isUserPrimitive(type) && !isCppPrimitive(type);
+    bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
+        && !isUserPrimitive(type) && !isCppPrimitive(type);
     bool isNotContainerEnumOrFlags = !typeEntry->isContainer() && !typeEntry->isEnum() && !typeEntry->isFlags();
     bool mayHaveImplicitConversion = type.referenceType() == LValueReference
                                      && !isUserPrimitive(type)
@@ -2807,7 +2808,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
                     const AbstractMetaClass *ownerClass = func->ownerClass();
                     const ComplexTypeEntry *baseContainerType = ownerClass->typeEntry()->baseContainerType();
                     if (baseContainerType && baseContainerType == func->arguments().constFirst().type().typeEntry()
-                        && isCopyable(ownerClass)) {
+                        && ownerClass->isCopyable()) {
                         tck << '!' << cpythonCheckFunction(ownerClass->typeEntry()) << pyArgName << ")\n";
                         Indentation indent(INDENT);
                         tck << INDENT << "&& ";
@@ -3436,7 +3437,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                     bool deRef = isValueTypeWithCopyConstructorOnly(arg.type())
                                  || isObjectTypeUsedAsValueType(arg.type())
                                  || (arg.type().referenceType() == LValueReference
-                                     && isWrapperType(arg.type()) && !isPointer(arg.type()));
+                                     && isWrapperType(arg.type()) && !arg.type().isPointer());
                     if (hasConversionRule) {
                         userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
@@ -4270,9 +4271,6 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
     else
         computedClassTargetFullName = getClassTargetFullName(classContext.preciseType());
 
-    QString suffix;
-    if (isObjectType(metaClass))
-        suffix = QLatin1String(" *");
     const QString typePtr = QLatin1String("_") + className
         + QLatin1String("_Type");
     s << "static SbkObjectType *" << typePtr << " = nullptr;\n";
@@ -4565,7 +4563,8 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
 
     AbstractMetaType fieldType = metaField.type();
     // Force use of pointer to return internal variable memory
-    bool newWrapperSameObject = !fieldType.isConstant() && isWrapperType(fieldType) && !isPointer(fieldType);
+    bool newWrapperSameObject = !fieldType.isConstant() && isWrapperType(fieldType)
+            && !fieldType.isPointer();
 
     QString cppField;
     if (avoidProtectedHack() && metaField.isProtected()) {
@@ -5354,7 +5353,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
         s << INDENT << "\"";
         if (!classContext.forSmartPointer()) {
             s << metaClass->qualifiedCppName();
-            if (isObjectType(classTypeEntry))
+            if (classTypeEntry->isObject())
                 s << '*';
         } else {
             s << classContext.preciseType().cppSignature();
@@ -5541,7 +5540,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream &s, const Generat
     if (!metaClass->isNamespace() && !metaClass->isAbstract())  {
         // Qt metatypes are registered only on their first use, so we do this now.
         bool canBeValue = false;
-        if (!isObjectType(metaClass)) {
+        if (!metaClass->isObjectType()) {
             // check if there's a empty ctor
             const AbstractMetaFunctionList &funcs = metaClass->functions();
             for (AbstractMetaFunction *func : funcs) {
@@ -6282,7 +6281,7 @@ bool CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
     int childIndex = argIndex;
     if (ctorHeuristicEnabled && argIndex > 0 && numArgs) {
         const AbstractMetaArgument &arg = func->arguments().at(argIndex-1);
-        if (arg.name() == QLatin1String("parent") && isObjectType(arg.type())) {
+        if (arg.name() == QLatin1String("parent") && arg.type().isObjectType()) {
             action = ArgumentOwner::Add;
             parentIndex = argIndex;
             childIndex = -1;
@@ -6366,9 +6365,11 @@ void CppGenerator::writeHashFunction(QTextStream &s, const GeneratorContext &con
         << "_HashFunc(PyObject *self) {\n";
     writeCppSelfDefinition(s, context);
     s << INDENT << "return " << hashType << '('
-        << metaClass->typeEntry()->hashFunction() << '('
-        << (isObjectType(metaClass) ? "" : "*") << CPP_SELF_VAR << "));\n";
-    s<< "}\n\n";
+        << metaClass->typeEntry()->hashFunction() << '(';
+    if (!metaClass->isObjectType())
+        s << '*';
+    s << CPP_SELF_VAR << "));\n";
+    s << "}\n\n";
 }
 
 void CppGenerator::writeDefaultSequenceMethods(QTextStream &s, const GeneratorContext &context)

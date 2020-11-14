@@ -427,8 +427,6 @@ protected:
     void writeMinimalConstructorExpression(QTextStream &s, const TypeEntry *type, const QString &defaultCtor = QString());
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
-    // verify whether the class is copyable
-    bool isCopyable(const AbstractMetaClass *metaClass);
 
     void clearTpFuncs();
 

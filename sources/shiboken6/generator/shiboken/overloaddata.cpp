@@ -86,7 +86,7 @@ static bool typesAreEqual(const AbstractMetaType &typeA, const AbstractMetaType 
             return true;
         }
 
-        return !(ShibokenGenerator::isCString(typeA) ^ ShibokenGenerator::isCString(typeB));
+        return !(typeA.isCString() ^ typeB.isCString());
     }
     return false;
 }
@@ -392,7 +392,7 @@ void OverloadData::sortNextOverloads()
         } else if (checkQVariant && targetTypeEntryName != qVariantT()) {
             if (!graph.containsEdge(qvariantIndex, targetTypeId)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeId, qvariantIndex);
-        } else if (checkQString && ShibokenGenerator::isPointer(ov->argType())
+        } else if (checkQString && ov->argType().isPointer()
             && targetTypeEntryName != qStringT()
             && targetTypeEntryName != qByteArrayT()
             && (!checkPyObject || targetTypeId != pyobjectIndex)) {

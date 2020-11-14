@@ -582,46 +582,6 @@ AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType &
     return implicitConversions(metaType.typeEntry());
 }
 
-bool Generator::isObjectType(const TypeEntry *type)
-{
-    if (type->isComplex())
-        return Generator::isObjectType(static_cast<const ComplexTypeEntry *>(type));
-    return type->isObject();
-}
-bool Generator::isObjectType(const ComplexTypeEntry *type)
-{
-    return type->isObject();
-}
-bool Generator::isObjectType(const AbstractMetaClass *metaClass)
-{
-    return Generator::isObjectType(metaClass->typeEntry());
-}
-bool Generator::isObjectType(const AbstractMetaType &metaType)
-{
-    return isObjectType(metaType.typeEntry());
-}
-
-bool Generator::isPointer(const AbstractMetaType &type)
-{
-    return type.indirections() > 0
-            || type.isNativePointer()
-            || type.isValuePointer();
-}
-
-bool Generator::isCString(const AbstractMetaType &type)
-{
-    return type.isNativePointer()
-            && type.indirections() == 1
-            && type.name() == QLatin1String("char");
-}
-
-bool Generator::isVoidPointer(const AbstractMetaType &type)
-{
-    return type.isNativePointer()
-            && type.indirections() == 1
-            && type.name() == QLatin1String("void");
-}
-
 QString Generator::getFullTypeName(const TypeEntry *type) const
 {
     QString result = type->qualifiedCppName();
@@ -634,9 +594,9 @@ QString Generator::getFullTypeName(const TypeEntry *type) const
 
 QString Generator::getFullTypeName(const AbstractMetaType &type) const
 {
-    if (isCString(type))
+    if (type.isCString())
         return QLatin1String("const char*");
-    if (isVoidPointer(type))
+    if (type.isVoidPointer())
         return QLatin1String("void*");
     if (type.typeEntry()->isContainer())
         return QLatin1String("::") + type.cppSignature();
@@ -655,9 +615,9 @@ QString Generator::getFullTypeName(const AbstractMetaClass *metaClass) const
 
 QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type) const
 {
-    if (isCString(type))
+    if (type.isCString())
         return QLatin1String("const char*");
-    if (isVoidPointer(type))
+    if (type.isVoidPointer())
         return QLatin1String("void*");
     if (!type.hasInstantiations())
         return getFullTypeName(type.typeEntry());
@@ -683,7 +643,7 @@ std::optional<DefaultValue>
     Generator::minimalConstructor(const AbstractMetaType &type,
                                   QString *errorString) const
 {
-    if (type.referenceType() == LValueReference && Generator::isObjectType(type))
+    if (type.referenceType() == LValueReference && type.isObjectType())
         return {};
 
     if (type.isContainer()) {
@@ -703,7 +663,7 @@ std::optional<DefaultValue>
 
     if (type.isNativePointer())
         return DefaultValue(DefaultValue::Pointer, type.typeEntry()->qualifiedCppName());
-    if (Generator::isPointer(type))
+    if (type.isPointer())
         return DefaultValue(DefaultValue::Pointer, QLatin1String("::") + type.typeEntry()->qualifiedCppName());
 
     if (type.typeEntry()->isSmartPointer())
@@ -834,7 +794,7 @@ std::optional<DefaultValue>
                 const AbstractMetaArgument &arg = arguments.at(i);
                 const TypeEntry *aType = arg.type().typeEntry();
                 suitable &= aType != cType;
-                simple &= aType->isCppPrimitive() || aType->isEnum() || isPointer(arg.type());
+                simple &= aType->isCppPrimitive() || aType->isEnum() || arg.type().isPointer();
             }
             if (suitable)
                 candidates.insert(arguments.size() + (simple ? 0 : 100), ctor);

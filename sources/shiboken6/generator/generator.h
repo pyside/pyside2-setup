@@ -270,20 +270,6 @@ public:
     /// Convenience function for implicitConversions(const TypeEntry *type).
     AbstractMetaFunctionList implicitConversions(const AbstractMetaType &metaType) const;
 
-    /// Check if type is a pointer.
-    static bool isPointer(const AbstractMetaType &type);
-
-    /// Tells if the type or class is an Object (or QObject) Type.
-    static bool isObjectType(const TypeEntry *type);
-    static bool isObjectType(const ComplexTypeEntry *type);
-    static bool isObjectType(const AbstractMetaType &metaType);
-    static bool isObjectType(const AbstractMetaClass *metaClass);
-
-    /// Returns true if the type is a C string (const char *).
-    static bool isCString(const AbstractMetaType &type);
-    /// Returns true if the type is a void pointer.
-    static bool isVoidPointer(const AbstractMetaType &type);
-
 protected:
     /// Returns the classes, topologically ordered, used to generate the binding code.
     ///

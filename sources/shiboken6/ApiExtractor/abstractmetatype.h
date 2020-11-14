@@ -101,6 +101,9 @@ public:
     // returns true if the type is used as an object, e.g. Xxx *
     bool isObject() const { return typeUsagePattern() == ObjectPattern; }
 
+    // returns true if the type is indicated an object by the TypeEntry
+    bool isObjectType() const;
+
     // returns true if the type is used as an array, e.g. Xxx[42]
     bool isArray() const { return typeUsagePattern() == ArrayPattern; }
 
@@ -190,6 +193,14 @@ public:
     void setViewOn(const AbstractMetaType &v);
 
     static AbstractMetaType createVoid();
+
+    // Query functions for generators
+    /// Check if type is a pointer.
+    bool isPointer() const;
+    /// Returns true if the type is a C string (const char *).
+    bool isCString() const;
+    /// Returns true if the type is a void pointer.
+    bool isVoidPointer() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const;
