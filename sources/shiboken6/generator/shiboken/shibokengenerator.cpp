@@ -2336,26 +2336,6 @@ AbstractMetaFunctionList ShibokenGenerator::getMethodsWithBothStaticAndNonStatic
     return methods;
 }
 
-AbstractMetaClassList ShibokenGenerator::getBaseClasses(const AbstractMetaClass *metaClass) const
-{
-    AbstractMetaClassList baseClasses;
-    if (metaClass) {
-        QStringList baseClassNames(metaClass->baseClassNames());
-        const QString defaultSuperclass = metaClass->typeEntry()->defaultSuperclass();
-        if (!defaultSuperclass.isEmpty()) {
-            int index = baseClassNames.indexOf(defaultSuperclass);
-            if (index >= 0)
-                baseClassNames.move(index, 0);
-        }
-        for (const QString &parent : baseClassNames) {
-            AbstractMetaClass *clazz = AbstractMetaClass::findClass(classes(), parent);
-            if (clazz)
-                baseClasses << clazz;
-        }
-    }
-    return baseClasses;
-}
-
 const AbstractMetaClass *ShibokenGenerator::getMultipleInheritingClass(const AbstractMetaClass *metaClass)
 {
     if (!metaClass || metaClass->baseClassNames().isEmpty())
@@ -2363,19 +2343,6 @@ const AbstractMetaClass *ShibokenGenerator::getMultipleInheritingClass(const Abs
     if (metaClass->baseClassNames().size() > 1)
         return metaClass;
     return getMultipleInheritingClass(metaClass->baseClass());
-}
-
-AbstractMetaClassList ShibokenGenerator::getAllAncestors(const AbstractMetaClass *metaClass) const
-{
-    AbstractMetaClassList result;
-    if (metaClass) {
-        AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
-        for (AbstractMetaClass *base : qAsConst(baseClasses)) {
-            result.append(base);
-            result.append(getAllAncestors(base));
-        }
-    }
-    return result;
 }
 
 QString ShibokenGenerator::getModuleHeaderFileName(const QString &moduleName) const

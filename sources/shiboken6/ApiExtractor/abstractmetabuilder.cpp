@@ -1454,6 +1454,21 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
         }
     }
 
+    // Super class set by attribute "default-superclass".
+    const QString defaultSuperclassName = metaClass->typeEntry()->defaultSuperclass();
+    if (!defaultSuperclassName.isEmpty()) {
+        auto defaultSuper = AbstractMetaClass::findClass(m_metaClasses, defaultSuperclassName);
+        if (defaultSuper != nullptr) {
+            metaClass->setDefaultSuperclass(defaultSuper);
+        } else {
+            QString message;
+            QTextStream(&message) << "Class \"" << defaultSuperclassName
+                << "\" specified as \"default-superclass\" of \"" << metaClass->name()
+                << "\" could not be found in the code model.";
+            qCWarning(lcShiboken, "%s", qPrintable(message));
+        }
+    }
+
     return true;
 }
 

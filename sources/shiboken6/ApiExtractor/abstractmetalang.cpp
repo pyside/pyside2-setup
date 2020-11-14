@@ -90,6 +90,7 @@ public:
     Documentation m_doc;
 
     const AbstractMetaClass *m_enclosingClass = nullptr;
+    AbstractMetaClass *m_defaultSuperclass = nullptr;
     AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance
     AbstractMetaTypeList m_baseTemplateInstantiations;
     AbstractMetaClass *m_extendedNamespace = nullptr;
@@ -409,6 +410,17 @@ QString AbstractMetaClass::baseClassName() const
     return d->m_baseClasses.isEmpty() ? QString() : d->m_baseClasses.constFirst()->name();
 }
 
+// Attribute "default-superclass"
+AbstractMetaClass *AbstractMetaClass::defaultSuperclass() const
+{
+    return d->m_defaultSuperclass;
+}
+
+void AbstractMetaClass::setDefaultSuperclass(AbstractMetaClass *s)
+{
+    d->m_defaultSuperclass = s;
+}
+
 AbstractMetaClass *AbstractMetaClass::baseClass() const
 {
     return d->m_baseClasses.value(0, nullptr);
@@ -417,6 +429,29 @@ AbstractMetaClass *AbstractMetaClass::baseClass() const
 const AbstractMetaClassList &AbstractMetaClass::baseClasses() const
 {
     return d->m_baseClasses;
+}
+
+// base classes including "defaultSuperclass".
+AbstractMetaClassList AbstractMetaClass::typeSystemBaseClasses() const
+{
+    AbstractMetaClassList result = d->m_baseClasses;
+    if (d->m_defaultSuperclass != nullptr) {
+        result.removeAll(d->m_defaultSuperclass);
+        result.prepend(d->m_defaultSuperclass);
+    }
+    return result;
+}
+
+// Recursive list of all base classes including defaultSuperclass
+AbstractMetaClassList AbstractMetaClass::allTypeSystemAncestors() const
+{
+    AbstractMetaClassList result;
+    const AbstractMetaClassList baseClasses = typeSystemBaseClasses();
+    for (AbstractMetaClass *base : baseClasses) {
+        result.append(base);
+        result.append(base->allTypeSystemAncestors());
+    }
+    return result;
 }
 
 void AbstractMetaClass::addBaseClass(AbstractMetaClass *baseClass)

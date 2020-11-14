@@ -87,9 +87,6 @@ public:
 
     const char *name() const override { return "Shiboken"; }
 
-    /// Returns a list of all ancestor classes for the given class.
-    AbstractMetaClassList getAllAncestors(const AbstractMetaClass *metaClass) const;
-
     /// Returns true if the user enabled PySide extensions.
     bool usePySideExtensions() const;
 
@@ -213,9 +210,6 @@ protected:
 
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
     AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass);
-
-    /// Returns a list of parent classes for a given class.
-    AbstractMetaClassList getBaseClasses(const AbstractMetaClass *metaClass) const;
 
     void writeToPythonConversion(QTextStream &s, const AbstractMetaType &type,
                                  const AbstractMetaClass *context, const QString &argumentName);

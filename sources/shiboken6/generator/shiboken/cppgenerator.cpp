@@ -1777,7 +1777,7 @@ void CppGenerator::writeSmartPointerConverterFunctions(QTextStream &s, const Abs
         // TODO: Missing conversion to smart pointer pointer type:
 
         s << "// Register smartpointer conversion for all derived classes\n";
-        const auto classes = getBaseClasses(targetClass);
+        const auto classes = targetClass->typeSystemBaseClasses();
         for (auto k : classes) {
             if (smartPointerTypeEntry->matchesInstantiation(k->typeEntry())) {
                 if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry())) {
@@ -3824,7 +3824,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
 QStringList CppGenerator::getAncestorMultipleInheritance(const AbstractMetaClass *metaClass)
 {
     QStringList result;
-    const AbstractMetaClassList &baseClases = getBaseClasses(metaClass);
+    const AbstractMetaClassList &baseClases = metaClass->typeSystemBaseClasses();
     if (!baseClases.isEmpty()) {
         for (const AbstractMetaClass *baseClass : baseClases) {
             QString offset;
@@ -3884,7 +3884,7 @@ void CppGenerator::writeSpecialCastFunction(QTextStream &s, const AbstractMetaCl
     s << "{\n";
     s << INDENT << "auto me = reinterpret_cast< ::" << className << " *>(obj);\n";
     bool firstClass = true;
-    const AbstractMetaClassList &allAncestors = getAllAncestors(metaClass);
+    const AbstractMetaClassList &allAncestors = metaClass->allTypeSystemAncestors();
     for (const AbstractMetaClass *baseClass : allAncestors) {
         s << INDENT << (!firstClass ? "else " : "") << "if (desiredType == reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(baseClass->typeEntry()) << "))\n";
         Indentation indent(INDENT);
@@ -4034,7 +4034,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(QTextStream &s, cons
     if (!klass)
         return;
 
-    const auto classes = getBaseClasses(klass);
+    const auto classes = klass->typeSystemBaseClasses();
     if (classes.isEmpty())
         return;
 
@@ -5317,7 +5317,7 @@ void CppGenerator::writeClassRegister(QTextStream &s,
 
     // Multiple inheritance
     QString pyTypeBasesVariable = chopType(pyTypeName) + QLatin1String("_Type_bases");
-    const AbstractMetaClassList baseClasses = getBaseClasses(metaClass);
+    const AbstractMetaClassList baseClasses = metaClass->typeSystemBaseClasses();
     if (metaClass->baseClassNames().size() > 1) {
         s << INDENT << "PyObject *" << pyTypeBasesVariable
             << " = PyTuple_Pack(" << baseClasses.size() << ',' << Qt::endl;
@@ -5598,7 +5598,7 @@ void CppGenerator::writeTypeDiscoveryFunction(QTextStream &s, const AbstractMeta
             s << INDENT << "return cptr;\n";
         }
     } else if (metaClass->isPolymorphic()) {
-        const AbstractMetaClassList &ancestors = getAllAncestors(metaClass);
+        const AbstractMetaClassList &ancestors = metaClass->allTypeSystemAncestors();
         for (AbstractMetaClass *ancestor : ancestors) {
             if (ancestor->baseClass())
                 continue;

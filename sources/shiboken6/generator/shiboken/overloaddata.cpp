@@ -335,7 +335,7 @@ void OverloadData::sortNextOverloads()
         // Process inheritance relationships
         if (targetType.isValue() || targetType.isObject()) {
             const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType.typeEntry());
-            const AbstractMetaClassList &ancestors = m_generator->getAllAncestors(metaClass);
+            const AbstractMetaClassList &ancestors = metaClass->allTypeSystemAncestors();
             for (const AbstractMetaClass *ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();
                 if (!sortData.map.contains(ancestorTypeName))

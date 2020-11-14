@@ -193,8 +193,15 @@ public:
 
     QString baseClassName() const;
 
+    AbstractMetaClass *defaultSuperclass() const; // Attribute "default-superclass"
+    void setDefaultSuperclass(AbstractMetaClass *s);
+
     AbstractMetaClass *baseClass() const;
     const AbstractMetaClassList &baseClasses() const;
+    // base classes including defaultSuperclass
+    AbstractMetaClassList typeSystemBaseClasses() const;
+    // Recursive list of all base classes including defaultSuperclass
+    AbstractMetaClassList allTypeSystemAncestors() const;
 
     void addBaseClass(AbstractMetaClass *base_class);
     void setBaseClass(AbstractMetaClass *base_class);
