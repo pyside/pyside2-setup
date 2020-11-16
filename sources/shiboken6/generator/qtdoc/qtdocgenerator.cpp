@@ -315,7 +315,7 @@ QTextStream &operator<<(QTextStream &str, const QtXmlToSphinx::LinkContext &link
     return str;
 }
 
-QtXmlToSphinx::QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context)
+QtXmlToSphinx::QtXmlToSphinx(const QtDocGenerator *generator, const QString& doc, const QString& context)
         : m_tableHasHeader(false), m_context(context), m_generator(generator), m_insideBold(false), m_insideItalic(false)
 {
     m_handlerMap.insert(QLatin1String("heading"), &QtXmlToSphinx::handleHeadingTag);
@@ -1307,7 +1307,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
     }
 }
 
-bool QtXmlToSphinx::convertToRst(QtDocGenerator *generator,
+bool QtXmlToSphinx::convertToRst(const QtDocGenerator *generator,
                                  const QString &sourceFileName,
                                  const QString &targetFileName,
                                  const QString &context, QString *errorMessage)
@@ -1540,7 +1540,7 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
 
 void QtDocGenerator::writeFormattedText(QTextStream &s, const Documentation &doc,
                                         const AbstractMetaClass *metaClass,
-                                        Documentation::Type docType)
+                                        Documentation::Type docType) const
 {
     QString metaClassName;
 
@@ -1762,7 +1762,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
     }
 }
 
-void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClass)
+void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClass) const
 {
     static const QString section_title = QLatin1String(".. attribute:: ");
 
@@ -1776,7 +1776,7 @@ void QtDocGenerator::writeEnums(QTextStream& s, const AbstractMetaClass* cppClas
 
 }
 
-void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppClass)
+void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppClass) const
 {
     static const QString section_title = QLatin1String(".. attribute:: ");
 
@@ -1786,7 +1786,7 @@ void QtDocGenerator::writeFields(QTextStream& s, const AbstractMetaClass* cppCla
     }
 }
 
-void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* cppClass)
+void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* cppClass) const
 {
     static const QString sectionTitle = QLatin1String(".. class:: ");
 
@@ -2006,7 +2006,7 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, con
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
-                                              const AbstractMetaClass* cppClass)
+                                              const AbstractMetaClass* cppClass) const
 {
     static const QStringList nativeTypes = {boolT(), floatT(), intT(),
         QLatin1String("object"),
@@ -2066,14 +2066,14 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
 }
 
 void QtDocGenerator::writeParameterType(QTextStream& s, const AbstractMetaClass* cppClass,
-                                        const AbstractMetaArgument &arg)
+                                        const AbstractMetaArgument &arg) const
 {
     s << INDENT << ":param " << arg.name() << ": "
       << translateToPythonType(arg.type(), cppClass) << Qt::endl;
 }
 
 void QtDocGenerator::writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
-                                                 const AbstractMetaFunction *func)
+                                                 const AbstractMetaFunction *func) const
 {
     s << Qt::endl;
     const AbstractMetaArgumentList &funcArgs = func->arguments();
@@ -2287,7 +2287,7 @@ static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
     return result;
 }
 
-void QtDocGenerator::writeAdditionalDocumentation()
+void QtDocGenerator::writeAdditionalDocumentation() const
 {
     QFile additionalDocumentationFile(m_additionalDocumentationList);
     if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text)) {

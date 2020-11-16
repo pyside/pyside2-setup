@@ -324,7 +324,7 @@ static inline void _writeTypeIndexValueLine(QTextStream &s,
     s << ",\n";
 }
 
-void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry)
+void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry) const
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
@@ -346,7 +346,7 @@ void HeaderGenerator::writeTypeIndexValueLine(QTextStream &s, const TypeEntry *t
     }
 }
 
-void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass)
+void HeaderGenerator::writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     auto typeEntry = metaClass->typeEntry();
     if (!typeEntry->generateCode())
@@ -597,13 +597,13 @@ bool HeaderGenerator::finishGeneration()
     return file.done() != FileOut::Failure;
 }
 
-void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum &cppEnum)
+void HeaderGenerator::writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     if (avoidProtectedHack() && cppEnum.isProtected())
         s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};\n";
 }
 
-void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum &cppEnum)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum &cppEnum) const
 {
      const QString enumName = avoidProtectedHack() && cppEnum.isProtected()
         ? protectedEnumSurrogateName(cppEnum)
@@ -619,19 +619,19 @@ void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnu
     }
 }
 
-void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass) const
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << cppClass->qualifiedCppName() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(cppClass->typeEntry()) << "); }\n";
 }
 
-void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType)
+void HeaderGenerator::writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType) const
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
       <<  "{ return reinterpret_cast<PyTypeObject *>(" << cpythonTypeNameExt(metaType) << "); }\n";
 }
 
-void HeaderGenerator::writeInheritedOverloads(QTextStream &s)
+void HeaderGenerator::writeInheritedOverloads(QTextStream &s) const
 {
     for (const AbstractMetaFunction *func : qAsConst(m_inheritedOverloads)) {
         s << INDENT << "inline ";

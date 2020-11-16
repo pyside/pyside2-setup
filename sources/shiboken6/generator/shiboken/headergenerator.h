@@ -55,13 +55,13 @@ private:
     void writeCopyCtor(QTextStream &s, const AbstractMetaClass *metaClass) const;
     void writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField &field) const;
     void writeFunction(QTextStream &s, const AbstractMetaFunction *func);
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum &cppEnum);
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass);
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType);
-    void writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry);
-    void writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass);
-    void writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum &cppEnum);
-    void writeInheritedOverloads(QTextStream &s);
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum &cppEnum) const;
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass) const;
+    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType) const;
+    void writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry) const;
+    void writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum &cppEnum) const;
+    void writeInheritedOverloads(QTextStream &s) const;
 
     QSet<const AbstractMetaFunction *> m_inheritedOverloads;
 };

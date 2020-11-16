@@ -833,7 +833,7 @@ static bool allArgumentsRemoved(const AbstractMetaFunction *func)
     return true;
 }
 
-QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func)
+QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func) const
 {
     if (func->type().isVoid())
         return QLatin1String("\"\"");
@@ -874,7 +874,7 @@ void CppGenerator::writeVirtualMethodCppCall(QTextStream &s,
                                              const CodeSnipList &snips,
                                              const AbstractMetaArgument *lastArg,
                                              const TypeEntry *retType,
-                                             const QString &returnStatement)
+                                             const QString &returnStatement) const
 {
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
@@ -907,7 +907,7 @@ void CppGenerator::writeVirtualMethodCppCall(QTextStream &s,
 // Determine the return statement (void or a result value).
 QString CppGenerator::virtualMethodReturn(QTextStream &s,
                                           const AbstractMetaFunction *func,
-                                          const FunctionModificationList &functionModifications)
+                                          const FunctionModificationList &functionModifications) const
 {
     if (func->isVoid())
         return QLatin1String("return;");
@@ -1744,7 +1744,8 @@ void CppGenerator::writeConverterRegister(QTextStream &s, const AbstractMetaClas
     writeCustomConverterRegister(s, customConversion, QLatin1String("converter"));
 }
 
-void CppGenerator::writeCustomConverterRegister(QTextStream &s, const CustomConversion *customConversion, const QString &converterVar)
+void CppGenerator::writeCustomConverterRegister(QTextStream &s, const CustomConversion *customConversion,
+                                                const QString &converterVar)
 {
     if (!customConversion)
         return;
@@ -2219,7 +2220,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream &s, OverloadData &overl
 }
 
 void CppGenerator::writeCppSelfConversion(QTextStream &s, const GeneratorContext &context,
-                                          const QString &className, bool useWrapperClass)
+                                          const QString &className, bool useWrapperClass) const
 {
     static const QString pythonSelfVar = QLatin1String("self");
     if (useWrapperClass)
@@ -2354,7 +2355,7 @@ static QString pythonToCppConverterForArgumentName(const QString &argumentName)
 
 void CppGenerator::writeTypeCheck(QTextStream &s, AbstractMetaType argType,
                                   const QString &argumentName, bool isNumber,
-                                  const QString &customType, bool rejectNull)
+                                  const QString &customType, bool rejectNull) const
 {
     QString customCheck;
     if (!customType.isEmpty()) {
@@ -2426,7 +2427,8 @@ static void checkTypeViability(const AbstractMetaFunction *func)
         checkTypeViability(func, func->arguments().at(i).type(), i + 1);
 }
 
-void CppGenerator::writeTypeCheck(QTextStream &s, const OverloadData *overloadData, QString argumentName)
+void CppGenerator::writeTypeCheck(QTextStream &s, const OverloadData *overloadData,
+                                  QString argumentName) const
 {
     QSet<const TypeEntry *> numericTypes;
     const OverloadDataList &overloads = overloadData->previousOverloadData()->nextOverloadData();
@@ -2470,7 +2472,7 @@ void CppGenerator::writeArgumentConversion(QTextStream &s,
 }
 
 std::optional<AbstractMetaType>
-    CppGenerator::getArgumentType(const AbstractMetaFunction *func, int argPos)
+    CppGenerator::getArgumentType(const AbstractMetaFunction *func, int argPos) const
 {
     if (argPos < 0 || argPos > func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()
@@ -2643,8 +2645,10 @@ static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rul
     snippetList << snip;
 }
 
-void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunction *func, TypeSystem::Language language)
+void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunction *func,
+                                       TypeSystem::Language language) const
 {
+
     CodeSnipList snippets;
     const AbstractMetaArgumentList &arguments = func->arguments();
     for (const AbstractMetaArgument &arg : arguments) {
@@ -2655,7 +2659,8 @@ void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunctio
     writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func);
 }
 
-void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunction *func, TypeSystem::Language language, const QString &outputVar)
+void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunction *func,
+                                       TypeSystem::Language language, const QString &outputVar) const
 {
     CodeSnipList snippets;
     QString rule = func->conversionRule(language, 0);
@@ -3009,7 +3014,8 @@ QString CppGenerator::convertibleToCppFunctionName(const CustomConversion::Targe
     return convertibleToCppFunctionName(fixedCppTypeName(toNative), fixedCppTypeName(targetType));
 }
 
-void CppGenerator::writeCppToPythonFunction(QTextStream &s, const QString &code, const QString &sourceTypeName, QString targetTypeName)
+void CppGenerator::writeCppToPythonFunction(QTextStream &s, const QString &code, const QString &sourceTypeName,
+                                            QString targetTypeName) const
 {
     QString prettyCode;
     QTextStream c(&prettyCode);
@@ -3032,13 +3038,14 @@ static void replaceCppToPythonVariables(QString &code, const QString &typeName)
     code.replace(QLatin1String("%in"), QLatin1String("cppInRef"));
     code.replace(QLatin1String("%out"), QLatin1String("pyOut"));
 }
-void CppGenerator::writeCppToPythonFunction(QTextStream &s, const CustomConversion *customConversion)
+
+void CppGenerator::writeCppToPythonFunction(QTextStream &s, const CustomConversion *customConversion) const
 {
     QString code = customConversion->nativeToTargetConversion();
     replaceCppToPythonVariables(code, getFullTypeName(customConversion->ownerType()));
     writeCppToPythonFunction(s, code, fixedCppTypeName(customConversion->ownerType()));
 }
-void CppGenerator::writeCppToPythonFunction(QTextStream &s, const AbstractMetaType &containerType)
+void CppGenerator::writeCppToPythonFunction(QTextStream &s, const AbstractMetaType &containerType) const
 {
     const CustomConversion *customConversion = containerType.typeEntry()->customConversion();
     if (!customConversion) {
@@ -3063,7 +3070,8 @@ void CppGenerator::writeCppToPythonFunction(QTextStream &s, const AbstractMetaTy
     writeCppToPythonFunction(s, code, fixedCppTypeName(containerType));
 }
 
-void CppGenerator::writePythonToCppFunction(QTextStream &s, const QString &code, const QString &sourceTypeName, const QString &targetTypeName)
+void CppGenerator::writePythonToCppFunction(QTextStream &s, const QString &code, const QString &sourceTypeName,
+                                            const QString &targetTypeName) const
 {
     QString prettyCode;
     QTextStream c(&prettyCode);
@@ -3305,7 +3313,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
 
 QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex,
                                             const AbstractMetaClass **wrappedClass,
-                                            QString *errorMessage)
+                                            QString *errorMessage) const
 {
     if (errorMessage != nullptr)
         errorMessage->clear();
@@ -4078,7 +4086,7 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
     return cpythonBaseName(metaClass->typeEntry()) + QLatin1String("_mi_init");
 }
 
-bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass)
+bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass) const
 {
     for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
         if (metaClass->hasFunction(it.key()))
@@ -4107,7 +4115,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass)
     return baseType && baseType->isContainer();
 }
 
-bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass *metaClass)
+bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClass *metaClass) const
 {
     for (const AbstractMetaField &f : metaClass->fields()) {
         if (!f.isStatic())
@@ -4379,7 +4387,7 @@ void CppGenerator::writeSequenceMethods(QTextStream &s,
         writeDefaultSequenceMethods(s, context);
 }
 
-void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
@@ -4408,7 +4416,7 @@ void CppGenerator::writeTypeAsSequenceDefinition(QTextStream &s, const AbstractM
     }
 }
 
-void CppGenerator::writeTypeAsMappingDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTypeAsMappingDefinition(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
@@ -4435,7 +4443,7 @@ void CppGenerator::writeTypeAsMappingDefinition(QTextStream &s, const AbstractMe
     }
 }
 
-void CppGenerator::writeTypeAsNumberDefinition(QTextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTypeAsNumberDefinition(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     QMap<QString, QString> nb;
 
@@ -4504,7 +4512,7 @@ void CppGenerator::writeTypeAsNumberDefinition(QTextStream &s, const AbstractMet
     }
 }
 
-void CppGenerator::writeTpTraverseFunction(QTextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTpTraverseFunction(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int ";
@@ -4514,7 +4522,7 @@ void CppGenerator::writeTpTraverseFunction(QTextStream &s, const AbstractMetaCla
     s << "}\n";
 }
 
-void CppGenerator::writeTpClearFunction(QTextStream &s, const AbstractMetaClass *metaClass)
+void CppGenerator::writeTpClearFunction(QTextStream &s, const AbstractMetaClass *metaClass) const
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int ";
@@ -4880,7 +4888,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
     s<< "}\n\n";
 }
 
-void CppGenerator::writeMethodDefinitionEntry(QTextStream &s, const AbstractMetaFunctionList &overloads)
+void CppGenerator::writeMethodDefinitionEntry(QTextStream &s, const AbstractMetaFunctionList &overloads) const
 {
     Q_ASSERT(!overloads.isEmpty());
     OverloadData overloadData(overloads, this);
@@ -4911,7 +4919,7 @@ void CppGenerator::writeMethodDefinitionEntry(QTextStream &s, const AbstractMeta
     }
 }
 
-void CppGenerator::writeMethodDefinition(QTextStream &s, const AbstractMetaFunctionList &overloads)
+void CppGenerator::writeMethodDefinition(QTextStream &s, const AbstractMetaFunctionList &overloads) const
 {
     Q_ASSERT(!overloads.isEmpty());
     const AbstractMetaFunction *func = overloads.constFirst();
@@ -4929,7 +4937,7 @@ void CppGenerator::writeMethodDefinition(QTextStream &s, const AbstractMetaFunct
     s << ',' << Qt::endl;
 }
 
-void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads)
+void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunctionList &overloads) const
 {
     OverloadData overloadData(overloads, this);
     const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
@@ -5140,7 +5148,7 @@ void CppGenerator::writeSignalInitialization(QTextStream &s, const AbstractMetaC
                 << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
 }
 
-void CppGenerator::writeFlagsToLong(QTextStream &s, const AbstractMetaEnum &cppEnum)
+void CppGenerator::writeFlagsToLong(QTextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
@@ -5154,7 +5162,7 @@ void CppGenerator::writeFlagsToLong(QTextStream &s, const AbstractMetaEnum &cppE
     s << "}\n";
 }
 
-void CppGenerator::writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum &cppEnum)
+void CppGenerator::writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     if (!flagsEntry)
@@ -5169,7 +5177,7 @@ void CppGenerator::writeFlagsNonZero(QTextStream &s, const AbstractMetaEnum &cpp
     s << "}\n";
 }
 
-void CppGenerator::writeFlagsMethods(QTextStream &s, const AbstractMetaEnum &cppEnum)
+void CppGenerator::writeFlagsMethods(QTextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     writeFlagsBinaryOperator(s, cppEnum, QLatin1String("and"), QLatin1String("&"));
     writeFlagsBinaryOperator(s, cppEnum, QLatin1String("or"), QLatin1String("|"));
@@ -5182,7 +5190,7 @@ void CppGenerator::writeFlagsMethods(QTextStream &s, const AbstractMetaEnum &cpp
     s << Qt::endl;
 }
 
-void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum &cppEnum)
+void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     QString cpythonName = cpythonEnumName(cppEnum);
 
@@ -5198,7 +5206,7 @@ void CppGenerator::writeFlagsNumberMethodsDefinition(QTextStream &s, const Abstr
     s << "};\n\n";
 }
 
-void CppGenerator::writeFlagsNumberMethodsDefinitions(QTextStream &s, const AbstractMetaEnumList &enums)
+void CppGenerator::writeFlagsNumberMethodsDefinitions(QTextStream &s, const AbstractMetaEnumList &enums) const
 {
     for (const AbstractMetaEnum &e : enums) {
         if (!e.isAnonymous() && !e.isPrivate() && e.typeEntry()->flags()) {
@@ -5210,7 +5218,7 @@ void CppGenerator::writeFlagsNumberMethodsDefinitions(QTextStream &s, const Abst
 }
 
 void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEnum &cppEnum,
-                                            const QString &pyOpName, const QString &cppOpName)
+                                            const QString &pyOpName, const QString &cppOpName) const
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
@@ -5233,7 +5241,7 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
 
 void CppGenerator::writeFlagsUnaryOperator(QTextStream &s, const AbstractMetaEnum &cppEnum,
                                            const QString &pyOpName,
-                                           const QString &cppOpName, bool boolResult)
+                                           const QString &cppOpName, bool boolResult) const
 {
     FlagsTypeEntry *flagsEntry = cppEnum.typeEntry()->flags();
     Q_ASSERT(flagsEntry);
@@ -5857,7 +5865,7 @@ void CppGenerator::writeSmartPointerGetattroFunction(QTextStream &s, const Gener
 // function.
 void CppGenerator::writeInitFunc(QTextStream &declStr, QTextStream &callStr,
                                  const Indentor &indent, const QString &initFunctionName,
-                                 const TypeEntry *enclosingEntry)
+                                 const TypeEntry *enclosingEntry) const
 {
     const bool hasParent =
         enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
@@ -6264,7 +6272,8 @@ static ArgumentOwner getArgumentOwner(const AbstractMetaFunction *func, int argI
     return argOwner;
 }
 
-bool CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, int argIndex, bool useHeuristicPolicy)
+bool CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, int argIndex,
+                                              bool useHeuristicPolicy) const
 {
     const int numArgs = func->arguments().count();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
@@ -6323,7 +6332,8 @@ bool CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
     return false;
 }
 
-void CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func, bool useHeuristicForReturn)
+void CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMetaFunction *func,
+                                              bool useHeuristicForReturn) const
 {
     const int numArgs = func->arguments().count();
 
@@ -6337,7 +6347,7 @@ void CppGenerator::writeParentChildManagement(QTextStream &s, const AbstractMeta
         writeReturnValueHeuristics(s, func);
 }
 
-void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func)
+void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMetaFunction *func) const
 {
     const  AbstractMetaType &type = func->type();
     if (!useReturnValueHeuristic()

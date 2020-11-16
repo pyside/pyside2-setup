@@ -59,7 +59,7 @@ QT_END_NAMESPACE
 class PrimitiveTypeEntry;
 class ContainerTypeEntry;
 
-QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor);
+QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor);
 void verifyDirectoryFor(const QString &file);
 
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
@@ -341,24 +341,24 @@ protected:
                                     const AbstractMetaFunction *metafunction,
                                     Options options = NoOption) const = 0;
 
-    void replaceTemplateVariables(QString &code, const AbstractMetaFunction *func);
+    void replaceTemplateVariables(QString &code, const AbstractMetaFunction *func) const;
 
     /**
      *   Returns the package name.
      */
-    QString packageName() const;
+    static QString packageName();
 
     // Returns the full name of the type.
-    QString getFullTypeName(const TypeEntry *type) const;
-    QString getFullTypeName(const AbstractMetaType &type) const;
-    QString getFullTypeName(const AbstractMetaClass *metaClass) const;
+    static QString getFullTypeName(const TypeEntry *type);
+    static QString getFullTypeName(const AbstractMetaType &type);
+    static QString getFullTypeName(const AbstractMetaClass *metaClass);
 
     /**
      *  Returns the full qualified C++ name for an AbstractMetaType, but removing modifiers
      *  as 'const', '&', and '*' (except if the class is not derived from a template).
      *  This is useful for instantiated templates.
      */
-    QString getFullTypeNameWithoutModifiers(const AbstractMetaType &type) const;
+    static QString getFullTypeNameWithoutModifiers(const AbstractMetaType &type);
 
     /**
      *   Tries to build a minimal constructor for the type.

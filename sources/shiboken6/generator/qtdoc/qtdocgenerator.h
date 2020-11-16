@@ -113,9 +113,10 @@ public:
             bool m_normalized = false;
     };
 
-    QtXmlToSphinx(QtDocGenerator* generator, const QString& doc, const QString& context = QString());
+    explicit QtXmlToSphinx(const QtDocGenerator *generator, const QString& doc,
+                           const QString& context = QString());
 
-    static bool convertToRst(QtDocGenerator *generator,
+    static bool convertToRst(const QtDocGenerator *generator,
                              const QString &sourceFileName,
                              const QString &targetFileName,
                              const QString &context = QString(),
@@ -181,7 +182,7 @@ private:
     QScopedPointer<LinkContext> m_seeAlsoContext; // for <see-also>foo()</see-also>
     bool m_tableHasHeader;
     QString m_context;
-    QtDocGenerator* m_generator;
+    const QtDocGenerator* m_generator;
     bool m_insideBold;
     bool m_insideItalic;
     QString m_lastTagName;
@@ -247,32 +248,32 @@ protected:
     void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, Options) const override {}
 
 private:
-    void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass);
+    void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass) const;
 
-    void writeFields(QTextStream &s, const AbstractMetaClass *cppClass);
-    void writeArguments(QTextStream &s, const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
-    QString functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
+    void writeFields(QTextStream &s, const AbstractMetaClass *cppClass) const;
+    static QString functionSignature(const AbstractMetaClass* cppClass,
+                                     const AbstractMetaFunction* func);
     void writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
                        const AbstractMetaFunction* func, bool indexed = true);
     void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
-                                     const AbstractMetaFunction* func);
+                                     const AbstractMetaFunction* func) const;
     void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);
     void writeFunctionBlock(QTextStream& s, const QString& title, QStringList& functions);
     void writeParameterType(QTextStream &s, const AbstractMetaClass *cppClass,
-                            const AbstractMetaArgument &arg);
+                            const AbstractMetaArgument &arg) const;
 
-    void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass);
+    void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass) const;
     void writeFormattedText(QTextStream &s, const Documentation &doc,
                             const AbstractMetaClass *metaclass = nullptr,
-                            Documentation::Type docType = Documentation::Detailed);
+                            Documentation::Type docType = Documentation::Detailed) const;
     bool writeInjectDocumentation(QTextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
     void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
     void writeModuleDocumentation();
-    void writeAdditionalDocumentation();
+    void writeAdditionalDocumentation() const;
 
-    QString parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
-    QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass);
+    static QString parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
+    QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass) const;
 
     QString m_docDataDir;
     QString m_libSourceDir;

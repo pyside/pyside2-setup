@@ -409,7 +409,7 @@ void Generator::setLicenseComment(const QString &licenseComment)
     m_d->licenseComment = licenseComment;
 }
 
-QString Generator::packageName() const
+QString Generator::packageName()
 {
     return TypeDatabase::instance()->defaultPackageName();
 }
@@ -527,7 +527,7 @@ void verifyDirectoryFor(const QString &file)
     }
 }
 
-void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFunction *func)
+void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFunction *func) const
 {
     const AbstractMetaClass *cpp_class = func->ownerClass();
     if (cpp_class)
@@ -556,7 +556,7 @@ void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFuncti
     }
 }
 
-QTextStream &formatCode(QTextStream &s, const QString &code, Indentor &indentor)
+QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor)
 {
     const auto lines= QStringView{code}.split(QLatin1Char('\n'));
     for (const auto &line : lines) {
@@ -582,7 +582,7 @@ AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType &
     return implicitConversions(metaType.typeEntry());
 }
 
-QString Generator::getFullTypeName(const TypeEntry *type) const
+QString Generator::getFullTypeName(const TypeEntry *type)
 {
     QString result = type->qualifiedCppName();
     if (type->isArray())
@@ -592,7 +592,7 @@ QString Generator::getFullTypeName(const TypeEntry *type) const
     return result;
 }
 
-QString Generator::getFullTypeName(const AbstractMetaType &type) const
+QString Generator::getFullTypeName(const AbstractMetaType &type)
 {
     if (type.isCString())
         return QLatin1String("const char*");
@@ -608,12 +608,12 @@ QString Generator::getFullTypeName(const AbstractMetaType &type) const
     return typeName + QString::fromLatin1("*").repeated(type.indirections());
 }
 
-QString Generator::getFullTypeName(const AbstractMetaClass *metaClass) const
+QString Generator::getFullTypeName(const AbstractMetaClass *metaClass)
 {
     return QLatin1String("::") + metaClass->qualifiedCppName();
 }
 
-QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type) const
+QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
 {
     if (type.isCString())
         return QLatin1String("const char*");
