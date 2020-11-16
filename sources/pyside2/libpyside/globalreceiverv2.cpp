@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -108,14 +108,14 @@ DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *paren
         //monitor class from method lifetime
         m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
 
-        m_hash = QByteArray::number((qlonglong)PyObject_Hash(m_callback))
-                 + QByteArray::number((qlonglong)PyObject_Hash(m_pythonSelf));
-
+        // PYSIDE-1422: Avoid hash on self which might be unhashable.
+        m_hash = QByteArray::number(static_cast<qlonglong>(PyObject_Hash(m_callback)))
+                 + QByteArray::number(reinterpret_cast<qlonglong>(m_pythonSelf));
     } else {
         m_callback = callback;
         Py_INCREF(m_callback);
 
-        m_hash = QByteArray::number((qlonglong)PyObject_Hash(m_callback));
+        m_hash = QByteArray::number(static_cast<qlonglong>(PyObject_Hash(m_callback)));
     }
 }
 
@@ -128,10 +128,11 @@ QByteArray DynamicSlotDataV2::hash(PyObject *callback)
 {
     Shiboken::GilState gil;
     if (PyMethod_Check(callback)) {
-        return  QByteArray::number((qlonglong)PyObject_Hash(PyMethod_GET_FUNCTION(callback)))
-              + QByteArray::number((qlonglong)PyObject_Hash(PyMethod_GET_SELF(callback)));
+        // PYSIDE-1422: Avoid hash on self which might be unhashable.
+        return  QByteArray::number(static_cast<qlonglong>(PyObject_Hash(PyMethod_GET_FUNCTION(callback))))
+              + QByteArray::number(reinterpret_cast<qlonglong>(PyMethod_GET_SELF(callback)));
     }
-    return QByteArray::number(qlonglong(PyObject_Hash(callback)));
+    return QByteArray::number(static_cast<qlonglong>(PyObject_Hash(callback)));
 }
 
 PyObject *DynamicSlotDataV2::callback()
