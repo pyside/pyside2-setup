@@ -148,6 +148,11 @@ void CodeSnipAbstract::prependCode(QString *code, QString firstLine)
     code->prepend(firstLine);
 }
 
+QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)
+{
+    return QRegularExpression(QLatin1Char('%') + QString::number(index) + QStringLiteral("\\b"));
+}
+
 // ---------------------- Modification
 QString Modification::accessModifierString() const
 {

@@ -40,6 +40,7 @@
 #include "typesystem.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QRegularExpression>
 
 // Cache FunctionModificationList in a flat list per class (0 for global
 // functions, or typically owner/implementing/declaring class.
@@ -823,19 +824,53 @@ bool AbstractMetaFunction::hasInjectedCode() const
     return false;
 }
 
-CodeSnipList AbstractMetaFunction::injectedCodeSnips(TypeSystem::CodeSnipPosition position, TypeSystem::Language language) const
+// Traverse the code snippets, return true if predicate returns true
+template <class Predicate>
+bool AbstractMetaFunction::traverseCodeSnips(Predicate predicate,
+                                             TypeSystem::CodeSnipPosition position,
+                                             TypeSystem::Language language) const
 {
-    CodeSnipList result;
-    const FunctionModificationList &mods = modifications(ownerClass());
-    for (const FunctionModification &mod : mods) {
+    for (const FunctionModification &mod : modifications(ownerClass())) {
         if (mod.isCodeInjection()) {
             for (const CodeSnip &snip : mod.snips()) {
-                if ((snip.language & language) && (snip.position == position || position == TypeSystem::CodeSnipPositionAny))
-                    result << snip;
+                if ((snip.language & language) != 0
+                    && (snip.position == position || position == TypeSystem::CodeSnipPositionAny)
+                    && predicate(snip)) {
+                    return true;
+                }
             }
         }
     }
+    return false;
+}
+
+CodeSnipList AbstractMetaFunction::injectedCodeSnips(TypeSystem::CodeSnipPosition position,
+                                                     TypeSystem::Language language) const
+{
+    CodeSnipList result;
+    traverseCodeSnips([&result] (const CodeSnip &s) {
+                           result.append(s);
+                           return false;
+                      }, position, language);
     return result;
+}
+
+bool AbstractMetaFunction::injectedCodeContains(const QRegularExpression &pattern,
+                                                TypeSystem::CodeSnipPosition position,
+                                                TypeSystem::Language language) const
+{
+    return traverseCodeSnips([pattern] (const CodeSnip &s) {
+                                 return s.code().contains(pattern);
+                             }, position, language);
+}
+
+bool AbstractMetaFunction::injectedCodeContains(QStringView pattern,
+                                                TypeSystem::CodeSnipPosition position,
+                                                TypeSystem::Language language) const
+{
+    return traverseCodeSnips([pattern] (const CodeSnip &s) {
+                                 return s.code().contains(pattern);
+                             }, position, language);
 }
 
 bool AbstractMetaFunction::hasSignatureModifications() const
@@ -1121,6 +1156,46 @@ int AbstractMetaFunctionPrivate::overloadNumber(const AbstractMetaFunction *q) c
 int AbstractMetaFunction::overloadNumber() const
 {
     return d->overloadNumber(this);
+}
+
+// Query functions for generators
+bool AbstractMetaFunction::injectedCodeUsesPySelf() const
+{
+    return injectedCodeContains(u"%PYSELF", TypeSystem::CodeSnipPositionAny, TypeSystem::NativeCode);
+}
+
+bool AbstractMetaFunction::injectedCodeCallsPythonOverride() const
+{
+    static const QRegularExpression
+        overrideCallRegexCheck(QStringLiteral(R"(PyObject_Call\s*\(\s*%PYTHON_METHOD_OVERRIDE\s*,)"));
+    Q_ASSERT(overrideCallRegexCheck.isValid());
+    return injectedCodeContains(overrideCallRegexCheck, TypeSystem::CodeSnipPositionAny,
+                                TypeSystem::NativeCode);
+}
+
+bool AbstractMetaFunction::injectedCodeHasReturnValueAttribution(TypeSystem::Language language) const
+{
+    if (language == TypeSystem::TargetLangCode) {
+        static const QRegularExpression
+            retValAttributionRegexCheck_target(QStringLiteral(R"(%PYARG_0\s*=[^=]\s*.+)"));
+        Q_ASSERT(retValAttributionRegexCheck_target.isValid());
+        return injectedCodeContains(retValAttributionRegexCheck_target, TypeSystem::CodeSnipPositionAny, language);
+    }
+
+    static const QRegularExpression
+        retValAttributionRegexCheck_native(QStringLiteral(R"(%0\s*=[^=]\s*.+)"));
+    Q_ASSERT(retValAttributionRegexCheck_native.isValid());
+    return injectedCodeContains(retValAttributionRegexCheck_native, TypeSystem::CodeSnipPositionAny, language);
+}
+
+bool AbstractMetaFunction::injectedCodeUsesArgument(int argumentIndex) const
+{
+    const QRegularExpression argRegEx = CodeSnipAbstract::placeHolderRegex(argumentIndex + 1);
+
+    return traverseCodeSnips([argRegEx](const CodeSnip &s) {
+                                 const QString code = s.code();
+                                 return code.contains(u"%ARGUMENT_NAMES") || code.contains(argRegEx);
+                             }, TypeSystem::CodeSnipPositionAny);
 }
 
 #ifndef QT_NO_DEBUG_STREAM

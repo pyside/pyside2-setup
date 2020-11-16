@@ -137,6 +137,7 @@ public:
     static QString fixSpaces(QString code);
     static QString dedent(const QString &code);
     static void prependCode(QString *code, QString firstLine);
+    static QRegularExpression placeHolderRegex(int index);
 };
 
 class CustomFunction : public CodeSnipAbstract

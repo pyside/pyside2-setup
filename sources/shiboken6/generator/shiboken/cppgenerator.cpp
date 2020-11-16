@@ -1122,14 +1122,14 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     s << Qt::endl;
 
     if (!snips.isEmpty()) {
-        if (injectedCodeUsesPySelf(func))
+        if (func->injectedCodeUsesPySelf())
             s << INDENT << "PyObject *pySelf = BindingManager::instance().retrieveWrapper(this);\n";
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty() ? nullptr : &func->arguments().constLast();
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode, func, lastArg);
     }
 
-    if (!injectedCodeCallsPythonOverride(func)) {
+    if (!func->injectedCodeCallsPythonOverride()) {
         s << INDENT;
         s << "Shiboken::AutoDecRef " << PYTHON_RETURN_VAR << "(PyObject_Call("
             << PYTHON_OVERRIDE_VAR << ", " << PYTHON_ARGS << ", nullptr));\n";
@@ -1192,7 +1192,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
             if (!func->conversionRule(TypeSystem::NativeCode, 0).isEmpty()) {
                 // Has conversion rule.
                 writeConversionRule(s, func, TypeSystem::NativeCode, QLatin1String(CPP_RETURN_VAR));
-            } else if (!injectedCodeHasReturnValueAttribution(func, TypeSystem::NativeCode)) {
+            } else if (!func->injectedCodeHasReturnValueAttribution(TypeSystem::NativeCode)) {
                 writePythonToCppTypeConversion(s, func->type(), QLatin1String(PYTHON_RETURN_VAR),
                                                QLatin1String(CPP_RETURN_VAR), func->implementingClass());
             }
@@ -2668,9 +2668,11 @@ void CppGenerator::writeConversionRule(QTextStream &s, const AbstractMetaFunctio
     writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionAny, language, func);
 }
 
-void CppGenerator::writeNoneReturn(QTextStream &s, const AbstractMetaFunction *func, bool thereIsReturnValue)
+void CppGenerator::writeNoneReturn(QTextStream &s, const AbstractMetaFunction *func,
+                                   bool thereIsReturnValue) const
 {
-    if (thereIsReturnValue && (func->isVoid() || func->argumentRemoved(0)) && !injectedCodeHasReturnValueAttribution(func)) {
+    if (thereIsReturnValue && (func->isVoid() || func->argumentRemoved(0))
+        && !func->injectedCodeHasReturnValueAttribution()) {
         s << INDENT << PYTHON_RETURN_VAR << " = Py_None;\n";
         s << INDENT << "Py_INCREF(Py_None);\n";
     }
@@ -2957,7 +2959,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
         if (hasConversionRule)
             continue;
         auto argType = getArgumentType(func, argIdx + 1);
-        if (!argType.has_value() || (mayHaveUnunsedArguments && !injectedCodeUsesArgument(func, argIdx)))
+        if (!argType.has_value() || (mayHaveUnunsedArguments && !func->injectedCodeUsesArgument(argIdx)))
             continue;
         int argPos = argIdx - removedArgs;
         QString argName = QLatin1String(CPP_ARG) + QString::number(argPos);
@@ -3693,7 +3695,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             if (!func->conversionRule(TypeSystem::TargetLangCode, 0).isEmpty()) {
                 writeConversionRule(s, func, TypeSystem::TargetLangCode, QLatin1String(PYTHON_RETURN_VAR));
             } else if (!isCtor && !func->isInplaceOperator() && !func->isVoid()
-                && !injectedCodeHasReturnValueAttribution(func, TypeSystem::TargetLangCode)) {
+                && !func->injectedCodeHasReturnValueAttribution(TypeSystem::TargetLangCode)) {
                 s << INDENT << PYTHON_RETURN_VAR << " = ";
                 if (isObjectTypeUsedAsValueType(func->type())) {
                     s << "Shiboken::Object::newObject(reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(func->type().typeEntry())

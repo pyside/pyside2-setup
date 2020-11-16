@@ -182,7 +182,7 @@ private:
      *   \param thereIsReturnValue indicates if the return type of any of the other overloads
      *                             for this function is different from 'void'
      */
-    void writeNoneReturn(QTextStream &s, const AbstractMetaFunction *func, bool thereIsReturnValue);
+    void writeNoneReturn(QTextStream &s, const AbstractMetaFunction *func, bool thereIsReturnValue) const;
 
     /**
      *   Writes the Python function wrapper overload decisor that selects which C++

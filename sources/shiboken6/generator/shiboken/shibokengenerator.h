@@ -150,14 +150,6 @@ protected:
     void processClassCodeSnip(QString &code, const GeneratorContext &context) const;
 
     /**
-     *   Verifies if any of the function's code injections of the "native"
-     *   type needs the type system variable "%PYSELF".
-     *   \param func the function to check
-     *   \return true if the function's native code snippets use "%PYSELF"
-     */
-    bool injectedCodeUsesPySelf(const AbstractMetaFunction *func);
-
-    /**
      *   Verifies if any of the function's code injections makes a call
      *   to the C++ method. This is used by the generator to avoid writing calls
      *   to C++ when the user custom code already does this.
@@ -166,30 +158,6 @@ protected:
      */
     static bool injectedCodeCallsCppFunction(const GeneratorContext &context,
                                              const AbstractMetaFunction *func);
-
-    /**
-     *   Verifies if any of the function's code injections of the "native" class makes a
-     *   call to the C++ method. This is used by the generator to avoid writing calls to
-     *   Python overrides of C++ virtual methods when the user custom code already does this.
-     *   \param func the function to check
-     *   \return true if the function's code snippets call the Python override for a C++ virtual method
-     */
-    bool injectedCodeCallsPythonOverride(const AbstractMetaFunction *func);
-
-    /**
-     *   Verifies if any of the function's code injections attributes values to
-     *   the return variable (%0 or %PYARG_0).
-     *   \param func        the function to check
-     *   \param language    the kind of code snip
-     *   \return true if the function's code attributes values to "%0" or "%PYARG_0"
-     */
-    bool injectedCodeHasReturnValueAttribution(const AbstractMetaFunction *func, TypeSystem::Language language = TypeSystem::TargetLangCode);
-
-    /**
-     *   Verifies if any of the function's code injections uses the type system variable
-     *   for function arguments of a given index.
-     */
-    bool injectedCodeUsesArgument(const AbstractMetaFunction *func, int argumentIndex);
 
     /**
      *   Function which parse the metafunction information

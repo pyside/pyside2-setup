@@ -80,11 +80,6 @@ QHash<QString, QString> ShibokenGenerator::m_formatUnits = QHash<QString, QStrin
 QHash<QString, QString> ShibokenGenerator::m_tpFuncs = QHash<QString, QString>();
 QStringList ShibokenGenerator::m_knownPythonTypes = QStringList();
 
-static QRegularExpression placeHolderRegex(int index)
-{
-    return QRegularExpression(QLatin1Char('%') + QString::number(index) + QStringLiteral("\\b"));
-}
-
 // Return a prefix to fully qualify value, eg:
 // resolveScopePrefix("Class::NestedClass::Enum::Value1", "Enum::Value1")
 //     -> "Class::NestedClass::")
@@ -1981,7 +1976,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
             if (type.referenceType() == LValueReference || type.isPointer())
                 code.replace(QString::fromLatin1("%%1.").arg(idx), replacement + QLatin1String("->"));
         }
-        code.replace(placeHolderRegex(idx), pair.second);
+        code.replace(CodeSnipAbstract::placeHolderRegex(idx), pair.second);
     }
 
     if (language == TypeSystem::NativeCode) {
@@ -2180,81 +2175,27 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         code.replace(rep.first, rep.second);
 }
 
-bool ShibokenGenerator::injectedCodeUsesPySelf(const AbstractMetaFunction *func)
-{
-    CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::NativeCode);
-    for (const CodeSnip &snip : qAsConst(snips)) {
-        if (snip.code().contains(QLatin1String("%PYSELF")))
-            return true;
-    }
-    return false;
-}
-
 bool ShibokenGenerator::injectedCodeCallsCppFunction(const GeneratorContext &context,
                                                      const AbstractMetaFunction *func)
 {
+    if (func->injectedCodeContains(u"%FUNCTION_NAME("))
+        return true;
     QString funcCall = func->originalName() + QLatin1Char('(');
-    QString wrappedCtorCall;
-    if (func->isConstructor()) {
+    if (func->isConstructor())
         funcCall.prepend(QLatin1String("new "));
-        const auto owner = func->ownerClass();
-        const QString className = context.useWrapper()
-            ? context.wrapperName() : owner->qualifiedCppName();
-        wrappedCtorCall = QLatin1String("new ") + className + QLatin1Char('(');
-    }
-    CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
-    for (const CodeSnip &snip : qAsConst(snips)) {
-        if (snip.code().contains(QLatin1String("%FUNCTION_NAME(")) || snip.code().contains(funcCall)
-            || (func->isConstructor()
-                && ((func->ownerClass()->isPolymorphic() && snip.code().contains(wrappedCtorCall))
-                    || snip.code().contains(QLatin1String("new %TYPE("))))
-            )
-            return true;
-    }
-    return false;
-}
-
-bool ShibokenGenerator::injectedCodeCallsPythonOverride(const AbstractMetaFunction *func)
-{
-    static const QRegularExpression overrideCallRegexCheck(QStringLiteral("PyObject_Call\\s*\\(\\s*%PYTHON_METHOD_OVERRIDE\\s*,"));
-    Q_ASSERT(overrideCallRegexCheck.isValid());
-    CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::NativeCode);
-    for (const CodeSnip &snip : qAsConst(snips)) {
-        if (snip.code().contains(overrideCallRegexCheck))
-            return true;
-    }
-    return false;
-}
-
-bool ShibokenGenerator::injectedCodeHasReturnValueAttribution(const AbstractMetaFunction *func, TypeSystem::Language language)
-{
-    static const QRegularExpression retValAttributionRegexCheck_native(QStringLiteral("%0\\s*=[^=]\\s*.+"));
-    Q_ASSERT(retValAttributionRegexCheck_native.isValid());
-    static const QRegularExpression retValAttributionRegexCheck_target(QStringLiteral("%PYARG_0\\s*=[^=]\\s*.+"));
-    Q_ASSERT(retValAttributionRegexCheck_target.isValid());
-    CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, language);
-    for (const CodeSnip &snip : qAsConst(snips)) {
-        if (language == TypeSystem::TargetLangCode) {
-            if (snip.code().contains(retValAttributionRegexCheck_target))
-                return true;
-        } else {
-            if (snip.code().contains(retValAttributionRegexCheck_native))
-                return true;
-        }
-    }
-    return false;
-}
-
-bool ShibokenGenerator::injectedCodeUsesArgument(const AbstractMetaFunction *func, int argumentIndex)
-{
-    CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny);
-    const QRegularExpression argRegEx = placeHolderRegex(argumentIndex + 1);
-    for (const CodeSnip &snip : qAsConst(snips)) {
-        QString code = snip.code();
-        if (code.contains(QLatin1String("%ARGUMENT_NAMES")) || code.contains(argRegEx))
-            return true;
-    }
-    return false;
+    if (func->injectedCodeContains(funcCall))
+        return true;
+    if (!func->isConstructor())
+        return false;
+    if (func->injectedCodeContains(u"new %TYPE("))
+        return true;
+     const auto owner = func->ownerClass();
+     if (!owner->isPolymorphic())
+         return false;
+    const QString className = context.useWrapper()
+        ? context.wrapperName() : owner->qualifiedCppName();
+    const QString wrappedCtorCall = QLatin1String("new ") + className + QLatin1Char('(');
+    return func->injectedCodeContains(wrappedCtorCall);
 }
 
 bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClass *metaClass)

@@ -38,6 +38,7 @@
 #include <QtCore/QScopedPointer>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
+QT_FORWARD_DECLARE_CLASS(QRegularExpression)
 
 class AbstractMetaFunctionPrivate;
 class AbstractMetaType;
@@ -241,6 +242,12 @@ public:
     */
     CodeSnipList injectedCodeSnips(TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny,
                                    TypeSystem::Language language = TypeSystem::All) const;
+    bool injectedCodeContains(const QRegularExpression &pattern,
+                              TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny,
+                              TypeSystem::Language language = TypeSystem::All) const;
+    bool injectedCodeContains(QStringView pattern,
+                              TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny,
+                              TypeSystem::Language language = TypeSystem::All) const;
 
     /**
     *   Verifies if any modification to the function alters/removes its
@@ -279,6 +286,30 @@ public:
 
     int overloadNumber() const;
 
+    // Query functions for generators
+    /// Verifies if any of the function's code injections of the "native"
+    /// type needs the type system variable "%PYSELF".
+    /// \return true if the function's native code snippets use "%PYSELF"
+    bool injectedCodeUsesPySelf() const;
+
+    /// Verifies if any of the function's code injections of the "native" class makes a
+    /// call to the C++ method. This is used by the generator to avoid writing calls to
+    /// Python overrides of C++ virtual methods when the user custom code already does this.
+    /// \param func the function to check
+    /// \return true if the function's code snippets call the Python override for a C++ virtual method
+    bool injectedCodeCallsPythonOverride() const;
+
+    /// Verifies if any of the function's code injections attributes values to
+    /// the return variable (%0 or %PYARG_0).
+    /// \param language    the kind of code snip
+    /// \return true if the function's code attributes values to "%0" or "%PYARG_0"
+    bool injectedCodeHasReturnValueAttribution(TypeSystem::Language language =
+                                                   TypeSystem::TargetLangCode) const;
+
+    /// Verifies if any of the function's code injections uses the type system variable
+    /// for function arguments of a given index.
+    bool injectedCodeUsesArgument(int argumentIndex) const;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebugBrief(QDebug &debug) const;
     void formatDebugVerbose(QDebug &debug) const;
@@ -288,6 +319,10 @@ public:
     void setSourceLocation(const SourceLocation &sourceLocation);
 
 private:
+    template <class Predicate>
+    bool traverseCodeSnips(Predicate predicate,
+                           TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny,
+                           TypeSystem::Language language = TypeSystem::All) const;
     bool autoDetectAllowThread() const;
 
     QScopedPointer<AbstractMetaFunctionPrivate> d;
