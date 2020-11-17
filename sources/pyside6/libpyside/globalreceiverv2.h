@@ -55,8 +55,26 @@ namespace PySide
 class DynamicSlotDataV2;
 class GlobalReceiverV2;
 
-typedef QMap<QByteArray, GlobalReceiverV2 *> GlobalReceiverV2Map;
-typedef QSharedPointer<GlobalReceiverV2Map> SharedMap;
+struct GlobalReceiverKey
+{
+    const PyObject *object;
+    const PyObject *method;
+};
+
+inline bool operator==(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
+{
+    return k1.object == k2.object && k1.method == k2.method;
+}
+
+inline bool operator!=(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
+{
+    return k1.object != k2.object || k1.method != k2.method;
+}
+
+size_t qHash(const GlobalReceiverKey &k, size_t seed = 0);
+
+using GlobalReceiverV2Map = QHash<GlobalReceiverKey, GlobalReceiverV2 *>;
+using GlobalReceiverV2MapPtr = QSharedPointer<GlobalReceiverV2Map>;
 
 /**
  * A class used to make the link between the C++ Signal/Slot and Python callback
@@ -72,7 +90,7 @@ public:
      * @param   callback    A Python callable object (can be a method or not)
      * @param   ma          A SharedPointer used on Signal manager that contains all instaces of GlobalReceiver
      **/
-    GlobalReceiverV2(PyObject *callback, SharedMap map);
+    GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr map);
 
     /**
      * Destructor
@@ -125,7 +143,7 @@ public:
      *
      * @return  a string with a unique id based on GlobalReceiver contents
      **/
-    QByteArray hash() const;
+    GlobalReceiverKey key() const;
 
     /**
      * Use to retrieve the unique hash of the PyObject based on GlobalReceiver rules
@@ -133,7 +151,7 @@ public:
      * @param   callback The Python callable object used to calculate the id
      * @return  a string with a unique id based on GlobalReceiver contents
      **/
-    static QByteArray hash(PyObject *callback);
+    static GlobalReceiverKey key(PyObject *callback);
 
     const MetaObjectBuilder &metaObjectBuilder() const { return m_metaObject; }
     MetaObjectBuilder &metaObjectBuilder() { return m_metaObject; }
@@ -142,7 +160,7 @@ private:
     MetaObjectBuilder m_metaObject;
     DynamicSlotDataV2 *m_data;
     QList<const QObject *> m_refs;
-    SharedMap m_sharedMap;
+    GlobalReceiverV2MapPtr m_sharedMap;
 };
 
 }

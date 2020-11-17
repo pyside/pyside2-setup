@@ -212,11 +212,10 @@ using namespace PySide;
 
 struct SignalManager::SignalManagerPrivate
 {
-    SharedMap m_globalReceivers;
+    GlobalReceiverV2MapPtr m_globalReceivers;
 
-    SignalManagerPrivate()
+    SignalManagerPrivate() : m_globalReceivers(new GlobalReceiverV2Map{})
     {
-        m_globalReceivers = SharedMap( new QMap<QByteArray, GlobalReceiverV2 *>() );
     }
 
     ~SignalManagerPrivate()
@@ -294,13 +293,13 @@ SignalManager &SignalManager::instance()
 
 QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback)
 {
-    SharedMap globalReceivers = m_d->m_globalReceivers;
-    QByteArray hash = GlobalReceiverV2::hash(callback);
+    GlobalReceiverV2MapPtr globalReceivers = m_d->m_globalReceivers;
+    GlobalReceiverKey key = GlobalReceiverV2::key(callback);
     GlobalReceiverV2 *gr = nullptr;
-    auto it = globalReceivers->find(hash);
+    auto it = globalReceivers->find(key);
     if (it == globalReceivers->end()) {
         gr = new GlobalReceiverV2(callback, globalReceivers);
-        globalReceivers->insert(hash, gr);
+        globalReceivers->insert(key, gr);
         if (sender) {
             gr->incRef(sender); // create a link reference
             gr->decRef(); // remove extra reference

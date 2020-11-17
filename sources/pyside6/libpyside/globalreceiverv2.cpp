@@ -45,6 +45,7 @@
 #include <autodecref.h>
 #include <gilstate.h>
 
+#include <QtCore/qhashfunctions.h>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QSet>
 
@@ -58,6 +59,15 @@ namespace
 
 namespace PySide
 {
+
+size_t qHash(const GlobalReceiverKey &k, size_t seed)
+{
+    QtPrivate::QHashCombine hash;
+    seed = hash(seed, k.object);
+    seed = hash(seed, k.method);
+    return seed;
+}
+
 class DynamicSlotDataV2
 {
     Q_DISABLE_COPY(DynamicSlotDataV2)
@@ -68,34 +78,32 @@ class DynamicSlotDataV2
         int addSlot(const char *signature);
         int id(const char *signature) const;
         PyObject *callback();
-        QByteArray hash() const;
+        GlobalReceiverKey key() const { return {m_pythonSelf, m_callback}; }
         void notify();
 
         static void onCallbackDestroyed(void *data);
-        static QByteArray hash(PyObject *callback);
-
+        static GlobalReceiverKey key(PyObject *callback);
 
     private:
         bool m_isMethod;
         PyObject *m_callback;
-        PyObject *m_pythonSelf;
-        PyObject *m_pyClass;
-        PyObject *m_weakRef;
+        PyObject *m_pythonSelf = nullptr;
+        PyObject *m_pyClass = nullptr;
+        PyObject *m_weakRef = nullptr;
         QMap<QByteArray, int> m_signatures;
         GlobalReceiverV2 *m_parent;
-        QByteArray m_hash;
 };
 
 }
 
 using namespace PySide;
 
-DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent)
-    : m_pythonSelf(0), m_pyClass(0), m_weakRef(0), m_parent(parent)
+DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent) :
+    m_isMethod(PyMethod_Check(callback)),
+    m_parent(parent)
 {
     Shiboken::GilState gil;
 
-    m_isMethod = PyMethod_Check(callback);
     if (m_isMethod) {
         //Can not store calback pointe because this will be destroyed at the end of the scope
         //To avoid increment intance reference keep the callback information
@@ -105,31 +113,20 @@ DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *paren
         //monitor class from method lifetime
         m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
 
-        // PYSIDE-1422: Avoid hash on self which might be unhashable.
-        m_hash = QByteArray::number(static_cast<qlonglong>(PyObject_Hash(m_callback)))
-                 + QByteArray::number(reinterpret_cast<qlonglong>(m_pythonSelf));
     } else {
         m_callback = callback;
         Py_INCREF(m_callback);
-
-        m_hash = QByteArray::number(static_cast<qlonglong>(PyObject_Hash(m_callback)));
     }
 }
 
-QByteArray DynamicSlotDataV2::hash() const
-{
-    return m_hash;
-}
-
-QByteArray DynamicSlotDataV2::hash(PyObject *callback)
+GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
 {
     Shiboken::GilState gil;
     if (PyMethod_Check(callback)) {
         // PYSIDE-1422: Avoid hash on self which might be unhashable.
-        return  QByteArray::number(static_cast<qlonglong>(PyObject_Hash(PyMethod_GET_FUNCTION(callback))))
-              + QByteArray::number(reinterpret_cast<qlonglong>(PyMethod_GET_SELF(callback)));
+        return {PyMethod_GET_SELF(callback), PyMethod_GET_FUNCTION(callback)};
     }
-    return QByteArray::number(static_cast<qlonglong>(PyObject_Hash(callback)));
+    return {nullptr, callback};
 }
 
 PyObject *DynamicSlotDataV2::callback()
@@ -179,7 +176,7 @@ DynamicSlotDataV2::~DynamicSlotDataV2()
        Py_DECREF(m_callback);
 }
 
-GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, SharedMap map) :
+GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, GlobalReceiverV2MapPtr map) :
     QObject(nullptr),
     m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject),
     m_sharedMap(std::move(map))
@@ -203,7 +200,7 @@ GlobalReceiverV2::~GlobalReceiverV2()
 {
     m_refs.clear();
     // Remove itself from map.
-    m_sharedMap->remove(m_data->hash());
+    m_sharedMap->remove(m_data->key());
     // Suppress handling of destroyed() for objects whose last reference is contained inside
     // the callback object that will now be deleted. The reference could be a default argument,
     // a callback local variable, etc.
@@ -286,14 +283,14 @@ void GlobalReceiverV2::notify()
     Py_END_ALLOW_THREADS
 }
 
-QByteArray GlobalReceiverV2::hash() const
+GlobalReceiverKey GlobalReceiverV2::key() const
 {
-    return m_data->hash();
+    return m_data->key();
 }
 
-QByteArray GlobalReceiverV2::hash(PyObject *callback)
+GlobalReceiverKey GlobalReceiverV2::key(PyObject *callback)
 {
-    return DynamicSlotDataV2::hash(callback);
+    return DynamicSlotDataV2::key(callback);
 }
 
 const QMetaObject *GlobalReceiverV2::metaObject() const
