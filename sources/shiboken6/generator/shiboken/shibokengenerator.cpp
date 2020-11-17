@@ -37,6 +37,7 @@
 #include "overloaddata.h"
 #include "propertyspec.h"
 #include <reporthandler.h>
+#include <textstream.h>
 #include <typedatabase.h>
 #include <abstractmetabuilder.h>
 #include <iostream>
@@ -692,20 +693,20 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntry *type,
         + QLatin1String(", reinterpret_cast<SbkObject *>(") + argName + QLatin1String(")))");
 }
 
-void ShibokenGenerator::writeToPythonConversion(QTextStream & s, const AbstractMetaType &type,
+void ShibokenGenerator::writeToPythonConversion(TextStream & s, const AbstractMetaType &type,
                                                 const AbstractMetaClass * /* context */,
                                                 const QString &argumentName) const
 {
     s << cpythonToPythonConversionFunction(type) << argumentName << ')';
 }
 
-void ShibokenGenerator::writeToCppConversion(QTextStream &s, const AbstractMetaClass *metaClass,
+void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaClass *metaClass,
                                              const QString &inArgName, const QString &outArgName) const
 {
     s << cpythonToCppConversionFunction(metaClass) << inArgName << ", &" << outArgName << ')';
 }
 
-void ShibokenGenerator::writeToCppConversion(QTextStream &s, const AbstractMetaType &type,
+void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaType &type,
                                              const AbstractMetaClass *context, const QString &inArgName,
                                              const QString &outArgName) const
 {
@@ -1341,7 +1342,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunction *func,
     return arg;
 }
 
-void ShibokenGenerator::writeArgument(QTextStream &s,
+void ShibokenGenerator::writeArgument(TextStream &s,
                                       const AbstractMetaFunction *func,
                                       const AbstractMetaArgument &argument,
                                       Options options) const
@@ -1349,7 +1350,7 @@ void ShibokenGenerator::writeArgument(QTextStream &s,
     s << argumentString(func, argument, options);
 }
 
-void ShibokenGenerator::writeFunctionArguments(QTextStream &s,
+void ShibokenGenerator::writeFunctionArguments(TextStream &s,
                                                const AbstractMetaFunction *func,
                                                Options options) const
 {
@@ -1397,8 +1398,7 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
                                              Options options,
                                              int /* argCount */) const
 {
-    QString result;
-    QTextStream s(&result);
+    StringStream s(TextStream::Language::Cpp);
     // The actual function
     if (!(func->isEmptyFunction() ||
           func->isNormal() ||
@@ -1423,10 +1423,10 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunction *func,
     if (func->exceptionSpecification() == ExceptionSpecification::NoExcept)
         s << " noexcept";
 
-    return result;
+    return s;
 }
 
-void ShibokenGenerator::writeArgumentNames(QTextStream &s,
+void ShibokenGenerator::writeArgumentNames(TextStream &s,
                                            const AbstractMetaFunction *func,
                                            Options options) const
 {
@@ -1450,7 +1450,7 @@ void ShibokenGenerator::writeArgumentNames(QTextStream &s,
     }
 }
 
-void ShibokenGenerator::writeFunctionCall(QTextStream &s,
+void ShibokenGenerator::writeFunctionCall(TextStream &s,
                                           const AbstractMetaFunction *func,
                                           Options options) const
 {
@@ -1461,9 +1461,9 @@ void ShibokenGenerator::writeFunctionCall(QTextStream &s,
     s << ')';
 }
 
-void ShibokenGenerator::writeUnusedVariableCast(QTextStream &s, const QString &variableName) const
+void ShibokenGenerator::writeUnusedVariableCast(TextStream &s, const QString &variableName) const
 {
-    s << INDENT << "SBK_UNUSED(" << variableName<< ")\n";
+    s << "SBK_UNUSED(" << variableName<< ")\n";
 }
 
 static bool filterFunction(const AbstractMetaFunction *func, bool avoidProtectedHack)
@@ -1565,14 +1565,10 @@ QString ShibokenGenerator::getCodeSnippets(const CodeSnipList &codeSnips,
                                            TypeSystem::Language language) const
 {
     QString code;
-    QTextStream c(&code);
     for (const CodeSnip &snip : codeSnips) {
         if ((position != TypeSystem::CodeSnipPositionAny && snip.position != position) || !(snip.language & language))
             continue;
-        QString snipCode;
-        QTextStream sc(&snipCode);
-        formatCode(sc, snip.code(), INDENT);
-        c << snipCode;
+        code.append(snip.code());
     }
     return code;
 }
@@ -1660,7 +1656,7 @@ ShibokenGenerator::ArgumentVarReplacementList
     return argReplacements;
 }
 
-void ShibokenGenerator::writeClassCodeSnips(QTextStream &s,
+void ShibokenGenerator::writeClassCodeSnips(TextStream &s,
                                        const CodeSnipList &codeSnips,
                                        TypeSystem::CodeSnipPosition position,
                                        TypeSystem::Language language,
@@ -1670,12 +1666,10 @@ void ShibokenGenerator::writeClassCodeSnips(QTextStream &s,
     if (code.isEmpty())
         return;
     processClassCodeSnip(code, context);
-    s << INDENT << "// Begin code injection\n";
-    s << code;
-    s << INDENT << "// End of code injection\n\n";
+    s << "// Begin code injection\n" << code << "// End of code injection\n\n";
 }
 
-void ShibokenGenerator::writeCodeSnips(QTextStream &s,
+void ShibokenGenerator::writeCodeSnips(TextStream &s,
                                        const CodeSnipList &codeSnips,
                                        TypeSystem::CodeSnipPosition position,
                                        TypeSystem::Language language) const
@@ -1684,12 +1678,10 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     if (code.isEmpty())
         return;
     processCodeSnip(code);
-    s << INDENT << "// Begin code injection\n";
-    s << code;
-    s << INDENT << "// End of code injection\n\n";
+    s << "// Begin code injection\n" << code << "// End of code injection\n\n";
 }
 
-void ShibokenGenerator::writeCodeSnips(QTextStream &s,
+void ShibokenGenerator::writeCodeSnips(TextStream &s,
                                        const CodeSnipList &codeSnips,
                                        TypeSystem::CodeSnipPosition position,
                                        TypeSystem::Language language,
@@ -1911,9 +1903,7 @@ void ShibokenGenerator::writeCodeSnips(QTextStream &s,
     replaceTemplateVariables(code, func);
 
     processCodeSnip(code);
-    s << INDENT << "// Begin code injection\n";
-    s << code;
-    s << INDENT << "// End of code injection\n\n";
+    s << "// Begin code injection\n" << code << "// End of code injection\n\n";
 }
 
 // Returns true if the string is an expression,
@@ -1992,7 +1982,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         QString conversion;
         switch (converterVariable) {
             case TypeSystemToCppFunction: {
-                QTextStream c(&conversion);
+                StringStream c(TextStream::Language::Cpp);
                 int end = match.capturedStart();
                 int start = end;
                 while (start > 0 && code.at(start) != QLatin1Char('\n'))
@@ -2010,9 +2000,6 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                     c << getFullTypeName(conversionType) << ' ' << varName;
                     writeMinimalConstructorExpression(c, conversionType);
                     c << ";\n";
-                    Indentor cIndent(INDENT);
-                    Indentation indent(cIndent);
-                    c << cIndent;
                 }
                 c << cpythonToCppConversionFunction(conversionType);
                 QString prefix;
@@ -2025,6 +2012,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 QString arg = getConverterTypeSystemVariableArgument(code, match.capturedEnd());
                 conversionString += arg;
                 c << arg << ", " << prefix << '(' << varName << ')';
+                conversion = c.toString();
                 break;
             }
             case TypeSystemCheckFunction:
@@ -2626,7 +2614,7 @@ bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const OverloadD
            || overloadData.hasArgumentWithDefaultValue();
 }
 
-void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s,
+void ShibokenGenerator::writeMinimalConstructorExpression(TextStream &s,
                                                           const AbstractMetaType &type,
                                                           const QString &defaultCtor) const
 {
@@ -2649,7 +2637,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s,
     }
 }
 
-void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const TypeEntry *type,
+void ShibokenGenerator::writeMinimalConstructorExpression(TextStream &s, const TypeEntry *type,
                                                           const QString &defaultCtor) const
 {
     if (!defaultCtor.isEmpty()) {
@@ -2664,7 +2652,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const 
     } else {
         const QString message = msgCouldNotFindMinimalConstructor(QLatin1String(__FUNCTION__), type->qualifiedCppName());
         qCWarning(lcShiboken()).noquote() << message;
-        s << ";\n#error " << message << Qt::endl;
+        s << ";\n#error " << message << '\n';
     }
 }
 
@@ -2690,16 +2678,14 @@ void ShibokenGenerator::replaceTemplateVariables(QString &code,
     code.replace(QLatin1String("%FUNCTION_NAME"), func->originalName());
 
     if (code.contains(QLatin1String("%ARGUMENT_NAMES"))) {
-        QString str;
-        QTextStream aux_stream(&str);
+        StringStream aux_stream;
         writeArgumentNames(aux_stream, func, Generator::SkipRemovedArguments);
-        code.replace(QLatin1String("%ARGUMENT_NAMES"), str);
+        code.replace(QLatin1String("%ARGUMENT_NAMES"), aux_stream);
     }
 
     if (code.contains(QLatin1String("%ARGUMENTS"))) {
-        QString str;
-        QTextStream aux_stream(&str);
+        StringStream aux_stream;
         writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
-        code.replace(QLatin1String("%ARGUMENTS"), str);
+        code.replace(QLatin1String("%ARGUMENTS"), aux_stream);
     }
 }

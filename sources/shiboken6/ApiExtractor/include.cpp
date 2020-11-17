@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "include.h"
+#include "textstream.h"
 #include <QDebug>
 #include <QDir>
 #include <QTextStream>
@@ -50,6 +51,13 @@ QTextStream& operator<<(QTextStream& out, const Include& include)
 {
     if (include.isValid())
         out << include.toString() << Qt::endl;
+    return out;
+}
+
+TextStream& operator<<(TextStream& out, const Include& include)
+{
+    if (include.isValid())
+        out << include.toString() << '\n';
     return out;
 }
 

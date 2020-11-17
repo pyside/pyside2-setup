@@ -38,6 +38,8 @@ QT_BEGIN_NAMESPACE
 class QTextStream;
 QT_END_NAMESPACE
 
+class TextStream;
+
 class Include
 {
 public:
@@ -86,6 +88,7 @@ public:
 
 QtCompatHashFunctionType qHash(const Include& inc);
 QTextStream& operator<<(QTextStream& out, const Include& include);
+TextStream& operator<<(TextStream& out, const Include& include);
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const Include &i);
 #endif

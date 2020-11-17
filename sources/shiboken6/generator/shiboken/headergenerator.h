@@ -48,20 +48,20 @@ public:
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
-    void generateClass(QTextStream &s, const GeneratorContext &classContext) override;
+    void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:
-    void writeCopyCtor(QTextStream &s, const AbstractMetaClass *metaClass) const;
-    void writeProtectedFieldAccessors(QTextStream &s, const AbstractMetaField &field) const;
-    void writeFunction(QTextStream &s, const AbstractMetaFunction *func);
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaClass *cppClass) const;
-    void writeSbkTypeFunction(QTextStream &s, const AbstractMetaType &metaType) const;
-    void writeTypeIndexValueLine(QTextStream &s, const TypeEntry *typeEntry) const;
-    void writeTypeIndexValueLines(QTextStream &s, const AbstractMetaClass *metaClass) const;
-    void writeProtectedEnumSurrogate(QTextStream &s, const AbstractMetaEnum &cppEnum) const;
-    void writeInheritedOverloads(QTextStream &s) const;
+    void writeCopyCtor(TextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeProtectedFieldAccessors(TextStream &s, const AbstractMetaField &field) const;
+    void writeFunction(TextStream &s, const AbstractMetaFunction *func);
+    void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
+    void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) const;
+    void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) const;
+    void writeTypeIndexValueLine(TextStream &s, const TypeEntry *typeEntry) const;
+    void writeTypeIndexValueLines(TextStream &s, const AbstractMetaClass *metaClass) const;
+    void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const;
+    void writeInheritedOverloads(TextStream &s) const;
 
     QSet<const AbstractMetaFunction *> m_inheritedOverloads;
 };

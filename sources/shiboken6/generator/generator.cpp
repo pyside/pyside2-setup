@@ -527,18 +527,6 @@ void verifyDirectoryFor(const QString &file)
     }
 }
 
-QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor)
-{
-    const auto lines= QStringView{code}.split(QLatin1Char('\n'));
-    for (const auto &line : lines) {
-        // Do not indent preprocessor lines
-        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#')))
-            s << indentor;
-        s << line << '\n';
-    }
-    return s;
-}
-
 AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry *type) const
 {
     if (type->isValue()) {

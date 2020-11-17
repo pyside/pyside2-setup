@@ -72,7 +72,7 @@ private:
     Indentor &indentor;
 };
 
-using Indentation = IndentationBase<4>;
+using Indentation4 = IndentationBase<4>;
 
 template <int tabWidth>
 inline QTextStream &operator <<(QTextStream &s, const IndentorBase<tabWidth> &indentor)

@@ -33,6 +33,7 @@
 #include "testutil.h"
 #include <abstractmetalang.h>
 #include <modifications.h>
+#include <textstream.h>
 #include <typesystem.h>
 
 void TestCodeInjections::testReadFile_data()
@@ -127,6 +128,34 @@ void TestCodeInjections::testInjectWithInvalidApiVersion()
     QCOMPARE(classA->typeEntry()->codeSnips().count(), 0);
 }
 
+void TestCodeInjections::testTextStream()
+{
+    StringStream str(TextStream::Language::Cpp);
+    str << "void foo(int a, int b) {\n";
+    {
+        Indentation i(str);
+        str << "if (a == b)\n" << indent << "return a;\n" << outdent
+            << "#if Q_OS_WIN\nprint()\n#endif\nreturn a + b;\n";
+    }
+    str << "}\n\n// A table\n|"
+        << AlignedField("bla", 40, QTextStream::AlignRight) << "|\n|"
+        << AlignedField("bla", 40, QTextStream::AlignLeft) << "|\n";
 
+static const char expected[] = R"(void foo(int a, int b) {
+    if (a == b)
+        return a;
+#if Q_OS_WIN
+    print()
+#endif
+    return a + b;
+}
+
+// A table
+|                                     bla|
+|bla                                     |
+)";
+
+    QCOMPARE(str.toString(), QLatin1String(expected));
+}
 
 QTEST_APPLESS_MAIN(TestCodeInjections)

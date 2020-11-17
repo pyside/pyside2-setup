@@ -241,7 +241,7 @@ protected:
     bool shouldGenerate(const AbstractMetaClass *) const override;
     QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
-    void generateClass(QTextStream &s, const GeneratorContext &classContext) override;
+    void generateClass(TextStream &ts, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:

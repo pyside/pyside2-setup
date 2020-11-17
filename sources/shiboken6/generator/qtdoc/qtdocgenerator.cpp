@@ -32,6 +32,7 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include "indentor.h"
 #include <messages.h>
 #include <modifications.h>
 #include <propertyspec.h>
@@ -62,6 +63,18 @@ static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
 static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
 
 static inline QString none() { return QStringLiteral("None"); }
+
+static QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor)
+{
+    const auto lines= QStringView{code}.split(QLatin1Char('\n'));
+    for (const auto &line : lines) {
+        // Do not indent preprocessor lines
+        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#')))
+            s << indentor;
+        s << line << '\n';
+    }
+    return s;
+}
 
 static void stripPythonQualifiers(QString *s)
 {
@@ -466,7 +479,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
 QString QtXmlToSphinx::transform(const QString& doc)
 {
     Q_ASSERT(m_buffers.isEmpty());
-    Indentation indentation(INDENT);
+    Indentation4 indentation(INDENT);
     if (doc.trimmed().isEmpty())
         return doc;
 
@@ -809,7 +822,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         if (!consecutiveSnippet)
             m_output << INDENT << "::\n\n";
 
-        Indentation indentation(INDENT);
+        Indentation4 indentation(INDENT);
         const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
         if (code.isEmpty())
             m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>\n";
@@ -830,7 +843,7 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
         } else {
             m_output << INDENT << "::\n\n";
         }
-        Indentation indentation(INDENT);
+        Indentation4 indentation(INDENT);
         pushOutputBuffer();
         m_output << INDENT;
         int indent = reader.attributes().value(QLatin1String("indent")).toInt();
@@ -1298,7 +1311,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
         m_output << INDENT << "::\n\n";
-        Indentation indentation(INDENT);
+        Indentation4 indentation(INDENT);
         if (code.isEmpty())
             m_output << INDENT << "<Code snippet \"" << location << "\" not found>\n";
         else
@@ -1323,7 +1336,7 @@ bool QtXmlToSphinx::convertToRst(const QtDocGenerator *generator,
 
     FileOut targetFile(targetFileName);
     QtXmlToSphinx x(generator, doc, context);
-    targetFile.stream << x;
+    targetFile.stream.textStream() << x;
     return targetFile.done(errorMessage) != FileOut::Failure;
 }
 
@@ -1616,8 +1629,9 @@ static bool extractBrief(Documentation *sourceDoc, Documentation *brief)
     return true;
 }
 
-void QtDocGenerator::generateClass(QTextStream &s, const GeneratorContext &classContext)
+void QtDocGenerator::generateClass(TextStream &ts, const GeneratorContext &classContext)
 {
+    QTextStream &s = ts.textStream();
     const AbstractMetaClass *metaClass = classContext.metaClass();
     qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
@@ -1754,7 +1768,7 @@ void QtDocGenerator::writeFunctionBlock(QTextStream& s, const QString& title, QS
         std::sort(functions.begin(), functions.end());
 
         s << ".. container:: function_list\n\n";
-        Indentation indentation(INDENT);
+        Indentation4 indentation(INDENT);
         for (const QString &func : qAsConst(functions))
             s << INDENT << '*' << ' ' << func << Qt::endl;
 
@@ -1831,7 +1845,7 @@ void QtDocGenerator::writeConstructors(QTextStream& s, const AbstractMetaClass* 
     s << Qt::endl;
 
     for (auto it = arg_map.cbegin(), end = arg_map.cend(); it != end; ++it) {
-        Indentation indentation(INDENT, 2);
+        Indentation4 indentation(INDENT, 2);
         writeParameterType(s, cppClass, it.value());
     }
 
@@ -1894,7 +1908,7 @@ void QtDocGenerator::writeDocSnips(QTextStream &s,
                                  TypeSystem::CodeSnipPosition position,
                                  TypeSystem::Language language)
 {
-    Indentation indentation(INDENT);
+    Indentation4 indentation(INDENT);
     QStringList invalidStrings;
     const static QString startMarkup = QLatin1String("[sphinx-begin]");
     const static QString endMarkup = QLatin1String("[sphinx-end]");
@@ -1954,7 +1968,7 @@ bool QtDocGenerator::writeInjectDocumentation(QTextStream& s,
                                             const AbstractMetaClass* cppClass,
                                             const AbstractMetaFunction* func)
 {
-    Indentation indentation(INDENT);
+    Indentation4 indentation(INDENT);
     bool didSomething = false;
 
     const DocModificationList &mods = cppClass->typeEntry()->docModifications();
@@ -2111,7 +2125,7 @@ void QtDocGenerator::writeFunction(QTextStream& s, const AbstractMetaClass* cppC
     s << functionSignature(cppClass, func);
 
     {
-        Indentation indentation(INDENT);
+        Indentation4 indentation(INDENT);
         if (!indexed)
             s << QLatin1Char('\n') << INDENT << QLatin1String(":noindex:");
         s << "\n\n";
@@ -2209,7 +2223,7 @@ void QtDocGenerator::writeModuleDocumentation()
         key.replace(QLatin1Char('.'), QLatin1Char('/'));
         QString outputDir = outputDirectory() + QLatin1Char('/') + key;
         FileOut output(outputDir + QLatin1String("/index.rst"));
-        QTextStream& s = output.stream;
+        QTextStream& s = output.stream.textStream();
 
         s << ".. module:: " << it.key() << Qt::endl << Qt::endl;
 
@@ -2218,7 +2232,7 @@ void QtDocGenerator::writeModuleDocumentation()
         s << Pad('*', title.length()) << Qt::endl << Qt::endl;
 
         /* Avoid showing "Detailed Description for *every* class in toc tree */
-        Indentation indentation(INDENT);
+        Indentation4 indentation(INDENT);
         // Store the it.key() in a QString so that it can be stripped off unwanted
         // information when neeeded. For example, the RST files in the extras directory
         // doesn't include the PySide# prefix in their names.

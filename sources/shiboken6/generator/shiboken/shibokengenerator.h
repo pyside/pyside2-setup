@@ -55,9 +55,10 @@ class DocParser;
 class CodeSnip;
 class QPropertySpec;
 class OverloadData;
+class TextStream;
 struct GeneratorClassInfoCacheEntry;
 
-QT_FORWARD_DECLARE_CLASS(QTextStream)
+QT_FORWARD_DECLARE_CLASS(TextStream)
 
 /**
  * Abstract generator that contains common methods used in CppGenerator and HeaderGenerator.
@@ -113,17 +114,17 @@ protected:
                                                                      QSet<QString> *seen);
 
     /// Write user's custom code snippets at class or module level.
-    void writeClassCodeSnips(QTextStream &s,
+    void writeClassCodeSnips(TextStream &s,
                              const QVector<CodeSnip> & codeSnips,
                              TypeSystem::CodeSnipPosition position,
                              TypeSystem::Language language,
                              const GeneratorContext &context) const;
-    void writeCodeSnips(QTextStream &s,
+    void writeCodeSnips(TextStream &s,
                         const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language) const;
     /// Write user's custom code snippets at function level.
-    void writeCodeSnips(QTextStream &s,
+    void writeCodeSnips(TextStream &s,
                         const QVector<CodeSnip> & codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
@@ -165,11 +166,11 @@ protected:
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
     AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass) const;
 
-    void writeToPythonConversion(QTextStream &s, const AbstractMetaType &type,
+    void writeToPythonConversion(TextStream &s, const AbstractMetaType &type,
                                  const AbstractMetaClass *context, const QString &argumentName) const;
-    void writeToCppConversion(QTextStream &s, const AbstractMetaType &type, const AbstractMetaClass *context,
+    void writeToCppConversion(TextStream &s, const AbstractMetaType &type, const AbstractMetaClass *context,
                               const QString &inArgName, const QString &outArgName) const;
-    void writeToCppConversion(QTextStream &s, const AbstractMetaClass *metaClass, const QString &inArgName,
+    void writeToCppConversion(TextStream &s, const AbstractMetaClass *metaClass, const QString &inArgName,
                               const QString &outArgName) const;
 
     /// Returns true if the argument is a pointer that rejects nullptr values.
@@ -338,9 +339,9 @@ protected:
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
     AbstractMetaType buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass) const;
 
-    void writeMinimalConstructorExpression(QTextStream &s, const AbstractMetaType &type,
+    void writeMinimalConstructorExpression(TextStream &s, const AbstractMetaType &type,
                                            const QString &defaultCtor = QString()) const;
-    void writeMinimalConstructorExpression(QTextStream &s, const TypeEntry *type,
+    void writeMinimalConstructorExpression(TextStream &s, const TypeEntry *type,
                                            const QString &defaultCtor = QString()) const;
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
@@ -353,11 +354,11 @@ protected:
     /// Initializes a list of Python known type names.
     static void initKnownPythonTypes();
 
-    void writeFunctionCall(QTextStream &s,
+    void writeFunctionCall(TextStream &s,
                            const AbstractMetaFunction *metaFunc,
                            Options options = NoOption) const;
 
-    void writeUnusedVariableCast(QTextStream &s, const QString &variableName) const;
+    void writeUnusedVariableCast(TextStream &s, const QString &variableName) const;
 
     AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *metaClass) const;
 
@@ -372,8 +373,6 @@ protected:
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData &overloadData);
-
-    Indentor INDENT;
 
     const QRegularExpression &convertToCppRegEx() const
     { return m_typeSystemConvRegEx[TypeSystemToCppFunction]; }
@@ -424,7 +423,7 @@ private:
      *   \param argument metaargument information to be parsed.
      *   \param options some extra options.
      */
-    void writeArgument(QTextStream &s,
+    void writeArgument(TextStream &s,
                        const AbstractMetaFunction *func,
                        const AbstractMetaArgument &argument,
                        Options options = NoOption) const;
@@ -491,11 +490,11 @@ private:
     /// \param func the pointer to metafunction information
     /// \param count the number of function arguments
     /// \param options some extra options used during the parser
-    void writeArgumentNames(QTextStream &s,
+    void writeArgumentNames(TextStream &s,
                             const AbstractMetaFunction *func,
                             Options options = NoOption) const;
 
-    void writeFunctionArguments(QTextStream &s,
+    void writeFunctionArguments(TextStream &s,
                                 const AbstractMetaFunction *func,
                                 Options options = NoOption) const;
 

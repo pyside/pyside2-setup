@@ -29,7 +29,6 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include "indentor.h"
 #include <abstractmetatype.h>
 #include <typedatabase_typedefs.h>
 #include <dependency.h>
@@ -50,6 +49,7 @@ class ComplexTypeEntry;
 class AbstractMetaType;
 class EnumTypeEntry;
 class FlagsTypeEntry;
+class TextStream;
 
 QT_BEGIN_NAMESPACE
 class QFile;
@@ -59,7 +59,6 @@ QT_END_NAMESPACE
 class PrimitiveTypeEntry;
 class ContainerTypeEntry;
 
-QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor);
 void verifyDirectoryFor(const QString &file);
 
 QString getClassTargetFullName(const AbstractMetaClass *metaClass, bool includePackageName = true);
@@ -373,7 +372,7 @@ protected:
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
-    virtual void generateClass(QTextStream &s, const GeneratorContext &classContext) = 0;
+    virtual void generateClass(TextStream &s, const GeneratorContext &classContext) = 0;
     virtual bool finishGeneration() = 0;
 
     /**

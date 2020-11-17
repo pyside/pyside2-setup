@@ -30,7 +30,7 @@
 #define FILEOUT_H
 
 #include <QtCore/QObject>
-#include <QtCore/QTextStream>
+#include "textstream.h"
 
 QT_FORWARD_DECLARE_CLASS(QFile)
 
@@ -57,7 +57,7 @@ public:
 
     static void touchFile(const QString &filePath);
 
-    QTextStream stream;
+    TextStream stream;
 
     static bool dummy;
     static bool diff;

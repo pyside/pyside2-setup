@@ -29,6 +29,7 @@ typesystem.cpp
 typesystemparser.cpp
 include.cpp
 typedatabase.cpp
+textstream.cpp
 # Clang
 clangparser/compilersupport.cpp
 clangparser/clangparser.cpp
