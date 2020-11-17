@@ -39,7 +39,7 @@ class DocModification;
 
 struct AddedFunction;
 struct FieldModification;
-struct FunctionModification;
+class FunctionModification;
 class TypeEntry;
 
 using AddedFunctionPtr = QSharedPointer<AddedFunction>;
