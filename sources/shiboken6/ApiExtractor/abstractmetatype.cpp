@@ -730,6 +730,20 @@ bool AbstractMetaType::shouldDereferencePointer() const
         && !isPointer();
 }
 
+bool AbstractMetaType::isCppIntegralPrimitive() const
+{
+    return  d->m_typeEntry->isCppIntegralPrimitive();
+}
+
+bool AbstractMetaType::isExtendedCppPrimitive() const
+{
+    if (isCString() || isVoidPointer())
+        return true;
+    if (!d->m_indirections.isEmpty())
+        return false;
+    return d->m_typeEntry->isExtendedCppPrimitive();
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {

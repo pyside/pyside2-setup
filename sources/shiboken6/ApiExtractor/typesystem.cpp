@@ -504,6 +504,31 @@ bool TypeEntry::isWrapperType() const
   return isObject() || isValue() || isSmartPointer();
 }
 
+bool TypeEntry::isCppIntegralPrimitive() const
+{
+    if (!isCppPrimitive())
+        return false;
+    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(this);
+    if (trueType->basicReferencedTypeEntry())
+        trueType = trueType->basicReferencedTypeEntry();
+    QString typeName = trueType->qualifiedCppName();
+    return !typeName.contains(u"double")
+        && !typeName.contains(u"float")
+        && !typeName.contains(u"wchar");
+}
+
+bool TypeEntry::isExtendedCppPrimitive() const
+{
+    if (isCppPrimitive())
+        return true;
+    if (!isPrimitive())
+        return false;
+    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(this);
+    if (trueType->basicReferencedTypeEntry())
+        trueType = trueType->basicReferencedTypeEntry();
+    return trueType->qualifiedCppName() == u"std::string";
+}
+
 const TypeEntryPrivate *TypeEntry::d_func() const
 {
     return m_d.data();

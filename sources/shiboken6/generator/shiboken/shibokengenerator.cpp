@@ -882,7 +882,7 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType &type) const
 
 QString ShibokenGenerator::converterObject(const TypeEntry *type) const
 {
-    if (isCppPrimitive(type))
+    if (type->isExtendedCppPrimitive())
         return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()").arg(type->qualifiedCppName());
     if (type->isWrapperType() || type->isEnum() || type->isFlags())
         return QString::fromLatin1("*PepType_SGTP(%1)->converter").arg(cpythonTypeNameExt(type));
@@ -1057,27 +1057,6 @@ bool ShibokenGenerator::isValueTypeWithCopyConstructorOnly(const AbstractMetaTyp
        && isValueTypeWithCopyConstructorOnly(type.typeEntry());
 }
 
-bool ShibokenGenerator::isCppPrimitive(const TypeEntry *type)
-{
-    if (type->isCppPrimitive())
-        return true;
-    if (!type->isPrimitive())
-        return false;
-    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(type);
-    if (trueType->basicReferencedTypeEntry())
-        trueType = trueType->basicReferencedTypeEntry();
-    return trueType->qualifiedCppName() == QLatin1String("std::string");
-}
-
-bool ShibokenGenerator::isCppPrimitive(const AbstractMetaType &type)
-{
-    if (type.isCString() || type.isVoidPointer())
-        return true;
-    if (type.indirections() != 0)
-        return false;
-    return isCppPrimitive(type.typeEntry());
-}
-
 bool ShibokenGenerator::isNullPtr(const QString &value)
 {
     return value == QLatin1String("0") || value == QLatin1String("nullptr")
@@ -1095,7 +1074,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType,
             metaType = customCheckResult.type.value();
     }
 
-    if (isCppPrimitive(metaType)) {
+    if (metaType.isExtendedCppPrimitive()) {
         if (metaType.isCString())
             return QLatin1String("Shiboken::String::check");
         if (metaType.isVoidPointer())
@@ -1160,7 +1139,7 @@ QString ShibokenGenerator::cpythonCheckFunction(const TypeEntry *type, bool gene
 
     if (type->isEnum() || type->isFlags() || type->isWrapperType())
         return QString::fromLatin1("SbkObject_TypeCheck(%1, ").arg(cpythonTypeNameExt(type));
-    if (isCppPrimitive(type)) {
+    if (type->isExtendedCppPrimitive()) {
         return pythonPrimitiveTypeName(static_cast<const PrimitiveTypeEntry *>(type))
                                        + QLatin1String("_Check");
     }
@@ -2654,7 +2633,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s,
          s << " = " << defaultCtor;
          return;
     }
-    if (isCppPrimitive(type) || type.isSmartPointer())
+    if (type.isExtendedCppPrimitive() || type.isSmartPointer())
         return;
     QString errorMessage;
     const auto ctor = minimalConstructor(type, &errorMessage);
@@ -2676,7 +2655,7 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const 
          s << " = " << defaultCtor;
          return;
     }
-    if (isCppPrimitive(type))
+    if (type->isExtendedCppPrimitive())
         return;
     const auto ctor = minimalConstructor(type);
     if (ctor.has_value()) {
@@ -2686,23 +2665,6 @@ void ShibokenGenerator::writeMinimalConstructorExpression(QTextStream &s, const 
         qCWarning(lcShiboken()).noquote() << message;
         s << ";\n#error " << message << Qt::endl;
     }
-}
-
-bool ShibokenGenerator::isCppIntegralPrimitive(const TypeEntry *type)
-{
-    if (!type->isCppPrimitive())
-        return false;
-    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(type);
-    if (trueType->basicReferencedTypeEntry())
-        trueType = trueType->basicReferencedTypeEntry();
-    QString typeName = trueType->qualifiedCppName();
-    return !typeName.contains(QLatin1String("double"))
-        && !typeName.contains(QLatin1String("float"))
-        && !typeName.contains(QLatin1String("wchar"));
-}
-bool ShibokenGenerator::isCppIntegralPrimitive(const AbstractMetaType &type)
-{
-    return isCppIntegralPrimitive(type.typeEntry());
 }
 
 QString ShibokenGenerator::pythonArgsAt(int i)

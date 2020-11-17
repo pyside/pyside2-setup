@@ -228,14 +228,6 @@ protected:
     bool isValueTypeWithCopyConstructorOnly(const TypeEntry *type) const;
     bool isValueTypeWithCopyConstructorOnly(const AbstractMetaType &type) const;
 
-    /// Returns true if the type is a C++ primitive, a void*, a const char*, or a std::string.
-    static bool isCppPrimitive(const TypeEntry *type);
-    static bool isCppPrimitive(const AbstractMetaType &type);
-
-    /// Returns true if the type is a C++ integral primitive, i.e. bool, char, int, long, and their unsigned counterparts.
-    static bool isCppIntegralPrimitive(const TypeEntry *type);
-    static bool isCppIntegralPrimitive(const AbstractMetaType &type);
-
     static bool isNullPtr(const QString &value);
 
     QString converterObject(const AbstractMetaType &type) const;

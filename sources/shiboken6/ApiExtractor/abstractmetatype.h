@@ -213,6 +213,12 @@ public:
     bool isPointerToWrapperType() const;
     /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
     bool shouldDereferencePointer() const;
+    /// Returns true if the type is a C++ integral primitive,
+    /// i.e. bool, char, int, long, and their unsigned counterparts.
+    bool isCppIntegralPrimitive() const;
+    /// Returns true if the type is an extended C++ primitive, a void*,
+    /// a const char*, or a std::string (cf isCppPrimitive()).
+    bool isExtendedCppPrimitive() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const;

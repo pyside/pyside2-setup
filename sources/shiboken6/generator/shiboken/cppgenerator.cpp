@@ -1579,7 +1579,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
             }
 
             if (sourceType.isUserPrimitive()
-                || isCppPrimitive(sourceType)
+                || sourceType.isExtendedCppPrimitive()
                 || sourceType.typeEntry()->isContainer()
                 || sourceType.typeEntry()->isEnum()
                 || sourceType.typeEntry()->isFlags()) {
@@ -2531,11 +2531,11 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
 
     bool treatAsPointer = isValueTypeWithCopyConstructorOnly(type);
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
-        && !type.isUserPrimitive() && !isCppPrimitive(type);
+        && !type.isUserPrimitive() && !type.isExtendedCppPrimitive();
     bool isNotContainerEnumOrFlags = !typeEntry->isContainer() && !typeEntry->isEnum() && !typeEntry->isFlags();
     bool mayHaveImplicitConversion = type.referenceType() == LValueReference
                                      && !type.isUserPrimitive()
-                                     && !isCppPrimitive(type)
+                                     && !type.isExtendedCppPrimitive()
                                      && isNotContainerEnumOrFlags
                                      && !(treatAsPointer || isPointerOrObjectType);
 
@@ -4589,7 +4589,7 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
             cppField.append(QLatin1Char(')'));
         }
     }
-    if (isCppIntegralPrimitive(fieldType) || fieldType.isEnum()) {
+    if (fieldType.isCppIntegralPrimitive() || fieldType.isEnum()) {
         s << INDENT << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ";\n";
         cppField = QLatin1String("cppOut_local");
     } else if (avoidProtectedHack() && metaField.isProtected()) {
@@ -4718,7 +4718,8 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
         s << INDENT << "static_cast<" << context.wrapperName()
             << " *>(" << CPP_SELF_VAR << ")->" << protectedFieldSetterName(metaField)
             << "(cppOut)";
-    } else if (isCppIntegralPrimitive(fieldType) || fieldType.typeEntry()->isEnum() || fieldType.typeEntry()->isFlags()) {
+    } else if (fieldType.isCppIntegralPrimitive() || fieldType.typeEntry()->isEnum()
+               || fieldType.typeEntry()->isFlags()) {
         s << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local = " << cppField << ";\n";
         s << INDENT << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);\n";
         s << INDENT << cppField << " = cppOut_local";

@@ -263,6 +263,12 @@ public:
     /// Returns true if the type passed has a Python wrapper for it.
     /// Although namespace has a Python wrapper, it's not considered a type.
     bool isWrapperType() const;
+    /// Returns true if the type is a C++ integral primitive,
+    /// i.e. bool, char, int, long, and their unsigned counterparts.
+    bool isCppIntegralPrimitive() const;
+    /// Returns true if the type is an extended C++ primitive, a void*,
+    /// a const char*, or a std::string (cf isCppPrimitive()).
+    bool isExtendedCppPrimitive() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     virtual void formatDebug(QDebug &d) const;
