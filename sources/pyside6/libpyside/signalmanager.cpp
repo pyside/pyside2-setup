@@ -76,7 +76,7 @@
 #include "globalreceiverv2.h"
 
 namespace {
-    static PyObject *metaObjectAttr = 0;
+    static PyObject *metaObjectAttr = nullptr;
 
     static int callMethod(QObject *object, int id, void **args);
     static PyObject *parseArguments(const QList< QByteArray >& paramTypes, void **args);
@@ -84,7 +84,7 @@ namespace {
 
     static void destroyMetaObject(PyObject *obj)
     {
-        void *ptr = PyCapsule_GetPointer(obj, 0);
+        void *ptr = PyCapsule_GetPointer(obj, nullptr);
         auto meta = reinterpret_cast<PySide::MetaObjectBuilder *>(ptr);
         SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
         if (wrapper)
@@ -157,7 +157,7 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
         return out;
     }
 
-    static PyObject *reduce_func  = 0;
+    static PyObject *reduce_func = nullptr;
 
     Shiboken::GilState gil;
     if (!reduce_func) {
@@ -188,7 +188,7 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
         return in;
     }
 
-    static PyObject *eval_func  = 0;
+    static PyObject *eval_func = nullptr;
 
     Shiboken::GilState gil;
     if (!eval_func) {
@@ -555,7 +555,7 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
             // Create a instance meta object
             if (!dmo) {
                 dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
-                PyObject *pyDmo = PyCapsule_New(dmo, 0, destroyMetaObject);
+                PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
                 PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
                 Py_DECREF(pyDmo);
             }

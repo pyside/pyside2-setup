@@ -155,7 +155,8 @@ PYSIDE_API QString getCallbackSignature(const char *signal, QObject *receiver, P
  * @return  Return true if this is a Qt Signal, otherwise return false
  * @todo    replace return type by QList<QByteArray>
  **/
-QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit = 0);
+QStringList getArgsFromSignature(const char *signature,
+                                 bool *isShortCircuit = nullptr);
 
 } // namespace Signal
 } // namespace PySide

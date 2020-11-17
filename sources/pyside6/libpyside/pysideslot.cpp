@@ -157,7 +157,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
             pySlotName = String::fromCString(PYSIDE_SLOT_LIST_ATTR);
 
         PyObject *pySignature = String::fromCString(signature);
-        PyObject *signatureList = 0;
+        PyObject *signatureList = nullptr;
         if (PyObject_HasAttr(callback, pySlotName)) {
             signatureList = PyObject_GetAttr(callback, pySlotName);
         } else {
