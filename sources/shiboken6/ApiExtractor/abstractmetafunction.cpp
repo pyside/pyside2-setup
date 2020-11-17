@@ -1198,6 +1198,15 @@ bool AbstractMetaFunction::injectedCodeUsesArgument(int argumentIndex) const
                              }, TypeSystem::CodeSnipPositionAny);
 }
 
+bool AbstractMetaFunction::isVisibilityModifiedToPrivate() const
+{
+    for (const auto &mod : modifications()) {
+        if (mod.modifiers().testFlag(Modification::Private))
+            return true;
+    }
+    return false;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaFunction::formatDebugBrief(QDebug &debug) const
 {

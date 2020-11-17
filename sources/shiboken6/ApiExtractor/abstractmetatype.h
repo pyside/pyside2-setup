@@ -201,6 +201,18 @@ public:
     bool isCString() const;
     /// Returns true if the type is a void pointer.
     bool isVoidPointer() const;
+    /// Returns true if the type is a primitive but not a C++ primitive.
+    bool isUserPrimitive() const;
+    /// Returns true if it is an Object Type used as a value.
+    bool isObjectTypeUsedAsValueType() const;
+    /// Returns true if the type passed has a Python wrapper for it.
+    /// Although namespace has a Python wrapper, it's not considered a type.
+    bool isWrapperType() const;
+    /// Checks if the type is an Object/QObject or pointer to Value Type.
+    /// In other words, tells if the type is "T*" and T has a Python wrapper.
+    bool isPointerToWrapperType() const;
+    /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
+    bool shouldDereferencePointer() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const;

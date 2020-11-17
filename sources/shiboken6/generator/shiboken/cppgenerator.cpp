@@ -479,7 +479,7 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
         writeCacheResetNative(s, classContext);
         for (const AbstractMetaFunction *func : funcs) {
             const bool notAbstract = !func->isAbstract();
-            if ((func->isPrivate() && notAbstract && !visibilityModifiedToPrivate(func))
+            if ((func->isPrivate() && notAbstract && !func->isVisibilityModifiedToPrivate())
                 || (func->isModifiedRemoved() && notAbstract))
                 continue;
             if (func->functionType() == AbstractMetaFunction::ConstructorFunction && !func->isUserAdded())
@@ -1173,7 +1173,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
                                    isNumber(func->type().typeEntry()), func->typeReplaced(0));
                     s << ";\n";
                     s << INDENT << "if (!typeIsValid";
-                    if (isPointerToWrapperType(func->type()))
+                    if (func->type().isPointerToWrapperType())
                         s << " && " << PYTHON_RETURN_VAR << " != Py_None";
                     s << ") {\n";
                     {
@@ -1556,18 +1556,19 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
                 continue;
             const AbstractMetaType sourceType = conv->arguments().constFirst().type();
             typeCheck = cpythonCheckFunction(sourceType);
-            bool isUserPrimitiveWithoutTargetLangName = isUserPrimitive(sourceType)
+            bool isUserPrimitiveWithoutTargetLangName = sourceType.isUserPrimitive()
                                                         && sourceType.typeEntry()->targetLangApiName() == sourceType.typeEntry()->name();
-            if (!isWrapperType(sourceType)
+            if (!sourceType.isWrapperType()
                 && !isUserPrimitiveWithoutTargetLangName
                 && !sourceType.typeEntry()->isEnum()
                 && !sourceType.typeEntry()->isFlags()
                 && !sourceType.typeEntry()->isContainer()) {
                 typeCheck += QLatin1Char('(');
             }
-            if (isWrapperType(sourceType)) {
+            if (sourceType.isWrapperType()) {
                 typeCheck += QLatin1String("pyIn)");
-                toCppConv = (sourceType.referenceType() == LValueReference || !isPointerToWrapperType(sourceType))
+                toCppConv = (sourceType.referenceType() == LValueReference
+                             || !sourceType.isPointerToWrapperType())
                     ? QLatin1String(" *") : QString();
                 toCppConv += cpythonWrapperCPtr(sourceType.typeEntry(), QLatin1String("pyIn"));
             } else if (typeCheck.contains(QLatin1String("%in"))) {
@@ -1577,7 +1578,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
                 typeCheck += QLatin1String("pyIn)");
             }
 
-            if (isUserPrimitive(sourceType)
+            if (sourceType.isUserPrimitive()
                 || isCppPrimitive(sourceType)
                 || sourceType.typeEntry()->isContainer()
                 || sourceType.typeEntry()->isEnum()
@@ -1589,7 +1590,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
                 writeToCppConversion(pc, sourceType, nullptr, QLatin1String("pyIn"), QLatin1String("cppIn"));
                 pc << ';';
                 toCppConv.append(QLatin1String("cppIn"));
-            } else if (!isWrapperType(sourceType)) {
+            } else if (!sourceType.isWrapperType()) {
                 QTextStream tcc(&toCppConv);
                 writeToCppConversion(tcc, sourceType, metaClass, QLatin1String("pyIn"), QLatin1String("/*BOZO-1061*/"));
             }
@@ -2464,7 +2465,7 @@ void CppGenerator::writeArgumentConversion(QTextStream &s,
 {
     if (argType.typeEntry()->isCustom() || argType.typeEntry()->isVarargs())
         return;
-    if (isWrapperType(argType))
+    if (argType.isWrapperType())
         writeInvalidPyObjectCheck(s, pyArgName);
     writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
     if (castArgumentAsUnused)
@@ -2530,10 +2531,10 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
 
     bool treatAsPointer = isValueTypeWithCopyConstructorOnly(type);
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
-        && !isUserPrimitive(type) && !isCppPrimitive(type);
+        && !type.isUserPrimitive() && !isCppPrimitive(type);
     bool isNotContainerEnumOrFlags = !typeEntry->isContainer() && !typeEntry->isEnum() && !typeEntry->isFlags();
     bool mayHaveImplicitConversion = type.referenceType() == LValueReference
-                                     && !isUserPrimitive(type)
+                                     && !type.isUserPrimitive()
                                      && !isCppPrimitive(type)
                                      && isNotContainerEnumOrFlags
                                      && !(treatAsPointer || isPointerOrObjectType);
@@ -2585,7 +2586,7 @@ void CppGenerator::writePythonToCppTypeConversion(QTextStream &s,
                 s << "0";
             else
                 s << "(long)" << defaultValue;
-        } else if (isUserPrimitive(type) || typeEntry->isEnum() || typeEntry->isFlags()) {
+        } else if (type.isUserPrimitive() || typeEntry->isEnum() || typeEntry->isFlags()) {
             writeMinimalConstructorExpression(s, typeEntry, defaultValue);
         } else if (!type.isContainer() && !type.isSmartPointer()) {
             writeMinimalConstructorExpression(s, type, defaultValue);
@@ -3445,9 +3446,9 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                 } else {
                     int idx = arg.argumentIndex() - removedArgs;
                     bool deRef = isValueTypeWithCopyConstructorOnly(arg.type())
-                                 || isObjectTypeUsedAsValueType(arg.type())
+                                 || arg.type().isObjectTypeUsedAsValueType()
                                  || (arg.type().referenceType() == LValueReference
-                                     && isWrapperType(arg.type()) && !arg.type().isPointer());
+                                     && arg.type().isWrapperType() && !arg.type().isPointer());
                     if (hasConversionRule) {
                         userArgs.append(arg.name() + QLatin1String(CONV_RULE_OUT_VAR_SUFFIX));
                     } else {
@@ -3497,7 +3498,8 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             firstArg += QLatin1String(CPP_SELF_VAR);
             firstArg += QLatin1Char(')');
             QString secondArg = QLatin1String(CPP_ARG0);
-            if (!func->isUnaryOperator() && shouldDereferenceArgumentPointer(func->arguments().constFirst())) {
+            if (!func->isUnaryOperator()
+                && func->arguments().constFirst().type().shouldDereferencePointer()) {
                 secondArg.prepend(QLatin1String("(*"));
                 secondArg.append(QLatin1Char(')'));
             }
@@ -3674,7 +3676,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
                 }
                 if (writeReturnType) {
                     s << func->type().cppSignature();
-                    if (isObjectTypeUsedAsValueType(func->type())) {
+                    if (func->type().isObjectTypeUsedAsValueType()) {
                         s << '*';
                         methodCall.prepend(QString::fromLatin1("new %1(").arg(func->type().typeEntry()->qualifiedCppName()));
                         methodCall.append(QLatin1Char(')'));
@@ -3697,7 +3699,7 @@ void CppGenerator::writeMethodCall(QTextStream &s, const AbstractMetaFunction *f
             } else if (!isCtor && !func->isInplaceOperator() && !func->isVoid()
                 && !func->injectedCodeHasReturnValueAttribution(TypeSystem::TargetLangCode)) {
                 s << INDENT << PYTHON_RETURN_VAR << " = ";
-                if (isObjectTypeUsedAsValueType(func->type())) {
+                if (func->type().isObjectTypeUsedAsValueType()) {
                     s << "Shiboken::Object::newObject(reinterpret_cast<SbkObjectType *>(" << cpythonTypeNameExt(func->type().typeEntry())
                         << "), " << CPP_RETURN_VAR << ", true, true)";
                 } else {
@@ -4572,7 +4574,7 @@ void CppGenerator::writeGetterFunction(QTextStream &s,
 
     AbstractMetaType fieldType = metaField.type();
     // Force use of pointer to return internal variable memory
-    bool newWrapperSameObject = !fieldType.isConstant() && isWrapperType(fieldType)
+    bool newWrapperSameObject = !fieldType.isConstant() && fieldType.isWrapperType()
             && !fieldType.isPointer();
 
     QString cppField;
@@ -4730,7 +4732,7 @@ void CppGenerator::writeSetterFunction(QTextStream &s,
     }
     s << ";\n" << Qt::endl;
 
-    if (isPointerToWrapperType(fieldType)) {
+    if (fieldType.isPointerToWrapperType()) {
         s << INDENT << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(self), \"";
         s << metaField.name() << "\", pyIn);\n";
     }
@@ -4841,7 +4843,7 @@ void CppGenerator::writeRichCompareFunction(QTextStream &s, const GeneratorConte
                         if (func->isPointerOperator())
                             s << '&';
                         s << CPP_SELF_VAR << ' ' << op << '(';
-                        if (shouldDereferenceAbstractMetaTypePointer(argType))
+                        if (argType.shouldDereferencePointer())
                             s << '*';
                         s << CPP_ARG0 << ");\n";
                         s << INDENT << PYTHON_RETURN_VAR << " = ";
@@ -6363,7 +6365,7 @@ void CppGenerator::writeReturnValueHeuristics(QTextStream &s, const AbstractMeta
 
     ArgumentOwner argOwner = getArgumentOwner(func, ArgumentOwner::ReturnIndex);
     if (argOwner.action == ArgumentOwner::Invalid || argOwner.index != ArgumentOwner::ThisIndex) {
-        if (isPointerToWrapperType(type))
+        if (type.isPointerToWrapperType())
             s << INDENT << "Shiboken::Object::setParent(self, " << PYTHON_RETURN_VAR << ");\n";
     }
 }

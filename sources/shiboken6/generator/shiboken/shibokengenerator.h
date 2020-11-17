@@ -225,32 +225,8 @@ protected:
     static bool isPyInt(const TypeEntry *type);
     static bool isPyInt(const AbstractMetaType &type);
 
-    /**
-     *  Returns true if the type passed has a Python wrapper for it.
-     *  Although namespace has a Python wrapper, it's not considered a type.
-     */
-    static bool isWrapperType(const TypeEntry *type);
-    static bool isWrapperType(const ComplexTypeEntry *type);
-    static bool isWrapperType(const AbstractMetaType &metaType);
-
-    /**
-     *  Checks if the type is an Object/QObject or pointer to Value Type.
-     *  In other words, tells if the type is "T*" and T has a Python wrapper.
-     */
-    static bool isPointerToWrapperType(const AbstractMetaType &type);
-
-    /**
-     *  Returns true if \p type is an Object Type used as a value.
-     */
-    static bool isObjectTypeUsedAsValueType(const AbstractMetaType &type);
-
-    static bool isValueTypeWithCopyConstructorOnly(const AbstractMetaClass *metaClass);
     bool isValueTypeWithCopyConstructorOnly(const TypeEntry *type) const;
     bool isValueTypeWithCopyConstructorOnly(const AbstractMetaType &type) const;
-
-    /// Returns true if the type is a primitive but not a C++ primitive.
-    static bool isUserPrimitive(const TypeEntry *type);
-    static bool isUserPrimitive(const AbstractMetaType &type);
 
     /// Returns true if the type is a C++ primitive, a void*, a const char*, or a std::string.
     static bool isCppPrimitive(const TypeEntry *type);
@@ -259,13 +235,6 @@ protected:
     /// Returns true if the type is a C++ integral primitive, i.e. bool, char, int, long, and their unsigned counterparts.
     static bool isCppIntegralPrimitive(const TypeEntry *type);
     static bool isCppIntegralPrimitive(const AbstractMetaType &type);
-
-    /// Checks if an argument type should be dereferenced by the Python method wrapper before calling the C++ method.
-    static bool shouldDereferenceArgumentPointer(const AbstractMetaArgument &arg);
-    /// Checks if a meta type should be dereferenced by the Python method wrapper passing it to C++.
-    static bool shouldDereferenceAbstractMetaTypePointer(const AbstractMetaType &metaType);
-
-    static bool visibilityModifiedToPrivate(const AbstractMetaFunction *func);
 
     static bool isNullPtr(const QString &value);
 

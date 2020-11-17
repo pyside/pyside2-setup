@@ -331,6 +331,7 @@ public:
     // Query functions for generators
     bool isObjectType() const;
     bool isCopyable() const;
+    bool isValueTypeWithCopyConstructorOnly() const;
 
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const QString &name);

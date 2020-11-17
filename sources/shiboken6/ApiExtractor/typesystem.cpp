@@ -488,6 +488,22 @@ void TypeEntry::setSourceLocation(const SourceLocation &sourceLocation)
     m_d->m_sourceLocation = sourceLocation;
 }
 
+bool TypeEntry::isUserPrimitive() const
+{
+    if (!isPrimitive())
+        return false;
+    const auto *trueType = static_cast<const PrimitiveTypeEntry *>(this);
+    if (trueType->basicReferencedTypeEntry())
+        trueType = trueType->basicReferencedTypeEntry();
+    return trueType->isPrimitive() && !trueType->isCppPrimitive()
+        && trueType->qualifiedCppName() != u"std::string";
+}
+
+bool TypeEntry::isWrapperType() const
+{
+  return isObject() || isValue() || isSmartPointer();
+}
+
 const TypeEntryPrivate *TypeEntry::d_func() const
 {
     return m_d.data();

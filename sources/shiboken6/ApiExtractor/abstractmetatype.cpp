@@ -703,6 +703,33 @@ bool AbstractMetaType::isVoidPointer() const
         && name() == QLatin1String("void");
 }
 
+bool AbstractMetaType::isUserPrimitive() const
+{
+    return d->m_indirections.isEmpty() && d->m_typeEntry->isUserPrimitive();
+}
+
+bool AbstractMetaType::isObjectTypeUsedAsValueType() const
+{
+    return d->m_typeEntry->isObject() && d->m_referenceType == NoReference
+        && d->m_indirections.isEmpty();
+}
+
+bool AbstractMetaType::isWrapperType() const
+{
+    return d->m_typeEntry->isWrapperType();
+}
+
+bool AbstractMetaType::isPointerToWrapperType() const
+{
+    return (isObjectType() && d->m_indirections.size() == 1) || isValuePointer();
+}
+
+bool AbstractMetaType::shouldDereferencePointer() const
+{
+    return d->m_referenceType == LValueReference && isWrapperType()
+        && !isPointer();
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void AbstractMetaType::formatDebug(QDebug &debug) const
 {

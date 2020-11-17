@@ -310,6 +310,8 @@ public:
     /// for function arguments of a given index.
     bool injectedCodeUsesArgument(int argumentIndex) const;
 
+    bool isVisibilityModifiedToPrivate() const;
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebugBrief(QDebug &debug) const;
     void formatDebugVerbose(QDebug &debug) const;

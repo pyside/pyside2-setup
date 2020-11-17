@@ -257,6 +257,13 @@ public:
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
 
+    // Query functions for generators
+    /// Returns true if the type is a primitive but not a C++ primitive.
+    bool isUserPrimitive() const;
+    /// Returns true if the type passed has a Python wrapper for it.
+    /// Although namespace has a Python wrapper, it's not considered a type.
+    bool isWrapperType() const;
+
 #ifndef QT_NO_DEBUG_STREAM
     virtual void formatDebug(QDebug &d) const;
 #endif

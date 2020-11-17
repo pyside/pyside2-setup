@@ -1408,6 +1408,31 @@ bool AbstractMetaClass::isCopyable() const
         || (copyable == ComplexTypeEntry::Unknown && hasCloneOperator());
 }
 
+bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
+{
+    if (!typeEntry()->isValue())
+        return false;
+    if (attributes().testFlag(AbstractMetaAttributes::HasRejectedDefaultConstructor))
+        return false;
+    const auto ctors = queryFunctions(AbstractMetaClass::Constructors);
+    bool copyConstructorFound = false;
+    for (auto ctor : ctors) {
+        switch (ctor->functionType()) {
+        case AbstractMetaFunction::ConstructorFunction:
+            return false;
+        case AbstractMetaFunction::CopyConstructorFunction:
+            copyConstructorFound = true;
+            break;
+        case AbstractMetaFunction::MoveConstructorFunction:
+            break;
+        default:
+            Q_ASSERT(false);
+            break;
+        }
+    }
+    return copyConstructorFound;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 
 void AbstractMetaClass::format(QDebug &debug) const
