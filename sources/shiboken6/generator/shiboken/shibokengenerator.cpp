@@ -1990,9 +1990,9 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
         }
         const auto conversionType = conversionTypeO.value();
         QString conversion;
-        QTextStream c(&conversion);
         switch (converterVariable) {
             case TypeSystemToCppFunction: {
+                QTextStream c(&conversion);
                 int end = match.capturedStart();
                 int start = end;
                 while (start > 0 && code.at(start) != QLatin1Char('\n'))
@@ -2032,7 +2032,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 if (conversionType.typeEntry()->isPrimitive()
                     && (conversionType.typeEntry()->name() == QLatin1String("PyObject")
                         || !conversion.endsWith(QLatin1Char(' ')))) {
-                    c << '(';
+                    conversion += u'(';
                     break;
                 }
             Q_FALLTHROUGH();
@@ -2055,7 +2055,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                     conversion.prepend(QLatin1Char('('));
                     conversion.replace(QLatin1String("%in"), arg);
                 } else {
-                    c << arg;
+                    conversion += arg;
                 }
             }
         }
