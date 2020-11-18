@@ -370,19 +370,12 @@ QString AbstractMetaFunctionPrivate::signature() const
         for (int i = 0; i < m_arguments.count(); ++i) {
             const AbstractMetaArgument &a = m_arguments.at(i);
             const AbstractMetaType &t = a.type();
-            if (!t.isVoid()) {
-                if (i > 0)
-                    m_cachedSignature += QLatin1String(", ");
-                m_cachedSignature += t.cppSignature();
-                // We need to have the argument names in the qdoc files
-                m_cachedSignature += QLatin1Char(' ');
-                m_cachedSignature += a.name();
-            } else {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QString::fromLatin1("No abstract meta type found for argument '%1' while"
-                                           "constructing signature for function '%2'.")
-                                           .arg(a.name(), m_name);
-            }
+            if (i > 0)
+                m_cachedSignature += QLatin1String(", ");
+            m_cachedSignature += t.cppSignature();
+            // We need to have the argument names in the qdoc files
+            m_cachedSignature += QLatin1Char(' ');
+            m_cachedSignature += a.name();
         }
         m_cachedSignature += QLatin1Char(')');
 
@@ -689,16 +682,9 @@ QString AbstractMetaFunctionPrivate::minimalSignature() const
     QString minimalSignature = m_originalName + QLatin1Char('(');
     for (int i = 0; i < m_arguments.count(); ++i) {
         const AbstractMetaType &t = m_arguments.at(i).type();
-        if (!t.isVoid()) {
-            if (i > 0)
-                minimalSignature += QLatin1Char(',');
-            minimalSignature += t.minimalSignature();
-        } else {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QString::fromLatin1("No abstract meta type found for argument '%1' while constructing"
-                                       " minimal signature for function '%2'.")
-                                       .arg(m_arguments.at(i).name(), m_name);
-        }
+        if (i > 0)
+            minimalSignature += QLatin1Char(',');
+        minimalSignature += t.minimalSignature();
     }
     minimalSignature += QLatin1Char(')');
     if (m_constant)

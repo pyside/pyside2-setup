@@ -995,7 +995,7 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         file.setFileName(QLatin1String(":/trolltech/generator/") + fileName);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            m_error = QString::fromLatin1("Could not open file: '%1'").arg(QDir::toNativeSeparators(fileName));
+            m_error = msgCannotOpenForReading(file);
             return false;
         }
     }

@@ -2958,7 +2958,7 @@
   <suppress-warning text="Unable to decide type of property: 'QLibrary::LoadHints' in class 'QPluginLoader'"/>
   <suppress-warning text="enum '_ISalnum' does not have a type entry or is not an enum"/>
   <suppress-warning text="enum 'Qt::Initialization' does not have a type entry or is not an enum"/>
-  <suppress-warning text="visibility of function '*' modified in class '*'"/>
+  <suppress-warning text="Visibility of function '*' modified in class '*'"/>
   <suppress-warning text="hiding of function '*' in class '*'"/>
   <suppress-warning text="namespace '*' does not have a type entry"/>
   <suppress-warning text="Shadowing: QObject::parent()const and QAbstractItemModel::parent() const"/>

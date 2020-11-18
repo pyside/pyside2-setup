@@ -32,6 +32,7 @@
 #include "abstractmetafunction.h"
 #include "abstractmetafield.h"
 #include "documentation.h"
+#include "messages.h"
 #include "modifications.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
@@ -1170,9 +1171,8 @@ void AbstractMetaClass::fixFunctions()
                         }
 
                         if (f->visibility() != sf->visibility()) {
-                            QString warn = QStringLiteral("visibility of function '%1' modified in class '%2'")
-                                                          .arg(f->name(), name());
-                            qCWarning(lcShiboken).noquote().nospace() << warn;
+                            qCWarning(lcShiboken, "%s",
+                                      qPrintable(msgFunctionVisibilityModified(this, f)));
 #if 0
                             // If new visibility is private, we can't
                             // do anything. If it isn't, then we
@@ -1215,10 +1215,8 @@ void AbstractMetaClass::fixFunctions()
                                 }
 
                                 if (!hasNonFinalModifier && !isBaseImplPrivate) {
-                                    qCWarning(lcShiboken).noquote().nospace()
-                                        << QStringLiteral("Shadowing: %1::%2 and %3::%4")
-                                           .arg(sf->implementingClass()->name(), sf->signature(),
-                                                f->implementingClass()->name(), f->signature());
+                                    qCWarning(lcShiboken, "%s",
+                                              qPrintable(msgShadowingFunction(sf, f)));
                                 }
                             }
                         }
@@ -1308,9 +1306,7 @@ std::optional<AbstractMetaEnum>
     auto scopeEntry = entry->parent();
     AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes, scopeEntry);
     if (!metaClass) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
-                              .arg(scopeEntry->qualifiedCppName(), entry->qualifiedCppName());
+        qCWarning(lcShiboken, "%s", qPrintable(msgClassOfEnumNotFound(entry)));
         return {};
     }
 
@@ -1339,8 +1335,7 @@ std::optional<AbstractMetaEnumValue>
             return enumValue;
     }
 
-    qCWarning(lcShiboken).noquote().nospace()
-        << QStringLiteral("no matching enum '%1'").arg(name);
+    qCWarning(lcShiboken, "no matching enum '%s'", qPrintable(name));
     return {};
 }
 

@@ -482,20 +482,14 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
         cls->fixFunctions();
 
-        if (!cls->typeEntry()) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("class '%1' does not have an entry in the type system")
-                                  .arg(cls->name());
-        } else {
-            const bool couldAddDefaultCtors = cls->isConstructible()
-                && !cls->isNamespace()
-                && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
-            if (couldAddDefaultCtors) {
-                if (!cls->hasConstructors())
-                    cls->addDefaultConstructor();
-                if (cls->typeEntry()->isValue() && !cls->isAbstract() && !cls->hasCopyConstructor())
-                    cls->addDefaultCopyConstructor(ancestorHasPrivateCopyConstructor(cls));
-            }
+        const bool couldAddDefaultCtors = cls->isConstructible()
+            && !cls->isNamespace()
+            && (cls->attributes() & AbstractMetaAttributes::HasRejectedConstructor) == 0;
+        if (couldAddDefaultCtors) {
+            if (!cls->hasConstructors())
+                cls->addDefaultConstructor();
+            if (cls->typeEntry()->isValue() && !cls->isAbstract() && !cls->hasCopyConstructor())
+                cls->addDefaultCopyConstructor(ancestorHasPrivateCopyConstructor(cls));
         }
     }
     const auto &allEntries = types->entries();
@@ -1327,11 +1321,8 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
 
             setupFunctionDefaults(metaFunction, metaClass);
 
-            if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction)) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("signal '%1' in class '%2' is overloaded.")
-                                      .arg(metaFunction->name(), metaClass->name());
-            }
+            if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction))
+                qCWarning(lcShiboken, "%s", qPrintable(msgSignalOverloaded(metaClass, metaFunction)));
 
             if (metaFunction->isConversionOperator())
                 fixReturnTypeOfConversionOperator(metaFunction);
@@ -1440,13 +1431,13 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
             auto typeEntry = types->findType(baseClassName);
             if (typeEntry == nullptr || !typeEntry->isComplex()) {
                 qCWarning(lcShiboken, "%s",
-                          qPrintable(msgUnknownBase(metaClass, baseClassName)));
+                          qPrintable(msgBaseNotInTypeSystem(metaClass, baseClassName)));
                 return false;
             }
             auto baseClass = AbstractMetaClass::findClass(m_metaClasses, typeEntry);
             if (!baseClass) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClassName);
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgUnknownBase(metaClass, baseClassName)));
                 return false;
             }
             metaClass->addBaseClass(baseClass);
@@ -1929,9 +1920,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             && !metaFunction->isOperatorOverload()
             && !metaFunction->isSignal()
             && metaFunction->argumentName(i + 1, false, currentClass).isEmpty()) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("Argument %1 on function '%2::%3' has default expression but does not have name.")
-                                  .arg(i+1).arg(className, metaFunction->minimalSignature());
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgUnnamedArgumentDefaultExpression(currentClass, i + 1,
+                                                                     className, metaFunction)));
         }
 
     }
@@ -2859,9 +2850,7 @@ static void writeRejectLogFile(const QString &name,
 {
     QFile f(name);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("failed to write log file: '%1'")
-                              .arg(QDir::toNativeSeparators(f.fileName()));
+        qCWarning(lcShiboken, "%s", qPrintable(msgCannotOpenForWriting(f)));
         return;
     }
 

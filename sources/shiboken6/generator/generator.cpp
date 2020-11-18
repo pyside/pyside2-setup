@@ -521,8 +521,8 @@ void verifyDirectoryFor(const QString &file)
     QDir dir = QFileInfo(file).absoluteDir();
     if (!dir.exists()) {
         if (!dir.mkpath(dir.absolutePath())) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << QStringLiteral("unable to create directory '%1'").arg(dir.absolutePath());
+            qCWarning(lcShiboken, "Unable to create directory '%s'",
+                      qPrintable(QDir::toNativeSeparators(dir.absolutePath())));
         }
     }
 }

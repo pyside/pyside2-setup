@@ -143,6 +143,29 @@ QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
     return result;
 }
 
+QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClass *context,
+                                            int n, const QString &className,
+                                            const AbstractMetaFunction *f)
+{
+    QString result;
+    QTextStream str(&result);
+    if (context)
+        str << context->sourceLocation();
+    str << "Argument " << n << " on function '" << className << "::"
+        << f->minimalSignature() << "' has default expression but does not have name.";
+    return result;
+}
+
+QString msgClassOfEnumNotFound(const EnumTypeEntry *entry)
+{
+    QString result;
+    QTextStream str(&result);
+    str << entry->sourceLocation() << "AbstractMeta::findEnum(), unknown class '"
+        << entry->parent()->qualifiedCppName() << "' in '"
+        << entry->qualifiedCppName() << '\'';
+    return result;
+}
+
 QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
                            const QString &className)
 {
@@ -231,6 +254,28 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
     return result;
 }
 
+QString msgShadowingFunction(const AbstractMetaFunction *f1,
+                             const AbstractMetaFunction *f2)
+{
+    auto f2Class = f2->implementingClass();
+    QString result;
+    QTextStream str(&result);
+    str << f2Class->sourceLocation() << "Shadowing: " << f1->implementingClass()->name()
+        << "::" << f1->signature() << " and " << f2Class->name() << "::"
+        << f2->signature();
+    return result;
+}
+
+QString msgSignalOverloaded(const AbstractMetaClass *c,
+                            const AbstractMetaFunction *f)
+{
+    QString result;
+    QTextStream str(&result);
+    str << c->sourceLocation() << "signal '" << f->name() << "' in class '"
+        << c->name() << "' is overloaded.";
+    return result;
+}
+
 QString msgSkippingField(const VariableModelItem &field, const QString &className,
                          const QString &type)
 {
@@ -285,12 +330,23 @@ QString msgEnumNotDefined(const EnumTypeEntry *t)
     return result;
 }
 
-QString msgUnknownBase(const AbstractMetaClass *metaClass, const QString &baseClassName)
+QString msgUnknownBase(const AbstractMetaClass *metaClass,
+                       const QString &baseClassName)
 {
     QString result;
     QTextStream str(&result);
-    str << metaClass->sourceLocation() << "class '" << metaClass->name()
-        << "' inherits from unknown base class '" << baseClassName << "'";
+    str << metaClass->sourceLocation() << "Base class '" << baseClassName << "' of class '"
+        << metaClass->name() << "' not found in the code for setting up inheritance.";
+    return result;
+}
+
+QString msgBaseNotInTypeSystem(const AbstractMetaClass *metaClass,
+                               const QString &baseClassName)
+{
+    QString result;
+    QTextStream str(&result);
+    str << metaClass->sourceLocation() << "Base class '" << baseClassName << "' of class '"
+        << metaClass->name() << "' not found in the type system for setting up inheritance.";
     return result;
 }
 
@@ -394,6 +450,16 @@ QString msgPropertyExists(const QString &className, const QString &name)
     return QLatin1String("class ") + className
         + QLatin1String(" already has a property \"") + name
         + QLatin1String("\" (defined by Q_PROPERTY).");
+}
+
+QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
+                                      const AbstractMetaFunction *f)
+{
+    QString result;
+    QTextStream str(&result);
+    str << c->sourceLocation() << "Visibility of function '" << f->name()
+        << "' modified in class '"<< c->name() << '\'';
+    return result;
 }
 
 // docparser.cpp
@@ -678,6 +744,44 @@ QString msgCannotFindView(const QString &viewedName, const QString &name)
 {
     return QLatin1String("Unable to find viewed type ") + viewedName
         + QLatin1String(" for ") + name;
+}
+
+// cppgenerator.cpp
+
+QString msgPureVirtualFunctionRemoved(const AbstractMetaFunction *f)
+{
+    QString result;
+    auto klass = f->ownerClass();
+    QTextStream str(&result);
+    str << klass->sourceLocation() << "Pure virtual method '" << klass->name()
+        << "::"<<  f->minimalSignature()
+        << "' must be implemented but was completely removed on type system.";
+    return result;
+}
+
+QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
+                                                const AbstractMetaFunction *f)
+{
+    QString result;
+    QTextStream str(&result);
+    if (auto klass = f->ownerClass())
+        str << klass->sourceLocation();
+    str << "Unknown type '" << typeReplaced
+        << "' used as argument type replacement in function '" << f->signature()
+        << "', the generated code may be broken.";
+    return result;
+}
+
+QString msgRegisterMetaTypeUnqualifiedName(const AbstractMetaClass *c,
+                                           const char *file, int line)
+{
+    QString result;
+    QTextStream str(&result);
+    str << c->sourceLocation() << " (" << file << ':' << line << ") FIXME:\n"
+        << "    The code tried to qRegisterMetaType the unqualified name "
+        << "'iterator' (" << c->qualifiedCppName()
+        << "). This is currently fixed by a hack(ct) and needs improvement!";
+    return result;
 }
 
 // qtdocgenerator.cpp

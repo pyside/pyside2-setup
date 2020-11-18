@@ -981,10 +981,7 @@ void CppGenerator::writeVirtualMethodNative(QTextStream &s,
     const QString returnStatement = virtualMethodReturn(s, func, functionModifications);
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QString::fromLatin1("Pure virtual method '%1::%2' must be implement but was "\
-                                   "completely removed on type system.")
-                                   .arg(func->ownerClass()->name(), func->minimalSignature());
+        qCWarning(lcShiboken, "%s", qPrintable(msgPureVirtualFunctionRemoved(func)));
         s << INDENT << returnStatement << "\n}\n\n";
         return;
     }
@@ -2491,10 +2488,8 @@ std::optional<AbstractMetaType>
 
     auto argType = buildAbstractMetaTypeFromString(typeReplaced);
     if (!argType.has_value() && !m_knownPythonTypes.contains(typeReplaced)) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QString::fromLatin1("Unknown type '%1' used as argument type replacement "\
-                                   "in function '%2', the generated code may be broken.")
-                                   .arg(typeReplaced, func->signature());
+        qCWarning(lcShiboken, "%s",
+                  qPrintable(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func)));
     }
     return argType;
 }
@@ -5571,11 +5566,9 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(QTextStream &s, const Generat
         if (canBeValue) {
             for (const QString &name : qAsConst(nameVariants)) {
                 if (name == QLatin1String("iterator")) {
-                    qCWarning(lcShiboken).noquote().nospace()
-                         << QString::fromLatin1("%1:%2 FIXME:\n"
-                                                "    The code tried to qRegisterMetaType the unqualified name "
-                                                "'iterator'. This is currently fixed by a hack(ct) and needs improvement!")
-                                                .arg(QFile::decodeName(__FILE__)).arg(__LINE__);
+                    qCWarning(lcShiboken, "%s",
+                              qPrintable(msgRegisterMetaTypeUnqualifiedName(context.metaClass(),
+                                                                            __FILE__, __LINE__)));
                     continue;
                 }
                 s << INDENT << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");\n";

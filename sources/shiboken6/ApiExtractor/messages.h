@@ -56,11 +56,17 @@ QString msgAddedFunctionInvalidReturnType(const QString &addedFuncName,
                                           const QStringList &typeName, const QString &why,
                                           const AbstractMetaClass *context = nullptr);
 
+QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClass *context,
+                                            int n, const QString &className,
+                                            const AbstractMetaFunction *f);
+
 QString msgNoFunctionForModification(const AbstractMetaClass *klass,
                                      const QString &signature,
                                      const QString &originalSignature,
                                      const QStringList &possibleSignatures,
                                      const AbstractMetaFunctionList &allFunctions);
+
+QString msgClassOfEnumNotFound(const EnumTypeEntry *entry);
 
 QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
                            const QString &className);
@@ -82,6 +88,12 @@ QString msgUnmatchedParameterType(const ArgumentModelItem &arg, int n,
 QString msgUnmatchedReturnType(const FunctionModelItem &functionItem,
                                const QString &why);
 
+QString msgShadowingFunction(const AbstractMetaFunction *f1,
+                             const AbstractMetaFunction *f2);
+
+QString msgSignalOverloaded(const AbstractMetaClass *c,
+                            const AbstractMetaFunction *f);
+
 QString msgSkippingFunction(const FunctionModelItem &functionItem,
                             const QString &signature, const QString &why);
 
@@ -101,6 +113,9 @@ QString msgEnumNotDefined(const EnumTypeEntry *t);
 
 QString msgUnknownBase(const AbstractMetaClass *metaClass,
                        const QString &baseClassName);
+
+QString msgBaseNotInTypeSystem(const AbstractMetaClass *metaClass,
+                               const QString &baseClassName);
 
 QString msgArrayModificationFailed(const FunctionModelItem &functionItem,
                                    const QString &className,
@@ -132,6 +147,9 @@ QString msgNamespaceToBeExtendedNotFound(const QString &namespaceName, const QSt
 QString msgPropertyTypeParsingFailed(const QString &name, const QString &typeName,
                                      const QString &why);
 QString msgPropertyExists(const QString &className, const QString &name);
+
+QString msgFunctionVisibilityModified(const AbstractMetaClass *c,
+                                      const AbstractMetaFunction *f);
 
 QString msgCannotFindDocumentation(const QString &fileName,
                                    const char *what, const QString &name,
@@ -202,6 +220,14 @@ QString msgCouldNotFindMinimalConstructor(const QString &where, const QString &t
                                           const QString &why = QString());
 
 QString msgRejectReason(const TypeRejection &r, const QString &needle = QString());
+
+QString msgPureVirtualFunctionRemoved(const AbstractMetaFunction *f);
+
+QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
+                                                const AbstractMetaFunction *f);
+
+QString msgRegisterMetaTypeUnqualifiedName(const AbstractMetaClass *c,
+                                           const char *file, int line);
 
 QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                       const QString &tag, const QString &message);
