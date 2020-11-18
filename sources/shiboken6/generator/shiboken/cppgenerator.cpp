@@ -1504,7 +1504,7 @@ void CppGenerator::writeConverterFunctions(QTextStream &s, const AbstractMetaCla
     else
         sourceTypeName = classContext.preciseType().name();
 
-    targetTypeName = QStringLiteral("%1_COPY").arg(sourceTypeName);
+    targetTypeName = sourceTypeName + QStringLiteral("_COPY");
     code.clear();
 
     QString pyInVariable = QLatin1String("pyIn");
@@ -2849,7 +2849,11 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(QTextStream &s, const Ov
         } else if (sequenceArgCount > 1) {
             typeChecks.prepend(QString::fromLatin1("numArgs >= %1").arg(startArg + sequenceArgCount));
         } else if (refFunc->isOperatorOverload() && !refFunc->isCallOperator()) {
-            typeChecks.prepend(QString::fromLatin1("%1isReverse").arg(refFunc->isReverseOperator() ? QString() : QLatin1String("!")));
+            QString check;
+            if (!refFunc->isReverseOperator())
+                check.append(QLatin1Char('!'));
+            check.append(QLatin1String("isReverse"));
+            typeChecks.prepend(check);
         }
 
         if (isFirst) {
@@ -2986,12 +2990,12 @@ QString CppGenerator::cppToPythonFunctionName(const QString &sourceTypeName, QSt
 {
     if (targetTypeName.isEmpty())
         targetTypeName = sourceTypeName;
-    return QString::fromLatin1("%1_CppToPython_%2").arg(sourceTypeName, targetTypeName);
+    return sourceTypeName + QLatin1String("_CppToPython_") + targetTypeName;
 }
 
 QString CppGenerator::pythonToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName)
 {
-    return QString::fromLatin1("%1_PythonToCpp_%2").arg(sourceTypeName, targetTypeName);
+    return sourceTypeName + QLatin1String("_PythonToCpp_") + targetTypeName;
 }
 QString CppGenerator::pythonToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType)
 {
@@ -3005,7 +3009,8 @@ QString CppGenerator::pythonToCppFunctionName(const CustomConversion::TargetToNa
 
 QString CppGenerator::convertibleToCppFunctionName(const QString &sourceTypeName, const QString &targetTypeName)
 {
-    return QString::fromLatin1("is_%1_PythonToCpp_%2_Convertible").arg(sourceTypeName, targetTypeName);
+    return QLatin1String("is_") + sourceTypeName + QLatin1String("_PythonToCpp_")
+            + targetTypeName + QLatin1String("_Convertible");
 }
 QString CppGenerator::convertibleToCppFunctionName(const AbstractMetaType &sourceType, const AbstractMetaType &targetType)
 {
@@ -3247,7 +3252,7 @@ void CppGenerator::writePythonToCppConversionFunctions(QTextStream &s, const Abs
     if (typeCheck.isEmpty())
         typeCheck = QLatin1String("false");
     else
-        typeCheck = QString::fromLatin1("%1pyIn)").arg(typeCheck);
+        typeCheck = typeCheck + QLatin1String("pyIn)");
     writeIsPythonConvertibleToCppFunction(s, typeName, typeName, typeCheck);
     s << Qt::endl;
 }

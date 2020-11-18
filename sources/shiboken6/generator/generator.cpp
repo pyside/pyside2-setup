@@ -276,7 +276,7 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
                 QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
                                " arguments.").arg(piece, type.originalTypeDescription());
         if (!context.isEmpty())
-            warning.append(QStringLiteral(" Calling context: %1").arg(context));
+            warning.append(QStringLiteral(" Calling context: ") + context);
 
         qCWarning(lcShiboken).noquote().nospace() << warning;
         return;

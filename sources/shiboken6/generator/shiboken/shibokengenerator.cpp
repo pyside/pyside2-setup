@@ -392,12 +392,12 @@ QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum &me
 
 QString ShibokenGenerator::protectedFieldGetterName(const AbstractMetaField &field)
 {
-    return QStringLiteral("protected_%1_getter").arg(field.name());
+    return QLatin1String("protected_") + field.name() + QLatin1String("_getter");
 }
 
 QString ShibokenGenerator::protectedFieldSetterName(const AbstractMetaField &field)
 {
-    return QStringLiteral("protected_%1_setter").arg(field.name());
+    return QLatin1String("protected_") + field.name() + QLatin1String("_setter");
 }
 
 QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunction *func) const
@@ -428,7 +428,8 @@ QString ShibokenGenerator::cpythonMethodDefinitionName(const AbstractMetaFunctio
 {
     if (!func->ownerClass())
         return QString();
-    return QStringLiteral("%1Method_%2").arg(cpythonBaseName(func->ownerClass()->typeEntry()), func->name());
+    return cpythonBaseName(func->ownerClass()->typeEntry()) + QLatin1String("Method_")
+           + func->name();
 }
 
 QString ShibokenGenerator::cpythonGettersSettersDefinitionName(const AbstractMetaClass *metaClass)
@@ -484,7 +485,7 @@ QString ShibokenGenerator::cpythonSetterFunctionName(const QPropertySpec &proper
 static QString cpythonEnumFlagsName(const QString &moduleName,
                                     const QString &qualifiedCppName)
 {
-    QString result = QStringLiteral("Sbk%1_%2").arg(moduleName, qualifiedCppName);
+    QString result = QLatin1String("Sbk") + moduleName + QLatin1Char('_') + qualifiedCppName;
     result.replace(QLatin1String("::"), QLatin1String("_"));
     return result;
 }
