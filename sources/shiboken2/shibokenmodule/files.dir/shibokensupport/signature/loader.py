@@ -101,8 +101,8 @@ def create_signature(props, key):
     return layout.create_signature(props, key)
 
 # name used in signature.cpp
-def seterror_argument(args, func_name):
-    return errorhandler.seterror_argument(args, func_name)
+def seterror_argument(args, func_name, info):
+    return errorhandler.seterror_argument(args, func_name, info)
 
 # name used in signature.cpp
 def make_helptext(func):

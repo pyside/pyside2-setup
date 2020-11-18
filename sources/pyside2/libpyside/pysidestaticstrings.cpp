@@ -60,4 +60,10 @@ STATIC_STRING_IMPL(name, "name")
 STATIC_STRING_IMPL(property, "property")
 STATIC_STRING_IMPL(select_id, "select_id")
 } // namespace PyName
+namespace PyMagicName
+{
+STATIC_STRING_IMPL(doc, "__doc__")
+STATIC_STRING_IMPL(name, "__name__")
+STATIC_STRING_IMPL(property_methods, "__property_methods__")
+} // namespace PyMagicName
 } // namespace PySide

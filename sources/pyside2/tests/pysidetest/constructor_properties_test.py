@@ -47,11 +47,13 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QApplication, QLabel, QFrame
+from PySide2.QtGui import QColor
+from PySide2.QtWidgets import QAction, QApplication, QFrame, QLabel
 
 
 class ConstructorPropertiesTest(UsesQApplication):
 
+    # PYSIDE-1019: First property extension was support by the constructor.
     def testCallConstructor(self):
         label = QLabel(
             frameStyle=QFrame.Panel | QFrame.Sunken,
@@ -65,6 +67,34 @@ class ConstructorPropertiesTest(UsesQApplication):
         ))
 
 
+class DiverseKeywordsTest(UsesQApplication):
+
+    def testDuplicateKeyword(self):
+        r, g, b, a = 1, 2, 3, 4
+        with self.assertRaises(TypeError) as cm:
+            QColor(r, g, b, a, a=0)
+        self.assertTrue("multiple" in cm.exception.args[0])
+
+    # PYSIDE-1305: Handle keyword args correctly.
+    def testUndefinedKeyword(self):
+        r, g, b, a = 1, 2, 3, 4
+        # From the jira issue:
+        with self.assertRaises(AttributeError) as cm:
+            QColor(r, g, b, a, alpha=0)
+        self.assertTrue("unsupported" in cm.exception.args[0])
+
+    # PYSIDE-1305: Handle keyword args correctly.
+    def testUndefinedConstructorKeyword(self):
+        # make sure that the given attribute lands in the constructor
+        x = QAction(autoRepeat=False)
+        self.assertEqual(x.autoRepeat(), False)
+        x = QAction(autoRepeat=True)
+        self.assertEqual(x.autoRepeat(), True)
+        # QAction derives from QObject, and so the missing attributes
+        # in the constructor are reported as AttributeError.
+        with self.assertRaises(AttributeError):
+            QAction(some_other_name=42)
+
+
 if __name__ == '__main__':
     unittest.main()
-

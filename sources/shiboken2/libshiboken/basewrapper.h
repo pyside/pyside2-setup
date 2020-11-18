@@ -157,8 +157,10 @@ void callCppDestructor(void *cptr)
     delete reinterpret_cast<T *>(cptr);
 }
 
-// setErrorAboutWrongArguments now gets overload info from the signature module.
-LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *funcName);
+// setErrorAboutWrongArguments now gets overload information from the signature module.
+// The extra info argument can contain additional data about the error.
+LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *funcName,
+                                                 PyObject *info);
 
 namespace ObjectType {
 

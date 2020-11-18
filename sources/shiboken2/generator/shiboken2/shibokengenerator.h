@@ -234,7 +234,7 @@ protected:
     QString wrapperName(const AbstractMetaClass *metaClass) const;
 
     QString fullPythonClassName(const AbstractMetaClass *metaClass);
-    QString fullPythonFunctionName(const AbstractMetaFunction *func);
+    QString fullPythonFunctionName(const AbstractMetaFunction *func, bool forceFunc);
 
     bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
 

@@ -968,9 +968,10 @@ void init()
 }
 
 // setErrorAboutWrongArguments now gets overload info from the signature module.
-void setErrorAboutWrongArguments(PyObject *args, const char *funcName)
+// Info can be nullptr and contains extra info.
+void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject *info)
 {
-    SetError_Argument(args, funcName);
+    SetError_Argument(args, funcName, info);
 }
 
 class FindBaseTypeVisitor : public HierarchyVisitor

@@ -95,15 +95,33 @@ def matched_type(args, sigs):
     return None
 
 
-def seterror_argument(args, func_name):
-    update_mapping()
+def seterror_argument(args, func_name, info):
     func = None
     try:
         func = eval(func_name, namespace)
     except Exception as e:
-        msg = "Internal error evaluating " + func_name + " :"  + str(e)
+        msg = "Internal error evaluating {func_name}: {e}".format(**locals())
         return TypeError, msg
+    if info and type(info) is str:
+        err = TypeError
+        if info == "<":
+            msg = "{func_name}(): not enough arguments".format(**locals())
+        elif info == ">":
+            msg = "{func_name}(): too many arguments".format(**locals())
+        elif info.isalnum():
+            msg = "{func_name}(): got multiple values for keyword argument '{info}'".format(**locals())
+        else:
+            msg = "{func_name}(): {info}".format(**locals())
+            err = AttributeError
+        return err, msg
+    if info and type(info) is dict:
+        keyword = tuple(info)[0]
+        msg = "{func_name}(): unsupported keyword '{keyword}'".format(**locals())
+        return AttributeError, msg
     sigs = get_signature(func, "typeerror")
+    if not sigs:
+        msg = "{func_name}({args}) is wrong (missing signature)".format(**locals())
+        return TypeError, msg
     if type(sigs) != list:
         sigs = [sigs]
     if type(args) != tuple:
@@ -144,7 +162,7 @@ def make_helptext(func):
         sigs = [sigs]
     try:
         func_name = func.__name__
-    except AttribureError:
+    except AttributeError:
         func_name = func.__func__.__name__
     sigtext = "\n".join(func_name + str(sig) for sig in sigs)
     msg = sigtext + "\n\n" + existing_doc if check_string_type(existing_doc) else sigtext

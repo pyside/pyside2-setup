@@ -87,6 +87,7 @@ STATIC_STRING_IMPL(get, "__get__")
 STATIC_STRING_IMPL(members, "__members__")
 STATIC_STRING_IMPL(module, "__module__")
 STATIC_STRING_IMPL(name, "__name__")
+STATIC_STRING_IMPL(property_methods, "__property_methods__")
 STATIC_STRING_IMPL(qualname, "__qualname__")
 STATIC_STRING_IMPL(self, "__self__")
 
