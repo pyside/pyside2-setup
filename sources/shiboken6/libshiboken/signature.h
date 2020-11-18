@@ -45,7 +45,7 @@ extern "C"
 
 LIBSHIBOKEN_API int InitSignatureStrings(PyTypeObject *, const char *[]);
 LIBSHIBOKEN_API void FinishSignatureInitialization(PyObject *, const char *[]);
-LIBSHIBOKEN_API void SetError_Argument(PyObject *, const char *);
+LIBSHIBOKEN_API void SetError_Argument(PyObject *, const char *, PyObject *);
 LIBSHIBOKEN_API PyObject *Sbk_TypeGet___signature__(PyObject *, PyObject *);
 LIBSHIBOKEN_API PyObject *Sbk_TypeGet___doc__(PyObject *);
 LIBSHIBOKEN_API PyObject *GetFeatureDict();

@@ -1840,6 +1840,11 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
         usesNamedArguments = rfunc->isCallOperator() || overloadData.hasArgumentWithDefaultValue();
     }
 
+    s << INDENT << "PyObject *errInfo{};\n";
+    s << INDENT << "SBK_UNUSED(errInfo)\n";
+    s << INDENT << "static const char *fullName = \""
+                << fullPythonFunctionName(rfunc, true) << "\";\n";
+    s << INDENT << "SBK_UNUSED(fullName)\n";
     if (maxArgs > 0) {
         s << INDENT << "int overloadId = -1;\n";
         s << INDENT << "PythonToCppFunc " << PYTHON_TO_CPP_VAR;
@@ -1878,28 +1883,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     s << "static int\n";
     s << cpythonFunctionName(rfunc) << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n";
 
-    QSet<QString> argNamesSet;
-    if (usePySideExtensions() && metaClass->isQObject()) {
-        // Write argNames variable with all known argument names.
-        const OverloadData::MetaFunctionList &overloads = overloadData.overloads();
-        for (const AbstractMetaFunction *func : overloads) {
-            const AbstractMetaArgumentList &arguments = func->arguments();
-            for (const AbstractMetaArgument &arg : arguments) {
-                if (arg.defaultValueExpression().isEmpty() || func->argumentRemoved(arg.argumentIndex() + 1))
-                    continue;
-                argNamesSet << arg.name();
-            }
-        }
-        QStringList argNamesList = argNamesSet.values();
-        std::sort(argNamesList.begin(), argNamesList.end());
-        if (argNamesList.isEmpty()) {
-            s << INDENT << "const char **argNames{};\n";
-        } else {
-            s << INDENT << "const char *argNames[] = {\""
-                << argNamesList.join(QLatin1String("\", \"")) << "\"};\n";
-        }
+    if (usePySideExtensions() && metaClass->isQObject())
         s << INDENT << "const QMetaObject *metaObject;\n";
-    }
 
     s << INDENT << "SbkObject *sbkSelf = reinterpret_cast<SbkObject *>(self);\n";
 
@@ -1939,6 +1924,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     {
         Indentation indent(INDENT);
         s << INDENT << "delete cptr;\n";
+        if (overloadData.maxArgs() > 0)
+            s << INDENT << "Py_XDECREF(errInfo);\n";
         s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
     }
     s << INDENT << "}\n";
@@ -1959,19 +1946,24 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
     s << INDENT << "if (Shiboken::BindingManager::instance().hasWrapper(cptr)) {\n";
     {
         Indentation indent(INDENT);
-        s << INDENT << "Shiboken::BindingManager::instance().releaseWrapper(Shiboken::BindingManager::instance().retrieveWrapper(cptr));\n";
+        s << INDENT << "Shiboken::BindingManager::instance().releaseWrapper("
+                       "Shiboken::BindingManager::instance().retrieveWrapper(cptr));\n";
     }
     s << INDENT << "}\n";
     s << INDENT << "Shiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);\n";
 
     // Create metaObject and register signal/slot
+    bool errHandlerNeeded = overloadData.maxArgs() > 0;
     if (metaClass->isQObject() && usePySideExtensions()) {
+        errHandlerNeeded = true;
         s << Qt::endl << INDENT << "// QObject setup\n";
         s << INDENT << "PySide::Signal::updateSourceObject(self);\n";
         s << INDENT << "metaObject = cptr->metaObject(); // <- init python qt properties\n";
-        s << INDENT << "if (kwds && !PySide::fillQtProperties(self, metaObject, kwds, argNames, "
-            << argNamesSet.count() << "))\n" << indent(INDENT)
-            << INDENT << returnStatement(m_currentErrorCode) << '\n' << outdent(INDENT);
+        s << INDENT << "if (errInfo && PyDict_Check(errInfo)) {\n" << indent(INDENT)
+            << INDENT << "if (!PySide::fillQtProperties(self, metaObject, errInfo))\n" << indent(INDENT)
+                << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent(INDENT)
+            << INDENT << "Py_DECREF(errInfo);\n" << outdent(INDENT)
+        << INDENT << "};\n";
     }
 
     // Constructor code injections, position=end
@@ -2009,7 +2001,7 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
 
     s << Qt::endl;
     s << Qt::endl << INDENT << "return 1;\n";
-    if (overloadData.maxArgs() > 0)
+    if (errHandlerNeeded)
         writeErrorSection(s, overloadData);
     s<< "}\n\n";
 }
@@ -2161,8 +2153,11 @@ void CppGenerator::writeArgumentsInitializer(QTextStream &s, OverloadData &overl
             s << INDENT << "if (numArgs" << (overloadData.hasArgumentWithDefaultValue() ? " + numNamedArgs" : "") << " > " << maxArgs << ") {\n";
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): too many arguments\");\n";
-                s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
+                s << INDENT << "static PyObject *const too_many = "
+                                   "Shiboken::String::createStaticString(\">\");\n";
+                s << INDENT << "errInfo = too_many;\n";
+                s << INDENT << "Py_INCREF(errInfo);\n";
+                s << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n";
             }
             s << INDENT << '}';
         }
@@ -2174,8 +2169,11 @@ void CppGenerator::writeArgumentsInitializer(QTextStream &s, OverloadData &overl
             s << "if (numArgs < " << minArgs << ") {\n";
             {
                 Indentation indent(INDENT);
-                s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): not enough arguments\");\n";
-                s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
+                s << INDENT << "static PyObject *const too_few = "
+                                   "Shiboken::String::createStaticString(\"<\");\n";
+                s << INDENT << "errInfo = too_few;\n";
+                s << INDENT << "Py_INCREF(errInfo);\n";
+                s << INDENT << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n";
             }
             s << INDENT << '}';
         }
@@ -2313,7 +2311,9 @@ void CppGenerator::writeErrorSection(QTextStream &s, OverloadData &overloadData)
 
     QString argsVar = pythonFunctionWrapperUsesListOfArguments(overloadData)
         ? QLatin1String("args") : QLatin1String(PYTHON_ARG);
-    s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", \"" << funcName << "\");\n";
+    s << INDENT << "Shiboken::setErrorAboutWrongArguments(" << argsVar
+                << ", fullName, errInfo);\n";
+    s << INDENT << "Py_XDECREF(errInfo);\n";
     s << INDENT << "return " << m_currentErrorCode << ";\n";
 }
 
@@ -2932,7 +2932,7 @@ void CppGenerator::writeSingleFunctionCall(QTextStream &s,
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
 
     // Handle named arguments.
-    writeNamedArgumentResolution(s, func, usePyArgs);
+    writeNamedArgumentResolution(s, func, usePyArgs, overloadData);
 
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
@@ -3263,34 +3263,46 @@ void CppGenerator::writeAddPythonToCppConversion(QTextStream &s, const QString &
     s << ");\n";
 }
 
-void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMetaFunction *func, bool usePyArgs)
+void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMetaFunction *func,
+                                                bool usePyArgs, const OverloadData &overloadData)
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
-    if (args.isEmpty())
+    if (args.isEmpty()) {
+        if (overloadData.hasArgumentWithDefaultValue()) {
+            s << INDENT << "if (kwds) {\n";
+            {
+                Indentation indent(INDENT);
+                s << INDENT << "errInfo = kwds;\n";
+                s << INDENT << "Py_INCREF(errInfo);\n";
+                s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
+            }
+            s << INDENT << "}\n";
+        }
         return;
-
-    QString pyErrString(QLatin1String("PyErr_SetString(PyExc_TypeError, \"") + fullPythonFunctionName(func)
-                        + QLatin1String("(): got multiple values for keyword argument '%1'.\");"));
+    }
 
     s << INDENT << "if (kwds) {\n";
     {
         Indentation indent(INDENT);
-        s << INDENT << "PyObject *keyName = nullptr;\n";
-        s << INDENT << "PyObject *value = nullptr;\n";
+        s << INDENT << "PyObject *value{};\n";
+        s << INDENT << "PyObject *kwds_dup = PyDict_Copy(kwds);\n";
         for (const AbstractMetaArgument &arg : args) {
             const int pyArgIndex = arg.argumentIndex()
                 - OverloadData::numberOfRemovedArguments(func, arg.argumentIndex());
             QString pyArgName = usePyArgs ? pythonArgsAt(pyArgIndex) : QLatin1String(PYTHON_ARG);
-            s << INDENT << "keyName = Py_BuildValue(\"s\",\"" << arg.name() << "\");\n";
-            s << INDENT << "if (PyDict_Contains(kwds, keyName)) {\n";
+            QString pyKeyName = QLatin1String("key_") + arg.name();
+            s << INDENT << "static PyObject *const " << pyKeyName
+                        << " = Shiboken::String::createStaticString(\"" << arg.name() << "\");\n";
+            s << INDENT << "if (PyDict_Contains(kwds, " << pyKeyName << ")) {\n";
             {
                 Indentation indent(INDENT);
-                s << INDENT << "value = PyDict_GetItem(kwds, keyName);\n";
+                s << INDENT << "value = PyDict_GetItem(kwds, " << pyKeyName << ");\n";
                 s << INDENT << "if (value && " << pyArgName << ") {\n";
                 {
                     Indentation indent(INDENT);
-                    s << INDENT << pyErrString.arg(arg.name()) << Qt::endl;
-                    s << INDENT << returnStatement(m_currentErrorCode) << Qt::endl;
+                    s << INDENT << "errInfo = " << pyKeyName << ";\n";
+                    s << INDENT << "Py_INCREF(errInfo);\n";
+                    s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
                 }
                 s << INDENT << "}\n";
                 s << INDENT << "if (value) {\n";
@@ -3307,9 +3319,29 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
                     }
                 }
                 s << INDENT << "}\n";
+                s << INDENT << "PyDict_DelItem(kwds_dup, " << pyKeyName << ");\n";
             }
             s << INDENT << "}\n";
         }
+        // PYSIDE-1305: Handle keyword args correctly.
+        // Normal functions handle their parameters immediately.
+        // For constructors that are QObject, we need to delay that
+        // until extra keyword signals and properties are handled.
+        s << INDENT << "if (PyDict_Size(kwds_dup) > 0) {\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "errInfo = kwds_dup;\n";
+            if (!(func->isConstructor() && func->ownerClass()->isQObject()))
+                s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
+            else
+                s << INDENT << "// fall through to handle extra keyword signals and properties\n";
+        }
+        s << INDENT << "} else {\n";
+        {
+            Indentation indent(INDENT);
+            s << INDENT << "Py_DECREF(kwds_dup);\n";
+        }
+        s << INDENT << "}\n";
     }
     s << INDENT << "}\n";
 }
@@ -4946,7 +4978,7 @@ void CppGenerator::writeSignatureInfo(QTextStream &s, const AbstractMetaFunction
 {
     OverloadData overloadData(overloads, this);
     const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
-    QString funcName = fullPythonFunctionName(rfunc);
+    QString funcName = fullPythonFunctionName(rfunc, false);
 
     int idx = overloads.length() - 1;
     bool multiple = idx > 0;

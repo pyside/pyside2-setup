@@ -253,7 +253,8 @@ private:
 
     void writeAddPythonToCppConversion(QTextStream &s, const QString &converterVar, const QString &pythonToCppFunc, const QString &isConvertibleFunc);
 
-    void writeNamedArgumentResolution(QTextStream &s, const AbstractMetaFunction *func, bool usePyArgs);
+    void writeNamedArgumentResolution(QTextStream &s, const AbstractMetaFunction *func,
+                                      bool usePyArgs, const OverloadData &overloadData);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
     QString argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex,

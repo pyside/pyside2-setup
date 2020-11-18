@@ -93,16 +93,31 @@ def matched_type(args, sigs):
     return None
 
 
-def seterror_argument(args, func_name):
+def seterror_argument(args, func_name, info):
     func = None
     try:
         func = eval(func_name, namespace)
     except Exception as e:
         msg = f"Internal error evaluating {func_name}: " + str(e)
         return TypeError, msg
+    if info and type(info) is str:
+        err = TypeError
+        if info == "<":
+            msg = f"{func_name}(): not enough arguments"
+        elif info == ">":
+            msg = f"{func_name}(): too many arguments"
+        elif info.isalnum():
+            msg = f"{func_name}(): got multiple values for keyword argument '{info}'"
+        else:
+            msg = f"{func_name}(): {info}"
+            err = AttributeError
+        return err, msg
+    if info and type(info) is dict:
+        msg = f"{func_name}(): unsupported keyword '{tuple(info)[0]}'"
+        return TypeError, msg
     sigs = get_signature(func, "typeerror")
     if not sigs:
-        msg = f"{func_name}({args} is wrong (missing signature)"
+        msg = f"{func_name}({args}) is wrong (missing signature)"
         return TypeError, msg
     if type(sigs) != list:
         sigs = [sigs]
@@ -143,7 +158,7 @@ def make_helptext(func):
         sigs = [sigs]
     try:
         func_name = func.__name__
-    except AttribureError:
+    except AttributeError:
         func_name = func.__func__.__name__
     sigtext = "\n".join(func_name + str(sig) for sig in sigs)
     msg = f"{sigtext}\n\n{existing_doc}" if check_string_type(existing_doc) else sigtext

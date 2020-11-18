@@ -205,8 +205,12 @@ PyObject *GetSignature_Wrapper(PyObject *ob, PyObject *modifier)
     if (dict == nullptr)
         return nullptr;
     PyObject *props = PyDict_GetItem(dict, func_name);
-    if (props == nullptr)
+    if (props == nullptr) {
+        // handle `__init__` like the class itself
+        if (strcmp(String::toCString(func_name), "__init__") == 0)
+            return GetSignature_TypeMod(objclass, modifier);
         Py_RETURN_NONE;
+    }
     return _GetSignature_Cached(props, PyName::method(), modifier);
 }
 
@@ -506,7 +510,7 @@ static PyObject *adjustFuncName(const char *func_name)
     return String::fromCString(_buf);
 }
 
-void SetError_Argument(PyObject *args, const char *func_name)
+void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
 {
     /*
      * This function replaces the type error construction with extra
@@ -516,15 +520,25 @@ void SetError_Argument(PyObject *args, const char *func_name)
     init_module_1();
     init_module_2();
 
+    // PYSIDE-1305: Handle errors set by fillQtProperties.
+    PyObject *err_val{};
+    if (PyErr_Occurred()) {
+        PyObject *e, *t;
+        PyErr_Fetch(&e, &err_val, &t);
+        info = err_val;
+        Py_XDECREF(&e);
+        Py_XDECREF(&t);
+    }
     // PYSIDE-1019: Modify the function name expression according to feature.
     AutoDecRef new_func_name(adjustFuncName(func_name));
     if (new_func_name.isNull()) {
         PyErr_Print();
         Py_FatalError("seterror_argument failed to call update_mapping");
     }
-    AutoDecRef res(PyObject_CallFunction(pyside_globals->seterror_argument_func,
-                                         const_cast<char *>("(OO)"),
-                                         args, new_func_name.object()));
+    if (info == nullptr)
+        info = Py_None;
+    AutoDecRef res(PyObject_CallFunctionObjArgs(pyside_globals->seterror_argument_func,
+                                                args, new_func_name.object(), info, nullptr));
     if (res.isNull()) {
         PyErr_Print();
         Py_FatalError("seterror_argument did not receive a result");
@@ -534,6 +548,7 @@ void SetError_Argument(PyObject *args, const char *func_name)
         PyErr_Print();
         Py_FatalError("unexpected failure in seterror_argument");
     }
+    Py_XDECREF(err_val);
     PyErr_SetObject(err, msg);
 }
 

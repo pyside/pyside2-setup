@@ -121,38 +121,36 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
     return true;
 }
 
-bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds, const char **blackList, unsigned int blackListSize)
+bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj, PyObject *kwds)
 {
 
     PyObject *key, *value;
     Py_ssize_t pos = 0;
 
     while (PyDict_Next(kwds, &pos, &key, &value)) {
-        if (!blackListSize || !std::binary_search(blackList, blackList + blackListSize, std::string(Shiboken::String::toCString(key)))) {
-            QByteArray propName(Shiboken::String::toCString(key));
-            bool accept = false;
-            if (metaObj->indexOfProperty(propName) != -1) {
-                if (!_setProperty(qObj, key, value, &accept))
-                    return false;
-            } else {
-                propName.append("()");
-                if (metaObj->indexOfSignal(propName) != -1) {
-                    accept = true;
-                    propName.prepend('2');
-                    if (!PySide::Signal::connect(qObj, propName, value))
-                        return false;
-                }
-            }
-            if (!accept) {
-                // PYSIDE-1019: Allow any existing attribute in the constructor.
-                if (!_setProperty(qObj, key, value, &accept))
-                    return false;
-            }
-            if (!accept) {
-                PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal",
-                             propName.constData());
+        QByteArray propName(Shiboken::String::toCString(key));
+        bool accept = false;
+        if (metaObj->indexOfProperty(propName) != -1) {
+            if (!_setProperty(qObj, key, value, &accept))
                 return false;
+        } else {
+            propName.append("()");
+            if (metaObj->indexOfSignal(propName) != -1) {
+                accept = true;
+                propName.prepend('2');
+                if (!PySide::Signal::connect(qObj, propName, value))
+                    return false;
             }
+        }
+        if (!accept) {
+            // PYSIDE-1019: Allow any existing attribute in the constructor.
+            if (!_setProperty(qObj, key, value, &accept))
+                return false;
+        }
+        if (!accept) {
+            PyErr_Format(PyExc_AttributeError, "'%s' is not a Qt property or a signal",
+                         propName.constData());
+            return false;
         }
     }
     return true;
