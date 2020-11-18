@@ -531,7 +531,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             } else if (entry->isEnum() && entry->generateCode()) {
                 auto enumEntry = static_cast<const EnumTypeEntry *>(entry);
                 const QString name = enumEntry->targetLangQualifier();
-                AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses, name);
+                AbstractMetaClass *cls = AbstractMetaClass::findClass(m_metaClasses,
+                                                                      enumEntry->parent());
 
                 const bool enumFound = cls
                     ? cls->findEnum(entry->targetLangEntryName()).has_value()
@@ -1436,12 +1437,13 @@ bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 
     for (const auto  &baseClassName : baseClasses) {
         if (!types->isClassRejected(baseClassName)) {
-            if (!types->findType(baseClassName)) {
+            auto typeEntry = types->findType(baseClassName);
+            if (typeEntry == nullptr || !typeEntry->isComplex()) {
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgUnknownBase(metaClass, baseClassName)));
                 return false;
             }
-            auto baseClass = AbstractMetaClass::findClass(m_metaClasses, baseClassName);
+            auto baseClass = AbstractMetaClass::findClass(m_metaClasses, typeEntry);
             if (!baseClass) {
                 qCWarning(lcShiboken).noquote().nospace()
                     << QStringLiteral("class not found for setup inheritance '%1'").arg(baseClassName);

@@ -1305,28 +1305,18 @@ std::optional<AbstractMetaEnum>
 {
     Q_ASSERT(entry->isEnum());
 
-    QString qualifiedName = entry->qualifiedCppName();
-    int pos = qualifiedName.lastIndexOf(QLatin1String("::"));
-
-    QString enumName;
-    QString className;
-
-    if (pos > 0) {
-        enumName = qualifiedName.mid(pos + 2);
-        className = qualifiedName.mid(0, pos);
-    } else {
-        enumName = qualifiedName;
-        className = TypeDatabase::globalNamespaceClassName(entry);
-    }
-
-    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes, className);
+    auto scopeEntry = entry->parent();
+    AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes, scopeEntry);
     if (!metaClass) {
         qCWarning(lcShiboken).noquote().nospace()
             << QStringLiteral("AbstractMeta::findEnum(), unknown class '%1' in '%2'")
-                              .arg(className, entry->qualifiedCppName());
+                              .arg(scopeEntry->qualifiedCppName(), entry->qualifiedCppName());
         return {};
     }
 
+    QString qualifiedName = entry->qualifiedCppName();
+    const int pos = qualifiedName.lastIndexOf(QLatin1String("::"));
+    const QString enumName = pos > 0 ? qualifiedName.mid(pos + 2) : qualifiedName;
     return metaClass->findEnum(enumName);
 }
 
