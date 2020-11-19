@@ -527,35 +527,6 @@ void verifyDirectoryFor(const QString &file)
     }
 }
 
-void Generator::replaceTemplateVariables(QString &code, const AbstractMetaFunction *func) const
-{
-    const AbstractMetaClass *cpp_class = func->ownerClass();
-    if (cpp_class)
-        code.replace(QLatin1String("%TYPE"), cpp_class->name());
-
-    const AbstractMetaArgumentList &argument = func->arguments();
-    for (const AbstractMetaArgument &arg : argument)
-        code.replace(QLatin1Char('%') + QString::number(arg.argumentIndex() + 1), arg.name());
-
-    //template values
-    code.replace(QLatin1String("%RETURN_TYPE"), translateType(func->type(), cpp_class));
-    code.replace(QLatin1String("%FUNCTION_NAME"), func->originalName());
-
-    if (code.contains(QLatin1String("%ARGUMENT_NAMES"))) {
-        QString str;
-        QTextStream aux_stream(&str);
-        writeArgumentNames(aux_stream, func, Generator::SkipRemovedArguments);
-        code.replace(QLatin1String("%ARGUMENT_NAMES"), str);
-    }
-
-    if (code.contains(QLatin1String("%ARGUMENTS"))) {
-        QString str;
-        QTextStream aux_stream(&str);
-        writeFunctionArguments(aux_stream, func, Options(SkipDefaultValues) | SkipRemovedArguments);
-        code.replace(QLatin1String("%ARGUMENTS"), str);
-    }
-}
-
 QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor)
 {
     const auto lines= QStringView{code}.split(QLatin1Char('\n'));

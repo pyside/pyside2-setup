@@ -93,21 +93,6 @@ public:
 protected:
     bool doSetup() override;
 
-    void writeArgumentNames(QTextStream &s,
-                            const AbstractMetaFunction *func,
-                            Options options = NoOption) const override;
-
-    /**
-     *   Function used to write the fucntion arguments on the class buffer.
-     *   \param s the class output buffer
-     *   \param func the pointer to metafunction information
-     *   \param count the number of function arguments
-     *   \param options some extra options used during the parser
-     */
-    void writeFunctionArguments(QTextStream &s,
-                                const AbstractMetaFunction *func,
-                                Options options = NoOption) const override;
-
     GeneratorContext contextForClass(const AbstractMetaClass *c) const override;
 
     /**
@@ -500,6 +485,22 @@ private:
 
     /// Return a prefix with '_' suitable for names in C++
     static QString moduleCppPrefix(const QString &moduleName = QString());
+
+    /// Functions used to write the function arguments on the class buffer.
+    /// \param s the class output buffer
+    /// \param func the pointer to metafunction information
+    /// \param count the number of function arguments
+    /// \param options some extra options used during the parser
+    void writeArgumentNames(QTextStream &s,
+                            const AbstractMetaFunction *func,
+                            Options options = NoOption) const;
+
+    void writeFunctionArguments(QTextStream &s,
+                                const AbstractMetaFunction *func,
+                                Options options = NoOption) const;
+
+    void replaceTemplateVariables(QString &code,
+                                  const AbstractMetaFunction *func) const;
 
     bool m_useCtorHeuristic = false;
     bool m_userReturnValueHeuristic = false;

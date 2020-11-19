@@ -327,23 +327,6 @@ protected:
                           Options options = NoOption) const;
 
     /**
-    *   Function used to write the fucntion arguments on the class buffer.
-    *   \param s the class output buffer
-    *   \param metafunction the pointer to metafunction information
-    *   \param count the number of function arguments
-    *   \param options some extra options used during the parser
-    */
-    virtual void writeFunctionArguments(QTextStream &s,
-                                        const AbstractMetaFunction *metafunction,
-                                        Options options = NoOption) const = 0;
-
-    virtual void writeArgumentNames(QTextStream &s,
-                                    const AbstractMetaFunction *metafunction,
-                                    Options options = NoOption) const = 0;
-
-    void replaceTemplateVariables(QString &code, const AbstractMetaFunction *func) const;
-
-    /**
      *   Returns the package name.
      */
     static QString packageName();

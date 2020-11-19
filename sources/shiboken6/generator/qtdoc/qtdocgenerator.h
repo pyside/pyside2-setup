@@ -244,9 +244,6 @@ protected:
     void generateClass(QTextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
-    void writeFunctionArguments(QTextStream&, const AbstractMetaFunction*, Options) const override {}
-    void writeArgumentNames(QTextStream&, const AbstractMetaFunction*, Options) const override {}
-
 private:
     void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass) const;
 
