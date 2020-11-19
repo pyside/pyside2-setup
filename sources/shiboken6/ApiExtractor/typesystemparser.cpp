@@ -2357,6 +2357,12 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
         }
     }
 
+    // Child of global <function>
+    if (originalSignature.isEmpty() && topElement.entry->isFunction()) {
+        auto f = static_cast<const FunctionTypeEntry *>(topElement.entry);
+        originalSignature = f->signatures().value(0);
+    }
+
     const QString signature = TypeDatabase::normalizedSignature(originalSignature);
     if (signature.isEmpty()) {
         m_error = QLatin1String("No signature for modified function");

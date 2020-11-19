@@ -200,7 +200,7 @@
              to a primitive type (PStr*) without help from the binding
              developer.
         -->
-        <modify-function signature="changePStr(PStr*, const char*)">
+        <modify-function>
             <modify-argument index="1">
                 <replace-type modified-type="PStr"/>
             </modify-argument>
@@ -215,7 +215,7 @@
     </function>
 
     <function signature="duplicatePStr(PStr*)">
-        <modify-function signature="duplicatePStr(PStr*)">
+        <modify-function>
             <modify-argument index="return">
                 <replace-type modified-type="PyObject"/>
             </modify-argument>
