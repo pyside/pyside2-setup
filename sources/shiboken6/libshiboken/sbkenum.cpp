@@ -472,7 +472,6 @@ PyObject *getEnumItemFromValue(PyTypeObject *enumType, long itemValue)
 }
 
 static PyTypeObject *createEnum(const char *fullName, const char *cppName,
-                                const char */* shortName */,
                                 PyTypeObject *flagsType)
 {
     PyTypeObject *enumType = newTypeWithName(fullName, cppName, flagsType);
@@ -485,7 +484,7 @@ static PyTypeObject *createEnum(const char *fullName, const char *cppName,
 
 PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
 {
-    PyTypeObject *enumType = createEnum(fullName, cppName, name, flagsType);
+    PyTypeObject *enumType = createEnum(fullName, cppName, flagsType);
     if (enumType && PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(enumType)) < 0) {
         Py_DECREF(enumType);
         return nullptr;
@@ -500,7 +499,7 @@ PyTypeObject *createGlobalEnum(PyObject *module, const char *name, const char *f
 
 PyTypeObject *createScopedEnum(SbkObjectType *scope, const char *name, const char *fullName, const char *cppName, PyTypeObject *flagsType)
 {
-    PyTypeObject *enumType = createEnum(fullName, cppName, name, flagsType);
+    PyTypeObject *enumType = createEnum(fullName, cppName, flagsType);
     if (enumType && PyDict_SetItemString(reinterpret_cast<PyTypeObject *>(scope)->tp_dict, name,
             reinterpret_cast<PyObject *>(enumType)) < 0) {
         Py_DECREF(enumType);
