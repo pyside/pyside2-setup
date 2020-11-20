@@ -30,6 +30,7 @@
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
 #include "abstractmetafunction.h"
+#include "graph.h"
 #include "messages.h"
 #include "propertyspec.h"
 #include "reporthandler.h"
@@ -37,27 +38,24 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
+#include "parser/codemodel.h"
+
 #include <clangparser/clangbuilder.h>
 #include <clangparser/clangutils.h>
 #include <clangparser/compilersupport.h>
 
-#include "parser/codemodel.h"
-
-#include <QDebug>
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QRegularExpression>
-#include <QTextStream>
-#include <QVariant>
-#include <QTime>
-#include <QQueue>
-#include <QDir>
+#include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
+#include <QtCore/QQueue>
+#include <QtCore/QRegularExpression>
+#include <QtCore/QTemporaryFile>
+#include <QtCore/QTextStream>
 
 #include <cstdio>
 #include <algorithm>
-#include "graph.h"
-#include <QTemporaryFile>
+#include <memory>
 
 static inline QString colonColon() { return QStringLiteral("::"); }
 
@@ -2653,7 +2651,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
             continue;
         }
 
-        QScopedPointer<AbstractMetaFunction> f(function->copy());
+        std::unique_ptr<AbstractMetaFunction> f(function->copy());
         f->setArguments(AbstractMetaArgumentList());
 
         if (!function->isVoid()) {
@@ -2717,13 +2715,13 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
         }
 
 
-        if (!applyArrayArgumentModifications(f->modifications(subclass), f.data(),
+        if (!applyArrayArgumentModifications(f->modifications(subclass), f.get(),
                                              &errorMessage)) {
             qCWarning(lcShiboken, "While specializing %s (%s): %s",
                       qPrintable(subclass->name()), qPrintable(templateClass->name()),
                       qPrintable(errorMessage));
         }
-        subclass->addFunction(f.take());
+        subclass->addFunction(f.release());
     }
 
      // Take copy

@@ -45,6 +45,7 @@
 #include <QtCore/QXmlStreamEntityResolver>
 
 #include <algorithm>
+#include <memory>
 
 const char *TARGET_CONVERSION_RULE_FLAG = "0";
 const char *NATIVE_CONVERSION_RULE_FLAG = "1";
@@ -1385,9 +1386,9 @@ NamespaceTypeEntry *
 {
     if (!checkRootElement())
         return nullptr;
-    QScopedPointer<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
+    std::unique_ptr<NamespaceTypeEntry> result(new NamespaceTypeEntry(name, since, currentParentTypeEntry()));
     auto visibility = TypeSystem::Visibility::Unspecified;
-    applyCommonAttributes(reader, result.data(), attributes);
+    applyCommonAttributes(reader, result.get(), attributes);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto attributeName = attributes->at(i).qualifiedName();
         if (attributeName == QLatin1String("files")) {
@@ -1428,14 +1429,14 @@ NamespaceTypeEntry *
     if (visibility != TypeSystem::Visibility::Unspecified)
         result->setVisibility(visibility);
     // Handle legacy "generate" before the common handling
-    applyComplexTypeAttributes(reader, result.data(), attributes);
+    applyComplexTypeAttributes(reader, result.get(), attributes);
 
     if (result->extends() && !result->hasPattern()) {
         m_error = msgExtendingNamespaceRequiresPattern(name);
         return nullptr;
     }
 
-    return result.take();
+    return result.release();
 }
 
 ValueTypeEntry *
