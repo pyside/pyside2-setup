@@ -540,6 +540,15 @@ QString msgCannotOpenForWriting(const QFile &f)
            .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 
+QString msgWriteFailed(const QFile &f, qsizetype size)
+{
+    QString result;
+    QTextStream(&result) << "Failed to write " << size << "bytes to '"
+        << QDir::toNativeSeparators(f.fileName()) << "': "
+        << f.errorString();
+    return result;
+}
+
 // generator.cpp
 
 QString msgCannotUseEnumAsInt(const QString &name)

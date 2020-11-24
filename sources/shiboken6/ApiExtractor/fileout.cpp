@@ -218,8 +218,10 @@ FileOut::State FileOut::done(QString *errorMessage)
             *errorMessage = msgCannotOpenForWriting(fileWrite);
             return Failure;
         }
-        stream.setDevice(&fileWrite);
-        stream << tmp;
+        if (fileWrite.write(tmp) == -1 || !fileWrite.flush()) {
+            *errorMessage = msgWriteFailed(fileWrite, tmp.size());
+            return Failure;
+        }
     }
     if (diff) {
         std::printf("%sFile: %s%s\n", colorInfo, qPrintable(name), colorReset);
