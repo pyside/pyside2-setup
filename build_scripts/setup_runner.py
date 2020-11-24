@@ -88,8 +88,13 @@ class SetupRunner(object):
         internal_build_type_arg = self.construct_internal_build_type_cmd_line_argument(build_type)
         setup_cmd = [sys.executable] + self.sub_argv + [internal_build_type_arg]
 
+        command = self.sub_argv[0]
+        if command == 'setup.py' and len(self.sub_argv) > 1:
+            command = self.sub_argv[1]
+
         # Add --reuse-build option if requested and not already present.
-        if reuse_build and not self.cmd_line_argument_is_in_args("reuse-build", self.sub_argv):
+        if (reuse_build and command != 'clean'
+            and not self.cmd_line_argument_is_in_args("reuse-build", self.sub_argv)):
             setup_cmd.append(self.construct_cmd_line_argument("reuse-build"))
         self.invocations_list.append(setup_cmd)
 
