@@ -22,7 +22,7 @@ target_include_directories(shiboken6 PRIVATE
                     )
 target_link_libraries(shiboken6 apiextractor Qt${QT_MAJOR_VERSION}::Core)
 if (NOT DISABLE_DOCSTRINGS)
-    target_sources(shiboken6 PRIVATE qtdoc/qtdocgenerator.cpp)
+    target_sources(shiboken6 PRIVATE qtdoc/qtxmltosphinx.cpp qtdoc/qtdocgenerator.cpp)
     target_compile_definitions(shiboken6 PUBLIC DOCSTRINGS_ENABLED)
 endif()
 
