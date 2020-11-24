@@ -114,7 +114,7 @@ def seterror_argument(args, func_name, info):
         return err, msg
     if info and type(info) is dict:
         msg = f"{func_name}(): unsupported keyword '{tuple(info)[0]}'"
-        return TypeError, msg
+        return AttributeError, msg
     sigs = get_signature(func, "typeerror")
     if not sigs:
         msg = f"{func_name}({args}) is wrong (missing signature)"

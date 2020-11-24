@@ -79,7 +79,7 @@ class DiverseKeywordsTest(UsesQApplication):
     def testUndefinedKeyword(self):
         r, g, b, a = 1, 2, 3, 4
         # From the jira issue:
-        with self.assertRaises(TypeError) as cm:
+        with self.assertRaises(AttributeError) as cm:
             QColor(r, g, b, a, alpha=0)
         self.assertTrue("unsupported" in cm.exception.args[0])
 
