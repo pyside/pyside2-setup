@@ -29,7 +29,7 @@
 #ifndef QTXMLTOSPHINX_H
 #define QTXMLTOSPHINX_H
 
-#include "indentor.h"
+#include <textstream.h>
 
 #include <QtCore/QHash>
 #include <QtCore/QList>
@@ -102,7 +102,7 @@ public:
             TableRow &first() { return m_rows.first(); }
             TableRow &last() { return m_rows.last(); }
 
-            void format(QTextStream& s, const Indentor &indent) const;
+            void format(TextStream& s) const;
 
         private:
             QList<TableRow> m_rows;
@@ -111,13 +111,11 @@ public:
     };
 
     explicit QtXmlToSphinx(const QtDocGenerator *generator,
-                           Indentor &indentor,
                            const QString& doc,
                            const QString& context = QString());
     ~QtXmlToSphinx();
 
     static bool convertToRst(const QtDocGenerator *generator,
-                             Indentor &indentor,
                              const QString &sourceFileName,
                              const QString &targetFileName,
                              const QString &context = QString(),
@@ -174,7 +172,7 @@ private:
     typedef void (QtXmlToSphinx::*TagHandler)(QXmlStreamReader&);
     QHash<QString, TagHandler> m_handlerMap;
     QStack<TagHandler> m_handlers;
-    QTextStream m_output;
+    TextStream m_output;
     QString m_result;
 
     QStack<QString*> m_buffers;
@@ -186,7 +184,6 @@ private:
     bool m_tableHasHeader;
     QString m_context;
     const QtDocGenerator* m_generator;
-    Indentor &INDENT;
     bool m_insideBold;
     bool m_insideItalic;
     QString m_lastTagName;
@@ -203,7 +200,7 @@ private:
     bool copyImage(const QString &href) const;
 };
 
-inline QTextStream& operator<<(QTextStream& s, const QtXmlToSphinx& xmlToSphinx)
+inline TextStream& operator<<(TextStream& s, const QtXmlToSphinx& xmlToSphinx)
 {
     return s << xmlToSphinx.result();
 }

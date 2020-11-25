@@ -29,6 +29,8 @@
 #ifndef RSTFORMAT_H
 #define RSTFORMAT_H
 
+#include <textstream.h>
+
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
 #include <QtCore/QTextStream>
@@ -41,7 +43,7 @@ struct rstVersionAdded
     const QVersionNumber m_version;
 };
 
-inline QTextStream &operator<<(QTextStream &s, const rstVersionAdded &v)
+inline TextStream &operator<<(TextStream &s, const rstVersionAdded &v)
 {
     s << ".. versionadded:: "<< v.m_version.toString() << "\n\n";
     return s;
@@ -58,7 +60,7 @@ class Pad
 public:
     explicit Pad(char c, int count) : m_char(c), m_count(count) {}
 
-    void write(QTextStream &str) const
+    void write(TextStream &str) const
     {
         for (int i = 0; i < m_count; ++i)
             str << m_char;
@@ -69,14 +71,14 @@ private:
     const int m_count;
 };
 
-inline QTextStream &operator<<(QTextStream &str, const Pad &pad)
+inline TextStream &operator<<(TextStream &str, const Pad &pad)
 {
     pad.write(str);
     return str;
 }
 
 template <class String>
-inline int writeEscapedRstText(QTextStream &str, const String &s)
+inline int writeEscapedRstText(TextStream &str, const String &s)
 {
     int escaped = 0;
     for (const QChar &c : s) {
@@ -99,13 +101,13 @@ class escape
 public:
     explicit escape(QStringView s) : m_string(s) {}
 
-    void write(QTextStream &str) const { writeEscapedRstText(str, m_string); }
+    void write(TextStream &str) const { writeEscapedRstText(str, m_string); }
 
 private:
     const QStringView m_string;
 };
 
-inline QTextStream &operator<<(QTextStream &str, const escape &e)
+inline TextStream &operator<<(TextStream &str, const escape &e)
 {
     e.write(str);
     return str;
@@ -131,7 +133,7 @@ class rstLabel
 public:
     explicit rstLabel(const QString &l) : m_label(l) {}
 
-    friend QTextStream &operator<<(QTextStream &str, const rstLabel &a)
+    friend TextStream &operator<<(TextStream &str, const rstLabel &a)
     {
         str << ".. _" << toRstLabel(a.m_label) << ":\n\n";
         return str;

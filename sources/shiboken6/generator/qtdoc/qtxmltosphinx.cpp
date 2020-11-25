@@ -28,7 +28,6 @@
 
 #include "qtxmltosphinx.h"
 #include "fileout.h"
-#include "indentor.h"
 #include "messages.h"
 #include "rstformat.h"
 #include "qtdocgenerator.h"
@@ -48,33 +47,6 @@ static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString titleAttribute() { return QStringLiteral("title"); }
 static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
 static inline QString briefAttribute() { return QStringLiteral("brief"); }
-
-static QTextStream &formatCode(QTextStream &s, const QString &code, const Indentor &indentor)
-{
-    const auto lines= QStringView{code}.split(QLatin1Char('\n'));
-    for (const auto &line : lines) {
-        // Do not indent preprocessor lines
-        if (!line.isEmpty() && !line.startsWith(QLatin1Char('#')))
-            s << indentor;
-        s << line << '\n';
-    }
-    return s;
-}
-
-// Return last character of a QString-buffered stream.
-static QChar lastChar(const QTextStream &str)
-{
-    const QString *string = str.string();
-    Q_ASSERT(string);
-    return string->isEmpty() ? QChar() : *(string->crbegin());
-}
-
-static QTextStream &ensureEndl(QTextStream &s)
-{
-    if (lastChar(s) != QLatin1Char('\n'))
-        s << '\n';
-    return s;
-}
 
 struct QtXmlToSphinx::LinkContext
 {
@@ -119,7 +91,7 @@ static const char *linkKeyWord(QtXmlToSphinx::LinkContext::Type type)
     return "";
 }
 
-QTextStream &operator<<(QTextStream &str, const QtXmlToSphinx::LinkContext &linkContext)
+TextStream &operator<<(TextStream &str, const QtXmlToSphinx::LinkContext &linkContext)
 {
     // Temporarily turn off bold/italic since links do not work within
     if (linkContext.flags & QtXmlToSphinx::LinkContext::InsideBold)
@@ -150,10 +122,11 @@ QTextStream &operator<<(QTextStream &str, const QtXmlToSphinx::LinkContext &link
     return str;
 }
 
-QtXmlToSphinx::QtXmlToSphinx(const QtDocGenerator *generator, Indentor &indentor,
+QtXmlToSphinx::QtXmlToSphinx(const QtDocGenerator *generator,
                              const QString& doc, const QString& context)
-        : m_tableHasHeader(false), m_context(context), m_generator(generator),
-          INDENT(indentor), m_insideBold(false), m_insideItalic(false)
+        : m_output(static_cast<QString *>(nullptr)),
+          m_tableHasHeader(false), m_context(context), m_generator(generator),
+          m_insideBold(false), m_insideItalic(false)
 {
     m_handlerMap.insert(QLatin1String("heading"), &QtXmlToSphinx::handleHeadingTag);
     m_handlerMap.insert(QLatin1String("brief"), &QtXmlToSphinx::handleParaTag);
@@ -305,7 +278,7 @@ QString QtXmlToSphinx::resolveContextForMethod(const QString& methodName) const
 QString QtXmlToSphinx::transform(const QString& doc)
 {
     Q_ASSERT(m_buffers.isEmpty());
-    Indentation4 indentation(INDENT);
+    Indentation indentation(m_output);
     if (doc.trimmed().isEmpty())
         return doc;
 
@@ -320,7 +293,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
             QTextStream(&message) << "XML Error "
                 << reader.errorString() << " at " << reader.lineNumber()
                 << ':' << reader.columnNumber() << '\n' << doc;
-            m_output << INDENT << message;
+            m_output << message;
             qCWarning(lcShibokenDoc).noquote().nospace() << message;
             break;
         }
@@ -345,10 +318,10 @@ QString QtXmlToSphinx::transform(const QString& doc)
 
     if (!m_inlineImages.isEmpty()) {
         // Write out inline image definitions stored in handleInlineImageTag().
-        m_output << '\n';
+        m_output << '\n' << disableIndent;
         for (const InlineImage &img : qAsConst(m_inlineImages))
             m_output << ".. |" << img.tag << "| image:: " << img.href << '\n';
-        m_output << '\n';
+        m_output << '\n' << enableIndent;
         m_inlineImages.clear();
     }
 
@@ -451,11 +424,12 @@ void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
         else
             type = types[typeIdx];
     } else if (token == QXmlStreamReader::EndElement) {
-        m_output << Pad(type, headingSize) << "\n\n";
+        m_output << disableIndent << Pad(type, headingSize) << "\n\n"
+            << enableIndent;
     } else if (token == QXmlStreamReader::Characters) {
-        m_output << "\n\n";
+        m_output << "\n\n" << disableIndent;
         headingSize = writeEscapedRstText(m_output, reader.text().trimmed());
-        m_output << '\n';
+        m_output << '\n' << enableIndent;
     }
 }
 
@@ -471,16 +445,16 @@ void QtXmlToSphinx::handleParaTag(QXmlStreamReader& reader)
         else if (result.startsWith(QLatin1String("**Note:**")))
             result.replace(0, 9, QLatin1String(".. note:: "));
 
-        m_output << INDENT << result << "\n\n";
+        m_output << result << "\n\n";
     } else if (token == QXmlStreamReader::Characters) {
         const auto  text = reader.text();
-        const QChar end = lastChar(m_output);
-        if (!text.isEmpty() && INDENT.indent == 0 && !end.isNull()) {
+        const QChar end = m_output.lastChar();
+        if (!text.isEmpty() && m_output.indentation() == 0 && !end.isNull()) {
             QChar start = text[0];
             if ((end == QLatin1Char('*') || end == QLatin1Char('`')) && start != QLatin1Char(' ') && !start.isPunct())
                 m_output << '\\';
         }
-        m_output << INDENT << escape(text);
+        m_output << escape(text);
     }
 }
 
@@ -548,7 +522,7 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
 {
     switch (reader.tokenType()) {
     case QXmlStreamReader::StartElement:
-        m_output << INDENT << ".. seealso:: ";
+        m_output << ".. seealso:: ";
         break;
     case QXmlStreamReader::Characters: {
         // Direct embedded link: <see-also>rootIsDecorated()</see-also>
@@ -584,7 +558,7 @@ static inline bool snippetComparison()
 }
 
 template <class Indent> // const char*/class Indentor
-void formatSnippet(QTextStream &str, Indent indent, const QString &snippet)
+void formatSnippet(TextStream &str, Indent indent, const QString &snippet)
 {
     const auto lines = QStringView{snippet}.split(QLatin1Char('\n'));
     for (const auto &line : lines) {
@@ -597,17 +571,15 @@ void formatSnippet(QTextStream &str, Indent indent, const QString &snippet)
 static QString msgSnippetComparison(const QString &location, const QString &identifier,
                                     const QString &pythonCode, const QString &fallbackCode)
 {
-    QString result;
-    QTextStream str(&result);
+    StringStream str;
+    str.setTabWidth(2);
     str << "Python snippet " << location;
     if (!identifier.isEmpty())
         str << " [" << identifier << ']';
-    str << ":\n";
-    formatSnippet(str, "  ", pythonCode);
-    str << "Corresponding fallback snippet:\n";
-    formatSnippet(str, "  ", fallbackCode);
-    str << "-- end --\n";
-    return result;
+    str << ":\n" << indent << pythonCode << ensureEndl << outdent
+        << "Corresponding fallback snippet:\n"
+        << indent << fallbackCode << ensureEndl << outdent << "-- end --\n";
+    return str;
 }
 
 void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
@@ -646,14 +618,14 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
             qCDebug(lcShibokenDoc, "%s", qPrintable(msgSnippetComparison(location, identifier, pythonCode, fallbackCode)));
 
         if (!consecutiveSnippet)
-            m_output << INDENT << "::\n\n";
+            m_output << "::\n\n";
 
-        Indentation4 indentation(INDENT);
+        Indentation indentation(m_output);
         const QString code = pythonCode.isEmpty() ? fallbackCode : pythonCode;
         if (code.isEmpty())
-            m_output << INDENT << "<Code snippet \"" << location << ':' << identifier << "\" not found>\n";
+            m_output << "<Code snippet \"" << location << ':' << identifier << "\" not found>\n";
         else
-            formatSnippet(m_output, INDENT, code);
+            m_output << code << ensureEndl;
         m_output << '\n';
     }
 }
@@ -667,18 +639,17 @@ void QtXmlToSphinx::handleDotsTag(QXmlStreamReader& reader)
             m_output.flush();
             m_output.string()->chop(2);
         } else {
-            m_output << INDENT << "::\n\n";
+            m_output << "::\n\n";
         }
-        Indentation4 indentation(INDENT);
+        Indentation indentation(m_output);
         pushOutputBuffer();
-        m_output << INDENT;
         int indent = reader.attributes().value(QLatin1String("indent")).toInt();
         for (int i = 0; i < indent; ++i)
             m_output << ' ';
     } else if (token == QXmlStreamReader::Characters) {
         m_output << reader.text().toString();
     } else if (token == QXmlStreamReader::EndElement) {
-        m_output << popOutputBuffer() << "\n\n\n";
+        m_output << disableIndent << popOutputBuffer() << "\n\n\n" << enableIndent;
     }
 }
 
@@ -693,7 +664,7 @@ void QtXmlToSphinx::handleTableTag(QXmlStreamReader& reader)
         m_currentTable.setHeaderEnabled(m_tableHasHeader);
         m_currentTable.normalize();
         m_output << ensureEndl;
-        m_currentTable.format(m_output, INDENT);
+        m_currentTable.format(m_output);
         m_currentTable.clear();
     }
 }
@@ -767,21 +738,21 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
                                               TableCell(QLatin1String("Description"))});
             m_tableHasHeader = true;
         }
-        INDENT.indent--;
+        m_output.indent();
     } else if (token == QXmlStreamReader::EndElement) {
-        INDENT.indent++;
+        m_output.outdent();
         if (!m_currentTable.isEmpty()) {
             switch (listType) {
             case BulletList:
             case OrderedList: {
                 m_output << '\n';
                 const char *separator = listType == BulletList ? "* " : "#. ";
-                const char *indent    = listType == BulletList ? "  " : "   ";
+                const char *indentLine = listType == BulletList ? "  " : "   ";
                 for (const TableCell &cell : m_currentTable.constFirst()) {
                     const auto itemLines = QStringView{cell.data}.split(QLatin1Char('\n'));
-                    m_output << INDENT << separator << itemLines.constFirst() << '\n';
+                    m_output << separator << itemLines.constFirst() << '\n';
                     for (int i = 1, max = itemLines.count(); i < max; ++i)
-                        m_output << INDENT << indent << itemLines[i] << '\n';
+                        m_output << indentLine << itemLines[i] << '\n';
                 }
                 m_output << '\n';
             }
@@ -790,7 +761,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
                 m_currentTable.setHeaderEnabled(m_tableHasHeader);
                 m_currentTable.normalize();
                 m_output << ensureEndl;
-                m_currentTable.format(m_output, INDENT);
+                m_currentTable.format(m_output);
                 break;
             }
         }
@@ -989,7 +960,7 @@ void QtXmlToSphinx::handleImageTag(QXmlStreamReader& reader)
         return;
     const QString href = reader.attributes().value(QLatin1String("href")).toString();
     if (copyImage(href))
-        m_output << INDENT << ".. image:: " <<  href << "\n\n";
+        m_output << ".. image:: " <<  href << "\n\n";
 }
 
 void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
@@ -1019,11 +990,10 @@ void QtXmlToSphinx::handleRawTag(QXmlStreamReader& reader)
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
         QString format = reader.attributes().value(QLatin1String("format")).toString();
-        m_output << INDENT << ".. raw:: " << format.toLower() << "\n\n";
+        m_output << ".. raw:: " << format.toLower() << "\n\n";
     } else if (token == QXmlStreamReader::Characters) {
-        const auto lst(reader.text().split(QLatin1Char('\n')));
-        for (const auto &row : lst)
-            m_output << INDENT << INDENT << row << '\n';
+        Indentation indent(m_output);
+        m_output << reader.text();
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << "\n\n";
     }
@@ -1033,15 +1003,12 @@ void QtXmlToSphinx::handleCodeTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        m_output << INDENT << "::\n\n";
-        INDENT.indent++;
+        m_output << "::\n\n" << indent;
     } else if (token == QXmlStreamReader::Characters) {
-        const auto lst(reader.text().split(QLatin1Char('\n')));
-        for (const auto &row : lst)
-            m_output << INDENT << INDENT << row << '\n';
+        Indentation indent(m_output);
+        m_output << reader.text();
     } else if (token == QXmlStreamReader::EndElement) {
-        m_output << "\n\n";
-        INDENT.indent--;
+        m_output << outdent << "\n\n";
     }
 }
 
@@ -1071,6 +1038,8 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
     if (reader.tokenType() != QXmlStreamReader::StartElement)
         return;
 
+    m_output << disableIndent;
+
     const auto  title = reader.attributes().value(titleAttribute());
     if (!title.isEmpty())
         m_output << rstLabel(title.toString());
@@ -1080,7 +1049,8 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
        ? writeEscapedRstText(m_output, title)
        : writeEscapedRstText(m_output, fullTitle);
 
-    m_output << '\n' << Pad('*', size) << "\n\n";
+    m_output << '\n' << Pad('*', size) << "\n\n"
+        << enableIndent;
 }
 
 void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
@@ -1089,7 +1059,7 @@ void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
         return;
     const auto  name = reader.attributes().value(nameAttribute());
     if (!name.isEmpty())
-        m_output << INDENT << rstLabel(name.toString());
+        m_output << rstLabel(name.toString());
 }
 
 void QtXmlToSphinx::handleIgnoredTag(QXmlStreamReader&)
@@ -1115,7 +1085,7 @@ void QtXmlToSphinx::handleAnchorTag(QXmlStreamReader& reader)
             m_opened_anchor = anchor;
             if (!m_context.isEmpty())
                 anchor.prepend(m_context + QLatin1Char('_'));
-            m_output << INDENT << rstLabel(anchor);
+            m_output << rstLabel(anchor);
         }
    } else if (token == QXmlStreamReader::EndElement) {
        m_opened_anchor.clear();
@@ -1138,18 +1108,17 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         QString code = readFromLocation(location, QString(), &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(msgTagWarning(reader, m_context, m_lastTagName, errorMessage)));
-        m_output << INDENT << "::\n\n";
-        Indentation4 indentation(INDENT);
+        m_output << "::\n\n";
+        Indentation indentation(m_output);
         if (code.isEmpty())
-            m_output << INDENT << "<Code snippet \"" << location << "\" not found>\n";
+            m_output << "<Code snippet \"" << location << "\" not found>\n";
         else
-            formatCode(m_output, code, INDENT);
+            m_output << code << ensureEndl;
         m_output << '\n';
     }
 }
 
 bool QtXmlToSphinx::convertToRst(const QtDocGenerator *generator,
-                                 Indentor &indentor,
                                  const QString &sourceFileName,
                                  const QString &targetFileName,
                                  const QString &context, QString *errorMessage)
@@ -1164,8 +1133,8 @@ bool QtXmlToSphinx::convertToRst(const QtDocGenerator *generator,
     sourceFile.close();
 
     FileOut targetFile(targetFileName);
-    QtXmlToSphinx x(generator, indentor, doc, context);
-    targetFile.stream.textStream() << x;
+    QtXmlToSphinx x(generator, doc, context);
+    targetFile.stream << x;
     return targetFile.done(errorMessage) != FileOut::Failure;
 }
 
@@ -1225,7 +1194,7 @@ void QtXmlToSphinx::Table::normalize()
     m_normalized = true;
 }
 
-void QtXmlToSphinx::Table::format(QTextStream& s, const Indentor &INDENT) const
+void QtXmlToSphinx::Table::format(TextStream& s) const
 {
     if (isEmpty())
         return;
@@ -1264,7 +1233,7 @@ void QtXmlToSphinx::Table::format(QTextStream& s, const Indentor &INDENT) const
         const QtXmlToSphinx::TableRow& row = m_rows.at(i);
 
         // print line
-        s << INDENT << '+';
+        s << '+';
         for (int col = 0; col < headerColumnCount; ++col) {
             char c;
             if (col >= row.length() || row[col].rowSpan == -1)
@@ -1284,24 +1253,23 @@ void QtXmlToSphinx::Table::format(QTextStream& s, const Indentor &INDENT) const
             for (int maxJ = std::min(int(row.count()), headerColumnCount); j < maxJ; ++j) { // for each column
                 const QtXmlToSphinx::TableCell& cell = row[j];
                 const auto rowLines = QStringView{cell.data}.split(QLatin1Char('\n')); // FIXME: Cache this!!!
-                if (!j) // First column, so we need print the identation
-                    s << INDENT;
 
                 if (!j || !cell.colSpan)
                     s << '|';
                 else
                     s << ' ';
+                const int width = colWidths.at(j);
                 if (rowLine < rowLines.count())
-                    s << qSetFieldWidth(colWidths[j]) << Qt::left << rowLines.at(rowLine) << qSetFieldWidth(0);
+                    s << AlignedField(rowLines.at(rowLine), width);
                 else
-                    s << Pad(' ', colWidths.at(j));
+                    s << Pad(' ', width);
             }
             for ( ; j < headerColumnCount; ++j) // pad
                 s << '|' << Pad(' ', colWidths.at(j));
             s << "|\n";
         }
     }
-    s << INDENT << horizontalLine << "\n\n";
+    s << horizontalLine << "\n\n";
 }
 
 void QtXmlToSphinx::stripPythonQualifiers(QString *s)

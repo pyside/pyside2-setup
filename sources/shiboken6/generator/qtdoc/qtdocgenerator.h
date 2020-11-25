@@ -77,26 +77,26 @@ protected:
     bool finishGeneration() override;
 
 private:
-    void writeEnums(QTextStream& s, const AbstractMetaClass* cppClass) const;
+    void writeEnums(TextStream& s, const AbstractMetaClass* cppClass) const;
 
-    void writeFields(QTextStream &s, const AbstractMetaClass *cppClass) const;
+    void writeFields(TextStream &s, const AbstractMetaClass *cppClass) const;
     static QString functionSignature(const AbstractMetaClass* cppClass,
                                      const AbstractMetaFunction* func);
-    void writeFunction(QTextStream& s, const AbstractMetaClass* cppClass,
+    void writeFunction(TextStream& s, const AbstractMetaClass* cppClass,
                        const AbstractMetaFunction* func, bool indexed = true);
-    void writeFunctionParametersType(QTextStream &s, const AbstractMetaClass *cppClass,
+    void writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
                                      const AbstractMetaFunction* func) const;
-    void writeFunctionList(QTextStream& s, const AbstractMetaClass* cppClass);
-    void writeFunctionBlock(QTextStream& s, const QString& title, QStringList& functions);
-    void writeParameterType(QTextStream &s, const AbstractMetaClass *cppClass,
+    void writeFunctionList(TextStream& s, const AbstractMetaClass* cppClass);
+    void writeFunctionBlock(TextStream& s, const QString& title, QStringList& functions);
+    void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
                             const AbstractMetaArgument &arg) const;
 
-    void writeConstructors(QTextStream &s, const AbstractMetaClass *cppClass) const;
-    void writeFormattedText(QTextStream &s, const Documentation &doc,
+    void writeConstructors(TextStream &s, const AbstractMetaClass *cppClass) const;
+    void writeFormattedText(TextStream &s, const Documentation &doc,
                             const AbstractMetaClass *metaclass = nullptr,
                             Documentation::Type docType = Documentation::Detailed) const;
-    bool writeInjectDocumentation(QTextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
-    void writeDocSnips(QTextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
+    bool writeInjectDocumentation(TextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
+    void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
     void writeModuleDocumentation();
     void writeAdditionalDocumentation() const;
