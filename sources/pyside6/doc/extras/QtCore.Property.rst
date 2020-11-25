@@ -1,5 +1,6 @@
 .. currentmodule:: PySide6.QtCore
 .. _Property:
+
 Property
 ********
 
