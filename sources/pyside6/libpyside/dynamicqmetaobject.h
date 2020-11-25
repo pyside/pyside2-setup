@@ -54,6 +54,9 @@ class MetaObjectBuilder
 {
     Q_DISABLE_COPY(MetaObjectBuilder)
 public:
+    using EnumValue = QPair<QByteArray, int>;
+    using EnumValues = QList<EnumValue>;
+
     MetaObjectBuilder(const char *className, const QMetaObject *metaObject);
 
     MetaObjectBuilder(PyTypeObject *type, const QMetaObject *metaObject);
@@ -68,10 +71,8 @@ public:
     int addProperty(const char *property, PyObject *data);
     void addInfo(const char *key, const char *value);
     void addInfo(const QMap<QByteArray, QByteArray> &info);
-    void addEnumerator(const char *name,
-                       bool flag,
-                       bool scoped,
-                       const QVector<QPair<QByteArray, int> > &entries);
+    void addEnumerator(const char *name, bool flag,
+                       bool scoped, const EnumValues &entries);
     void removeProperty(int index);
 
     const QMetaObject *update();

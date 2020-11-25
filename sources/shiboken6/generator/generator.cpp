@@ -174,8 +174,8 @@ struct Generator::GeneratorPrivate
     QString licenseComment;
     QString moduleName;
     QStringList instantiatedContainersNames;
-    QVector<AbstractMetaType> instantiatedContainers;
-    QVector<AbstractMetaType> instantiatedSmartPointers;
+    AbstractMetaTypeList instantiatedContainers;
+    AbstractMetaTypeList instantiatedSmartPointers;
     AbstractMetaClassList m_invisibleTopNamespaces;
 };
 
@@ -332,12 +332,12 @@ void Generator::collectInstantiatedContainersAndSmartPointers()
         collectInstantiatedContainersAndSmartPointers(metaClass);
 }
 
-QVector<AbstractMetaType> Generator::instantiatedContainers() const
+AbstractMetaTypeList Generator::instantiatedContainers() const
 {
     return m_d->instantiatedContainers;
 }
 
-QVector<AbstractMetaType> Generator::instantiatedSmartPointers() const
+AbstractMetaTypeList Generator::instantiatedSmartPointers() const
 {
     return m_d->instantiatedSmartPointers;
 }

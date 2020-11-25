@@ -64,12 +64,12 @@ FileOut::~FileOut()
         done();
 }
 
-static QVector<int> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
+static QList<int> lcsLength(const QByteArrayList &a, const QByteArrayList &b)
 {
     const int height = a.size() + 1;
     const int width = b.size() + 1;
 
-    QVector<int> res(width * height, 0);
+    QList<int> res(width * height, 0);
 
     for (int row = 1; row < height; row++) {
         for (int col = 1; col < width; col++) {
@@ -129,7 +129,7 @@ void Unit::print(const QByteArrayList &a, const QByteArrayList &b) const
     }
 }
 
-static void unitAppend(Type type, int pos, QVector<Unit> *units)
+static void unitAppend(Type type, int pos, QList<Unit> *units)
 {
     if (!units->isEmpty() && units->last().type == type)
         units->last().end = pos;
@@ -137,12 +137,12 @@ static void unitAppend(Type type, int pos, QVector<Unit> *units)
         units->append(Unit{type, pos, pos});
 }
 
-static QVector<Unit> diffHelper(const QVector<int> &lcs,
+static QList<Unit> diffHelper(const QList<int> &lcs,
                                 const QByteArrayList &a, const QByteArrayList &b,
                                 int row, int col)
 {
     if (row > 0 && col > 0 && a.at(row - 1) == b.at(col - 1)) {
-        QVector<Unit> result = diffHelper(lcs, a, b, row - 1, col - 1);
+        QList<Unit> result = diffHelper(lcs, a, b, row - 1, col - 1);
         unitAppend(Unchanged, row - 1, &result);
         return result;
     }
@@ -150,22 +150,22 @@ static QVector<Unit> diffHelper(const QVector<int> &lcs,
     const int width = b.size() + 1;
     if (col > 0
         && (row == 0 || lcs.at(width * row + col -1 ) >= lcs.at(width * (row - 1) + col))) {
-        QVector<Unit> result = diffHelper(lcs, a, b, row, col - 1);
+        QList<Unit> result = diffHelper(lcs, a, b, row, col - 1);
         unitAppend(Add, col - 1, &result);
         return result;
     }
     if (row > 0
         && (col == 0 || lcs.at(width * row + col-1) < lcs.at(width * (row - 1) + col))) {
-        QVector<Unit> result = diffHelper(lcs, a, b, row - 1, col);
+        QList<Unit> result = diffHelper(lcs, a, b, row - 1, col);
         unitAppend(Delete, row - 1, &result);
         return result;
     }
-    return QVector<Unit>{};
+    return {};
 }
 
 static void diff(const QByteArrayList &a, const QByteArrayList &b)
 {
-    const QVector<Unit> res = diffHelper(lcsLength(a, b), a, b, a.size(), b.size());
+    const QList<Unit> res = diffHelper(lcsLength(a, b), a, b, a.size(), b.size());
     for (const Unit &unit : res)
         unit.print(a, b);
 }

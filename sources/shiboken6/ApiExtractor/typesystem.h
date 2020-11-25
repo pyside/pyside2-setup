@@ -650,7 +650,7 @@ protected:
 class SmartPointerTypeEntry : public ComplexTypeEntry
 {
 public:
-    using Instantiations = QVector<const TypeEntry *>;
+    using Instantiations = QList<const TypeEntry *>;
 
     explicit SmartPointerTypeEntry(const QString &entryName,
                                    const QString &getterName,
@@ -798,7 +798,7 @@ public:
     bool replaceOriginalTargetToNativeConversions() const;
     void setReplaceOriginalTargetToNativeConversions(bool replaceOriginalTargetToNativeConversions);
 
-    using TargetToNativeConversions = QVector<TargetToNativeConversion *>;
+    using TargetToNativeConversions = QList<TargetToNativeConversion *>;
     bool hasTargetToNativeConversions() const;
     TargetToNativeConversions& targetToNativeConversions();
     const TargetToNativeConversions& targetToNativeConversions() const;

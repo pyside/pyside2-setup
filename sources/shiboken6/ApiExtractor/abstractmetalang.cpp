@@ -106,7 +106,7 @@ public:
     AbstractMetaFunctionList m_externalConversionOperators;
 
     QStringList m_baseClassNames;  // Base class names from C++, including rejected
-    QVector<TypeEntry *> m_templateArgs;
+    TypeEntries m_templateArgs;
     ComplexTypeEntry *m_typeEntry = nullptr;
     SourceLocation m_sourceLocation;
 
@@ -566,12 +566,12 @@ bool AbstractMetaClass::hasProtectedMembers() const
     return hasProtectedFields() || hasProtectedFunctions();
 }
 
-const QVector<TypeEntry *> &AbstractMetaClass::templateArguments() const
+const TypeEntries &AbstractMetaClass::templateArguments() const
 {
     return d->m_templateArgs;
 }
 
-void AbstractMetaClass::setTemplateArguments(const QVector<TypeEntry *> &args)
+void AbstractMetaClass::setTemplateArguments(const TypeEntries &args)
 {
     d->m_templateArgs = args;
 }

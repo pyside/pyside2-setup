@@ -30,7 +30,7 @@
 #define HEADER_PATHS_H
 
 #include <QByteArray>
-#include <QVector>
+#include <QList>
 #include <QString>
 
 enum class HeaderType
@@ -67,6 +67,6 @@ public:
     }
 };
 
-using HeaderPaths = QVector<HeaderPath>;
+using HeaderPaths = QList<HeaderPath>;
 
 #endif // HEADER_PATHS_H

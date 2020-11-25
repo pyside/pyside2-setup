@@ -115,17 +115,17 @@ protected:
 
     /// Write user's custom code snippets at class or module level.
     void writeClassCodeSnips(TextStream &s,
-                             const QVector<CodeSnip> & codeSnips,
+                             const CodeSnipList &codeSnips,
                              TypeSystem::CodeSnipPosition position,
                              TypeSystem::Language language,
                              const GeneratorContext &context) const;
     void writeCodeSnips(TextStream &s,
-                        const QVector<CodeSnip> & codeSnips,
+                        const CodeSnipList &codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language) const;
     /// Write user's custom code snippets at function level.
     void writeCodeSnips(TextStream &s,
-                        const QVector<CodeSnip> & codeSnips,
+                        const CodeSnipList &codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
                         const AbstractMetaFunction *func,
@@ -364,12 +364,12 @@ protected:
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
-    using ExtendedConverterData = QHash<const TypeEntry *, QVector<const AbstractMetaClass *> >;
+    using ExtendedConverterData = QHash<const TypeEntry *, AbstractMetaClassCList>;
     /// Returns all extended conversions for the current module.
     ExtendedConverterData getExtendedConverters() const;
 
     /// Returns a list of converters for the non wrapper types of the current module.
-    QVector<const CustomConversion *> getPrimitiveCustomConversions() const;
+    QList<const CustomConversion *> getPrimitiveCustomConversions() const;
 
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData &overloadData);
@@ -441,13 +441,13 @@ private:
 
     /// Utility function for writeCodeSnips.
     using ArgumentVarReplacementPair = QPair<AbstractMetaArgument, QString>;
-    using ArgumentVarReplacementList = QVector<ArgumentVarReplacementPair>;
+    using ArgumentVarReplacementList = QList<ArgumentVarReplacementPair>;
     ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
                                                       bool usePyArgs, TypeSystem::Language language,
                                                       const AbstractMetaArgument *lastArg) const;
 
     /// Returns a string with the user's custom code snippets that comply with \p position and \p language.
-    QString getCodeSnippets(const QVector<CodeSnip> & codeSnips,
+    QString getCodeSnippets(const CodeSnipList &codeSnips,
                             TypeSystem::CodeSnipPosition position,
                             TypeSystem::Language language) const;
 

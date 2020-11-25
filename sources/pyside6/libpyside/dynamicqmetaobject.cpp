@@ -52,7 +52,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 #include <private/qmetaobjectbuilder_p.h>
 
 #include <cstring>
@@ -92,10 +92,8 @@ public:
     int addProperty(const QByteArray &property, PyObject *data);
     void addInfo(const QByteArray &key, const  QByteArray &value);
     void addInfo(const QMap<QByteArray, QByteArray> &info);
-    void addEnumerator(const char *name,
-                       bool flag,
-                       bool scoped,
-                       const QVector<QPair<QByteArray, int> > &entries);
+    void addEnumerator(const char *name, bool flag, bool scoped,
+                       const MetaObjectBuilder::EnumValues &entries);
     void removeProperty(int index);
     const QMetaObject *update();
 
@@ -363,13 +361,13 @@ void MetaObjectBuilder::addInfo(const QMap<QByteArray, QByteArray> &info)
 }
 
 void MetaObjectBuilder::addEnumerator(const char *name, bool flag, bool scoped,
-                                      const QVector<QPair<QByteArray, int> > &entries)
+                                      const EnumValues &entries)
 {
     m_d->addEnumerator(name, flag, scoped, entries);
 }
 
 void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool scoped,
-                                             const QVector<QPair<QByteArray, int> > &entries)
+                                             const MetaObjectBuilder::EnumValues &entries)
 {
     auto builder = ensureBuilder();
     int have_already = builder->indexOfEnumerator(name);
@@ -379,7 +377,7 @@ void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool s
     enumbuilder.setIsFlag(flag);
     enumbuilder.setIsScoped(scoped);
 
-    for (auto item : entries)
+    for (const auto &item : entries)
         enumbuilder.addKey(item.first, item.second);
     m_dirty = true;
 }
@@ -572,7 +570,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         AutoDecRef items(PyMapping_Items(members));
         Py_ssize_t nr_items = PySequence_Length(items);
 
-        QVector<QPair<QByteArray, int> > entries;
+        QList<QPair<QByteArray, int> > entries;
         for (Py_ssize_t idx = 0; idx < nr_items; ++idx) {
             AutoDecRef item(PySequence_GetItem(items, idx));
             AutoDecRef key(PySequence_GetItem(item, 0));

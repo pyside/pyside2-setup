@@ -1009,7 +1009,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
         *metaClass += AbstractMetaAttributes::FinalCppClass;
 
     QStringList baseClassNames;
-    const QVector<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
+    const QList<_ClassModelItem::BaseClass> &baseClasses = classItem->baseClasses();
     for (const _ClassModelItem::BaseClass &baseClass : baseClasses) {
         if (baseClass.accessPolicy == CodeModel::Public)
             baseClassNames.append(baseClass.name);
@@ -1028,7 +1028,7 @@ AbstractMetaClass *AbstractMetaBuilderPrivate::traverseClass(const FileModelItem
     }
 
     TemplateParameterList template_parameters = classItem->templateParameters();
-    QVector<TypeEntry *> template_args;
+    TypeEntries template_args;
     template_args.clear();
     auto argumentParent = metaClass->typeEntry()->typeSystemTypeEntry();
     for (int i = 0; i < template_parameters.size(); ++i) {
@@ -2005,8 +2005,8 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qua
     // 8. No? Check if the current class is a template and this type is one
     //    of the parameters.
     if (currentClass) {
-        const QVector<TypeEntry *> &template_args = currentClass->templateArguments();
-        for (TypeEntry *te : template_args) {
+        const auto &template_args = currentClass->templateArguments();
+        for (const TypeEntry *te : template_args) {
             if (te->name() == qualifiedName)
                 return {te};
         }
@@ -3033,7 +3033,7 @@ void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
 {
     // For purposes of type lookup, join all namespaces of the same name
     // within the parent item.
-    QVector<NamespaceModelItem> candidates;
+    QList<NamespaceModelItem> candidates;
     const QString name = item->name();
     if (!m_scopes.isEmpty()) {
         for (const auto &n : m_scopes.constLast()->namespaces()) {

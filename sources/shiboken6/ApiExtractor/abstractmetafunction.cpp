@@ -426,9 +426,9 @@ int AbstractMetaFunction::actualMinimumArgumentCount() const
 }
 
 // Returns reference counts for argument at idx, or all arguments if idx == -2
-QVector<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClass *cls, int idx) const
+QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaClass *cls, int idx) const
 {
-    QVector<ReferenceCount> returned;
+    QList<ReferenceCount> returned;
 
     for (const auto &mod : modifications(cls)) {
         for (const ArgumentModification &argumentMod : mod.argument_mods()) {

@@ -32,7 +32,7 @@
 #include <qtcompat.h>
 
 #include <QString>
-#include <QVector>
+#include <QList>
 
 QT_BEGIN_NAMESPACE
 class QTextStream;
@@ -93,6 +93,6 @@ TextStream& operator<<(TextStream& out, const Include& include);
 QDebug operator<<(QDebug d, const Include &i);
 #endif
 
-using IncludeList = QVector<Include>;
+using IncludeList = QList<Include>;
 
 #endif

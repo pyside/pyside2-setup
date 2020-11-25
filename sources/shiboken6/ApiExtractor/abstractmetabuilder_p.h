@@ -39,7 +39,7 @@
 
 #include <QSet>
 #include <QFileInfo>
-#include <QVector>
+#include <QList>
 
 #include <optional>
 
@@ -205,7 +205,7 @@ public:
 
     QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
 
-    QVector<NamespaceModelItem> m_scopes;
+    QList<NamespaceModelItem> m_scopes;
 
     QSet<AbstractMetaClass *> m_setupInheritanceDone;
 
@@ -213,7 +213,7 @@ public:
     QFileInfoList m_globalHeaders;
     QStringList m_headerPaths;
     mutable QHash<QString, Include> m_resolveIncludeHash;
-    QVector<TypeClassEntry> m_typeSystemTypeDefs; // look up metatype->class for type system typedefs
+    QList<TypeClassEntry> m_typeSystemTypeDefs; // look up metatype->class for type system typedefs
     bool m_skipDeprecated = false;
 };
 

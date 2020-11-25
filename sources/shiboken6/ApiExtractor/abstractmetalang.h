@@ -255,8 +255,8 @@ public:
     bool hasProtectedMembers() const;
 
 
-    const QVector<TypeEntry *> &templateArguments() const;
-    void setTemplateArguments(const QVector<TypeEntry *> &args);
+    const TypeEntries &templateArguments() const;
+    void setTemplateArguments(const TypeEntries &);
 
     // only valid during metabuilder's run
     const QStringList &baseClassNames() const;

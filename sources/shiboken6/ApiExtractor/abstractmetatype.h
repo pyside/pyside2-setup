@@ -34,7 +34,7 @@
 
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QSharedDataPointer>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -45,7 +45,7 @@ class AbstractMetaType
 {
     Q_GADGET
 public:
-    using Indirections = QVector<Indirection>;
+    using Indirections = QList<Indirection>;
 
     enum TypeUsagePattern {
         PrimitivePattern,

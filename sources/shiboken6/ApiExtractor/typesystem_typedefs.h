@@ -32,7 +32,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QSharedPointer>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 class CodeSnip;
 class DocModification;
@@ -43,11 +43,11 @@ class FunctionModification;
 class TypeEntry;
 
 using AddedFunctionPtr = QSharedPointer<AddedFunction>;
-using AddedFunctionList = QVector<AddedFunctionPtr>;
-using CodeSnipList = QVector<CodeSnip>;
-using DocModificationList = QVector<DocModification>;
-using FieldModificationList = QVector<FieldModification>;
-using FunctionModificationList = QVector<FunctionModification>;
-using TypeEntries = QVector<const TypeEntry *>;
+using AddedFunctionList = QList<AddedFunctionPtr>;
+using CodeSnipList = QList<CodeSnip>;
+using DocModificationList = QList<DocModification>;
+using FieldModificationList = QList<FieldModification>;
+using FunctionModificationList = QList<FunctionModification>;
+using TypeEntries = QList<const TypeEntry *>;
 
 #endif // TYPESYSTEM_TYPEDEFS_H

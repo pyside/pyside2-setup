@@ -612,7 +612,7 @@ QString msgInvalidVersion(const QString &package, const QString &version)
 }
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
-                            const QVector<const AbstractMetaFunction *> &involvedConversions)
+                            const QList<const AbstractMetaFunction *> &involvedConversions)
 {
     QString result;
     QTextStream str(&result);

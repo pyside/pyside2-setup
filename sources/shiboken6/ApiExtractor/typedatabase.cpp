@@ -34,7 +34,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QPair>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamReader>
@@ -52,7 +52,7 @@ static QString wildcardToRegExp(QString w)
 }
 
 using ApiVersion =QPair<QRegularExpression, QVersionNumber>;
-using ApiVersions = QVector<ApiVersion>;
+using ApiVersions = QList<ApiVersion>;
 
 Q_GLOBAL_STATIC(ApiVersions, apiVersions)
 
@@ -82,7 +82,7 @@ struct IntTypeNormalizationEntry
     QString replacement;
 };
 
-using IntTypeNormalizationEntries = QVector<IntTypeNormalizationEntry>;
+using IntTypeNormalizationEntries = QList<IntTypeNormalizationEntry>;
 
 static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
 {
@@ -154,7 +154,7 @@ void TypeDatabase::addSystemInclude(const QString &name)
 // Note: This inserts duplicate TypeEntry * into m_entries.
 void TypeDatabase::addInlineNamespaceLookups(const NamespaceTypeEntry *n)
 {
-    QVector<TypeEntry *> additionalEntries; // Store before modifying the hash
+    TypeEntryList additionalEntries; // Store before modifying the hash
     for (TypeEntry *entry : m_entries) {
         if (entry->isChildOf(n))
             additionalEntries.append(entry);
@@ -357,7 +357,7 @@ bool TypeDatabase::isClassRejected(const QString& className, QString *reason) co
 }
 
 // Match class name and function/enum/field
-static bool findRejection(const QVector<TypeRejection> &rejections,
+static bool findRejection(const QList<TypeRejection> &rejections,
                           TypeRejection::MatchType matchType,
                           const QString& className, const QString& name,
                           QString *reason = nullptr)
@@ -533,7 +533,7 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
         pattern = warning;
     } else {
         // Legacy syntax: Use wildcards '*' (unless escaped by '\')
-        QVector<int> asteriskPositions;
+        QList<int> asteriskPositions;
         const int warningSize = warning.size();
         for (int i = 0; i < warningSize; ++i) {
             if (warning.at(i) == QLatin1Char('\\'))

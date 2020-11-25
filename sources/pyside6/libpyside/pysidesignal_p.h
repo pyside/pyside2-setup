@@ -43,7 +43,7 @@
 #include <sbkpython.h>
 
 #include <QtCore/QByteArray>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 struct PySideSignalData
 {
@@ -54,7 +54,7 @@ struct PySideSignalData
     };
 
     QByteArray signalName;
-    QVector<Signature> signatures;
+    QList<Signature> signatures;
     QByteArrayList *signalArguments;
 };
 

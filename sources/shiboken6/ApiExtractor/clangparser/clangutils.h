@@ -34,7 +34,7 @@
 #include <QtCore/QPair>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 #include <functional>
 
@@ -104,8 +104,8 @@ struct Diagnostic {
     CXDiagnosticSeverity severity = CXDiagnostic_Warning;
 };
 
-QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu);
-CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds);
+QList<Diagnostic> getDiagnostics(CXTranslationUnit tu);
+CXDiagnosticSeverity maxSeverity(const QList<Diagnostic> &ds);
 
 // Parse a template argument list "a<b<c,d>,e>" and invoke a handler
 // with each match (level and string). Return begin and end of the list.

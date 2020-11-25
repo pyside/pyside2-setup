@@ -31,7 +31,7 @@
 #ifndef CODEMODEL_FWD_H
 #define CODEMODEL_FWD_H
 
-#include <QtCore/QVector>
+#include <QtCore/QList>
 #include <QtCore/QSharedPointer>
 
 // forward declarations
@@ -67,19 +67,19 @@ using TemplateTypeAliasModelItem = QSharedPointer<_TemplateTypeAliasModelItem>;
 using VariableModelItem = QSharedPointer<_VariableModelItem>;
 using MemberModelItem = QSharedPointer<_MemberModelItem>;
 
-using ArgumentList = QVector<ArgumentModelItem>;
-using ClassList = QVector<ClassModelItem>;
-using ItemList = QVector<CodeModelItem>;
-using EnumList = QVector<EnumModelItem>;
-using EnumeratorList = QVector<EnumeratorModelItem>;
-using FileList = QVector<FileModelItem>;
-using FunctionList = QVector<FunctionModelItem>;
-using NamespaceList = QVector<NamespaceModelItem>;
-using ScopeList = QVector<ScopeModelItem>;
-using TemplateParameterList = QVector<TemplateParameterModelItem>;
-using TypeDefList = QVector<TypeDefModelItem>;
-using TemplateTypeAliasList = QVector<TemplateTypeAliasModelItem>;
-using VariableList = QVector<VariableModelItem>;
-using MemberList = QVector<MemberModelItem>;
+using ArgumentList = QList<ArgumentModelItem>;
+using ClassList = QList<ClassModelItem>;
+using ItemList = QList<CodeModelItem>;
+using EnumList = QList<EnumModelItem>;
+using EnumeratorList = QList<EnumeratorModelItem>;
+using FileList = QList<FileModelItem>;
+using FunctionList = QList<FunctionModelItem>;
+using NamespaceList = QList<NamespaceModelItem>;
+using ScopeList = QList<ScopeModelItem>;
+using TemplateParameterList = QList<TemplateParameterModelItem>;
+using TypeDefList = QList<TypeDefModelItem>;
+using TemplateTypeAliasList = QList<TemplateTypeAliasModelItem>;
+using VariableList = QList<VariableModelItem>;
+using MemberList = QList<MemberModelItem>;
 
 #endif // CODEMODEL_FWD_H

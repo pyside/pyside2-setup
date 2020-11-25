@@ -169,9 +169,9 @@ Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
     return result;
 }
 
-QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu)
+QList<Diagnostic> getDiagnostics(CXTranslationUnit tu)
 {
-    QVector<Diagnostic> result;
+    QList<Diagnostic> result;
     const unsigned count = clang_getNumDiagnostics(tu);
     result.reserve(int(count));
     for (unsigned i = 0; i < count; ++i) {
@@ -219,7 +219,7 @@ QPair<int, int> parseTemplateArgumentList(const QString &l,
     return qMakePair(-1, -1);
 }
 
-CXDiagnosticSeverity maxSeverity(const QVector<Diagnostic> &ds)
+CXDiagnosticSeverity maxSeverity(const QList<Diagnostic> &ds)
 {
     CXDiagnosticSeverity result = CXDiagnostic_Ignored;
     for (const Diagnostic& d : ds) {

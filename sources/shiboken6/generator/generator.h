@@ -35,7 +35,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QTextStream>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 #include <optional>
 
@@ -185,7 +185,7 @@ class Generator
 {
 public:
     using OptionDescription = QPair<QString, QString>;
-    using OptionDescriptions = QVector<OptionDescription>;
+    using OptionDescriptions = QList<OptionDescription>;
 
     /// Optiosn used around the generator code
     enum Option {
@@ -386,8 +386,8 @@ protected:
     */
     virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
-    QVector<AbstractMetaType> instantiatedContainers() const;
-    QVector<AbstractMetaType> instantiatedSmartPointers() const;
+    AbstractMetaTypeList instantiatedContainers() const;
+    AbstractMetaTypeList instantiatedSmartPointers() const;
 
     static QString getSimplifiedContainerTypeName(const AbstractMetaType &type);
     void addInstantiatedContainersAndSmartPointers(const AbstractMetaType &type,
@@ -405,7 +405,7 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
 using GeneratorPtr = QSharedPointer<Generator>;
-using Generators = QVector<GeneratorPtr>;
+using Generators = QList<GeneratorPtr>;
 
 #endif // GENERATOR_H
 

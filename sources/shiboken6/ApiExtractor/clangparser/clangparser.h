@@ -35,7 +35,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QPair>
 #include <QtCore/QString>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 #include <string_view>
 
@@ -59,7 +59,7 @@ private:
 class BaseVisitor {
     Q_DISABLE_COPY(BaseVisitor)
 public:
-    using Diagnostics = QVector<Diagnostic>;
+    using Diagnostics = QList<Diagnostic>;
 
     enum StartTokenResult { Error, Skip, Recurse };
 

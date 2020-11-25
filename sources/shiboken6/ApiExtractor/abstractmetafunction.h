@@ -218,7 +218,7 @@ public:
     AbstractMetaFunction *copy() const;
 
     QString conversionRule(TypeSystem::Language language, int idx) const;
-    QVector<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
+    QList<ReferenceCount> referenceCounts(const AbstractMetaClass *cls, int idx = -2) const;
     ArgumentOwner argumentOwner(const AbstractMetaClass *cls, int idx) const;
 
     // Returns the ownership rules for the given argument in the given context

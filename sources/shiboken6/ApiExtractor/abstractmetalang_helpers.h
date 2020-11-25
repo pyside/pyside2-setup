@@ -30,7 +30,7 @@
 #define ABSTRACTMETALANG_HELPERS_H
 
 template <class MetaClass>
-MetaClass *findByName(QVector<MetaClass *> haystack, QStringView needle)
+MetaClass *findByName(QList<MetaClass *> haystack, QStringView needle)
 {
     for (MetaClass *c : haystack) {
         if (c->name() == needle)

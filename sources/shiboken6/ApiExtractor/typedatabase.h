@@ -221,8 +221,8 @@ private:
     TypeEntryMap m_flagsEntries;
     TypedefEntryMap m_typedefEntries;
     TemplateEntryMap m_templates;
-    QVector<QRegularExpression> m_suppressedWarnings;
-    QVector<const TypeSystemTypeEntry *> m_typeSystemEntries; // maintain order, default is first.
+    QList<QRegularExpression> m_suppressedWarnings;
+    QList<const TypeSystemTypeEntry *> m_typeSystemEntries; // maintain order, default is first.
 
     AddedFunctionList m_globalUserFunctions;
     FunctionModificationList m_functionMods;
@@ -232,7 +232,7 @@ private:
     QStringList m_typesystemPaths;
     QHash<QString, bool> m_parsedTypesystemFiles;
 
-    QVector<TypeRejection> m_rejections;
+    QList<TypeRejection> m_rejections;
 
     QStringList m_dropTypeEntries;
     QByteArrayList m_systemIncludes;

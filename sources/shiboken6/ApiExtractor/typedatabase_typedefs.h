@@ -31,7 +31,7 @@
 
 #include <QtCore/QMultiMap>
 #include <QtCore/QString>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 class ConstantValueTypeEntry;
 class ContainerTypeEntry;
@@ -41,7 +41,7 @@ class TemplateEntry;
 class TypeEntry;
 class TypedefEntry;
 
-using TypeEntryList = QVector<TypeEntry *>;
+using TypeEntryList = QList<TypeEntry *>;
 using TemplateEntryMap =QMap<QString, TemplateEntry *>;
 
 template <class Key, class Value>
@@ -62,8 +62,8 @@ using TypeEntryMultiMapConstIteratorRange = QMultiMapConstIteratorRange<QString,
 using TypeEntryMap = QMap<QString, TypeEntry *>;
 using TypedefEntryMap = QMap<QString, TypedefEntry *>;
 
-using ContainerTypeEntryList = QVector<const ContainerTypeEntry *>;
-using NamespaceTypeEntryList = QVector<NamespaceTypeEntry *>;
-using PrimitiveTypeEntryList = QVector<const PrimitiveTypeEntry *>;
+using ContainerTypeEntryList = QList<const ContainerTypeEntry *>;
+using NamespaceTypeEntryList = QList<NamespaceTypeEntry *>;
+using PrimitiveTypeEntryList = QList<const PrimitiveTypeEntry *>;
 
 #endif // TYPEDATABASE_TYPEDEFS_H

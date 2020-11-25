@@ -51,7 +51,7 @@ private:
 };
 
 template <class T>
-static QSharedPointer<T> findModelItem(const QVector<QSharedPointer<T> > &list, const QString &name)
+static QSharedPointer<T> findModelItem(const QList<QSharedPointer<T> > &list, const QString &name)
 {
     const auto it = std::find_if(list.cbegin(), list.cend(), ModelItemNamePredicate<T>(name));
     return it != list.cend() ? *it : QSharedPointer<T>();

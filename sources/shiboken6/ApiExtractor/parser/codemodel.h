@@ -41,7 +41,7 @@
 #include <QtCore/QSet>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -258,7 +258,7 @@ public:
         : _ScopeModelItem(model, name, kind), m_classType(CodeModel::Class) {}
     ~_ClassModelItem();
 
-    QVector<BaseClass> baseClasses() const { return m_baseClasses; }
+    QList<BaseClass> baseClasses() const { return m_baseClasses; }
 
     void addBaseClass(const QString &name, CodeModel::AccessPolicy accessPolicy);
 
@@ -284,7 +284,7 @@ public:
 #endif
 
 private:
-    QVector<BaseClass> m_baseClasses;
+    QList<BaseClass> m_baseClasses;
     TemplateParameterList m_templateParameters;
     CodeModel::ClassType m_classType;
 

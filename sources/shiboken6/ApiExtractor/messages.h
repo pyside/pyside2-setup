@@ -35,7 +35,7 @@
 
 #include <QtCore/QMap>
 #include <QtCore/QString>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 class EnumTypeEntry;
 class FunctionTypeEntry;
@@ -204,7 +204,7 @@ QString msgIncorrectlyNestedName(const QString &name);
 QString msgCannotFindView(const QString &viewedName, const QString &name);
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
-                            const QVector<const AbstractMetaFunction *> &involvedConversions);
+                            const QList<const AbstractMetaFunction *> &involvedConversions);
 
 QString msgClassNotFound(const TypeEntry *t);
 

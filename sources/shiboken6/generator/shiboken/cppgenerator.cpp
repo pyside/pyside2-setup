@@ -216,8 +216,9 @@ QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
     return fileNameBase + fileNameSuffix();
 }
 
-QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
-                                                                               uint queryIn)
+QList<AbstractMetaFunctionList>
+    CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
+                                                 uint queryIn)
 {
     // ( func_name, num_args ) => func_list
     QMap<QPair<QString, int>, AbstractMetaFunctionList> results;
@@ -240,7 +241,7 @@ QVector<AbstractMetaFunctionList> CppGenerator::filterGroupedOperatorFunctions(c
         QPair<QString, int > op(func->name(), args);
         results[op].append(func);
     }
-    QVector<AbstractMetaFunctionList> result;
+    QList<AbstractMetaFunctionList> result;
     result.reserve(results.size());
     for (auto it = results.cbegin(), end = results.cend(); it != end; ++it)
         result.append(it.value());
@@ -410,7 +411,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     metaClass->getEnumsFromInvisibleNamespacesToBeGenerated(&classEnums);
 
     //Extra includes
-    QVector<Include> includes;
+    QList<Include> includes;
     if (!classContext.useWrapper())
         includes += metaClass->typeEntry()->extraIncludes();
     for (const AbstractMetaEnum &cppEnum : qAsConst(classEnums))
@@ -667,7 +668,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     if (supportsNumberProtocol(metaClass) && !metaClass->typeEntry()->isSmartPointer()) {
-        const QVector<AbstractMetaFunctionList> opOverloads = filterGroupedOperatorFunctions(
+        const QList<AbstractMetaFunctionList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
                 AbstractMetaClass::ArithmeticOp
                 | AbstractMetaClass::LogicalOp
@@ -2155,7 +2156,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overlo
             s << '}';
         }
     }
-    const QVector<int> invalidArgsLength = overloadData.invalidArgumentLengths();
+    const QList<int> invalidArgsLength = overloadData.invalidArgumentLengths();
     if (!invalidArgsLength.isEmpty()) {
         QStringList invArgsLen;
         for (int i : qAsConst(invalidArgsLength))
@@ -2409,7 +2410,7 @@ void CppGenerator::writeTypeCheck(TextStream &s, const OverloadData *overloadDat
     QSet<const TypeEntry *> numericTypes;
     const OverloadDataList &overloads = overloadData->previousOverloadData()->nextOverloadData();
     for (OverloadData *od : overloads) {
-        const OverloadData::MetaFunctionList &odOverloads = od->overloads();
+        const AbstractMetaFunctionCList &odOverloads = od->overloads();
         for (const AbstractMetaFunction *func : odOverloads) {
             checkTypeViability(func);
             const AbstractMetaType &argType = od->argument(func)->type();
@@ -2655,7 +2656,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
 {
     s << "// Overloaded function decisor\n";
     const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
-    const OverloadData::MetaFunctionList &functionOverloads = overloadData.overloadsWithoutRepetition();
+    const AbstractMetaFunctionCList &functionOverloads = overloadData.overloadsWithoutRepetition();
     for (int i = 0; i < functionOverloads.count(); i++) {
         const auto func = functionOverloads.at(i);
         s << "// " << i << ": ";
@@ -2697,7 +2698,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
     // variable to be used further on this method on the conditional that identifies default
     // method calls.
     if (!hasDefaultCall) {
-        const OverloadData::MetaFunctionList &overloads = parentOverloadData->overloads();
+        const AbstractMetaFunctionCList &overloads = parentOverloadData->overloads();
         for (const AbstractMetaFunction *func : overloads) {
             if (parentOverloadData->isFinalOccurrence(func)) {
                 referenceFunction = func;
@@ -2853,7 +2854,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
 void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloadData,
                                       const GeneratorContext &context) const
 {
-    const OverloadData::MetaFunctionList &overloads = overloadData.overloadsWithoutRepetition();
+    const AbstractMetaFunctionCList &overloads = overloadData.overloadsWithoutRepetition();
     s << "// Call function/method\n"
         << (overloads.count() > 1 ? "switch (overloadId) " : "") << "{\n";
     {
@@ -3707,9 +3708,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunction *fu
     bool hasReturnPolicy = false;
 
     // Ownership transference between C++ and Python.
-    QVector<ArgumentModification> ownership_mods;
+    QList<ArgumentModification> ownership_mods;
     // Python object reference management.
-    QVector<ArgumentModification> refcount_mods;
+    QList<ArgumentModification> refcount_mods;
     for (const auto &func_mod : func->modifications()) {
         for (const ArgumentModification &arg_mod : func_mod.argument_mods()) {
             if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
@@ -4052,7 +4053,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const
 }
 
 void CppGenerator::writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
-                                                        const QVector<const AbstractMetaClass *>& conversions) const
+                                                        const AbstractMetaClassCList &conversions) const
 {
     s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName()
       << ".\n";
@@ -4450,7 +4451,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     nb.insert(QLatin1String("__ixor__"), QString());
     nb.insert(QLatin1String("__ior__"), QString());
 
-    const QVector<AbstractMetaFunctionList> opOverloads =
+    const QList<AbstractMetaFunctionList> opOverloads =
             filterGroupedOperatorFunctions(metaClass,
                                            AbstractMetaClass::ArithmeticOp
                                            | AbstractMetaClass::LogicalOp
@@ -4747,7 +4748,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "switch (op) {\n";
     {
         Indentation indent(s);
-        const QVector<AbstractMetaFunctionList> &groupedFuncs = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
+        const QList<AbstractMetaFunctionList> &groupedFuncs = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
         for (const AbstractMetaFunctionList &overloads : groupedFuncs) {
             const AbstractMetaFunction *rfunc = overloads[0];
 
@@ -5950,7 +5951,7 @@ bool CppGenerator::finishGeneration()
 
     //Extra includes
     s  << '\n' << "// Extra includes\n";
-    QVector<Include> extraIncludes = moduleEntry->extraIncludes();
+    QList<Include> extraIncludes = moduleEntry->extraIncludes();
     for (const AbstractMetaEnum &cppEnum : qAsConst(globalEnums))
         extraIncludes.append(cppEnum.typeEntry()->extraIncludes());
     std::sort(extraIncludes.begin(), extraIncludes.end());
@@ -6041,7 +6042,7 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    const QVector<const CustomConversion *> &typeConversions = getPrimitiveCustomConversions();
+    const QList<const CustomConversion *> &typeConversions = getPrimitiveCustomConversions();
     if (!typeConversions.isEmpty()) {
         s  << "\n// Primitive Type converters.\n\n";
         for (const CustomConversion *conversion : typeConversions) {

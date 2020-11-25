@@ -1519,9 +1519,9 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
     return extConvs;
 }
 
-QVector<const CustomConversion *> ShibokenGenerator::getPrimitiveCustomConversions() const
+QList<const CustomConversion *> ShibokenGenerator::getPrimitiveCustomConversions() const
 {
-    QVector<const CustomConversion *> conversions;
+    QList<const CustomConversion *> conversions;
     const PrimitiveTypeEntryList &primitiveTypeList = primitiveTypes();
     for (const PrimitiveTypeEntry *type : primitiveTypeList) {
         if (!shouldGenerateTypeEntry(type) || !type->isUserPrimitive() || !type->customConversion())
@@ -1964,7 +1964,7 @@ using StringPair = QPair<QString, QString>;
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable,
                                                            QString &code) const
 {
-    QVector<StringPair> replacements;
+    QList<StringPair> replacements;
     QRegularExpressionMatchIterator rit = m_typeSystemConvRegEx[converterVariable].globalMatch(code);
     while (rit.hasNext()) {
         const QRegularExpressionMatch match = rit.next();

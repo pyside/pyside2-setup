@@ -29,7 +29,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <QVector>
+#include <QList>
 #include <QHash>
 #include <QString>
 
@@ -39,7 +39,7 @@ class Graph
 public:
     Q_DISABLE_COPY(Graph)
 
-    using Indexes = QVector<int>;
+    using Indexes = QList<int>;
 
     struct SortResult
     {

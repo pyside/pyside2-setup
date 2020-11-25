@@ -30,7 +30,7 @@
 #define ABSTRACTMETALANG_TYPEDEFS_H
 
 #include <QtCore/QSharedPointer>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 class AbstractMetaClass;
 class AbstractMetaField;
@@ -40,13 +40,14 @@ class AbstractMetaEnumValue;
 class AbstractMetaFunction;
 class AbstractMetaType;
 
-using AbstractMetaArgumentList = QVector<AbstractMetaArgument>;
-using AbstractMetaClassList = QVector<AbstractMetaClass *>;
+using AbstractMetaArgumentList = QList<AbstractMetaArgument>;
+using AbstractMetaClassList = QList<AbstractMetaClass *>;
+using AbstractMetaClassCList = QList<const AbstractMetaClass *>;
 using AbstractMetaEnumList = QList<AbstractMetaEnum>;
 using AbstractMetaEnumValueList = QList<AbstractMetaEnumValue>;
 using AbstractMetaFieldList = QList<AbstractMetaField>;
-using AbstractMetaFunctionList = QVector<AbstractMetaFunction *>;
-using AbstractMetaFunctionCList = QVector<const AbstractMetaFunction *>;
-using AbstractMetaTypeList = QVector<AbstractMetaType>;
+using AbstractMetaFunctionList = QList<AbstractMetaFunction *>;
+using AbstractMetaFunctionCList = QList<const AbstractMetaFunction *>;
+using AbstractMetaTypeList = QList<AbstractMetaType>;
 
 #endif // ABSTRACTMETALANG_TYPEDEFS_H

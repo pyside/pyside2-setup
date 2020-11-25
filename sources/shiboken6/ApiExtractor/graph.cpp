@@ -27,7 +27,7 @@
 ****************************************************************************/
 
 #include "graph.h"
-#include <QVector>
+#include <QList>
 #include <QDebug>
 #include <QSet>
 #include <iterator>
@@ -38,7 +38,7 @@
 struct Graph::GraphPrivate
 {
     enum Color { WHITE, GRAY, BLACK };
-    using Edges = QVector<QSet<int> >;
+    using Edges = QList<QSet<int> >;
 
     Edges edges;
 
@@ -46,7 +46,7 @@ struct Graph::GraphPrivate
     {
     }
 
-    void dfsVisit(int node, Graph::Indexes &result, QVector<Color> &colors) const
+    void dfsVisit(int node, Graph::Indexes &result, QList<Color> &colors) const
     {
         colors[node] = GRAY;
         for (const auto &c : edges.at(node)) {
@@ -80,7 +80,7 @@ Graph::SortResult Graph::topologicalSort() const
     SortResult result;
     result.result.reserve(nodeCount);
 
-    QVector<GraphPrivate::Color> colors(nodeCount, GraphPrivate::WHITE);
+    QList<GraphPrivate::Color> colors(nodeCount, GraphPrivate::WHITE);
 
     for (int i = 0; i < nodeCount; ++i) {
         if (colors[i] == GraphPrivate::WHITE)

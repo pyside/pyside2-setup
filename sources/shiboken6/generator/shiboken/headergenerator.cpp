@@ -354,7 +354,7 @@ void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const AbstractMeta
 // Format the typedefs for the typedef entries to be generated
 static void formatTypeDefEntries(TextStream &s)
 {
-    QVector<const TypedefEntry *> entries;
+    QList<const TypedefEntry *> entries;
     const auto typeDbEntries = TypeDatabase::instance()->typedefEntries();
     for (auto it = typeDbEntries.cbegin(), end = typeDbEntries.cend(); it != end; ++it) {
         if (it.value()->generateCode() != 0)
@@ -408,7 +408,7 @@ bool HeaderGenerator::finishGeneration()
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
     int smartPointerCount = 0;
-    const QVector<AbstractMetaType> &instantiatedSmartPtrs = instantiatedSmartPointers();
+    const AbstractMetaTypeList &instantiatedSmartPtrs = instantiatedSmartPointers();
     for (const AbstractMetaType &metaType : instantiatedSmartPtrs) {
         QString indexName = getTypeIndexVariableName(metaType);
         _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
@@ -453,7 +453,7 @@ bool HeaderGenerator::finishGeneration()
         _writeTypeIndexValueLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
     }
 
-    const QVector<AbstractMetaType> &containers = instantiatedContainers();
+    const AbstractMetaTypeList &containers = instantiatedContainers();
     for (const AbstractMetaType &container : containers) {
         _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(container), pCount);
         macrosStream << ", // " << container.cppSignature() << '\n';

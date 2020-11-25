@@ -111,7 +111,7 @@ static inline QString yesAttributeValue() { return QStringLiteral("yes"); }
 static inline QString trueAttributeValue() { return QStringLiteral("true"); }
 static inline QString falseAttributeValue() { return QStringLiteral("false"); }
 
-static QVector<CustomConversion *> customConversionsForReview;
+static QList<CustomConversion *> customConversionsForReview;
 
 // Set a regular expression for rejection from text. By legacy, those are fixed
 // strings, except for '*' meaning 'match all'. Enclosing in "^..$"

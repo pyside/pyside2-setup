@@ -29,7 +29,7 @@
 #ifndef DEPENDENCY_H
 #define DEPENDENCY_H
 
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 #include <utility>
 
@@ -42,6 +42,6 @@ struct Dependency {
     AbstractMetaClass *child;
 };
 
-using Dependencies = QVector<Dependency>;
+using Dependencies = QList<Dependency>;
 
 #endif // DEPENDENCY_H

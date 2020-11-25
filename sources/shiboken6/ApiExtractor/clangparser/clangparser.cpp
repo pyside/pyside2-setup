@@ -282,7 +282,7 @@ bool parse(const QByteArrayList  &clangArgs, unsigned clangFlags, BaseVisitor &b
 
     clang_visitChildren(rootCursor, visitorCallback, reinterpret_cast<CXClientData>(&bv));
 
-    QVector<Diagnostic> diagnostics = getDiagnostics(translationUnit);
+    QList<Diagnostic> diagnostics = getDiagnostics(translationUnit);
     diagnostics.append(bv.diagnostics());
     bv.setDiagnostics(diagnostics);
 

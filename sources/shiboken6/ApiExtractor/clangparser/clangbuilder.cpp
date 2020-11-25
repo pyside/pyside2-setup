@@ -39,7 +39,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QString>
 #include <QtCore/QStack>
-#include <QtCore/QVector>
+#include <QtCore/QList>
 
 #include <cstring>
 #include <ctype.h>

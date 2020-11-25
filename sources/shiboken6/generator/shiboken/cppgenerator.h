@@ -44,7 +44,7 @@ public:
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
-    static QVector<AbstractMetaFunctionList>
+    static QList<AbstractMetaFunctionList>
         filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass, uint query);
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
@@ -354,7 +354,7 @@ private:
     void writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
     void writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
-                                              const QVector<const AbstractMetaClass *>& conversions) const;
+                                              const AbstractMetaClassCList &conversions) const;
 
     void writeParentChildManagement(TextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn) const;
     bool writeParentChildManagement(TextStream &s, const AbstractMetaFunction *func, int argIndex, bool userHeuristicPolicy) const;
