@@ -65,6 +65,14 @@ void TextStream::outdent(int n)
     Q_ASSERT(m_indentation >= 0);
 }
 
+qint64 TextStream::pos() const
+{
+    // QTextStream::pos() only works for QIODevice, be a bit smarter
+    if (auto s = m_str.string())
+        return s->size();
+    return m_str.pos();
+}
+
 void TextStream::putRepetitiveChars(char c, int count)
 {
     if (count > 0) {

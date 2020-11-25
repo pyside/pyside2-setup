@@ -74,6 +74,7 @@ public:
     void outdent(int n = 1);
 
     // QTextStream API
+    qint64 pos() const;
     QTextStream::FieldAlignment fieldAlignment() const
     { return m_str.fieldAlignment();  }
     void setFieldAlignment(QTextStream::FieldAlignment al)
@@ -166,7 +167,11 @@ public:
         const auto oldFieldAlignment = s.fieldAlignment();
         s.setFieldWidth(m_fieldWidth);
         s.setFieldAlignment(m_alignment);
+        const auto oldPos = s.pos();
         s << m_value;
+        // Ensure something is written when an empty string is encountered
+        if (oldPos == s.pos())
+            s << ' ';
         s.setFieldAlignment(oldFieldAlignment);
         s.setFieldWidth(oldFieldWidth);
     }
