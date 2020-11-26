@@ -3656,6 +3656,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunction *fu
                             enumName = func->type().cppSignature();
                         const QString methodCall = enumName + QLatin1Char('(')
                                                    + mc.toString() + QLatin1Char(')');
+                        mc.clear();
+                        mc << methodCall;
                         s << enumName;
                         writeReturnType = false;
                     }
