@@ -213,9 +213,10 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 
     if (pData->typeName.isEmpty())
         PyErr_SetString(PyExc_TypeError, "Invalid property type or type name.");
-    else if (pData->constant && (pData->fset || pData->notify))
-        PyErr_SetString(PyExc_TypeError, "A constant property cannot have a WRITE method or a NOTIFY signal.");
-
+    else if (pData->constant && ((pData->fset && pData->fset != Py_None)
+                                 || (pData->notify && pData->notify != Py_None)))
+        PyErr_SetString(PyExc_TypeError, "A constant property cannot have a WRITE method or a "
+                                         "NOTIFY signal.");
     if (!PyErr_Occurred()) {
         Py_XINCREF(pData->fget);
         Py_XINCREF(pData->fset);
