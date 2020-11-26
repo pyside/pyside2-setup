@@ -270,13 +270,12 @@ _property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyO
         Py_XDECREF(del);
         del = pData->fdel ? pData->fdel : Py_None;
     }
-    if (pData->getter_doc && get != Py_None) {
-        /* make _init use __doc__ from getter */
-        doc = "";
-    }
-    else {
-        doc = !pData->doc.isEmpty() ? pData->doc : "";
-    }
+    // make _init use __doc__ from getter
+    if ((pData->getter_doc && get != Py_None) || pData->doc.isEmpty())
+        doc.clear();
+    else
+        doc = pData->doc;
+
     auto notify = pData->notify ? pData->notify : Py_None;
 
     PyObject *typeName = String::fromCString(pData->typeName);
