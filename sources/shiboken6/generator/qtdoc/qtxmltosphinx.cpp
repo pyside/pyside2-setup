@@ -122,87 +122,246 @@ TextStream &operator<<(TextStream &str, const QtXmlToSphinx::LinkContext &linkCo
     return str;
 }
 
+enum class WebXmlTag {
+    Unknown,
+    heading, brief, para, italic, bold, see_also, snippet, dots, codeline,
+    table, header, row, item, argument, teletype, link, inlineimage, image,
+    list, term, raw, underline, superscript, code, badcode, legalese,
+    rst, section, quotefile,
+    // ignored tags
+    generatedlist, tableofcontents, quotefromfile, skipto, target, page, group,
+    // useless tags
+    description, definition, printuntil, relation,
+    // Doxygen tags
+    title, ref, computeroutput, detaileddescription, name, listitem,
+    parametername, parameteritem, ulink, itemizedlist, parameternamelist,
+    parameterlist,
+    // Doxygen ignored tags
+    highlight, linebreak, programlisting, xreftitle, sp, entry, simplesect,
+    verbatim, xrefsect, xrefdescription,
+};
+
+using WebXmlTagHash = QHash<QStringView, WebXmlTag>;
+
+static const WebXmlTagHash &webXmlTagHash()
+{
+    static const WebXmlTagHash result = {
+        {u"heading", WebXmlTag::heading},
+        {u"brief", WebXmlTag::brief},
+        {u"para", WebXmlTag::para},
+        {u"italic", WebXmlTag::italic},
+        {u"bold", WebXmlTag::bold},
+        {u"see-also", WebXmlTag::see_also},
+        {u"snippet", WebXmlTag::snippet},
+        {u"dots", WebXmlTag::dots},
+        {u"codeline", WebXmlTag::codeline},
+        {u"table", WebXmlTag::table},
+        {u"header", WebXmlTag::header},
+        {u"row", WebXmlTag::row},
+        {u"item", WebXmlTag::item},
+        {u"argument", WebXmlTag::argument},
+        {u"teletype", WebXmlTag::teletype},
+        {u"link", WebXmlTag::link},
+        {u"inlineimage", WebXmlTag::inlineimage},
+        {u"image", WebXmlTag::image},
+        {u"list", WebXmlTag::list},
+        {u"term", WebXmlTag::term},
+        {u"raw", WebXmlTag::raw},
+        {u"underline", WebXmlTag::underline},
+        {u"superscript", WebXmlTag::superscript},
+        {u"code", WebXmlTag::code},
+        {u"badcode", WebXmlTag::badcode},
+        {u"legalese", WebXmlTag::legalese},
+        {u"rst", WebXmlTag::rst},
+        {u"section", WebXmlTag::section},
+        {u"quotefile", WebXmlTag::quotefile},
+        {u"generatedlist", WebXmlTag::generatedlist},
+        {u"tableofcontents", WebXmlTag::tableofcontents},
+        {u"quotefromfile", WebXmlTag::quotefromfile},
+        {u"skipto", WebXmlTag::skipto},
+        {u"target", WebXmlTag::target},
+        {u"page", WebXmlTag::page},
+        {u"group", WebXmlTag::group},
+        {u"description", WebXmlTag::description},
+        {u"definition", WebXmlTag::definition},
+        {u"printuntil", WebXmlTag::printuntil},
+        {u"relation", WebXmlTag::relation},
+        {u"title", WebXmlTag::title},
+        {u"ref", WebXmlTag::ref},
+        {u"computeroutput", WebXmlTag::computeroutput},
+        {u"detaileddescription", WebXmlTag::detaileddescription},
+        {u"name", WebXmlTag::name},
+        {u"listitem", WebXmlTag::listitem},
+        {u"parametername", WebXmlTag::parametername},
+        {u"parameteritem", WebXmlTag::parameteritem},
+        {u"ulink", WebXmlTag::ulink},
+        {u"itemizedlist", WebXmlTag::itemizedlist},
+        {u"parameternamelist", WebXmlTag::parameternamelist},
+        {u"parameterlist", WebXmlTag::parameterlist},
+        {u"highlight", WebXmlTag::highlight},
+        {u"linebreak", WebXmlTag::linebreak},
+        {u"programlisting", WebXmlTag::programlisting},
+        {u"xreftitle", WebXmlTag::xreftitle},
+        {u"sp", WebXmlTag::sp},
+        {u"entry", WebXmlTag::entry},
+        {u"simplesect", WebXmlTag::simplesect},
+        {u"verbatim", WebXmlTag::verbatim},
+        {u"xrefsect", WebXmlTag::xrefsect},
+        {u"xrefdescription", WebXmlTag::xrefdescription},
+    };
+    return result;
+}
+
 QtXmlToSphinx::QtXmlToSphinx(const QtDocGenerator *generator,
                              const QString& doc, const QString& context)
         : m_output(static_cast<QString *>(nullptr)),
           m_tableHasHeader(false), m_context(context), m_generator(generator),
           m_insideBold(false), m_insideItalic(false)
 {
-    m_handlerMap.insert(QLatin1String("heading"), &QtXmlToSphinx::handleHeadingTag);
-    m_handlerMap.insert(QLatin1String("brief"), &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert(QLatin1String("para"), &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert(QLatin1String("italic"), &QtXmlToSphinx::handleItalicTag);
-    m_handlerMap.insert(QLatin1String("bold"), &QtXmlToSphinx::handleBoldTag);
-    m_handlerMap.insert(QLatin1String("see-also"), &QtXmlToSphinx::handleSeeAlsoTag);
-    m_handlerMap.insert(QLatin1String("snippet"), &QtXmlToSphinx::handleSnippetTag);
-    m_handlerMap.insert(QLatin1String("dots"), &QtXmlToSphinx::handleDotsTag);
-    m_handlerMap.insert(QLatin1String("codeline"), &QtXmlToSphinx::handleDotsTag);
-    m_handlerMap.insert(QLatin1String("table"), &QtXmlToSphinx::handleTableTag);
-    m_handlerMap.insert(QLatin1String("header"), &QtXmlToSphinx::handleRowTag);
-    m_handlerMap.insert(QLatin1String("row"), &QtXmlToSphinx::handleRowTag);
-    m_handlerMap.insert(QLatin1String("item"), &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert(QLatin1String("argument"), &QtXmlToSphinx::handleArgumentTag);
-    m_handlerMap.insert(QLatin1String("teletype"), &QtXmlToSphinx::handleArgumentTag);
-    m_handlerMap.insert(QLatin1String("link"), &QtXmlToSphinx::handleLinkTag);
-    m_handlerMap.insert(QLatin1String("inlineimage"), &QtXmlToSphinx::handleInlineImageTag);
-    m_handlerMap.insert(QLatin1String("image"), &QtXmlToSphinx::handleImageTag);
-    m_handlerMap.insert(QLatin1String("list"), &QtXmlToSphinx::handleListTag);
-    m_handlerMap.insert(QLatin1String("term"), &QtXmlToSphinx::handleTermTag);
-    m_handlerMap.insert(QLatin1String("raw"), &QtXmlToSphinx::handleRawTag);
-    m_handlerMap.insert(QLatin1String("underline"), &QtXmlToSphinx::handleItalicTag);
-    m_handlerMap.insert(QLatin1String("superscript"), &QtXmlToSphinx::handleSuperScriptTag);
-    m_handlerMap.insert(QLatin1String("code"), &QtXmlToSphinx::handleCodeTag);
-    m_handlerMap.insert(QLatin1String("badcode"), &QtXmlToSphinx::handleCodeTag);
-    m_handlerMap.insert(QLatin1String("legalese"), &QtXmlToSphinx::handleCodeTag);
-    m_handlerMap.insert(QLatin1String("rst"), &QtXmlToSphinx::handleRstPassTroughTag);
-    m_handlerMap.insert(QLatin1String("section"), &QtXmlToSphinx::handleAnchorTag);
-    m_handlerMap.insert(QLatin1String("quotefile"), &QtXmlToSphinx::handleQuoteFileTag);
-
-    // ignored tags
-    m_handlerMap.insert(QLatin1String("generatedlist"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("tableofcontents"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("quotefromfile"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("skipto"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("target"), &QtXmlToSphinx::handleTargetTag);
-    m_handlerMap.insert(QLatin1String("page"), &QtXmlToSphinx::handlePageTag);
-    m_handlerMap.insert(QLatin1String("group"), &QtXmlToSphinx::handlePageTag);
-
-    // useless tags
-    m_handlerMap.insert(QLatin1String("description"), &QtXmlToSphinx::handleUselessTag);
-    m_handlerMap.insert(QLatin1String("definition"), &QtXmlToSphinx::handleUselessTag);
-    m_handlerMap.insert(QLatin1String("printuntil"), &QtXmlToSphinx::handleUselessTag);
-    m_handlerMap.insert(QLatin1String("relation"), &QtXmlToSphinx::handleUselessTag);
-
-    // Doxygen tags
-    m_handlerMap.insert(QLatin1String("title"), &QtXmlToSphinx::handleHeadingTag);
-    m_handlerMap.insert(QLatin1String("ref"), &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert(QLatin1String("computeroutput"), &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert(QLatin1String("detaileddescription"), &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert(QLatin1String("name"), &QtXmlToSphinx::handleParaTag);
-    m_handlerMap.insert(QLatin1String("listitem"), &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert(QLatin1String("parametername"), &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert(QLatin1String("parameteritem"), &QtXmlToSphinx::handleItemTag);
-    m_handlerMap.insert(QLatin1String("ulink"), &QtXmlToSphinx::handleLinkTag);
-    m_handlerMap.insert(QLatin1String("itemizedlist"), &QtXmlToSphinx::handleListTag);
-    m_handlerMap.insert(QLatin1String("parameternamelist"), &QtXmlToSphinx::handleListTag);
-    m_handlerMap.insert(QLatin1String("parameterlist"), &QtXmlToSphinx::handleListTag);
-
-    // Doxygen ignored tags
-    m_handlerMap.insert(QLatin1String("highlight"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("linebreak"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("programlisting"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("xreftitle"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("sp"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("entry"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("simplesect"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("verbatim"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("xrefsect"), &QtXmlToSphinx::handleIgnoredTag);
-    m_handlerMap.insert(QLatin1String("xrefdescription"), &QtXmlToSphinx::handleIgnoredTag);
-
     m_result = transform(doc);
 }
 
 QtXmlToSphinx::~QtXmlToSphinx() = default;
+
+void QtXmlToSphinx::callHandler(WebXmlTag t, QXmlStreamReader &r)
+{
+    switch (t) {
+    case WebXmlTag::heading:
+        handleHeadingTag(r);
+        break;
+    case WebXmlTag::brief:
+    case WebXmlTag::para:
+        handleParaTag(r);
+        break;
+    case WebXmlTag::italic:
+        handleItalicTag(r);
+        break;
+    case WebXmlTag::bold:
+        handleBoldTag(r);
+        break;
+    case WebXmlTag::see_also:
+        handleSeeAlsoTag(r);
+        break;
+    case WebXmlTag::snippet:
+        handleSnippetTag(r);
+        break;
+    case WebXmlTag::dots:
+    case WebXmlTag::codeline:
+        handleDotsTag(r);
+        break;
+    case WebXmlTag::table:
+        handleTableTag(r);
+        break;
+    case WebXmlTag::header:
+        handleRowTag(r);
+        break;
+    case WebXmlTag::row:
+        handleRowTag(r);
+        break;
+    case WebXmlTag::item:
+        handleItemTag(r);
+        break;
+    case WebXmlTag::argument:
+        handleArgumentTag(r);
+        break;
+    case WebXmlTag::teletype:
+        handleArgumentTag(r);
+        break;
+    case WebXmlTag::link:
+        handleLinkTag(r);
+        break;
+    case WebXmlTag::inlineimage:
+        handleInlineImageTag(r);
+        break;
+    case WebXmlTag::image:
+        handleImageTag(r);
+        break;
+    case WebXmlTag::list:
+        handleListTag(r);
+        break;
+    case WebXmlTag::term:
+        handleTermTag(r);
+        break;
+    case WebXmlTag::raw:
+        handleRawTag(r);
+        break;
+    case WebXmlTag::underline:
+        handleItalicTag(r);
+        break;
+    case WebXmlTag::superscript:
+        handleSuperScriptTag(r);
+        break;
+    case WebXmlTag::code:
+    case WebXmlTag::badcode:
+    case WebXmlTag::legalese:
+        handleCodeTag(r);
+        break;
+    case WebXmlTag::rst:
+        handleRstPassTroughTag(r);
+        break;
+    case WebXmlTag::section:
+        handleAnchorTag(r);
+        break;
+    case WebXmlTag::quotefile:
+        handleQuoteFileTag(r);
+        break;
+    case WebXmlTag::generatedlist:
+    case WebXmlTag::tableofcontents:
+    case WebXmlTag::quotefromfile:
+    case WebXmlTag::skipto:
+        handleIgnoredTag(r);
+        break;
+    case WebXmlTag::target:
+        handleTargetTag(r);
+        break;
+    case WebXmlTag::page:
+    case WebXmlTag::group:
+        handlePageTag(r);
+        break;
+    case WebXmlTag::description:
+    case WebXmlTag::definition:
+    case WebXmlTag::printuntil:
+    case WebXmlTag::relation:
+        handleUselessTag(r);
+        break;
+    case WebXmlTag::title:
+        handleHeadingTag(r);
+        break;
+    case WebXmlTag::ref:
+    case WebXmlTag::computeroutput:
+    case WebXmlTag::detaileddescription:
+    case WebXmlTag::name:
+        handleParaTag(r);
+        break;
+    case WebXmlTag::listitem:
+    case WebXmlTag::parametername:
+    case WebXmlTag::parameteritem:
+        handleItemTag(r);
+        break;
+    case WebXmlTag::ulink:
+        handleLinkTag(r);
+        break;
+    case WebXmlTag::itemizedlist:
+    case WebXmlTag::parameternamelist:
+    case WebXmlTag::parameterlist:
+        handleListTag(r);
+        break;
+    case WebXmlTag::highlight:
+    case WebXmlTag::linebreak:
+    case WebXmlTag::programlisting:
+    case WebXmlTag::xreftitle:
+    case WebXmlTag::sp:
+    case WebXmlTag::entry:
+    case WebXmlTag::simplesect:
+    case WebXmlTag::verbatim:
+    case WebXmlTag::xrefsect:
+    case WebXmlTag::xrefdescription:
+        handleIgnoredTag(r);
+        break;
+    case WebXmlTag::Unknown:
+        break;
+    }
+}
 
 void QtXmlToSphinx::pushOutputBuffer()
 {
@@ -299,19 +458,17 @@ QString QtXmlToSphinx::transform(const QString& doc)
         }
 
         if (token == QXmlStreamReader::StartElement) {
-            const auto tagName = reader.name();
-            TagHandler handler = m_handlerMap.value(tagName.toString(), &QtXmlToSphinx::handleUnknownTag);
-            if (!m_handlers.isEmpty() && ( (m_handlers.top() == &QtXmlToSphinx::handleIgnoredTag) ||
-                                           (m_handlers.top() == &QtXmlToSphinx::handleRawTag)) )
-                handler = &QtXmlToSphinx::handleIgnoredTag;
-
-            m_handlers.push(handler);
+            WebXmlTag tag = webXmlTagHash().value(reader.name(), WebXmlTag::Unknown);
+            if (!m_tagStack.isEmpty() && tag == WebXmlTag::raw)
+                tag = WebXmlTag::Unknown;
+            m_tagStack.push(tag);
         }
-        if (!m_handlers.isEmpty())
-            (this->*(m_handlers.top()))(reader);
+
+        if (!m_tagStack.isEmpty())
+            callHandler(m_tagStack.top(), reader);
 
         if (token == QXmlStreamReader::EndElement) {
-            m_handlers.pop();
+            m_tagStack.pop();
             m_lastTagName = reader.name().toString();
         }
     }

@@ -42,6 +42,8 @@ class QXmlStreamReader;
 QT_END_NAMESPACE
 class QtDocGenerator;
 
+enum class WebXmlTag;
+
 class QtXmlToSphinx
 {
 public:
@@ -169,14 +171,11 @@ private:
     void handleLinkText(LinkContext *linkContext, const QString &linktext) const;
     void handleLinkEnd(LinkContext *linkContext);
 
-    typedef void (QtXmlToSphinx::*TagHandler)(QXmlStreamReader&);
-    QHash<QString, TagHandler> m_handlerMap;
-    QStack<TagHandler> m_handlers;
+    QStack<WebXmlTag> m_tagStack;
     TextStream m_output;
     QString m_result;
 
     QStack<QString*> m_buffers;
-
 
     Table m_currentTable;
     QScopedPointer<LinkContext> m_linkContext; // for <link>
@@ -198,6 +197,7 @@ private:
     QString popOutputBuffer();
     void writeTable(Table& table);
     bool copyImage(const QString &href) const;
+    void callHandler(WebXmlTag t, QXmlStreamReader &);
 };
 
 inline TextStream& operator<<(TextStream& s, const QtXmlToSphinx& xmlToSphinx)
