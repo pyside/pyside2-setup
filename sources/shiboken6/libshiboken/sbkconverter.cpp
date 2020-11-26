@@ -43,10 +43,10 @@
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "autodecref.h"
-#include "sbkdbg.h"
 #include "helper.h"
 #include "voidptr.h"
 
+#include <string>
 #include <unordered_map>
 
 static SbkConverter **PrimitiveTypeConverters;
@@ -377,8 +377,11 @@ SbkConverter *getConverter(const char *typeName)
     ConvertersMap::const_iterator it = converters.find(typeName);
     if (it != converters.end())
         return it->second;
-    if (Py_VerboseFlag > 0)
-        SbkDbg() << "Can't find type resolver for type '" << typeName << "'.";
+    if (Py_VerboseFlag > 0) {
+        const std::string message =
+            std::string("Can't find type resolver for type '") + typeName + "'.";
+        PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 0);
+    }
     return nullptr;
 }
 

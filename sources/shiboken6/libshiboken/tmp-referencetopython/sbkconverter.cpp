@@ -41,8 +41,6 @@
 #include "sbkconverter_p.h"
 #include "basewrapper_p.h"
 
-#include "sbkdbg.h"
-
 namespace Shiboken {
 namespace Conversions {
 

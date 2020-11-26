@@ -43,7 +43,6 @@
 #include "sbkstaticstrings_p.h"
 #include "sbkconverter.h"
 #include "basewrapper.h"
-#include "sbkdbg.h"
 #include "autodecref.h"
 #include "sbkpython.h"
 

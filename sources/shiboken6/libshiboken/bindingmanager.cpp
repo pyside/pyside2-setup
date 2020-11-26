@@ -41,7 +41,6 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
-#include "sbkdbg.h"
 #include "gilstate.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"

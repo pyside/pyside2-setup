@@ -131,7 +131,6 @@ install(FILES
         sbkconverter.h
         sbkenum.h
         sbkmodule.h
-        sbkdbg.h
         sbkstring.h
         sbkstaticstrings.h
         shiboken.h
