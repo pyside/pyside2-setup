@@ -48,8 +48,6 @@
     win32
 [QtQml::bug_951]
     py3
-[QtQml::javascript_exceptions]
-    py3
 [QtScript::qscriptvalue_test]
     linux
     darwin
