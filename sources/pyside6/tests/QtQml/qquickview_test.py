@@ -40,7 +40,7 @@ from helper.helper import adjust_filename
 from helper.timedqapplication import TimedQApplication
 
 from PySide6.QtCore import QUrl, QObject, Property, Slot
-from PySide6.QtQml import QtQml, QQmlEngine
+from PySide6.QtQml import QQmlEngine
 from PySide6.QtQuick import QQuickView
 
 class MyObject(QObject):

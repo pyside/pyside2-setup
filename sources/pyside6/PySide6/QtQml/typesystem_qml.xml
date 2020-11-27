@@ -71,9 +71,6 @@
 
     <enum-type name="QQmlModuleImportSpecialVersions" since="6.0"/>
 
-    <!-- For qmlEngine(const QObject*), qmlContext(const QObject*) in qqml.h -->
-    <namespace-type name="QtQml"/>
-
     <!-- expose QQmlIncubationController::incubateWhile() (see
          QtQml_VolatileBoolTypeF/pysideqmlregistertype.h) -->
     <namespace-type name="std" generate="no">
