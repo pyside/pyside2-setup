@@ -346,14 +346,6 @@ protected:
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 
-    void clearTpFuncs();
-
-
-    /// Initializes correspondences between primitive and Python types.
-    static void initPrimitiveTypesCorrespondences();
-    /// Initializes a list of Python known type names.
-    static void initKnownPythonTypes();
-
     void writeFunctionCall(TextStream &s,
                            const AbstractMetaFunction *metaFunc,
                            Options options = NoOption) const;
@@ -379,11 +371,7 @@ protected:
 
     static QString pythonArgsAt(int i);
 
-    static QHash<QString, QString> m_pythonPrimitiveTypeName;
-    static QHash<QString, QString> m_pythonOperators;
-    static QHash<QString, QString> m_formatUnits;
-    static QHash<QString, QString> m_tpFuncs;
-    static QStringList m_knownPythonTypes;
+    static const QHash<QString, QString> &formatUnits();
 
 private:
     static QString cpythonGetterFunctionName(const QString &name,
@@ -513,7 +501,7 @@ private:
     mutable AbstractMetaTypeCache m_metaTypeFromStringCache;
 
     /// Type system converter variable replacement names and regular expressions.
-    QString m_typeSystemConvName[TypeSystemConverterVariables];
+    static const QHash<int, QString> &typeSystemConvName();
     QRegularExpression m_typeSystemConvRegEx[TypeSystemConverterVariables];
 };
 

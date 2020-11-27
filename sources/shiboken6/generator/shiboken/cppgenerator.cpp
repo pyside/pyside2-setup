@@ -30,6 +30,7 @@
 
 #include "cppgenerator.h"
 #include "ctypenames.h"
+#include "pytypenames.h"
 #include "fileout.h"
 #include "overloaddata.h"
 #include <abstractmetaenum.h>
@@ -57,9 +58,8 @@
 
 static const char CPP_ARG0[] = "cppArg0";
 
-QHash<QString, QString> CppGenerator::m_nbFuncs = QHash<QString, QString>();
-QHash<QString, QString> CppGenerator::m_sqFuncs = QHash<QString, QString>();
-QHash<QString, QString> CppGenerator::m_mpFuncs = QHash<QString, QString>();
+static inline QString reprFunction() { return QStringLiteral("__repr__"); }
+
 QString CppGenerator::m_currentErrorCode(QLatin1String("{}"));
 
 static const char typeNameFunc[] = R"CPP(
@@ -121,82 +121,73 @@ TextStream &operator<<(TextStream &s, const returnStatement &r)
     return s;
 }
 
-CppGenerator::CppGenerator()
+// Protocol function name / function parameters / return type
+struct ProtocolEntry
 {
-    // Number protocol structure members names
-    m_nbFuncs.insert(QLatin1String("__add__"), QLatin1String("nb_add"));
-    m_nbFuncs.insert(QLatin1String("__sub__"), QLatin1String("nb_subtract"));
-    m_nbFuncs.insert(QLatin1String("__mul__"), QLatin1String("nb_multiply"));
-    m_nbFuncs.insert(QLatin1String("__div__"), QLatin1String("nb_divide"));
-    m_nbFuncs.insert(QLatin1String("__mod__"), QLatin1String("nb_remainder"));
-    m_nbFuncs.insert(QLatin1String("__neg__"), QLatin1String("nb_negative"));
-    m_nbFuncs.insert(QLatin1String("__pos__"), QLatin1String("nb_positive"));
-    m_nbFuncs.insert(QLatin1String("__invert__"), QLatin1String("nb_invert"));
-    m_nbFuncs.insert(QLatin1String("__lshift__"), QLatin1String("nb_lshift"));
-    m_nbFuncs.insert(QLatin1String("__rshift__"), QLatin1String("nb_rshift"));
-    m_nbFuncs.insert(QLatin1String("__and__"), QLatin1String("nb_and"));
-    m_nbFuncs.insert(QLatin1String("__xor__"), QLatin1String("nb_xor"));
-    m_nbFuncs.insert(QLatin1String("__or__"), QLatin1String("nb_or"));
-    m_nbFuncs.insert(QLatin1String("__iadd__"), QLatin1String("nb_inplace_add"));
-    m_nbFuncs.insert(QLatin1String("__isub__"), QLatin1String("nb_inplace_subtract"));
-    m_nbFuncs.insert(QLatin1String("__imul__"), QLatin1String("nb_inplace_multiply"));
-    m_nbFuncs.insert(QLatin1String("__idiv__"), QLatin1String("nb_inplace_divide"));
-    m_nbFuncs.insert(QLatin1String("__imod__"), QLatin1String("nb_inplace_remainder"));
-    m_nbFuncs.insert(QLatin1String("__ilshift__"), QLatin1String("nb_inplace_lshift"));
-    m_nbFuncs.insert(QLatin1String("__irshift__"), QLatin1String("nb_inplace_rshift"));
-    m_nbFuncs.insert(QLatin1String("__iand__"), QLatin1String("nb_inplace_and"));
-    m_nbFuncs.insert(QLatin1String("__ixor__"), QLatin1String("nb_inplace_xor"));
-    m_nbFuncs.insert(QLatin1String("__ior__"), QLatin1String("nb_inplace_or"));
-    m_nbFuncs.insert(QLatin1String("bool"), QLatin1String("nb_nonzero"));
+    QString name;
+    QString arguments;
+    QString returnType;
+};
 
-    // sequence protocol functions
-    m_sequenceProtocol.insert(QLatin1String("__len__"),
-                              {QLatin1String("PyObject *self"),
-                               QLatin1String("Py_ssize_t")});
-    m_sequenceProtocol.insert(QLatin1String("__getitem__"),
-                              {QLatin1String("PyObject *self, Py_ssize_t _i"),
-                               QLatin1String("PyObject*")});
-    m_sequenceProtocol.insert(QLatin1String("__setitem__"),
-                              {QLatin1String("PyObject *self, Py_ssize_t _i, PyObject *_value"),
-                               intT()});
-    m_sequenceProtocol.insert(QLatin1String("__getslice__"),
-                              {QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2"),
-                               QLatin1String("PyObject*")});
-    m_sequenceProtocol.insert(QLatin1String("__setslice__"),
-                              {QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject *_value"),
-                               intT()});
-    m_sequenceProtocol.insert(QLatin1String("__contains__"),
-                              {QLatin1String("PyObject *self, PyObject *_value"),
-                               intT()});
-    m_sequenceProtocol.insert(QLatin1String("__concat__"),
-                              {QLatin1String("PyObject *self, PyObject *_other"),
-                               QLatin1String("PyObject*")});
+using ProtocolEntries = QList<ProtocolEntry>;
 
-    // Sequence protocol structure members names
-    m_sqFuncs.insert(QLatin1String("__concat__"), QLatin1String("sq_concat"));
-    m_sqFuncs.insert(QLatin1String("__contains__"), QLatin1String("sq_contains"));
-    m_sqFuncs.insert(QLatin1String("__getitem__"), QLatin1String("sq_item"));
-    m_sqFuncs.insert(QLatin1String("__getslice__"), QLatin1String("sq_slice"));
-    m_sqFuncs.insert(QLatin1String("__len__"), QLatin1String("sq_length"));
-    m_sqFuncs.insert(QLatin1String("__setitem__"), QLatin1String("sq_ass_item"));
-    m_sqFuncs.insert(QLatin1String("__setslice__"), QLatin1String("sq_ass_slice"));
-
-    // mapping protocol function
-    m_mappingProtocol.insert(QLatin1String("__mlen__"),
-                             {QLatin1String("PyObject *self"),
-                              QLatin1String("Py_ssize_t")});
-    m_mappingProtocol.insert(QLatin1String("__mgetitem__"),
-                             {QLatin1String("PyObject *self, PyObject *_key"),
-                              QLatin1String("PyObject*")});
-    m_mappingProtocol.insert(QLatin1String("__msetitem__"),
-                             {QLatin1String("PyObject *self, PyObject *_key, PyObject *_value"),
-                              intT()});
-
-    // Sequence protocol structure members names
-    m_mpFuncs.insert(QLatin1String("__mlen__"), QLatin1String("mp_length"));
-    m_mpFuncs.insert(QLatin1String("__mgetitem__"), QLatin1String("mp_subscript"));
-    m_mpFuncs.insert(QLatin1String("__msetitem__"), QLatin1String("mp_ass_subscript"));
+static bool contains(const ProtocolEntries &l, const QString &needle)
+{
+    for (const auto &m : l) {
+        if (m.name == needle)
+            return true;
+    }
+    return false;
 }
+
+// Maps special function names to function parameters and return types
+// used by CPython API in the mapping protocol.
+const ProtocolEntries &mappingProtocols()
+{
+    static const ProtocolEntries result = {
+        {QLatin1String("__mlen__"),
+         QLatin1String("PyObject *self"),
+         QLatin1String("Py_ssize_t")},
+        {QLatin1String("__mgetitem__"),
+         QLatin1String("PyObject *self, PyObject *_key"),
+         QLatin1String("PyObject*")},
+        {QLatin1String("__msetitem__"),
+         QLatin1String("PyObject *self, PyObject *_key, PyObject *_value"),
+         intT()}};
+    return result;
+}
+
+// Maps special function names to function parameters and return types
+// used by CPython API in the sequence protocol.
+const ProtocolEntries &sequenceProtocols()
+{
+    static const ProtocolEntries result = {
+        {QLatin1String("__len__"),
+         QLatin1String("PyObject *self"),
+         QLatin1String("Py_ssize_t")},
+        {QLatin1String("__getitem__"),
+         QLatin1String("PyObject *self, Py_ssize_t _i"),
+         QLatin1String("PyObject*")},
+        {QLatin1String("__setitem__"),
+         QLatin1String("PyObject *self, Py_ssize_t _i, PyObject *_value"),
+         intT()},
+        {QLatin1String("__getslice__"),
+         QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2"),
+         QLatin1String("PyObject*")},
+        {QLatin1String("__setslice__"),
+         QLatin1String("PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject *_value"),
+         intT()},
+        {QLatin1String("__contains__"),
+         QLatin1String("PyObject *self, PyObject *_value"),
+         intT()},
+        {QLatin1String("__concat__"),
+         QLatin1String("PyObject *self, PyObject *_other"),
+         QLatin1String("PyObject*")}
+    };
+    return result;
+}
+
+CppGenerator::CppGenerator() = default;
 
 QString CppGenerator::fileNameSuffix() const
 {
@@ -271,6 +262,15 @@ std::optional<AbstractMetaType>
             return i;
     }
     return {};
+}
+
+void CppGenerator::clearTpFuncs()
+{
+    m_tpFuncs = {
+        {QLatin1String("__str__"), {}}, {QLatin1String("__str__"), {}},
+        {reprFunction(), {}}, {QLatin1String("__iter__"), {}},
+        {QLatin1String("__next__"), {}}
+    };
 }
 
 using FunctionGroupMap = QMap<QString, AbstractMetaFunctionList>;
@@ -541,8 +541,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             continue;
 
         const AbstractMetaFunction *rfunc = overloads.constFirst();
-        if (m_sequenceProtocol.contains(rfunc->name()) || m_mappingProtocol.contains(rfunc->name()))
+        if (contains(sequenceProtocols(), rfunc->name())
+            || contains(mappingProtocols(), rfunc->name())) {
             continue;
+        }
 
         if (rfunc->isConstructor()) {
             // @TODO: Implement constructor support for smart pointers, so that they can be
@@ -1072,7 +1074,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (!convert && argTypeEntry->isPrimitive()) {
                 if (argTypeEntry->basicReferencedTypeEntry())
                     argTypeEntry = argTypeEntry->basicReferencedTypeEntry();
-                convert = !m_formatUnits.contains(argTypeEntry->name());
+                convert = !formatUnits().contains(argTypeEntry->name());
             }
 
             StringStream ac(TextStream::Language::Cpp);
@@ -2448,6 +2450,18 @@ void CppGenerator::writeArgumentConversion(TextStream &s,
         writeUnusedVariableCast(s, argName);
 }
 
+static const QStringList &knownPythonTypes()
+{
+    static const QStringList result = {
+        pyBoolT(), pyIntT(), pyFloatT(), pyLongT(),
+        QLatin1String("PyObject"), QLatin1String("PyString"),
+        QLatin1String("PyBuffer"), QLatin1String("PySequence"),
+        QLatin1String("PyTuple"), QLatin1String("PyList"),
+        QLatin1String("PyDict"), QLatin1String("PyObject*"),
+        QLatin1String("PyObject *"), QLatin1String("PyTupleObject*")};
+    return result;
+}
+
 std::optional<AbstractMetaType>
     CppGenerator::getArgumentType(const AbstractMetaFunction *func, int argPos) const
 {
@@ -2466,7 +2480,7 @@ std::optional<AbstractMetaType>
     }
 
     auto argType = buildAbstractMetaTypeFromString(typeReplaced);
-    if (!argType.has_value() && !m_knownPythonTypes.contains(typeReplaced)) {
+    if (!argType.has_value() && !knownPythonTypes().contains(typeReplaced)) {
         qCWarning(lcShiboken, "%s",
                   qPrintable(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func)));
     }
@@ -4078,8 +4092,8 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
 
 bool CppGenerator::supportsMappingProtocol(const AbstractMetaClass *metaClass) const
 {
-    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
-        if (metaClass->hasFunction(it.key()))
+    for (const auto &m : mappingProtocols()) {
+        if (metaClass->hasFunction(m.name))
             return true;
     }
 
@@ -4096,8 +4110,8 @@ bool CppGenerator::supportsNumberProtocol(const AbstractMetaClass *metaClass) co
 
 bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClass *metaClass) const
 {
-    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
-        if (metaClass->hasFunction(it.key()))
+    for (const auto &seq : sequenceProtocols()) {
+        if (metaClass->hasFunction(seq.name))
             return true;
     }
 
@@ -4230,15 +4244,15 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         tp_getset = cpythonGettersSettersDefinitionName(metaClass);
 
     // search for special functions
-    ShibokenGenerator::clearTpFuncs();
+    clearTpFuncs();
     const AbstractMetaFunctionList &funcs = metaClass->functions();
     for (AbstractMetaFunction *func : funcs) {
         if (m_tpFuncs.contains(func->name()))
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
-    if (m_tpFuncs.value(QLatin1String("__repr__")).isEmpty()
+    if (m_tpFuncs.value(reprFunction()).isEmpty()
         && metaClass->hasToStringCapability()) {
-        m_tpFuncs[QLatin1String("__repr__")] = writeReprFunction(s,
+        m_tpFuncs[reprFunction()] = writeReprFunction(s,
                 classContext,
                 metaClass->toStringCapabilityIndirections());
     }
@@ -4276,7 +4290,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         << "}\n\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
         << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType\n"
         << pyTypeSlotEntry("Py_tp_dealloc", tp_dealloc)
-        << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(QLatin1String("__repr__")))
+        << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(reprFunction()))
         << pyTypeSlotEntry("Py_tp_hash", tp_hash)
         << pyTypeSlotEntry("Py_tp_call", tp_call)
         << pyTypeSlotEntry("Py_tp_str", m_tpFuncs.value(QLatin1String("__str__")))
@@ -4318,16 +4332,13 @@ void CppGenerator::writeMappingMethods(TextStream &s,
                                        const AbstractMetaClass *metaClass,
                                        const GeneratorContext &context) const
 {
-    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
-        const AbstractMetaFunction *func = metaClass->findFunction(it.key());
+    for (const auto & m : mappingProtocols()) {
+        const AbstractMetaFunction *func = metaClass->findFunction(m.name);
         if (!func)
             continue;
         QString funcName = cpythonFunctionName(func);
-        QString funcArgs = it.value().first;
-        QString funcRetVal = it.value().second;
-
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
-        s << funcRetVal << ' ' << funcName << '(' << funcArgs << ")\n{\n";
+        s << m.returnType << ' ' << funcName << '(' << m.arguments << ")\n{\n";
         writeInvalidPyObjectCheck(s, QLatin1String("self"));
 
         writeCppSelfDefinition(s, func, context);
@@ -4345,17 +4356,15 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
 {
     bool injectedCode = false;
 
-    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
-        const AbstractMetaFunction *func = metaClass->findFunction(it.key());
+    for (const auto &seq : sequenceProtocols()) {
+        const AbstractMetaFunction *func = metaClass->findFunction(seq.name);
         if (!func)
             continue;
         injectedCode = true;
         QString funcName = cpythonFunctionName(func);
-        QString funcArgs = it.value().first;
-        QString funcRetVal = it.value().second;
 
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
-        s << funcRetVal << ' ' << funcName << '(' << funcArgs << ")\n{\n" << indent;
+        s << seq.returnType << ' ' << funcName << '(' << seq.arguments << ")\n{\n" << indent;
         writeInvalidPyObjectCheck(s, QLatin1String("self"));
 
         writeCppSelfDefinition(s, func, context);
@@ -4369,16 +4378,30 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
         writeDefaultSequenceMethods(s, context);
 }
 
+// Sequence protocol structure member names
+static const QHash<QString, QString> &sqFuncs()
+{
+    static const QHash<QString, QString> result = {
+        {QLatin1String("__concat__"), QLatin1String("sq_concat")},
+        {QLatin1String("__contains__"), QLatin1String("sq_contains")},
+        {QLatin1String("__getitem__"), QLatin1String("sq_item")},
+        {QLatin1String("__getslice__"), QLatin1String("sq_slice")},
+        {QLatin1String("__len__"), QLatin1String("sq_length")},
+        {QLatin1String("__setitem__"), QLatin1String("sq_ass_item")},
+        {QLatin1String("__setslice__"), QLatin1String("sq_ass_slice")}
+    };
+    return result;
+}
+
 void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
 {
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
-    for (auto it = m_sequenceProtocol.cbegin(), end = m_sequenceProtocol.cend(); it != end; ++it) {
-        const QString &funcName = it.key();
-        const AbstractMetaFunction *func = metaClass->findFunction(funcName);
-        funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QString();
-        if (!hasFunctions && func)
+    for (const auto &seq : sequenceProtocols()) {
+        if (const AbstractMetaFunction *func = metaClass->findFunction(seq.name)) {
+            funcs.insert(seq.name, QLatin1Char('&') + cpythonFunctionName(func));
             hasFunctions = true;
+        }
     }
 
     QString baseName = cpythonBaseName(metaClass);
@@ -4390,68 +4413,77 @@ void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s, const AbstractMe
         funcs[QLatin1String("__setitem__")] = baseName + QLatin1String("__setitem__");
     }
 
-    for (QHash<QString, QString>::const_iterator it = m_sqFuncs.cbegin(), end = m_sqFuncs.cend(); it != end; ++it) {
+    for (auto it = sqFuncs().cbegin(), end = sqFuncs().cend(); it != end; ++it) {
         const QString &sqName = it.key();
-        if (funcs[sqName].isEmpty())
-            continue;
-        s <<  "{Py_" << it.value() << ", (void *)" << funcs[sqName] << "},\n";
+        auto fit = funcs.constFind(sqName);
+        if (fit != funcs.constEnd()) {
+            s <<  "{Py_" << it.value() << ", reinterpret_cast<void *>("
+               << fit.value() << ")},\n";
+        }
     }
 }
 
 void CppGenerator::writeTypeAsMappingDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
 {
-    bool hasFunctions = false;
+    // Sequence protocol structure members names
+    static const QHash<QString, QString> mpFuncs{
+        {QLatin1String("__mlen__"), QLatin1String("mp_length")},
+        {QLatin1String("__mgetitem__"), QLatin1String("mp_subscript")},
+        {QLatin1String("__msetitem__"), QLatin1String("mp_ass_subscript")},
+    };
     QMap<QString, QString> funcs;
-    for (auto it = m_mappingProtocol.cbegin(), end = m_mappingProtocol.cend(); it != end; ++it) {
-        const QString &funcName = it.key();
-        const AbstractMetaFunction *func = metaClass->findFunction(funcName);
-        funcs[funcName] = func ? cpythonFunctionName(func).prepend(QLatin1Char('&')) : QLatin1String("0");
-        if (!hasFunctions && func)
-            hasFunctions = true;
+    for (const auto &m : mappingProtocols()) {
+        if (const AbstractMetaFunction *func = metaClass->findFunction(m.name)) {
+            const QString entry = QLatin1String("reinterpret_cast<void *>(&")
+                                  + cpythonFunctionName(func) + QLatin1Char(')');
+            funcs.insert(m.name, entry);
+        } else {
+            funcs.insert(m.name, QLatin1String(NULL_PTR));
+        }
     }
 
-    //use default implementation
-    if (!hasFunctions) {
-        funcs.insert(QLatin1String("__mlen__"), QString());
-        funcs.insert(QLatin1String("__mgetitem__"), QString());
-        funcs.insert(QLatin1String("__msetitem__"), QString());
+    for (auto it = mpFuncs.cbegin(), end = mpFuncs.cend(); it != end; ++it) {
+        const auto fit = funcs.constFind(it.key());
+        if (fit != funcs.constEnd())
+            s <<  "{Py_" << it.value() << ", " << fit.value() <<  "},\n";
     }
+}
 
-    for (auto it = m_mpFuncs.cbegin(), end = m_mpFuncs.cend(); it != end; ++it) {
-        const QString &mpName = it.key();
-        if (funcs[mpName].isEmpty())
-            continue;
-        s <<  "{Py_" << it.value() << ", (void *)" << funcs[mpName] << "},\n";
-    }
+// Number protocol structure members names
+static const QHash<QString, QString> &nbFuncs()
+{
+    static const QHash<QString, QString> result = {
+        {QLatin1String("__add__"), QLatin1String("nb_add")},
+        {QLatin1String("__sub__"), QLatin1String("nb_subtract")},
+        {QLatin1String("__mul__"), QLatin1String("nb_multiply")},
+        {QLatin1String("__div__"), QLatin1String("nb_divide")},
+        {QLatin1String("__mod__"), QLatin1String("nb_remainder")},
+        {QLatin1String("__neg__"), QLatin1String("nb_negative")},
+        {QLatin1String("__pos__"), QLatin1String("nb_positive")},
+        {QLatin1String("__invert__"), QLatin1String("nb_invert")},
+        {QLatin1String("__lshift__"), QLatin1String("nb_lshift")},
+        {QLatin1String("__rshift__"), QLatin1String("nb_rshift")},
+        {QLatin1String("__and__"), QLatin1String("nb_and")},
+        {QLatin1String("__xor__"), QLatin1String("nb_xor")},
+        {QLatin1String("__or__"), QLatin1String("nb_or")},
+        {QLatin1String("__iadd__"), QLatin1String("nb_inplace_add")},
+        {QLatin1String("__isub__"), QLatin1String("nb_inplace_subtract")},
+        {QLatin1String("__imul__"), QLatin1String("nb_inplace_multiply")},
+        {QLatin1String("__idiv__"), QLatin1String("nb_inplace_divide")},
+        {QLatin1String("__imod__"), QLatin1String("nb_inplace_remainder")},
+        {QLatin1String("__ilshift__"), QLatin1String("nb_inplace_lshift")},
+        {QLatin1String("__irshift__"), QLatin1String("nb_inplace_rshift")},
+        {QLatin1String("__iand__"), QLatin1String("nb_inplace_and")},
+        {QLatin1String("__ixor__"), QLatin1String("nb_inplace_xor")},
+        {QLatin1String("__ior__"), QLatin1String("nb_inplace_or")},
+        {boolT(), QLatin1String("nb_nonzero")}
+    };
+    return result;
 }
 
 void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMetaClass *metaClass) const
 {
     QMap<QString, QString> nb;
-
-    nb.insert(QLatin1String("__add__"), QString());
-    nb.insert(QLatin1String("__sub__"), QString());
-    nb.insert(QLatin1String("__mul__"), QString());
-    nb.insert(QLatin1String("__div__"), QString());
-    nb.insert(QLatin1String("__mod__"), QString());
-    nb.insert(QLatin1String("__neg__"), QString());
-    nb.insert(QLatin1String("__pos__"), QString());
-    nb.insert(QLatin1String("__invert__"), QString());
-    nb.insert(QLatin1String("__lshift__"), QString());
-    nb.insert(QLatin1String("__rshift__"), QString());
-    nb.insert(QLatin1String("__and__"), QString());
-    nb.insert(QLatin1String("__xor__"), QString());
-    nb.insert(QLatin1String("__or__"), QString());
-    nb.insert(QLatin1String("__iadd__"), QString());
-    nb.insert(QLatin1String("__isub__"), QString());
-    nb.insert(QLatin1String("__imul__"), QString());
-    nb.insert(QLatin1String("__idiv__"), QString());
-    nb.insert(QLatin1String("__imod__"), QString());
-    nb.insert(QLatin1String("__ilshift__"), QString());
-    nb.insert(QLatin1String("__irshift__"), QString());
-    nb.insert(QLatin1String("__iand__"), QString());
-    nb.insert(QLatin1String("__ixor__"), QString());
-    nb.insert(QLatin1String("__ior__"), QString());
 
     const QList<AbstractMetaFunctionList> opOverloads =
             filterGroupedOperatorFunctions(metaClass,
@@ -4468,27 +4500,29 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     QString baseName = cpythonBaseName(metaClass);
 
     if (hasBoolCast(metaClass))
-        nb.insert(QLatin1String("bool"), baseName + QLatin1String("___nb_bool"));
+        nb.insert(boolT(), baseName + QLatin1String("___nb_bool"));
 
-    for (QHash<QString, QString>::const_iterator it = m_nbFuncs.cbegin(), end = m_nbFuncs.cend(); it != end; ++it) {
+    for (auto it = nbFuncs().cbegin(), end = nbFuncs().cend(); it != end; ++it) {
         const QString &nbName = it.key();
-        if (nb[nbName].isEmpty())
-            continue;
-
-        if (nbName == QLatin1String("bool")) {
-            s <<  "{Py_nb_bool, (void *)" << nb[nbName] << "},\n";
-        } else {
-            bool excludeFromPy3K = nbName == QLatin1String("__div__") || nbName == QLatin1String("__idiv__");
-            if (!excludeFromPy3K)
-                s <<  "{Py_" << it.value() << ", (void *)" << nb[nbName] << "},\n";
+        if (nbName == QLatin1String("__div__") || nbName == QLatin1String("__idiv__"))
+            continue; // excludeFromPy3K
+        const auto nbIt = nb.constFind(nbName);
+        if (nbIt != nb.constEnd()) {
+            const QString fixednbName = nbName == boolT()
+                ? QLatin1String("nb_bool") : it.value();
+            s <<  "{Py_" << fixednbName << ", reinterpret_cast<void *>("
+               << nbIt.value() << ")},\n";
         }
     }
-    if (!nb[QLatin1String("__div__")].isEmpty())
-        s << "{Py_nb_true_divide, (void *)" << nb[QLatin1String("__div__")] << "},\n";
 
-    if (!nb[QLatin1String("__idiv__")].isEmpty()) {
+    auto nbIt = nb.constFind(QLatin1String("__div__"));
+    if (nbIt != nb.constEnd())
+        s << "{Py_nb_true_divide, reinterpret_cast<void *>(" << nbIt.value() << ")},\n";
+
+    nbIt = nb.constFind(QLatin1String("__idiv__"));
+    if (nbIt != nb.constEnd()) {
         s << "// This function is unused in Python 3. We reference it here.\n"
-            << "{0, (void *)" << nb[QLatin1String("__idiv__")] << "},\n"
+            << "{0, reinterpret_cast<void *>(" << nbIt.value() << ")},\n"
             << "// This list is ending at the first 0 entry.\n"
             << "// Therefore, we need to put the unused functions at the very end.\n";
     }
@@ -6413,7 +6447,7 @@ QString CppGenerator::writeReprFunction(TextStream &s,
                                         uint indirections) const
 {
     const AbstractMetaClass *metaClass = context.metaClass();
-    QString funcName = cpythonBaseName(metaClass) + QLatin1String("__repr__");
+    QString funcName = cpythonBaseName(metaClass) + reprFunction();
     s << "extern \"C\"\n{\n"
         << "static PyObject *" << funcName << "(PyObject *self)\n{\n" << indent;
     writeCppSelfDefinition(s, context);

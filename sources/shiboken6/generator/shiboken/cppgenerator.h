@@ -401,20 +401,9 @@ private:
     std::optional<AbstractMetaType>
         findSmartPointerInstantiation(const TypeEntry *entry) const;
 
-    // Number protocol structure members names.
-    static QHash<QString, QString> m_nbFuncs;
+    void clearTpFuncs();
 
-    // Maps special function names to function parameters and return types
-    // used by CPython API in the sequence protocol.
-    QHash<QString, QPair<QString, QString> > m_sequenceProtocol;
-    // Sequence protocol structure members names.
-    static QHash<QString, QString> m_sqFuncs;
-
-    // Maps special function names to function parameters and return types
-    // used by CPython API in the mapping protocol.
-    QHash<QString, QPair<QString, QString> > m_mappingProtocol;
-    // Mapping protocol structure members names.
-    static QHash<QString, QString> m_mpFuncs;
+    QHash<QString, QString> m_tpFuncs;
 
     static QString m_currentErrorCode;
 
