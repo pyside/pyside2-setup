@@ -154,6 +154,11 @@ void TextStream::putString(QStringView v)
     }
 }
 
+void TextStream::putChar(QChar c)
+{
+    putCharHelper(c);
+}
+
 void TextStream::putString(const char *s)
 {
     const char firstChar = *s;
@@ -167,6 +172,11 @@ void TextStream::putString(const char *s)
         m_str << s;
         m_lastCharClass = CharClass::Other;
     }
+}
+
+void TextStream::putChar(char c)
+{
+    putCharHelper(c);
 }
 
 void TextStream::putInt(int t)

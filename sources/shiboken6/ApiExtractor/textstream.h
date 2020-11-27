@@ -91,9 +91,9 @@ public:
     QChar lastChar() const;
 
     void putString(QStringView v);
-    void putChar(QChar c) { putCharHelper(c); }
+    void putChar(QChar c);
     void putString(const char *s);
-    void putChar(char c) { putCharHelper(c); }
+    void putChar(char c);
 
     void putInt(int t);
     void putSizeType(qsizetype t);
