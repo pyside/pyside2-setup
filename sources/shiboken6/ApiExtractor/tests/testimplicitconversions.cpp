@@ -58,7 +58,7 @@ void TestImplicitConversions::testWithPrivateCtors()
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     const AbstractMetaClass *classC = AbstractMetaClass::findClass(classes, QLatin1String("C"));
-    AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
+    const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
              classC->typeEntry());
@@ -88,7 +88,7 @@ void TestImplicitConversions::testWithModifiedVisibility()
     QCOMPARE(classes.count(), 2);
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
-    AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
+    const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
              classB->typeEntry());
@@ -122,7 +122,7 @@ void TestImplicitConversions::testWithAddedCtor()
     QCOMPARE(classes.count(), 3);
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
+    auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 2);
 
     // Added constructors with custom types should never result in implicit converters.
@@ -149,17 +149,17 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     QCOMPARE(classes.count(), 2);
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
-    AbstractMetaFunctionList implicitConvs = classA->implicitConversions();
+    const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.count(), 1);
-    AbstractMetaFunctionList externalConvOps = classA->externalConversionOperators();
+    const auto &externalConvOps = classA->externalConversionOperators();
     QCOMPARE(externalConvOps.count(), 1);
 
-    const AbstractMetaFunction *convOp = nullptr;
-    for (const AbstractMetaFunction *func : classB->functions()) {
+    AbstractMetaFunctionCPtr convOp;
+    for (const auto &func : classB->functions()) {
         if (func->isConversionOperator())
             convOp = func;
     }
-    QVERIFY(convOp);
+    QVERIFY(!convOp.isNull());
     QCOMPARE(implicitConvs.constFirst(), convOp);
 }
 

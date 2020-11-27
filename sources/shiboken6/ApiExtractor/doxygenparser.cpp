@@ -42,7 +42,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 
-static QString getSectionKindAttr(const AbstractMetaFunction *func)
+static QString getSectionKindAttr(const AbstractMetaFunctionCPtr &func)
 {
     if (func->isSignal())
         return QLatin1String("signal");
@@ -121,8 +121,8 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
     metaClass->setDocumentation(classDoc);
 
     //Functions Documentation
-    const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
-    for (AbstractMetaFunction *func : funcs) {
+    const auto &funcs = DocParser::documentableFunctions(metaClass);
+    for (const auto &func : funcs) {
         QString query = QLatin1String("/doxygen/compounddef/sectiondef");
         // properties
         if (func->isPropertyReader() || func->isPropertyWriter()
@@ -172,13 +172,13 @@ void DoxygenParser::fillDocumentation(AbstractMetaClass* metaClass)
             QString doc = getDocumentation(xquery, funcQuery, DocModificationList());
             if (doc.isEmpty()) {
                 qCWarning(lcShibokenDoc, "%s",
-                          qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, func,
+                          qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, func.data(),
                                                                 funcQuery)));
             } else {
                 funcDoc.setValue(doc, tag.first);
             }
         }
-        func->setDocumentation(funcDoc);
+        qSharedPointerConstCast<AbstractMetaFunction>(func)->setDocumentation(funcDoc);
         isProperty = false;
     }
 

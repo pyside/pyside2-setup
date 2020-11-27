@@ -276,8 +276,8 @@ public:
 
     bool isCallOperator() const;
 
-    static AbstractMetaFunction *
-        find(const AbstractMetaFunctionList &haystack, const QString &needle);
+    static AbstractMetaFunctionCPtr
+        find(const AbstractMetaFunctionCList &haystack, const QString &needle);
 
     // for the meta builder only
     void setAllowThreadModification(TypeSystem::AllowThread am);

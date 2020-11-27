@@ -128,7 +128,7 @@ const AbstractMetaEnumList &ApiExtractor::globalEnums() const
     return m_builder->globalEnums();
 }
 
-const AbstractMetaFunctionList &ApiExtractor::globalFunctions() const
+const AbstractMetaFunctionCList &ApiExtractor::globalFunctions() const
 {
     Q_ASSERT(m_builder);
     return m_builder->globalFunctions();

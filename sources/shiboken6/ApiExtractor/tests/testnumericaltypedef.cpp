@@ -50,9 +50,8 @@ void TestNumericalTypedef::testNumericalTypedef()
     QVERIFY(!builder.isNull());
 
     QCOMPARE(builder->globalFunctions().size(), 2);
-    const AbstractMetaFunction *funcDouble = builder->globalFunctions().constFirst();
-    QVERIFY(funcDouble);
-    const AbstractMetaFunction *funcReal = builder->globalFunctions().constLast();
+    auto funcDouble = builder->globalFunctions().constFirst();
+    auto funcReal = builder->globalFunctions().constLast();
     QVERIFY(funcReal);
 
     if (funcDouble->name() == QLatin1String("funcReal"))
@@ -90,10 +89,8 @@ void TestNumericalTypedef::testUnsignedNumericalTypedef()
     QVERIFY(!builder.isNull());
 
     QCOMPARE(builder->globalFunctions().size(), 2);
-    const AbstractMetaFunction *funcUnsignedShort = builder->globalFunctions().constFirst();
-    QVERIFY(funcUnsignedShort);
-    const AbstractMetaFunction *funcUShort = builder->globalFunctions().constLast();
-    QVERIFY(funcUShort);
+    auto funcUnsignedShort = builder->globalFunctions().constFirst();
+    auto funcUShort = builder->globalFunctions().constLast();
 
     if (funcUnsignedShort->name() == QLatin1String("funcUShort"))
         std::swap(funcUnsignedShort, funcUShort);

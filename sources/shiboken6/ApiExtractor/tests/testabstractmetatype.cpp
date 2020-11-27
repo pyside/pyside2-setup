@@ -74,7 +74,7 @@ void TestAbstractMetaType::testConstCharPtrType()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     QCOMPARE(builder->globalFunctions().size(), 1);
-    AbstractMetaFunction *func = builder->globalFunctions().constFirst();
+    const auto func = builder->globalFunctions().constFirst();
     AbstractMetaType rtype = func->type();
     // Test properties of const char*
     QVERIFY(!rtype.isVoid());
@@ -111,8 +111,7 @@ void TestAbstractMetaType::testApiVersionSupported()
     QCOMPARE(classes.size(), 2);
 
 
-    AbstractMetaFunctionList functions = builder->globalFunctions();
-    QCOMPARE(functions.size(), 2);
+    QCOMPARE(builder->globalFunctions().size(), 2);
 }
 
 
@@ -145,9 +144,9 @@ void TestAbstractMetaType::testCharType()
     QCOMPARE(classes.size(), 1);
     QCOMPARE(classes.constFirst()->package(), QLatin1String("Foo"));
 
-    AbstractMetaFunctionList functions = builder->globalFunctions();
+    const auto functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
-    AbstractMetaFunction *func = functions.constFirst();
+    const auto func = functions.constFirst();
     AbstractMetaType rtype = func->type();
     // Test properties of const char*
     QVERIFY(!rtype.isVoid());
@@ -205,9 +204,9 @@ void TestAbstractMetaType::testTypedefWithTemplates()
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    AbstractMetaFunctionList functions = builder->globalFunctions();
+    const auto functions = builder->globalFunctions();
     QCOMPARE(functions.count(), 1);
-    AbstractMetaFunction *function = functions.constFirst();
+    const auto function = functions.constFirst();
     AbstractMetaArgumentList args = function->arguments();
     QCOMPARE(args.count(), 1);
     const AbstractMetaArgument &arg = args.constFirst();
@@ -232,9 +231,9 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     QCOMPARE(classes.size(), 1);
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    AbstractMetaFunctionList overloads = classA->queryFunctionsByName(QLatin1String("method"));
+    const auto overloads = classA->queryFunctionsByName(QLatin1String("method"));
     QCOMPARE(overloads.count(), 1);
-    AbstractMetaFunction* method = overloads.constFirst();
+    const auto method = overloads.constFirst();
     QVERIFY(method);
     AbstractMetaArgumentList args = method->arguments();
     QCOMPARE(args.count(), 1);

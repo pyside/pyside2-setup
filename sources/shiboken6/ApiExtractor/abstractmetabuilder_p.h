@@ -97,12 +97,9 @@ public:
                                                  const QSet<QString> &enumsDeclarations);
     void traverseEnums(const ScopeModelItem &item, AbstractMetaClass *parent,
                        const QStringList &enumsDeclarations);
-    AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem,
-                                               AbstractMetaClass::Attributes *constructorAttributes,
-                                               AbstractMetaClass *currentClass);
-    AbstractMetaFunctionList templateClassFunctionList(const ScopeModelItem &scopeItem,
-                                                       AbstractMetaClass *metaClass,
-                                                       bool *constructorRejected);
+    AbstractMetaFunctionRawPtrList classFunctionList(const ScopeModelItem &scopeItem,
+                                                     AbstractMetaClass::Attributes *constructorAttributes,
+                                                     AbstractMetaClass *currentClass);
     void traverseFunctions(ScopeModelItem item, AbstractMetaClass *parent);
     void applyFunctionModifications(AbstractMetaFunction* func);
     void traverseFields(const ScopeModelItem &item, AbstractMetaClass *parent);
@@ -110,9 +107,11 @@ public:
                                 AbstractMetaClass *currentClass);
     void traverseOperatorFunction(const FunctionModelItem &item,
                                   AbstractMetaClass *currentClass);
-    AbstractMetaFunction* traverseFunction(const AddedFunctionPtr &addedFunc);
-    AbstractMetaFunction* traverseFunction(const AddedFunctionPtr &addedFunc,
-                                           AbstractMetaClass *metaClass);
+    AbstractMetaFunction *traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
+                                                      AbstractMetaClass *metaClass = nullptr);
+    bool traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc);
+    bool traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
+                                     AbstractMetaClass *metaClass);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
                                            AbstractMetaClass *currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
@@ -193,7 +192,7 @@ public:
     AbstractMetaClassList m_templates;
     AbstractMetaClassList m_smartPointers;
     QHash<const _CodeModelItem *, AbstractMetaClass *> m_itemToClass;
-    AbstractMetaFunctionList m_globalFunctions;
+    AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 
     using RejectMap = QMap<QString, AbstractMetaBuilder::RejectReason>;

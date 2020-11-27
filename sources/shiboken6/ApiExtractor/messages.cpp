@@ -52,7 +52,7 @@ QString msgNoFunctionForModification(const AbstractMetaClass *klass,
                                      const QString &signature,
                                      const QString &originalSignature,
                                      const QStringList &possibleSignatures,
-                                     const AbstractMetaFunctionList &allFunctions)
+                                     const AbstractMetaFunctionCList &allFunctions)
 {
     QString result;
     QTextStream str(&result);

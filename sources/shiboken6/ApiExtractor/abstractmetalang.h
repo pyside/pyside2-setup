@@ -99,16 +99,15 @@ public:
 
     void fixFunctions();
 
-    const AbstractMetaFunctionList &functions() const;
-    void setFunctions(const AbstractMetaFunctionList &functions);
-    void addFunction(AbstractMetaFunction *function);
-    bool hasFunction(const AbstractMetaFunction *f) const;
+    const AbstractMetaFunctionCList &functions() const;
+    void setFunctions(const AbstractMetaFunctionCList &functions);
+    void addFunction(const AbstractMetaFunctionCPtr &function);
     bool hasFunction(const QString &str) const;
-    const AbstractMetaFunction* findFunction(const QString& functionName) const;
+    AbstractMetaFunctionCPtr findFunction(const QString& functionName) const;
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
-    const AbstractMetaFunction *copyConstructor() const;
+    AbstractMetaFunctionCPtr copyConstructor() const;
     bool hasCopyConstructor() const;
     bool hasPrivateCopyConstructor() const;
 
@@ -134,17 +133,17 @@ public:
 
     bool generateExceptionHandling() const;
 
-    AbstractMetaFunctionList queryFunctionsByName(const QString &name) const;
+    AbstractMetaFunctionCList queryFunctionsByName(const QString &name) const;
     static bool queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query);
-    static AbstractMetaFunctionList queryFunctionList(const AbstractMetaFunctionList &list,
+    static AbstractMetaFunctionCList queryFunctionList(const AbstractMetaFunctionCList &list,
                                                       FunctionQueryOptions query);
-    static const AbstractMetaFunction *queryFirstFunction(const AbstractMetaFunctionList &list,
-                                                          FunctionQueryOptions query);
+    static AbstractMetaFunctionCPtr queryFirstFunction(const AbstractMetaFunctionCList &list,
+                                                       FunctionQueryOptions query);
 
-    AbstractMetaFunctionList queryFunctions(FunctionQueryOptions query) const;
-    AbstractMetaFunctionList functionsInTargetLang() const;
-    AbstractMetaFunctionList cppSignalFunctions() const;
-    AbstractMetaFunctionList implicitConversions() const;
+    AbstractMetaFunctionCList queryFunctions(FunctionQueryOptions query) const;
+    AbstractMetaFunctionCList functionsInTargetLang() const;
+    AbstractMetaFunctionCList cppSignalFunctions() const;
+    AbstractMetaFunctionCList implicitConversions() const;
 
     /**
      *   Retrieves all class' operator overloads that meet
@@ -154,7 +153,7 @@ public:
      *   /return list of operator overload methods that meet the
      *   query criteria
      */
-    AbstractMetaFunctionList operatorOverloads(OperatorQueryOptions query = AllOperators) const;
+    AbstractMetaFunctionCList operatorOverloads(OperatorQueryOptions query = AllOperators) const;
 
     bool hasArithmeticOperatorOverload() const;
     bool hasBitwiseOperatorOverload() const;
@@ -178,7 +177,7 @@ public:
     void getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const;
     void getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const;
 
-    void getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const;
+    void getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionCList *funcList) const;
 
     QString fullName() const;
 
@@ -300,9 +299,9 @@ public:
 
     /// Returns a list of conversion operators for this class. The conversion
     /// operators are defined in other classes of the same module.
-    AbstractMetaFunctionList externalConversionOperators() const;
+    const AbstractMetaFunctionCList &externalConversionOperators() const;
     /// Adds a converter operator for this class.
-    void addExternalConversionOperator(AbstractMetaFunction* conversionOp);
+    void addExternalConversionOperator(const AbstractMetaFunctionCPtr &conversionOp);
     /// Returns true if this class has any converter operators defined elsewhere.
     bool hasExternalConversionOperators() const;
 

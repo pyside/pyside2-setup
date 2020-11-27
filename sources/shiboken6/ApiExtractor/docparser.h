@@ -112,14 +112,14 @@ public:
     */
     virtual Documentation retrieveModuleDocumentation(const QString& name) = 0;
 
-    static bool skipForQuery(const AbstractMetaFunction *func);
+    static bool skipForQuery(const AbstractMetaFunctionCPtr &func);
 
 protected:
     QString getDocumentation(const XQueryPtr &xquery, const QString& query,
                              const DocModificationList& mods) const;
 
 
-    static AbstractMetaFunctionList documentableFunctions(const AbstractMetaClass *metaClass);
+    static AbstractMetaFunctionCList documentableFunctions(const AbstractMetaClass *metaClass);
 
 private:
     QString m_packageName;

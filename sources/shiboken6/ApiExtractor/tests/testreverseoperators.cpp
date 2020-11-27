@@ -52,9 +52,9 @@ void TestReverseOperators::testReverseSum()
     QVERIFY(classA);
     QCOMPARE(classA->functions().count(), 4);
 
-    const AbstractMetaFunction* reverseOp = nullptr;
-    const AbstractMetaFunction* normalOp = 0;
-    for (const AbstractMetaFunction *func : classA->functions()) {
+    AbstractMetaFunctionCPtr reverseOp;
+    AbstractMetaFunctionCPtr normalOp;
+    for (const auto &func : classA->functions()) {
         if (func->name() == QLatin1String("operator+")) {
             if (func->isReverseOperator())
                 reverseOp = func;
@@ -63,10 +63,10 @@ void TestReverseOperators::testReverseSum()
         }
     }
 
-    QVERIFY(normalOp);
+    QVERIFY(!normalOp.isNull());
     QVERIFY(!normalOp->isReverseOperator());
     QCOMPARE(normalOp->arguments().count(), 1);
-    QVERIFY(reverseOp);
+    QVERIFY(!reverseOp.isNull());
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().count(), 1);
 }
@@ -98,9 +98,9 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QVERIFY(classB);
     QCOMPARE(classB->functions().count(), 4);
 
-    const AbstractMetaFunction *reverseOp = nullptr;
-    const AbstractMetaFunction *normalOp = nullptr;
-    for (const AbstractMetaFunction *func : classB->functions()) {
+    AbstractMetaFunctionCPtr reverseOp;
+    AbstractMetaFunctionCPtr normalOp;
+    for (const auto &func : classB->functions()) {
         if (func->name() == QLatin1String("operator+")) {
             if (func->isReverseOperator())
                 reverseOp = func;
@@ -108,11 +108,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
                 normalOp = func;
         }
     }
-    QVERIFY(normalOp);
+    QVERIFY(!normalOp.isNull());
     QVERIFY(!normalOp->isReverseOperator());
     QCOMPARE(normalOp->arguments().count(), 1);
     QCOMPARE(normalOp->minimalSignature(), QLatin1String("operator+(B,A)"));
-    QVERIFY(reverseOp);
+    QVERIFY(!reverseOp.isNull());
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().count(), 1);
     QCOMPARE(reverseOp->minimalSignature(), QLatin1String("operator+(A,B)"));

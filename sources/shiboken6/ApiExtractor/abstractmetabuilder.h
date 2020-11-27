@@ -68,7 +68,7 @@ public:
     const AbstractMetaClassList &classes() const;
     const AbstractMetaClassList &templates() const;
     const AbstractMetaClassList &smartPointers() const;
-    const AbstractMetaFunctionList &globalFunctions() const;
+    const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
     std::optional<AbstractMetaEnum> findEnum(const TypeEntry *typeEntry) const;
 

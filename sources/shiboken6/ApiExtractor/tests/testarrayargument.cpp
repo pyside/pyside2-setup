@@ -63,8 +63,8 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 
 static QString functionMinimalSignature(const AbstractMetaClass *c, const QString &name)
 {
-    const AbstractMetaFunction *f = c->findFunction(name);
-    return f ? f->minimalSignature() : QString();
+    const auto f = c->findFunction(name);
+    return f.isNull() ? QString() : f->minimalSignature();
 }
 
 void TestArrayArgument::testArraySignature()

@@ -44,7 +44,7 @@ public:
 protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
-    static QList<AbstractMetaFunctionList>
+    static QList<AbstractMetaFunctionCList>
         filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass, uint query);
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
@@ -55,18 +55,18 @@ private:
                        const TypeEntry *enclosingEntry = nullptr) const;
     void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext) const;
     void writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
-                                const AbstractMetaFunction *func) const;
+                                const AbstractMetaFunctionCPtr &func) const;
     void writeDestructorNative(TextStream &s, const GeneratorContext &classContext) const;
 
-    QString getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func) const;
-    void writeVirtualMethodNative(TextStream &s, const AbstractMetaFunction *func,
+    QString getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const;
+    void writeVirtualMethodNative(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                   int cacheIndex) const;
-    void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunction *func,
+    void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const CodeSnipList &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntry *retType,
                                    const QString &returnStatement) const;
     QString virtualMethodReturn(TextStream &s,
-                                const AbstractMetaFunction *func,
+                                const AbstractMetaFunctionCPtr &func,
                                 const FunctionModificationList &functionModifications) const;
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
     void writeMetaCast(TextStream &s, const GeneratorContext &classContext) const;
@@ -90,15 +90,15 @@ private:
 
     void writeMethodWrapperPreamble(TextStream &s, OverloadData &overloadData,
                                     const GeneratorContext &context) const;
-    void writeConstructorWrapper(TextStream &s, const AbstractMetaFunctionList &overloads,
+    void writeConstructorWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
                                  const GeneratorContext &classContext) const;
-    void writeMethodWrapper(TextStream &s, const AbstractMetaFunctionList &overloads,
+    void writeMethodWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
                             const GeneratorContext &classContext) const;
     void writeArgumentsInitializer(TextStream &s, OverloadData &overloadData) const;
     void writeCppSelfConversion(TextStream &s, const GeneratorContext &context,
                                 const QString &className, bool useWrapperClass) const;
     void writeCppSelfDefinition(TextStream &s,
-                                const AbstractMetaFunction *func,
+                                const AbstractMetaFunctionCPtr &func,
                                 const GeneratorContext &context,
                                 bool hasStaticOverload = false) const;
     void writeCppSelfDefinition(TextStream &s,
@@ -162,7 +162,7 @@ private:
      *  \return The type of the argument indicated by \p argPos.
      */
     std::optional<AbstractMetaType>
-        getArgumentType(const AbstractMetaFunction *func, int argPos) const;
+        getArgumentType(const AbstractMetaFunctionCPtr &func, int argPos) const;
 
     void writePythonToCppTypeConversion(TextStream &s,
                                         const AbstractMetaType &type,
@@ -172,10 +172,11 @@ private:
                                         const QString &defaultValue = QString()) const;
 
     /// Writes the conversion rule for arguments of regular and virtual methods.
-    void writeConversionRule(TextStream &s, const AbstractMetaFunction *func, TypeSystem::Language language) const;
+    void writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                             TypeSystem::Language language) const;
     /// Writes the conversion rule for the return value of a method.
-    void writeConversionRule(TextStream &s, const AbstractMetaFunction *func, TypeSystem::Language language,
-                             const QString &outputVar) const;
+    void writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                             TypeSystem::Language language, const QString &outputVar) const;
 
     /**
      *   Set the Python method wrapper return value variable to Py_None if
@@ -186,7 +187,8 @@ private:
      *   \param thereIsReturnValue indicates if the return type of any of the other overloads
      *                             for this function is different from 'void'
      */
-    static void writeNoneReturn(TextStream &s, const AbstractMetaFunction *func, bool thereIsReturnValue);
+    static void writeNoneReturn(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                bool thereIsReturnValue);
 
     /**
      *   Writes the Python function wrapper overload decisor that selects which C++
@@ -207,7 +209,7 @@ private:
     /// Writes the call to a single function usually from a collection of overloads.
     void writeSingleFunctionCall(TextStream &s,
                                  const OverloadData &overloadData,
-                                 const AbstractMetaFunction *func,
+                                 const AbstractMetaFunctionCPtr &func,
                                  const GeneratorContext &context) const;
 
     /// Returns the name of a C++ to Python conversion function.
@@ -261,14 +263,14 @@ private:
                                        const QString &pythonToCppFunc,
                                        const QString &isConvertibleFunc) const;
 
-    void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunction *func,
+    void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                       bool usePyArgs, const OverloadData &overloadData) const;
 
     /// Returns a string containing the name of an argument for the given function and argument index.
-    QString argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex,
+    QString argumentNameFromIndex(const AbstractMetaFunctionCPtr &func, int argIndex,
                                   const AbstractMetaClass **wrappedClass,
                                   QString *errorMessage = nullptr) const;
-    void writeMethodCall(TextStream &s, const AbstractMetaFunction *func,
+    void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                          const GeneratorContext &context, int maxArgs = 0) const;
 
     QString getInitFunctionName(const GeneratorContext &context) const;
@@ -284,9 +286,9 @@ private:
     void writeClassDefinition(TextStream &s,
                               const AbstractMetaClass *metaClass,
                               const GeneratorContext &classContext);
-    void writeMethodDefinitionEntry(TextStream &s, const AbstractMetaFunctionList &overloads) const;
-    void writeMethodDefinition(TextStream &s, const AbstractMetaFunctionList &overloads) const;
-    void writeSignatureInfo(TextStream &s, const AbstractMetaFunctionList &overloads) const;
+    void writeMethodDefinitionEntry(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
+    void writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
+    void writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(TextStream &s,
                               const AbstractMetaClass *metaClass,
@@ -356,9 +358,11 @@ private:
     void writeExtendedConverterInitialization(TextStream &s, const TypeEntry *externalType,
                                               const AbstractMetaClassCList &conversions) const;
 
-    void writeParentChildManagement(TextStream &s, const AbstractMetaFunction *func, bool userHeuristicForReturn) const;
-    bool writeParentChildManagement(TextStream &s, const AbstractMetaFunction *func, int argIndex, bool userHeuristicPolicy) const;
-    void writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunction *func) const;
+    void writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                    bool userHeuristicForReturn) const;
+    bool writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                    int argIndex, bool userHeuristicPolicy) const;
+    void writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunctionCPtr &func) const;
     void writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context) const;
 
     /**
@@ -394,9 +398,9 @@ private:
     QString writeReprFunction(TextStream &s, const GeneratorContext &context,
                               uint indirections) const;
 
-    const AbstractMetaFunction *boolCast(const AbstractMetaClass *metaClass) const;
+    AbstractMetaFunctionCPtr boolCast(const AbstractMetaClass *metaClass) const;
     bool hasBoolCast(const AbstractMetaClass *metaClass) const
-    { return boolCast(metaClass) != nullptr; }
+    { return !boolCast(metaClass).isNull(); }
 
     std::optional<AbstractMetaType>
         findSmartPointerInstantiation(const TypeEntry *entry) const;

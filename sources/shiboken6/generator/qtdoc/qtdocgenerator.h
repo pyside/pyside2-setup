@@ -81,11 +81,11 @@ private:
 
     void writeFields(TextStream &s, const AbstractMetaClass *cppClass) const;
     static QString functionSignature(const AbstractMetaClass* cppClass,
-                                     const AbstractMetaFunction* func);
+                                     const AbstractMetaFunctionCPtr &func);
     void writeFunction(TextStream& s, const AbstractMetaClass* cppClass,
-                       const AbstractMetaFunction* func, bool indexed = true);
+                       const AbstractMetaFunctionCPtr &func, bool indexed = true);
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
-                                     const AbstractMetaFunction* func) const;
+                                     const AbstractMetaFunctionCPtr &func) const;
     void writeFunctionList(TextStream& s, const AbstractMetaClass* cppClass);
     void writeFunctionBlock(TextStream& s, const QString& title, QStringList& functions);
     void writeParameterType(TextStream &s, const AbstractMetaClass *cppClass,
@@ -95,13 +95,16 @@ private:
     void writeFormattedText(TextStream &s, const Documentation &doc,
                             const AbstractMetaClass *metaclass = nullptr,
                             Documentation::Type docType = Documentation::Detailed) const;
-    bool writeInjectDocumentation(TextStream& s, TypeSystem::DocModificationMode mode, const AbstractMetaClass* cppClass, const AbstractMetaFunction* func);
+    bool writeInjectDocumentation(TextStream& s, TypeSystem::DocModificationMode mode,
+                                  const AbstractMetaClass* cppClass,
+                                  const AbstractMetaFunctionCPtr &func);
     void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips, TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
     void writeModuleDocumentation();
     void writeAdditionalDocumentation() const;
 
-    static QString parseArgDocStyle(const AbstractMetaClass *cppClass, const AbstractMetaFunction *func);
+    static QString parseArgDocStyle(const AbstractMetaClass *cppClass,
+                                    const AbstractMetaFunctionCPtr &func);
     QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass) const;
 
     QString m_docDataDir;

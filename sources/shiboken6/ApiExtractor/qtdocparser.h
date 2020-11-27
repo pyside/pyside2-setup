@@ -43,7 +43,7 @@ private:
     QString queryFunctionDocumentation(const QString &sourceFileName,
                                        const AbstractMetaClass* metaClass,
                                        const QString &classQuery,
-                                       const  AbstractMetaFunction *func,
+                                       const AbstractMetaFunctionCPtr &func,
                                        const DocModificationList &signedModifs,
                                        const XQueryPtr &xquery,
                                        QString *errorMessage);

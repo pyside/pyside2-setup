@@ -143,9 +143,9 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
            << " : public " << metaClass->qualifiedCppName()
            << "\n{\npublic:\n" << indent;
 
-        const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
+        const auto &funcs = filterFunctions(metaClass);
         int maxOverrides = 0;
-        for (AbstractMetaFunction *func : funcs) {
+        for (const auto &func : funcs) {
             if ((func->attributes() & AbstractMetaAttributes::FinalCppMethod) == 0) {
                 writeFunction(s, func);
                 // PYSIDE-803: Build a boolean cache for unused overrides.
@@ -222,7 +222,7 @@ void *qt_metacast(const char *_clname) override;
     s << "#endif // SBK_" << outerHeaderGuard << "_H\n\n";
 }
 
-void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunction *func)
+void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func)
 {
 
     // do not write copy ctors here.
@@ -282,8 +282,7 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunction *f
             s << " override";
         s << ";\n";
         // Check if this method hide other methods in base classes
-        const AbstractMetaFunctionList &ownerFuncs = func->ownerClass()->functions();
-        for (const AbstractMetaFunction *f : ownerFuncs) {
+        for (const auto &f : func->ownerClass()->functions()) {
             if (f != func
                 && !f->isConstructor()
                 && !f->isPrivate()
@@ -618,7 +617,7 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType
 
 void HeaderGenerator::writeInheritedOverloads(TextStream &s) const
 {
-    for (const AbstractMetaFunction *func : qAsConst(m_inheritedOverloads)) {
+    for (const auto &func : qAsConst(m_inheritedOverloads)) {
         s << "inline ";
         s << functionSignature(func, QString(), QString(), Generator::EnumAsInts|Generator::OriginalTypeDescription)
             << " { ";

@@ -81,7 +81,7 @@ public:
     };
     Q_DECLARE_FLAGS(AttroCheck, AttroCheckFlag);
 
-    using FunctionGroups = QMap<QString, AbstractMetaFunctionList>; // Sorted
+    using FunctionGroups = QMap<QString, AbstractMetaFunctionCList>; // Sorted
 
     ShibokenGenerator();
     ~ShibokenGenerator() override;
@@ -110,8 +110,8 @@ protected:
      *   \param func the metafunction to be searched in subclasses.
      *   \param seen the function's minimal signatures already seen.
      */
-    static AbstractMetaFunctionList getFunctionAndInheritedOverloads(const AbstractMetaFunction *func,
-                                                                     QSet<QString> *seen);
+    static AbstractMetaFunctionCList getFunctionAndInheritedOverloads(const AbstractMetaFunctionCPtr &func,
+                                                                      QSet<QString> *seen);
 
     /// Write user's custom code snippets at class or module level.
     void writeClassCodeSnips(TextStream &s,
@@ -128,7 +128,7 @@ protected:
                         const CodeSnipList &codeSnips,
                         TypeSystem::CodeSnipPosition position,
                         TypeSystem::Language language,
-                        const AbstractMetaFunction *func,
+                        const AbstractMetaFunctionCPtr &func,
                         const AbstractMetaArgument *lastArg = nullptr) const;
 
     /// Replaces variables for the user's custom code at global or class level.
@@ -143,7 +143,7 @@ protected:
      *   \return true if the function's code snippets call the wrapped C++ function
      */
     static bool injectedCodeCallsCppFunction(const GeneratorContext &context,
-                                             const AbstractMetaFunction *func);
+                                             const AbstractMetaFunctionCPtr &func);
 
     /**
      *   Function which parse the metafunction information
@@ -151,7 +151,7 @@ protected:
      *   \param option some extra options
      *   \param arg_count the number of function arguments
      */
-    QString functionSignature(const AbstractMetaFunction *func,
+    QString functionSignature(const AbstractMetaFunctionCPtr &func,
                               const QString &prepend = QString(),
                               const QString &append = QString(),
                               Options options = NoOption,
@@ -164,7 +164,7 @@ protected:
     AttroCheck checkAttroFunctionNeeds(const AbstractMetaClass *metaClass) const;
 
     /// Returns a list of methods of the given class where each one is part of a different overload with both static and non-static method.
-    AbstractMetaFunctionList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass) const;
+    AbstractMetaFunctionCList getMethodsWithBothStaticAndNonStaticMethods(const AbstractMetaClass *metaClass) const;
 
     void writeToPythonConversion(TextStream &s, const AbstractMetaType &type,
                                  const AbstractMetaClass *context, const QString &argumentName) const;
@@ -174,18 +174,18 @@ protected:
                               const QString &outArgName) const;
 
     /// Returns true if the argument is a pointer that rejects nullptr values.
-    bool shouldRejectNullPointerArgument(const AbstractMetaFunction *func, int argIndex) const;
+    bool shouldRejectNullPointerArgument(const AbstractMetaFunctionCPtr &func, int argIndex) const;
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const;
 
     /// Condition to call WriteVirtualMethodNative. Was extracted because also used to count these calls.
-    bool shouldWriteVirtualMethodNative(const AbstractMetaFunction *func) const;
+    bool shouldWriteVirtualMethodNative(const AbstractMetaFunctionCPtr &func) const;
 
     QString wrapperName(const AbstractMetaClass *metaClass) const;
 
     static QString fullPythonClassName(const AbstractMetaClass *metaClass);
-    static QString fullPythonFunctionName(const AbstractMetaFunction *func, bool forceFunc);
+    static QString fullPythonFunctionName(const AbstractMetaFunctionCPtr &func, bool forceFunc);
 
     bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
 
@@ -197,9 +197,9 @@ protected:
     static QString pythonPrimitiveTypeName(const PrimitiveTypeEntry *type);
 
     static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
-    static QString pythonOperatorFunctionName(const AbstractMetaFunction *func);
+    static QString pythonOperatorFunctionName(const AbstractMetaFunctionCPtr &func);
     static QString pythonRichCompareOperatorId(const QString &cppOpFuncName);
-    static QString pythonRichCompareOperatorId(const AbstractMetaFunction *func);
+    static QString pythonRichCompareOperatorId(const AbstractMetaFunctionCPtr &func);
 
     static QString fixedCppTypeName(const CustomConversion::TargetToNativeConversion *toNative);
     static QString fixedCppTypeName(const AbstractMetaType &type);
@@ -259,8 +259,8 @@ protected:
     QString cpythonToPythonConversionFunction(const AbstractMetaClass *metaClass) const;
     QString cpythonToPythonConversionFunction(const TypeEntry *type) const;
 
-    QString cpythonFunctionName(const AbstractMetaFunction *func) const;
-    static QString cpythonMethodDefinitionName(const AbstractMetaFunction *func);
+    QString cpythonFunctionName(const AbstractMetaFunctionCPtr &func) const;
+    static QString cpythonMethodDefinitionName(const AbstractMetaFunctionCPtr &func);
     static QString cpythonGettersSettersDefinitionName(const AbstractMetaClass *metaClass);
     static QString cpythonGetattroFunctionName(const AbstractMetaClass *metaClass);
     static QString cpythonSetattroFunctionName(const AbstractMetaClass *metaClass);
@@ -276,9 +276,9 @@ protected:
     static QString cpythonWrapperCPtr(const TypeEntry *type, const QString &argName);
 
     /// Guesses the scope to where belongs an argument's default value.
-    QString guessScopeForDefaultValue(const AbstractMetaFunction *func,
+    QString guessScopeForDefaultValue(const AbstractMetaFunctionCPtr &func,
                                       const AbstractMetaArgument &arg) const;
-    QString guessScopeForDefaultFlagsValue(const AbstractMetaFunction *func,
+    QString guessScopeForDefaultFlagsValue(const AbstractMetaFunctionCPtr &func,
                                            const AbstractMetaArgument &arg,
                                            const QString &value) const;
 
@@ -290,7 +290,7 @@ protected:
     /// Returns the special cast function name, the function used to proper cast class with multiple inheritance.
     static QString cpythonSpecialCastFunctionName(const AbstractMetaClass *metaClass);
 
-    static QString getFormatUnitString(const AbstractMetaFunction *func, bool incRef = false);
+    static QString getFormatUnitString(const AbstractMetaFunctionCPtr &func, bool incRef = false);
 
     /// Returns the file name for the module global header. If no module name is provided the current will be used.
     QString getModuleHeaderFileName(const QString &moduleName = QString()) const;
@@ -347,12 +347,12 @@ protected:
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 
     void writeFunctionCall(TextStream &s,
-                           const AbstractMetaFunction *metaFunc,
+                           const AbstractMetaFunctionCPtr &metaFunc,
                            Options options = NoOption) const;
 
     void writeUnusedVariableCast(TextStream &s, const QString &variableName) const;
 
-    AbstractMetaFunctionList filterFunctions(const AbstractMetaClass *metaClass) const;
+    AbstractMetaFunctionCList filterFunctions(const AbstractMetaClass *metaClass) const;
 
     // All data about extended converters: the type entries of the target type, and a
     // list of AbstractMetaClasses accepted as argument for the conversion.
@@ -393,7 +393,7 @@ private:
      *   \param func the metafunction to be searched in subclasses.
      *   \param seen the function's minimal signatures already seen.
      */
-    static AbstractMetaFunctionList getInheritedOverloads(const AbstractMetaFunction *func,
+    static AbstractMetaFunctionCList getInheritedOverloads(const AbstractMetaFunctionCPtr & func,
                                                           QSet<QString> *seen);
 
     /**
@@ -401,8 +401,8 @@ private:
      *   \param scope scope used to search for overloads.
      *   \param functionName the function name.
      */
-    AbstractMetaFunctionList getFunctionOverloads(const AbstractMetaClass *scope,
-                                                  const QString &functionName) const;
+    AbstractMetaFunctionCList getFunctionOverloads(const AbstractMetaClass *scope,
+                                                   const QString &functionName) const;
     /**
      *   Write a function argument in the C++ in the text stream \p s.
      *   This function just call \code s << argumentString(); \endcode
@@ -412,7 +412,7 @@ private:
      *   \param options some extra options.
      */
     void writeArgument(TextStream &s,
-                       const AbstractMetaFunction *func,
+                       const AbstractMetaFunctionCPtr &func,
                        const AbstractMetaArgument &argument,
                        Options options = NoOption) const;
     /**
@@ -421,16 +421,16 @@ private:
      *   \param argument metaargument information to be parsed.
      *   \param options some extra options.
      */
-    QString argumentString(const AbstractMetaFunction *func,
+    QString argumentString(const AbstractMetaFunctionCPtr &func,
                            const AbstractMetaArgument &argument,
                            Options options = NoOption) const;
 
-    QString functionReturnType(const AbstractMetaFunction *func, Options options = NoOption) const;
+    QString functionReturnType(const AbstractMetaFunctionCPtr &func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
     using ArgumentVarReplacementPair = QPair<AbstractMetaArgument, QString>;
     using ArgumentVarReplacementList = QList<ArgumentVarReplacementPair>;
-    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunction* func,
+    ArgumentVarReplacementList getArgumentReplacement(const AbstractMetaFunctionCPtr &func,
                                                       bool usePyArgs, TypeSystem::Language language,
                                                       const AbstractMetaArgument *lastArg) const;
 
@@ -479,15 +479,15 @@ private:
     /// \param count the number of function arguments
     /// \param options some extra options used during the parser
     void writeArgumentNames(TextStream &s,
-                            const AbstractMetaFunction *func,
+                            const AbstractMetaFunctionCPtr &func,
                             Options options = NoOption) const;
 
     void writeFunctionArguments(TextStream &s,
-                                const AbstractMetaFunction *func,
+                                const AbstractMetaFunctionCPtr &func,
                                 Options options = NoOption) const;
 
     void replaceTemplateVariables(QString &code,
-                                  const AbstractMetaFunction *func) const;
+                                  const AbstractMetaFunctionCPtr &func) const;
 
     bool m_useCtorHeuristic = false;
     bool m_userReturnValueHeuristic = false;

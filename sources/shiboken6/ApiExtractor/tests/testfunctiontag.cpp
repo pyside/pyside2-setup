@@ -82,7 +82,7 @@ void TestFunctionTag::testRenameGlobalFunction()
     QVERIFY(func);
 
     QCOMPARE(builder->globalFunctions().size(), 1);
-    const AbstractMetaFunction *metaFunc = builder->globalFunctions().constFirst();
+    const auto metaFunc = builder->globalFunctions().constFirst();
 
     QVERIFY(metaFunc);
     QCOMPARE(metaFunc->modifications().size(), 1);

@@ -106,7 +106,7 @@ enum FunctionMatchFlags
 };
 
 static QString functionXQuery(const QString &classQuery,
-                              const AbstractMetaFunction *func,
+                              const AbstractMetaFunctionCPtr &func,
                               unsigned matchFlags = MatchArgumentCount | MatchArgumentType
                                                     | DescriptionOnly)
 {
@@ -165,7 +165,7 @@ static QString msgArgumentCountMatch(const AbstractMetaFunction *func,
 QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
                                                 const AbstractMetaClass* metaClass,
                                                 const QString &classQuery,
-                                                const  AbstractMetaFunction *func,
+                                                const AbstractMetaFunctionCPtr &func,
                                                 const DocModificationList &signedModifs,
                                                 const XQueryPtr &xquery,
                                                 QString *errorMessage)
@@ -182,8 +182,11 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
         const QString propertyQuery = classQuery + QLatin1String("/property[@name=\"")
             + prop.name() + QLatin1String("\"]/description");
         const QString properyDocumentation = getDocumentation(xquery, propertyQuery, funcModifs);
-        if (properyDocumentation.isEmpty())
-            *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func, propertyQuery);
+        if (properyDocumentation.isEmpty()) {
+            *errorMessage =
+                msgCannotFindDocumentation(sourceFileName, metaClass, func.data(),
+                                           propertyQuery);
+        }
         return properyDocumentation;
     }
 
@@ -192,7 +195,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     const QString result = getDocumentation(xquery, fullQuery, funcModifs);
     if (!result.isEmpty())
         return result;
-    *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func, fullQuery);
+    *errorMessage = msgCannotFindDocumentation(sourceFileName, metaClass, func.data(), fullQuery);
     if (func->arguments().isEmpty()) // No arguments, can't be helped
         return result;
     // Test whether some mismatch in argument types occurred by checking for
@@ -208,7 +211,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
                              + QLatin1String("\" obtained by matching the argument count only."));
         return getDocumentation(xquery, countOnlyQuery, funcModifs);
     }
-    *errorMessage += msgArgumentCountMatch(func, signatures);
+    *errorMessage += msgArgumentCountMatch(func.data(), signatures);
     return result;
 }
 
@@ -269,14 +272,14 @@ void QtDocParser::fillDocumentation(AbstractMetaClass* metaClass)
     metaClass->setDocumentation(doc);
 
     //Functions Documentation
-    const AbstractMetaFunctionList &funcs = DocParser::documentableFunctions(metaClass);
-    for (AbstractMetaFunction *func : funcs) {
+    const auto &funcs = DocParser::documentableFunctions(metaClass);
+    for (const auto &func : funcs) {
         const QString documentation =
             queryFunctionDocumentation(sourceFileName, metaClass, classQuery,
                                        func, signedModifs, xquery, &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-        func->setDocumentation(Documentation(documentation));
+        qSharedPointerConstCast<AbstractMetaFunction>(func)->setDocumentation(Documentation(documentation));
     }
 #if 0
     // Fields

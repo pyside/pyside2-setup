@@ -43,7 +43,7 @@ using OverloadDataList = QList<OverloadData *>;
 class OverloadData
 {
 public:
-    OverloadData(const AbstractMetaFunctionList &overloads, const ShibokenGenerator *generator);
+    OverloadData(const AbstractMetaFunctionCList &overloads, const ShibokenGenerator *generator);
     ~OverloadData();
 
     int minArgs() const { return m_headOverloadData->m_minArgs; }
@@ -68,22 +68,22 @@ public:
     bool hasStaticFunction() const;
 
     /// Returns true if any of the overloads passed as argument is static.
-    static bool hasStaticFunction(const AbstractMetaFunctionList &overloads);
+    static bool hasStaticFunction(const AbstractMetaFunctionCList &overloads);
 
     /// Returns true if any of the overloads for the current OverloadData is not static.
     bool hasInstanceFunction() const;
 
     /// Returns true if any of the overloads passed as argument is not static.
-    static bool hasInstanceFunction(const AbstractMetaFunctionList &overloads);
+    static bool hasInstanceFunction(const AbstractMetaFunctionCList &overloads);
 
     /// Returns true if among the overloads for the current OverloadData there are static and non-static methods altogether.
     bool hasStaticAndInstanceFunctions() const;
 
     /// Returns true if among the overloads passed as argument there are static and non-static methods altogether.
-    static bool hasStaticAndInstanceFunctions(const AbstractMetaFunctionList &overloads);
+    static bool hasStaticAndInstanceFunctions(const AbstractMetaFunctionCList &overloads);
 
-    const AbstractMetaFunction *referenceFunction() const;
-    const AbstractMetaArgument *argument(const AbstractMetaFunction *func) const;
+    AbstractMetaFunctionCPtr referenceFunction() const;
+    const AbstractMetaArgument *argument(const AbstractMetaFunctionCPtr &func) const;
     OverloadDataList overloadDataOnPosition(int argPos) const;
 
     bool isHeadOverloadData() const { return this == m_headOverloadData; }
@@ -92,12 +92,12 @@ public:
     OverloadData *headOverloadData() const { return m_headOverloadData; }
 
     /// Returns the function that has a default value at the current OverloadData argument position, otherwise returns null.
-    const AbstractMetaFunction *getFunctionWithDefaultValue() const;
+    AbstractMetaFunctionCPtr getFunctionWithDefaultValue() const;
 
     bool nextArgumentHasDefaultValue() const;
     /// Returns the nearest occurrence, including this instance, of an argument with a default value.
     OverloadData *findNextArgWithDefault();
-    bool isFinalOccurrence(const AbstractMetaFunction *func) const;
+    bool isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const;
 
     /// Returns the list of overloads removing repeated constant functions (ex.: "foo()" and "foo()const", the second is removed).
     AbstractMetaFunctionCList overloadsWithoutRepetition() const;
@@ -107,10 +107,9 @@ public:
 
     QList<int> invalidArgumentLengths() const;
 
-    static int numberOfRemovedArguments(const AbstractMetaFunction *func, int finalArgPos = -1);
-    static QPair<int, int> getMinMaxArguments(const AbstractMetaFunctionList &overloads);
+    static int numberOfRemovedArguments(const AbstractMetaFunctionCPtr &func, int finalArgPos = -1);
     /// Returns true if all overloads have no more than one argument.
-    static bool isSingleArgument(const AbstractMetaFunctionList &overloads);
+    static bool isSingleArgument(const AbstractMetaFunctionCList &overloads);
 
     void dumpGraph(const QString &filename) const;
     QString dumpGraph() const;
@@ -119,27 +118,26 @@ public:
     QString argumentTypeReplaced() const;
 
     bool hasArgumentWithDefaultValue() const;
-    static bool hasArgumentWithDefaultValue(const AbstractMetaFunctionList &overloads);
-    static bool hasArgumentWithDefaultValue(const AbstractMetaFunction *func);
+    static bool hasArgumentWithDefaultValue(const AbstractMetaFunctionCPtr &func);
 
     /// Returns a list of function arguments which have default values and were not removed.
-    static AbstractMetaArgumentList getArgumentsWithDefaultValues(const AbstractMetaFunction *func);
+    static AbstractMetaArgumentList getArgumentsWithDefaultValues(const AbstractMetaFunctionCPtr &func);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &) const;
 #endif
 
 private:
-    OverloadData(OverloadData *headOverloadData, const AbstractMetaFunction *func,
+    OverloadData(OverloadData *headOverloadData, const AbstractMetaFunctionCPtr &func,
                  const AbstractMetaType &argType, int argPos);
 
-    void addOverload(const AbstractMetaFunction *func);
-    OverloadData *addOverloadData(const AbstractMetaFunction *func, const AbstractMetaArgument &arg);
+    void addOverload(const AbstractMetaFunctionCPtr &func);
+    OverloadData *addOverloadData(const AbstractMetaFunctionCPtr &func, const AbstractMetaArgument &arg);
 
     void sortNextOverloads();
     bool sortByOverloadNumberModification();
 
-    int functionNumber(const AbstractMetaFunction *func) const;
+    int functionNumber(const AbstractMetaFunctionCPtr &func) const;
     OverloadDataList overloadDataOnPosition(OverloadData *overloadData, int argPos) const;
 
     int m_minArgs;

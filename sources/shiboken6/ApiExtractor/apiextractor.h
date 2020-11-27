@@ -83,7 +83,7 @@ public:
     void setLanguageLevel(LanguageLevel languageLevel);
 
     const AbstractMetaEnumList &globalEnums() const;
-    const AbstractMetaFunctionList &globalFunctions() const;
+    const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaClassList &classes() const;
     const AbstractMetaClassList &smartPointers() const;
     AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;

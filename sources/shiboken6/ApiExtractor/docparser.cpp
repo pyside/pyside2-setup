@@ -73,7 +73,7 @@ QString DocParser::execXQuery(const XQueryPtr &xquery, const QString& query) con
     return result;
 }
 
-bool DocParser::skipForQuery(const AbstractMetaFunction *func)
+bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 {
     // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
     if (!func || func->isPrivate()
@@ -94,9 +94,9 @@ bool DocParser::skipForQuery(const AbstractMetaFunction *func)
     return false;
 }
 
-AbstractMetaFunctionList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
+AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClass *metaClass)
 {
-    AbstractMetaFunctionList result = metaClass->functionsInTargetLang();
+    auto result = metaClass->functionsInTargetLang();
     for (int i = result.size() - 1; i >= 0; --i)  {
         if (DocParser::skipForQuery(result.at(i)) || result.at(i)->isUserAdded())
             result.removeAt(i);

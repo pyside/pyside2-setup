@@ -77,7 +77,8 @@ namespace Internet {
 
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("Bookmarks"));
     QVERIFY(classB);
-    const AbstractMetaFunction* func = classB->findFunction(QLatin1String("list"));
+    const auto func = classB->findFunction(QLatin1String("list"));
+    QVERIFY(!func.isNull());
     AbstractMetaType funcType = func->type();
     QVERIFY(!funcType.isVoid());
     QCOMPARE(funcType.cppSignature(), QLatin1String("QList<Internet::Url >"));
@@ -116,7 +117,8 @@ namespace Namespace {
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
-    const AbstractMetaFunction* func = classB->findFunction(QLatin1String("foo"));
+    const auto func = classB->findFunction(QLatin1String("foo"));
+    QVERIFY(!func.isNull());
     AbstractMetaType argType = func->arguments().constFirst().type();
     QCOMPARE(argType.instantiations().count(), 1);
     QCOMPARE(argType.typeEntry()->qualifiedCppName(), QLatin1String("QList"));
@@ -146,10 +148,10 @@ void func(List<int> arg) {}
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
+    const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
-    AbstractMetaFunction *func = globalFuncs.constFirst();
+    const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>)"));
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              QLatin1String("List<int >"));
@@ -171,10 +173,10 @@ void func(List<int>* arg) {}
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
+    AbstractMetaFunctionCList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
-    AbstractMetaFunction* func = globalFuncs.constFirst();
+    const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>*)"));
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              QLatin1String("List<int > *"));
@@ -196,10 +198,10 @@ void func(List<int>& arg) {}
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
-    AbstractMetaFunctionList globalFuncs = builder->globalFunctions();
+    const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.count(), 1);
 
-    AbstractMetaFunction* func = globalFuncs.constFirst();
+    const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), QLatin1String("func(List<int>&)"));
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              QLatin1String("List<int > &"));
@@ -230,13 +232,13 @@ struct List {
     QCOMPARE(templates.count(), 1);
     const AbstractMetaClass *list = templates.constFirst();
     // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
-    const AbstractMetaFunction *append = list->findFunction(QStringLiteral("append"));
-    QVERIFY(append);
+    const auto append = list->findFunction(QStringLiteral("append"));
+    QVERIFY(!append.isNull());
     QCOMPARE(append->arguments().size(), 1);
     QCOMPARE(append->arguments().at(0).type().cppSignature(), QLatin1String("List<T >"));
     // Verify that the parameter of "void erase(Iterator)" is not modified
-    const AbstractMetaFunction *erase = list->findFunction(QStringLiteral("erase"));
-    QVERIFY(erase);
+    const auto erase = list->findFunction(QStringLiteral("erase"));
+    QVERIFY(!erase.isNull());
     QCOMPARE(erase->arguments().size(), 1);
     QEXPECT_FAIL("", "Clang: Some other code changes the parameter type", Abort);
     QCOMPARE(erase->arguments().at(0).type().cppSignature(), QLatin1String("List::Iterator"));
@@ -438,12 +440,12 @@ typedef Vector<int> IntVector;
              ContainerTypeEntry::VectorContainer);
     QCOMPARE(vector->functions().count(), 4);
 
-    const AbstractMetaFunction* method = vector->findFunction(QLatin1String("method"));
-    QVERIFY(method);
+    const auto method = vector->findFunction(QLatin1String("method"));
+    QVERIFY(!method.isNull());
     QCOMPARE(method->signature(), QLatin1String("method(const Vector<int > & vector)"));
 
-    const AbstractMetaFunction* otherMethod = vector->findFunction(QLatin1String("otherMethod"));
-    QVERIFY(otherMethod);
+    const auto otherMethod = vector->findFunction(QLatin1String("otherMethod"));
+    QVERIFY(!otherMethod.isNull());
     QCOMPARE(otherMethod->signature(), QLatin1String("otherMethod()"));
     QVERIFY(!otherMethod->type().isVoid());
     QCOMPARE(otherMethod->type().cppSignature(), QLatin1String("Vector<int >"));
@@ -572,15 +574,13 @@ void TestTemplates::testTemplateTypeDefs()
     QCOMPARE(xmlOptionalInt->templateBaseClass(), optional);
 
     // Check whether the value() method now has an 'int' return
-    const AbstractMetaFunction *valueMethod =
-        optionalInt->findFunction(QLatin1String("value"));
-    QVERIFY(valueMethod);
+    const auto valueMethod = optionalInt->findFunction(QLatin1String("value"));
+    QVERIFY(!valueMethod.isNull());
     QCOMPARE(valueMethod->type().cppSignature(), QLatin1String("int"));
 
     // ditto for typesystem XML
-    const AbstractMetaFunction *xmlValueMethod =
-        xmlOptionalInt->findFunction(QLatin1String("value"));
-    QVERIFY(xmlValueMethod);
+    const auto xmlValueMethod = xmlOptionalInt->findFunction(QLatin1String("value"));
+    QVERIFY(!xmlValueMethod.isNull());
     QCOMPARE(xmlValueMethod->type().cppSignature(), QLatin1String("int"));
 
     // Check whether the m_value field is of type 'int'

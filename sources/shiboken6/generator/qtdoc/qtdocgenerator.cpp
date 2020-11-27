@@ -58,7 +58,7 @@ static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
 
 static inline QString none() { return QStringLiteral("None"); }
 
-static bool shouldSkip(const AbstractMetaFunction* func)
+static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
 {
     // Constructors go to separate section
     if (DocParser::skipForQuery(func) || func->isConstructor())
@@ -69,8 +69,8 @@ static bool shouldSkip(const AbstractMetaFunction* func)
         return false;
 
     const AbstractMetaArgumentList funcArgs = func->arguments();
-    const AbstractMetaFunctionList &ownerFunctions = func->ownerClass()->functions();
-    for (AbstractMetaFunction *f : ownerFunctions) {
+    const auto &ownerFunctions = func->ownerClass()->functions();
+    for (const auto &f : ownerFunctions) {
         if (f != func
             && f->isConstant()
             && f->name() == func->name()
@@ -92,7 +92,7 @@ static bool shouldSkip(const AbstractMetaFunction* func)
     return false;
 }
 
-static bool functionSort(const AbstractMetaFunction* func1, const AbstractMetaFunction* func2)
+static bool functionSort(const AbstractMetaFunctionCPtr &func1, const AbstractMetaFunctionCPtr &func2)
 {
     return func1->name() < func2->name();
 }
@@ -107,7 +107,7 @@ static inline QVersionNumber versionOf(const TypeEntry *te)
     return QVersionNumber();
 }
 
-static QString getFuncName(const AbstractMetaFunction* cppFunc) {
+static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc) {
     static bool hashInitialized = false;
     static QHash<QString, QString> operatorsHash;
     if (!hashInitialized) {
@@ -292,7 +292,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     writeFunctionList(s, metaClass);
 
     //Function list
-    AbstractMetaFunctionList functionList = metaClass->functions();
+    auto functionList = metaClass->functions();
     std::sort(functionList.begin(), functionList.end(), functionSort);
 
     s << "\nDetailed Description\n"
@@ -311,7 +311,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
 
     QStringList uniqueFunctions;
-    for (AbstractMetaFunction *func : qAsConst(functionList)) {
+    for (const auto &func : qAsConst(functionList)) {
         if (shouldSkip(func))
             continue;
 
@@ -335,8 +335,8 @@ void QtDocGenerator::writeFunctionList(TextStream& s, const AbstractMetaClass* c
     QStringList slotList;
     QStringList staticFunctionList;
 
-    const AbstractMetaFunctionList &classFunctions = cppClass->functions();
-    for (AbstractMetaFunction *func : classFunctions) {
+    const auto &classFunctions = cppClass->functions();
+    for (const auto &func : classFunctions) {
         if (shouldSkip(func))
             continue;
 
@@ -427,7 +427,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
 {
     static const QString sectionTitle = QLatin1String(".. class:: ");
 
-    AbstractMetaFunctionList lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
+    auto lst = cppClass->queryFunctions(AbstractMetaClass::Constructors | AbstractMetaClass::Visible);
     for (int i = lst.size() - 1; i >= 0; --i) {
         if (lst.at(i)->isModifiedRemoved() || lst.at(i)->functionType() == AbstractMetaFunction::MoveConstructorFunction)
             lst.removeAt(i);
@@ -440,7 +440,7 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
         s << sectionTitle << cppClass->fullName();
     } else {
         QByteArray pad;
-        for (AbstractMetaFunction *func : qAsConst(lst)) {
+        for (const auto &func : qAsConst(lst)) {
             s << pad;
             if (first) {
                 first = false;
@@ -474,12 +474,12 @@ void QtDocGenerator::writeConstructors(TextStream& s, const AbstractMetaClass* c
 
     s << '\n';
 
-    for (AbstractMetaFunction *func : qAsConst(lst))
+    for (const auto &func : qAsConst(lst))
         writeFormattedText(s, func->documentation().value(), cppClass);
 }
 
 QString QtDocGenerator::parseArgDocStyle(const AbstractMetaClass* /* cppClass */,
-                                         const AbstractMetaFunction* func)
+                                         const AbstractMetaFunctionCPtr &func)
 {
     QString ret;
     int optArgs = 0;
@@ -589,7 +589,7 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
 bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
                                             TypeSystem::DocModificationMode mode,
                                             const AbstractMetaClass* cppClass,
-                                            const AbstractMetaFunction* func)
+                                            const AbstractMetaFunctionCPtr &func)
 {
     Indentation indentation(s);
     bool didSomething = false;
@@ -630,7 +630,8 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream& s,
     return didSomething;
 }
 
-QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass, const AbstractMetaFunction* func)
+QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass,
+                                          const AbstractMetaFunctionCPtr &func)
 {
     QString funcName;
 
@@ -710,7 +711,7 @@ void QtDocGenerator::writeParameterType(TextStream& s, const AbstractMetaClass* 
 }
 
 void QtDocGenerator::writeFunctionParametersType(TextStream &s, const AbstractMetaClass *cppClass,
-                                                 const AbstractMetaFunction *func) const
+                                                 const AbstractMetaFunctionCPtr &func) const
 {
     s << '\n';
     const AbstractMetaArgumentList &funcArgs = func->arguments();
@@ -743,7 +744,7 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s, const AbstractMe
 }
 
 void QtDocGenerator::writeFunction(TextStream& s, const AbstractMetaClass* cppClass,
-                                   const AbstractMetaFunction* func, bool indexed)
+                                   const AbstractMetaFunctionCPtr &func, bool indexed)
 {
     s << functionSignature(cppClass, func);
 

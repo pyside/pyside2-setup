@@ -67,8 +67,8 @@ void TestModifyFunction::testRenameArgument()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
-    const AbstractMetaFunction* func = classA->findFunction(QLatin1String("method"));
-    Q_ASSERT(func);
+    const auto func = classA->findFunction(QLatin1String("method"));
+    QVERIFY(!func.isNull());
 
     QCOMPARE(func->argumentName(1), QLatin1String("otherArg"));
 }
@@ -95,7 +95,8 @@ void TestModifyFunction::testOwnershipTransfer()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
-    const AbstractMetaFunction* func = classB->findFunction(QLatin1String("method"));
+    const auto func = classB->findFunction(QLatin1String("method"));
+    QVERIFY(!func.isNull());
 
     QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
 }
@@ -143,7 +144,7 @@ void TestModifyFunction::invalidateAfterUse()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
-    const AbstractMetaFunction* func = classB->findFunction(QLatin1String("call"));
+    auto func = classB->findFunction(QLatin1String("call"));
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse);
@@ -216,7 +217,7 @@ void TestModifyFunction::testWithApiVersion()
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
-    const AbstractMetaFunction* func = classB->findFunction(QLatin1String("method"));
+    auto func = classB->findFunction(QLatin1String("method"));
 
     QCOMPARE(func->ownership(func->ownerClass(), TypeSystem::TargetLangCode, 0), TypeSystem::CppOwnership);
 
@@ -256,28 +257,28 @@ struct A {
     QVERIFY(classA);
 
     // Nothing specified, true
-    const AbstractMetaFunction *f1 = classA->findFunction(QLatin1String("f1"));
-    QVERIFY(f1);
+    const auto f1 = classA->findFunction(QLatin1String("f1"));
+    QVERIFY(!f1.isNull());
     QVERIFY(!f1->allowThread());
 
     // 'auto' specified, should be false for nontrivial function
-    const AbstractMetaFunction *f2 = classA->findFunction(QLatin1String("f2"));
-    QVERIFY(f2);
+    const auto f2 = classA->findFunction(QLatin1String("f2"));
+    QVERIFY(!f2.isNull());
     QVERIFY(f2->allowThread());
 
     // 'no' specified, should be false
-    const AbstractMetaFunction *f3 = classA->findFunction(QLatin1String("f3"));
-    QVERIFY(f3);
+    const auto f3 = classA->findFunction(QLatin1String("f3"));
+    QVERIFY(!f3.isNull());
     QVERIFY(!f3->allowThread());
 
     // Nothing specified, should be false for simple getter
-    const AbstractMetaFunction *getter1 = classA->findFunction(QLatin1String("getter1"));
-    QVERIFY(getter1);
+    const auto getter1 = classA->findFunction(QLatin1String("getter1"));
+    QVERIFY(!getter1.isNull());
     QVERIFY(!getter1->allowThread());
 
     // Forced to true simple getter
-    const AbstractMetaFunction *getter2 = classA->findFunction(QLatin1String("getter2"));
-    QVERIFY(getter2);
+    const auto getter2 = classA->findFunction(QLatin1String("getter2"));
+    QVERIFY(!getter2.isNull());
     QVERIFY(getter2->allowThread()); // Forced to true simple getter
 }
 
@@ -310,8 +311,8 @@ void TestModifyFunction::testGlobalFunctionModification()
     ArgumentModification argMod = argMods.constFirst();
     QCOMPARE(argMod.replacedDefaultExpression, QLatin1String("A()"));
 
-    const AbstractMetaFunction *func = builder->globalFunctions().constFirst();
-    QVERIFY(func);
+    QVERIFY(!builder->globalFunctions().isEmpty());
+    const auto func = builder->globalFunctions().constFirst();
     QCOMPARE(func->arguments().count(), 1);
     const AbstractMetaArgument &arg = func->arguments().constFirst();
     QCOMPARE(arg.type().cppSignature(), QLatin1String("A *"));
@@ -452,19 +453,19 @@ void TestModifyFunction::testScopedModifications()
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(builder->classes(), QLatin1String("A"));
     QVERIFY(classA);
 
-    const AbstractMetaFunction *f = classA->findFunction(QStringLiteral("unspecified"));
-    QVERIFY(f);
+    auto f = classA->findFunction(QStringLiteral("unspecified"));
+    QVERIFY(!f.isNull());
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateUnspecified);
     QCOMPARE(f->allowThread(), expectedAllowThread);
 
     f = classA->findFunction(QStringLiteral("nonThrowing"));
-    QVERIFY(f);
+    QVERIFY(!f.isNull());
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::NoExcept);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateNonThrowing);
 
     f = classA->findFunction(QStringLiteral("throwing"));
-    QVERIFY(f);
+    QVERIFY(!f.isNull());
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateThrowing);
 }

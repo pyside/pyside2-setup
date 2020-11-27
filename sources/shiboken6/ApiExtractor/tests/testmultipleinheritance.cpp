@@ -62,8 +62,7 @@ void TestMultipleInheritance::testVirtualClass()
 
     const AbstractMetaClass *classD = AbstractMetaClass::findClass(classes, QLatin1String("D"));
     bool functionFound = false;
-    const AbstractMetaFunctionList &functions = classD->functions();
-    for (AbstractMetaFunction *f : functions) {
+    for (const auto &f : classD->functions()) {
         if (f->name() == QLatin1String("theBug")) {
             functionFound = true;
             break;

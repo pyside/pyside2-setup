@@ -72,7 +72,6 @@ AbstractMetaBuilderPrivate::AbstractMetaBuilderPrivate() :
 
 AbstractMetaBuilderPrivate::~AbstractMetaBuilderPrivate()
 {
-    qDeleteAll(m_globalFunctions);
     qDeleteAll(m_templates);
     qDeleteAll(m_smartPointers);
     qDeleteAll(m_metaClasses);
@@ -103,7 +102,7 @@ const AbstractMetaClassList &AbstractMetaBuilder::smartPointers() const
     return d->m_smartPointers;
 }
 
-const AbstractMetaFunctionList &AbstractMetaBuilder::globalFunctions() const
+const AbstractMetaFunctionCList &AbstractMetaBuilder::globalFunctions() const
 {
     return d->m_globalFunctions;
 }
@@ -152,10 +151,9 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
             if (!clazz)
                 continue;
 
-            const AbstractMetaFunctionList functions = clazz->functions();
             bool found = false;
             QStringList possibleSignatures;
-            for (AbstractMetaFunction *function : functions) {
+            for (const auto &function : clazz->functions()) {
                 if (function->implementingClass() == clazz
                     && modification.matches(function->minimalSignature())) {
                     found = true;
@@ -172,7 +170,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
                 qCWarning(lcShiboken).noquote().nospace()
                     << msgNoFunctionForModification(clazz, signature,
                                                     modification.originalSignature(),
-                                                    possibleSignatures, functions);
+                                                    possibleSignatures, clazz->functions());
             }
         }
     }
@@ -290,7 +288,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
             metaFunction->setVisibility(AbstractMetaFunction::Public);
             metaFunction->setOriginalAttributes(metaFunction->attributes());
             setupFunctionDefaults(metaFunction, baseoperandClass);
-            baseoperandClass->addFunction(metaFunction);
+            baseoperandClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
             Q_ASSERT(!metaFunction->wasPrivate());
         } else {
             delete metaFunction;
@@ -338,7 +336,7 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
                 }
 
                 setupFunctionDefaults(streamFunction, funcClass);
-                funcClass->addFunction(streamFunction);
+                funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
                 if (funcClass == streamClass)
                     funcClass->typeEntry()->addExtraInclude(streamedClass->typeEntry()->include());
                 else
@@ -449,10 +447,9 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         if (!metaFunc)
             continue;
 
-        if (!funcEntry->hasSignature(metaFunc->minimalSignature())) {
-            delete metaFunc;
+        AbstractMetaFunctionCPtr metaFuncPtr(metaFunc);
+        if (!funcEntry->hasSignature(metaFunc->minimalSignature()))
             continue;
-        }
 
         applyFunctionModifications(metaFunc);
 
@@ -461,7 +458,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
             delete metaFunc->typeEntry();
 
         metaFunc->setTypeEntry(funcEntry);
-        m_globalFunctions << metaFunc;
+        m_globalFunctions << metaFuncPtr;
     }
 
     ReportHandler::startProgress("Fixing class inheritance...");
@@ -509,7 +506,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
                 const QStringList &signatures = fte->signatures();
                 for (const QString &signature : signatures) {
                     bool ok = false;
-                    for (AbstractMetaFunction *func : qAsConst(m_globalFunctions)) {
+                    for (const auto &func : qAsConst(m_globalFunctions)) {
                         if (signature == func->minimalSignature()) {
                             ok = true;
                             break;
@@ -612,13 +609,10 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     // Functions added to the module on the type system.
     const AddedFunctionList &globalUserFunctions = types->globalUserFunctions();
     for (const AddedFunctionPtr &addedFunc : globalUserFunctions) {
-        AbstractMetaFunction *metaFunc = traverseFunction(addedFunc);
-        if (Q_UNLIKELY(!metaFunc)) {
+        if (!traverseAddedGlobalFunction(addedFunc)) {
             qFatal("Unable to traverse added global function \"%s\".",
                    qPrintable(addedFunc->name()));
         }
-        metaFunc->setFunctionType(AbstractMetaFunction::NormalFunction);
-        m_globalFunctions << metaFunc;
     }
 
     m_itemToClass.clear();
@@ -633,7 +627,7 @@ static bool metaEnumLessThan(const AbstractMetaEnum &e1, const AbstractMetaEnum 
 static bool metaClassLessThan(const AbstractMetaClass *c1, const AbstractMetaClass *c2)
 { return c1->fullName() < c2->fullName(); }
 
-static bool metaFunctionLessThan(const AbstractMetaFunction *f1, const AbstractMetaFunction *f2)
+static bool metaFunctionLessThan(const AbstractMetaFunctionCPtr &f1, const AbstractMetaFunctionCPtr &f2)
 { return f1->name() < f2->name(); }
 
 bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
@@ -1233,12 +1227,13 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     metaFunction->setType(metaType);
 }
 
-AbstractMetaFunctionList AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
-                                                                       AbstractMetaClass::Attributes *constructorAttributes,
-                                                                       AbstractMetaClass *currentClass)
+AbstractMetaFunctionRawPtrList
+    AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
+                                                  AbstractMetaClass::Attributes *constructorAttributes,
+                                                  AbstractMetaClass *currentClass)
 {
     *constructorAttributes = {};
-    AbstractMetaFunctionList result;
+    AbstractMetaFunctionRawPtrList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
     for (const FunctionModelItem &function : scopeFunctionList) {
@@ -1258,7 +1253,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
                                                    AbstractMetaClass *metaClass)
 {
     AbstractMetaAttributes::Attributes constructorAttributes;
-    const AbstractMetaFunctionList functions =
+    const AbstractMetaFunctionRawPtrList functions =
         classFunctionList(scopeItem, &constructorAttributes, metaClass);
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
@@ -1325,7 +1320,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
             if (metaFunction->isConversionOperator())
                 fixReturnTypeOfConversionOperator(metaFunction);
 
-            metaClass->addFunction(metaFunction);
+            metaClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
             applyFunctionModifications(metaFunction);
         } else if (metaFunction->isDestructor()) {
             metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
@@ -1346,7 +1341,7 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
     // Add the functions added by the typesystem
     const AddedFunctionList &addedFunctions = metaClass->typeEntry()->addedFunctions();
     for (const AddedFunctionPtr &addedFunc : addedFunctions) {
-        if (!traverseFunction(addedFunc, metaClass)) {
+        if (!traverseAddedMemberFunction(addedFunc, metaClass)) {
                 qFatal("Unable to traverse function \"%s\" added to \"%s\".",
                        qPrintable(addedFunc->name()), qPrintable(metaClass->name()));
         }
@@ -1496,13 +1491,19 @@ static void applyDefaultExpressionModifications(const FunctionModificationList &
     }
 }
 
-AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc)
+bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc)
 {
-    return traverseFunction(addedFunc, nullptr);
+    AbstractMetaFunction *metaFunction = traverseAddedFunctionHelper(addedFunc);
+    if (metaFunction == nullptr)
+        return false;
+    metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
+    m_globalFunctions << AbstractMetaFunctionCPtr(metaFunction);
+    return true;
 }
 
-AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFunctionPtr &addedFunc,
-                                                                   AbstractMetaClass *metaClass)
+AbstractMetaFunction *
+    AbstractMetaBuilderPrivate::traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
+                                                            AbstractMetaClass *metaClass)
 {
     QString errorMessage;
 
@@ -1581,35 +1582,42 @@ AbstractMetaFunction* AbstractMetaBuilderPrivate::traverseFunction(const AddedFu
     if (!metaArguments.isEmpty())
         fixArgumentNames(metaFunction, metaFunction->modifications(metaClass));
 
-    if (metaClass) {
-        const AbstractMetaArgumentList fargs = metaFunction->arguments();
-        if (metaClass->isNamespace())
-            *metaFunction += AbstractMetaFunction::Static;
-        if (metaFunction->name() == metaClass->name()) {
-            metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
-            if (fargs.size() == 1) {
-                const TypeEntry *te = fargs.constFirst().type().typeEntry();
-                if (te->isCustom())
-                    metaFunction->setExplicit(true);
-                if (te->name() == metaFunction->name())
-                    metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
-            }
-        } else {
-            auto type = AbstractMetaFunction::NormalFunction;
-            if (metaFunction->name() == QLatin1String("__getattro__"))
-                type = AbstractMetaFunction::GetAttroFunction;
-            else if (metaFunction->name() == QLatin1String("__setattro__"))
-                type = AbstractMetaFunction::SetAttroFunction;
-            metaFunction->setFunctionType(type);
-        }
+    return metaFunction;
+}
 
-        metaFunction->setDeclaringClass(metaClass);
-        metaFunction->setImplementingClass(metaClass);
-        metaClass->addFunction(metaFunction);
-        metaClass->setHasNonPrivateConstructor(true);
+bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
+                                                             AbstractMetaClass *metaClass)
+{
+    AbstractMetaFunction *metaFunction = traverseAddedFunctionHelper(addedFunc, metaClass);
+    if (metaFunction == nullptr)
+        return false;
+
+    const AbstractMetaArgumentList fargs = metaFunction->arguments();
+    if (metaClass->isNamespace())
+        *metaFunction += AbstractMetaFunction::Static;
+    if (metaFunction->name() == metaClass->name()) {
+        metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
+        if (fargs.size() == 1) {
+            const TypeEntry *te = fargs.constFirst().type().typeEntry();
+            if (te->isCustom())
+                metaFunction->setExplicit(true);
+            if (te->name() == metaFunction->name())
+                metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
+        }
+    } else {
+        auto type = AbstractMetaFunction::NormalFunction;
+        if (metaFunction->name() == QLatin1String("__getattro__"))
+            type = AbstractMetaFunction::GetAttroFunction;
+        else if (metaFunction->name() == QLatin1String("__setattro__"))
+            type = AbstractMetaFunction::SetAttroFunction;
+        metaFunction->setFunctionType(type);
     }
 
-    return metaFunction;
+    metaFunction->setDeclaringClass(metaClass);
+    metaFunction->setImplementingClass(metaClass);
+    metaClass->addFunction(AbstractMetaFunctionCPtr(metaFunction));
+    metaClass->setHasNonPrivateConstructor(true);
+    return true;
 }
 
 void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods)
@@ -2640,10 +2648,10 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     }
 
     const auto &templateTypes = subclass->templateBaseClassInstantiations();
-    const AbstractMetaFunctionList existingSubclassFuncs =
+    const AbstractMetaFunctionCList existingSubclassFuncs =
         subclass->functions(); // Take copy
-    const AbstractMetaFunctionList &templateClassFunctions = templateClass->functions();
-    for (const AbstractMetaFunction *function : templateClassFunctions) {
+    const auto &templateClassFunctions = templateClass->functions();
+    for (const auto &function : templateClassFunctions) {
         // If the function is modified or the instantiation has an equally named
         // function we have shadowing, so we need to skip it.
         if (function->isModifiedRemoved(TypeSystem::All)
@@ -2721,7 +2729,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
                       qPrintable(subclass->name()), qPrintable(templateClass->name()),
                       qPrintable(errorMessage));
         }
-        subclass->addFunction(f.release());
+        subclass->addFunction(AbstractMetaFunctionCPtr(f.release()));
     }
 
      // Take copy
@@ -2786,17 +2794,14 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(AbstractMetaClass *metaClass,
     }
 }
 
-static AbstractMetaFunction* findCopyCtor(AbstractMetaClass* cls)
+static AbstractMetaFunctionCPtr findCopyCtor(AbstractMetaClass* cls)
 {
-
-    const auto &functions = cls->functions();
-
-    for (AbstractMetaFunction *f : qAsConst(functions)) {
+    for (const auto &f : cls->functions()) {
         const AbstractMetaFunction::FunctionType t = f->functionType();
         if (t == AbstractMetaFunction::CopyConstructorFunction || t == AbstractMetaFunction::AssignmentOperatorFunction)
             return f;
     }
-    return nullptr;
+    return {};
 }
 
 void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
@@ -2804,8 +2809,8 @@ void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
     bool result = true;
 
     // find copy ctor for the current class
-    AbstractMetaFunction* copyCtor = findCopyCtor(cls);
-    if (copyCtor) { // if exists a copy ctor in this class
+    auto copyCtor = findCopyCtor(cls);
+    if (!copyCtor.isNull()) { // if exists a copy ctor in this class
         result = copyCtor->isPublic();
     } else { // else... lets find one in the parent class
         QQueue<AbstractMetaClass*> baseClasses;
@@ -2829,8 +2834,8 @@ void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
 
 void AbstractMetaBuilderPrivate::setupExternalConversion(AbstractMetaClass *cls)
 {
-    const AbstractMetaFunctionList &convOps = cls->operatorOverloads(AbstractMetaClass::ConversionOp);
-    for (AbstractMetaFunction *func : convOps) {
+    const auto &convOps = cls->operatorOverloads(AbstractMetaClass::ConversionOp);
+    for (const auto &func : convOps) {
         if (func->isModifiedRemoved())
             continue;
         AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_metaClasses, func->type().typeEntry());
@@ -2981,8 +2986,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
                 graph.addEdge(baseIt.value(), classIndex);
         }
 
-        const AbstractMetaFunctionList &functions = clazz->functions();
-        for (AbstractMetaFunction *func : functions) {
+        for (const auto &func : clazz->functions()) {
             const AbstractMetaArgumentList &arguments = func->arguments();
             for (const AbstractMetaArgument &arg : arguments) {
                 // Check methods with default args: If a class is instantiated by value,

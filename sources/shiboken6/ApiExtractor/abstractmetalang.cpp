@@ -42,7 +42,7 @@
 
 #include <QtCore/QDebug>
 
-bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
+bool function_sorter(const AbstractMetaFunctionCPtr &a, const AbstractMetaFunctionCPtr &b)
 {
     return a->signature() < b->signature();
 }
@@ -66,11 +66,6 @@ public:
           m_isTypeDef(false),
           m_hasToStringCapability(false)
     {
-    }
-
-    ~AbstractMetaClassPrivate()
-    {
-        qDeleteAll(m_functions);
     }
 
     uint m_hasVirtuals : 1;
@@ -97,13 +92,13 @@ public:
     AbstractMetaClass *m_extendedNamespace = nullptr;
 
     const AbstractMetaClass *m_templateBaseClass = nullptr;
-    AbstractMetaFunctionList m_functions;
+    AbstractMetaFunctionCList m_functions;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
     QList<QPropertySpec> m_propertySpecs;
     AbstractMetaClassList m_innerClasses;
 
-    AbstractMetaFunctionList m_externalConversionOperators;
+    AbstractMetaFunctionCList m_externalConversionOperators;
 
     QStringList m_baseClassNames;  // Base class names from C++, including rejected
     TypeEntries m_templateArgs;
@@ -146,10 +141,10 @@ bool AbstractMetaClass::isPolymorphic() const
 /*******************************************************************************
  * Returns a list of all the functions with a given name
  */
-AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &name) const
+AbstractMetaFunctionCList AbstractMetaClass::queryFunctionsByName(const QString &name) const
 {
-    AbstractMetaFunctionList returned;
-    for (AbstractMetaFunction *function : d->m_functions) {
+    AbstractMetaFunctionCList returned;
+    for (const auto &function : d->m_functions) {
         if (function->name() == name)
             returned.append(function);
     }
@@ -161,7 +156,7 @@ AbstractMetaFunctionList AbstractMetaClass::queryFunctionsByName(const QString &
  * Returns a list of all the functions retrieved during parsing which should
  * be added to the API.
  */
-AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
+AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
 {
     FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemovedFromTargetLang;
 
@@ -172,7 +167,7 @@ AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
         public_flags |= WasPublic;
 
     // Constructors
-    AbstractMetaFunctionList returned = queryFunctions(Constructors | default_flags | public_flags);
+    AbstractMetaFunctionCList returned = queryFunctions(Constructors | default_flags | public_flags);
 
     // Final functions
     returned += queryFunctions(FinalInTargetLangFunctions | NonStaticFunctions | default_flags | public_flags);
@@ -189,18 +184,18 @@ AbstractMetaFunctionList AbstractMetaClass::functionsInTargetLang() const
     return returned;
 }
 
-AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
+AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
 {
     if (!hasCloneOperator() && !hasExternalConversionOperators())
-        return AbstractMetaFunctionList();
+        return {};
 
-    AbstractMetaFunctionList returned;
-    const AbstractMetaFunctionList list = queryFunctions(Constructors) + externalConversionOperators();
+    AbstractMetaFunctionCList returned;
+    const auto list = queryFunctions(Constructors) + externalConversionOperators();
 
     // Exclude anything that uses rvalue references, be it a move
     // constructor "QPolygon(QPolygon &&)" or something else like
     // "QPolygon(QVector<QPoint> &&)".
-    for (AbstractMetaFunction *f : list) {
+    for (const auto &f : list) {
         if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1 || f->isConversionOperator())
             && !f->isExplicit()
             && f->functionType() != AbstractMetaFunction::CopyConstructorFunction
@@ -213,11 +208,11 @@ AbstractMetaFunctionList AbstractMetaClass::implicitConversions() const
     return returned;
 }
 
-AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(OperatorQueryOptions query) const
+AbstractMetaFunctionCList AbstractMetaClass::operatorOverloads(OperatorQueryOptions query) const
 {
-    const AbstractMetaFunctionList &list = queryFunctions(OperatorOverloads | Visible);
-    AbstractMetaFunctionList returned;
-    for (AbstractMetaFunction *f : list) {
+    const auto &list = queryFunctions(OperatorOverloads | Visible);
+    AbstractMetaFunctionCList returned;
+    for (const auto &f : list) {
         if (((query & ArithmeticOp) && f->isArithmeticOperator())
             || ((query & BitwiseOp) && f->isBitwiseOperator())
             || ((query & ComparisonOp) && f->isComparisonOperator())
@@ -234,7 +229,7 @@ AbstractMetaFunctionList AbstractMetaClass::operatorOverloads(OperatorQueryOptio
 
 bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 {
-    for (const AbstractMetaFunction *f : d->m_functions) {
+    for (const auto & f: d->m_functions) {
         if (f->ownerClass() == f->implementingClass() && f->isArithmeticOperator() && !f->isPrivate())
             return true;
     }
@@ -243,7 +238,7 @@ bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 
 bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 {
-    for (const AbstractMetaFunction *f : d->m_functions) {
+    for (const auto & f: d->m_functions) {
         if (f->ownerClass() == f->implementingClass() && f->isBitwiseOperator() && !f->isPrivate())
             return true;
     }
@@ -252,7 +247,7 @@ bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 
 bool AbstractMetaClass::hasComparisonOperatorOverload() const
 {
-    for (const AbstractMetaFunction *f : d->m_functions) {
+    for (const auto &f : d->m_functions) {
         if (f->ownerClass() == f->implementingClass() && f->isComparisonOperator() && !f->isPrivate())
             return true;
     }
@@ -261,7 +256,7 @@ bool AbstractMetaClass::hasComparisonOperatorOverload() const
 
 bool AbstractMetaClass::hasLogicalOperatorOverload() const
 {
-    for (const AbstractMetaFunction *f : d->m_functions) {
+    for (const auto &f : d->m_functions) {
         if (f->ownerClass() == f->implementingClass() && f->isLogicalOperator() && !f->isPrivate())
             return true;
     }
@@ -303,20 +298,20 @@ void AbstractMetaClass::setTemplateBaseClass(const AbstractMetaClass *cls)
     d->m_templateBaseClass = cls;
 }
 
-const AbstractMetaFunctionList &AbstractMetaClass::functions() const
+const AbstractMetaFunctionCList &AbstractMetaClass::functions() const
 {
     return d->m_functions;
 }
 
-void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
+void AbstractMetaClass::setFunctions(const AbstractMetaFunctionCList &functions)
 {
     d->m_functions = functions;
 
     // Functions must be sorted by name before next loop
     sortFunctions();
 
-    for (AbstractMetaFunction *f : qAsConst(d->m_functions)) {
-        f->setOwnerClass(this);
+    for (const auto &f : qAsConst(d->m_functions)) {
+        qSharedPointerConstCast<AbstractMetaFunction>(f)->setOwnerClass(this);
         if (!f->isPublic())
             d->m_hasNonpublic = true;
     }
@@ -324,8 +319,8 @@ void AbstractMetaClass::setFunctions(const AbstractMetaFunctionList &functions)
 
 bool AbstractMetaClass::hasDefaultToStringFunction() const
 {
-    const AbstractMetaFunctionList &funcs = queryFunctionsByName(QLatin1String("toString"));
-    for (const AbstractMetaFunction *f : funcs) {
+    const auto &funcs = queryFunctionsByName(QLatin1String("toString"));
+    for (const auto &f : funcs) {
         if (!f->actualMinimumArgumentCount())
             return true;
     }
@@ -362,10 +357,10 @@ void AbstractMetaClass::addPropertySpec(const QPropertySpec &spec)
     d->m_propertySpecs << spec;
 }
 
-void AbstractMetaClass::addFunction(AbstractMetaFunction *function)
+void AbstractMetaClass::addFunction(const AbstractMetaFunctionCPtr &function)
 {
     Q_ASSERT(!function->signature().startsWith(QLatin1Char('(')));
-    function->setOwnerClass(this);
+    qSharedPointerConstCast<AbstractMetaFunction>(function)->setOwnerClass(this);
 
     if (!function->isDestructor())
         d->m_functions << function;
@@ -382,7 +377,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
     if (!other->isSignal())
         return false;
 
-    for (const AbstractMetaFunction *f : d->m_functions) {
+    for (const auto &f : d->m_functions) {
         if (f->isSignal() && f->compareTo(other) & AbstractMetaFunction::EqualName)
             return other->modifiedName() == f->modifiedName();
     }
@@ -535,17 +530,17 @@ QString AbstractMetaClass::qualifiedCppName() const
 
 bool AbstractMetaClass::hasFunction(const QString &str) const
 {
-    return findFunction(str);
+    return !findFunction(str).isNull();
 }
 
-const AbstractMetaFunction *AbstractMetaClass::findFunction(const QString &functionName) const
+AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(const QString &functionName) const
 {
     return AbstractMetaFunction::find(d->m_functions, functionName);
 }
 
 bool AbstractMetaClass::hasProtectedFunctions() const
 {
-    for (AbstractMetaFunction *func : d->m_functions) {
+    for (const auto &func : d->m_functions) {
         if (func->isProtected())
             return true;
     }
@@ -637,12 +632,12 @@ std::optional<QPropertySpec>
     return {};
 }
 
-AbstractMetaFunctionList AbstractMetaClass::externalConversionOperators() const
+const AbstractMetaFunctionCList &AbstractMetaClass::externalConversionOperators() const
 {
     return d->m_externalConversionOperators;
 }
 
-void AbstractMetaClass::addExternalConversionOperator(AbstractMetaFunction *conversionOp)
+void AbstractMetaClass::addExternalConversionOperator(const AbstractMetaFunctionCPtr &conversionOp)
 {
     if (!d->m_externalConversionOperators.contains(conversionOp))
         d->m_externalConversionOperators.append(conversionOp);
@@ -712,27 +707,18 @@ bool AbstractMetaClass::deleteInMainThread() const
             || (!d->m_baseClasses.isEmpty() && d->m_baseClasses.constFirst()->deleteInMainThread());
 }
 
-static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
-{
-    for (const AbstractMetaFunction *f : l) {
-        if ((f->compareTo(func) & AbstractMetaFunction::PrettySimilar) == AbstractMetaFunction::PrettySimilar)
-            return true;
-    }
-    return false;
-}
-
 bool AbstractMetaClass::hasConstructors() const
 {
     return AbstractMetaClass::queryFirstFunction(d->m_functions, Constructors) != nullptr;
 }
 
-const AbstractMetaFunction *AbstractMetaClass::copyConstructor() const
+AbstractMetaFunctionCPtr AbstractMetaClass::copyConstructor() const
 {
-    for (const AbstractMetaFunction *f : d->m_functions) {
+    for (const auto &f : d->m_functions) {
         if (f->functionType() == AbstractMetaFunction::CopyConstructorFunction)
             return f;
     }
-    return nullptr;
+    return {};
 }
 
 bool AbstractMetaClass::hasCopyConstructor() const
@@ -742,8 +728,8 @@ bool AbstractMetaClass::hasCopyConstructor() const
 
 bool AbstractMetaClass::hasPrivateCopyConstructor() const
 {
-    const AbstractMetaFunction *copyCt = copyConstructor();
-    return copyCt && copyCt->isPrivate();
+    const auto copyCt = copyConstructor();
+    return !copyCt.isNull() && copyCt->isPrivate();
 }
 
 void AbstractMetaClass::addDefaultConstructor()
@@ -761,7 +747,7 @@ void AbstractMetaClass::addDefaultConstructor()
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
 
-    addFunction(f);
+    addFunction(AbstractMetaFunctionCPtr(f));
     this->setHasNonPrivateConstructor(true);
 }
 
@@ -794,7 +780,7 @@ void AbstractMetaClass::addDefaultCopyConstructor(bool isPrivate)
     f->setImplementingClass(this);
     f->setOriginalAttributes(f->attributes());
 
-    addFunction(f);
+    addFunction(AbstractMetaFunctionCPtr(f));
 }
 
 bool AbstractMetaClass::hasNonPrivateConstructor() const
@@ -852,11 +838,6 @@ void AbstractMetaClass::setHasVirtualDestructor(bool value)
 bool AbstractMetaClass::isConstructible() const
 {
     return (hasNonPrivateConstructor() || !hasPrivateConstructor()) && !hasPrivateDestructor();
-}
-
-bool AbstractMetaClass::hasFunction(const AbstractMetaFunction *f) const
-{
-    return functions_contains(d->m_functions, f);
 }
 
 bool AbstractMetaClass::generateExceptionHandling() const
@@ -949,29 +930,29 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     return true;
 }
 
-AbstractMetaFunctionList AbstractMetaClass::queryFunctionList(const AbstractMetaFunctionList &list,
+AbstractMetaFunctionCList AbstractMetaClass::queryFunctionList(const AbstractMetaFunctionCList &list,
                                                               FunctionQueryOptions query)
 {
-    AbstractMetaFunctionList result;
-    for (AbstractMetaFunction *f : list) {
-        if (queryFunction(f, query))
+    AbstractMetaFunctionCList result;
+    for (const auto &f : list) {
+        if (queryFunction(f.data(), query))
             result.append(f);
     }
     return result;
 }
 
-const AbstractMetaFunction *AbstractMetaClass::queryFirstFunction(const AbstractMetaFunctionList &list,
+AbstractMetaFunctionCPtr AbstractMetaClass::queryFirstFunction(const AbstractMetaFunctionCList &list,
                                                                FunctionQueryOptions query)
 {
-    AbstractMetaFunctionList result;
-    for (AbstractMetaFunction *f : list) {
-        if (queryFunction(f, query))
+    AbstractMetaFunctionCList result;
+    for (const auto &f : list) {
+        if (queryFunction(f.data(), query))
             return f;
     }
-    return nullptr;
+    return {};
 }
 
-AbstractMetaFunctionList AbstractMetaClass::queryFunctions(FunctionQueryOptions query) const
+AbstractMetaFunctionCList AbstractMetaClass::queryFunctions(FunctionQueryOptions query) const
 {
     return AbstractMetaClass::queryFunctionList(d->m_functions, query);
 }
@@ -981,7 +962,7 @@ bool AbstractMetaClass::hasSignals() const
     return queryFirstFunction(d->m_functions, Signals | Visible | NotRemovedFromTargetLang) != nullptr;
 }
 
-AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
+AbstractMetaFunctionCList AbstractMetaClass::cppSignalFunctions() const
 {
     return queryFunctions(Signals | Visible | NotRemovedFromTargetLang);
 }
@@ -1056,7 +1037,7 @@ void AbstractMetaClass::getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMet
     }
 }
 
-void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const
+void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionCList *funcList) const
 {
     if (isNamespace()) {
         invisibleNamespaceRecursion([funcList](AbstractMetaClass *c) {
@@ -1088,7 +1069,8 @@ static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractM
     }
 }
 
-static void addExtraIncludesForFunction(AbstractMetaClass *metaClass, const AbstractMetaFunction *meta_function)
+static void addExtraIncludesForFunction(AbstractMetaClass *metaClass,
+                                        const AbstractMetaFunctionCPtr &meta_function)
 {
     Q_ASSERT(metaClass);
     Q_ASSERT(meta_function);
@@ -1106,13 +1088,13 @@ void AbstractMetaClass::fixFunctions()
 
     d->m_functionsFixed = true;
 
-    AbstractMetaFunctionList funcs = functions();
-    AbstractMetaFunctionList nonRemovedFuncs;
+    AbstractMetaFunctionCList funcs = functions();
+    AbstractMetaFunctionCList nonRemovedFuncs;
     nonRemovedFuncs.reserve(funcs.size());
     for (auto f : qAsConst(funcs)) {
         // Fishy: Setting up of implementing/declaring/base classes changes
         // the applicable modifications; clear cached ones.
-        f->clearModificationsCache();
+        qSharedPointerConstCast<AbstractMetaFunction>(f)->clearModificationsCache();
         if (!f->isRemovedFromAllLanguages(f->implementingClass()))
             nonRemovedFuncs.append(f);
     }
@@ -1122,7 +1104,7 @@ void AbstractMetaClass::fixFunctions()
         // Since we always traverse the complete hierarchy we are only
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
-        AbstractMetaFunctionList superFuncs;
+        AbstractMetaFunctionCList superFuncs;
         // Super classes can never be final
         if (superClass->isFinalInTargetLang()) {
             qCWarning(lcShiboken).noquote().nospace()
@@ -1130,11 +1112,11 @@ void AbstractMetaClass::fixFunctions()
             *superClass -= AbstractMetaAttributes::FinalInTargetLang;
         }
         superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
-        AbstractMetaFunctionList virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
+        const auto virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
         superFuncs += virtuals;
 
-        QSet<AbstractMetaFunction *> funcsToAdd;
-        for (auto sf : qAsConst(superFuncs)) {
+        QSet<AbstractMetaFunctionCPtr> funcsToAdd;
+        for (const auto &sf : qAsConst(superFuncs)) {
             if (sf->isRemovedFromAllLanguages(sf->implementingClass()))
                 continue;
 
@@ -1145,8 +1127,9 @@ void AbstractMetaClass::fixFunctions()
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
             bool add = (sf->isNormal() || sf->isSignal() || sf->isEmptyFunction());
-            for (AbstractMetaFunction *f : qAsConst(nonRemovedFuncs)) {
-                const AbstractMetaFunction::CompareResult cmp = f->compareTo(sf);
+            for (const auto &cf : qAsConst(nonRemovedFuncs)) {
+                AbstractMetaFunctionPtr f(qSharedPointerConstCast<AbstractMetaFunction>(cf));
+                const AbstractMetaFunction::CompareResult cmp = cf->compareTo(sf.data());
 
                 if (cmp & AbstractMetaFunction::EqualModifiedName) {
                     add = false;
@@ -1172,7 +1155,7 @@ void AbstractMetaClass::fixFunctions()
 
                         if (f->visibility() != sf->visibility()) {
                             qCWarning(lcShiboken, "%s",
-                                      qPrintable(msgFunctionVisibilityModified(this, f)));
+                                      qPrintable(msgFunctionVisibilityModified(this, f.data())));
 #if 0
                             // If new visibility is private, we can't
                             // do anything. If it isn't, then we
@@ -1216,7 +1199,7 @@ void AbstractMetaClass::fixFunctions()
 
                                 if (!hasNonFinalModifier && !isBaseImplPrivate) {
                                     qCWarning(lcShiboken, "%s",
-                                              qPrintable(msgShadowingFunction(sf, f)));
+                                              qPrintable(msgShadowingFunction(sf.data(), f.data())));
                                 }
                             }
                         }
@@ -1248,19 +1231,19 @@ void AbstractMetaClass::fixFunctions()
                 funcsToAdd << sf;
         }
 
-        for (AbstractMetaFunction *f : qAsConst(funcsToAdd)) {
+        for (const auto &f : qAsConst(funcsToAdd)) {
             AbstractMetaFunction *copy = f->copy();
             (*copy) += AddedMethod;
-            funcs.append(copy);
+            funcs.append(AbstractMetaFunctionCPtr(copy));
         }
     }
 
     bool hasPrivateConstructors = false;
     bool hasPublicConstructors = false;
-    for (AbstractMetaFunction *func : qAsConst(funcs)) {
+    for (const auto &func : qAsConst(funcs)) {
         for (const auto &mod : func->modifications(this)) {
             if (mod.isRenameModifier())
-                func->setName(mod.renamedToName());
+                qSharedPointerConstCast<AbstractMetaFunction>(func)->setName(mod.renamedToName());
         }
 
         // Make sure class is abstract if one of the functions is

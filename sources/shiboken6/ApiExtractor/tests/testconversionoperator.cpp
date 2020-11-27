@@ -65,14 +65,14 @@ void TestConversionOperator::testConversionOperator()
     QCOMPARE(classC->functions().count(), 3);
     QCOMPARE(classA->externalConversionOperators().count(), 2);
 
-    AbstractMetaFunction *convOp = nullptr;
-    for (AbstractMetaFunction *func : classB->functions()) {
+    AbstractMetaFunctionCPtr convOp;
+    for (const auto &func : classB->functions()) {
         if (func->isConversionOperator()) {
             convOp = func;
             break;
         }
     }
-    QVERIFY(convOp);
+    QVERIFY(!convOp.isNull());
     QVERIFY(classA->externalConversionOperators().contains(convOp));
 }
 

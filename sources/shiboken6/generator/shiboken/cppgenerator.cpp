@@ -207,15 +207,15 @@ QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
     return fileNameBase + fileNameSuffix();
 }
 
-QList<AbstractMetaFunctionList>
+QList<AbstractMetaFunctionCList>
     CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
                                                  uint queryIn)
 {
     // ( func_name, num_args ) => func_list
-    QMap<QPair<QString, int>, AbstractMetaFunctionList> results;
+    QMap<QPair<QString, int>, AbstractMetaFunctionCList> results;
     const AbstractMetaClass::OperatorQueryOptions query(queryIn);
-    const AbstractMetaFunctionList &funcs = metaClass->operatorOverloads(query);
-    for (AbstractMetaFunction *func : funcs) {
+    const auto &funcs = metaClass->operatorOverloads(query);
+    for (const auto &func : funcs) {
         if (func->isModifiedRemoved()
             || func->usesRValueReferences()
             || func->name() == QLatin1String("operator[]")
@@ -232,26 +232,28 @@ QList<AbstractMetaFunctionList>
         QPair<QString, int > op(func->name(), args);
         results[op].append(func);
     }
-    QList<AbstractMetaFunctionList> result;
+    QList<AbstractMetaFunctionCList> result;
     result.reserve(results.size());
     for (auto it = results.cbegin(), end = results.cend(); it != end; ++it)
         result.append(it.value());
     return result;
 }
 
-const AbstractMetaFunction *CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
+AbstractMetaFunctionCPtr CppGenerator::boolCast(const AbstractMetaClass *metaClass) const
 {
     if (!useIsNullAsNbNonZero())
-        return nullptr;
+        return {};
     // TODO: This could be configurable someday
-    const AbstractMetaFunction *func = metaClass->findFunction(QLatin1String("isNull"));
-    if (!func || func->isVoid() || !func->type().typeEntry()->isPrimitive() || !func->isPublic())
-        return nullptr;
+    const auto func = metaClass->findFunction(QLatin1String("isNull"));
+    if (func.isNull() || func->isVoid() || !func->type().typeEntry()->isPrimitive()
+        || !func->isPublic()) {
+        return {};
+    }
     auto pte = static_cast<const PrimitiveTypeEntry *>(func->type().typeEntry());
     while (pte->referencedTypeEntry())
         pte = pte->referencedTypeEntry();
-    return func && func->isConstant() && pte->name() == QLatin1String("bool")
-        && func->arguments().isEmpty() ? func : nullptr;
+    return func->isConstant() && pte->name() == QLatin1String("bool")
+            && func->arguments().isEmpty() ? func : AbstractMetaFunctionCPtr{};
 }
 
 std::optional<AbstractMetaType>
@@ -272,8 +274,6 @@ void CppGenerator::clearTpFuncs()
         {QLatin1String("__next__"), {}}
     };
 }
-
-using FunctionGroupMap = QMap<QString, AbstractMetaFunctionList>;
 
 // Prevent ELF symbol qt_version_tag from being generated into the source
 static const char includeQDebug[] =
@@ -477,10 +477,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             s << "}\n\n";
         }
 
-        const AbstractMetaFunctionList &funcs = filterFunctions(metaClass);
+        const auto &funcs = filterFunctions(metaClass);
         int maxOverrides = 0;
         writeCacheResetNative(s, classContext);
-        for (const AbstractMetaFunction *func : funcs) {
+        for (const auto &func : funcs) {
             const bool notAbstract = !func->isAbstract();
             if ((func->isPrivate() && notAbstract && !func->isVisibilityModifiedToPrivate())
                 || (func->isModifiedRemoved() && notAbstract))
@@ -506,10 +506,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         << "extern \"C\" {\n";
     const auto &functionGroups = getFunctionGroups(metaClass);
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
-        AbstractMetaFunctionList overloads;
+        AbstractMetaFunctionCList overloads;
         QSet<QString> seenSignatures;
         bool staticEncountered = false;
-        for (AbstractMetaFunction *func : it.value()) {
+        for (const auto &func : it.value()) {
             if (!func->isAssignmentOperator()
                 && !func->usesRValueReferences()
                 && !func->isCastOperator()
@@ -533,14 +533,14 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         if (!staticEncountered) {
             for (int i = overloads.size() - 1; i >= 0; --i) {
                 if (overloads.at(i)->isStatic())
-                    delete overloads.takeAt(i);
+                    overloads.removeAt(i);
             }
         }
 
         if (overloads.isEmpty())
             continue;
 
-        const AbstractMetaFunction *rfunc = overloads.constFirst();
+        const auto rfunc = overloads.constFirst();
         if (contains(sequenceProtocols(), rfunc->name())
             || contains(mappingProtocols(), rfunc->name())) {
             continue;
@@ -578,8 +578,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                     auto pointerToInnerType =
                             buildAbstractMetaTypeFromString(pointerToInnerTypeName);
                     Q_ASSERT(pointerToInnerType.has_value());
-                    AbstractMetaFunction *mutableRfunc = overloads.constFirst();
-                    mutableRfunc->setType(pointerToInnerType.value());
+                    auto mutableRfunc = overloads.constFirst();
+                    qSharedPointerConstCast<AbstractMetaFunction>(mutableRfunc)->setType(pointerToInnerType.value());
                 } else if (smartPointerTypeEntry->refCountMethodName().isEmpty()
                            || smartPointerTypeEntry->refCountMethodName() != rfunc->name()) {
                     // Skip all public methods of the smart pointer except for the raw getter and
@@ -652,7 +652,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             writeSetattroFunction(s, attroCheck, classContext);
     }
 
-    if (const AbstractMetaFunction *f = boolCast(metaClass)) {
+    const auto f = boolCast(metaClass);
+    if (!f.isNull()) {
         ErrorCode errorCode(-1);
         s << "static int " << cpythonBaseName(metaClass) << "___nb_bool(PyObject *self)\n"
             << "{\n" << indent;
@@ -670,15 +671,15 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     if (supportsNumberProtocol(metaClass) && !metaClass->typeEntry()->isSmartPointer()) {
-        const QList<AbstractMetaFunctionList> opOverloads = filterGroupedOperatorFunctions(
+        const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
                 AbstractMetaClass::ArithmeticOp
                 | AbstractMetaClass::LogicalOp
                 | AbstractMetaClass::BitwiseOp);
 
-        for (const AbstractMetaFunctionList &allOverloads : opOverloads) {
-            AbstractMetaFunctionList overloads;
-            for (AbstractMetaFunction *func : allOverloads) {
+        for (const AbstractMetaFunctionCList &allOverloads : opOverloads) {
+            AbstractMetaFunctionCList overloads;
+            for (const auto &func : allOverloads) {
                 if (!func->isModifiedRemoved()
                     && !func->isPrivate()
                     && (func->ownerClass() == func->implementingClass() || func->isAbstract()))
@@ -790,7 +791,7 @@ void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &
 }
 
 void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
-                                          const AbstractMetaFunction *func) const
+                                          const AbstractMetaFunctionCPtr &func) const
 {
     const QString qualifiedName = classContext.wrapperName() + QLatin1String("::");
     s << functionSignature(func, qualifiedName, QString(),
@@ -821,7 +822,7 @@ Shiboken::Object::destroy(wrapper, this);
 )" << outdent << "}\n";
 }
 
-static bool allArgumentsRemoved(const AbstractMetaFunction *func)
+static bool allArgumentsRemoved(const AbstractMetaFunctionCPtr& func)
 {
     if (func->arguments().isEmpty())
         return false;
@@ -833,7 +834,7 @@ static bool allArgumentsRemoved(const AbstractMetaFunction *func)
     return true;
 }
 
-QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunction *func) const
+QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const
 {
     if (func->type().isVoid())
         return QLatin1String("\"\"");
@@ -869,7 +870,7 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
 // When writing an overridden method of a wrapper class, write the part
 // calling the C++ function in case no overload in Python exists.
 void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
-                                             const AbstractMetaFunction *func,
+                                             const AbstractMetaFunctionCPtr &func,
                                              const QString &funcName,
                                              const CodeSnipList &snips,
                                              const AbstractMetaArgument *lastArg,
@@ -905,7 +906,7 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
 
 // Determine the return statement (void or a result value).
 QString CppGenerator::virtualMethodReturn(TextStream &s,
-                                          const AbstractMetaFunction *func,
+                                          const AbstractMetaFunctionCPtr &func,
                                           const FunctionModificationList &functionModifications) const
 {
     if (func->isVoid())
@@ -958,7 +959,7 @@ QString CppGenerator::virtualMethodReturn(TextStream &s,
 }
 
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
-                                            const AbstractMetaFunction *func,
+                                            const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
 {
     //skip metaObject function, this will be written manually ahead
@@ -978,7 +979,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     const QString returnStatement = virtualMethodReturn(s, func, functionModifications);
 
     if (func->isAbstract() && func->isModifiedRemoved()) {
-        qCWarning(lcShiboken, "%s", qPrintable(msgPureVirtualFunctionRemoved(func)));
+        qCWarning(lcShiboken, "%s", qPrintable(msgPureVirtualFunctionRemoved(func.data())));
         s << returnStatement << '\n' << outdent << "}\n\n";
         return;
     }
@@ -1255,14 +1256,11 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
     s << "int " << wrapperClassName << "::qt_metacall(QMetaObject::Call call, int id, void **args)\n";
     s << "{\n" << indent;
 
-    AbstractMetaFunction *func = nullptr;
-    AbstractMetaFunctionList list =
-        classContext.metaClass()->queryFunctionsByName(QLatin1String("qt_metacall"));
-    if (list.size() == 1)
-        func = list[0];
+    const auto list = classContext.metaClass()->queryFunctionsByName(QLatin1String("qt_metacall"));
 
     CodeSnipList snips;
-    if (func) {
+    if (list.size() == 1) {
+        const auto func = list.constFirst();
         snips = func->injectedCodeSnips();
         if (func->isUserAdded()) {
             CodeSnipList snips = func->injectedCodeSnips();
@@ -1506,10 +1504,10 @@ return result;)";
     CustomConversion *customConversion = metaClass->typeEntry()->customConversion();
 
     // Implicit conversions.
-    AbstractMetaFunctionList implicitConvs;
+    AbstractMetaFunctionCList implicitConvs;
     if (!customConversion || !customConversion->replaceOriginalTargetToNativeConversions()) {
-        const AbstractMetaFunctionList &allImplicitConvs = implicitConversions(metaClass->typeEntry());
-        for (AbstractMetaFunction *func : allImplicitConvs) {
+        const auto &allImplicitConvs = implicitConversions(metaClass->typeEntry());
+        for (const auto &func : allImplicitConvs) {
             if (!func->isUserAdded())
                 implicitConvs << func;
         }
@@ -1519,7 +1517,7 @@ return result;)";
         s << "// Implicit conversions.\n";
 
     AbstractMetaType targetType = buildAbstractMetaTypeFromAbstractMetaClass(metaClass);
-    for (const AbstractMetaFunction *conv : qAsConst(implicitConvs)) {
+    for (const auto &conv : qAsConst(implicitConvs)) {
         if (conv->isModifiedRemoved())
             continue;
 
@@ -1693,10 +1691,10 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     CustomConversion *customConversion = metaClass->typeEntry()->customConversion();
 
     // Add implicit conversions.
-    AbstractMetaFunctionList implicitConvs;
+    AbstractMetaFunctionCList implicitConvs;
     if (!customConversion || !customConversion->replaceOriginalTargetToNativeConversions()) {
-        const AbstractMetaFunctionList &allImplicitConvs = implicitConversions(metaClass->typeEntry());
-        for (AbstractMetaFunction *func : allImplicitConvs) {
+        const auto &allImplicitConvs = implicitConversions(metaClass->typeEntry());
+        for (const auto &func : allImplicitConvs) {
             if (!func->isUserAdded())
                 implicitConvs << func;
         }
@@ -1706,7 +1704,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         s << "// Add implicit conversions to type converter.\n";
 
     AbstractMetaType targetType = buildAbstractMetaTypeFromAbstractMetaClass(metaClass);
-    for (const AbstractMetaFunction *conv : qAsConst(implicitConvs)) {
+    for (const auto &conv : qAsConst(implicitConvs)) {
         if (conv->isModifiedRemoved())
             continue;
         AbstractMetaType sourceType;
@@ -1778,7 +1776,7 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
 void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overloadData,
                                               const GeneratorContext &context) const
 {
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaClass *ownerClass = rfunc->targetLangOwner();
     Q_ASSERT(ownerClass == context.metaClass());
     int minArgs = overloadData.minArgs();
@@ -1852,13 +1850,13 @@ static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
     }
 }
 
-void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunctionList &overloads,
+void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
                                            const GeneratorContext &classContext) const
 {
     ErrorCode errorCode(-1);
     OverloadData overloadData(overloads, this);
 
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaClass *metaClass = rfunc->ownerClass();
 
     s << "static int\n";
@@ -1949,7 +1947,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
 
     // Constructor code injections, position=end
     bool hasCodeInjectionsAtEnd = false;
-    for (AbstractMetaFunction *func : overloads) {
+    for (const auto &func : overloads) {
         const CodeSnipList &injectedCodeSnips = func->injectedCodeSnips();
         for (const CodeSnip &cs : injectedCodeSnips) {
             if (cs.position == TypeSystem::CodeSnipPositionEnd) {
@@ -1961,7 +1959,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     if (hasCodeInjectionsAtEnd) {
         // FIXME: C++ arguments are not available in code injection on constructor when position = end.
         s <<"switch (overloadId) {\n";
-        for (AbstractMetaFunction *func : overloads) {
+        for (const auto &func : overloads) {
             Indentation indent(s);
             const CodeSnipList &injectedCodeSnips = func->injectedCodeSnips();
             for (const CodeSnip &cs : injectedCodeSnips) {
@@ -1986,11 +1984,11 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
     s<< outdent << "}\n\n";
 }
 
-void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionList &overloads,
+void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionCList &overloads,
                                       const GeneratorContext &classContext) const
 {
     OverloadData overloadData(overloads, this);
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
 
     int maxArgs = overloadData.maxArgs();
 
@@ -2098,7 +2096,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const AbstractMetaFunctionL
 
 void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overloadData) const
 {
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
     s << "PyTuple_GET_SIZE(args);\n";
     writeUnusedVariableCast(s, QLatin1String("numArgs"));
 
@@ -2258,7 +2256,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
 }
 
 void CppGenerator::writeCppSelfDefinition(TextStream &s,
-                                          const AbstractMetaFunction *func,
+                                          const AbstractMetaFunctionCPtr &func,
                                           const GeneratorContext &context,
                                           bool hasStaticOverload) const
 {
@@ -2282,7 +2280,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
 
 void CppGenerator::writeErrorSection(TextStream &s, OverloadData &overloadData) const
 {
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
     s  << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n";
     Indentation indentation(s);
     QString funcName = fullPythonFunctionName(rfunc, true);
@@ -2366,7 +2364,8 @@ void CppGenerator::writeTypeCheck(TextStream &s, AbstractMetaType argType,
     s << typeCheck;
 }
 
-static void checkTypeViability(const AbstractMetaFunction *func, const AbstractMetaType &type, int argIdx)
+static void checkTypeViability(const AbstractMetaFunctionCPtr &func,
+                               const AbstractMetaType &type, int argIdx)
 {
     if (type.isVoid()
         || !type.typeEntry()->isPrimitive()
@@ -2394,7 +2393,7 @@ static void checkTypeViability(const AbstractMetaFunction *func, const AbstractM
     qCWarning(lcShiboken).noquote().nospace() << message;
 }
 
-static void checkTypeViability(const AbstractMetaFunction *func)
+static void checkTypeViability(const AbstractMetaFunctionCPtr &func)
 {
     if (func->isUserAdded())
         return;
@@ -2409,8 +2408,7 @@ void CppGenerator::writeTypeCheck(TextStream &s, const OverloadData *overloadDat
     QSet<const TypeEntry *> numericTypes;
     const OverloadDataList &overloads = overloadData->previousOverloadData()->nextOverloadData();
     for (OverloadData *od : overloads) {
-        const AbstractMetaFunctionCList &odOverloads = od->overloads();
-        for (const AbstractMetaFunction *func : odOverloads) {
+        for (const auto &func : od->overloads()) {
             checkTypeViability(func);
             const AbstractMetaType &argType = od->argument(func)->type();
             if (!argType.isPrimitive())
@@ -2460,7 +2458,7 @@ static const QStringList &knownPythonTypes()
 }
 
 std::optional<AbstractMetaType>
-    CppGenerator::getArgumentType(const AbstractMetaFunction *func, int argPos) const
+    CppGenerator::getArgumentType(const AbstractMetaFunctionCPtr &func, int argPos) const
 {
     if (argPos < 0 || argPos > func->arguments().size()) {
         qCWarning(lcShiboken).noquote().nospace()
@@ -2479,7 +2477,7 @@ std::optional<AbstractMetaType>
     auto argType = buildAbstractMetaTypeFromString(typeReplaced);
     if (!argType.has_value() && !knownPythonTypes().contains(typeReplaced)) {
         qCWarning(lcShiboken, "%s",
-                  qPrintable(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func)));
+                  qPrintable(msgUnknownTypeInArgumentTypeReplacement(typeReplaced, func.data())));
     }
     return argType;
 }
@@ -2630,7 +2628,7 @@ static void addConversionRuleCodeSnippet(CodeSnipList &snippetList, QString &rul
     snippetList << snip;
 }
 
-void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunction *func,
+void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                        TypeSystem::Language language) const
 {
 
@@ -2644,7 +2642,7 @@ void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunction
     writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode, func);
 }
 
-void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunction *func,
+void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                        TypeSystem::Language language, const QString &outputVar) const
 {
     CodeSnipList snippets;
@@ -2653,7 +2651,7 @@ void CppGenerator::writeConversionRule(TextStream &s, const AbstractMetaFunction
     writeCodeSnips(s, snippets, TypeSystem::CodeSnipPositionAny, language, func);
 }
 
-void CppGenerator::writeNoneReturn(TextStream &s, const AbstractMetaFunction *func,
+void CppGenerator::writeNoneReturn(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    bool thereIsReturnValue)
 {
     if (thereIsReturnValue && (func->isVoid() || func->argumentRemoved(0))
@@ -2666,7 +2664,7 @@ void CppGenerator::writeNoneReturn(TextStream &s, const AbstractMetaFunction *fu
 void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadData &overloadData) const
 {
     s << "// Overloaded function decisor\n";
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaFunctionCList &functionOverloads = overloadData.overloadsWithoutRepetition();
     for (int i = 0; i < functionOverloads.count(); i++) {
         const auto func = functionOverloads.at(i);
@@ -2701,7 +2699,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
                                                         const OverloadData *parentOverloadData) const
 {
     bool hasDefaultCall = parentOverloadData->nextArgumentHasDefaultValue();
-    const AbstractMetaFunction *referenceFunction = parentOverloadData->referenceFunction();
+    auto referenceFunction = parentOverloadData->referenceFunction();
 
     // If the next argument has not an argument with a default value, it is still possible
     // that one of the overloads for the current overload data has its final occurrence here.
@@ -2709,8 +2707,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
     // variable to be used further on this method on the conditional that identifies default
     // method calls.
     if (!hasDefaultCall) {
-        const AbstractMetaFunctionCList &overloads = parentOverloadData->overloads();
-        for (const AbstractMetaFunction *func : overloads) {
+        for (const auto &func : parentOverloadData->overloads()) {
             if (parentOverloadData->isFinalOccurrence(func)) {
                 referenceFunction = func;
                 hasDefaultCall = true;
@@ -2740,7 +2737,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         // The current overload data describes the last argument of a signature,
         // so the method can be identified right now.
         if (isLastArgument || (signatureFound && !hasDefaultCall)) {
-            const AbstractMetaFunction *func = parentOverloadData->referenceFunction();
+            const auto func = parentOverloadData->referenceFunction();
             s << "overloadId = " << parentOverloadData->headOverloadData()->overloads().indexOf(func)
                 << "; // " << func->minimalSignature() << '\n';
             return;
@@ -2759,10 +2756,10 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         s << "if (numArgs == " << numArgs << ") {\n";
         {
             Indentation indent(s);
-            const AbstractMetaFunction *func = referenceFunction;
+            auto func = referenceFunction;
             for (OverloadData *overloadData : overloads) {
-                const AbstractMetaFunction *defValFunc = overloadData->getFunctionWithDefaultValue();
-                if (defValFunc) {
+                const auto defValFunc = overloadData->getFunctionWithDefaultValue();
+                if (!defValFunc.isNull()) {
                     func = defValFunc;
                     break;
                 }
@@ -2778,7 +2775,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
                                 && !overloadData->getFunctionWithDefaultValue()
                                 && !overloadData->findNextArgWithDefault();
 
-        const AbstractMetaFunction *refFunc = overloadData->referenceFunction();
+        const auto refFunc = overloadData->referenceFunction();
 
         QStringList typeChecks;
 
@@ -2794,7 +2791,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
                 if (usePyArgs)
                     pyArgName = pythonArgsAt(od->argPos());
                 StringStream tck(TextStream::Language::Cpp);
-                const AbstractMetaFunction *func = od->referenceFunction();
+                auto func = od->referenceFunction();
 
                 if (func->isConstructor() && func->arguments().count() == 1) {
                     const AbstractMetaClass *ownerClass = func->ownerClass();
@@ -2874,7 +2871,7 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
             writeSingleFunctionCall(s, overloadData, overloads.constFirst(), context);
         } else {
             for (int i = 0; i < overloads.count(); i++) {
-                const AbstractMetaFunction *func = overloads.at(i);
+                const auto func = overloads.at(i);
                 s << "case " << i << ": // " << func->signature() << "\n{\n";
                 {
                     Indentation indent(s);
@@ -2896,7 +2893,7 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
 
 void CppGenerator::writeSingleFunctionCall(TextStream &s,
                                            const OverloadData &overloadData,
-                                           const AbstractMetaFunction *func,
+                                           const AbstractMetaFunctionCPtr &func,
                                            const GeneratorContext &context) const
 {
     if (func->isDeprecated()) {
@@ -3240,7 +3237,7 @@ void CppGenerator::writeAddPythonToCppConversion(TextStream &s, const QString &c
     s << ");\n";
 }
 
-void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunction *func,
+void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                                 bool usePyArgs, const OverloadData &overloadData) const
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
@@ -3320,7 +3317,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
     s << "}\n";
 }
 
-QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunction *func, int argIndex,
+QString CppGenerator::argumentNameFromIndex(const AbstractMetaFunctionCPtr &func, int argIndex,
                                             const AbstractMetaClass **wrappedClass,
                                             QString *errorMessage) const
 {
@@ -3372,7 +3369,7 @@ const char defaultExceptionHandling[] = R"(} catch (const std::exception &e) {
 }
 )";
 
-void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunction *func,
+void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const GeneratorContext &context, int maxArgs) const
 {
     s << "// " << func->minimalSignature() << (func->isReverseOperator() ? " [reverse operator]": "") << '\n';
@@ -3382,7 +3379,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunction *fu
             if (cs.position == TypeSystem::CodeSnipPositionEnd) {
                 auto klass = func->ownerClass();
                 s << "overloadId = "
-                  << klass->functions().indexOf(const_cast<AbstractMetaFunction *>(func))
+                  << klass->functions().indexOf(func)
                   << ";\n";
                 break;
             }
@@ -4168,9 +4165,9 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     QString cppClassName = metaClass->qualifiedCppName();
     const QString className = chopType(cpythonTypeName(metaClass));
     QString baseClassName;
-    AbstractMetaFunctionList ctors;
-    const AbstractMetaFunctionList &allCtors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-    for (AbstractMetaFunction *f : allCtors) {
+    AbstractMetaFunctionCList ctors;
+    const auto &allCtors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    for (const auto &f : allCtors) {
         if (!f->isPrivate() && !f->isModifiedRemoved() && !classContext.forSmartPointer())
             ctors.append(f);
     }
@@ -4242,8 +4239,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
 
     // search for special functions
     clearTpFuncs();
-    const AbstractMetaFunctionList &funcs = metaClass->functions();
-    for (AbstractMetaFunction *func : funcs) {
+    for (const auto &func : metaClass->functions()) {
         if (m_tpFuncs.contains(func->name()))
             m_tpFuncs[func->name()] = cpythonFunctionName(func);
     }
@@ -4269,8 +4265,8 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (!metaClass->typeEntry()->hashFunction().isEmpty())
         tp_hash = QLatin1Char('&') + cpythonBaseName(metaClass) + QLatin1String("_HashFunc");
 
-    const AbstractMetaFunction *callOp = metaClass->findFunction(QLatin1String("operator()"));
-    if (callOp && !callOp->isModifiedRemoved())
+    const auto callOp = metaClass->findFunction(QLatin1String("operator()"));
+    if (!callOp.isNull() && !callOp->isModifiedRemoved())
         tp_call = QLatin1Char('&') + cpythonFunctionName(callOp);
 
     QString computedClassTargetFullName;
@@ -4330,8 +4326,8 @@ void CppGenerator::writeMappingMethods(TextStream &s,
                                        const GeneratorContext &context) const
 {
     for (const auto & m : mappingProtocols()) {
-        const AbstractMetaFunction *func = metaClass->findFunction(m.name);
-        if (!func)
+        const auto func = metaClass->findFunction(m.name);
+        if (func.isNull())
             continue;
         QString funcName = cpythonFunctionName(func);
         CodeSnipList snips = func->injectedCodeSnips(TypeSystem::CodeSnipPositionAny, TypeSystem::TargetLangCode);
@@ -4354,8 +4350,8 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
     bool injectedCode = false;
 
     for (const auto &seq : sequenceProtocols()) {
-        const AbstractMetaFunction *func = metaClass->findFunction(seq.name);
-        if (!func)
+        const auto func = metaClass->findFunction(seq.name);
+        if (func.isNull())
             continue;
         injectedCode = true;
         QString funcName = cpythonFunctionName(func);
@@ -4395,7 +4391,8 @@ void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s, const AbstractMe
     bool hasFunctions = false;
     QMap<QString, QString> funcs;
     for (const auto &seq : sequenceProtocols()) {
-        if (const AbstractMetaFunction *func = metaClass->findFunction(seq.name)) {
+        const auto func = metaClass->findFunction(seq.name);
+        if (!func.isNull()) {
             funcs.insert(seq.name, QLatin1Char('&') + cpythonFunctionName(func));
             hasFunctions = true;
         }
@@ -4430,7 +4427,8 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s, const AbstractMet
     };
     QMap<QString, QString> funcs;
     for (const auto &m : mappingProtocols()) {
-        if (const AbstractMetaFunction *func = metaClass->findFunction(m.name)) {
+        const auto func = metaClass->findFunction(m.name);
+        if (!func.isNull()) {
             const QString entry = QLatin1String("reinterpret_cast<void *>(&")
                                   + cpythonFunctionName(func) + QLatin1Char(')');
             funcs.insert(m.name, entry);
@@ -4482,14 +4480,14 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
 {
     QMap<QString, QString> nb;
 
-    const QList<AbstractMetaFunctionList> opOverloads =
+    const QList<AbstractMetaFunctionCList> opOverloads =
             filterGroupedOperatorFunctions(metaClass,
                                            AbstractMetaClass::ArithmeticOp
                                            | AbstractMetaClass::LogicalOp
                                            | AbstractMetaClass::BitwiseOp);
 
-    for (const AbstractMetaFunctionList &opOverload : opOverloads) {
-        const AbstractMetaFunction *rfunc = opOverload.at(0);
+    for (const AbstractMetaFunctionCList &opOverload : opOverloads) {
+        const auto rfunc = opOverload.at(0);
         QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
         nb[opName] = cpythonFunctionName(rfunc);
     }
@@ -4781,9 +4779,10 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "switch (op) {\n";
     {
         Indentation indent(s);
-        const QList<AbstractMetaFunctionList> &groupedFuncs = filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
-        for (const AbstractMetaFunctionList &overloads : groupedFuncs) {
-            const AbstractMetaFunction *rfunc = overloads[0];
+        const QList<AbstractMetaFunctionCList> &groupedFuncs =
+            filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
+        for (const AbstractMetaFunctionCList &overloads : groupedFuncs) {
+            const auto rfunc = overloads[0];
 
             QString operatorId = ShibokenGenerator::pythonRichCompareOperatorId(rfunc);
             s << "case " << operatorId << ':' << '\n';
@@ -4794,7 +4793,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
             op = op.right(op.size() - QLatin1String("operator").size());
 
             int alternativeNumericTypes = 0;
-            for (const AbstractMetaFunction *func : overloads) {
+            for (const auto &func : overloads) {
                 if (!func->isStatic() &&
                     ShibokenGenerator::isNumber(func->arguments().at(0).type().typeEntry()))
                     alternativeNumericTypes++;
@@ -4804,7 +4803,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
             OverloadData overloadData(overloads, this);
             const OverloadDataList &nextOverloads = overloadData.nextOverloadData();
             for (OverloadData *od : nextOverloads) {
-                const AbstractMetaFunction *func = od->referenceFunction();
+                const auto func = od->referenceFunction();
                 if (func->isStatic())
                     continue;
                 auto argTypeO = getArgumentType(func, 1);
@@ -4893,12 +4892,12 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         << outdent << "}\n\n";
 }
 
-void CppGenerator::writeMethodDefinitionEntry(TextStream &s, const AbstractMetaFunctionList &overloads) const
+void CppGenerator::writeMethodDefinitionEntry(TextStream &s, const AbstractMetaFunctionCList &overloads) const
 {
     Q_ASSERT(!overloads.isEmpty());
     OverloadData overloadData(overloads, this);
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
-    const AbstractMetaFunction *func = overloadData.referenceFunction();
+    const auto func = overloadData.referenceFunction();
     int min = overloadData.minArgs();
     int max = overloadData.maxArgs();
 
@@ -4924,10 +4923,10 @@ void CppGenerator::writeMethodDefinitionEntry(TextStream &s, const AbstractMetaF
     }
 }
 
-void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFunctionList &overloads) const
+void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const
 {
     Q_ASSERT(!overloads.isEmpty());
-    const AbstractMetaFunction *func = overloads.constFirst();
+    const auto func = overloads.constFirst();
     if (m_tpFuncs.contains(func->name()))
         return;
 
@@ -4941,16 +4940,16 @@ void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFuncti
     s << ',' << '\n';
 }
 
-void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionList &overloads) const
+void CppGenerator::writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const
 {
     OverloadData overloadData(overloads, this);
-    const AbstractMetaFunction *rfunc = overloadData.referenceFunction();
+    const auto rfunc = overloadData.referenceFunction();
     QString funcName = fullPythonFunctionName(rfunc, false);
 
     int idx = overloads.length() - 1;
     bool multiple = idx > 0;
 
-    for (const AbstractMetaFunction *f : overloads) {
+    for (const auto &f : overloads) {
         QStringList args;
         // PYSIDE-1328: `self`-ness cannot be computed in Python because there are mixed cases.
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
@@ -5130,8 +5129,8 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
 void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaClass *metaClass)
 {
     // Try to check something and print some warnings
-    const AbstractMetaFunctionList &signalFuncs = metaClass->cppSignalFunctions();
-    for (const AbstractMetaFunction *cppSignal : signalFuncs) {
+    const auto &signalFuncs = metaClass->cppSignalFunctions();
+    for (const auto &cppSignal : signalFuncs) {
         if (cppSignal->declaringClass() != metaClass)
             continue;
         const AbstractMetaArgumentList &arguments = cppSignal->arguments();
@@ -5548,8 +5547,7 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
         bool canBeValue = false;
         if (!metaClass->isObjectType()) {
             // check if there's a empty ctor
-            const AbstractMetaFunctionList &funcs = metaClass->functions();
-            for (AbstractMetaFunction *func : funcs) {
+            for (const auto &func : metaClass->functions()) {
                 if (func->isConstructor() && !func->arguments().count()) {
                     canBeValue = true;
                     break;
@@ -5777,8 +5775,8 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
         }
         s << "}\n";
 
-        const AbstractMetaFunctionList &funcs = getMethodsWithBothStaticAndNonStaticMethods(metaClass);
-        for (const AbstractMetaFunction *func : funcs) {
+        const auto &funcs = getMethodsWithBothStaticAndNonStaticMethods(metaClass);
+        for (const auto &func : funcs) {
             QString defName = cpythonMethodDefinitionName(func);
             s << "static PyMethodDef non_static_" << defName << " = {\n";
             {
@@ -5892,8 +5890,8 @@ bool CppGenerator::finishGeneration()
 
     const auto functionGroups = getGlobalFunctionGroups();
     for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
-        AbstractMetaFunctionList overloads;
-        for (AbstractMetaFunction *func : it.value()) {
+        AbstractMetaFunctionCList overloads;
+        for (const auto &func : it.value()) {
             if (!func->isModifiedRemoved()) {
                 overloads.append(func);
                 if (func->typeEntry())
@@ -6248,7 +6246,7 @@ bool CppGenerator::finishGeneration()
     return file.done() != FileOut::Failure;
 }
 
-static ArgumentOwner getArgumentOwner(const AbstractMetaFunction *func, int argIndex)
+static ArgumentOwner getArgumentOwner(const AbstractMetaFunctionCPtr &func, int argIndex)
 {
     ArgumentOwner argOwner = func->argumentOwner(func->ownerClass(), argIndex);
     if (argOwner.index == ArgumentOwner::InvalidIndex)
@@ -6256,8 +6254,8 @@ static ArgumentOwner getArgumentOwner(const AbstractMetaFunction *func, int argI
     return argOwner;
 }
 
-bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunction *func, int argIndex,
-                                              bool useHeuristicPolicy) const
+bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                              int argIndex, bool useHeuristicPolicy) const
 {
     const int numArgs = func->arguments().count();
     bool ctorHeuristicEnabled = func->isConstructor() && useCtorHeuristic() && useHeuristicPolicy;
@@ -6316,7 +6314,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
     return false;
 }
 
-void CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunction *func,
+void CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                               bool useHeuristicForReturn) const
 {
     const int numArgs = func->arguments().count();
@@ -6331,7 +6329,7 @@ void CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
         writeReturnValueHeuristics(s, func);
 }
 
-void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunction *func) const
+void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunctionCPtr &func) const
 {
     const  AbstractMetaType &type = func->type();
     if (!useReturnValueHeuristic()

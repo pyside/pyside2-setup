@@ -302,7 +302,7 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
 
 }
 
-void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunction *func)
+void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunctionCPtr &func)
 {
     addInstantiatedContainersAndSmartPointers(func->type(), func->signature());
     const AbstractMetaArgumentList &arguments = func->arguments();
@@ -314,8 +314,7 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 {
     if (!metaClass->typeEntry()->generateCode())
         return;
-    const AbstractMetaFunctionList &funcs = metaClass->functions();
-    for (const AbstractMetaFunction *func : funcs)
+    for (const auto &func : metaClass->functions())
         collectInstantiatedContainersAndSmartPointers(func);
     for (const AbstractMetaField &field : metaClass->fields())
         addInstantiatedContainersAndSmartPointers(field.type(), field.name());
@@ -326,7 +325,7 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 
 void Generator::collectInstantiatedContainersAndSmartPointers()
 {
-    for (const AbstractMetaFunction *func : globalFunctions())
+    for (const auto &func : globalFunctions())
         collectInstantiatedContainersAndSmartPointers(func);
     for (const AbstractMetaClass *metaClass : classes())
         collectInstantiatedContainersAndSmartPointers(metaClass);
@@ -367,7 +366,7 @@ AbstractMetaClassList Generator::classesTopologicalSorted(const Dependencies &ad
     return m_d->apiextractor->classesTopologicalSorted(additionalDependencies);
 }
 
-const AbstractMetaFunctionList &Generator::globalFunctions() const
+const AbstractMetaFunctionCList &Generator::globalFunctions() const
 {
     return m_d->apiextractor->globalFunctions();
 }
@@ -527,16 +526,16 @@ void verifyDirectoryFor(const QString &file)
     }
 }
 
-AbstractMetaFunctionList Generator::implicitConversions(const TypeEntry *type) const
+AbstractMetaFunctionCList Generator::implicitConversions(const TypeEntry *type) const
 {
     if (type->isValue()) {
         if (const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), type))
             return metaClass->implicitConversions();
     }
-    return AbstractMetaFunctionList();
+    return {};
 }
 
-AbstractMetaFunctionList Generator::implicitConversions(const AbstractMetaType &metaType) const
+AbstractMetaFunctionCList Generator::implicitConversions(const AbstractMetaType &metaType) const
 {
     return implicitConversions(metaType.typeEntry());
 }
@@ -729,9 +728,9 @@ std::optional<DefaultValue>
 
     const QString qualifiedCppName = cType->qualifiedCppName();
     // Obtain a list of constructors sorted by complexity and number of arguments
-    QMultiMap<int, const AbstractMetaFunction *> candidates;
-    const AbstractMetaFunctionList &constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
-    for (const AbstractMetaFunction *ctor : constructors) {
+    QMultiMap<int, const AbstractMetaFunctionCPtr> candidates;
+    const auto &constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    for (const auto &ctor : constructors) {
         if (!ctor->isUserAdded() && !ctor->isPrivate()
             && ctor->functionType() == AbstractMetaFunction::ConstructorFunction) {
             // No arguments: Default constructible

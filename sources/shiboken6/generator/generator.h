@@ -264,10 +264,10 @@ public:
      *   \param type a TypeEntry that is expected to be a value-type
      *   \return a list of constructors that could be used as implicit converters
      */
-    AbstractMetaFunctionList implicitConversions(const TypeEntry *type) const;
+    AbstractMetaFunctionCList implicitConversions(const TypeEntry *type) const;
 
     /// Convenience function for implicitConversions(const TypeEntry *type).
-    AbstractMetaFunctionList implicitConversions(const AbstractMetaType &metaType) const;
+    AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
 
 protected:
     /// Returns the classes, topologically ordered, used to generate the binding code.
@@ -277,7 +277,7 @@ protected:
     AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
 
     /// Returns all global functions found by APIExtractor
-    const AbstractMetaFunctionList &globalFunctions() const;
+    const AbstractMetaFunctionCList &globalFunctions() const;
 
     /// Returns all global enums found by APIExtractor
     const AbstractMetaEnumList &globalEnums() const;
@@ -398,7 +398,7 @@ private:
 
     struct GeneratorPrivate;
     GeneratorPrivate *m_d;
-    void collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunction *func);
+    void collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunctionCPtr &func);
     void collectInstantiatedContainersAndSmartPointers(const AbstractMetaClass *metaClass);
     void collectInstantiatedContainersAndSmartPointers();
 };

@@ -40,14 +40,17 @@ class AbstractMetaEnumValue;
 class AbstractMetaFunction;
 class AbstractMetaType;
 
+using AbstractMetaFunctionPtr = QSharedPointer<AbstractMetaFunction>;
+using AbstractMetaFunctionCPtr = QSharedPointer<const AbstractMetaFunction>;
+
 using AbstractMetaArgumentList = QList<AbstractMetaArgument>;
 using AbstractMetaClassList = QList<AbstractMetaClass *>;
 using AbstractMetaClassCList = QList<const AbstractMetaClass *>;
 using AbstractMetaEnumList = QList<AbstractMetaEnum>;
 using AbstractMetaEnumValueList = QList<AbstractMetaEnumValue>;
 using AbstractMetaFieldList = QList<AbstractMetaField>;
-using AbstractMetaFunctionList = QList<AbstractMetaFunction *>;
-using AbstractMetaFunctionCList = QList<const AbstractMetaFunction *>;
+using AbstractMetaFunctionRawPtrList = QList<AbstractMetaFunction *>;
+using AbstractMetaFunctionCList = QList<AbstractMetaFunctionCPtr>;
 using AbstractMetaTypeList = QList<AbstractMetaType>;
 
 #endif // ABSTRACTMETALANG_TYPEDEFS_H

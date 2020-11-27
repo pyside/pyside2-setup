@@ -1108,11 +1108,15 @@ QString AbstractMetaFunction::modifiedName() const
     return d->modifiedName(this);
 }
 
-AbstractMetaFunction *
-AbstractMetaFunction::find(const AbstractMetaFunctionList &haystack,
+AbstractMetaFunctionCPtr
+AbstractMetaFunction::find(const AbstractMetaFunctionCList &haystack,
                            const QString &needle)
 {
-    return findByName(haystack, needle);
+    for (const auto &f : haystack) {
+        if (f->name() == needle)
+            return f;
+    }
+    return {};
 }
 
 void AbstractMetaFunction::setAllowThreadModification(TypeSystem::AllowThread am)

@@ -64,7 +64,7 @@ void TestEnum::testEnumCppSignature()
     QCOMPARE(globalEnums.constFirst().name(), QLatin1String("GlobalEnum"));
 
     // enum as parameter of a function
-    AbstractMetaFunctionList functions = builder->globalFunctions();
+    const auto functions = builder->globalFunctions();
     QCOMPARE(functions.count(), 1);
     QCOMPARE(functions.constFirst()->arguments().count(), 1);
     QCOMPARE(functions.constFirst()->arguments().constFirst().type().cppSignature(),
@@ -73,10 +73,9 @@ void TestEnum::testEnumCppSignature()
     // enum as parameter of a method
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QCOMPARE(classA->enums().count(), 1);
-    AbstractMetaFunctionList funcs = classA->queryFunctionsByName(QLatin1String("method"));
+    const auto funcs = classA->queryFunctionsByName(QLatin1String("method"));
     QVERIFY(!funcs.isEmpty());
-    AbstractMetaFunction *method = funcs.constFirst();
-    QVERIFY(method);
+    const auto method = funcs.constFirst();
     AbstractMetaArgument arg = method->arguments().constFirst();
     QCOMPARE(arg.type().name(), QLatin1String("ClassEnum"));
     QCOMPARE(arg.type().cppSignature(), QLatin1String("A::ClassEnum"));

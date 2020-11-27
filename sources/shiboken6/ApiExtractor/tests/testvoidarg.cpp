@@ -45,7 +45,8 @@ void TestVoidArg::testVoidParsedFunction()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("a"));
+    const auto addedFunc = classA->findFunction(QLatin1String("a"));
+    QVERIFY(!addedFunc.isNull());
     QCOMPARE(addedFunc->arguments().count(), 0);
 }
 
@@ -63,7 +64,8 @@ void TestVoidArg::testVoidAddedFunction()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("a"));
+    const auto addedFunc = classA->findFunction(QLatin1String("a"));
+    QVERIFY(!addedFunc.isNull());
     QCOMPARE(addedFunc->arguments().count(), 0);
 
 }
@@ -80,7 +82,8 @@ void TestVoidArg::testVoidPointerParsedFunction()
     AbstractMetaClassList classes = builder->classes();
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    const AbstractMetaFunction* addedFunc = classA->findFunction(QLatin1String("a"));
+    const auto addedFunc = classA->findFunction(QLatin1String("a"));
+    QVERIFY(!addedFunc.isNull());
     QCOMPARE(addedFunc->arguments().count(), 1);
 
 }
