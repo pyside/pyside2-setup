@@ -84,15 +84,21 @@ template <typename T>
 struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
 {
     const QByteArray name;
+    const QMetaObject *metaObject;
 
-    QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObject = nullptr)
+    static const QMetaObject *metaObjectFn(const QMetaTypeInterface *mti)
+    {
+        return static_cast<const QPysideQmlMetaTypeInterface *>(mti)->metaObject;
+    }
+
+    QPysideQmlMetaTypeInterface(const QByteArray &name, const QMetaObject *metaObjectIn = nullptr)
         : QMetaTypeInterface {
             /*.revision=*/ 0,
             /*.alignment=*/ alignof(T),
             /*.size=*/ sizeof(T),
             /*.flags=*/ QtPrivate::QMetaTypeTypeFlags<T>::Flags,
             /*.typeId=*/ 0,
-            /*.metaObject=*/ metaObject,
+            /*.metaObjectFn=*/ metaObjectFn,
             /*.name=*/ name.constData(),
             /*.defaultCtr=*/ [](const QMetaTypeInterface *, void *addr) { new (addr) T(); },
             /*.copyCtr=*/ [](const QMetaTypeInterface *, void *addr, const void *other) {
@@ -111,7 +117,7 @@ struct QPysideQmlMetaTypeInterface : QtPrivate::QMetaTypeInterface
             /*.dataStreamIn=*/ nullptr,
             /*.legacyRegisterOp=*/ nullptr
         }
-        , name(name) {}
+        , name(name), metaObject(metaObjectIn) {}
 };
 
 template <class WrapperClass>
