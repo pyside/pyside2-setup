@@ -1845,9 +1845,6 @@ void CppGenerator::writeMethodWrapperPreamble(QTextStream &s, OverloadData &over
         writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
     }
 
-    if (usesNamedArguments && !rfunc->isCallOperator())
-        s << INDENT << "const Py_ssize_t numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);\n";
-
     if (initPythonArguments) {
         s << INDENT << "const Py_ssize_t numArgs = ";
         if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor() && !pythonFunctionWrapperUsesListOfArguments(overloadData))
@@ -2149,7 +2146,7 @@ void CppGenerator::writeArgumentsInitializer(QTextStream &s, OverloadData &overl
     bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
     if (usesNamedArguments) {
         if (!ownerClassIsQObject) {
-            s << INDENT << "if (numArgs" << (overloadData.hasArgumentWithDefaultValue() ? " + numNamedArgs" : "") << " > " << maxArgs << ") {\n";
+            s << INDENT << "if (numArgs > " << maxArgs << ") {\n";
             {
                 Indentation indent(INDENT);
                 s << INDENT << "PyErr_SetString(PyExc_TypeError, \"" << fullPythonFunctionName(rfunc) << "(): too many arguments\");\n";
