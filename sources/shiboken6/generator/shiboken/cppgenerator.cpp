@@ -1843,9 +1843,6 @@ static const char *fullName = ")" << fullPythonFunctionName(rfunc, true)
         writeUnusedVariableCast(s, QLatin1String(PYTHON_TO_CPP_VAR));
     }
 
-    if (usesNamedArguments && !rfunc->isCallOperator())
-        s << "const Py_ssize_t numNamedArgs = (kwds ? PyDict_Size(kwds) : 0);\n";
-
     if (initPythonArguments) {
         s << "const Py_ssize_t numArgs = ";
         if (minArgs == 0 && maxArgs == 1 && !rfunc->isConstructor() && !pythonFunctionWrapperUsesListOfArguments(overloadData))
@@ -2132,7 +2129,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, OverloadData &overlo
     bool ownerClassIsQObject = rfunc->ownerClass() && rfunc->ownerClass()->isQObject() && rfunc->isConstructor();
     if (usesNamedArguments) {
         if (!ownerClassIsQObject) {
-            s << "if (numArgs" << (overloadData.hasArgumentWithDefaultValue() ? " + numNamedArgs" : "") << " > " << maxArgs << ") {\n";
+            s << "if (numArgs > " << maxArgs << ") {\n";
             {
                 Indentation indent(s);
                 s << "static PyObject *const too_many = "
