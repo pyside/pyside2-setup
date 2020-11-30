@@ -107,41 +107,43 @@ static inline QVersionNumber versionOf(const TypeEntry *te)
     return QVersionNumber();
 }
 
-static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc) {
-    static bool hashInitialized = false;
-    static QHash<QString, QString> operatorsHash;
-    if (!hashInitialized) {
-        operatorsHash.insert(QLatin1String("operator+"), QLatin1String("__add__"));
-        operatorsHash.insert(QLatin1String("operator+="), QLatin1String("__iadd__"));
-        operatorsHash.insert(QLatin1String("operator-"), QLatin1String("__sub__"));
-        operatorsHash.insert(QLatin1String("operator-="), QLatin1String("__isub__"));
-        operatorsHash.insert(QLatin1String("operator*"), QLatin1String("__mul__"));
-        operatorsHash.insert(QLatin1String("operator*="), QLatin1String("__imul__"));
-        operatorsHash.insert(QLatin1String("operator/"), QLatin1String("__div__"));
-        operatorsHash.insert(QLatin1String("operator/="), QLatin1String("__idiv__"));
-        operatorsHash.insert(QLatin1String("operator%"), QLatin1String("__mod__"));
-        operatorsHash.insert(QLatin1String("operator%="), QLatin1String("__imod__"));
-        operatorsHash.insert(QLatin1String("operator<<"), QLatin1String("__lshift__"));
-        operatorsHash.insert(QLatin1String("operator<<="), QLatin1String("__ilshift__"));
-        operatorsHash.insert(QLatin1String("operator>>"), QLatin1String("__rshift__"));
-        operatorsHash.insert(QLatin1String("operator>>="), QLatin1String("__irshift__"));
-        operatorsHash.insert(QLatin1String("operator&"), QLatin1String("__and__"));
-        operatorsHash.insert(QLatin1String("operator&="), QLatin1String("__iand__"));
-        operatorsHash.insert(QLatin1String("operator|"), QLatin1String("__or__"));
-        operatorsHash.insert(QLatin1String("operator|="), QLatin1String("__ior__"));
-        operatorsHash.insert(QLatin1String("operator^"), QLatin1String("__xor__"));
-        operatorsHash.insert(QLatin1String("operator^="), QLatin1String("__ixor__"));
-        operatorsHash.insert(QLatin1String("operator=="), QLatin1String("__eq__"));
-        operatorsHash.insert(QLatin1String("operator!="), QLatin1String("__ne__"));
-        operatorsHash.insert(QLatin1String("operator<"), QLatin1String("__lt__"));
-        operatorsHash.insert(QLatin1String("operator<="), QLatin1String("__le__"));
-        operatorsHash.insert(QLatin1String("operator>"), QLatin1String("__gt__"));
-        operatorsHash.insert(QLatin1String("operator>="), QLatin1String("__ge__"));
-        hashInitialized = true;
-    }
+static const QHash<QString, QString> &operatorMapping()
+{
+    static const QHash<QString, QString> result = {
+        {QLatin1String("operator+"), QLatin1String("__add__")},
+        {QLatin1String("operator+="), QLatin1String("__iadd__")},
+        {QLatin1String("operator-"), QLatin1String("__sub__")},
+        {QLatin1String("operator-="), QLatin1String("__isub__")},
+        {QLatin1String("operator*"), QLatin1String("__mul__")},
+        {QLatin1String("operator*="), QLatin1String("__imul__")},
+        {QLatin1String("operator/"), QLatin1String("__div__")},
+        {QLatin1String("operator/="), QLatin1String("__idiv__")},
+        {QLatin1String("operator%"), QLatin1String("__mod__")},
+        {QLatin1String("operator%="), QLatin1String("__imod__")},
+        {QLatin1String("operator<<"), QLatin1String("__lshift__")},
+        {QLatin1String("operator<<="), QLatin1String("__ilshift__")},
+        {QLatin1String("operator>>"), QLatin1String("__rshift__")},
+        {QLatin1String("operator>>="), QLatin1String("__irshift__")},
+        {QLatin1String("operator&"), QLatin1String("__and__")},
+        {QLatin1String("operator&="), QLatin1String("__iand__")},
+        {QLatin1String("operator|"), QLatin1String("__or__")},
+        {QLatin1String("operator|="), QLatin1String("__ior__")},
+        {QLatin1String("operator^"), QLatin1String("__xor__")},
+        {QLatin1String("operator^="), QLatin1String("__ixor__")},
+        {QLatin1String("operator=="), QLatin1String("__eq__")},
+        {QLatin1String("operator!="), QLatin1String("__ne__")},
+        {QLatin1String("operator<"), QLatin1String("__lt__")},
+        {QLatin1String("operator<="), QLatin1String("__le__")},
+        {QLatin1String("operator>"), QLatin1String("__gt__")},
+        {QLatin1String("operator>="), QLatin1String("__ge__")},
+    };
+    return result;
+}
 
-    QHash<QString, QString>::const_iterator it = operatorsHash.constFind(cppFunc->name());
-    QString result = it != operatorsHash.cend() ? it.value() : cppFunc->name();
+static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc)
+{
+    const auto it = operatorMapping().constFind(cppFunc->name());
+    QString result = it != operatorMapping().cend() ? it.value() : cppFunc->name();
     result.replace(QLatin1String("::"), QLatin1String("."));
     return result;
 }
