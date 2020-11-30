@@ -67,7 +67,11 @@ def call_testrunner(python_ver, buildnro):
     _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
     rmtree(_env, True)
     # Pinning the virtualenv before creating one
-    run_instruction(["pip", "install", "--user", "virtualenv==20.0.25"], "Failed to pin virtualenv")
+    # Use pip3 if possible while pip seems to install the virtualenv to wrong dir in some OS
+    python3 = "python3"
+    if sys.platform == "win32":
+        python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+    run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.0.25"], "Failed to pin virtualenv")    # installing to user base might not be in PATH by default.
     # installing to user base might not be in PATH by default.
     env_path = os.path.join(site.USER_BASE, "bin")
     v_env = os.path.join(env_path, "virtualenv")
@@ -104,11 +108,7 @@ def run_test_instructions():
 
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
-    # We didn't build for Python 2 in win
-    if CI_HOST_OS != "Windows":
-        call_testrunner("", str(testRun))
-        testRun =+ 1
-    # We know that second build was with python3
+
     if CI_RELEASE_CONF:
         # In win machines, there are additional python versions to test with
         if CI_HOST_OS == "Windows":

@@ -112,7 +112,11 @@ def call_setup(python_ver, phase):
     if phase in ["BUILD"]:
         rmtree(_env, True)
         # Pinning the virtualenv before creating one
-        run_instruction(["pip", "install", "--user", "virtualenv==20.0.25"], "Failed to pin virtualenv")
+        # Use pip3 if possible while pip seems to install the virtualenv to wrong dir in some OS
+        python3 = "python3"
+        if sys.platform == "win32":
+            python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
+        run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.0.25"], "Failed to pin virtualenv")
         # installing to user base might not be in PATH by default.
         env_path = os.path.join(site.USER_BASE, "bin")
         v_env = os.path.join(env_path, "virtualenv")
@@ -161,17 +165,6 @@ def call_setup(python_ver, phase):
     env = os.environ
     run_instruction(cmd, "Failed to run setup.py for build", initial_env=env)
 
-def run_build_instructions(phase):
-
-    # Uses default python, hopefully we have python2 installed on all hosts
-    # Skip building using Python 2 on Windows, because of different MSVC C runtimes (VS2008 vs VS2015+)
-    if CI_HOST_OS != "Windows":
-        call_setup("", phase)
-    # In case of packaging build, we have to build also python3 wheel
-
-    if CI_RELEASE_CONF and CI_HOST_OS_VER not in ["RHEL_6_6"]:
-        call_setup("3", phase)
-
 if __name__ == "__main__":
 
     # Remove some environment variables that impact cmake
@@ -180,7 +173,7 @@ if __name__ == "__main__":
             del os.environ[env_var]
 
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
-        run_build_instructions("BUILD")
+        call_setup("3","BUILD")
 
     if CI_TEST_PHASE in ["ALL", "WHEEL"]:
-        run_build_instructions("WHEEL")
+        call_setup("3","WHEEL")
