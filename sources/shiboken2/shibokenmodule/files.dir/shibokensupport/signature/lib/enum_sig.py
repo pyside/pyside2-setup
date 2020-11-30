@@ -154,7 +154,8 @@ class ExactEnumerator(object):
                 self.fmt.class_name = class_name
             ret.update(self.function("__init__", klass))
             for func_name, func in functions:
-                ret.update(self.function(func_name, func))
+                if func_name != "__init__":
+                    ret.update(self.function(func_name, func))
             self.fmt.level -= 1
         return ret
 
