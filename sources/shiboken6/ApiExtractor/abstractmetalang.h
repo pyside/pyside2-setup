@@ -208,8 +208,8 @@ public:
     /**
      *   \return the namespace from another package which this namespace extends.
      */
-    AbstractMetaClass *extendedNamespace() const;
-    void setExtendedNamespace(AbstractMetaClass *e);
+    const AbstractMetaClass *extendedNamespace() const;
+    void setExtendedNamespace(const AbstractMetaClass *e);
 
     const AbstractMetaClassList &innerClasses() const;
     void addInnerClass(AbstractMetaClass* cl);

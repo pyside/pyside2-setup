@@ -89,7 +89,7 @@ public:
     AbstractMetaClass *m_defaultSuperclass = nullptr;
     AbstractMetaClassList m_baseClasses; // Real base classes after setting up inheritance
     AbstractMetaTypeList m_baseTemplateInstantiations;
-    AbstractMetaClass *m_extendedNamespace = nullptr;
+    const AbstractMetaClass *m_extendedNamespace = nullptr;
 
     const AbstractMetaClass *m_templateBaseClass = nullptr;
     AbstractMetaFunctionCList m_functions;
@@ -465,12 +465,12 @@ void AbstractMetaClass::setBaseClass(AbstractMetaClass *baseClass)
     }
 }
 
-AbstractMetaClass *AbstractMetaClass::extendedNamespace() const
+const AbstractMetaClass *AbstractMetaClass::extendedNamespace() const
 {
     return d->m_extendedNamespace;
 }
 
-void AbstractMetaClass::setExtendedNamespace(AbstractMetaClass *e)
+void AbstractMetaClass::setExtendedNamespace(const AbstractMetaClass *e)
 {
     d->m_extendedNamespace = e;
 }

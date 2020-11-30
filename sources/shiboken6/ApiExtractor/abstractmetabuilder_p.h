@@ -76,7 +76,7 @@ public:
     NamespaceModelItem currentScope() const { return m_scopes.constLast(); }
 
     AbstractMetaClass *argumentToClass(const ArgumentModelItem &,
-                                       AbstractMetaClass *currentClass);
+                                       const AbstractMetaClass *currentClass);
 
     void addAbstractMetaClass(AbstractMetaClass *cls, const _CodeModelItem *item);
     AbstractMetaClass *traverseTypeDef(const FileModelItem &dom,
@@ -113,9 +113,9 @@ public:
     bool traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
                                      AbstractMetaClass *metaClass);
     AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
-                                           AbstractMetaClass *currentClass);
+                                           const AbstractMetaClass *currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
-                                                   AbstractMetaClass *cls);
+                                                   const AbstractMetaClass *cls);
     void checkFunctionModifications();
     void registerHashFunction(const FunctionModelItem &functionItem,
                               AbstractMetaClass *currentClass);
@@ -143,20 +143,20 @@ public:
     void setupFunctionDefaults(AbstractMetaFunction *metaFunction,
                                AbstractMetaClass *metaClass);
 
-    QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type, AbstractMetaClass *,
-                            int argumentIndex);
+    QString fixDefaultValue(const ArgumentModelItem &item, const AbstractMetaType &type,
+                            const AbstractMetaClass *, int argumentIndex);
     std::optional<AbstractMetaType>
-        translateType(const TypeInfo &type, AbstractMetaClass *currentClass,
+        translateType(const TypeInfo &type, const AbstractMetaClass *currentClass,
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
     static std::optional<AbstractMetaType>
-        translateTypeStatic(const TypeInfo &type, AbstractMetaClass *current,
+        translateTypeStatic(const TypeInfo &type, const AbstractMetaClass *current,
                             AbstractMetaBuilderPrivate *d = nullptr, TranslateTypeFlags flags = {},
                             QString *errorMessageIn = nullptr);
     static TypeEntries findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
-                                             AbstractMetaClass *currentClass = nullptr,
+                                             const AbstractMetaClass *currentClass = nullptr,
                                              AbstractMetaBuilderPrivate *d = nullptr);
     static TypeEntries findTypeEntries(const QString &qualifiedName, const QString &name,
-                                       AbstractMetaClass *currentClass = nullptr,
+                                       const AbstractMetaClass *currentClass = nullptr,
                                        AbstractMetaBuilderPrivate *d = nullptr,
                                        QString *errorMessage = nullptr);
 

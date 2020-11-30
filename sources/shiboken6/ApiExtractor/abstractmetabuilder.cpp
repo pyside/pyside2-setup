@@ -177,7 +177,7 @@ void AbstractMetaBuilderPrivate::checkFunctionModifications()
 }
 
 AbstractMetaClass *AbstractMetaBuilderPrivate::argumentToClass(const ArgumentModelItem &argument,
-                                                               AbstractMetaClass *currentClass)
+                                                               const AbstractMetaClass *currentClass)
 {
     AbstractMetaClass *returned = nullptr;
     auto type = translateType(argument->type(), currentClass);
@@ -1121,7 +1121,7 @@ static inline QString qualifiedFieldSignatureWithType(const QString &className,
 
 std::optional<AbstractMetaField>
     AbstractMetaBuilderPrivate::traverseField(const VariableModelItem &field,
-                                              AbstractMetaClass *cls)
+                                              const AbstractMetaClass *cls)
 {
     QString fieldName = field->name();
     QString className = cls->typeEntry()->qualifiedCppName();
@@ -1710,7 +1710,7 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
 }
 
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
-                                                                   AbstractMetaClass *currentClass)
+                                                                   const AbstractMetaClass *currentClass)
 {
     if (functionItem->isDeleted() || !functionItem->templateParameters().isEmpty())
         return nullptr;
@@ -1979,7 +1979,7 @@ static const TypeEntry* findTypeEntryUsingContext(const AbstractMetaClass* metaC
 // Helper for findTypeEntries/translateTypeStatic()
 TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qualifiedName,
                                                               const QString &name,
-                                                              AbstractMetaClass *currentClass,
+                                                              const AbstractMetaClass *currentClass,
                                                               AbstractMetaBuilderPrivate *d)
 {
     // 5.1 - Try first using the current scope
@@ -2026,7 +2026,7 @@ TypeEntries AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qua
 // and does some error checking.
 TypeEntries AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
                                                         const QString &name,
-                                                        AbstractMetaClass *currentClass,
+                                                        const AbstractMetaClass *currentClass,
                                                         AbstractMetaBuilderPrivate *d,
                                                         QString *errorMessage)
 {
@@ -2078,7 +2078,7 @@ const AbstractMetaClass *AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(co
 
 std::optional<AbstractMetaType>
     AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
-                                              AbstractMetaClass *currentClass,
+                                              const AbstractMetaClass *currentClass,
                                               TranslateTypeFlags flags,
                                               QString *errorMessage)
 {
@@ -2093,7 +2093,7 @@ static bool isNumber(const QString &s)
 
 std::optional<AbstractMetaType>
     AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
-                                                    AbstractMetaClass *currentClass,
+                                                    const AbstractMetaClass *currentClass,
                                                     AbstractMetaBuilderPrivate *d,
                                                     TranslateTypeFlags flags,
                                                     QString *errorMessageIn)
@@ -2374,7 +2374,7 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
 
 QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &item,
                                                     const AbstractMetaType &type,
-                                                    AbstractMetaClass *implementingClass,
+                                                    const AbstractMetaClass *implementingClass,
                                                     int /* argumentIndex */)
 {
     QString expr = item->defaultValueExpression();
@@ -2916,7 +2916,7 @@ void AbstractMetaBuilderPrivate::dumpLog() const
     writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_fields.log"), m_rejectedFields);
 }
 
-using ClassIndexHash = QHash<AbstractMetaClass *, int>;
+using ClassIndexHash = QHash<const AbstractMetaClass *, int>;
 
 static ClassIndexHash::ConstIterator findByTypeEntry(const ClassIndexHash &map,
                                                      const TypeEntry *typeEntry)
