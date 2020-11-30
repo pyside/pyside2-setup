@@ -66,6 +66,9 @@ public:
 
     QString qualifiedCppName() const;
 
+    // Names under which the field will be registered to Python.
+    QStringList definitionNames() const;
+
     QString originalName() const;
     void setOriginalName(const QString& name);
 
@@ -79,6 +82,8 @@ public:
 
     bool canGenerateGetter() const;
     bool canGenerateSetter() const;
+
+    TypeSystem::SnakeCase snakeCase() const;
 
     static std::optional<AbstractMetaField>
         find(const AbstractMetaFieldList &haystack, const QString &needle);

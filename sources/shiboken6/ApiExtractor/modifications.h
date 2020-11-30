@@ -382,6 +382,9 @@ public:
     QList<ArgumentModification> &argument_mods();
     void setArgument_mods(const QList<ArgumentModification> &argument_mods);
 
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase s);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;
 #endif
@@ -422,6 +425,9 @@ public:
 
     bool isRemoved() const;
     void setRemoved(bool r);
+
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase s);
 
 private:
     QSharedDataPointer<FieldModificationData> d;

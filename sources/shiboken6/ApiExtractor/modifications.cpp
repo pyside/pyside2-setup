@@ -173,6 +173,7 @@ public:
     bool m_readable = true;
     bool m_writable = true;
     bool m_removed = false;
+    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
 FieldModification::FieldModification() : d(new FieldModificationData)
@@ -243,6 +244,17 @@ void FieldModification::setRemoved(bool r)
 {
     if (d->m_removed != r)
         d->m_removed = r;
+}
+
+TypeSystem::SnakeCase FieldModification::snakeCase() const
+{
+    return d->snakeCase;
+}
+
+void FieldModification::setSnakeCase(TypeSystem::SnakeCase s)
+{
+    if (d->snakeCase != s)
+        d->snakeCase = s;
 }
 
 // Helpers to split a parameter list of <add-function>, <declare-function>
@@ -716,6 +728,7 @@ public:
     bool m_thread = false;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
+    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
 FunctionModification::FunctionModification() : d(new FunctionModificationData)
@@ -761,6 +774,17 @@ QList<ArgumentModification> &FunctionModification::argument_mods()
 void FunctionModification::setArgument_mods(const QList<ArgumentModification> &argument_mods)
 {
     d->m_argument_mods = argument_mods;
+}
+
+TypeSystem::SnakeCase FunctionModification::snakeCase() const
+{
+    return d->snakeCase;
+}
+
+void FunctionModification::setSnakeCase(TypeSystem::SnakeCase s)
+{
+    if (d->snakeCase != s)
+        d->snakeCase = s;
 }
 
 const CodeSnipList &FunctionModification::snips() const

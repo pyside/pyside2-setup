@@ -1967,6 +1967,14 @@
         </add-function>
     </value-type>
     <value-type name="SizeF"/>
+    <function signature="SnakeCaseGlobalFunction()" snake-case="yes"/>
+    <object-type name="SnakeCaseTest" snake-case="yes">
+        <modify-function signature="testFunctionDisabled()const" snake-case="no"/>
+        <modify-function signature="testFunctionBoth()const" snake-case="both"/>
+        <modify-field name="testFieldDisabled" snake-case="no"/>
+        <modify-field name="testFieldBoth" snake-case="both"/>
+    </object-type>
+    <object-type name="SnakeCaseDerivedTest" snake-case="yes"/>
     <value-type name="MapUser"/>
     <value-type name="PairUser"/>
     <value-type name="ListUser">

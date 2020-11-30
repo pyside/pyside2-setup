@@ -637,9 +637,18 @@ void TypeEntry::useAsTypedef(const TypeEntry *source)
     m_d->m_version = source->m_d->m_version;
 }
 
+// ----------------- TypeSystemTypeEntry
+class TypeSystemTypeEntryPrivate : public TypeEntryPrivate
+{
+public:
+    using TypeEntryPrivate::TypeEntryPrivate;
+
+    TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Disabled;
+};
+
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                          const TypeEntry *parent) :
-    TypeEntry(entryName, TypeSystemType, vr, parent)
+    TypeEntry(new TypeSystemTypeEntryPrivate(entryName, TypeSystemType, vr, parent))
 {
 }
 
@@ -650,7 +659,20 @@ TypeSystemTypeEntry::TypeSystemTypeEntry(TypeEntryPrivate *d) :
 
 TypeEntry *TypeSystemTypeEntry::clone() const
 {
-    return new TypeSystemTypeEntry(new TypeEntryPrivate(*d_func()));
+    S_D(const TypeSystemTypeEntry);
+    return new TypeSystemTypeEntry(new TypeSystemTypeEntryPrivate(*d));
+}
+
+TypeSystem::SnakeCase TypeSystemTypeEntry::snakeCase() const
+{
+    S_D(const TypeSystemTypeEntry);
+    return d->m_snakeCase;
+}
+
+void TypeSystemTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
+{
+    S_D(TypeSystemTypeEntry);
+    d->m_snakeCase = sc;
 }
 
 // ----------------- VoidTypeEntry
@@ -1148,6 +1170,7 @@ public:
     // For class functions
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
+    TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
 ComplexTypeEntry::ComplexTypeEntry(const QString &entryName, TypeEntry::Type t,
@@ -1405,6 +1428,18 @@ bool ComplexTypeEntry::hasDefaultConstructor() const
 {
     S_D(const ComplexTypeEntry);
     return !d->m_defaultConstructor.isEmpty();
+}
+
+TypeSystem::SnakeCase ComplexTypeEntry::snakeCase() const
+{
+    S_D(const ComplexTypeEntry);
+    return d->m_snakeCase;
+}
+
+void ComplexTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
+{
+    S_D(ComplexTypeEntry);
+    d->m_snakeCase = sc;
 }
 
 TypeEntry *ComplexTypeEntry::clone() const
@@ -1954,6 +1989,7 @@ public:
     }
 
     QStringList m_signatures;
+    TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
 FunctionTypeEntry::FunctionTypeEntry(const QString &entryName, const QString &signature,
@@ -1979,6 +2015,18 @@ bool FunctionTypeEntry::hasSignature(const QString &signature) const
 {
     S_D(const FunctionTypeEntry);
     return d->m_signatures.contains(signature);
+}
+
+TypeSystem::SnakeCase FunctionTypeEntry::snakeCase() const
+{
+    S_D(const FunctionTypeEntry);
+    return d->m_snakeCase;
+}
+
+void FunctionTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
+{
+    S_D(FunctionTypeEntry);
+    d->m_snakeCase = sc;
 }
 
 TypeEntry *FunctionTypeEntry::clone() const
@@ -2074,7 +2122,8 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
     if (d->m_typeFlags != 0)
         debug << ", typeFlags=" << d->m_typeFlags;
     debug << ", copyableFlag=" << d->m_copyableFlag
-        << ", except=" << int(d->m_exceptionHandling);
+        << ", except=" << int(d->m_exceptionHandling)
+        << ", snakeCase=" << int(d->m_snakeCase);
     FORMAT_NONEMPTY_STRING("defaultSuperclass", d->m_defaultSuperclass)
     FORMAT_NONEMPTY_STRING("polymorphicIdValue", d->m_polymorphicIdValue)
     FORMAT_NONEMPTY_STRING("targetType", d->m_targetType)
@@ -2082,6 +2131,15 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
     FORMAT_LIST_SIZE("addedFunctions", d->m_addedFunctions)
     formatList(debug, "functionMods", d->m_functionMods, ", ");
     FORMAT_LIST_SIZE("fieldMods", d->m_fieldMods)
+}
+
+void FunctionTypeEntry::formatDebug(QDebug &debug) const
+{
+    S_D(const FunctionTypeEntry);
+
+    TypeEntry::formatDebug(debug);
+    debug << "signatures=" << d->m_signatures
+          << ", snakeCase=" << int(d->m_snakeCase);
 }
 
 void TypedefEntry::formatDebug(QDebug &debug) const

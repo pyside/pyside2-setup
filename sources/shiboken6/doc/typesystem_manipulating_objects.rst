@@ -78,7 +78,8 @@ modify-field
              <modify-field name="..."
                  write="true | false"
                  read="true | false"
-                 remove="true | false" />
+                 remove="true | false"
+                 snake-case="yes | no | both" />
          </object-type>
 
     The ``name`` attribute is the name of the field, the *optional* ``write``
@@ -91,6 +92,8 @@ modify-field
     The  *optional* ``rename`` attribute can be used to change the name of the
     given field in the generated target language API.
 
+    The *optional* **snake-case** attribute allows for overriding the value
+    specified on the class entry or **typesystem** element.
 
 .. _modify-function:
 
@@ -112,7 +115,8 @@ modify-function
                               allow-thread="true | auto | false"
                               exception-handling="off | auto-off | auto-on | on"
                               overload-number="number"
-                              rename="..." />
+                              rename="..."
+                              snake-case="yes | no | both" />
          </object-type>
 
     The ``signature`` attribute is a normalized C++ signature, excluding return
@@ -191,6 +195,8 @@ modify-function
     The  *optional* ``access`` attribute changes the access privileges of the
     given function in the generated target language API.
 
+    The *optional* **snake-case** attribute allows for overriding the value
+    specified on the class entry or **typesystem** element.
 
 .. _add-function:
 

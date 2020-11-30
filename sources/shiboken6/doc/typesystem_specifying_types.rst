@@ -35,7 +35,8 @@ typesystem
 
     .. code-block:: xml
 
-        <typesystem package="..." default-superclass="..." allow-thread="..." exception-handling="...">
+        <typesystem package="..." default-superclass="..." allow-thread="..."
+                    exception-handling="..." snake-case="yes | no | both" >
         </typesystem>
 
     The **package** attribute is a string describing the package to be used,
@@ -46,6 +47,22 @@ typesystem
     The *optional* attributes **allow-thread** and **exception-handling**
     specify the default handling for the corresponding function modification
     (see :ref:`modify-function`).
+
+    The *optional* **snake-case** attribute specifies whether function
+    and field names will be automatically changed to the snake case
+    style that is common in Python (for example,  ``snakeCase`` will be
+    changed to ``snake_case``).
+
+    The value ``both`` means that the function or field will be exposed
+    under both its original name and the snake case version. There are
+    limitations to this though:
+
+    - When overriding a virtual function of a C++ class in Python,
+      the snake case name must be used.
+
+    - When static and non-static overloads of a class member function
+      exist (as is the case for example for ``QFileInfo::exists()``),
+      the snake case name must be used.
 
 load-typesystem
 ^^^^^^^^^^^^^^^
@@ -280,7 +297,8 @@ value-type
              hash-function="..."
              stream="yes | no"
              default-constructor="..."
-             revision="..." />
+             revision="..."
+             snake-case="yes | no | both" />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name, such as
@@ -310,6 +328,9 @@ value-type
     specify the default handling for the corresponding function modification
     (see :ref:`modify-function`).
 
+    The *optional* **snake-case** attribute allows for overriding the value
+    specified on the **typesystem** element.
+
 .. _object-type:
 
 object-type
@@ -330,7 +351,8 @@ object-type
              exception-handling="..."
              hash-function="..."
              stream="yes | no"
-             revision="..." />
+             revision="..."
+             snake-case="yes | no | both" />
         </typesystem>
 
     The **name** attribute is the fully qualified C++ class name. If there is no
@@ -359,6 +381,9 @@ object-type
     The *optional* attributes **allow-thread** and **exception-handling**
     specify the default handling for the corresponding function modification
     (see :ref:`modify-function`).
+
+    The *optional* **snake-case** attribute allows for overriding the value
+    specified on the **typesystem** element.
 
 interface-type
 ^^^^^^^^^^^^^^
@@ -480,7 +505,7 @@ function
     .. code-block:: xml
 
         <typesystem>
-            <function signature="..." rename="..." since="..."/>
+            <function signature="..." rename="..." since="..." snake-case="yes | no | both" />
         </typesystem>
 
     This tag has some limitations, it doesn't support function modifications, besides you
@@ -489,6 +514,9 @@ function
 
     The function tag has two *optional* attributes: **since**, whose value is used to specify
     the API version of this function, and **rename**, to modify the function name.
+
+    The *optional* **snake-case** attribute allows for overriding the value
+    specified on the **typesystem** element.
 
 .. _system_include:
 

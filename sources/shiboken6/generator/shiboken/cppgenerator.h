@@ -286,7 +286,10 @@ private:
     void writeClassDefinition(TextStream &s,
                               const AbstractMetaClass *metaClass,
                               const GeneratorContext &classContext);
-    void writeMethodDefinitionEntry(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
+    QString methodDefinitionParameters(const OverloadData &overloadData) const;
+    void writeMethodDefinitionEntries(TextStream &s,
+                                      const AbstractMetaFunctionCList &overloads,
+                                      qsizetype maxEntries = -1) const;
     void writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
     void writeSignatureInfo(TextStream &s, const AbstractMetaFunctionCList &overloads) const;
     /// Writes the implementation of all methods part of python sequence protocol

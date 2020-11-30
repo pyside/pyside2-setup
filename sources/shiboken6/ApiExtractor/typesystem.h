@@ -296,6 +296,9 @@ public:
 
     TypeEntry *clone() const override;
 
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase sc);
+
 protected:
     explicit TypeSystemTypeEntry(TypeEntryPrivate *d);
 };
@@ -573,6 +576,9 @@ public:
 
     void useAsTypedef(const ComplexTypeEntry *source);
 
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase sc);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &debug) const override;
 #endif
@@ -741,7 +747,14 @@ public:
     bool hasSignature(const QString& signature) const;
     void addSignature(const QString& signature);
 
+    TypeSystem::SnakeCase snakeCase() const;
+    void setSnakeCase(TypeSystem::SnakeCase sc);
+
     TypeEntry *clone() const override;
+
+#ifndef QT_NO_DEBUG_STREAM
+    void formatDebug(QDebug &d) const override;
+#endif
 
 protected:
     explicit FunctionTypeEntry(FunctionTypeEntryPrivate *d);

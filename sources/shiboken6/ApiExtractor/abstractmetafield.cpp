@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "abstractmetafield.h"
+#include "abstractmetabuilder.h"
 #include "abstractmetalang.h"
 #include "abstractmetatype.h"
 #include "documentation.h"
@@ -111,6 +112,11 @@ QString AbstractMetaField::qualifiedCppName() const
            + originalName();
 }
 
+QStringList AbstractMetaField::definitionNames() const
+{
+    return AbstractMetaBuilder::definitionNames(d->m_name, snakeCase());
+}
+
 QString AbstractMetaField::originalName() const
 {
     return d->m_originalName.isEmpty() ? d->m_name : d->m_originalName;
@@ -164,6 +170,23 @@ bool AbstractMetaField::canGenerateSetter() const
 {
     return d->m_setterEnabled && !isStatic()
         && (!d->m_type.isConstant() || d->m_type.isPointerToConst());
+}
+
+TypeSystem::SnakeCase AbstractMetaField::snakeCase() const
+{
+    // Renamed?
+    if (!d->m_originalName.isEmpty() && d->m_originalName != d->m_name)
+        return TypeSystem::SnakeCase::Disabled;
+
+    for (const auto &mod : modifications()) {
+        if (mod.snakeCase() != TypeSystem::SnakeCase::Unspecified)
+            return mod.snakeCase();
+    }
+
+    auto typeEntry = enclosingClass()->typeEntry();
+    const auto snakeCase = typeEntry->snakeCase();
+    return snakeCase != TypeSystem::SnakeCase::Unspecified
+        ? snakeCase : typeEntry->typeSystemTypeEntry()->snakeCase();
 }
 
 FieldModificationList AbstractMetaField::modifications() const

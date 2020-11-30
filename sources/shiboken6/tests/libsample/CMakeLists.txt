@@ -43,6 +43,7 @@ samplenamespace.cpp
 sbkdate.cpp
 simplefile.cpp
 size.cpp
+snakecasetest.cpp
 sometime.cpp
 str.cpp
 strlist.cpp

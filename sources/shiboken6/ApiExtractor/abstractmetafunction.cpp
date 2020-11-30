@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "abstractmetafunction.h"
+#include "abstractmetabuilder.h"
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
 #include "abstractmetatype.h"
@@ -142,6 +143,11 @@ QString AbstractMetaFunction::originalName() const
 void AbstractMetaFunction::setOriginalName(const QString &name)
 {
     d->m_originalName = name;
+}
+
+QStringList AbstractMetaFunction::definitionNames() const
+{
+    return AbstractMetaBuilder::definitionNames(d->m_name, snakeCase());
 }
 
 const Documentation &AbstractMetaFunction::documentation() const
@@ -1130,6 +1136,46 @@ int AbstractMetaFunctionPrivate::overloadNumber(const AbstractMetaFunction *q) c
 int AbstractMetaFunction::overloadNumber() const
 {
     return d->overloadNumber(this);
+}
+
+TypeSystem::SnakeCase AbstractMetaFunction::snakeCase() const
+{
+    if (isUserAdded())
+        return TypeSystem::SnakeCase::Disabled;
+    // Renamed?
+    if (!d->m_originalName.isEmpty() && d->m_originalName != d->m_name)
+        return TypeSystem::SnakeCase::Disabled;
+    switch (d->m_functionType) {
+    case AbstractMetaFunction::NormalFunction:
+    case AbstractMetaFunction::SignalFunction:
+    case AbstractMetaFunction::EmptyFunction:
+    case AbstractMetaFunction::SlotFunction:
+    case AbstractMetaFunction::GlobalScopeFunction:
+        if (isOperatorOverload())
+            return TypeSystem::SnakeCase::Disabled;
+        break;
+    default:
+        return TypeSystem::SnakeCase::Disabled;
+    }
+
+    for (const auto &mod : modifications()) {
+        if (mod.snakeCase() != TypeSystem::SnakeCase::Unspecified)
+            return mod.snakeCase();
+    }
+
+    if (d->m_typeEntry) { // Global function
+        const auto snakeCase = d->m_typeEntry->snakeCase();
+        return snakeCase != TypeSystem::SnakeCase::Unspecified
+            ? snakeCase : d->m_typeEntry->typeSystemTypeEntry()->snakeCase();
+    }
+
+    if (d->m_class) {
+        auto typeEntry = d->m_class->typeEntry();
+        const auto snakeCase = typeEntry->snakeCase();
+        return snakeCase != TypeSystem::SnakeCase::Unspecified
+            ? snakeCase : typeEntry->typeSystemTypeEntry()->snakeCase();
+    }
+    return TypeSystem::SnakeCase::Disabled;
 }
 
 // Query functions for generators

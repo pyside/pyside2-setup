@@ -575,11 +575,15 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
             writeMethodWrapper(s, overloads, classContext);
             writeSignatureInfo(signatureStream, overloads);
+            // For a mixture of static and member function overloads,
+            // a separate PyMethodDef entry is written which is referenced
+            // in the PyMethodDef list and later in getattro() for handling
+            // the non-static case.
             if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
                 QString methDefName = cpythonMethodDefinitionName(rfunc);
-                smd << "static PyMethodDef " << methDefName << " = {\n" << indent;
-                writeMethodDefinitionEntry(smd, overloads);
-                smd << outdent << "\n};\n\n";
+                smd << "static PyMethodDef " << methDefName << " = " << indent;
+                writeMethodDefinitionEntries(smd, overloads, 1);
+                smd << outdent << ";\n\n";
             }
             writeMethodDefinition(md, overloads);
         }
@@ -716,12 +720,16 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass)
             << "[] = {\n" << indent;
         for (const AbstractMetaField &metaField : fields) {
-            if (!metaField.isStatic()) {
-                const QString getter = metaField.canGenerateGetter()
+            const bool canGenerateGetter = metaField.canGenerateGetter();
+            const bool canGenerateSetter = metaField.canGenerateSetter();
+            if (canGenerateGetter || canGenerateSetter) {
+                const QString getter = canGenerateGetter
                     ? cpythonGetterFunctionName(metaField) : QString();
-                const QString setter = metaField.canGenerateSetter()
+                const QString setter = canGenerateSetter
                     ? cpythonSetterFunctionName(metaField) : QString();
-                writePyGetSetDefEntry(s, metaField.name(), getter, setter);
+                const auto names = metaField.definitionNames();
+                for (const auto &name : names)
+                    writePyGetSetDefEntry(s, name, getter, setter);
             }
         }
 
@@ -953,7 +961,8 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         return;
 
     const TypeEntry *retType = func->type().typeEntry();
-    const QString funcName = func->isOperatorOverload() ? pythonOperatorFunctionName(func) : func->name();
+    const QString funcName = func->isOperatorOverload()
+        ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
 
     QString prefix = wrapperName(func->ownerClass()) + QLatin1String("::");
     s << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues|Generator::OriginalTypeDescription)
@@ -4881,16 +4890,16 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         << outdent << "}\n\n";
 }
 
-void CppGenerator::writeMethodDefinitionEntry(TextStream &s, const AbstractMetaFunctionCList &overloads) const
+QString CppGenerator::methodDefinitionParameters(const OverloadData &overloadData) const
 {
-    Q_ASSERT(!overloads.isEmpty());
-    OverloadData overloadData(overloads, this);
     bool usePyArgs = pythonFunctionWrapperUsesListOfArguments(overloadData);
     const auto func = overloadData.referenceFunction();
     int min = overloadData.minArgs();
     int max = overloadData.maxArgs();
 
-    s << '"' << func->name() << "\", reinterpret_cast<PyCFunction>("
+    QString result;
+    QTextStream s(&result);
+    s << "reinterpret_cast<PyCFunction>("
         << cpythonFunctionName(func) << "), ";
     if ((min == max) && (max < 2) && !usePyArgs) {
         if (max == 0)
@@ -4910,6 +4919,24 @@ void CppGenerator::writeMethodDefinitionEntry(TextStream &s, const AbstractMetaF
         && overloadData.hasStaticFunction()) {
         s << "|METH_STATIC";
     }
+    return result;
+}
+
+void CppGenerator::writeMethodDefinitionEntries(TextStream &s,
+                                                const AbstractMetaFunctionCList &overloads,
+                                                qsizetype maxEntries) const
+{
+    Q_ASSERT(!overloads.isEmpty());
+    OverloadData overloadData(overloads, this);
+    const QStringList names = overloadData.referenceFunction()->definitionNames();
+    const QString parameters = methodDefinitionParameters(overloadData);
+    const qsizetype count = maxEntries > 0
+        ? qMin(names.size(), maxEntries) : names.size();
+    for (qsizetype i = 0; i < count; ++i) {
+        if (i)
+            s << ",\n";
+         s << "{\"" << names.at(i) << "\", " << parameters << '}';
+    }
 }
 
 void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFunctionCList &overloads) const
@@ -4922,9 +4949,7 @@ void CppGenerator::writeMethodDefinition(TextStream &s, const AbstractMetaFuncti
     if (OverloadData::hasStaticAndInstanceFunctions(overloads)) {
         s << cpythonMethodDefinitionName(func);
     } else {
-        s << '{';
-        writeMethodDefinitionEntry(s, overloads);
-        s << '}';
+        writeMethodDefinitionEntries(s, overloads);
     }
     s << ',' << '\n';
 }
@@ -5778,7 +5803,8 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                     << defName << ".ml_doc,\n";
             }
             s << "};\n"
-                << "if (Shiboken::String::compare(name, \"" << func->name() << "\") == 0)\n";
+                << "if (Shiboken::String::compare(name, \""
+                << func->definitionNames().constFirst() << "\") == 0)\n";
             Indentation indent(s);
             s << "return PyCFunction_NewEx(&non_static_" << defName << ", self, 0);\n";
         }

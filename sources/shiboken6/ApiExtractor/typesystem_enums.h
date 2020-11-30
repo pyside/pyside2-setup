@@ -81,6 +81,13 @@ enum class ExceptionHandling {
     On
 };
 
+enum class SnakeCase {
+    Unspecified,
+    Disabled,
+    Enabled,
+    Both
+};
+
 enum Visibility { // For namespaces
     Unspecified,
     Visible,

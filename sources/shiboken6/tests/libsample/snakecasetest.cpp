@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,26 +26,44 @@
 **
 ****************************************************************************/
 
-#ifndef TESTABSTRACTMETACLASS_H
-#define TESTABSTRACTMETACLASS_H
+#include "snakecasetest.h"
 
-#include <QObject>
-
-class TestModifyFunction : public QObject
+int SnakeCaseGlobalFunction()
 {
-    Q_OBJECT
-    private slots:
-        void testOwnershipTransfer();
-        void testWithApiVersion();
-        void testAllowThread();
-        void testRenameArgument_data();
-        void testRenameArgument();
-        void invalidateAfterUse();
-        void testGlobalFunctionModification();
-        void testScopedModifications_data();
-        void testScopedModifications();
-        void testSnakeCaseRenaming_data();
-        void testSnakeCaseRenaming();
-};
+    return 42;
+}
 
-#endif
+SnakeCaseTest::SnakeCaseTest() = default;
+SnakeCaseTest::~SnakeCaseTest() = default;
+
+int SnakeCaseTest::testFunction1() const
+{
+    return 42;
+}
+
+int SnakeCaseTest::testFunctionDisabled() const
+{
+    return 42;
+}
+
+int SnakeCaseTest::testFunctionBoth() const
+{
+    return 42;
+}
+
+int SnakeCaseTest::callVirtualFunc() const
+{
+    return virtualFunc();
+}
+
+int SnakeCaseTest::virtualFunc() const
+{
+    return 42;
+}
+
+SnakeCaseDerivedTest::SnakeCaseDerivedTest() = default;
+
+int SnakeCaseDerivedTest::virtualFunc() const
+{
+    return 43;
+}

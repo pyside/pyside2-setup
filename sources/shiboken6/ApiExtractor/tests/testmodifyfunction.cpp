@@ -29,6 +29,7 @@
 #include "testmodifyfunction.h"
 #include <QtTest/QTest>
 #include "testutil.h"
+#include <abstractmetabuilder_p.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <modifications.h>
@@ -467,6 +468,27 @@ void TestModifyFunction::testScopedModifications()
     QVERIFY(!f.isNull());
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateThrowing);
+}
+
+void TestModifyFunction::testSnakeCaseRenaming_data()
+{
+    QTest::addColumn<QString>("name");
+    QTest::addColumn<QString>("expected");
+    QTest::newRow("s1")
+        << QStringLiteral("snakeCaseFunc") << QStringLiteral("snake_case_func");
+    QTest::newRow("s2")
+        << QStringLiteral("SnakeCaseFunc") << QStringLiteral("snake_case_func");
+    QTest::newRow("consecutive-uppercase")
+        << QStringLiteral("snakeCAseFunc") << QStringLiteral("snakeCAseFunc");
+}
+
+void TestModifyFunction::testSnakeCaseRenaming()
+{
+    QFETCH(QString, name);
+    QFETCH(QString, expected);
+
+    const QString actual = AbstractMetaBuilder::getSnakeCaseName(name);
+    QCOMPARE(actual, expected);
 }
 
 QTEST_APPLESS_MAIN(TestModifyFunction)

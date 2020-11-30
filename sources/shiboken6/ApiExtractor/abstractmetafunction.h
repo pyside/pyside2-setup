@@ -95,6 +95,9 @@ public:
     QString name() const;
     void setName(const QString &name);
 
+    // Names under which the function will be registered to Python.
+    QStringList definitionNames() const;
+
     QString originalName() const;
 
     void setOriginalName(const QString &name);
@@ -282,6 +285,8 @@ public:
     void setExceptionHandlingModification(TypeSystem::ExceptionHandling em);
 
     int overloadNumber() const;
+
+    TypeSystem::SnakeCase snakeCase() const;
 
     // Query functions for generators
     /// Verifies if any of the function's code injections of the "native"

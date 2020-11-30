@@ -451,13 +451,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
         if (!funcEntry->hasSignature(metaFunc->minimalSignature()))
             continue;
 
+        metaFunc->setTypeEntry(funcEntry);
         applyFunctionModifications(metaFunc);
 
         setInclude(funcEntry, func->fileName());
-        if (metaFunc->typeEntry())
-            delete metaFunc->typeEntry();
 
-        metaFunc->setTypeEntry(funcEntry);
         m_globalFunctions << metaFuncPtr;
     }
 
@@ -1366,6 +1364,51 @@ void AbstractMetaBuilderPrivate::fillAddedFunctions(AbstractMetaClass *metaClass
                        qPrintable(addedFunc->name()), qPrintable(metaClass->name()));
         }
     }
+}
+
+QString AbstractMetaBuilder::getSnakeCaseName(const QString &name)
+{
+    const int size = name.size();
+    if (size < 3)
+        return name;
+    QString result;
+    result.reserve(size + 4);
+    for (int i = 0; i < size; ++i) {
+        const QChar c = name.at(i);
+        if (c.isUpper()) {
+            if (i > 0) {
+                if (name.at(i - 1).isUpper())
+                    return name; // Give up at consecutive upper chars
+                 result.append(u'_');
+            }
+            result.append(c.toLower());
+        } else {
+            result.append(c);
+        }
+    }
+    return result;
+}
+
+// Names under which an item will be registered to Python depending on snakeCase
+QStringList AbstractMetaBuilder::definitionNames(const QString &name,
+                                                 TypeSystem::SnakeCase snakeCase)
+{
+    QStringList result;
+    switch (snakeCase) {
+    case TypeSystem::SnakeCase::Unspecified:
+    case TypeSystem::SnakeCase::Disabled:
+        result.append(name);
+        break;
+    case TypeSystem::SnakeCase::Enabled:
+        result.append(AbstractMetaBuilder::getSnakeCaseName(name));
+        break;
+    case TypeSystem::SnakeCase::Both:
+        result.append(AbstractMetaBuilder::getSnakeCaseName(name));
+        if (name != result.constFirst())
+            result.append(name);
+        break;
+    }
+    return result;
 }
 
 void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction *func)

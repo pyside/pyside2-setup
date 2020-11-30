@@ -97,6 +97,7 @@ static inline QString replaceAttribute() { return QStringLiteral("replace"); }
 static inline QString toAttribute() { return QStringLiteral("to"); }
 static inline QString signatureAttribute() { return QStringLiteral("signature"); }
 static inline QString snippetAttribute() { return QStringLiteral("snippet"); }
+static inline QString snakeCaseAttribute() { return QStringLiteral("snake-case"); }
 static inline QString staticAttribute() { return QStringLiteral("static"); }
 static inline QString threadAttribute() { return QStringLiteral("thread"); }
 static inline QString sourceAttribute() { return QStringLiteral("source"); }
@@ -391,6 +392,18 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"value-type", StackElement::ValueTypeEntry},
     };
 ENUM_LOOKUP_BINARY_SEARCH()
+
+
+ENUM_LOOKUP_BEGIN(TypeSystem::SnakeCase, Qt::CaseSensitive,
+                  snakeCaseFromAttribute, TypeSystem::SnakeCase::Unspecified)
+{
+    {u"no", TypeSystem::SnakeCase::Disabled},
+    {u"false", TypeSystem::SnakeCase::Disabled},
+    {u"yes", TypeSystem::SnakeCase::Enabled},
+    {u"true", TypeSystem::SnakeCase::Enabled},
+    {u"both", TypeSystem::SnakeCase::Both},
+};
+ENUM_LOOKUP_LINEAR_SEARCH()
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
                   visibilityFromAttribute, TypeSystem::Visibility::Unspecified)
@@ -1442,18 +1455,29 @@ FunctionTypeEntry *
 {
     if (!checkRootElement())
         return nullptr;
-    const int signatureIndex = indexOfAttribute(*attributes, signatureAttribute());
-    if (signatureIndex == -1) {
+
+    QString signature;
+    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Disabled;
+
+    for (int i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == signatureAttribute()) {
+            signature = TypeDatabase::normalizedSignature(attributes->takeAt(i).value().toString());
+        } else if (name == snakeCaseAttribute()) {
+            snakeCase = snakeCaseFromAttribute(attributes->takeAt(i).value());
+        }
+    }
+
+    if (signature.isEmpty()) {
         m_error =  msgMissingAttribute(signatureAttribute());
         return nullptr;
     }
-    const QString signature =
-        TypeDatabase::normalizedSignature(attributes->takeAt(signatureIndex).value().toString());
 
     TypeEntry *existingType = m_database->findType(name);
 
     if (!existingType) {
         auto *result = new FunctionTypeEntry(name, signature, since, currentParentTypeEntry());
+        result->setSnakeCase(snakeCase);
         applyCommonAttributes(reader, result, attributes);
         return result;
     }
@@ -1564,6 +1588,8 @@ void TypeSystemParser::applyComplexTypeAttributes(const QXmlStreamReader &reader
                 ctype->setDeleteInMainThread(true);
         } else if (name == QLatin1String("target-type")) {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
+        }  else if (name == snakeCaseAttribute()) {
+            ctype->setSnakeCase(snakeCaseFromAttribute(attributes->takeAt(i).value()));
         }
     }
 
@@ -1700,6 +1726,8 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &
                                                const QVersionNumber &since,
                                                QXmlStreamAttributes *attributes)
 {
+    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
+
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == packageAttribute()) {
@@ -1724,6 +1752,8 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
+        } else if (name == snakeCaseAttribute()) {
+            snakeCase = snakeCaseFromAttribute(attributes->takeAt(i).value());
         }
     }
 
@@ -1735,6 +1765,7 @@ TypeSystemTypeEntry *TypeSystemParser::parseRootElement(const QXmlStreamReader &
                                               currentParentTypeEntry());
     }
     moduleEntry->setCodeGeneration(m_generate);
+    moduleEntry->setSnakeCase(snakeCase);
 
     if ((m_generate == TypeEntry::GenerateForSubclass ||
          m_generate == TypeEntry::GenerateNothing) && !m_defaultPackage.isEmpty())
@@ -2078,6 +2109,8 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
             fm.setWritable(convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true));
         } else if (name == renameAttribute()) {
             fm.setRenamedToName(attributes->takeAt(i).value().toString());
+        } else if (name == snakeCaseAttribute()) {
+            fm.setSnakeCase(snakeCaseFromAttribute(attributes->takeAt(i).value()));
         }
     }
     if (fm.name().isEmpty()) {
@@ -2232,6 +2265,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     int overloadNumber = TypeSystem::OverloadNumberUnset;
     TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
+    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == QLatin1String("signature")) {
@@ -2265,6 +2299,8 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
         } else if (name == overloadNumberAttribute()) {
             if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
                 return false;
+        } else if (name == snakeCaseAttribute()) {
+            snakeCase = snakeCaseFromAttribute(attributes->takeAt(i).value());
         } else if (name == virtualSlotAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -2295,6 +2331,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     mod.setOriginalSignature(originalSignature);
     mod.setExceptionHandling(exceptionHandling);
     mod.setOverloadNumber(overloadNumber);
+    mod.setSnakeCase(snakeCase);
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
