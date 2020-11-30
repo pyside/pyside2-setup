@@ -1782,7 +1782,6 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overl
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
     bool initPythonArguments;
-    bool usesNamedArguments;
 
     // If method is a constructor...
     if (rfunc->isConstructor()) {
@@ -1809,7 +1808,6 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overl
         s << " *cptr{};\n";
 
         initPythonArguments = maxArgs > 0;
-        usesNamedArguments = !ownerClass->isQObject() && overloadData.hasArgumentWithDefaultValue();
 
     } else {
         if (rfunc->implementingClass() &&
@@ -1820,7 +1818,6 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s, OverloadData &overl
             s << "PyObject *" << PYTHON_RETURN_VAR << "{};\n";
 
         initPythonArguments = minArgs != maxArgs || maxArgs > 1;
-        usesNamedArguments = rfunc->isCallOperator() || overloadData.hasArgumentWithDefaultValue();
     }
 
     s << R"(PyObject *errInfo{};
