@@ -51,6 +51,8 @@ extern const char *END_ALLOW_THREADS;
 
 #include <QtCore/QRegularExpression>
 
+#include <array>
+
 class DocParser;
 class CodeSnip;
 class QPropertySpec;
@@ -366,8 +368,8 @@ protected:
     /// Returns true if the Python wrapper for the received OverloadData must accept a list of arguments.
     static bool pythonFunctionWrapperUsesListOfArguments(const OverloadData &overloadData);
 
-    const QRegularExpression &convertToCppRegEx() const
-    { return m_typeSystemConvRegEx[TypeSystemToCppFunction]; }
+    static const QRegularExpression &convertToCppRegEx()
+    { return typeSystemConvRegExps()[TypeSystemToCppFunction]; }
 
     static QString pythonArgsAt(int i);
 
@@ -502,7 +504,9 @@ private:
 
     /// Type system converter variable replacement names and regular expressions.
     static const QHash<int, QString> &typeSystemConvName();
-    QRegularExpression m_typeSystemConvRegEx[TypeSystemConverterVariables];
+
+    using TypeSystemConverterRegExps = std::array<QRegularExpression, TypeSystemConverterVariables>;
+    static const TypeSystemConverterRegExps &typeSystemConvRegExps();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::AttroCheck);

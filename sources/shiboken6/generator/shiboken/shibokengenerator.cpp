@@ -124,20 +124,27 @@ using GeneratorClassInfoCache = QHash<const AbstractMetaClass *, GeneratorClassI
 
 Q_GLOBAL_STATIC(GeneratorClassInfoCache, generatorClassInfoCache)
 
-ShibokenGenerator::ShibokenGenerator()
+static const char CHECKTYPE_REGEX[] = R"(%CHECKTYPE\[([^\[]*)\]\()";
+static const char ISCONVERTIBLE_REGEX[] = R"(%ISCONVERTIBLE\[([^\[]*)\]\()";
+static const char CONVERTTOPYTHON_REGEX[] = R"(%CONVERTTOPYTHON\[([^\[]*)\]\()";
+// Capture a '*' leading the variable name into the target
+// so that "*valuePtr = %CONVERTTOCPP..." works as expected.
+static const char CONVERTTOCPP_REGEX[] =
+    R"((\*?%?[a-zA-Z_][\w\.]*(?:\[[^\[^<^>]+\])*)(?:\s+)=(?:\s+)%CONVERTTOCPP\[([^\[]*)\]\()";
+
+const ShibokenGenerator::TypeSystemConverterRegExps &
+    ShibokenGenerator::typeSystemConvRegExps()
 {
-    const char CHECKTYPE_REGEX[] = R"(%CHECKTYPE\[([^\[]*)\]\()";
-    const char ISCONVERTIBLE_REGEX[] = R"(%ISCONVERTIBLE\[([^\[]*)\]\()";
-    const char CONVERTTOPYTHON_REGEX[] = R"(%CONVERTTOPYTHON\[([^\[]*)\]\()";
-    // Capture a '*' leading the variable name into the target
-    // so that "*valuePtr = %CONVERTTOCPP..." works as expected.
-    const char CONVERTTOCPP_REGEX[] =
-        R"((\*?%?[a-zA-Z_][\w\.]*(?:\[[^\[^<^>]+\])*)(?:\s+)=(?:\s+)%CONVERTTOCPP\[([^\[]*)\]\()";
-    m_typeSystemConvRegEx[TypeSystemCheckFunction]         = QRegularExpression(QLatin1String(CHECKTYPE_REGEX));
-    m_typeSystemConvRegEx[TypeSystemIsConvertibleFunction] = QRegularExpression(QLatin1String(ISCONVERTIBLE_REGEX));
-    m_typeSystemConvRegEx[TypeSystemToPythonFunction]      = QRegularExpression(QLatin1String(CONVERTTOPYTHON_REGEX));
-    m_typeSystemConvRegEx[TypeSystemToCppFunction]         = QRegularExpression(QLatin1String(CONVERTTOCPP_REGEX));
+    static const TypeSystemConverterRegExps result = {
+        QRegularExpression(QLatin1String(CHECKTYPE_REGEX)),
+        QRegularExpression(QLatin1String(ISCONVERTIBLE_REGEX)),
+        QRegularExpression(QLatin1String(CONVERTTOCPP_REGEX)),
+        QRegularExpression(QLatin1String(CONVERTTOPYTHON_REGEX))
+    };
+    return result;
 }
+
+ShibokenGenerator::ShibokenGenerator() = default;
 
 ShibokenGenerator::~ShibokenGenerator() = default;
 
@@ -1934,7 +1941,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                                                            QString &code) const
 {
     QList<StringPair> replacements;
-    QRegularExpressionMatchIterator rit = m_typeSystemConvRegEx[converterVariable].globalMatch(code);
+    QRegularExpressionMatchIterator rit = typeSystemConvRegExps()[converterVariable].globalMatch(code);
     while (rit.hasNext()) {
         const QRegularExpressionMatch match = rit.next();
         const QStringList list = match.capturedTexts();
