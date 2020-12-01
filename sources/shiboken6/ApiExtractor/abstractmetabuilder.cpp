@@ -1175,15 +1175,35 @@ std::optional<AbstractMetaField>
     return metaField;
 }
 
+static bool applyFieldModifications(AbstractMetaField *f)
+{
+    const auto &modifications = f->modifications();
+    for (const auto &mod : modifications) {
+        if (mod.isRemoveModifier() && mod.removal() == TypeSystem::All)
+            return false;
+        if (mod.isRenameModifier()) {
+            f->setOriginalName(f->name());
+            f->setName(mod.renamedToName());
+        } else if (!mod.isReadable()) {
+            f->setGetterEnabled(false);
+        } else if (!mod.isWritable()) {
+            f->setSetterEnabled(false);
+        }
+    }
+    f->setOriginalAttributes(f->attributes());
+    return true;
+}
+
 void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item,
                                                 AbstractMetaClass *metaClass)
 {
     const VariableList &variables = scope_item->variables();
     for (const VariableModelItem &field : variables) {
-        auto metaField = traverseField(field, metaClass);
-        if (metaField.has_value() && !metaField->isModifiedRemoved()) {
-            metaField->setOriginalAttributes(metaField->attributes());
-            metaClass->addField(*metaField);
+        auto metaFieldO = traverseField(field, metaClass);
+        if (metaFieldO.has_value()) {
+            AbstractMetaField metaField = metaFieldO.value();
+            if (applyFieldModifications(&metaField))
+                metaClass->addField(metaField);
         }
     }
 }

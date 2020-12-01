@@ -67,6 +67,8 @@ public:
     Complex userPrimitiveField;
     Point valueTypeField;
     ObjectType* objectTypeField;
+    int toBeRenamedField;
+    int readOnlyField;
 
     Abstract(int id = -1);
     virtual ~Abstract();

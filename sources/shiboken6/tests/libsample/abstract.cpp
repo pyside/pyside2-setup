@@ -36,7 +36,7 @@ const int Abstract::staticPrimitiveField = 0;
 
 Abstract::Abstract(int id) : m_id(id)
 {
-    primitiveField = 123;
+    toBeRenamedField = readOnlyField = primitiveField = 123;
     valueTypeField = Point(12, 34);
     objectTypeField = nullptr;
     bitField = 0;

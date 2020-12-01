@@ -640,6 +640,8 @@
         <enum-type name="PrintFormat"/>
         <modify-function signature="id()" rename="id_"/>
         <modify-function signature="hideFunction(HideType*)" remove="all"/>
+        <modify-field name="toBeRenamedField" rename="renamedField"/>
+        <modify-field name="readOnlyField" write="false"/>
     </object-type>
 
     <object-type name="Derived" polymorphic-id-expression="%1->type() == Derived::TpDerived">

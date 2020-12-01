@@ -62,8 +62,8 @@ public:
     void setType(const AbstractMetaType &type);
 
     QString name() const;
-    void setName(const QString &name, bool realName = true);
-    bool hasName() const;
+    void setName(const QString &name);
+
     QString qualifiedCppName() const;
 
     QString originalName() const;
@@ -71,6 +71,14 @@ public:
 
     const Documentation &documentation() const;
     void setDocumentation(const Documentation& doc);
+
+    bool isGetterEnabled() const; // Modifications
+    void setGetterEnabled(bool e);
+    bool isSetterEnabled() const; // Modifications
+    void setSetterEnabled(bool e);
+
+    bool canGenerateGetter() const;
+    bool canGenerateSetter() const;
 
     static std::optional<AbstractMetaField>
         find(const AbstractMetaFieldList &haystack, const QString &needle);

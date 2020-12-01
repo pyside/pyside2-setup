@@ -2165,6 +2165,9 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             if (!convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true))
                 fm.clearModifierFlag(FieldModification::Writable);
+        } else if (name == renameAttribute()) {
+            fm.setRenamedToName(attributes->takeAt(i).value().toString());
+            fm.setModifierFlag(Modification::Rename);
         }
     }
     if (fm.name.isEmpty()) {

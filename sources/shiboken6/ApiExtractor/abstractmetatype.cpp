@@ -689,6 +689,12 @@ bool AbstractMetaType::isPointer() const
         || isNativePointer() || isValuePointer();
 }
 
+bool AbstractMetaType::isPointerToConst() const
+{
+    return d->m_constant && !d->m_indirections.isEmpty()
+        && d->m_indirections.constLast() != Indirection::ConstPointer;
+}
+
 bool AbstractMetaType::isCString() const
 {
     return isNativePointer()

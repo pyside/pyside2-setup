@@ -65,6 +65,27 @@ class TestAccessingCppFields(unittest.TestCase):
         # attribution with invalid type
         self.assertRaises(TypeError, lambda : setattr(d, 'primitiveField', None))
 
+    def testAccessingRenamedFields(self):
+        '''Reads and writes a renamed field.'''
+        d = Derived()
+        self.assertEqual(type(d.renamedField), int)
+        old_value = d.renamedField
+        new_value = 2255
+        d.renamedField = new_value
+        self.assertEqual(d.renamedField, new_value)
+        self.assertNotEqual(d.renamedField, old_value)
+
+    def testAccessingReadOnlyFields(self):
+        '''Tests a read-only field.'''
+        d = Derived()
+        self.assertEqual(type(d.readOnlyField), int)
+        old_value = d.readOnlyField
+        try:
+            d.readOnlyField = 25555
+        except AttributeError:
+            pass
+        self.assertEqual(d.readOnlyField, old_value)
+
     def testAccessingUsersPrimitiveTypeField(self):
         '''Reads and writes an user's primitive type (in this case an 'Complex') field.'''
         d = Derived()

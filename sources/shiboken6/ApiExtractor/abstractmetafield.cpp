@@ -41,8 +41,9 @@ public:
     QString m_originalName;
     QString m_name;
     AbstractMetaType m_type;
-    bool m_hasName = false;
     Documentation m_doc;
+    bool m_setterEnabled = true; // Modifications
+    bool m_getterEnabled = true; // Modifications
 };
 
 AbstractMetaField::AbstractMetaField() : d(new AbstractMetaFieldData)
@@ -101,27 +102,21 @@ QString AbstractMetaField::name() const
     return d->m_name;
 }
 
-void AbstractMetaField::setName(const QString &name, bool realName)
+void AbstractMetaField::setName(const QString &name)
 {
-    if (d->m_name != name || d->m_hasName != realName) {
+    if (d->m_name != name)
         d->m_name = name;
-        d->m_hasName = realName;
-    }
-}
-
-bool AbstractMetaField::hasName() const
-{
-    return d->m_hasName;
 }
 
 QString AbstractMetaField::qualifiedCppName() const
 {
-    return enclosingClass()->qualifiedCppName() + QLatin1String("::") + d->m_name;
+    return enclosingClass()->qualifiedCppName() + QLatin1String("::")
+           + originalName();
 }
 
 QString AbstractMetaField::originalName() const
 {
-    return d->m_originalName;
+    return d->m_originalName.isEmpty() ? d->m_name : d->m_originalName;
 }
 
 void AbstractMetaField::setOriginalName(const QString &name)
@@ -139,6 +134,39 @@ void AbstractMetaField::setDocumentation(const Documentation &doc)
 {
     if (d->m_doc != doc)
         d->m_doc = doc;
+}
+
+bool AbstractMetaField::isGetterEnabled() const
+{
+    return d->m_getterEnabled;
+}
+
+void AbstractMetaField::setGetterEnabled(bool e)
+{
+    if (d->m_getterEnabled != e)
+        d->m_getterEnabled = e;
+}
+
+bool AbstractMetaField::isSetterEnabled() const
+{
+    return d->m_setterEnabled;
+}
+
+void AbstractMetaField::setSetterEnabled(bool e)
+{
+    if (e != d->m_setterEnabled)
+        d->m_setterEnabled = e;
+}
+
+bool AbstractMetaField::canGenerateGetter() const
+{
+    return d->m_getterEnabled && !isStatic();
+}
+
+bool AbstractMetaField::canGenerateSetter() const
+{
+    return d->m_setterEnabled && !isStatic()
+        && (!d->m_type.isConstant() || d->m_type.isPointerToConst());
 }
 
 FieldModificationList AbstractMetaField::modifications() const

@@ -197,6 +197,9 @@ public:
     // Query functions for generators
     /// Check if type is a pointer.
     bool isPointer() const;
+    /// Helper for field setters: Check for "const QWidget *" (settable field),
+    /// but not "int *const" (read-only field).
+    bool isPointerToConst() const;
     /// Returns true if the type is a C string (const char *).
     bool isCString() const;
     /// Returns true if the type is a void pointer.
