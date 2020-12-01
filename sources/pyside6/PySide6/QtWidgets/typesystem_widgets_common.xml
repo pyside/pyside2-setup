@@ -1198,6 +1198,10 @@
       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="removeownership-1"/>
     </modify-function>
 
+    <modify-function signature="replaceWidget(QWidget*,QWidget*,QFlags&lt;Qt::FindChildOption&gt;)">
+       <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp" snippet="addownership-2"/>
+    </modify-function>
+
     <modify-function signature="parentWidget()const">
       <modify-argument index="this">
         <parent index="return" action="add"/>
