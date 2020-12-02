@@ -41,7 +41,7 @@ from ..utils import (copydir, copyfile, copy_icu_libs, find_files_using_glob,
                      linux_set_rpaths, linux_run_read_elf, linux_get_rpaths,
                      rpaths_has_origin)
 from ..config import config
-
+from ..versions import PYSIDE
 
 def prepare_standalone_package_linux(self, vars):
     built_modules = vars['built_modules']
