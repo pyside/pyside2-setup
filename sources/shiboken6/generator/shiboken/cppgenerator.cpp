@@ -5218,7 +5218,9 @@ void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnu
         << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
         << ">(int(PyLong_AsLong(self)));\n"
         << "cppArg = static_cast<" << flagsEntry->originalName()
-        << ">(int(PyLong_AsLong(" << PYTHON_ARG << ")));\n\n"
+        << ">(int(PyLong_AsLong(" << PYTHON_ARG << ")));\n"
+        << "if (PyErr_Occurred())\n" << indent
+            << "return nullptr;\n" << outdent
         << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;\n"
         << "return ";
     writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));
