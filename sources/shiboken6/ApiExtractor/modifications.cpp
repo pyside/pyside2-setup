@@ -163,6 +163,88 @@ QString Modification::accessModifierString() const
     return QString();
 }
 
+// ---------------------- FieldModification
+
+class FieldModificationData : public QSharedData
+{
+public:
+    QString m_name;
+    QString m_renamedToName;
+    bool m_readable = true;
+    bool m_writable = true;
+    bool m_removed = false;
+};
+
+FieldModification::FieldModification() : d(new FieldModificationData)
+{
+}
+
+FieldModification::FieldModification(const FieldModification &) = default;
+FieldModification &FieldModification::operator=(const FieldModification &) = default;
+FieldModification::FieldModification(FieldModification &&) = default;
+FieldModification &FieldModification::operator=(FieldModification &&) = default;
+FieldModification::~FieldModification() = default;
+
+QString FieldModification::name() const
+{
+    return d->m_name;
+}
+
+void FieldModification::setName(const QString &value)
+{
+    if (d->m_name != value)
+        d->m_name = value;
+}
+
+bool FieldModification::isRenameModifier() const
+{
+    return !d->m_renamedToName.isEmpty();
+}
+
+QString FieldModification::renamedToName() const
+{
+    return d->m_renamedToName;
+}
+
+void FieldModification::setRenamedToName(const QString &value)
+{
+    if (d->m_renamedToName != value)
+        d->m_renamedToName = value;
+}
+
+bool FieldModification::isReadable() const
+{
+    return d->m_readable;
+}
+
+void FieldModification::setReadable(bool e)
+{
+    if (d->m_readable != e)
+        d->m_readable = e;
+}
+
+bool FieldModification::isWritable() const
+{
+    return d->m_writable;
+}
+
+void FieldModification::setWritable(bool e)
+{
+    if (d->m_writable != e)
+        d->m_writable = e;
+}
+
+bool FieldModification::isRemoved() const
+{
+    return d->m_removed;
+}
+
+void FieldModification::setRemoved(bool r)
+{
+    if (d->m_removed != r)
+        d->m_removed = r;
+}
+
 // Helpers to split a parameter list of <add-function>, <declare-function>
 // (@ denoting names), like
 // "void foo(QList<X,Y> &@list@ = QList<X,Y>{1,2}, int @b@=5, ...)"

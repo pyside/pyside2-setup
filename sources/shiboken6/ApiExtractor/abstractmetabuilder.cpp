@@ -1179,7 +1179,7 @@ static bool applyFieldModifications(AbstractMetaField *f)
 {
     const auto &modifications = f->modifications();
     for (const auto &mod : modifications) {
-        if (mod.isRemoveModifier() && mod.removal() == TypeSystem::All)
+        if (mod.isRemoved())
             return false;
         if (mod.isRenameModifier()) {
             f->setOriginalName(f->name());

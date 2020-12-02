@@ -41,6 +41,7 @@
 
 class FunctionModificationData;
 class ModificationData;
+class FieldModificationData;
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -379,18 +380,34 @@ QDebug operator<<(QDebug d, const ArgumentModification &a);
 QDebug operator<<(QDebug d, const FunctionModification &fm);
 #endif
 
-struct FieldModification: public Modification
+class FieldModification
 {
-    bool isReadable() const
-    {
-        return modifiers().testFlag(Readable);
-    }
-    bool isWritable() const
-    {
-        return modifiers().testFlag(Writable);
-    }
+public:
+    FieldModification();
+    FieldModification(const FieldModification &);
+    FieldModification &operator=(const FieldModification &);
+    FieldModification(FieldModification &&);
+    FieldModification &operator=(FieldModification &&);
+    ~FieldModification();
 
-    QString name;
+    QString name() const;
+    void setName(const QString &value);
+
+    bool isRenameModifier() const;
+    QString renamedToName() const;
+    void setRenamedToName(const QString &value);
+
+    bool isReadable() const;
+    void setReadable(bool e);
+
+    bool isWritable() const;
+    void setWritable(bool e);
+
+    bool isRemoved() const;
+    void setRemoved(bool r);
+
+private:
+    QSharedDataPointer<FieldModificationData> d;
 };
 
 /**

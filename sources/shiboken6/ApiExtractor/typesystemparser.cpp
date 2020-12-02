@@ -2089,30 +2089,26 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
                                QXmlStreamAttributes *attributes)
 {
     FieldModification fm;
-    fm.setModifiers(FieldModification::Readable | FieldModification::Writable);
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == nameAttribute()) {
-            fm.name = attributes->takeAt(i).value().toString();
+            fm.setName(attributes->takeAt(i).value().toString());
         } else if (name == removeAttribute()) {
-            if (!convertRemovalAttribute(attributes->takeAt(i).value(), fm, m_error))
-                return false;
+            if (attributes->takeAt(i).value() == u"all")
+                fm.setRemoved(true);
         }  else if (name == readAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            if (!convertBoolean(attributes->takeAt(i).value(), readAttribute(), true))
-                fm.clearModifierFlag(FieldModification::Readable);
+            fm.setReadable(convertBoolean(attributes->takeAt(i).value(), readAttribute(), true));
         } else if (name == writeAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            if (!convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true))
-                fm.clearModifierFlag(FieldModification::Writable);
+            fm.setWritable(convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true));
         } else if (name == renameAttribute()) {
             fm.setRenamedToName(attributes->takeAt(i).value().toString());
-            fm.setModifierFlag(Modification::Rename);
         }
     }
-    if (fm.name.isEmpty()) {
+    if (fm.name().isEmpty()) {
         m_error = msgMissingAttribute(nameAttribute());
         return false;
     }

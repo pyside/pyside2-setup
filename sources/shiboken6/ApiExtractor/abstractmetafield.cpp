@@ -76,10 +76,7 @@ bool AbstractMetaField::isModifiedRemoved(int types) const
 {
     const FieldModificationList &mods = modifications();
     for (const FieldModification &mod : mods) {
-        if (!mod.isRemoveModifier())
-            continue;
-
-        if ((mod.removal() & types) == types)
+        if (mod.isRemoved())
             return true;
     }
 
@@ -175,7 +172,7 @@ FieldModificationList AbstractMetaField::modifications() const
     FieldModificationList returned;
 
     for (const FieldModification &mod : mods) {
-        if (mod.name == name())
+        if (mod.name() == name())
             returned += mod;
     }
 

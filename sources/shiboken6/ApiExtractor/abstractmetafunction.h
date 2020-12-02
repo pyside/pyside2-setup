@@ -47,7 +47,6 @@ class Documentation;
 class SourceLocation;
 
 struct ArgumentOwner;
-struct FieldModification;
 struct ReferenceCount;
 
 class AbstractMetaFunction : public AbstractMetaAttributes

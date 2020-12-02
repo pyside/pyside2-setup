@@ -523,7 +523,6 @@ public:
     void setAddedFunctions(const AddedFunctionList &addedFunctions);
     void addNewFunction(const AddedFunctionPtr &addedFunction);
 
-    FieldModification fieldModification(const QString &name) const;
     void setFieldModifications(const FieldModificationList &mods);
     FieldModificationList fieldModifications() const;
 

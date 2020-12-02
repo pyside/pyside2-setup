@@ -38,7 +38,7 @@ class CodeSnip;
 class DocModification;
 
 struct AddedFunction;
-struct FieldModification;
+class FieldModification;
 class FunctionModification;
 class TypeEntry;
 

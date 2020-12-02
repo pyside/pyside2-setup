@@ -1227,19 +1227,6 @@ void ComplexTypeEntry::addNewFunction(const AddedFunctionPtr &addedFunction)
     d->m_addedFunctions << addedFunction;
 }
 
-FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
-{
-    S_D(const ComplexTypeEntry);
-    for (const auto &fieldMod : d->m_fieldMods) {
-        if (fieldMod.name == name)
-            return fieldMod;
-    }
-    FieldModification mod;
-    mod.name = name;
-    mod.setModifiers(FieldModification::Readable | FieldModification::Writable);
-    return mod;
-}
-
 void ComplexTypeEntry::setFieldModifications(const FieldModificationList &mods)
 {
     S_D(ComplexTypeEntry);
