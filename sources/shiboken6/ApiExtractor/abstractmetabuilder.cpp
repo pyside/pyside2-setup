@@ -1497,13 +1497,13 @@ static void applyDefaultExpressionModifications(const FunctionModificationList &
     // use replace/remove-default-expression for set default value
     for (const auto &modification : functionMods) {
         for (const auto &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index == i + 1) {
-                if (argumentModification.removedDefaultExpression) {
+            if (argumentModification.index() == i + 1) {
+                if (argumentModification.removedDefaultExpression()) {
                     metaArg->setDefaultValueExpression(QString());
                     break;
                 }
-                if (!argumentModification.replacedDefaultExpression.isEmpty()) {
-                    metaArg->setDefaultValueExpression(argumentModification.replacedDefaultExpression);
+                if (!argumentModification.replacedDefaultExpression().isEmpty()) {
+                    metaArg->setDefaultValueExpression(argumentModification.replacedDefaultExpression());
                     break;
                 }
             }
@@ -1646,8 +1646,8 @@ void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, co
 
     for (const FunctionModification &mod : mods) {
         for (const ArgumentModification &argMod : mod.argument_mods()) {
-            if (!argMod.renamed_to.isEmpty())
-                arguments[argMod.index - 1].setName(argMod.renamed_to, false);
+            if (!argMod.renamedToName().isEmpty())
+                arguments[argMod.index() - 1].setName(argMod.renamedToName(), false);
         }
     }
 
@@ -1710,8 +1710,8 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
 {
     for (const FunctionModification &mod : functionMods) {
         for (const ArgumentModification &argMod : mod.argument_mods()) {
-            if (argMod.array) {
-                const int i = argMod.index - 1;
+            if (argMod.isArray()) {
+                const int i = argMod.index() - 1;
                 if (i < 0 || i >= func->arguments().size()) {
                     *errorMessage = msgCannotSetArrayUsage(func->minimalSignature(), i,
                                                            QLatin1String("Index out of range."));

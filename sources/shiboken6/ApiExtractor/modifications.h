@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -39,6 +39,7 @@
 #include <QtCore/QSharedPointer>
 #include <QtCore/QString>
 
+class ArgumentModificationData;
 class FunctionModificationData;
 class ModificationData;
 class FieldModificationData;
@@ -174,47 +175,66 @@ public:
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny;
 };
 
-struct ArgumentModification
+class ArgumentModification
 {
-    ArgumentModification() : removedDefaultExpression(false), removed(false),
-        noNullPointers(false), resetAfterUse(false), array(false) {}
-    explicit ArgumentModification(int idx) : index(idx), removedDefaultExpression(false), removed(false),
-              noNullPointers(false), resetAfterUse(false), array(false) {}
-
-    // Should the default expression be removed?
-
+public:
+    ArgumentModification();
+    explicit ArgumentModification(int idx);
+    ArgumentModification(const ArgumentModification &);
+    ArgumentModification &operator=(const ArgumentModification &);
+    ArgumentModification(ArgumentModification &&);
+    ArgumentModification &operator=(ArgumentModification &&);
+    ~ArgumentModification();
 
     // Reference count flags for this argument
-    QList<ReferenceCount> referenceCounts;
+    const QList<ReferenceCount> &referenceCounts() const;
+    void addReferenceCount(const ReferenceCount &value);
 
     // The text given for the new type of the argument
-    QString modified_type;
+    QString modifiedType() const;
+    void setModifiedType(const QString &value);
 
-    QString replace_value;
-
-    // The text of the new default expression of the argument
-    QString replacedDefaultExpression;
+     // The text of the new default expression of the argument
+    QString replacedDefaultExpression() const;
+    void setReplacedDefaultExpression(const QString &value);
 
     // The new definition of ownership for a specific argument
-    QHash<TypeSystem::Language, TypeSystem::Ownership> ownerships;
+    const QHash<TypeSystem::Language, TypeSystem::Ownership> &ownerships() const;
+    void insertOwnership(TypeSystem::Language l, TypeSystem::Ownership o);
 
     // Different conversion rules
-    CodeSnipList conversion_rules;
+    const CodeSnipList &conversionRules() const;
+    CodeSnipList &conversionRules();
 
-    //QObject parent(owner) of this argument
-    ArgumentOwner owner;
+    // QObject parent(owner) of this argument
+    ArgumentOwner owner() const;
+    void setOwner(const ArgumentOwner &value);
 
-    //New name
-    QString renamed_to;
+    // New name
+    QString renamedToName() const;
+    void setRenamedToName(const QString &value);
 
-    // The index of this argument
-    int index = -1;
+    int index() const;
+    void setIndex(int value);
 
-    uint removedDefaultExpression : 1;
-    uint removed : 1;
-    uint noNullPointers : 1;
-    uint resetAfterUse : 1;
-    uint array : 1; // consider "int*" to be "int[]"
+    bool removedDefaultExpression() const;
+    void setRemovedDefaultExpression(const uint &value);
+
+    bool isRemoved() const;
+    void setRemoved(bool value);
+
+    bool noNullPointers() const;
+    void setNoNullPointers(bool value);
+
+    bool resetAfterUse() const;
+    void setResetAfterUse(bool value);
+
+    // consider "int*" to be "int[]"
+    bool isArray() const;
+    void setArray(bool value);
+
+private:
+    QSharedDataPointer<ArgumentModificationData> d;
 };
 
 class Modification

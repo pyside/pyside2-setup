@@ -454,6 +454,182 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
     return d;
 }
 
+class ArgumentModificationData : public QSharedData
+{
+public:
+    ArgumentModificationData(int idx = -1) :  index(idx),
+        removedDefaultExpression(false), removed(false),
+        noNullPointers(false), resetAfterUse(false), array(false)
+    {}
+
+    QList<ReferenceCount> referenceCounts;
+    QString modified_type;
+    QString replacedDefaultExpression;
+    QHash<TypeSystem::Language, TypeSystem::Ownership> ownerships;
+    CodeSnipList conversion_rules;
+    ArgumentOwner owner;
+    QString renamed_to;
+    int index = -1;
+    uint removedDefaultExpression : 1;
+    uint removed : 1;
+    uint noNullPointers : 1;
+    uint resetAfterUse : 1;
+    uint array : 1;
+};
+
+ArgumentModification::ArgumentModification() : d(new ArgumentModificationData)
+{
+}
+
+ArgumentModification::ArgumentModification(int idx) : d(new ArgumentModificationData(idx))
+{
+}
+
+ArgumentModification::ArgumentModification(const ArgumentModification &) = default;
+ArgumentModification &ArgumentModification::operator=(const ArgumentModification &) = default;
+ArgumentModification::ArgumentModification(ArgumentModification &&) = default;
+ArgumentModification &ArgumentModification::operator=(ArgumentModification &&) = default;
+ArgumentModification::~ArgumentModification() = default;
+
+QString ArgumentModification::modifiedType() const
+{
+    return d->modified_type;
+}
+
+void ArgumentModification::setModifiedType(const QString &value)
+{
+    if (d->modified_type != value)
+        d->modified_type = value;
+}
+
+QString ArgumentModification::replacedDefaultExpression() const
+{
+    return d->replacedDefaultExpression;
+}
+
+void ArgumentModification::setReplacedDefaultExpression(const QString &value)
+{
+    if (d->replacedDefaultExpression != value)
+        d->replacedDefaultExpression = value;
+}
+
+const QHash<TypeSystem::Language, TypeSystem::Ownership> &ArgumentModification::ownerships() const
+{
+    return d->ownerships;
+}
+
+void ArgumentModification::insertOwnership(TypeSystem::Language l, TypeSystem::Ownership o)
+{
+    d->ownerships.insert(l, o);
+}
+
+const CodeSnipList &ArgumentModification::conversionRules() const
+{
+    return d->conversion_rules;
+}
+
+CodeSnipList &ArgumentModification::conversionRules()
+{
+    return d->conversion_rules;
+}
+
+ArgumentOwner ArgumentModification::owner() const
+{
+    return d->owner;
+}
+
+void ArgumentModification::setOwner(const ArgumentOwner &value)
+{
+    d->owner = value;
+}
+
+QString ArgumentModification::renamedToName() const
+{
+    return d->renamed_to;
+}
+
+void ArgumentModification::setRenamedToName(const QString &value)
+{
+    if (d->renamed_to != value)
+        d->renamed_to = value;
+}
+
+int ArgumentModification::index() const
+{
+    return d->index;
+}
+
+void ArgumentModification::setIndex(int value)
+{
+    if (d->index != value)
+        d->index = value;
+}
+
+bool ArgumentModification::removedDefaultExpression() const
+{
+    return d->removedDefaultExpression;
+}
+
+void ArgumentModification::setRemovedDefaultExpression(const uint &value)
+{
+    if (d->removedDefaultExpression != value)
+        d->removedDefaultExpression = value;
+}
+
+bool ArgumentModification::isRemoved() const
+{
+    return d->removed;
+}
+
+void ArgumentModification::setRemoved(bool value)
+{
+    if (d->removed != value)
+        d->removed = value;
+}
+
+bool ArgumentModification::noNullPointers() const
+{
+    return d->noNullPointers;
+}
+
+void ArgumentModification::setNoNullPointers(bool value)
+{
+    if (d->noNullPointers != value)
+        d->noNullPointers = value;
+}
+
+bool ArgumentModification::resetAfterUse() const
+{
+    return d->resetAfterUse;
+}
+
+void ArgumentModification::setResetAfterUse(bool value)
+{
+    if (d->resetAfterUse != value)
+        d->resetAfterUse = value;
+}
+
+bool ArgumentModification::isArray() const
+{
+    return d->array;
+}
+
+void ArgumentModification::setArray(bool value)
+{
+    if (d->array != value)
+        d->array = value;
+}
+
+const QList<ReferenceCount> &ArgumentModification::referenceCounts() const
+{
+    return d->referenceCounts;
+}
+
+void ArgumentModification::addReferenceCount(const ReferenceCount &value)
+{
+    d->referenceCounts.append(value);
+}
+
 class ModificationData : public QSharedData
 {
 public:
@@ -705,28 +881,26 @@ QDebug operator<<(QDebug d, const ArgumentModification &a)
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
-    d << "ArgumentModification(index=" << a.index;
-    if (a.removedDefaultExpression)
+    d << "ArgumentModification(index=" << a.index();
+    if (a.removedDefaultExpression())
         d << ", removedDefaultExpression";
-    if (a.removed)
+    if (a.isRemoved())
         d << ", removed";
-    if (a.noNullPointers)
+    if (a.noNullPointers())
         d << ", noNullPointers";
-    if (a.array)
+    if (a.isArray())
         d << ", array";
-    if (!a.referenceCounts.isEmpty())
-        d << ", referenceCounts=" << a.referenceCounts;
-    if (!a.modified_type.isEmpty())
-        d << ", modified_type=\"" << a.modified_type << '"';
-    if (!a.replace_value.isEmpty())
-        d << ", replace_value=\"" << a.replace_value << '"';
-    if (!a.replacedDefaultExpression.isEmpty())
-        d << ", replacedDefaultExpression=\"" << a.replacedDefaultExpression << '"';
-    if (!a.ownerships.isEmpty())
-        d << ", ownerships=" << a.ownerships;
-    if (!a.renamed_to.isEmpty())
-        d << ", renamed_to=\"" << a.renamed_to << '"';
-     d << ", owner=" << a.owner << ')';
+    if (!a.referenceCounts().isEmpty())
+        d << ", referenceCounts=" << a.referenceCounts();
+    if (!a.modifiedType().isEmpty())
+        d << ", modified_type=\"" << a.modifiedType() << '"';
+    if (!a.replacedDefaultExpression().isEmpty())
+        d << ", replacedDefaultExpression=\"" << a.replacedDefaultExpression() << '"';
+    if (!a.ownerships().isEmpty())
+        d << ", ownerships=" << a.ownerships();
+    if (!a.renamedToName().isEmpty())
+        d << ", renamed_to=\"" << a.renamedToName() << '"';
+     d << ", owner=" << a.owner() << ')';
     return  d;
 }
 

@@ -887,7 +887,7 @@ bool TypeSystemParser::endElement(QStringView localName)
             m_current->parent->value.customFunction->addTemplateInstance(m_current->value.templateInstance);
             break;
         case StackElement::ConversionRule:
-            m_contextStack.top()->functionMods.last().argument_mods().last().conversion_rules.last().addTemplateInstance(m_current->value.templateInstance);
+            m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addTemplateInstance(m_current->value.templateInstance);
             break;
         case StackElement::InjectCodeInFunction:
             m_contextStack.top()->functionMods.last().snips().last().addTemplateInstance(m_current->value.templateInstance);
@@ -940,7 +940,7 @@ bool TypeSystemParser::characters(const String &ch)
 
     if (m_current->type == StackElement::ConversionRule
         && m_current->parent->type == StackElement::ModifyArgument) {
-        m_contextStack.top()->functionMods.last().argument_mods().last().conversion_rules.last().addCode(ch);
+        m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().last().addCode(ch);
         return true;
     }
 
@@ -1798,8 +1798,8 @@ bool TypeSystemParser::parseReplaceArgumentType(const QXmlStreamReader &,
         m_error = QLatin1String("Type replacement requires 'modified-type' attribute");
         return false;
     }
-    m_contextStack.top()->functionMods.last().argument_mods().last().modified_type =
-        attributes->takeAt(modifiedTypeIndex).value().toString();
+    m_contextStack.top()->functionMods.last().argument_mods().last().setModifiedType(
+        attributes->takeAt(modifiedTypeIndex).value().toString());
     return true;
 }
 
@@ -1838,7 +1838,7 @@ bool TypeSystemParser::parseCustomConversion(const QXmlStreamReader &,
     if (topElement.type == StackElement::ModifyArgument) {
         CodeSnip snip;
         snip.language = lang;
-        m_contextStack.top()->functionMods.last().argument_mods().last().conversion_rules.append(snip);
+        m_contextStack.top()->functionMods.last().argument_mods().last().conversionRules().append(snip);
         return true;
     }
 
@@ -1954,15 +1954,12 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
     }
 
     QString index;
-    QString replaceValue;
     QString renameTo;
     bool resetAfterUse = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == indexAttribute()) {
              index = attributes->takeAt(i).value().toString();
-        } else if (name == QLatin1String("replace-value")) {
-            replaceValue = attributes->takeAt(i).value().toString();
         } else if (name == invalidateAfterUseAttribute()) {
             resetAfterUse = convertBoolean(attributes->takeAt(i).value(),
                                            invalidateAfterUseAttribute(), false);
@@ -1980,15 +1977,9 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
     if (!parseArgumentIndex(index, &idx, &m_error))
         return false;
 
-    if (!replaceValue.isEmpty() && idx) {
-        m_error = QLatin1String("replace-value is only supported for return values (index=0).");
-        return false;
-    }
-
     ArgumentModification argumentModification = ArgumentModification(idx);
-    argumentModification.replace_value = replaceValue;
-    argumentModification.resetAfterUse = resetAfterUse;
-    argumentModification.renamed_to = renameTo;
+    argumentModification.setResetAfterUse(resetAfterUse);
+    argumentModification.setRenamedToName(renameTo);
     m_contextStack.top()->functionMods.last().argument_mods().append(argumentModification);
     return true;
 }
@@ -2002,7 +1993,7 @@ bool TypeSystemParser::parseNoNullPointer(const QXmlStreamReader &reader,
     }
 
     ArgumentModification &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
-    lastArgMod.noNullPointers = true;
+    lastArgMod.setNoNullPointers(true);
 
     const int defaultValueIndex =
         indexOfAttribute(*attributes, u"default-value");
@@ -2043,7 +2034,7 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
         m_error = QStringLiteral("unsupported owner attribute: '%1'").arg(ownership);
         return false;
     }
-    m_contextStack.top()->functionMods.last().argument_mods().last().ownerships[lang] = owner;
+    m_contextStack.top()->functionMods.last().argument_mods().last().insertOwnership(lang, owner);
     return true;
 }
 
@@ -2063,7 +2054,7 @@ bool TypeSystemParser::parseRename(const QXmlStreamReader &,
         return false;
     }
     const QString renamed_to = attributes->takeAt(toIndex).value().toString();
-    m_contextStack.top()->functionMods.last().argument_mods().last().renamed_to = renamed_to;
+    m_contextStack.top()->functionMods.last().argument_mods().last().setRenamedToName(renamed_to);
     return true;
 }
 
@@ -2352,8 +2343,8 @@ bool TypeSystemParser::parseReplaceDefaultExpression(const QXmlStreamReader &,
         return false;
     }
 
-    m_contextStack.top()->functionMods.last().argument_mods().last().replacedDefaultExpression =
-        attributes->takeAt(withIndex).value().toString();
+    m_contextStack.top()->functionMods.last().argument_mods().last().setReplacedDefaultExpression(
+        attributes->takeAt(withIndex).value().toString());
     return true;
 }
 
@@ -2413,7 +2404,7 @@ bool TypeSystemParser::parseReferenceCount(const QXmlStreamReader &reader,
         }
     }
 
-    m_contextStack.top()->functionMods.last().argument_mods().last().referenceCounts.append(rc);
+    m_contextStack.top()->functionMods.last().argument_mods().last().addReferenceCount(rc);
     return true;
 }
 
@@ -2443,7 +2434,7 @@ bool TypeSystemParser::parseParentOwner(const QXmlStreamReader &,
             }
         }
     }
-    m_contextStack.top()->functionMods.last().argument_mods().last().owner = ao;
+    m_contextStack.top()->functionMods.last().argument_mods().last().setOwner(ao);
     return true;
 }
 
@@ -2966,7 +2957,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             }
 
-            m_contextStack.top()->functionMods.last().argument_mods().last().removed = true;
+            m_contextStack.top()->functionMods.last().argument_mods().last().setRemoved(true);
             break;
 
         case StackElement::ModifyField:
@@ -2991,7 +2982,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 return false;
             break;
         case StackElement::RemoveDefaultExpression:
-            m_contextStack.top()->functionMods.last().argument_mods().last().removedDefaultExpression = true;
+            m_contextStack.top()->functionMods.last().argument_mods().last().setRemovedDefaultExpression(true);
             break;
         case StackElement::CustomMetaConstructor:
         case StackElement::CustomMetaDestructor:
@@ -3011,7 +3002,7 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
                 m_error = QLatin1String("array must be child of modify-argument");
                 return false;
             }
-            m_contextStack.top()->functionMods.last().argument_mods().last().array = true;
+            m_contextStack.top()->functionMods.last().argument_mods().last().setArray(true);
             break;
         case StackElement::InjectCode:
             if (!parseInjectCode(reader, topElement, element, &attributes))

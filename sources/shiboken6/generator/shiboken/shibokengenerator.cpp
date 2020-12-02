@@ -651,7 +651,7 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
         return false;
     for (const auto &funcMod : func->modifications()) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
-            if (argMod.index == argIndex + 1 && argMod.noNullPointers)
+            if (argMod.index() == argIndex + 1 && argMod.noNullPointers())
                 return true;
         }
     }

@@ -899,10 +899,10 @@ QString CppGenerator::virtualMethodReturn(TextStream &s,
     const AbstractMetaType &returnType = func->type();
     for (const FunctionModification &mod : functionModifications) {
         for (const ArgumentModification &argMod : mod.argument_mods()) {
-            if (argMod.index == 0 && !argMod.replacedDefaultExpression.isEmpty()) {
+            if (argMod.index() == 0 && !argMod.replacedDefaultExpression().isEmpty()) {
                 static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
                 Q_ASSERT(regex.isValid());
-                QString expr = argMod.replacedDefaultExpression;
+                QString expr = argMod.replacedDefaultExpression();
                 for (int offset = 0; ; ) {
                     const QRegularExpressionMatch match = regex.match(expr, offset);
                     if (!match.hasMatch())
@@ -1086,12 +1086,14 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     QSet<int> invalidateArgs;
     for (const FunctionModification &funcMod : functionModifications) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
-            if (argMod.resetAfterUse && !invalidateArgs.contains(argMod.index)) {
-                invalidateArgs.insert(argMod.index);
-                s << "bool invalidateArg" << argMod.index
+            const int index = argMod.index();
+            if (argMod.resetAfterUse() && !invalidateArgs.contains(index)) {
+                invalidateArgs.insert(index);
+                s << "bool invalidateArg" << index
                     << " = PyTuple_GET_ITEM(" << PYTHON_ARGS << ", "
-                    << argMod.index - 1 << ")->ob_refcnt == 1;\n";
-            } else if (argMod.index == 0 && argMod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::CppOwnership) {
+                    << index - 1 << ")->ob_refcnt == 1;\n";
+            } else if (index == 0 &&
+                       argMod.ownerships().value(TypeSystem::TargetLangCode) == TypeSystem::CppOwnership) {
                 invalidateReturn = true;
             }
         }
@@ -1186,8 +1188,9 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     for (const FunctionModification &funcMod : functionModifications) {
         for (const ArgumentModification &argMod : funcMod.argument_mods()) {
-            if (argMod.ownerships.contains(TypeSystem::NativeCode)
-                && argMod.index == 0 && argMod.ownerships[TypeSystem::NativeCode] == TypeSystem::CppOwnership) {
+            if (argMod.ownerships().contains(TypeSystem::NativeCode)
+                && argMod.index() == 0
+                && argMod.ownerships().value(TypeSystem::NativeCode) == TypeSystem::CppOwnership) {
                 s << "if (Shiboken::Object::checkType(" << PYTHON_RETURN_VAR << "))\n";
                 Indentation indent(s);
                 s << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR << ");\n";
@@ -3705,9 +3708,9 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
     QList<ArgumentModification> refcount_mods;
     for (const auto &func_mod : func->modifications()) {
         for (const ArgumentModification &arg_mod : func_mod.argument_mods()) {
-            if (!arg_mod.ownerships.isEmpty() && arg_mod.ownerships.contains(TypeSystem::TargetLangCode))
+            if (arg_mod.ownerships().contains(TypeSystem::TargetLangCode))
                 ownership_mods.append(arg_mod);
-            else if (!arg_mod.referenceCounts.isEmpty())
+            else if (!arg_mod.referenceCounts().isEmpty())
                 refcount_mods.append(arg_mod);
         }
     }
@@ -3721,11 +3724,11 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
         for (const ArgumentModification &arg_mod : qAsConst(ownership_mods)) {
             const AbstractMetaClass *wrappedClass = nullptr;
             QString errorMessage;
-            QString pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass, &errorMessage);
+            QString pyArgName = argumentNameFromIndex(func, arg_mod.index(), &wrappedClass, &errorMessage);
             if (!wrappedClass) {
                 QString message;
                 QTextStream str(&message);
-                str << "Invalid ownership modification for argument " << arg_mod.index
+                str << "Invalid ownership modification for argument " << arg_mod.index()
                     << " (" << pyArgName << ") of ";
                 if (const AbstractMetaClass *declaringClass = func->declaringClass())
                     str << declaringClass->name() << "::";
@@ -3735,19 +3738,21 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 break;
             }
 
-            if (arg_mod.index == 0 || arg_mod.owner.index == 0)
+            if (arg_mod.index() == 0 || arg_mod.owner().index == 0)
                 hasReturnPolicy = true;
 
             // The default ownership does nothing. This is useful to avoid automatic heuristically
             // based generation of code defining parenting.
-            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::DefaultOwnership)
+            const auto ownership =
+                arg_mod.ownerships().value(TypeSystem::TargetLangCode, TypeSystem::DefaultOwnership);
+            if (ownership == TypeSystem::DefaultOwnership)
                 continue;
 
             s << "Shiboken::Object::";
-            if (arg_mod.ownerships[TypeSystem::TargetLangCode] == TypeSystem::TargetLangOwnership) {
+            if (ownership == TypeSystem::TargetLangOwnership) {
                 s << "getOwnership(" << pyArgName << ");";
             } else if (wrappedClass->hasVirtualDestructor()) {
-                if (arg_mod.index == 0)
+                if (arg_mod.index() == 0)
                     s << "releaseOwnership(" << PYTHON_RETURN_VAR << ");";
                 else
                     s << "releaseOwnership(" << pyArgName << ");";
@@ -3759,7 +3764,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
     } else if (!refcount_mods.isEmpty()) {
         for (const ArgumentModification &arg_mod : qAsConst(refcount_mods)) {
-            ReferenceCount refCount = arg_mod.referenceCounts.constFirst();
+            ReferenceCount refCount = arg_mod.referenceCounts().constFirst();
             if (refCount.action != ReferenceCount::Set
                 && refCount.action != ReferenceCount::Remove
                 && refCount.action != ReferenceCount::Add) {
@@ -3773,12 +3778,12 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 pyArgName = QLatin1String("Py_None");
             } else {
                 QString errorMessage;
-                pyArgName = argumentNameFromIndex(func, arg_mod.index, &wrappedClass, &errorMessage);
+                pyArgName = argumentNameFromIndex(func, arg_mod.index(), &wrappedClass, &errorMessage);
                 if (pyArgName.isEmpty()) {
                     QString message;
                     QTextStream str(&message);
                     str << "Invalid reference count modification for argument "
-                        << arg_mod.index << " of ";
+                        << arg_mod.index() << " of ";
                     if (const AbstractMetaClass *declaringClass = func->declaringClass())
                         str << declaringClass->name() << "::";
                     str << func->name() << "(): " << errorMessage;
@@ -3794,15 +3799,15 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 s << "Shiboken::Object::removeReference(";
 
             s << "reinterpret_cast<SbkObject *>(self), \"";
-            QString varName = arg_mod.referenceCounts.constFirst().varName;
+            QString varName = arg_mod.referenceCounts().constFirst().varName;
             if (varName.isEmpty())
-                varName = func->minimalSignature() + QString::number(arg_mod.index);
+                varName = func->minimalSignature() + QString::number(arg_mod.index());
 
             s << varName << "\", " << pyArgName
               << (refCount.action == ReferenceCount::Add ? ", true" : "")
               << ");\n";
 
-            if (arg_mod.index == 0)
+            if (arg_mod.index() == 0)
                 hasReturnPolicy = true;
         }
     }

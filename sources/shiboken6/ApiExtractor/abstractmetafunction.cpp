@@ -431,9 +431,9 @@ QList<ReferenceCount> AbstractMetaFunction::referenceCounts(const AbstractMetaCl
 
     for (const auto &mod : modifications(cls)) {
         for (const ArgumentModification &argumentMod : mod.argument_mods()) {
-            if (argumentMod.index != idx && idx != -2)
+            if (argumentMod.index() != idx && idx != -2)
                 continue;
-            returned += argumentMod.referenceCounts;
+            returned += argumentMod.referenceCounts();
         }
     }
 
@@ -444,9 +444,9 @@ ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClass *cls, 
 {
     for (const auto &mod : modifications(cls)) {
         for (const ArgumentModification &argumentMod : mod.argument_mods()) {
-            if (argumentMod.index != idx)
+            if (argumentMod.index() != idx)
                 continue;
-            return argumentMod.owner;
+            return argumentMod.owner();
         }
     }
     return ArgumentOwner();
@@ -456,10 +456,10 @@ QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int 
 {
     for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index != key)
+            if (argumentModification.index() != key)
                 continue;
 
-            for (const CodeSnip &snip : argumentModification.conversion_rules) {
+            for (const CodeSnip &snip : argumentModification.conversionRules()) {
                 if (snip.language == language && !snip.code().isEmpty())
                     return snip.code();
             }
@@ -474,8 +474,8 @@ bool AbstractMetaFunction::argumentRemoved(int key) const
 {
     for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index == key) {
-                if (argumentModification.removed)
+            if (argumentModification.index() == key) {
+                if (argumentModification.isRemoved())
                     return true;
             }
         }
@@ -625,8 +625,8 @@ TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *c
 {
     for (const auto &modification : modifications(cls)) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index == key)
-                return argumentModification.ownerships.value(language, TypeSystem::InvalidOwnership);
+            if (argumentModification.index() == key)
+                return argumentModification.ownerships().value(language, TypeSystem::InvalidOwnership);
         }
     }
 
@@ -637,9 +637,9 @@ QString AbstractMetaFunction::typeReplaced(int key) const
 {
     for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index == key
-                && !argumentModification.modified_type.isEmpty()) {
-                return argumentModification.modified_type;
+            if (argumentModification.index() == key
+                && !argumentModification.modifiedType().isEmpty()) {
+                return argumentModification.modifiedType();
             }
         }
     }
@@ -651,7 +651,7 @@ bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
 {
     for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index == argumentIndex && argumentModification.array != 0)
+            if (argumentModification.index() == argumentIndex && argumentModification.isArray())
                 return true;
         }
     }
@@ -853,7 +853,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
             // since zero represents the return type and we're
             // interested only in checking the function arguments,
             // it will be ignored.
-            if (argmod.index > 0)
+            if (argmod.index() > 0)
                 return true;
         }
     }
