@@ -99,9 +99,7 @@ class StackElement
             CodeSnipMask                = 0xc000,
 
             // Function modifier tags (0x010000, 0x020000, ... , 0xf00000)
-            Access                      = 0x010000,
-            Removal                     = 0x020000,
-            Rename                      = 0x040000,
+            Rename                      = 0x040000, // (modify-argument)
             ModifyArgument              = 0x080000,
             Thread                      = 0x100000,
             FunctionModifiers           = 0xff0000,
@@ -226,10 +224,8 @@ private:
                             QXmlStreamAttributes *attributes);
     bool parseDefineOwnership(const QXmlStreamReader &, const StackElement &topElement,
                               QXmlStreamAttributes *);
-    bool parseRemoval(const QXmlStreamReader &, const StackElement &topElement,
-                      QXmlStreamAttributes *);
-    bool parseRename(const QXmlStreamReader &, StackElement::ElementType type,
-                     const StackElement &topElement, QXmlStreamAttributes *);
+    bool parseRename(const QXmlStreamReader &, const StackElement &topElement,
+                     QXmlStreamAttributes *);
     bool parseModifyField(const QXmlStreamReader &, QXmlStreamAttributes *);
     bool parseAddFunction(const QXmlStreamReader &, const StackElement &topElement,
                           StackElement::ElementType t, QXmlStreamAttributes *);

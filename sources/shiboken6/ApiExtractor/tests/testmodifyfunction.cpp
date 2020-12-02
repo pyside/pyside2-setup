@@ -54,13 +54,12 @@ void TestModifyFunction::testRenameArgument()
         <primitive-type name='int'/>\n\
         <object-type name='A'>\n\
         <modify-function signature='";
-   const char xmlCode2[] = "'>\n\
-            <modify-argument index='1'>\n\
-                <rename to='otherArg'/>\n\
-            </modify-argument>\n\
-        </modify-function>\n\
-        </object-type>\n\
-    </typesystem>\n";
+   const char xmlCode2[] = R"('>
+            <modify-argument index='1' rename='otherArg'/>
+        </modify-function>
+        </object-type>
+    </typesystem>
+)";
 
     const QByteArray xmlCode = QByteArray(xmlCode1) + pattern + QByteArray(xmlCode2);
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.constData(), false));

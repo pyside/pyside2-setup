@@ -64,6 +64,8 @@ rename to
          <rename to='...' />
      </modify-argument>
 
+.. warning:: This tag is deprecated, use the ``rename`` attribute from :ref:`modify-argument` tag instead.
+
 .. _remove-default-expression:
 
 remove-default-expression

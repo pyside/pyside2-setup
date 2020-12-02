@@ -421,20 +421,20 @@ void TestAddFunction::testAddFunctionWithApiVersion()
 void TestAddFunction::testModifyAddedFunction()
 {
     const char cppCode[] = "class Foo { };\n";
-    const char xmlCode[] = "\
-    <typesystem package='Package'>\n\
-        <primitive-type name='float'/>\n\
-        <primitive-type name='int'/>\n\
-        <value-type name='Foo'>\n\
-            <add-function signature='method(float, int)'>\n\
-                <inject-code class='target' position='beginning'>custom_code();</inject-code>\n\
-                <modify-argument index='2'>\n\
-                    <replace-default-expression with='0'/>\n\
-                    <rename to='varName'/>\n\
-                </modify-argument>\n\
-            </add-function>\n\
-        </value-type>\n\
-    </typesystem>\n";
+    const char xmlCode[] = R"(
+<typesystem package='Package'>
+    <primitive-type name='float'/>
+    <primitive-type name='int'/>
+    <value-type name='Foo'>
+        <add-function signature='method(float, int)'>
+            <inject-code class='target' position='beginning'>custom_code();</inject-code>
+            <modify-argument index='2' rename='varName'>
+                <replace-default-expression with='0'/>
+            </modify-argument>
+        </add-function>
+    </value-type>
+</typesystem>
+)";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();

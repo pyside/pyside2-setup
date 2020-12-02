@@ -17,7 +17,7 @@ modify-argument
     .. code-block:: xml
 
          <modify-function>
-             <modify-argument index="return | this | 1 ..." >
+             <modify-argument index="return | this | 1 ..." rename="...">
                  // modifications
              </modify-argument>
          </modify-function>
@@ -27,52 +27,5 @@ modify-argument
     modify the function's return value or the object the function is called upon,
     respectively.
 
-.. _remove:
-
-remove
-^^^^^^
-
-    The remove node removes the given method from the generated target language
-    API, and it is a child of the modify-function node.
-
-    .. code-block:: xml
-
-         <modify-function>
-             <remove class="all" />
-         </modify-function>
-
-    .. warning:: This tag is deprecated, use the ``remove`` attribute from :ref:`modify-function` tag instead.
-
-.. _access:
-
-access
-^^^^^^
-
-    The access node changes the access privileges of the given function in the
-    generated target language API, and it is a child of the modify-function node.
-
-    .. code-block:: xml
-
-        <modify-function>
-            <access modifier="public | protected | private"/>
-        </modify-function>
-
-    .. warning:: This tag is deprecated, use the ``access`` attribute from :ref:`modify-function` tag instead.
-
-.. _rename:
-
-rename
-^^^^^^
-
-    The rename node changes the name of the given function in the generated target
-    language API, and it is a child of the modify-function node.
-
-    .. code-block:: xml
-
-        <modify-function>
-            <rename to="..." />
-        </modify-function>
-
-    The ``to`` attribute is the new name of the function.
-
-    .. warning:: This tag is deprecated, use the ``rename`` attribute from :ref:`modify-function` tag instead.
+    The optional ``rename`` attribute is used to rename a argument and use this
+    new name in the generated code.

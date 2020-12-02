@@ -73,15 +73,14 @@ void TestImplicitConversions::testWithModifiedVisibility()
         A(const B&);\n\
     };\n\
     class B {};\n";
-    const char* xmlCode = "\
-    <typesystem package='Foo'>\n\
-        <value-type name='A'>\n\
-            <modify-function signature='A(const B&amp;)'>\n\
-                <access modifier='private'/>\n\
-            </modify-function>\n\
-        </value-type>\n\
-        <value-type name='B'/>\n\
-    </typesystem>\n";
+    const char* xmlCode = R"(
+<typesystem package='Foo'>
+    <value-type name='A'>
+        <modify-function signature='A(const B&amp;)' access='private'/>
+    </value-type>
+    <value-type name='B'/>
+</typesystem>
+)";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(!builder.isNull());
     AbstractMetaClassList classes = builder->classes();

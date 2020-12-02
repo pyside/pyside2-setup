@@ -121,14 +121,13 @@ static const char* cppCode2 ="\
         void func();\n\
     };\n";
 
-static const char* xmlCode2 = "\
-<typesystem package='Foo'>\n\
-    <value-type name='ValueA'>\n\
-        <modify-function signature='func()'>\n\
-            <remove class='all'/>\n\
-        </modify-function>\n\
-    </value-type>\n\
-</typesystem>\n";
+static const char* xmlCode2 = R"(
+<typesystem package='Foo'>
+    <value-type name='ValueA'>
+        <modify-function signature='func()' remove='all'/>
+    </value-type>
+</typesystem>
+)";
 
 void TestDropTypeEntries::testDropEntryWithChildTags()
 {

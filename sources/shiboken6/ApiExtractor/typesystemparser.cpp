@@ -342,8 +342,7 @@ ENUM_LOOKUP_LINEAR_SEARCH()
 ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
                   elementFromTag, StackElement::None)
     {
-        {u"access", StackElement::Access}, // sorted!
-        {u"add-conversion", StackElement::AddConversion},
+        {u"add-conversion", StackElement::AddConversion}, // sorted!
         {u"add-function", StackElement::AddFunction},
         {u"array", StackElement::Array},
         {u"container-type", StackElement::ContainerTypeEntry},
@@ -376,10 +375,9 @@ ENUM_LOOKUP_BEGIN(StackElement::ElementType, Qt::CaseInsensitive,
         {u"reference-count", StackElement::ReferenceCount},
         {u"reject-enum-value", StackElement::RejectEnumValue},
         {u"rejection", StackElement::Rejection},
-        {u"remove", StackElement::Removal},
         {u"remove-argument", StackElement::RemoveArgument},
         {u"remove-default-expression", StackElement::RemoveDefaultExpression},
-        {u"rename", StackElement::Rename},
+        {u"rename", StackElement::Rename}, // ### fixme PySide7: remove
         {u"replace", StackElement::Replace},
         {u"replace-default-expression", StackElement::ReplaceDefaultExpression},
         {u"replace-type", StackElement::ReplaceType},
@@ -1975,6 +1973,7 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
 
     QString index;
     QString replaceValue;
+    QString renameTo;
     bool resetAfterUse = false;
     for (int i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -1985,6 +1984,8 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
         } else if (name == invalidateAfterUseAttribute()) {
             resetAfterUse = convertBoolean(attributes->takeAt(i).value(),
                                            invalidateAfterUseAttribute(), false);
+        } else if (name == renameAttribute()) {
+            renameTo = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -2005,6 +2006,7 @@ bool TypeSystemParser::parseModifyArgument(const QXmlStreamReader &,
     ArgumentModification argumentModification = ArgumentModification(idx);
     argumentModification.replace_value = replaceValue;
     argumentModification.resetAfterUse = resetAfterUse;
+    argumentModification.renamed_to = renameTo;
     m_contextStack.top()->functionMods.last().argument_mods().append(argumentModification);
     return true;
 }
@@ -2063,83 +2065,23 @@ bool TypeSystemParser::parseDefineOwnership(const QXmlStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::parseRemoval(const QXmlStreamReader &,
-                           const StackElement &topElement,
-                           QXmlStreamAttributes *attributes)
-{
-    if (topElement.type != StackElement::ModifyFunction) {
-        m_error = QLatin1String("Function modification parent required");
-        return false;
-    }
-
-    TypeSystem::Language lang = TypeSystem::All;
-    const int classIndex = indexOfAttribute(*attributes, classAttribute());
-    if (classIndex != -1) {
-        const auto value = attributes->takeAt(classIndex).value();
-        lang = languageFromAttribute(value);
-        if (lang == TypeSystem::TargetLangCode) // "target" means TargetLangAndNativeCode here
-            lang = TypeSystem::TargetLangAndNativeCode;
-        if (lang != TypeSystem::TargetLangAndNativeCode && lang != TypeSystem::All) {
-            m_error = QStringLiteral("unsupported class attribute: '%1'").arg(value);
-            return false;
-        }
-    }
-    m_contextStack.top()->functionMods.last().setRemoval(lang);
-    return true;
-}
-
-bool TypeSystemParser::parseRename(const QXmlStreamReader &reader,
-                          StackElement::ElementType type,
+// ### fixme PySide7: remove (replaced by attribute).
+bool TypeSystemParser::parseRename(const QXmlStreamReader &,
                           const StackElement &topElement,
                           QXmlStreamAttributes *attributes)
 {
-    if (topElement.type != StackElement::ModifyField
-        && topElement.type != StackElement::ModifyFunction
-        && topElement.type != StackElement::ModifyArgument) {
-        m_error = QLatin1String("Function, field  or argument modification parent required");
+    if (topElement.type != StackElement::ModifyArgument) {
+        m_error = QLatin1String("Argument modification parent required");
         return false;
     }
 
-    Modification *mod = nullptr;
-    if (topElement.type == StackElement::ModifyFunction)
-        mod = &m_contextStack.top()->functionMods.last();
-    else if (topElement.type == StackElement::ModifyField)
-        mod = &m_contextStack.top()->fieldMods.last();
-
-    Modification::ModifierFlag modifierFlag = Modification::Rename;
-    if (type == StackElement::Rename) {
-        const int toIndex = indexOfAttribute(*attributes, toAttribute());
-        if (toIndex == -1) {
-            m_error = msgMissingAttribute(toAttribute());
-            return false;
-        }
-        const QString renamed_to = attributes->takeAt(toIndex).value().toString();
-        if (topElement.type == StackElement::ModifyFunction)
-            mod->setRenamedToName(renamed_to);
-        else if (topElement.type == StackElement::ModifyField)
-            mod->setRenamedToName(renamed_to);
-        else
-            m_contextStack.top()->functionMods.last().argument_mods().last().renamed_to = renamed_to;
-    } else {
-        const int modifierIndex = indexOfAttribute(*attributes, modifierAttribute());
-        if (modifierIndex == -1) {
-            m_error = msgMissingAttribute(modifierAttribute());
-            return false;
-        }
-        const auto modifier = attributes->takeAt(modifierIndex).value();
-        modifierFlag = modifierFromAttribute(modifier);
-        if (modifierFlag == Modification::InvalidModifier) {
-            m_error = QStringLiteral("Unknown access modifier: '%1'").arg(modifier);
-            return false;
-        }
-        if (modifierFlag == Modification::Friendly) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedAttributeValueWarning(reader, modifierAttribute(), modifier)));
-        }
+    const int toIndex = indexOfAttribute(*attributes, toAttribute());
+    if (toIndex == -1) {
+        m_error = msgMissingAttribute(toAttribute());
+        return false;
     }
-
-    if (mod)
-        mod->setModifierFlag(modifierFlag);
+    const QString renamed_to = attributes->takeAt(toIndex).value().toString();
+    m_contextStack.top()->functionMods.last().argument_mods().last().renamed_to = renamed_to;
     return true;
 }
 
@@ -3038,15 +2980,10 @@ bool TypeSystemParser::startElement(const QXmlStreamReader &reader)
             }
         }
             break;
-        case StackElement::Removal:
-            if (!parseRemoval(reader, topElement, &attributes))
-                return false;
-            break;
         case StackElement::Rename:
-        case StackElement::Access:
-            if (!parseRename(reader, element->type, topElement, &attributes))
-                return false;
-            break;
+             if (!parseRename(reader, topElement, &attributes))
+                 return false;
+             break;
         case StackElement::RemoveArgument:
             if (topElement.type != StackElement::ModifyArgument) {
                 m_error = QLatin1String("Removing argument requires argument modification as parent");
