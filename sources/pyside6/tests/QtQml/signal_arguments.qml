@@ -48,7 +48,7 @@ Rectangle {
     }
     Connections {
         target: o
-        onSumResult: {
+        function onSumResult(sum) {
             // set the value on the Qml side
             sumResultText.text = sum
             // set internal Python value from the already
