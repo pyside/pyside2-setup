@@ -69,7 +69,7 @@ public:
         Invisible                    = 0x0010000, // Only private functions
         VirtualInCppFunctions        = 0x0020000, // Only functions that are virtual in C++
         VirtualInTargetLangFunctions = 0x0080000, // Only functions which are virtual in TargetLang
-        NotRemovedFromTargetLang     = 0x0400000, // Only functions that have not been removed from TargetLang
+        NotRemoved                   = 0x0400000, // Only functions that have not been removed
         OperatorOverloads            = 0x2000000, // Only functions that are operator overloads
         GenerateExceptionHandling    = 0x4000000,
         GetAttroFunction             = 0x8000000,

@@ -1059,28 +1059,10 @@ static bool convertBoolean(QStringView value, const QString &attributeName, bool
     return defaultValue;
 }
 
-static bool convertRemovalAttribute(QStringView remove, Modification& mod, QString& errorMsg)
+static bool convertRemovalAttribute(QStringView value)
 {
-    if (remove.isEmpty())
-        return true;
-#ifdef QTBUG_69389_FIXED
-    if (remove.compare(u"all", Qt::CaseInsensitive) == 0) {
-#else
-    if (QtPrivate::compareStrings(remove, u"all", Qt::CaseInsensitive) == 0) {
-#endif
-        mod.setRemoval(TypeSystem::All);
-        return true;
-    }
-#ifdef QTBUG_69389_FIXED
-    if (remove.compare(u"target", Qt::CaseInsensitive) == 0) {
-#else
-    if (QtPrivate::compareStrings(remove, u"target", Qt::CaseInsensitive) == 0) {
-#endif
-        mod.setRemoval(TypeSystem::TargetLangAndNativeCode);
-        return true;
-    }
-    errorMsg = QString::fromLatin1("Bad removal type '%1'").arg(remove);
-    return false;
+    return value == u"all" // Legacy
+        || convertBoolean(value, removeAttribute(), false);
 }
 
 // Check whether an entry should be dropped, allowing for dropping the module
@@ -2094,8 +2076,7 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
         if (name == nameAttribute()) {
             fm.setName(attributes->takeAt(i).value().toString());
         } else if (name == removeAttribute()) {
-            if (attributes->takeAt(i).value() == u"all")
-                fm.setRemoved(true);
+            fm.setRemoved(convertRemovalAttribute(attributes->takeAt(i).value()));
         }  else if (name == readAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -2253,7 +2234,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
 
     QString originalSignature;
     QString access;
-    QString removal;
+    bool removed = false;
     QString rename;
     bool deprecated = false;
     bool isThread = false;
@@ -2269,7 +2250,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
         } else if (name == renameAttribute()) {
             rename = attributes->takeAt(i).value().toString();
         } else if (name == removeAttribute()) {
-            removal = attributes->takeAt(i).value().toString();
+            removed = convertRemovalAttribute(attributes->takeAt(i).value());
         } else if (name == deprecatedAttribute()) {
             deprecated = convertBoolean(attributes->takeAt(i).value(),
                                         deprecatedAttribute(), false);
@@ -2342,8 +2323,7 @@ bool TypeSystemParser::parseModifyFunction(const QXmlStreamReader &reader,
     if (deprecated)
         mod.setModifierFlag(Modification::Deprecated);
 
-    if (!removal.isEmpty() && !convertRemovalAttribute(removal, mod, m_error))
-        return false;
+    mod.setRemoved(removed);
 
     if (!rename.isEmpty()) {
         mod.setRenamedToName(rename);

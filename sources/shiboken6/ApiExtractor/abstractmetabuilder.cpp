@@ -2674,7 +2674,7 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(AbstractMetaClass *sub
     for (const auto &function : templateClassFunctions) {
         // If the function is modified or the instantiation has an equally named
         // function we have shadowing, so we need to skip it.
-        if (function->isModifiedRemoved(TypeSystem::All)
+        if (function->isModifiedRemoved()
             || AbstractMetaFunction::find(existingSubclassFuncs, function->name()) != nullptr) {
             continue;
         }

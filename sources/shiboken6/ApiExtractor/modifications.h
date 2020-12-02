@@ -258,8 +258,8 @@ public:
     void setModifiers(Modifiers m);
     void setModifierFlag(ModifierFlag f);
     void clearModifierFlag(ModifierFlag f);
-    TypeSystem::Language removal() const;
-    void setRemoval(TypeSystem::Language r);
+    bool isRemoved() const;
+    void setRemoved(bool r);
 
     bool isAccessModifier() const
     {
@@ -305,10 +305,7 @@ public:
         return modifiers().testFlag(Rename);
     }
 
-    bool isRemoveModifier() const
-    {
-        return removal() != TypeSystem::NoLanguage;
-    }
+    bool isRemoveModifier() const { return isRemoved(); }
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;

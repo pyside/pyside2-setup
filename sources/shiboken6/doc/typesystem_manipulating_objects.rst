@@ -77,15 +77,20 @@ modify-field
          <object-type>
              <modify-field name="..."
                  write="true | false"
-                 read="true | false" />
+                 read="true | false"
+                 remove="true | false" />
          </object-type>
 
     The ``name`` attribute is the name of the field, the *optional* ``write``
     and ``read`` attributes specify the field's access privileges in the target
     language API (both are set to true by default).
-    The ``remove`` attribute is an *optional* attribute, which can mark the field
-    to be discarded on generation; it has the same purpose of the deprecated tag
-    :ref:`remove`.
+
+    The ``remove`` attribute is an *optional* boolean attribute, which can
+    mark the field to be discarded on generation.
+
+    The  *optional* ``rename`` attribute can be used to change the name of the
+    given field in the generated target language API.
+
 
 .. _modify-function:
 
@@ -102,7 +107,7 @@ modify-function
          <object-type>
              <modify-function signature="..."
                               since="..."
-                              remove="all | c++"
+                              remove="true | false"
                               access="public | private | protected"
                               allow-thread="true | auto | false"
                               exception-handling="off | auto-off | auto-on | on"
@@ -177,8 +182,15 @@ modify-function
     Numbers should be given for all overloads; otherwise, the order will be in
     declaration order.
 
-    The ``remove``, ``access`` and ``rename`` attributes are *optional* attributes
-    for added convenience; they serve the same purpose as the deprecated tags :ref:`remove`, :ref:`access` and :ref:`rename`.
+    The ``remove`` attribute is an *optional* boolean attribute, which can
+    mark the function to be discarded on generation.
+
+    The  *optional* ``rename`` attribute can be used to change the name of the
+    given function in the generated target language API.
+
+    The  *optional* ``access`` attribute changes the access privileges of the
+    given function in the generated target language API.
+
 
 .. _add-function:
 

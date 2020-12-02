@@ -193,13 +193,12 @@ AbstractMetaFunction::~AbstractMetaFunction() = default;
 /*******************************************************************************
  * Indicates that this function has a modification that removes it
  */
-bool AbstractMetaFunction::isModifiedRemoved(int types) const
+bool AbstractMetaFunction::isModifiedRemoved(const AbstractMetaClass *cls) const
 {
-    for (const auto &mod : modifications(implementingClass())) {
-        if (!mod.isRemoveModifier())
-            continue;
-
-        if ((mod.removal() & types) == types)
+    if (d->m_functionType != GlobalScopeFunction && cls == nullptr)
+        cls = d->m_implementingClass;
+    for (const auto &mod : modifications(cls)) {
+        if (mod.isRemoved())
             return true;
     }
 
@@ -632,21 +631,6 @@ TypeSystem::Ownership AbstractMetaFunction::ownership(const AbstractMetaClass *c
     }
 
     return TypeSystem::InvalidOwnership;
-}
-
-bool AbstractMetaFunction::isRemovedFromAllLanguages(const AbstractMetaClass *cls) const
-{
-    return isRemovedFrom(cls, TypeSystem::All);
-}
-
-bool AbstractMetaFunction::isRemovedFrom(const AbstractMetaClass *cls, TypeSystem::Language language) const
-{
-    for (const auto &modification : modifications(cls)) {
-        if ((modification.removal() & language) == language)
-            return true;
-    }
-
-    return false;
 }
 
 QString AbstractMetaFunction::typeReplaced(int key) const

@@ -158,7 +158,7 @@ AbstractMetaFunctionCList AbstractMetaClass::queryFunctionsByName(const QString 
  */
 AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
 {
-    FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemovedFromTargetLang;
+    FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemoved;
 
     // Only public functions in final classes
     // default_flags |= isFinal() ? WasPublic : 0;
@@ -851,14 +851,11 @@ bool AbstractMetaClass::generateExceptionHandling() const
 
 bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query)
 {
-    if ((query & NotRemovedFromTargetLang)
-        && f->isRemovedFrom(f->implementingClass(), TypeSystem::TargetLangCode)) {
-        return false;
-    }
-
-    if ((query & NotRemovedFromTargetLang) && f->isVirtual()
-        && f->isRemovedFrom(f->declaringClass(), TypeSystem::TargetLangCode)) {
-        return false;
+    if ((query.testFlag(NotRemoved))) {
+        if (f->isModifiedRemoved())
+            return false;
+        if (f->isVirtual() && f->isModifiedRemoved(f->declaringClass()))
+            return false;
     }
 
     if ((query & Visible) && f->isPrivate())
@@ -959,12 +956,12 @@ AbstractMetaFunctionCList AbstractMetaClass::queryFunctions(FunctionQueryOptions
 
 bool AbstractMetaClass::hasSignals() const
 {
-    return queryFirstFunction(d->m_functions, Signals | Visible | NotRemovedFromTargetLang) != nullptr;
+    return queryFirstFunction(d->m_functions, Signals | Visible | NotRemoved) != nullptr;
 }
 
 AbstractMetaFunctionCList AbstractMetaClass::cppSignalFunctions() const
 {
-    return queryFunctions(Signals | Visible | NotRemovedFromTargetLang);
+    return queryFunctions(Signals | Visible | NotRemoved);
 }
 
 std::optional<AbstractMetaField>
@@ -1095,7 +1092,7 @@ void AbstractMetaClass::fixFunctions()
         // Fishy: Setting up of implementing/declaring/base classes changes
         // the applicable modifications; clear cached ones.
         qSharedPointerConstCast<AbstractMetaFunction>(f)->clearModificationsCache();
-        if (!f->isRemovedFromAllLanguages(f->implementingClass()))
+        if (!f->isModifiedRemoved())
             nonRemovedFuncs.append(f);
     }
 
@@ -1117,7 +1114,7 @@ void AbstractMetaClass::fixFunctions()
 
         QSet<AbstractMetaFunctionCPtr> funcsToAdd;
         for (const auto &sf : qAsConst(superFuncs)) {
-            if (sf->isRemovedFromAllLanguages(sf->implementingClass()))
+            if (sf->isModifiedRemoved())
                 continue;
 
             // skip functions added in base classes
@@ -1262,9 +1259,7 @@ void AbstractMetaClass::fixFunctions()
 
 
         // Make sure that we include files for all classes that are in use
-
-        if (!func->isRemovedFrom(this, TypeSystem::ShellCode))
-            addExtraIncludesForFunction(this, func);
+        addExtraIncludesForFunction(this, func);
     }
 
     if (hasPrivateConstructors && !hasPublicConstructors) {

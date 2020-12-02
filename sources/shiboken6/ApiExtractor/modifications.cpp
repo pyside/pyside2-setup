@@ -459,7 +459,7 @@ class ModificationData : public QSharedData
 public:
     QString renamedToName;
     Modification::Modifiers modifiers;
-    TypeSystem::Language removal = TypeSystem::NoLanguage;
+    bool removed = false;
 };
 
 Modification::Modification() : md(new ModificationData)
@@ -475,8 +475,8 @@ Modification::~Modification() = default;
 void Modification::formatDebug(QDebug &debug) const
 {
     debug << "modifiers=" << md->modifiers;
-    if (md->removal)
-      debug << ", removal";
+    if (md->removed)
+      debug << ", removed";
     if (!md->renamedToName.isEmpty())
         debug << ", renamedToName=\"" << md->renamedToName << '"';
 }
@@ -517,15 +517,15 @@ void Modification::clearModifierFlag(ModifierFlag f)
         md->modifiers = newMods;
 }
 
-TypeSystem::Language Modification::removal() const
+bool Modification::isRemoved() const
 {
-    return md->removal;
+    return md->removed;
 }
 
-void Modification::setRemoval(TypeSystem::Language r)
+void Modification::setRemoved(bool r)
 {
-    if (md->removal != r)
-        md->removal = r;
+    if (md->removed != r)
+        md->removed = r;
 }
 
 class FunctionModificationData : public QSharedData

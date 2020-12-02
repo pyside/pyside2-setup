@@ -158,7 +158,7 @@ public:
     QString minimalSignature() const;
     QString debugSignature() const; // including virtual/override/final, etc., for debugging only.
 
-    bool isModifiedRemoved(int types = TypeSystem::All) const;
+    bool isModifiedRemoved(const AbstractMetaClass *cls = nullptr) const;
 
     bool isVoid() const;
 
@@ -225,8 +225,7 @@ public:
 
     QString typeReplaced(int argument_index) const;
     bool isModifiedToArray(int argumentIndex) const;
-    bool isRemovedFromAllLanguages(const AbstractMetaClass *) const;
-    bool isRemovedFrom(const AbstractMetaClass *, TypeSystem::Language language) const;
+
     bool argumentRemoved(int) const;
     /**
     *   Verifies if any modification to the function is an inject code.
