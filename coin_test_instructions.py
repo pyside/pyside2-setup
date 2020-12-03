@@ -43,6 +43,7 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_ci_qmake_path
+from build_scripts.coin_utils import installLibClang
 import os
 import site
 import sys
@@ -105,6 +106,7 @@ def run_test_instructions():
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
             del os.environ[env_var]
+    installLibClang(CI_HOST_OS)
 
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
