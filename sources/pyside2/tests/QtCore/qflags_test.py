@@ -30,6 +30,7 @@
 
 '''Test cases for QFlags'''
 
+import operator
 import os
 import sys
 import unittest
@@ -117,12 +118,13 @@ class QFlagsOnQVariant(unittest.TestCase):
 class QFlagsWrongType(unittest.TestCase):
     def testWrongType(self):
         '''Wrong type passed to QFlags binary operators'''
+        for op in operator.or_, operator.and_, operator.xor:
+            for x in '43', 'jabba', QObject, object:
+                self.assertRaises(TypeError, op, Qt.NoItemFlags, x)
+                self.assertRaises(TypeError, op, x, Qt.NoItemFlags)
+        # making sure this actually does not fail all the time
+        self.assertEqual(operator.or_(Qt.NoItemFlags, 43), 43)
 
-        self.assertRaises(TypeError, Qt.NoItemFlags | '43')
-        self.assertRaises(TypeError, Qt.NoItemFlags & '43')
-        self.assertRaises(TypeError, 'jabba' & Qt.NoItemFlags)
-        self.assertRaises(TypeError, 'hut' & Qt.NoItemFlags)
-        self.assertRaises(TypeError, Qt.NoItemFlags & QObject())
 
 if __name__ == '__main__':
     unittest.main()

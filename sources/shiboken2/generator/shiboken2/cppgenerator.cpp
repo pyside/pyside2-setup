@@ -5230,6 +5230,8 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
     s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName()
         << ">(int(PyInt_AsLong(" << PYTHON_ARG << ")));\n";
     s << "#endif\n\n";
+    s << INDENT << "if (PyErr_Occurred())\n" << indent(INDENT)
+        << INDENT << "return nullptr;\n" << outdent(INDENT);
     s << INDENT << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;\n";
     s << INDENT << "return ";
     writeToPythonConversion(s, flagsType, nullptr, QLatin1String("cppResult"));

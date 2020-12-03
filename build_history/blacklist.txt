@@ -18,9 +18,6 @@
     darwin py3
 [QtCore::qfileread_test]
     darwin
-#  Nested exception in Python 3
-[QtCore::qflags_test]
-    py3
 [QtCore::qobject_connect_notify_test]
     linux
     darwin
