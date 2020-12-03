@@ -155,6 +155,8 @@ class BuildLog(object):
         # Python2 legacy: Correct 'linux2' to 'linux', recommended way.
         platform = 'linux' if sys.platform.startswith('linux') else sys.platform
         res = [platform, 'qt6']
+        if is_ci:
+            res.append('ci')
         if self.selected.build_classifiers:
             # Use classifier string encoded into build_dir.txt file.
             res.extend(self.selected.build_classifiers.split('-'))
