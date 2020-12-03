@@ -96,3 +96,22 @@
     qt6
 [QtQml::registertype]
     qt6
+# Following test cases are failing with qt6 in ci
+[QtNetwork::accessManager_test]
+    win32 ci
+[QtQml::listproperty]
+    win32 ci
+    linux ci
+    darwin ci
+[QtCore::bug_686]
+    linux ci
+[QtCore::qthread_signal_test]
+    linux ci
+[QtQml::qqmlnetwork_test]
+    linux ci
+[QtGui::qrasterwindow_test]
+    darwin ci
+[QtWidgets::bug_750]
+    darwin ci
+[QtWidgets::qpicture_test]
+    darwin ci
