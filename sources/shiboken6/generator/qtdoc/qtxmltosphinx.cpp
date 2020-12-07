@@ -46,7 +46,6 @@
 static inline QString nameAttribute() { return QStringLiteral("name"); }
 static inline QString titleAttribute() { return QStringLiteral("title"); }
 static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
-static inline QString briefAttribute() { return QStringLiteral("brief"); }
 
 struct QtXmlToSphinx::LinkContext
 {
