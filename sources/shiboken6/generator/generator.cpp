@@ -729,7 +729,7 @@ std::optional<DefaultValue>
     const QString qualifiedCppName = cType->qualifiedCppName();
     // Obtain a list of constructors sorted by complexity and number of arguments
     QMultiMap<int, const AbstractMetaFunctionCPtr> candidates;
-    const auto &constructors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    const auto &constructors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
     for (const auto &ctor : constructors) {
         if (!ctor->isUserAdded() && !ctor->isPrivate()
             && ctor->functionType() == AbstractMetaFunction::ConstructorFunction) {

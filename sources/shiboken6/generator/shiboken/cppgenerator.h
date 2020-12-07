@@ -30,6 +30,7 @@
 #define CPPGENERATOR_H
 
 #include "shibokengenerator.h"
+#include "abstractmetalang_enums.h"
 
 /**
  *   The CppGenerator generate the implementations of C++ bindings classes.
@@ -45,7 +46,8 @@ protected:
     QString fileNameSuffix() const override;
     QString fileNameForContext(const GeneratorContext &context) const override;
     static QList<AbstractMetaFunctionCList>
-        filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass, uint query);
+        filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
+                                       OperatorQueryOptions query);
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 

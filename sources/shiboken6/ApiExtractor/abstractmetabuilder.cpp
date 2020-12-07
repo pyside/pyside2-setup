@@ -2897,7 +2897,7 @@ void AbstractMetaBuilderPrivate::setupClonable(AbstractMetaClass *cls)
 
 void AbstractMetaBuilderPrivate::setupExternalConversion(AbstractMetaClass *cls)
 {
-    const auto &convOps = cls->operatorOverloads(AbstractMetaClass::ConversionOp);
+    const auto &convOps = cls->operatorOverloads(OperatorQueryOption::ConversionOp);
     for (const auto &func : convOps) {
         if (func->isModifiedRemoved())
             continue;

@@ -70,7 +70,7 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
     QVERIFY(classes[0]->hasConstructors());
     QCOMPARE(classes[0]->functions().size(), 2); // default ctor + copy ctor
 
-    auto ctors = classes[0]->queryFunctions(AbstractMetaClass::Constructors);
+    auto ctors = classes[0]->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.constFirst()->minimalSignature() != QLatin1String("ClassName()"))
         qSwap(ctors[0], ctors[1]);
@@ -150,9 +150,9 @@ public:
     QVERIFY(f->attributes() & AbstractMetaAttributes::FinalCppClass);
 
     // implementing class, ownclass, declaringclass
-    const auto ctorA = a->queryFunctions(AbstractMetaClass::Constructors).constFirst();
-    const auto ctorB = b->queryFunctions(AbstractMetaClass::Constructors).constFirst();
-    const auto ctorC = c->queryFunctions(AbstractMetaClass::Constructors).constFirst();
+    const auto ctorA = a->queryFunctions(FunctionQueryOption::Constructors).constFirst();
+    const auto ctorB = b->queryFunctions(FunctionQueryOption::Constructors).constFirst();
+    const auto ctorC = c->queryFunctions(FunctionQueryOption::Constructors).constFirst();
     QVERIFY(ctorA->isConstructor());
     QVERIFY(!ctorA->isVirtual());
     QVERIFY(ctorB->isConstructor());
@@ -357,7 +357,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
 
     const AbstractMetaClass *classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
-    auto ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 2);
     QCOMPARE(ctors.constFirst()->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(ctors.at(1)->functionType(), AbstractMetaFunction::CopyConstructorFunction);
@@ -368,7 +368,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
 
     const AbstractMetaClass *classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
-    ctors = classB->queryFunctions(AbstractMetaClass::Constructors);
+    ctors = classB->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 2);
     QCOMPARE(ctors.constFirst()->functionType(), AbstractMetaFunction::ConstructorFunction);
     QCOMPARE(ctors.at(1)->functionType(), AbstractMetaFunction::CopyConstructorFunction);
@@ -425,7 +425,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 2);
 
-    auto ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.constFirst()->minimalSignature() != QLatin1String("A()"))
         qSwap(ctors[0], ctors[1]);
@@ -459,7 +459,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     AbstractMetaClass* classF = AbstractMetaClass::findClass(classes, QLatin1String("F"));
     QVERIFY(classF);
 
-    ctors = classF->queryFunctions(AbstractMetaClass::Constructors);
+    ctors = classF->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.constFirst()->minimalSignature() != QLatin1String("F(int,int)"))
         qSwap(ctors[0], ctors[1]);
@@ -492,7 +492,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
 
-    auto ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 2);
     if (ctors.constFirst()->minimalSignature() != QLatin1String("A()"))
         qSwap(ctors[0], ctors[1]);
@@ -506,7 +506,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     AbstractMetaClass* classB = AbstractMetaClass::findClass(classes, QLatin1String("B"));
     QVERIFY(classB);
 
-    ctors = classB->queryFunctions(AbstractMetaClass::Constructors);
+    ctors = classB->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
     QCOMPARE(ctors.constFirst()->arguments().size(), 0);
     QCOMPARE(ctors.constFirst()->minimalSignature(), QLatin1String("B()"));
@@ -530,7 +530,7 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
 
-    const auto ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
     QCOMPARE(ctors.constFirst()->arguments().size(), 0);
     QCOMPARE(ctors.constFirst()->minimalSignature(), QLatin1String("A()"));
@@ -551,7 +551,7 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
     AbstractMetaClass* classA = AbstractMetaClass::findClass(classes, QLatin1String("A"));
     QVERIFY(classA);
 
-    const auto ctors = classA->queryFunctions(AbstractMetaClass::Constructors);
+    const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
     QCOMPARE(ctors.constFirst()->arguments().size(), 0);
     QCOMPARE(ctors.constFirst()->minimalSignature(), QLatin1String("A()"));
@@ -666,7 +666,7 @@ void TestAbstractMetaClass::testFreeOperators()
     const auto classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     QVERIFY(classes.constFirst()->hasArithmeticOperatorOverload());
-    AbstractMetaClass::FunctionQueryOptions opts(AbstractMetaClass::OperatorOverloads);
+    FunctionQueryOptions opts(FunctionQueryOption::OperatorOverloads);
     QCOMPARE(classes.constFirst()->queryFunctions(opts).size(), 1);
 }
 

@@ -158,28 +158,35 @@ AbstractMetaFunctionCList AbstractMetaClass::queryFunctionsByName(const QString 
  */
 AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
 {
-    FunctionQueryOptions default_flags = NormalFunctions | Visible | NotRemoved;
+    FunctionQueryOptions default_flags = FunctionQueryOption::NormalFunctions
+        | FunctionQueryOption::Visible | FunctionQueryOption::NotRemoved;
 
     // Only public functions in final classes
     // default_flags |= isFinal() ? WasPublic : 0;
     FunctionQueryOptions public_flags;
     if (isFinalInTargetLang())
-        public_flags |= WasPublic;
+        public_flags |= FunctionQueryOption::WasPublic;
 
     // Constructors
-    AbstractMetaFunctionCList returned = queryFunctions(Constructors | default_flags | public_flags);
+    AbstractMetaFunctionCList returned = queryFunctions(FunctionQueryOption::Constructors
+                                                        | default_flags | public_flags);
 
     // Final functions
-    returned += queryFunctions(FinalInTargetLangFunctions | NonStaticFunctions | default_flags | public_flags);
+    returned += queryFunctions(FunctionQueryOption::FinalInTargetLangFunctions
+                               | FunctionQueryOption::NonStaticFunctions
+                               | default_flags | public_flags);
 
     // Virtual functions
-    returned += queryFunctions(VirtualInTargetLangFunctions | NonStaticFunctions | default_flags | public_flags);
+    returned += queryFunctions(FunctionQueryOption::VirtualInTargetLangFunctions
+                               | FunctionQueryOption::NonStaticFunctions
+                               | default_flags | public_flags);
 
     // Static functions
-    returned += queryFunctions(StaticFunctions | default_flags | public_flags);
+    returned += queryFunctions(FunctionQueryOption::StaticFunctions
+                               | default_flags | public_flags);
 
     // Empty, private functions, since they aren't caught by the other ones
-    returned += queryFunctions(Empty | Invisible);
+    returned += queryFunctions(FunctionQueryOption::Empty | FunctionQueryOption::Invisible);
 
     return returned;
 }
@@ -190,7 +197,7 @@ AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
         return {};
 
     AbstractMetaFunctionCList returned;
-    const auto list = queryFunctions(Constructors) + externalConversionOperators();
+    const auto list = queryFunctions(FunctionQueryOption::Constructors) + externalConversionOperators();
 
     // Exclude anything that uses rvalue references, be it a move
     // constructor "QPolygon(QPolygon &&)" or something else like
@@ -210,17 +217,18 @@ AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
 
 AbstractMetaFunctionCList AbstractMetaClass::operatorOverloads(OperatorQueryOptions query) const
 {
-    const auto &list = queryFunctions(OperatorOverloads | Visible);
+    const auto &list = queryFunctions(FunctionQueryOption::OperatorOverloads
+                                      | FunctionQueryOption::Visible);
     AbstractMetaFunctionCList returned;
     for (const auto &f : list) {
-        if (((query & ArithmeticOp) && f->isArithmeticOperator())
-            || ((query & BitwiseOp) && f->isBitwiseOperator())
-            || ((query & ComparisonOp) && f->isComparisonOperator())
-            || ((query & LogicalOp) && f->isLogicalOperator())
-            || ((query & SubscriptionOp) && f->isSubscriptOperator())
-            || ((query & AssignmentOp) && f->isAssignmentOperator())
-            || ((query & ConversionOp) && f->isConversionOperator())
-            || ((query & OtherOp) && f->isOtherOperator()))
+        if ((query.testFlag(OperatorQueryOption::ArithmeticOp) && f->isArithmeticOperator())
+            || (query.testFlag(OperatorQueryOption::BitwiseOp) && f->isBitwiseOperator())
+            || (query.testFlag(OperatorQueryOption::ComparisonOp) && f->isComparisonOperator())
+            || (query.testFlag(OperatorQueryOption::LogicalOp) && f->isLogicalOperator())
+            || (query.testFlag(OperatorQueryOption::SubscriptionOp) && f->isSubscriptOperator())
+            || (query.testFlag(OperatorQueryOption::AssignmentOp) && f->isAssignmentOperator())
+            || (query.testFlag(OperatorQueryOption::ConversionOp) && f->isConversionOperator())
+            || (query.testFlag(OperatorQueryOption::OtherOp) && f->isOtherOperator()))
             returned += f;
     }
 
@@ -709,7 +717,8 @@ bool AbstractMetaClass::deleteInMainThread() const
 
 bool AbstractMetaClass::hasConstructors() const
 {
-    return AbstractMetaClass::queryFirstFunction(d->m_functions, Constructors) != nullptr;
+    return AbstractMetaClass::queryFirstFunction(d->m_functions,
+                                                 FunctionQueryOption::Constructors) != nullptr;
 }
 
 AbstractMetaFunctionCPtr AbstractMetaClass::copyConstructor() const
@@ -842,8 +851,8 @@ bool AbstractMetaClass::isConstructible() const
 
 bool AbstractMetaClass::generateExceptionHandling() const
 {
-    return queryFirstFunction(d->m_functions, AbstractMetaClass::Visible
-                              | AbstractMetaClass::GenerateExceptionHandling) != nullptr;
+    return queryFirstFunction(d->m_functions, FunctionQueryOption::Visible
+                              | FunctionQueryOption::GenerateExceptionHandling) != nullptr;
 }
 /* Goes through the list of functions and returns a list of all
    functions matching all of the criteria in \a query.
@@ -851,44 +860,46 @@ bool AbstractMetaClass::generateExceptionHandling() const
 
 bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQueryOptions query)
 {
-    if ((query.testFlag(NotRemoved))) {
+    if ((query.testFlag(FunctionQueryOption::NotRemoved))) {
         if (f->isModifiedRemoved())
             return false;
         if (f->isVirtual() && f->isModifiedRemoved(f->declaringClass()))
             return false;
     }
 
-    if ((query & Visible) && f->isPrivate())
+    if (query.testFlag(FunctionQueryOption::Visible) && f->isPrivate())
         return false;
 
-    if ((query & VirtualInTargetLangFunctions) && f->isFinalInTargetLang())
+    if (query.testFlag(FunctionQueryOption::VirtualInTargetLangFunctions) && f->isFinalInTargetLang())
         return false;
 
-    if ((query & Invisible) && !f->isPrivate())
+    if (query.testFlag(FunctionQueryOption::Invisible) && !f->isPrivate())
         return false;
 
-    if ((query & Empty) && !f->isEmptyFunction())
+    if (query.testFlag(FunctionQueryOption::Empty) && !f->isEmptyFunction())
         return false;
 
-    if ((query & WasPublic) && !f->wasPublic())
+    if (query.testFlag(FunctionQueryOption::WasPublic) && !f->wasPublic())
         return false;
 
-    if ((query & ClassImplements) && f->ownerClass() != f->implementingClass())
+    if (query.testFlag(FunctionQueryOption::ClassImplements) && f->ownerClass() != f->implementingClass())
         return false;
 
-    if ((query & FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
+    if (query.testFlag(FunctionQueryOption::FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
         return false;
 
-    if ((query & VirtualInCppFunctions) && !f->isVirtual())
+    if (query.testFlag(FunctionQueryOption::VirtualInCppFunctions) && !f->isVirtual())
         return false;
 
-    if ((query & Signals) && (!f->isSignal()))
+    if (query.testFlag(FunctionQueryOption::Signals) && (!f->isSignal()))
         return false;
 
-    if ((query & Constructors) && (!f->isConstructor() || f->ownerClass() != f->implementingClass()))
+    if (query.testFlag(FunctionQueryOption::Constructors)
+         && (!f->isConstructor() || f->ownerClass() != f->implementingClass())) {
         return false;
+    }
 
-    if (!(query & Constructors) && f->isConstructor())
+    if (!query.testFlag(FunctionQueryOption::Constructors) && f->isConstructor())
         return false;
 
     // Destructors are never included in the functions of a class currently
@@ -899,27 +910,27 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
             return false;
         }*/
 
-    if ((query & StaticFunctions) && (!f->isStatic() || f->isSignal()))
+    if (query.testFlag(FunctionQueryOption::StaticFunctions) && (!f->isStatic() || f->isSignal()))
         return false;
 
-    if ((query & NonStaticFunctions) && (f->isStatic()))
+    if (query.testFlag(FunctionQueryOption::NonStaticFunctions) && (f->isStatic()))
         return false;
 
-    if ((query & NormalFunctions) && (f->isSignal()))
+    if (query.testFlag(FunctionQueryOption::NormalFunctions) && (f->isSignal()))
         return false;
 
-    if ((query & OperatorOverloads) && !f->isOperatorOverload())
+    if (query.testFlag(FunctionQueryOption::OperatorOverloads) && !f->isOperatorOverload())
         return false;
 
-    if ((query & GenerateExceptionHandling) && !f->generateExceptionHandling())
+    if (query.testFlag(FunctionQueryOption::GenerateExceptionHandling) && !f->generateExceptionHandling())
         return false;
 
-    if (query.testFlag(GetAttroFunction)
+    if (query.testFlag(FunctionQueryOption::GetAttroFunction)
         && f->functionType() != AbstractMetaFunction::GetAttroFunction) {
         return false;
     }
 
-    if (query.testFlag(SetAttroFunction)
+    if (query.testFlag(FunctionQueryOption::SetAttroFunction)
         && f->functionType() != AbstractMetaFunction::SetAttroFunction) {
         return false;
     }
@@ -956,12 +967,17 @@ AbstractMetaFunctionCList AbstractMetaClass::queryFunctions(FunctionQueryOptions
 
 bool AbstractMetaClass::hasSignals() const
 {
-    return queryFirstFunction(d->m_functions, Signals | Visible | NotRemoved) != nullptr;
+    return queryFirstFunction(d->m_functions,
+                              FunctionQueryOption::Signals
+                              | FunctionQueryOption::Visible
+                              | FunctionQueryOption::NotRemoved) != nullptr;
 }
 
 AbstractMetaFunctionCList AbstractMetaClass::cppSignalFunctions() const
 {
-    return queryFunctions(Signals | Visible | NotRemoved);
+    return queryFunctions(FunctionQueryOption::Signals
+                          | FunctionQueryOption::Visible
+                          | FunctionQueryOption::NotRemoved);
 }
 
 std::optional<AbstractMetaField>
@@ -1108,8 +1124,8 @@ void AbstractMetaClass::fixFunctions()
                 << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
             *superClass -= AbstractMetaAttributes::FinalInTargetLang;
         }
-        superFuncs = superClass->queryFunctions(AbstractMetaClass::ClassImplements);
-        const auto virtuals = superClass->queryFunctions(AbstractMetaClass::VirtualInCppFunctions);
+        superFuncs = superClass->queryFunctions(FunctionQueryOption::ClassImplements);
+        const auto virtuals = superClass->queryFunctions(FunctionQueryOption::VirtualInCppFunctions);
         superFuncs += virtuals;
 
         QSet<AbstractMetaFunctionCPtr> funcsToAdd;
@@ -1377,7 +1393,7 @@ bool AbstractMetaClass::isValueTypeWithCopyConstructorOnly() const
         return false;
     if (attributes().testFlag(AbstractMetaAttributes::HasRejectedDefaultConstructor))
         return false;
-    const auto ctors = queryFunctions(AbstractMetaClass::Constructors);
+    const auto ctors = queryFunctions(FunctionQueryOption::Constructors);
     bool copyConstructorFound = false;
     for (auto ctor : ctors) {
         switch (ctor->functionType()) {

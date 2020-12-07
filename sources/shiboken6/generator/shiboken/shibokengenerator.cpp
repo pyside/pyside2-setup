@@ -1469,7 +1469,7 @@ ShibokenGenerator::ExtendedConverterData ShibokenGenerator::getExtendedConverter
         // Use only the classes for the current module.
         if (!shouldGenerate(metaClass))
             continue;
-        const auto &overloads = metaClass->operatorOverloads(AbstractMetaClass::ConversionOp);
+        const auto &overloads = metaClass->operatorOverloads(OperatorQueryOption::ConversionOp);
         for (const auto &convOp : overloads) {
             // Get only the conversion operators that return a type from another module,
             // that are value-types and were not removed in the type system.
@@ -2066,7 +2066,7 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
         if (getGeneratorClassInfo(metaClass).needsGetattroFunction)
             result |= AttroCheckFlag::GetattroOverloads;
         if (metaClass->queryFirstFunction(metaClass->functions(),
-                                          AbstractMetaClass::GetAttroFunction)) {
+                                          FunctionQueryOption::GetAttroFunction)) {
             result |= AttroCheckFlag::GetattroUser;
         }
         if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT())
@@ -2074,7 +2074,7 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(const A
         if (useOverrideCaching(metaClass))
             result |= AttroCheckFlag::SetattroMethodOverride;
         if (metaClass->queryFirstFunction(metaClass->functions(),
-                                          AbstractMetaClass::SetAttroFunction)) {
+                                          FunctionQueryOption::SetAttroFunction)) {
             result |= AttroCheckFlag::SetattroUser;
         }
         // PYSIDE-1255: If setattro is generated for a class inheriting

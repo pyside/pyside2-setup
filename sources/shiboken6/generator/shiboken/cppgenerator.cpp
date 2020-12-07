@@ -209,11 +209,10 @@ QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
 
 QList<AbstractMetaFunctionCList>
     CppGenerator::filterGroupedOperatorFunctions(const AbstractMetaClass *metaClass,
-                                                 uint queryIn)
+                                                 OperatorQueryOptions query)
 {
     // ( func_name, num_args ) => func_list
     QMap<QPair<QString, int>, AbstractMetaFunctionCList> results;
-    const AbstractMetaClass::OperatorQueryOptions query(queryIn);
     const auto &funcs = metaClass->operatorOverloads(query);
     for (const auto &func : funcs) {
         if (func->isModifiedRemoved()
@@ -662,9 +661,9 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     if (supportsNumberProtocol(metaClass) && !metaClass->typeEntry()->isSmartPointer()) {
         const QList<AbstractMetaFunctionCList> opOverloads = filterGroupedOperatorFunctions(
                 metaClass,
-                AbstractMetaClass::ArithmeticOp
-                | AbstractMetaClass::LogicalOp
-                | AbstractMetaClass::BitwiseOp);
+                OperatorQueryOption::ArithmeticOp
+                | OperatorQueryOption::LogicalOp
+                | OperatorQueryOption::BitwiseOp);
 
         for (const AbstractMetaFunctionCList &allOverloads : opOverloads) {
             AbstractMetaFunctionCList overloads;
@@ -4162,7 +4161,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     const QString className = chopType(cpythonTypeName(metaClass));
     QString baseClassName;
     AbstractMetaFunctionCList ctors;
-    const auto &allCtors = metaClass->queryFunctions(AbstractMetaClass::Constructors);
+    const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
     for (const auto &f : allCtors) {
         if (!f->isPrivate() && !f->isModifiedRemoved() && !classContext.forSmartPointer())
             ctors.append(f);
@@ -4478,9 +4477,9 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
 
     const QList<AbstractMetaFunctionCList> opOverloads =
             filterGroupedOperatorFunctions(metaClass,
-                                           AbstractMetaClass::ArithmeticOp
-                                           | AbstractMetaClass::LogicalOp
-                                           | AbstractMetaClass::BitwiseOp);
+                                           OperatorQueryOption::ArithmeticOp
+                                           | OperatorQueryOption::LogicalOp
+                                           | OperatorQueryOption::BitwiseOp);
 
     for (const AbstractMetaFunctionCList &opOverload : opOverloads) {
         const auto rfunc = opOverload.at(0);
@@ -4778,7 +4777,7 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     {
         Indentation indent(s);
         const QList<AbstractMetaFunctionCList> &groupedFuncs =
-            filterGroupedOperatorFunctions(metaClass, AbstractMetaClass::ComparisonOp);
+            filterGroupedOperatorFunctions(metaClass, OperatorQueryOption::ComparisonOp);
         for (const AbstractMetaFunctionCList &overloads : groupedFuncs) {
             const auto rfunc = overloads[0];
 
@@ -5691,7 +5690,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
 
     if (attroCheck.testFlag(AttroCheckFlag::SetattroUser)) {
         auto func = AbstractMetaClass::queryFirstFunction(metaClass->functions(),
-                                                          AbstractMetaClass::SetAttroFunction);
+                                                          FunctionQueryOption::SetAttroFunction);
         Q_ASSERT(func);
         s << "{\n";
         {
@@ -5812,7 +5811,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
 
     if (attroCheck.testFlag(AttroCheckFlag::GetattroUser)) {
         auto func = AbstractMetaClass::queryFirstFunction(metaClass->functions(),
-                                                          AbstractMetaClass::GetAttroFunction);
+                                                          FunctionQueryOption::GetAttroFunction);
         Q_ASSERT(func);
         s << "{\n";
         {
