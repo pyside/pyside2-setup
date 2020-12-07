@@ -116,12 +116,9 @@ get_target_property(QtCore_is_framework Qt${QT_MAJOR_VERSION}::Core FRAMEWORK)
 
 if (QtCore_is_framework)
     # Get the path to the framework dir.
-    get_filename_component(QT_FRAMEWORK_INCLUDE_DIR "${QT_INCLUDE_DIR}/../" ABSOLUTE)
+    set(QT_FRAMEWORK_INCLUDE_DIR "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_LIBS}")
     message(STATUS "*** QT_FRAMEWORK_INCLUDE_DIR is ${QT_FRAMEWORK_INCLUDE_DIR}")
-
-    # QT_INCLUDE_DIR points to the QtCore.framework directory, so we need to adjust this to point
-    # to the actual include directory, which has include files for non-framework parts of Qt.
-    get_filename_component(QT_INCLUDE_DIR "${QT_INCLUDE_DIR}/../../include" ABSOLUTE)
+    set(QT_INCLUDE_DIR "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_HEADERS}")
 endif()
 
 set_cmake_cxx_flags()
