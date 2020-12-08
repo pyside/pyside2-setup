@@ -52,6 +52,7 @@ class SourceLocation;
 
 class CodeModel
 {
+    Q_GADGET
 public:
     Q_DISABLE_COPY(CodeModel)
 
@@ -60,6 +61,7 @@ public:
         Protected,
         Private
     };
+    Q_ENUM(AccessPolicy)
 
     enum FunctionType {
         Normal,
@@ -70,12 +72,14 @@ public:
         Signal,
         Slot
     };
+    Q_ENUM(FunctionType)
 
     enum ClassType {
         Class,
         Struct,
         Union
     };
+    Q_ENUM(ClassType)
 
 public:
     CodeModel();
