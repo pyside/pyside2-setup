@@ -525,13 +525,11 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
     init_module_2();
 
     // PYSIDE-1305: Handle errors set by fillQtProperties.
-    PyObject *err_val{};
     if (PyErr_Occurred()) {
-        PyObject *e, *t;
-        PyErr_Fetch(&e, &err_val, &t);
-        info = err_val;
-        Py_XDECREF(&e);
-        Py_XDECREF(&t);
+        PyObject *e, *v, *t;
+        // Note: These references are all borrowed.
+        PyErr_Fetch(&e, &v, &t);
+        info = v;
     }
     // PYSIDE-1019: Modify the function name expression according to feature.
     AutoDecRef new_func_name(adjustFuncName(func_name));
@@ -552,7 +550,6 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
         PyErr_Print();
         Py_FatalError("unexpected failure in seterror_argument");
     }
-    Py_XDECREF(err_val);
     PyErr_SetObject(err, msg);
 }
 
